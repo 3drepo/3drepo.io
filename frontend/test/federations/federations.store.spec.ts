@@ -23,7 +23,7 @@ import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { federationMockFactory, prepareMockContainers, prepareMockNewFederation, prepareMockSettingsReply, federationMockStats } from './federations.fixtures';
 import { createTestStore } from '../test.helpers';
 import { containerMockFactory, prepareMockViews } from '../containers/containers.fixtures';
-import { Roles } from '@/v5/store/currentUser/currentUser.types';
+import { Role } from '@/v5/store/currentUser/currentUser.types';
 
 describe('Federations: store', () => {
 	let dispatch, getState;
@@ -158,22 +158,22 @@ describe('Federations: store', () => {
 		}
 
 		it('should return Project Admins access rights', () => {
-			const { hasCollaboratorAccess, hasCommenterAccess } = CreateFederationWithRole(Roles.ADMIN)
+			const { hasCollaboratorAccess, hasCommenterAccess } = CreateFederationWithRole(Role.ADMIN)
 			expect(hasCollaboratorAccess).toBeTruthy();
 			expect(hasCommenterAccess).toBeTruthy();
 		});
 		it('should return Collaborators access rights', () => {
-			const { hasCollaboratorAccess, hasCommenterAccess } = CreateFederationWithRole(Roles.COLLABORATOR)
+			const { hasCollaboratorAccess, hasCommenterAccess } = CreateFederationWithRole(Role.COLLABORATOR)
 			expect(hasCollaboratorAccess).toBeTruthy();
 			expect(hasCommenterAccess).toBeTruthy();
 		});
 		it('should return Commenters access rights', () => {
-			const { hasCollaboratorAccess, hasCommenterAccess } = CreateFederationWithRole(Roles.COMMENTER)
+			const { hasCollaboratorAccess, hasCommenterAccess } = CreateFederationWithRole(Role.COMMENTER)
 			expect(hasCollaboratorAccess).toBeFalsy();
 			expect(hasCommenterAccess).toBeTruthy();
 		});
 		it('should return Viewers access rights', () => {
-			const { hasCollaboratorAccess, hasCommenterAccess } = CreateFederationWithRole(Roles.VIEWER)
+			const { hasCollaboratorAccess, hasCommenterAccess } = CreateFederationWithRole(Role.VIEWER)
 			expect(hasCollaboratorAccess).toBeFalsy();
 			expect(hasCommenterAccess).toBeFalsy();
 		});

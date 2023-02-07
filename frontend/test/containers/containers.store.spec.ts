@@ -23,7 +23,7 @@ import { NewContainer, UploadStatuses } from '@/v5/store/containers/containers.t
 import { revisionsMockFactory } from '../revisions/revisions.fixtures';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { createTestStore, listContainsElementWithId } from '../test.helpers';
-import { Roles } from '@/v5/store/currentUser/currentUser.types';
+import { Role } from '@/v5/store/currentUser/currentUser.types';
 
 describe('Containers: store', () => {
 	let dispatch, getState;
@@ -155,25 +155,25 @@ describe('Containers: store', () => {
 		}
 
 		it('should return Project Admins access rights', () => {
-			const { hasCollaboratorAccess, hasCommenterAccess, canUpload } = CreateContainerWithRole(Roles.ADMIN)
+			const { hasCollaboratorAccess, hasCommenterAccess, canUpload } = CreateContainerWithRole(Role.ADMIN)
 			expect(hasCollaboratorAccess).toBeTruthy();
 			expect(hasCommenterAccess).toBeTruthy();
 			expect(canUpload).toBeTruthy();
 		});
 		it('should return Collaborators access rights', () => {
-			const { hasCollaboratorAccess, hasCommenterAccess, canUpload } = CreateContainerWithRole(Roles.COLLABORATOR)
+			const { hasCollaboratorAccess, hasCommenterAccess, canUpload } = CreateContainerWithRole(Role.COLLABORATOR)
 			expect(hasCollaboratorAccess).toBeTruthy();
 			expect(hasCommenterAccess).toBeTruthy();
 			expect(canUpload).toBeTruthy();
 		});
 		it('should return Commenters access rights', () => {
-			const { hasCollaboratorAccess, hasCommenterAccess, canUpload } = CreateContainerWithRole(Roles.COMMENTER)
+			const { hasCollaboratorAccess, hasCommenterAccess, canUpload } = CreateContainerWithRole(Role.COMMENTER)
 			expect(hasCollaboratorAccess).toBeFalsy();
 			expect(hasCommenterAccess).toBeTruthy();
 			expect(canUpload).toBeFalsy();
 		});
 		it('should return Viewers access rights', () => {
-			const { hasCollaboratorAccess, hasCommenterAccess, canUpload } = CreateContainerWithRole(Roles.VIEWER)
+			const { hasCollaboratorAccess, hasCommenterAccess, canUpload } = CreateContainerWithRole(Role.VIEWER)
 			expect(hasCollaboratorAccess).toBeFalsy();
 			expect(hasCommenterAccess).toBeFalsy();
 			expect(canUpload).toBeFalsy();
