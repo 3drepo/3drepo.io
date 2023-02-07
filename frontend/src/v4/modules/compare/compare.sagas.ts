@@ -319,10 +319,6 @@ function* startCompare() {
 		yield put(CompareActions.setIsPending(true));
 		const isFederation = yield select(selectIsFederation);
 
-		// this should be called later, after the catch block, but the
-		// startComparisonOf* method (which returns a Promise) never completes
-		yield put(CompareActions.setCompareProcessed(false));
-
 		if (isFederation) {
 			yield call(startComparisonOfFederation);
 		} else {
@@ -334,7 +330,7 @@ function* startCompare() {
 		yield put(CompareActions.setIsPending(false));
 		yield put(DialogActions.showErrorDialog('start', 'comparison', error.message));
 	}
-	// yield put(CompareActions.setCompareProcessed(false));
+	yield put(CompareActions.setCompareProcessed(false));
 }
 
 function* stopCompare() {
