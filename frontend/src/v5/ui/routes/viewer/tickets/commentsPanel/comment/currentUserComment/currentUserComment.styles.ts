@@ -16,9 +16,10 @@
  */
 
 import styled from 'styled-components';
-import { BasicComment, CommentAuthor, CommentButtons } from '../basicCommentWithImages/basicCommentWithImages.styles';
+import { BasicCommentWithImages } from '../basicCommentWithImages/basicCommentWithImages.component';
+import { CommentAuthor, CommentButtons } from '../basicCommentWithImages/basicCommentWithImages.styles';
 
-export const CommentContainer = styled(BasicComment)`
+export const CommentContainer = styled(BasicCommentWithImages)`
 	background-color: ${({ theme }) => theme.palette.secondary.main};
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	border-top-right-radius: 0;

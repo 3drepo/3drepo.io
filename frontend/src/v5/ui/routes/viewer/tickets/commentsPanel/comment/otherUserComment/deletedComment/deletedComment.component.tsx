@@ -17,13 +17,15 @@
 
 import { FormattedMessage } from 'react-intl';
 import { deletedCommentMessage } from '../../comment.helpers';
-import { CommentAuthor, CommentAge } from '../../basicCommentWithImages/basicCommentWithImages.styles';
-import { CommentMessageDeleted } from './deletedComment.styles';
+import { CommentAuthor, CommentAge, CommentMessage } from '../../basicCommentWithImages/basicCommentWithImages.styles';
+import { CommentContainer } from './deletedComment.styles';
+import { UserCirclePopover } from '../otherUserComment.styles';
 
 export const DeletedComment = ({ user, authorDisplayName }) => (
-	<>
+	<CommentContainer data-author={user.user}>
+		<UserCirclePopover user={user} />
 		<CommentAuthor>{authorDisplayName}</CommentAuthor>
-		<CommentMessageDeleted>{deletedCommentMessage}</CommentMessageDeleted>
+		<CommentMessage>{deletedCommentMessage}</CommentMessage>
 		<CommentAge>
 			<FormattedMessage
 				id="ticket.otherUser.comment.time.deleted"
@@ -31,5 +33,5 @@ export const DeletedComment = ({ user, authorDisplayName }) => (
 				values={{ name: user.firstName }}
 			/>
 		</CommentAge>
-	</>
+	</CommentContainer>
 );

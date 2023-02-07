@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { HoverPopover as HoverPopoverBase } from '@controls/hoverPopover/hoverPopover.component';
+import { UserCirclePopover as UserCirclePopoverBase } from '@components/shared/userCirclePopover/userCirclePopover.component';
 import styled from 'styled-components';
-import { BasicComment, CommentMessage, CommentButtons } from '../basicCommentWithImages/basicCommentWithImages.styles';
+import { BasicCommentWithImages } from '../basicCommentWithImages/basicCommentWithImages.component';
+import { CommentMessage, CommentButtons } from '../basicCommentWithImages/basicCommentWithImages.styles';
 
-export const HoverPopover = styled(HoverPopoverBase)`
+export const UserCirclePopover = styled(UserCirclePopoverBase)`
 	position: absolute;
 	left: -34px;
 	margin-top: -10px;
@@ -29,7 +30,7 @@ export const HoverPopover = styled(HoverPopoverBase)`
 	}
 `;
 
-export const CommentContainer = styled(BasicComment)`
+export const CommentContainer = styled(BasicCommentWithImages)`
 	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin-left: 39px;
@@ -47,7 +48,7 @@ export const CommentContainer = styled(BasicComment)`
 		& + & {
 			border-top-left-radius: 10px;
 
-			${HoverPopover} {
+			${UserCirclePopover} {
 				display: none;
 			}
 		}

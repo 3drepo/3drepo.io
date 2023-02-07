@@ -70,7 +70,6 @@ export const BasicComment = styled.div<BasicCommentProps>`
 	position: relative;
 
 	${CommentButtons} {
-		display: flex;
 		opacity: 0;
 		transition: opacity .3s;
 		pointer-events: none;

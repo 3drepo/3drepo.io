@@ -16,9 +16,13 @@
  */
 
 import styled from 'styled-components';
-import { CommentMessage } from '../../basicCommentWithImages/basicCommentWithImages.styles';
+import { BasicComment, CommentMessage } from '../../basicCommentWithImages/basicCommentWithImages.styles';
+import { CommentContainer as CommentContainerBase } from '../otherUserComment.styles';
 
-export const CommentMessageDeleted = styled(CommentMessage)`
-	color: ${({ theme }) => theme.palette.secondary.light};
-	text-align: right;
+export const CommentContainer: any = styled(CommentContainerBase).attrs({
+	as: BasicComment,
+})`
+	${CommentMessage} {
+		color: ${({ theme }) => theme.palette.base.light};
+	}
 `;

@@ -22,10 +22,8 @@ import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
 import { ErrorCommentButton, PrimaryCommentButton } from '../commentButton/commentButton.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
-import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
-import { editedCommentMessage } from '../comment.helpers';
 import { CommentContainer } from './currentUserComment.styles';
-import { CommentAge, CommentButtons, EditedCommentLabel } from '../basicCommentWithImages/basicCommentWithImages.styles';
+import { CommentButtons } from '../basicCommentWithImages/basicCommentWithImages.styles';
 import { EditComment } from './editComment/editComment.component';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 
@@ -41,12 +39,12 @@ export const CurrentUserComment = ({
 	author,
 	deleted,
 	message,
-	commentAge,
 	metadata,
 	history,
 	onDelete,
 	onReply,
 	onEdit,
+	...props
 }: CurrentUserCommentProps) => {
 	const [isEditMode, setIsEditMode] = useState(false);
 
@@ -66,7 +64,7 @@ export const CurrentUserComment = ({
 	}
 
 	return (
-		<CommentContainer data-author={author}>
+		<CommentContainer data-author={author} message={message} {...props}>
 			<CommentButtons>
 				<ErrorCommentButton onClick={() => onDelete(_id)}>
 					<DeleteIcon />
@@ -79,9 +77,6 @@ export const CurrentUserComment = ({
 				</PrimaryCommentButton>
 			</CommentButtons>
 			{metadata.message && (<CommentReply variant="secondary" {...metadata} />)}
-			{history && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
-			<CommentMarkDown>{message}</CommentMarkDown>
-			<CommentAge>{commentAge}</CommentAge>
 		</CommentContainer>
 	);
 };

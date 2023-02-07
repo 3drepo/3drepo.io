@@ -17,16 +17,12 @@
 
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getMemberImgSrc, USER_NOT_FOUND } from '@/v5/store/users/users.helpers';
-import { UserPopover } from '@components/shared/userPopover/userPopover.component';
-import { UserCircle } from '@controls/assignees/assignees.styles';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
 import { PrimaryCommentButton } from '../commentButton/commentButton.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
-import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
-import { editedCommentMessage } from '../comment.helpers';
-import { CommentButtons, CommentAuthor, CommentAge, EditedCommentLabel } from '../basicCommentWithImages/basicCommentWithImages.styles';
-import { HoverPopover, CommentContainer } from './otherUserComment.styles';
+import { CommentButtons, CommentAuthor } from '../basicCommentWithImages/basicCommentWithImages.styles';
+import { CommentContainer, UserCirclePopover } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 
 type OtherUserCommentProps = Omit<IComment, 'updatedAt'> & {
@@ -34,24 +30,14 @@ type OtherUserCommentProps = Omit<IComment, 'updatedAt'> & {
 	metadata?: CommentReplyMetadata;
 	onReply: (commentId) => void;
 };
-const OtherUserCommentPopoverWrapper = ({ user, children }) => (
-	<CommentContainer data-author={user.user}>
-		<HoverPopover anchor={(props) => <UserCircle user={user} {...props} />}>
-			<UserPopover user={user} />
-		</HoverPopover>
-		{children}
-	</CommentContainer>
-);
-
 export const OtherUserComment = ({
 	_id,
 	deleted,
-	message,
-	commentAge,
 	author,
 	history,
 	onReply,
 	metadata,
+	...props
 }: OtherUserCommentProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	let user = UsersHooksSelectors.selectUser(teamspace, author);
@@ -62,24 +48,18 @@ export const OtherUserComment = ({
 	}
 	const authorDisplayName = `${user.firstName} ${user.lastName}`;
 
+	if (deleted) return (<DeletedComment user={user} authorDisplayName={authorDisplayName} />);
+
 	return (
-		<OtherUserCommentPopoverWrapper user={user}>
-			{deleted
-				? (<DeletedComment user={user} authorDisplayName={authorDisplayName} />)
-				: (
-					<>
-						<CommentButtons>
-							<PrimaryCommentButton onClick={() => onReply(_id)}>
-								<ReplyIcon />
-							</PrimaryCommentButton>
-						</CommentButtons>
-						<CommentAuthor>{authorDisplayName}</CommentAuthor>
-						{metadata.message && (<CommentReply isCurrentUserComment={false} {...metadata} />)}
-						{history && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
-						<CommentMarkDown>{message}</CommentMarkDown>
-						<CommentAge>{commentAge}</CommentAge>
-					</>
-				)}
-		</OtherUserCommentPopoverWrapper>
+		<CommentContainer data-author={user.user} {...props}>
+			<UserCirclePopover user={user} />
+			<CommentAuthor>{authorDisplayName}</CommentAuthor>
+			{metadata.message && (<CommentReply isCurrentUserComment={false} {...metadata} />)}
+			<CommentButtons>
+				<PrimaryCommentButton onClick={() => onReply(_id)}>
+					<ReplyIcon />
+				</PrimaryCommentButton>
+			</CommentButtons>
+		</CommentContainer>
 	);
 };

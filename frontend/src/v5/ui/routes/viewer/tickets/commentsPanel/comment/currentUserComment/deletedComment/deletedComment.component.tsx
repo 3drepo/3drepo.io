@@ -17,13 +17,12 @@
 
 import { FormattedMessage } from 'react-intl';
 import { deletedCommentMessage } from '../../comment.helpers';
-import { CommentAge } from '../../basicCommentWithImages/basicCommentWithImages.styles';
-import { CommentContainer } from '../currentUserComment.styles';
-import { CommentMessageDeleted } from './deletedComment.styles';
+import { CommentAge, CommentMessage } from '../../basicCommentWithImages/basicCommentWithImages.styles';
+import { CommentContainer } from './deletedComment.styles';
 
 export const DeletedComment = ({ author }) => (
 	<CommentContainer data-author={author}>
-		<CommentMessageDeleted>{deletedCommentMessage}</CommentMessageDeleted>
+		<CommentMessage>{deletedCommentMessage}</CommentMessage>
 		<CommentAge>
 			<FormattedMessage
 				id="ticket.currentUser.comment.time.deleted"
