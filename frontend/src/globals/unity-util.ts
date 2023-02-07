@@ -192,6 +192,22 @@ export class UnityUtil {
 
 		const buildUrl = new URL('/unity/Build', UnityUtil.unityUrl);
 
+		// This snippet attempts to allocate as much memory as Unity can address
+		// and that the browser can provide. So long as the viewer keeps to this
+		// limit, it should never need another allocation and so remain stable.
+
+		let memory = null;
+		let memorySizeInMb = 2032;
+		do {
+			try {
+				// Initial size is given in pages, which are 65536 bytes
+				memory = new WebAssembly.Memory({ initial: memorySizeInMb * 16 });
+				break;
+			} catch {
+				memorySizeInMb -= 256;
+			}
+		} while (memory === null && memorySizeInMb > 0);
+
 		const config = {
 			dataUrl: `${buildUrl}/unity.data.unityweb`,
 			frameworkUrl: `${buildUrl}/unity.framework.js.unityweb`,
@@ -205,6 +221,12 @@ export class UnityUtil {
 				UnityUtil.onUnityError(e);
 				return true; // Returning true suppresses loader.js' alert call
 			},
+			// These members result in the unityFramework function taking the
+			// provided WebAssembly.Memory as the memory object, instead of
+			// creating its own
+			wasmMemory: memory,
+			buffer: memory.buffer,
+			TOTAL_MEMORY: memory.buffer.byteLength,
 		};
 
 		createUnityInstance(canvas, config, (progress) => {
