@@ -54,8 +54,14 @@ export const CommentButtons = styled.div`
 	top: 0;
 `;
 
+export const SingleImage = styled.img`
+	width: calc(100% + 24px);
+	margin-left: -12px;
+	margin-top: -10px;
+	border-radius: 10px 10px 0 0;
+`;
 
-export type BasicCommentProps = {
+type BasicCommentProps = {
 	'data-author': string,
 };
 export const BasicComment = styled.div<BasicCommentProps>`

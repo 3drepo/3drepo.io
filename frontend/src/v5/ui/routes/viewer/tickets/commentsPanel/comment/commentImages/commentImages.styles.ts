@@ -16,32 +16,22 @@
  */
 
 import styled from 'styled-components';
-import { BasicCommentWithImages } from '../basicCommentWithImages/basicCommentWithImages.component';
-import { CommentAuthor, CommentButtons, SingleImage } from '../basicCommentWithImages/basicCommentWithImages.styles';
 
-export const CommentContainer = styled(BasicCommentWithImages)`
-	background-color: ${({ theme }) => theme.palette.secondary.main};
-	color: ${({ theme }) => theme.palette.primary.contrast};
-	align-self: end;
-	&, ${SingleImage} {
-		border-top-right-radius: 0;
-	}
+export const FlexContainer = styled.div`
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	gap: 5px;
 
-	&::before {
-		right: 100%;
+	& ~ & {
+		margin-top: 5px;
 	}
+`;
 
-	${CommentButtons} {
-		left: -94px;
-	}
-
-	& > ${CommentAuthor} {
-		display: none;
-	}
-
-	& + & {
-		&, ${SingleImage} {
-			border-top-right-radius: 10px;
-		}
-	}
+export const Image = styled.img`
+	border-radius: 5px;
+	width: 120px;
+	height: 120px;
+	overflow: hidden;
+	object-fit: cover;
 `;

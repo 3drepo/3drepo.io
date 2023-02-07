@@ -21,10 +21,10 @@ import { CommentAuthor, CommentAge, CommentMessage } from '../../basicCommentWit
 import { CommentContainer } from './deletedComment.styles';
 import { UserCirclePopover } from '../otherUserComment.styles';
 
-export const DeletedComment = ({ user, authorDisplayName }) => (
-	<CommentContainer data-author={user.user}>
+export const DeletedComment = ({ user, author }) => (
+	<CommentContainer data-author={user.user} author={author}>
 		<UserCirclePopover user={user} />
-		<CommentAuthor>{authorDisplayName}</CommentAuthor>
+		<CommentAuthor>{author}</CommentAuthor>
 		<CommentMessage>{deletedCommentMessage}</CommentMessage>
 		<CommentAge>
 			<FormattedMessage

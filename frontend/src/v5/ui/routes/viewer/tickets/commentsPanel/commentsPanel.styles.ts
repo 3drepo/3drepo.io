@@ -57,6 +57,7 @@ export const CommentReplyContainer = styled.div`
 
 export const DeleteButton = styled.div<{ error?: boolean }>`
 	position: absolute;
+	z-index: 3;
 	top: -7px;
 	right: -7px;
 	height: 24px;

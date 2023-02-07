@@ -43,7 +43,7 @@ export const createMetadata = (comment: IComment): CommentReplyMetadata => (
 	_.pick(comment, '_id', 'author', 'message') as CommentReplyMetadata
 );
 
-export const extractMessage = (message: string) => message.replaceAll(/\[[_a-z]*\]:- ".*"\n[\n]?/g, '');
+export const extractMessage = (message: string = '') => message.replaceAll(/\[[_a-z]*\]:- ".*"\n[\n]?/g, '');
 export const sanitiseMessage = (message: string) => message.replaceAll('"', '&#34;').replaceAll('\n', '<br />');
 export const desanitiseMessage = (message: string) => message.replaceAll('&#34;', '"').replaceAll('<br />', '\n');
 

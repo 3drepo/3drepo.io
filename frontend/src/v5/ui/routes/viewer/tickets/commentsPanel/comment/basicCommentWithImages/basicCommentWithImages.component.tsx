@@ -18,30 +18,36 @@
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { CommentHistoryBlock } from '@/v5/store/tickets/tickets.types';
 import { editedCommentMessage } from '../comment.helpers';
+import { CommentImages } from '../commentImages/commentImages.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
-import { BasicComment, BasicCommentProps, CommentAge, EditedCommentLabel } from './basicCommentWithImages.styles';
+import { BasicComment, CommentAge, CommentAuthor, EditedCommentLabel, SingleImage } from './basicCommentWithImages.styles';
 
-export type BasicCommentWithImagesProps = BasicCommentProps & {
+export type BasicCommentWithImagesProps = {
 	images?: string[];
 	children?: any;
 	className?: string;
 	message?: string;
 	commentAge: string;
-	history?: CommentHistoryBlock;
+	history?: CommentHistoryBlock[];
+	author?: string;
+	'data-author': string,
 };
 export const BasicCommentWithImages = ({
+	author,
 	images = [],
 	children,
 	message,
 	commentAge,
+	history,
 	...props
 }: BasicCommentWithImagesProps) => {
 	return (
 		<BasicComment {...props}>
-			{images.length === 1 && (<img src={getImgSrc(images[0])} />)}
-			{history && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
+			{images.length === 1 && (<SingleImage src={getImgSrc(images[0])} />)}
+			{author && (<CommentAuthor>{author}</CommentAuthor>)}
+			{history?.length && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			{children}
-			{images.length > 1 && (<img src={getImgSrc(images[0])} />)}
+			{images.length > 1 && (<CommentImages images={images} />)}
 			{message && (<CommentMarkDown>{message}</CommentMarkDown>)}
 			<CommentAge>{commentAge}</CommentAge>
 		</BasicComment>

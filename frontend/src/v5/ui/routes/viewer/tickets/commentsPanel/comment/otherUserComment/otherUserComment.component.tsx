@@ -34,7 +34,6 @@ export const OtherUserComment = ({
 	_id,
 	deleted,
 	author,
-	history,
 	onReply,
 	metadata,
 	...props
@@ -48,12 +47,11 @@ export const OtherUserComment = ({
 	}
 	const authorDisplayName = `${user.firstName} ${user.lastName}`;
 
-	if (deleted) return (<DeletedComment user={user} authorDisplayName={authorDisplayName} />);
+	if (deleted) return (<DeletedComment user={user} author={authorDisplayName} />);
 
 	return (
-		<CommentContainer data-author={user.user} {...props}>
+		<CommentContainer data-author={user.user} author={authorDisplayName} {...props}>
 			<UserCirclePopover user={user} />
-			<CommentAuthor>{authorDisplayName}</CommentAuthor>
 			{metadata.message && (<CommentReply isCurrentUserComment={false} {...metadata} />)}
 			<CommentButtons>
 				<PrimaryCommentButton onClick={() => onReply(_id)}>

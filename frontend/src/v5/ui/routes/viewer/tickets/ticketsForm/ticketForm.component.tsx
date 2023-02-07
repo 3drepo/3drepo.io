@@ -134,7 +134,7 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 			</TitleContainer>
 			<CardContent>
 				<PanelsContainer>
-					<PropertiesPanel module="properties" properties={template?.properties || []} propertiesValues={ticket.properties} {...rest} />
+					{/* <PropertiesPanel module="properties" properties={template?.properties || []} propertiesValues={ticket.properties} {...rest} />
 					{
 						(template.modules || []).map((module) => (
 							<ModulePanel
@@ -145,7 +145,7 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 								{...rest}
 							/>
 						))
-					}
+					} */}
 					{template?.config?.comments && (<CommentsPanel scrollPanelIntoView={scrollPanelIntoView} />)}
 				</PanelsContainer>
 			</CardContent>

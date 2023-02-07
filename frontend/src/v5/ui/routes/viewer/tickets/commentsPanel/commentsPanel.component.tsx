@@ -186,6 +186,8 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 			title={formatMessage({ id: 'customTicket.panel.comments', defaultMessage: 'Comments' })}
 			Icon={CommentIcon}
 			onChange={scrollPanelIntoView}
+		defaultExpanded
+
 		>
 			<FormProvider {...formData}>
 				<ScrollArea autoHeight autoHeightMin={400} autoHeightMax={400}>

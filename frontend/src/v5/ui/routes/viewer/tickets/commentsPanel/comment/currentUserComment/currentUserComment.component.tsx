@@ -40,7 +40,6 @@ export const CurrentUserComment = ({
 	deleted,
 	message,
 	metadata,
-	history,
 	onDelete,
 	onReply,
 	onEdit,
