@@ -86,7 +86,7 @@ const PropertiesPanel = (props: PropertiesListProps) => (
 interface ModulePanelProps {
 	module: TemplateModule;
 	moduleValues: Record<string, any>;
-	scrollPanelIntoView: (isExpanding, el) => void;
+	scrollPanelIntoView: (event, isExpanding) => void;
 }
 
 const ModulePanel = ({ module, moduleValues, scrollPanelIntoView, ...rest }: ModulePanelProps) => (
