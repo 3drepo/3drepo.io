@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { BasicComment, CommentAuthor, CommentButtons } from '../comment.styles';
+import { BasicComment, CommentAuthor, CommentButtons } from '../basicCommentWithImages/basicCommentWithImages.styles';
 
 export const CommentContainer = styled(BasicComment)`
 	background-color: ${({ theme }) => theme.palette.secondary.main};

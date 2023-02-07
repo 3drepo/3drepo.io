@@ -17,7 +17,7 @@
 
 import { FormattedMessage } from 'react-intl';
 import { deletedCommentMessage } from '../../comment.helpers';
-import { CommentAge } from '../../comment.styles';
+import { CommentAge } from '../../basicCommentWithImages/basicCommentWithImages.styles';
 import { CommentContainer } from '../currentUserComment.styles';
 import { CommentMessageDeleted } from './deletedComment.styles';
 

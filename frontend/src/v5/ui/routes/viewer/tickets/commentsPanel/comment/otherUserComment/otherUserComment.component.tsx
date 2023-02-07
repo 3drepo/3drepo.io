@@ -25,7 +25,7 @@ import { PrimaryCommentButton } from '../commentButton/commentButton.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { editedCommentMessage } from '../comment.helpers';
-import { CommentAuthor, CommentButtons, CommentAge, EditedCommentLabel } from '../comment.styles';
+import { CommentButtons, CommentAuthor, CommentAge, EditedCommentLabel } from '../basicCommentWithImages/basicCommentWithImages.styles';
 import { HoverPopover, CommentContainer } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 

@@ -17,7 +17,7 @@
 
 import { HoverPopover as HoverPopoverBase } from '@controls/hoverPopover/hoverPopover.component';
 import styled from 'styled-components';
-import { BasicComment, CommentMessage, CommentButtons } from '../comment.styles';
+import { BasicComment, CommentMessage, CommentButtons } from '../basicCommentWithImages/basicCommentWithImages.styles';
 
 export const HoverPopover = styled(HoverPopoverBase)`
 	position: absolute;

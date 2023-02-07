@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { CommentMessage } from '../../comment.styles';
+import { CommentMessage } from '../../basicCommentWithImages/basicCommentWithImages.styles';
 
 export const CommentMessageDeleted = styled(CommentMessage)`
 	color: ${({ theme }) => theme.palette.secondary.light};

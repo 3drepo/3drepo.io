@@ -18,7 +18,7 @@
 import { CurrentUserHooksSelectors, TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CommentReplyMetadata } from '@/v5/store/tickets/tickets.types';
 import { USER_NOT_FOUND } from '@/v5/store/users/users.helpers';
-import { CommentAuthor } from '../comment.styles';
+import { CommentAuthor } from '../basicCommentWithImages/basicCommentWithImages.styles';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { CommentReplyContainer } from './commentReply.styles';
 

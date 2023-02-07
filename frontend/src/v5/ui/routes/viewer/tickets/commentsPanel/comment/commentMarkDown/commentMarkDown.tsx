@@ -16,7 +16,7 @@
  */
 
 import ReactMarkdown from 'react-markdown';
-import { CommentMessage } from '../comment.styles';
+import { CommentMessage } from '../basicCommentWithImages/basicCommentWithImages.styles';
 
 const RENDERERS = { paragraph: CommentMessage };
 

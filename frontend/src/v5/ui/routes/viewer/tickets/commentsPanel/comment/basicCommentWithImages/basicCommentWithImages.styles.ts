@@ -25,16 +25,6 @@ export const CommentAuthor = styled.div`
 	margin-bottom: 5px;
 `;
 
-export const CommentButtons = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	height: 100%;
-	margin: 0 6px;
-	position: absolute;
-	top: 0;
-`;
-
 export const CommentMessage = styled(Typography).attrs({ variant: 'body1' })`
 	word-break: break-word;
 `;
@@ -53,11 +43,22 @@ export const CommentAge = styled(CommentSmallText)`
 	text-align: right;
 `;
 
-export type CommentProps = {
+
+export const CommentButtons = styled.div`
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 100%;
+	margin: 0 6px;
+	position: absolute;
+	top: 0;
+`;
+
+
+export type BasicCommentProps = {
 	'data-author': string,
 };
-
-export const BasicComment = styled.div<CommentProps>`
+export const BasicComment = styled.div<BasicCommentProps>`
 	max-width: 241px;
 	width: fit-content;
 	margin-top: 12px;
