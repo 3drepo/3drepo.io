@@ -17,7 +17,7 @@
 
 const { v5Path } = require('../../../interop');
 
-const { bulkWrite, dropDatabase, find, listCollections } = require(`${v5Path}/handler/db`);
+const { dropCollection, dropDatabase, find, insertMany, listCollections } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const { initialise } = require(`${v5Path}/models/notifications`);
 
@@ -33,12 +33,20 @@ const processCollection = async (user) => {
 	}));
 
 	if (updatedNotifications.length) {
-		console.log(updatedNotifications);
 		logger.logInfo(`\t-Migrating ${updatedNotifications.length} records for ${user}`);
-		// await bulkWrite(INTERNAL_DB, NOTIFICATIONS_COLL, updatedNotifications);
+		try {
+			await insertMany(INTERNAL_DB, NOTIFICATIONS_COLL, updatedNotifications, false);
+		} catch (err) {
+			if (err?.result?.ok) {
+				// insert successful, report # inserted (skipping duplicates)
+				logger.logInfo(`\t\t-Records inserted: ${err.result.nInserted}`);
+			} else {
+				throw err;
+			}
+		}
 	}
 
-	// await dropCollection(NOTIFICATIONS_DB, user);
+	await dropCollection(NOTIFICATIONS_DB, user);
 };
 
 const run = async () => {
@@ -52,22 +60,13 @@ const run = async () => {
 		return;
 	}
 
-	collections.forEach(async ({ name }) => {
+	for (let i = 0; i < collections.length; ++i) {
 		// eslint-disable-next-line no-await-in-loop
-		await processCollection(name);
-	});
-
-	/*
-	if (moveToInternalOperations.length) {
-		logger.logInfo(`\t-Migrating ${moveToInternalOperations.length} collections from ${NOTIFICATIONS_DB}`);
-		await bulkWrite(INTERNAL_DB, NOTIFICATIONS_COLL, moveToInternalOperations.flatMap((collOps) => collOps));
-	} else {
-		logger.logInfo('\t-Nothing to migrate');
+		await processCollection(collections[i].name);
 	}
-	*/
 
 	logger.logInfo(`\t-Migration to ${INTERNAL_DB}:${NOTIFICATIONS_COLL} complete. Dropping ${NOTIFICATIONS_DB} DB...`);
-	// await dropDatabase(NOTIFICATIONS_DB);
+	await dropDatabase(NOTIFICATIONS_DB);
 };
 
 module.exports = run;
