@@ -18,6 +18,9 @@
 import { formatMessage, formatRelativeTime } from '@/v5/services/intl';
 import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
 import _ from 'lodash';
+import { clientConfigService } from '@/v4/services/clientConfig';
+
+export const imageIsTooBig = (file): boolean => (file.size > clientConfigService.resourceUploadSizeLimit);
 
 // Message metadata and text functions
 export const MAX_MESSAGE_LENGTH = 1200;
