@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { CommentMessage } from '../comment.styles';
+import { CommentMessage } from '../basicCommentWithImages/basicCommentWithImages.styles';
 
 export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'secondary', shortMessage?: boolean }>`
 	border: solid 0 ${({ theme }) => theme.palette.primary.main};

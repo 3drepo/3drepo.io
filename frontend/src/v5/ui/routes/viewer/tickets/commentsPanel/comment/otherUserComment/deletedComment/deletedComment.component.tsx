@@ -17,7 +17,7 @@
 
 import { FormattedMessage } from 'react-intl';
 import { deletedCommentMessage } from '../../comment.helpers';
-import { CommentAuthor, CommentAge } from '../../comment.styles';
+import { CommentAuthor, CommentAge } from '../../basicCommentWithImages/basicCommentWithImages.styles';
 import { CommentMessageDeleted } from './deletedComment.styles';
 
 export const DeletedComment = ({ user, authorDisplayName }) => (
