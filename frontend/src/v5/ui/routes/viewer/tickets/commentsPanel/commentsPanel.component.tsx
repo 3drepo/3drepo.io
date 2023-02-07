@@ -242,7 +242,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 							<strong>{name} </strong> 
 							<FormattedMessage
 								id="customTicket.comments.images.error"
-								defaultMessage="is too big. Please reduce the size of the file."
+								defaultMessage="is too big. 1GB limit."
 							/>
 						</ErroredImageMessage>
 					))}
