@@ -70,6 +70,7 @@ const selectStyles = css`
 	.MuiSelect-select {
 		background-color: transparent;
 		padding: 0;
+		border: none;
 	}
 	.MuiOutlinedInput-notchedOutline {
 		border: none;
