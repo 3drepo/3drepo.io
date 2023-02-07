@@ -17,6 +17,7 @@
 
 import { FormattedMessage } from 'react-intl';
 import { LoginLink, Logo } from '@components/authTemplate/authTemplate.styles';
+import MicrosoftIcon from '@assets/icons/thirdParty/microsoft.svg';
 import {
 	Container,
 	BulletPoint,
@@ -25,8 +26,7 @@ import {
 	BulletPointBody,
 	BulletPointIcon,
 	Tick,
-	BookADemoButton,
-	LaptopIcon,
+	SSOButton,
 	MainTitle,
 } from './userSignupSidebar.styles';
 
@@ -103,11 +103,11 @@ export const UserSignupSidebar = () => (
 				</BulletPointBody>
 			</BulletPointMessage>
 		</BulletPoint>
-		<BookADemoButton
-			to={{ pathname: 'https://3drepo.com/demo/' }}
-			startIcon={<LaptopIcon />}
+		<SSOButton
+			to={{ pathname: 'signup-sso' }}
+			startIcon={<MicrosoftIcon />}
 		>
-			<FormattedMessage id="userSignup.sidebar.bookADemo" defaultMessage="Book A Demo" />
-		</BookADemoButton>
+			<FormattedMessage id="userSignup.sidebar.sso.microsoft" defaultMessage="Sign up with Microsoft" />
+		</SSOButton>
 	</Container>
 );

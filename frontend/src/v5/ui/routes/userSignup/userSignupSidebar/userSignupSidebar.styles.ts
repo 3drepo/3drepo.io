@@ -16,7 +16,6 @@
  */
 
 import TickBase from '@assets/icons/outlined/tick-outlined.svg';
-import LatopIconBase from '@assets/icons/outlined/laptop-outlined.svg';
 import { Button } from '@controls/button';
 import { Display } from '@/v5/ui/themes/media';
 import { Link } from 'react-router-dom';
@@ -88,9 +87,8 @@ export const BulletPointBody = styled.div`
 	line-height: 1.3rem;
 `;
 
-export const BookADemoButton = styled(Button).attrs({
+export const SSOButton = styled(Button).attrs({
 	component: Link,
-	target: '_blank',
 	variant: 'contained',
 	color: 'primary',
 })`
@@ -98,9 +96,14 @@ export const BookADemoButton = styled(Button).attrs({
 	font-weight: 300;
 	margin: 28px 0 0;
 	padding: 10px 20px 10px 28px;
-`;
+	border-radius: 0;
+	background-color: #2F2F2F;
 
-export const LaptopIcon = styled(LatopIconBase)`
-	width: 16px;
-	height: 16px;
+	&:hover {
+		backgroundColor: #2F2F2F,
+	},
+
+	&:active{
+		backgroundColor: #2F2F2F,
+	}
 `;
