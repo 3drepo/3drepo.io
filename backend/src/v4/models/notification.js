@@ -256,7 +256,6 @@ module.exports = {
 	 * This delete all notifications for the particular user
 	 */
 	deleteAllNotifications: async function(user) {
-		// TODO this exists in v5
 		await db.deleteMany(INTERNAL_DB, NOTIFICATIONS_COLL, { user });
 	},
 

@@ -26,19 +26,19 @@ const NOTIFICATIONS_DB = 'notifications';
 const NOTIFICATIONS_COLL = 'notifications';
 
 const processCollection = async (user) => {
-	const migrationOps = (await find(NOTIFICATIONS_DB, user, {})).map((entry) => ({
-		updateOne: {
-			filter: { _id: entry._id },
-			update: { $set: {
-				...entry,
-				user,
-				timestamp: new Date(entry.timestamp),
-			} },
-			upsert: true,
-		},
+	const updatedNotifications = (await find(NOTIFICATIONS_DB, user, {})).map((entry) => ({
+		...entry,
+		user,
+		timestamp: new Date(entry.timestamp),
 	}));
 
-	return migrationOps;
+	if (updatedNotifications.length) {
+		console.log(updatedNotifications);
+		logger.logInfo(`\t-Migrating ${updatedNotifications.length} records for ${user}`);
+		// await bulkWrite(INTERNAL_DB, NOTIFICATIONS_COLL, updatedNotifications);
+	}
+
+	// await dropCollection(NOTIFICATIONS_DB, user);
 };
 
 const run = async () => {
@@ -52,17 +52,22 @@ const run = async () => {
 		return;
 	}
 
-	const moveToInternalOperations = await Promise.all(collections.map(({ name }) => processCollection(name)));
+	collections.forEach(async ({ name }) => {
+		// eslint-disable-next-line no-await-in-loop
+		await processCollection(name);
+	});
 
+	/*
 	if (moveToInternalOperations.length) {
 		logger.logInfo(`\t-Migrating ${moveToInternalOperations.length} collections from ${NOTIFICATIONS_DB}`);
 		await bulkWrite(INTERNAL_DB, NOTIFICATIONS_COLL, moveToInternalOperations.flatMap((collOps) => collOps));
 	} else {
 		logger.logInfo('\t-Nothing to migrate');
 	}
+	*/
 
 	logger.logInfo(`\t-Migration to ${INTERNAL_DB}:${NOTIFICATIONS_COLL} complete. Dropping ${NOTIFICATIONS_DB} DB...`);
-	await dropDatabase(NOTIFICATIONS_DB);
+	// await dropDatabase(NOTIFICATIONS_DB);
 };
 
 module.exports = run;
