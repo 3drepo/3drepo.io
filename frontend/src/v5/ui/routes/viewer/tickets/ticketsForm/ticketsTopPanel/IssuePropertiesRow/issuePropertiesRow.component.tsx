@@ -19,9 +19,9 @@ import { Assignees } from '@controls/assignees/assignees.component';
 import { PriorityLevelChip, PriorityLevels, TicketStatusChip, TicketStatuses } from '@controls/chip';
 import { DueDate } from '@controls/dueDate/dueDate.component';
 import { FormattedMessage } from 'react-intl';
-import { IssuePropertiesContainer, PropertyColumn, PropertyTitle } from './issuePropertiesBar.styles';
+import { IssuePropertiesContainer, PropertyColumn, PropertyTitle } from './issuePropertiesRow.styles';
 
-type IIssuePropertiesBar = {
+type IIssuePropertiesRow = {
 	priority: PriorityLevels;
 	dueDate: number;
 	status: TicketStatuses;
@@ -29,7 +29,7 @@ type IIssuePropertiesBar = {
 	onBlur: () => void;
 };
 
-export const IssuePropertiesBar = ({ priority, dueDate, status, assignees, onBlur }: IIssuePropertiesBar) => (
+export const IssuePropertiesRow = ({ priority, dueDate, status, assignees, onBlur }: IIssuePropertiesRow) => (
 	<IssuePropertiesContainer>
 		<PropertyColumn>
 			<PropertyTitle>

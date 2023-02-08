@@ -23,7 +23,7 @@ import { InputController } from '@controls/inputs/inputController.component';
 import { TextAreaFixedSize } from '@controls/inputs/textArea/textAreaFixedSize.component';
 import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
-import { IssuePropertiesBar } from './issuePropertiesBar/issuePropertiesBar.component';
+import { IssuePropertiesRow } from './IssuePropertiesRow/issuePropertiesRow.component';
 import { BaseTicketInfo, DescriptionProperty, TopPanel } from './ticketsTopPanel.styles';
 
 type ITicketsTopPanel = {
@@ -65,7 +65,7 @@ export const TicketsTopPanel = ({ ticket, formState, focusOnTitle, onPropertyBlu
 			</DescriptionProperty>
 		</BaseTicketInfo>
 		{ticket.properties[IssueProperties.PRIORITY] && (
-			<IssuePropertiesBar
+			<IssuePropertiesRow
 				priority={ticket.properties[IssueProperties.PRIORITY]}
 				dueDate={ticket.properties[IssueProperties.DUE_DATE]}
 				status={ticket.properties[IssueProperties.STATUS]}
