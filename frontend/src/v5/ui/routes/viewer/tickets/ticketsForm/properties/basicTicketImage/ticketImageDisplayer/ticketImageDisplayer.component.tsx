@@ -19,6 +19,7 @@ import { FormattedMessage } from 'react-intl';
 import EmptyImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
 import EnlargeImageIcon from '@assets/icons/outlined/enlarge_image-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
+import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
 import { Modal } from '@controls/modal';
 import {
 	EmptyImageContainer,
@@ -26,7 +27,6 @@ import {
 	IconText,
 	Image,
 	Container,
-	OverlappingContainer,
 } from './ticketImageDisplayer.styles';
 
 const LoadedImage = ({ imgSrc }) => {

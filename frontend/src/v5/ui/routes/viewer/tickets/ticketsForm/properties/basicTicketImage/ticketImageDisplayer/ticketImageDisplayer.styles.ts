@@ -20,17 +20,6 @@ import styled from 'styled-components';
 import { CentredContainer } from '@controls/centredContainer';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
 
-export const OverlappingContainer = styled.div`
-	position: relative;
-	color: ${({ theme }) => theme.palette.primary.contrast};
-	& > * {
-		position: absolute;
-		top: 0;
-		left: 0;
-		cursor: pointer;
-	}
-`;
-
 export const Container = styled.div`
 	border-radius: 5px;
 	overflow: hidden;

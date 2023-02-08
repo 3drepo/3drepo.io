@@ -21,7 +21,7 @@ import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
 import { PrimaryCommentButton } from '../commentButton/commentButton.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
-import { CommentButtons, CommentAuthor } from '../basicCommentWithImages/basicCommentWithImages.styles';
+import { CommentButtons } from '../basicCommentWithImages/basicCommentWithImages.styles';
 import { CommentContainer, UserCirclePopover } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 

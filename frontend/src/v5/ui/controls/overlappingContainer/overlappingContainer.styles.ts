@@ -16,23 +16,17 @@
  */
 
 import styled from 'styled-components';
-import { BasicComment, CommentMessage } from '../../basicCommentWithImages/basicCommentWithImages.styles';
-import { CommentContainer as CommentContainerBase } from '../currentUserComment.styles';
 
-export const CommentContainer: any = styled(CommentContainerBase).attrs({
-	as: BasicComment,
-})`
-	${CommentMessage} {
-		color: ${({ theme }) => theme.palette.secondary.light};
-		text-align: right;
-	}
-`;
+export const OverlappingContainer = styled.div`
+	position: relative;
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	cursor: pointer;
 
-export const CommentContainer: any = styled(CommentContainerBase).attrs({
-	as: BasicComment,
-})`
-	${CommentMessage} {
-		color: ${({ theme }) => theme.palette.secondary.light};
-		text-align: right;
+	& > * {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
 	}
 `;
