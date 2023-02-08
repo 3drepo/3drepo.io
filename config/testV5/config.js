@@ -23,8 +23,15 @@ const tmpDir = require("os").tmpdir();
 const {mkdirSync} = require("fs");
 const Path = require("path");
 const fileSharePath = Path.join(tmpDir, "v5FileShare");
+const sharedDirPath = Path.join(tmpDir, "v5SharedDir");
 try {
 	mkdirSync(fileSharePath);
+} catch(err) {
+	if(err.code !== "EEXIST") throw err;
+}
+
+try {
+	mkdirSync(sharedDirPath);
 } catch(err) {
 	if(err.code !== "EEXIST") throw err;
 }
@@ -111,7 +118,7 @@ module.exports = {
 		model_queue: 'modelq',
 		callback_queue: 'callbackq',
 		upload_dir: tmpDir,
-		shared_storage: tmpDir,
+		shared_storage: sharedDirPath,
 		event_exchange: 'eventExchange'
 	},
 	subscriptions: {
