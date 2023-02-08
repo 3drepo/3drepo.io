@@ -27,12 +27,3 @@ export const CommentContainer: any = styled(CommentContainerBase).attrs({
 		text-align: right;
 	}
 `;
-
-export const CommentContainer: any = styled(CommentContainerBase).attrs({
-	as: BasicComment,
-})`
-	${CommentMessage} {
-		color: ${({ theme }) => theme.palette.secondary.light};
-		text-align: right;
-	}
-`;
