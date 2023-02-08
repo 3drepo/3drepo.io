@@ -16,7 +16,6 @@
  */
 
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { getMemberImgSrc, USER_NOT_FOUND } from '@/v5/store/users/users.helpers';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { UserCircle } from '@controls/assignees/assignees.styles';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
@@ -54,12 +53,7 @@ export const OtherUserComment = ({
 	metadata,
 }: OtherUserCommentProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	let user = UsersHooksSelectors.selectUser(teamspace, author);
-	if (user) {
-		user = { ...user, avatarUrl: getMemberImgSrc(teamspace, user.user), hasAvatar: true };
-	} else {
-		user = USER_NOT_FOUND;
-	}
+	const user = UsersHooksSelectors.selectUser(teamspace, author);
 	const authorDisplayName = `${user.firstName} ${user.lastName}`;
 
 	return (
