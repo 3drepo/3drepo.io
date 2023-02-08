@@ -178,14 +178,8 @@ export const UserSignupFormStepAccount = ({
 				disabled={!password}
 				formError={errors.confirmPassword}
 			/>
-			<NextStepButton
-				disabled={!formIsValid}
-				onClick={onSubmitStep}
-			>
-				<FormattedMessage
-					id="userSignup.form.button.next"
-					defaultMessage="Next step"
-				/>
+			<NextStepButton disabled={!formIsValid} onClick={onSubmitStep}>
+				<FormattedMessage id="userSignup.form.button.next" defaultMessage="Next step" />
 			</NextStepButton>
 		</>
 	);
