@@ -18,15 +18,22 @@
 import { CurrentUserHooksSelectors, TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CommentReplyMetadata } from '@/v5/store/tickets/tickets.types';
 import { CommentAuthor } from '../basicCommentWithImages/basicCommentWithImages.styles';
-import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
-import { CommentReplyContainer } from './commentReply.styles';
+import { CommentMarkDown, CommentReplyContainer, OriginalMessage } from './commentReply.styles';
 
 type CommentReplyProps = CommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',
 	isCurrentUserComment?: boolean,
 	shortMessage?: boolean,
+	images?: string[],
 };
-export const CommentReply = ({ message, author, variant = 'primary', isCurrentUserComment = true, ...props }: CommentReplyProps) => {
+export const CommentReply = ({
+	message,
+	author,
+	variant = 'primary',
+	isCurrentUserComment = true,
+	images = [],
+	...props
+}: CommentReplyProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const currentUser = CurrentUserHooksSelectors.selectUsername();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
@@ -35,8 +42,14 @@ export const CommentReply = ({ message, author, variant = 'primary', isCurrentUs
 
 	return (
 		<CommentReplyContainer variant={variant} {...props}>
-			{authorDisplayName && (<CommentAuthor>{authorDisplayName}</CommentAuthor>)}
-			<CommentMarkDown>{message}</CommentMarkDown>
+			<div>
+				{authorDisplayName && (<CommentAuthor>{authorDisplayName}</CommentAuthor>)}
+					<OriginalMessage>
+						{images && <span>icon</span>}
+						<CommentMarkDown>{message}</CommentMarkDown>
+					</OriginalMessage>
+			</div>
+			{/* {images && (<ExpandableImage images={images.map(getImgSrc)} showExtraImagesValue />)} */}
 		</CommentReplyContainer>
 	);
 };

@@ -16,15 +16,21 @@
  */
 
 import styled, { css } from 'styled-components';
+import { ExpandableImage as ExpandableImageBase } from '@controls/expandableImage/expandableImage.component';
+import { CommentMarkDown as CommentMarkDownBase } from '../commentMarkDown/commentMarkDown';
 import { CommentMessage } from '../basicCommentWithImages/basicCommentWithImages.styles';
 
 export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'secondary', shortMessage?: boolean }>`
 	border: solid 0 ${({ theme }) => theme.palette.primary.main};
 	border-left-width: 4px;
 	border-radius: 5px;
-	padding: 6px 10px 6px 9px;
+	padding: 6px 6px 6px 9px;
 	margin-bottom: 5px;
 	overflow-x: hidden;
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+
 	${({ theme, variant }) => {
 		if (variant === 'primary') {
 			return css`
@@ -56,4 +62,16 @@ export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'seconda
 			}
 		}
 	`}
+`;
+
+export const CommentMarkDown = styled(CommentMarkDownBase)`
+	display: inline;
+`;
+
+export const OriginalMessage = styled.div`
+	display: inline-block;
+`;
+
+export const ExpandableImage = styled(ExpandableImageBase)`
+	width: 67px;
 `;
