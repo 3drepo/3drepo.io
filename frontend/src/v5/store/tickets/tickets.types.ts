@@ -103,6 +103,7 @@ export type IComment = {
 
 export type CommentReplyMetadata = {
 	_id: string,
-	message: string,
+	message?: string,
 	author: string,
+	images?: string[],
 };

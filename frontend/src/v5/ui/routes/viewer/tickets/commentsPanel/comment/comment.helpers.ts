@@ -33,14 +33,20 @@ const extractMetadataValue = (message: string, metadataName: keyof CommentReplyM
 	return regex.exec(message)?.[1] || '';
 };
 
+const extractMetadataImages = (message: string) => {
+	const images = extractMetadataValue(message, 'images');
+	return images ? images.split(",") : [];
+};
+
 export const extractMetadata = (message: string): CommentReplyMetadata => ({
 	_id: extractMetadataValue(message, '_id'),
 	author: extractMetadataValue(message, 'author'),
 	message: extractMetadataValue(message, 'message'),
+	images: extractMetadataImages(message),
 });
 
 export const createMetadata = (comment: IComment): CommentReplyMetadata => (
-	_.pick(comment, '_id', 'author', 'message') as CommentReplyMetadata
+	_.pick(comment, '_id', 'author', 'message', 'images') as CommentReplyMetadata
 );
 
 export const extractMessage = (message: string = '') => message.replaceAll(/\[[_a-z]*\]:- ".*"\n[\n]?/g, '');
@@ -51,11 +57,12 @@ const createMetadataValue = (metadataName: keyof CommentReplyMetadata, metadataV
 	`[${metadataName}]:- "${metadataValue}"\n`
 );
 
-const stringifyMetadata = ({ author, _id, message }: CommentReplyMetadata) => {
+const stringifyMetadata = ({ author, _id, message, images = [] }: CommentReplyMetadata) => {
 	const metadata = [
 		createMetadataValue('_id', _id),
 		createMetadataValue('author', author),
 		createMetadataValue('message', extractMessage(message)),
+		createMetadataValue('images', images.join(",")),
 	];
 	return metadata.join('');
 };
