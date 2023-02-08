@@ -17,7 +17,7 @@
 
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/chip';
@@ -37,18 +37,10 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
-	const hasIssueProperties = ticket?.properties?.Priority;
-	const {
-		number,
-		properties: {
-			[IssueProperties.STATUS]: status,
-			[IssueProperties.PRIORITY]: priority,
-			[IssueProperties.ASSIGNEES]: assignees,
-			[IssueProperties.DUE_DATE]: dueDate,
-		},
-	} = ticket;
+	const { status, priority, assignees = [], dueDate = null } = getPropertiesInCamelCase(ticket.properties);
 	const riskLevel = ticket.modules?.safetibase?.[SafetibaseProperties.LEVEL_OF_RISK];
 	const treatmentStatus = ticket.modules?.safetibase?.[SafetibaseProperties.TREATMENT_STATUS];
+
 	const updateTicketProperty = (value) => TicketsActionsDispatchers
 		.updateTicket(teamspace, project, containerOrFederation, ticket._id, { properties: value }, isFederation);
 	const onBlurAssignees = (newVals) => {
@@ -69,18 +61,18 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			key={ticket._id}
 			$selected={selected}
 		>
-			<Id>{template?.code}:{number}</Id>
+			<Id>{template?.code}:{ticket.number}</Id>
 			<Title onClick={expandTicket}>{ticket.title}</Title>
 			<ChipList>
 				{status && <TicketStatusChip state={status} />}
 				{riskLevel && <RiskLevelChip state={riskLevel} />}
 				{treatmentStatus && <TreatmentLevelChip state={treatmentStatus} />}
 			</ChipList>
-			{hasIssueProperties && (
+			{priority && (
 				<IssuePropertiesRow>
-					<DueDate value={dueDate ?? null} onBlur={onBlurDueDate} />
+					<DueDate value={dueDate} onBlur={onBlurDueDate} />
 					<PriorityLevelChip state={priority} />
-					<Assignees values={assignees ?? []} onBlur={onBlurAssignees} />
+					<Assignees values={assignees} onBlur={onBlurAssignees} />
 				</IssuePropertiesRow>
 			)}
 		</Ticket>

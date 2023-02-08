@@ -24,6 +24,7 @@ import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
+import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { EditableTicket, ITemplate } from './tickets.types';
 
 export const modelIsFederation = (modelId: string) => (
@@ -181,4 +182,18 @@ export const sanitizeViewVals = (vals, template) => {
 export const templateAlreadyFetched = (template: ITemplate) => {
 	const fetchedProperties = ['modules', 'properties', 'config'];
 	return fetchedProperties.some((prop) => Object.keys(template).includes(prop));
+};
+
+export const getPropertiesInCamelCase = (properties) => {
+	const {
+		[IssueProperties.STATUS]: status,
+		[IssueProperties.PRIORITY]: priority,
+		[IssueProperties.ASSIGNEES]: assignees,
+		[IssueProperties.DUE_DATE]: dueDate,
+		[BaseProperties.OWNER]: owner,
+		[BaseProperties.CREATED_AT]: createdAt,
+		[BaseProperties.UPDATED_AT]: updatedAt,
+		...otherProperties
+	} = properties;
+	return { status, priority, assignees, dueDate, owner, createdAt, updatedAt, ...otherProperties };
 };
