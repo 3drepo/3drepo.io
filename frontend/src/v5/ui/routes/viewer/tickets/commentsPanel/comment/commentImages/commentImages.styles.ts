@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { hexToOpacity } from '@/v5/ui/themes/theme';
 import styled from 'styled-components';
 
 export const FlexContainer = styled.div`
@@ -23,15 +24,27 @@ export const FlexContainer = styled.div`
 	width: 100%;
 	gap: 5px;
 
+	& > * {
+		border-radius: 5px;
+		overflow: hidden;
+		flex: 1;
+	}
+
 	& ~ & {
 		margin-top: 5px;
 	}
 `;
 
 export const Image = styled.img`
-	border-radius: 5px;
-	width: 120px;
-	height: 120px;
-	overflow: hidden;
 	object-fit: cover;
+	aspect-ratio: 1 / 1;
+`;
+
+export const ExtraImages = styled.div`
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	${({ theme }) => theme.typography.h2}
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	background-color: ${({ theme }) => hexToOpacity(theme.palette.base.main, 60)};
 `;

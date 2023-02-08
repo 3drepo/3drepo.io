@@ -16,7 +16,8 @@
  */
 
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
-import { FlexContainer, Image } from './commentImages.styles';
+import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
+import { ExtraImages, FlexContainer, Image } from './commentImages.styles';
 
 type CommentImagesProps = {
 	images: string[];
@@ -48,7 +49,10 @@ export const CommentImages = ({ images }: CommentImagesProps) => {
 			</FlexContainer>
 			<FlexContainer>
 				<Image src={getImgSrc(images[2])} />
-				<Image src={getImgSrc(images[3])} />
+				<OverlappingContainer>
+					<Image src={getImgSrc(images[3])}/>
+					<ExtraImages>+{images.length - 3}</ExtraImages>
+				</OverlappingContainer>
 			</FlexContainer>
 		</>
 	);
