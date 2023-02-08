@@ -20,7 +20,7 @@ import { defaults, pick, omitBy, difference, isMatch, mapValues } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { MenuItem } from '@mui/material';
-import { FormModal } from '@/v5/ui/controls/modal/formModal/formDialog.component';
+import { FormModal } from '@controls/formModal/formModal.component';
 import { useForm, SubmitHandler, useWatch } from 'react-hook-form';
 import { useParams } from 'react-router';
 import { IContainer, ContainerSettings } from '@/v5/store/containers/containers.types';

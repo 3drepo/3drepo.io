@@ -19,7 +19,7 @@ import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/mate
 import { FormattedMessage } from 'react-intl';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { CloseButton } from '@controls/modal/modal.styles';
-import { Actions, Status, WarningIcon } from '@/v5/ui/components/shared/modals/modals.styles';
+import { Actions, Status, WarningIcon } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { Container } from './alertModal.styles';
 
 interface AlertModalProps {

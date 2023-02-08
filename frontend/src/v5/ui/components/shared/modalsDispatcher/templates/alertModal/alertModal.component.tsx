@@ -17,7 +17,7 @@
 import { FC, useEffect } from 'react';
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { DialogContainer, Actions, Details, Status, WarningIcon } from '@/v5/ui/components/shared/modals/modals.styles';
+import { DialogContainer, Actions, Details, Status, WarningIcon } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { AxiosError } from 'axios';
 import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isProjectNotFound, isResourceNotFound } from '@/v5/validation/errors.helpers';
 import { generatePath, useHistory } from 'react-router';

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,27 +14,33 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Dialog } from '@mui/material';
-
+import { DetailedHTMLProps, FormHTMLAttributes } from 'react';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { CloseButton } from './modal.styles';
+import { Title, Header, CloseButton, Subtitle } from './modalHeader.styles';
 
-interface IModal {
+export interface IModalHeader extends Omit<DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>, 'ref'> {
 	onClickClose: () => void;
-	open:boolean;
-	children:any;
-	className?: string;
+	title: any;
+	subtitle?: string;
+	disableClosing?: boolean;
 }
 
-export const Modal = ({ onClickClose, children, ...props }: IModal) => (
-	<Dialog
-		onClose={onClickClose}
-		maxWidth="md"
-		{...props}
-	>
-		<CloseButton aria-label="Close dialog" onClick={onClickClose}>
+export const ModalHeader = ({
+	onClickClose,
+	title,
+	subtitle,
+	className,
+	disableClosing = false,
+}: IModalHeader) => (
+	<Header className={className}>
+		<div>
+			<Title>
+				{title}
+			</Title>
+			{subtitle && <Subtitle>{subtitle}</Subtitle>}
+		</div>
+		<CloseButton aria-label="Close dialog" onClick={onClickClose} disabled={disableClosing}>
 			<CloseIcon />
 		</CloseButton>
-		{children}
-	</Dialog>
+	</Header>
 );
