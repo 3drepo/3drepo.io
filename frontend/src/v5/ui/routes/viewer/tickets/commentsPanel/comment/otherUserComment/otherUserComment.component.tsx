@@ -16,7 +16,6 @@
  */
 
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { getMemberImgSrc, USER_NOT_FOUND } from '@/v5/store/users/users.helpers';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
 import { PrimaryCommentButton } from '../commentButton/commentButton.styles';
@@ -39,12 +38,7 @@ export const OtherUserComment = ({
 	...props
 }: OtherUserCommentProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	let user = UsersHooksSelectors.selectUser(teamspace, author);
-	if (user) {
-		user = { ...user, avatarUrl: getMemberImgSrc(teamspace, user.user), hasAvatar: true };
-	} else {
-		user = USER_NOT_FOUND;
-	}
+	const user = UsersHooksSelectors.selectUser(teamspace, author);
 	const authorDisplayName = `${user.firstName} ${user.lastName}`;
 
 	if (deleted) return (<DeletedComment user={user} author={authorDisplayName} />);

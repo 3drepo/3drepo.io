@@ -17,14 +17,7 @@
 
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
-import { formatMessage } from '@/v5/services/intl';
-import { IUser } from './users.redux';
 
 export const getMemberImgSrc = (teamspace: string, member: string) => (
 	generateV5ApiUrl(`teamspaces/${teamspace}/members/${member}/avatar`, clientConfigService.GET_API)
 );
-
-export const USER_NOT_FOUND = {
-	firstName: formatMessage({ id: 'user.notFound.firstName', defaultMessage: 'User' }),
-	lastName: formatMessage({ id: 'user.notFound.lastName', defaultMessage: 'not found' }),
-} as IUser;

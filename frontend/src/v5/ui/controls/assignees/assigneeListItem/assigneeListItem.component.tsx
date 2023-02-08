@@ -23,7 +23,6 @@ import { JobPopover } from '@components/shared/jobPopover/jobPopover.component';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { useSelector } from 'react-redux';
 import { selectJobs } from '@/v4/modules/jobs/jobs.selectors';
-import { getMemberImgSrc } from '@/v5/store/users/users.helpers';
 import { JobCircle } from '../assignees.styles';
 
 type IAssigneeListItem = {
@@ -34,10 +33,7 @@ export const AssigneeListItem = ({ assignee }: IAssigneeListItem) => {
 	const { teamspace } = useParams<DashboardParams>();
 	const jobsInTeamspace = useSelector(selectJobs);
 	const isJob = jobsInTeamspace.some(({ _id }) => _id === assignee);
-	let user = UsersHooksSelectors.selectUser(teamspace, assignee);
-	if (user) {
-		user = { ...user, avatarUrl: getMemberImgSrc(teamspace, assignee), hasAvatar: true };
-	}
+	const user = UsersHooksSelectors.selectUser(teamspace, assignee);
 
 	if (!isJob && !user) return (<></>);
 
