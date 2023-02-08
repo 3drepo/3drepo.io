@@ -16,62 +16,89 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
+import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
 import { CreationInfo } from '@components/shared/creationInfo/creationInfo.component';
 import { InputController } from '@controls/inputs/inputController.component';
 import { TextAreaFixedSize } from '@controls/inputs/textArea/textAreaFixedSize.component';
+import { filter } from 'lodash';
+import { useFormContext } from 'react-hook-form';
 import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
+import { PropertiesList } from '../propertiesList.component';
 import { IssuePropertiesRow } from './IssuePropertiesRow/issuePropertiesRow.component';
 import { BaseTicketInfo, DescriptionProperty, TopPanel } from './ticketsTopPanel.styles';
 
 type ITicketsTopPanel = {
-	ticket: Partial<ITicket>;
+	title: string;
+	properties: PropertyDefinition[];
+	propertiesValues: Record<string, any>;
 	onPropertyBlur?: (...args) => void;
 	focusOnTitle?: boolean;
-	formState: any;
 };
 
-export const TicketsTopPanel = ({ ticket, formState, focusOnTitle, onPropertyBlur }: ITicketsTopPanel) => (
-	<TopPanel>
-		<BaseTicketInfo>
-			<TitleProperty
-				name={BaseProperties.TITLE}
-				defaultValue={ticket[BaseProperties.TITLE]}
-				formError={formState.errors[BaseProperties.TITLE]}
-				placeholder={formatMessage({
-					id: 'customTicket.topPanel.titlePlaceholder',
-					defaultMessage: 'Ticket name',
-				})}
-				inputProps={{ autoFocus: focusOnTitle }}
-				onBlur={onPropertyBlur}
-			/>
-			<CreationInfo
-				owner={ticket.properties?.[BaseProperties.OWNER]}
-				createdAt={ticket.properties?.[BaseProperties.CREATED_AT]}
-				updatedAt={ticket.properties?.[BaseProperties.UPDATED_AT]}
-			/>
-			<DescriptionProperty>
-				<InputController
-					Input={TextAreaFixedSize}
-					name={`properties[${BaseProperties.DESCRIPTION}]`}
-					onBlur={onPropertyBlur}
+export const TicketsTopPanel = ({
+	title,
+	properties,
+	propertiesValues,
+	focusOnTitle,
+	onPropertyBlur,
+}: ITicketsTopPanel) => {
+	const {
+		owner,
+		createdAt,
+		updatedAt,
+		priority,
+		status,
+		dueDate,
+		assignees,
+	} = getPropertiesInCamelCase(propertiesValues);
+	const { formState } = useFormContext();
+	const topPanelProperties: string[] = Object.values({ ...BaseProperties, ...IssueProperties });
+	const extraProperties = filter(properties, ({ name }) => !topPanelProperties.includes(name));
+
+	return (
+		<TopPanel>
+			<BaseTicketInfo>
+				<TitleProperty
+					name={BaseProperties.TITLE}
+					defaultValue={title}
+					formError={formState.errors[BaseProperties.TITLE]}
 					placeholder={formatMessage({
-						id: 'customTicket.topPanel.description',
-						defaultMessage: 'Description',
+						id: 'customTicket.topPanel.titlePlaceholder',
+						defaultMessage: 'Ticket name',
 					})}
+					inputProps={{ autoFocus: focusOnTitle }}
+					onBlur={onPropertyBlur}
 				/>
-			</DescriptionProperty>
-		</BaseTicketInfo>
-		{ticket.properties[IssueProperties.PRIORITY] && (
-			<IssuePropertiesRow
-				priority={ticket.properties[IssueProperties.PRIORITY]}
-				dueDate={ticket.properties[IssueProperties.DUE_DATE]}
-				status={ticket.properties[IssueProperties.STATUS]}
-				assignees={ticket.properties[IssueProperties.ASSIGNEES]}
-				onBlur={onPropertyBlur}
-			/>
-		)}
-	</TopPanel>
-);
+				<CreationInfo
+					owner={owner}
+					createdAt={createdAt}
+					updatedAt={updatedAt}
+				/>
+				<DescriptionProperty>
+					<InputController
+						Input={TextAreaFixedSize}
+						name={`properties[${BaseProperties.DESCRIPTION}]`}
+						onBlur={onPropertyBlur}
+						placeholder={formatMessage({
+							id: 'customTicket.topPanel.description',
+							defaultMessage: 'Description',
+						})}
+					/>
+				</DescriptionProperty>
+				<PropertiesList module="properties" properties={extraProperties} propertiesValues={propertiesValues} />
+			</BaseTicketInfo>
+			{priority && (
+				<IssuePropertiesRow
+					priority={priority}
+					dueDate={dueDate}
+					status={status}
+					assignees={assignees}
+					onBlur={onPropertyBlur}
+				/>
+			)}
+		</TopPanel>
+	);
+};

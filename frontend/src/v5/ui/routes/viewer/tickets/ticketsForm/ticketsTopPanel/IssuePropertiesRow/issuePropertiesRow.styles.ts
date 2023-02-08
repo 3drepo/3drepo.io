@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TicketStatusChip } from '@controls/chip';
 import styled from 'styled-components';
 
 export const IssuePropertiesContainer = styled.div`
