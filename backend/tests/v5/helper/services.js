@@ -27,6 +27,8 @@ const { createAppAsync: createServer } = require(`${srcV4}/services/api`);
 const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
 
+const { providers } = require(`${src}/services/sso/sso.constants`);
+
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -42,7 +44,7 @@ const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constant
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const FilesManager = require('../../../src/v5/services/filesManager');
 
-const { USERS_DB_NAME, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
+const { USERS_DB_NAME, USERS_COL, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
 const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
 const db = {};
@@ -87,6 +89,10 @@ db.reset = async () => {
 
 	await Promise.all([...dbProms, ...colProms]);
 	await DbHandler.disconnect();
+};
+
+db.addSSO = async (user, id = ServiceHelper.generateRandomString()) => {
+	await DbHandler.updateOne(USERS_DB_NAME, USERS_COL, { user }, { $set: { 'customData.sso': { type: providers.AAD, id } } });
 };
 
 // userCredentials should be the same format as the return value of generateUserCredentials
@@ -324,6 +330,7 @@ ServiceHelper.generateUserCredentials = () => ({
 	basicData: {
 		firstName: ServiceHelper.generateRandomString(),
 		lastName: ServiceHelper.generateRandomString(),
+		email: `${ServiceHelper.generateRandomString()}@${ServiceHelper.generateRandomString(6)}.com`,
 		billing: {
 			billingInfo: {
 				company: ServiceHelper.generateRandomString(),
