@@ -17,6 +17,7 @@
 
 const systemFailureMsg = { message: 'System error occured. Please contact support.', userErr: false };
 const ModelSettingConstants = {};
+ModelSettingConstants.SETTINGS_COL = 'settings';
 // Codes should match with https://github.com/3drepo/3drepobouncer/blob/master/bouncer/src/repo/error_codes.h
 const importErrorMapping = {
 	0: { success: true },
