@@ -16,11 +16,13 @@
  */
 
 import { Gap } from '@controls/gap';
+import { ScrollArea } from '@controls/scrollArea';
 import styled from 'styled-components';
 
 export const ErrorTextGap = styled(Gap)``;
 
 export const PanelsContainer = styled.div`
+	padding: 14px 15px;
 	.MuiAccordion-root {
 		&:first-of-type {
 			border-top-left-radius: 6px;
@@ -43,4 +45,10 @@ export const PanelsContainer = styled.div`
 			}
 		}
 	}
+`;
+
+export const CardContent = styled(ScrollArea).attrs({
+	autoHide: true,
+})`
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 `;

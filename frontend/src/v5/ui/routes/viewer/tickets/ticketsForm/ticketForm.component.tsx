@@ -16,9 +16,8 @@
  */
 import { ITemplate, ITicket, TemplateModule } from '@/v5/store/tickets/tickets.types';
 import { Accordion } from '@controls/accordion/accordion.component';
-import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
-import { PanelsContainer } from './ticketsForm.styles';
+import { CardContent, PanelsContainer } from './ticketsForm.styles';
 import { TicketsTopPanel } from './ticketsTopPanel/ticketsTopPanel.component';
 import { PropertiesList } from './propertiesList.component';
 
@@ -42,22 +41,20 @@ interface Props {
 }
 
 export const TicketForm = ({ template, ticket, ...rest }: Props) => (
-	<>
+	<CardContent>
 		<TicketsTopPanel title={ticket.title} properties={template.properties || []} propertiesValues={ticket.properties} {...rest} />
-		<CardContent>
-			<PanelsContainer>
-				{
-					(template.modules || []).map((module, idx) => (
-						<ModulePanel
-							key={module.name || module.type}
-							module={module}
-							moduleValues={ticket.modules[module.name]}
-							defaultExpanded={idx === 0}
-							{...rest}
-						/>
-					))
-				}
-			</PanelsContainer>
-		</CardContent>
-	</>
+		<PanelsContainer>
+			{
+				(template.modules || []).map((module, idx) => (
+					<ModulePanel
+						key={module.name || module.type}
+						module={module}
+						moduleValues={ticket.modules[module.name]}
+						defaultExpanded={idx === 0}
+						{...rest}
+					/>
+				))
+			}
+		</PanelsContainer>
+	</CardContent>
 );

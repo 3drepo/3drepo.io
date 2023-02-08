@@ -1028,6 +1028,7 @@ export const theme = createTheme({
 					label: {
 						transform: 'none',
 						position: 'unset',
+						zIndex: 0,
 					},
 				},
 			},

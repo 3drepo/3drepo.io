@@ -20,11 +20,17 @@ import styled from 'styled-components';
 
 export const IssuePropertiesContainer = styled.div`
 	border-top: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
-	height: 30px;
+	box-shadow: 0 6px 10px rgb(0 0 0 / 4%);
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	height: 50px;
 	padding: 10px 15px;
 	display: inline-flex;
     align-items: center;
 	width: 100%;
+	position: sticky;
+	top: 0;
+	box-sizing: border-box;
+	z-index: 1;
 `;
 
 export const PropertyColumn = styled.span`

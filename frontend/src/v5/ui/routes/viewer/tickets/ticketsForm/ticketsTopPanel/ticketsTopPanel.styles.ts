@@ -20,14 +20,14 @@ import styled from 'styled-components';
 export const TopPanel = styled.div`
 	width: 100%;
 	position: relative;
-	z-index: 1;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	box-sizing: border-box;
-	box-shadow: 0 6px 10px rgb(0 0 0 / 4%);
+	display: unset; // This is necessary for sticky child elements
 `;
 
 export const BaseTicketInfo = styled.div`
 	padding: 10px 15px;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
 export const DescriptionProperty = styled.div`
