@@ -40,6 +40,7 @@ export const IssuePropertiesRow = ({ priority, dueDate, status, assignees, onBlu
 			</PropertyTitle>
 			<PriorityLevelChip state={priority} />
 		</PropertyColumn>
+		<ColumnSeparator />
 		<PropertyColumn>
 			<PropertyTitle>
 				<FormattedMessage
@@ -49,6 +50,7 @@ export const IssuePropertiesRow = ({ priority, dueDate, status, assignees, onBlu
 			</PropertyTitle>
 			<DueDate value={dueDate} />
 		</PropertyColumn>
+		<ColumnSeparator />
 		<PropertyColumn>
 			<PropertyTitle>
 				<FormattedMessage

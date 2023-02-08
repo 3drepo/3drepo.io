@@ -23,14 +23,17 @@ export const IssuePropertiesContainer = styled.div`
 	padding: 10px 15px;
 	display: inline-flex;
     align-items: center;
+	width: 100%;
 `;
 
 export const PropertyColumn = styled.span`
+	width: 70px;
 `;
 
 export const PropertyTitle = styled.div`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
+	padding: 0 7px;
 `;
 
 export const ColumnSeparator = styled.div`
