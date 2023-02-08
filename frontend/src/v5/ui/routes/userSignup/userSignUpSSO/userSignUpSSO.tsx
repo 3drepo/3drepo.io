@@ -24,7 +24,7 @@ import UserIcon from '@assets/icons/outlined/user-outlined.svg';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import MenuItem from '@mui/material/MenuItem/MenuItem';
-import { defaults, isEqual, omit, pick } from 'lodash';
+import { defaults, isEqual, pick } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
@@ -34,6 +34,7 @@ import { UserSignupFormStep } from '../userSignupForm/userSignupFormStep/userSig
 import { NextStepButton } from '../userSignupForm/userSignupFormStep/userSignupFormStep.styles';
 import { IconContainer } from '../userSignupForm/userSignupFormStep/userSignupFormStepAccount/userSignupFormStepAccount.styles';
 import { UserSignupFormStepTermsAndSubmit } from '../userSignupForm/userSignupFormStep/userSignupFormStepTermsAndSubmit/userSignupFormStepTermsAndSubmit.component';
+import { signup } from '@/v5/services/api/sso';
 
 export interface IAccountFormInput {
 	username: string;
@@ -215,12 +216,10 @@ export const UserSignupSSO = () => {
 	const createAccount = async () => {
 		try {
 			setFormIsSubmitting(true);
-			const newUser = omit(fields, ['confirmPassword', 'termsAgreed']) as INewUser;
-			newUser.email = newUser.email.trim();
+			const newUser = pick(fields, ['username', 'company', 'countryCode', 'mailListAgreed']);
 			if (!fields.company) delete newUser.company;
-			// await registerNewUser(newUser);
-			// const { email, firstName } = fields;
-			// completeRegistration({ email, firstName });
+			const res = await signup(newUser);
+			return res;
 		} catch (error) {
 			setFormIsSubmitting(false);
 			if (isInvalidArguments(error)) {
@@ -229,6 +228,8 @@ export const UserSignupSSO = () => {
 				removeCompletedStep(LAST_STEP);
 			}
 		}
+
+		return null;
 	};
 
 	const getStepProps = (stepIndex: number) => ({
