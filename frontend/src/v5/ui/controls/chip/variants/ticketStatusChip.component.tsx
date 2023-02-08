@@ -63,7 +63,8 @@ const STATUS_MAP = {
 type ITicketStatusChip = {
 	variant?: 'outlined' | 'text',
 	state: TicketStatuses,
+	className?: string,
 };
-export const TicketStatusChip = ({ variant = 'outlined', state = TicketStatuses.OPEN }: ITicketStatusChip) => (
-	<Chip variant={variant} {...STATUS_MAP[state]} />
+export const TicketStatusChip = ({ variant = 'outlined', state = TicketStatuses.OPEN, className }: ITicketStatusChip) => (
+	<Chip variant={variant} {...STATUS_MAP[state]} className={className} />
 );

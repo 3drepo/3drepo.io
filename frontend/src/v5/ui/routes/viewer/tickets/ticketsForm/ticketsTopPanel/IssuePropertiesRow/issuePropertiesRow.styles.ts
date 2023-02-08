@@ -38,3 +38,7 @@ export const ColumnSeparator = styled.div`
 	border-left: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
 	margin: 0 10px;
 `;
+
+export const Status = styled(TicketStatusChip)`
+	border: none;
+`;
