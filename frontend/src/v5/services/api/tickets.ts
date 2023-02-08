@@ -166,6 +166,32 @@ export const fetchContainerTicketComments = async (
 	return data;
 };
 
+export const fetchFederationTicketComment = async (
+	teamspace: string,
+	projectId: string,
+	federationId: string,
+	ticketId: string,
+	commentId: string,
+): Promise<Partial<IComment>> => {
+	const { data } = await api.get(
+		`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/${ticketId}/comments/${commentId}`,
+	);
+	return data;
+};
+
+export const fetchContainerTicketComment = async (
+	teamspace: string,
+	projectId: string,
+	containerId: string,
+	ticketId: string,
+	commentId: string,
+): Promise<Partial<IComment>> => {
+	const { data } = await api.get(
+		`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/${ticketId}/comments/${commentId}`,
+	);
+	return data;
+};
+
 export const createFederationTicketComment = async (
 	teamspace: string,
 	projectId: string,

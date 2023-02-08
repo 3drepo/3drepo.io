@@ -126,16 +126,19 @@ export function* createTicketComment({
 		if (comment.images) {
 			commentToCreate.images = comment.images.map(stripBase64Prefix)
 		}
-		const data = yield createModelTicketComment(teamspace, projectId, modelId, ticketId, commentToCreate);
-		const now = new Date();
-		const richComment = {
-			...comment,
-			_id: data._id,
-			createdAt: now,
-			updatedAt: now,
-			deleted: false,
+		const { _id: newCommentId } = yield createModelTicketComment(teamspace, projectId, modelId, ticketId, commentToCreate);
+
+		const fetchModelTicketComment = isFederation
+			? API.Tickets.fetchFederationTicketComment
+			: API.Tickets.fetchContainerTicketComment;
+		
+		let fetchedComment = yield fetchModelTicketComment(teamspace, projectId, modelId, ticketId, newCommentId);
+		fetchedComment = {
+			...fetchedComment,
+			createdAt: new Date(fetchedComment.createdAt),
+			updatedAt: new Date(fetchedComment.updatedAt),
 		};
-		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, richComment));
+		yield put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, fetchedComment));
 		onSuccess();
 	} catch (error) {
 		onError(error);
