@@ -20,7 +20,7 @@ import { CommentHistoryBlock } from '@/v5/store/tickets/tickets.types';
 import { editedCommentMessage } from '../comment.helpers';
 import { CommentImages } from '../commentImages/commentImages.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
-import { BasicComment, CommentAge, CommentAuthor, EditedCommentLabel, SingleImage } from './basicCommentWithImages.styles';
+import { BasicComment, CommentAge, CommentAuthor, EditedCommentLabel, SingleImage, CommentImagesContainer } from './basicCommentWithImages.styles';
 
 export type BasicCommentWithImagesProps = {
 	images?: string[];
@@ -47,7 +47,11 @@ export const BasicCommentWithImages = ({
 			{author && (<CommentAuthor>{author}</CommentAuthor>)}
 			{history?.length && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			{children}
-			{images.length > 1 && (<CommentImages images={images} />)}
+			{images.length > 1 && (
+				<CommentImagesContainer>
+					<CommentImages images={images} />
+				</CommentImagesContainer>
+			)}
 			{message && (<CommentMarkDown>{message}</CommentMarkDown>)}
 			<CommentAge>{commentAge}</CommentAge>
 		</BasicComment>

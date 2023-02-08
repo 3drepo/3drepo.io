@@ -56,8 +56,7 @@ export const CommentButtons = styled.div`
 
 export const SingleImage = styled.img`
 	width: calc(100% + 24px);
-	margin-left: -12px;
-	margin-top: -10px;
+	margin: -10px 0 5px -12px;
 	border-radius: 10px 10px 0 0;
 `;
 
@@ -111,4 +110,10 @@ export const BasicComment = styled.div<BasicCommentProps>`
 			}
 		}
 	}
+`;
+
+export const CommentImagesContainer = styled.div`
+	width: calc(100% + 14px);
+	margin-top: -5px;
+	margin-left: -7px;
 `;
