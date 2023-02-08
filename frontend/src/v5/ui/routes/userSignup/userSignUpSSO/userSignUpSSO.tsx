@@ -154,7 +154,7 @@ export const UserSignupFormStepAccount = ({
 };
 
 export const UserSignupSSO = () => {
-	const LAST_STEP = 2;
+	const LAST_STEP = 1;
 	const [activeStep, setActiveStep] = useState(0);
 	const [completedSteps, setCompletedSteps] = useState(new Set<number>());
 	const [fields, setFields] = useState<any>({});
