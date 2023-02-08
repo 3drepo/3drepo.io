@@ -17,8 +17,8 @@
 
 import styled from 'styled-components';
 import { FormTextArea } from '@controls/inputs/formInputs.component';
-import { MessageInput } from '../../../commentsPanel.styles';
 import { BasicComment } from '../../comment.styles';
+import { MessageInput } from '../../../createCommentBox/createCommentBox.styles';
 
 export const EditCommentContainer = styled(BasicComment)`
 	border-radius: 0;
