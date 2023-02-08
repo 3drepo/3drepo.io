@@ -55,9 +55,11 @@ export const CommentButtons = styled.div`
 `;
 
 export const SingleImage = styled.img`
-	width: calc(100% + 24px);
+	width: 241px;
 	margin: -10px 0 5px -12px;
-	border-radius: 10px 10px 0 0;
+	border-radius: inherit;
+	border-bottom-right-radius: 0;
+	border-bottom-left-radius: 0;
 `;
 
 type BasicCommentProps = {
@@ -113,7 +115,7 @@ export const BasicComment = styled.div<BasicCommentProps>`
 `;
 
 export const CommentImagesContainer = styled.div`
-	width: calc(100% + 14px);
+	width: 231px;
 	margin-top: -5px;
 	margin-left: -7px;
 `;

@@ -17,15 +17,13 @@
 
 import styled from 'styled-components';
 import { BasicCommentWithImages } from '../basicCommentWithImages/basicCommentWithImages.component';
-import { CommentAuthor, CommentButtons, SingleImage } from '../basicCommentWithImages/basicCommentWithImages.styles';
+import { CommentAuthor, CommentButtons } from '../basicCommentWithImages/basicCommentWithImages.styles';
 
 export const CommentContainer = styled(BasicCommentWithImages)`
 	background-color: ${({ theme }) => theme.palette.secondary.main};
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	align-self: end;
-	&, ${SingleImage} {
-		border-top-right-radius: 0;
-	}
+	border-top-right-radius: 0;
 
 	&::before {
 		right: 100%;
@@ -40,8 +38,6 @@ export const CommentContainer = styled(BasicCommentWithImages)`
 	}
 
 	& + & {
-		&, ${SingleImage} {
-			border-top-right-radius: 10px;
-		}
+		border-top-right-radius: 10px;
 	}
 `;
