@@ -169,7 +169,7 @@ User.addUser = async (newUserData) => {
 };
 
 User.removeUser = (user) => db.deleteOne(USERS_DB_NAME, USERS_COL, { user });
-User.removeUsers = (users) => db.deleteOne(USERS_DB_NAME, USERS_COL, { user: { $in: users } });
+User.removeUsers = (users) => db.deleteMany(USERS_DB_NAME, USERS_COL, { user: { $in: users } });
 
 User.verify = async (username) => {
 	const { customData } = await db.findOneAndUpdate(USERS_DB_NAME, USERS_COL, { user: username },

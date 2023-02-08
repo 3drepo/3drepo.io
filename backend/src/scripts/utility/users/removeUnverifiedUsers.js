@@ -26,6 +26,7 @@ const run = async () => {
 	const projection = { user: 1 };
 	const usersToRemove = await getUsersByQuery(query, projection);
 	await removeUsers(usersToRemove.map(({ user }) => user));
+
 	logger.logInfo(`${usersToRemove.length} users removed.`);
 };
 
