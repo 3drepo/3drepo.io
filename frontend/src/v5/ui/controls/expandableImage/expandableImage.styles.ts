@@ -16,18 +16,27 @@
  */
 
 import styled from 'styled-components';
+import { OverlappingContainer as OverlappingContainerBase } from '@controls/overlappingContainer/overlappingContainer.styles';
+import { hexToOpacity } from '../../themes/theme';
 
-export const FlexContainer = styled.div`
+export const OverlappingContainer = styled(OverlappingContainerBase)`
+	border-radius: 5px;
+	overflow: hidden;
+`;
+
+export const Image = styled.img`
+	object-fit: cover;
+	aspect-ratio: 1 / 1;
+	cursor: pointer;
+	border-radius: 5px;
+	overflow: hidden;
+`;
+
+export const ExtraImages = styled.div`
 	display: flex;
-	flex-direction: row;
-	width: 100%;
-	gap: 5px;
-
-	& > * {
-		flex: 1;
-	}
-
-	& ~ & {
-		margin-top: 5px;
-	}
+	justify-content: center;
+	align-items: center;
+	${({ theme }) => theme.typography.h2}
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	background-color: ${({ theme }) => hexToOpacity(theme.palette.secondary.main, 60)};
 `;
