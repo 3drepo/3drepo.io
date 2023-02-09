@@ -74,4 +74,5 @@ export const OriginalMessage = styled.div`
 
 export const ExpandableImage = styled(ExpandableImageBase)`
 	width: 67px;
+	height: 67px;
 `;
