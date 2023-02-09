@@ -52,11 +52,13 @@ interface IProps {
 	editMode?: boolean;
 	teamspace: string;
 	modelId: string;
+	project?: string;
+	revision?: string;
 	isCommenter?: boolean;
 	onCancelEditMode?: () => void;
 	onSaveEdit?: (values) => void;
 	onDelete?: (teamspace, model, id) => void;
-	onShare?: (teamspace, model, id) => void;
+	onShare?: (teamspace, model, id, project?, revision?) => void;
 	onSetDefault?: (teamspace, model, id) => void;
 	onOpenEditMode?: () => void;
 	onClick?: (viewpoint) => void;
@@ -238,8 +240,8 @@ export class ViewItem extends PureComponent<IProps, any> {
 
 	public handleShareLink = (event: MouseEvent) => {
 		event.stopPropagation();
-		const { teamspace, modelId, viewpoint: {_id} } = this.props;
-		this.props.onShare(teamspace, modelId, _id);
+		const { teamspace, modelId, viewpoint: {_id}, project, revision } = this.props;
+		this.props.onShare(teamspace, modelId, _id, project, revision);
 	}
 
 	public handleSetDefault = () => {
