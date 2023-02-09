@@ -18,8 +18,8 @@
 import styled from 'styled-components';
 import { JobAvatar } from '@controls/jobAvatar/jobAvatar.component';
 import { MultiSelect } from '@controls/inputs/multiSelect/multiSelect.component';
-import { ExtraAssigneesCircle } from './extraAssignees/extraAssigneesCircle.component';
 import { BaseCircle } from '@components/shared/userCirclePopover/userCirlcePopover.styles';
+import { ExtraAssigneesCircle } from './extraAssignees/extraAssigneesCircle.component';
 
 export const HiddenSearchSelect = styled(MultiSelect)`
 	height: 0;

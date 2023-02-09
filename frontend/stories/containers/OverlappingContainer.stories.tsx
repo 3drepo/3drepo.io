@@ -33,7 +33,7 @@ export default {
 } as ComponentMeta<typeof OverlappingContainer>;
 
 const BackgroundImage = styled.img.attrs({
-	src: 'https://cdn.photographycourse.net/wp-content/uploads/2014/11/Landscape-Photography-steps.jpg'
+	src: 'https://cdn.photographycourse.net/wp-content/uploads/2014/11/Landscape-Photography-steps.jpg',
 })``;
 
 const FrontText = styled.div`
@@ -43,7 +43,6 @@ const FrontText = styled.div`
 	align-items: center;
 	${({ theme }) => theme.typography.h5}
 `;
-
 
 const FrontTextOnHover = styled(FrontText)`
 	opacity: 0;

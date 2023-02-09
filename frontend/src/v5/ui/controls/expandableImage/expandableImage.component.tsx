@@ -24,7 +24,12 @@ type ExpandableImageProps = {
 	className?: string,
 	showExtraImagesValue?: boolean,
 };
-export const ExpandableImage = ({ displayImageIndex = 0, images, showExtraImagesValue, className }: ExpandableImageProps) => {
+export const ExpandableImage = ({
+	displayImageIndex = 0,
+	images,
+	showExtraImagesValue,
+	className,
+}: ExpandableImageProps) => {
 	const displayImage = images[displayImageIndex];
 
 	const openImagesModal = () => {

@@ -51,11 +51,10 @@ UserCirclePopoverWithAvatar.args = {
 	user: basicUser,
 } as Props;
 
-
 export const UserCirclePopoverWithoutAvatar = Template.bind({});
 UserCirclePopoverWithoutAvatar.args = {
 	user: {
 		...basicUser,
 		hasAvatar: false,
-	}
+	},
 } as Props;

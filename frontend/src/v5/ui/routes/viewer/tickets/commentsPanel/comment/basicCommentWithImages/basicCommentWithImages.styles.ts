@@ -43,7 +43,6 @@ export const CommentAge = styled(CommentSmallText)`
 	text-align: right;
 `;
 
-
 export const CommentButtons = styled.div`
 	display: flex;
 	flex-direction: row;

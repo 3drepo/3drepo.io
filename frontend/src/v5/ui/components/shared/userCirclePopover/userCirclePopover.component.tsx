@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UserCircle } from './userCirlcePopover.styles';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { IUser } from '@/v5/store/users/users.redux';
+import { UserCircle } from './userCirlcePopover.styles';
 
 type UserCirclePopoverProps = {
 	user: IUser;
