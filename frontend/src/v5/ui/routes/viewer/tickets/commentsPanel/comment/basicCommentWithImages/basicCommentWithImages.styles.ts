@@ -55,7 +55,7 @@ export const CommentButtons = styled.div`
 
 export const SingleImage = styled.img`
 	width: 241px;
-	margin: -10px 0 5px -12px;
+	margin: -10px 0 10px -12px;
 	border-radius: inherit;
 	border-bottom-right-radius: 0;
 	border-bottom-left-radius: 0;
