@@ -20,7 +20,11 @@ import { CommentMessage } from '../basicCommentWithImages/basicCommentWithImages
 
 const RENDERERS = { paragraph: CommentMessage };
 
-export const CommentMarkDown = ({ children, ...props }) => (
+type CommentMarkDownProps = {
+	children?: any,
+	className?: string,
+};
+export const CommentMarkDown = ({ children, ...props }: CommentMarkDownProps) => (
 	<ReactMarkdown renderers={RENDERERS} escapeHtml={false} {...props}>
 		{children}
 	</ReactMarkdown>
