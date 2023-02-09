@@ -142,7 +142,7 @@ const fillModelData = async function(fullNotifications) {
 	notifications.forEach (notification => {
 		const teamSpace = modelsData[notification.teamSpace] || {};
 		const {name, federate} = teamSpace[notification.modelId] || {};
-		Object.assign(notification, {timestamp: new Date(notification.timestamp).getTime(), modelName: name, federation: federate, project: (modelToProject[notification.teamSpace] ?? {})[notification.modelId]});
+		Object.assign(notification, {timestamp: notification.timestamp.getTime(), modelName: name, federation: federate, project: (modelToProject[notification.teamSpace] ?? {})[notification.modelId]});
 	});
 
 	return fullNotifications;

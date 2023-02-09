@@ -26,10 +26,10 @@ const NOTIFICATIONS_DB = 'notifications';
 const NOTIFICATIONS_COLL = 'notifications';
 
 const processCollection = async (user) => {
-	const updatedNotifications = (await find(NOTIFICATIONS_DB, user, {})).map((entry) => ({
+	const updatedNotifications = (await find(NOTIFICATIONS_DB, user, {})).map(({ timestamp, ...entry }) => ({
 		...entry,
 		user,
-		timestamp: new Date(entry.timestamp),
+		timestamp: new Date(timestamp),
 	}));
 
 	if (updatedNotifications.length) {
