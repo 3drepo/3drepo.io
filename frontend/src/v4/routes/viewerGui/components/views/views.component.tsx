@@ -57,6 +57,8 @@ interface IProps {
 	isCommenter: boolean;
 	teamspace: string;
 	model: string;
+	project?: string;
+	revision?: string;
 	modelSettings: any;
 	fetchViewpoints: (teamspace, modelId) => void;
 	createViewpoint: (teamspace, modelId, view) => void;
@@ -64,7 +66,7 @@ interface IProps {
 	updateViewpoint: (teamspace, modelId, viewId, newName) => void;
 	deleteViewpoint: (teamspace, modelId, viewId) => void;
 	showViewpoint: (teamspace, modelId, view) => void;
-	shareViewpointLink: (teamspace, modelId, viewId) => void;
+	shareViewpointLink: (teamspace, modelId, viewId, project?, revision?) => void;
 	setDefaultViewpoint: (teamspace, modelId, viewId) => void;
 	setActiveViewpoint: (teamspace, modelId, view) => void;
 	subscribeOnViewpointChanges: (teamspace, modelId) => void;
@@ -128,7 +130,7 @@ export class Views extends PureComponent<IProps, any> {
 	));
 
 	public renderViewpoints = renderWhenTrue(() => {
-		const { editMode, teamspace, model, activeViewpoint } = this.props;
+		const { editMode, teamspace, model, activeViewpoint, project, revision } = this.props;
 		const { filteredViewpoints } = this.state;
 
 		const Viewpoints = filteredViewpoints.map((viewpoint) => {
@@ -150,6 +152,8 @@ export class Views extends PureComponent<IProps, any> {
 					onShare={this.props.shareViewpointLink}
 					teamspace={teamspace}
 					modelId={model}
+					project={project}
+					revision={revision}
 					onSaveEdit={this.handleUpdate(viewpoint._id)}
 					onChangeName={this.handleActiveViewpointChange}
 					onSetDefault={this.props.setDefaultViewpoint}

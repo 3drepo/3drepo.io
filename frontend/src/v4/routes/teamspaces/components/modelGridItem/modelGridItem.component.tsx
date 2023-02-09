@@ -77,7 +77,7 @@ interface IProps {
 	removeFromStarred: (modelName) => void;
 	setState: (componentState: IViewpointsComponentState) => void;
 	searchEnabled?: boolean;
-	shareViewpointLink: (teamspace, modelId, viewId) => void;
+	shareViewpointLink: (teamspace, modelId, viewId, project?, revision?) => void;
 }
 
 export const ModelGridItem = memo((props: IProps) => {

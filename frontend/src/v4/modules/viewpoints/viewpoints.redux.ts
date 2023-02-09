@@ -39,7 +39,7 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	setSearchQuery: ['searchQuery'],
 	showDeleteInfo: ['viewpointId'],
 	setComponentState: ['componentState'],
-	shareViewpointLink: ['teamspace', 'modelId', 'viewpointId'],
+	shareViewpointLink: ['teamspace', 'modelId', 'viewpointId', 'project', 'revision'],
 	setDefaultViewpoint: ['teamspace', 'modelId', 'view'],
 	setSelectedViewpoint: ['selectedViewpoint'],
 	deselectViewsAndLeaveClipping: [],
