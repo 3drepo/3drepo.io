@@ -50,8 +50,8 @@ export const createMetadata = (comment: ITicketComment): TicketCommentReplyMetad
 );
 
 export const extractMessage = (message: string = '') => message.replaceAll(/\[[_a-z]*\]:- ".*"\n[\n]?/g, '');
-export const sanitiseMessage = (message: string) => message.replaceAll('"', '&#34;').replaceAll('\n', '<br />');
-export const desanitiseMessage = (message: string) => message.replaceAll('&#34;', '"').replaceAll('<br />', '\n');
+export const sanitiseMessage = (message: string = '') => message.replaceAll('"', '&#34;').replaceAll('\n', '<br />');
+export const desanitiseMessage = (message: string = '') => message.replaceAll('&#34;', '"').replaceAll('<br />', '\n');
 
 const createMetadataValue = (metadataName: keyof TicketCommentReplyMetadata, metadataValue: string) => (
 	`[${metadataName}]:- "${metadataValue}"\n`
