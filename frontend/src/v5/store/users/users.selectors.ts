@@ -37,7 +37,7 @@ export const selectUser = createSelector(
 		if (user) {
 			return { ...user, avatarUrl: getMemberImgSrc(teamspace, user.user), hasAvatar: true };
 		}
-		return { user: userName, firstName: userName, lastName: '', avatarUrl: '' };
+		return { user: userName, firstName: userName, lastName: '', avatarUrl: '', isNotTeamspaceMember: true };
 	},
 );
 
