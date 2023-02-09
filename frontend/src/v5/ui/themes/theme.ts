@@ -597,6 +597,7 @@ export const theme = createTheme({
 			styleOverrides: {
 				paper: {
 					borderRadius: 10,
+					background: 'transparent',
 				},
 				container: {
 					backgroundColor: 'rgba(18, 30, 51, 0.9)',

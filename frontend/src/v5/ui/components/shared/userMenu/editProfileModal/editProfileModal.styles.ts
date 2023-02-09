@@ -18,10 +18,10 @@ import styled, { css } from 'styled-components';
 import TabBase from '@mui/material/Tab';
 import TabPanelBase from '@mui/lab/TabPanel';
 import TabListBase from '@mui/lab/TabList';
-import { FormModal as FormModalBase } from '@controls/modal/formModal/formDialog.component';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
+import { FormModalNoButtons } from '@controls/formModal/formModalNoButtons/formModalNoButtons.component';
 
-export const FormModal = styled(FormModalBase)`
+export const FormModal = styled(FormModalNoButtons)`
 	.MuiDialogContent-root {
 		padding: 0;
 		margin-bottom: 0;

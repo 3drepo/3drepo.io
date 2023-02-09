@@ -26,7 +26,7 @@ import {
 	Message,
 	TruncatableTitle,
 	Instruction,
-} from '@/v5/ui/components/shared/modals/modals.styles';
+} from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { CircledIcon } from '@controls/circledIcon';
 import { useForm } from 'react-hook-form';
 import { UnhandledErrorInterceptor } from './deleteModal.styles';

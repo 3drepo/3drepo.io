@@ -27,7 +27,7 @@ import {
 	VisualSettingsDialogContent,
 	WarningMessage,
 } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
-import { VisualSettingsModalContent } from '@components/shared/userMenu/visualSettingsModal/visualSettingsModal.styles';
+import { FormModalNoButtons } from '@components/shared/userMenu/visualSettingsModal/visualSettingsModal.styles';
 import { css } from 'styled-components';
 
 const sharedInputStyles = css`
@@ -70,6 +70,7 @@ const selectStyles = css`
 	.MuiSelect-select {
 		background-color: transparent;
 		padding: 0;
+		border: none;
 	}
 	.MuiOutlinedInput-notchedOutline {
 		border: none;
@@ -101,8 +102,7 @@ export default css`
 			display: none;
 		}
 	}
-	${VisualSettingsModalContent} {
-
+	${FormModalNoButtons} {
 		${VisualSettingsDialogContent} {
 			padding: 0;
 			margin: 0;

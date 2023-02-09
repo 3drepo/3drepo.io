@@ -26,15 +26,16 @@ import { useContainersData } from '../dashboard/projects/containers/containers.h
 import { useFederationsData } from '../dashboard/projects/federations/federations.hooks';
 
 export const Viewer = () => {
-	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
+	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
 	TicketsCardActionsDispatchers.resetState();
 
 	useContainersData();
 	useFederationsData();
 
-	const areStatsPending = FederationsHooksSelectors.selectAreStatsPending();
-	const isListPending = FederationsHooksSelectors.selectIsListPending();
-	const isLoading = areStatsPending || isListPending;
+	const areFederationStatsPending = FederationsHooksSelectors.selectAreStatsPending();
+	const isFederationListPending = FederationsHooksSelectors.selectIsListPending();
+	const areContainersPending = ContainersHooksSelectors.selectAreStatsPending();
+	const isLoading = areFederationStatsPending || isFederationListPending || areContainersPending;
 
 	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const selectedFederation = FederationsHooksSelectors.selectFederationById(containerOrFederation);
@@ -55,6 +56,7 @@ export const Viewer = () => {
 	const v4Match = {
 		params: {
 			model: containerOrFederation,
+			project,
 			teamspace,
 			revision,
 		},
