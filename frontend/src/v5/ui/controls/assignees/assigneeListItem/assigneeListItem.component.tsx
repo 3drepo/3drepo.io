@@ -35,7 +35,7 @@ export const AssigneeListItem = ({ assignee }: IAssigneeListItem) => {
 	const isJob = jobsInTeamspace.some(({ _id }) => _id === assignee);
 	const user = UsersHooksSelectors.selectUser(teamspace, assignee);
 
-	if (!isJob && !user) return (<></>);
+	if (!isJob && user.isNotTeamspaceMember) return (<></>);
 
 	if (!isJob) return (<UserCirclePopover user={user} />);
 
