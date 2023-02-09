@@ -26,6 +26,7 @@ import {
 	enableRealtimeFederationUpdateTicket,
 } from '@/v5/services/realtime/ticket.events';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component';
@@ -37,16 +38,38 @@ export const Tickets = () => {
 	const isFederation = modelIsFederation(containerOrFederation);
 	const view = TicketsCardHooksSelectors.selectView();
 
-	useEffect(() => (
-		isFederation
-			? combineSubscriptions(
+	useEffect(() => {
+		UsersActionsDispatchers.fetchUsers(teamspace);
+		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
+	}, []);
+
+	useEffect(() => {
+		if (isFederation) {
+			combineSubscriptions(
 				enableRealtimeFederationNewTicket(teamspace, project, containerOrFederation),
 				enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation),
-			) : combineSubscriptions(
+			);
+		} else {
+			combineSubscriptions(
 				enableRealtimeContainerNewTicket(teamspace, project, containerOrFederation),
 				enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation),
-			)
-	), [containerOrFederation]);
+			);
+		}
+		if (view === TicketsCardViews.List) {
+			TicketsActionsDispatchers.fetchTickets(
+				teamspace,
+				project,
+				containerOrFederation,
+				isFederation,
+			);
+			TicketsActionsDispatchers.fetchTemplates(
+				teamspace,
+				project,
+				containerOrFederation,
+				isFederation,
+			);
+		}
+	}, [containerOrFederation]);
 
 	return (
 		<>

@@ -17,15 +17,12 @@
 
 import { useEffect } from 'react';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
+import { FormInputProps } from '@controls/inputs/inputController.component';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
-import { BasicTicketImage, BasicTicketImageProps } from '../basicTicketImage.component';
+import { BasicTicketImage } from '../basicTicketImage.component';
 import { TicketImageActionMenu } from '../ticketImageActionMenu.component';
 
-type TicketImageProps = Omit<BasicTicketImageProps, 'onEmptyImageClick' | 'imgSrc' | 'children'> & {
-	onChange?: (imgSrc) => void,
-	onBlur?: () => void;
-	value?: string,
-};
+type TicketImageProps = Omit<FormInputProps, 'inputRef'>;
 
 export const TicketImage = ({ value, onChange, onBlur, ...props }: TicketImageProps) => {
 	const onImageChange = (newValue) => onChange(newValue ? stripBase64Prefix(newValue) : null);

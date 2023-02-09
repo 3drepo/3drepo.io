@@ -16,9 +16,9 @@
  */
 
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { MultiSelectMenuItem } from '@controls/formMultiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
+import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
-import { isEqual } from 'lodash';
+import { intersection, isEqual } from 'lodash';
 import { memo, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { AssigneeListItem } from './assigneeListItem/assigneeListItem.component';
@@ -40,11 +40,13 @@ export const Assignees = memo(({
 	disabled,
 	...props
 }: AssigneesProps) => {
-	const [values, setValues] = useState(initialValues);
-	const [open, setOpen] = useState(false);
-	const listedAssignees = initialValues.slice(0, max - 1);
-	const overflowAssignees = initialValues.slice(max - 1);
 	const allUsersAndJobs = UsersHooksSelectors.selectAssigneesListItems();
+	// Must filter out users not included in this teamspace. This can occur when a user
+	// has been assigned to a ticket and later on is removed from the teamspace
+	const [values, setValues] = useState(intersection(initialValues, allUsersAndJobs.map((i) => i.value)));
+	const [open, setOpen] = useState(false);
+	const listedAssignees = values.slice(0, max - 1);
+	const overflowValue = initialValues.slice(max - 1).length;
 
 	const preventPropagation = (e) => {
 		if (e.key !== 'Escape') e.stopPropagation();
@@ -64,7 +66,6 @@ export const Assignees = memo(({
 		<AssigneesList onClick={onClick} {...props}>
 			<HiddenSearchSelect
 				value={values}
-				multiple
 				open={open}
 				onClose={handleClose}
 				onChange={onChange}
@@ -82,11 +83,11 @@ export const Assignees = memo(({
 			) : (
 				<FormattedMessage id="assignees.unassigned" defaultMessage="Unassigned" />
 			)}
-			{overflowAssignees.length ? (
+			{overflowValue ? (
 				<HoverPopover
-					anchor={(extraProps) => <ExtraAssignees assignees={overflowAssignees} {...extraProps} />}
+					anchor={(extraProps) => <ExtraAssignees overflowValue={overflowValue} {...extraProps} />}
 				>
-					<ExtraAssigneesPopover assignees={overflowAssignees} />
+					<ExtraAssigneesPopover assignees={values} />
 				</HoverPopover>
 			) : <></>}
 		</AssigneesList>

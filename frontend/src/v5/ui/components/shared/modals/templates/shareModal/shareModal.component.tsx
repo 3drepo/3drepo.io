@@ -18,14 +18,8 @@
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { ShareTextField } from '@controls/shareTextField';
-import CloseIcon from '@assets/icons/close.svg';
-import {
-	Title,
-	Header,
-	CloseButton,
-	Form,
-	FormDialogContent,
-} from '@controls/modal/formModal/formDialog.styles';
+import { Form, FormDialogContent } from '@controls/modal/formModal/formDialog.styles';
+import { FormModalHeader } from '@controls/modal/formModal/formModalHeader/formModalHeader.component';
 import { MailToButton } from './shareModal.styles';
 
 type IShareModal = {
@@ -47,14 +41,10 @@ export const ShareModal = ({
 	link,
 }: IShareModal) => (
 	<Form>
-		<Header>
-			<Title>
-				{title}
-			</Title>
-			<CloseButton aria-label="Close dialog" onClick={onClickClose}>
-				<CloseIcon />
-			</CloseButton>
-		</Header>
+		<FormModalHeader
+			title={title}
+			handleClose={onClickClose}
+		/>
 		<FormDialogContent>
 			<ShareTextField
 				label={formatMessage({

@@ -16,12 +16,12 @@
  */
 
 import { Link } from 'react-router-dom';
-import LogoIcon from '@assets/icons/logo.svg';
-import PrintIcon from '@assets/icons/print.svg';
+import LogoIcon from '@assets/icons/filled/logo-filled.svg';
+import PrintIcon from '@assets/icons/outlined/print-outlined.svg';
 import { FormattedMessage } from 'react-intl';
-import { CircleButton } from '@/v5/ui/controls/circleButton';
 import { AppBarContainer, Items } from '@components/shared/appBar/appBar.styles';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
 import { NavLink, NavLinks } from './legalAppBar.styles';
 
 type ILegalAppBar = {
@@ -47,9 +47,9 @@ export const LegalAppBar = ({ activePage }: ILegalAppBar): JSX.Element => (
 			</NavLinks>
 		</Items>
 		<Items>
-			<CircleButton onClick={window.print} variant="contrast" aria-label="print">
+			<NavbarButton onClick={window.print} aria-label="print">
 				<PrintIcon />
-			</CircleButton>
+			</NavbarButton>
 		</Items>
 	</AppBarContainer>
 );

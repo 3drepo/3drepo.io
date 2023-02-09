@@ -598,7 +598,7 @@ function parseMarkupBuffer(markupBuffer) {
 		_.get(xml, "Markup.Comment") && xml.Markup.Comment.forEach(comment => {
 			const obj = addPreExistingComment(
 				_.get(comment, "Author[0]._"),
-				_.get(comment, "Comment[0]._"),
+				_.get(comment, "Comment[0]._") ?? "",
 				{ guid: utils.stringToUUID(_.get(comment, "Viewpoint[0].@.Guid"))},
 				utils.stringToUUID(_.get(comment, "@.Guid")),
 				utils.isoStringToTimestamp(_.get(comment, "Date[0]._"))
@@ -1002,7 +1002,7 @@ bcf.importBCF = function(requester, account, model, dataBuffer, settings) {
 
 	if (settings.federate) {
 		for (let i = 0; settings.subModels && i < settings.subModels.length; i++) {
-			const subModelId = settings.subModels[i].model;
+			const subModelId = settings.subModels[i];
 			ifcToModelMapPromises.push(
 				Meta.getIfcGuids(account, subModelId).then(ifcGuidResults => {
 					for (let j = 0; j < ifcGuidResults.length; j++) {

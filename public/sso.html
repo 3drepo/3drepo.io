@@ -1,0 +1,117 @@
+<html><head><meta charset="utf-8"/>
+
+
+	</head><body>
+
+<script>
+	const DOMAIN = (new URL(window.location.href)).origin;
+	window.onload = () => {
+		const params = new Proxy(new URLSearchParams(window.location.search), {
+			get: (searchParams, prop) => searchParams.get(prop)});
+		if(params.signupPost) {
+			const msg = params.error ? `Errored (code: ${params.error})` : "SUCCESS"
+			document.getElementById('signUpRes').innerHTML = msg;
+		}
+
+		if(params.loginPost) {
+			if(params.error)
+				document.getElementById('loginRes').innerHTML =  `Errored (code: ${params.error})`;
+			else
+				window.location.href = DOMAIN
+		}
+
+		if(params.linkPost) {
+			const msg = params.error ? `Errored (code: ${params.error})` : "SUCCESS"
+			document.getElementById('linkRes').innerHTML =  msg;
+		}
+	}
+	const runPOST = () => {
+		var xhr = new XMLHttpRequest();
+		xhr.open("POST", `/api/v5/sso/aad/signup?redirectUri=${DOMAIN}/sso.html?signupPost=1`, true);
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.send(JSON.stringify({
+		  "username": document.getElementById('username').value,
+		  "countryCode": "GB",
+		  "company": "3D Repo",
+		  "mailListAgreed": true,
+		}));
+		xhr.onload = function() {
+			var data = JSON.parse(this.responseText);
+			if(this.status === 200) {
+				window.location.href = data.link
+			} else {
+				document.getElementById('signUpRes').innerHTML = "Failed: " + data.message;
+			}
+
+		}
+	}
+
+	const runLogin = () => {
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", `/api/v5/sso/aad/authenticate?redirectUri=${DOMAIN}/sso.html?loginPost=1`, true);
+		xhr.onload = function() {
+			var data = JSON.parse(this.responseText);
+			if(this.status === 200) {
+				window.location.href = data.link
+			} else {
+				document.getElementById('loginRes').innerHTML = "Failed: " + data.message;
+			}
+		}
+		xhr.send();
+	}
+
+	const linkAccount = () => {
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", `/api/v5/sso/aad/link?redirectUri=${DOMAIN}/sso.html?linkPost=1`, true);
+		xhr.onload = function() {
+			var data = JSON.parse(this.responseText);
+			if(this.status === 200) {
+				window.location.href = data.link
+			} else {
+				document.getElementById('linkRes').innerHTML = "Failed: " + data.message;
+			}
+		}
+		xhr.send();
+	}
+
+	const unlinkAccount = () => {
+		var xhr = new XMLHttpRequest();
+		xhr.open("POST", "/api/v5/sso/unlink", true);
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.send(JSON.stringify({
+			"password": document.getElementById('pw').value
+		}));
+		xhr.onload = function() {
+			if(this.status === 200)
+				document.getElementById('unlinkRes').innerHTML = "Account unlinked";
+			else{
+				var data = JSON.parse(this.responseText);
+				document.getElementById('unlinkRes').innerHTML = "Failed: " + data.message;
+			}
+
+		}
+	}
+
+</script>
+<h1>SSO demo</h1>
+<p>
+	<label for="username">Username</label>
+	<input type="text" id="username" name="username">
+	<input type="button" value="Sign up with SSO" id="MyButton" onclick="runPOST()" >
+	<label id="signUpRes"><label>
+</p>
+<p>
+	<input type="button" value="Login via SSO" id="MyButton2" onclick="runLogin()" >
+	<label id="loginRes"><label>
+</p>
+<p>
+	<input type="button" value="Link account" id="MyButton3" onclick="linkAccount()" >
+	<label id="linkRes"><label>
+</p>
+<p>
+	<label for="pw">New Password</label>
+	<input type="password" id="pw" name="pw">
+	<input type="button" value="Unlink account" id="MyButton4" onclick="unlinkAccount()" >
+	<label id="unlinkRes"><label>
+</p>
+</body></html>

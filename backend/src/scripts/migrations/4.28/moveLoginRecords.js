@@ -17,7 +17,8 @@
 
 const { v5Path } = require('../../../interop');
 
-const { INTERNAL_DB, listCollections, dropDatabase, dropCollection, find, insertMany } = require(`${v5Path}/handler/db`);
+const { listCollections, dropDatabase, dropCollection, find, insertMany } = require(`${v5Path}/handler/db`);
+const { INTERNAL_DB } = require(`${v5Path}/handler/db.constants`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const { initialise } = require(`${v5Path}/models/loginRecords`);
 

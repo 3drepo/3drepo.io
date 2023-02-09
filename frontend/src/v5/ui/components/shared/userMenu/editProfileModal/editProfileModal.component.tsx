@@ -17,7 +17,7 @@
 import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
-import { defaults, pick } from 'lodash';
+import { defaults, isNull, omitBy, pick } from 'lodash';
 import { TabContext } from '@mui/lab';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useErrorInterceptor } from '@controls/errorMessage/useErrorInterceptor';
@@ -65,8 +65,8 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 	const interceptedError = useErrorInterceptor();
 
 	const defaultPersonalValues = defaults(
-		pick(user, ['firstName', 'lastName', 'email', 'company', 'countryCode']),
-		{ countryCode: 'GB', avatarFile: '' },
+		pick(omitBy(user, isNull), ['firstName', 'lastName', 'email', 'company', 'countryCode']),
+		{ company: '', countryCode: 'GB', avatarFile: '' },
 	);
 
 	const getTabSubmitFunction = () => {
@@ -80,6 +80,7 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);
 
 	const personalFormData = useForm<IUpdatePersonalInputs>({
+		mode: 'all',
 		resolver: yupResolver(EditProfileUpdatePersonalSchema),
 		context: { alreadyExistingEmails },
 		defaultValues: defaultPersonalValues,

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// detects edge as browser but not device
+const { INTERNAL_DB } = require('../handler/db.constants');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUIDString } = require('../utils/helper/uuids');
@@ -28,13 +28,13 @@ const LoginRecords = {};
 const LOGIN_RECORDS_COL = 'loginRecords';
 
 LoginRecords.getLastLoginDate = async (user) => {
-	const lastRecord = await db.findOne(db.INTERNAL_DB, LOGIN_RECORDS_COL,
+	const lastRecord = await db.findOne(INTERNAL_DB, LOGIN_RECORDS_COL,
 		{ user, failed: { $ne: true } }, { loginTime: 1 }, { loginTime: -1 });
 	return lastRecord?.loginTime;
 };
 
 LoginRecords.removeAllUserRecords = async (user) => {
-	await db.deleteMany(db.INTERNAL_DB, LOGIN_RECORDS_COL, { user });
+	await db.deleteMany(INTERNAL_DB, LOGIN_RECORDS_COL, { user });
 };
 
 const getFailedAttemptsSince = async (user, limit, dateFrom) => {
@@ -44,7 +44,7 @@ const getFailedAttemptsSince = async (user, limit, dateFrom) => {
 		query.loginTime = { $gt: dateFrom };
 	}
 
-	const res = await db.find(db.INTERNAL_DB, LOGIN_RECORDS_COL,
+	const res = await db.find(INTERNAL_DB, LOGIN_RECORDS_COL,
 		query, { loginTime: 1 }, { loginTime: -1 }, limit);
 
 	return res.map(({ loginTime }) => loginTime);
@@ -99,7 +99,7 @@ const generateRecord = (_id, ipAddr, userAgent, referer) => {
 
 LoginRecords.saveSuccessfulLoginRecord = async (user, sessionId, ipAddress, userAgent, referer) => {
 	const loginRecord = generateRecord(sessionId, ipAddress, userAgent, referer);
-	await db.insertOne(db.INTERNAL_DB, LOGIN_RECORDS_COL, { user, ...loginRecord });
+	await db.insertOne(INTERNAL_DB, LOGIN_RECORDS_COL, { user, ...loginRecord });
 
 	publish(events.SUCCESSFUL_LOGIN_ATTEMPT, { username: user, loginRecord });
 };
@@ -107,14 +107,14 @@ LoginRecords.saveSuccessfulLoginRecord = async (user, sessionId, ipAddress, user
 LoginRecords.recordFailedAttempt = async (user, ipAddress, userAgent, referer) => {
 	const loginRecord = generateRecord(generateUUIDString(), ipAddress, userAgent, referer);
 
-	await db.insertOne(db.INTERNAL_DB, LOGIN_RECORDS_COL, { failed: true, user, ...loginRecord });
+	await db.insertOne(INTERNAL_DB, LOGIN_RECORDS_COL, { failed: true, user, ...loginRecord });
 
 	if (await (LoginRecords.isAccountLocked(user))) {
 		publish(events.ACCOUNT_LOCKED, { user });
 	}
 };
 
-LoginRecords.initialise = () => db.createIndex(db.INTERNAL_DB, LOGIN_RECORDS_COL,
+LoginRecords.initialise = () => db.createIndex(INTERNAL_DB, LOGIN_RECORDS_COL,
 	{ user: 1, loginTime: -1, failed: 1 }, { runInBackground: true });
 
 module.exports = LoginRecords;

@@ -510,7 +510,7 @@ const testNewRevisionProcessed = () => {
 
 	describe('Update with new revision when the model is already deleted', () => {
 		test('should not trigger event', async () => {
-			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue({ matchedCount: 0 });
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValue(false);
 			publishFn.mockClear();
 
 			const teamspace = generateRandomString();
