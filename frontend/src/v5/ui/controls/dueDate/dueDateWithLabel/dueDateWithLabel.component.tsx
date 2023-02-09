@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,19 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import { DatePickerWrapper } from '../datePickerWrapper.component';
+import { DueDateEmptyLabel } from './dueDateLabel/dueDateEmptyLabel.component';
+import { DueDateFilledLabel } from './dueDateLabel/dueDateFilledLabel.component';
 
-export const DateContainer = styled.span<{ isOverdue?: boolean; disabled?: boolean }>`
-	font-size: 10px;
-	padding: 3px 0;
-	color: ${({ theme, isOverdue = false }) => (isOverdue ? theme.palette.error.main : theme.palette.secondary.main)};
-	${({ disabled }) => !disabled && css`
-		&:hover {
-			text-decoration: underline;
-		}
-	`}
-`;
+type IDueDateWithLabel = {
+	value: any;
+	disabled?: boolean;
+	onBlur: (newValue) => void;
+};
 
-export const EmptyDateContainer = styled(DateContainer)`
-	color: ${({ theme }) => theme.palette.base.main};
-`;
+export const DueDateWithLabel = ({ value, disabled, onBlur }: IDueDateWithLabel) => (
+	<DatePickerWrapper
+		value={value}
+		disabled={disabled}
+		onBlur={onBlur}
+	>
+		{value ? (
+			<DueDateFilledLabel value={value} disabled={disabled} />
+		) : (
+			<DueDateEmptyLabel disabled={disabled} />
+		)}
+	</DatePickerWrapper>
+);

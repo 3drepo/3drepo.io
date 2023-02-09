@@ -24,11 +24,11 @@ type IDueDateFilledLabel = IDueDateEmptyLabel & {
 	value: number;
 };
 
-export const DueDateFilledLabel = ({ value, disabled, onClick }: IDueDateFilledLabel): JSX.Element => {
+export const DueDateFilledLabel = ({ value, disabled }: IDueDateFilledLabel): JSX.Element => {
 	const isOverdue = value < Date.now();
 	const formattedDate = formatDate(value);
 	return (
-		<DateContainer disabled={disabled} isOverdue={isOverdue} onClick={onClick}>
+		<DateContainer disabled={disabled} isOverdue={isOverdue}>
 			{isOverdue ? (
 				<FormattedMessage id="dueDate.overdue" defaultMessage="Overdue {date}" values={{ date: formattedDate }} />
 			) : (

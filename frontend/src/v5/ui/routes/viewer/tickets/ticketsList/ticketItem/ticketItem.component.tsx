@@ -21,7 +21,7 @@ import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/chip';
-import { DueDate } from '@controls/dueDate/dueDate.component';
+import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
 import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { IssueProperties, SafetibaseProperties, TicketsCardViews } from '../../tickets.constants';
@@ -70,7 +70,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			</ChipList>
 			{priority && (
 				<IssuePropertiesRow>
-					<DueDate value={dueDate} onBlur={onBlurDueDate} />
+					<DueDateWithLabel value={dueDate} onBlur={onBlurDueDate} />
 					<PriorityLevelChip state={priority} />
 					<Assignees values={assignees} onBlur={onBlurAssignees} />
 				</IssuePropertiesRow>

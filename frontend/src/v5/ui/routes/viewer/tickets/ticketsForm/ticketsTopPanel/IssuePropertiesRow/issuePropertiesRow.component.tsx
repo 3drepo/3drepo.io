@@ -16,10 +16,10 @@
  */
 
 import { Assignees } from '@controls/assignees/assignees.component';
-import { PriorityLevelChip, PriorityLevels, TicketStatusChip, TicketStatuses } from '@controls/chip';
-import { DueDate } from '@controls/dueDate/dueDate.component';
+import { PriorityLevelChip, PriorityLevels, TicketStatuses } from '@controls/chip';
+import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
 import { FormattedMessage } from 'react-intl';
-import { ColumnSeparator, DueDate, IssuePropertiesContainer, PropertyColumn, PropertyTitle, Status } from './issuePropertiesRow.styles';
+import { ColumnSeparator, IssuePropertiesContainer, PropertyColumn, PropertyTitle, Status } from './issuePropertiesRow.styles';
 
 type IIssuePropertiesRow = {
 	priority: PriorityLevels;
@@ -48,7 +48,7 @@ export const IssuePropertiesRow = ({ priority, dueDate, status, assignees, onBlu
 					defaultMessage="Due"
 				/>
 			</PropertyTitle>
-			<DueDate value={dueDate} />
+			<DueDateWithIcon value={dueDate} onBlur={onBlur} />
 		</PropertyColumn>
 		<ColumnSeparator />
 		<PropertyColumn>

@@ -15,24 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CalendarIconBase from '@assets/icons/outlined/calendar-outlined.svg';
-import { Backdrop as MuiBackdrop } from '@mui/material';
-import styled from 'styled-components';
-import { FONT_WEIGHT } from '../../themes/theme';
+import { FormattedMessage } from 'react-intl';
+import { EmptyDateContainer } from './dueDateLabel.styles';
 
-export const StopBackgroundInteraction = styled(MuiBackdrop)`
-	z-index: 15;
-`;
+export type IDueDateEmptyLabel = {
+	disabled: boolean;
+};
 
-export const Blah = styled.div`
-	font-weight: ${FONT_WEIGHT.BOLD};
-	padding: 3px 7px;
-	height: 20px;
-	box-sizing: border-box;
-`;
-
-export const CalendarIcon = styled(CalendarIconBase)`
-	height: 11px;
-	width: 11px;
-	margin-top: -1px;
-`;
+export const DueDateEmptyLabel = ({ disabled }: IDueDateEmptyLabel): JSX.Element => (
+	<EmptyDateContainer disabled={disabled}>
+		{disabled ? (
+			<FormattedMessage id="dueDate.emptyText.nonDisabled" defaultMessage="Due Date Unset" />
+		) : (
+			<FormattedMessage id="dueDate.emptyText.disabled" defaultMessage="Set Due Date" />
+		)}
+	</EmptyDateContainer>
+);

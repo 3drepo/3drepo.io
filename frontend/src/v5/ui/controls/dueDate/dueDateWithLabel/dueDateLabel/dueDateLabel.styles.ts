@@ -15,20 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
-import { EmptyDateContainer } from './dueDateLabel.styles';
+import styled, { css } from 'styled-components';
 
-export type IDueDateEmptyLabel = {
-	disabled: boolean;
-	onClick: (event) => void;
-};
+export const DateContainer = styled.span<{ isOverdue?: boolean; disabled?: boolean }>`
+	font-size: 10px;
+	/* padding: 3px 0; */
+	color: ${({ theme, isOverdue = false }) => (isOverdue ? theme.palette.error.main : theme.palette.secondary.main)};
+	${({ disabled }) => !disabled && css`
+		&:hover {
+			text-decoration: underline;
+		}
+	`}
+	display: inline-flex;
+    gap: 3px;
+    align-items: center;
+`;
 
-export const DueDateEmptyLabel = ({ disabled, onClick }: IDueDateEmptyLabel): JSX.Element => (
-	<EmptyDateContainer disabled={disabled} onClick={onClick}>
-		{disabled ? (
-			<FormattedMessage id="dueDate.emptyText.nonDisabled" defaultMessage="Due Date Unset" />
-		) : (
-			<FormattedMessage id="dueDate.emptyText.disabled" defaultMessage="Set Due Date" />
-		)}
-	</EmptyDateContainer>
-);
+export const EmptyDateContainer = styled(DateContainer)`
+	color: ${({ theme }) => theme.palette.base.main};
+`;
