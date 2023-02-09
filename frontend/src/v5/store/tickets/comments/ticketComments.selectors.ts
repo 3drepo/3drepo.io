@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,15 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as CurrentUser from './currentUser';
-import * as TicketComments from './ticketComments';
-import * as Auth from './auth';
-import * as Teamspaces from './teamspaces';
-import * as Projects from './projects';
-import * as Containers from './containers';
-import * as Federations from './federations';
-import * as Revisions from './revisions';
-import * as Users from './users';
-import * as Tickets from './tickets';
+import { createSelector } from 'reselect';
+import { ITicketCommentsState } from './ticketComments.redux';
 
-export { Auth, TicketComments, CurrentUser, Teamspaces, Projects, Containers, Federations, Revisions, Users, Tickets };
+const selectCommentsDomain = (state): ITicketCommentsState => state.ticketsComment || {};
+
+export const selectComments = createSelector(
+	selectCommentsDomain,
+	(state, ticketId) => ticketId,
+	(state, ticketId) => state.commentsByTicketId[ticketId] || [],
+);
+
+export const selectCommentById = createSelector(
+	selectComments,
+	(_, ticketId, commentId) => commentId,
+	(comments, commentId) => comments.find(({ _id }) => _id === commentId) || null,
+);

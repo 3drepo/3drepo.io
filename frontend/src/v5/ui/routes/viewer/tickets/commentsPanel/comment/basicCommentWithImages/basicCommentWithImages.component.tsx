@@ -16,8 +16,8 @@
  */
 
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
-import { CommentHistoryBlock } from '@/v5/store/tickets/tickets.types';
-import { editedCommentMessage } from '../comment.helpers';
+import { TicketCommentHistoryBlock } from '@/v5/store/tickets/comments/ticketComments.types';
+import { editedCommentMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { CommentImages } from '../commentImages/commentImages.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { BasicComment, CommentAge, CommentAuthor, EditedCommentLabel, SingleImage, CommentImagesContainer } from './basicCommentWithImages.styles';
@@ -28,7 +28,7 @@ export type BasicCommentWithImagesProps = {
 	className?: string;
 	message?: string;
 	commentAge: string;
-	history?: CommentHistoryBlock[];
+	history?: TicketCommentHistoryBlock[];
 	author?: string;
 	'data-author': string,
 };

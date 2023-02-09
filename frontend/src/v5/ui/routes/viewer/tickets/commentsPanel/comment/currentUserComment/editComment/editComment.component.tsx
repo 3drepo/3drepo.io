@@ -18,16 +18,16 @@
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import CancelIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
 import { useForm } from 'react-hook-form';
-import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
+import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
+import { desanitiseMessage, sanitiseMessage, addReply } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { EditCommentButtons, EditCommentContainer, EditCommentInput } from './editComment.styles';
-import { desanitiseMessage, sanitiseMessage, addReply } from '../../comment.helpers';
 import { ErrorCommentButton, PrimaryCommentButton } from '../../commentButton/commentButton.styles';
 import { CommentReply } from '../../commentReply/commentReply.component';
 
-type EditCommentProps = Pick<IComment, '_id' | 'author' | 'message'> & {
+type EditCommentProps = Pick<ITicketComment, '_id' | 'author' | 'message'> & {
 	onClose: () => void;
 	onEdit: (id, message) => void;
-	metadata?: CommentReplyMetadata;
+	metadata?: TicketCommentReplyMetadata;
 };
 export const EditComment = ({ _id, message, author, metadata, onEdit, onClose }: EditCommentProps) => {
 	const { control, watch } = useForm<{ editedMessage }>({

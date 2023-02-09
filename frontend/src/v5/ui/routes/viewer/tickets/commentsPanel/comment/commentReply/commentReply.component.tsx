@@ -16,11 +16,12 @@
  */
 
 import { CurrentUserHooksSelectors, TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { CommentReplyMetadata } from '@/v5/store/tickets/tickets.types';
+import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
+import { TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { CommentAuthor } from '../basicCommentWithImages/basicCommentWithImages.styles';
-import { CommentMarkDown, CommentReplyContainer, OriginalMessage } from './commentReply.styles';
+import { CommentMarkDown, CommentReplyContainer, ExpandableImage, OriginalMessage } from './commentReply.styles';
 
-type CommentReplyProps = CommentReplyMetadata & {
+type CommentReplyProps = TicketCommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',
 	isCurrentUserComment?: boolean,
 	shortMessage?: boolean,
@@ -44,12 +45,14 @@ export const CommentReply = ({
 		<CommentReplyContainer variant={variant} {...props}>
 			<div>
 				{authorDisplayName && (<CommentAuthor>{authorDisplayName}</CommentAuthor>)}
-					<OriginalMessage>
-						{images && <span>icon</span>}
-						<CommentMarkDown>{message}</CommentMarkDown>
-					</OriginalMessage>
+				<OriginalMessage>
+					<CommentMarkDown>
+						{images.length && <span>icon</span>}
+						{message}
+					</CommentMarkDown>
+				</OriginalMessage>
 			</div>
-			{/* {images && (<ExpandableImage images={images.map(getImgSrc)} showExtraImagesValue />)} */}
+			{images.length && (<ExpandableImage images={images.map(getImgSrc)} showExtraImagesValue />)}
 		</CommentReplyContainer>
 	);
 };

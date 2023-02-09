@@ -14,9 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+/* eslint-disable max-len */
 import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 import { AuthActions, IAuthActionCreators } from '@/v5/store/auth/auth.redux';
+import { TicketCommentsActions, ITicketCommentsActionCreators } from '@/v5/store/tickets/comments/ticketComments.redux';
 import { ContainersActions, IContainersActionCreators } from '@/v5/store/containers/containers.redux';
 import { CurrentUserActions, ICurrentUserActionCreators } from '@/v5/store/currentUser/currentUser.redux';
 import { DialogsActions, IDialogsActionCreators } from '@/v5/store/dialogs/dialogs.redux';
@@ -48,4 +49,5 @@ export const RevisionsActionsDispatchers = createActionsDispatchers<IRevisionsAc
 export const TeamspacesActionsDispatchers = createActionsDispatchers<ITeamspacesActionCreators>(TeamspacesActions);
 export const TicketsActionsDispatchers = createActionsDispatchers<ITicketsActionCreators>(TicketsActions);
 export const TicketsCardActionsDispatchers = createActionsDispatchers<ITicketsCardActionCreators>(TicketsCardActions);
+export const TicketCommentsActionsDispatchers = createActionsDispatchers<ITicketCommentsActionCreators>(TicketCommentsActions);
 export const UsersActionsDispatchers = createActionsDispatchers<IUsersActions>(UsersActions);

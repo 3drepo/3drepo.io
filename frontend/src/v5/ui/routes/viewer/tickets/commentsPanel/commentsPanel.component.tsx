@@ -17,12 +17,12 @@
 import CommentIcon from '@assets/icons/outlined/comment-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams } from 'react-router-dom';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketCommentsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ScrollArea } from '@controls/scrollArea';
 import { FormattedMessage } from 'react-intl';
-import { IComment } from '@/v5/store/tickets/tickets.types';
+import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { useEffect, useState } from 'react';
 import { ViewerParams } from '../../../routes.constants';
 import { Accordion, Comments, EmptyCommentsBox } from './commentsPanel.styles';
@@ -33,16 +33,17 @@ type CommentsPanelProps = {
 	scrollPanelIntoView: (event, isExpanding) => void,
 };
 export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
-	const [commentReply, setCommentReply] = useState<IComment>(null);
+	const [commentReply, setCommentReply] = useState<ITicketComment>(null);
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const { comments = [], number } = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
+	const { number } = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
+	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
 
 	const commentsListIsEmpty = comments?.length > 0;
 
 	const handleDeleteComment = (commentId) => {
-		TicketsActionsDispatchers.deleteTicketComment(
+		TicketCommentsActionsDispatchers.deleteComment(
 			teamspace,
 			project,
 			containerOrFederation,
@@ -64,7 +65,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 			images: oldComment.images,
 			timestamp: new Date(),
 		});
-		TicketsActionsDispatchers.updateTicketComment(
+		TicketCommentsActionsDispatchers.updateComment(
 			teamspace,
 			project,
 			containerOrFederation,
@@ -77,7 +78,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 
 	useEffect(() => {
 		if (!number) return;
-		TicketsActionsDispatchers.fetchTicketComments(
+		TicketCommentsActionsDispatchers.fetchComments(
 			teamspace,
 			project,
 			containerOrFederation,

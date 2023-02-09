@@ -16,9 +16,9 @@
  */
 
 import { formatMessage, formatRelativeTime } from '@/v5/services/intl';
-import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
 import _ from 'lodash';
 import { clientConfigService } from '@/v4/services/clientConfig';
+import { TicketCommentReplyMetadata, ITicketComment } from './ticketComments.types';
 
 export const imageIsTooBig = (file): boolean => (file.size > clientConfigService.resourceUploadSizeLimit);
 
@@ -27,7 +27,7 @@ export const MAX_MESSAGE_LENGTH = 1200;
 export const deletedCommentMessage = formatMessage({ id: 'ticket.comment.message.deleted', defaultMessage: 'Message deleted' });
 export const editedCommentMessage = formatMessage({ id: 'ticket.comment.message.edited', defaultMessage: 'edited' });
 
-const extractMetadataValue = (message: string, metadataName: keyof CommentReplyMetadata) => {
+const extractMetadataValue = (message: string, metadataName: keyof TicketCommentReplyMetadata) => {
 	// eslint-disable-next-line security/detect-non-literal-regexp
 	const regex = new RegExp(`\\[${metadataName}\\]:- "([^"]*)"\\n`);
 	return regex.exec(message)?.[1] || '';
@@ -35,39 +35,39 @@ const extractMetadataValue = (message: string, metadataName: keyof CommentReplyM
 
 const extractMetadataImages = (message: string) => {
 	const images = extractMetadataValue(message, 'images');
-	return images ? images.split(",") : [];
+	return images ? images.split(',') : [];
 };
 
-export const extractMetadata = (message: string): CommentReplyMetadata => ({
+export const extractMetadata = (message: string): TicketCommentReplyMetadata => ({
 	_id: extractMetadataValue(message, '_id'),
 	author: extractMetadataValue(message, 'author'),
 	message: extractMetadataValue(message, 'message'),
 	images: extractMetadataImages(message),
 });
 
-export const createMetadata = (comment: IComment): CommentReplyMetadata => (
-	_.pick(comment, '_id', 'author', 'message', 'images') as CommentReplyMetadata
+export const createMetadata = (comment: ITicketComment): TicketCommentReplyMetadata => (
+	_.pick(comment, '_id', 'author', 'message', 'images') as TicketCommentReplyMetadata
 );
 
 export const extractMessage = (message: string = '') => message.replaceAll(/\[[_a-z]*\]:- ".*"\n[\n]?/g, '');
 export const sanitiseMessage = (message: string) => message.replaceAll('"', '&#34;').replaceAll('\n', '<br />');
 export const desanitiseMessage = (message: string) => message.replaceAll('&#34;', '"').replaceAll('<br />', '\n');
 
-const createMetadataValue = (metadataName: keyof CommentReplyMetadata, metadataValue: string) => (
+const createMetadataValue = (metadataName: keyof TicketCommentReplyMetadata, metadataValue: string) => (
 	`[${metadataName}]:- "${metadataValue}"\n`
 );
 
-const stringifyMetadata = ({ author, _id, message, images = [] }: CommentReplyMetadata) => {
+const stringifyMetadata = ({ author, _id, message, images = [] }: TicketCommentReplyMetadata) => {
 	const metadata = [
 		createMetadataValue('_id', _id),
 		createMetadataValue('author', author),
 		createMetadataValue('message', extractMessage(message)),
-		createMetadataValue('images', images.join(",")),
+		createMetadataValue('images', images.join(',')),
 	];
 	return metadata.join('');
 };
 
-export const addReply = (metadata: CommentReplyMetadata, newMessage: string) => `${stringifyMetadata(metadata)}\n${newMessage}`;
+export const addReply = (metadata: TicketCommentReplyMetadata, newMessage: string) => `${stringifyMetadata(metadata)}\n${newMessage}`;
 
 // Time related functions
 const TIME_UNIT = {

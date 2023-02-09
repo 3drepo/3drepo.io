@@ -20,7 +20,7 @@ import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
 import { selectTickets, selectTemplates, selectTicketById, selectTemplateById, selectRiskCategories } from '@/v5/store/tickets/tickets.selectors';
 import { cloneDeep } from 'lodash';
 import { createTestStore } from '../test.helpers';
-import { commentMockFactory, mockRiskCategories, templateMockFactory, ticketMockFactory } from './tickets.fixture';
+import { mockRiskCategories, templateMockFactory, ticketMockFactory } from './tickets.fixture';
 
 describe('Tickets: store', () => {
 	let dispatch, getState;
@@ -61,54 +61,7 @@ describe('Tickets: store', () => {
 			const ticketFromStore = selectTicketById(getState(), modelId, ticket._id);
 			expect(ticketFromStore).toEqual(ticket);
 		});
-	})
-
-	describe('comments', () => {
-		let ticket;
-
-		beforeEach(() => {
-			ticket = ticketMockFactory();
-			dispatch(TicketsActions.fetchTicketsSuccess(modelId, [ticket]));
-		});
-
-		it('should fetch and set ticket comments', () => {
-			const comment = commentMockFactory();
-			dispatch(TicketsActions.fetchTicketCommentsSuccess(modelId, ticket._id, [comment]));
-			const commentFromStore = selectTicketById(getState(), modelId, ticket._id).comments[0];
-	
-			expect(commentFromStore).toEqual(comment);
-		});
-	
-		it('should update the ticket comments', () => {
-			const comment = commentMockFactory();
-			dispatch(TicketsActions.fetchTicketCommentsSuccess(modelId, ticket._id, [comment]));
-	
-			const updatedComment = commentMockFactory({ ...comment, message: 'modified message' });	
-			dispatch(TicketsActions.upsertTicketCommentSuccess(modelId, ticket._id, updatedComment));
-			const commentFromStore = selectTicketById(getState(), modelId, ticket._id).comments[0];
-	
-			expect(commentFromStore).toEqual(updatedComment);
-		});
-	
-		it('should insert a ticket comment', () => {
-			const comment = commentMockFactory();
-			dispatch(TicketsActions.upsertTicketCommentSuccess(modelId, ticket._id, comment));
-
-			const commentFromStore = selectTicketById(getState(), modelId, ticket._id).comments[0];
-			expect(commentFromStore).toEqual(comment);
-		});
-	
-		it('should delete a ticket comment', () => {
-			const comment = commentMockFactory({ deleted: false });
-			dispatch(TicketsActions.fetchTicketCommentsSuccess(modelId, ticket._id, [comment]));
-	
-			const updatedComment = commentMockFactory({ ...comment, deleted: true });	
-			dispatch(TicketsActions.upsertTicketCommentSuccess(modelId, ticket._id, updatedComment));
-			const commentFromStore = selectTicketById(getState(), modelId, ticket._id).comments[0];
-	
-			expect(commentFromStore).toEqual(updatedComment);
-		});
-	})
+	});
 
 	describe('templates', () => {
 		beforeEach(() => {

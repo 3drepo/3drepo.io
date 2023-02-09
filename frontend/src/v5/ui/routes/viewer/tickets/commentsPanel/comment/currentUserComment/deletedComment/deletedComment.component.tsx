@@ -16,7 +16,7 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { deletedCommentMessage } from '../../comment.helpers';
+import { deletedCommentMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { CommentAge, CommentMessage } from '../../basicCommentWithImages/basicCommentWithImages.styles';
 import { CommentContainer } from './deletedComment.styles';
 

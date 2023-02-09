@@ -16,13 +16,13 @@
  */
 
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
-import { IComment } from '@/v5/store/tickets/tickets.types';
+import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
+import { extractMessage, extractMetadata, getRelativeTime } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { useEffect, useState } from 'react';
-import { extractMessage, extractMetadata, getRelativeTime } from './comment.helpers';
 import { CurrentUserComment } from './currentUserComment/currentUserComment.component';
 import { OtherUserComment } from './otherUserComment/otherUserComment.component';
 
-export type CommentProps = IComment & {
+export type CommentProps = ITicketComment & {
 	onDelete: (commentId) => void;
 	onReply: (commentId) => void;
 	onEdit: (commentId, newMessage: string) => void;

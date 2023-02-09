@@ -25,6 +25,7 @@ import * as GroupsSelectors from '@/v4/modules/groups/groups.selectors';
 import * as RevisionsSelectors from '@/v5/store/revisions/revisions.selectors';
 import * as TicketsSelectors from '@/v5/store/tickets/tickets.selectors';
 import * as TicketsCardSelectors from '@/v5/store/tickets/card/ticketsCard.selectors';
+import * as TicketCommentsSelectors from '@/v5/store/tickets/comments/ticketComments.selectors';
 import * as TeamspacesSelectors from '@/v5/store/teamspaces/teamspaces.selectors';
 import * as UsersSelectors from '@/v5/store/users/users.selectors';
 
@@ -37,5 +38,6 @@ export const ProjectsHooksSelectors = createHooksSelectors(ProjectsSelectors);
 export const RevisionsHooksSelectors = createHooksSelectors(RevisionsSelectors);
 export const TicketsHooksSelectors = createHooksSelectors(TicketsSelectors);
 export const TicketsCardHooksSelectors = createHooksSelectors(TicketsCardSelectors);
+export const TicketCommentsHooksSelectors = createHooksSelectors(TicketCommentsSelectors);
 export const TeamspacesHooksSelectors = createHooksSelectors(TeamspacesSelectors);
 export const UsersHooksSelectors = createHooksSelectors(UsersSelectors);

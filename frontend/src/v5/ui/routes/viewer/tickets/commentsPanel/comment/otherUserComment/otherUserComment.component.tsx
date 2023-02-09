@@ -17,16 +17,16 @@
 
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
-import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
+import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { PrimaryCommentButton } from '../commentButton/commentButton.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentButtons } from '../basicCommentWithImages/basicCommentWithImages.styles';
 import { CommentContainer, UserCirclePopover } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 
-type OtherUserCommentProps = Omit<IComment, 'updatedAt'> & {
+type OtherUserCommentProps = Omit<ITicketComment, 'updatedAt'> & {
 	commentAge: string;
-	metadata?: CommentReplyMetadata;
+	metadata?: TicketCommentReplyMetadata;
 	onReply: (commentId) => void;
 };
 export const OtherUserComment = ({

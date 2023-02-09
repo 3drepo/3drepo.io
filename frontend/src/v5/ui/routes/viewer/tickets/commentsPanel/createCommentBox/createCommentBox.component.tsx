@@ -21,13 +21,15 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { CurrentUserHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { uuid } from '@/v4/helpers/uuid';
 import { convertFileToImageSrc, getSupportedImageExtensions } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
-import { IComment } from '@/v5/store/tickets/tickets.types';
+import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
+import { addReply, createMetadata, imageIsTooBig, MAX_MESSAGE_LENGTH, sanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
+import { FormattedMessage } from 'react-intl';
 import { useEffect, useState } from 'react';
 import {
 	Controls,
@@ -43,9 +45,7 @@ import {
 	ErroredImageMessage,
 	FileIconInput,
 } from './createCommentBox.styles';
-import { addReply, createMetadata, imageIsTooBig, MAX_MESSAGE_LENGTH, sanitiseMessage } from '../comment/comment.helpers';
 import { CommentReply } from '../comment/commentReply/commentReply.component';
-import { FormattedMessage } from 'react-intl';
 
 type ImageToUpload = {
 	id: string,
@@ -56,7 +56,7 @@ type ImageToUpload = {
 
 
 type CreateCommentBoxProps = {
-	commentReply: IComment | null;
+	commentReply: ITicketComment | null;
 	setCommentReply: (reply) => void;
 };
 export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommentBoxProps) => {
@@ -97,7 +97,7 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 			author: currentUser.username,
 			message,
 		};
-		TicketsActionsDispatchers.createTicketComment(
+		TicketCommentsActionsDispatchers.createComment(
 			teamspace,
 			project,
 			containerOrFederation,

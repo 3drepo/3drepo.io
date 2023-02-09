@@ -19,7 +19,7 @@ import { useState } from 'react';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
-import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
+import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { ErrorCommentButton, PrimaryCommentButton } from '../commentButton/commentButton.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
 import { CommentContainer } from './currentUserComment.styles';
@@ -27,9 +27,9 @@ import { CommentButtons } from '../basicCommentWithImages/basicCommentWithImages
 import { EditComment } from './editComment/editComment.component';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 
-export type CurrentUserCommentProps = Omit<IComment, 'updatedAt'> & {
+export type CurrentUserCommentProps = Omit<ITicketComment, 'updatedAt'> & {
 	commentAge: string;
-	metadata?: CommentReplyMetadata;
+	metadata?: TicketCommentReplyMetadata;
 	onDelete: (commentId) => void;
 	onReply: (commentId) => void;
 	onEdit: (commentId, newMessage: string) => void;

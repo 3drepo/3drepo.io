@@ -15,33 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
+import { TicketCommentHistoryBlock, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import * as faker from 'faker';
 import { times } from 'lodash';
 
-export const ticketMockFactory = (overrides?: ITicket): ITicket => ({
-	_id: faker.datatype.uuid(),
-	number: faker.datatype.number(),
-	type: faker.random.word(),
-	properties: {
-		owner: faker.random.word(),
-		defaultView: EMPTY_VIEW,
-		pin: [],
-		status: faker.random.arrayElement(['None', 'Low', 'Medium', 'High']),
-		priority : faker.random.arrayElement(['Open', 'In progress', 'For approval', 'Closed', 'Void']),
-		assignes: [],
-		...overrides?.properties,
-	},
-	modules: {},
+export const commentHistoryMockFactory = (overrides?: Partial<TicketCommentHistoryBlock>): TicketCommentHistoryBlock => ({
+	images: [faker.random.word()],
+	message: faker.random.word(),
+	timestamp: faker.datatype.datetime(),
 	...overrides,
 });
 
-export const templateMockFactory = (overrides?: ITemplate): ITemplate => ({
+export const commentMockFactory = (overrides?: Partial<ITicketComment>): ITicketComment => ({
 	_id: faker.datatype.uuid(),
-	name: faker.random.word(),
-	code: faker.random.alpha({ count: 5, upcase: true }),
+	message: faker.random.word(),
+	images: [faker.random.word()],
+	author: faker.random.word(),
+	createdAt: faker.datatype.datetime(),
+	updatedAt: faker.datatype.datetime(),
+	deleted: faker.datatype.boolean(),
 	...overrides,
-});
+}) as ITicketComment;
 
-export const mockRiskCategories = (): string[] => times(5, () => faker.random.word())
+export const mockRiskCategories = (): string[] => times(5, () => faker.random.word());
