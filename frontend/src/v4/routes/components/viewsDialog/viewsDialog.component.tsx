@@ -34,6 +34,8 @@ interface IProps {
 	searchQuery: string;
 	teamspace: string;
 	modelId: string;
+	project?: string;
+	revision?: string;
 	handleClose: () => void;
 	onChange: (v) => void;
 	fetchModelSettings: (teamspace: string, modelId: string) => void;
@@ -44,7 +46,7 @@ interface IProps {
 
 const renderLoadingState = renderWhenTrue(<StyledLoader />);
 
-export const ViewsDialog = ({ viewpoints, searchQuery, searchEnabled, teamspace, modelId, ...props }: IProps) => {
+export const ViewsDialog = ({ viewpoints, searchQuery, searchEnabled, teamspace, modelId, project, revision, ...props }: IProps) => {
 	const [filteredViews, setFilteredViewpoints] = useState([]);
 
 	useEffect(() => {
@@ -112,6 +114,8 @@ export const ViewsDialog = ({ viewpoints, searchQuery, searchEnabled, teamspace,
 						onShare={props.onShare}
 						teamspace={teamspace}
 						modelId={modelId}
+						project={project}
+						revision={revision}
 						defaultView={checkIfDefaultView(viewpoint)}
 						displayShare
 					/>
