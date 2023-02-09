@@ -15,26 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { CloseButton, Header, Subtitle, Title } from './formModalHeader.styles';
+const { UUIDToString } = require('../../utils/helper/uuids');
+const Yup = require('yup');
+const { types } = require('../../utils/helper/yup');
 
-type IFormModalHeader = {
-	title: string;
-	subtitle?: string;
-	handleClose: () => void;
-	disableClosing?: boolean;
+const Comments = {};
+
+const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal));
+
+Comments.serialiseComment = (comment) => {
+	const caster = Yup.object({
+		_id: uuidString,
+		ticket: uuidString,
+		createdAt: types.timestamp,
+		updatedAt: types.timestamp,
+		images: Yup.array().of(uuidString),
+		history: Yup.array().of(Yup.object({
+			timestamp: types.timestamp,
+			images: Yup.array().of(uuidString),
+		})),
+	});
+	return caster.cast(comment);
 };
 
-export const FormModalHeader = ({ title, subtitle, handleClose, disableClosing }: IFormModalHeader) => (
-	<Header>
-		<div>
-			<Title>
-				{title}
-			</Title>
-			{subtitle && <Subtitle>{subtitle}</Subtitle>}
-		</div>
-		<CloseButton aria-label="Close dialog" onClick={handleClose} disabled={disableClosing}>
-			<CloseIcon />
-		</CloseButton>
-	</Header>
-);
+module.exports = Comments;

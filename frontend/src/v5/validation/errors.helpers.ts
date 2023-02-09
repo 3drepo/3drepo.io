@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 export const getErrorMessage = (error: any) => error.response?.data?.message || error.message;
-export const getErrorCode = (error: any) => error.response?.data?.code;
+export const getErrorCode = (error: any) => error?.response?.data?.code;
 export const getErrorStatus = (error: any) => error.response?.data?.status;
 
 export const isInvalidArguments = (error: any): boolean => getErrorCode(error) === 'INVALID_ARGUMENTS';
@@ -38,3 +38,8 @@ export const nameAlreadyExists = (error: any): boolean => fieldAlreadyExists(err
 export const usernameAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'username');
 export const emailAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'email');
 export const projectAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'project');
+
+export const isPathNotFound = (error): boolean => getErrorCode(error).endsWith('NOT_FOUND');
+
+export const isProjectNotFound = (code: string): boolean => code === 'PROJECT_NOT_FOUND';
+export const isResourceNotFound = (code: string): boolean => code === 'RESOURCE_NOT_FOUND';

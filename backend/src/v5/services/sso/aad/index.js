@@ -26,6 +26,8 @@ const Aad = {};
 
 let clientApplication;
 
+const cryptoProvider = new msal.CryptoProvider();
+
 const checkAadConfig = () => {
 	if (!config.sso?.aad?.clientId || !config.sso?.aad?.clientSecret || !config.sso?.aad?.authority) {
 		throw templates.ssoNotAvailable;
@@ -49,6 +51,8 @@ const getClientApplication = () => {
 	return clientApplication;
 };
 
+Aad.generateCryptoHash = cryptoProvider.base64Encode;
+Aad.decryptCryptoHash = cryptoProvider.base64Decode;
 Aad.getAuthenticationCodeUrl = (params) => {
 	const clientApp = getClientApplication();
 	return clientApp.getAuthCodeUrl(params);

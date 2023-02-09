@@ -19,7 +19,7 @@ import { FormattedMessage } from 'react-intl';
 import EmptyImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
 import EnlargeImageIcon from '@assets/icons/outlined/enlarge_image-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { Modal } from '@controls/modal';
+import { Modal } from '@controls/modal/modal.component';
 import {
 	EmptyImageContainer,
 	EnlargeContainer,
