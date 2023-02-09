@@ -31,7 +31,7 @@ export const ExpandableImage = ({ displayImageIndex = 0, images, showExtraImages
 		alert("exapnd");
 	};
 
-	if (!showExtraImagesValue || images.length === 0) {
+	if (!showExtraImagesValue || images.length === 1) {
 		return (<Image src={displayImage} onClick={openImagesModal} className={className} />);
 	}
 
