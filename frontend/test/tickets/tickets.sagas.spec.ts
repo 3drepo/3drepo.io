@@ -242,16 +242,18 @@ describe('Tickets: sagas', () => {
 		});
 		
 		it('should call container`s update ticket comment endpoint', async () => {
+			MockDate.set(new Date());
 			mockServer
 				.put(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}/comments/${comment._id}`, () => true)
 				.reply(200);
 
-			const commentUpdate = { message: 'updatedMessage', history: [commentHistoryMockFactory()] };
+			const commentUpdate = { message: 'updatedMessage', history: [commentHistoryMockFactory()], updatedAt: new Date() };
 
 			await expectSaga(TicketsSaga.default)
 				.dispatch(TicketsActions.updateTicketComment(teamspace, projectId, modelId, ticketId, false, comment._id, commentUpdate))
 				.put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, { _id: comment._id, ...commentUpdate }))
 				.silentRun();
+			MockDate.reset();
 		});
 		
 		it('should call container`s update ticket comment endpoint with 404', async () => {
@@ -358,16 +360,18 @@ describe('Tickets: sagas', () => {
 		});
 		
 		it('should call federation`s update ticket comment endpoint', async () => {
+			MockDate.set(new Date());
 			mockServer
 				.put(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}/comments/${comment._id}`, () => true)
 				.reply(200);
 
-			const commentUpdate = { message: 'updatedMessage', history: [commentHistoryMockFactory()] };
+			const commentUpdate = { message: 'updatedMessage', history: [commentHistoryMockFactory()], updatedAt: new Date() };
 
 			await expectSaga(TicketsSaga.default)
 				.dispatch(TicketsActions.updateTicketComment(teamspace, projectId, modelId, ticketId, true, comment._id, commentUpdate))
 				.put(TicketsActions.upsertTicketCommentSuccess(modelId, ticketId, { _id: comment._id, ...commentUpdate }))
 				.silentRun();
+			MockDate.reset();
 		});
 		
 		it('should call federation`s update ticket comment endpoint with 404', async () => {
