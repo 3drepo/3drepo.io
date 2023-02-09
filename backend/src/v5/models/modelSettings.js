@@ -16,10 +16,10 @@
  */
 
 const Models = {};
-const { SETTINGS_COL, events } = require('../services/eventsManager/eventsManager.constants');
+const { SETTINGS_COL, getInfoFromCode } = require('./modelSettings.constants');
 const db = require('../handler/db');
+const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUIDString } = require('../utils/helper/uuids');
-const { getInfoFromCode } = require('./modelSettings.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
@@ -34,6 +34,8 @@ const findOneAndUpdateModel = (ts, query, action, projection) => db.findOneAndUp
 
 const noFederations = { federate: { $ne: true } };
 const onlyFederations = { federate: true };
+
+Models.findModels = findModels;
 
 Models.addModel = async (teamspace, project, data) => {
 	const _id = generateUUIDString();
