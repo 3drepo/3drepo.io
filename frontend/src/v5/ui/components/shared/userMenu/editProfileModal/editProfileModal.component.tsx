@@ -23,6 +23,8 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { useErrorInterceptor } from '@controls/errorMessage/useErrorInterceptor';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { EditProfileUpdatePasswordSchema, EditProfileUpdatePersonalSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
+import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
+import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
 import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
 import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
 import { EditProfilePasswordTab, EMPTY_PASSWORDS, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
@@ -105,12 +107,7 @@ export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalP
 				{ firstName: <TruncatableName>{user.firstName}</TruncatableName> },
 			)}
 			onClickClose={onClickClose}
-			confirmLabel={CONFIRM_LABELS[activeTab]}
-			onSubmit={getTabSubmitFunction()}
-			isValid={getTabSubmitFunction()}
-			isSubmitting={isSubmitting}
 			disableClosing={isSubmitting}
-			hideSubmitButton={activeTab === INTEGRATIONS_TAB}
 		>
 			<TabContext value={activeTab}>
 				<TabList onChange={onTabChange} textColor="primary" indicatorColor="primary">
@@ -147,6 +144,18 @@ export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalP
 					/>
 				</TabPanel>
 			</TabContext>
+			<FormModalActions>
+				<ModalCancelButton disabled={isSubmitting} onClick={onClickClose} />
+				{activeTab !== INTEGRATIONS_TAB && (
+					<ModalSubmitButton
+						disabled={!getTabSubmitFunction()}
+						onClick={getTabSubmitFunction()}
+						isPending={isSubmitting}
+					>
+						{CONFIRM_LABELS[activeTab]}
+					</ModalSubmitButton>
+				)}
+			</FormModalActions>
 		</FormModal>
 	);
 };

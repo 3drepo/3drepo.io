@@ -18,7 +18,7 @@
 import { useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { NewFederationSettingsSchema } from '@/v5/validation/containerAndFederationSchemes/federationSchemes';
-import { FormModal } from '@controls/modal/formModal/formDialog.component';
+import { FormModal } from '@controls/formModal/formModal.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormProvider, useForm } from 'react-hook-form';
 import { NewFederation } from '@/v5/store/federations/federations.types';

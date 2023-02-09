@@ -17,6 +17,7 @@
 
 import { createSelector } from 'reselect';
 import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
+import { compact } from 'lodash';
 import { IFederationsState } from './federations.redux';
 import { IFederation } from './federations.types';
 import { selectContainers } from '../containers/containers.selectors';
@@ -52,7 +53,7 @@ export const selectFederationById = createSelector(
 export const selectContainersByFederationId = createSelector(
 	selectContainers,
 	selectFederationById,
-	(containers, federation) => federation?.containers?.map(
+	(containers, federation) => compact(federation?.containers?.map(
 		(containerId) => containers.find((container) => container._id === containerId),
-	) ?? [],
+	)) ?? [],
 );

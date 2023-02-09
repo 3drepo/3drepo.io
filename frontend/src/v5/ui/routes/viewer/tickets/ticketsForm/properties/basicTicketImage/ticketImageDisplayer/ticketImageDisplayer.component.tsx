@@ -19,6 +19,7 @@ import EmptyImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
 import EnlargeImageIcon from '@assets/icons/outlined/enlarge_image-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { Modal } from '@controls/modal/modal.component';
 import {
 	EmptyImageContainer,
 	EnlargeContainer,
@@ -28,10 +29,24 @@ import {
 	OverlappingContainer,
 } from './ticketImageDisplayer.styles';
 
+type IImageModal = {
+	imgSrc: string;
+	open: boolean;
+	onClickClose: () => void;
+};
+
+const ImageModal = ({ imgSrc, ...props }: IImageModal) => (
+	<Modal maxWidth="xl" {...props}>
+		<Image
+			src={imgSrc}
+			alt={formatMessage({ id: 'viewer.cards.ticketImage.image', defaultMessage: 'image' })}
+		/>
+	</Modal>
+);
+
 const LoadedImage = ({ imgSrc }) => {
-	const onClickViewImage = () => DialogsActionsDispatchers.open(Image, {
-		src: imgSrc,
-		alt: formatMessage({ id: 'viewer.cards.ticketImage.largeImage', defaultMessage: 'enlarged image' }),
+	const onClickViewImage = () => DialogsActionsDispatchers.open(ImageModal, {
+		imgSrc,
 	});
 	return (
 		<>

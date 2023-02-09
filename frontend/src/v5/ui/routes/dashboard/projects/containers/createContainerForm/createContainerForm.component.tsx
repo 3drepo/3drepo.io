@@ -17,7 +17,7 @@
 import { useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { FormModal } from '@controls/modal/formModal/formDialog.component';
+import { FormModal } from '@controls/formModal/formModal.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
