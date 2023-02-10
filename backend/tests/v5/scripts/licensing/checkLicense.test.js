@@ -26,7 +26,7 @@ const LicenseCheck = require(`${utilScripts}/licensing/checkLicense`);
 jest.mock('cryptolens');
 const CryptoLens = require('cryptolens');
 
-CryptoLense.Helper.GetMachineCode.mockReturnValue(generateRandomString());
+CryptoLens.Helpers.GetMachineCode.mockReturnValue(generateRandomString());
 
 const runTest = () => {
 	describe('License Check', () => {
@@ -39,24 +39,26 @@ const runTest = () => {
 		});
 
 		test('Should execute without errors if the key is invalid', async () => {
+			CryptoLens.Key.Activate.mockRejectedValueOnce(new Error(generateRandomString()));
 			config.repoLicense = generateRandomString();
 			await expect(LicenseCheck.run()).resolves.toBeUndefined();
+			expect(CryptoLens.Key.Activate).toHaveBeenCalledTimes(1);
+			expect(CryptoLens.Key.Deactivate).not.toHaveBeenCalled();
 		});
 
 		test('Should execute without errors if the key is valid', async () => {
 			config.repoLicense = generateRandomString();
-			const activateFn = jest.spyOn(CryptoLens.Key, 'Activate').mockResolvedValue({
+			CryptoLens.Key.Activate.mockResolvedValueOnce({
 				Key: config.repoLicense,
 				Created: new Date(),
 				Expires: new Date(),
 				ActivatedMachines: [],
 			});
-			const deactivateFn = jest.spyOn(CryptoLens.Key, 'Deactivate').mockResolvedValue();
 
 			await expect(LicenseCheck.run()).resolves.toBeUndefined();
 
-			expect(activateFn).toHaveBeenCalledTimes(1);
-			expect(deactivateFn).toHaveBeenCalledTimes(1);
+			expect(CryptoLens.Key.Activate).toHaveBeenCalledTimes(1);
+			expect(CryptoLens.Key.Deactivate).toHaveBeenCalledTimes(1);
 		});
 	});
 };

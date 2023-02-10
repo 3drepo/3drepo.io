@@ -21,14 +21,14 @@ const { RSA_PUB_KEY, TOKEN, PRODUCT_ID } = require('./licenses.constants');
 const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
-const { repoLicense } = require(`${v5Path}/utils/config`);
+const config = require(`${v5Path}/utils/config`);
 const Path = require('path');
 
 const run = async () => {
 	try {
-		if (!repoLicense) throw new Error('No license in configuration');
+		if (!config.repoLicense) throw new Error('No license in configuration');
 		const machineCode = Helpers.GetMachineCode();
-		const res = await Key.Activate(TOKEN, RSA_PUB_KEY, PRODUCT_ID, repoLicense, machineCode);
+		const res = await Key.Activate(TOKEN, RSA_PUB_KEY, PRODUCT_ID, config.repoLicense, machineCode);
 		logger.logInfo('License verified.');
 		logger.logInfo(`Key: ${res.Key}`);
 		logger.logInfo(`Created: ${new Date(res.Created * 1000)}`);
@@ -36,7 +36,7 @@ const run = async () => {
 		logger.logInfo(`Max Number of machines: ${res.MaxNoOfMachines}`);
 		logger.logInfo(`Number of machines currently activated: ${res.ActivatedMachines.length}`);
 
-		await Key.Deactivate(TOKEN, PRODUCT_ID, repoLicense, machineCode);
+		await Key.Deactivate(TOKEN, PRODUCT_ID, config.repoLicense, machineCode);
 	} catch (err) {
 		logger.logError(`Verification failed: ${err.message}`);
 	}
