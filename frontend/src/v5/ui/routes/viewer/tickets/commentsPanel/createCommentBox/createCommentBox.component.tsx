@@ -85,18 +85,27 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 		reset();
 		setCommentReply(null);
 		setIsSubmittingMessage(false);
+		setImagesToUpload([]);
 	};
 
 	const createComment = async () => {
 		setIsSubmittingMessage(true);
-		let message = sanitiseMessage(messageInput);
+		const newComment: Partial<ITicketComment> = {
+			author: currentUser.username,
+		};
+		let message = '';
+		if (messageInput) {
+			message = sanitiseMessage(messageInput);
+		}
 		if (commentReply) {
 			message = addReply(createMetadata(commentReply), message);
 		}
-		const newComment = {
-			author: currentUser.username,
-			message,
-		};
+		if (message) {
+			newComment.message = message;
+		}
+		if (imagesToUpload.length > 0) {
+			newComment.images = imagesToUpload.map(({ src }) => src);
+		}
 		TicketCommentsActionsDispatchers.createComment(
 			teamspace,
 			project,
