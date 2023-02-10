@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import { DragAndDrop } from '@controls/dragAndDrop';
 import { DashboardListHeader } from '@components/dashboard/dashboardList/dashboardListHeader';
-import { FormModal } from '@controls/modal/formModal/formDialog.component';
+import { FormModal } from '@controls/formModal/formModal.component';
 import { ScrollArea } from '@controls/scrollArea';
 
 const MODAL_PADDING = 35;
