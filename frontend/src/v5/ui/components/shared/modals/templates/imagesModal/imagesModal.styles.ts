@@ -34,21 +34,23 @@ export const Image = styled.img.attrs({
 
 export const Container = styled.div`
 	${modalContentStyles}
-	position: relative;
+	display: flex;
 `;
 
 export const PreviousButton = styled.button`
 	width: 20px;
 	height: 20px;
-	position: absolute;
-	left: 0;
+	position: fixed;
+	left: 10px;
 	top: calc(50% - 10px);
 	border-radius: 50%;
 	background-color: red;
+	cursor: pointer;
 `;
 
 export const NextButton = styled(PreviousButton)`
 	transform: rotate(180deg);
-	right: 0;
+	right: 10px;
+	left: unset;
 `;
 
