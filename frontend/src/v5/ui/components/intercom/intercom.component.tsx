@@ -54,16 +54,9 @@ const IntercomButton = () => {
 export const Intercom = () => {
 	const { intercomLicense } = clientConfigService;
 
-	let appId = intercomLicense;
-	const commentStartIndex = intercomLicense.indexOf('#');
-
-	if (commentStartIndex) {
-		appId = intercomLicense.slice(0, commentStartIndex).trim();
-	}
-
 	return (
 		intercomLicense ? (
-			<IntercomProvider appId={appId}>
+			<IntercomProvider appId={intercomLicense}>
 				<IntercomButton />
 			</IntercomProvider>
 		) : <></>
