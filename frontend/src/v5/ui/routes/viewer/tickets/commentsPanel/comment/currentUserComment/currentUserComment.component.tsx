@@ -75,7 +75,7 @@ export const CurrentUserComment = ({
 					<EditIcon />
 				</PrimaryCommentButton>
 			</CommentButtons>
-			{metadata.message && (<CommentReply variant="secondary" {...metadata} />)}
+			<CommentReply variant="secondary" {...metadata} />
 		</CommentContainer>
 	);
 };

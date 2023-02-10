@@ -48,7 +48,7 @@ export const EditComment = ({ _id, message, author, metadata, onEdit, onClose }:
 	return (
 		<>
 			<EditCommentContainer data-author={author}>
-				{metadata.message && (<CommentReply {...metadata} />)}
+				<CommentReply {...metadata} />
 				<EditCommentInput
 					name="editedMessage"
 					control={control}

@@ -46,7 +46,7 @@ export const OtherUserComment = ({
 	return (
 		<CommentContainer data-author={user.user} author={authorDisplayName} {...props}>
 			<UserCirclePopover user={user} />
-			{metadata.message && (<CommentReply isCurrentUserComment={false} {...metadata} />)}
+			<CommentReply isCurrentUserComment={false} {...metadata} />
 			<CommentButtons>
 				<PrimaryCommentButton onClick={() => onReply(_id)}>
 					<ReplyIcon />
