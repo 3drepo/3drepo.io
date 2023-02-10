@@ -18,6 +18,7 @@
 import { formatMessage, formatRelativeTime } from '@/v5/services/intl';
 import _ from 'lodash';
 import { clientConfigService } from '@/v4/services/clientConfig';
+import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { TicketCommentReplyMetadata, ITicketComment } from './ticketComments.types';
 
 export const imageIsTooBig = (file): boolean => (file.size > clientConfigService.resourceUploadSizeLimit);
@@ -68,6 +69,19 @@ const stringifyMetadata = ({ author, _id, message, images = [] }: TicketCommentR
 };
 
 export const addReply = (metadata: TicketCommentReplyMetadata, newMessage: string) => `${stringifyMetadata(metadata)}\n${newMessage}`;
+
+export const parseMessageAndImages = (inputComment: Partial<ITicketComment>) => {
+	const comment = { ...inputComment };
+	if (!comment.message) {
+		delete comment.message;
+	}
+	if (!comment.images?.length) {
+		delete comment.images;
+	} else {
+		comment.images = comment.images.map(stripBase64Prefix);
+	} 
+	return comment;
+};
 
 // Time related functions
 const TIME_UNIT = {

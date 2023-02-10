@@ -26,7 +26,7 @@ import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 export type CommentProps = ITicketComment & {
 	onDelete: (commentId) => void;
 	onReply: (commentId) => void;
-	onEdit: (commentId, newMessage: string) => void;
+	onEdit: (commentId, newMessage, newImages) => void;
 };
 export const Comment = ({ updatedAt, author, message = '', deleted, _id, images = [], ...props }: CommentProps) => {
 	const [commentAge, setCommentAge] = useState('');
@@ -34,7 +34,6 @@ export const Comment = ({ updatedAt, author, message = '', deleted, _id, images 
 	const isCurrentUser = CurrentUserHooksSelectors.selectUsername() === author;
 	const metadata = extractMetadata(message);
 	const noMetadataMessage = !deleted ? extractMessage(message) : message;
-	const imagesSrc = images.map(getImgSrc);
 
 	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt));
 
@@ -54,7 +53,7 @@ export const Comment = ({ updatedAt, author, message = '', deleted, _id, images 
 			message={noMetadataMessage}
 			deleted={deleted}
 			_id={_id}
-			images={imagesSrc}
+			images={images}
 		/>
 	);
 };

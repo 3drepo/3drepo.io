@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { TicketCommentHistoryBlock } from '@/v5/store/tickets/comments/ticketComments.types';
 import { editedCommentMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { CommentImages } from '../commentImages/commentImages.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { BasicComment, CommentAge, CommentAuthor, EditedCommentLabel, SingleImage, CommentImagesContainer } from './basicCommentWithImages.styles';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 export type BasicCommentWithImagesProps = {
 	images?: string[];
@@ -41,23 +41,26 @@ export const BasicCommentWithImages = ({
 	commentAge,
 	history,
 	...props
-}: BasicCommentWithImagesProps) => (
-	<BasicComment {...props}>
-		{images.length === 1 && (
-			<SingleImage
-				src={images[0]}
-				onClick={() => DialogsActionsDispatchers.open('images', { src: images[0] })}
-			/>
-		)}
-		{author && (<CommentAuthor>{author}</CommentAuthor>)}
-		{children}
-		{images.length > 1 && (
-			<CommentImagesContainer>
-				<CommentImages images={images} />
-			</CommentImagesContainer>
-		)}
-		{history?.length && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
-		{message && (<CommentMarkDown>{message}</CommentMarkDown>)}
-		<CommentAge>{commentAge}</CommentAge>
-	</BasicComment>
-);
+}: BasicCommentWithImagesProps) => {
+	const imagesSrc = images.map(getImgSrc);
+	return (
+		<BasicComment {...props}>
+			{images.length === 1 && (
+				<SingleImage
+					src={imagesSrc[0]}
+					onClick={() => DialogsActionsDispatchers.open('images', { images: imagesSrc })}
+				/>
+			)}
+			{author && (<CommentAuthor>{author}</CommentAuthor>)}
+			{children}
+			{images.length > 1 && (
+				<CommentImagesContainer>
+					<CommentImages images={imagesSrc} />
+				</CommentImagesContainer>
+			)}
+			{history?.length && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
+			{message && (<CommentMarkDown>{message}</CommentMarkDown>)}
+			<CommentAge>{commentAge}</CommentAge>
+		</BasicComment>
+	);
+};

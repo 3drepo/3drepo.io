@@ -19,7 +19,7 @@ import { put, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { sortBy } from 'lodash';
-import { stripBase64Prefix } from '@/v5/ui/controls/fileUploader/imageFile.helper';
+import { parseMessageAndImages } from './ticketComments.helpers';
 import {
 	TicketCommentsTypes,
 	TicketCommentsActions,
@@ -78,10 +78,8 @@ export function* createComment({
 		const createModelComment = isFederation
 			? API.TicketComments.createFederationComment
 			: API.TicketComments.createContainerComment;
-		const newComment = { ...comment };
-		if (comment.images) {
-			newComment.images = comment.images.map(stripBase64Prefix);
-		}
+		const newComment = parseMessageAndImages(comment);
+		
 		const { _id: newCommentId } = yield createModelComment(teamspace, projectId, modelId, ticketId, newComment);
 
 		const fetchModelComment = isFederation
@@ -125,10 +123,12 @@ export function* updateComment({
 		const updateModelComment = isFederation
 			? API.TicketComments.updateFederationComment
 			: API.TicketComments.updateContainerComment;
-		yield updateModelComment(teamspace, projectId, modelId, ticketId, commentId, comment);
+
+		const newComment = parseMessageAndImages(comment)
+		yield updateModelComment(teamspace, projectId, modelId, ticketId, commentId, newComment);
 		yield put(TicketCommentsActions.upsertCommentSuccess(
 			ticketId,
-			{ _id: commentId, ...comment, updatedAt: new Date() },
+			{ _id: commentId, ...newComment, updatedAt: new Date() },
 		));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {

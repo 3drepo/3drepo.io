@@ -32,7 +32,7 @@ export type CurrentUserCommentProps = Omit<ITicketComment, 'updatedAt'> & {
 	metadata?: TicketCommentReplyMetadata;
 	onDelete: (commentId) => void;
 	onReply: (commentId) => void;
-	onEdit: (commentId, newMessage: string) => void;
+	onEdit: (commentId, newMessage, newImages) => void;
 };
 export const CurrentUserComment = ({
 	_id,
@@ -40,6 +40,7 @@ export const CurrentUserComment = ({
 	deleted,
 	message,
 	metadata,
+	images,
 	onDelete,
 	onReply,
 	onEdit,
@@ -54,6 +55,7 @@ export const CurrentUserComment = ({
 			<EditComment
 				_id={_id}
 				message={message}
+				images={images}
 				author={author}
 				metadata={metadata}
 				onEdit={onEdit}
@@ -63,7 +65,7 @@ export const CurrentUserComment = ({
 	}
 
 	return (
-		<CommentContainer data-author={author} message={message} {...props}>
+		<CommentContainer data-author={author} message={message} images={images} {...props}>
 			<CommentButtons>
 				<ErrorCommentButton onClick={() => onDelete(_id)}>
 					<DeleteIcon />

@@ -24,7 +24,7 @@ import { ScrollArea } from '@controls/scrollArea';
 import { FormattedMessage } from 'react-intl';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { useEffect, useState } from 'react';
-import { ViewerParams } from '../../../routes.constants';
+import { ViewerParams } from '../../../../routes.constants';
 import { Accordion, Comments, EmptyCommentsBox } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
 import { CreateCommentBox } from './createCommentBox/createCommentBox.component';
@@ -58,7 +58,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 		setCommentReply(comment);
 	};
 
-	const handleEditComment = (commentId, message: string) => {
+	const handleEditComment = (commentId, message, images) => {
 		const oldComment = comments.find(({ _id }) => _id === commentId);
 		const newHistory = (oldComment.history || []).concat({
 			message: oldComment.message,
@@ -72,7 +72,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 			ticketId,
 			isFederation,
 			commentId,
-			{ history: newHistory, message },
+			{ history: newHistory, message, images },
 		);
 	};
 
