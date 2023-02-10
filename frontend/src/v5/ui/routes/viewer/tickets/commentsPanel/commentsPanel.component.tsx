@@ -89,7 +89,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 
 	return (
 		<Accordion
-			title={formatMessage({ id: 'customTicket.panel.comments', defaultMessage: 'Comments' })}
+			title={formatMessage({ id: 'customTicket.comments.title', defaultMessage: 'Comments' })}
 			Icon={CommentIcon}
 			onChange={scrollPanelIntoView}
 			defaultExpanded
@@ -110,7 +110,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 				)}
 				{!commentsListIsEmpty && (
 					<EmptyCommentsBox>
-						<FormattedMessage id="ticket.comments.empty" defaultMessage="No comments" />
+						<FormattedMessage id="customTicket.comments.empty" defaultMessage="No comments" />
 					</EmptyCommentsBox>
 				)}
 			</ScrollArea>

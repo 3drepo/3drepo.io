@@ -25,7 +25,7 @@ export const DeletedComment = ({ author }) => (
 		<CommentMessage>{deletedCommentMessage}</CommentMessage>
 		<CommentAge>
 			<FormattedMessage
-				id="ticket.currentUser.comment.time.deleted"
+				id="customTicket.currentUser.comment.time.deleted"
 				defaultMessage="You deleted this message"
 			/>
 		</CommentAge>

@@ -150,7 +150,7 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 			<MessageInput
 				name="message"
 				placeholder={formatMessage({
-					id: 'customTicket.panel.comments.leaveAComment',
+					id: 'customTicket.comments.leaveAComment',
 					defaultMessage: 'Leave a comment',
 				})}
 				control={control}

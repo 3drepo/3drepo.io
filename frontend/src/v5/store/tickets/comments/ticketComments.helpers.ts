@@ -24,8 +24,8 @@ export const imageIsTooBig = (file): boolean => (file.size > clientConfigService
 
 // Message metadata and text functions
 export const MAX_MESSAGE_LENGTH = 1200;
-export const deletedCommentMessage = formatMessage({ id: 'ticket.comment.message.deleted', defaultMessage: 'Message deleted' });
-export const editedCommentMessage = formatMessage({ id: 'ticket.comment.message.edited', defaultMessage: 'edited' });
+export const deletedCommentMessage = formatMessage({ id: 'customTicket.comment.message.deleted', defaultMessage: 'Message deleted' });
+export const editedCommentMessage = formatMessage({ id: 'customTicket.comment.message.edited', defaultMessage: 'edited' });
 
 const extractMetadataValue = (message: string, metadataName: keyof TicketCommentReplyMetadata) => {
 	// eslint-disable-next-line security/detect-non-literal-regexp

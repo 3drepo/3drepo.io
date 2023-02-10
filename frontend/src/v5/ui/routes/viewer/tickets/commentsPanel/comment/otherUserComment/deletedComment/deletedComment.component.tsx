@@ -28,7 +28,7 @@ export const DeletedComment = ({ user, author }) => (
 		<CommentMessage>{deletedCommentMessage}</CommentMessage>
 		<CommentAge>
 			<FormattedMessage
-				id="ticket.otherUser.comment.time.deleted"
+				id="customTicket.otherUser.comment.time.deleted"
 				defaultMessage="{name} deleted this message"
 				values={{ name: user.firstName }}
 			/>
