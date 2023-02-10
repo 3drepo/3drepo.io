@@ -72,10 +72,10 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const { number } = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
-
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 
-	const commentReplyLength = commentReply ? addReply(createMetadata(commentReply), '').length : 0;
+	const replyMetadata = createMetadata(commentReply)
+	const commentReplyLength = commentReply ? addReply(replyMetadata, '').length : 0;
 	const charsCount = (messageInput?.length || 0) + commentReplyLength;
 	const charsLimitIsReached = charsCount >= MAX_MESSAGE_LENGTH;
 
@@ -145,7 +145,7 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 		<Container>
 			{commentReply && (
 				<CommentReplyContainer>
-					<CommentReply {...createMetadata(commentReply)} shortMessage />
+					<CommentReply {...replyMetadata} shortMessage />
 					<DeleteButton onClick={() => setCommentReply(null)}>
 						<DeleteIcon />
 					</DeleteButton>

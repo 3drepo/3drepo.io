@@ -15,11 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CurrentUserHooksSelectors, TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
+import { CurrentUserHooksSelectors, TicketsCardHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { CommentAuthor } from '../basicCommentWithImages/basicCommentWithImages.styles';
+import { useParams } from 'react-router-dom';
 import { CommentMarkDown, CommentReplyContainer, ExpandableImage, OriginalMessage, CameraIcon } from './commentReply.styles';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 
 type CommentReplyProps = TicketCommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',
@@ -35,11 +37,21 @@ export const CommentReply = ({
 	images = [],
 	...props
 }: CommentReplyProps) => {
-	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const isFederation = modelIsFederation(containerOrFederation);
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const currentUser = CurrentUserHooksSelectors.selectUsername();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
 
 	const authorDisplayName = (isCurrentUserComment && author === currentUser) ? '' : `${user.firstName} ${user.lastName}`;
+	const imagesSrcs = images.map((image) => getTicketResourceUrl(
+		teamspace,
+		project,
+		containerOrFederation,
+		ticketId,
+		image,
+		isFederation,
+	));
 
 	if (!message && images.length === 0) return (<></>);
 
@@ -54,7 +66,7 @@ export const CommentReply = ({
 					</CommentMarkDown>
 				</OriginalMessage>
 			</div>
-			{images.length > 0 && (<ExpandableImage images={images.map(getImgSrc)} showExtraImagesValue />)}
+			{images.length > 0 && (<ExpandableImage images={imagesSrcs} showExtraImagesValue />)}
 		</CommentReplyContainer>
 	);
 };
