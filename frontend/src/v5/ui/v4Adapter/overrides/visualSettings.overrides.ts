@@ -108,6 +108,7 @@ export default css`
 			margin: 0;
 			overflow: hidden;
 			height: unset;
+			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 			${DialogTabs} {
 				background-color: ${({ theme }) => theme.palette.primary.contrast};
 				padding: 0 27px;
