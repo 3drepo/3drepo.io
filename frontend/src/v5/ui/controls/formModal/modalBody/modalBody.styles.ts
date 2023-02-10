@@ -15,26 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { CloseButton, Header, Subtitle, Title } from './formModalHeader.styles';
+import styled from 'styled-components';
+import { DialogContent } from '@mui/material';
 
-type IFormModalHeader = {
-	title: string;
-	subtitle?: string;
-	handleClose: () => void;
-	disableClosing?: boolean;
-};
-
-export const FormModalHeader = ({ title, subtitle, handleClose, disableClosing }: IFormModalHeader) => (
-	<Header>
-		<div>
-			<Title>
-				{title}
-			</Title>
-			{subtitle && <Subtitle>{subtitle}</Subtitle>}
-		</div>
-		<CloseButton aria-label="Close dialog" onClick={handleClose} disabled={disableClosing}>
-			<CloseIcon />
-		</CloseButton>
-	</Header>
-);
+export const FormModalContent = styled(DialogContent)`
+	padding: 27px 58px 65px;
+	display: block;
+	overflow: visible;
+`;

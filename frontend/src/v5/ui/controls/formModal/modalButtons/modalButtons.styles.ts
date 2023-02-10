@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,34 +16,24 @@
  */
 
 import styled from 'styled-components';
-
 import { SubmitButton as SubmitButtonBase } from '@controls/submitButton';
-import { DialogActions, DialogContent, Paper } from '@mui/material';
+import { DialogActions } from '@mui/material';
+import { Button } from '@controls/button';
 
-export const RemoveWhiteCorners = styled(Paper)`
-	background-color: transparent;
-`;
-
-export const Form = styled.form`
-	display: flex;
-	flex-direction: column;
-	min-width: 520px;
-
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	border-radius: 15px; /* prevents white pixels in corners */
-`;
-
-export const FormDialogContent = styled(DialogContent)`
-	padding: 27px 58px 65px;
-	display: block;
-	overflow: visible;
-`;
-
-export const FormDialogActions = styled(DialogActions)`
+export const FormModalActions = styled(DialogActions)`
 	background: ${({ theme }) => theme.palette.tertiary.lightest};
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_7};
 `;
 
-export const SubmitButton = styled(SubmitButtonBase)`
+export const CancelButton = styled(Button).attrs({
+	variant: 'outlined',
+	color: 'secondary',
+	size: 'medium',
+})``;
+
+export const SubmitButton = styled(SubmitButtonBase).attrs({
+	size: 'medium',
+	fullWidth: false,
+})`
 	margin: 8px;
 `;

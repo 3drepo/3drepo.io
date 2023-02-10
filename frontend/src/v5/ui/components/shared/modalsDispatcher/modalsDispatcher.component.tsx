@@ -20,7 +20,7 @@ import { useSelector } from 'react-redux';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { selectDialogs } from '@/v5/store/dialogs/dialogs.selectors';
 import { IDialogConfig } from '@/v5/store/dialogs/dialogs.redux';
-import { Modal } from '@/v5/ui/controls/modal';
+import { Modal } from '@/v5/ui/controls/modal/modal.component';
 import { MODAL_TEMPLATES } from './templates';
 
 const ModalTemplateContainer = ({ id, modalType, props }: IDialogConfig) => {
