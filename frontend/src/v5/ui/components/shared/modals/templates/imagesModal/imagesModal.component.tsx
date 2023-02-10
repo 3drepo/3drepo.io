@@ -15,15 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatMessage } from '@/v5/services/intl';
-import styled from 'styled-components';
+import { useState } from 'react';
+import { Container, Image, NextButton, PreviousButton } from './imagesModal.styles';
 
-export const ImageModal = styled.img.attrs({
-	alt: formatMessage({ id: 'modal.image', defaultMessage: 'Enlarged image' })
-})<{ src: string }>`
-	object-fit: cover;
-	height: 100%;
-	max-height: calc(100vh - 64px);
-	width: 100%;
-	max-width: calc(100vw - 64px);
-`;
+type ImagesModalProps = {
+	srcs: string[];
+};
+export const ImagesModal = ({ srcs }: ImagesModalProps) => {
+	const [imageIndex, setImageIndex] = useState(0);
+	const imagesLength = srcs.length;
+
+	if (imagesLength === 1) return (<Image src={srcs[imageIndex]} />);
+
+	const changeImageIndex = (delta) => setImageIndex((imageIndex + delta + imagesLength) % imagesLength);
+
+	return (
+		<Container>
+			<PreviousButton onClick={() => changeImageIndex(1)} />
+			<Image src={srcs[imageIndex]} />
+			<NextButton onClick={() => changeImageIndex(-1)} />
+		</Container>
+	);
+};

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Image, ExtraImages, OverlappingContainer } from './expandableImage.styles';
 
 type ExpandableImageProps = {
@@ -33,7 +34,9 @@ export const ExpandableImage = ({
 	const displayImage = images[displayImageIndex];
 
 	const openImagesModal = () => {
-		alert("exapnd");
+		const end = images.slice(0, displayImageIndex);
+		const start = images.slice(displayImageIndex);
+		DialogsActionsDispatchers.open('images', { srcs: start.concat(end) })
 	};
 
 	if (!showExtraImagesValue || images.length === 1) {

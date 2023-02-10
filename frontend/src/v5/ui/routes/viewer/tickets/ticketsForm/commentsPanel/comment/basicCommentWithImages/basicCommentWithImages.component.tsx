@@ -35,32 +35,29 @@ export type BasicCommentWithImagesProps = {
 };
 export const BasicCommentWithImages = ({
 	author,
-	images = [],
+	images,
 	children,
 	message,
 	commentAge,
 	history,
 	...props
-}: BasicCommentWithImagesProps) => {
-	const a = () => DialogsActionsDispatchers.open('image', { src: getImgSrc(images[0]) });
-	return (
-		<BasicComment {...props}>
-			{images.length === 1 && (
-				<SingleImage
-					src={getImgSrc(images[0])}
-					onClick={a}
-				/>
-			)}
-			{author && (<CommentAuthor>{author}</CommentAuthor>)}
-			{children}
-			{images.length > 1 && (
-				<CommentImagesContainer>
-					<CommentImages images={images} />
-				</CommentImagesContainer>
-			)}
-			{history?.length && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
-			{message && (<CommentMarkDown>{message}</CommentMarkDown>)}
-			<CommentAge>{commentAge}</CommentAge>
-		</BasicComment>
-	);
-};
+}: BasicCommentWithImagesProps) => (
+	<BasicComment {...props}>
+		{images.length === 1 && (
+			<SingleImage
+				src={images[0]}
+				onClick={() => DialogsActionsDispatchers.open('images', { src: images[0] })}
+			/>
+		)}
+		{author && (<CommentAuthor>{author}</CommentAuthor>)}
+		{children}
+		{images.length > 1 && (
+			<CommentImagesContainer>
+				<CommentImages images={images} />
+			</CommentImagesContainer>
+		)}
+		{history?.length && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
+		{message && (<CommentMarkDown>{message}</CommentMarkDown>)}
+		<CommentAge>{commentAge}</CommentAge>
+	</BasicComment>
+);

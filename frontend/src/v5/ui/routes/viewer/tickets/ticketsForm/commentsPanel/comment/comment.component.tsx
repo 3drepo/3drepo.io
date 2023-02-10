@@ -21,18 +21,20 @@ import { extractMessage, extractMetadata, getRelativeTime } from '@/v5/store/tic
 import { useEffect, useState } from 'react';
 import { CurrentUserComment } from './currentUserComment/currentUserComment.component';
 import { OtherUserComment } from './otherUserComment/otherUserComment.component';
+import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 
 export type CommentProps = ITicketComment & {
 	onDelete: (commentId) => void;
 	onReply: (commentId) => void;
 	onEdit: (commentId, newMessage: string) => void;
 };
-export const Comment = ({ updatedAt, author, message = '', deleted, _id, ...props }: CommentProps) => {
+export const Comment = ({ updatedAt, author, message = '', deleted, _id, images = [], ...props }: CommentProps) => {
 	const [commentAge, setCommentAge] = useState('');
 
 	const isCurrentUser = CurrentUserHooksSelectors.selectUsername() === author;
 	const metadata = extractMetadata(message);
 	const noMetadataMessage = !deleted ? extractMessage(message) : message;
+	const imagesSrc = images.map(getImgSrc);
 
 	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt));
 
@@ -52,6 +54,7 @@ export const Comment = ({ updatedAt, author, message = '', deleted, _id, ...prop
 			message={noMetadataMessage}
 			deleted={deleted}
 			_id={_id}
+			images={imagesSrc}
 		/>
 	);
 };
