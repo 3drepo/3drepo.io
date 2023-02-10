@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AlertModal } from './alertModal/alertModal.component';
-import { DeleteModal } from './deleteModal/deleteModal.component';
-import { ImageModal } from './imageModal/imageModal.styles';
-import { InfoModal } from './infoModal/infoModal.component';
-import { ShareModal } from './shareModal/shareModal.component';
-import { WarningModal } from './warningModal/warningModal.component';
+import { formatMessage } from '@/v5/services/intl';
+import styled from 'styled-components';
 
-export const MODAL_TEMPLATES = {
-	alert: AlertModal,
-	warning: WarningModal,
-	delete: DeleteModal,
-	info: InfoModal,
-	share: ShareModal,
-	image: ImageModal,
-};
+export const ImageModal = styled.img.attrs({
+	alt: formatMessage({ id: 'modal.image', defaultMessage: 'Enlarged image' })
+})<{ src: string }>`
+	object-fit: cover;
+	height: 100%;
+	max-height: calc(100vh - 64px);
+	width: 100%;
+	max-width: calc(100vw - 64px);
+`;

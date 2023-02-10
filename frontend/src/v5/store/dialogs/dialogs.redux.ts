@@ -71,7 +71,7 @@ export interface IDialogsActionCreators {
 
 export interface IDialogConfig {
 	id: string;
-	modalType?: 'delete' | 'warning' | 'alert' | 'info' | ((any) => JSX.Element);
+	modalType?: 'delete' | 'warning' | 'alert' | 'info' | 'image' | ((any) => JSX.Element);
 	props: any;
 }
 
