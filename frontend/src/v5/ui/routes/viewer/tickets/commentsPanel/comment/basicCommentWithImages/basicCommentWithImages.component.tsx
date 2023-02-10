@@ -45,13 +45,13 @@ export const BasicCommentWithImages = ({
 		<BasicComment {...props}>
 			{images.length === 1 && (<SingleImage src={getImgSrc(images[0])} />)}
 			{author && (<CommentAuthor>{author}</CommentAuthor>)}
-			{history?.length && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			{children}
 			{images.length > 1 && (
 				<CommentImagesContainer>
 					<CommentImages images={images} />
 				</CommentImagesContainer>
 			)}
+			{history?.length && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			{message && (<CommentMarkDown>{message}</CommentMarkDown>)}
 			<CommentAge>{commentAge}</CommentAge>
 		</BasicComment>
