@@ -36,7 +36,7 @@ export const ExpandableImage = ({
 	const openImagesModal = () => {
 		const end = images.slice(0, displayImageIndex);
 		const start = images.slice(displayImageIndex);
-		DialogsActionsDispatchers.open('images', { srcs: start.concat(end) })
+		DialogsActionsDispatchers.open('images', { images: start.concat(end) })
 	};
 
 	if (!showExtraImagesValue || images.length === 1) {

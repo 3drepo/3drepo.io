@@ -29,7 +29,7 @@ import {
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 const LoadedImage = ({ imgSrc }) => (
-	<OverlappingContainer onClick={() => DialogsActionsDispatchers.open('images', { src: [imgSrc] })}>
+	<OverlappingContainer onClick={() => DialogsActionsDispatchers.open('images', { images: [imgSrc] })}>
 		<Image
 			src={imgSrc}
 			alt={formatMessage({ id: 'viewer.cards.ticketImage.image', defaultMessage: 'image' })}

@@ -19,21 +19,21 @@ import { useState } from 'react';
 import { Container, Image, NextButton, PreviousButton } from './imagesModal.styles';
 
 type ImagesModalProps = {
-	srcs: string[];
+	images: string[];
 };
-export const ImagesModal = ({ srcs }: ImagesModalProps) => {
+export const ImagesModal = ({ images }: ImagesModalProps) => {
 	const [imageIndex, setImageIndex] = useState(0);
-	const imagesLength = srcs.length;
+	const imagesLength = images.length;
 
-	if (imagesLength === 1) return (<Image src={srcs[imageIndex]} />);
+	if (imagesLength === 1) return (<Image src={images[imageIndex]} />);
 
 	const changeImageIndex = (delta) => setImageIndex((imageIndex + delta + imagesLength) % imagesLength);
 
 	return (
 		<Container>
-			<PreviousButton onClick={() => changeImageIndex(1)} />
-			<Image src={srcs[imageIndex]} />
-			<NextButton onClick={() => changeImageIndex(-1)} />
+			<PreviousButton onClick={() => changeImageIndex(-1)} />
+			<Image src={images[imageIndex]} />
+			<NextButton onClick={() => changeImageIndex(+1)} />
 		</Container>
 	);
 };
