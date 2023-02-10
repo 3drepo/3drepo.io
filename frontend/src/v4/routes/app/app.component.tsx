@@ -82,9 +82,11 @@ export class App extends PureComponent<IProps, IState> {
 		<Route key={path} path={path} render={() => <StaticPageRoute title={title} fileName={fileName} />} />
 	)));
 
-	public renderLoginRoute = memoize(() => {
-		return <Route exact path={ROUTES.LOGIN} component={Login} />;
-	});
+	public renderLoginRoute = memoize(() =>
+			<Route exact path={ROUTES.LOGIN}>
+				<Redirect to="v5/login" />
+			</Route>
+	);
 
 	public renderHeader = renderWhenTrue(() => (
 		<TopMenu />
@@ -135,8 +137,13 @@ export class App extends PureComponent<IProps, IState> {
 				<Route component={ViewerCanvas} />
 				{this.renderHeader(!isStaticRoute(location.pathname))}
 				<Switch>
+					<Route exact path="/">
+						<Redirect to="v5/" />
+					</Route>
 					{this.renderLoginRoute()}
-					<Route exact path={ROUTES.SIGN_UP} component={SignUp} />
+					<Route exact path={ROUTES.SIGN_UP}>
+						<Redirect to="v5/signup" />
+					</Route>
 					<Route exact path={ROUTES.PASSWORD_FORGOT} component={PasswordForgot} />
 					<Route exact path={ROUTES.PASSWORD_CHANGE} component={PasswordChange} />
 					<Route exact path={ROUTES.REGISTER_REQUEST} component={RegisterRequest} />
