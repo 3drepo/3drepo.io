@@ -31,6 +31,9 @@ import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { useEffect, useState } from 'react';
+import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { ActionMenuItem } from '@controls/actionMenu';
+import { MenuItem } from '@mui/material';
 import {
 	Controls,
 	CharsCounter,
@@ -46,14 +49,14 @@ import {
 	FileIconInput,
 } from './createCommentBox.styles';
 import { CommentReply } from '../comment/commentReply/commentReply.component';
+import { ActionMenu } from '../../../ticketsList/ticketsList.styles';
 
 type ImageToUpload = {
 	id: string,
-	name: string,
+	name?: string,
 	src: string,
 	error?: boolean,
 };
-
 
 type CreateCommentBoxProps = {
 	commentReply: ITicketComment | null;
@@ -120,13 +123,22 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 
 	const uploadImages = async () => {
 		const files = await uploadFile(getSupportedImageExtensions(), true) as File[];
-		const imgSrcs = await Promise.all(files.map(async (file) => ({
+		const images = await Promise.all(files.map(async (file) => ({
 			name: file.name,
 			src: await convertFileToImageSrc(file) as string,
 			error: imageIsTooBig(file),
 			id: uuid(),
 		})));
-		setImagesToUpload(imagesToUpload.concat(imgSrcs));
+		setImagesToUpload(imagesToUpload.concat(images));
+	};
+
+	const uploadScreenshot = async () => {
+		const image = await ViewerService.getScreenshot() as unknown as string;
+		const imageToUpload: ImageToUpload = {
+			src: image,
+			id: uuid(),
+		};
+		setImagesToUpload(imagesToUpload.concat(imageToUpload));
 	};
 
 	const deleteImage = (idToDelete) => {
@@ -178,9 +190,16 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 				</ErroredImageMessage>
 			))}
 			<Controls>
-				<FileIconInput onClick={uploadImages}>
-					<FileIcon />
-				</FileIconInput>
+				<ActionMenu TriggerButton={<FileIconInput><FileIcon /></FileIconInput>}>
+					<ActionMenuItem>
+						<MenuItem onClick={uploadScreenshot}>
+							<FormattedMessage id="customTicket.comments.action.createScreenshot" defaultMessage="Create screenshot" />
+						</MenuItem>
+						<MenuItem onClick={uploadImages}>
+							<FormattedMessage id="customTicket.comments.action.uploadImage" defaultMessage="Upload images" />
+						</MenuItem>
+					</ActionMenuItem>
+				</ActionMenu>
 				<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>
 				<SendButton
 					disabled={disableSendMessage}

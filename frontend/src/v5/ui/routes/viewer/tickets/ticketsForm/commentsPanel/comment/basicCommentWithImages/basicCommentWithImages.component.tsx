@@ -21,6 +21,7 @@ import { editedCommentMessage } from '@/v5/store/tickets/comments/ticketComments
 import { CommentImages } from '../commentImages/commentImages.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
 import { BasicComment, CommentAge, CommentAuthor, EditedCommentLabel, SingleImage, CommentImagesContainer } from './basicCommentWithImages.styles';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 export type BasicCommentWithImagesProps = {
 	images?: string[];
@@ -41,9 +42,15 @@ export const BasicCommentWithImages = ({
 	history,
 	...props
 }: BasicCommentWithImagesProps) => {
+	const a = () => DialogsActionsDispatchers.open('image', { src: getImgSrc(images[0]) });
 	return (
 		<BasicComment {...props}>
-			{images.length === 1 && (<SingleImage src={getImgSrc(images[0])} />)}
+			{images.length === 1 && (
+				<SingleImage
+					src={getImgSrc(images[0])}
+					onClick={a}
+				/>
+			)}
 			{author && (<CommentAuthor>{author}</CommentAuthor>)}
 			{children}
 			{images.length > 1 && (

@@ -27,7 +27,7 @@ import { UnsupportedProperty } from './properties/unsupportedProperty.component'
 import { TicketProperty } from './properties/properties.helper';
 import { TitleContainer, PanelsContainer, ErrorTextGap } from './ticketsForm.styles';
 import { TitleProperty } from './properties/titleProperty.component';
-import { CommentsPanel } from '../commentsPanel/commentsPanel.component';
+import { CommentsPanel } from './commentsPanel/commentsPanel.component';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
@@ -134,7 +134,7 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 			</TitleContainer>
 			<CardContent>
 				<PanelsContainer>
-					{/* <PropertiesPanel module="properties" properties={template?.properties || []} propertiesValues={ticket.properties} {...rest} />
+					<PropertiesPanel module="properties" properties={template?.properties || []} propertiesValues={ticket.properties} {...rest} />
 					{
 						(template.modules || []).map((module) => (
 							<ModulePanel
@@ -145,7 +145,7 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 								{...rest}
 							/>
 						))
-					} */}
+					}
 					{template?.config?.comments && (<CommentsPanel scrollPanelIntoView={scrollPanelIntoView} />)}
 				</PanelsContainer>
 			</CardContent>

@@ -59,6 +59,7 @@ export const SingleImage = styled.img`
 	border-radius: inherit;
 	border-bottom-right-radius: 0;
 	border-bottom-left-radius: 0;
+	cursor: pointer;
 `;
 
 type BasicCommentProps = {
