@@ -17,8 +17,9 @@
 
 import styled, { css } from 'styled-components';
 import { ExpandableImage as ExpandableImageBase } from '@controls/expandableImage/expandableImage.component';
+import CameraIconBase from '@assets/icons/outlined/camera-outlined.svg';
 import { CommentMarkDown as CommentMarkDownBase } from '../commentMarkDown/commentMarkDown';
-import { CommentMessage } from '../basicCommentWithImages/basicCommentWithImages.styles';
+import { CommentImagesContainer, CommentMessage } from '../basicCommentWithImages/basicCommentWithImages.styles';
 
 export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'secondary', shortMessage?: boolean }>`
 	border: solid 0 ${({ theme }) => theme.palette.primary.main};
@@ -30,6 +31,7 @@ export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'seconda
 	display: flex;
 	justify-content: space-between;
 	align-items: flex-start;
+	min-width: 199px;
 
 	${({ theme, variant }) => {
 		if (variant === 'primary') {
@@ -62,10 +64,19 @@ export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'seconda
 			}
 		}
 	`}
+
+	& ~ ${CommentImagesContainer} {
+		margin-top: 6px;
+	}
 `;
 
 export const CommentMarkDown = styled(CommentMarkDownBase)`
 	display: inline;
+`;
+
+export const CameraIcon = styled(CameraIconBase)`
+	margin-right: 5px;
+	margin-bottom: -1px;
 `;
 
 export const OriginalMessage = styled.div`
@@ -73,6 +84,6 @@ export const OriginalMessage = styled.div`
 `;
 
 export const ExpandableImage = styled(ExpandableImageBase)`
-	width: 67px;
+	min-width: 67px;
 	height: 67px;
 `;
