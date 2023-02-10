@@ -27,7 +27,8 @@ const Path = require('path');
 const run = async () => {
 	try {
 		if (!repoLicense) throw new Error('No license in configuration');
-		const res = await Key.Activate(TOKEN, RSA_PUB_KEY, PRODUCT_ID, repoLicense, Helpers.GetMachineCode());
+		const machineCode = Helpers.GetMachineCode();
+		const res = await Key.Activate(TOKEN, RSA_PUB_KEY, PRODUCT_ID, repoLicense, machineCode);
 		logger.logInfo('License verified.');
 		logger.logInfo(`Key: ${res.Key}`);
 		logger.logInfo(`Created: ${new Date(res.Created * 1000)}`);
@@ -35,7 +36,7 @@ const run = async () => {
 		logger.logInfo(`Max Number of machines: ${res.MaxNoOfMachines}`);
 		logger.logInfo(`Number of machines currently activated: ${res.ActivatedMachines.length}`);
 
-		await Key.Deactivate(TOKEN, PRODUCT_ID, repoLicense, Helpers.GetMachineCode());
+		await Key.Deactivate(TOKEN, PRODUCT_ID, repoLicense, machineCode);
 	} catch (err) {
 		logger.logError(`Verification failed: ${err.message}`);
 	}

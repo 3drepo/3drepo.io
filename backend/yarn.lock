@@ -2080,7 +2080,7 @@ crypto-random-string@^2.0.0:
   resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-2.0.0.tgz#ef2a7a966ec11083388369baa02ebead229b30d5"
   integrity sha512-v1plID3y9r/lPhviJ1wrXpLeyUIGAZ2SHNYTEapm7/8A9nLPoyvVp3RK/EPFqn5kEznyWgYZNsRtYYIWbuG8KA==
 
-cryptolens@^1.0.1-4.2:
+cryptolens@1.0.1-4.2:
   version "1.0.1-4.2"
   resolved "https://registry.yarnpkg.com/cryptolens/-/cryptolens-1.0.1-4.2.tgz#dcba886f0a4b41b9bcc5dab6ce5591be36dcd4e4"
   integrity sha512-K8j6z3DuejJw1OMREag7nxU19n95oXvFMCGvoVRqj1kBSxxerZDHctO6THnu7S2cyxIaGv/4c/L1T6ud3ucoQw==
