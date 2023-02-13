@@ -16,9 +16,13 @@
  */
 
 const { initialise: initialiseLoginRecords } = require('../models/loginRecords');
+const { initialise: initialiseNotifications } = require('../models/notifications');
 
 const Initialiser = {};
 
-Initialiser.initialiseSystem = () => initialiseLoginRecords();
+Initialiser.initialiseSystem = () => Promise.all([
+	initialiseLoginRecords(),
+	initialiseNotifications(),
+]);
 
 module.exports = Initialiser;

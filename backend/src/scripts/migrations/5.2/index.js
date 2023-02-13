@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { INTERNAL_DB } = require('../handler/db.constants');
-const db = require('../handler/db');
+const moveNotificationsToInternal = require('./moveNotificationsToInternal');
 
-const Notifications = {};
-const NOTIFICATIONS_COLL = 'notifications';
+const scripts = [
+	{ script: moveNotificationsToInternal, desc: 'Move notifications to internal DB' },
+];
 
-Notifications.initialise = () => db.createIndex(INTERNAL_DB, NOTIFICATIONS_COLL,
-	{ user: 1, timestamp: -1 }, { runInBackground: true });
-
-Notifications.removeAllUserNotifications = async (user) => {
-	await db.deleteMany(INTERNAL_DB, NOTIFICATIONS_COLL, { user });
-};
-
-module.exports = Notifications;
+module.exports = scripts;
