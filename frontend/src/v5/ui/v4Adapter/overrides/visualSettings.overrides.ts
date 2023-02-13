@@ -27,7 +27,7 @@ import {
 	VisualSettingsDialogContent,
 	WarningMessage,
 } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
-import { FormModalNoButtons } from '@components/shared/userMenu/visualSettingsModal/visualSettingsModal.styles';
+import { VisualSettingsModalContent } from '@components/shared/userMenu/visualSettingsModal/visualSettingsModal.styles';
 import { css } from 'styled-components';
 
 const sharedInputStyles = css`
@@ -102,7 +102,7 @@ export default css`
 			display: none;
 		}
 	}
-	${FormModalNoButtons} {
+	${VisualSettingsModalContent} {
 		${VisualSettingsDialogContent} {
 			padding: 0;
 			margin: 0;
