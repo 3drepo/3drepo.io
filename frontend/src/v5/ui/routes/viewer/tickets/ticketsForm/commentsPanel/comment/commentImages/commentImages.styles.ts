@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import { ExpandableImage as ExpandableImageBase } from '@controls/expandableImage/expandableImage.component';
 
 export const ClickListener = styled.div`
 	display: contents;
@@ -35,3 +36,7 @@ export const FlexContainer = styled.div`
 		margin-top: 5px;
 	}
 `;
+
+export const ExpandableImage = styled(ExpandableImageBase).attrs({
+	variant: 'secondary',
+})``;

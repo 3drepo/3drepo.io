@@ -16,9 +16,19 @@
  */
 
 import styled, { css } from 'styled-components';
+import { Skeleton } from '@mui/material';
 
 export const Image = styled.img<{ isLoading: boolean }>`
 	${({ isLoading }) => isLoading && css`
 		display: none;
 	`}
+`;
+
+export const SkeletonImage = styled(Skeleton).attrs({
+	variant: 'rectangular',
+})<{ $variant: 'primary' | 'secondary' }>`
+	height: 100%;
+	background-color: ${({ theme: { palette }, $variant }) => (
+		$variant === 'primary' ? palette.base.lighter : palette.secondary.light
+	)};
 `;

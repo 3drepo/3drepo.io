@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Skeleton } from '@mui/material';
 import { useState } from 'react';
-import { Image } from './imageWithSkeleton.styles';
+import { Image, SkeletonImage } from './imageWithSkeleton.styles';
 
 type ImageWithSkeletonProps = {
 	src: string,
 	className?: string,
 	onClick?: (event?) => void,
+	variant?: 'primary' | 'secondary',
 };
-export const ImageWithSkeleton = ({ src, onClick, ...props }: ImageWithSkeletonProps) => {
+export const ImageWithSkeleton = ({ src, onClick, variant = 'primary', ...props }: ImageWithSkeletonProps) => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	const handleImageLoaded = () => setIsLoading(false);
@@ -32,7 +32,7 @@ export const ImageWithSkeleton = ({ src, onClick, ...props }: ImageWithSkeletonP
 	return (
 		<>
 			<Image src={src} onLoad={handleImageLoaded} isLoading={isLoading} onClick={onClick} {...props} />
-			{isLoading && <Skeleton variant="rectangular" {...props} />}
+			{isLoading && <SkeletonImage {...props} $variant={variant} />}
 		</>
 	);
 };

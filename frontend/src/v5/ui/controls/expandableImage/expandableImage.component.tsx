@@ -30,18 +30,19 @@ export const ExpandableImage = ({
 	images,
 	showExtraImagesValue,
 	className,
+	...imgProps
 }: ExpandableImageProps) => {
 	const displayImage = images[displayImageIndex];
 
 	const openImagesModal = () => DialogsActionsDispatchers.open('images', { images, displayImageIndex });
 
 	if (!showExtraImagesValue || images.length === 1) {
-		return (<Image src={displayImage} onClick={openImagesModal} className={className} />);
+		return (<Image src={displayImage} onClick={openImagesModal} className={className} {...imgProps} />);
 	}
 
 	return (
 		<OverlappingContainer onClick={openImagesModal} className={className}>
-			<Image src={displayImage} />
+			<Image src={displayImage} {...imgProps} />
 			<ExtraImages>+{images.length - (displayImageIndex + 1)}</ExtraImages>
 		</OverlappingContainer>
 	);

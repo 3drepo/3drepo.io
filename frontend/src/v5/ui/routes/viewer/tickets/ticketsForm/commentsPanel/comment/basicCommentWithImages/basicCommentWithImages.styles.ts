@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
+import { ImageWithSkeleton } from '@controls/imageWithSkeleton/imageWithSkeleton.component';
 
 export const CommentAuthor = styled.div`
 	font-weight: 600;
@@ -53,13 +54,19 @@ export const CommentButtons = styled.div`
 	top: 0;
 `;
 
-export const SingleImage = styled.img`
+export const SingleImage = styled(ImageWithSkeleton).attrs({
+	variant: 'secondary'
+})`
 	width: 241px;
 	margin: -10px 0 10px -12px;
 	border-radius: inherit;
 	border-bottom-right-radius: 0;
 	border-bottom-left-radius: 0;
 	cursor: pointer;
+
+	&:is(span) {
+		padding-top: 100%;
+	}
 `;
 
 type BasicCommentProps = {

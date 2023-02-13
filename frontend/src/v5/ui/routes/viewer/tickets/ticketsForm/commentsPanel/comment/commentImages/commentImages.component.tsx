@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ExpandableImage } from '@controls/expandableImage/expandableImage.component';
-import { FlexContainer, ClickListener } from './commentImages.styles';
+import { FlexContainer, ClickListener, ExpandableImage } from './commentImages.styles';
 
 type CommentImagesProps = {
 	images: string[];
