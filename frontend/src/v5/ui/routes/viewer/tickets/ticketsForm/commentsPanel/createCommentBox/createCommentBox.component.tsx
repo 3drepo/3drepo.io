@@ -21,7 +21,7 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { CurrentUserHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DialogsActionsDispatchers, TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { uuid } from '@/v4/helpers/uuid';
 import { convertFileToImageSrc, getSupportedImageExtensions } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
@@ -138,6 +138,13 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 		setImagesToUpload(imagesToUpload.filter(({ id }) => id !== idToDelete));
 	};
 
+	const openImagesModal = (imageIndex) => {
+		DialogsActionsDispatchers.open('images', {
+			images: imagesToUpload.map(({ src }) => src),
+			displayImageIndex: imageIndex,
+		});
+	};
+
 	useEffect(() => {
 		if (number) resetCommentBox();
 	}, [number]);
@@ -165,9 +172,9 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 			/>
 			<ScrollArea autoHeightMax={100} autoHeight hideHorizontal autoHide>
 				<Images>
-					{imagesToUpload.map(({ src, id, error }) => (
+					{imagesToUpload.map(({ src, id, error }, index) => (
 						<ImageContainer key={id}>
-							<Image src={src} error={error} />
+							<Image src={src} $error={error} onClick={() => openImagesModal(index)} />
 							<DeleteButton onClick={() => deleteImage(id)} error={error}>
 								<DeleteIcon />
 							</DeleteButton>

@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import { OverlappingContainer as OverlappingContainerBase } from '@controls/overlappingContainer/overlappingContainer.styles';
+import { ImageWithSkeleton } from '@controls/imageWithSkeleton/imageWithSkeleton.component';
 import { hexToOpacity } from '../../themes/theme';
 
 export const OverlappingContainer = styled(OverlappingContainerBase)`
@@ -24,7 +25,7 @@ export const OverlappingContainer = styled(OverlappingContainerBase)`
 	overflow: hidden;
 `;
 
-export const Image = styled.img`
+export const Image = styled(ImageWithSkeleton)`
 	object-fit: cover;
 	aspect-ratio: 1 / 1;
 	cursor: pointer;

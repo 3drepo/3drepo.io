@@ -20,6 +20,7 @@ import { Typography } from '@controls/typography';
 import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
 import { Container as TextAreaContainer } from '@controls/inputs/textArea/textAreaFixedSize.styles';
 import { SubmitButton } from '@controls/submitButton';
+import { ImageWithSkeleton } from '@controls/imageWithSkeleton/imageWithSkeleton.component';
 
 export const Container = styled.section`
 	display: flex;
@@ -75,14 +76,19 @@ export const ImageContainer = styled.div`
 	position: relative;
 `;
 
-export const Image = styled.img<{ error?: boolean }>`
+export const Image = styled(ImageWithSkeleton)<{ $error?: boolean }>`
 	width: 44px;
     height: 44px;
     object-fit: cover;
+    box-sizing: border-box;
 	border-radius: 5px;
 	overflow: hidden;
-	
-	${({ error, theme }) => error && css`
+
+	&:is(img) {
+		cursor: pointer;
+	}
+
+	${({ $error, theme }) => $error && css`
 		border: solid 1px ${theme.palette.error.main};
 	`}
 `;

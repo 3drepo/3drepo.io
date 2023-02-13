@@ -21,9 +21,11 @@ import ChevronIcon from '@assets/icons/outlined/small_chevron-outlined.svg';
 
 type ImagesModalProps = {
 	images: string[];
+	// to use if the image to display is not the first one
+	displayImageIndex?: number,
 };
-export const ImagesModal = ({ images }: ImagesModalProps) => {
-	const [imageIndex, setImageIndex] = useState(0);
+export const ImagesModal = ({ images, displayImageIndex = 0 }: ImagesModalProps) => {
+	const [imageIndex, setImageIndex] = useState(displayImageIndex);
 	const imagesLength = images.length;
 
 	if (imagesLength === 1) return (<Image src={images[imageIndex]} />);
