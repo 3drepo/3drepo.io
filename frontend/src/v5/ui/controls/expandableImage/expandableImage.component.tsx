@@ -33,9 +33,7 @@ export const ExpandableImage = ({
 }: ExpandableImageProps) => {
 	const displayImage = images[displayImageIndex];
 
-	const openImagesModal = () => {
-		DialogsActionsDispatchers.open('images', { images, displayImageIndex })
-	};
+	const openImagesModal = () => DialogsActionsDispatchers.open('images', { images, displayImageIndex });
 
 	if (!showExtraImagesValue || images.length === 1) {
 		return (<Image src={displayImage} onClick={openImagesModal} className={className} />);

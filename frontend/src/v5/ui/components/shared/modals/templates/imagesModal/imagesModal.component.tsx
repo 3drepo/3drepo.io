@@ -28,9 +28,9 @@ export const ImagesModal = ({ images, displayImageIndex = 0 }: ImagesModalProps)
 	const [imageIndex, setImageIndex] = useState(displayImageIndex);
 	const imagesLength = images.length;
 
-	if (imagesLength === 1) return (<Image src={images[imageIndex]} />);
-
 	const changeImageIndex = (delta) => setImageIndex((imageIndex + delta + imagesLength) % imagesLength);
+
+	if (imagesLength === 1) return (<Image src={images[imageIndex]} />);
 
 	return (
 		<Container>
