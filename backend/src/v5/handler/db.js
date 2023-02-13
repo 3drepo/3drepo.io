@@ -183,9 +183,10 @@ DBHandler.insertOne = async (database, colName, data) => {
 	await collection.insertOne(data);
 };
 
-DBHandler.insertMany = async (database, colName, data) => {
+DBHandler.insertMany = async (database, colName, data, ordered) => {
 	const collection = await getCollection(database, colName);
-	await collection.insertMany(data);
+	const options = deleteIfUndefined({ ordered });
+	await collection.insertMany(data, options);
 };
 
 DBHandler.updateMany = async (database, colName, query, data, upsert = false) => {
