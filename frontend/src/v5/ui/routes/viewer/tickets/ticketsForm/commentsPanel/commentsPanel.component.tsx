@@ -94,7 +94,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 			onChange={scrollPanelIntoView}
 			defaultExpanded
 		>
-			<ScrollArea autoHeight autoHeightMin={400} autoHeightMax={400}>
+			<ScrollArea autoHeight autoHeightMin={400} autoHeightMax={400} autoHide>
 				{commentsListIsEmpty && (
 					<Comments>
 						{comments.map((comment) => (

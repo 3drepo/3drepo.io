@@ -50,6 +50,7 @@ import {
 } from './createCommentBox.styles';
 import { CommentReply } from '../comment/commentReply/commentReply.component';
 import { ActionMenu } from '../../../ticketsList/ticketsList.styles';
+import { ScrollArea } from '@controls/scrollArea';
 
 type ImageToUpload = {
 	id: string,
@@ -162,16 +163,18 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 					maxLength: Math.max(MAX_MESSAGE_LENGTH - commentReplyLength, 0),
 				}}
 			/>
-			<Images>
-				{imagesToUpload.map(({ src, id, error }) => (
-					<ImageContainer key={id}>
-						<Image src={src} error={error} />
-						<DeleteButton onClick={() => deleteImage(id)} error={error}>
-							<DeleteIcon />
-						</DeleteButton>
-					</ImageContainer>
-				))}
-			</Images>
+			<ScrollArea autoHeightMax={100} autoHeight hideHorizontal autoHide>
+				<Images>
+					{imagesToUpload.map(({ src, id, error }) => (
+						<ImageContainer key={id}>
+							<Image src={src} error={error} />
+							<DeleteButton onClick={() => deleteImage(id)} error={error}>
+								<DeleteIcon />
+							</DeleteButton>
+						</ImageContainer>
+					))}
+				</Images>
+			</ScrollArea>
 			{erroredImages.length > 0 && erroredImages.map(({ name }) => (
 				<ErroredImageMessage>
 					<strong>{name} </strong> 

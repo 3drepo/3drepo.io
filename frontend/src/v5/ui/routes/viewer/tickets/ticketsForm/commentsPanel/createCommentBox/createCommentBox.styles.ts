@@ -26,12 +26,13 @@ export const Container = styled.section`
 	flex-direction: column;
 	border: solid 0 ${({ theme }) => theme.palette.secondary.lightest};
 	border-top-width: 1px;
-	padding: 0 15px 11px;
+	padding: 0 0 11px 15px;
 `;
 
 export const CommentReplyContainer = styled.div`
 	position: relative;
 	margin-top: 11px;
+	margin-right: 15px;
 `;
 
 export const DeleteButton = styled.div<{ error?: boolean }>`
@@ -67,6 +68,7 @@ export const Images = styled.div`
 	flex-wrap: wrap;
 	gap: 10px;
 	margin-top: 10px;
+	width: 315px;
 `;
 
 export const ImageContainer = styled.div`
@@ -91,14 +93,14 @@ export const ErroredImageMessage = styled.div`
 
 export const MessageInput = styled(FormTextAreaFixedSize)`
 	.MuiInputBase-multiline {
-		padding: 8px 0 6px;
+		padding: 8px 15px 6px 0;
 		line-height: 16px;
 	}
 
 	${TextAreaContainer} {
 		border: none;
 		box-shadow: none;
-		padding: 0;
+		padding: 0 3px 0 0;
 	}
 `;
 
@@ -132,7 +134,7 @@ export const SendButton = styled(SubmitButton).attrs({
 	color: 'primary',
 	variant: 'contained',
 })`
-	margin: 0 0 0 auto;
+	margin: 0 15px 0 auto;
 	border-radius: 50%;
 	padding: 0;
 	min-width: unset;
