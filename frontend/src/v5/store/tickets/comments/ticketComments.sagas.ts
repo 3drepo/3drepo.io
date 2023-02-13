@@ -124,11 +124,10 @@ export function* updateComment({
 			? API.TicketComments.updateFederationComment
 			: API.TicketComments.updateContainerComment;
 
-		const newComment = parseMessageAndImages(comment)
-		yield updateModelComment(teamspace, projectId, modelId, ticketId, commentId, newComment);
+		yield updateModelComment(teamspace, projectId, modelId, ticketId, commentId, parseMessageAndImages(comment));
 		yield put(TicketCommentsActions.upsertCommentSuccess(
 			ticketId,
-			{ _id: commentId, ...newComment, updatedAt: new Date() },
+			{ _id: commentId, ...comment, updatedAt: new Date() },
 		));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
