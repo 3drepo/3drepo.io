@@ -41,6 +41,10 @@ export const CommentImages = ({ images }: CommentImagesProps) => {
 			</>
 		);
 	}
+
+	// preload extra images
+	images.slice(4).forEach((src) => new Image().src = src);
+	
 	return (
 		<>
 			<FlexContainer>
