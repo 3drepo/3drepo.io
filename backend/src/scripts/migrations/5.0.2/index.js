@@ -15,16 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const addVertexCountsToMeshBSONs = require('./addVertexCountsToMeshBSONs');
-const addVertexCountsToSuperMeshBSONs = require('../5.0.2/addVertexCountsToSuperMeshBSONs');
-const moveTSDataToTSSettings = require('./moveTSDataToTSSettings');
-const updateFedSettingSubModels = require('./updateFedSettingSubModels');
+const addVertexCountsToSuperMeshBSONs = require('./addVertexCountsToSuperMeshBSONs');
 
 const scripts = [
-	{ script: addVertexCountsToMeshBSONs, desc: 'Add vertex counts to mesh BSONs for streaming' },
 	{ script: addVertexCountsToSuperMeshBSONs, desc: 'Add vertex counts to super mesh BSONs for streaming' },
-	{ script: moveTSDataToTSSettings, desc: 'Move team data in system.users to teamspace settings' },
-	{ script: updateFedSettingSubModels, desc: 'Update subModels in federation settings' },
 ];
 
 module.exports = scripts;
