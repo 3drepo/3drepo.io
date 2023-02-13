@@ -19,11 +19,12 @@ import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/mate
 import { FormattedMessage } from 'react-intl';
 import { DialogContainer, Actions, Details, Status, WarningIcon } from '@/v5/ui/components/shared/modals/modals.styles';
 import { AxiosError } from 'axios';
-import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isPathNotAuthorized, isProjectNotFound, isResourceNotFound } from '@/v5/validation/errors.helpers';
+import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isPathNotAuthorized, isProjectNotFound, isResourceNotFound, isNotLoggedIn } from '@/v5/validation/errors.helpers';
 import { generatePath, useHistory } from 'react-router';
 import { DASHBOARD_ROUTE, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatMessage } from '@/v5/services/intl';
+import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 interface IAlertModal {
 	onClickClose?: () => void,
@@ -45,6 +46,8 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 	const unauthorized = isPathNotAuthorized(error);
 	const unauthInTeamspace = unauthorized && teamspace;
 	const unauthInProject = unauthorized && project;
+
+	if (isNotLoggedIn(error)) AuthActionsDispatchers.authenticate();
 
 	const getSafePath = () => {
 		// eslint-disable-next-line max-len
