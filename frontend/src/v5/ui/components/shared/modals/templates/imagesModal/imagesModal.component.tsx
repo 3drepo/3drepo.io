@@ -17,6 +17,7 @@
 
 import { useState } from 'react';
 import { Container, Image, NextButton, PreviousButton } from './imagesModal.styles';
+import ChevronIcon from '@assets/icons/outlined/small_chevron-outlined.svg';
 
 type ImagesModalProps = {
 	images: string[];
@@ -31,9 +32,13 @@ export const ImagesModal = ({ images }: ImagesModalProps) => {
 
 	return (
 		<Container>
-			<PreviousButton onClick={() => changeImageIndex(-1)} />
-			<Image src={images[imageIndex]} />
-			<NextButton onClick={() => changeImageIndex(+1)} />
+			<PreviousButton onClick={() => changeImageIndex(-1)}>
+				<ChevronIcon />
+			</PreviousButton>
+			<Image src={images[imageIndex]} key={images[imageIndex]}/>
+			<NextButton onClick={() => changeImageIndex(+1)}>
+				<ChevronIcon />
+			</NextButton>
 		</Container>
 	);
 };

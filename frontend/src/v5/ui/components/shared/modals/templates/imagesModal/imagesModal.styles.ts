@@ -16,6 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
+import { CircleButton } from '@controls/circleButton';
 import styled, { css } from 'styled-components';
 
 const modalContentStyles = css`
@@ -37,20 +38,18 @@ export const Container = styled.div`
 	display: flex;
 `;
 
-export const PreviousButton = styled.button`
-	width: 20px;
-	height: 20px;
+export const NextButton = styled(CircleButton).attrs({
+	variant: 'viewer',
+})`
 	position: fixed;
-	left: 10px;
 	top: calc(50% - 10px);
-	border-radius: 50%;
-	background-color: red;
 	cursor: pointer;
+	right: 30px;
 `;
 
-export const NextButton = styled(PreviousButton)`
+export const PreviousButton = styled(NextButton)`
 	transform: rotate(180deg);
-	right: 10px;
-	left: unset;
+	right: unset;
+	left: 30px;
 `;
 
