@@ -28,13 +28,13 @@ import { defaults, isEqual, pick } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
+import { signup } from '@/v5/services/api/sso';
 import { Background, Container, LogoHeightBalancer, UserSignupMain } from '../userSignup.styles';
 import { Title, Container as FormContainer, LoginPrompt, LoginPromptLink, Stepper } from '../userSignupForm/userSignupForm.styles';
 import { UserSignupFormStep } from '../userSignupForm/userSignupFormStep/userSignupFormStep.component';
 import { NextStepButton } from '../userSignupForm/userSignupFormStep/userSignupFormStep.styles';
 import { IconContainer } from '../userSignupForm/userSignupFormStep/userSignupFormStepAccount/userSignupFormStepAccount.styles';
 import { UserSignupFormStepTermsAndSubmit } from '../userSignupForm/userSignupFormStep/userSignupFormStepTermsAndSubmit/userSignupFormStepTermsAndSubmit.component';
-import { signup } from '@/v5/services/api/sso';
 
 export interface IAccountFormInput {
 	username: string;

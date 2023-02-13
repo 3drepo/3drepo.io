@@ -17,17 +17,17 @@
 
 import api from './default';
 
-const getRedirectUrl = () => {
+const getRedirectUrl = (searchParams = '') => {
 	const { origin, pathname } = new URL(window.location.href);
-	return `${origin}${pathname}`;
+	return encodeURIComponent(`${origin}${pathname}${searchParams}`);
 };
 
 const SSO_ROUTE = 'sso/aad';
 
-export const signup = (data): Promise<any> => api.post(`${SSO_ROUTE}/signup?redirectUri=${getRedirectUrl()}?signupPost=1`, data);
+export const signup = (data): Promise<any> => api.post(`${SSO_ROUTE}/signup?redirectUri=${getRedirectUrl('?signupPost=1')}`, data);
 
-export const signin = (): Promise<any> => api.get(`${SSO_ROUTE}/authenticate?redirectUri=${getRedirectUrl()}?loginPost=1`);
+export const signin = (): Promise<any> => api.get(`${SSO_ROUTE}/authenticate?redirectUri=${getRedirectUrl('?loginPost=1')}`);
 
-export const linkAccount = (): Promise<any> => api.get(`${SSO_ROUTE}/link?redirectUri=${getRedirectUrl()}?linkPost=1`);
+export const linkAccount = (): Promise<any> => api.get(`${SSO_ROUTE}/link?redirectUri=${getRedirectUrl('?linkPost=1')}`);
 
 export const unlinkAccount = (): Promise<any> => api.post(`${SSO_ROUTE}/unlink`);
