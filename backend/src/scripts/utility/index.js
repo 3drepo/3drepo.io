@@ -25,15 +25,15 @@ const Path = require('path');
 
 const scripts = [];
 
-const findScripts = (dir) => {
+const findScripts = (dir, ignoreFiles = true) => {
 	const data = readdirSync(dir, { withFileTypes: true });
 	data.forEach((entry) => {
 		const entryPath = Path.join(dir, entry.name);
 		if (entry.isDirectory()) {
-			findScripts(entryPath, scripts);
+			findScripts(entryPath, false);
 		} else {
 			try {
-				if (Path.extname(entry.name) === '.js' && entryPath !== __filename) {
+				if (!ignoreFiles && Path.extname(entry.name) === '.js') {
 					// eslint-disable-next-line global-require
 					const fn = require(entryPath).genYargs;
 					if (fn) scripts.push(fn);
@@ -46,7 +46,7 @@ const findScripts = (dir) => {
 	});
 };
 
-findScripts(__dirname, scripts);
+findScripts(__dirname);
 const populateCommands = (yargs) => {
 	scripts.forEach((genYargs) => {
 		genYargs(yargs);
