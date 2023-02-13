@@ -28,7 +28,9 @@ const { cn_queue: { shared_storage: sharedDir } } = require(`${v5Path}/utils/con
 const Path = require('path');
 const { readdir, stat, rm } = require('fs/promises');
 
-const run = async (threshold) => {
+const DEFAULT_THRESHOLD = 14;
+
+const run = async (threshold = DEFAULT_THRESHOLD) => {
 	if (threshold <= 0 || Number.isNaN(Number(threshold))) {
 		throw new Error('Threshold must be at least 1');
 	}
@@ -67,7 +69,7 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 	const argsSpec = (subYargs) => subYargs.option('threshold', {
 		describe: 'Files existed before the threshold(in days) will be removed',
 		type: 'number',
-		default: 14,
+		default: DEFAULT_THRESHOLD,
 	});
 	return yargs.command(commandName,
 		'Remove any file processing data from file share that are x days old',
