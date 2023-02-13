@@ -17,6 +17,10 @@
 
 import styled from 'styled-components';
 
+export const ClickListener = styled.div`
+	display: contents;
+`;
+
 export const FlexContainer = styled.div`
 	display: flex;
 	flex-direction: row;

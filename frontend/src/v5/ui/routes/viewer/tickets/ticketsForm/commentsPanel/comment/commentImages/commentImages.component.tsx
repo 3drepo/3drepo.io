@@ -16,7 +16,7 @@
  */
 
 import { ExpandableImage } from '@controls/expandableImage/expandableImage.component';
-import { FlexContainer } from './commentImages.styles';
+import { FlexContainer, ClickListener } from './commentImages.styles';
 
 type CommentImagesProps = {
 	images: string[];
@@ -25,7 +25,9 @@ export const CommentImages = ({ images }: CommentImagesProps) => {
 	if (images.length <= 3) {
 		return (
 			<FlexContainer>
-				{images.map((image, index) => (<ExpandableImage images={images} displayImageIndex={index} key={image} />))}
+				{images.map((image, index) => (
+					<ExpandableImage images={images} displayImageIndex={index} key={image} />
+				))}
 			</FlexContainer>
 		);
 	}
@@ -33,27 +35,31 @@ export const CommentImages = ({ images }: CommentImagesProps) => {
 		return (
 			<>
 				<FlexContainer>
-					{(images.slice(0, 2)).map((image, index) => (<ExpandableImage images={images} displayImageIndex={index} key={image} />))}
+					{(images.slice(0, 2)).map((image, index) => (
+						<ExpandableImage images={images} displayImageIndex={index} key={image} />
+					))}
 				</FlexContainer>
 				<FlexContainer>
-					{(images.slice(2, 5)).map((image, index) => (<ExpandableImage images={images} displayImageIndex={index + 2} key={image} />))}
+					{(images.slice(2, 5)).map((image, index) => (
+						<ExpandableImage images={images} displayImageIndex={index + 2} key={image} />
+					))}
 				</FlexContainer>
 			</>
 		);
 	}
 
-	// preload extra images
-	images.slice(4).forEach((src) => new Image().src = src);
-	
+	const preloadImage = (src) => new Image().src = src;
 	return (
-		<>
+		<ClickListener onClick={() => images.slice(4).forEach(preloadImage)}>
 			<FlexContainer>
-				{(images.slice(0, 2)).map((image, index) => (<ExpandableImage images={images} displayImageIndex={index} key={image} />))}
+				{(images.slice(0, 2)).map((image, index) => (
+					<ExpandableImage images={images} displayImageIndex={index} key={image} />
+				))}
 			</FlexContainer>
 			<FlexContainer>
 				<ExpandableImage images={images} displayImageIndex={2} />
 				<ExpandableImage images={images} displayImageIndex={3} showExtraImagesValue />
 			</FlexContainer>
-		</>
+		</ClickListener>
 	);
 };
