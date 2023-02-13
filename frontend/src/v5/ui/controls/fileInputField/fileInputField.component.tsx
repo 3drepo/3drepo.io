@@ -21,7 +21,7 @@ import { FormattedMessage } from 'react-intl';
 import { FileLabel, HiddenFileInput } from './fileInputField.styles';
 
 type IFileInputField = ButtonProps & {
-	acceptedFormats?: string;
+	accept?: string;
 	handleChange: (files) => void;
 };
 
@@ -30,10 +30,10 @@ const onInputClick = (event: React.MouseEvent<HTMLInputElement, MouseEvent>) => 
 	element.value = '';
 };
 
-export const FileInputField = ({ acceptedFormats, handleChange, ...props }: IFileInputField) => (
+export const FileInputField = ({ accept, handleChange, ...props }: IFileInputField) => (
 	<FileLabel htmlFor="hidden-file-buton">
 		<HiddenFileInput
-			accept={acceptedFormats}
+			accept={accept}
 			id="hidden-file-buton"
 			type="file"
 			onChange={(event) => handleChange(event.target.files)}
