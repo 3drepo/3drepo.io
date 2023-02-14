@@ -21,20 +21,21 @@ import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
 import { Container as TextAreaContainer } from '@controls/inputs/textArea/textAreaFixedSize.styles';
 import { SubmitButton } from '@controls/submitButton';
 import { ImageWithSkeleton } from '@controls/imageWithSkeleton/imageWithSkeleton.component';
+import { DragAndDrop as DragAndDropBase } from '@controls/dragAndDrop';
+import { DashedContainer } from '@controls/dragAndDrop/dragAndDrop.styles';
 
 export const Container = styled.section`
 	display: flex;
 	flex-direction: column;
 	border: solid 0 ${({ theme }) => theme.palette.secondary.lightest};
 	border-top-width: 1px;
-	padding: 0 0 11px 15px;
+	padding: 0 0 11px;
 	overflow-x: hidden;
 `;
 
 export const CommentReplyContainer = styled.div`
 	position: relative;
-	margin-top: 11px;
-	margin-right: 15px;
+	margin: 11px 15px 0;
 `;
 
 export const DeleteButton = styled.div<{ error?: boolean }>`
@@ -64,13 +65,28 @@ export const DeleteButton = styled.div<{ error?: boolean }>`
 	`}
 `;
 
+export const DragAndDrop = styled(DragAndDropBase).attrs({
+	borderRadius: 5,
+	dashSize: 2,
+})<{ $hidden?: boolean }>`
+	${({ $hidden }) => $hidden && css`
+		height: 0;
+		overflow: hidden;
+	`}
+
+	& > ${DashedContainer} {
+		padding: 13px;
+		width: calc(100% - 30px);
+		margin: 10px 15px;
+	}
+`;
+
 export const Images = styled.div`
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
 	gap: 10px;
-	margin-top: 10px;
-	width: 315px;
+	margin: 10px 15px 0;
 
 	&:not(:empty) {
 		min-height: 54px;
@@ -106,7 +122,7 @@ export const ErroredImageMessage = styled.div`
 
 export const MessageInput = styled(FormTextAreaFixedSize)`
 	.MuiInputBase-multiline {
-		padding: 8px 15px 6px 0;
+		padding: 8px 15px 6px;
 		line-height: 16px;
 	}
 
@@ -141,6 +157,7 @@ export const FileIconInput = styled.div`
 	display: flex;
 	padding: 4px;
 	color: ${({ theme }) => theme.palette.secondary.main};
+	margin-left: 15px;
 `;
 
 export const SendButton = styled(SubmitButton).attrs({
