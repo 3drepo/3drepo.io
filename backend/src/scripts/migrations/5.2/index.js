@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+const moveNotificationsToInternal = require('./moveNotificationsToInternal');
 
-export const VisualSettingsModalContent = styled.div`
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	width: 400px;
-	overflow: hidden;
-`;
+const scripts = [
+	{ script: moveNotificationsToInternal, desc: 'Move notifications to internal DB' },
+];
+
+module.exports = scripts;

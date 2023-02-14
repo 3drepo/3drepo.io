@@ -242,7 +242,7 @@ const testIsAccountLocked = () => {
 
 const testRemoveAllUserRecords = () => {
 	describe('Remove all user login records', () => {
-		test('Should just drop the user collection within loginRecords', async () => {
+		test('Should delete user loginRecords', async () => {
 			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValue(undefined);
 
 			const user = generateRandomString();
