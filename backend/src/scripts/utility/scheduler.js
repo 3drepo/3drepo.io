@@ -20,8 +20,7 @@ const process = require('process');
 const Yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 
-const { readFile } = require('fs/promises');
-const { readdirSync } = require('fs');
+const { readFile, readdir } = require('fs/promises');
 const Path = require('path');
 
 const Yup = require('yup');
@@ -31,6 +30,7 @@ const { v5Path } = require('../../interop');
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const cmdToRunFn = {};
+const cmdList = [];
 
 const logError = (err) => {
 	logger.logError(err?.message ?? err);
@@ -38,31 +38,31 @@ const logError = (err) => {
 	console.error(err);
 };
 
-const findCmds = (dir = __dirname, ignoreFiles = true) => {
-	const data = readdirSync(dir, { withFileTypes: true });
-	data.forEach((entry) => {
+const findCmds = async (dir = __dirname, ignoreFiles = true) => {
+	const data = await readdir(dir, { withFileTypes: true });
+	for (const entry of data) {
 		const entryPath = Path.join(dir, entry.name);
 		if (entry.isDirectory()) {
-			findCmds(entryPath, false);
+			// eslint-disable-next-line no-await-in-loop
+			await findCmds(entryPath, false);
 		} else {
 			try {
 				const { ext, name } = Path.parse(entry.name);
 				if (!ignoreFiles && ext === '.js') {
 					// eslint-disable-next-line global-require
-					const fn = require(entryPath).run;
+					const { run: fn } = require(entryPath);
 					if (fn) {
 						cmdToRunFn[name] = fn;
+						cmdList.push(name);
 					}
 				}
 			} catch (err) {
 				logError(err);
 			}
 		}
-	});
+	}
 };
 
-findCmds();
-const cmdList = Object.keys(cmdToRunFn);
 const parser = Yargs(hideBin(process.argv))
 	.option('config', {
 		type: 'string',
@@ -73,33 +73,56 @@ const parser = Yargs(hideBin(process.argv))
 	.wrap(Yargs().terminalWidth())
 	.parse();
 
-const taskArrSchema = Yup.array().of(
-	Yup.object({
-		name: Yup.string().oneOf(cmdList),
-		params: Yup.array().of(Yup.mixed()).default([]),
-	}),
-).default([]);
-
-const schema = Yup.object({
-	daily: taskArrSchema,
-	weekly: taskArrSchema,
-	monthly: taskArrSchema,
-});
-
-const runScripts = (scripts) => {
+const runScripts = async (scripts) => {
 	for (let i = 0; i < scripts.length; ++i) {
 		const { name, params } = scripts[i];
-		logger.logInfo(`Running ${name} ${params.length ? `with ${JSON.stringify(params)}` : ''}...`);
+		logger.logInfo(`[${i + 1}/${scripts.length}] ${name}${params.length ? ` with ${JSON.stringify(params)}` : ''}...`);
+		// eslint-disable-next-line no-await-in-loop
+		await cmdToRunFn[name](...params);
 	}
+};
+
+const getSchema = () => {
+	// This needs to be a function as cmdList needs to be initialised
+	const taskArrSchema = Yup.array().of(
+		Yup.object({
+			name: Yup.string().oneOf(cmdList),
+			params: Yup.array().of(Yup.mixed()).default([]),
+		}),
+	).default([]);
+
+	return Yup.object({
+		daily: taskArrSchema,
+		weekly: taskArrSchema,
+		monthly: taskArrSchema,
+	});
+};
+
+/* Weekly tasks are executed on sundays */
+const runWeekly = () => new Date().getDay() === 0;
+
+/* Weekly tasks are executed on the first sunday of every month */
+const runMonthly = () => {
+	const date = new Date();
+	return date.getDay() === 0 && date.getDate() <= 7;
 };
 
 const run = async () => {
 	const { config } = await parser;
+	await findCmds();
 	const conf = JSON.parse(await readFile(config, 'utf8'));
-	const { daily, weekly, monthly } = await schema.validate(conf);
-	runScripts(daily);
-	runScripts(weekly);
-	runScripts(monthly);
+	const { daily, weekly, monthly } = await getSchema().validate(conf);
+	logger.logInfo('======================== Daily tasks ========================');
+	await runScripts(daily);
+
+	if (runWeekly()) {
+		logger.logInfo('======================== Weekly tasks ========================');
+		await runScripts(weekly);
+	}
+	if (runMonthly()) {
+		logger.logInfo('======================== Monthly tasks ========================');
+		await runScripts(monthly);
+	}
 };
 
 // eslint-disable-next-line no-console
