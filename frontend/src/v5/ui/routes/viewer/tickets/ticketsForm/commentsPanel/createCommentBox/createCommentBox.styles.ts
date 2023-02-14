@@ -71,6 +71,7 @@ export const Images = styled.div`
 	gap: 10px;
 	margin-top: 10px;
 	width: 315px;
+    min-height: 54px;
 `;
 
 export const ImageContainer = styled.div`
