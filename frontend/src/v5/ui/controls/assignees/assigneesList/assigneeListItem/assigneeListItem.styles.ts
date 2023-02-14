@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,20 +16,10 @@
  */
 
 import { Avatar } from '@controls/avatar';
-import styled, { css } from 'styled-components';
 import { JobAvatar } from '@controls/jobAvatar/jobAvatar.component';
-import { MultiSelect } from '@controls/inputs/multiSelect/multiSelect.component';
-import { ExtraAssigneesCircle } from './extraAssignees/extraAssigneesCircle.component';
+import styled, { css } from 'styled-components';
 
-export const HiddenSearchSelect = styled(MultiSelect)`
-	height: 0;
-	width: 0;
-	overflow: hidden;
-	position: absolute;
-	right: 0;
-`;
-
-const BaseCircle = css`
+export const BaseCircle = css`
 	margin: 0 -8px 0 0;
 	color: ${({ theme }) => theme.palette.primary.main};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
@@ -56,53 +46,4 @@ export const UserCircle = styled(Avatar)`
 
 export const JobCircle = styled(JobAvatar)`
 	${BaseCircle}
-`;
-
-export const ExtraAssignees = styled(ExtraAssigneesCircle)`
-	${BaseCircle}
-	.MuiAvatar-root {
-		background-color: ${({ theme }) => theme.palette.primary.main};
-		color: ${({ theme }) => theme.palette.primary.contrast};
-	}
-`;
-
-export const AssigneesList = styled.div`
-	position: relative;
-	width: fit-content;
-	user-select: none;
-	color: ${({ theme }) => theme.palette.base.main};
-	font-size: 10px;
-
-	.MuiButtonBase-root {
-		z-index: 11;
-		&:hover {
-			z-index: 12; /* avatar appears on top when hovered */
-		}
-
-		::before {
-			content: "";
-			margin: 0;
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
-			position: absolute;
-			opacity: 0;
-			width: 100%;
-			height: 100%;
-			box-sizing: border-box;
-			border-radius: 50%;
-			z-index: 10;
-		}
-	}
-
-	&:hover .MuiButtonBase-root {
-		&::before {
-			opacity: 0.3;
-		}
-		&:hover::before {
-			opacity: 0;
-		}
-	}
-
-	>:last-child .MuiButtonBase-root {
-		margin: 0;
-	}
 `;

@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Assignees } from '@controls/assignees/assignees.component';
+import { TicketDetailsAssignees } from '@controls/assignees/ticketDetailsAssignees/ticketDetailAssignees.component';
 import { PriorityLevelChip, PriorityLevels, TicketStatuses } from '@controls/chip';
 import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
+import { InputController } from '@controls/inputs/inputController.component';
 import { FormattedMessage } from 'react-intl';
 import { ColumnSeparator, IssuePropertiesContainer, PropertyColumn, PropertyTitle, Status } from './issuePropertiesRow.styles';
 
@@ -25,11 +26,10 @@ type IIssuePropertiesRow = {
 	priority: PriorityLevels;
 	dueDate: number;
 	status: TicketStatuses;
-	assignees: string[];
 	onBlur: () => void;
 };
 
-export const IssuePropertiesRow = ({ priority, dueDate, status, assignees, onBlur }: IIssuePropertiesRow) => (
+export const IssuePropertiesRow = ({ priority, dueDate, status, onBlur }: IIssuePropertiesRow) => (
 	<IssuePropertiesContainer>
 		<PropertyColumn>
 			<PropertyTitle>
@@ -60,6 +60,11 @@ export const IssuePropertiesRow = ({ priority, dueDate, status, assignees, onBlu
 			</PropertyTitle>
 			<Status state={status} />
 		</PropertyColumn>
-		<Assignees max={4} values={assignees} onBlur={onBlur} />
+		<InputController
+			Input={TicketDetailsAssignees}
+			name="properties.Assignees"
+			onBlur={onBlur}
+			key="Assignees"
+		/>
 	</IssuePropertiesContainer>
 );

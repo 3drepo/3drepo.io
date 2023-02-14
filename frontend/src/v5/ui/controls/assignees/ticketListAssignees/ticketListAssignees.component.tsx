@@ -17,36 +17,29 @@
 
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
-import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
-import { intersection, isEqual } from 'lodash';
-import { memo, useState } from 'react';
-import { FormattedMessage } from 'react-intl';
-import { AssigneeListItem } from './assigneeListItem/assigneeListItem.component';
-import { AssigneesList, ExtraAssignees, HiddenSearchSelect } from './assignees.styles';
-import { ExtraAssigneesPopover } from './extraAssignees/extraAssigneesPopover.component';
+import { intersection } from 'lodash';
+import { useState } from 'react';
+import { AssigneesList } from '../assigneesList/assigneesList.component';
+import { AssigneesContainer, HiddenSearchSelect } from './ticketListAssignees.styles';
 
-type AssigneesProps = {
+type TicketListAssigneesProps = {
 	values: string[];
-	max?: number;
 	disabled?: boolean;
 	onBlur: (values) => void;
 	className?: string;
 };
 
-export const Assignees = memo(({
+export const TicketListAssignees = ({
 	values: initialValues,
 	onBlur,
-	max = 7,
 	disabled,
 	...props
-}: AssigneesProps) => {
+}: TicketListAssigneesProps) => {
 	const allUsersAndJobs = UsersHooksSelectors.selectAssigneesListItems();
 	// Must filter out users not included in this teamspace. This can occur when a user
 	// has been assigned to a ticket and later on is removed from the teamspace
 	const [values, setValues] = useState(intersection(initialValues, allUsersAndJobs.map((i) => i.value)));
 	const [open, setOpen] = useState(false);
-	const listedAssignees = values.slice(0, max - 1);
-	const overflowValue = initialValues.slice(max - 1).length;
 
 	const preventPropagation = (e) => {
 		if (e.key !== 'Escape') e.stopPropagation();
@@ -63,7 +56,7 @@ export const Assignees = memo(({
 	const onChange = (e) => setValues(e?.target?.value);
 
 	return (
-		<AssigneesList onClick={onClick} {...props}>
+		<AssigneesContainer onClick={onClick} {...props}>
 			<HiddenSearchSelect
 				value={values}
 				open={open}
@@ -76,20 +69,7 @@ export const Assignees = memo(({
 					</MultiSelectMenuItem>
 				))}
 			</HiddenSearchSelect>
-			{listedAssignees.length ? (
-				listedAssignees.map((assignee) => (
-					<AssigneeListItem key={assignee} assignee={assignee} />
-				))
-			) : (
-				<FormattedMessage id="assignees.unassigned" defaultMessage="Unassigned" />
-			)}
-			{overflowValue ? (
-				<HoverPopover
-					anchor={(extraProps) => <ExtraAssignees overflowValue={overflowValue} {...extraProps} />}
-				>
-					<ExtraAssigneesPopover assignees={values} />
-				</HoverPopover>
-			) : <></>}
-		</AssigneesList>
+			<AssigneesList values={values} maxItems={7} />
+		</AssigneesContainer>
 	);
-}, (a, b) => isEqual(a.values, b.values));
+};

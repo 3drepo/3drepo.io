@@ -16,18 +16,24 @@
  */
 
 import { StyledIconButton } from '@controls/avatar/avatar.styles';
-import { Avatar } from '@mui/material';
+import styled from 'styled-components';
+import { BaseCircle } from '../assigneeListItem/assigneeListItem.styles';
 
-type IExtraAssignees = {
-	overflowValue: number;
-};
+export const ExtraAssigneesList = styled.ul`
+	padding: 8px 10px;
+	margin: 0;
+`;
 
-export const ExtraAssigneesCircle = ({ overflowValue, ...props }: IExtraAssignees) => (
-	<StyledIconButton
-		{...props}
-	>
-		<Avatar>
-			+{overflowValue}
-		</Avatar>
-	</StyledIconButton>
-);
+export const ExtraAssigneesListItem = styled.li`
+	${({ theme }) => theme.typography.body1};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	list-style-type: none;
+`;
+
+export const ExtraAssigneesContainer = styled(StyledIconButton)`
+	${BaseCircle}
+	.MuiAvatar-root {
+		background-color: ${({ theme }) => theme.palette.primary.main};
+		color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+`;

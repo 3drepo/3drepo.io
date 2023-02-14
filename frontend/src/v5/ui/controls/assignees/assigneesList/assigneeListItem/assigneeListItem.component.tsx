@@ -24,7 +24,7 @@ import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { useSelector } from 'react-redux';
 import { selectJobs } from '@/v4/modules/jobs/jobs.selectors';
 import { getMemberImgSrc } from '@/v5/store/users/users.helpers';
-import { JobCircle, UserCircle } from '../assignees.styles';
+import { JobCircle, UserCircle } from './assigneeListItem.styles';
 
 type IAssigneeListItem = {
 	assignee: string;

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ExtraAssigneesList, ExtraAssigneesListItem } from './extraAssigneesPopover.styles';
+import { ExtraAssigneesList, ExtraAssigneesListItem } from './extraAssignees.styles';
 
 type IExtraAssignees = {
 	assignees: string[];
