@@ -21,7 +21,7 @@ import { CurrentUserHooksSelectors, AuthHooksSelectors } from '@/v5/services/sel
 
 // Must be a separate component used as IntercomProvider child
 const IntercomButton = () => {
-	const { boot, shutdown } = useIntercom();
+	const { boot, hardShutdown } = useIntercom();
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
 
@@ -41,18 +41,19 @@ const IntercomButton = () => {
 	};
 
 	useEffect(() => {
-		if (isAuthenticated) {
+		if (isAuthenticated && currentUser.email) {
 			setNameAndMail();
 		} else {
-			shutdown();
+			hardShutdown();
 		}
-	}, [isAuthenticated]);
+	}, [isAuthenticated, currentUser.email]);
 
 	return <div />;
 };
 
 export const Intercom = () => {
 	const { intercomLicense } = clientConfigService;
+
 	return (
 		intercomLicense ? (
 			<IntercomProvider appId={intercomLicense}>

@@ -19,23 +19,39 @@ const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 
 const db = require(`${src}/handler/db`);
+const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 
 const Notifications = require(`${src}/models/notifications`);
 
+const NOTIFICATIONS_COLL = 'notifications';
+
 const testRemoveAllUserNotifications = () => {
 	describe('Remove all user notifications', () => {
-		test('Should just drop the user collection within notifications', async () => {
-			const fn = jest.spyOn(db, 'dropCollection').mockResolvedValue(undefined);
+		test('Should delete user notifications', async () => {
+			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValue(undefined);
 
-			const username = generateRandomString();
-			await expect(Notifications.removeAllUserNotifications(username)).resolves.toBeUndefined();
+			const user = generateRandomString();
+			await expect(Notifications.removeAllUserNotifications(user)).resolves.toBeUndefined();
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('notifications', username);
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COLL, { user });
+		});
+	});
+};
+
+const testInitialise = () => {
+	describe('Initialise', () => {
+		test('should ensure indices exist', async () => {
+			const fn = jest.spyOn(db, 'createIndex').mockResolvedValueOnce(undefined);
+			await Notifications.initialise();
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, NOTIFICATIONS_COLL,
+				{ user: 1, timestamp: -1 }, { runInBackground: true });
 		});
 	});
 };
 
 describe('models/notifications', () => {
 	testRemoveAllUserNotifications();
+	testInitialise();
 });
