@@ -125,5 +125,11 @@ const run = async () => {
 	}
 };
 
-// eslint-disable-next-line no-console
-Promise.resolve(run()).catch(logError).finally(process.exit);
+Promise.resolve(run()).catch((err) => {
+	logError(err);
+	// eslint-disable-next-line no-process-exit
+	process.exit(1);
+}).finally(() => {
+	// eslint-disable-next-line no-process-exit
+	process.exit();
+});
