@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { CircleButton } from '@controls/circleButton';
+import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
 import styled, { css } from 'styled-components';
 
 const modalContentStyles = css`
@@ -38,13 +38,19 @@ export const Container = styled.div`
 	display: flex;
 `;
 
-export const NextButton = styled(CircleButton).attrs({
-	variant: 'viewer',
-})`
+export const NextButton = styled(NavbarButton)`
 	position: fixed;
 	top: calc(50% - 10px);
 	cursor: pointer;
 	right: 30px;
+	border-width: 2px;
+	height: 32px;
+	min-width: 32px;
+	width: 32px;
+
+	& svg {
+		margin-left: 1px;
+	}
 `;
 
 export const PreviousButton = styled(NextButton)`

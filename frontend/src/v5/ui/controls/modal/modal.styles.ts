@@ -15,8 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { IconButton } from '@mui/material';
+import DialogBase from '@mui/material/Dialog';
+import { ModalType } from '@/v5/store/dialogs/dialogs.redux';
+
+export const Dialog = styled(DialogBase)<{ type?: ModalType }>`
+	${({ type }) => type === 'images' && css`
+		.MuiPaper-root {
+			border-radius: 0;
+		}
+	`}
+`;
 
 export const CloseButton = styled(IconButton)`
 	&& {

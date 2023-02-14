@@ -34,7 +34,7 @@ const ModalTemplateContainer = ({ id, modalType, props }: IDialogConfig) => {
 	if (typeof modalType === 'string') {
 		const ModalTemplate = MODAL_TEMPLATES[modalType];
 		return (
-			<Modal open={openState} onClickClose={onClickClose}>
+			<Modal open={openState} onClickClose={onClickClose} type={modalType}>
 				<ModalTemplate onClickClose={onClickClose} {...props} />
 			</Modal>
 		);
