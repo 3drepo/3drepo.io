@@ -28,6 +28,7 @@ export const Container = styled.section`
 	border: solid 0 ${({ theme }) => theme.palette.secondary.lightest};
 	border-top-width: 1px;
 	padding: 0 0 11px 15px;
+    overflow-x: hidden;
 `;
 
 export const CommentReplyContainer = styled.div`
@@ -74,15 +75,17 @@ export const Images = styled.div`
 
 export const ImageContainer = styled.div`
 	position: relative;
+	width: 44px;
+    height: 44px;
 `;
 
 export const Image = styled(ImageWithSkeleton)<{ $error?: boolean }>`
-	width: 44px;
-    height: 44px;
     object-fit: cover;
     box-sizing: border-box;
 	border-radius: 5px;
 	overflow: hidden;
+	width: 100%;
+    height: 100%;
 
 	&:is(img) {
 		cursor: pointer;
