@@ -23,7 +23,17 @@ const { hideBin } = require('yargs/helpers');
 const { readdirSync } = require('fs');
 const Path = require('path');
 
+const { v5Path } = require('../../interop');
+
+const { logger } = require(`${v5Path}/utils/logger`);
+
 const scripts = [];
+
+const logError = (err) => {
+	logger.logError(err?.message ?? err);
+	// eslint-disable-next-line no-console
+	//	console.error(err);
+};
 
 const findScripts = (dir, ignoreFiles = true) => {
 	const data = readdirSync(dir, { withFileTypes: true });
@@ -61,5 +71,11 @@ const parser = populateCommands(Yargs(hideBin(process.argv)))
 	.demandCommand()
 	.parse();
 
-// eslint-disable-next-line no-console
-Promise.resolve(parser).catch(console.error).finally(process.exit);
+Promise.resolve(parser).catch((err) => {
+	logError(err);
+	// eslint-disable-next-line no-process-exit
+	process.exit(1);
+}).finally(() => {
+	// eslint-disable-next-line no-process-exit
+	process.exit();
+});
