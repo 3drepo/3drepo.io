@@ -30,7 +30,7 @@ import { addReply, createMetadata, imageIsTooBig, MAX_MESSAGE_LENGTH, sanitiseMe
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
-import { useEffect, useState } from 'react';
+import { DragEventHandler, useEffect, useRef, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { MenuItem } from '@mui/material';
@@ -43,6 +43,7 @@ import {
 	MessageInput,
 	DeleteButton,
 	CommentReplyContainer,
+	DragAndDrop,
 	Images,
 	Image,
 	ImageContainer,
@@ -66,6 +67,8 @@ type CreateCommentBoxProps = {
 export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommentBoxProps) => {
 	const [imagesToUpload, setImagesToUpload] = useState<ImageToUpload[]>([]);
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
+	const [isDraggingFile, setIsDraggingFile] = useState(false);
+	const containerRef = useRef<HTMLElement>();
 	const { watch, reset, control } = useForm<{ message: string, images: File[] }>({ mode: 'all' });
 	const messageInput = watch('message');
 
@@ -78,7 +81,7 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 	const replyMetadata = createMetadata(commentReply);
 	const commentReplyLength = commentReply ? addReply(replyMetadata, '').length : 0;
 	const charsCount = (messageInput?.length || 0) + commentReplyLength;
-	const charsLimitIsReached = charsCount >= MAX_MESSAGE_LENGTH;
+	const charsLimitIsReached = charsCount > MAX_MESSAGE_LENGTH;
 
 	const erroredImages = imagesToUpload.filter(({ error }) => error);
 	const disableSendMessage = (!messageInput?.trim()?.length && !imagesToUpload.length)
@@ -114,8 +117,7 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 		);
 	};
 
-	const uploadImages = async () => {
-		const files = await uploadFile(getSupportedImageExtensions(), true) as File[];
+	const uploadFiles = async (files: File[]) => {
 		const images = await Promise.all(files.map(async (file) => ({
 			name: file.name,
 			src: await convertFileToImageSrc(file) as string,
@@ -123,6 +125,11 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 			id: uuid(),
 		})));
 		setImagesToUpload(imagesToUpload.concat(images));
+	};
+
+	const uploadImages = async () => {
+		const files = await uploadFile(getSupportedImageExtensions(), true) as File[];
+		await uploadFiles(files);
 	};
 
 	const uploadScreenshot = async () => {
@@ -145,12 +152,26 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 		});
 	};
 
+	const handleDragOver = () => {
+		setIsDraggingFile(true);
+	};
+
+	const handleDragLeave = ({ relatedTarget }) => {
+		if (containerRef.current.contains(relatedTarget)) return;
+		setIsDraggingFile(false);
+	};
+
 	useEffect(() => {
 		if (number) resetCommentBox();
 	}, [number]);
 
 	return (
-		<Container>
+		<Container
+			onDragOver={handleDragOver}
+			onDragLeave={handleDragLeave}
+			onDrop={() => setIsDraggingFile(false)}
+			ref={containerRef}
+		>
 			{commentReply && (
 				<CommentReplyContainer>
 					<CommentReply {...replyMetadata} shortMessage />
@@ -170,18 +191,26 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 					maxLength: Math.max(MAX_MESSAGE_LENGTH - commentReplyLength, 0),
 				}}
 			/>
-			<ScrollArea autoHeightMax={100} autoHeight hideHorizontal autoHide>
-				<Images>
-					{imagesToUpload.map(({ src, id, error }, index) => (
-						<ImageContainer key={id}>
-							<Image src={src} $error={error} onClick={() => openImagesModal(index)} />
-							<DeleteButton onClick={() => deleteImage(id)} error={error}>
-								<DeleteIcon />
-							</DeleteButton>
-						</ImageContainer>
-					))}
-				</Images>
-			</ScrollArea>
+			<DragAndDrop accept={getSupportedImageExtensions()} onDrop={uploadFiles} $hidden={!isDraggingFile}>
+				<FormattedMessage
+					id="customTicket.comments.dropFiles"
+					defaultMessage="Drop your files here"
+				/>
+			</DragAndDrop>
+			{imagesToUpload.length > 0 && (
+				<ScrollArea autoHeightMax={100} autoHeight autoHide>
+					<Images>
+						{imagesToUpload.map(({ src, id, error }, index) => (
+							<ImageContainer key={id}>
+								<Image src={src} $error={error} onClick={() => openImagesModal(index)} />
+								<DeleteButton onClick={() => deleteImage(id)} error={error}>
+									<DeleteIcon />
+								</DeleteButton>
+							</ImageContainer>
+						))}
+					</Images>
+				</ScrollArea>
+			)}
 			{erroredImages.length > 0 && erroredImages.map(({ name }) => (
 				<ErroredImageMessage>
 					<strong>{name} </strong>
