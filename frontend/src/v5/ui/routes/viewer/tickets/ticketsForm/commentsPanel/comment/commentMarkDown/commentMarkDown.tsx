@@ -18,7 +18,12 @@
 import ReactMarkdown from 'react-markdown';
 import { CommentMessage } from '../basicCommentWithImages/basicCommentWithImages.styles';
 
-const RENDERERS = { paragraph: CommentMessage };
+const SanitisedImage = (props) => (<>![image]({props.src})</>);
+
+const RENDERERS = {
+	paragraph: CommentMessage,
+	image: SanitisedImage,
+};
 
 type CommentMarkDownProps = {
 	children?: any,
