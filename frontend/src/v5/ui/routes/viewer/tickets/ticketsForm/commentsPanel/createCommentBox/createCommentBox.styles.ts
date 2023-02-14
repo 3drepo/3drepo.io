@@ -28,7 +28,7 @@ export const Container = styled.section`
 	border: solid 0 ${({ theme }) => theme.palette.secondary.lightest};
 	border-top-width: 1px;
 	padding: 0 0 11px 15px;
-    overflow-x: hidden;
+	overflow-x: hidden;
 `;
 
 export const CommentReplyContainer = styled.div`
@@ -71,22 +71,22 @@ export const Images = styled.div`
 	gap: 10px;
 	margin-top: 10px;
 	width: 315px;
-    min-height: 54px;
+	min-height: 54px;
 `;
 
 export const ImageContainer = styled.div`
 	position: relative;
 	width: 44px;
-    height: 44px;
+	height: 44px;
 `;
 
 export const Image = styled(ImageWithSkeleton)<{ $error?: boolean }>`
-    object-fit: cover;
-    box-sizing: border-box;
+	object-fit: cover;
+	box-sizing: border-box;
 	border-radius: 5px;
 	overflow: hidden;
 	width: 100%;
-    height: 100%;
+	height: 100%;
 
 	&:is(img) {
 		cursor: pointer;
