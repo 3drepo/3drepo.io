@@ -23,6 +23,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { RevisionsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Sidebar } from '@controls/sideBar';
+import { Button } from '@controls/button';
 import { IContainer, UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
 import { UploadsSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
@@ -39,10 +40,10 @@ import {
 	ContainersHooksSelectors,
 	FederationsHooksSelectors,
 } from '@/v5/services/selectorsHooks';
+import { getSupportedFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
 import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
-import { getSupportedFileExtensions } from './uploadFileForm.helpers';
 
 type IUploadFileForm = {
 	presetContainerId?: string;
@@ -258,11 +259,15 @@ export const UploadFileForm = ({
 								</Typography>
 								<FileInputField
 									accept={getSupportedFileExtensions()}
-									handleChange={(files) => addFilesToList({ files })}
-									size="medium"
-									variant="contained"
-									color="primary"
-								/>
+									onChange={(files) => addFilesToList({ files })}
+								>
+									<Button component="span" size="medium" variant="contained" color="primary">
+										<FormattedMessage
+											id="uploads.fileInput.browse"
+											defaultMessage="Browse"
+										/>
+									</Button>
+								</FileInputField>
 								<HelpText>
 									<FormattedMessage
 										id="uploads.dropzone.message"
@@ -273,7 +278,9 @@ export const UploadFileForm = ({
 													href="https://help.3drepo.io/en/articles/4798885-supported-file-formats"
 													target="_blank"
 													rel="noreferrer"
-												>{child}</a>
+												>
+													{child}
+												</a>
 											),
 										}}
 									/>

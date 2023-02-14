@@ -16,10 +16,8 @@
  */
 
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { uploadFile } from '@controls/fileUploader/uploadFile';
+import { getSupportedFileExtensions, uploadFile } from '@controls/fileUploader/uploadFile';
 import { UploadFileForm } from './uploadFileForm.component';
-
-export const getSupportedFileExtensions = () => ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
 
 export const uploadToContainer = async (presetContainerId: string) => {
 	const onUpload = (presetFile) => {

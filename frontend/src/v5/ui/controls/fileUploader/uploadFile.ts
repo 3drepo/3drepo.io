@@ -17,6 +17,8 @@
 
 import { ChangeEvent } from 'react';
 
+export const getSupportedFileExtensions = () => ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
+
 export const uploadFile = (accept, multiple = false) => new Promise((resolve) => {
 	const input = document.createElement('input');
 	input.type = 'file';
