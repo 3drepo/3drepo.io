@@ -19,6 +19,7 @@ import EmptyImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
 import EnlargeImageIcon from '@assets/icons/outlined/enlarge_image-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import {
 	EmptyImageContainer,
 	EnlargeContainer,
@@ -26,7 +27,6 @@ import {
 	Image,
 	Container,
 } from './ticketImageDisplayer.styles';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 const LoadedImage = ({ imgSrc }) => (
 	<OverlappingContainer onClick={() => DialogsActionsDispatchers.open('images', { images: [imgSrc] })}>

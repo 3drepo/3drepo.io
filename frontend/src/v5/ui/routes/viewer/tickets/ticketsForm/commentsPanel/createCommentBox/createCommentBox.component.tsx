@@ -34,6 +34,7 @@ import { useEffect, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { MenuItem } from '@mui/material';
+import { ScrollArea } from '@controls/scrollArea';
 import {
 	Controls,
 	CharsCounter,
@@ -50,7 +51,6 @@ import {
 } from './createCommentBox.styles';
 import { CommentReply } from '../comment/commentReply/commentReply.component';
 import { ActionMenu } from '../../../ticketsList/ticketsList.styles';
-import { ScrollArea } from '@controls/scrollArea';
 
 type ImageToUpload = {
 	id: string,
@@ -75,7 +75,7 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 	const { number } = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 
-	const replyMetadata = createMetadata(commentReply)
+	const replyMetadata = createMetadata(commentReply);
 	const commentReplyLength = commentReply ? addReply(replyMetadata, '').length : 0;
 	const charsCount = (messageInput?.length || 0) + commentReplyLength;
 	const charsLimitIsReached = charsCount >= MAX_MESSAGE_LENGTH;
@@ -184,7 +184,7 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 			</ScrollArea>
 			{erroredImages.length > 0 && erroredImages.map(({ name }) => (
 				<ErroredImageMessage>
-					<strong>{name} </strong> 
+					<strong>{name} </strong>
 					<FormattedMessage
 						id="customTicket.comments.images.error"
 						defaultMessage="is too big. 1GB limit."

@@ -27,7 +27,7 @@ const modalContentStyles = css`
 `;
 
 export const Image = styled.img.attrs({
-	alt: formatMessage({ id: 'modal.image', defaultMessage: 'Enlarged image' })
+	alt: formatMessage({ id: 'modal.image', defaultMessage: 'Enlarged image' }),
 })`
 	${modalContentStyles}
 	object-fit: cover;
@@ -52,4 +52,3 @@ export const PreviousButton = styled(NextButton)`
 	right: unset;
 	left: 30px;
 `;
-

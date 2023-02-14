@@ -79,7 +79,7 @@ export const parseMessageAndImages = (inputComment: Partial<ITicketComment>) => 
 		delete comment.images;
 	} else {
 		comment.images = comment.images.map(stripBase64Prefix);
-	} 
+	}
 	return comment;
 };
 

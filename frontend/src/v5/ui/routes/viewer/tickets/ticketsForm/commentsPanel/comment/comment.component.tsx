@@ -21,7 +21,6 @@ import { extractMessage, extractMetadata, getRelativeTime } from '@/v5/store/tic
 import { useEffect, useState } from 'react';
 import { CurrentUserComment } from './currentUserComment/currentUserComment.component';
 import { OtherUserComment } from './otherUserComment/otherUserComment.component';
-import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 
 export type CommentProps = ITicketComment & {
 	onDelete: (commentId) => void;

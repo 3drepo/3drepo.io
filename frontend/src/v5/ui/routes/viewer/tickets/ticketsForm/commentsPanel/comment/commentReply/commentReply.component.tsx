@@ -18,10 +18,10 @@
 import { CurrentUserHooksSelectors, TicketsCardHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
-import { CommentAuthor } from '../basicCommentWithImages/basicCommentWithImages.styles';
 import { useParams } from 'react-router-dom';
-import { CommentMarkDown, CommentReplyContainer, ExpandableImage, OriginalMessage, CameraIcon } from './commentReply.styles';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { CommentMarkDown, CommentReplyContainer, ExpandableImage, OriginalMessage, CameraIcon } from './commentReply.styles';
+import { CommentAuthor } from '../basicCommentWithImages/basicCommentWithImages.styles';
 
 type CommentReplyProps = TicketCommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',

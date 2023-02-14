@@ -47,9 +47,11 @@ export const CommentImages = ({ images }: CommentImagesProps) => {
 		);
 	}
 
-	const preloadImage = (src) => new Image().src = src;
+	const preloadImage = (src) => { new Image().src = src; };
+	const preloadImages = () => images.slice(4).forEach(preloadImage);
+
 	return (
-		<ClickListener onClick={() => images.slice(4).forEach(preloadImage)}>
+		<ClickListener onClick={preloadImages}>
 			<FlexContainer>
 				{(images.slice(0, 2)).map((image, index) => (
 					<ExpandableImage images={images} displayImageIndex={index} key={image} />

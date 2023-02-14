@@ -79,7 +79,7 @@ export function* createComment({
 			? API.TicketComments.createFederationComment
 			: API.TicketComments.createContainerComment;
 		const newComment = parseMessageAndImages(comment);
-		
+
 		const { _id: newCommentId } = yield createModelComment(teamspace, projectId, modelId, ticketId, newComment);
 
 		const fetchModelComment = isFederation

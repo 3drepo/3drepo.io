@@ -55,7 +55,7 @@ export const CommentButtons = styled.div`
 `;
 
 export const SingleImage = styled(ImageWithSkeleton).attrs({
-	variant: 'secondary'
+	variant: 'secondary',
 })`
 	width: 241px;
 	margin: -10px 0 10px -12px;
