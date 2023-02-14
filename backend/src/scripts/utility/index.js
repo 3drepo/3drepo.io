@@ -32,7 +32,7 @@ const scripts = [];
 const logError = (err) => {
 	logger.logError(err?.message ?? err);
 	// eslint-disable-next-line no-console
-	//	console.error(err);
+	console.error(err);
 };
 
 const findScripts = (dir, ignoreFiles = true) => {
