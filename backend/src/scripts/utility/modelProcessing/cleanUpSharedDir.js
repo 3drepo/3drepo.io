@@ -67,7 +67,7 @@ const run = async (threshold = DEFAULT_THRESHOLD) => {
 const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('threshold', {
-		describe: 'Files existed before the threshold(in days) will be removed',
+		describe: 'Files that were created before the threshold (in days) will be removed',
 		type: 'number',
 		default: DEFAULT_THRESHOLD,
 	});
