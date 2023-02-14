@@ -63,7 +63,7 @@ const runTest = () => {
 		describe.each([
 			['Threshold is set to negative', -1],
 			['Threshold is not a number', generateRandomString()],
-			['Threshold is not provided'],
+			['Threshold is not provided', null],
 			['Threshold is not a number and force flag is set', generateRandomString()],
 
 		])('Should throw an error if:', (desc, threshold) => {
@@ -72,6 +72,23 @@ const runTest = () => {
 				await expect(CleanUpSharedDir.run(threshold)).rejects.toEqual(negThresError);
 				checkFilesExist(data.map(({ name }) => name), true);
 			});
+		});
+
+		test('Should remove files older than 14 days if threshold is not set', async () => {
+			const threshold = 14;
+			await expect(CleanUpSharedDir.run()).resolves.toBeUndefined();
+			const shouldExist = [];
+			const shouldDelete = [];
+			data.forEach(({ name, daysOld }) => {
+				if (daysOld >= threshold) {
+					shouldDelete.push(name);
+				} else {
+					shouldExist.push(name);
+				}
+			});
+
+			checkFilesExist(shouldExist, true);
+			checkFilesExist(shouldDelete, false);
 		});
 
 		test('Should remove files older than 10 days if threshold is set to 10', async () => {
