@@ -19,7 +19,7 @@ import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { UploadFileForm } from './uploadFileForm.component';
 
-export const fileAcceptFormats = () => ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
+export const getSupportedFileExtensions = () => ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
 
 export const uploadToContainer = async (presetContainerId: string) => {
 	const onUpload = (presetFile) => {
@@ -28,6 +28,6 @@ export const uploadToContainer = async (presetContainerId: string) => {
 			presetContainerId,
 		});
 	};
-	const file = await uploadFile(fileAcceptFormats());
+	const file = await uploadFile(getSupportedFileExtensions());
 	onUpload(file);
 };

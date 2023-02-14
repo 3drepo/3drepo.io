@@ -42,7 +42,7 @@ import {
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
 import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
-import { fileAcceptFormats } from './uploadFileForm.helpers';
+import { getSupportedFileExtensions } from './uploadFileForm.helpers';
 
 type IUploadFileForm = {
 	presetContainerId?: string;
@@ -248,7 +248,7 @@ export const UploadFileForm = ({
 							<DropZone
 								hidden={isUploading}
 								onDrop={(files) => addFilesToList({ files })}
-								accept={fileAcceptFormats()}
+								accept={getSupportedFileExtensions()}
 							>
 								<Typography variant="h3" color="secondary">
 									<FormattedMessage id="dragAndDrop.drop" defaultMessage="Drop files here" />
@@ -257,7 +257,7 @@ export const UploadFileForm = ({
 									<FormattedMessage id="dragAndDrop.or" defaultMessage="or" />
 								</Typography>
 								<FileInputField
-									accept={fileAcceptFormats()}
+									accept={getSupportedFileExtensions()}
 									handleChange={(files) => addFilesToList({ files })}
 									size="medium"
 									variant="contained"
