@@ -42,7 +42,7 @@ export const NextButton = styled(NavbarButton)`
 	position: fixed;
 	top: calc(50% - 10px);
 	cursor: pointer;
-	right: 30px;
+	right: 63px;
 	border-width: 2px;
 	height: 32px;
 	min-width: 32px;
@@ -56,5 +56,5 @@ export const NextButton = styled(NavbarButton)`
 export const PreviousButton = styled(NextButton)`
 	transform: rotate(180deg);
 	right: unset;
-	left: 30px;
+	left: 63px;
 `;

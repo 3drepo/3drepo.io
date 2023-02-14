@@ -20,18 +20,25 @@ import { IconButton } from '@mui/material';
 import DialogBase from '@mui/material/Dialog';
 import { ModalType } from '@/v5/store/dialogs/dialogs.redux';
 
-export const Dialog = styled(DialogBase)<{ type?: ModalType }>`
-	${({ type }) => type === 'images' && css`
-		.MuiPaper-root {
-			border-radius: 0;
-		}
-	`}
-`;
-
 export const CloseButton = styled(IconButton)`
 	&& {
 		position: absolute;
 		top: 11px;
 		right: 11px;
 	}
+`;
+
+export const Dialog = styled(DialogBase)<{ type?: ModalType }>`
+	${({ type }) => type === 'images' && css`
+		.MuiPaper-root {
+			border-radius: 0;
+		}
+
+		${CloseButton} {
+			top: 35px;
+			right: 50px;
+			position: fixed;
+			color: ${({ theme }) => theme.palette.primary.contrast};
+		}
+	`}
 `;
