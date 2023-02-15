@@ -47,6 +47,11 @@ export const NextButton = styled(NavbarButton)`
 	height: 32px;
 	min-width: 32px;
 	width: 32px;
+	background-color: ${({ theme }) => theme.palette.secondary.main};
+
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+	}
 
 	& svg {
 		margin-left: 1px;
