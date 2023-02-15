@@ -15,59 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { formatMessage } from '@/v5/services/intl';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, useFormContext } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import UserIcon from '@assets/icons/outlined/user-outlined.svg';
 import EmailIcon from '@assets/icons/outlined/email-outlined.svg';
 import PasswordIcon from '@assets/icons/outlined/lock-outlined.svg';
-import { UserSignupSchemaAccount } from '@/v5/validation/userSchemes/userSignupSchemes';
-import { isEqual, pick, defaults } from 'lodash';
 import { FormPasswordField, FormTextField } from '@controls/inputs/formInputs.component';
 import { NextStepButton } from '../userSignupFormStep.styles';
 import { IconContainer } from './userSignupFormStepAccount.styles';
 
-export interface IAccountFormInput {
-	username: string;
-	email: string;
-	password: string;
-	confirmPassword: string;
-}
-
 type UserSignupFormStepAccountProps = {
-	updateFields: (fields: any) => void;
-	onSubmitStep: () => void;
-	onComplete: () => void;
-	onUncomplete: () => void;
-	fields: IAccountFormInput;
-	alreadyExistingUsernames: string[];
-	alreadyExistingEmails: string[];
+	moveToNextStep: () => void;
 };
 
 export const UserSignupFormStepAccount = ({
-	updateFields,
-	onSubmitStep,
-	onComplete,
-	onUncomplete,
-	fields,
-	alreadyExistingUsernames,
-	alreadyExistingEmails,
+	moveToNextStep,
 }: UserSignupFormStepAccountProps) => {
 	const { formState: { errors, dirtyFields, isValid }, watch, trigger } = useFormContext();
-	const values = pick(watch(), Object.keys(UserSignupSchemaAccount.fields));
+	const password = watch('password');
 
 	useEffect(() => {
 		if (dirtyFields.password && dirtyFields.confirmPassword) {
 			trigger('confirmPassword');
 		}
-	}, [values.password]);
-
-	// useEffect(() => {
-	// 	if (isValid) {
-	// 		onComplete();
-	// 	}
-	// }, [isValid]);
+	}, [password]);
 
 	return (
 		<>
@@ -133,10 +105,10 @@ export const UserSignupFormStepAccount = ({
 					defaultMessage: 'Confirm password',
 				})}
 				required
-				disabled={!values.password}
+				disabled={!password}
 				formError={errors.confirmPassword}
 			/>
-			<NextStepButton disabled={!isValid} onClick={onSubmitStep}>
+			<NextStepButton disabled={!isValid} onClick={moveToNextStep}>
 				<FormattedMessage id="userSignup.form.button.next" defaultMessage="Next step" />
 			</NextStepButton>
 		</>
