@@ -17,10 +17,27 @@
 
 import axios from 'axios';
 import { clientConfigService } from '@/v4/services/clientConfig';
+import { isNotLoggedIn } from '@/v5/validation/errors.helpers';
+import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
+import { AuthActionsDispatchers } from '../actionsDispatchers';
 
 axios.defaults.withCredentials = true;
 
 export const generateV5ApiUrl = (url: string, requestMethod: string): string => encodeURI(clientConfigService.apiUrl(requestMethod, `v5/${url}`));
+
+axios.interceptors.response.use(
+	(response) => response,
+	(error) => {
+		try {
+			const isLoginPage = error.response?.data?.place.endsWith(LOGIN_PATH);
+			const sessionHasExpired = !isLoginPage && isNotLoggedIn(error);
+			if (sessionHasExpired) AuthActionsDispatchers.authenticate();
+			return Promise.reject(error);
+		} catch (e) {
+			return Promise.reject(error);
+		}
+	},
+);
 
 const getRequest = (url, ...options) => {
 	const requestUrl = generateV5ApiUrl(url, clientConfigService.GET_API);
