@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ScrollArea } from '@controls/scrollArea';
+import { ScrollArea, ScrollAreaProps } from '@controls/scrollArea/scrollArea.styles';
 import { CardContentContainer } from './card.styles';
 
-export const CardContent: typeof ScrollArea = ({ children, ...props }) => (
+export const CardContent = ({ children, ...props }: ScrollAreaProps) => (
 	<ScrollArea {...props} autoHide>
 		<CardContentContainer>
 			{children}
