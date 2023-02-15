@@ -17,7 +17,7 @@
 
 import { FormattedMessage } from 'react-intl';
 import { useEffect, useRef, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, useFormContext } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { UserSignupSchemaTermsAndSubmit } from '@/v5/validation/userSchemes/userSignupSchemes';
 import { clientConfigService } from '@/v4/services/clientConfig';
@@ -35,6 +35,7 @@ import {
 	FormCheckbox,
 	Link,
 } from './userSignupFormStepTermsAndSubmit.styles';
+import { SubmitButton } from '@controls/submitButton';
 
 export interface ITermsAndSubmitFormInput {
 	termsAgreed: boolean;
@@ -75,23 +76,14 @@ export const UserSignupFormStepTermsAndSubmit = ({
 	);
 
 	const {
-		handleSubmit,
 		control,
 		getValues,
 		formState,
 		formState: { isValid: formIsValid },
-	} = useForm<ITermsAndSubmitFormInput>({
-		mode: 'onChange',
-		resolver: yupResolver(UserSignupSchemaTermsAndSubmit),
-		defaultValues: getTermsAndSubmitFields(),
-	});
+	} = useFormContext<ITermsAndSubmitFormInput>();
 
 	const captchaRef = useRef<ReCAPTCHA>();
 	const [captchaIsPending, setCaptchaIsPending] = useState(false);
-
-	const createAccount: SubmitHandler<ITermsAndSubmitFormInput> = () => {
-		onSubmitStep();
-	};
 
 	const handleCaptchaChange = async (captcha) => {
 		if (!fields.captcha && captcha) {
@@ -120,12 +112,12 @@ export const UserSignupFormStepTermsAndSubmit = ({
 		}
 	}, [formIsValid]);
 
-	useEffect(() => {
-		const formValues = getValues();
-		if (isActiveStep && !isMatch(getTermsAndSubmitFields(), formValues)) {
-			updateFields(formValues);
-		}
-	}, [formState]);
+	// useEffect(() => {
+	// 	const formValues = getValues();
+	// 	if (isActiveStep && !isMatch(getTermsAndSubmitFields(), formValues)) {
+	// 		updateFields(formValues);
+	// 	}
+	// }, [formState]);
 
 	return (
 		<>
@@ -181,13 +173,14 @@ export const UserSignupFormStepTermsAndSubmit = ({
 				isPending={formIsSubmitting || captchaIsPending}
 				startIcon={<SignupIcon />}
 				disabled={!formIsValid || !fields.captcha}
-				onClick={handleSubmit(createAccount)}
+				// onClick={handleSubmit(createAccount)}
 			>
 				<FormattedMessage
 					id="userSignup.form.button.createAccount"
 					defaultMessage="Create account"
 				/>
 			</CreateAccountButton>
+			<SubmitButton />
 		</>
 	);
 };
