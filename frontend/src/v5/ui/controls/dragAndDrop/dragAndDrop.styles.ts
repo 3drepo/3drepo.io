@@ -19,6 +19,10 @@ import styled, { css } from 'styled-components';
 import Dropzone from 'react-dropzone';
 import { DashedContainer as DashedContainerBase } from '@controls/dashedContainer/dashedContainer.component';
 
+export const Container = styled.div`
+	display: contents;
+`;
+
 export const DropArea = styled(Dropzone)`
 	position: relative;
 	width: 100%;

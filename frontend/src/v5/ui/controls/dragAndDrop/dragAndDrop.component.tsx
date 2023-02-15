@@ -16,7 +16,7 @@
  */
 
 import { useState } from 'react';
-import { DashedContainer, DropArea } from './dragAndDrop.styles';
+import { Container, DashedContainer, DropArea } from './dragAndDrop.styles';
 
 interface IDragAndDrop {
 	hidden?: boolean;
@@ -28,13 +28,13 @@ interface IDragAndDrop {
 export const DragAndDrop = ({ children, onDrop, hidden = false, ...props }: IDragAndDrop) => {
 	const [dragOverlay, setDragOverlay] = useState(false);
 
-	const handleDragIn = (e) => {
+	const handleDragEnter = (e) => {
 		if (e.dataTransfer.items.length > 0) {
 			setDragOverlay(true);
 		}
 	};
 
-	const handleDragOut = () => {
+	const handleDragLeave = () => {
 		setDragOverlay(false);
 	};
 
@@ -43,17 +43,15 @@ export const DragAndDrop = ({ children, onDrop, hidden = false, ...props }: IDra
 		setDragOverlay(false);
 	};
 	return (
-		<DropArea
-			onDragEnter={handleDragIn}
-			onDragLeave={handleDragOut}
-			onDrop={handleDrop}
-			hidden={hidden}
-			disableClick
-			{...props}
-		>
-			<DashedContainer $dragOverlay={dragOverlay}>
-				{children}
-			</DashedContainer>
+		<DropArea hidden={hidden} disableClick onDrop={handleDrop} {...props}>
+			<Container
+				onDragEnter={handleDragEnter}
+				onDragLeave={handleDragLeave}
+			>
+				<DashedContainer $dragOverlay={dragOverlay}>
+					{children}
+				</DashedContainer>
+			</Container>
 		</DropArea>
 	);
 };
