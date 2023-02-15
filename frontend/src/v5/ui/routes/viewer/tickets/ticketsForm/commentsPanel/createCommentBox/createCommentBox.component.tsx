@@ -152,12 +152,8 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 		});
 	};
 
-	const handleDragOver = () => {
-		setIsDraggingFile(true);
-	};
-
 	const handleDragLeave = ({ relatedTarget }) => {
-		if (containerRef.current.contains(relatedTarget)) return;
+		if (containerRef.current.contains(relatedTarget) || !relatedTarget.parentElement) return;
 		setIsDraggingFile(false);
 	};
 
@@ -167,7 +163,7 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 
 	return (
 		<Container
-			onDragOver={handleDragOver}
+			onDragEnter={() => setIsDraggingFile(true)}
 			onDragLeave={handleDragLeave}
 			onDrop={() => setIsDraggingFile(false)}
 			ref={containerRef}
@@ -191,7 +187,7 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 					maxLength: Math.max(MAX_MESSAGE_LENGTH - commentReplyLength, 0),
 				}}
 			/>
-			<DragAndDrop accept={getSupportedImageExtensions()} onDrop={uploadFiles} $hidden={!isDraggingFile}>
+			<DragAndDrop accept={getSupportedImageExtensions()} onDrop={uploadFiles} hidden={!isDraggingFile}>
 				<FormattedMessage
 					id="customTicket.comments.dropFiles"
 					defaultMessage="Drop your files here"

@@ -69,15 +69,11 @@ export const DragAndDrop = styled(DragAndDropBase).attrs({
 	borderRadius: 5,
 	dashSize: 2,
 })<{ $hidden?: boolean }>`
-	${({ $hidden }) => $hidden && css`
-		height: 0;
-		overflow: hidden;
-	`}
+	margin: 10px 15px;
+	width: calc(100% - 30px);
 
-	& > ${DashedContainer} {
+	${DashedContainer} {
 		padding: 13px;
-		width: calc(100% - 30px);
-		margin: 10px 15px;
 	}
 `;
 
