@@ -68,6 +68,7 @@ describe("Issues", function () {
 
 	const bcf = {
 		path: "/../statics/bcf/example1.bcf",
+		withEmptyComment: "/../statics/bcf/emptyComment.bcfzip",
 		withGroupsPath: "/../statics/bcf/withGroups.bcf",
 		invalidFile: "/../statics/bcf/notBCF.txt",
 		solibri: "/../statics/bcf/solibri.bcf",
@@ -3226,6 +3227,12 @@ describe("Issues", function () {
 							});
 					}
 				], done);
+			});
+
+			it("with empty comments should succeed", function(done) {
+				agent.post(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
+					.attach("file", __dirname + bcf.withEmptyComment)
+					.expect(200, done);
 			});
 
 			it("if user is collaborator should succeed", function(done) {

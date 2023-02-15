@@ -57,6 +57,7 @@ interface IProps {
 		params: {
 			model: string;
 			teamspace: string;
+			project?: string;
 			revision?: string;
 		}
 	};

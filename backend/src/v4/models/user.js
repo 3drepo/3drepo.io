@@ -511,12 +511,6 @@ User.verify = async function (username, token, options) {
 	}
 
 	try {
-		await Role.grantTeamSpaceRoleToUser(username, username);
-	} catch(err) {
-		systemLogger.logError("Failed to create role for ", username, err);
-	}
-
-	try {
 		await TeamspaceProcessorV5.initTeamspace(username);
 	} catch(err) {
 		systemLogger.logError("Failed to init teamspace settings for ", username, err);
