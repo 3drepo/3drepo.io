@@ -16,7 +16,7 @@
  */
 
 import ReactMarkdown from 'react-markdown';
-import { CommentMessage } from '../basicCommentWithImages/basicCommentWithImages.styles';
+import { CommentMessage } from '../basicComment/basicComment.styles';
 
 const SanitisedImage = ({ src }) => (<>![image]({src})</>);
 

@@ -17,12 +17,12 @@
 
 import { FormattedMessage } from 'react-intl';
 import { deletedCommentMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
-import { CommentAuthor, CommentAge, CommentMessage } from '../../basicCommentWithImages/basicCommentWithImages.styles';
-import { CommentContainer } from './deletedComment.styles';
+import { CommentAuthor, CommentAge, CommentMessage } from '../../basicComment/basicComment.styles';
+import { Comment } from './deletedComment.styles';
 import { UserCirclePopover } from '../otherUserComment.styles';
 
 export const DeletedComment = ({ user, author }) => (
-	<CommentContainer data-author={user.user} author={author}>
+	<Comment data-author={user.user} author={author}>
 		<UserCirclePopover user={user} />
 		<CommentAuthor>{author}</CommentAuthor>
 		<CommentMessage>{deletedCommentMessage}</CommentMessage>
@@ -33,5 +33,5 @@ export const DeletedComment = ({ user, author }) => (
 				values={{ name: user.firstName }}
 			/>
 		</CommentAge>
-	</CommentContainer>
+	</Comment>
 );

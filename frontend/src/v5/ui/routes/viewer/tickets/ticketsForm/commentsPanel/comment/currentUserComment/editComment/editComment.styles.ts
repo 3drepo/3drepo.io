@@ -17,10 +17,10 @@
 
 import styled from 'styled-components';
 import { FormTextArea } from '@controls/inputs/formInputs.component';
-import { BasicComment } from '../../basicCommentWithImages/basicCommentWithImages.styles';
+import { CommentContainer } from '../../basicComment/basicComment.styles';
 import { MessageInput } from '../../../createCommentBox/createCommentBox.styles';
 
-export const EditCommentContainer = styled(BasicComment)`
+export const EditCommentContainer = styled(CommentContainer)`
 	border-radius: 0;
 	border: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
 	border-bottom-color: ${({ theme }) => theme.palette.primary.main};

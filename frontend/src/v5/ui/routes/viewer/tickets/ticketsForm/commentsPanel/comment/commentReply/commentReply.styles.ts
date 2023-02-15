@@ -19,7 +19,7 @@ import styled, { css } from 'styled-components';
 import { ExpandableImage as ExpandableImageBase } from '@controls/expandableImage/expandableImage.component';
 import CameraIconBase from '@assets/icons/outlined/camera-outlined.svg';
 import { CommentMarkDown as CommentMarkDownBase } from '../commentMarkDown/commentMarkDown';
-import { CommentImagesContainer, CommentMessage } from '../basicCommentWithImages/basicCommentWithImages.styles';
+import { CommentImagesContainer, CommentMessage } from '../basicComment/basicComment.styles';
 
 export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'secondary', shortMessage?: boolean }>`
 	border: solid 0 ${({ theme }) => theme.palette.primary.main};

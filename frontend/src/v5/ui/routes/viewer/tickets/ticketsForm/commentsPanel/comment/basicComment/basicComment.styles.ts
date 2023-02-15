@@ -69,10 +69,7 @@ export const SingleImage = styled(ImageWithSkeleton).attrs({
 	}
 `;
 
-type BasicCommentProps = {
-	'data-author': string,
-};
-export const BasicComment = styled.div<BasicCommentProps>`
+export const CommentContainer = styled.div<{ 'data-author': string }>`
 	max-width: 241px;
 	width: fit-content;
 	margin-top: 12px;

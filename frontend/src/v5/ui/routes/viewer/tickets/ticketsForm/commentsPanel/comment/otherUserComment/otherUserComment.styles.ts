@@ -17,8 +17,8 @@
 
 import { UserCirclePopover as UserCirclePopoverBase } from '@components/shared/userCirclePopover/userCirclePopover.component';
 import styled from 'styled-components';
-import { BasicCommentWithImages } from '../basicCommentWithImages/basicCommentWithImages.component';
-import { CommentMessage, CommentButtons } from '../basicCommentWithImages/basicCommentWithImages.styles';
+import { BasicComment } from '../basicComment/basicComment.component';
+import { CommentMessage, CommentButtons } from '../basicComment/basicComment.styles';
 
 export const UserCirclePopover = styled(UserCirclePopoverBase)`
 	position: absolute;
@@ -30,7 +30,7 @@ export const UserCirclePopover = styled(UserCirclePopoverBase)`
 	}
 `;
 
-export const CommentContainer = styled(BasicCommentWithImages)`
+export const Comment = styled(BasicComment)`
 	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin-left: 39px;

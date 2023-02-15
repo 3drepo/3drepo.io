@@ -21,7 +21,7 @@ import { TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketCo
 import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { CommentMarkDown, CommentReplyContainer, ExpandableImage, OriginalMessage, CameraIcon } from './commentReply.styles';
-import { CommentAuthor } from '../basicCommentWithImages/basicCommentWithImages.styles';
+import { CommentAuthor } from '../basicComment/basicComment.styles';
 
 type CommentReplyProps = TicketCommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',
