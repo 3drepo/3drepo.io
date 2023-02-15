@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useParams } from 'react-router';
 import { View } from '@/v5/store/store.types';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { SelectProps } from '@controls/inputs/select/select.component';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Thumbnail, ThumbnailPlaceholder, ViewLabel, MenuItemView, Select } from './selectView.styles';
 
 const getThumbnailBasicPath = (
@@ -44,7 +43,8 @@ type SelectViewProps = Omit<SelectProps, 'children'> & {
 };
 
 export const SelectView = ({ views, containerOrFederationId, isContainer, ...props }: SelectViewProps) => {
-	const { teamspace, project } = useParams<DashboardParams>() as { teamspace: string, project: string };
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const getThumbnail = getThumbnailBasicPath(teamspace, project, containerOrFederationId, isContainer);
 
 	return (

@@ -15,28 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IContainer } from '@/v5/store/containers/containers.types';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainerSettingsSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
-import { SettingsForm } from '../../settingsForm/settingsForm.component';
+import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { SettingsModal } from '../../settingsModal/settingsModal.component';
 
-type ContainerSettingsFormProps = {
+type ContainerSettingsModalProps = {
+	containerId: string;
 	open: boolean;
-	container: IContainer;
-	onClose: () => void;
+	onClickClose: () => void;
 };
 
-export const ContainerSettingsForm = ({
-	container,
+export const ContainerSettingsModal = ({
+	containerId,
 	...otherProps
-}: ContainerSettingsFormProps) => (
-	<SettingsForm
-		containerOrFederation={container}
-		isContainer
-		settingsSchema={ContainerSettingsSchema}
-		fetchSettings={ContainersActionsDispatchers.fetchContainerSettings}
-		fetchViews={ContainersActionsDispatchers.fetchContainerViews}
-		updateSettings={ContainersActionsDispatchers.updateContainerSettings}
-		{...otherProps}
-	/>
-);
+}: ContainerSettingsModalProps) => {
+	const container = ContainersHooksSelectors.selectContainerById(containerId);
+	return (
+		<SettingsModal
+			containerOrFederation={container}
+			isContainer
+			settingsSchema={ContainerSettingsSchema}
+			fetchSettings={ContainersActionsDispatchers.fetchContainerSettings}
+			fetchViews={ContainersActionsDispatchers.fetchContainerViews}
+			updateSettings={ContainersActionsDispatchers.updateContainerSettings}
+			{...otherProps}
+		/>
+	);
+};

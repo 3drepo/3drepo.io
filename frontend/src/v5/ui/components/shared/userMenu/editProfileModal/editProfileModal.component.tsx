@@ -47,7 +47,8 @@ const TAB_LABELS = {
 
 type EditProfileModalProps = {
 	user: ICurrentUser;
-	onClose: () => void;
+	open: boolean;
+	onClickClose: () => void;
 };
 
 type EditProfileUnexpectedErrors = {
@@ -56,7 +57,7 @@ type EditProfileUnexpectedErrors = {
 	[INTEGRATIONS_TAB]?: any;
 };
 
-export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
+export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalProps) => {
 	const [activeTab, setActiveTab] = useState(PERSONAL_TAB);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [personalSubmitFunction, setPersonalSubmitFunction] = useState(null);
@@ -100,12 +101,12 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 
 	return (
 		<FormModal
-			open
+			open={open}
 			title={formatMessage(
 				{ id: 'editProfile.title', defaultMessage: '{firstName}\'s profile' },
 				{ firstName: <TruncatableName>{user.firstName}</TruncatableName> },
 			)}
-			onClickClose={onClose}
+			onClickClose={onClickClose}
 			disableClosing={isSubmitting}
 		>
 			<TabContext value={activeTab}>
@@ -144,7 +145,7 @@ export const EditProfileModal = ({ user, onClose }: EditProfileModalProps) => {
 				</TabPanel>
 			</TabContext>
 			<FormModalActions>
-				<ModalCancelButton disabled={isSubmitting} onClick={onClose} />
+				<ModalCancelButton disabled={isSubmitting} onClick={onClickClose} />
 				{activeTab !== INTEGRATIONS_TAB && (
 					<ModalSubmitButton
 						disabled={!getTabSubmitFunction()}

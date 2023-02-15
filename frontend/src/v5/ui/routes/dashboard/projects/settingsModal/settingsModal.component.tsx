@@ -22,17 +22,16 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { MenuItem } from '@mui/material';
 import { FormModal } from '@controls/formModal/formModal.component';
 import { useForm, SubmitHandler, useWatch } from 'react-hook-form';
-import { useParams } from 'react-router';
 import { IContainer, ContainerSettings } from '@/v5/store/containers/containers.types';
 import { IFederation, FederationSettings } from '@/v5/store/federations/federations.types';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { ShareTextField } from '@controls/shareTextField';
 import { FormattedMessage } from 'react-intl';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { FormNumberField, FormSelect, FormSelectView, FormTextField } from '@controls/inputs/formInputs.component';
-import { FlexContainer, SectionTitle, Placeholder, HiddenMenuItem } from './settingsForm.styles';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FlexContainer, SectionTitle, Placeholder, HiddenMenuItem } from './settingsModal.styles';
 
 const UNITS = [
 	{
@@ -117,12 +116,12 @@ const getDefaultValues = (containerOrFederation: IContainer | IFederation, isCon
 	};
 };
 
-type ISettingsForm = {
+type ISettingsModal = {
 	open: boolean;
 	containerOrFederation: IContainer | IFederation;
 	settingsSchema: any;
 	isContainer?: boolean;
-	onClose: () => void;
+	onClickClose: () => void;
 	fetchSettings: (teamspace: string, project: string, containerOrFederationId: string) => void;
 	fetchViews: (teamspace: string, project: string, containerOrFederationId: string) => void;
 	updateSettings: (
@@ -135,7 +134,7 @@ type ISettingsForm = {
 	) => void;
 };
 
-export const SettingsForm = ({
+export const SettingsModal = ({
 	open,
 	containerOrFederation,
 	settingsSchema,
@@ -143,8 +142,8 @@ export const SettingsForm = ({
 	fetchSettings,
 	fetchViews,
 	updateSettings,
-	onClose,
-}: ISettingsForm) => {
+	onClickClose,
+}: ISettingsModal) => {
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
 	const [isValid, setIsValid] = useState(false);
 	const DEFAULT_VALUES = getDefaultValues(containerOrFederation, isContainer) as any;
@@ -165,7 +164,8 @@ export const SettingsForm = ({
 	});
 
 	const currentUnit = useWatch({ control, name: 'unit' });
-	const { teamspace, project } = useParams<DashboardParams>() as { teamspace: string, project: string };
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 
 	const containerOrFederationName = isContainer ? 'Container' : 'Federation';
 	const EMPTY_GIS_VALUES = { latitude: 0, longitude: 0, angleFromNorth: 0 };
@@ -212,29 +212,27 @@ export const SettingsForm = ({
 			project,
 			containerOrFederation._id,
 			settings,
-			onClose,
+			onClickClose,
 			onSubmitError,
 		);
 	};
 
 	useEffect(() => {
-		if (open) {
-			fetchSettings(teamspace, project, containerOrFederation._id);
-			fetchViews(teamspace, project, containerOrFederation._id);
-			reset(getDefaultValues(containerOrFederation, isContainer));
-			setAlreadyExistingNames([]);
-		}
-	}, [open]);
+		fetchSettings(teamspace, project, containerOrFederation._id);
+		fetchViews(teamspace, project, containerOrFederation._id);
+	}, []);
 
-	useEffect(() => { reset(getDefaultValues(containerOrFederation, isContainer)); }, [containerOrFederation]);
+	useEffect(() => {
+		reset(getDefaultValues(containerOrFederation, isContainer));
+	}, [containerOrFederation]);
 
 	useEffect(() => { setIsValid(formState.isValid && fieldsHaveChanged()); }, [JSON.stringify(watch())]);
 
 	return (
 		<FormModal
-			title={formatMessage({ id: 'settings.title', defaultMessage: `${containerOrFederationName} settings` })}
 			open={open}
-			onClickClose={onClose}
+			title={formatMessage({ id: 'settings.title', defaultMessage: `${containerOrFederationName} settings` })}
+			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'settings.ok', defaultMessage: 'Save Changes' })}
 			isValid={isValid}
