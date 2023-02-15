@@ -69,6 +69,7 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
 	const containerRef = useRef<HTMLElement>();
+	const inputRef = useRef<any>();
 	const { watch, reset, control } = useForm<{ message: string, images: File[] }>({ mode: 'all' });
 	const messageInput = watch('message');
 
@@ -158,6 +159,12 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 
 	useEffect(() => { resetCommentBox(); }, [ticketId]);
 
+	useEffect(() => {
+		if (commentReply?.message || commentReply?.images?.length) {
+			inputRef.current.focus();
+		}
+	}, [commentReply?._id]);
+
 	return (
 		<Container
 			onDragEnter={() => setIsDraggingFile(true)}
@@ -183,6 +190,7 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 				inputProps={{
 					maxLength: Math.max(MAX_MESSAGE_LENGTH - commentReplyLength, 0),
 				}}
+				inputRef={inputRef}
 			/>
 			<DragAndDrop accept={getSupportedImageExtensions()} onDrop={uploadFiles} hidden={!isDraggingFile}>
 				<FormattedMessage

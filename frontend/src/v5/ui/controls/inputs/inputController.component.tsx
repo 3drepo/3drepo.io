@@ -24,7 +24,6 @@ export type FormInputProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
 	className: string,
 	error: boolean,
 	helperText: string,
-	inputRef: any,
 }>;
 
 export type InputControllerProps<T extends FormInputProps> = T & {
@@ -35,6 +34,7 @@ export type InputControllerProps<T extends FormInputProps> = T & {
 	defaultValue?: any,
 	onChange?: (event) => void,
 	onBlur?: () => void,
+	inputRef?: any,
 };
 
 // eslint-disable-next-line
@@ -46,6 +46,7 @@ export const InputController = <T,>({
 	defaultValue,
 	onChange,
 	onBlur,
+	inputRef,
 	...props
 }: InputControllerProps<T>) => (
 	<Controller
@@ -66,7 +67,7 @@ export const InputController = <T,>({
 					field.onBlur();
 					onBlur?.();
 				}}
-				inputRef={ref}
+				inputRef={inputRef || ref}
 				error={!!formError}
 				helperText={formError?.message}
 			/>
