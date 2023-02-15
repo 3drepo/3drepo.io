@@ -17,7 +17,7 @@
 
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { getErrorCode, isPathNotFound } from '@/v5/validation/errors.helpers';
-import { MODAL_TEMPLATES } from '@components/shared/modals/templates';
+import { MODAL_TEMPLATES } from '@components/shared/modalsDispatcher/templates';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
