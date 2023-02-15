@@ -23,7 +23,8 @@ import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ScrollArea } from '@controls/scrollArea';
 import { FormattedMessage } from 'react-intl';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import Scrollbars from 'react-custom-scrollbars';
 import { ViewerParams } from '../../../../routes.constants';
 import { Accordion, Comments, EmptyCommentsBox } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
@@ -38,6 +39,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
+	const scrollAreaRef = useRef<Scrollbars>();
 
 	const commentsListIsEmpty = comments?.length > 0;
 
@@ -86,14 +88,18 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 		);
 	}, [ticketId]);
 
+	useEffect(() => {
+		if (!comments.length) return;
+		setTimeout(() => scrollAreaRef.current.scrollToBottom(), 100);
+	}, [comments.length]);
+
 	return (
 		<Accordion
 			title={formatMessage({ id: 'customTicket.comments.title', defaultMessage: 'Comments' })}
 			Icon={CommentIcon}
 			onChange={scrollPanelIntoView}
-			defaultExpanded
 		>
-			<ScrollArea autoHeight autoHeightMin={400} autoHeightMax={400} autoHide>
+			<ScrollArea autoHeight autoHeightMin={400} autoHeightMax={400} autoHide ref={scrollAreaRef}>
 				{commentsListIsEmpty && (
 					<Comments>
 						{comments.map((comment) => (

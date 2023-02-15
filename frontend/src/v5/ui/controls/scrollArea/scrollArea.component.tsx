@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { forwardRef } from 'react';
 import { ScrollbarProps } from 'react-custom-scrollbars';
 import { ScrollbarWrapper } from './scrollArea.styles';
 
@@ -24,17 +25,18 @@ export type IScrollArea = ScrollbarProps & {
 	hideHorizontal?: boolean;
 };
 
-export const ScrollArea = ({
+export const ScrollArea = forwardRef(({
 	variant = 'base',
 	hideHorizontal = true,
 	children,
 	...props
-}: IScrollArea) => (
+}: IScrollArea, ref: any) => (
 	<ScrollbarWrapper
 		$hidehorizontal={hideHorizontal}
 		variant={variant}
+		ref={ref}
 		{...props}
 	>
 		{children}
 	</ScrollbarWrapper>
-);
+));
