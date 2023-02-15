@@ -31,6 +31,9 @@ export const Container = styled.section`
 	border-top-width: 1px;
 	padding: 0 0 11px;
 	overflow-x: hidden;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	position: sticky;
+	bottom: 0;
 `;
 
 export const CommentReplyContainer = styled.div`
