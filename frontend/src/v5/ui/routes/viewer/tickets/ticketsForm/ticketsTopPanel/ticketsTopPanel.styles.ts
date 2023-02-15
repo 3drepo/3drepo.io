@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import { ErrorTextGap } from '../ticketsForm.styles';
 
 export const TopPanel = styled.div`
 	width: 100%;
@@ -28,6 +29,12 @@ export const TopPanel = styled.div`
 export const BaseTicketInfo = styled.div`
 	padding: 10px 15px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	> :not(:first-child) {
+		margin: 10px 0 0;
+		&${ErrorTextGap} {
+			margin: 0;
+		}
+	}
 `;
 
 export const DescriptionProperty = styled.div`

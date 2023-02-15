@@ -60,22 +60,24 @@ export const TicketsTopPanel = ({
 	return (
 		<TopPanel>
 			<BaseTicketInfo>
-				<TitleProperty
-					name={BaseProperties.TITLE}
-					defaultValue={title}
-					formError={formState.errors[BaseProperties.TITLE]}
-					placeholder={formatMessage({
-						id: 'customTicket.topPanel.titlePlaceholder',
-						defaultMessage: 'Ticket name',
-					})}
-					inputProps={{ autoFocus: focusOnTitle }}
-					onBlur={onPropertyBlur}
-				/>
-				<CreationInfo
-					owner={owner}
-					createdAt={createdAt}
-					updatedAt={updatedAt}
-				/>
+				<div>
+					<TitleProperty
+						name={BaseProperties.TITLE}
+						defaultValue={title}
+						formError={formState.errors[BaseProperties.TITLE]}
+						placeholder={formatMessage({
+							id: 'customTicket.topPanel.titlePlaceholder',
+							defaultMessage: 'Ticket name',
+						})}
+						inputProps={{ autoFocus: focusOnTitle }}
+						onBlur={onPropertyBlur}
+					/>
+					<CreationInfo
+						owner={owner}
+						createdAt={createdAt}
+						updatedAt={updatedAt}
+					/>
+				</div>
 				<DescriptionProperty>
 					<InputController
 						Input={TextAreaFixedSize}
@@ -87,7 +89,7 @@ export const TicketsTopPanel = ({
 						})}
 					/>
 				</DescriptionProperty>
-				<PropertiesList module="properties" properties={extraProperties} propertiesValues={propertiesValues} />
+				<PropertiesList module="properties" properties={extraProperties} propertiesValues={propertiesValues} onPropertyBlur={onPropertyBlur} />
 			</BaseTicketInfo>
 			{priority && (
 				<IssuePropertiesRow
