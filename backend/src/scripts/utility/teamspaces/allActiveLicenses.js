@@ -23,7 +23,7 @@ const { v5Path } = require('../../../interop');
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const { getTeamspaceActiveLicenses } = require(`${v5Path}/models/teamspaceSettings`);
-const { getTeamspaceList } = require('../../utils');
+const { getTeamspaceList, parsePath } = require('../../utils');
 
 const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
 
@@ -52,7 +52,7 @@ const run = async (outFile) => {
 			res.push(tsLicenses);
 		}
 	}
-	await writeResultsToFile(res, outFile);
+	await writeResultsToFile(res, parsePath(outFile));
 };
 
 const genYargs = /* istanbul ignore next */ (yargs) => {

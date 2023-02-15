@@ -24,7 +24,7 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getLastLoginDate } = require(`${v5Path}/models/loginRecords`);
-const { getTeamspaceList } = require('../../utils');
+const { getTeamspaceList, parsePath } = require('../../utils');
 const FS = require('fs');
 const Path = require('path');
 const { USERS_DB_NAME } = require('../../../v5/models/users.constants');
@@ -68,7 +68,7 @@ const run = async (outFile) => {
 		await findMembersLastLogin(members);
 		res.push({ teamspace, members });
 	}
-	await writeResultsToFile(res, outFile);
+	await writeResultsToFile(res, parsePath(outFile));
 };
 
 const genYargs = /* istanbul ignore next */(yargs) => {

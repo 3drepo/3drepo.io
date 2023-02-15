@@ -18,7 +18,7 @@
 const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
-const { getCollectionsEndsWith } = require('../../utils');
+const { getCollectionsEndsWith, parsePath } = require('../../utils');
 
 const { find } = require(`${v5Path}/handler/db`);
 
@@ -58,7 +58,7 @@ const run = async (dbNames, outFile = DEFAULT_OUT_FILE) => {
 		}
 	}
 
-	await writeResultsToFile(results, outFile);
+	await writeResultsToFile(results, parsePath(outFile));
 };
 
 const genYargs =/* istanbul ignore next */ (yargs) => {
