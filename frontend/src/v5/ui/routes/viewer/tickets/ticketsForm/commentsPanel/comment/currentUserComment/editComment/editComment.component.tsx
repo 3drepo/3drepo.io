@@ -18,7 +18,6 @@
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import CancelIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
 import { useForm } from 'react-hook-form';
-import { isEqual } from 'lodash';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { desanitiseMessage, sanitiseMessage, addReply } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { EditCommentButtons, EditCommentContainer, EditCommentInput } from './editComment.styles';
@@ -35,9 +34,7 @@ export const EditComment = ({ _id, message, images, author, metadata, onEdit, on
 		defaultValues: { editedMessage: desanitiseMessage(message) },
 	});
 	const editedMessage = watch('editedMessage') || '';
-	// TODO - user should be able to update images
-	const newImages = images;
-	const commentIsDifferent = (message !== sanitiseMessage(editedMessage) || isEqual(images, newImages));
+	const commentIsDifferent = message !== sanitiseMessage(editedMessage);
 	const commentIsNotEmpty = (editedMessage.trim().length > 0 || images?.length > 0);
 	const canUpdate = commentIsDifferent && commentIsNotEmpty;
 
@@ -46,7 +43,7 @@ export const EditComment = ({ _id, message, images, author, metadata, onEdit, on
 		if (metadata._id) {
 			newMessage = addReply(metadata, newMessage);
 		}
-		onEdit(_id, newMessage, newImages);
+		onEdit(_id, newMessage, images);
 		onClose();
 	};
 
