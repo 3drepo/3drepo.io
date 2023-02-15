@@ -55,20 +55,29 @@ Utils.getCollectionsEndsWith = async (teamspace, str) => {
 	return collections.filter(({ name }) => name.endsWith(str));
 };
 
-Utils.parsePath = (path) => {
-	const pathArr = path.split('%');
+const stringSplice = (string, index, length, replacement) => {
+	const before = string.slice(0, index);
+	const after = string.slice(index + length);
+	return `${before}${replacement}${after}`;
+};
 
-	/**
-	 * env vars are defined in between 2 %.
-	 * So we will only get matches on the odd index, where it is not the last one.
-	 */
-	for (let i = 1; i < pathArr.length - 1; i += 2) {
-		if (pathArr[i].length && process.env[pathArr[i]]) {
-			pathArr[i] = process.env[pathArr[i]];
+Utils.parsePath = (path) => {
+	const regex = /[^%]?%([^%]*)%[^%]?/gm;
+	const matches = path.matchAll(regex);
+
+	// making a copy of the string to manipulate and return
+	let res = `${path}`;
+
+	for (const match of matches) {
+		const envVar = process.env[match[1]];
+		if (envVar) {
+			const wholeMatch = match[0];
+			const replacedStr = wholeMatch.replace(`%${match[1]}%`);
+			res = stringSplice(match.index, wholeMatch.length, replacedStr);
 		}
 	}
 
-	return pathArr.join('');
+	return res;
 };
 
 module.exports = Utils;
