@@ -25,10 +25,11 @@ type IModal = DialogProps & {
 	type?: ModalType;
 };
 
-export const Modal = ({ onClickClose, children, ...props }: IModal) => (
+export const Modal = ({ onClickClose, children, maxWidth, type, ...props }: IModal) => (
 	<Dialog
 		onClose={onClickClose}
-		maxWidth="md"
+		maxWidth={maxWidth || type === 'images' ? 'xl' : 'md'}
+		type={type}
 		{...props}
 	>
 		<CloseButton aria-label="Close dialog" onClick={onClickClose}>
