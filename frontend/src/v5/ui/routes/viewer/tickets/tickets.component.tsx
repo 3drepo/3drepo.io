@@ -26,7 +26,7 @@ import {
 	enableRealtimeFederationUpdateTicket,
 } from '@/v5/services/realtime/ticket.events';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsActionsDispatchers, TicketsCardActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component';
@@ -41,6 +41,8 @@ export const Tickets = () => {
 	useEffect(() => {
 		UsersActionsDispatchers.fetchUsers(teamspace);
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
+
+		return () => { TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List); };
 	}, []);
 
 	useEffect(() => {

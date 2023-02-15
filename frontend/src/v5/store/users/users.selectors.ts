@@ -19,6 +19,7 @@ import { sortBy } from 'lodash';
 import { selectJobs } from '@/v4/modules/jobs';
 import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
 import { IUser, IUsersState } from './users.redux';
+import { getMemberImgSrc } from './users.helpers';
 
 const selectUsersDomain = (state): IUsersState => state?.users || {};
 
@@ -30,9 +31,14 @@ export const selectUsersByTeamspace = createSelector(
 
 export const selectUser = createSelector(
 	selectUsersByTeamspace,
-	(_, teamspace, userName) => userName,
-	(usersInTeamspace, userName): IUser | null => usersInTeamspace
-		.find((teamspaceUser) => teamspaceUser.user === userName),
+	(_, teamspace, userName) => [teamspace, userName],
+	(usersInTeamspace, [teamspace, userName]): IUser => {
+		const user = usersInTeamspace.find((teamspaceUser) => teamspaceUser.user === userName);
+		if (user) {
+			return { ...user, avatarUrl: getMemberImgSrc(teamspace, user.user), hasAvatar: true };
+		}
+		return { user: userName, firstName: userName, lastName: '', avatarUrl: '', isNotTeamspaceMember: true };
+	},
 );
 
 export const selectCurrentTeamspaceUsers = createSelector(
