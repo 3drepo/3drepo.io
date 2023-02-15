@@ -55,4 +55,20 @@ Utils.getCollectionsEndsWith = async (teamspace, str) => {
 	return collections.filter(({ name }) => name.endsWith(str));
 };
 
+Utils.parsePath = (path) => {
+	const pathArr = path.split('%');
+
+	/**
+	 * env vars are defined in between 2 %.
+	 * So we will only get matches on the odd index, where it is not the last one.
+	 */
+	for (let i = 1; i < pathArr.length - 1; i += 2) {
+		if (pathArr[i].length && process.env[pathArr[i]]) {
+			pathArr[i] = process.env[pathArr[i]];
+		}
+	}
+
+	return pathArr.join('');
+};
+
 module.exports = Utils;
