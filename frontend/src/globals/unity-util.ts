@@ -142,6 +142,24 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Removes the IndexedDb database /idbfs, which emulates a synchronous
+	 * filesystem.
+	 * The viewer should not store anything use the File API between runs.
+	 */
+	private static clearIdbfs(): Promise<void> {
+		const deleteRequest = indexedDB.deleteDatabase('/idbfs');
+		return new Promise((resolve) => {
+			deleteRequest.onsuccess = () => {
+				resolve();
+			};
+			deleteRequest.onerror = () => {
+				console.error('Failed to delete /idbfs. Consider clearing the cache or deleting this database manually.');
+				resolve();
+			};
+		});
+	}
+
+	/**
 	 * Launch the Unity Game.
  	 * @category Configurations
 	 * @param canvas - the html dom of the unity canvas
@@ -168,7 +186,7 @@ export class UnityUtil {
 			}
 		}
 
-		return UnityUtil._loadUnity(canvasDom, domainURL);
+		return this.clearIdbfs().then(() => UnityUtil._loadUnity(canvasDom, domainURL));
 	}
 
 	/** @hidden */
