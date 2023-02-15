@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { registerNewUser } from '@/v5/services/api/signup';
 import { formatMessage } from '@/v5/services/intl';
@@ -28,7 +28,7 @@ import { INewUser } from '@/v5/store/auth/auth.types';
 import { omit } from 'lodash';
 import { FormProvider, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { UserSignUpSchema, UserSignupSchemaAccount, UserSignupSchemaPersonal, UserSignupSchemaTermsAndSubmit } from '@/v5/validation/userSchemes/userSignupSchemes';
+import { UserSignupSchemaAccount, UserSignupSchemaPersonal, UserSignupSchemaTermsAndSubmit } from '@/v5/validation/userSchemes/userSignupSchemes';
 import { UserSignupFormStepAccount } from './userSignupFormStep/userSignupFormStepAccount/userSignupFormStepAccount.component';
 import { UserSignupFormStepPersonal } from './userSignupFormStep/userSignupFormStepPersonal/userSignupFormStepPersonal.component';
 import { UserSignupFormStepTermsAndSubmit } from './userSignupFormStep/userSignupFormStepTermsAndSubmit/userSignupFormStepTermsAndSubmit.component';
@@ -51,13 +51,9 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const LAST_STEP = 2;
 	const [activeStep, setActiveStep] = useState(0);
 	const [completedSteps, setCompletedSteps] = useState(new Set<number>());
-	const [fields, setFields] = useState<any>({});
 	const [alreadyExistingUsernames, setAlreadyExistingUsernames] = useState([]);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
 	const [erroredStep, setErroredStep] = useState<number>();
-	const [formIsSubmitting, setFormIsSubmitting] = useState(false);
-
-	const updateFields = (newFields) => setFields((prevFields) => ({ ...prevFields, ...newFields }));
 
 	const DEFAULT_FIELDS = {
 		username: '',
@@ -124,37 +120,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 		}
 	};
 
-	const moveToNextStep = () =>{
-		moveToStep(activeStep + 1);
-		addCompletedStep(activeStep);
-	};
-
-	// const createAccount = async () => {
-	// 	try {
-	// 		setFormIsSubmitting(true);
-	// 		const newUser = omit(fields, ['confirmPassword', 'termsAgreed']) as INewUser;
-	// 		newUser.email = newUser.email.trim();
-	// 		if (!fields.company) delete newUser.company;
-	// 		await registerNewUser(newUser);
-	// 		const { email, firstName } = fields;
-	// 		completeRegistration({ email, firstName });
-	// 	} catch (error) {
-	// 		setFormIsSubmitting(false);
-	// 		if (isInvalidArguments(error)) {
-	// 			handleInvalidArgumentsError(error);
-	// 		} else {
-	// 			removeCompletedStep(LAST_STEP);
-	// 		}
-	// 	}
-	// };
-
-	const getStepProps = (stepIndex: number) => ({
-		fields,
-		updateFields,
-		onSubmitStep: moveToNextStep,
-		onComplete: () => addCompletedStep(stepIndex),
-		onUncomplete: () => removeCompletedStep(stepIndex),
-	});
+	const moveToNextStep = () => moveToStep(activeStep + 1);
 
 	const getStepContainerProps = (stepIndex: number) => ({
 		stepIndex,
@@ -173,11 +139,9 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 			formData.trigger('email');
 		} else return;
 
-		updateFields({ password: '', confirmPassword: '' });
 		setActiveStep(0);
 		setErroredStep(0);
 		removeCompletedStep(LAST_STEP);
-		updateFields({ termsAgreed: false, mailListAgreed: false });
 	};
 
 	const onSubmit = async (values) => {
@@ -191,14 +155,18 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 		} catch (error) {
 			if (isInvalidArguments(error)) {
 				handleInvalidArgumentsError(error);
-			} else {
-				removeCompletedStep(LAST_STEP);
 			}
+			removeCompletedStep(LAST_STEP);
 		}
 	};
 
-	console.log(formData.formState.isValid);
-	console.log(JSON.stringify(formData.watch(), null, '\t'));
+	useEffect(() => {
+		if (formData.formState.isValid) {
+			addCompletedStep(activeStep);
+		} else {
+			removeCompletedStep(activeStep);
+		}
+	}, [formData.formState.isValid]);
 
 	return (
 		<Container>
@@ -233,9 +201,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 							})}
 						>
 							<UserSignupFormStepAccount
-								{...getStepProps(0)}
-								alreadyExistingUsernames={alreadyExistingUsernames}
-								alreadyExistingEmails={alreadyExistingEmails}
+								moveToNextStep={moveToNextStep}
 							/>
 						</UserSignupFormStep>
 						<UserSignupFormStep
@@ -246,7 +212,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 							})}
 						>
 							<UserSignupFormStepPersonal
-								{...getStepProps(1)}
+								moveToNextStep={moveToNextStep}
 							/>
 						</UserSignupFormStep>
 						<UserSignupFormStep
@@ -256,11 +222,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 								defaultMessage: 'Terms and submit',
 							})}
 						>
-							<UserSignupFormStepTermsAndSubmit
-								{...getStepProps(2)}
-								formIsSubmitting={formIsSubmitting}
-								isActiveStep={activeStep === LAST_STEP}
-							/>
+							<UserSignupFormStepTermsAndSubmit />
 						</UserSignupFormStep>
 					</Stepper>
 				</form>

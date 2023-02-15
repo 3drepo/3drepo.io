@@ -16,15 +16,11 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, useFormContext } from 'react-hook-form';
-import { UserSignupSchemaPersonal } from '@/v5/validation/userSchemes/userSignupSchemes';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { MenuItem } from '@mui/material';
-import { defaults, isEqual, pick } from 'lodash';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
+import { useFormContext } from 'react-hook-form';
 import { NextStepButton } from '../userSignupFormStep.styles';
 
 export interface IPersonalFormInput {
@@ -35,46 +31,16 @@ export interface IPersonalFormInput {
 }
 
 type UserSignupFormStepPersonalProps = {
-	updateFields: (fields: any) => void;
-	onSubmitStep: () => void;
-	onComplete: () => void;
-	onUncomplete: () => void;
-	fields: IPersonalFormInput;
+	moveToNextStep: () => void;
 };
 
 export const UserSignupFormStepPersonal = ({
-	updateFields,
-	onSubmitStep,
-	onComplete,
-	onUncomplete,
-	fields,
+	moveToNextStep,
 }: UserSignupFormStepPersonalProps) => {
-	// const DEFAULT_FIELDS: IPersonalFormInput = {
-	// 	firstName: '',
-	// 	lastName: '',
-	// 	company: '',
-	// 	countryCode: 'GB',
-	// };
-	// const getPersonalFields = (): IPersonalFormInput => defaults(
-	// 	pick(fields, ['firstName', 'lastName', 'company', 'countryCode']),
-	// 	DEFAULT_FIELDS,
-	// );
-
 	const {
-		getValues,
 		control,
-		formState,
 		formState: { errors, isValid: formIsValid },
 	} = useFormContext<IPersonalFormInput>();
-
-	// useEffect(() => (formIsValid ? onComplete : onUncomplete)(), [formIsValid]);
-
-	// useEffect(() => {
-	// 	const newFields = getValues();
-	// 	if (!isEqual(newFields, getPersonalFields())) {
-	// 		updateFields(newFields);
-	// 	}
-	// }, [formState]);
 
 	return (
 		<>
@@ -124,7 +90,7 @@ export const UserSignupFormStepPersonal = ({
 			</FormSelect>
 			<NextStepButton
 				disabled={!formIsValid}
-				onClick={onSubmitStep}
+				onClick={moveToNextStep}
 			>
 				<FormattedMessage
 					id="userSignup.form.button.next"
