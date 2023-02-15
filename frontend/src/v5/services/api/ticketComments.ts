@@ -18,7 +18,6 @@ import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types
 import { pick } from 'lodash';
 import api from './default';
 
-// comments
 export const fetchFederationComments = async (
 	teamspace: string,
 	projectId: string,
