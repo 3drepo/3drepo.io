@@ -19,7 +19,7 @@ import FileIcon from '@assets/icons/outlined/file-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { CurrentUserHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CurrentUserHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DialogsActionsDispatchers, TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { uuid } from '@/v4/helpers/uuid';
@@ -75,7 +75,6 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const { number } = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 
 	const replyMetadata = createMetadata(commentReply);
@@ -95,7 +94,7 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 		setImagesToUpload([]);
 	};
 
-	const createComment = async () => {
+	const createComment = () => {
 		setIsSubmittingMessage(true);
 		const newComment: Partial<ITicketComment> = {
 			author: currentUser.username,
@@ -157,9 +156,7 @@ export const CreateCommentBox = ({ commentReply, setCommentReply }: CreateCommen
 		setIsDraggingFile(false);
 	};
 
-	useEffect(() => {
-		if (number) resetCommentBox();
-	}, [number]);
+	useEffect(() => { resetCommentBox(); }, [ticketId]);
 
 	return (
 		<Container
