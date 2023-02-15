@@ -28,11 +28,13 @@ import { EditFederation } from './editFederation';
 import { FormModal } from './editFederationModal.styles';
 
 type EditFederationModalProps = IFormModal & {
+	open: boolean;
 	federation: IFederation;
 	onClickClose?: () => void;
 };
 
 export const EditFederationModal = ({
+	open,
 	federation,
 	onClickClose,
 	...otherProps
@@ -57,7 +59,7 @@ export const EditFederationModal = ({
 	);
 	return (
 		<FormModal
-			open
+			open={open}
 			title={
 				formatMessage({
 					id: 'modal.editFederation.title',
