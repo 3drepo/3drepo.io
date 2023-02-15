@@ -19,11 +19,14 @@ const { v5Path } = require('../interop');
 
 const { listDatabases, listCollections } = require(`${v5Path}/handler/db`);
 const { USERNAME_BLACKLIST } = require(`${v5Path}/models/users.constants`);
+const { logger } = require(`${v5Path}/utils/logger`);
 
 const Utils = {};
 
 let includeTS = [];
 let excludeTS = [];
+
+let showStackTrace = false;
 
 process.argv.forEach((arg) => {
 	const res = arg.match(/--includeTS=(\S*)/);
@@ -34,6 +37,10 @@ process.argv.forEach((arg) => {
 	const res2 = arg.match(/--excludeTS=(\S*)/);
 	if (res2?.length > 1) {
 		excludeTS = res2[1].split(',');
+	}
+
+	if (arg === '-v') {
+		showStackTrace = true;
 	}
 });
 
@@ -78,6 +85,16 @@ Utils.parsePath = (path) => {
 	}
 
 	return res;
+};
+
+Utils.handleErrorBeforeExit = (err) => {
+	logger.logError(err?.message ?? err);
+	if (showStackTrace) {
+		// eslint-disable-next-line no-console
+		console.error(err);
+	}
+	// eslint-disable-next-line no-process-exit
+	process.exit(1);
 };
 
 module.exports = Utils;

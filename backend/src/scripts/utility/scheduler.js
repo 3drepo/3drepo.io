@@ -25,18 +25,14 @@ const Path = require('path');
 
 const Yup = require('yup');
 
+const { handleErrorBeforeExit } = require('../utils');
+
 const { v5Path } = require('../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const cmdToRunFn = {};
 const cmdList = [];
-
-const logError = (err) => {
-	logger.logError(err?.message ?? err);
-	// eslint-disable-next-line no-console
-	console.error(err);
-};
 
 const findCmds = async (dir = __dirname, ignoreFiles = true) => {
 	const data = await readdir(dir, { withFileTypes: true });
@@ -57,7 +53,7 @@ const findCmds = async (dir = __dirname, ignoreFiles = true) => {
 					}
 				}
 			} catch (err) {
-				logError(err);
+				handleErrorBeforeExit(err);
 			}
 		}
 	}
@@ -125,11 +121,7 @@ const run = async () => {
 	}
 };
 
-Promise.resolve(run()).catch((err) => {
-	logError(err);
-	// eslint-disable-next-line no-process-exit
-	process.exit(1);
-}).finally(() => {
+Promise.resolve(run()).catch(handleErrorBeforeExit).finally(() => {
 	// eslint-disable-next-line no-process-exit
 	process.exit();
 });
