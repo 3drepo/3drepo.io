@@ -16,11 +16,13 @@
  */
 
 import { createSelector } from 'reselect';
+import { ICurrentUserState } from './currentUser.redux';
+import { ICurrentUser } from './currentUser.types';
 
-const selectCurrentUserDomain = (state) => (state.currentUser2);
+const selectCurrentUserDomain = (state) => (state.currentUser2 as ICurrentUserState);
 
 export const selectCurrentUser = createSelector(
-	selectCurrentUserDomain, (state) => state.currentUser || {},
+	selectCurrentUserDomain, (state) => state.currentUser || {} as ICurrentUser,
 );
 
 export const selectUsername = createSelector(
