@@ -17,7 +17,7 @@
 import CommentIcon from '@assets/icons/outlined/comment-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams } from 'react-router-dom';
-import { TicketCommentsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ScrollArea } from '@controls/scrollArea';
@@ -37,7 +37,6 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const { number } = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
 
 	const commentsListIsEmpty = comments?.length > 0;
@@ -77,7 +76,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 	};
 
 	useEffect(() => {
-		if (!number) return;
+		if (!ticketId) return;
 		TicketCommentsActionsDispatchers.fetchComments(
 			teamspace,
 			project,
@@ -85,7 +84,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 			ticketId,
 			isFederation,
 		);
-	}, [number]);
+	}, [ticketId]);
 
 	return (
 		<Accordion
