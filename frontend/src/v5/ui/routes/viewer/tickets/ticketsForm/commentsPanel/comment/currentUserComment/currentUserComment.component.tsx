@@ -21,9 +21,8 @@ import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { ErrorCommentButton, PrimaryCommentButton } from '../commentButton/commentButton.styles';
-import { CommentReply } from '../commentReply/commentReply.component';
-import { CommentContainer } from './currentUserComment.styles';
-import { CommentButtons } from '../basicCommentWithImages/basicCommentWithImages.styles';
+import { Comment } from './currentUserComment.styles';
+import { CommentButtons } from '../basicComment/basicComment.styles';
 import { EditComment } from './editComment/editComment.component';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 
@@ -65,7 +64,13 @@ export const CurrentUserComment = ({
 	}
 
 	return (
-		<CommentContainer data-author={author} message={message} images={images} {...props}>
+		<Comment
+			data-author={author}
+			message={message}
+			images={images}
+			metadata={metadata}
+			{...props}
+		>
 			<CommentButtons>
 				<ErrorCommentButton onClick={() => onDelete(_id)}>
 					<DeleteIcon />
@@ -77,7 +82,6 @@ export const CurrentUserComment = ({
 					<EditIcon />
 				</PrimaryCommentButton>
 			</CommentButtons>
-			<CommentReply variant="secondary" {...metadata} />
-		</CommentContainer>
+		</Comment>
 	);
 };

@@ -19,9 +19,8 @@ import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/sel
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { PrimaryCommentButton } from '../commentButton/commentButton.styles';
-import { CommentReply } from '../commentReply/commentReply.component';
-import { CommentButtons } from '../basicCommentWithImages/basicCommentWithImages.styles';
-import { CommentContainer, UserCirclePopover } from './otherUserComment.styles';
+import { CommentButtons } from '../basicComment/basicComment.styles';
+import { Comment, UserCirclePopover } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 
 type OtherUserCommentProps = Omit<ITicketComment, 'updatedAt'> & {
@@ -34,7 +33,6 @@ export const OtherUserComment = ({
 	deleted,
 	author,
 	onReply,
-	metadata,
 	...props
 }: OtherUserCommentProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -44,14 +42,18 @@ export const OtherUserComment = ({
 	if (deleted) return (<DeletedComment user={user} author={authorDisplayName} />);
 
 	return (
-		<CommentContainer data-author={user.user} author={authorDisplayName} {...props}>
+		<Comment
+			data-author={user.user}
+			author={authorDisplayName}
+			isCurrentUserComment={false}
+			{...props}
+		>
 			<UserCirclePopover user={user} />
-			<CommentReply isCurrentUserComment={false} {...metadata} />
 			<CommentButtons>
 				<PrimaryCommentButton onClick={() => onReply(_id)}>
 					<ReplyIcon />
 				</PrimaryCommentButton>
 			</CommentButtons>
-		</CommentContainer>
+		</Comment>
 	);
 };
