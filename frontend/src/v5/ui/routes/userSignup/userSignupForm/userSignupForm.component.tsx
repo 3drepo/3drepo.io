@@ -26,6 +26,9 @@ import {
 } from '@/v5/validation/errors.helpers';
 import { INewUser } from '@/v5/store/auth/auth.types';
 import { omit } from 'lodash';
+import { FormProvider, useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { UserSignUpSchema, UserSignupSchemaAccount, UserSignupSchemaPersonal, UserSignupSchemaTermsAndSubmit } from '@/v5/validation/userSchemes/userSignupSchemes';
 import { UserSignupFormStepAccount } from './userSignupFormStep/userSignupFormStepAccount/userSignupFormStepAccount.component';
 import { UserSignupFormStepPersonal } from './userSignupFormStep/userSignupFormStepPersonal/userSignupFormStepPersonal.component';
 import { UserSignupFormStepTermsAndSubmit } from './userSignupFormStep/userSignupFormStepTermsAndSubmit/userSignupFormStepTermsAndSubmit.component';
@@ -55,6 +58,40 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const [formIsSubmitting, setFormIsSubmitting] = useState(false);
 
 	const updateFields = (newFields) => setFields((prevFields) => ({ ...prevFields, ...newFields }));
+
+	const DEFAULT_FIELDS = {
+		username: '',
+		email: '',
+		password: '',
+		confirmPassword: '',
+		firstName: '',
+		lastName: '',
+		company: '',
+		countryCode: 'GB',
+		termsAgreed: false,
+		mailListAgreed: false,
+	};
+
+	let schema = null;
+
+	switch (activeStep) {
+		case 0:
+			schema = UserSignupSchemaAccount;
+			break;
+		case 1:
+			schema = UserSignupSchemaAccount.concat(UserSignupSchemaPersonal);
+			break;
+		default:
+			schema = UserSignupSchemaAccount.concat(UserSignupSchemaPersonal).concat(UserSignupSchemaTermsAndSubmit);
+			break;
+	}
+
+	const formData = useForm({
+		resolver: yupResolver(schema),
+		mode: 'all',
+		defaultValues: DEFAULT_FIELDS,
+		context: { alreadyExistingUsernames, alreadyExistingEmails },
+	});
 
 	const addCompletedStep = (stepIndex: number) => {
 		if (stepIndex === LAST_STEP) return;
@@ -87,45 +124,34 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 		}
 	};
 
-	const moveToNextStep = () => moveToStep(activeStep + 1);
-
-	const handleInvalidArgumentsError = (error) => {
-		if (usernameAlreadyExists(error)) {
-			setAlreadyExistingUsernames([...alreadyExistingUsernames, fields.username]);
-		} else if (emailAlreadyExists(error)) {
-			setAlreadyExistingEmails([...alreadyExistingEmails, fields.email]);
-		} else return;
-
-		updateFields({ password: '', confirmPassword: '' });
-		setActiveStep(0);
-		setErroredStep(0);
-		removeCompletedStep(LAST_STEP);
-		updateFields({ termsAgreed: false, mailListAgreed: false });
+	const moveToNextStep = () =>{
+		moveToStep(activeStep + 1);
+		addCompletedStep(activeStep);
 	};
 
-	const createAccount = async () => {
-		try {
-			setFormIsSubmitting(true);
-			const newUser = omit(fields, ['confirmPassword', 'termsAgreed']) as INewUser;
-			newUser.email = newUser.email.trim();
-			if (!fields.company) delete newUser.company;
-			await registerNewUser(newUser);
-			const { email, firstName } = fields;
-			completeRegistration({ email, firstName });
-		} catch (error) {
-			setFormIsSubmitting(false);
-			if (isInvalidArguments(error)) {
-				handleInvalidArgumentsError(error);
-			} else {
-				removeCompletedStep(LAST_STEP);
-			}
-		}
-	};
+	// const createAccount = async () => {
+	// 	try {
+	// 		setFormIsSubmitting(true);
+	// 		const newUser = omit(fields, ['confirmPassword', 'termsAgreed']) as INewUser;
+	// 		newUser.email = newUser.email.trim();
+	// 		if (!fields.company) delete newUser.company;
+	// 		await registerNewUser(newUser);
+	// 		const { email, firstName } = fields;
+	// 		completeRegistration({ email, firstName });
+	// 	} catch (error) {
+	// 		setFormIsSubmitting(false);
+	// 		if (isInvalidArguments(error)) {
+	// 			handleInvalidArgumentsError(error);
+	// 		} else {
+	// 			removeCompletedStep(LAST_STEP);
+	// 		}
+	// 	}
+	// };
 
 	const getStepProps = (stepIndex: number) => ({
 		fields,
 		updateFields,
-		onSubmitStep: stepIndex < LAST_STEP ? moveToNextStep : createAccount,
+		onSubmitStep: moveToNextStep,
 		onComplete: () => addCompletedStep(stepIndex),
 		onUncomplete: () => removeCompletedStep(stepIndex),
 	});
@@ -137,6 +163,42 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 		canReachStep,
 		error: erroredStep === stepIndex,
 	});
+
+	const handleInvalidArgumentsError = (error) => {
+		if (usernameAlreadyExists(error)) {
+			setAlreadyExistingUsernames([...alreadyExistingUsernames, formData.getValues().username]);
+			formData.trigger('username');
+		} else if (emailAlreadyExists(error)) {
+			setAlreadyExistingEmails([...alreadyExistingEmails, formData.getValues().email]);
+			formData.trigger('email');
+		} else return;
+
+		updateFields({ password: '', confirmPassword: '' });
+		setActiveStep(0);
+		setErroredStep(0);
+		removeCompletedStep(LAST_STEP);
+		updateFields({ termsAgreed: false, mailListAgreed: false });
+	};
+
+	const onSubmit = async (values) => {
+		try {
+			const newUser = omit(values, ['confirmPassword', 'termsAgreed']) as INewUser;
+			newUser.email = newUser.email.trim();
+			if (!values.company) delete newUser.company;
+			await registerNewUser(newUser);
+			const { email, firstName } = values;
+			completeRegistration({ email, firstName });
+		} catch (error) {
+			if (isInvalidArguments(error)) {
+				handleInvalidArgumentsError(error);
+			} else {
+				removeCompletedStep(LAST_STEP);
+			}
+		}
+	};
+
+	console.log(formData.formState.isValid);
+	console.log(JSON.stringify(formData.watch(), null, '\t'));
 
 	return (
 		<Container>
@@ -157,50 +219,52 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 					<FormattedMessage id="userSignup.title.lastStep" defaultMessage="Almost there..." />
 				)}
 			</Title>
-			<form>
-				<Stepper
-					activeStep={activeStep}
-					orientation="vertical"
-				>
-					<UserSignupFormStep
-						{...getStepContainerProps(0)}
-						label={formatMessage({
-							id: 'userSignup.step.account',
-							defaultMessage: 'Account',
-						})}
+			<FormProvider {...formData}>
+				<form onSubmit={formData.handleSubmit(onSubmit)}>
+					<Stepper
+						activeStep={activeStep}
+						orientation="vertical"
 					>
-						<UserSignupFormStepAccount
-							{...getStepProps(0)}
-							alreadyExistingUsernames={alreadyExistingUsernames}
-							alreadyExistingEmails={alreadyExistingEmails}
-						/>
-					</UserSignupFormStep>
-					<UserSignupFormStep
-						{...getStepContainerProps(1)}
-						label={formatMessage({
-							id: 'userSignup.step.personal',
-							defaultMessage: 'Personal',
-						})}
-					>
-						<UserSignupFormStepPersonal
-							{...getStepProps(1)}
-						/>
-					</UserSignupFormStep>
-					<UserSignupFormStep
-						{...getStepContainerProps(2)}
-						label={formatMessage({
-							id: 'userSignup.step.termsAndSubmit',
-							defaultMessage: 'Terms and submit',
-						})}
-					>
-						<UserSignupFormStepTermsAndSubmit
-							{...getStepProps(2)}
-							formIsSubmitting={formIsSubmitting}
-							isActiveStep={activeStep === LAST_STEP}
-						/>
-					</UserSignupFormStep>
-				</Stepper>
-			</form>
+						<UserSignupFormStep
+							{...getStepContainerProps(0)}
+							label={formatMessage({
+								id: 'userSignup.step.account',
+								defaultMessage: 'Account',
+							})}
+						>
+							<UserSignupFormStepAccount
+								{...getStepProps(0)}
+								alreadyExistingUsernames={alreadyExistingUsernames}
+								alreadyExistingEmails={alreadyExistingEmails}
+							/>
+						</UserSignupFormStep>
+						<UserSignupFormStep
+							{...getStepContainerProps(1)}
+							label={formatMessage({
+								id: 'userSignup.step.personal',
+								defaultMessage: 'Personal',
+							})}
+						>
+							<UserSignupFormStepPersonal
+								{...getStepProps(1)}
+							/>
+						</UserSignupFormStep>
+						<UserSignupFormStep
+							{...getStepContainerProps(2)}
+							label={formatMessage({
+								id: 'userSignup.step.termsAndSubmit',
+								defaultMessage: 'Terms and submit',
+							})}
+						>
+							<UserSignupFormStepTermsAndSubmit
+								{...getStepProps(2)}
+								formIsSubmitting={formIsSubmitting}
+								isActiveStep={activeStep === LAST_STEP}
+							/>
+						</UserSignupFormStep>
+					</Stepper>
+				</form>
+			</FormProvider>
 			<LoginPrompt>
 				<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
 				<LoginPromptLink to="/v5/login">
