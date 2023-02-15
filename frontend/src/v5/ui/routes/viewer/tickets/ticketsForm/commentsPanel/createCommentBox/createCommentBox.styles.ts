@@ -34,6 +34,7 @@ export const Container = styled.section`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	position: sticky;
 	bottom: 0;
+	border-radius: 0 0 5px 5px;
 `;
 
 export const CommentReplyContainer = styled.div`
