@@ -34,15 +34,15 @@ An example:
 {
   "daily": [
     // This will clean up any files within the shared directory older than 14 days (using default params)
-    { "name": "cleanUpSharedDir" } 
+    { "name": "cleanUpSharedDir" }
   ],
   "weekly": [
     // This will remove incomplete revisions older than 5 days (instead of the 14 days default)
-    {"name": "removeIncompleteRevisions", params: [5]} 
+    {"name": "removeIncompleteRevisions", params: [5]}
   ],
   "monthly": [
     // This will print out a report of all active licenses to C://dataOutput
-    {"name": "allActiveLicenses", params: ["C://dataOutput"]} 
+    {"name": "allActiveLicenses", "params": ["C://dataOutput"]}
   ]
 }
 ````
