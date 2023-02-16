@@ -365,8 +365,8 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static toUnity(methodName, requireStatus?, params?) {
-		if(UnityUtil.verbose) {
-			console.debug("[TO UNITY]",methodName, requireStatus, params);
+		if (UnityUtil.verbose) {
+			console.debug('[TO UNITY]', methodName, requireStatus, params);
 		}
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
