@@ -898,6 +898,10 @@ export class UnityUtil {
 		UnityUtil.toUnity('SetStreamingModelPriority', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ modelNamespace, priority }));
 	}
 
+	public static setStreamingMeshFactor(factor: number) {
+		UnityUtil.toUnity('SetStreamingMeshFactor', UnityUtil.LoadingState.VIEWER_READY, Number(factor));
+	}
+
 	public static setStreamingFovWeight(weight: number) {
 		UnityUtil.toUnity('SetStreamingFovWeight', UnityUtil.LoadingState.VIEWER_READY, Number(weight));
 	}
