@@ -51,6 +51,8 @@ export const UserSignupSchemaTermsAndSubmit = Yup.object().shape({
 	captcha: Yup.string().required(),
 });
 
-export const UserSignUpSchema = Yup.object().concat(UserSignupSchemaAccount)
-	.concat(UserSignupSchemaPersonal)
-	.concat(UserSignupSchemaTermsAndSubmit);
+export const UserSignupSchemaSSO = Yup.object().shape({
+	username,
+	company,
+	countryCode,
+});
