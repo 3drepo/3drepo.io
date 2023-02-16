@@ -36,12 +36,12 @@ import {
 	Container,
 	Title,
 	Underlined,
-	Stepper,
 	LoginPrompt,
 	LoginPromptLink,
 } from './userSignupForm.styles';
 import { UserSignupFormStep } from './userSignupFormStep/userSignupFormStep.component';
 import { UserSignupWelcomeProps } from '../userSignupWelcome/userSignupWelcome.component';
+import { UserSignupFormStepper, UserSignupFormStepperContextValue } from './userSignupFormStepper/userSignupFormStepper.component';
 
 type UserSignupFormProps = {
 	completeRegistration: (registrationCompleteData: UserSignupWelcomeProps) => void;
@@ -49,11 +49,10 @@ type UserSignupFormProps = {
 
 export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) => {
 	const LAST_STEP = 2;
-	const [activeStep, setActiveStep] = useState(0);
-	const [completedSteps, setCompletedSteps] = useState(new Set<number>());
 	const [alreadyExistingUsernames, setAlreadyExistingUsernames] = useState([]);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
-	const [erroredStep, setErroredStep] = useState<number>();
+
+	const [contextValue, setContextValue] = useState<UserSignupFormStepperContextValue | null>();
 
 	const DEFAULT_FIELDS = {
 		username: '',
@@ -70,7 +69,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 
 	let schema = null;
 
-	switch (activeStep) {
+	switch (contextValue?.activeStep) {
 		case 0:
 			schema = UserSignupSchemaAccount;
 			break;
@@ -89,47 +88,6 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 		context: { alreadyExistingUsernames, alreadyExistingEmails },
 	});
 
-	const addCompletedStep = (stepIndex: number) => {
-		if (stepIndex === LAST_STEP) return;
-		completedSteps.add(stepIndex);
-		setCompletedSteps(new Set(completedSteps));
-	};
-
-	const removeCompletedStep = (stepIndex: number) => {
-		completedSteps.delete(stepIndex);
-		setCompletedSteps(new Set(completedSteps));
-	};
-
-	const canReachStep = (stepToReach: number): boolean => {
-		// move to a previous step
-		if (stepToReach <= activeStep) return true;
-		// move to a next step iff the current step and the
-		// ones up to the step to reach are completed
-		for (let middleStep = activeStep; middleStep < stepToReach; middleStep++) {
-			if (!completedSteps.has(middleStep)) {
-				return false;
-			}
-		}
-		return true;
-	};
-
-	const moveToStep = (stepToReach: number) => {
-		if (canReachStep(stepToReach)) {
-			setActiveStep(stepToReach);
-			if (stepToReach > erroredStep) setErroredStep(null);
-		}
-	};
-
-	const moveToNextStep = () => moveToStep(activeStep + 1);
-
-	const getStepContainerProps = (stepIndex: number) => ({
-		stepIndex,
-		completedSteps,
-		moveToStep,
-		canReachStep,
-		error: erroredStep === stepIndex,
-	});
-
 	const handleInvalidArgumentsError = (error) => {
 		if (usernameAlreadyExists(error)) {
 			setAlreadyExistingUsernames([...alreadyExistingUsernames, formData.getValues().username]);
@@ -139,9 +97,8 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 			formData.trigger('email');
 		} else return;
 
-		setActiveStep(0);
-		setErroredStep(0);
-		removeCompletedStep(LAST_STEP);
+		contextValue.moveToStep(0);
+		contextValue.setErroredStep(0);
 	};
 
 	const onSubmit = async (values) => {
@@ -156,22 +113,13 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 			if (isInvalidArguments(error)) {
 				handleInvalidArgumentsError(error);
 			}
-			removeCompletedStep(LAST_STEP);
 		}
 	};
-
-	useEffect(() => {
-		if (formData.formState.isValid) {
-			addCompletedStep(activeStep);
-		} else {
-			removeCompletedStep(activeStep);
-		}
-	}, [formData.formState.isValid]);
 
 	return (
 		<Container>
 			<Title>
-				{activeStep < LAST_STEP ? (
+				{contextValue?.activeStep < LAST_STEP ? (
 					<FormattedMessage
 						id="userSignup.title.middleStep"
 						defaultMessage="Create your {free} account"
@@ -189,42 +137,28 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 			</Title>
 			<FormProvider {...formData}>
 				<form onSubmit={formData.handleSubmit(onSubmit)}>
-					<Stepper
-						activeStep={activeStep}
-						orientation="vertical"
+					<UserSignupFormStepper
+						onContextUpdated={setContextValue}
 					>
 						<UserSignupFormStep
-							{...getStepContainerProps(0)}
-							label={formatMessage({
-								id: 'userSignup.step.account',
-								defaultMessage: 'Account',
-							})}
+							stepIndex={0}
+							label={formatMessage({ id: 'userSignup.step.account', defaultMessage: 'Account' })}
 						>
-							<UserSignupFormStepAccount
-								moveToNextStep={moveToNextStep}
-							/>
+							<UserSignupFormStepAccount />
 						</UserSignupFormStep>
 						<UserSignupFormStep
-							{...getStepContainerProps(1)}
-							label={formatMessage({
-								id: 'userSignup.step.personal',
-								defaultMessage: 'Personal',
-							})}
+							stepIndex={1}
+							label={formatMessage({ id: 'userSignup.step.personal', defaultMessage: 'Personal' })}
 						>
-							<UserSignupFormStepPersonal
-								moveToNextStep={moveToNextStep}
-							/>
+							<UserSignupFormStepPersonal />
 						</UserSignupFormStep>
 						<UserSignupFormStep
-							{...getStepContainerProps(2)}
-							label={formatMessage({
-								id: 'userSignup.step.termsAndSubmit',
-								defaultMessage: 'Terms and submit',
-							})}
+							stepIndex={2}
+							label={formatMessage({ id: 'userSignup.step.termsAndSubmit', defaultMessage: 'Terms and submit' })}
 						>
 							<UserSignupFormStepTermsAndSubmit />
 						</UserSignupFormStep>
-					</Stepper>
+					</UserSignupFormStepper>
 				</form>
 			</FormProvider>
 			<LoginPrompt>
