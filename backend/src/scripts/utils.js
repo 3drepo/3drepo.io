@@ -79,7 +79,7 @@ Utils.parsePath = (path) => {
 		const envVar = process.env[match[1]];
 		if (envVar) {
 			const wholeMatch = match[0];
-			const replacedStr = wholeMatch.replace(`%${match[1]}%`);
+			const replacedStr = wholeMatch.replace(`%${match[1]}%`, envVar);
 			res = stringSplice(match.index, wholeMatch.length, replacedStr);
 		}
 	}
