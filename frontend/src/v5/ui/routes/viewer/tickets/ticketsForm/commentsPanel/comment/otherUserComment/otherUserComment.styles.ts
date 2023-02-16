@@ -15,46 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UserCirclePopover as UserCirclePopoverBase } from '@components/shared/userCirclePopover/userCirclePopover.component';
-import styled from 'styled-components';
+import { UserCirclePopover } from '@components/shared/userCirclePopover/userCirclePopover.component';
+import styled, { css } from 'styled-components';
 import { BasicComment } from '../basicComment/basicComment.component';
-import { CommentMessage, CommentButtons } from '../basicComment/basicComment.styles';
 
-export const UserCirclePopover = styled(UserCirclePopoverBase)`
+export const AuthorAvatar = styled(UserCirclePopover)`
 	position: absolute;
-	left: -34px;
-	margin-top: -10px;
+	top: 0;
 
 	.MuiAvatar-root {
 		border: none;
 	}
 `;
 
-export const Comment = styled(BasicComment)`
+export const Comment = styled(BasicComment)<{ isFirstOfBlock: boolean }>`
 	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin-left: 39px;
-	border-top-left-radius: 0;
 
-	&::before {
-		left: 100%;
-	}
-
-	${CommentButtons} {
-		right: -40px;
-	}
-
-	&[data-author="${(props) => props['data-author']}"] {
-		& + & {
-			border-top-left-radius: 10px;
-
-			${UserCirclePopover} {
-				display: none;
-			}
-		}
-	}
-`;
-
-export const CommentMessageDeleted = styled(CommentMessage)`
-	color: ${({ theme }) => theme.palette.base.light};
+	${({ isFirstOfBlock }) => isFirstOfBlock && css`
+		border-top-left-radius: 0;
+	`}
 `;

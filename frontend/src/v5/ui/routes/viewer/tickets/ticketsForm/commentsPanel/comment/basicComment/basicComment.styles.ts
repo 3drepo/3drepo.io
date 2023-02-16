@@ -44,16 +44,6 @@ export const CommentAge = styled(CommentSmallText)`
 	text-align: right;
 `;
 
-export const CommentButtons = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	height: 100%;
-	margin: 0 6px;
-	position: absolute;
-	top: 0;
-`;
-
 export const SingleImage = styled(ImageWithSkeleton).attrs({
 	variant: 'secondary',
 })`
@@ -69,22 +59,39 @@ export const SingleImage = styled(ImageWithSkeleton).attrs({
 	}
 `;
 
-export const CommentContainer = styled.div<{ 'data-author': string }>`
+export const CommentContainer = styled.div`
 	max-width: 241px;
 	width: fit-content;
-	margin-top: 12px;
 	padding: 10px 12px 7px;
 	box-sizing: border-box;
 	border-radius: 10px;
 	display: flex;
 	flex-direction: column;
-	position: relative;
+`;
 
-	${CommentButtons} {
-		opacity: 0;
-		transition: opacity .3s;
-		pointer-events: none;
-	}
+export const CommentImagesContainer = styled.div`
+	width: 231px;
+	margin-top: -5px;
+	margin-left: -7px;
+	margin-bottom: 3px;
+`;
+
+export const CommentButtons = styled.div`
+	display: flex;
+	flex-direction: row;
+	height: 100%;
+	margin: 0 6px;
+	opacity: 0;
+	transition: opacity .3s;
+	pointer-events: none;
+`;
+
+export const CommentWithButtonsContainer = styled.div`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	flex-direction: row;
+	position: relative;
 
 	@keyframes activateButtons {
 		100% {
@@ -98,28 +105,4 @@ export const CommentContainer = styled.div<{ 'data-author': string }>`
 		animation: activateButtons forwards;
 		animation-delay: .5s;
 	}
-
-	&::before {
-		content: '';
-		width: 400px;
-		height: 100%;
-		position: absolute;
-		top: -2px;
-	}
-
-	&[data-author="${(props) => props['data-author']}"] {
-		& + & {
-			margin-top: 4px;
-
-			& > ${CommentAuthor} {
-				display: none;
-			}
-		}
-	}
-`;
-
-export const CommentImagesContainer = styled.div`
-	width: 231px;
-	margin-top: -5px;
-	margin-left: -7px;
 `;

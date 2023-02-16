@@ -18,6 +18,7 @@
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { extractMessage, extractMetadata, getRelativeTime } from '@/v5/store/tickets/comments/ticketComments.helpers';
+import { Gap } from '@controls/gap';
 import { useEffect, useState } from 'react';
 import { CurrentUserComment } from './currentUserComment/currentUserComment.component';
 import { OtherUserComment } from './otherUserComment/otherUserComment.component';
@@ -26,8 +27,18 @@ export type CommentProps = ITicketComment & {
 	onDelete: (commentId) => void;
 	onReply: (commentId) => void;
 	onEdit: (commentId, newMessage, newImages) => void;
+	isFirstOfBlock: boolean;
 };
-export const Comment = ({ updatedAt, author, message = '', deleted, _id, images = [], ...props }: CommentProps) => {
+export const Comment = ({
+	updatedAt,
+	author,
+	message = '',
+	deleted,
+	_id,
+	images = [],
+	isFirstOfBlock,
+	...props
+}: CommentProps) => {
 	const [commentAge, setCommentAge] = useState('');
 
 	const isCurrentUser = CurrentUserHooksSelectors.selectUsername() === author;
@@ -44,15 +55,19 @@ export const Comment = ({ updatedAt, author, message = '', deleted, _id, images 
 
 	const UserComment = isCurrentUser ? CurrentUserComment : OtherUserComment;
 	return (
-		<UserComment
-			{...props}
-			author={author}
-			commentAge={commentAge}
-			metadata={metadata}
-			message={noMetadataMessage}
-			deleted={deleted}
-			_id={_id}
-			images={images}
-		/>
+		<>
+			<Gap $height={isFirstOfBlock ? '12px' : '4px'} />
+			<UserComment
+				{...props}
+				author={author}
+				commentAge={commentAge}
+				metadata={metadata}
+				message={noMetadataMessage}
+				deleted={deleted}
+				_id={_id}
+				images={images}
+				isFirstOfBlock={isFirstOfBlock}
+			/>
+		</>
 	);
 };

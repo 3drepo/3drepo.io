@@ -15,23 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
 import { deletedCommentMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
-import { CommentAuthor, CommentAge, CommentMessage } from '../../basicComment/basicComment.styles';
+import { formatMessage } from '@/v5/services/intl';
+import { AuthorAvatar } from '../otherUserComment.styles';
 import { Comment } from './deletedComment.styles';
-import { UserCirclePopover } from '../otherUserComment.styles';
+import { CommentWithButtonsContainer } from '../../basicComment/basicComment.styles';
 
-export const DeletedComment = ({ user, author }) => (
-	<Comment data-author={user.user} author={author}>
-		<UserCirclePopover user={user} />
-		<CommentAuthor>{author}</CommentAuthor>
-		<CommentMessage>{deletedCommentMessage}</CommentMessage>
-		<CommentAge>
-			<FormattedMessage
-				id="customTicket.otherUser.comment.time.deleted"
-				defaultMessage="{name} deleted this message"
-				values={{ name: user.firstName }}
-			/>
-		</CommentAge>
-	</Comment>
+export const DeletedComment = ({ user, author, isFirstOfBlock }) => (
+	<CommentWithButtonsContainer>
+		{isFirstOfBlock && <AuthorAvatar user={user} />}
+		<Comment
+			author={author}
+			isFirstOfBlock={isFirstOfBlock}
+			message={deletedCommentMessage}
+			commentAge={formatMessage({
+				id: 'customTicket.otherUser.comment.time.deleted',
+				defaultMessage: '{name} deleted this message',
+			}, { name: user.firstName })}
+		/>
+	</CommentWithButtonsContainer>
 );

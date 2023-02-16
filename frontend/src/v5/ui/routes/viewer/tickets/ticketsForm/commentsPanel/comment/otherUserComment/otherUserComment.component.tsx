@@ -19,12 +19,13 @@ import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/sel
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { PrimaryCommentButton } from '../commentButton/commentButton.styles';
-import { CommentButtons } from '../basicComment/basicComment.styles';
-import { Comment, UserCirclePopover } from './otherUserComment.styles';
+import { Comment, AuthorAvatar } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
+import { CommentButtons, CommentWithButtonsContainer } from '../basicComment/basicComment.styles';
 
 type OtherUserCommentProps = Omit<ITicketComment, 'updatedAt'> & {
 	commentAge: string;
+	isFirstOfBlock: boolean;
 	metadata?: TicketCommentReplyMetadata;
 	onReply: (commentId) => void;
 };
@@ -33,27 +34,29 @@ export const OtherUserComment = ({
 	deleted,
 	author,
 	onReply,
+	isFirstOfBlock,
 	...props
 }: OtherUserCommentProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
-	const authorDisplayName = `${user.firstName} ${user.lastName}`;
+	const authorDisplayName = isFirstOfBlock ? `${user.firstName} ${user.lastName}` : null;
 
-	if (deleted) return (<DeletedComment user={user} author={authorDisplayName} />);
+	if (deleted) return (<DeletedComment user={user} author={authorDisplayName} isFirstOfBlock={isFirstOfBlock} />);
 
 	return (
-		<Comment
-			data-author={user.user}
-			author={authorDisplayName}
-			isCurrentUserComment={false}
-			{...props}
-		>
-			<UserCirclePopover user={user} />
+		<CommentWithButtonsContainer>
+			{isFirstOfBlock && <AuthorAvatar user={user} />}
+			<Comment
+				author={authorDisplayName}
+				isCurrentUserComment={false}
+				isFirstOfBlock={isFirstOfBlock}
+				{...props}
+			/>
 			<CommentButtons>
 				<PrimaryCommentButton onClick={() => onReply(_id)}>
 					<ReplyIcon />
 				</PrimaryCommentButton>
 			</CommentButtons>
-		</Comment>
+		</CommentWithButtonsContainer>
 	);
 };

@@ -21,14 +21,15 @@ import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { ErrorCommentButton, PrimaryCommentButton } from '../commentButton/commentButton.styles';
-import { Comment } from './currentUserComment.styles';
-import { CommentButtons } from '../basicComment/basicComment.styles';
+import { Comment, CommentWithButtonsContainer } from './currentUserComment.styles';
 import { EditComment } from './editComment/editComment.component';
 import { DeletedComment } from './deletedComment/deletedComment.component';
+import { CommentButtons } from '../basicComment/basicComment.styles';
 
 export type CurrentUserCommentProps = Omit<ITicketComment, 'updatedAt'> & {
 	commentAge: string;
 	metadata?: TicketCommentReplyMetadata;
+	isFirstOfBlock: boolean;
 	onDelete: (commentId) => void;
 	onReply: (commentId) => void;
 	onEdit: (commentId, newMessage, newImages) => void;
@@ -64,13 +65,7 @@ export const CurrentUserComment = ({
 	}
 
 	return (
-		<Comment
-			data-author={author}
-			message={message}
-			images={images}
-			metadata={metadata}
-			{...props}
-		>
+		<CommentWithButtonsContainer>
 			<CommentButtons>
 				<ErrorCommentButton onClick={() => onDelete(_id)}>
 					<DeleteIcon />
@@ -82,6 +77,12 @@ export const CurrentUserComment = ({
 					<EditIcon />
 				</PrimaryCommentButton>
 			</CommentButtons>
-		</Comment>
+			<Comment
+				message={message}
+				images={images}
+				metadata={metadata}
+				{...props}
+			/>
+		</CommentWithButtonsContainer>
 	);
 };

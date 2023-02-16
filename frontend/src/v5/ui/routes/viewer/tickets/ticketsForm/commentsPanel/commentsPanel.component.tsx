@@ -43,6 +43,12 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 
 	const commentsListIsEmpty = comments?.length > 0;
 
+	const getCommentIsFirstOfBlock = (index) => {
+		if (index === 0) return true;
+		const commentAuthor = comments[index].author;
+		return comments[index - 1].author !== commentAuthor;
+	};
+
 	const handleDeleteComment = (commentId) => {
 		TicketCommentsActionsDispatchers.deleteComment(
 			teamspace,
@@ -102,13 +108,14 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 			<ScrollArea autoHeight autoHeightMin={400} autoHeightMax={400} autoHide ref={scrollAreaRef}>
 				{commentsListIsEmpty && (
 					<Comments>
-						{comments.map((comment) => (
+						{comments.map((comment, index) => (
 							<Comment
 								{...comment}
 								key={comment._id}
 								onDelete={handleDeleteComment}
 								onReply={handleReplyToComment}
 								onEdit={handleEditComment}
+								isFirstOfBlock={getCommentIsFirstOfBlock(index)}
 							/>
 						))}
 					</Comments>

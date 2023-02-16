@@ -15,29 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { BasicComment } from '../basicComment/basicComment.component';
-import { CommentAuthor, CommentButtons } from '../basicComment/basicComment.styles';
+import { CommentWithButtonsContainer as CommentWithButtonsContainerBase } from '../basicComment/basicComment.styles';
 
-export const Comment = styled(BasicComment)`
+export const CommentWithButtonsContainer = styled(CommentWithButtonsContainerBase)`
+	justify-content: flex-end;
+`;
+
+export const Comment = styled(BasicComment)<{ isFirstOfBlock: boolean }>`
 	background-color: ${({ theme }) => theme.palette.secondary.main};
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	align-self: end;
-	border-top-right-radius: 0;
 
-	&::before {
-		right: 100%;
-	}
-
-	${CommentButtons} {
-		left: -94px;
-	}
-
-	& > ${CommentAuthor} {
-		display: none;
-	}
-
-	& + & {
-		border-top-right-radius: 10px;
-	}
+	${({ isFirstOfBlock }) => isFirstOfBlock && css`
+		border-top-right-radius: 0;
+	`}
 `;

@@ -34,11 +34,10 @@ export type BasicCommentProps = {
 	metadata?: TicketCommentReplyMetadata;
 	isCurrentUserComment?: boolean;
 	author?: string;
-	'data-author': string,
 };
 export const BasicComment = ({
 	author,
-	images,
+	images = [],
 	children,
 	message,
 	commentAge,
@@ -50,7 +49,6 @@ export const BasicComment = ({
 	const imagesSrc = images.map(getImgSrc);
 	return (
 		<CommentContainer {...props}>
-			{children}
 			{images.length === 1 && (
 				<SingleImage
 					src={imagesSrc[0]}
