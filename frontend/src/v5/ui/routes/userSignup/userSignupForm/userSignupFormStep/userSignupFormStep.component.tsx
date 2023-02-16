@@ -16,46 +16,45 @@
  */
 
 import { StepContent, Step, StepProps } from '@mui/material';
+import { useContext } from 'react';
 import { StepLabel } from '../userSignupForm.styles';
+import { UserSignupFormStepperContext } from '../userSignupFormStepper/userSignupFormStepper.component';
 import { UserSignupFormStepIcon } from './userSignupFormStepIcon/userSignupFormStepIcon.component';
 
 type UserSignupFormStepProps = StepProps & {
 	stepIndex: number;
-	moveToStep: (stepIndex: number) => void;
-	canReachStep: (stepIndex: number) => boolean;
 	label: string;
-	completedSteps: Set<number>;
 	children: any;
-	error?: boolean;
 };
 
 export const UserSignupFormStep = ({
 	stepIndex,
-	moveToStep,
-	canReachStep,
 	label,
-	completedSteps,
 	children,
-	error,
 	...props
-}: UserSignupFormStepProps) => (
-	<Step {...props}>
-		<StepLabel
-			error={error}
-			onClick={() => moveToStep(stepIndex)}
-			icon={(
-				<UserSignupFormStepIcon
-					stepIndex={stepIndex}
-					completed={completedSteps.has(stepIndex)}
-					error={error}
-				/>
-			)}
-			$reachable={canReachStep(stepIndex)}
-		>
-			{label}
-		</StepLabel>
-		<StepContent>
-			{children}
-		</StepContent>
-	</Step>
-);
+}: UserSignupFormStepProps) => {
+	const { moveToStep, canReachStep, completedSteps, erroredStep } = useContext(UserSignupFormStepperContext);
+	const error = erroredStep === stepIndex;
+
+	return (
+		<Step {...props}>
+			<StepLabel
+				error={error}
+				onClick={() => moveToStep(stepIndex)}
+				icon={(
+					<UserSignupFormStepIcon
+						stepIndex={stepIndex}
+						completed={completedSteps.has(stepIndex)}
+						error={error}
+					/>
+				)}
+				$reachable={canReachStep(stepIndex)}
+			>
+				{label}
+			</StepLabel>
+			<StepContent>
+				{children}
+			</StepContent>
+		</Step>
+	);
+};

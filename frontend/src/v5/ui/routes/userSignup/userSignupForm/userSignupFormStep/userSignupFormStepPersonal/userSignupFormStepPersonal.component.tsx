@@ -21,7 +21,7 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import { MenuItem } from '@mui/material';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { useFormContext } from 'react-hook-form';
-import { NextStepButton } from '../userSignupFormStep.styles';
+import { NextStepButton } from '../userSignupFormNextButton/userSignupFormNextButton.component';
 
 export interface IPersonalFormInput {
 	firstName: string;
@@ -30,16 +30,10 @@ export interface IPersonalFormInput {
 	countryCode: string;
 }
 
-type UserSignupFormStepPersonalProps = {
-	moveToNextStep: () => void;
-};
-
-export const UserSignupFormStepPersonal = ({
-	moveToNextStep,
-}: UserSignupFormStepPersonalProps) => {
+export const UserSignupFormStepPersonal = () => {
 	const {
 		control,
-		formState: { errors, isValid: formIsValid },
+		formState: { errors },
 	} = useFormContext<IPersonalFormInput>();
 
 	return (
@@ -88,10 +82,7 @@ export const UserSignupFormStepPersonal = ({
 					</MenuItem>
 				))}
 			</FormSelect>
-			<NextStepButton
-				disabled={!formIsValid}
-				onClick={moveToNextStep}
-			>
+			<NextStepButton>
 				<FormattedMessage
 					id="userSignup.form.button.next"
 					defaultMessage="Next step"

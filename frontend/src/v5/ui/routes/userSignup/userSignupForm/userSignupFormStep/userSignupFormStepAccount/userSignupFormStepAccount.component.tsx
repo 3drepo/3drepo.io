@@ -22,17 +22,11 @@ import UserIcon from '@assets/icons/outlined/user-outlined.svg';
 import EmailIcon from '@assets/icons/outlined/email-outlined.svg';
 import PasswordIcon from '@assets/icons/outlined/lock-outlined.svg';
 import { FormPasswordField, FormTextField } from '@controls/inputs/formInputs.component';
-import { NextStepButton } from '../userSignupFormStep.styles';
 import { IconContainer } from './userSignupFormStepAccount.styles';
+import { NextStepButton } from '../userSignupFormNextButton/userSignupFormNextButton.component';
 
-type UserSignupFormStepAccountProps = {
-	moveToNextStep: () => void;
-};
-
-export const UserSignupFormStepAccount = ({
-	moveToNextStep,
-}: UserSignupFormStepAccountProps) => {
-	const { formState: { errors, dirtyFields, isValid }, watch, trigger } = useFormContext();
+export const UserSignupFormStepAccount = () => {
+	const { formState: { errors, dirtyFields }, watch, trigger } = useFormContext();
 	const password = watch('password');
 
 	useEffect(() => {
@@ -108,7 +102,8 @@ export const UserSignupFormStepAccount = ({
 				disabled={!password}
 				formError={errors.confirmPassword}
 			/>
-			<NextStepButton disabled={!isValid} onClick={moveToNextStep}>
+
+			<NextStepButton>
 				<FormattedMessage id="userSignup.form.button.next" defaultMessage="Next step" />
 			</NextStepButton>
 		</>
