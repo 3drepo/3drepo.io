@@ -43,6 +43,7 @@ const SettingsSchema = Yup.object().shape({
 	memoryThreshold: schema.number(0, 2032),
 	memoryLimit: schema.number(0, 2032),
 	fovWeight: schema.number(0, 10),
+	meshFactor: schema.number(1, Number.POSITIVE_INFINITY),
 	phBundleFadeDistance: schema.number(0, Number.POSITIVE_INFINITY),
 	phBundleFadeBias: schema.number(0, Number.POSITIVE_INFINITY),
 	phBundleFadePower: schema.number(0, Number.POSITIVE_INFINITY),
@@ -308,6 +309,24 @@ const StreamingSettings = (props) => {
 							</ErrorTooltip>
 							<V5ErrorText>
 								{form.errors.memoryLimit}
+							</V5ErrorText>
+						</div>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				Mesh Factor
+				<Field name="meshFactor" render={ ({ field, form }) => {
+					return (
+						<div>
+							<ErrorTooltip title={form.errors.meshFactor || ''} placement="bottom-end">
+							<ShortInput
+								error={Boolean(form.errors.meshFactor)}
+								{...field}
+							/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.meshFactor}
 							</V5ErrorText>
 						</div>
 					);

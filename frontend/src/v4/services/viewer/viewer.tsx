@@ -924,6 +924,13 @@ export class ViewerService {
 		UnityUtil.setStreamingMemoryLimit(limitMB);
 	}
 
+	public setStreamingMeshFactor = (factor: number) => {
+		if (factor === undefined) {
+ 			return;
+		}
+		UnityUtil.setStreamingMeshFactor(factor);
+	}
+
 	public setStreamingFovWeight = (weight: number) => {
 		if (weight === undefined) {
  			return;
