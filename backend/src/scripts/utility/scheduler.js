@@ -97,7 +97,7 @@ const getSchema = () => {
 /* Weekly tasks are executed on sundays */
 const runWeekly = () => new Date().getDay() === 0;
 
-/* Weekly tasks are executed on the first sunday of every month */
+/* Monthly tasks are executed on the first sunday of every month */
 const runMonthly = () => {
 	const date = new Date();
 	return date.getDay() === 0 && date.getDate() <= 7;
