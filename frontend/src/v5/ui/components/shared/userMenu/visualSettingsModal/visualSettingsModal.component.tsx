@@ -22,6 +22,7 @@ import { Modal } from '@controls/modal/modal.component';
 import { VisualSettingsModalContent } from './visualSettingsModal.styles';
 
 type IVisualSettingsModal = {
+	open: boolean;
 	onClickClose: () => void;
 	visualSettings: any;
 	updateSettings: (username, settings) => void;
@@ -30,12 +31,13 @@ type IVisualSettingsModal = {
 };
 
 export const VisualSettingsModal = ({
+	open,
 	onClickClose,
 	...visualSettingsProps
 }: IVisualSettingsModal) => (
 	<Modal
 		onClickClose={onClickClose}
-		open
+		open={open}
 	>
 		<ModalHeader
 			title={formatMessage({

@@ -118,6 +118,8 @@ export class UnityUtil {
 	/** @hidden */
 	public static defaultHighlightColor = [1, 1, 0];
 
+	public static verbose = false;
+
 	/**
 	* Initialise Unity.
 	* @category Configurations
@@ -138,6 +140,24 @@ export class UnityUtil {
 			if (UnityUtil.progressCallback) {
 				UnityUtil.progressCallback(progress);
 			}
+		});
+	}
+
+	/**
+	 * Removes the IndexedDb database /idbfs, which emulates a synchronous
+	 * filesystem.
+	 * The viewer should not store anything use the File API between runs.
+	 */
+	private static clearIdbfs(): Promise<void> {
+		const deleteRequest = indexedDB.deleteDatabase('/idbfs');
+		return new Promise((resolve) => {
+			deleteRequest.onsuccess = () => {
+				resolve();
+			};
+			deleteRequest.onerror = () => {
+				console.error('Failed to delete /idbfs. Consider clearing the cache or deleting this database manually.');
+				resolve();
+			};
 		});
 	}
 
@@ -168,7 +188,7 @@ export class UnityUtil {
 			}
 		}
 
-		return UnityUtil._loadUnity(canvasDom, domainURL);
+		return this.clearIdbfs().then(() => UnityUtil._loadUnity(canvasDom, domainURL));
 	}
 
 	/** @hidden */
@@ -345,6 +365,9 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static toUnity(methodName, requireStatus?, params?) {
+		if (UnityUtil.verbose) {
+			console.debug('[TO UNITY]', methodName, requireStatus, params);
+		}
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {
@@ -878,6 +901,10 @@ export class UnityUtil {
 
 	public static setStreamingModelPriority(modelNamespace: string, priority: number) {
 		UnityUtil.toUnity('SetStreamingModelPriority', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ modelNamespace, priority }));
+	}
+
+	public static setStreamingMeshFactor(factor: number) {
+		UnityUtil.toUnity('SetStreamingMeshFactor', UnityUtil.LoadingState.VIEWER_READY, Number(factor));
 	}
 
 	public static setStreamingFovWeight(weight: number) {

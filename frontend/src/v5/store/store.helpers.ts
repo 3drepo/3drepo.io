@@ -26,10 +26,6 @@ export const EMPTY_VIEW: View = {
 	hasThumbnail: false,
 };
 
-export const isFederation = (containerOrFederation: CF) => (
-	'containers' in containerOrFederation
-);
-
 export const uniqueIds = <T>(listItems: T[]) =>
 	// eslint-disable-next-line implicit-arrow-linebreak
 	uniqWith(listItems, (a, b) => (a as unknown as CF)._id === (b as unknown as CF)._id);

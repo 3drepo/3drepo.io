@@ -17,25 +17,28 @@
 
 import { FederationSettingsSchema } from '@/v5/validation/containerAndFederationSchemes/federationSchemes';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { IFederation } from '@/v5/store/federations/federations.types';
-import { SettingsForm } from '../../settingsForm/settingsForm.component';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { SettingsModal } from '../../settingsModal/settingsModal.component';
 
-type FederationSettingsFormProps = {
+type FederationSettingsModalProps = {
+	federationId: string;
 	open: boolean;
-	federation: IFederation;
-	onClose: () => void;
+	onClickClose: () => void;
 };
 
-export const FederationSettingsForm = ({
-	federation,
+export const FederationSettingsModal = ({
+	federationId,
 	...otherProps
-}: FederationSettingsFormProps) => (
-	<SettingsForm
-		containerOrFederation={federation}
-		settingsSchema={FederationSettingsSchema}
-		fetchSettings={FederationsActionsDispatchers.fetchFederationSettings}
-		fetchViews={FederationsActionsDispatchers.fetchFederationViews}
-		updateSettings={FederationsActionsDispatchers.updateFederationSettings}
-		{...otherProps}
-	/>
-);
+}: FederationSettingsModalProps) => {
+	const federation = FederationsHooksSelectors.selectFederationById(federationId);
+	return (
+		<SettingsModal
+			containerOrFederation={federation}
+			settingsSchema={FederationSettingsSchema}
+			fetchSettings={FederationsActionsDispatchers.fetchFederationSettings}
+			fetchViews={FederationsActionsDispatchers.fetchFederationViews}
+			updateSettings={FederationsActionsDispatchers.updateFederationSettings}
+			{...otherProps}
+		/>
+	);
+};

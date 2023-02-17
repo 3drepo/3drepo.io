@@ -25,7 +25,7 @@ interface IUserPopover {
 }
 
 export const UserPopover = ({ user }: IUserPopover) => {
-	if (!user) {
+	if (user.isNotTeamspaceMember) {
 		return (
 			<PopoverContainer>
 				<Data>
