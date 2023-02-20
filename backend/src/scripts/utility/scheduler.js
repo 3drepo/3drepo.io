@@ -133,8 +133,6 @@ const run = async () => {
 		logger.logInfo('======================== Monthly tasks ========================');
 		await runScripts(monthly);
 	}
-
-	throw new Error('OmG');
 };
 
 Promise.resolve(run()).catch(onError).finally(() => {

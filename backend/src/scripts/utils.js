@@ -75,12 +75,15 @@ Utils.parsePath = (path) => {
 	// making a copy of the string to manipulate and return
 	let res = `${path}`;
 
+	let offset = 0;
+
 	for (const match of matches) {
 		const envVar = process.env[match[1]];
 		if (envVar) {
 			const wholeMatch = match[0];
 			const replacedStr = wholeMatch.replace(`%${match[1]}%`, envVar);
-			res = stringSplice(res, match.index, wholeMatch.length, replacedStr);
+			res = stringSplice(res, match.index + offset, wholeMatch.length, replacedStr);
+			offset += replacedStr.length - wholeMatch.length;
 		}
 	}
 
