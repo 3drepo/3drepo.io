@@ -22,6 +22,7 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { FederationsActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 type FederationEllipsisMenuProps = {
 	federation: IFederation,
@@ -37,6 +38,7 @@ export const FederationEllipsisMenu = ({
 	openEditFederationModal,
 }: FederationEllipsisMenuProps) => {
 	const { teamspace, project } = useParams<DashboardParams>();
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	return (
 		<EllipsisMenu>
@@ -79,6 +81,7 @@ export const FederationEllipsisMenu = ({
 					pathname: './user_permissions',
 					search: `?modelId=${federation._id}`,
 				}}
+				hidden={!isProjectAdmin}
 			/>
 
 			<EllipsisMenuItem
@@ -122,6 +125,7 @@ export const FederationEllipsisMenu = ({
 						}),
 					});
 				}}
+				hidden={!isProjectAdmin}
 			/>
 		</EllipsisMenu>
 	);

@@ -18,7 +18,7 @@
 import { cloneDeep } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { INITIAL_HELICOPTER_SPEED, VIEWER_NAV_MODES } from '../../constants/viewer';
-import { VIEWER_DRAGGABLE_PANELS, VIEWER_LEFT_PANELS, VIEWER_RIGHT_PANELS } from '../../constants/viewerGui';
+import { getViewerLeftPanels, VIEWER_DRAGGABLE_PANELS, VIEWER_RIGHT_PANELS } from '../../constants/viewerGui';
 
 export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActions({
 	fetchData: ['teamspace', 'model'],
@@ -120,7 +120,7 @@ const updatePanelsList = (panels, lockedPanels, panelName, visibility) => {
 
 export const setPanelVisibility = (state = INITIAL_STATE, { panelName, visibility }) => {
 	const locked = [...state.lockedPanels];
-	const leftPanels = VIEWER_LEFT_PANELS.map(({type}) => type).includes(panelName) ?
+	const leftPanels = getViewerLeftPanels().map(({type}) => type).includes(panelName) ?
 			updatePanelsList([...state.leftPanels], locked, panelName, visibility) : [...state.leftPanels];
 	const rightPanels = VIEWER_RIGHT_PANELS.map(({type}) => type).includes(panelName) ?
 			updatePanelsList([...state.rightPanels], locked, panelName, visibility) : [...state.rightPanels];
