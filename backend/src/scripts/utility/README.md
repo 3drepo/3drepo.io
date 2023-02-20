@@ -21,6 +21,7 @@ The scheduler takes in a configuration in json format. The accepted properties a
 - `daily` : executed everytime the scheduler runs
 - `weekly`: executed every Sunday.
 - `monthly`: executed on the first Sunday of every month.
+- `emailOnFailure`: boolean flag to denote if an email should be sent upon error (default: true)
 
 Each property takes an array of objects with the following properties:
 

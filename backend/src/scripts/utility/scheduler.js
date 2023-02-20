@@ -30,9 +30,30 @@ const { handleErrorBeforeExit } = require('../utils');
 const { v5Path } = require('../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
+const { sendSystemEmail } = require(`${v5Path}/services/mailer`);
+const { templates: emailTemplates } = require(`${v5Path}/services/mailer/mailer.constants`);
 
 const cmdToRunFn = {};
 const cmdList = [];
+
+let emailOnError = true;
+
+const parser = Yargs(hideBin(process.argv))
+	.option('config', {
+		type: 'string',
+		description: 'Specify the scheduler config file',
+		default: Path.join(__dirname, 'scheduler.config.json'),
+	})
+	.scriptName('yarn run-scheduled-tasks')
+	.wrap(Yargs().terminalWidth())
+	.parse();
+
+const onError = async (err) => {
+	if (emailOnError) {
+		await sendSystemEmail(emailTemplates.SCHEDULER_ERROR.name, { err });
+	}
+	handleErrorBeforeExit(err);
+};
 
 const findCmds = async (dir = __dirname, ignoreFiles = true) => {
 	const data = await readdir(dir, { withFileTypes: true });
@@ -53,21 +74,12 @@ const findCmds = async (dir = __dirname, ignoreFiles = true) => {
 					}
 				}
 			} catch (err) {
-				handleErrorBeforeExit(err);
+				// eslint-disable-next-line no-await-in-loop
+				await onError(err);
 			}
 		}
 	}
 };
-
-const parser = Yargs(hideBin(process.argv))
-	.option('config', {
-		type: 'string',
-		description: 'Specify the scheduler config file',
-		default: Path.join(__dirname, 'scheduler.config.json'),
-	})
-	.scriptName('yarn run-scheduled-tasks')
-	.wrap(Yargs().terminalWidth())
-	.parse();
 
 const runScripts = async (scripts) => {
 	for (let i = 0; i < scripts.length; ++i) {
@@ -91,6 +103,7 @@ const getSchema = () => {
 		daily: taskArrSchema,
 		weekly: taskArrSchema,
 		monthly: taskArrSchema,
+		emailOnFailure: Yup.boolean().default(true),
 	});
 };
 
@@ -107,7 +120,8 @@ const run = async () => {
 	const { config } = await parser;
 	await findCmds();
 	const conf = JSON.parse(await readFile(config, 'utf8'));
-	const { daily, weekly, monthly } = await getSchema().validate(conf);
+	const { daily, weekly, monthly, emailOnFailure } = await getSchema().validate(conf);
+	emailOnError = emailOnFailure;
 	logger.logInfo('======================== Daily tasks ========================');
 	await runScripts(daily);
 
@@ -119,9 +133,11 @@ const run = async () => {
 		logger.logInfo('======================== Monthly tasks ========================');
 		await runScripts(monthly);
 	}
+
+	throw new Error('OmG');
 };
 
-Promise.resolve(run()).catch(handleErrorBeforeExit).finally(() => {
+Promise.resolve(run()).catch(onError).finally(() => {
 	// eslint-disable-next-line no-process-exit
 	process.exit();
 });

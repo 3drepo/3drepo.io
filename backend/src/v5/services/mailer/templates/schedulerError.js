@@ -15,23 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const forgotPassword = require('./templates/forgotPassword');
-const schedulerError = require('./templates/schedulerError');
-const { toConstantCase } = require('../../utils/helper/strings');
-const verifyUser = require('./templates/verifyUser');
+const Yup = require('yup');
+const config = require('../../../utils/config');
+const { generateTemplateFn } = require('./common');
 
-const MailerConstants = {};
+const TEMPLATE_PATH = `${__dirname}/html/schedulerError.html`;
 
-const templates = {
-	verifyUser,
-	forgotPassword,
-	schedulerError,
-};
+const dataSchema = Yup.object({
+	err: Yup.mixed(),
+	domain: Yup.string().default(() => config.getBaseURL()),
+}).required(true);
 
-MailerConstants.templates = {};
-Object.keys(templates).forEach((templateName) => {
-	const name = toConstantCase(templateName);
-	MailerConstants.templates[name] = { ...templates[templateName], name };
-});
+const SchedulerErrorTemplate = {};
+SchedulerErrorTemplate.subject = () => '[SCHEDULER] Error occured';
 
-module.exports = MailerConstants;
+SchedulerErrorTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
+
+module.exports = SchedulerErrorTemplate;
