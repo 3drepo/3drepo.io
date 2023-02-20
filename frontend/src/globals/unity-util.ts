@@ -18,7 +18,7 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-enable no-var */
 
-// import { IndexedDbCache } from './unity-indexedbcache';
+import { IndexedDbCache } from './unity-indexedbcache';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
@@ -188,7 +188,12 @@ export class UnityUtil {
 			}
 		}
 
-		// return this.clearIdbfs().then(() => UnityUtil._loadUnity(canvasDom, domainURL));
+		try {
+			return this.clearIdbfs().then(() => UnityUtil._loadUnity(canvasDom, domainURL));
+		} catch (error) {
+			console.error('Unable to clear IndexDbFs', error);
+		}
+
 		return UnityUtil._loadUnity(canvasDom, domainURL);
 	}
 
@@ -2014,6 +2019,10 @@ export class UnityUtil {
 	 * @param unityInstance
 	 */
 	public static createIndexedDbCache(gameObjectName: string) {
-		// this.unityInstance.repoDbCache = new IndexedDbCache(this.unityInstance, gameObjectName, this.unityUrl);
+		try {
+			this.unityInstance.repoDbCache = new IndexedDbCache(this.unityInstance, gameObjectName, this.unityUrl);
+		} catch (error) {
+			console.error('Failed to create IndexedDbCache', error);
+		}
 	}
 }
