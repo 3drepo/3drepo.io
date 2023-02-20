@@ -21,6 +21,13 @@ import { TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/se
 import { TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ScrollArea } from '@controls/scrollArea';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import {
+	enableRealtimeContainerNewTicketComment,
+	enableRealtimeContainerUpdateTicketComment,
+	enableRealtimeFederationNewTicketComment,
+	enableRealtimeFederationUpdateTicketComment,
+} from '@/v5/services/realtime/ticketComments.events';
 import { FormattedMessage } from 'react-intl';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { useEffect, useRef, useState } from 'react';
@@ -84,13 +91,23 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 	};
 
 	useEffect(() => {
-		if (!ticketId) return;
+		if (!ticketId) return null;
 		TicketCommentsActionsDispatchers.fetchComments(
 			teamspace,
 			project,
 			containerOrFederation,
 			ticketId,
 			isFederation,
+		);
+		if (isFederation) {
+			return combineSubscriptions(
+				enableRealtimeFederationNewTicketComment(teamspace, project, containerOrFederation, ticketId),
+				enableRealtimeFederationUpdateTicketComment(teamspace, project, containerOrFederation, ticketId),
+			);
+		}
+		return combineSubscriptions(
+			enableRealtimeContainerNewTicketComment(teamspace, project, containerOrFederation, ticketId),
+			enableRealtimeContainerUpdateTicketComment(teamspace, project, containerOrFederation, ticketId),
 		);
 	}, [ticketId]);
 

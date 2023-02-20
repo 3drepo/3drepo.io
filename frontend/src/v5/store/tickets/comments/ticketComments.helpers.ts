@@ -93,8 +93,8 @@ const TIME_UNIT = {
 	year: formatMessage({ id: 'timeUnit.year', defaultMessage: 'year' }),
 };
 
-export const getRelativeTime = (from: Date) => {
-	let timeDifference = ((new Date().getTime() - from.getTime()) / 1000) + 1;
+export const getRelativeTime = (from: Date | number) => {
+	let timeDifference = ((new Date().getTime() - new Date(from).getTime()) / 1000) + 1;
 	if (timeDifference < 60) return formatRelativeTime(-Math.floor(timeDifference), TIME_UNIT.second);
 
 	timeDifference /= 60;
