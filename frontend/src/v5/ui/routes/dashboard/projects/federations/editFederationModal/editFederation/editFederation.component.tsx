@@ -41,7 +41,10 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 	const getContainerById = (id: string) => containers.find((container: IContainer) => container._id === id);
 	const [includedContainers, setIncludedContainers] = useState<IContainer[]>([]);
 	const [availableContainers, setAvailableContainers] = useState<IContainer[]>([]);
-	const isCollaborator = FederationsHooksSelectors.selectHasCollaboratorAccess(federation._id);
+	const isNewFederation = !federation._id;
+	const isCollaboratorFromId = FederationsHooksSelectors.selectHasCollaboratorAccess(federation._id);
+	const isCollaborator = isNewFederation ? true : isCollaboratorFromId;
+
 	useEffect(() => {
 		setIncludedContainers(federation.containers.map(getContainerById));
 	}, [containers]);
