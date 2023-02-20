@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { DialogContent } from '@mui/material';
+import { Dialog, DialogContent, DialogProps, IconButton } from '@mui/material';
 import { Typography } from '@controls/typography';
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 import { FormTextField } from '@controls/inputs/formInputs.component';
@@ -24,7 +24,17 @@ import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
 import WarningIconBase from '@assets/icons/outlined/warning-outlined.svg';
 
-export const DialogContainer = styled.div`
+export const Modal = styled(Dialog).attrs(({ maxWidth = 'md' }: DialogProps) => ({ maxWidth }))``;
+
+export const CloseButton = styled(IconButton).attrs({
+	'aria-label': 'Close modal',
+})`
+	position: absolute;
+	top: 11px;
+	right: 11px;
+`;
+
+export const ModalContent = styled.div`
 	display: flex;
 	flex-direction: column;
 	align-items: center;

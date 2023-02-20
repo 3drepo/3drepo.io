@@ -20,6 +20,7 @@ import { FormattedMessage } from 'react-intl';
 import { ShareTextField } from '@controls/shareTextField';
 import { ModalHeader } from '@controls/formModal/modalHeader/modalHeader.component';
 import { ModalBody } from '@controls/formModal/modalBody/modalBody.component';
+import { Modal } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { Form } from '@controls/formModal/formModal.styles';
 import { MailToButton } from './shareModal.styles';
 
@@ -28,7 +29,7 @@ type IShareModal = {
 	title: string;
 	// the title in the email
 	name: string;
-
+	open: boolean;
 	subject: string;
 	link: string;
 	onClickClose: () => void;
@@ -40,23 +41,26 @@ export const ShareModal = ({
 	subject,
 	onClickClose,
 	link,
+	open,
 }: IShareModal) => (
-	<Form>
-		<ModalHeader onClickClose={onClickClose} title={title} />
-		<ModalBody>
-			<ShareTextField
-				label={formatMessage({
-					id: 'shareModal.linkLabel',
-					defaultMessage: 'Link',
-				})}
-				value={link}
-			/>
-			<MailToButton href={`mailto:?subject=3D Repo ${subject} - ${name}&body=${link}`}>
-				<FormattedMessage
-					id="shareModal.mailTo"
-					defaultMessage="Send by email"
+	<Modal open={open} onClose={onClickClose}>
+		<Form>
+			<ModalHeader onClickClose={onClickClose} title={title} />
+			<ModalBody>
+				<ShareTextField
+					label={formatMessage({
+						id: 'shareModal.linkLabel',
+						defaultMessage: 'Link',
+					})}
+					value={link}
 				/>
-			</MailToButton>
-		</ModalBody>
-	</Form>
+				<MailToButton href={`mailto:?subject=3D Repo ${subject} - ${name}&body=${link}`}>
+					<FormattedMessage
+						id="shareModal.mailTo"
+						defaultMessage="Send by email"
+					/>
+				</MailToButton>
+			</ModalBody>
+		</Form>
+	</Modal>
 );

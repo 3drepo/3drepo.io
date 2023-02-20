@@ -18,9 +18,8 @@
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { CloseButton } from '@controls/modal/modal.styles';
-import { Actions, Status, WarningIcon } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
-import { Container } from './alertModal.styles';
+import { Actions, Status, WarningIcon, CloseButton, ModalContent } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
+import { Modal } from './alertModal.styles';
 
 interface AlertModalProps {
 	method: string;
@@ -28,53 +27,64 @@ interface AlertModalProps {
 	message: string;
 	content: string;
 	status: string;
+	open: boolean;
+	onClose: () => void;
 	handleResolve: () => string;
 }
-export const AlertModal = (props: AlertModalProps) => {
-	const { method, dataType, content, message, status, handleResolve } = props;
+export const AlertModal = ({
+	method,
+	dataType,
+	content,
+	message,
+	status,
+	handleResolve,
+	...props
+}: AlertModalProps) => {
 	const statusMessage = status + message ? ` -  ${message}` : '';
 
 	return (
-		<Container>
-			<WarningIcon />
-			<CloseButton type="submit" onClick={handleResolve}>
-				<CloseIcon />
-			</CloseButton>
-			<DialogTitle>
-				{method && dataType ? (
-					<FormattedMessage
-						id="alertModal.header"
-						defaultMessage="Something went wrong trying to {method} the {dataType}"
-						values={{
-							method,
-							dataType,
-						}}
-					/>
-				) : (
-					<FormattedMessage
-						id="alertModal.header.default"
-						defaultMessage="Something went wrong"
-					/>
-				)}
-			</DialogTitle>
-			<DialogContent>
-				<DialogContentText>{content}</DialogContentText>
-				{!!status && <Status>{statusMessage}</Status>}
-			</DialogContent>
-			<Actions>
-				<Button autoFocus type="submit" onClick={handleResolve} variant="contained" color="primary">
-					<FormattedMessage
-						id="alertModal.action.ok"
-						defaultMessage="Ok, close window"
-					/>
-				</Button>
-				<Button href="https://3drepo.com/contact/" variant="outlined" color="secondary">
-					<FormattedMessage
-						id="alertModal.action.contactSupport"
-						defaultMessage="Contact support"
-					/>
-				</Button>
-			</Actions>
-		</Container>
+		<Modal {...props}>
+			<ModalContent>
+				<WarningIcon />
+				<CloseButton type="submit" onClick={handleResolve}>
+					<CloseIcon />
+				</CloseButton>
+				<DialogTitle>
+					{method && dataType ? (
+						<FormattedMessage
+							id="alertModal.header"
+							defaultMessage="Something went wrong trying to {method} the {dataType}"
+							values={{
+								method,
+								dataType,
+							}}
+						/>
+					) : (
+						<FormattedMessage
+							id="alertModal.header.default"
+							defaultMessage="Something went wrong"
+						/>
+					)}
+				</DialogTitle>
+				<DialogContent>
+					<DialogContentText>{content}</DialogContentText>
+					{!!status && <Status>{statusMessage}</Status>}
+				</DialogContent>
+				<Actions>
+					<Button autoFocus type="submit" onClick={handleResolve} variant="contained" color="primary">
+						<FormattedMessage
+							id="alertModal.action.ok"
+							defaultMessage="Ok, close window"
+						/>
+					</Button>
+					<Button href="https://3drepo.com/contact/" variant="outlined" color="secondary">
+						<FormattedMessage
+							id="alertModal.action.contactSupport"
+							defaultMessage="Contact support"
+						/>
+					</Button>
+				</Actions>
+			</ModalContent>
+		</Modal>
 	);
 };

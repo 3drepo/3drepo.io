@@ -17,7 +17,23 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
+import { Modal as ModalBase, CloseButton as CloseButtonBase } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import styled, { css } from 'styled-components';
+
+export const Modal = styled(ModalBase).attrs({
+	maxWidth: 'lg',
+})`
+	.MuiPaper-root {
+		border-radius: 0;
+	}
+`;
+
+export const CloseButton = styled(CloseButtonBase)`
+	top: 35px;
+	right: 50px;
+	position: fixed;
+	color: ${({ theme }) => theme.palette.primary.contrast};
+`;
 
 const modalContentStyles = css`
 	height: 100%;

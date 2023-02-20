@@ -18,7 +18,7 @@ import { Button, DialogContentText, DialogTitle } from '@mui/material';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import {
-	DialogContainer,
+	Modal,
 	Actions,
 	RetypeCheck,
 	ConfirmationPhrase,
@@ -26,9 +26,12 @@ import {
 	Message,
 	TruncatableTitle,
 	Instruction,
+	ModalContent,
+	CloseButton,
 } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { CircledIcon } from '@controls/circledIcon';
 import { useForm } from 'react-hook-form';
+import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { UnhandledErrorInterceptor } from './deleteModal.styles';
 
 interface IDeleteModal {
@@ -39,6 +42,7 @@ interface IDeleteModal {
 	confidenceCheck?: boolean,
 	titleLabel?: string,
 	confirmLabel?: string,
+	open: boolean,
 }
 
 export const DeleteModal = ({
@@ -49,6 +53,7 @@ export const DeleteModal = ({
 	confidenceCheck,
 	titleLabel,
 	confirmLabel,
+	open,
 }: IDeleteModal) => {
 	const { control, watch, handleSubmit } = useForm({
 		mode: 'onChange',
@@ -66,60 +71,65 @@ export const DeleteModal = ({
 	};
 
 	return (
-		<DialogContainer>
-			<CircledIcon variant="error" size="large">
-				<DeleteIcon />
-			</CircledIcon>
-			<DialogTitle>
-				<TruncatableTitle>
-					{titleLabel || (
-						<FormattedMessage
-							id="deleteModal.header"
-							defaultMessage="Delete {name}?"
-							values={{ name }}
-						/>
-					)}
-				</TruncatableTitle>
-			</DialogTitle>
-			<Message>
-				<DialogContentText>
-					{message}
-				</DialogContentText>
-				{ confidenceCheck && (
-					<RetypeCheck>
-						<Instruction>
+		<Modal open={open} onClose={onClickClose}>
+			<ModalContent>
+				<CircledIcon variant="error" size="large">
+					<DeleteIcon />
+				</CircledIcon>
+				<DialogTitle>
+					<TruncatableTitle>
+						{titleLabel || (
 							<FormattedMessage
-								id="deleteModal.content.retypeCheck"
-								defaultMessage="Confirm by typing {confirmationPhrase} below:"
-								values={{
-									confirmationPhrase: <ConfirmationPhrase>{name}</ConfirmationPhrase>,
-								}}
+								id="deleteModal.header"
+								defaultMessage="Delete {name}?"
+								values={{ name }}
 							/>
-						</Instruction>
-						<RetypeCheckField
-							control={control}
-							name="retypedName"
-						/>
-					</RetypeCheck>
-				)}
-				<UnhandledErrorInterceptor />
-			</Message>
-			<Actions>
-				<Button onClick={onClickClose} variant="contained" color="primary">
-					<FormattedMessage
-						id="deleteModal.action.cancel"
-						defaultMessage="Cancel"
-					/>
-				</Button>
-				<Button autoFocus type="submit" onClick={handleSubmit(onSubmit)} variant="outlined" color="secondary" disabled={!isValid}>
-					{ confirmLabel || (
-						<FormattedMessage
-							id="deleteModal.action.confirm"
-							defaultMessage="Delete"
-						/>
+						)}
+					</TruncatableTitle>
+				</DialogTitle>
+				<CloseButton onClick={onClickClose}>
+					<CloseIcon />
+				</CloseButton>
+				<Message>
+					<DialogContentText>
+						{message}
+					</DialogContentText>
+					{ confidenceCheck && (
+						<RetypeCheck>
+							<Instruction>
+								<FormattedMessage
+									id="deleteModal.content.retypeCheck"
+									defaultMessage="Confirm by typing {confirmationPhrase} below:"
+									values={{
+										confirmationPhrase: <ConfirmationPhrase>{name}</ConfirmationPhrase>,
+									}}
+								/>
+							</Instruction>
+							<RetypeCheckField
+								control={control}
+								name="retypedName"
+							/>
+						</RetypeCheck>
 					)}
-				</Button>
-			</Actions>
-		</DialogContainer>
+					<UnhandledErrorInterceptor />
+				</Message>
+				<Actions>
+					<Button onClick={onClickClose} variant="contained" color="primary">
+						<FormattedMessage
+							id="deleteModal.action.cancel"
+							defaultMessage="Cancel"
+						/>
+					</Button>
+					<Button autoFocus type="submit" onClick={handleSubmit(onSubmit)} variant="outlined" color="secondary" disabled={!isValid}>
+						{ confirmLabel || (
+							<FormattedMessage
+								id="deleteModal.action.confirm"
+								defaultMessage="Delete"
+							/>
+						)}
+					</Button>
+				</Actions>
+			</ModalContent>
+		</Modal>
 	);
 };

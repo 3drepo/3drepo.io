@@ -18,7 +18,7 @@
 import { VisualSettingsDialog } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.component';
 import { formatMessage } from '@/v5/services/intl';
 import { ModalHeader } from '@controls/formModal/modalHeader/modalHeader.component';
-import { Modal } from '@controls/modal/modal.component';
+import { Modal } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { VisualSettingsModalContent } from './visualSettingsModal.styles';
 
 type IVisualSettingsModal = {
@@ -36,7 +36,7 @@ export const VisualSettingsModal = ({
 	...visualSettingsProps
 }: IVisualSettingsModal) => (
 	<Modal
-		onClickClose={onClickClose}
+		onClose={onClickClose}
 		open={open}
 	>
 		<ModalHeader

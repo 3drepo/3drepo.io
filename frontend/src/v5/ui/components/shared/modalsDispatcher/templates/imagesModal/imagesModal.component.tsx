@@ -17,30 +17,42 @@
 
 import { useState } from 'react';
 import ChevronIcon from '@assets/icons/outlined/small_chevron-outlined.svg';
-import { Container, Image, NextButton, PreviousButton } from './imagesModal.styles';
+import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
+import { Modal, Container, Image, NextButton, PreviousButton, CloseButton } from './imagesModal.styles';
 
 type ImagesModalProps = {
 	images: string[];
 	// to use if the image to display is not the first one
-	displayImageIndex?: number,
+	displayImageIndex?: number;
+	onClickClose: () => void;
+	open: boolean;
 };
-export const ImagesModal = ({ images, displayImageIndex = 0 }: ImagesModalProps) => {
+export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open }: ImagesModalProps) => {
 	const [imageIndex, setImageIndex] = useState(displayImageIndex);
 	const imagesLength = images.length;
 
 	const changeImageIndex = (delta) => setImageIndex((imageIndex + delta + imagesLength) % imagesLength);
 
-	if (imagesLength === 1) return (<Image src={images[imageIndex]} />);
-
 	return (
-		<Container>
-			<PreviousButton onClick={() => changeImageIndex(-1)}>
-				<ChevronIcon />
-			</PreviousButton>
-			<Image src={images[imageIndex]} key={images[imageIndex]} />
-			<NextButton onClick={() => changeImageIndex(+1)}>
-				<ChevronIcon />
-			</NextButton>
-		</Container>
+		<Modal open={open} onClose={onClickClose}>
+			<Container>
+				{imagesLength === 1 ? (
+					<Image src={images[imageIndex]} />
+				) : (
+					<>
+						<PreviousButton onClick={() => changeImageIndex(-1)}>
+							<ChevronIcon />
+						</PreviousButton>
+						<Image src={images[imageIndex]} key={images[imageIndex]} />
+						<NextButton onClick={() => changeImageIndex(+1)}>
+							<ChevronIcon />
+						</NextButton>
+					</>
+				)}
+				<CloseButton onClick={onClickClose}>
+					<CloseIcon />
+				</CloseButton>
+			</Container>
+		</Modal>
 	);
 };
