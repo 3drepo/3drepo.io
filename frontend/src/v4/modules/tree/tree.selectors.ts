@@ -285,8 +285,10 @@ export const selectGetNumNodesByMeshSharedIdsArray = (meshes = []) => createSele
 		return foundNodes.size;
 	}
 );
-
-export const selectGetNodesIdsFromSharedIds = (objects = []) => createSelector(
+type MyObject = {
+	shared_ids: string[]
+}
+export const selectGetNodesIdsFromSharedIds = (objects: MyObject[] = []) => createSelector(
 	selectNodesBySharedIdsMap,
 	(nodesBySharedIds) => {
 		if (!objects.length) {
