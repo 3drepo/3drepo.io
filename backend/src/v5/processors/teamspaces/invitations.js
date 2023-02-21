@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { events } = require('../../eventsManager/eventsManager.constants');
-const { initTeamspace } = require('../../../processors/teamspaces/teamspaces');
-const { subscribe } = require('../../eventsManager/eventsManager');
-const { unpack: unpackInvitations } = require('../../../processors/teamspaces/invitations');
+const { getUserByUsername } = require('../../models/users');
+// istanbul ignore next
+const { unpack } = require('../../../v4/models/invitations');
 
-const userVerified = async ({ username }) => {
-	await initTeamspace(username);
-	await unpackInvitations(username);
+const Invitations = {};
+
+Invitations.unpack = async (username) => {
+	const user = await getUserByUsername(username);
+	await unpack(user);
 };
 
-const UserEventsListener = {};
-
-UserEventsListener.init = () => {
-	subscribe(events.USER_VERIFIED, userVerified);
-};
-
-module.exports = UserEventsListener;
+module.exports = Invitations;
