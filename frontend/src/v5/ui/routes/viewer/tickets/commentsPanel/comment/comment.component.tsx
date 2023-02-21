@@ -37,9 +37,12 @@ export const Comment = ({ updatedAt, author, message, deleted, _id, ...props }: 
 	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt));
 
 	useEffect(() => {
-		updateMessageAge();
-		const intervalId = window.setInterval(updateMessageAge, 10_000);
-		return () => clearInterval(intervalId);
+		if (updatedAt) {
+			updateMessageAge();
+			const intervalId = window.setInterval(updateMessageAge, 10_000);
+			return () => clearInterval(intervalId);
+		}
+		return null;
 	}, [updatedAt]);
 
 	const UserComment = isCurrentUser ? CurrentUserComment : OtherUserComment;
