@@ -29,11 +29,15 @@ import {
 	StyledTextFieldContainer,
 	Title
 } from './newJobForm.styles';
+import { formatMessage } from '@/v5/services/intl';
 
 const NewJobSchema = Yup.object().shape({
 	name: Yup.string()
 		.max(50, 'Job name is limited to 50 characters')
-		.required('Job name is a required field')
+		.required(formatMessage({
+			id: 'validation.jobName.required',
+			defaultMessage: 'Job name is a required field',
+		}))
 });
 
 interface IProps {
