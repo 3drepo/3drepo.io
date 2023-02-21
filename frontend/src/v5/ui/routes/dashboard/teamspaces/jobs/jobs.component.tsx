@@ -16,9 +16,9 @@
  */
 
 import { Jobs as V4Jobs } from '@/v4/routes/jobs';
-import { V5JobsOverrides } from '@/v5/ui/v4Adapter/overrides/jobs.overrides';
-import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
+import { NewJobBottomButton, V5JobsOverrides } from '@/v5/ui/v4Adapter/overrides/jobs.overrides';
 import { FormattedMessage } from 'react-intl';
+import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { Header, Title } from '../projects/projectsList.styles';
 
 export const Jobs = () => (
@@ -29,8 +29,9 @@ export const Jobs = () => (
 			</Title>
 		</Header>
 		<V4Jobs />
-		<DashedContainer>
-			Add new Job
-		</DashedContainer>
+		<NewJobBottomButton>
+			<AddCircleIcon />
+			<FormattedMessage id="jobs.addJobButton" defaultMessage="Add new Job" />
+		</NewJobBottomButton>
 	</V5JobsOverrides>
 );

@@ -17,6 +17,9 @@
 import { PureComponent } from 'react';
 import RemoveCircle from '@mui/icons-material/RemoveCircle';
 import ReactDOM from 'react-dom';
+import { isV5 } from '@/v4/helpers/isV5';
+import { formatMessage } from '@/v5/services/intl';
+import BinIcon from '@assets/icons/outlined/delete-outlined.svg'
 
 import { ColorPicker } from '../components/colorPicker/colorPicker.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
@@ -34,7 +37,7 @@ const JOBS_TABLE_CELLS = [{
 	searchBy: ['name'],
 	HeadingComponent: CellUserSearch
 }, {
-	name: 'Colour',
+	name: isV5() ? formatMessage({ id: 'job.assignedColours', defaultMessage: 'Assigned Colours' }) : 'Colour',
 	type: CELL_TYPES.COLOR,
 	HeadingProps: {
 		component: {
@@ -105,7 +108,7 @@ export class Jobs extends PureComponent<IProps, IState> {
 				},
 				{},
 				{
-					Icon: RemoveCircle,
+					Icon: isV5() ? BinIcon : RemoveCircle,
 					onClick: this.onRemove.bind(null, job._id)
 				}
 			];
