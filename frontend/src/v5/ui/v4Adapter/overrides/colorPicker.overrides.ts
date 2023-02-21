@@ -39,4 +39,41 @@ export default css`
 			}
 		}
 	}
+	
+	.color-picker__panel { // Colour picker modal
+		.MuiInput-root {
+			border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+			border-Radius: 5px;
+			padding: 0 7px;
+			width: auto;
+
+			&.Mui-focused {
+				border: 1px solid ${({ theme }) => theme.palette.primary.main};
+				box-shadow: 0 0 2px ${({ theme }) => theme.palette.primary.main};
+			}
+
+			.MuiInput-input {
+				font-size: 12px;
+				margin-left: -13px;
+				padding: 0 12px;
+			}
+
+			.MuiInputAdornment-positionEnd {
+				margin: 0 0 0 -30px;
+			}
+		}
+
+		.colorPicker {
+			margin: 0;
+		}
+
+		.MuiSlider-root {
+			width: 145px;
+			margin-right: 15px;
+		}
+
+		.MuiCheckbox-root {
+			margin: 8px 8px 8px -8px;
+		}
+	}
 `;
