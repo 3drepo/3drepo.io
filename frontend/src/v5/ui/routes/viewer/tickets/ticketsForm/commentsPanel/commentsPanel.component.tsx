@@ -145,7 +145,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 			</ScrollArea>
 			<CreateCommentBox
 				commentReply={commentReply}
-				setCommentReply={setCommentReply}
+				deleteCommentReply={() => setCommentReply(null)}
 			/>
 		</Accordion>
 	);
