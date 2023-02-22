@@ -28,8 +28,8 @@ export const NavLink = styled(Link)<{ selected: boolean }>`
 	${({ theme }) => theme.typography.h5}
 	color: ${({ theme: { palette }, selected }) => (selected ? palette.primary.main : palette.base.light)};
 	cursor: pointer;
-    display: inline-block;
-    white-space: nowrap;
+	display: inline-block;
+	white-space: nowrap;
 `;
 
 export const Items = styled(ItemsBase)`
