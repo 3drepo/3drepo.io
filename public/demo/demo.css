@@ -1,0 +1,54 @@
+html, body, #viewer, #canvas, #unity {
+    height: 100%;
+    width: 100%;
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: rgb(235, 235, 235);
+    font-family: 'Nunito Sans', sans-serif;
+}
+#model {
+  height: 10vh;
+  background: rgba(255,255,255,0.0);
+  text-align: center;
+  width: 100%;
+}
+#changeModel {
+  z-index: 3;
+  margin: 0;
+  display: flex;
+  position: absolute;
+  width: 50%;
+  min-width: 600px;
+  top: 5px;
+}
+#changeModel input, #changeModel button {
+  height: 24px;
+  text-align: center;
+  min-height: 20px;
+  background: rgba(255, 255, 255, 0.803);
+  border: none;
+  margin: 4;
+  border: solid 1px #d0d0d0;
+}
+#changeModel button  {
+    width: 200px;
+  cursor: pointer;
+}
+#changeModel input {
+    width: 70%;
+}
+.hide {
+  display: none;
+}
+.show {
+  display: initial;
+}
+#status {
+    z-index: 3;
+    position: absolute;
+    top: 45vh;
+    width: 100%;
+    text-align: center;
+    font-size: 2rem;
+}
