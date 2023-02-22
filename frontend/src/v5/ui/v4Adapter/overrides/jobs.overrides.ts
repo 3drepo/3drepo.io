@@ -18,35 +18,41 @@ import styled from 'styled-components';
 import { Footer } from '@/v4/routes/components/userManagementTab/userManagementTab.styles';
 import { Head, Row, Cell } from '@/v4/routes/components/customTable/customTable.styles';
 import { SearchField } from '@/v4/routes/components/customTable/components/cellUserSearch/cellUserSearch.styles';
-import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 import { LoaderContainer } from '@/v4/routes/userManagement/userManagement.styles';
-
-export const NewJobBottomButton = styled(DashedContainer)`
-	padding: 23px 0;
-	color: ${({ theme }) => theme.palette.primary.main};
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	margin-top: 15px;
-	${({ theme }) => theme.typography.h5}
-	cursor: pointer;
-
-	&:hover {
-		color: ${({ theme }) => theme.palette.primary.dark};
-	}
-
-	svg {
-		width: 34px;
-		height: 34px;
-		margin-right: 3px;
-	}
-`;
+import { FloatingButtonContainer } from '@/v4/routes/components/floatingActionPanel/floatingActionPanel.styles';
+import { labelButtonPrimaryStyles } from '@/v5/ui/controls/button/button.styles';
 
 export const V5JobsOverrides = styled.div`
+	position: relative;
+
 	${LoaderContainer} {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 	}
 
+	${FloatingButtonContainer} {
+		top: 0;
+		right: 0;
+
+		button {
+			margin: 8px 0 8px 8px;
+			border: 0;
+			border-radius: 6px;
+			width: fit-content;
+			padding: 11px 16px;
+			text-transform: none;
+			font-size: 12px;
+			height: 35px;
+			min-height: 35px;
+
+			${labelButtonPrimaryStyles}
+
+			svg {
+				margin-right: 10px;
+			}
+		}
+	}
+
+	// columns headers
 	${Row} {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		min-height: unset;
@@ -61,11 +67,12 @@ export const V5JobsOverrides = styled.div`
 	${SearchField} input {
 		letter-spacing: normal;
 	}
-
 	${Head} ${Cell} {
 		${({ theme }) => theme.typography.kicker}
+		padding-top: 5px;
 	}
 
+	// row items
 	.simplebar-content {
 		& > :first-child {
 			border-radius: 5px 5px 0 0;
@@ -78,6 +85,7 @@ export const V5JobsOverrides = styled.div`
 		}
 	}
 
+	// delete button
 	.MuiIconButton-root:hover {
 		background-color: transparent;
 	}
