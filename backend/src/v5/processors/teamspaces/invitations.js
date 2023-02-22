@@ -16,7 +16,6 @@
  */
 
 const { getUserByUsername } = require('../../models/users');
-// istanbul ignore next
 const { unpack } = require('../../../v4/models/invitations');
 
 const Invitations = {};
