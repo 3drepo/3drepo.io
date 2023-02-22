@@ -19,6 +19,7 @@ import { useState } from 'react';
 import AddUserIcon from '@assets/icons/outlined/add_user-outlined.svg';
 import { Tooltip } from '@mui/material';
 import { FormInputProps } from '@controls/inputs/inputController.component';
+import { formatMessage } from '@/v5/services/intl';
 import { AddUserButton, AssigneesList, HiddenManyOfProperty, InlineAssignees } from './ticketDetailsAssignees.styles';
 
 export const TicketDetailsAssignees = ({ value, disabled, ...props }: FormInputProps) => {
@@ -41,7 +42,13 @@ export const TicketDetailsAssignees = ({ value, disabled, ...props }: FormInputP
 			/>
 			<AssigneesList values={value} maxItems={3} />
 			{!disabled && (
-				<Tooltip title="Assign" arrow>
+				<Tooltip
+					title={formatMessage({
+						id: 'customTicket.topPanel.addAssignees.tooltip',
+						defaultMessage: 'Assign',
+					})}
+					arrow
+				>
 					<div>
 						<AddUserButton onClick={handleOpen}>
 							<AddUserIcon />
