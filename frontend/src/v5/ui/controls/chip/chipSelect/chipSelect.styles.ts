@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,9 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { Chip } from './chip.component';
-export { FilterChip } from './chip.styles';
-export { PriorityLevelChip, PriorityLevels } from './variants/priorityLevelChip.component';
-export { RiskLevelChip, RiskLevels } from './variants/riskLevelChip.component';
-export { TicketStatusChip, TicketStatuses } from './variants/ticketStatusChip.component';
-export { TreatmentLevelChip, TreatmentLevels } from './variants/treatmentLevelChip.component';
+import { Select } from '@controls/inputs/select/select.component';
+import styled from 'styled-components';
+
+export const IconWrapper = styled.span<{color: string;}>`
+	margin: 0 8px 0 2px;
+	svg {
+		height: 11px;
+		width: 11px;
+		color: ${({ color }) => color};
+	}
+`;
+
+export const HiddenSelect = styled(Select)`
+	height: 0;
+	width: 0;
+	overflow: hidden;
+`;

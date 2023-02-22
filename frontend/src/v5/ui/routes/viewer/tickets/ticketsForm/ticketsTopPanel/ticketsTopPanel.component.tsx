@@ -50,7 +50,6 @@ export const TicketsTopPanel = ({
 		createdAt,
 		updatedAt,
 		priority,
-		status,
 		dueDate,
 	} = getPropertiesInCamelCase(propertiesValues);
 	const { formState } = useFormContext();
@@ -93,9 +92,7 @@ export const TicketsTopPanel = ({
 			</BaseTicketInfo>
 			{priority && (
 				<IssuePropertiesRow
-					priority={priority}
 					dueDate={dueDate}
-					status={status}
 					onBlur={onPropertyBlur}
 				/>
 			)}

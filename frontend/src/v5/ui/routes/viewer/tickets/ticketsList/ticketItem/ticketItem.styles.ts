@@ -16,7 +16,6 @@
  */
 
 import { TicketListAssignees } from '@controls/assignees/ticketListAssignees/ticketListAssignees.component';
-import { PriorityLevelChip as PriorityLevelChipBase } from '@controls/chip';
 import styled from 'styled-components';
 
 export const Id = styled.div`
@@ -66,10 +65,4 @@ export const IssuePropertiesRow = styled.div`
 	display: inline-flex;
 	width: 100%;
 	align-items: center;
-`;
-
-export const PriorityLevelChip = styled(PriorityLevelChipBase)`
-	.MuiChip-label {
-		display: none;
-	}
 `;

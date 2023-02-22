@@ -16,20 +16,20 @@
  */
 
 import { TicketDetailsAssignees } from '@controls/assignees/ticketDetailsAssignees/ticketDetailAssignees.component';
-import { PriorityLevelChip, PriorityLevels, TicketStatuses } from '@controls/chip';
+import { PRIORITY_LEVELS_MAP, STATUS_MAP } from '@controls/chip/chip.types';
+import { ChipSelect } from '@controls/chip/chipSelect/chipSelect.component';
 import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
 import { InputController } from '@controls/inputs/inputController.component';
+
 import { FormattedMessage } from 'react-intl';
-import { ColumnSeparator, IssuePropertiesContainer, PropertyColumn, PropertyTitle, Status } from './issuePropertiesRow.styles';
+import { ColumnSeparator, IssuePropertiesContainer, PropertyColumn, PropertyTitle } from './issuePropertiesRow.styles';
 
 type IIssuePropertiesRow = {
-	priority: PriorityLevels;
 	dueDate: number;
-	status: TicketStatuses;
 	onBlur: () => void;
 };
 
-export const IssuePropertiesRow = ({ priority, dueDate, status, onBlur }: IIssuePropertiesRow) => (
+export const IssuePropertiesRow = ({ dueDate, onBlur }: IIssuePropertiesRow) => (
 	<IssuePropertiesContainer>
 		<PropertyColumn>
 			<PropertyTitle>
@@ -38,7 +38,15 @@ export const IssuePropertiesRow = ({ priority, dueDate, status, onBlur }: IIssue
 					defaultMessage="Priority"
 				/>
 			</PropertyTitle>
-			<PriorityLevelChip state={priority} />
+			<InputController
+				Input={ChipSelect}
+				variant="text"
+				tooltip="Set priority"
+				name="properties.Priority"
+				onBlur={onBlur}
+				key="Priority"
+				values={PRIORITY_LEVELS_MAP}
+			/>
 		</PropertyColumn>
 		<ColumnSeparator />
 		<PropertyColumn>
@@ -58,7 +66,15 @@ export const IssuePropertiesRow = ({ priority, dueDate, status, onBlur }: IIssue
 					defaultMessage="Status"
 				/>
 			</PropertyTitle>
-			<Status state={status} />
+			<InputController
+				Input={ChipSelect}
+				variant="text"
+				tooltip="Set status"
+				name="properties.Status"
+				onBlur={onBlur}
+				key="Status"
+				values={STATUS_MAP}
+			/>
 		</PropertyColumn>
 		<InputController
 			Input={TicketDetailsAssignees}

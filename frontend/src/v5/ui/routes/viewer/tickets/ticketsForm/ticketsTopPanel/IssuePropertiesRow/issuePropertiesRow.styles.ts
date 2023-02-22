@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketStatusChip } from '@controls/chip';
 import styled from 'styled-components';
 
 export const IssuePropertiesContainer = styled.div`
@@ -47,8 +46,4 @@ export const ColumnSeparator = styled.div`
 	height: 100%;
 	border-left: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
 	margin: 0 10px;
-`;
-
-export const Status = styled(TicketStatusChip)`
-	border: none;
 `;

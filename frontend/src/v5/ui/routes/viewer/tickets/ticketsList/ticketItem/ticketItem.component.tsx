@@ -20,12 +20,13 @@ import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { RiskLevelChip, TicketStatusChip, TreatmentLevelChip } from '@controls/chip';
+import { Chip } from '@controls/chip/chip.component';
+import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, STATUS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
 import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
 import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { IssueProperties, SafetibaseProperties, TicketsCardViews } from '../../tickets.constants';
-import { Ticket, Id, Title, ChipList, Assignees, IssuePropertiesRow, PriorityLevelChip } from './ticketItem.styles';
+import { Ticket, Id, Title, ChipList, Assignees, IssuePropertiesRow } from './ticketItem.styles';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -64,14 +65,14 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			<Id>{template?.code}:{ticket.number}</Id>
 			<Title onClick={expandTicket}>{ticket.title}</Title>
 			<ChipList>
-				{status && <TicketStatusChip state={status} />}
-				{riskLevel && <RiskLevelChip state={riskLevel} />}
-				{treatmentStatus && <TreatmentLevelChip state={treatmentStatus} />}
+				{status && <Chip {...STATUS_MAP[status]} variant="outlined" />}
+				{riskLevel && <Chip {...RISK_LEVELS_MAP[riskLevel]} variant="filled" />}
+				{treatmentStatus && <Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />}
 			</ChipList>
 			{priority && (
 				<IssuePropertiesRow>
 					<DueDateWithLabel value={dueDate} onBlur={onBlurDueDate} />
-					<PriorityLevelChip state={priority} />
+					<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" label="" />
 					<Assignees values={assignees} onBlur={onBlurAssignees} />
 				</IssuePropertiesRow>
 			)}
