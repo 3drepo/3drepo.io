@@ -24,9 +24,11 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import MenuItem from '@mui/material/MenuItem/MenuItem';
 import { pick } from 'lodash';
 import { useState } from 'react';
+import { useLocation, Redirect } from 'react-router-dom';
 import { FormProvider, useForm, useFormContext } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { signup } from '@/v5/services/api/sso';
+import { isInvalidArguments, usernameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { Background, Container, LogoHeightBalancer, UserSignupMain } from '../userSignup.styles';
 import { Title, Container as FormContainer, LoginPrompt, LoginPromptLink } from '../userSignupForm/userSignupForm.styles';
 import { UserSignupFormStep } from '../userSignupForm/userSignupFormStep/userSignupFormStep.component';
@@ -34,6 +36,7 @@ import { IconContainer } from '../userSignupForm/userSignupFormStep/userSignupFo
 import { UserSignupFormStepTermsAndSubmit } from '../userSignupForm/userSignupFormStep/userSignupFormStepTermsAndSubmit/userSignupFormStepTermsAndSubmit.component';
 import { UserSignupFormStepper, UserSignupFormStepperContextValue } from '../userSignupForm/userSignupFormStepper/userSignupFormStepper.component';
 import { NextStepButton } from '../userSignupForm/userSignupFormStep/userSignupFormNextButton/userSignupFormNextButton.component';
+import { UserSignupSSOError } from './userSignUpSSOError';
 
 export interface IAccountFormInput {
 	username: string;
@@ -44,7 +47,7 @@ export interface IAccountFormInput {
 }
 
 export const UserSignupFormStepAccount = () => {
-	const { formState: { errors } } = useFormContext();
+	const { control, formState: { errors } } = useFormContext();
 
 	return (
 		<>
@@ -61,6 +64,7 @@ export const UserSignupFormStepAccount = () => {
 					id: 'userSignup.form.username',
 					defaultMessage: 'Username',
 				})}
+				control={control}
 				required
 				formError={errors.username}
 			/>
@@ -71,6 +75,7 @@ export const UserSignupFormStepAccount = () => {
 					id: 'userSignup.form.company',
 					defaultMessage: 'Company',
 				})}
+				control={control}
 				formError={errors.company}
 			/>
 			<FormSelect
@@ -79,6 +84,7 @@ export const UserSignupFormStepAccount = () => {
 					id: 'userSignup.form.countryCode',
 					defaultMessage: 'Country',
 				})}
+				control={control}
 				required
 			>
 				{clientConfigService.countries.map((country) => (
@@ -97,6 +103,18 @@ export const UserSignupFormStepAccount = () => {
 
 export const UserSignupSSO = () => {
 	const [contextValue, setContextValue] = useState<UserSignupFormStepperContextValue | null>();
+	const [alreadyExistingUsernames, setAlreadyExistingUsernames] = useState([]);
+	const { search } = useLocation();
+	const searchParams = new URLSearchParams(search);
+
+	if (searchParams.get('signupPost')) {
+		if (!searchParams.get('error') || searchParams.get('error') === '2') {
+			return (<Redirect to={{ pathname: 'v5/login-sso' }} />);
+		}
+		if (searchParams.get('error')) {
+			return (<UserSignupSSOError />);
+		}
+	}
 
 	const DEFAULT_FIELDS: IAccountFormInput = {
 		username: '',
@@ -104,21 +122,6 @@ export const UserSignupSSO = () => {
 		countryCode: 'GB',
 		termsAgreed: false,
 		mailListAgreed: false,
-	};
-
-	const onSubmit = async (values) => {
-		try {
-			const newUser = pick(values, ['username', 'company', 'countryCode', 'mailListAgreed']);
-			if (!values.company) delete newUser.company;
-			const res = await signup(newUser);
-			return res;
-		} catch (error) {
-			// if (isInvalidArguments(error))
-			// handleInvalidArgumentsError(error);
-			// }
-		}
-
-		return null;
 	};
 
 	let schema = null;
@@ -136,7 +139,33 @@ export const UserSignupSSO = () => {
 		resolver: yupResolver(schema),
 		mode: 'all',
 		defaultValues: DEFAULT_FIELDS,
+		context: { alreadyExistingUsernames },
 	});
+
+	const handleInvalidArgumentsError = (error) => {
+		if (usernameAlreadyExists(error)) {
+			setAlreadyExistingUsernames([...alreadyExistingUsernames, formData.getValues().username]);
+			formData.trigger('username');
+		}
+
+		contextValue.moveToStep(0);
+		contextValue.setErroredStep(0);
+	};
+
+	const onSubmit = async (values) => {
+		try {
+			const newUser = pick(values, ['username', 'company', 'countryCode', 'mailListAgreed']);
+			if (!values.company) delete newUser.company;
+			const res = await signup(newUser);
+			window.location.href = res.data.link;
+		} catch (error) {
+			if (isInvalidArguments(error)) {
+				handleInvalidArgumentsError(error);
+			}
+		}
+
+		return null;
+	};
 
 	return (
 		<Container>
@@ -180,7 +209,6 @@ export const UserSignupSSO = () => {
 								<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Log in" />
 							</LoginPromptLink>
 						</LoginPrompt>
-
 					</FormContainer>
 				</UserSignupMain>
 			</Background>

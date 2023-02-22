@@ -26,7 +26,7 @@ import { IconContainer } from './userSignupFormStepAccount.styles';
 import { NextStepButton } from '../userSignupFormNextButton/userSignupFormNextButton.component';
 
 export const UserSignupFormStepAccount = () => {
-	const { formState: { errors, dirtyFields }, watch, trigger } = useFormContext();
+	const { control, formState: { errors, dirtyFields }, watch, trigger } = useFormContext();
 	const password = watch('password');
 
 	useEffect(() => {
@@ -50,6 +50,7 @@ export const UserSignupFormStepAccount = () => {
 					id: 'userSignup.form.username',
 					defaultMessage: 'Username',
 				})}
+				control={control}
 				required
 				formError={errors.username}
 			/>
@@ -66,6 +67,7 @@ export const UserSignupFormStepAccount = () => {
 					id: 'userSignup.form.email',
 					defaultMessage: 'Email',
 				})}
+				control={control}
 				required
 				formError={errors.email}
 			/>
@@ -83,6 +85,7 @@ export const UserSignupFormStepAccount = () => {
 					defaultMessage: 'Password',
 				})}
 				required
+				control={control}
 				formError={errors.password}
 			/>
 			<FormPasswordField
@@ -100,6 +103,7 @@ export const UserSignupFormStepAccount = () => {
 				})}
 				required
 				disabled={!password}
+				control={control}
 				formError={errors.confirmPassword}
 			/>
 
