@@ -50,7 +50,7 @@ export const createMetadata = (comment: ITicketComment): TicketCommentReplyMetad
 	_.pick(comment, '_id', 'author', 'message', 'images') as TicketCommentReplyMetadata
 );
 
-export const extractMessage = (message: string = '') => message.replaceAll(/\[[_a-z]*\]:- ".*"\n[\n]?/g, '');
+export const stripMetadata = (message: string = '') => message.replaceAll(/\[[_a-z]*\]:- ".*"\n[\n]?/g, '');
 export const sanitiseMessage = (message: string = '') => message.replaceAll('"', '&#34;').replaceAll('\n', '<br />');
 export const desanitiseMessage = (message: string = '') => message.replaceAll('&#34;', '"').replaceAll('<br />', '\n');
 
@@ -62,7 +62,7 @@ const stringifyMetadata = ({ author, _id, message, images = [] }: TicketCommentR
 	const metadata = [
 		createMetadataValue('_id', _id),
 		createMetadataValue('author', author),
-		createMetadataValue('message', extractMessage(message)),
+		createMetadataValue('message', stripMetadata(message)),
 		createMetadataValue('images', images.join(',')),
 	];
 	return metadata.join('');

@@ -17,7 +17,7 @@
 
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
-import { extractMessage, extractMetadata, getRelativeTime } from '@/v5/store/tickets/comments/ticketComments.helpers';
+import { stripMetadata, extractMetadata, getRelativeTime } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { Gap } from '@controls/gap';
 import { useEffect, useState } from 'react';
 import { CurrentUserComment } from './currentUserComment/currentUserComment.component';
@@ -43,7 +43,7 @@ export const Comment = ({
 
 	const isCurrentUser = CurrentUserHooksSelectors.selectUsername() === author;
 	const metadata = extractMetadata(message);
-	const noMetadataMessage = !deleted ? extractMessage(message) : message;
+	const noMetadataMessage = !deleted ? stripMetadata(message) : message;
 
 	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt));
 
