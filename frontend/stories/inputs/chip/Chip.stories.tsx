@@ -16,11 +16,10 @@
  */
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Chip } from '@controls/chip';
 import StarIcon from '@assets/icons/outlined/star-outlined.svg';
 import ClockIcon from '@assets/icons/outlined/clock-outlined.svg';
 import BellIcon from '@assets/icons/outlined/bell-outlined.svg';
-import { ChipList } from '@/v5/ui/routes/viewer/tickets/ticketsList/ticketItem/ticketItem.styles';
+import { Chip } from '@controls/chip/chip.component';
 
 const Icons = {
 	star: <StarIcon />,
@@ -31,7 +30,7 @@ const Icons = {
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
-	title: 'Ticket Chips/Chip',
+	title: 'Inputs/Chip/Chip',
 	component: Chip,
 	// More on argTypes: https://storybook.js.org/docs/react/api/argtypes
 	argTypes: {
@@ -56,15 +55,18 @@ export default {
 				type: 'select',
 			},
 		},
+		onDelete: {
+			defaultValue: null,
+		},
 	},
-	parameters: { controls: { exclude: ['size', 'onDelete', 'deleteIcon', 'avatar', 'sx', 'classes', 'clickable', 'children'] } },
+	parameters: { controls: { exclude: ['size', 'onDelete', 'deleteIcon', 'avatar', 'sx', 'classes', 'clickable', 'children', 'ref'] } },
 } as ComponentMeta<typeof Chip>;
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 const Template: ComponentStory<typeof Chip> = (args) => (
-	<ChipList>
+	<div>
 		<Chip {...args} />
-	</ChipList>
+	</div>
 );
 
 export const Filled = Template.bind({});
@@ -83,4 +85,5 @@ export const Outlined = Template.bind({});
 Outlined.args = {
 	variant: 'outlined',
 	color: 'hotpink',
+	tooltip: 'I am a tooltip!',
 };
