@@ -38,6 +38,7 @@ import { UserSignup } from '../userSignup/userSignup.component';
 import { UserVerification } from '../userVerification/userVerification.component';
 import { TeamspaceLayout } from './teamspaces/teamspaceLayout/teamspaceLayout.component';
 import { UserSignupSSO } from '../userSignup/userSignUpSSO/userSignUpSSO';
+import { LoginSSO } from '../login/loginSSO.component';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -50,6 +51,9 @@ export const MainRoute = () => {
 			<Switch>
 				<Route title={formatMessage({ id: 'pageTitle.login', defaultMessage: 'Log in' })} exact path={`${path}/login`}>
 					<Login />
+				</Route>
+				<Route title={formatMessage({ id: 'pageTitle.login', defaultMessage: 'Log in' })} exact path={`${path}/login-sso`}>
+					<LoginSSO />
 				</Route>
 				<Route title={formatMessage({ id: 'pageTitle.signUp', defaultMessage: 'Create Account' })} exact path={`${path}/signup`}>
 					<UserSignup />
