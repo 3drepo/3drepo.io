@@ -17,9 +17,12 @@
 
 import { VisualSettingsDialog } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.component';
 import { formatMessage } from '@/v5/services/intl';
-import { FormModalNoButtons } from './visualSettingsModal.styles';
+import { ModalHeader } from '@controls/formModal/modalHeader/modalHeader.component';
+import { Modal } from '@controls/modal/modal.component';
+import { VisualSettingsModalContent } from './visualSettingsModal.styles';
 
 type IVisualSettingsModal = {
+	open: boolean;
 	onClickClose: () => void;
 	visualSettings: any;
 	updateSettings: (username, settings) => void;
@@ -28,20 +31,26 @@ type IVisualSettingsModal = {
 };
 
 export const VisualSettingsModal = ({
+	open,
 	onClickClose,
 	...visualSettingsProps
 }: IVisualSettingsModal) => (
-	<FormModalNoButtons
-		title={formatMessage({
-			id: 'visualSettingsModal.title',
-			defaultMessage: 'Visual Settings',
-		})}
+	<Modal
 		onClickClose={onClickClose}
-		open
+		open={open}
 	>
-		<VisualSettingsDialog
-			handleClose={onClickClose}
-			{...visualSettingsProps}
+		<ModalHeader
+			title={formatMessage({
+				id: 'visualSettingsModal.title',
+				defaultMessage: 'Visual Settings',
+			})}
+			onClickClose={onClickClose}
 		/>
-	</FormModalNoButtons>
+		<VisualSettingsModalContent>
+			<VisualSettingsDialog
+				handleClose={onClickClose}
+				{...visualSettingsProps}
+			/>
+		</VisualSettingsModalContent>
+	</Modal>
 );

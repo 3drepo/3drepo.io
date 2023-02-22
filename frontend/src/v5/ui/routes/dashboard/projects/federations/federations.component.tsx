@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 
@@ -29,6 +29,7 @@ import { Button } from '@controls/button';
 import { enableRealtimeNewFederation } from '@/v5/services/realtime/federation.events';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { FEDERATION_SEARCH_FIELDS } from '@/v5/store/federations/federations.helpers';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { FederationsList } from './federationsList';
 import { SkeletonListItem } from './federationsList/skeletonListItem';
 import { CreateFederationForm } from './createFederationForm';
@@ -43,7 +44,8 @@ export const Federations = (): JSX.Element => {
 	} = useFederationsData();
 
 	const { teamspace, project } = useParams<DashboardParams>();
-	const [createFedOpen, setCreateFedOpen] = useState(false);
+
+	const onClickCreate = () => DialogsActionsDispatchers.open(CreateFederationForm);
 
 	useEffect(() => enableRealtimeNewFederation(teamspace, project), [project]);
 
@@ -55,7 +57,7 @@ export const Federations = (): JSX.Element => {
 		<>
 			<SearchContextComponent items={favouriteFederations} fieldsToFilter={FEDERATION_SEARCH_FIELDS}>
 				<FederationsList
-					onClickCreate={() => setCreateFedOpen(true)}
+					onClickCreate={onClickCreate}
 					title={(
 						<FormattedMessage
 							id="federations.favourites.collapseTitle"
@@ -79,7 +81,7 @@ export const Federations = (): JSX.Element => {
 			<Divider />
 			<SearchContextComponent items={federations} fieldsToFilter={FEDERATION_SEARCH_FIELDS}>
 				<FederationsList
-					onClickCreate={() => setCreateFedOpen(true)}
+					onClickCreate={onClickCreate}
 					title={(
 						<FormattedMessage
 							id="federations.all.collapseTitle"
@@ -100,7 +102,7 @@ export const Federations = (): JSX.Element => {
 								startIcon={<AddCircleIcon />}
 								variant="contained"
 								color="primary"
-								onClick={() => setCreateFedOpen(true)}
+								onClick={onClickCreate}
 							>
 								<FormattedMessage id="federations.all.newFederation" defaultMessage="New Federation" />
 							</Button>
@@ -108,10 +110,6 @@ export const Federations = (): JSX.Element => {
 					)}
 				/>
 			</SearchContextComponent>
-			<CreateFederationForm
-				open={createFedOpen}
-				onClickClose={() => setCreateFedOpen(false)}
-			/>
 		</>
 	);
 };

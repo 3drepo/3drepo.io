@@ -16,22 +16,6 @@
  */
 
 import styled from 'styled-components';
-import { FormModalNoButtons as FormModalNoButtonsBase } from '@controls/formModal/formModalNoButtons/formModalNoButtons.component';
-import { FormModalContent } from '@controls/formModal/modalBody/modalBody.styles';
-
-export const FormModalNoButtons = styled(FormModalNoButtonsBase)`
-	.MuiDialog-paper {
-		width: 400px;
-
-		form {
-			min-width: unset;
-		}
-	}
-
-	${FormModalContent} {
-		padding: 0;
-	}
-`;
 
 export const VisualSettingsModalContent = styled.div`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};

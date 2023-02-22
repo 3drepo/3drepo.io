@@ -121,7 +121,7 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 
 		return generatedObject;
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('generate', 'viewpoint'));
+		yield put(DialogActions.showErrorDialog('generate', 'viewpoint', error));
 	}
 }
 

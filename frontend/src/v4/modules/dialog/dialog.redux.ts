@@ -81,6 +81,8 @@ const showDialog = (state = INITIAL_STATE, action) => {
 const showErrorDialog = (state = INITIAL_STATE, action) => {
 	const { method, dataType, message, status } = action;
 	const messageText = typeof message === 'object' && message.message ? message.message : message;
+
+	console.debug(message);
 	const config = {
 		title: 'Error',
 		template: Dialogs.ErrorDialog,

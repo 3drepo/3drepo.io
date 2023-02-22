@@ -20,15 +20,17 @@ import { getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
 import { CardContent, PanelsContainer } from './ticketsForm.styles';
 import { TicketsTopPanel } from './ticketsTopPanel/ticketsTopPanel.component';
 import { PropertiesList } from './propertiesList.component';
+import { CommentsPanel } from '../commentsPanel/commentsPanel.component';
 
 interface ModulePanelProps {
 	module: TemplateModule;
 	moduleValues: Record<string, any>;
+	scrollPanelIntoView: (isExpanding, el) => void;
 	defaultExpanded: boolean;
 }
 
-const ModulePanel = ({ module, moduleValues, defaultExpanded, ...rest }: ModulePanelProps) => (
-	<Accordion {...getModulePanelTitle(module)} defaultExpanded={defaultExpanded}>
+const ModulePanel = ({ module, moduleValues, scrollPanelIntoView, defaultExpanded, ...rest }: ModulePanelProps) => (
+	<Accordion {...getModulePanelTitle(module)} onChange={scrollPanelIntoView} defaultExpanded={defaultExpanded}>
 		<PropertiesList module={`modules.${module.name || module.type}`} properties={module.properties || []} propertiesValues={moduleValues} {...rest} />
 	</Accordion>
 );
@@ -37,24 +39,38 @@ interface Props {
 	template: Partial<ITemplate>;
 	ticket: Partial<ITicket>;
 	onPropertyBlur?: (...args) => void;
-	focusOnTitle?: boolean;
 }
 
-export const TicketForm = ({ template, ticket, ...rest }: Props) => (
-	<CardContent>
-		<TicketsTopPanel title={ticket.title} properties={template.properties || []} propertiesValues={ticket.properties} {...rest} />
-		<PanelsContainer>
-			{
-				(template.modules || []).map((module, idx) => (
-					<ModulePanel
-						key={module.name || module.type}
-						module={module}
-						moduleValues={ticket.modules[module.name]}
-						defaultExpanded={idx === 0}
-						{...rest}
-					/>
-				))
-			}
-		</PanelsContainer>
-	</CardContent>
-);
+export const TicketForm = ({ template, ticket, ...rest }: Props) => {
+	const scrollPanelIntoView = ({ target }, isExpanding) => {
+		if (!isExpanding) return;
+		const panel = target.parentNode.parentNode;
+		const scrollableContainer = panel.parentNode.parentNode.parentNode;
+		setTimeout(() => {
+			scrollableContainer.scrollTo({
+				top: panel.offsetTop - 15,
+				behavior: 'smooth',
+			});
+		}, 400);
+	};
+	return (
+		<CardContent>
+			<TicketsTopPanel title={ticket.title} properties={template.properties || []} propertiesValues={ticket.properties} {...rest} />
+			<PanelsContainer>
+				{
+					(template.modules || []).map((module, idx) => (
+						<ModulePanel
+							key={module.name || module.type}
+							module={module}
+							moduleValues={ticket.modules[module.name]}
+							defaultExpanded={idx === 0}
+							scrollPanelIntoView={scrollPanelIntoView}
+							{...rest}
+						/>
+					))
+				}
+				{template?.config?.comments && (<CommentsPanel scrollPanelIntoView={scrollPanelIntoView} />)}
+			</PanelsContainer>
+		</CardContent>
+	);
+};

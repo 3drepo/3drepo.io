@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { formatDate, formatMessage } from '@/v5/services/intl';
+import { formatDate } from '@/v5/services/intl';
 
 import {
 	DashboardListItemButton,
@@ -30,21 +30,15 @@ import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { Display } from '@/v5/ui/themes/media';
-import { FederationSettingsForm } from '@/v5/ui/routes/dashboard/projects/federations/federationSettingsForm/federationSettingsForm.component';
 import { EditFederationModal } from '@/v5/ui/routes/dashboard/projects/federations/editFederationModal/editFederationModal.component';
 
 import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { enableRealtimeFederationNewRevision, enableRealtimeFederationRemoved, enableRealtimeFederationUpdateSettings } from '@/v5/services/realtime/federation.events';
 import { DialogsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
-const MODALS = {
-	federationSettings: 'federationSettings',
-	none: 'none',
-};
 interface IFederationListItem {
 	federation: IFederation;
 }
@@ -54,22 +48,6 @@ export const FederationListItem = memo(({
 }: IFederationListItem): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
 
-	const [openModal, setOpenModal] = useState(MODALS.none);
-	const closeModal = () => setOpenModal(MODALS.none);
-
-	const onClickShare = () => {
-		const link = prefixBaseDomain(viewerRoute(teamspace, project, federation));
-		const subject = formatMessage({ id: 'shareModal.federation.subject', defaultMessage: 'federation' });
-		const title = formatMessage({ id: 'shareModal.federation.title', defaultMessage: 'Share Federation' });
-
-		DialogsActionsDispatchers.open('share', {
-			name: federation.name,
-			subject,
-			title,
-			link,
-		});
-	};
-
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
 		if (checked) {
 			FederationsActionsDispatchers.addFavourite(teamspace, project, federation._id);
@@ -78,11 +56,7 @@ export const FederationListItem = memo(({
 		}
 	};
 
-	const onClickEdit = () => {
-		DialogsActionsDispatchers.open(EditFederationModal, {
-			federation,
-		});
-	};
+	const onClickEdit = () => DialogsActionsDispatchers.open(EditFederationModal, { federation });
 
 	useEffect(() => combineSubscriptions(
 		enableRealtimeFederationUpdateSettings(teamspace, project, federation._id),
@@ -92,9 +66,7 @@ export const FederationListItem = memo(({
 
 	return (
 		<>
-			<DashboardListItem
-				key={federation._id}
-			>
+			<DashboardListItem key={federation._id}>
 				<DashboardListItemRow>
 					<DashboardListItemFederationTitle
 						minWidth={90}
@@ -163,19 +135,9 @@ export const FederationListItem = memo(({
 						/>
 					</DashboardListItemIcon>
 					<DashboardListItemIcon>
-						<FederationEllipsisMenu
-							federation={federation}
-							openShareModal={onClickShare}
-							openEditFederationModal={onClickEdit}
-							openFederationSettings={() => setOpenModal(MODALS.federationSettings)}
-						/>
+						<FederationEllipsisMenu federation={federation} onClickEdit={onClickEdit} />
 					</DashboardListItemIcon>
 				</DashboardListItemRow>
-				<FederationSettingsForm
-					open={openModal === MODALS.federationSettings}
-					federation={federation}
-					onClose={closeModal}
-				/>
 			</DashboardListItem>
 		</>
 	);

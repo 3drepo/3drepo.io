@@ -25,6 +25,9 @@ const db = require("../handler/db");
 const _ = require("lodash");
 const User = require("./user");
 
+const {v5Path} = require("../../interop");
+const { INTERNAL_DB } = require(`${v5Path}/handler/db.constants`);
+
 const types = {
 	ISSUE_ASSIGNED : "ISSUE_ASSIGNED",
 	ISSUE_CLOSED: "ISSUE_CLOSED",
@@ -33,10 +36,10 @@ const types = {
 	USER_REFERENCED : "USER_REFERENCED"
 };
 
-const NOTIFICATIONS_DB = "notifications";
+const NOTIFICATIONS_COLL = "notifications";
 
 const generateNotification = function(type, data) {
-	const timestamp = (new Date()).getTime();
+	const timestamp = new Date();
 	return Object.assign({_id:utils.generateUUID(), read:false, type, timestamp}, data);
 };
 
@@ -61,21 +64,20 @@ const unionArrayMerger = opts => (objValue, srcValue) => {
  * @param {Object} data The particular data for notification. should be relevant data for the particular type of notification.
  * @returns {Promise} Returns a promise with the recently created notification
  */
-const insertNotification = async (username, type, data) => {
-	const insertion = await db.insertOne(NOTIFICATIONS_DB, username, generateNotification(type, data));
+const insertNotification = async (user, type, data) => {
+	const insertion = await db.insertOne(INTERNAL_DB, NOTIFICATIONS_COLL, { user, ...generateNotification(type, data) });
 	return utils.objectIdToString(insertion.ops[0]);
 };
 
-const deleteNotification = (username, _id) => {
+const deleteNotification = (user, _id) => {
 	_id = utils.stringToUUID(_id);
 
-	return db.getCollection(NOTIFICATIONS_DB, username)
-		.then(c => c.deleteOne({_id}));
+	return db.deleteOne(INTERNAL_DB, NOTIFICATIONS_COLL, { user, _id });
 };
 
-const updateNotification = (username, _id, data) => {
+const updateNotification = (user, _id, data) => {
 	_id =  utils.stringToUUID(_id);
-	return db.updateMany(NOTIFICATIONS_DB, username, {_id}, { $set: data });
+	return db.updateMany(INTERNAL_DB, NOTIFICATIONS_COLL, { user, _id }, { $set: data });
 };
 
 const upsertNotification = async (username, data, type, criteria, opts) => {
@@ -85,7 +87,7 @@ const upsertNotification = async (username, data, type, criteria, opts) => {
 	}
 
 	const n = notifications[0];
-	const timestamp = (new Date()).getTime();
+	const timestamp = new Date();
 
 	const mergedData = {..._.mergeWith(n, data, unionArrayMerger(opts)), read:false,timestamp};
 
@@ -140,15 +142,15 @@ const fillModelData = async function(fullNotifications) {
 	notifications.forEach (notification => {
 		const teamSpace = modelsData[notification.teamSpace] || {};
 		const {name, federate} = teamSpace[notification.modelId] || {};
-		Object.assign(notification, {modelName: name, federation: federate, project: (modelToProject[notification.teamSpace] ?? {})[notification.modelId]});
+		Object.assign(notification, {timestamp: notification.timestamp?.getTime(), modelName: name, federation: federate, project: (modelToProject[notification.teamSpace] ?? {})[notification.modelId]});
 	});
 
 	return fullNotifications;
 
 };
 
-const getNotification = (username, type, criteria) =>
-	db.find(NOTIFICATIONS_DB, username, Object.assign({type},  criteria));
+const getNotification = (user, type, criteria) =>
+	db.find(INTERNAL_DB, NOTIFICATIONS_COLL, { user, type, ...criteria });
 
 const getHistoricAssignedRoles = (issue) => {
 	const comments = issue.comments;
@@ -246,15 +248,15 @@ module.exports = {
 
 	updateNotification,
 
-	updateAllNotifications: async function(username, data) {
-		await db.updateMany(NOTIFICATIONS_DB, username, {}, { $set: data });
+	updateAllNotifications: async function(user, data) {
+		await db.updateMany(INTERNAL_DB, NOTIFICATIONS_COLL, { user }, { $set: data });
 	},
 
 	/**
 	 * This delete all notifications for the particular user
 	 */
-	deleteAllNotifications: async function(username) {
-		await db.deleteMany(NOTIFICATIONS_DB, username, {});
+	deleteAllNotifications: async function(user) {
+		await db.deleteMany(INTERNAL_DB, NOTIFICATIONS_COLL, { user });
 	},
 
 	/**
@@ -428,11 +430,11 @@ module.exports = {
 	 * @param {string} username The username of the user which the notificatons belongs to
 	 * @returns {Promise<Notification[]>} It contains the notifications for the user passed through parameter
  	 */
-	getNotifications: function(username, criteria = {}) {
+	getNotifications: function(user, criteria = {}) {
 		if (criteria._id) {
 			criteria._id = utils.stringToUUID(criteria._id);
 		}
 
-		return db.find(NOTIFICATIONS_DB, username, criteria, undefined, {timestamp: -1}).then(fillModelData);
+		return db.find(INTERNAL_DB, NOTIFICATIONS_COLL, { user, ...criteria }, undefined, {timestamp: -1}).then(fillModelData);
 	}
 };

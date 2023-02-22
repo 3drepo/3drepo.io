@@ -63,6 +63,9 @@ export const formatMessage: typeof intlInternal.formatMessage = (descriptor, val
 export const formatDate: typeof intlInternal.formatDate = (value, opts?): string => getIntl().formatDate(value, opts);
 
 // eslint-disable-next-line max-len
+export const formatRelativeTime: typeof intlInternal.formatRelativeTime = (value, unit?, opts?): string => getIntl().formatRelativeTime(value, unit, opts);
+
+// eslint-disable-next-line max-len
 export const formatPlural: typeof intlInternal.formatPlural = (value, opts?): Intl.LDMLPluralRule => getIntl().formatPlural(value, opts);
 
 export const getIntlProviderProps = () => ({
