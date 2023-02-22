@@ -19,6 +19,9 @@ import { PureComponent } from 'react';
 
 import Grid from '@mui/material/Grid';
 import * as Yup from 'yup';
+import { formatMessage } from '@/v5/services/intl';
+import { FormattedMessage } from 'react-intl';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { Field, Form, Formik } from 'formik';
 import { ColorPicker } from '../colorPicker/colorPicker.component';
@@ -29,7 +32,6 @@ import {
 	StyledTextFieldContainer,
 	Title
 } from './newJobForm.styles';
-import { formatMessage } from '@/v5/services/intl';
 
 const NewJobSchema = Yup.object().shape({
 	name: Yup.string()
@@ -116,10 +118,14 @@ export class NewJobForm extends PureComponent<IProps, any> {
 							<SaveButton
 								type="submit"
 								variant="contained"
-								color="secondary"
+								color={isV5() ? 'primary' : 'secondary'}
 								disabled={!form.isValid || form.isValidating}
-								aria-label="Add new job">
-								+ Add job
+								aria-label="Add new job"
+							>
+								<FormattedMessage
+									id="newJobForm.addJob.button"
+									defaultMessage="+ Add job"
+								/>
 							</SaveButton>}
 						/>
 						</Form>
