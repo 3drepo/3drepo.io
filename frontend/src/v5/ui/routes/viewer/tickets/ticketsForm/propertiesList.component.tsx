@@ -18,6 +18,7 @@
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { get } from 'lodash';
+import { Fragment } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { TicketProperty } from './properties/properties.helper';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
@@ -46,7 +47,7 @@ export const PropertiesList = ({ module, properties, propertiesValues = {}, onPr
 				const PropertyComponent = TicketProperty[type] || UnsupportedProperty;
 				const formError = get(formState.errors, inputName);
 				return (
-					<>
+					<Fragment key={name}>
 						<InputController
 							Input={PropertyComponent}
 							label={name}
@@ -55,12 +56,11 @@ export const PropertiesList = ({ module, properties, propertiesValues = {}, onPr
 							name={inputName}
 							formError={formError}
 							defaultValue={propertiesValues[name] ?? defaultValue}
-							key={name}
 							onBlur={onPropertyBlur}
 							values={values}
 						/>
 						{formError && <ErrorTextGap />}
-					</>
+					</Fragment>
 				);
 			})}
 		</>
