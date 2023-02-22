@@ -21,6 +21,13 @@ import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ScrollArea } from '@controls/scrollArea';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import {
+	enableRealtimeContainerNewTicketComment,
+	enableRealtimeContainerUpdateTicketComment,
+	enableRealtimeFederationNewTicketComment,
+	enableRealtimeFederationUpdateTicketComment,
+} from '@/v5/services/realtime/ticketComments.events';
 import { FormattedMessage } from 'react-intl';
 import { IComment } from '@/v5/store/tickets/tickets.types';
 import { useEffect, useState } from 'react';
@@ -73,13 +80,23 @@ export const CommentsPanel = ({ scrollPanelIntoView }) => {
 	};
 
 	useEffect(() => {
-		if (!number) return;
+		if (!number) return null;
 		TicketsActionsDispatchers.fetchTicketComments(
 			teamspace,
 			project,
 			containerOrFederation,
 			ticketId,
 			isFederation,
+		);
+		if (isFederation) {
+			return combineSubscriptions(
+				enableRealtimeFederationNewTicketComment(teamspace, project, containerOrFederation, ticketId),
+				enableRealtimeFederationUpdateTicketComment(teamspace, project, containerOrFederation, ticketId),
+			);
+		}
+		return combineSubscriptions(
+			enableRealtimeContainerNewTicketComment(teamspace, project, containerOrFederation, ticketId),
+			enableRealtimeContainerUpdateTicketComment(teamspace, project, containerOrFederation, ticketId),
 		);
 	}, [number]);
 
