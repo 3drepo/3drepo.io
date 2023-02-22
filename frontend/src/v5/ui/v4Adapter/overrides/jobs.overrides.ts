@@ -107,10 +107,12 @@ export const V5JobsOverrides = styled.div<{ isAdmin: boolean }>`
 			${({ theme }) => theme.typography.h5}
 		}
 		& > :first-child {
-			border-radius: 5px 5px 0 0;
+			border-top-left-radius: 5px;
+			border-top-right-radius: 5px;
 		}
 		& > :last-child {
-			border-radius: 0 0 5px 5px;
+			border-bottom-left-radius: 5px;
+			border-bottom-right-radius: 5px;
 		}
 		&:empty {
 			display: none;
