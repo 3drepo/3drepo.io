@@ -48,14 +48,15 @@ export const V5JobsOverrides = styled.div<{ isAdmin: boolean }>`
 			min-height: 35px;
 			color: ${({ theme }) => theme.palette.primary.contrast};
 
-			${({ isAdmin }) => isAdmin
-				? labelButtonPrimaryStyles
-				: css`
+			${({ isAdmin }) => {
+		/* eslint-disable @typescript-eslint/indent */
+				if (isAdmin) return labelButtonPrimaryStyles;
+				return css`
 					pointer-events: none;
 					cursor: default;
 					background-color: ${({ theme }) => theme.palette.base.lightest};
-				` 
-			}
+				`;
+			}}
 
 			svg {
 				margin-right: 10px;
