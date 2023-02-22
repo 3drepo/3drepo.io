@@ -25,13 +25,12 @@ import {
 	selectJobsPending,
 	JobsActions,
 } from '../../modules/jobs';
-import { selectCurrentTeamspace, selectUsers } from '../../modules/userManagement';
+import { selectCurrentTeamspace } from '../../modules/userManagement';
 import { Jobs } from './jobs.component';
 
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,
 	jobs: selectJobs,
-	users: selectUsers,
 	colors: selectJobsColors,
 	isPending: selectJobsPending,
 });

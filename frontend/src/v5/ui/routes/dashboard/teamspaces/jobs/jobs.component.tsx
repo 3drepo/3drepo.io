@@ -15,23 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UserManagementActions } from '@/v4/modules/userManagement';
 import { Jobs as V4Jobs } from '@/v4/routes/jobs';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { V5JobsOverrides } from '@/v5/ui/v4Adapter/overrides/jobs.overrides';
-import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { useDispatch } from 'react-redux';
 import { Header, Title } from '../projects/projectsList.styles';
 
 export const Jobs = () => {
 	const { isAdmin } = TeamspacesHooksSelectors.selectCurrentTeamspaceDetails();
-	const dispatch = useDispatch();
-
-	useEffect(() => {
-		dispatch(UserManagementActions.fetchTeamspaceUsers());
-	}, []);
-
 	return (
 		<V5JobsOverrides isAdmin={isAdmin}>
 			<Header>
