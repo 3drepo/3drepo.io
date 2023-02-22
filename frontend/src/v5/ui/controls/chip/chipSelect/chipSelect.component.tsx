@@ -30,7 +30,7 @@ const SelectItem = ({ label, icon, color, ...props }: IChipSelectItem) => {
 	return <MenuItem {...props}> <Icon /> {label} </MenuItem>;
 };
 
-export const ChipSelect = ({ values, value, onBlur, onChange, ...props }: IChipSelect) => {
+export const ChipSelect = ({ values, value, onBlur, onChange, inputRef, error, helperText, ...props }: IChipSelect) => {
 	const [open, setOpen] = useState(false);
 	const arrayOfListItems: IChipMapItem[] = Object.values(values);
 
@@ -42,7 +42,16 @@ export const ChipSelect = ({ values, value, onBlur, onChange, ...props }: IChipS
 
 	return (
 		<>
-			<HiddenSelect onChange={onChange} open={open} onOpen={handleOpen} onClose={handleClose} value={value ?? ''}>
+			<HiddenSelect
+				open={open}
+				onOpen={handleOpen}
+				onClose={handleClose}
+				onChange={onChange}
+				value={value ?? ''}
+				inputRef={inputRef}
+				error={error}
+				helperText={helperText}
+			>
 				{arrayOfListItems.map(({ label, ...itemProps }) => (
 					<SelectItem key={label} value={label} label={label} {...itemProps} />
 				))}
