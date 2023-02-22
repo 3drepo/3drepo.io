@@ -58,6 +58,8 @@ export const V5JobsOverrides = styled.div`
 		min-height: unset;
 	}
 
+	${Head} svg,
+	${Head} ${Cell},
 	${SearchField} *,
 	.MuiTableSortLabel-icon .MuiTableSortLabel-icon {
 		color: ${({ theme }) => theme.palette.base.main};
@@ -84,13 +86,11 @@ export const V5JobsOverrides = styled.div`
 	}
 
 	// row items
-	${Cell} {
-		color: ${({ theme }) => theme.palette.secondary.main};
-		${({ theme }) => theme.typography.h5}
-	}
-
 	.simplebar-content {
-		color: ${({ theme }) => theme.palette.secondary.main};
+		${Cell} {
+			color: ${({ theme }) => theme.palette.secondary.main};
+			${({ theme }) => theme.typography.h5}
+		}
 		& > :first-child {
 			border-radius: 5px 5px 0 0;
 		}
