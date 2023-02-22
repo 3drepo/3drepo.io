@@ -191,6 +191,7 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 		}
 
 		// a small pause to allow visibility states to be setup before we proceed
+		// NOTE: temporary workaround until https://github.com/3drepo/3drepounity/issues/454 is resolved
 		await new Promise(resolve => setTimeout(resolve, 10));
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
