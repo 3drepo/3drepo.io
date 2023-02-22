@@ -14,15 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Footer } from '@/v4/routes/components/userManagementTab/userManagementTab.styles';
 import { Head, Row, Cell } from '@/v4/routes/components/customTable/customTable.styles';
 import { SearchField } from '@/v4/routes/components/customTable/components/cellUserSearch/cellUserSearch.styles';
 import { LoaderContainer } from '@/v4/routes/userManagement/userManagement.styles';
 import { FloatingButtonContainer } from '@/v4/routes/components/floatingActionPanel/floatingActionPanel.styles';
 import { labelButtonPrimaryStyles } from '@/v5/ui/controls/button/button.styles';
+import { NewJobBottomButton } from '@/v4/routes/jobs/jobs.styles';
+import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 
-export const V5JobsOverrides = styled.div`
+export const V5JobsOverrides = styled.div<{ isAdmin: boolean }>`
 	position: relative;
 
 	.simplebar-wrapper,
@@ -46,8 +48,13 @@ export const V5JobsOverrides = styled.div`
 			min-height: 35px;
 			color: ${({ theme }) => theme.palette.primary.contrast};
 
-			&:not(.Mui-disabled) {
-				${labelButtonPrimaryStyles}
+			${({ isAdmin }) => isAdmin
+				? labelButtonPrimaryStyles
+				: css`
+					pointer-events: none;
+					cursor: default;
+					background-color: ${({ theme }) => theme.palette.base.lightest};
+				` 
 			}
 
 			svg {
@@ -86,6 +93,10 @@ export const V5JobsOverrides = styled.div`
 		${Cell} {
 			${({ theme }) => theme.typography.kicker}
 			padding: 0;
+
+			&:nth-of-type(2) {
+				margin-left: 25px;
+			}
 		}
 	}
 
@@ -104,12 +115,40 @@ export const V5JobsOverrides = styled.div`
 		&:empty {
 			display: none;
 		}
+
+		${({ isAdmin }) => !isAdmin && css`
+			${ColorSelect} {
+				background-color: transparent;
+				pointer-events: none;
+				cursor: default;
+
+				svg {
+					display: none;
+				}
+			}
+		`}
 	}
 
 	// delete button
-	.MuiIconButton-root:hover {
-		background-color: transparent;
+	${/* sc-selector */Cell}:last-of-type {
+		.MuiIconButton-root {
+			${({ isAdmin }) => !isAdmin && css`
+				color: ${({ theme }) => theme.palette.base.lightest};
+				pointer-events: none;
+				cursor: default;
+			`}
+		
+			&:hover {
+				background-color: transparent;
+			}
+		}
 	}
+
+	${({ isAdmin }) => !isAdmin && css`
+		${NewJobBottomButton} {
+			display: none;
+		}
+	`}
 
 	${Footer} {
 		display: none;

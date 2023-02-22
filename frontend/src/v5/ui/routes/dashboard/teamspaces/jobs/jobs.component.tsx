@@ -16,17 +16,21 @@
  */
 
 import { Jobs as V4Jobs } from '@/v4/routes/jobs';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { V5JobsOverrides } from '@/v5/ui/v4Adapter/overrides/jobs.overrides';
 import { FormattedMessage } from 'react-intl';
 import { Header, Title } from '../projects/projectsList.styles';
 
-export const Jobs = () => (
-	<V5JobsOverrides>
-		<Header>
-			<Title>
-				<FormattedMessage id="jobs.title" defaultMessage="Jobs" />
-			</Title>
-		</Header>
-		<V4Jobs />
-	</V5JobsOverrides>
-);
+export const Jobs = () => {
+	const { isAdmin } = TeamspacesHooksSelectors.selectCurrentTeamspaceDetails();
+	return (
+		<V5JobsOverrides isAdmin={isAdmin}>
+			<Header>
+				<Title>
+					<FormattedMessage id="jobs.title" defaultMessage="Jobs" />
+				</Title>
+			</Header>
+			<V4Jobs />
+		</V5JobsOverrides>
+	);
+};
