@@ -58,7 +58,7 @@ const JOBS_TABLE_CELLS = [{
 interface IProps {
 	currentTeamspace: string;
 	jobs: any[];
-	users: { job: string }[];
+	users: Array<{ job: string }>;
 	colors: any[];
 	create: (teamspace, job) => void;
 	remove: (teamspace, jobId) => void;
@@ -100,10 +100,10 @@ export class Jobs extends PureComponent<IProps, IState> {
 		this.props.create(this.props.currentTeamspace, { _id: name, color });
 	}
 
-	public jobIsAssigned = (job) => {
+	public jobIsAssigned = ({ _id }) => {
 		const { users } = this.props;
 		const assignedJobs = new Set(users.map(({ job }) => job));
-		return assignedJobs.has(job._id);
+		return assignedJobs.has(_id);
 	}
 
 	public getJobsTableRows = (jobs = [], colors = []): any[] => {
