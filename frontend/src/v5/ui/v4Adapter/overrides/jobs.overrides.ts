@@ -58,22 +58,39 @@ export const V5JobsOverrides = styled.div`
 		min-height: unset;
 	}
 
-	${Cell},
 	${SearchField} *,
 	.MuiTableSortLabel-icon .MuiTableSortLabel-icon {
 		color: ${({ theme }) => theme.palette.base.main};
 	}
 
-	${SearchField} input {
-		letter-spacing: normal;
+	${SearchField}${SearchField} {
+		.search-field__label {
+			margin-top: 15px;
+		}
+
+		input {
+			letter-spacing: normal;
+		}
 	}
-	${Head} ${Cell} {
-		${({ theme }) => theme.typography.kicker}
-		padding-top: 5px;
+
+	${Head}${Head} {
+		min-height: unset;
+		height: 40px;
+
+		${Cell} {
+			${({ theme }) => theme.typography.kicker}
+			padding: 0;
+		}
 	}
 
 	// row items
+	${Cell} {
+		color: ${({ theme }) => theme.palette.secondary.main};
+		${({ theme }) => theme.typography.h5}
+	}
+
 	.simplebar-content {
+		color: ${({ theme }) => theme.palette.secondary.main};
 		& > :first-child {
 			border-radius: 5px 5px 0 0;
 		}

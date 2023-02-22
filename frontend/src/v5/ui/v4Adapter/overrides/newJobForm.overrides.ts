@@ -15,10 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { css } from 'styled-components';
-import { Container, SaveButton } from '@/v4/routes/components/newJobForm/newJobForm.styles';
+import { Container, SaveButton, Title } from '@/v4/routes/components/newJobForm/newJobForm.styles';
 
 export default css`
 	${Container} {
+		${Title} {
+			color: ${({ theme }) => theme.palette.secondary.main}
+		}
+
 		.MuiFormControl-root.MuiFormControl-root {
 			margin: 0;
 
@@ -29,7 +33,7 @@ export default css`
 		}
 
 		${SaveButton} {
-			margin-left: 0;
+			margin: 18px 0 0;
 		}
 	}
 `;
