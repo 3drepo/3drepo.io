@@ -58,6 +58,7 @@ const JOBS_TABLE_CELLS = [{
 interface IProps {
 	currentTeamspace: string;
 	jobs: any[];
+	users: { job: string }[];
 	colors: any[];
 	create: (teamspace, job) => void;
 	remove: (teamspace, jobId) => void;
@@ -99,6 +100,12 @@ export class Jobs extends PureComponent<IProps, IState> {
 		this.props.create(this.props.currentTeamspace, { _id: name, color });
 	}
 
+	public jobIsAssigned = (job) => {
+		const { users } = this.props;
+		const assignedJobs = new Set(users.map(({ job }) => job));
+		return assignedJobs.has(job._id);
+	}
+
 	public getJobsTableRows = (jobs = [], colors = []): any[] => {
 		return jobs.map((job) => {
 			const data = [
@@ -114,6 +121,7 @@ export class Jobs extends PureComponent<IProps, IState> {
 				{},
 				{
 					Icon: isV5() ? BinIcon : RemoveCircle,
+					disabled: this.jobIsAssigned(job),
 					onClick: this.onRemove.bind(null, job._id)
 				}
 			];
