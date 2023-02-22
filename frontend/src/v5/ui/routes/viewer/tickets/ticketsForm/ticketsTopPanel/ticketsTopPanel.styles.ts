@@ -23,7 +23,7 @@ export const TopPanel = styled.div`
 	position: relative;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	box-sizing: border-box;
-	display: unset; // This is necessary for sticky child elements
+	display: unset; /* This is necessary for sticky child elements */
 `;
 
 export const BaseTicketInfo = styled.div`

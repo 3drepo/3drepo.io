@@ -24,7 +24,7 @@ export const IssuePropertiesContainer = styled.div`
 	height: 50px;
 	padding: 10px 15px;
 	display: inline-flex;
-    align-items: center;
+	align-items: center;
 	width: 100%;
 	position: sticky;
 	top: 0;

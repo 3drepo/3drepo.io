@@ -19,7 +19,6 @@ import styled, { css } from 'styled-components';
 
 export const DateContainer = styled.span<{ isOverdue?: boolean; disabled?: boolean }>`
 	font-size: 10px;
-	/* padding: 3px 0; */
 	color: ${({ theme, isOverdue = false }) => (isOverdue ? theme.palette.error.main : theme.palette.secondary.main)};
 	${({ disabled }) => !disabled && css`
 		&:hover {
@@ -27,8 +26,8 @@ export const DateContainer = styled.span<{ isOverdue?: boolean; disabled?: boole
 		}
 	`}
 	display: inline-flex;
-    gap: 3px;
-    align-items: center;
+	gap: 3px;
+	align-items: center;
 `;
 
 export const EmptyDateContainer = styled(DateContainer)`
