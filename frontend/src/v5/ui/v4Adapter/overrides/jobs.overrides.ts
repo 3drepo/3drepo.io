@@ -25,6 +25,7 @@ import { labelButtonPrimaryStyles } from '@/v5/ui/controls/button/button.styles'
 export const V5JobsOverrides = styled.div`
 	position: relative;
 
+	.simplebar-wrapper,
 	${LoaderContainer} {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 	}
@@ -43,8 +44,11 @@ export const V5JobsOverrides = styled.div`
 			font-size: 12px;
 			height: 35px;
 			min-height: 35px;
+			color: ${({ theme }) => theme.palette.primary.contrast};
 
-			${labelButtonPrimaryStyles}
+			&:not(.Mui-disabled) {
+				${labelButtonPrimaryStyles}
+			}
 
 			svg {
 				margin-right: 10px;
