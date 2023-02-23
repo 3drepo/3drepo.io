@@ -20,6 +20,7 @@ import { Chip } from '../chip.component';
 
 export const FilterChip = styled(Chip).attrs(({ theme }) => ({
 	color: theme.palette.base.main,
+	clickable: false,
 }))<{ selected?: boolean }>`
 	${({ theme }) => theme.typography.kicker};
 	cursor: pointer;
@@ -28,6 +29,7 @@ export const FilterChip = styled(Chip).attrs(({ theme }) => ({
 	padding: 3px 7px;
 	margin: 0;
 	font-size: 8px;
+	letter-spacing: 0.3px;
 	border: 1px solid;
 	.MuiChip-label {
 		padding: 0;
@@ -35,16 +37,16 @@ export const FilterChip = styled(Chip).attrs(({ theme }) => ({
 	:hover {
 		color: ${({ theme }) => theme.palette.primary.main};
 		border-color: ${({ theme }) => theme.palette.primary.main};
+		background-color: inherit;
 	}
 	${({ selected }) => selected && css`
-	&& {
-		border-color: ${({ theme }) => theme.palette.primary.main};
-		color: ${({ theme }) => theme.palette.primary.main};
-		background-color: ${({ theme }) => theme.palette.primary.lightest};
-		:hover {
+		&& {
+			border-color: ${({ theme }) => theme.palette.primary.main};
+			color: ${({ theme }) => theme.palette.primary.main};
 			background-color: ${({ theme }) => theme.palette.primary.lightest};
+			:hover {
+				background-color: ${({ theme }) => theme.palette.primary.lightest};
+			}
 		}
-
-	}
 	`}
 `;
