@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { ManyOfProperty } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/manyOfProperty.component';
 import { CircleButton } from '@controls/circleButton';
+import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 import { AssigneesList as AssigneesListBase } from '../assigneesList/assigneesList.component';
 
 export const HiddenManyOfProperty = styled(ManyOfProperty)`
@@ -51,4 +52,8 @@ export const InlineAssignees = styled.div`
 	display: inline-flex;
 	align-items: center;
 	user-select: none;
+
+	${({ theme }) => theme.typography.kicker};
+	letter-spacing: 0.3px;
+	font-weight: ${FONT_WEIGHT.MEDIUM};
 `;

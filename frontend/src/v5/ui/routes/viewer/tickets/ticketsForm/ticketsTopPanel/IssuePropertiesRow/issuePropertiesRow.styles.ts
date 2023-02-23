@@ -46,7 +46,7 @@ export const PropertyTitle = styled.div`
 export const ColumnSeparator = styled.div`
 	height: 100%;
 	border-left: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
-	margin: 0 0 0 10px;
+	margin: 0 0 0 7px;
 `;
 
 export const FloatRight = styled.span`
