@@ -63,7 +63,7 @@ export class IndexedDbCache {
 		// This allows the Worker to be created from arbitrary origins, as may
 		// be done for example, when the viewer is embedded.
 
-		const result = await fetch(new URL('unity/indexeddbworker.js', this.host));
+		const result = await fetch(new URL('unity/indexeddbworker.js', this.host).toString());
 		const source = await result.text();
 		const blob = new Blob([source], { type: 'application/javascript' });
 		this.worker = new Worker(URL.createObjectURL(blob));
