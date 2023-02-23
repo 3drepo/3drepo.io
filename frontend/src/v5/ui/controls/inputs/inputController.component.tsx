@@ -14,10 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { forwardRef } from 'react';
 import { Controller, ControllerRenderProps } from 'react-hook-form';
 
 export type FormInputProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
-	name: string,
 	required: boolean,
 	label: string | JSX.Element,
 	disabled: boolean,
@@ -34,11 +34,10 @@ export type InputControllerProps<T extends FormInputProps> = T & {
 	defaultValue?: any,
 	onChange?: (event) => void,
 	onBlur?: () => void,
-	inputRef?: any,
 };
 
 // eslint-disable-next-line
-export const InputController = <T,>({
+export const InputController = forwardRef(<T,>({
 	Input,
 	name,
 	control,
@@ -46,14 +45,13 @@ export const InputController = <T,>({
 	defaultValue,
 	onChange,
 	onBlur,
-	inputRef,
 	...props
-}: InputControllerProps<T>) => (
+}: InputControllerProps<T>, ref) => (
 	<Controller
 		name={name}
 		control={control}
 		defaultValue={defaultValue}
-		render={({ field: { ref, ...field } }) => (
+		render={({ field }) => (
 			// @ts-ignore
 			<Input
 				{...field}
@@ -67,10 +65,10 @@ export const InputController = <T,>({
 					field.onBlur();
 					onBlur?.();
 				}}
-				inputRef={inputRef || ref}
+				inputRef={ref || field.ref}
 				error={!!formError}
 				helperText={formError?.message}
 			/>
 		)}
 	/>
-);
+));

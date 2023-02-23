@@ -38,7 +38,7 @@ export const FormNumberField = (props: FormType<typeof NumberField>) => (<InputC
 export const FormPasswordField = (props: FormType<typeof PasswordField>) => (<InputController Input={PasswordField} {...props} />);
 export const FormTextField = (props: FormType<typeof TextField>) => (<InputController Input={TextField} {...props} />);
 export const FormTextArea = (props: FormType<typeof TextArea>) => (<InputController Input={TextArea} {...props} />);
-export const FormTextAreaFixedSize = (props: FormType<typeof TextAreaFixedSize>) => (<InputController Input={TextAreaFixedSize} {...props} />);
+export const FormTextAreaFixedSize = forwardRef((props: FormType<typeof TextAreaFixedSize>, ref) => (<InputController Input={TextAreaFixedSize} {...props} ref={ref} />));
 
 // calendar inputs
 export const FormDatePicker = (props: FormType<typeof DatePicker>) => (<InputController Input={DatePicker} {...props} />);

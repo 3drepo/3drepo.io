@@ -190,7 +190,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 				inputProps={{
 					maxLength: Math.max(MAX_MESSAGE_LENGTH - commentReplyLength, 0),
 				}}
-				inputRef={inputRef}
+				ref={inputRef}
 			/>
 			<DragAndDrop accept={getSupportedImageExtensions()} onDrop={uploadFiles} hidden={!isDraggingFile}>
 				<FormattedMessage
