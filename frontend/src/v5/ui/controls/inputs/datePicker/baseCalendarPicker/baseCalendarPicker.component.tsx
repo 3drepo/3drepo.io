@@ -33,6 +33,7 @@ export const BaseCalendarPicker = ({
 	PickerComponent,
 	helperText,
 	error,
+	required,
 	value = null,
 	renderInput: RenderInput,
 	...props
@@ -72,6 +73,7 @@ export const BaseCalendarPicker = ({
 					onKeyDown={(e) => e.preventDefault()}
 					error={error}
 					helperText={helperText}
+					required={required}
 					inputProps={{
 						...textFieldProps.inputProps,
 						placeholder: formatMessage({
