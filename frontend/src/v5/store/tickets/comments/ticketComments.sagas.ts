@@ -29,6 +29,7 @@ import {
 	DeleteCommentAction,
 } from './ticketComments.redux';
 import { DialogsActions } from '../../dialogs/dialogs.redux';
+import { RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../../store.helpers';
 
 export function* fetchComments({
 	teamspace,
@@ -56,10 +57,7 @@ export function* fetchComments({
 				{ model: isFederation ? 'federation' : 'container' },
 			),
 			error,
-			details: formatMessage({
-				id: 'comments.fetch.error.details',
-				defaultMessage: 'If reloading the page doesn\'t work please contact support',
-			}),
+			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
 		}));
 	}
 }
@@ -102,10 +100,7 @@ export function* createComment({
 				{ model: isFederation ? 'federation' : 'container' },
 			),
 			error,
-			details: formatMessage({
-				id: 'comments.create.error.details',
-				defaultMessage: 'If reloading the page doesn\'t work please contact support',
-			}),
+			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
 		}));
 	}
 }
@@ -136,10 +131,7 @@ export function* updateComment({
 				{ model: isFederation ? 'federation' : 'container' },
 			),
 			error,
-			details: formatMessage({
-				id: 'comments.update.error.details',
-				defaultMessage: 'If reloading the page doesn\'t work please contact support',
-			}),
+			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
 		}));
 	}
 }
@@ -165,10 +157,7 @@ export function* deleteComment({
 				{ model: isFederation ? 'federation' : 'container' },
 			),
 			error,
-			details: formatMessage({
-				id: 'comments.delete.error.details',
-				defaultMessage: 'If reloading the page doesn\'t work please contact support',
-			}),
+			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
 		}));
 	}
 }

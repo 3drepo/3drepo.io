@@ -21,6 +21,7 @@ import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { TeamspacesActions, TeamspacesTypes, ITeamspace } from './teamspaces.redux';
+import { RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 
 export function* fetch() {
 	try {
@@ -33,10 +34,7 @@ export function* fetch() {
 				defaultMessage: 'loading your Teamspaces',
 			}),
 			error,
-			details: formatMessage({
-				id: 'teamspaces.fetch.error.details',
-				defaultMessage: 'If reloading the page doesn\'t work please contact support',
-			}),
+			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
 		}));
 	}
 }
@@ -52,10 +50,7 @@ export function* fetchQuota({ teamspace }) {
 				defaultMessage: 'fetching the quota',
 			}),
 			error,
-			details: formatMessage({
-				id: 'teamspaces.fetchQuota.error.details',
-				defaultMessage: 'If reloading the page doesn\'t work please contact support',
-			}),
+			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
 		}));
 	}
 }

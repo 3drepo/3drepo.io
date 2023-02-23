@@ -31,6 +31,7 @@ import {
 	FetchRiskCategoriesAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
+import { RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsAction) {
 	try {
@@ -82,10 +83,7 @@ export function* fetchTemplate({ teamspace, projectId, modelId, templateId, isFe
 				defaultMessage: 'trying to fetch a template',
 			}),
 			error,
-			details: formatMessage({
-				id: 'tickets.fetchTemplate.error.details',
-				defaultMessage: 'If reloading the page doesn\'t work please contact support',
-			}),
+			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
 		}));
 	}
 }
@@ -104,10 +102,7 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }:
 				defaultMessage: 'trying to fetch templates',
 			}),
 			error,
-			details: formatMessage({
-				id: 'tickets.fetchTemplates.error.details',
-				defaultMessage: 'If reloading the page doesn\'t work please contact support',
-			}),
+			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
 		}));
 	}
 }
