@@ -32,6 +32,7 @@ import { FormattedMessage } from 'react-intl';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { useEffect, useRef, useState } from 'react';
 import Scrollbars from 'react-custom-scrollbars';
+import { sanitiseMessage, stripMetadata } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { ViewerParams } from '../../../../routes.constants';
 import { Accordion, Comments, EmptyCommentsBox } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
@@ -69,7 +70,10 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 
 	const handleReplyToComment = (commentId) => {
 		const comment = comments.find(({ _id }) => _id === commentId);
-		setCommentReply(comment);
+		setCommentReply({
+			...comment,
+			message: sanitiseMessage(stripMetadata(comment.message)),
+		});
 	};
 
 	const handleEditComment = (commentId, message, images) => {

@@ -100,7 +100,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 		const newComment: Partial<ITicketComment> = {
 			author: currentUser.username,
 			images: imagesToUpload.map(({ src }) => src),
-			message: sanitiseMessage(messageInput),
+			message: messageInput,
 		};
 		if (commentReply) {
 			newComment.message = addReply(createMetadata(commentReply), newComment.message);
