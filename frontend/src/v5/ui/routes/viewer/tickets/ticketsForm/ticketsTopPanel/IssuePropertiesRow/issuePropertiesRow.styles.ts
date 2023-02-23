@@ -16,10 +16,11 @@
  */
 
 import styled from 'styled-components';
+import { TopPanelShadow } from '../ticketsTopPanel.styles';
 
 export const IssuePropertiesContainer = styled.div`
 	border-top: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
-	box-shadow: 0 6px 10px rgb(0 0 0 / 4%);
+	${TopPanelShadow};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	height: 50px;
 	padding: 10px 15px;

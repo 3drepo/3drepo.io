@@ -54,7 +54,7 @@ export const TicketsTopPanel = ({
 	const { formState } = useFormContext();
 	const topPanelProperties: string[] = Object.values({ ...BaseProperties, ...IssueProperties });
 	const extraProperties = filter(properties, ({ name }) => !topPanelProperties.includes(name));
-
+	const renderIssuePropertiesBar = priority && createdAt; // if template has issueProperties and is not new ticket
 	return (
 		<TopPanel>
 			<BaseTicketInfo>
@@ -89,7 +89,7 @@ export const TicketsTopPanel = ({
 				</DescriptionProperty>
 				<PropertiesList module="properties" properties={extraProperties} propertiesValues={propertiesValues} onPropertyBlur={onPropertyBlur} />
 			</BaseTicketInfo>
-			{priority && <IssuePropertiesRow onBlur={onPropertyBlur} />}
+			{renderIssuePropertiesBar && <IssuePropertiesRow onBlur={onPropertyBlur} />}
 		</TopPanel>
 	);
 };
