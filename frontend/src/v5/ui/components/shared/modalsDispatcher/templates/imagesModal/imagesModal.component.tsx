@@ -44,7 +44,7 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open 
 							<ChevronIcon />
 						</PreviousButton>
 						<Image src={images[imageIndex]} key={images[imageIndex]} />
-						<NextButton onClick={() => changeImageIndex(+1)}>
+						<NextButton onClick={() => changeImageIndex(1)}>
 							<ChevronIcon />
 						</NextButton>
 					</>
