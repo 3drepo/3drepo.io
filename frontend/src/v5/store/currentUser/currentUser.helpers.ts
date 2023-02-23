@@ -16,5 +16,7 @@
  */
 
 import { clientConfigService } from '@/v4/services/clientConfig';
+import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 
 export const avatarFileIsTooBig = (file): boolean => (file.size > clientConfigService.avatarSizeLimit);
+export const AVATAR_MAX_SIZE_MESSAGE = formatInfoUnit(clientConfigService.avatarSizeLimit);
