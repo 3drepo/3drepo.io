@@ -40,9 +40,10 @@ interface Props {
 	template: Partial<ITemplate>;
 	ticket: Partial<ITicket>;
 	onPropertyBlur?: (...args) => void;
+	focusOnTitle?: boolean;
 }
 
-export const TicketForm = ({ template, ticket, ...rest }: Props) => {
+export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) => {
 	const scrollPanelIntoView = ({ target }, isExpanding) => {
 		if (!isExpanding) return;
 		const panel = target.closest(`#${PANEL_ID}`);
@@ -57,7 +58,13 @@ export const TicketForm = ({ template, ticket, ...rest }: Props) => {
 	};
 	return (
 		<CardContent id={SCROLLBAR_ID}>
-			<TicketsTopPanel title={ticket.title} properties={template.properties || []} propertiesValues={ticket.properties} {...rest} />
+			<TicketsTopPanel
+				title={ticket.title}
+				properties={template.properties || []}
+				propertiesValues={ticket.properties}
+				focusOnTitle={focusOnTitle}
+				{...rest}
+			/>
 			<PanelsContainer>
 				{
 					(template.modules || []).map((module, idx) => (
