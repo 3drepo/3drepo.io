@@ -31,7 +31,7 @@ import {
 	FetchRiskCategoriesAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
-import { RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
+import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsAction) {
 	try {
@@ -44,7 +44,7 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: F
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'tickets.fetchTickets.error', defaultMessage: 'trying to fetch {model} tickets' },
-				{ model: isFederation ? 'federation' : 'container' },
+				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
 		}));
@@ -62,7 +62,7 @@ export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFedera
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'tickets.fetchTicket.error', defaultMessage: 'trying to fetch the ticket details for {model}' },
-				{ model: isFederation ? 'federation' : 'container' },
+				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
 		}));
@@ -135,7 +135,7 @@ export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket,
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'tickets.updateTicket.error', defaultMessage: 'trying to update the ticket for {model} ' },
-				{ model: isFederation ? 'federation' : 'container' },
+				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
 		}));
@@ -154,7 +154,7 @@ export function* createTicket({ teamspace, projectId, modelId, ticket, isFederat
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'tickets.createTicket.error', defaultMessage: 'trying to create the ticket for {model} ' },
-				{ model: isFederation ? 'federation' : 'container' },
+				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
 		}));

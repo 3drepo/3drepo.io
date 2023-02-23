@@ -29,7 +29,7 @@ import {
 	DeleteCommentAction,
 } from './ticketComments.redux';
 import { DialogsActions } from '../../dialogs/dialogs.redux';
-import { RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../../store.helpers';
+import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../../store.helpers';
 
 export function* fetchComments({
 	teamspace,
@@ -54,7 +54,7 @@ export function* fetchComments({
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'comments.fetch.error', defaultMessage: 'trying to fetch the comments for {model} ticket' },
-				{ model: isFederation ? 'federation' : 'container' },
+				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
 			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
@@ -97,7 +97,7 @@ export function* createComment({
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'comments.create.error', defaultMessage: 'trying to create the comment for {model} ticket' },
-				{ model: isFederation ? 'federation' : 'container' },
+				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
 			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
@@ -128,7 +128,7 @@ export function* updateComment({
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'comments.update.error', defaultMessage: 'trying to update the comment for {model} ticket' },
-				{ model: isFederation ? 'federation' : 'container' },
+				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
 			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
@@ -154,7 +154,7 @@ export function* deleteComment({
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'comments.delete.error', defaultMessage: 'trying to delete the comment for {model} ticket' },
-				{ model: isFederation ? 'federation' : 'container' },
+				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
 			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,

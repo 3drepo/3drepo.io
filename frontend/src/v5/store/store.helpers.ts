@@ -41,3 +41,17 @@ export const RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE = formatMessage({
 	id: 'error.details.reloadPageOrContactSupport',
 	defaultMessage: 'If reloading the page doesn\'t work please contact support',
 });
+
+export const formattedContainerText = formatMessage({
+	id: 'container',
+	defaultMessage: 'container',
+});
+
+export const formattedFederationText = formatMessage({
+	id: 'federation',
+	defaultMessage: 'federation',
+});
+
+export const getContainerOrFederationFormattedText = (isFederation) => (
+	isFederation ? formattedFederationText : formattedContainerText
+);
