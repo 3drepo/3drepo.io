@@ -14,18 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { SyntheticEvent } from 'react';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
+import { IButton } from '@controls/button/button.component';
 import { Button, Container } from './revisionsListItemButton.styles';
 
-type IRevisionsListItemButton= {
+type IProps = IButton & {
 	status?: boolean;
-	onClick?: (e: SyntheticEvent) => void;
 };
 
-export const RevisionsListItemButton = ({ status, onClick }: IRevisionsListItemButton): JSX.Element => {
+export const RevisionsListItemButton = ({ status, disabled, ...props }: IProps): JSX.Element => {
 	const isVoid = !!status;
 	const voidStr = formatMessage({ id: 'revisionDetails.void', defaultMessage: 'void' });
 	const activeStr = formatMessage({ id: 'revisionDetails.active', defaultMessage: 'active' });
@@ -35,7 +34,7 @@ export const RevisionsListItemButton = ({ status, onClick }: IRevisionsListItemB
 	return (
 		<Container>
 			<Tooltip
-				title={(
+				title={disabled ? '' : (
 					<FormattedMessage
 						id="revisionDetails.list.item.button.tooltip"
 						defaultMessage={`Change to ${changeToStatus}`}
@@ -43,9 +42,11 @@ export const RevisionsListItemButton = ({ status, onClick }: IRevisionsListItemB
 					/>
 				)}
 			>
-				<Button $isVoid={isVoid} onClick={onClick}>
-					{textStatus}
-				</Button>
+				<span>
+					<Button $isVoid={isVoid} disabled={disabled} {...props}>
+						{textStatus}
+					</Button>
+				</span>
 			</Tooltip>
 		</Container>
 	);

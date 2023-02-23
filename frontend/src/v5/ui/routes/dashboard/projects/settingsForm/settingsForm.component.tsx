@@ -32,6 +32,7 @@ import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { FormNumberField, FormSelect, FormSelectView, FormTextField } from '@controls/inputs/formInputs.component';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FlexContainer, SectionTitle, Placeholder, HiddenMenuItem } from './settingsForm.styles';
 
 const UNITS = [
@@ -166,7 +167,7 @@ export const SettingsForm = ({
 
 	const currentUnit = useWatch({ control, name: 'unit' });
 	const { teamspace, project } = useParams<DashboardParams>() as { teamspace: string, project: string };
-
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const containerOrFederationName = isContainer ? 'Container' : 'Federation';
 	const EMPTY_GIS_VALUES = { latitude: 0, longitude: 0, angleFromNorth: 0 };
 
@@ -255,12 +256,14 @@ export const SettingsForm = ({
 				label={formatMessage({ id: 'settings.form.name', defaultMessage: 'Name' })}
 				required
 				formError={errors.name}
+				disabled={!isProjectAdmin}
 			/>
 			<FormTextField
 				name="desc"
 				control={control}
 				label={formatMessage({ id: 'settings.form.desc', defaultMessage: 'Description' })}
 				formError={errors.desc}
+				disabled={!isProjectAdmin}
 			/>
 			<FlexContainer>
 				<FormSelect
@@ -271,6 +274,7 @@ export const SettingsForm = ({
 						defaultMessage: 'Units',
 					})}
 					control={control}
+					disabled={!isProjectAdmin}
 				>
 					{UNITS.map(({ name, abbreviation }) => (
 						<MenuItem key={abbreviation} value={abbreviation}>
@@ -283,6 +287,7 @@ export const SettingsForm = ({
 					control={control}
 					label={formatMessage({ id: 'settings.form.code', defaultMessage: 'Code' })}
 					formError={errors.code}
+					disabled={!isProjectAdmin}
 				/>
 			</FlexContainer>
 			{isContainer && (
@@ -294,6 +299,7 @@ export const SettingsForm = ({
 							defaultMessage: 'Category',
 						})}
 						control={control}
+						disabled={!isProjectAdmin}
 					>
 						{CONTAINER_TYPES.map((type) => (
 							<MenuItem key={type} value={type}>
@@ -314,6 +320,7 @@ export const SettingsForm = ({
 				views={containerOrFederation.views}
 				containerOrFederationId={containerOrFederation._id}
 				isContainer={isContainer}
+				disabled={!isProjectAdmin}
 			/>
 			<SectionTitle>
 				<FormattedMessage
@@ -327,12 +334,14 @@ export const SettingsForm = ({
 					control={control}
 					label={formatMessage({ id: 'settings.form.lat', defaultMessage: 'Latitude (decimal)' })}
 					formError={errors.latitude}
+					disabled={!isProjectAdmin}
 				/>
 				<FormNumberField
 					name="longitude"
 					control={control}
 					label={formatMessage({ id: 'settings.form.long', defaultMessage: 'Longitude (decimal)' })}
 					formError={errors.longitude}
+					disabled={!isProjectAdmin}
 				/>
 			</FlexContainer>
 			<FormNumberField
@@ -340,6 +349,7 @@ export const SettingsForm = ({
 				control={control}
 				label={formatMessage({ id: 'settings.form.angleFromNorth', defaultMessage: 'Angle from North (clockwise degrees)' })}
 				formError={errors.angleFromNorth}
+				disabled={!isProjectAdmin}
 			/>
 			<FlexContainer>
 				<FormNumberField
@@ -348,6 +358,7 @@ export const SettingsForm = ({
 					label={`x (${currentUnit})`}
 					formError={errors.x}
 					required
+					disabled={!isProjectAdmin}
 				/>
 				<FormNumberField
 					name="y"
@@ -355,6 +366,7 @@ export const SettingsForm = ({
 					label={`y (${currentUnit})`}
 					formError={errors.y}
 					required
+					disabled={!isProjectAdmin}
 				/>
 				<FormNumberField
 					name="z"
@@ -362,6 +374,7 @@ export const SettingsForm = ({
 					label={`z (${currentUnit})`}
 					formError={errors.z}
 					required
+					disabled={!isProjectAdmin}
 				/>
 			</FlexContainer>
 			<UnhandledErrorInterceptor expectedErrorValidators={[nameAlreadyExists]} />

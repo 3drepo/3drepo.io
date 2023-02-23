@@ -17,12 +17,13 @@
 
 import { FederationsActions } from '@/v5/store/federations/federations.redux';
 import { times } from 'lodash';
-import { selectAreStatsPending, selectContainersByFederationId, selectFavouriteFederations, selectFederationById, selectFederations, selectIsListPending } from '@/v5/store/federations/federations.selectors';
+import { selectAreStatsPending, selectContainersByFederationId, selectFavouriteFederations, selectFederationById, selectFederations, selectHasCollaboratorAccess, selectHasCommenterAccess, selectIsListPending } from '@/v5/store/federations/federations.selectors';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { federationMockFactory, prepareMockContainers, prepareMockNewFederation, prepareMockSettingsReply, federationMockStats } from './federations.fixtures';
 import { createTestStore } from '../test.helpers';
 import { containerMockFactory, prepareMockViews } from '../containers/containers.fixtures';
+import { Role } from '@/v5/store/currentUser/currentUser.types';
 
 describe('Federations: store', () => {
 	let dispatch, getState;
@@ -145,5 +146,36 @@ describe('Federations: store', () => {
 		dispatch(FederationsActions.updateFederationContainersSuccess(projectId, federationId, newContainerIds));
 		const containersFromState = selectContainersByFederationId(getState(), federationId);
 		expect(containersFromState).toEqual(newContainers);
+	});
+
+	describe('Federation permissions:', () => {
+		const CreateFederationWithRole = (role) => {
+			const newFederation = createAndAddFederationToStore({ role });
+			const hasCollaboratorAccess = selectHasCollaboratorAccess(getState(), newFederation._id);
+			const hasCommenterAccess = selectHasCommenterAccess(getState(), newFederation._id);
+
+			return { hasCollaboratorAccess, hasCommenterAccess }
+		}
+
+		it('should return Project Admins access rights', () => {
+			const { hasCollaboratorAccess, hasCommenterAccess } = CreateFederationWithRole(Role.ADMIN)
+			expect(hasCollaboratorAccess).toBeTruthy();
+			expect(hasCommenterAccess).toBeTruthy();
+		});
+		it('should return Collaborators access rights', () => {
+			const { hasCollaboratorAccess, hasCommenterAccess } = CreateFederationWithRole(Role.COLLABORATOR)
+			expect(hasCollaboratorAccess).toBeTruthy();
+			expect(hasCommenterAccess).toBeTruthy();
+		});
+		it('should return Commenters access rights', () => {
+			const { hasCollaboratorAccess, hasCommenterAccess } = CreateFederationWithRole(Role.COMMENTER)
+			expect(hasCollaboratorAccess).toBeFalsy();
+			expect(hasCommenterAccess).toBeTruthy();
+		});
+		it('should return Viewers access rights', () => {
+			const { hasCollaboratorAccess, hasCommenterAccess } = CreateFederationWithRole(Role.VIEWER)
+			expect(hasCollaboratorAccess).toBeFalsy();
+			expect(hasCommenterAccess).toBeFalsy();
+		});
 	});
 });
