@@ -27,13 +27,14 @@ export const IssuePropertiesContainer = styled.div`
 	align-items: center;
 	width: 100%;
 	position: sticky;
-	top: 0;
+	top: -1px; /* -1 stops border combining with header border making double thick border */
 	box-sizing: border-box;
 	z-index: 1;
 `;
 
 export const PropertyColumn = styled.span`
-	width: 70px;
+	width: fit-content;
+	min-width: 70px;
 `;
 
 export const PropertyTitle = styled.div`
@@ -45,5 +46,9 @@ export const PropertyTitle = styled.div`
 export const ColumnSeparator = styled.div`
 	height: 100%;
 	border-left: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
-	margin: 0 10px;
+	margin: 0 0 0 10px;
+`;
+
+export const FloatRight = styled.span`
+	margin-left: auto;
 `;

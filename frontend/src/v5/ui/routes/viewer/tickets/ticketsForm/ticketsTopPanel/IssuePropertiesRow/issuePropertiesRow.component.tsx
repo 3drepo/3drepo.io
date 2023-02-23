@@ -23,7 +23,7 @@ import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIc
 import { InputController } from '@controls/inputs/inputController.component';
 
 import { FormattedMessage } from 'react-intl';
-import { ColumnSeparator, IssuePropertiesContainer, PropertyColumn, PropertyTitle } from './issuePropertiesRow.styles';
+import { ColumnSeparator, FloatRight, IssuePropertiesContainer, PropertyColumn, PropertyTitle } from './issuePropertiesRow.styles';
 
 type IIssuePropertiesRow = {
 	dueDate: number;
@@ -83,11 +83,13 @@ export const IssuePropertiesRow = ({ dueDate, onBlur }: IIssuePropertiesRow) => 
 				values={STATUS_MAP}
 			/>
 		</PropertyColumn>
-		<InputController
-			Input={TicketDetailsAssignees}
-			name="properties.Assignees"
-			onBlur={onBlur}
-			key="Assignees"
-		/>
+		<FloatRight>
+			<InputController
+				Input={TicketDetailsAssignees}
+				name="properties.Assignees"
+				onBlur={onBlur}
+				key="Assignees"
+			/>
+		</FloatRight>
 	</IssuePropertiesContainer>
 );
