@@ -24,11 +24,16 @@ export const StopBackgroundInteraction = styled(MuiBackdrop)`
 	z-index: 15;
 `;
 
-export const Blah = styled.div`
+export const DueDateWithIconContainer = styled.div`
+	${({ theme }) => theme.typography.kicker};
+	letter-spacing: 0.3px;
 	font-weight: ${FONT_WEIGHT.BOLD};
-	padding: 3px 7px;
+	font-size: 10px;
+
+	padding: 3px 0 3px 7px;
 	height: 20px;
 	box-sizing: border-box;
+	cursor: pointer;
 `;
 
 export const CalendarIcon = styled(CalendarIconBase)`

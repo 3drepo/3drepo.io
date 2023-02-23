@@ -50,7 +50,6 @@ export const TicketsTopPanel = ({
 		createdAt,
 		updatedAt,
 		priority,
-		dueDate,
 	} = getPropertiesInCamelCase(propertiesValues);
 	const { formState } = useFormContext();
 	const topPanelProperties: string[] = Object.values({ ...BaseProperties, ...IssueProperties });
@@ -90,12 +89,7 @@ export const TicketsTopPanel = ({
 				</DescriptionProperty>
 				<PropertiesList module="properties" properties={extraProperties} propertiesValues={propertiesValues} onPropertyBlur={onPropertyBlur} />
 			</BaseTicketInfo>
-			{priority && (
-				<IssuePropertiesRow
-					dueDate={dueDate}
-					onBlur={onPropertyBlur}
-				/>
-			)}
+			{priority && <IssuePropertiesRow onBlur={onPropertyBlur} />}
 		</TopPanel>
 	);
 };

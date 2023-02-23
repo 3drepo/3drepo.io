@@ -26,11 +26,10 @@ import { FormattedMessage } from 'react-intl';
 import { ColumnSeparator, FloatRight, IssuePropertiesContainer, PropertyColumn, PropertyTitle } from './issuePropertiesRow.styles';
 
 type IIssuePropertiesRow = {
-	dueDate: number;
 	onBlur: () => void;
 };
 
-export const IssuePropertiesRow = ({ dueDate, onBlur }: IIssuePropertiesRow) => (
+export const IssuePropertiesRow = ({ onBlur }: IIssuePropertiesRow) => (
 	<IssuePropertiesContainer>
 		<PropertyColumn>
 			<PropertyTitle>
@@ -60,7 +59,12 @@ export const IssuePropertiesRow = ({ dueDate, onBlur }: IIssuePropertiesRow) => 
 					defaultMessage="Due"
 				/>
 			</PropertyTitle>
-			<DueDateWithIcon value={dueDate} onBlur={onBlur} />
+			<InputController
+				Input={DueDateWithIcon}
+				name="properties.Due Date"
+				onBlur={onBlur}
+				key="Due Date"
+			/>
 		</PropertyColumn>
 		<ColumnSeparator />
 		<PropertyColumn>

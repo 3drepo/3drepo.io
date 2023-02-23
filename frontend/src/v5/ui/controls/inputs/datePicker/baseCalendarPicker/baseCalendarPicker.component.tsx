@@ -24,6 +24,7 @@ import { formatDayOfWeek } from '../dateFormatHelper';
 export type BaseCalendarPickerProps = FormInputProps & {
 	defaultValue?: Date;
 	PickerComponent: any;
+	renderInput?: any;
 };
 
 export const BaseCalendarPicker = ({
@@ -33,6 +34,7 @@ export const BaseCalendarPicker = ({
 	helperText,
 	error,
 	value = null,
+	renderInput: RenderInput,
 	...props
 }: BaseCalendarPickerProps) => {
 	const [open, setOpen] = useState(false);
@@ -57,7 +59,11 @@ export const BaseCalendarPicker = ({
 			dayOfWeekFormatter={formatDayOfWeek}
 			defaultValue={defaultValue ? dayjs(defaultValue) : null}
 			disableHighlightToday
-			renderInput={({ ref, inputRef, ...textFieldProps }) => (
+			renderInput={({ ref, inputRef, ...textFieldProps }) => (RenderInput ? (
+				<div ref={inputRef}>
+					<RenderInput onClick={handleClick} {...textFieldProps} />
+				</div>
+			) : (
 				<TextField
 					{...textFieldProps}
 					ref={inputRef}
@@ -74,7 +80,7 @@ export const BaseCalendarPicker = ({
 						}),
 					}}
 				/>
-			)}
+			))}
 		/>
 	);
 };

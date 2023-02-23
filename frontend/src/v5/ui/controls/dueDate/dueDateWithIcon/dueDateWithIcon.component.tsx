@@ -16,17 +16,12 @@
  */
 
 import { formatDate } from '@/v5/services/intl';
-import { DatePickerWrapper } from '../datePickerWrapper.component';
-import { Blah, CalendarIcon } from '../dueDate.styles';
+import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
+import { FormInputProps } from '@controls/inputs/inputController.component';
+import { CalendarIcon, DueDateWithIconContainer } from '../dueDate.styles';
 import { DateContainer, EmptyDateContainer } from '../dueDateWithLabel/dueDateLabel/dueDateLabel.styles';
 
-type IDueDateWithIcon = {
-	value: any;
-	disabled?: boolean;
-	onBlur: () => void;
-};
-
-export const DueDateWithIcon = ({ value, disabled, onBlur }: IDueDateWithIcon) => {
+export const DueDateWithIcon = ({ value, disabled, ...props }: FormInputProps) => {
 	const isOverdue = value < Date.now();
 	const formattedDate = formatDate(value, {
 		day: 'numeric',
@@ -34,18 +29,19 @@ export const DueDateWithIcon = ({ value, disabled, onBlur }: IDueDateWithIcon) =
 		year: '2-digit',
 	});
 	return (
-		<DatePickerWrapper
-			value={value}
-			disabled={disabled}
-			onBlur={onBlur}
-		>
-			<Blah>
-				{value ? (
-					<DateContainer isOverdue={isOverdue}><CalendarIcon /> {formattedDate}</DateContainer>
-				) : (
-					<EmptyDateContainer disabled={disabled}><CalendarIcon /> Unset</EmptyDateContainer>
-				)}
-			</Blah>
-		</DatePickerWrapper>
+		<DueDateWithIconContainer>
+			<DatePicker
+				value={value}
+				disabled={disabled}
+				renderInput={
+					(args) => (value ? (
+						<DateContainer {...args} isOverdue={isOverdue}><CalendarIcon /> {formattedDate}</DateContainer>
+					) : (
+						<EmptyDateContainer {...args} disabled={disabled}><CalendarIcon /> Unset</EmptyDateContainer>
+					))
+				}
+				{...props}
+			/>
+		</DueDateWithIconContainer>
 	);
 };
