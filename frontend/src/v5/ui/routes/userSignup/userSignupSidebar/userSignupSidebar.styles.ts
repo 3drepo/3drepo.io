@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import TickBase from '@assets/icons/outlined/tick-outlined.svg';
 import { Button } from '@controls/button';
 import { Display } from '@/v5/ui/themes/media';
 import { Link } from 'react-router-dom';
@@ -23,7 +22,6 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
 	margin: auto;
-	min-height: 100vh;
 	min-width: 510px;
 	max-width: 510px;
 	box-sizing: border-box;
@@ -44,47 +42,6 @@ export const MainTitle = styled.div`
 	font-weight: lighter;
 	letter-spacing: 0.03rem;
 	margin: 8px 0 22px;
-`;
-
-export const BulletPoint = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: flex-start;
-`;
-
-export const BulletPointIcon = styled.div`
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border: solid 1px ${({ theme }) => theme.palette.primary.main};
-	border-radius: 50%;
-	min-width: 21px;
-	min-height: 21px;
-	margin-right: 10px;
-`;
-
-export const Tick = styled(TickBase)`
-	width: 13px;
-	height: 13px;
-	color: ${({ theme }) => theme.palette.primary.main};
-`;
-
-export const BulletPointMessage = styled.div`
-	display: flex;
-	flex-direction: column;
-	${({ theme }) => theme.typography.body1};
-`;
-
-export const BulletPointTitle = styled.div`
-	${({ theme }) => theme.typography.h3};
-	font-size: 1rem;
-	font-weight: 600;
-`;
-
-export const BulletPointBody = styled.div`
-	color: ${({ theme }) => theme.palette.base.main};
-	margin-bottom: 10px;
-	line-height: 1.3rem;
 `;
 
 export const SSOButton = styled(Button).attrs({

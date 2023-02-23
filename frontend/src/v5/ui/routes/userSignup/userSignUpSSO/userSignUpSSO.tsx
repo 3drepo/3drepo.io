@@ -17,7 +17,6 @@
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { formatMessage } from '@/v5/services/intl';
 import { UserSignupSchemaSSO, UserSignupSchemaTermsAndSubmit } from '@/v5/validation/userSchemes/userSignupSchemes';
-import { LogoContainer, BlueLogo } from '@components/authTemplate/authTemplate.styles';
 import UserIcon from '@assets/icons/outlined/user-outlined.svg';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -29,7 +28,7 @@ import { FormProvider, useForm, useFormContext } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { signup } from '@/v5/services/api/sso';
 import { isInvalidArguments, usernameAlreadyExists } from '@/v5/validation/errors.helpers';
-import { Background, Container, LogoHeightBalancer, UserSignupMain } from '../userSignup.styles';
+import { Container, UserSignupMain } from '../userSignup.styles';
 import { Title, Container as FormContainer, LoginPrompt, LoginPromptLink } from '../userSignupForm/userSignupForm.styles';
 import { UserSignupFormStep } from '../userSignupForm/userSignupFormStep/userSignupFormStep.component';
 import { IconContainer } from '../userSignupForm/userSignupFormStep/userSignupFormStepAccount/userSignupFormStepAccount.styles';
@@ -169,49 +168,43 @@ export const UserSignupSSO = () => {
 
 	return (
 		<Container>
-			<Background>
-				<UserSignupMain>
-					<LogoContainer>
-						<BlueLogo />
-					</LogoContainer>
-					<LogoHeightBalancer />
-					<FormContainer>
-						<Title>
-							<FormattedMessage id="userSignupSSO.title" defaultMessage="We just need a few more details from you..." />
-						</Title>
-						<FormProvider {...formData}>
-							<form onSubmit={formData.handleSubmit(onSubmit)}>
-								<UserSignupFormStepper onContextUpdated={setContextValue}>
-									<UserSignupFormStep
-										stepIndex={0}
-										label={formatMessage({
-											id: 'userSignup.step.username',
-											defaultMessage: 'Username',
-										})}
-									>
-										<UserSignupFormStepAccount />
-									</UserSignupFormStep>
-									<UserSignupFormStep
-										stepIndex={1}
-										label={formatMessage({
-											id: 'userSignup.step.termsAndSubmit',
-											defaultMessage: 'Terms and submit',
-										})}
-									>
-										<UserSignupFormStepTermsAndSubmit />
-									</UserSignupFormStep>
-								</UserSignupFormStepper>
-							</form>
-						</FormProvider>
-						<LoginPrompt>
-							<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
-							<LoginPromptLink to="/v5/login">
-								<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Log in" />
-							</LoginPromptLink>
-						</LoginPrompt>
-					</FormContainer>
-				</UserSignupMain>
-			</Background>
+			<UserSignupMain>
+				<FormContainer>
+					<Title>
+						<FormattedMessage id="userSignupSSO.title" defaultMessage="We just need a few more details from you..." />
+					</Title>
+					<FormProvider {...formData}>
+						<form onSubmit={formData.handleSubmit(onSubmit)}>
+							<UserSignupFormStepper onContextUpdated={setContextValue}>
+								<UserSignupFormStep
+									stepIndex={0}
+									label={formatMessage({
+										id: 'userSignup.step.username',
+										defaultMessage: 'Username',
+									})}
+								>
+									<UserSignupFormStepAccount />
+								</UserSignupFormStep>
+								<UserSignupFormStep
+									stepIndex={1}
+									label={formatMessage({
+										id: 'userSignup.step.termsAndSubmit',
+										defaultMessage: 'Terms and submit',
+									})}
+								>
+									<UserSignupFormStepTermsAndSubmit />
+								</UserSignupFormStep>
+							</UserSignupFormStepper>
+						</form>
+					</FormProvider>
+					<LoginPrompt>
+						<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
+						<LoginPromptLink to="/v5/login">
+							<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Log in" />
+						</LoginPromptLink>
+					</LoginPrompt>
+				</FormContainer>
+			</UserSignupMain>
 		</Container>
 	);
 };
