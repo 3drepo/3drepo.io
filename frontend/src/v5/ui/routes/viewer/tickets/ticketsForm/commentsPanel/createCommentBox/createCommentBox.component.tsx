@@ -26,7 +26,7 @@ import { uuid } from '@/v4/helpers/uuid';
 import { convertFileToImageSrc, getSupportedImageExtensions } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
-import { addReply, createMetadata, imageIsTooBig, MAX_MESSAGE_LENGTH } from '@/v5/store/tickets/comments/ticketComments.helpers';
+import { addReply, createMetadata, imageIsTooBig, IMAGE_MAX_SIZE_MESSAGE, MAX_MESSAGE_LENGTH } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
@@ -219,7 +219,8 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 							<strong>{name} </strong>
 							<FormattedMessage
 								id="customTicket.comments.images.error"
-								defaultMessage="is too big. 1GB limit."
+								defaultMessage="is too big. {value} limit."
+								values={{ value: IMAGE_MAX_SIZE_MESSAGE }}
 							/>
 						</>
 					))}

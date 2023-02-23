@@ -16,11 +16,13 @@
  */
 
 import { formatMessage, formatRelativeTime } from '@/v5/services/intl';
+import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 import _ from 'lodash';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { TicketCommentReplyMetadata, ITicketComment } from './ticketComments.types';
 
+export const IMAGE_MAX_SIZE_MESSAGE = formatInfoUnit(clientConfigService.resourceUploadSizeLimit);
 export const imageIsTooBig = (file): boolean => (file.size > clientConfigService.resourceUploadSizeLimit);
 
 // Message metadata and text functions
