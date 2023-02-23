@@ -28,8 +28,7 @@ export const LoginSSO = () => {
 
 	if (!searchParams.get('loginPost')) {
 		signin().then(({ data }) => {
-			console.log(data.link);
-			// window.location.href = data.link;
+			window.location.href = data.link;
 		});
 	}
 
