@@ -23,6 +23,7 @@ import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIc
 import { InputController } from '@controls/inputs/inputController.component';
 
 import { FormattedMessage } from 'react-intl';
+import { IssueProperties } from '../../../tickets.constants';
 import { ColumnSeparator, FloatRight, IssuePropertiesContainer, PropertyColumn, PropertyTitle } from './issuePropertiesRow.styles';
 
 type IIssuePropertiesRow = {
@@ -45,9 +46,9 @@ export const IssuePropertiesRow = ({ onBlur }: IIssuePropertiesRow) => (
 					id: 'customTicket.topPanel.priority.tooltip',
 					defaultMessage: 'Set priority',
 				})}
-				name="properties.Priority"
+				name={`properties[${IssueProperties.PRIORITY}]`}
 				onBlur={onBlur}
-				key="Priority"
+				key={IssueProperties.PRIORITY}
 				values={PRIORITY_LEVELS_MAP}
 			/>
 		</PropertyColumn>
@@ -61,9 +62,9 @@ export const IssuePropertiesRow = ({ onBlur }: IIssuePropertiesRow) => (
 			</PropertyTitle>
 			<InputController
 				Input={DueDateWithIcon}
-				name="properties.Due Date"
+				name={`properties[${IssueProperties.DUE_DATE}]`}
 				onBlur={onBlur}
-				key="Due Date"
+				key={IssueProperties.DUE_DATE}
 			/>
 		</PropertyColumn>
 		<ColumnSeparator />
@@ -81,18 +82,18 @@ export const IssuePropertiesRow = ({ onBlur }: IIssuePropertiesRow) => (
 					id: 'customTicket.topPanel.status.tooltip',
 					defaultMessage: 'Set status',
 				})}
-				name="properties.Status"
+				name={`properties[${IssueProperties.STATUS}]`}
 				onBlur={onBlur}
-				key="Status"
+				key={IssueProperties.STATUS}
 				values={STATUS_MAP}
 			/>
 		</PropertyColumn>
 		<FloatRight>
 			<InputController
 				Input={TicketDetailsAssignees}
-				name="properties.Assignees"
+				name={`properties[${IssueProperties.ASSIGNEES}]`}
 				onBlur={onBlur}
-				key="Assignees"
+				key={IssueProperties.ASSIGNEES}
 			/>
 		</FloatRight>
 	</IssuePropertiesContainer>
