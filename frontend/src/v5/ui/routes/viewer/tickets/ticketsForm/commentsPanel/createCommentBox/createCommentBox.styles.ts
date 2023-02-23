@@ -116,8 +116,9 @@ export const Image = styled(ImageWithSkeleton)<{ $error?: boolean }>`
 	`}
 `;
 
-export const ErroredImageMessage = styled.div`
+export const ErroredImageMessages = styled.div`
 	color: ${({ theme }) => theme.palette.error.main};
+	margin: 0 0 4px 15px;
 `;
 
 export const MessageInput = styled(FormTextAreaFixedSize)`

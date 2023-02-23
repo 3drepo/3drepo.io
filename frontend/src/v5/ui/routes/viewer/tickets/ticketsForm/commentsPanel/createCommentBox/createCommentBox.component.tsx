@@ -26,7 +26,7 @@ import { uuid } from '@/v4/helpers/uuid';
 import { convertFileToImageSrc, getSupportedImageExtensions } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
-import { addReply, createMetadata, imageIsTooBig, MAX_MESSAGE_LENGTH, sanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
+import { addReply, createMetadata, imageIsTooBig, MAX_MESSAGE_LENGTH } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
@@ -47,7 +47,7 @@ import {
 	Images,
 	Image,
 	ImageContainer,
-	ErroredImageMessage,
+	ErroredImageMessages,
 	FileIconInput,
 } from './createCommentBox.styles';
 import { CommentReply } from '../comment/commentReply/commentReply.component';
@@ -212,15 +212,19 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 					</Images>
 				</ScrollArea>
 			)}
-			{erroredImages.length > 0 && erroredImages.map(({ name }) => (
-				<ErroredImageMessage>
-					<strong>{name} </strong>
-					<FormattedMessage
-						id="customTicket.comments.images.error"
-						defaultMessage="is too big. 1GB limit."
-					/>
-				</ErroredImageMessage>
-			))}
+			{erroredImages.length > 0 && (
+				<ErroredImageMessages>
+					{erroredImages.map(({ name }) => (
+						<>
+							<strong>{name} </strong>
+							<FormattedMessage
+								id="customTicket.comments.images.error"
+								defaultMessage="is too big. 1GB limit."
+							/>
+						</>
+					))}
+				</ErroredImageMessages>
+			)}
 			<Controls>
 				<ActionMenu TriggerButton={<FileIconInput><FileIcon /></FileIconInput>}>
 					<ActionMenuItem>
