@@ -19,6 +19,7 @@ import { useLocation } from 'react-router-dom';
 import { verifyUser } from '@/v5/services/api/signup';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
+import { AuthForm } from '@components/authTemplate/authTemplate.styles';
 import { AuthTemplate, Title, Message, BackToLogin } from './userVerification.styles';
 
 export const UserVerification = () => {
@@ -80,18 +81,20 @@ export const UserVerification = () => {
 
 	return (
 		<AuthTemplate>
-			<Title>
-				{title}
-			</Title>
-			<Message>
-				{message}
-			</Message>
-			<BackToLogin>
-				<FormattedMessage
-					id="userVerification.backToLogin"
-					defaultMessage="Back to login"
-				/>
-			</BackToLogin>
+			<AuthForm>
+				<Title>
+					{title}
+				</Title>
+				<Message>
+					{message}
+				</Message>
+				<BackToLogin>
+					<FormattedMessage
+						id="userVerification.backToLogin"
+						defaultMessage="Back to login"
+					/>
+				</BackToLogin>
+			</AuthForm>
 		</AuthTemplate>
 	);
 };

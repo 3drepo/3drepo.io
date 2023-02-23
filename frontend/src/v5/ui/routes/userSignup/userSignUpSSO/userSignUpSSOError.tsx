@@ -15,32 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BlueLogo, LogoContainer } from '@components/authTemplate/authTemplate.styles';
 import { FormattedMessage } from 'react-intl';
-import { Background, Container, LogoHeightBalancer, UserSignupMain } from '../userSignup.styles';
+import { Container, UserSignupMain } from '../userSignup.styles';
 import { Title, Container as FormContainer, LoginPrompt, LoginPromptLink } from '../userSignupForm/userSignupForm.styles';
 
 export const UserSignupSSOError = () => (
 	<Container>
-		<Background>
-			<UserSignupMain>
-				<LogoContainer>
-					<BlueLogo />
-				</LogoContainer>
-				<LogoHeightBalancer />
-				<FormContainer>
-					<Title>
-						<FormattedMessage id="userSignupSSO.title" defaultMessage="We just need a few more details from you..." />
-					</Title>
-
-					<LoginPrompt>
-						<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
-						<LoginPromptLink to="/v5/login">
-							<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Log in" />
-						</LoginPromptLink>
-					</LoginPrompt>
-				</FormContainer>
-			</UserSignupMain>
-		</Background>
+		<UserSignupMain>
+			<FormContainer>
+				<Title>
+					<FormattedMessage id="userSignupSSO.title" defaultMessage="We just need a few more details from you..." />
+				</Title>
+				<LoginPrompt>
+					<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
+					<LoginPromptLink to="/v5/login">
+						<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Log in" />
+					</LoginPromptLink>
+				</LoginPrompt>
+			</FormContainer>
+		</UserSignupMain>
 	</Container>
 );

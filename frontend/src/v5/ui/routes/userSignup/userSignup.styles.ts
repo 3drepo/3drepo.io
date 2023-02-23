@@ -16,15 +16,18 @@
  */
 
 import styled from 'styled-components';
-import { BlueLogo, customBackgroundPath, Background as BackgroundBase } from '@components/authTemplate/authTemplate.styles';
-import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled.div`
 	display: flex;
 	flex-direction: row;
 	justify-content: stretch;
-	width: 100%;
-	min-height: 100vh;
+	max-width: 951px;
+	border-radius: 20px;
+	max-height: 627px;
+	z-index: 2;
+	background-color: red;
+    border-radius: 20px;
+
 `;
 
 export const UserSignupMain = styled.div`
@@ -34,18 +37,4 @@ export const UserSignupMain = styled.div`
 	align-items: center;
 	width: 100%;
 	height: fit-content;
-`;
-
-export const LogoHeightBalancer = styled(BlueLogo)`
-	visibility: hidden;
-	display: none;
-	margin-bottom: 100px;
-
-	@media (max-width: ${Display.Tablet}px) {
-		display: flex;
-	}
-`;
-
-export const Background = styled(BackgroundBase)`
-	${({ theme }) => !customBackgroundPath && `background: ${theme.palette.tertiary.lightest};`}
 `;

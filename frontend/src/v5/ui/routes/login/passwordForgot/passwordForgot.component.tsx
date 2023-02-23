@@ -24,6 +24,7 @@ import { Gap } from '@controls/gap';
 import { useForm } from 'react-hook-form';
 import * as API from '@/v5/services/api';
 import { FormattedMessage } from 'react-intl';
+import { AuthForm } from '@components/authTemplate/authTemplate.styles';
 import { ReturnLink } from '../components/returnLink.component';
 import { AuthHeading, AuthParagraph, FormUsernameField } from '../components/components.styles';
 
@@ -37,7 +38,7 @@ export const PasswordForgot = (): JSX.Element => {
 
 	return (
 		<AuthTemplate>
-			<form onSubmit={handleSubmit(onSubmit)}>
+			<AuthForm onSubmit={handleSubmit(onSubmit)}>
 				<AuthHeading>
 					<FormattedMessage id="auth.forgotPassword.heading" defaultMessage="Forgot Password" />
 				</AuthHeading>
@@ -70,7 +71,7 @@ export const PasswordForgot = (): JSX.Element => {
 					)
 				}
 				<ReturnLink />
-			</form>
+			</AuthForm>
 		</AuthTemplate>
 	);
 };
