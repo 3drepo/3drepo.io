@@ -29,6 +29,7 @@ const COLOUR_MAP = {
 const getBackgroundColor = (variant: ScrollbarVariant) => COLOUR_MAP[variant];
 
 const ThumbVertical = styled.div<{ variant: ScrollbarVariant }>`
+	z-index: 10;
 	right: 6px;
 	bottom: 6px;
 	top: 0px;
@@ -38,6 +39,7 @@ const ThumbVertical = styled.div<{ variant: ScrollbarVariant }>`
 `;
 
 const ThumbHorizontal = styled.div<{ variant: ScrollbarVariant }>`
+	z-index: 10;
 	left: 6px;
 	right: 6px;
 	bottom: 6px;

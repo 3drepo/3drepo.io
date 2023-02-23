@@ -22,6 +22,7 @@ import {
 	Accordion as MuiAccordion,
 	AccordionProps as MuiAccordionProps,
 } from '@mui/material';
+import { PANEL_ID } from '@/v5/store/tickets/tickets.helpers';
 import { IconContainer, TitleContainer } from './accordion.styles';
 
 export type AccordionProps = MuiAccordionProps & {
@@ -36,7 +37,7 @@ export const Accordion = ({ defaultExpanded = false, children, title, Icon, ...p
 	const toggleExpanded = () => setExpanded(!expanded);
 
 	return (
-		<MuiAccordion expanded={expanded} {...props}>
+		<MuiAccordion id={PANEL_ID} expanded={expanded} {...props}>
 			<AccordionSummary onClick={toggleExpanded}>
 				{Icon && (
 					<IconContainer>

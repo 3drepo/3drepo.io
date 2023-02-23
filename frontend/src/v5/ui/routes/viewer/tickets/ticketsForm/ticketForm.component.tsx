@@ -16,12 +16,13 @@
  */
 import { ITemplate, ITicket, TemplateModule } from '@/v5/store/tickets/tickets.types';
 import { Accordion } from '@controls/accordion/accordion.component';
-import { getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
+import { getModulePanelTitle, PANEL_ID } from '@/v5/store/tickets/tickets.helpers';
 import { CardContent, PanelsContainer } from './ticketsForm.styles';
 import { TicketsTopPanel } from './ticketsTopPanel/ticketsTopPanel.component';
 import { PropertiesList } from './propertiesList.component';
 import { CommentsPanel } from '../commentsPanel/commentsPanel.component';
 
+const SCROLLBAR_ID = 'cardScrollbar';
 interface ModulePanelProps {
 	module: TemplateModule;
 	moduleValues: Record<string, any>;
@@ -44,17 +45,18 @@ interface Props {
 export const TicketForm = ({ template, ticket, ...rest }: Props) => {
 	const scrollPanelIntoView = ({ target }, isExpanding) => {
 		if (!isExpanding) return;
-		const panel = target.parentNode.parentNode;
-		const scrollableContainer = panel.parentNode.parentNode.parentNode;
+		const panel = target.closest(`#${PANEL_ID}`);
+		if (!panel) return;
+		const scrollableContainer = panel.closest(`#${SCROLLBAR_ID}`).firstChild;
 		setTimeout(() => {
 			scrollableContainer.scrollTo({
-				top: panel.offsetTop - 15,
+				top: panel.offsetTop - 65,
 				behavior: 'smooth',
 			});
 		}, 400);
 	};
 	return (
-		<CardContent>
+		<CardContent id={SCROLLBAR_ID}>
 			<TicketsTopPanel title={ticket.title} properties={template.properties || []} propertiesValues={ticket.properties} {...rest} />
 			<PanelsContainer>
 				{

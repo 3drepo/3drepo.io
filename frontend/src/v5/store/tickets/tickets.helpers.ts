@@ -28,6 +28,8 @@ import { useParams } from 'react-router-dom';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { EditableTicket, ITemplate } from './tickets.types';
 
+export const PANEL_ID = 'modulePanel';
+
 export const modelIsFederation = (modelId: string) => (
 	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
 );
