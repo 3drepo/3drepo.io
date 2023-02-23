@@ -20,6 +20,7 @@ import { Image, SkeletonImage } from './imageWithSkeleton.styles';
 
 type ImageWithSkeletonProps = {
 	src: string,
+	draggable?: boolean,
 	className?: string,
 	onClick?: (event?) => void,
 	variant?: 'primary' | 'secondary',

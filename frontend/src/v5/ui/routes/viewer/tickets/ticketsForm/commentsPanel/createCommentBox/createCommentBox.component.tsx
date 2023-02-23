@@ -203,7 +203,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 					<Images>
 						{imagesToUpload.map(({ src, id, error }, index) => (
 							<ImageContainer key={id}>
-								<Image src={src} $error={error} onClick={() => openImagesModal(index)} />
+								<Image src={src} $error={error} onClick={() => openImagesModal(index)} draggable={false} />
 								<DeleteButton onClick={() => deleteImage(id)} error={error}>
 									<DeleteIcon />
 								</DeleteButton>
