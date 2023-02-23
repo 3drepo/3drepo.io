@@ -17,13 +17,20 @@
 
 import { createSelector } from 'reselect';
 import { ITicketCommentsState } from './ticketComments.redux';
+import { ITicketComment } from './ticketComments.types';
+
+const formatDates = ({ createdAt, updatedAt, ...comment }: ITicketComment): ITicketComment => ({
+	...comment,
+	createdAt: new Date(createdAt),
+	updatedAt: new Date(updatedAt),
+});
 
 const selectCommentsDomain = (state): ITicketCommentsState => state.ticketsComment || {};
 
 export const selectComments = createSelector(
 	selectCommentsDomain,
 	(state, ticketId) => ticketId,
-	(state, ticketId) => state.commentsByTicketId[ticketId] || [],
+	(state, ticketId) => (state.commentsByTicketId[ticketId] || []).map(formatDates),
 );
 
 export const selectCommentById = createSelector(

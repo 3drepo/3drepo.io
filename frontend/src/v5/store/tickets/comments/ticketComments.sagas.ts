@@ -43,13 +43,7 @@ export function* fetchComments({
 			? API.TicketComments.fetchFederationComments
 			: API.TicketComments.fetchContainerComments;
 		const { comments } = yield fetchModelComments(teamspace, projectId, modelId, ticketId);
-		const richComments = sortBy(comments, 'createdAt').map(({ createdAt, updatedAt, ...comment }) => ({
-			...comment,
-			createdAt: new Date(createdAt),
-			updatedAt: new Date(updatedAt),
-		}));
-
-		yield put(TicketCommentsActions.fetchCommentsSuccess(ticketId, richComments));
+		yield put(TicketCommentsActions.fetchCommentsSuccess(ticketId, sortBy(comments, 'createdAt')));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
@@ -84,12 +78,7 @@ export function* createComment({
 			? API.TicketComments.fetchFederationComment
 			: API.TicketComments.fetchContainerComment;
 
-		let fetchedComment = yield fetchModelComment(teamspace, projectId, modelId, ticketId, newCommentId);
-		fetchedComment = {
-			...fetchedComment,
-			createdAt: new Date(fetchedComment.createdAt),
-			updatedAt: new Date(fetchedComment.updatedAt),
-		};
+		const fetchedComment = yield fetchModelComment(teamspace, projectId, modelId, ticketId, newCommentId);
 		yield put(TicketCommentsActions.upsertCommentSuccess(ticketId, fetchedComment));
 		onSuccess();
 	} catch (error) {
