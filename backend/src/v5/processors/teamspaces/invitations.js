@@ -16,14 +16,23 @@
  */
 
 const { getUserByUsername } = require('../../models/users');
-const { unpack } = require('../../../v4/models/invitations');
+const { logger } = require('../../utils/logger');
+
+/* eslint-disable */
+const { v4Path } = require('../../../interop');
+const { unpack } = require(`${v4Path}/models/invitations`);
+/* eslint-enable */
 
 const Invitations = {};
 
 // istanbul ignore next
 Invitations.unpack = async (username) => {
-	const user = await getUserByUsername(username);
-	await unpack(user);
+	try {
+		const user = await getUserByUsername(username);
+		await unpack(user);
+	} catch (err) {
+		logger.logError(`Failed to process invitations for ${username}: ${err.message}`);
+	}
 };
 
 module.exports = Invitations;
