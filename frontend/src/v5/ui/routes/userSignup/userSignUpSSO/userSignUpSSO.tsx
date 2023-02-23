@@ -109,7 +109,7 @@ export const UserSignupSSO = () => {
 
 	if (searchParams.get('signupPost')) {
 		if (!searchParams.get('error') || searchParams.get('error') === '2') {
-			return (<Redirect to={{ pathname: 'v5/login-sso' }} />);
+			return (<Redirect to={{ pathname: '/v5/login-sso' }} />);
 		}
 		if (searchParams.get('error')) {
 			return (<UserSignupSSOError />);
