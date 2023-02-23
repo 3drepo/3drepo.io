@@ -31,8 +31,8 @@ export const commentMockFactory = (overrides?: Partial<ITicketComment>): ITicket
 	message: faker.random.word(),
 	images: [faker.random.word()],
 	author: faker.random.word(),
-	createdAt: faker.datatype.datetime(),
-	updatedAt: faker.datatype.datetime(),
+	createdAt: faker.datatype.datetime().getTime(),
+	updatedAt: faker.datatype.datetime().getTime(),
 	deleted: faker.datatype.boolean(),
 	...overrides,
 }) as ITicketComment;

@@ -1,5 +1,5 @@
 module.exports = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/js-with-ts',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/internals/testing/setupTests.ts'],
   moduleNameMapper: {
@@ -9,6 +9,16 @@ module.exports = {
   },
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
-    '^.+\\.svg$': '<rootDir>/internals/testing/svgTransform.ts'
+    '^.+\\.svg$': '<rootDir>/internals/testing/svgTransform.ts',
+  },
+  transformIgnorePatterns: [
+	"node_modules/(?!byte-size/.*)"
+  ],
+  globals: {
+    'ts-jest': {
+      tsconfig: {
+		allowJs: true,
+	  }
+    }
   }
 }
