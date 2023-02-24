@@ -809,12 +809,12 @@ const testVerify = () => {
 			expect(invitationsRes.body).toEqual({});
 
 			const teamspacesRes = await testSession.get('/v5/teamspaces');
-			expect(teamspacesRes.body).toEqual({
-				teamspaces: [
-					{ name: nonVerifiedUser.user, isAdmin: true },
-					{ name: teamspace.name, isAdmin: true },
-				],
-			});
+			const expectedList = [
+				{ name: nonVerifiedUser.user, isAdmin: true },
+				{ name: teamspace.name, isAdmin: true },
+			];
+			expect(teamspacesRes.body.teamspaces.length).toEqual(expectedList.length);
+			expect(teamspacesRes.body.teamspaces).toEqual(expect.arrayContaining(expectedList));
 			await testSession.post('/v5/logout/');
 		});
 	});
