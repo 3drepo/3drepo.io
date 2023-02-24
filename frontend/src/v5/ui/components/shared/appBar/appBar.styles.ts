@@ -22,7 +22,6 @@ export const Items = styled.div`
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	flex: 1;
 	max-width: calc(100% - 200px);
 	margin-left: 5px;
 	
