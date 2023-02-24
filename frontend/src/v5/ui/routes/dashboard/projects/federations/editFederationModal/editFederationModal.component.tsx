@@ -21,18 +21,20 @@ import { formatMessage } from '@/v5/services/intl';
 import { IFederation } from '@/v5/store/federations/federations.types';
 
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { IFormModal } from '@controls/modal/formModal/formDialog.component';
+import { IFormModal } from '@controls/formModal/formModal.component';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEqual } from 'lodash';
 import { EditFederation } from './editFederation';
 import { FormModal } from './editFederationModal.styles';
 
 type EditFederationModalProps = IFormModal & {
+	open: boolean;
 	federation: IFederation;
 	onClickClose?: () => void;
 };
 
 export const EditFederationModal = ({
+	open,
 	federation,
 	onClickClose,
 	...otherProps
@@ -57,7 +59,7 @@ export const EditFederationModal = ({
 	);
 	return (
 		<FormModal
-			open
+			open={open}
 			title={
 				formatMessage({
 					id: 'modal.editFederation.title',

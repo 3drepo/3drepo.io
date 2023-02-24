@@ -35,7 +35,7 @@ export const RevisionsListItemAuthor = ({
 	...rest
 }: IRevisionsListItemAuthor): JSX.Element => {
 	const { teamspace } = useParams<DashboardParams>();
-	const author: IUser | null = UsersHooksSelectors.selectUser(teamspace, authorName);
+	const author: IUser = UsersHooksSelectors.selectUser(teamspace, authorName);
 
 	return (
 		<FixedOrGrowContainer {...rest} $active={active}>
@@ -46,8 +46,8 @@ export const RevisionsListItemAuthor = ({
 						$active={active}
 						{...props}
 					>
-						<Name>{author?.firstName || authorName}</Name>
-						<Name>{author?.lastName}</Name>
+						<Name>{author.firstName}</Name>
+						<Name>{author.lastName}</Name>
 					</Text>
 				)}
 			>

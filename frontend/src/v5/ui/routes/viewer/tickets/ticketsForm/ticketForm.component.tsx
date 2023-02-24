@@ -27,6 +27,7 @@ import { UnsupportedProperty } from './properties/unsupportedProperty.component'
 import { TicketProperty } from './properties/properties.helper';
 import { TitleContainer, PanelsContainer, ErrorTextGap } from './ticketsForm.styles';
 import { TitleProperty } from './properties/titleProperty.component';
+import { CommentsPanel } from '../commentsPanel/commentsPanel.component';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
@@ -85,10 +86,11 @@ const PropertiesPanel = (props: PropertiesListProps) => (
 interface ModulePanelProps {
 	module: TemplateModule;
 	moduleValues: Record<string, any>;
+	scrollPanelIntoView: (isExpanding, el) => void;
 }
 
-const ModulePanel = ({ module, moduleValues, ...rest }: ModulePanelProps) => (
-	<Accordion {...getModulePanelTitle(module)}>
+const ModulePanel = ({ module, moduleValues, scrollPanelIntoView, ...rest }: ModulePanelProps) => (
+	<Accordion {...getModulePanelTitle(module)} onChange={scrollPanelIntoView}>
 		<PropertiesList module={`modules.${module.name || module.type}`} properties={module.properties || []} propertiesValues={moduleValues} {...rest} />
 	</Accordion>
 );
@@ -102,6 +104,19 @@ interface Props {
 
 export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) => {
 	const { formState } = useFormContext();
+
+	const scrollPanelIntoView = ({ target }, isExpanding) => {
+		if (!isExpanding) return;
+		const panel = target.parentNode.parentNode;
+		const scrollableContainer = panel.parentNode.parentNode.parentNode;
+		setTimeout(() => {
+			scrollableContainer.scrollTo({
+				top: panel.offsetTop - 15,
+				behavior: 'smooth',
+			});
+		}, 400);
+	};
+
 	return (
 		<>
 			<TitleContainer>
@@ -126,10 +141,12 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 								key={module.name || module.type}
 								module={module}
 								moduleValues={ticket.modules[module.name]}
+								scrollPanelIntoView={scrollPanelIntoView}
 								{...rest}
 							/>
 						))
 					}
+					{template?.config?.comments && (<CommentsPanel scrollPanelIntoView={scrollPanelIntoView} />)}
 				</PanelsContainer>
 			</CardContent>
 		</>

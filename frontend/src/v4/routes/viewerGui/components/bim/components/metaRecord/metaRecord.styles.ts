@@ -20,6 +20,7 @@ import styled, { css } from 'styled-components';
 import IconButton from '@mui/material/IconButton';
 import SelectSimilarIcon from '@mui/icons-material/Adjust';
 import CopyIcon from '@mui/icons-material/FileCopy';
+import { Tooltip } from '@mui/material';
 
 import { COLOR } from '@/v4/styles';
 import {
@@ -134,3 +135,12 @@ export const StyledSelectSimilarIcon = styled(SelectSimilarIcon).attrs({
 		color: ${COLOR.PRIMARY_DARK};
 	}
 `;
+
+export const BimTooltip = styled(Tooltip).attrs({
+	PopperProps: {
+		// @ts-ignore
+		sx: {
+			left: '-1px !important',
+		}
+	},
+})``;

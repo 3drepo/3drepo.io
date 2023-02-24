@@ -234,7 +234,7 @@ const testIsAccountLocked = () => {
 
 const testRemoveAllUserRecords = () => {
 	describe('Remove all user login records', () => {
-		test('Should just drop the user collection within loginRecords', async () => {
+		test('Should delete user loginRecords', async () => {
 			const user = generateRandomString();
 			await expect(LoginRecord.removeAllUserRecords(user)).resolves.toBeUndefined();
 

@@ -14,24 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Dialog } from '@mui/material';
+import { Dialog, DialogProps } from '@mui/material';
 
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { CloseButton } from './modal.styles';
 
-interface IModal {
+type IModal = DialogProps & {
 	onClickClose: () => void;
-	open:boolean;
-	children:any;
-	className?: string;
-}
+};
 
-export const Modal = ({ onClickClose, open, children, className }: IModal) => (
+export const Modal = ({ onClickClose, children, ...props }: IModal) => (
 	<Dialog
-		open={open}
 		onClose={onClickClose}
-		className={className}
 		maxWidth="md"
+		{...props}
 	>
 		<CloseButton aria-label="Close dialog" onClick={onClickClose}>
 			<CloseIcon />
