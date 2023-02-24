@@ -26,7 +26,7 @@ export type FormInputProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
 	helperText: string,
 }>;
 
-export type InputControllerProps<T extends FormInputProps> = T & {
+export type InputControllerProps<T> = T & FormInputProps & {
 	Input: (props: T) => JSX.Element,
 	name: string,
 	control?: any,
