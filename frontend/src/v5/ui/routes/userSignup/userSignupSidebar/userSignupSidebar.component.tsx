@@ -22,6 +22,7 @@ import {
 	SSOButton,
 	MainTitle,
 } from './userSignupSidebar.styles';
+import { LoginPrompt, LoginPromptLink } from '../userSignupForm/userSignupForm.styles';
 
 export const UserSignupSidebar = () => (
 	<Container>
@@ -39,5 +40,12 @@ export const UserSignupSidebar = () => (
 		>
 			<FormattedMessage id="userSignup.sidebar.sso.microsoft" defaultMessage="Sign up with Microsoft" />
 		</SSOButton>
+		<LoginPrompt>
+			<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
+			<LoginPromptLink to="/v5/login">
+				<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Log in" />
+			</LoginPromptLink>
+		</LoginPrompt>
+
 	</Container>
 );

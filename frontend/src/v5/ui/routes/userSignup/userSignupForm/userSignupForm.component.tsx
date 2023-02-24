@@ -16,7 +16,6 @@
  */
 
 import { useState } from 'react';
-import { FormattedMessage } from 'react-intl';
 import { registerNewUser } from '@/v5/services/api/signup';
 import { formatMessage } from '@/v5/services/intl';
 import {
@@ -34,10 +33,6 @@ import { UserSignupFormStepPersonal } from './userSignupFormStep/userSignupFormS
 import { UserSignupFormStepTermsAndSubmit } from './userSignupFormStep/userSignupFormStepTermsAndSubmit/userSignupFormStepTermsAndSubmit.component';
 import {
 	Container,
-	Title,
-	Underlined,
-	LoginPrompt,
-	LoginPromptLink,
 } from './userSignupForm.styles';
 import { UserSignupFormStep } from './userSignupFormStep/userSignupFormStep.component';
 import { UserSignupWelcomeProps } from '../userSignupWelcome/userSignupWelcome.component';
@@ -48,7 +43,6 @@ type UserSignupFormProps = {
 };
 
 export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) => {
-	const LAST_STEP = 2;
 	const [alreadyExistingUsernames, setAlreadyExistingUsernames] = useState([]);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
 
@@ -118,23 +112,6 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 
 	return (
 		<Container>
-			<Title>
-				{contextValue?.activeStep < LAST_STEP ? (
-					<FormattedMessage
-						id="userSignup.title.middleStep"
-						defaultMessage="Create your {free} account"
-						values={{
-							free: (
-								<Underlined>
-									<FormattedMessage id="userSignup.title.middleStep.free" defaultMessage="free" />
-								</Underlined>
-							),
-						}}
-					/>
-				) : (
-					<FormattedMessage id="userSignup.title.lastStep" defaultMessage="Almost there..." />
-				)}
-			</Title>
 			<FormProvider {...formData}>
 				<form onSubmit={formData.handleSubmit(onSubmit)}>
 					<UserSignupFormStepper
@@ -161,12 +138,6 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 					</UserSignupFormStepper>
 				</form>
 			</FormProvider>
-			<LoginPrompt>
-				<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
-				<LoginPromptLink to="/v5/login">
-					<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Log in" />
-				</LoginPromptLink>
-			</LoginPrompt>
 		</Container>
 	);
 };

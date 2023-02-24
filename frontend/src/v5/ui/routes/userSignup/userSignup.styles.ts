@@ -25,8 +25,9 @@ export const Container = styled.div`
 	border-radius: 20px;
 	max-height: 627px;
 	z-index: 2;
-	background-color: red;
     border-radius: 20px;
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	padding: 45px;
 
 `;
 
@@ -35,6 +36,5 @@ export const UserSignupMain = styled.div`
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	width: 100%;
 	height: fit-content;
 `;

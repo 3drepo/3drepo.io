@@ -24,10 +24,16 @@ export const MainContentStyling = css`
 	margin: 28px;
 	width: 454px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border-radius: 6px;
+	border-radius: 10px;
 	box-sizing: border-box;
+	margin: 0;
 	/* TODO - fix after new design will be released */
 	box-shadow: ${clientConfigService.getCustomBackgroundImagePath() ? '0px 8px 15px -3px #878787' : '0 1px 1px rgb(0 0 0 / 14%)'};
+`;
+
+export const Title = styled.div`
+	${({ theme }) => theme.typography.h1};
+	color: ${({ theme }) => theme.palette.secondary.main};
 `;
 
 export const Container = styled.div`
@@ -36,11 +42,6 @@ export const Container = styled.div`
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-`;
-
-export const Title = styled.div`
-	${({ theme }) => theme.typography.h1};
-	color: ${({ theme }) => theme.palette.secondary.main};
 `;
 
 export const Underlined = styled.div`
