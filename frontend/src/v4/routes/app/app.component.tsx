@@ -138,11 +138,17 @@ export class App extends PureComponent<IProps, IState> {
 				{this.renderHeader(!isStaticRoute(location.pathname))}
 				<Switch>
 					<Route exact path="/">
-						<Redirect to="v5/" />
+						{() => {
+							// Using this instead of <Redirect /> to force refresh so that isV5() is updated
+							window.location.replace('v5/');
+						}}
 					</Route>
 					{this.renderLoginRoute()}
 					<Route exact path={ROUTES.SIGN_UP}>
-						<Redirect to="v5/signup" />
+						{() => {
+							// Using this instead of <Redirect /> to force refresh so that isV5() is updated
+							window.location.replace('v5/signup');
+						}}
 					</Route>
 					<Route exact path={ROUTES.PASSWORD_FORGOT} component={PasswordForgot} />
 					<Route exact path={ROUTES.PASSWORD_CHANGE} component={PasswordChange} />

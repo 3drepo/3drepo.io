@@ -196,7 +196,7 @@ invitations.teamspaceInvitationCheck = async (email, teamspace) => {
 
 const applyModelPermissions = (teamspace, invitedUser, modelsPermissions) => async modelSetting=> {
 	const {permission} = modelsPermissions.find(({model}) => model === modelSetting._id);
-	return await changePermissions(teamspace, modelSetting._id, modelSetting.permissions.concat({user: invitedUser, permission}));
+	return changePermissions(teamspace, modelSetting._id, modelSetting.permissions.concat({user: invitedUser, permission}));
 };
 
 const applyProjectPermissions = (teamspace, invitedUser) => async ({ project_admin , project, models}) => {
