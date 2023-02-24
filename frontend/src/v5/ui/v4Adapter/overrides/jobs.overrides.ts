@@ -114,6 +114,7 @@ export const V5JobsOverrides = styled.div<{ isAdmin: boolean }>`
 		& > :last-child {
 			border-bottom-left-radius: 5px;
 			border-bottom-right-radius: 5px;
+			border: none;
 		}
 		&:empty {
 			display: none;
@@ -134,6 +135,10 @@ export const V5JobsOverrides = styled.div<{ isAdmin: boolean }>`
 
 	// delete button
 	${/* sc-selector */Cell}:last-of-type {
+		svg {
+			width: 15px;
+		}
+
 		.MuiIconButton-root {
 			${({ isAdmin }) => !isAdmin && css`
 				color: ${({ theme }) => theme.palette.base.lightest};
