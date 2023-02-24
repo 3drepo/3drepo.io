@@ -32,6 +32,11 @@ export const V5JobsOverrides = styled.div<{ isAdmin: boolean }>`
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 	}
 
+	.simplebar-track.simplebar-horizontal,
+	.simplebar-track.simplebar-vertical {
+		height: 0;
+	}
+
 	${FloatingButtonContainer} {
 		top: 0;
 		right: 0;
