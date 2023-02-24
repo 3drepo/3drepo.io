@@ -23,7 +23,7 @@ import { FONT_WEIGHT } from '@/v4/styles';
 
 export const MainContentStyling = css`
 	margin: 28px;
-	width: 454px;
+	width: 408px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	border-radius: 10px;
 	box-sizing: border-box;
