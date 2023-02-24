@@ -163,27 +163,31 @@ export class UnityUtil {
 
 		const clearedFlagKey = 'repoV1CacheCleared';
 
-		if (!window.localStorage.getItem(clearedFlagKey)) {
-			const id = (Math.floor(Math.random() * 100000)).toString();
-			window.localStorage.setItem(clearedFlagKey, id);
-			if (window.localStorage.getItem(clearedFlagKey) === id) {
-				const deleteRequest = indexedDB.deleteDatabase('/idbfs');
-				return new Promise((resolve) => {
-					deleteRequest.onsuccess = () => {
-						resolve();
-					};
-					deleteRequest.onerror = () => {
-						console.error('Failed to delete /idbfs. Consider clearing the cache or deleting this database manually.');
-						resolve();
-					};
-					deleteRequest.onblocked = () => { // If the request was blocked its most likely because another tab has idbfs open, so leave it alone
-						resolve();
-					};
-					deleteRequest.onupgradeneeded = () => {
-						resolve();
-					};
-				});
+		try {
+			if (!window.localStorage.getItem(clearedFlagKey)) {
+				const id = (Math.floor(Math.random() * 100000)).toString();
+				window.localStorage.setItem(clearedFlagKey, id);
+				if (window.localStorage.getItem(clearedFlagKey) === id) {
+					const deleteRequest = indexedDB.deleteDatabase('/idbfs');
+					return new Promise((resolve) => {
+						deleteRequest.onsuccess = () => {
+							resolve();
+						};
+						deleteRequest.onerror = () => {
+							console.error('Failed to delete /idbfs. Consider clearing the cache or deleting this database manually.');
+							resolve();
+						};
+						deleteRequest.onblocked = () => { // If the request was blocked its most likely because another tab has idbfs open, so leave it alone
+							resolve();
+						};
+						deleteRequest.onupgradeneeded = () => {
+							resolve();
+						};
+					});
+				}
 			}
+		} catch (error) {
+			console.error('Unable to clear IndexDbFs', error);
 		}
 		return Promise.resolve();
 	}
