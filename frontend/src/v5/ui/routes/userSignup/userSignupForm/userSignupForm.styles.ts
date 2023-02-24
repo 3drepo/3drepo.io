@@ -19,6 +19,7 @@ import { Link } from 'react-router-dom';
 import StepperBase from '@mui/material/Stepper';
 import StepLabelBase from '@mui/material/StepLabel';
 import { clientConfigService } from '@/v4/services/clientConfig';
+import { FONT_WEIGHT } from '@/v4/styles';
 
 export const MainContentStyling = css`
 	margin: 28px;
@@ -72,7 +73,9 @@ export const LoginPrompt = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
 	font-family: ${({ theme }) => theme.typography.fontFamily};
 	text-decoration: none;
-	font-weight: 400;
+	font-weight: ${FONT_WEIGHT.BOLD};
+	font-size: 13px;
+	line-height: 19px;
 `;
 
 export const LoginPromptLink = styled(Link)`
