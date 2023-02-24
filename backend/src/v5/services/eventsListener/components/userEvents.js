@@ -17,19 +17,14 @@
 
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { initTeamspace } = require('../../../processors/teamspaces/teamspaces');
-const { logger } = require('../../../utils/logger');
 const { subscribe } = require('../../eventsManager/eventsManager');
 const { unpack: unpackInvitations } = require('../../../processors/teamspaces/invitations');
 
 const userVerified = async ({ username }) => {
-	try {
-		await Promise.all([
-			initTeamspace(username),
-			unpackInvitations(username),
-		]);
-	} catch (err) {
-		logger.logError(`Failed to process actions after user verification: ${err.message}`);
-	}
+	await Promise.all([
+		initTeamspace(username),
+		unpackInvitations(username),
+	]);
 };
 
 const UserEventsListener = {};
