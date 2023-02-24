@@ -16,13 +16,14 @@
  */
 
 import { UploadStatuses } from '../containers/containers.types';
+import { Role } from '../currentUser/currentUser.types';
 import { SurveyPoint, View } from '../store.types';
 
 export interface IFederation {
 	_id: string;
 	desc?: string;
 	name: string;
-	role: string;
+	role: Role;
 	isFavourite: boolean;
 	code?: string;
 	status: UploadStatuses;

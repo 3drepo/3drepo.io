@@ -17,11 +17,13 @@
 import { useRouteMatch } from 'react-router-dom';
 import { discardSlash, discardUrlComponent } from '@/v5/services/routing/routing';
 import { FormattedMessage } from 'react-intl';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Container, Link } from '../navigationTabs.styles';
 
 export const ProjectNavigation = (): JSX.Element => {
 	let { url } = useRouteMatch();
 	url = discardSlash(url);
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	return (
 		<Container>
@@ -30,8 +32,8 @@ export const ProjectNavigation = (): JSX.Element => {
 			<Link to={`${url}/t/board`}><FormattedMessage id="projectNavigation.issuesAndRisks" defaultMessage="Issues and risks" /></Link>
 			<Link to={`${url}/t/tasks`}><FormattedMessage id="projectNavigation.tasks" defaultMessage="Tasks" /></Link>
 			<Link to={`${discardUrlComponent(url, 'settings')}/t/project_settings`}><FormattedMessage id="projectNavigation.settings" defaultMessage="Project settings" /></Link>
-			<Link to={`${url}/t/project_permissions`}><FormattedMessage id="projectNavigation.projectPermissions" defaultMessage="Project permissions" /></Link>
-			<Link to={`${url}/t/user_permissions`}><FormattedMessage id="projectNavigation.userPermission" defaultMessage="User permissions" /></Link>
+			{ isProjectAdmin && <Link to={`${url}/t/project_permissions`}><FormattedMessage id="projectNavigation.projectPermissions" defaultMessage="Project permissions" /></Link> }
+			{ isProjectAdmin && <Link to={`${url}/t/user_permissions`}><FormattedMessage id="projectNavigation.userPermission" defaultMessage="User permissions" /></Link> }
 		</Container>
 	);
 };

@@ -14,12 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { DialogContainer, Actions, Details, Status, WarningIcon } from '@/v5/ui/components/shared/modals/modals.styles';
 import { AxiosError } from 'axios';
-import { getErrorCode, getErrorMessage, getErrorStatus } from '@/v5/validation/errors.helpers';
+import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isPathNotAuthorized, isProjectNotFound, isResourceNotFound } from '@/v5/validation/errors.helpers';
+import { generatePath, useHistory } from 'react-router';
+import { DASHBOARD_ROUTE, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { formatMessage } from '@/v5/services/intl';
 
 interface IAlertModal {
 	onClickClose?: () => void,
@@ -29,10 +33,46 @@ interface IAlertModal {
 }
 
 export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '', error, details }) => {
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
+	const history = useHistory();
+
 	const message = getErrorMessage(error);
 	const code = getErrorCode(error);
 	const status = getErrorStatus(error);
 	const errorStatus = status && code ? `${status} - ${code}` : '';
+	const pathNotFound = isPathNotFound(error);
+	const unauthorized = isPathNotAuthorized(error);
+	const unauthInTeamspace = unauthorized && teamspace;
+	const unauthInProject = unauthorized && project;
+
+	const getSafePath = () => {
+		// eslint-disable-next-line max-len
+		if (isResourceNotFound(code) || (unauthInProject)) return generatePath(PROJECT_ROUTE_BASE, { teamspace, project });
+		if (isProjectNotFound(code) || (unauthInTeamspace)) return generatePath(TEAMSPACE_ROUTE_BASE, { teamspace });
+		// Teamspace not found
+		return generatePath(DASHBOARD_ROUTE);
+	};
+
+	const getSafePathName = () => {
+		if (isResourceNotFound(code) || (unauthInProject)) {
+			return formatMessage({ id: 'alertModal.redirect.project', defaultMessage: 'the project page' });
+		}
+		if (isProjectNotFound(code) || (unauthInTeamspace)) {
+			return formatMessage({ id: 'alertModal.redirect.teamspace', defaultMessage: 'the teamspace page' });
+		}
+		// teamspace not found
+		return formatMessage({ id: 'alertModal.redirect.dashboard', defaultMessage: 'the dashboard' });
+	};
+
+	const redirectToSafePath = () => {
+		const path = getSafePath();
+		history.push(path);
+	};
+
+	useEffect(() => () => {
+		if (pathNotFound || unauthorized) redirectToSafePath();
+	}, []);
 
 	return (
 		<DialogContainer>
@@ -43,6 +83,16 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 					defaultMessage="Something went wrong when {currentActions}"
 					values={{ currentActions }}
 				/>
+				{(pathNotFound || unauthorized) && (
+					<>.
+						<br />
+						<FormattedMessage
+							id="alertModal.redirect"
+							defaultMessage="You'll be redirected to {to}."
+							values={{ to: getSafePathName() }}
+						/>
+					</>
+				)}
 			</DialogTitle>
 			<DialogContent>
 				<DialogContentText>

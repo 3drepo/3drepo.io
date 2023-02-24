@@ -16,7 +16,7 @@
  */
 
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
-import { selectCurrentProject, selectCurrentProjectDetails, selectCurrentProjects } from '@/v5/store/projects/projects.selectors';
+import { selectCurrentProject, selectCurrentProjectDetails, selectCurrentProjects, selectIsProjectAdmin } from '@/v5/store/projects/projects.selectors';
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { times } from 'lodash';
 import { projectMockFactory } from './projects.fixtures';
@@ -90,4 +90,14 @@ describe('Projects: store', () => {
 			expect(projectIsIncluded).toBeFalsy();
 		});
 	});
+
+	it('should return a users project admin status', () => {
+		const adminProject = createAndAddProjectToStore({ isAdmin: true });
+		dispatch(ProjectsActions.setCurrentProject(adminProject._id));
+		expect(selectIsProjectAdmin(getState())).toBeTruthy();
+		
+		const nonAdminProject = createAndAddProjectToStore({ isAdmin: false });
+		dispatch(ProjectsActions.setCurrentProject(nonAdminProject._id));
+		expect(selectIsProjectAdmin(getState())).toBeFalsy();
+	})
 });
