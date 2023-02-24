@@ -16,15 +16,18 @@
  */
 
 import { Button } from '@controls/button';
-import { Link } from 'react-router-dom';
+import { Link as BaseLink } from 'react-router-dom';
 import styled from 'styled-components';
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
+import { Typography } from '@mui/material';
 
 export const Container = styled.div`
 	margin: auto;
 	box-sizing: border-box;
 	display: block;
 	width: 412px;
+	color: ${({ theme }) => theme.palette.secondary.main};
+	margin-left: 40px;
 `;
 
 export const MainTitle = styled.div`
@@ -32,25 +35,82 @@ export const MainTitle = styled.div`
 	font-size: 40px;
 	font-weight: ${FONT_WEIGHT.BOLDER};
 	line-height: 42px;
+	margin-bottom: 27px;
+	width: 270px;
 `;
 
 export const SSOButton = styled(Button).attrs({
-	component: Link,
+	component: BaseLink,
 	variant: 'contained',
 	color: 'primary',
 })`
 	width: fit-content;
-	font-weight: 300;
-	margin: 28px 0 0;
-	padding: 10px 20px 10px 28px;
+	font-weight: 500;
+	font-size: 12px;
 	border-radius: 0;
 	background-color: #2F2F2F;
 
 	&:hover {
-		backgroundColor: #2F2F2F,
-	},
+		background-color: #2F2F2FF0;
+	}
 
 	&:active{
-		backgroundColor: #2F2F2F,
+		background-color: #2F2F2FF0;
 	}
+
+	margin: 0 0 43px 0;
+	padding:20px;
+`;
+
+export const SignUpWithMicrosoftText = styled(Typography)`
+	${({ theme }) => theme.typography.h1};
+	margin-bottom: 10px;
+`;
+
+export const MicrosoftInstructionsText = styled(Typography)`
+	${({ theme }) => theme.typography.body1};
+	color: ${({ theme }) => theme.palette.base.main};
+	margin-bottom: 5px;
+    width: 376px;
+`;
+
+export const MicrosoftInstructionsRemarkText = styled(Typography)`
+	${({ theme }) => theme.typography.body1};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	font-weight: ${FONT_WEIGHT.BOLDER};
+    font-size: 10px;
+`;
+
+export const MicrosoftInstructionsTermsText = styled(Typography)`
+	${({ theme }) => theme.typography.inter};
+	color: ${({ theme }) => theme.palette.base.main};
+	width: 360px;
+	font-size: 10px;
+	margin-bottom: 20px;
+`;
+
+export const Link = styled(BaseLink)`
+	&& {
+		color: ${({ theme }) => theme.palette.primary.main};
+		text-decoration: none;
+		font-weight: ${FONT_WEIGHT.BOLDER};
+	}
+`;
+
+export const SidebarContent = styled.div`
+	margin-left: 4px;
+`;
+
+export const NewSticker = styled.div`
+	${({ theme }) => theme.typography.inter};
+	color: ${({ theme }) => theme.palette.primary.main};
+	border: solid 1.5px ${({ theme }) => theme.palette.primary.main}; 
+	border-radius: 5px;
+    padding: 4px 6px;
+    display: inline;
+    font-size: 10px;
+    font-weight: 700;
+    top: -4px;
+    position: relative;
+    left: 8px;
 `;
