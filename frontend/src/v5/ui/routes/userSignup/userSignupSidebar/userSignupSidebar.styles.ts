@@ -16,32 +16,22 @@
  */
 
 import { Button } from '@controls/button';
-import { Display } from '@/v5/ui/themes/media';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 
 export const Container = styled.div`
 	margin: auto;
-	min-width: 510px;
-	max-width: 510px;
 	box-sizing: border-box;
-	padding: 0 70px;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	background-color: ${({ theme }) => theme.palette.secondary.main};
-	color: ${({ theme }) => theme.palette.primary.contrast};
-	
-	@media (max-width: ${Display.Tablet}px) {
-		display: none;
-	}
+	display: block;
+	width: 412px;
 `;
 
 export const MainTitle = styled.div`
-	${({ theme }) => theme.typography.h2};
-	font-weight: lighter;
-	letter-spacing: 0.03rem;
-	margin: 8px 0 22px;
+	${({ theme }) => theme.typography.h1};
+	font-size: 40px;
+	font-weight: ${FONT_WEIGHT.BOLDER};
+	line-height: 42px;
 `;
 
 export const SSOButton = styled(Button).attrs({
