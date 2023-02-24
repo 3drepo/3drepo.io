@@ -31,7 +31,7 @@ import {
 	createAttachResourceComments,
 	createRemoveResourceComment
 } from '../../helpers/comments';
-import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
+import { imageUrlToBase64IfNotAlready } from '../../helpers/imageUrlToBase64';
 import { prepareIssue } from '../../helpers/issues';
 import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
 import { prepareResources } from '../../helpers/resources';
@@ -113,16 +113,15 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 			};
 		}
 
-		if (issueData.descriptionThumbnail ) {
-			issue.viewpoint = {
-				...(issue.viewpoint || {}),
-				screenshot: issueData.descriptionThumbnail.substring(issueData.descriptionThumbnail.indexOf(',') + 1 )
-			};
+		const extraIssueData = omit(issueData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'descriptionThumbnail']);
+
+		if (!issueData?.viewpoint?.position) {
+			delete extraIssueData.viewpoint;
 		}
 
 		issue = {
 			...issue,
-			...omit(issueData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'viewpoint', 'descriptionThumbnail']),
+			...extraIssueData,
 			owner: issueData.author,
 			rev_id: revision,
 			creator_role: userJob._id,
@@ -476,14 +475,22 @@ export function* cloneIssue({ dialogId }) {
 		'lastUpdated',
 		'resources',
 		'thumbnail',
-		'viewpoint',
 		'priority_last_changed',
 		'status_last_changed',
 	]);
 
-	if (activeIssue.descriptionThumbnail) {
-		const base64Image = yield imageUrlToBase64(activeIssue.descriptionThumbnail);
-		clonedProperties.descriptionThumbnail = `data:image/png;base64,${base64Image}`;
+	const { descriptionThumbnail } = activeIssue;
+
+	if (descriptionThumbnail) {
+		clonedProperties.descriptionThumbnail = yield imageUrlToBase64IfNotAlready(descriptionThumbnail);
+	}
+
+	if (clonedProperties.viewpoint?.screenshot) {
+		clonedProperties.viewpoint.screenshot = yield imageUrlToBase64IfNotAlready(descriptionThumbnail);
+	}
+
+	if (clonedProperties.viewpoint?.screenshotSmall) {
+		clonedProperties.viewpoint.screenshotSmall = yield imageUrlToBase64IfNotAlready(descriptionThumbnail);
 	}
 
 	try {
@@ -652,12 +659,8 @@ export function* attachLinkResources({ links }) {
 
 export function * updateActiveIssueViewpoint({screenshot}) {
 	const { model, account } = yield select(selectActiveIssueDetails);
-	let { viewpoint } = yield generateViewpoint(account, model, '', false);
-
-	if (screenshot) {
-		viewpoint = {...viewpoint, screenshot};
-	}
-
+	const { viewpoint } = yield generateViewpoint(account, model, '', false);
+	viewpoint.screenshot = yield imageUrlToBase64IfNotAlready(screenshot);
 	yield put(IssuesActions.updateActiveIssue({viewpoint}));
 }
 

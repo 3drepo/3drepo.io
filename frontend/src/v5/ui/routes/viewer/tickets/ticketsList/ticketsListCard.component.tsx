@@ -21,10 +21,10 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
+import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { ViewerParams } from '../../../routes.constants';
-import { EmptyList } from './ticketsList.styles';
 
 export const TicketsListCard = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -41,9 +41,9 @@ export const TicketsListCard = () => {
 				{tickets.length ? (
 					<TicketsList tickets={tickets} />
 				) : (
-					<EmptyList>
+					<EmptyListMessage>
 						<FormattedMessage id="viewer.cards.tickets.emptyList" defaultMessage="No tickets have been created yet" />
-					</EmptyList>
+					</EmptyListMessage>
 				)}
 			</CardContent>
 		</CardContainer>

@@ -32,7 +32,7 @@ import {
 
 import { EXTENSION_RE } from '../../constants/resources';
 import { VIEWER_EVENTS } from '../../constants/viewer';
-import { imageUrlToBase64 } from '../../helpers/imageUrlToBase64';
+import { imageUrlToBase64IfNotAlready } from '../../helpers/imageUrlToBase64';
 import { disableConflictingMeasurementActions, generateName } from '../../helpers/measurements';
 import { prepareResources } from '../../helpers/resources';
 import { chopShapesUuids } from '../../helpers/shapes';
@@ -119,7 +119,6 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 			yield generateViewpoint( teamspace, model, riskData.name, !Boolean(riskData.descriptionThumbnail) ) :
 			{ viewpoint: {} };
 
-			// .substring(screenshot.indexOf(',') + 1);
 		if (riskData.descriptionThumbnail ) {
 			risk.viewpoint = {
 				...(risk.viewpoint || {}),
@@ -127,9 +126,15 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 			};
 		}
 
+		const extraRiskData = omit(riskData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'descriptionThumbnail']);
+
+		if (!riskData?.viewpoint?.position) {
+			delete extraRiskData.viewpoint;
+		}
+
 		risk = {
 			...risk,
-			...omit(riskData, ['author', 'statusColor', 'roleColor', 'defaultHidden', 'viewpoint', 'descriptionThumbnail']),
+			...extraRiskData,
 			owner: riskData.author,
 			rev_id: revision,
 			creator_role: userJob._id
@@ -402,14 +407,22 @@ function* cloneRisk({ dialogId }) {
 		'lastUpdated',
 		'resources',
 		'thumbnail',
-		'viewpoint',
 		'priority_last_changed',
 		'status_last_changed',
 	]);
 
-	if (activeRisk.descriptionThumbnail) {
-		const base64Image = yield imageUrlToBase64(activeRisk.descriptionThumbnail);
-		clonedProperties.descriptionThumbnail = `data:image/png;base64,${base64Image}`;
+	const { descriptionThumbnail } = activeRisk;
+
+	if (descriptionThumbnail) {
+		clonedProperties.descriptionThumbnail = yield imageUrlToBase64IfNotAlready(descriptionThumbnail);
+	}
+
+	if (clonedProperties.viewpoint?.screenshot) {
+		clonedProperties.viewpoint.screenshot = yield imageUrlToBase64IfNotAlready(descriptionThumbnail);
+	}
+
+	if (clonedProperties.viewpoint?.screenshotSmall) {
+		clonedProperties.viewpoint.screenshotSmall = yield imageUrlToBase64IfNotAlready(descriptionThumbnail);
 	}
 
 	try {
@@ -609,14 +622,10 @@ function* showMitigationSuggestions({conditions, setFieldValue}) {
 	}
 }
 
-export function * updateActiveRiskViewpoint({screenshot}) {
+export function * updateActiveRiskViewpoint({ screenshot }) {
 	const { model, account } = yield select(selectActiveRiskDetails);
-	let { viewpoint } = yield generateViewpoint(account, model, '', false);
-
-	if (screenshot) {
-		viewpoint = {...viewpoint, screenshot};
-	}
-
+	const { viewpoint } = yield generateViewpoint(account, model, '', false);
+	viewpoint.screenshot = yield imageUrlToBase64IfNotAlready(screenshot);
 	yield put(RisksActions.updateRisk({viewpoint}));
 }
 

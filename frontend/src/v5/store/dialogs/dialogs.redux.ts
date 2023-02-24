@@ -49,7 +49,7 @@ export const openHandler = (state, { modalType, props }: OpenAction) => {
 	state.dialogs = [...state.dialogs, dialog];
 };
 
-export const closeHandler = (state, { dialogId }: CloseAction) => {
+const closeHandler = (state, { dialogId }: CloseAction) => {
 	state.dialogs = state.dialogs.filter(({ id }) => (id !== dialogId));
 };
 
