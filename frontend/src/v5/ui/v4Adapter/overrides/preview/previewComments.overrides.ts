@@ -76,10 +76,7 @@ export const CommentListStyling = css`
 			color: ${({ theme }) => theme.palette.base.main};
 			margin: 0 5px;
 			padding: 5px 0 10px;
-
-			& + *:not(${CommentPadding}){
-				border-top: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
-			}
+			border-bottom: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
 
 			&:not(:first-of-type) {
 				padding-top: 10px;
@@ -154,7 +151,15 @@ export const CommentListStyling = css`
 		}
 
 		${CommentPadding} {
-			padding: 5px 0 10px;
+			padding: 7px 0;
+
+			& + ${SystemMessage} {
+				border-top: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
+			}
+		}
+
+		& > *:last-child {
+			border-bottom: 0;
 		}
 	}
 `;
