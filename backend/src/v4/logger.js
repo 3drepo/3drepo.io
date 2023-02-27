@@ -49,8 +49,8 @@ function createLogger() {
 	if (config.logfile.logDirectory) {
 		transporters.push(
 			new winston.transports.DailyRotateFile({
-				filename: config.logfile.logDirectory + "/3drepo",
-				datePattern: "-yyyy-MM-dd.log",
+				filename: config.logfile.logDirectory + "/io-%DATE%.log",
+				datePattern: "YYYY-MM-DD",
 				timestamp: true,
 				level: config.logfile.file_level
 			})
