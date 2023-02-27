@@ -17,7 +17,8 @@
 
 import { FONT_WEIGHT } from '@/v4/styles';
 import styled from 'styled-components';
-import { Container as ContainerBase } from '../userSignup.styles';
+import { Link as LinkBase } from 'react-router-dom';
+import { Container as ContainerBase, UserSignupMain } from '../userSignup.styles';
 import { LoginPrompt, Title } from '../userSignupForm/userSignupForm.styles';
 
 export const Container = styled(ContainerBase)`
@@ -28,8 +29,15 @@ export const Container = styled(ContainerBase)`
 	}
 
 	${Title} {
-		width: 408px;
 		margin-bottom: 40px;
 		font-weight: ${FONT_WEIGHT.BOLDER};
 	}
+
+	${UserSignupMain} {
+		width: 361px;
+	}
+`;
+
+export const Link = styled(LinkBase)`
+	width: 100%;
 `;

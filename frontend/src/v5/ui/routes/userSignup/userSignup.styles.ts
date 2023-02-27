@@ -36,4 +36,5 @@ export const UserSignupMain = styled.div`
 	justify-content: center;
 	align-items: center;
 	height: fit-content;
+	color: ${({ theme }) => theme.palette.base.main};
 `;
