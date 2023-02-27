@@ -37,7 +37,7 @@ import { LegalRoutes } from '../legal';
 import { UserSignup } from '../userSignup/userSignup.component';
 import { UserVerification } from '../userVerification/userVerification.component';
 import { TeamspaceLayout } from './teamspaces/teamspaceLayout/teamspaceLayout.component';
-import { UserSignupSSO } from '../userSignup/userSignUpSSO/userSignUpSSO';
+import { UserSignupSSO } from '../userSignup/userSignUpSSO/userSignUpSSO.component';
 import { LoginSSO } from '../login/loginSSO.component';
 
 export const MainRoute = () => {

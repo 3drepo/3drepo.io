@@ -58,7 +58,7 @@ export const SSOButton = styled(Button).attrs({
 		background-color: #2F2F2FF0;
 	}
 
-	margin: 0 0 43px 0;
+	margin: 0 0 43px;
 	padding:20px;
 `;
 
@@ -71,14 +71,14 @@ export const MicrosoftInstructionsText = styled(Typography)`
 	${({ theme }) => theme.typography.body1};
 	color: ${({ theme }) => theme.palette.base.main};
 	margin-bottom: 5px;
-    width: 376px;
+	width: 376px;
 `;
 
 export const MicrosoftInstructionsRemarkText = styled(Typography)`
 	${({ theme }) => theme.typography.body1};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	font-weight: ${FONT_WEIGHT.BOLDER};
-    font-size: 10px;
+	font-size: 10px;
 `;
 
 export const MicrosoftInstructionsTermsText = styled(Typography)`
@@ -106,11 +106,11 @@ export const NewSticker = styled.div`
 	color: ${({ theme }) => theme.palette.primary.main};
 	border: solid 1.5px ${({ theme }) => theme.palette.primary.main}; 
 	border-radius: 5px;
-    padding: 4px 6px;
-    display: inline;
-    font-size: 10px;
-    font-weight: 700;
-    top: -4px;
-    position: relative;
-    left: 8px;
+	padding: 4px 6px;
+	display: inline;
+	font-size: 10px;
+	font-weight: 700;
+	top: -4px;
+	position: relative;
+	left: 8px;
 `;
