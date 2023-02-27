@@ -15,24 +15,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { AuthTemplate } from '@components/authTemplate';
+import { SubmitButton } from '@controls/submitButton';
 import { FormattedMessage } from 'react-intl';
-import { Container, UserSignupMain } from '../userSignup.styles';
+import { UserSignupMain } from '../userSignup.styles';
 import { Title, Container as FormContainer, LoginPrompt, LoginPromptLink } from '../userSignupForm/userSignupForm.styles';
+import { Container, Link } from './userSignUpSSO.styles';
 
 export const UserSignupSSOError = () => (
-	<Container>
-		<UserSignupMain>
-			<FormContainer>
-				<Title>
-					<FormattedMessage id="userSignupSSO.title" defaultMessage="We just need a few more details from you..." />
-				</Title>
-				<LoginPrompt>
-					<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
-					<LoginPromptLink to="/v5/login">
-						<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Log in" />
-					</LoginPromptLink>
-				</LoginPrompt>
-			</FormContainer>
-		</UserSignupMain>
-	</Container>
+	<AuthTemplate>
+		<Container>
+			<UserSignupMain>
+				<FormContainer>
+					<Title>
+						<FormattedMessage id="userSignupSSO.error.alreadyRegistered" defaultMessage="It looks like you already have an account with us..." />
+					</Title>
+					<FormattedMessage
+						id="userSignupSSO.error.alreadyRegisteredDetails"
+						defaultMessage="To use the Microsoft Sign In feature, you’ll need to link your existing 3D Repo account.<br></br><br></br>
+						Sign in using your 3D Repo credentials and we’ll direct you to where you can link your account to Microsoft."
+						values={{
+							br: () => (<br />),
+						}}
+					/>
+					<Link to="/v5/login">
+						<SubmitButton>
+							<FormattedMessage id="userSignup.signupPrompt.signInButton" defaultMessage="Goto Sign in" />
+						</SubmitButton>
+					</Link>
+					<LoginPrompt>
+						<FormattedMessage id="userSignup.signupPrompt.message" defaultMessage="Don't have an account?" />
+						<LoginPromptLink to="/v5/signup">
+							<FormattedMessage id="userSignup.signupPrompt.link" defaultMessage="Sign up" />
+						</LoginPromptLink>
+					</LoginPrompt>
+				</FormContainer>
+			</UserSignupMain>
+		</Container>
+	</AuthTemplate>
+
 );

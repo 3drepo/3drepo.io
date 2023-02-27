@@ -102,7 +102,9 @@ export const LoginLink = styled(Link).attrs({
 })`
 	width: fit-content;
 	margin-bottom: 28px;
-	position: relative;
+	position: absolute;
+	top: 40px;
+	left: 50px;
 `;
 
 export const LogoContainer = styled(LoginLink)`
