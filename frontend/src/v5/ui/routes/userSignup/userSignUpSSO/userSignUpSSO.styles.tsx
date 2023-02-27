@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,25 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { FONT_WEIGHT } from '@/v4/styles';
 import styled from 'styled-components';
+import { Container as ContainerBase } from '../userSignup.styles';
+import { LoginPrompt, Title } from '../userSignupForm/userSignupForm.styles';
 
-export const Container = styled.div`
-	display: flex;
-	flex-direction: row;
-	justify-content: stretch;
-	max-width: 951px;
-	border-radius: 20px;
-	max-height: 627px;
-	z-index: 2;
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	padding: 45px;
+export const Container = styled(ContainerBase)`
+	padding: 55px;
 
-`;
+	${LoginPrompt} {
+		margin-top:15px;
+	}
 
-export const UserSignupMain = styled.div`
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	height: fit-content;
+	${Title} {
+		width: 408px;
+		margin-bottom: 40px;
+		font-weight: ${FONT_WEIGHT.BOLDER};
+	}
 `;

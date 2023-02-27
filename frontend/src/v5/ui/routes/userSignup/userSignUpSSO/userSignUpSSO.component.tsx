@@ -14,28 +14,25 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { clientConfigService } from '@/v4/services/clientConfig';
 import { formatMessage } from '@/v5/services/intl';
 import { UserSignupSchemaSSO, UserSignupSchemaTermsAndSubmit } from '@/v5/validation/userSchemes/userSignupSchemes';
-import UserIcon from '@assets/icons/outlined/user-outlined.svg';
-import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { yupResolver } from '@hookform/resolvers/yup';
-import MenuItem from '@mui/material/MenuItem/MenuItem';
 import { pick } from 'lodash';
 import { useState } from 'react';
 import { useLocation, Redirect } from 'react-router-dom';
-import { FormProvider, useForm, useFormContext } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { signup } from '@/v5/services/api/sso';
 import { isInvalidArguments, usernameAlreadyExists } from '@/v5/validation/errors.helpers';
-import { Container, UserSignupMain } from '../userSignup.styles';
-import { Title, Container as FormContainer, LoginPrompt, LoginPromptLink } from '../userSignupForm/userSignupForm.styles';
+import { AuthTemplate } from '@components/authTemplate';
+import { UserSignupMain } from '../userSignup.styles';
+import { Container as FormContainer, LoginPrompt, LoginPromptLink, Title } from '../userSignupForm/userSignupForm.styles';
 import { UserSignupFormStep } from '../userSignupForm/userSignupFormStep/userSignupFormStep.component';
-import { IconContainer } from '../userSignupForm/userSignupFormStep/userSignupFormStepAccount/userSignupFormStepAccount.styles';
 import { UserSignupFormStepTermsAndSubmit } from '../userSignupForm/userSignupFormStep/userSignupFormStepTermsAndSubmit/userSignupFormStepTermsAndSubmit.component';
 import { UserSignupFormStepper, UserSignupFormStepperContextValue } from '../userSignupForm/userSignupFormStepper/userSignupFormStepper.component';
-import { NextStepButton } from '../userSignupForm/userSignupFormStep/userSignupFormNextButton/userSignupFormNextButton.component';
-import { UserSignupSSOError } from './userSignUpSSOError';
+import { Container } from './userSignUpSSO.styles';
+import { MinUserSignupFormStepAccount } from './minUserSignupFormStepAccount.component';
+import { UserSignupSSOError } from './userSignUpSSOError.component';
 
 export interface IAccountFormInput {
 	username: string;
@@ -44,61 +41,6 @@ export interface IAccountFormInput {
 	termsAgreed: boolean;
 	mailListAgreed: boolean;
 }
-
-export const UserSignupFormStepAccount = () => {
-	const { control, formState: { errors } } = useFormContext();
-
-	return (
-		<>
-			<FormTextField
-				InputProps={{
-					startAdornment: (
-						<IconContainer>
-							<UserIcon />
-						</IconContainer>
-					),
-				}}
-				name="username"
-				label={formatMessage({
-					id: 'userSignup.form.username',
-					defaultMessage: 'Username',
-				})}
-				control={control}
-				required
-				formError={errors.username}
-			/>
-
-			<FormTextField
-				name="company"
-				label={formatMessage({
-					id: 'userSignup.form.company',
-					defaultMessage: 'Company',
-				})}
-				control={control}
-				formError={errors.company}
-			/>
-			<FormSelect
-				name="countryCode"
-				label={formatMessage({
-					id: 'userSignup.form.countryCode',
-					defaultMessage: 'Country',
-				})}
-				control={control}
-				required
-			>
-				{clientConfigService.countries.map((country) => (
-					<MenuItem key={country.code} value={country.code}>
-						{country.name}
-					</MenuItem>
-				))}
-			</FormSelect>
-
-			<NextStepButton>
-				<FormattedMessage id="userSignup.form.button.next" defaultMessage="Next step" />
-			</NextStepButton>
-		</>
-	);
-};
 
 export const UserSignupSSO = () => {
 	const [contextValue, setContextValue] = useState<UserSignupFormStepperContextValue | null>();
@@ -167,44 +109,46 @@ export const UserSignupSSO = () => {
 	};
 
 	return (
-		<Container>
-			<UserSignupMain>
-				<FormContainer>
-					<Title>
-						<FormattedMessage id="userSignupSSO.title" defaultMessage="We just need a few more details from you..." />
-					</Title>
-					<FormProvider {...formData}>
-						<form onSubmit={formData.handleSubmit(onSubmit)}>
-							<UserSignupFormStepper onContextUpdated={setContextValue}>
-								<UserSignupFormStep
-									stepIndex={0}
-									label={formatMessage({
-										id: 'userSignup.step.username',
-										defaultMessage: 'Username',
-									})}
-								>
-									<UserSignupFormStepAccount />
-								</UserSignupFormStep>
-								<UserSignupFormStep
-									stepIndex={1}
-									label={formatMessage({
-										id: 'userSignup.step.termsAndSubmit',
-										defaultMessage: 'Terms and submit',
-									})}
-								>
-									<UserSignupFormStepTermsAndSubmit />
-								</UserSignupFormStep>
-							</UserSignupFormStepper>
-						</form>
-					</FormProvider>
-					<LoginPrompt>
-						<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
-						<LoginPromptLink to="/v5/login">
-							<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Log in" />
-						</LoginPromptLink>
-					</LoginPrompt>
-				</FormContainer>
-			</UserSignupMain>
-		</Container>
+		<AuthTemplate>
+			<Container>
+				<UserSignupMain>
+					<FormContainer>
+						<Title>
+							<FormattedMessage id="userSignupSSO.title" defaultMessage="We just need a few more details from you..." />
+						</Title>
+						<FormProvider {...formData}>
+							<form onSubmit={formData.handleSubmit(onSubmit)}>
+								<UserSignupFormStepper onContextUpdated={setContextValue}>
+									<UserSignupFormStep
+										stepIndex={0}
+										label={formatMessage({
+											id: 'userSignup.step.username',
+											defaultMessage: 'Username',
+										})}
+									>
+										<MinUserSignupFormStepAccount />
+									</UserSignupFormStep>
+									<UserSignupFormStep
+										stepIndex={1}
+										label={formatMessage({
+											id: 'userSignup.step.termsAndSubmit',
+											defaultMessage: 'Terms and submit',
+										})}
+									>
+										<UserSignupFormStepTermsAndSubmit />
+									</UserSignupFormStep>
+								</UserSignupFormStepper>
+							</form>
+						</FormProvider>
+						<LoginPrompt>
+							<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
+							<LoginPromptLink to="/v5/login">
+								<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Log in" />
+							</LoginPromptLink>
+						</LoginPrompt>
+					</FormContainer>
+				</UserSignupMain>
+			</Container>
+		</AuthTemplate>
 	);
 };
