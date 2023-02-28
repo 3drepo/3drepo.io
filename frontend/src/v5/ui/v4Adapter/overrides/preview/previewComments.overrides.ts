@@ -25,6 +25,7 @@ import { Container as CommentFooter, Date, Username } from '@/v4/routes/componen
 import { Container as TabContainer, TabContent as TabContentRisks, Content as ContentRisks } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { TabContent as TabContentIssues, Content as ContentIssues, StyledTabs as Tabs } from '@/v4/routes/viewerGui/components/issues/components/issueDetails/issueDetails.styles';
 import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
+import { CommentWrapper, Container as SystemMessage, Avatar as MessageInfoIcon, DateTimeContainer as MessageDateTime } from '@/v4/routes/components/messagesList/components/message/components/systemMessage/systemMessage.styles';
 
 export const CommentListStyling = css`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
@@ -70,6 +71,37 @@ export const CommentListStyling = css`
 	// comments body section
 	${CommentListContainer} {
 		padding: 0;
+
+		${SystemMessage} {
+			color: ${({ theme }) => theme.palette.base.main};
+			margin: 0 5px;
+			padding: 5px 0 10px;
+			border-bottom: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
+
+			&:not(:first-of-type) {
+				padding-top: 10px;
+			}
+
+			${CommentWrapper} {
+				margin: 0 0 0 12px;
+
+				span {
+					margin-right: 5px;
+				}
+			}
+
+			${MessageInfoIcon} {
+				&, & > svg {
+					width: 20px;
+					height: 20px;
+					color: ${({ theme }) => theme.palette.base.main};
+				}
+			}
+
+			${MessageDateTime} {
+				display: inline-block;
+			}
+		}
 
 		${CommentAndDeleteButtonContainer} {
 			&:not(:hover) [aria-label="Remove"] > button {
@@ -119,7 +151,15 @@ export const CommentListStyling = css`
 		}
 
 		${CommentPadding} {
-			padding: 5px 0 10px;
+			padding: 7px 0;
+
+			& + ${SystemMessage} {
+				border-top: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
+			}
+		}
+
+		& > *:last-child {
+			border-bottom: 0;
 		}
 	}
 `;
