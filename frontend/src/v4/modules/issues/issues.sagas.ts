@@ -659,12 +659,8 @@ export function* attachLinkResources({ links }) {
 
 export function * updateActiveIssueViewpoint({screenshot}) {
 	const { model, account } = yield select(selectActiveIssueDetails);
-	let { viewpoint } = yield generateViewpoint(account, model, '', false);
-
-	if (screenshot) {
-		viewpoint = {...viewpoint, screenshot};
-	}
-
+	const { viewpoint } = yield generateViewpoint(account, model, '', false);
+	viewpoint.screenshot = yield imageUrlToBase64IfNotAlready(screenshot);
 	yield put(IssuesActions.updateActiveIssue({viewpoint}));
 }
 
