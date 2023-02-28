@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 export const getErrorMessage = (error: any) => error.response?.data?.message || error.message;
-export const getErrorCode = (error: any) => error?.response?.data?.code;
+export const getErrorCode = (error: any) => error?.response?.data?.code || '';
 export const getErrorStatus = (error: any) => error.response?.data?.status;
 
 export const isInvalidArguments = (error: any): boolean => getErrorCode(error) === 'INVALID_ARGUMENTS';
@@ -23,6 +23,8 @@ export const isInvalidArguments = (error: any): boolean => getErrorCode(error) =
 export const isPasswordIncorrect = (error: any): boolean => getErrorCode(error) === 'INCORRECT_PASSWORD';
 
 export const isFileFormatUnsupported = (error: any): boolean => getErrorCode(error) === 'UNSUPPORTED_FILE_FORMAT';
+
+export const isNotLoggedIn = (error: any): boolean => getErrorCode(error) === 'NOT_LOGGED_IN';
 
 export const isNetworkError = (error: any): boolean => getErrorMessage(error) === 'Network Error';
 
@@ -40,6 +42,7 @@ export const emailAlreadyExists = (error: any): boolean => fieldAlreadyExists(er
 export const projectAlreadyExists = (error: any): boolean => fieldAlreadyExists(error, 'project');
 
 export const isPathNotFound = (error): boolean => getErrorCode(error).endsWith('NOT_FOUND');
+export const isPathNotAuthorized = (error): boolean => getErrorCode(error).endsWith('NOT_AUTHORIZED');
 
 export const isProjectNotFound = (code: string): boolean => code === 'PROJECT_NOT_FOUND';
 export const isResourceNotFound = (code: string): boolean => code === 'RESOURCE_NOT_FOUND';

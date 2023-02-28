@@ -141,13 +141,16 @@ export const UploadFileForm = ({
 		return noExceedingMax;
 	};
 
+	const extensionIsSpm = (extension: string) => extension === 'spm';
+
 	const addFilesToList = ({ files, container }: AddFilesProps): void => {
 		const filesToAppend = [];
 		for (const file of files) {
+			const extension = file.name.split('.').slice(-1)[0].toLocaleLowerCase();
 			filesToAppend.push({
 				file,
 				progress: 0,
-				extension: file.name.split('.').slice(-1)[0],
+				extension,
 				revisionTag: parseFilename(file.name),
 				containerName: container?.name || '',
 				containerId: container?._id || '',
@@ -156,7 +159,7 @@ export const UploadFileForm = ({
 				containerCode: container?.code || '',
 				containerDesc: container?.desc || '',
 				revisionDesc: '',
-				importAnimations: false,
+				importAnimations: extensionIsSpm(extension),
 				timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London',
 			});
 		}
@@ -271,7 +274,7 @@ export const UploadFileForm = ({
 												!getValues(`uploads.${origIndex}.containerId`)
 												&& !!getValues(`uploads.${origIndex}.containerName`)
 											}
-											isSpm={sortedList[selectedIndex].extension === 'spm'}
+											isSpm={extensionIsSpm(sortedList[origIndex].extension)}
 											onChange={(field: string, val: string | boolean) => {
 												// @ts-ignore
 												setValue(`uploads.${origIndex}.${field}`, val);
