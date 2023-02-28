@@ -16,13 +16,14 @@
  */
 
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
-import { selectContainerById, selectContainers, selectFavouriteContainers } from '@/v5/store/containers/containers.selectors';
+import { selectCanUploadToProject, selectContainerById, selectContainers, selectFavouriteContainers, selectHasCollaboratorAccess, selectHasCommenterAccess } from '@/v5/store/containers/containers.selectors';
 import { times } from 'lodash';
 import { containerMockFactory, prepareMockSettingsReply, prepareMockStats, prepareMockViews } from './containers.fixtures';
 import { NewContainer, UploadStatuses } from '@/v5/store/containers/containers.types';
 import { revisionsMockFactory } from '../revisions/revisions.fixtures';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { createTestStore, listContainsElementWithId } from '../test.helpers';
+import { Role } from '@/v5/store/currentUser/currentUser.types';
 
 describe('Containers: store', () => {
 	let dispatch, getState;
@@ -140,6 +141,42 @@ describe('Containers: store', () => {
 			dispatch(ContainersActions.deleteContainerSuccess(projectId, newContainer._id));
 			const containerIsIncluded = selectContainerById(getState(), newContainer._id);
 			expect(containerIsIncluded).toBeFalsy();
+		});
+	});
+
+	describe('Container permissions:', () => {
+		const CreateContainerWithRole = (role) => {
+			const newContainer = createAndAddContainerToStore({ role }) as NewContainer;
+			const hasCollaboratorAccess = selectHasCollaboratorAccess(getState(), newContainer._id);
+			const hasCommenterAccess = selectHasCommenterAccess(getState(), newContainer._id);
+			const canUpload = selectCanUploadToProject(getState());
+
+			return { hasCollaboratorAccess, hasCommenterAccess, canUpload }
+		}
+
+		it('should return Project Admins access rights', () => {
+			const { hasCollaboratorAccess, hasCommenterAccess, canUpload } = CreateContainerWithRole(Role.ADMIN)
+			expect(hasCollaboratorAccess).toBeTruthy();
+			expect(hasCommenterAccess).toBeTruthy();
+			expect(canUpload).toBeTruthy();
+		});
+		it('should return Collaborators access rights', () => {
+			const { hasCollaboratorAccess, hasCommenterAccess, canUpload } = CreateContainerWithRole(Role.COLLABORATOR)
+			expect(hasCollaboratorAccess).toBeTruthy();
+			expect(hasCommenterAccess).toBeTruthy();
+			expect(canUpload).toBeTruthy();
+		});
+		it('should return Commenters access rights', () => {
+			const { hasCollaboratorAccess, hasCommenterAccess, canUpload } = CreateContainerWithRole(Role.COMMENTER)
+			expect(hasCollaboratorAccess).toBeFalsy();
+			expect(hasCommenterAccess).toBeTruthy();
+			expect(canUpload).toBeFalsy();
+		});
+		it('should return Viewers access rights', () => {
+			const { hasCollaboratorAccess, hasCommenterAccess, canUpload } = CreateContainerWithRole(Role.VIEWER)
+			expect(hasCollaboratorAccess).toBeFalsy();
+			expect(hasCommenterAccess).toBeFalsy();
+			expect(canUpload).toBeFalsy();
 		});
 	});
 })

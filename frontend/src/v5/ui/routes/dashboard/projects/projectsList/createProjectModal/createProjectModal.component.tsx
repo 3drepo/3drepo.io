@@ -43,6 +43,8 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 	const [existingProjectsByTeamspace, setExistingProjectsByTeamspace] = useState({});
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
+	const filteredTeamspaces = teamspaces.filter((ts) => ts.isAdmin);
+
 	const DEFAULT_VALUES = {
 		teamspace: currentTeamspace,
 		projectName: '',
@@ -109,7 +111,7 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 				label={formatMessage({ id: 'project.creation.form.teamspace', defaultMessage: 'Teamspace' })}
 				control={control}
 			>
-				{teamspaces.map((ts) => (
+				{filteredTeamspaces.map((ts) => (
 					<MenuItem key={ts.name} value={ts.name}>
 						{ts.name}
 					</MenuItem>

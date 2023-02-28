@@ -92,7 +92,7 @@ const getPanelConfig = (panelType) => ({
 	type: panelType
 });
 
-export const VIEWER_LEFT_PANELS = [
+export const getViewerLeftPanels = () =>  [
 	VIEWER_PANELS.ISSUES,
 	VIEWER_PANELS.RISKS,
 	VIEWER_PANELS.TICKETS,

@@ -17,6 +17,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { uniqWith, isArray, isEqual } from 'lodash';
 import { IContainer } from './containers/containers.types';
+import { Role } from './currentUser/currentUser.types';
 import { IFederation } from './federations/federations.types';
 import { View } from './store.types';
 
@@ -55,3 +56,6 @@ export const formattedFederationText = formatMessage({
 export const getContainerOrFederationFormattedText = (isFederation) => (
 	isFederation ? formattedFederationText : formattedContainerText
 );
+
+export const isCollaboratorRole = (role: Role): boolean => [Role.ADMIN, Role.COLLABORATOR].includes(role);
+export const isCommenterRole = (role: Role): boolean => [Role.ADMIN, Role.COLLABORATOR, Role.COMMENTER].includes(role);
