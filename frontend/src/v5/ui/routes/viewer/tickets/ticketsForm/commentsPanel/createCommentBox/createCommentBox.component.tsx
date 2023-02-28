@@ -62,7 +62,7 @@ type ImageToUpload = {
 
 type CreateCommentBoxProps = {
 	commentReply: ITicketComment | null;
-	deleteCommentReply: (reply) => void;
+	deleteCommentReply: () => void;
 };
 export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCommentBoxProps) => {
 	const [imagesToUpload, setImagesToUpload] = useState<ImageToUpload[]>([]);
@@ -90,7 +90,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 
 	const resetCommentBox = () => {
 		reset();
-		deleteCommentReply(null);
+		deleteCommentReply();
 		setIsSubmittingMessage(false);
 		setImagesToUpload([]);
 	};
@@ -175,7 +175,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 			{commentReply && (
 				<CommentReplyContainer>
 					<CommentReply {...replyMetadata} shortMessage />
-					<DeleteButton onClick={() => deleteCommentReply(null)}>
+					<DeleteButton onClick={deleteCommentReply}>
 						<DeleteIcon />
 					</DeleteButton>
 				</CommentReplyContainer>
