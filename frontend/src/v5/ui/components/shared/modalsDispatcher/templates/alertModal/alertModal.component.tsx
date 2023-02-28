@@ -19,7 +19,7 @@ import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/mate
 import { FormattedMessage } from 'react-intl';
 import { DialogContainer, Actions, Details, Status, WarningIcon } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { AxiosError } from 'axios';
-import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isProjectNotFound, isResourceNotFound } from '@/v5/validation/errors.helpers';
+import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isPathNotAuthorized, isProjectNotFound, isResourceNotFound } from '@/v5/validation/errors.helpers';
 import { generatePath, useHistory } from 'react-router';
 import { DASHBOARD_ROUTE, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -42,19 +42,23 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 	const status = getErrorStatus(error);
 	const errorStatus = status && code ? `${status} - ${code}` : '';
 	const pathNotFound = isPathNotFound(error);
+	const unauthorized = isPathNotAuthorized(error);
+	const unauthInTeamspace = unauthorized && teamspace;
+	const unauthInProject = unauthorized && project;
 
 	const getSafePath = () => {
-		if (isResourceNotFound(code)) return generatePath(PROJECT_ROUTE_BASE, { teamspace, project });
-		if (isProjectNotFound(code)) return generatePath(TEAMSPACE_ROUTE_BASE, { teamspace });
+		// eslint-disable-next-line max-len
+		if (isResourceNotFound(code) || (unauthInProject)) return generatePath(PROJECT_ROUTE_BASE, { teamspace, project });
+		if (isProjectNotFound(code) || (unauthInTeamspace)) return generatePath(TEAMSPACE_ROUTE_BASE, { teamspace });
 		// Teamspace not found
 		return generatePath(DASHBOARD_ROUTE);
 	};
 
 	const getSafePathName = () => {
-		if (isResourceNotFound(code)) {
+		if (isResourceNotFound(code) || (unauthInProject)) {
 			return formatMessage({ id: 'alertModal.redirect.project', defaultMessage: 'the project page' });
 		}
-		if (isProjectNotFound(code)) {
+		if (isProjectNotFound(code) || (unauthInTeamspace)) {
 			return formatMessage({ id: 'alertModal.redirect.teamspace', defaultMessage: 'the teamspace page' });
 		}
 		// teamspace not found
@@ -67,7 +71,7 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 	};
 
 	useEffect(() => () => {
-		if (pathNotFound) redirectToSafePath();
+		if (pathNotFound || unauthorized) redirectToSafePath();
 	}, []);
 
 	return (
@@ -79,7 +83,7 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 					defaultMessage="Something went wrong when {currentActions}"
 					values={{ currentActions }}
 				/>
-				{pathNotFound && (
+				{(pathNotFound || unauthorized) && (
 					<>.
 						<br />
 						<FormattedMessage

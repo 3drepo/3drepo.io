@@ -31,6 +31,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
 import { ScrollArea } from '@controls/scrollArea';
 
+import { ContainersHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ISSUE_FILTERS, ISSUES_ACTIONS_MENU } from '../../constants/issues';
 import { RISK_FILTERS } from '../../constants/risks';
 import { ROUTES, RouteParams } from '../../constants/routes';
@@ -161,7 +162,8 @@ const IssueBoardCard = ({ metadata, onClick }: any) => (
 export function Board(props: IProps) {
 	const boardRef = useRef(null);
 	const { type, teamspace, project: projectId, modelId: v4Model, containerOrFederation } = useParams<RouteParams>();
-	const project = isV5() ? props.projectsMap[projectId]?.name : projectId;
+	const v5Project = ProjectsHooksSelectors.selectCurrentProjectName();
+	const project = isV5() ? v5Project : projectId;
 	const modelId = isV5() ? containerOrFederation : v4Model;
 	const projectParam = `${project ? `/${project}` : ''}`;
 	const modelParam = `${modelId ? `/${modelId}` : ''}`;
@@ -174,7 +176,6 @@ export function Board(props: IProps) {
 		resetIssues,
 		resetRisks,
 	} = props;
-
 	useEffect(() => {
 		if (type !== props.boardType) {
 			props.setBoardType(type);

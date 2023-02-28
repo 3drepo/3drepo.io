@@ -18,8 +18,14 @@
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { initTeamspace } = require('../../../processors/teamspaces/teamspaces');
 const { subscribe } = require('../../eventsManager/eventsManager');
+const { unpack: unpackInvitations } = require('../../../processors/teamspaces/invitations');
 
-const userVerified = ({ username }) => initTeamspace(username);
+const userVerified = async ({ username }) => {
+	await Promise.all([
+		initTeamspace(username),
+		unpackInvitations(username),
+	]);
+};
 
 const UserEventsListener = {};
 
