@@ -19,7 +19,7 @@ import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import reducers from '@/v5/store/reducers';
 import { createStore, combineReducers } from 'redux';
 import { times } from 'lodash';
-import { selectCurrentQuota, selectCurrentTeamspace, selectTeamspaces } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { selectCurrentQuota, selectCurrentTeamspace, selectCurrentTeamspaceDetails, selectIsTeamspaceAdmin, selectTeamspaces } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { quotaMockFactory, teamspaceMockFactory } from './teamspaces.fixtures';
 
 
@@ -40,7 +40,7 @@ describe('Teamspaces: store', () => {
 		expect(teamspaces).toEqual(mockTeamspaces);
 	});
 
-	it('should set the current teamspace succesfully', () => {
+	it('should set the current teamspace successfully', () => {
 		const mockTeamspaces = times(5, () => teamspaceMockFactory());
 		dispatch(TeamspacesActions.setCurrentTeamspace(mockTeamspaces[3].name));
 		const currentTeamspace = selectCurrentTeamspace(getState());
@@ -53,11 +53,23 @@ describe('Teamspaces: store', () => {
 		
 		dispatch(TeamspacesActions.setCurrentTeamspace(teamspace.name));
 		dispatch(TeamspacesActions.fetchQuotaSuccess(teamspace.name, quota));
-	
+		
 		expect(selectCurrentQuota(getState())).toBe(quota);
-
+		
 		dispatch(TeamspacesActions.setCurrentTeamspace('anotherTeamspace'));
 		expect(selectCurrentQuota(getState())).toBeFalsy();
+	})
+	
+	it('should return a users teamspace admin status', () => {
+		const adminTeamspace = teamspaceMockFactory({ isAdmin: true });
+		const nonAdminTeamspace = teamspaceMockFactory({ isAdmin: false });
+		dispatch(TeamspacesActions.fetchSuccess([adminTeamspace, nonAdminTeamspace]));
+
+		dispatch(TeamspacesActions.setCurrentTeamspace(adminTeamspace.name));
+		expect(selectIsTeamspaceAdmin(getState())).toBeTruthy();
+		
+		dispatch(TeamspacesActions.setCurrentTeamspace(nonAdminTeamspace.name));
+		expect(selectIsTeamspaceAdmin(getState())).toBeFalsy();
 	})
 
 });

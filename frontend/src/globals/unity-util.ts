@@ -149,16 +149,47 @@ export class UnityUtil {
 	 * The viewer should not store anything use the File API between runs.
 	 */
 	private static clearIdbfs(): Promise<void> {
-		const deleteRequest = indexedDB.deleteDatabase('/idbfs');
-		return new Promise((resolve) => {
-			deleteRequest.onsuccess = () => {
-				resolve();
-			};
-			deleteRequest.onerror = () => {
-				console.error('Failed to delete /idbfs. Consider clearing the cache or deleting this database manually.');
-				resolve();
-			};
-		});
+		// The following snippet makes sure only one tab ever attempts to clear
+		// the cache. This is because the cache only needs to be cleared once,
+		// and simultaneous attempts can cause stalls.
+
+		// This function uses the shared localstorage to store whether the cache
+		// has been cleared.
+		// localstorage does not have a CAS operation, but reads and writes are
+		// atomic.
+		// Below, each tab that encounters an uncleared cache will first write
+		// a unique id, and then attempt to read it back. Only the tab whose id
+		// matches will embark on the clear operation.
+
+		const clearedFlagKey = 'repoV1CacheCleared';
+
+		try {
+			if (!window.localStorage.getItem(clearedFlagKey)) {
+				const id = (Math.floor(Math.random() * 100000)).toString();
+				window.localStorage.setItem(clearedFlagKey, id);
+				if (window.localStorage.getItem(clearedFlagKey) === id) {
+					const deleteRequest = indexedDB.deleteDatabase('/idbfs');
+					return new Promise((resolve) => {
+						deleteRequest.onsuccess = () => {
+							resolve();
+						};
+						deleteRequest.onerror = () => {
+							console.error('Failed to delete /idbfs. Consider clearing the cache or deleting this database manually.');
+							resolve();
+						};
+						deleteRequest.onblocked = () => { // If the request was blocked its most likely because another tab has idbfs open, so leave it alone
+							resolve();
+						};
+						deleteRequest.onupgradeneeded = () => {
+							resolve();
+						};
+					});
+				}
+			}
+		} catch (error) {
+			console.error('Unable to clear IndexDbFs', error);
+		}
+		return Promise.resolve();
 	}
 
 	/**

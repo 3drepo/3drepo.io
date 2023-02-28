@@ -58,6 +58,8 @@ jest.mock('../../../../../src/v5/services/sessions');
 const Sessions = require(`${src}/services/sessions`);
 jest.mock('../../../../../src/v5/processors/teamspaces/teamspaces');
 const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
+jest.mock('../../../../../src/v5/processors/teamspaces/invitations');
+const Invitations = require(`${src}/processors/teamspaces/invitations`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
@@ -788,10 +790,13 @@ const testUserEventsListener = () => {
 	describe('User Events', () => {
 		test(`Should trigger userVerified if there is a ${events.USER_VERIFIED}`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.USER_VERIFIED);
-			EventsManager.publish(events.USER_VERIFIED, { username: 'username1' });
+			const username = generateRandomString();
+			EventsManager.publish(events.USER_VERIFIED, { username });
 			await waitOnEvent;
-			expect(Teamspaces.initTeamspace.mock.calls.length).toBe(1);
-			expect(Teamspaces.initTeamspace.mock.calls[0][0]).toEqual('username1');
+			expect(Teamspaces.initTeamspace).toHaveBeenCalledTimes(1);
+			expect(Teamspaces.initTeamspace).toHaveBeenCalledWith(username);
+			expect(Invitations.unpack).toHaveBeenCalledTimes(1);
+			expect(Invitations.unpack).toHaveBeenCalledWith(username);
 		});
 	});
 };
