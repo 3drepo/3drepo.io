@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,21 +14,28 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import ButtonBase from '@mui/material/Button';
 import styled from 'styled-components';
-import { LabelButton } from '@controls/button';
 
-export const Container = styled.div`
-	min-width: 80px;
-	position: absolute;
-	right: 60px;
-`;
+export const Button = styled(ButtonBase)<{ color?: string, outlined?: any }>`
+	white-space: nowrap;
+	align-items: center;
+	padding: 8px 12px 8px 15px;
+	color: ${({ theme }) => theme.palette.tertiary.main};
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 
-export const Button = styled(LabelButton)<{ $isVoid: boolean }>`
-	margin: 0;
-	width: 100%;
-	color: ${({ theme, $isVoid }) => ($isVoid ? theme.palette.error.main : theme.palette.primary.main)};
+	&:hover, &:active {
+		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
+		text-decoration-line: none;
+	}
 
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	&:disabled {
+		background-color: ${({ theme }) => theme.palette.base.lightest};
+		color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+
+	&.Mui-focusVisible {
+		box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
 	}
 `;

@@ -15,42 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ElementType, forwardRef, Ref } from 'react';
-import { Typography } from '@/v5/ui/controls/typography';
-import { ButtonTypeMap } from '@mui/material/Button/Button';
+import { forwardRef, Ref } from 'react';
 import { ButtonProps } from '@mui/material/Button';
 import { CircularProgress } from '@mui/material';
-import { MuiButton, ErrorButton, LabelButton } from './button.styles';
+import { MuiButton, ErrorButton } from './button.styles';
 
-type ButtonVariants = ButtonProps['variant'] | 'label';
-
-export type IButton<T extends ElementType = ButtonTypeMap['defaultComponent']> = Omit<ButtonProps<T>, 'variant'> & {
-	variant?: ButtonVariants;
+export type IButton = ButtonProps & {
 	className?: string;
 	errorButton?: boolean;
 	isPending?: boolean;
 };
 
-const ButtonBase = <T extends ElementType>({
+const ButtonBase = ({
 	children,
 	variant,
 	errorButton,
 	isPending,
 	...props
-}: IButton<T>, ref: Ref<HTMLButtonElement>): JSX.Element => {
+}: IButton, ref: Ref<HTMLButtonElement>) => {
 	if (errorButton) {
 		return (
 			<ErrorButton {...props} ref={ref}>
 				{children}
 			</ErrorButton>
-		);
-	}
-
-	if (variant === 'label') {
-		return (
-			<LabelButton {...props} ref={ref}>
-				<Typography variant="kicker">{children}</Typography>
-			</LabelButton>
 		);
 	}
 
@@ -64,7 +51,7 @@ const ButtonBase = <T extends ElementType>({
 
 	return (
 		<MuiButton variant={variant} {...props} ref={ref}>
-			{ children }
+			{children}
 		</MuiButton>
 	);
 };

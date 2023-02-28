@@ -18,7 +18,7 @@
 import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 import { Actions, Footer, Invitation, List } from '@/v4/routes/components/invitationsDialog/invitationsDialog.styles';
 import { css } from 'styled-components';
-import { secondaryButtonStyling } from '../dialogs/generalDialogStyling.overrides';
+import { secondaryButtonStyling } from '../resuableOverrides.styles';
 
 export default css`
 	${EmptyStateInfo} {

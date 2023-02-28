@@ -50,7 +50,7 @@ import {
 	StyledLinkableField,
 	ActionsLine,
 } from '@/v4/routes/components/textField/textField.styles';
-import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
+import { primaryButtonStyling } from '@/v5/ui/v4Adapter/resuableOverrides.styles';
 import { ViewerPanelContent } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 import { StyledTextField as AutoSuggestField } from '@/v4/routes/components/autosuggestField/autosuggestField.styles';
 import { MultipleInputsContainer } from '@/v4/routes/components/criteriaField/components/criteriaValueField/criteriaValueField.styles';
@@ -272,7 +272,7 @@ const expandedGroupItem = css`
 					}
 
 					.MuiButton-contained {
-						${labelButtonPrimaryStyles}
+						${primaryButtonStyling}
 
 						&.Mui-disabled {
 							color: ${({ theme }) => theme.palette.primary.contrast};
