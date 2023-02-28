@@ -22,7 +22,7 @@ import { ButtonProps } from '@mui/material/Button';
 import { CircularProgress } from '@mui/material';
 import { MuiButton, ErrorButton, LabelButton } from './button.styles';
 
-type ButtonVariants = ButtonProps['variant'] | 'label' | 'label-outlined';
+type ButtonVariants = ButtonProps['variant'] | 'label';
 
 export type IButton<T extends ElementType = ButtonTypeMap['defaultComponent']> = Omit<ButtonProps<T>, 'variant'> & {
 	variant?: ButtonVariants;
@@ -31,7 +31,7 @@ export type IButton<T extends ElementType = ButtonTypeMap['defaultComponent']> =
 	isPending?: boolean;
 };
 
-export const ButtonBase = <T extends ElementType>({
+const ButtonBase = <T extends ElementType>({
 	children,
 	variant,
 	errorButton,
@@ -45,6 +45,7 @@ export const ButtonBase = <T extends ElementType>({
 			</ErrorButton>
 		);
 	}
+
 	if (variant === 'label') {
 		return (
 			<LabelButton {...props} ref={ref}>
@@ -52,25 +53,20 @@ export const ButtonBase = <T extends ElementType>({
 			</LabelButton>
 		);
 	}
-	if (variant === 'label-outlined') {
-		return (
-			<LabelButton outlined {...props} ref={ref}>
-				<Typography variant="kicker">{children}</Typography>
-			</LabelButton>
-		);
-	}
 
-	return isPending
-		? (
+	if (isPending) {
+		return (
 			<MuiButton variant={variant} {...props} startIcon="" ref={ref}>
 				<CircularProgress color="inherit" size="13px" thickness={7} />
 			</MuiButton>
-		)
-		: (
-			<MuiButton variant={variant} {...props} ref={ref}>
-				{ children }
-			</MuiButton>
 		);
+	}
+
+	return (
+		<MuiButton variant={variant} {...props} ref={ref}>
+			{ children }
+		</MuiButton>
+	);
 };
 
 export const Button = forwardRef(ButtonBase);
