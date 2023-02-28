@@ -15,17 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import { Button as ButtonComponent } from '@controls/button';
+import { LabelButton } from '@controls/button';
 
-export const Button = styled(ButtonComponent).attrs({
-	variant: 'label',
-	color: 'secondary',
-})`
+export const Button = styled(LabelButton)`
 	margin: 0;
 	width: 135px;
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
-	}
 
 	&.Mui-disabled {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
