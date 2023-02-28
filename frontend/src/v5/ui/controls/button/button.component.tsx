@@ -26,7 +26,7 @@ export type IButton<T extends ElementType = ButtonTypeMap['defaultComponent']> =
 	isPending?: boolean;
 };
 
-const ButtonBase = <T extends ElementType>({
+const ButtonBase = ({
 	children,
 	variant,
 	errorButton,
