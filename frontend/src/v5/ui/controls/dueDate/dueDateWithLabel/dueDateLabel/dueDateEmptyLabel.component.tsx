@@ -26,9 +26,9 @@ export type IDueDateEmptyLabel = {
 export const DueDateEmptyLabel = ({ disabled, ...props }: IDueDateEmptyLabel): JSX.Element => (
 	<EmptyDateContainer disabled={disabled} {...props}>
 		{disabled ? (
-			<FormattedMessage id="dueDate.emptyText.nonDisabled" defaultMessage="Due Date Unset" />
+			<FormattedMessage id="dueDate.emptyText.disabled" defaultMessage="Due Date Unset" />
 		) : (
-			<FormattedMessage id="dueDate.emptyText.disabled" defaultMessage="Set Due Date" />
+			<FormattedMessage id="dueDate.emptyText.nonDisabled" defaultMessage="Set Due Date" />
 		)}
 	</EmptyDateContainer>
 );
