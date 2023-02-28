@@ -22,7 +22,7 @@ import { useState } from 'react';
 import { useLocation, Redirect } from 'react-router-dom';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
-import { signup } from '@/v5/services/api/sso';
+import { getRedirectUrl, signup, SSOErrorCode } from '@/v5/services/api/sso';
 import { isInvalidArguments, usernameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { AuthTemplate } from '@components/authTemplate';
 import { UserSignupMain } from '../userSignup.styles';
@@ -44,14 +44,14 @@ export interface IAccountFormInput {
 
 export const UserSignupSSO = () => {
 	const [contextValue, setContextValue] = useState<UserSignupFormStepperContextValue | null>();
-	const [alreadyExistingUsernames, setAlreadyExistingUsernames] = useState([]);
 	const { search } = useLocation();
 	const searchParams = new URLSearchParams(search);
 
 	if (searchParams.get('signupPost')) {
-		if (!searchParams.get('error') || searchParams.get('error') === '2') {
+		if (!searchParams.get('error') || searchParams.get('error') === SSOErrorCode.EMAIL_EXISTS_WITH_SSO) {
 			return (<Redirect to={{ pathname: '/v5/login-sso' }} />);
 		}
+
 		if (searchParams.get('error')) {
 			return (<UserSignupSSOError />);
 		}
@@ -80,17 +80,16 @@ export const UserSignupSSO = () => {
 		resolver: yupResolver(schema),
 		mode: 'all',
 		defaultValues: DEFAULT_FIELDS,
-		context: { alreadyExistingUsernames },
 	});
 
 	const handleInvalidArgumentsError = (error) => {
+		let errorParam = SSOErrorCode.UNKNOWN;
+
 		if (usernameAlreadyExists(error)) {
-			setAlreadyExistingUsernames([...alreadyExistingUsernames, formData.getValues().username]);
-			formData.trigger('username');
+			errorParam = SSOErrorCode.EXISTING_USERNAME;
 		}
 
-		contextValue.moveToStep(0);
-		contextValue.setErroredStep(0);
+		window.location.href = `${getRedirectUrl()}?signupPost=1&error=${errorParam}`;
 	};
 
 	const onSubmit = async (values) => {
