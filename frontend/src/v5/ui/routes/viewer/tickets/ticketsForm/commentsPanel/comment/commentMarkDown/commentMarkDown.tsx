@@ -20,7 +20,7 @@ import ReactMarkdown from 'react-markdown';
 import { CommentMessage } from '../basicComment/basicComment.styles';
 
 const ImageMarkdown = ({ src }) => (<>![image]({src})</>);
-const CodeMarkdown = ({ value }) => (<>{desanitiseMessage(value)}</>);
+const CodeMarkdown = ({ value }) => (<code>{desanitiseMessage(value)}</code>);
 
 const RENDERERS = {
 	paragraph: CommentMessage,
