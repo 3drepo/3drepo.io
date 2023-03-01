@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ChevronIcon from '@assets/icons/outlined/small_chevron-outlined.svg';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { Modal, Container, Image, NextButton, PreviousButton, CloseButton } from './imagesModal.styles';
@@ -32,6 +32,24 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open 
 	const imagesLength = images.length;
 
 	const changeImageIndex = (delta) => setImageIndex((imageIndex + delta + imagesLength) % imagesLength);
+
+	const handleKeyDown = ({ keyCode }) => {
+		const ESCAPE_KEY = 27;
+		const LEFT_KEY = 37;
+		const RIGHT_KEY = 39;
+
+		switch (keyCode) {
+			case ESCAPE_KEY: onClickClose(); 
+			case LEFT_KEY: changeImageIndex(-1); 
+			case RIGHT_KEY: changeImageIndex(1);
+			default: null; 
+		}
+	};
+
+	useEffect(() => {
+		document.addEventListener("keydown", handleKeyDown);
+		return () => document.removeEventListener("keydown", handleKeyDown);
+	});
 
 	return (
 		<Modal open={open} onClose={onClickClose}>
