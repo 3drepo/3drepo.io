@@ -20,6 +20,8 @@ import { Link as BaseLink } from 'react-router-dom';
 import styled from 'styled-components';
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 import { Typography } from '@mui/material';
+import MicrosoftIcon from '@assets/icons/thirdParty/microsoft.svg';
+import { createElement } from 'react';
 
 export const Container = styled.div`
 	margin: auto;
@@ -39,23 +41,21 @@ export const MainTitle = styled.div`
 	width: 270px;
 `;
 
-export const SSOButton = styled(Button).attrs({
+export const MicrosoftButton = styled(Button).attrs({
 	component: BaseLink,
 	variant: 'contained',
 	color: 'primary',
+	startIcon: createElement(MicrosoftIcon),
 })`
 	width: fit-content;
 	font-weight: 500;
 	font-size: 12px;
 	border-radius: 0;
-	background-color: #2F2F2F;
+	background-color: #2F2F2F; // The colour is hardcoded as this are microsoft specs and not part of the theme
 
-	&:hover {
-		background-color: #2F2F2FF0;
-	}
+	&:hover, &:active {
+		background-color: #2F2F2FF0; 
 
-	&:active{
-		background-color: #2F2F2FF0;
 	}
 
 	margin: 0 0 43px;
