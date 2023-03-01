@@ -32,7 +32,7 @@ import { ButtonContainer,
 } from '@/v4/routes/teamspaceSettings/teamspaceSettings.styles';
 import styled from 'styled-components';
 
-export const V5TeamspaceSettingsOverrides = styled.div`
+export const V5TeamspaceSettingsOverrides = styled.div<{ isAdmin: boolean }>`
 	${Panel} {
 		border: none;
 		box-shadow: none;
@@ -82,10 +82,12 @@ export const V5TeamspaceSettingsOverrides = styled.div`
 						svg {
 							margin: 0 0 0 5px;
 							color: ${({ theme }) => theme.palette.secondary.main};
+							display: ${({ isAdmin }) => (isAdmin ? 'block' : 'none')};
 						}
 					}
 					.MuiInputBase-input {
 						color: ${({ theme }) => theme.palette.secondary.main};
+						display: ${({ isAdmin }) => (isAdmin ? 'block' : 'none')};
 					}
 				}
 				fieldset, &:hover fieldset, .Mui-focused fieldset {
@@ -95,6 +97,7 @@ export const V5TeamspaceSettingsOverrides = styled.div`
 			}
 			${SuggestionsContainer} {
 				padding: 0;
+				display: ${({ isAdmin }) => (isAdmin ? 'block' : 'none')};
 				${FileGrid} {
 					width: max-content;
 					height: 40px;
@@ -125,6 +128,7 @@ export const V5TeamspaceSettingsOverrides = styled.div`
 				background-color: transparent;
 				right: 0;
 				bottom: -8px;
+				display: ${({ isAdmin }) => (isAdmin ? 'block' : 'none')};
 				
 				button:not(.Mui-disabled) {
 					background-color: ${({ theme }) => theme.palette.primary.main};

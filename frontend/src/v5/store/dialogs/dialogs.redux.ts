@@ -32,7 +32,7 @@ export const { Types: DialogsTypes, Creators: DialogsActions } = createActions({
 	close: ['dialogId'],
 }, { prefix: 'MODALS/' }) as { Types: Constants<IDialogsActionCreators>; Creators: IDialogsActionCreators };
 
-const openHandler = (state, { modalType, props }: OpenAction) => {
+export const openHandler = (state, { modalType, props }: OpenAction) => {
 	// avoid opening 2+ redirect modals
 	if (getErrorCode(props?.error)) {
 		const currentErrorIsPathNotFound = isPathNotFound(props?.error);

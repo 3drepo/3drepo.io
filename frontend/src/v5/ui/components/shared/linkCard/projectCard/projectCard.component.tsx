@@ -37,6 +37,8 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 	const { teamspace } = useParams<TeamspaceParams>();
 	const to = projectRoute(teamspace, project);
 
+	const { isAdmin } = project;
+
 	const preventNavigation = (e) => e.preventDefault();
 
 	const onClickDelete = () => {
@@ -95,6 +97,7 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 							defaultMessage: 'Delete Project',
 						})}
 						onClick={onClickDelete}
+						hidden={!isAdmin}
 					/>
 				</EllipsisMenu>
 			</EllipsisMenuContainer>

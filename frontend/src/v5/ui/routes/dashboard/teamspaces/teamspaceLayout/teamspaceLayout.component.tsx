@@ -37,8 +37,8 @@ interface ITeamspaceLayout {
 
 export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.Element => {
 	const { teamspace } = useParams<TeamspaceParams>();
-	const currentUserIsUpating = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
-	const { isAdmin } = TeamspacesHooksSelectors.selectCurrentTeamspaceDetails() || {};
+	const currentUserIsUpdating = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
+	const isAdmin = TeamspacesHooksSelectors.selectIsTeamspaceAdmin();
 
 	const [imgSrc, setImgSrc] = useState(null);
 
@@ -52,7 +52,7 @@ export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.
 		}
 	}, [teamspace]);
 
-	useEffect(() => { if (!currentUserIsUpating) updateImg(); }, [currentUserIsUpating]);
+	useEffect(() => { if (!currentUserIsUpdating) updateImg(); }, [currentUserIsUpdating]);
 
 	return (
 		<Container className={className}>

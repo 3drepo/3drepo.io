@@ -40,7 +40,6 @@ export const Board = () => {
 	useEffect(() => {
 		if (!componentIsReady) return;
 		dispatch(UserManagementActions.fetchTeamspaceUsers());
-		dispatch(UserManagementActions.fetchProject(projectName));
 		dispatch(TeamspacesActions.fetchTeamspacesIfNecessary(username));
 	}, [projectName, username]);
 
