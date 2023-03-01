@@ -17,7 +17,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { UserSignupSchemaSSO, UserSignupSchemaTermsAndSubmit } from '@/v5/validation/userSchemes/userSignupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { pick } from 'lodash';
+import { omit } from 'lodash';
 import { useState } from 'react';
 import { useLocation, Redirect } from 'react-router-dom';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -93,7 +93,7 @@ export const UserSignupSSO = () => {
 
 	const onSubmit = async (values) => {
 		try {
-			const newUser = pick(values, ['username', 'company', 'countryCode', 'mailListAgreed']);
+			const newUser = omit(values, ['termsAgreed']);
 			if (!values.company) delete newUser.company;
 			const res = await signup(newUser);
 			window.location.href = res.data.link;
