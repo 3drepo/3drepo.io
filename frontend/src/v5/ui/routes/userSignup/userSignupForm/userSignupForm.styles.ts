@@ -19,7 +19,7 @@ import { Link } from 'react-router-dom';
 import StepperBase from '@mui/material/Stepper';
 import StepLabelBase from '@mui/material/StepLabel';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { FONT_WEIGHT } from '@/v4/styles';
+import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 
 export const MainContentStyling = css`
 	width: 408px;
@@ -34,6 +34,9 @@ export const MainContentStyling = css`
 export const Title = styled.div`
 	${({ theme }) => theme.typography.h1};
 	color: ${({ theme }) => theme.palette.secondary.main};
+	font-weight: ${FONT_WEIGHT.BOLDER};
+	font-size: 24px;
+	line-height: 30px;
 `;
 
 export const Container = styled.div`
@@ -42,6 +45,7 @@ export const Container = styled.div`
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	width: 408px;
 `;
 
 export const Underlined = styled.div`
@@ -52,6 +56,8 @@ export const Underlined = styled.div`
 
 export const Stepper = styled(StepperBase)`
 	${MainContentStyling}
+	width: 100%;
+
 `;
 
 export const StepLabel = styled(StepLabelBase)<{ $reachable?: boolean }>`
@@ -63,16 +69,16 @@ export const StepLabel = styled(StepLabelBase)<{ $reachable?: boolean }>`
 
 	.MuiStepLabel-label {
 		font-size: 15px;
-		font-weight: 600;
+		font-weight: 500;
 	}
 `;
 
 export const LoginPrompt = styled.div`
 	${({ theme }) => theme.typography.link};
-	color: ${({ theme }) => theme.palette.base.main};
+	color: ${({ theme }) => theme.palette.secondary.main};
 	font-family: ${({ theme }) => theme.typography.fontFamily};
 	text-decoration: none;
-	font-weight: ${FONT_WEIGHT.BOLD};
+	font-weight: ${FONT_WEIGHT.MEDIUM};
 	font-size: 13px;
 	line-height: 19px;
 `;

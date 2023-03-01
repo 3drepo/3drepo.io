@@ -25,7 +25,6 @@ import { FormattedMessage } from 'react-intl';
 import { getRedirectUrl, signup, SSOErrorCode } from '@/v5/services/api/sso';
 import { isInvalidArguments, usernameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { AuthTemplate } from '@components/authTemplate';
-import { UserSignupMain } from '../userSignup.styles';
 import { Container as FormContainer, LoginPrompt, LoginPromptLink, Title } from '../userSignupForm/userSignupForm.styles';
 import { UserSignupFormStep } from '../userSignupForm/userSignupFormStep/userSignupFormStep.component';
 import { UserSignupFormStepTermsAndSubmit } from '../userSignupForm/userSignupFormStep/userSignupFormStepTermsAndSubmit/userSignupFormStepTermsAndSubmit.component';
@@ -110,43 +109,41 @@ export const UserSignupSSO = () => {
 	return (
 		<AuthTemplate>
 			<Container>
-				<UserSignupMain>
-					<FormContainer>
-						<Title>
-							<FormattedMessage id="userSignupSSO.title" defaultMessage="We just need a few more details from you..." />
-						</Title>
-						<FormProvider {...formData}>
-							<form onSubmit={formData.handleSubmit(onSubmit)}>
-								<UserSignupFormStepper onContextUpdated={setContextValue}>
-									<UserSignupFormStep
-										stepIndex={0}
-										label={formatMessage({
-											id: 'userSignup.step.username',
-											defaultMessage: 'Username',
-										})}
-									>
-										<MinUserSignupFormStepAccount />
-									</UserSignupFormStep>
-									<UserSignupFormStep
-										stepIndex={1}
-										label={formatMessage({
-											id: 'userSignup.step.termsAndSubmit',
-											defaultMessage: 'Terms and submit',
-										})}
-									>
-										<UserSignupFormStepTermsAndSubmit />
-									</UserSignupFormStep>
-								</UserSignupFormStepper>
-							</form>
-						</FormProvider>
-						<LoginPrompt>
-							<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
-							<LoginPromptLink to="/v5/login">
-								<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Log in" />
-							</LoginPromptLink>
-						</LoginPrompt>
-					</FormContainer>
-				</UserSignupMain>
+				<FormContainer>
+					<Title>
+						<FormattedMessage id="userSignupSSO.title" defaultMessage="We just need a few more details from you..." />
+					</Title>
+					<FormProvider {...formData}>
+						<form onSubmit={formData.handleSubmit(onSubmit)}>
+							<UserSignupFormStepper onContextUpdated={setContextValue}>
+								<UserSignupFormStep
+									stepIndex={0}
+									label={formatMessage({
+										id: 'userSignup.step.username',
+										defaultMessage: 'Username',
+									})}
+								>
+									<MinUserSignupFormStepAccount />
+								</UserSignupFormStep>
+								<UserSignupFormStep
+									stepIndex={1}
+									label={formatMessage({
+										id: 'userSignup.step.termsAndSubmit',
+										defaultMessage: 'Terms and submit',
+									})}
+								>
+									<UserSignupFormStepTermsAndSubmit />
+								</UserSignupFormStep>
+							</UserSignupFormStepper>
+						</form>
+					</FormProvider>
+					<LoginPrompt>
+						<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
+						<LoginPromptLink to="/v5/login">
+							<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Log in" />
+						</LoginPromptLink>
+					</LoginPrompt>
+				</FormContainer>
 			</Container>
 		</AuthTemplate>
 	);
