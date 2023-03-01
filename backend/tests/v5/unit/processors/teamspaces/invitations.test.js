@@ -42,6 +42,19 @@ const testUnpack = () => {
 			expect(InvitationsModelV4.unpack).toHaveBeenCalledTimes(1);
 			expect(InvitationsModelV4.unpack).toHaveBeenCalledWith(user);
 		});
+
+		test('should catch error and do nothing if it failed', async () => {
+			const username = generateRandomString();
+			const user = generateRandomString();
+
+			UsersModel.getUserByUsername.mockRejectedValueOnce(user);
+
+			await Invitations.unpack(username);
+
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(username);
+			expect(InvitationsModelV4.unpack).not.toHaveBeenCalled();
+		});
 	});
 };
 
