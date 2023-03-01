@@ -19,7 +19,6 @@ import { Button } from '@controls/button';
 import { Link as BaseLink } from 'react-router-dom';
 import styled from 'styled-components';
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
-import { Typography } from '@mui/material';
 import MicrosoftIcon from '@assets/icons/thirdParty/microsoft.svg';
 import { createElement } from 'react';
 
@@ -62,30 +61,28 @@ export const MicrosoftButton = styled(Button).attrs({
 	padding:20px;
 `;
 
-export const SignUpWithMicrosoftText = styled(Typography)`
+export const SignUpWithMicrosoftText = styled.div`
 	${({ theme }) => theme.typography.h1};
 	margin-bottom: 10px;
 `;
 
-export const MicrosoftInstructionsText = styled(Typography)`
+export const MicrosoftInstructionsText = styled.div`
 	${({ theme }) => theme.typography.body1};
 	color: ${({ theme }) => theme.palette.base.main};
 	margin-bottom: 5px;
 	width: 376px;
 `;
 
-export const MicrosoftInstructionsRemarkText = styled(Typography)`
-	${({ theme }) => theme.typography.body1};
+export const MicrosoftInstructionsRemarkText = styled.div`
+	${({ theme }) => theme.typography.caption};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	font-weight: ${FONT_WEIGHT.BOLDER};
-	font-size: 10px;
 `;
 
-export const MicrosoftInstructionsTermsText = styled(Typography)`
-	${({ theme }) => theme.typography.inter};
+export const MicrosoftInstructionsTermsText = styled.div`
+	${({ theme }) => theme.typography.caption};
 	color: ${({ theme }) => theme.palette.base.main};
 	width: 360px;
-	font-size: 10px;
 	margin-bottom: 20px;
 `;
 
@@ -102,7 +99,6 @@ export const SidebarContent = styled.div`
 `;
 
 export const NewSticker = styled.div`
-	${({ theme }) => theme.typography.inter};
 	color: ${({ theme }) => theme.palette.primary.main};
 	border: solid 1.5px ${({ theme }) => theme.palette.primary.main}; 
 	border-radius: 5px;
