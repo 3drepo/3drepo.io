@@ -274,7 +274,7 @@ const testUpdateCustomMetadata = () => {
 	});
 };
 
-describe('E2E routes/teamspaces/projects/containers/metadata', () => {
+describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);

@@ -23,6 +23,7 @@ const { unlinkSync, readFileSync } = require('fs');
 
 const { storeFile } = require(`${src}/services/filesManager`);
 const { getRefsByQuery } = require(`${src}/models/fileRefs`);
+const { disconnect } = require(`${src}/handler/db`);
 
 const GetDBRefs = require(`${utilScripts}/fileshare/getDBRefs`);
 
@@ -91,5 +92,6 @@ describe(determineTestGroup(__filename), () => {
 		return { db, colData };
 	});
 	beforeAll(async () => { await setupData(data); });
+	afterAll(disconnect);
 	runTest(data);
 });
