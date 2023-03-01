@@ -773,7 +773,7 @@ const testVerify = () => {
 				_id: nonVerifiedUserEmail,
 				teamSpaces: [
 					{
-						teamspace,
+						teamspace: teamspace.name,
 						job: 'Main Contractor',
 						permissions: {
 							teamspace_admin: true,
