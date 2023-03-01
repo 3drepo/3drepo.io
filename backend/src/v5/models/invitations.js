@@ -16,12 +16,15 @@
  */
 
 const Invitations = {};
+const { ADMIN_DB } = require('../handler/db.constants');
 const db = require('../handler/db');
 
 const COL_NAME = 'invitations';
 
-const findMany = (query, projection, sort) => db.find('admin', COL_NAME, query, projection, sort);
+const findMany = (query, projection, sort) => db.find(ADMIN_DB, COL_NAME, query, projection, sort);
 
 Invitations.getInvitationsByTeamspace = (teamspace, projection = {}) => findMany({ 'teamSpaces.teamspace': teamspace }, projection);
+
+Invitations.initialise = () => db.createIndex(ADMIN_DB, COL_NAME, { 'teamSpaces.teamspace': 1 }, { runInBackground: true });
 
 module.exports = Invitations;

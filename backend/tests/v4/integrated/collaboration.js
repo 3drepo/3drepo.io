@@ -26,6 +26,8 @@ const helpers = require("../helpers/signUp");
 const async = require("async");
 const C = require("../../../src/v4/constants");
 
+const { queue: {purgeQueues}} = require("../../v5/helper/services");
+
 describe("Sharing/Unsharing a model", function () {
 	const User = require("../../../src/v4/models/user");
 	let server;
@@ -69,20 +71,13 @@ describe("Sharing/Unsharing a model", function () {
 
 	after(function(done) {
 
-		const q = require("../../../src/v4/services/queue");
-
-		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
-			return q.channel.purgeQueue(q.workerQName);
-		}).then(() => {
-			q.channel.assertQueue(q.modelQName, { durable: true }).then(() => {
-				return q.channel.purgeQueue(q.modelQName);
-			}).then(() => {
-				server.close(function() {
-					console.log("API test server is closed");
-					done();
-				});
+		purgeQueues().then(() => {
+			server.close(function() {
+				console.log("API test server is closed");
+				done();
 			});
 		});
+
 	});
 
 	describe("for view only", function() {
@@ -245,7 +240,6 @@ describe("Sharing/Unsharing a model", function () {
 
 		it("and the viewer should NOT be able to upload model", function(done) {
 			agent.post(`/${username}/${model}/upload`)
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
 				.expect(401, done);
 		});
 
@@ -615,7 +609,6 @@ describe("Sharing/Unsharing a model", function () {
 
 		it("and the commenter should NOT be able to upload model", function(done) {
 			agent.post(`/${username}/${model}/upload`)
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/8000cubes.obj")
 				.expect(401, done);
 		});
 

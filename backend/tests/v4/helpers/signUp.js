@@ -17,6 +17,8 @@
 
 "use strict";
 
+const ServiceHelperV5 = require("../../v5/helper/services")
+
 function signUpAndLogin(params) {
 
 	const server = params.server;
@@ -35,23 +37,19 @@ function signUpAndLogin(params) {
 
 		agent = request.agent(server);
 
-		// create a user
-		return User.createUser(username, password, {
-			email: email
-		}, 200000).then(emailVerifyToken => {
-			return User.verify(username, emailVerifyToken.token, {skipImportToyModel : true, skipCreateBasicPlan: noBasicPlan});
-		}).then(user => {
+		return ServiceHelperV5.db.createUser({user:  username, password, basicData: {email}}).then(() => {
+			return ServiceHelperV5.db.createTeamspace(username, [], undefined, false).then(() => {
+				// login
+				agent.post("/login")
+					.send({ username, password })
+					.expect(200, function(err, res) {
+						expect(res.body.username).to.equal(username);
+						console.log(typeof done);
+						done(err, agent);
 
-			// login
-			agent.post("/login")
-				.send({ username, password })
-				.expect(200, function(err, res) {
-					expect(res.body.username).to.equal(username);
-					console.log(typeof done);
-					done(err, agent);
+					});
 
-				});
-
+			})
 		}).catch(err => {
 			done(err, agent);
 		});

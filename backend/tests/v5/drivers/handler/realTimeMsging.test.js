@@ -18,9 +18,10 @@
 const http = require('http');
 const { io: ioClient } = require('socket.io-client');
 const { src } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+const { determineTestGroup, generateRandomString } = require('../../helper/services');
 
 const { session } = require(`${src}/services/sessions`);
+const { disconnect } = require(`${src}/handler/db`);
 
 const RealTime = require(`${src}/handler/realTimeMsging`);
 
@@ -358,8 +359,9 @@ const testSocketRooms = () => {
 	});
 };
 
-describe('Socket IO', () => {
+describe(determineTestGroup(__filename), () => {
 	testSocketConnection();
 	testSocketEmit();
 	testSocketRooms();
+	afterAll(disconnect);
 });
