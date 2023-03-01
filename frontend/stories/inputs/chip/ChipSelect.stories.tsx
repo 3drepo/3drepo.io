@@ -55,7 +55,7 @@ export default {
 	},
 	component: ChipSelect,
 	parameters: { controls: { exclude: ['name', 'inputRef', 'helperText', 'error', 'size', 'onDelete',
-		'deleteIcon', 'avatar', 'sx', 'classes', 'clickable', 'children', 'required', 'ref'] } },
+		'deleteIcon', 'avatar', 'sx', 'classes', 'clickable', 'children', 'required', 'icon', 'values', 'ref'] } },
 } as ComponentMeta<typeof ChipSelect>;
 
 const ChipSelectStory: ComponentStory<typeof ChipSelect> = ({ ...args }: any) => {
