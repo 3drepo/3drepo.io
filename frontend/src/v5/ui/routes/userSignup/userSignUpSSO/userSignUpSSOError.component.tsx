@@ -16,6 +16,7 @@
  */
 
 import { AuthTemplate } from '@components/authTemplate';
+import { Gap } from '@controls/gap';
 import { SubmitButton } from '@controls/submitButton';
 import { FormattedMessage } from 'react-intl';
 import { UserSignupMain } from '../userSignup.styles';
@@ -31,12 +32,13 @@ export const UserSignupSSOError = () => (
 						<FormattedMessage id="userSignupSSO.error.alreadyRegistered" defaultMessage="It looks like you already have an account with us..." />
 					</Title>
 					<FormattedMessage
-						id="userSignupSSO.error.alreadyRegisteredDetails"
-						defaultMessage="To use the Microsoft Sign In feature, you’ll need to link your existing 3D Repo account.<br></br><br></br>
-						Sign in using your 3D Repo credentials and we’ll direct you to where you can link your account to Microsoft."
-						values={{
-							br: () => (<br />),
-						}}
+						id="userSignupSSO.error.linkAccountMessage"
+						defaultMessage="To use the Microsoft Sign In feature, you’ll need to link your existing 3D Repo account."
+					/>
+					<Gap />
+					<FormattedMessage
+						id="userSignupSSO.error.signInMessage"
+						defaultMessage="Sign in using your 3D Repo credentials and we’ll direct you to where you can link your account to Microsoft."
 					/>
 					<Link to="/v5/login">
 						<SubmitButton>
