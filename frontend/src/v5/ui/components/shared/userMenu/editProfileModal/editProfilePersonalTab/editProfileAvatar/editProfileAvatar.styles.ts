@@ -79,8 +79,8 @@ export const AvatarButton = styled(Button).attrs({
 	variant: 'outlined',
 })`
 	cursor: pointer;
-	padding: 10px 15px;
 	margin: 8px 0 0;
+	padding: 0;
 	width: fit-content;
 `;
 
@@ -89,6 +89,8 @@ const AVATAR_ID = 'avatar';
 export const AvatarLabel = styled.label.attrs({
 	htmlFor: AVATAR_ID,
 })`
+	padding: 6px 15px;
+	cursor: pointer;
 `;
 
 export const AvatarInput = styled.input.attrs({
