@@ -46,6 +46,7 @@ export const MicrosoftButton = styled(Button).attrs({
 	color: 'primary',
 	startIcon: createElement(MicrosoftIcon),
 })`
+	display: flex;
 	width: fit-content;
 	font-weight: 500;
 	font-size: 12px;

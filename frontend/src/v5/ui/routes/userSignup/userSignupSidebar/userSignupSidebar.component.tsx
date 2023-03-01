@@ -81,9 +81,7 @@ export const UserSignupSidebar = () => (
 
 				/>
 			</MicrosoftInstructionsTermsText>
-			<MicrosoftButton
-				to={{ pathname: 'signup-sso' }}
-			>
+			<MicrosoftButton to={{ pathname: 'signup-sso' }}>
 				<FormattedMessage id="userSignup.sidebar.sso.microsoft" defaultMessage="Sign up with Microsoft" />
 			</MicrosoftButton>
 			<LoginPrompt>

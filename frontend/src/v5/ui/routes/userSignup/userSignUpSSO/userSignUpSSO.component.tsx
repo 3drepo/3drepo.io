@@ -140,7 +140,7 @@ export const UserSignupSSO = () => {
 					<LoginPrompt>
 						<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
 						<LoginPromptLink to="/v5/login">
-							<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Log in" />
+							<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Sign in" />
 						</LoginPromptLink>
 					</LoginPrompt>
 				</FormContainer>
