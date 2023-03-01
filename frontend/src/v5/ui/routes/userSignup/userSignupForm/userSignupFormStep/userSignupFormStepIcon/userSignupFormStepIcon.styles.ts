@@ -20,9 +20,9 @@ import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import ErrorIcon from '@assets/icons/outlined/stepper_error-outlined.svg';
 
 const stepIconStyle = css`
-	width: 28px;
-	height: 28px;
-	padding: 5px;
+	width: 35px;
+	height: 35px;
+	padding: 10px;
 	border-radius: 50%;
 	box-sizing: border-box;
 `;
@@ -33,6 +33,7 @@ export const StepIconContainer = styled.div`
 	background-color: currentColor;
 	font-family: ${({ theme }) => theme.typography.fontFamily};
 	font-size: 12px;
+	line-height: 15px;
 	display: flex;
 	align-items: center;
 	justify-content: center;

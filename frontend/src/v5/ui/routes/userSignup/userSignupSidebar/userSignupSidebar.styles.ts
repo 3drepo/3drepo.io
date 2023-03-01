@@ -33,9 +33,8 @@ export const Container = styled.div`
 
 export const MainTitle = styled.div`
 	${({ theme }) => theme.typography.h1};
-	font-size: 40px;
 	font-weight: ${FONT_WEIGHT.BOLDER};
-	line-height: 42px;
+	line-height: 30px;
 	margin-bottom: 27px;
 	width: 270px;
 `;
@@ -90,7 +89,7 @@ export const Link = styled(BaseLink)`
 	&& {
 		color: ${({ theme }) => theme.palette.primary.main};
 		text-decoration: none;
-		font-weight: ${FONT_WEIGHT.BOLDER};
+		font-weight: ${FONT_WEIGHT.BOLD};
 	}
 `;
 
