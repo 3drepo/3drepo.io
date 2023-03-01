@@ -63,6 +63,10 @@ export const IssuePropertiesRow = ({ onBlur }: IIssuePropertiesRow) => (
 			</PropertyTitle>
 			<InputController
 				Input={DueDateWithIcon}
+				tooltip={formatMessage({
+					id: 'customTicket.topPanel.dueDate.tooltip',
+					defaultMessage: 'Set due date',
+				})}
 				name={`properties[${IssueProperties.DUE_DATE}]`}
 				onBlur={onBlur}
 				key={IssueProperties.DUE_DATE}

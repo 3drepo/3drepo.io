@@ -18,11 +18,16 @@
 import { formatDate } from '@/v5/services/intl';
 import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
 import { FormInputProps } from '@controls/inputs/inputController.component';
+import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { CalendarIcon, DueDateWithIconContainer } from '../dueDate.styles';
 import { DateContainer, EmptyDateContainer } from '../dueDateWithLabel/dueDateLabel/dueDateLabel.styles';
 
-export const DueDateWithIcon = ({ value, disabled, ...props }: FormInputProps) => {
+type IDueDateWithIcon = FormInputProps & {
+	tooltip?: string;
+};
+
+export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: IDueDateWithIcon) => {
 	const isOverdue = value < Date.now();
 	const formattedDate = formatDate(value, {
 		day: 'numeric',
@@ -30,21 +35,23 @@ export const DueDateWithIcon = ({ value, disabled, ...props }: FormInputProps) =
 		year: '2-digit',
 	});
 	return (
-		<DueDateWithIconContainer>
-			<DatePicker
-				value={value}
-				disabled={disabled}
-				renderInput={
-					(args) => (value ? (
-						<DateContainer {...args} isOverdue={isOverdue}><CalendarIcon /> {formattedDate}</DateContainer>
-					) : (
-						<EmptyDateContainer {...args} disabled={disabled}><CalendarIcon />
-							<FormattedMessage id="dueDate.withIcon.unset" defaultMessage="Unset" />
-						</EmptyDateContainer>
-					))
-				}
-				{...props}
-			/>
-		</DueDateWithIconContainer>
+		<Tooltip title={tooltip}>
+			<DueDateWithIconContainer>
+				<DatePicker
+					value={value}
+					disabled={disabled}
+					renderInput={
+						(args) => (value ? (
+							<DateContainer {...args} isOverdue={isOverdue}><CalendarIcon /> {formattedDate}</DateContainer>
+						) : (
+							<EmptyDateContainer {...args} disabled={disabled}><CalendarIcon />
+								<FormattedMessage id="dueDate.withIcon.unset" defaultMessage="Unset" />
+							</EmptyDateContainer>
+						))
+					}
+					{...props}
+				/>
+			</DueDateWithIconContainer>
+		</Tooltip>
 	);
 };
