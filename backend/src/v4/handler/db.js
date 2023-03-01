@@ -16,17 +16,19 @@
  */
 
 "use strict";
+
+const {v5Path} = require("../../interop");
+const {_context, disconnect} = require(`${v5Path}/handler/db`);
+
 (function() {
-	const config	  = require("../config.js");
 	const C = require("../constants");
-	const MongoClient = require("mongodb").MongoClient;
 	const GridFSBucket = require("mongodb").GridFSBucket;
 	const { PassThrough } = require("stream");
 	const responseCodes = require("../response_codes");
 
 	async function getGridFSBucket(database, collection, chunksize = null) {
 		try {
-			const dbConn = await Handler.getDB(database);
+			const dbConn = await _context.getDB(database);
 			const options = {bucketName: collection};
 
 			if (chunksize) {
@@ -39,49 +41,9 @@
 			throw err;
 		}
 	}
-
-	function getHostPorts() {
-		const hostPorts = [];
-
-		for (const host in config.db.host) {
-			hostPorts.push(`${config.db.host[host]}:${config.db.port[host]}`);
-		}
-
-		return hostPorts.join(",");
-	}
-
-	function getURL(username, password) {
-		// Generate connection string that could include multiple hosts that
-		// represent a replica set.
-
-		let authStr = "";
-		if(username && password) {
-			authStr = `${username}:${encodeURIComponent(password)}@`;
-		} else if(config.db.username && config.db.password) {
-			authStr = `${config.db.username}:${encodeURIComponent(config.db.password)}@`;
-		}
-
-		let connectString = `mongodb://${authStr}${getHostPorts()}/?`;
-
-		connectString += config.db.replicaSet ? "&replicaSet=" + config.db.replicaSet : "";
-		connectString += config.db.authSource ? "&authSource=" + config.db.authSource : "";
-
-		if (Number.isInteger(config.db.timeout)) {
-			connectString += "&socketTimeoutMS=" + config.db.timeout;
-		}
-		return connectString;
-	}
-
-	const connect = (username, password) => {
-		return MongoClient.connect(getURL(username, password), {
-			useNewUrlParser: true,
-			useUnifiedTopology: true
-		});
-	};
+	const connect =  _context.connect;
 
 	const Handler = {};
-
-	let db;
 
 	Handler.authenticate = async (user, password) => {
 		let conn;
@@ -98,12 +60,7 @@
 
 	};
 
-	Handler.disconnect = function () {
-		if(db) {
-			db.close();
-			db = null;
-		}
-	};
+	Handler.disconnect = disconnect;
 
 	const dropAllIndicies = async (database, colName) => {
 		const collection = await Handler.getCollection(database, colName);
@@ -114,7 +71,7 @@
 		const colName = collection.name || collection;
 		try {
 			await dropAllIndicies(database, colName);
-			const dbConn = await Handler.getDB(database);
+			const dbConn = await _context.getDB(database);
 			await dbConn.dropCollection(colName);
 
 		} catch(err) {
@@ -183,21 +140,14 @@
 		return collection.deleteOne(query);
 	};
 
-	Handler.getDB = async (database) => {
-		if (db) {
-			return db.db(database);
-		} else {
-			db = await connect();
-			return db.db(database);
-		}
-	};
+	Handler.getDB = _context.getDB;
 
 	Handler.getAuthDB = function () {
-		return Handler.getDB("admin");
+		return _context.getDB("admin");
 	};
 
 	Handler.getCollection = function (database, colName) {
-		return Handler.getDB(database).then(dbConn => {
+		return _context.getDB(database).then(dbConn => {
 			return dbConn.collection(colName);
 		}).catch(err => {
 			Handler.disconnect();
@@ -206,12 +156,12 @@
 	};
 
 	Handler.getDatabaseStats = async (database) => {
-		const dbConn = await Handler.getDB(database);
+		const dbConn = await _context.getDB(database);
 		return dbConn.stats();
 	};
 
 	Handler.getCollectionStats = function (database, colName) {
-		return Handler.getDB(database).then(dbConn => {
+		return _context.getDB(database).then(dbConn => {
 			return dbConn.collection(colName).stats();
 		}).catch(err => {
 			Handler.disconnect();
@@ -322,7 +272,7 @@
 
 	Handler.listCollections = async function (database) {
 		try {
-			const dbConn = await Handler.getDB(database);
+			const dbConn = await _context.getDB(database);
 			const colls = await dbConn.listCollections().toArray();
 			return colls.map(({name, options}) => ({name, options}));
 		} catch (err) {
@@ -332,23 +282,12 @@
 	};
 
 	Handler.runCommand = function (database, cmd) {
-		return Handler.getDB(database).then(dbConn => {
+		return _context.getDB(database).then(dbConn => {
 			return dbConn.command(cmd);
 		}).catch(err => {
 			Handler.disconnect();
 			return Promise.reject(err);
 		});
-	};
-
-	Handler.getSessionStore = () => {
-		const MongoStore = require("connect-mongo");
-		const sessionStore = MongoStore.create({
-			clientPromise: connect(),
-			dbName: "admin",
-			collectionName: "sessions",
-			stringify: false
-		});
-		return Promise.resolve(sessionStore);
 	};
 
 	Handler.updateMany = async function (database, colName, query, data, upsert = false) {
@@ -399,7 +338,7 @@
 	Handler.dropDatabase = async (database) => {
 		if(!["config", "admin"].includes(database)) {
 			try {
-				const dbConn = await Handler.getDB(database);
+				const dbConn = await _context.getDB(database);
 				const collections = await Handler.listCollections(database);
 				await Promise.all(collections.map(({name}) => dropAllIndicies(database,name)));
 				await dbConn.dropDatabase();

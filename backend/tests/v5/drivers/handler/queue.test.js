@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../helper/path');
-const { generateRandomString, sleepMS } = require('../../helper/services');
+const { determineTestGroup, generateRandomString, sleepMS } = require('../../helper/services');
 
 const Queue = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
@@ -162,7 +162,7 @@ const testConnection = () => {
 	});
 };
 
-describe('AMQP', () => {
+describe(determineTestGroup(__filename), () => {
 	testQueueMessages();
 	testExchangeMessages();
 	testConnection();

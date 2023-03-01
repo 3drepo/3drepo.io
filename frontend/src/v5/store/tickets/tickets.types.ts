@@ -36,6 +36,7 @@ export interface ITicket {
 	type: string,
 	properties: Property,
 	modules?: Record<string, Property>,
+	comments?: IComment[],
 }
 
 export interface TemplateModule {
@@ -52,7 +53,12 @@ export interface ITemplate {
 	code: string;
 	properties: PropertyDefinition[];
 	modules?: TemplateModule[];
-	config: any;
+	config: {
+		comments: boolean;
+		defaultView: boolean;
+		issueProperties: boolean;
+		pin: boolean;
+	};
 }
 
 export type NewTicket = Omit<ITicket, '_id'>;
@@ -76,4 +82,27 @@ export type Viewpoint = {
 	screenshot?: any;
 	camera: Camera;
 	clippingPlanes?: ClippingPlane[];
+};
+
+export type CommentHistoryBlock = {
+	message: string,
+	images: string[],
+	timestamp: Date,
+};
+
+export type IComment = {
+	_id: string,
+	message?: string,
+	images?: string[],
+	author: string,
+	createdAt: Date,
+	updatedAt: Date,
+	deleted: boolean,
+	history?: CommentHistoryBlock[],
+};
+
+export type CommentReplyMetadata = {
+	_id: string,
+	message: string,
+	author: string,
 };

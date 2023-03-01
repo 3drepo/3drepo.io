@@ -18,6 +18,9 @@
 import copy from 'copy-to-clipboard';
 import { get } from 'lodash';
 import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
+import { generatePath } from 'react-router-dom';
+import { isV5 } from '@/v4/helpers/isV5';
+import { prefixBaseDomain } from '@/v5/services/routing/routing';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { CHAT_CHANNELS } from '../../constants/chat';
@@ -118,7 +121,7 @@ export function* generateViewpoint(teamspace, modelId, name, withScreenshot = fa
 
 		return generatedObject;
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('generate', 'viewpoint'));
+		yield put(DialogActions.showErrorDialog('generate', 'viewpoint', error));
 	}
 }
 
@@ -368,8 +371,16 @@ export function* prepareNewViewpoint({teamspace, modelId, viewpointName}) {
 	}
 }
 
-export function* shareViewpointLink({ teamspace, modelId, viewpointId }) {
-	const url = `${location.hostname}${ROUTES.VIEWER}/${teamspace}/${modelId}?viewId=${viewpointId}`;
+export function* shareViewpointLink({ teamspace, modelId, viewpointId, project, revision }) {
+	const pathParams = {
+		teamspace,
+		project,
+		model: modelId,
+		revision,
+	};
+	const basePath = generatePath(isV5() ? ROUTES.V5_MODEL_VIEWER : ROUTES.MODEL_VIEWER, pathParams);
+	const url = prefixBaseDomain(`${basePath}?viewId=${viewpointId}`);
+
 	copy(url);
 	yield put(SnackbarActions.show('Share link copied to clipboard'));
 }

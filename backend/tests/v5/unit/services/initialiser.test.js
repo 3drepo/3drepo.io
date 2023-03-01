@@ -19,6 +19,10 @@ const { src } = require('../../helper/path');
 
 jest.mock('../../../../src/v5/models/loginRecords');
 const LoginRecords = require(`${src}/models/loginRecords`);
+jest.mock('../../../../src/v5/models/notifications');
+const Notifications = require(`${src}/models/notifications`);
+jest.mock('../../../../src/v5/models/invitations');
+const Invitations = require(`${src}/models/invitations`);
 const Initialiser = require(`${src}/services/initialiser`);
 
 const testInitialiseSystem = () => {
@@ -27,6 +31,8 @@ const testInitialiseSystem = () => {
 			await Initialiser.initialiseSystem();
 
 			expect(LoginRecords.initialise).toHaveBeenCalledTimes(1);
+			expect(Notifications.initialise).toHaveBeenCalledTimes(1);
+			expect(Invitations.initialise).toHaveBeenCalledTimes(1);
 		});
 	});
 };

@@ -17,7 +17,7 @@
 import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { FormModal } from '@controls/modal/formModal/formDialog.component';
+import { FormModal } from '@controls/formModal/formModal.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CreateProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
@@ -42,6 +42,8 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 	const currentTeamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const [existingProjectsByTeamspace, setExistingProjectsByTeamspace] = useState({});
 	const [isSubmitting, setIsSubmitting] = useState(false);
+
+	const filteredTeamspaces = teamspaces.filter((ts) => ts.isAdmin);
 
 	const DEFAULT_VALUES = {
 		teamspace: currentTeamspace,
@@ -109,7 +111,7 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 				label={formatMessage({ id: 'project.creation.form.teamspace', defaultMessage: 'Teamspace' })}
 				control={control}
 			>
-				{teamspaces.map((ts) => (
+				{filteredTeamspaces.map((ts) => (
 					<MenuItem key={ts.name} value={ts.name}>
 						{ts.name}
 					</MenuItem>

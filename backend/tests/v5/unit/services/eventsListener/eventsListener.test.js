@@ -41,6 +41,9 @@ const TicketTemplates = require(`${src}/models/tickets.templates`);
 jest.mock('../../../../../src/v5/schemas/tickets');
 const TicketSchemas = require(`${src}/schemas/tickets`);
 
+jest.mock('../../../../../src/v5/schemas/tickets/tickets.comments');
+const CommentSchemas = require(`${src}/schemas/tickets/tickets.comments`);
+
 jest.mock('../../../../../src/v5/services/chat');
 const ChatService = require(`${src}/services/chat`);
 const { EVENTS: chatEvents } = require(`${src}/services/chat/chat.constants`);
@@ -55,6 +58,8 @@ jest.mock('../../../../../src/v5/services/sessions');
 const Sessions = require(`${src}/services/sessions`);
 jest.mock('../../../../../src/v5/processors/teamspaces/teamspaces');
 const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
+jest.mock('../../../../../src/v5/processors/teamspaces/invitations');
+const Invitations = require(`${src}/processors/teamspaces/invitations`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
@@ -540,6 +545,134 @@ const testModelEventsListener = () => {
 				is a ${events.NEW_TICKET} (Federation)`, async () => {
 			await addTicketTest(true);
 		});
+
+		const addCommentTest = async (isFederation) => {
+			const waitOnEvent = eventTriggeredPromise(events.NEW_COMMENT);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				data: {
+					[generateRandomString()]: generateRandomString(),
+					[generateRandomString()]: generateRandomString(),
+				},
+			};
+
+			CommentSchemas.serialiseComment.mockImplementationOnce(() => data.data);
+			ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
+			const event = isFederation
+				? chatEvents.FEDERATION_NEW_TICKET_COMMENT
+				: chatEvents.CONTAINER_NEW_TICKET_COMMENT;
+			EventsManager.publish(events.NEW_COMMENT, data);
+			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
+
+			await waitOnEvent;
+
+			expect(CommentSchemas.serialiseComment).toHaveBeenCalledTimes(1);
+			expect(CommentSchemas.serialiseComment).toHaveBeenCalledWith(data.data);
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				event,
+				data.data,
+				data.teamspace,
+				data.project,
+				data.model,
+			);
+		};
+
+		test(`Should create a ${chatEvents.CONTAINER_NEW_TICKET_COMMENT} if there is a ${events.NEW_COMMENT} (Container)`, async () => {
+			await addCommentTest(false);
+		});
+
+		test(`Should create a ${chatEvents.FEDERATION_NEW_TICKET_COMMENT} if there is a ${events.NEW_COMMENT} (Federation)`, async () => {
+			await addCommentTest(true);
+		});
+
+		test(`Should fail gracefully on error if there is an ${events.NEW_COMMENT} event`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.NEW_COMMENT);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				data: {
+					[generateRandomString()]: generateRandomString(),
+					[generateRandomString()]: generateRandomString(),
+				},
+			};
+
+			ModelSettings.isFederation.mockRejectedValueOnce(generateRandomString());
+			EventsManager.publish(events.NEW_COMMENT, data);
+
+			await waitOnEvent;
+			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
+			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+		});
+
+		const updateCommentTest = async (isFederation) => {
+			const waitOnEvent = eventTriggeredPromise(events.UPDATE_COMMENT);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				data: {
+					[generateRandomString()]: generateRandomString(),
+					[generateRandomString()]: generateRandomString(),
+				},
+			};
+
+			CommentSchemas.serialiseComment.mockImplementationOnce(() => data.data);
+			ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
+			const event = isFederation
+				? chatEvents.FEDERATION_UPDATE_TICKET_COMMENT
+				: chatEvents.CONTAINER_UPDATE_TICKET_COMMENT;
+			EventsManager.publish(events.UPDATE_COMMENT, data);
+			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
+
+			await waitOnEvent;
+
+			expect(CommentSchemas.serialiseComment).toHaveBeenCalledTimes(1);
+			expect(CommentSchemas.serialiseComment).toHaveBeenCalledWith(data.data);
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				event,
+				data.data,
+				data.teamspace,
+				data.project,
+				data.model,
+			);
+		};
+
+		test(`Should create a ${chatEvents.CONTAINER_UPDATE_TICKET_COMMENT} if there is a ${events.UPDATE_COMMENT} (Container)`, async () => {
+			await updateCommentTest(false);
+		});
+
+		test(`Should create a ${chatEvents.FEDERATION_UPDATE_TICKET_COMMENT} if there is a ${events.UPDATE_COMMENT} (Federation)`, async () => {
+			await updateCommentTest(true);
+		});
+
+		test(`Should fail gracefully on error if there is an ${events.UPDATE_COMMENT} event`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.UPDATE_COMMENT);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				data: {
+					[generateRandomString()]: generateRandomString(),
+					[generateRandomString()]: generateRandomString(),
+				},
+			};
+
+			ModelSettings.isFederation.mockRejectedValueOnce(generateRandomString());
+			EventsManager.publish(events.UPDATE_COMMENT, data);
+
+			await waitOnEvent;
+			expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
+			expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+		});
 	});
 };
 
@@ -589,6 +722,7 @@ const testAuthEventsListener = () => {
 				expect(ChatService.createInternalMessage).not.toHaveBeenCalled();
 			});
 		});
+
 		describe(events.SESSION_REMOVED, () => {
 			test(`Should trigger sessionsRemoved if there is a ${events.SESSIONS_REMOVED}`, async () => {
 				const waitOnEvent = eventTriggeredPromise(events.SESSIONS_REMOVED);
@@ -656,10 +790,13 @@ const testUserEventsListener = () => {
 	describe('User Events', () => {
 		test(`Should trigger userVerified if there is a ${events.USER_VERIFIED}`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.USER_VERIFIED);
-			EventsManager.publish(events.USER_VERIFIED, { username: 'username1' });
+			const username = generateRandomString();
+			EventsManager.publish(events.USER_VERIFIED, { username });
 			await waitOnEvent;
-			expect(Teamspaces.initTeamspace.mock.calls.length).toBe(1);
-			expect(Teamspaces.initTeamspace.mock.calls[0][0]).toEqual('username1');
+			expect(Teamspaces.initTeamspace).toHaveBeenCalledTimes(1);
+			expect(Teamspaces.initTeamspace).toHaveBeenCalledWith(username);
+			expect(Invitations.unpack).toHaveBeenCalledTimes(1);
+			expect(Invitations.unpack).toHaveBeenCalledWith(username);
 		});
 	});
 };

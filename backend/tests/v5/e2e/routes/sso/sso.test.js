@@ -20,13 +20,6 @@ const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
 const { generateRandomString, generateRandomURL } = require('../../../helper/services');
 
-jest.mock('../../../../../src/v5/services/sso/aad', () => ({
-	...jest.requireActual('../../../../../src/v5/services/sso/aad'),
-	getUserDetails: jest.fn(),
-}));
-const Aad = require('../../../../../src/v5/services/sso/aad');
-const { providers } = require('../../../../../src/v5/services/sso/sso.constants');
-
 const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
@@ -36,20 +29,18 @@ const session = require('supertest-session');
 
 let testSession;
 
-const userEmail = `${generateRandomString()}@email.com`;
-const testUser = ServiceHelper.generateUserCredentials();
-const ssoUserId = generateRandomString();
-const userEmailSso = `${generateRandomString()}@email.com`;
-const testUserSso = ServiceHelper.generateUserCredentials();
-
-const setupData = async () => {
-	await ServiceHelper.db.createUser(testUser, [], { email: userEmail });
-	await ServiceHelper.db.createUser(testUserSso, [], { email: userEmailSso,
-		sso: { type: providers.AAD, id: ssoUserId } });
-};
-
 const testUnlink = () => {
+	const testUser = ServiceHelper.generateUserCredentials();
+	const testUserSso = ServiceHelper.generateUserCredentials();
+
 	describe('Unlink', () => {
+		beforeAll(async () => {
+			await Promise.all([
+				ServiceHelper.db.createUser(testUser, []),
+				ServiceHelper.db.createUser(testUserSso, []),
+			]);
+		});
+
 		const redirectUri = generateRandomURL();
 
 		test('should fail without a valid session or an API key', async () => {
@@ -71,15 +62,11 @@ const testUnlink = () => {
 
 		describe('With valid authentication', () => {
 			beforeAll(async () => {
-				Aad.getUserDetails.mockResolvedValueOnce({ email: userEmailSso, id: ssoUserId });
-				await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify({ redirectUri: generateRandomURL() }))}`);
+				await testSession.post('/v5/login/').send({ user: testUserSso.user, password: testUserSso.password });
+				await ServiceHelper.db.addSSO(testUserSso.user);
 			});
 
 			afterAll(async () => {
-				// link user back to SSO
-				Aad.getUserDetails.mockResolvedValueOnce({ email: userEmailSso, id: generateRandomString() });
-				await testSession.get(`/v5/sso/aad/link-post?state=${encodeURIComponent(JSON.stringify({ redirectUri: generateRandomURL() }))}`)
-					.expect(302);
 				await testSession.post('/v5/logout/');
 			});
 
@@ -105,14 +92,11 @@ const testUnlink = () => {
 	});
 };
 
-const app = ServiceHelper.app();
-
-describe('E2E routes/sso', () => {
+describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
-		server = app;
+		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
-		testSession = session(app);
-		await setupData();
+		testSession = session(server);
 	});
 
 	afterAll(() => ServiceHelper.closeApp(server));

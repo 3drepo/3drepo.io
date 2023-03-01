@@ -54,6 +54,7 @@ export interface IUser {
 	email?: string;
 	hasAvatar?: boolean;
 	avatarUrl: string;
+	isNotTeamspaceMember?: boolean;
 }
 
 export type FetchUsersAction = Action<'FETCH_USERS'> & TeamspaceId;

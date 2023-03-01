@@ -19,6 +19,7 @@ const { determineTestGroup, fileExists, resetFileshare, db: { reset: resetDB }, 
 const { utilScripts, src } = require('../../helper/path');
 const { times } = require('lodash');
 
+const { disconnect } = require(`${src}/handler/db`);
 const { storeFile } = require(`${src}/services/filesManager`);
 const { getRefsByQuery, removeRefsByQuery } = require(`${src}/models/fileRefs`);
 const { fs: { path: fileShareRoot } } = require(`${src}/utils/config`);
@@ -102,4 +103,5 @@ describe(determineTestGroup(__filename), () => {
 		await setupData(data);
 	});
 	runTest(data);
+	afterAll(disconnect);
 });

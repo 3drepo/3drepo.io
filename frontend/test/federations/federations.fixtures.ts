@@ -27,12 +27,13 @@ import {
 import { times } from 'lodash';
 import { FetchFederationViewsResponse } from '@/v5/services/api/federations';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
+import { Role } from '@/v5/store/currentUser/currentUser.types';
 
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({
 	_id: faker.datatype.uuid(),
 	name: faker.random.words(3),
 	desc: faker.random.words(3),
-	role: faker.random.arrayElement(['admin', 'collaborator']),
+	role: faker.random.arrayElement([Role.ADMIN, Role.COLLABORATOR]),
 	lastUpdated: faker.date.past(2),
 	status: UploadStatuses.OK,
 	code: faker.datatype.uuid(),

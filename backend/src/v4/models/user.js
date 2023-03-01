@@ -417,13 +417,6 @@ User.createUser = async function (username, password, customData, tokenExpiryTim
 			}
 		});
 
-	// ["jobTitle", "industry", "phoneNumber", "howDidYouFindUs"]
-	// 	.forEach(key => {
-	// 		if (customData[key]) {
-	// 			cleanedCustomData.extras[key] = customData[key];
-	// 		}
-	// 	});
-
 	const billingInfo = {};
 
 	["firstName", "lastName", "countryCode", "company"].forEach(key => {
@@ -508,12 +501,6 @@ User.verify = async function (username, token, options) {
 		ModelHelper.importToyProject(username, username).catch(err => {
 			systemLogger.logError("Failed to import toy model", { err: err && err.stack ? err.stack : err });
 		});
-	}
-
-	try {
-		await Role.grantTeamSpaceRoleToUser(username, username);
-	} catch(err) {
-		systemLogger.logError("Failed to create role for ", username, err);
 	}
 
 	try {

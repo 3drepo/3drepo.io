@@ -20,11 +20,10 @@ import { useState, useEffect } from 'react';
 import { isNil, isNumber } from 'lodash';
 import MoreIcon from '@mui/icons-material/ChevronRight';
 import LessIcon from '@mui/icons-material/ExpandMore';
-import Tooltip from '@mui/material/Tooltip';
 
 import { sortMetadata } from '@/v4/helpers/bim';
 import { StarIcon } from '@/v4/routes/components/starIcon/starIcon.component';
-import { StarIconWrapper, StyledCopyIcon, StyledSelectSimilarIcon } from '../metaRecord/metaRecord.styles';
+import { BimTooltip, StarIconWrapper, StyledCopyIcon, StyledSelectSimilarIcon } from '../metaRecord/metaRecord.styles';
 import { List, Title, Data, Header, Value, Actions, StyledIconButton } from './metaRecord.styles';
 
 export interface IMetaData {
@@ -78,16 +77,16 @@ const MetaRecordData = ({ value, field, copyRules, selectAllSimilar }) => {
 		<Data>
 			<Value>{value}</Value>
 			<Actions>
-				<Tooltip title="Copy group filter to clipboard">
+				<BimTooltip title="Copy group filter to clipboard">
 					<StyledIconButton onClick={() => copyRules(rules)}>
 						<StyledCopyIcon />
 					</StyledIconButton>
-				</Tooltip>
-				<Tooltip title="Select elements with same parameter value">
+				</BimTooltip>
+				<BimTooltip title="Select elements with same parameter value">
 					<StyledIconButton onClick={() => selectAllSimilar(rules)}>
 						<StyledSelectSimilarIcon />
 					</StyledIconButton>
-				</Tooltip>
+				</BimTooltip>
 			</Actions>
 		</Data>
 	);

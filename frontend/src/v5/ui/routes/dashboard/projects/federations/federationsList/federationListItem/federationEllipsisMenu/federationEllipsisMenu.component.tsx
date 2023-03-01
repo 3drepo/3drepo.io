@@ -20,23 +20,59 @@ import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { FederationsActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { viewerRoute } from '@/v5/services/routing/routing';
+import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FederationSettingsModal } from '../../../federationSettingsModal/federationSettingsModal.component';
 
 type FederationEllipsisMenuProps = {
 	federation: IFederation,
-	openFederationSettings: () => void,
-	openShareModal: () => void,
-	openEditFederationModal: () => void,
+	onClickEdit: () => void,
 };
 
 export const FederationEllipsisMenu = ({
 	federation,
-	openFederationSettings,
-	openShareModal,
-	openEditFederationModal,
+	onClickEdit,
 }: FederationEllipsisMenuProps) => {
 	const { teamspace, project } = useParams<DashboardParams>();
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+
+	// eslint-disable-next-line max-len
+	const onClickSettings = () => DialogsActionsDispatchers.open(FederationSettingsModal, { federationId: federation._id });
+
+	const onClickShare = () => {
+		const link = prefixBaseDomain(viewerRoute(teamspace, project, federation));
+		const subject = formatMessage({ id: 'shareModal.federation.subject', defaultMessage: 'federation' });
+		const title = formatMessage({ id: 'shareModal.federation.title', defaultMessage: 'Share Federation' });
+
+		DialogsActionsDispatchers.open('share', {
+			name: federation.name,
+			subject,
+			title,
+			link,
+		});
+	};
+
+	const onClickDelete = () => {
+		DialogsActionsDispatchers.open('delete', {
+			name: federation.name,
+			onClickConfirm: () => new Promise<void>(
+				(accept, reject) => {
+					FederationsActionsDispatchers.deleteFederation(
+						teamspace,
+						project,
+						federation._id,
+						accept,
+						reject,
+					);
+				},
+			),
+			message: formatMessage({
+				id: 'deleteFederation.federation.message',
+				defaultMessage: 'By deleting this Federation your data will be lost permanently and will not be recoverable.',
+			}),
+		});
+	};
 
 	return (
 		<EllipsisMenu>
@@ -53,7 +89,7 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.edit',
 					defaultMessage: 'Edit Federation',
 				})}
-				onClick={openEditFederationModal}
+				onClick={onClickEdit}
 			/>
 
 			<EllipsisMenuItem
@@ -79,6 +115,7 @@ export const FederationEllipsisMenu = ({
 					pathname: './user_permissions',
 					search: `?modelId=${federation._id}`,
 				}}
+				hidden={!isProjectAdmin}
 			/>
 
 			<EllipsisMenuItem
@@ -86,7 +123,7 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.shareFederation',
 					defaultMessage: 'Share Federation',
 				})}
-				onClick={openShareModal}
+				onClick={onClickShare}
 			/>
 
 			<EllipsisMenuItem
@@ -94,7 +131,7 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.settings',
 					defaultMessage: 'Settings',
 				})}
-				onClick={openFederationSettings}
+				onClick={onClickSettings}
 			/>
 
 			<EllipsisMenuItem
@@ -102,26 +139,8 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.delete',
 					defaultMessage: 'Delete',
 				})}
-				onClick={() => {
-					DialogsActionsDispatchers.open('delete', {
-						name: federation.name,
-						onClickConfirm: () => new Promise<void>(
-							(accept, reject) => {
-								FederationsActionsDispatchers.deleteFederation(
-									teamspace,
-									project,
-									federation._id,
-									accept,
-									reject,
-								);
-							},
-						),
-						message: formatMessage({
-							id: 'deleteFederation.federation.message',
-							defaultMessage: 'By deleting this Federation your data will be lost permanently and will not be recoverable.',
-						}),
-					});
-				}}
+				onClick={onClickDelete}
+				hidden={!isProjectAdmin}
 			/>
 		</EllipsisMenu>
 	);

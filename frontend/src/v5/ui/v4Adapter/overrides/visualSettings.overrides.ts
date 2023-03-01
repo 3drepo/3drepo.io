@@ -70,6 +70,7 @@ const selectStyles = css`
 	.MuiSelect-select {
 		background-color: transparent;
 		padding: 0;
+		border: none;
 	}
 	.MuiOutlinedInput-notchedOutline {
 		border: none;
@@ -102,12 +103,12 @@ export default css`
 		}
 	}
 	${VisualSettingsModalContent} {
-
 		${VisualSettingsDialogContent} {
 			padding: 0;
 			margin: 0;
 			overflow: hidden;
 			height: unset;
+			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 			${DialogTabs} {
 				background-color: ${({ theme }) => theme.palette.primary.contrast};
 				padding: 0 27px;

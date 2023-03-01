@@ -31,7 +31,7 @@ import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { SearchInput } from '@controls/search/searchInput';
 import { Button } from '@controls/button';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
@@ -65,15 +65,16 @@ export const ContainersList = ({
 	// eslint-disable-next-line max-len
 	const { items: containers, filteredItems: filteredContainers } = useContext<SearchContextType<IContainer>>(SearchContext);
 	const hasContainers = containers.length > 0;
-
 	const { sortedList, setSortConfig } = useOrderedList(filteredContainers, DEFAULT_SORT_CONFIG);
 
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
+	const canUpload = ContainersHooksSelectors.selectCanUploadToProject();
 
 	const selectOrToggleItem = useCallback((id: string) => {
 		setSelectedItemId((state) => (state === id ? null : id));
 	}, []);
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	return (
 		<Container>
@@ -86,22 +87,26 @@ export const ContainersList = ({
 						<SearchInput
 							placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search containers...' })}
 						/>
-						<Button
-							startIcon={<AddCircleIcon />}
-							variant="outlined"
-							color="secondary"
-							onClick={onClickCreate}
-						>
-							<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
-						</Button>
-						<Button
-							startIcon={<ArrowUpCircleIcon />}
-							variant="contained"
-							color="primary"
-							onClick={() => DialogsActionsDispatchers.open(UploadFileForm)}
-						>
-							<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
-						</Button>
+						{ isProjectAdmin && (
+							<Button
+								startIcon={<AddCircleIcon />}
+								variant="outlined"
+								color="secondary"
+								onClick={onClickCreate}
+							>
+								<FormattedMessage id="containers.mainHeader.newContainer" defaultMessage="New container" />
+							</Button>
+						)}
+						{ canUpload && (
+							<Button
+								startIcon={<ArrowUpCircleIcon />}
+								variant="contained"
+								color="primary"
+								onClick={() => DialogsActionsDispatchers.open(UploadFileForm)}
+							>
+								<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
+							</Button>
+						)}
 					</CollapseSideElementGroup>
 				)}
 			>
@@ -142,7 +147,7 @@ export const ContainersList = ({
 						</DashboardListEmptyContainer>
 					)}
 				</DashboardList>
-				{showBottomButton && !isListPending && hasContainers && (
+				{showBottomButton && !isListPending && hasContainers && isProjectAdmin && (
 					<DashboardListButton
 						startIcon={<AddCircleIcon />}
 						onClick={onClickCreate}

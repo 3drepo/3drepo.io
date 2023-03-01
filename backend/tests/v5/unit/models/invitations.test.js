@@ -38,6 +38,18 @@ const testGetInvitationsByTeamspace = () => {
 	});
 };
 
+const testInit = () => {
+	describe('Initialise Invitations', () => {
+		test('Should create the desired index', async () => {
+			const fn = jest.spyOn(db, 'createIndex').mockResolvedValueOnce();
+			await expect(Invitations.initialise()).resolves.toBeUndefined();
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'invitations', { 'teamSpaces.teamspace': 1 }, { runInBackground: true });
+		});
+	});
+};
+
 describe('models/invitations', () => {
 	testGetInvitationsByTeamspace();
+	testInit();
 });

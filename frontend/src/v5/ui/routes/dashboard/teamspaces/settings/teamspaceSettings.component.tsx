@@ -16,6 +16,7 @@
  */
 
 import { TeamspaceSettings as V4TeamspaceSettings } from '@/v4/routes/teamspaceSettings';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { V5TeamspaceSettingsOverrides } from '@/v5/ui/v4Adapter/overrides/teamspaceSettings.overrides';
 import { FormattedMessage } from 'react-intl';
 import {
@@ -29,8 +30,10 @@ export const TeamspaceSettings = () => {
 	const history = useHistory();
 	const location = useLocation();
 	const match = useRouteMatch();
+
+	const isAdmin = TeamspacesHooksSelectors.selectIsTeamspaceAdmin();
 	return (
-		<V5TeamspaceSettingsOverrides>
+		<V5TeamspaceSettingsOverrides isAdmin={isAdmin}>
 			<Header>
 				<Title>
 					<FormattedMessage id="teamspaceSettings.title" defaultMessage="Teamspace Settings" />

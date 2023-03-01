@@ -28,6 +28,8 @@ const readline = require('readline');
 const { times } = require('lodash');
 const { utilScripts, src } = require('../../helper/path');
 
+const { disconnect } = require(`${src}/handler/db`);
+
 const { getRefsByQuery } = require(`${src}/models/fileRefs`);
 const { storeFile } = require(`${src}/services/filesManager`);
 const { fs: { path: fileShareRoot } } = require(`${src}/utils/config`);
@@ -262,4 +264,5 @@ const runTest = () => {
 
 describe(determineTestGroup(__filename), () => {
 	runTest();
+	afterAll(disconnect);
 });

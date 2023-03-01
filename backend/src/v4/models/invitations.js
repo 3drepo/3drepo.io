@@ -196,7 +196,7 @@ invitations.teamspaceInvitationCheck = async (email, teamspace) => {
 
 const applyModelPermissions = (teamspace, invitedUser, modelsPermissions) => async modelSetting=> {
 	const {permission} = modelsPermissions.find(({model}) => model === modelSetting._id);
-	return await changePermissions(teamspace, modelSetting._id, modelSetting.permissions.concat({user: invitedUser, permission}));
+	return changePermissions(teamspace, modelSetting._id, modelSetting.permissions.concat({user: invitedUser, permission}));
 };
 
 const applyProjectPermissions = (teamspace, invitedUser) => async ({ project_admin , project, models}) => {
@@ -248,11 +248,5 @@ invitations.getInvitationsByTeamspace = async (teamspaceName) => {
 		return { email, ...teamspaceData };
 	});
 };
-
-// Ensure the index exists at init
-getCollection().then((coll) => coll.createIndex({ "teamSpaces.teamspace": 1 }, { "background": true }))
-	.catch((err)=> {
-		systemLogger.logError("failed to create index for invitations", err);
-	});
 
 module.exports = invitations;

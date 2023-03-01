@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
@@ -27,6 +27,8 @@ import { FormattedMessage } from 'react-intl';
 import { enableRealtimeNewContainer } from '@/v5/services/realtime/container.events';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { CONTAINERS_SEARCH_FIELDS } from '@/v5/store/containers/containers.helpers';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
@@ -36,13 +38,14 @@ export const IsMainList = createContext(false);
 
 export const Containers = (): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const {
 		containers,
 		favouriteContainers,
 		isListPending,
 	} = useContainersData();
 
-	const [createContainerOpen, setCreateContainerOpen] = useState(false);
+	const onClickCreate = () => DialogsActionsDispatchers.open(CreateContainerForm);
 
 	useEffect(() => enableRealtimeNewContainer(teamspace, project), [project]);
 
@@ -64,7 +67,7 @@ export const Containers = (): JSX.Element => {
 						collapsed: <FormattedMessage id="containers.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
 						visible: <FormattedMessage id="containers.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
 					}}
-					onClickCreate={() => setCreateContainerOpen(true)}
+					onClickCreate={onClickCreate}
 					emptyMessage={(
 						<DashboardListEmptyText>
 							<FormattedMessage
@@ -90,29 +93,27 @@ export const Containers = (): JSX.Element => {
 							visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
 						}}
 						showBottomButton
-						onClickCreate={() => setCreateContainerOpen(true)}
+						onClickCreate={onClickCreate}
 						emptyMessage={(
 							<>
 								<DashboardListEmptyText>
 									<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
 								</DashboardListEmptyText>
-								<Button
-									startIcon={<AddCircleIcon />}
-									variant="contained"
-									color="primary"
-									onClick={() => setCreateContainerOpen(true)}
-								>
-									<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
-								</Button>
+								{ isProjectAdmin && (
+									<Button
+										startIcon={<AddCircleIcon />}
+										variant="contained"
+										color="primary"
+										onClick={onClickCreate}
+									>
+										<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
+									</Button>
+								)}
 							</>
 						)}
 					/>
 				</SearchContextComponent>
 			</IsMainList.Provider>
-			<CreateContainerForm
-				open={createContainerOpen}
-				onClickClose={() => setCreateContainerOpen(false)}
-			/>
 		</>
 	);
 };

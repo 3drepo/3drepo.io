@@ -15,11 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const config = require('../../../../src/v5/utils/config');
 const { src } = require('../../helper/path');
 
+const config = require(`${src}/utils/config`);
 const Quota = require(`${src}/utils/quota`);
-const db = require(`${src}/handler/db`);
+
+jest.mock('../../../../src/v5/handler/db');
+const DBHandler = require(`${src}/handler/db`);
+
 const { templates } = require(`${src}/utils/responseCodes`);
 const { generateRandomString } = require('../../helper/services');
 
@@ -85,7 +88,7 @@ const testGetQuotaInfo = () => {
 		[tsWithFreeQuota]: {},
 	};
 
-	jest.spyOn(db, 'findOne').mockImplementation((ts, col, { _id }) => {
+	DBHandler.findOne.mockImplementation((ts, col, { _id }) => {
 		const subscriptions = subsByTeamspace[_id];
 		return Promise.resolve({ subscriptions });
 	});
@@ -148,21 +151,21 @@ const testGetQuotaInfo = () => {
 
 const testGetSpaceUsed = () => {
 	describe('Calculate the spaced used', () => {
-		const teamspace = generateRandomString();
-		const expectedSize = 1048576;
-
-		const fn1 = jest.spyOn(db, 'listCollections').mockImplementation((ts) => Promise.resolve(ts === teamspace ? [
-			{ name: 'a.issues.ref' },
-			{ name: 'a.scene.stash' },
-			{ name: 'ref' },
-		] : []));
-		const fn2 = jest.spyOn(db, 'aggregate').mockImplementation(() => Promise.resolve([{ _id: null, total: expectedSize }]));
-
 		test('should return spaced used in bytes', async () => {
+			const teamspace = generateRandomString();
+			const expectedSize = 1048576;
+
+			DBHandler.aggregate.mockResolvedValueOnce([{ _id: null, total: expectedSize }]);
+			DBHandler.listCollections.mockResolvedValueOnce([
+				{ name: 'a.issues.ref' },
+				{ name: 'a.scene.stash' },
+				{ name: 'ref' },
+			]);
 			const res = await Quota.getSpaceUsed(teamspace);
 			expect(res).toEqual(expectedSize);
-			expect(fn1).toHaveBeenCalledTimes(1);
-			expect(fn2).toHaveBeenCalledTimes(1);
+			expect(DBHandler.listCollections).toHaveBeenCalledTimes(1);
+			expect(DBHandler.listCollections).toHaveBeenCalledWith(teamspace);
+			expect(DBHandler.aggregate).toHaveBeenCalledTimes(1);
 		});
 	});
 };
@@ -178,32 +181,28 @@ const testSufficientQuota = () => {
 		});
 
 		test('should return error if quota exceeds the limit', async () => {
-			jest.spyOn(db, 'findOne').mockImplementationOnce(() => ({
-				subscriptions: { enterprise: { data: 1, collaborators: 2 } },
-			}));
+			DBHandler.findOne.mockResolvedValueOnce({ subscriptions: { enterprise: { data: 1, collaborators: 2 } } });
 
-			jest.spyOn(db, 'listCollections').mockImplementationOnce(() => Promise.resolve([
+			DBHandler.listCollections.mockResolvedValueOnce([
 				{ name: 'a.issues.ref' },
 				{ name: 'a.scene.stash' },
 				{ name: 'ref' },
-			]));
-			jest.spyOn(db, 'aggregate').mockImplementationOnce(() => Promise.resolve([{ _id: null, total: 1048576 }]));
+			]);
+			DBHandler.aggregate.mockResolvedValueOnce([{ _id: null, total: 1048576 }]);
 
 			const teamspace = generateRandomString();
 			await expect(Quota.sufficientQuota(teamspace, 2000000)).rejects.toEqual(templates.quotaLimitExceeded);
 		});
 
 		test('should succeed if quota does not exceed the limit', async () => {
-			jest.spyOn(db, 'findOne').mockImplementationOnce(() => ({
-				subscriptions: [{ data: 1, collaborators: 2 }],
-			}));
+			DBHandler.findOne.mockResolvedValueOnce({ subscriptions: [{ data: 1, collaborators: 2 }] });
 
-			jest.spyOn(db, 'listCollections').mockImplementationOnce(() => Promise.resolve([
+			DBHandler.listCollections.mockResolvedValueOnce([
 				{ name: 'a.issues.ref' },
 				{ name: 'a.scene.stash' },
 				{ name: 'ref' },
-			]));
-			jest.spyOn(db, 'aggregate').mockImplementationOnce(() => Promise.resolve([{ _id: null, total: 1048576 }]));
+			]);
+			DBHandler.aggregate.mockResolvedValueOnce([{ _id: null, total: 1048576 }]);
 
 			const teamspace = generateRandomString();
 			await expect(Quota.sufficientQuota(teamspace, 1)).resolves.toBe(undefined);
@@ -214,14 +213,18 @@ const testSufficientQuota = () => {
 const testGetCollaboratorsAssigned = () => {
 	describe('Get collaborators used', () => {
 		test('should get the total collaborators used by the user', async () => {
-			jest.spyOn(db, 'find').mockImplementationOnce(() => [
+			DBHandler.find.mockResolvedValueOnce([
 				{ user: generateRandomString() },
 				{ user: generateRandomString() },
 			]);
 
+			DBHandler.find.mockResolvedValueOnce([]);
+
 			const teamspace = generateRandomString();
 			const res = await Quota.getCollaboratorsAssigned(teamspace);
 			expect(res).toEqual(2);
+
+			expect(DBHandler.find).toHaveBeenCalledTimes(2);
 		});
 	});
 };

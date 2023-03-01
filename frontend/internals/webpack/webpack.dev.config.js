@@ -18,8 +18,14 @@ const statsOptions = {
 module.exports = getWebpackConfig({
   mode: MODES.DEVELOPMENT,
   devtool: 'inline-source-map',
+  entry: {
+    unityutil: { // This entry creates the dev unity-util.js that is usually constructed by webpack.prod.config in production environments
+      import: './src/globals/unity-util-external.ts', 
+			filename: '../unity/unity-util.js' 
+    }
+  },
   output: {
-	clean: true
+    clean: true
   },
   plugins: [
     new LiveReloadPlugin({

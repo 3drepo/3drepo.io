@@ -21,31 +21,26 @@ import { formatMessage } from '@/v5/services/intl';
 import { IFederation } from '@/v5/store/federations/federations.types';
 
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useParams } from 'react-router-dom';
-import { IFormModal } from '@controls/modal/formModal/formDialog.component';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { IFormModal } from '@controls/formModal/formModal.component';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { isEqual } from 'lodash';
 import { EditFederation } from './editFederation';
 import { FormModal } from './editFederationModal.styles';
-import { useContainersData } from '../../containers/containers.hooks';
 
 type EditFederationModalProps = IFormModal & {
-	openState?: boolean;
+	open: boolean;
 	federation: IFederation;
-	isNewFederation?: boolean;
 	onClickClose?: () => void;
-	onContainersChange?: (containers) => void;
 };
 
 export const EditFederationModal = ({
-	openState,
+	open,
 	federation,
-	isNewFederation,
 	onClickClose,
-	onContainersChange,
 	...otherProps
 }: EditFederationModalProps): JSX.Element => {
-	useContainersData();
-	const { teamspace, project } = useParams<DashboardParams>();
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const [includedContainers, setIncludedContainers] = useState<IContainer[]>([]);
 
 	const saveChanges = (event: SyntheticEvent) => {
@@ -58,10 +53,13 @@ export const EditFederationModal = ({
 		event.preventDefault();
 		onClickClose();
 	};
-
+	const formIsDirty = () => !isEqual(
+		includedContainers.map((c) => c._id),
+		federation.containers,
+	);
 	return (
 		<FormModal
-			open={openState}
+			open={open}
 			title={
 				formatMessage({
 					id: 'modal.editFederation.title',
@@ -71,7 +69,7 @@ export const EditFederationModal = ({
 			confirmLabel={formatMessage({ id: 'modal.editFederation.confirm', defaultMessage: 'Save Changes' })}
 			onClickClose={onClickClose}
 			onSubmit={saveChanges}
-			isValid={includedContainers.length > 0}
+			isValid={includedContainers.length && formIsDirty()}
 			maxWidth="lg"
 			hideHorizontalScroll={false}
 			{...otherProps}
