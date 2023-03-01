@@ -49,12 +49,10 @@ export const TicketsTopPanel = ({
 		owner,
 		createdAt,
 		updatedAt,
-		priority,
 	} = getPropertiesInCamelCase(propertiesValues);
 	const { formState } = useFormContext();
 	const topPanelProperties: string[] = Object.values({ ...BaseProperties, ...IssueProperties });
 	const extraProperties = filter(properties, ({ name }) => !topPanelProperties.includes(name));
-	const renderIssuePropertiesBar = priority && createdAt; // if template has issueProperties and is not new ticket
 	return (
 		<TopPanel>
 			<BaseTicketInfo>
@@ -70,11 +68,13 @@ export const TicketsTopPanel = ({
 						inputProps={{ autoFocus: focusOnTitle }}
 						onBlur={onPropertyBlur}
 					/>
-					<CreationInfo
-						owner={owner}
-						createdAt={createdAt}
-						updatedAt={updatedAt}
-					/>
+					{createdAt && (
+						<CreationInfo
+							owner={owner}
+							createdAt={createdAt}
+							updatedAt={updatedAt}
+						/>
+					)}
 				</div>
 				<DescriptionProperty>
 					<InputController
@@ -89,7 +89,7 @@ export const TicketsTopPanel = ({
 				</DescriptionProperty>
 				<PropertiesList module="properties" properties={extraProperties} propertiesValues={propertiesValues} onPropertyBlur={onPropertyBlur} />
 			</BaseTicketInfo>
-			{renderIssuePropertiesBar && <IssuePropertiesRow onBlur={onPropertyBlur} />}
+			<IssuePropertiesRow onBlur={onPropertyBlur} />
 		</TopPanel>
 	);
 };

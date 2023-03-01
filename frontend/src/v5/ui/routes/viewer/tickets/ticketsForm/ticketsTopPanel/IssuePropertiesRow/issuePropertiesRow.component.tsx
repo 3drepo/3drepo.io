@@ -50,6 +50,7 @@ export const IssuePropertiesRow = ({ onBlur }: IIssuePropertiesRow) => (
 				onBlur={onBlur}
 				key={IssueProperties.PRIORITY}
 				values={PRIORITY_LEVELS_MAP}
+				defaultValue={PRIORITY_LEVELS_MAP.Low.label}
 			/>
 		</PropertyColumn>
 		<ColumnSeparator />
@@ -86,6 +87,7 @@ export const IssuePropertiesRow = ({ onBlur }: IIssuePropertiesRow) => (
 				onBlur={onBlur}
 				key={IssueProperties.STATUS}
 				values={STATUS_MAP}
+				defaultValue={STATUS_MAP.Open.label}
 			/>
 		</PropertyColumn>
 		<FloatRight>

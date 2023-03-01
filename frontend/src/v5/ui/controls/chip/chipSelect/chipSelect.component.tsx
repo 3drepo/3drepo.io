@@ -23,14 +23,24 @@ import { IChip, IChipMap, IChipMapItem } from '../chip.types';
 import { HiddenSelect, IconWrapper } from './chipSelect.styles';
 
 type IChipSelectItem = IChipMapItem & { value: string; };
-type IChipSelect = IChip & FormInputProps & { values: IChipMap };
+type IChipSelect = IChip & FormInputProps & { values: IChipMap, defaultValue?: string };
 
 const SelectItem = ({ label, icon, color, ...props }: IChipSelectItem) => {
 	const Icon = () => <IconWrapper color={color}> {icon} </IconWrapper>;
 	return <MenuItem {...props}> <Icon /> {label} </MenuItem>;
 };
 
-export const ChipSelect = ({ values, value, onBlur, onChange, inputRef, error, helperText, ...props }: IChipSelect) => {
+export const ChipSelect = ({
+	values,
+	value,
+	defaultValue,
+	onBlur,
+	onChange,
+	inputRef,
+	error,
+	helperText,
+	...props
+}: IChipSelect) => {
 	const [open, setOpen] = useState(false);
 	const arrayOfListItems: IChipMapItem[] = Object.values(values);
 
@@ -47,7 +57,8 @@ export const ChipSelect = ({ values, value, onBlur, onChange, inputRef, error, h
 				onOpen={handleOpen}
 				onClose={handleClose}
 				onChange={onChange}
-				value={value ?? ''}
+				value={value}
+				defaultValue={defaultValue}
 				inputRef={inputRef}
 				error={error}
 				helperText={helperText}
