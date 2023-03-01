@@ -16,7 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
+import { selectCurrentProject, selectIsProjectAdmin } from '@/v5/store/projects/projects.selectors';
 import { IContainersState } from './containers.redux';
 import { IContainer } from './containers.types';
 import { Role } from '../currentUser/currentUser.types';
@@ -68,5 +68,6 @@ export const selectHasCommenterAccess = createSelector(
 
 export const selectCanUploadToProject = createSelector(
 	selectContainers,
-	(containers): boolean => containers.some(({ role }) => isCollaboratorRole(role)),
+	selectIsProjectAdmin,
+	(containers, isAdmin): boolean => isAdmin || containers.some(({ role }) => isCollaboratorRole(role)),
 );
