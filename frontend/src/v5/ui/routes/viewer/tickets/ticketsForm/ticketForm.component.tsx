@@ -16,7 +16,7 @@
  */
 import { ITemplate, ITicket, TemplateModule } from '@/v5/store/tickets/tickets.types';
 import { Accordion } from '@controls/accordion/accordion.component';
-import { getModulePanelTitle, PANEL_ID } from '@/v5/store/tickets/tickets.helpers';
+import { getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
 import { CardContent, PanelsContainer } from './ticketsForm.styles';
 import { TicketsTopPanel } from './ticketsTopPanel/ticketsTopPanel.component';
 import { PropertiesList } from './propertiesList.component';
@@ -46,7 +46,7 @@ interface Props {
 export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) => {
 	const scrollPanelIntoView = ({ target }, isExpanding) => {
 		if (!isExpanding) return;
-		const panel = target.closest(`#${PANEL_ID}`);
+		const panel = target.closest('.MuiAccordion-root');
 		if (!panel) return;
 		const scrollableContainer = panel.closest(`#${SCROLLBAR_ID}`).firstChild;
 		setTimeout(() => {
