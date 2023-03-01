@@ -27,21 +27,21 @@ import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalB
 import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
 import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
 import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
-import { EditProfilePasswordTab, EMPTY_PASSWORDS, IUpdatePasswordInputs } from './editProfilePasswordTab/editProfilePasswordTab.component';
+import { EditProfileAuthenticationTab, EMPTY_PASSWORDS, IUpdatePasswordInputs } from './editProfileAuthenticationTab/editProfileAuthenticationTab.component';
 import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editProfileIntegrationsTab.component';
 
 const PERSONAL_TAB = 'personal';
-const PASSWORD_TAB = 'password';
+const AUTHENTICATION_TAB = 'authentication';
 const INTEGRATIONS_TAB = 'integrations';
 
 const CONFIRM_LABELS = {
 	personal: formatMessage({ defaultMessage: 'Update profile', id: 'editProfile.tab.confirmButton.updateProfile' }),
-	password: formatMessage({ defaultMessage: 'Update password', id: 'editProfile.tab.confirmButton.updatePassword' }),
+	authentication: formatMessage({ defaultMessage: 'Update password', id: 'editProfile.tab.confirmButton.updatePassword' }),
 };
 
 const TAB_LABELS = {
 	personal: formatMessage({ defaultMessage: 'Personal', id: 'editProfile.tab.title.personal' }),
-	password: formatMessage({ defaultMessage: 'Password', id: 'editProfile.tab.title.password' }),
+	authentication: formatMessage({ defaultMessage: 'Authentication', id: 'editProfile.tab.title.authentication' }),
 	integrations: formatMessage({ defaultMessage: 'Integrations', id: 'editProfile.tab.title.integrations' }),
 };
 
@@ -53,7 +53,7 @@ type EditProfileModalProps = {
 
 type EditProfileUnexpectedErrors = {
 	[PERSONAL_TAB]?: any;
-	[PASSWORD_TAB]?: any;
+	[AUTHENTICATION_TAB]?: any;
 	[INTEGRATIONS_TAB]?: any;
 };
 
@@ -61,7 +61,7 @@ export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalP
 	const [activeTab, setActiveTab] = useState(PERSONAL_TAB);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [personalSubmitFunction, setPersonalSubmitFunction] = useState(null);
-	const [passwordSubmitFunction, setPasswordSubmitFunction] = useState(null);
+	const [authenticationSubmitFunction, setAuthenticationSubmitFunction] = useState(null);
 	const [incorrectPassword, setIncorrectPassword] = useState(false);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
 	const [unexpectedErrors, setUnexpectedErrors] = useState<EditProfileUnexpectedErrors>({});
@@ -75,7 +75,7 @@ export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalP
 	const getTabSubmitFunction = () => {
 		switch (activeTab) {
 			case PERSONAL_TAB: return personalSubmitFunction;
-			case PASSWORD_TAB: return passwordSubmitFunction;
+			case AUTHENTICATION_TAB: return authenticationSubmitFunction;
 			default: return null;
 		}
 	};
@@ -89,7 +89,7 @@ export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalP
 		defaultValues: defaultPersonalValues,
 	});
 
-	const passwordFormData = useForm<IUpdatePasswordInputs>({
+	const authenticationFormData = useForm<IUpdatePasswordInputs>({
 		mode: 'all',
 		resolver: yupResolver(EditProfileUpdatePasswordSchema(incorrectPassword)),
 		defaultValues: EMPTY_PASSWORDS,
@@ -112,7 +112,7 @@ export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalP
 			<TabContext value={activeTab}>
 				<TabList onChange={onTabChange} textColor="primary" indicatorColor="primary">
 					<Tab value={PERSONAL_TAB} label={TAB_LABELS.personal} disabled={isSubmitting} />
-					<Tab value={PASSWORD_TAB} label={TAB_LABELS.password} disabled={isSubmitting} />
+					<Tab value={AUTHENTICATION_TAB} label={TAB_LABELS.authentication} disabled={isSubmitting} />
 					<Tab value={INTEGRATIONS_TAB} label={TAB_LABELS.integrations} disabled={isSubmitting} />
 				</TabList>
 				<FormProvider {...personalFormData}>
@@ -127,14 +127,14 @@ export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalP
 						/>
 					</TabPanel>
 				</FormProvider>
-				<FormProvider {...passwordFormData}>
-					<TabPanel value={PASSWORD_TAB}>
-						<EditProfilePasswordTab
+				<FormProvider {...authenticationFormData}>
+					<TabPanel value={AUTHENTICATION_TAB}>
+						<EditProfileAuthenticationTab
 							incorrectPassword={incorrectPassword}
 							setIncorrectPassword={setIncorrectPassword}
 							setIsSubmitting={setIsSubmitting}
-							setSubmitFunction={setPasswordSubmitFunction}
-							unexpectedError={unexpectedErrors[PASSWORD_TAB]}
+							setSubmitFunction={setAuthenticationSubmitFunction}
+							unexpectedError={unexpectedErrors[AUTHENTICATION_TAB]}
 						/>
 					</TabPanel>
 				</FormProvider>

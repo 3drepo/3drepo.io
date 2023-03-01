@@ -38,7 +38,7 @@ export const EMPTY_PASSWORDS = {
 	confirmPassword: '',
 };
 
-type EditProfilePasswordTabProps = {
+type EditProfileAuthenticationTabProps = {
 	incorrectPassword: boolean;
 	setIncorrectPassword: (isIncorrect: boolean) => void;
 	setIsSubmitting: (isSubmitting: boolean) => void;
@@ -46,13 +46,13 @@ type EditProfilePasswordTabProps = {
 	unexpectedError: any,
 };
 
-export const EditProfilePasswordTab = ({
+export const EditProfileAuthenticationTab = ({
 	incorrectPassword,
 	setIncorrectPassword,
 	setIsSubmitting,
 	setSubmitFunction,
 	unexpectedError,
-}: EditProfilePasswordTabProps) => {
+}: EditProfileAuthenticationTabProps) => {
 	const {
 		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, touchedFields },
 		control,
