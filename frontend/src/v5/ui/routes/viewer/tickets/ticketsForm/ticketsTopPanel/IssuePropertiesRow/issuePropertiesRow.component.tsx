@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { TicketDetailsAssignees } from '@controls/assignees/ticketDetailsAssignees/ticketDetailAssignees.component';
+import { TicketDetailsAssignees } from '@controls/assignees/ticketDetailsAssignees/ticketDetailsAssignees.component';
 import { PRIORITY_LEVELS_MAP, STATUS_MAP } from '@controls/chip/chip.types';
 import { ChipSelect } from '@controls/chip/chipSelect/chipSelect.component';
 import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';

@@ -25,6 +25,9 @@ export const HiddenManyOfProperty = styled(ManyOfProperty)`
 	height: 0;
 	width: 0;
 	overflow: hidden;
+	position: absolute;
+	right: 0;
+	top: 0;
 `;
 
 export const AssigneesList = styled(AssigneesListBase)`
@@ -52,6 +55,7 @@ export const InlineAssignees = styled.div`
 	display: inline-flex;
 	align-items: center;
 	user-select: none;
+	position: relative;
 
 	${({ theme }) => theme.typography.kicker};
 	letter-spacing: 0.3px;
