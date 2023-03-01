@@ -1023,7 +1023,7 @@ export const theme = createTheme({
 		MuiFormControl: {
 			styleOverrides: {
 				root: {
-					margin: '18px 0 0',
+					margin: '17px 0 0',
 					width: '100%',
 					boxSizing: 'border-box',
 					label: {

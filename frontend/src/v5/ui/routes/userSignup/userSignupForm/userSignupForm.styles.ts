@@ -35,8 +35,6 @@ export const Title = styled.div`
 	${({ theme }) => theme.typography.h1};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	font-weight: ${FONT_WEIGHT.BOLDER};
-	font-size: 24px;
-	line-height: 30px;
 `;
 
 export const Container = styled.div`
@@ -57,7 +55,6 @@ export const Underlined = styled.div`
 export const Stepper = styled(StepperBase)`
 	${MainContentStyling}
 	width: 100%;
-
 `;
 
 export const StepLabel = styled(StepLabelBase)<{ $reachable?: boolean }>`

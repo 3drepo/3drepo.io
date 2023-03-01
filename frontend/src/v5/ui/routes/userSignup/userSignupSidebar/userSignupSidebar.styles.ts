@@ -34,9 +34,10 @@ export const Container = styled.div`
 export const MainTitle = styled.div`
 	${({ theme }) => theme.typography.h1};
 	font-weight: ${FONT_WEIGHT.BOLDER};
-	line-height: 30px;
+	line-height: 42px;
 	margin-bottom: 27px;
 	width: 270px;
+	font-size: 40px;
 `;
 
 export const MicrosoftButton = styled(Button).attrs({
