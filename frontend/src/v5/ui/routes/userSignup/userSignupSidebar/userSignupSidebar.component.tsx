@@ -42,7 +42,7 @@ export const UserSignupSidebar = () => (
 		<SignUpWithMicrosoftText>
 			<FormattedMessage
 				id="userSignup.sidebar.signUpWithMicrosoft"
-				defaultMessage="Sign up with microsoft"
+				defaultMessage="Sign up with Microsoft"
 			/>
 			<NewSticker>
 				<FormattedMessage
