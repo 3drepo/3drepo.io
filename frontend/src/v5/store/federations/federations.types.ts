@@ -37,7 +37,8 @@ export type FederationBackendSettings = {
 		timestamp: number;
 		errorCode: string;
 	}
-}
+};
+
 export type FederationRevision = Pick<FederationBackendSettings, '_id' | 'timestamp' | 'author' >;
 
 export interface IFederation {
