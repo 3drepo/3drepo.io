@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const forgotPassword = require('./templates/forgotPassword');
 const errorNotification = require('./templates/errorNotification');
+const forgotPassword = require('./templates/forgotPassword');
 const { toConstantCase } = require('../../utils/helper/strings');
 const verifyUser = require('./templates/verifyUser');
 
