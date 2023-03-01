@@ -27,6 +27,7 @@ import { AuthTemplate } from '@components/authTemplate';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
 import { AuthSubHeader, Divider, MicrosoftButton, NewSticker } from '@components/authTemplate/authTemplate.styles';
+import { useSSOLogin } from '@/v5/services/sso.hooks';
 import { AuthFormLogin, ForgotPasswordPrompt, OtherOptions, SignUpPrompt, UnhandledErrorInterceptor } from './login.styles';
 import { AuthHeading, ErrorMessage, FormPasswordField, FormUsernameField } from './components/components.styles';
 import { PASSWORD_FORGOT_PATH, RELEASE_NOTES_ROUTE, SIGN_UP_PATH } from '../routes.constants';
@@ -59,6 +60,12 @@ export const Login = () => {
 		].includes(err.response?.data?.code)
 	);
 
+	const [loginWithSSO, ssoErrorMessage, isLoggingWithSSO] = useSSOLogin();
+
+	if (isLoggingWithSSO) {
+		return null;
+	}
+
 	return (
 		<AuthTemplate
 			footer={(
@@ -77,9 +84,10 @@ export const Login = () => {
 						<FormattedMessage id="feature.new" defaultMessage="New" />
 					</NewSticker>
 				</AuthSubHeader>
-				<MicrosoftButton to={{ pathname: 'login-sso' }}>
+				<MicrosoftButton onClick={loginWithSSO}>
 					<FormattedMessage id="auth.login.sso.microsoft" defaultMessage="Sign in with Microsoft" />
 				</MicrosoftButton>
+				{ssoErrorMessage && <ErrorMessage>{ssoErrorMessage}</ErrorMessage>}
 				<Divider><FormattedMessage id="auth.login.divider" defaultMessage="or" /></Divider>
 				<AuthSubHeader>
 					<FormattedMessage id="auth.login.heading.signInWithUsername" defaultMessage="Sign in with username or email" />
