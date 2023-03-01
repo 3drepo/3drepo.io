@@ -16,10 +16,9 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import MicrosoftIcon from '@assets/icons/thirdParty/microsoft.svg';
 import {
 	Container,
-	SSOButton,
+	MicrosoftButton,
 	MainTitle,
 	SignUpWithMicrosoftText,
 	MicrosoftInstructionsRemarkText,
@@ -82,12 +81,11 @@ export const UserSignupSidebar = () => (
 
 				/>
 			</MicrosoftInstructionsTermsText>
-			<SSOButton
+			<MicrosoftButton
 				to={{ pathname: 'signup-sso' }}
-				startIcon={<MicrosoftIcon />}
 			>
 				<FormattedMessage id="userSignup.sidebar.sso.microsoft" defaultMessage="Sign up with Microsoft" />
-			</SSOButton>
+			</MicrosoftButton>
 			<LoginPrompt>
 				<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
 				<LoginPromptLink to="/v5/login">

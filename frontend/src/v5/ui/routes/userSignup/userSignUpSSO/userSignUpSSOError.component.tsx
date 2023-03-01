@@ -42,7 +42,7 @@ export const UserSignupSSOError = () => (
 					/>
 					<Link to="/v5/login">
 						<SubmitButton>
-							<FormattedMessage id="userSignup.signupPrompt.signInButton" defaultMessage="Goto Sign in" />
+							<FormattedMessage id="userSignup.signupPrompt.signInButton" defaultMessage="Go to Sign in" />
 						</SubmitButton>
 					</Link>
 					<LoginPrompt>
