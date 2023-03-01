@@ -3367,7 +3367,6 @@ describe("Issues", function () {
 
 			it("if teamspace does not exist should fail", async function() {
 				const res = await agent.post(`/${fakeTeamspace}/${viewerModel}/issues.bcfzip`)
-					.attach("file", __dirname + bcf.path)
 					.expect(404);
 
 				expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);

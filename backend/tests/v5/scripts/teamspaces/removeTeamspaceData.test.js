@@ -31,6 +31,8 @@ const { getMembersInfo } = require(`${src}/models/teamspaceSettings`);
 const { getUserByUsername } = require(`${src}/models/users`);
 const { createProject, getProjectList } = require(`${src}/models/projectSettings`);
 
+const { disconnect } = require(`${src}/handler/db`);
+
 const { times } = require('lodash');
 
 const generateData = () => times(2, () => generateRandomString());
@@ -106,4 +108,5 @@ const runTest = () => {
 
 describe(determineTestGroup(__filename), () => {
 	runTest();
+	afterAll(disconnect);
 });

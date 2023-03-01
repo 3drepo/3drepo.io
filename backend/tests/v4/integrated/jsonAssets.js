@@ -16,7 +16,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+const { queue: {purgeQueues}} = require("../../v5/helper/services");
 const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
@@ -50,17 +50,10 @@ describe("JSON Assets", function () {
 		});
 
 		after(function(done) {
-			const q = require("../../../src/v4/services/queue");
-			q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
-				return q.channel.purgeQueue(q.workerQName);
-			}).then(() => {
-				q.channel.assertQueue(q.modelQName, { durable: true }).then(() => {
-					return q.channel.purgeQueue(q.modelQName);
-				}).then(() => {
-					server.close(function() {
-						console.log("API test server is closed");
-						done();
-					});
+			purgeQueues().then(() => {
+				server.close(function() {
+					console.log("API test server is closed");
+					done();
 				});
 			});
 		});
@@ -151,21 +144,13 @@ describe("JSON Assets", function () {
 		});
 
 		after(function(done) {
-			const q = require("../../../src/v4/services/queue");
-			q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
-				return q.channel.purgeQueue(q.workerQName);
-			}).then(() => {
-				q.channel.assertQueue(q.modelQName, { durable: true }).then(() => {
-					return q.channel.purgeQueue(q.modelQName);
-				}).then(() => {
-					server.close(function() {
-						console.log("API test server is closed");
-						done();
-					});
+			purgeQueues().then(() => {
+				server.close(function() {
+					console.log("API test server is closed");
+					done();
 				});
 			});
 		});
-
 		const goldenFullTree = {
 			mainTree: {
 				nodes: {
@@ -374,17 +359,10 @@ describe("JSON Assets", function () {
 		});
 
 		after(function(done) {
-			const q = require("../../../src/v4/services/queue");
-			q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
-				return q.channel.purgeQueue(q.workerQName);
-			}).then(() => {
-				q.channel.assertQueue(q.modelQName, { durable: true }).then(() => {
-					return q.channel.purgeQueue(q.modelQName);
-				}).then(() => {
-					server.close(function() {
-						console.log("API test server is closed");
-						done();
-					});
+			purgeQueues().then(() => {
+				server.close(function() {
+					console.log("API test server is closed");
+					done();
 				});
 			});
 		});
@@ -461,21 +439,13 @@ describe("JSON Assets", function () {
 		});
 
 		after(function(done) {
-			const q = require("../../../src/v4/services/queue");
-			q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
-				return q.channel.purgeQueue(q.workerQName);
-			}).then(() => {
-				q.channel.assertQueue(q.modelQName, { durable: true }).then(() => {
-					return q.channel.purgeQueue(q.modelQName);
-				}).then(() => {
-					server.close(function() {
-						console.log("API test server is closed");
-						done();
-					});
+			purgeQueues().then(() => {
+				server.close(function() {
+					console.log("API test server is closed");
+					done();
 				});
 			});
 		});
-
 		it("get JSON MPC should succeed", function(done) {
 			const mpcId = "fafca0a1-be32-4326-b922-9987915f3ca0_unity";
 

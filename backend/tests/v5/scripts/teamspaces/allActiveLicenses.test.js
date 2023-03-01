@@ -30,6 +30,8 @@ const DayJS = require('dayjs');
 
 const { src, utilScripts, tmpDir } = require('../../helper/path');
 
+const { disconnect } = require(`${src}/handler/db`);
+
 const AllActiveLicenses = require(`${utilScripts}/teamspaces/allActiveLicenses`);
 
 const { editSubscriptions } = require(`${src}/models/teamspaceSettings`);
@@ -148,4 +150,5 @@ describe(determineTestGroup(__filename), () => {
 		await setupData(data);
 	});
 	runTest(data);
+	afterAll(disconnect);
 });

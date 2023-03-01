@@ -417,13 +417,6 @@ User.createUser = async function (username, password, customData, tokenExpiryTim
 			}
 		});
 
-	// ["jobTitle", "industry", "phoneNumber", "howDidYouFindUs"]
-	// 	.forEach(key => {
-	// 		if (customData[key]) {
-	// 			cleanedCustomData.extras[key] = customData[key];
-	// 		}
-	// 	});
-
 	const billingInfo = {};
 
 	["firstName", "lastName", "countryCode", "company"].forEach(key => {
