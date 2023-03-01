@@ -1,7 +1,5 @@
 name: Container Build
 
-on: [push]
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -9,8 +7,6 @@ concurrency:
 permissions:
   checks: write
   contents: write
-
-name: Build images
 
 on: 
   push:
@@ -102,7 +98,6 @@ jobs:
         push: ${{ github.event_name != 'pull_request' }} # Only push if not a PR.
         tags: ${{ steps.docker-tag-creation.outputs.tags }}
         labels: ${{ steps.docker-tag-creation.outputs.labels }}
-        tags: ${{ matrix.image-name }}:${{ matrix.tag }}
         no-cache-filters: certs
         # https://github.com/docker/build-push-action/blob/master/docs/advanced/cache.md#github-cache
         cache-from: type=registry,ref=${{ secrets.REGISTRY_LOGIN_SERVER }}/3drepo.io:buildcache,compression=zstd
