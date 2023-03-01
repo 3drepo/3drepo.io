@@ -22,6 +22,10 @@ on:
 
 jobs:
   build-images:
+    secrets:
+      REGISTRY_LOGIN_SERVER: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
     concurrency:
       # If a previous run is ongoing with the same head_ref (it's a run on the
       # same PR) then cancel it to save time. If it isn't a PR, only cancel the
