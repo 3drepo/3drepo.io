@@ -39,16 +39,23 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open 
 		const RIGHT_KEY = 39;
 
 		switch (keyCode) {
-			case ESCAPE_KEY: onClickClose(); 
-			case LEFT_KEY: changeImageIndex(-1); 
-			case RIGHT_KEY: changeImageIndex(1);
-			default: null; 
+			case ESCAPE_KEY:
+				onClickClose();
+				break;
+			case LEFT_KEY:
+				changeImageIndex(-1);
+				break;
+			case RIGHT_KEY:
+				changeImageIndex(1);
+				break;
+			default:
+				// do nothing
 		}
 	};
 
 	useEffect(() => {
-		document.addEventListener("keydown", handleKeyDown);
-		return () => document.removeEventListener("keydown", handleKeyDown);
+		document.addEventListener('keydown', handleKeyDown);
+		return () => document.removeEventListener('keydown', handleKeyDown);
 	});
 
 	return (
