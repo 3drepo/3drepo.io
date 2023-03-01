@@ -19,6 +19,27 @@ import { UploadStatuses } from '../containers/containers.types';
 import { Role } from '../currentUser/currentUser.types';
 import { SurveyPoint, View } from '../store.types';
 
+export type FederationBackendSettings = {
+	_id?: string;
+	desc?: string;
+	name?: string;
+	surveyPoints?: SurveyPoint[];
+	status?: UploadStatuses;
+	timestamp?: number;
+	type?: string;
+	angleFromNorth: number;
+	code?: string;
+	unit?: string;
+	author?: string;
+	defaultView?: string;
+	errorReason?: {
+		message: string;
+		timestamp: number;
+		errorCode: string;
+	}
+}
+export type FederationRevision = Pick<FederationBackendSettings, '_id' | 'timestamp' | 'author' >;
+
 export interface IFederation {
 	_id: string;
 	desc?: string;
@@ -38,6 +59,7 @@ export interface IFederation {
 	angleFromNorth?: number;
 	defaultView?: string;
 	unit?: string;
+	revision?: FederationRevision;
 }
 
 export type NewFederation = {
@@ -51,33 +73,11 @@ export type NewFederationRealtime = NewFederation & {
 	_id: string;
 };
 
-export type FederationBackendSettings = {
-	_id?: string;
-	desc?: string;
-	name?: string;
-	surveyPoints?: SurveyPoint[];
-	status?: UploadStatuses;
-	timestamp?: number;
-	type?: string;
-	angleFromNorth: number;
-	code?: string;
-	unit?: string;
-	author?: string;
-	defaultView?: string;
-	errorReason?: {
-		message: string;
-		timestamp: number;
-		errorCode: string;
-	}
-};
-
 export type FederationSettings = Omit<FederationBackendSettings, 'surveyPoints'> & {
 	surveyPoint: SurveyPoint;
 };
 
 export type MinimumFederation = Pick<IFederation, '_id' | 'name' | 'role' | 'isFavourite'>;
-
-export type FederationRevision = Pick<FederationBackendSettings, '_id' | 'timestamp' | 'author' >;
 
 export type FederationStats = {
 	code: string;
