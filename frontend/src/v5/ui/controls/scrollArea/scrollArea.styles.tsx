@@ -29,7 +29,6 @@ const COLOUR_MAP = {
 const getBackgroundColor = (variant: ScrollbarVariant) => COLOUR_MAP[variant];
 
 const ThumbVertical = styled.div<{ variant: ScrollbarVariant }>`
-	z-index: 10;
 	right: 6px;
 	bottom: 6px;
 	top: 0px;
@@ -39,13 +38,23 @@ const ThumbVertical = styled.div<{ variant: ScrollbarVariant }>`
 `;
 
 const ThumbHorizontal = styled.div<{ variant: ScrollbarVariant }>`
-	z-index: 10;
 	left: 6px;
 	right: 6px;
 	bottom: 6px;
 	border-radius: 3px;
 	height: 6px;
 	background-color: ${({ variant }) => getBackgroundColor(variant)};
+`;
+
+const TrackVertical = styled.div`
+	z-index: 10;
+	height: 100%;
+	right: 0;
+`;
+const TrackHorizontal = styled.div`
+	z-index: 10;
+	width: 100%;
+	bottom: 0;
 `;
 
 export const ScrollbarWrapper = styled(Scrollbars).attrs(
@@ -58,5 +67,7 @@ export const ScrollbarWrapper = styled(Scrollbars).attrs(
 				<ThumbHorizontal style={style} variant={variant} />
 			) : (<span />)
 		),
+		renderTrackVertical: ({ style }) => <TrackVertical style={style} />,
+		renderTrackHorizontal: ({ style }) => <TrackHorizontal style={style} />,
 	}),
 )``;
