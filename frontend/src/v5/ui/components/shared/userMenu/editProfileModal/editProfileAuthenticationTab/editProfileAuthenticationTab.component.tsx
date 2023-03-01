@@ -25,6 +25,9 @@ import * as API from '@/v5/services/api';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { isPasswordIncorrect } from '@/v5/validation/errors.helpers';
 import { FormPasswordField } from '@controls/inputs/formInputs.component';
+import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
+import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
+import { TabContent } from '../editProfileModal.styles';
 
 export interface IUpdatePasswordInputs {
 	oldPassword: string;
@@ -42,16 +45,16 @@ type EditProfileAuthenticationTabProps = {
 	incorrectPassword: boolean;
 	setIncorrectPassword: (isIncorrect: boolean) => void;
 	setIsSubmitting: (isSubmitting: boolean) => void;
-	setSubmitFunction: (fn: Function) => void;
 	unexpectedError: any,
+	onClickClose: () => void,
 };
 
 export const EditProfileAuthenticationTab = ({
 	incorrectPassword,
 	setIncorrectPassword,
 	setIsSubmitting,
-	setSubmitFunction,
 	unexpectedError,
+	onClickClose,
 }: EditProfileAuthenticationTabProps) => {
 	const {
 		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, touchedFields },
@@ -78,14 +81,9 @@ export const EditProfileAuthenticationTab = ({
 		}
 	};
 
-	useEffect(() => setIsSubmitting(isSubmitting), [isSubmitting]);
+	const onSubmitClick = (event) => handleSubmit(onSubmit)(event).catch(onSubmitError)
 
-	useEffect(() => {
-		setSubmitFunction(() => (formIsValid
-			? (event) => handleSubmit(onSubmit)(event).catch(onSubmitError)
-			: null
-		));
-	}, [formIsValid]);
+	useEffect(() => setIsSubmitting(isSubmitting), [isSubmitting]);
 
 	useEffect(() => {
 		if (incorrectPassword && touchedFields.oldPassword) {
@@ -106,48 +104,59 @@ export const EditProfileAuthenticationTab = ({
 
 	return (
 		<>
-			<FormPasswordField
-				control={control}
-				name="oldPassword"
-				label={formatMessage({
-					id: 'editProfile.form.oldPassword',
-					defaultMessage: 'Current Password',
-				})}
-				formError={errors.oldPassword}
-				required
-			/>
-			<FormPasswordField
-				control={control}
-				name="newPassword"
-				label={formatMessage({
-					id: 'editProfile.form.newPassword',
-					defaultMessage: 'New Password',
-				})}
-				formError={errors.newPassword}
-				required
-			/>
-			<FormPasswordField
-				control={control}
-				name="confirmPassword"
-				label={formatMessage({
-					id: 'editProfile.form.confirmPassword',
-					defaultMessage: 'Confirm Password',
-				})}
-				formError={errors.confirmPassword}
-				required
-			/>
-			<UnhandledError
-				error={unexpectedError}
-				expectedErrorValidators={[isPasswordIncorrect]}
-			/>
-			{isSubmitSuccessful && (
-				<SuccessMessage>
+			<TabContent>
+				<FormPasswordField
+					control={control}
+					name="oldPassword"
+					label={formatMessage({
+						id: 'editProfile.form.oldPassword',
+						defaultMessage: 'Current Password',
+					})}
+					formError={errors.oldPassword}
+					required
+				/>
+				<FormPasswordField
+					control={control}
+					name="newPassword"
+					label={formatMessage({
+						id: 'editProfile.form.newPassword',
+						defaultMessage: 'New Password',
+					})}
+					formError={errors.newPassword}
+					required
+				/>
+				<FormPasswordField
+					control={control}
+					name="confirmPassword"
+					label={formatMessage({
+						id: 'editProfile.form.confirmPassword',
+						defaultMessage: 'Confirm Password',
+					})}
+					formError={errors.confirmPassword}
+					required
+				/>
+				<UnhandledError
+					error={unexpectedError}
+					expectedErrorValidators={[isPasswordIncorrect]}
+				/>
+				{isSubmitSuccessful && (
+					<SuccessMessage>
+						<FormattedMessage
+							id="editProfile.form.updatePasswordSuccess"
+							defaultMessage="Your password has been changed successfully."
+						/>
+					</SuccessMessage>
+				)}
+			</TabContent>
+			<FormModalActions>
+				<ModalCancelButton onClick={onClickClose} />
+				<ModalSubmitButton disabled={!formIsValid} onClick={onSubmitClick} isPending={isSubmitting}>
 					<FormattedMessage
-						id="editProfile.form.updatePasswordSuccess"
-						defaultMessage="Your password has been changed successfully."
+						defaultMessage="Update password"
+						id="editProfile.tab.confirmButton.updatePassword"
 					/>
-				</SuccessMessage>
-			)}
+				</ModalSubmitButton>
+			</FormModalActions>
 		</>
 	);
 };

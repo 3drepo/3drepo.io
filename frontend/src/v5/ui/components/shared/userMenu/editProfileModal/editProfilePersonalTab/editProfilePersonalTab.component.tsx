@@ -17,7 +17,6 @@
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatMessage } from '@/v5/services/intl';
-import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
 import { MenuItem } from '@mui/material';
@@ -29,7 +28,9 @@ import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledE
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { emailAlreadyExists, isFileFormatUnsupported } from '@/v5/validation/errors.helpers';
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
-import { ScrollArea } from './editProfilePersonalTab.styles';
+import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
+import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
+import { TabContent } from '../editProfileModal.styles';
 
 export interface IUpdatePersonalInputs {
 	firstName: string;
@@ -43,21 +44,21 @@ export interface IUpdatePersonalInputs {
 type EditProfilePersonalTabProps = {
 	alreadyExistingEmails: string[];
 	setAlreadyExistingEmails: (emails: string[]) => void;
-	setSubmitFunction: (fn: Function) => void,
 	setIsSubmitting: (isSubmitting: boolean) => void,
 	unexpectedError: any,
-	user: ICurrentUser,
+	onClickClose: () => void,
 };
 
 export const EditProfilePersonalTab = ({
 	alreadyExistingEmails,
 	setAlreadyExistingEmails,
-	setSubmitFunction,
 	setIsSubmitting,
 	unexpectedError,
-	user,
+	onClickClose,
 }: EditProfilePersonalTabProps) => {
 	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
+	const user = CurrentUserHooksSelectors.selectCurrentUser();
+	const [canSubmit, setCanSubmit] = useState(false);
 	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
 	const {
 		getValues,
@@ -111,81 +112,91 @@ export const EditProfilePersonalTab = ({
 
 	// enable submission only if form is valid and fields are dirty
 	useEffect(() => {
-		const shouldEnableSubmit = formIsValid && isEmpty(formErrors) && fieldsAreDirty;
-		setSubmitFunction(() => (shouldEnableSubmit ? handleSubmit(onSubmit) : null));
+		setCanSubmit(formIsValid && isEmpty(formErrors) && fieldsAreDirty);
 	}, [JSON.stringify(watch()), user, formIsValid, JSON.stringify(formErrors)]);
 
 	useEffect(() => setIsSubmitting(formIsUploading), [formIsUploading]);
 
 	return (
-		<ScrollArea>
-			<EditProfileAvatar user={user} />
-			<FormTextField
-				name="firstName"
-				control={control}
-				label={formatMessage({
-					id: 'editProfile.form.firstName',
-					defaultMessage: 'First Name',
-				})}
-				required
-				formError={formErrors.firstName}
-			/>
-			<FormTextField
-				name="lastName"
-				control={control}
-				label={formatMessage({
-					id: 'editProfile.form.lastName',
-					defaultMessage: 'Last Name',
-				})}
-				required
-				formError={formErrors.lastName}
-			/>
-			<FormTextField
-				name="email"
-				control={control}
-				label={formatMessage({
-					id: 'editProfile.form.email',
-					defaultMessage: 'Email',
-				})}
-				required
-				formError={formErrors.email}
-			/>
-			<FormTextField
-				name="company"
-				control={control}
-				label={formatMessage({
-					id: 'editProfile.form.company',
-					defaultMessage: 'Company',
-				})}
-				formError={formErrors.company}
-			/>
-			<FormSelect
-				name="countryCode"
-				control={control}
-				label={formatMessage({
-					id: 'editProfile.form.countryCode',
-					defaultMessage: 'Country',
-				})}
-				required
-			>
-				{clientConfigService.countries.map((country) => (
-					<MenuItem key={country.code} value={country.code}>
-						{country.name}
-					</MenuItem>
-				))}
-			</FormSelect>
-			{submitWasSuccessful && (
-				<SuccessMessage>
+		<>
+			<TabContent>
+				<EditProfileAvatar user={user} />
+				<FormTextField
+					name="firstName"
+					control={control}
+					label={formatMessage({
+						id: 'editProfile.form.firstName',
+						defaultMessage: 'First Name',
+					})}
+					required
+					formError={formErrors.firstName}
+				/>
+				<FormTextField
+					name="lastName"
+					control={control}
+					label={formatMessage({
+						id: 'editProfile.form.lastName',
+						defaultMessage: 'Last Name',
+					})}
+					required
+					formError={formErrors.lastName}
+				/>
+				<FormTextField
+					name="email"
+					control={control}
+					label={formatMessage({
+						id: 'editProfile.form.email',
+						defaultMessage: 'Email',
+					})}
+					required
+					formError={formErrors.email}
+				/>
+				<FormTextField
+					name="company"
+					control={control}
+					label={formatMessage({
+						id: 'editProfile.form.company',
+						defaultMessage: 'Company',
+					})}
+					formError={formErrors.company}
+				/>
+				<FormSelect
+					name="countryCode"
+					control={control}
+					label={formatMessage({
+						id: 'editProfile.form.countryCode',
+						defaultMessage: 'Country',
+					})}
+					required
+				>
+					{clientConfigService.countries.map((country) => (
+						<MenuItem key={country.code} value={country.code}>
+							{country.name}
+						</MenuItem>
+					))}
+				</FormSelect>
+				{submitWasSuccessful && (
+					<SuccessMessage>
+						<FormattedMessage
+							id="editProfile.form.updateProfileSuccess"
+							defaultMessage="Your profile has been changed successfully."
+						/>
+					</SuccessMessage>
+				)}
+				<UnhandledError
+					error={unexpectedError}
+					expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]}
+				/>
+			</TabContent>
+			<FormModalActions>
+				<ModalCancelButton onClick={onClickClose}/>
+				<ModalSubmitButton disabled={!canSubmit} onClick={handleSubmit(onSubmit)}>
 					<FormattedMessage
-						id="editProfile.form.updateProfileSuccess"
-						defaultMessage="Your profile has been changed successfully."
+						defaultMessage="Update profile"
+						id="editProfile.tab.confirmButton.updateProfile"
 					/>
-				</SuccessMessage>
-			)}
-			<UnhandledError
-				error={unexpectedError}
-				expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]}
-			/>
-		</ScrollArea>
+				</ModalSubmitButton>
+			</FormModalActions>
+		</>
 	);
 };

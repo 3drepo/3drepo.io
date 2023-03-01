@@ -14,12 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import TabBase from '@mui/material/Tab';
 import TabPanelBase from '@mui/lab/TabPanel';
 import TabListBase from '@mui/lab/TabList';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { FormModalNoButtons } from '@controls/formModal/formModalNoButtons/formModalNoButtons.component';
+import { ScrollArea } from '@controls/scrollArea';
 
 export const FormModal = styled(FormModalNoButtons)`
 	.MuiDialogContent-root {
@@ -56,10 +57,15 @@ export const TabList = styled(TabListBase)`
 export const TabPanel = styled(TabPanelBase)<{ $personalTab?: boolean }>`
 	box-sizing: border-box;
 	overflow-x: hidden;
-	height: min(554px, 50vh);
+	padding: 0;
+`;
 
-	padding: 30px 58px 48px;
-	${({ $personalTab }) => $personalTab && css`
-		padding: 0;
-	`};
+export const TabContent = styled(ScrollArea).attrs({
+	autoHeight: true,
+	autoHeightMin: 'min(554px, 50vh)',
+})`
+	& > :first-child {
+		padding: 30px 58px;
+		box-sizing: border-box;
+	}
 `;

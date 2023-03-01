@@ -44,6 +44,7 @@ const ThumbHorizontal = styled.div<{ variant: ScrollbarVariant }>`
 	border-radius: 3px;
 	height: 6px;
 	background-color: ${({ variant }) => getBackgroundColor(variant)};
+	overflow-x: hidden;
 `;
 
 export const ScrollbarWrapper = styled(Scrollbars).attrs(

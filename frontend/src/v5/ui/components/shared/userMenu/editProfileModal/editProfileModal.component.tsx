@@ -23,8 +23,6 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { useErrorInterceptor } from '@controls/errorMessage/useErrorInterceptor';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { EditProfileUpdatePasswordSchema, EditProfileUpdatePersonalSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
-import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
-import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
 import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
 import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
 import { EditProfileAuthenticationTab, EMPTY_PASSWORDS, IUpdatePasswordInputs } from './editProfileAuthenticationTab/editProfileAuthenticationTab.component';
@@ -33,11 +31,6 @@ import { EditProfileIntegrationsTab } from './editProfileIntegrationsTab/editPro
 const PERSONAL_TAB = 'personal';
 const AUTHENTICATION_TAB = 'authentication';
 const INTEGRATIONS_TAB = 'integrations';
-
-const CONFIRM_LABELS = {
-	personal: formatMessage({ defaultMessage: 'Update profile', id: 'editProfile.tab.confirmButton.updateProfile' }),
-	authentication: formatMessage({ defaultMessage: 'Update password', id: 'editProfile.tab.confirmButton.updatePassword' }),
-};
 
 const TAB_LABELS = {
 	personal: formatMessage({ defaultMessage: 'Personal', id: 'editProfile.tab.title.personal' }),
@@ -60,8 +53,6 @@ type EditProfileUnexpectedErrors = {
 export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalProps) => {
 	const [activeTab, setActiveTab] = useState(PERSONAL_TAB);
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [personalSubmitFunction, setPersonalSubmitFunction] = useState(null);
-	const [authenticationSubmitFunction, setAuthenticationSubmitFunction] = useState(null);
 	const [incorrectPassword, setIncorrectPassword] = useState(false);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
 	const [unexpectedErrors, setUnexpectedErrors] = useState<EditProfileUnexpectedErrors>({});
@@ -71,14 +62,6 @@ export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalP
 		pick(omitBy(user, isNull), ['firstName', 'lastName', 'email', 'company', 'countryCode']),
 		{ company: '', countryCode: 'GB', avatarFile: '' },
 	);
-
-	const getTabSubmitFunction = () => {
-		switch (activeTab) {
-			case PERSONAL_TAB: return personalSubmitFunction;
-			case AUTHENTICATION_TAB: return authenticationSubmitFunction;
-			default: return null;
-		}
-	};
 
 	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);
 
@@ -121,9 +104,8 @@ export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalP
 							alreadyExistingEmails={alreadyExistingEmails}
 							setAlreadyExistingEmails={setAlreadyExistingEmails}
 							setIsSubmitting={setIsSubmitting}
-							setSubmitFunction={setPersonalSubmitFunction}
 							unexpectedError={unexpectedErrors[PERSONAL_TAB]}
-							user={user}
+							onClickClose={onClickClose}
 						/>
 					</TabPanel>
 				</FormProvider>
@@ -133,29 +115,18 @@ export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalP
 							incorrectPassword={incorrectPassword}
 							setIncorrectPassword={setIncorrectPassword}
 							setIsSubmitting={setIsSubmitting}
-							setSubmitFunction={setAuthenticationSubmitFunction}
 							unexpectedError={unexpectedErrors[AUTHENTICATION_TAB]}
+							onClickClose={onClickClose}
 						/>
 					</TabPanel>
 				</FormProvider>
 				<TabPanel value={INTEGRATIONS_TAB}>
 					<EditProfileIntegrationsTab
 						unexpectedError={unexpectedErrors[INTEGRATIONS_TAB]}
+						onClickClose={onClickClose}
 					/>
 				</TabPanel>
 			</TabContext>
-			<FormModalActions>
-				<ModalCancelButton disabled={isSubmitting} onClick={onClickClose} />
-				{activeTab !== INTEGRATIONS_TAB && (
-					<ModalSubmitButton
-						disabled={!getTabSubmitFunction()}
-						onClick={getTabSubmitFunction()}
-						isPending={isSubmitting}
-					>
-						{CONFIRM_LABELS[activeTab]}
-					</ModalSubmitButton>
-				)}
-			</FormModalActions>
 		</FormModal>
 	);
 };
