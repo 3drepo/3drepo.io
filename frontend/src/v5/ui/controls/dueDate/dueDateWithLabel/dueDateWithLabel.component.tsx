@@ -23,7 +23,7 @@ import { DueDateEmptyLabel } from './dueDateLabel/dueDateEmptyLabel.component';
 import { DueDateFilledLabel } from './dueDateLabel/dueDateFilledLabel.component';
 
 type IDueDateWithLabel = {
-	value: any;
+	value: number;
 	disabled?: boolean;
 	onBlur: (newValue) => void;
 };
