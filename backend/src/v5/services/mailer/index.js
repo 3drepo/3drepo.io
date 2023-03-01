@@ -21,6 +21,7 @@ const { createTestAccount } = require('nodemailer');
 const { templates: emailTemplates } = require('./mailer.constants');
 const { logger } = require('../../utils/logger');
 const nodemailer = require('nodemailer');
+const systemTemplate = require('./templates/systemTemplate');
 const { templates } = require('../../utils/responseCodes');
 
 const Mailer = {};
@@ -64,6 +65,34 @@ checkMailerConfig().catch(
 		process.exit(1);
 	},
 );
+
+Mailer.sendSystemEmail = async (templateName, data, attachments) => {
+	const template = emailTemplates[templateName];
+
+	if (!template) {
+		logger.logError(`Mailer error - Unrecognised email template ${templateName}`);
+		throw templates.unknown;
+	}
+
+	try {
+		await checkMailerConfig();
+		const emailContent = await template.html(data);
+		const mailOptions = {
+			from: config.mail.sender,
+			to: config.contact.email,
+			subject: template.subject(data),
+			html: await systemTemplate.html({ ...data, emailContent }),
+		};
+
+		if (attachments) {
+			mailOptions.attachments = attachments;
+		}
+		await transporter.sendMail(mailOptions);
+	} catch (err) {
+		logger.logError(`Email error - ${err.message}`);
+		throw err;
+	}
+};
 
 Mailer.sendEmail = async (templateName, to, data, attachments) => {
 	const template = emailTemplates[templateName];
