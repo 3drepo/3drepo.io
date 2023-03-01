@@ -23,6 +23,10 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import { Link } from 'react-router-dom';
 import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
 import { Display } from '@/v5/ui/themes/media';
+import { Divider as DividerBase } from '@mui/material';
+import { Button } from '@controls/button';
+import MicrosoftIcon from '@assets/icons/thirdParty/microsoft.svg';
+import { createElement } from 'react';
 
 const customLogoPath = clientConfigService.getCustomLogoPath();
 export const customBackgroundPath = clientConfigService.getCustomBackgroundImagePath();
@@ -30,8 +34,8 @@ export const customBackgroundPath = clientConfigService.getCustomBackgroundImage
 export const AuthForm = styled.form`
 	min-width: 408px;
 	border-radius: 20px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	padding: 58px 64px 38px;
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	padding: 56px 64px 38px;
 	z-index: 1;
 
 	${({ theme }) => theme.typography.body1};
@@ -49,6 +53,16 @@ export const Footer = styled(Typography).attrs({
 		text-decoration: none;
 		color: inherit;
 	}
+`;
+
+export const Divider = styled(DividerBase)`
+	color: ${({ theme }) => theme.palette.base.main};
+
+	&::before, &::after {
+		border-color: ${({ theme }) => theme.palette.base.lightest};
+	}
+
+	margin: 19px 0;
 `;
 
 export const BackgroundOverlay = styled(LoginBackground)`
@@ -116,4 +130,46 @@ export const LogoContainer = styled(LoginLink)`
 		justify-content: center;
 		align-items: center;
 	}
+`;
+
+export const AuthSubHeader = styled.div`
+	${({ theme }) => theme.typography.h3};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	user-select: none;
+	margin: 19px 0;
+`;
+
+export const MicrosoftButton = styled(Button).attrs({
+	component: Link,
+	variant: 'contained',
+	color: 'primary',
+	startIcon: createElement(MicrosoftIcon),
+})`
+	display: flex;
+	width: fit-content;
+	font-weight: 500;
+	font-size: 12px;
+	border-radius: 0;
+	background-color: #2F2F2F; // The colour is hardcoded as this are microsoft specs and not part of the theme
+
+	&:hover, &:active {
+		background-color: #2F2F2FF0; 
+
+	}
+
+	margin: 0;
+	padding:20px;
+`;
+
+export const NewSticker = styled.div`
+	color: ${({ theme }) => theme.palette.primary.main};
+	border: solid 1.5px ${({ theme }) => theme.palette.primary.main}; 
+	border-radius: 5px;
+	padding: 4px 6px;
+	display: inline;
+	font-size: 10px;
+	font-weight: 700;
+	top: -4px;
+	position: relative;
+	left: 8px;
 `;

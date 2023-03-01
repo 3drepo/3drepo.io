@@ -26,8 +26,8 @@ import { LoginSchema } from '@/v5/validation/userSchemes/loginSchemes';
 import { AuthTemplate } from '@components/authTemplate';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
-import { AuthForm } from '@components/authTemplate/authTemplate.styles';
-import { ForgotPasswordPrompt, OtherOptions, SignUpPrompt, UnhandledErrorInterceptor } from './login.styles';
+import { AuthSubHeader, Divider, MicrosoftButton, NewSticker } from '@components/authTemplate/authTemplate.styles';
+import { AuthFormLogin, ForgotPasswordPrompt, OtherOptions, SignUpPrompt, UnhandledErrorInterceptor } from './login.styles';
 import { AuthHeading, ErrorMessage, FormPasswordField, FormUsernameField } from './components/components.styles';
 import { PASSWORD_FORGOT_PATH, RELEASE_NOTES_ROUTE, SIGN_UP_PATH } from '../routes.constants';
 
@@ -67,10 +67,23 @@ export const Login = () => {
 				</a>
 			)}
 		>
-			<AuthForm onSubmit={handleSubmit(onSubmit)}>
+			<AuthFormLogin onSubmit={handleSubmit(onSubmit)}>
 				<AuthHeading>
-					<FormattedMessage id="auth.login.heading" defaultMessage="Log in" />
+					<FormattedMessage id="auth.login.heading" defaultMessage="Sign into your account" />
 				</AuthHeading>
+				<AuthSubHeader>
+					<FormattedMessage id="auth.login.heading.signInWithMicrosoft" defaultMessage="Sign in with Microsoft" />
+					<NewSticker>
+						<FormattedMessage id="feature.new" defaultMessage="New" />
+					</NewSticker>
+				</AuthSubHeader>
+				<MicrosoftButton to={{ pathname: 'login-sso' }}>
+					<FormattedMessage id="auth.login.sso.microsoft" defaultMessage="Sign in with Microsoft" />
+				</MicrosoftButton>
+				<Divider><FormattedMessage id="auth.login.divider" defaultMessage="or" /></Divider>
+				<AuthSubHeader>
+					<FormattedMessage id="auth.login.heading.signInWithUsername" defaultMessage="Sign in with username or email" />
+				</AuthSubHeader>
 				<FormUsernameField
 					control={control}
 					name="username"
@@ -106,7 +119,7 @@ export const Login = () => {
 				<SubmitButton disabled={!isValid} isPending={isPending} startIcon={<LoginIcon />}>
 					<FormattedMessage id="auth.login.buttonText" defaultMessage="Log in" />
 				</SubmitButton>
-			</AuthForm>
+			</AuthFormLogin>
 		</AuthTemplate>
 	);
 };

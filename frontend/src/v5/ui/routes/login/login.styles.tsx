@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
 import { UnhandledErrorInterceptor as UnhandledErrorInterceptorBase } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
+import { AuthForm } from '@components/authTemplate/authTemplate.styles';
 
 export const OtherOptions = styled.div`
 	display: flex;
@@ -43,4 +44,9 @@ export const ForgotPasswordPrompt = styled(StyledTypography)`
 
 export const UnhandledErrorInterceptor = styled(UnhandledErrorInterceptorBase)`
 	margin-top: 5px;
+`;
+
+export const AuthFormLogin = styled(AuthForm)`
+	min-width: 0;
+	width: 361px;
 `;
