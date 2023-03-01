@@ -22,12 +22,12 @@ import { FormInputProps } from '@controls/inputs/inputController.component';
 import { formatMessage } from '@/v5/services/intl';
 import { AddUserButton, AssigneesList, HiddenManyOfProperty, InlineAssignees } from './ticketDetailsAssignees.styles';
 
-export const TicketDetailsAssignees = ({ value, disabled, ...props }: FormInputProps) => {
+export const TicketDetailsAssignees = ({ value, disabled, onBlur, ...props }: FormInputProps) => {
 	const [open, setOpen] = useState(false);
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => {
 		setOpen(false);
-		props.onBlur();
+		onBlur();
 	};
 
 	return (
