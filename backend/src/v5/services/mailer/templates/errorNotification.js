@@ -27,7 +27,8 @@ const dataSchema = Yup.object({
 	err: Yup.object({
 		message: Yup.string().default('no message found'),
 		stack: Yup.mixed().default('no stack trace provided'),
-	}).transform((err) => (isObject(err) ? err : { message: err || undefined })),
+	}).transform((err, orgVal) => (isObject(orgVal)
+		? { message: orgVal.message, stack: orgVal.stack } : { message: orgVal || undefined })),
 	title: Yup.string().default('Unexpected error'),
 	message: Yup.string().default('Unexpected error'),
 	scope: Yup.string().default('application'),
