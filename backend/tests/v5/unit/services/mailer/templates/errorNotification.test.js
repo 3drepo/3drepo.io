@@ -33,8 +33,13 @@ const testHtml = () => {
 			expect(isHtml(res)).toEqual(true);
 		});
 
+		test('should get errorNotification template html if error object is null', async () => {
+			const res = await ErrorNotification.html({ err: null });
+			expect(isHtml(res)).toEqual(true);
+		});
+
 		test('should get errorNotification template html if error object is undefined', async () => {
-			const res = await ErrorNotification.html({});
+			const res = await ErrorNotification.html({ });
 			expect(isHtml(res)).toEqual(true);
 		});
 	});
