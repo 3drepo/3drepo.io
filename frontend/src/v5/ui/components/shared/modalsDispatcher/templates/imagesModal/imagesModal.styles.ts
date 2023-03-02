@@ -47,6 +47,7 @@ export const Image = styled.img.attrs({
 })`
 	${modalContentStyles}
 	object-fit: cover;
+	max-width: min(1200px, calc(100vw - 250px));
 `;
 
 export const Container = styled.div`
@@ -63,7 +64,7 @@ export const NextButton = styled(NavbarButton)`
 	height: 32px;
 	min-width: 32px;
 	width: 32px;
-	background-color: ${({ theme }) => theme.palette.secondary.main};
+
 	&:hover {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 	}
