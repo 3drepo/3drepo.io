@@ -16,6 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
+import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CONTAINERS_SEARCH_FIELDS } from '@/v5/store/containers/containers.helpers';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
@@ -40,6 +41,9 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 	const getContainerById = (id: string) => containers.find((container: IContainer) => container._id === id);
 	const [includedContainers, setIncludedContainers] = useState<IContainer[]>([]);
 	const [availableContainers, setAvailableContainers] = useState<IContainer[]>([]);
+	const isNewFederation = !federation._id;
+	const isCollaboratorFromId = FederationsHooksSelectors.selectHasCollaboratorAccess(federation._id);
+	const isCollaborator = isNewFederation ? true : isCollaboratorFromId;
 
 	useEffect(() => {
 		if (containers.length) {
@@ -90,7 +94,7 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 							/>
 						</DashboardListEmptyText>
 					)}
-					actionButton={({ children, disabled, filteredContainers }: ActionButtonProps) => (
+					actionButton={({ children, disabled, filteredContainers }: ActionButtonProps) => isCollaborator && (
 						<Button
 							errorButton
 							onClick={() => removeContainers(filteredContainers)}
@@ -103,7 +107,7 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 						allResults: <FormattedMessage id="modal.editFederation.included.removeAll" defaultMessage="Remove all" />,
 						filteredResults: <FormattedMessage id="modal.editFederation.included.removeShown" defaultMessage="Remove shown" />,
 					}}
-					iconButton={useCallback(({ container }: IconButtonProps) => (
+					iconButton={useCallback(({ container }: IconButtonProps) => isCollaborator && (
 						<Tooltip title={formatMessage({
 							id: 'modal.editFederation.available.remove.tooltip',
 							defaultMessage: 'Remove container',
@@ -142,12 +146,13 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 							/>
 						</DashboardListEmptyText>
 					)}
-					actionButton={({ children, disabled, filteredContainers }) => (
+					actionButton={({ children, disabled, filteredContainers, ...buttonProps }) => isCollaborator && (
 						<Button
 							variant="outlined"
 							color="primary"
 							onClick={() => includeContainers(filteredContainers)}
 							disabled={disabled}
+							{...buttonProps}
 						>
 							{children}
 						</Button>
@@ -156,7 +161,7 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 						allResults: <FormattedMessage id="modal.editFederation.available.includeAll" defaultMessage="Include all" />,
 						filteredResults: <FormattedMessage id="modal.editFederation.available.includeShown" defaultMessage="Include shown" />,
 					}}
-					iconButton={useCallback(({ container, isSelected }: IconButtonProps) => (
+					iconButton={useCallback(({ container, isSelected }: IconButtonProps) => isCollaborator && (
 						<Tooltip title={formatMessage({
 							id: 'modal.editFederation.available.include.tooltip',
 							defaultMessage: 'Include container',

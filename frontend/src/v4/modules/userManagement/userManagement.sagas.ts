@@ -60,7 +60,14 @@ export function* fetchQuotaAndInvitations() {
 
 		yield put(UserManagementActions.setUsersPending(false));
 	} catch (error) {
-		yield put(DialogActions.showEndpointErrorDialog('get', 'teamspace details', error));
+		if (isV5()) {
+			DialogsActionsDispatchers.open('alert', {
+				currentActions: formatMessage({ id: 'teamspaceUsers.alert', defaultMessage: 'trying to access teamspace users' }),
+			error,
+			})
+		} else {
+			yield put(DialogActions.showEndpointErrorDialog('get', 'teamspace details', error));
+		}
 		yield put(UserManagementActions.setUsersPending(false));
 	}
 }
@@ -287,7 +294,14 @@ export function* fetchProject({ project }) {
 
 		yield put(UserManagementActions.setProjectsPending(false));
 	} catch (error) {
-		yield put(DialogActions.showEndpointErrorDialog('get', 'project permissions', error));
+		if (isV5()) {
+			DialogsActionsDispatchers.open('alert', {
+				currentActions: formatMessage({ id: 'projectPermissions.alert', defaultMessage: 'trying to fetch a project' }),
+				error,
+			})
+		} else {
+			yield put(DialogActions.showEndpointErrorDialog('get', 'project permissions', error));
+		}
 		yield put(UserManagementActions.setProjectsPending(false));
 	}
 }

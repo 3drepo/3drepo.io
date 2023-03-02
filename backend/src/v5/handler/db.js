@@ -24,6 +24,7 @@ const { deleteIfUndefined } = require('../utils/helper/objects');
 const { templates } = require('../utils/responseCodes');
 
 let dbConn;
+let sessionConn;
 let defaultRoleProm;
 const DBHandler = {};
 
@@ -58,10 +59,10 @@ const connect = (username, password) => MongoClient.connect(
 
 const getDB = async (db) => {
 	if (!dbConn) {
-		dbConn = await connect();
+		dbConn = connect();
 	}
 
-	return dbConn.db(db);
+	return (await dbConn).db(db);
 };
 
 const getCollection = async (db, col) => {
@@ -86,6 +87,12 @@ const runCommand = async (database, cmd) => {
 		// istanbul ignore next
 		throw err;
 	}
+};
+
+// This is a temp workaround for v4 and should not be used anywhere!
+// eslint-disable-next-line no-underscore-dangle
+DBHandler._context = {
+	connect, getDB,
 };
 
 DBHandler.authenticate = async (user, password) => {
@@ -124,10 +131,18 @@ const ensureDefaultRoleExists = () => {
 
 DBHandler.canConnect = () => DBHandler.authenticate();
 DBHandler.disconnect = async () => {
+	const dummyObj = { close: /* istanbul ignore next */ () => {} };
 	if (dbConn) {
-		await dbConn.close();
+		const conn = await dbConn.catch(/* istanbul ignore next */ () => dummyObj);
+		await conn.close();
 		dbConn = null;
 		defaultRoleProm = null;
+	}
+
+	if (sessionConn) {
+		const conn = await sessionConn.catch(/* istanbul ignore next */ () => dummyObj);
+		await conn.close();
+		sessionConn = null;
 	}
 };
 
@@ -412,8 +427,9 @@ DBHandler.getSessionStore = /* istanbul ignore next */() => {
 	// For some reason this library is very problematic...
 	// eslint-disable-next-line global-require
 	const MongoStore = require('connect-mongo');
+	sessionConn = connect();
 	const sessionStore = MongoStore.create({
-		clientPromise: connect(),
+		clientPromise: sessionConn,
 		dbName: 'admin',
 		collectionName: 'sessions',
 		stringify: false,
