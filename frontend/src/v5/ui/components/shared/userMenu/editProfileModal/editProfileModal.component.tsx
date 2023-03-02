@@ -22,7 +22,8 @@ import { TabContext } from '@mui/lab';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useErrorInterceptor } from '@controls/errorMessage/useErrorInterceptor';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { EditProfileUpdatePasswordSchema, EditProfileUpdatePersonalSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
+import { EditProfileUpdatePasswordSchema, EditProfileUpdatePersonalSchema, EditProfileUpdateSSOPasswordSchema } from '@/v5/validation/userSchemes/editProfileSchemes';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormModal, TabList, Tab, TabPanel, TruncatableName } from './editProfileModal.styles';
 import { EditProfilePersonalTab, IUpdatePersonalInputs } from './editProfilePersonalTab/editProfilePersonalTab.component';
 import { EditProfileAuthenticationTab, EMPTY_PASSWORDS, IUpdatePasswordInputs } from './editProfileAuthenticationTab/editProfileAuthenticationTab.component';
@@ -58,6 +59,8 @@ export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalP
 	const [unexpectedErrors, setUnexpectedErrors] = useState<EditProfileUnexpectedErrors>({});
 	const interceptedError = useErrorInterceptor();
 
+	const { sso } = CurrentUserHooksSelectors.selectCurrentUser();
+
 	const defaultPersonalValues = defaults(
 		pick(omitBy(user, isNull), ['firstName', 'lastName', 'email', 'company', 'countryCode']),
 		{ company: '', countryCode: 'GB', avatarFile: '' },
@@ -74,7 +77,7 @@ export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalP
 
 	const authenticationFormData = useForm<IUpdatePasswordInputs>({
 		mode: 'all',
-		resolver: yupResolver(EditProfileUpdatePasswordSchema(incorrectPassword)),
+		resolver: yupResolver(sso ? EditProfileUpdateSSOPasswordSchema : EditProfileUpdatePasswordSchema(incorrectPassword)),
 		defaultValues: EMPTY_PASSWORDS,
 	});
 

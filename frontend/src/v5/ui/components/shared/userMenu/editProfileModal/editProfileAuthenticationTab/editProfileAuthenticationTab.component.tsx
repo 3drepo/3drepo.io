@@ -15,19 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useFormContext } from 'react-hook-form';
-import { useEffect } from 'react';
-import { formatMessage } from '@/v5/services/intl';
-import { FormattedMessage } from 'react-intl';
-import { SuccessMessage } from '@controls/successMessage/successMessage.component';
-
-import * as API from '@/v5/services/api';
-import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
-import { isPasswordIncorrect } from '@/v5/validation/errors.helpers';
-import { FormPasswordField } from '@controls/inputs/formInputs.component';
-import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
-import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
-import { TabContent } from '../editProfileModal.styles';
+import { EditProfileAuthenticationSSOTab } from './editProfileAuthenticationSSOTab.component';
+import { EditProfileAuthenticationBasicTab } from './editProfileAuthenticationBasicTab.component';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export interface IUpdatePasswordInputs {
 	oldPassword: string;
@@ -52,111 +42,17 @@ type EditProfileAuthenticationTabProps = {
 export const EditProfileAuthenticationTab = ({
 	incorrectPassword,
 	setIncorrectPassword,
-	setIsSubmitting,
-	unexpectedError,
-	onClickClose,
+	...props
 }: EditProfileAuthenticationTabProps) => {
-	const {
-		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, touchedFields },
-		control,
-		trigger,
-		reset,
-		watch,
-		handleSubmit,
-	} = useFormContext();
+	const { sso } = CurrentUserHooksSelectors.selectCurrentUser();
 
-	const oldPassword = watch('oldPassword');
-	const newPassword = watch('newPassword');
-	const confirmPassword = watch('confirmPassword');
-
-	const onSubmit = async () => {
-		setIncorrectPassword(false);
-		await API.CurrentUser.updateUser({ oldPassword, newPassword });
-		reset(EMPTY_PASSWORDS);
-	};
-
-	const onSubmitError = (apiError) => {
-		if (isPasswordIncorrect(apiError)) {
-			setIncorrectPassword(true);
-		}
-	};
-
-	const onSubmitClick = (event) => handleSubmit(onSubmit)(event).catch(onSubmitError)
-
-	useEffect(() => setIsSubmitting(isSubmitting), [isSubmitting]);
-
-	useEffect(() => {
-		if (incorrectPassword && touchedFields.oldPassword) {
-			setIncorrectPassword(false);
-		}
-	}, [oldPassword]);
-
-	// re-trigger validation on oldPassword when incorrect
-	useEffect(() => {
-		if (oldPassword) {
-			trigger('oldPassword');
-		}
-	}, [incorrectPassword]);
-
-	useEffect(() => {
-		trigger(Object.keys(touchedFields) as Array<keyof IUpdatePasswordInputs>);
-	}, [oldPassword, newPassword, confirmPassword]);
+	if (sso) return (<EditProfileAuthenticationSSOTab {...props} />);
 
 	return (
-		<>
-			<TabContent>
-				<FormPasswordField
-					control={control}
-					name="oldPassword"
-					label={formatMessage({
-						id: 'editProfile.form.oldPassword',
-						defaultMessage: 'Current Password',
-					})}
-					formError={errors.oldPassword}
-					required
-				/>
-				<FormPasswordField
-					control={control}
-					name="newPassword"
-					label={formatMessage({
-						id: 'editProfile.form.newPassword',
-						defaultMessage: 'New Password',
-					})}
-					formError={errors.newPassword}
-					required
-				/>
-				<FormPasswordField
-					control={control}
-					name="confirmPassword"
-					label={formatMessage({
-						id: 'editProfile.form.confirmPassword',
-						defaultMessage: 'Confirm Password',
-					})}
-					formError={errors.confirmPassword}
-					required
-				/>
-				<UnhandledError
-					error={unexpectedError}
-					expectedErrorValidators={[isPasswordIncorrect]}
-				/>
-				{isSubmitSuccessful && (
-					<SuccessMessage>
-						<FormattedMessage
-							id="editProfile.form.updatePasswordSuccess"
-							defaultMessage="Your password has been changed successfully."
-						/>
-					</SuccessMessage>
-				)}
-			</TabContent>
-			<FormModalActions>
-				<ModalCancelButton onClick={onClickClose} />
-				<ModalSubmitButton disabled={!formIsValid} onClick={onSubmitClick} isPending={isSubmitting}>
-					<FormattedMessage
-						defaultMessage="Update password"
-						id="editProfile.tab.confirmButton.updatePassword"
-					/>
-				</ModalSubmitButton>
-			</FormModalActions>
-		</>
+		<EditProfileAuthenticationBasicTab
+			incorrectPassword={incorrectPassword}
+			setIncorrectPassword={setIncorrectPassword}
+			{...props}
+		/>
 	);
 };
