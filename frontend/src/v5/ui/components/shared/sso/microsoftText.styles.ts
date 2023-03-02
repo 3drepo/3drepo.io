@@ -26,6 +26,8 @@ export const Container = styled.div`
 export const MicrosoftTitleText = styled.div`
 	${({ theme }) => theme.typography.h1};
 	margin-bottom: 10px;
+	display: flex;
+	align-items: center;
 `;
 
 export const MicrosoftInstructionsText = styled.div`
@@ -61,10 +63,11 @@ export const NewSticker = styled.div`
 	border: solid 1.5px ${({ theme }) => theme.palette.primary.main}; 
 	border-radius: 5px;
 	padding: 4px 6px;
-	display: inline;
 	font-size: 10px;
 	font-weight: 700;
-	top: -4px;
-	position: relative;
-	left: 8px;
+	margin-left: 8px;
+	height: 12px;
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
 `;

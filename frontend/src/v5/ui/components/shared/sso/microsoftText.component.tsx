@@ -27,10 +27,14 @@ import {
 	Link,
 } from './microsoftText.styles';
 
-export const MicrosoftText = ({ title, className }) => (
+type MicrosoftTextProps = {
+	title: string,
+	className?: string,
+};
+export const MicrosoftText = ({ title, className }: MicrosoftTextProps) => (
 	<Container className={className}>
 		<MicrosoftTitleText>
-			{title}
+			<span>{title}</span>
 			<NewSticker>
 				<FormattedMessage
 					id="Microsoft.sso.new"
