@@ -26,8 +26,10 @@ import { isPasswordIncorrect } from '@/v5/validation/errors.helpers';
 import { FormPasswordField } from '@controls/inputs/formInputs.component';
 import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
 import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
-import { TabContent } from '../editProfileModal.styles';
 import { unlinkAccount } from '@/v5/services/api/sso';
+import { MicrosoftInstructionsText } from '@components/shared/sso/microsoftText.styles';
+import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TabContent, MicrosoftTitleText } from '../editProfileModal.styles';
 
 type IUpdateSSOPasswordInputs = {
 	newPassword: string;
@@ -57,8 +59,9 @@ export const EditProfileAuthenticationSSOTab = ({
 	const confirmPassword = watch('confirmPassword');
 
 	const onSubmit = async () => {
-		await unlinkAccount({ password: newPassword });
 		setIsSubmitting(isSubmitting);
+		await unlinkAccount({ password: newPassword });
+		CurrentUserActionsDispatchers.updateUserSuccess({ sso: null });
 	};
 
 	useEffect(() => {
@@ -68,6 +71,21 @@ export const EditProfileAuthenticationSSOTab = ({
 	return (
 		<>
 			<TabContent>
+				<MicrosoftTitleText>
+					<FormattedMessage
+						defaultMessage="Unlink Microsoft Account"
+						id="editProfile.authentication.unlinkMicrosoftAccount.title"
+					/>
+				</MicrosoftTitleText>
+				<MicrosoftInstructionsText>
+					<FormattedMessage
+						defaultMessage={`
+							Your account is currently linked with Microsoft. If you would like to
+							unlink your account, please create a new password and click the unlink button.
+						`}
+						id="editProfile.authentication.unlinkMicrosoftAccount.description"
+					/>
+				</MicrosoftInstructionsText>
 				<FormPasswordField
 					control={control}
 					name="newPassword"
