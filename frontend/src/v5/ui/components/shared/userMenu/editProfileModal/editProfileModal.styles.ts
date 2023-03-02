@@ -21,6 +21,8 @@ import TabListBase from '@mui/lab/TabList';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { FormModalNoButtons } from '@controls/formModal/formModalNoButtons/formModalNoButtons.component';
 import { ScrollArea } from '@controls/scrollArea';
+import { MicrosoftText as MicrosoftTextBase } from '@components/shared/sso/microsoftText.component';
+import { MicrosoftTitleText } from '@components/shared/sso/microsoftText.styles';
 
 export const FormModal = styled(FormModalNoButtons)`
 	.MuiDialogContent-root {
@@ -67,5 +69,11 @@ export const TabContent = styled(ScrollArea).attrs({
 	& > :first-child {
 		padding: 30px 58px;
 		box-sizing: border-box;
+	}
+`;
+
+export const MicrosoftText = styled(MicrosoftTextBase)`
+	${MicrosoftTitleText} {
+		${({ theme }) => theme.palette.h3}
 	}
 `;

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,23 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Link as BaseLink } from 'react-router-dom';
 import styled from 'styled-components';
-import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
+import { Button } from '@controls/button';
+import MicrosoftIcon from '@assets/icons/thirdParty/microsoft.svg';
+import { createElement } from 'react';
 
-export const Container = styled.div`
-	margin: auto;
-	box-sizing: border-box;
-	display: block;
-	width: 412px;
-	color: ${({ theme }) => theme.palette.secondary.main};
-	margin-left: 40px;
-`;
+export const MicrosoftButton = styled(Button).attrs({
+	component: BaseLink,
+	variant: 'contained',
+	color: 'primary',
+	startIcon: createElement(MicrosoftIcon),
+})`
+	display: flex;
+	width: fit-content;
+	font-weight: 500;
+	font-size: 12px;
+	border-radius: 0;
+	padding: 20px;
+	margin: 0;
+	background-color: #2F2F2F; // The colour is hardcoded as this are microsoft specs and not part of the theme
 
-export const MainTitle = styled.div`
-	${({ theme }) => theme.typography.h1};
-	font-weight: ${FONT_WEIGHT.BOLDER};
-	line-height: 42px;
-	margin-bottom: 27px;
-	width: 270px;
-	font-size: 40px;
+	&:hover, &:active {
+		background-color: #2F2F2FF0; 
+	}
 `;

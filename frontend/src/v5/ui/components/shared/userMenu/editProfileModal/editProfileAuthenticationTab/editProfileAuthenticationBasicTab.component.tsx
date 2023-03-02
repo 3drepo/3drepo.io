@@ -27,7 +27,9 @@ import { isPasswordIncorrect } from '@/v5/validation/errors.helpers';
 import { FormPasswordField } from '@controls/inputs/formInputs.component';
 import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
 import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
-import { TabContent } from '../editProfileModal.styles';
+import { MicrosoftButton } from '@components/shared/sso/microsoftButton.component';
+import { Gap } from '@controls/gap';
+import { TabContent, MicrosoftText } from '../editProfileModal.styles';
 
 export interface IUpdatePasswordInputs {
 	oldPassword: string;
@@ -135,6 +137,14 @@ export const EditProfileAuthenticationBasicTab = ({
 					formError={errors.confirmPassword}
 					required
 				/>
+				<Gap />
+				<MicrosoftText title={formatMessage({
+					id: 'editProfile.authentication.signInWithMicrosoft.title',
+					defaultMessage: 'Sign in with Microsoft',
+				})} />
+				<MicrosoftButton to={{ pathname: 'signin-sso' }}>
+					<FormattedMessage id="editProfile.authentication.signInWithMicrosoft.button" defaultMessage="Sign in with Microsoft" />
+				</MicrosoftButton>
 				<UnhandledError
 					error={unexpectedError}
 					expectedErrorValidators={[isPasswordIncorrect]}

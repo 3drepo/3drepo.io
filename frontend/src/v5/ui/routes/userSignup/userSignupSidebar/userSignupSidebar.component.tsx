@@ -16,20 +16,12 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import {
-	Container,
-	MicrosoftButton,
-	MainTitle,
-	SignUpWithMicrosoftText,
-	MicrosoftInstructionsRemarkText,
-	MicrosoftInstructionsTermsText,
-	MicrosoftInstructionsText,
-	Link,
-	SidebarContent,
-	NewSticker,
-} from './userSignupSidebar.styles';
+import { MicrosoftButton } from '@components/shared/sso/microsoftButton.component';
+import { MicrosoftText } from '@components/shared/sso/microsoftText.component';
+import { formatMessage } from '@/v5/services/intl';
+import { Container, MainTitle } from './userSignupSidebar.styles';
 import { LoginPrompt, LoginPromptLink } from '../userSignupForm/userSignupForm.styles';
-import { TERMS_ROUTE, PRIVACY_ROUTE } from '../../routes.constants';
+import { Gap } from '@controls/gap';
 
 export const UserSignupSidebar = () => (
 	<Container>
@@ -39,57 +31,21 @@ export const UserSignupSidebar = () => (
 				defaultMessage="Create your free account"
 			/>
 		</MainTitle>
-		<SignUpWithMicrosoftText>
-			<FormattedMessage
-				id="userSignup.sidebar.signUpWithMicrosoft"
-				defaultMessage="Sign up with Microsoft"
-			/>
-			<NewSticker>
-				<FormattedMessage
-					id="userSignup.sidebar.new"
-					defaultMessage="New"
-				/>
-			</NewSticker>
-		</SignUpWithMicrosoftText>
-		<SidebarContent>
-			<MicrosoftInstructionsText>
-				<FormattedMessage
-					id="userSignup.sidebar.signUpWithMicrosoftInstructions"
-					defaultMessage={`
-					You can now link your Microsoft account and sign in to 3D Repo using your Microsoft account. It’s quick, easy, and secure.
-				`}
-				/>
-			</MicrosoftInstructionsText>
-			<MicrosoftInstructionsRemarkText>
-				<FormattedMessage
-					id="userSignup.sidebar.signUpWithMicrosoftInstructionsRemark"
-					defaultMessage={`
-					Your Microsoft data will be completely private.
-				`}
-				/>
-			</MicrosoftInstructionsRemarkText>
-			<MicrosoftInstructionsTermsText>
-				<FormattedMessage
-					id="userSignup.sidebar.signUpWithMicrosoftTerms"
-					defaultMessage={`
-					By creating an account using your Microsoft account, you agree to our <TermsLink>Terms</TermsLink> and <PrivacyLink>Privacy Policy</PrivacyLink>.
-				`}
-					values={{
-						TermsLink: (label) => <Link to={TERMS_ROUTE} target="_blank">{label}</Link>,
-						PrivacyLink: (label) => <Link to={PRIVACY_ROUTE} target="_blank">{label}</Link>,
-					}}
-
-				/>
-			</MicrosoftInstructionsTermsText>
+		<div>
+			<MicrosoftText title={formatMessage({
+				id: 'userSignup.sidebar.signUpWithMicrosoft',
+				defaultMessage: 'Sign up with Microsoft',
+			})} />
 			<MicrosoftButton to={{ pathname: 'signup-sso' }}>
 				<FormattedMessage id="userSignup.sidebar.sso.microsoft" defaultMessage="Sign up with Microsoft" />
 			</MicrosoftButton>
+			<Gap $height='43px'/>
 			<LoginPrompt>
 				<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
 				<LoginPromptLink to="/v5/login">
 					<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Sign in" />
 				</LoginPromptLink>
 			</LoginPrompt>
-		</SidebarContent>
+		</div>
 	</Container>
 );
