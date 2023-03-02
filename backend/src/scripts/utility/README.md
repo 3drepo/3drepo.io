@@ -4,7 +4,7 @@ The utility script consist of a library of helpful commands to extract or update
 To see the list of commands and how to run them, run `yarn run-script --help` on the [backend root folder](../../../)
 
 ## Scheduler
-[The scheduler](./scheduler.js) is an executable script. Depending on the [configuration](scheduler.config.js), it will execute certain script(s) within the utility suite. It is designed to be hooked onto a job scheduler (e.g. `cron`) to be executed on a daily basis.
+[The scheduler](./scheduler.js) is an executable script. Depending on the [configuration](scheduler.config.json), it will execute certain script(s) within the utility suite. It is designed to be hooked onto a job scheduler (e.g. `cron`) to be executed on a daily basis.
 
 To run the scheduler with the default configuration, run the following on the [backend root folder](../../../):
 ````
