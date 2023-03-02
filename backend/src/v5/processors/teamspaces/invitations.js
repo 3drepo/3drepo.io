@@ -25,7 +25,6 @@ const { unpack } = require(`${v4Path}/models/invitations`);
 
 const Invitations = {};
 
-// istanbul ignore next
 Invitations.unpack = async (username) => {
 	try {
 		const user = await getUserByUsername(username);
