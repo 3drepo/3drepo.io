@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const errorNotification = require('./templates/errorNotification');
 const forgotPassword = require('./templates/forgotPassword');
-const schedulerError = require('./templates/schedulerError');
 const { toConstantCase } = require('../../utils/helper/strings');
 const verifyUser = require('./templates/verifyUser');
 
@@ -25,7 +25,7 @@ const MailerConstants = {};
 const templates = {
 	verifyUser,
 	forgotPassword,
-	schedulerError,
+	errorNotification,
 };
 
 MailerConstants.templates = {};

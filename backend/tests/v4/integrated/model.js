@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { queue: {purgeQueues}} = require("../../v5/helper/services");
 const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
@@ -54,18 +55,12 @@ describe("Model", function () {
 
 	});
 
+
 	after(function(done) {
-		const q = require("../../../src/v4/services/queue");
-		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
-			return q.channel.purgeQueue(q.workerQName);
-		}).then(() => {
-			q.channel.assertQueue(q.modelQName, { durable: true }).then(() => {
-				return q.channel.purgeQueue(q.modelQName);
-			}).then(() => {
-				server.close(function() {
-					console.log("API test server is closed");
-					done();
-				});
+		purgeQueues().then(() => {
+			server.close(function() {
+				console.log("API test server is closed");
+				done();
 			});
 		});
 	});

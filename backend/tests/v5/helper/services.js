@@ -23,7 +23,7 @@ const { times } = require('lodash');
 
 const { image, src, srcV4 } = require('./path');
 
-const { createApp: createServer } = require(`${srcV4}/services/api`);
+const { createAppAsync: createServer } = require(`${srcV4}/services/api`);
 const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
 
@@ -65,6 +65,9 @@ queue.purgeQueues = async () => {
 			channel.purgeQueue(model_queue),
 			channel.purgeQueue(callback_queue),
 		]);
+
+		await channel.close();
+		await conn.close();
 	} catch (err) {
 		// doesn't really matter if purge queue failed. it's just for clean up.
 	}
@@ -96,13 +99,16 @@ db.addSSO = async (user, id = ServiceHelper.generateRandomString()) => {
 db.createUser = (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
 	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
-	return DbHandler.createUser(user, password, { ...basicData, ...customData, apiKey }, roles);
+	return DbHandler.createUser(user, password, { billing: { billingInfo: {} },
+		...basicData,
+		...customData,
+		apiKey }, roles);
 };
 
 db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 
-db.createTeamspace = async (teamspace, admins = [], subscriptions) => {
-	await ServiceHelper.db.createUser({ user: teamspace, password: teamspace });
+db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = true) => {
+	if (createUser) await ServiceHelper.db.createUser({ user: teamspace, password: teamspace });
 	await initTeamspace(teamspace);
 	await Promise.all(admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)));
 
@@ -566,7 +572,7 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
 });
 
-ServiceHelper.app = () => createServer().listen(8080);
+ServiceHelper.app = async () => (await createServer()).listen(8080);
 
 ServiceHelper.frontend = () => createFrontend().listen(8080);
 
@@ -628,8 +634,8 @@ ServiceHelper.socket.joinRoom = (socket, data) => new Promise((resolve, reject) 
 });
 
 ServiceHelper.closeApp = async (server) => {
-	await DbHandler.disconnect();
 	if (server) await server.close();
+	await db.reset();
 	EventsManager.reset();
 	QueueHandler.close();
 };
