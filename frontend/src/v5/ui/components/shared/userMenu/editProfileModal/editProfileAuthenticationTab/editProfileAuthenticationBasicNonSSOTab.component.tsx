@@ -29,7 +29,9 @@ import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.
 import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
 import { MicrosoftButton } from '@components/shared/sso/microsoftButton.component';
 import { Gap } from '@controls/gap';
-import { TabContent, MicrosoftText } from '../editProfileModal.styles';
+import { linkAccount } from '@/v5/services/api/sso';
+import { TabContent } from '../editProfileModal.styles';
+import { MicrosoftText } from './editProfileAuthenticationTab.styles'
 
 export interface IUpdatePasswordInputs {
 	oldPassword: string;
@@ -43,7 +45,7 @@ export const EMPTY_PASSWORDS = {
 	confirmPassword: '',
 };
 
-type EditProfileAuthenticationBasicTabProps = {
+type EditProfileAuthenticationNonSSOTabProps = {
 	incorrectPassword: boolean;
 	setIncorrectPassword: (isIncorrect: boolean) => void;
 	setIsSubmitting: (isSubmitting: boolean) => void;
@@ -51,13 +53,13 @@ type EditProfileAuthenticationBasicTabProps = {
 	onClickClose: () => void,
 };
 
-export const EditProfileAuthenticationBasicTab = ({
+export const EditProfileAuthenticationNonSSOTab = ({
 	incorrectPassword,
 	setIncorrectPassword,
 	setIsSubmitting,
 	unexpectedError,
 	onClickClose,
-}: EditProfileAuthenticationBasicTabProps) => {
+}: EditProfileAuthenticationNonSSOTabProps) => {
 	const {
 		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, touchedFields },
 		control,
@@ -84,6 +86,12 @@ export const EditProfileAuthenticationBasicTab = ({
 	};
 
 	const onSubmitClick = (event) => handleSubmit(onSubmit)(event).catch(onSubmitError)
+
+	const handleLinkAccount = async () => {
+		const res = await linkAccount();
+		console.log(res)
+		// window.location.href = res.data.link;
+	};
 
 	useEffect(() => setIsSubmitting(isSubmitting), [isSubmitting]);
 
@@ -138,12 +146,14 @@ export const EditProfileAuthenticationBasicTab = ({
 					required
 				/>
 				<Gap />
-				<MicrosoftText title={formatMessage({
-					id: 'editProfile.authentication.signInWithMicrosoft.title',
-					defaultMessage: 'Sign in with Microsoft',
-				})} />
-				<MicrosoftButton to={{ pathname: 'signin-sso' }}>
-					<FormattedMessage id="editProfile.authentication.signInWithMicrosoft.button" defaultMessage="Sign in with Microsoft" />
+				<MicrosoftText
+					title={formatMessage({
+						id: 'editProfile.authentication.linkAccountWithMicrosoft.title',
+						defaultMessage: 'Link account with Microsoft',
+					})}
+				/>
+				<MicrosoftButton onClick={handleLinkAccount}>
+					<FormattedMessage id="editProfile.authentication.signInWithMicrosoft.button" defaultMessage="Link account with Microsoft" />
 				</MicrosoftButton>
 				<UnhandledError
 					error={unexpectedError}

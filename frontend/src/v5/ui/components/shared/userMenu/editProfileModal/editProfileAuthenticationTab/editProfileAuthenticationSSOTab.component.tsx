@@ -27,6 +27,7 @@ import { FormPasswordField } from '@controls/inputs/formInputs.component';
 import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
 import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
 import { TabContent } from '../editProfileModal.styles';
+import { unlinkAccount } from '@/v5/services/api/sso';
 
 type IUpdateSSOPasswordInputs = {
 	newPassword: string;
@@ -55,8 +56,8 @@ export const EditProfileAuthenticationSSOTab = ({
 	const newPassword = watch('newPassword');
 	const confirmPassword = watch('confirmPassword');
 
-	const onSubmit = () => {
-		// API.SSOUser.unlink({ password });
+	const onSubmit = async () => {
+		await unlinkAccount({ password: newPassword });
 		setIsSubmitting(isSubmitting);
 	};
 
@@ -94,8 +95,8 @@ export const EditProfileAuthenticationSSOTab = ({
 				{isSubmitSuccessful && (
 					<SuccessMessage>
 						<FormattedMessage
-							id="editProfile.form.updatePasswordSuccess"
-							defaultMessage="Your password has been changed successfully."
+							id="editProfile.authentication.unlinkAccount"
+							defaultMessage="Your account has been unlinked successfully."
 						/>
 					</SuccessMessage>
 				)}

@@ -16,7 +16,7 @@
  */
 
 import { EditProfileAuthenticationSSOTab } from './editProfileAuthenticationSSOTab.component';
-import { EditProfileAuthenticationBasicTab } from './editProfileAuthenticationBasicTab.component';
+import { EditProfileAuthenticationNonSSOTab } from './editProfileAuthenticationBasicNonSSOTab.component';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export interface IUpdatePasswordInputs {
@@ -49,7 +49,7 @@ export const EditProfileAuthenticationTab = ({
 	if (sso) return (<EditProfileAuthenticationSSOTab {...props} />);
 
 	return (
-		<EditProfileAuthenticationBasicTab
+		<EditProfileAuthenticationNonSSOTab
 			incorrectPassword={incorrectPassword}
 			setIncorrectPassword={setIncorrectPassword}
 			{...props}
