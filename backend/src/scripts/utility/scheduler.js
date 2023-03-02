@@ -50,7 +50,13 @@ const parser = Yargs(hideBin(process.argv))
 
 const onError = async (err) => {
 	if (emailOnError) {
-		await sendSystemEmail(emailTemplates.SCHEDULER_ERROR.name, { err });
+		const data = {
+			err,
+			scope: 'scheduler',
+			title: 'Scheduler exited due to an error',
+			message: 'Error found whilst running the scheduler',
+		};
+		await sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data);
 	}
 	handleErrorBeforeExit(err);
 };
