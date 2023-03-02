@@ -49,7 +49,7 @@ export const username = trimmedString
 			defaultMessage: 'This username is already taken',
 		}),
 		(usernameValue, testContext) => (
-			!testContext.options.context.alreadyExistingUsernames.map((u) => u.trim()).includes(usernameValue)
+			!testContext.options.context?.alreadyExistingUsernames?.map((u) => u.trim()).includes(usernameValue)
 		),
 	);
 
