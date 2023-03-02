@@ -180,7 +180,7 @@ const testNewRevision = () => {
 	});
 };
 
-describe('E2E routes/teamspaces/projects/federations', () => {
+describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);

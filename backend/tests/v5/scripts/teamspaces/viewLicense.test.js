@@ -33,6 +33,8 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const { isEmpty } = require(`${src}/utils/helper/objects`);
 
+const { disconnect } = require(`${src}/handler/db`);
+
 const [ENTERPRISE,, DISCRETIONARY] = SUBSCRIPTION_TYPES;
 
 const setupData = async (data) => {
@@ -123,4 +125,5 @@ const createData = () => ({
 describe(determineTestGroup(__filename), () => {
 	const data = createData();
 	runTest(data);
+	afterAll(disconnect);
 });

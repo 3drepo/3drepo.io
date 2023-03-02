@@ -92,13 +92,11 @@ const testUnlink = () => {
 	});
 };
 
-const app = ServiceHelper.app();
-
-describe('E2E routes/sso', () => {
+describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
-		server = app;
+		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
-		testSession = session(app);
+		testSession = session(server);
 	});
 
 	afterAll(() => ServiceHelper.closeApp(server));

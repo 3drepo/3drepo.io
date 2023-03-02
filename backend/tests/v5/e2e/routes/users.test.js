@@ -115,7 +115,6 @@ const setupData = async () => {
 			loginTime: new Date(1 / 1 / 18),
 			failed: true,
 		}))),
-
 	]);
 };
 
@@ -774,7 +773,7 @@ const testVerify = () => {
 				_id: nonVerifiedUserEmail,
 				teamSpaces: [
 					{
-						teamspace,
+						teamspace: teamspace.name,
 						job: 'Main Contractor',
 						permissions: {
 							teamspace_admin: true,
@@ -808,13 +807,11 @@ const testVerify = () => {
 	});
 };
 
-const app = ServiceHelper.app();
-
-describe('E2E routes/users', () => {
+describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
-		server = app;
+		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
-		testSession = session(app);
+		testSession = session(server);
 		await setupData();
 	});
 
