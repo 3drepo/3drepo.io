@@ -39,12 +39,6 @@ export interface IUpdatePasswordInputs {
 	confirmPassword: string;
 }
 
-export const EMPTY_PASSWORDS = {
-	oldPassword: '',
-	newPassword: '',
-	confirmPassword: '',
-};
-
 type EditProfileAuthenticationNonSSOTabProps = {
 	incorrectPassword: boolean;
 	setIncorrectPassword: (isIncorrect: boolean) => void;
@@ -76,7 +70,7 @@ export const EditProfileAuthenticationNonSSOTab = ({
 	const onSubmit = async () => {
 		setIncorrectPassword(false);
 		await API.CurrentUser.updateUser({ oldPassword, newPassword });
-		reset(EMPTY_PASSWORDS);
+		reset();
 	};
 
 	const onSubmitError = (apiError) => {
@@ -89,8 +83,7 @@ export const EditProfileAuthenticationNonSSOTab = ({
 
 	const handleLinkAccount = async () => {
 		const res = await linkAccount();
-		console.log(res)
-		// window.location.href = res.data.link;
+		window.location.href = res.data.link;
 	};
 
 	useEffect(() => setIsSubmitting(isSubmitting), [isSubmitting]);
