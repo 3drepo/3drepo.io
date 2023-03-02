@@ -15,23 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const errorNotification = require('./templates/errorNotification');
-const forgotPassword = require('./templates/forgotPassword');
-const { toConstantCase } = require('../../utils/helper/strings');
-const verifyUser = require('./templates/verifyUser');
+const Yup = require('yup');
+const config = require('../../../utils/config');
 
-const MailerConstants = {};
+const { generateTemplateFn } = require('./common');
 
-const templates = {
-	verifyUser,
-	forgotPassword,
-	errorNotification,
-};
+const TEMPLATE_PATH = `${__dirname}/html/systemTemplate.html`;
 
-MailerConstants.templates = {};
-Object.keys(templates).forEach((templateName) => {
-	const name = toConstantCase(templateName);
-	MailerConstants.templates[name] = { ...templates[templateName], name };
-});
+const dataSchema = Yup.object({
+	domain: Yup.string().default(() => config.getBaseURL()),
+	emailContent: Yup.string().required(),
+}).required(true);
 
-module.exports = MailerConstants;
+const BaseTemplate = {};
+
+BaseTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
+
+module.exports = BaseTemplate;

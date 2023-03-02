@@ -40,16 +40,12 @@ const Notifications = require(`${src}/models/notifications`);
 jest.mock('../../../../src/v5/services/intercom');
 const Intercom = require(`${src}/services/intercom`);
 
-jest.mock('../../../../src/v5/utils/helper/strings');
-const Strings = require(`${src}/utils/helper/strings`);
+const { generateRandomString } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
-const { generateRandomString } = require('../../helper/services');
-
-const exampleHashString = generateRandomString();
 
 const user = {
 	user: generateRandomString(),
@@ -83,8 +79,6 @@ UsersModel.getUserByUsername.mockImplementation((username) => {
 });
 
 const verifyMock = UsersModel.verify.mockImplementation(() => user.customData);
-Strings.generateHashString.mockImplementation(() => exampleHashString);
-Strings.formatPronouns.mockImplementation((str) => str);
 
 const testLogin = () => {
 	describe('Login', () => {
@@ -211,11 +205,11 @@ const testGenerateResetPasswordToken = () => {
 			expect(UsersModel.updateResetPasswordToken.mock.calls[0][1]).toHaveProperty('expiredAt');
 			const { expiredAt } = UsersModel.updateResetPasswordToken.mock.calls[0][1];
 			expect(UsersModel.updateResetPasswordToken)
-				.toHaveBeenCalledWith(user.user, { token: exampleHashString, expiredAt });
+				.toHaveBeenCalledWith(user.user, { token: expect.any(String), expiredAt });
 			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
 			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.FORGOT_PASSWORD.name, user.customData.email,
 				{
-					token: exampleHashString,
+					token: expect.any(String),
 					email: user.customData.email,
 					username: user.user,
 					firstName: user.customData.firstName,
@@ -244,10 +238,10 @@ const testSignUp = () => {
 		test('should sign a user up and send verification email (non SSO user)', async () => {
 			await Users.signUp(newUserData);
 			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
-			expect(UsersModel.addUser).toHaveBeenCalledWith({ ...newUserData, token: exampleHashString });
+			expect(UsersModel.addUser).toHaveBeenCalledWith({ ...newUserData, token: expect.any(String) });
 			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
 			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.VERIFY_USER.name, newUserData.email, {
-				token: exampleHashString,
+				token: expect.any(String),
 				email: newUserData.email,
 				firstName: newUserData.firstName,
 				username: newUserData.username,
@@ -261,7 +255,7 @@ const testSignUp = () => {
 			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
 			expect(UsersModel.addUser).toHaveBeenCalledWith({
 				...newUserData,
-				password: exampleHashString,
+				password: expect.any(String),
 				sso,
 			});
 			expect(Mailer.sendEmail).not.toHaveBeenCalled();

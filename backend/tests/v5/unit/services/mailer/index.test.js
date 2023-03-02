@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -18,6 +18,7 @@
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 const BaseTemplate = require('../../../../../src/v5/services/mailer/templates/baseTemplate');
+const SystemTemplate = require('../../../../../src/v5/services/mailer/templates/systemTemplate');
 
 const config = require(`${src}/utils/config`);
 const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.constants`);
@@ -129,6 +130,104 @@ const testSendEmail = () => {
 	});
 };
 
+const testSendSystemEmail = () => {
+	describe('send system email', () => {
+		const attachments = { attachment: generateRandomString() };
+		const data = {
+			username: generateRandomString(),
+			token: generateRandomString(),
+			firstName: generateRandomString(),
+		};
+
+		const mailerConfig = { ...config.mail };
+
+		beforeEach(() => {
+			config.mail = { ...mailerConfig };
+		});
+
+		test('should fail if config.mail.sender is not set', async () => {
+			Mailer.reset();
+			config.mail.sender = undefined;
+
+			await expect(Mailer.sendSystemEmail(emailTemplates.FORGOT_PASSWORD.name, data, attachments))
+				.rejects.toThrow('config.mail.sender is not set');
+			Mailer.reset();
+		});
+
+		test('should fail if config.mail.smtpConfig is not set and config.mail.generateCredentials is false', async () => {
+			Mailer.reset();
+			config.mail.generateCredentials = false;
+			delete config.mail.smtpConfig;
+			await expect(Mailer.sendSystemEmail(emailTemplates.FORGOT_PASSWORD.name, data, attachments))
+				.rejects.toThrow('config.mail.smtpConfig is not set');
+			Mailer.reset();
+		});
+
+		test('should pass if config.mail.smtpConfig is not set and config.mail.generateCredentials is true', async () => {
+			Mailer.reset();
+			config.mail.generateCredentials = true;
+			delete config.mail.smtpConfig;
+			await Mailer.sendSystemEmail(emailTemplates.FORGOT_PASSWORD.name, data, attachments);
+			expect(sendMailMock).toBeCalledTimes(1);
+			expect(sendMailMock).toBeCalledWith({
+				from: config.mail.sender,
+				to: config.contact.mail,
+				subject: emailTemplates.FORGOT_PASSWORD.subject(),
+				html: await SystemTemplate.html({
+					...data,
+					emailContent: await emailTemplates.FORGOT_PASSWORD.html(data),
+				}),
+				attachments,
+			});
+			Mailer.reset();
+		});
+
+		test('should send email if attachments are provided', async () => {
+			await Mailer.sendSystemEmail(emailTemplates.FORGOT_PASSWORD.name, data, attachments);
+			expect(sendMailMock).toBeCalledTimes(1);
+			expect(sendMailMock).toBeCalledWith({
+				from: config.mail.sender,
+				to: config.contact.mail,
+				subject: emailTemplates.FORGOT_PASSWORD.subject(),
+				html: await SystemTemplate.html({
+					...data,
+					emailContent: await emailTemplates.FORGOT_PASSWORD.html(data),
+				}),
+				attachments,
+			});
+		});
+
+		test('should send email if attachments are not provided', async () => {
+			await Mailer.sendSystemEmail(emailTemplates.VERIFY_USER.name, data);
+			expect(sendMailMock).toBeCalledTimes(1);
+			expect(sendMailMock).toBeCalledWith({
+				from: config.mail.sender,
+				to: config.contact.mail,
+				subject: emailTemplates.VERIFY_USER.subject(),
+				html: await SystemTemplate.html({ ...data, emailContent: await emailTemplates.VERIFY_USER.html(data) }),
+			});
+		});
+
+		test('should log the error and throw it back if sendSystemMail fails', async () => {
+			sendMailMock.mockImplementationOnce(() => { throw templates.unknown; });
+
+			await expect(Mailer.sendSystemEmail(emailTemplates.FORGOT_PASSWORD.name, data, attachments))
+				.rejects.toEqual(templates.unknown);
+		});
+
+		test('should throw error if the template name is not recognised', async () => {
+			await expect(Mailer.sendSystemEmail(generateRandomString(), data, attachments))
+				.rejects.toEqual(templates.unknown);
+		});
+
+		test('should throw error if the data does not provide sufficient info for the template', async () => {
+			await expect(Mailer.sendSystemEmail(emailTemplates.VERIFY_USER.name, undefined, attachments))
+				.rejects.toThrow();
+		});
+	});
+};
+
 describe('services/mailer/index', () => {
 	testSendEmail();
+	testSendSystemEmail();
 });
