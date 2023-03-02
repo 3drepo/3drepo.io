@@ -19,12 +19,13 @@ import { UserSignupSchemaSSO, UserSignupSchemaTermsAndSubmit } from '@/v5/valida
 import { yupResolver } from '@hookform/resolvers/yup';
 import { omit } from 'lodash';
 import { useState } from 'react';
-import { useLocation, Redirect } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { getRedirectUrl, signup, SSOErrorCode } from '@/v5/services/api/sso';
 import { isInvalidArguments, usernameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { AuthTemplate } from '@components/authTemplate';
+import { useSSOLogin } from '@/v5/services/sso.hooks';
 import { Container as FormContainer, LoginPrompt, LoginPromptLink, Title } from '../userSignupForm/userSignupForm.styles';
 import { UserSignupFormStep } from '../userSignupForm/userSignupFormStep/userSignupFormStep.component';
 import { UserSignupFormStepTermsAndSubmit } from '../userSignupForm/userSignupFormStep/userSignupFormStepTermsAndSubmit/userSignupFormStepTermsAndSubmit.component';
@@ -45,10 +46,16 @@ export const UserSignupSSO = () => {
 	const [contextValue, setContextValue] = useState<UserSignupFormStepperContextValue | null>();
 	const { search } = useLocation();
 	const searchParams = new URLSearchParams(search);
+	const [loginWithSSO,, isLoggingWithSSO] = useSSOLogin();
+
+	if (isLoggingWithSSO) {
+		return null;
+	}
 
 	if (searchParams.get('signupPost')) {
 		if (!searchParams.get('error') || searchParams.get('error') === SSOErrorCode.EMAIL_EXISTS_WITH_SSO) {
-			return (<Redirect to={{ pathname: '/v5/login-sso' }} />);
+			loginWithSSO();
+			return null;
 		}
 
 		if (searchParams.get('error')) {

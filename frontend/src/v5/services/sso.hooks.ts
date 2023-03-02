@@ -33,5 +33,5 @@ export const useSSOLogin = () => {
 
 	return [() => signin().then(({ data }) => {
 		window.location.href = data.link;
-	}), searchParams.get('error') ? errorMessage : null, isLogingIn];
+	}), searchParams.get('error') ? errorMessage : null, isLogingIn] as [ ()=> void, string | null, boolean];
 };
