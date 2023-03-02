@@ -25,6 +25,7 @@ export const Container = styled.div`
 
 export const MicrosoftTitleText = styled.div`
 	${({ theme }) => theme.typography.h1};
+	color: ${({ theme }) => theme.palette.secondary.main};
 	margin-bottom: 10px;
 	display: flex;
 	align-items: center;
