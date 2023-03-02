@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useFormContext } from 'react-hook-form';
+import { useEffect } from 'react';
 import { EditProfileAuthenticationSSOTab } from './editProfileAuthenticationSSOTab.component';
 import { EditProfileAuthenticationNonSSOTab } from './editProfileAuthenticationBasicNonSSOTab.component';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export interface IUpdatePasswordInputs {
 	oldPassword: string;
@@ -45,6 +47,9 @@ export const EditProfileAuthenticationTab = ({
 	...props
 }: EditProfileAuthenticationTabProps) => {
 	const { sso } = CurrentUserHooksSelectors.selectCurrentUser();
+	const { reset } = useFormContext();
+
+	useEffect(() => { reset(EMPTY_PASSWORDS); }, [sso])
 
 	if (sso) return (<EditProfileAuthenticationSSOTab {...props} />);
 
