@@ -16,11 +16,10 @@
  */
 
 const { src } = require('../../../../../helper/path');
-
-const db = require(`${src}/handler/db`);
+const { generateRandomString } = require('../../../../../helper/services');
 
 jest.mock('../../../../../../../src/v5/models/projectSettings');
-const ProjectsModel = require(`${src}/models/projectSettings`);
+const ProjectSettings = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 jest.mock('../../../../../../../src/v5/models/issues');
@@ -37,6 +36,9 @@ jest.mock('../../../../../../../src/v5/models/views');
 const Legends = require(`${src}/models/legends`);
 jest.mock('../../../../../../../src/v5/models/legends');
 const { templates } = require(`${src}/utils/responseCodes`);
+
+jest.mock('../../../../../../../src/v5/utils/helper/models');
+const ModelHelper = require(`${src}/utils/helper/models`);
 
 const newFederationId = 'newFederationId';
 ModelSettings.addModel.mockImplementation(() => newFederationId);
@@ -105,7 +107,7 @@ const federationSettings = {
 const user1Favourites = [1];
 const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) => _id) };
 
-ProjectsModel.getProjectById.mockImplementation(() => project);
+ProjectSettings.getProjectById.mockImplementation(() => project);
 ModelSettings.getFederations.mockImplementation(() => federationList);
 const getFederationByIdMock = ModelSettings.getFederationById.mockImplementation((teamspace,
 	federation) => federationSettings[federation]);
@@ -284,7 +286,7 @@ const testAddFederation = () => {
 			};
 			const res = await Federations.addFederation('teamspace', 'project', 'tsAdmin', data);
 			expect(res).toEqual(newFederationId);
-			expect(ProjectsModel.addModelToProject.mock.calls.length).toBe(1);
+			expect(ProjectSettings.addModelToProject.mock.calls.length).toBe(1);
 		});
 	});
 };
@@ -292,32 +294,18 @@ const testAddFederation = () => {
 const testDeleteFederation = () => {
 	describe('Delete federation', () => {
 		test('should succeed', async () => {
-			const modelId = 1;
-			const collectionList = [
-				{ name: `${modelId}.collA` },
-				{ name: `${modelId}.collB` },
-				{ name: 'otherModel.collA' },
-				{ name: 'otherModel.collB' },
-			];
+			ModelHelper.removeModelData.mockResolvedValueOnce();
+			ProjectSettings.removeModelFromProject.mockResolvedValueOnce();
 
-			const fnList = jest.spyOn(db, 'listCollections').mockResolvedValue(collectionList);
-			const fnDrop = jest.spyOn(db, 'dropCollection').mockResolvedValue(true);
+			const teamspace = generateRandomString();
+			const projectId = generateRandomString();
+			const model = generateRandomString();
+			await Federations.deleteFederation(teamspace, projectId, model);
 
-			const teamspace = 'teamspace';
-			await Federations.deleteFederation(teamspace, 'project', modelId, 'tsAdmin');
-
-			expect(fnList.mock.calls.length).toBe(1);
-			expect(fnList.mock.calls[0][0]).toEqual(teamspace);
-
-			expect(fnDrop.mock.calls.length).toBe(2);
-			expect(fnDrop.mock.calls[0][0]).toEqual(teamspace);
-			expect(fnDrop.mock.calls[0][1]).toEqual(collectionList[0].name);
-			expect(fnDrop.mock.calls[1][0]).toEqual(teamspace);
-			expect(fnDrop.mock.calls[1][1]).toEqual(collectionList[1].name);
-		});
-
-		test('should succeed if file removal fails', async () => {
-			await Federations.deleteFederation('teamspace', 'project', 3, 'tsAdmin');
+			expect(ModelHelper.removeModelData).toHaveBeenCalledTimes(1);
+			expect(ModelHelper.removeModelData).toHaveBeenCalledWith(teamspace, projectId, model);
+			expect(ProjectSettings.removeModelFromProject).toHaveBeenCalledTimes(1);
+			expect(ProjectSettings.removeModelFromProject).toHaveBeenCalledWith(teamspace, projectId, model);
 		});
 	});
 };

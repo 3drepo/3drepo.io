@@ -37,3 +37,8 @@ export const selectCurrentTeamspaceDetails = createSelector(
 export const selectCurrentQuota = createSelector(
 	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => state.quota[teamspace],
 );
+
+export const selectIsTeamspaceAdmin = createSelector(
+	selectCurrentTeamspaceDetails,
+	(teamspace): boolean => teamspace?.isAdmin || null,
+);

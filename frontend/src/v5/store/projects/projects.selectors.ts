@@ -23,7 +23,7 @@ import { IProject } from './projects.types';
 const selectProjectsDomain = (state): IProjectsState => state?.projects;
 
 export const selectProjects = createSelector(
-	selectProjectsDomain, (state) => state.projectsByTeamspace,
+	selectProjectsDomain, (state) => state.projectsByTeamspace ?? {},
 );
 
 export const selectCurrentProjects = createSelector(
@@ -36,9 +36,14 @@ export const selectCurrentProject = createSelector(
 
 export const selectCurrentProjectDetails = createSelector(
 	selectCurrentProject, selectCurrentProjects,
-	(project, projects) => projects.find(({ _id }) => _id === project) || {} as IProject,
+	(project, projects): IProject => projects.find(({ _id }) => _id === project) || {} as IProject,
 );
 export const selectCurrentProjectName = createSelector(
 	selectCurrentProjectDetails,
 	(project) => project?.name || null,
+);
+
+export const selectIsProjectAdmin = createSelector(
+	selectCurrentProjectDetails,
+	(project): boolean => project?.isAdmin || null,
 );

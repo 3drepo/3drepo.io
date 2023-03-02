@@ -44,3 +44,11 @@ export type UpdateApiKey = Pick<ICurrentUser, 'apiKey'>;
 export type UpdateUser = UpdatePersonalData | UpdatePassword | UpdateApiKey;
 
 export type UpdateUserSuccess = Partial<ICurrentUser>;
+
+export enum Role {
+	ADMIN = 'admin',
+	COLLABORATOR = 'collaborator',
+	COMMENTER = 'commenter',
+	VIEWER = 'viewer',
+	NONE = 'none',
+}

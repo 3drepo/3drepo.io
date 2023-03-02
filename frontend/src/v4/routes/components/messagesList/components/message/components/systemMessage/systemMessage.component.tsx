@@ -19,7 +19,7 @@ import SystemInfoIcon from '@mui/icons-material/InfoOutlined';
 
 import { DATE_TIME_FORMAT } from '../../../../../../../services/formatting/formatDate';
 import { DateTime } from '../../../../../dateTime/dateTime.component';
-import { Avatar, CommentWrapper, Container, MarkdownComment } from './systemMessage.styles';
+import { Avatar, CommentWrapper, Container, DateTimeContainer, MarkdownComment } from './systemMessage.styles';
 
 interface IProps {
 	created: number;
@@ -31,7 +31,7 @@ const Comment: FunctionComponent<{ propertyName }> = ({ children, propertyName }
 	if (propertyName === 'issue_referenced') {
 		return (<MarkdownComment>{children}</MarkdownComment>);
 	}
-	return (<>{children}</>);
+	return (<span>{children}</span>);
 };
 
 export const SystemMessage = ({ created, propertyName, comment }: IProps) => {
@@ -42,7 +42,9 @@ export const SystemMessage = ({ created, propertyName, comment }: IProps) => {
 			</Avatar>
 			<CommentWrapper>
 				<Comment propertyName={propertyName}>{comment}</Comment>
-				<DateTime value={created} format={DATE_TIME_FORMAT} />
+				<DateTimeContainer>
+					<DateTime value={created} format={DATE_TIME_FORMAT} />
+				</DateTimeContainer>
 			</CommentWrapper>
 		</Container>
 	);

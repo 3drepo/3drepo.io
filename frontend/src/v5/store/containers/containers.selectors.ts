@@ -16,9 +16,11 @@
  */
 
 import { createSelector } from 'reselect';
-import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
+import { selectCurrentProject, selectIsProjectAdmin } from '@/v5/store/projects/projects.selectors';
 import { IContainersState } from './containers.redux';
 import { IContainer } from './containers.types';
+import { Role } from '../currentUser/currentUser.types';
+import { isCollaboratorRole, isCommenterRole } from '../store.helpers';
 
 const selectContainersDomain = (state): IContainersState => state?.containers || ({ containersByProject: {} });
 
@@ -47,4 +49,25 @@ export const selectContainerById = createSelector(
 	selectContainers,
 	(_, id) => id,
 	(containers, id): IContainer | null => containers.find((container) => (container._id === id)),
+);
+
+export const selectContainerRole = createSelector(
+	selectContainerById,
+	(container): Role | null => container?.role || null,
+);
+
+export const selectHasCollaboratorAccess = createSelector(
+	selectContainerRole,
+	(role): boolean => isCollaboratorRole(role),
+);
+
+export const selectHasCommenterAccess = createSelector(
+	selectContainerRole,
+	(role): boolean => isCommenterRole(role),
+);
+
+export const selectCanUploadToProject = createSelector(
+	selectContainers,
+	selectIsProjectAdmin,
+	(containers, isAdmin): boolean => isAdmin || containers.some(({ role }) => isCollaboratorRole(role)),
 );

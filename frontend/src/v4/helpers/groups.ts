@@ -166,30 +166,32 @@ export function* createGroupsByColor(overrides) {
 	// 	}
 	// ]
 	//
-	return sharedIdnodes.reduce((arr, objectId, i) =>  {
-		const { teamspace, modelId } = modelsDict[objectId];
+	return sharedIdnodes
+		.filter((objectId) => objectId in modelsDict)
+		.reduce((arr, objectId, i) =>  {
+			const { teamspace, modelId } = modelsDict[objectId];
 
-		// if there is a group with that color already use that one
-		let colorGroup = arr.find(({color}) => color.join(',') === hexToArray(overrides[objectId]).join(','));
+			// if there is a group with that color already use that one
+			let colorGroup = arr.find(({color}) => color.join(',') === hexToArray(overrides[objectId]).join(','));
 
-		if (!colorGroup) {
-			// Otherwise create a group with that color
-			colorGroup = { color: hexToArray(overrides[objectId]), objects: [] , totalSavedMeshes: 0};
+			if (!colorGroup) {
+				// Otherwise create a group with that color
+				colorGroup = { color: hexToArray(overrides[objectId]), objects: [] , totalSavedMeshes: 0};
 
-			arr.push(colorGroup);
-		}
+				arr.push(colorGroup);
+			}
 
-		let sharedIdsItem =  colorGroup.objects.find(({model, account}) => model === modelId && account === teamspace);
+			let sharedIdsItem =  colorGroup.objects.find(({model, account}) => model === modelId && account === teamspace);
 
-		if (!sharedIdsItem) {
-			sharedIdsItem = { shared_ids: [], account: teamspace, model: modelId};
-			colorGroup.objects.push(sharedIdsItem);
-			colorGroup.totalSavedMeshes ++;
-		}
+			if (!sharedIdsItem) {
+				sharedIdsItem = { shared_ids: [], account: teamspace, model: modelId};
+				colorGroup.objects.push(sharedIdsItem);
+				colorGroup.totalSavedMeshes ++;
+			}
 
-		sharedIdsItem.shared_ids.push(objectId);
-		return arr;
-	}, []);
+			sharedIdsItem.shared_ids.push(objectId);
+			return arr;
+		}, []);
 }
 
 export function* createGroupsByTransformations(transformations) {

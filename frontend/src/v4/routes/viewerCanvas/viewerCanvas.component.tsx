@@ -186,6 +186,9 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 			ticketPins
 		} = this.props;
 
+		if (prevProps.transparencies && !isEqual(prevProps.sequenceHiddenNodes, sequenceHiddenNodes)) {
+			this.props.handleTransparenciesVisibility(sequenceHiddenNodes);
+		}
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
@@ -245,9 +248,6 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 			} else {
 				viewer.setNavigationOff();
 			}
-		}
-		if (prevProps.transparencies && !isEqual(prevProps.sequenceHiddenNodes, sequenceHiddenNodes)) {
-			this.props.handleTransparenciesVisibility(sequenceHiddenNodes);
 		}
 	}
 

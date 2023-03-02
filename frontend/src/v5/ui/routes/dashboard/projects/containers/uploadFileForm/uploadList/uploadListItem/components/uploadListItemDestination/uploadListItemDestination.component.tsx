@@ -17,12 +17,13 @@
 
 import { useState } from 'react';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useFormContext } from 'react-hook-form';
 import { canUploadToBackend, prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { createFilterOptions } from '@mui/material';
+import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { Autocomplete, DestinationInput, NewOrExisting } from './uploadListItemDestination.styles';
 import { NewContainer } from './options/newContainer/newContainer.component';
 import { AlreadyUsedName } from './options/alreadyUsedName/alreadyUsedName.component';
@@ -43,14 +44,10 @@ interface IUploadListItemDestination {
 const emptyOption = prepareSingleContainerData({
 	_id: '',
 	name: '',
-	role: '',
+	role: Role.NONE,
 	isFavourite: false,
 });
 const getFilteredContainersOptions = createFilterOptions<IContainer>({ trim: true });
-const NO_OPTIONS_TEXT = formatMessage({
-	id: 'uploads.destination.noOptions',
-	defaultMessage: 'Start typing to create a new Container.',
-});
 
 export const UploadListItemDestination = ({
 	control,
@@ -76,8 +73,16 @@ export const UploadListItemDestination = ({
 		return '';
 	});
 	const { getValues } = useFormContext();
-
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const errorMessage = errors.containerName?.message;
+
+	const NO_OPTIONS_TEXT = isProjectAdmin ? formatMessage({
+		id: 'uploads.destination.noOptions.admin',
+		defaultMessage: 'Start typing to create a new Container.',
+	}) : formatMessage({
+		id: 'uploads.destination.noOptions.nonAdmin',
+		defaultMessage: 'There are no Containers to upload to.',
+	});
 
 	const onFocus = () => {
 		const containerNamesInModal = getValues('uploads')
@@ -115,8 +120,9 @@ export const UploadListItemDestination = ({
 			return [];
 		}
 
+		// filter out currently selected value and containers with insufficient permissions
 		const filteredOptions = getFilteredContainersOptions(options, params)
-			.filter((c) => c.name !== value.name);
+			.filter(({ name, role }) => (name !== value.name) && (role === Role.COLLABORATOR));
 
 		const containerNameExists = options.some(({ name }: IContainer) => inputValue === name);
 		if (inputValue && !containerNameExists) {
@@ -147,7 +153,7 @@ export const UploadListItemDestination = ({
 				return (<AlreadyUsedName {...optionProps} />);
 			}
 
-			if (!errorMessage && !containers.map(({ name }) => name).includes(trimmedName)) {
+			if (isProjectAdmin && !errorMessage && !containers.map(({ name }) => name).includes(trimmedName)) {
 				return (<NewContainer containerName={trimmedName} {...optionProps} />);
 			}
 		}
