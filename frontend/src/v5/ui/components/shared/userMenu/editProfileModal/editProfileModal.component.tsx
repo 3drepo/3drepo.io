@@ -40,7 +40,6 @@ const TAB_LABELS = {
 };
 
 type EditProfileModalProps = {
-	user: ICurrentUser;
 	open: boolean;
 	onClickClose: () => void;
 };
@@ -51,7 +50,7 @@ type EditProfileUnexpectedErrors = {
 	[INTEGRATIONS_TAB]?: any;
 };
 
-export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalProps) => {
+export const EditProfileModal = ({ open, onClickClose }: EditProfileModalProps) => {
 	const [activeTab, setActiveTab] = useState(PERSONAL_TAB);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [incorrectPassword, setIncorrectPassword] = useState(false);
@@ -59,7 +58,7 @@ export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalP
 	const [unexpectedErrors, setUnexpectedErrors] = useState<EditProfileUnexpectedErrors>({});
 	const interceptedError = useErrorInterceptor();
 
-	const { sso } = CurrentUserHooksSelectors.selectCurrentUser();
+	const user = CurrentUserHooksSelectors.selectCurrentUser();
 
 	const defaultPersonalValues = defaults(
 		pick(omitBy(user, isNull), ['firstName', 'lastName', 'email', 'company', 'countryCode']),
@@ -77,7 +76,7 @@ export const EditProfileModal = ({ user, open, onClickClose }: EditProfileModalP
 
 	const authenticationFormData = useForm<IUpdatePasswordInputs>({
 		mode: 'all',
-		resolver: yupResolver(sso ? EditProfileUpdateSSOPasswordSchema : EditProfileUpdatePasswordSchema(incorrectPassword)),
+		resolver: yupResolver(user.sso ? EditProfileUpdateSSOPasswordSchema : EditProfileUpdatePasswordSchema(incorrectPassword)),
 		defaultValues: EMPTY_PASSWORDS,
 	});
 
