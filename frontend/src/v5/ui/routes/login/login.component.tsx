@@ -28,6 +28,7 @@ import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
 import { AuthSubHeader, Divider, MicrosoftButton, NewSticker } from '@components/authTemplate/authTemplate.styles';
 import { useSSOLogin } from '@/v5/services/sso.hooks';
+import { Gap } from '@controls/gap';
 import { AuthFormLogin, ForgotPasswordPrompt, OtherOptions, SignUpPrompt, UnhandledErrorInterceptor } from './login.styles';
 import { AuthHeading, ErrorMessage, FormPasswordField, FormUsernameField } from './components/components.styles';
 import { PASSWORD_FORGOT_PATH, RELEASE_NOTES_ROUTE, SIGN_UP_PATH } from '../routes.constants';
@@ -35,7 +36,7 @@ import { PASSWORD_FORGOT_PATH, RELEASE_NOTES_ROUTE, SIGN_UP_PATH } from '../rout
 const APP_VERSION = ClientConfig.VERSION;
 
 export const Login = () => {
-	const { control, handleSubmit, formState: { isValid } } = useForm({
+	const { control, handleSubmit, formState: { isValid, errors } } = useForm({
 		mode: 'onSubmit',
 		defaultValues: {
 			username: '',
@@ -87,7 +88,12 @@ export const Login = () => {
 				<MicrosoftButton onClick={loginWithSSO}>
 					<FormattedMessage id="auth.login.sso.microsoft" defaultMessage="Sign in with Microsoft" />
 				</MicrosoftButton>
-				{ssoErrorMessage && <ErrorMessage>{ssoErrorMessage}</ErrorMessage>}
+				{ssoErrorMessage && (
+					<>
+						<Gap $height="5px" />
+						<ErrorMessage>{ssoErrorMessage}</ErrorMessage>
+					</>
+				)}
 				<Divider><FormattedMessage id="auth.login.divider" defaultMessage="or" /></Divider>
 				<AuthSubHeader>
 					<FormattedMessage id="auth.login.heading.signInWithUsername" defaultMessage="Sign in with username or email" />
@@ -96,6 +102,7 @@ export const Login = () => {
 					control={control}
 					name="username"
 					required
+					formError={errors.username}
 				/>
 				<FormPasswordField
 					control={control}

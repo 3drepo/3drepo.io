@@ -16,6 +16,7 @@
  */
 
 import { AxiosResponse } from 'axios';
+import { formatMessage } from '../intl';
 import api from './default';
 
 export enum SSOErrorCode {
@@ -24,8 +25,17 @@ export enum SSOErrorCode {
 	NON_SSO_USER = '3',
 	USER_NOT_FOUND = '4',
 	UNKNOWN = '5',
-	EXISTING_USERNAME = '6',
+	EXISTING_USERNAME = '6', // this is created in the frontend
 }
+
+export const errorMessages = {
+	[SSOErrorCode.EMAIL_EXISTS]: formatMessage({ id: 'ssoerror.Code1', defaultMessage: 'Non SSO user already exists with that email' }),
+	[SSOErrorCode.EMAIL_EXISTS_WITH_SSO]: formatMessage({ id: 'ssoerror.Code2', defaultMessage: 'SSO user already exists with that email' }),
+	[SSOErrorCode.NON_SSO_USER]: formatMessage({ id: 'ssoerror.Code3', defaultMessage: 'Non SSO user already exists' }),
+	[SSOErrorCode.USER_NOT_FOUND]: formatMessage({ id: 'ssoerror.Code4', defaultMessage: 'User not found' }),
+	[SSOErrorCode.UNKNOWN]: formatMessage({ id: 'ssoerror.Code5', defaultMessage: 'Unknown error' }),
+	[SSOErrorCode.EXISTING_USERNAME]: formatMessage({ id: 'ssoerror.Code6', defaultMessage: 'Existing userna' }),
+};
 
 export const getRedirectUrl = (searchParams = '') => {
 	const { origin, pathname } = new URL(window.location.href);

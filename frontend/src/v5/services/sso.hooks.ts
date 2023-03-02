@@ -15,23 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useLocation } from 'react-router-dom';
-import { signin } from './api/sso';
+import { useLocation, useHistory } from 'react-router-dom';
+import { DASHBOARD_ROUTE } from '../ui/routes/routes.constants';
+import { errorMessages, signin } from './api/sso';
 import { formatMessage } from './intl';
 
-const errorMessage = formatMessage({ id: 'auth.authenticate.ssoerror', defaultMessage: 'Error trying to authenticate' });
-
 export const useSSOLogin = () => {
+	const history = useHistory();
 	const { search } = useLocation();
 	const searchParams = new URLSearchParams(search);
 	const isLogingIn = !!searchParams.get('loginPost') && !searchParams.get('error');
 
 	if (isLogingIn) {
-		const { origin } = new URL(window.location.href);
-		window.location.href = origin;
+		history.push(DASHBOARD_ROUTE);
 	}
+
+	const errorMessage = searchParams.get('error')
+		? formatMessage({
+			id: 'auth.ssoerror',
+			defaultMessage: 'Error authenticating: {errorMessage}',
+		},
+		{
+			errorMessage: errorMessages[searchParams.get('error')],
+		}) : null;
 
 	return [() => signin().then(({ data }) => {
 		window.location.href = data.link;
-	}), searchParams.get('error') ? errorMessage : null, isLogingIn] as [ ()=> void, string | null, boolean];
+	}), errorMessage, isLogingIn] as [ ()=> void, string | null, boolean];
 };
