@@ -67,5 +67,9 @@ export const TabContent = styled(ScrollArea).attrs({
 	& > :first-child {
 		padding: 30px 58px;
 		box-sizing: border-box;
+
+		& > :first-child {
+			margin-top: 0;
+		}
 	}
 `;
