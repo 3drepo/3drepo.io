@@ -64,7 +64,7 @@ export const CreationInfo = ({
 					values={{ username: <Username />, creationDate: formatDate(createdAt) }}
 				/>
 			</span>
-			{updatedAt && (
+			{updatedAt && updatedAt !== createdAt && (
 				<span>
 					<FormattedMessage
 						id="creationInfo.lastUpdated"
