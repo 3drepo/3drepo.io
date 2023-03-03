@@ -15,17 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { getRelativeTime } from '@/v5/helpers/intl.helper';
 import { formatDate } from '@/v5/services/intl';
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { PopoverContainer } from '@components/shared/userPopover/userPopover.styles';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
 import { FormattedMessage } from 'react-intl';
 import { CreationInfoContainer, TruncateName } from './creationInfo.styles';
-
-dayjs.extend(relativeTime);
 
 type ICreationInfo = {
 	owner: string;
@@ -46,7 +43,7 @@ export const CreationInfo = ({
 		</HoverPopover>
 	);
 	const LastUpdated = () => (
-		<HoverPopover anchor={(props) => <span {...props}>{dayjs(updatedAt).fromNow()}</span>}>
+		<HoverPopover anchor={(props) => <span {...props}>{getRelativeTime(updatedAt)}</span>}>
 			<PopoverContainer>
 				{formatDate(updatedAt, {
 					hour: 'numeric',

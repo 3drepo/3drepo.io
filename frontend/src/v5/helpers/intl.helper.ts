@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import byteSize from 'byte-size';
-import { formatMessage } from '../services/intl';
+import { formatMessage, formatRelativeTime } from '../services/intl';
 
 type ByteSizeType = {
 	value: number,
@@ -49,4 +49,34 @@ export const formatInfoUnit = (value: number): string => {
 		id: 'units.information.format',
 		defaultMessage: '{value} {unit}',
 	}, formattedSize);
+};
+
+// Time related functions
+const TIME_UNIT = {
+	second: formatMessage({ id: 'timeUnit.second', defaultMessage: 'second' }),
+	minute: formatMessage({ id: 'timeUnit.minute', defaultMessage: 'minute' }),
+	hour: formatMessage({ id: 'timeUnit.hour', defaultMessage: 'hour' }),
+	day: formatMessage({ id: 'timeUnit.day', defaultMessage: 'day' }),
+	month: formatMessage({ id: 'timeUnit.month', defaultMessage: 'month' }),
+	year: formatMessage({ id: 'timeUnit.year', defaultMessage: 'year' }),
+};
+
+export const getRelativeTime = (from: Date | number) => {
+	let timeDifference = ((new Date().getTime() - new Date(from).getTime()) / 1000) + 1;
+	if (timeDifference < 60) return formatRelativeTime(-Math.floor(timeDifference), TIME_UNIT.second);
+
+	timeDifference /= 60;
+	if (timeDifference < 60) return formatRelativeTime(-Math.floor(timeDifference), TIME_UNIT.minute);
+
+	timeDifference /= 60;
+	if (timeDifference < 24) return formatRelativeTime(-Math.floor(timeDifference), TIME_UNIT.hour);
+
+	timeDifference /= 24;
+	if (timeDifference < 30) return formatRelativeTime(-Math.floor(timeDifference), TIME_UNIT.day);
+	const daysDifference = timeDifference;
+
+	timeDifference /= 30;
+	if (timeDifference < 12) return formatRelativeTime(-Math.floor(timeDifference), TIME_UNIT.month);
+
+	return formatRelativeTime(-Math.floor(daysDifference / 365), TIME_UNIT.year);
 };
