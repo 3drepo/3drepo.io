@@ -29,7 +29,7 @@ function* authenticate() {
 		yield put(CurrentUserActions.fetchUser());
 		yield put(AuthActions.setAuthenticationStatus(true));
 	} catch (error) {
-		if (error.response.status !== 401) {
+		if (error.response?.status !== 401) {
 			yield put(DialogsActions.open('alert', {
 				currentActions: formatMessage({ id: 'auth.authenticate.error', defaultMessage: 'trying to authenticate' }),
 				error,
@@ -40,7 +40,7 @@ function* authenticate() {
 	yield put(AuthActions.setPendingStatus(false));
 }
 
-export function* login({ username, password }: LoginAction) {
+function* login({ username, password }: LoginAction) {
 	yield put(AuthActions.setPendingStatus(true));
 	try {
 		yield API.Auth.login(username, password);

@@ -59,7 +59,7 @@ Teamspaces.initTeamspace = async (username) => {
 		]);
 		await grantAdminToUser(username, username);
 	} catch (err) {
-		logger.logError(`Failed to initialize teamspace for ${username}`);
+		logger.logError(`Failed to initialize teamspace for ${username}:${err.message}`);
 	}
 };
 

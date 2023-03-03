@@ -19,10 +19,10 @@ import { Link } from 'react-router-dom';
 import LogoIcon from '@assets/icons/filled/logo-filled.svg';
 import PrintIcon from '@assets/icons/outlined/print-outlined.svg';
 import { FormattedMessage } from 'react-intl';
-import { AppBarContainer, Items } from '@components/shared/appBar/appBar.styles';
+import { AppBarContainer } from '@components/shared/appBar/appBar.styles';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
-import { NavLink, NavLinks } from './legalAppBar.styles';
+import { NavLink, NavLinks, Items } from './legalAppBar.styles';
 
 type ILegalAppBar = {
 	activePage: string;

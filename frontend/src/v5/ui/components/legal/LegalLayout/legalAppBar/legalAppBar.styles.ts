@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import { Items as ItemsBase } from '@components/shared/appBar/appBar.styles';
 
 export const NavLinks = styled.div`
 	margin: 0 13px;
@@ -27,4 +28,14 @@ export const NavLink = styled(Link)<{ selected: boolean }>`
 	${({ theme }) => theme.typography.h5}
 	color: ${({ theme: { palette }, selected }) => (selected ? palette.primary.main : palette.base.light)};
 	cursor: pointer;
+	display: inline-block;
+	white-space: nowrap;
+`;
+
+export const Items = styled(ItemsBase)`
+	max-width: unset;
+
+	&:last-child {
+		min-width: unset;
+	}
 `;

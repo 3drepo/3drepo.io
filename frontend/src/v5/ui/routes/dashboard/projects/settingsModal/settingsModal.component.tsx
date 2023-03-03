@@ -164,6 +164,7 @@ export const SettingsModal = ({
 	});
 
 	const currentUnit = useWatch({ control, name: 'unit' });
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 
@@ -253,12 +254,14 @@ export const SettingsModal = ({
 				label={formatMessage({ id: 'settings.form.name', defaultMessage: 'Name' })}
 				required
 				formError={errors.name}
+				disabled={!isProjectAdmin}
 			/>
 			<FormTextField
 				name="desc"
 				control={control}
 				label={formatMessage({ id: 'settings.form.desc', defaultMessage: 'Description' })}
 				formError={errors.desc}
+				disabled={!isProjectAdmin}
 			/>
 			<FlexContainer>
 				<FormSelect
@@ -269,6 +272,7 @@ export const SettingsModal = ({
 						defaultMessage: 'Units',
 					})}
 					control={control}
+					disabled={!isProjectAdmin}
 				>
 					{UNITS.map(({ name, abbreviation }) => (
 						<MenuItem key={abbreviation} value={abbreviation}>
@@ -281,6 +285,7 @@ export const SettingsModal = ({
 					control={control}
 					label={formatMessage({ id: 'settings.form.code', defaultMessage: 'Code' })}
 					formError={errors.code}
+					disabled={!isProjectAdmin}
 				/>
 			</FlexContainer>
 			{isContainer && (
@@ -292,6 +297,7 @@ export const SettingsModal = ({
 							defaultMessage: 'Category',
 						})}
 						control={control}
+						disabled={!isProjectAdmin}
 					>
 						{CONTAINER_TYPES.map((type) => (
 							<MenuItem key={type} value={type}>
@@ -312,6 +318,7 @@ export const SettingsModal = ({
 				views={containerOrFederation.views}
 				containerOrFederationId={containerOrFederation._id}
 				isContainer={isContainer}
+				disabled={!isProjectAdmin}
 			/>
 			<SectionTitle>
 				<FormattedMessage
@@ -325,12 +332,14 @@ export const SettingsModal = ({
 					control={control}
 					label={formatMessage({ id: 'settings.form.lat', defaultMessage: 'Latitude (decimal)' })}
 					formError={errors.latitude}
+					disabled={!isProjectAdmin}
 				/>
 				<FormNumberField
 					name="longitude"
 					control={control}
 					label={formatMessage({ id: 'settings.form.long', defaultMessage: 'Longitude (decimal)' })}
 					formError={errors.longitude}
+					disabled={!isProjectAdmin}
 				/>
 			</FlexContainer>
 			<FormNumberField
@@ -338,6 +347,7 @@ export const SettingsModal = ({
 				control={control}
 				label={formatMessage({ id: 'settings.form.angleFromNorth', defaultMessage: 'Angle from North (clockwise degrees)' })}
 				formError={errors.angleFromNorth}
+				disabled={!isProjectAdmin}
 			/>
 			<FlexContainer>
 				<FormNumberField
@@ -346,6 +356,7 @@ export const SettingsModal = ({
 					label={`x (${currentUnit})`}
 					formError={errors.x}
 					required
+					disabled={!isProjectAdmin}
 				/>
 				<FormNumberField
 					name="y"
@@ -353,6 +364,7 @@ export const SettingsModal = ({
 					label={`y (${currentUnit})`}
 					formError={errors.y}
 					required
+					disabled={!isProjectAdmin}
 				/>
 				<FormNumberField
 					name="z"
@@ -360,6 +372,7 @@ export const SettingsModal = ({
 					label={`z (${currentUnit})`}
 					formError={errors.z}
 					required
+					disabled={!isProjectAdmin}
 				/>
 			</FlexContainer>
 			<UnhandledErrorInterceptor expectedErrorValidators={[nameAlreadyExists]} />

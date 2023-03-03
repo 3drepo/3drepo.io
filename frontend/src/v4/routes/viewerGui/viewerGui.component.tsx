@@ -20,7 +20,7 @@ import { isEmpty } from 'lodash';
 import { PureComponent } from 'react';
 
 import { VIEWER_EVENTS } from '../../constants/viewer';
-import { VIEWER_LEFT_PANELS, VIEWER_PANELS } from '../../constants/viewerGui';
+import { getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Activities } from './components/activities/';
@@ -236,7 +236,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 
 	private renderLeftPanelsButtons = () => (
 		<LeftPanelsButtons>
-			{VIEWER_LEFT_PANELS.map(({ name, type }) => (
+			{getViewerLeftPanels().map(({ name, type }) => (
 				<PanelButton
 					key={type}
 					onClick={this.handleTogglePanel}
