@@ -22,7 +22,7 @@ on:
 
 jobs:
   build-images:
-    secrets:
+    env:
       REGISTRY_LOGIN_SERVER: ${{ secrets.REGISTRY_LOGIN_SERVER }}
       REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
@@ -37,7 +37,9 @@ jobs:
     permissions:
       contents: read  # Read the repo contents.
       id-token: write # Produce identity token for keyless signing.
+    
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
@@ -49,7 +51,7 @@ jobs:
         - image: io
           dockerfile: .azure/Docker/Dockerfile
           platforms: linux/amd64,linux/arm64
-          image-name: "${{ secrets.REGISTRY_LOGIN_SERVER }}/3drepo.io"
+          image-name: "${{ REGISTRY_LOGIN_SERVER }}/3drepo.io"
           tag: ${{ github.sha }}
           release-tag: latest
 
@@ -66,10 +68,9 @@ jobs:
     - name: 'Log into ACR'
       uses: azure/docker-login@v1
       with:
-        login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-
+        login-server: ${{ REGISTRY_LOGIN_SERVER }}
+        username: ${{ REGISTRY_USERNAME }}
+        password: ${{ REGISTRY_PASSWORD }}
     # Build and push with Docker.
     - uses: docker/setup-qemu-action@27d0a4f181a40b142cce983c5393082c365d1480 # v1
       with:
@@ -82,7 +83,7 @@ jobs:
       with:
         # list of Docker images to use as base name for tags
         images: |
-          "${{ secrets.REGISTRY_LOGIN_SERVER }}/3drepo.io"
+          "${{ REGISTRY_LOGIN_SERVER }}/3drepo.io"
         # Docker tags based on the following events/attributes
         tags: |
           type=schedule
@@ -99,10 +100,10 @@ jobs:
         context: .
         file: ${{ matrix.dockerfile }}
         platforms: ${{ matrix.platforms }}
-        push: ${{ github.event_name != 'pull_request' }} # Only push if not a PR.
+        push: true # ${{ github.event_name != 'pull_request' }} # Only push if not a PR.
         tags: ${{ steps.docker-tag-creation.outputs.tags }}
         labels: ${{ steps.docker-tag-creation.outputs.labels }}
         no-cache-filters: certs
         # https://github.com/docker/build-push-action/blob/master/docs/advanced/cache.md#github-cache
-        cache-from: type=registry,ref="${{ secrets.REGISTRY_LOGIN_SERVER }}/3drepo.io":buildcache,compression=zstd
-        cache-to: type=registry,ref="${{ secrets.REGISTRY_LOGIN_SERVER }}/3drepo.io":buildcache,mode=max
+        cache-from: type=registry,ref="${{ REGISTRY_LOGIN_SERVER }}/3drepo.io":buildcache,compression=zstd
+        cache-to: type=registry,ref="${{ REGISTRY_LOGIN_SERVER }}/3drepo.io":buildcache,mode=max
