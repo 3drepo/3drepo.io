@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { isEmpty } from 'lodash';
+import { camelCase, isEmpty, mapKeys } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
@@ -25,7 +25,6 @@ import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
-import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { EditableTicket, ITemplate } from './tickets.types';
 
 export const modelIsFederation = (modelId: string) => (
@@ -185,16 +184,4 @@ export const templateAlreadyFetched = (template: ITemplate) => {
 	return fetchedProperties.some((prop) => Object.keys(template).includes(prop));
 };
 
-export const getPropertiesInCamelCase = (properties) => {
-	const {
-		[IssueProperties.STATUS]: status,
-		[IssueProperties.PRIORITY]: priority,
-		[IssueProperties.ASSIGNEES]: assignees,
-		[IssueProperties.DUE_DATE]: dueDate,
-		[BaseProperties.OWNER]: owner,
-		[BaseProperties.CREATED_AT]: createdAt,
-		[BaseProperties.UPDATED_AT]: updatedAt,
-		...otherProperties
-	} = properties;
-	return { status, priority, assignees, dueDate, owner, createdAt, updatedAt, ...otherProperties };
-};
+export const getPropertiesInCamelCase = (properties) => mapKeys(properties, (_, key) => camelCase(key));
