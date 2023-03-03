@@ -15,18 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const errorNotification = require('./templates/errorNotification');
 const forgotPassword = require('./templates/forgotPassword');
+const { toConstantCase } = require('../../utils/helper/strings');
 const verifyUser = require('./templates/verifyUser');
 
 const MailerConstants = {};
 
-MailerConstants.templates = {
-	VERIFY_USER: verifyUser,
-	FORGOT_PASSWORD: forgotPassword,
+const templates = {
+	verifyUser,
+	forgotPassword,
+	errorNotification,
 };
 
-Object.keys(MailerConstants.templates).forEach((templateName) => {
-	MailerConstants.templates[templateName].name = templateName;
+MailerConstants.templates = {};
+Object.keys(templates).forEach((templateName) => {
+	const name = toConstantCase(templateName);
+	MailerConstants.templates[name] = { ...templates[templateName], name };
 });
 
 module.exports = MailerConstants;

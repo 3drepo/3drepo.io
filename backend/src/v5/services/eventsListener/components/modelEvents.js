@@ -34,7 +34,10 @@ const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
 		await updateModelStatus(teamspace, UUIDToString(projectId), model, status, corId);
 	} catch (err) {
-		// do nothing - the model may have been deleted before the task came back.
+		logger.logError(`Failed to update model status for ${teamspace}.${model}: ${err.message}`);
+		if (err.stack) {
+			logger.logError(err.stack);
+		}
 	}
 };
 
@@ -43,7 +46,10 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user, conta
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
 		await newRevisionProcessed(teamspace, UUIDToString(projectId), model, corId, value, user, containers);
 	} catch (err) {
-		// do nothing - the model may have been deleted before the task came back.
+		logger.logError(`Failed to process a completed revision for ${teamspace}.${model}: ${err.message}`);
+		if (err.stack) {
+			logger.logError(err.stack);
+		}
 	}
 };
 
