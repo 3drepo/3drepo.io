@@ -1,8 +1,8 @@
 name: Container Build
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+# concurrency:
+#   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+#   cancel-in-progress: true
 
 permissions:
   checks: write
@@ -68,9 +68,9 @@ jobs:
     - name: 'Log into ACR'
       uses: azure/docker-login@v1
       with:
-        login-server: ${{ REGISTRY_LOGIN_SERVER }}
-        username: ${{ REGISTRY_USERNAME }}
-        password: ${{ REGISTRY_PASSWORD }}
+        login-server: ${{ env.REGISTRY_LOGIN_SERVER }}
+        username: ${{  env.REGISTRY_USERNAME }}
+        password: ${{  env.REGISTRY_PASSWORD }}
       env:
         REGISTRY_LOGIN_SERVER: ${{ secrets.REGISTRY_LOGIN_SERVER }}
         REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
@@ -110,9 +110,8 @@ jobs:
         labels: ${{ steps.docker-tag-creation.outputs.labels }}
         no-cache-filters: certs
         # https://github.com/docker/build-push-action/blob/master/docs/advanced/cache.md#github-cache
-        cache-from: type=registry,ref="${{ REGISTRY_LOGIN_SERVER }}/3drepo.io":buildcache,compression=zstd
-        cache-to: type=registry,ref="${{ REGISTRY_LOGIN_SERVER }}/3drepo.io":buildcache,mode=max
+        cache-from: type=registry,ref="${{  env.REGISTRY_LOGIN_SERVER }}/3drepo.io":buildcache,compression=zstd
+        cache-to: type=registry,ref="${{  env.REGISTRY_LOGIN_SERVER }}/3drepo.io":buildcache,mode=max
       env:
         REGISTRY_LOGIN_SERVER: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-        REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-        REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+
