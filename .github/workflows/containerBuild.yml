@@ -54,6 +54,10 @@ jobs:
           image-name: "${{ REGISTRY_LOGIN_SERVER }}/3drepo.io"
           tag: ${{ github.sha }}
           release-tag: latest
+      env:
+        REGISTRY_LOGIN_SERVER: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+        REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
 
         # - image: io-debug
         #   dockerfile: .azure/Docker/Dockerfile_debug
@@ -71,6 +75,11 @@ jobs:
         login-server: ${{ REGISTRY_LOGIN_SERVER }}
         username: ${{ REGISTRY_USERNAME }}
         password: ${{ REGISTRY_PASSWORD }}
+      env:
+        REGISTRY_LOGIN_SERVER: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+        REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        
     # Build and push with Docker.
     - uses: docker/setup-qemu-action@27d0a4f181a40b142cce983c5393082c365d1480 # v1
       with:
@@ -107,3 +116,7 @@ jobs:
         # https://github.com/docker/build-push-action/blob/master/docs/advanced/cache.md#github-cache
         cache-from: type=registry,ref="${{ REGISTRY_LOGIN_SERVER }}/3drepo.io":buildcache,compression=zstd
         cache-to: type=registry,ref="${{ REGISTRY_LOGIN_SERVER }}/3drepo.io":buildcache,mode=max
+      env:
+        REGISTRY_LOGIN_SERVER: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+        REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
