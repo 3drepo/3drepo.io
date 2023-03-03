@@ -24,12 +24,12 @@ import { EditCommentButtons, EditCommentContainer, EditCommentInput } from './ed
 import { ErrorCommentButton, PrimaryCommentButton } from '../../commentButton/commentButton.styles';
 import { CommentReply } from '../../commentReply/commentReply.component';
 
-type EditCommentProps = Pick<ITicketComment, '_id' | 'author' | 'message' | 'images'> & {
+type EditCommentProps = Pick<ITicketComment, 'author' | 'message' | 'images'> & {
 	onClose: () => void;
-	onEdit: (id, newMessage, newImages) => void;
+	onEdit: (newMessage, newImages) => void;
 	metadata?: TicketCommentReplyMetadata;
 };
-export const EditComment = ({ _id, message, images, author, metadata, onEdit, onClose }: EditCommentProps) => {
+export const EditComment = ({ message, images, author, metadata, onEdit, onClose }: EditCommentProps) => {
 	const { control, watch } = useForm<{ editedMessage }>({
 		defaultValues: { editedMessage: desanitiseMessage(message) },
 	});
@@ -43,7 +43,7 @@ export const EditComment = ({ _id, message, images, author, metadata, onEdit, on
 		if (metadata._id) {
 			newMessage = addReply(metadata, newMessage);
 		}
-		onEdit(_id, newMessage, images);
+		onEdit(newMessage, images);
 		onClose();
 	};
 

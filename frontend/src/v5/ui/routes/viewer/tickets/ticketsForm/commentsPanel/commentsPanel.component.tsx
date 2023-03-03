@@ -30,7 +30,7 @@ import {
 } from '@/v5/services/realtime/ticketComments.events';
 import { FormattedMessage } from 'react-intl';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Scrollbars from 'react-custom-scrollbars';
 import { sanitiseMessage, stripMetadata } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { ViewerParams } from '../../../../routes.constants';
@@ -49,7 +49,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
 	const scrollAreaRef = useRef<Scrollbars>();
 
-	const commentsListIsEmpty = comments?.length > 0;
+	const commentsLength = comments?.length || 0;
 
 	const getCommentIsFirstOfBlock = (index) => {
 		if (index === 0) return true;
@@ -57,27 +57,25 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 		return comments[index - 1].author !== commentAuthor;
 	};
 
-	const handleDeleteComment = (commentId) => {
+	const handleDeleteComment = useCallback((comment) => {
 		TicketCommentsActionsDispatchers.deleteComment(
 			teamspace,
 			project,
 			containerOrFederation,
 			ticketId,
 			isFederation,
-			commentId,
+			comment._id,
 		);
-	};
+	}, []);
 
-	const handleReplyToComment = (commentId) => {
-		const comment = comments.find(({ _id }) => _id === commentId);
+	const handleReplyToComment = useCallback((comment) => {
 		setCommentReply({
 			...comment,
 			message: sanitiseMessage(stripMetadata(comment.message)),
 		});
-	};
+	}, []);
 
-	const handleEditComment = (commentId, message, images) => {
-		const oldComment = comments.find(({ _id }) => _id === commentId);
+	const handleEditComment = useCallback((oldComment, message, images) => {
 		const newHistory = (oldComment.history || []).concat({
 			message: oldComment.message,
 			images: oldComment.images,
@@ -89,10 +87,10 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 			containerOrFederation,
 			ticketId,
 			isFederation,
-			commentId,
+			oldComment._id,
 			{ history: newHistory, message, images },
 		);
-	};
+	}, []);
 
 	useEffect(() => {
 		if (!ticketId) return null;
@@ -116,9 +114,9 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 	}, [ticketId]);
 
 	useEffect(() => {
-		if (!comments.length) return;
+		if (!commentsLength) return;
 		setTimeout(() => scrollAreaRef.current.scrollToBottom(), 100);
-	}, [comments.length]);
+	}, [commentsLength]);
 
 	return (
 		<Accordion
@@ -127,7 +125,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 			onChange={scrollPanelIntoView}
 		>
 			<ScrollArea autoHeight autoHeightMin={400} autoHeightMax={400} autoHide ref={scrollAreaRef}>
-				{commentsListIsEmpty && (
+				{commentsLength && (
 					<Comments>
 						{comments.map((comment, index) => (
 							<Comment
@@ -141,7 +139,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 						))}
 					</Comments>
 				)}
-				{!commentsListIsEmpty && (
+				{!commentsLength && (
 					<EmptyCommentsBox>
 						<FormattedMessage id="customTicket.comments.empty" defaultMessage="No comments" />
 					</EmptyCommentsBox>

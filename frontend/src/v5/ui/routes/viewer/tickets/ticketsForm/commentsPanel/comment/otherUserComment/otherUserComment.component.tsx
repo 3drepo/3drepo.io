@@ -27,7 +27,7 @@ type OtherUserCommentProps = Omit<ITicketComment, 'updatedAt'> & {
 	commentAge: string;
 	isFirstOfBlock: boolean;
 	metadata?: TicketCommentReplyMetadata;
-	onReply: (commentId) => void;
+	onReply: () => void;
 };
 export const OtherUserComment = ({
 	_id,
@@ -53,7 +53,7 @@ export const OtherUserComment = ({
 				{...props}
 			/>
 			<CommentButtons>
-				<PrimaryCommentButton onClick={() => onReply(_id)}>
+				<PrimaryCommentButton onClick={onReply}>
 					<ReplyIcon />
 				</PrimaryCommentButton>
 			</CommentButtons>

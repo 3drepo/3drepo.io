@@ -30,9 +30,9 @@ export type CurrentUserCommentProps = Omit<ITicketComment, 'updatedAt'> & {
 	commentAge: string;
 	metadata?: TicketCommentReplyMetadata;
 	isFirstOfBlock: boolean;
-	onDelete: (commentId) => void;
-	onReply: (commentId) => void;
-	onEdit: (commentId, newMessage, newImages) => void;
+	onDelete: () => void;
+	onReply: () => void;
+	onEdit: (newMessage, newImages) => void;
 };
 export const CurrentUserComment = ({
 	_id,
@@ -53,7 +53,6 @@ export const CurrentUserComment = ({
 	if (isEditMode) {
 		return (
 			<EditComment
-				_id={_id}
 				message={message}
 				images={images}
 				author={author}
@@ -67,10 +66,10 @@ export const CurrentUserComment = ({
 	return (
 		<CommentWithButtonsContainer>
 			<CommentButtons>
-				<ErrorCommentButton onClick={() => onDelete(_id)}>
+				<ErrorCommentButton onClick={onDelete}>
 					<DeleteIcon />
 				</ErrorCommentButton>
-				<PrimaryCommentButton onClick={() => onReply(_id)}>
+				<PrimaryCommentButton onClick={onReply}>
 					<ReplyIcon />
 				</PrimaryCommentButton>
 				<PrimaryCommentButton onClick={() => setIsEditMode(true)}>

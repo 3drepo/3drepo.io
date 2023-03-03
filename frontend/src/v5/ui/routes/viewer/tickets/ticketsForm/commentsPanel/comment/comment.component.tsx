@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CurrentUserHooksSelectors, TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { stripMetadata, extractMetadata, getRelativeTime } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { Gap } from '@controls/gap';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { CurrentUserComment } from './currentUserComment/currentUserComment.component';
 import { OtherUserComment } from './otherUserComment/otherUserComment.component';
 
@@ -29,16 +29,19 @@ export type CommentProps = ITicketComment & {
 	onEdit: (commentId, newMessage, newImages) => void;
 	isFirstOfBlock: boolean;
 };
-export const Comment = ({
-	updatedAt,
-	author,
-	message = '',
-	deleted,
-	_id,
-	images = [],
+export const Comment = memo(({
 	isFirstOfBlock,
-	...props
+	onDelete,
+	onReply,
+	onEdit,
+	...comment
 }: CommentProps) => {
+	const {
+		updatedAt,
+		author,
+		message = '',
+		deleted,
+	} = comment;
 	const [commentAge, setCommentAge] = useState('');
 
 	const isCurrentUser = CurrentUserHooksSelectors.selectUsername() === author;
@@ -61,16 +64,15 @@ export const Comment = ({
 		<>
 			<Gap $height={isFirstOfBlock ? '12px' : '4px'} />
 			<UserComment
-				{...props}
-				author={author}
+				{...comment}
+				onDelete={() => onDelete(comment)}
+				onReply={() => onReply(comment)}
+				onEdit={(newMessage, newImages) => onEdit(comment, newMessage, newImages)}
 				commentAge={commentAge}
 				metadata={metadata}
 				message={noMetadataMessage}
-				deleted={deleted}
-				_id={_id}
-				images={images}
 				isFirstOfBlock={isFirstOfBlock}
 			/>
 		</>
 	);
-};
+});
