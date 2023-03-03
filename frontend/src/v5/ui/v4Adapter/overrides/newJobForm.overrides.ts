@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,22 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Container } from './dashedContainer.styles';
+import { css } from 'styled-components';
+import { Container, SaveButton, Title } from '@/v4/routes/components/newJobForm/newJobForm.styles';
 
-type DashedContainerProps = {
-	children: any;
-	className?: string;
-	borderRadius?: number;
-	strokeColor?: string;
-	strokeWidth?: number;
-	dashSize?: number;
-	gapSize?: number;
-	zeroPadding?: boolean;
-	onClick?: (e) => void;
-};
+export default css`
+	${Container} {
+		${Title} {
+			color: ${({ theme }) => theme.palette.secondary.main}
+		}
 
-export const DashedContainer = ({ children, ...dashedOptions }: DashedContainerProps) => (
-	<Container {...dashedOptions}>
-		{children}
-	</Container>
-);
+		.MuiFormControl-root.MuiFormControl-root {
+			margin: 0;
+
+			.MuiInputBase-root input,
+			.MuiInputBase-root fieldset {
+				height: 30px;
+			}
+		}
+
+		${SaveButton} {
+			margin: 18px 0 0;
+		}
+	}
+`;
