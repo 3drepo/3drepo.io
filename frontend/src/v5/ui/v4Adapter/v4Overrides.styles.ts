@@ -35,6 +35,7 @@ import issues from './overrides/cards/issues/issues.overrides';
 import safetiBase from './overrides/cards/safetiBase/safetiBase.overrides';
 import sharedStyles from './overrides/cards/sharedStyles/sharedStyles.overrides';
 import colorPicker from './overrides/colorPicker.overrides';
+import newJobDialog from './overrides/newJobForm.overrides';
 import groups from './overrides/cards/groups.overrides';
 import measurements from './overrides/cards/measurements.overrides';
 import tree from './overrides/cards/tree.overrides';
@@ -90,4 +91,5 @@ export const V4OverridesContainer = styled.div`
 	}
 
 	${board}
+	${newJobDialog}
 `;

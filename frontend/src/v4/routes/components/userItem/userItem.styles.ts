@@ -29,7 +29,7 @@ const BaseStyles = styled(Grid)`
 `;
 
 export const Name = styled(BaseStyles)`
-	${isV5 ? css`
+	${isV5() ? css`
 		color: ${({ theme }) => theme.palette.secondary.main};
 		font-size: 15px;
 		font-weight: 500;

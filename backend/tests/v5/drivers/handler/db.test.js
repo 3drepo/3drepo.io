@@ -931,4 +931,6 @@ describe(determineTestGroup(__filename), () => {
 	testGrantRole();
 	testRevokeRole();
 	testSetPassword();
+
+	afterAll(() => DB.disconnect());
 });

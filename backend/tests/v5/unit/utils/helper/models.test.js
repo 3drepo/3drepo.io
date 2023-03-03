@@ -39,6 +39,47 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const testRemoveModelData = () => {
 	describe('Remove model data', () => {
+		test('should remove model data successfully', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+
+			const modelCol1 = `${model}.ref`;
+			const modelCol2 = `${model}.history`;
+
+			ModelSettings.deleteModel.mockResolvedValueOnce();
+			DB.listCollections.mockResolvedValueOnce([
+				modelCol1,
+				modelCol2,
+				generateRandomString(),
+			].map((name) => ({ name })));
+
+			await ModelHelper.removeModelData(teamspace, project, model);
+
+			expect(FilesManager.removeAllFilesFromModel).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeAllFilesFromModel).toHaveBeenCalledWith(teamspace, model);
+
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
+				{ teamspace, project, model });
+
+			expect(ModelSettings.deleteModel).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.deleteModel).toHaveBeenCalledWith(teamspace, project, model);
+
+			expect(DB.listCollections).toHaveBeenCalledTimes(1);
+			expect(DB.listCollections).toHaveBeenCalledWith(teamspace);
+
+			expect(DB.dropCollection).toHaveBeenCalledTimes(2);
+			expect(DB.dropCollection).toHaveBeenCalledWith(teamspace, modelCol1);
+			expect(DB.dropCollection).toHaveBeenCalledWith(teamspace, modelCol2);
+
+			expect(Tickets.removeAllTicketsInModel).toHaveBeenCalledTimes(1);
+			expect(Tickets.removeAllTicketsInModel).toHaveBeenCalledWith(teamspace, project, model);
+
+			expect(Tickets.removeAllTicketsInModel).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace,
+				TICKETS_RESOURCES_COL, { teamspace, project, model });
+		});
 		test(`should not return with error if deleteModel failed with ${templates.modelNotFound.code}`, async () => {
 			DB.listCollections.mockResolvedValueOnce([]);
 			ModelSettings.deleteModel.mockRejectedValue(templates.modelNotFound);
