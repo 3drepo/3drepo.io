@@ -38,6 +38,10 @@ export default css`
 			border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 			border-radius: 5px;
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
+
+			& > * {
+				border-color: ${({ theme }) => theme.palette.base.lightest};
+			}
 		}
 
 		.simplebar-content-wrapper {

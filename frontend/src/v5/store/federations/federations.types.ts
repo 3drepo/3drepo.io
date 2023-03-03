@@ -19,38 +19,6 @@ import { UploadStatuses } from '../containers/containers.types';
 import { Role } from '../currentUser/currentUser.types';
 import { SurveyPoint, View } from '../store.types';
 
-export interface IFederation {
-	_id: string;
-	desc?: string;
-	name: string;
-	role: Role;
-	isFavourite: boolean;
-	code?: string;
-	status: UploadStatuses;
-	containers: string[];
-	issues: number;
-	risks: number;
-	category: string;
-	lastUpdated: Date;
-	hasStatsPending: boolean;
-	views?: View[];
-	surveyPoint?: SurveyPoint;
-	angleFromNorth?: number;
-	defaultView?: string;
-	unit?: string;
-}
-
-export type NewFederation = {
-	name: string;
-	unit: string;
-	desc?: string;
-	code?: string;
-};
-
-export type NewFederationRealtime = NewFederation & {
-	_id: string;
-};
-
 export type FederationBackendSettings = {
 	_id?: string;
 	desc?: string;
@@ -71,13 +39,46 @@ export type FederationBackendSettings = {
 	}
 };
 
+export type FederationRevision = Pick<FederationBackendSettings, '_id' | 'timestamp' | 'author' >;
+
+export interface IFederation {
+	_id: string;
+	desc?: string;
+	name: string;
+	role: Role;
+	isFavourite: boolean;
+	code?: string;
+	status: UploadStatuses;
+	containers: string[];
+	issues: number;
+	risks: number;
+	category: string;
+	lastUpdated: Date;
+	hasStatsPending: boolean;
+	views?: View[];
+	surveyPoint?: SurveyPoint;
+	angleFromNorth?: number;
+	defaultView?: string;
+	unit?: string;
+	revision?: FederationRevision;
+}
+
+export type NewFederation = {
+	name: string;
+	unit: string;
+	desc?: string;
+	code?: string;
+};
+
+export type NewFederationRealtime = NewFederation & {
+	_id: string;
+};
+
 export type FederationSettings = Omit<FederationBackendSettings, 'surveyPoints'> & {
 	surveyPoint: SurveyPoint;
 };
 
 export type MinimumFederation = Pick<IFederation, '_id' | 'name' | 'role' | 'isFavourite'>;
-
-export type FederationRevision = Pick<FederationBackendSettings, '_id' | 'timestamp' | 'author' >;
 
 export type FederationStats = {
 	code: string;

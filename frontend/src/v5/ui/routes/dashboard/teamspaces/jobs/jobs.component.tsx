@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,22 +14,23 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Container } from './dashedContainer.styles';
 
-type DashedContainerProps = {
-	children: any;
-	className?: string;
-	borderRadius?: number;
-	strokeColor?: string;
-	strokeWidth?: number;
-	dashSize?: number;
-	gapSize?: number;
-	zeroPadding?: boolean;
-	onClick?: (e) => void;
+import { Jobs as V4Jobs } from '@/v4/routes/jobs';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { V5JobsOverrides } from '@/v5/ui/v4Adapter/overrides/jobs.overrides';
+import { FormattedMessage } from 'react-intl';
+import { Header, Title } from '../projects/projectsList.styles';
+
+export const Jobs = () => {
+	const { isAdmin } = TeamspacesHooksSelectors.selectCurrentTeamspaceDetails();
+	return (
+		<V5JobsOverrides isAdmin={isAdmin}>
+			<Header>
+				<Title>
+					<FormattedMessage id="jobs.title" defaultMessage="Jobs" />
+				</Title>
+			</Header>
+			<V4Jobs />
+		</V5JobsOverrides>
+	);
 };
-
-export const DashedContainer = ({ children, ...dashedOptions }: DashedContainerProps) => (
-	<Container {...dashedOptions}>
-		{children}
-	</Container>
-);
