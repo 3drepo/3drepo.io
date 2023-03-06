@@ -170,60 +170,60 @@ export function* removeInvitation({ email }) {
 export function* removeUser({ username }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
-		yield API.removeUser(teamspace, username);
-		yield put(UserManagementActions.removeUserSuccess(username));
+		if (isV5()) {
+			DialogsActionsDispatchers.open('delete', {
+				name: username,
+				onClickConfirm: () => new Promise<void>(
+					(accept, reject) => {
+						try {
+							dispatch(UserManagementActions.removeUserCascade(username))
+							accept();
+						} catch {
+							reject();
+						}
+					},
+				),
+				titleLabel: formatMessage({
+					id: 'deleteModal.teamspaceUser.title',
+					defaultMessage: 'Remove {username}',
+				}, { username }),
+				confirmLabel: formatMessage({
+					id: 'deleteModal.teamspaceUser.confirm',
+					defaultMessage: 'Remove',
+				}),
+				message: formatMessage({
+					id: 'deleteModal.teamspaceUser.message',
+					defaultMessage: 'Are you sure you want to remove this user?',
+				}),
+				confidenceCheck: true,
+			});
+		} else {
+			yield API.removeUser(teamspace, username);
+			yield put(UserManagementActions.removeUserSuccess(username));
+		}
 	} catch (error) {
 		const responseCode = API.getResponseCode('USER_IN_COLLABORATOR_LIST');
 		const errorData = error.response.data || {};
 
-		if (errorData.status === 400 && errorData.value === responseCode) {
-			if (isV5()) {
-				DialogsActionsDispatchers.open('delete', {
-					name: username,
-					onClickConfirm: () => new Promise<void>(
-						(accept, reject) => {
-							try {
-								dispatch(UserManagementActions.removeUserCascade(username))
-								accept();
-							} catch {
-								reject();
-							}
-						},
-					),
-					titleLabel: formatMessage({
-						id: 'deleteModal.teamspaceUser.title',
-						defaultMessage: 'Remove {username}',
-					}, { username }),
-					confirmLabel: formatMessage({
-						id: 'deleteModal.teamspaceUser.confirm',
-						defaultMessage: 'Remove',
-					}),
-					message: formatMessage({
-						id: 'deleteModal.teamspaceUser.message',
-						defaultMessage: 'Are you sure you want to remove this Teamspace admin?',
-					}),
-					confidenceCheck: true,
-				});
-			} else {
-				const config = {
-					title: 'Remove User',
-					template: RemoveUserDialog,
-					confirmText: 'Remove',
-					onConfirm: () => UserManagementActions.removeUserCascade(username),
-					data: {
-						models: errorData.models,
-						projects: errorData.projects,
-						teamspacePerms: '',
-						username
-					}
-				};
-
-				if (errorData.teamspace) {
-					config.data.teamspacePerms = errorData.teamspace.permissions.join(', ');
+		if (errorData.status === 400 && errorData.value === responseCode && !isV5()) {
+			const config = {
+				title: 'Remove User',
+				template: RemoveUserDialog,
+				confirmText: 'Remove',
+				onConfirm: () => UserManagementActions.removeUserCascade(username),
+				data: {
+					models: errorData.models,
+					projects: errorData.projects,
+					teamspacePerms: '',
+					username
 				}
+			};
 
-				yield put(DialogActions.showDialog(config));
+			if (errorData.teamspace) {
+				config.data.teamspacePerms = errorData.teamspace.permissions.join(', ');
 			}
+
+			yield put(DialogActions.showDialog(config));
 		} else {
 			yield put(DialogActions.showEndpointErrorDialog('remove', 'licence', error));
 		}
