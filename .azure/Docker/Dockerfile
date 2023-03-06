@@ -3,10 +3,13 @@ FROM node:18 as builder
 
 WORKDIR /home/node/3drepo.io/backend
 COPY ./backend/package.json ./package.json
+COPY ./backend/yarn.lock ./yarn.lock
+
 RUN yarn install --network-timeout 500000 
 
 WORKDIR /home/node/3drepo.io/frontend
 COPY ./frontend/package.json ./package.json
+COPY ./frontend/yarn.lock ./yarn.lock
 RUN yarn install --network-timeout 500000 
 RUN yarn build
 
@@ -43,7 +46,7 @@ COPY --chown=root:node --from=builder /home/node/3drepo.io/resources ./resources
 COPY --chown=root:node --from=builder /home/node/3drepo.io/run ./run
 
 ARG NODE_ENV=local
-ENV NODE_ENV ${NODE_ENV:-"production"}
+ENV NODE_ENV ${NODE_ENV:-"test"}
 ENV NODE_CONFIG_DIR='./config'
 EXPOSE 8080 3000
 
