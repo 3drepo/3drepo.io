@@ -1,11 +1,14 @@
 ARG REBUILD_DATE=unknown
 FROM node:18 as builder
+
 COPY . /home/node/3drepo.io
-RUN cd /home/node/3drepo.io/backend && \
-        yarn install --network-timeout 100000 && \
-        cd ../frontend  && \
-        yarn install --network-timeout 100000 && \ 
-        yarn build
+
+WORKDIR /home/node/3drepo.io/backend
+RUN yarn install --network-timeout 500000 
+
+WORKDIR /home/node/3drepo.io/frontend
+RUN yarn install --network-timeout 500000 
+RUN yarn build
 
 FROM node:18 as deploy
 
@@ -30,21 +33,20 @@ RUN if [ ${NODE_USERNAME} != "root" ] \
     fi
 
 WORKDIR /home/node/3drepo.io/
-COPY --chown=root:node --from=builder /home/node/3drepo.io/backend /home/node/3drepo.io/backend
-COPY --chown=root:node --from=builder /home/node/3drepo.io/public /home/node/3drepo.io/public
-COPY --chown=root:node --from=builder /home/node/3drepo.io/config /home/node/3drepo.io/config
-COPY --chown=root:node --from=builder /home/node/3drepo.io/resources /home/node/3drepo.io/resources
-COPY --chown=root:node --from=builder /home/node/3drepo.io/run /home/node/3drepo.io/run
+COPY --chown=root:node --from=builder /home/node/3drepo.io/backend ./backend
+COPY --chown=root:node --from=builder /home/node/3drepo.io/public ./public
+COPY --chown=root:node --from=builder /home/node/3drepo.io/config ./config
+COPY --chown=root:node --from=builder /home/node/3drepo.io/resources ./resources
+COPY --chown=root:node --from=builder /home/node/3drepo.io/run ./run
 
 ARG NODE_ENV=local
 ENV NODE_ENV ${NODE_ENV:-"production"}
 ENV NODE_CONFIG_DIR='./config'
 EXPOSE 8080 3000
 
-COPY .azure/Docker/src/init.sh /usr/local/bin/start.sh
+COPY .azure/Docker/src/init.sh /usr/local/bin/start
 COPY .azure/Docker/src/getCustomLogins.py /usr/local/bin/getCustomLogins.py
-
-RUN chmod +x /usr/local/bin/start.sh ; ln -s /usr/local/bin/start.sh /usr/local/bin/start
+RUN chmod +x /usr/local/bin/start
 
 WORKDIR /home/node/3drepo.io/
 ENTRYPOINT [ "start" ]
