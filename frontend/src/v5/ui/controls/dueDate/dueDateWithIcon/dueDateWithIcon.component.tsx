@@ -16,15 +16,16 @@
  */
 
 import { formatDate } from '@/v5/services/intl';
-import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
+import { BaseDueDate } from '../baseDueDate.component';
 import { CalendarIcon, DueDateWithIconContainer } from '../dueDate.styles';
 import { DateContainer, EmptyDateContainer } from '../dueDateWithLabel/dueDateLabel/dueDateLabel.styles';
 
 type IDueDateWithIcon = FormInputProps & {
 	tooltip?: string;
+	onBlur: () => void;
 };
 
 export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: IDueDateWithIcon) => {
@@ -35,23 +36,27 @@ export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: IDueDate
 		year: '2-digit',
 	});
 	return (
-		<Tooltip title={tooltip}>
-			<DueDateWithIconContainer>
-				<DatePicker
-					value={value}
-					disabled={disabled}
-					renderInput={
-						(args) => (value ? (
-							<DateContainer {...args} isOverdue={isOverdue}><CalendarIcon /> {formattedDate}</DateContainer>
-						) : (
-							<EmptyDateContainer {...args} disabled={disabled}><CalendarIcon />
-								<FormattedMessage id="dueDate.withIcon.unset" defaultMessage="Unset" />
-							</EmptyDateContainer>
-						))
-					}
-					{...props}
-				/>
-			</DueDateWithIconContainer>
-		</Tooltip>
+		<DueDateWithIconContainer>
+			<BaseDueDate
+				value={value}
+				disabled={disabled}
+				renderInput={
+					(args) => (
+						<Tooltip title={tooltip} arrow>
+							<div ref={args.inputRef}>
+								{value ? (
+									<DateContainer {...args} isOverdue={isOverdue}><CalendarIcon /> {formattedDate}</DateContainer>
+								) : (
+									<EmptyDateContainer {...args} disabled={disabled}><CalendarIcon />
+										<FormattedMessage id="dueDate.withIcon.unset" defaultMessage="Unset" />
+									</EmptyDateContainer>
+								)}
+							</div>
+						</Tooltip>
+					)
+				}
+				{...props}
+			/>
+		</DueDateWithIconContainer>
 	);
 };

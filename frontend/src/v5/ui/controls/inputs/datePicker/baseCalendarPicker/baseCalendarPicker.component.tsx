@@ -24,7 +24,6 @@ import { formatDayOfWeek } from '../dateFormatHelper';
 export type BaseCalendarPickerProps = FormInputProps & {
 	defaultValue?: Date;
 	PickerComponent: any;
-	renderInput?: any;
 };
 
 export const BaseCalendarPicker = ({
@@ -35,7 +34,6 @@ export const BaseCalendarPicker = ({
 	error,
 	required,
 	value = null,
-	renderInput: RenderInput,
 	...props
 }: BaseCalendarPickerProps) => {
 	const [open, setOpen] = useState(false);
@@ -47,24 +45,7 @@ export const BaseCalendarPicker = ({
 
 	return (
 		<PickerComponent
-			{...props}
-			value={value}
-			onOpen={() => setOpen(true)}
-			onClose={() => {
-				// This is to signal that the date has changed (we are using onblur to save changes)
-				props.onBlur?.();
-				setOpen(false);
-			}}
-			disabled={disabled}
-			open={open}
-			dayOfWeekFormatter={formatDayOfWeek}
-			defaultValue={defaultValue ? dayjs(defaultValue) : null}
-			disableHighlightToday
-			renderInput={({ ref, inputRef, ...textFieldProps }) => (RenderInput ? (
-				<div ref={inputRef}>
-					<RenderInput onClick={handleClick} {...textFieldProps} />
-				</div>
-			) : (
+			renderInput={({ ref, inputRef, ...textFieldProps }) => (
 				<TextField
 					{...textFieldProps}
 					ref={inputRef}
@@ -82,7 +63,20 @@ export const BaseCalendarPicker = ({
 						}),
 					}}
 				/>
-			))}
+			)}
+			{...props}
+			value={value}
+			onOpen={() => setOpen(true)}
+			onClose={() => {
+				// This is to signal that the date has changed (we are using onblur to save changes)
+				props.onBlur?.();
+				setOpen(false);
+			}}
+			disabled={disabled}
+			open={open}
+			dayOfWeekFormatter={formatDayOfWeek}
+			defaultValue={defaultValue ? dayjs(defaultValue) : null}
+			disableHighlightToday
 		/>
 	);
 };

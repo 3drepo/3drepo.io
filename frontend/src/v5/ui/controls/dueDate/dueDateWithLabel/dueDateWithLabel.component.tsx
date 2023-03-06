@@ -15,54 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatDayOfWeek } from '@controls/inputs/datePicker/dateFormatHelper';
-import { DatePicker } from '@mui/x-date-pickers';
-import { useState } from 'react';
-import { StopBackgroundInteraction } from '../dueDate.styles';
+import { BaseDueDate } from '../baseDueDate.component';
 import { DueDateEmptyLabel } from './dueDateLabel/dueDateEmptyLabel.component';
 import { DueDateFilledLabel } from './dueDateLabel/dueDateFilledLabel.component';
 
 type IDueDateWithLabel = {
 	value: number;
 	disabled?: boolean;
-	onBlur: (newValue) => void;
+	onBlur?: (newValue) => void;
 };
 
-export const DueDateWithLabel = ({ value: initialValue, disabled, onBlur }: IDueDateWithLabel) => {
-	const [open, setOpen] = useState(false);
-	const [value, setValue] = useState<number>(initialValue);
-
-	const preventPropagation = (e) => { if (e.key !== 'Escape') e.stopPropagation(); };
-	const handleClose = () => setOpen(false);
-	const onClickDueDate = () => setOpen(!disabled);
-	const onDateChange = (newValue) => {
-		setValue(new Date(newValue).getTime());
-		onBlur?.(newValue);
-	};
-
-	return (
-		<div onClick={preventPropagation} aria-hidden="true">
-			<StopBackgroundInteraction open={open} onClick={handleClose} />
-			<DatePicker
-				value={value}
-				open={open}
-				// onChange is a required prop in DatePicker, however it is not needed as onAccept works better
-				// (onChange triggers when changing year, onAccept only when a date is finally chosen)
-				onChange={() => true}
-				onAccept={onDateChange}
-				onClose={handleClose}
-				dayOfWeekFormatter={formatDayOfWeek}
-				disableHighlightToday
-				renderInput={({ inputRef }) => (
-					<div ref={inputRef}>
-						{value ? (
-							<DueDateFilledLabel onClick={onClickDueDate} value={value} disabled={disabled} />
-						) : (
-							<DueDateEmptyLabel onClick={onClickDueDate} disabled={disabled} />
-						)}
-					</div>
+export const DueDateWithLabel = ({ value, disabled, onBlur }: IDueDateWithLabel) => (
+	<BaseDueDate
+		value={value}
+		disabled={disabled}
+		onBlur={onBlur}
+		renderInput={({ inputRef }) => (
+			<div ref={inputRef}>
+				{value ? (
+					<DueDateFilledLabel value={value} disabled={disabled} />
+				) : (
+					<DueDateEmptyLabel disabled={disabled} />
 				)}
-			/>
-		</div>
-	);
-};
+			</div>
+		)}
+	/>
+);
