@@ -50,7 +50,7 @@ jobs:
         include:
         - image: io
           dockerfile: .azure/Docker/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64 #,linux/arm64
           image-name: "3drepo.azurecr.io/3drepo.io"
           tag: ${{ github.sha }}
           release-tag: latest
@@ -84,6 +84,7 @@ jobs:
       with:
         driver-opts: |
           image=moby/buildkit:master
+
     - name: Docker meta
       id: docker-tag-creation # you'll use this in the next step
       uses: docker/metadata-action@507c2f2dc502c992ad446e3d7a5dfbe311567a96 # v4.3.0
@@ -115,6 +116,5 @@ jobs:
         # https://github.com/docker/build-push-action/blob/master/docs/advanced/cache.md#github-cache
         cache-from: type=registry,ref=3drepo.azurecr.io/3drepo.io:buildcache,compression=zstd
         cache-to: type=registry,ref=3drepo.azurecr.io/3drepo.io:buildcache,mode=max
-      # env:
-      #   REGISTRY_LOGIN_SERVER: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+
 
