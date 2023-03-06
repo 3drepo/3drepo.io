@@ -18,6 +18,9 @@
 import { isV5 } from '@/v4/helpers/isV5';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
+import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { selectIsTeamspaceAdmin } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { selectUser } from '@/v5/store/users/users.selectors';
 import { isEmpty } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
@@ -35,7 +38,9 @@ import {
 	selectCurrentTeamspace,
 	selectInvitations,
 	selectProject,
+	selectProjectPermissions,
 	selectUserNotExists,
+	selectUsers,
 	UserManagementActions,
 	UserManagementTypes,
 } from '../userManagement';
@@ -171,32 +176,38 @@ export function* removeUser({ username }) {
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
 		if (isV5()) {
-			DialogsActionsDispatchers.open('delete', {
-				name: username,
-				onClickConfirm: () => new Promise<void>(
-					(accept, reject) => {
-						try {
-							dispatch(UserManagementActions.removeUserCascade(username))
-							accept();
-						} catch {
-							reject();
-						}
-					},
-				),
-				titleLabel: formatMessage({
-					id: 'deleteModal.teamspaceUser.title',
-					defaultMessage: 'Remove {username}',
-				}, { username }),
-				confirmLabel: formatMessage({
-					id: 'deleteModal.teamspaceUser.confirm',
-					defaultMessage: 'Remove',
-				}),
-				message: formatMessage({
-					id: 'deleteModal.teamspaceUser.message',
-					defaultMessage: 'Are you sure you want to remove this user?',
-				}),
-				confidenceCheck: true,
-			});
+			const users = yield select(selectUsers);
+			const { isAdmin } = (yield users).find((u) => u.user === username);
+			if (isAdmin) {
+				DialogsActionsDispatchers.open('delete', {
+					name: username,
+					onClickConfirm: () => new Promise<void>(
+						(accept, reject) => {
+							try {
+								dispatch(UserManagementActions.removeUserCascade(username))
+								accept();
+							} catch {
+								reject();
+							}
+						},
+					),
+					titleLabel: formatMessage({
+						id: 'deleteModal.teamspaceUser.title',
+						defaultMessage: 'Remove {username}',
+					}, { username }),
+					confirmLabel: formatMessage({
+						id: 'deleteModal.teamspaceUser.confirm',
+						defaultMessage: 'Remove',
+					}),
+					message: formatMessage({
+						id: 'deleteModal.teamspaceUser.message',
+						defaultMessage: 'Are you sure you want to remove this user?',
+					}),
+					confidenceCheck: true,
+				});
+			} else {
+				dispatch(UserManagementActions.removeUserCascade(username))
+			}
 		} else {
 			yield API.removeUser(teamspace, username);
 			yield put(UserManagementActions.removeUserSuccess(username));
