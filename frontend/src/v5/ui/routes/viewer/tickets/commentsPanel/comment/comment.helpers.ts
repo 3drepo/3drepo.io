@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatMessage, formatRelativeTime } from '@/v5/services/intl';
+import { formatMessage } from '@/v5/services/intl';
 import { CommentReplyMetadata, IComment } from '@/v5/store/tickets/tickets.types';
 import _ from 'lodash';
 
