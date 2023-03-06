@@ -35,7 +35,7 @@ const testSwaggerDocumentation = () => {
 	});
 };
 
-describe('Swagger', () => {
+describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.frontend();
 		agent = await SuperTest(server);
