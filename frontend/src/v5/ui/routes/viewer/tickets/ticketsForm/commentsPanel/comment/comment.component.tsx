@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CurrentUserHooksSelectors, TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { stripMetadata, extractMetadata, getRelativeTime } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { Gap } from '@controls/gap';
