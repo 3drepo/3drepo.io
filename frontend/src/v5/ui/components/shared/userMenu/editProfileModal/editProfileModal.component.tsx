@@ -39,19 +39,19 @@ const TAB_LABELS = {
 	integrations: formatMessage({ defaultMessage: 'Integrations', id: 'editProfile.tab.title.integrations' }),
 };
 
-type EditProfileModalProps = {
-	open: boolean;
-	onClickClose: () => void;
-};
-
 type EditProfileUnexpectedErrors = {
 	[PERSONAL_TAB]?: any;
 	[AUTHENTICATION_TAB]?: any;
 	[INTEGRATIONS_TAB]?: any;
 };
 
-export const EditProfileModal = ({ open, onClickClose }: EditProfileModalProps) => {
-	const [activeTab, setActiveTab] = useState(PERSONAL_TAB);
+type EditProfileModalProps = {
+	open: boolean;
+	onClickClose: () => void;
+	initialTab?: 'authentication' | 'integrations';
+};
+export const EditProfileModal = ({ open, onClickClose, initialTab }: EditProfileModalProps) => {
+	const [activeTab, setActiveTab] = useState(initialTab || PERSONAL_TAB);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [incorrectPassword, setIncorrectPassword] = useState(false);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
