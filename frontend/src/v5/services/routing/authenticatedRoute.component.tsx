@@ -30,14 +30,14 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	const history = useHistory();
 	const isAuthenticated: boolean = AuthHooksSelectors.selectIsAuthenticated();
 	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
-	const [,ssoError, ssoPArams] = useSSOLogin();
+	const [,ssoError, ssoParams] = useSSOLogin();
 
 	const location = useLocation();
 
 	useEffect(() => {
 		AuthActionsDispatchers.setReturnUrl(location);
 		if (!isAuthenticated && authenticationFetched) {
-			const url = ssoError ? pathName(addParams(LOGIN_PATH, ssoPArams)) : LOGIN_PATH;
+			const url = ssoError ? pathName(addParams(LOGIN_PATH, ssoParams)) : LOGIN_PATH;
 			history.replace(url);
 		}
 	}, [isAuthenticated, authenticationFetched]);

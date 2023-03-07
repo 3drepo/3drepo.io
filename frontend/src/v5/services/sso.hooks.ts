@@ -26,7 +26,7 @@ export const useSSOLogin = () => {
 	const loginPost = searchParams.get('loginPost');
 	const error = searchParams.get('error');
 	const returnUrl = AuthHooksSelectors.selectReturnUrl();
-	const ssoPArams = new URLSearchParams(omitBy({ loginPost, error }, isNull)).toString();
+	const ssoParams = new URLSearchParams(omitBy({ loginPost, error }, isNull)).toString();
 
 	const errorMessage = error
 		? formatMessage({
@@ -40,5 +40,5 @@ export const useSSOLogin = () => {
 
 	return [() => signin(redrectUri).then(({ data }) => {
 		window.location.href = data.link;
-	}), errorMessage, ssoPArams.toString()] as [ ()=> void, string | null, string];
+	}), errorMessage, ssoParams.toString()] as [ ()=> void, string | null, string];
 };
