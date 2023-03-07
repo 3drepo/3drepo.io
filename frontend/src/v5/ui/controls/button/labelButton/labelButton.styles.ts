@@ -18,12 +18,13 @@
 import ButtonBase from '@mui/material/Button';
 import styled from 'styled-components';
 
-export const Button = styled(ButtonBase)<{ color?: string, outlined?: any }>`
+export const LabelButton = styled(ButtonBase)<{ color?: string, outlined?: any }>`
 	white-space: nowrap;
 	align-items: center;
 	padding: 8px 12px 8px 15px;
 	color: ${({ theme }) => theme.palette.tertiary.main};
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	${({ theme }) => theme.typography.kicker};
 
 	&:hover, &:active {
 		background-color: ${({ theme }) => theme.palette.tertiary.lighter};

@@ -16,7 +16,7 @@
  */
 import styled, { css } from 'styled-components';
 import { alpha } from '@mui/material/styles';
-import { Button as LabelButton } from '@controls/button/labelButton/labelButton.styles';
+import { LabelButton } from '@controls/button';
 
 export const Container = styled.div<{ selected?: boolean }>`
 	position: relative;
