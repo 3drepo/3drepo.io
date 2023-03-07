@@ -41,6 +41,7 @@ export const Comment = memo(({
 		author,
 		message = '',
 		deleted,
+		createdAt,
 	} = comment;
 	const [commentAge, setCommentAge] = useState('');
 
@@ -48,10 +49,10 @@ export const Comment = memo(({
 	const metadata = extractMetadata(message);
 	const noMetadataMessage = !deleted ? stripMetadata(message) : message;
 
-	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt));
+	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt || createdAt));
 
 	useEffect(() => {
-		if (updatedAt) {
+		if (createdAt) {
 			updateMessageAge();
 			const intervalId = window.setInterval(updateMessageAge, 10_000);
 			return () => clearInterval(intervalId);
