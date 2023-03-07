@@ -79,17 +79,6 @@ const buttonContainerStyling = css`
 	}
 `;
 
-export const secondaryButtonStyling = css`
-	border: 1px solid ${({ theme }) => theme.palette.secondary.main};
-	color: ${({ theme }) => theme.palette.secondary.main};
-	line-height: 1;
-	:hover {
-		background-color: ${({ theme }) => theme.palette.secondary.main};
-		color: ${({ theme }) => theme.palette.primary.contrast};
-		text-decoration: none;
-	}
-`;
-
 export default css`
 	${titleStyling}
 	${contentStyling}
