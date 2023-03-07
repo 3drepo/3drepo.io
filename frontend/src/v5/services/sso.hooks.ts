@@ -16,7 +16,7 @@
  */
 
 import { isNull, omitBy } from 'lodash';
-import { getParams } from '../helpers/url.helper';
+import { addParams, getParams } from '../helpers/url.helper';
 import { errorMessages, signin } from './api/sso';
 import { formatMessage } from './intl';
 import { AuthHooksSelectors } from './selectorsHooks';
@@ -35,10 +35,9 @@ export const useSSOLogin = () => {
 		},
 		{ errorMessage: errorMessages[error] }) : null;
 
-	const { origin } = new URL(window.location.href);
-	const redrectUri = `${origin}${returnUrl.pathname}${returnUrl.search}`;
+	const redirectUri = addParams(returnUrl.pathname, returnUrl.search);
 
-	return [() => signin(redrectUri).then(({ data }) => {
+	return [() => signin(redirectUri).then(({ data }) => {
 		window.location.href = data.link;
 	}), errorMessage, ssoParams.toString()] as [ ()=> void, string | null, string];
 };
