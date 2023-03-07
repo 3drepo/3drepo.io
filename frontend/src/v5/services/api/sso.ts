@@ -35,7 +35,7 @@ export const errorMessages = {
 	[SSOErrorCode.NON_SSO_USER]: formatMessage({ id: 'ssoerror.Code3', defaultMessage: 'Non SSO user already exists' }),
 	[SSOErrorCode.USER_NOT_FOUND]: formatMessage({ id: 'ssoerror.Code4', defaultMessage: 'User not found' }),
 	[SSOErrorCode.UNKNOWN]: formatMessage({ id: 'ssoerror.Code5', defaultMessage: 'Unknown error' }),
-	[SSOErrorCode.EXISTING_USERNAME]: formatMessage({ id: 'ssoerror.Code6', defaultMessage: 'Existing userna' }),
+	[SSOErrorCode.EXISTING_USERNAME]: formatMessage({ id: 'ssoerror.Code6', defaultMessage: 'Existing username' }),
 };
 
 const SSO_ROUTE = 'sso';

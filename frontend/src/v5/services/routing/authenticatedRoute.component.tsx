@@ -30,7 +30,7 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	const history = useHistory();
 	const isAuthenticated: boolean = AuthHooksSelectors.selectIsAuthenticated();
 	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
-	const [,ssoError,,ssoPArams] = useSSOLogin();
+	const [,ssoError, ssoPArams] = useSSOLogin();
 
 	const location = useLocation();
 
