@@ -155,6 +155,17 @@ export const V5UserListOverrides = styled.div`
 			}
 		}
 	}
+
+	// delete button
+	${/* sc-selector */Cell}:last-of-type {
+		svg {
+			width: 15px;
+		}
+
+		.MuiIconButton-root:hover {
+			background-color: transparent;
+		}
+	}
 	
 	${LicencesFooter} {
 		${({ theme }) => theme.typography.body1};

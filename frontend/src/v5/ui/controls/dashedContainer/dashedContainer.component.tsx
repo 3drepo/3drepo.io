@@ -25,6 +25,7 @@ type DashedContainerProps = {
 	dashSize?: number;
 	gapSize?: number;
 	zeroPadding?: boolean;
+	onClick?: (e) => void;
 };
 
 export const DashedContainer = ({ children, ...dashedOptions }: DashedContainerProps) => (

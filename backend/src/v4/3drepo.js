@@ -31,9 +31,25 @@ const vhost = require("vhost");
 const crypto = require("crypto");
 const utils = require("./utils");
 
+const { v5Path } = require("../interop");
+const { sendSystemEmail } = require(`${v5Path}/services/mailer`);
+const { templates } = require(`${v5Path}/services/mailer/mailer.constants`);
+
 const certs = {};
 const certMap = {};
 let sslOptions = {};
+
+process.on("unhandledRejection", async (err) => {
+	try {
+		systemLogger.logError(`Unhandled promise rejection found with error: ${err?.message || err}`);
+		await sendSystemEmail(templates.ERROR_NOTIFICATION.name, {err, title: "Application exiting on unhandled promise rejection", message: "Unhandled promise rejection found"});
+	} catch(mailErr) {
+		systemLogger.logError(`Failed to send email: ${mailErr.message}`);
+	}
+
+	// eslint-disable-next-line no-process-exit
+	process.exit(-1);
+});
 
 function initAPM() {
 	systemLogger.logInfo("Initialising APM:");
