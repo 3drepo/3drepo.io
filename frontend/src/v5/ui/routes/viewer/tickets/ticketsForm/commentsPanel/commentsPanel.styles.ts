@@ -17,7 +17,8 @@
 
 import styled from 'styled-components';
 import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
-import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
+import { TableVirtuoso } from 'react-virtuoso';
+import { ScrollArea } from '@controls/scrollArea';
 
 export const Accordion = styled(AccordionBase)`
 	&& {
@@ -31,13 +32,34 @@ export const Accordion = styled(AccordionBase)`
 	}
 `;
 
+export const VirtuosoScroller = styled(ScrollArea).attrs({
+	hideHorizontal: true,
+	autoHide: true,
+	autoHeight: true,
+	autoHeightMax: 400,
+	autoHeightMin: 400,
+})``;
+
 export const Comments = styled.div`
-	display: flex;
-	flex-direction: column;
-	padding: 0 13px 10px 10px;
-	overflow-x: hidden;
+	height: 400px;
 `;
 
-export const EmptyCommentsBox = styled(EmptyListMessage)`
-	margin: 15px; 
+export const VirtualisedList = styled(TableVirtuoso)`
+	box-sizing: border-box;
+	padding: 0 0 10px;
+	overflow-x: hidden;
+
+	table {
+		display: flex;
+		justify-content: center;
+
+		tr {
+			display: flex;
+			flex-direction: column;
+		}
+	}
+`;
+
+export const EmptyCommentsBox = styled.div`
+	padding: 15px;
 `;
