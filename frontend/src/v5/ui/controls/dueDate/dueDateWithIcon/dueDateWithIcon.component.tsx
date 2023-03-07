@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatDate } from '@/v5/services/intl';
+import { formatShortDate } from '@/v5/helpers/intl.helper';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
@@ -30,11 +30,6 @@ type IDueDateWithIcon = FormInputProps & {
 
 export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: IDueDateWithIcon) => {
 	const isOverdue = value < Date.now();
-	const formattedDate = formatDate(value, {
-		day: 'numeric',
-		month: 'numeric',
-		year: '2-digit',
-	});
 	return (
 		<DueDateWithIconContainer>
 			<BaseDueDate
@@ -45,7 +40,7 @@ export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: IDueDate
 						<Tooltip title={tooltip} arrow>
 							<div ref={args.inputRef}>
 								{value ? (
-									<DateContainer {...args} isOverdue={isOverdue}><CalendarIcon /> {formattedDate}</DateContainer>
+									<DateContainer {...args} isOverdue={isOverdue}><CalendarIcon /> {formatShortDate(value)}</DateContainer>
 								) : (
 									<EmptyDateContainer {...args} disabled={disabled}><CalendarIcon />
 										<FormattedMessage id="dueDate.withIcon.unset" defaultMessage="Unset" />

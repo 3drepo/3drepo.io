@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import byteSize from 'byte-size';
-import { formatMessage, formatRelativeTime } from '../services/intl';
+import { formatDate, formatMessage, formatRelativeTime } from '../services/intl';
 
 type ByteSizeType = {
 	value: number,
@@ -80,3 +80,18 @@ export const getRelativeTime = (from: Date | number) => {
 
 	return formatRelativeTime(-Math.floor(daysDifference / 365), TIME_UNIT.year);
 };
+
+// The default fomatDate format is DD/MM/YYYY
+export const formatShortDate = (date) => formatDate(date, { // DD/MM/YY
+	day: 'numeric',
+	month: 'numeric',
+	year: '2-digit',
+});
+
+export const formatLongDateTime = (date) => formatDate(date, { // DD Month YYYY at hh:mm
+	hour: 'numeric',
+	minute: 'numeric',
+	day: 'numeric',
+	month: 'long',
+	year: 'numeric',
+});

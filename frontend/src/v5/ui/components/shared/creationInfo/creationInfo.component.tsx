@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { getRelativeTime } from '@/v5/helpers/intl.helper';
+import { formatLongDateTime, getRelativeTime } from '@/v5/helpers/intl.helper';
 import { formatDate } from '@/v5/services/intl';
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { UserPopover } from '@components/shared/userPopover/userPopover.component';
@@ -45,13 +45,7 @@ export const CreationInfo = ({
 	const LastUpdated = () => (
 		<HoverPopover anchor={(props) => <span {...props}>{getRelativeTime(updatedAt)}</span>}>
 			<PopoverContainer>
-				{formatDate(updatedAt, {
-					hour: 'numeric',
-					minute: 'numeric',
-					day: 'numeric',
-					month: 'long',
-					year: 'numeric',
-				})}
+				{formatLongDateTime(updatedAt)}
 			</PopoverContainer>
 		</HoverPopover>
 	);
