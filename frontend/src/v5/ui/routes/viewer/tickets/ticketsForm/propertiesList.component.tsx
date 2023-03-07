@@ -22,7 +22,7 @@ import { Fragment } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { TicketProperty } from './properties/properties.helper';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
-import { ErrorTextGap } from './ticketsForm.styles';
+import { ErrorTextGap, PropertiesListContainer } from './ticketsForm.styles';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
@@ -34,7 +34,7 @@ interface PropertiesListProps {
 export const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyBlur }: PropertiesListProps) => {
 	const { formState } = useFormContext();
 	return (
-		<>
+		<PropertiesListContainer>
 			{properties.map(({
 				name,
 				type,
@@ -63,6 +63,6 @@ export const PropertiesList = ({ module, properties, propertiesValues = {}, onPr
 					</Fragment>
 				);
 			})}
-		</>
+		</PropertiesListContainer>
 	);
 };

@@ -57,26 +57,24 @@ export const TicketsTopPanel = ({
 	return (
 		<TopPanel>
 			<BaseTicketInfo>
-				<div>
-					<TitleProperty
-						name={BaseProperties.TITLE}
-						defaultValue={title}
-						formError={formState.errors[BaseProperties.TITLE]}
-						placeholder={formatMessage({
-							id: 'customTicket.topPanel.titlePlaceholder',
-							defaultMessage: 'Ticket name',
-						})}
-						inputProps={{ autoFocus: focusOnTitle }}
-						onBlur={onPropertyBlur}
+				<TitleProperty
+					name={BaseProperties.TITLE}
+					defaultValue={title}
+					formError={formState.errors[BaseProperties.TITLE]}
+					placeholder={formatMessage({
+						id: 'customTicket.topPanel.titlePlaceholder',
+						defaultMessage: 'Ticket name',
+					})}
+					inputProps={{ autoFocus: focusOnTitle }}
+					onBlur={onPropertyBlur}
+				/>
+				{createdAt && (
+					<CreationInfo
+						owner={owner}
+						createdAt={createdAt}
+						updatedAt={updatedAt}
 					/>
-					{createdAt && (
-						<CreationInfo
-							owner={owner}
-							createdAt={createdAt}
-							updatedAt={updatedAt}
-						/>
-					)}
-				</div>
+				)}
 				<DescriptionProperty>
 					<InputController
 						Input={TextAreaFixedSize}

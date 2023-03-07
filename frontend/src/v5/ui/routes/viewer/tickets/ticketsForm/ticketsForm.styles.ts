@@ -38,12 +38,14 @@ export const PanelsContainer = styled.div`
 			border-bottom-left-radius: 6px;
 			border-bottom-right-radius: 6px;
 		}
+	}
+`;
 
-		.MuiAccordionDetails-root > :not(:first-child) {
-			margin-top: 10px;
-			&${ErrorTextGap} {
-				margin: 0;
-			}
+export const PropertiesListContainer = styled.div`
+	> :not(:first-child) {
+		margin: 10px 0 0;
+		&${ErrorTextGap} {
+			margin: 0;
 		}
 	}
 `;
