@@ -17,6 +17,7 @@
 
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { getErrorCode, isPathNotFound } from '@/v5/validation/errors.helpers';
+import { MODAL_TEMPLATES } from '@components/shared/modalsDispatcher/templates';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
@@ -64,14 +65,16 @@ export const dialogsReducer = createReducer(INITIAL_STATE, produceAll({
 type OpenAction = Action<'OPEN'> & { modalType: string | ((any) => JSX.Element), props: any };
 type CloseAction = Action<'CLOSE'> & { dialogId: string };
 
+export type ModalType = keyof typeof MODAL_TEMPLATES | ((any) => JSX.Element);
+
 export interface IDialogsActionCreators {
-	open: (type?: string | ((any) => JSX.Element), props?: any) => OpenAction;
+	open: (type?: ModalType, props?: any) => OpenAction;
 	close: (id: string) => CloseAction;
 }
 
 export interface IDialogConfig {
 	id: string;
-	modalType?: 'delete' | 'warning' | 'alert' | 'info' | ((any) => JSX.Element);
+	modalType?: ModalType;
 	props: any;
 }
 
