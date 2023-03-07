@@ -142,6 +142,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 						initialTopMostItemIndex={commentsLength - 1}
 						followOutput={() => true}
 						components={{ Scroller }}
+						overscan={800}
 						itemContent={(index, comment: ITicketComment) => (
 							<>
 								<Comment
