@@ -39,7 +39,6 @@ import { Accordion, Comments, EmptyCommentsBox, VirtualisedList, VirtuosoScrolle
 import { Comment } from './comment/comment.component';
 import { CreateCommentBox } from './createCommentBox/createCommentBox.component';
 
-
 const Scroller = forwardRef((props, ref: MutableRefObject<HTMLDivElement | null>) => (
 	<VirtuosoScroller
 		ref={(scrollerRef) => {
@@ -49,11 +48,12 @@ const Scroller = forwardRef((props, ref: MutableRefObject<HTMLDivElement | null>
 			scrollerContainer.setAttribute('data-test-id', 'virtuoso-scroller');
 			scrollerContainer.setAttribute('data-virtuoso-scroller', true);
 			scrollerContainer.setAttribute('tabindex', 0);
-			return ref.current = scrollerContainer;
+			// eslint-disable-next-line no-param-reassign
+			ref.current = scrollerContainer;
 		}}
 		{...omit(props, ['data-test-id', 'data-virtuoso-scroller', 'tabindex', 'style'])}
 	/>
-))
+));
 
 type CommentsPanelProps = {
 	scrollPanelIntoView: (event, isExpanding) => void,
@@ -140,7 +140,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 					<VirtualisedList
 						data={comments}
 						initialTopMostItemIndex={commentsLength - 1}
-						followOutput={(_) => true}
+						followOutput={() => true}
 						components={{ Scroller }}
 						itemContent={(index, comment: ITicketComment) => (
 							<>
