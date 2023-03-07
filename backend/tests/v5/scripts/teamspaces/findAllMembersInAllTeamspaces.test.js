@@ -36,7 +36,7 @@ const FindAllMembers = require(`${utilScripts}/teamspaces/findAllMembersInAllTea
 
 const { saveSuccessfulLoginRecord } = require(`${src}/models/loginRecords`);
 const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
-const { updateOne } = require(`${src}/handler/db`);
+const { disconnect, updateOne } = require(`${src}/handler/db`);
 
 const runTest = (testData) => {
 	describe('Find all members in all teamspaces', () => {
@@ -126,4 +126,5 @@ describe(determineTestGroup(__filename), () => {
 		await setupData(data);
 	});
 	runTest(data);
+	afterAll(disconnect);
 });

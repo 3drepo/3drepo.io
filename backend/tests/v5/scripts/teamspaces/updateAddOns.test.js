@@ -30,6 +30,8 @@ const { getAddOns, updateAddOns } = require(`${src}/models/teamspaceSettings`);
 const { ADD_ONS } = require(`${src}/models/teamspaces.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
+const { disconnect } = require(`${src}/handler/db`);
+
 const setupData = async (data) => {
 	await Promise.all(Object.keys(data).map(async (index) => {
 		const { name, addOns } = data[index];
@@ -127,4 +129,5 @@ const createData = () => ({
 describe(determineTestGroup(__filename), () => {
 	const data = createData();
 	runTest(data);
+	afterAll(disconnect);
 });

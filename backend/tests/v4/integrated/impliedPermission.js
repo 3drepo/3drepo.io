@@ -1,5 +1,7 @@
 "use strict";
 
+const { queue: {purgeQueues}} = require("../../v5/helper/services");
+
 // test implied permission like admin of teamspace can do everything in their own teamspace and
 // admin of an project can do everything in their own project, and all the crazy wildcard permissions
 // for all models in a project
@@ -20,7 +22,6 @@ describe("Implied permission::", function () {
 		"code": "00123",
 		"unit": "m",
 	};
-	const q = require("../../../src/v4/services/queue");
 
 	const baseIssue = {
 		"status": "open",
@@ -43,7 +44,7 @@ describe("Implied permission::", function () {
 		"creator_role":"jobA",
 		"assigned_roles":["jobB"]
 	};
-	
+
 	const baseView = {
 		"viewpoint":{
 			"up":[0,1,0],
@@ -52,7 +53,7 @@ describe("Implied permission::", function () {
 			"view_dir":[0,0,-1],
 			"right":[1,0,0]
 		}
-	};	
+	};
 
 	before(function(done) {
 		server = app.listen(8080, function () {
@@ -93,15 +94,7 @@ describe("Implied permission::", function () {
 				});
 		});
 
-		after(function() {
-			return q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
-				return q.channel.purgeQueue(q.workerQName);
-			}).then(() => {
-				q.channel.assertQueue(q.modelQName, { durable: true }).then(() => {
-					return q.channel.purgeQueue(q.modelQName);
-				});
-			});
-		});
+		after(purgeQueues);
 
 		// list teamspaces api show implied permissions
 		it("list teamspaces api show correct inherited and implied permissions (1)", function(done) {
@@ -326,9 +319,7 @@ describe("Implied permission::", function () {
 				});
 		});
 
-		after(function() {
-			return q.channel.purgeQueue(q.workerQName);
-		});
+		after(purgeQueues);
 
 		// list teamspaces api show implied permissions
 		it("list teamspaces api show correct inherited and implied permissions(2)", function(done) {
@@ -439,7 +430,6 @@ describe("Implied permission::", function () {
 		it("can create federation in your own project", function(done) {
 
 			const modelName = "fedmodel123";
-			const q = require("../../../src/v4/services/queue");
 			let corId, appId;
 
 			agent
@@ -693,9 +683,7 @@ describe("Implied permission::", function () {
 				});
 		});
 
-		after(function() {
-			return q.channel.purgeQueue(q.workerQName);
-		});
+		after(purgeQueues);
 
 		// list teamspaces api show implied permissions
 		it("list teamspaces api show correct inherited and implied permissions (3)", function(done) {
@@ -1016,9 +1004,7 @@ describe("Implied permission::", function () {
 				});
 		});
 
-		after(function() {
-			return q.channel.purgeQueue(q.workerQName);
-		});
+		after(purgeQueues);
 
 		it("list teamspaces api show correct inherited and implied permissions (4)", function(done) {
 			agent
@@ -1330,9 +1316,7 @@ describe("Implied permission::", function () {
 				});
 		});
 
-		after(function() {
-			return q.channel.purgeQueue(q.workerQName);
-		});
+		after(purgeQueues);
 
 		it("list teamspaces api show correct inherited and implied permissions (5)", function(done) {
 			agent

@@ -38,4 +38,4 @@ export const enableRealtimeFederationRemoved = (teamspace:string, project:string
 export const enableRealtimeFederationNewRevision = (teamspace:string, project:string, federationId:string) =>
 	subscribeToRoomEvent({ teamspace, project, model: federationId }, 'federationNewRevision',
 		(revision: FederationRevision) =>
-			FederationsActionsDispatchers.updateFederationSuccess(project, federationId, revision));
+			FederationsActionsDispatchers.updateFederationSuccess(project, federationId, { revision }));

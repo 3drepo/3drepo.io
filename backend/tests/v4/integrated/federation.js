@@ -16,6 +16,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { queue: {purgeQueues}} = require("../../v5/helper/services");
 
 const request = require("supertest");
 const expect = require("chai").expect;
@@ -63,18 +64,10 @@ describe("Federated Model", function () {
 	});
 
 	after(function(done) {
-		const q = require("../../../src/v4/services/queue");
-
-		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
-			return q.channel.purgeQueue(q.workerQName);
-		}).then(() => {
-			q.channel.assertQueue(q.modelQName, { durable: true }).then(() => {
-				return q.channel.purgeQueue(q.modelQName);
-			}).then(() => {
-				server.close(function() {
-					console.log("API test server is closed");
-					done();
-				});
+		purgeQueues().then(() => {
+			server.close(function() {
+				console.log("API test server is closed");
+				done();
 			});
 		});
 	});
@@ -82,7 +75,6 @@ describe("Federated Model", function () {
 	it("should be created successfully", function(done) {
 		this.timeout(5000);
 
-		const q = require("../../../src/v4/services/queue");
 		let corId, appId;
 
 		agent.post(`/${username}/model`)
@@ -248,12 +240,9 @@ describe("Federated Model", function () {
 
 		this.timeout(5000);
 
-		const q = require("../../../src/v4/services/queue");
 		let corId, appId;
 
-		q.channel.assertQueue(q.workerQName, { durable: true }).then(() => {
-			return q.channel.purgeQueue(q.workerQName);
-		}).then(() => {
+		purgeQueues().then(() => {
 			agent.post(`/${username}/model`)
 				.send({
 					modelName: "dupfed",
@@ -337,7 +326,6 @@ describe("Federated Model", function () {
 	it("update should succeed if model is a federation", function(done) {
 		this.timeout(5000);
 
-		const q = require("../../../src/v4/services/queue");
 		let corId, appId;
 
 		agent.put(`/${username}/${fedModelId}`)

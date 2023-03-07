@@ -44,6 +44,7 @@ const runSessionsRemovedTests = () => {
 
 			await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
 			await expect(onLogOutMessage).resolves.toEqual({ reason: 'You have logged in else where' });
+			socket.close();
 		});
 
 		test('Should log user out if they are logged in else where (login after socket connection)', async () => {
@@ -57,6 +58,7 @@ const runSessionsRemovedTests = () => {
 
 			await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
 			await expect(onLogOutMessage).resolves.toEqual({ reason: 'You have logged in else where' });
+			socket.close();
 		});
 
 		test('Should not log the user out if the referrer is different', async () => {
@@ -73,6 +75,7 @@ const runSessionsRemovedTests = () => {
 				{ ...headers, referer: `https://${ServiceHelper.generateRandomString()}.com` });
 			await expect(onLogOutMessage).resolves.toBeUndefined();
 			expect(fn).not.toHaveBeenCalled();
+			socket.close();
 		});
 
 		test('Should not affect a different user', async () => {
@@ -88,15 +91,16 @@ const runSessionsRemovedTests = () => {
 			await ServiceHelper.loginAndGetCookie(agent, anotherUser.user, anotherUser.password, headers);
 			await expect(onLogOutMessage).resolves.toBeUndefined();
 			expect(fn).not.toHaveBeenCalled();
+			socket.close();
 		});
 	});
 };
 
-describe('E2E Chat Service (Session Channel)', () => {
+describe(ServiceHelper.determineTestGroup(__filename), () => {
 	let server;
 	let chatApp;
 	beforeAll(async () => {
-		server = ServiceHelper.app();
+		server = await ServiceHelper.app();
 		chatApp = await ServiceHelper.chatApp();
 		agent = await SuperTest(server);
 		await setupData();
