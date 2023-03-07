@@ -36,6 +36,8 @@ const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 
 const entriesLimit = 500;
 
+const DEFAULT_REV_AGE = 14;
+
 const removeFilesHelper = async (ts, col, query) => {
 	try {
 		await removeFilesWithMeta(ts, col, query);
@@ -190,7 +192,7 @@ const processTeamspace = async (teamspace, revisionAge) => {
 	}
 };
 
-const run = async (revisionAge, force) => {
+const run = async (revisionAge = DEFAULT_REV_AGE, force) => {
 	if (revisionAge < 0 || Number.isNaN(Number(revisionAge))) {
 		throw new Error('Revision age must be a positive number');
 	}
@@ -224,7 +226,7 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 	const argsSpec = (subYargs) => subYargs.option('revisionAge', {
 		describe: 'Days threshold for failed revisions',
 		type: 'number',
-		default: 14,
+		default: DEFAULT_REV_AGE,
 	}).option('force', {
 		describe: 'Ignore low revision age, never prompt',
 		type: 'boolean',

@@ -1,0 +1,9 @@
+{
+	"daily": [
+		{ "name": "cleanUpSharedDir" },
+		{ "name": "removeUnverifiedUsers" }
+	],
+	"weekly": [
+		{"name": "removeIncompleteRevisions"}
+	]
+}
