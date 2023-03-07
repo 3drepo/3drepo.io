@@ -35,10 +35,12 @@ export const Accordion = styled(AccordionBase)`
 export const VirtuosoScroller = styled(ScrollArea).attrs({
 	hideHorizontal: true,
 	autoHide: true,
-	autoHeight: true,
-	autoHeightMax: 400,
-	autoHeightMin: 400,
-})``;
+})`
+	& > :first-child {
+		margin-bottom: 0 !important;
+		overflow-x: hidden !important;
+	}
+`;
 
 export const Comments = styled.div`
 	height: 400px;
@@ -46,7 +48,6 @@ export const Comments = styled.div`
 
 export const VirtualisedList = styled(TableVirtuoso)`
 	box-sizing: border-box;
-	padding: 0 0 10px;
 	overflow-x: hidden;
 
 	table {
