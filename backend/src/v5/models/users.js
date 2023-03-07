@@ -41,6 +41,8 @@ User.authenticate = async (user, password) => {
 	throw templates.incorrectUsernameOrPassword;
 };
 
+User.getUsersByQuery = (query, projection) => db.find(USERS_DB_NAME, USERS_COL, query, projection);
+
 User.getUserByQuery = async (query, projection) => {
 	const userDoc = await userQuery(query, projection);
 	if (!userDoc) {
@@ -167,6 +169,7 @@ User.addUser = async (newUserData) => {
 };
 
 User.removeUser = (user) => db.deleteOne(USERS_DB_NAME, USERS_COL, { user });
+User.removeUsers = (users) => db.deleteMany(USERS_DB_NAME, USERS_COL, { user: { $in: users } });
 
 User.verify = async (username) => {
 	const { customData } = await db.findOneAndUpdate(USERS_DB_NAME, USERS_COL, { user: username },
