@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { forwardRef, ComponentProps } from 'react';
 import { Checkbox } from './checkbox/checkbox.component';
 import { DatePicker } from './datePicker/datePicker.component';
 import { DateTimePicker } from './datePicker/dateTimePicker.component';
-import { InputController } from './inputController.component';
+import { InputController, InputControllerProps } from './inputController.component';
 import { MultiSelect } from './multiSelect/multiSelect.component';
 import { NumberField } from './numberField/numberField.component';
 import { PasswordField } from './passwordField/passwordField.component';
@@ -29,22 +30,25 @@ import { TextAreaFixedSize } from './textArea/textAreaFixedSize.component';
 import { TextField } from './textField/textField.component';
 import { Toggle } from './toggle/toggle.component';
 
+// @ts-ignore
+type FormType<T> = Omit<InputControllerProps<ComponentProps<T>>, 'Input'>;
+
 // text inputs
-export const FormNumberField = (props) => (<InputController Input={NumberField} {...props} />);
-export const FormPasswordField = (props) => (<InputController Input={PasswordField} {...props} />);
-export const FormTextArea = (props) => (<InputController Input={TextArea} {...props} />);
-export const FormTextAreaFixedSize = (props) => (<InputController Input={TextAreaFixedSize} {...props} />);
-export const FormTextField = (props) => (<InputController Input={TextField} {...props} />);
+export const FormNumberField = (props: FormType<typeof NumberField>) => (<InputController Input={NumberField} {...props} />);
+export const FormPasswordField = (props: FormType<typeof PasswordField>) => (<InputController Input={PasswordField} {...props} />);
+export const FormTextField = (props: FormType<typeof TextField>) => (<InputController Input={TextField} {...props} />);
+export const FormTextArea = (props: FormType<typeof TextArea>) => (<InputController Input={TextArea} {...props} />);
+export const FormTextAreaFixedSize = forwardRef((props: FormType<typeof TextAreaFixedSize>, ref) => (<InputController Input={TextAreaFixedSize} {...props} ref={ref} />));
 
 // calendar inputs
-export const FormDatePicker = (props) => (<InputController Input={DatePicker} {...props} />);
-export const FormDateTimePicker = (props) => (<InputController Input={DateTimePicker} {...props} />);
+export const FormDatePicker = (props: FormType<typeof DatePicker>) => (<InputController Input={DatePicker} {...props} />);
+export const FormDateTimePicker = (props: FormType<typeof DateTimePicker>) => (<InputController Input={DateTimePicker} {...props} />);
 
 // select inputs
-export const FormMultiSelect = (props) => (<InputController Input={MultiSelect} {...props} />);
-export const FormSelectView = (props) => (<InputController Input={SelectView} {...props} />);
-export const FormSelect = (props) => (<InputController Input={Select} {...props} />);
+export const FormMultiSelect = (props: FormType<typeof MultiSelect>) => (<InputController Input={MultiSelect} {...props} />);
+export const FormSelectView = (props: FormType<typeof SelectView>) => (<InputController Input={SelectView} {...props} />);
+export const FormSelect = (props: FormType<typeof Select>) => (<InputController Input={Select} {...props} />);
 
 // control inputs
-export const FormCheckbox = (props) => (<InputController Input={Checkbox} {...props} />);
-export const FormToggle = (props) => (<InputController Input={Toggle} {...props} />);
+export const FormCheckbox = (props: FormType<typeof Checkbox>) => (<InputController Input={Checkbox} {...props} />);
+export const FormToggle = (props: FormType<typeof Toggle>) => (<InputController Input={Toggle} {...props} />);
