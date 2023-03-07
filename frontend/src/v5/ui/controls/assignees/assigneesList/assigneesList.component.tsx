@@ -20,23 +20,25 @@ import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { intersection } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { AssigneeListItem } from './assigneeListItem/assigneeListItem.component';
+import { AssigneesListContainer } from './assigneesList.styles';
 import { ExtraAssigneesCircle } from './extraAssignees/extraAssigneesCircle.component';
 import { ExtraAssigneesPopover } from './extraAssignees/extraAssigneesPopover.component';
 
 type IAssigneesList = {
 	values: string[];
 	maxItems: number;
+	onClick?: (e) => void;
 	className?: string;
 };
 
-export const AssigneesList = ({ values, maxItems = 3, className }: IAssigneesList) => {
+export const AssigneesList = ({ values, maxItems = 3, onClick, className }: IAssigneesList) => {
 	const allUsersAndJobs = UsersHooksSelectors.selectAssigneesListItems();
 	const filteredValues = intersection(values, allUsersAndJobs.map((i) => i.value));
 	const overflowRequired = filteredValues.length > maxItems;
 	const listedAssignees = overflowRequired ? filteredValues.slice(0, maxItems - 1) : filteredValues;
 	const overflowValue = overflowRequired ? filteredValues.slice(maxItems - 1).length : 0;
 	return (
-		<div className={className}>
+		<AssigneesListContainer onClick={onClick} className={className}>
 			{listedAssignees.length ? (
 				listedAssignees.map((assignee) => (
 					<AssigneeListItem key={assignee} assignee={assignee} />
@@ -51,6 +53,6 @@ export const AssigneesList = ({ values, maxItems = 3, className }: IAssigneesLis
 					<ExtraAssigneesPopover assignees={filteredValues} />
 				</HoverPopover>
 			) : <></>}
-		</div>
+		</AssigneesListContainer>
 	);
 };
