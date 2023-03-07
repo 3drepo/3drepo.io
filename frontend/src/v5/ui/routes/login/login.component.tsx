@@ -64,7 +64,7 @@ export const Login = () => {
 	const [loginWithSSO, ssoErrorMessage, isLoggingWithSSO] = useSSOLogin();
 
 	if (isLoggingWithSSO) {
-		return null;
+		return (null);
 	}
 
 	return (

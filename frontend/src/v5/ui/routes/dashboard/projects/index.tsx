@@ -19,12 +19,12 @@ import { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { useRouteMatch, Switch, Redirect, useLocation } from 'react-router-dom';
 
-import { discardSlash } from '@/v5/services/routing/routing';
 import { DashboardParams, NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DashboardFooter } from '@components/shared/dashboardFooter';
 import { formatMessage } from '@/v5/services/intl';
 import { Route } from '@/v5/services/routing/route.component';
+import { discardSlash } from '@/v5/helpers/url.helper';
 import { Federations } from './federations';
 import { Containers } from './containers';
 import { UserPermissions } from './userPermissions/userPermissions.component';

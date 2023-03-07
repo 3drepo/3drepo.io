@@ -105,7 +105,6 @@ const CustomLogo = styled.img.attrs({
 `;
 
 export const Logo = styled(customLogoPath ? CustomLogo : DefaultLogo)``;
-
 export const BlueLogo = styled(Logo)`
 	color: ${({ theme }) => theme.palette.secondary.main};
 `;
@@ -150,7 +149,7 @@ export const MicrosoftButton = styled(Button).attrs({
 	font-weight: 500;
 	font-size: 12px;
 	border-radius: 0;
-	background-color: #2F2F2F; // The colour is hardcoded as this are microsoft specs and not part of the theme
+	background-color: #2F2F2F; /* The colour is hardcoded as this are microsoft specs and not part of the theme */
 
 	&:hover, &:active {
 		background-color: #2F2F2FF0; 

@@ -15,31 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useLocation, useHistory } from 'react-router-dom';
-import { DASHBOARD_ROUTE } from '../ui/routes/routes.constants';
+import { isNull, omitBy } from 'lodash';
+import { getParams } from '../helpers/url.helper';
 import { errorMessages, signin } from './api/sso';
 import { formatMessage } from './intl';
+import { AuthHooksSelectors } from './selectorsHooks';
 
 export const useSSOLogin = () => {
-	const history = useHistory();
-	const { search } = useLocation();
-	const searchParams = new URLSearchParams(search);
-	const isLogingIn = !!searchParams.get('loginPost') && !searchParams.get('error');
+	const searchParams = getParams();
+	const loginPost = searchParams.get('loginPost');
+	const error = searchParams.get('error');
 
-	if (isLogingIn) {
-		history.push(DASHBOARD_ROUTE);
-	}
+	const isLoggingIn = !!loginPost && !error;
+	const returnUrl = AuthHooksSelectors.selectReturnUrl();
+	const ssoPArams = new URLSearchParams(omitBy({ loginPost, error }, isNull)).toString();
 
-	const errorMessage = searchParams.get('error')
+	const errorMessage = error
 		? formatMessage({
 			id: 'auth.ssoerror',
 			defaultMessage: 'Error authenticating: {errorMessage}',
 		},
-		{
-			errorMessage: errorMessages[searchParams.get('error')],
-		}) : null;
+		{ errorMessage: errorMessages[error] }) : null;
 
-	return [() => signin().then(({ data }) => {
+	const { origin } = new URL(window.location.href);
+	const redrectUri = `${origin}${returnUrl.pathname}${returnUrl.search}`;
+
+	return [() => signin(redrectUri).then(({ data }) => {
 		window.location.href = data.link;
-	}), errorMessage, isLogingIn] as [ ()=> void, string | null, boolean];
+	}), errorMessage, isLoggingIn, ssoPArams.toString()] as [ ()=> void, string | null, boolean, string];
 };
