@@ -29,7 +29,7 @@ export const Container = styled(ContainerBase)`
 	}
 
 	${Title} {
-		margin-bottom: 40px;
+		margin-bottom: 15px;
 		font-weight: ${FONT_WEIGHT.BOLDER};
 	}
 
