@@ -16,7 +16,7 @@
  */
 
 import { useFormContext } from 'react-hook-form';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
@@ -56,9 +56,10 @@ export const EditProfileAuthenticationNonSSOTab = ({
 	unexpectedError,
 	onClickClose,
 }: EditProfileAuthenticationNonSSOTabProps) => {
+	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
 	const { errorCode, unlinkPost, reset: resetSSOParams } = useSSO();
 	const {
-		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, touchedFields },
+		formState: { errors, isValid: formIsValid, isSubmitting, touchedFields },
 		control,
 		trigger,
 		reset,
@@ -73,11 +74,13 @@ export const EditProfileAuthenticationNonSSOTab = ({
 	const onSubmit = async () => {
 		setIncorrectPassword(false);
 		await API.CurrentUser.updateUser({ oldPassword, newPassword });
+		setSubmitWasSuccessful(true);
 		reset();
 		resetSSOParams();
 	};
 
 	const onSubmitError = (apiError) => {
+		setSubmitWasSuccessful(false);
 		if (isPasswordIncorrect(apiError)) {
 			setIncorrectPassword(true);
 		}
@@ -156,7 +159,7 @@ export const EditProfileAuthenticationNonSSOTab = ({
 					error={unexpectedError}
 					expectedErrorValidators={[isPasswordIncorrect]}
 				/>
-				{isSubmitSuccessful && !unlinkPost && (
+				{submitWasSuccessful && (
 					<SuccessMessage>
 						<FormattedMessage
 							id="editProfile.form.updatePasswordSuccess"
