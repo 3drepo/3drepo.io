@@ -28,6 +28,7 @@ const { times } = require('lodash');
 const { src, utilScripts } = require('../../helper/path');
 
 const RemoveUnverifiedUsers = require(`${utilScripts}/users/removeUnverifiedUsers`);
+const { disconnect } = require(`${src}/handler/db`);
 
 const { getUsersByQuery } = require(`${src}/models/users`);
 
@@ -83,4 +84,5 @@ const runTest = () => {
 
 describe(determineTestGroup(__filename), () => {
 	runTest();
+	afterAll(disconnect);
 });
