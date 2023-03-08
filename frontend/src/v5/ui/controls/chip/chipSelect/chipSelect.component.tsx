@@ -36,7 +36,6 @@ export const ChipSelect = ({
 	defaultValue,
 	onBlur,
 	onChange,
-	inputRef,
 	error,
 	helperText,
 	...props
@@ -59,7 +58,6 @@ export const ChipSelect = ({
 				onChange={onChange}
 				value={value}
 				defaultValue={defaultValue}
-				inputRef={inputRef}
 				error={error}
 				helperText={helperText}
 			>
