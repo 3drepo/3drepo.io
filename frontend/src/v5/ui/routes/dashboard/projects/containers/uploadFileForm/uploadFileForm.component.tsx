@@ -23,11 +23,14 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { RevisionsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Sidebar } from '@controls/sideBar';
+import { Button } from '@controls/button';
 import { IContainer, UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
 import { UploadsSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
+import { Typography } from '@controls/typography';
+import { FileInputField } from '@controls/fileInputField/fileInputField.component';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import {
@@ -37,9 +40,10 @@ import {
 	ContainersHooksSelectors,
 	FederationsHooksSelectors,
 } from '@/v5/services/selectorsHooks';
+import { getSupportedFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadList } from './uploadList';
 import { SidebarForm } from './sidebarForm';
-import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll } from './uploadFileForm.styles';
+import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
 
 type IUploadFileForm = {
 	presetContainerId?: string;
@@ -246,17 +250,45 @@ export const UploadFileForm = ({
 								</>
 							)}
 							<DropZone
-								message={formatMessage(
-									{ id: 'uploads.dropzone.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>' },
-									{ MoreLink:
-										(child: string) => (
-											<a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a>
-										),
-									},
-								)}
-								processFiles={(files) => addFilesToList({ files })}
 								hidden={isUploading}
-							/>
+								onDrop={(files) => addFilesToList({ files })}
+								accept={getSupportedFileExtensions()}
+							>
+								<Typography variant="h3" color="secondary">
+									<FormattedMessage id="dragAndDrop.drop" defaultMessage="Drop files here" />
+								</Typography>
+								<Typography variant="h5" color="secondary">
+									<FormattedMessage id="dragAndDrop.or" defaultMessage="or" />
+								</Typography>
+								<FileInputField
+									accept={getSupportedFileExtensions()}
+									onChange={(files) => addFilesToList({ files })}
+								>
+									<Button component="span" size="medium" variant="contained" color="primary">
+										<FormattedMessage
+											id="uploads.fileInput.browse"
+											defaultMessage="Browse"
+										/>
+									</Button>
+								</FileInputField>
+								<HelpText>
+									<FormattedMessage
+										id="uploads.dropzone.message"
+										defaultMessage="Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>"
+										values={{
+											MoreLink: (child: string) => (
+												<a
+													href="https://help.3drepo.io/en/articles/4798885-supported-file-formats"
+													target="_blank"
+													rel="noreferrer"
+												>
+													{child}
+												</a>
+											),
+										}}
+									/>
+								</HelpText>
+							</DropZone>
 						</Padding>
 					</UploadsListScroll>
 					<Sidebar
