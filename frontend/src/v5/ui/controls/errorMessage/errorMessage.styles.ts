@@ -16,21 +16,9 @@
  */
 
 import styled from 'styled-components';
-import ErrorIconBase from '@assets/icons/twoToned/warning_small-two_toned.svg';
+import { PostSubmitSuccessfulMessage } from '@controls/successMessage/successMessage.styles';
 
-export const Container = styled.div`
+export const Container = styled(PostSubmitSuccessfulMessage)`
 	color: ${({ theme }) => theme.palette.error.main};
-	${({ theme }) => theme.typography.body1};
-	font-weight: 500;
-	justify-content: flex-start;
-	display: flex;
-	margin-top: 19px;
-`;
-
-export const ErrorIcon = styled(ErrorIconBase)`
-	min-width: 18px;
-`;
-
-export const Message = styled.div`
-	margin-left: 8px;
+	background-color: ${({ theme }) => theme.palette.error.lightest};
 `;

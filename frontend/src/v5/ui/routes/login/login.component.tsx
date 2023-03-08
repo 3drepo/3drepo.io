@@ -86,7 +86,7 @@ export const Login = () => {
 					required
 				/>
 				<UnhandledErrorInterceptor expectedErrorValidators={[isExpectedError]} />
-				{errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
+				{errorMessage && <ErrorMessage title={errorMessage} />}
 				<OtherOptions>
 					<SignUpPrompt>
 						<FormattedMessage

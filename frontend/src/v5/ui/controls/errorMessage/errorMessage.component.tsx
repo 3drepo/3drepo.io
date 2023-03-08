@@ -14,18 +14,23 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Container, ErrorIcon, Message } from './errorMessage.styles';
+import CrossIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
+import { Typography } from '@controls/typography';
+import { Container } from './errorMessage.styles';
+import { IconContainer } from '../successMessage/successMessage.styles';
 
 type ErrorMessageProps = {
-	children: any,
+	title?: string,
 	className?: string,
+	children?: any,
 };
-
-export const ErrorMessage = ({ children, className }: ErrorMessageProps) => (
+export const ErrorMessage = ({ title, children, className }: ErrorMessageProps) => (
 	<Container className={className}>
-		<ErrorIcon />
-		<Message>
-			{children}
-		</Message>
+		<IconContainer>
+			<CrossIcon />
+		</IconContainer>
+		{title && (<Typography variant="h5">{title}</Typography>)}
+		{title && children && (<span />)}
+		{children && <Typography variant="body1">{children}</Typography>}
 	</Container>
 );

@@ -95,7 +95,7 @@ export const PasswordChange = () => {
 							/>
 						</AuthParagraph>
 					)}
-				{errorMessage && <ErrorMessage><ErrorIcon />{errorMessage}</ErrorMessage>}
+				{errorMessage && <ErrorMessage title={errorMessage} />}
 				<ReturnLink />
 			</AuthForm>
 		</AuthTemplate>
