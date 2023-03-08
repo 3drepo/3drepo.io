@@ -18,8 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { TicketDetailsAssignees } from '@controls/assignees/ticketDetailsAssignees/ticketDetailsAssignees.component';
 import { PRIORITY_LEVELS_MAP, STATUS_MAP } from '@controls/chip/chip.types';
-import { ChipSelect } from '@controls/chip/chipSelect/chipSelect.component';
-import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
+import { FormChipSelect, FormDueDateWithIcon } from '@controls/inputs/formInputs.component';
 import { InputController } from '@controls/inputs/inputController.component';
 
 import { FormattedMessage } from 'react-intl';
@@ -39,8 +38,7 @@ export const IssuePropertiesRow = ({ onBlur }: IIssuePropertiesRow) => (
 					defaultMessage="Priority"
 				/>
 			</PropertyTitle>
-			<InputController
-				Input={ChipSelect}
+			<FormChipSelect
 				variant="text"
 				tooltip={formatMessage({
 					id: 'customTicket.topPanel.priority.tooltip',
@@ -61,8 +59,7 @@ export const IssuePropertiesRow = ({ onBlur }: IIssuePropertiesRow) => (
 					defaultMessage="Due"
 				/>
 			</PropertyTitle>
-			<InputController
-				Input={DueDateWithIcon}
+			<FormDueDateWithIcon
 				tooltip={formatMessage({
 					id: 'customTicket.topPanel.dueDate.tooltip',
 					defaultMessage: 'Set due date',
@@ -80,8 +77,7 @@ export const IssuePropertiesRow = ({ onBlur }: IIssuePropertiesRow) => (
 					defaultMessage="Status"
 				/>
 			</PropertyTitle>
-			<InputController
-				Input={ChipSelect}
+			<FormChipSelect
 				variant="text"
 				tooltip={formatMessage({
 					id: 'customTicket.topPanel.status.tooltip',

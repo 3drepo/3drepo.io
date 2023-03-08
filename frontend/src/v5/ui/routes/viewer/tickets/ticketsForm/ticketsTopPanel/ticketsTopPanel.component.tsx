@@ -20,8 +20,7 @@ import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
 import { CreationInfo } from '@components/shared/creationInfo/creationInfo.component';
-import { InputController } from '@controls/inputs/inputController.component';
-import { TextAreaFixedSize } from '@controls/inputs/textArea/textAreaFixedSize.component';
+import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
 import { filter } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { BaseProperties, IssueProperties } from '../../tickets.constants';
@@ -76,8 +75,7 @@ export const TicketsTopPanel = ({
 					/>
 				)}
 				<DescriptionProperty>
-					<InputController
-						Input={TextAreaFixedSize}
+					<FormTextAreaFixedSize
 						name={`properties[${BaseProperties.DESCRIPTION}]`}
 						onBlur={onPropertyBlur}
 						placeholder={formatMessage({
