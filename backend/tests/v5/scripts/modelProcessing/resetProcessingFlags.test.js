@@ -26,6 +26,7 @@ const { utilScripts, src } = require('../../helper/path');
 
 const { findModels } = require(`${src}/models/modelSettings`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
+const { disconnect } = require(`${src}/handler/db`);
 
 const ResetProcessingFlags = require(`${utilScripts}/modelProcessing/resetProcessingFlags`);
 
@@ -114,4 +115,5 @@ const runTest = () => {
 
 describe(determineTestGroup(__filename), () => {
 	runTest();
+	afterAll(disconnect);
 });
