@@ -16,10 +16,10 @@
  */
 
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useFormContext } from 'react-hook-form';
+import { useSSO } from '@components/shared/sso/useSSO';
 import { useEffect } from 'react';
 import { EditProfileAuthenticationSSOTab } from './editProfileAuthenticationSSOTab.component';
-import { EditProfileAuthenticationNonSSOTab } from './editProfileAuthenticationBasicNonSSOTab.component';
+import { EditProfileAuthenticationNonSSOTab } from './editProfileAuthenticationNonSSOTab.component';
 
 export interface IUpdatePasswordInputs {
 	oldPassword: string;
@@ -46,10 +46,10 @@ export const EditProfileAuthenticationTab = ({
 	setIncorrectPassword,
 	...props
 }: EditProfileAuthenticationTabProps) => {
+	const { reset: resetSSOParams } = useSSO();
 	const { sso } = CurrentUserHooksSelectors.selectCurrentUser();
-	const { reset } = useFormContext();
 
-	useEffect(() => { reset(EMPTY_PASSWORDS); }, [sso])
+	useEffect(() => resetSSOParams, []);
 
 	if (sso) return (<EditProfileAuthenticationSSOTab {...props} />);
 

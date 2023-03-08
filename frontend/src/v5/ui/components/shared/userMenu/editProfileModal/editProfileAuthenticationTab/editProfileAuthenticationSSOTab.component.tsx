@@ -16,6 +16,7 @@
  */
 
 import { useFormContext } from 'react-hook-form';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
@@ -29,6 +30,9 @@ import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalB
 import { unlinkAccount } from '@/v5/services/api/sso';
 import { MicrosoftInstructionsText } from '@components/shared/sso/microsoftText.styles';
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useSSO } from '@components/shared/sso/useSSO';
+import { SSOErrorResponseMessage } from '@components/shared/sso/ssoResponseHandler/ssoErrorResponseMessage.component';
+import { Gap } from '@controls/gap';
 import { TabContent, MicrosoftTitleText } from '../editProfileModal.styles';
 
 type IUpdateSSOPasswordInputs = {
@@ -47,12 +51,17 @@ export const EditProfileAuthenticationSSOTab = ({
 	unexpectedError,
 	onClickClose,
 }: EditProfileAuthenticationSSOTabProps) => {
+	const { errorCode, linkPost, reset: resetSSOParams } = useSSO();
+	const history = useHistory();
+	const { search } = useLocation();
+	const searchParams = new URLSearchParams(search);
 	const {
 		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, touchedFields },
 		control,
 		trigger,
 		watch,
 		handleSubmit,
+		reset,
 	} = useFormContext();
 
 	const newPassword = watch('newPassword');
@@ -61,7 +70,11 @@ export const EditProfileAuthenticationSSOTab = ({
 	const onSubmit = async () => {
 		setIsSubmitting(isSubmitting);
 		await unlinkAccount({ password: newPassword });
+		searchParams.append('unlinkPost', '1');
+		resetSSOParams();
+		reset();
 		CurrentUserActionsDispatchers.updateUserSuccess({ sso: null });
+		history.push({ search: searchParams.toString() });
 	};
 
 	useEffect(() => {
@@ -71,6 +84,17 @@ export const EditProfileAuthenticationSSOTab = ({
 	return (
 		<>
 			<TabContent>
+				{linkPost && !errorCode && (
+					<SuccessMessage>
+						<FormattedMessage
+							id="editProfile.authentication.linkWithMicrosoft.success"
+							defaultMessage={`You have successfully linked your Microsoft account with 3D Repo.
+											Please use the Microsoft button to sign in at log in on your next visit.`}
+						/>
+					</SuccessMessage>
+				)}
+				<SSOErrorResponseMessage />
+				{linkPost && (<Gap />)}
 				<MicrosoftTitleText>
 					<FormattedMessage
 						defaultMessage="Unlink Microsoft Account"

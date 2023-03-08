@@ -28,6 +28,8 @@ import { FormPasswordField } from '@controls/inputs/formInputs.component';
 import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
 import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
 import { MicrosoftButton } from '@components/shared/sso/microsoftButton.component';
+import { useSSO } from '@components/shared/sso/useSSO';
+import { SSOErrorResponseMessage } from '@components/shared/sso/ssoResponseHandler/ssoErrorResponseMessage.component';
 import { Gap } from '@controls/gap';
 import { linkAccount } from '@/v5/services/api/sso';
 import { TabContent } from '../editProfileModal.styles';
@@ -54,6 +56,7 @@ export const EditProfileAuthenticationNonSSOTab = ({
 	unexpectedError,
 	onClickClose,
 }: EditProfileAuthenticationNonSSOTabProps) => {
+	const { errorCode, unlinkPost, reset: resetSSOParams } = useSSO();
 	const {
 		formState: { errors, isValid: formIsValid, isSubmitting, isSubmitSuccessful, touchedFields },
 		control,
@@ -71,6 +74,7 @@ export const EditProfileAuthenticationNonSSOTab = ({
 		setIncorrectPassword(false);
 		await API.CurrentUser.updateUser({ oldPassword, newPassword });
 		reset();
+		resetSSOParams();
 	};
 
 	const onSubmitError = (apiError) => {
@@ -108,6 +112,16 @@ export const EditProfileAuthenticationNonSSOTab = ({
 	return (
 		<>
 			<TabContent>
+				{unlinkPost && !errorCode && (
+					<SuccessMessage>
+						<FormattedMessage
+							id="editProfile.authentication.unlinkWithMicrosoft.success"
+							defaultMessage="You have successfully unlinked your Microsoft account with 3D Repo."
+						/>
+					</SuccessMessage>
+				)}
+				<SSOErrorResponseMessage />
+				{unlinkPost && (<Gap />)}
 				<FormPasswordField
 					control={control}
 					name="oldPassword"
@@ -138,6 +152,18 @@ export const EditProfileAuthenticationNonSSOTab = ({
 					formError={errors.confirmPassword}
 					required
 				/>
+				<UnhandledError
+					error={unexpectedError}
+					expectedErrorValidators={[isPasswordIncorrect]}
+				/>
+				{isSubmitSuccessful && !unlinkPost && (
+					<SuccessMessage>
+						<FormattedMessage
+							id="editProfile.form.updatePasswordSuccess"
+							defaultMessage="Your password has been changed successfully."
+						/>
+					</SuccessMessage>
+				)}
 				<Gap />
 				<MicrosoftText
 					title={formatMessage({
@@ -148,18 +174,6 @@ export const EditProfileAuthenticationNonSSOTab = ({
 				<MicrosoftButton onClick={handleLinkAccount}>
 					<FormattedMessage id="editProfile.authentication.signInWithMicrosoft.button" defaultMessage="Link account with Microsoft" />
 				</MicrosoftButton>
-				<UnhandledError
-					error={unexpectedError}
-					expectedErrorValidators={[isPasswordIncorrect]}
-				/>
-				{isSubmitSuccessful && (
-					<SuccessMessage>
-						<FormattedMessage
-							id="editProfile.form.updatePasswordSuccess"
-							defaultMessage="Your password has been changed successfully."
-						/>
-					</SuccessMessage>
-				)}
 			</TabContent>
 			<FormModalActions>
 				<ModalCancelButton onClick={onClickClose} />
