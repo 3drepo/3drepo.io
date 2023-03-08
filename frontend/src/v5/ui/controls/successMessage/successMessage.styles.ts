@@ -28,7 +28,7 @@ export const PostSubmitSuccessfulMessage = styled.div`
 	display: grid;
 	align-items: center;
 	grid-template-columns: 33px 1fr;
-	grid-template-rows: 25px 1fr;
+	grid-template-rows: minmax(25px, 1fr) auto;
 
 	h5 {
 		// TODO - this value is not aligned between Figma and the Theme
@@ -38,6 +38,7 @@ export const PostSubmitSuccessfulMessage = styled.div`
 
 export const IconContainer = styled.div`
 	display: flex;
+    align-self: start;
 
 	svg {
 		border: solid 2px;
