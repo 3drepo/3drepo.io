@@ -16,7 +16,6 @@
  */
 import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { defaults, isNull, omitBy, pick } from 'lodash';
 import { TabContext } from '@mui/lab';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -57,7 +56,6 @@ export const EditProfileModal = ({ open, onClickClose, initialTab }: EditProfile
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
 	const [unexpectedErrors, setUnexpectedErrors] = useState<EditProfileUnexpectedErrors>({});
 	const interceptedError = useErrorInterceptor();
-
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
 
 	const defaultPersonalValues = defaults(
