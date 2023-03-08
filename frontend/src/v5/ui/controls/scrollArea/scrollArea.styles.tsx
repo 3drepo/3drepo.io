@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Scrollbars from 'react-custom-scrollbars';
+import Scrollbars, { ScrollbarProps } from 'react-custom-scrollbars';
 import styled from 'styled-components';
 import { COLOR } from '@/v5/ui/themes/theme';
 
@@ -44,6 +44,7 @@ const ThumbHorizontal = styled.div<{ variant: ScrollbarVariant }>`
 	border-radius: 3px;
 	height: 6px;
 	background-color: ${({ variant }) => getBackgroundColor(variant)};
+	overflow-x: hidden;
 `;
 
 const TrackVertical = styled.div`
@@ -57,17 +58,22 @@ const TrackHorizontal = styled.div`
 	bottom: 0;
 `;
 
-export const ScrollbarWrapper = styled(Scrollbars).attrs(
-	({ variant, $hidehorizontal }: { variant: ScrollbarVariant, $hidehorizontal: boolean }) => ({
+export type ScrollAreaProps = ScrollbarProps & {
+	variant?: ScrollbarVariant;
+	as?: React.ElementType;
+	hideHorizontal?: boolean;
+};
+export const ScrollArea = styled(Scrollbars).attrs(
+	({ variant = 'base', hideHorizontal = true }: ScrollAreaProps) => ({
 		autoHideTimeout: 1000,
 		autoHideDuration: 300,
 		renderThumbVertical: ({ style }) => <ThumbVertical style={style} variant={variant} />,
 		renderThumbHorizontal: ({ style }) => (
-			$hidehorizontal ? (
+			hideHorizontal ? (
 				<ThumbHorizontal style={style} variant={variant} />
 			) : (<span />)
 		),
 		renderTrackVertical: ({ style }) => <TrackVertical style={style} />,
 		renderTrackHorizontal: ({ style }) => <TrackHorizontal style={style} />,
 	}),
-)``;
+)<ScrollAreaProps>``;

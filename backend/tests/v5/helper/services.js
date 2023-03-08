@@ -646,4 +646,10 @@ ServiceHelper.resetFileshare = () => {
 	fs.mkdirSync(fsDir);
 };
 
+ServiceHelper.resetSharedDir = () => {
+	const fsDir = config.cn_queue.shared_storage;
+	fs.rmSync(fsDir, { recursive: true });
+	fs.mkdirSync(fsDir);
+};
+
 module.exports = ServiceHelper;

@@ -20,7 +20,7 @@ import { getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
 import { CardContent, PanelsContainer } from './ticketsForm.styles';
 import { TicketsTopPanel } from './ticketsTopPanel/ticketsTopPanel.component';
 import { PropertiesList } from './propertiesList.component';
-import { CommentsPanel } from '../commentsPanel/commentsPanel.component';
+import { CommentsPanel } from './commentsPanel/commentsPanel.component';
 
 const SCROLLBAR_ID = 'cardScrollbar';
 interface ModulePanelProps {

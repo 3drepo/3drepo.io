@@ -36,7 +36,6 @@ export interface ITicket {
 	type: string,
 	properties: Property,
 	modules?: Record<string, Property>,
-	comments?: IComment[],
 }
 
 export interface TemplateModule {
@@ -82,27 +81,4 @@ export type Viewpoint = {
 	screenshot?: any;
 	camera: Camera;
 	clippingPlanes?: ClippingPlane[];
-};
-
-export type CommentHistoryBlock = {
-	message: string,
-	images: string[],
-	timestamp: Date,
-};
-
-export type IComment = {
-	_id: string,
-	message?: string,
-	images?: string[],
-	author: string,
-	createdAt: Date,
-	updatedAt: Date,
-	deleted: boolean,
-	history?: CommentHistoryBlock[],
-};
-
-export type CommentReplyMetadata = {
-	_id: string,
-	message: string,
-	author: string,
 };

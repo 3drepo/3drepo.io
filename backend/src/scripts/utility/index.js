@@ -23,17 +23,19 @@ const { hideBin } = require('yargs/helpers');
 const { readdirSync } = require('fs');
 const Path = require('path');
 
+const { handleErrorBeforeExit } = require('../utils');
+
 const scripts = [];
 
-const findScripts = (dir) => {
+const findScripts = (dir, ignoreFiles = true) => {
 	const data = readdirSync(dir, { withFileTypes: true });
 	data.forEach((entry) => {
 		const entryPath = Path.join(dir, entry.name);
 		if (entry.isDirectory()) {
-			findScripts(entryPath, scripts);
+			findScripts(entryPath, false);
 		} else {
 			try {
-				if (Path.extname(entry.name) === '.js' && entryPath !== __filename) {
+				if (!ignoreFiles && Path.extname(entry.name) === '.js') {
 					// eslint-disable-next-line global-require
 					const fn = require(entryPath).genYargs;
 					if (fn) scripts.push(fn);
@@ -46,7 +48,7 @@ const findScripts = (dir) => {
 	});
 };
 
-findScripts(__dirname, scripts);
+findScripts(__dirname);
 const populateCommands = (yargs) => {
 	scripts.forEach((genYargs) => {
 		genYargs(yargs);
@@ -59,7 +61,15 @@ const parser = populateCommands(Yargs(hideBin(process.argv)))
 	.scriptName('yarn run-script')
 	.wrap(Yargs().terminalWidth())
 	.demandCommand()
+	.fail((msg, err) => {
+		if (msg) {
+			Yargs().showHelp();
+		}
+		handleErrorBeforeExit(msg ?? err);
+	})
 	.parse();
 
-// eslint-disable-next-line no-console
-Promise.resolve(parser).catch(console.error).finally(process.exit);
+Promise.resolve(parser).catch(handleErrorBeforeExit).finally(() => {
+	// eslint-disable-next-line no-process-exit
+	process.exit();
+});

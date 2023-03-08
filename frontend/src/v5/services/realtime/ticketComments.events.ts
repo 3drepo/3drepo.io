@@ -16,9 +16,9 @@
  */
 /* eslint-disable implicit-arrow-linebreak */
 
-import { IComment } from '@/v5/store/tickets/tickets.types';
+import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { subscribeToRoomEvent } from './realtime.service';
-import { TicketsActionsDispatchers } from '../actionsDispatchers';
+import { TicketCommentsActionsDispatchers } from '../actionsDispatchers';
 
 // Container
 export const enableRealtimeContainerUpdateTicketComment = (
@@ -30,8 +30,8 @@ export const enableRealtimeContainerUpdateTicketComment = (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
 		'containerUpdateTicketComment',
-		(comment: Partial<IComment>) => (
-			TicketsActionsDispatchers.upsertTicketCommentSuccess(containerId, ticketId, comment)
+		(comment: Partial<ITicketComment>) => (
+			TicketCommentsActionsDispatchers.upsertCommentSuccess(ticketId, comment)
 		),
 	)
 );
@@ -45,7 +45,7 @@ export const enableRealtimeContainerNewTicketComment = (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
 		'containerNewTicketComment',
-		(comment: IComment) => TicketsActionsDispatchers.upsertTicketCommentSuccess(containerId, ticketId, comment),
+		(comment: ITicketComment) => TicketCommentsActionsDispatchers.upsertCommentSuccess(ticketId, comment),
 	)
 );
 
@@ -59,8 +59,8 @@ export const enableRealtimeFederationUpdateTicketComment = (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: federationId },
 		'federationUpdateTicketComment',
-		(comment: Partial<IComment>) => (
-			TicketsActionsDispatchers.upsertTicketCommentSuccess(federationId, ticketId, comment)
+		(comment: Partial<ITicketComment>) => (
+			TicketCommentsActionsDispatchers.upsertCommentSuccess(ticketId, comment)
 		),
 	)
 );
@@ -74,6 +74,6 @@ export const enableRealtimeFederationNewTicketComment = (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: federationId },
 		'federationNewTicketComment',
-		(comment: IComment) => TicketsActionsDispatchers.upsertTicketCommentSuccess(federationId, ticketId, comment),
+		(comment: ITicketComment) => TicketCommentsActionsDispatchers.upsertCommentSuccess(ticketId, comment),
 	)
 );
