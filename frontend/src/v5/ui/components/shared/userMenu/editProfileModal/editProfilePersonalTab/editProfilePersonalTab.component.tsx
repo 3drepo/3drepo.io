@@ -27,9 +27,9 @@ import { pickBy, isEmpty, isMatch, mapValues, omit } from 'lodash';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { emailAlreadyExists, isFileFormatUnsupported } from '@/v5/validation/errors.helpers';
-import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
 import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
+import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { TabContent } from '../editProfileModal.styles';
 
 export interface IUpdatePersonalInputs {
@@ -196,7 +196,7 @@ export const EditProfilePersonalTab = ({
 				/>
 			</TabContent>
 			<FormModalActions>
-				<ModalCancelButton onClick={onClickClose}/>
+				<ModalCancelButton onClick={onClickClose} />
 				<ModalSubmitButton disabled={!canSubmit} onClick={handleSubmit(onSubmit)}>
 					<FormattedMessage
 						defaultMessage="Update profile"

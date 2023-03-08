@@ -33,7 +33,7 @@ import { SSOErrorResponseMessage } from '@components/shared/sso/ssoResponseHandl
 import { Gap } from '@controls/gap';
 import { linkAccount } from '@/v5/services/api/sso';
 import { TabContent } from '../editProfileModal.styles';
-import { MicrosoftText } from './editProfileAuthenticationTab.styles'
+import { MicrosoftText } from './editProfileAuthenticationTab.styles';
 
 export interface IUpdatePasswordInputs {
 	oldPassword: string;
@@ -86,7 +86,7 @@ export const EditProfileAuthenticationNonSSOTab = ({
 		}
 	};
 
-	const onSubmitClick = (event) => handleSubmit(onSubmit)(event).catch(onSubmitError)
+	const onSubmitClick = (event) => handleSubmit(onSubmit)(event).catch(onSubmitError);
 
 	const handleLinkAccount = async () => {
 		const res = await linkAccount();

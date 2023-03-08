@@ -42,9 +42,11 @@ export const AuthTemplate = ({ footer, children }: IAuthTemplate): JSX.Element =
 				<Logo />
 			</LoginLink>
 			{children}
-			{footer && (<Footer>
-				{footer}
-			</Footer>)}
+			{footer && (
+				<Footer>
+					{footer}
+				</Footer>
+			)}
 		</Background>
 	);
 };

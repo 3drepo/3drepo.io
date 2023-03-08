@@ -34,7 +34,7 @@ export const MicrosoftButton = styled(Button).attrs({
 	border-radius: 0;
 	padding: 20px;
 	margin: 0;
-	background-color: #2F2F2F; // The colour is hardcoded as this are microsoft specs and not part of the theme
+	background-color: #2F2F2F; // The colour is hardcoded as these are microsoft specs and not part of the theme
 
 	&:hover, &:active {
 		background-color: #2F2F2FF0; 

@@ -23,7 +23,7 @@ export const getRedirectUrl = (searchParams = '') => {
 	return `${origin}${pathname}${searchParams}`;
 };
 
-const SSO_ROUTE = 'sso'
+const SSO_ROUTE = 'sso';
 const AAD_ROUTE = `${SSO_ROUTE}/aad`;
 
 export const signup = (data): Promise<AxiosResponse<{link: string}>> => api.post(`${AAD_ROUTE}/signup?redirectUri=${getRedirectUrl('?signupPost=1')}`, data);

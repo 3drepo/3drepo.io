@@ -17,8 +17,8 @@
 
 import { FormattedMessage } from 'react-intl';
 import TickIcon from '@assets/icons/outlined/fat_tick-outlined.svg';
-import { PostSubmitSuccessfulMessage, IconContainer } from './successMessage.styles';
 import { Typography } from '@controls/typography';
+import { PostSubmitSuccessfulMessage, IconContainer } from './successMessage.styles';
 
 type SuccessMessageProps = {
 	children: any;

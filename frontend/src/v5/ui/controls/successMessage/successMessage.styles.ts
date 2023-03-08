@@ -31,14 +31,13 @@ export const PostSubmitSuccessfulMessage = styled.div`
 	grid-template-rows: minmax(25px, 1fr) auto;
 
 	h5 {
-		// TODO - this value is not aligned between Figma and the Theme
 		font-size: 16px;
 	}
 `;
 
 export const IconContainer = styled.div`
 	display: flex;
-    align-self: start;
+	align-self: start;
 
 	svg {
 		border: solid 2px;

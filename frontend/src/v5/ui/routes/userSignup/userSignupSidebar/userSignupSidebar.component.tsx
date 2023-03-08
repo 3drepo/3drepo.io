@@ -19,9 +19,9 @@ import { FormattedMessage } from 'react-intl';
 import { MicrosoftButton } from '@components/shared/sso/microsoftButton.component';
 import { MicrosoftText } from '@components/shared/sso/microsoftText.component';
 import { formatMessage } from '@/v5/services/intl';
+import { Gap } from '@controls/gap';
 import { Container, MainTitle } from './userSignupSidebar.styles';
 import { LoginPrompt, LoginPromptLink } from '../userSignupForm/userSignupForm.styles';
-import { Gap } from '@controls/gap';
 
 export const UserSignupSidebar = () => (
 	<Container>
@@ -32,14 +32,16 @@ export const UserSignupSidebar = () => (
 			/>
 		</MainTitle>
 		<div>
-			<MicrosoftText title={formatMessage({
-				id: 'userSignup.sidebar.signUpWithMicrosoft',
-				defaultMessage: 'Sign up with Microsoft',
-			})} />
+			<MicrosoftText
+				title={formatMessage({
+					id: 'userSignup.sidebar.signUpWithMicrosoft',
+					defaultMessage: 'Sign up with Microsoft',
+				})}
+			/>
 			<MicrosoftButton to={{ pathname: 'signup-sso' }}>
 				<FormattedMessage id="userSignup.sidebar.sso.microsoft" defaultMessage="Sign up with Microsoft" />
 			</MicrosoftButton>
-			<Gap $height='43px'/>
+			<Gap $height="43px" />
 			<LoginPrompt>
 				<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
 				<LoginPromptLink to="/v5/login">

@@ -74,7 +74,11 @@ export const EditProfileModal = ({ open, onClickClose, initialTab }: EditProfile
 
 	const authenticationFormData = useForm<IUpdatePasswordInputs>({
 		mode: 'all',
-		resolver: yupResolver(user.sso ? EditProfileUpdateSSOPasswordSchema : EditProfileUpdatePasswordSchema(incorrectPassword)),
+		resolver: yupResolver(
+			user.sso
+				? EditProfileUpdateSSOPasswordSchema
+				: EditProfileUpdatePasswordSchema(incorrectPassword),
+		),
 		defaultValues: EMPTY_PASSWORDS,
 	});
 

@@ -21,9 +21,9 @@ import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
-import { ButtonsContainer, Button, ShareTextFieldLabel } from './editProfileIntegrationsTab.styles';
 import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
 import { ModalCancelButton } from '@controls/formModal/modalButtons/modalButtons.component';
+import { ButtonsContainer, Button, ShareTextFieldLabel } from './editProfileIntegrationsTab.styles';
 import { TabContent } from '../editProfileModal.styles';
 
 type EditProfileIntegrationsTabProps = {

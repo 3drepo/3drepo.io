@@ -31,14 +31,16 @@ export const ErrorMessage = ({ title, children, className }: ErrorMessageProps) 
 			<CrossIcon />
 		</IconContainer>
 		{title && (
+			<Typography variant="h5">
+				{title}
+			</Typography>
+		)}
+		{title && children && (<span />)}
+		{children && (
 			<div>
-				<Typography variant="h5">
-					{title}
-				</Typography>
+				<Typography variant="body1">{children}</Typography>
 				<Gap $height="10px" />
 			</div>
 		)}
-		{title && children && (<span />)}
-		{children && <Typography variant="body1">{children}</Typography>}
 	</Container>
 );

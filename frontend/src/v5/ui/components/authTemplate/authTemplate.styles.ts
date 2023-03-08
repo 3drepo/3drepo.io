@@ -72,7 +72,6 @@ export const Background = styled.div`
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	flex-direction: column;
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: cover;
