@@ -15,23 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import TickIconBase from '@assets/icons/outlined/fat_tick-outlined.svg';
 
 export const PostSubmitSuccessfulMessage = styled.div`
-	${({ theme }) => theme.typography.body1};
 	color: ${({ theme }) => theme.palette.primary.main};
 	background-color: ${({ theme }) => theme.palette.primary.lightest};
-	height: 45px;
+	min-height: 45px;
 	box-sizing: border-box;
 	border: solid 1px currentColor;
-	padding: 15px;
+	padding: 10px 15px;
 	margin-top: 19px;
 	border-radius: 5px;
-	display: flex;
-	flex-direction: row;
+	display: grid;
 	align-items: center;
+	grid-template-columns: 33px 1fr;
+	grid-template-rows: 25px 1fr;
+
+	h5 {
+		// TODO - this value is not aligned between Figma and the Theme
+		font-size: 16px;
+	}
 `;
 
-export const TickIcon = styled(TickIconBase)`
-	margin-right: 10px;
+export const IconContainer = styled.div`
+	display: flex;
+
+	svg {
+		border: solid 2px;
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		padding: 4px;
+	}
 `;

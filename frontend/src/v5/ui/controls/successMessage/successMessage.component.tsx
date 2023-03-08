@@ -15,16 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PostSubmitSuccessfulMessage, TickIcon } from './successMessage.styles';
+import { FormattedMessage } from 'react-intl';
+import TickIcon from '@assets/icons/outlined/fat_tick-outlined.svg';
+import { PostSubmitSuccessfulMessage, IconContainer } from './successMessage.styles';
+import { Typography } from '@controls/typography';
 
 type SuccessMessageProps = {
 	children: any;
 	className?: string;
 };
-
 export const SuccessMessage = ({ children, className }: SuccessMessageProps) => (
 	<PostSubmitSuccessfulMessage className={className}>
-		<TickIcon />
-		{children}
+		<IconContainer>
+			<TickIcon />
+		</IconContainer>
+		<Typography variant="h5">
+			<FormattedMessage
+				id="successfulMessage.title"
+				defaultMessage="Success!"
+			/>
+		</Typography>
+		<span />
+		<Typography variant="body1">{children}</Typography>
 	</PostSubmitSuccessfulMessage>
 );
