@@ -23,7 +23,7 @@ import { MenuItem } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { pickBy, isEmpty, isMatch, mapValues } from 'lodash';
+import { pickBy, isEmpty, isMatch, mapValues, omit } from 'lodash';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { emailAlreadyExists, isFileFormatUnsupported } from '@/v5/validation/errors.helpers';
@@ -71,14 +71,18 @@ export const EditProfilePersonalTab = ({
 		formState: { errors: formErrors, isValid: formIsValid },
 	} = useFormContext();
 
-	const getTrimmedNonEmptyValues = (): IUpdatePersonalInputs => {
-		const trimmedValues = mapValues(getValues(), (value) => value?.trim?.() ?? value);
+	const getSubmittableValues = (): IUpdatePersonalInputs => {
+		let values = getValues();
+		if (user.sso) {
+			values = omit(values, ['firstName', 'lastName', 'email']);
+		}
+		const trimmedValues = mapValues(values, (value) => value?.trim?.() ?? value);
 		return pickBy(trimmedValues) as IUpdatePersonalInputs;
 	};
 
 	const onSubmissionSuccess = () => {
 		setSubmitWasSuccessful(true);
-		const { avatarFile, ...values } = getTrimmedNonEmptyValues();
+		const { avatarFile, ...values } = getSubmittableValues();
 		reset(values);
 	};
 
@@ -100,7 +104,7 @@ export const EditProfilePersonalTab = ({
 	};
 
 	const onSubmit = () => {
-		const values = getTrimmedNonEmptyValues();
+		const values = getSubmittableValues();
 		CurrentUserActionsDispatchers.updatePersonalData(
 			values,
 			onSubmissionSuccess,
@@ -108,7 +112,7 @@ export const EditProfilePersonalTab = ({
 		);
 	};
 
-	const fieldsAreDirty = !isMatch(user, getTrimmedNonEmptyValues());
+	const fieldsAreDirty = !isMatch(user, getSubmittableValues());
 
 	// enable submission only if form is valid and fields are dirty
 	useEffect(() => {
@@ -130,6 +134,7 @@ export const EditProfilePersonalTab = ({
 					})}
 					required
 					formError={formErrors.firstName}
+					disabled={!!user.sso}
 				/>
 				<FormTextField
 					name="lastName"
@@ -140,6 +145,7 @@ export const EditProfilePersonalTab = ({
 					})}
 					required
 					formError={formErrors.lastName}
+					disabled={!!user.sso}
 				/>
 				<FormTextField
 					name="email"
@@ -150,6 +156,7 @@ export const EditProfilePersonalTab = ({
 					})}
 					required
 					formError={formErrors.email}
+					disabled={!!user.sso}
 				/>
 				<FormTextField
 					name="company"
