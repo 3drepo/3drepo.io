@@ -16,32 +16,36 @@
  */
 
 import { ButtonProps } from '@mui/material';
-import { Button } from '@controls/button';
-import { FormattedMessage } from 'react-intl';
+import { uuid } from '@/v4/helpers/uuid';
+import { useState } from 'react';
 import { FileLabel, HiddenFileInput } from './fileInputField.styles';
 
 type IFileInputField = ButtonProps & {
-	acceptedFormats?: string;
-	handleChange: (files) => void;
+	accept?: string;
+	onChange: (files) => void;
+	children: any;
 };
 
-const onInputClick = (event: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
-	const element = event.target as HTMLInputElement;
-	element.value = '';
-};
+export const FileInputField = ({ accept, onChange, children }: IFileInputField) => {
+	const [id] = useState(uuid());
 
-export const FileInputField = ({ acceptedFormats, handleChange, ...props }: IFileInputField) => (
-	<FileLabel htmlFor="hidden-file-buton">
-		<HiddenFileInput
-			accept={acceptedFormats}
-			id="hidden-file-buton"
-			type="file"
-			onChange={(event) => handleChange(event.target.files)}
-			onClick={onInputClick}
-			multiple
-		/>
-		<Button component="span" {...props}>
-			<FormattedMessage id="fileInput.browse" defaultMessage="Browse" />
-		</Button>
-	</FileLabel>
-);
+	const handleClick = (event: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
+		const element = event.target as HTMLInputElement;
+		element.value = '';
+	};
+	const handleChange = (event) => onChange(event.target.files);
+
+	return (
+		<FileLabel htmlFor={`hidden-file-input-${id}`}>
+			<HiddenFileInput
+				accept={accept}
+				id={`hidden-file-input-${id}`}
+				type="file"
+				onChange={handleChange}
+				onClick={handleClick}
+				multiple
+			/>
+			{children}
+		</FileLabel>
+	);
+};

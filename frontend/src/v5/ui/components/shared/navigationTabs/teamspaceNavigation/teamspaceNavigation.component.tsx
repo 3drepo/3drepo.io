@@ -28,6 +28,7 @@ export const TeamspaceNavigation = (): JSX.Element => {
 	return (
 		<Container>
 			<Link to={`${url}/projects`}><FormattedMessage id="teamspaceNavigation.projects" defaultMessage="Projects" /></Link>
+			<Link to={`${url}/jobs`}><FormattedMessage id="teamspaceNavigation.jobs" defaultMessage="Jobs" /></Link>
 			<Link to={`${url}/settings`}><FormattedMessage id="teamspaceNavigation.settings" defaultMessage="Teamspace Settings" /></Link>
 			{isAdmin && <Link to={`${url}/users`}><FormattedMessage id="teamspaceNavigation.users" defaultMessage="Users" /></Link>}
 		</Container>

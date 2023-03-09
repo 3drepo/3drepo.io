@@ -1,6 +1,6 @@
 {
   "name": "3drepo.io",
-  "version": "5.1.0",
+  "version": "5.1.2",
   "engines": {
     "node": "18.x.x"
   },
@@ -21,7 +21,8 @@
     "start": "cross-env NODE_CONFIG_DIR=../config node ./src/v4/3drepo.js",
     "watch": "cross-env NODE_CONFIG_DIR=../config nodemon ./src/v4/3drepo.js",
     "run-migration": "cross-env NODE_CONFIG_DIR=../config node ./src/scripts/migrations/index",
-    "run-script": "cross-env NODE_CONFIG_DIR=../config node ./src/scripts/utility/index"
+    "run-script": "cross-env NODE_CONFIG_DIR=../config node ./src/scripts/utility/index",
+    "run-scheduled-tasks": "cross-env NODE_CONFIG_DIR=../config node ./src/scripts/utility/scheduler"
   },
   "dependencies": {
     "@azure/msal-node": "1.11.0",
@@ -39,6 +40,7 @@
     "cors": "2.8.5",
     "countries-and-timezones": "3.3.0",
     "crypto-js": "4.0.0",
+    "cryptolens": "1.0.1-4.2",
     "csv-parse": "4.8.5",
     "dayjs": "1.10.7",
     "device": "0.3.12",

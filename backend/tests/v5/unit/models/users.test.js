@@ -17,7 +17,7 @@
 
 const { src } = require('../../helper/path');
 
-const _ = require('lodash');
+const { cloneDeep, times } = require('lodash');
 
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
@@ -104,7 +104,7 @@ const testAppendFavourites = () => {
 	const user = 'xxx';
 
 	const determineAction = (teamspace, favToAdd, dataOverride) => {
-		const results = _.cloneDeep(dataOverride || favouritesData.starredModels);
+		const results = cloneDeep(dataOverride || favouritesData.starredModels);
 		results[teamspace] = results[teamspace] || [];
 		favToAdd.forEach((id) => {
 			if (!results[teamspace].includes(id)) results[teamspace].push(id);
@@ -176,7 +176,7 @@ const testDeleteFromFavourites = () => {
 	const user = 'xxx';
 
 	const determineAction = (teamspace, favToRm) => {
-		const results = _.cloneDeep(favouritesData.starredModels);
+		const results = cloneDeep(favouritesData.starredModels);
 		if (results[teamspace]) {
 			if (favToRm?.length) {
 				const newArr = results[teamspace].filter((id) => !favToRm.includes(id));
@@ -406,6 +406,21 @@ const testGetUserByEmail = () => {
 	});
 };
 
+const testGetUsersByQuery = () => {
+	describe('Get users by query', () => {
+		test('should return users that satisfies the query', async () => {
+			const expectedRes = times(10, () => ({ [generateRandomString()]: generateRandomString() }));
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedRes);
+			const query = { [generateRandomString()]: generateRandomString() };
+			const proj = { [generateRandomString()]: generateRandomString() };
+			const res = await User.getUsersByQuery(query, proj);
+			expect(res).toEqual(expectedRes);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, query, proj);
+		});
+	});
+};
+
 const formatNewUserData = (newUserData, createdAt, emailExpiredAt) => {
 	const formattedData = {
 		createdAt,
@@ -526,6 +541,20 @@ const testRemoveUser = () => {
 	});
 };
 
+const testRemoveUsers = () => {
+	describe('Drop users', () => {
+		test('Should call deleteMany to remove the users from the database', async () => {
+			const users = times(10, () => generateRandomString());
+			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+
+			await expect(User.removeUsers(users)).resolves.toBeUndefined();
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { user: { $in: users } });
+		});
+	});
+};
+
 const testIsAccountActive = () => {
 	describe.each([
 		['inactive is set to true', { customData: { inactive: true } }, false],
@@ -617,8 +646,10 @@ describe('models/users', () => {
 	testUpdateResetPasswordToken();
 	testGetUserByUsernameOrEmail();
 	testGetUserByEmail();
+	testGetUsersByQuery();
 	testAddUser();
 	testRemoveUser();
+	testRemoveUsers();
 	testVerify();
 	testIsAccountActive();
 	testUnlinkFromSso();

@@ -19,6 +19,9 @@ import { PureComponent } from 'react';
 
 import Grid from '@mui/material/Grid';
 import * as Yup from 'yup';
+import { formatMessage } from '@/v5/services/intl';
+import { FormattedMessage } from 'react-intl';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { Field, Form, Formik } from 'formik';
 import { ColorPicker } from '../colorPicker/colorPicker.component';
@@ -33,7 +36,10 @@ import {
 const NewJobSchema = Yup.object().shape({
 	name: Yup.string()
 		.max(50, 'Job name is limited to 50 characters')
-		.required('Job name is a required field')
+		.required(formatMessage({
+			id: 'validation.jobName.required',
+			defaultMessage: 'Job name is a required field',
+		}))
 });
 
 interface IProps {
@@ -112,10 +118,14 @@ export class NewJobForm extends PureComponent<IProps, any> {
 							<SaveButton
 								type="submit"
 								variant="contained"
-								color="secondary"
+								color={isV5() ? 'primary' : 'secondary'}
 								disabled={!form.isValid || form.isValidating}
-								aria-label="Add new job">
-								+ Add job
+								aria-label="Add new job"
+							>
+								<FormattedMessage
+									id="newJobForm.addJob.button"
+									defaultMessage="+ Add job"
+								/>
 							</SaveButton>}
 						/>
 						</Form>
