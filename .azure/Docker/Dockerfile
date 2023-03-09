@@ -4,12 +4,12 @@ FROM node:18 as builder
 WORKDIR /home/node/3drepo.io/backend
 COPY ./backend/package.json ./package.json
 COPY ./backend/yarn.lock ./yarn.lock
-RUN yarn install --network-timeout 500000 
+RUN yarn install --network-timeout 500000 --immutable --immutable-cache --check-cache
 
 WORKDIR /home/node/3drepo.io/frontend
 COPY ./frontend/package.json ./package.json
 COPY ./frontend/yarn.lock ./yarn.lock
-RUN yarn install --network-timeout 500000 
+RUN yarn install --network-timeout 500000 --immutable --immutable-cache --check-cache
 
 WORKDIR /home/node/3drepo.io/
 COPY . .
