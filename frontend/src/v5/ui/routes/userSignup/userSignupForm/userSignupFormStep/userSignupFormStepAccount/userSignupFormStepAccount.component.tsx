@@ -17,70 +17,16 @@
 import { formatMessage } from '@/v5/services/intl';
 import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import UserIcon from '@assets/icons/outlined/user-outlined.svg';
 import EmailIcon from '@assets/icons/outlined/email-outlined.svg';
 import PasswordIcon from '@assets/icons/outlined/lock-outlined.svg';
-import { UserSignupSchemaAccount } from '@/v5/validation/userSchemes/userSignupSchemes';
-import { isEqual, pick, defaults } from 'lodash';
 import { FormPasswordField, FormTextField } from '@controls/inputs/formInputs.component';
-import { NextStepButton } from '../userSignupFormStep.styles';
 import { IconContainer } from './userSignupFormStepAccount.styles';
+import { NextStepButton } from '../userSignupFormNextButton/userSignupFormNextButton.component';
 
-export interface IAccountFormInput {
-	username: string;
-	email: string;
-	password: string;
-	confirmPassword: string;
-}
-
-type UserSignupFormStepAccountProps = {
-	updateFields: (fields: any) => void;
-	onSubmitStep: () => void;
-	onComplete: () => void;
-	onUncomplete: () => void;
-	fields: IAccountFormInput;
-	alreadyExistingUsernames: string[];
-	alreadyExistingEmails: string[];
-};
-
-export const UserSignupFormStepAccount = ({
-	updateFields,
-	onSubmitStep,
-	onComplete,
-	onUncomplete,
-	fields,
-	alreadyExistingUsernames,
-	alreadyExistingEmails,
-}: UserSignupFormStepAccountProps) => {
-	const DEFAULT_FIELDS: IAccountFormInput = {
-		username: '',
-		email: '',
-		password: '',
-		confirmPassword: '',
-	};
-
-	const getAccountFields = (): IAccountFormInput => defaults(
-		pick(fields, ['username', 'email', 'password', 'confirmPassword']),
-		DEFAULT_FIELDS,
-	);
-
-	const {
-		watch,
-		getValues,
-		trigger,
-		control,
-		formState,
-		formState: { errors, isValid: formIsValid, dirtyFields },
-	} = useForm<IAccountFormInput>({
-		mode: 'all',
-		reValidateMode: 'onChange',
-		resolver: yupResolver(UserSignupSchemaAccount),
-		context: { alreadyExistingUsernames, alreadyExistingEmails },
-		defaultValues: getAccountFields(),
-	});
-
+export const UserSignupFormStepAccount = () => {
+	const { control, formState: { errors, dirtyFields }, watch, trigger } = useFormContext();
 	const password = watch('password');
 
 	useEffect(() => {
@@ -88,23 +34,6 @@ export const UserSignupFormStepAccount = ({
 			trigger('confirmPassword');
 		}
 	}, [password]);
-
-	useEffect(() => {
-		if (formIsValid) {
-			onComplete();
-		} else {
-			onUncomplete();
-			if (alreadyExistingUsernames.length) trigger('username');
-			if (alreadyExistingEmails.length) trigger('email');
-		}
-	}, [formIsValid]);
-
-	useEffect(() => {
-		const newFields = getValues();
-		if (!isEqual(newFields, getAccountFields())) {
-			updateFields(newFields);
-		}
-	}, [formState]);
 
 	return (
 		<>
@@ -117,11 +46,11 @@ export const UserSignupFormStepAccount = ({
 					),
 				}}
 				name="username"
-				control={control}
 				label={formatMessage({
 					id: 'userSignup.form.username',
 					defaultMessage: 'Username',
 				})}
+				control={control}
 				required
 				formError={errors.username}
 			/>
@@ -134,14 +63,13 @@ export const UserSignupFormStepAccount = ({
 					),
 				}}
 				name="email"
-				control={control}
 				label={formatMessage({
 					id: 'userSignup.form.email',
 					defaultMessage: 'Email',
 				})}
+				control={control}
 				required
 				formError={errors.email}
-
 			/>
 			<FormPasswordField
 				InputProps={{
@@ -152,12 +80,12 @@ export const UserSignupFormStepAccount = ({
 					),
 				}}
 				name="password"
-				control={control}
 				label={formatMessage({
 					id: 'userSignup.form.password',
 					defaultMessage: 'Password',
 				})}
 				required
+				control={control}
 				formError={errors.password}
 			/>
 			<FormPasswordField
@@ -169,23 +97,18 @@ export const UserSignupFormStepAccount = ({
 					),
 				}}
 				name="confirmPassword"
-				control={control}
 				label={formatMessage({
 					id: 'userSignup.form.confirmPassword',
 					defaultMessage: 'Confirm password',
 				})}
 				required
 				disabled={!password}
+				control={control}
 				formError={errors.confirmPassword}
 			/>
-			<NextStepButton
-				disabled={!formIsValid}
-				onClick={onSubmitStep}
-			>
-				<FormattedMessage
-					id="userSignup.form.button.next"
-					defaultMessage="Next step"
-				/>
+
+			<NextStepButton>
+				<FormattedMessage id="userSignup.form.button.next" defaultMessage="Next step" />
 			</NextStepButton>
 		</>
 	);

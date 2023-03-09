@@ -21,9 +21,9 @@ export type FormInputProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
 	required: boolean,
 	label: string | JSX.Element,
 	disabled: boolean,
-	className: string,
 	error: boolean,
 	helperText: string,
+	className: string,
 }>;
 
 export type InputControllerProps<T> = T & FormInputProps & {
