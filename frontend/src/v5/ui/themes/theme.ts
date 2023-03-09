@@ -1023,7 +1023,7 @@ export const theme = createTheme({
 		MuiFormControl: {
 			styleOverrides: {
 				root: {
-					margin: '18px 0 0',
+					margin: '17px 0 0',
 					width: '100%',
 					boxSizing: 'border-box',
 					label: {
@@ -1118,9 +1118,6 @@ export const theme = createTheme({
 				},
 				containedPrimary: {
 					color: COLOR.PRIMARY_MAIN_CONTRAST,
-					'& path': {
-						fill: COLOR.PRIMARY_MAIN_CONTRAST,
-					},
 					'&:hover': {
 						backgroundColor: COLOR.PRIMARY_DARK,
 					},

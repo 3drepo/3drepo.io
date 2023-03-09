@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,17 +14,23 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { signin } from '@/v5/services/api/sso';
+import { useLocation } from 'react-router-dom';
 
-import styled from 'styled-components';
+export const LoginSSO = () => {
+	const { search } = useLocation();
+	const searchParams = new URLSearchParams(search);
 
-import { Button } from '@controls/button';
+	if (searchParams.get('loginPost')) {
+		const { origin } = new URL(window.location.href);
+		window.location.href = origin;
+	}
 
-export const NextStepButton = styled(Button).attrs({
-	variant: 'contained',
-	color: 'primary',
-})`
-	width: fit-content;
-	font-weight: 300;
-	margin: 10px 0 12px;
-	float: right;
-`;
+	if (!searchParams.get('loginPost')) {
+		signin().then(({ data }) => {
+			window.location.href = data.link;
+		});
+	}
+
+	return null;
+};

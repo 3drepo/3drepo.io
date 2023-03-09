@@ -19,7 +19,7 @@ import { DialogTabs, NeutralActionButton, VisualSettingsButtonsContainer } from 
 import { FieldsRow, StyledFormControl } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { ResourceIconContainer, IconButton } from '@/v4/routes/components/resources/resources.styles';
 import { LabelButton } from '@/v4/routes/viewerGui/components/labelButton/labelButton.styles';
-import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
+import { primaryButtonStyling } from '@/v5/ui/v4Adapter/resuableOverrides.styles';
 import {
 	Container as AttachResourcesMainContainer,
 	Content,
@@ -215,7 +215,7 @@ const AttachResourcesLink = css`
 		margin: 0 23px;
 
 		${LabelButton} {
-			${labelButtonPrimaryStyles}
+			${primaryButtonStyling}
 			text-decoration: none !important;
 			padding: 4px 19px;
 			margin: 0;

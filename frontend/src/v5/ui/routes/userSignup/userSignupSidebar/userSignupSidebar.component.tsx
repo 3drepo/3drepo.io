@@ -16,98 +16,80 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { LoginLink, Logo } from '@components/authTemplate/authTemplate.styles';
 import {
 	Container,
-	BulletPoint,
-	BulletPointMessage,
-	BulletPointTitle,
-	BulletPointBody,
-	BulletPointIcon,
-	Tick,
-	BookADemoButton,
-	LaptopIcon,
+	MicrosoftButton,
 	MainTitle,
+	SignUpWithMicrosoftText,
+	MicrosoftInstructionsRemarkText,
+	MicrosoftInstructionsTermsText,
+	MicrosoftInstructionsText,
+	Link,
+	SidebarContent,
+	NewSticker,
 } from './userSignupSidebar.styles';
+import { LoginPrompt, LoginPromptLink } from '../userSignupForm/userSignupForm.styles';
+import { TERMS_ROUTE, PRIVACY_ROUTE } from '../../routes.constants';
 
 export const UserSignupSidebar = () => (
 	<Container>
-		<LoginLink>
-			<Logo />
-		</LoginLink>
 		<MainTitle>
 			<FormattedMessage
-				id="userSignup.sidebar"
-				defaultMessage={`
-					3D Repo is the most accessible BIM 
-					collaboration platform to enable open 
-					and transparent communication for AECO 
-					projects of all sizes.
-				`}
+				id="userSignup.sidebar.mainTitle"
+				defaultMessage="Create your free account"
 			/>
 		</MainTitle>
-		<BulletPoint>
-			<BulletPointIcon>
-				<Tick />
-			</BulletPointIcon>
-			<BulletPointMessage>
-				<BulletPointTitle>
-					<FormattedMessage
-						id="userSignup.sidebar.noSoftwareInstallation.title"
-						defaultMessage="Security & encryption"
-					/>
-				</BulletPointTitle>
-				<BulletPointBody>
-					<FormattedMessage
-						id="userSignup.sidebar.noSoftwareInstallation.message"
-						defaultMessage="Reduce required BIM coordination and data checking time by up to 35%."
-					/>
-				</BulletPointBody>
-			</BulletPointMessage>
-		</BulletPoint>
-		<BulletPoint>
-			<BulletPointIcon>
-				<Tick />
-			</BulletPointIcon>
-			<BulletPointMessage>
-				<BulletPointTitle>
-					<FormattedMessage
-						id="userSignup.sidebar.securityAndExnryption.title"
-						defaultMessage="No software installation"
-					/>
-				</BulletPointTitle>
-				<BulletPointBody>
-					<FormattedMessage
-						id="userSignup.sidebar.securityAndExnryption.message"
-						defaultMessage="Automating manual tasks can boost related data accuracy by up to 95%."
-					/>
-				</BulletPointBody>
-			</BulletPointMessage>
-		</BulletPoint>
-		<BulletPoint>
-			<BulletPointIcon>
-				<Tick />
-			</BulletPointIcon>
-			<BulletPointMessage>
-				<BulletPointTitle>
-					<FormattedMessage
-						id="userSignup.sidebar.integration.title"
-						defaultMessage="Integration - open API’s"
-					/>
-				</BulletPointTitle>
-				<BulletPointBody>
-					<FormattedMessage
-						id="userSignup.sidebar.integration.message"
-						defaultMessage="Get the whole team on the same page and talking to each other."
-					/>
-				</BulletPointBody>
-			</BulletPointMessage>
-		</BulletPoint>
-		<BookADemoButton
-			to={{ pathname: 'https://3drepo.com/demo/' }}
-			startIcon={<LaptopIcon />}
-		>
-			<FormattedMessage id="userSignup.sidebar.bookADemo" defaultMessage="Book A Demo" />
-		</BookADemoButton>
+		<SignUpWithMicrosoftText>
+			<FormattedMessage
+				id="userSignup.sidebar.signUpWithMicrosoft"
+				defaultMessage="Sign up with Microsoft"
+			/>
+			<NewSticker>
+				<FormattedMessage
+					id="userSignup.sidebar.new"
+					defaultMessage="New"
+				/>
+			</NewSticker>
+		</SignUpWithMicrosoftText>
+		<SidebarContent>
+			<MicrosoftInstructionsText>
+				<FormattedMessage
+					id="userSignup.sidebar.signUpWithMicrosoftInstructions"
+					defaultMessage={`
+					You can now link your Microsoft account and sign in to 3D Repo using your Microsoft account. It’s quick, easy, and secure.
+				`}
+				/>
+			</MicrosoftInstructionsText>
+			<MicrosoftInstructionsRemarkText>
+				<FormattedMessage
+					id="userSignup.sidebar.signUpWithMicrosoftInstructionsRemark"
+					defaultMessage={`
+					Your Microsoft data will be completely private.
+				`}
+				/>
+			</MicrosoftInstructionsRemarkText>
+			<MicrosoftInstructionsTermsText>
+				<FormattedMessage
+					id="userSignup.sidebar.signUpWithMicrosoftTerms"
+					defaultMessage={`
+					By creating an account using your Microsoft account, you agree to our <TermsLink>Terms</TermsLink> and <PrivacyLink>Privacy Policy</PrivacyLink>.
+				`}
+					values={{
+						TermsLink: (label) => <Link to={TERMS_ROUTE} target="_blank">{label}</Link>,
+						PrivacyLink: (label) => <Link to={PRIVACY_ROUTE} target="_blank">{label}</Link>,
+					}}
+
+				/>
+			</MicrosoftInstructionsTermsText>
+			<MicrosoftButton to={{ pathname: 'signup-sso' }}>
+				<FormattedMessage id="userSignup.sidebar.sso.microsoft" defaultMessage="Sign up with Microsoft" />
+			</MicrosoftButton>
+			<LoginPrompt>
+				<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
+				<LoginPromptLink to="/v5/login">
+					<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Sign in" />
+				</LoginPromptLink>
+			</LoginPrompt>
+		</SidebarContent>
 	</Container>
 );
