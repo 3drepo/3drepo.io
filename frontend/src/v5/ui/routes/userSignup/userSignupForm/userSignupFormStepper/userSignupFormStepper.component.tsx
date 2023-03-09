@@ -106,7 +106,16 @@ export const UserSignupFormStepper = ({ children, onSubmit, ...props }: UserSign
 	}, [isValid]);
 
 	useEffect(() => {
-		const newContextValue = { ...contextValue, activeStep, erroredStep, completedSteps, moveToNextStep };
+		const newContextValue = {
+			activeStep,
+			completedSteps,
+			erroredStep,
+			moveToNextStep,
+			moveToStep,
+			setErroredStep,
+			canReachStep,
+		};
+
 		setContextValue(newContextValue);
 		props.onContextUpdated?.(newContextValue);
 	}, [activeStep, completedSteps, erroredStep]);

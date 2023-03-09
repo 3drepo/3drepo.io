@@ -28,7 +28,7 @@ import {
 	StyledListItem,
 } from '@/v4/routes/components/dialogContainer/components/suggestedTreatmentsDialog/suggestedTreatmentsDialog.styles';
 import { LabelButton } from '@/v4/routes/viewerGui/components/labelButton/labelButton.styles';
-import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
+import { primaryButtonStyling } from '@/v5/ui/v4Adapter/resuableOverrides.styles';
 import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 
 export default css`
@@ -106,7 +106,7 @@ export default css`
 			}
 
 			${LabelButton} {
-				${labelButtonPrimaryStyles}
+				${primaryButtonStyling}
 				border-radius: 5px;
 				padding: 5px 15px;
 			}

@@ -26,7 +26,7 @@ export default {
 	argTypes: {
 		variant: {
 			description: 'Variant of the button',
-			options: ['contained', 'outlined', 'text', 'label', 'label-outlined'],
+			options: ['contained', 'outlined', 'text'],
 			control: { type: 'select' },
 		},
 		/**
@@ -75,18 +75,6 @@ Outlined.args = {
 export const Text = Template.bind({});
 Text.args = {
 	variant: 'text',
-	color: 'primary',
-};
-
-export const Label = Template.bind({});
-Label.args = {
-	variant: 'label',
-	color: 'primary',
-};
-
-export const LabelOutlined = Template.bind({});
-LabelOutlined.args = {
-	variant: 'label-outlined',
 	color: 'primary',
 };
 
