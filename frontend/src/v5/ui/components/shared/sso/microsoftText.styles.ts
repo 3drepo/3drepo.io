@@ -34,7 +34,7 @@ export const MicrosoftTitleText = styled.div`
 export const MicrosoftInstructionsText = styled.div`
 	${({ theme }) => theme.typography.body1};
 	color: ${({ theme }) => theme.palette.base.main};
-	margin-bottom: 5px;
+	margin-bottom: 15px;
 	width: 376px;
 `;
 
