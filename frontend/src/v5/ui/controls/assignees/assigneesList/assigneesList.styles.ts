@@ -28,6 +28,7 @@ export const AssigneesListContainer = styled.div`
 
 	.MuiButtonBase-root {
 		z-index: 11;
+		cursor: pointer;
 		&:hover {
 			z-index: 12; /* avatar appears on top when hovered */
 		}

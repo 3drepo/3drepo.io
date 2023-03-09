@@ -34,6 +34,7 @@ export const AssigneesList = styled(AssigneesListBase)`
 	.MuiButtonBase-root {
 		height: unset;
 		width: unset;
+		cursor: default;
 		.MuiAvatar-root {
 			height: 28px;
 			width: 28px;
