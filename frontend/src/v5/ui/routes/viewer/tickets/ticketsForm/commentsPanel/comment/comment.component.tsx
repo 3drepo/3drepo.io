@@ -19,7 +19,7 @@ import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { stripMetadata, extractMetadata, getRelativeTime } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { Gap } from '@controls/gap';
-import { memo, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CurrentUserComment } from './currentUserComment/currentUserComment.component';
 import { OtherUserComment } from './otherUserComment/otherUserComment.component';
 
@@ -29,20 +29,17 @@ export type CommentProps = ITicketComment & {
 	onEdit: (commentId, newMessage, newImages) => void;
 	isFirstOfBlock: boolean;
 };
-export const Comment = memo(({
+export const Comment = ({
+	updatedAt,
+	createdAt,
+	author,
+	message = '',
+	deleted,
+	_id,
+	images = [],
 	isFirstOfBlock,
-	onDelete,
-	onReply,
-	onEdit,
-	...comment
+	...props
 }: CommentProps) => {
-	const {
-		updatedAt,
-		author,
-		message = '',
-		deleted,
-		createdAt,
-	} = comment;
 	const [commentAge, setCommentAge] = useState('');
 
 	const isCurrentUser = CurrentUserHooksSelectors.selectUsername() === author;
@@ -62,15 +59,16 @@ export const Comment = memo(({
 		<>
 			<Gap $height={isFirstOfBlock ? '12px' : '4px'} />
 			<UserComment
-				{...comment}
-				onDelete={() => onDelete(comment)}
-				onReply={() => onReply(comment)}
-				onEdit={(newMessage, newImages) => onEdit(comment, newMessage, newImages)}
+				{...props}
+				author={author}
 				commentAge={commentAge}
 				metadata={metadata}
 				message={noMetadataMessage}
+				deleted={deleted}
+				_id={_id}
+				images={images}
 				isFirstOfBlock={isFirstOfBlock}
 			/>
 		</>
 	);
-});
+};

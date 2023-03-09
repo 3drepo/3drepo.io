@@ -29,7 +29,7 @@ import {
 } from '@/v5/services/realtime/ticketComments.events';
 import { FormattedMessage } from 'react-intl';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
-import { forwardRef, MutableRefObject, useCallback, useEffect, useState } from 'react';
+import { forwardRef, MutableRefObject, useEffect, useState } from 'react';
 import { Gap } from '@controls/gap';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { omit } from 'lodash';
@@ -73,25 +73,27 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 		return comments[index - 1].author !== commentAuthor;
 	};
 
-	const handleDeleteComment = useCallback((comment) => {
+	const handleDeleteComment = (commentId) => {
 		TicketCommentsActionsDispatchers.deleteComment(
 			teamspace,
 			project,
 			containerOrFederation,
 			ticketId,
 			isFederation,
-			comment._id,
+			commentId,
 		);
-	}, []);
+	};
 
-	const handleReplyToComment = useCallback((comment) => {
+	const handleReplyToComment = (commentId) => {
+		const comment = comments.find(({ _id }) => _id === commentId);
 		setCommentReply({
 			...comment,
 			message: sanitiseMessage(stripMetadata(comment.message)),
 		});
-	}, []);
+	};
 
-	const handleEditComment = useCallback((oldComment, message, images) => {
+	const handleEditComment = (commentId, message, images) => {
+		const oldComment = comments.find(({ _id }) => _id === commentId);
 		const newHistory = (oldComment.history || []).concat({
 			message: oldComment.message,
 			images: oldComment.images,
@@ -103,10 +105,10 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 			containerOrFederation,
 			ticketId,
 			isFederation,
-			oldComment._id,
+			commentId,
 			{ history: newHistory, message, images },
 		);
-	}, []);
+	};
 
 	useEffect(() => {
 		if (!ticketId) return null;

@@ -23,11 +23,11 @@ import { Comment, AuthorAvatar } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons, CommentWithButtonsContainer } from '../basicComment/basicComment.styles';
 
-type OtherUserCommentProps = Omit<ITicketComment, 'updatedAt'> & {
+type OtherUserCommentProps = Omit<ITicketComment, 'updatedAt' | 'createdAt'> & {
 	commentAge: string;
 	isFirstOfBlock: boolean;
 	metadata?: TicketCommentReplyMetadata;
-	onReply: () => void;
+	onReply: (commentId) => void;
 };
 export const OtherUserComment = ({
 	_id,
@@ -53,7 +53,7 @@ export const OtherUserComment = ({
 				{...props}
 			/>
 			<CommentButtons>
-				<PrimaryCommentButton onClick={onReply}>
+				<PrimaryCommentButton onClick={() => onReply(_id)}>
 					<ReplyIcon />
 				</PrimaryCommentButton>
 			</CommentButtons>

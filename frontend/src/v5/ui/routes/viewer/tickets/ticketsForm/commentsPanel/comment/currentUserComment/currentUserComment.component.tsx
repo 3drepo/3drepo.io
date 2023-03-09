@@ -26,13 +26,13 @@ import { EditComment } from './editComment/editComment.component';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons } from '../basicComment/basicComment.styles';
 
-export type CurrentUserCommentProps = Omit<ITicketComment, 'updatedAt'> & {
+export type CurrentUserCommentProps = Omit<ITicketComment, 'updatedAt' | 'createdAt'> & {
 	commentAge: string;
 	metadata?: TicketCommentReplyMetadata;
 	isFirstOfBlock: boolean;
-	onDelete: () => void;
-	onReply: () => void;
-	onEdit: (newMessage, newImages) => void;
+	onDelete: (commentId) => void;
+	onReply: (commentId) => void;
+	onEdit: (commentId, newMessage, newImages) => void;
 };
 export const CurrentUserComment = ({
 	_id,
@@ -53,6 +53,7 @@ export const CurrentUserComment = ({
 	if (isEditMode) {
 		return (
 			<EditComment
+				_id={_id}
 				message={message}
 				images={images}
 				author={author}
@@ -66,10 +67,10 @@ export const CurrentUserComment = ({
 	return (
 		<CommentWithButtonsContainer>
 			<CommentButtons>
-				<ErrorCommentButton onClick={onDelete}>
+				<ErrorCommentButton onClick={() => onDelete(_id)}>
 					<DeleteIcon />
 				</ErrorCommentButton>
-				<PrimaryCommentButton onClick={onReply}>
+				<PrimaryCommentButton onClick={() => onReply(_id)}>
 					<ReplyIcon />
 				</PrimaryCommentButton>
 				<PrimaryCommentButton onClick={() => setIsEditMode(true)}>
