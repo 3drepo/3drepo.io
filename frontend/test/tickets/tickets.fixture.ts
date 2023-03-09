@@ -16,7 +16,7 @@
  */
 
  import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-import { CommentHistoryBlock, IComment, ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import * as faker from 'faker';
 import { times } from 'lodash';
 
@@ -43,23 +43,5 @@ export const templateMockFactory = (overrides?: ITemplate): ITemplate => ({
 	code: faker.random.alpha({ count: 5, upcase: true }),
 	...overrides,
 });
-
-export const commentHistoryMockFactory = (overrides?: Partial<CommentHistoryBlock>): CommentHistoryBlock => ({
-	images: [faker.random.word()],
-	message: faker.random.word(),
-	timestamp: faker.datatype.datetime(),
-	...overrides,
-});
-
-export const commentMockFactory = (overrides?: Partial<IComment>): IComment => ({
-	_id: faker.datatype.uuid(),
-	message: faker.random.word(),
-	images: [faker.random.word()],
-	author: faker.random.word(),
-	createdAt: faker.datatype.datetime(),
-	updatedAt: faker.datatype.datetime(),
-	deleted: faker.datatype.boolean(),
-	...overrides,
-}) as IComment;
 
 export const mockRiskCategories = (): string[] => times(5, () => faker.random.word())

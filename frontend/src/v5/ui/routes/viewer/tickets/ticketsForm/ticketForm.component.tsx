@@ -27,7 +27,7 @@ import { UnsupportedProperty } from './properties/unsupportedProperty.component'
 import { TicketProperty } from './properties/properties.helper';
 import { TitleContainer, PanelsContainer, ErrorTextGap } from './ticketsForm.styles';
 import { TitleProperty } from './properties/titleProperty.component';
-import { CommentsPanel } from '../commentsPanel/commentsPanel.component';
+import { CommentsPanel } from './commentsPanel/commentsPanel.component';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
@@ -63,6 +63,7 @@ const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyB
 							defaultValue={propertiesValues[name] ?? defaultValue}
 							key={name}
 							onBlur={onPropertyBlur}
+							// @ts-ignore
 							values={values}
 						/>
 						{formError && <ErrorTextGap />}
@@ -86,7 +87,7 @@ const PropertiesPanel = (props: PropertiesListProps) => (
 interface ModulePanelProps {
 	module: TemplateModule;
 	moduleValues: Record<string, any>;
-	scrollPanelIntoView: (isExpanding, el) => void;
+	scrollPanelIntoView: (event, isExpanding) => void;
 }
 
 const ModulePanel = ({ module, moduleValues, scrollPanelIntoView, ...rest }: ModulePanelProps) => (

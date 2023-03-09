@@ -18,53 +18,30 @@ import { FormattedMessage } from 'react-intl';
 import EmptyImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
 import EnlargeImageIcon from '@assets/icons/outlined/enlarge_image-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
+import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Modal } from '@controls/modal/modal.component';
 import {
 	EmptyImageContainer,
 	EnlargeContainer,
 	IconText,
 	Image,
 	Container,
-	OverlappingContainer,
 } from './ticketImageDisplayer.styles';
 
-type IImageModal = {
-	imgSrc: string;
-	open: boolean;
-	onClickClose: () => void;
-};
-
-const ImageModal = ({ imgSrc, ...props }: IImageModal) => (
-	<Modal maxWidth="xl" {...props}>
+const LoadedImage = ({ imgSrc }) => (
+	<OverlappingContainer onClick={() => DialogsActionsDispatchers.open('images', { images: [imgSrc] })}>
 		<Image
 			src={imgSrc}
 			alt={formatMessage({ id: 'viewer.cards.ticketImage.image', defaultMessage: 'image' })}
 		/>
-	</Modal>
+		<EnlargeContainer>
+			<EnlargeImageIcon />
+			<IconText>
+				<FormattedMessage id="viewer.cards.ticketImage.enlarge" defaultMessage="Enlarge" />
+			</IconText>
+		</EnlargeContainer>
+	</OverlappingContainer>
 );
-
-const LoadedImage = ({ imgSrc }) => {
-	const onClickViewImage = () => DialogsActionsDispatchers.open(ImageModal, {
-		imgSrc,
-	});
-	return (
-		<>
-			<OverlappingContainer onClick={onClickViewImage}>
-				<Image
-					src={imgSrc}
-					alt={formatMessage({ id: 'viewer.cards.ticketImage.image', defaultMessage: 'image' })}
-				/>
-				<EnlargeContainer>
-					<EnlargeImageIcon />
-					<IconText>
-						<FormattedMessage id="viewer.cards.ticketImage.enlarge" defaultMessage="Enlarge" />
-					</IconText>
-				</EnlargeContainer>
-			</OverlappingContainer>
-		</>
-	);
-};
 
 const EmptyImage = (props) => (
 	<EmptyImageContainer {...props}>

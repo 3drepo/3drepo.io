@@ -16,32 +16,39 @@
  */
 import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { DialogContainer, Actions, WarningIcon } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
+import { ModalContent, Actions, WarningIcon, CloseButton, Modal } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
+import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 
 interface IWarningModal {
-	message: string;
-	title: string;
-	onClickClose: () =>void;
+	message: string,
+	title: string,
+	onClickClose: () =>void,
+	open: boolean,
 }
 
-export const WarningModal = ({ title, message, onClickClose }: IWarningModal) => (
-	<DialogContainer>
-		<WarningIcon />
-		<DialogTitle>
-			{ title }
-		</DialogTitle>
-		<DialogContent>
-			<DialogContentText>
-				{ message }
-			</DialogContentText>
-		</DialogContent>
-		<Actions>
-			<Button autoFocus variant="contained" color="primary" onClick={onClickClose}>
-				<FormattedMessage
-					id="alertModal.action.ok"
-					defaultMessage="Ok, close window"
-				/>
-			</Button>
-		</Actions>
-	</DialogContainer>
+export const WarningModal = ({ title, message, onClickClose, open }: IWarningModal) => (
+	<Modal open={open} onClose={onClickClose}>
+		<ModalContent>
+			<WarningIcon />
+			<DialogTitle>
+				{ title }
+			</DialogTitle>
+			<CloseButton onClick={onClickClose}>
+				<CloseIcon />
+			</CloseButton>
+			<DialogContent>
+				<DialogContentText>
+					{ message }
+				</DialogContentText>
+			</DialogContent>
+			<Actions>
+				<Button autoFocus variant="contained" color="primary" onClick={onClickClose}>
+					<FormattedMessage
+						id="alertModal.action.ok"
+						defaultMessage="Ok, close window"
+					/>
+				</Button>
+			</Actions>
+		</ModalContent>
+	</Modal>
 );

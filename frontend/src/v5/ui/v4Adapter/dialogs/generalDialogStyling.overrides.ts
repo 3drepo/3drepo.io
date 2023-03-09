@@ -16,7 +16,7 @@
  */
 import { css } from 'styled-components';
 import { DialogTitle } from '@/v4/routes/components/dialogContainer/components/dialog/dialog.styles';
-import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
+import { primaryButtonStyling } from '@/v5/ui/v4Adapter/resuableOverrides.styles';
 import { Footer as InvitationsListFooter } from '@/v4/routes/components/invitationsDialog/invitationsDialog.styles';
 import { Footer as NewInviteFooter } from '@/v4/routes/components/invitationDialog/invitationDialog.styles';
 
@@ -69,24 +69,13 @@ const buttonContainerStyling = css`
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 
 		.MuiButtonBase-root.MuiButtonBase-root:last-child {
-			${labelButtonPrimaryStyles}
+			${primaryButtonStyling}
 			line-height: 1;
 
 			&, &:hover, &:active {
 				border: 0;
 			}
 		}
-	}
-`;
-
-export const secondaryButtonStyling = css`
-	border: 1px solid ${({ theme }) => theme.palette.secondary.main};
-	color: ${({ theme }) => theme.palette.secondary.main};
-	line-height: 1;
-	:hover {
-		background-color: ${({ theme }) => theme.palette.secondary.main};
-		color: ${({ theme }) => theme.palette.primary.contrast};
-		text-decoration: none;
 	}
 `;
 
