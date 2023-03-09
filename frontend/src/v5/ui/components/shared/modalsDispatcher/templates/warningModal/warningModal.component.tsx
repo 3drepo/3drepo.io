@@ -36,7 +36,6 @@ export const WarningModal = ({ title, message, onClickClose, open }: IWarningMod
 			<CloseButton onClick={onClickClose}>
 				<CloseIcon />
 			</CloseButton>
-			<WarningIcon />
 			<DialogContent>
 				<DialogContentText>
 					{ message }
