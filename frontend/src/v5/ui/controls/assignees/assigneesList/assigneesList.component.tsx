@@ -31,14 +31,14 @@ type IAssigneesList = {
 	className?: string;
 };
 
-export const AssigneesList = ({ values, maxItems = 3, onClick, className }: IAssigneesList) => {
+export const AssigneesList = ({ values, maxItems = 3, ...props }: IAssigneesList) => {
 	const allUsersAndJobs = UsersHooksSelectors.selectAssigneesListItems();
 	const filteredValues = intersection(values, allUsersAndJobs.map((i) => i.value));
 	const overflowRequired = filteredValues.length > maxItems;
 	const listedAssignees = overflowRequired ? filteredValues.slice(0, maxItems - 1) : filteredValues;
 	const overflowValue = overflowRequired ? filteredValues.slice(maxItems - 1).length : 0;
 	return (
-		<AssigneesListContainer onClick={onClick} className={className}>
+		<AssigneesListContainer {...props}>
 			{listedAssignees.length ? (
 				listedAssignees.map((assignee) => (
 					<AssigneeListItem key={assignee} assignee={assignee} />
