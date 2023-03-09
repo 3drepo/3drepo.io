@@ -18,7 +18,7 @@
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useRouteMatch, Redirect } from 'react-router-dom';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { LoginLink, Background, Container, Footer, Logo, BackgroundOverlay } from './authTemplate.styles';
+import { LoginLink, Background, Footer, Logo, BackgroundOverlay } from './authTemplate.styles';
 
 interface IAuthTemplate {
 	footer?: JSX.Element;
@@ -41,12 +41,12 @@ export const AuthTemplate = ({ footer, children }: IAuthTemplate): JSX.Element =
 			<LoginLink>
 				<Logo />
 			</LoginLink>
-			<Container>
-				{children}
-			</Container>
-			<Footer>
-				{footer}
-			</Footer>
+			{children}
+			{footer && (
+				<Footer>
+					{footer}
+				</Footer>
+			)}
 		</Background>
 	);
 };
