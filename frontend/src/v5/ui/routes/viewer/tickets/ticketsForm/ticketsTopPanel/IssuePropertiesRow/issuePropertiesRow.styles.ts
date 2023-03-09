@@ -35,7 +35,7 @@ export const IssuePropertiesContainer = styled.div`
 
 export const PropertyColumn = styled.span`
 	width: fit-content;
-	min-width: 70px;
+	min-width: 68px;
 `;
 
 export const PropertyTitle = styled.div`

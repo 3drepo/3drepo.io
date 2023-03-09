@@ -23,6 +23,8 @@ export const AssigneesListContainer = styled.div`
 	user-select: none;
 	color: ${({ theme }) => theme.palette.base.main};
 	font-size: 10px;
+	height: 28px;
+	line-height: 28px;
 
 	.MuiButtonBase-root {
 		z-index: 11;

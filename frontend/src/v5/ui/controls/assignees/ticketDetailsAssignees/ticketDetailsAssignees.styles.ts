@@ -48,7 +48,7 @@ export const AddUserButton = styled(CircleButton)`
 	border: 1px dashed ${({ theme }) => theme.palette.base.light};
 	padding: 5px;
 	color: ${({ theme }) => theme.palette.base.main};
-	margin: 2px 0 2px 10px;
+	margin: 2px 0 0 10px;
 `;
 
 export const InlineAssignees = styled.div`
