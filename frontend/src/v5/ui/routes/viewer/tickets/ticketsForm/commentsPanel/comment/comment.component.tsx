@@ -52,12 +52,9 @@ export const Comment = memo(({
 	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt || createdAt));
 
 	useEffect(() => {
-		if (createdAt) {
-			updateMessageAge();
-			const intervalId = window.setInterval(updateMessageAge, 10_000);
-			return () => clearInterval(intervalId);
-		}
-		return null;
+		updateMessageAge();
+		const intervalId = window.setInterval(updateMessageAge, 10_000);
+		return () => clearInterval(intervalId);
 	}, [updatedAt]);
 
 	const UserComment = isCurrentUser ? CurrentUserComment : OtherUserComment;
