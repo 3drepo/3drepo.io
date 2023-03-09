@@ -55,15 +55,14 @@ export default {
 	},
 	component: ChipSelect,
 	parameters: { controls: { exclude: ['name', 'inputRef', 'helperText', 'error', 'size', 'onDelete',
-		'deleteIcon', 'avatar', 'sx', 'classes', 'clickable', 'children', 'required', 'icon', 'values', 'ref'] } },
+		'deleteIcon', 'avatar', 'sx', 'classes', 'clickable', 'children', 'required', 'icon', 'ref'] } },
 } as ComponentMeta<typeof ChipSelect>;
 
-const ChipSelectStory: ComponentStory<typeof ChipSelect> = ({ ...args }: any) => {
-	const [value, setValue] = useState('None');
+const ChipSelectStory: ComponentStory<typeof ChipSelect> = ({ value: initialValue, ...args }: any) => {
+	const [value, setValue] = useState(initialValue);
 	const handleChange = (event: SelectChangeEvent<any[]>) => {
 		setValue(event.target.value as any);
 	};
-
 	return (
 		<ChipSelect
 			{...args}
@@ -78,5 +77,5 @@ export const NoLabelExample = ChipSelectStory.bind({});
 NoLabelExample.args = {
 	label: '',
 	variant: 'text',
-	tooltip: 'Set priority',
+	tooltip: 'I am a custom tooltip',
 };
