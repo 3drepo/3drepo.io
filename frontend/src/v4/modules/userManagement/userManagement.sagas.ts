@@ -18,9 +18,6 @@
 import { isV5 } from '@/v4/helpers/isV5';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
-import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { selectIsTeamspaceAdmin } from '@/v5/store/teamspaces/teamspaces.selectors';
-import { selectUser } from '@/v5/store/users/users.selectors';
 import { isEmpty } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
@@ -207,12 +204,7 @@ export function* removeUser({ username }) {
 				template: RemoveUserDialog,
 				confirmText: 'Remove',
 				onConfirm: () => UserManagementActions.removeUserCascade(username),
-				data: {
-					// models: errorData.models,
-					// projects: errorData.projects,
-					// teamspacePerms: '',
-					username
-				}
+				data: { username }
 			};
 			yield put(DialogActions.showDialog(config));
 		}
