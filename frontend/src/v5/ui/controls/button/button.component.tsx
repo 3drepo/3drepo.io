@@ -16,28 +16,23 @@
  */
 
 import { ElementType, forwardRef, Ref } from 'react';
-import { Typography } from '@/v5/ui/controls/typography';
-import { ButtonTypeMap } from '@mui/material/Button/Button';
-import { ButtonProps } from '@mui/material/Button';
+import { ButtonProps, ButtonTypeMap } from '@mui/material/Button';
 import { CircularProgress } from '@mui/material';
-import { MuiButton, ErrorButton, LabelButton } from './button.styles';
+import { MuiButton, ErrorButton } from './button.styles';
 
-type ButtonVariants = ButtonProps['variant'] | 'label' | 'label-outlined';
-
-export type IButton<T extends ElementType = ButtonTypeMap['defaultComponent']> = Omit<ButtonProps<T>, 'variant'> & {
-	variant?: ButtonVariants;
+export type IButton<T extends ElementType = ButtonTypeMap['defaultComponent']> = ButtonProps<T> & {
 	className?: string;
 	errorButton?: boolean;
 	isPending?: boolean;
 };
 
-export const ButtonBase = <T extends ElementType>({
+const ButtonBase = <T extends ElementType>({
 	children,
 	variant,
 	errorButton,
 	isPending,
 	...props
-}: IButton<T>, ref: Ref<HTMLButtonElement>): JSX.Element => {
+}: IButton<T>, ref: Ref<HTMLButtonElement>) => {
 	if (errorButton) {
 		return (
 			<ErrorButton {...props} ref={ref}>
@@ -45,32 +40,20 @@ export const ButtonBase = <T extends ElementType>({
 			</ErrorButton>
 		);
 	}
-	if (variant === 'label') {
-		return (
-			<LabelButton {...props} ref={ref}>
-				<Typography variant="kicker">{children}</Typography>
-			</LabelButton>
-		);
-	}
-	if (variant === 'label-outlined') {
-		return (
-			<LabelButton outlined {...props} ref={ref}>
-				<Typography variant="kicker">{children}</Typography>
-			</LabelButton>
-		);
-	}
 
-	return isPending
-		? (
+	if (isPending) {
+		return (
 			<MuiButton variant={variant} {...props} startIcon="" ref={ref}>
 				<CircularProgress color="inherit" size="13px" thickness={7} />
 			</MuiButton>
-		)
-		: (
-			<MuiButton variant={variant} {...props} ref={ref}>
-				{ children }
-			</MuiButton>
 		);
+	}
+
+	return (
+		<MuiButton variant={variant} {...props} ref={ref}>
+			{children}
+		</MuiButton>
+	);
 };
 
 export const Button = forwardRef(ButtonBase);

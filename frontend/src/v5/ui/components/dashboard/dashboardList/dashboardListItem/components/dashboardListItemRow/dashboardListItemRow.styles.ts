@@ -16,7 +16,7 @@
  */
 import styled, { css } from 'styled-components';
 import { alpha } from '@mui/material/styles';
-import { LabelButton, labelButtonSecondaryStyles } from '@controls/button/button.styles';
+import { LabelButton } from '@controls/button';
 
 export const Container = styled.div<{ selected?: boolean }>`
 	position: relative;
@@ -37,8 +37,8 @@ export const Container = styled.div<{ selected?: boolean }>`
 		}
 
 		${LabelButton} {
-			${labelButtonSecondaryStyles};
 			background-color: ${alpha(theme.palette.tertiary.lightest, 0.8)};
+			color: ${theme.palette.tertiary.main};
 		}
 	`}
 `;
