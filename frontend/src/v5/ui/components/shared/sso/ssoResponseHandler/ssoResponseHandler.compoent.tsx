@@ -26,8 +26,8 @@ export const SSOResponseHandler = () => {
 	const { linkPost, unlinkPost } = useSSO();
 
 	useEffect(() => {
-		const wasSSOAction = linkPost || unlinkPost;
-		if (!username || !wasSSOAction) return;
+		const isSSOLinkAction = linkPost || unlinkPost;
+		if (!username || !isSSOLinkAction) return;
 		DialogsActionsDispatchers.open(EditProfileModal, { initialTab: 'authentication' });
 	}, [username]);
 
