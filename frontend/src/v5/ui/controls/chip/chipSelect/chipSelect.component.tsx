@@ -25,10 +25,12 @@ import { HiddenSelect, IconWrapper } from './chipSelect.styles';
 type IChipSelectItem = IChipMapItem & { value: string; };
 type IChipSelect = IChip & FormInputProps & { values: IChipMap, defaultValue?: string };
 
-const SelectItem = ({ label, icon, color, ...props }: IChipSelectItem) => {
-	const Icon = () => <IconWrapper color={color}> {icon} </IconWrapper>;
-	return <MenuItem {...props}> <Icon /> {label} </MenuItem>;
-};
+const SelectItem = ({ label, icon, color, ...props }: IChipSelectItem) => (
+	<MenuItem {...props}>
+		<IconWrapper color={color}> {icon} </IconWrapper>
+		{label}
+	</MenuItem>
+);
 
 export const ChipSelect = ({
 	values,
