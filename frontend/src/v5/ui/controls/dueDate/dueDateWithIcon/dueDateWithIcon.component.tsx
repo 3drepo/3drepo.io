@@ -23,9 +23,9 @@ import { BaseDueDate } from '../baseDueDate.component';
 import { CalendarIcon, DueDateWithIconContainer } from '../dueDate.styles';
 import { DateContainer, EmptyDateContainer } from '../dueDateWithLabel/dueDateLabel/dueDateLabel.styles';
 
-type IDueDateWithIcon = FormInputProps & {
+type IDueDateWithIcon = Omit<FormInputProps, 'onBlur'> & {
 	tooltip?: string;
-	onBlur: () => void;
+	onBlur: (newValue) => void;
 };
 
 export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: IDueDateWithIcon) => {
