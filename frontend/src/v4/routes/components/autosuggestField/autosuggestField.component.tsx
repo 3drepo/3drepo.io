@@ -18,9 +18,8 @@
 import { PureComponent } from 'react';
 import { MenuItem, Paper } from '@mui/material';
 import Autosuggest from 'react-autosuggest';
-import { Highlight } from '../highlight/highlight.component';
-
 import { ConditionalV5OrViewerScrollArea } from '@/v5/ui/v4Adapter/components/conditionalV5OrViewerScrollArea.component';
+import { Highlight } from '../highlight/highlight.component';
 import { Container, StyledTextField, SuggestionsList } from './autosuggestField.styles';
 
 interface IProps {
