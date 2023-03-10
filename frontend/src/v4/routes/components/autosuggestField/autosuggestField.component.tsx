@@ -102,7 +102,7 @@ export class AutosuggestField extends PureComponent<IProps, IState> {
 				{...options.containerProps}
 				style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
 			>
-				<ConditionalV5OrViewerScrollArea autoHeight autoHide={false}>
+				<ConditionalV5OrViewerScrollArea autoHeight>
 					{options.children}
 				</ConditionalV5OrViewerScrollArea>
 			</Paper>
