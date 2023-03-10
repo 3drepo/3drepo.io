@@ -26,7 +26,7 @@ import { AuthActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/servi
 import { enableKickedOutEvent } from '@/v5/services/realtime/auth.events';
 import { ModalsDispatcher } from '@components/shared/modalsDispatcher/modalsDispatcher.component';
 import { Intercom } from '@components/intercom/intercom.component';
-import { SSOResponseHandler } from '@components/shared/sso/ssoResponseHandler/ssoResponseHandler.compoent';
+import { SSOResponseHandler } from '@components/shared/sso/ssoResponseHandler/ssoResponseHandler.component';
 import { MainRoute } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
 
