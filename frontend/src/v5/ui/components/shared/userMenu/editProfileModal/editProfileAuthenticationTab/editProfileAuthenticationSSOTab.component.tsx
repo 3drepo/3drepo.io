@@ -94,7 +94,7 @@ export const EditProfileAuthenticationSSOTab = ({
 					</SuccessMessage>
 				)}
 				<SSOErrorResponseMessage />
-				{linkPost && (<Gap />)}
+				{linkPost && (<Gap $height="28px" />)}
 				<MicrosoftTitleText>
 					<FormattedMessage
 						defaultMessage="Unlink Microsoft Account"

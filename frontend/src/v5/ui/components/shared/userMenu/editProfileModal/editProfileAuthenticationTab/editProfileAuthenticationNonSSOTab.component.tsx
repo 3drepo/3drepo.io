@@ -124,7 +124,7 @@ export const EditProfileAuthenticationNonSSOTab = ({
 					</SuccessMessage>
 				)}
 				<SSOErrorResponseMessage />
-				{unlinkPost && (<Gap />)}
+				{unlinkPost && (<Gap $height="10px" />)}
 				<FormPasswordField
 					control={control}
 					name="oldPassword"
