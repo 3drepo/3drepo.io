@@ -19,7 +19,7 @@ const { codeExists, createResponseCode, templates } = require('../../utils/respo
 const { decryptCryptoHash, generateCryptoHash, getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
 const { errorCodes, providers } = require('../../services/sso/sso.constants');
 const { getUserByEmail, getUserByQuery } = require('../../models/users');
-const { redirectWithError, setSessionReferer } = require('.');
+const { redirectWithError, setSsoInfo } = require('.');
 const { addPkceProtection } = require('./pkce');
 const { getUserFromSession } = require('../../utils/sessions');
 const { logger } = require('../../utils/logger');
@@ -128,7 +128,7 @@ const emailNotUsed = async (req, res, next) => {
 
 Aad.emailNotUsed = validateMany([checkStateIsValid, emailNotUsed]);
 
-Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, setSessionReferer, authenticate(redirectUri)]);
+Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, setSsoInfo, authenticate(redirectUri)]);
 
 const hasAssociatedAccount = async (req, res, next) => {
 	try {
