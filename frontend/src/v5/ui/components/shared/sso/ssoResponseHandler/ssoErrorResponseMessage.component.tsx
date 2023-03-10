@@ -18,15 +18,7 @@
 import { useSSO } from '@components/shared/sso/useSSO';
 import { formatMessage } from '@/v5/services/intl';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
-
-export enum SSOErrorCode {
-	EMAIL_EXISTS = '1',
-	EMAIL_EXISTS_WITH_SSO = '2',
-	NON_SSO_USER = '3',
-	USER_NOT_FOUND = '4',
-	UNKNOWN = '5',
-	EXISTING_USERNAME = '6',
-}
+import { SSOErrorCode } from '@/v5/services/api/sso';
 
 const getErroInfo = (errorCode) => {
 	switch (errorCode) {
