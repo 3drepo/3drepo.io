@@ -37,6 +37,8 @@ import { LegalRoutes } from '../legal';
 import { UserSignup } from '../userSignup/userSignup.component';
 import { UserVerification } from '../userVerification/userVerification.component';
 import { TeamspaceLayout } from './teamspaces/teamspaceLayout/teamspaceLayout.component';
+import { UserSignupSSO } from '../userSignup/userSignUpSSO/userSignUpSSO.component';
+import { LoginSSO } from '../login/loginSSO.component';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -50,8 +52,14 @@ export const MainRoute = () => {
 				<Route title={formatMessage({ id: 'pageTitle.login', defaultMessage: 'Log in' })} exact path={`${path}/login`}>
 					<Login />
 				</Route>
+				<Route title={formatMessage({ id: 'pageTitle.login', defaultMessage: 'Log in' })} exact path={`${path}/login-sso`}>
+					<LoginSSO />
+				</Route>
 				<Route title={formatMessage({ id: 'pageTitle.signUp', defaultMessage: 'Create Account' })} exact path={`${path}/signup`}>
 					<UserSignup />
+				</Route>
+				<Route title={formatMessage({ id: 'pageTitle.signUp', defaultMessage: 'Create Account' })} exact path={`${path}/signup-sso`}>
+					<UserSignupSSO />
 				</Route>
 				<Route title={formatMessage({ id: 'pageTitle.userVerification', defaultMessage: 'Verify Email' })} exact path={`${path}/register-verify`}>
 					<UserVerification />

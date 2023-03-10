@@ -147,7 +147,7 @@ const establishRoutes = (isFed) => {
 	const canDeleteModel = isFed ? async (req, res, next) => { await next(); } : canDeleteContainer;
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/models:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}:
 	 *   post:
 	 *     description: Add a new model to the specified project the user is admin of
 	 *     tags: [Models]
@@ -165,6 +165,13 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *       - name: type
+ 	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
 	 *     requestBody:
 	 *       content:
    	 *         application/json:

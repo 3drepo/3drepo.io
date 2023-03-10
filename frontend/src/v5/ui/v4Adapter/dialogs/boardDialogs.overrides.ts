@@ -40,11 +40,11 @@ import { UserIndicator } from '@/v4/routes/components/messagesList/components/me
 import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 import { ViewerPanelFooter } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 import { StyledButton } from '@/v4/routes/viewerGui/components/containedButton/containedButton.styles';
-import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
+import { primaryButtonStyling } from '@/v5/ui/v4Adapter/resuableOverrides.styles';
 import CommentStyling, { CommentListStyling } from '../overrides/preview/previewComments.overrides';
 
 const primaryButtonStyles = css`
-	${labelButtonPrimaryStyles}
+	${primaryButtonStyling}
 
 	&:disabled {
 		/* TODO - fix after new palette is released */

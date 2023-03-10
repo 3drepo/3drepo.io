@@ -25,6 +25,6 @@ export const NextStepButton = styled(Button).attrs({
 })`
 	width: fit-content;
 	font-weight: 300;
-	margin: 20px 0 0;
+	margin: 10px 0 12px;
 	float: right;
 `;

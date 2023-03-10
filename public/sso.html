@@ -24,10 +24,16 @@
 			const msg = params.error ? `Errored (code: ${params.error})` : "SUCCESS"
 			document.getElementById('linkRes').innerHTML =  msg;
 		}
+
+		if (params.username) {
+			document.getElementById('username').value = params.username;
+		}
 	}
 	const runPOST = () => {
+		const username = document.getElementById('username').value;
+
 		var xhr = new XMLHttpRequest();
-		xhr.open("POST", `/api/v5/sso/aad/signup?redirectUri=${DOMAIN}/sso.html?signupPost=1`, true);
+		xhr.open("POST", `/api/v5/sso/aad/signup?redirectUri=${encodeURIComponent(`${DOMAIN}/sso.html?username=${username}&signupPost=1`)}`, true);
 		xhr.setRequestHeader('Content-Type', 'application/json');
 		xhr.send(JSON.stringify({
 		  "username": document.getElementById('username').value,

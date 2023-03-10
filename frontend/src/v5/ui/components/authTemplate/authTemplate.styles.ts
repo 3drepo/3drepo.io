@@ -27,8 +27,8 @@ import { Display } from '@/v5/ui/themes/media';
 const customLogoPath = clientConfigService.getCustomLogoPath();
 export const customBackgroundPath = clientConfigService.getCustomBackgroundImagePath();
 
-export const Container = styled.div`
-	width: 408px;
+export const AuthForm = styled.form`
+	min-width: 408px;
 	border-radius: 20px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	padding: 58px 64px 38px;
@@ -69,7 +69,6 @@ export const Background = styled.div`
 	height: 100%;
 	width: 100%;
 	display: flex;
-	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	flex-direction: column;
@@ -102,7 +101,9 @@ export const LoginLink = styled(Link).attrs({
 })`
 	width: fit-content;
 	margin-bottom: 28px;
-	position: relative;
+	position: absolute;
+	top: 40px;
+	left: 50px;
 `;
 
 export const LogoContainer = styled(LoginLink)`
