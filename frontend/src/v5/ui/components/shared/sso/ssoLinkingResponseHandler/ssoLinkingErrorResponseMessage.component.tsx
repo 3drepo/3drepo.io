@@ -21,30 +21,28 @@ import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
 import { SSOErrorCode } from '@/v5/services/api/sso';
 
 const getErroInfo = (errorCode) => {
-	switch (errorCode) {
-		case SSOErrorCode.EMAIL_EXISTS:
-			return {
-				title: formatMessage({
-					id: 'sso.error.emailExists.action',
-					defaultMessage: 'SSO Error - An email is already linked',
-				}),
-				message: formatMessage({
-					id: 'sso.error.emailExists.message',
-					defaultMessage: 'Your account cannot be linked with Microsoft because another email is already linked',
-				}),
-			};
-		default:
-			return {
-				title: formatMessage({
-					id: 'sso.error.unkown.action',
-					defaultMessage: 'SSO Error - Unknown',
-				}),
-				message: formatMessage({
-					id: 'sso.error.unkown.message',
-					defaultMessage: 'An unknown error occurred (CODE: {errorCode})',
-				}, { errorCode }),
-			};
+	if (SSOErrorCode.EMAIL_EXISTS) {
+		return {
+			title: formatMessage({
+				id: 'sso.linking.error.emailExists.action',
+				defaultMessage: 'SSO Error - An email is already linked',
+			}),
+			message: formatMessage({
+				id: 'sso.linking.error.emailExists.message',
+				defaultMessage: 'Your account cannot be linked with Microsoft because another email is already linked',
+			}),
+		};
 	}
+	return {
+		title: formatMessage({
+			id: 'sso.linking.error.unkown.action',
+			defaultMessage: 'SSO Error - Unknown',
+		}),
+		message: formatMessage({
+			id: 'sso.linking.error.unkown.message',
+			defaultMessage: 'An unknown error occurred (CODE: {errorCode})',
+		}, { errorCode }),
+	};
 };
 
 export const SSOErrorResponseMessage = () => {
