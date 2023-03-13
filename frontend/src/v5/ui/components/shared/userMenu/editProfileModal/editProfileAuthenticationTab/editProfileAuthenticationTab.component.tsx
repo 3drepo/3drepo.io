@@ -16,8 +16,8 @@
  */
 
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useSSO } from '@components/shared/sso/useSSO';
 import { useEffect } from 'react';
+import { useSSO } from '@/v5/services/sso.hooks';
 import { EditProfileAuthenticationSSOTab } from './editProfileAuthenticationSSOTab.component';
 import { EditProfileAuthenticationNonSSOTab } from './editProfileAuthenticationNonSSOTab.component';
 

@@ -28,10 +28,10 @@ import { FormPasswordField } from '@controls/inputs/formInputs.component';
 import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
 import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
 import { MicrosoftButton } from '@components/shared/sso/microsoftButton.component';
-import { useSSO } from '@components/shared/sso/useSSO';
 import { SSOErrorResponseMessage } from '@components/shared/sso/ssoLinkingResponseHandler/ssoLinkingErrorResponseMessage.component';
 import { Gap } from '@controls/gap';
 import { linkAccount } from '@/v5/services/api/sso';
+import { useSSO } from '@/v5/services/sso.hooks';
 import { TabContent } from '../editProfileModal.styles';
 import { MicrosoftText } from './editProfileAuthenticationTab.styles';
 

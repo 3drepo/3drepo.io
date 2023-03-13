@@ -16,6 +16,7 @@
  */
 
 import { isNull, omitBy } from 'lodash';
+import { useHistory } from 'react-router-dom';
 import { addParams, getParams } from '../helpers/url.helper';
 import { errorMessages, signin } from './api/sso';
 import { formatMessage } from './intl';
@@ -40,4 +41,21 @@ export const useSSOLogin = () => {
 	return [() => signin(redirectUri).then(({ data }) => {
 		window.location.href = data.link;
 	}), errorMessage, ssoParams.toString()] as [ ()=> void, string | null, string];
+};
+
+export const useSSO = () => {
+	const history = useHistory();
+	const searchParams = getParams();
+	const errorCode = searchParams.get('error');
+	const linkPost = searchParams.get('linkPost');
+	const unlinkPost = searchParams.get('unlinkPost');
+
+	const reset = () => {
+		searchParams.delete('error');
+		searchParams.delete('linkPost');
+		searchParams.delete('unlinkPost');
+		history.replace({ search: searchParams.toString() });
+	};
+
+	return { linkPost, unlinkPost, errorCode, reset };
 };

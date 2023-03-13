@@ -30,9 +30,9 @@ import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalB
 import { unlinkAccount } from '@/v5/services/api/sso';
 import { MicrosoftInstructionsText } from '@components/shared/sso/microsoftText.styles';
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useSSO } from '@components/shared/sso/useSSO';
 import { SSOErrorResponseMessage } from '@components/shared/sso/ssoLinkingResponseHandler/ssoLinkingErrorResponseMessage.component';
 import { Gap } from '@controls/gap';
+import { useSSO } from '@/v5/services/sso.hooks';
 import { TabContent, MicrosoftTitleText } from '../editProfileModal.styles';
 
 type IUpdateSSOPasswordInputs = {
