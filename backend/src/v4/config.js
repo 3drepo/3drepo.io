@@ -316,12 +316,4 @@ config.loginPolicy.maxUnsuccessfulLoginAttempts = config.loginPolicy.maxUnsucces
 config.loginPolicy.remainingLoginAttemptsPromptThreshold = config.loginPolicy.remainingLoginAttemptsPromptThreshold || 5;
 config.loginPolicy.lockoutDuration = config.loginPolicy.lockoutDuration || 900000; // milliseconds
 
-config.sso= {
-		aad: {
-			clientId: "4caba479-bfa6-46bc-9214-a0dc1dcbf8c7",
-			authority: "https://login.microsoftonline.com/common",
-			clientSecret: "9ab8Q~9APghc~vGCXorqSF5JxiwoQM~oxQrjlcGg"
-		}
-	}
-
 module.exports = config;
