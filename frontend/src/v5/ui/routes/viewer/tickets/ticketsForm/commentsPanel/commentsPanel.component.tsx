@@ -65,7 +65,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
 
-	const commentsLength = comments?.length || 0;
+	const commentsLength = comments.length;
 
 	const getCommentIsFirstOfBlock = (index) => {
 		if (index === 0) return true;
