@@ -18,6 +18,7 @@
 import { desanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import ReactMarkdown from 'react-markdown';
 import { CommentMessage } from '../basicComment/basicComment.styles';
+import { OverflowContainer } from './commentMarkDown.styles';
 
 const ImageMarkdown = ({ src }) => (<>![image]({src})</>);
 const CodeMarkdown = ({ value }) => (<code>{desanitiseMessage(value)}</code>);
@@ -33,7 +34,9 @@ type CommentMarkDownProps = {
 	className?: string,
 };
 export const CommentMarkDown = ({ children, ...props }: CommentMarkDownProps) => (
-	<ReactMarkdown renderers={RENDERERS} escapeHtml={false} {...props}>
-		{children}
-	</ReactMarkdown>
+	<OverflowContainer>
+		<ReactMarkdown renderers={RENDERERS} escapeHtml={false} {...props}>
+				{children}
+		</ReactMarkdown>
+	</OverflowContainer>
 );
