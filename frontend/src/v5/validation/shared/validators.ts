@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { formatMessage } from '@/v5/services/intl';
-import { isNull } from 'lodash';
+import { isNull, isNumber } from 'lodash';
 import * as Yup from 'yup';
 
 export const trimmedString = Yup.string().transform((value) => value.trim());
@@ -29,5 +29,5 @@ export const requiredNumber = (requiredError?) => nullableNumber.test(
 		id: 'validation.number.required',
 		defaultMessage: 'This is required',
 	}),
-	(number) => !isNull(number),
+	(number) => isNumber(number),
 );
