@@ -14,9 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const appendSlashIfNeeded = (uri) => (uri[uri.length - 1] !== '/' ? `${uri}/` : uri);
+const appendSlashIfNeeded = (uri) => (uri.at(-1) !== '/' ? `${uri}/` : uri);
 
-export const discardSlash = (uri) => (uri[uri.length - 1] === '/' ? uri.slice(0, -1) : uri);
+export const discardSlash = (uri) => (uri.at(-1) === '/' ? uri.slice(0, -1) : uri);
 
 export const discardTab = (uri) => discardSlash(uri).split('/').slice(0, -1).join('/');
 
