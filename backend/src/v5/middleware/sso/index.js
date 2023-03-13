@@ -31,7 +31,7 @@ Sso.redirectWithError = (res, url, errorCode) => {
 	res.redirect(urlRedirect.href);
 };
 
-Sso.setSsoInfo = async (req, res, next) => {
+Sso.setSessionInfo = async (req, res, next) => {
 	const ssoInfo = {
 		userAgent: req.headers['user-agent'],
 		...(req.headers.referer ? { referer: getURLDomain(req.headers.referer) } : { }),

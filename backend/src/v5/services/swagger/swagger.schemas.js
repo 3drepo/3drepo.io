@@ -45,7 +45,7 @@ Schemas.schemas.roles = {
 Schemas.schemas.errorCodes = {
 	type: 'string',
 	enum: [1, 2, 3, 4, 5],
-	description: 'Error codes: <br/><br/>* `1` - There is a non SSO account with the same email<br/><br/>* `2` - There is an SSO account witht he same email<br/><br/>* `3` - The user is non SSO<br/><br/>* `4` - The user was not found<br/><br/>* `5` - Unknown',
+	description: 'Error codes: <br/><br/>* `1` - A non SSO account with the same email already exists<br/><br/>* `2` - An SSO account witht he same email already exists<br/><br/>* `3` - The user is non SSO<br/><br/>* `4` - The user was not found<br/><br/>* `5` - Unknown',
 };
 
 const ticketTemplatePropSchema = {
