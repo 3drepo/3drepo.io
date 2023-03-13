@@ -244,8 +244,8 @@ const testAuthenticate = () => {
 				createResponseCode(templates.ssoNotAvailable));
 		});
 
-		test('should set authParams and respond with a link if req has no body', async () => {
-			const req = { query: { redirectUri: generateRandomString() }, headers: {} };
+		test('should set authParams, ssoInfo and respond with a link if req has no body', async () => {
+			const req = { query: { redirectUri: generateRandomString() }, headers: { 'user-agent': generateRandomString() }, session: {} };
 			addPkceCodes(req);
 
 			const authURL = generateRandomURL();
@@ -263,13 +263,17 @@ const testAuthenticate = () => {
 				codeChallenge: req.session.pkceCodes.challenge,
 				codeChallengeMethod: req.session.pkceCodes.challengeMethod,
 			});
+			expect(req.session.ssoInfo).toEqual({
+				userAgent: req.headers['user-agent'],
+			});
 		});
 
-		test('should set authParams and respond with a link if req has body', async () => {
+		test('should set authParams, ssoInfo and respond with a link if req has body', async () => {
 			const req = {
 				query: { redirectUri: generateRandomString() },
 				body: { username: generateRandomString() },
-				headers: {},
+				headers: { 'user-agent': generateRandomString() },
+				session: {},
 			};
 			addPkceCodes(req);
 
@@ -288,14 +292,18 @@ const testAuthenticate = () => {
 				codeChallenge: req.session.pkceCodes.challenge,
 				codeChallengeMethod: req.session.pkceCodes.challengeMethod,
 			});
+			expect(req.session.ssoInfo).toEqual({
+				userAgent: req.headers['user-agent'],
+			});
 		});
 
-		test('should set authParams, set session referer and respond with a link if req headers have referer', async () => {
+		test('should set authParams, ssoInfo with referer and respond with a link if req headers have referer', async () => {
 			const referer = generateRandomString();
 			const req = {
 				query: { redirectUri: generateRandomString() },
 				body: { username: generateRandomString() },
-				headers: { referer },
+				headers: { referer, 'user-agent': generateRandomString() },
+				session: {},
 			};
 			addPkceCodes(req);
 
@@ -311,7 +319,10 @@ const testAuthenticate = () => {
 				codeChallenge: req.session.pkceCodes.challenge,
 				codeChallengeMethod: req.session.pkceCodes.challengeMethod,
 			});
-			expect(req.session.referer).toEqual(referer);
+			expect(req.session.ssoInfo).toEqual({
+				userAgent: req.headers['user-agent'],
+				referer: req.headers.referer,
+			});
 		});
 	});
 };
