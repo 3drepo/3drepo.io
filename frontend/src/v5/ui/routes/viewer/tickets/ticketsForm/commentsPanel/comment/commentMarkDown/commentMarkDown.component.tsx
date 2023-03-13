@@ -36,7 +36,7 @@ type CommentMarkDownProps = {
 export const CommentMarkDown = ({ children, ...props }: CommentMarkDownProps) => (
 	<OverflowContainer>
 		<ReactMarkdown renderers={RENDERERS} escapeHtml={false} {...props}>
-				{children}
+			{children}
 		</ReactMarkdown>
 	</OverflowContainer>
 );
