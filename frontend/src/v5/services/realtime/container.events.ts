@@ -22,8 +22,13 @@ import { subscribeToRoomEvent } from './realtime.service';
 
 export const enableRealtimeContainerUpdateSettings = (teamspace:string, project:string, containerId:string) =>
 	subscribeToRoomEvent({ teamspace, project, model: containerId }, 'containerSettingsUpdate',
-		(settings: ContainerSettings) =>
-			ContainersActionsDispatchers.fetchContainerSettingsSuccess(project, containerId, settings));
+		(settings: ContainerSettings) => {
+			// eslint-disable-next-line no-console
+			console.log('containerSettingsUpdate');
+			// eslint-disable-next-line no-console
+			console.log(settings);
+			ContainersActionsDispatchers.fetchContainerSettingsSuccess(project, containerId, settings);
+		});
 
 export const enableRealtimeNewContainer = (teamspace:string, project:string) =>
 	subscribeToRoomEvent({ teamspace, project }, 'newContainer',
