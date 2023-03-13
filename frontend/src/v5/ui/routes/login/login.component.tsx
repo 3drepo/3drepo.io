@@ -26,6 +26,7 @@ import { LoginSchema } from '@/v5/validation/userSchemes/loginSchemes';
 import { AuthTemplate } from '@components/authTemplate';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
+import { AuthForm } from '@components/authTemplate/authTemplate.styles';
 import { ForgotPasswordPrompt, OtherOptions, SignUpPrompt, UnhandledErrorInterceptor } from './login.styles';
 import { AuthHeading, ErrorMessage, FormPasswordField, FormUsernameField } from './components/components.styles';
 import { PASSWORD_FORGOT_PATH, RELEASE_NOTES_ROUTE, SIGN_UP_PATH } from '../routes.constants';
@@ -66,7 +67,7 @@ export const Login = () => {
 				</a>
 			)}
 		>
-			<form onSubmit={handleSubmit(onSubmit)}>
+			<AuthForm onSubmit={handleSubmit(onSubmit)}>
 				<AuthHeading>
 					<FormattedMessage id="auth.login.heading" defaultMessage="Log in" />
 				</AuthHeading>
@@ -105,7 +106,7 @@ export const Login = () => {
 				<SubmitButton disabled={!isValid} isPending={isPending} startIcon={<LoginIcon />}>
 					<FormattedMessage id="auth.login.buttonText" defaultMessage="Log in" />
 				</SubmitButton>
-			</form>
+			</AuthForm>
 		</AuthTemplate>
 	);
 };

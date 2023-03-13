@@ -47,3 +47,8 @@ export const ViewerBottomActions = styled.div`
 	align-items: center;
 	width: 100%;
 `;
+
+export const MeasureUnit = styled.strong`
+	margin-left: 2px;
+	width: 22px;
+`;

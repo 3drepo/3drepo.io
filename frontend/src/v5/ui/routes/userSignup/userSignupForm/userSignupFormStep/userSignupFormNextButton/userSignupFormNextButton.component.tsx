@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,16 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { ButtonProps } from '@mui/material';
+import { useContext } from 'react';
+import { useFormContext } from 'react-hook-form';
+import { UserSignupFormStepperContext } from '../../userSignupFormStepper/userSignupFormStepper.component';
+import { NextStepButton as NextStepButtonBase } from '../userSignupFormStep.styles';
 
-import { Button } from '@controls/button';
+export const NextStepButton = (props: ButtonProps) => {
+	const { moveToNextStep } = useContext(UserSignupFormStepperContext);
+	const { formState: { isValid } } = useFormContext();
 
-export const NextStepButton = styled(Button).attrs({
-	variant: 'contained',
-	color: 'primary',
-})`
-	width: fit-content;
-	font-weight: 300;
-	margin: 10px 0 12px;
-	float: right;
-`;
+	return (<NextStepButtonBase onClick={moveToNextStep} disabled={!isValid} {...props} />);
+};

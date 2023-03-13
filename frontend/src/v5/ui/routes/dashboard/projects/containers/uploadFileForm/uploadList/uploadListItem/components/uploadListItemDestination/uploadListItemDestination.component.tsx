@@ -24,6 +24,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { createFilterOptions } from '@mui/material';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
+import { isCollaboratorRole } from '@/v5/store/store.helpers';
 import { Autocomplete, DestinationInput, NewOrExisting } from './uploadListItemDestination.styles';
 import { NewContainer } from './options/newContainer/newContainer.component';
 import { AlreadyUsedName } from './options/alreadyUsedName/alreadyUsedName.component';
@@ -122,7 +123,8 @@ export const UploadListItemDestination = ({
 
 		// filter out currently selected value and containers with insufficient permissions
 		const filteredOptions = getFilteredContainersOptions(options, params)
-			.filter(({ name, role }) => (name !== value.name) && (role === Role.COLLABORATOR));
+			.filter(({ name }) => name !== value.name)
+			.filter(({ role }) => isCollaboratorRole(role));
 
 		const containerNameExists = options.some(({ name }: IContainer) => inputValue === name);
 		if (inputValue && !containerNameExists) {

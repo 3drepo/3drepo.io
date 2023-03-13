@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,31 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AppBar } from '@mui/material';
+import ButtonBase from '@mui/material/Button';
 import styled from 'styled-components';
-import LogoIconBase from '@assets/icons/filled/logo-filled.svg';
 
-export const LogoIcon = styled(LogoIconBase)`
-	color: ${({ theme }) => theme.palette.primary.contrast};
-`;
-
-export const Items = styled.div`
-	display: flex;
-	flex-direction: row;
+export const LabelButton = styled(ButtonBase)<{ color?: string, outlined?: any }>`
+	white-space: nowrap;
 	align-items: center;
-	max-width: calc(100% - 200px);
-	margin-left: 5px;
-	
-	&:last-child {
-		justify-content: flex-end;
-		min-width: 152px;
-	}
-`;
+	padding: 8px 12px 8px 15px;
+	color: ${({ theme }) => theme.palette.tertiary.main};
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	${({ theme }) => theme.typography.kicker};
 
-export const AppBarContainer = styled(AppBar).attrs({
-	position: 'static',
-})`
-	@media print {
-		display: none;
+	&:hover, &:active {
+		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
+		text-decoration-line: none;
+	}
+
+	&:disabled {
+		background-color: ${({ theme }) => theme.palette.base.lightest};
+		color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+
+	&.Mui-focusVisible {
+		box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
 	}
 `;
