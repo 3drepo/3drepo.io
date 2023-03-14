@@ -30,8 +30,8 @@ import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalB
 import { MicrosoftButton } from '@components/shared/sso/microsoftButton.component';
 import { SSOErrorResponseMessage } from '@components/shared/sso/ssoLinkingResponseHandler/ssoLinkingErrorResponseMessage.component';
 import { Gap } from '@controls/gap';
-import { linkAccount } from '@/v5/services/api/sso';
-import { useSSO } from '@/v5/services/sso.hooks';
+import { linkAccount, postActions } from '@/v5/services/api/sso';
+import { useSSOParams } from '@/v5/services/sso.hooks';
 import { TabContent } from '../editProfileModal.styles';
 import { MicrosoftText } from './editProfileAuthenticationTab.styles';
 
@@ -57,7 +57,9 @@ export const EditProfileAuthenticationNonSSOTab = ({
 	onClickClose,
 }: EditProfileAuthenticationNonSSOTabProps) => {
 	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
-	const { errorCode, unlinkPost, reset: resetSSOParams } = useSSO();
+	const [{ error, action }, resetSSOParams] = useSSOParams();
+	const unlinkPost = action === postActions.UNLINK_POST;
+
 	const {
 		formState: { errors, isValid: formIsValid, isSubmitting, touchedFields },
 		control,
@@ -115,7 +117,7 @@ export const EditProfileAuthenticationNonSSOTab = ({
 	return (
 		<>
 			<TabContent>
-				{unlinkPost && !errorCode && (
+				{unlinkPost && !error && (
 					<SuccessMessage>
 						<FormattedMessage
 							id="editProfile.authentication.unlinkWithMicrosoft.success"

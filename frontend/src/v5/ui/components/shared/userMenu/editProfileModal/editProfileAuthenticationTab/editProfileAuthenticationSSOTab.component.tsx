@@ -27,12 +27,12 @@ import { isPasswordIncorrect } from '@/v5/validation/errors.helpers';
 import { FormPasswordField } from '@controls/inputs/formInputs.component';
 import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
 import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalButtons/modalButtons.component';
-import { unlinkAccount } from '@/v5/services/api/sso';
+import { postActions, unlinkAccount } from '@/v5/services/api/sso';
 import { MicrosoftInstructionsText } from '@components/shared/sso/microsoftText.styles';
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { SSOErrorResponseMessage } from '@components/shared/sso/ssoLinkingResponseHandler/ssoLinkingErrorResponseMessage.component';
 import { Gap } from '@controls/gap';
-import { useSSO } from '@/v5/services/sso.hooks';
+import { useSSOParams } from '@/v5/services/sso.hooks';
 import { TabContent, MicrosoftTitleText } from '../editProfileModal.styles';
 
 type IUpdateSSOPasswordInputs = {
@@ -51,7 +51,9 @@ export const EditProfileAuthenticationSSOTab = ({
 	unexpectedError,
 	onClickClose,
 }: EditProfileAuthenticationSSOTabProps) => {
-	const { errorCode, linkPost, reset: resetSSOParams } = useSSO();
+	const [{ error, action }, resetSSOParams] = useSSOParams();
+	const linkPost = action === postActions.LINK_POST;
+
 	const history = useHistory();
 	const { search } = useLocation();
 	const searchParams = new URLSearchParams(search);
@@ -70,7 +72,7 @@ export const EditProfileAuthenticationSSOTab = ({
 	const onSubmit = async () => {
 		setIsSubmitting(isSubmitting);
 		await unlinkAccount({ password: newPassword });
-		searchParams.append('unlinkPost', '1');
+		searchParams.append(postActions.UNLINK_POST, '1');
 		resetSSOParams();
 		reset();
 		CurrentUserActionsDispatchers.updateUserSuccess({ sso: null });
@@ -84,7 +86,7 @@ export const EditProfileAuthenticationSSOTab = ({
 	return (
 		<>
 			<TabContent>
-				{linkPost && !errorCode && (
+				{linkPost && !error && (
 					<SuccessMessage>
 						<FormattedMessage
 							id="editProfile.authentication.linkWithMicrosoft.success"

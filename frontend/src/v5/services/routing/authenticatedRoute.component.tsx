@@ -24,20 +24,20 @@ import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isNotLoggedIn } from '@/v5/validation/errors.helpers';
 import { addParams, pathName } from '@/v5/helpers/url.helper';
 import { Route, RouteProps } from './route.component';
-import { useSSOLogin } from '../sso.hooks';
+import { useSSOParams } from '../sso.hooks';
 
 const WrapAuthenticationRedirect = ({ children }) => {
 	const history = useHistory();
 	const isAuthenticated: boolean = AuthHooksSelectors.selectIsAuthenticated();
 	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
-	const [,ssoError, ssoParams] = useSSOLogin();
+	const [{ error: ssoError, searchParams }] = useSSOParams();
 
 	const location = useLocation();
 
 	useEffect(() => {
 		AuthActionsDispatchers.setReturnUrl(location);
 		if (!isAuthenticated && authenticationFetched) {
-			const url = ssoError ? pathName(addParams(LOGIN_PATH, ssoParams)) : LOGIN_PATH;
+			const url = ssoError ? pathName(addParams(LOGIN_PATH, searchParams)) : LOGIN_PATH;
 			history.replace(url);
 		}
 	}, [isAuthenticated, authenticationFetched]);

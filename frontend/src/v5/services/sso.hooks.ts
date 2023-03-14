@@ -15,19 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isNull, omitBy } from 'lodash';
+import { isNull, omitBy, values } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { addParams, getParams } from '../helpers/url.helper';
-import { errorMessages, signin } from './api/sso';
+import { errorMessages, postActions, signin } from './api/sso';
 import { formatMessage } from './intl';
 import { AuthHooksSelectors } from './selectorsHooks';
 
+export const useSSOParams = () => {
+	const history = useHistory();
+	const allParams = getParams();
+	const error = allParams.get('error');
+	const action = values(postActions).filter((postAction) => allParams.get(postAction))[0];
+
+	const reset = () => {
+		allParams.delete('error');
+		allParams.delete(action);
+		history.replace({ search: allParams.toString() });
+	};
+
+	const actionParamValue = allParams.get(action);
+	const searchParams = new URLSearchParams(omitBy({ error, [action]: actionParamValue }, isNull)).toString();
+
+	return [{ searchParams, error, action }, reset] as
+	[ {searchParams: string, error: string | null, action: string | null}, () => void ];
+};
+
 export const useSSOLogin = () => {
-	const searchParams = getParams();
-	const loginPost = searchParams.get('loginPost');
-	const error = searchParams.get('error');
+	const [{ error }] = useSSOParams();
+
 	const returnUrl = AuthHooksSelectors.selectReturnUrl();
-	const ssoParams = new URLSearchParams(omitBy({ loginPost, error }, isNull)).toString();
 
 	const errorMessage = error
 		? formatMessage({
@@ -38,24 +55,7 @@ export const useSSOLogin = () => {
 
 	const redirectUri = addParams(returnUrl.pathname, returnUrl.search);
 
-	return [() => signin(redirectUri).then(({ data }) => {
+	return [errorMessage, () => signin(redirectUri).then(({ data }) => {
 		window.location.href = data.link;
-	}), errorMessage, ssoParams.toString()] as [ ()=> void, string | null, string];
-};
-
-export const useSSO = () => {
-	const history = useHistory();
-	const searchParams = getParams();
-	const errorCode = searchParams.get('error');
-	const linkPost = searchParams.get('linkPost');
-	const unlinkPost = searchParams.get('unlinkPost');
-
-	const reset = () => {
-		searchParams.delete('error');
-		searchParams.delete('linkPost');
-		searchParams.delete('unlinkPost');
-		history.replace({ search: searchParams.toString() });
-	};
-
-	return { linkPost, unlinkPost, errorCode, reset };
+	})] as [ string | null, ()=> void];
 };
