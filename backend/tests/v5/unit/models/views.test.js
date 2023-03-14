@@ -21,6 +21,8 @@ const View = require(`${src}/models/views`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
+const VIEWS_COLL = 'views';
+
 const testGetViewById = () => {
 	describe('Get view by Id', () => {
 		test('should return error if the view does not exist', async () => {
@@ -55,7 +57,22 @@ const testGetViews = () => {
 	});
 };
 
+const testInitialise = () => {
+	describe('Initialise', () => {
+		test('should ensure indices exist', async () => {
+			const fn = jest.spyOn(db, 'createIndex').mockResolvedValueOnce(undefined);
+			const ts = 'teamspace';
+			await View.initialise(ts);
+			expect(fn).toHaveBeenCalledTimes(3);
+			expect(fn.mock.calls[0][0]).toEqual(ts);
+			expect(fn.mock.calls[0][1]).toEqual(VIEWS_COLL);
+			expect(fn.mock.calls[0][3]).toEqual({ runInBackground: true });
+		});
+	});
+};
+
 describe('models/views', () => {
 	testGetViewById();
 	testGetViews();
+	testInitialise();
 });
