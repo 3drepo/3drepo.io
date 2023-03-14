@@ -21,10 +21,8 @@ const { templates } = require('../utils/responseCodes');
 
 const VIEWS_COLL = 'views';
 
-const getCollectionName = (model) => `${model}.views`;
-
 Views.getViewById = async (teamspace, model, id, projection) => {
-	const foundView = await db.findOne(teamspace, getCollectionName(model), { _id: id }, projection);
+	const foundView = await db.findOne(teamspace, VIEWS_COLL, { _id: id, model }, projection);
 
 	if (!foundView) {
 		throw templates.viewNotFound;
@@ -33,7 +31,7 @@ Views.getViewById = async (teamspace, model, id, projection) => {
 	return foundView;
 };
 
-Views.getViews = (teamspace, model, projection) => db.find(teamspace, getCollectionName(model), {}, projection);
+Views.getViews = (teamspace, model, projection) => db.find(teamspace, VIEWS_COLL, { model }, projection);
 
 Views.initialise = (teamspace) => Promise.all([
 	db.createIndex(teamspace, VIEWS_COLL, { teamspace: 1 }, { runInBackground: true }),

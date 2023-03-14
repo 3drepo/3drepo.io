@@ -233,8 +233,8 @@ db.createRisk = (teamspace, modelId, risk) => {
 };
 
 db.createViews = (teamspace, modelId, views) => {
-	const formattedViews = views.map((view) => ({ ...view, _id: stringToUUID(view._id) }));
-	return DbHandler.insertMany(teamspace, `${modelId}.views`, formattedViews);
+	const formattedViews = views.map((view) => ({ ...view, _id: stringToUUID(view._id), model: modelId }));
+	return DbHandler.insertMany(teamspace, 'views', formattedViews);
 };
 
 db.createLegends = (teamspace, modelId, legends) => {

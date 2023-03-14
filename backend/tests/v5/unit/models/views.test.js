@@ -50,8 +50,8 @@ const testGetViews = () => {
 
 			expect(fn.mock.calls.length).toBe(1);
 			expect(fn.mock.calls[0][0]).toEqual(ts);
-			expect(fn.mock.calls[0][1]).toEqual(`${model}.views`);
-			expect(fn.mock.calls[0][2]).toEqual({});
+			expect(fn.mock.calls[0][1]).toEqual(VIEWS_COLL);
+			expect(fn.mock.calls[0][2]).toEqual({ model });
 			expect(fn.mock.calls[0][3]).toEqual(projection);
 		});
 	});
