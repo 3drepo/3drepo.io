@@ -20,9 +20,10 @@ import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { FederationsActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
+import { viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { FederationSettingsModal } from '../../../federationSettingsModal/federationSettingsModal.component';
 
 type FederationEllipsisMenuProps = {

@@ -20,9 +20,9 @@ import { get } from 'lodash';
 import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import { generatePath } from 'react-router-dom';
 import { isV5 } from '@/v4/helpers/isV5';
-import { prefixBaseDomain } from '@/v5/services/routing/routing';
 
 import { UnityUtil } from '@/globals/unity-util';
+import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { ROUTES } from '../../constants/routes';
 import { createGroupsByColor, createGroupsByTransformations, prepareGroup } from '../../helpers/groups';
