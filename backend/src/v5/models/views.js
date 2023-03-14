@@ -19,6 +19,8 @@ const Views = {};
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
 
+const VIEWS_COLL = 'views';
+
 const getCollectionName = (model) => `${model}.views`;
 
 Views.getViewById = async (teamspace, model, id, projection) => {
@@ -32,5 +34,11 @@ Views.getViewById = async (teamspace, model, id, projection) => {
 };
 
 Views.getViews = (teamspace, model, projection) => db.find(teamspace, getCollectionName(model), {}, projection);
+
+Views.initialise = (teamspace) => Promise.all([
+	db.createIndex(teamspace, VIEWS_COLL, { teamspace: 1 }, { runInBackground: true }),
+	db.createIndex(teamspace, VIEWS_COLL, { teamspace: 1, project: 1 }, { runInBackground: true }),
+	db.createIndex(teamspace, VIEWS_COLL, { teamspace: 1, project: 1, model: 1 }, { runInBackground: true }),
+]);
 
 module.exports = Views;
