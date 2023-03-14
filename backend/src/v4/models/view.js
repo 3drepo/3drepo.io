@@ -25,12 +25,20 @@ const ChatEvent = require("./chatEvent");
 const Viewpoint = require("./viewpoint");
 const Groups = require("./group.js");
 
+const {v5Path} = require("../../interop");
+const { findProjectByModelId } = require(`${v5Path}/models/projectSettings`);
+
 const fieldTypes = {
 	"_id": "[object Object]",
 	"name": "[object String]",
+	"teamspace": "[object String]",
+	"project": "[object Object]",
+	"model": "[object String]",
 	"thumbnail": ["[object String]", "[object Object]"],
 	"viewpoint": "[object Object]"
 };
+
+const VIEWS_COLL = "views";
 
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
@@ -88,24 +96,20 @@ class View {
 			this.viewpointType !== "view",this.viewpointType, createThumbnail);
 	}
 
-	getCollectionName(model) {
-		return `${model}.${this.collName}`;
-	}
-
 	getCollection(teamspace, model) {
-		return db.getCollection(teamspace, this.getCollectionName(model));
+		return db.getCollection(teamspace, VIEWS_COLL, { model });
 	}
 
 	async findByQuery(teamspace, model, query, projection) {
-		return db.find(teamspace, this.getCollectionName(model), query, projection);
+		return db.find(teamspace, VIEWS_COLL, { ...query, model }, projection);
 	}
 
 	async findOneByQuery(teamspace, model, query, projection) {
-		return db.findOne(teamspace, this.getCollectionName(model), query, projection);
+		return db.findOne(teamspace, VIEWS_COLL, { ...query, model }, projection);
 	}
 
 	async updateByQuery(teamspace, model, query, action) {
-		return db.updateOne(teamspace, this.getCollectionName(model), query, action);
+		return db.updateOne(teamspace, VIEWS_COLL, { ...query, model }, action);
 	}
 
 	async findByUID(account, model, uid, projection, noClean = false) {
@@ -210,6 +214,9 @@ class View {
 		// =============================
 
 		newView._id = utils.stringToUUID(newView._id || utils.generateUUID());
+		newView.teamspace = account;
+		newView.project = (await findProjectByModelId(account, model, { _id: 1 }))._id;
+		newView.model = model;
 
 		if (newView.viewpoint) {
 			newView.viewpoint = await this.createViewpoint(account, model, newView._id, newView.viewpoint, true);

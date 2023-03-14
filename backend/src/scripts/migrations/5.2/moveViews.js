@@ -33,7 +33,7 @@ const processCollection = async (teamspace, project, model, collection, destColl
 		...entry,
 		teamspace,
 		project,
-		model
+		model,
 	}));
 
 	if (updatedViews.length) {
@@ -57,7 +57,7 @@ const getModelToProjectMap = async (teamspace) => {
 	const projects = await find(teamspace, PROJECTS_COLL, {}, { models: 1 });
 	const idMap = {};
 	projects.forEach(({ _id, models }) => {
-		models.forEach((model) => idMap[model] = _id);
+		models.forEach((model) => { idMap[model] = _id; });
 	});
 	return idMap;
 };
