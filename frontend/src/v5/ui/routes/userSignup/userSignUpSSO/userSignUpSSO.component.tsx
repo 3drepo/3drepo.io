@@ -47,7 +47,7 @@ export const UserSignupSSO = () => {
 	const [contextValue, setContextValue] = useState<UserSignupFormStepperContextValue | null>();
 	const { search } = useLocation();
 	const searchParams = new URLSearchParams(search);
-	const [loginWithSSO] = useSSOLogin();
+	const [,loginWithSSO] = useSSOLogin();
 
 	if (searchParams.get('signupPost')) {
 		if (!searchParams.get('error') || searchParams.get('error') === SSOErrorCode.EMAIL_EXISTS_WITH_SSO) {

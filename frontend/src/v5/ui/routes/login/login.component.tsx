@@ -63,7 +63,7 @@ export const Login = () => {
 		].includes(err.response?.data?.code)
 	);
 
-	const [loginWithSSO, ssoErrorMessage] = useSSOLogin();
+	const [ssoErrorMessage, loginWithSSO] = useSSOLogin();
 
 	return (
 		<AuthTemplate
