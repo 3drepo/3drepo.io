@@ -60,7 +60,7 @@ const testGetViews = () => {
 const testInitialise = () => {
 	describe('Initialise', () => {
 		test('should ensure indices exist', async () => {
-			const fn = jest.spyOn(db, 'createIndex').mockResolvedValueOnce(undefined);
+			const fn = jest.spyOn(db, 'createIndex').mockResolvedValue(undefined);
 			const ts = 'teamspace';
 			await View.initialise(ts);
 			expect(fn).toHaveBeenCalledTimes(3);
