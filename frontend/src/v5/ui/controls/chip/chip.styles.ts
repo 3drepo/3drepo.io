@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { IChip } from './chip.types';
+import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
 
 const filledStyles = (color: string) => css`
 	color: ${({ theme }) => theme.palette.primary.contrast};
@@ -43,7 +43,7 @@ const textStyles = (color: string) => css`
 	}
 `;
 
-export const ChipWrapper = styled.div<Pick<IChip, 'variant' | 'color'>>`
+export const ChipWrapper = styled.div<{ variant: string; color: string }>`
 	display: contents;
 	.MuiChip-root {
 		${({ theme }) => theme.typography.body2};
@@ -81,4 +81,9 @@ export const ChipWrapper = styled.div<Pick<IChip, 'variant' | 'color'>>`
 		}
 	}}
 	}
+`;
+
+export const PaddedCrossIcon = styled(CrossIcon)`
+	box-sizing: border-box;
+	padding: 1px;
 `;

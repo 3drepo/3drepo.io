@@ -21,13 +21,13 @@ import FlagOutlineIcon from '@assets/icons/outlined/flag-outlined.svg';
 import FlagFillIcon from '@assets/icons/filled/flag-filled.svg';
 import StarIcon from '@assets/icons/outlined/star-outlined.svg';
 import ClockIcon from '@assets/icons/outlined/clock-outlined.svg';
-import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
 import BellIcon from '@assets/icons/outlined/bell-outlined.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 
 import { ChipProps } from '@mui/material';
 import { ReactElement } from 'react';
 import { COLOR } from '../../themes/theme';
+import { PaddedCrossIcon } from './chip.styles';
 
 export type IChip = Omit<ChipProps, 'color' | 'variant'> & {
 	color?: string;
@@ -151,7 +151,7 @@ export const STATUS_MAP = {
 	[TicketStatuses.VOID]: {
 		label: formatMessage({ id: 'chip.ticketStatus.void', defaultMessage: 'Void' }),
 		color: '#000',
-		icon: <CrossIcon />,
+		icon: <PaddedCrossIcon />,
 	},
 };
 
