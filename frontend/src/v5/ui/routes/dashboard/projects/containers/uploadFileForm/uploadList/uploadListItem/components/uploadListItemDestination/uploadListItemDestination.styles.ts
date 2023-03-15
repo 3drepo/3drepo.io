@@ -30,32 +30,48 @@ export const DestinationInput = styled(FormTextField)<{ neworexisting: NewOrExis
 	margin: 0;
 	border: none;
 	border-radius: 6px;
-	>.MuiInputBase-root {
+	
+	& > .MuiInputBase-root {
 		&, &.Mui-focused, &.Mui-error, &.Mui-focused.Mui-error {
-			>.MuiInputBase-input {
+			& > .MuiInputBase-input {
 				font-weight: bold;
 				padding: 0;
-				&.Mui-disabled { -webkit-text-fill-color: ${({ theme }) => theme.palette.secondary.main}; }
+
+				&.Mui-disabled {
+					-webkit-text-fill-color: ${({ theme }) => theme.palette.secondary.main};
+				}
 			}
 		}
 		${({ neworexisting, theme }) => {
-		if (neworexisting === 'new') {
-			return css`
-				>.MuiInputBase-input { color: ${theme.palette.primary.main}; };
-				color: ${theme.palette.primary.main};
-				background-color: ${theme.palette.primary.lightest};
-				fieldset, &:hover fieldset { border: none; }
-			`;
-		}
-		if (neworexisting === 'existing') {
-			return css`
-				>.MuiInputBase-input { color: ${theme.palette.secondary.main} };
-				color: ${theme.palette.secondary.main};
-				background-color: ${theme.palette.tertiary.lightest};
-				fieldset, &:hover fieldset { border: none; }
-			`;
-		}
-		return '';
-	}}
+			if (neworexisting === 'new') {
+				return css`
+					color: ${theme.palette.primary.main};
+					background-color: ${theme.palette.primary.lightest};
+
+					& > .MuiInputBase-input {
+						color: ${theme.palette.primary.main};
+					}
+
+					fieldset, &:hover fieldset {
+						border: none;
+					}
+				`;
+			}
+			if (neworexisting === 'existing') {
+				return css`
+					color: ${theme.palette.secondary.main};
+					background-color: ${theme.palette.tertiary.lightest};
+
+					& > .MuiInputBase-input {
+						color: ${theme.palette.secondary.main};
+					}
+
+					fieldset, &:hover fieldset {
+						border: none;
+					}
+				`;
+			}
+			return '';
+		}}
 	}
 `;
