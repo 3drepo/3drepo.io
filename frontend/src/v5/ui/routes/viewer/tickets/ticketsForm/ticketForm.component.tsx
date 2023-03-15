@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ITemplate, ITicket, PropertyDefinition, TemplateModule } from '@/v5/store/tickets/tickets.types';
-import { get } from 'lodash';
+import { get, some } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
 import PropetiesIcon from '@assets/icons/outlined/bullet_list-outlined.svg';
@@ -74,15 +74,19 @@ const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyB
 	);
 };
 
-const PropertiesPanel = (props: PropertiesListProps) => (
-	<Accordion
-		defaultExpanded
-		Icon={PropetiesIcon}
-		title={formatMessage({ id: 'customTicket.panel.properties', defaultMessage: 'Properties' })}
-	>
-		<PropertiesList {...props} />
-	</Accordion>
-);
+const PropertiesPanel = ({ properties, ...props }: PropertiesListProps) => {
+	const required = some(properties, (property) => property.required);
+	return (
+		<Accordion
+			defaultExpanded
+			Icon={PropetiesIcon}
+			title={formatMessage({ id: 'customTicket.panel.properties', defaultMessage: 'Properties' })}
+			required={required}
+		>
+			<PropertiesList properties={properties} {...props} />
+		</Accordion>
+	);
+};
 
 interface ModulePanelProps {
 	module: TemplateModule;
@@ -90,11 +94,14 @@ interface ModulePanelProps {
 	scrollPanelIntoView: (event, isExpanding) => void;
 }
 
-const ModulePanel = ({ module, moduleValues, scrollPanelIntoView, ...rest }: ModulePanelProps) => (
-	<Accordion {...getModulePanelTitle(module)} onChange={scrollPanelIntoView}>
-		<PropertiesList module={`modules.${module.name || module.type}`} properties={module.properties || []} propertiesValues={moduleValues} {...rest} />
-	</Accordion>
-);
+const ModulePanel = ({ module, moduleValues, scrollPanelIntoView, ...rest }: ModulePanelProps) => {
+	const required = some(module.properties, (property) => property.required);
+	return (
+		<Accordion {...getModulePanelTitle(module)} onChange={scrollPanelIntoView} required={required}>
+			<PropertiesList module={`modules.${module.name || module.type}`} properties={module.properties || []} propertiesValues={moduleValues} {...rest} />
+		</Accordion>
+	);
+};
 
 interface Props {
 	template: Partial<ITemplate>;
