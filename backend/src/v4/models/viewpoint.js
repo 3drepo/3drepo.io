@@ -26,6 +26,9 @@ const { systemLogger } = require("../logger.js");
 const C = require("../constants");
 const FileType = require("file-type");
 
+const {v5Path} = require("../../interop");
+const { findProjectByModelId } = require(`${v5Path}/models/projectSettings`);
+
 const checkCameraValues = (output, input) => {
 	// Check vectors/points
 	["right", "up", "view_dir", "position", "look_at"].forEach((key) => {
@@ -302,7 +305,11 @@ Viewpoint.createViewpoint = async (account, model, collName, routePrefix, hostId
 
 Viewpoint.setExternalScreenshotRef = async function(viewpoint, account, model, collName) {
 	const screenshot = viewpoint.screenshot;
-	const ref = await FileRef.storeFile(account, model + "." + collName + ".ref", null, null, screenshot);
+	const ref = await FileRef.storeFile(account, collName + ".ref", null, null, screenshot, {
+		teamspace: account,
+		project: (await findProjectByModelId(account, model, { _id: 1 }))._id,
+		model
+	});
 	delete viewpoint.screenshot;
 	viewpoint.screenshot_ref = ref._id;
 	return viewpoint;
