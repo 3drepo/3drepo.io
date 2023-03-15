@@ -694,7 +694,7 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					margin: '0',
-					padding: '8px 14px',
+					padding: '4px 15px',
 					width: '100%',
 					minHeight: 34,
 					boxSizing: 'border-box',

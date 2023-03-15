@@ -20,6 +20,7 @@ import styled from 'styled-components';
 
 export const IconWrapper = styled.span<{color: string;}>`
 	margin: 0 8px 0 2px;
+	display: flex;
 	svg {
 		height: 11px;
 		width: 11px;
