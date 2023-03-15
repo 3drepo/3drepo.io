@@ -30,10 +30,9 @@ export const Sidebar = ({
 	className,
 	open,
 	onClick,
-	hidden = false,
 	children,
 }: ISidebar): JSX.Element => (
-	<SidebarContainer className={className} open={open} hidden={hidden}>
+	<SidebarContainer className={className} open={open}>
 		<ExpandButton onClick={onClick}>
 			<ExpandIcon />
 		</ExpandButton>
