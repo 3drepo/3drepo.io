@@ -146,14 +146,14 @@ const typography: TypographyOptions = {
 		fontWeight: FONT_WEIGHT.BOLDER,
 		fontSize: '0.625rem',
 		lineHeight: '1rem',
-		letterSpacing: '0.18em',
+		letterSpacing: '0.1em',
 		textTransform: 'uppercase',
 	},
 	kicker: {
 		fontWeight: FONT_WEIGHT.BOLD,
 		fontSize: '0.563rem',
 		lineHeight: '0.75rem',
-		letterSpacing: '0.18em',
+		letterSpacing: '0.1em',
 		textTransform: 'uppercase',
 	},
 };
