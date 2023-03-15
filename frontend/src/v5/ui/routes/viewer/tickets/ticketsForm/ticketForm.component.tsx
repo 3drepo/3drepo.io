@@ -31,12 +31,11 @@ import { CommentsPanel } from './commentsPanel/commentsPanel.component';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
-	propertiesValues: Record<string, any>;
 	module: string;
 	onPropertyBlur?: (...args) => void;
 }
 
-const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyBlur }: PropertiesListProps) => {
+const PropertiesList = ({ module, properties, onPropertyBlur }: PropertiesListProps) => {
 	const { formState } = useFormContext();
 	return (
 		<>
@@ -60,7 +59,7 @@ const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyB
 							required={required}
 							name={inputName}
 							formError={formError}
-							defaultValue={propertiesValues[name] ?? defaultValue}
+							defaultValue={defaultValue}
 							key={name}
 							onBlur={onPropertyBlur}
 							// @ts-ignore
@@ -90,15 +89,14 @@ const PropertiesPanel = ({ properties, ...props }: PropertiesListProps) => {
 
 interface ModulePanelProps {
 	module: TemplateModule;
-	moduleValues: Record<string, any>;
 	scrollPanelIntoView: (event, isExpanding) => void;
 }
 
-const ModulePanel = ({ module, moduleValues, scrollPanelIntoView, ...rest }: ModulePanelProps) => {
+const ModulePanel = ({ module, scrollPanelIntoView, ...rest }: ModulePanelProps) => {
 	const required = some(module.properties, (property) => property.required);
 	return (
 		<Accordion {...getModulePanelTitle(module)} onChange={scrollPanelIntoView} required={required}>
-			<PropertiesList module={`modules.${module.name || module.type}`} properties={module.properties || []} propertiesValues={moduleValues} {...rest} />
+			<PropertiesList module={`modules.${module.name || module.type}`} properties={module.properties || []} {...rest} />
 		</Accordion>
 	);
 };
@@ -138,13 +136,12 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 			</TitleContainer>
 			<CardContent>
 				<PanelsContainer>
-					<PropertiesPanel module="properties" properties={template?.properties || []} propertiesValues={ticket.properties} {...rest} />
+					<PropertiesPanel module="properties" properties={template?.properties || []} {...rest} />
 					{
 						(template.modules || []).map((module) => (
 							<ModulePanel
 								key={module.name || module.type}
 								module={module}
-								moduleValues={ticket.modules[module.name]}
 								scrollPanelIntoView={scrollPanelIntoView}
 								{...rest}
 							/>
