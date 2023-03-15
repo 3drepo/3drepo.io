@@ -132,10 +132,6 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 					name={TITLE_INPUT_NAME}
 					defaultValue={ticket[TITLE_INPUT_NAME]}
 					formError={formState.errors[TITLE_INPUT_NAME]}
-					placeholder={formatMessage({
-						id: 'customTicket.newTicket.titlePlaceholder',
-						defaultMessage: 'Ticket name',
-					})}
 					inputProps={{ autoFocus: focusOnTitle }}
 					onBlur={rest?.onPropertyBlur}
 				/>
