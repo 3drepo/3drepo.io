@@ -391,6 +391,14 @@ const testNewRevision = () => {
 			expect(QueueHandler.queueMessage).toHaveBeenCalledTimes(1);
 		});
 
+		test('v4 compatibility test', async () => {
+			await fs.copyFile(objModel, fileCreated);
+			ModelSettings.getContainerById.mockResolvedValueOnce({ });
+			await expect(Containers.newRevision(teamspace, model, data, file)).resolves.toBe(undefined);
+			await expect(fileExists(fileCreated)).resolves.toBe(false);
+			expect(QueueHandler.queueMessage).toHaveBeenCalledTimes(1);
+		});
+
 		test('should return whatever error queueModelUpload returns should it fail', async () => {
 			ModelSettings.getContainerById.mockResolvedValueOnce({ properties: { unit: 'm' } });
 			await expect(Containers.newRevision(teamspace, model, data, file))
