@@ -16,29 +16,24 @@
  */
 
 import { ErrorTooltip } from '@controls/errorTooltip';
-import { Control } from 'react-hook-form/dist/types';
-import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import { FormTextField } from './uploadListItemRevisionTag.styles';
 
 type IUploadListItemRevision = {
 	isSelected?: boolean;
 	errorMessage?: string;
-	control: Control<UploadItemFields>;
 	defaultValue?: string;
 	disabled?: boolean;
+	name: string;
 };
 
 export const UploadListItemRevisionTag = ({
-	control,
 	isSelected = false,
 	errorMessage,
 	disabled = false,
 	...props
 }: IUploadListItemRevision): JSX.Element => (
 	<FormTextField
-		control={control}
 		disabled={disabled}
-		name="revisionTag"
 		formError={errorMessage}
 		required
 		$selectedrow={isSelected}

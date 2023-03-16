@@ -42,21 +42,22 @@ export const UploadList = ({
 		<Container>
 			{
 				values.map((item, index) => {
-					const prefix = `uploads.${getOriginalIndex(index)}`;
+					const revisionPrefix = `uploads.${getOriginalIndex(index)}`;
 					const defaultInputValues = {
-						containerName: watch(`${prefix}.containerName`) || item.containerName,
-						revisionTag: watch(`${prefix}.revisionTag`) || item.revisionTag,
+						containerName: watch(`${revisionPrefix}.containerName`) || item.containerName,
+						revisionTag: watch(`${revisionPrefix}.revisionTag`) || item.revisionTag,
 					};
 					return (
 						<UploadListItem
+							revisionPrefix={revisionPrefix}
 							key={item.uploadId}
 							item={item}
 							defaultValues={defaultInputValues}
 							onClickEdit={() => onClickEdit(index)}
 							onClickDelete={() => onClickDelete(index)}
 							onChange={(field, val) => {
-								setValue(`${prefix}.${field}`, val);
-								trigger(`${prefix}.${field}`);
+								setValue(`${revisionPrefix}.${field}`, val);
+								trigger(`${revisionPrefix}.${field}`);
 							}}
 							isSelected={index === selectedIndex}
 							isUploading={isUploading}

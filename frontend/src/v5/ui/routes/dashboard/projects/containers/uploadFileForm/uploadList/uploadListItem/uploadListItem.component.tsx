@@ -15,16 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { IContainer, UploadItemFields } from '@/v5/store/containers/containers.types';
+import { useFormContext } from 'react-hook-form';
+import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import filesize from 'filesize';
 import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
-import { ListItemSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
-import { RevisionsHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
@@ -33,6 +31,7 @@ import { UploadProgress } from './uploadProgress';
 
 type IUploadListItem = {
 	item: UploadItemFields;
+	revisionPrefix: string;
 	defaultValues: {
 		containerName: string;
 		revisionTag: string;
@@ -46,6 +45,7 @@ type IUploadListItem = {
 
 export const UploadListItem = ({
 	item,
+	revisionPrefix,
 	defaultValues,
 	onClickEdit,
 	onClickDelete,
@@ -53,22 +53,14 @@ export const UploadListItem = ({
 	isUploading,
 	onChange,
 }: IUploadListItem): JSX.Element => {
-	const federationsNames = FederationsHooksSelectors.selectFederations().map(({ name }) => name);
-	const [containersNamesInUse, setContainersNamesInUse] = useState([]);
 	const {
-		control,
 		formState: { errors },
 		getValues,
 		setValue,
 		trigger,
 		watch,
 		setError,
-	} = useForm<UploadItemFields>({
-		defaultValues,
-		mode: 'onChange',
-		resolver: yupResolver(ListItemSchema),
-		context: { alreadyExistingNames: containersNamesInUse.concat(federationsNames) },
-	});
+	} = useFormContext();
 
 	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(item.uploadId);
 
@@ -79,17 +71,17 @@ export const UploadListItem = ({
 	};
 
 	useEffect(() => {
-		if (getValues('containerName')) trigger('containerName');
-	}, [watch('containerName')]);
+		if (getValues(`${revisionPrefix}.containerName`)) trigger(`${revisionPrefix}.containerName`);
+	}, [watch(`${revisionPrefix}.containerName`)]);
 
 	useEffect(() => {
-		trigger('revisionTag');
-		updateValue('revisionTag');
+		trigger(`${revisionPrefix}.revisionTag`);
+		updateValue(`${revisionPrefix}.revisionTag`);
 		const largeFilesizeMessage = filesizeTooLarge(item.file);
 		if (largeFilesizeMessage) {
-			setError('file', { type: 'custom', message: largeFilesizeMessage });
+			setError(`${revisionPrefix}.file`, { type: 'custom', message: largeFilesizeMessage });
 		}
-	}, [watch('revisionTag')]);
+	}, [watch(`${revisionPrefix}.revisionTag`)]);
 
 	return (
 		<UploadListItemRow
@@ -105,15 +97,11 @@ export const UploadListItem = ({
 			/>
 			<Destination
 				disabled={isUploading}
-				errors={errors}
-				control={control}
 				defaultValue={defaultValues.containerName}
 				onPropertyChange={onPropertyChange}
-				containersNamesInUse={containersNamesInUse}
-				setContainersNamesInUse={setContainersNamesInUse}
 			/>
 			<RevisionTag
-				control={control}
+				name={`${revisionPrefix}.revisionTag`}
 				disabled={isUploading}
 				isSelected={isSelected}
 				errorMessage={errors.revisionTag?.message}
