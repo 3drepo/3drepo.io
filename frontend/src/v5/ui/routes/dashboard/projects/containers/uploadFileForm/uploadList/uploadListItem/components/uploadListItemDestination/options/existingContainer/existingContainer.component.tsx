@@ -22,11 +22,10 @@ import { ExistingContainerOption, InUseText, Name } from './existingContainer.st
 
 interface IExistingContainer {
 	container: IContainer;
-	latestRevision: string;
 	inUse: boolean;
 }
 
-export const ExistingContainer = ({ container, latestRevision, inUse, ...props }: IExistingContainer) => (
+export const ExistingContainer = ({ container, inUse, ...props }: IExistingContainer) => (
 	<ExistingContainerOption {...props}>
 		<Name>{container.name}</Name>
 		<LatestRevision
