@@ -65,7 +65,8 @@ export const BaseCalendarPicker = ({
 				/>
 			)}
 			{...props}
-			value={value}
+			// If value is 0 display it as null to prevent it showing as 1/1/1970
+			value={value || null}
 			onOpen={() => setOpen(true)}
 			onClose={() => {
 				// This is to signal that the date has changed (we are using onblur to save changes)
@@ -77,6 +78,11 @@ export const BaseCalendarPicker = ({
 			dayOfWeekFormatter={formatDayOfWeek}
 			defaultValue={defaultValue ? dayjs(defaultValue) : null}
 			disableHighlightToday
+			componentsProps={{
+				actionBar: {
+					hidden: required,
+				},
+			}}
 		/>
 	);
 };

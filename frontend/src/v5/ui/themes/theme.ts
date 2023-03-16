@@ -27,6 +27,7 @@ import ChevronIcon from '@assets/icons/outlined/chevron-outlined.svg';
 import ThinChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import type {} from '@mui/x-date-pickers/themeAugmentation';
+import { CalendarActionBar } from '@controls/inputs/datePicker/baseCalendarPicker/calendarActionBar/calendarActionBar.component';
 
 export const COLOR = {
 	PRIMARY_MAIN_CONTRAST: '#FFFFFF',
@@ -1289,6 +1290,7 @@ export const theme = createTheme({
 					OpenPickerIcon: CalendarIcon,
 					LeftArrowIcon: ThinChevronIcon,
 					RightArrowIcon: ThinChevronIcon,
+					ActionBar: CalendarActionBar,
 				},
 			},
 		},
@@ -1298,6 +1300,7 @@ export const theme = createTheme({
 					OpenPickerIcon: CalendarIcon,
 					LeftArrowIcon: ThinChevronIcon,
 					RightArrowIcon: ThinChevronIcon,
+					ActionBar: CalendarActionBar,
 				},
 			},
 		},

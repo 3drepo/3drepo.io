@@ -47,7 +47,8 @@ export const BaseDueDate = ({ value: initialValue, disabled, onBlur, ...props }:
 		<div onClick={handleClick} aria-hidden="true">
 			<StopBackgroundInteraction open={open} onClick={handleClose} />
 			<DatePicker
-				value={value}
+				// If value is 0 display it as null to prevent it showing as 1/1/1970
+				value={value || null}
 				open={open}
 				// onChange is a required prop in DatePicker, however it is not needed as onAccept works better
 				// (onChange triggers when changing year, onAccept only when a date is finally chosen)
