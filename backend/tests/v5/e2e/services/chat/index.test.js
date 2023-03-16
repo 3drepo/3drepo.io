@@ -19,7 +19,7 @@ const ServiceHelper = require('../../../helper/services');
 const SuperTest = require('supertest');
 const { src } = require('../../../helper/path');
 
-const { EVENTS, ERRORS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
+const { EVENTS, ERRORS, ACTIONS, SOCKET_HEADER } = require(`${src}/services/chat/chat.constants`);
 const { broadcastMessage } = require(`${src}/handler/queue`);
 const { cn_queue: { event_exchange: eventExchange } } = require(`${src}/utils/config`);
 
@@ -129,6 +129,17 @@ const testUnauthenticatedUser = () => {
 				await expect(onJoinErrorCheck(socket, data, ERRORS.UNAUTHORISED)).resolves.toBeUndefined();
 				socket.close();
 			});
+		});
+
+		test('should be able to join rooms after login', async () => {
+			const socket = await ServiceHelper.socket.connectToSocket();
+			await ServiceHelper.loginAndGetCookie(agent, tsAdmin.user, tsAdmin.password,
+				{ [SOCKET_HEADER]: socket.id });
+
+			// introduce a delay to let backend sort out their events (i.e. hooking the session with the socket)
+			await ServiceHelper.sleepMS(100);
+			await expect(onJoinSuccessCheck(socket, { notifications: true })).resolves.toBeUndefined();
+			socket.close();
 		});
 	});
 };

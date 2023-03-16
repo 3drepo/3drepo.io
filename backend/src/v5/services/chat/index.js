@@ -61,6 +61,8 @@ const processInternalMessage = async (msg) => {
 		if (socket) {
 			SocketsManager.addSocketToSession(sessionID, socket);
 			const sessionData = await getSessions({ _id: sessionID });
+
+			// istanbul ignore else
 			if (sessionData.length) {
 				// eslint-disable-next-line prefer-destructuring
 				socket.session = sessionData[0].session;
