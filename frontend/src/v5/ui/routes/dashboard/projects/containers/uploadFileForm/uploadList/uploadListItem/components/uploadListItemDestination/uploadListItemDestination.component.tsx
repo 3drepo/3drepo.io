@@ -32,7 +32,7 @@ import { ExistingContainer } from './options/existingContainer/existingContainer
 import { OptionsBox } from './options';
 
 interface IUploadListItemDestination {
-	onValueChange: (option) => void;
+	onPropertyChange: (name, value) => void;
 	control?: any;
 	errors?: any;
 	disabled?: boolean;
@@ -55,7 +55,7 @@ export const UploadListItemDestination = ({
 	errors,
 	disabled = false,
 	className,
-	onValueChange,
+	onPropertyChange,
 	defaultValue,
 	containersNamesInUse,
 	setContainersNamesInUse,
@@ -95,6 +95,18 @@ export const UploadListItemDestination = ({
 		setContainersNamesInUse([...processingContainersNames, ...containerNamesInModal]);
 	};
 
+	const onDestinationChange = (value: IContainer): void => {
+		const conversion = {
+			containerId: value._id,
+			containerName: value.name,
+			containerCode: value.code,
+			containerType: value.type || 'Uncategorised',
+			containerUnit: value.unit || 'mm',
+			containerDesc: value.desc,
+		};
+		Object.entries(conversion).forEach(([key, value]) => onPropertyChange(key, value));
+	};
+
 	const onChange = (_, newValue: IContainer) => {
 		setDisableClearable(!newValue);
 		if (!newValue) {
@@ -109,7 +121,7 @@ export const UploadListItemDestination = ({
 		} : emptyOption;
 
 		setSelectedContainer(newValueOrEmptyOption);
-		onValueChange(newValueOrEmptyOption);
+		onDestinationChange(newValueOrEmptyOption);
 	};
 
 	const onBlur = () => {

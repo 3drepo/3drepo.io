@@ -73,19 +73,9 @@ export const UploadListItem = ({
 	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(item.uploadId);
 
 	const updateValue = (name) => onChange(name, watch(name));
-	const onDestinationChange = (value: IContainer): void => {
-		const conversion = {
-			containerId: value._id,
-			containerName: value.name,
-			containerCode: value.code,
-			containerType: value.type || 'Uncategorised',
-			containerUnit: value.unit || 'mm',
-			containerDesc: value.desc,
-		};
-		Object.keys(conversion).forEach((key: any) => {
-			setValue(key, conversion[key]);
-			updateValue(key);
-		});
+	const onPropertyChange = (name, value) => {
+		setValue(name, value);
+		updateValue(name);
 	};
 
 	useEffect(() => {
@@ -118,7 +108,7 @@ export const UploadListItem = ({
 				errors={errors}
 				control={control}
 				defaultValue={defaultValues.containerName}
-				onValueChange={onDestinationChange}
+				onPropertyChange={onPropertyChange}
 				containersNamesInUse={containersNamesInUse}
 				setContainersNamesInUse={setContainersNamesInUse}
 			/>
