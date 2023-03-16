@@ -16,17 +16,18 @@
  */
 
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { postActions } from '@/v5/services/api/sso';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useSSOParams } from '@/v5/services/sso.hooks';
 import { EditProfileModal } from '@components/shared/userMenu/editProfileModal/editProfileModal.component';
 import { useEffect } from 'react';
-import { useSSO } from '../useSSO';
 
 export const SSOResponseHandler = () => {
 	const { username } = CurrentUserHooksSelectors.selectCurrentUser();
-	const { linkPost, unlinkPost } = useSSO();
+	const { action } = useSSOParams()[0];
 
 	useEffect(() => {
-		const isSSOLinkAction = linkPost || unlinkPost;
+		const isSSOLinkAction = [postActions.LINK_POST, postActions.UNLINK_POST].includes(action);
 		if (!username || !isSSOLinkAction) return;
 		DialogsActionsDispatchers.open(EditProfileModal, { initialTab: 'authentication' });
 	}, [username]);

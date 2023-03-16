@@ -23,6 +23,7 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import { Link } from 'react-router-dom';
 import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
 import { Display } from '@/v5/ui/themes/media';
+import { Divider as DividerBase } from '@mui/material';
 
 const customLogoPath = clientConfigService.getCustomLogoPath();
 export const customBackgroundPath = clientConfigService.getCustomBackgroundImagePath();
@@ -30,8 +31,8 @@ export const customBackgroundPath = clientConfigService.getCustomBackgroundImage
 export const AuthForm = styled.form`
 	min-width: 408px;
 	border-radius: 20px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	padding: 58px 64px 38px;
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	padding: 56px 64px 38px;
 	z-index: 1;
 
 	${({ theme }) => theme.typography.body1};
@@ -41,14 +42,26 @@ export const Footer = styled(Typography).attrs({
 	variant: 'body1',
 })`
 	color: ${({ theme }) => theme.palette.base.light};
-	padding: 30px;
+	height: 0;
 	user-select: none;
 	z-index: 1;
 	
 	a {
 		text-decoration: none;
 		color: inherit;
+		position: relative;
+		top: 30px;
 	}
+`;
+
+export const Divider = styled(DividerBase)`
+	color: ${({ theme }) => theme.palette.base.main};
+
+	&::before, &::after {
+		border-color: ${({ theme }) => theme.palette.base.lightest};
+	}
+
+	margin: 19px 0;
 `;
 
 export const BackgroundOverlay = styled(LoginBackground)`
@@ -91,7 +104,6 @@ const CustomLogo = styled.img.attrs({
 `;
 
 export const Logo = styled(customLogoPath ? CustomLogo : DefaultLogo)``;
-
 export const BlueLogo = styled(Logo)`
 	color: ${({ theme }) => theme.palette.secondary.main};
 `;
@@ -116,4 +128,11 @@ export const LogoContainer = styled(LoginLink)`
 		justify-content: center;
 		align-items: center;
 	}
+`;
+
+export const AuthSubHeader = styled.div`
+	${({ theme }) => theme.typography.h3};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	user-select: none;
+	margin: 19px 0;
 `;

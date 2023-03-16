@@ -16,8 +16,8 @@
  */
 
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useSSO } from '@components/shared/sso/useSSO';
 import { useEffect } from 'react';
+import { useSSOParams } from '@/v5/services/sso.hooks';
 import { EditProfileAuthenticationSSOTab } from './editProfileAuthenticationSSOTab.component';
 import { EditProfileAuthenticationNonSSOTab } from './editProfileAuthenticationNonSSOTab.component';
 
@@ -46,7 +46,7 @@ export const EditProfileAuthenticationTab = ({
 	setIncorrectPassword,
 	...props
 }: EditProfileAuthenticationTabProps) => {
-	const { reset: resetSSOParams } = useSSO();
+	const [, resetSSOParams] = useSSOParams();
 	const { sso } = CurrentUserHooksSelectors.selectCurrentUser();
 
 	useEffect(() => resetSSOParams, []);

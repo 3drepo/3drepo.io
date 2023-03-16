@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useSSO } from '@components/shared/sso/useSSO';
 import { formatMessage } from '@/v5/services/intl';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
 import { SSOErrorCode } from '@/v5/services/api/sso';
+import { useSSOParams } from '@/v5/services/sso.hooks';
 
 const getErroInfo = (errorCode) => {
 	if (SSOErrorCode.EMAIL_EXISTS) {
@@ -46,11 +46,11 @@ const getErroInfo = (errorCode) => {
 };
 
 export const SSOErrorResponseMessage = () => {
-	const { errorCode } = useSSO();
+	const [ssoParams] = useSSOParams();
 
-	if (!errorCode) return (<></>);
+	if (!ssoParams.error) return (<></>);
 
-	const { title, message } = errorCode && getErroInfo(errorCode);
+	const { title, message } = ssoParams.error && getErroInfo(ssoParams.error);
 
 	return (<ErrorMessage title={title}>{message}</ErrorMessage>);
 };
