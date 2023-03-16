@@ -417,7 +417,7 @@ class Ticket extends View {
 		const coll = await this.getCollection(account, model);
 		try {
 			const tickets = await coll.find({}, {number: 1}).sort({ number: -1 }).limit(1).toArray();
-			newTicket.number = (tickets.length > 0) ? tickets[0].number + 1 : 1;
+			newTicket.number = (tickets.length > 0 && tickets[0].number) ? tickets[0].number + 1 : 1;
 		} catch(e) {
 			newTicket.number = 1;
 		}
