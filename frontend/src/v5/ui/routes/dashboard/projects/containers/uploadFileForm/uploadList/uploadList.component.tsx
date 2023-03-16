@@ -42,8 +42,7 @@ export const UploadList = ({
 		<Container>
 			{
 				values.map((item, index) => {
-					const origIndex = getOriginalIndex(index);
-					const prefix = `uploads.${origIndex}`;
+					const prefix = `uploads.${getOriginalIndex(index)}`;
 					const defaultInputValues = {
 						containerName: watch(`${prefix}.containerName`) || item.containerName,
 						revisionTag: watch(`${prefix}.revisionTag`) || item.revisionTag,
