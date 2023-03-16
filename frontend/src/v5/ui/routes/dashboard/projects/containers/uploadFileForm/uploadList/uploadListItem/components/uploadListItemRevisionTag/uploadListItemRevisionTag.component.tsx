@@ -33,7 +33,6 @@ export const UploadListItemRevisionTag = ({
 	isSelected = false,
 	errorMessage,
 	disabled = false,
-	defaultValue,
 	...props
 }: IUploadListItemRevision): JSX.Element => (
 	<FormTextField
@@ -41,7 +40,6 @@ export const UploadListItemRevisionTag = ({
 		disabled={disabled}
 		name="revisionTag"
 		formError={errorMessage}
-		defaultValue={defaultValue}
 		required
 		$selectedrow={isSelected}
 		InputProps={{
