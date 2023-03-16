@@ -62,6 +62,26 @@ class Ticket extends View {
 		this.refIdsField = refIdsField;
 	}
 
+	getCollectionName(model) {
+		return `${model}.${this.collName}`;
+	}
+
+	getCollection(teamspace, model) {
+		return db.getCollection(teamspace, this.getCollectionName(model), {});
+	}
+
+	async findByQuery(teamspace, model, query, projection) {
+		return db.find(teamspace, this.getCollectionName(model), { ...query }, projection);
+	}
+
+	async findOneByQuery(teamspace, model, query, projection) {
+		return db.findOne(teamspace, this.getCollectionName(model), { ...query }, projection);
+	}
+
+	async updateByQuery(teamspace, model, query, action) {
+		return db.updateOne(teamspace, this.getCollectionName(model), { ...query }, action);
+	}
+
 	clean(account, model, ticketToClean) {
 		const ticketFields = ["rev_id", "group_id"];
 		ticketToClean.account = account;
@@ -417,7 +437,7 @@ class Ticket extends View {
 		const coll = await this.getCollection(account, model);
 		try {
 			const tickets = await coll.find({}, {number: 1}).sort({ number: -1 }).limit(1).toArray();
-			newTicket.number = (tickets.length > 0 && tickets[0].number) ? tickets[0].number + 1 : 1;
+			newTicket.number = (tickets.length > 0) ? tickets[0].number + 1 : 1;
 		} catch(e) {
 			newTicket.number = 1;
 		}

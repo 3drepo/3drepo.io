@@ -38,8 +38,6 @@ const fieldTypes = {
 	"viewpoint": "[object Object]"
 };
 
-const VIEWS_COLL = "views";
-
 const getResponse = (responseCodeType) => (type) => responseCodes[responseCodeType + "_" + type];
 
 class View {
@@ -96,20 +94,24 @@ class View {
 			this.viewpointType !== "view",this.viewpointType, createThumbnail);
 	}
 
+	getCollectionName() {
+		return this.collName;
+	}
+
 	getCollection(teamspace, model) {
-		return db.getCollection(teamspace, VIEWS_COLL, { model });
+		return db.getCollection(teamspace, this.getCollectionName(), { model });
 	}
 
 	async findByQuery(teamspace, model, query, projection) {
-		return db.find(teamspace, VIEWS_COLL, { ...query, model }, projection);
+		return db.find(teamspace, this.getCollectionName(), { ...query, model }, projection);
 	}
 
 	async findOneByQuery(teamspace, model, query, projection) {
-		return db.findOne(teamspace, VIEWS_COLL, { ...query, model }, projection);
+		return db.findOne(teamspace, this.getCollectionName(), { ...query, model }, projection);
 	}
 
 	async updateByQuery(teamspace, model, query, action) {
-		return db.updateOne(teamspace, VIEWS_COLL, { ...query, model }, action);
+		return db.updateOne(teamspace, this.getCollectionName(), { ...query, model }, action);
 	}
 
 	async findByUID(account, model, uid, projection, noClean = false) {
