@@ -61,29 +61,31 @@ export const UploadListItemDestination = ({
 	setContainersNamesInUse,
 }: IUploadListItemDestination): JSX.Element => {
 	const [value, setValue] = useState<IContainer>({ ...emptyOption, name: defaultValue });
-	const [disableClearable, setDisableClearable] = useState(!value.name);
+	const [disableClearable, setDisableClearable] = useState(!defaultValue);
+	const { getValues } = useFormContext();
+
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+	const federationsNames = FederationsHooksSelectors.selectFederations().map(({ name }) => name);
 	const containers = ContainersHooksSelectors.selectContainers();
+	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>(() => {
+		if (!defaultValue) return '';
+		return containers.find((c) => c.name === defaultValue) ? 'existing' : 'new';
+	});
+
 	const processingContainersNames = containers
 		.filter((container) => !canUploadToBackend(container.status))
 		.map(({ name }) => name);
-	const federationsNames = FederationsHooksSelectors.selectFederations().map(({ name }) => name);
-	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>(() => {
-		if (defaultValue) {
-			return containers.find((c) => c.name === defaultValue) ? 'existing' : 'new';
-		}
-		return '';
-	});
-	const { getValues } = useFormContext();
-	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const errorMessage = errors.containerName?.message;
 
-	const NO_OPTIONS_TEXT = isProjectAdmin ? formatMessage({
-		id: 'uploads.destination.noOptions.admin',
-		defaultMessage: 'Start typing to create a new Container.',
-	}) : formatMessage({
-		id: 'uploads.destination.noOptions.nonAdmin',
-		defaultMessage: 'There are no Containers to upload to.',
-	});
+	const NO_OPTIONS_TEXT = isProjectAdmin
+		? formatMessage({
+			id: 'uploads.destination.noOptions.admin',
+			defaultMessage: 'Start typing to create a new Container.',
+		})
+		: formatMessage({
+			id: 'uploads.destination.noOptions.nonAdmin',
+			defaultMessage: 'There are no Containers to upload to.',
+		});
 
 	const onFocus = () => {
 		const containerNamesInModal = getValues('uploads')
@@ -165,7 +167,6 @@ export const UploadListItemDestination = ({
 			return (
 				<ExistingContainer
 					container={option}
-					latestRevision={option.latestRevision}
 					inUse={optionIsUsed(option)}
 					{...optionProps}
 				/>
