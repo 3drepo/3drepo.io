@@ -42,7 +42,7 @@ import { compByColum } from '../store.helpers';
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
 		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
-		yield API.Containers.addFavourites(teamspace, containerId, projectId);
+		yield API.Containers.addFavourites(teamspace, projectId, containerId);
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.addFavourite.error', defaultMessage: 'trying to add container to favourites' }),
@@ -55,7 +55,7 @@ export function* addFavourites({ containerId, teamspace, projectId }: AddFavouri
 export function* removeFavourites({ containerId, teamspace, projectId }: RemoveFavouriteAction) {
 	try {
 		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
-		yield API.Containers.removeFavourites(containerId, teamspace, projectId);
+		yield API.Containers.removeFavourites(teamspace, projectId, containerId);
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.removeFavourite.error', defaultMessage: 'trying to remove container from favourites' }),

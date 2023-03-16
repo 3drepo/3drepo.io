@@ -20,13 +20,9 @@ import { useParams } from 'react-router-dom';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { ModelActions } from '@/v4/modules/model';
 import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
 import { ViewerParams } from '../routes.constants';
 import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';
-import { useContainersData } from '../dashboard/projects/containers/containers.hooks';
-import { useFederationsData } from '../dashboard/projects/federations/federations.hooks';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);

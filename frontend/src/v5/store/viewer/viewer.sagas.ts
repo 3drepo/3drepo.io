@@ -24,7 +24,7 @@ import { prepareFederationsData } from '../federations/federations.helpers';
 import { FederationsActions, FederationsTypes } from '../federations/federations.redux';
 import { FetchDataAction, ViewerActions, ViewerTypes } from './viewer.redux';
 
-function* fetchData({ teamspace, containerOrFederation, project, revision }: FetchDataAction) {
+function* fetchData({ teamspace, containerOrFederation, project }: FetchDataAction) {
 	yield put(ViewerActions.setFetching(true));
 
 	const { federations }: FetchFederationsResponse = yield API.Federations.fetchFederations(teamspace, project);
