@@ -25,18 +25,18 @@ const getErroInfo = (errorCode) => {
 		return {
 			title: formatMessage({
 				id: 'sso.linking.error.emailExists.action',
-				defaultMessage: 'SSO Error - An email is already linked',
+				defaultMessage: 'Email is already in use',
 			}),
 			message: formatMessage({
 				id: 'sso.linking.error.emailExists.message',
-				defaultMessage: 'Your account cannot be linked with Microsoft because another email is already linked',
+				defaultMessage: 'Your account cannot be linked with Microsoft because the email is associated with a different account',
 			}),
 		};
 	}
 	return {
 		title: formatMessage({
 			id: 'sso.linking.error.unkown.action',
-			defaultMessage: 'SSO Error - Unknown',
+			defaultMessage: 'Unknown error',
 		}),
 		message: formatMessage({
 			id: 'sso.linking.error.unkown.message',
