@@ -22,6 +22,7 @@ const { generateRandomString } = require('../../../helper/services');
 const ModelHelper = require(`${src}/utils/helper/models`);
 
 const { TICKETS_RESOURCES_COL } = require(`${src}/models/tickets.constants`);
+const { VIEWS_RESOURCES_COL } = require(`${src}/models/views.constants`);
 
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
@@ -59,8 +60,10 @@ const testRemoveModelData = () => {
 			expect(FilesManager.removeAllFilesFromModel).toHaveBeenCalledTimes(1);
 			expect(FilesManager.removeAllFilesFromModel).toHaveBeenCalledWith(teamspace, model);
 
-			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledTimes(2);
 			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
+				{ teamspace, project, model });
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, VIEWS_RESOURCES_COL,
 				{ teamspace, project, model });
 
 			expect(ModelSettings.deleteModel).toHaveBeenCalledTimes(1);
@@ -93,8 +96,10 @@ const testRemoveModelData = () => {
 			expect(FilesManager.removeAllFilesFromModel).toHaveBeenCalledTimes(1);
 			expect(FilesManager.removeAllFilesFromModel).toHaveBeenCalledWith(teamspace, model);
 
-			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledTimes(2);
 			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
+				{ teamspace, project, model });
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace, VIEWS_RESOURCES_COL,
 				{ teamspace, project, model });
 
 			expect(ModelSettings.deleteModel).toHaveBeenCalledTimes(1);
