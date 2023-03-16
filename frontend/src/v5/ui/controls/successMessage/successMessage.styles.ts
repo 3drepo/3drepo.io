@@ -40,10 +40,11 @@ export const IconContainer = styled.div`
 	align-self: start;
 
 	svg {
-		border: solid 2px;
+		border: solid 1px;
 		width: 10px;
 		height: 10px;
 		border-radius: 50%;
 		padding: 4px;
+		margin-top: 1px;
 	}
 `;
