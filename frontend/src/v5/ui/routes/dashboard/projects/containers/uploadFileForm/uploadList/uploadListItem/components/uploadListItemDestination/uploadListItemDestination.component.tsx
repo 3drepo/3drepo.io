@@ -71,7 +71,7 @@ export const UploadListItemDestination = ({
 
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const projectId = ProjectsHooksSelectors.selectCurrentProjectName();
+	const projectId = ProjectsHooksSelectors.selectCurrentProject();
 	const federationsNames = FederationsHooksSelectors.selectFederations().map(({ name }) => name);
 	const containers = ContainersHooksSelectors.selectContainers();
 
