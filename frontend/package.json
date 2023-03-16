@@ -156,7 +156,7 @@
 		"babel-plugin-styled-components": "2.0.6",
 		"copy-webpack-plugin": "10.2.4",
 		"cross-env": "7.0.2",
-		"css-loader": "6.6.0",
+		"css-loader": "6.7.3",
 		"cssnano": "5.1.7",
 		"dpdm": "3.9.0",
 		"esbuild-loader": "2.20.0",
