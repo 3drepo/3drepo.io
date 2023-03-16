@@ -18,6 +18,7 @@
 const { initialise: initInvites } = require('../models/invitations');
 const { initialise: initLoginRecs } = require('../models/loginRecords');
 const { initialise: initNotifs } = require('../models/notifications');
+const { initialise: initViews } = require('../models/views');
 
 const Initialiser = {};
 
@@ -25,6 +26,7 @@ Initialiser.initialiseSystem = () => Promise.all([
 	initLoginRecs(),
 	initInvites(),
 	initNotifs(),
+	initViews(),
 ]);
 
 module.exports = Initialiser;
