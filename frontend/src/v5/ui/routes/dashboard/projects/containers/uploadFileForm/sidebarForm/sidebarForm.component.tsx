@@ -30,7 +30,6 @@ import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, Hidd
 
 type ISidebarForm = {
 	value: UploadItemFields,
-	isNewContainer: boolean;
 	isSpm: boolean;
 	onChange: (name: string, val: string | boolean) => void;
 };
@@ -38,7 +37,6 @@ type ISidebarForm = {
 export const SidebarForm = ({
 	value,
 	onChange,
-	isNewContainer,
 	isSpm,
 }: ISidebarForm): JSX.Element => {
 	const { control, formState: { errors }, getValues, setValue, trigger } = useForm<UploadItemFields>({
@@ -46,6 +44,8 @@ export const SidebarForm = ({
 		mode: 'onChange',
 		resolver: yupResolver(SidebarSchema),
 	});
+
+	const isNewContainer = !value.containerId && !!value.containerName;
 
 	const TimezoneOptions = useMemo(() => {
 		type ITimezone = { name: string; label: string; utcOffset: number; };
@@ -66,11 +66,9 @@ export const SidebarForm = ({
 		return allTimezones;
 	}, []);
 
-	useEffect(() => {
-		trigger();
-	}, []);
-
 	const updateValue = (name) => onChange(name, getValues(name));
+
+	useEffect(() => { trigger(); }, []);
 
 	return (
 		<div onChange={(e: any) => updateValue(e.target.name)}>
