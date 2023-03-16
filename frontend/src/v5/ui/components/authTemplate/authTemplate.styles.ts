@@ -50,7 +50,7 @@ export const Footer = styled(Typography).attrs({
 		text-decoration: none;
 		color: inherit;
 		position: relative;
-    	top: 30px;
+		top: 30px;
 	}
 `;
 
