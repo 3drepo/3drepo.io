@@ -60,7 +60,7 @@ export const UploadListItemDestination = ({
 	containersNamesInUse,
 	setContainersNamesInUse,
 }: IUploadListItemDestination): JSX.Element => {
-	const [value, setValue] = useState<IContainer>({ ...emptyOption, name: defaultValue });
+	const [selectedContainer, setSelectedContainer] = useState<IContainer>({ ...emptyOption, name: defaultValue });
 	const [disableClearable, setDisableClearable] = useState(!defaultValue);
 	const { getValues } = useFormContext();
 
@@ -91,7 +91,7 @@ export const UploadListItemDestination = ({
 		const containerNamesInModal = getValues('uploads')
 			.map(({ containerName }) => containerName.trim())
 			.filter(Boolean)
-			.filter((name) => name !== value.name);
+			.filter((name) => name !== selectedContainer.name);
 		setContainersNamesInUse([...processingContainersNames, ...containerNamesInModal]);
 	};
 
@@ -108,12 +108,12 @@ export const UploadListItemDestination = ({
 			name: newValue.name.trim(),
 		} : emptyOption;
 
-		setValue(newValueOrEmptyOption);
+		setSelectedContainer(newValueOrEmptyOption);
 		onValueChange(newValueOrEmptyOption);
 	};
 
 	const onBlur = () => {
-		setContainersNamesInUse(containersNamesInUse.concat(value.name));
+		setContainersNamesInUse(containersNamesInUse.concat(selectedContainer.name));
 	};
 
 	const getFilterOptions = (options: IContainer[], params) => {
@@ -125,7 +125,7 @@ export const UploadListItemDestination = ({
 
 		// filter out currently selected value and containers with insufficient permissions
 		const filteredOptions = getFilteredContainersOptions(options, params)
-			.filter(({ name }) => name !== value.name)
+			.filter(({ name }) => name !== selectedContainer.name)
 			.filter(({ role }) => isCollaboratorRole(role));
 
 		const containerNameExists = options.some(({ name }: IContainer) => inputValue === name);
@@ -142,7 +142,7 @@ export const UploadListItemDestination = ({
 
 	const optionIsUsed = ({ name }: IContainer) => {
 		const trimmedName = name.trim();
-		if (trimmedName === value.name) return false;
+		if (trimmedName === selectedContainer.name) return false;
 		return containersNamesInUse.includes(trimmedName);
 	};
 
@@ -163,7 +163,7 @@ export const UploadListItemDestination = ({
 		}
 
 		// option is an existing container
-		if (option._id || trimmedName === value.name) {
+		if (option._id || trimmedName === selectedContainer.name) {
 			return (
 				<ExistingContainer
 					container={option}
@@ -177,7 +177,7 @@ export const UploadListItemDestination = ({
 
 	return (
 		<Autocomplete
-			value={value}
+			value={selectedContainer}
 			className={className}
 			disableClearable={disableClearable}
 			filterOptions={getFilterOptions}
@@ -196,7 +196,7 @@ export const UploadListItemDestination = ({
 					formError={errors.containerName}
 					name="containerName"
 					disabled={disabled}
-					value={value}
+					value={selectedContainer}
 					{...params}
 					neworexisting={newOrExisting}
 					InputProps={{
