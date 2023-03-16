@@ -30,12 +30,12 @@ export enum SSOErrorCode {
 }
 
 export const errorMessages = {
-	[SSOErrorCode.EMAIL_EXISTS]: formatMessage({ id: 'ssoerror.Code1', defaultMessage: 'Non SSO user already exists with that email' }),
-	[SSOErrorCode.EMAIL_EXISTS_WITH_SSO]: formatMessage({ id: 'ssoerror.Code2', defaultMessage: 'SSO user already exists with that email' }),
-	[SSOErrorCode.NON_SSO_USER]: formatMessage({ id: 'ssoerror.Code3', defaultMessage: 'Non SSO user already exists' }),
-	[SSOErrorCode.USER_NOT_FOUND]: formatMessage({ id: 'ssoerror.Code4', defaultMessage: 'User not found' }),
-	[SSOErrorCode.UNKNOWN]: formatMessage({ id: 'ssoerror.Code5', defaultMessage: 'Unknown error' }),
-	[SSOErrorCode.EXISTING_USERNAME]: formatMessage({ id: 'ssoerror.Code6', defaultMessage: 'Existing username' }),
+	[SSOErrorCode.EMAIL_EXISTS]: formatMessage({ id: 'ssoerror.Code1', defaultMessage: 'This email is associated with an account that is not linked with Microsoft. Please log in with your username and password.' }),
+	[SSOErrorCode.EMAIL_EXISTS_WITH_SSO]: formatMessage({ id: 'ssoerror.Code2', defaultMessage: 'This email is associated with an account that is linked with Microsoft. Please log in with Micorosoft.' }),
+	[SSOErrorCode.NON_SSO_USER]: formatMessage({ id: 'ssoerror.Code3', defaultMessage: 'This email is associated with an account that is not linked with Microsoft. Please log in with your username and password.' }),
+	[SSOErrorCode.USER_NOT_FOUND]: formatMessage({ id: 'ssoerror.Code4', defaultMessage: 'You are not registered with 3D Repo. Please sign up to proceed.' }),
+	[SSOErrorCode.UNKNOWN]: formatMessage({ id: 'ssoerror.Code5', defaultMessage: 'Unknown error.' }),
+	[SSOErrorCode.EXISTING_USERNAME]: formatMessage({ id: 'ssoerror.Code6', defaultMessage: 'Existing username.' }),
 };
 
 export const postActions = {

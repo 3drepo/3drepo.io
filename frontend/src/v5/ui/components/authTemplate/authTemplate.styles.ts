@@ -42,13 +42,15 @@ export const Footer = styled(Typography).attrs({
 	variant: 'body1',
 })`
 	color: ${({ theme }) => theme.palette.base.light};
-	padding: 30px;
+	height: 0;
 	user-select: none;
 	z-index: 1;
 	
 	a {
 		text-decoration: none;
 		color: inherit;
+		position: relative;
+    	top: 30px;
 	}
 `;
 

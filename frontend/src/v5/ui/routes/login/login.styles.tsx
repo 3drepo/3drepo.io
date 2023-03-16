@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import { Typography } from '@controls/typography';
 import { UnhandledErrorInterceptor as UnhandledErrorInterceptorBase } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { AuthForm } from '@components/authTemplate/authTemplate.styles';
+import { MicrosoftButton as MicrosoftButtonBase } from '@components/shared/sso/microsoftButton.component';
 
 export const OtherOptions = styled.div`
 	display: flex;
@@ -49,4 +50,8 @@ export const UnhandledErrorInterceptor = styled(UnhandledErrorInterceptorBase)`
 export const AuthFormLogin = styled(AuthForm)`
 	min-width: 0;
 	width: 361px;
+`;
+
+export const MicrosoftButton = styled(MicrosoftButtonBase)`
+	width:100%;
 `;
