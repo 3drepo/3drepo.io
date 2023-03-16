@@ -17,9 +17,11 @@
 
 const { removeAllFilesFromModel, removeFilesWithMeta } = require('../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../models/tickets.constants');
+const { VIEWS_RESOURCES_COL } = require('../../models/views.constants');
 const db = require('../../handler/db');
 const { deleteModel } = require('../../models/modelSettings');
 const { removeAllTicketsInModel } = require('../../models/tickets');
+const { removeAllViewsInModel } = require('../../models/views');
 const { templates } = require('../responseCodes');
 
 const ModelHelper = {};
@@ -41,6 +43,8 @@ ModelHelper.removeModelData = async (teamspace, project, model) => {
 		}),
 		removeAllTicketsInModel(teamspace, project, model),
 		removeFilesWithMeta(teamspace, TICKETS_RESOURCES_COL, { teamspace, project, model }),
+		removeAllViewsInModel(teamspace, project, model),
+		removeFilesWithMeta(teamspace, VIEWS_RESOURCES_COL, { teamspace, project, model }),
 	]);
 };
 

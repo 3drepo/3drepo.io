@@ -21,6 +21,7 @@ const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 const { dropCollection, find, insertMany } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const { initialise } = require(`${v5Path}/models/views`);
+const { VIEWS_RESOURCES_COL } = require(`${v5Path}/models/views.constants`);
 
 const PROJECTS_COLL = 'projects';
 const VIEWS_COLL = 'views';
@@ -81,7 +82,7 @@ const processTeamspace = async (teamspace) => {
 		// eslint-disable-next-line no-await-in-loop
 		await Promise.all([
 			processCollection(teamspace, modelToProjectMap[model], model, collection, VIEWS_COLL),
-			processCollection(teamspace, modelToProjectMap[model], model, `${collection}${refExt}`, `${VIEWS_COLL}${refExt}`),
+			processCollection(teamspace, modelToProjectMap[model], model, `${collection}${refExt}`, `${VIEWS_RESOURCES_COL}${refExt}`),
 		]);
 	}
 };

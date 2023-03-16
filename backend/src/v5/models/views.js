@@ -39,4 +39,8 @@ Views.initialise = (teamspace) => Promise.all([
 	db.createIndex(teamspace, VIEWS_COLL, { teamspace: 1, project: 1, model: 1 }, { runInBackground: true }),
 ]);
 
+Views.removeAllViewsInModel = async (teamspace, project, model) => {
+	await db.deleteMany(teamspace, VIEWS_COLL, { teamspace, project, model });
+};
+
 module.exports = Views;
