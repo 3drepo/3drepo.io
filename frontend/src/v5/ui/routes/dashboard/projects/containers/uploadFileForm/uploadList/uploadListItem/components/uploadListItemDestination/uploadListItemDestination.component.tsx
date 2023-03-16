@@ -26,21 +26,24 @@ import { createFilterOptions } from '@mui/material';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { name as containerNameScheme } from '@/v5/validation/containerAndFederationSchemes/validators';
 import { isCollaboratorRole } from '@/v5/store/store.helpers';
+import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Autocomplete, DestinationInput, NewOrExisting } from './uploadListItemDestination.styles';
 import { NewContainer } from './options/newContainer/newContainer.component';
 import { AlreadyUsedName } from './options/alreadyUsedName/alreadyUsedName.component';
 import { ExistingContainer } from './options/existingContainer/existingContainer.component';
 import { OptionsBox } from './options';
-import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
-interface IUploadListItemDestination {
-	onPropertyChange: (name, value) => void;
-	disabled?: boolean;
-	className?: string;
-	defaultValue: string;
-}
+const NO_OPTIONS_TEXT_ADMIN = formatMessage({
+	id: 'uploads.destination.noOptions.admin',
+	defaultMessage: 'Start typing to create a new Container.',
+});
 
-const emptyOption = prepareSingleContainerData({
+const NO_OPTIONS_TEXT_NON_ADMIN = formatMessage({
+	id: 'uploads.destination.noOptions.nonAdmin',
+	defaultMessage: 'There are no Containers to upload to.',
+});
+
+const EMPTY_OPTION = prepareSingleContainerData({
 	_id: '',
 	name: '',
 	role: Role.NONE,
@@ -48,13 +51,19 @@ const emptyOption = prepareSingleContainerData({
 });
 const getFilteredContainersOptions = createFilterOptions<IContainer>({ trim: true });
 
+interface IUploadListItemDestination {
+	onPropertyChange: (name, value) => void;
+	disabled?: boolean;
+	className?: string;
+	defaultValue: string;
+}
 export const UploadListItemDestination = ({
 	disabled = false,
 	className,
 	onPropertyChange,
 	defaultValue,
 }: IUploadListItemDestination): JSX.Element => {
-	const [selectedContainer, setSelectedContainer] = useState<IContainer>({ ...emptyOption, name: defaultValue });
+	const [selectedContainer, setSelectedContainer] = useState<IContainer>({ ...EMPTY_OPTION, name: defaultValue });
 	const [disableClearable, setDisableClearable] = useState(!defaultValue);
 	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>('');
 	const [error, setError] = useState('');
@@ -80,16 +89,6 @@ export const UploadListItemDestination = ({
 		...processingContainersNames,
 		...federationsNames,
 	];
-
-	const NO_OPTIONS_TEXT = isProjectAdmin
-		? formatMessage({
-			id: 'uploads.destination.noOptions.admin',
-			defaultMessage: 'Start typing to create a new Container.',
-		})
-		: formatMessage({
-			id: 'uploads.destination.noOptions.nonAdmin',
-			defaultMessage: 'There are no Containers to upload to.',
-		});
 
 	const onDestinationChange = (value: IContainer): void => {
 		const conversion = {
@@ -125,7 +124,7 @@ export const UploadListItemDestination = ({
 		}
 
 		const newValueOrEmptyOption = container || {
-			...emptyOption,
+			...EMPTY_OPTION,
 			name: containerName,
 		};
 
@@ -166,7 +165,7 @@ export const UploadListItemDestination = ({
 			// create an extra option to transform into a
 			// "add new container" OR "name already used" option
 			filteredOptions.unshift({
-				...emptyOption,
+				...EMPTY_OPTION,
 				name: inputValue.trim(),
 			});
 		}
@@ -187,7 +186,7 @@ export const UploadListItemDestination = ({
 		if (option?._id === '') {
 			// option is an extra
 			if (nameAlreadyExists(trimmedName)) {
-				return (<AlreadyUsedName {...optionProps} />);
+				return (<AlreadyUsedName />);
 			}
 
 			if (isProjectAdmin && !error && !containers.map(({ name }) => name).includes(trimmedName)) {
@@ -221,7 +220,7 @@ export const UploadListItemDestination = ({
 			getOptionDisabled={optionIsUsed}
 			getOptionLabel={({ name }: IContainer) => name}
 			ListboxComponent={OptionsBox}
-			noOptionsText={NO_OPTIONS_TEXT}
+			noOptionsText={isProjectAdmin ? NO_OPTIONS_TEXT_ADMIN : NO_OPTIONS_TEXT_NON_ADMIN}
 			onInputChange={onInputChange}
 			options={containers}
 			renderOption={getRenderOption}
