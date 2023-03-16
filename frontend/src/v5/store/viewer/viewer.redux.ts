@@ -29,7 +29,7 @@ export const INITIAL_STATE: ViewerState = {
 };
 
 export const setFetching = (state: ViewerState, { isFetching }: SetFetchingAction) => {
-	state.isFetching  = isFetching;
+	state.isFetching = isFetching;
 };
 
 export const viewerReducer = createReducer(INITIAL_STATE, produceAll({

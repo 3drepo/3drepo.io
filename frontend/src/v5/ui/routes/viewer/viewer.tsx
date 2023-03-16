@@ -37,63 +37,44 @@ export const Viewer = () => {
 
 	useEffect(() => {
 		ViewerActionsDispatchers.fetchData(teamspace, containerOrFederation, project, revision);
-	}, []);
+	}, [teamspace, containerOrFederation, project, revision]);
 
 	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
 
-	if (isFetching || fetchPending) {
-		console.log('not a lot of things');
-		return (<>the dude is fetching</>);
+	const isLoading = isFetching || fetchPending;
+
+	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
+	const selectedFederation = FederationsHooksSelectors.selectFederationById(containerOrFederation);
+	const federationsContainers = FederationsHooksSelectors.selectContainersByFederationId(containerOrFederation);
+
+	const federationIsEmpty = selectedFederation?.containers?.length === 0
+		|| federationsContainers.every((container) => container?.revisionsCount === 0);
+
+	if (isLoading) {
+		return (<></>);
 	}
 
-	console.log('Done');
-	return (<>Fetched</>);
+	if (selectedContainer?.revisionsCount === 0) {
+		return <InvalidContainerOverlay status={selectedContainer.status} />;
+	}
 
-	// useContainersData();
-	// useFederationsData();
+	if (selectedFederation && federationIsEmpty) {
+		return <InvalidFederationOverlay containers={federationsContainers} />;
+	}
 
-	// const areFederationStatsPending = FederationsHooksSelectors.selectAreStatsPending();
-	// const isFederationListPending = FederationsHooksSelectors.selectIsListPending();
-	// const areContainersPending = ContainersHooksSelectors.selectAreStatsPending();
-	// const isContainerListPending = ContainersHooksSelectors.selectIsListPending();
+	const v4Match = {
+		params: {
+			model: containerOrFederation,
+			project,
+			teamspace,
+			revision,
+		},
+	};
 
-	// // eslint-disable-next-line max-len
-	// const isLoading = areFederationStatsPending || isFederationListPending || areContainersPending || isContainerListPending;
-
-	// const selectedContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
-	// const selectedFederation = FederationsHooksSelectors.selectFederationById(containerOrFederation);
-	// const federationsContainers = FederationsHooksSelectors.selectContainersByFederationId(containerOrFederation);
-
-	// const federationIsEmpty = selectedFederation?.containers?.length === 0
-	// 	|| federationsContainers.every((container) => container?.revisionsCount === 0);
-
-	// useEffect(() => () => dispatch(ModelActions.reset()), []);
-
-	// if (isLoading) {
-	// 	return (<></>);
-	// }
-
-	// if (selectedContainer?.revisionsCount === 0) {
-	// 	return <InvalidContainerOverlay status={selectedContainer.status} />;
-	// }
-
-	// if (selectedFederation && federationIsEmpty) {
-	// 	return <InvalidFederationOverlay containers={federationsContainers} />;
-	// }
-
-	// const v4Match = {
-	// 	params: {
-	// 		model: containerOrFederation,
-	// 		project,
-	// 		teamspace,
-	// 		revision,
-	// 	},
-	// };
-
-	// return (
-	// 	<>
-	// 		<CheckLatestRevisionReadiness />
-	// 		<ViewerGui match={v4Match} key={containerOrFederation} />
-	// 	</>
-	// );
+	return (
+		<>
+			<CheckLatestRevisionReadiness />
+			<ViewerGui match={v4Match} key={containerOrFederation} />
+		</>
+	);
 };

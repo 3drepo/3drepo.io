@@ -42,7 +42,7 @@ import { compByColum } from '../store.helpers';
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
 		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, true));
-		yield API.Containers.addFavourites({ teamspace, containerId, projectId });
+		yield API.Containers.addFavourites(teamspace, containerId, projectId);
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.addFavourite.error', defaultMessage: 'trying to add container to favourites' }),
@@ -55,7 +55,7 @@ export function* addFavourites({ containerId, teamspace, projectId }: AddFavouri
 export function* removeFavourites({ containerId, teamspace, projectId }: RemoveFavouriteAction) {
 	try {
 		yield put(ContainersActions.setFavouriteSuccess(projectId, containerId, false));
-		yield API.Containers.removeFavourites({ containerId, teamspace, projectId });
+		yield API.Containers.removeFavourites(containerId, teamspace, projectId);
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.removeFavourite.error', defaultMessage: 'trying to remove container from favourites' }),
@@ -67,7 +67,7 @@ export function* removeFavourites({ containerId, teamspace, projectId }: RemoveF
 
 export function* fetchContainers({ teamspace, projectId }: FetchContainersAction) {
 	try {
-		const { containers }: FetchContainersResponse = yield API.Containers.fetchContainers({ teamspace, projectId });
+		const { containers }: FetchContainersResponse = yield API.Containers.fetchContainers(teamspace, projectId);
 		const containersWithoutStats = prepareContainersData(containers);
 		const storedContainers = yield select(selectContainers);
 		const isPending = yield select(selectIsListPending);
@@ -92,9 +92,7 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 
 export function* fetchContainerStats({ teamspace, projectId, containerId }: FetchContainerStatsAction) {
 	try {
-		const stats = yield API.Containers.fetchContainerStats({
-			teamspace, projectId, containerId,
-		});
+		const stats = yield API.Containers.fetchContainerStats(teamspace, projectId, containerId);
 
 		const container = yield select(selectContainerById, containerId);
 
@@ -121,11 +119,7 @@ export function* fetchContainerViews({
 	containerId,
 }: FetchContainerViewsAction) {
 	try {
-		const { views }: FetchContainerViewsResponseView = yield API.Containers.fetchContainerViews({
-			teamspace,
-			projectId,
-			containerId,
-		});
+		const { views }: FetchContainerViewsResponseView = yield API.Containers.fetchContainerViews(teamspace, projectId, containerId);
 		yield put(ContainersActions.fetchContainerViewsSuccess(projectId, containerId, views));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -141,11 +135,7 @@ export function* fetchContainerSettings({
 	containerId,
 }: FetchContainerSettingsAction) {
 	try {
-		const rawSettings = yield API.Containers.fetchContainerSettings({
-			teamspace,
-			projectId,
-			containerId,
-		});
+		const rawSettings = yield API.Containers.fetchContainerSettings(teamspace, projectId, containerId);
 		const settings = prepareContainerSettingsForFrontend(rawSettings);
 		yield put(ContainersActions.fetchContainerSettingsSuccess(projectId, containerId, settings));
 	} catch (error) {
@@ -166,9 +156,7 @@ export function* updateContainerSettings({
 }: UpdateContainerSettingsAction) {
 	try {
 		const rawSettings = prepareContainerSettingsForBackend(settings);
-		yield API.Containers.updateContainerSettings({
-			teamspace, projectId, containerId, settings: rawSettings,
-		});
+		yield API.Containers.updateContainerSettings(teamspace, projectId, containerId, rawSettings);
 		yield put(ContainersActions.updateContainerSettingsSuccess(projectId, containerId, settings));
 		onSuccess();
 	} catch (error) {
@@ -178,7 +166,7 @@ export function* updateContainerSettings({
 
 export function* createContainer({ teamspace, projectId, newContainer, onSuccess, onError }: CreateContainerAction) {
 	try {
-		const id = yield API.Containers.createContainer({ teamspace, projectId, newContainer });
+		const id = yield API.Containers.createContainer(teamspace, projectId, newContainer);
 
 		const container = { _id: id, ...newContainer };
 		yield put(ContainersActions.createContainerSuccess(
@@ -193,7 +181,7 @@ export function* createContainer({ teamspace, projectId, newContainer, onSuccess
 
 export function* deleteContainer({ teamspace, projectId, containerId, onSuccess, onError }: DeleteContainerAction) {
 	try {
-		yield API.Containers.deleteContainer({ teamspace, projectId, containerId });
+		yield API.Containers.deleteContainer(teamspace, projectId, containerId);
 		yield put(ContainersActions.deleteContainerSuccess(projectId, containerId));
 		onSuccess();
 	} catch (error) {
