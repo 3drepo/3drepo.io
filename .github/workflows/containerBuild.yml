@@ -138,7 +138,7 @@ jobs:
     steps:
     - name: Azure Pipelines Action
       if: needs.get-details.outputs.issue-number
-      uses: Azure/pipelines@v1.2
+      uses: 3drepo/pipelines@ISSUE_1
       with:
         azure-devops-project-url: https://dev.azure.com/3drepo/3drepo.io
         azure-pipeline-name: 'deploy'
