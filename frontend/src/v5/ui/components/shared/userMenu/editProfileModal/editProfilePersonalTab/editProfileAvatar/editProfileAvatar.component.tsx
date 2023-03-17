@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
+import { avatarFile } from '@/v5/validation/userSchemes/validators';
 import { FormattedMessage } from 'react-intl';
+import { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import {
 	Header,
@@ -37,17 +39,24 @@ type EditProfilePersonalTabProps = {
 };
 
 export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
+	const [fileSizeError, setFileSizeError] = useState('');
 	const { setValue, getValues, formState: { errors }, control } = useFormContext();
-
-	const addImage = (event, field) => {
-		if (!event.target.files.length) return;
-		const file = event.target.files[0];
-		setValue('avatarFile', file);
-		field.onChange(file);
-	};
 
 	const error = errors.avatarFile;
 	const newAvatar = getValues('avatarFile');
+
+	const addImage = (event, onChange) => {
+		if (!event.target.files.length) return;
+		const file = event.target.files[0];
+		setFileSizeError('');
+		try {
+			avatarFile.validateSync(file);
+			setValue('avatarFile', file);
+			onChange(file);
+		} catch (validationError) {
+			setFileSizeError(validationError.message)
+		}
+	};
 
 	const getUserWithAvatar = () => {
 		if (!newAvatar) return user;
@@ -59,6 +68,10 @@ export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
 	};
 
 	const avatarIsAvailable = () => newAvatar || user.hasAvatar;
+
+	useEffect(() => {
+		setFileSizeError('');
+	}, [JSON.stringify(getValues())])
 
 	return (
 		<Header>
@@ -78,7 +91,7 @@ export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
 				<Controller
 					name="avatarFile"
 					control={control}
-					render={({ field: { value, ...field } }) => (
+					render={({ field: { value, onChange, ...field } }) => (
 						<AvatarButton color={avatarIsAvailable() ? 'secondary' : 'primary'}>
 							<AvatarLabel>
 								{avatarIsAvailable() ? (
@@ -88,13 +101,13 @@ export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
 								)}
 								<AvatarInput
 									{...field}
-									onChange={(event) => addImage(event, field)}
+									onChange={(event) => addImage(event, onChange)}
 								/>
 							</AvatarLabel>
 						</AvatarButton>
 					)}
 				/>
-				{error && <ErrorMessage title={error.message} />}
+				{(fileSizeError || error) && <ErrorMessage title={fileSizeError || error.message} />}
 			</UserInfo>
 		</Header>
 	);

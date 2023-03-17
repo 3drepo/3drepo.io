@@ -25,7 +25,6 @@ export const EditProfileUpdatePersonalSchema = Yup.object().shape({
 	email,
 	company,
 	countryCode,
-	avatarFile,
 });
 
 export const EditProfileUpdatePasswordSchema = (incorrectPassword) => Yup.object().shape({
