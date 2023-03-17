@@ -14,7 +14,7 @@ RUN yarn install --network-timeout 500000 --immutable --immutable-cache --check-
 
 FROM node:18 as frontend-base
 WORKDIR /home/node/3drepo.io/frontend
-COPY --from=base /home/node/3drepo.io/frontend ./node_modules
+COPY --from=base /home/node/3drepo.io/frontend/node_modules ./node_modules
 COPY ./frontend/ . 
 RUN yarn build
 
