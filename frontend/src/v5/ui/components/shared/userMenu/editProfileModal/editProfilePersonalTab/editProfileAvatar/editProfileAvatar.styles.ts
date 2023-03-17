@@ -30,7 +30,7 @@ export const ScrollArea = styled(ScrollAreaBase).attrs({
 export const Header = styled.div`
 	display: flex;
 	flex-direction: row;
-	align-items: center;
+	align-items: flex-start;
 `;
 
 export const Avatar = styled(AvatarBase).attrs({
