@@ -15,22 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Typography } from '@controls/typography';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import Dropzone from 'react-dropzone';
-import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
+import { DashedContainer as DashedContainerBase } from '@controls/dashedContainer/dashedContainer.component';
 
-export const Container = styled(Dropzone)`
+export const Container = styled.div`
+	display: contents;
+`;
+
+export const DropArea = styled(Dropzone)`
 	position: relative;
 	width: 100%;
 	height: 100%;
 `;
 
-export const UploadDialog = styled(DashedContainer).attrs(({ theme }) => ({
+export const DashedContainer = styled(DashedContainerBase).attrs(({ theme, $dragOverlay }: any) => ({
 	borderRadius: 10,
 	dashSize: 5,
 	strokeColor: theme.palette.primary.main,
-}))`
+	gapSize: $dragOverlay ? 0 : 5,
+}))<{ $dragOverlay?: boolean }>`
 	width: 100%;
 	height: 100%;
 	padding: 30px;
@@ -41,16 +45,7 @@ export const UploadDialog = styled(DashedContainer).attrs(({ theme }) => ({
 	align-items: center;
 	flex-direction: column;
 	
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	&.drag-over {
-		background-color: ${({ theme }) => theme.palette.primary.lightest};
-	}
-`;
-
-export const HelpText = styled(Typography).attrs({
-	variant: 'h5',
-})`
-	color: ${({ theme }) => theme.palette.base.main};
-	padding: 10px;
-	a { color: inherit }
+	${({ $dragOverlay, theme: { palette } }) => css`
+		background-color: ${$dragOverlay ? palette.primary.lightest : palette.primary.contrast};
+	`}
 `;

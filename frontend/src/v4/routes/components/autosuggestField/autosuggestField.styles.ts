@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isV5 } from '@/v4/helpers/isV5';
 import Popper from '@mui/material/Popper';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { COLOR } from '../../../styles';
 import { TextField } from '../textField/textField.component';
 
@@ -34,8 +35,8 @@ export const SuggestionsList = styled(Popper)`
 
 	.react-autosuggest__suggestions-list {
 		max-height: 250px;
-		overflow: auto;
 		padding-left: 0;
+		${!isV5() && css`overflow: auto;`}
 	}
 
 	.react-autosuggest__suggestion {

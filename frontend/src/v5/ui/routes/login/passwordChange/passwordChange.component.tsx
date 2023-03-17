@@ -26,7 +26,7 @@ import { PasswordChangeSchema } from '@/v5/validation/userSchemes/passwordChange
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SubmitButton } from '@controls/submitButton';
 import { useForm } from 'react-hook-form';
-import ErrorIcon from '@assets/icons/twoToned/warning_small-two_toned.svg';
+import { AuthForm } from '@components/authTemplate/authTemplate.styles';
 import { AuthHeading, AuthParagraph, ErrorMessage, FormPasswordField } from '../components/components.styles';
 import { ReturnLink } from '../components/returnLink.component';
 import { LOGIN_PATH } from '../../routes.constants';
@@ -55,7 +55,7 @@ export const PasswordChange = () => {
 
 	return (
 		<AuthTemplate>
-			<form onSubmit={handleSubmit(onSubmit)}>
+			<AuthForm onSubmit={handleSubmit(onSubmit)}>
 				<AuthHeading>
 					<FormattedMessage id="auth.changePassword.heading" defaultMessage="Create a new password" />
 				</AuthHeading>
@@ -94,9 +94,9 @@ export const PasswordChange = () => {
 							/>
 						</AuthParagraph>
 					)}
-				{errorMessage && <ErrorMessage><ErrorIcon />{errorMessage}</ErrorMessage>}
+				{errorMessage && <ErrorMessage title={errorMessage} />}
 				<ReturnLink />
-			</form>
+			</AuthForm>
 		</AuthTemplate>
 	);
 };

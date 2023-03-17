@@ -38,6 +38,7 @@ import { MeasuringType } from './components/measuringType';
 import {
 	Container,
 	MeasureIcon,
+	MeasureUnit,
 	ViewerBottomActions,
 	ViewsContainer,
 } from './measurements.styles';
@@ -146,7 +147,7 @@ export class Measurements extends PureComponent<IProps, IState> {
 						{label}
 						{(name === MEASURE_ACTIONS_ITEMS.EDGE_SNAPPING && this.props.edgeSnappingEnabled) && <Check fontSize="small" />}
 						{(name === MEASURE_ACTIONS_ITEMS.SHOW_XYZ && this.props.XYZdisplay) && <Check fontSize="small" />}
-						{name === MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN && <strong>{this.props.measureUnits}</strong>}
+						{name === MEASURE_ACTIONS_ITEMS.UNITS_DISPLAYED_IN && <MeasureUnit>{this.props.measureUnits}</MeasureUnit>}
 					</StyledItemText>
 				</StyledListItem>
 			))}

@@ -26,6 +26,7 @@ import { authReducer } from '@/v5/store/auth/auth.redux';
 import { ticketsReducer } from '@/v5/store/tickets/tickets.redux';
 import { revisionsReducer } from '@/v5/store/revisions/revisions.redux';
 import { ticketsCardReducer } from './tickets/card/ticketsCard.redux';
+import { ticketCommentsReducer } from './tickets/comments/ticketComments.redux';
 
 // <-- IMPORT MODULE REDUCER -->
 
@@ -39,6 +40,7 @@ export default {
 	revisions: revisionsReducer,
 	teamspaces2: teamspacesReducer,
 	tickets: ticketsReducer,
-	users: usersReducer,
 	ticketsCard: ticketsCardReducer,
+	ticketsComment: ticketCommentsReducer,
+	users: usersReducer,
 };

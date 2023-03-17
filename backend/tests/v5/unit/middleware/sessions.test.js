@@ -53,8 +53,9 @@ const Sessions = require(`${src}/middleware/sessions`);
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
-const webBrowserUserAgent = 'web browser user agent';
-const urlDomain = 'url domain';
+const pluginAgent = generateRandomString();
+const webBrowserUserAgent = generateRandomString();
+const urlDomain = generateRandomString();
 
 UserAgentHelper.isFromWebBrowser.mockImplementation((userAgent) => userAgent === webBrowserUserAgent);
 StringsHelper.getURLDomain.mockImplementation(() => urlDomain);
@@ -181,7 +182,7 @@ const testManageSession = () => {
 };
 
 const testUpdateSession = () => {
-	const checkResults = (request, mockCB) => {
+	const checkResults = (request, userAgent, mockCB) => {
 		expect(mockCB).toHaveBeenCalledTimes(1);
 		expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 		expect(EventsManager.publish).toHaveBeenCalledWith(events.SESSION_CREATED,
@@ -189,10 +190,11 @@ const testUpdateSession = () => {
 				username: request.loginData.username,
 				sessionID: request.sessionID,
 				ipAddress: request.ips[0] || request.ip,
-				userAgent: request.headers['user-agent'],
-				referer: request?.session?.user?.referer,
+				...(userAgent ? { userAgent } : { }),
+				referer: request.session?.user?.referer,
 				socketId: request.headers[SOCKET_HEADER],
 			});
+		expect(request.session?.ssoInfo).toEqual(undefined);
 	};
 
 	const req = {
@@ -206,26 +208,28 @@ const testUpdateSession = () => {
 	};
 
 	describe.each([
-		['the request has a referer', { ...req, headers: { ...req.headers, referer: 'http://abc.com/' } }],
-		['the session has a referer', { ...req, session: { ...req.session, referer: 'http://abc.com/' } }],
+		['the request has a referer (SSO)', { ...req, session: { ...req.session, ssoInfo: { referer: 'http://abc.com/' } } }],
+		['the session has a referer', { ...req, headers: { ...req.headers, referer: generateRandomString() } }],
 		['the request has socket id', { ...req, headers: { ...req.headers, [SOCKET_HEADER]: 'socketsdlfkdsj' } }],
-		['the request has user agent', { ...req, headers: { ...req.headers, 'user-agent': 'some user agent' } }],
-		['the request has web user agent', { ...req, headers: { ...req.headers, 'user-agent': webBrowserUserAgent } }],
+		['the request has user agent from the plugin', { ...req, headers: { ...req.headers, 'user-agent': pluginAgent } }, pluginAgent],
+		['the request has user agent from the plugin (SSO)', { ...req, session: { ...req.session, ssoInfo: { userAgent: pluginAgent } } }, pluginAgent],
+		['the request has web user agent', { ...req, headers: { ...req.headers, 'user-agent': webBrowserUserAgent } }, webBrowserUserAgent],
+		['the request has web user agent (SSO)', { ...req, session: { ...req.session, ssoInfo: { userAgent: webBrowserUserAgent } } }, webBrowserUserAgent],
 		['the request has empty ips array', { ...req, ips: [] }],
-	])('Update Session', (desc, request) => {
+	])('Update Session', (desc, request, userAgent) => {
 		test(`should update session if ${desc}`, async () => {
 			const mockCB = jest.fn();
 			await Sessions.updateSession(request, {}, mockCB);
-			checkResults(request, mockCB);
+			checkResults(request, userAgent, mockCB);
 		});
 	});
 
-	test('Should update session', async () => {
+	test('Should update session with cookie.maxAge', async () => {
 		const mockCB = jest.fn();
 		const initialMaxAge = config.cookie.maxAge;
 		config.cookie.maxAge = 100;
 		await Sessions.updateSession(req, {}, mockCB);
-		checkResults(req, mockCB);
+		checkResults(req, undefined, mockCB);
 		config.cookie.maxAge = initialMaxAge;
 	});
 
@@ -234,7 +238,7 @@ const testUpdateSession = () => {
 		const initialMaxAge = config.cookie.maxAge;
 		config.cookie.maxAge = undefined;
 		await Sessions.updateSession(req, {}, mockCB);
-		checkResults(req, mockCB);
+		checkResults(req, undefined, mockCB);
 		config.cookie.maxAge = initialMaxAge;
 	});
 };

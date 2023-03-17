@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { formatMessage } from '@/v5/services/intl';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
-import { Gap } from '@controls/gap';
 import { FormattedMessage } from 'react-intl';
 import { Link } from './unexpectedError.styles';
 
@@ -24,12 +24,13 @@ type UnexpectedErrorProps = {
 };
 
 export const UnexpectedError = ({ className }: UnexpectedErrorProps) => (
-	<ErrorMessage className={className}>
-		<FormattedMessage
-			id="form.unexpectedError.mainMessage"
-			defaultMessage="An unexpected error has occurred. Please try again later."
-		/>
-		<Gap $height="10px" />
+	<ErrorMessage
+		className={className}
+		title={formatMessage({
+			id: 'form.unexpectedError.mainMessage',
+			defaultMessage: 'An unexpected error has occurred. Please try again later.',
+		})}
+	>
 		<FormattedMessage
 			id="form.unexpectedError.contactSupport.message"
 			defaultMessage="If the error persists, please {contactSupport}."

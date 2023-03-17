@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Avatar } from '@controls/avatar';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { JobAvatar } from '@controls/jobAvatar/jobAvatar.component';
 import { MultiSelect } from '@controls/inputs/multiSelect/multiSelect.component';
+import { BaseCircle } from '@components/shared/userCirclePopover/userCirlcePopover.styles';
 import { ExtraAssigneesCircle } from './extraAssignees/extraAssigneesCircle.component';
 
 export const HiddenSearchSelect = styled(MultiSelect)`
@@ -27,31 +27,6 @@ export const HiddenSearchSelect = styled(MultiSelect)`
 	overflow: hidden;
 	position: absolute;
 	right: 0;
-`;
-
-const BaseCircle = css`
-	margin: 0 -8px 0 0;
-	color: ${({ theme }) => theme.palette.primary.main};
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	height: 28px;
-	width: 28px;
-	pointer-events: auto;
-	
-	.MuiAvatar-root {
-		border: 2px solid ${({ theme }) => theme.palette.primary.contrast};
-		box-sizing: border-box;
-		height: 100%;
-		width: 100%;
-		font-size: 10px;
-	}
-`;
-
-export const UserCircle = styled(Avatar)`
-	${BaseCircle}
-	.MuiAvatar-root {
-		background-color: ${({ theme }) => theme.palette.base.lightest};
-		color: ${({ theme }) => theme.palette.secondary.main};
-	}
 `;
 
 export const JobCircle = styled(JobAvatar)`

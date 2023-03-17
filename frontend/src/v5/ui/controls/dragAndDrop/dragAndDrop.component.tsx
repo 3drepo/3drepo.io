@@ -15,71 +15,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useState } from 'react';
-
-import { FormattedMessage } from 'react-intl';
-import { Typography } from '@controls/typography';
-import { HelpText, UploadDialog, Container } from './dragAndDrop.styles';
-import { FileInputField } from '../fileInputField/fileInputField.component';
+import { useState } from 'react';
+import { Container, DashedContainer, DropArea } from './dragAndDrop.styles';
 
 interface IDragAndDrop {
-	message?: ReactNode,
 	hidden?: boolean;
-	processFiles: (files) => void,
+	onDrop: (files) => void,
 	className?: string;
+	children?: any;
+	accept?: string;
 }
-
-export const DragAndDrop = ({ className, message, processFiles, hidden = false }: IDragAndDrop) => {
+export const DragAndDrop = ({ children, onDrop, hidden = false, ...props }: IDragAndDrop) => {
 	const [dragOverlay, setDragOverlay] = useState(false);
-	const acceptedFormats = ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
 
-	const handleDragIn = (e) => {
+	const handleDragEnter = (e) => {
 		if (e.dataTransfer.items.length > 0) {
 			setDragOverlay(true);
 		}
 	};
 
-	const handleDragOut = () => {
+	const handleDragLeave = () => {
 		setDragOverlay(false);
 	};
 
 	const handleDrop = (files) => {
-		processFiles(files);
+		onDrop(files);
 		setDragOverlay(false);
 	};
 	return (
-		<Container
-			className={className}
-			onDragEnter={handleDragIn}
-			onDragLeave={handleDragOut}
-			onDrop={handleDrop}
-			accept={acceptedFormats}
-			hidden={hidden}
-			disableClick
-		>
-			<UploadDialog
-				gapSize={dragOverlay ? 0 : 5}
-				className={dragOverlay && 'drag-over'}
+		<DropArea hidden={hidden} disableClick onDrop={handleDrop} {...props}>
+			<Container
+				onDragEnter={handleDragEnter}
+				onDragLeave={handleDragLeave}
 			>
-				<Typography variant="h3" color="secondary">
-					<FormattedMessage id="dragAndDrop.drop" defaultMessage="Drop files here" />
-				</Typography>
-
-				<Typography variant="h5" color="secondary">
-					<FormattedMessage id="dragAndDrop.or" defaultMessage="or" />
-				</Typography>
-
-				<FileInputField
-					acceptedFormats={acceptedFormats}
-					handleChange={(files) => processFiles(files)}
-					size="medium"
-					variant="contained"
-					color="primary"
-				/>
-				<HelpText>
-					{message}
-				</HelpText>
-			</UploadDialog>
-		</Container>
+				<DashedContainer $dragOverlay={dragOverlay}>
+					{children}
+				</DashedContainer>
+			</Container>
+		</DropArea>
 	);
 };
