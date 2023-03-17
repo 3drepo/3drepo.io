@@ -43,35 +43,35 @@ export const DestinationInput = styled(TextField)<{ neworexisting: NewOrExisting
 			}
 		}
 		${({ neworexisting, theme }) => {
-			if (neworexisting === 'new') {
-				return css`
+		if (neworexisting === 'new') {
+			return css`
+				color: ${theme.palette.primary.main};
+				background-color: ${theme.palette.primary.lightest};
+
+				& > .MuiInputBase-input {
 					color: ${theme.palette.primary.main};
-					background-color: ${theme.palette.primary.lightest};
+				}
 
-					& > .MuiInputBase-input {
-						color: ${theme.palette.primary.main};
-					}
+				fieldset, &:hover fieldset {
+					border: none;
+				}
+			`;
+		}
+		if (neworexisting === 'existing') {
+			return css`
+				color: ${theme.palette.secondary.main};
+				background-color: ${theme.palette.tertiary.lightest};
 
-					fieldset, &:hover fieldset {
-						border: none;
-					}
-				`;
-			}
-			if (neworexisting === 'existing') {
-				return css`
+				& > .MuiInputBase-input {
 					color: ${theme.palette.secondary.main};
-					background-color: ${theme.palette.tertiary.lightest};
+				}
 
-					& > .MuiInputBase-input {
-						color: ${theme.palette.secondary.main};
-					}
-
-					fieldset, &:hover fieldset {
-						border: none;
-					}
-				`;
-			}
-			return '';
-		}}
+				fieldset, &:hover fieldset {
+					border: none;
+				}
+			`;
+		}
+		return '';
+	}}
 	}
 `;

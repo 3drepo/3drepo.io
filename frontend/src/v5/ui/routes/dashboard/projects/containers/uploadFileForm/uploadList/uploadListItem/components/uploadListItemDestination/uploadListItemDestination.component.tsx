@@ -107,12 +107,12 @@ export const UploadListItemDestination = ({
 				{ context: { alreadyExistingNames: containersNamesInUse } },
 			);
 			setError('');
-		} catch (error) {
-			setError(error.message);
+		} catch (validationError) {
+			setError(validationError.message);
 		}
 	};
 
-	const updateDestination = (containerName: string) => { 
+	const updateDestination = (containerName: string) => {
 		const container = containers.find(({ name }) => name === containerName);
 		setDisableClearable(!containerName);
 		if (!containerName) {
@@ -133,7 +133,7 @@ export const UploadListItemDestination = ({
 			trigger(name);
 		});
 
-		if (container) {	
+		if (container) {
 			RevisionsActionsDispatchers.fetch(
 				teamspace,
 				projectId,
@@ -145,7 +145,7 @@ export const UploadListItemDestination = ({
 	const handleInputChange = (_, newValue: string, reason: 'clear' | 'reset' | 'input') => {
 		const containerName = newValue?.trim();
 		testName(containerName);
-		if (reason === 'input' || reason === 'reset' && !newValue) return;
+		if (reason === 'input' || (reason === 'reset' && !newValue)) return;
 
 		updateDestination(containerName);
 	};
