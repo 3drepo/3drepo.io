@@ -26,15 +26,18 @@ import { LoginSchema } from '@/v5/validation/userSchemes/loginSchemes';
 import { AuthTemplate } from '@components/authTemplate';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
-import { AuthForm } from '@components/authTemplate/authTemplate.styles';
-import { ForgotPasswordPrompt, OtherOptions, SignUpPrompt, UnhandledErrorInterceptor } from './login.styles';
+import { AuthSubHeader, Divider } from '@components/authTemplate/authTemplate.styles';
+import { useSSOLogin } from '@/v5/services/sso.hooks';
+import { Gap } from '@controls/gap';
+import { NewSticker } from '@components/shared/sso/microsoftText.styles';
+import { AuthFormLogin, ForgotPasswordPrompt, MicrosoftButton, OtherOptions, SignUpPrompt, UnhandledErrorInterceptor } from './login.styles';
 import { AuthHeading, ErrorMessage, FormPasswordField, FormUsernameField } from './components/components.styles';
 import { PASSWORD_FORGOT_PATH, RELEASE_NOTES_ROUTE, SIGN_UP_PATH } from '../routes.constants';
 
 const APP_VERSION = ClientConfig.VERSION;
 
 export const Login = () => {
-	const { control, handleSubmit, formState: { isValid } } = useForm({
+	const { control, handleSubmit, formState: { isValid, errors } } = useForm({
 		mode: 'onSubmit',
 		defaultValues: {
 			username: '',
@@ -59,6 +62,8 @@ export const Login = () => {
 		].includes(err.response?.data?.code)
 	);
 
+	const [ssoErrorMessage, loginWithSSO] = useSSOLogin();
+
 	return (
 		<AuthTemplate
 			footer={(
@@ -67,14 +72,34 @@ export const Login = () => {
 				</a>
 			)}
 		>
-			<AuthForm onSubmit={handleSubmit(onSubmit)}>
+			<AuthFormLogin onSubmit={handleSubmit(onSubmit)}>
 				<AuthHeading>
-					<FormattedMessage id="auth.login.heading" defaultMessage="Log in" />
+					<FormattedMessage id="auth.login.heading" defaultMessage="Sign into your account" />
 				</AuthHeading>
+				<AuthSubHeader>
+					<FormattedMessage id="auth.login.heading.signInWithMicrosoft" defaultMessage="Sign in with Microsoft" />
+					<NewSticker>
+						<FormattedMessage id="feature.new" defaultMessage="New" />
+					</NewSticker>
+				</AuthSubHeader>
+				<MicrosoftButton onClick={loginWithSSO}>
+					<FormattedMessage id="auth.login.sso.microsoft" defaultMessage="Sign in with Microsoft" />
+				</MicrosoftButton>
+				{ssoErrorMessage && (
+					<>
+						<Gap $height="5px" />
+						<ErrorMessage>{ssoErrorMessage}</ErrorMessage>
+					</>
+				)}
+				<Divider><FormattedMessage id="auth.login.divider" defaultMessage="or" /></Divider>
+				<AuthSubHeader>
+					<FormattedMessage id="auth.login.heading.signInWithUsername" defaultMessage="Sign in with username or email" />
+				</AuthSubHeader>
 				<FormUsernameField
 					control={control}
 					name="username"
 					required
+					formError={errors.username}
 				/>
 				<FormPasswordField
 					control={control}
@@ -86,7 +111,7 @@ export const Login = () => {
 					required
 				/>
 				<UnhandledErrorInterceptor expectedErrorValidators={[isExpectedError]} />
-				{errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
+				{errorMessage && <ErrorMessage title={errorMessage} />}
 				<OtherOptions>
 					<SignUpPrompt>
 						<FormattedMessage
@@ -106,7 +131,7 @@ export const Login = () => {
 				<SubmitButton disabled={!isValid} isPending={isPending} startIcon={<LoginIcon />}>
 					<FormattedMessage id="auth.login.buttonText" defaultMessage="Log in" />
 				</SubmitButton>
-			</AuthForm>
+			</AuthFormLogin>
 		</AuthTemplate>
 	);
 };

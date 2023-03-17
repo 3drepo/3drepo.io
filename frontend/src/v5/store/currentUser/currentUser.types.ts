@@ -28,6 +28,7 @@ export interface ICurrentUser {
 	intercomRef?: string,
 	personalDataIsUpdating?: boolean,
 	apiKeyIsUpdating?: boolean,
+	sso?: string,
 }
 
 export type UpdatePersonalData = Partial<Pick<ICurrentUser, 'firstName' | 'lastName' | 'email' | 'company' | 'countryCode'>> & {
