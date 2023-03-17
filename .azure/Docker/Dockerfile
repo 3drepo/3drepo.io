@@ -5,7 +5,6 @@ WORKDIR /home/node/3drepo.io/backend
 COPY ./backend/package.json ./package.json
 COPY ./backend/yarn.lock ./yarn.lock
 RUN yarn install --network-timeout 500000 --immutable --immutable-cache --check-cache
-COPY ./backend/ ./backend/
 
 WORKDIR /home/node/3drepo.io/frontend
 COPY ./frontend/package.json ./package.json
@@ -44,7 +43,8 @@ RUN if [ ${NODE_USERNAME} != "root" ] \
     fi
 
 WORKDIR /home/node/3drepo.io/
-COPY --chown=root:node --from=base /home/node/3drepo.io/backend ./backend
+COPY --chown=root:node --from=base /home/node/3drepo.io/backend/node_modules ./backend/node_modules
+COPY --chown=root:node ./backend/ ./backend/
 COPY --chown=root:node --from=frontend-base /home/node/3drepo.io/public ./public
 COPY --chown=root:node ./config ./config
 COPY --chown=root:node ./resources ./resources
