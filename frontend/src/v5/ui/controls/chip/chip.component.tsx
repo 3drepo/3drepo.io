@@ -19,9 +19,9 @@ import { Chip as MuiChip, Tooltip } from '@mui/material';
 import { ChipWrapper } from './chip.styles';
 import { IChip } from './chip.types';
 
-export const Chip = ({ color, variant, tooltip = '', ...props }: IChip) => (
-	<ChipWrapper variant={variant} color={color}>
-		<Tooltip title={tooltip} arrow>
+export const Chip = ({ color, variant, tooltip = '', disabled, ...props }: IChip) => (
+	<ChipWrapper variant={variant} color={color} disabled={disabled}>
+		<Tooltip title={disabled ? '' : tooltip} arrow>
 			<MuiChip clickable={false} {...props} />
 		</Tooltip>
 	</ChipWrapper>

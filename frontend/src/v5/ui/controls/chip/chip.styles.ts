@@ -43,7 +43,7 @@ const textStyles = (color: string) => css`
 	}
 `;
 
-export const ChipWrapper = styled.div<{ variant: string; color: string }>`
+export const ChipWrapper = styled.div<{ variant: string; color: string; disabled: boolean }>`
 	display: contents;
 	.MuiChip-root {
 		${({ theme }) => theme.typography.body2};
@@ -56,6 +56,7 @@ export const ChipWrapper = styled.div<{ variant: string; color: string }>`
 		gap: 4px;
 		user-select: none;
 		cursor: pointer;
+		pointer-events: ${({ disabled }) => (disabled ? 'none' : 'auto')};
 		margin: 0;
 		letter-spacing: 0.3px;
 		svg {

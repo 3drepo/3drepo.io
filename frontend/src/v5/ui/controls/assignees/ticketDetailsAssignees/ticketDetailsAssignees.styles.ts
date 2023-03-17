@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { ManyOfProperty } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/manyOfProperty.component';
 import { CircleButton } from '@controls/circleButton';
 import { AssigneesList as AssigneesListBase } from '../assigneesList/assigneesList.component';
@@ -31,6 +31,7 @@ export const HiddenManyOfProperty = styled(ManyOfProperty)`
 `;
 
 export const AssigneesList = styled(AssigneesListBase)`
+	cursor: pointer;
 	.MuiButtonBase-root {
 		height: unset;
 		width: unset;
@@ -48,10 +49,10 @@ export const AddUserButton = styled(CircleButton)`
 	border: 1px dashed ${({ theme }) => theme.palette.base.light};
 	padding: 5px;
 	color: ${({ theme }) => theme.palette.base.main};
-	margin: 0 0 0 10px;
+	margin: 0 0 0 3px;
 `;
 
-export const InlineAssignees = styled.div`
+export const InlineAssignees = styled.div<{ disabled: boolean; }>`
 	display: inline-flex;
 	align-items: center;
 	user-select: none;
@@ -61,4 +62,10 @@ export const InlineAssignees = styled.div`
 		font-size: 0;
 		letter-spacing: 0;
 	}
+
+	${({ disabled }) => disabled && css`
+		${AddUserButton} {
+			display: none;
+		}
+	`}
 `;

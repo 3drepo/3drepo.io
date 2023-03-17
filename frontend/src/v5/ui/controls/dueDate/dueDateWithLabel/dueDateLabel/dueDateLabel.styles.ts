@@ -19,8 +19,10 @@ import styled, { css } from 'styled-components';
 
 export const DateContainer = styled.span<{ isOverdue?: boolean; disabled?: boolean }>`
 	font-size: 10px;
+	user-select: none;
 	color: ${({ theme, isOverdue = false }) => (isOverdue ? theme.palette.error.main : theme.palette.secondary.main)};
 	${({ disabled }) => !disabled && css`
+		cursor: pointer;
 		&:hover {
 			text-decoration: underline;
 		}

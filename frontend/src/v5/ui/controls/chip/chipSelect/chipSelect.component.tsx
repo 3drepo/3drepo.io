@@ -40,12 +40,16 @@ export const ChipSelect = ({
 	onChange,
 	error,
 	helperText,
+	disabled,
 	...props
 }: IChipSelect) => {
 	const [open, setOpen] = useState(false);
 	const arrayOfListItems: IChipMapItem[] = Object.values(values);
 
-	const handleOpen = () => setOpen(true);
+	const handleOpen = () => {
+		if (disabled) return;
+		setOpen(true);
+	};
 	const handleClose = () => {
 		onBlur?.();
 		setOpen(false);
@@ -67,7 +71,7 @@ export const ChipSelect = ({
 					<SelectItem key={label} value={label} label={label} {...itemProps} />
 				))}
 			</HiddenSelect>
-			<Chip {...values[value]} onClick={handleOpen} {...props} />
+			<Chip disabled={disabled} {...values[value]} onClick={handleOpen} {...props} />
 		</>
 	);
 };

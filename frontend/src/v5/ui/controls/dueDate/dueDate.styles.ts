@@ -29,7 +29,6 @@ export const DueDateWithIconContainer = styled.div`
 	padding-left: 7px;
 	height: 20px;
 	box-sizing: border-box;
-	cursor: pointer;
 `;
 
 export const CalendarIcon = styled(CalendarIconBase)`

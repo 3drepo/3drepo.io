@@ -37,9 +37,9 @@ export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: IDueDate
 				disabled={disabled}
 				renderInput={
 					({ inputRef, ...args }) => (
-						<Tooltip title={tooltip} arrow>
+						<Tooltip title={disabled ? '' : tooltip} arrow>
 							{value ? (
-								<DateContainer {...args} ref={inputRef} isOverdue={isOverdue}><CalendarIcon /> {formatShortDate(value)}</DateContainer>
+								<DateContainer {...args} ref={inputRef} isOverdue={isOverdue} disabled={disabled}><CalendarIcon /> {formatShortDate(value)}</DateContainer>
 							) : (
 								<EmptyDateContainer {...args} ref={inputRef} disabled={disabled}><CalendarIcon />
 									{ disabled ? (

@@ -24,14 +24,17 @@ import { AddUserButton, AssigneesList, HiddenManyOfProperty, InlineAssignees } f
 
 export const TicketDetailsAssignees = ({ value, disabled, onBlur, ...props }: FormInputProps) => {
 	const [open, setOpen] = useState(false);
-	const handleOpen = () => setOpen(true);
+	const handleOpen = () => {
+		if (disabled) return;
+		setOpen(true);
+	};
 	const handleClose = () => {
 		setOpen(false);
 		onBlur();
 	};
 
 	return (
-		<InlineAssignees>
+		<InlineAssignees disabled={disabled}>
 			<HiddenManyOfProperty
 				open={open}
 				value={value}
@@ -41,21 +44,19 @@ export const TicketDetailsAssignees = ({ value, disabled, onBlur, ...props }: Fo
 				{...props}
 			/>
 			<AssigneesList onClick={handleOpen} values={value} maxItems={3} />
-			{!disabled && (
-				<Tooltip
-					title={formatMessage({
-						id: 'customTicket.topPanel.addAssignees.tooltip',
-						defaultMessage: 'Assign',
-					})}
-					arrow
-				>
-					<div>
-						<AddUserButton onClick={handleOpen}>
-							<AddUserIcon />
-						</AddUserButton>
-					</div>
-				</Tooltip>
-			)}
+			<Tooltip
+				title={formatMessage({
+					id: 'customTicket.topPanel.addAssignees.tooltip',
+					defaultMessage: 'Assign',
+				})}
+				arrow
+			>
+				<div>
+					<AddUserButton onClick={handleOpen}>
+						<AddUserIcon />
+					</AddUserButton>
+				</div>
+			</Tooltip>
 		</InlineAssignees>
 	);
 };

@@ -28,7 +28,6 @@ export const AssigneesListContainer = styled.div`
 
 	.MuiButtonBase-root {
 		z-index: 11;
-		cursor: pointer;
 		&:hover {
 			z-index: 12; /* avatar appears on top when hovered */
 		}
@@ -45,6 +44,9 @@ export const AssigneesListContainer = styled.div`
 			border-radius: 50%;
 			z-index: 10;
 		}
+	}
+	span:last-child .MuiButtonBase-root {
+		margin: 0;
 	}
 
 	&:hover .MuiButtonBase-root {

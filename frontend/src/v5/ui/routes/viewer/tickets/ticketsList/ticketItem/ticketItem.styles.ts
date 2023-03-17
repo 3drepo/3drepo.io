@@ -58,6 +58,9 @@ export const ChipList = styled.div`
 
 export const Assignees = styled(TicketListAssignees)`
 	margin-left: auto;
+	.MuiButtonBase-root {
+		cursor: pointer;
+	}
 `;
 
 export const IssuePropertiesRow = styled.div`
