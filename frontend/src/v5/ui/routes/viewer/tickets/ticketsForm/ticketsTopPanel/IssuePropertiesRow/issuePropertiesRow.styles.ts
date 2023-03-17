@@ -35,19 +35,21 @@ export const IssuePropertiesContainer = styled.div`
 
 export const PropertyColumn = styled.span`
 	width: fit-content;
-	min-width: 68px;
+	min-width: 57px;
+	.MuiChip-root {
+		padding: 0;
+	}
 `;
 
 export const PropertyTitle = styled.div`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
-	padding: 0 7px;
 `;
 
 export const ColumnSeparator = styled.div`
 	height: 100%;
 	border-left: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
-	margin: 0 0 0 7px;
+	margin: 0 10px;
 `;
 
 export const FloatRight = styled.span`
