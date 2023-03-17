@@ -118,7 +118,6 @@ export const UploadFileForm = ({
 		trigger,
 		getValues,
 		setValue,
-		watch,
 	} = formData;
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -204,7 +203,9 @@ export const UploadFileForm = ({
 		setAlreadyExistingTags(tags);
 	}, [JSON.stringify(revisionsByContainer), JSON.stringify(containersNamesInModal)]);
 
-	useEffect(() => { trigger(); }, [alreadyExistingTags]);
+	useEffect(() => {
+		trigger();
+	}, [alreadyExistingTags]);
 
 	useEffect(() => {
 		if (presetFile) addFilesToList([presetFile], presetContainer);
@@ -303,21 +304,18 @@ export const UploadFileForm = ({
 						{
 							sidebarOpen
 								? (
-									<span key={watch(`uploads.${origIndex}.containerName`)}>
-										<SidebarForm
-											value={getValues(`uploads.${origIndex}`)}
-											key={sortedList[selectedIndex].uploadId}
-											isSpm={extensionIsSpm(sortedList[origIndex].extension)}
-											onChange={(field: string, val: string | boolean) => {
-												// @ts-ignore
-												setValue(`uploads.${origIndex}.${field}`, val);
-												// @ts-ignore
-												trigger(`uploads.${origIndex}.${field}`);
-											}}
-										/>
-									</span>
-								)
-								: <></>
+									<SidebarForm
+										value={getValues(`uploads.${origIndex}`)}
+										key={sortedList[selectedIndex].uploadId}
+										isSpm={extensionIsSpm(sortedList[origIndex].extension)}
+										onChange={(field: string, val: string | boolean) => {
+											// @ts-ignore
+											setValue(`uploads.${origIndex}.${field}`, val);
+											// @ts-ignore
+											trigger(`uploads.${origIndex}.${field}`);
+										}}
+									/>
+								) : (<></>)
 						}
 					</Sidebar>
 				</UploadsContainer>
