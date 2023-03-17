@@ -25,12 +25,8 @@ export const StopBackgroundInteraction = styled(MuiBackdrop)`
 `;
 
 export const DueDateWithIconContainer = styled.div`
-	${({ theme }) => theme.typography.kicker};
-	letter-spacing: 0.3px;
-	font-weight: ${FONT_WEIGHT.BOLD};
-	font-size: 10px;
-
-	padding: 3px 0 3px 7px;
+	font-weight: ${FONT_WEIGHT.MEDIUM};
+	padding-left: 7px;
 	height: 20px;
 	box-sizing: border-box;
 	cursor: pointer;

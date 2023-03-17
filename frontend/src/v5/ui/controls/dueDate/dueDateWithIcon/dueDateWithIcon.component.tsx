@@ -42,7 +42,11 @@ export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: IDueDate
 								<DateContainer {...args} ref={inputRef} isOverdue={isOverdue}><CalendarIcon /> {formatShortDate(value)}</DateContainer>
 							) : (
 								<EmptyDateContainer {...args} ref={inputRef} disabled={disabled}><CalendarIcon />
-									<FormattedMessage id="dueDate.withIcon.unset" defaultMessage="Unset" />
+									{ disabled ? (
+										<FormattedMessage id="dueDate.withIcon.unset.enabled" defaultMessage="Date unset" />
+									) : (
+										<FormattedMessage id="dueDate.withIcon.unset.disabled" defaultMessage="Set date" />
+									)}
 								</EmptyDateContainer>
 							)}
 						</Tooltip>
