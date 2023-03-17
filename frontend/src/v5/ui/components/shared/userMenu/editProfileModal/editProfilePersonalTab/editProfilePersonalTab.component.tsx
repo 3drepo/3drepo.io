@@ -125,6 +125,18 @@ export const EditProfilePersonalTab = ({
 		<>
 			<TabContent>
 				<EditProfileAvatar user={user} />
+				{submitWasSuccessful && (
+					<SuccessMessage>
+						<FormattedMessage
+							id="editProfile.form.updateProfileSuccess"
+							defaultMessage="Your profile has been changed successfully."
+						/>
+					</SuccessMessage>
+				)}
+				<UnhandledError
+					error={unexpectedError}
+					expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]}
+				/>
 				<FormTextField
 					name="firstName"
 					control={control}
@@ -182,18 +194,6 @@ export const EditProfilePersonalTab = ({
 						</MenuItem>
 					))}
 				</FormSelect>
-				{submitWasSuccessful && (
-					<SuccessMessage>
-						<FormattedMessage
-							id="editProfile.form.updateProfileSuccess"
-							defaultMessage="Your profile has been changed successfully."
-						/>
-					</SuccessMessage>
-				)}
-				<UnhandledError
-					error={unexpectedError}
-					expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]}
-				/>
 			</TabContent>
 			<FormModalActions>
 				<ModalCancelButton onClick={onClickClose} />
