@@ -23,7 +23,6 @@ interface ISidebar {
 	onClick: () => void;
 	className?: string;
 	children: JSX.Element;
-	hidden?: boolean;
 }
 
 export const Sidebar = ({
