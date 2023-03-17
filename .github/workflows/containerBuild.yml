@@ -21,7 +21,22 @@ on:
       - 'staging'
 
 jobs:
+  get-details:
+    name: Get PR and Issue Details
+    runs-on: ubuntu-latest
+    outputs:
+      issue-number: ${{ steps.commitMsgParser.outputs.issue-number }}
+      issue-content-id: ${{ steps.commitMsgParser.outputs.issue-content-id }}
+    steps:
+      - name: Extract Issue Number from PR
+        uses: 3drepo/extract-pr-information@v1
+        with:
+          pr: ${{ github.event.pull_request.number }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        id: commitMsgParser
+
   build-images:
+    needs: [ get-details ]
     env:
       REGISTRY_LOGIN_SERVER: ${{ secrets.REGISTRY_LOGIN_SERVER }}
       REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
@@ -36,8 +51,8 @@ jobs:
       cancel-in-progress: true
     permissions:
       contents: read  # Read the repo contents.
-      id-token: write # Produce identity token for keyless signing.
-    
+      # id-token: write # Produce identity token for keyless signing. #might not need this, testing.
+     
     runs-on: ubuntu-latest
 
     strategy:
@@ -71,10 +86,6 @@ jobs:
         login-server: 3drepo.azurecr.io
         username: ${{  env.REGISTRY_USERNAME }}
         password: ${{  env.REGISTRY_PASSWORD }}
-      # env:
-      #   REGISTRY_LOGIN_SERVER: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-      #   REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-      #   REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
 
     # Build and push with Docker.
     - uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18 # v2.1.0
@@ -95,6 +106,7 @@ jobs:
           "3drepo.azurecr.io/3drepo.io"
         # Docker tags based on the following events/attributes
         tags: |
+          type=raw,value=ISSUE_${{ needs.get-details.outputs.issue-number }}
           type=schedule
           type=ref,event=branch
           type=ref,event=pr
@@ -119,3 +131,16 @@ jobs:
         cache-to: type=registry,ref=3drepo.azurecr.io/3drepo.io:buildcache,mode=max
 
 
+  deploy-branch:
+    name: Call Azure Destroy Pipeline
+    runs-on: ubuntu-latest
+    needs: [ get-details, build-images]
+    steps:
+    - name: Azure Pipelines Action
+      if: needs.get-details.outputs.issue-number
+      uses: Azure/pipelines@v1.2
+      with:
+        azure-devops-project-url: https://dev.azure.com/3drepo/3drepo.io
+        azure-pipeline-name: 'deploy'
+        azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
+        azure-pipeline-variables:  '{"branchName": "issue-${{ needs.get-details.outputs.issue-number }}","tag":"${{ github.sha }}"}'
