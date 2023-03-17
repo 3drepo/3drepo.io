@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { discardSlash } from '@/v5/services/routing/routing';
 import { useRouteMatch, Switch, Redirect } from 'react-router-dom';
 import { formatMessage } from '@/v5/services/intl';
 import { Route } from '@/v5/services/routing/route.component';
 import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
+import { discardSlash } from '@/v5/helpers/url.helper';
 import { ProjectsList } from '../projects/projectsList.component';
 import { TeamspaceSettings } from '../settings/teamspaceSettings.component';
 import { UsersList } from '../users/usersList.component';
