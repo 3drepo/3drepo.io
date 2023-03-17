@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
@@ -39,7 +39,7 @@ export const SidebarForm = ({
 	onChange,
 	isSpm,
 }: ISidebarForm): JSX.Element => {
-	const { control, formState: { errors }, getValues, setValue, trigger } = useForm<UploadItemFields>({
+	const { control, formState: { errors }, getValues, setValue } = useForm<UploadItemFields>({
 		defaultValues: value,
 		mode: 'onChange',
 		resolver: yupResolver(SidebarSchema),
@@ -67,8 +67,6 @@ export const SidebarForm = ({
 	}, []);
 
 	const updateValue = (name) => onChange(name, getValues(name));
-
-	useEffect(() => { trigger(); }, []);
 
 	return (
 		<div onChange={(e: any) => updateValue(e.target.name)}>
