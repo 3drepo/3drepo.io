@@ -132,7 +132,7 @@ jobs:
 
 
   deploy-branch:
-    name: Call Azure Destroy Pipeline
+    name: Call Azure Deploy Pipeline
     runs-on: ubuntu-latest
     needs: [ get-details, build-images]
     steps:
