@@ -32,8 +32,8 @@ export const Viewer = () => {
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
 
 	useEffect(() => {
-		ViewerActionsDispatchers.fetchData(teamspace, containerOrFederation, project, revision);
-	}, [teamspace, containerOrFederation, project, revision]);
+		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
+	}, [teamspace, project, containerOrFederation]);
 
 	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
 
