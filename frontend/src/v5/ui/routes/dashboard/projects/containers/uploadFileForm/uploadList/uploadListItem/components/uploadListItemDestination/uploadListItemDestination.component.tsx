@@ -16,7 +16,7 @@
  */
 
 import { useState } from 'react';
-import { IContainer } from '@/v5/store/containers/containers.types';
+import { IContainer, UploadItemFields } from '@/v5/store/containers/containers.types';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useFormContext } from 'react-hook-form';
 import { canUploadToBackend, prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
@@ -49,10 +49,11 @@ const EMPTY_OPTION = prepareSingleContainerData({
 	role: Role.NONE,
 	isFavourite: false,
 });
+
 const getFilteredContainersOptions = createFilterOptions<IContainer>({ trim: true });
 
 interface IUploadListItemDestination {
-	onPropertyChange: (name, value) => void;
+	revisionPrefix: string;
 	disabled?: boolean;
 	className?: string;
 	defaultValue: string;
@@ -60,14 +61,14 @@ interface IUploadListItemDestination {
 export const UploadListItemDestination = ({
 	disabled = false,
 	className,
-	onPropertyChange,
+	revisionPrefix,
 	defaultValue,
 }: IUploadListItemDestination): JSX.Element => {
 	const [selectedContainer, setSelectedContainer] = useState<IContainer>({ ...EMPTY_OPTION, name: defaultValue });
 	const [disableClearable, setDisableClearable] = useState(!defaultValue);
 	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>('');
 	const [error, setError] = useState('');
-	const { getValues } = useFormContext();
+	const { getValues, setValue, trigger } = useFormContext();
 
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -90,17 +91,14 @@ export const UploadListItemDestination = ({
 		...federationsNames,
 	];
 
-	const onDestinationChange = (value: IContainer): void => {
-		const conversion = {
-			containerId: value._id,
-			containerName: value.name,
-			containerCode: value.code,
-			containerType: value.type || 'Uncategorised',
-			containerUnit: value.unit || 'mm',
-			containerDesc: value.desc,
-		};
-		Object.entries(conversion).forEach(([key, value]) => onPropertyChange(key, value));
-	};
+	const getValidContainer = (baseContainer: IContainer): Partial<UploadItemFields> => ({
+		containerId: baseContainer._id,
+		containerName: baseContainer.name,
+		containerCode: baseContainer.code,
+		containerType: baseContainer.type || 'Uncategorised',
+		containerUnit: baseContainer.unit || 'mm',
+		containerDesc: baseContainer.desc,
+	});
 
 	const testName = (containerName) => {
 		try {
@@ -114,7 +112,7 @@ export const UploadListItemDestination = ({
 		}
 	};
 
-	const updateValue = (containerName) => { 
+	const updateDestination = (containerName: string) => { 
 		const container = containers.find(({ name }) => name === containerName);
 		setDisableClearable(!containerName);
 		if (!containerName) {
@@ -129,7 +127,11 @@ export const UploadListItemDestination = ({
 		};
 
 		setSelectedContainer(newValueOrEmptyOption);
-		onDestinationChange(newValueOrEmptyOption);
+		Object.entries(getValidContainer(newValueOrEmptyOption)).forEach(([key, value]) => {
+			const name = `${revisionPrefix}.${key}`;
+			setValue(name, value);
+			trigger(name);
+		});
 
 		if (container) {	
 			RevisionsActionsDispatchers.fetch(
@@ -140,12 +142,12 @@ export const UploadListItemDestination = ({
 		}
 	};
 
-	const onInputChange = (_, newValue: string, reason: 'clear' | 'reset' | 'input') => {
+	const handleInputChange = (_, newValue: string, reason: 'clear' | 'reset' | 'input') => {
 		const containerName = newValue?.trim();
 		testName(containerName);
 		if (reason === 'input' || reason === 'reset' && !newValue) return;
 
-		updateValue(containerName);
+		updateDestination(containerName);
 	};
 
 	const getFilterOptions = (options: IContainer[], params) => {
@@ -192,7 +194,7 @@ export const UploadListItemDestination = ({
 			if (isProjectAdmin && !error && !containers.map(({ name }) => name).includes(trimmedName)) {
 				const onClick = (...args) => {
 					optionProps.onClick?.(...args);
-					updateValue(trimmedName);
+					updateDestination(trimmedName);
 				};
 				return (<NewContainer containerName={trimmedName} {...optionProps} onClick={onClick} />);
 			}
@@ -221,7 +223,7 @@ export const UploadListItemDestination = ({
 			getOptionLabel={({ name }: IContainer) => name}
 			ListboxComponent={OptionsBox}
 			noOptionsText={isProjectAdmin ? NO_OPTIONS_TEXT_ADMIN : NO_OPTIONS_TEXT_NON_ADMIN}
-			onInputChange={onInputChange}
+			onInputChange={handleInputChange}
 			options={containers}
 			renderOption={getRenderOption}
 			renderInput={({ InputProps, ...params }) => (

@@ -97,16 +97,19 @@ export const UploadFileForm = ({
 }: IUploadFileForm): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
+	const revisionsByContainer = RevisionsHooksSelectors.selectRevisionsByContainer();
 	const allUploadsComplete = RevisionsHooksSelectors.selectUploadIsComplete();
 	const presetContainer = ContainersHooksSelectors.selectContainerById(presetContainerId);
 
 	const [selectedIndex, setSelectedIndex] = useState<number>(null);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
+	const [alreadyExistingTags, setAlreadyExistingTags] = useState({});
 	const [fileError, setFileError] = useState(false);
 
-	const methods = useForm<UploadFieldArray>({
-		mode: 'onBlur',
+	const formData = useForm<UploadFieldArray>({
+		mode: 'onChange',
 		resolver: yupResolver(UploadsSchema),
+		context: { alreadyExistingTags, alreadyExistingNames: [] },
 	});
 	const {
 		control,
@@ -116,7 +119,7 @@ export const UploadFileForm = ({
 		getValues,
 		setValue,
 		watch,
-	} = methods;
+	} = formData;
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'uploads',
@@ -163,8 +166,8 @@ export const UploadFileForm = ({
 		append(filesToAppend);
 	};
 
+	const containersNamesInModal = getValues('uploads')?.map(({ containerName }) => containerName);
 	const sidebarOpen = !isNull(selectedIndex) && !isUploading;
-
 	const indexMap = new Map(fields.map(({ uploadId }, index) => [uploadId, index]));
 	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
 	const origIndex = sidebarOpen && getOriginalIndex(selectedIndex);
@@ -194,12 +197,22 @@ export const UploadFileForm = ({
 	}, [fields.length]);
 
 	useEffect(() => {
+		const tags = {};
+		getValues('uploads').forEach(({ containerId }, index) => {
+			tags[`uploads[${index}].revisionTag`] = revisionsByContainer?.[containerId] || [];
+		});
+		setAlreadyExistingTags(tags);
+	}, [JSON.stringify(revisionsByContainer), JSON.stringify(containersNamesInModal)]);
+
+	useEffect(() => { trigger(); }, [alreadyExistingTags]);
+
+	useEffect(() => {
 		if (presetFile) addFilesToList([presetFile], presetContainer);
 		FederationsActionsDispatchers.fetchFederations(teamspace, project);
 	}, []);
 
 	return (
-		<FormProvider {...methods}>
+		<FormProvider {...formData}>
 			<Modal
 				open={open}
 				onSubmit={handleSubmit(onSubmit)}

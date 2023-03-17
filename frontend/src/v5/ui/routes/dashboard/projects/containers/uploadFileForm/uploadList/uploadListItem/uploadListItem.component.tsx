@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { useFormContext } from 'react-hook-form';
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import filesize from 'filesize';
-import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
+import { get } from 'lodash';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
@@ -40,7 +39,6 @@ type IUploadListItem = {
 	isUploading: boolean;
 	onClickEdit: () => void;
 	onClickDelete: () => void;
-	onChange: (name, val) => void;
 };
 
 export const UploadListItem = ({
@@ -51,37 +49,11 @@ export const UploadListItem = ({
 	onClickDelete,
 	isSelected,
 	isUploading,
-	onChange,
 }: IUploadListItem): JSX.Element => {
-	const {
-		formState: { errors },
-		getValues,
-		setValue,
-		trigger,
-		watch,
-		setError,
-	} = useFormContext();
+	const { formState: { errors: formErrors } } = useFormContext();
+	const errors = get(formErrors, revisionPrefix);
 
 	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(item.uploadId);
-
-	const updateValue = (name) => onChange(name, watch(name));
-	const onPropertyChange = (name, value) => {
-		setValue(name, value);
-		updateValue(name);
-	};
-
-	useEffect(() => {
-		if (getValues(`${revisionPrefix}.containerName`)) trigger(`${revisionPrefix}.containerName`);
-	}, [watch(`${revisionPrefix}.containerName`)]);
-
-	useEffect(() => {
-		trigger(`${revisionPrefix}.revisionTag`);
-		updateValue(`${revisionPrefix}.revisionTag`);
-		const largeFilesizeMessage = filesizeTooLarge(item.file);
-		if (largeFilesizeMessage) {
-			setError(`${revisionPrefix}.file`, { type: 'custom', message: largeFilesizeMessage });
-		}
-	}, [watch(`${revisionPrefix}.revisionTag`)]);
 
 	return (
 		<UploadListItemRow
@@ -93,21 +65,21 @@ export const UploadListItem = ({
 				name={item.file.name}
 				filesize={filesize(item.file.size)}
 				isSelected={isSelected}
-				errorMessage={errors.file?.message}
+				errorMessage={errors?.file?.message}
 			/>
 			<Destination
+				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
 				defaultValue={defaultValues.containerName}
-				onPropertyChange={onPropertyChange}
 			/>
 			<RevisionTag
-				name={`${revisionPrefix}.revisionTag`}
+				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
 				isSelected={isSelected}
-				errorMessage={errors.revisionTag?.message}
+				errorMessage={errors?.revisionTag?.message}
 			/>
 			{isUploading
-				? <UploadProgress uploadId={item.uploadId} errorMessage={uploadErrorMessage} />
+				? (<UploadProgress uploadId={item.uploadId} errorMessage={uploadErrorMessage} />)
 				: (
 					<>
 						<Button variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit}>

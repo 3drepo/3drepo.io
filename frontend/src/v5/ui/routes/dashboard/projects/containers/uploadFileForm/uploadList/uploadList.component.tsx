@@ -37,15 +37,15 @@ export const UploadList = ({
 	onClickDelete,
 	getOriginalIndex,
 }: IUploadList): JSX.Element => {
-	const { trigger, setValue, watch } = useFormContext();
+	const { getValues } = useFormContext();
 	return (
 		<Container>
 			{
 				values.map((item, index) => {
 					const revisionPrefix = `uploads.${getOriginalIndex(index)}`;
 					const defaultInputValues = {
-						containerName: watch(`${revisionPrefix}.containerName`) || item.containerName,
-						revisionTag: watch(`${revisionPrefix}.revisionTag`) || item.revisionTag,
+						containerName: getValues(`${revisionPrefix}.containerName`) || item.containerName,
+						revisionTag: getValues(`${revisionPrefix}.revisionTag`) || item.revisionTag,
 					};
 					return (
 						<UploadListItem
@@ -55,10 +55,6 @@ export const UploadList = ({
 							defaultValues={defaultInputValues}
 							onClickEdit={() => onClickEdit(index)}
 							onClickDelete={() => onClickDelete(index)}
-							onChange={(field, val) => {
-								setValue(`${revisionPrefix}.${field}`, val);
-								trigger(`${revisionPrefix}.${field}`);
-							}}
 							isSelected={index === selectedIndex}
 							isUploading={isUploading}
 						/>

@@ -100,6 +100,18 @@ export const revisionTag = Yup.string()
 			id: 'validation.revisions.tag.error.required',
 			defaultMessage: 'Revision Name is a required field',
 		}),
+	)
+	.test(
+		'alreadyExistingTags',
+		formatMessage({
+			id: 'validation.model.tag.alreadyExisting',
+			defaultMessage: 'This tag is already used within this container',
+		}),
+		(tagValue, testContext) => (
+			!(testContext.options.context.alreadyExistingTags[testContext.path] || [])
+				.map(({ tag }) => tag)
+				.includes(tagValue)
+		),
 	);
 
 export const revisionDesc = Yup.lazy((value) => (
