@@ -17,7 +17,7 @@
 
 import { useFormContext } from 'react-hook-form';
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
-import { UploadListItem } from './uploadListItem';
+import { UploadListItem } from './uploadListItem/uploadListItem.component';
 import { Container } from './uploadList.styles';
 
 type IUploadList = {

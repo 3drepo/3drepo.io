@@ -41,8 +41,8 @@ import {
 	ContainersHooksSelectors,
 } from '@/v5/services/selectorsHooks';
 import { getSupportedFileExtensions } from '@controls/fileUploader/uploadFile';
-import { UploadList } from './uploadList';
-import { SidebarForm } from './sidebarForm';
+import { UploadList } from './uploadList/uploadList.component';
+import { SidebarForm } from './sidebarForm/sidebarForm.component';
 import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
 
 const DEFAULT_SORT_CONFIG = {
@@ -81,7 +81,6 @@ const uploadModalLabels = ({ isUploading, fileCount }: UploadModalLabelTypes) =>
 			defaultMessage: '{fileCount, plural, one {Upload file} other {Upload files}}',
 		}, { fileCount }),
 	});
-
 
 type IUploadFileForm = {
 	presetContainerId?: string;

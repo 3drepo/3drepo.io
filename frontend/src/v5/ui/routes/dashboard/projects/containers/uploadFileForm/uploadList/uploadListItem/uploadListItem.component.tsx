@@ -26,7 +26,7 @@ import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uplo
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
 import { Button, Destination, RevisionTag } from './uploadListItem.styles';
-import { UploadProgress } from './uploadProgress';
+import { UploadProgress } from './uploadProgress/uploadProgress.component';
 
 type IUploadListItem = {
 	item: UploadItemFields;
