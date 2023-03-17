@@ -58,17 +58,15 @@ export const EditProfilePersonalTab = ({
 }: EditProfilePersonalTabProps) => {
 	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
-	const [canSubmit, setCanSubmit] = useState(false);
 	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
 	const {
 		getValues,
 		trigger,
 		handleSubmit,
 		reset,
-		watch,
 		setError: setFormError,
 		control,
-		formState: { errors: formErrors, isValid: formIsValid },
+		formState: { errors: formErrors },
 	} = useFormContext();
 
 	const getSubmittableValues = (): IUpdatePersonalInputs => {
@@ -81,9 +79,9 @@ export const EditProfilePersonalTab = ({
 	};
 
 	const onSubmissionSuccess = () => {
-		setSubmitWasSuccessful(true);
 		const { avatarFile, ...values } = getSubmittableValues();
 		reset(values);
+		setSubmitWasSuccessful(true);
 	};
 
 	const onSubmissionError = (apiError) => {
@@ -113,13 +111,15 @@ export const EditProfilePersonalTab = ({
 	};
 
 	const fieldsAreDirty = !isMatch(user, getSubmittableValues());
-
-	// enable submission only if form is valid and fields are dirty
-	useEffect(() => {
-		setCanSubmit(formIsValid && isEmpty(formErrors) && fieldsAreDirty);
-	}, [JSON.stringify(watch()), user, formIsValid, JSON.stringify(formErrors)]);
+	const canSubmit = isEmpty(formErrors) && fieldsAreDirty;
 
 	useEffect(() => setIsSubmitting(formIsUploading), [formIsUploading]);
+
+	useEffect(() => {
+		if (submitWasSuccessful) {
+			setSubmitWasSuccessful(false);
+		}
+	}, [JSON.stringify(getValues())]);
 
 	return (
 		<>
