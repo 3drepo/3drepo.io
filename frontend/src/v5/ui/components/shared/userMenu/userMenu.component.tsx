@@ -49,7 +49,7 @@ type UserMenuProps = {
 export const UserMenu = ({ user } : UserMenuProps) => {
 	const signOut = () => AuthActionsDispatchers.logout();
 
-	const onClickEditProfile = () => DialogsActionsDispatchers.open(EditProfileModal, { user });
+	const onClickEditProfile = () => DialogsActionsDispatchers.open(EditProfileModal);
 
 	const visualSettings = useSelector(selectSettings);
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser().username;

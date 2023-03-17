@@ -94,7 +94,7 @@ export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
 						</AvatarButton>
 					)}
 				/>
-				{error && <ErrorMessage>{error.message}</ErrorMessage>}
+				{error && <ErrorMessage title={error.message} />}
 			</UserInfo>
 		</Header>
 	);
