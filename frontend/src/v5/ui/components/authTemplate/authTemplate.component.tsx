@@ -22,7 +22,7 @@ import { LoginLink, Background, Footer, Logo, BackgroundOverlay } from './authTe
 
 interface IAuthTemplate {
 	footer?: JSX.Element;
-	children: JSX.Element | JSX.Element[];
+	children?: JSX.Element | JSX.Element[];
 }
 
 export const AuthTemplate = ({ footer, children }: IAuthTemplate): JSX.Element => {

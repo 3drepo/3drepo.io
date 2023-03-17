@@ -24,6 +24,7 @@ const RTM = require(`${src}/handler/realTimeMsging`);
 
 jest.mock('../../../../../src/v5/services/sessions', () => ({
 	session: Promise.resolve({ middleware: jest.fn() }),
+	getSessions: jest.fn(),
 }));
 const SessionService = require(`${src}/services/sessions`);
 
@@ -80,25 +81,26 @@ const testOnNewMsg = () => {
 			[[, subscribeCallBack]] = QueueService.listenToExchange.mock.calls;
 		});
 
-		test('Should fail gracefully if there is an unforseen error on processing the message', () => {
+		test('Should fail gracefully if there is an unforseen error on processing the message', async () => {
 			// an undefined data packet should cause a JSON parse error.
-			expect(subscribeCallBack).not.toThrow();
+			await expect(subscribeCallBack()).resolves.toBeUndefined();
 		});
 
-		test('Should fail gracefully if the message format is not anticipated', () => {
-			expect(subscribeCallBack({
+		test('Should fail gracefully if the message format is not anticipated', async () => {
+			await expect(subscribeCallBack({
 				content: Buffer.from(JSON.stringify({ [generateRandomString()]: generateRandomString(),
-				})) })).toBeUndefined();
+				})) })).resolves.toBeUndefined();
 		});
 
 		describe('Direct message', () => {
-			test('should process and broadcast it to the sessions channels', () => {
+			test('should process and broadcast it to the sessions channels', async () => {
 				const recipients = [generateRandomString(), generateRandomString(), generateRandomString()];
 				const event = generateRandomString();
 				const data = generateRandomString();
 				const message = { recipients, event, data };
 
-				expect(subscribeCallBack({ content: Buffer.from(JSON.stringify(message)) })).toBeUndefined();
+				await expect(subscribeCallBack({ content: Buffer.from(JSON.stringify(message)) }))
+					.resolves.toBeUndefined();
 
 				expect(broadcastFn).toHaveBeenCalledTimes(recipients.length);
 				for (let i = 0; i < recipients.length; ++i) {
@@ -109,14 +111,16 @@ const testOnNewMsg = () => {
 
 		describe('Internal message', () => {
 			describe(`${chatEvents.LOGGED_IN}`, () => {
-				test('Should try to update session on the socket if it is within its management', () => {
+				test('Should try to update session on the socket if it is within its management', async () => {
 					const socketId = generateRandomString();
 					const sessionID = generateRandomString();
 					SocketsManager.getSocketById.mockReturnValueOnce(true);
 
+					SessionService.getSessions.mockReturnValueOnce([{}]);
+
 					const data = { sessionID, socketId };
 
-					subscribeCallBack({
+					await subscribeCallBack({
 						content: Buffer.from(
 							JSON.stringify({ internal: true, event: chatEvents.LOGGED_IN, data }),
 						),
@@ -124,15 +128,39 @@ const testOnNewMsg = () => {
 
 					expect(SocketsManager.getSocketById).toHaveBeenCalledTimes(1);
 					expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
+
+					expect(SessionService.getSessions).toHaveBeenCalledTimes(1);
+					expect(SessionService.getSessions).toHaveBeenCalledWith({ _id: sessionID });
 				});
 
-				test('Should ignore the event if the socket is not within its management', () => {
+				test('Should try to update session on the socket but fails gracefully if session was not found', async () => {
+					const socketId = generateRandomString();
+					const sessionID = generateRandomString();
+					SocketsManager.getSocketById.mockReturnValueOnce(true);
+					SessionService.getSessions.mockReturnValueOnce([]);
+
+					const data = { sessionID, socketId };
+
+					await subscribeCallBack({
+						content: Buffer.from(
+							JSON.stringify({ internal: true, event: chatEvents.LOGGED_IN, data }),
+						),
+					});
+
+					expect(SocketsManager.getSocketById).toHaveBeenCalledTimes(1);
+					expect(SocketsManager.getSocketById).toHaveBeenCalledWith(socketId);
+
+					expect(SessionService.getSessions).toHaveBeenCalledTimes(1);
+					expect(SessionService.getSessions).toHaveBeenCalledWith({ _id: sessionID });
+				});
+
+				test('Should ignore the event if the socket is not within its management', async () => {
 					const socketId = generateRandomString();
 					const sessionID = generateRandomString();
 					SocketsManager.getSocketById.mockReturnValueOnce(false);
 					const data = { sessionID, socketId };
 
-					subscribeCallBack({
+					await subscribeCallBack({
 						content: Buffer.from(
 							JSON.stringify({ internal: true, event: chatEvents.LOGGED_IN, data }),
 						),
@@ -146,11 +174,11 @@ const testOnNewMsg = () => {
 			});
 
 			describe(`${chatEvents.LOGGED_OUT}`, () => {
-				test('Should try call socketManager to reset the sockets associated with the sessions', () => {
+				test('Should try call socketManager to reset the sockets associated with the sessions', async () => {
 					const sessionIds = [generateRandomString(), generateRandomString()];
 					const data = { sessionIds };
 
-					subscribeCallBack({
+					await subscribeCallBack({
 						content: Buffer.from(
 							JSON.stringify({ internal: true, event: chatEvents.LOGGED_OUT, data }),
 						),
@@ -161,10 +189,10 @@ const testOnNewMsg = () => {
 				});
 			});
 
-			test('Should ignore the event and not crash if it is not recognised', () => {
+			test('Should ignore the event and not crash if it is not recognised', async () => {
 				const data = { [generateRandomString()]: generateRandomString() };
 
-				subscribeCallBack({
+				await subscribeCallBack({
 					content: Buffer.from(
 						JSON.stringify({ internal: true, event: generateRandomString(), data }),
 					),
@@ -173,7 +201,7 @@ const testOnNewMsg = () => {
 		});
 
 		describe('Channel Broadcast', () => {
-			test('should process and broadcast on behalf of the sender', () => {
+			test('should process and broadcast on behalf of the sender', async () => {
 				const event = generateRandomString();
 				const data = generateRandomString();
 				const channel = generateRandomString();
@@ -182,13 +210,14 @@ const testOnNewMsg = () => {
 
 				SocketsManager.getSocketById.mockReturnValueOnce(undefined);
 
-				expect(subscribeCallBack({ content: Buffer.from(JSON.stringify(message)) })).toBeUndefined();
+				await expect(subscribeCallBack({ content: Buffer.from(JSON.stringify(message)) }))
+					.resolves.toBeUndefined();
 
 				expect(broadcastFn).toHaveBeenCalledTimes(1);
 				expect(broadcastFn).toHaveBeenCalledWith(channel, event, data);
 			});
 
-			test('should process and send using sender\'s socket if found', () => {
+			test('should process and send using sender\'s socket if found', async () => {
 				const event = generateRandomString();
 				const data = generateRandomString();
 				const channel = generateRandomString();
@@ -198,7 +227,8 @@ const testOnNewMsg = () => {
 				const socket = { broadcast: jest.fn() };
 				SocketsManager.getSocketById.mockReturnValueOnce(socket);
 
-				expect(subscribeCallBack({ content: Buffer.from(JSON.stringify(message)) })).toBeUndefined();
+				await expect(subscribeCallBack({ content: Buffer.from(JSON.stringify(message)) }))
+					.resolves.toBeUndefined();
 
 				expect(broadcastFn).not.toHaveBeenCalled();
 
