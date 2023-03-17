@@ -40,7 +40,7 @@ export const TicketDetailsAssignees = ({ value, disabled, onBlur, ...props }: Fo
 				onOpen={handleOpen}
 				{...props}
 			/>
-			<AssigneesList values={value} maxItems={3} />
+			<AssigneesList onClick={handleOpen} values={value} maxItems={3} />
 			{!disabled && (
 				<Tooltip
 					title={formatMessage({

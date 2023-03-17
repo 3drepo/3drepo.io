@@ -18,8 +18,8 @@
 import styled from 'styled-components';
 import { ManyOfProperty } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/manyOfProperty.component';
 import { CircleButton } from '@controls/circleButton';
-import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 import { AssigneesList as AssigneesListBase } from '../assigneesList/assigneesList.component';
+import { AssigneesListContainer } from '../assigneesList/assigneesList.styles';
 
 export const HiddenManyOfProperty = styled(ManyOfProperty)`
 	height: 0;
@@ -34,7 +34,6 @@ export const AssigneesList = styled(AssigneesListBase)`
 	.MuiButtonBase-root {
 		height: unset;
 		width: unset;
-		cursor: default;
 		.MuiAvatar-root {
 			height: 28px;
 			width: 28px;
@@ -43,13 +42,13 @@ export const AssigneesList = styled(AssigneesListBase)`
 `;
 
 export const AddUserButton = styled(CircleButton)`
-	height: 24px;
-	width: 24px;
+	height: 23.2px;
+	width: 23.2px;
 	min-width: unset;
 	border: 1px dashed ${({ theme }) => theme.palette.base.light};
 	padding: 5px;
 	color: ${({ theme }) => theme.palette.base.main};
-	margin: 2px 0 0 10px;
+	margin: 0 0 0 10px;
 `;
 
 export const InlineAssignees = styled.div`
@@ -58,7 +57,8 @@ export const InlineAssignees = styled.div`
 	user-select: none;
 	position: relative;
 
-	${({ theme }) => theme.typography.kicker};
-	letter-spacing: 0.3px;
-	font-weight: ${FONT_WEIGHT.MEDIUM};
+	${AssigneesListContainer} {
+		font-size: 0;
+		letter-spacing: 0;
+	}
 `;
