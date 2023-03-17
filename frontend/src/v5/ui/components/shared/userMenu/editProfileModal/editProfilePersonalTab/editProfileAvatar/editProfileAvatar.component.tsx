@@ -71,7 +71,7 @@ export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
 
 	useEffect(() => {
 		setFileSizeError('');
-	}, [JSON.stringify(getValues())])
+	}, [JSON.stringify(getValues())]);
 
 	return (
 		<Header>

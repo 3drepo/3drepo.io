@@ -66,7 +66,7 @@ export const EditProfilePersonalTab = ({
 		reset,
 		setError: setFormError,
 		control,
-		formState: { errors: formErrors },
+		formState: { errors: formErrors, isDirty, touchedFields },
 	} = useFormContext();
 
 	const getSubmittableValues = (): IUpdatePersonalInputs => {
@@ -119,7 +119,7 @@ export const EditProfilePersonalTab = ({
 		if (submitWasSuccessful) {
 			setSubmitWasSuccessful(false);
 		}
-	}, [JSON.stringify(getValues())]);
+	}, [JSON.stringify(isDirty), touchedFields]);
 
 	return (
 		<>
