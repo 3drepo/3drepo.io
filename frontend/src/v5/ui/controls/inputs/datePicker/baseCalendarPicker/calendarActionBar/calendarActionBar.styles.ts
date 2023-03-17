@@ -23,8 +23,8 @@ export const ClearDateAction = styled(Typography).attrs({
 })`
 	color: ${({ theme }) => theme.palette.error.main};
 	position: absolute;
-    right: 22px;
-    bottom: 18px;
+	right: 22px;
+	bottom: 18px;
 	font-weight: 500;
 	cursor: pointer;
 `;
