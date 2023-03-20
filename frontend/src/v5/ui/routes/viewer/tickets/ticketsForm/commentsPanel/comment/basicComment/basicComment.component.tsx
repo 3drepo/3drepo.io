@@ -20,7 +20,7 @@ import { editedCommentMessage } from '@/v5/store/tickets/comments/ticketComments
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { CommentImages } from '../commentImages/commentImages.component';
-import { CommentMarkDown } from '../commentMarkDown/commentMarkDown';
+import { CommentMarkDown } from '../commentMarkDown/commentMarkDown.component';
 import { CommentContainer, CommentAge, CommentAuthor, EditedCommentLabel, SingleImage, CommentImagesContainer } from './basicComment.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
 
