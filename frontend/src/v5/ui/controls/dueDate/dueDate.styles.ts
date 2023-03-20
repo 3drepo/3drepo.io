@@ -33,5 +33,5 @@ export const DueDateWithIconContainer = styled.div`
 export const CalendarIcon = styled(CalendarIconBase)`
 	height: 11px;
 	width: 11px;
-	margin-top: -1px;
+	margin: -1px 2px 0 0;
 `;
