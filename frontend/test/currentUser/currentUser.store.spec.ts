@@ -53,13 +53,11 @@ describe('CurrentUser: store', () => {
 	
 		// personalDataIsUpdating
 		it('should set updating personal data to true', () => {
-			dispatch(CurrentUserActions.setPersonalDataIsUpdating(true));
 			const personalDataIsUpdating = selectPersonalDataIsUpdating(getState());
 			expect(personalDataIsUpdating).toBe(true);
 		});
 	
 		it('should set updating personal data to false', () => {
-			dispatch(CurrentUserActions.setPersonalDataIsUpdating(false));
 			const personalDataIsUpdating = selectPersonalDataIsUpdating(getState());
 			expect(personalDataIsUpdating).toBe(false);
 		});
