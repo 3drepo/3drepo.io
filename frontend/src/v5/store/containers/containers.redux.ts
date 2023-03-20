@@ -26,6 +26,7 @@ import { Action } from 'redux';
 import { ContainerStats, IContainer, NewContainer, UploadStatuses } from './containers.types';
 import { TeamspaceProjectAndContainerId, ProjectAndContainerId, TeamspaceAndProjectId, ProjectId } from '../store.types';
 import { IRevision } from '../revisions/revisions.types';
+import { Role } from '../currentUser/currentUser.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
 	addFavourite: ['teamspace', 'projectId', 'containerId'],
@@ -119,6 +120,7 @@ export const createContainerSuccess = (state, {
 		isFavourite: false,
 		revisionsCount: 0,
 		status: UploadStatuses.OK,
+		role: Role.ADMIN,
 	});
 };
 
