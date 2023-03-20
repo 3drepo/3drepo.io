@@ -37,7 +37,6 @@ jobs:
         id: commitMsgParser
 
       - uses: chrnorm/deployment-action@v2
-        needs: [ get-details ]
         name: Create GitHub deployment
         id: githubdeployment
         with:
