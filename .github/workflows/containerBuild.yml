@@ -43,7 +43,7 @@ jobs:
         with:
           token: '${{ github.token }}'
           environment-url: https://issue-${{ steps.commitMsgParser.outputs.issue-number }}.staging.dev.3drepo.io
-          environment: staging
+          environment: issue-${{ steps.commitMsgParser.outputs.issue-number }}
 
   build-images:
     needs: [ get-details ]
