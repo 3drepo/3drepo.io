@@ -108,7 +108,7 @@ export const EditProfilePersonalTab = ({
 				() => onSubmissionSuccess(resolve),
 				(apiError) => onSubmissionError(apiError, reject),
 			);
-		})
+		});
 	};
 
 	const fieldsAreDirty = !isMatch(user, getSubmittableValues());

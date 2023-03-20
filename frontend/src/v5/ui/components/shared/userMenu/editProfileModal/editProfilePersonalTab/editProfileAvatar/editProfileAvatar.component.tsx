@@ -56,7 +56,7 @@ export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
 		} catch (validationError) {
 			// sets the value to dirty
 			setValue('avatarFile', newAvatar, { shouldDirty: true });
-			setFileSizeError(validationError.message)
+			setFileSizeError(validationError.message);
 		}
 	};
 
