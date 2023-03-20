@@ -28,7 +28,7 @@
     "@azure/msal-node": "1.16.0",
     "@elastic/elasticsearch": "7.17.0",
     "amqplib": "0.8.0",
-    "apidoc": "0.17.7",
+    "apidoc": "0.29.0",
     "app-config": "1.0.0",
     "archiver": "3.0.0",
     "async": "2.6.4",
