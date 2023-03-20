@@ -44,7 +44,6 @@ export interface IUpdatePersonalInputs {
 type EditProfilePersonalTabProps = {
 	alreadyExistingEmails: string[];
 	setAlreadyExistingEmails: (emails: string[]) => void;
-	setIsSubmitting: (isSubmitting: boolean) => void,
 	unexpectedError: any,
 	onClickClose: () => void,
 };
@@ -52,11 +51,9 @@ type EditProfilePersonalTabProps = {
 export const EditProfilePersonalTab = ({
 	alreadyExistingEmails,
 	setAlreadyExistingEmails,
-	setIsSubmitting,
 	unexpectedError,
 	onClickClose,
 }: EditProfilePersonalTabProps) => {
-	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
 	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
 	const {
@@ -66,7 +63,7 @@ export const EditProfilePersonalTab = ({
 		reset,
 		setError: setFormError,
 		control,
-		formState: { errors: formErrors, isDirty, touchedFields },
+		formState: { errors: formErrors, isDirty, touchedFields, isSubmitting },
 	} = useFormContext();
 
 	const getSubmittableValues = (): IUpdatePersonalInputs => {
@@ -78,13 +75,14 @@ export const EditProfilePersonalTab = ({
 		return pickBy(trimmedValues) as IUpdatePersonalInputs;
 	};
 
-	const onSubmissionSuccess = () => {
+	const onSubmissionSuccess = (resolve) => {
 		const { avatarFile, ...values } = getSubmittableValues();
 		reset(values);
 		setSubmitWasSuccessful(true);
+		resolve();
 	};
 
-	const onSubmissionError = (apiError) => {
+	const onSubmissionError = (apiError, reject) => {
 		setSubmitWasSuccessful(false);
 		if (emailAlreadyExists(apiError)) {
 			setAlreadyExistingEmails([...alreadyExistingEmails, getValues('email')]);
@@ -99,21 +97,22 @@ export const EditProfilePersonalTab = ({
 				}),
 			});
 		}
+		reject();
 	};
 
-	const onSubmit = () => {
+	const onSubmit = async () => {
 		const values = getSubmittableValues();
-		CurrentUserActionsDispatchers.updatePersonalData(
-			values,
-			onSubmissionSuccess,
-			onSubmissionError,
-		);
+		await new Promise((resolve, reject) => {
+			CurrentUserActionsDispatchers.updatePersonalData(
+				values,
+				() => onSubmissionSuccess(resolve),
+				(apiError) => onSubmissionError(apiError, reject),
+			);
+		})
 	};
 
 	const fieldsAreDirty = !isMatch(user, getSubmittableValues());
 	const canSubmit = isEmpty(formErrors) && fieldsAreDirty;
-
-	useEffect(() => setIsSubmitting(formIsUploading), [formIsUploading]);
 
 	useEffect(() => {
 		if (submitWasSuccessful) {
@@ -197,7 +196,7 @@ export const EditProfilePersonalTab = ({
 			</TabContent>
 			<FormModalActions>
 				<ModalCancelButton onClick={onClickClose} />
-				<ModalSubmitButton disabled={!canSubmit} onClick={handleSubmit(onSubmit)}>
+				<ModalSubmitButton disabled={!canSubmit} onClick={handleSubmit(onSubmit)} isPending={isSubmitting}>
 					<FormattedMessage
 						defaultMessage="Update profile"
 						id="editProfile.tab.confirmButton.updateProfile"
