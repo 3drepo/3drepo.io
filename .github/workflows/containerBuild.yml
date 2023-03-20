@@ -7,6 +7,7 @@ name: Container Build
 permissions:
   checks: write
   contents: write
+  deployments: write
 
 on: 
   push:
@@ -34,6 +35,15 @@ jobs:
           pr: ${{ github.event.pull_request.number }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
         id: commitMsgParser
+
+      - uses: chrnorm/deployment-action@v2
+        needs: [ get-details ]
+        name: Create GitHub deployment
+        id: githubdeployment
+        with:
+          token: '${{ github.token }}'
+          environment-url: https://issue-${{ needs.get-details.outputs.issue-number }}.staging.dev.3drepo.io
+          environment: staging
 
   build-images:
     needs: [ get-details ]
@@ -144,3 +154,19 @@ jobs:
         azure-pipeline-name: 'deploy'
         azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
         azure-pipeline-variables:  '{"branchName": "issue-${{ needs.get-details.outputs.issue-number }}","tag":"${{ github.sha }}"}'
+
+    - name: Update deployment status (success)
+      if: success()
+      uses: chrnorm/deployment-status@v2
+      with:
+        token: '${{ github.token }}'
+        state: 'success'
+        deployment-id: ${{ steps.githubdeployment.outputs.deployment_id }}
+
+    - name: Update deployment status (failure)
+      if: failure()
+      uses: chrnorm/deployment-status@v2
+      with:
+        token: '${{ github.token }}'
+        state: 'failure'
+        deployment-id: ${{ steps.githubdeployment.outputs.deployment_id }}
