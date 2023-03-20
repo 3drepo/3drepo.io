@@ -41,7 +41,7 @@ jobs:
         id: githubdeployment
         with:
           token: '${{ github.token }}'
-          environment-url: https://issue-${{ needs.get-details.outputs.issue-number }}.staging.dev.3drepo.io
+          environment-url: https://issue-${{ steps.commitMsgParser.outputs.issue-number }}.staging.dev.3drepo.io
           environment: staging
 
   build-images:
