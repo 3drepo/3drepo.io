@@ -42,8 +42,6 @@ jobs:
         id: githubdeployment
         with:
           token: '${{ github.token }}'
-          pr: ${{ github.event.pull_request.number }}
-          transient_environment: true
           environment-url: https://issue-${{ steps.commitMsgParser.outputs.issue-number }}.staging.dev.3drepo.io
           environment: staging
 
