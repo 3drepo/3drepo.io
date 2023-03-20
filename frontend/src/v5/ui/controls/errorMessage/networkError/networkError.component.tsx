@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FormattedMessage } from 'react-intl';
+import { formatMessage } from '@/v5/services/intl';
 import { ErrorMessage } from '../errorMessage.component';
 
 type NetworkErrorProps = {
@@ -22,7 +22,11 @@ type NetworkErrorProps = {
 };
 
 export const NetworkError = ({ className }: NetworkErrorProps) => (
-	<ErrorMessage className={className}>
-		<FormattedMessage id="errorMessage.networkError" defaultMessage="Network Error" />
-	</ErrorMessage>
+	<ErrorMessage
+		className={className}
+		title={formatMessage({
+			id: 'errorMessage.networkError',
+			defaultMessage: 'Network Error',
+		})}
+	/>
 );

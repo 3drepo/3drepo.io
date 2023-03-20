@@ -21,8 +21,13 @@ export default {
 	title: 'Outputs/ErrorMessage',
 	component: ErrorMessage,
 	argTypes: {
+		title: {
+			description: 'The title to display',
+			defaultValue: 'Error message\'s title',
+			type: 'string',
+		},
 		children: {
-			description: 'The text to display',
+			description: 'The body of the error',
 			defaultValue: 'Error message\'s content',
 			type: 'string',
 		},
@@ -34,18 +39,18 @@ const Template: ComponentStory<typeof ErrorMessage> = ({ children, ...args }) =>
 	<ErrorMessage {...args}>{children}</ErrorMessage>
 );
 
-export const SingleLineError = Template.bind({});
-SingleLineError.args = {
+export const TitleOnlyError = Template.bind({});
+TitleOnlyError.args = {
+	title: 'Error',
+};
+
+export const ChildrenOnlyError = Template.bind({});
+ChildrenOnlyError.args = {
 	children: 'Error',
 };
 
-export const MultiLineError = Template.bind({});
-MultiLineError.args = {
-	children: (
-		<>
-			This is the error message.
-			<br />
-			Note that, when I break, the icon stays aligned with the top line.
-		</>
-	),
+export const TitleAndChildrenError = Template.bind({});
+TitleAndChildrenError.args = {
+	title: 'Error with title',
+	children: 'Note that, when I break, the icon stays aligned with the top line.',
 };

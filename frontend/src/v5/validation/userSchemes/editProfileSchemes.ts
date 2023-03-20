@@ -68,3 +68,22 @@ export const EditProfileUpdatePasswordSchema = (incorrectPassword) => Yup.object
 			(value, testContext) => value === testContext.parent.newPassword,
 		),
 });
+
+export const EditProfileUpdateSSOPasswordSchema = Yup.object().shape({
+	newPassword: password('New Password'),
+	confirmPassword: Yup.string()
+		.required(
+			formatMessage({
+				id: 'editProfile.confirmPassword.error.required',
+				defaultMessage: 'Confirm password is a required field',
+			}),
+		)
+		.test(
+			'passwordMatch',
+			formatMessage({
+				id: 'editProfile.confirmPassword.error.notMatch',
+				defaultMessage: 'Password confirmation doesn\'t match the password',
+			}),
+			(value, testContext) => value === testContext.parent.newPassword,
+		),
+});

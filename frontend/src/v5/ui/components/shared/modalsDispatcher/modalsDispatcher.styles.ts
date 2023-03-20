@@ -21,7 +21,6 @@ import { Typography } from '@controls/typography';
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
-import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
 import WarningIconBase from '@assets/icons/outlined/warning-outlined.svg';
 
 export const Modal = styled(Dialog).attrs(({ maxWidth = 'md' }: DialogProps) => ({ maxWidth }))``;
@@ -97,10 +96,6 @@ export const RetypeCheckField = styled(FormTextField)`
 export const ConfirmationPhrase = styled.span`
 	font-weight: ${FONT_WEIGHT.BOLDER};
 	color: ${({ theme }) => theme.palette.error.main};
-`;
-
-export const ErrorMessage = styled(ErrorMessageBase)`
-	justify-content: center;
 `;
 
 export const WarningIcon = styled(WarningIconBase)`

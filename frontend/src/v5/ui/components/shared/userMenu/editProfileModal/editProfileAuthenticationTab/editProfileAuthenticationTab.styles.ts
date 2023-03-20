@@ -14,13 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import styled from 'styled-components';
-import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
+import { MicrosoftText as MicrosoftTextBase } from '@components/shared/sso/microsoftText.component';
+import { MicrosoftTitleText } from '@components/shared/sso/microsoftText.styles';
 
-export const ScrollArea = styled(ScrollAreaBase)`
-	& > :first-child {
-		padding: 30px 58px;
-		box-sizing: border-box;
+export const MicrosoftText = styled(MicrosoftTextBase)`
+	${MicrosoftTitleText} {
+		margin-top: 10px;
+		span {
+			${({ theme }) => theme.typography.h3}
+		}
 	}
 `;

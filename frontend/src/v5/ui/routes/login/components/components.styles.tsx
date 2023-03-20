@@ -22,6 +22,7 @@ import PasswordIcon from '@assets/icons/outlined/lock-outlined.svg';
 import styled, { css } from 'styled-components';
 import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
 import { FormTextField, FormPasswordField as FormPasswordFieldBase } from '@controls/inputs/formInputs.component';
+import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 
 export const AuthHeading = styled(Typography).attrs({
 	variant: 'h1',
@@ -29,6 +30,7 @@ export const AuthHeading = styled(Typography).attrs({
 	color: ${({ theme }) => theme.palette.secondary.main};
 	user-select: none;
 	margin-bottom: 22px;
+	font-weight: ${FONT_WEIGHT.BOLDER}
 `;
 
 const authFieldStyles = css`

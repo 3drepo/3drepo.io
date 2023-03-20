@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useRouteMatch } from 'react-router-dom';
-import { discardSlash, discardUrlComponent } from '@/v5/services/routing/routing';
 import { FormattedMessage } from 'react-intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { discardSlash, discardUrlComponent } from '@/v5/helpers/url.helper';
 import { Container, Link } from '../navigationTabs.styles';
 
 export const ProjectNavigation = (): JSX.Element => {
