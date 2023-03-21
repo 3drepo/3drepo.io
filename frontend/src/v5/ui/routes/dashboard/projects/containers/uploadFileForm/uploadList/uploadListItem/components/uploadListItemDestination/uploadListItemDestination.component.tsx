@@ -107,8 +107,10 @@ export const UploadListItemDestination = ({
 				{ context: { alreadyExistingNames: containersNamesInUse } },
 			);
 			setError('');
+			setNewOrExisting(containers.find(({ name }) => name === containerName) ? 'existing' : 'new');
 		} catch (validationError) {
 			setError(validationError.message);
+			setNewOrExisting('');
 		}
 	};
 
@@ -184,6 +186,10 @@ export const UploadListItemDestination = ({
 
 	const getRenderOption = (optionProps, option: IContainer) => {
 		const trimmedName = option?.name?.trim();
+		const handleOptionClick = (...args) => {
+			optionProps.onClick?.(...args);
+			updateDestination(trimmedName);
+		};
 
 		if (option?._id === '') {
 			// option is an extra
@@ -192,11 +198,7 @@ export const UploadListItemDestination = ({
 			}
 
 			if (isProjectAdmin && !error && !containers.map(({ name }) => name).includes(trimmedName)) {
-				const onClick = (...args) => {
-					optionProps.onClick?.(...args);
-					updateDestination(trimmedName);
-				};
-				return (<NewContainer containerName={trimmedName} {...optionProps} onClick={onClick} />);
+				return (<NewContainer containerName={trimmedName} {...optionProps} onClick={handleOptionClick} />);
 			}
 		}
 
@@ -207,6 +209,7 @@ export const UploadListItemDestination = ({
 					container={option}
 					inUse={optionIsUsed(option)}
 					{...optionProps}
+					onClick={handleOptionClick}
 				/>
 			);
 		}
