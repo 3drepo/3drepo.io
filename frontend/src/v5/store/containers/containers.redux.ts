@@ -19,12 +19,10 @@ import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
-import { ContainerSettings } from '@/v5/store/containers/containers.types';
-import { SuccessAndErrorCallbacks, View } from '@/v5/store/store.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
-import { ContainerStats, IContainer, NewContainer, UploadStatuses } from './containers.types';
-import { TeamspaceProjectAndContainerId, ProjectAndContainerId, TeamspaceAndProjectId, ProjectId } from '../store.types';
+import { ContainerStats, IContainer, NewContainer, UploadStatuses, ContainerSettings } from './containers.types';
+import { TeamspaceProjectAndContainerId, ProjectAndContainerId, TeamspaceAndProjectId, ProjectId, SuccessAndErrorCallbacks, View } from '../store.types';
 import { IRevision } from '../revisions/revisions.types';
 import { Role } from '../currentUser/currentUser.types';
 
