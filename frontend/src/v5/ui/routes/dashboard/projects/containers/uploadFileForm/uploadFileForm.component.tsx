@@ -23,7 +23,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { RevisionsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Sidebar } from '@controls/sideBar/sidebar.component';
-import { isNull } from 'lodash';
+import { isNull, isNumber } from 'lodash';
 import { Button } from '@controls/button';
 import { IContainer, UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
@@ -170,6 +170,14 @@ export const UploadFileForm = ({
 	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
 	const origIndex = sidebarOpen && getOriginalIndex(selectedIndex);
 
+	const getSortedListSelectedIndex = () => {
+		if (!fields.length || !isNumber(selectedIndex)) return;
+
+		const { uploadId } = fields[selectedIndex];
+		const newIndex = sortedList.findIndex((r) => r.uploadId === uploadId);
+		return newIndex;
+	};
+
 	const onClickDelete = (index: number) => {
 		if (index < selectedIndex) setSelectedIndex(selectedIndex - 1);
 		if (index === selectedIndex) setSelectedIndex(null);
@@ -246,7 +254,7 @@ export const UploadFileForm = ({
 									</UploadsListHeader>
 									<UploadList
 										values={sortedList}
-										selectedIndex={selectedIndex}
+										selectedIndex={getSortedListSelectedIndex()}
 										isUploading={isUploading}
 										onClickEdit={setSelectedIndex}
 										onClickDelete={onClickDelete}
@@ -296,10 +304,7 @@ export const UploadFileForm = ({
 							</DropZone>
 						</Padding>
 					</UploadsListScroll>
-					<Sidebar
-						open={sidebarOpen}
-						onClose={() => setSelectedIndex(null)}
-					>
+					<Sidebar open={sidebarOpen} onClose={() => setSelectedIndex(null)}>
 						{
 							sidebarOpen
 								? (

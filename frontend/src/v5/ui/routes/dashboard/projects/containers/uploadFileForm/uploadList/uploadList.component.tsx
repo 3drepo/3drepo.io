@@ -42,7 +42,8 @@ export const UploadList = ({
 		<Container>
 			{
 				values.map((item, index) => {
-					const revisionPrefix = `uploads.${getOriginalIndex(index)}`;
+					const originalIndex = getOriginalIndex(index);
+					const revisionPrefix = `uploads.${originalIndex}`;
 					const defaultInputValues = {
 						containerName: getValues(`${revisionPrefix}.containerName`) || item.containerName,
 						revisionTag: getValues(`${revisionPrefix}.revisionTag`) || item.revisionTag,
@@ -53,7 +54,7 @@ export const UploadList = ({
 							key={item.uploadId}
 							item={item}
 							defaultValues={defaultInputValues}
-							onClickEdit={() => onClickEdit(index)}
+							onClickEdit={() => onClickEdit(originalIndex)}
 							onClickDelete={() => onClickDelete(index)}
 							isSelected={index === selectedIndex}
 							isUploading={isUploading}
