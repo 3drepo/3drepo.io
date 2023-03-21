@@ -27,7 +27,7 @@ type IDashboardListItemDate = {
 	mobileWidth?: number;
 	className?: string;
 	active?: boolean;
-	hideWhenSmallerThan?: Display;
+	hideWhenSmallerThan?: Display | number;
 };
 
 export const RevisionsListItemDate = ({
