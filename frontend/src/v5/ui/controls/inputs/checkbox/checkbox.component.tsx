@@ -23,7 +23,7 @@ export type CheckboxProps = FormInputProps & FormControlLabelProps & {
 
 export const Checkbox = ({ value, onClick, ...props }: CheckboxProps) => (
 	<FormControlLabel
-		control={<MuiCheckbox checked={value} onClick={onClick} />}
+		control={<MuiCheckbox checked={!!value} onClick={onClick} />}
 		{...props}
 	/>
 );

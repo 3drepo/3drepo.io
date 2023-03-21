@@ -27,7 +27,7 @@ export const Toggle = ({ name, label, disabled, value, error, helperText, ...pro
 		control={(
 			<Switch
 				id={name}
-				checked={value || false} // This is to fix uncontrolled to controlled change. It always has a value.
+				checked={!!value}
 				{...props}
 			/>
 		)}
