@@ -191,7 +191,7 @@ const ifcGuidProjectionFilter = {
 };
 
 Meta.getIfcGuids = async (account, model) => {
-	return db.find(account, getSceneCollectionName(model), { type: "meta" }, ifcGuidProjection);
+	return db.find(account, getSceneCollectionName(model), { type: "meta", "metadata.key": "IFC GUID" }, ifcGuidProjection);
 };
 
 Meta.ifcGuidsToUUIDs = async (account, model, branch, revId, ifcGuids) => {
