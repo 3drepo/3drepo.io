@@ -43,26 +43,19 @@ export const spyOnAxiosApiCallWithFile = (api, method) => {
 	});
 };
 
-
-// let sagaPromise = null;
-// let waitPatterns = [];
-// export const getSagaPromise = (...wait) => {
-// 	waitPatterns = wait;
-// 	sagaPromise;
-// }
-
 export const createTestStore = () => {
 	let middlewares = undefined;
 	let waitingActions: Action[] | string[] = [];
-	let resolvePromise: (value: unknown) => void | null = null;
+	let resolvePromiseObj = { resolvePromise: null };
 
 	const sagaMiddleware = createSagaMiddleware();
 	
 	middlewares = applyMiddleware(sagaMiddleware);
 
-	const waitingActionsDispatched =  (action: Action) => {
+	const discountMatchingActions =  (action: Action) => {
 		const waitingAction = waitingActions[0];
-		if (action.type === waitingAction &&  isEqual(waitingAction, action)) {
+
+		if (action.type === waitingAction || isEqual(waitingAction, action)) {
 			waitingActions.shift();
 		}
 	
@@ -73,21 +66,28 @@ export const createTestStore = () => {
 		{
 			...reducers,
 			spyActions: (state, action) => {
-				if (waitingActionsDispatched(action)) resolvePromise(true);
-				return state;
+				const { resolvePromise } = resolvePromiseObj;
+
+				console.log(resolvePromiseObj.resolvePromise);
+
+				if (discountMatchingActions(action) && resolvePromise) {
+					resolvePromise(true);
+					resolvePromiseObj.resolvePromise = null;
+				}
+				return {};
 			}
 		}
 	), middlewares);
 	
-	const waitForSaga = (func, waitActions) =>  { 
+	const waitForActions = (func, waitActions) =>  { 
 		waitingActions = waitActions;
-		var promise = new Promise((resolve) => {resolvePromise = resolve;});
+		var promise = new Promise((resolve) => {resolvePromiseObj.resolvePromise = resolve;});
 		func();
 		return promise;
 	}
 
 	sagaMiddleware.run(rootSaga);
-	return {...store, waitForSaga};
+	return {...store, waitForActions};
 };
 
 export const listContainsElementWithId = (list, element) => (	

@@ -26,10 +26,10 @@ import { prepareFederationsData } from '../federations/federations.helpers';
 import { FederationsActions, FederationsTypes } from '../federations/federations.redux';
 import { selectFederationById } from '../federations/federations.selectors';
 import { IFederation } from '../federations/federations.types';
-import { FetchDataAction, ViewerActions, ViewerTypes } from './viewer.redux';
+import { FetchDataAction, ViewerActionsCreators, ViewerTypes } from './viewer.redux';
 
 function* fetchData({ teamspace, containerOrFederation, project }: FetchDataAction) {
-	yield put(ViewerActions.setFetching(true));
+	yield put(ViewerActionsCreators.setFetching(true));
 	try {
 		const { federations }: FetchFederationsResponse = yield API.Federations.fetchFederations(teamspace, project);
 		const federationsWithoutStats = prepareFederationsData(federations);
@@ -60,7 +60,7 @@ function* fetchData({ teamspace, containerOrFederation, project }: FetchDataActi
 		}));
 	}
 
-	yield put(ViewerActions.setFetching(false));
+	yield put(ViewerActionsCreators.setFetching(false));
 }
 
 export default function* ViewerSaga() {
