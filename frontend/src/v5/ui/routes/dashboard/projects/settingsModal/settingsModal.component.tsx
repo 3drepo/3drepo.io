@@ -201,13 +201,13 @@ export const SettingsModal = ({
 		x, y, z,
 		...otherSettings
 	}) => {
-		const settings: ContainerSettings | FederationSettings = {
+		const settings = {
 			surveyPoint: {
 				latLong: [latitude, longitude],
 				position: [x, y, z],
 			},
 			...otherSettings,
-		};
+		} as ContainerSettings | FederationSettings;
 		updateSettings(
 			teamspace,
 			project,

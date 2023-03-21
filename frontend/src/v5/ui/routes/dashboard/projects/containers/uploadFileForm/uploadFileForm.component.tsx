@@ -179,8 +179,8 @@ export const UploadFileForm = ({
 	const sidebarOpen = Number.isInteger(selectedIndex) && !isUploading;
 
 	const indexMap = new Map(fields.map(({ uploadId }, index) => [uploadId, index]));
-	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
-	const origIndex = sidebarOpen && getOriginalIndex(selectedIndex);
+	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId) as number;
+	const origIndex = sidebarOpen ? getOriginalIndex(selectedIndex) : 0;
 
 	const onClickEdit = (id: number) => setSelectedIndex(id);
 
