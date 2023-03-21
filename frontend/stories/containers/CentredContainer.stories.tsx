@@ -49,7 +49,7 @@ export default {
 	parameters: { controls: { exclude: ['className'] } },
 } as ComponentMeta<typeof CentredContainer>;
 
-const ParentComponent = styled.div<{parentHeight: string, parentWidth: string}>`
+const ParentComponent = styled.div<{ parentHeight: string, parentWidth: string }>`
 	${({ parentHeight, parentWidth }) => css`
 		height: ${parentHeight || '300px'};
 		width: ${parentWidth || '100%'};

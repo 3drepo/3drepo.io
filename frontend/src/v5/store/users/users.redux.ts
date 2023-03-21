@@ -58,7 +58,7 @@ export interface IUser {
 }
 
 export type FetchUsersAction = Action<'FETCH_USERS'> & TeamspaceId;
-export type FetchUsersSuccessAction = Action<'FETCH_USERS_SUCCESS'> & TeamspaceId & {users: IUser[]};
+export type FetchUsersSuccessAction = Action<'FETCH_USERS_SUCCESS'> & TeamspaceId & { users: IUser[] };
 
 export interface IUsersActions {
 	fetchUsers: (teamspace: string) => FetchUsersAction;

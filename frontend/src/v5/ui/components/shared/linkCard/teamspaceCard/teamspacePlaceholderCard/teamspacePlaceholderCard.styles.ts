@@ -38,7 +38,7 @@ export const ImagePlaceholder = styled.img`
 	margin-bottom: -5px;
 `;
 
-export const TextPlaceholder = styled.div<{ width?: string;}>`
+export const TextPlaceholder = styled.div<{ width?: string; }>`
 	${PlaceholderStyle}
 	height: 10px;
 	width: ${({ width }) => width || '100%'};

@@ -21,7 +21,7 @@ import { CheckboxProps, Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { Checkbox } from './favouriteCheckbox.styles';
 
-interface IFavouriteCheckbox extends Omit<CheckboxProps, 'icon'|'checkedIcon'> {
+interface IFavouriteCheckbox extends Omit<CheckboxProps, 'icon' | 'checkedIcon'> {
 	selected?: boolean;
 }
 

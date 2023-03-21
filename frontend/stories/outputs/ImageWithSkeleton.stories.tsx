@@ -31,7 +31,7 @@ export default {
 	parameters: { controls: { exclude: ['className', 'onClick', 'src'] } },
 } as ComponentMeta<typeof ImageWithSkeleton>;
 
-const Container = styled.div<{ $variant?: 'primary'|'secondary' }>`
+const Container = styled.div<{ $variant?: 'primary' | 'secondary' }>`
 	height: 200px;
 	width: 200px;
 	padding: 20px;

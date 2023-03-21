@@ -47,7 +47,7 @@ export const PinActions = styled.div`
 
 export const PinName = styled(Typography).attrs({
 	variant: 'h5',
-})<{required:boolean}>`
+})<{ required: boolean }>`
 	user-select: none;
 
 	${({ required }) => required && css`

@@ -75,7 +75,7 @@ const PseudoElement = css`
 	box-sizing: border-box;
 `;
 
-export const GroupIcon = styled.div<{$color?: string, $variant?: 'light' | 'dark' }>`
+export const GroupIcon = styled.div<{ $color?: string, $variant?: 'light' | 'dark' }>`
 	${IconSize}
 	padding: 0;
 	display: inline-flex;

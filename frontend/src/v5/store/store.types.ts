@@ -27,7 +27,7 @@ export type TeamspaceAndProjectId = TeamspaceId & ProjectId;
 
 export type TeamspaceProjectAndContainerId = TeamspaceId & ProjectId & ContainerId;
 
-export type TeamspaceProjectAndFederationId= TeamspaceId & ProjectId & FederationId;
+export type TeamspaceProjectAndFederationId = TeamspaceId & ProjectId & FederationId;
 
 export type ProjectAndContainerId = ProjectId & ContainerId;
 
