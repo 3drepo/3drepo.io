@@ -72,7 +72,7 @@ export const Containers = (): JSX.Element => {
 						<DashboardListEmptyText>
 							<FormattedMessage
 								id="containers.favourites.emptyMessage"
-								defaultMessage="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
+								defaultMessage="Click on the star to mark a container as favourite"
 							/>
 						</DashboardListEmptyText>
 					)}
