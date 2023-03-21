@@ -21,5 +21,5 @@ import { ViewerState } from './viewer.redux';
 const selectViewerDomain = (state): ViewerState => state.viewer2;
 
 export const selectIsFetching = createSelector(
-	selectViewerDomain, (state) => !!state.isFetching,
+	selectViewerDomain, (state) => state.isFetching,
 );
