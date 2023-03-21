@@ -19,8 +19,7 @@ import { createStore, combineReducers, applyMiddleware, Action } from 'redux';
 import reducers from '@/v5/store/reducers';
 import createSagaMiddleware from 'redux-saga';
 import rootSaga from '@/v4/modules/sagas';
-import { all, fork, getContext, setContext, take } from 'redux-saga/effects';
-import { ViewerTypes } from '@/v5/store/viewer/viewer.redux';
+import { isEqual } from 'lodash';
 
 export const alertAction = (currentAction: string) => ({
 	action: {
@@ -54,55 +53,38 @@ export const spyOnAxiosApiCallWithFile = (api, method) => {
 
 export const createTestStore = () => {
 	let middlewares = undefined;
-	let waitingActions = [];
+	let waitingActions: Action[] | string[] = [];
+	let resolvePromise: (value: unknown) => void | null = null;
 
 	const sagaMiddleware = createSagaMiddleware();
 	
 	middlewares = applyMiddleware(sagaMiddleware);
 
-	const actionsCounter = function* (waitingActions: Action[]){
-		while (waitingActions.length > 0){
-			const action = yield;
-			if (waitingActions[0].type == )
-			 false;
+	const waitingActionsDispatched =  (action: Action) => {
+		const waitingAction = waitingActions[0];
+		if (action.type === waitingAction &&  isEqual(waitingAction, action)) {
+			waitingActions.shift();
 		}
-
-		return true;
+	
+		return waitingActions.length === 0;
 	};
 
-	
-	const store = createStore(combineReducers({...reducers,
-	 spy: (state, action) =>
-		if (actionsCounter) {
-
+	const store = createStore(combineReducers(
+		{
+			...reducers,
+			spyActions: (state, action) => {
+				if (waitingActionsDispatched(action)) resolvePromise(true);
+				return state;
+			}
 		}
-		return state;
-	}), middlewares);
+	), middlewares);
 	
-	const waitForSaga = (func) =>  { 
-		// setContext({waitingPatterns});
-		// func();
-
-
+	const waitForSaga = (func, waitActions) =>  { 
+		waitingActions = waitActions;
+		var promise = new Promise((resolve) => {resolvePromise = resolve;});
+		func();
 		return promise;
 	}
-
-	// sagaMiddleware.run(function* () {
-	// 	yield(all([
-	// 		fork(rootSaga),
-	// 		fork(function * () {
-	// 			const pp = {resolve: null};
-	// 			const waitingPatterns: string[] =  yield getContext('waitingPatterns');
-	// 			console.log(waitingPatterns);
-	// 			const sagaPromise = new Promise(resolve =>  pp.resolve = resolve);
-	// 			yield setContext({promise: sagaPromise});
-	// 			for (const p of waitingPatterns) {
-	// 				yield take(p);
-	// 			}
-	// 			pp.resolve();
-	// 		})
-	// 	]))
-	// });
 
 	sagaMiddleware.run(rootSaga);
 	return {...store, waitForSaga};
