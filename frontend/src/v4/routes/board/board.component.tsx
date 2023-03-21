@@ -496,7 +496,7 @@ export function Board(props: IProps) {
 		const messagePrefix = 'You have to choose';
 		const messageSufix = noModelAndProject ? 'project and model' : noModel ? 'model' : 'project';
 		const chooseMessage = isV5()
-			? formatMessage({ defaultMessage: `Select the federation or container to show board`, id: 'board.emptyBoard.placeholder' })
+			? formatMessage({ defaultMessage: 'Please select a federation or container to proceed', id: 'board.emptyBoard.placeholder' })
 			: `${messagePrefix} ${messageSufix} to show board.`;
 		const areModels =
 			getProjectModels(props.teamspaces, props.projectsMap, props.modelsMap, teamspace, project).length > 1;
