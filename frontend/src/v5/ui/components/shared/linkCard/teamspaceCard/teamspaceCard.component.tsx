@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { uriCombine } from '@/v5/services/routing/routing';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
 import { CoverImage } from '@controls/coverImage/coverImage.component';
 import { DEFAULT_TEAMSPACE_IMG_SRC, getTeamspaceImgSrc } from '@/v5/store/teamspaces/teamspaces.helpers';
+import { uriCombine } from '@/v5/helpers/url.helper';
 import { LinkCard } from '../linkCard.component';
 
 interface ITeamspaceCard {

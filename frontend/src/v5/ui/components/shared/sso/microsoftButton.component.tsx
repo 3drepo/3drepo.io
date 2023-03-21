@@ -14,23 +14,29 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { signin } from '@/v5/services/api/sso';
-import { useLocation } from 'react-router-dom';
 
-export const LoginSSO = () => {
-	const { search } = useLocation();
-	const searchParams = new URLSearchParams(search);
+import { Link as BaseLink } from 'react-router-dom';
+import styled from 'styled-components';
+import { Button } from '@controls/button';
+import MicrosoftIcon from '@assets/icons/thirdParty/microsoft.svg';
+import { createElement } from 'react';
 
-	if (searchParams.get('loginPost')) {
-		const { origin } = new URL(window.location.href);
-		window.location.href = origin;
+export const MicrosoftButton = styled(Button).attrs({
+	component: BaseLink,
+	variant: 'contained',
+	color: 'primary',
+	startIcon: createElement(MicrosoftIcon),
+})`
+	display: flex;
+	width: fit-content;
+	font-weight: 500;
+	font-size: 12px;
+	border-radius: 0;
+	padding: 20px;
+	margin: 0;
+	background-color: #2F2F2F; /* The colour is hardcoded as these are microsoft specs and not part of the theme */
+
+	&:hover, &:active {
+		background-color: #2F2F2FF0; 
 	}
-
-	if (!searchParams.get('loginPost')) {
-		signin().then(({ data }) => {
-			window.location.href = data.link;
-		});
-	}
-
-	return null;
-};
+`;
