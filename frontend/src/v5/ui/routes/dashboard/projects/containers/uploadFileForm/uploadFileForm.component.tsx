@@ -22,7 +22,7 @@ import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { RevisionsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Sidebar } from '@controls/sideBar';
+import { Sidebar } from '@controls/sideBar/sidebar.component';
 import { isNull } from 'lodash';
 import { Button } from '@controls/button';
 import { IContainer, UploadFieldArray } from '@/v5/store/containers/containers.types';
@@ -269,7 +269,7 @@ export const UploadFileForm = ({
 									accept={getSupportedFileExtensions()}
 									onChange={(files) => addFilesToList(files)}
 								>
-									<Button component="span" size="medium" variant="contained" color="primary">
+									<Button component="span" variant="contained" color="primary">
 										<FormattedMessage
 											id="uploads.fileInput.browse"
 											defaultMessage="Browse"
@@ -298,7 +298,7 @@ export const UploadFileForm = ({
 					</UploadsListScroll>
 					<Sidebar
 						open={sidebarOpen}
-						onClick={() => setSelectedIndex(null)}
+						onClose={() => setSelectedIndex(null)}
 					>
 						{
 							sidebarOpen
