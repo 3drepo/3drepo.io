@@ -171,7 +171,7 @@ export const UploadFileForm = ({
 	const origIndex = sidebarOpen && getOriginalIndex(selectedIndex);
 
 	const getSortedListSelectedIndex = () => {
-		if (!fields.length || !isNumber(selectedIndex)) return;
+		if (!fields.length || !isNumber(selectedIndex)) return null;
 
 		const { uploadId } = fields[selectedIndex];
 		const newIndex = sortedList.findIndex((r) => r.uploadId === uploadId);
