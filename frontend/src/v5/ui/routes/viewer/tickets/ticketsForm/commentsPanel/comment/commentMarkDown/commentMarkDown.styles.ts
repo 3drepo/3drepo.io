@@ -15,25 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { desanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
-import ReactMarkdown from 'react-markdown';
-import { CommentMessage } from '../basicComment/basicComment.styles';
+import styled from 'styled-components';
 
-const ImageMarkdown = ({ src }) => (<>![image]({src})</>);
-const CodeMarkdown = ({ value }) => (<code>{desanitiseMessage(value)}</code>);
-
-const RENDERERS = {
-	paragraph: CommentMessage,
-	image: ImageMarkdown,
-	code: CodeMarkdown,
-};
-
-type CommentMarkDownProps = {
-	children?: any,
-	className?: string,
-};
-export const CommentMarkDown = ({ children, ...props }: CommentMarkDownProps) => (
-	<ReactMarkdown renderers={RENDERERS} escapeHtml={false} {...props}>
-		{children}
-	</ReactMarkdown>
-);
+export const OverflowContainer = styled.span`
+	word-break: break-word;
+`;

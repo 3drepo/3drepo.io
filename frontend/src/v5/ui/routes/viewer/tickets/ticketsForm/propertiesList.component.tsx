@@ -26,12 +26,11 @@ import { ErrorTextGap, PropertiesListContainer } from './ticketsForm.styles';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
-	propertiesValues: Record<string, any>;
 	module: string;
 	onPropertyBlur?: (...args) => void;
 }
 
-export const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyBlur }: PropertiesListProps) => {
+export const PropertiesList = ({ module, properties, onPropertyBlur }: PropertiesListProps) => {
 	const { formState } = useFormContext();
 	return (
 		<PropertiesListContainer>
@@ -55,7 +54,7 @@ export const PropertiesList = ({ module, properties, propertiesValues = {}, onPr
 							required={required}
 							name={inputName}
 							formError={formError}
-							defaultValue={propertiesValues[name] ?? defaultValue}
+							defaultValue={defaultValue}
 							onBlur={onPropertyBlur}
 							// @ts-ignore
 							values={values}

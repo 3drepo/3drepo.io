@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ITemplate, ITicket, TemplateModule } from '@/v5/store/tickets/tickets.types';
+import { some } from 'lodash';
 import { Accordion } from '@controls/accordion/accordion.component';
 import { getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
 import { CardContent, PanelsContainer } from './ticketsForm.styles';
@@ -25,16 +26,19 @@ import { CommentsPanel } from './commentsPanel/commentsPanel.component';
 const SCROLLBAR_ID = 'cardScrollbar';
 interface ModulePanelProps {
 	module: TemplateModule;
-	moduleValues: Record<string, any>;
-	scrollPanelIntoView: (isExpanding, el) => void;
+	scrollPanelIntoView: (isExpanding, event) => void;
 	defaultExpanded: boolean;
 }
 
-const ModulePanel = ({ module, moduleValues, scrollPanelIntoView, defaultExpanded, ...rest }: ModulePanelProps) => (
-	<Accordion {...getModulePanelTitle(module)} onChange={scrollPanelIntoView} defaultExpanded={defaultExpanded}>
-		<PropertiesList module={`modules.${module.name || module.type}`} properties={module.properties || []} propertiesValues={moduleValues} {...rest} />
-	</Accordion>
-);
+const ModulePanel = ({ module, scrollPanelIntoView, defaultExpanded, ...rest }: ModulePanelProps) => {
+	const required = some(module.properties, (property) => property.required);
+	return (
+		// eslint-disable-next-line max-len
+		<Accordion {...getModulePanelTitle(module)} onChange={scrollPanelIntoView} defaultExpanded={defaultExpanded} required={required}>
+			<PropertiesList module={`modules.${module.name || module.type}`} properties={module.properties || []} {...rest} />
+		</Accordion>
+	);
+};
 
 interface Props {
 	template: Partial<ITemplate>;
@@ -61,7 +65,6 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 			<TicketsTopPanel
 				title={ticket.title}
 				properties={template.properties || []}
-				propertiesValues={ticket.properties}
 				focusOnTitle={focusOnTitle}
 				{...rest}
 			/>
@@ -71,7 +74,6 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 						<ModulePanel
 							key={module.name || module.type}
 							module={module}
-							moduleValues={ticket.modules[module.name]}
 							defaultExpanded={idx === 0}
 							scrollPanelIntoView={scrollPanelIntoView}
 							{...rest}

@@ -20,7 +20,6 @@ import { useParams } from 'react-router-dom';
 import { TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { ScrollArea } from '@controls/scrollArea';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import {
 	enableRealtimeContainerNewTicketComment,
@@ -30,13 +29,31 @@ import {
 } from '@/v5/services/realtime/ticketComments.events';
 import { FormattedMessage } from 'react-intl';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
-import { useEffect, useRef, useState } from 'react';
-import Scrollbars from 'react-custom-scrollbars';
+import { forwardRef, MutableRefObject, useEffect, useState } from 'react';
+import { Gap } from '@controls/gap';
+import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
+import { omit } from 'lodash';
 import { sanitiseMessage, stripMetadata } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { ViewerParams } from '../../../../routes.constants';
-import { Accordion, Comments, EmptyCommentsBox } from './commentsPanel.styles';
+import { Accordion, Comments, EmptyCommentsBox, VirtualisedList, VirtuosoScroller } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
 import { CreateCommentBox } from './createCommentBox/createCommentBox.component';
+
+const Scroller = forwardRef((props, ref: MutableRefObject<HTMLDivElement | null>) => (
+	<VirtuosoScroller
+		ref={(scrollerRef) => {
+			if (!scrollerRef) return;
+			const { container } = scrollerRef as any;
+			const scrollerContainer = container.childNodes[0];
+			scrollerContainer.setAttribute('data-test-id', 'virtuoso-scroller');
+			scrollerContainer.setAttribute('data-virtuoso-scroller', true);
+			scrollerContainer.setAttribute('tabindex', 0);
+			// eslint-disable-next-line no-param-reassign
+			ref.current = scrollerContainer;
+		}}
+		{...omit(props, ['data-test-id', 'data-virtuoso-scroller', 'tabindex', 'style'])}
+	/>
+));
 
 type CommentsPanelProps = {
 	scrollPanelIntoView: (event, isExpanding) => void,
@@ -47,9 +64,8 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
-	const scrollAreaRef = useRef<Scrollbars>();
 
-	const commentsListIsEmpty = comments?.length > 0;
+	const commentsLength = comments.length;
 
 	const getCommentIsFirstOfBlock = (index) => {
 		if (index === 0) return true;
@@ -115,38 +131,42 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 		);
 	}, [ticketId]);
 
-	useEffect(() => {
-		if (!comments.length) return;
-		setTimeout(() => scrollAreaRef.current.scrollToBottom(), 100);
-	}, [comments.length]);
-
 	return (
 		<Accordion
 			title={formatMessage({ id: 'customTicket.comments.title', defaultMessage: 'Comments' })}
 			Icon={CommentIcon}
 			onChange={scrollPanelIntoView}
 		>
-			<ScrollArea autoHeight autoHeightMin={400} autoHeightMax={400} autoHide ref={scrollAreaRef}>
-				{commentsListIsEmpty && (
-					<Comments>
-						{comments.map((comment, index) => (
-							<Comment
-								{...comment}
-								key={comment._id}
-								onDelete={handleDeleteComment}
-								onReply={handleReplyToComment}
-								onEdit={handleEditComment}
-								isFirstOfBlock={getCommentIsFirstOfBlock(index)}
-							/>
-						))}
-					</Comments>
-				)}
-				{!commentsListIsEmpty && (
+			<Comments>
+				{commentsLength ? (
+					<VirtualisedList
+						data={comments}
+						initialTopMostItemIndex={commentsLength - 1}
+						followOutput={() => true}
+						components={{ Scroller }}
+						overscan={800}
+						itemContent={(index, comment: ITicketComment) => (
+							<>
+								<Comment
+									{...comment}
+									key={comment._id}
+									onDelete={handleDeleteComment}
+									onReply={handleReplyToComment}
+									onEdit={handleEditComment}
+									isFirstOfBlock={getCommentIsFirstOfBlock(index)}
+								/>
+								{index === commentsLength - 1 && (<Gap $height="5px" />)}
+							</>
+						)}
+					/>
+				) : (
 					<EmptyCommentsBox>
-						<FormattedMessage id="customTicket.comments.empty" defaultMessage="No comments" />
+						<EmptyListMessage>
+							<FormattedMessage id="customTicket.comments.empty" defaultMessage="No comments" />
+						</EmptyListMessage>
 					</EmptyCommentsBox>
 				)}
-			</ScrollArea>
+			</Comments>
 			<CreateCommentBox
 				commentReply={commentReply}
 				deleteCommentReply={() => setCommentReply(null)}

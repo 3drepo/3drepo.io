@@ -16,12 +16,11 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
 import { CreationInfo } from '@components/shared/creationInfo/creationInfo.component';
 import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
-import { filter } from 'lodash';
+import { filter, some } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
@@ -32,7 +31,6 @@ import { BaseTicketInfo, DescriptionProperty, TopPanel } from './ticketsTopPanel
 type ITicketsTopPanel = {
 	title: string;
 	properties: PropertyDefinition[];
-	propertiesValues: Record<string, any>;
 	onPropertyBlur?: (...args) => void;
 	focusOnTitle?: boolean;
 };
@@ -40,17 +38,16 @@ type ITicketsTopPanel = {
 export const TicketsTopPanel = ({
 	title,
 	properties,
-	propertiesValues,
 	focusOnTitle,
 	onPropertyBlur,
 }: ITicketsTopPanel) => {
-	const {
-		owner,
-		createdAt,
-		updatedAt,
-		priority: hasIssueProperties,
-	} = getPropertiesInCamelCase(propertiesValues);
-	const { formState } = useFormContext();
+	const { formState, getValues } = useFormContext();
+
+	const owner = getValues(`properties.${BaseProperties.OWNER}`);
+	const createdAt = getValues(`properties.${BaseProperties.CREATED_AT}`);
+	const updatedAt = getValues(`properties.${BaseProperties.UPDATED_AT}`);
+
+	const hasIssueProperties = some(properties, (property) => property.name === IssueProperties.PRIORITY);
 	const topPanelProperties: string[] = Object.values({ ...BaseProperties, ...IssueProperties });
 	const extraProperties = filter(properties, ({ name }) => !topPanelProperties.includes(name));
 	return (
@@ -84,7 +81,7 @@ export const TicketsTopPanel = ({
 						})}
 					/>
 				</DescriptionProperty>
-				<PropertiesList module="properties" properties={extraProperties} propertiesValues={propertiesValues} onPropertyBlur={onPropertyBlur} />
+				<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
 			</BaseTicketInfo>
 			{hasIssueProperties && <IssuePropertiesRow onBlur={onPropertyBlur} />}
 		</TopPanel>

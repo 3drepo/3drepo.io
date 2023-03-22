@@ -26,7 +26,7 @@ import { EditComment } from './editComment/editComment.component';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons } from '../basicComment/basicComment.styles';
 
-export type CurrentUserCommentProps = Omit<ITicketComment, 'updatedAt'> & {
+export type CurrentUserCommentProps = Omit<ITicketComment, 'updatedAt' | 'createdAt'> & {
 	commentAge: string;
 	metadata?: TicketCommentReplyMetadata;
 	isFirstOfBlock: boolean;

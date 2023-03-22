@@ -40,14 +40,14 @@ export const INITIAL_STATE: ITicketCommentsState = {
 	commentsByTicketId: {},
 };
 
-export const fetchTicketCommentsSuccess = (state: ITicketCommentsState, {
+export const fetchCommentsSuccess = (state: ITicketCommentsState, {
 	ticketId,
 	comments,
 }: FetchCommentsSuccessAction) => {
 	state.commentsByTicketId[ticketId] = comments;
 };
 
-export const upsertTicketCommentSuccess = (state: ITicketCommentsState, {
+export const upsertCommentSuccess = (state: ITicketCommentsState, {
 	ticketId,
 	comment,
 }: UpsertCommentSuccessAction) => {
@@ -63,8 +63,8 @@ export const upsertTicketCommentSuccess = (state: ITicketCommentsState, {
 };
 
 export const ticketCommentsReducer = createReducer(INITIAL_STATE, produceAll({
-	[TicketCommentsTypes.FETCH_COMMENTS_SUCCESS]: fetchTicketCommentsSuccess,
-	[TicketCommentsTypes.UPSERT_COMMENT_SUCCESS]: upsertTicketCommentSuccess,
+	[TicketCommentsTypes.FETCH_COMMENTS_SUCCESS]: fetchCommentsSuccess,
+	[TicketCommentsTypes.UPSERT_COMMENT_SUCCESS]: upsertCommentSuccess,
 }));
 
 export interface ITicketCommentsState {
