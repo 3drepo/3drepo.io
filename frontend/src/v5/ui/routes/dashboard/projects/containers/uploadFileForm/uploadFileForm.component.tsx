@@ -179,9 +179,11 @@ export const UploadFileForm = ({
 	const origIndex = sidebarOpen && getOriginalIndex(getSortedListSelectedIndex());
 
 	const onClickDelete = (index: number) => {
-		if (index < selectedIndex) setSelectedIndex(selectedIndex - 1);
-		if (index === selectedIndex) setSelectedIndex(null);
-		remove(getOriginalIndex(index));
+		const { uploadId } = sortedList[index];
+		const sortedIndex = fields.findIndex((r) => r.uploadId === uploadId);
+		if (sortedIndex < selectedIndex) setSelectedIndex(selectedIndex - 1);
+		if (sortedIndex === selectedIndex) setSelectedIndex(null);
+		remove(sortedIndex);
 	};
 
 	const onSubmit = async ({ uploads }: UploadFieldArray) => {
@@ -252,7 +254,6 @@ export const UploadFileForm = ({
 											<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
 										</DashboardListHeaderLabel>
 									</UploadsListHeader>
-									<button type="button" onClick={() => console.log(getValues())}>get</button>
 									<UploadList
 										values={sortedList}
 										selectedIndex={getSortedListSelectedIndex()}
