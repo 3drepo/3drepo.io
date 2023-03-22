@@ -164,12 +164,6 @@ export const UploadFileForm = ({
 		append(filesToAppend);
 	};
 
-	const containersNamesInModal = getValues('uploads')?.map(({ containerName }) => containerName);
-	const sidebarOpen = !isNull(selectedIndex) && !isUploading;
-	const indexMap = new Map(fields.map(({ uploadId }, index) => [uploadId, index]));
-	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
-	const origIndex = sidebarOpen && getOriginalIndex(selectedIndex);
-
 	const getSortedListSelectedIndex = () => {
 		if (!fields.length || !isNumber(selectedIndex)) return null;
 
@@ -177,6 +171,12 @@ export const UploadFileForm = ({
 		const newIndex = sortedList.findIndex((r) => r.uploadId === uploadId);
 		return newIndex;
 	};
+
+	const containersNamesInModal = getValues('uploads')?.map(({ containerName }) => containerName);
+	const sidebarOpen = !isNull(selectedIndex) && !isUploading;
+	const indexMap = new Map(fields.map(({ uploadId }, index) => [uploadId, index]));
+	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
+	const origIndex = sidebarOpen && getOriginalIndex(getSortedListSelectedIndex());
 
 	const onClickDelete = (index: number) => {
 		if (index < selectedIndex) setSelectedIndex(selectedIndex - 1);
@@ -252,6 +252,7 @@ export const UploadFileForm = ({
 											<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
 										</DashboardListHeaderLabel>
 									</UploadsListHeader>
+									<button type="button" onClick={() => console.log(getValues())}>get</button>
 									<UploadList
 										values={sortedList}
 										selectedIndex={getSortedListSelectedIndex()}
@@ -310,8 +311,8 @@ export const UploadFileForm = ({
 								? (
 									<SidebarForm
 										value={getValues(`uploads.${origIndex}`)}
-										key={sortedList[selectedIndex].uploadId}
-										isSpm={extensionIsSpm(sortedList[origIndex].extension)}
+										key={sortedList[getSortedListSelectedIndex()].uploadId}
+										isSpm={extensionIsSpm(sortedList[getSortedListSelectedIndex()].extension)}
 										onChange={(field: string, val: string | boolean) => {
 											// @ts-ignore
 											setValue(`uploads.${origIndex}.${field}`, val);
