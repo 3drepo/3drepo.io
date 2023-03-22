@@ -76,41 +76,43 @@ export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
 	}, [JSON.stringify(watch())]);
 
 	return (
-		<Header>
-			<ProfilePicture>
-				{avatarIsAvailable() ? (
-					<Avatar user={getUserWithAvatar()} />
-				) : (
-					<UserIcon />
-				)}
-			</ProfilePicture>
-			<UserInfo>
-				<Username>{user.username}</Username>
-				<FullName>
-					<TruncatableName>{user.firstName}</TruncatableName>
-					<TruncatableName>{user.lastName}</TruncatableName>
-				</FullName>
-				<Controller
-					name="avatarFile"
-					control={control}
-					render={({ field: { value, onChange, ...field } }) => (
-						<AvatarButton color={avatarIsAvailable() ? 'secondary' : 'primary'}>
-							<AvatarLabel>
-								{avatarIsAvailable() ? (
-									<FormattedMessage id="editProfile.changeImage" defaultMessage="Change image" />
-								) : (
-									<FormattedMessage id="editProfile.addImage" defaultMessage="Add image" />
-								)}
-								<AvatarInput
-									{...field}
-									onChange={(event) => addImage(event, onChange)}
-								/>
-							</AvatarLabel>
-						</AvatarButton>
+		<>
+			<Header>
+				<ProfilePicture>
+					{avatarIsAvailable() ? (
+						<Avatar user={getUserWithAvatar()} />
+					) : (
+						<UserIcon />
 					)}
-				/>
-				{(fileSizeError || error) && <ErrorMessage title={fileSizeError || error.message} />}
-			</UserInfo>
-		</Header>
+				</ProfilePicture>
+				<UserInfo>
+					<Username>{user.username}</Username>
+					<FullName>
+						<TruncatableName>{user.firstName}</TruncatableName>
+						<TruncatableName>{user.lastName}</TruncatableName>
+					</FullName>
+					<Controller
+						name="avatarFile"
+						control={control}
+						render={({ field: { value, onChange, ...field } }) => (
+							<AvatarButton color={avatarIsAvailable() ? 'secondary' : 'primary'}>
+								<AvatarLabel>
+									{avatarIsAvailable() ? (
+										<FormattedMessage id="editProfile.changeImage" defaultMessage="Change image" />
+									) : (
+										<FormattedMessage id="editProfile.addImage" defaultMessage="Add image" />
+									)}
+									<AvatarInput
+										{...field}
+										onChange={(event) => addImage(event, onChange)}
+									/>
+								</AvatarLabel>
+							</AvatarButton>
+						)}
+					/>
+				</UserInfo>
+			</Header>
+			{(fileSizeError || error) && <ErrorMessage title={fileSizeError || error.message} />}
+		</>
 	);
 };
