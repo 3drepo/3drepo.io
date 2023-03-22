@@ -94,10 +94,10 @@ export const UploadListItemDestination = ({
 	const getValidContainer = (baseContainer: IContainer): Partial<UploadItemFields> => ({
 		containerId: baseContainer._id,
 		containerName: baseContainer.name,
-		containerCode: baseContainer.code,
+		containerCode: baseContainer.code || '',
 		containerType: baseContainer.type || 'Uncategorised',
 		containerUnit: baseContainer.unit || 'mm',
-		containerDesc: baseContainer.desc,
+		containerDesc: baseContainer.desc || '',
 	});
 
 	const testName = (containerName) => {

@@ -39,7 +39,7 @@ export const SidebarForm = ({
 	onChange,
 	isSpm,
 }: ISidebarForm): JSX.Element => {
-	const { control, formState: { errors }, getValues, setValue, trigger } = useForm<UploadItemFields>({
+	const { control, formState: { errors }, getValues, setValue, reset } = useForm<UploadItemFields>({
 		defaultValues: value,
 		mode: 'onChange',
 		resolver: yupResolver(SidebarSchema),
@@ -69,7 +69,7 @@ export const SidebarForm = ({
 	const updateValue = (name) => onChange(name, getValues(name));
 
 	useEffect(() => {
-		trigger();
+		reset(value);
 	}, [value]);
 
 	return (
