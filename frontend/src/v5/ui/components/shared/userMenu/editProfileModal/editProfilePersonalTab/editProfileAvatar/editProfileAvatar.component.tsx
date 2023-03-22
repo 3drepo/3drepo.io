@@ -40,10 +40,10 @@ type EditProfilePersonalTabProps = {
 
 export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
 	const [fileSizeError, setFileSizeError] = useState('');
-	const { setValue, getValues, formState: { errors }, control } = useFormContext();
+	const { setValue, watch, formState: { errors }, control } = useFormContext();
 
 	const error = errors.avatarFile;
-	const newAvatar = getValues('avatarFile');
+	const newAvatar = watch('avatarFile');
 
 	const addImage = (event, onChange) => {
 		if (!event.target.files.length) return;
@@ -73,7 +73,7 @@ export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
 
 	useEffect(() => {
 		setFileSizeError('');
-	}, [JSON.stringify(getValues())]);
+	}, [JSON.stringify(watch())]);
 
 	return (
 		<Header>
