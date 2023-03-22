@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useParams } from 'react-router';
+import { useParams, generatePath } from 'react-router';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { formatMessage } from '@/v5/services/intl';
 import { ContainersActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -22,7 +22,7 @@ import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { viewerRoute } from '@/v5/services/routing/routing';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { BOARD_ROUTE, DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { ContainersHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { uploadToContainer } from '../../../uploadFileForm/uploadFileForm.helpers';
@@ -42,6 +42,13 @@ export const ContainerEllipsisMenu = ({
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const hasCollaboratorAccess = ContainersHooksSelectors.selectHasCollaboratorAccess(container._id);
+
+	const getBoardPath = ({ type }) => generatePath(BOARD_ROUTE, {
+		teamspace,
+		project,
+		type,
+		containerOrFederation: container._id,
+	});
 
 	const onClickShare = () => {
 		const link = prefixBaseDomain(viewerRoute(teamspace, project, container));
@@ -102,12 +109,14 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.viewIssues',
 					defaultMessage: 'View Issues',
 				})}
+				to={{ pathname: getBoardPath({ type: 'issues' }) }}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.viewRisks',
 					defaultMessage: 'View Risks',
 				})}
+				to={{ pathname: getBoardPath({ type: 'risks' }) }}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage(selected

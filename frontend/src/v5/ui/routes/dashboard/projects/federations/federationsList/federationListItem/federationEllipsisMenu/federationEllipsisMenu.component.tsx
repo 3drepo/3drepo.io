@@ -14,14 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useParams } from 'react-router';
+import { useParams, generatePath } from 'react-router';
 import { formatMessage } from '@/v5/services/intl';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { FederationsActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { viewerRoute } from '@/v5/services/routing/routing';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { BOARD_ROUTE, DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { FederationSettingsModal } from '../../../federationSettingsModal/federationSettingsModal.component';
@@ -37,6 +37,13 @@ export const FederationEllipsisMenu = ({
 }: FederationEllipsisMenuProps) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+
+	const getBoardPath = ({ type }) => generatePath(BOARD_ROUTE, {
+		teamspace,
+		project,
+		type,
+		containerOrFederation: federation._id,
+	});
 
 	// eslint-disable-next-line max-len
 	const onClickSettings = () => DialogsActionsDispatchers.open(FederationSettingsModal, { federationId: federation._id });
@@ -98,6 +105,7 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.viewIssues',
 					defaultMessage: 'View Issues',
 				})}
+				to={{ pathname: getBoardPath({ type: 'issues' }) }}
 			/>
 
 			<EllipsisMenuItem
@@ -105,6 +113,7 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.viewRisks',
 					defaultMessage: 'View Risks',
 				})}
+				to={{ pathname: getBoardPath({ type: 'risks' }) }}
 			/>
 
 			<EllipsisMenuItem
