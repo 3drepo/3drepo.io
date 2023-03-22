@@ -41,6 +41,6 @@ export default {
 	teamspaces2: teamspacesReducer,
 	tickets: ticketsReducer,
 	ticketsCard: ticketsCardReducer,
-	ticketsComment: ticketCommentsReducer,
+	ticketComments: ticketCommentsReducer,
 	users: usersReducer,
 };

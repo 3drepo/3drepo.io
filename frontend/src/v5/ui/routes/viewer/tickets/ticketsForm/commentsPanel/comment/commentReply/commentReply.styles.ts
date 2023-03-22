@@ -18,7 +18,7 @@
 import styled, { css } from 'styled-components';
 import { ExpandableImage as ExpandableImageBase } from '@controls/expandableImage/expandableImage.component';
 import CameraIconBase from '@assets/icons/outlined/camera-outlined.svg';
-import { CommentMarkDown as CommentMarkDownBase } from '../commentMarkDown/commentMarkDown';
+import { CommentMarkDown as CommentMarkDownBase } from '../commentMarkDown/commentMarkDown.component';
 import { CommentImagesContainer, CommentMessage } from '../basicComment/basicComment.styles';
 
 export const CommentReplyContainer = styled.div<{ variant?: 'primary' | 'secondary', shortMessage?: boolean }>`
