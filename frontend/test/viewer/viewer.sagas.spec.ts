@@ -21,8 +21,7 @@ import { containerMockFactory, prepareMockStatsReply } from '../containers/conta
 import { federationMockFactory } from '../federations/federations.fixtures';
 import { mockServer } from '../../internals/testing/mockServer';
 import { createTestStore } from '../test.helpers';
-import { ProjectsActions, ProjectsTypes } from '@/v5/store/projects/projects.redux';
-import { projectMockFactory } from '../projects/projects.fixtures';
+import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 
 describe('Viewer: sagas', () => {
 	const teamspace = 'myteamspace';
@@ -57,10 +56,7 @@ describe('Viewer: sagas', () => {
 			await waitForActions(() => {
 				dispatch(ViewerActionsCreators.fetchData(teamspace, projectId, containerOrFederationId));
 			}, [ViewerActionsCreators.setFetching(false)]);
+
 		});
-
-
 	});
-
-
 });

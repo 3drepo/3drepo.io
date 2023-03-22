@@ -54,7 +54,7 @@ export const createTestStore = () => {
 
 	const discountMatchingActions =  (action: Action) => {
 		const waitingAction = waitingActions[0];
-
+	
 		if (action.type === waitingAction || isEqual(waitingAction, action)) {
 			waitingActions.shift();
 		}
@@ -67,8 +67,6 @@ export const createTestStore = () => {
 			...reducers,
 			spyActions: (state, action) => {
 				const { resolvePromise } = resolvePromiseObj;
-
-				console.log(resolvePromiseObj.resolvePromise);
 
 				if (discountMatchingActions(action) && resolvePromise) {
 					resolvePromise(true);
