@@ -57,6 +57,7 @@ export const UserInfo = styled.div`
 	display: flex;
 	flex-direction: column;
 	margin-left: 20px;
+	flex: 1;
 `;
 
 export const TruncatableName = styled(Truncate).attrs({
