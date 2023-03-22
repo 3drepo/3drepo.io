@@ -32,14 +32,14 @@ import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalB
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { TabContent } from '../editProfileModal.styles';
 
-export interface IUpdatePersonalInputs {
+export type IUpdatePersonalInputs = Partial<{
 	firstName: string;
 	lastName: string;
 	email: string;
-	company?: string;
-	countryCode?: string;
-	avatarFile?: File;
-}
+	company: string;
+	countryCode: string;
+	avatarFile: File;
+}>;
 
 type EditProfilePersonalTabProps = {
 	alreadyExistingEmails: string[];
@@ -68,9 +68,6 @@ export const EditProfilePersonalTab = ({
 
 	const getSubmittableValues = (): IUpdatePersonalInputs => {
 		let values = getValues();
-		if (user.sso) {
-			values = omit(values, ['firstName', 'lastName', 'email']);
-		}
 		const trimmedValues = mapValues(values, (value) => value?.trim?.() ?? value);
 		return pickBy(trimmedValues) as IUpdatePersonalInputs;
 	};
@@ -101,7 +98,10 @@ export const EditProfilePersonalTab = ({
 	};
 
 	const onSubmit = async () => {
-		const values = getSubmittableValues();
+		let values = getSubmittableValues();
+		if (user.sso) {
+			values = omit(values, ['firstName', 'lastName', 'email']);
+		}
 		await new Promise((resolve, reject) => {
 			CurrentUserActionsDispatchers.updatePersonalData(
 				values,
