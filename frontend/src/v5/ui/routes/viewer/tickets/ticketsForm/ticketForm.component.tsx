@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ITemplate, ITicket, PropertyDefinition, TemplateModule } from '@/v5/store/tickets/tickets.types';
-import { get } from 'lodash';
+import { get, some } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { formatMessage } from '@/v5/services/intl';
 import PropetiesIcon from '@assets/icons/outlined/bullet_list-outlined.svg';
@@ -31,12 +31,11 @@ import { CommentsPanel } from './commentsPanel/commentsPanel.component';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
-	propertiesValues: Record<string, any>;
 	module: string;
 	onPropertyBlur?: (...args) => void;
 }
 
-const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyBlur }: PropertiesListProps) => {
+const PropertiesList = ({ module, properties, onPropertyBlur }: PropertiesListProps) => {
 	const { formState } = useFormContext();
 	return (
 		<>
@@ -60,7 +59,7 @@ const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyB
 							required={required}
 							name={inputName}
 							formError={formError}
-							defaultValue={propertiesValues[name] ?? defaultValue}
+							defaultValue={defaultValue}
 							key={name}
 							onBlur={onPropertyBlur}
 							// @ts-ignore
@@ -74,27 +73,33 @@ const PropertiesList = ({ module, properties, propertiesValues = {}, onPropertyB
 	);
 };
 
-const PropertiesPanel = (props: PropertiesListProps) => (
-	<Accordion
-		defaultExpanded
-		Icon={PropetiesIcon}
-		title={formatMessage({ id: 'customTicket.panel.properties', defaultMessage: 'Properties' })}
-	>
-		<PropertiesList {...props} />
-	</Accordion>
-);
+const PropertiesPanel = ({ properties, ...props }: PropertiesListProps) => {
+	const required = some(properties, (property) => property.required);
+	return (
+		<Accordion
+			defaultExpanded
+			Icon={PropetiesIcon}
+			title={formatMessage({ id: 'customTicket.panel.properties', defaultMessage: 'Properties' })}
+			required={required}
+		>
+			<PropertiesList properties={properties} {...props} />
+		</Accordion>
+	);
+};
 
 interface ModulePanelProps {
 	module: TemplateModule;
-	moduleValues: Record<string, any>;
 	scrollPanelIntoView: (event, isExpanding) => void;
 }
 
-const ModulePanel = ({ module, moduleValues, scrollPanelIntoView, ...rest }: ModulePanelProps) => (
-	<Accordion {...getModulePanelTitle(module)} onChange={scrollPanelIntoView}>
-		<PropertiesList module={`modules.${module.name || module.type}`} properties={module.properties || []} propertiesValues={moduleValues} {...rest} />
-	</Accordion>
-);
+const ModulePanel = ({ module, scrollPanelIntoView, ...rest }: ModulePanelProps) => {
+	const required = some(module.properties, (property) => property.required);
+	return (
+		<Accordion {...getModulePanelTitle(module)} onChange={scrollPanelIntoView} required={required}>
+			<PropertiesList module={`modules.${module.name || module.type}`} properties={module.properties || []} {...rest} />
+		</Accordion>
+	);
+};
 
 interface Props {
 	template: Partial<ITemplate>;
@@ -125,23 +130,18 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 					name={TITLE_INPUT_NAME}
 					defaultValue={ticket[TITLE_INPUT_NAME]}
 					formError={formState.errors[TITLE_INPUT_NAME]}
-					placeholder={formatMessage({
-						id: 'customTicket.newTicket.titlePlaceholder',
-						defaultMessage: 'Ticket name',
-					})}
 					inputProps={{ autoFocus: focusOnTitle }}
 					onBlur={rest?.onPropertyBlur}
 				/>
 			</TitleContainer>
 			<CardContent>
 				<PanelsContainer>
-					<PropertiesPanel module="properties" properties={template?.properties || []} propertiesValues={ticket.properties} {...rest} />
+					<PropertiesPanel module="properties" properties={template?.properties || []} {...rest} />
 					{
 						(template.modules || []).map((module) => (
 							<ModulePanel
 								key={module.name || module.type}
 								module={module}
-								moduleValues={ticket.modules[module.name]}
 								scrollPanelIntoView={scrollPanelIntoView}
 								{...rest}
 							/>

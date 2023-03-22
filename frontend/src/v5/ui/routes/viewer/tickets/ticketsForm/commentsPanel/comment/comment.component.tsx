@@ -31,6 +31,7 @@ export type CommentProps = ITicketComment & {
 };
 export const Comment = ({
 	updatedAt,
+	createdAt,
 	author,
 	message = '',
 	deleted,
@@ -45,15 +46,12 @@ export const Comment = ({
 	const metadata = extractMetadata(message);
 	const noMetadataMessage = !deleted ? stripMetadata(message) : message;
 
-	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt));
+	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt || createdAt));
 
 	useEffect(() => {
-		if (updatedAt) {
-			updateMessageAge();
-			const intervalId = window.setInterval(updateMessageAge, 10_000);
-			return () => clearInterval(intervalId);
-		}
-		return null;
+		updateMessageAge();
+		const intervalId = window.setInterval(updateMessageAge, 10_000);
+		return () => clearInterval(intervalId);
 	}, [updatedAt]);
 
 	const UserComment = isCurrentUser ? CurrentUserComment : OtherUserComment;

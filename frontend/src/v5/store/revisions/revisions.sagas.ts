@@ -67,7 +67,7 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 	};
 	if (!containerId) {
 		try {
-			containerId = yield API.Containers.createContainer({ teamspace, projectId, newContainer });
+			containerId = yield API.Containers.createContainer(teamspace, projectId, newContainer);
 			yield put(ContainersActions.createContainerSuccess(projectId, { _id: containerId, ...newContainer }));
 		} catch (error) {
 			yield put(DialogsActions.open('alert', {

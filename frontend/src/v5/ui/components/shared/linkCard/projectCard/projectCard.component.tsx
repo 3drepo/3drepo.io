@@ -16,7 +16,7 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { projectRoute } from '@/v5/services/routing/routing';
+import { projectRoute, projectTabRoute } from '@/v5/services/routing/routing';
 import { formatMessage } from '@/v5/services/intl';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { Highlight } from '@controls/highlight';
@@ -98,6 +98,14 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 							defaultMessage: 'Delete Project',
 						})}
 						onClick={onClickDelete}
+						hidden={!isAdmin}
+					/>
+					<EllipsisMenuItem
+						title={formatMessage({
+							id: 'projectCard.ellipsisMenu.settings',
+							defaultMessage: 'Settings',
+						})}
+						to={projectTabRoute(teamspace, project, 'project_settings')}
 						hidden={!isAdmin}
 					/>
 				</EllipsisMenu>

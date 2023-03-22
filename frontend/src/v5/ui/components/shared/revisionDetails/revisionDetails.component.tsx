@@ -19,7 +19,6 @@ import { useEffect } from 'react';
 import { range } from 'lodash';
 
 import { RevisionsListHeaderLabel } from '@components/shared/revisionDetails/components/revisionsListHeaderLabel';
-import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { Button } from '@controls/button';
 import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
 import { RevisionsListItem } from '@components/shared/revisionDetails/components/revisionsListItem';
@@ -50,8 +49,9 @@ interface IRevisionDetails {
 export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisionDetails): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const isLoading: boolean = RevisionsHooksSelectors.selectIsPending(containerId);
-	const revisions: IRevision[] = RevisionsHooksSelectors.selectRevisions(containerId);
+	const isLoading = RevisionsHooksSelectors.selectIsPending(containerId);
+	const revisions = RevisionsHooksSelectors.selectRevisions(containerId)
+		.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 	const selected = revisions.findIndex((r) => !r.void);
 	const isSingle = revisions?.length === 1;
 

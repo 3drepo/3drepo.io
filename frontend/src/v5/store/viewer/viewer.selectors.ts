@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,20 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { formatMessage } from '@/v5/services/intl';
-import { isNumber } from 'lodash';
-import * as Yup from 'yup';
 
-export const trimmedString = Yup.string().transform((value) => value.trim());
+import { createSelector } from 'reselect';
+import { ViewerState } from './viewer.redux';
 
-export const nullableNumber = Yup.number().transform(
-	(_, val) => ((val || val === 0) ? Number(val) : null),
-).nullable(true);
-export const requiredNumber = (requiredError?) => nullableNumber.test(
-	'requiredNumber',
-	requiredError || formatMessage({
-		id: 'validation.number.required',
-		defaultMessage: 'This is required',
-	}),
-	(number) => isNumber(number),
+const selectViewerDomain = (state): ViewerState => state.viewer2;
+
+export const selectIsFetching = createSelector(
+	selectViewerDomain, (state) => state.isFetching,
 );

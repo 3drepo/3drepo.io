@@ -18,7 +18,7 @@
 import { createSelector } from 'reselect';
 import { ITicketCommentsState } from './ticketComments.redux';
 
-const selectCommentsDomain = (state): ITicketCommentsState => state.ticketsComment || {};
+const selectCommentsDomain = (state): ITicketCommentsState => state.ticketComments || {};
 
 export const selectComments = createSelector(
 	selectCommentsDomain,
