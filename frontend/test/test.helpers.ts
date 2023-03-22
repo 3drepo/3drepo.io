@@ -15,8 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createStore, combineReducers } from 'redux';
+import { createStore, combineReducers, applyMiddleware, Action } from 'redux';
 import reducers from '@/v5/store/reducers';
+import createSagaMiddleware from 'redux-saga';
+import rootSaga from '@/v4/modules/sagas';
+import { all, fork, getContext, setContext, take } from 'redux-saga/effects';
+import { ViewerTypes } from '@/v5/store/viewer/viewer.redux';
 
 export const alertAction = (currentAction: string) => ({
 	action: {
@@ -40,7 +44,69 @@ export const spyOnAxiosApiCallWithFile = (api, method) => {
 	});
 };
 
-export const createTestStore = () => createStore(combineReducers(reducers));
+
+// let sagaPromise = null;
+// let waitPatterns = [];
+// export const getSagaPromise = (...wait) => {
+// 	waitPatterns = wait;
+// 	sagaPromise;
+// }
+
+export const createTestStore = () => {
+	let middlewares = undefined;
+	let waitingActions = [];
+
+	const sagaMiddleware = createSagaMiddleware();
+	
+	middlewares = applyMiddleware(sagaMiddleware);
+
+	const actionsCounter = function* (waitingActions: Action[]){
+		while (waitingActions.length > 0){
+			const action = yield;
+			if (waitingActions[0].type == )
+			 false;
+		}
+
+		return true;
+	};
+
+	
+	const store = createStore(combineReducers({...reducers,
+	 spy: (state, action) =>
+		if (actionsCounter) {
+
+		}
+		return state;
+	}), middlewares);
+	
+	const waitForSaga = (func) =>  { 
+		// setContext({waitingPatterns});
+		// func();
+
+
+		return promise;
+	}
+
+	// sagaMiddleware.run(function* () {
+	// 	yield(all([
+	// 		fork(rootSaga),
+	// 		fork(function * () {
+	// 			const pp = {resolve: null};
+	// 			const waitingPatterns: string[] =  yield getContext('waitingPatterns');
+	// 			console.log(waitingPatterns);
+	// 			const sagaPromise = new Promise(resolve =>  pp.resolve = resolve);
+	// 			yield setContext({promise: sagaPromise});
+	// 			for (const p of waitingPatterns) {
+	// 				yield take(p);
+	// 			}
+	// 			pp.resolve();
+	// 		})
+	// 	]))
+	// });
+
+	sagaMiddleware.run(rootSaga);
+	return {...store, waitForSaga};
+};
 
 export const listContainsElementWithId = (list, element) => (	
 	list.map(({ _id }) => _id).includes(element._id)
