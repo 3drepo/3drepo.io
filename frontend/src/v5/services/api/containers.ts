@@ -20,89 +20,55 @@ import {
 	ContainerBackendSettings,
 	ContainerStats,
 	MinimumContainer,
-	NewContainer,
 } from '@/v5/store/containers/containers.types';
-import { TeamspaceAndProjectId, TeamspaceProjectAndContainerId, View } from '@/v5/store/store.types';
+import { View } from '@/v5/store/store.types';
 import api from './default';
 
-export const addFavourites = (
-	{ teamspace, projectId, containerId }: TeamspaceProjectAndContainerId,
-): Promise<AxiosResponse<void>> => (
+export const addFavourites = (teamspace, projectId, containerId): Promise<AxiosResponse<void>> => (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites`, {
 		containers: [containerId],
 	})
 );
 
-export const removeFavourites = (
-	{ teamspace, projectId, containerId }: TeamspaceProjectAndContainerId,
-): Promise<AxiosResponse<void>> => (
+export const removeFavourites = (teamspace, projectId, containerId): Promise<AxiosResponse<void>> => (
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/favourites?ids=${containerId}`)
 );
 
-export const fetchContainers = async ({
-	teamspace,
-	projectId,
-}: TeamspaceAndProjectId): Promise<FetchContainersResponse> => {
+export const fetchContainers = async (teamspace, projectId): Promise<FetchContainersResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers`);
 	return data;
 };
 
-export const fetchContainerStats = async ({
-	teamspace,
-	projectId,
-	containerId,
-}: TeamspaceProjectAndContainerId): Promise<ContainerStats> => {
+export const fetchContainerStats = async (teamspace, projectId, containerId): Promise<ContainerStats> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`);
 	return data;
 };
 
-export const fetchContainerViews = async ({
-	teamspace,
-	projectId,
-	containerId,
-}: TeamspaceProjectAndContainerId): Promise<FetchContainerViewsResponse> => {
+export const fetchContainerViews = async (teamspace, projectId, containerId): Promise<FetchContainerViewsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/views`);
 	return data;
 };
 
-export const fetchContainerSettings = async ({
-	teamspace,
-	projectId,
-	containerId,
-}: TeamspaceProjectAndContainerId): Promise<ContainerBackendSettings> => {
+export const fetchContainerSettings = async (teamspace, projectId, containerId): Promise<ContainerBackendSettings> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`);
 	return data;
 };
 
-export const updateContainerSettings = async ({
-	teamspace,
-	projectId,
-	containerId,
-	settings,
-}: UpdateContainerSettingsParams): Promise<AxiosResponse<void>> => (
+export const updateContainerSettings = async (teamspace, projectId, containerId, settings): Promise<AxiosResponse<void>> => (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`, settings)
 );
 
-export const createContainer = async ({
-	teamspace,
-	projectId,
-	newContainer,
-}: CreateContainerParams): Promise<string> => {
+export const createContainer = async (teamspace, projectId, newContainer): Promise<string> => {
 	const { data } = await api.post(`teamspaces/${teamspace}/projects/${projectId}/containers`, newContainer);
 	return data._id;
 };
 
-export const deleteContainer = (
-	{ teamspace, projectId, containerId }: TeamspaceProjectAndContainerId,
-): Promise<AxiosResponse<void>> => (
+export const deleteContainer = (teamspace, projectId, containerId): Promise<AxiosResponse<void>> => (
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
 );
 
 /**
  * Types
 */
-type CreateContainerParams = TeamspaceAndProjectId & { newContainer: NewContainer };
-type UpdateContainerSettingsParams = TeamspaceProjectAndContainerId & { settings: ContainerBackendSettings };
-
 export type FetchContainersResponse = { containers: Array<MinimumContainer> };
 export type FetchContainerViewsResponse = { views: View[] };
