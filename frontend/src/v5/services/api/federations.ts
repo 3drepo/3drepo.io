@@ -19,91 +19,55 @@ import {
 	FederationBackendSettings,
 	MinimumFederation,
 	FederationStats,
-	NewFederation,
 } from '@/v5/store/federations/federations.types';
-import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, View } from '@/v5/store/store.types';
+import { View } from '@/v5/store/store.types';
 import { AxiosResponse } from 'axios';
 import api from './default';
 
-export const createFederation = async (
-	{ teamspace, projectId, newFederation }: CreateFederationParams,
-): Promise<CreateFederationResponse> => {
+export const createFederation = async (teamspace, projectId, newFederation): Promise<CreateFederationResponse> => {
 	const { data } = await api.post(`teamspaces/${teamspace}/projects/${projectId}/federations`, newFederation);
 	return data._id;
 };
 
-export const addFavourites = (
-	{ teamspace, projectId, federationId }: TeamspaceProjectAndFederationId,
-): Promise<AxiosResponse<void>> => (
+export const addFavourites = (teamspace, projectId, federationId): Promise<AxiosResponse<void>> => (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/favourites`, {
 		federations: [federationId],
 	})
 );
 
-export const removeFavourites = (
-	{ teamspace, projectId, federationId }: TeamspaceProjectAndFederationId,
-): Promise<AxiosResponse<void>> => (
+export const removeFavourites = (teamspace, projectId, federationId): Promise<AxiosResponse<void>> => (
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}/federations/favourites?ids=${federationId}`)
 );
 
-export const fetchFederations = async ({
-	teamspace,
-	projectId,
-}: TeamspaceAndProjectId): Promise<FetchFederationsResponse> => {
+export const fetchFederations = async (teamspace, projectId): Promise<FetchFederationsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations`);
 	return data;
 };
 
-export const fetchFederationStats = async ({
-	teamspace,
-	projectId,
-	federationId,
-}: TeamspaceProjectAndFederationId): Promise<FederationStats> => {
+export const fetchFederationStats = async (teamspace, projectId, federationId): Promise<FederationStats> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/stats`);
 	return data;
 };
 
-export const fetchFederationViews = async ({
-	teamspace,
-	projectId,
-	federationId,
-}: TeamspaceProjectAndFederationId): Promise<FetchFederationViewsResponse> => {
+export const fetchFederationViews = async (teamspace, projectId, federationId): Promise<FetchFederationViewsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/views`);
 	return data;
 };
 
-export const fetchFederationSettings = async ({
-	teamspace,
-	projectId,
-	federationId,
-}: TeamspaceProjectAndFederationId): Promise<FederationBackendSettings> => {
+export const fetchFederationSettings = async (teamspace, projectId, federationId): Promise<FederationBackendSettings> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`);
 	return data;
 };
 
-export const updateFederationSettings = async ({
-	teamspace,
-	projectId,
-	federationId,
-	settings,
-}: UpdateFederationSettingsParams): Promise<AxiosResponse<void>> => (
+export const updateFederationSettings = async (teamspace, projectId, federationId, settings): Promise<AxiosResponse<void>> => (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`, settings)
 );
 
-export const deleteFederation = ({
-	teamspace,
-	projectId,
-	federationId,
-}: TeamspaceProjectAndFederationId): Promise<AxiosResponse<void>> => (
+export const deleteFederation = (teamspace, projectId, federationId): Promise<AxiosResponse<void>> => (
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
 );
 
-export const updateFederationContainers = async ({
-	teamspace,
-	projectId,
-	federationId,
-	containers,
-}: UpdateFederationContainersParams): Promise<AxiosResponse<void>> => (
+export const updateFederationContainers = async (teamspace, projectId, federationId, containers): Promise<AxiosResponse<void>> => (
 	api.post(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/revisions`, {
 		containers,
 	})
@@ -112,10 +76,6 @@ export const updateFederationContainers = async ({
 /**
  * Types
 */
-type CreateFederationParams = TeamspaceAndProjectId & { newFederation: NewFederation };
-type UpdateFederationContainersParams = TeamspaceProjectAndFederationId & { containers: string[] };
-type UpdateFederationSettingsParams = TeamspaceProjectAndFederationId & { settings: FederationBackendSettings };
-
 export type CreateFederationResponse = { _id: string };
 export type FetchFederationsResponse = { federations: Array<MinimumFederation> };
 export type FetchFederationViewsResponse = { views: View[] };

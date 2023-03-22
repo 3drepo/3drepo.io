@@ -51,7 +51,6 @@ type EditProfileModalProps = {
 };
 export const EditProfileModal = ({ open, onClickClose, initialTab }: EditProfileModalProps) => {
 	const [activeTab, setActiveTab] = useState(initialTab || PERSONAL_TAB);
-	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [incorrectPassword, setIncorrectPassword] = useState(false);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
 	const [unexpectedErrors, setUnexpectedErrors] = useState<EditProfileUnexpectedErrors>({});
@@ -82,6 +81,8 @@ export const EditProfileModal = ({ open, onClickClose, initialTab }: EditProfile
 		defaultValues: EMPTY_PASSWORDS,
 	});
 
+	const isSubmitting = personalFormData.formState.isSubmitting || authenticationFormData.formState.isSubmitting;
+
 	useEffect(() => {
 		setUnexpectedErrors({ ...unexpectedErrors, [activeTab]: interceptedError });
 	}, [interceptedError]);
@@ -107,7 +108,6 @@ export const EditProfileModal = ({ open, onClickClose, initialTab }: EditProfile
 						<EditProfilePersonalTab
 							alreadyExistingEmails={alreadyExistingEmails}
 							setAlreadyExistingEmails={setAlreadyExistingEmails}
-							setIsSubmitting={setIsSubmitting}
 							unexpectedError={unexpectedErrors[PERSONAL_TAB]}
 							onClickClose={onClickClose}
 						/>
@@ -118,7 +118,6 @@ export const EditProfileModal = ({ open, onClickClose, initialTab }: EditProfile
 						<EditProfileAuthenticationTab
 							incorrectPassword={incorrectPassword}
 							setIncorrectPassword={setIncorrectPassword}
-							setIsSubmitting={setIsSubmitting}
 							unexpectedError={unexpectedErrors[AUTHENTICATION_TAB]}
 							onClickClose={onClickClose}
 						/>

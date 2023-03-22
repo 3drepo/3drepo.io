@@ -44,7 +44,6 @@ export interface IUpdatePasswordInputs {
 type EditProfileAuthenticationNonSSOTabProps = {
 	incorrectPassword: boolean;
 	setIncorrectPassword: (isIncorrect: boolean) => void;
-	setIsSubmitting: (isSubmitting: boolean) => void;
 	unexpectedError: any,
 	onClickClose: () => void,
 };
@@ -52,7 +51,6 @@ type EditProfileAuthenticationNonSSOTabProps = {
 export const EditProfileAuthenticationNonSSOTab = ({
 	incorrectPassword,
 	setIncorrectPassword,
-	setIsSubmitting,
 	unexpectedError,
 	onClickClose,
 }: EditProfileAuthenticationNonSSOTabProps) => {
@@ -94,8 +92,6 @@ export const EditProfileAuthenticationNonSSOTab = ({
 		const res = await linkAccount();
 		window.location.href = res.data.link;
 	};
-
-	useEffect(() => setIsSubmitting(isSubmitting), [isSubmitting]);
 
 	useEffect(() => {
 		if (incorrectPassword && touchedFields.oldPassword) {

@@ -36,7 +36,6 @@ export const EMPTY_PASSWORDS = {
 type EditProfileAuthenticationTabProps = {
 	incorrectPassword: boolean;
 	setIncorrectPassword: (isIncorrect: boolean) => void;
-	setIsSubmitting: (isSubmitting: boolean) => void;
 	unexpectedError: any,
 	onClickClose: () => void,
 };

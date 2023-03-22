@@ -30,7 +30,7 @@ export const ScrollArea = styled(ScrollAreaBase).attrs({
 export const Header = styled.div`
 	display: flex;
 	flex-direction: row;
-	align-items: center;
+	align-items: flex-start;
 `;
 
 export const Avatar = styled(AvatarBase).attrs({
@@ -57,12 +57,15 @@ export const UserInfo = styled.div`
 	display: flex;
 	flex-direction: column;
 	margin-left: 20px;
+	flex: 1;
 `;
 
 export const TruncatableName = styled(Truncate).attrs({
 	lines: 1,
 	width: 274,
-})``;
+})`
+	width: fit-content;
+`;
 
 export const Username = styled.div`
 	font-size: ${({ theme }) => theme.typography.h3};

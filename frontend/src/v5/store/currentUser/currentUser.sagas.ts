@@ -49,7 +49,6 @@ export function* updatePersonalData({
 	onSuccess,
 	onError,
 }: UpdatePersonalDataAction) {
-	yield put(CurrentUserActions.setPersonalDataIsUpdating(true));
 	try {
 		yield API.CurrentUser.updateUser(restOfPersonalData);
 		if (avatarFile) {
@@ -64,7 +63,6 @@ export function* updatePersonalData({
 	} catch (error) {
 		onError(error);
 	}
-	yield put(CurrentUserActions.setPersonalDataIsUpdating(false));
 }
 
 export function* generateApiKey() {

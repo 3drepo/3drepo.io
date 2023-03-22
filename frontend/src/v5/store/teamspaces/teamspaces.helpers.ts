@@ -22,7 +22,7 @@ import { Quota, QuotaUnit } from './teamspaces.redux';
 export const DEFAULT_TEAMSPACE_IMG_SRC = 'assets/images/teamspace_placeholder.svg';
 
 export const getTeamspaceImgSrc = (teamspace: string) => (
-	generateV5ApiUrl(`teamspaces/${teamspace}/avatar?${Date.now()}`, clientConfigService.GET_API)
+	generateV5ApiUrl(`teamspaces/${teamspace}/avatar`, clientConfigService.GET_API)
 );
 
 export const isQuotaUnitUnlimited = (quotaUnit: QuotaUnit) => quotaUnit.available === 'unlimited';
