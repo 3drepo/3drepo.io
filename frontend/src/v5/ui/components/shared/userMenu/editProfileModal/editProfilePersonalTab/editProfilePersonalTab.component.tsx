@@ -32,19 +32,18 @@ import { ModalCancelButton, ModalSubmitButton } from '@controls/formModal/modalB
 import { EditProfileAvatar } from './editProfileAvatar/editProfileAvatar.component';
 import { TabContent } from '../editProfileModal.styles';
 
-export interface IUpdatePersonalInputs {
+export type IUpdatePersonalInputs = Partial<{
 	firstName: string;
 	lastName: string;
 	email: string;
-	company?: string;
-	countryCode?: string;
-	avatarFile?: File;
-}
+	company: string;
+	countryCode: string;
+	avatarFile: File;
+}>;
 
 type EditProfilePersonalTabProps = {
 	alreadyExistingEmails: string[];
 	setAlreadyExistingEmails: (emails: string[]) => void;
-	setIsSubmitting: (isSubmitting: boolean) => void,
 	unexpectedError: any,
 	onClickClose: () => void,
 };
@@ -52,41 +51,35 @@ type EditProfilePersonalTabProps = {
 export const EditProfilePersonalTab = ({
 	alreadyExistingEmails,
 	setAlreadyExistingEmails,
-	setIsSubmitting,
 	unexpectedError,
 	onClickClose,
 }: EditProfilePersonalTabProps) => {
-	const formIsUploading = CurrentUserHooksSelectors.selectPersonalDataIsUpdating();
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
-	const [canSubmit, setCanSubmit] = useState(false);
 	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
 	const {
 		getValues,
 		trigger,
 		handleSubmit,
 		reset,
-		watch,
 		setError: setFormError,
 		control,
-		formState: { errors: formErrors, isValid: formIsValid },
+		formState: { errors: formErrors, isDirty, touchedFields, isSubmitting },
 	} = useFormContext();
 
 	const getSubmittableValues = (): IUpdatePersonalInputs => {
-		let values = getValues();
-		if (user.sso) {
-			values = omit(values, ['firstName', 'lastName', 'email']);
-		}
+		const values = getValues();
 		const trimmedValues = mapValues(values, (value) => value?.trim?.() ?? value);
 		return pickBy(trimmedValues) as IUpdatePersonalInputs;
 	};
 
-	const onSubmissionSuccess = () => {
-		setSubmitWasSuccessful(true);
+	const onSubmissionSuccess = (resolve) => {
 		const { avatarFile, ...values } = getSubmittableValues();
 		reset(values);
+		setSubmitWasSuccessful(true);
+		resolve();
 	};
 
-	const onSubmissionError = (apiError) => {
+	const onSubmissionError = (apiError, reject) => {
 		setSubmitWasSuccessful(false);
 		if (emailAlreadyExists(apiError)) {
 			setAlreadyExistingEmails([...alreadyExistingEmails, getValues('email')]);
@@ -101,30 +94,48 @@ export const EditProfilePersonalTab = ({
 				}),
 			});
 		}
+		reject();
 	};
 
-	const onSubmit = () => {
-		const values = getSubmittableValues();
-		CurrentUserActionsDispatchers.updatePersonalData(
-			values,
-			onSubmissionSuccess,
-			onSubmissionError,
-		);
+	const onSubmit = async () => {
+		let values = getSubmittableValues();
+		if (user.sso) {
+			values = omit(values, ['firstName', 'lastName', 'email']);
+		}
+		await new Promise((resolve, reject) => {
+			CurrentUserActionsDispatchers.updatePersonalData(
+				values,
+				() => onSubmissionSuccess(resolve),
+				(apiError) => onSubmissionError(apiError, reject),
+			);
+		});
 	};
 
 	const fieldsAreDirty = !isMatch(user, getSubmittableValues());
+	const canSubmit = isEmpty(formErrors) && fieldsAreDirty;
 
-	// enable submission only if form is valid and fields are dirty
 	useEffect(() => {
-		setCanSubmit(formIsValid && isEmpty(formErrors) && fieldsAreDirty);
-	}, [JSON.stringify(watch()), user, formIsValid, JSON.stringify(formErrors)]);
-
-	useEffect(() => setIsSubmitting(formIsUploading), [formIsUploading]);
+		if (submitWasSuccessful) {
+			setSubmitWasSuccessful(false);
+		}
+	}, [JSON.stringify(isDirty), touchedFields]);
 
 	return (
 		<>
 			<TabContent>
 				<EditProfileAvatar user={user} />
+				{submitWasSuccessful && (
+					<SuccessMessage>
+						<FormattedMessage
+							id="editProfile.form.updateProfileSuccess"
+							defaultMessage="Your profile has been changed successfully."
+						/>
+					</SuccessMessage>
+				)}
+				<UnhandledError
+					error={unexpectedError}
+					expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]}
+				/>
 				<FormTextField
 					name="firstName"
 					control={control}
@@ -182,22 +193,10 @@ export const EditProfilePersonalTab = ({
 						</MenuItem>
 					))}
 				</FormSelect>
-				{submitWasSuccessful && (
-					<SuccessMessage>
-						<FormattedMessage
-							id="editProfile.form.updateProfileSuccess"
-							defaultMessage="Your profile has been changed successfully."
-						/>
-					</SuccessMessage>
-				)}
-				<UnhandledError
-					error={unexpectedError}
-					expectedErrorValidators={[emailAlreadyExists, isFileFormatUnsupported]}
-				/>
 			</TabContent>
 			<FormModalActions>
 				<ModalCancelButton onClick={onClickClose} />
-				<ModalSubmitButton disabled={!canSubmit} onClick={handleSubmit(onSubmit)}>
+				<ModalSubmitButton disabled={!canSubmit} onClick={handleSubmit(onSubmit)} isPending={isSubmitting}>
 					<FormattedMessage
 						defaultMessage="Update profile"
 						id="editProfile.tab.confirmButton.updateProfile"
