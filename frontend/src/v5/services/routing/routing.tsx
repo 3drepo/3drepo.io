@@ -20,7 +20,6 @@ import { IProject } from '@/v5/store/projects/projects.types';
 import { generatePath } from 'react-router';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { VIEWER_ROUTE, PROJECT_ROUTE_BASE, PROJECT_ROUTE, BOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
-import { TeamspaceId } from '@/v5/store/store.types';
 
 export const projectRoute = (teamspace: string, project: IProject | string) => {
 	const projectId = (project as IProject)?._id || (project as string);
@@ -56,9 +55,9 @@ export const viewerRoute = (
 	return generatePath(VIEWER_ROUTE, params);
 };
 
-type BoardRouteParams = TeamspaceId & {
-	project: string;
-	type: 'issues' | 'risks';
-	containerOrFederation: string;
-};
-export const boardRoute = (routeParams: BoardRouteParams) => generatePath(BOARD_ROUTE, routeParams);
+export const boardRoute = (
+	teamspace: string,
+	project: string,
+	type: 'issues' | 'risks',
+	containerOrFederation: string,
+) => generatePath(BOARD_ROUTE, { teamspace, project, type, containerOrFederation });

@@ -98,12 +98,12 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.viewIssues',
 					defaultMessage: 'View Issues',
 				})}
-				to={{ pathname: boardRoute({
+				to={{ pathname: boardRoute(
 					teamspace,
 					project,
-					type: 'issues',
-					containerOrFederation: federation._id,
-				}) }}
+					'issues',
+					federation._id,
+				) }}
 			/>
 
 			<EllipsisMenuItem
@@ -111,12 +111,12 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.viewRisks',
 					defaultMessage: 'View Risks',
 				})}
-				to={{ pathname: boardRoute({
+				to={{ pathname: boardRoute(
 					teamspace,
 					project,
-					type: 'risks',
-					containerOrFederation: federation._id,
-				}) }}
+					'risks',
+					federation._id,
+				) }}
 			/>
 
 			<EllipsisMenuItem

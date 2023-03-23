@@ -102,24 +102,24 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.viewIssues',
 					defaultMessage: 'View Issues',
 				})}
-				to={{ pathname: boardRoute({
+				to={{ pathname: boardRoute(
 					teamspace,
 					project,
-					type: 'issues',
-					containerOrFederation: container._id,
-				}) }}
+					'issues',
+					container._id,
+				) }}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.viewRisks',
 					defaultMessage: 'View Risks',
 				})}
-				to={{ pathname: boardRoute({
+				to={{ pathname: boardRoute(
 					teamspace,
 					project,
-					type: 'risks',
-					containerOrFederation: container._id,
-				}) }}
+					'risks',
+					container._id,
+				) }}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage(selected
