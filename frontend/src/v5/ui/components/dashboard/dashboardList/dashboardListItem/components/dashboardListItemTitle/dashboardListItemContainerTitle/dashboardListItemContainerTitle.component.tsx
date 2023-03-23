@@ -60,7 +60,7 @@ export const DashboardListItemContainerTitle = ({
 						</Highlight>
 					)}
 					status={container.status}
-					error={container.errorResponse}
+					error={container.errorReason}
 					hasRevisions={hasRevisions}
 				/>
 			)}
