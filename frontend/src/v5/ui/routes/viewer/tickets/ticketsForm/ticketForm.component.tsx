@@ -31,7 +31,7 @@ interface ModulePanelProps {
 }
 
 const ModulePanel = ({ module, scrollPanelIntoView, defaultExpanded, ...rest }: ModulePanelProps) => {
-	const required = some(module.properties, (property) => property.required);
+	const required = some(module.properties, 'required');
 	return (
 		// eslint-disable-next-line max-len
 		<Accordion {...getModulePanelTitle(module)} onChange={scrollPanelIntoView} defaultExpanded={defaultExpanded} required={required}>

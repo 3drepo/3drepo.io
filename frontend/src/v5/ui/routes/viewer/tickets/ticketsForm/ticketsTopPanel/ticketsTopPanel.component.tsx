@@ -47,7 +47,7 @@ export const TicketsTopPanel = ({
 	const createdAt = getValues(`properties.${BaseProperties.CREATED_AT}`);
 	const updatedAt = getValues(`properties.${BaseProperties.UPDATED_AT}`);
 
-	const hasIssueProperties = some(properties, (property) => property.name === IssueProperties.PRIORITY);
+	const hasIssueProperties = properties.some((property) => property.name === IssueProperties.PRIORITY);
 	const topPanelProperties: string[] = Object.values({ ...BaseProperties, ...IssueProperties });
 	const extraProperties = filter(properties, ({ name }) => !topPanelProperties.includes(name));
 	return (
