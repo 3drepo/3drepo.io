@@ -173,7 +173,7 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v1
 
     - name: Checkout Default Helm values
-      run: curl 'https://$(ACCESS_TOKEN)@$(PATH_TO_VALUES)' --output ./values.yaml
+      run: curl 'https://${ACCESS_TOKEN}@${PATH_TO_VALUES}' --output ./values.yaml
       env:
         ACCESS_TOKEN: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
         PATH_TO_VALUES: ${{ secrets.DEVOPS_HELM_VALUES }}
