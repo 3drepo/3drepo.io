@@ -23,6 +23,7 @@ import { ContainerSettings } from '@/v5/store/containers/containers.types';
 import { ContainerBackendSettings } from '@/v5/store/containers/containers.types';
 import { View } from '@/v5/store/store.types';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
+import { omit } from 'lodash';
 
 export const containerMockFactory = (overrides?: Partial<IContainer>): IContainer => ({
 	_id: faker.datatype.uuid(),
@@ -55,6 +56,8 @@ export const containerMockFactory = (overrides?: Partial<IContainer>): IContaine
 	
 	...overrides,
 });
+
+export const prepareMockBasecontainer = (container: IContainer) => omit(container, ['views', 'defaultView', 'surveyPoint', 'angleFromNorth'])
 
 export const prepareMockStats = (overrides?: Partial<ContainerStats>): ContainerStats => ({
 	revisions: {

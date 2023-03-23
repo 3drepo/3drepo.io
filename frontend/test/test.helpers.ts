@@ -91,3 +91,5 @@ export const createTestStore = () => {
 export const listContainsElementWithId = (list, element) => (	
 	list.map(({ _id }) => _id).includes(element._id)
 );
+
+export const findById = <T>(list: T[], _id:string):T | null => list.find((item) => (item as any)._id === _id);
