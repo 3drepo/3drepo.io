@@ -161,6 +161,7 @@ const IssueBoardCard = ({ metadata, onClick }: any) => (
 
 export function Board(props: IProps) {
 	const boardRef = useRef(null);
+	const firstUpdate = useRef(true);
 	const { type, teamspace, project: projectId, modelId: v4Model, containerOrFederation } = useParams<RouteParams>();
 	const v5Project = ProjectsHooksSelectors.selectCurrentProjectName();
 	const project = isV5() ? v5Project : projectId;
@@ -260,8 +261,11 @@ export function Board(props: IProps) {
 	};
 
 	useEffect(() => {
-		if (isV5() && boardRef.current) {
+		if (isV5() && boardRef.current && !firstUpdate.current) {
 			handleModelChange({ target: { value: null } });
+		}
+		if (firstUpdate.current) {
+			firstUpdate.current = false;
 		}
 	}, [projectId]);
 
@@ -496,7 +500,7 @@ export function Board(props: IProps) {
 		const messagePrefix = 'You have to choose';
 		const messageSufix = noModelAndProject ? 'project and model' : noModel ? 'model' : 'project';
 		const chooseMessage = isV5()
-			? formatMessage({ defaultMessage: `Select the federation or container to show board`, id: 'board.emptyBoard.placeholder' })
+			? formatMessage({ defaultMessage: 'Please select a federation or container to proceed', id: 'board.emptyBoard.placeholder' })
 			: `${messagePrefix} ${messageSufix} to show board.`;
 		const areModels =
 			getProjectModels(props.teamspaces, props.projectsMap, props.modelsMap, teamspace, project).length > 1;
