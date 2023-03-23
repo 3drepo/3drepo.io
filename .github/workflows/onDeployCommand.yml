@@ -168,7 +168,6 @@ jobs:
       with:
         token: '${{ github.token }}'
         state: 'success'
-        transient-environment: true
         auto-inactive: true
         deployment-id: ${{ needs.get-details.outputs.deployment-id }}
         environment-url: https://issue-${{ needs.get-details.outputs.issue-number }}.staging.dev.3drepo.io/?sha=${{ github.sha }}
