@@ -1,4 +1,4 @@
-name: Container Build
+name: Deploy To Staging
 
 # concurrency:
 #   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -14,12 +14,8 @@ on:
     branches:
       - 'master'
       - 'staging'
-    tags:
-      - '[0-9]+.[0-9]+.[0-9]+*'
-  pull_request:
-    branches:
-      - 'master'
-      - 'staging'
+  repository_dispatch:
+    types: [deploy]
 
 jobs:
   get-details:
