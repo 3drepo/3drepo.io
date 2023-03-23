@@ -171,7 +171,7 @@ jobs:
         transient-environment: true
         auto-inactive: true
         deployment-id: ${{ needs.get-details.outputs.deployment-id }}
-        environment-url: https://issue-${{ steps.commitMsgParser.outputs.issue-number }}.staging.dev.3drepo.io/?sha=${{ github.sha }}
+        environment-url: https://issue-${{ needs.get-details.outputs.issue-number }}.staging.dev.3drepo.io/?sha=${{ github.sha }}
         environment: issue- ${{ needs.get-details.outputs.issue-number }}
 
     - name: Update deployment status (failure)
