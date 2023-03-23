@@ -58,10 +58,16 @@ jobs:
         state: 'success'
         deployment-id: ${{ needs.get-details.outputs.deployment-id }}
 
-    - name: Update deployment status (failure)
+    - name: Delete the deployment
       if: success()
-      uses: chrnorm/deployment-status@v2
-      with:
-        token: '${{ github.token }}'
-        state: 'failure'
-        deployment-id: ${{ needs.get-details.outputs.deployment-id }}
+      run: | 
+            gh api \
+            --method DELETE \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/$OWNER/$REPO/deployments/$DEPLOYMENT_ID
+      env:
+        OWNER: ${{ github.repository_owner	}}
+        REPO: ${{ github.repository	}}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DEPLOYMENT_ID: ${{ needs.get-details.outputs.deployment-id }}
