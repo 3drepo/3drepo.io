@@ -202,7 +202,7 @@ jobs:
         version: 5.0.7
         atomic: true
         helm-wait: true
-        timeout: 900
+        timeout: 30m
 
     # - name: Azure Pipelines Action
     #   if: needs.get-details.outputs.issue-number
