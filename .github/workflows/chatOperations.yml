@@ -3,7 +3,7 @@ on:
   issue_comment:
     types: [created]
 jobs:
-  slashCommandDispatch:
+  chatOperations:
     runs-on: ubuntu-latest
     steps:
       - name: Slash Command Dispatch

@@ -30,11 +30,10 @@ jobs:
         id: commitMsgParser
 
       - uses: chrnorm/deployment-action@v2
-        name: Create GitHub deployment
+        name: Get GitHub deployment
         id: githubdeployment
         with:
           token: '${{ github.token }}'
-          environment-url: https://issue-${{ steps.commitMsgParser.outputs.issue-number }}.staging.dev.3drepo.io
           environment: issue-${{ steps.commitMsgParser.outputs.issue-number }}
 
   destroy-branch:

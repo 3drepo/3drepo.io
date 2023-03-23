@@ -20,7 +20,7 @@ on:
     branches:
       - 'master'
       - 'staging'
-      
+
   repository_dispatch:
     types: [ deploy-command ]
 
@@ -45,7 +45,10 @@ jobs:
         id: githubdeployment
         with:
           token: '${{ github.token }}'
-          state: 'in_progress'
+          sha: '${{ github.sha }}'
+          transient-environment: true
+          auto-inactive: true
+          initial-status: 'in_progress'
           environment: issue-${{ steps.commitMsgParser.outputs.issue-number }}
 
   build-images:
