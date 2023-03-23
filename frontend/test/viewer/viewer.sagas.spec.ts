@@ -25,6 +25,8 @@ import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { selectContainerById } from '@/v5/store/containers/containers.selectors';
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { selectFederationById } from '@/v5/store/federations/federations.selectors';
+import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
+import { selectDialogs } from '@/v5/store/dialogs/dialogs.selectors';
 
 
 describe('Viewer: sagas', () => {
@@ -114,5 +116,32 @@ describe('Viewer: sagas', () => {
 
 		});
 
+		it('should open a error dialog if it cant find the federation/container', async () => {
+			const containers = times(3, () => containerMockFactory());
+			const federations  = times(3, () => federationMockFactory());
+			const baseContainers = containers.map(prepareMockBasecontainer); 
+			const containerOrFederationId = 'nonexistentid';
+
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
+				.reply(200, { federations });
+
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
+				.reply(200, {containers: baseContainers});
+
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerOrFederationId}/stats`)
+				.reply(404, {});
+				
+			await waitForActions(() => {
+				dispatch(ViewerActionsCreators.fetchData(teamspace, projectId, containerOrFederationId));
+			}, [DialogsTypes.OPEN]);
+
+			const dialogs =  selectDialogs(getState());
+
+			expect(dialogs.length).toEqual(1);
+			expect(dialogs[0].modalType).toEqual('alert');
+		});
 	});
 });
