@@ -9,9 +9,11 @@ permissions:
   contents: write
   deployments: write
 
-on: 
+on:
+  push: # temp until dispatch merged
+  
   repository_dispatch:
-    types: [deploy]
+    types: [ deploy-command ]
 
 jobs:
   get-details:
