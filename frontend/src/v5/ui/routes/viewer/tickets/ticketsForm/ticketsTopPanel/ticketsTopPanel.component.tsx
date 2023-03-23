@@ -57,10 +57,6 @@ export const TicketsTopPanel = ({
 					name={BaseProperties.TITLE}
 					defaultValue={title}
 					formError={formState.errors[BaseProperties.TITLE]}
-					placeholder={formatMessage({
-						id: 'customTicket.topPanel.titlePlaceholder',
-						defaultMessage: 'Ticket name',
-					})}
 					inputProps={{ autoFocus: focusOnTitle }}
 					onBlur={onPropertyBlur}
 				/>
