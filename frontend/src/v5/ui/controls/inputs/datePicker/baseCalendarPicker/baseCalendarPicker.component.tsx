@@ -33,7 +33,7 @@ export const BaseCalendarPicker = ({
 	helperText,
 	error,
 	required,
-	value = null,
+	value,
 	...props
 }: BaseCalendarPickerProps) => {
 	const [open, setOpen] = useState(false);
@@ -66,7 +66,7 @@ export const BaseCalendarPicker = ({
 			)}
 			{...props}
 			// If value is 0 display it as null to prevent it showing as 1/1/1970
-			value={value || null}
+			value={value || (defaultValue ? dayjs(defaultValue) : null)}
 			onOpen={() => setOpen(true)}
 			onClose={() => {
 				// This is to signal that the date has changed (we are using onblur to save changes)
