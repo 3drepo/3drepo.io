@@ -73,6 +73,7 @@ export const UploadListItem = ({
 				defaultValue={defaultValues.containerName}
 			/>
 			<RevisionTag
+				defaultValue={defaultValues.revisionTag}
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
 				isSelected={isSelected}

@@ -81,7 +81,7 @@ export const UploadListItemDestination = ({
 		.map(({ name }) => name);
 
 	const containersNamesInModal = getValues('uploads')
-		.map(({ containerName }) => containerName.trim())
+		.map(({ containerName }) => containerName?.trim())
 		.filter(Boolean)
 		.filter((name) => name !== selectedContainer.name);
 
