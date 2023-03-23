@@ -10,10 +10,6 @@ permissions:
   deployments: write
 
 on: 
-  push:
-    branches:
-      - 'master'
-      - 'staging'
   repository_dispatch:
     types: [deploy]
 
@@ -158,6 +154,8 @@ jobs:
         token: '${{ github.token }}'
         state: 'success'
         deployment-id: ${{ needs.get-details.outputs.deployment-id }}
+        environment-url: https://issue-${{ steps.commitMsgParser.outputs.issue-number }}.staging.dev.3drepo.io
+        environment: issue-${{ steps.commitMsgParser.outputs.issue-number }}
 
     - name: Update deployment status (failure)
       if: failure()
