@@ -20,7 +20,7 @@ import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
 import { CreationInfo } from '@components/shared/creationInfo/creationInfo.component';
 import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
-import { filter, some } from 'lodash';
+import { filter } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
