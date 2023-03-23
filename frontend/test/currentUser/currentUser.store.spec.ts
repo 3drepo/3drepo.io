@@ -16,11 +16,7 @@
  */
 
 import { CurrentUserActions } from '@/v5/store/currentUser/currentUser.redux';
-import {
-	selectPersonalDataIsUpdating,
-	selectApiKeyIsUpdating,
-	selectCurrentUser,
-} from '@/v5/store/currentUser/currentUser.selectors';
+import { selectApiKeyIsUpdating, selectCurrentUser } from '@/v5/store/currentUser/currentUser.selectors';
 import { currentUserMockFactory, generatePersonalData } from './currentUser.fixtures';
 import { createTestStore } from '../test.helpers';
 
@@ -50,19 +46,6 @@ describe('CurrentUser: store', () => {
 			const currentUser = selectCurrentUser(getState());
 			expect(currentUser).toEqual({ ...mockCurrentUser, firstName: mockFirstName });
 		})
-	
-		// personalDataIsUpdating
-		it('should set updating personal data to true', () => {
-			dispatch(CurrentUserActions.setPersonalDataIsUpdating(true));
-			const personalDataIsUpdating = selectPersonalDataIsUpdating(getState());
-			expect(personalDataIsUpdating).toBe(true);
-		});
-	
-		it('should set updating personal data to false', () => {
-			dispatch(CurrentUserActions.setPersonalDataIsUpdating(false));
-			const personalDataIsUpdating = selectPersonalDataIsUpdating(getState());
-			expect(personalDataIsUpdating).toBe(false);
-		});
 
 		// apiKeyIsUpdating
 		it('should set api key data to true', () => {

@@ -33,7 +33,7 @@ export const BaseCalendarPicker = ({
 	helperText,
 	error,
 	required,
-	value = null,
+	value,
 	...props
 }: BaseCalendarPickerProps) => {
 	const [open, setOpen] = useState(false);
@@ -46,7 +46,7 @@ export const BaseCalendarPicker = ({
 	return (
 		<PickerComponent
 			{...props}
-			value={value}
+			value={value || (defaultValue ? dayjs(defaultValue) : null)}
 			onOpen={() => setOpen(true)}
 			onClose={() => {
 				// This is to signal that the date has changed (we are using onblur to save changes)
@@ -56,7 +56,6 @@ export const BaseCalendarPicker = ({
 			disabled={disabled}
 			open={open}
 			dayOfWeekFormatter={formatDayOfWeek}
-			defaultValue={defaultValue ? dayjs(defaultValue) : null}
 			disableHighlightToday
 			renderInput={({ ref, inputRef, ...textFieldProps }) => (
 				<TextField

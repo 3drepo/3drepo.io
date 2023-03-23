@@ -29,10 +29,12 @@ interface ITeamspaceCard {
 }
 
 export const TeamspaceCard = ({ teamspaceName, className }: ITeamspaceCard): JSX.Element => {
-	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
-	const isPersonalTeamspace = teamspaceName === currentUser.username;
+	const { username, avatarUrl } = CurrentUserHooksSelectors.selectCurrentUser();
+
+	const isPersonalTeamspace = teamspaceName === username;
 	const { url } = useRouteMatch();
 	const to = uriCombine(url, teamspaceName || '');
+	const imgSrc = isPersonalTeamspace ? avatarUrl : getTeamspaceImgSrc(teamspaceName);
 
 	return (
 		<LinkCard
@@ -46,7 +48,7 @@ export const TeamspaceCard = ({ teamspaceName, className }: ITeamspaceCard): JSX
 					: <FormattedMessage id="teamspaceCard.sharedWithMe" defaultMessage="Shared with me" />
 			}
 		>
-			<CoverImage imgSrc={getTeamspaceImgSrc(teamspaceName)} defaultImgSrc={DEFAULT_TEAMSPACE_IMG_SRC} />
+			<CoverImage imgSrc={imgSrc} defaultImgSrc={DEFAULT_TEAMSPACE_IMG_SRC} />
 		</LinkCard>
 	);
 };

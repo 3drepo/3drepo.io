@@ -402,7 +402,7 @@ const testNewRevisionProcessed = () => {
 			}
 			expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
-			expect(EventsManager.publish).toHaveBeenCalledTimes(3);
+			expect(EventsManager.publish).toHaveBeenCalledTimes(success ? 3 : 2);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 				{
 					teamspace,
@@ -424,14 +424,16 @@ const testNewRevisionProcessed = () => {
 					isFederation: false,
 				});
 
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
-				{
-					teamspace,
-					project,
-					model,
-					revision: corId,
-					isFederation: false,
-				});
+			if (success) {
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
+					{
+						teamspace,
+						project,
+						model,
+						revision: corId,
+						isFederation: false,
+					});
+			}
 		});
 	});
 
