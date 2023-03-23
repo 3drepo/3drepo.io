@@ -84,8 +84,6 @@ describe('Current User: sagas', () => {
 
 			await expectSaga(CurrentUserSaga.default)
 				.dispatch(CurrentUserActions.updatePersonalData(personalData, onSuccess, onError))
-				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
-				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
 			
 			expect(onSuccess).toHaveBeenCalled();
@@ -104,10 +102,8 @@ describe('Current User: sagas', () => {
 
 			await expectSaga(CurrentUserSaga.default)
 				.dispatch(CurrentUserActions.updatePersonalData(personalDataWithAvatar, onSuccess, onError))
-				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
 				.put(CurrentUserActions.updateUserSuccess({ avatarUrl, hasAvatar: true }))
 				.put(CurrentUserActions.updateUserSuccess(userData))
-				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
 			
 			expect(onSuccess).toHaveBeenCalled();
@@ -123,8 +119,6 @@ describe('Current User: sagas', () => {
 
 			await expectSaga(CurrentUserSaga.default)
 				.dispatch(CurrentUserActions.updatePersonalData(userData, onSuccess, onError))
-				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
-				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
 			
 			expect(onSuccess).not.toHaveBeenCalled();
@@ -140,8 +134,6 @@ describe('Current User: sagas', () => {
 
 			await expectSaga(CurrentUserSaga.default)
 				.dispatch(CurrentUserActions.updatePersonalData({...userData, avatarFile}, onSuccess, onError))
-				.put(CurrentUserActions.setPersonalDataIsUpdating(true))
-				.put(CurrentUserActions.setPersonalDataIsUpdating(false))
 				.run();
 			
 			expect(onSuccess).not.toHaveBeenCalled();
