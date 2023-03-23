@@ -178,6 +178,13 @@ jobs:
         ACCESS_TOKEN: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
         PATH_TO_VALUES: ${{ secrets.DEVOPS_HELM_VALUES }}
 
+    - name: set Custom Values
+      run: |
+        echo "customHelmOverride=${customHelmOverride}\n" >> $GITHUB_OUTPUT
+      id: custom_values
+      env:
+        customHelmOverride: config.ADDITIONAL_CONFIG=hello   #   example of setting an additional setting in helm.
+
     - name: Deploy Helm
       uses: bitovi/github-actions-deploy-eks-helm@v1.2.3
       if: needs.get-details.outputs.issue-number
@@ -188,12 +195,11 @@ jobs:
         chart-path: 3drepo/io
         namespace: default
         name: issue-${{ needs.get-details.outputs.issue-number }}
-        values: "image.tag=${{ github.sha }},branchName=issue-${{ needs.get-details.outputs.issue-number }},${customHelmOverride}"
+        values: "image.tag=${{ github.sha }},branchName=issue-${{ needs.get-details.outputs.issue-number }},${{ steps.custom_values.outputs.customHelmOverride }}"
         chart-repository: https://3drepo.github.io/DevOps/
         version: 5.0.7
         atomic: true
-      env:
-        customHelmOverride: config.ADDITIONAL_CONFIG=hello   #   example of setting an additional setting in helm.
+
         
         # you can swap for this version to change to it's own rabbitmq 
 
