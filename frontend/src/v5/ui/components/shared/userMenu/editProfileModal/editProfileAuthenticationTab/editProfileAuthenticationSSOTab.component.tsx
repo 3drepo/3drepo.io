@@ -41,13 +41,11 @@ type IUpdateSSOPasswordInputs = {
 };
 
 type EditProfileAuthenticationSSOTabProps = {
-	setIsSubmitting: (isSubmitting: boolean) => void;
 	unexpectedError: any,
 	onClickClose: () => void,
 };
 
 export const EditProfileAuthenticationSSOTab = ({
-	setIsSubmitting,
 	unexpectedError,
 	onClickClose,
 }: EditProfileAuthenticationSSOTabProps) => {
@@ -70,7 +68,6 @@ export const EditProfileAuthenticationSSOTab = ({
 	const confirmPassword = watch('confirmPassword');
 
 	const onSubmit = async () => {
-		setIsSubmitting(isSubmitting);
 		await unlinkAccount({ password: newPassword });
 		searchParams.append(postActions.UNLINK_POST, '1');
 		resetSSOParams();
