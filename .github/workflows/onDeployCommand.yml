@@ -147,6 +147,13 @@ jobs:
         cache-from: type=registry,ref=3drepo.azurecr.io/3drepo.io:buildcache,compression=zstd
         cache-to: type=registry,ref=3drepo.azurecr.io/3drepo.io:buildcache,mode=max
 
+    - name: Update deployment status (failure)
+      if: failure() && needs.get-details.outputs.deployment-id
+      uses: chrnorm/deployment-status@v2
+      with:
+        token: '${{ github.token }}'
+        state: 'failure'
+        deployment-id: ${{ needs.get-details.outputs.deployment-id }}
 
   deploy-branch:
     name: Call Azure Deploy Pipeline
