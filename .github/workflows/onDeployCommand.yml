@@ -188,8 +188,7 @@ jobs:
         chart-path: 3drepo/io
         namespace: default
         name: issue-${{ needs.get-details.outputs.issue-number }}
-        values: 'image.tag=${{ github.sha }},branchName=issue-${{ needs.get-details.outputs.issue-number }},$(customHelmOverride)'
-
+        values: 'image.tag=${{ github.sha }},branchName=issue-${{ needs.get-details.outputs.issue-number }},${customHelmOverride}'
         chart-repository: https://3drepo.github.io/DevOps/
         version: 5.0.7
         atomic: true
