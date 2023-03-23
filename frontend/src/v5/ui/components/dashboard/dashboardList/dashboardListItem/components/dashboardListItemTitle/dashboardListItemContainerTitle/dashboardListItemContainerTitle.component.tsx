@@ -18,7 +18,7 @@
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
+import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/latestRevision.component';
 import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Highlight } from '@controls/highlight';
 import { SearchContext } from '@controls/search/searchContext';
