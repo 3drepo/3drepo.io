@@ -162,7 +162,7 @@ jobs:
     steps:
 
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -188,7 +188,7 @@ jobs:
         chart-path: 3drepo/io
         namespace: default
         name: issue-${{ needs.get-details.outputs.issue-number }}
-        values: 'image.tag=${{ github.sha }},branchName=issue-${{ needs.get-details.outputs.issue-number }},${customHelmOverride}'
+        values: "image.tag=${{ github.sha }},branchName=issue-${{ needs.get-details.outputs.issue-number }},${customHelmOverride}"
         chart-repository: https://3drepo.github.io/DevOps/
         version: 5.0.7
         atomic: true
