@@ -1,8 +1,8 @@
 name: Deploy To Staging
 
-# concurrency:
-#   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-#   cancel-in-progress: true
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   checks: write
@@ -10,7 +10,6 @@ permissions:
   deployments: write
 
 on:
-
   push:
     branches:
       - 'master'
@@ -180,10 +179,13 @@ jobs:
 
     - name: set Custom Values
       run: |
-        echo "customHelmOverride=${customHelmOverride}\n" >> $GITHUB_OUTPUT
+        echo "customHelmOverride=${customHelmOverride}" >> $GITHUB_OUTPUT
       id: custom_values
       env:
         customHelmOverride: config.ADDITIONAL_CONFIG=hello   #   example of setting an additional setting in helm.
+        
+        # you can swap for this version to change to it's own rabbitmq 
+        # customHelmOverride: config.APP_QUEUE_DNS=issue-${{ needs.get-details.outputs.issue-number }}-rabbitmq
 
     - name: Deploy Helm
       uses: bitovi/github-actions-deploy-eks-helm@v1.2.3
@@ -199,12 +201,8 @@ jobs:
         chart-repository: https://3drepo.github.io/DevOps/
         version: 5.0.7
         atomic: true
-
-        
-        # you can swap for this version to change to it's own rabbitmq 
-
-        # customHelmOverride: config.APP_QUEUE_DNS=issue-${{ needs.get-details.outputs.issue-number }}-rabbitmq   #   config.APP_QUEUE_DNS=issue-xxx-rabbitmq for changing rabbit queue
-
+        helm-wait: true
+        timeout: 900
 
     # - name: Azure Pipelines Action
     #   if: needs.get-details.outputs.issue-number
