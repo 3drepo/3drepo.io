@@ -162,7 +162,7 @@ jobs:
         azure-pipeline-variables:  '{"branchName": "issue-${{ needs.get-details.outputs.issue-number }}","tag":"${{ github.sha }}"}'
 
     - name: Update deployment status (success)
-      if: success()
+      if: success() && needs.get-details.outputs.deployment-id
       uses: chrnorm/deployment-status@v2
       with:
         token: '${{ github.token }}'
@@ -172,7 +172,7 @@ jobs:
         environment: issue-${{ steps.commitMsgParser.outputs.issue-number }}
 
     - name: Update deployment status (failure)
-      if: failure()
+      if: failure() && needs.get-details.outputs.deployment-id
       uses: chrnorm/deployment-status@v2
       with:
         token: '${{ github.token }}'
