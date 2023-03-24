@@ -178,12 +178,14 @@ jobs:
         ACCESS_TOKEN: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
         PATH_TO_VALUES: ${{ secrets.DEVOPS_HELM_VALUES }}
 
+
+
     - name: Set Custom Values
       run: |
         echo "customHelmOverride=${customHelmOverride}" >> $GITHUB_OUTPUT
       id: custom_values
       env:
-        customHelmOverride: config.ADDITIONAL_CONFIG=hello   #   example of setting an additional setting in helm.
+        customHelmOverride: config.APP_CONFIG=hello   #   example of setting an additional setting in helm.
         
         # you can swap for this version to change to it's own rabbitmq 
         # customHelmOverride: config.APP_QUEUE_DNS=issue-${{ needs.get-details.outputs.issue-number }}-rabbitmq
