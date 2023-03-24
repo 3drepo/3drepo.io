@@ -16,7 +16,7 @@
  */
 
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
+import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/latestRevision.component';
 import { FormattedMessage } from 'react-intl';
 import { ExistingContainerOption, InUseText, Name } from './existingContainer.styles';
 
