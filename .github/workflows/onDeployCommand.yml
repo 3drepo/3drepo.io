@@ -83,7 +83,7 @@ jobs:
 
         include:
         - image: io
-          dockerfile: .azure/Docker/Dockerfile
+          dockerfile: .container/Dockerfile
           platforms: linux/amd64 #,linux/arm64
           image-name: "3drepo.azurecr.io/3drepo.io"
           tag: ${{ github.sha }}
@@ -92,7 +92,7 @@ jobs:
         # example of how to add an additional build to the matrix.
         
         # - image: io-debug
-        #   dockerfile: .azure/Docker/Dockerfile_debug
+        #   dockerfile: .container/Dockerfile_debug
         #   platforms: linux/amd64,linux/arm64
         #   image-name: "${{ secrets.REGISTRY_LOGIN_SERVER }}/3drepo.io"
         #   tag: ${{ github.sha }}-debug
