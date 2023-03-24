@@ -195,7 +195,7 @@ jobs:
       if: needs.get-details.outputs.issue-number
       with:
         aws-region: eu-west-2
-        cluster-name: d5
+        cluster-name: ${{ secrets.AWS_EKS_CLUSTER }}
         config-files: ./values.yaml
         chart-path: 3drepo/io
         namespace: default
