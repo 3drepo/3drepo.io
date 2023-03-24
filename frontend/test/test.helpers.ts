@@ -15,8 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createStore, combineReducers } from 'redux';
+import { createStore, combineReducers, applyMiddleware, Action } from 'redux';
 import reducers from '@/v5/store/reducers';
+import createSagaMiddleware from 'redux-saga';
+import rootSaga from '@/v4/modules/sagas';
+import { isEqual } from 'lodash';
 
 export const alertAction = (currentAction: string) => ({
 	action: {
@@ -40,8 +43,51 @@ export const spyOnAxiosApiCallWithFile = (api, method) => {
 	});
 };
 
-export const createTestStore = () => createStore(combineReducers(reducers));
+export const createTestStore = () => {
+	let waitingActions: Action[] | string[] = [];
+	let resolvePromiseObj = { resolvePromise: null };
+
+	const sagaMiddleware = createSagaMiddleware();
+	const middlewares = applyMiddleware(sagaMiddleware);
+
+	const discountMatchingActions =  (action: Action) => {
+		const waitingAction = waitingActions[0];
+	
+		if (action.type === waitingAction || isEqual(waitingAction, action)) {
+			waitingActions.shift();
+		}
+	
+		return waitingActions.length === 0;
+	};
+
+	const store = createStore(combineReducers(
+		{
+			...reducers,
+			spyActions: (state, action) => {
+				const { resolvePromise } = resolvePromiseObj;
+
+				if (discountMatchingActions(action) && resolvePromise) {
+					resolvePromise(true);
+					resolvePromiseObj.resolvePromise = null;
+				}
+				return {};
+			}
+		}
+	), middlewares);
+	
+	const waitForActions = (func, waitActions) =>  { 
+		waitingActions = waitActions;
+		const promise = new Promise((resolve) => {resolvePromiseObj.resolvePromise = resolve;});
+		func();
+		return promise;
+	}
+
+	sagaMiddleware.run(rootSaga);
+	return {...store, waitForActions};
+};
 
 export const listContainsElementWithId = (list, element) => (	
 	list.map(({ _id }) => _id).includes(element._id)
 );
+
+export const findById = <T extends { _id: string }>(list: T[], _id:string):T | null => list.find((item) => item._id === _id);
