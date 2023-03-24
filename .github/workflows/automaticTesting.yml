@@ -138,13 +138,13 @@ jobs:
     name: Ensure that custom settings are not being merged
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout .azure/build-and-deploy.yaml
+      - name: Checkout .github/workflows/onDeployCommand.yml
         uses: Bhacaz/checkout-files@v2
         with:
-          files: .azure/build-and-deploy.yaml
+          files: .github/workflows/onDeployCommand.yml
           branch: ${{ github.head_ref || github.ref_name }}
       - name: Check to see if customHelmOverride has any APP settings
         id: customHelmOverride
         uses: mikefarah/yq@master
         with:
-          cmd: if ( $(yq eval '.variables.customHelmOverride | ( contains("APP_") )' .azure/build-and-deploy.yaml) === "true" ); then echo $(yq eval '.variables.customHelmOverride' .azure/build-and-deploy.yaml); exit 1;  fi
+          cmd: if ( $(yq eval '.jobs.deploy-branch.steps[3].env.customHelmOverride | ( contains("APP_") )' .github/workflows/onDeployCommand.yml ) === "true" ); then echo $(yq eval '.jobs.deploy-branch.steps[3].env.customHelmOverride' .github/workflows/onDeployCommand.yml ); exit 1;  fi
