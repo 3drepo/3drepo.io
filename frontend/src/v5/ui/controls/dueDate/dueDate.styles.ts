@@ -15,9 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CalendarIconBase from '@assets/icons/outlined/calendar-outlined.svg';
 import { Backdrop as MuiBackdrop } from '@mui/material';
 import styled from 'styled-components';
+import { FONT_WEIGHT } from '../../themes/theme';
 
 export const StopBackgroundInteraction = styled(MuiBackdrop)`
 	z-index: 15;
+`;
+
+export const DueDateWithIconContainer = styled.div`
+	font-weight: ${FONT_WEIGHT.MEDIUM};
+	height: 20px;
+	box-sizing: border-box;
+`;
+
+export const CalendarIcon = styled(CalendarIconBase)`
+	height: 11px;
+	width: 11px;
+	margin: -1px 2px 0 0;
 `;

@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ChipSelect } from '@controls/chip/chipSelect/chipSelect.component';
+import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
 import { forwardRef, ComponentProps } from 'react';
 import { Checkbox } from './checkbox/checkbox.component';
 import { DatePicker } from './datePicker/datePicker.component';
@@ -43,11 +45,13 @@ export const FormTextAreaFixedSize = forwardRef((props: FormType<typeof TextArea
 // calendar inputs
 export const FormDatePicker = (props: FormType<typeof DatePicker>) => (<InputController Input={DatePicker} {...props} />);
 export const FormDateTimePicker = (props: FormType<typeof DateTimePicker>) => (<InputController Input={DateTimePicker} {...props} />);
+export const FormDueDateWithIcon = (props: FormType<typeof DueDateWithIcon>) => (<InputController Input={DueDateWithIcon} {...props} />);
 
 // select inputs
 export const FormMultiSelect = (props: FormType<typeof MultiSelect>) => (<InputController Input={MultiSelect} {...props} />);
 export const FormSelectView = (props: FormType<typeof SelectView>) => (<InputController Input={SelectView} {...props} />);
 export const FormSelect = (props: FormType<typeof Select>) => (<InputController Input={Select} {...props} />);
+export const FormChipSelect = (props: FormType<typeof ChipSelect>) => (<InputController Input={ChipSelect} {...props} />);
 
 // control inputs
 export const FormCheckbox = (props: FormType<typeof Checkbox>) => (<InputController Input={Checkbox} {...props} />);

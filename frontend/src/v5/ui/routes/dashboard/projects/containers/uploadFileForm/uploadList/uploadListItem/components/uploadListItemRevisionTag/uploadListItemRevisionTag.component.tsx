@@ -15,42 +15,52 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
 import { ErrorTooltip } from '@controls/errorTooltip';
-import { Control } from 'react-hook-form/dist/types';
-import { UploadItemFields } from '@/v5/store/containers/containers.types';
+import { useFormContext } from 'react-hook-form';
 import { FormTextField } from './uploadListItemRevisionTag.styles';
 
 type IUploadListItemRevision = {
 	isSelected?: boolean;
 	errorMessage?: string;
-	control: Control<UploadItemFields>;
 	defaultValue?: string;
 	disabled?: boolean;
+	revisionPrefix: string;
 };
 
 export const UploadListItemRevisionTag = ({
-	control,
 	isSelected = false,
 	errorMessage,
 	disabled = false,
-	defaultValue,
+	revisionPrefix,
 	...props
-}: IUploadListItemRevision): JSX.Element => (
-	<FormTextField
-		control={control}
-		disabled={disabled}
-		name="revisionTag"
-		formError={errorMessage}
-		defaultValue={defaultValue}
-		required
-		$selectedrow={isSelected}
-		InputProps={{
-			startAdornment: !!errorMessage && (
-				<ErrorTooltip>
-					{errorMessage}
-				</ErrorTooltip>
-			),
-		}}
-		{...props}
-	/>
-);
+}: IUploadListItemRevision): JSX.Element => {
+	const { setError, getValues } = useFormContext();
+	const name = `${revisionPrefix}.revisionTag`;
+
+	const handleChange = () => {
+		const largeFilesizeMessage = filesizeTooLarge(getValues(`${revisionPrefix}.file`));
+		if (largeFilesizeMessage) {
+			setError(`${revisionPrefix}.file`, { type: 'custom', message: largeFilesizeMessage });
+		}
+	};
+
+	return (
+		<FormTextField
+			disabled={disabled}
+			formError={errorMessage}
+			required
+			$selectedrow={isSelected}
+			name={name}
+			onChange={handleChange}
+			InputProps={{
+				startAdornment: !!errorMessage && (
+					<ErrorTooltip>
+						{errorMessage}
+					</ErrorTooltip>
+				),
+			}}
+			{...props}
+		/>
+	);
+};

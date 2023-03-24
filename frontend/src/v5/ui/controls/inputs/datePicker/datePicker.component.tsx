@@ -18,7 +18,7 @@ import { DatePicker as MuiDatePicker, DatePickerProps as MuiDatePickerProps } fr
 import { BaseCalendarPicker, BaseCalendarPickerProps } from './baseCalendarPicker/baseCalendarPicker.component';
 import { getDateMask } from './dateFormatHelper';
 
-type DatePickerProps = BaseCalendarPickerProps & Partial<MuiDatePickerProps<any, any>>;
+type DatePickerProps = Partial<BaseCalendarPickerProps> & Partial<MuiDatePickerProps<any, any>>;
 export const DatePicker = (props: DatePickerProps) => (
 	<BaseCalendarPicker
 		PickerComponent={MuiDatePicker}
