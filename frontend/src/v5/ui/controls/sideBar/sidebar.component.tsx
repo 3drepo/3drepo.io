@@ -20,21 +20,19 @@ import { SidebarContainer, ExpandButton, SidebarContent } from './sidebar.styles
 
 interface ISidebar {
 	open: boolean;
-	onClick: () => void;
+	onClose: () => void;
 	className?: string;
 	children: JSX.Element;
-	hidden?: boolean;
 }
 
 export const Sidebar = ({
 	className,
 	open,
-	onClick,
-	hidden = false,
+	onClose,
 	children,
 }: ISidebar): JSX.Element => (
-	<SidebarContainer className={className} open={open} hidden={hidden}>
-		<ExpandButton onClick={onClick}>
+	<SidebarContainer className={className} open={open}>
+		<ExpandButton onClick={onClose}>
 			<ExpandIcon />
 		</ExpandButton>
 		<SidebarContent>

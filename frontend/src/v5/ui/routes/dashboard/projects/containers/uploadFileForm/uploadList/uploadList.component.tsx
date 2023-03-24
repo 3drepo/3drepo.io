@@ -17,7 +17,7 @@
 
 import { useFormContext } from 'react-hook-form';
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
-import { UploadListItem } from './uploadListItem';
+import { UploadListItem } from './uploadListItem/uploadListItem.component';
 import { Container } from './uploadList.styles';
 
 type IUploadList = {
@@ -37,27 +37,25 @@ export const UploadList = ({
 	onClickDelete,
 	getOriginalIndex,
 }: IUploadList): JSX.Element => {
-	const { trigger, setValue, watch } = useFormContext();
+	const { getValues } = useFormContext();
 	return (
 		<Container>
 			{
 				values.map((item, index) => {
-					const origIndex = getOriginalIndex(index);
+					const originalIndex = getOriginalIndex(index);
+					const revisionPrefix = `uploads.${originalIndex}`;
 					const defaultInputValues = {
-						containerName: watch(`uploads.${origIndex}.containerName`) || item.containerName,
-						revisionTag: watch(`uploads.${origIndex}.revisionTag`) || item.revisionTag,
+						containerName: getValues(`${revisionPrefix}.containerName`) || item.containerName,
+						revisionTag: getValues(`${revisionPrefix}.revisionTag`) || item.revisionTag,
 					};
 					return (
 						<UploadListItem
+							revisionPrefix={revisionPrefix}
 							key={item.uploadId}
 							item={item}
 							defaultValues={defaultInputValues}
-							onClickEdit={() => onClickEdit(index)}
+							onClickEdit={() => onClickEdit(originalIndex)}
 							onClickDelete={() => onClickDelete(index)}
-							onChange={(field, val) => {
-								setValue(`uploads.${origIndex}.${field}`, val);
-								trigger(`uploads.${origIndex}.${field}`);
-							}}
 							isSelected={index === selectedIndex}
 							isUploading={isUploading}
 						/>

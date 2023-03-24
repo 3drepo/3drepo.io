@@ -15,16 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ChipProps } from '@mui/material';
-import { forwardRef } from 'react';
-import { COLOR } from '../../themes/theme';
-import { ChipBase } from './chip.styles';
+import { Chip as MuiChip, Tooltip } from '@mui/material';
+import { ChipWrapper } from './chip.styles';
+import { IChip } from './chip.types';
 
-type IChip = Omit<ChipProps, 'color' | 'variant'> & {
-	color?: string;
-	variant?: 'text' | 'outlined' | 'filled';
-};
-
-export const Chip = forwardRef(({ color = COLOR.PRIMARY_MAIN, variant, ...props }: IChip, ref: any) => (
-	<ChipBase $coloroverride={color} $variant={variant} {...props} ref={ref} />
-));
+export const Chip = ({ color, variant, tooltip = '', disabled, ...props }: IChip) => (
+	<ChipWrapper variant={variant} color={color} disabled={disabled}>
+		<Tooltip title={disabled ? '' : tooltip} arrow>
+			<MuiChip clickable={false} {...props} />
+		</Tooltip>
+	</ChipWrapper>
+);
