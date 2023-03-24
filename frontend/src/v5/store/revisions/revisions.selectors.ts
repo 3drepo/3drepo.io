@@ -22,6 +22,11 @@ import { IRevisionsState } from './revisions.redux';
 const selectRevisionsDomain = (state): IRevisionsState => state.revisions;
 const selectContainerIdParam = (_, containerId: string) => containerId;
 
+export const selectRevisionsByContainer = createSelector(
+	selectRevisionsDomain,
+	(state) => state.revisionsByContainer,
+);
+
 export const selectRevisions = createSelector(
 	selectRevisionsDomain,
 	selectContainerIdParam,
