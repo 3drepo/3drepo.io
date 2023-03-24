@@ -67,7 +67,7 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             /repos/$OWNER/$REPO/deployments/$DEPLOYMENT_ID
       env:
-        OWNER: ${{ github.repository_owner	}}
-        REPO: ${{ github.repository	}}
+        OWNER: ${{ github.repository_owner }}
+        REPO: ${{ github.repository }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEPLOYMENT_ID: ${{ needs.get-details.outputs.deployment-id }}
