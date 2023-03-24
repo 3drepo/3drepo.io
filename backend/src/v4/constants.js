@@ -662,7 +662,7 @@
 		"dae","ter","csm","3d","lws","xml","ogex",
 		"ms3d","cob","scn","blend","pk3","ndo",
 		"ifc","xgl","zgl","fbx","assbin", "bim", "dgn",
-		"rvt", "rfa", "spm", "dwg", "dxf", "nwd"
+		"rvt", "rfa", "spm", "dwg", "dxf", "nwd", "nwc"
 	]);
 	define("MS_CHUNK_BYTES_LIMIT", Math.min(52428800, uploadSizeLimit));
 	define("CONTENT_LENGTH_HEADER", "content-length");

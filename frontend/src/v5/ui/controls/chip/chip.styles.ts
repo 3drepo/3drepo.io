@@ -15,13 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Chip, ChipProps } from '@mui/material';
 import styled, { css } from 'styled-components';
-
-export type ChipType = ChipProps & {
-	$variant: 'text' | 'outlined' | 'filled';
-	$coloroverride: string;
-};
+import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
 
 const filledStyles = (color: string) => css`
 	color: ${({ theme }) => theme.palette.primary.contrast};
@@ -48,57 +43,48 @@ const textStyles = (color: string) => css`
 	}
 `;
 
-export const ChipBase = styled(Chip)<ChipType>`
-	${({ theme }) => theme.typography.body2};
-	font-size: 0.5rem;
-	text-transform: uppercase;
-	padding: 3px 7px;
-	border-width: 1px;
-	border-radius: 6px;
-	height: 20px;
-	gap: 4px;
-	user-select: none;
-	margin: 0;
-	letter-spacing: 0.3px;
-	svg {
-		height: 11px;
-		width: 11px;
-	}
-	.MuiChip-label {
-		padding: 0;
-	}
-	.MuiChip-icon {
-		color: inherit;
+export const ChipWrapper = styled.div<{ variant: string; color: string; disabled: boolean }>`
+	display: contents;
+	.MuiChip-root {
+		${({ theme }) => theme.typography.body2};
+		font-size: 0.5rem;
+		text-transform: uppercase;
+		padding: 3px 7px;
+		border-width: 1px;
+		border-radius: 6px;
+		height: 20px;
+		gap: 4px;
+		user-select: none;
+		cursor: pointer;
+		pointer-events: ${({ disabled }) => (disabled ? 'none' : 'auto')};
 		margin: 0;
-	}
-	${({ $variant, $coloroverride }) => {
-		switch ($variant) {
+		letter-spacing: 0.3px;
+		svg {
+			height: 11px;
+			width: 11px;
+		}
+		.MuiChip-label {
+			padding: 0;
+			line-height: 100%;
+		}
+		.MuiChip-icon {
+			color: inherit;
+			margin: 0;
+		}
+		${({ variant, color }) => {
+		switch (variant) {
 			case 'text':
-				return textStyles($coloroverride);
+				return textStyles(color);
 			case 'filled':
-				return filledStyles($coloroverride);
+				return filledStyles(color);
 			default: // outlined
-				return outlinedStyles($coloroverride);
+				return outlinedStyles(color);
 		}
 	}}
+	}
 `;
 
-export const FilterChip = styled(ChipBase).attrs(({ theme }) => ({
-	clickable: false,
-	$variant: 'outlined',
-	$coloroverride: theme.palette.base.main,
-}))<{ selected?: boolean }>`
-	cursor: pointer;
-	height: 18px;
-	:hover {
-		background-color: inherit;
-		color: ${({ theme }) => theme.palette.primary.main};
-	}
-	${({ selected }) => selected && css`
-		background-color: ${({ theme }) => theme.palette.primary.lightest};
-		color: ${({ theme }) => theme.palette.primary.main};
-		:hover {
-			background-color: ${({ theme }) => theme.palette.primary.lightest};
-		}
-	`}
+export const PaddedCrossIcon = styled(CrossIcon)`
+	box-sizing: border-box;
+	padding: 1px;
 `;

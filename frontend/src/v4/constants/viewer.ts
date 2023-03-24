@@ -112,7 +112,7 @@ export const DEFAULT_SETTINGS = {
 	clipPlaneBorderColor: [0.02, 0.16, 0.32],
 	memoryThreshold: 500,
 	memoryLimit: 2032,
-	meshFactor: 2.5,
+	meshFactor: 1.3,
 	maxNearPlane: -1,
 	maxFarPlane: -1,
 	fovWeight: 2,
