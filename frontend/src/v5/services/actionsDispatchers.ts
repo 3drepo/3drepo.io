@@ -29,7 +29,7 @@ import { TicketsActions, ITicketsActionCreators } from '@/v5/store/tickets/ticke
 import { TicketsCardActions, ITicketsCardActionCreators } from '@/v5/store/tickets/card/ticketsCard.redux';
 import { ITeamspacesActionCreators, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { IUsersActions, UsersActions } from '@/v5/store/users/users.redux';
-import { ViewerActionsCreators, ViewerActionsCreatorsType } from '@/v5/store/viewer/viewer.redux';
+import { ViewerActions, ViewerActionsCreators } from '@/v5/store/viewer/viewer.redux';
 
 import { Action } from 'redux';
 
@@ -53,4 +53,4 @@ export const TicketsActionsDispatchers = createActionsDispatchers<ITicketsAction
 export const TicketsCardActionsDispatchers = createActionsDispatchers<ITicketsCardActionCreators>(TicketsCardActions);
 export const TicketCommentsActionsDispatchers = createActionsDispatchers<ITicketCommentsActionCreators>(TicketCommentsActions);
 export const UsersActionsDispatchers = createActionsDispatchers<IUsersActions>(UsersActions);
-export const ViewerActionsDispatchers = createActionsDispatchers<ViewerActionsCreatorsType>(ViewerActionsCreators);
+export const ViewerActionsDispatchers = createActionsDispatchers<ViewerActionsCreators>(ViewerActions);

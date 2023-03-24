@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ViewerActionsCreators, ViewerTypes } from '@/v5/store/viewer/viewer.redux';
+import { ViewerActions, ViewerTypes } from '@/v5/store/viewer/viewer.redux';
 import { times } from 'lodash';
 import { containerMockFactory, prepareMockBasecontainer, prepareMockStatsReply } from '../containers/containers.fixtures';
 import { federationMockFactory, prepareMockBaseFederation, prepareMockFederationStatsReply } from '../federations/federations.fixtures';
@@ -61,8 +61,8 @@ describe('Viewer: sagas', () => {
 				.reply(200, containerStat);
 				
 			await waitForActions(() => {
-				dispatch(ViewerActionsCreators.fetchData(teamspace, projectId, containerOrFederationId));
-			}, [ViewerActionsCreators.setFetching(false)]);
+				dispatch(ViewerActions.fetchData(teamspace, projectId, containerOrFederationId));
+			}, [ViewerActions.setFetching(false)]);
 
 			const container = selectContainerById(getState(), containerOrFederationId);
 
@@ -101,8 +101,8 @@ describe('Viewer: sagas', () => {
 				.reply(200, containersStats[2]);			
 				
 			await waitForActions(() => {
-				dispatch(ViewerActionsCreators.fetchData(teamspace, projectId, containerOrFederationId));
-			}, [ViewerActionsCreators.setFetching(false)]);
+				dispatch(ViewerActions.fetchData(teamspace, projectId, containerOrFederationId));
+			}, [ViewerActions.setFetching(false)]);
 
 
 			const federation = selectFederationById(getState(), containerOrFederationId);
@@ -135,7 +135,7 @@ describe('Viewer: sagas', () => {
 				.reply(404, {});
 				
 			await waitForActions(() => {
-				dispatch(ViewerActionsCreators.fetchData(teamspace, projectId, containerOrFederationId));
+				dispatch(ViewerActions.fetchData(teamspace, projectId, containerOrFederationId));
 			}, [DialogsTypes.OPEN]);
 
 			const dialogs =  selectDialogs(getState());

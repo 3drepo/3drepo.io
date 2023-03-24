@@ -19,10 +19,10 @@ import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
 
-export const { Types: ViewerTypes, Creators: ViewerActionsCreators } = createActions({
+export const { Types: ViewerTypes, Creators: ViewerActions } = createActions({
 	fetchData: ['teamspace', 'project', 'containerOrFederation'],
 	setFetching: ['isFetching'],
-}, { prefix: 'VIEWER2/' }) as { Types: Constants<ViewerActionsCreatorsType>; Creators: ViewerActionsCreatorsType };
+}, { prefix: 'VIEWER2/' }) as { Types: Constants<ViewerActionsCreators>; Creators: ViewerActionsCreators };
 
 export const INITIAL_STATE: ViewerState = {
 	isFetching: false,
@@ -43,7 +43,7 @@ export interface ViewerState {
 export type FetchDataAction = Action<'FETCH_DATA'> & { teamspace: string, containerOrFederation: string, project: string };
 export type SetFetchingAction = Action<'SET_FETCHING'> & { isFetching };
 
-export interface ViewerActionsCreatorsType {
+export interface ViewerActionsCreators {
 	fetchData: (teamspace:string, project:string, containerOrFederation:string) => FetchDataAction;
 	setFetching: (isFetching: boolean) => SetFetchingAction;
 }

@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ViewerActionsCreators } from '@/v5/store/viewer/viewer.redux';
+import { ViewerActions } from '@/v5/store/viewer/viewer.redux';
 import { selectIsFetching } from '@/v5/store/viewer/viewer.selectors';
 import { createTestStore } from '../test.helpers';
 
@@ -29,14 +29,14 @@ describe('Viewer: redux', () => {
 	});
 
 	it('should change the state of fetching to true when setFetching(true) hass been dispatched' , async () => {
-		dispatch(ViewerActionsCreators.setFetching(true));
+		dispatch(ViewerActions.setFetching(true));
 		const fetching = selectIsFetching(getState());
 		expect(fetching).toBeTruthy();
 	});
 
 	it('should change the state of fetching to false when setFetching(true) has been dispatched' , async () => {
-		dispatch(ViewerActionsCreators.setFetching(true));
-		dispatch(ViewerActionsCreators.setFetching(false));
+		dispatch(ViewerActions.setFetching(true));
+		dispatch(ViewerActions.setFetching(false));
 		const fetching = selectIsFetching(getState());
 		expect(fetching).toBeFalsy();
 	});
