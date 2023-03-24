@@ -44,13 +44,11 @@ export const spyOnAxiosApiCallWithFile = (api, method) => {
 };
 
 export const createTestStore = () => {
-	let middlewares = undefined;
 	let waitingActions: Action[] | string[] = [];
 	let resolvePromiseObj = { resolvePromise: null };
 
 	const sagaMiddleware = createSagaMiddleware();
-	
-	middlewares = applyMiddleware(sagaMiddleware);
+	const middlewares = applyMiddleware(sagaMiddleware);
 
 	const discountMatchingActions =  (action: Action) => {
 		const waitingAction = waitingActions[0];
@@ -79,7 +77,7 @@ export const createTestStore = () => {
 	
 	const waitForActions = (func, waitActions) =>  { 
 		waitingActions = waitActions;
-		var promise = new Promise((resolve) => {resolvePromiseObj.resolvePromise = resolve;});
+		const promise = new Promise((resolve) => {resolvePromiseObj.resolvePromise = resolve;});
 		func();
 		return promise;
 	}
@@ -92,4 +90,4 @@ export const listContainsElementWithId = (list, element) => (
 	list.map(({ _id }) => _id).includes(element._id)
 );
 
-export const findById = <T>(list: T[], _id:string):T | null => list.find((item) => (item as any)._id === _id);
+export const findById = <T extends { _id: string }>(list: T[], _id:string):T | null => list.find((item) => item._id === _id);

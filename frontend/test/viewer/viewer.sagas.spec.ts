@@ -17,7 +17,7 @@
 
 import { ViewerActions, ViewerTypes } from '@/v5/store/viewer/viewer.redux';
 import { times } from 'lodash';
-import { containerMockFactory, prepareMockBasecontainer, prepareMockStatsReply } from '../containers/containers.fixtures';
+import { containerMockFactory, prepareMockBaseContainer, prepareMockStatsReply } from '../containers/containers.fixtures';
 import { federationMockFactory, prepareMockBaseFederation, prepareMockFederationStatsReply } from '../federations/federations.fixtures';
 import { mockServer } from '../../internals/testing/mockServer';
 import { createTestStore, findById } from '../test.helpers';
@@ -44,7 +44,7 @@ describe('Viewer: sagas', () => {
 		it('should fetch the containers, the federations and the container particular data for viewing a container', async () => {
 			const containers = times(3, () => containerMockFactory());
 			const federations  = times(3, () => federationMockFactory());
-			const baseContainers = containers.map(prepareMockBasecontainer); 
+			const baseContainers = containers.map(prepareMockBaseContainer); 
 			const containerStat = prepareMockStatsReply(containers[1]);
 			const containerOrFederationId = containers[1]._id;
 
@@ -74,7 +74,7 @@ describe('Viewer: sagas', () => {
 			const federations = times(3, () => federationMockFactory());
 			const baseFederations = federations.map(prepareMockBaseFederation);
 			const containersStats = containers.map(prepareMockStatsReply);
-			const baseContainers = containers.map(prepareMockBasecontainer);
+			const baseContainers = containers.map(prepareMockBaseContainer);
 			const containersInState = baseContainers.map((base, index) => prepareSingleContainerData(base, containersStats[index]));
 			const theFederation = federations[1];
 			theFederation.containers = [ baseContainers[2]._id, baseContainers[0]._id];
@@ -106,9 +106,9 @@ describe('Viewer: sagas', () => {
 
 
 			const federation = selectFederationById(getState(), containerOrFederationId);
-			const containersId = [...federation.containers].sort();
+			const containersIds = [...federation.containers].sort();
 	
-			containersId.forEach(containerId => {
+			containersIds.forEach(containerId => {
 				const theFetchedContainer = findById(containersInState, containerId);
 				const container = selectContainerById(getState(), containerId);
 				expect(container).toEqual(theFetchedContainer);
@@ -119,7 +119,7 @@ describe('Viewer: sagas', () => {
 		it('should open a error dialog if it cant find the federation/container', async () => {
 			const containers = times(3, () => containerMockFactory());
 			const federations  = times(3, () => federationMockFactory());
-			const baseContainers = containers.map(prepareMockBasecontainer); 
+			const baseContainers = containers.map(prepareMockBaseContainer); 
 			const containerOrFederationId = 'nonexistentid';
 
 			mockServer

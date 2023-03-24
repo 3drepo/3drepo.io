@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@ import { ViewerActions } from '@/v5/store/viewer/viewer.redux';
 import { selectIsFetching } from '@/v5/store/viewer/viewer.selectors';
 import { createTestStore } from '../test.helpers';
 
-describe('Viewer: redux', () => {
+describe('Viewer: store', () => {
 	const teamspace = 'myteamspace';
 	const projectId = 'myprojectid';
 	
@@ -28,13 +28,14 @@ describe('Viewer: redux', () => {
 		({ dispatch, getState } = createTestStore());
 	});
 
-	it('should change the state of fetching to true when setFetching(true) hass been dispatched' , async () => {
+	it('should change the state of fetching to true when setFetching(true) has been dispatched' , async () => {
+		dispatch(ViewerActions.setFetching(false));
 		dispatch(ViewerActions.setFetching(true));
 		const fetching = selectIsFetching(getState());
 		expect(fetching).toBeTruthy();
 	});
 
-	it('should change the state of fetching to false when setFetching(true) has been dispatched' , async () => {
+	it('should change the state of fetching to false when setFetching(false) has been dispatched' , async () => {
 		dispatch(ViewerActions.setFetching(true));
 		dispatch(ViewerActions.setFetching(false));
 		const fetching = selectIsFetching(getState());

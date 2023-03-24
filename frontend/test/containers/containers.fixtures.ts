@@ -57,7 +57,7 @@ export const containerMockFactory = (overrides?: Partial<IContainer>): IContaine
 	...overrides,
 });
 
-export const prepareMockBasecontainer = (container: IContainer) => omit(container, ['views', 'defaultView', 'surveyPoint', 'angleFromNorth'])
+export const prepareMockBaseContainer = (container: IContainer) => omit(container, ['views', 'defaultView', 'surveyPoint', 'angleFromNorth'])
 
 export const prepareMockStats = (overrides?: Partial<ContainerStats>): ContainerStats => ({
 	revisions: {
