@@ -25,6 +25,7 @@ const yauzl = require("yauzl-promise");
 const C = require("../constants");
 const systemLogger = require("../logger.js").systemLogger;
 const utils = require("../utils");
+const responseCodes = require("../response_codes.js");
 
 const { addPreExistingComment } = require("./comment");
 const FileRef = require("./fileRef");
@@ -841,7 +842,7 @@ const processZipFileEntry = async(entry, files) => {
 	}
 
 	// if entry is a file and start with guid
-	if (!entry.fileName.endsWith("/") && !entry.fileName.endsWith("\\") && guid) {
+	if (!entry.fileName.endsWith("/") && !entry.fileName.endsWith("\\") && guid && entry.uncompressedSize > 0) {
 		const rs = await entry.openReadStream();
 		return new Promise((resolve, reject) => {
 
@@ -896,101 +897,109 @@ async function readBCF(account, model, requester, ifcToModelMap, dataBuffer, set
 	const fileGuids = Object.keys(files);
 	for (let i = 0; i < fileGuids.length; i++) {
 		const guid = fileGuids[i];
-		// FIXME - separate?
-		const {issue, viewpointsData} = await parseMarkupBuffer(files[guid][`${guid}/markup.bcf`]);
-		issue._id = utils.stringToUUID(guid);
+		try {
+			// FIXME - separate?
+			const {issue, viewpointsData} = await parseMarkupBuffer(files[guid][`${guid}/markup.bcf`]);
+			issue._id = utils.stringToUUID(guid);
 
-		// TODO: instead of doing a foreach with await inside (forcing serialisation on the processing), we should
-		//       it should really be a foreach with a promise.push(...). and assign issue.viewpoints to promise.all()
-		//       to ensure the order of the viewpoints, instead of pushing it within the loop.
-		const viewpoints = await parseViewpoints(utils.uuidToString(issue._id), files[guid], viewpointsData);
-		const vpGuids = Object.keys(viewpoints);
+			// TODO: instead of doing a foreach with await inside (forcing serialisation on the processing), we should
+			//       it should really be a foreach with a promise.push(...). and assign issue.viewpoints to promise.all()
+			//       to ensure the order of the viewpoints, instead of pushing it within the loop.
+			const viewpoints = await parseViewpoints(utils.uuidToString(issue._id), files[guid], viewpointsData);
+			const vpGuids = Object.keys(viewpoints);
 
-		for (let vpGuidIdx = 0; vpGuidIdx < vpGuids.length; vpGuidIdx++) {
-			const vpGuid = vpGuids[vpGuidIdx];
-			if (!viewpoints[vpGuid].viewpointXml) {
-				systemLogger.logInfo("Cannot find viewpoint xml for ", vpGuid);
-				continue;
-			}
+			for (let vpGuidIdx = 0; vpGuidIdx < vpGuids.length; vpGuidIdx++) {
+				const vpGuid = vpGuids[vpGuidIdx];
+				if (!viewpoints[vpGuid].viewpointXml) {
+					systemLogger.logInfo("Cannot find viewpoint xml for ", vpGuid);
+					continue;
+				}
 
-			const vpXML = viewpoints[vpGuid].viewpointXml;
+				const vpXML = viewpoints[vpGuid].viewpointXml;
 
-			let vp = {
-				guid: utils.stringToUUID(vpGuid)
-			};
-
-			const extras = parseViewpointExtras(vpXML, viewpoints[vpGuid].Viewpoint, viewpoints[vpGuid].Snapshot);
-			if (Object.keys(extras)) {
-				vp.extras = extras;
-			}
-
-			if (viewpoints[vpGuid].snapshot) {
-				vp.screenshot = viewpoints[vpGuid].snapshot;
-				// TODO do not import View
-				await Viewpoint.setExternalScreenshotRef(vp, account, model, "issues");
-			}
-
-			if (_.get(vpXML, "VisualizationInfo.ClippingPlanes")) {
-				vp.clippingPlanes = parseViewpointClippingPlanes(_.get(vpXML, "VisualizationInfo.ClippingPlanes"), scale);
-			}
-
-			if (_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]")) {
-				vp = {...vp, ...parseViewpointCamera(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]"), scale)};
-				vp.fov = parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._")) * Math.PI / 180;
-				vp.type = "perspective";
-
-			}
-
-			if (_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]")) {
-				vp = {...vp, ...parseViewpointCamera(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]"), scale)};
-				vp.orthographicSize = parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].ViewToWorldScale[0]._"));
-				vp.type = "orthographic";
-			}
-
-			if (_.get(vpXML, "VisualizationInfo.Components")) {
-				const groupDbCol = {
-					account: account,
-					model: model
+				let vp = {
+					guid: utils.stringToUUID(vpGuid)
 				};
 
-				const vpComponents = await parseViewpointComponents(groupDbCol, _.get(vpXML, "VisualizationInfo.Components"), settings.federate, issue.name, issue._id, ifcToModelMap);
-				vp = {...vp, ...vpComponents};
-			}
-			issue.viewpoints.push(vp);
-		}
-
-		if (viewpoints[vpGuids[0]]?.snapshot) {
-			// take the first screenshot as thumbnail
-			await utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).then((image) => {
-				if (image) {
-					issue.thumbnail = {
-						flag: 1,
-						content: image
-					};
+				const extras = parseViewpointExtras(vpXML, viewpoints[vpGuid].Viewpoint, viewpoints[vpGuid].Snapshot);
+				if (Object.keys(extras)) {
+					vp.extras = extras;
 				}
-			}).catch(resizeErr => {
-				systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
-					account,
-					model,
-					issueId: utils.uuidToString(issue._id),
-					viewpointId: vpGuids[0],
-					err: resizeErr
+
+				if (viewpoints[vpGuid].snapshot) {
+					vp.screenshot = viewpoints[vpGuid].snapshot;
+					// TODO do not import View
+					await Viewpoint.setExternalScreenshotRef(vp, account, model, "issues");
+				}
+
+				if (_.get(vpXML, "VisualizationInfo.ClippingPlanes")) {
+					vp.clippingPlanes = parseViewpointClippingPlanes(_.get(vpXML, "VisualizationInfo.ClippingPlanes"), scale);
+				}
+
+				if (_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]")) {
+					vp = {...vp, ...parseViewpointCamera(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0]"), scale)};
+					vp.fov = parseFloat(_.get(vpXML, "VisualizationInfo.PerspectiveCamera[0].FieldOfView[0]._")) * Math.PI / 180;
+					vp.type = "perspective";
+
+				}
+
+				if (_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]")) {
+					vp = {...vp, ...parseViewpointCamera(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0]"), scale)};
+					vp.orthographicSize = parseFloat(_.get(vpXML, "VisualizationInfo.OrthogonalCamera[0].ViewToWorldScale[0]._"));
+					vp.type = "orthographic";
+				}
+
+				if (_.get(vpXML, "VisualizationInfo.Components")) {
+					const groupDbCol = {
+						account: account,
+						model: model
+					};
+
+					const vpComponents = await parseViewpointComponents(groupDbCol, _.get(vpXML, "VisualizationInfo.Components"), settings.federate, issue.name, issue._id, ifcToModelMap);
+					vp = {...vp, ...vpComponents};
+				}
+				issue.viewpoints.push(vp);
+			}
+
+			if (viewpoints[vpGuids[0]]?.snapshot) {
+				// take the first screenshot as thumbnail
+				await utils.resizeAndCropScreenshot(viewpoints[vpGuids[0]].snapshot, 120, 120, true).then((image) => {
+					if (image) {
+						issue.thumbnail = {
+							flag: 1,
+							content: image
+						};
+					}
+				}).catch(resizeErr => {
+					systemLogger.logError("Resize failed as screenshot is not a valid png, no thumbnail will be generated", {
+						account,
+						model,
+						issueId: utils.uuidToString(issue._id),
+						viewpointId: vpGuids[0],
+						err: resizeErr
+					});
 				});
-			});
+			}
+
+			// System notification of BCF import
+			const currentTS = Date.now();
+			const bcfImportNotification = {
+				guid: utils.generateUUID(),
+				created: currentTS,
+				action: {property: "bcf_import"},
+				owner: requester.user
+			};
+
+			issue.comments.push(bcfImportNotification);
+
+			parsePromises.push(issue);
+		} catch {
+			// throw error if issue cannot be processed
+			throw responseCodes.INVALID_ARGUMENTS;
+			// alternatively, it could also silently fail
+			// and process remainder, maybe only erroring
+			// if all fail
 		}
-
-		// System notification of BCF import
-		const currentTS = Date.now();
-		const bcfImportNotification = {
-			guid: utils.generateUUID(),
-			created: currentTS,
-			action: {property: "bcf_import"},
-			owner: requester.user
-		};
-
-		issue.comments.push(bcfImportNotification);
-
-		parsePromises.push(issue);
 	}
 
 	return await Promise.all(parsePromises);
