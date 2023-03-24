@@ -27,7 +27,6 @@ import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
 
 type CommentReplyProps = TicketCommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',
-	isCurrentUserComment?: boolean,
 	shortMessage?: boolean,
 	images?: string[],
 };
@@ -35,7 +34,6 @@ export const CommentReply = ({
 	message,
 	author,
 	variant = 'primary',
-	isCurrentUserComment = true,
 	images = [],
 	...props
 }: CommentReplyProps) => {
