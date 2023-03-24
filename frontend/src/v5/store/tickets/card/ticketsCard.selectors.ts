@@ -18,7 +18,6 @@
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { selectCurrentModel } from '@/v4/modules/model';
 import { IPin } from '@/v4/services/viewer/viewer';
-import { TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { theme } from '@/v5/ui/themes/theme';
 import { createSelector } from 'reselect';
 import { selectTemplateById, selectTicketById, selectTickets } from '../tickets.selectors';
@@ -72,12 +71,9 @@ export const selectSelectedTemplate = createSelector(
 
 export const selectTicketPins = createSelector(
 	selectCurrentTickets,
-	selectView,
 	selectSelectedTicketId,
-	(tickets, view, selectedTicketId) => {
-		if (view !== TicketsCardViews.List) return [];
-
-		return tickets.reduce(
+	(tickets, selectedTicketId) => {
+		tickets.reduce(
 			(accum, ticket) => (ticket.properties?.Pin ? [...accum, ticketToPin(ticket, selectedTicketId)] : accum),
 			[],
 		);
