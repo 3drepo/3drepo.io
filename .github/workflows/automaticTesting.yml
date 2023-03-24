@@ -157,7 +157,6 @@ jobs:
             line_number=$(yq eval '.jobs.deploy-branch.steps[3].env.customHelmOverride' .github/workflows/onDeployCommand.yml | xargs -I{} grep -n {} .github/workflows/onDeployCommand.yml | cut -d: -f1)
             content="$(yq eval '.jobs.deploy-branch.steps[3].env.customHelmOverride' .github/workflows/onDeployCommand.yml)"
             echo "::warning file=.github/workflows/onDeployCommand.yml,line:${line_number},endLine=${line_number},title=APP_ settings present::${content}"
-            # echo "::notice file=.github/workflows/onDeployCommand.yml,line:${line_number}::${content}"
         id: custom_values_notice
 
           
