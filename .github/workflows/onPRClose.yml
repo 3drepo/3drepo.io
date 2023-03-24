@@ -47,16 +47,238 @@ jobs:
           field: Status
           value: Merged
 
-  destroy-deployed-branch:
-    name: Call Azure Destroy Pipeline
+destroy-branch:
+    name: Destroy Branch
     runs-on: ubuntu-latest
-    needs: get-details
+    needs: [ get-details ]
     steps:
-    - name: Azure Pipelines Action
-      if: needs.get-details.outputs.issue-number
-      uses: Azure/pipelines@v1.2
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
       with:
-        azure-devops-project-url: https://dev.azure.com/3drepo/3drepo.io
-        azure-pipeline-name: 'destroy'
-        azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
-        azure-pipeline-variables:  '{"branchName": "issue-${{ needs.get-details.outputs.issue-number }}"}'
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-west-2
+
+    - name: Destroy Helm
+      uses: bitovi/github-actions-deploy-eks-helm@v1.2.3
+      if: needs.get-details.outputs.issue-number
+      with:
+        action: uninstall
+        aws-region: eu-west-2
+        cluster-name: ${{ secrets.AWS_EKS_CLUSTER }}
+        config-files: ./values.yaml
+        chart-path: 3drepo/io
+        namespace: default
+        name: issue-${{ needs.get-details.outputs.issue-number }}
+        chart-repository: https://3drepo.github.io/DevOps/
+        version: 5.0.7
+        atomic: true
+        helm-wait: true
+        timeout: 30m
+
+    - name: Set failure notices
+      if: failure()
+      run: |
+          echo "::error file=.github/workflows/onDestroyCommand.yml,title=Failure to remove helm instance::We failed to remove the helm instance"
+      id: custom_destroy_helm_notice
+      
+    - name: Update deployment status
+      uses: chrnorm/deployment-status@v2
+      with:
+        token: '${{ github.token }}'
+        state: 'inactive'
+        deployment-id: ${{ needs.get-details.outputs.deployment-id }}
+
+    - name: Delete the deployment
+      if: success()
+      run: | 
+            gh api \
+            --method DELETE \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/$OWNER/$REPO/deployments/$DEPLOYMENT_ID
+      env:
+        OWNER: ${{ github.repository_owner }}
+        REPO: ${{ github.repository }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DEPLOYMENT_ID: ${{ needs.get-details.outputs.deployment-id }}
+
+  build-images:
+    name: Build Container Images
+    if: ${{github.event.pull_request.merged && ( github.event.pull_request.base.ref == 'staging' || github.event.pull_request.base.ref == 'master' )}}
+    needs: [ get-details ]
+    env:
+      REGISTRY_LOGIN_SERVER: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+    concurrency:
+      # If a previous run is ongoing with the same head_ref (it's a run on the
+      # same PR) then cancel it to save time. If it isn't a PR, only cancel the
+      # previous run if it's on the same commit SHA. This prevents a run for a
+      # commit push from cancelling a previous commit push's build, since we
+      # want an image built and tagged for each commit.
+      group: build-images-${{ matrix.image }}-${{ github.head_ref || github.sha }}
+      cancel-in-progress: true
+    permissions:
+      contents: read  # Read the repo contents.
+     
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+        - io
+        # - io-debug
+
+        include:
+        - image: io
+          dockerfile: .container/Dockerfile
+          platforms: linux/amd64 #,linux/arm64
+          image-name: "3drepo.azurecr.io/3drepo.io"
+          tag: ${{ github.sha }}
+          release-tag: latest
+
+        # example of how to add an additional build to the matrix.
+        
+        # - image: io-debug
+        #   dockerfile: .container/Dockerfile_debug
+        #   platforms: linux/amd64,linux/arm64
+        #   image-name: "${{ secrets.REGISTRY_LOGIN_SERVER }}/3drepo.io"
+        #   tag: ${{ github.sha }}-debug
+        #   release-tag: debug
+
+    steps:
+    - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+
+    - name: 'Log into ACR'
+      uses: azure/docker-login@v1
+      with:
+        login-server: 3drepo.azurecr.io
+        username: ${{  env.REGISTRY_USERNAME }}
+        password: ${{  env.REGISTRY_PASSWORD }}
+
+    # Build and push with Docker.
+    - uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18 # v2.1.0
+      with:
+        platforms: ${{ matrix.platforms }}
+
+    - uses: docker/setup-buildx-action@f03ac48505955848960e80bbb68046aa35c7b9e7 # v2.4.1
+      with:
+        driver-opts: |
+          image=moby/buildkit:master
+
+    - name: Docker meta
+      id: docker-tag-creation
+      uses: docker/metadata-action@507c2f2dc502c992ad446e3d7a5dfbe311567a96 # v4.3.0
+      with:
+        # list of Docker images to use as base name for tags
+        images: |
+          "3drepo.azurecr.io/3drepo.io"
+        # Docker tags based on the following events/attributes
+        tags: |
+          type=raw,value=ISSUE_${{ needs.get-details.outputs.issue-number }}
+          type=schedule
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=sha
+          type=sha,format=long,prefix=
+
+    - uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671 # v4.0.0
+      id: build-and-push
+      with:
+        context: .
+        file: ${{ matrix.dockerfile }}
+        platforms: ${{ matrix.platforms }}
+        push: true # ${{ github.event_name != 'pull_request' }} # Only push if not a PR.
+        tags: ${{ steps.docker-tag-creation.outputs.tags }}
+        labels: ${{ steps.docker-tag-creation.outputs.labels }}
+        no-cache-filters: certs
+        # https://github.com/docker/build-push-action/blob/master/docs/advanced/cache.md#github-cache
+        cache-from: type=registry,ref=3drepo.azurecr.io/3drepo.io:buildcache,compression=zstd
+        cache-to: type=registry,ref=3drepo.azurecr.io/3drepo.io:buildcache,mode=max
+
+  deploy-branch:
+    name: Deploy Pipeline
+    if: ${{github.event.pull_request.merged && ( github.event.pull_request.base.ref == 'staging' || github.event.pull_request.base.ref == 'master' )}}
+    runs-on: ubuntu-latest
+    needs: [ get-details, build-images ]
+    steps:
+
+    - uses: chrnorm/deployment-action@v2
+        name: Create GitHub deployment
+        id: githubdeployment
+        with:
+          token: '${{ github.token }}'
+          sha: '${{ github.sha }}'
+          transient-environment: false
+          auto-inactive: true
+          initial-status: 'in_progress'
+          environment: ${{ github.event.pull_request.base.ref }}
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-west-2
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Checkout Default Helm values
+      run: curl "https://${ACCESS_TOKEN}@${PATH_TO_VALUES}" --output ./values.yaml
+      env:
+        ACCESS_TOKEN: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
+        PATH_TO_VALUES: ${{ secrets.DEVOPS_HELM_VALUES }}
+
+    - name: Set Custom Values
+      run: |
+        echo "customHelmOverride=${customHelmOverride}" >> $GITHUB_OUTPUT
+      id: custom_values
+      env:
+        customHelmOverride: config.ADDITIONAL_CONFIG=hello   #   example of setting an additional setting in helm.
+        
+        # you can swap for this version to change to it's own rabbitmq 
+        # customHelmOverride: config.APP_QUEUE_DNS=issue-${{ needs.get-details.outputs.issue-number }}-rabbitmq
+
+    - name: Deploy Helm
+      uses: bitovi/github-actions-deploy-eks-helm@v1.2.3
+      if: needs.get-details.outputs.issue-number
+      with:
+        aws-region: eu-west-2
+        cluster-name: ${{ secrets.AWS_EKS_CLUSTER }}
+        config-files: ./values.yaml
+        chart-path: 3drepo/io
+        namespace: default
+        name: ${{ github.event.pull_request.base.ref }}
+        values: "image.tag=${{ github.sha }},branchName=${{ github.event.pull_request.base.ref }},${{ steps.custom_values.outputs.customHelmOverride }}"
+        chart-repository: https://3drepo.github.io/DevOps/
+        version: ${{ variables.HELM_IO_CHART }}
+        atomic: true
+        helm-wait: true
+        timeout: 30m
+
+    - name: Update deployment status (success)
+      if: success() && needs.get-details.outputs.deployment-id
+      uses: chrnorm/deployment-status@v2
+      with:
+        token: '${{ github.token }}'
+        state: 'success'
+        auto-inactive: true
+        deployment-id: ${{ steps.githubdeployment.outputs.deployment-id }}
+        environment-url: https://${{ github.event.pull_request.base.ref }}.dev.3drepo.io/?sha=${{ github.sha }}
+        environment: ${{ github.event.pull_request.base.ref }}
+
+    - name: Update deployment status (failure)
+      if: failure() && needs.get-details.outputs.deployment-id
+      uses: chrnorm/deployment-status@v2
+      with:
+        token: '${{ github.token }}'
+        state: 'failure'
+        deployment-id: ${{ steps.githubdeployment.outputs.deployment-id }}
+
