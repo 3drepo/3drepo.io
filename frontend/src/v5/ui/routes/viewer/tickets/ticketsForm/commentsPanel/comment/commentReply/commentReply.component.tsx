@@ -45,7 +45,7 @@ export const CommentReply = ({
 	const currentUser = CurrentUserHooksSelectors.selectUsername();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
 
-	const authorDisplayName = (isCurrentUserComment && author === currentUser)
+	const authorDisplayName = (author === currentUser)
 		? formatMessage({ id: 'comment.currentUser.author', defaultMessage: 'You' })
 		: `${user.firstName} ${user.lastName}`;
 	const imagesSrcs = images.map((image) => getTicketResourceUrl(
