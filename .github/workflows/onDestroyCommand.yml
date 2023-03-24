@@ -68,7 +68,7 @@ jobs:
     - name: Set failure notices
       if: failure()
       run: |
-          echo "::warning file=.github/workflows/onDestroyCommand.yml,title=Failure to remove helm instance::${content}"
+          echo "::error file=.github/workflows/onDestroyCommand.yml,title=Failure to remove helm instance::We failed to remove the helm instance"
       id: custom_destroy_helm_notice
       
     - name: Update deployment status

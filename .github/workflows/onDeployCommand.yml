@@ -1,6 +1,7 @@
 name: Deploy To Staging
 
-# The deployment system now needs environment variable setting to gather the custom variables, it's below, search for customHelmOverride       
+# The deployment system now needs environment variable setting to gather the custom variables, 
+# it's below, search for customHelmOverride       
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -70,7 +71,6 @@ jobs:
       cancel-in-progress: true
     permissions:
       contents: read  # Read the repo contents.
-      # id-token: write # Produce identity token for keyless signing. #might not need this, testing.
      
     runs-on: ubuntu-latest
 
@@ -89,6 +89,8 @@ jobs:
           tag: ${{ github.sha }}
           release-tag: latest
 
+        # example of how to add an additional build to the matrix.
+        
         # - image: io-debug
         #   dockerfile: .azure/Docker/Dockerfile_debug
         #   platforms: linux/amd64,linux/arm64
@@ -117,7 +119,7 @@ jobs:
           image=moby/buildkit:master
 
     - name: Docker meta
-      id: docker-tag-creation # you'll use this in the next step
+      id: docker-tag-creation
       uses: docker/metadata-action@507c2f2dc502c992ad446e3d7a5dfbe311567a96 # v4.3.0
       with:
         # list of Docker images to use as base name for tags
