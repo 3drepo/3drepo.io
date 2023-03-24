@@ -102,7 +102,6 @@ jobs:
       - name: Run Frontend yarn test
         run: cd frontend ; yarn test
 
-
   run-frontend-lint:
     name: Run Frontend lint
     runs-on: ubuntu-20.04
