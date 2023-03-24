@@ -149,9 +149,15 @@ jobs:
         with:
           cmd: |
             if $(yq eval '.jobs.deploy-branch.steps[3].env.customHelmOverride | contains("APP_")' .github/workflows/onDeployCommand.yml) = "true"; then
-                line_number=$(yq eval '.jobs.deploy-branch.steps[3].env.customHelmOverride' .github/workflows/onDeployCommand.yml | xargs -I{} grep -n {} .github/workflows/onDeployCommand.yml | cut -d: -f1)
-                echo "::warning file=.github/workflows/onDeployCommand.yml,line:${line_number}::APP_ settings present"
-                content="$(yq eval '.jobs.deploy-branch.steps[3].env.customHelmOverride' .github/workflows/onDeployCommand.yml)"
-                echo "::notice file=.github/workflows/onDeployCommand.yml,line:${line_number}::${content}"
-                exit 0
+                exit 1
             fi
+      - name: Set failure notices
+        if: failure()
+        run: |
+            line_number=$(yq eval '.jobs.deploy-branch.steps[3].env.customHelmOverride' .github/workflows/onDeployCommand.yml | xargs -I{} grep -n {} .github/workflows/onDeployCommand.yml | cut -d: -f1)
+            echo "::warning file=.github/workflows/onDeployCommand.yml,line:${line_number}::APP_ settings present"
+            content="$(yq eval '.jobs.deploy-branch.steps[3].env.customHelmOverride' .github/workflows/onDeployCommand.yml)"
+            echo "::notice file=.github/workflows/onDeployCommand.yml,line:${line_number}::${content}"
+        id: custom_values_notice
+
+          
