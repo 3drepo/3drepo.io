@@ -204,7 +204,7 @@ jobs:
         name: issue-${{ needs.get-details.outputs.issue-number }}
         values: "image.tag=${{ github.sha }},branchName=issue-${{ needs.get-details.outputs.issue-number }},${{ steps.custom_values.outputs.customHelmOverride }}"
         chart-repository: https://3drepo.github.io/DevOps/
-        version: 5.0.7
+        version: ${{ variables.HELM_IO_CHART }}
         atomic: true
         helm-wait: true
         timeout: 30m
