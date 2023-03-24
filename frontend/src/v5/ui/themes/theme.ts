@@ -454,6 +454,7 @@ export const theme = createTheme({
 					// This is necessary for overriding styles of v4 tooltips
 					container: () => document.getElementById('v4Overrides'),
 				},
+				disableInteractive: true,
 			},
 			styleOverrides: {
 				tooltip: {
