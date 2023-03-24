@@ -177,7 +177,7 @@ destroy-branch:
           "3drepo.azurecr.io/3drepo.io"
         # Docker tags based on the following events/attributes
         tags: |
-          type=raw,value=ISSUE_${{ needs.get-details.outputs.issue-number }}
+          type=raw,value=${{ github.event.pull_request.base.ref }}
           type=schedule
           type=ref,event=branch
           type=ref,event=pr
