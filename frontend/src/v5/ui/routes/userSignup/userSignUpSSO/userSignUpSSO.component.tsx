@@ -123,8 +123,8 @@ export const UserSignupSSO = () => {
 								<UserSignupFormStep
 									stepIndex={0}
 									label={formatMessage({
-										id: 'userSignup.step.username',
-										defaultMessage: 'Username',
+										id: 'userSignup.step.account',
+										defaultMessage: 'Account',
 									})}
 								>
 									<MinUserSignupFormStepAccount />
