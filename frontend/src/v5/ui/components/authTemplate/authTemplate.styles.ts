@@ -111,23 +111,14 @@ export const BlueLogo = styled(Logo)`
 export const LoginLink = styled(Link).attrs({
 	to: LOGIN_PATH,
 })`
+`;
+
+export const LogoContainer = styled(LoginLink)`
 	width: fit-content;
 	margin-bottom: 28px;
 	position: absolute;
 	top: 40px;
 	left: 50px;
-`;
-
-export const LogoContainer = styled(LoginLink)`
-	margin-bottom: 72px;
-	display: none;
-
-	@media (max-width: ${Display.Tablet}px) {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-	}
 `;
 
 export const AuthSubHeader = styled.div`
