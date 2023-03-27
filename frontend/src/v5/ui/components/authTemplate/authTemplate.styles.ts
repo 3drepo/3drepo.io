@@ -22,7 +22,6 @@ import { Typography } from '@controls/typography';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { Link } from 'react-router-dom';
 import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
-import { Display } from '@/v5/ui/themes/media';
 import { Divider as DividerBase } from '@mui/material';
 
 const customLogoPath = clientConfigService.getCustomLogoPath();
