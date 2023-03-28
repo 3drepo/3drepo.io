@@ -120,7 +120,7 @@ export const DeleteModal = ({
 					{ isContainerPartOfFederation(error)
 						&& (
 							<ErrorMessage title={formatMessage({ id: 'containers.delete.partOfFederation', defaultMessage: 'Part of a federation' })}>
-								<FormattedMessage id="containers.delete.partOfFederationDetail" defaultMessage="The container cannot be deleted as is part of a federation." />
+								<FormattedMessage id="containers.delete.partOfFederationDetail" defaultMessage="The container is currently being used as part of a federation. Please remove the container from the federation before deletion." />
 							</ErrorMessage>
 						)}
 				</Message>
