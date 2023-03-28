@@ -16,11 +16,9 @@
  */
 
 const moveNotificationsToInternal = require('./moveNotificationsToInternal');
-const moveViews = require('./moveViews');
 
 const scripts = [
 	{ script: moveNotificationsToInternal, desc: 'Move notifications to internal DB' },
-	{ script: moveViews, desc: 'Move model views to views collection' },
 ];
 
 module.exports = scripts;
