@@ -31,13 +31,13 @@ const testGetViewById = () => {
 
 		test('should return error if the view does not exist', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
-			await expect(View.getViewById(ts, model, 'a'))
+			await expect(View.getViewById(ts, model, generateRandomString()))
 				.rejects.toEqual(templates.viewNotFound);
 		});
 
 		test('should succeed if view exists', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue('view');
-			await expect(View.getViewById(ts, model, 'b')).resolves.toEqual('view');
+			await expect(View.getViewById(ts, model, generateRandomString())).resolves.toEqual('view');
 		});
 	});
 };
@@ -52,11 +52,8 @@ const testGetViews = () => {
 			const projection = { _id: 1 };
 			await expect(View.getViews(ts, model, projection)).resolves.toEqual(mockData);
 
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual(ts);
-			expect(fn.mock.calls[0][1]).toEqual(VIEWS_COLL);
-			expect(fn.mock.calls[0][2]).toEqual({ model });
-			expect(fn.mock.calls[0][3]).toEqual(projection);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(ts, VIEWS_COLL, { model }, projection);
 		});
 	});
 };
@@ -68,9 +65,8 @@ const testInitialise = () => {
 			const ts = generateRandomString();
 			await View.initialise(ts);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn.mock.calls[0][0]).toEqual(ts);
-			expect(fn.mock.calls[0][1]).toEqual(VIEWS_COLL);
-			expect(fn.mock.calls[0][3]).toEqual({ runInBackground: true });
+			expect(fn).toHaveBeenCalledWith(ts, VIEWS_COLL,
+				{ teamspace: 1, project: 1, model: 1 }, { runInBackground: true });
 		});
 	});
 };
