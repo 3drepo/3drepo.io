@@ -49,42 +49,29 @@ export const DateField = ({
 	...dateFieldProps
 }: IProps) => {
 	const [value, setValue] = useState(propValue || null);
-	const [selectedValue, setSelectedValue] = useState(value);
-
-	useEffect(() => {
-		setValue(propValue || null);
-		setSelectedValue(propValue || null);
-	}, [propValue]);
-
-	const handleOpen = () => {
-		setSelectedValue(selectedValue || new Date());
-	};
+	const Picker: ComponentType<DatePickerProps | DateTimePickerProps> = dateTime ? StyledDateTimePicker : StyledDatePicker;
 
 	const handleAccept = (newValue) => {
 		if (newValue) {
-			setValue(selectedValue);
-			if (onChange) {
-				onChange({
-					target: {
-						value: newValue.valueOf(),
-						name,
-					}
-				});
-			}
+			setValue(newValue);
+			onChange?.({
+				target: {
+					value: newValue.valueOf(),
+					name,
+				}
+			});
 		}
 	};
 
-	const handleChange = (newValue) => {
-		setSelectedValue(newValue);
-	};
-	const Picker: ComponentType<DatePickerProps | DateTimePickerProps> = dateTime ? StyledDateTimePicker : StyledDatePicker;
+	useEffect(() => {
+		setValue(propValue || null);
+	}, [propValue]);
 
 	return (
 		<Picker
-			value={selectedValue}
-			onOpen={handleOpen}
+			value={value}
 			onAccept={handleAccept}
-			onChange={handleChange}
+			onChange={() => {}}
 			disableHighlightToday
 			renderInput={(props) => (
 				<TextField
