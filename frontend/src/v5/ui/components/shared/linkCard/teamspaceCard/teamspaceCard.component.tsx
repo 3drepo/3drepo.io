@@ -29,12 +29,12 @@ interface ITeamspaceCard {
 }
 
 export const TeamspaceCard = ({ teamspaceName, className }: ITeamspaceCard): JSX.Element => {
-	const { username, avatarUrl } = CurrentUserHooksSelectors.selectCurrentUser();
+	const { username } = CurrentUserHooksSelectors.selectCurrentUser();
 
 	const isPersonalTeamspace = teamspaceName === username;
 	const { url } = useRouteMatch();
 	const to = uriCombine(url, teamspaceName || '');
-	const imgSrc = isPersonalTeamspace ? avatarUrl : getTeamspaceImgSrc(teamspaceName);
+	const imgSrc = getTeamspaceImgSrc(teamspaceName);
 
 	return (
 		<LinkCard
