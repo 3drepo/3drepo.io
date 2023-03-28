@@ -57,6 +57,7 @@ export const VirtualisedList = styled(TableVirtuoso)`
 		tr {
 			display: flex;
 			flex-direction: column;
+			width: 320px;
 		}
 	}
 `;
