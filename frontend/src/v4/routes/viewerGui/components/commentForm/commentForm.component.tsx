@@ -52,6 +52,7 @@ import {
 	Counter,
 	FileUploadContainer,
 	FileUploadInvoker,
+	FlippedIcon,
 	RemoveButtonWrapper,
 	StyledForm,
 	StyledTextField,
@@ -147,7 +148,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 
 	public renderScreenshotButton = renderWhenTrue(() => (
 		<TooltipButton
-			Icon={CameraIcon}
+			Icon={() => <FlippedIcon><CameraIcon /></FlippedIcon>}
 			label="Take a screenshot"
 			action={this.handleNewScreenshot}
 			disabled={!this.props.canComment || !this.props.isModelLoaded}
