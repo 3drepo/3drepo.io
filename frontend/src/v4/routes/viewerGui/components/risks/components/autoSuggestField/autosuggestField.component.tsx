@@ -74,7 +74,7 @@ export const AutoSuggestField: FunctionComponent<IProps> = ({
 	const [value, setValue] = useState('');
 	const [nodeRef, setNodeRef] = useState(null);
 	const [popperElement, setPopperElement] = useState(null);
-	const { styles, attributes } = usePopper(nodeRef, popperElement, { placement: 'top-start' });
+	const { styles, attributes } = usePopper(nodeRef, popperElement, { placement: 'bottom-start' });
 
 	useEffect(() => {
 		setValue(field.value);
