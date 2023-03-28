@@ -303,23 +303,26 @@ export class Groups extends PureComponent<IProps, IState> {
 		});
 	}
 
-	public renderActionsMenu = () => (
-		<MenuList>
-			{GROUPS_ACTIONS_MENU.map(({ name, Icon, label }) => {
-				return (
-					<StyledListItem key={name} onClick={this.menuActionsMap[name]}>
-						<IconWrapper><Icon fontSize="small" /></IconWrapper>
-						<StyledItemText>
-							{label}
-							{(name === GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL && this.props.isAllOverridden) && <Check fontSize="small" />}
-							{(name === GROUPS_ACTIONS_ITEMS.SHOW_SMART && this.props.showSmart) && <Check fontSize="small" />}
-							{(name === GROUPS_ACTIONS_ITEMS.SHOW_STANDARD && this.props.showStandard) && <Check fontSize="small" />}
-						</StyledItemText>
-					</StyledListItem>
-				);
-			})}
-		</MenuList>
-	)
+	public renderActionsMenu = () => {
+		const shouldDisble = (name) => !this.props.groups.length && [GROUPS_ACTIONS_ITEMS.DELETE_ALL, GROUPS_ACTIONS_ITEMS.EXPORT].includes(name);
+		return (
+			<MenuList>
+				{GROUPS_ACTIONS_MENU.map(({ name, Icon, label }) => {
+					return (
+						<StyledListItem key={name} onClick={this.menuActionsMap[name]} disabled={shouldDisble(name)}>
+							<IconWrapper><Icon fontSize="small" /></IconWrapper>
+							<StyledItemText>
+								{label}
+								{(name === GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL && this.props.isAllOverridden) && <Check fontSize="small" />}
+								{(name === GROUPS_ACTIONS_ITEMS.SHOW_SMART && this.props.showSmart) && <Check fontSize="small" />}
+								{(name === GROUPS_ACTIONS_ITEMS.SHOW_STANDARD && this.props.showStandard) && <Check fontSize="small" />}
+							</StyledItemText>
+						</StyledListItem>
+					);
+				})}
+			</MenuList>
+		);
+	}
 
 	public handleNavigationChange = (currentIndex) => {
 		this.props.showGroupDetails(this.props.groups[currentIndex], this.props.revision);
