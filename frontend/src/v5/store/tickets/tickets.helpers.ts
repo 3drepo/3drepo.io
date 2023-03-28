@@ -161,30 +161,39 @@ export const getImgSrc = (imgData) => {
 	return addBase64Prefix(imgData);
 };
 
-export const sanitizeViewVals = (vals, ticket:ITicket, template) => {
-	if (vals.properties) {
-		const props = vals.properties;
-		const propsDefs: any[] = template.properties;
+const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
+	if (!values) return values;
 
-		Object.keys(props).forEach((key) => {
-			const definition = propsDefs.find((def) => def.name === key);
-			if (definition?.type === 'view') {
-				const viewValue:Viewpoint | undefined = props[key];
-				const oldValue:Viewpoint | undefined = ticket.properties[key];
+	Object.keys(values).forEach((key) => {
+		const definition = propertiesDefinitions.find((def) => def.name === key);
+		if (definition?.type === 'view') {
+			const viewValue:Viewpoint | undefined = values[key];
+			const oldValue:Viewpoint | undefined = oldValues[key];
 
-				if (isResourceId(viewValue?.screenshot)) {
-					delete viewValue.screenshot;
-				}
-
-				if (viewValue && !viewValue.camera && oldValue?.camera) {
-					viewValue.camera = null;
-					viewValue.clippingPlanes = null;
-				}
+			if (isResourceId(viewValue?.screenshot)) {
+				delete viewValue.screenshot;
 			}
-		});
+
+			if (viewValue && !viewValue.camera && oldValue?.camera) {
+				viewValue.camera = null;
+				viewValue.clippingPlanes = null;
+			}
+		}
+	});
+	return values;
+};
+
+export const sanitizeViewVals = (values:Partial<ITicket>, ticket:ITicket, template) => {
+	if (values.properties) {
+		sanitizeViewValues(values.properties, ticket.properties, template.properties);
 	}
 
-	return vals;
+	if (values.modules) {
+		template.modules.forEach(((module) => {
+			sanitizeViewValues(values.modules[module.name], ticket.modules[module.name], module.properties);
+		}));
+	}
+	return values;
 };
 
 export const templateAlreadyFetched = (template: ITemplate) => {
