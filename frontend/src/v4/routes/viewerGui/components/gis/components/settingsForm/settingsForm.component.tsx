@@ -18,6 +18,9 @@
 import { Field } from 'formik';
 import SaveIcon from '@mui/icons-material/Save';
 
+import { selectSettings } from '@/v4/modules/model';
+import { isViewer } from '@/v4/helpers/permissions';
+import { select } from 'redux-saga/effects';
 import { ViewerPanelButton, ViewerPanelFooter } from '../../../viewerPanel/viewerPanel.styles';
 import { Container, Header, Headline, StyledForm, StyledTextField } from './settingsForm.styles';
 
@@ -28,8 +31,7 @@ const defaultFieldProps = {
 };
 
 export const SettingsForm = (props) => {
-	const {unit} = props;
-
+	const { unit, readOnly } = props;
 	return (
 		<StyledForm>
 			<Container>
@@ -46,6 +48,7 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.latitude)}
 						helperText={form.errors.latitude}
 						label="Latitude"
+						disabled={readOnly}
 					/>
 				)} />
 				<Field name="longitude" render={ ({ field, form }) => (
@@ -55,6 +58,7 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.longitude)}
 						helperText={form.errors.longitude}
 						label="Longitude"
+						disabled={readOnly}
 					/>
 				)} />
 				<Field name="angleFromNorth" render={ ({ field, form }) => (
@@ -64,6 +68,7 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.angleFromNorth)}
 						helperText={form.errors.angleFromNorth}
 						label="Angle from North (Clockwise Degrees)"
+						disabled={readOnly}
 					/>
 				)} />
 				<Headline color="primary" variant="subtitle1">
@@ -77,6 +82,7 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.axisX)}
 						helperText={form.errors.axisX}
 						label={unit ? `x (${unit})` : 'x'}
+						disabled={readOnly}
 					/>
 				)} />
 				<Field name="axisY" render={ ({ field, form }) => (
@@ -86,6 +92,7 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.axisY)}
 						helperText={form.errors.axisY}
 						label={unit ? `y (${unit})` : 'y'}
+						disabled={readOnly}
 					/>
 				)} />
 				<Field name="axisZ" render={ ({ field, form }) => (
@@ -95,6 +102,7 @@ export const SettingsForm = (props) => {
 						error={Boolean(form.errors.axisZ)}
 						helperText={form.errors.axisZ}
 						label={unit ? `z (${unit})` : 'z'}
+						disabled={readOnly}
 					/>
 				)} />
 			</Container>
@@ -104,7 +112,7 @@ export const SettingsForm = (props) => {
 						type="submit"
 						aria-label="Save"
 						color="secondary"
-						disabled={!form.isValid || form.isValidating}
+						disabled={!form.isValid || form.isValidating || readOnly }
 						variant="fab"
 					>
 						<SaveIcon />
