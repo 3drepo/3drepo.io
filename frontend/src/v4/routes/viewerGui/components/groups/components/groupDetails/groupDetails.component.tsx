@@ -135,7 +135,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 	));
 
 	public componentDidMount() {
-		this.setState({ isFormDirty: this.isNewGroup, isFormValid: true });
+		this.setState({ isFormDirty: this.isNewGroup, isFormValid: false });
 	}
 
 	public componentDidUpdate(prevProps: Readonly<PropsWithChildren<IProps>>) {
@@ -252,6 +252,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 						disabled={!this.props.canUpdate}
 					/>
 				</Actions>
+				// TODO - fix disabling
 				<ViewerPanelButton
 					variant="fab"
 					color="secondary"
