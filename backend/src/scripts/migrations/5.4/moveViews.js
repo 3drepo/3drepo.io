@@ -25,7 +25,7 @@ const { initialise } = require(`${v5Path}/models/views`);
 
 const PROJECTS_COLL = 'projects';
 
-const viewsExt = `.${VIEWS_COLL}`
+const viewsExt = `.${VIEWS_COLL}`;
 const refExt = '.ref';
 
 const processCollection = async (teamspace, project, model, collection, destCollection) => {
