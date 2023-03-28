@@ -25,7 +25,7 @@ import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
-import { EditableTicket, ITemplate } from './tickets.types';
+import { EditableTicket, ITemplate, ITicket, Viewpoint } from './tickets.types';
 
 export const modelIsFederation = (modelId: string) => (
 	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
@@ -161,22 +161,39 @@ export const getImgSrc = (imgData) => {
 	return addBase64Prefix(imgData);
 };
 
-export const sanitizeViewVals = (vals, template) => {
-	if (vals.properties) {
-		const props = vals.properties;
-		const propsDefs: any[] = template.properties;
+const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
+	if (!values) return values;
 
-		Object.keys(props).forEach((key) => {
-			const definition = propsDefs.find((def) => def.name === key);
-			if (definition?.type === 'view') {
-				if (props[key] && isResourceId(props[key].screenshot)) {
-					delete props[key].screenshot;
-				}
+	Object.keys(values).forEach((key) => {
+		const definition = propertiesDefinitions.find((def) => def.name === key);
+		if (definition?.type === 'view') {
+			const viewValue:Viewpoint | undefined = values[key];
+			const oldValue:Viewpoint | undefined = oldValues[key];
+
+			if (isResourceId(viewValue?.screenshot)) {
+				delete viewValue.screenshot;
 			}
-		});
+
+			if (viewValue && !viewValue.camera && oldValue?.camera) {
+				viewValue.camera = null;
+				viewValue.clippingPlanes = null;
+			}
+		}
+	});
+	return values;
+};
+
+export const sanitizeViewVals = (values:Partial<ITicket>, ticket:ITicket, template) => {
+	if (values.properties) {
+		sanitizeViewValues(values.properties, ticket.properties, template.properties);
 	}
 
-	return vals;
+	if (values.modules) {
+		template.modules.forEach(((module) => {
+			sanitizeViewValues(values.modules[module.name], ticket.modules[module.name], module.properties);
+		}));
+	}
+	return values;
 };
 
 export const templateAlreadyFetched = (template: ITemplate) => {
