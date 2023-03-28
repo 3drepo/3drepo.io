@@ -125,20 +125,35 @@ export const DeleteModal = ({
 						)}
 				</Message>
 				<Actions>
-					<Button onClick={onClickClose} variant="contained" color="primary">
-						<FormattedMessage
-							id="deleteModal.action.cancel"
-							defaultMessage="Cancel"
-						/>
-					</Button>
-					<Button autoFocus type="submit" onClick={handleSubmit(onSubmit)} variant="outlined" color="secondary" disabled={!isValid}>
-						{ confirmLabel || (
-							<FormattedMessage
-								id="deleteModal.action.confirm"
-								defaultMessage="Delete"
-							/>
+					{ !error
+						&& (
+							<>
+								<Button onClick={onClickClose} variant="contained" color="primary">
+									<FormattedMessage
+										id="deleteModal.action.cancel"
+										defaultMessage="Cancel"
+									/>
+								</Button>
+								<Button autoFocus type="submit" onClick={handleSubmit(onSubmit)} variant="outlined" color="secondary" disabled={!isValid}>
+									{ confirmLabel || (
+										<FormattedMessage
+											id="deleteModal.action.confirm"
+											defaultMessage="Delete"
+										/>
+									)}
+								</Button>
+							</>
 						)}
-					</Button>
+
+					{error
+						&& (
+							<Button onClick={onClickClose} variant="contained" color="primary">
+								<FormattedMessage
+									id="deleteModal.action.close"
+									defaultMessage="Close"
+								/>
+							</Button>
+						)}
 				</Actions>
 			</ModalContent>
 		</Modal>
