@@ -28,6 +28,7 @@ const EXTENSION_COLOUR_MAP = {
 	dwg: '#E51050',
 	dxf: '#1D1D1B',
 	nwd: '#007628',
+	nwc: '#007628',
 };
 const ICON_SIZE = 35;
 

@@ -17,13 +17,13 @@
 
 const { SESSION_CHANNEL_PREFIX, EVENTS: chatEvents } = require('./chat.constants');
 const { broadcastMessage, listenToExchange } = require('../../handler/queue');
+const { getSessions, session } = require('../sessions');
 const RTMsg = require('../../handler/realTimeMsging');
 const SocketsManager = require('./socketsManager');
 const { UUIDToString } = require('../../utils/helper/uuids');
 const chatLabel = require('../../utils/logger').labels.chat;
 const { cn_queue: { event_exchange: eventExchange } } = require('../../utils/config');
 const logger = require('../../utils/logger').logWithLabel(chatLabel);
-const { session } = require('../sessions');
 
 const ChatService = {};
 
@@ -51,9 +51,8 @@ const processMessage = (service, msg) => {
 	}
 };
 
-const processInternalMessage = (msg) => {
+const processInternalMessage = async (msg) => {
 	const { event, data } = msg;
-
 	if (event === chatEvents.LOGGED_IN) {
 		const { sessionID, socketId } = data;
 		const socket = SocketsManager.getSocketById(socketId);
@@ -61,6 +60,13 @@ const processInternalMessage = (msg) => {
 		// istanbul ignore else
 		if (socket) {
 			SocketsManager.addSocketToSession(sessionID, socket);
+			const sessionData = await getSessions({ _id: sessionID });
+
+			// istanbul ignore else
+			if (sessionData.length) {
+				// eslint-disable-next-line prefer-destructuring
+				socket.session = sessionData[0].session;
+			}
 		}
 	} else if (event === chatEvents.LOGGED_OUT) {
 		const { sessionIds } = data;
@@ -70,13 +76,13 @@ const processInternalMessage = (msg) => {
 	}
 };
 
-const onMessage = (service) => (msg) => {
+const onMessage = (service) => async (msg) => {
 	try {
 		const content = JSON.parse(msg.content);
 		if (content.channel) {
 			onMessageV4(service, content);
 		} else if (content.internal) {
-			processInternalMessage(content);
+			await processInternalMessage(content);
 		} else {
 			processMessage(service, content);
 		}
@@ -92,6 +98,7 @@ const subscribeToEvents = (service) => {
 ChatService.createInternalMessage = async (event, data) => {
 	try {
 		const message = JSON.stringify({ internal: true, event, data });
+		logger.logDebug(`[INTERNAL][NEW EVENT]: ${event}\t${message}`);
 		await broadcastMessage(eventExchange, message);
 	} catch (err) {
 		// istanbul ignore next

@@ -46,6 +46,18 @@ const ThumbHorizontal = styled.div<{ variant: ScrollbarVariant }>`
 	background-color: ${({ variant }) => getBackgroundColor(variant)};
 	overflow-x: hidden;
 `;
+
+const TrackVertical = styled.div`
+	z-index: 10;
+	height: 100%;
+	right: 0;
+`;
+const TrackHorizontal = styled.div`
+	z-index: 10;
+	width: 100%;
+	bottom: 0;
+`;
+
 export type ScrollAreaProps = ScrollbarProps & {
 	variant?: ScrollbarVariant;
 	as?: React.ElementType;
@@ -61,5 +73,7 @@ export const ScrollArea = styled(Scrollbars).attrs(
 				<ThumbHorizontal style={style} variant={variant} />
 			) : (<span />)
 		),
+		renderTrackVertical: ({ style }) => <TrackVertical style={style} />,
+		renderTrackHorizontal: ({ style }) => <TrackHorizontal style={style} />,
 	}),
 )<ScrollAreaProps>``;

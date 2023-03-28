@@ -27,7 +27,6 @@ import { omit } from 'lodash';
 import { prepareMockViewsReply } from './containers.fixtures';
 import { prepareMockRawSettingsReply } from './containers.fixtures';
 import { prepareContainerSettingsForFrontend } from './../../src/v5/store/containers/containers.helpers';
-import { alertAction } from '../test.helpers';
 
 describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';

@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { getRelativeTime } from '@/v5/helpers/intl.helper';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
-import { stripMetadata, extractMetadata, getRelativeTime } from '@/v5/store/tickets/comments/ticketComments.helpers';
+import { stripMetadata, extractMetadata } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { Gap } from '@controls/gap';
 import { useEffect, useState } from 'react';
 import { CurrentUserComment } from './currentUserComment/currentUserComment.component';
@@ -31,6 +32,7 @@ export type CommentProps = ITicketComment & {
 };
 export const Comment = ({
 	updatedAt,
+	createdAt,
 	author,
 	message = '',
 	deleted,
@@ -45,15 +47,12 @@ export const Comment = ({
 	const metadata = extractMetadata(message);
 	const noMetadataMessage = !deleted ? stripMetadata(message) : message;
 
-	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt));
+	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt || createdAt));
 
 	useEffect(() => {
-		if (updatedAt) {
-			updateMessageAge();
-			const intervalId = window.setInterval(updateMessageAge, 10_000);
-			return () => clearInterval(intervalId);
-		}
-		return null;
+		updateMessageAge();
+		const intervalId = window.setInterval(updateMessageAge, 10_000);
+		return () => clearInterval(intervalId);
 	}, [updatedAt]);
 
 	const UserComment = isCurrentUser ? CurrentUserComment : OtherUserComment;

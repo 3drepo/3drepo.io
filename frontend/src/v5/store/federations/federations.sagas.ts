@@ -49,7 +49,7 @@ export function* createFederation({
 	onError,
 }: CreateFederationAction) {
 	try {
-		const federationId = yield API.Federations.createFederation({ teamspace, projectId, newFederation });
+		const federationId = yield API.Federations.createFederation(teamspace, projectId, newFederation);
 		yield put(FederationsActions.createFederationSuccess(projectId, newFederation, federationId));
 		if (containers.length) {
 			yield put(FederationsActions.updateFederationContainers(teamspace, projectId, federationId, containers));
@@ -64,7 +64,7 @@ export function* createFederation({
 export function* addFavourites({ federationId, teamspace, projectId }: AddFavouriteAction) {
 	try {
 		yield put(FederationsActions.setFavouriteSuccess(projectId, federationId, true));
-		yield API.Federations.addFavourites({ teamspace, projectId, federationId });
+		yield API.Federations.addFavourites(teamspace, projectId, federationId);
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: 'trying to add federation to favourites',
@@ -77,7 +77,7 @@ export function* addFavourites({ federationId, teamspace, projectId }: AddFavour
 export function* removeFavourites({ federationId, teamspace, projectId }: RemoveFavouriteAction) {
 	try {
 		yield put(FederationsActions.setFavouriteSuccess(projectId, federationId, false));
-		yield API.Federations.removeFavourites({ teamspace, projectId, federationId });
+		yield API.Federations.removeFavourites(teamspace, projectId, federationId);
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: 'trying to remove federation from favourites',
@@ -89,10 +89,7 @@ export function* removeFavourites({ federationId, teamspace, projectId }: Remove
 
 export function* fetchFederations({ teamspace, projectId }: FetchFederationsAction) {
 	try {
-		const { federations }: FetchFederationsResponse = yield API.Federations.fetchFederations({
-			teamspace,
-			projectId,
-		});
+		const { federations }: FetchFederationsResponse = yield API.Federations.fetchFederations(teamspace, projectId);
 		const federationsWithoutStats = prepareFederationsData(federations);
 		const storedFederations = yield select(selectFederations);
 		const isPending = yield select(selectIsListPending);
@@ -116,9 +113,7 @@ export function* fetchFederations({ teamspace, projectId }: FetchFederationsActi
 
 export function* fetchFederationStats({ teamspace, projectId, federationId }: FetchFederationStatsAction) {
 	try {
-		const stats: FederationStats = yield API.Federations.fetchFederationStats({
-			teamspace, projectId, federationId,
-		});
+		const stats: FederationStats = yield API.Federations.fetchFederationStats(teamspace, projectId, federationId);
 
 		const federation = yield select(selectFederationById, federationId);
 
@@ -131,7 +126,7 @@ export function* fetchFederationStats({ teamspace, projectId, federationId }: Fe
 		}
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to fetch federations',
+			currentActions: 'trying to fetch federations stats',
 			error,
 		}));
 	}
@@ -143,11 +138,7 @@ export function* fetchFederationViews({
 	federationId,
 }: FetchFederationViewsAction) {
 	try {
-		const { views }: FetchFederationViewsResponse = yield API.Federations.fetchFederationViews({
-			teamspace,
-			projectId,
-			federationId,
-		});
+		const { views }: FetchFederationViewsResponse = yield API.Federations.fetchFederationViews(teamspace, projectId, federationId);
 		yield put(FederationsActions.fetchFederationViewsSuccess(projectId, federationId, views));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -163,11 +154,7 @@ export function* fetchFederationSettings({
 	federationId,
 }: FetchFederationSettingsAction) {
 	try {
-		const rawSettings = yield API.Federations.fetchFederationSettings({
-			teamspace,
-			projectId,
-			federationId,
-		});
+		const rawSettings = yield API.Federations.fetchFederationSettings(teamspace, projectId, federationId);
 		const settings = prepareFederationSettingsForFrontend(rawSettings);
 		yield put(FederationsActions.fetchFederationSettingsSuccess(projectId, federationId, settings));
 	} catch (error) {
@@ -188,9 +175,7 @@ export function* updateFederationSettings({
 }: UpdateFederationSettingsAction) {
 	try {
 		const rawSettings = prepareFederationSettingsForBackend(settings);
-		yield API.Federations.updateFederationSettings({
-			teamspace, projectId, federationId, settings: rawSettings,
-		});
+		yield API.Federations.updateFederationSettings(teamspace, projectId, federationId, rawSettings);
 		yield put(FederationsActions.updateFederationSettingsSuccess(projectId, federationId, settings));
 		onSuccess();
 	} catch (error) {
@@ -200,7 +185,7 @@ export function* updateFederationSettings({
 
 export function* deleteFederation({ teamspace, projectId, federationId, onSuccess, onError }: DeleteFederationAction) {
 	try {
-		yield API.Federations.deleteFederation({ teamspace, projectId, federationId });
+		yield API.Federations.deleteFederation(teamspace, projectId, federationId);
 		yield put(FederationsActions.deleteFederationSuccess(projectId, federationId));
 		onSuccess();
 	} catch (error) {
@@ -215,7 +200,7 @@ export function* updateFederationContainers({
 	containers,
 }: UpdateFederationContainersAction) {
 	try {
-		yield API.Federations.updateFederationContainers({ teamspace, projectId, federationId, containers });
+		yield API.Federations.updateFederationContainers(teamspace, projectId, federationId, containers);
 		yield put(FederationsActions.updateFederationContainersSuccess(projectId, federationId, containers));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {

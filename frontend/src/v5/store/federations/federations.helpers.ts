@@ -43,7 +43,7 @@ export const prepareNewFederation = (
 		lastUpdated: new Date(),
 		category: '',
 		hasStatsPending: false,
-		role: Role.NONE,
+		role: Role.ADMIN,
 		isFavourite: false,
 	}
 );

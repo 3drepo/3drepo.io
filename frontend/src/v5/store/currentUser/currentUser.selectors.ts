@@ -33,10 +33,6 @@ export const selectFirstName = createSelector(
 	selectCurrentUser, (state) => state.firstName || '',
 );
 
-export const selectPersonalDataIsUpdating = createSelector(
-	selectCurrentUser, (state) => !!(state.personalDataIsUpdating),
-);
-
 export const selectApiKey = createSelector(
 	selectCurrentUser, (state) => state.apiKey || '',
 );

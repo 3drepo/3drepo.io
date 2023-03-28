@@ -1,0 +1,16 @@
+name: Chat Operations Dispatch
+on:
+  issue_comment:
+    types: [ created ]
+jobs:
+  chatOperation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Slash Command Dispatch
+        uses: peter-evans/slash-command-dispatch@v3
+        with:
+          token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
+          commands: |
+            deploy
+            destroy
+          issue-type: pull-request  # initially we only require pull request for operations to match /azp run

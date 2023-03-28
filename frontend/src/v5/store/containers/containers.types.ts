@@ -115,9 +115,9 @@ export interface IContainer {
 	isFavourite: boolean;
 	role: Role;
 	hasStatsPending: boolean;
-	errorResponse?: {
+	errorReason?: {
 		message: string;
-		date: Date | null;
+		timestamp: Date | null;
 	};
 	desc?: string;
 	views?: View[];
