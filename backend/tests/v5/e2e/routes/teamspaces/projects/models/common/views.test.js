@@ -64,7 +64,7 @@ const setupBasicData = async (users, teamspace, project, models, modelsWithViews
 	]);
 
 	await Promise.all(modelsWithViews.map(async (model) => {
-		await ServiceHelper.db.createViews(teamspace, model._id,
+		await ServiceHelper.db.createViews(teamspace, project.id, model._id,
 			[model.viewWithThumbnail, model.viewNoThumbnail]);
 	}));
 };

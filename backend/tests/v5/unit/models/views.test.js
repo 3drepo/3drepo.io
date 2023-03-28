@@ -20,9 +20,8 @@ const { generateRandomString } = require('../../helper/services');
 
 const View = require(`${src}/models/views`);
 const db = require(`${src}/handler/db`);
+const { VIEWS_COLL } = require(`${src}/models/views.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
-
-const VIEWS_COLL = 'views';
 
 const testGetViewById = () => {
 	describe('Get view by Id', () => {

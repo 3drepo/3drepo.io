@@ -16,10 +16,9 @@
  */
 
 const Views = {};
+const { VIEWS_COLL } = require('./views.constants');
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
-
-const VIEWS_COLL = 'views';
 
 Views.getViewById = async (teamspace, model, id, projection) => {
 	const foundView = await db.findOne(teamspace, VIEWS_COLL, { _id: id, model }, projection);

@@ -610,9 +610,9 @@ const testUpdateModelSettings = () => {
 			await setupBasicData(users, teamspace, project, models);
 
 			await Promise.all([
-				ServiceHelper.db.createViews(teamspace, fed._id, [fed.view]),
+				ServiceHelper.db.createViews(teamspace, project.id, fed._id, [fed.view]),
 				ServiceHelper.db.createLegends(teamspace, fed._id, [fed.legend]),
-				ServiceHelper.db.createViews(teamspace, con._id, [con.view]),
+				ServiceHelper.db.createViews(teamspace, project.id, con._id, [con.view]),
 				ServiceHelper.db.createLegends(teamspace, con._id, [con.legend]),
 			]);
 		});

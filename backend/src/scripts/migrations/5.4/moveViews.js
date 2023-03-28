@@ -19,14 +19,13 @@ const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
 const { dropCollection, find, insertMany } = require(`${v5Path}/handler/db`);
+const { VIEWS_COLL, VIEWS_RESOURCES_COL } = require(`${v5Path}/models/views.constants`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const { initialise } = require(`${v5Path}/models/views`);
-const { VIEWS_RESOURCES_COL } = require(`${v5Path}/models/views.constants`);
 
 const PROJECTS_COLL = 'projects';
-const VIEWS_COLL = 'views';
 
-const viewsExt = '.views';
+const viewsExt = `.${VIEWS_COLL}`
 const refExt = '.ref';
 
 const processCollection = async (teamspace, project, model, collection, destCollection) => {

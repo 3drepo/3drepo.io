@@ -17,6 +17,7 @@
 
 const Views = {};
 
+Views.VIEWS_COLL = 'views';
 Views.VIEWS_RESOURCES_COL = 'views';
 
 module.exports = Views;

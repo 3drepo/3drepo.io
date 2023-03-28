@@ -38,6 +38,7 @@ const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { editSubscriptions, grantAdminToUser } = require(`${src}/models/teamspaceSettings`);
 const { createTeamspaceRole } = require(`${src}/models/roles`);
+const { VIEWS_COLL } = require(`${src}/models/views.constants`);
 const { initTeamspace } = require(`${src}/processors/teamspaces/teamspaces`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
@@ -232,9 +233,9 @@ db.createRisk = (teamspace, modelId, risk) => {
 	return DbHandler.insertOne(teamspace, `${modelId}.risks`, formattedRisk);
 };
 
-db.createViews = (teamspace, modelId, views) => {
-	const formattedViews = views.map((view) => ({ ...view, _id: stringToUUID(view._id), model: modelId }));
-	return DbHandler.insertMany(teamspace, 'views', formattedViews);
+db.createViews = (teamspace, project, model, views) => {
+	const formattedViews = views.map((view) => ({ ...view, _id: stringToUUID(view._id), project, model }));
+	return DbHandler.insertMany(teamspace, VIEWS_COLL, formattedViews);
 };
 
 db.createLegends = (teamspace, modelId, legends) => {
