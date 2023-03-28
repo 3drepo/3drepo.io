@@ -252,7 +252,6 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 						disabled={!this.props.canUpdate}
 					/>
 				</Actions>
-				// TODO - fix disabling
 				<ViewerPanelButton
 					variant="fab"
 					color="secondary"
