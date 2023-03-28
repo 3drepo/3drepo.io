@@ -33,11 +33,8 @@ Views.getViewById = async (teamspace, model, id, projection) => {
 
 Views.getViews = (teamspace, model, projection) => db.find(teamspace, VIEWS_COLL, { model }, projection);
 
-Views.initialise = (teamspace) => Promise.all([
-	db.createIndex(teamspace, VIEWS_COLL, { teamspace: 1 }, { runInBackground: true }),
-	db.createIndex(teamspace, VIEWS_COLL, { teamspace: 1, project: 1 }, { runInBackground: true }),
-	db.createIndex(teamspace, VIEWS_COLL, { teamspace: 1, project: 1, model: 1 }, { runInBackground: true }),
-]);
+Views.initialise = (teamspace) => db.createIndex(teamspace, VIEWS_COLL,
+	{ teamspace: 1, project: 1, model: 1 }, { runInBackground: true });
 
 Views.removeAllViewsInModel = async (teamspace, project, model) => {
 	await db.deleteMany(teamspace, VIEWS_COLL, { teamspace, project, model });

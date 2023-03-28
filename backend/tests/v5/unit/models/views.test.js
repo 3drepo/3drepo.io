@@ -16,6 +16,7 @@
  */
 
 const { src } = require('../../helper/path');
+const { generateRandomString } = require('../../helper/services');
 
 const View = require(`${src}/models/views`);
 const db = require(`${src}/handler/db`);
@@ -25,15 +26,18 @@ const VIEWS_COLL = 'views';
 
 const testGetViewById = () => {
 	describe('Get view by Id', () => {
+		const ts = generateRandomString();
+		const model = generateRandomString();
+
 		test('should return error if the view does not exist', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
-			await expect(View.getViewById('someTS', 'someModel', 'a'))
+			await expect(View.getViewById(ts, model, 'a'))
 				.rejects.toEqual(templates.viewNotFound);
 		});
 
 		test('should succeed if view exists', async () => {
 			jest.spyOn(db, 'findOne').mockResolvedValue('view');
-			await expect(View.getViewById('someTS', 'someModel', 'b')).resolves.toEqual('view');
+			await expect(View.getViewById(ts, model, 'b')).resolves.toEqual('view');
 		});
 	});
 };
@@ -41,10 +45,10 @@ const testGetViewById = () => {
 const testGetViews = () => {
 	describe('Get views', () => {
 		test('should return list of views', async () => {
-			const mockData = ['a', 'b', 'c'];
+			const mockData = [generateRandomString(), generateRandomString(), generateRandomString()];
 			const fn = jest.spyOn(db, 'find').mockResolvedValue(mockData);
-			const ts = 'teamspace';
-			const model = 'model';
+			const ts = generateRandomString();
+			const model = generateRandomString();
 			const projection = { _id: 1 };
 			await expect(View.getViews(ts, model, projection)).resolves.toEqual(mockData);
 
@@ -61,9 +65,9 @@ const testInitialise = () => {
 	describe('Initialise', () => {
 		test('should ensure indices exist', async () => {
 			const fn = jest.spyOn(db, 'createIndex').mockResolvedValue(undefined);
-			const ts = 'teamspace';
+			const ts = generateRandomString();
 			await View.initialise(ts);
-			expect(fn).toHaveBeenCalledTimes(3);
+			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn.mock.calls[0][0]).toEqual(ts);
 			expect(fn.mock.calls[0][1]).toEqual(VIEWS_COLL);
 			expect(fn.mock.calls[0][3]).toEqual({ runInBackground: true });
