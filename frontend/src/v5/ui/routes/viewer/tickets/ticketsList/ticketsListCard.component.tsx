@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CardContainer, CardHeader } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
@@ -29,13 +29,14 @@ import { ViewerParams } from '../../../routes.constants';
 export const TicketsListCard = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
+	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 
 	return (
 		<CardContainer>
 			<CardHeader>
 				<TicketsIcon />
 				<FormattedMessage id="viewer.cards.tickets.title" defaultMessage="Tickets" />
-				<NewTicketMenu />
+				{!readOnly && (<NewTicketMenu />)}
 			</CardHeader>
 			<CardContent>
 				{tickets.length ? (
