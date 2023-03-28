@@ -65,7 +65,7 @@ export const TicketDetailsCard = () => {
 	const onBlurHandler = () => {
 		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
 		let validVals = removeEmptyObjects(nullifyEmptyStrings(filterErrors(values, formData.formState.errors)));
-		validVals = sanitizeViewVals(validVals, template);
+		validVals = sanitizeViewVals(validVals, ticket, template);
 
 		if (isEmpty(validVals)) return;
 
