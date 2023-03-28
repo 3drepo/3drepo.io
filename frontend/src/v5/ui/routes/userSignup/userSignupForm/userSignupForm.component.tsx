@@ -119,7 +119,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 					>
 						<UserSignupFormStep
 							stepIndex={0}
-							label={formatMessage({ id: 'userSignup.step.username', defaultMessage: 'Username' })}
+							label={formatMessage({ id: 'userSignup.step.account', defaultMessage: 'Account' })}
 						>
 							<UserSignupFormStepAccount />
 						</UserSignupFormStep>

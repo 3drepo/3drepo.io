@@ -22,7 +22,6 @@ import { Typography } from '@controls/typography';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { Link } from 'react-router-dom';
 import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
-import { Display } from '@/v5/ui/themes/media';
 import { Divider as DividerBase } from '@mui/material';
 
 const customLogoPath = clientConfigService.getCustomLogoPath();
@@ -111,23 +110,14 @@ export const BlueLogo = styled(Logo)`
 export const LoginLink = styled(Link).attrs({
 	to: LOGIN_PATH,
 })`
+`;
+
+export const LogoContainer = styled(LoginLink)`
 	width: fit-content;
 	margin-bottom: 28px;
 	position: absolute;
 	top: 40px;
 	left: 50px;
-`;
-
-export const LogoContainer = styled(LoginLink)`
-	margin-bottom: 72px;
-	display: none;
-
-	@media (max-width: ${Display.Tablet}px) {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-	}
 `;
 
 export const AuthSubHeader = styled.div`
