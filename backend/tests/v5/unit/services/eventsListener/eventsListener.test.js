@@ -58,6 +58,8 @@ jest.mock('../../../../../src/v5/services/sessions');
 const Sessions = require(`${src}/services/sessions`);
 jest.mock('../../../../../src/v5/processors/teamspaces/teamspaces');
 const Teamspaces = require(`${src}/processors/teamspaces/teamspaces`);
+jest.mock('../../../../../src/v5/processors/teamspaces/invitations');
+const Invitations = require(`${src}/processors/teamspaces/invitations`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
@@ -101,6 +103,22 @@ const testModelEventsListener = () => {
 			expect(ModelSettings.updateModelStatus).toHaveBeenCalledTimes(0);
 		});
 
+		test(`Should fail gracefully on error if there is a ${events.QUEUED_TASK_UPDATE} (Rejected with an error object)`, async () => {
+			ProjectSettings.findProjectByModelId.mockRejectedValueOnce(new Error(generateRandomString()));
+			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				corId: generateRandomString(),
+				status: generateRandomString(),
+			};
+			await EventsManager.publish(events.QUEUED_TASK_UPDATE, data);
+			await waitOnEvent;
+			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
+			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
+			expect(ModelSettings.updateModelStatus).toHaveBeenCalledTimes(0);
+		});
+
 		test(`Should trigger newRevisionProcessed if there is a ${events.QUEUED_TASK_COMPLETED} (container)`, async () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
@@ -125,6 +143,25 @@ const testModelEventsListener = () => {
 
 		test(`Should fail gracefully on error if there is a ${events.QUEUED_TASK_COMPLETED}`, async () => {
 			ProjectSettings.findProjectByModelId.mockRejectedValueOnce(templates.projectNotFound);
+			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				corId: generateRandomString(),
+				value: generateRandomString(),
+				user: generateRandomString(),
+				containers: [generateRandomString()],
+			};
+			EventsManager.publish(events.QUEUED_TASK_COMPLETED, data);
+
+			await waitOnEvent;
+			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
+			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
+			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(0);
+		});
+
+		test(`Should fail gracefully on error if there is a ${events.QUEUED_TASK_COMPLETED} (Rejected with an error object)`, async () => {
+			ProjectSettings.findProjectByModelId.mockRejectedValueOnce(new Error(generateRandomString()));
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -393,6 +430,27 @@ const testModelEventsListener = () => {
 			};
 
 			Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(templates.revisionNotFound);
+			EventsManager.publish(events.NEW_REVISION, data);
+
+			await waitOnEvent;
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
+				{ _id: 0, tag: 1, author: 1, timestamp: 1 });
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
+		});
+
+		test(`Should fail gracefully on error if there is a ${events.NEW_REVISION} (container)(Rejected with an error object)`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
+
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				revision: generateRandomString(),
+				isFederation: false,
+			};
+
+			Revisions.getRevisionByIdOrTag.mockRejectedValueOnce(new Error(generateRandomString()));
 			EventsManager.publish(events.NEW_REVISION, data);
 
 			await waitOnEvent;
@@ -788,10 +846,13 @@ const testUserEventsListener = () => {
 	describe('User Events', () => {
 		test(`Should trigger userVerified if there is a ${events.USER_VERIFIED}`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.USER_VERIFIED);
-			EventsManager.publish(events.USER_VERIFIED, { username: 'username1' });
+			const username = generateRandomString();
+			EventsManager.publish(events.USER_VERIFIED, { username });
 			await waitOnEvent;
-			expect(Teamspaces.initTeamspace.mock.calls.length).toBe(1);
-			expect(Teamspaces.initTeamspace.mock.calls[0][0]).toEqual('username1');
+			expect(Teamspaces.initTeamspace).toHaveBeenCalledTimes(1);
+			expect(Teamspaces.initTeamspace).toHaveBeenCalledWith(username);
+			expect(Invitations.unpack).toHaveBeenCalledTimes(1);
+			expect(Invitations.unpack).toHaveBeenCalledWith(username);
 		});
 	});
 };

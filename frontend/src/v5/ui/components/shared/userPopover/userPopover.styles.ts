@@ -26,6 +26,8 @@ export const AvatarWrapper = styled.div`
 export const PopoverContainer = styled.div`
 	padding: 6px 11px 6px 7px;
 	display: flex;
+	font-family: ${({ theme }) => theme.typography.fontFamily};
+	color: ${({ theme }) => theme.palette.secondary.main};
 `;
 
 export const Data = styled.div`

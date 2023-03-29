@@ -22,9 +22,7 @@ import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { BasicTicketImage } from '../basicTicketImage.component';
 import { TicketImageActionMenu } from '../ticketImageActionMenu.component';
 
-type TicketImageProps = Omit<FormInputProps, 'inputRef'>;
-
-export const TicketImage = ({ value, onChange, onBlur, ...props }: TicketImageProps) => {
+export const TicketImage = ({ value, onChange, onBlur, ...props }: FormInputProps) => {
 	const onImageChange = (newValue) => onChange(newValue ? stripBase64Prefix(newValue) : null);
 	const imgSrc = getImgSrc(value);
 

@@ -27,6 +27,7 @@ import ChevronIcon from '@assets/icons/outlined/chevron-outlined.svg';
 import ThinChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import type {} from '@mui/x-date-pickers/themeAugmentation';
+import { CalendarActionBar } from '@controls/inputs/datePicker/baseCalendarPicker/calendarActionBar/calendarActionBar.component';
 
 export const COLOR = {
 	PRIMARY_MAIN_CONTRAST: '#FFFFFF',
@@ -146,14 +147,14 @@ const typography: TypographyOptions = {
 		fontWeight: FONT_WEIGHT.BOLDER,
 		fontSize: '0.625rem',
 		lineHeight: '1rem',
-		letterSpacing: '0.18em',
+		letterSpacing: '0.1em',
 		textTransform: 'uppercase',
 	},
 	kicker: {
 		fontWeight: FONT_WEIGHT.BOLD,
 		fontSize: '0.563rem',
 		lineHeight: '0.75rem',
-		letterSpacing: '0.18em',
+		letterSpacing: '0.1em',
 		textTransform: 'uppercase',
 	},
 };
@@ -694,7 +695,7 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					margin: '0',
-					padding: '8px 14px',
+					padding: '4px 16px 4px 12px',
 					width: '100%',
 					minHeight: 34,
 					boxSizing: 'border-box',
@@ -1023,7 +1024,7 @@ export const theme = createTheme({
 		MuiFormControl: {
 			styleOverrides: {
 				root: {
-					margin: '18px 0 0',
+					margin: '17px 0 0',
 					width: '100%',
 					boxSizing: 'border-box',
 					label: {
@@ -1118,9 +1119,6 @@ export const theme = createTheme({
 				},
 				containedPrimary: {
 					color: COLOR.PRIMARY_MAIN_CONTRAST,
-					'& path': {
-						fill: COLOR.PRIMARY_MAIN_CONTRAST,
-					},
 					'&:hover': {
 						backgroundColor: COLOR.PRIMARY_DARK,
 					},
@@ -1292,6 +1290,7 @@ export const theme = createTheme({
 					OpenPickerIcon: CalendarIcon,
 					LeftArrowIcon: ThinChevronIcon,
 					RightArrowIcon: ThinChevronIcon,
+					ActionBar: CalendarActionBar,
 				},
 			},
 		},
@@ -1301,6 +1300,7 @@ export const theme = createTheme({
 					OpenPickerIcon: CalendarIcon,
 					LeftArrowIcon: ThinChevronIcon,
 					RightArrowIcon: ThinChevronIcon,
+					ActionBar: CalendarActionBar,
 				},
 			},
 		},

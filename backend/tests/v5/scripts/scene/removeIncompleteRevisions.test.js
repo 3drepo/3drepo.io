@@ -28,6 +28,8 @@ const readline = require('readline');
 const { times } = require('lodash');
 const { utilScripts, src } = require('../../helper/path');
 
+const { disconnect } = require(`${src}/handler/db`);
+
 const { getRefsByQuery } = require(`${src}/models/fileRefs`);
 const { storeFile } = require(`${src}/services/filesManager`);
 const { fs: { path: fileShareRoot } } = require(`${src}/utils/config`);
@@ -210,7 +212,6 @@ const runTest = () => {
 		describe.each([
 			['Threshold is set to negative', [-1]],
 			['Threshold is not a number', [generateRandomString()]],
-			['Threshold is not provided', []],
 			['Threshold is not a number and force flag is set', [generateRandomString(), true]],
 
 		])('Should throw an error if:', (desc, params) => {
@@ -222,9 +223,17 @@ const runTest = () => {
 			});
 		});
 
-		test('Should remove revisions older than 14 days', async () => {
-			await RemoveIncompleteRevisions.run(14);
+		test('Should remove revisions older than 14 days if no threshold is provided', async () => {
+			await RemoveIncompleteRevisions.run();
 			const { revsToExist, deletedRevs } = determineExistingRevs(data, 14);
+			await checkRevisionsExist(revsToExist, true);
+			await checkRevisionsExist(Object.values(deletedRevs), false);
+		});
+
+		test('Should remove revisions older than 5 days if threshold is set to 5', async () => {
+			const threshold = 5;
+			await RemoveIncompleteRevisions.run(threshold);
+			const { revsToExist, deletedRevs } = determineExistingRevs(data, threshold);
 			await checkRevisionsExist(revsToExist, true);
 			await checkRevisionsExist(Object.values(deletedRevs), false);
 		});
@@ -262,4 +271,5 @@ const runTest = () => {
 
 describe(determineTestGroup(__filename), () => {
 	runTest();
+	afterAll(disconnect);
 });

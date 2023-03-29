@@ -25,7 +25,7 @@ export interface IRevisionStatus {
 	name: React.ReactElement | string;
 	status: UploadStatuses;
 	error?: {
-		date: Date | null;
+		timestamp: Date | null;
 		message: string;
 	}
 }
@@ -58,13 +58,13 @@ export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.El
 					{name}
 				</Name>
 				<ErrorTooltip>
-					{error.date ? (
+					{error.timestamp ? (
 						<FormattedMessage
 							id="containers.list.item.latestRevision.status.error.tooltipMessageWithDate"
 							defaultMessage="The latest upload on <b>{date}</b> at <b>{time}</b> has failed due to <b>{message}</b>."
 							values={{
-								date: formatDate(error.date),
-								time: formatDate(error.date, {
+								date: formatDate(error.timestamp),
+								time: formatDate(error.timestamp, {
 									hour: 'numeric',
 									minute: 'numeric',
 								}),

@@ -19,15 +19,22 @@ import { Link } from 'react-router-dom';
 import StepperBase from '@mui/material/Stepper';
 import StepLabelBase from '@mui/material/StepLabel';
 import { clientConfigService } from '@/v4/services/clientConfig';
+import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 
 export const MainContentStyling = css`
-	margin: 28px;
-	width: 454px;
+	width: 408px;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border-radius: 6px;
+	border-radius: 10px;
 	box-sizing: border-box;
+	margin: 0;
 	/* TODO - fix after new design will be released */
 	box-shadow: ${clientConfigService.getCustomBackgroundImagePath() ? '0px 8px 15px -3px #878787' : '0 1px 1px rgb(0 0 0 / 14%)'};
+`;
+
+export const Title = styled.div`
+	${({ theme }) => theme.typography.h1};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	font-weight: ${FONT_WEIGHT.BOLDER};
 `;
 
 export const Container = styled.div`
@@ -36,11 +43,7 @@ export const Container = styled.div`
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-`;
-
-export const Title = styled.div`
-	${({ theme }) => theme.typography.h1};
-	color: ${({ theme }) => theme.palette.secondary.main};
+	width: 408px;
 `;
 
 export const Underlined = styled.div`
@@ -51,6 +54,7 @@ export const Underlined = styled.div`
 
 export const Stepper = styled(StepperBase)`
 	${MainContentStyling}
+	width: 100%;
 `;
 
 export const StepLabel = styled(StepLabelBase)<{ $reachable?: boolean }>`
@@ -62,16 +66,18 @@ export const StepLabel = styled(StepLabelBase)<{ $reachable?: boolean }>`
 
 	.MuiStepLabel-label {
 		font-size: 15px;
-		font-weight: 600;
+		font-weight: 500;
 	}
 `;
 
 export const LoginPrompt = styled.div`
 	${({ theme }) => theme.typography.link};
-	color: ${({ theme }) => theme.palette.base.main};
+	color: ${({ theme }) => theme.palette.secondary.main};
 	font-family: ${({ theme }) => theme.typography.fontFamily};
 	text-decoration: none;
-	font-weight: 400;
+	font-weight: ${FONT_WEIGHT.MEDIUM};
+	font-size: 13px;
+	line-height: 19px;
 `;
 
 export const LoginPromptLink = styled(Link)`

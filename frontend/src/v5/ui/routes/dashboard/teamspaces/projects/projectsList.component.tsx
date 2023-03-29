@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FormattedMessage } from 'react-intl';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ProjectCard, AddProjectCard } from '@components/shared/linkCard/projectCard';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { formatMessage } from '@/v5/services/intl';
@@ -28,6 +28,7 @@ import { CreateProjectModal } from '../../projects/projectsList/createProjectMod
 export const ProjectsList = () => {
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 	const openNewProjectModal = () => DialogsActionsDispatchers.open(CreateProjectModal);
+	const isAdmin = TeamspacesHooksSelectors.selectIsTeamspaceAdmin();
 
 	return (
 		<SearchContextComponent items={projects} fieldsToFilter={['name']}>
@@ -39,12 +40,11 @@ export const ProjectsList = () => {
 					<SearchInput
 						placeholder={formatMessage({ id: 'projectsList.search.placeholder', defaultMessage: 'Search projects...' })}
 					/>
-					<NewProjectButton
-						startIcon={<AddCircleIcon />}
-						onClick={openNewProjectModal}
-					>
-						<FormattedMessage id="projectsList.newProject.button" defaultMessage="New project" />
-					</NewProjectButton>
+					{isAdmin && (
+						<NewProjectButton startIcon={<AddCircleIcon />} onClick={openNewProjectModal}>
+							<FormattedMessage id="projectsList.newProject.button" defaultMessage="New project" />
+						</NewProjectButton>
+					)}
 				</ActionComponents>
 			</Header>
 			<ProjectCardsList>
@@ -61,7 +61,7 @@ export const ProjectsList = () => {
 						</>
 					)}
 				</SearchContext.Consumer>
-				<AddProjectCard onClick={openNewProjectModal} />
+				{isAdmin && <AddProjectCard onClick={openNewProjectModal} />}
 			</ProjectCardsList>
 		</SearchContextComponent>
 	);

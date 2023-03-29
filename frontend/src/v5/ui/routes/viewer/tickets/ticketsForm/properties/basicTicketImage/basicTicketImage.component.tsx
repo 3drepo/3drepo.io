@@ -14,15 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { getSupportedImageExtensions, convertFileToImageSrc } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { FormControl, FormHelperText } from '@mui/material';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ActionsList, ActionsSide, Container, Label } from './basicTicketImage.styles';
 import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplayer.component';
 
-type BasicTicketImageProps = Omit<FormInputProps, 'inputRef' | 'onBlur'> & {
+type BasicTicketImageProps = Omit<FormInputProps, 'onBlur'> & {
 	children: any,
 };
 
@@ -37,13 +37,12 @@ export const BasicTicketImage = ({
 	disabled,
 	onChange,
 }: BasicTicketImageProps) => {
-	const { isAdmin } = ProjectsHooksSelectors.selectCurrentProjectDetails();
-
 	const uploadImage = async () => {
 		const file = await uploadFile(getSupportedImageExtensions());
 		const imgSrc = await convertFileToImageSrc(file);
 		onChange?.(imgSrc);
 	};
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	return (
 		<FormControl error={error} required={required}>
@@ -54,7 +53,7 @@ export const BasicTicketImage = ({
 				</ActionsSide>
 				<TicketImageDisplayer
 					imgSrc={value}
-					disabled={disabled || !isAdmin}
+					disabled={disabled || !isProjectAdmin}
 					onEmptyImageClick={uploadImage}
 				/>
 			</Container>

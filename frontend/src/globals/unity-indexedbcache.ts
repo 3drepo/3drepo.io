@@ -57,8 +57,16 @@ export class IndexedDbCache {
 	// interact with the main thread (of their creator) by posting messages.
 	// When messages are passed, a deep copy is created.
 
-	createWorker() {
-		this.worker = new Worker(new URL('unity/indexeddbworker.js', this.host));
+	async createWorker() {
+		// This preamble fetches the Worker source and stores it as a blob,
+		// creating the Worker from the blob, rather than the remote URL itself.
+		// This allows the Worker to be created from arbitrary origins, as may
+		// be done for example, when the viewer is embedded.
+
+		const result = await fetch(new URL('unity/indexeddbworker.js', this.host).toString());
+		const source = await result.text();
+		const blob = new Blob([source], { type: 'application/javascript' });
+		this.worker = new Worker(URL.createObjectURL(blob));
 		this.worker.onmessage = (ev) => {
 			// The state of the IndexedDb has changed, so we may need to pause
 			// requests.

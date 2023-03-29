@@ -25,6 +25,8 @@ import auth2Saga from '@/v5/store/auth/auth.sagas';
 import usersSaga from '@/v5/store/users/users.sagas';
 import revisionsSaga from '@/v5/store/revisions/revisions.sagas';
 import ticketsSaga from '@/v5/store/tickets/tickets.sagas';
+import ticketCommentsSaga from '@/v5/store/tickets/comments/ticketComments.sagas';
+import viewer2Saga from '@/v5/store/viewer/viewer.sagas';
 import activitiesSaga from './activities/activities.sagas';
 import authSaga from './auth/auth.sagas';
 import billingSaga from './billing/billing.sagas';
@@ -96,7 +98,9 @@ export default function* rootSaga() {
 		fork(federationsSaga),
 		fork(revisionsSaga),
 		fork(ticketsSaga),
+		fork(ticketCommentsSaga),
 		fork(usersSaga),
+		fork(viewer2Saga),
 		// <-- INJECT MODULE SAGA -->
 	]);
 }

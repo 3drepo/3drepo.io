@@ -29,6 +29,7 @@ import { Button } from '@controls/button';
 import { enableRealtimeNewFederation } from '@/v5/services/realtime/federation.events';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { FEDERATION_SEARCH_FIELDS } from '@/v5/store/federations/federations.helpers';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { FederationsList } from './federationsList';
 import { SkeletonListItem } from './federationsList/skeletonListItem';
@@ -44,6 +45,7 @@ export const Federations = (): JSX.Element => {
 	} = useFederationsData();
 
 	const { teamspace, project } = useParams<DashboardParams>();
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	const onClickCreate = () => DialogsActionsDispatchers.open(CreateFederationForm);
 
@@ -72,7 +74,7 @@ export const Federations = (): JSX.Element => {
 						<DashboardListEmptyText>
 							<FormattedMessage
 								id="federations.favourites.emptyMessage"
-								defaultMessage="You haven’t added any Favourites. Click the star on a Federation to add your first favourite Federation."
+								defaultMessage="Click on the star to mark a federation as favourite"
 							/>
 						</DashboardListEmptyText>
 					)}
@@ -98,14 +100,16 @@ export const Federations = (): JSX.Element => {
 							<DashboardListEmptyText>
 								<FormattedMessage id="federations.all.emptyMessage" defaultMessage="You haven’t created any Federations." />
 							</DashboardListEmptyText>
-							<Button
-								startIcon={<AddCircleIcon />}
-								variant="contained"
-								color="primary"
-								onClick={onClickCreate}
-							>
-								<FormattedMessage id="federations.all.newFederation" defaultMessage="New Federation" />
-							</Button>
+							{isProjectAdmin && (
+								<Button
+									startIcon={<AddCircleIcon />}
+									variant="contained"
+									color="primary"
+									onClick={onClickCreate}
+								>
+									<FormattedMessage id="federations.all.newFederation" defaultMessage="New Federation" />
+								</Button>
+							)}
 						</>
 					)}
 				/>

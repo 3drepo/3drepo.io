@@ -622,14 +622,10 @@ function* showMitigationSuggestions({conditions, setFieldValue}) {
 	}
 }
 
-export function * updateActiveRiskViewpoint({screenshot}) {
+export function * updateActiveRiskViewpoint({ screenshot }) {
 	const { model, account } = yield select(selectActiveRiskDetails);
-	let { viewpoint } = yield generateViewpoint(account, model, '', false);
-
-	if (screenshot) {
-		viewpoint = {...viewpoint, screenshot};
-	}
-
+	const { viewpoint } = yield generateViewpoint(account, model, '', false);
+	viewpoint.screenshot = yield imageUrlToBase64IfNotAlready(screenshot);
 	yield put(RisksActions.updateRisk({viewpoint}));
 }
 

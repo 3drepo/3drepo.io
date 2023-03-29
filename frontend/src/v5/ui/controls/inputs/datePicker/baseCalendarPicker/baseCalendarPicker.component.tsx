@@ -32,7 +32,8 @@ export const BaseCalendarPicker = ({
 	PickerComponent,
 	helperText,
 	error,
-	value = null,
+	required,
+	value,
 	...props
 }: BaseCalendarPickerProps) => {
 	const [open, setOpen] = useState(false);
@@ -44,8 +45,28 @@ export const BaseCalendarPicker = ({
 
 	return (
 		<PickerComponent
+			renderInput={({ ref, inputRef, ...textFieldProps }) => (
+				<TextField
+					{...textFieldProps}
+					ref={inputRef}
+					inputRef={inputRef}
+					onClick={handleClick}
+					onKeyDown={(e) => e.preventDefault()}
+					error={error}
+					helperText={helperText}
+					required={required}
+					inputProps={{
+						...textFieldProps.inputProps,
+						placeholder: formatMessage({
+							id: 'calendarPicker.placeholder',
+							defaultMessage: 'Choose a date',
+						}),
+					}}
+				/>
+			)}
 			{...props}
-			value={value}
+			// If value is 0 display it as null to prevent it showing as 1/1/1970
+			value={value || (defaultValue ? dayjs(defaultValue) : null)}
 			onOpen={() => setOpen(true)}
 			onClose={() => {
 				// This is to signal that the date has changed (we are using onblur to save changes)
@@ -57,24 +78,11 @@ export const BaseCalendarPicker = ({
 			dayOfWeekFormatter={formatDayOfWeek}
 			defaultValue={defaultValue ? dayjs(defaultValue) : null}
 			disableHighlightToday
-			renderInput={({ ref, inputRef, ...textFieldProps }) => (
-				<TextField
-					{...textFieldProps}
-					ref={inputRef}
-					inputRef={inputRef}
-					onClick={handleClick}
-					onKeyDown={(e) => e.preventDefault()}
-					error={error}
-					helperText={helperText}
-					inputProps={{
-						...textFieldProps.inputProps,
-						placeholder: formatMessage({
-							id: 'calendarPicker.placeholder',
-							defaultMessage: 'Choose a date',
-						}),
-					}}
-				/>
-			)}
+			componentsProps={{
+				actionBar: {
+					hidden: required,
+				},
+			}}
 		/>
 	);
 };

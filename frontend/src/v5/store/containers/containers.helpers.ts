@@ -51,9 +51,9 @@ export const prepareSingleContainerData = (
 	status: stats?.status ?? UploadStatuses.OK,
 	unit: stats?.unit ?? '',
 	hasStatsPending: !stats,
-	errorResponse: stats?.errorReason && {
+	errorReason: stats?.errorReason && {
 		message: stats.errorReason.message,
-		date: getNullableDate(stats?.errorReason.timestamp),
+		timestamp: getNullableDate(stats?.errorReason.timestamp),
 	},
 });
 

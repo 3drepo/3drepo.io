@@ -443,7 +443,7 @@ export class RiskDetails extends PureComponent<IProps, IState> {
 
 	public handleViewpointUpdate = (viewpoint?) => {
 		const { updateViewpoint } = this.props;
-		return updateViewpoint(viewpoint?.screenshot);
+		return updateViewpoint(viewpoint?.screenshot || this.riskData.descriptionThumbnail);
 	}
 
 	public onUpdateRiskViewpoint = () => {

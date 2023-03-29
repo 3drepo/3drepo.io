@@ -72,6 +72,7 @@ describe("Issues", function () {
 		withGroupsPath: "/../statics/bcf/withGroups.bcf",
 		invalidFile: "/../statics/bcf/notBCF.txt",
 		solibri: "/../statics/bcf/solibri.bcf",
+		sizeZero: "/../statics/bcf/sizeZero.bcf",
 		issue1: "75959a60-8ef1-11e6-8d05-9717c0574272",
 		issue2: "8d46d1b0-8ef1-11e6-8d05-9717c0574272"
 	};
@@ -3367,7 +3368,6 @@ describe("Issues", function () {
 
 			it("if teamspace does not exist should fail", async function() {
 				const res = await agent.post(`/${fakeTeamspace}/${viewerModel}/issues.bcfzip`)
-					.attach("file", __dirname + bcf.path)
 					.expect(404);
 
 				expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
@@ -3387,32 +3387,56 @@ describe("Issues", function () {
 					.attach("file", __dirname + bcf.solibri)
 					.expect(200, done);
 			});
+
+			it("if file is bad with zero size contents should fail", function(done) {
+				agent.post(`/${altTeamspace}/${commenterModel}/issues.bcfzip`)
+					.attach("file", __dirname + bcf.sizeZero)
+					.expect(400, function(err, res) {
+						expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+						done(err);
+					});
+			});
 		});
 
 		describe("Exporting a bcf file", function() {
 			it("should succeed", function(done) {
 				agent.get(`/${bcfusername}/${bcfmodel}/issues.bcfzip`)
-					.expect(200, done);
+					.expect(200, function(err, res) {
+						expect(res.text.length).to.be.above(7000);
+						done(err);
+					});
 			});
 
 			it("for specific issue numbers should succeed", function(done) {
 				agent.get(`/${bcfusername}/${bcfmodel}/issues.bcfzip?numbers=8,9`)
-					.expect(200, done);
+					.expect(200, function(err, res) {
+						expect(res.text.length).to.be.above(4000);
+						done(err);
+					});
 			});
 
 			it("if user is collaborator should succeed", function(done) {
 				agent.get(`/${altTeamspace}/${collaboratorModel}/issues.bcfzip`)
-					.expect(200, done);
+					.expect(200, function(err, res) {
+						expect(res.text.length).to.be.above(7000);
+						done(err);
+					});
 			});
 
 			it("if user is commenter should succeed", function(done) {
 				agent.get(`/${altTeamspace}/${commenterModel}/issues.bcfzip`)
-					.expect(200, done);
+					.expect(200, function(err, res) {
+						expect(res.text.length).to.be.above(9000);
+						done(err);
+					});
 			});
 
 			it("if user is viewer should succeed", function(done) {
 				agent.get(`/${altTeamspace}/${viewerModel}/issues.bcfzip`)
-					.expect(200, done);
+					.expect(200, function(err, res) {
+						expect(res.text.length).to.be.above(3000);
+						done(err);
+					});
 			});
 
 			it("if model does not exist should fail", function(done) {

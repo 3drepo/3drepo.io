@@ -338,7 +338,7 @@
 				return this.INCORRECT_USERNAME_OR_PASSWORD;
 			}
 			// other error
-			systemLogger.logError(mongoErr);
+			systemLogger.logError("A mongo error occured", mongoErr);
 			return {
 				value: 1000,
 				message: "System error. Please try again later.",
@@ -416,10 +416,6 @@
 		if (!resCode || valid_values.indexOf(resCode.value) === -1) {
 			if (resCode && resCode.stack) {
 				systemLogger.logError(resCode.stack, undefined, logLabels.network);
-			} else if (resCode && resCode.message) {
-				systemLogger.logError(resCode.message, undefined, logLabels.network);
-			} else {
-				systemLogger.logError(JSON.stringify(resCode), undefined, logLabels.network);
 			}
 
 			if(!resCode.value) {

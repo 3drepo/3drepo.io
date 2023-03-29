@@ -55,3 +55,7 @@ export const MarkdownComment = styled(MarkdownMessage)`
 		margin: 0;
 	}
 `;
+
+export const DateTimeContainer = styled.div`
+	display: inline;
+`;

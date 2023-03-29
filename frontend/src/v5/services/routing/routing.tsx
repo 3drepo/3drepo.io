@@ -19,33 +19,17 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { IProject } from '@/v5/store/projects/projects.types';
 import { generatePath } from 'react-router';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
-import { VIEWER_ROUTE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
-
-const appendSlashIfNeeded = (uri) => (uri[uri.length - 1] !== '/' ? `${uri}/` : uri);
-
-export const discardSlash = (uri) => (uri[uri.length - 1] === '/' ? uri.slice(0, -1) : uri);
-
-export const discardTab = (uri) => discardSlash(uri).split('/').slice(0, -1).join('/');
-
-export const discardUrlComponent = (uri, component) => discardSlash(uri.replace(component, ''));
+import { VIEWER_ROUTE, PROJECT_ROUTE_BASE, PROJECT_ROUTE, BOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 
 export const projectRoute = (teamspace: string, project: IProject | string) => {
 	const projectId = (project as IProject)?._id || (project as string);
 	return generatePath(PROJECT_ROUTE_BASE, { teamspace, project: projectId });
 };
 
-export const uriCombine = (uri, path) => {
-	let pathname = appendSlashIfNeeded(uri);
-	const otherPath = appendSlashIfNeeded(path);
-
-	const url = new URL(pathname, 'http://domain.com');
-	pathname = (new URL(otherPath, url)).pathname;
-
-	const val = pathname.slice(0, -1); // takes out the '/' at the end
-	return val;
+export const projectTabRoute = (teamspace: string, project: IProject | string, tab: string) => {
+	const projectId = (project as IProject)?._id || (project as string);
+	return generatePath(PROJECT_ROUTE, { teamspace, project: projectId, tab });
 };
-
-export const prefixBaseDomain = (uri: string) => `${window.location.protocol}//${window.location.hostname}${uri}`;
 
 type RevisionParam = IRevision | string | null | undefined;
 type ContainerOrFederationParam = IContainer | IFederation | string;
@@ -70,3 +54,10 @@ export const viewerRoute = (
 
 	return generatePath(VIEWER_ROUTE, params);
 };
+
+export const boardRoute = (
+	teamspace: string,
+	project: string,
+	type: 'issues' | 'risks',
+	containerOrFederation: string,
+) => generatePath(BOARD_ROUTE, { teamspace, project, type, containerOrFederation });

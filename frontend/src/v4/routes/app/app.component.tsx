@@ -32,13 +32,11 @@ import { SnackbarContainer } from '../components/snackbarContainer';
 import StaticPageRoute from '../components/staticPageRoute/staticPageRoute.component';
 import TopMenu from '../components/topMenu/topMenu.container';
 import { Dashboard } from '../dashboard';
-import { Login } from '../login';
 import { NotFound } from '../notFound';
 import { PasswordChange } from '../passwordChange';
 import { PasswordForgot } from '../passwordForgot';
 import RegisterRequest from '../registerRequest/registerRequest.container';
 import { RegisterVerify } from '../registerVerify';
-import { SignUp } from '../signUp';
 import { ViewerCanvas } from '../viewerCanvas';
 import { ViewerGui } from '../viewerGui';
 import { AppContainer } from './app.styles';
@@ -81,12 +79,6 @@ export class App extends PureComponent<IProps, IState> {
 	public renderStaticRoutes = memoize(() => STATIC_ROUTES.map(({ title, path, fileName }) => (
 		<Route key={path} path={path} render={() => <StaticPageRoute title={title} fileName={fileName} />} />
 	)));
-
-	public renderLoginRoute = memoize(() =>
-			<Route exact path={ROUTES.LOGIN}>
-				<Redirect to="v5/login" />
-			</Route>
-	);
 
 	public renderHeader = renderWhenTrue(() => (
 		<TopMenu />
@@ -137,13 +129,6 @@ export class App extends PureComponent<IProps, IState> {
 				<Route component={ViewerCanvas} />
 				{this.renderHeader(!isStaticRoute(location.pathname))}
 				<Switch>
-					<Route exact path="/">
-						<Redirect to="v5/" />
-					</Route>
-					{this.renderLoginRoute()}
-					<Route exact path={ROUTES.SIGN_UP}>
-						<Redirect to="v5/signup" />
-					</Route>
 					<Route exact path={ROUTES.PASSWORD_FORGOT} component={PasswordForgot} />
 					<Route exact path={ROUTES.PASSWORD_CHANGE} component={PasswordChange} />
 					<Route exact path={ROUTES.REGISTER_REQUEST} component={RegisterRequest} />

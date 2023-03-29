@@ -21,8 +21,10 @@ import { ContainersActionsDispatchers, DialogsActionsDispatchers } from '@/v5/se
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
-import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
+import { boardRoute, viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { ContainersHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { uploadToContainer } from '../../../uploadFileForm/uploadFileForm.helpers';
 import { ContainerSettingsModal } from '../../../containerSettingsModal/containerSettingsModal.component';
 
@@ -38,6 +40,8 @@ export const ContainerEllipsisMenu = ({
 	onSelectOrToggleItem,
 }: ContainerEllipsisMenuProps) => {
 	const { teamspace, project } = useParams<DashboardParams>();
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+	const hasCollaboratorAccess = ContainersHooksSelectors.selectHasCollaboratorAccess(container._id);
 
 	const onClickShare = () => {
 		const link = prefixBaseDomain(viewerRoute(teamspace, project, container));
@@ -91,18 +95,31 @@ export const ContainerEllipsisMenu = ({
 				})}
 				onClick={() => uploadToContainer(container._id)}
 				disabled={!canUploadToBackend(container.status)}
+				hidden={!hasCollaboratorAccess}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.viewIssues',
 					defaultMessage: 'View Issues',
 				})}
+				to={{ pathname: boardRoute(
+					teamspace,
+					project,
+					'issues',
+					container._id,
+				) }}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.viewRisks',
 					defaultMessage: 'View Risks',
 				})}
+				to={{ pathname: boardRoute(
+					teamspace,
+					project,
+					'risks',
+					container._id,
+				) }}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage(selected
@@ -119,6 +136,7 @@ export const ContainerEllipsisMenu = ({
 					pathname: './user_permissions',
 					search: `?modelId=${container._id}`,
 				}}
+				hidden={!isProjectAdmin}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
@@ -140,6 +158,7 @@ export const ContainerEllipsisMenu = ({
 					defaultMessage: 'Delete',
 				})}
 				onClick={onClickDelete}
+				hidden={!isProjectAdmin}
 			/>
 		</EllipsisMenu>
 	);

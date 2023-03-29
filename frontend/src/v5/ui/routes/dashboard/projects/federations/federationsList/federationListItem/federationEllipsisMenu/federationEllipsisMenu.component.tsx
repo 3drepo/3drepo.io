@@ -20,8 +20,10 @@ import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { FederationsActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
+import { boardRoute, viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { FederationSettingsModal } from '../../../federationSettingsModal/federationSettingsModal.component';
 
 type FederationEllipsisMenuProps = {
@@ -34,6 +36,7 @@ export const FederationEllipsisMenu = ({
 	onClickEdit,
 }: FederationEllipsisMenuProps) => {
 	const { teamspace, project } = useParams<DashboardParams>();
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	// eslint-disable-next-line max-len
 	const onClickSettings = () => DialogsActionsDispatchers.open(FederationSettingsModal, { federationId: federation._id });
@@ -95,6 +98,12 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.viewIssues',
 					defaultMessage: 'View Issues',
 				})}
+				to={{ pathname: boardRoute(
+					teamspace,
+					project,
+					'issues',
+					federation._id,
+				) }}
 			/>
 
 			<EllipsisMenuItem
@@ -102,6 +111,12 @@ export const FederationEllipsisMenu = ({
 					id: 'federations.ellipsisMenu.viewRisks',
 					defaultMessage: 'View Risks',
 				})}
+				to={{ pathname: boardRoute(
+					teamspace,
+					project,
+					'risks',
+					federation._id,
+				) }}
 			/>
 
 			<EllipsisMenuItem
@@ -113,6 +128,7 @@ export const FederationEllipsisMenu = ({
 					pathname: './user_permissions',
 					search: `?modelId=${federation._id}`,
 				}}
+				hidden={!isProjectAdmin}
 			/>
 
 			<EllipsisMenuItem
@@ -137,6 +153,7 @@ export const FederationEllipsisMenu = ({
 					defaultMessage: 'Delete',
 				})}
 				onClick={onClickDelete}
+				hidden={!isProjectAdmin}
 			/>
 		</EllipsisMenu>
 	);

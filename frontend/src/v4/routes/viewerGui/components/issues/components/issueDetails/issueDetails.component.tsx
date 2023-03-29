@@ -442,7 +442,7 @@ export class IssueDetails extends PureComponent<IProps, IState> {
 
 	public handleViewpointUpdate = ( viewpoint? ) => {
 		const { updateViewpoint } = this.props;
-		updateViewpoint(viewpoint?.screenshot);
+		updateViewpoint(viewpoint?.screenshot || this.issueData.descriptionThumbnail)
 	}
 
 	public onUpdateIssueViewpoint = () => {

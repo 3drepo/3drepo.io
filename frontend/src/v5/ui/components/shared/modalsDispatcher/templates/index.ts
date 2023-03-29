@@ -17,6 +17,7 @@
 
 import { AlertModal } from './alertModal/alertModal.component';
 import { DeleteModal } from './deleteModal/deleteModal.component';
+import { ImagesModal } from './imagesModal/imagesModal.component';
 import { InfoModal } from './infoModal/infoModal.component';
 import { ShareModal } from './shareModal/shareModal.component';
 import { WarningModal } from './warningModal/warningModal.component';
@@ -27,4 +28,5 @@ export const MODAL_TEMPLATES = {
 	delete: DeleteModal,
 	info: InfoModal,
 	share: ShareModal,
+	images: ImagesModal,
 };

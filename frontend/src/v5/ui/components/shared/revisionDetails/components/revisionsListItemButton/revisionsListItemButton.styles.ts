@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import { Button as ButtonComponent } from '@controls/button';
+import { LabelButton } from '@controls/button';
 
 export const Container = styled.div`
 	min-width: 80px;
@@ -23,11 +23,12 @@ export const Container = styled.div`
 	right: 60px;
 `;
 
-export const Button = styled(ButtonComponent).attrs({
-	variant: 'label',
-	color: 'secondary',
-})`
+export const Button = styled(LabelButton)<{ $isVoid: boolean }>`
 	margin: 0;
 	width: 100%;
 	color: ${({ theme, $isVoid }) => ($isVoid ? theme.palette.error.main : theme.palette.primary.main)};
+
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	}
 `;

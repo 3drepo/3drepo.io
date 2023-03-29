@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 type IProps = {
-	className?: any;
+	className?: string;
 };
 
 export default ({ className }: IProps) => (

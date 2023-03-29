@@ -77,7 +77,7 @@ const testGetJobList = () => {
 	});
 };
 
-describe('E2E routes/teamspaces/jobs', () => {
+describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);

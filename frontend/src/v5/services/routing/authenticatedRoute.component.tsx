@@ -17,28 +17,47 @@
 
 import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
 import { useEffect } from 'react';
+import axios from 'axios';
 import { useHistory, useLocation } from 'react-router-dom';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
+import { isNotLoggedIn } from '@/v5/validation/errors.helpers';
+import { addParams, pathName } from '@/v5/helpers/url.helper';
 import { Route, RouteProps } from './route.component';
+import { useSSOParams } from '../sso.hooks';
 
 const WrapAuthenticationRedirect = ({ children }) => {
 	const history = useHistory();
 	const isAuthenticated: boolean = AuthHooksSelectors.selectIsAuthenticated();
 	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
+	const [{ error: ssoError, searchParams }] = useSSOParams();
 
 	const location = useLocation();
 
 	useEffect(() => {
 		AuthActionsDispatchers.setReturnUrl(location);
 		if (!isAuthenticated && authenticationFetched) {
-			history.replace(LOGIN_PATH);
+			const url = ssoError ? pathName(addParams(LOGIN_PATH, searchParams)) : LOGIN_PATH;
+			history.replace(url);
 		}
 	}, [isAuthenticated, authenticationFetched]);
 
 	if (!isAuthenticated) {
 		return (<></>);
 	}
+
+	// Unauthenticate when session times out
+	axios.interceptors.response.use(
+		(response) => response,
+		(error) => {
+			try {
+				if (isNotLoggedIn(error)) AuthActionsDispatchers.setAuthenticationStatus(false);
+				return Promise.reject(error);
+			} catch (e) {
+				return Promise.reject(error);
+			}
+		},
+	);
 
 	return children;
 };

@@ -23,6 +23,8 @@ const session = require('supertest-session');
 const fs = require('fs');
 const User = require('../../../../src/v5/models/users');
 const { providers } = require('../../../../src/v5/services/sso/sso.constants');
+const { insertOne } = require('../../../../src/v5/handler/db');
+const { updateProfile } = require('../../../../src/v5/models/users');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -46,6 +48,9 @@ const testUserWithToken = ServiceHelper.generateUserCredentials();
 const testUserWithExpiredToken = ServiceHelper.generateUserCredentials();
 const lockedUser = ServiceHelper.generateUserCredentials();
 const lockedUserWithExpiredLock = ServiceHelper.generateUserCredentials();
+const nonVerifiedUserEmail = 'nonverifieduser@email.com';
+const teamspace = { name: ServiceHelper.generateRandomString() };
+
 const ssoUserId = ServiceHelper.generateRandomString();
 const fsAvatarData = ServiceHelper.generateRandomString();
 const gridFsAvatarData = ServiceHelper.generateRandomString();
@@ -54,6 +59,14 @@ const validEmailToken = { token: ServiceHelper.generateRandomString(), expiredAt
 const expiredEmailToken = { token: ServiceHelper.generateRandomString(), expiredAt: new Date(2020, 12, 12) };
 const expiredPasswordToken = { token: ServiceHelper.generateRandomString(), expiredAt: new Date(2020, 12, 12) };
 const setupData = async () => {
+	await ServiceHelper.db.createTeamspace(teamspace.name, [nonVerifiedUser.user], {
+		discretionary: {
+			collaborators: 'unlimited',
+			data: 10,
+			expiryDate: Date.now() + 100000,
+		},
+	});
+
 	await Promise.all([
 		ServiceHelper.db.createUser(testUser),
 		ServiceHelper.db.createUser(ssoTestUser, [], {
@@ -61,12 +74,13 @@ const setupData = async () => {
 		}),
 		ServiceHelper.db.createUser(userWithFsAvatar, []),
 		ServiceHelper.db.createUser(userWithGridFsAvatar, []),
-		ServiceHelper.db.createUser(nonVerifiedUser, [], {
+		ServiceHelper.db.createUser(nonVerifiedUser, [teamspace.name], {
 			inactive: true,
 			emailVerifyToken: {
 				token: validEmailToken.token,
 				expiredAt: validEmailToken.expiredAt,
 			},
+			email: nonVerifiedUserEmail,
 		}),
 		ServiceHelper.db.createUser(nonVerifiedUserWithExpiredToken, [], {
 			inactive: true,
@@ -101,7 +115,6 @@ const setupData = async () => {
 			loginTime: new Date(1 / 1 / 18),
 			failed: true,
 		}))),
-
 	]);
 };
 
@@ -699,6 +712,15 @@ const testSignUp = () => {
 
 const testVerify = () => {
 	describe('Verify a user', () => {
+		afterEach(async () => {
+			// set the user back to inactive
+			await updateProfile(nonVerifiedUser.user, {
+				inactive: true,
+				'emailVerifyToken.token': validEmailToken.token,
+				'emailVerifyToken.expiredAt': validEmailToken.expiredAt,
+			});
+		});
+
 		test('should fail if the user does not exists', async () => {
 			const res = await agent.post('/v5/user/verify').send({ username: 'nonExistingUser', token: validEmailToken })
 				.expect(templates.invalidArguments.status);
@@ -739,22 +761,57 @@ const testVerify = () => {
 			// check that a teamspace has been created
 			const userTeamspaces = await agent.get(`/v5/teamspaces?key=${nonVerifiedUser.apiKey}`)
 				.expect(templates.ok.status);
-			expect(userTeamspaces.body.teamspaces.length).toEqual(1);
+			expect(userTeamspaces.body.teamspaces.length).toEqual(2);
 
 			// trying to verify the user again should fail
 			await agent.post('/v5/user/verify').send({ username: nonVerifiedUser.user, token: validEmailToken.token })
 				.expect(templates.invalidArguments.status);
 		});
+
+		test('should verify the user and have access to inviter\'s teamspace if there is an invitation pending', async () => {
+			const invitation = {
+				_id: nonVerifiedUserEmail,
+				teamSpaces: [
+					{
+						teamspace: teamspace.name,
+						job: 'Main Contractor',
+						permissions: {
+							teamspace_admin: true,
+						},
+					},
+				],
+			};
+
+			// adding the invitation
+			insertOne('admin', 'invitations', invitation);
+
+			// verifying the user
+			await agent.post('/v5/user/verify').send({ username: nonVerifiedUser.user, token: validEmailToken.token })
+				.expect(templates.ok.status);
+
+			// the invitation should be deleted after verification
+			await testSession.post('/v5/login/').send({ user: nonVerifiedUser.user, password: nonVerifiedUser.password })
+				.expect(templates.ok.status);
+			const invitationsRes = await testSession.get('/invitations');
+			expect(invitationsRes.body).toEqual({});
+
+			const teamspacesRes = await testSession.get('/v5/teamspaces');
+			const expectedList = [
+				{ name: nonVerifiedUser.user, isAdmin: true },
+				{ name: teamspace.name, isAdmin: true },
+			];
+			expect(teamspacesRes.body.teamspaces.length).toEqual(expectedList.length);
+			expect(teamspacesRes.body.teamspaces).toEqual(expect.arrayContaining(expectedList));
+			await testSession.post('/v5/logout/');
+		});
 	});
 };
 
-const app = ServiceHelper.app();
-
-describe('E2E routes/users', () => {
+describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
-		server = app;
+		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
-		testSession = session(app);
+		testSession = session(server);
 		await setupData();
 	});
 

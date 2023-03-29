@@ -26,8 +26,8 @@ export interface ICurrentUser {
 	countryCode?: string,
 	avatarUrl?: string,
 	intercomRef?: string,
-	personalDataIsUpdating?: boolean,
 	apiKeyIsUpdating?: boolean,
+	sso?: string,
 }
 
 export type UpdatePersonalData = Partial<Pick<ICurrentUser, 'firstName' | 'lastName' | 'email' | 'company' | 'countryCode'>> & {
@@ -44,3 +44,11 @@ export type UpdateApiKey = Pick<ICurrentUser, 'apiKey'>;
 export type UpdateUser = UpdatePersonalData | UpdatePassword | UpdateApiKey;
 
 export type UpdateUserSuccess = Partial<ICurrentUser>;
+
+export enum Role {
+	ADMIN = 'admin',
+	COLLABORATOR = 'collaborator',
+	COMMENTER = 'commenter',
+	VIEWER = 'viewer',
+	NONE = 'none',
+}
