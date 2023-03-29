@@ -45,15 +45,21 @@ export const Viewer = () => {
 	const federationIsEmpty = selectedFederation?.containers?.length === 0
 		|| federationsContainers.every((container) => container?.revisionsCount === 0);
 
+	const handlePinClick = ({ id }) => {
+		if (id === NEW_PIN_ID) return;
+		TicketsCardActionsDispatchers.setSelectedTicket(id);
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
+		dispatch(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.TICKETS, true));
+	};
+
 	useEffect(() => {
 		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
-		ViewerService.on(VIEWER_EVENTS.CLICK_PIN, ({ id }) => {
-			if (id === NEW_PIN_ID) return;
-			TicketsCardActionsDispatchers.setSelectedTicket(id);
-			TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
-			dispatch(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.TICKETS, true));
-		});
-		return () => ViewerService.off(VIEWER_EVENTS.MODEL_LOADED, !isFetching);
+		ViewerService.on(VIEWER_EVENTS.CLICK_PIN, handlePinClick);
+		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, TicketsCardActionsDispatchers.resetState);
+		return () => {
+			ViewerService.off(VIEWER_EVENTS.CLICK_PIN, handlePinClick);
+			ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, TicketsCardActionsDispatchers.resetState);
+		};
 	}, [teamspace, project, containerOrFederation]);
 
 	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
