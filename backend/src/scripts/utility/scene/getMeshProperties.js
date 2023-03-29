@@ -72,7 +72,7 @@ const processScene = async (teamspace, name, rev) => {
 		bounding_box: 1,
 		primitive: 1,
 	};
-	const meshNodes = await find(teamspace, `${name}.scene`, query, properties);
+	const meshNodes = await find(teamspace, `${name}.scene`, query, properties, undefined, 10000);
 	if (meshNodes.length) {
 		logger.logInfo(`Processing scene ${teamspace}.${name}...`);
 		await processMeshNodes(meshNodes);
