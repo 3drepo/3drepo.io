@@ -107,7 +107,7 @@ export const OptionsList = styled(ListComponent)`
 export const ButtonContainer = styled.div`
 	position: absolute;
 	right: 12px;
-	bottom: 0;
+	top: -21px;
 	margin-bottom: 8px;
 	display: flex;
 	align-items: center;

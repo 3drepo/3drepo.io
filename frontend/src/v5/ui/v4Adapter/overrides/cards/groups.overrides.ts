@@ -243,7 +243,7 @@ const expandedGroupItem = css`
 						padding-top: 20px;
 					}
 					${ButtonContainer} {
-						bottom: 6px;
+						top: -8px;
 					}
 				}
 				// Field / Operation / Value box area
