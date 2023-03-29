@@ -23,7 +23,7 @@ import { Comment, AuthorAvatar } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons, CommentWithButtonsContainer } from '../basicComment/basicComment.styles';
 
-type OtherUserCommentProps = Omit<ITicketComment, 'updatedAt' | 'createdAt'> & {
+type OtherUserCommentProps = ITicketComment & {
 	commentAge: string;
 	isFirstOfBlock: boolean;
 	metadata?: TicketCommentReplyMetadata;
