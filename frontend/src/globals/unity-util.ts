@@ -286,8 +286,6 @@ export class UnityUtil {
 	 * Cancels any model that is currently loading. This will reject any model promises with "cancel" as the message
 	 */
 	public static cancelLoadModel() {
-		console.trace('canceled!');
-
 		if (!UnityUtil.loadedFlag && UnityUtil.loadedResolve) {
 			// If the previous model is being loaded but hasn't finished yet
 			UnityUtil.loadedResolve.reject('cancel');
@@ -348,8 +346,6 @@ export class UnityUtil {
 	 */
 	public static onLoaded(): Promise<object> {
 		if (!UnityUtil.loadedPromise) {
-			console.log('{{{{{{{{{{{{{{{{{{{{{{{{{{{ new promise }}}}}}}}}}}}}}}}}}}}}}}}}}}')
-
 			UnityUtil.loadedPromise = new Promise((resolve, reject) => {
 				UnityUtil.loadedResolve = { resolve, reject };
 			});
@@ -400,8 +396,6 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static toUnity(methodName, requireStatus?, params?) {
-		console.log(JSON.stringify({methodName, params}, null, '\t'));
-
 		if (UnityUtil.verbose) {
 			console.debug('[TO UNITY]', methodName, requireStatus, params);
 		}
@@ -1335,10 +1329,7 @@ export class UnityUtil {
 		clearCanvas = true,
 	): Promise<void> {
 		if (clearCanvas && UnityUtil.loadedFlag) {
-			console.log('{{{{{{{{{{{{{{{{{{{{{{{{{ reset }}}}}}}}}}}}}}}}}}}}}}}}}');
 			UnityUtil.reset(!initView);
-		} else {
-			console.log('{{{{{{{{{{{{{{{{{{{ NO RESET }}}}}}}}}}}}}}}}}}}');
 		}
 
 		const params: any = {
