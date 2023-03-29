@@ -18,7 +18,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { UserSignupSchemaSSO, UserSignupSchemaTermsAndSubmit } from '@/v5/validation/userSchemes/userSignupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { omit } from 'lodash';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
@@ -27,6 +27,8 @@ import { isInvalidArguments, usernameAlreadyExists } from '@/v5/validation/error
 import { AuthTemplate } from '@components/authTemplate';
 import { useSSOLogin } from '@/v5/services/sso.hooks';
 import { getCurrentUrl } from '@/v5/helpers/url.helper';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import ReCAPTCHA from 'react-google-recaptcha';
 import { Container as FormContainer, LoginPrompt, LoginPromptLink, Title } from '../userSignupForm/userSignupForm.styles';
 import { UserSignupFormStep } from '../userSignupForm/userSignupFormStep/userSignupFormStep.component';
 import { UserSignupFormStepTermsAndSubmit } from '../userSignupForm/userSignupFormStep/userSignupFormStepTermsAndSubmit/userSignupFormStepTermsAndSubmit.component';
@@ -48,6 +50,9 @@ export const UserSignupSSO = () => {
 	const { search } = useLocation();
 	const searchParams = new URLSearchParams(search);
 	const [,loginWithSSO] = useSSOLogin();
+	const captchaRef = useRef<ReCAPTCHA>();
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	const { captcha_client_key } = clientConfigService;
 
 	if (searchParams.get('signupPost')) {
 		if (!searchParams.get('error') || searchParams.get('error') === SSOErrorCode.EMAIL_EXISTS_WITH_SSO) {
@@ -98,6 +103,9 @@ export const UserSignupSSO = () => {
 	const onSubmit = async (values) => {
 		try {
 			const newUser = omit(values, ['termsAgreed']);
+			captchaRef?.current?.reset();
+			newUser.captcha = captcha_client_key ? await captchaRef.current.executeAsync() : 'CAPTCHA_IS_DISABLED';
+
 			if (!values.company) delete newUser.company;
 			const res = await signup(newUser);
 			window.location.href = res.data.link;
@@ -139,6 +147,13 @@ export const UserSignupSSO = () => {
 									<UserSignupFormStepTermsAndSubmit />
 								</UserSignupFormStep>
 							</UserSignupFormStepper>
+							{captcha_client_key && (
+								<ReCAPTCHA
+									ref={captchaRef}
+									size="invisible"
+									sitekey={captcha_client_key}
+								/>
+							)}
 						</form>
 					</FormProvider>
 					<LoginPrompt>
