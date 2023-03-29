@@ -74,6 +74,7 @@ const processScene = async (teamspace, name, rev) => {
 	};
 	const meshNodes = await find(teamspace, `${name}.scene`, query, properties);
 	if (meshNodes.length) {
+		logger.logInfo(`Processing scene ${teamspace}.${name}...`);
 		await processMeshNodes(meshNodes);
 	}
 	globalSceneCounter++;
