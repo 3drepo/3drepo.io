@@ -137,6 +137,13 @@ export class Notifications extends PureComponent<IProps, any> {
 		this.props.unsubscribeFromChanges();
 	}
 
+	public componentDidUpdate(prevProps: Readonly<IProps>, prevState: Readonly<any>, snapshot?: any): void {
+		if (prevProps.currentUser !==  this.props.currentUser) {
+			this.props.unsubscribeFromChanges();
+			this.props.subscribeOnChanges();
+		}
+	}
+
 	public toggleDrawer = () => {
 		this.props.setDrawerPanelState(!this.props.drawerOpened);
 	}
