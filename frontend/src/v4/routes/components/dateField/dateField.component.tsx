@@ -42,7 +42,6 @@ export const DateField = ({
 	name,
 	value: propValue,
 	placeholder,
-	disabled,
 	dateTime,
 	defaultValue,
 	className,
