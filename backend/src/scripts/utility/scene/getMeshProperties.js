@@ -32,10 +32,12 @@ const { find } = require(`${v5Path}/handler/db`);
 // In the resulting file, identify each revision by a simple integer
 let globalSceneCounter = 0;
 let globalMeshCounter = 0;
+let globalTeamspaceCounter = 0;
+let globalTeamspaceTotal = 0;
 let globalFs = null;
 
 const printUpdate = () => {
-	logger.logInfo(`Processed ${globalMeshCounter} meshes across ${globalSceneCounter} revisions...`);
+	logger.logInfo(`Processed ${globalMeshCounter} meshes across ${globalSceneCounter} revisions in ${globalTeamspaceCounter} out of ${globalTeamspaceTotal} teamspaces...`);
 };
 
 const processMeshNodes = (meshNodes) => new Promise((resolve) => {
@@ -82,6 +84,7 @@ const processProject = async (teamspace, name) => {
 	for (const rev of revisions) {
 		// eslint-disable-next-line no-await-in-loop
 		await processScene(teamspace, name, rev);
+		break; // process only one revision for now
 	}
 };
 
@@ -91,6 +94,7 @@ const processTeamspace = async (teamspace) => {
 		// eslint-disable-next-line no-await-in-loop
 		await processProject(teamspace, name.slice(0, -('.history'.length)));
 	}
+	globalTeamspaceCounter++;
 };
 
 const run = async (filename) => {
@@ -102,6 +106,7 @@ const run = async (filename) => {
 	setInterval(printUpdate, 3000);
 	logger.logInfo('Finding all teamspaces...');
 	const teamspaces = await getTeamspaceList();
+	globalTeamspaceTotal = teamspaces.length;
 	for (const teamspace of teamspaces) {
 		// eslint-disable-next-line no-await-in-loop
 		await processTeamspace(teamspace);
