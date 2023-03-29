@@ -1,7 +1,7 @@
 import { TicketsCardActions } from "@/v5/store/tickets/card/ticketsCard.redux";
-import { selectReadOnly, selectSelectedTemplate, selectSelectedTemplateId, selectSelectedTicketId, selectView } from "@/v5/store/tickets/card/ticketsCard.selectors";
+import { selectReadOnly, selectSelectedTemplateId, selectSelectedTicketId, selectView } from "@/v5/store/tickets/card/ticketsCard.selectors";
 import { TicketsCardViews } from "@/v5/ui/routes/viewer/tickets/tickets.constants";
-import { createTestStore } from "test/test.helpers";
+import { createTestStore } from "../../test.helpers";
 
 
 describe('Tickets: store', () => {
