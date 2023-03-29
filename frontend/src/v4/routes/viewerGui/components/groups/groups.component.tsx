@@ -304,7 +304,12 @@ export class Groups extends PureComponent<IProps, IState> {
 	}
 
 	public renderActionsMenu = () => {
-		const shouldDisble = (name) => !this.props.groups.length && [GROUPS_ACTIONS_ITEMS.DELETE_ALL, GROUPS_ACTIONS_ITEMS.EXPORT].includes(name);
+		const shouldDisble = (name) => {
+			if (!this.canAddOrUpdate && [GROUPS_ACTIONS_ITEMS.DELETE_ALL, GROUPS_ACTIONS_ITEMS.IMPORT].includes(name)) return true;
+
+			// disable options that needs at least one group when there are none
+			return !this.props.groups.length && [GROUPS_ACTIONS_ITEMS.DELETE_ALL,GROUPS_ACTIONS_ITEMS.EXPORT].includes(name);
+		}
 		return (
 			<MenuList>
 				{GROUPS_ACTIONS_MENU.map(({ name, Icon, label }) => {
