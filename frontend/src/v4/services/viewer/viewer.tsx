@@ -683,6 +683,8 @@ export class ViewerService {
 		}
 		if (isSelected) {
 			UnityUtil.selectPin(id);
+		} else {
+			UnityUtil.deselectPin(id);
 		}
 	}
 
