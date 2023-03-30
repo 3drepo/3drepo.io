@@ -16,7 +16,7 @@
  */
 import styled from 'styled-components';
 import { Display } from '@/v5/ui/themes/media';
-import { ScrollArea } from '@controls/scrollArea';
+import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 
 export const DashboardScroll = styled(ScrollArea)`
 	>div {

@@ -16,7 +16,7 @@
  */
 
 import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
-import { ScrollArea } from '@controls/scrollArea';
+import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 import Grid from '@mui/material/Grid';
 import { isString } from 'lodash';
 

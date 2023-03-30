@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
+import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea/scrollArea.styles';
 import styled from 'styled-components';
 
 export const ScrollArea = styled(ScrollAreaBase)`

@@ -19,7 +19,7 @@ import { Button, InputAdornment, List, MenuItem, Switch } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import * as Yup from 'yup';
-import { ScrollArea } from '@controls/scrollArea';
+import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
 import { DEFAULT_SETTINGS } from '../../../../../constants/viewer';
 import { IS_FIREFOX } from '../../../../../helpers/browser';

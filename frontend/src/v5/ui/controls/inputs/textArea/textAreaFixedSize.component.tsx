@@ -17,7 +17,7 @@
 
 import { FormControl, FormHelperText, InputLabel, InputProps } from '@mui/material';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { ScrollArea } from '@controls/scrollArea';
+import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 import { Container, Input } from './textAreaFixedSize.styles';
 
 export type TextAreaFixedSizeProps = FormInputProps & InputProps & {

@@ -34,7 +34,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { MenuItem } from '@mui/material';
-import { ScrollArea } from '@controls/scrollArea';
+import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 import {
 	Controls,
 	CharsCounter,

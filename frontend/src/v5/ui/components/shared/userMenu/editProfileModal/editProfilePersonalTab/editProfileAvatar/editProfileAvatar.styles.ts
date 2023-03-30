@@ -16,7 +16,7 @@
  */
 import styled from 'styled-components';
 import UserIconBase from '@assets/icons/filled/user-filled.svg';
-import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
+import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea/scrollArea.styles';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { Avatar as AvatarBase } from '@controls/avatar';
 import { Button } from '@controls/button';

@@ -17,7 +17,7 @@
 
 import { useRouteMatch } from 'react-router-dom';
 
-import { ScrollArea } from '@controls/scrollArea';
+import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 import { LegalContent } from './legalLayout.styles';
 import { LegalAppBar } from './legalAppBar/legalAppBar.component';
 

@@ -17,7 +17,7 @@
 
 import { MenuItem, MenuList, TextField } from '@mui/material';
 import styled from 'styled-components';
-import { ScrollArea } from '@controls/scrollArea';
+import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 
 import { COLOR } from '../../../../styles';
 
