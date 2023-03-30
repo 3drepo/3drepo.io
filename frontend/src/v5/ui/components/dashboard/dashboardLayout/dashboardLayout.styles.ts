@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 
 export const Content = styled.section`
+	height: 100%;
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	overflow-y: auto;
 	flex-grow: 1;

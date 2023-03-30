@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { CoverImage } from '@controls/coverImage/coverImage.component';
+import { DashboardScrollArea } from '@controls/scrollArea/dashboardScrollArea.styles';
 import { Content as DashboardContent } from '../../projects/projects.styles';
 
 export const Container = styled.div`
@@ -38,9 +39,8 @@ export const Content = styled(DashboardContent)`
 	box-sizing: border-box;
 `;
 
-export const Section = styled.section`
-	min-height: 100%;
-	height: auto;
+export const Section = styled(DashboardScrollArea)`
+	height: 100%;
 	display: flex;
 	flex-direction: column;
 `;
