@@ -20,7 +20,7 @@ const { generateRandomString } = require('../../helper/services');
 
 const View = require(`${src}/models/views`);
 const db = require(`${src}/handler/db`);
-const { VIEWS_COLL } = require(`${src}/models/views.constants`);
+const { VIEWS_COL } = require(`${src}/models/views.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const testGetViewById = () => {
@@ -52,7 +52,7 @@ const testGetViews = () => {
 			await expect(View.getViews(ts, model, projection)).resolves.toEqual(mockData);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(ts, VIEWS_COLL, { model }, projection);
+			expect(fn).toHaveBeenCalledWith(ts, VIEWS_COL, { model }, projection);
 		});
 	});
 };
@@ -64,7 +64,7 @@ const testInitialise = () => {
 			const ts = generateRandomString();
 			await View.initialise(ts);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(ts, VIEWS_COLL,
+			expect(fn).toHaveBeenCalledWith(ts, VIEWS_COL,
 				{ teamspace: 1, project: 1, model: 1 }, { runInBackground: true });
 		});
 	});

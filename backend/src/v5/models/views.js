@@ -16,12 +16,12 @@
  */
 
 const Views = {};
-const { VIEWS_COLL } = require('./views.constants');
+const { VIEWS_COL } = require('./views.constants');
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
 
 Views.getViewById = async (teamspace, model, id, projection) => {
-	const foundView = await db.findOne(teamspace, VIEWS_COLL, { _id: id, model }, projection);
+	const foundView = await db.findOne(teamspace, VIEWS_COL, { _id: id, model }, projection);
 
 	if (!foundView) {
 		throw templates.viewNotFound;
@@ -30,13 +30,13 @@ Views.getViewById = async (teamspace, model, id, projection) => {
 	return foundView;
 };
 
-Views.getViews = (teamspace, model, projection) => db.find(teamspace, VIEWS_COLL, { model }, projection);
+Views.getViews = (teamspace, model, projection) => db.find(teamspace, VIEWS_COL, { model }, projection);
 
-Views.initialise = (teamspace) => db.createIndex(teamspace, VIEWS_COLL,
+Views.initialise = (teamspace) => db.createIndex(teamspace, VIEWS_COL,
 	{ teamspace: 1, project: 1, model: 1 }, { runInBackground: true });
 
 Views.removeAllViewsInModel = async (teamspace, project, model) => {
-	await db.deleteMany(teamspace, VIEWS_COLL, { teamspace, project, model });
+	await db.deleteMany(teamspace, VIEWS_COL, { teamspace, project, model });
 };
 
 module.exports = Views;

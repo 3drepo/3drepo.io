@@ -19,13 +19,13 @@ const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
 const { dropCollection, find, insertMany } = require(`${v5Path}/handler/db`);
-const { VIEWS_COLL, VIEWS_RESOURCES_COL } = require(`${v5Path}/models/views.constants`);
+const { VIEWS_COL } = require(`${v5Path}/models/views.constants`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const { initialise } = require(`${v5Path}/models/views`);
 
 const PROJECTS_COLL = 'projects';
 
-const viewsExt = `.${VIEWS_COLL}`;
+const viewsExt = `.${VIEWS_COL}`;
 const refExt = '.ref';
 
 const processCollection = async (teamspace, project, model, collection, destCollection) => {
@@ -80,8 +80,8 @@ const processTeamspace = async (teamspace) => {
 		const collection = name;
 		logger.logInfo(`\t\t\t${collection}`);
 		const model = collection.slice(0, -(viewsExt.length));
-		processPromises.push(processCollection(teamspace, modelToProjectMap[model], model, collection, VIEWS_COLL));
-		processPromises.push(processCollection(teamspace, modelToProjectMap[model], model, `${collection}${refExt}`, `${VIEWS_RESOURCES_COL}${refExt}`));
+		processPromises.push(processCollection(teamspace, modelToProjectMap[model], model, collection, VIEWS_COL));
+		processPromises.push(processCollection(teamspace, modelToProjectMap[model], model, `${collection}${refExt}`, `${VIEWS_COL}${refExt}`));
 	});
 
 	await Promise.all(processPromises);
