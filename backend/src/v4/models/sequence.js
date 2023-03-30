@@ -271,9 +271,9 @@ Sequence.getList = async (account, model, branch, revision, cleanResponse = fals
 
 	const refNodesBranch = revision ? undefined : "master";
 	const refNodes = await getRefNodes(account, model, refNodesBranch, revision, {project:1});
-	const submodels = refNodes.map(r => r.project);
+	const submodels = [refNodes[0].project];// refNodes.map(r => r.project);
 
-	const submodelSequencesPromises = Promise.all(submodels.map((submodel) => Sequence.getList(account, submodel, submodelBranch, undefined, cleanResponse)));
+	const submodelSequencesPromises = Promise.all(submodels.map((submodel) => Sequence.getList(account, submodel, submodelBranch, undefined, cleanResponse).catch(() => [])));
 
 	const sequences = await db.find(account, sequenceCol(model), sequencesQuery, {frames: 0});
 
