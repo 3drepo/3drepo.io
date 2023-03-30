@@ -42,10 +42,10 @@ export const UploadsContainer = styled.div`
 	overflow-x: hidden;
 `;
 
-export const UploadsListScroll = styled(ScrollArea).attrs({
-	autoHeight: true,
-	autoHeightMin: '65vh',
-})``;
+export const UploadsListScroll = styled(ScrollArea)`
+	min-height: 65vh;
+    max-height: 200px;
+`;
 
 export const Padding = styled.div`
 	margin: ${MODAL_PADDING}px;
