@@ -30,7 +30,7 @@ import { Ticket, Id, Title, ChipList, Assignees, IssuePropertiesRow } from './ti
 
 type TicketItemProps = {
 	ticket: ITicket;
-	onClick: () => void;
+	onClick: React.MouseEventHandler<HTMLDivElement>;
 	selected?: boolean;
 };
 
