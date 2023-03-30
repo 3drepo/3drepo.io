@@ -22,6 +22,7 @@ import { useParams } from 'react-router-dom';
 import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { ViewerParams } from '../../../routes.constants';
@@ -38,7 +39,7 @@ export const TicketsListCard = () => {
 				<FormattedMessage id="viewer.cards.tickets.title" defaultMessage="Tickets" />
 				{!readOnly && (<NewTicketMenu />)}
 			</CardHeader>
-			<CardContent>
+			<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
 				{tickets.length ? (
 					<TicketsList tickets={tickets} />
 				) : (

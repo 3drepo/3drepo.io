@@ -75,7 +75,6 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 	}, [value]);
 	useEffect(() => () => {
 		ViewerService.clearMeasureMode();
-
 		if (prevValue.current) {
 			ViewerService.removePin(pinId);
 		}
