@@ -19,10 +19,8 @@ import { Display } from '@/v5/ui/themes/media';
 import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 
 export const DashboardScroll = styled(ScrollArea)`
-	>div {
-		display: flex;
-		flex-direction: column;
-	}
+	display: flex;
+	flex-direction: column;
 `;
 
 export const Content = styled.div`
