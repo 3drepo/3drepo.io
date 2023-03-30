@@ -21,11 +21,11 @@ import { FormModal } from '@controls/formModal/formModal.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CreateProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
-import { MenuItem } from '@mui/material';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
-import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
+import { FormTextField } from '@controls/inputs/formInputs.component';
+import { TextField } from '@controls/inputs/textField/textField.component';
 
 interface CreateProjectModalProps {
 	open: boolean;
@@ -34,65 +34,46 @@ interface CreateProjectModalProps {
 
 interface IFormInput {
 	projectName: string;
-	teamspace: string;
 }
 
 export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalProps) => {
-	const teamspaces = TeamspacesHooksSelectors.selectTeamspaces();
 	const currentTeamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const [existingProjectsByTeamspace, setExistingProjectsByTeamspace] = useState({});
+	const [existingProjects, setExistingProjects] = useState([]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const filteredTeamspaces = teamspaces.filter((ts) => ts.isAdmin);
-
 	const DEFAULT_VALUES = {
-		teamspace: currentTeamspace,
 		projectName: '',
 	};
 
 	const {
 		control,
 		formState,
-		formState: { errors, touchedFields },
-		watch,
+		formState: { errors },
 		handleSubmit,
 		getValues,
 		trigger,
 	} = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(CreateProjectSchema),
-		context: { existingProjectsByTeamspace },
+		context: { existingProjects },
 		defaultValues: DEFAULT_VALUES,
 	});
 
 	const onSubmissionError = (error) => {
 		if (projectAlreadyExists(error)) {
-			const { teamspace, projectName } = getValues();
-			setExistingProjectsByTeamspace({
-				...existingProjectsByTeamspace,
-				[teamspace]: [
-					...(existingProjectsByTeamspace[teamspace] || []),
-					projectName,
-				],
-			});
+			const { projectName } = getValues();
+			setExistingProjects((currentValue) => [...currentValue, projectName]);
 		}
 	};
 
-	const onSubmit: SubmitHandler<IFormInput> = ({ teamspace, projectName }) => {
-		ProjectsActionsDispatchers.createProject(teamspace, projectName.trim(), onClickClose, onSubmissionError);
+	const onSubmit: SubmitHandler<IFormInput> = ({ projectName }) => {
+		ProjectsActionsDispatchers.createProject(currentTeamspace, projectName.trim(), onClickClose, onSubmissionError);
 		setIsSubmitting(false);
 	};
 
 	useEffect(() => {
-		if (Object.keys(existingProjectsByTeamspace).length) trigger('projectName');
-	}, [errors, JSON.stringify(existingProjectsByTeamspace)]);
-
-	useEffect(() => {
-		ProjectsActionsDispatchers.fetch(getValues('teamspace'));
-		if (touchedFields.projectName) {
-			trigger('projectName');
-		}
-	}, [watch('teamspace')]);
+		if (existingProjects.length) trigger('projectName');
+	}, [errors, JSON.stringify(existingProjects)]);
 
 	return (
 		<FormModal
@@ -105,18 +86,11 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 			isSubmitting={isSubmitting}
 			maxWidth="sm"
 		>
-			<FormSelect
-				required
-				name="teamspace"
+			<TextField
 				label={formatMessage({ id: 'project.creation.form.teamspace', defaultMessage: 'Teamspace' })}
-				control={control}
-			>
-				{filteredTeamspaces.map((ts) => (
-					<MenuItem key={ts.name} value={ts.name}>
-						{ts.name}
-					</MenuItem>
-				))}
-			</FormSelect>
+				value={currentTeamspace}
+				disabled
+			/>
 			<FormTextField
 				required
 				name="projectName"
