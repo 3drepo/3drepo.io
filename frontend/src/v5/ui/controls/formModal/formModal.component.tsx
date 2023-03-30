@@ -36,7 +36,6 @@ export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HT
 	maxWidth?: DialogProps['maxWidth'];
 	isSubmitting?: boolean;
 	disableClosing?: boolean;
-	hideHorizontalScroll?: boolean;
 }
 
 export const FormModal = ({
@@ -54,7 +53,6 @@ export const FormModal = ({
 	maxWidth = false,
 	isSubmitting = false,
 	disableClosing = false,
-	hideHorizontalScroll = true,
 	...formProps
 }: IFormModal) => {
 	const handleClose = () => {
@@ -72,7 +70,7 @@ export const FormModal = ({
 		>
 			<Form {...formProps}>
 				<ModalHeader onClickClose={handleClose} title={title} subtitle={subtitle} disableClosing={disableClosing} />
-				<ModalBody hideHorizontalScroll={hideHorizontalScroll}>
+				<ModalBody>
 					{children}
 				</ModalBody>
 				<FormModalActions>

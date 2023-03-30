@@ -14,19 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
-import { FormModalContent } from './modalBody.styles';
+import { FormModalContent, ScrollArea } from './modalBody.styles';
 
 export interface IModalBody {
 	children: any,
-	hideHorizontalScroll?: boolean,
 }
 
-export const ModalBody = ({
-	children,
-	hideHorizontalScroll = true,
-}: IModalBody) => (
-	<ScrollArea variant="base" autoHeightMax="70vh" autoHeight hideHorizontal={hideHorizontalScroll}>
+export const ModalBody = ({ children }: IModalBody) => (
+	<ScrollArea>
 		<FormModalContent>
 			{children}
 		</FormModalContent>

@@ -17,9 +17,14 @@
 
 import styled from 'styled-components';
 import { DialogContent } from '@mui/material';
+import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea/scrollArea.styles';
 
 export const FormModalContent = styled(DialogContent)`
 	padding: 27px 58px 65px;
 	display: block;
 	overflow: visible;
+`;
+
+export const ScrollArea = styled(ScrollAreaBase)`
+	max-height: calc(70vh - 46px);
 `;
