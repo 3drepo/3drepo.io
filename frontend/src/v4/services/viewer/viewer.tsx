@@ -681,6 +681,9 @@ export class ViewerService {
 		} else {
 			UnityUtil.dropBookmarkPin(id, position, norm, colour);
 		}
+	}
+
+	public setSelectionPin({id, isSelected}) {
 		if (isSelected) {
 			UnityUtil.selectPin(id);
 		} else {
