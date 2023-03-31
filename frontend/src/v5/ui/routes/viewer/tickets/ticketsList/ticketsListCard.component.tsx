@@ -20,7 +20,7 @@ import { CardContainer, CardHeader } from '@components/viewer/cards/card.styles'
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
-import { CardContent } from '@components/viewer/cards/cardContent.component';
+import { CardContent } from '@components/viewer/cards/card.styles';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';

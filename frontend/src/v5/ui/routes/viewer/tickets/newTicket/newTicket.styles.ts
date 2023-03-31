@@ -20,7 +20,7 @@ import { CircleButton } from '@controls/circleButton';
 import styled from 'styled-components';
 
 export const Form = styled.form`
-	min-height: calc(100% - 49px);
+	height: calc(100% - 49px);
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
@@ -33,7 +33,7 @@ export const SaveButton = styled(SubmitButton)`
 
 export const BottomArea = styled.div`
 	box-shadow: 0 -6px 10px rgb(0 0 0 / 4%);
-	z-index: 1;
+	z-index: 2;
 	display: flex;
 	justify-content: flex-end;
 `;
