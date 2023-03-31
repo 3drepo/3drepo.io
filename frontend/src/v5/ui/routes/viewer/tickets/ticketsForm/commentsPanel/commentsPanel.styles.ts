@@ -53,6 +53,7 @@ export const VirtualisedList = styled(TableVirtuoso)`
 	table {
 		display: flex;
 		justify-content: center;
+		margin-right: -16px;
 
 		tr {
 			display: flex;
