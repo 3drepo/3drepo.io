@@ -37,7 +37,7 @@ export const ViewsContainer = styled(ViewerPanel).attrs({
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.VIEWS]}px;
 `;
 
-export const Container = styled(ScrollArea).attrs({ autoHide: true })`
+export const Container = styled(ScrollArea)`
 	display: flex;
 	flex-direction: column;
 	overflow: auto;
