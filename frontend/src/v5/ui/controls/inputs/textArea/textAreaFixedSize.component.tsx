@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormControl, FormHelperText, InputLabel, InputProps } from '@mui/material';
+import { FormControl, FormHelperText, InputLabel, InputProps, InputBase } from '@mui/material';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
-import { Container, Input } from './textAreaFixedSize.styles';
+import { Container } from './textAreaFixedSize.styles';
 
 export type TextAreaFixedSizeProps = FormInputProps & InputProps & {
 	height?: number,
@@ -43,17 +42,14 @@ export const TextAreaFixedSize = ({
 			</InputLabel>
 		)}
 		<Container $error={error} $height={height}>
-			<ScrollArea autoHeight autoHeightMin={height} autoHeightMax={height} autoHide>
-				<Input
-					id={name}
-					multiline
-					minRows={4}
-					$height={height}
-					{...props}
-					value={value}
-					defaultValue={undefined} // this is to be certain that is a controlled field
-				/>
-			</ScrollArea>
+			<InputBase
+				id={name}
+				multiline
+				minRows={4}
+				{...props}
+				value={value}
+				defaultValue={undefined} // this is to be certain that is a controlled field
+			/>
 		</Container>
 		<FormHelperText>{helperText}</FormHelperText>
 	</FormControl>
