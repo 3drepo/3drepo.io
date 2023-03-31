@@ -130,7 +130,6 @@ export const MessageInput = styled(FormTextAreaFixedSize)`
 	${TextAreaContainer} {
 		border: none;
 		box-shadow: none;
-		padding: 0 3px 0 0;
 	}
 `;
 
