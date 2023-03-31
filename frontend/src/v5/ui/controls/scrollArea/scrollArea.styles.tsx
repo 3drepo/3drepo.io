@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-export const ScrollArea = styled.div<{ variant?: 'base' | 'secondary' }>`
+export const ScrollArea = styled.div`
     height: 100%;
     width: 100%;
 	overflow: overlay;
@@ -32,10 +32,7 @@ export const ScrollArea = styled.div<{ variant?: 'base' | 'secondary' }>`
 	}
 
 	&:hover::-webkit-scrollbar-thumb {
-		background: ${({ theme: { palette }, variant }) => (
-			// variant === 'secondary' ? palette.secondary.lightest : palette.base.lightest
-			palette.base.lightest
-		)};
+		background: ${({ theme }) => theme.palette.base.lightest};
 		width: 11px;
 		height: 11px;
 		border-radius: 11px;
