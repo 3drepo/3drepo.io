@@ -42,7 +42,7 @@ const generatePropertiesValidator = async (teamspace, properties, oldProperties,
 
 	const proms = properties.map(async (prop) => {
 		if (prop.deprecated || prop.readOnly) return;
-		let validator = propTypesToValidator(prop.type, !isNewTicket && !prop.required);
+		let validator = propTypesToValidator(prop.type, !isNewTicket, prop.required);
 		if (validator) {
 			if (prop.values) {
 				let values;

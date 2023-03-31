@@ -14,10 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const Yup = require('yup');
 
+const { utils: { stripWhen }, types } = require('../../utils/helper/yup');
+const Yup = require('yup');
 const { propTypes } = require('./templates.constants');
-const { types } = require('../../utils/helper/yup');
+const { schema: rulesSchema } = require('../rules');
 
 const Validators = {};
 
@@ -26,8 +27,72 @@ const CameraType = {
 	PERSPECTIVE: 'perspective',
 };
 
-const groupIdOrData = types.id; // FIXME
-Validators.propTypesToValidator = (propType, isNullable = false) => {
+const groupSchema = (allowIds) => {
+	const group = Yup.object({
+		name: types.strings.title,
+		rules: rulesSchema,
+		objects: Yup.array().of(types.id).min(1),
+	}).test(('Rules and objects', 'Groups can only contain either rules or objects, not both', ({ rules, objects }) => !(rules && objects)));
+
+	if (allowIds) return Yup.lazy((val) => (val?.name ? group.required() : types.id.required()));
+
+	return group.required();
+};
+
+const generateViewValidator = (isUpdate, isNullable) => {
+	const imposeNullableRule = (val) => (isNullable ? val.nullable() : val);
+
+	const generateGroupArraySchema = (extraFields) => {
+		const arrSchema = Yup.array().of(Yup.object({
+			...extraFields,
+			group: groupSchema(isUpdate),
+			prefix: stripWhen(Yup.array().of(types.strings.title), (value) => !value?.length),
+		}));
+
+		return stripWhen(imposeNullableRule(arrSchema), (value) => value !== null && !value?.length);
+	};
+
+	const state = imposeNullableRule(Yup.object({
+		showHiddenObjects: Yup.boolean().default(false),
+		colored: generateGroupArraySchema(isUpdate, {
+			color: types.color3Arr,
+			opacity: Yup.number().max(1).test('opacity value', 'Opacity value must be bigger than 0', (val) => val > 0),
+		}),
+		hidden: generateGroupArraySchema(isUpdate),
+		transformed: generateGroupArraySchema(isUpdate, {
+			transformation: Yup.array().of(Yup.number()).length(16).required(),
+		}),
+	}).default(undefined));
+
+	const camera = imposeNullableRule(Yup.object({
+		type: Yup.string().oneOf([CameraType.PERSPECTIVE, CameraType.ORTHOGRAPHIC])
+			.default(CameraType.PERSPECTIVE),
+		position: types.position.required(),
+		forward: types.position.required(),
+		up: types.position.required(),
+		size: Yup.number().when('type', (type, schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
+	}).default(undefined));
+
+	const clippingPlanes = imposeNullableRule(Yup.array().of(
+		Yup.object().shape({
+			normal: types.position.required(),
+			distance: Yup.number().required(),
+			clipDirection: Yup.number().oneOf([-1, 1]).required(),
+		}),
+	)).default(undefined);
+
+	const validator = Yup.object().shape({
+		screenshot: types.embeddedImage(isNullable),
+		state,
+		camera,
+		clippingPlanes,
+	}).default(undefined);
+
+	return imposeNullableRule(validator);
+};
+
+Validators.propTypesToValidator = (propType, isUpdate = false, required = false) => {
+	const isNullable = isUpdate && !required;
 	const imposeNullableRule = (val) => (isNullable ? val.nullable() : val);
 	switch (propType) {
 	case propTypes.TEXT:
@@ -47,34 +112,7 @@ Validators.propTypesToValidator = (propType, isNullable = false) => {
 	case propTypes.IMAGE:
 		return types.embeddedImage(isNullable);
 	case propTypes.VIEW:
-	{ const validator = Yup.object().shape({
-		screenshot: types.embeddedImage(isNullable),
-		state: imposeNullableRule(Yup.object({
-			showHiddenObjects: Yup.boolean().default(false),
-			highlightedGroups: Yup.array().of(groupIdOrData),
-			colorOverrideGroups: Yup.array().of(groupIdOrData),
-			hiddenGroups: Yup.array().of(groupIdOrData),
-			shownGroups: Yup.array().of(groupIdOrData),
-			transformGroups: Yup.array().of(groupIdOrData),
-		}).default(undefined)),
-		camera: imposeNullableRule(Yup.object({
-			type: Yup.string().oneOf([CameraType.PERSPECTIVE, CameraType.ORTHOGRAPHIC])
-				.default(CameraType.PERSPECTIVE),
-			position: types.position.required(),
-			forward: types.position.required(),
-			up: types.position.required(),
-			size: Yup.number().when('type', (type, schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
-		}).default(undefined)),
-		clippingPlanes: imposeNullableRule(Yup.array().of(
-			Yup.object().shape({
-				normal: types.position.required(),
-				distance: Yup.number().required(),
-				clipDirection: Yup.number().oneOf([-1, 1]).required(),
-			}),
-		)).default(undefined),
-	}).default(undefined);
-	return imposeNullableRule(validator);
-	}
+		return generateViewValidator(isUpdate, isNullable);
 	case propTypes.MEASUREMENTS:
 		return imposeNullableRule(Yup.array().of(
 			Yup.object().shape({
