@@ -19,23 +19,28 @@ import styled from 'styled-components';
 
 export const ScrollArea = styled.div<{ variant?: 'base' | 'secondary' }>`
     height: 100%;
+    width: 100%;
 	overflow: overlay;
 
 	&::-webkit-scrollbar,
 	&::-webkit-scrollbar-thumb {
 		width: 11px;
+		height: 11px;
 		border-radius: 11px;
 		background-clip: padding-box;
 		border: 3px solid transparent;
 	}
 
-	&:hover::-webkit-scrollbar-thumb {	
+	&:hover::-webkit-scrollbar-thumb {
 		background: ${({ theme: { palette }, variant }) => (
-			variant === 'base' ? palette.base.light : palette.secondary.light
+			// variant === 'secondary' ? palette.secondary.lightest : palette.base.lightest
+			palette.base.lightest
 		)};
 		width: 11px;
+		height: 11px;
 		border-radius: 11px;
 		background-clip: padding-box;
 		border: 3px solid transparent;
 	}
 `;
+ScrollArea.displayName = 'ScrollArea';
