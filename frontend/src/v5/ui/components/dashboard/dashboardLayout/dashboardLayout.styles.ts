@@ -16,8 +16,9 @@
  */
 
 import styled from 'styled-components';
+import { DashboardScrollArea } from '@controls/scrollArea/dashboardScrollArea.styles';
 
-export const Content = styled.section`
+export const Content = styled(DashboardScrollArea)`
 	height: 100%;
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	overflow-y: auto;

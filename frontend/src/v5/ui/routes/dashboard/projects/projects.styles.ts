@@ -16,12 +16,6 @@
  */
 import styled from 'styled-components';
 import { Display } from '@/v5/ui/themes/media';
-import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
-
-export const DashboardScroll = styled(ScrollArea)`
-	display: flex;
-	flex-direction: column;
-`;
 
 export const Content = styled.div`
 	max-width: 1289px;

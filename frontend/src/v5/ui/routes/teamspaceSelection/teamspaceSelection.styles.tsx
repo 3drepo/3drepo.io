@@ -18,11 +18,9 @@
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
-import { DashboardScroll } from '../dashboard/projects/projects.styles';
+import { DashboardScrollArea } from '@controls/scrollArea/dashboardScrollArea.styles';
 
-export const ScrollBar = styled(DashboardScroll).attrs({
-	variant: 'secondary',
-})`
+export const ScrollArea = styled(DashboardScrollArea)`
 	background: ${({ theme }) => theme.palette.gradient.secondary};
 	border-top: 1px solid ${({ theme }) => hexToOpacity(theme.palette.primary.main, 10)};
 `;
