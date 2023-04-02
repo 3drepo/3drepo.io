@@ -20,4 +20,6 @@ import { ScrollArea } from './scrollArea.styles';
 
 export const DashboardScrollArea = styled(ScrollArea)`
 	height: calc(1005 - 62px);
+	position: relative;
+	z-index: 0;
 `;
