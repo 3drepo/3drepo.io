@@ -18,8 +18,8 @@
 import styled from 'styled-components';
 
 export const ScrollArea = styled.div`
-    height: 100%;
-    width: 100%;
+	height: 100%;
+	width: 100%;
 	overflow: overlay;
 
 	&::-webkit-scrollbar,
@@ -27,17 +27,12 @@ export const ScrollArea = styled.div`
 		width: 11px;
 		height: 11px;
 		border-radius: 11px;
-		background-clip: padding-box;
 		border: 3px solid transparent;
 	}
 
 	&:hover::-webkit-scrollbar-thumb {
 		background: ${({ theme }) => theme.palette.base.lightest};
-		width: 11px;
-		height: 11px;
-		border-radius: 11px;
 		background-clip: padding-box;
-		border: 3px solid transparent;
 	}
 `;
 ScrollArea.displayName = 'ScrollArea';
