@@ -151,8 +151,7 @@ Tickets.validateTicket = async (teamspace, template, newTicket, oldTicket) => {
 		await generateModuleValidator(teamspace, fullTem.modules, oldTicket?.modules, isNewTicket, true),
 	).default({});
 
-	const res = await Yup.object(validatorObj).validate(validatedTicket, { stripUnknown: true });
-	return res;
+	return Yup.object(validatorObj).validate(validatedTicket, { stripUnknown: true });
 };
 
 const calculateLevelOfRisk = (likelihood, consequence) => {

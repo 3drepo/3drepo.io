@@ -47,24 +47,24 @@ const groupSchema = (allowIds) => {
 const generateViewValidator = (isUpdate, isNullable) => {
 	const imposeNullableRule = (val) => (isNullable ? val.nullable() : val);
 
-	const generateGroupArraySchema = (extraFields) => {
-		const arrSchema = Yup.array().of(Yup.object({
+	const generateGroupArraySchema = (extraFields, testCB = (v) => v) => {
+		const arrSchema = Yup.array().of(testCB(Yup.object({
 			...extraFields,
 			group: groupSchema(isUpdate),
 			prefix: stripWhen(Yup.array().of(types.strings.title), (value) => !value?.length),
-		}));
+		})));
 
 		return stripWhen(imposeNullableRule(arrSchema), (value) => value !== null && !value?.length);
 	};
 
 	const state = imposeNullableRule(Yup.object({
 		showHidden: Yup.boolean().default(false),
-		colored: generateGroupArraySchema(isUpdate, {
+		colored: generateGroupArraySchema({
 			color: types.color3Arr,
-			opacity: Yup.number().max(1).test('opacity value', 'Opacity value must be bigger than 0', (val) => val > 0),
-		}),
-		hidden: generateGroupArraySchema(isUpdate),
-		transformed: generateGroupArraySchema(isUpdate, {
+			opacity: Yup.number().max(1).test('opacity value', 'Opacity value must be bigger than 0', (val) => val === undefined || val > 0),
+		}, (sch) => sch.test('color and opacity', 'Must define a colour or opacity override', ({ color, opacity }) => color || opacity)),
+		hidden: generateGroupArraySchema(),
+		transformed: generateGroupArraySchema({
 			transformation: Yup.array().of(Yup.number()).length(16).required(),
 		}),
 	}).default(undefined));
