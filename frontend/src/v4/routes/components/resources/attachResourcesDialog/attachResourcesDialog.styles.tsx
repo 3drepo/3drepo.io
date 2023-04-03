@@ -50,20 +50,19 @@ export const StyledDropZone = styled(Dropzone)`
 `;
 
 export const ResourcesListContainer = styled.div`
-	overflow: hidden;
+	overflow: hidden scroll;
 	width: 500px;
 	& >:last-child {
 		height: 55px;
 	}
+	${!isV5() && css`
+		max-height: 114px;
+	`}
 `;
 
-export const ResourcesListScroller = styled(ConditionalV5OrViewerScrollArea).attrs({
-	autoHeight: true,
-	autoHeightMax: isV5() ? 200 : 114,
-})`
+export const ResourcesListScroller = styled.div`
 	margin-top: 20px;
 	overflow: hidden;
-	max-height: 114px;
 `;
 
 export const ResourceListItem = styled.div`
