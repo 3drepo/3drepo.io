@@ -33,11 +33,11 @@ import { useEffect, useState } from 'react';
 import { Gap } from '@controls/gap';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { sanitiseMessage, stripMetadata } from '@/v5/store/tickets/comments/ticketComments.helpers';
+import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 import { ViewerParams } from '../../../../routes.constants';
 import { Accordion, Comments, EmptyCommentsBox, VirtualisedList } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
 import { CreateCommentBox } from './createCommentBox/createCommentBox.component';
-import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 
 type CommentsPanelProps = {
 	scrollPanelIntoView: (event, isExpanding) => void,

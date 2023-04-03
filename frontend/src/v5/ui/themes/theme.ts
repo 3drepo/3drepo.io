@@ -590,7 +590,6 @@ export const theme = createTheme({
 						height: 11,
 						borderRadius: 11,
 						border: '3px solid transparent',
-						background: 'red'
 					},
 
 					'&:hover::-webkit-scrollbar-thumb': {
