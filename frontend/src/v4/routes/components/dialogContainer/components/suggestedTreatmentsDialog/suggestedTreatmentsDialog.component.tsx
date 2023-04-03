@@ -146,12 +146,10 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 					/>
 				</Grid>
 			</StyledGrid>
-			<ViewerScrollArea>
-				<StyledDialogContent>
-					{!isEmpty(suggestions) && <SuggestionsList suggestions={getSuggestions} onClick={handleClick} />}
-					{isEmpty(suggestions) && <EmptyStateInfo>No suggestion found</EmptyStateInfo>}
-				</StyledDialogContent>
-			</ViewerScrollArea>
+			<StyledDialogContent>
+				{!isEmpty(suggestions) && <SuggestionsList suggestions={getSuggestions} onClick={handleClick} />}
+				{isEmpty(suggestions) && <EmptyStateInfo>No suggestion found</EmptyStateInfo>}
+			</StyledDialogContent>
 		</Container>
 	);
 };

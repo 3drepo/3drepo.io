@@ -78,19 +78,15 @@ export const Container = styled.div`
 	position: relative;
 	width: 600px;
 	min-height: 40vh;
-`;
-
-export const ViewerScrollArea = styled(ViewerScrollAreaBase).attrs({
-	autoHeight: true,
-	autoHeightMax: isV5() ? '100%' : '60vh',
-})`
-	margin-top: 66px;
+	overflow: auto;
 `;
 
 export const StyledDialogContent = styled(DialogContent)`
 	&& {
 		padding-top: 0;
 		overflow: unset;
+		max-height: 60vh;
+		margin-top: 66px;
 	}
 `;
 

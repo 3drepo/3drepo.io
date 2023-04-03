@@ -33,6 +33,7 @@ import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 
 export default css`
 	${Container} {
+		overflow: hidden;
 		/* top bar */
 		${StyledGrid} {
 			position: initial;
@@ -52,17 +53,11 @@ export default css`
 			}
 		}
 
-		/* main dashboard */
-		${ViewerScrollArea} {
-			margin-top: 0;
-			position: initial;
-
-			.MuiDialogContent-root {
-				min-height: 260px;
-			}
-		}
-
 		${StyledDialogContent} {
+			min-height: 260px;
+			max-height: calc(100vh - 249px);
+			margin-top: 0;
+
 			${EmptyStateInfo} {
 				margin-right: 0;
 				margin-left: 0;
