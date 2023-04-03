@@ -17,6 +17,7 @@
 
 const { utils: { stripWhen }, types } = require('../../utils/helper/yup');
 const Yup = require('yup');
+const { isUUIDString } = require('../../utils/helper/typeCheck');
 const { propTypes } = require('./templates.constants');
 const { schema: rulesSchema } = require('../rules');
 
@@ -31,7 +32,11 @@ const groupSchema = (allowIds) => {
 	const group = Yup.object({
 		name: types.strings.title,
 		rules: rulesSchema,
-		objects: Yup.array().of(types.id).min(1),
+		objects: Yup.array().of(Yup.object({
+			container: Yup.string().test('Container id', 'Container ID must be an UUID string', isUUIDString).required(),
+			_ids: Yup.array().of(types.id).min(1).required(),
+
+		})).min(1),
 	}).test(('Rules and objects', 'Groups can only contain either rules or objects, not both', ({ rules, objects }) => !(rules && objects)));
 
 	if (allowIds) return Yup.lazy((val) => (val?.name ? group.required() : types.id.required()));
