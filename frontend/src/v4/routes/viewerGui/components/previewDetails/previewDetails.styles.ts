@@ -192,7 +192,6 @@ export const MainInfoContainer = styled.div`
 `;
 
 const expandedStyles = css`
-	overflow: auto;
 	position: static;
 
 	${MessageListContainer} {
@@ -217,13 +216,12 @@ const unexpandedStyles  = css`
 	}
 `;
 
-export const ScrollableContainer = styled(ConditionalV5OrViewerScrollArea).attrs({
-	autoHeight: true,
-	autoHeightMax: '100%',
-})`
+export const ScrollableContainer = styled.div`
 	${({ expanded }: { expanded: boolean }) => expanded ? expandedStyles : unexpandedStyles};
 	display: flex;
 	flex-direction: column;
+	max-height: 100%;
+	overflow: overlay;
 `;
 
 export const TextField = styled(TextFieldBase)<{ mutable: boolean }>`
