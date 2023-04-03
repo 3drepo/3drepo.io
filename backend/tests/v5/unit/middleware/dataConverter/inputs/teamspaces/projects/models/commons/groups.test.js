@@ -17,7 +17,7 @@
 
 const _ = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
-const { generateGroup, generateUUIDString } = require('../../../../../../../../helper/services');
+const { generateLegacyGroup, generateUUIDString } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
@@ -83,9 +83,9 @@ const deserialiseGroup = (group) => {
 };
 
 const testValidateGroupsImportData = () => {
-	const ruleGroup = generateGroup('ab', generateUUIDString(), true);
-	const ifcGroup = generateGroup('ab', generateUUIDString(), false, true);
-	const normalGroup = generateGroup('ab', generateUUIDString(), false, false);
+	const ruleGroup = generateLegacyGroup('ab', generateUUIDString(), true);
+	const ifcGroup = generateLegacyGroup('ab', generateUUIDString(), false, true);
+	const normalGroup = generateLegacyGroup('ab', generateUUIDString(), false, false);
 
 	const numberRule = {
 		field: 'abc',
