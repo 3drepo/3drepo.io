@@ -17,7 +17,6 @@
 
 import { MenuItem, MenuList, TextField } from '@mui/material';
 import styled from 'styled-components';
-import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 
 import { COLOR } from '../../../../styles';
 
@@ -37,10 +36,10 @@ export const ViewsContainer = styled(ViewerPanel).attrs({
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.VIEWS]}px;
 `;
 
-export const Container = styled(ScrollArea)`
+export const Container = styled.div`
 	display: flex;
 	flex-direction: column;
-	overflow: auto;
+	overflow: overlay;
 	flex: auto;
 `;
 
