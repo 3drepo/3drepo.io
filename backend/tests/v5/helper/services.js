@@ -160,7 +160,7 @@ db.createSequence = async (teamspace, model, { sequence, states, activities, act
 	]);
 };
 
-db.createGroups = (teamspace, modelId, groups = []) => {
+db.createLegacyGroups = (teamspace, modelId, groups = []) => {
 	const toInsert = groups.map((entry) => {
 		const converted = {
 			...entry,
@@ -525,7 +525,41 @@ ServiceHelper.generateComment = (author = ServiceHelper.generateRandomString()) 
 	};
 };
 
-ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
+// This generates groups for v5 schema (used for tickets), use generateLegacyGroup if you need v4 compatible groups
+ServiceHelper.generateGroup = (isSmart = false, {
+	serialised = false,
+	hasId = true,
+	container = ServiceHelper.generateUUIDString(),
+	nObjects = 3,
+} = {}) => {
+	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
+	const group = deleteIfUndefined({
+		_id: hasId ? genId() : undefined,
+		name: ServiceHelper.generateRandomString(),
+	});
+
+	if (isSmart) {
+		group.rules = [
+			{
+				field: 'IFC GUID',
+				operator: 'IS',
+				values: [
+					'1rbbJcnUDEEA_ArpSqk3B7',
+				],
+			},
+		];
+	} else {
+		group.objects = [{
+			container,
+			_ids: times(nObjects, genId),
+		}];
+	}
+
+	return group;
+};
+
+// This generates groups with v4 schema. use generateGroup for v5 (tickets) schema
+ServiceHelper.generateLegacyGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
 	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
 	const group = {
 		_id: genId(),

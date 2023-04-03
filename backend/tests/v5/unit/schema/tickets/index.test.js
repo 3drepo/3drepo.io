@@ -17,7 +17,14 @@
 const { times, cloneDeep } = require('lodash');
 
 const { src, image } = require('../../../helper/path');
-const { generateRandomString, generateRandomNumber, generateUUID, generateRandomDate } = require('../../../helper/services');
+const {
+	generateGroup,
+	generateRandomString,
+	generateRandomNumber,
+	generateUUID,
+	generateRandomDate,
+} = require('../../../helper/services');
+
 const FS = require('fs');
 
 jest.mock('../../../../../src/v5/schemas/tickets/templates');
@@ -85,16 +92,12 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 						} : {},
 					});
 
-					try {
-						await TicketSchema.validateTicket(teamspace, template, fullData, oldTicket);
-					} catch (err) {
-						throw undefined;
-					}
+					await TicketSchema.validateTicket(teamspace, template, fullData, oldTicket);
 				};
 
 				await expect(runTest(goodTest)).resolves.toBeUndefined();
 
-				if (badTest !== undefined) await expect(runTest(badTest)).rejects.toBeUndefined();
+				if (badTest !== undefined) await expect(runTest(badTest)).rejects.not.toBeUndefined();
 			});
 		});
 };
@@ -264,7 +267,18 @@ const testValidateTicket = () => {
 			['Image', { type: propTypes.IMAGE }, FS.readFileSync(image, { encoding: 'base64' }), generateRandomString()],
 			['View (empty)', { type: propTypes.VIEW }, {}, 123],
 			['View (Image only)', { type: propTypes.VIEW }, { screenshot: FS.readFileSync(image, { encoding: 'base64' }) }, { screenshot: 'abc' }],
-			['View', { type: propTypes.VIEW }, { camera: { position: [1, 1, 1], forward: [1, 1, 1], up: [1, 1, 1] }, clippingPlanes: [{ normal: [1, 1, 1], clipDirection: -1, distance: 100 }] }, { camera: {} }],
+			['View', { type: propTypes.VIEW }, {
+				camera: { position: [1, 1, 1], forward: [1, 1, 1], up: [1, 1, 1] },
+				clippingPlanes: [{ normal: [1, 1, 1], clipDirection: -1, distance: 100 }],
+				state: {
+					hidden: [
+						{
+							group: generateGroup(false, { hasId: false }),
+							prefix: [generateRandomString()],
+						},
+					],
+				},
+			}, { camera: {} }],
 			['View (orthographic)', { type: propTypes.VIEW }, { camera: { type: 'orthographic', size: 5, position: [1, 1, 1], forward: [1, 1, 1], up: [1, 1, 1] } }, { camera: { type: 'orthographic' } }],
 			['Measurements', { type: propTypes.MEASUREMENTS }, [
 				{

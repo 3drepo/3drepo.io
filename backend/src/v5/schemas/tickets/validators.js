@@ -31,7 +31,7 @@ const CameraType = {
 const groupSchema = (allowIds) => {
 	const group = Yup.object({
 		name: types.strings.title,
-		rules: rulesSchema,
+		rules: Yup.lazy((val) => (val ? rulesSchema : Yup.mixed())),
 		objects: Yup.array().of(Yup.object({
 			container: Yup.string().test('Container id', 'Container ID must be an UUID string', isUUIDString).required(),
 			_ids: Yup.array().of(types.id).min(1).required(),
@@ -58,7 +58,7 @@ const generateViewValidator = (isUpdate, isNullable) => {
 	};
 
 	const state = imposeNullableRule(Yup.object({
-		showHiddenObjects: Yup.boolean().default(false),
+		showHidden: Yup.boolean().default(false),
 		colored: generateGroupArraySchema(isUpdate, {
 			color: types.color3Arr,
 			opacity: Yup.number().max(1).test('opacity value', 'Opacity value must be bigger than 0', (val) => val > 0),
