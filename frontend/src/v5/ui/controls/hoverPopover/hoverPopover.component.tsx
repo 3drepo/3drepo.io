@@ -21,15 +21,21 @@ import { PopoverContainer } from './hoverPopover.styles';
 type IHoverPopover = {
 	anchor: (props) => ReactElement;
 	children: ReactElement;
+	className?: string,
 };
 
-export const HoverPopover = ({ anchor: AnchorEl, children }: IHoverPopover) => {
+export const HoverPopover = ({ anchor: AnchorEl, children, className }: IHoverPopover) => {
 	const [anchorEl, setAnchorEl] = useState<Element | null>(null);
 	const onMouseEnter = (event) => setAnchorEl(event.currentTarget);
 	const onMouseLeave = () => setAnchorEl(null);
 
 	return (
-		<span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onBlur={onMouseLeave}>
+		<span
+			onMouseEnter={onMouseEnter}
+			onMouseLeave={onMouseLeave}
+			onBlur={onMouseLeave}
+			className={className}
+		>
 			<AnchorEl />
 			<PopoverContainer
 				open={!!anchorEl}

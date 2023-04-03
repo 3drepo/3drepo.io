@@ -17,12 +17,16 @@
 
 import { AppBar } from '@mui/material';
 import styled from 'styled-components';
+import LogoIconBase from '@assets/icons/filled/logo-filled.svg';
+
+export const LogoIcon = styled(LogoIconBase)`
+	color: ${({ theme }) => theme.palette.primary.contrast};
+`;
 
 export const Items = styled.div`
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	flex: 1;
 	max-width: calc(100% - 200px);
 	margin-left: 5px;
 	

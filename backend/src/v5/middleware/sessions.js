@@ -43,16 +43,22 @@ Sessions.manageSessions = async (req, res, next) => {
 const updateSessionDetails = (req) => {
 	const updatedUser = { ...req.loginData, webSession: false };
 	const { session } = req;
+	let userAgent = req.headers['user-agent'];
 
-	if (req.headers['user-agent']) {
-		updatedUser.webSession = isFromWebBrowser(req.headers['user-agent']);
-	}
+	const { ssoInfo } = req.session;
+	if (ssoInfo) {
+		userAgent = ssoInfo.userAgent;
+		if (ssoInfo.referer) {
+			updatedUser.referer = ssoInfo.referer;
+		}
 
-	if (session.referer) {
-		updatedUser.referer = session.referer;
-		delete session.referer;
+		delete req.session.ssoInfo;
 	} else if (req.headers.referer) {
 		updatedUser.referer = getURLDomain(req.headers.referer);
+	}
+
+	if (userAgent) {
+		updatedUser.webSession = isFromWebBrowser(userAgent);
 	}
 
 	session.user = updatedUser;
@@ -62,10 +68,11 @@ const updateSessionDetails = (req) => {
 		session.cookie.maxAge = config.cookie.maxAge;
 	}
 
-	publish(events.SESSION_CREATED, { username: updatedUser.username,
+	publish(events.SESSION_CREATED, {
+		username: updatedUser.username,
 		sessionID: req.sessionID,
 		ipAddress: req.ips[0] || req.ip,
-		userAgent: req.headers['user-agent'],
+		userAgent,
 		socketId: req.headers[SOCKET_HEADER],
 		referer: updatedUser.referer });
 

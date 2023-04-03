@@ -16,21 +16,18 @@
  */
 
 import { useEffect } from 'react';
-import { useParams } from 'react-router';
 import { range } from 'lodash';
 
 import { RevisionsListHeaderLabel } from '@components/shared/revisionDetails/components/revisionsListHeaderLabel';
-import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { Button } from '@controls/button';
 import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
 import { RevisionsListItem } from '@components/shared/revisionDetails/components/revisionsListItem';
 import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, RevisionsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { uploadToContainer } from '@/v5/ui/routes/dashboard/projects/containers/uploadFileForm/uploadFileForm.helpers';
 import {
 	Container,
@@ -50,9 +47,11 @@ interface IRevisionDetails {
 }
 
 export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisionDetails): JSX.Element => {
-	const { teamspace, project } = useParams<DashboardParams>();
-	const isLoading: boolean = RevisionsHooksSelectors.selectIsPending(containerId);
-	const revisions: IRevision[] = RevisionsHooksSelectors.selectRevisions(containerId);
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
+	const isLoading = RevisionsHooksSelectors.selectIsPending(containerId);
+	const revisions = RevisionsHooksSelectors.selectRevisions(containerId)
+		.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 	const selected = revisions.findIndex((r) => !r.void);
 	const isSingle = revisions?.length === 1;
 

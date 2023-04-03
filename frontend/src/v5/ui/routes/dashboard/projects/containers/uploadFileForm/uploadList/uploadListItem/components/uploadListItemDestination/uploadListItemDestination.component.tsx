@@ -16,120 +16,160 @@
  */
 
 import { useState } from 'react';
-import { IContainer } from '@/v5/store/containers/containers.types';
-import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { IContainer, UploadItemFields } from '@/v5/store/containers/containers.types';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useFormContext } from 'react-hook-form';
 import { canUploadToBackend, prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { createFilterOptions } from '@mui/material';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
+import { name as containerNameScheme } from '@/v5/validation/containerAndFederationSchemes/validators';
+import { isCollaboratorRole } from '@/v5/store/store.helpers';
+import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Autocomplete, DestinationInput, NewOrExisting } from './uploadListItemDestination.styles';
 import { NewContainer } from './options/newContainer/newContainer.component';
 import { AlreadyUsedName } from './options/alreadyUsedName/alreadyUsedName.component';
 import { ExistingContainer } from './options/existingContainer/existingContainer.component';
-import { OptionsBox } from './options';
+import { OptionsBox } from './options/optionsBox.component';
 
-interface IUploadListItemDestination {
-	onValueChange: (option) => void;
-	control?: any;
-	errors?: any;
-	disabled?: boolean;
-	className?: string;
-	defaultValue: string;
-	containersNamesInUse: string[];
-	setContainersNamesInUse: (names: string[]) => void;
-}
+const NO_OPTIONS_TEXT_ADMIN = formatMessage({
+	id: 'uploads.destination.noOptions.admin',
+	defaultMessage: 'Start typing to create a new Container.',
+});
 
-const emptyOption = prepareSingleContainerData({
+const NO_OPTIONS_TEXT_NON_ADMIN = formatMessage({
+	id: 'uploads.destination.noOptions.nonAdmin',
+	defaultMessage: 'There are no Containers to upload to.',
+});
+
+const EMPTY_OPTION = prepareSingleContainerData({
 	_id: '',
 	name: '',
 	role: Role.NONE,
 	isFavourite: false,
 });
+
 const getFilteredContainersOptions = createFilterOptions<IContainer>({ trim: true });
 
+interface IUploadListItemDestination {
+	revisionPrefix: string;
+	disabled?: boolean;
+	className?: string;
+	defaultValue: string;
+}
 export const UploadListItemDestination = ({
-	control,
-	errors,
 	disabled = false,
 	className,
-	onValueChange,
+	revisionPrefix,
 	defaultValue,
-	containersNamesInUse,
-	setContainersNamesInUse,
 }: IUploadListItemDestination): JSX.Element => {
-	const [value, setValue] = useState<IContainer>({ ...emptyOption, name: defaultValue });
-	const [disableClearable, setDisableClearable] = useState(!value.name);
+	const [selectedContainer, setSelectedContainer] = useState<IContainer>({ ...EMPTY_OPTION, name: defaultValue });
+	const [disableClearable, setDisableClearable] = useState(!defaultValue);
+	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>('');
+	const [error, setError] = useState('');
+	const { getValues, setValue, trigger } = useFormContext();
+
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const projectId = ProjectsHooksSelectors.selectCurrentProject();
+	const federationsNames = FederationsHooksSelectors.selectFederations().map(({ name }) => name);
 	const containers = ContainersHooksSelectors.selectContainers();
+
 	const processingContainersNames = containers
 		.filter((container) => !canUploadToBackend(container.status))
 		.map(({ name }) => name);
-	const federationsNames = FederationsHooksSelectors.selectFederations().map(({ name }) => name);
-	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>(() => {
-		if (defaultValue) {
-			return containers.find((c) => c.name === defaultValue) ? 'existing' : 'new';
+
+	const containersNamesInModal = getValues('uploads')
+		.map(({ containerName }) => containerName?.trim())
+		.filter(Boolean)
+		.filter((name) => name !== selectedContainer.name);
+
+	const containersNamesInUse = [
+		...containersNamesInModal,
+		...processingContainersNames,
+		...federationsNames,
+	];
+
+	const getValidContainer = (baseContainer: IContainer): Partial<UploadItemFields> => ({
+		containerId: baseContainer._id,
+		containerName: baseContainer.name,
+		containerCode: baseContainer.code || '',
+		containerType: baseContainer.type || 'Uncategorised',
+		containerUnit: baseContainer.unit || 'mm',
+		containerDesc: baseContainer.desc || '',
+	});
+
+	const testName = (containerName) => {
+		try {
+			containerNameScheme.validateSync(
+				containerName,
+				{ context: { alreadyExistingNames: containersNamesInUse } },
+			);
+			setError('');
+			setNewOrExisting(containers.find(({ name }) => name === containerName) ? 'existing' : 'new');
+		} catch (validationError) {
+			setError(validationError.message);
+			setNewOrExisting('');
 		}
-		return '';
-	});
-	const { getValues } = useFormContext();
-	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const errorMessage = errors.containerName?.message;
-
-	const NO_OPTIONS_TEXT = isProjectAdmin ? formatMessage({
-		id: 'uploads.destination.noOptions.admin',
-		defaultMessage: 'Start typing to create a new Container.',
-	}) : formatMessage({
-		id: 'uploads.destination.noOptions.nonAdmin',
-		defaultMessage: 'There are no Containers to upload to.',
-	});
-
-	const onFocus = () => {
-		const containerNamesInModal = getValues('uploads')
-			.map(({ containerName }) => containerName.trim())
-			.filter(Boolean)
-			.filter((name) => name !== value.name);
-		setContainersNamesInUse([...processingContainersNames, ...containerNamesInModal]);
 	};
 
-	const onChange = (_, newValue: IContainer) => {
-		setDisableClearable(!newValue);
-		if (!newValue) {
+	const updateDestination = (containerName: string) => {
+		const container = containers.find(({ name }) => name === containerName);
+		setDisableClearable(!containerName);
+		if (!containerName) {
 			setNewOrExisting('');
 		} else {
-			setNewOrExisting(newValue._id === '' ? 'new' : 'existing');
+			setNewOrExisting(container ? 'existing' : 'new');
 		}
 
-		const newValueOrEmptyOption = newValue ? {
-			...newValue,
-			name: newValue.name.trim(),
-		} : emptyOption;
+		const newValueOrEmptyOption = container || {
+			...EMPTY_OPTION,
+			name: containerName,
+		};
 
-		setValue(newValueOrEmptyOption);
-		onValueChange(newValueOrEmptyOption);
+		setSelectedContainer(newValueOrEmptyOption);
+		Object.entries(getValidContainer(newValueOrEmptyOption)).forEach(([key, value]) => {
+			const name = `${revisionPrefix}.${key}`;
+			setValue(name, value);
+			trigger(name);
+		});
+
+		if (container) {
+			RevisionsActionsDispatchers.fetch(
+				teamspace,
+				projectId,
+				container._id,
+			);
+		}
 	};
 
-	const onBlur = () => {
-		setContainersNamesInUse(containersNamesInUse.concat(value.name));
+	const handleInputChange = (_, newValue: string, reason: 'clear' | 'reset' | 'input') => {
+		const containerName = newValue?.trim();
+		testName(containerName);
+		if (reason === 'input' || (reason === 'reset' && !newValue)) return;
+
+		updateDestination(containerName);
 	};
 
 	const getFilterOptions = (options: IContainer[], params) => {
 		const inputValue = params.inputValue.trim();
-		if (containersNamesInUse.length === containers.length && !inputValue) {
+		if (containersNamesInModal.length === containers.length && !inputValue) {
 			// all the containers have been allocated already
 			return [];
 		}
 
 		// filter out currently selected value and containers with insufficient permissions
 		const filteredOptions = getFilteredContainersOptions(options, params)
-			.filter(({ name, role }) => (name !== value.name) && (role === Role.COLLABORATOR));
+			.filter(({ name }) => name !== selectedContainer.name)
+			.filter(({ role }) => isCollaboratorRole(role));
 
 		const containerNameExists = options.some(({ name }: IContainer) => inputValue === name);
 		if (inputValue && !containerNameExists) {
 			// create an extra option to transform into a
 			// "add new container" OR "name already used" option
 			filteredOptions.unshift({
-				...emptyOption,
+				...EMPTY_OPTION,
 				name: inputValue.trim(),
 			});
 		}
@@ -138,7 +178,7 @@ export const UploadListItemDestination = ({
 
 	const optionIsUsed = ({ name }: IContainer) => {
 		const trimmedName = name.trim();
-		if (trimmedName === value.name) return false;
+		if (trimmedName === selectedContainer.name) return false;
 		return containersNamesInUse.includes(trimmedName);
 	};
 
@@ -146,26 +186,30 @@ export const UploadListItemDestination = ({
 
 	const getRenderOption = (optionProps, option: IContainer) => {
 		const trimmedName = option?.name?.trim();
+		const handleOptionClick = (...args) => {
+			optionProps.onClick?.(...args);
+			updateDestination(trimmedName);
+		};
 
 		if (option?._id === '') {
 			// option is an extra
 			if (nameAlreadyExists(trimmedName)) {
-				return (<AlreadyUsedName {...optionProps} />);
+				return (<AlreadyUsedName />);
 			}
 
-			if (isProjectAdmin && !errorMessage && !containers.map(({ name }) => name).includes(trimmedName)) {
-				return (<NewContainer containerName={trimmedName} {...optionProps} />);
+			if (isProjectAdmin && !error && !containers.map(({ name }) => name).includes(trimmedName)) {
+				return (<NewContainer containerName={trimmedName} {...optionProps} onClick={handleOptionClick} />);
 			}
 		}
 
 		// option is an existing container
-		if (option._id || trimmedName === value.name) {
+		if (option._id || trimmedName === selectedContainer.name) {
 			return (
 				<ExistingContainer
 					container={option}
-					latestRevision={option.latestRevision}
 					inUse={optionIsUsed(option)}
 					{...optionProps}
+					onClick={handleOptionClick}
 				/>
 			);
 		}
@@ -174,31 +218,27 @@ export const UploadListItemDestination = ({
 
 	return (
 		<Autocomplete
-			value={value}
+			value={selectedContainer}
 			className={className}
 			disableClearable={disableClearable}
 			filterOptions={getFilterOptions}
 			getOptionDisabled={optionIsUsed}
 			getOptionLabel={({ name }: IContainer) => name}
 			ListboxComponent={OptionsBox}
-			noOptionsText={NO_OPTIONS_TEXT}
-			onBlur={onBlur}
-			onChange={onChange}
-			onFocus={onFocus}
+			noOptionsText={isProjectAdmin ? NO_OPTIONS_TEXT_ADMIN : NO_OPTIONS_TEXT_NON_ADMIN}
+			onInputChange={handleInputChange}
 			options={containers}
 			renderOption={getRenderOption}
 			renderInput={({ InputProps, ...params }) => (
 				<DestinationInput
-					control={control}
-					formError={errors.containerName}
-					name="containerName"
+					error={!!error}
 					disabled={disabled}
-					value={value}
+					value={selectedContainer}
 					{...params}
 					neworexisting={newOrExisting}
 					InputProps={{
 						...InputProps,
-						startAdornment: !!errorMessage && (<ErrorTooltip>{errorMessage}</ErrorTooltip>),
+						startAdornment: !!error && (<ErrorTooltip>{error}</ErrorTooltip>),
 					}}
 				/>
 			)}

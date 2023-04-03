@@ -302,7 +302,7 @@ describe("Notifications", function() {
 			], done);
 		});
 
-		it("should be deleted after the las issue associated in that model has been closed", done => {
+		it("should be deleted after the last issue associated in that model has been closed", done => {
 			const issue = Object.assign({}, baseIssue, {status: "closed"});
 			const issueId = issuesId.pop();
 

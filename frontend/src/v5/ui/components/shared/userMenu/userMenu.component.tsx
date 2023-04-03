@@ -16,7 +16,7 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { AuthActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import TeamspacesIcon from '@assets/icons/filled/teamspaces-filled.svg';
@@ -49,7 +49,7 @@ type UserMenuProps = {
 export const UserMenu = ({ user } : UserMenuProps) => {
 	const signOut = () => AuthActionsDispatchers.logout();
 
-	const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
+	const onClickEditProfile = () => DialogsActionsDispatchers.open(EditProfileModal);
 
 	const visualSettings = useSelector(selectSettings);
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser().username;
@@ -67,68 +67,61 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 	}, []);
 
 	return (
-		<>
-			<AvatarContainer>
-				<ActionMenu TriggerButton={<div><Avatar user={user} isButton /></div>}>
-					<ActionMenuSection>
-						<AvatarSection>
-							<Avatar
-								user={user}
-								size="medium"
-							/>
-							<UserFullName>
-								<TruncatableName>{user.firstName}</TruncatableName>
-								<TruncatableName>{user.lastName}</TruncatableName>
-							</UserFullName>
-							<UserUserName>{user.username}</UserUserName>
-							<ActionMenuItem>
-								<EditProfileButton onClick={() => setIsEditProfileModalOpen(true)}>
-									<FormattedMessage
-										id="userMenu.editYourProfile"
-										defaultMessage="Edit your profile"
-									/>
-								</EditProfileButton>
-							</ActionMenuItem>
-						</AvatarSection>
-					</ActionMenuSection>
-					<ActionMenuSection>
-						<ActionMenuItemLink
-							Icon={TeamspacesIcon}
-							to={DASHBOARD_ROUTE}
-						>
-							<FormattedMessage
-								id="userMenu.teamspaces"
-								defaultMessage="Teamspaces"
-							/>
-						</ActionMenuItemLink>
-						<ActionMenuItemLink
-							Icon={VisualSettingsIcon}
-							onClick={onClickVisualSettings}
-						>
-							<FormattedMessage
-								id="userMenu.visualSettings"
-								defaultMessage="Visual settings"
-							/>
-						</ActionMenuItemLink>
-					</ActionMenuSection>
-					<ActionMenuSection>
+		<AvatarContainer>
+			<ActionMenu TriggerButton={<div><Avatar user={user} isButton /></div>}>
+				<ActionMenuSection>
+					<AvatarSection>
+						<Avatar
+							user={user}
+							size="medium"
+						/>
+						<UserFullName>
+							<TruncatableName>{user.firstName}</TruncatableName>
+								&nbsp;
+							<TruncatableName>{user.lastName}</TruncatableName>
+						</UserFullName>
+						<UserUserName>{user.username}</UserUserName>
 						<ActionMenuItem>
-							<SignOutButton onClick={signOut}>
+							<EditProfileButton onClick={onClickEditProfile}>
 								<FormattedMessage
-									id="userMenu.logOut"
-									defaultMessage="Log out"
+									id="userMenu.editYourProfile"
+									defaultMessage="Edit your profile"
 								/>
-							</SignOutButton>
+							</EditProfileButton>
 						</ActionMenuItem>
-					</ActionMenuSection>
-				</ActionMenu>
-			</AvatarContainer>
-			{isEditProfileModalOpen && (
-				<EditProfileModal
-					user={user}
-					onClose={() => setIsEditProfileModalOpen(false)}
-				/>
-			)}
-		</>
+					</AvatarSection>
+				</ActionMenuSection>
+				<ActionMenuSection>
+					<ActionMenuItemLink
+						Icon={TeamspacesIcon}
+						to={DASHBOARD_ROUTE}
+					>
+						<FormattedMessage
+							id="userMenu.teamspaces"
+							defaultMessage="Teamspaces"
+						/>
+					</ActionMenuItemLink>
+					<ActionMenuItemLink
+						Icon={VisualSettingsIcon}
+						onClick={onClickVisualSettings}
+					>
+						<FormattedMessage
+							id="userMenu.visualSettings"
+							defaultMessage="Visual settings"
+						/>
+					</ActionMenuItemLink>
+				</ActionMenuSection>
+				<ActionMenuSection>
+					<ActionMenuItem>
+						<SignOutButton onClick={signOut}>
+							<FormattedMessage
+								id="userMenu.logOut"
+								defaultMessage="Log out"
+							/>
+						</SignOutButton>
+					</ActionMenuItem>
+				</ActionMenuSection>
+			</ActionMenu>
+		</AvatarContainer>
 	);
 };

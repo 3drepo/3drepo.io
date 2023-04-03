@@ -19,24 +19,15 @@ import Button from '@mui/material/Button';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 
-import { Headline } from './removeUserDialog.styles';
-
 interface IProps {
-	models: any[];
-	projects: any[];
 	username: string;
-	teamspacePerms: string;
 	handleResolve: () => void;
 	handleClose: () => void;
 }
 export const RemoveUserDialog = (props: IProps) => {
-	const renderItems = (items) => {
-		return items.map((item, index) => (<p key={index}>{item.model || item}</p>));
-	};
-
 	const description = `\
-		User ${props.username} has permissions assigned on the following items,\
-		they will be removed together with the user. \
+		User ${props.username} has permissions assigned\
+		which will be removed together with the user. \
 		Do you really want to remove this User?
 	`;
 
@@ -44,26 +35,6 @@ export const RemoveUserDialog = (props: IProps) => {
 		<>
 			<DialogContent>
 				{description}
-				{ props.projects.length ? (
-					<>
-						<Headline>Projects: </Headline>
-						{renderItems(props.projects)}
-					</>
-				) : '' }
-
-				{ props.models.length ? (
-					<>
-						<Headline>Models: </Headline>
-						{renderItems(props.models)}
-					</>
-				) : '' }
-
-				{ props.teamspacePerms ? (
-					<>
-						<Headline>Teamspace: </Headline>
-						<p>{props.teamspacePerms}</p>
-					</>
-				) : '' }
 			</DialogContent>
 
 			<DialogActions>

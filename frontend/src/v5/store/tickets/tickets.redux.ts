@@ -28,6 +28,10 @@ const mergeWithArray = (objValue, srcValue) => mergeWith(objValue, srcValue, (ta
 	return undefined;
 });
 
+const getTicketByModelId = (state, modelId, ticketId) => (
+	state.ticketsByModelId?.[modelId].find(({ _id }) => _id === ticketId)
+);
+
 export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTickets: ['teamspace', 'projectId', 'modelId', 'isFederation'],
 	fetchTicket: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation'],
@@ -56,7 +60,7 @@ export const fetchTicketsSuccess = (state: ITicketsState, { modelId, tickets }: 
 export const upsertTicketSuccess = (state: ITicketsState, { modelId, ticket }: UpsertTicketSuccessAction) => {
 	if (!state.ticketsByModelId[modelId]) state.ticketsByModelId[modelId] = [];
 
-	const modelTicket = state.ticketsByModelId[modelId].find(({ _id }) => _id === ticket._id);
+	const modelTicket = getTicketByModelId(state, modelId, ticket._id);
 
 	mergeWithArray(modelTicket, ticket);
 
@@ -97,7 +101,7 @@ export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 }));
 
 export interface ITicketsState {
-	ticketsByModelId: Record<string, ITicket[]>;
+	ticketsByModelId: Record<string, ITicket[]>,
 	templatesByModelId: Record<string, ITemplate[]>,
 	riskCategories: string[],
 }

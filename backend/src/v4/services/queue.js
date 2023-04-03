@@ -22,14 +22,13 @@
  ****************************************************************************/
 "use strict";
 
-const amqp = require("amqplib");
+const {v5Path} = require("../../interop");
+const QueueV5 = require(`${v5Path}/handler/queue`);
+
+const { nanoid } = require("nanoid");
 const fs = require("fs").promises;
-const shortid = require("shortid");
-const systemLogger = require("../logger").systemLogger;
-const Mailer = require("../mailer/mailer");
 const config = require("../config");
 const C = require("../constants");
-const responseCodes = require("../response_codes");
 const Utils = require("../utils");
 
 const sharedSpacePH = "$SHARED_SPACE";
@@ -52,68 +51,14 @@ class ImportQueue {
 		this.modelQName = config.cn_queue.model_queue;
 		this.eventExchange = config.cn_queue.event_exchange;
 		this.url = config.cn_queue.host;
-		this.uid = shortid.generate();
-		this.channel = null;
-		this.initialised = this.connect();
+		this.uid = nanoid();
 	}
 
 	connect() {
-		if (this.channel) {
-			return Promise.resolve(this.channel);
-		}
-
-		return amqp.connect(this.url).then(conn => {
-			conn.on("close", () => {
-				systemLogger.logError("[AMQP] connection closed");
-				this.channel = null;
-			});
-
-			conn.on("error", (err)  => {
-				const message = "[AMQP] connection error: " + err.message;
-				systemLogger.logError(message);
-				Mailer.sendQueueFailedEmail({message}).catch(() => {});
-			});
-
-			return conn.createChannel();
-		}).then(channel => {
-			this.channel = channel;
-			return this.subscribeToQueues().then(() => channel);
-		}).catch((err) => {
-			const message = "Failed to connect to rabbitmq: " + err.message;
-			systemLogger.logError(message);
-			Mailer.sendQueueFailedEmail({message}).catch(() => {});
-		});
-	}
-
-	subscribeToQueues() {
-		return Promise.all([
-			this.consumeEventQueue()
-		]);
-	}
-
-	// This should only be called by connect(). Do not ever use else where!
-	consumeEventQueue() {
-		return this.channel.assertExchange(this.eventExchange, "fanout", {
-			durable: true
-		}).then(() => {
-			return this.channel.assertQueue("", { exclusive: true });
-		}).then(queue => {
-			return this.channel.bindQueue(queue.queue, this.eventExchange, "").then(() => {
-				return this.channel.consume(queue.queue, (rep) => {
-					if (this.eventCallback) {
-						this.eventCallback(JSON.parse(rep.content));
-					}
-
-				}, { noAck: true });
-			});
-		}).catch((err) => {
-			systemLogger.logError("Failed to consume event queue: " + err.message);
-		});
-	}
-
-	getChannel() {
-		return this.initialised.then(() => {
-			return this.channel ? Promise.resolve(this.channel) : this.connect();
+		return QueueV5.listenToExchange(this.eventExchange, async ({content}) => {
+			if(this.eventCallback) {
+				await this.eventCallback(JSON.parse(content));
+			}
 		});
 	}
 
@@ -234,67 +179,12 @@ class ImportQueue {
 	 * @param {isModelImport} whether this job is a model import
 	 *******************************************************************************/
 	_dispatchWork(corID, msg, isModelImport) {
-		return this.getChannel().then((channel) => {
-			const queueName = isModelImport ? this.modelQName : this.workerQName;
-			return channel.assertQueue(queueName, { durable: true }).then(() => {
-				return channel.sendToQueue(queueName,
-					new Buffer.from(msg), {
-						correlationId: corID,
-						appId: this.uid,
-						persistent: true
-
-					}
-				);
-			}).then(() => {
-				systemLogger.logInfo(
-					"Sent work to queue[" + queueName + "]: " + msg.toString()
-					+ " with corr id: " + corID.toString()
-				);
-			});
-		}).catch((err) => {
-			const message = "Failed to dispatch work: "  + err.message;
-			systemLogger.logError(message);
-			Mailer.sendQueueFailedEmail({message}).catch(() => {});
-			return Promise.reject(responseCodes.QUEUE_CONN_ERR);
-		});
+		const queueName = isModelImport ? this.modelQName : this.workerQName;
+		return QueueV5.queueMessage(queueName, corID, msg);
 	}
 
 	insertEventMessage(msg) {
-		return  this.getChannel().then((channel) => {
-			return channel.assertExchange(this.eventExchange, "fanout", {
-				durable: true
-			}).then(() => {
-				return channel.publish(
-					this.eventExchange,
-					"",
-					new Buffer.from(JSON.stringify(msg)), {
-						persistent: true
-					}
-				);
-			});
-
-		}).catch((err) => {
-			systemLogger.logError("Failed to insert event: "  + err.message);
-		});
-	}
-
-	processCallbackMsg(res) {
-		systemLogger.logInfo("Job request id " + res.properties.correlationId
-				+ " returned with: " + res.content);
-
-		const {value, message, database, project, user = "unknown" , status} = JSON.parse(res.content);
-
-		const ModelHelper = require("../models/helper/model");
-
-		if (status && Utils.isString(status)) {
-			ModelHelper.setStatus(database, project, status, user);
-		} else {
-			if (value === 0) {
-				ModelHelper.importSuccess(database, project, this.sharedSpacePath, user);
-			} else {
-				ModelHelper.importFail(database, project, this.sharedSpacePath, user, value, message);
-			}
-		}
+		return QueueV5.broadcastMessage(this.eventExchange, JSON.stringify(msg));
 	}
 
 	subscribeToEventMessages(callback) {

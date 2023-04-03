@@ -31,6 +31,7 @@ import {
 	FetchRiskCategoriesAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
+import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsAction) {
 	try {
@@ -43,7 +44,7 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: F
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'tickets.fetchTickets.error', defaultMessage: 'trying to fetch {model} tickets' },
-				{ model: isFederation ? 'federation' : 'container' },
+				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
 		}));
@@ -60,8 +61,8 @@ export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFedera
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
-				{ id: 'tickets.fetchTicket.error', defaultMessage: 'trying to fetch the ticket details for {model} ' },
-				{ model: isFederation ? 'federation' : 'container' },
+				{ id: 'tickets.fetchTicket.error', defaultMessage: 'trying to fetch the ticket details for {model}' },
+				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
 		}));
@@ -82,10 +83,7 @@ export function* fetchTemplate({ teamspace, projectId, modelId, templateId, isFe
 				defaultMessage: 'trying to fetch a template',
 			}),
 			error,
-			details: formatMessage({
-				id: 'tickets.fetchTemplate.error.details',
-				defaultMessage: 'If reloading the page doesn\'t work please contact support',
-			}),
+			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
 		}));
 	}
 }
@@ -104,10 +102,7 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }:
 				defaultMessage: 'trying to fetch templates',
 			}),
 			error,
-			details: formatMessage({
-				id: 'tickets.fetchTemplates.error.details',
-				defaultMessage: 'If reloading the page doesn\'t work please contact support',
-			}),
+			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
 		}));
 	}
 }
@@ -140,7 +135,7 @@ export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket,
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'tickets.updateTicket.error', defaultMessage: 'trying to update the ticket for {model} ' },
-				{ model: isFederation ? 'federation' : 'container' },
+				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
 		}));
@@ -159,7 +154,7 @@ export function* createTicket({ teamspace, projectId, modelId, ticket, isFederat
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'tickets.createTicket.error', defaultMessage: 'trying to create the ticket for {model} ' },
-				{ model: isFederation ? 'federation' : 'container' },
+				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
 		}));

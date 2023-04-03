@@ -22,12 +22,16 @@ import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { RevisionsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Sidebar } from '@controls/sideBar';
+import { Sidebar } from '@controls/sideBar/sidebar.component';
+import { isNull, isNumber } from 'lodash';
+import { Button } from '@controls/button';
 import { IContainer, UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
 import { UploadsSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
+import { Typography } from '@controls/typography';
+import { FileInputField } from '@controls/fileInputField/fileInputField.component';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import {
@@ -35,23 +39,16 @@ import {
 	ProjectsHooksSelectors,
 	RevisionsHooksSelectors,
 	ContainersHooksSelectors,
-	FederationsHooksSelectors,
 } from '@/v5/services/selectorsHooks';
-import { UploadList } from './uploadList';
-import { SidebarForm } from './sidebarForm';
-import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll } from './uploadFileForm.styles';
+import { getSupportedFileExtensions } from '@controls/fileUploader/uploadFile';
+import { UploadList } from './uploadList/uploadList.component';
+import { SidebarForm } from './sidebarForm/sidebarForm.component';
+import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
 
-type IUploadFileForm = {
-	presetContainerId?: string;
-	presetFile?: File;
-	open: boolean;
-	onClickClose: () => void;
+const DEFAULT_SORT_CONFIG = {
+	column: 'file',
+	direction: SortingDirection.ASCENDING,
 };
-
-interface AddFilesProps {
-	files: File[];
-	container?: IContainer;
-}
 
 type UploadModalLabelTypes = {
 	isUploading: boolean;
@@ -85,6 +82,12 @@ const uploadModalLabels = ({ isUploading, fileCount }: UploadModalLabelTypes) =>
 		}, { fileCount }),
 	});
 
+type IUploadFileForm = {
+	presetContainerId?: string;
+	presetFile?: File;
+	open: boolean;
+	onClickClose: () => void;
+};
 export const UploadFileForm = ({
 	presetContainerId,
 	presetFile,
@@ -93,13 +96,19 @@ export const UploadFileForm = ({
 }: IUploadFileForm): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
+	const revisionsByContainer = RevisionsHooksSelectors.selectRevisionsByContainer();
+	const allUploadsComplete = RevisionsHooksSelectors.selectUploadIsComplete();
+	const presetContainer = ContainersHooksSelectors.selectContainerById(presetContainerId);
 
 	const [selectedIndex, setSelectedIndex] = useState<number>(null);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
-	const methods = useForm<UploadFieldArray>({
-		mode: 'onBlur',
+	const [alreadyExistingTags, setAlreadyExistingTags] = useState({});
+	const [fileError, setFileError] = useState(false);
+
+	const formData = useForm<UploadFieldArray>({
+		mode: 'onChange',
 		resolver: yupResolver(UploadsSchema),
-		context: { alreadyExistingNames: FederationsHooksSelectors.selectFederations().map(({ name }) => name) },
+		context: { alreadyExistingTags, alreadyExistingNames: [] },
 	});
 	const {
 		control,
@@ -108,23 +117,12 @@ export const UploadFileForm = ({
 		trigger,
 		getValues,
 		setValue,
-		watch,
-	} = methods;
+	} = formData;
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'uploads',
 		keyName: 'uploadId',
 	});
-
-	const [fileError, setFileError] = useState(false);
-	useEffect(() => {
-		setFileError(fields.some(({ file }) => filesizeTooLarge(file)));
-	}, [fields.length]);
-
-	const DEFAULT_SORT_CONFIG = {
-		column: 'file',
-		direction: SortingDirection.ASCENDING,
-	};
 	const { sortedList, setSortConfig }: any = useOrderedList(fields || [], DEFAULT_SORT_CONFIG);
 
 	const revTagMaxValue = useMemo(() => {
@@ -143,7 +141,7 @@ export const UploadFileForm = ({
 
 	const extensionIsSpm = (extension: string) => extension === 'spm';
 
-	const addFilesToList = ({ files, container }: AddFilesProps): void => {
+	const addFilesToList = (files: File[], container?: IContainer): void => {
 		const filesToAppend = [];
 		for (const file of files) {
 			const extension = file.name.split('.').slice(-1)[0].toLocaleLowerCase();
@@ -166,24 +164,26 @@ export const UploadFileForm = ({
 		append(filesToAppend);
 	};
 
-	const presetContainer = ContainersHooksSelectors.selectContainerById(presetContainerId);
-	useEffect(() => {
-		if (presetFile) addFilesToList({ files: [presetFile], container: presetContainer });
-		FederationsActionsDispatchers.fetchFederations(teamspace, project);
-	}, []);
+	const getSortedListSelectedIndex = () => {
+		if (!fields.length || !isNumber(selectedIndex)) return null;
 
-	const sidebarOpen = Number.isInteger(selectedIndex) && !isUploading;
+		const { uploadId } = fields[selectedIndex];
+		const newIndex = sortedList.findIndex((r) => r.uploadId === uploadId);
+		return newIndex;
+	};
 
+	const containersNamesInModal = getValues('uploads')?.map(({ containerName }) => containerName);
+	const sidebarOpen = !isNull(selectedIndex) && !isUploading;
 	const indexMap = new Map(fields.map(({ uploadId }, index) => [uploadId, index]));
 	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
-	const origIndex = sidebarOpen && getOriginalIndex(selectedIndex);
+	const origIndex = sidebarOpen && getOriginalIndex(getSortedListSelectedIndex());
 
-	const onClickEdit = (id: number) => setSelectedIndex(id);
-
-	const onClickDelete = (id: number) => {
-		if (id < selectedIndex) setSelectedIndex(selectedIndex - 1);
-		if (id === selectedIndex) setSelectedIndex(null);
-		remove(getOriginalIndex(id));
+	const onClickDelete = (index: number) => {
+		const { uploadId } = sortedList[index];
+		const sortedIndex = fields.findIndex((r) => r.uploadId === uploadId);
+		if (sortedIndex < selectedIndex) setSelectedIndex(selectedIndex - 1);
+		if (sortedIndex === selectedIndex) setSelectedIndex(null);
+		remove(sortedIndex);
 	};
 
 	const onSubmit = async ({ uploads }: UploadFieldArray) => {
@@ -200,10 +200,29 @@ export const UploadFileForm = ({
 		}
 	};
 
-	const allUploadsComplete = RevisionsHooksSelectors.selectUploadIsComplete();
+	useEffect(() => {
+		setFileError(fields.some(({ file }) => filesizeTooLarge(file)));
+	}, [fields.length]);
+
+	useEffect(() => {
+		const tags = {};
+		getValues('uploads').forEach(({ containerId }, index) => {
+			tags[`uploads[${index}].revisionTag`] = revisionsByContainer?.[containerId] || [];
+		});
+		setAlreadyExistingTags(tags);
+	}, [JSON.stringify(revisionsByContainer), JSON.stringify(containersNamesInModal)]);
+
+	useEffect(() => {
+		trigger();
+	}, [alreadyExistingTags]);
+
+	useEffect(() => {
+		if (presetFile) addFilesToList([presetFile], presetContainer);
+		FederationsActionsDispatchers.fetchFederations(teamspace, project);
+	}, []);
 
 	return (
-		<FormProvider {...methods}>
+		<FormProvider {...formData}>
 			<Modal
 				open={open}
 				onSubmit={handleSubmit(onSubmit)}
@@ -237,54 +256,72 @@ export const UploadFileForm = ({
 									</UploadsListHeader>
 									<UploadList
 										values={sortedList}
-										selectedIndex={selectedIndex}
+										selectedIndex={getSortedListSelectedIndex()}
 										isUploading={isUploading}
-										onClickEdit={(id) => onClickEdit(id)}
-										onClickDelete={(id) => onClickDelete(id)}
+										onClickEdit={setSelectedIndex}
+										onClickDelete={onClickDelete}
 										getOriginalIndex={getOriginalIndex}
 									/>
 								</>
 							)}
 							<DropZone
-								message={formatMessage(
-									{ id: 'uploads.dropzone.message', defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>' },
-									{ MoreLink:
-										(child: string) => (
-											<a href="https://help.3drepo.io/en/articles/4798885-supported-file-formats" target="_blank" rel="noreferrer">{child}</a>
-										),
-									},
-								)}
-								processFiles={(files) => addFilesToList({ files })}
 								hidden={isUploading}
-							/>
+								onDrop={addFilesToList}
+								accept={getSupportedFileExtensions()}
+							>
+								<Typography variant="h3" color="secondary">
+									<FormattedMessage id="dragAndDrop.drop" defaultMessage="Drop files here" />
+								</Typography>
+								<Typography variant="h5" color="secondary">
+									<FormattedMessage id="dragAndDrop.or" defaultMessage="or" />
+								</Typography>
+								<FileInputField
+									accept={getSupportedFileExtensions()}
+									onChange={(files) => addFilesToList(files)}
+								>
+									<Button component="span" variant="contained" color="primary">
+										<FormattedMessage
+											id="uploads.fileInput.browse"
+											defaultMessage="Browse"
+										/>
+									</Button>
+								</FileInputField>
+								<HelpText>
+									<FormattedMessage
+										id="uploads.dropzone.message"
+										defaultMessage="Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>"
+										values={{
+											MoreLink: (child: string) => (
+												<a
+													href="https://help.3drepo.io/en/articles/4798885-supported-file-formats"
+													target="_blank"
+													rel="noreferrer"
+												>
+													{child}
+												</a>
+											),
+										}}
+									/>
+								</HelpText>
+							</DropZone>
 						</Padding>
 					</UploadsListScroll>
-					<Sidebar
-						open={sidebarOpen}
-						onClick={() => setSelectedIndex(null)}
-					>
+					<Sidebar open={sidebarOpen} onClose={() => setSelectedIndex(null)}>
 						{
 							sidebarOpen
 								? (
-									<span key={watch(`uploads.${origIndex}.containerName`)}>
-										<SidebarForm
-											value={getValues(`uploads.${origIndex}`)}
-											key={sortedList[selectedIndex].uploadId}
-											isNewContainer={
-												!getValues(`uploads.${origIndex}.containerId`)
-												&& !!getValues(`uploads.${origIndex}.containerName`)
-											}
-											isSpm={extensionIsSpm(sortedList[origIndex].extension)}
-											onChange={(field: string, val: string | boolean) => {
-												// @ts-ignore
-												setValue(`uploads.${origIndex}.${field}`, val);
-												// @ts-ignore
-												trigger(`uploads.${origIndex}.${field}`);
-											}}
-										/>
-									</span>
-								)
-								: <></>
+									<SidebarForm
+										value={getValues(`uploads.${origIndex}`)}
+										key={sortedList[getSortedListSelectedIndex()].uploadId}
+										isSpm={extensionIsSpm(sortedList[getSortedListSelectedIndex()].extension)}
+										onChange={(field: string, val: string | boolean) => {
+											// @ts-ignore
+											setValue(`uploads.${origIndex}.${field}`, val);
+											// @ts-ignore
+											trigger(`uploads.${origIndex}.${field}`);
+										}}
+									/>
+								) : (<></>)
 						}
 					</Sidebar>
 				</UploadsContainer>

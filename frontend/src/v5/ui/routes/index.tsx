@@ -24,8 +24,9 @@ import { theme } from '@/v5/ui/themes/theme';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { AuthActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { enableKickedOutEvent } from '@/v5/services/realtime/auth.events';
-import { ModalsDispatcher } from '@components/shared/modals';
+import { ModalsDispatcher } from '@components/shared/modalsDispatcher/modalsDispatcher.component';
 import { Intercom } from '@components/intercom/intercom.component';
+import { SSOResponseHandler } from '@components/shared/sso/ssoLinkingResponseHandler/ssoLinkingResponseHandler.component';
 import { MainRoute } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
 
@@ -53,6 +54,7 @@ export const Root = () => {
 				<StylesProvider injectFirst>
 					<V4Adapter>
 						<MainRoute />
+						<SSOResponseHandler />
 						<ModalsDispatcher />
 						<Intercom />
 					</V4Adapter>

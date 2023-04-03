@@ -26,12 +26,24 @@ export const pinsDiff = (pinsA: any[], pinsB: any[]): any[] => {
 	const pinsMap = pinsById(pinsB);
 
 	return pinsA.reduce( (diffPins, pin) => {
-		if (!isEqual(pin, pinsMap[pin.id])) {
+		if (!pinsMap[pin.id]) {
 			diffPins.push(pin);
 		}
 		return diffPins;
 	}, []);
 };
+
+export const pinsSelectionChanged = (pinsA: any[], pinsB: any[]): any[] => {
+	const pinsMap = pinsById(pinsB);
+
+	return pinsA.reduce( (diffPins, pin) => {
+		if (pinsMap[pin.id]?.isSelected !== pin.isSelected) {
+			diffPins.push(pin);
+		}
+		return diffPins;
+	}, []);
+};
+
 
 export const hasPin = (ticket, sequence?, min?, max?) => {
 	let validPin = ticket.position && ticket.position.length === 3;

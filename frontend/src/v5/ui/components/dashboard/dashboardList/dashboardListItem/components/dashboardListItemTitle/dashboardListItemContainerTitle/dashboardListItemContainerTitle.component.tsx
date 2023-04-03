@@ -16,15 +16,14 @@
  */
 
 import { viewerRoute } from '@/v5/services/routing/routing';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/latestRevision.component';
 import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Highlight } from '@controls/highlight';
 import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';
 import { DashboardListItemTitle } from '../dashboardListItemTitle.component';
 
@@ -40,7 +39,8 @@ export const DashboardListItemContainerTitle = ({
 	isSelected = false,
 	openInNewTab = false,
 }: IContainerTitle): JSX.Element => {
-	const { teamspace, project } = useParams<DashboardParams>();
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const { query: filterQuery } = useContext(SearchContext);
 
 	const hasRevisions = container.revisionsCount > 0;
@@ -60,7 +60,7 @@ export const DashboardListItemContainerTitle = ({
 						</Highlight>
 					)}
 					status={container.status}
-					error={container.errorResponse}
+					error={container.errorReason}
 					hasRevisions={hasRevisions}
 				/>
 			)}

@@ -16,13 +16,13 @@
  */
 
 import { VisualSettingsDialog } from '@/v4/routes/components/topMenu/components/visualSettingsDialog/visualSettingsDialog.component';
-import { Dialog } from '@mui/material';
-import { FormModalHeader } from '@controls/modal/formModal/formModalHeader/formModalHeader.component';
-import { RemoveWhiteCorners } from '@controls/modal/formModal/formDialog.styles';
 import { formatMessage } from '@/v5/services/intl';
+import { ModalHeader } from '@controls/formModal/modalHeader/modalHeader.component';
+import { Modal } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { VisualSettingsModalContent } from './visualSettingsModal.styles';
 
 type IVisualSettingsModal = {
+	open: boolean;
 	onClickClose: () => void;
 	visualSettings: any;
 	updateSettings: (username, settings) => void;
@@ -31,19 +31,20 @@ type IVisualSettingsModal = {
 };
 
 export const VisualSettingsModal = ({
+	open,
 	onClickClose,
 	...visualSettingsProps
 }: IVisualSettingsModal) => (
-	<Dialog
-		open
-		PaperComponent={RemoveWhiteCorners}
+	<Modal
+		onClose={onClickClose}
+		open={open}
 	>
-		<FormModalHeader
+		<ModalHeader
 			title={formatMessage({
 				id: 'visualSettingsModal.title',
 				defaultMessage: 'Visual Settings',
 			})}
-			handleClose={onClickClose}
+			onClickClose={onClickClose}
 		/>
 		<VisualSettingsModalContent>
 			<VisualSettingsDialog
@@ -51,5 +52,5 @@ export const VisualSettingsModal = ({
 				{...visualSettingsProps}
 			/>
 		</VisualSettingsModalContent>
-	</Dialog>
+	</Modal>
 );

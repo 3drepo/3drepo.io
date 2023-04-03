@@ -24,6 +24,7 @@ const { findProjectByModelId } = require('../../../models/projectSettings');
 const { getRevisionByIdOrTag } = require('../../../models/revisions');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
+const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseTicket } = require('../../../schemas/tickets');
 const { setNestedProperty } = require('../../../utils/helper/objects');
 const { subscribe } = require('../../eventsManager/eventsManager');
@@ -33,7 +34,10 @@ const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
 		await updateModelStatus(teamspace, UUIDToString(projectId), model, status, corId);
 	} catch (err) {
-		// do nothing - the model may have been deleted before the task came back.
+		logger.logError(`Failed to update model status for ${teamspace}.${model}: ${err.message}`);
+		if (err.stack) {
+			logger.logError(err.stack);
+		}
 	}
 };
 
@@ -42,7 +46,10 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user, conta
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
 		await newRevisionProcessed(teamspace, UUIDToString(projectId), model, corId, value, user, containers);
 	} catch (err) {
-		// do nothing - the model may have been deleted before the task came back.
+		logger.logError(`Failed to process a completed revision for ${teamspace}.${model}: ${err.message}`);
+		if (err.stack) {
+			logger.logError(err.stack);
+		}
 	}
 };
 
@@ -126,6 +133,28 @@ const modelTicketUpdated = async ({ teamspace, project, model, ticket, author, c
 	}
 };
 
+const ticketCommentAdded = async ({ teamspace, project, model, data }) => {
+	try {
+		const isFed = await isFederationCheck(teamspace, model);
+		const event = isFed ? chatEvents.FEDERATION_NEW_TICKET_COMMENT : chatEvents.CONTAINER_NEW_TICKET_COMMENT;
+		const serialisedComment = serialiseComment(data);
+		await createModelMessage(event, serialisedComment, teamspace, project, model);
+	} catch (err) {
+		logger.logError(`Failed to process comment added event ${err.message}`);
+	}
+};
+
+const ticketCommentUpdated = async ({ teamspace, project, model, data }) => {
+	try {
+		const isFed = await isFederationCheck(teamspace, model);
+		const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET_COMMENT : chatEvents.CONTAINER_UPDATE_TICKET_COMMENT;
+		const serialisedComment = serialiseComment(data);
+		await createModelMessage(event, serialisedComment, teamspace, project, model);
+	} catch (err) {
+		logger.logError(`Failed to process comment updated event ${err.message}`);
+	}
+};
+
 const ModelEventsListener = {};
 
 ModelEventsListener.init = () => {
@@ -139,6 +168,8 @@ ModelEventsListener.init = () => {
 	subscribe(events.DELETE_MODEL, modelDeleted);
 	subscribe(events.NEW_TICKET, modelTicketAdded);
 	subscribe(events.UPDATE_TICKET, modelTicketUpdated);
+	subscribe(events.NEW_COMMENT, ticketCommentAdded);
+	subscribe(events.UPDATE_COMMENT, ticketCommentUpdated);
 };
 
 module.exports = ModelEventsListener;

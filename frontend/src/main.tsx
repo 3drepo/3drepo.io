@@ -40,6 +40,8 @@ import { Version, VersionContext } from './versionContext';
 import { getSocket, initializeSocket, SocketEvents, subscribeToSocketEvent } from './v5/services/realtime/realtime.service';
 import { setSocketIdHeader } from './v4/services/api';
 import { setSocket } from './v4/modules/chat/chat.sagas';
+import { ROUTES } from './v4/constants/routes';
+import { LOGIN_PATH as V5_LOGIN_PATH, SIGN_UP_PATH as V5_SIGN_UP_PATH } from './v5/ui/routes/routes.constants';
 
 window.UnityUtil = UnityUtil;
 
@@ -61,6 +63,18 @@ const render = () => {
 				<IntlProvider {...getIntlProviderProps()}>
 					<LocalizationProvider dateAdapter={AdapterDayjs}>
 						<Switch>
+							<Route exact path="/">
+								{/* Using this instead of <Redirect /> to force refresh so that isV5() is updated */}
+								{() => window.location.replace('v5/')}
+							</Route>
+							<Route exact path={ROUTES.SIGN_UP}>
+								{/* Using this instead of <Redirect /> to force refresh so that isV5() is updated */}
+								{() => window.location.replace(V5_SIGN_UP_PATH)}
+							</Route>
+							<Route exact path={ROUTES.LOGIN}>
+								{/* Using this instead of <Redirect /> to force refresh so that isV5() is updated */}
+								{() => window.location.replace(V5_LOGIN_PATH)}
+							</Route>
 							<Route path="/v5">
 								<VersionContext.Provider value={Version.V5}>
 									<V5Root />

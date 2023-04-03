@@ -28,7 +28,7 @@ export const TitleProperty = (props) => {
 			onKeyDown={handleKeyDown}
 			placeholder={formatMessage({
 				id: 'customTicket.newTicket.titlePlaceholder',
-				defaultMessage: 'Ticket name',
+				defaultMessage: 'Ticket name (required)',
 			})}
 			{...props}
 		/>

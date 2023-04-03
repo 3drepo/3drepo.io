@@ -38,8 +38,10 @@ describe('Users: store', () => {
 	it('should not crash when teamspace and/or username do not exist', () => {
 		const nonExistingUser = selectUser(getState(), teamspace, '');
 		const nonExistingTeamspace = selectUser(getState(), '', username);
-		expect(nonExistingUser).toBeFalsy();
-		expect(nonExistingTeamspace).toBeFalsy();
+		expect(nonExistingUser).not.toBeFalsy();
+		expect(nonExistingUser.isNotTeamspaceMember).toBeTruthy();
+		expect(nonExistingTeamspace).not.toBeFalsy();
+		expect(nonExistingTeamspace.isNotTeamspaceMember).toBeTruthy();
 	})
 
 	it('should set users', () => {

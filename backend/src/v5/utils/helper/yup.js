@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { UUIDToString } = require('./uuids');
+const { UUIDToString, stringToUUID } = require('./uuids');
+const { fileExtensionFromBuffer, isUUIDString } = require('./typeCheck');
 const Yup = require('yup');
-const { fileExtensionFromBuffer } = require('./typeCheck');
 const { fileUploads } = require('../config');
 const tz = require('countries-and-timezones');
 const zxcvbn = require('zxcvbn');
@@ -100,13 +100,40 @@ YupHelper.types.strings.name = Yup.string().min(1).max(35);
 
 YupHelper.types.date = Yup.date().transform((n, orgVal) => new Date(orgVal));
 
-YupHelper.types.embeddedImage = (isNullable) => Yup.mixed().transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : n))
-	.test('Too large image', `Image must be smaller than ${fileUploads.resourceSizeLimit} Bytes`, (buffer) => !buffer || buffer.length <= fileUploads.resourceSizeLimit)
-	.test('Non supported type', `Image must be of type ${fileUploads.imageExtensions.join(',')}`, async (buffer) => {
-		if (!buffer) return true;
-		const ext = await fileExtensionFromBuffer(buffer);
-		return ext && fileUploads.imageExtensions.includes(ext.toLowerCase());
-	})
-	.test('Not null', 'Image cannot be null', (val) => isNullable || val !== null);
+const imageValidityTests = (yupType, isNullable) => yupType.test('image-validity-test', 'Image is not valid', async (value, { createError, originalValue }) => {
+	if (isUUIDString(originalValue)) {
+		return true;
+	}
+
+	if (value === null && !isNullable) {
+		return createError({ message: 'Image cannot be null' });
+	}
+
+	if (value) {
+		if (value?.length > fileUploads.resourceSizeLimit) {
+			return createError({ message: `Image must be smaller than ${fileUploads.resourceSizeLimit} Bytes` });
+		}
+
+		const ext = await fileExtensionFromBuffer(value);
+		if (!ext || !fileUploads.imageExtensions.includes(ext.toLowerCase())) {
+			return createError({ message: `Image must be of type ${fileUploads.imageExtensions.join(',')}` });
+		}
+	}
+
+	return true;
+});
+
+YupHelper.types.embeddedImage = (isNullable) => imageValidityTests(
+	Yup.mixed().transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : n)),
+	isNullable,
+);
+
+YupHelper.types.embeddedImageOrRef = () => imageValidityTests(
+	Yup.mixed()
+		.transform((currValue, orgVal) => {
+			if (orgVal) return isUUIDString(orgVal) ? stringToUUID(orgVal) : Buffer.from(orgVal, 'base64');
+			return currValue;
+		}),
+);
 
 module.exports = YupHelper;

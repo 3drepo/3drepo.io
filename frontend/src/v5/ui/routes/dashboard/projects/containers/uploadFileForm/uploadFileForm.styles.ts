@@ -18,8 +18,9 @@
 import styled from 'styled-components';
 import { DragAndDrop } from '@controls/dragAndDrop';
 import { DashboardListHeader } from '@components/dashboard/dashboardList/dashboardListHeader';
-import { FormModal } from '@controls/modal/formModal/formDialog.component';
+import { FormModal } from '@controls/formModal/formModal.component';
 import { ScrollArea } from '@controls/scrollArea';
+import { Typography } from '@controls/typography';
 
 const MODAL_PADDING = 35;
 
@@ -60,4 +61,14 @@ export const DropZone = styled(DragAndDrop)`
 export const UploadsListHeader = styled(DashboardListHeader)`
 	padding: 0 45px 13px 25px;
 	margin-top: 0;
+`;
+
+export const HelpText = styled(Typography).attrs({
+	variant: 'h5',
+})`
+	color: ${({ theme }) => theme.palette.base.main};
+	padding: 10px;
+	a {
+		color: inherit;
+	}
 `;

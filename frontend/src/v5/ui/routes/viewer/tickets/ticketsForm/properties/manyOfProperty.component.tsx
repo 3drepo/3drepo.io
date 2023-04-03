@@ -22,7 +22,13 @@ import { FormInputProps } from '@controls/inputs/inputController.component';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { intersection } from 'lodash';
 
-type ManyOfPropertyProps = FormInputProps & { values: PropertyDefinition['values'] };
+type ManyOfPropertyProps = FormInputProps & {
+	open?: boolean;
+	values: PropertyDefinition['values'];
+	onClose: () => void;
+	onOpen: () => void;
+};
+
 export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
 	let items = [];
 

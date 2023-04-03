@@ -138,7 +138,6 @@ export const theme = createTheme(
 					styleOverrides: {
 						root: {
 							'&&': {
-								padding: '4px 10px',
 								fontSize: '12px',
 							},
 						},
@@ -158,33 +157,6 @@ export const theme = createTheme(
 							},
 							'&.react-autosuggest__suggestions-container': {
 								boxShadow: 'none',
-							},
-							'&.color-picker__panel': { // Colour picker modal
-								'.MuiInput-root': {
-									'&.Mui-focused': {
-										border: `1px solid ${COLOR.PRIMARY_MAIN}`,
-										boxShadow: `0 0 2px ${COLOR.PRIMARY_MAIN}`,
-									},
-									border: `1px solid ${COLOR.BASE_LIGHTEST}`,
-									borderRadius: 5,
-									padding: '0 7px',
-									width: 'auto',
-									'.MuiInput-input': {
-										fontSize: 12,
-										marginLeft: -13,
-										paddingRight: '0 !important',
-									},
-									'.MuiInputAdornment-positionEnd': {
-										margin: '0 0 0 -30px',
-									},
-								},
-								'.MuiSlider-root': {
-									width: 145,
-									marginRight: 15,
-								},
-								'.MuiCheckbox-root': {
-									margin: '8px 8px 8px -8px',
-								},
 							},
 						},
 					},

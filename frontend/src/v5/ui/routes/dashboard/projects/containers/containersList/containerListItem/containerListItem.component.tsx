@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useContext, useEffect, useState } from 'react';
+import { memo, useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import {
@@ -40,11 +40,9 @@ import { RevisionDetails } from '@components/shared/revisionDetails';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Display } from '@/v5/ui/themes/media';
-import { formatDate, formatMessage } from '@/v5/services/intl';
-import { prefixBaseDomain, viewerRoute } from '@/v5/services/routing/routing';
-import { ContainersActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { formatDate } from '@/v5/services/intl';
+import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
-import { ContainerSettingsForm } from '../../containerSettingsForm/containerSettingsForm.component';
 import { IsMainList } from '../../containers.component';
 
 interface IContainerListItem {
@@ -73,27 +71,12 @@ export const ContainerListItem = memo(({
 		return null;
 	}, [container._id]);
 
-	const [containerSettingsOpen, setContainerSettingsOpen] = useState(false);
-
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
 		if (checked) {
 			ContainersActionsDispatchers.addFavourite(teamspace, project, container._id);
 		} else {
 			ContainersActionsDispatchers.removeFavourite(teamspace, project, container._id);
 		}
-	};
-
-	const onClickShare = () => {
-		const link = prefixBaseDomain(viewerRoute(teamspace, project, container));
-		const subject = formatMessage({ id: 'shareModal.container.subject', defaultMessage: 'container' });
-		const title = formatMessage({ id: 'shareModal.container.title', defaultMessage: 'Share Container' });
-
-		DialogsActionsDispatchers.open('share', {
-			name: container.name,
-			subject,
-			title,
-			link,
-		});
 	};
 
 	return (
@@ -154,8 +137,6 @@ export const ContainerListItem = memo(({
 						selected={isSelected}
 						container={container}
 						onSelectOrToggleItem={onSelectOrToggleItem}
-						openShareModal={onClickShare}
-						openContainerSettings={() => setContainerSettingsOpen(true)}
 					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
@@ -166,11 +147,6 @@ export const ContainerListItem = memo(({
 					status={container.status}
 				/>
 			)}
-			<ContainerSettingsForm
-				open={containerSettingsOpen}
-				container={container}
-				onClose={() => setContainerSettingsOpen(false)}
-			/>
 		</DashboardListItem>
 	);
 });

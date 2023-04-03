@@ -46,7 +46,9 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 	const isCollaborator = isNewFederation ? true : isCollaboratorFromId;
 
 	useEffect(() => {
-		setIncludedContainers(federation.containers.map(getContainerById));
+		if (containers.length) {
+			setIncludedContainers(federation.containers.map(getContainerById));
+		}
 	}, [containers]);
 
 	useEffect(() => {

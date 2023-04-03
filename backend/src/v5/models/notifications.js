@@ -15,11 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { INTERNAL_DB } = require('../handler/db.constants');
 const db = require('../handler/db');
 
 const Notifications = {};
-const NOTIFICATIONS_DB = 'notifications';
+const NOTIFICATIONS_COLL = 'notifications';
 
-Notifications.removeAllUserNotifications = (user) => db.dropCollection(NOTIFICATIONS_DB, user);
+Notifications.initialise = () => db.createIndex(INTERNAL_DB, NOTIFICATIONS_COLL,
+	{ user: 1, timestamp: -1 }, { runInBackground: true });
+
+Notifications.removeAllUserNotifications = async (user) => {
+	await db.deleteMany(INTERNAL_DB, NOTIFICATIONS_COLL, { user });
+};
 
 module.exports = Notifications;

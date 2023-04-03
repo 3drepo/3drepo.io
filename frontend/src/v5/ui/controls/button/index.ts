@@ -16,3 +16,4 @@
  */
 
 export { Button } from './button.component';
+export { LabelButton } from './labelButton/labelButton.styles';

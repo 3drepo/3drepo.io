@@ -19,7 +19,6 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
-const { generateRandomString, generateRandomURL } = require('../../helper/services');
 const session = require('supertest-session');
 const fs = require('fs');
 const User = require('../../../../src/v5/models/users');
@@ -33,9 +32,6 @@ const { loginPolicy } = require(`${src}/utils/config`);
 
 jest.mock('../../../../src/v5/services/mailer');
 const Mailer = require(`${src}/services/mailer`);
-
-jest.mock('../../../../src/v5/services/sso/aad');
-const Aad = require(`${src}/services/sso/aad`);
 
 let testSession;
 let server;
@@ -52,19 +48,16 @@ const testUserWithToken = ServiceHelper.generateUserCredentials();
 const testUserWithExpiredToken = ServiceHelper.generateUserCredentials();
 const lockedUser = ServiceHelper.generateUserCredentials();
 const lockedUserWithExpiredLock = ServiceHelper.generateUserCredentials();
-const userEmail = 'example@email.com';
-const userEmailSso = 'examplesso@email.com';
 const nonVerifiedUserEmail = 'nonverifieduser@email.com';
-const ssoUserId = generateRandomString();
-const userEmail2 = 'example2@email.com';
-const fsAvatarData = generateRandomString();
-const gridFsAvatarData = generateRandomString();
-const validPasswordToken = { token: generateRandomString(), expiredAt: new Date(2030, 12, 12) };
-const validEmailToken = { token: generateRandomString(), expiredAt: new Date(2030, 12, 12) };
-const expiredEmailToken = { token: generateRandomString(), expiredAt: new Date(2020, 12, 12) };
-const expiredPasswordToken = { token: generateRandomString(), expiredAt: new Date(2020, 12, 12) };
 const teamspace = { name: ServiceHelper.generateRandomString() };
 
+const ssoUserId = ServiceHelper.generateRandomString();
+const fsAvatarData = ServiceHelper.generateRandomString();
+const gridFsAvatarData = ServiceHelper.generateRandomString();
+const validPasswordToken = { token: ServiceHelper.generateRandomString(), expiredAt: new Date(2030, 12, 12) };
+const validEmailToken = { token: ServiceHelper.generateRandomString(), expiredAt: new Date(2030, 12, 12) };
+const expiredEmailToken = { token: ServiceHelper.generateRandomString(), expiredAt: new Date(2020, 12, 12) };
+const expiredPasswordToken = { token: ServiceHelper.generateRandomString(), expiredAt: new Date(2020, 12, 12) };
 const setupData = async () => {
 	await ServiceHelper.db.createTeamspace(teamspace.name, [nonVerifiedUser.user], {
 		discretionary: {
@@ -75,9 +68,9 @@ const setupData = async () => {
 	});
 
 	await Promise.all([
-		ServiceHelper.db.createUser(testUser, [], { email: userEmail }),
+		ServiceHelper.db.createUser(testUser),
 		ServiceHelper.db.createUser(ssoTestUser, [], {
-			email: userEmailSso, sso: { type: providers.AAD, id: ssoUserId },
+			sso: { type: providers.AAD, id: ssoUserId },
 		}),
 		ServiceHelper.db.createUser(userWithFsAvatar, []),
 		ServiceHelper.db.createUser(userWithGridFsAvatar, []),
@@ -97,7 +90,6 @@ const setupData = async () => {
 			},
 		}),
 		ServiceHelper.db.createUser(testUserWithToken, [], {
-			email: userEmail2,
 			resetPasswordToken: {
 				token: validPasswordToken.token,
 				expiredAt: validPasswordToken.expiredAt,
@@ -123,7 +115,6 @@ const setupData = async () => {
 			loginTime: new Date(1 / 1 / 18),
 			failed: true,
 		}))),
-
 	]);
 };
 
@@ -137,13 +128,13 @@ const testLogin = () => {
 
 		test('should log in a user using email', async () => {
 			await agent.post('/v5/login/')
-				.send({ user: userEmail, password: testUser.password })
+				.send({ user: testUser.basicData.email, password: testUser.password })
 				.expect(templates.ok.status);
 		});
 
 		test('should log in a user using email (all upper case)', async () => {
 			await agent.post('/v5/login/')
-				.send({ user: userEmail.toUpperCase(), password: testUser.password })
+				.send({ user: testUser.basicData.email.toUpperCase(), password: testUser.password })
 				.expect(templates.ok.status);
 		});
 
@@ -242,7 +233,7 @@ const testGetUsername = () => {
 	});
 };
 
-const formatUserProfile = (user, email, hasAvatar = false, sso) => ({
+const formatUserProfile = (user, hasAvatar = false, sso) => ({
 	username: user.user,
 	firstName: user.basicData.firstName,
 	lastName: user.basicData.lastName,
@@ -251,7 +242,7 @@ const formatUserProfile = (user, email, hasAvatar = false, sso) => ({
 	countryCode: user.basicData.billing.billingInfo.countryCode,
 	company: user.basicData.billing.billingInfo.company,
 	...(sso ? { sso } : {}),
-	...(email ? { email } : {}),
+	...(user.basicData.email ? { email: user.basicData.email } : {}),
 });
 
 const testGetProfile = () => {
@@ -263,12 +254,17 @@ const testGetProfile = () => {
 
 		test('should return the user profile if the user has a session via an API key', async () => {
 			const res = await agent.get(`/v5/user?key=${testUser.apiKey}`).expect(200);
-			expect(res.body).toEqual(formatUserProfile(testUser, userEmail));
+			expect(res.body).toEqual(formatUserProfile(testUser));
 		});
 
 		test('should return the user profile if the user has a session via an API key and has avatar', async () => {
 			const res = await agent.get(`/v5/user?key=${userWithFsAvatar.apiKey}`).expect(200);
-			expect(res.body).toEqual(formatUserProfile(userWithFsAvatar, undefined, true));
+			expect(res.body).toEqual(formatUserProfile(userWithFsAvatar, true));
+		});
+
+		test('should return the user profile (SSO user)', async () => {
+			const res = await testSession.get(`/v5/user?key=${ssoTestUser.apiKey}`).expect(200);
+			expect(res.body).toEqual(formatUserProfile(ssoTestUser, false, providers.AAD));
 		});
 
 		describe('With valid authentication', () => {
@@ -281,22 +277,7 @@ const testGetProfile = () => {
 
 			test('should return the user profile if the user is logged in', async () => {
 				const res = await testSession.get('/v5/user/').expect(200);
-				expect(res.body).toEqual(formatUserProfile(testUser, userEmail));
-			});
-		});
-
-		describe('With valid authentication (SSO user)', () => {
-			beforeAll(async () => {
-				Aad.getUserDetails.mockResolvedValueOnce({ email: userEmailSso, id: ssoUserId });
-				await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify({ redirectUri: generateRandomURL() }))}`);
-			});
-			afterAll(async () => {
-				await testSession.post('/v5/logout/');
-			});
-
-			test('should return the user profile if the user is logged in', async () => {
-				const res = await testSession.get('/v5/user/').expect(200);
-				expect(res.body).toEqual(formatUserProfile(ssoTestUser, userEmailSso, false, providers.AAD));
+				expect(res.body).toEqual(formatUserProfile(testUser));
 			});
 		});
 	});
@@ -332,16 +313,16 @@ const testUpdateProfile = () => {
 			});
 
 			test('should fail if the update data have existing email', async () => {
-				const data = { email: userEmail2 };
+				const data = { email: testUserWithToken.basicData.email };
 				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
 				expect(res.body.code).toEqual(templates.invalidArguments.code);
 			});
 
 			test('should update the profile if the update data have existing email but belongs to the user', async () => {
-				const data = { email: userEmail };
+				const data = { email: testUser.basicData.email };
 				await testSession.put('/v5/user/').send(data).expect(200);
 				const updatedProfileRes = await testSession.get('/v5/user/');
-				expect(updatedProfileRes.body.email).toEqual(userEmail);
+				expect(updatedProfileRes.body.email).toEqual(testUser.basicData.email);
 			});
 
 			test('should fail if the update data have extra properties', async () => {
@@ -400,22 +381,27 @@ const testUpdateProfile = () => {
 		});
 
 		describe('With valid authentication (SSO user)', () => {
+			const ssoCred = ServiceHelper.generateUserCredentials();
 			beforeAll(async () => {
-				Aad.getUserDetails.mockResolvedValueOnce({ email: userEmailSso, id: ssoUserId });
-				await testSession.get(`/v5/sso/aad/authenticate-post?state=${encodeURIComponent(JSON.stringify({ redirectUri: generateRandomURL() }))}`);
+				await ServiceHelper.db.createUser(ssoCred);
+				await testSession.post('/v5/login/').send({ user: ssoCred.user, password: ssoCred.password });
+				await ServiceHelper.db.addSSO(ssoCred.user);
 			});
 			afterAll(async () => {
 				await testSession.post('/v5/logout/');
 			});
 
 			test('should fail if the user tries to update sso fields', async () => {
-				const data = { firstName: generateRandomString(), lastName: generateRandomString() };
+				const data = {
+					firstName: ServiceHelper.generateRandomString(),
+					lastName: ServiceHelper.generateRandomString(),
+				};
 				const res = await testSession.put('/v5/user/').send(data).expect(templates.invalidArguments.status);
 				expect(res.body.code).toEqual(templates.invalidArguments.code);
 			});
 
 			test('should succeed if the user tries to update non sso fields', async () => {
-				const data = { company: generateRandomString(), countryCode: 'GB' };
+				const data = { company: ServiceHelper.generateRandomString(), countryCode: 'GB' };
 				await testSession.put('/v5/user/').send(data).expect(200);
 				const updatedProfileRes = await testSession.get('/v5/user/');
 				expect(updatedProfileRes.body).toEqual(expect.objectContaining(data));
@@ -581,7 +567,8 @@ const testForgotPassword = () => {
 
 		test('should not send email but return ok if user is an SSO user', async () => {
 			await User.linkToSso(ssoTestUser.user, ssoTestUser.basicData.firstName, ssoTestUser.basicData.lastName,
-				userEmailSso, { type: generateRandomString(), id: generateRandomString() });
+				ssoTestUser.basicData.email,
+				{ type: ServiceHelper.generateRandomString(), id: ServiceHelper.generateRandomString() });
 			await agent.post('/v5/user/password').send({ user: ssoTestUser.user })
 				.expect(templates.ok.status);
 			await User.unlinkFromSso(ssoTestUser.user, ssoTestUser.password);
@@ -601,13 +588,13 @@ const testForgotPassword = () => {
 		});
 
 		test('should send forgot password email with valid email', async () => {
-			await agent.post('/v5/user/password').send({ user: userEmail })
+			await agent.post('/v5/user/password').send({ user: testUser.basicData.email })
 				.expect(templates.ok.status);
 			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
 		});
 
 		test('should send forgot password email with valid email in upper case', async () => {
-			await agent.post('/v5/user/password').send({ user: userEmail.toUpperCase() })
+			await agent.post('/v5/user/password').send({ user: testUser.basicData.email.toUpperCase() })
 				.expect(templates.ok.status);
 			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
 		});
@@ -617,7 +604,7 @@ const testForgotPassword = () => {
 const testResetPassword = () => {
 	describe('Reset user password', () => {
 		test('should fail if a token is not provided', async () => {
-			const res = await agent.put('/v5/user/password').send({ newPassword: generateRandomString(), user: testUserWithToken.user })
+			const res = await agent.put('/v5/user/password').send({ newPassword: ServiceHelper.generateRandomString(), user: testUserWithToken.user })
 				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
@@ -629,7 +616,7 @@ const testResetPassword = () => {
 		});
 
 		test('should fail if user is not provided', async () => {
-			const res = await agent.put('/v5/user/password').send({ newPassword: generateRandomString(), token: 'some random token' })
+			const res = await agent.put('/v5/user/password').send({ newPassword: ServiceHelper.generateRandomString(), token: 'some random token' })
 				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
@@ -641,31 +628,31 @@ const testResetPassword = () => {
 		});
 
 		test('should fail if user is not found', async () => {
-			const res = await agent.put('/v5/user/password').send({ newPassword: generateRandomString(), token: 'some random token', user: 'invalid user' })
+			const res = await agent.put('/v5/user/password').send({ newPassword: ServiceHelper.generateRandomString(), token: 'some random token', user: 'invalid user' })
 				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if user has no token', async () => {
-			const res = await agent.put('/v5/user/password').send({ newPassword: generateRandomString(), token: 'some random token', user: testUser.user })
+			const res = await agent.put('/v5/user/password').send({ newPassword: ServiceHelper.generateRandomString(), token: 'some random token', user: testUser.user })
 				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if user has expired token', async () => {
-			const res = await agent.put('/v5/user/password').send({ newPassword: generateRandomString(), token: expiredPasswordToken.token, user: testUserWithExpiredToken.user })
+			const res = await agent.put('/v5/user/password').send({ newPassword: ServiceHelper.generateRandomString(), token: expiredPasswordToken.token, user: testUserWithExpiredToken.user })
 				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if user token is different than the one provided', async () => {
-			const res = await agent.put('/v5/user/password').send({ newPassword: generateRandomString(), token: 'different token', user: testUserWithToken.user })
+			const res = await agent.put('/v5/user/password').send({ newPassword: ServiceHelper.generateRandomString(), token: 'different token', user: testUserWithToken.user })
 				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should reset user password', async () => {
-			const newPassword = generateRandomString();
+			const newPassword = ServiceHelper.generateRandomString();
 			await agent.put('/v5/user/password').send({ newPassword, token: validPasswordToken.token, user: testUserWithToken.user })
 				.expect(templates.ok.status);
 
@@ -674,7 +661,7 @@ const testResetPassword = () => {
 				.expect(templates.incorrectPassword.status);
 
 			// using the same token should fail
-			await agent.put('/v5/user/password').send({ newPassword: generateRandomString(), token: validPasswordToken.token, user: testUserWithToken.user })
+			await agent.put('/v5/user/password').send({ newPassword: ServiceHelper.generateRandomString(), token: validPasswordToken.token, user: testUserWithToken.user })
 				.expect(templates.invalidArguments.status);
 
 			// trying to log in with the new password should succeed
@@ -688,13 +675,13 @@ const testResetPassword = () => {
 const testSignUp = () => {
 	describe('Sign a user up', () => {
 		const newUserData = {
-			username: generateRandomString(),
+			username: ServiceHelper.generateRandomString(),
 			email: 'newEmail@email.com',
-			password: generateRandomString(),
-			firstName: generateRandomString(),
-			lastName: generateRandomString(),
+			password: ServiceHelper.generateRandomString(),
+			firstName: ServiceHelper.generateRandomString(),
+			lastName: ServiceHelper.generateRandomString(),
 			countryCode: 'GB',
-			company: generateRandomString(),
+			company: ServiceHelper.generateRandomString(),
 			mailListAgreed: true,
 		};
 
@@ -705,7 +692,7 @@ const testSignUp = () => {
 		});
 
 		test('should fail if the email already exists', async () => {
-			const res = await agent.post('/v5/user').send({ ...newUserData, email: userEmail })
+			const res = await agent.post('/v5/user').send({ ...newUserData, email: testUser.basicData.email })
 				.expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
@@ -786,7 +773,7 @@ const testVerify = () => {
 				_id: nonVerifiedUserEmail,
 				teamSpaces: [
 					{
-						teamspace,
+						teamspace: teamspace.name,
 						job: 'Main Contractor',
 						permissions: {
 							teamspace_admin: true,
@@ -820,13 +807,11 @@ const testVerify = () => {
 	});
 };
 
-const app = ServiceHelper.app();
-
-describe('E2E routes/users', () => {
+describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
-		server = app;
+		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
-		testSession = session(app);
+		testSession = session(server);
 		await setupData();
 	});
 

@@ -39,7 +39,15 @@ export const SearchSelect = ({ children, ...props }: SelectProps) => {
 		<SearchContextComponent filteringFunction={filterItems} items={children as ReactNode[]}>
 			<SearchContext.Consumer>
 				{ ({ filteredItems }: SearchContextType<typeof MenuItem>) => (
-					<Select {...props} MenuProps={{ disableAutoFocusItem: true }}>
+					<Select
+						{...props}
+						MenuProps={{
+							disableAutoFocusItem: true,
+							PaperProps: {
+								style: { maxHeight: 231 },
+							},
+						}}
+					>
 						<SearchInputContainer>
 							<SearchInput
 								placeholder={formatMessage({ id: 'searchSelect.searchInput.placeholder', defaultMessage: 'Search...' })}

@@ -17,14 +17,18 @@
 
 import { ChangeEvent } from 'react';
 
-export const uploadFile = (accept) => new Promise((resolve) => {
+export const getSupportedFileExtensions = () => ClientConfig.acceptedFormat.map((format) => `.${format}`).toString();
+
+export const uploadFile = (accept, multiple = false) => new Promise((resolve) => {
 	const input = document.createElement('input');
 	input.type = 'file';
 	input.accept = accept;
+	input.multiple = multiple;
 
 	const getFileFromInputEvent = (event: ChangeEvent<HTMLInputElement>) => {
 		if (!event.target.files.length) return null;
-		return event.target.files[0];
+		const { files } = event.target;
+		return multiple ? Array.from(files) : files[0];
 	};
 
 	input.onchange = (e) => {

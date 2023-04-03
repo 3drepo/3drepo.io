@@ -215,7 +215,7 @@ const testGetRiskCategories = () => {
 	});
 };
 
-describe('E2E routes/teamspaces/settings', () => {
+describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);

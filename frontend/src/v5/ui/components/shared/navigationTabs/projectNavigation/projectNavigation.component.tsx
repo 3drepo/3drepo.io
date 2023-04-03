@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useRouteMatch } from 'react-router-dom';
-import { discardSlash, discardUrlComponent } from '@/v5/services/routing/routing';
 import { FormattedMessage } from 'react-intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { discardSlash, discardUrlComponent } from '@/v5/helpers/url.helper';
 import { Container, Link } from '../navigationTabs.styles';
 
 export const ProjectNavigation = (): JSX.Element => {
@@ -30,7 +30,6 @@ export const ProjectNavigation = (): JSX.Element => {
 			<Link to={`${url}/t/federations`}><FormattedMessage id="projectNavigation.federations" defaultMessage="Federations" /></Link>
 			<Link to={`${url}/t/containers`}><FormattedMessage id="projectNavigation.containers" defaultMessage="Containers" /></Link>
 			<Link to={`${url}/t/board`}><FormattedMessage id="projectNavigation.issuesAndRisks" defaultMessage="Issues and risks" /></Link>
-			<Link to={`${url}/t/tasks`}><FormattedMessage id="projectNavigation.tasks" defaultMessage="Tasks" /></Link>
 			<Link to={`${discardUrlComponent(url, 'settings')}/t/project_settings`}><FormattedMessage id="projectNavigation.settings" defaultMessage="Project settings" /></Link>
 			{ isProjectAdmin && <Link to={`${url}/t/project_permissions`}><FormattedMessage id="projectNavigation.projectPermissions" defaultMessage="Project permissions" /></Link> }
 			{ isProjectAdmin && <Link to={`${url}/t/user_permissions`}><FormattedMessage id="projectNavigation.userPermission" defaultMessage="User permissions" /></Link> }

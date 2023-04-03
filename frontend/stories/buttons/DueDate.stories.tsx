@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { DueDate } from '@controls/dueDate/dueDate.component';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
 	title: 'Buttons/DueDate',
-	component: DueDate,
+	component: DueDateWithLabel,
 	// More on argTypes: https://storybook.js.org/docs/react/api/argtypes
 
 	argTypes: {
@@ -36,12 +36,12 @@ export default {
 			type: 'boolean',
 		},
 	},
-} as ComponentMeta<typeof DueDate>;
+} as ComponentMeta<typeof DueDateWithLabel>;
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof DueDate> = (args) => (
+const Template: ComponentStory<typeof DueDateWithLabel> = (args) => (
 	<LocalizationProvider dateAdapter={AdapterDayjs}>
-		<DueDate {...args} />
+		<DueDateWithLabel {...args} />
 	</LocalizationProvider>
 );
 

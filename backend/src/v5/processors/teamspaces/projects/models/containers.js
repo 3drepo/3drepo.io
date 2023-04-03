@@ -19,6 +19,7 @@ const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+const Comments = require('./commons/tickets.comments');
 const Groups = require('./commons/groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
@@ -30,7 +31,7 @@ const { queueModelUpload } = require('../../../../services/modelProcessing');
 const { templates } = require('../../../../utils/responseCodes');
 const { timestampToString } = require('../../../../utils/helper/dates');
 
-const Containers = { ...Groups, ...Views, ...Tickets };
+const Containers = { ...Groups, ...Views, ...Tickets, ...Comments };
 
 Containers.addContainer = addModel;
 
@@ -81,10 +82,12 @@ Containers.getContainerStats = async (teamspace, container) => {
 Containers.getRevisions = (teamspace, container, showVoid) => getRevisions(teamspace,
 	container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1 });
 
-Containers.newRevision = (teamspace, model, data, file) => queueModelUpload(teamspace, model, data, file)
-	.finally(() => fs.rm(file.path).catch((e) => {
+Containers.newRevision = async (teamspace, container, data, file) => {
+	const { properties: { unit: units } = {} } = await getContainerById(teamspace, container, { 'properties.unit': 1 });
+	await queueModelUpload(teamspace, container, { ...data, units }, file).finally(() => fs.rm(file.path).catch((e) => {
 		logger.logError(`Failed to delete uploaded file: ${e.message}`);
 	}));
+};
 
 Containers.updateRevisionStatus = updateRevisionStatus;
 

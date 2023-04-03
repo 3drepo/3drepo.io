@@ -28,7 +28,9 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyStrings, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import { IssueProperties, TicketsCardViews } from '../tickets.constants';
+import { hexToGLColor } from '@/v4/helpers/colors';
+import { theme } from '@/v5/ui/themes/theme';
+import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
 
@@ -66,7 +68,7 @@ export const TicketDetailsCard = () => {
 	const onBlurHandler = () => {
 		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
 		let validVals = removeEmptyObjects(nullifyEmptyStrings(filterErrors(values, formData.formState.errors)));
-		validVals = sanitizeViewVals(validVals, template);
+		validVals = sanitizeViewVals(validVals, ticket, template);
 
 		if (isEmpty(validVals)) return;
 
@@ -75,6 +77,11 @@ export const TicketDetailsCard = () => {
 	};
 
 	useEffect(() => {
+		if (ticket.properties?.Pin) {
+			ViewerService.addPin({
+				id: 'new-Pin', position: ticket.properties.Pin, colour: hexToGLColor(theme.palette.primary.main), type: 'issue' });
+		}
+
 		TicketsActionsDispatchers.fetchTicket(
 			teamspace,
 			project,
@@ -91,9 +98,6 @@ export const TicketDetailsCard = () => {
 				isFederation,
 			);
 		}
-		const view = ticket?.properties?.[IssueProperties.DEFAULT_VIEW];
-		if (!(view?.camera)) return;
-		ViewerService.setViewpoint(view);
 	}, [ticket._id]);
 
 	if (!ticket) return (<></>);

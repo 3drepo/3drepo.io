@@ -16,13 +16,15 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { prefixBaseDomain, projectRoute } from '@/v5/services/routing/routing';
+import { projectRoute, projectTabRoute } from '@/v5/services/routing/routing';
 import { formatMessage } from '@/v5/services/intl';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { Highlight } from '@controls/highlight';
 import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
 import { DialogsActionsDispatchers, ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IProject } from '@/v5/store/projects/projects.types';
+import { prefixBaseDomain } from '@/v5/helpers/url.helper';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ProjectImage, EllipsisMenuContainer, EllipsisMenu } from './projectCard.styles';
 import { LinkCard } from '../linkCard.component';
 
@@ -37,7 +39,8 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 	const { teamspace } = useParams<TeamspaceParams>();
 	const to = projectRoute(teamspace, project);
 
-	const { isAdmin } = project;
+	const { isAdmin: isProjectAdmin } = project;
+	const isTeamspaceAdmin = TeamspacesHooksSelectors.selectIsTeamspaceAdmin();
 
 	const preventNavigation = (e) => e.preventDefault();
 
@@ -97,7 +100,15 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 							defaultMessage: 'Delete Project',
 						})}
 						onClick={onClickDelete}
-						hidden={!isAdmin}
+						hidden={!isTeamspaceAdmin}
+					/>
+					<EllipsisMenuItem
+						title={formatMessage({
+							id: 'projectCard.ellipsisMenu.settings',
+							defaultMessage: 'Settings',
+						})}
+						to={projectTabRoute(teamspace, project, 'project_settings')}
+						hidden={!isProjectAdmin}
 					/>
 				</EllipsisMenu>
 			</EllipsisMenuContainer>

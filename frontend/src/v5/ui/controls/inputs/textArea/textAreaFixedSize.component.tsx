@@ -33,9 +33,10 @@ export const TextAreaFixedSize = ({
 	label,
 	value = '', // this is to be certain that is a controlled field
 	height = 80,
+	className,
 	...props
 }: TextAreaFixedSizeProps) => (
-	<FormControl required={required} disabled={disabled} error={error}>
+	<FormControl required={required} disabled={disabled} error={error} className={className}>
 		{label && (
 			<InputLabel id={`${name}-label`}>
 				{label}

@@ -49,3 +49,9 @@ export const UserSignupSchemaPersonal = Yup.object().shape({
 export const UserSignupSchemaTermsAndSubmit = Yup.object().shape({
 	termsAgreed: Yup.boolean().oneOf([true]),
 });
+
+export const UserSignupSchemaSSO = Yup.object().shape({
+	username,
+	company,
+	countryCode,
+});

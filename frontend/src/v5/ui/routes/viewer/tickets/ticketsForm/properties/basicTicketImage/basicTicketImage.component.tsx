@@ -22,7 +22,7 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ActionsList, ActionsSide, Container, Label } from './basicTicketImage.styles';
 import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplayer.component';
 
-type BasicTicketImageProps = Omit<FormInputProps, 'inputRef' | 'onBlur'> & {
+type BasicTicketImageProps = Omit<FormInputProps, 'onBlur'> & {
 	children: any,
 };
 
@@ -46,7 +46,7 @@ export const BasicTicketImage = ({
 
 	return (
 		<FormControl error={error} required={required}>
-			<Container className={className} error={error}>
+			<Container className={className} error={error} disabled={disabled}>
 				<ActionsSide>
 					<Label>{label}</Label>
 					<ActionsList>{children}</ActionsList>

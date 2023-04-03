@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Typography } from '@mui/material';
+import { FormLabel } from '@mui/material';
 import styled from 'styled-components';
 
 export const IconContainer = styled.div`
@@ -30,7 +30,8 @@ export const IconContainer = styled.div`
 	}
 `;
 
-export const TitleContainer = styled(Typography)`
+export const TitleContainer = styled(FormLabel)`
 	height: 16px;
 	font-weight: 500;
+	color: inherit;
 `;

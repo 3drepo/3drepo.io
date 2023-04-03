@@ -27,7 +27,6 @@ export const { Types: CurrentUserTypes, Creators: CurrentUserActions } = createA
 	updateUser: ['userData'],
 	updateUserSuccess: ['userData'],
 	updatePersonalData: ['personalData', 'onSuccess', 'onError'],
-	setPersonalDataIsUpdating: ['personalDataIsUpdating'],
 	generateApiKey: [],
 	deleteApiKey: [],
 	setApiKeyIsUpdating: ['apiKeyIsUpdating'],
@@ -45,10 +44,6 @@ export const updateUserSuccess = (state, { userData }: UpdateUserSuccessAction) 
 	state.currentUser = { ...state.currentUser, ...userData };
 };
 
-export const setPersonalDataIsUpdating = (state, { personalDataIsUpdating }: SetPersonalDataIsUpdatingAction) => {
-	state.currentUser.personalDataIsUpdating = personalDataIsUpdating;
-};
-
 export const setApiKeyIsUpdating = (state, { apiKeyIsUpdating }: SetApiKeyIsUpdatingAction) => {
 	state.currentUser.apiKeyIsUpdating = apiKeyIsUpdating;
 };
@@ -56,7 +51,6 @@ export const setApiKeyIsUpdating = (state, { apiKeyIsUpdating }: SetApiKeyIsUpda
 export const currentUserReducer = createReducer<ICurrentUserState>(INITIAL_STATE, produceAll({
 	[CurrentUserTypes.FETCH_USER_SUCCESS]: fetchUserSuccess,
 	[CurrentUserTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
-	[CurrentUserTypes.SET_PERSONAL_DATA_IS_UPDATING]: setPersonalDataIsUpdating,
 	[CurrentUserTypes.SET_API_KEY_IS_UPDATING]: setApiKeyIsUpdating,
 })) as (state: ICurrentUserState, action: any) => ICurrentUserState;
 
@@ -77,7 +71,6 @@ export type UpdatePersonalDataAction = Action<'UPDATE_PERSONAL_DATA'> & {
 	onError: (error: Error) => void,
 };
 export type UpdateApiKeyAction = Action<'UPDATE_API_KEY'>;
-export type SetPersonalDataIsUpdatingAction = Action<'SET_PERSONAL_DATA_IS_UPDATING'> & { personalDataIsUpdating: boolean };
 export type SetApiKeyIsUpdatingAction = Action<'SET_API_KEY_IS_UPDATING'> & { apiKeyIsUpdating: boolean };
 
 export interface ICurrentUserActionCreators {
@@ -89,7 +82,6 @@ export interface ICurrentUserActionCreators {
 		onSuccess: () => void,
 		onError: (error) => void,
 	) => UpdatePersonalDataAction;
-	setPersonalDataIsUpdating: (personalDataIsUpdating: boolean) => SetPersonalDataIsUpdatingAction;
 	generateApiKey: () => UpdateApiKeyAction;
 	deleteApiKey: () => UpdateApiKeyAction;
 	setApiKeyIsUpdating: (apiKeyIsUpdating: boolean) => SetApiKeyIsUpdatingAction;

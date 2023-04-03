@@ -140,7 +140,7 @@ export class CriteriaValueField extends PureComponent<IProps, IState> {
 	}
 
 	public componentDidUpdate(prevProps) {
-		const { selectedOperator, selectedId, onChange, name, value } = this.props;
+		const { selectedOperator, selectedId, onChange, name, value = [] } = this.props;
 		const operatorChanged = selectedOperator !== prevProps.selectedOperator;
 		const idChanged = selectedId !== prevProps.selectedId;
 		const hasSwitchedToNextCriterion = selectedId && idChanged;

@@ -21,11 +21,13 @@ const http = require('http');
 const fs = require('fs');
 const { times } = require('lodash');
 
-const { src, srcV4 } = require('./path');
+const { image, src, srcV4 } = require('./path');
 
-const { createApp: createServer } = require(`${srcV4}/services/api`);
+const { createAppAsync: createServer } = require(`${srcV4}/services/api`);
 const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
+
+const { providers } = require(`${src}/services/sso/sso.constants`);
 
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
@@ -42,7 +44,7 @@ const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constant
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const FilesManager = require('../../../src/v5/services/filesManager');
 
-const { USERS_DB_NAME, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
+const { USERS_DB_NAME, USERS_COL, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
 const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
 const db = {};
@@ -56,13 +58,16 @@ queue.purgeQueues = async () => {
 		const conn = await amqp.connect(host);
 		const channel = await conn.createChannel();
 
-		channel.on('error', () => {});
+		channel.on('error', () => { });
 
 		await Promise.all([
 			channel.purgeQueue(worker_queue),
 			channel.purgeQueue(model_queue),
 			channel.purgeQueue(callback_queue),
 		]);
+
+		await channel.close();
+		await conn.close();
 	} catch (err) {
 		// doesn't really matter if purge queue failed. it's just for clean up.
 	}
@@ -86,17 +91,24 @@ db.reset = async () => {
 	await DbHandler.disconnect();
 };
 
+db.addSSO = async (user, id = ServiceHelper.generateRandomString()) => {
+	await DbHandler.updateOne(USERS_DB_NAME, USERS_COL, { user }, { $set: { 'customData.sso': { type: providers.AAD, id } } });
+};
+
 // userCredentials should be the same format as the return value of generateUserCredentials
 db.createUser = (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
 	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
-	return DbHandler.createUser(user, password, { ...basicData, ...customData, apiKey }, roles);
+	return DbHandler.createUser(user, password, { billing: { billingInfo: {} },
+		...basicData,
+		...customData,
+		apiKey }, roles);
 };
 
 db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
 
-db.createTeamspace = async (teamspace, admins = [], subscriptions) => {
-	await ServiceHelper.db.createUser({ user: teamspace, password: teamspace });
+db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = true) => {
+	if (createUser) await ServiceHelper.db.createUser({ user: teamspace, password: teamspace });
 	await initTeamspace(teamspace);
 	await Promise.all(admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)));
 
@@ -195,6 +207,19 @@ db.createTicket = (teamspace, project, model, ticket) => {
 	return DbHandler.insertOne(teamspace, 'tickets', formattedTicket);
 };
 
+db.createComment = (teamspace, project, model, ticket, comment) => {
+	const formattedComment = {
+		...comment,
+		_id: stringToUUID(comment._id),
+		project: stringToUUID(project),
+		ticket: stringToUUID(ticket),
+		teamspace,
+		model,
+	};
+
+	return DbHandler.insertOne(teamspace, 'tickets.comments', formattedComment);
+};
+
 db.createJobs = (teamspace, jobs) => DbHandler.insertMany(teamspace, 'jobs', jobs);
 
 db.createIssue = (teamspace, modelId, issue) => {
@@ -246,7 +271,7 @@ ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
 ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
-    + Math.random() * (end.getTime() - start.getTime()));
+	+ Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
 
 ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
@@ -305,6 +330,7 @@ ServiceHelper.generateUserCredentials = () => ({
 	basicData: {
 		firstName: ServiceHelper.generateRandomString(),
 		lastName: ServiceHelper.generateRandomString(),
+		email: `${ServiceHelper.generateRandomString()}@${ServiceHelper.generateRandomString(6)}.com`,
 		billing: {
 			billingInfo: {
 				company: ServiceHelper.generateRandomString(),
@@ -486,6 +512,19 @@ ServiceHelper.generateTicket = (template, internalType = false) => {
 	return ticket;
 };
 
+ServiceHelper.generateComment = (author = ServiceHelper.generateRandomString()) => {
+	const base64img = fs.readFileSync(image).toString('base64');
+
+	return {
+		_id: ServiceHelper.generateUUIDString(),
+		createdAt: ServiceHelper.generateRandomDate(),
+		updatedAt: ServiceHelper.generateRandomDate(),
+		message: ServiceHelper.generateRandomString(),
+		images: [base64img],
+		author,
+	};
+};
+
 ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
 	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
 	const group = {
@@ -533,7 +572,7 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
 });
 
-ServiceHelper.app = () => createServer().listen(8080);
+ServiceHelper.app = async () => (await createServer()).listen(8080);
 
 ServiceHelper.frontend = () => createFrontend().listen(8080);
 
@@ -595,14 +634,20 @@ ServiceHelper.socket.joinRoom = (socket, data) => new Promise((resolve, reject) 
 });
 
 ServiceHelper.closeApp = async (server) => {
-	await DbHandler.disconnect();
 	if (server) await server.close();
+	await db.reset();
 	EventsManager.reset();
 	QueueHandler.close();
 };
 
 ServiceHelper.resetFileshare = () => {
 	const fsDir = config.fs.path;
+	fs.rmSync(fsDir, { recursive: true });
+	fs.mkdirSync(fsDir);
+};
+
+ServiceHelper.resetSharedDir = () => {
+	const fsDir = config.cn_queue.shared_storage;
 	fs.rmSync(fsDir, { recursive: true });
 	fs.mkdirSync(fsDir);
 };

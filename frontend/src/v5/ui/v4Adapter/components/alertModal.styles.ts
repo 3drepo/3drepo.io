@@ -16,9 +16,9 @@
  */
 
 import styled from 'styled-components';
-import { DialogContainer as ContainerBase } from '@/v5/ui/components/shared/modals/modals.styles';
+import { Modal as ModalBase } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 
-export const Container = styled(ContainerBase)`
+export const Modal = styled(ModalBase)`
 	min-width: 450px;
 	min-height: 248px;
 `;

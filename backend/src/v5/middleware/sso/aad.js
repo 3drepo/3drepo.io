@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { authenticateRedirectUri, linkRedirectUri, signupRedirectUri } = require('../../services/sso/aad/aad.constants');
-const { createResponseCode, templates } = require('../../utils/responseCodes');
+const { codeExists, createResponseCode, templates } = require('../../utils/responseCodes');
+const { decryptCryptoHash, generateCryptoHash, getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
 const { errorCodes, providers } = require('../../services/sso/sso.constants');
-const { getAuthenticationCodeUrl, getUserDetails } = require('../../services/sso/aad');
 const { getUserByEmail, getUserByQuery } = require('../../models/users');
-const { redirectWithError, setSessionReferer } = require('.');
+const { redirectWithError, setSessionInfo } = require('.');
 const { addPkceProtection } = require('./pkce');
 const { getUserFromSession } = require('../../utils/sessions');
 const { logger } = require('../../utils/logger');
@@ -30,11 +30,17 @@ const Aad = {};
 
 const checkStateIsValid = async (req, res, next) => {
 	try {
-		req.state = JSON.parse(req.query.state);
+		req.state = JSON.parse(decryptCryptoHash(req.body.state));
+
+		if (req.session.csrfToken !== req.state.csrfToken) {
+			throw createResponseCode(templates.invalidArguments, 'CSRF Token mismatched. Please clear your cookies and try again');
+		}
 		await next();
 	} catch (err) {
-		logger.logError('Failed to parse req.query.state');
-		respond(req, res, createResponseCode(templates.invalidArguments, 'state(query string) is required and must be valid JSON'));
+		const response = codeExists(err.code) ? err
+			: createResponseCode(templates.invalidArguments, 'state is required and must be valid JSON');
+
+		respond(req, res, response);
 	}
 };
 
@@ -56,12 +62,14 @@ const authenticate = (redirectUri) => async (req, res) => {
 
 		req.authParams = {
 			redirectUri,
-			state: JSON.stringify({
+			state: generateCryptoHash(JSON.stringify({
+				csrfToken: req.session.csrfToken,
 				redirectUri: req.query.redirectUri,
 				...(req.body || {}),
-			}),
+			})),
 			codeChallenge: req.session.pkceCodes.challenge,
 			codeChallengeMethod: req.session.pkceCodes.challengeMethod,
+			responseMode: 'form_post',
 		};
 
 		const link = await getAuthenticationCodeUrl(req.authParams);
@@ -73,22 +81,22 @@ const authenticate = (redirectUri) => async (req, res) => {
 
 const verifyNewUserDetails = async (req, res, next) => {
 	try {
-		const { id, email, firstName, lastName } = await getUserDetails(req.query.code,
+		const { id, email, firstName, lastName } = await getUserDetails(req.body.code,
 			signupRedirectUri, req.session.pkceCodes?.verifier);
 
 		const user = await getUserByEmail(email, { 'customData.sso': 1 }).catch(() => undefined);
 		if (user) {
 			throw user.customData.sso ? errorCodes.EMAIL_EXISTS_WITH_SSO : errorCodes.EMAIL_EXISTS;
 		} else {
+			const { redirectUri, csrfToken, ...data } = req.state;
 			req.body = {
-				...req.state,
+				...data,
 				email,
 				firstName,
 				lastName,
 				sso: { type: providers.AAD, id },
 			};
 
-			delete req.body.redirectUri;
 			await next();
 		}
 	} catch (errorCode) {
@@ -101,7 +109,7 @@ Aad.verifyNewUserDetails = validateMany([checkStateIsValid, verifyNewUserDetails
 const emailNotUsed = async (req, res, next) => {
 	try {
 		const username = getUserFromSession(req.session);
-		const { id, email, firstName, lastName } = await getUserDetails(req.query.code,
+		const { id, email, firstName, lastName } = await getUserDetails(req.body.code,
 			linkRedirectUri, req.session.pkceCodes?.verifier);
 
 		const user = await getUserByQuery({ 'customData.email': email, user: { $ne: username } })
@@ -114,18 +122,17 @@ const emailNotUsed = async (req, res, next) => {
 			await next();
 		}
 	} catch (errorCode) {
-		const state = JSON.parse(req.query.state);
-		redirectWithError(res, state.redirectUri, errorCode);
+		redirectWithError(res, req.state.redirectUri, errorCode);
 	}
 };
 
 Aad.emailNotUsed = validateMany([checkStateIsValid, emailNotUsed]);
 
-Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, setSessionReferer, authenticate(redirectUri)]);
+Aad.authenticate = (redirectUri) => validateMany([addPkceProtection, setSessionInfo, authenticate(redirectUri)]);
 
 const hasAssociatedAccount = async (req, res, next) => {
 	try {
-		const { id, email } = await getUserDetails(req.query.code, authenticateRedirectUri,
+		const { id, email } = await getUserDetails(req.body.code, authenticateRedirectUri,
 			req.session.pkceCodes?.verifier);
 
 		const { user, customData: { sso } } = await getUserByEmail(email, { _id: 0, user: 1, 'customData.sso': 1 });

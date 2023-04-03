@@ -17,6 +17,11 @@
 import { PureComponent } from 'react';
 import RemoveCircle from '@mui/icons-material/RemoveCircle';
 import ReactDOM from 'react-dom';
+import { isV5 } from '@/v4/helpers/isV5';
+import { formatMessage } from '@/v5/services/intl';
+import BinIcon from '@assets/icons/outlined/delete-outlined.svg'
+import { FormattedMessage } from 'react-intl';
+import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 
 import { ColorPicker } from '../components/colorPicker/colorPicker.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
@@ -26,7 +31,8 @@ import { Loader } from '../components/loader/loader.component';
 import { NewJobForm } from '../components/newJobForm/newJobForm.component';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
 import { LoaderContainer } from '../userManagement/userManagement.styles';
-import { Container } from './jobs.styles';
+import { Panel } from '../components/floatingActionPanel/floatingActionPanel.styles';
+import { Container, NewJobBottomButton } from './jobs.styles';
 
 const JOBS_TABLE_CELLS = [{
 	name: 'Job name',
@@ -34,7 +40,7 @@ const JOBS_TABLE_CELLS = [{
 	searchBy: ['name'],
 	HeadingComponent: CellUserSearch
 }, {
-	name: 'Colour',
+	name: isV5() ? formatMessage({ id: 'job.assignedColours', defaultMessage: 'Assigned Colours' }) : 'Colour',
 	type: CELL_TYPES.COLOR,
 	HeadingProps: {
 		component: {
@@ -64,6 +70,7 @@ interface IState {
 	rows: any[];
 	containerElement: Node;
 	panelKey: number;
+	panelBottomAnchorEl: any;
 }
 
 export class Jobs extends PureComponent<IProps, IState> {
@@ -76,7 +83,8 @@ export class Jobs extends PureComponent<IProps, IState> {
 	public state = {
 		rows: [],
 		containerElement: null,
-		panelKey: Math.random()
+		panelKey: Math.random(),
+		panelBottomAnchorEl: null,
 	};
 
 	public handleColorChange = (jobId) => (color) => {
@@ -105,7 +113,7 @@ export class Jobs extends PureComponent<IProps, IState> {
 				},
 				{},
 				{
-					Icon: RemoveCircle,
+					Icon: isV5() ? BinIcon : RemoveCircle,
 					onClick: this.onRemove.bind(null, job._id)
 				}
 			];
@@ -127,7 +135,7 @@ export class Jobs extends PureComponent<IProps, IState> {
 
 	public renderNewJobFormPanel = ({ closePanel }) => {
 		const formProps = {
-			title: 'Add new job',
+			title: formatMessage({ id: 'jobPanel.addJob', defaultMessage: 'Add new job' }),
 			colors: this.props.colors,
 			onSave: this.onSave
 		};
@@ -139,15 +147,40 @@ export class Jobs extends PureComponent<IProps, IState> {
 			container={container}
 			key={this.state.panelKey}
 			render={this.renderNewJobFormPanel}
+			{...(isV5() ? {
+				Icon: () => (
+					<>
+						<AddCircleIcon />
+						<FormattedMessage id="newJob.panelButton" defaultMessage="New job" />
+					</>
+				)
+			} : {})}
 		/>
 	)
 
 	public render() {
 		const { jobs, colors, isPending, currentTeamspace } =  this.props;
-		const { containerElement } = this.state;
+		const { containerElement, panelBottomAnchorEl } = this.state;
+
+		const openNewJobForm = ({ currentTarget }: React.MouseEvent<HTMLDivElement>) => {
+			this.setState({
+				...this.state,
+				panelBottomAnchorEl: currentTarget,
+			});
+		};
+
+		const closeNewJobForm = () => {
+			this.setState({
+				...this.state,
+				panelBottomAnchorEl: null,
+			});
+		};
 
 		if (isPending) {
-			const content = `Loading "${currentTeamspace}" jobs data...`;
+			const content = formatMessage({
+				id: 'jobs.loading',
+				defaultMessage: 'Loading "{currentTeamspace}" jobs data...',
+			}, { currentTeamspace });
 			return (
 				<LoaderContainer>
 					<Loader content={content} />
@@ -164,6 +197,29 @@ export class Jobs extends PureComponent<IProps, IState> {
 					/>
 				</UserManagementTab>
 				{containerElement && this.renderNewJobForm(containerElement)}
+				{isV5() && (
+					<>
+						<NewJobBottomButton onClick={openNewJobForm}>
+							<AddCircleIcon />
+							<FormattedMessage id="jobs.addJobButton" defaultMessage="Add new Job" />
+						</NewJobBottomButton>
+						<Panel
+							open={Boolean(panelBottomAnchorEl)}
+							anchorEl={panelBottomAnchorEl}
+							onClose={closeNewJobForm}
+							anchorOrigin={{
+								vertical: 'top',
+								horizontal: 'center',
+							}}
+							transformOrigin={{
+								vertical: 'center',
+								horizontal: 'center',
+							}}
+						>
+							{this.renderNewJobFormPanel({ closePanel: () => {} })}
+						</Panel>
+					</>
+				)}
 			</Container>
 		);
 	}

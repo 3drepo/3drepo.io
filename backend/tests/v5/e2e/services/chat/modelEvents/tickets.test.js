@@ -18,7 +18,7 @@
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
 const SuperTest = require('supertest');
-const { generateTicket } = require('../../../../helper/services');
+const { generateComment, generateTicket, generateRandomString } = require('../../../../helper/services');
 const { basePropertyLabels, propTypes } = require('../../../../../../src/v5/schemas/tickets/templates.constants');
 
 const { EVENTS } = require(`${src}/services/chat/chat.constants`);
@@ -32,6 +32,8 @@ const federation = ServiceHelper.generateRandomModel({ isFederation: true });
 const template = ServiceHelper.generateTemplate();
 const containerTicket = ServiceHelper.generateTicket(template);
 const federationTicket = ServiceHelper.generateTicket(template);
+const containerComment = ServiceHelper.generateComment(user.user);
+const federationComment = ServiceHelper.generateComment(user.user);
 
 let agent;
 const setupData = async () => {
@@ -58,6 +60,10 @@ const setupData = async () => {
 	await ServiceHelper.db.createTemplates(teamspace, [template]);
 	await ServiceHelper.db.createTicket(teamspace, project.id, container._id, containerTicket);
 	await ServiceHelper.db.createTicket(teamspace, project.id, federation._id, federationTicket);
+	await ServiceHelper.db.createComment(teamspace, project.id, container._id, containerTicket._id,
+		containerComment);
+	await ServiceHelper.db.createComment(teamspace, project.id, federation._id, federationTicket._id,
+		federationComment);
 };
 
 const ticketAddedTest = () => {
@@ -204,11 +210,173 @@ const ticketUpdatedTest = () => {
 	});
 };
 
-describe('E2E Chat Service (Tickets)', () => {
+const commentAddedTest = () => {
+	describe('On adding a new comment', () => {
+		test(`should trigger a ${EVENTS.CONTAINER_NEW_TICKET_COMMENT} event when a new container ticket comment has been added`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: container._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.CONTAINER_NEW_TICKET_COMMENT, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			const newComment = generateComment();
+			const postRes = await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/${containerTicket._id}/comments?key=${user.apiKey}`)
+				.send(newComment)
+				.expect(templates.ok.status);
+
+			const commentId = postRes.body._id;
+			const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/${containerTicket._id}/comments/${commentId}?key=${user.apiKey}`)
+				.expect(templates.ok.status);
+
+			const { createdAt, author, images, message } = getRes.body;
+			await expect(socketPromise).resolves.toEqual({
+				...data,
+				data: { _id: commentId, ticket: containerTicket._id, createdAt, author, images, message },
+			});
+
+			socket.close();
+		});
+
+		test(`should trigger a ${EVENTS.FEDERATION_NEW_TICKET_COMMENT} event when a new federation ticket comment has been added`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: federation._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.FEDERATION_NEW_TICKET_COMMENT, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			const newComment = generateComment();
+			const postRes = await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}/tickets/${federationTicket._id}/comments?key=${user.apiKey}`)
+				.send(newComment)
+				.expect(templates.ok.status);
+
+			const commentId = postRes.body._id;
+			const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}/tickets/${federationTicket._id}/comments/${commentId}?key=${user.apiKey}`)
+				.expect(templates.ok.status);
+
+			const { createdAt, author, images, message } = getRes.body;
+			await expect(socketPromise).resolves.toEqual({
+				...data,
+				data: { _id: commentId, ticket: federationTicket._id, createdAt, author, images, message },
+			});
+
+			socket.close();
+		});
+	});
+};
+
+const commentUpdatedTest = () => {
+	describe('On updating a comment', () => {
+		test(`should trigger a ${EVENTS.CONTAINER_UPDATE_TICKET_COMMENT} event when a container ticket comment has been updated`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: container._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.CONTAINER_UPDATE_TICKET_COMMENT, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			const updateData = { message: generateRandomString() };
+			await agent.put(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/${containerTicket._id}/comments/${containerComment._id}?key=${user.apiKey}`)
+				.send(updateData)
+				.expect(templates.ok.status);
+
+			const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/${containerTicket._id}/comments/${containerComment._id}?key=${user.apiKey}`)
+				.expect(templates.ok.status);
+
+			await expect(socketPromise).resolves.toEqual({
+				...data,
+				data: {
+					_id: containerComment._id,
+					ticket: containerTicket._id,
+					message: updateData.message,
+					author: containerComment.author,
+					updatedAt: getRes.body.updatedAt,
+				},
+			});
+
+			socket.close();
+		});
+
+		test(`should trigger a ${EVENTS.FEDERATION_UPDATE_TICKET_COMMENT} event when a federation ticket comment has been updated`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: federation._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.FEDERATION_UPDATE_TICKET_COMMENT, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			const updateData = { message: generateRandomString() };
+			await agent.put(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}/tickets/${federationTicket._id}/comments/${federationComment._id}?key=${user.apiKey}`)
+				.send(updateData)
+				.expect(templates.ok.status);
+
+			const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}/tickets/${federationTicket._id}/comments/${federationComment._id}?key=${user.apiKey}`)
+				.expect(templates.ok.status);
+
+			await expect(socketPromise).resolves.toEqual({
+				...data,
+				data: {
+					_id: federationComment._id,
+					ticket: federationTicket._id,
+					message: updateData.message,
+					author: federationComment.author,
+					updatedAt: getRes.body.updatedAt,
+				},
+			});
+
+			socket.close();
+		});
+
+		test(`should trigger a ${EVENTS.CONTAINER_UPDATE_TICKET_COMMENT} event when a container ticket comment has been deleted`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: container._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.CONTAINER_UPDATE_TICKET_COMMENT, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			await agent.delete(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/${containerTicket._id}/comments/${containerComment._id}?key=${user.apiKey}`)
+				.expect(templates.ok.status);
+
+			const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/${containerTicket._id}/comments/${containerComment._id}?key=${user.apiKey}`)
+				.expect(templates.ok.status);
+
+			await expect(socketPromise).resolves.toEqual({
+				...data,
+				data: {
+					_id: containerComment._id,
+					ticket: containerTicket._id,
+					deleted: true,
+					updatedAt: getRes.body.updatedAt,
+				},
+			});
+
+			socket.close();
+		});
+	});
+};
+
+describe(ServiceHelper.determineTestGroup(__filename), () => {
 	let server;
 	let chatApp;
 	beforeAll(async () => {
-		server = ServiceHelper.app();
+		server = await ServiceHelper.app();
 		chatApp = await ServiceHelper.chatApp();
 		agent = await SuperTest(server);
 		await setupData();
@@ -219,4 +387,6 @@ describe('E2E Chat Service (Tickets)', () => {
 
 	ticketAddedTest();
 	ticketUpdatedTest();
+	commentAddedTest();
+	commentUpdatedTest();
 });

@@ -20,10 +20,12 @@ const config = require('../../utils/config');
 
 const Sso = {};
 
+const cryptoProvider = new CryptoProvider();
+
 Sso.addPkceProtection = async (req, res, next) => {
-	const cryptoProvider = new CryptoProvider();
 	const { verifier, challenge } = await cryptoProvider.generatePkceCodes();
 
+	req.session.csrfToken = cryptoProvider.createNewGuid();
 	req.session.pkceCodes = { challengeMethod: 'S256', verifier, challenge };
 	req.session.cookie.domain = config.cookie_domain;
 

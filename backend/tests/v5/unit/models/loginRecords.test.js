@@ -18,7 +18,8 @@ const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 
-const db = require(`${src}/handler/db`);
+jest.mock('../../../../src/v5/handler/db');
+const DBHandler = require(`${src}/handler/db`);
 const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 jest.mock('../../../../src/v5/utils/helper/userAgent');
 const UserAgentHelper = require(`${src}/utils/helper/userAgent`);
@@ -42,6 +43,10 @@ const testSaveRecordHelper = (testFailed = false) => {
 	const browserUserAgent = generateRandomString();
 	const pluginUserAgent = `PLUGIN: ${generateRandomString()}`;
 	const referrer = generateRandomString();
+
+	if (testFailed) {
+		DBHandler.find.mockResolvedValue([]);
+	}
 
 	const formatLoginRecord = (userAgentInfo, referer, ipAddr = ipAddress) => {
 		const formattedLoginRecord = {
@@ -82,40 +87,38 @@ const testSaveRecordHelper = (testFailed = false) => {
 		}
 	};
 
-	const fn = jest.spyOn(db, 'insertOne').mockResolvedValue(undefined);
-
 	test('Should save a new login record if user agent is from plugin', async () => {
 		await callFunction(username, sessionId, ipAddress, pluginUserAgent, referrer);
 		const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
 			referrer);
-		checkResults(fn, username, formattedLoginRecord);
+		checkResults(DBHandler.insertOne, username, formattedLoginRecord);
 	});
 
 	test('Should save a new login record if user agent is from browser', async () => {
 		await callFunction(username, sessionId, ipAddress, browserUserAgent, referrer);
 		const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
 			referrer);
-		checkResults(fn, username, formattedLoginRecord);
+		checkResults(DBHandler.insertOne, username, formattedLoginRecord);
 	});
 
 	test('Should save a new login record if user agent empty', async () => {
 		await callFunction(username, sessionId, ipAddress, '', referrer);
 		const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
 			referrer);
-		checkResults(fn, username, formattedLoginRecord);
+		checkResults(DBHandler.insertOne, username, formattedLoginRecord);
 	});
 
 	test('Should save a new login record if there is no referrer', async () => {
 		await callFunction(username, sessionId, ipAddress, browserUserAgent);
 		const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo());
-		checkResults(fn, username, formattedLoginRecord);
+		checkResults(DBHandler.insertOne, username, formattedLoginRecord);
 	});
 
 	test('Should save a new login record if there is no location', async () => {
 		await callFunction(username, sessionId, '0.0.0.0', browserUserAgent);
 		const formattedLoginRecord = formatLoginRecord(UserAgentHelper.getUserAgentInfo(),
 			undefined, '0.0.0.0');
-		checkResults(fn, username, formattedLoginRecord);
+		checkResults(DBHandler.insertOne, username, formattedLoginRecord);
 	});
 };
 
@@ -124,9 +127,6 @@ const testRecordFailedAttempt = () => {
 		testSaveRecordHelper(true);
 
 		test(`Should emit ${events.ACCOUNT_LOCKED} event if the account becomes locked`, async () => {
-			// for last login time
-			jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
-
 			let date = Date.now();
 			const records = times(loginPolicy.maxUnsuccessfulLoginAttempts, () => {
 				date -= 60000;
@@ -136,7 +136,7 @@ const testRecordFailedAttempt = () => {
 			const user = generateRandomString();
 
 			// for all failed login since last login
-			jest.spyOn(db, 'find').mockResolvedValueOnce(records);
+			DBHandler.find.mockResolvedValueOnce(records);
 			await LoginRecord.recordFailedAttempt(user,
 				generateRandomString(), generateRandomString(), generateRandomString());
 
@@ -157,83 +157,75 @@ const testIsAccountLocked = () => {
 	describe('Is account locked', () => {
 		const user = generateRandomString();
 		test('Should return false if there is no failed login records', async () => {
-			const findLastLoginFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
-			const findRecordsFn = jest.spyOn(db, 'find').mockResolvedValueOnce([]);
+			DBHandler.find.mockResolvedValueOnce([]);
 			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeFalsy();
 
-			expect(findLastLoginFn).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOne).toHaveBeenCalledTimes(1);
 
-			expect(findRecordsFn).toHaveBeenCalledTimes(1);
-			expect(findRecordsFn).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
+			expect(DBHandler.find).toHaveBeenCalledTimes(1);
+			expect(DBHandler.find).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
 				{ user, failed: true }, { loginTime: 1 }, { loginTime: -1 }, loginPolicy.maxUnsuccessfulLoginAttempts);
 		});
 
 		test('Should only search through failed records since the last successful login', async () => {
 			const date = new Date();
-			const findLastLoginFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ loginTime: date });
-			const findRecordsFn = jest.spyOn(db, 'find').mockResolvedValueOnce([]);
+			DBHandler.findOne.mockResolvedValueOnce({ loginTime: date });
+
+			DBHandler.find.mockResolvedValueOnce([]);
 			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeFalsy();
 
-			expect(findLastLoginFn).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOne).toHaveBeenCalledTimes(1);
 
-			expect(findRecordsFn).toHaveBeenCalledTimes(1);
-			expect(findRecordsFn).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
+			expect(DBHandler.find).toHaveBeenCalledTimes(1);
+			expect(DBHandler.find).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
 				{ user, failed: true, loginTime: { $gt: date } }, { loginTime: 1 },
 				{ loginTime: -1 }, loginPolicy.maxUnsuccessfulLoginAttempts);
 		});
 
 		test(`Should return true if there has been ${loginPolicy.maxUnsuccessfulLoginAttempts} failed attempts without timeouts`, async () => {
-			jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
-
 			let ts = Date.now();
 			const records = times(loginPolicy.maxUnsuccessfulLoginAttempts, () => {
 				ts -= 60000;
 				return { loginTime: new Date(ts) };
 			});
 
-			jest.spyOn(db, 'find').mockResolvedValueOnce(records);
+			DBHandler.find.mockResolvedValueOnce(records);
 
 			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeTruthy();
 		});
 
 		test(`Should return false if there has been less than ${loginPolicy.maxUnsuccessfulLoginAttempts} failed attempts without timeouts`, async () => {
-			jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
-
 			let ts = Date.now();
 			const records = times(loginPolicy.maxUnsuccessfulLoginAttempts - 1, () => {
 				ts -= 60000;
 				return { loginTime: new Date(ts) };
 			});
 
-			jest.spyOn(db, 'find').mockResolvedValueOnce(records);
+			DBHandler.find.mockResolvedValueOnce(records);
 
 			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeFalsy();
 		});
 
 		test('Should return false if sufficient time has lapsed since the account has been locked', async () => {
-			jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
-
 			let ts = Date.now() - loginPolicy.lockoutDuration;
 			const records = times(loginPolicy.maxUnsuccessfulLoginAttempts, () => {
 				ts -= 60000;
 				return { loginTime: new Date(ts) };
 			});
 
-			jest.spyOn(db, 'find').mockResolvedValueOnce(records);
+			DBHandler.find.mockResolvedValueOnce(records);
 
 			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeFalsy();
 		});
 
 		test('Should return false if sufficient time has lapsed in between attempts', async () => {
-			jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
-
 			let ts = Date.now() - loginPolicy.lockoutDuration;
 			const records = times(loginPolicy.maxUnsuccessfulLoginAttempts, () => {
 				ts -= loginPolicy.lockoutDuration;
 				return { loginTime: new Date(ts) };
 			});
 
-			jest.spyOn(db, 'find').mockResolvedValueOnce(records);
+			DBHandler.find.mockResolvedValueOnce(records);
 
 			await expect(LoginRecord.isAccountLocked(user)).resolves.toBeFalsy();
 		});
@@ -242,14 +234,12 @@ const testIsAccountLocked = () => {
 
 const testRemoveAllUserRecords = () => {
 	describe('Remove all user login records', () => {
-		test('Should just drop the user collection within loginRecords', async () => {
-			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValue(undefined);
-
+		test('Should delete user loginRecords', async () => {
 			const user = generateRandomString();
 			await expect(LoginRecord.removeAllUserRecords(user)).resolves.toBeUndefined();
 
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol, { user });
+			expect(DBHandler.deleteMany).toHaveBeenCalledTimes(1);
+			expect(DBHandler.deleteMany).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol, { user });
 		});
 	});
 };
@@ -258,24 +248,22 @@ const testGetLastLoginDate = () => {
 	describe('Get last login date', () => {
 		test('should return the last login date in record', async () => {
 			const expectedDate = new Date();
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ loginTime: expectedDate });
+			DBHandler.findOne.mockResolvedValueOnce({ loginTime: expectedDate });
 
 			const user = generateRandomString();
 			await expect(LoginRecord.getLastLoginDate(user)).resolves.toEqual(expectedDate);
 
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
+			expect(DBHandler.findOne).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOne).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
 				{ user, failed: { $ne: true } }, { loginTime: 1 }, { loginTime: -1 });
 		});
 
 		test('should return undefined if the user has no login record', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
-
 			const user = generateRandomString();
 			await expect(LoginRecord.getLastLoginDate(user)).resolves.toBeUndefined();
 
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
+			expect(DBHandler.findOne).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOne).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
 				{ user, failed: { $ne: true } }, { loginTime: 1 }, { loginTime: -1 });
 		});
 	});
@@ -284,10 +272,9 @@ const testGetLastLoginDate = () => {
 const testInitialise = () => {
 	describe('Initialise', () => {
 		test('should ensure indices exist', async () => {
-			const fn = jest.spyOn(db, 'createIndex').mockResolvedValueOnce(undefined);
 			await LoginRecord.initialise();
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
+			expect(DBHandler.createIndex).toHaveBeenCalledTimes(1);
+			expect(DBHandler.createIndex).toHaveBeenCalledWith(INTERNAL_DB, loginRecordsCol,
 				{ user: 1, loginTime: -1, failed: 1 }, { runInBackground: true });
 		});
 	});

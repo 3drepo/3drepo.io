@@ -16,19 +16,17 @@
  */
 
 import { useEffect } from 'react';
-import { useParams } from 'react-router';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { ContainersHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export const useContainersData = () => {
-	const { teamspace, project } = useParams<DashboardParams>() as { teamspace: string, project: string };
-
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const containers = ContainersHooksSelectors.selectContainers();
 	const favouriteContainers = ContainersHooksSelectors.selectFavouriteContainers();
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
-
 	useEffect(() => {
+		if (!teamspace || !project) return;
 		ContainersActionsDispatchers.fetchContainers(teamspace, project);
 	}, [project]);
 

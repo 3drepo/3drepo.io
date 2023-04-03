@@ -27,7 +27,7 @@ interface IProps {
 	render: (closePanel: any) => void;
 	container?: HTMLElement;
 	children?: any;
-	Icon?: string;
+	Icon?: string | (() => JSX.Element);
 	buttonProps?: any;
 }
 

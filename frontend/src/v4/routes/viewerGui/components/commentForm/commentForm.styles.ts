@@ -39,6 +39,14 @@ export const Title = styled.div`
 	color: ${COLOR.BLACK_20};
 `;
 
+export const FlippedIcon = styled.div`
+	transform: rotateY(180deg);
+
+	svg {
+		height: 18px;
+	}
+`;
+
 export const TextFieldWrapper = styled.div`
 	.rta {
 		position: relative;

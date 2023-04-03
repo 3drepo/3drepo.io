@@ -25,8 +25,8 @@ import {
 	enableRealtimeFederationNewTicket,
 	enableRealtimeFederationUpdateTicket,
 } from '@/v5/services/realtime/ticket.events';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsActionsDispatchers, TicketsCardActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component';
@@ -38,9 +38,16 @@ export const Tickets = () => {
 	const isFederation = modelIsFederation(containerOrFederation);
 	const view = TicketsCardHooksSelectors.selectView();
 
+	const readOnly = isFederation
+		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
+		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
+	TicketsCardActionsDispatchers.setReadOnly(readOnly);
+
 	useEffect(() => {
 		UsersActionsDispatchers.fetchUsers(teamspace);
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
+
+		return () => { TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List); };
 	}, []);
 
 	useEffect(() => {
@@ -53,20 +60,6 @@ export const Tickets = () => {
 			combineSubscriptions(
 				enableRealtimeContainerNewTicket(teamspace, project, containerOrFederation),
 				enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation),
-			);
-		}
-		if (view === TicketsCardViews.List) {
-			TicketsActionsDispatchers.fetchTickets(
-				teamspace,
-				project,
-				containerOrFederation,
-				isFederation,
-			);
-			TicketsActionsDispatchers.fetchTemplates(
-				teamspace,
-				project,
-				containerOrFederation,
-				isFederation,
 			);
 		}
 	}, [containerOrFederation]);

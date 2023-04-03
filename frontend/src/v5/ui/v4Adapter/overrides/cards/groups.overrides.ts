@@ -36,7 +36,6 @@ import { Container as PreviewDetailsContainer,
 	MainInfoContainer,
 } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { Container as FiltersContainer,
-	ChipsContainer,
 	InputLabel,
 	SelectedCriteria,
 	FormContainer,
@@ -50,7 +49,7 @@ import {
 	StyledLinkableField,
 	ActionsLine,
 } from '@/v4/routes/components/textField/textField.styles';
-import { labelButtonPrimaryStyles } from '@controls/button/button.styles';
+import { primaryButtonStyling } from '@/v5/ui/v4Adapter/resuableOverrides.styles';
 import { ViewerPanelContent } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 import { StyledTextField as AutoSuggestField } from '@/v4/routes/components/autosuggestField/autosuggestField.styles';
 import { MultipleInputsContainer } from '@/v4/routes/components/criteriaField/components/criteriaValueField/criteriaValueField.styles';
@@ -231,19 +230,17 @@ const expandedGroupItem = css`
 			${FiltersContainer} {
 				border: none;
 				background-color: #F7F8FA; // TODO - fix after new palette is released
+				position: initial;
 
 				${InputLabel} {
 					padding: 0 15px;
-					top: 23PX;
-					left: 0;
+					position: initial;
 				}
 				${SelectedCriteria} {
 					padding: 5px 15px 12px;
-					${ChipsContainer} {
-						padding-top: 20px;
-					}
 					${ButtonContainer} {
-						bottom: 6px;
+						top: -25px;
+						right: 14px;
 					}
 				}
 				// Field / Operation / Value box area
@@ -272,7 +269,7 @@ const expandedGroupItem = css`
 					}
 
 					.MuiButton-contained {
-						${labelButtonPrimaryStyles}
+						${primaryButtonStyling}
 
 						&.Mui-disabled {
 							color: ${({ theme }) => theme.palette.primary.contrast};

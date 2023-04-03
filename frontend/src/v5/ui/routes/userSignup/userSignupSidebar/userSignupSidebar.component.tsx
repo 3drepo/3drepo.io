@@ -16,98 +16,38 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { LoginLink, Logo } from '@components/authTemplate/authTemplate.styles';
-import {
-	Container,
-	BulletPoint,
-	BulletPointMessage,
-	BulletPointTitle,
-	BulletPointBody,
-	BulletPointIcon,
-	Tick,
-	BookADemoButton,
-	LaptopIcon,
-	MainTitle,
-} from './userSignupSidebar.styles';
+import { MicrosoftButton } from '@components/shared/sso/microsoftButton.component';
+import { MicrosoftText } from '@components/shared/sso/microsoftText.component';
+import { formatMessage } from '@/v5/services/intl';
+import { Gap } from '@controls/gap';
+import { Container, MainTitle } from './userSignupSidebar.styles';
+import { LoginPrompt, LoginPromptLink } from '../userSignupForm/userSignupForm.styles';
 
 export const UserSignupSidebar = () => (
 	<Container>
-		<LoginLink>
-			<Logo />
-		</LoginLink>
 		<MainTitle>
 			<FormattedMessage
-				id="userSignup.sidebar"
-				defaultMessage={`
-					3D Repo is the most accessible BIM 
-					collaboration platform to enable open 
-					and transparent communication for AECO 
-					projects of all sizes.
-				`}
+				id="userSignup.sidebar.mainTitle"
+				defaultMessage="Create your free account"
 			/>
 		</MainTitle>
-		<BulletPoint>
-			<BulletPointIcon>
-				<Tick />
-			</BulletPointIcon>
-			<BulletPointMessage>
-				<BulletPointTitle>
-					<FormattedMessage
-						id="userSignup.sidebar.noSoftwareInstallation.title"
-						defaultMessage="Security & encryption"
-					/>
-				</BulletPointTitle>
-				<BulletPointBody>
-					<FormattedMessage
-						id="userSignup.sidebar.noSoftwareInstallation.message"
-						defaultMessage="Reduce required BIM coordination and data checking time by up to 35%."
-					/>
-				</BulletPointBody>
-			</BulletPointMessage>
-		</BulletPoint>
-		<BulletPoint>
-			<BulletPointIcon>
-				<Tick />
-			</BulletPointIcon>
-			<BulletPointMessage>
-				<BulletPointTitle>
-					<FormattedMessage
-						id="userSignup.sidebar.securityAndExnryption.title"
-						defaultMessage="No software installation"
-					/>
-				</BulletPointTitle>
-				<BulletPointBody>
-					<FormattedMessage
-						id="userSignup.sidebar.securityAndExnryption.message"
-						defaultMessage="Automating manual tasks can boost related data accuracy by up to 95%."
-					/>
-				</BulletPointBody>
-			</BulletPointMessage>
-		</BulletPoint>
-		<BulletPoint>
-			<BulletPointIcon>
-				<Tick />
-			</BulletPointIcon>
-			<BulletPointMessage>
-				<BulletPointTitle>
-					<FormattedMessage
-						id="userSignup.sidebar.integration.title"
-						defaultMessage="Integration - open API’s"
-					/>
-				</BulletPointTitle>
-				<BulletPointBody>
-					<FormattedMessage
-						id="userSignup.sidebar.integration.message"
-						defaultMessage="Get the whole team on the same page and talking to each other."
-					/>
-				</BulletPointBody>
-			</BulletPointMessage>
-		</BulletPoint>
-		<BookADemoButton
-			to={{ pathname: 'https://3drepo.com/demo/' }}
-			startIcon={<LaptopIcon />}
-		>
-			<FormattedMessage id="userSignup.sidebar.bookADemo" defaultMessage="Book A Demo" />
-		</BookADemoButton>
+		<div>
+			<MicrosoftText
+				title={formatMessage({
+					id: 'userSignup.sidebar.signUpWithMicrosoft',
+					defaultMessage: 'Sign up with Microsoft',
+				})}
+			/>
+			<MicrosoftButton to={{ pathname: 'signup-sso' }}>
+				<FormattedMessage id="userSignup.sidebar.sso.microsoft" defaultMessage="Sign up with Microsoft" />
+			</MicrosoftButton>
+			<Gap $height="43px" />
+			<LoginPrompt>
+				<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
+				<LoginPromptLink to="/v5/login">
+					<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Sign in" />
+				</LoginPromptLink>
+			</LoginPrompt>
+		</div>
 	</Container>
 );

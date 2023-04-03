@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEqual, omitBy, orderBy, values } from 'lodash';
+import { map, omitBy, orderBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE } from '../../constants/compare';
 import { searchByFilters } from '../../helpers/searching';
@@ -145,13 +145,14 @@ export const selectBaseModelsList = createSelector(
 	}
 );
 
-const isAllSelected = (allModels, selectedModelsMap) => isEqual(
-	allModels.length,
-	values(selectedModelsMap).filter((selectedModel) => selectedModel).length
-);
+const isAllSelected = (allModels, selectedModelsMap) => {
+	const filteredSelectedModels = Object.entries(selectedModelsMap).filter(([_, value]) => value).map(([key]) => key);
+	const allModelsId = map(allModels, '_id');
+	return !allModelsId.some((model) => !filteredSelectedModels.includes(model));
+};
 
 export const selectIsAllSelected = createSelector(
-	selectCompareModels, selectSelectedModelsMap,
+	selectFilteredCompareModels, selectSelectedModelsMap,
 	(compareModels, selectedModelsMap) => isAllSelected(compareModels, selectedModelsMap)
 );
 

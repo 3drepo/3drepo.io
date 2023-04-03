@@ -18,12 +18,14 @@
 const { src, modelFolder, objModel } = require('../../../../../helper/path');
 const ServiceHelper = require('../../../../../helper/services');
 
-const db = require(`${src}/handler/db`);
 const fs = require('fs/promises');
 const path = require('path');
 
+jest.mock('../../../../../../../src/v5/utils/helper/models');
+const ModelHelper = require(`${src}/utils/helper/models`);
+
 jest.mock('../../../../../../../src/v5/models/projectSettings');
-const ProjectsModel = require(`${src}/models/projectSettings`);
+const ProjectSettings = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
 jest.mock('../../../../../../../src/v5/models/users');
@@ -37,6 +39,9 @@ const Legends = require(`${src}/models/legends`);
 jest.mock('../../../../../../../src/v5/models/legends');
 jest.mock('../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
+
+jest.mock('../../../../../../../src/v5/handler/queue');
+const QueueHandler = require(`${src}/handler/queue`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -146,8 +151,8 @@ const model1Revisions = [
 	{ _id: ServiceHelper.generateUUIDString(), author: 'user1', timestamp: new Date(), void: true },
 ];
 
-ProjectsModel.getProjectById.mockImplementation(() => project);
-ProjectsModel.addModelToProject.mockResolvedValue();
+ProjectSettings.getProjectById.mockImplementation(() => project);
+ProjectSettings.addModelToProject.mockResolvedValue();
 ModelSettings.getModelByQuery.mockImplementation((ts, query) => {
 	if (query.name === 'model1') Promise.resolve(modelList[0]);
 	else throw templates.modelNotFound;
@@ -323,7 +328,7 @@ const testAddContainer = () => {
 			};
 			const res = await Containers.addContainer('teamspace', 'project', 'tsAdmin', data);
 			expect(res).toEqual(newContainerId);
-			expect(ProjectsModel.addModelToProject.mock.calls.length).toBe(1);
+			expect(ProjectSettings.addModelToProject.mock.calls.length).toBe(1);
 		});
 	});
 };
@@ -331,32 +336,18 @@ const testAddContainer = () => {
 const testDeleteContainer = () => {
 	describe('Delete container', () => {
 		test('should succeed', async () => {
-			const modelId = 1;
-			const collectionList = [
-				{ name: `${modelId}.collA` },
-				{ name: `${modelId}.collB` },
-				{ name: 'otherModel.collA' },
-				{ name: 'otherModel.collB' },
-			];
+			ModelHelper.removeModelData.mockResolvedValueOnce();
+			ProjectSettings.removeModelFromProject.mockResolvedValueOnce();
 
-			const fnList = jest.spyOn(db, 'listCollections').mockResolvedValue(collectionList);
-			const fnDrop = jest.spyOn(db, 'dropCollection').mockResolvedValue(true);
+			const teamspace = ServiceHelper.generateRandomString();
+			const projectId = ServiceHelper.generateRandomString();
+			const model = ServiceHelper.generateRandomString();
+			await Containers.deleteContainer(teamspace, projectId, model);
 
-			const teamspace = 'teamspace';
-			await Containers.deleteContainer(teamspace, 'project', modelId);
-
-			expect(fnList.mock.calls.length).toBe(1);
-			expect(fnList.mock.calls[0][0]).toEqual(teamspace);
-
-			expect(fnDrop.mock.calls.length).toBe(2);
-			expect(fnDrop.mock.calls[0][0]).toEqual(teamspace);
-			expect(fnDrop.mock.calls[0][1]).toEqual(collectionList[0].name);
-			expect(fnDrop.mock.calls[1][0]).toEqual(teamspace);
-			expect(fnDrop.mock.calls[1][1]).toEqual(collectionList[1].name);
-		});
-
-		test('should succeed if file removal fails', async () => {
-			await Containers.deleteContainer('teamspace', 'project', 3);
+			expect(ModelHelper.removeModelData).toHaveBeenCalledTimes(1);
+			expect(ModelHelper.removeModelData).toHaveBeenCalledWith(teamspace, projectId, model);
+			expect(ProjectSettings.removeModelFromProject).toHaveBeenCalledTimes(1);
+			expect(ProjectSettings.removeModelFromProject).toHaveBeenCalledWith(teamspace, projectId, model);
 		});
 	});
 };
@@ -394,16 +385,27 @@ const testNewRevision = () => {
 		const file = { path: fileCreated, originalname: 'hello.obj' };
 		test('should execute successfully if queueModelUpload returns', async () => {
 			await fs.copyFile(objModel, fileCreated);
+			ModelSettings.getContainerById.mockResolvedValueOnce({ properties: { unit: 'm' } });
 			await expect(Containers.newRevision(teamspace, model, data, file)).resolves.toBe(undefined);
 			await expect(fileExists(fileCreated)).resolves.toBe(false);
+			expect(QueueHandler.queueMessage).toHaveBeenCalledTimes(1);
+		});
+
+		test('v4 compatibility test', async () => {
+			await fs.copyFile(objModel, fileCreated);
+			ModelSettings.getContainerById.mockResolvedValueOnce({ });
+			await expect(Containers.newRevision(teamspace, model, data, file)).resolves.toBe(undefined);
+			await expect(fileExists(fileCreated)).resolves.toBe(false);
+			expect(QueueHandler.queueMessage).toHaveBeenCalledTimes(1);
 		});
 
 		test('should return whatever error queueModelUpload returns should it fail', async () => {
+			ModelSettings.getContainerById.mockResolvedValueOnce({ properties: { unit: 'm' } });
 			await expect(Containers.newRevision(teamspace, model, data, file))
 				.rejects.toEqual(templates.queueInsertionFailed);
 			await expect(fileExists(fileCreated)).resolves.toBe(false);
+			expect(QueueHandler.queueMessage).not.toHaveBeenCalled();
 		});
-		afterAll(ServiceHelper.queue.purgeQueues);
 	});
 };
 

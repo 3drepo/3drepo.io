@@ -21,29 +21,63 @@ import { ContainersActionsDispatchers, DialogsActionsDispatchers } from '@/v5/se
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
-import { viewerRoute } from '@/v5/services/routing/routing';
+import { boardRoute, viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { ContainersHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { uploadToContainer } from '../../../uploadFileForm/uploadFileForm.helpers';
+import { ContainerSettingsModal } from '../../../containerSettingsModal/containerSettingsModal.component';
 
 type ContainerEllipsisMenuProps = {
 	selected: boolean,
 	container: IContainer,
 	onSelectOrToggleItem: (id: string) => void,
-	openShareModal: () => void,
-	openContainerSettings: () => void,
 };
 
 export const ContainerEllipsisMenu = ({
 	selected,
 	container,
 	onSelectOrToggleItem,
-	openShareModal,
-	openContainerSettings,
 }: ContainerEllipsisMenuProps) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const hasCollaboratorAccess = ContainersHooksSelectors.selectHasCollaboratorAccess(container._id);
+
+	const onClickShare = () => {
+		const link = prefixBaseDomain(viewerRoute(teamspace, project, container));
+		const subject = formatMessage({ id: 'shareModal.container.subject', defaultMessage: 'container' });
+		const title = formatMessage({ id: 'shareModal.container.title', defaultMessage: 'Share Container' });
+
+		DialogsActionsDispatchers.open('share', {
+			name: container.name,
+			subject,
+			title,
+			link,
+		});
+	};
+
+	// eslint-disable-next-line max-len
+	const onClickSettings = () => DialogsActionsDispatchers.open(ContainerSettingsModal, { containerId: container._id });
+
+	const onClickDelete = () => DialogsActionsDispatchers.open('delete', {
+		name: container.name,
+		onClickConfirm: () => new Promise<void>(
+			(accept, reject) => {
+				ContainersActionsDispatchers.deleteContainer(
+					teamspace,
+					project,
+					container._id,
+					accept,
+					reject,
+				);
+			},
+		),
+		message: formatMessage({
+			id: 'deleteModal.container.message',
+			defaultMessage: 'By deleting this Container your data will be lost permanently and will not be recoverable.',
+		}),
+	});
+
 	return (
 		<EllipsisMenu selected={selected}>
 			<EllipsisMenuItem
@@ -68,12 +102,24 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.viewIssues',
 					defaultMessage: 'View Issues',
 				})}
+				to={{ pathname: boardRoute(
+					teamspace,
+					project,
+					'issues',
+					container._id,
+				) }}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.viewRisks',
 					defaultMessage: 'View Risks',
 				})}
+				to={{ pathname: boardRoute(
+					teamspace,
+					project,
+					'risks',
+					container._id,
+				) }}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage(selected
@@ -97,38 +143,21 @@ export const ContainerEllipsisMenu = ({
 					id: 'containers.ellipsisMenu.shareContainer',
 					defaultMessage: 'Share Container',
 				})}
-				onClick={openShareModal}
+				onClick={onClickShare}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.settings',
 					defaultMessage: 'Settings',
 				})}
-				onClick={openContainerSettings}
+				onClick={onClickSettings}
 			/>
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.delete',
 					defaultMessage: 'Delete',
 				})}
-				onClick={() => DialogsActionsDispatchers.open('delete', {
-					name: container.name,
-					onClickConfirm: () => new Promise<void>(
-						(accept, reject) => {
-							ContainersActionsDispatchers.deleteContainer(
-								teamspace,
-								project,
-								container._id,
-								accept,
-								reject,
-							);
-						},
-					),
-					message: formatMessage({
-						id: 'deleteModal.container.message',
-						defaultMessage: 'By deleting this Container your data will be lost permanently and will not be recoverable.',
-					}),
-				})}
+				onClick={onClickDelete}
 				hidden={!isProjectAdmin}
 			/>
 		</EllipsisMenu>

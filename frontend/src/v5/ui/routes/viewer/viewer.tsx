@@ -17,33 +17,62 @@
 
 import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
-import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
-import { ViewerParams } from '../routes.constants';
+import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useEffect, useState } from 'react';
+import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { VIEWER_EVENTS } from '@/v4/constants/viewer';
+import { ViewerGuiActions } from '@/v4/modules/viewerGui';
+import { dispatch } from '@/v4/modules/store';
+import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';
-import { useContainersData } from '../dashboard/projects/containers/containers.hooks';
-import { useFederationsData } from '../dashboard/projects/federations/federations.hooks';
+import { ViewerParams } from '../routes.constants';
+import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
+import { TicketsCardViews } from './tickets/tickets.constants';
 
 export const Viewer = () => {
+	const [fetchPending, setFetchPending] = useState(true);
+
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
-	TicketsCardActionsDispatchers.resetState();
+	const isFetching = ViewerHooksSelectors.selectIsFetching();
 
-	useContainersData();
-	useFederationsData();
-
-	const areFederationStatsPending = FederationsHooksSelectors.selectAreStatsPending();
-	const isFederationListPending = FederationsHooksSelectors.selectIsListPending();
-	const areContainersPending = ContainersHooksSelectors.selectAreStatsPending();
-	const isLoading = areFederationStatsPending || isFederationListPending || areContainersPending;
+	const isLoading = isFetching || fetchPending;
 
 	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const selectedFederation = FederationsHooksSelectors.selectFederationById(containerOrFederation);
 	const federationsContainers = FederationsHooksSelectors.selectContainersByFederationId(containerOrFederation);
+
 	const federationIsEmpty = selectedFederation?.containers?.length === 0
 		|| federationsContainers.every((container) => container?.revisionsCount === 0);
 
-	if (isLoading) return (<></>);
+	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
+
+	const handlePinClick = ({ id }) => {
+		if (!tickets.some((t) => t._id === id)) return;
+
+		TicketsCardActionsDispatchers.setSelectedTicket(id);
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
+		dispatch(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.TICKETS, true));
+	};
+
+	useEffect(() => {
+		ViewerService.on(VIEWER_EVENTS.CLICK_PIN, handlePinClick);
+		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, TicketsCardActionsDispatchers.resetState);
+		return () => {
+			ViewerService.off(VIEWER_EVENTS.CLICK_PIN, handlePinClick);
+			ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, TicketsCardActionsDispatchers.resetState);
+		};
+	}, [tickets]);
+
+	useEffect(() => {
+		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
+	}, [teamspace, project, containerOrFederation]);
+
+	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
+
+	if (isLoading) {
+		return (<></>);
+	}
 
 	if (selectedContainer?.revisionsCount === 0) {
 		return <InvalidContainerOverlay status={selectedContainer.status} />;
@@ -65,7 +94,7 @@ export const Viewer = () => {
 	return (
 		<>
 			<CheckLatestRevisionReadiness />
-			<ViewerGui match={v4Match} />
+			<ViewerGui match={v4Match} key={containerOrFederation} />
 		</>
 	);
 };

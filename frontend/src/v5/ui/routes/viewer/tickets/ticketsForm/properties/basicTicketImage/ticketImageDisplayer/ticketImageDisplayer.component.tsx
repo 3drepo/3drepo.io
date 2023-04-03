@@ -14,46 +14,34 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import EmptyImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
 import EnlargeImageIcon from '@assets/icons/outlined/enlarge_image-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { Modal } from '@controls/modal';
+import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import {
 	EmptyImageContainer,
 	EnlargeContainer,
 	IconText,
 	Image,
 	Container,
-	OverlappingContainer,
 } from './ticketImageDisplayer.styles';
 
-const LoadedImage = ({ imgSrc }) => {
-	const [showLargePicture, setShowLargePicture] = useState(false);
-	return (
-		<>
-			<OverlappingContainer onClick={() => setShowLargePicture(true)}>
-				<Image
-					src={imgSrc}
-					alt={formatMessage({ id: 'viewer.cards.ticketImage.image', defaultMessage: 'image' })}
-				/>
-				<EnlargeContainer>
-					<EnlargeImageIcon />
-					<IconText>
-						<FormattedMessage id="viewer.cards.ticketImage.enlarge" defaultMessage="Enlarge" />
-					</IconText>
-				</EnlargeContainer>
-			</OverlappingContainer>
-			<Modal open={showLargePicture} onClickClose={() => setShowLargePicture(false)}>
-				<Image
-					src={imgSrc}
-					alt={formatMessage({ id: 'viewer.cards.ticketImage.largeImage', defaultMessage: 'enlarged image' })}
-				/>
-			</Modal>
-		</>
-	);
-};
+const LoadedImage = ({ imgSrc }) => (
+	<OverlappingContainer onClick={() => DialogsActionsDispatchers.open('images', { images: [imgSrc] })}>
+		<Image
+			src={imgSrc}
+			alt={formatMessage({ id: 'viewer.cards.ticketImage.image', defaultMessage: 'image' })}
+		/>
+		<EnlargeContainer>
+			<EnlargeImageIcon />
+			<IconText>
+				<FormattedMessage id="viewer.cards.ticketImage.enlarge" defaultMessage="Enlarge" />
+			</IconText>
+		</EnlargeContainer>
+	</OverlappingContainer>
+);
 
 const EmptyImage = (props) => (
 	<EmptyImageContainer {...props}>

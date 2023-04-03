@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { SyntheticEvent } from 'react';
-import { useParams } from 'react-router';
 
 import { RevisionsListItemText } from '@components/shared/revisionDetails/components/revisionsListItemText';
 import { RevisionsListItemDate } from '@components/shared/revisionDetails/components/revisionsListItemDate';
@@ -26,11 +25,10 @@ import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatDate } from '@/v5/services/intl';
 import { viewerRoute } from '@/v5/services/routing/routing';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@mui/material';
 import { getRevisionFileUrl } from '@/v5/services/api/revisions';
-import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Container, DownloadButton, DownloadIcon } from './revisionsListItem.styles';
 
 type IRevisionsListItem = {
@@ -40,7 +38,8 @@ type IRevisionsListItem = {
 };
 
 export const RevisionsListItem = ({ revision, containerId, active = false }: IRevisionsListItem): JSX.Element => {
-	const { teamspace, project } = useParams<DashboardParams>();
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const { timestamp, desc, author, tag, void: voidStatus } = revision;
 
 	const toggleVoidStatus = (e: SyntheticEvent) => {

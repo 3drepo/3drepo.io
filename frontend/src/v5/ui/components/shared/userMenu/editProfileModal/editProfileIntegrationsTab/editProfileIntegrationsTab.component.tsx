@@ -21,14 +21,19 @@ import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CurrentUserActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
+import { FormModalActions } from '@controls/formModal/modalButtons/modalButtons.styles';
+import { ModalCancelButton } from '@controls/formModal/modalButtons/modalButtons.component';
 import { ButtonsContainer, Button, ShareTextFieldLabel } from './editProfileIntegrationsTab.styles';
+import { TabContent } from '../editProfileModal.styles';
 
 type EditProfileIntegrationsTabProps = {
 	unexpectedError: any,
+	onClickClose: () => void,
 };
 
 export const EditProfileIntegrationsTab = ({
 	unexpectedError,
+	onClickClose,
 }: EditProfileIntegrationsTabProps) => {
 	const apiKey = CurrentUserHooksSelectors.selectApiKey();
 
@@ -36,34 +41,39 @@ export const EditProfileIntegrationsTab = ({
 
 	return (
 		<>
-			<ShareTextField
-				label={(
-					<ShareTextFieldLabel>
+			<TabContent>
+				<ShareTextField
+					label={(
+						<ShareTextFieldLabel>
+							<FormattedMessage
+								id="editProfile.form.apiKey"
+								defaultMessage="API KEY"
+							/>
+						</ShareTextFieldLabel>
+					)}
+					value={apiKey}
+					hideValue
+					disabled={!apiKey}
+				/>
+				<ButtonsContainer>
+					<Button variant="outlined" color="primary" onClick={generateApiKey}>
 						<FormattedMessage
-							id="editProfile.form.apiKey"
-							defaultMessage="API KEY"
+							id="editProfile.form.generateApiKey"
+							defaultMessage="Generate"
 						/>
-					</ShareTextFieldLabel>
-				)}
-				value={apiKey}
-				hideValue
-				disabled={!apiKey}
-			/>
-			<ButtonsContainer>
-				<Button variant="outlined" color="primary" onClick={generateApiKey}>
-					<FormattedMessage
-						id="editProfile.form.generateApiKey"
-						defaultMessage="Generate"
-					/>
-				</Button>
-				<Button variant="outlined" color="secondary" onClick={deleteApiKey} disabled={!apiKey}>
-					<FormattedMessage
-						id="editProfile.form.deleteApiKey"
-						defaultMessage="Delete"
-					/>
-				</Button>
-			</ButtonsContainer>
-			<UnhandledError error={unexpectedError} />
+					</Button>
+					<Button variant="outlined" color="secondary" onClick={deleteApiKey} disabled={!apiKey}>
+						<FormattedMessage
+							id="editProfile.form.deleteApiKey"
+							defaultMessage="Delete"
+						/>
+					</Button>
+				</ButtonsContainer>
+				<UnhandledError error={unexpectedError} />
+			</TabContent>
+			<FormModalActions>
+				<ModalCancelButton onClick={onClickClose} />
+			</FormModalActions>
 		</>
 	);
 };

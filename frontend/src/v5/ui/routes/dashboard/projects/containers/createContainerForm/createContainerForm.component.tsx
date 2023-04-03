@@ -14,20 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { FormModal } from '@controls/modal/formModal/formDialog.component';
+import { FormModal } from '@controls/formModal/formModal.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { useParams } from 'react-router';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
 import { CreateContainerSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { MenuItem } from '@mui/material';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FlexContainer } from './createContainerForm.styles';
 
 interface ICreateContainer {
@@ -47,7 +46,6 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
 	const {
 		handleSubmit,
-		reset,
 		getValues,
 		trigger,
 		control,
@@ -65,7 +63,8 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 			code: '',
 		},
 	});
-	const { teamspace, project } = useParams<DashboardParams>();
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 
 	const onSubmitError = (err) => {
 		if (nameAlreadyExists(err)) {
@@ -78,15 +77,10 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 		ContainersActionsDispatchers.createContainer(teamspace, project, body, onClickClose, onSubmitError);
 	};
 
-	useEffect(() => {
-		reset();
-		setAlreadyExistingNames([]);
-	}, [open]);
-
 	return (
 		<FormModal
-			title={formatMessage({ id: 'containers.creation.title', defaultMessage: 'Create new Container' })}
 			open={open}
+			title={formatMessage({ id: 'containers.creation.title', defaultMessage: 'Create new Container' })}
 			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'containers.creation.ok', defaultMessage: 'Create Container' })}

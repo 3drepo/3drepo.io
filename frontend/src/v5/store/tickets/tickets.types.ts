@@ -52,7 +52,12 @@ export interface ITemplate {
 	code: string;
 	properties: PropertyDefinition[];
 	modules?: TemplateModule[];
-	config: any;
+	config: {
+		comments: boolean;
+		defaultView: boolean;
+		issueProperties: boolean;
+		pin: boolean;
+	};
 }
 
 export type NewTicket = Omit<ITicket, '_id'>;

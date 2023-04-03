@@ -146,6 +146,7 @@ const establishRoutes = (isFed) => {
 	const router = Router({ mergeParams: true });
 	const hasReadAccess = isFed ? hasReadAccessToFederation : hasReadAccessToContainer;
 	const hasCommenterAccess = isFed ? hasCommenterAccessToFederation : hasCommenterAccessToContainer;
+
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/templates:
@@ -168,7 +169,7 @@ const establishRoutes = (isFed) => {
 	 *           type: string
 	 *           format: uuid
 	 *       - name: type
- 	 *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -207,6 +208,8 @@ const establishRoutes = (isFed) => {
 	 *                       _id:
 	 *                         type: string
 	 *                         format: uuid
+	 *                         description: The ID of the template
+	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                       name:
 	 *                         type: string
 	 *                         example: Risk
@@ -234,7 +237,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -246,14 +249,14 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - name: template
+	 *       - name: template
 	 *         description: Template ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *           format: uuid
- 	 *       - name: showDeprecated
+	 *       - name: showDeprecated
 	 *         description: Indicate if the response should return deprecated properties/modules (default is false)
 	 *         in: query
 	 *         required: false
@@ -294,7 +297,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -361,6 +364,7 @@ const establishRoutes = (isFed) => {
 	 *                 _id:
 	 *                   type: string
 	 *                   format: uuid
+	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 */
 	router.post('/', hasCommenterAccess, validateNewTicket, createTicket(isFed));
 
@@ -385,7 +389,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -419,10 +423,12 @@ const establishRoutes = (isFed) => {
 	 *                         type: string
 	 *                         format: uuid
 	 *                         description: id of the ticket
+	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                       type:
 	 *                         type: string
 	 *                         format: uuid
 	 *                         description: template id
+	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                       title:
 	 *                         type: string
 	 *                         description: ticket title
@@ -430,6 +436,7 @@ const establishRoutes = (isFed) => {
 	 *                       number:
 	 *                         type: number
 	 *                         description: ticket number
+	 *                         example: 1
 	 *                       properties:
 	 *                         type: object
 	 *                         description: ticket properties
@@ -461,7 +468,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -479,7 +486,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
- 	 *       - name: showDeprecated
+	 *       - name: showDeprecated
 	 *         description: Indicate if the response should return deprecated properties/modules (default is false)
 	 *         in: query
 	 *         required: false
@@ -502,10 +509,12 @@ const establishRoutes = (isFed) => {
 	 *                   type: string
 	 *                   format: uuid
 	 *                   description: id of the ticket
+	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                 type:
 	 *                   type: string
 	 *                   format: uuid
 	 *                   description: template id
+	 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *                 title:
 	 *                   type: string
 	 *                   description: ticket title
@@ -513,6 +522,7 @@ const establishRoutes = (isFed) => {
 	 *                 number:
 	 *                   type: number
 	 *                   description: ticket number
+	 *                   example: 1
 	 *                 properties:
 	 *                   type: object
 	 *                   description: ticket properties
@@ -544,7 +554,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -562,7 +572,7 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - name: resource
+	 *       - name: resource
 	 *         description: Resource ID
 	 *         in: path
 	 *         required: true
@@ -604,7 +614,7 @@ const establishRoutes = (isFed) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:

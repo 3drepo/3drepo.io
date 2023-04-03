@@ -61,7 +61,7 @@ describe('Tickets: store', () => {
 			const ticketFromStore = selectTicketById(getState(), modelId, ticket._id);
 			expect(ticketFromStore).toEqual(ticket);
 		});
-	})
+	});
 
 	describe('templates', () => {
 		beforeEach(() => {

@@ -18,13 +18,13 @@
 import { useRouteMatch, useLocation, Switch, Redirect } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { formatMessage } from '@/v5/services/intl';
-import { discardSlash } from '@/v5/services/routing/routing';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
 import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
 import { Route } from '@/v5/services/routing/route.component';
 import { AuthenticatedRoute } from '@/v5/services/routing/authenticatedRoute.component';
+import { discardSlash } from '@/v5/helpers/url.helper';
 import { PasswordForgot } from '../login/passwordForgot';
 import { PasswordChange } from '../login/passwordChange';
 import { TeamspaceSelection } from '../teamspaceSelection';
@@ -37,6 +37,7 @@ import { LegalRoutes } from '../legal';
 import { UserSignup } from '../userSignup/userSignup.component';
 import { UserVerification } from '../userVerification/userVerification.component';
 import { TeamspaceLayout } from './teamspaces/teamspaceLayout/teamspaceLayout.component';
+import { UserSignupSSO } from '../userSignup/userSignUpSSO/userSignUpSSO.component';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -52,6 +53,9 @@ export const MainRoute = () => {
 				</Route>
 				<Route title={formatMessage({ id: 'pageTitle.signUp', defaultMessage: 'Create Account' })} exact path={`${path}/signup`}>
 					<UserSignup />
+				</Route>
+				<Route title={formatMessage({ id: 'pageTitle.signUp', defaultMessage: 'Create Account' })} exact path={`${path}/signup-sso`}>
+					<UserSignupSSO />
 				</Route>
 				<Route title={formatMessage({ id: 'pageTitle.userVerification', defaultMessage: 'Verify Email' })} exact path={`${path}/register-verify`}>
 					<UserVerification />

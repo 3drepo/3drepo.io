@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { NewFederationSettingsSchema } from '@/v5/validation/containerAndFederationSchemes/federationSchemes';
-import { FormModal } from '@controls/modal/formModal/formDialog.component';
+import { FormModal } from '@controls/formModal/formModal.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormProvider, useForm } from 'react-hook-form';
 import { NewFederation } from '@/v5/store/federations/federations.types';
@@ -27,6 +26,7 @@ import { prepareNewFederation } from '@/v5/store/federations/federations.helpers
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { EditFederation } from '../editFederationModal/editFederation';
 import { CreateFederationFormSettings } from './createFederationSettings';
 
@@ -55,24 +55,15 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	const {
 		handleSubmit,
 		getValues,
-		reset,
 		trigger,
 		formState: { isValid },
 	} = methods;
 
-	const { teamspace, project } = useParams() as { teamspace: string, project: string };
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
+
 	const [modalPhase, setModalPhase] = useState('settings');
 	const [includedContainers, setIncludedContainers] = useState([]);
-
-	useEffect(() => {
-		if (open) {
-			setModalPhase('settings');
-		} else {
-			reset();
-			setIsSubmitting(false);
-		}
-		setAlreadyExistingNames([]);
-	}, [open]);
 
 	const onSubmitError = (err) => {
 		setIsSubmitting(false);
@@ -117,8 +108,8 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 
 	return (
 		<FormModal
-			isValid={isValid}
 			open={open}
+			isValid={isValid}
 			onClickClose={onClickClose}
 			isSubmitting={isSubmitting}
 			{...(modalPhase === 'settings' ? SettingsModalProps : EditModalProps)}

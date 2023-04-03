@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
-import { FormattedMessage } from 'react-intl';
+import { useRef, useState } from 'react';
 import { registerNewUser } from '@/v5/services/api/signup';
 import { formatMessage } from '@/v5/services/intl';
 import {
@@ -26,187 +25,135 @@ import {
 } from '@/v5/validation/errors.helpers';
 import { INewUser } from '@/v5/store/auth/auth.types';
 import { omit } from 'lodash';
+import { FormProvider, useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { UserSignupSchemaAccount, UserSignupSchemaPersonal, UserSignupSchemaTermsAndSubmit } from '@/v5/validation/userSchemes/userSignupSchemes';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import ReCAPTCHA from 'react-google-recaptcha';
 import { UserSignupFormStepAccount } from './userSignupFormStep/userSignupFormStepAccount/userSignupFormStepAccount.component';
 import { UserSignupFormStepPersonal } from './userSignupFormStep/userSignupFormStepPersonal/userSignupFormStepPersonal.component';
 import { UserSignupFormStepTermsAndSubmit } from './userSignupFormStep/userSignupFormStepTermsAndSubmit/userSignupFormStepTermsAndSubmit.component';
 import {
 	Container,
-	Title,
-	Underlined,
-	Stepper,
-	LoginPrompt,
-	LoginPromptLink,
 } from './userSignupForm.styles';
 import { UserSignupFormStep } from './userSignupFormStep/userSignupFormStep.component';
 import { UserSignupWelcomeProps } from '../userSignupWelcome/userSignupWelcome.component';
+import { UserSignupFormStepper, UserSignupFormStepperContextValue } from './userSignupFormStepper/userSignupFormStepper.component';
 
 type UserSignupFormProps = {
 	completeRegistration: (registrationCompleteData: UserSignupWelcomeProps) => void;
 };
 
 export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) => {
-	const LAST_STEP = 2;
-	const [activeStep, setActiveStep] = useState(0);
-	const [completedSteps, setCompletedSteps] = useState(new Set<number>());
-	const [fields, setFields] = useState<any>({});
 	const [alreadyExistingUsernames, setAlreadyExistingUsernames] = useState([]);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
-	const [erroredStep, setErroredStep] = useState<number>();
-	const [formIsSubmitting, setFormIsSubmitting] = useState(false);
+	const captchaRef = useRef<ReCAPTCHA>();
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	const { captcha_client_key } = clientConfigService;
 
-	const updateFields = (newFields) => setFields((prevFields) => ({ ...prevFields, ...newFields }));
+	const [contextValue, setContextValue] = useState<UserSignupFormStepperContextValue | null>();
 
-	const addCompletedStep = (stepIndex: number) => {
-		if (stepIndex === LAST_STEP) return;
-		completedSteps.add(stepIndex);
-		setCompletedSteps(new Set(completedSteps));
+	const DEFAULT_FIELDS = {
+		username: '',
+		email: '',
+		password: '',
+		confirmPassword: '',
+		firstName: '',
+		lastName: '',
+		company: '',
+		countryCode: 'GB',
+		termsAgreed: false,
+		mailListAgreed: false,
 	};
 
-	const removeCompletedStep = (stepIndex: number) => {
-		completedSteps.delete(stepIndex);
-		setCompletedSteps(new Set(completedSteps));
-	};
+	let schema = null;
 
-	const canReachStep = (stepToReach: number): boolean => {
-		// move to a previous step
-		if (stepToReach <= activeStep) return true;
-		// move to a next step iff the current step and the
-		// ones up to the step to reach are completed
-		for (let middleStep = activeStep; middleStep < stepToReach; middleStep++) {
-			if (!completedSteps.has(middleStep)) {
-				return false;
-			}
-		}
-		return true;
-	};
+	switch (contextValue?.activeStep) {
+		case 0:
+			schema = UserSignupSchemaAccount;
+			break;
+		case 1:
+			schema = UserSignupSchemaAccount.concat(UserSignupSchemaPersonal);
+			break;
+		default:
+			schema = UserSignupSchemaAccount.concat(UserSignupSchemaPersonal).concat(UserSignupSchemaTermsAndSubmit);
+			break;
+	}
 
-	const moveToStep = (stepToReach: number) => {
-		if (canReachStep(stepToReach)) {
-			setActiveStep(stepToReach);
-			if (stepToReach > erroredStep) setErroredStep(null);
-		}
-	};
-
-	const moveToNextStep = () => moveToStep(activeStep + 1);
+	const formData = useForm({
+		resolver: yupResolver(schema),
+		mode: 'all',
+		defaultValues: DEFAULT_FIELDS,
+		context: { alreadyExistingUsernames, alreadyExistingEmails },
+	});
 
 	const handleInvalidArgumentsError = (error) => {
 		if (usernameAlreadyExists(error)) {
-			setAlreadyExistingUsernames([...alreadyExistingUsernames, fields.username]);
+			setAlreadyExistingUsernames([...alreadyExistingUsernames, formData.getValues().username]);
+			formData.trigger('username');
 		} else if (emailAlreadyExists(error)) {
-			setAlreadyExistingEmails([...alreadyExistingEmails, fields.email]);
+			setAlreadyExistingEmails([...alreadyExistingEmails, formData.getValues().email]);
+			formData.trigger('email');
 		} else return;
 
-		updateFields({ password: '', confirmPassword: '' });
-		setActiveStep(0);
-		setErroredStep(0);
-		removeCompletedStep(LAST_STEP);
-		updateFields({ termsAgreed: false, mailListAgreed: false });
+		contextValue.moveToStep(0);
+		contextValue.setErroredStep(0);
 	};
 
-	const createAccount = async () => {
+	const onSubmit = async (values) => {
 		try {
-			setFormIsSubmitting(true);
-			const newUser = omit(fields, ['confirmPassword', 'termsAgreed']) as INewUser;
+			const newUser = omit(values, ['confirmPassword', 'termsAgreed']) as INewUser;
 			newUser.email = newUser.email.trim();
-			if (!fields.company) delete newUser.company;
+			captchaRef?.current?.reset();
+			newUser.captcha = captcha_client_key ? await captchaRef.current.executeAsync() : 'CAPTCHA_IS_DISABLED';
+
+			if (!values.company) delete newUser.company;
 			await registerNewUser(newUser);
-			const { email, firstName } = fields;
+			const { email, firstName } = values;
 			completeRegistration({ email, firstName });
 		} catch (error) {
-			setFormIsSubmitting(false);
 			if (isInvalidArguments(error)) {
 				handleInvalidArgumentsError(error);
-			} else {
-				removeCompletedStep(LAST_STEP);
 			}
 		}
 	};
 
-	const getStepProps = (stepIndex: number) => ({
-		fields,
-		updateFields,
-		onSubmitStep: stepIndex < LAST_STEP ? moveToNextStep : createAccount,
-		onComplete: () => addCompletedStep(stepIndex),
-		onUncomplete: () => removeCompletedStep(stepIndex),
-	});
-
-	const getStepContainerProps = (stepIndex: number) => ({
-		stepIndex,
-		completedSteps,
-		moveToStep,
-		canReachStep,
-		error: erroredStep === stepIndex,
-	});
-
 	return (
 		<Container>
-			<Title>
-				{activeStep < LAST_STEP ? (
-					<FormattedMessage
-						id="userSignup.title.middleStep"
-						defaultMessage="Create your {free} account"
-						values={{
-							free: (
-								<Underlined>
-									<FormattedMessage id="userSignup.title.middleStep.free" defaultMessage="free" />
-								</Underlined>
-							),
-						}}
-					/>
-				) : (
-					<FormattedMessage id="userSignup.title.lastStep" defaultMessage="Almost there..." />
-				)}
-			</Title>
-			<form>
-				<Stepper
-					activeStep={activeStep}
-					orientation="vertical"
-				>
-					<UserSignupFormStep
-						{...getStepContainerProps(0)}
-						label={formatMessage({
-							id: 'userSignup.step.account',
-							defaultMessage: 'Account',
-						})}
+			<FormProvider {...formData}>
+				<form onSubmit={formData.handleSubmit(onSubmit)}>
+					<UserSignupFormStepper
+						onContextUpdated={setContextValue}
 					>
-						<UserSignupFormStepAccount
-							{...getStepProps(0)}
-							alreadyExistingUsernames={alreadyExistingUsernames}
-							alreadyExistingEmails={alreadyExistingEmails}
+						<UserSignupFormStep
+							stepIndex={0}
+							label={formatMessage({ id: 'userSignup.step.account', defaultMessage: 'Account' })}
+						>
+							<UserSignupFormStepAccount />
+						</UserSignupFormStep>
+						<UserSignupFormStep
+							stepIndex={1}
+							label={formatMessage({ id: 'userSignup.step.personal', defaultMessage: 'Personal' })}
+						>
+							<UserSignupFormStepPersonal />
+						</UserSignupFormStep>
+						<UserSignupFormStep
+							stepIndex={2}
+							label={formatMessage({ id: 'userSignup.step.termsAndSubmit', defaultMessage: 'Terms and submit' })}
+						>
+							<UserSignupFormStepTermsAndSubmit />
+						</UserSignupFormStep>
+					</UserSignupFormStepper>
+					{captcha_client_key && (
+						<ReCAPTCHA
+							ref={captchaRef}
+							size="invisible"
+							sitekey={captcha_client_key}
 						/>
-					</UserSignupFormStep>
-					<UserSignupFormStep
-						{...getStepContainerProps(1)}
-						label={formatMessage({
-							id: 'userSignup.step.personal',
-							defaultMessage: 'Personal',
-						})}
-					>
-						<UserSignupFormStepPersonal
-							{...getStepProps(1)}
-						/>
-					</UserSignupFormStep>
-					<UserSignupFormStep
-						{...getStepContainerProps(2)}
-						label={formatMessage({
-							id: 'userSignup.step.termsAndSubmit',
-							defaultMessage: 'Terms and submit',
-						})}
-					>
-						<UserSignupFormStepTermsAndSubmit
-							{...getStepProps(2)}
-							formIsSubmitting={formIsSubmitting}
-							isActiveStep={activeStep === LAST_STEP}
-						/>
-					</UserSignupFormStep>
-				</Stepper>
-			</form>
-			<LoginPrompt>
-				<FormattedMessage id="userSignup.loginPrompt.message" defaultMessage="Already have an account?" />
-				<LoginPromptLink to="/v5/login">
-					<FormattedMessage id="userSignup.loginPrompt.link" defaultMessage="Log in" />
-				</LoginPromptLink>
-			</LoginPrompt>
+					)}
+
+				</form>
+			</FormProvider>
 		</Container>
 	);
 };
