@@ -26,7 +26,6 @@ export const ScrollArea = styled(DashboardScrollArea)`
 `;
 
 export const HomeContent = styled.div`
-	padding-bottom: 130px;
 	box-sizing: border-box;
 	display: flex;
 	flex-flow: column;

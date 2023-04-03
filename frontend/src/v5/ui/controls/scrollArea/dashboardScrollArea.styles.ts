@@ -19,7 +19,9 @@ import styled from 'styled-components';
 import { ScrollArea } from './scrollArea.styles';
 
 export const DashboardScrollArea = styled(ScrollArea)`
-	height: calc(1005 - 62px);
+	height: calc(100% - 62px);
 	position: relative;
 	z-index: 0;
+	display: flex;
+	flex-direction: column;
 `;
