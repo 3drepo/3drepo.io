@@ -94,7 +94,6 @@ export const Federations = (): JSX.Element => {
 						collapsed: <FormattedMessage id="federations.all.collapse.tooltip.show" defaultMessage="Show federations" />,
 						visible: <FormattedMessage id="federations.all.collapse.tooltip.hide" defaultMessage="Hide federations" />,
 					}}
-					showBottomButton
 					emptyMessage={(
 						<>
 							<DashboardListEmptyText>

@@ -20,7 +20,6 @@ import { Head, Row, Cell } from '@/v4/routes/components/customTable/customTable.
 import { SearchField } from '@/v4/routes/components/customTable/components/cellUserSearch/cellUserSearch.styles';
 import { LoaderContainer } from '@/v4/routes/userManagement/userManagement.styles';
 import { FloatingButtonContainer } from '@/v4/routes/components/floatingActionPanel/floatingActionPanel.styles';
-import { NewJobBottomButton } from '@/v4/routes/jobs/jobs.styles';
 import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 import { primaryButtonStyling } from '../resuableOverrides.styles';
 
@@ -156,12 +155,6 @@ export const V5JobsOverrides = styled.div<{ isAdmin: boolean }>`
 			}
 		}
 	}
-
-	${({ isAdmin }) => !isAdmin && css`
-		${NewJobBottomButton} {
-			display: none;
-		}
-	`}
 
 	${Footer} {
 		display: none;

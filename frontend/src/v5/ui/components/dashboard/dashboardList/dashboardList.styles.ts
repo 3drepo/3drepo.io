@@ -17,7 +17,6 @@
 
 import styled from 'styled-components';
 import { Divider as DividerComponent } from '@mui/material';
-import { Button } from '@controls/button';
 import { Typography } from '@controls/typography';
 import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 
@@ -47,26 +46,4 @@ export const DashboardListEmptyText = styled(Typography).attrs({
 export const Divider = styled(DividerComponent)`
 	margin-top: 16px;
 	width: 100%;
-`;
-
-export const DashboardListButton = styled(Button).attrs({
-	variant: 'contained',
-	color: 'secondary',
-})`
-	${({ theme }) => theme.typography.h3}
-	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
-	color: ${({ theme }) => theme.palette.primary.main};
-	:hover, :focus {
-		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
-		color: ${({ theme }) => theme.palette.primary.dark};
-	}
-	width: 100%;
-	margin: 0;
-	height: 80px;
-	margin-top: 18px;
-
-	svg {
-		width: 34px;
-		height: 34px;
-	}
 `;
