@@ -19,7 +19,6 @@ import styled from 'styled-components';
 import { DragAndDrop } from '@controls/dragAndDrop';
 import { DashboardListHeader } from '@components/dashboard/dashboardList/dashboardListHeader';
 import { FormModal } from '@controls/formModal/formModal.component';
-import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 import { Typography } from '@controls/typography';
 
 const MODAL_PADDING = 35;
@@ -42,9 +41,10 @@ export const UploadsContainer = styled.div`
 	overflow-x: hidden;
 `;
 
-export const UploadsListScroll = styled(ScrollArea)`
-	min-height: 65vh;
+export const UploadsListScroll = styled.div`
+	min-height: 64vh;
 	max-height: 200px;
+	width: 100%;
 `;
 
 export const Padding = styled.div`
