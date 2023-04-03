@@ -20,19 +20,6 @@ import styled from 'styled-components';
 export const ScrollArea = styled.div`
 	height: 100%;
 	width: 100%;
-	overflow: overlay;
-
-	&::-webkit-scrollbar,
-	&::-webkit-scrollbar-thumb {
-		width: 11px;
-		height: 11px;
-		border-radius: 11px;
-		border: 3px solid transparent;
-	}
-
-	&:hover::-webkit-scrollbar-thumb {
-		background: ${({ theme }) => theme.palette.base.lightest};
-		background-clip: padding-box;
-	}
+	overflow: auto;
 `;
 ScrollArea.displayName = 'ScrollArea';
