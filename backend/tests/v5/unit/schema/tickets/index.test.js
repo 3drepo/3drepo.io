@@ -95,7 +95,7 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 					await TicketSchema.validateTicket(teamspace, template, fullData, oldTicket);
 				};
 
-				await expect(runTest(goodTest)).resolves.toBeUndefined();
+				if (goodTest !== undefined) await expect(runTest(goodTest)).resolves.toBeUndefined();
 
 				if (badTest !== undefined) await expect(runTest(badTest)).rejects.not.toBeUndefined();
 			});
@@ -253,6 +253,118 @@ const testPresetValues = () => {
 	});
 };
 
+const testGroups = () => {
+	describe('Groups (Inside views)', () => {
+		const testCases = [
+			['Undefined state object', { type: propTypes.VIEW }, {
+				state: undefined,
+			}],
+			['Empty state object', { type: propTypes.VIEW }, {
+				state: {},
+			}],
+			['Have all groups', { type: propTypes.VIEW }, {
+				state: {
+					hidden: [{ group: generateGroup(false, { hasId: false }) }],
+					colored: [{ group: generateGroup(false, { hasId: false }), color: times(3, () => 0), opacity: 1 }],
+					transformed: [{ group: generateGroup(false, { hasId: false }),
+						transformation: times(16, () => 0) }],
+				},
+			},
+			{
+				state: {
+					hidden: [{ group: {} }],
+				},
+			},
+			],
+
+			['Prefixes', { type: propTypes.VIEW }, {
+				state: {
+					hidden: [{ group: generateGroup(false, { hasId: false }),
+						prefix: times(2, () => generateRandomString) }],
+					colored: [{ group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 0),
+						opacity: 1,
+						prefix: times(2, () => generateRandomString) }],
+					transformed: [{ group: generateGroup(false, { hasId: false }),
+						transformation: times(16, () => 0),
+						prefix: times(2, () => generateRandomString) }],
+				},
+			}, {
+				state: {
+					hidden: [{ group: generateGroup(false, { hasId: false }), prefix: generateRandomString() }],
+				},
+			},
+			],
+
+			['Color groups', { type: propTypes.VIEW },
+				{
+					state: {
+						colored: [{ group: generateGroup(false, { hasId: false }),
+							color: times(3, () => 0),
+							opacity: 1 }],
+					},
+				}, {
+					state: {
+						colored: [{ group: generateGroup(false, { hasId: false }) }],
+					},
+				}],
+
+			['Color groups- just colours', { type: propTypes.VIEW },
+				{
+					state: {
+						colored: [{ group: generateGroup(false, { hasId: false }), color: times(3, () => 0) }],
+					},
+				}, {
+					state: {
+						colored: [{ group: generateGroup(false, { hasId: false }), color: [1, 1] }],
+					},
+				}],
+
+			['Color groups- just opacity', { type: propTypes.VIEW },
+				{
+					state: {
+						colored: [{ group: generateGroup(false, { hasId: false }), opacity: 0.5 }],
+					},
+				}, {
+					state: {
+						colored: [{ group: generateGroup(false, { hasId: false }), opacity: 0 }],
+					},
+				}],
+
+			['Transformed groups', { type: propTypes.VIEW },
+				{
+					state: {
+						transformed: [{ group: generateGroup(false, { hasId: false }),
+							transformation: times(16, () => 1) }],
+					},
+				}, {
+					state: {
+						transformed: [{ group: generateGroup(false, { hasId: false }) }],
+					},
+				}],
+
+			['Transformed groups - type check', { type: propTypes.VIEW }, undefined, {
+				state: {
+					transformed: [{ group: generateGroup(false, { hasId: false }), transformation: false }],
+				},
+			}],
+
+			['Transformed groups - type check', { type: propTypes.VIEW }, undefined, {
+				state: {
+					transformed: [{ group: generateGroup(false, { hasId: false }),
+						transformation: times(15, () => 1) }],
+				},
+			}],
+
+		];
+
+		testPropertyTypes(testCases, false, true);
+	// testPropertyTypes(propertyTypeSetData, true, true);
+	// testPropertyTypes(propertyTypeUnsetData, false, false);
+	// testPropertyTypes(propertyTypeUnsetData, true, false);
+	});
+};
+
 const testValidateTicket = () => {
 	describe('Validate ticket', () => {
 		const propertyTypeSetData = [
@@ -308,6 +420,8 @@ const testValidateTicket = () => {
 		testPropertyTypes(propertyTypeSetData, true, true);
 		testPropertyTypes(propertyTypeUnsetData, false, false);
 		testPropertyTypes(propertyTypeUnsetData, true, false);
+
+		testGroups();
 		const randomData = generateRandomString();
 
 		const commonPropertyConditionTests = [
