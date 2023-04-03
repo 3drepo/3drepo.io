@@ -61,10 +61,11 @@ export const TabPanel = styled(TabPanelBase)<{ $personalTab?: boolean }>`
 	padding: 0;
 `;
 
-export const TabContent = styled(ScrollArea)`
+export const TabContent = styled.div`
 	height: min(554px, 50vh);
 	padding: 30px 58px;
 	box-sizing: border-box;
+	overflow: overlay;
 
 	& > :first-child {
 		margin-top: 0;
