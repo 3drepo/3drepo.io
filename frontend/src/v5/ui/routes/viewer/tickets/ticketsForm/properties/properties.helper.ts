@@ -37,3 +37,5 @@ export const TicketProperty = {
 	image: TicketImage,
 	view: TicketView,
 };
+
+export const NEW_PIN_ID = 'new-Pin';

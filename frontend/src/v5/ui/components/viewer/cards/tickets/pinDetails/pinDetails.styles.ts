@@ -18,10 +18,16 @@
 import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
 
-export const PinContainer = styled.div<{ selected: boolean, error: boolean }>`
+export const PinContainer = styled.div<{ selected: boolean, error: boolean, disabled: boolean }>`
 	width: auto;
-	color: ${({ theme }) => theme.palette.secondary.main};
-	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	border: solid 1px;
+	${({ disabled, theme: { palette } }) => (disabled ? css`
+		border-color: ${palette.secondary.lightest};
+		color: ${palette.base.light};
+	` : css`
+		border-color: ${palette.base.lightest};
+		color: ${palette.secondary.main};
+	`)}
 	border-radius: 5px;
 	padding: 10px 15px;
 
@@ -60,15 +66,20 @@ export const PinName = styled(Typography).attrs({
 	`}
 `;
 
-export const PinAction = styled.div`
+export const PinAction = styled.div<{disabled?: boolean}>`
 	font-size: 10px;
 	font-weight: 500;
-	color: ${({ theme }) => theme.palette.base.main};
 	display: flex;
 	align-items: center;
 	gap: 3px;
 	user-select: none;
-	cursor: pointer;
+	${({ theme: { palette }, disabled }) => (disabled ? css`
+		color: ${palette.secondary.lightest};
+		pointer-events: none;
+	` : css`
+		color: ${palette.base.main};
+		cursor: pointer;
+	`)};
 	svg {
 		height: 12px;
 		width: auto;

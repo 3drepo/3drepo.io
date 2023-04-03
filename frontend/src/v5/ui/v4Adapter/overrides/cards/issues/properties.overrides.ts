@@ -61,9 +61,12 @@ export default css`
 			.MuiInputBase-root {
 				padding: 0;
 				input {
-					cursor: pointer;
 					height: 24px;
 					color: ${({ theme }) => theme.palette.secondary.main};
+
+					&:not(.Mui-disabled) {
+						cursor: pointer;
+					}
 				}
 			}
 		}

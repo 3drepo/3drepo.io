@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { isV5 } from '@/v4/helpers/isV5';
+import styled, { css } from 'styled-components';
 
 import { COLOR } from '../../../../../../styles';
 
@@ -27,6 +28,12 @@ export const Wrapper = styled.div`
 		overflow: auto;
 		padding-left: 0;
 		margin: 0;
+		${isV5() && css`
+			box-shadow:
+				0 5px 5px -3px rgba(0,0,0,0.2),
+				0 8px 10px 1px rgba(0,0,0,0.14),
+				0 3px 14px 2px rgba(0,0,0,0.12)
+		`}
 	}
 
 	.react-autosuggest__suggestion {

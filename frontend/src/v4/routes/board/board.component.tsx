@@ -31,8 +31,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
 import { ScrollArea as ScrollAreaStyles } from '@controls/scrollArea/scrollArea.styles';
 
-import { ContainersHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ISSUE_FILTERS, ISSUES_ACTIONS_MENU } from '../../constants/issues';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ISSUE_FILTERS } from '../../constants/issues';
 import { RISK_FILTERS } from '../../constants/risks';
 import { ROUTES, RouteParams } from '../../constants/routes';
 import { filtersValuesMap as issuesFilters, getHeaderMenuItems as getIssueMenuItems } from '../../helpers/issues';
@@ -411,7 +411,7 @@ export function Board(props: IProps) {
 			aria-label="Add new card"
 			aria-haspopup="true"
 			onClick={handleAddNewCard}
-			disabled={props.isPending || !modelId || !project}
+			disabled={props.isPending || !modelId || !project || hasViewerPermissions}
 		>
 			<Add />
 			{isV5() && isIssuesBoard && formatMessage({ id: 'board.newIssue.button', defaultMessage: 'New issue' })}

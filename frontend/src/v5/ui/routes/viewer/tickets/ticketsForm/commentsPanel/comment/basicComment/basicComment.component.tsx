@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketCommentHistoryBlock, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
+import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { editedCommentMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
@@ -24,16 +24,12 @@ import { CommentMarkDown } from '../commentMarkDown/commentMarkDown.component';
 import { CommentContainer, CommentAge, CommentAuthor, EditedCommentLabel, SingleImage, CommentImagesContainer } from './basicComment.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
 
-export type BasicCommentProps = {
-	images?: string[];
+export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
 	children?: any;
 	className?: string;
-	message?: string;
 	commentAge: string;
-	history?: TicketCommentHistoryBlock[];
 	metadata?: TicketCommentReplyMetadata;
 	isCurrentUserComment?: boolean;
-	author?: string;
 };
 export const BasicComment = ({
 	author,
@@ -41,12 +37,14 @@ export const BasicComment = ({
 	children,
 	message,
 	commentAge,
-	history,
 	metadata,
 	isCurrentUserComment = true,
+	createdAt,
+	updatedAt,
 	...props
 }: BasicCommentProps) => {
 	const imagesSrc = images.map(getImgSrc);
+	const isEdited = updatedAt && (createdAt !== updatedAt);
 	return (
 		<CommentContainer {...props}>
 			{images.length === 1 && (
@@ -67,7 +65,7 @@ export const BasicComment = ({
 					<CommentImages images={imagesSrc} />
 				</CommentImagesContainer>
 			)}
-			{history?.length && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
+			{isEdited && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			{message && (<CommentMarkDown>{message}</CommentMarkDown>)}
 			<CommentAge>{commentAge}</CommentAge>
 		</CommentContainer>

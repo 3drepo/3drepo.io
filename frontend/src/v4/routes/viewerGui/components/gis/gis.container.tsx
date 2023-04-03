@@ -31,7 +31,8 @@ const mapStateToProps = createStructuredSelector({
 	mapsProviders: selectMaps,
 	visibleLayers: selectGisLayers,
 	hasGISCoordinates: selectHasGISCoordinates,
-	urlParams: selectUrlParams
+	urlParams: selectUrlParams,
+	modelSettings: selectSettings,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

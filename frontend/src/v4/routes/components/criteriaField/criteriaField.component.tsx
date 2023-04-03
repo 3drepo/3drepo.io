@@ -61,6 +61,7 @@ interface IProps {
 interface IState {
 	selectedCriteria?: any[];
 	criterionForm?: any;
+	menuOpen?: boolean;
 }
 
 const MenuButton = ({ IconProps, Icon, ...props }) => (
@@ -83,8 +84,13 @@ const emptyCriterion = {
 export class CriteriaField extends PureComponent<IProps, IState> {
 	public state = {
 		selectedCriteria: [],
-		criterionForm: { ...emptyCriterion }
+		criterionForm: { ...emptyCriterion },
+		menuOpen: false,
 	};
+
+	public setMenuOpen = (menuOpen) => {
+		this.setState({ ...this.state, menuOpen });
+	}
 
 	public renderPlaceholder = renderWhenTrue(() => (
 		<Placeholder>{this.props.placeholder}</Placeholder>
@@ -107,9 +113,11 @@ export class CriteriaField extends PureComponent<IProps, IState> {
 		</ChipsContainer>
 	));
 
-	public renderOptionsMenu = renderWhenTrue(() => (
+	public renderOptionsMenu = () => (
 		<ButtonContainer>
 			<ButtonMenu
+				open={this.state.menuOpen}
+				onOpen={() => this.setMenuOpen(true)}
 				renderButton={MenuButton}
 				renderContent={this.renderOptions}
 				PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
@@ -117,7 +125,7 @@ export class CriteriaField extends PureComponent<IProps, IState> {
 				ButtonProps={{ disabled: false }}
 			/>
 		</ButtonContainer>
-	));
+	);
 
 	public componentDidMount() {
 		const { value, criterionForm, selectedCriterion } = this.props;
@@ -260,23 +268,33 @@ export class CriteriaField extends PureComponent<IProps, IState> {
 	)
 
 	public renderOptions = () => {
-		const options = [{
-			Component: this.renderCopyOption
-		}, {
-			label: 'Paste filters',
-			onClick: this.togglePasteMode
-		}, {
-			label: 'Deselect',
-			onClick: this.deselectCriterion
-		}, {
-			label: 'Clear all',
-			onClick: this.clearCriteria
-		}];
+		const options = [
+			{
+				Component: this.renderCopyOption,
+				disabled: !this.state.selectedCriteria?.length
+			}, {
+				label: 'Paste filters',
+				onClick: this.togglePasteMode
+			}, {
+				label: 'Deselect',
+				onClick: this.deselectCriterion,
+				disabled: !this.props.selectedCriterion
+			}, {
+				label: 'Clear all',
+				onClick: this.clearCriteria,
+				disabled: !this.state.selectedCriteria?.length
+			}
+		];
+
+		const closeMenuAndExecutCallback = (callback?) => (event) => {
+			this.setMenuOpen(false);
+			callback?.(event);
+		};
 
 		return (
 			<OptionsList>
-				{options.map(({ label, Component = MenuItem, onClick }, index) => (
-					<Component key={index} onClick={onClick}>{label}</Component>
+				{options.map(({ label, Component = MenuItem, onClick, disabled }, index) => (
+					<Component key={index} onClick={closeMenuAndExecutCallback(onClick)} disabled={disabled}>{label}</Component>
 				))}
 			</OptionsList>
 		);
@@ -305,7 +323,7 @@ export class CriteriaField extends PureComponent<IProps, IState> {
 						{this.renderPlaceholder(placeholder && !value.length && !isPasteEnabled)}
 						{this.renderCriteriaChips(!!value.length)}
 						{this.renderCriteriaPasteField(isPasteEnabled)}
-						{this.renderOptionsMenu(!isPasteEnabled)}
+						{this.renderOptionsMenu()}
 					</SelectedCriteria>
 				</FiltersContainer>
 				{this.renderForm()}

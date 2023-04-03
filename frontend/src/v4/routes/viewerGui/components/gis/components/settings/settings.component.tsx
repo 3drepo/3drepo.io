@@ -44,6 +44,7 @@ interface IProps {
 	};
 	updateModelSettings: (modelData, settings) => void;
 	urlParams: { teamspace, model, revision };
+	readOnly: boolean;
 }
 
 export class Settings extends PureComponent<IProps, any> {
@@ -64,7 +65,8 @@ export class Settings extends PureComponent<IProps, any> {
 
 	public renderForm = () => {
 		const props = {
-			unit: this.props.properties.unit
+			unit: this.props.properties.unit,
+			readOnly: this.props.readOnly,
 		} as any;
 
 		const Form = withFormik({

@@ -16,7 +16,7 @@
  */
 
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
@@ -30,13 +30,14 @@ import { Ticket, Id, Title, ChipList, Assignees, IssuePropertiesRow } from './ti
 
 type TicketItemProps = {
 	ticket: ITicket;
-	onClick: () => void;
+	onClick: React.MouseEventHandler<HTMLDivElement>;
 	selected?: boolean;
 };
 
 export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
+	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
 	const { status, priority, assignees = [], dueDate = null } = getPropertiesInCamelCase(ticket.properties);
 	const riskLevel = ticket.modules?.safetibase?.[SafetibaseProperties.LEVEL_OF_RISK];
@@ -71,9 +72,9 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			</ChipList>
 			{priority && (
 				<IssuePropertiesRow>
-					<DueDateWithLabel value={dueDate} onBlur={onBlurDueDate} />
+					<DueDateWithLabel value={dueDate} onBlur={onBlurDueDate} disabled={readOnly} />
 					<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" label="" />
-					<Assignees values={assignees} onBlur={onBlurAssignees} />
+					<Assignees values={assignees} onBlur={onBlurAssignees} disabled={readOnly} />
 				</IssuePropertiesRow>
 			)}
 		</Ticket>

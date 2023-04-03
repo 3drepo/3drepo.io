@@ -74,6 +74,7 @@ interface IProps {
 	removeMeasurement: (uuid) => void;
 	setMeasurementColor: (uuid, color) => void;
 	setMeasurementName: (uuid, type, name) => void;
+	setActiveIssue: (issue, revision, ignoreViewer) => void;
 	dialogId?: string;
 	postCommentIsPending?: boolean;
 	showSequenceDate: (date) => void;
@@ -231,6 +232,10 @@ export class IssueDetails extends PureComponent<IProps, IState> {
 	public componentWillUnmount() {
 		const { teamspace, model, issue, unsubscribeOnIssueCommentsChanges } = this.props;
 		unsubscribeOnIssueCommentsChanges(teamspace, model, issue._id);
+
+		if (this.props.issue.defaultHidden) {
+			this.props.setActiveIssue({}, null, true);
+		}
 	}
 
 	public componentDidUpdate(prevProps) {

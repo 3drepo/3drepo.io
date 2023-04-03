@@ -250,6 +250,7 @@ function* showDetails({ group, revision }) {
 		yield put(GroupsActions.clearSelectionHighlights());
 		yield put(GroupsActions.highlightGroup(group));
 		yield put(GroupsActions.setComponentState({
+			activeGroup: group._id,
 			showDetails: true,
 			editingGroup: cloneDeep(group),
 			criteriaFieldState: INITIAL_CRITERIA_FIELD_STATE

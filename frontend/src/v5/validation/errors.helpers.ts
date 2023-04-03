@@ -46,3 +46,5 @@ export const isPathNotAuthorized = (error): boolean => getErrorCode(error).endsW
 
 export const isProjectNotFound = (code: string): boolean => code === 'PROJECT_NOT_FOUND';
 export const isResourceNotFound = (code: string): boolean => code === 'RESOURCE_NOT_FOUND';
+
+export const isContainerPartOfFederation = (error): boolean => getErrorCode(error).endsWith('CONTAINER_IS_SUB_MODEL');

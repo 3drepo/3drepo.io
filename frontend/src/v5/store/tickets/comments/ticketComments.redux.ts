@@ -54,11 +54,15 @@ export const upsertCommentSuccess = (state: ITicketCommentsState, {
 	if (!state.commentsByTicketId[ticketId]) state.commentsByTicketId[ticketId] = [];
 
 	const commentToUpdate = getCommentById(state, ticketId, comment._id);
+	const commentWithMessage = {
+		...comment,
+		message: comment.message || '',
+	};
 
 	if (commentToUpdate) {
-		merge(commentToUpdate, comment);
+		merge(commentToUpdate, commentWithMessage);
 	} else {
-		state.commentsByTicketId[ticketId].push(comment as ITicketComment);
+		state.commentsByTicketId[ticketId].push(commentWithMessage as ITicketComment);
 	}
 };
 
