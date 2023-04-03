@@ -421,12 +421,8 @@ const testValidateTicket = () => {
 
 					},
 				};
-				try {
-					await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket));
-					//					.resolves.toEqual({ ...input, properties: {}, modules: {} });
-				} catch (err) {
-					console.log(err);
-				}
+				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
+					.resolves.toEqual({ ...input, properties: {}, modules: {} });
 			});
 
 			test('Should remove the property if it will be the same after default values', async () => {

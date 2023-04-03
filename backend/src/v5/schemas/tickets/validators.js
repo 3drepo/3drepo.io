@@ -37,7 +37,7 @@ const groupSchema = (allowIds) => {
 			_ids: Yup.array().of(types.id).min(1).required(),
 
 		})).min(1),
-	}).test(('Rules and objects', 'Groups can only contain either rules or objects, not both', ({ rules, objects }) => !(rules && objects)));
+	}).test(('Rules and objects', 'Groups must contain either rules or objects, but not both', ({ rules, objects }) => (rules || objects) && !(rules && objects)));
 
 	if (allowIds) return Yup.lazy((val) => (val?.name ? group.required() : types.id.required()));
 
