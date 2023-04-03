@@ -18,6 +18,8 @@
 import styled, { css } from 'styled-components';
 import * as DashboardListItemRowStyles from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemRow/dashboardListItemRow.styles';
 
+const BORDER_RADIUS = '10px';
+
 export const Container = styled.li<{ selected?: boolean }>`
 	box-sizing: border-box;
 	height: 100%;
@@ -27,45 +29,45 @@ export const Container = styled.li<{ selected?: boolean }>`
 	border-bottom-style: none;
 
 	&:last-child {
-		border-radius: 0 0 5px 5px;
+		border-radius: 0 0 ${BORDER_RADIUS} ${BORDER_RADIUS};
 		border-bottom-style: solid;
 
 		${DashboardListItemRowStyles.Container} {
 			${({ selected }) => selected && css`
 				&:only-child {
-					border-bottom-left-radius: 5px;
-					border-bottom-right-radius: 5px;
+					border-bottom-left-radius: ${BORDER_RADIUS};
+					border-bottom-right-radius: ${BORDER_RADIUS};
 				}
 				& + * {
-					border-radius: 0 0 5px 5px;
+					border-radius: 0 0 ${BORDER_RADIUS} ${BORDER_RADIUS};
 				}
 			`}
 			
 			${({ selected }) => !selected && css`
-				border-radius: 0 0 5px 5px;
+				border-radius: 0 0 ${BORDER_RADIUS} ${BORDER_RADIUS};
 			`}
 		}
 	}
 
 	&:first-child {
-		border-radius: 5px 5px 0 0;
+		border-radius: ${BORDER_RADIUS} ${BORDER_RADIUS} 0 0;
 
 		${DashboardListItemRowStyles.Container} {
-			border-radius: 5px 5px 0 0;
+			border-radius: ${BORDER_RADIUS} ${BORDER_RADIUS} 0 0;
 		}
 	}
 
 	&:only-child {
-		border-radius: 5px;
+		border-radius: ${BORDER_RADIUS};
 
 		${DashboardListItemRowStyles.Container} {
 			${({ selected }) => selected && css`
 				& + * {
-					border-radius: 0 0 5px 5px;
+					border-radius: 0 0 ${BORDER_RADIUS} ${BORDER_RADIUS};
 				}
 			`}
 			${({ selected }) => !selected && css`
-				border-radius: 5px;
+				border-radius: ${BORDER_RADIUS};
 			`}
 		}
 	}
