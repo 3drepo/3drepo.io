@@ -16,8 +16,10 @@
  */
 /* eslint-disable import/no-extraneous-dependencies */
 
-const { Builder, By, Key, until, Actions } = require('selenium-webdriver');
-// const { input } = require('selenium-webdriver/lib');
+const { Builder, By, Key, until } = require('selenium-webdriver');
+const { browserSize } = require('./config.json');
+const { resizeWindow } = require('./helpers/setupHelper');
+const { delay } = require('./helpers/generalHelpers');
 
 const navigateTo3dRepo = async (driver) => {
 	await driver.get('https://3drepo.lan/');
@@ -42,64 +44,56 @@ const navigateToModelPage = async (driver, { teamspace, project, model }) => {
 	// await driver.wait(until.titleIs('watevs'), 100000);
 };
 
-const clickOnModel = async (driver) => {
+const convertToScreenCoords = (coords) => {
+	// console.log(coords);
+	let { x, y } = coords;
+	x = Math.round(x - 0.5 * browserSize.width);
+	y = Math.round(y - 0.5 * browserSize.height);
+	return { x, y };
+};
+
+const clickOnModel = async (driver, coords) => {
 	const canvas = await driver.findElement(By.id('unityViewer'));
 	await driver.wait(until.elementIsEnabled(canvas));
 
-	await new Promise((resolve) => setTimeout(resolve, 15000));
+	const newCoords = convertToScreenCoords(coords);
 
-	console.log('{{{{{{{{{{{ ----- }}}}}}}}}}}');
+	console.log(newCoords);
 
+	await delay(10000);
+	// console.log('{{{{{{{{{{{ ----- }}}}}}}}}}}');
 	// eslint-disable-next-line no-underscore-dangle
+	const cc = { x: 618 - 505, y: 291 - 349 };
+
 	await driver.actions()
-		.move({ x: 400, y: 300, origin: canvas })
+		.move({ ...cc, origin: canvas })
 		.press()
 		.release()
 		.perform();
 
-	await new Promise((resolve) => setTimeout(resolve, 3000));
+	// await new Promise((resolve) => setTimeout(resolve, 120000));
+	await delay(10000);
 
 	console.log('{{{{{{{{{{{ done }}}}}}}}}}}');
 
-	await driver.wait(until.titleIs('Single cube - Viewer'), 1000);
+	await driver.wait(until.titleIs('Single cube - Viewer'), 6000);
 };
 
 (async function example() {
 	const driver = await new Builder().forBrowser('chrome').build();
 
 	try {
-		await driver.get('https://webglfundamentals.org/webgl/webgl-picking-w-gpu.html');
-		const canvas = await driver.findElement(By.xpath('//canvas'));
-		await driver.wait(until.elementIsEnabled(canvas));
+		// await driver.manage().window().setRect({ width: 500, height: 500 });
+		await resizeWindow(driver, browserSize);
+		await delay(2000);
 
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-		console.log('{{{{{{{{{{{ ----- }}}}}}}}}}}');
-		// eslint-disable-next-line no-underscore-dangle
-		await driver.actions()
-			.move({ x: -100, y: -75, origin: canvas })
-			.perform();
-
-		await new Promise((resolve) => setTimeout(resolve, 3000));
-
-		await driver.actions()
-			.move({ x: 0, y: 0, origin: canvas })
-			.perform();
-
-		await new Promise((resolve) => setTimeout(resolve, 2000));
-
-		// await driver.get('http://www.google.com/ncr');
-		// const acceptButton = await driver.findElement(By.xpath("//div[text()='Accept all']"));
-		// acceptButton.click();
-		// const elem = await driver.findElement(By.name('q'));
-		// driver.wait(until.elementIsEnabled(elem));
-		// elem.sendKeys('webdriver', Key.RETURN);
-		// await driver.wait(until.titleIs('Single cube  - Viewer'), 1000);
+		// await new Promise((resolve) => setTimeout(resolve, 2000));
 
 		// await navigateTo3dRepo(driver);
 		// await enterCredentials(driver, { username: 'teamSpace1', password: 'vdN5xQTQRY6syiD' });
 		// await navigateToModelPage(driver, { teamspace: 'teamSpace1', project: '7b11d960-9b36-11ed-b559-0768f95e09ad', model: '8a49d120-a181-11ed-b5b4-45706a9895f2' });
-		// await new Promise((resolve) => setTimeout(resolve, 10000));
-		// await clickOnModel(driver);
+		// await new Promise((resolve) => setTimeout(resolve, 3000));
+		// await clickOnModel(driver, { x: 0.6118811881188119, y: 0.5 });
 	} finally {
 		await driver.quit();
 	}

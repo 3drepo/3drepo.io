@@ -1,0 +1,19 @@
+{
+  "name": "tests-regression",
+  "version": "1.0.0",
+  "description": "Regression tests using selenium for the frontend",
+  "main": "test.js",
+  "scripts": {
+    "build": "yarn tsc",
+    "launch": "node ./build/test.js"
+  },
+  "author": "3D Repo",
+  "license": "AGPL-3.0",
+  "dependencies": {
+    "selenium-webdriver": "4.8.2"
+  },
+  "devDependencies": {
+    "@tsconfig/node18": "1.0.1",
+    "typescript": "5.0.3"
+  }
+}
