@@ -22,8 +22,9 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import BuildIcon from '@mui/icons-material/Build';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { includes, isEmpty } from 'lodash';
+import { includes } from 'lodash';
 
+import { isAdmin } from '@/v4/helpers/permissions';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import {
@@ -60,6 +61,7 @@ interface IProps {
 	visibleLayers: any[];
 	id?: string;
 	urlParams: any;
+	modelSettings: any;
 }
 
 interface IState {
@@ -238,6 +240,7 @@ export class Gis extends PureComponent<IProps, IState> {
 							properties={this.getSettingsProperties()}
 							updateModelSettings={this.props.updateModelSettings}
 							urlParams={this.props.urlParams}
+							readOnly={!isAdmin(this.props.modelSettings.permissions)}
 						/>
 					)
 				}

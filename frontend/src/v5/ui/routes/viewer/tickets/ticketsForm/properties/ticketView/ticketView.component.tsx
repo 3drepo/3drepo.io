@@ -47,6 +47,7 @@ export const TicketView = ({
 	value,
 	onBlur,
 	onChange,
+	disabled,
 	...props
 }: ITicketView) => {
 	const updateViewpoint = async () => {
@@ -59,7 +60,8 @@ export const TicketView = ({
 		await ViewerService.setViewpoint(value);
 	};
 	const deleteViewpoint = () => {
-		const view = value?.screenshot ? { ...value, camera: null, clippingPlanes: null } : null;
+		let view = null;
+		if (value?.screenshot) view = { screenshot: value.screenshot };
 		onChange?.(view);
 	};
 
@@ -76,15 +78,16 @@ export const TicketView = ({
 		<BasicTicketImage
 			value={imgSrc}
 			onChange={onImageChange}
+			disabled={disabled}
 			{...props}
 		>
-			<TicketImageAction onClick={goToViewpoint} disabled={!(value?.camera)}>
+			<TicketImageAction onClick={goToViewpoint} disabled={disabled || !(value?.camera)}>
 				<GotoViewpointIcon />
 				<FormattedMessage id="viewer.card.ticketView.action.gotToViewpoint" defaultMessage="Go to viewpoint" />
 			</TicketImageAction>
 			{ !!(value?.camera) && (
 				<ActionMenu TriggerButton={(
-					<TicketImageAction>
+					<TicketImageAction disabled={disabled}>
 						<EditViewpointIcon />
 						<FormattedMessage id="viewer.card.ticketView.action.editViewpoint" defaultMessage="Edit viewpoint" />
 					</TicketImageAction>
@@ -101,12 +104,12 @@ export const TicketView = ({
 				</ActionMenu>
 			)}
 			{ !(value?.camera) && (
-				<TicketImageAction onClick={updateViewpoint}>
+				<TicketImageAction onClick={updateViewpoint} disabled={disabled}>
 					<CreateViewpointIcon />
 					<FormattedMessage id="viewer.card.ticketView.action.createViewpoint" defaultMessage="Create viewpoint" />
 				</TicketImageAction>
 			)}
-			<TicketImageActionMenu value={imgSrc} onChange={onImageChange} />
+			{ !disabled && (<TicketImageActionMenu value={imgSrc} onChange={onImageChange} />)}
 		</BasicTicketImage>
 	);
 };

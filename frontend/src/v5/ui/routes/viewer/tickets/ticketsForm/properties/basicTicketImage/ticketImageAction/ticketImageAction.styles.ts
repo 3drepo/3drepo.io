@@ -41,6 +41,7 @@ export const TicketImageAction = styled.li<{ disabled?: boolean }>`
 	${({ disabled, theme }) => disabled && css`
 		&, &:hover {
 			cursor: default;
+			pointer-events: none;
 			color: ${theme.palette.secondary.lightest};
 		}
 	`}

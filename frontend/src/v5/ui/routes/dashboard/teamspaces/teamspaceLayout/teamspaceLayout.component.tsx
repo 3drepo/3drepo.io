@@ -21,8 +21,8 @@ import { AppBar } from '@components/shared/appBar';
 import { TeamspacesActionsDispatchers, ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TeamspaceNavigation } from '@components/shared/navigationTabs/teamspaceNavigation/teamspaceNavigation.component';
 import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
-import { DEFAULT_TEAMSPACE_IMG_SRC } from '@/v5/store/teamspaces/teamspaces.helpers';
-import { CurrentUserHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DEFAULT_TEAMSPACE_IMG_SRC, getTeamspaceImgSrc } from '@/v5/store/teamspaces/teamspaces.helpers';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
 import { Typography } from '@mui/material';
 import { DashboardFooter } from '@components/shared/dashboardFooter';
@@ -38,7 +38,6 @@ interface ITeamspaceLayout {
 export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.Element => {
 	const { teamspace } = useParams<TeamspaceParams>();
 	const isAdmin = TeamspacesHooksSelectors.selectIsTeamspaceAdmin();
-	const { avatarUrl } = CurrentUserHooksSelectors.selectCurrentUser();
 
 	useEffect(() => {
 		if (teamspace) {
@@ -51,7 +50,7 @@ export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.
 		<Container className={className}>
 			<AppBar />
 			<TopBar>
-				<TeamspaceImage imgSrc={avatarUrl} defaultImgSrc={DEFAULT_TEAMSPACE_IMG_SRC} />
+				<TeamspaceImage imgSrc={getTeamspaceImgSrc(teamspace)} defaultImgSrc={DEFAULT_TEAMSPACE_IMG_SRC} />
 				<TeamspaceInfo>
 					<Typography variant="h1">
 						<FormattedMessage

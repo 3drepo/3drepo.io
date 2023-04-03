@@ -32,7 +32,11 @@ import {
 import { CircledIcon } from '@controls/circledIcon';
 import { useForm } from 'react-hook-form';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { UnhandledErrorInterceptor } from './deleteModal.styles';
+import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
+import { isContainerPartOfFederation } from '@/v5/validation/errors.helpers';
+import { useErrorInterceptor } from '@controls/errorMessage/useErrorInterceptor';
+import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
+import { formatMessage } from '@/v5/services/intl';
 
 interface IDeleteModal {
 	onClickClose?: () => void,
@@ -55,6 +59,7 @@ export const DeleteModal = ({
 	confirmLabel,
 	open,
 }: IDeleteModal) => {
+	const error = useErrorInterceptor();
 	const { control, watch, handleSubmit } = useForm({
 		mode: 'onChange',
 		defaultValues: { retypedName: '' },
@@ -111,23 +116,44 @@ export const DeleteModal = ({
 							/>
 						</RetypeCheck>
 					)}
-					<UnhandledErrorInterceptor />
+					<UnhandledErrorInterceptor expectedErrorValidators={[isContainerPartOfFederation]} />
+					{ isContainerPartOfFederation(error)
+						&& (
+							<ErrorMessage title={formatMessage({ id: 'containers.delete.partOfFederation', defaultMessage: 'Part of a federation' })}>
+								<FormattedMessage id="containers.delete.partOfFederationDetail" defaultMessage="The container is currently being used as part of a federation. Please remove the container from the federation before deletion." />
+							</ErrorMessage>
+						)}
 				</Message>
 				<Actions>
-					<Button onClick={onClickClose} variant="contained" color="primary">
-						<FormattedMessage
-							id="deleteModal.action.cancel"
-							defaultMessage="Cancel"
-						/>
-					</Button>
-					<Button autoFocus type="submit" onClick={handleSubmit(onSubmit)} variant="outlined" color="secondary" disabled={!isValid}>
-						{ confirmLabel || (
-							<FormattedMessage
-								id="deleteModal.action.confirm"
-								defaultMessage="Delete"
-							/>
+					{ !error
+						&& (
+							<>
+								<Button onClick={onClickClose} variant="contained" color="primary">
+									<FormattedMessage
+										id="deleteModal.action.cancel"
+										defaultMessage="Cancel"
+									/>
+								</Button>
+								<Button autoFocus type="submit" onClick={handleSubmit(onSubmit)} variant="outlined" color="secondary" disabled={!isValid}>
+									{ confirmLabel || (
+										<FormattedMessage
+											id="deleteModal.action.confirm"
+											defaultMessage="Delete"
+										/>
+									)}
+								</Button>
+							</>
 						)}
-					</Button>
+
+					{error
+						&& (
+							<Button onClick={onClickClose} variant="contained" color="primary">
+								<FormattedMessage
+									id="deleteModal.action.close"
+									defaultMessage="Close"
+								/>
+							</Button>
+						)}
 				</Actions>
 			</ModalContent>
 		</Modal>

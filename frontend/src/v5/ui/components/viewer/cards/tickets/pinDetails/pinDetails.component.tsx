@@ -28,7 +28,7 @@ import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { PinAction, PinActions, PinContainer, PinName, SettingLocationText } from './pinDetails.styles';
 
-export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText }: FormInputProps) => {
+export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText, disabled }: FormInputProps) => {
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
 	const pinId = `new-${label}`;
@@ -75,7 +75,6 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 	}, [value]);
 	useEffect(() => () => {
 		ViewerService.clearMeasureMode();
-
 		if (prevValue.current) {
 			ViewerService.removePin(pinId);
 		}
@@ -85,7 +84,7 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 
 	return (
 		<FormControl required={required} error={error}>
-			<PinContainer selected={editMode} error={error}>
+			<PinContainer selected={editMode} error={error} disabled={disabled}>
 				<PinName onClick={onClickEditPin} required={required}>
 					{label}
 				</PinName>
@@ -97,14 +96,14 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 					)}
 
 					{!editMode && (
-						<PinAction onClick={onClickEditPin}>
+						<PinAction onClick={onClickEditPin} disabled={disabled}>
 							{hasPin && (<><PinIcon /> <FormattedMessage id="tickets.pin.changeLocation" defaultMessage="Change pin location" /></>)}
 							{!hasPin && (<><CircledPlusIcon /> <FormattedMessage id="tickets.pin.addPin" defaultMessage="Add pin" /></>)}
 						</PinAction>
 					)}
 
 					{hasPin && (
-						<PinAction onClick={onClickDelete}>
+						<PinAction onClick={onClickDelete} disabled={disabled}>
 							<DeleteIcon />
 							<FormattedMessage id="tickets.pin.deletePin" defaultMessage="Delete pin" />
 						</PinAction>

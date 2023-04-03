@@ -16,9 +16,6 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { useEffect, useRef, useState } from 'react';
-import { clientConfigService } from '@/v4/services/clientConfig';
-import ReCAPTCHA from 'react-google-recaptcha';
 import SignupIcon from '@assets/icons/outlined/add_user-outlined.svg';
 import { TERMS_ROUTE, PRIVACY_ROUTE, COOKIES_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
@@ -43,35 +40,8 @@ export interface ITermsAndSubmitFormInput {
 export const UserSignupFormStepTermsAndSubmit = () => {
 	const {
 		control,
-		getValues,
-		setValue,
 		formState: { isValid: formIsValid, isSubmitting },
 	} = useFormContext<ITermsAndSubmitFormInput>();
-
-	const captchaRef = useRef<ReCAPTCHA>();
-	const [captchaIsPending, setCaptchaIsPending] = useState(false);
-
-	const handleCaptchaChange = async (captcha) => {
-		if (!getValues('captcha') && captcha) {
-			setCaptchaIsPending(true);
-			setValue('captcha', captcha);
-			setCaptchaIsPending(false);
-		}
-	};
-
-	useEffect(() => {
-		if (!clientConfigService.captcha_client_key) {
-			setValue('captcha', 'CAPTCHA_IS_DISABLED');
-		}
-	}, []);
-
-	useEffect(() => {
-		if (formIsValid) {
-			if (!getValues('captcha')) {
-				captchaRef?.current?.execute();
-			}
-		}
-	}, [formIsValid]);
 
 	return (
 		<>
@@ -113,18 +83,10 @@ export const UserSignupFormStepTermsAndSubmit = () => {
 						)}
 					/>
 				</CheckboxContainer>
-				{clientConfigService.captcha_client_key && (
-					<ReCAPTCHA
-						ref={captchaRef}
-						size="invisible"
-						sitekey={clientConfigService.captcha_client_key}
-						onChange={handleCaptchaChange}
-					/>
-				)}
 			</TermsContainer>
 			<UnhandledErrorInterceptor expectedErrorValidators={[emailAlreadyExists, usernameAlreadyExists]} />
 			<CreateAccountButton
-				isPending={isSubmitting || captchaIsPending}
+				isPending={isSubmitting}
 				startIcon={<SignupIcon />}
 				disabled={!formIsValid}
 			>
