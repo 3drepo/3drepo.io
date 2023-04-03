@@ -90,7 +90,7 @@ export const Images = styled(ScrollArea)`
 	gap: 10px;
 	padding: 10px 15px 0;
 	position: relative;
-    box-shadow: 0 0 9px 7px ${({ theme }) => theme.palette.primary.contrast};
+	box-shadow: 0 0 9px 7px ${({ theme }) => theme.palette.primary.contrast};
 
 	&:not(:empty) {
 		min-height: 54px;

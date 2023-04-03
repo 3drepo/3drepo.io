@@ -44,7 +44,7 @@ export const UploadsContainer = styled.div`
 
 export const UploadsListScroll = styled(ScrollArea)`
 	min-height: 65vh;
-    max-height: 200px;
+	max-height: 200px;
 `;
 
 export const Padding = styled.div`
