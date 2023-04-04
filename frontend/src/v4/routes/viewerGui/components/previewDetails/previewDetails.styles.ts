@@ -29,7 +29,6 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { isV5 } from '@/v4/helpers/isV5';
-import { ConditionalV5OrViewerScrollArea } from '@/v5/ui/v4Adapter/components/conditionalV5OrViewerScrollArea.component';
 import {GROUP_PANEL_NAME} from '../../../../constants/groups';
 import { TextField as TextFieldBase } from '../../../components/textField/textField.component';
 
