@@ -17,8 +17,6 @@
 
 import Grid from '@mui/material/Grid';
 import styled, { css } from 'styled-components';
-import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import { COLOR } from '../../../../styles';
 import { Panel as PanelComponent } from '../../../components/panel/panel.component';
