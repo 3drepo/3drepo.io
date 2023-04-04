@@ -287,8 +287,10 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 
 		// init before clear - it's on puporse because of library's bug;
 		// the library doesn't clear current state, only past and future
+		// and then call again init to allow to undo
 		this.props.initHistory();
 		this.props.clearHistory();
+		this.props.initHistory();
 	}
 
 	public handleSave = () => {

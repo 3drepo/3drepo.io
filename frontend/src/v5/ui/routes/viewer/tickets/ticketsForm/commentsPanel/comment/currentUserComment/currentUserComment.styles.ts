@@ -18,9 +18,13 @@
 import styled, { css } from 'styled-components';
 import { BasicComment } from '../basicComment/basicComment.component';
 import { CommentWithButtonsContainer as CommentWithButtonsContainerBase } from '../basicComment/basicComment.styles';
+import { QuotedMessage, secondaryQuotedMessageStyles } from '../quotedMessage/quotedMessage.styles';
 
 export const CommentWithButtonsContainer = styled(CommentWithButtonsContainerBase)`
 	justify-content: flex-end;
+	${QuotedMessage} {
+		${secondaryQuotedMessageStyles}
+	}
 `;
 
 export const Comment = styled(BasicComment)<{ isFirstOfBlock: boolean }>`

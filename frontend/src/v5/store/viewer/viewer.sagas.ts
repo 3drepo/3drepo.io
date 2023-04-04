@@ -26,6 +26,7 @@ import { prepareFederationsData } from '../federations/federations.helpers';
 import { FederationsActions, FederationsTypes } from '../federations/federations.redux';
 import { selectFederationById } from '../federations/federations.selectors';
 import { IFederation } from '../federations/federations.types';
+import { TicketsActions } from '../tickets/tickets.redux';
 import { FetchDataAction, ViewerActions, ViewerTypes } from './viewer.redux';
 
 function* fetchData({ teamspace, containerOrFederation, project }: FetchDataAction) {
@@ -54,6 +55,8 @@ function* fetchData({ teamspace, containerOrFederation, project }: FetchDataActi
 			yield put(ContainersActions.fetchContainerStats(teamspace, project, containerOrFederation));
 			yield take(ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS);
 		}
+		yield put(TicketsActions.fetchTickets(teamspace, project, containerOrFederation, isFederation));
+		yield put(TicketsActions.fetchTemplates(teamspace, project, containerOrFederation, isFederation));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'viewer.fetch.error', defaultMessage: 'trying to fetch viewer data' }),

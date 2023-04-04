@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { registerNewUser } from '@/v5/services/api/signup';
 import { formatMessage } from '@/v5/services/intl';
 import {
@@ -28,6 +28,8 @@ import { omit } from 'lodash';
 import { FormProvider, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { UserSignupSchemaAccount, UserSignupSchemaPersonal, UserSignupSchemaTermsAndSubmit } from '@/v5/validation/userSchemes/userSignupSchemes';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import ReCAPTCHA from 'react-google-recaptcha';
 import { UserSignupFormStepAccount } from './userSignupFormStep/userSignupFormStepAccount/userSignupFormStepAccount.component';
 import { UserSignupFormStepPersonal } from './userSignupFormStep/userSignupFormStepPersonal/userSignupFormStepPersonal.component';
 import { UserSignupFormStepTermsAndSubmit } from './userSignupFormStep/userSignupFormStepTermsAndSubmit/userSignupFormStepTermsAndSubmit.component';
@@ -45,6 +47,9 @@ type UserSignupFormProps = {
 export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) => {
 	const [alreadyExistingUsernames, setAlreadyExistingUsernames] = useState([]);
 	const [alreadyExistingEmails, setAlreadyExistingEmails] = useState([]);
+	const captchaRef = useRef<ReCAPTCHA>();
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	const { captcha_client_key } = clientConfigService;
 
 	const [contextValue, setContextValue] = useState<UserSignupFormStepperContextValue | null>();
 
@@ -99,6 +104,9 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 		try {
 			const newUser = omit(values, ['confirmPassword', 'termsAgreed']) as INewUser;
 			newUser.email = newUser.email.trim();
+			captchaRef?.current?.reset();
+			newUser.captcha = captcha_client_key ? await captchaRef.current.executeAsync() : 'CAPTCHA_IS_DISABLED';
+
 			if (!values.company) delete newUser.company;
 			await registerNewUser(newUser);
 			const { email, firstName } = values;
@@ -119,7 +127,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 					>
 						<UserSignupFormStep
 							stepIndex={0}
-							label={formatMessage({ id: 'userSignup.step.username', defaultMessage: 'Username' })}
+							label={formatMessage({ id: 'userSignup.step.account', defaultMessage: 'Account' })}
 						>
 							<UserSignupFormStepAccount />
 						</UserSignupFormStep>
@@ -136,6 +144,14 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 							<UserSignupFormStepTermsAndSubmit />
 						</UserSignupFormStep>
 					</UserSignupFormStepper>
+					{captcha_client_key && (
+						<ReCAPTCHA
+							ref={captchaRef}
+							size="invisible"
+							sitekey={captcha_client_key}
+						/>
+					)}
+
 				</form>
 			</FormProvider>
 		</Container>

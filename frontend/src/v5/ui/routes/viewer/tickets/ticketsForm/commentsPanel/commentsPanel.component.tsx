@@ -45,6 +45,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 	const [commentReply, setCommentReply] = useState<ITicketComment>(null);
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
+	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
 
@@ -149,10 +150,12 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 					</EmptyCommentsBox>
 				)}
 			</Comments>
-			<CreateCommentBox
-				commentReply={commentReply}
-				deleteCommentReply={() => setCommentReply(null)}
-			/>
+			{!readOnly && (
+				<CreateCommentBox
+					commentReply={commentReply}
+					deleteCommentReply={() => setCommentReply(null)}
+				/>
+			)}
 		</Accordion>
 	);
 };
