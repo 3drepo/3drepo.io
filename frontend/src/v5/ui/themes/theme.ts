@@ -157,6 +157,11 @@ const typography: TypographyOptions = {
 		letterSpacing: '0.1em',
 		textTransform: 'uppercase',
 	},
+	label: {
+		fontWeight: FONT_WEIGHT.REGULAR,
+		fontSize: '0.625rem',
+		lineHeight: '1rem',
+	},
 };
 
 export const hexToOpacity = (hex: string, opacityInPercentage: number): string => {
