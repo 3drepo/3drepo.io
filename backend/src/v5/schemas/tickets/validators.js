@@ -96,7 +96,7 @@ const generateViewValidator = (isUpdate, isNullable) => {
 	return imposeNullableRule(validator);
 };
 
-Validators.propTypesToValidator = (propType, isUpdate = false, required = false) => {
+Validators.propTypesToValidator = (propType, isUpdate, required) => {
 	const isNullable = isUpdate && !required;
 	const imposeNullableRule = (val) => (isNullable ? val.nullable() : val);
 	switch (propType) {
