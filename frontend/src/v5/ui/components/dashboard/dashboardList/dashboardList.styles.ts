@@ -28,9 +28,7 @@ export const ListContainer = styled.ul`
 	padding: 0;
 `;
 
-export const DashboardListEmptyContainer = styled(DashedContainer).attrs({
-	borderRadius: 10,
-})`
+export const DashboardListEmptyContainer = styled(DashedContainer)`
 	display: flex;
 	align-items: center;
 	height: 80px;
