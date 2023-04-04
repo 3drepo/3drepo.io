@@ -580,24 +580,6 @@ export const theme = createTheme({
 			defaultProps: {
 				elevation: 8,
 			},
-			styleOverrides: {
-				root: {
-					overflow: 'overlay',
-
-					[`&::-webkit-scrollbar,
-					  &::-webkit-scrollbar-thumb`]: {
-						width: 11,
-						height: 11,
-						borderRadius: 11,
-						border: '3px solid transparent',
-					},
-
-					'&:hover::-webkit-scrollbar-thumb': {
-						background: COLOR.BASE_LIGHTEST,
-						backgroundClip: 'padding-box',
-					},
-				},
-			},
 		},
 		MuiCard: {
 			styleOverrides: {
