@@ -19,7 +19,6 @@ import styled, { css } from 'styled-components';
 import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
 import { Display } from '@/v5/ui/themes/media';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 import * as RevisionsListHeaderLabelStyles from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.styles';
 
 export const Container = styled.div`
@@ -63,9 +62,7 @@ export const RevisionsListHeaderContainer = styled.header`
 	}
 `;
 
-export const RevisionsList = styled(ScrollArea).attrs({
-	as: 'ul',
-})`
+export const RevisionsList = styled.ul`
 	display: flex;
 	flex-direction: column;
 	padding: 0;

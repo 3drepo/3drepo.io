@@ -17,7 +17,6 @@
 import styled from 'styled-components';
 import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 import ArrowBackMui from '@mui/icons-material/ArrowBack';
-import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 
 export const ArrowBack = styled(ArrowBackMui)`
 	cursor: pointer;
@@ -60,10 +59,12 @@ export const HeaderButtons = styled.span`
 `;
 
 // TODO - fix after new palette is released
-export const CardContent = styled(ScrollArea)`
+export const CardContent = styled.div`
 	padding: 15px;
 	box-sizing: border-box;
 	background-color: #f9faff;
+	overflow: overlay;
+	height: 100%;
 `;
 
 export const EmptyCardMessage = styled(DashedContainer).attrs({

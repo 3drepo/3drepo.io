@@ -33,7 +33,6 @@ import { useEffect, useState } from 'react';
 import { Gap } from '@controls/gap';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { sanitiseMessage, stripMetadata } from '@/v5/store/tickets/comments/ticketComments.helpers';
-import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 import { ViewerParams } from '../../../../routes.constants';
 import { Accordion, Comments, EmptyCommentsBox, VirtualisedList } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
@@ -127,7 +126,6 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 						data={comments}
 						initialTopMostItemIndex={commentsLength - 1}
 						followOutput={() => true}
-						components={{ Scroller: ScrollArea }}
 						overscan={800}
 						itemContent={(index, comment: ITicketComment) => (
 							<>

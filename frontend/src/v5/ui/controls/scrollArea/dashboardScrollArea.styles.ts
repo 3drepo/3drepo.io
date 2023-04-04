@@ -16,10 +16,11 @@
  */
 
 import styled from 'styled-components';
-import { ScrollArea } from './scrollArea.styles';
 
-export const DashboardScrollArea = styled(ScrollArea)`
-	height: calc(100% - 62px);
+export const DashboardScrollArea = styled.div`
+	height: 100%;
+	width: 100%;
+	overflow: overlay;
 	position: relative;
 	z-index: 0;
 	display: flex;

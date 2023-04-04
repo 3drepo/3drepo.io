@@ -23,7 +23,6 @@ import { SubmitButton } from '@controls/submitButton';
 import { ImageWithSkeleton } from '@controls/imageWithSkeleton/imageWithSkeleton.component';
 import { DragAndDrop as DragAndDropBase } from '@controls/dragAndDrop';
 import { DashedContainer } from '@controls/dragAndDrop/dragAndDrop.styles';
-import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 
 export const Container = styled.section`
 	display: flex;
@@ -82,7 +81,7 @@ export const DragAndDrop = styled(DragAndDropBase).attrs({
 	}
 `;
 
-export const Images = styled(ScrollArea)`
+export const Images = styled.div`
 	max-height: 100px;
 	display: flex;
 	flex-direction: row;
@@ -91,6 +90,7 @@ export const Images = styled(ScrollArea)`
 	padding: 10px 15px 0;
 	position: relative;
 	box-shadow: 0 0 9px 7px ${({ theme }) => theme.palette.primary.contrast};
+	overflow-y: overlay;
 
 	&:not(:empty) {
 		min-height: 54px;

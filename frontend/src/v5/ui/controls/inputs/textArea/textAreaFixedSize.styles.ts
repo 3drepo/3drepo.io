@@ -16,14 +16,13 @@
  */
 
 import styled, { css } from 'styled-components';
-import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 
-export const Container = styled(ScrollArea)<{ $error?: boolean, $height: number }>`
+export const Container = styled.div<{ $error?: boolean, $height: number }>`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	border: solid 1px;
 	border-color: ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 5px;
-	overflow-x: hidden;
+	overflow: hidden overlay;
 	height: ${({ $height }) => $height}px;
 
 	& > div > :last-child {
