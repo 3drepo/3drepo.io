@@ -16,10 +16,10 @@
  */
 
 import styled from 'styled-components';
-import { DashboardScrollArea } from '@controls/scrollArea/dashboardScrollArea.styles';
 
-export const Content = styled(DashboardScrollArea)`
+export const Content = styled.div`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	overflow-y: auto;
 	flex-grow: 1;
+	height: 100%;
 `;
