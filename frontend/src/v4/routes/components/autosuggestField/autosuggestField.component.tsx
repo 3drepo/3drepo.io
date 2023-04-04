@@ -18,9 +18,8 @@
 import { PureComponent } from 'react';
 import { MenuItem, Paper } from '@mui/material';
 import Autosuggest from 'react-autosuggest';
-import { ConditionalV5OrViewerScrollArea } from '@/v5/ui/v4Adapter/components/conditionalV5OrViewerScrollArea.component';
 import { Highlight } from '../highlight/highlight.component';
-import { Container, StyledTextField, SuggestionsList } from './autosuggestField.styles';
+import { Container, OptionsContainer, StyledTextField, SuggestionsList } from './autosuggestField.styles';
 
 interface IProps {
 	suggestions: any[];
@@ -101,9 +100,9 @@ export class AutosuggestField extends PureComponent<IProps, IState> {
 				{...options.containerProps}
 				style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
 			>
-				<ConditionalV5OrViewerScrollArea autoHeight>
+				<OptionsContainer>
 					{options.children}
-				</ConditionalV5OrViewerScrollArea>
+				</OptionsContainer>
 			</Paper>
 		</SuggestionsList>
 	)
