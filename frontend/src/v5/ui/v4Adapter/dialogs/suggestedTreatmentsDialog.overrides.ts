@@ -23,7 +23,6 @@ import {
 	StyledDialogContent,
 	Description,
 	ExpandButton,
-	ViewerScrollArea,
 	TextLabel,
 	StyledListItem,
 } from '@/v4/routes/components/dialogContainer/components/suggestedTreatmentsDialog/suggestedTreatmentsDialog.styles';

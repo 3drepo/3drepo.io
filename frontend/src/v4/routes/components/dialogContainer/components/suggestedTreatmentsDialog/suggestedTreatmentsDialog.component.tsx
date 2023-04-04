@@ -26,7 +26,7 @@ import { LabelButton } from '../../../../viewerGui/components/labelButton/labelB
 import { EmptyStateInfo } from '../../../components.styles';
 import { CellSelect } from '../../../customTable/components/cellSelect/cellSelect.component';
 import {
-	Container, Label, StyledDialogContent, StyledGrid, StyledList, StyledListItem, StyledTypography, ViewerScrollArea,
+	Container, Label, StyledDialogContent, StyledGrid, StyledList, StyledListItem, StyledTypography,
 } from './suggestedTreatmentsDialog.styles';
 import { SuggestionDetails } from './suggestionDetails/suggestionDetails.component';
 
