@@ -22,8 +22,6 @@ import Grid from '@mui/material/Grid';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
-import { ConditionalV5OrViewerScrollArea as ViewerScrollAreaBase } from '@/v5/ui/v4Adapter/components/conditionalV5OrViewerScrollArea.component';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import { COLOR } from '../../../../../styles';
 
