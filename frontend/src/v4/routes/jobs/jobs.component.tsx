@@ -162,13 +162,6 @@ export class Jobs extends PureComponent<IProps, IState> {
 		const { jobs, colors, isPending, currentTeamspace } =  this.props;
 		const { containerElement, panelBottomAnchorEl } = this.state;
 
-		const openNewJobForm = ({ currentTarget }: React.MouseEvent<HTMLDivElement>) => {
-			this.setState({
-				...this.state,
-				panelBottomAnchorEl: currentTarget,
-			});
-		};
-
 		const closeNewJobForm = () => {
 			this.setState({
 				...this.state,
