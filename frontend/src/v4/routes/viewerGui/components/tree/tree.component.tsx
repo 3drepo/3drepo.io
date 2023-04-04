@@ -19,7 +19,6 @@ import Check from '@mui/icons-material/Check';
 import TreeIcon from '@mui/icons-material/DeviceHub';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList as List } from 'react-window';
-import { ScrollArea } from '@controls/scrollArea/scrollArea.styles';
 
 import { TREE_ACTIONS_ITEMS, TREE_ACTIONS_MENU, TREE_ITEM_SIZE } from '../../../../constants/tree';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
@@ -136,7 +135,6 @@ export class Tree extends PureComponent<IProps, IState> {
 							itemSize={TREE_ITEM_SIZE}
 							itemKey={this.getNodeId}
 							className="tree-list"
-							outerElementType={ScrollArea}
 							outerRef={this.scrollbarRef}
 						>
 							{this.renderTreeNode}
