@@ -25,12 +25,10 @@ export const Container = styled.li<{ selected?: boolean }>`
 	height: 100%;
 	width: 100%;
 	list-style: none;
-	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-	border-bottom-style: none;
+	border-bottom: 1px solid ${({ theme }) => theme.palette.tertiary.lightest};
 
 	&:last-child {
 		border-radius: 0 0 ${BORDER_RADIUS} ${BORDER_RADIUS};
-		border-bottom-style: solid;
 
 		${DashboardListItemRowStyles.Container} {
 			${({ selected }) => selected && css`
