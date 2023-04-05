@@ -466,7 +466,7 @@ export const theme = createTheme({
 				tooltip: {
 					backgroundColor: COLOR.SECONDARY_DARK,
 					padding: '7px 10px 8px 10px',
-					borderRadius: '3px',
+					borderRadius: '8px',
 					...typography.caption,
 				},
 				tooltipPlacementBottom: {
@@ -559,8 +559,8 @@ export const theme = createTheme({
 			},
 			styleOverrides: {
 				root: {
-					borderRadius: '5px',
-					height: '18px',
+					borderRadius: 5,
+					height: 18,
 					margin: 'auto 10px',
 				},
 				barColorPrimary: {
@@ -584,6 +584,11 @@ export const theme = createTheme({
 		MuiPaper: {
 			defaultProps: {
 				elevation: 8,
+			},
+			styleOverrides: {
+				root: {
+					borderRadius: 10,
+				},
 			},
 		},
 		MuiCard: {
@@ -672,6 +677,7 @@ export const theme = createTheme({
 					justifyContent: 'space-between',
 					background: GRADIENT.SECONDARY,
 					zIndex: 10,
+					borderRadius: 0,
 					'>*': {
 						maxHeight: '100%',
 					},
@@ -720,7 +726,7 @@ export const theme = createTheme({
 		MuiList: {
 			styleOverrides: {
 				root: {
-					borderRadius: 5,
+					borderRadius: 10,
 					boxShadow: SHADOW.LEVEL_5,
 					padding: '10px 0px',
 					// multiSelect
@@ -877,7 +883,7 @@ export const theme = createTheme({
 				root: {
 					color: COLOR.SECONDARY_MAIN,
 					background: COLOR.PRIMARY_MAIN_CONTRAST,
-					borderRadius: 5,
+					borderRadius: 8,
 
 					input: {
 						padding: '0px 15px',
@@ -893,12 +899,12 @@ export const theme = createTheme({
 					},
 					'&.Mui-focused:not(.Mui-disabled) .MuiOutlinedInput-notchedOutline, .Mui-focused .MuiSelect-select': {
 						border: `1px solid ${COLOR.PRIMARY_MAIN}`,
-						borderRadius: 5,
+						borderRadius: 8,
 						boxShadow: `0 0 2px ${COLOR.PRIMARY_MAIN}`,
 					},
 					'&, &:focus, &:active, &:hover': {
 						'.MuiOutlinedInput-notchedOutline': {
-							borderRadius: 5,
+							borderRadius: 8,
 							border: `1px solid ${COLOR.BASE_LIGHTEST}`,
 						},
 						'&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
@@ -959,7 +965,7 @@ export const theme = createTheme({
 			},
 			styleOverrides: {
 				select: {
-					borderRadius: 5,
+					borderRadius: 8,
 					color: COLOR.SECONDARY_MAIN,
 					background: COLOR.PRIMARY_MAIN_CONTRAST,
 					lineHeight: '35px',
@@ -1098,7 +1104,7 @@ export const theme = createTheme({
 					},
 				},
 				root: {
-					borderRadius: 5,
+					borderRadius: 8,
 					disableRipple: true,
 					textTransform: 'initial',
 					padding: '10px 15px',
