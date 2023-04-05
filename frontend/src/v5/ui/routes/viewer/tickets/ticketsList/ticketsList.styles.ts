@@ -23,7 +23,7 @@ import { Ticket } from './ticketItem/ticketItem.styles';
 
 export const List = styled.div`
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
-	border-radius: 6px;
+	border-radius: 8px;
 	overflow: hidden;
 	display: inline-block;
 	width: 100%;

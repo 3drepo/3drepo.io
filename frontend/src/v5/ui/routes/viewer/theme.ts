@@ -257,7 +257,7 @@ export const theme = createTheme(
 								[`& ${Wrapper}`]: {
 									overflow: 'hidden',
 									left: '100%',
-									borderRadius: 8,
+									borderRadius: 10,
 								},
 							},
 							// filter panel menu

@@ -148,17 +148,17 @@ export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected
 	`}
 
 	&:last-child {
-		border-radius: 0 0 5px 5px;
+		border-radius: 0 0 8px 8px;
 		border-bottom-style: solid;
 	}
 
 	&:first-child {
-		border-radius: 5px 5px 0 0;
+		border-radius: 8px 8px 0 0;
 		border-top-style: solid;
 	}
 
 	&:only-child {
-		border-radius: 5px;
+		border-radius: 8px;
 	}
 
 	${({ theme, selected }) => selected && css`
