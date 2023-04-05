@@ -36,10 +36,28 @@ export const TextField = styled(TextFieldComponent)`
 	.MuiInputBase-adornedEnd {
 		padding-right: 0;
 	}
+	.MuiInputBase-input::placeholder {
+		opacity: 1;
+		color: ${({ theme }) => theme.palette.base.main};
+	}
 
 	.MuiOutlinedInput-root {
 		margin: 0;
+		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
+		&.Mui-focused {
+			background-color: ${({ theme }) => theme.palette.primary.contrast};
+		}
+		&.Mui-focused, &:hover, & {
+			.MuiOutlinedInput-notchedOutline {
+				border: none;
+				box-shadow: none;
+			}
+		}
+		&:hover:not(.Mui-focused) .MuiInputBase-input::placeholder {
+			color: ${({ theme }) => theme.palette.secondary.main};
+		}
 	}
+
 `;
 
 export const StartAdornment = styled(InputAdornmentComponent).attrs({
