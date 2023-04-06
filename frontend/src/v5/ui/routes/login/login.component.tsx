@@ -29,7 +29,6 @@ import { SubmitButton } from '@controls/submitButton/submitButton.component';
 import { AuthSubHeader, Divider } from '@components/authTemplate/authTemplate.styles';
 import { useSSOLogin } from '@/v5/services/sso.hooks';
 import { Gap } from '@controls/gap';
-import { NewSticker } from '@components/shared/sso/microsoftText.styles';
 import { AuthFormLogin, ForgotPasswordPrompt, MicrosoftButton, OtherOptions, SignUpPrompt, UnhandledErrorInterceptor } from './login.styles';
 import { AuthHeading, ErrorMessage, FormPasswordField, FormUsernameField } from './components/components.styles';
 import { PASSWORD_FORGOT_PATH, RELEASE_NOTES_ROUTE, SIGN_UP_PATH } from '../routes.constants';
@@ -78,9 +77,6 @@ export const Login = () => {
 				</AuthHeading>
 				<AuthSubHeader>
 					<FormattedMessage id="auth.login.heading.signInWithMicrosoft" defaultMessage="Sign in with Microsoft" />
-					<NewSticker>
-						<FormattedMessage id="feature.new" defaultMessage="New" />
-					</NewSticker>
 				</AuthSubHeader>
 				<MicrosoftButton onClick={loginWithSSO}>
 					<FormattedMessage id="auth.login.sso.microsoft" defaultMessage="Sign in with Microsoft" />
