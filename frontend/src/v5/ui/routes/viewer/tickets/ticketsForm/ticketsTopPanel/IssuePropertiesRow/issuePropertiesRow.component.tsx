@@ -16,6 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
+import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { TicketDetailsAssignees } from '@controls/assignees/ticketDetailsAssignees/ticketDetailsAssignees.component';
 import { PRIORITY_LEVELS_MAP, STATUS_MAP } from '@controls/chip/chip.types';
 import { FormChipSelect, FormDueDateWithIcon } from '@controls/inputs/formInputs.component';
@@ -28,80 +29,84 @@ import { ColumnSeparator, FloatRight, IssuePropertiesContainer, PropertyColumn, 
 type IIssuePropertiesRow = {
 	onBlur: () => void;
 	readOnly: boolean;
+	properties: PropertyDefinition[];
 };
 
-export const IssuePropertiesRow = ({ onBlur, readOnly }: IIssuePropertiesRow) => (
-	<IssuePropertiesContainer>
-		<PropertyColumn>
-			<PropertyTitle>
-				<FormattedMessage
-					id="ticketTopPanel.priority.label"
-					defaultMessage="Priority"
+export const IssuePropertiesRow = ({ onBlur, readOnly, properties }: IIssuePropertiesRow) => {
+	const getDefaultValue = (name) => properties.find((p) => p.name === name).default;
+	return (
+		<IssuePropertiesContainer>
+			<PropertyColumn>
+				<PropertyTitle>
+					<FormattedMessage
+						id="ticketTopPanel.priority.label"
+						defaultMessage="Priority"
+					/>
+				</PropertyTitle>
+				<FormChipSelect
+					variant="text"
+					tooltip={formatMessage({
+						id: 'customTicket.topPanel.priority.tooltip',
+						defaultMessage: 'Set priority',
+					})}
+					name={`properties[${IssueProperties.PRIORITY}]`}
+					onBlur={onBlur}
+					key={IssueProperties.PRIORITY}
+					values={PRIORITY_LEVELS_MAP}
+					defaultValue={getDefaultValue(IssueProperties.PRIORITY)}
+					disabled={readOnly}
 				/>
-			</PropertyTitle>
-			<FormChipSelect
-				variant="text"
-				tooltip={formatMessage({
-					id: 'customTicket.topPanel.priority.tooltip',
-					defaultMessage: 'Set priority',
-				})}
-				name={`properties[${IssueProperties.PRIORITY}]`}
-				onBlur={onBlur}
-				key={IssueProperties.PRIORITY}
-				values={PRIORITY_LEVELS_MAP}
-				defaultValue={PRIORITY_LEVELS_MAP.None.label}
-				disabled={readOnly}
-			/>
-		</PropertyColumn>
-		<ColumnSeparator />
-		<PropertyColumn>
-			<PropertyTitle>
-				<FormattedMessage
-					id="ticketTopPanel.dueDate.label"
-					defaultMessage="Due"
+			</PropertyColumn>
+			<ColumnSeparator />
+			<PropertyColumn>
+				<PropertyTitle>
+					<FormattedMessage
+						id="ticketTopPanel.dueDate.label"
+						defaultMessage="Due"
+					/>
+				</PropertyTitle>
+				<FormDueDateWithIcon
+					tooltip={formatMessage({
+						id: 'customTicket.topPanel.dueDate.tooltip',
+						defaultMessage: 'Set due date',
+					})}
+					name={`properties[${IssueProperties.DUE_DATE}]`}
+					onBlur={onBlur}
+					key={IssueProperties.DUE_DATE}
+					disabled={readOnly}
 				/>
-			</PropertyTitle>
-			<FormDueDateWithIcon
-				tooltip={formatMessage({
-					id: 'customTicket.topPanel.dueDate.tooltip',
-					defaultMessage: 'Set due date',
-				})}
-				name={`properties[${IssueProperties.DUE_DATE}]`}
-				onBlur={onBlur}
-				key={IssueProperties.DUE_DATE}
-				disabled={readOnly}
-			/>
-		</PropertyColumn>
-		<ColumnSeparator />
-		<PropertyColumn>
-			<PropertyTitle>
-				<FormattedMessage
-					id="ticketTopPanel.status.label"
-					defaultMessage="Status"
+			</PropertyColumn>
+			<ColumnSeparator />
+			<PropertyColumn>
+				<PropertyTitle>
+					<FormattedMessage
+						id="ticketTopPanel.status.label"
+						defaultMessage="Status"
+					/>
+				</PropertyTitle>
+				<FormChipSelect
+					variant="text"
+					tooltip={formatMessage({
+						id: 'customTicket.topPanel.status.tooltip',
+						defaultMessage: 'Set status',
+					})}
+					name={`properties[${IssueProperties.STATUS}]`}
+					onBlur={onBlur}
+					key={IssueProperties.STATUS}
+					values={STATUS_MAP}
+					defaultValue={getDefaultValue(IssueProperties.STATUS)}
+					disabled={readOnly}
 				/>
-			</PropertyTitle>
-			<FormChipSelect
-				variant="text"
-				tooltip={formatMessage({
-					id: 'customTicket.topPanel.status.tooltip',
-					defaultMessage: 'Set status',
-				})}
-				name={`properties[${IssueProperties.STATUS}]`}
-				onBlur={onBlur}
-				key={IssueProperties.STATUS}
-				values={STATUS_MAP}
-				defaultValue={STATUS_MAP.Open.label}
-				disabled={readOnly}
-			/>
-		</PropertyColumn>
-		<FloatRight>
-			<InputController
-				Input={TicketDetailsAssignees}
-				name={`properties[${IssueProperties.ASSIGNEES}]`}
-				onBlur={onBlur}
-				key={IssueProperties.ASSIGNEES}
-				disabled={readOnly}
-			/>
-		</FloatRight>
-	</IssuePropertiesContainer>
-);
+			</PropertyColumn>
+			<FloatRight>
+				<InputController
+					Input={TicketDetailsAssignees}
+					name={`properties[${IssueProperties.ASSIGNEES}]`}
+					onBlur={onBlur}
+					key={IssueProperties.ASSIGNEES}
+					disabled={readOnly}
+				/>
+			</FloatRight>
+		</IssuePropertiesContainer>
+	);
+};
