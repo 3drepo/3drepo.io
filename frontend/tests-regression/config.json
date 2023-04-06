@@ -1,6 +1,11 @@
 {
 	"domain":"https://3drepo.lan/",
-	"usersDefinitions" : {
+	"apiDomain": "https://3drepo.lan:443/api", 
+	"browserSize": {
+		"width": 1024,
+		"height": 768
+	},
+	"usersProfiles" : {
 		"viewer": {
 			"username":  "teamSpace1",
 			"password": "vdN5xQTQRY6syiD",

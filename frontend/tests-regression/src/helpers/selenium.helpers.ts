@@ -14,6 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { Builder } from 'selenium-webdriver';
+import * as config from '../../config.json';
 
 // This is for ensure that the size of the innerwidt/innerheight of the browser is exactly what
 // regardless of the bars of the browser that is running the test
@@ -27,3 +29,11 @@ export const resizeWindow = async (driver, size) => {
 
 	await driver.manage().window().setRect(currentResolution);
 };
+
+export const initializeSeleniumDriver = async (browserType) => {
+	const driver = await new Builder().forBrowser(browserType).build();
+	await resizeWindow(driver, config.browserSize);
+	return driver;
+};
+
+

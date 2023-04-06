@@ -14,33 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import apiDomain from '../../config.json';
 
-import { When, Then, Given, AfterAll, BeforeAll } from '@cucumber/cucumber';
-import { expect } from 'chai';
-import * as API from '@3drepo/api';
-import { initializeSeleniumDriver } from '../../src/helpers/selenium.helpers';
-
-let driver;
-BeforeAll(async () => {
-	driver = await initializeSeleniumDriver('chrome');
-});
-
-Given('Im not logged in', async () => {
-	try {
-		await API.Auth.authenticate();
-	} catch (e) {
-		console.log('the error is ');
-		console.log(e);
-	}
-});
-
-When('I navigate to {string}', async (page) => {
-});
-
-Then('I should be redirected to the {string} page', async (page) => {
-	expect(true).to.equals(true);
-});
-
-AfterAll(async () => {
-	await driver.quit();
-});
+export const clientConfigService = {
+	GET_API: null,
+	POST_API: null,
+	apiUrl: (_, url) => new URL(url, apiDomain as unknown as string).toString()
+};
