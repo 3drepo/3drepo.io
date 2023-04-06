@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useEffect } from 'react';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Link } from 'react-router-dom';
 import LoginIcon from '@assets/icons/outlined/login-outlined.svg';
@@ -54,7 +55,6 @@ export const Login = () => {
 
 	const onSubmit = ({ username, password }) => {
 		AuthActionsDispatchers.login(username, password);
-		resetSSOParams();
 	};
 
 	const isExpectedError = (err) => (
@@ -65,6 +65,8 @@ export const Login = () => {
 			'TOO_MANY_LOGIN_ATTEMPTS',
 		].includes(err.response?.data?.code)
 	);
+
+	useEffect(() => resetSSOParams, []);
 
 	return (
 		<AuthTemplate
