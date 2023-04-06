@@ -19,7 +19,7 @@ import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
-import { EditProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
+import { ProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -51,7 +51,7 @@ export const ProjectSettings = () => {
 		reset,
 	} = useForm<IFormInput>({
 		mode: 'onChange',
-		resolver: yupResolver(EditProjectSchema),
+		resolver: yupResolver(ProjectSchema),
 		context: { existingNames },
 		defaultValues,
 	});
