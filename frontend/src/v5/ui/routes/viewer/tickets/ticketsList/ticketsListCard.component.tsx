@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CardContainer, CardHeader } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
 import { CardContent } from '@components/viewer/cards/cardContent.component';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { ViewerParams } from '../../../routes.constants';
@@ -29,15 +30,16 @@ import { ViewerParams } from '../../../routes.constants';
 export const TicketsListCard = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
+	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 
 	return (
 		<CardContainer>
 			<CardHeader>
 				<TicketsIcon />
 				<FormattedMessage id="viewer.cards.tickets.title" defaultMessage="Tickets" />
-				<NewTicketMenu />
+				{!readOnly && (<NewTicketMenu />)}
 			</CardHeader>
-			<CardContent>
+			<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
 				{tickets.length ? (
 					<TicketsList tickets={tickets} />
 				) : (

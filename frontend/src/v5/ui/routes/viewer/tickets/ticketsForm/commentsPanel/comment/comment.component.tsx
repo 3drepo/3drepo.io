@@ -61,6 +61,8 @@ export const Comment = ({
 			<Gap $height={isFirstOfBlock ? '12px' : '4px'} />
 			<UserComment
 				{...props}
+				updatedAt={updatedAt}
+				createdAt={createdAt}
 				author={author}
 				commentAge={commentAge}
 				metadata={metadata}

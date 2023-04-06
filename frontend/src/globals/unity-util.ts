@@ -1328,9 +1328,10 @@ export class UnityUtil {
 		initView = null,
 		clearCanvas = true,
 	): Promise<void> {
-		if (clearCanvas) {
+		if (clearCanvas && UnityUtil.loadedFlag) {
 			UnityUtil.reset(!initView);
 		}
+
 		const params: any = {
 			database: account,
 			model,

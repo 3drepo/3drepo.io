@@ -23,7 +23,7 @@ import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
-import { pinsDiff } from '../../helpers/pins';
+import { pinsDiff, pinsSelectionChanged } from '../../helpers/pins';
 import { PresentationMode } from '../../modules/presentation/presentation.constants';
 import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
 transformationDiffRemoves } from '../../modules/sequences/sequences.helper';
@@ -119,9 +119,11 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 
 			const toAdd = pinsDiff(curr, prev);
 			const toRemove = pinsDiff(prev, curr);
+			const toChangeSelection = pinsSelectionChanged(curr, prev);
 
 			toRemove.forEach(viewer.removePin.bind(viewer));
 			toAdd.forEach(viewer.addPin.bind(viewer));
+			toChangeSelection.forEach(viewer.setSelectionPin.bind(viewer));
 		}
 	}
 

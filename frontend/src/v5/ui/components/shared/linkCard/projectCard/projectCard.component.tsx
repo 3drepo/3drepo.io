@@ -24,6 +24,7 @@ import { TeamspaceParams } from '@/v5/ui/routes/routes.constants';
 import { DialogsActionsDispatchers, ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IProject } from '@/v5/store/projects/projects.types';
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { EllipsisMenuContainer, EllipsisMenu } from './projectCard.styles';
 import { LinkCard } from '../linkCard.component';
 
@@ -38,7 +39,8 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 	const { teamspace } = useParams<TeamspaceParams>();
 	const to = projectRoute(teamspace, project);
 
-	const { isAdmin } = project;
+	const { isAdmin: isProjectAdmin } = project;
+	const isTeamspaceAdmin = TeamspacesHooksSelectors.selectIsTeamspaceAdmin();
 
 	const preventNavigation = (e) => e.preventDefault();
 
@@ -98,7 +100,7 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 							defaultMessage: 'Delete Project',
 						})}
 						onClick={onClickDelete}
-						hidden={!isAdmin}
+						hidden={!isTeamspaceAdmin}
 					/>
 					<EllipsisMenuItem
 						title={formatMessage({
@@ -106,7 +108,7 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 							defaultMessage: 'Settings',
 						})}
 						to={projectTabRoute(teamspace, project, 'project_settings')}
-						hidden={!isAdmin}
+						hidden={!isProjectAdmin}
 					/>
 				</EllipsisMenu>
 			</EllipsisMenuContainer>
