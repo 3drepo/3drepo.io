@@ -27,7 +27,7 @@ import { AuthTemplate } from '@components/authTemplate';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
 import { AuthSubHeader, Divider } from '@components/authTemplate/authTemplate.styles';
-import { useSSOLogin } from '@/v5/services/sso.hooks';
+import { useSSOLogin, useSSOParams } from '@/v5/services/sso.hooks';
 import { Gap } from '@controls/gap';
 import { NewSticker } from '@components/shared/sso/microsoftText.styles';
 import { AuthFormLogin, ForgotPasswordPrompt, MicrosoftButton, OtherOptions, SignUpPrompt, UnhandledErrorInterceptor } from './login.styles';
@@ -37,6 +37,9 @@ import { PASSWORD_FORGOT_PATH, RELEASE_NOTES_ROUTE, SIGN_UP_PATH } from '../rout
 const APP_VERSION = ClientConfig.VERSION;
 
 export const Login = () => {
+	const [ssoErrorMessage, loginWithSSO] = useSSOLogin();
+	const [, resetSSOParams] = useSSOParams();
+
 	const { control, handleSubmit, formState: { isValid, errors } } = useForm({
 		mode: 'onSubmit',
 		defaultValues: {
@@ -45,12 +48,13 @@ export const Login = () => {
 		},
 		resolver: yupResolver(LoginSchema),
 	});
-	const isPending = AuthHooksSelectors.selectIsPending();
 
+	const isPending = AuthHooksSelectors.selectIsPending();
 	const errorMessage: string = AuthHooksSelectors.selectLoginError();
 
 	const onSubmit = ({ username, password }) => {
 		AuthActionsDispatchers.login(username, password);
+		resetSSOParams();
 	};
 
 	const isExpectedError = (err) => (
@@ -61,8 +65,6 @@ export const Login = () => {
 			'TOO_MANY_LOGIN_ATTEMPTS',
 		].includes(err.response?.data?.code)
 	);
-
-	const [ssoErrorMessage, loginWithSSO] = useSSOLogin();
 
 	return (
 		<AuthTemplate
