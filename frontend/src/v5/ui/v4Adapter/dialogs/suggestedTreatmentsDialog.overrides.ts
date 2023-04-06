@@ -107,7 +107,7 @@ export default css`
 
 			${LabelButton} {
 				${primaryButtonStyling}
-				border-radius: 5px;
+				border-radius: 8px;
 				padding: 5px 15px;
 			}
 

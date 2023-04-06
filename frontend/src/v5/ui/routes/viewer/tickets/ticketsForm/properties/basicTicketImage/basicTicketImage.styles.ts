@@ -22,7 +22,7 @@ export const Container = styled.div<{ error?: boolean }>`
 	padding: 13px;
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border-radius: 5px;
+	border-radius: 8px;
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;

@@ -69,9 +69,6 @@ export const theme = createTheme(
 				MuiInputBase: {
 					styleOverrides: {
 						root: {
-							'&&': {
-								borderRadius: 5,
-							},
 							'&.Mui-focused': {
 								'.MuiSelect-select': {
 									border: `1px solid ${COLOR.PRIMARY_MAIN}`,

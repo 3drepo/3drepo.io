@@ -53,10 +53,6 @@ export default css`
 			right: 0;
 		}
 
-		${DescriptionImage} {
-			border-radius: 5px;
-		}
-
 		${IssuesDateFieldContainer} {
 			.MuiInputBase-root {
 				padding: 0;
@@ -68,7 +64,7 @@ export default css`
 			}
 		}
 		${DescriptionImage} img {
-			border-radius: 5px;
+			border-radius: 8px;
 		}
 	
 		${UpdateButtonsContainer} {

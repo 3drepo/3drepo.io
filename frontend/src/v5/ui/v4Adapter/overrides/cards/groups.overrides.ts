@@ -131,7 +131,7 @@ const expandedGroupItem = css`
 				}
 				${TextFieldContainer} {
 					border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-					border-radius: 5px;
+					border-radius: 8px;
 					background-color: ${({ theme }) => theme.palette.primary.contrast};
 
 					label {

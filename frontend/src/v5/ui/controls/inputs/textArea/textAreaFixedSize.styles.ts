@@ -26,7 +26,7 @@ export const Container = styled.div<{ $error?: boolean, $height: number }>`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	border: solid 1px;
 	border-color: ${({ theme }) => theme.palette.base.lightest};
-	border-radius: 5px;
+	border-radius: 8px;
 	overflow-x: hidden;
 	min-height: ${({ $height }) => $height}px;
 
