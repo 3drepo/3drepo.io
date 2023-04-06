@@ -1,6 +1,10 @@
 {
-	"browserSize": {
-		"width": 1024,
-		"height":768
-	} 
+	"domain":"https://3drepo.lan/",
+	"usersDefinitions" : {
+		"viewer": {
+			"username":  "teamSpace1",
+			"password": "vdN5xQTQRY6syiD",
+			"email": "santiago.montero@3drepo.orgs"
+		}
+	}
 }

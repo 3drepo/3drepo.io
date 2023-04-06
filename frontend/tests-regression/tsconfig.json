@@ -1,14 +1,9 @@
 {
-  "extends": "@tsconfig/node18/tsconfig.json",
-
-  "compilerOptions": {
-    "module": "commonjs",
-    "outDir": "build",
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-  },
-  "include": [
-    "config.json",
-    "**/*.ts"
-  ],
+	"compilerOptions": {
+		"esModuleInterop": true,
+		"types": [
+			"node",
+			"@types/selenium-webdriver"
+		]
+	}
 }

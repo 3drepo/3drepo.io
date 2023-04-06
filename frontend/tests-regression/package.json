@@ -1,19 +1,35 @@
 {
-  "name": "tests-regression",
+  "name": "@cucumber/typescript-example",
   "version": "1.0.0",
-  "description": "Regression tests using selenium for the frontend",
-  "main": "test.js",
+  "description": "A simple example of a TypeScript Cucumber-JS project",
+  "main": "src/index.ts",
   "scripts": {
-    "build": "yarn tsc",
-    "launch": "node ./build/test.js"
+    "test": "cucumber-js"
   },
-  "author": "3D Repo",
-  "license": "AGPL-3.0",
-  "dependencies": {
-    "selenium-webdriver": "4.8.2"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cucumber/cucumber-js.git"
   },
+  "keywords": [
+    "cucumber",
+    "bdd",
+    "typescript",
+    "example"
+  ],
+  "author": "Matt Wynne",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cucumber/cucumber-js/issues"
+  },
+  "homepage": "https://github.com/cucumber/cucumber-js#readme",
   "devDependencies": {
-    "@tsconfig/node18": "1.0.1",
-    "typescript": "5.0.3"
+    "@types/node": "18.15.11",
+    "ts-node": "^10.4.0",
+    "typescript": "^5.0.3"
+  },
+  "dependencies": {
+    "@cucumber/cucumber": "*",
+    "@types/selenium-webdriver": "^4.1.13",
+    "selenium-webdriver": "^4.8.2"
   }
 }

@@ -14,4 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-export const delay = (time) => new Promise((resolve) => setTimeout(resolve, time));
+
+// This is for ensure that the size of the innerwidt/innerheight of the browser is exactly what
+// regardless of the bars of the browser that is running the test
+export const resizeWindow = async (driver, size) => {
+	await driver.manage().window().setRect(size);
+	const actualSize = await driver.executeScript('return ({ width: window.innerWidth, height: window.innerHeight})');
+	const currentResolution = ({
+		width: size.width * 2 - actualSize.width,
+		height: size.height * 2 - actualSize.height,
+	});
+
+	await driver.manage().window().setRect(currentResolution);
+};
