@@ -42,19 +42,36 @@ function* fetchData({ teamspace, containerOrFederation, project }: FetchDataActi
 
 		const isFederation = federationsWithoutStats.some(({ _id }) => _id === containerOrFederation);
 
+		const fetchContainerStatsHasError = { value: false };
+
 		if (isFederation) {
 			yield put(FederationsActions.fetchFederationStats(teamspace, project, containerOrFederation));
 			yield take(FederationsTypes.FETCH_FEDERATION_STATS_SUCCESS);
 			const federation: IFederation = yield select(selectFederationById, containerOrFederation);
 
 			for (const containerId of federation.containers) {
-				yield put(ContainersActions.fetchContainerStats(teamspace, project, containerId));
+				yield put(ContainersActions.fetchContainerStats(
+					teamspace,
+					project,
+					containerId,
+					null,
+					() => { fetchContainerStatsHasError.value = true; },
+				));
 				yield take(ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS);
 			}
 		} else {
-			yield put(ContainersActions.fetchContainerStats(teamspace, project, containerOrFederation));
+			yield put(ContainersActions.fetchContainerStats(
+				teamspace,
+				project,
+				containerOrFederation,
+				null,
+				() => { fetchContainerStatsHasError.value = true; },
+			));
 			yield take(ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS);
 		}
+
+		if (fetchContainerStatsHasError.value) return;
+
 		yield put(TicketsActions.fetchTickets(teamspace, project, containerOrFederation, isFederation));
 		yield put(TicketsActions.fetchTemplates(teamspace, project, containerOrFederation, isFederation));
 	} catch (error) {

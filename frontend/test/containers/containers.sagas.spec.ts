@@ -26,6 +26,7 @@ import { containerMockFactory, prepareMockSettingsReply } from './containers.fix
 import { omit } from 'lodash';
 import { prepareMockViewsReply } from './containers.fixtures';
 import { prepareMockRawSettingsReply } from './containers.fixtures';
+import { alertAction } from '../test.helpers';
 import { prepareContainerSettingsForFrontend } from './../../src/v5/store/containers/containers.helpers';
 
 describe('Containers: sagas', () => {
@@ -129,11 +130,33 @@ describe('Containers: sagas', () => {
 			})
 
 			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[0]._id))
+				.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[0]._id, onSuccess, onError))
 				.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[1]._id))
 				.put(ContainersActions.fetchContainerStatsSuccess(projectId, mockContainers[0]._id, prepareMockStatsReply(mockContainers[0])))
 				.put(ContainersActions.fetchContainerStatsSuccess(projectId, mockContainers[1]._id, prepareMockStatsReply(mockContainers[1])))
 				.silentRun();
+
+			expect(onSuccess).toHaveBeenCalled();
+			expect(onError).not.toHaveBeenCalled();
+		})
+
+		it('should call container stats endpoint with 401', async () => {
+			const container = mockContainers[0];
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${container._id}/stats`)
+				.reply(401, {
+					message: 'You do not have sufficient access rights for this action.',
+					code: 'NOT_AUTHORIZED',
+					value: 'NOT_AUTHORIZED',
+				});
+
+			await expectSaga(ContainersSaga.default)
+				.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[0]._id, onSuccess, onError))
+				.put.like(alertAction('trying to fetch containers details'))
+				.silentRun();
+
+				expect(onSuccess).not.toHaveBeenCalled();
+				expect(onError).toHaveBeenCalled();
 		})
 
 		it('should call containers endpoint with 404', async () => {

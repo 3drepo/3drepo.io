@@ -34,7 +34,7 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	setFavouriteSuccess: ['projectId', 'containerId', 'isFavourite'],
 	fetchContainers: ['teamspace', 'projectId'],
 	fetchContainersSuccess: ['projectId', 'containers'],
-	fetchContainerStats: ['teamspace', 'projectId', 'containerId'],
+	fetchContainerStats: ['teamspace', 'projectId', 'containerId', 'onSuccess', 'onError'],
 	fetchContainerStatsSuccess: ['projectId', 'containerId', 'stats'],
 	fetchContainerViews: ['teamspace', 'projectId', 'containerId'],
 	fetchContainerViewsSuccess: ['projectId', 'containerId', 'views'],
@@ -181,15 +181,15 @@ export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & TeamspaceProjec
 export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & ProjectAndContainerId & { isFavourite: boolean};
 export type FetchContainersAction = Action<'FETCH_CONTAINERS'> & TeamspaceAndProjectId;
 export type FetchContainersSuccessAction = Action<'FETCH_CONTAINERS_SUCCESS'> & ProjectId & { containers: IContainer[] };
-export type FetchContainerStatsAction = Action<'FETCH_CONTAINER_STATS'> & TeamspaceProjectAndContainerId;
+export type FetchContainerStatsAction = Action<'FETCH_CONTAINER_STATS'> & TeamspaceProjectAndContainerId & Partial<SuccessAndErrorCallbacks>;
 export type FetchContainerStatsSuccessAction = Action<'FETCH_CONTAINER_STATS_SUCCESS'> & ProjectAndContainerId & { containerStats: ContainerStats };
 export type FetchContainerViewsAction = Action<'FETCH_CONTAINER_VIEWS'> & TeamspaceProjectAndContainerId;
 export type FetchContainerViewsSuccessAction = Action<'FETCH_CONTAINER_VIEWS_SUCCESS'> & ProjectAndContainerId & { views: View[] };
 export type FetchContainerSettingsAction = Action<'FETCH_CONTAINER_SETTINGS'> & TeamspaceProjectAndContainerId;
 export type FetchContainerSettingsSuccessAction = Action<'FETCH_CONTAINER_SETTINGS_SUCCESS'> & ProjectAndContainerId & { settings: ContainerSettings};
-export type UpdateContainerSettingsAction = Action<'UPDATE_CONTAINER_SETTINGS'> & TeamspaceProjectAndContainerId & { settings: ContainerSettings, onSuccess: () => void, onError: (error) => void };
+export type UpdateContainerSettingsAction = Action<'UPDATE_CONTAINER_SETTINGS'> & TeamspaceProjectAndContainerId & SuccessAndErrorCallbacks & { settings: ContainerSettings };
 export type UpdateContainerSettingsSuccessAction = Action<'UPDATE_CONTAINER_SETTINGS_SUCCESS'> & ProjectAndContainerId & { settings: ContainerSettings};
-export type CreateContainerAction = Action<'CREATE_CONTAINER'> & TeamspaceAndProjectId & { newContainer: NewContainer, onSuccess: () => void, onError: (error) => void };
+export type CreateContainerAction = Action<'CREATE_CONTAINER'> & TeamspaceAndProjectId & SuccessAndErrorCallbacks & { newContainer: NewContainer };
 export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & ProjectId & { container: IContainer };
 export type DeleteContainerAction = Action<'DELETE'> & TeamspaceProjectAndContainerId & SuccessAndErrorCallbacks;
 export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndContainerId;
@@ -202,7 +202,13 @@ export interface IContainersActionCreators {
 	setFavouriteSuccess: (projectId: string, containerId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
 	fetchContainers: (teamspace: string, projectId: string) => FetchContainersAction;
 	fetchContainersSuccess: (projectId: string, containers: IContainer[]) => FetchContainersSuccessAction;
-	fetchContainerStats: (teamspace: string, projectId: string, containerId: string) => FetchContainerStatsAction;
+	fetchContainerStats: (
+		teamspace: string,
+		projectId: string,
+		containerId: string,
+		onSuccess?: () => void,
+		onError?: (error) => void,
+	) => FetchContainerStatsAction;
 	fetchContainerStatsSuccess: (
 		projectId: string,
 		containerId: string,
