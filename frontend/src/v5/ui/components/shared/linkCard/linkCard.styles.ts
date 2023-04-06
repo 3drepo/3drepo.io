@@ -67,8 +67,7 @@ export const Card = styled(CardBase)<{ $variant: string; }>`
 		}
 		if ($variant === 'secondary') {
 			return css`
-				background-color: rgb(255 255 255 / 5%);
-				${Heading} { color: ${theme.palette.primary.contrast}; }
+				background-color: ${theme.palette.tertiary.lighter};
 			`;
 		}
 		return '';

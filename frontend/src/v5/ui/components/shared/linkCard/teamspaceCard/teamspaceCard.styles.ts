@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
-import { CardListItem } from '../../linkCard.styles';
-import { AddTeamspaceIcon, Container } from './addTeamspaceCard.styles';
+import { CoverImage } from '@controls/coverImage/coverImage.component';
+import styled from 'styled-components';
+import { LinkCard } from '../linkCard.component';
+import { Details } from '../linkCard.styles';
 
-export const AddTeamspaceCard = (): JSX.Element => (
-	<CardListItem>
-		<a href="https://3drepo.com/pricing/" target="_blank" rel="noreferrer">
-			<Container>
-				<AddTeamspaceIcon />
-				<FormattedMessage id="teamspaceSelect.addNewTeamspace" defaultMessage="New Teamspace" />
-			</Container>
-		</a>
-	</CardListItem>
-);
+export const TeamspaceImage = styled(CoverImage)`
+	height: 132px;
+`;
+
+export const TeamspaceLinkCard = styled(LinkCard)`
+	${Details} {
+		padding: 5px 0 0;
+	}
+`;

@@ -16,7 +16,7 @@
  */
 
 import { flatten, partition } from 'lodash';
-import { AddTeamspaceCard, TeamspaceCard, TeamspacePlaceholderCard } from '@components/shared/linkCard/teamspaceCard';
+import { TeamspaceCard, TeamspacePlaceholderCard } from '@components/shared/linkCard/teamspaceCard';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TeamspacesHooksSelectors, CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CardList } from './teamspaceList.styles';
@@ -48,7 +48,6 @@ export const TeamspaceList = ({ className }: ITeamspaceList): JSX.Element => {
 					</>
 				)
 			}
-			{ !!teamspaces.length && (<AddTeamspaceCard />) }
 		</CardList>
 	);
 };

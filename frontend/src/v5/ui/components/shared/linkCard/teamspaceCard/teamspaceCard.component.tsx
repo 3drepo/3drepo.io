@@ -18,10 +18,9 @@
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
-import { CoverImage } from '@controls/coverImage/coverImage.component';
 import { DEFAULT_TEAMSPACE_IMG_SRC, getTeamspaceImgSrc } from '@/v5/store/teamspaces/teamspaces.helpers';
 import { uriCombine } from '@/v5/helpers/url.helper';
-import { LinkCard } from '../linkCard.component';
+import { TeamspaceImage, TeamspaceLinkCard } from './teamspaceCard.styles';
 
 interface ITeamspaceCard {
 	teamspaceName?: string;
@@ -37,7 +36,7 @@ export const TeamspaceCard = ({ teamspaceName, className }: ITeamspaceCard): JSX
 	const imgSrc = isPersonalTeamspace ? avatarUrl : getTeamspaceImgSrc(teamspaceName);
 
 	return (
-		<LinkCard
+		<TeamspaceLinkCard
 			className={className}
 			to={to}
 			variant="secondary"
@@ -48,7 +47,7 @@ export const TeamspaceCard = ({ teamspaceName, className }: ITeamspaceCard): JSX
 					: <FormattedMessage id="teamspaceCard.sharedWithMe" defaultMessage="Shared with me" />
 			}
 		>
-			<CoverImage imgSrc={imgSrc} defaultImgSrc={DEFAULT_TEAMSPACE_IMG_SRC} />
-		</LinkCard>
+			<TeamspaceImage imgSrc={imgSrc} defaultImgSrc={DEFAULT_TEAMSPACE_IMG_SRC} />
+		</TeamspaceLinkCard>
 	);
 };
