@@ -49,7 +49,7 @@ export const IssuePropertiesRow = ({ onBlur, readOnly }: IIssuePropertiesRow) =>
 				onBlur={onBlur}
 				key={IssueProperties.PRIORITY}
 				values={PRIORITY_LEVELS_MAP}
-				defaultValue={PRIORITY_LEVELS_MAP.Low.label}
+				defaultValue={PRIORITY_LEVELS_MAP.None.label}
 				disabled={readOnly}
 			/>
 		</PropertyColumn>
