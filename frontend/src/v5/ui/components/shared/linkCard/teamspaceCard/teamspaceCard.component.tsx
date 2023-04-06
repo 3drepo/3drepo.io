@@ -20,7 +20,7 @@ import { FormattedMessage } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
 import { DEFAULT_TEAMSPACE_IMG_SRC, getTeamspaceImgSrc } from '@/v5/store/teamspaces/teamspaces.helpers';
 import { uriCombine } from '@/v5/helpers/url.helper';
-import { TeamspaceImage, TeamspaceLinkCard } from './teamspaceCard.styles';
+import { LinkCard } from '../linkCard.component';
 
 interface ITeamspaceCard {
 	teamspaceName?: string;
@@ -36,18 +36,18 @@ export const TeamspaceCard = ({ teamspaceName, className }: ITeamspaceCard): JSX
 	const imgSrc = isPersonalTeamspace ? avatarUrl : getTeamspaceImgSrc(teamspaceName);
 
 	return (
-		<TeamspaceLinkCard
+		<LinkCard
 			className={className}
 			to={to}
 			variant="secondary"
 			heading={teamspaceName}
+			imgSrc={imgSrc}
+			defaultImgSrc={DEFAULT_TEAMSPACE_IMG_SRC}
 			subheading={
 				isPersonalTeamspace
 					? <FormattedMessage id="teamspaceCard.myTeamspace" defaultMessage="My Teamspace" />
 					: <FormattedMessage id="teamspaceCard.sharedWithMe" defaultMessage="Shared with me" />
 			}
-		>
-			<TeamspaceImage imgSrc={imgSrc} defaultImgSrc={DEFAULT_TEAMSPACE_IMG_SRC} />
-		</TeamspaceLinkCard>
+		/>
 	);
 };
