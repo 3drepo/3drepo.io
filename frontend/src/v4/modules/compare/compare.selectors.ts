@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { map, omitBy, orderBy, values } from 'lodash';
+import { map, omitBy, orderBy, keys, sum } from 'lodash';
 import { createSelector } from 'reselect';
 import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE } from '../../constants/compare';
 import { searchByFilters } from '../../helpers/searching';
+import { selectModels } from '../teamspaces';
 import { selectIsModelLoaded } from '../viewerGui';
 
 export const selectCompareDomain = (state) => ({...state.compare});
@@ -165,9 +166,15 @@ export const selectIsPending = createSelector(
 );
 
 export const selectIsCompareButtonDisabled = createSelector(
-	selectSelectedModelsMap, selectIsCompareProcessed, selectIsModelLoaded,
-	(selectedModelsMap, isCompareProcessed, isModelLoaded) => {
-		const areSelectedModels = values(selectedModelsMap).filter((selectedModel) => selectedModel).length;
-		return !areSelectedModels || isCompareProcessed || !isModelLoaded;
+	selectSelectedModelsMap, selectIsCompareProcessed, selectIsModelLoaded, selectModels,
+	(selectedModelsMap, isCompareProcessed, isModelLoaded, models) => {
+		const selectedModels = keys(selectedModelsMap).filter((m) => selectedModelsMap[m]).map((id) => models[id]);
+
+		const totalRevisions = sum(selectedModels.map((model) => {
+			if (!model.federate) return model.nRevisions;
+			return sum(model.subModels.map(({ model }) => models[model].nRevisions));
+		}));
+		
+		return !selectedModels.length || totalRevisions <= 1 || isCompareProcessed || !isModelLoaded;
 	}
 );
