@@ -171,10 +171,12 @@ export const selectIsCompareButtonDisabled = createSelector(
 		const selectedModels = keys(selectedModelsMap).filter((m) => selectedModelsMap[m]).map((id) => models[id]);
 
 		const totalRevisions = sum(selectedModels.map((model) => {
-			if (!model.federate) return model.nRevisions;
-			return sum(model.subModels.map(({ model }) => models[model].nRevisions));
+			if (!model.federate) {
+				return model.nRevisions;
+			}
+			return sum(model.subModels.map((subModel) => models[subModel.model].nRevisions));
 		}));
-		
+
 		return !selectedModels.length || totalRevisions <= 1 || isCompareProcessed || !isModelLoaded;
 	}
 );
