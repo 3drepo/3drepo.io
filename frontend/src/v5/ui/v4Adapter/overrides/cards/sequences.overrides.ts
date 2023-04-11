@@ -190,8 +190,8 @@ const SequencePlayerStyles = css`
 						
 						padding: 2px !important;
 						width: 26px;
-						border: 1px solid ${({ theme }) => theme.palette.base.lighter};
-						border-radius: 5px;
+						border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+						border-radius: 8px;
 						margin-top: 0px;
 						margin-bottom: 0px;
 						font-size: 0.75rem;
@@ -322,7 +322,7 @@ export const ActivitiesListStyles = css`
 		margin: 0 15px 15px;
 		padding: 15px 15px 4px;
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		border-radius: 5px;
+		border-radius: 8px;
 		color: ${({ theme }) => theme.palette.secondary.main};
 		font-size: 12px;
 		font-weight: 500;
