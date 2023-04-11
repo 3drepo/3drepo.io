@@ -28,9 +28,9 @@ interface ILinkCard {
 }
 
 export const LinkCard = ({ variant = 'primary', className, children, to, heading, subheading, imgSrc, defaultImgSrc }: ILinkCard): JSX.Element => (
-	<CardListItem>
+	<CardListItem className={className}>
 		<Link to={to}>
-			<Card $variant={variant} className={className}>
+			<Card $variant={variant}>
 				<CardImage imgSrc={imgSrc} defaultImgSrc={defaultImgSrc} />
 				{children}
 				<Details>

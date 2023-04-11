@@ -38,7 +38,3 @@ export const Card = styled(LinkCard)`
 		${PlaceholderStyle}
 	}
 `;
-
-export const DisableHoverState = styled.div`
-	pointer-events: none;
-`;

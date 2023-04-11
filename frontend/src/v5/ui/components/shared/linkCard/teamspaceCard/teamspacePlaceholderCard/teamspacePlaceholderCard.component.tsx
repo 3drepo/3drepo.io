@@ -15,13 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextPlaceholder, Card, DisableHoverState } from './teamspacePlaceholderCard.styles';
+import { TextPlaceholder, Card } from './teamspacePlaceholderCard.styles';
 
 export const TeamspacePlaceholderCard = (): JSX.Element => (
-	<DisableHoverState>
-		<Card variant="secondary" to="">
-			<TextPlaceholder />
-			<TextPlaceholder width="50%" />
-		</Card>
-	</DisableHoverState>
+	<Card variant="secondary" to="">
+		<TextPlaceholder />
+		<TextPlaceholder width="50%" />
+	</Card>
 );
