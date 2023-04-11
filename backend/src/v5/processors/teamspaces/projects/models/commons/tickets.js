@@ -24,7 +24,13 @@ const { generateUUID } = require('../../../../../utils/helper/uuids');
 
 const Tickets = {};
 
-const processBinaryProperties = (template, oldTicket, updatedTicket) => {
+/**
+ * Special properties:
+ *  Images - images comes in as a base64 string within the JSON object, but we store this separate. A UUID reference is created and replaces thes the image entry, and
+ *           the image itself will be stored via filesManager
+ *  Groups - Groups will come in embedded, however we will store the group separately with a group id as reference
+ */
+const processSpecialProperties = (template, oldTicket, updatedTicket) => {
 	const toRemove = [];
 	const toAdd = [];
 
@@ -32,26 +38,24 @@ const processBinaryProperties = (template, oldTicket, updatedTicket) => {
 
 	const updateReferences = (templateProperties, oldProperties = {}, updatedProperties = {}) => {
 		templateProperties.forEach(({ type, name }) => {
-			let oldProp;
-			let newProp;
+			const processUpdate = (oldProp, newProp) => {
+				if (oldProp && newProp !== undefined) {
+					toRemove.push(oldProp);
+				}
+
+				if (newProp) {
+					const ref = generateUUID();
+					// eslint-disable-next-line no-param-reassign
+					updatedProperties[name] = type === propTypes.IMAGE
+						? ref : { ...updatedProperties[name], screenshot: ref };
+					toAdd.push({ ref, data: newProp });
+				}
+			};
+
 			if (type === propTypes.IMAGE) {
-				oldProp = oldProperties[name];
-				newProp = updatedProperties[name];
+				processUpdate(oldProperties[name], updatedProperties[name]);
 			} else if (type === propTypes.VIEW) {
-				oldProp = oldProperties[name]?.screenshot;
-				newProp = updatedProperties[name]?.screenshot;
-			}
-
-			if (oldProp && newProp !== undefined) {
-				toRemove.push(oldProp);
-			}
-
-			if (newProp) {
-				const ref = generateUUID();
-				// eslint-disable-next-line no-param-reassign
-				updatedProperties[name] = type === propTypes.IMAGE
-					? ref : { ...updatedProperties[name], screenshot: ref };
-				toAdd.push({ ref, data: newProp });
+				processUpdate(oldProperties[name]?.screenshot, updatedProperties[name]?.screenshot);
 			}
 		});
 	};
@@ -73,14 +77,14 @@ const storeFiles = (teamspace, project, model, ticket, binaryData) => Promise.al
 );
 
 Tickets.addTicket = async (teamspace, project, model, template, ticket) => {
-	const { toAdd } = processBinaryProperties(template, undefined, ticket);
+	const { toAdd } = processSpecialProperties(template, undefined, ticket);
 	const res = await addTicket(teamspace, project, model, ticket);
 	await storeFiles(teamspace, project, model, res, toAdd);
 	return res;
 };
 
 Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData, author) => {
-	const { toAdd, toRemove } = processBinaryProperties(template, oldTicket, updateData);
+	const { toAdd, toRemove } = processSpecialProperties(template, oldTicket, updateData);
 	await updateTicket(teamspace, project, model, oldTicket, updateData, author);
 	await Promise.all([
 		toRemove.map((ref) => removeFile(teamspace, TICKETS_RESOURCES_COL, ref)),
