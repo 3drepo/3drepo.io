@@ -60,7 +60,7 @@ export const ProjectSettings = () => {
 		setSubmitWasSuccessful(false);
 		if (projectAlreadyExists(error)) {
 			const { projectName } = getValues();
-			setExistingNames(existingNames.concat(projectName));
+			setExistingNames(existingNames.concat(projectName.toLocaleLowerCase()));
 		}
 	};
 
@@ -77,7 +77,7 @@ export const ProjectSettings = () => {
 		setIsSubmitting(false);
 	};
 
-	const nameWasChanged = () => watch('projectName')?.trim() !== currentProject.name;
+	const nameWasChanged = () => watch('projectName')?.trim().toLocaleLowerCase() !== currentProject.name.toLocaleLowerCase();
 
 	useEffect(() => {
 		reset(defaultValues);

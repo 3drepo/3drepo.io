@@ -61,8 +61,7 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 
 	const onSubmissionError = (error) => {
 		if (projectAlreadyExists(error)) {
-			const { projectName } = getValues();
-			setExistingNames((currentValue) => [...currentValue, projectName]);
+			setExistingNames((currentValue) => [...currentValue, getValues('projectName').toLocaleLowerCase()]);
 		}
 	};
 

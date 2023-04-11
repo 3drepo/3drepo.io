@@ -16,11 +16,11 @@
  */
 
 import * as Yup from 'yup';
-import { trimmedLowercaseString } from '../shared/validators';
+import { trimmedString } from '../shared/validators';
 import { formatMessage } from '../../services/intl';
 
 export const ProjectSchema = Yup.object().shape({
-	projectName: trimmedLowercaseString
+	projectName: trimmedString
 		.max(120, formatMessage({
 			id: 'projectForm.name.error.max',
 			defaultMessage: 'Project name is limited to 120 characters',
@@ -46,7 +46,7 @@ export const ProjectSchema = Yup.object().shape({
 			}),
 			(projectName, { options }) => {
 				const existingNames = options.context.existingNames || [];
-				return !existingNames.map((name) => name.trim().toLocaleLowerCase()).includes(projectName);
+				return !existingNames.map((name) => name.trim().toLocaleLowerCase()).includes(projectName.toLocaleLowerCase());
 			},
 		),
 });
