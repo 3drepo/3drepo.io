@@ -889,6 +889,9 @@ export const theme = createTheme({
 						padding: '0px 15px',
 						height: 35,
 						lineHeight: '35px',
+						'&:-webkit-autofill': { // Remove input background colour on chrome
+							'-webkit-box-shadow': `0 0 0 18px ${COLOR.PRIMARY_MAIN_CONTRAST} inset`,
+						},
 					},
 					'input, textarea': {
 						...typography.body1,
