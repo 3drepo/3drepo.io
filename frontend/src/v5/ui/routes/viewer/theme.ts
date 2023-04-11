@@ -159,6 +159,14 @@ export const theme = createTheme(
 					defaultProps: {
 						container: () => document.getElementById('v4DialogsOverrides'),
 					},
+					styleOverrides: {
+						paper: {
+							borderRadius: 8,
+							'>ul': {
+								borderRadius: 'inherit',
+							},
+						},
+					},
 				},
 				MuiAvatar: {
 					styleOverrides: {
