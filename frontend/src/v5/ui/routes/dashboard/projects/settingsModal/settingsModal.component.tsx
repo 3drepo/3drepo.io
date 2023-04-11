@@ -171,6 +171,8 @@ export const SettingsModal = ({
 	const containerOrFederationName = isContainer ? 'Container' : 'Federation';
 	const EMPTY_GIS_VALUES = { latitude: 0, longitude: 0, angleFromNorth: 0 };
 
+	const nameWasChanged = () => watch('name')?.trim().toLocaleLowerCase() !== containerOrFederation.name.toLocaleLowerCase();
+
 	const getGisValues = (obj) => defaults(pick(
 		omitBy(obj, (val) => val === ''),
 		Object.keys(EMPTY_GIS_VALUES),
@@ -191,7 +193,7 @@ export const SettingsModal = ({
 
 	const onSubmitError = (err) => {
 		if (nameAlreadyExists(err)) {
-			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
+			setAlreadyExistingNames([getValues('name').toLocaleLowerCase(), ...alreadyExistingNames]);
 			trigger('name');
 		}
 	};
@@ -236,7 +238,7 @@ export const SettingsModal = ({
 			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'settings.ok', defaultMessage: 'Save Changes' })}
-			isValid={isValid}
+			isValid={isValid && nameWasChanged()}
 		>
 			<SectionTitle>
 				<FormattedMessage
