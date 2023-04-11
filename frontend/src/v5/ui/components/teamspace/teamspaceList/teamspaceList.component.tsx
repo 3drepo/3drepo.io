@@ -16,9 +16,10 @@
  */
 
 import { flatten, partition } from 'lodash';
-import { TeamspaceCard, TeamspacePlaceholderCard } from '@components/shared/linkCard/teamspaceCard';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TeamspacesHooksSelectors, CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TeamspaceCard } from '@components/shared/linkCard/teamspaceCard/teamspaceCard.component';
+import { TeamspacePlaceholderCard } from '@components/shared/linkCard/teamspaceCard/teamspacePlaceholderCard/teamspacePlaceholderCard.component';
 import { CardList } from './teamspaceList.styles';
 
 type ITeamspaceList = {
