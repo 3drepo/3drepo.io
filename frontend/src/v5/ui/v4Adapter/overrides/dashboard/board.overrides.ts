@@ -174,7 +174,7 @@ const boardContainerStyles = css`
 		border-radius: 8px;
 		font-size: 0.75rem;
 		font-weight: 600;
-		padding: 10px 15px 10px 8px;
+		padding: 8px 16px;
 		border: none;
 
 		svg {

@@ -1092,6 +1092,9 @@ export const theme = createTheme({
 			},
 		},
 		MuiButton: {
+			defaultProps: {
+				size: 'large',
+			},
 			styleOverrides: {
 				iconSizeMedium: {
 					'& > *:first-child': {
@@ -1107,14 +1110,13 @@ export const theme = createTheme({
 					borderRadius: 8,
 					disableRipple: true,
 					textTransform: 'initial',
-					padding: '10px 15px',
+					padding: '8px 16px',
 					fontSize: '0.75rem',
 					fontWeight: FONT_WEIGHT.BOLD,
 					minWidth: null,
 					transition: 'none',
 				},
 				contained: {
-					padding: '10px 15px',
 					height: '35px',
 					boxShadow: 'none',
 					[`&:hover,
@@ -1150,14 +1152,25 @@ export const theme = createTheme({
 						backgroundColor: COLOR.SECONDARY_DARK,
 					},
 				},
-				containedSizeSmall: {
-					height: '30px',
-					padding: '7.5px 15px',
+				sizeSmall: {
+					padding: '4px 8px',
+					height: '22px',
+					lineHeight: '22px',
+					fontSize: null, // null value means it will use the size from button.root
+				},
+				sizeMedium: {
+					padding: '5px 16px',
+					height: '28px',
+					lineHeight: '28px',
+					fontSize: null, // null value means it will use the size from button.root
+				},
+				sizeLarge: {
+					height: '35px',
+					lineHeight: '35px',
 					fontSize: null, // null value means it will use the size from button.root
 				},
 				outlined: {
 					height: '35px',
-					padding: '10px 15px',
 					backgroundColor: 'transparent',
 					'.Mui-focusVisible': {
 						backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
@@ -1198,13 +1211,7 @@ export const theme = createTheme({
 						backgroundColor: COLOR.SECONDARY_DARK,
 					},
 				},
-				outlinedSizeSmall: {
-					height: '30px',
-					padding: '7.5px 15px',
-					fontSize: null, // null value means it will use the size from button.root
-				},
 				text: {
-					padding: '10px 15px',
 					[`&:hover,
 					  &:active`]: {
 						boxShadow: 'none',

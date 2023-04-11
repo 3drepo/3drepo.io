@@ -21,6 +21,7 @@ import { Button } from '@controls/button';
 
 export const Title = styled(Button).attrs({
 	variant: 'text',
+	size: 'small',
 })<{ selected?: boolean }>`
 	${({ theme }) => theme.typography.h5};
 

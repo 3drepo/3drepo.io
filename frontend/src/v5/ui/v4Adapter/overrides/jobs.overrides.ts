@@ -45,7 +45,7 @@ export const V5JobsOverrides = styled.div<{ isAdmin: boolean }>`
 			border: 0;
 			border-radius: 6px;
 			width: fit-content;
-			padding: 11px 16px;
+			padding: 8px 16px;
 			text-transform: none;
 			font-size: 12px;
 			height: 35px;

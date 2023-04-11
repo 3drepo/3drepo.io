@@ -37,7 +37,7 @@ const AddUserButton = css`
 			border-radius: 8px;
 			width: auto;
 			text-transform: none;
-			padding: 10px 15px;
+			padding: 8px 16px;
 			margin: 0;
 			background-color: ${({ theme }) => theme.palette.primary.main};
 			color: ${({ theme }) => theme.palette.primary.contrast};
