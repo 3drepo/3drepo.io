@@ -46,13 +46,13 @@ const runTest = (testData) => {
 
 			// first line is csv titles, last line is always empty
 			const content = readFileSync(outFile).toString().split('\n').slice(1, -1);
-			expect(content.length).toBe(testData.invalidLicenses.length);
+			expect(content.length).toBe(testData.expiredLicenses.length);
 			const result = content.map((str) => {
 				const [name, type, data, collaborators, expiryDate] = str.split(',');
 				return deleteIfUndefined({ name, type, data, collaborators, expiryDate });
 			});
 
-			const goldenData = testData.invalidLicenses.map(
+			const goldenData = testData.expiredLicenses.map(
 				({ expiryDate, collaborators, data, ...others }) => deleteIfUndefined({
 					...others,
 					collaborators: String(collaborators),
@@ -102,7 +102,7 @@ const createData = () => ({
 		data: Math.round(generateRandomNumber(0)),
 	},
 	],
-	invalidLicenses: [
+	expiredLicenses: [
 		{
 			name: generateRandomString(),
 			expiryDate: generateRandomDate(),
@@ -116,7 +116,8 @@ const createData = () => ({
 			type: 'discretionary',
 			collaborators: 'unlimited',
 			data: Math.round(generateRandomNumber(0)),
-		},
+		}],
+	invalidLicenses: [
 		{
 			name: generateRandomString(),
 			expiryDate: generateRandomDate(),
@@ -132,8 +133,8 @@ const createData = () => ({
 
 });
 
-const setupData = async ({ validLicenses, invalidLicenses }) => {
-	const allTeamspaces = [...validLicenses, ...invalidLicenses];
+const setupData = async ({ validLicenses, invalidLicenses, expiredLicenses }) => {
+	const allTeamspaces = [...validLicenses, ...invalidLicenses, ...expiredLicenses];
 	await Promise.all(allTeamspaces.map(async ({ name, type, ...subData }) => {
 		await createTeamspace(name);
 		if (type) {
