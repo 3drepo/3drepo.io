@@ -17,8 +17,9 @@
 
 import styled, { css } from 'styled-components';
 import { Typography } from '@mui/material';
+import { Button } from '@controls/button';
 
-export const Title = styled.div<{ selected?: boolean }>`
+export const Title = styled(Button)<{ selected?: boolean }>`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	padding: 0;
 	margin: 0;
