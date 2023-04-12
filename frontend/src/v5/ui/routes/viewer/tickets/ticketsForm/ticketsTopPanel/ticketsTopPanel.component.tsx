@@ -21,7 +21,6 @@ import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
 import { CreationInfo } from '@components/shared/creationInfo/creationInfo.component';
 import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
-import { partition } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
@@ -51,7 +50,8 @@ export const TicketsTopPanel = ({
 
 	const hasIssueProperties = properties.some((property) => property.name === IssueProperties.PRIORITY);
 	const topPanelPropertiesNames: string[] = Object.values({ ...BaseProperties, ...IssueProperties });
-	const [topPanelProperties, extraProperties] = partition(properties, ({ name }) => topPanelPropertiesNames.includes(name));
+	const extraProperties = properties.filter(({ name }) => !topPanelPropertiesNames.includes(name));
+
 	return (
 		<TopPanel>
 			<BaseTicketInfo>
@@ -83,7 +83,7 @@ export const TicketsTopPanel = ({
 				</DescriptionProperty>
 				<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
 			</BaseTicketInfo>
-			{hasIssueProperties && <IssuePropertiesRow onBlur={onPropertyBlur} readOnly={readOnly} properties={topPanelProperties} />}
+			{hasIssueProperties && <IssuePropertiesRow onBlur={onPropertyBlur} readOnly={readOnly} />}
 		</TopPanel>
 	);
 };
