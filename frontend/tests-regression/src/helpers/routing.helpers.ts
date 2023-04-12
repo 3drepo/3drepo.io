@@ -14,10 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import apiDomain from '../../config.json';
+import { until, By } from 'selenium-webdriver';
+import { domain } from '../../config.json';
 
-export const clientConfigService = {
-	GET_API: null,
-	POST_API: null,
-	apiUrl: (_, url) => new URL(url, apiDomain as unknown as string).toString()
+const absoluteUrl = (url) => new URL(url, domain).toString();
+
+const v5routes = {
+	login: 'login',
+};
+
+export const getUrl = (urlAlias) => absoluteUrl(v5routes[urlAlias] ? `v5/${v5routes[urlAlias]}` : urlAlias);
+
+export const navigateTo = async (driver, url) => {
+	await driver.get(getUrl(url));
+	await driver.wait(until.elementLocated(By.css('body')), 100000);
 };

@@ -6,9 +6,5 @@
 			"node",
 			"@types/selenium-webdriver"
 		],
-		"paths": {
-			"@3drepo/api": ["../src/v5/services/api"],
-			"@/v4/services/clientConfig": ["./src/helpers/3drepoConfig.ts"]
-		}
-	},
+	}
 }

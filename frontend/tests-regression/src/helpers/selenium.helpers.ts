@@ -17,6 +17,8 @@
 import { Builder } from 'selenium-webdriver';
 import * as config from '../../config.json';
 
+export const delay = (time) => new Promise((resolve) => setTimeout(resolve, time));
+
 // This is for ensure that the size of the innerwidt/innerheight of the browser is exactly what
 // regardless of the bars of the browser that is running the test
 export const resizeWindow = async (driver, size) => {
@@ -35,5 +37,3 @@ export const initializeSeleniumDriver = async (browserType) => {
 	await resizeWindow(driver, config.browserSize);
 	return driver;
 };
-
-

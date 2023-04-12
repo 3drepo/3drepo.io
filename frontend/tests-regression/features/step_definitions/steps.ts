@@ -17,8 +17,11 @@
 
 import { When, Then, Given, AfterAll, BeforeAll } from '@cucumber/cucumber';
 import { expect } from 'chai';
-import * as API from '@3drepo/api';
+import { until, By } from 'selenium-webdriver';
 import { initializeSeleniumDriver } from '../../src/helpers/selenium.helpers';
+import { getLogin, logout } from '../../src/helpers/api.helpers';
+import { domain } from '../../config.json';
+import { getUrl, navigateTo } from '../../src/helpers/routing.helpers';
 
 let driver;
 BeforeAll(async () => {
@@ -26,18 +29,21 @@ BeforeAll(async () => {
 });
 
 Given('Im not logged in', async () => {
-	try {
-		await API.Auth.authenticate();
-	} catch (e) {
-		console.log('the error is ');
-		console.log(e);
+	await driver.get(domain);
+	await driver.wait(until.elementLocated(By.css('body')), 100000);
+
+	const res = await getLogin(driver);
+	if (res.status === 200) {
+		await logout(driver);
 	}
 });
 
 When('I navigate to {string}', async (page) => {
+	await navigateTo(driver, page);
 });
 
 Then('I should be redirected to the {string} page', async (page) => {
+	await driver.wait(until.urlIs(getUrl(page)));
 	expect(true).to.equals(true);
 });
 
