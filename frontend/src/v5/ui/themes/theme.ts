@@ -99,31 +99,37 @@ const typography: TypographyOptions = {
 		fontWeight: FONT_WEIGHT.MEDIUM,
 		fontSize: '1.5rem',
 		lineHeight: '1.875rem',
+		textDecoration: 'none',
 	},
 	h2: {
 		fontWeight: FONT_WEIGHT.MEDIUM,
 		fontSize: '1.125rem',
 		lineHeight: '1.5rem',
+		textDecoration: 'none',
 	},
 	h3: {
 		fontWeight: FONT_WEIGHT.MEDIUM,
 		fontSize: '0.938rem',
 		lineHeight: '1.313rem',
+		textDecoration: 'none',
 	},
 	h4: {
 		fontWeight: FONT_WEIGHT.REGULAR,
 		fontSize: '0.938rem',
 		lineHeight: '1.313rem',
+		textDecoration: 'none',
 	},
 	h5: {
 		fontWeight: FONT_WEIGHT.MEDIUM,
 		fontSize: '0.8125rem',
 		lineHeight: '1.188rem',
+		textDecoration: 'none',
 	},
 	body1: {
 		fontWeight: FONT_WEIGHT.REGULAR,
 		fontSize: '0.75rem',
 		lineHeight: '1.125rem',
+		textDecoration: 'none',
 	},
 	body2: {
 		fontWeight: FONT_WEIGHT.BOLD,
@@ -131,6 +137,7 @@ const typography: TypographyOptions = {
 		lineHeight: '0.75rem',
 		letterSpacing: '0.18em',
 		textTransform: 'uppercase',
+		textDecoration: 'none',
 	},
 	link: {
 		fontWeight: FONT_WEIGHT.MEDIUM,
@@ -142,6 +149,7 @@ const typography: TypographyOptions = {
 		fontWeight: FONT_WEIGHT.MEDIUM,
 		fontSize: '0.625rem',
 		lineHeight: '1rem',
+		textDecoration: 'none',
 	},
 	kickerTitle: {
 		fontWeight: FONT_WEIGHT.BOLDER,
@@ -149,6 +157,7 @@ const typography: TypographyOptions = {
 		lineHeight: '1rem',
 		letterSpacing: '0.1em',
 		textTransform: 'uppercase',
+		textDecoration: 'none',
 	},
 	kicker: {
 		fontWeight: FONT_WEIGHT.BOLD,
@@ -156,11 +165,13 @@ const typography: TypographyOptions = {
 		lineHeight: '0.75rem',
 		letterSpacing: '0.1em',
 		textTransform: 'uppercase',
+		textDecoration: 'none',
 	},
 	label: {
 		fontWeight: FONT_WEIGHT.REGULAR,
 		fontSize: '0.625rem',
 		lineHeight: '1rem',
+		textDecoration: 'none',
 	},
 };
 

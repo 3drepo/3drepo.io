@@ -61,7 +61,7 @@ export const WelcomeMessage = styled(Typography).attrs({
 export const PricingLink = styled(Link).attrs({
 	target: '_blank',
 })`
-	${({ theme }) => theme.typography.link};
+	${({ theme }) => theme.typography.body1};
 	display: block;
 	margin-top: 3px;
 `;
