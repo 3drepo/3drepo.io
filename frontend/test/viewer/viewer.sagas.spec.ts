@@ -136,7 +136,7 @@ describe('Viewer: sagas', () => {
 				
 			await waitForActions(() => {
 				dispatch(ViewerActions.fetchData(teamspace, projectId, containerOrFederationId));
-			}, [DialogsTypes.OPEN]);
+			}, [DialogsTypes.OPEN, ViewerActions.setFetching(false)]);
 
 			const dialogs =  selectDialogs(getState());
 

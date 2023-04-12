@@ -130,14 +130,11 @@ describe('Containers: sagas', () => {
 			})
 
 			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[0]._id, onSuccess, onError))
+				.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[0]._id))
 				.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[1]._id))
 				.put(ContainersActions.fetchContainerStatsSuccess(projectId, mockContainers[0]._id, prepareMockStatsReply(mockContainers[0])))
 				.put(ContainersActions.fetchContainerStatsSuccess(projectId, mockContainers[1]._id, prepareMockStatsReply(mockContainers[1])))
 				.silentRun();
-
-			expect(onSuccess).toHaveBeenCalled();
-			expect(onError).not.toHaveBeenCalled();
 		})
 
 		it('should call container stats endpoint with 401', async () => {
@@ -151,12 +148,9 @@ describe('Containers: sagas', () => {
 				});
 
 			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[0]._id, onSuccess, onError))
+				.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[0]._id))
 				.put.like(alertAction('trying to fetch containers details'))
 				.silentRun();
-
-				expect(onSuccess).not.toHaveBeenCalled();
-				expect(onError).toHaveBeenCalled();
 		})
 
 		it('should call containers endpoint with 404', async () => {

@@ -90,7 +90,7 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 	}
 }
 
-export function* fetchContainerStats({ teamspace, projectId, containerId, onSuccess, onError }: FetchContainerStatsAction) {
+export function* fetchContainerStats({ teamspace, projectId, containerId }: FetchContainerStatsAction) {
 	try {
 		const stats = yield API.Containers.fetchContainerStats(teamspace, projectId, containerId);
 
@@ -105,9 +105,7 @@ export function* fetchContainerStats({ teamspace, projectId, containerId, onSucc
 		if (!basicDataEqual || !revisionsEqual) {
 			yield put(ContainersActions.fetchContainerStatsSuccess(projectId, containerId, stats));
 		}
-		onSuccess?.();
 	} catch (error) {
-		onError?.(error);
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.fetchStats.error', defaultMessage: 'trying to fetch containers details' }),
 			error,
