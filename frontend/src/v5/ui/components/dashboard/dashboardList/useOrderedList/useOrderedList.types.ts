@@ -21,3 +21,8 @@ export type ISortConfig = {
 	column: string;
 	direction: SortingDirection;
 };
+
+export const DEFAULT_SORT_CONFIG = {
+	column: 'lastUpdated',
+	direction: SortingDirection.DESCENDING,
+};
