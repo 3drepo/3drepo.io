@@ -14,9 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { WebDriver, until, By } from 'selenium-webdriver';
 import { usersProfiles } from '../../config.json';
-import { getUrl } from './routing.helpers';
 
 export interface UserProfile {
 	username: string,
@@ -24,16 +22,3 @@ export interface UserProfile {
 }
 
 export const getUserForRole = (role):UserProfile => usersProfiles[role];
-
-export const signIn = async (driver: WebDriver, { username, password }: UserProfile) => {
-	await driver.wait(until.urlIs(getUrl('login')));
-	const usernameInput = await driver.findElement(By.name('username'));
-	await driver.wait(until.elementIsEnabled(usernameInput));
-	usernameInput.sendKeys(username);
-	const passwordInput = await driver.findElement(By.name('password'));
-	await driver.wait(until.elementIsEnabled(passwordInput));
-	passwordInput.sendKeys(password);
-	const loginButton = await driver.findElement(By.xpath("//button[contains(text(),'Log in')]"));
-	await driver.wait(until.elementIsEnabled(loginButton));
-	loginButton.click();
-};

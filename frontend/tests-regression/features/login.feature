@@ -11,11 +11,11 @@ Feature: Login
 
 	Scenario: You can log into 3D Repo with a valid username and password
 		Given I navigate to the 'login' page
-		When I log in as 'viewer'
+		When I sign in as 'viewer'
 		Then I should be redirected to the 'dashboard' page
 
-	# Scenario: Upon log in, you should be redirected to the page you wish to go
-	# 	When Im not logged in 
-	# 	And I navigate to the 'viewers settings' page
-	# 	When I login as 'viewer'
-	# 	Then I should be redirected to the 'viewers settings' page
+	Scenario: Upon log in, you should be redirected to the page you wish to go
+		Given Im not logged in 
+		And I navigate to the 'viewer teamspace settings' page
+		When I sign in as 'viewer'
+		Then I should be redirected to the 'viewer teamspace settings' page

@@ -18,11 +18,11 @@
 import { When, Then, Given, AfterAll, BeforeAll } from '@cucumber/cucumber';
 import { expect } from 'chai';
 import { WebDriver, until } from 'selenium-webdriver';
-import { initializeSeleniumDriver, waitUntilPageLoaded } from '../../src/helpers/selenium.helpers';
+import { initializeSeleniumDriver, navigateTo, signIn, waitUntilPageLoaded } from '../../src/helpers/selenium.helpers';
 import { getLogin, logout } from '../../src/helpers/api.helpers';
 import { domain } from '../../config.json';
-import { getUrl, navigateTo } from '../../src/helpers/routing.helpers';
-import { getUserForRole, signIn } from '../../src/helpers/users.helpers';
+import { getUrl } from '../../src/helpers/routing.helpers';
+import { getUserForRole } from '../../src/helpers/users.helpers';
 
 let driver: WebDriver;
 BeforeAll(async () => {
@@ -34,6 +34,7 @@ Given('Im not logged in', async () => {
 	await waitUntilPageLoaded(driver);
 
 	const res = await getLogin(driver);
+
 	if (res.status === 200) {
 		await logout(driver);
 	}
@@ -47,7 +48,7 @@ When('I navigate to the {string} page', async (page) => {
 	await navigateTo(driver, page);
 });
 
-When('I log in as {string}', async (role: string) => {
+When('I sign in as {string}', async (role: string) => {
 	const user = getUserForRole(role);
 	await signIn(driver, user);
 });

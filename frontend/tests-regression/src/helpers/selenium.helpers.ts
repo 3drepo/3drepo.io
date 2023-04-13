@@ -14,8 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Builder, until, By } from 'selenium-webdriver';
+import { Builder, until, By, WebDriver } from 'selenium-webdriver';
 import * as config from '../../config.json';
+import { getUrl } from './routing.helpers';
+import { UserProfile } from './users.helpers';
 
 export const delay = (time) => new Promise((resolve) => setTimeout(resolve, time));
 
@@ -39,3 +41,21 @@ export const initializeSeleniumDriver = async (browserType) => {
 };
 
 export const waitUntilPageLoaded = async (driver) => driver.wait(until.elementLocated(By.css('body')));
+
+export const signIn = async (driver: WebDriver, { username, password }: UserProfile) => {
+	await driver.wait(until.urlIs(getUrl('login')));
+	const usernameInput = await driver.findElement(By.name('username'));
+	await driver.wait(until.elementIsEnabled(usernameInput));
+	usernameInput.sendKeys(username);
+	const passwordInput = await driver.findElement(By.name('password'));
+	await driver.wait(until.elementIsEnabled(passwordInput));
+	passwordInput.sendKeys(password);
+	const loginButton = await driver.findElement(By.xpath("//button[contains(text(),'Log in')]"));
+	await driver.wait(until.elementIsEnabled(loginButton));
+	loginButton.click();
+};
+
+export const navigateTo = async (driver:WebDriver, page:string) => {
+	await driver.get(getUrl(page));
+	await driver.wait(until.elementLocated(By.css('body')), 100000);
+};

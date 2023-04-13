@@ -14,19 +14,33 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { until, By } from 'selenium-webdriver';
 import { domain } from '../../config.json';
+import { getUserForRole } from './users.helpers';
 
 const absoluteUrl = (url) => new URL(url, domain).toString();
 
 const v5routes = {
 	login: 'login',
 	dashboard: 'dashboard',
+	'teamspace settings': 'dashboard/{username}/t/settings',
 };
 
-export const getUrl = (urlAlias) => absoluteUrl(v5routes[urlAlias] ? `v5/${v5routes[urlAlias]}` : urlAlias);
+const replaceParams = (url:string, params: object | null) => {
+	if (!params) return url;
 
-export const navigateTo = async (driver, url) => {
-	await driver.get(getUrl(url));
-	await driver.wait(until.elementLocated(By.css('body')), 100000);
+	let parsedUrl = url;
+	Object.keys(params).forEach((paramKey) => { parsedUrl = parsedUrl.replace(`{${paramKey}}`, params[paramKey]); });
+
+	return parsedUrl;
+};
+
+export const getUrl = (page: string) => {
+	const pageChunks = page.split(' ');
+	let params = null;
+	if (pageChunks.length > 1) {
+		params = getUserForRole(pageChunks.shift());
+	}
+	const urlAlias = pageChunks.join(' ');
+
+	return absoluteUrl(v5routes[urlAlias] ? replaceParams(`v5/${v5routes[urlAlias]}`, params) : urlAlias);
 };
