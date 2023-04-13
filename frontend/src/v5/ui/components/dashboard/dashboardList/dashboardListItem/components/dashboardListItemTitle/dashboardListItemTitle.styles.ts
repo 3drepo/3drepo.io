@@ -25,6 +25,7 @@ export const Title = styled(Button)<{ selected?: boolean }>`
 	margin: 0;
 	justify-content: flex-start;
 	max-width: 100%;
+	height: 19px;
 
 	${({ theme, selected }) => selected && css`
 		color: ${theme.palette.primary.contrast};
