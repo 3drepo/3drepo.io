@@ -38,7 +38,7 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const accessibleProjects = ProjectsHooksSelectors.selectProjects()[teamspace] || [];
-	const hasAccessToProject = accessibleProjects.findIndex(({ _id }) => _id === project) >= 0;
+	const hasAccessToProject = accessibleProjects.some(({ _id }) => _id === project);
 	const history = useHistory();
 
 	const message = getErrorMessage(error);
