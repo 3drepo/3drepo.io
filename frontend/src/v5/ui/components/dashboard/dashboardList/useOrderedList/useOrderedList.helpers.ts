@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,9 +15,5 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-
-export const DEFAULT_SORT_CONFIG = {
-	column: 'name',
-	direction: SortingDirection.DESCENDING,
-};
+// Positive infinity ensures null values are shown at the top
+export const dateToNum = (date) => (date ? (date).getTime() : Number.POSITIVE_INFINITY);
