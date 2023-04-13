@@ -83,6 +83,10 @@ export const NewTicketCard = () => {
 		);
 	}, []);
 
+	useEffect(() => {
+		formData.reset(defaultTicket);
+	}, [JSON.stringify(defaultTicket)]);
+
 	return (
 		<CardContainer>
 			<CardHeader>
