@@ -25,10 +25,6 @@ export const Container = styled.div<{ $error?: boolean, $height: number }>`
 	overflow: hidden overlay;
 	height: ${({ $height }) => $height}px;
 
-	& > div > :last-child {
-		margin-right: -3px;
-	}
-
 	${({ theme, $error }) => ($error ? css`
 		&& {
 			background-color: ${theme.palette.error.lightest};
