@@ -21,7 +21,6 @@ import {
 	PreviewDetails as PreviewDetailsRisk,
 	TabContent as TabContentRisks,
 	Content as ContentRisks,
-	Container as TabsContainer,
 } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import {
 	HorizontalView as HorizontalViewIssue,
