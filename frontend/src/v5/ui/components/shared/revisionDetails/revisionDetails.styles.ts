@@ -68,6 +68,7 @@ export const RevisionsList = styled.ul`
 	padding: 0;
 	max-height: 260px;
 	margin-bottom: 40px;
+    overflow-y: auto;
 `;
 
 const selectedRevisionListItemStyles = css`
@@ -115,6 +116,7 @@ export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected
 	box-sizing: border-box;
 	background-color: ${({ theme }) => theme.palette.secondary.light};
 	height: 52px;
+	min-height: 52px;
 	width: calc(100% - 98px);
 	list-style: none;
 	border: 1px solid ${({ theme }) => theme.palette.secondary.mid};
