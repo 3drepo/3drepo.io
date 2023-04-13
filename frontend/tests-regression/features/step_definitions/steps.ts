@@ -17,20 +17,21 @@
 
 import { When, Then, Given, AfterAll, BeforeAll } from '@cucumber/cucumber';
 import { expect } from 'chai';
-import { until, By } from 'selenium-webdriver';
-import { initializeSeleniumDriver } from '../../src/helpers/selenium.helpers';
+import { WebDriver, until } from 'selenium-webdriver';
+import { initializeSeleniumDriver, waitUntilPageLoaded } from '../../src/helpers/selenium.helpers';
 import { getLogin, logout } from '../../src/helpers/api.helpers';
 import { domain } from '../../config.json';
 import { getUrl, navigateTo } from '../../src/helpers/routing.helpers';
+import { getUserForRole, signIn } from '../../src/helpers/users.helpers';
 
-let driver;
+let driver: WebDriver;
 BeforeAll(async () => {
 	driver = await initializeSeleniumDriver('chrome');
 });
 
 Given('Im not logged in', async () => {
 	await driver.get(domain);
-	await driver.wait(until.elementLocated(By.css('body')), 100000);
+	await waitUntilPageLoaded(driver);
 
 	const res = await getLogin(driver);
 	if (res.status === 200) {
@@ -40,6 +41,15 @@ Given('Im not logged in', async () => {
 
 When('I navigate to {string}', async (page) => {
 	await navigateTo(driver, page);
+});
+
+When('I navigate to the {string} page', async (page) => {
+	await navigateTo(driver, page);
+});
+
+When('I log in as {string}', async (role: string) => {
+	const user = getUserForRole(role);
+	await signIn(driver, user);
 });
 
 Then('I should be redirected to the {string} page', async (page) => {

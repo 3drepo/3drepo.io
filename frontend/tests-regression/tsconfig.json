@@ -5,6 +5,6 @@
 		"types": [
 			"node",
 			"@types/selenium-webdriver"
-		],
+		]
 	}
 }

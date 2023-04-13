@@ -21,6 +21,7 @@ const absoluteUrl = (url) => new URL(url, domain).toString();
 
 const v5routes = {
 	login: 'login',
+	dashboard: 'dashboard',
 };
 
 export const getUrl = (urlAlias) => absoluteUrl(v5routes[urlAlias] ? `v5/${v5routes[urlAlias]}` : urlAlias);

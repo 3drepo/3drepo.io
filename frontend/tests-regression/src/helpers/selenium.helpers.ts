@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Builder } from 'selenium-webdriver';
+import { Builder, until, By } from 'selenium-webdriver';
 import * as config from '../../config.json';
 
 export const delay = (time) => new Promise((resolve) => setTimeout(resolve, time));
@@ -37,3 +37,5 @@ export const initializeSeleniumDriver = async (browserType) => {
 	await resizeWindow(driver, config.browserSize);
 	return driver;
 };
+
+export const waitUntilPageLoaded = async (driver) => driver.wait(until.elementLocated(By.css('body')));
