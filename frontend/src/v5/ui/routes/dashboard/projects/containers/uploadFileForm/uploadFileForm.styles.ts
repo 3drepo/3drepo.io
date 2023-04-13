@@ -45,6 +45,7 @@ export const UploadsListScroll = styled.div`
 	min-height: 64vh;
 	max-height: 200px;
 	width: 100%;
+	overflow-y: scroll;
 `;
 
 export const Padding = styled.div`

@@ -68,7 +68,7 @@ export const RevisionsList = styled.ul`
 	padding: 0;
 	max-height: 260px;
 	margin-bottom: 40px;
-    overflow-y: auto;
+	overflow-y: auto;
 `;
 
 const selectedRevisionListItemStyles = css`
