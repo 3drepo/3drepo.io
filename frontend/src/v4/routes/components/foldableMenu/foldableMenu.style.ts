@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 
+import { isV5 } from '@/v4/helpers/isV5';
 import { COLOR } from '../../../styles';
 import { FileUploadInvoker } from '../../viewerGui/components/commentForm/commentForm.styles';
 
@@ -77,7 +78,7 @@ export const Wrapper = styled.div<{ top: number, left?: boolean }>`
 	max-width: 400px;
 	width: 100%;
 	box-shadow: 1px 1px 3px 0 ${COLOR.BLACK_20};
-	border-radius: 0 2px 2px 0;
+	border-radius: ${isV5() ? '8px' : '0 2px 2px 0'};
 	${getDirection};
 	max-height: ${({ top }) => `calc(100vh - ${top}px - 25px)`};
 	overflow: auto;

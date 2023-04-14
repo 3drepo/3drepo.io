@@ -464,6 +464,11 @@ export const theme = createTheme({
 				// This is necessary for overriding styles of v4 dialogs
 				container: () => document.getElementById('v4Overrides'),
 			},
+			styleOverrides: {
+				paper: {
+					borderRadius: 10,
+				},
+			},
 		},
 		MuiTooltip: {
 			defaultProps: {
@@ -595,11 +600,6 @@ export const theme = createTheme({
 		MuiPaper: {
 			defaultProps: {
 				elevation: 8,
-			},
-			styleOverrides: {
-				root: {
-					borderRadius: 10,
-				},
 			},
 		},
 		MuiCard: {
