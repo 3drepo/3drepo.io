@@ -37,7 +37,6 @@ import {
 	RevisionsListEmptyWrapper,
 	RevisionsListEmptyContainer,
 	RevisionsListEmptyText,
-	ScrollArea,
 } from './revisionDetails.styles';
 
 interface IRevisionDetails {
@@ -99,29 +98,27 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 				<RevisionsListHeaderLabel width="20%" tabletWidth={150}><FormattedMessage id="revisionDetails.revisionCode" defaultMessage="Revision code" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel hideWhenSmallerThan={887}><FormattedMessage id="revisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
-			<ScrollArea variant="secondary" autoHeight>
-				<RevisionsList>
-					{isLoading ? (
-						range(revisionsCount).map((key) => <SkeletonListItem key={key} />)
-					) : (
-						revisions.map((revision, i) => (
-							<RevisionsListItemWrapper
-								isSingle={isSingle}
-								isBeforeSelected={i === selected - 1}
-								selected={i === selected}
-								onClick={() => {}}
-								key={revision._id}
-							>
-								<RevisionsListItem
-									revision={revision}
-									containerId={containerId}
-									active={i === selected}
-								/>
-							</RevisionsListItemWrapper>
-						))
-					)}
-				</RevisionsList>
-			</ScrollArea>
+			<RevisionsList>
+				{isLoading ? (
+					range(revisionsCount).map((key) => <SkeletonListItem key={key} />)
+				) : (
+					revisions.map((revision, i) => (
+						<RevisionsListItemWrapper
+							isSingle={isSingle}
+							isBeforeSelected={i === selected - 1}
+							selected={i === selected}
+							onClick={() => {}}
+							key={revision._id}
+						>
+							<RevisionsListItem
+								revision={revision}
+								containerId={containerId}
+								active={i === selected}
+							/>
+						</RevisionsListItemWrapper>
+					))
+				)}
+			</RevisionsList>
 		</Container>
 	);
 };

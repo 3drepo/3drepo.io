@@ -52,7 +52,7 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 		if (!isExpanding) return;
 		const panel = target.closest('.MuiAccordion-root');
 		if (!panel) return;
-		const scrollableContainer = panel.closest(`#${SCROLLBAR_ID}`).firstChild;
+		const scrollableContainer = panel.closest(`#${SCROLLBAR_ID}`);
 		setTimeout(() => {
 			scrollableContainer.scrollTo({
 				top: panel.offsetTop - 65,

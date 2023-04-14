@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ScrollArea, ScrollAreaProps } from '@controls/scrollArea/scrollArea.styles';
-import { CardContentContainer } from './card.styles';
+import styled from 'styled-components';
 
-export const CardContent = ({ children, ...props }: ScrollAreaProps) => (
-	<ScrollArea {...props} autoHide>
-		<CardContentContainer>
-			{children}
-		</CardContentContainer>
-	</ScrollArea>
-);
+export const DashboardScrollArea = styled.div`
+	height: 100%;
+	width: 100%;
+	overflow: overlay;
+	position: relative;
+	z-index: 0;
+	display: flex;
+	flex-direction: column;
+`;
