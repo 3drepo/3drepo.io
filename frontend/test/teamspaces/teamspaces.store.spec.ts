@@ -19,7 +19,7 @@ import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import reducers from '@/v5/store/reducers';
 import { createStore, combineReducers } from 'redux';
 import { times } from 'lodash';
-import { selectCurrentQuota, selectCurrentTeamspace, selectCurrentTeamspaceDetails, selectIsTeamspaceAdmin, selectTeamspaces } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { selectCurrentQuota, selectCurrentTeamspace, selectIsTeamspaceAdmin, selectTeamspaces } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { quotaMockFactory, teamspaceMockFactory } from './teamspaces.fixtures';
 
 
