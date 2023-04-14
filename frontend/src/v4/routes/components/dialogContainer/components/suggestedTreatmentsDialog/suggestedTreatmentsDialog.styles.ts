@@ -22,8 +22,6 @@ import Grid from '@mui/material/Grid';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
-import { ConditionalV5OrViewerScrollArea as ViewerScrollAreaBase } from '@/v5/ui/v4Adapter/components/conditionalV5OrViewerScrollArea.component';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import { COLOR } from '../../../../../styles';
 
@@ -78,19 +76,15 @@ export const Container = styled.div`
 	position: relative;
 	width: 600px;
 	min-height: 40vh;
-`;
-
-export const ViewerScrollArea = styled(ViewerScrollAreaBase).attrs({
-	autoHeight: true,
-	autoHeightMax: isV5() ? '100%' : '60vh',
-})`
-	margin-top: 66px;
+	overflow: auto;
 `;
 
 export const StyledDialogContent = styled(DialogContent)`
 	&& {
 		padding-top: 0;
 		overflow: unset;
+		max-height: 60vh;
+		margin-top: 66px;
 	}
 `;
 

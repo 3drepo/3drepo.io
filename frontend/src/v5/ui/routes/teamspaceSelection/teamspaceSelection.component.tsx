@@ -21,7 +21,7 @@ import { DashboardFooter } from '@components/shared/dashboardFooter';
 import { TeamspaceList } from '@components/teamspace/teamspaceList';
 import { useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { FadeMessageTrigger, HomeContent, ScrollBar, WelcomeMessage } from './teamspaceSelection.styles';
+import { FadeMessageTrigger, HomeContent, ScrollArea, WelcomeMessage } from './teamspaceSelection.styles';
 
 export const TeamspaceSelection = (): JSX.Element => {
 	const firstName = CurrentUserHooksSelectors.selectFirstName();
@@ -40,7 +40,7 @@ export const TeamspaceSelection = (): JSX.Element => {
 	return (
 		<>
 			<AppBar />
-			<ScrollBar>
+			<ScrollArea>
 				<HomeContent>
 					<FadeMessageTrigger ref={welcomeRef}>
 						<WelcomeMessage $visible={isVisible}>
@@ -56,7 +56,7 @@ export const TeamspaceSelection = (): JSX.Element => {
 					<TeamspaceList />
 				</HomeContent>
 				<DashboardFooter variant="dark" />
-			</ScrollBar>
+			</ScrollArea>
 		</>
 	);
 };

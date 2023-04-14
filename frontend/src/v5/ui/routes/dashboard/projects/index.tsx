@@ -29,7 +29,7 @@ import { Federations } from './federations';
 import { Containers } from './containers';
 import { UserPermissions } from './userPermissions/userPermissions.component';
 import { ProjectPermissions } from './projectPermissions/projectPermissions.component';
-import { Content, DashboardScroll } from './projects.styles';
+import { Content } from './projects.styles';
 import { ProjectSettings } from './projectSettings/projectSettings.component';
 import { Board } from './board/board.component';
 
@@ -44,7 +44,7 @@ export const ProjectContent = () => {
 	}, [teamspace]);
 
 	return (
-		<DashboardScroll>
+		<>
 			<Content>
 				<Switch>
 					<Route exact path={path}>
@@ -80,6 +80,6 @@ export const ProjectContent = () => {
 				</Switch>
 			</Content>
 			<DashboardFooter variant="light" />
-		</DashboardScroll>
+		</>
 	);
 };
