@@ -28,27 +28,25 @@ type ITeamspaceList = {
 export const TeamspaceList = ({ className }: ITeamspaceList): JSX.Element => {
 	const username = CurrentUserHooksSelectors.selectUsername();
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
+	const teamspacesArePending = TeamspacesHooksSelectors.selectTeamspacesArePending();
+
 	const sortedTeamspaces = flatten(partition(teamspaces, (ts) => ts.name === username));
 
 	return (
 		<CardList className={className}>
-			{
-				teamspaces.length ? (
-					sortedTeamspaces.map((teamspace) => (
-						<TeamspaceCard
-							key={teamspace.name}
-							teamspaceName={teamspace.name}
-						/>
-					))
-				) : (
-					<>
-						<TeamspacePlaceholderCard />
-						<TeamspacePlaceholderCard />
-						<TeamspacePlaceholderCard />
-					</>
-				)
-			}
-			{ !!teamspaces.length && (<AddTeamspaceCard />) }
+			{sortedTeamspaces.map((teamspace) => (
+				<TeamspaceCard
+					key={teamspace.name}
+					teamspaceName={teamspace.name}
+				/>
+			))}
+			{teamspacesArePending ? (
+				<>
+					<TeamspacePlaceholderCard />
+					<TeamspacePlaceholderCard />
+					<TeamspacePlaceholderCard />
+				</>
+			) : (<AddTeamspaceCard />)}
 		</CardList>
 	);
 };
