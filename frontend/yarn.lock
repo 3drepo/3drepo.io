@@ -4346,10 +4346,10 @@
   resolved "https://registry.yarnpkg.com/@webpack-cli/serve/-/serve-1.7.0.tgz#e1993689ac42d2b16e9194376cfb6753f6254db1"
   integrity sha512-oxnCNGj88fL+xzV+dacXs44HcDwf1ovs3AuEzvP7mqXw7fQntqIhQ1BRmynh4qEKQSSSRSWVyXRjmTbZIX9V2Q==
 
-"@webscopeio/react-textarea-autocomplete@4.6.3":
-  version "4.6.3"
-  resolved "https://registry.yarnpkg.com/@webscopeio/react-textarea-autocomplete/-/react-textarea-autocomplete-4.6.3.tgz#4abc9a36006e6c52321f3d43c10711432fa10afe"
-  integrity sha512-09aVXwhxIcfpU3Qyx5zxAec73BDE/32BGTWZkXDCB5yZEzU5Qnw++68Lvv/Z/oB+ifqFsG9JOoXf2S0lz6mwcg==
+"@webscopeio/react-textarea-autocomplete@4.9.0":
+  version "4.9.0"
+  resolved "https://registry.yarnpkg.com/@webscopeio/react-textarea-autocomplete/-/react-textarea-autocomplete-4.9.0.tgz#bd238c1a2451b1f2339f605d5cb0aa49123da534"
+  integrity sha512-2Z+bGvKRTz2B/98u3UFlVz4xoU+Jqr5dpkPiy9FAj0+G4+x29LNYSMaUHYD3clh9tCitUWMoVCE4ylvLU+lsLw==
   dependencies:
     custom-event "^1.0.1"
     textarea-caret "3.0.2"
@@ -11530,7 +11530,7 @@ nanoclone@^0.2.1:
   resolved "https://registry.yarnpkg.com/nanoclone/-/nanoclone-0.2.1.tgz#dd4090f8f1a110d26bb32c49ed2f5b9235209ed4"
   integrity sha512-wynEP02LmIbLpcYw8uBKpcfF6dmg2vcpKqxeH5UcoKEYdExslsdUA4ugFauuaeYdTB76ez6gJW8XAZ6CgkXYxA==
 
-nanoid@^3.3.1, nanoid@^3.3.6:
+nanoid@^3.1.23, nanoid@^3.3.1, nanoid@^3.3.6:
   version "3.3.6"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.6.tgz#443380c856d6e9f9824267d960b4236ad583ea4c"
   integrity sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==
@@ -12761,6 +12761,15 @@ postcss-value-parser@^4.0.2, postcss-value-parser@^4.1.0, postcss-value-parser@^
   resolved "https://registry.yarnpkg.com/postcss-value-parser/-/postcss-value-parser-4.2.0.tgz#723c09920836ba6d3e5af019f92bc0971c02e514"
   integrity sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==
 
+postcss@8.2.15:
+  version "8.2.15"
+  resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.2.15.tgz#9e66ccf07292817d226fc315cbbf9bc148fbca65"
+  integrity sha512-2zO3b26eJD/8rb106Qu2o7Qgg52ND5HPjcyQiK2B98O388h43A448LCslC0dI2P97wCAQRJsFvwTRcXxTKds+Q==
+  dependencies:
+    colorette "^1.2.2"
+    nanoid "^3.1.23"
+    source-map "^0.6.1"
+
 postcss@^6.0.14:
   version "6.0.23"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-6.0.23.tgz#61c82cc328ac60e677645f979054eb98bc0e3324"
@@ -13298,6 +13307,11 @@ react-intl@5.21.0:
     hoist-non-react-statics "^3.3.2"
     intl-messageformat "9.9.4"
     tslib "^2.1.0"
+
+react-is@16.8.0:
+  version "16.8.0"
+  resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.8.0.tgz#518db476214f3fb0716af9f82dfd420225ae970f"
+  integrity sha512-LOy+3La39aduxaPfuj+lCXC5RQ8ukjVPAAsFJ3yQ+DIOLf4eR9OMKeWKF0IzjRyE95xMj5QELwiXGgfQsIJguA==
 
 react-is@17.0.2, react-is@^17.0.1, react-is@^17.0.2:
   version "17.0.2"
