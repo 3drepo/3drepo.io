@@ -26,8 +26,8 @@ import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
 import { Typography } from '@mui/material';
 import { DashboardFooter } from '@components/shared/dashboardFooter';
-import { ScrollArea } from '@controls/scrollArea';
-import { Container, Section, TopBar, TeamspaceImage, TeamspaceInfo, Content } from './teamspaceLayout.styles';
+import { DashboardScrollArea } from '@controls/scrollArea/dashboardScrollArea.styles';
+import { Container, TopBar, TeamspaceImage, TeamspaceInfo, Content } from './teamspaceLayout.styles';
 import { TeamspaceQuota } from './teamspaceQuota/teamspaceQuota.component';
 
 interface ITeamspaceLayout {
@@ -63,14 +63,12 @@ export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.
 				</TeamspaceInfo>
 			</TopBar>
 			<TeamspaceNavigation />
-			<ScrollArea variant="base" autoHide>
-				<Section>
-					<Content>
-						{children}
-					</Content>
-					<DashboardFooter variant="light" />
-				</Section>
-			</ScrollArea>
+			<DashboardScrollArea>
+				<Content>
+					{children}
+				</Content>
+				<DashboardFooter variant="light" />
+			</DashboardScrollArea>
 		</Container>
 	);
 };

@@ -56,7 +56,7 @@ export const DeleteButton = styled.div<{ error?: boolean }>`
 
 	background: ${({ theme }) => theme.palette.primary.contrast};
 	border-radius: 100%;
-	box-shadow: 0 3px 8px 3px rgba(0, 0, 0, 0.15);
+	box-shadow: 0 3px 8px 1px rgba(0, 0, 0, 0.20);
 	cursor: pointer;
 
 	svg {
@@ -82,11 +82,15 @@ export const DragAndDrop = styled(DragAndDropBase).attrs({
 `;
 
 export const Images = styled.div`
+	max-height: 100px;
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
 	gap: 10px;
-	margin: 10px 15px 0;
+	padding: 10px 15px 0;
+	position: relative;
+	box-shadow: 0 0 9px 7px ${({ theme }) => theme.palette.primary.contrast};
+	overflow-y: overlay;
 
 	&:not(:empty) {
 		min-height: 54px;
@@ -130,7 +134,6 @@ export const MessageInput = styled(FormTextAreaFixedSize)`
 	${TextAreaContainer} {
 		border: none;
 		box-shadow: none;
-		padding: 0 3px 0 0;
 	}
 `;
 

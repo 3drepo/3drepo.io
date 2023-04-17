@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled, { css } from 'styled-components';
-import { Footer } from '@/v4/routes/components/userManagementTab/userManagementTab.styles';
+import { Footer, Container } from '@/v4/routes/components/userManagementTab/userManagementTab.styles';
 import { Head, Row, Cell } from '@/v4/routes/components/customTable/customTable.styles';
 import { SearchField } from '@/v4/routes/components/customTable/components/cellUserSearch/cellUserSearch.styles';
 import { LoaderContainer } from '@/v4/routes/userManagement/userManagement.styles';
@@ -26,6 +26,10 @@ import { primaryButtonStyling } from '../resuableOverrides.styles';
 
 export const V5JobsOverrides = styled.div<{ isAdmin: boolean }>`
 	position: relative;
+
+	${Container} {
+		height: unset;
+	}
 
 	.simplebar-wrapper,
 	${LoaderContainer} {

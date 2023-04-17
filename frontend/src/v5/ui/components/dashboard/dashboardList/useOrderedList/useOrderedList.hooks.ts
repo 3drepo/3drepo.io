@@ -19,6 +19,7 @@ import { useMemo, useState } from 'react';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { get } from 'lodash';
 import { ISortConfig } from './useOrderedList.types';
+import { dateToNum } from './useOrderedList.helpers';
 
 export const useOrderedList = <T>(items: T[], defaultConfig: ISortConfig) => {
 	const [sortConfig, setSortConfig] = useState<ISortConfig>(defaultConfig);
@@ -39,7 +40,7 @@ export const useOrderedList = <T>(items: T[], defaultConfig: ISortConfig) => {
 			}
 
 			if (aValue instanceof Date || bValue instanceof Date) {
-				return (aValue || new Date(0)).getTime() - (bValue || new Date(0)).getTime();
+				return dateToNum(aValue) - dateToNum(bValue);
 			}
 
 			return 0;

@@ -19,8 +19,6 @@ import { Button, InputAdornment, List, MenuItem, Switch } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import * as Yup from 'yup';
-import { ScrollArea } from '@controls/scrollArea';
-import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
 import { DEFAULT_SETTINGS } from '../../../../../constants/viewer';
 import { IS_FIREFOX } from '../../../../../helpers/browser';
 import { schema } from '../../../../../services/validation';
@@ -644,12 +642,10 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 					onSubmit={this.onSubmit}
 					>
 					<Form>
-						<ConditionalV5Wrapper v5Wrapper={ScrollArea}>
-							{selectedTab === 0 && <BasicSettings onCacheChange={this.onCacheChange} />}
-							{selectedTab === 1 && <AdvancedSettings />}
-							{selectedTab === 2 && <StreamingSettings />}
-							{selectedTab === 0 && showCacheWarning && <CacheWarning />}
-						</ConditionalV5Wrapper>
+						{selectedTab === 0 && <BasicSettings onCacheChange={this.onCacheChange} />}
+						{selectedTab === 1 && <AdvancedSettings />}
+						{selectedTab === 2 && <StreamingSettings />}
+						{selectedTab === 0 && showCacheWarning && <CacheWarning />}
 						<Buttons onClickCancel={handleClose} />
 					</Form>
 				</Formik>

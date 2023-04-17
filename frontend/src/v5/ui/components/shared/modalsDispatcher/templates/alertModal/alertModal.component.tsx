@@ -19,7 +19,7 @@ import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/mate
 import { FormattedMessage } from 'react-intl';
 import { Modal, Actions, Details, Status, WarningIcon, ModalContent, CloseButton } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { AxiosError } from 'axios';
-import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isPathNotAuthorized, isProjectNotFound, isResourceNotFound } from '@/v5/validation/errors.helpers';
+import { getErrorCode, getErrorMessage, getErrorStatus, isPathNotFound, isPathNotAuthorized, isProjectNotFound, isModelNotFound } from '@/v5/validation/errors.helpers';
 import { generatePath, useHistory } from 'react-router';
 import { DASHBOARD_ROUTE, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -37,6 +37,8 @@ interface IAlertModal {
 export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '', error, details, open }) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
+	const accessibleProjects = ProjectsHooksSelectors.selectProjects()[teamspace] || [];
+	const hasAccessToProject = accessibleProjects.some(({ _id }) => _id === project);
 	const history = useHistory();
 
 	const message = getErrorMessage(error);
@@ -44,23 +46,23 @@ export const AlertModal: FC<IAlertModal> = ({ onClickClose, currentActions = '',
 	const status = getErrorStatus(error);
 	const errorStatus = status && code ? `${status} - ${code}` : '';
 	const pathNotFound = isPathNotFound(error);
+	const modelNotFound = isModelNotFound(code);
+	const projectNotFound = isProjectNotFound(code);
 	const unauthorized = isPathNotAuthorized(error);
-	const unauthInTeamspace = unauthorized && teamspace;
-	const unauthInProject = unauthorized && project;
 
 	const getSafePath = () => {
 		// eslint-disable-next-line max-len
-		if (isResourceNotFound(code) || (unauthInProject)) return generatePath(PROJECT_ROUTE_BASE, { teamspace, project });
-		if (isProjectNotFound(code) || (unauthInTeamspace)) return generatePath(TEAMSPACE_ROUTE_BASE, { teamspace });
+		if ((modelNotFound || unauthorized) && hasAccessToProject) return generatePath(PROJECT_ROUTE_BASE, { teamspace, project });
+		if ((projectNotFound || unauthorized) && teamspace) return generatePath(TEAMSPACE_ROUTE_BASE, { teamspace });
 		// Teamspace not found
 		return generatePath(DASHBOARD_ROUTE);
 	};
 
 	const getSafePathName = () => {
-		if (isResourceNotFound(code) || (unauthInProject)) {
+		if ((modelNotFound || unauthorized) && hasAccessToProject) {
 			return formatMessage({ id: 'alertModal.redirect.project', defaultMessage: 'the project page' });
 		}
-		if (isProjectNotFound(code) || (unauthInTeamspace)) {
+		if ((projectNotFound || unauthorized) && teamspace) {
 			return formatMessage({ id: 'alertModal.redirect.teamspace', defaultMessage: 'the teamspace page' });
 		}
 		// teamspace not found

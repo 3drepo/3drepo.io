@@ -94,6 +94,7 @@ export const V5UserListOverrides = styled.div`
 	}
 	${UserTable}{
 		background-color: transparent;
+		height: unset;
 		${Head} {
 			min-height: unset;
 			height: 40px;

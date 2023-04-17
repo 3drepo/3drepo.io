@@ -18,7 +18,6 @@ import { PureComponent, ReactChildren, createRef } from 'react';
 import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBack from '@mui/icons-material/ArrowBack';
-import Scrollbars from 'react-custom-scrollbars';
 
 import { formatMessage } from '@/v5/services/intl';
 import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
@@ -97,7 +96,7 @@ export class ReportedItems extends PureComponent<IProps, IState> {
 		prevScroll: 0
 	};
 
-	public listViewRef = createRef<Scrollbars>();
+	public listViewRef = createRef<HTMLDivElement>();
 	public listContainerRef = createRef<any>();
 
 	public handleClickOutside = () => {
@@ -185,11 +184,11 @@ export class ReportedItems extends PureComponent<IProps, IState> {
 		const changes = {} as IState;
 
 		if (detailsWasClosed) {
-			this.listViewRef.current.scrollTop(this.state.prevScroll);
+			this.listViewRef.current.scrollTo(0, this.state.prevScroll);
 		}
 
 		if (this.listViewRef.current) {
-			this.setState({prevScroll: this.listViewRef.current.getScrollTop()});
+			this.setState({prevScroll: this.listViewRef.current.scrollTop});
 		}
 	}
 
