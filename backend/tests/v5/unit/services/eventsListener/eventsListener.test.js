@@ -849,8 +849,7 @@ const testUserEventsListener = () => {
 			const username = generateRandomString();
 			EventsManager.publish(events.USER_VERIFIED, { username });
 			await waitOnEvent;
-			expect(Teamspaces.initTeamspace).toHaveBeenCalledTimes(1);
-			expect(Teamspaces.initTeamspace).toHaveBeenCalledWith(username);
+			expect(Teamspaces.initTeamspace).not.toHaveBeenCalled();
 			expect(Invitations.unpack).toHaveBeenCalledTimes(1);
 			expect(Invitations.unpack).toHaveBeenCalledWith(username);
 		});
