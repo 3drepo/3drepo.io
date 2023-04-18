@@ -16,8 +16,8 @@
     "typescript",
     "example"
   ],
-  "author": "Matt Wynne",
-  "license": "MIT",
+	"author": "3D Repo",
+	"license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/cucumber/cucumber-js/issues"
   },
