@@ -138,7 +138,6 @@
 		"@babel/preset-react": "7.14.5",
 		"@babel/preset-typescript": "7.21.4",
 		"@formatjs/cli": "4.4.0",
-		"@mui/styled-engine": "npm:@mui/styled-engine-sc@5.12.0",
 		"@mui/styled-engine-sc": "5.12.0",
 		"@storybook/addon-actions": "6.5.16",
 		"@storybook/addon-essentials": "6.5.16",
@@ -206,7 +205,7 @@
 		"@mui/styled-engine": "npm:@mui/styled-engine-sc@5.12.0",
 		"@types/react": "17.0.39",
 		"@types/react-dom": "17.0.11",
-		"html-to-react": "1.4.3",
+		"html-to-react": "1.4.5",
 		"react": "17.0.2",
 		"react-dom": "17.0.2"
 	}
