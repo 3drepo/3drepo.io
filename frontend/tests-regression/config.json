@@ -7,9 +7,9 @@
 	},
 	"usersProfiles" : {
 		"viewer": {
-			"username":  "teamSpace1",
-			"password": "vdN5xQTQRY6syiD",
-			"email": "santiago.montero@3drepo.orgs"
+			"username":  "username",
+			"password": "password",
+			"email": "username@3drepo.orgs"
 		}
 	}
 }
