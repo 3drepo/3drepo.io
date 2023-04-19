@@ -38,9 +38,9 @@ export const TermsLegalPaper = () => (
 		<Clause><ClauseNo id="1.2.">1.2.</ClauseNo>
 			<p>The Service is provided by Asite 3D Repo Limited (<strong>3D Repo</strong>,
 				<strong> us</strong> or <strong>we</strong>). We are a limited company registered in England and Wales
-				under company number 09014101, whose registered
-				office is at, <strong>307 Euston Road, London NW1 3AD, UK.</strong> Our registered
-				<strong> VAT number is GB 206 9090 15.</strong>
+				under company number 14772861, whose registered
+				office is at, <strong>7th Floor, Leconfield House, Curzon Street, London, England, W1J 5JA.</strong> Our registered
+				<strong> VAT reg TBC.</strong>
 			</p>
 		</Clause>
 		<Clause><ClauseNo id="1.3.">1.3.</ClauseNo>
@@ -634,7 +634,7 @@ export const TermsLegalPaper = () => (
 			<p><em>MODEL CANCELLATION FORM FOR CONSUMERS (see clause 11.2):</em></p>
 			<p>
 				<em>
-					To: Asite 3D Repo Limited of 307 Euston Road, London NW1 3AD, UK; <SupportEmail />
+					To: Asite 3D Repo Limited of 7th Floor, Leconfield House, Curzon Street, London, England, W1J 5JA; <SupportEmail />
 				</em>
 			</p>
 			<p><em>I hereby give notice that I cancel my contract for the supply of the 3D Repo service.</em></p>
