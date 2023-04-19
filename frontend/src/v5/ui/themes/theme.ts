@@ -314,6 +314,9 @@ export const theme = createTheme({
 					'&, *': {
 						color: 'currentColor',
 					},
+					'&.MuiInputAdornment-filled.MuiInputAdornment-positionStart:not(.MuiInputAdornment-hiddenLabel)': {
+						margin: 0,
+					},
 				},
 			},
 		},
@@ -349,18 +352,6 @@ export const theme = createTheme({
 						marginTop: 40,
 						position: 'absolute',
 						pointerEvents: 'none',
-					},
-				},
-			},
-		},
-		MuiInputBase: {
-			styleOverrides: {
-				multiline: {
-					'&&': {
-						padding: '5px 10px',
-						'& fieldset': {
-							height: '100%',
-						},
 					},
 				},
 			},
@@ -889,17 +880,78 @@ export const theme = createTheme({
 				},
 			},
 		},
+		MuiFilledInput: {
+			styleOverrides: {
+				root: {
+					backgroundColor: COLOR.TERTIARY_LIGHTER,
+					border: '1px solid transparent',
+					borderRadius: 8,
+					lineHeight: '35px',
+					height: 35,
+					boxSizing: 'border-box',
+					'&.Mui-focused': {
+						backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
+					},
+					'&:hover:not(.Mui-focused)': {
+						backgroundColor: COLOR.TERTIARY_LIGHTER,
+						'.MuiInputBase-input::placeholder': {
+							color: COLOR.SECONDARY_MAIN,
+						},
+					},
+					'&, &:hover, &.Mui-focused': {
+						'&:not(.Mui-disabled):before, &:not(.Mui-disabled):after': {
+							border: 'none',
+						},
+					},
+				},
+				input: {
+					padding: '0 12px',
+				},
+			},
+		},
 		MuiOutlinedInput: {
 			styleOverrides: {
 				root: {
 					color: COLOR.SECONDARY_MAIN,
 					background: COLOR.PRIMARY_MAIN_CONTRAST,
 					borderRadius: 8,
-
+					'&, &:focus, &:active, &:hover': {
+						'.MuiOutlinedInput-notchedOutline': {
+							borderRadius: 8,
+							border: `1px solid ${COLOR.BASE_LIGHTEST}`,
+						},
+						'&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
+							borderColor: COLOR.SECONDARY_LIGHTEST,
+						},
+						'&.Mui-error .MuiOutlinedInput-notchedOutline': {
+							borderColor: COLOR.ERROR_MAIN,
+						},
+					},
 					input: {
 						padding: '0px 15px',
 						height: 35,
 						lineHeight: '35px',
+					},
+				},
+				notchedOutline: {
+					height: 35,
+					bottom: 0,
+					position: 'absolute',
+					top: 'unset',
+					boxSizing: 'border-box',
+					border: `1px solid ${COLOR.BASE_LIGHTEST}`,
+					legend: {
+						display: 'none',
+					},
+				},
+			},
+		},
+		MuiInputBase: {
+			styleOverrides: {
+				root: {
+
+					input: {
+
 						'&:-webkit-autofill': { // Remove input background colour on chrome
 							'-webkit-box-shadow': `0 0 0 18px ${COLOR.PRIMARY_MAIN_CONTRAST} inset`,
 						},
@@ -911,21 +963,14 @@ export const theme = createTheme({
 					'.MuiInputAdornment-root': {
 						color: COLOR.BASE_MAIN,
 					},
-					'&.Mui-focused:not(.Mui-disabled) .MuiOutlinedInput-notchedOutline, .Mui-focused .MuiSelect-select': {
-						border: `1px solid ${COLOR.PRIMARY_MAIN}`,
-						borderRadius: 8,
-						boxShadow: `0 0 2px ${COLOR.PRIMARY_MAIN}`,
-					},
-					'&, &:focus, &:active, &:hover': {
-						'.MuiOutlinedInput-notchedOutline': {
+					'&.Mui-focused:not(.Mui-disabled)': {
+						[`.MuiOutlinedInput-notchedOutline,
+							.MuiSelect-select,
+							&.MuiFilledInput-root`
+						]: {
+							border: `1px solid ${COLOR.PRIMARY_MAIN}`,
 							borderRadius: 8,
-							border: `1px solid ${COLOR.BASE_LIGHTEST}`,
-						},
-						'&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
-							borderColor: COLOR.SECONDARY_LIGHTEST,
-						},
-						'&.Mui-error .MuiOutlinedInput-notchedOutline': {
-							borderColor: COLOR.ERROR_MAIN,
+							boxShadow: `0 0 2px ${COLOR.PRIMARY_MAIN}`,
 						},
 					},
 					'&.Mui-disabled': {
@@ -959,15 +1004,12 @@ export const theme = createTheme({
 						},
 					},
 				},
-				notchedOutline: {
-					height: 35,
-					bottom: 0,
-					position: 'absolute',
-					top: 'unset',
-					boxSizing: 'border-box',
-					border: `1px solid ${COLOR.BASE_LIGHTEST}`,
-					legend: {
-						display: 'none',
+				multiline: {
+					'&&': {
+						padding: '5px 10px',
+						'& fieldset': {
+							height: '100%',
+						},
 					},
 				},
 			},
