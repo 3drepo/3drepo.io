@@ -36,7 +36,7 @@ export const TermsLegalPaper = () => (
 			</p>
 		</Clause>
 		<Clause><ClauseNo id="1.2.">1.2.</ClauseNo>
-			<p>The Service is provided by 3D Repo Limited (<strong>3D Repo</strong>,
+			<p>The Service is provided by Asite 3D Repo Limited (<strong>3D Repo</strong>,
 				<strong> us</strong> or <strong>we</strong>). We are a limited company registered in England and Wales
 				under company number 09014101, whose registered
 				office is at, <strong>307 Euston Road, London NW1 3AD, UK.</strong> Our registered
@@ -613,7 +613,7 @@ export const TermsLegalPaper = () => (
 		<Clause><ClauseNo id="12.1.">12.1.</ClauseNo>
 			<p>&quot;3D Repo&quot;, &quot;3D Diff&quot;, &quot;3D Send&quot;,
 				&quot;BIM Forensics&quot;, &quot;PlanBase&quot;, &quot;SafetiBase&quot; and &quot;British
-				Information Modelling&quot; are trademarks of 3D Repo Limited and are registered or pending trade marks
+				Information Modelling&quot; are trademarks of Asite 3D Repo Limited and are registered or pending trade marks
 				in certain territories. All our rights are reserved.
 			</p>
 		</Clause>
@@ -634,7 +634,7 @@ export const TermsLegalPaper = () => (
 			<p><em>MODEL CANCELLATION FORM FOR CONSUMERS (see clause 11.2):</em></p>
 			<p>
 				<em>
-					To: 3D Repo Limited of 307 Euston Road, London NW1 3AD, UK; <SupportEmail />
+					To: Asite 3D Repo Limited of 307 Euston Road, London NW1 3AD, UK; <SupportEmail />
 				</em>
 			</p>
 			<p><em>I hereby give notice that I cancel my contract for the supply of the 3D Repo service.</em></p>
