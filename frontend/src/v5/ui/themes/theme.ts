@@ -510,6 +510,7 @@ export const theme = createTheme({
 				},
 				inputRoot: {
 					height: '100%',
+					borderRadius: 8,
 					'&.Mui-disabled': {
 						backgroundColor: COLOR.TERTIARY_LIGHTEST,
 						'.MuiAutocomplete-endAdornment': {
@@ -1382,6 +1383,7 @@ export const theme = createTheme({
 		MuiCalendarPicker: {
 			styleOverrides: {
 				root: {
+					borderRadius: 10,
 					// header section
 					'.MuiPickersCalendarHeader-root': {
 						padding: 0,
