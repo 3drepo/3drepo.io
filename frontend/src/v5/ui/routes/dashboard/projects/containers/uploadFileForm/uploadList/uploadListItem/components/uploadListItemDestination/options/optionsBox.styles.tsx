@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
 import styled from 'styled-components';
 
-export const ScrollArea = styled(ScrollAreaBase)`
+export const OptionsBox = styled.div`
 	padding: 0;
 	${({ theme }) => theme.typography.body1};
 	font-weight: 500;
+	max-height: 350px;
 `;

@@ -593,6 +593,16 @@ export const theme = createTheme({
 			defaultProps: {
 				elevation: 8,
 			},
+			styleOverrides: {
+				root: {
+					'&:has(> .MuiList-root)': {
+						overflow: 'overlay',
+						'& > MuiList-root': {
+							position: 'unset',
+						},
+					},
+				},
+			},
 		},
 		MuiCard: {
 			styleOverrides: {

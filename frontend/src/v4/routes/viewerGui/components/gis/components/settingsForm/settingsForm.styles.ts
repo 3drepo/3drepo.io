@@ -40,7 +40,6 @@ export const StyledTextField = styled(TextField)`
 `;
 
 export const Container = styled(ViewerPanelContent)`
-	& > :first-child {
-		padding: 24px;
-	}
+	padding: 24px;
+	box-sizing: border-box;
 `;

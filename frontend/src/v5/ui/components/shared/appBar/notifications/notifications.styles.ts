@@ -56,19 +56,23 @@ const containerStyles = css`
 			cursor: initial;
 			height: unset;
 			width: 100%;
-			padding: 15px 20px 10px 25px;
+			padding: 15px 25px 10px;
 			box-sizing: border-box;
 			color: ${({ theme }) => theme.palette.secondary.main};
+
+			& > :nth-child(2) {
+				margin-top: 44px;
+			}
 		}
 	}
 `;
 
 const headerStyles = css`
 	.MuiListSubheader-root {
-		position: relative;
-		top: -15px;
-		left: -25px;
-		width: calc(100% + 45px);
+		position: fixed;
+		top: 0;
+		margin-left: -25px;
+		width: 520px;
 	}
 
 	.MuiToolbar-root {

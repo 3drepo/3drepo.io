@@ -19,10 +19,7 @@ import styled, { css } from 'styled-components';
 import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
 import { Display } from '@/v5/ui/themes/media';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { ScrollArea as Scrollbar } from '@controls/scrollArea';
 import * as RevisionsListHeaderLabelStyles from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.styles';
-
-const revisionsListItemHeight = '52px';
 
 export const Container = styled.div`
 	display: flex;
@@ -68,8 +65,10 @@ export const RevisionsListHeaderContainer = styled.header`
 export const RevisionsList = styled.ul`
 	display: flex;
 	flex-direction: column;
-	width: calc(100% - 98px);
 	padding: 0;
+	max-height: 260px;
+	margin-bottom: 40px;
+	overflow-y: auto;
 `;
 
 const selectedRevisionListItemStyles = css`
@@ -116,8 +115,9 @@ const revisionListItemStylesLineStyles = ({ theme, selected, isBeforeSelected })
 export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected?: boolean, isBeforeSelected?: boolean }>`
 	box-sizing: border-box;
 	background-color: ${({ theme }) => theme.palette.secondary.light};
-	height: ${revisionsListItemHeight};
-	width: 100%;
+	height: 52px;
+	min-height: 52px;
+	width: calc(100% - 98px);
 	list-style: none;
 	border: 1px solid ${({ theme }) => theme.palette.secondary.mid};
 	border-bottom-style: none;
@@ -164,10 +164,4 @@ export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected
 	${({ theme, selected }) => selected && css`
 		background-color: ${theme.palette.primary.main};
 	`}
-`;
-
-export const ScrollArea = styled(Scrollbar).attrs({
-	autoHeightMax: `calc(${revisionsListItemHeight} * 5)`,
-})`
-	margin-bottom: 40px;
 `;

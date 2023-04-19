@@ -18,12 +18,12 @@
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { DashboardScroll } from '../dashboard/projects/projects.styles';
+import { DashboardScrollArea } from '@controls/scrollArea/dashboardScrollArea.styles';
 
 const WELCOME_TEXT_MARGIN = 50;
 const NAVBAR_AND_FOOTER_HEIGHT = 104;
 
-export const ScrollBar = styled(DashboardScroll).attrs({
+export const ScrollBar = styled(DashboardScrollArea).attrs({
 	variant: 'secondary',
 })`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};

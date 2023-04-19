@@ -16,23 +16,14 @@
  */
 
 import styled, { css } from 'styled-components';
-import InputBase from '@mui/material/Input';
-
-export const Input = styled(InputBase)<{ $height }>`
-	min-height: ${({ $height }) => $height}px;
-`;
 
 export const Container = styled.div<{ $error?: boolean, $height: number }>`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	border: solid 1px;
 	border-color: ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 8px;
-	overflow-x: hidden;
-	min-height: ${({ $height }) => $height}px;
-
-	& > div > :last-child {
-		margin-right: -3px;
-	}
+	overflow: hidden overlay;
+	height: ${({ $height }) => $height}px;
 
 	${({ theme, $error }) => ($error ? css`
 		&& {
@@ -50,7 +41,7 @@ export const Container = styled.div<{ $error?: boolean, $height: number }>`
 	`)}
 
 	.MuiInputBase-multiline {
-		padding: 5px 15px 5px 10px;
+		width: 100%;
 	}
 
 	textarea {
