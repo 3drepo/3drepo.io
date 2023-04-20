@@ -20,7 +20,7 @@ import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMen
 import { intersection } from 'lodash';
 import { useState } from 'react';
 import { AssigneesList } from '../assigneesList/assigneesList.component';
-import { HiddenSearchSelect } from './ticketListAssignees.styles';
+import { AssigneesSelectMenu } from '../assigneesSelectMenu/assigneesSelectMenu.component';
 
 type TicketListAssigneesProps = {
 	values: string[];
@@ -57,7 +57,7 @@ export const TicketListAssignees = ({
 
 	return (
 		<>
-			<HiddenSearchSelect
+			<AssigneesSelectMenu
 				value={values}
 				open={open}
 				onClose={handleClose}
@@ -68,7 +68,7 @@ export const TicketListAssignees = ({
 						{label}
 					</MultiSelectMenuItem>
 				))}
-			</HiddenSearchSelect>
+			</AssigneesSelectMenu>
 			<AssigneesList onClick={onClick} values={values} maxItems={7} {...props} />
 		</>
 	);

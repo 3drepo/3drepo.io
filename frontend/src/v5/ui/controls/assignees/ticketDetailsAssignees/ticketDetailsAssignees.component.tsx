@@ -20,7 +20,8 @@ import AddUserIcon from '@assets/icons/outlined/add_user-outlined.svg';
 import { Tooltip } from '@mui/material';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { formatMessage } from '@/v5/services/intl';
-import { AddUserButton, AssigneesList, HiddenManyOfProperty, InlineAssignees } from './ticketDetailsAssignees.styles';
+import { AddUserButton, AssigneesList, InlineAssignees } from './ticketDetailsAssignees.styles';
+import { AssigneesSelectMenu } from '../assigneesSelectMenu/assigneesSelectMenu.component';
 
 export const TicketDetailsAssignees = ({ value, disabled, onBlur, ...props }: FormInputProps) => {
 	const [open, setOpen] = useState(false);
@@ -35,7 +36,7 @@ export const TicketDetailsAssignees = ({ value, disabled, onBlur, ...props }: Fo
 
 	return (
 		<InlineAssignees disabled={disabled}>
-			<HiddenManyOfProperty
+			<AssigneesSelectMenu
 				open={open}
 				value={value}
 				values="jobsAndUsers"
