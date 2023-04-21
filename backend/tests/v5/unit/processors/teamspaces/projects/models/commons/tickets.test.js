@@ -15,15 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { generateRandomString, generateTemplate, generateTicket } = require('../../../../../../helper/services');
+const { generateRandomString, generateTemplate, generateTicket, generateGroup } = require('../../../../../../helper/services');
 
 const Tickets = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
 
 const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
+const { isUUID } = require(`${src}/utils/helper/typeCheck`);
+
 jest.mock('../../../../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);
+
+jest.mock('../../../../../../../../src/v5/models/tickets.groups');
+const TicketGroupsModel = require(`${src}/models/tickets.groups`);
 
 jest.mock('../../../../../../../../src/v5/schemas/tickets/templates');
 const TemplatesModel = require(`${src}/schemas/tickets/templates`);
@@ -199,6 +205,109 @@ const updateTicketImageTest = async (isView) => {
 	);
 };
 
+const groupTests = () => {
+	const generateGroupsTestData = () => {
+		const propName = generateRandomString();
+		const moduleName = generateRandomString();
+
+		const template = {
+			properties: [
+				{
+					name: propName,
+					type: propTypes.VIEW,
+				},
+			],
+			modules: [
+				{
+					name: moduleName,
+					properties: [
+						{
+							name: propName,
+							type: propTypes.VIEW,
+						},
+					],
+				},
+				{
+					type: 'safetibase',
+					properties: [],
+				},
+			],
+		};
+
+		const generateStatesData = () => (
+			{ state: {
+				colored: times(3, () => ({ group: generateGroup(true, { hasId: false }) })),
+				hidden: times(3, () => ({ group: generateGroup(false, { hasId: false }) })),
+				transformed: times(3, () => ({ group: generateGroup(false, { hasId: false }) })),
+			} }
+		);
+
+		const ticket = {
+			_id: generateRandomString(),
+			title: generateRandomString(),
+			properties: {
+				[propName]: generateStatesData(),
+			},
+			modules: {
+				[moduleName]: {
+					[propName]: generateStatesData(),
+				},
+			},
+		};
+
+		return { template, ticket, propName, moduleName };
+	};
+
+	describe('Test group state', () => {
+		test('Groups should be extracted and replaced with a group UUID', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+
+			const testData = generateGroupsTestData();
+			const expectedOutput = generateRandomString();
+
+			TicketsModel.addTicket.mockResolvedValueOnce(expectedOutput);
+			TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
+
+			await expect(Tickets.addTicket(teamspace, project, model, testData.template,
+				testData.ticket)).resolves.toEqual(expectedOutput);
+
+			expect(TicketsModel.addTicket).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.addTicket).toHaveBeenCalledWith(teamspace, project, model, expect.any(Object));
+
+			const newGroups = [];
+
+			const processedTicket = TicketsModel.addTicket.mock.calls[0][3];
+			const propData = processedTicket.properties[testData.propName];
+			const modPropData = processedTicket.modules[testData.moduleName][testData.propName];
+
+			console.dir(propData, { depth: null });
+
+			[propData, modPropData].forEach(({ state }) => {
+				Object.keys(state).forEach((key) => {
+					state[key].forEach(({ group }) => {
+						expect(isUUID(group)).toBeTruthy();
+						newGroups.push(group);
+					});
+				});
+			});
+
+			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(testData.template);
+
+			expect(TicketGroupsModel.addGroups).toHaveBeenCalledTimes(1);
+			expect(TicketGroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, model, expect.any(Array));
+
+			const groupIDsToSave = TicketGroupsModel.addGroups.mock.calls[0][3].map(({ _id }) => _id);
+
+			expect(groupIDsToSave.length).toBe(newGroups.length);
+			expect(groupIDsToSave).toEqual(expect.arrayContaining(newGroups));
+			expect(TicketGroupsModel.deleteGroups).not.toHaveBeenCalled();
+		});
+	});
+};
+
 const testAddTicket = () => {
 	describe('Add ticket', () => {
 		test('should call addTicket in model and return whatever it returns', async () => {
@@ -227,6 +336,8 @@ const testAddTicket = () => {
 
 		test('should process image and store a ref', () => addTicketImageTest());
 		test('should process screenshot from view data and store a ref', () => addTicketImageTest(true));
+
+		groupTests();
 	});
 };
 
