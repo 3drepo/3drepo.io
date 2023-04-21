@@ -125,7 +125,7 @@ const moduleTypeProperties = {
 	shapes: { title: formatMessage({ id: 'customTicket.panel.shapes', defaultMessage: 'Shapes' }), Icon: ShapesIcon },
 };
 
-export const getModulePanelTitle = (module) => {
+export const getModulePanelProps = (module) => {
 	if (module.name) return { title: module.name, Icon: CustomModuleIcon };
 	return moduleTypeProperties[module.type];
 };

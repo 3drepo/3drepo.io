@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormLabel } from '@mui/material';
-import styled from 'styled-components';
+	import styled from 'styled-components';
 
 export const IconContainer = styled.div`
 	display: inline-block;
@@ -30,8 +29,12 @@ export const IconContainer = styled.div`
 	}
 `;
 
-export const TitleContainer = styled(FormLabel)`
+export const TitleContainer = styled.span`
 	height: 16px;
 	font-weight: 500;
 	color: inherit;
+
+	width: 100%;
+    display: flex;
+    align-items: center;
 `;

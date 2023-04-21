@@ -28,10 +28,9 @@ export type AccordionProps = MuiAccordionProps & {
 	Icon?: any;
 	title: any | JSX.Element;
 	children: any;
-	required?: boolean;
 };
 
-export const Accordion = ({ defaultExpanded = false, children, title, Icon, required, ...props }: AccordionProps) => {
+export const Accordion = ({ defaultExpanded = false, children, title, Icon, ...props }: AccordionProps) => {
 	const [expanded, setExpanded] = useState(defaultExpanded);
 
 	const toggleExpanded = () => setExpanded(!expanded);
@@ -44,7 +43,7 @@ export const Accordion = ({ defaultExpanded = false, children, title, Icon, requ
 						<Icon />
 					</IconContainer>
 				)}
-				<TitleContainer required={required}>{title}</TitleContainer>
+				<TitleContainer>{title}</TitleContainer>
 			</AccordionSummary>
 			<AccordionDetails>
 				{children}
