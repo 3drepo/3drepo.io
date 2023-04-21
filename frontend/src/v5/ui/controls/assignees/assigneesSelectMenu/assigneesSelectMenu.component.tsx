@@ -27,6 +27,9 @@ import { partition } from 'lodash';
 import { onlyText } from 'react-children-utilities';
 import { FormattedMessage } from 'react-intl';
 import { useSelector } from 'react-redux';
+import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSelectMenuItem.component';
+import { AssigneeListItem } from '../assigneesList/assigneeListItem/assigneeListItem.component';
+import { ListHeading } from './assigneesSelectMenu.styles';
 
 export const AssigneesSelectMenu = ({
 	open,
@@ -43,11 +46,26 @@ export const AssigneesSelectMenu = ({
 		.filter((node) => onlyText(node).toLowerCase()
 			.includes(query.toLowerCase()));
 
-	const jobsArray = jobs.map(({ _id, color }) => (
-		<div data-type="job">{_id} {color}</div>
+	const jobsArray = jobs.map(({ _id }) => (
+		<AssigneesSelectMenuItem
+			key={_id}
+			value={_id}
+			data-type="job"
+			icon={() => <AssigneeListItem assignee={_id} />}
+			title={_id}
+			selected
+		/>
 	));
-	const usersArray = users.map(({ user, job }) => (
-		<div data-type="user">{user} {job}</div>
+
+	const usersArray = users.map(({ user, firstName, lastName, job }) => (
+		<AssigneesSelectMenuItem
+			key={user}
+			value={user}
+			data-type="user"
+			icon={() => <AssigneeListItem assignee={user} />}
+			title={`${firstName} ${lastName}`}
+			subtitle={job}
+		/>
 	));
 
 	const isJob = ({ props: { 'data-type': dataType } }) => dataType === 'job';
