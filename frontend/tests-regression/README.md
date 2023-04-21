@@ -10,17 +10,17 @@
     <a href="https://staging.dev.3drepo.io/docs/">Docs</a>
 </p>
 
-The regression tests for 3drepo are meant to be a safeguard against any bugs that might be reappear. Its based on 3drepos tests before pushing out a majore release
+The regression tests for 3drepo are meant to be a safeguard against any bugs that might reappear. It's based on 3DRepo's tests before pushing out a major release.
 
 # Features
 
-- Provides a config file "config.json" file with the test data in order to run the tests
-- Testing of dashboard aand viewer (To be finished)
+- Provides a config file "config.json" with the test data in order to run the tests
+- Testing of dashboard and viewer (To be finished)
 
 # Getting Started
 
-- start your local 3drepo installation or use 3drepo.io
-- Update congig.json with relevant data (the domain and api domain, users and all relevant data must match the server you are using )
+- start your local 3DRepo installation or use 3drepo.io
+- Update config.json with the relevant data (the domain and api domain, users and all relevant data must match the server you are using)
 - run `yarn install`
 - run `yarn test`
 
