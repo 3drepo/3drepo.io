@@ -19,6 +19,7 @@ export enum TicketsCardViews {
 	List = 'list',
 	Details = 'details',
 	New = 'new',
+	Groups = 'groups',
 }
 
 export enum BaseProperties {

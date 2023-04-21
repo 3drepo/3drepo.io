@@ -28,6 +28,8 @@ import { isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsCardViews } from '../../../tickets.constants';
 import { BasicTicketImage } from '../basicTicketImage/basicTicketImage.component';
 import { ActionMenu, TicketImageAction } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
 import { TicketImageActionMenu } from '../basicTicketImage/ticketImageActionMenu.component';
@@ -81,6 +83,10 @@ export const TicketView = ({
 			disabled={disabled}
 			{...props}
 		>
+			{/* //TODO - delete after refactoring */}
+			<TicketImageAction onClick={() => TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Groups)}>
+				<b>GROUPS</b>
+			</TicketImageAction>
 			<TicketImageAction onClick={goToViewpoint} disabled={disabled || !(value?.camera)}>
 				<GotoViewpointIcon />
 				<FormattedMessage id="viewer.card.ticketView.action.gotToViewpoint" defaultMessage="Go to viewpoint" />

@@ -31,6 +31,7 @@ import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component';
 import { NewTicketCard } from './newTicket/newTicket.component';
+import { TicketGroupsCard } from './ticketGroupsCard/ticketGroupsCard.component';
 import { ViewerParams } from '../../routes.constants';
 
 export const Tickets = () => {
@@ -69,6 +70,7 @@ export const Tickets = () => {
 			{view === TicketsCardViews.List && <TicketsListCard />}
 			{view === TicketsCardViews.Details && <TicketDetailsCard />}
 			{view === TicketsCardViews.New && <NewTicketCard />}
+			{view === TicketsCardViews.Groups && <TicketGroupsCard />}
 		</>
 	);
 };
