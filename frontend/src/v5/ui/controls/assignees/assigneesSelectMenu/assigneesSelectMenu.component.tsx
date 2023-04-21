@@ -79,6 +79,9 @@ export const AssigneesSelectMenu = ({
 									onKeyDown={preventPropagation}
 								/>
 							</SearchInputContainer>
+							<ListHeading>
+								<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
+							</ListHeading>
 							{jobsBlah.length > 0 && jobsBlah}
 							{!jobsBlah.length && (
 								<NoResults>
@@ -88,7 +91,9 @@ export const AssigneesSelectMenu = ({
 									/>
 								</NoResults>
 							)}
-							<div>--- SEPARATOR ---</div>
+							<ListHeading>
+								<FormattedMessage id="assigneesSelectMenu.usersHeading" defaultMessage="Users" />
+							</ListHeading>
 							{usersBlah.length > 0 && usersBlah}
 							{!usersBlah.length && (
 								<NoResults>
