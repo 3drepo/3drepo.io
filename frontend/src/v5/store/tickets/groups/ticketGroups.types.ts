@@ -19,6 +19,12 @@ export interface ITicketGroupFromApi {
 	groupsByTicketId: Record<string, IGroupFromApi>,
 }
 
+export interface IGroupRule {
+	field: string,
+	operator: string,
+	values: string[],
+}
+
 export interface IGroupFromApi {
 	_id: string,
 	name: string,
@@ -26,13 +32,7 @@ export interface IGroupFromApi {
 		container: string,
 	}[],
 	description?: string,
-	rules?: Rule[],
-}
-
-export interface Rule {
-	field: string,
-	operator: string,
-	values: string[],
+	rules?: IGroupRule[],
 }
 
 export enum GroupType {
@@ -40,27 +40,23 @@ export enum GroupType {
 	SMART = 'smart',
 };
 
-export interface IViewState {
-	showDefaultHidden: boolean,
-	colored: ColoredGroupCollection[],
-	hidden: HiddenGroupCollection[],
-	transformed: TransformedGroupCollection[],
-}
-
-export interface GroupCollection {
+interface BaseGroupCollection {
 	prefix?: string[],
 	group: IGroupFromApi,
 }
 
-export interface ColoredGroupCollection extends GroupCollection {
+export interface IColoredGroupCollection extends BaseGroupCollection {
 	// at least 1 of the following is required, but not necessarily both
 	color?: [number, number, number],
 	opacity?: number,
 }
 
-export interface HiddenGroupCollection extends GroupCollection { }
+export interface IHiddenGroupCollection extends BaseGroupCollection { }
 
-export interface TransformedGroupCollection extends GroupCollection {
-	transformation: any[],
+export type IGroupCollection = IColoredGroupCollection | IHiddenGroupCollection;
+
+export interface IViewState {
+	showDefaultHidden: boolean,
+	colored: IColoredGroupCollection[],
+	hidden: IHiddenGroupCollection[],
 }
-
