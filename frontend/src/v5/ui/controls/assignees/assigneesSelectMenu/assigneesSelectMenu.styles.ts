@@ -25,3 +25,8 @@ export const ListHeading = styled.div`
 	padding: 4px 14px;
 	font-weight: ${FONT_WEIGHT.BOLD};
 `;
+
+export const SearchInput = styled(SearchInputBase)`
+	width: auto;
+	margin: 12px;
+`;

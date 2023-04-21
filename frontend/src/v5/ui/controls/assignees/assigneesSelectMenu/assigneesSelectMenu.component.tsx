@@ -20,16 +20,14 @@ import { formatMessage } from '@/v5/services/intl';
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Select } from '@controls/inputs/select/select.component';
 import { SearchContext, SearchContextComponent, SearchContextType } from '@controls/search/searchContext';
-import { SearchInput } from '@controls/search/searchInput';
 import { NoResults, SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { MenuItem } from '@mui/material';
 import { partition } from 'lodash';
-import { onlyText } from 'react-children-utilities';
 import { FormattedMessage } from 'react-intl';
 import { useSelector } from 'react-redux';
 import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSelectMenuItem.component';
 import { AssigneeListItem } from '../assigneesList/assigneeListItem/assigneeListItem.component';
-import { ListHeading } from './assigneesSelectMenu.styles';
+import { ListHeading, SearchInput } from './assigneesSelectMenu.styles';
 
 export const AssigneesSelectMenu = ({
 	open,
@@ -43,8 +41,8 @@ export const AssigneesSelectMenu = ({
 	const jobs = useSelector(selectJobs);
 	const users = UsersHooksSelectors.selectUsersByTeamspace(teamspace);
 	const filterItems = (items, query: string) => items
-		.filter((node) => onlyText(node).toLowerCase()
-			.includes(query.toLowerCase()));
+		.filter(({ props: { title, subtitle } }) => [title, subtitle]
+			.some((string) => string?.toLowerCase().includes(query.toLowerCase())));
 
 	const jobsArray = jobs.map(({ _id }) => (
 		<AssigneesSelectMenuItem
