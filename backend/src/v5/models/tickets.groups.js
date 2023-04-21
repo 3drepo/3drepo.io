@@ -15,18 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { generateUUID } = require('../utils/helper/uuids');
-
 const GROUPS_COL = 'tickets.groups';
 
-const { insertOne } = require('../handler/db');
+const { deleteMany, insertMany } = require('../handler/db');
 
 const Groups = {};
 
-Groups.addGroup = async (teamspace, project, model, ticket, data) => {
-	const _id = generateUUID();
-	await insertOne(teamspace, GROUPS_COL, { ...data, _id, teamspace, project, model, ticket });
-	return _id;
+Groups.addGroups = async (teamspace, project, model, ticket, groups) => {
+	const data = groups.map((groupData) => ({ ...groupData, teamspace, project, model, ticket }));
+	await insertMany(teamspace, GROUPS_COL, data);
+};
+
+Groups.deleteGroups = async (teamspace, project, model, ticket, groupIds) => {
+	await deleteMany(teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: { $in: [groupIds] } });
 };
 
 module.exports = Groups;

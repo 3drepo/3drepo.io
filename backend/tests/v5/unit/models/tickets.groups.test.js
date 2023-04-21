@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { generateRandomString } = require('../../helper/services');
 const { src } = require('../../helper/path');
 
@@ -22,50 +23,47 @@ const Groups = require(`${src}/models/tickets.groups`);
 
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
-const { isUUID } = require(`${src}/utils/helper/typeCheck`);
 
 const groupCol = 'tickets.groups';
 
-const testAddGroup = () => {
-	describe('Add group', () => {
-		test('Should return a UUID upon adding the group', async () => {
+const testAddGroups = () => {
+	describe('Add groups', () => {
+		test('Should insert all the groups', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
 			const ticket = generateRandomString();
-			const data = {
+			const data = times(6, {
 				[generateRandomString()]: generateRandomString(),
-			};
+			});
 
-			const _id = await Groups.addGroup(teamspace, project, model, ticket, data);
+			await Groups.addGroups(teamspace, project, model, ticket, data);
 
-			expect(isUUID(_id)).toBeTruthy();
-
-			expect(db.insertOne).toHaveBeenCalledTimes(1);
-			expect(db.insertOne).toHaveBeenCalledWith(teamspace, groupCol,
-				{ teamspace, project, model, ticket, ...data, _id });
+			expect(db.insertMany).toHaveBeenCalledTimes(1);
+			expect(db.insertMany).toHaveBeenCalledWith(teamspace, groupCol,
+				data.map((entry) => ({ teamspace, project, model, ticket, ...entry })));
 		});
 
-		test('Should relay the error if insertOne failed', async () => {
+		test('Should relay the error if insertMany failed', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
 			const ticket = generateRandomString();
-			const data = {
+			const data = times(6, {
 				[generateRandomString()]: generateRandomString(),
-			};
+			});
 
 			const err = generateRandomString();
-			db.insertOne.mockRejectedValueOnce(err);
-			await expect(Groups.addGroup(teamspace, project, model, ticket, data)).rejects.toEqual(err);
+			db.insertMany.mockRejectedValueOnce(err);
+			await expect(Groups.addGroups(teamspace, project, model, ticket, data)).rejects.toEqual(err);
 
-			expect(db.insertOne).toHaveBeenCalledTimes(1);
-			expect(db.insertOne).toHaveBeenCalledWith(teamspace, groupCol,
-				expect.objectContaining({ teamspace, project, model, ticket, ...data }));
+			expect(db.insertMany).toHaveBeenCalledTimes(1);
+			expect(db.insertMany).toHaveBeenCalledWith(teamspace, groupCol,
+				data.map((entry) => ({ teamspace, project, model, ticket, ...entry })));
 		});
 	});
 };
 
 describe('models/tickets.groups', () => {
-	testAddGroup();
+	testAddGroups();
 });
