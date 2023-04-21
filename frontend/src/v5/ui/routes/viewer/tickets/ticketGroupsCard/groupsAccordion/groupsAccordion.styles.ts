@@ -18,10 +18,10 @@
 import styled, { css } from 'styled-components';
 import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
 import { CentredContainer } from '@controls/centredContainer';
-import CheckboxBase from '@mui/material/Checkbox';
+import CheckBoxBase from '@mui/material/Checkbox';
 import { GroupCollectionAccordion, GroupItemContainer } from '../groups/groups.styles';
 
-export const Accordion = styled(AccordionBase)<{ groupsCount?: number }>`
+export const Accordion = styled(AccordionBase)<{ $groupsCount?: number }>`
 	background: transparent;
 
 	&& {
@@ -58,7 +58,7 @@ export const Accordion = styled(AccordionBase)<{ groupsCount?: number }>`
 			width: 9px;
 			left: -9px;
 			position: absolute;
-			${({ groupsCount = 0 }) => css`
+			${({ $groupsCount: groupsCount = 0 }) => css`
 				border-right: ${(groupsCount + 1)}px;
 				height: ${(groupsCount + 1) * 61}px;
 				top: -${(groupsCount + 1) * 61 - 22}px;
@@ -88,6 +88,6 @@ export const NumberContainer = styled(CentredContainer)`
 	color: currentColor;
 `;
 
-export const Checkbox = styled(CheckboxBase)`
+export const Checkbox = styled(CheckBoxBase)`
 	margin-left: auto;
 `;
