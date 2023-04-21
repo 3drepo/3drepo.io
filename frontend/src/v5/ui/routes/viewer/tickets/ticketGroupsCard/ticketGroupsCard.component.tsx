@@ -24,7 +24,7 @@ import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import { MOCK_DATA } from '@/v5/store/tickets/groups/ticketGroups.helpers';
 import { CardContent, NewGroupButton } from './ticketGroupsCard.styles';
 import { TicketsCardViews } from '../tickets.constants';
-import { GroupsAccordion } from './groups/groups.component';
+import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 
 export const TicketGroupsCard = () => {
 	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();

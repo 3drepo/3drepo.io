@@ -18,31 +18,26 @@
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import ShowIcon from '@assets/icons/outlined/eye-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
-import GroupsIcon from '@mui/icons-material/GroupWork';
 import {
 	Name,
 	GroupsCount,
 	NameContainer,
-	GroupOfGroupsContainer,
-	GroupsAccordionContainer,
+	GroupCollectionAccordion,
 	CollectionTitle,
-	GroupCollection,
-	GroupItem,
+	GroupCollectionContainer,
+	GroupItemContainer,
 } from './groups.styles';
 import { IGroupFromApi } from '@/v5/store/tickets/groups/ticketGroups.types';
-import { ColoredGroupCollection } from '@/v5/store/tickets/groups/ticketGroups.types';
-import { TransformedGroupCollection } from '@/v5/store/tickets/groups/ticketGroups.types';
-import { HiddenGroupCollection } from '@/v5/store/tickets/groups/ticketGroups.types';
+import { IGroupCollection } from '@/v5/store/tickets/groups/ticketGroups.types';
 import { groupBy, partition, keys, values } from 'lodash';
 import { GroupIconComponent } from '../../../groups/groupItem/groupIcon/groupIcon.component';
 import { ErrorCommentButton, PrimaryCommentButton } from '../../ticketsForm/commentsPanel/comment/commentButton/commentButton.styles';
 import { CommentButtons } from '../../ticketsForm/commentsPanel/comment/basicComment/basicComment.styles';
 import { rgbaToHex } from '@/v4/helpers/colors';
 import { FormattedMessage } from 'react-intl';
-import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 
 type GroupProps = { group: IGroupFromApi, color?: [number, number, number], opacity?: number };
-const Group = ({ group, color, opacity }: GroupProps) => {
+const GroupItem = ({ group, color, opacity }: GroupProps) => {
 	const deleteGroup = () => {};
 	const toggleShowGroup = () => {};
 	const editGroup = () => {};
@@ -51,7 +46,7 @@ const Group = ({ group, color, opacity }: GroupProps) => {
 	const alphaHexColor = rgbaToHex(alphaColor.join());
 
 	return (
-		<GroupItem>
+		<GroupItemContainer>
 			<CollectionTitle>
 				<GroupIconComponent rules={group.rules} color={alphaHexColor} />
 				<NameContainer>
@@ -77,14 +72,12 @@ const Group = ({ group, color, opacity }: GroupProps) => {
 					</PrimaryCommentButton>
 				</CommentButtons>
 			</CollectionTitle>
-		</GroupItem>
+		</GroupItemContainer>
 	);
 };
 
-type GroupCollection = ColoredGroupCollection | HiddenGroupCollection | TransformedGroupCollection;
-
-type GroupOfGroupsProps = { groups: GroupCollection[], previousGroupLength: number };
-const GroupOfGroups = ({ groups,  previousGroupLength }: GroupOfGroupsProps) => {
+type GroupCollectionProps = { groups: IGroupCollection[], previousGroupLength: number };
+const GroupCollection = ({ groups, previousGroupLength }: GroupCollectionProps) => {
 	const title = groups[0].prefix[0];
 	const nextPrefixGroups = groups.map(({ prefix, ...group }) => ({
 		...group,
@@ -92,7 +85,7 @@ const GroupOfGroups = ({ groups,  previousGroupLength }: GroupOfGroupsProps) => 
 	}));
 	
 	return (
-		<GroupCollection
+		<GroupCollectionAccordion
 			title={
 				<CollectionTitle>
 					<NameContainer>
@@ -101,26 +94,26 @@ const GroupOfGroups = ({ groups,  previousGroupLength }: GroupOfGroupsProps) => 
 				</CollectionTitle>
 			}
 		>
-			<GroupOfGroupsContainer>
+			<GroupCollectionContainer>
 				<Groups groups={nextPrefixGroups}/>
-			</GroupOfGroupsContainer>
-		</GroupCollection>
+			</GroupCollectionContainer>
+		</GroupCollectionAccordion>
 	);
 };
 
-type GroupsProps = { groups: GroupCollection[] };
+type GroupsProps = { groups: IGroupCollection[] };
 export const Groups = ({ groups }: GroupsProps) => {
-	const [groupOfGroups, groupItems] = partition(groups, (g) => g.prefix?.length);
-	const collectionsDict = groupBy(groupOfGroups, (g) => g.prefix[0]);
+	const [groupBatches, groupItems] = partition(groups, (g) => g.prefix?.length);
+	const collectionsDict = groupBy(groupBatches, (g) => g.prefix[0]);
 	const collections = values(collectionsDict);
 	const groupsByPrefix = groupBy(groups, 'prefix');
 	const groupsByPrefixIndices = keys(groupsByPrefix);
 
 	return (
 		<>
-			{groupItems.map((group) => (<Group {...group} />))}
+			{groupItems.map((group) => (<GroupItem {...group} />))}
 			{collections.map((collection, index) => (
-				<GroupOfGroups
+				<GroupCollection
 					groups={collection}
 					previousGroupLength={groupsByPrefix[groupsByPrefixIndices[index]].length}
 				/>
@@ -128,28 +121,3 @@ export const Groups = ({ groups }: GroupsProps) => {
 		</>
 	);
 };
-
-type GroupsAccordionProps = {
-	title: any;
-	groups: GroupCollection[];
-	children: any;
-}
-export const GroupsAccordion = ({ title, groups, children }: GroupsAccordionProps) => (
-	<GroupsAccordionContainer
-		Icon={GroupsIcon}
-		title={title}
-		groupsCount={groups.length}
-	>
-		{groups?.length ? (
-			<Groups groups={groups} />
-		) : (
-			<EmptyListMessage>
-				<FormattedMessage
-					id="ticketCard.groupsList.empty"
-					defaultMessage="No Groups"
-				/>
-			</EmptyListMessage>
-		)}
-		{children}
-	</GroupsAccordionContainer>
-);

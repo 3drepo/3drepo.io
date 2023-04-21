@@ -31,13 +31,13 @@ const GroupStyling = css`
 	align-items: center;
 `;
 
-export const GroupItem = styled.div`
+export const GroupItemContainer = styled.div`
 	${GroupStyling}
 	flex-direction: row;
 	margin-bottom: 4px;
 `;
 
-export const GroupCollection = styled(Accordion)`
+export const GroupCollectionAccordion = styled(Accordion)`
 	&& {
 		border: 0;
 		background-color: transparent;
@@ -96,7 +96,7 @@ export const CollectionTitle = styled.span`
 	}
 `;
 
-export const GroupOfGroupsContainer = styled.div`
+export const GroupCollectionContainer = styled.div`
 	margin: 0;
 	padding-left: 0;
 	position: relative;
@@ -124,54 +124,4 @@ export const GroupsCount = styled(Typography).attrs({
 	variant: 'caption',
 })`
 	color: ${({ theme }) => theme.palette.base.main};
-`;
-
-export const GroupsAccordionContainer = styled(Accordion)<{ groupsCount?: number }>`
-	background: transparent;
-
-	&& {
-		border-radius: 0;
-		border: 0;
-	}
-
-	.MuiAccordionSummary-root {
-		border-bottom: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
-	}
-
-	.MuiAccordionDetails-root {
-		border-top: 0;
-		padding: 14px;
-		display: flex;
-		flex-direction: column;
-	}
-
-	&.Mui-expanded + & .MuiAccordionSummary-root {
-		border-top: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
-	}
-
-	${GroupCollection} :is(${GroupCollection}, ${GroupItem}) {
-		position: relative;
-
-		&::after {
-			content: "";
-			background: transparent;
-			box-sizing: border-box;
-			border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
-			border-left: solid 1px ${({ theme }) => theme.palette.base.lightest};
-			width: 9px;
-			left: -9px;
-			position: absolute;
-			${({ groupsCount = 0 }) => css`
-				border-right: ${(groupsCount + 1)}px;
-				height: ${(groupsCount + 1) * 61}px;
-				top: -${(groupsCount + 1) * 61 - 22}px;
-			`}
-		}
-
-		&:last-child::after {
-			border-left: solid 1px ${({ theme }) => theme.palette.base.lightest};
-			border-bottom-left-radius: 5px;
-		}
-	}
 `;
