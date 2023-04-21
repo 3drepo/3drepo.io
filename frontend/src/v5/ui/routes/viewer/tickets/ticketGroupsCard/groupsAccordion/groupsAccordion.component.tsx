@@ -48,7 +48,7 @@ export const GroupsAccordion = ({ title, groups = [], children }: GroupsAccordio
 					<Checkbox checked={checked} onClick={toggleCheckbox}/>
 				</TitleContainer>
 			}
-			groupsCount={groupsCount}
+			$groupsCount={groupsCount}
 		>
 			{groupsCount ? (
 				<Groups groups={groups} />
