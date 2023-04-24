@@ -31,8 +31,6 @@ import { HiddenSelect, HorizontalRule, ListHeading, SearchInput } from './assign
 export const AssigneesSelectMenu = ({
 	value,
 	values,
-	onClose,
-	onOpen,
 	...props
 }) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
