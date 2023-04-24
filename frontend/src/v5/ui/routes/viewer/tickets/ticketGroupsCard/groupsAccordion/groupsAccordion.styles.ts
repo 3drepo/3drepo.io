@@ -46,7 +46,8 @@ export const Accordion = styled(AccordionBase)<{ $groupsCount?: number }>`
 		border-top: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
 	}
 
-	${GroupCollectionAccordion} :is(${GroupCollectionAccordion}, ${GroupItemContainer}) {
+	${GroupCollectionAccordion} ${GroupCollectionAccordion},
+	${GroupCollectionAccordion} ${GroupItemContainer} {
 		position: relative;
 
 		&::after {
@@ -58,10 +59,10 @@ export const Accordion = styled(AccordionBase)<{ $groupsCount?: number }>`
 			width: 9px;
 			left: -9px;
 			position: absolute;
-			${({ $groupsCount: groupsCount = 0 }) => css`
-				border-right: ${(groupsCount + 1)}px;
-				height: ${(groupsCount + 1) * 61}px;
-				top: -${(groupsCount + 1) * 61 - 22}px;
+			${({ $groupsCount = 0 }) => css`
+				border-right: ${($groupsCount + 1)}px;
+				height: ${($groupsCount + 1) * 61}px;
+				top: -${($groupsCount + 1) * 61 - 22}px;
 			`}
 		}
 
