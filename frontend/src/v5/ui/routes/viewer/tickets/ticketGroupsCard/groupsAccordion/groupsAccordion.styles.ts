@@ -46,6 +46,7 @@ export const Accordion = styled(AccordionBase)<{ $groupsCount?: number }>`
 		border-top: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
 	}
 
+	/* stylelint-disable selector-type-no-unknown */
 	${GroupCollectionAccordion} ${GroupCollectionAccordion},
 	${GroupCollectionAccordion} ${GroupItemContainer} {
 		position: relative;
