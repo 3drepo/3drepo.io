@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString, stringToUUID } = require('../../utils/helper/uuids');
 const {
 	basePropertyLabels,
 	defaultProperties,
@@ -26,9 +27,8 @@ const {
 	riskLevelsToNum } = require('./templates.constants');
 const { deleteIfUndefined, isEqual } = require('../../utils/helper/objects');
 const { getAllUsersInTeamspace, getRiskCategories } = require('../../models/teamspaceSettings');
-const { isDate, isObject } = require('../../utils/helper/typeCheck');
+const { isDate, isObject, isUUIDString } = require('../../utils/helper/typeCheck');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
-const { UUIDToString } = require('../../utils/helper/uuids');
 const Yup = require('yup');
 const { generateFullSchema } = require('./templates');
 const { getJobNames } = require('../../models/jobs');
@@ -232,11 +232,9 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 				res[name] = Yup.object({
 					screenshot: uuidString,
 					state: Yup.object({
-						highlightedGroups: Yup.array().of(uuidString),
-						colorOverrideGroups: Yup.array().of(uuidString),
-						hiddenGroups: Yup.array().of(uuidString),
-						shownGroups: Yup.array().of(uuidString),
-						transformGroups: Yup.array().of(uuidString),
+						colored: Yup.array().of(uuidString),
+						hidden: Yup.array().of(uuidString),
+						transformed: Yup.array().of(uuidString),
 					}).default(undefined),
 				}).nullable().default(undefined);
 			} else if (type === propTypes.IMAGE) {
@@ -264,6 +262,52 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 		properties: castProps(properties),
 		modules: Yup.object(modulesCaster).default(undefined),
 	});
+};
+const genToUUIDSchema = ({ properties, modules }) => {
+	const uuidObj = Yup.mixed().transform(stringToUUID);
+	const groupCast = Yup.lazy((val) => (isUUIDString(val) ? uuidObj
+		: Yup.object({
+			objects: Yup.array().of(Yup.object({
+				_ids: Yup.array().of(uuidObj),
+			})),
+		})));
+	const groupStateArrays = Yup.array().of(Yup.object({
+		group: groupCast,
+	}));
+	const castProps = (props) => {
+		const res = {};
+		props.forEach(({ type, name }) => {
+			if (type === propTypes.VIEW) {
+				res[name] = Yup.object({
+					state: Yup.object({
+						colored: groupStateArrays,
+						hidden: groupStateArrays,
+						transformed: groupStateArrays,
+					}).default(undefined),
+				}).nullable().default(undefined);
+			}
+		});
+
+		return Yup.object(res).default(undefined);
+	};
+
+	const modulesCaster = {};
+
+	modules.forEach(({ name, type, properties: modProps }) => {
+		const id = name ?? type;
+		modulesCaster[id] = castProps(modProps);
+	});
+
+	return Yup.object({
+		properties: castProps(properties),
+		modules: Yup.object(modulesCaster).default(undefined),
+	});
+};
+
+Tickets.deserialiseUUIDsInTicket = (ticket, template) => {
+	const fullTem = generateFullSchema(template);
+	const caster = genToUUIDSchema(fullTem);
+	return caster.cast(ticket);
 };
 
 Tickets.serialiseTicket = (ticket, fullTemplate, stripDeprecated) => {
