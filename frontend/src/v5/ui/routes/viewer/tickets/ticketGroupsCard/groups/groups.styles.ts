@@ -31,10 +31,21 @@ const GroupStyling = css`
 	align-items: center;
 `;
 
+export const GroupItemButtons = styled.div`
+	width: 100%;
+	display: flex;
+	justify-content: flex-end;
+	height: 100%;
+`;
+
 export const GroupItemContainer = styled.div`
 	${GroupStyling}
 	flex-direction: row;
 	margin-bottom: 4px;
+
+	&:not(:hover) ${GroupItemButtons} {
+		display: none;
+	}
 `;
 
 export const GroupCollectionAccordion = styled(Accordion)`
@@ -86,14 +97,19 @@ export const GroupCollectionAccordion = styled(Accordion)`
 	}
 `;
 
-export const CollectionTitle = styled.span`
+export const GroupTitle = styled.span`
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+	width: 100%;
 
 	&:hover ${CommentButtons} {
 		opacity: 1;
 	}
+`;
+
+export const GroupCollectionTitle = styled(GroupTitle)`
+	justify-content: space-between;
 `;
 
 export const GroupCollectionContainer = styled.div`

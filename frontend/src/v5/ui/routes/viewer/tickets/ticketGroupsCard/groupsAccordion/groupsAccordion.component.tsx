@@ -27,8 +27,9 @@ type GroupsAccordionProps = {
 	title: any;
 	groups: IGroupCollection[];
 	children: any;
+	colored?: boolean;
 };
-export const GroupsAccordion = ({ title, groups = [], children }: GroupsAccordionProps) => {
+export const GroupsAccordion = ({ title, groups = [], children, colored }: GroupsAccordionProps) => {
 	const [checked, setChecked] = useState(false);
 	
 	const groupsCount = groups.length;
@@ -51,7 +52,7 @@ export const GroupsAccordion = ({ title, groups = [], children }: GroupsAccordio
 			$groupsCount={groupsCount}
 		>
 			{groupsCount ? (
-				<Groups groups={groups} />
+				<Groups groups={groups} colored={colored} />
 			) : (
 				<EmptyListMessage>
 					<FormattedMessage

@@ -17,29 +17,50 @@
 
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import ShowIcon from '@assets/icons/outlined/eye-outlined.svg';
+import HideIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
+import { IGroupFromApi } from '@/v5/store/tickets/groups/ticketGroups.types';
+import { IGroupCollection } from '@/v5/store/tickets/groups/ticketGroups.types';
+import { groupBy, partition, keys, values } from 'lodash';
+import { rgbaToHex } from '@/v4/helpers/colors';
+import { FormattedMessage } from 'react-intl';
+import { GroupIconComponent } from '../../../groups/groupItem/groupIcon/groupIcon.component';
+import { ErrorTicketButton, PrimaryTicketButton } from '../../ticketButton/ticketButton.styles';
 import {
 	Name,
 	GroupsCount,
 	NameContainer,
 	GroupCollectionAccordion,
-	CollectionTitle,
+	GroupTitle,
 	GroupCollectionContainer,
 	GroupItemContainer,
+	GroupItemButtons,
+	GroupCollectionTitle,
 } from './groups.styles';
-import { IGroupFromApi } from '@/v5/store/tickets/groups/ticketGroups.types';
-import { IGroupCollection } from '@/v5/store/tickets/groups/ticketGroups.types';
-import { groupBy, partition, keys, values } from 'lodash';
-import { GroupIconComponent } from '../../../groups/groupItem/groupIcon/groupIcon.component';
-import { ErrorCommentButton, PrimaryCommentButton } from '../../ticketsForm/commentsPanel/comment/commentButton/commentButton.styles';
-import { CommentButtons } from '../../ticketsForm/commentsPanel/comment/basicComment/basicComment.styles';
-import { rgbaToHex } from '@/v4/helpers/colors';
-import { FormattedMessage } from 'react-intl';
+import { GroupToggle } from './groupToggle/groupToggle.component';
+import { useState } from 'react';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { formatMessage } from '@/v5/services/intl';
 
-type GroupProps = { group: IGroupFromApi, color?: [number, number, number], opacity?: number };
-const GroupItem = ({ group, color, opacity }: GroupProps) => {
-	const deleteGroup = () => {};
-	const toggleShowGroup = () => {};
+type GroupProps = { group: IGroupFromApi, color?: [number, number, number], opacity?: number, colored: boolean };
+const GroupItem = ({ group, color, opacity, colored }: GroupProps) => {
+	const [groupIsVisible, setGroupIsVisible] = useState(false);
+
+	const deleteGroup = () => {
+		DialogsActionsDispatchers.open('delete', {
+			name: group.name,
+			onClickConfirm: () => {},
+			message: formatMessage({
+				id: 'deleteModal.groups.message',
+				defaultMessage: 'By deleting this Collection your data will be lost permanently and will not be recoverable.',
+			}),
+		});
+	};
+
+	const toggleShowGroup = () => {
+		setGroupIsVisible(!groupIsVisible);
+	};
+
 	const editGroup = () => {};
 
 	const alphaColor = (color || [255, 255, 255]).concat(opacity);
@@ -47,7 +68,7 @@ const GroupItem = ({ group, color, opacity }: GroupProps) => {
 
 	return (
 		<GroupItemContainer>
-			<CollectionTitle>
+			<GroupTitle>
 				<GroupIconComponent rules={group.rules} color={alphaHexColor} />
 				<NameContainer>
 					<Name>{group.name}</Name>
@@ -60,24 +81,27 @@ const GroupItem = ({ group, color, opacity }: GroupProps) => {
 						/>
 					</GroupsCount>
 				</NameContainer>
-				<CommentButtons>
-					<ErrorCommentButton onClick={deleteGroup}>
-						<DeleteIcon />
-					</ErrorCommentButton>
-					<PrimaryCommentButton onClick={toggleShowGroup}>
-						<ShowIcon />
-					</PrimaryCommentButton>
-					<PrimaryCommentButton onClick={editGroup}>
-						<EditIcon />
-					</PrimaryCommentButton>
-				</CommentButtons>
-			</CollectionTitle>
+				{colored && (
+					<GroupItemButtons>
+						<ErrorTicketButton onClick={deleteGroup}>
+							<DeleteIcon />
+						</ErrorTicketButton>
+						<PrimaryTicketButton onClick={toggleShowGroup}>
+							{groupIsVisible ? (<ShowIcon />) : (<HideIcon />)}
+						</PrimaryTicketButton>
+						<PrimaryTicketButton onClick={editGroup}>
+							<EditIcon />
+						</PrimaryTicketButton>
+					</GroupItemButtons>
+				)}
+			</GroupTitle>
+			<GroupToggle colored={colored} />
 		</GroupItemContainer>
 	);
 };
 
-type GroupCollectionProps = { groups: IGroupCollection[], previousGroupLength: number };
-const GroupCollection = ({ groups, previousGroupLength }: GroupCollectionProps) => {
+type GroupCollectionProps = { groups: IGroupCollection[], previousGroupLength: number, colored: boolean };
+const GroupCollection = ({ groups, previousGroupLength, colored }: GroupCollectionProps) => {
 	const title = groups[0].prefix[0];
 	const nextPrefixGroups = groups.map(({ prefix, ...group }) => ({
 		...group,
@@ -87,22 +111,23 @@ const GroupCollection = ({ groups, previousGroupLength }: GroupCollectionProps) 
 	return (
 		<GroupCollectionAccordion
 			title={
-				<CollectionTitle>
+				<GroupCollectionTitle>
 					<NameContainer>
 						<Name>{title}-{previousGroupLength}</Name>
 					</NameContainer>
-				</CollectionTitle>
+					<GroupToggle colored={colored} onClick={(e) => e.stopPropagation()} />
+				</GroupCollectionTitle>
 			}
 		>
 			<GroupCollectionContainer>
-				<Groups groups={nextPrefixGroups}/>
+				<Groups groups={nextPrefixGroups} colored={colored} />
 			</GroupCollectionContainer>
 		</GroupCollectionAccordion>
 	);
 };
 
-type GroupsProps = { groups: IGroupCollection[] };
-export const Groups = ({ groups }: GroupsProps) => {
+type GroupsProps = { groups: IGroupCollection[], colored: boolean };
+export const Groups = ({ groups, colored }: GroupsProps) => {
 	const [groupBatches, groupItems] = partition(groups, (g) => g.prefix?.length);
 	const collectionsDict = groupBy(groupBatches, (g) => g.prefix[0]);
 	const collections = values(collectionsDict);
@@ -111,9 +136,10 @@ export const Groups = ({ groups }: GroupsProps) => {
 
 	return (
 		<>
-			{groupItems.map((group) => (<GroupItem {...group} />))}
+			{groupItems.map((group) => (<GroupItem {...group} colored={colored} />))}
 			{collections.map((collection, index) => (
 				<GroupCollection
+					colored={colored}
 					groups={collection}
 					previousGroupLength={groupsByPrefix[groupsByPrefixIndices[index]].length}
 				/>

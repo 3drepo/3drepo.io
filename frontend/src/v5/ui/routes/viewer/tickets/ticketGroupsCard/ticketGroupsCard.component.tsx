@@ -40,6 +40,7 @@ export const TicketGroupsCard = () => {
 				<GroupsAccordion
 					title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'coloured' })}
 					groups={groups.colored}
+					colored
 				>
 					<NewGroupButton startIcon={<AddCircleIcon />}>
 						<FormattedMessage
