@@ -16,8 +16,18 @@
  */
 
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
+import { Select } from '@controls/inputs/select/select.component';
 import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 import styled from 'styled-components';
+
+export const HiddenSelect = styled(Select)`
+	height: 0;
+	width: 0;
+	overflow: hidden;
+	position: absolute;
+	right: 0;
+	top: 0;
+`;
 
 export const ListHeading = styled.div`
 	${({ theme }) => theme.typography.h5};

@@ -18,7 +18,6 @@
 import { selectJobs } from '@/v4/modules/jobs';
 import { formatMessage } from '@/v5/services/intl';
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Select } from '@controls/inputs/select/select.component';
 import { SearchContext, SearchContextComponent, SearchContextType } from '@controls/search/searchContext';
 import { NoResults, SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { MenuItem } from '@mui/material';
@@ -27,10 +26,9 @@ import { FormattedMessage } from 'react-intl';
 import { useSelector } from 'react-redux';
 import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSelectMenuItem.component';
 import { AssigneeListItem } from '../assigneesList/assigneeListItem/assigneeListItem.component';
-import { HorizontalRule, ListHeading, SearchInput } from './assigneesSelectMenu.styles';
+import { HiddenSelect, HorizontalRule, ListHeading, SearchInput } from './assigneesSelectMenu.styles';
 
 export const AssigneesSelectMenu = ({
-	open,
 	value,
 	values,
 	onClose,
@@ -79,7 +77,7 @@ export const AssigneesSelectMenu = ({
 				{ ({ filteredItems }: SearchContextType<typeof MenuItem>) => {
 					const [jobsBlah, usersBlah] = partition(filteredItems, isJob);
 					return (
-						<Select
+						<HiddenSelect
 							value={value}
 							multiple
 							{...props}
@@ -122,7 +120,7 @@ export const AssigneesSelectMenu = ({
 									/>
 								</NoResults>
 							)}
-						</Select>
+						</HiddenSelect>
 					);
 				}}
 			</SearchContext.Consumer>
