@@ -28,33 +28,27 @@ const { isUUID } = require('../../../../../utils/helper/typeCheck');
 
 const Tickets = {};
 
-const processGroupsUpdate = (oldData, newData, fields) => {
-	const oldGroups = [];
-	const keptGroups = [];
-	const toAdd = [];
-
+const processGroupsUpdate = (oldData, newData, fields, groupsState) => {
 	fields.forEach((fieldName) => {
 		const oldProp = getNestedProperty(oldData, fieldName) ?? [];
 		const newProp = getNestedProperty(newData, fieldName) ?? [];
 
 		oldProp.forEach(({ group }) => {
-			oldGroups.push(UUIDToString(group));
+			groupsState.old.push(UUIDToString(group));
 		});
 
 		newProp.forEach((propData) => {
 			const { group } = propData;
 			if (isUUID(group)) {
-				keptGroups.push(UUIDToString(group));
+				groupsState.stillUsed.push(UUIDToString(group));
 			} else {
 				const groupId = generateUUID();
-				toAdd.push({ ...group, _id: groupId });
+				groupsState.toAdd.push({ ...group, _id: groupId });
 				// eslint-disable-next-line no-param-reassign
 				propData.group = groupId;
 			}
 		});
 	});
-
-	return { toRemove: getArrayDifference(keptGroups, oldGroups).map(stringToUUID), toAdd };
 };
 
 /**
@@ -70,6 +64,11 @@ const processSpecialProperties = (template, oldTicket, updatedTicket) => {
 		binaries: {
 			toRemove: [],
 			toAdd: [],
+		},
+		groups: {
+			toAdd: [],
+			old: [],
+			stillUsed: [],
 		},
 	};
 
@@ -100,7 +99,7 @@ const processSpecialProperties = (template, oldTicket, updatedTicket) => {
 			} else if (type === propTypes.VIEW) {
 				// Make constants out of these
 				processImageUpdate('screenshot');
-				res.groups = processGroupsUpdate(oldProperties[name], updatedProperties[name], ['state.colored', 'state.hidden', 'state.transformed']);
+				processGroupsUpdate(oldProperties[name], updatedProperties[name], ['state.colored', 'state.hidden', 'state.transformed'], res.groups);
 			}
 		});
 	};
@@ -111,6 +110,11 @@ const processSpecialProperties = (template, oldTicket, updatedTicket) => {
 		const id = name ?? type;
 		updateReferences(properties, oldTicket?.modules?.[id], updatedTicket?.modules?.[id]);
 	});
+
+	res.groups.toRemove = getArrayDifference(res.groups.stillUsed, res.groups.old).map(stringToUUID);
+
+	delete res.groups.old;
+	delete res.groups.stillUsed;
 
 	return res;
 };
