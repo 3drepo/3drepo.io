@@ -35,11 +35,6 @@ export interface IGroupFromApi {
 	rules?: IGroupRule[],
 }
 
-export enum GroupType {
-	NORMAL = 'normal',
-	SMART = 'smart',
-}
-
 interface BaseGroupCollection {
 	prefix?: string[],
 	group: IGroupFromApi,
