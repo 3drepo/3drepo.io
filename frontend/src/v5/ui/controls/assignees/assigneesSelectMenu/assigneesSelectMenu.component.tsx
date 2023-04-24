@@ -27,7 +27,7 @@ import { FormattedMessage } from 'react-intl';
 import { useSelector } from 'react-redux';
 import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSelectMenuItem.component';
 import { AssigneeListItem } from '../assigneesList/assigneeListItem/assigneeListItem.component';
-import { ListHeading, SearchInput } from './assigneesSelectMenu.styles';
+import { HorizontalRule, ListHeading, SearchInput } from './assigneesSelectMenu.styles';
 
 export const AssigneesSelectMenu = ({
 	open,
@@ -107,6 +107,7 @@ export const AssigneesSelectMenu = ({
 									/>
 								</NoResults>
 							)}
+							<HorizontalRule />
 							<ListHeading>
 								<FormattedMessage id="assigneesSelectMenu.usersHeading" defaultMessage="Users" />
 							</ListHeading>
