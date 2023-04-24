@@ -19,8 +19,10 @@ import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import ShowIcon from '@assets/icons/outlined/eye-outlined.svg';
 import HideIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
-import { IGroupFromApi } from '@/v5/store/tickets/groups/ticketGroups.types';
-import { IGroupCollection } from '@/v5/store/tickets/groups/ticketGroups.types';
+import { IGroupFromApi, IGroupCollection } from '@/v5/store/tickets/groups/ticketGroups.types';
+import { useState } from 'react';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { formatMessage } from '@/v5/services/intl';
 import { groupBy, partition, keys, values } from 'lodash';
 import { rgbaToHex } from '@/v4/helpers/colors';
 import { FormattedMessage } from 'react-intl';
@@ -38,9 +40,6 @@ import {
 	GroupCollectionTitle,
 } from './groups.styles';
 import { GroupToggle } from './groupToggle/groupToggle.component';
-import { useState } from 'react';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { formatMessage } from '@/v5/services/intl';
 
 type GroupProps = { group: IGroupFromApi, color?: [number, number, number], opacity?: number, colored: boolean };
 const GroupItem = ({ group, color, opacity, colored }: GroupProps) => {
@@ -107,17 +106,17 @@ const GroupCollection = ({ groups, previousGroupLength, colored }: GroupCollecti
 		...group,
 		prefix: prefix.slice(1),
 	}));
-	
+
 	return (
 		<GroupCollectionAccordion
-			title={
+			title={(
 				<GroupCollectionTitle>
 					<NameContainer>
 						<Name>{title}-{previousGroupLength}</Name>
 					</NameContainer>
 					<GroupToggle colored={colored} onClick={(e) => e.stopPropagation()} />
 				</GroupCollectionTitle>
-			}
+			)}
 		>
 			<GroupCollectionContainer>
 				<Groups groups={nextPrefixGroups} colored={colored} />

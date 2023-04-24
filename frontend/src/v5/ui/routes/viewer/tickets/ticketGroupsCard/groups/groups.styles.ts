@@ -17,8 +17,8 @@
 
 import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
-import { CommentButtons } from '../../ticketsForm/commentsPanel/comment/basicComment/basicComment.styles';
 import { Accordion } from '@controls/accordion/accordion.component';
+import { CommentButtons } from '../../ticketsForm/commentsPanel/comment/basicComment/basicComment.styles';
 
 const GroupStyling = css`
 	border: 0;
@@ -132,7 +132,7 @@ export const Name = styled(Typography).attrs({
 	variant: 'body1',
 })`
 	cursor: pointer;
-    width: max-content;
+	width: max-content;
 	color: ${({ theme }) => theme.palette.secondary.main};
 `;
 

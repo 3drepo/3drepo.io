@@ -38,7 +38,7 @@ export interface IGroupFromApi {
 export enum GroupType {
 	NORMAL = 'normal',
 	SMART = 'smart',
-};
+}
 
 interface BaseGroupCollection {
 	prefix?: string[],

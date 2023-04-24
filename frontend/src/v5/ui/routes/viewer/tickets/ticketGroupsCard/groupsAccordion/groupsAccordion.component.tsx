@@ -31,24 +31,24 @@ type GroupsAccordionProps = {
 };
 export const GroupsAccordion = ({ title, groups = [], children, colored }: GroupsAccordionProps) => {
 	const [checked, setChecked] = useState(false);
-	
+
 	const groupsCount = groups.length;
 
 	const toggleCheckbox = (e) => {
 		e.stopPropagation();
-		setChecked(!checked)
+		setChecked(!checked);
 	};
 
 	return (
 		<Accordion
 			Icon={GroupsIcon}
-			title={
+			title={(
 				<TitleContainer>
 					{title}
 					<NumberContainer>{groupsCount}</NumberContainer>
-					<Checkbox checked={checked} onClick={toggleCheckbox}/>
+					<Checkbox checked={checked} onClick={toggleCheckbox} />
 				</TitleContainer>
-			}
+			)}
 			$groupsCount={groupsCount}
 		>
 			{groupsCount ? (

@@ -23,5 +23,5 @@ import { Checkbox } from './groupToggle.styles';
 type GroupToggleProps = CheckboxProps & { colored: boolean };
 export const GroupToggle = ({ colored, ...props }: GroupToggleProps) => {
 	if (colored) return (<Checkbox {...props} />);
-	return (<Checkbox icon={<EyeDisabledIcon />} checkedIcon={<EyeIcon />} {...props} />)
+	return (<Checkbox icon={<EyeDisabledIcon />} checkedIcon={<EyeIcon />} {...props} />);
 };
