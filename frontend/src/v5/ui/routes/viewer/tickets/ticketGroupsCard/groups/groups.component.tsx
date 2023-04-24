@@ -48,11 +48,12 @@ const GroupItem = ({ group, color, opacity, colored }: GroupProps) => {
 	const deleteGroup = () => {
 		DialogsActionsDispatchers.open('delete', {
 			name: group.name,
-			onClickConfirm: () => {},
 			message: formatMessage({
 				id: 'deleteModal.groups.message',
 				defaultMessage: 'By deleting this Collection your data will be lost permanently and will not be recoverable.',
 			}),
+			onClickConfirm: () => {},
+			confirmLabel: formatMessage({ id: 'deleteModal.groups.confirmButton', defaultMessage: 'Delete Collection' }),
 		});
 	};
 
