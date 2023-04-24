@@ -39,7 +39,7 @@ import {
 	GroupItemButtons,
 	GroupCollectionTitle,
 } from './groups.styles';
-import { GroupToggle } from './groupToggle/groupToggle.component';
+import { GroupToggle } from '../groupToggle/groupToggle.component';
 
 type GroupProps = { group: IGroupFromApi, color?: [number, number, number], opacity?: number, colored: boolean };
 const GroupItem = ({ group, color, opacity, colored }: GroupProps) => {
