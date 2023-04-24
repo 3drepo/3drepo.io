@@ -69,6 +69,10 @@ export const AssigneesSelectMenu = ({
 			e.stopPropagation();
 		}
 	};
+	const onClickList = (e) => {
+		preventPropagation(e);
+		onClick();
+	};
 	return (
 		<SearchContextComponent filteringFunction={filterItems} items={[...jobsArray, ...usersArray]}>
 			<SearchContext.Consumer>
@@ -85,6 +89,7 @@ export const AssigneesSelectMenu = ({
 									style: { maxHeight: 531, maxWidth: 218 },
 								},
 							}}
+							onClick={onClickList}
 						>
 							<SearchInputContainer>
 								<SearchInput
