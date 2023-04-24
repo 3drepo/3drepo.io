@@ -21,68 +21,49 @@ import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/sel
 import { SearchContext, SearchContextComponent, SearchContextType } from '@controls/search/searchContext';
 import { NoResults, SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { MenuItem } from '@mui/material';
-import { partition } from 'lodash';
+import { get, partition } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { useSelector } from 'react-redux';
 import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSelectMenuItem.component';
 import { AssigneeListItem } from '../assigneesList/assigneeListItem/assigneeListItem.component';
 import { HiddenSelect, HorizontalRule, ListHeading, SearchInput } from './assigneesSelectMenu.styles';
 
+const isUser = (assignee) => get(assignee, 'user');
+
+const preventPropagation = (e) => {
+	if (e.key !== 'Escape') {
+		e.stopPropagation();
+	}
+};
+
 export const AssigneesSelectMenu = ({
+	open,
 	value,
 	values,
+	onClick,
 	...props
 }) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const jobs = useSelector(selectJobs);
 	const users = UsersHooksSelectors.selectUsersByTeamspace(teamspace);
 	const filterItems = (items, query: string) => items
-		.filter(({ props: { title, subtitle } }) => [title, subtitle]
+		.filter(({ _id, firstName, lastName, job }) => [_id, firstName, lastName, job]
 			.some((string) => string?.toLowerCase().includes(query.toLowerCase())));
 
-	const jobsArray = jobs.map(({ _id }) => (
-		<AssigneesSelectMenuItem
-			key={_id}
-			value={_id}
-			data-type="job"
-			icon={() => <AssigneeListItem assignee={_id} />}
-			title={_id}
-			selected
-		/>
-	));
-
-	const usersArray = users.map(({ user, firstName, lastName, job }) => (
-		<AssigneesSelectMenuItem
-			key={user}
-			value={user}
-			data-type="user"
-			icon={() => <AssigneeListItem assignee={user} />}
-			title={`${firstName} ${lastName}`}
-			subtitle={job}
-		/>
-	));
-
-	const isJob = ({ props: { 'data-type': dataType } }) => dataType === 'job';
-
-	const preventPropagation = (e) => {
-		if (e.key !== 'Escape') {
-			e.stopPropagation();
-		}
-	};
 	const onClickList = (e) => {
 		preventPropagation(e);
 		onClick();
 	};
 	return (
-		<SearchContextComponent filteringFunction={filterItems} items={[...jobsArray, ...usersArray]}>
+		<SearchContextComponent filteringFunction={filterItems} items={[...jobs, ...users]}>
 			<SearchContext.Consumer>
 				{ ({ filteredItems }: SearchContextType<typeof MenuItem>) => {
-					const [jobsBlah, usersBlah] = partition(filteredItems, isJob);
+					const [filteredUsers, filteredJobs] = partition(filteredItems, isUser);
 					return (
 						<HiddenSelect
+							open={open}
 							value={value}
 							multiple
-							{...props}
 							MenuProps={{
 								disableAutoFocusItem: true,
 								PaperProps: {
@@ -90,6 +71,7 @@ export const AssigneesSelectMenu = ({
 								},
 							}}
 							onClick={onClickList}
+							{...props}
 						>
 							<SearchInputContainer>
 								<SearchInput
@@ -99,10 +81,17 @@ export const AssigneesSelectMenu = ({
 								/>
 							</SearchInputContainer>
 							<ListHeading>
-								<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
+								{formatMessage({ id: 'assigneesSelectMenu.jobsHeading', defaultMessage: 'Jobs' })}
 							</ListHeading>
-							{jobsBlah.length > 0 && jobsBlah}
-							{!jobsBlah.length && (
+							{filteredJobs.length > 0 && filteredJobs.map(({ _id }) => (
+								<AssigneesSelectMenuItem
+									key={_id}
+									value={_id}
+									icon={() => <AssigneeListItem assignee={_id} />}
+									title={_id}
+								/>
+							))}
+							{!filteredJobs.length && (
 								<NoResults>
 									<FormattedMessage
 										id="form.searchSelect.menuContent.emptyList"
@@ -112,10 +101,18 @@ export const AssigneesSelectMenu = ({
 							)}
 							<HorizontalRule />
 							<ListHeading>
-								<FormattedMessage id="assigneesSelectMenu.usersHeading" defaultMessage="Users" />
+								{formatMessage({ id: 'assigneesSelectMenu.usersHeading', defaultMessage: 'Users' })}
 							</ListHeading>
-							{usersBlah.length > 0 && usersBlah}
-							{!usersBlah.length && (
+							{filteredUsers.length > 0 && filteredUsers.map(({ user, firstName, lastName, job }) => (
+								<AssigneesSelectMenuItem
+									key={user}
+									value={user}
+									icon={() => <AssigneeListItem assignee={user} />}
+									title={`${firstName} ${lastName}`}
+									subtitle={job}
+								/>
+							))}
+							{!filteredUsers.length && (
 								<NoResults>
 									<FormattedMessage
 										id="form.searchSelect.menuContent.emptyList"

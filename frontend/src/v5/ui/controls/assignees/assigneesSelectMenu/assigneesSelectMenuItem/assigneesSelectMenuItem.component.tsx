@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { MenuItemProps } from '@mui/material';
 import { ListItemContainer, Subtitle, Title, Checkbox } from './assigneesSelectMenuItem.styles';
 
-type IAssigneesSelectMenuItem = {
+type IAssigneesSelectMenuItem = MenuItemProps & {
 	icon: any;
 	title: string;
 	subtitle?: string;
-	selected: boolean
 	value: string;
 };
 
