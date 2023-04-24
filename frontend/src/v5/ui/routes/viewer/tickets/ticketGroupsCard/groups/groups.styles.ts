@@ -18,7 +18,7 @@
 import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
 import { Accordion } from '@controls/accordion/accordion.component';
-import { CommentButtons } from '../../ticketsForm/commentsPanel/comment/basicComment/basicComment.styles';
+import { GroupIcon } from '../../../groups/groupItem/groupIcon/groupIcon.styles';
 
 const GroupStyling = css`
 	border: 0;
@@ -45,6 +45,10 @@ export const GroupItemContainer = styled.div`
 
 	&:not(:hover) ${GroupItemButtons} {
 		display: none;
+	}
+
+	${GroupIcon}::after {
+		border-color: ${({ theme }) => theme.palette.secondary.lightest};
 	}
 `;
 
@@ -102,10 +106,6 @@ export const GroupTitle = styled.span`
 	flex-direction: row;
 	align-items: center;
 	width: 100%;
-
-	&:hover ${CommentButtons} {
-		opacity: 1;
-	}
 `;
 
 export const GroupCollectionTitle = styled(GroupTitle)`

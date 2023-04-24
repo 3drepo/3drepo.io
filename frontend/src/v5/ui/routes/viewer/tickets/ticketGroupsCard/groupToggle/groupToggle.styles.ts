@@ -18,8 +18,8 @@
 import { Checkbox as CheckboxBase } from '@mui/material';
 import styled from 'styled-components';
 
-export const Checkbox = styled(CheckboxBase)`
-	/* svg {
-		width: 16px
-	} */
+export const EyeCheckbox = styled(CheckboxBase)`
+	&, &.Mui-checked {
+		color: ${({ theme }) => theme.palette.secondary.main};
+	}
 `;

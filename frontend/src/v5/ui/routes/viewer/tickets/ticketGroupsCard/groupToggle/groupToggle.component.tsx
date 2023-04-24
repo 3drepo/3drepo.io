@@ -17,11 +17,11 @@
 
 import EyeIcon from '@assets/icons/outlined/eye-outlined.svg';
 import EyeDisabledIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
-import { CheckboxProps } from '@mui/material';
-import { Checkbox } from './groupToggle.styles';
+import { Checkbox, CheckboxProps } from '@mui/material';
+import { EyeCheckbox } from './groupToggle.styles';
 
 type GroupToggleProps = CheckboxProps & { colored: boolean };
 export const GroupToggle = ({ colored, ...props }: GroupToggleProps) => {
 	if (colored) return (<Checkbox {...props} />);
-	return (<Checkbox icon={<EyeDisabledIcon />} checkedIcon={<EyeIcon />} {...props} />);
+	return (<EyeCheckbox icon={<EyeDisabledIcon />} checkedIcon={<EyeIcon />} {...props} />);
 };

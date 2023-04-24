@@ -29,15 +29,15 @@ import { FormattedMessage } from 'react-intl';
 import { GroupIconComponent } from '../../../groups/groupItem/groupIcon/groupIcon.component';
 import { ErrorTicketButton, PrimaryTicketButton } from '../../ticketButton/ticketButton.styles';
 import {
+	NameContainer,
 	Name,
 	GroupsCount,
-	NameContainer,
-	GroupCollectionAccordion,
 	GroupTitle,
-	GroupCollectionContainer,
 	GroupItemContainer,
 	GroupItemButtons,
 	GroupCollectionTitle,
+	GroupCollectionAccordion,
+	GroupCollectionContainer,
 } from './groups.styles';
 import { GroupToggle } from '../groupToggle/groupToggle.component';
 
