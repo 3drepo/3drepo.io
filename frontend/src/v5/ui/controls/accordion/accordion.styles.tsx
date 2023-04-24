@@ -35,6 +35,6 @@ export const TitleContainer = styled.span`
 	color: inherit;
 
 	width: 100%;
-    display: flex;
-    align-items: center;
+	display: flex;
+	align-items: center;
 `;
