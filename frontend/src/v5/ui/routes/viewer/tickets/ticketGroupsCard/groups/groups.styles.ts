@@ -47,7 +47,7 @@ export const GroupItemContainer = styled.div`
 		display: none;
 	}
 
-	${GroupIcon}::after {
+	${/* sc-selector */ GroupIcon}::after {
 		border-color: ${({ theme }) => theme.palette.secondary.lightest};
 	}
 `;

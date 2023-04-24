@@ -82,8 +82,8 @@ export const TitleContainer = styled.div`
 
 export const NumberContainer = styled(CentredContainer)`
 	border-radius: 26px;
-    width: 26px;
-    height: 26px;
+	width: 26px;
+	height: 26px;
 	margin-left: 3px;
 	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	color: currentColor;
