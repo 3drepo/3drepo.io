@@ -16,9 +16,10 @@
  */
 
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addGroups, deleteGroups } = require('../../../../../models/tickets.groups');
+const { addGroups, deleteGroups, getGroupsByIds } = require('../../../../../models/tickets.groups');
 const { addTicket, getAllTickets, getTicketById, updateTicket } = require('../../../../../models/tickets');
 const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = require('../../../../../schemas/tickets/templates.constants');
+const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getFileWithMetaAsStream, removeFile, storeFile } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
@@ -34,13 +35,13 @@ const processGroupsUpdate = (oldData, newData, fields, groupsState) => {
 		const newProp = getNestedProperty(newData, fieldName) ?? [];
 
 		oldProp.forEach(({ group }) => {
-			groupsState.old.push(UUIDToString(group));
+			groupsState.old.add(UUIDToString(group));
 		});
 
 		newProp.forEach((propData) => {
 			const { group } = propData;
 			if (isUUID(group)) {
-				groupsState.stillUsed.push(UUIDToString(group));
+				groupsState.stillUsed.add(UUIDToString(group));
 			} else {
 				const groupId = generateUUID();
 				groupsState.toAdd.push({ ...group, _id: groupId });
@@ -67,8 +68,8 @@ const processSpecialProperties = (template, oldTicket, updatedTicket) => {
 		},
 		groups: {
 			toAdd: [],
-			old: [],
-			stillUsed: [],
+			old: new Set(),
+			stillUsed: new Set(),
 		},
 	};
 
@@ -111,10 +112,10 @@ const processSpecialProperties = (template, oldTicket, updatedTicket) => {
 		updateReferences(properties, oldTicket?.modules?.[id], updatedTicket?.modules?.[id]);
 	});
 
-	res.groups.toRemove = getArrayDifference(res.groups.stillUsed, res.groups.old).map(stringToUUID);
+	res.groups.toRemove = getArrayDifference(Array.from(res.groups.stillUsed),
+		Array.from(res.groups.old)).map(stringToUUID);
 
 	delete res.groups.old;
-	delete res.groups.stillUsed;
 
 	return res;
 };
@@ -126,6 +127,18 @@ const storeFiles = (teamspace, project, model, ticket, binaryData) => Promise.al
 );
 
 const processExternalData = async (teamspace, project, model, ticketId, { binaries, groups }) => {
+	const stillUsed = Array.from(groups.stillUsed);
+	if (stillUsed.length) {
+		const existingGroups = await getGroupsByIds(teamspace, project, model, ticketId,
+			stillUsed.map(stringToUUID), { _id: 1 });
+
+		if (existingGroups.length !== stillUsed.length) {
+			const notFoundGroups = getArrayDifference(existingGroups.map(({ _id }) => UUIDToString(_id)),
+				stillUsed);
+			throw createResponseCode(templates.invalidArguments, `The following groups are not found: ${notFoundGroups.join(',')}`);
+		}
+	}
+
 	await Promise.all([
 		binaries.toRemove.map((ref) => removeFile(teamspace, TICKETS_RESOURCES_COL, ref)),
 		storeFiles(teamspace, project, model, ticketId, binaries.toAdd),
@@ -137,14 +150,14 @@ const processExternalData = async (teamspace, project, model, ticketId, { binari
 Tickets.addTicket = async (teamspace, project, model, template, ticket) => {
 	const externalDataDelta = processSpecialProperties(template, undefined, ticket);
 	const res = await addTicket(teamspace, project, model, ticket);
-	processExternalData(teamspace, project, model, res, externalDataDelta);
+	await processExternalData(teamspace, project, model, res, externalDataDelta);
 	return res;
 };
 
 Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData, author) => {
 	const externalDataDelta = processSpecialProperties(template, oldTicket, updateData);
 	await updateTicket(teamspace, project, model, oldTicket, updateData, author);
-	processExternalData(teamspace, project, model, oldTicket._id, externalDataDelta);
+	await processExternalData(teamspace, project, model, oldTicket._id, externalDataDelta);
 };
 
 Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(

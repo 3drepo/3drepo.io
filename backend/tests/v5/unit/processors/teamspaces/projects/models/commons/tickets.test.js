@@ -25,6 +25,8 @@ const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = r
 
 const { isUUID } = require(`${src}/utils/helper/typeCheck`);
 
+const { templates } = require(`${src}/utils/responseCodes`);
+
 jest.mock('../../../../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);
 
@@ -434,6 +436,10 @@ const updateTicketGroupTests = () => {
 			const updatedPropData = cloneDeep(testData.ticket.properties[testData.propName]);
 			const updatedModPropData = cloneDeep(testData.ticket.modules[testData.moduleName][testData.propName]);
 
+			TicketGroupsModel.getGroupsByIds.mockImplementationOnce(
+				(ts, proj, mod, ticket, ids) => Promise.resolve(ids.map(
+					(_id) => ({ _id }))));
+
 			Object.keys(updatedPropData.state).forEach((key) => {
 				const groupArr = updatedPropData.state[key];
 
@@ -491,6 +497,52 @@ const updateTicketGroupTests = () => {
 
 			expect(TicketGroupsModel.deleteGroups).toHaveBeenCalledTimes(1);
 			expect(TicketGroupsModel.deleteGroups).toHaveBeenCalledWith(teamspace, project, model, toRemove);
+		});
+		test('Throw an error if retained groups contains group ids that does not exist', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+
+			const testData = generateGroupsTestData(true);
+
+			const toRemove = [];
+
+			const updatedPropData = cloneDeep(testData.ticket.properties[testData.propName]);
+			const updatedModPropData = cloneDeep(testData.ticket.modules[testData.moduleName][testData.propName]);
+
+			Object.keys(updatedPropData.state).forEach((key) => {
+				const groupArr = updatedPropData.state[key];
+
+				toRemove.push(groupArr[0].group);
+				groupArr[0].group = generateGroup(true, { hasId: false });
+			});
+
+			Object.keys(updatedModPropData.state).forEach((key) => {
+				const groupArr = updatedModPropData.state[key];
+
+				toRemove.push(groupArr[0].group);
+				groupArr[0].group = generateGroup(true, { hasId: false });
+			});
+
+			const toUpdate = {
+				properties: {
+					[testData.propName]: updatedPropData,
+				},
+				modules: {
+					[testData.moduleName]: {
+						[testData.propName]: updatedModPropData,
+					},
+				},
+			};
+
+			TicketGroupsModel.getGroupsByIds.mockImplementationOnce(
+				(ts, proj, mod, ticket, ids) => Promise.resolve([{ _id: ids[0] }]));
+
+			TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
+
+			await expect(Tickets.updateTicket(teamspace, project, model, testData.template,
+				testData.ticket, toUpdate)).rejects.toEqual(
+				expect.objectContaining({ code: templates.invalidArguments.code }));
 		});
 	});
 };
