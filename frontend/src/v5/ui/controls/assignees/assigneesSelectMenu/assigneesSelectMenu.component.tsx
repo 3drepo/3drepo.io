@@ -80,11 +80,13 @@ export const AssigneesSelectMenu = ({
 					const [jobsBlah, usersBlah] = partition(filteredItems, isJob);
 					return (
 						<Select
+							value={value}
+							multiple
 							{...props}
 							MenuProps={{
 								disableAutoFocusItem: true,
 								PaperProps: {
-									style: { maxHeight: 231 },
+									style: { maxHeight: 531, maxWidth: 218 },
 								},
 							}}
 						>

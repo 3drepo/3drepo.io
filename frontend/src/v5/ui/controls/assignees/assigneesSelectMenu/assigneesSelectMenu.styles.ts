@@ -28,6 +28,9 @@ export const ListHeading = styled.div`
 
 export const SearchInput = styled(SearchInputBase)`
 	width: auto;
+	margin: 2px 12px 12px 12px;
+`;
+
 export const HorizontalRule = styled.hr`
 	background-color: ${({ theme }) => theme.palette.base.lightest};
 	height: 1px;
