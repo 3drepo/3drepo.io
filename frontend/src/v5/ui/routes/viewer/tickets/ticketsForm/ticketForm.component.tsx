@@ -34,7 +34,6 @@ const ModulePanel = ({ module, scrollPanelIntoView, defaultExpanded, ...rest }: 
 	const required = some(module.properties, 'required');
 	const { title, ...accordionProps } = getModulePanelProps(module);
 	return (
-		// eslint-disable-next-line max-len
 		<Accordion
 			{...accordionProps}
 			onChange={scrollPanelIntoView}
