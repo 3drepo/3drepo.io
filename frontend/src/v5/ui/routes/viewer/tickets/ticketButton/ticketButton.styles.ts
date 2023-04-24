@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 
-const CommentButtonStyling = styled.button`
+const TicketButtonStyling = styled.button`
 	height: 24px;
 	width: 24px;
 	margin: 2px;
@@ -33,7 +33,7 @@ const CommentButtonStyling = styled.button`
 	}
 `;
 
-export const PrimaryCommentButton = styled(CommentButtonStyling)<{ disabled?: boolean }>`
+export const PrimaryTicketButton = styled(TicketButtonStyling)<{ disabled?: boolean }>`
 	color: ${({ theme }) => theme.palette.primary.main};
 	background-color: ${({ theme }) => theme.palette.primary.lightest};
 
@@ -44,7 +44,7 @@ export const PrimaryCommentButton = styled(CommentButtonStyling)<{ disabled?: bo
 	`}
 `;
 
-export const ErrorCommentButton = styled(CommentButtonStyling)`
+export const ErrorTicketButton = styled(TicketButtonStyling)`
 	color: ${({ theme }) => theme.palette.error.main};
 	background-color: ${({ theme }) => theme.palette.error.lightest};
 `;
