@@ -76,8 +76,7 @@ const GroupItem = ({ group, color, opacity, colored }: GroupProps) => {
 						<FormattedMessage
 							id="groups.item.numberOfMeshes"
 							defaultMessage="{count, plural, =0 {No objects} one {# object} other {# objects}}"
-							// TODO - fix when logic is implemented
-							// values={{ count: group.totalSavedMeshes }}
+							// TODO - fix with actual mesh count when logic is implemented
 							values={{ count: group.objects.length }}
 						/>
 					</GroupsCount>
