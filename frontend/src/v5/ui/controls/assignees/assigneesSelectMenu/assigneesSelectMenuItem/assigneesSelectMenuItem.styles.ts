@@ -32,9 +32,13 @@ export const Title = styled.div`
 	${({ theme }) => theme.typography.body1};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	line-height: 15px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	width: 135px;
 `;
 
-export const Subtitle = styled.div`
+export const Subtitle = styled(Title)`
 	${({ theme }) => theme.typography.body1};
 	font-size: 11px;
 	color: ${({ theme }) => theme.palette.base.main};
