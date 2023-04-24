@@ -23,7 +23,7 @@ import { IGroupFromApi, IGroupCollection } from '@/v5/store/tickets/groups/ticke
 import { useState } from 'react';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
-import { groupBy, partition, keys, values } from 'lodash';
+import { groupBy, partition, values } from 'lodash';
 import { rgbaToHex } from '@/v4/helpers/colors';
 import { FormattedMessage } from 'react-intl';
 import { GroupIconComponent } from '../../../groups/groupItem/groupIcon/groupIcon.component';
@@ -75,6 +75,7 @@ const GroupItem = ({ group, color, opacity, colored }: GroupProps) => {
 						<FormattedMessage
 							id="groups.item.numberOfMeshes"
 							defaultMessage="{count, plural, =0 {No objects} one {# object} other {# objects}}"
+							// TODO - fix when logic is implemented
 							// values={{ count: group.totalSavedMeshes }}
 							values={{ count: group.objects.length }}
 						/>
@@ -99,49 +100,35 @@ const GroupItem = ({ group, color, opacity, colored }: GroupProps) => {
 	);
 };
 
-type GroupCollectionProps = { groups: IGroupCollection[], previousGroupLength: number, colored: boolean };
-const GroupCollection = ({ groups, previousGroupLength, colored }: GroupCollectionProps) => {
-	const title = groups[0].prefix[0];
-	const nextPrefixGroups = groups.map(({ prefix, ...group }) => ({
-		...group,
-		prefix: prefix.slice(1),
-	}));
-
-	return (
-		<GroupCollectionAccordion
-			title={(
-				<GroupCollectionTitle>
-					<NameContainer>
-						<Name>{title}-{previousGroupLength}</Name>
-					</NameContainer>
-					<GroupToggle colored={colored} onClick={(e) => e.stopPropagation()} />
-				</GroupCollectionTitle>
-			)}
-		>
-			<GroupCollectionContainer>
-				<Groups groups={nextPrefixGroups} colored={colored} />
-			</GroupCollectionContainer>
-		</GroupCollectionAccordion>
-	);
-};
-
 type GroupsProps = { groups: IGroupCollection[], colored: boolean };
 export const Groups = ({ groups, colored }: GroupsProps) => {
 	const [groupBatches, groupItems] = partition(groups, (g) => g.prefix?.length);
 	const collectionsDict = groupBy(groupBatches, (g) => g.prefix[0]);
 	const collections = values(collectionsDict);
-	const groupsByPrefix = groupBy(groups, 'prefix');
-	const groupsByPrefixIndices = keys(groupsByPrefix);
+
+	const collectionToGroup = (collection) => collection.map(({ prefix, ...group }) => ({
+		...group,
+		prefix: prefix.slice(1),
+	}));
 
 	return (
 		<>
 			{groupItems.map((group) => (<GroupItem {...group} colored={colored} />))}
-			{collections.map((collection, index) => (
-				<GroupCollection
-					colored={colored}
-					groups={collection}
-					previousGroupLength={groupsByPrefix[groupsByPrefixIndices[index]].length}
-				/>
+			{collections.map((collection) => (
+				<GroupCollectionAccordion
+					title={(
+						<GroupCollectionTitle>
+							<NameContainer>
+								<Name>{collection[0].prefix[0]}</Name>
+							</NameContainer>
+							<GroupToggle colored={colored} onClick={(e) => e.stopPropagation()} />
+						</GroupCollectionTitle>
+					)}
+				>
+					<GroupCollectionContainer>
+						<Groups groups={collectionToGroup(collection)} colored={colored} />
+					</GroupCollectionContainer>
+				</GroupCollectionAccordion>
 			))}
 		</>
 	);
