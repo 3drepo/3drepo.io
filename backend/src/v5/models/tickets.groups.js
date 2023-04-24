@@ -31,6 +31,6 @@ Groups.deleteGroups = async (teamspace, project, model, ticket, groupIds) => {
 };
 
 Groups.getGroupsByIds = (teamspace, project, model, ticket, groupIds, projection) => find(
-	teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: { $in: [groupIds] } }, projection);
+	teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
 
 module.exports = Groups;

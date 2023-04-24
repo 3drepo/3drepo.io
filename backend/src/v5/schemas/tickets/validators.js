@@ -31,6 +31,7 @@ const CameraType = {
 const groupSchema = (allowIds) => {
 	const group = Yup.object({
 		name: types.strings.title,
+		description: types.strings.longDescription,
 		rules: Yup.lazy((val) => (val ? rulesSchema : Yup.mixed())),
 		objects: Yup.array().of(Yup.object({
 			container: Yup.string().test('Container id', 'Container ID must be an UUID string', isUUIDString).required(),

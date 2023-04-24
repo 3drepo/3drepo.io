@@ -142,8 +142,8 @@ const processExternalData = async (teamspace, project, model, ticketId, { binari
 	await Promise.all([
 		binaries.toRemove.map((ref) => removeFile(teamspace, TICKETS_RESOURCES_COL, ref)),
 		storeFiles(teamspace, project, model, ticketId, binaries.toAdd),
-		groups.toAdd.length ? addGroups(teamspace, project, model, groups.toAdd) : Promise.resolve(),
-		groups.toRemove.length ? deleteGroups(teamspace, project, model, groups.toRemove) : Promise.resolve(),
+		groups.toAdd.length ? addGroups(teamspace, project, model, ticketId, groups.toAdd) : Promise.resolve(),
+		groups.toRemove.length ? deleteGroups(teamspace, project, model, ticketId, groups.toRemove) : Promise.resolve(),
 	]);
 };
 
