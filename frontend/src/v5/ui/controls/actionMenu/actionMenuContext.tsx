@@ -15,23 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { createContext } from 'react';
 
-export const Container = styled.span`
-	width: fit-content;
-`;
-
-export const ActionMenuSection = styled.div`
-	display: flex;
-	flex-direction: column;
-	padding: 11px;
-
-	&:not(:last-of-type) {
-		border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
-	}
-`;
-
-export const Menu = styled.div`
-	display: flex;
-	flex-direction: column;
-`;
+type ActionMenuContextType = { close: () => void };
+export const ActionMenuContext = createContext<ActionMenuContextType>({ close: () => {} });
+ActionMenuContext.displayName = 'ActionMenuContext';

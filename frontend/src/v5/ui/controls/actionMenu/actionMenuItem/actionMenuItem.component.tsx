@@ -14,20 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useContext } from 'react';
 import { MenuItem } from './actionMenuItem.styles';
+import { ActionMenuContext } from '../actionMenuContext';
 
 type ActionMenuItemProps = {
 	className?: string;
 	children?: React.ReactNode;
-	onClick?: () => void;
+	onClick?: (e) => void;
 };
 
 export const ActionMenuItem = ({
-	children,
+	onClick,
 	...props
-}: ActionMenuItemProps) => (
-	<MenuItem {...props}>
-		{children}
-	</MenuItem>
-);
-ActionMenuItem.isActionMenuClosingElement = true;
+}: ActionMenuItemProps) => {
+	const { close } = useContext(ActionMenuContext);
+
+	const handleClick = (e) => {
+		onClick?.(e);
+		close();
+	};
+
+	return (<MenuItem onClick={handleClick} {...props} />);
+};

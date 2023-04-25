@@ -14,58 +14,44 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ReactNode, useState, Children, ReactElement, cloneElement } from 'react';
+import { ReactNode, useState } from 'react';
 import { ClickAwayListener, Popover } from '@mui/material';
-import { Menu } from './actionMenu.styles';
-
-const applyCloseMenuToActionMenuItems = (el: any, handleClose: () => void) => {
-	if (el?.type?.isActionMenuClosingElement) {
-		return cloneElement(el, {
-			onClick: () => {
-				el.props.onClick?.();
-				handleClose();
-			},
-		});
-	}
-
-	if (el?.props?.children) {
-		return cloneElement(el, {
-			children: Children.map(el.props.children, (child) => applyCloseMenuToActionMenuItems(child, handleClose)),
-		});
-	}
-
-	return el;
-};
+import { Menu, Container } from './actionMenu.styles';
+import { ActionMenuContext } from './actionMenuContext';
 
 type ActionMenuProps = {
 	className?: string;
 	children: ReactNode;
 	TriggerButton: any;
 	PopoverProps?: any;
+	onOpen?: (e) => void;
+	onClose?: (e) => void;
 };
-
 export const ActionMenu = ({
 	className,
-	TriggerButton: TriggerButtonInput,
+	TriggerButton,
 	children,
 	PopoverProps,
+	onOpen,
+	onClose,
 }: ActionMenuProps) => {
 	const [anchorEl, setAnchorEl] = useState(null);
-	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
-	const handleClose = () => setAnchorEl(null);
 
-	const TriggerButton = cloneElement(TriggerButtonInput as ReactElement, {
-		onClick: (e) => {
-			TriggerButtonInput.props.onClick?.(e);
-			handleClick(e);
-		},
-	});
+	const handleOpen = (e) => {
+		setAnchorEl(e.currentTarget);
+		onOpen?.(e);
+	};
 
-	const MenuChildren = Children.toArray(children).map((child) => applyCloseMenuToActionMenuItems(child, handleClose));
+	const handleClose = (e) => {
+		setAnchorEl(null);
+		onClose?.(e);
+	};
 
 	return (
-		<>
-			{TriggerButton}
+		<ActionMenuContext.Provider value={{ close: () => setAnchorEl(null) }}>
+			<Container onClick={handleOpen}>
+				{TriggerButton}
+			</Container>
 			<Popover
 				open={Boolean(anchorEl)}
 				anchorEl={anchorEl}
@@ -82,10 +68,10 @@ export const ActionMenu = ({
 			>
 				<ClickAwayListener onClickAway={handleClose}>
 					<Menu>
-						{MenuChildren}
+						{children}
 					</Menu>
 				</ClickAwayListener>
 			</Popover>
-		</>
+		</ActionMenuContext.Provider>
 	);
 };
