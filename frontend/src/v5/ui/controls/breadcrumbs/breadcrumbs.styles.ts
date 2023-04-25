@@ -30,6 +30,7 @@ export const Container = styled(Breadcrumbs)`
 			overflow: hidden;
 			display: block;
 			white-space: nowrap;
+			height: 31px;
 		}
 
 		.MuiBreadcrumbs-li {
