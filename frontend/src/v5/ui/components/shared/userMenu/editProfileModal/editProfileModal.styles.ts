@@ -20,7 +20,6 @@ import TabPanelBase from '@mui/lab/TabPanel';
 import TabListBase from '@mui/lab/TabList';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { FormModalNoButtons } from '@controls/formModal/formModalNoButtons/formModalNoButtons.component';
-import { ScrollArea } from '@controls/scrollArea';
 import { MicrosoftTitleText as MicrosoftTitleTextBase } from '@components/shared/sso/microsoftText.styles';
 
 export const FormModal = styled(FormModalNoButtons)`
@@ -61,17 +60,14 @@ export const TabPanel = styled(TabPanelBase)<{ $personalTab?: boolean }>`
 	padding: 0;
 `;
 
-export const TabContent = styled(ScrollArea).attrs({
-	autoHeight: true,
-	autoHeightMin: 'min(554px, 50vh)',
-})`
-	& > :first-child {
-		padding: 30px 58px;
-		box-sizing: border-box;
+export const TabContent = styled.div`
+	height: min(554px, 50vh);
+	padding: 30px 58px;
+	box-sizing: border-box;
+	overflow: overlay;
 
-		& > :first-child {
-			margin-top: 0;
-		}
+	& > :first-child {
+		margin-top: 0;
 	}
 `;
 

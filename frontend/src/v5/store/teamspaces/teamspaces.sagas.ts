@@ -24,6 +24,7 @@ import { TeamspacesActions, TeamspacesTypes, ITeamspace } from './teamspaces.red
 import { RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 
 export function* fetch() {
+	yield put(TeamspacesActions.setTeamspacesArePending(true));
 	try {
 		const { data: { teamspaces } } = yield API.Teamspaces.fetchTeamspaces();
 		yield put(TeamspacesActions.fetchSuccess(teamspaces as ITeamspace[]));
@@ -37,6 +38,7 @@ export function* fetch() {
 			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
 		}));
 	}
+	yield put(TeamspacesActions.setTeamspacesArePending(false));
 }
 
 export function* fetchQuota({ teamspace }) {

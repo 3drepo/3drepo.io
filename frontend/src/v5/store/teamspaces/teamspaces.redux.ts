@@ -26,16 +26,22 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	fetchQuota: ['teamspace'],
 	fetchQuotaSuccess: ['teamspace', 'quota'],
 	setCurrentTeamspace: ['currentTeamspace'],
+	setTeamspacesArePending: ['teamspacesArePending'],
 }, { prefix: 'TEAMSPACES2/' }) as { Types: Constants<ITeamspacesActionCreators>; Creators: ITeamspacesActionCreators };
 
 export const INITIAL_STATE: ITeamspacesState = {
 	teamspaces: [],
 	currentTeamspace: null,
 	quota: {},
+	teamspacesArePending: false,
 };
 
 export const setCurrentTeamspace = (state, { currentTeamspace }: SetCurrentTeamspaceAction) => {
 	state.currentTeamspace = currentTeamspace;
+};
+
+export const setTeamspacesArePending = (state, { teamspacesArePending }: SetTeamspacesArePendingAction) => {
+	state.teamspacesArePending = teamspacesArePending;
 };
 
 export const fetchSuccess = (state, { teamspaces }: FetchSuccessAction) => {
@@ -50,6 +56,7 @@ export const teamspacesReducer = createReducer(INITIAL_STATE, produceAll({
 	[TeamspacesTypes.FETCH_SUCCESS]: fetchSuccess,
 	[TeamspacesTypes.FETCH_QUOTA_SUCCESS]: fetchQuotaSuccess,
 	[TeamspacesTypes.SET_CURRENT_TEAMSPACE]: setCurrentTeamspace,
+	[TeamspacesTypes.SET_TEAMSPACES_ARE_PENDING]: setTeamspacesArePending,
 }));
 
 /**
@@ -59,6 +66,7 @@ export interface ITeamspacesState {
 	teamspaces: ITeamspace[];
 	quota: Record<string, Quota>;
 	currentTeamspace: string;
+	teamspacesArePending: boolean;
 }
 
 export type QuotaUnit = {
@@ -83,11 +91,13 @@ export type FetchSuccessAction = Action<'FETCH_SUCCESS'> & { teamspaces: ITeamsp
 export type FetchQuotaAction = Action<'FETCH_QUOTA'> & { teamspace: string };
 export type FetchQuotaSuccessAction = Action<'FETCH_QUOTA_SUCCESS'> & { teamspace: string, quota: Quota };
 export type SetCurrentTeamspaceAction = Action<'SET_CURRENT_TEAMSPACE'> & { currentTeamspace: string };
+export type SetTeamspacesArePendingAction = Action<'SET_TEAMSPACES_ARE_PENDING'> & { teamspacesArePending: boolean };
 
 export interface ITeamspacesActionCreators {
 	fetch: () => FetchAction;
 	fetchSuccess: (teamspaces: ITeamspace[]) => FetchSuccessAction;
 	setCurrentTeamspace: (teamspace: string) => SetCurrentTeamspaceAction;
+	setTeamspacesArePending: (teamspacesArePending: boolean) => SetTeamspacesArePendingAction;
 	fetchQuota: (teamspace: string) => FetchQuotaAction;
 	fetchQuotaSuccess: (teamspace: string, quota: Quota) => FetchQuotaSuccessAction;
 }

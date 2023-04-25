@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,9 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+import styled from 'styled-components';
 
-export const DEFAULT_SORT_CONFIG = {
-	column: 'name',
-	direction: SortingDirection.DESCENDING,
-};
+export const DashboardScrollArea = styled.div`
+	height: 100%;
+	width: 100%;
+	overflow: overlay;
+	position: relative;
+	z-index: 0;
+	display: flex;
+	flex-direction: column;
+`;

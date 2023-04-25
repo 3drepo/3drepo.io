@@ -38,7 +38,7 @@ const teamspaceSettingUpdate = (ts, query, actions) => db.updateOne(ts, TEAMSPAC
 const teamspaceSettingQuery = (ts, query, projection, sort) => db.findOne(ts,
 	TEAMSPACE_SETTINGS_COL, query, projection, sort);
 
-const getTeamspaceSetting = async (ts, projection) => {
+TeamspaceSetting.getTeamspaceSetting = async (ts, projection) => {
 	const tsDoc = await teamspaceSettingQuery(ts, { _id: ts }, projection);
 	if (!tsDoc) {
 		throw templates.teamspaceNotFound;
@@ -47,7 +47,7 @@ const getTeamspaceSetting = async (ts, projection) => {
 };
 
 TeamspaceSetting.getSubscriptions = async (ts) => {
-	const { subscriptions } = await getTeamspaceSetting(ts, { subscriptions: 1 });
+	const { subscriptions } = await TeamspaceSetting.getTeamspaceSetting(ts, { subscriptions: 1 });
 	return subscriptions || {};
 };
 
@@ -79,7 +79,7 @@ const possibleAddOns = {
 };
 
 TeamspaceSetting.getAddOns = async (teamspace) => {
-	const { addOns } = await getTeamspaceSetting(teamspace, possibleAddOns);
+	const { addOns } = await TeamspaceSetting.getTeamspaceSetting(teamspace, possibleAddOns);
 	return addOns || {};
 };
 
@@ -115,7 +115,7 @@ TeamspaceSetting.removeAddOns = (teamspace) => teamspaceSettingUpdate(teamspace,
 	{ _id: teamspace }, { $unset: possibleAddOns });
 
 TeamspaceSetting.getTeamspaceAdmins = async (teamspace) => {
-	const tsSettings = await getTeamspaceSetting(teamspace, { permissions: 1 });
+	const tsSettings = await TeamspaceSetting.getTeamspaceSetting(teamspace, { permissions: 1 });
 	return tsSettings.permissions.flatMap(
 		({ user, permissions }) => (permissions.includes(TEAMSPACE_ADMIN) ? user : []),
 	);
@@ -147,6 +147,12 @@ TeamspaceSetting.getTeamspaceActiveLicenses = (teamspace) => {
 	const query = { $or: SUBSCRIPTION_TYPES.flatMap((type) => [{ [`subscriptions.${type}`]: { $exists: true }, [`subscriptions.${type}.expiryDate`]: null },
 		{ [`subscriptions.${type}.expiryDate`]: { $gt: currentDate } },
 	]) };
+	return teamspaceSettingQuery(teamspace, query, { _id: 1, subscriptions: 1 });
+};
+
+TeamspaceSetting.getTeamspaceExpiredLicenses = (teamspace) => {
+	const currentDate = new Date();
+	const query = { $or: SUBSCRIPTION_TYPES.map((type) => ({ [`subscriptions.${type}.expiryDate`]: { $lt: currentDate } })) };
 	return teamspaceSettingQuery(teamspace, query, { _id: 1, subscriptions: 1 });
 };
 
