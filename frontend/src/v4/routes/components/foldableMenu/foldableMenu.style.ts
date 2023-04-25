@@ -78,7 +78,7 @@ export const Wrapper = styled.div<{ top: number, left?: boolean }>`
 	max-width: 400px;
 	width: 100%;
 	box-shadow: 1px 1px 3px 0 ${COLOR.BLACK_20};
-	border-radius: ${isV5() ? '8px' : '0 2px 2px 0'};
+	border-radius: 0 2px 2px 0;
 	${getDirection};
 	max-height: ${({ top }) => `calc(100vh - ${top}px - 25px)`};
 	overflow: auto;
