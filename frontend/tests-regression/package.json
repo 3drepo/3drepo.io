@@ -1,17 +1,11 @@
 {
-  "name": "@cucumber/typescript-example",
+  "name": "regression_tests",
   "version": "1.0.0",
-  "description": "A simple example of a TypeScript Cucumber-JS project",
+  "description": "Regression tests for 3drepo",
   "main": "src/index.ts",
   "scripts": {
     "test": "cucumber-js"
   },
-  "keywords": [
-    "cucumber",
-    "bdd",
-    "typescript",
-    "example"
-  ],
   "author": "3D Repo",
   "license": "AGPL-3.0",
   "devDependencies": {
