@@ -221,6 +221,9 @@ Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
 const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal));
 
 const generateCastObject = ({ properties, modules }, stripDeprecated) => {
+	const groupCast = Yup.array().of(Yup.object({
+		group: uuidString,
+	}));
 	const castProps = (props) => {
 		const res = {};
 		props.forEach(({ type, name, deprecated }) => {
@@ -232,9 +235,9 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 				res[name] = Yup.object({
 					screenshot: uuidString,
 					state: Yup.object({
-						colored: Yup.array().of(uuidString),
-						hidden: Yup.array().of(uuidString),
-						transformed: Yup.array().of(uuidString),
+						colored: groupCast,
+						hidden: groupCast,
+						transformed: groupCast,
 					}).default(undefined),
 				}).nullable().default(undefined);
 			} else if (type === propTypes.IMAGE) {
