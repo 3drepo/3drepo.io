@@ -27,7 +27,7 @@ Groups.addGroups = async (teamspace, project, model, ticket, groups) => {
 };
 
 Groups.deleteGroups = async (teamspace, project, model, ticket, groupIds) => {
-	await deleteMany(teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: { $in: [groupIds] } });
+	await deleteMany(teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: { $in: groupIds } });
 };
 
 Groups.getGroupsByIds = (teamspace, project, model, ticket, groupIds, projection) => find(
