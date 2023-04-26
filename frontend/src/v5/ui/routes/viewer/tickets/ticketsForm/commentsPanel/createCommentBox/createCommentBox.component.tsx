@@ -34,7 +34,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { MenuItem } from '@mui/material';
-import { ScrollArea } from '@controls/scrollArea';
 import {
 	Controls,
 	CharsCounter,
@@ -199,18 +198,16 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 				/>
 			</DragAndDrop>
 			{imagesToUpload.length > 0 && (
-				<ScrollArea autoHeightMax={100} autoHeight autoHide>
-					<Images>
-						{imagesToUpload.map(({ src, id, error }, index) => (
-							<ImageContainer key={id}>
-								<Image src={src} $error={error} onClick={() => openImagesModal(index)} draggable={false} />
-								<DeleteButton onClick={() => deleteImage(id)} error={error}>
-									<DeleteIcon />
-								</DeleteButton>
-							</ImageContainer>
-						))}
-					</Images>
-				</ScrollArea>
+				<Images>
+					{imagesToUpload.map(({ src, id, error }, index) => (
+						<ImageContainer key={id}>
+							<Image src={src} $error={error} onClick={() => openImagesModal(index)} draggable={false} />
+							<DeleteButton onClick={() => deleteImage(id)} error={error}>
+								<DeleteIcon />
+							</DeleteButton>
+						</ImageContainer>
+					))}
+				</Images>
 			)}
 			{erroredImages.length > 0 && (
 				<ErroredImageMessages>

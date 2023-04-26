@@ -24,7 +24,7 @@ export const Container = styled(Card)`
 	${({ theme }) => theme.typography.h3};
 	background-color: rgb(255 255 255 / 5%);
 	width: 246px;
-	height: 253px;
+	height: 256px;
 	display: flex;
 	flex-flow: column;
 	align-items: center;
