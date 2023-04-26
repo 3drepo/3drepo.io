@@ -57,7 +57,6 @@ const generateViewValidator = (isUpdate, isNullable) => {
 
 		return stripWhen(imposeNullableRule(arrSchema), (value) => value !== null && !value?.length);
 	};
-
 	const state = imposeNullableRule(Yup.object({
 		showHidden: Yup.boolean().default(false),
 		colored: generateGroupArraySchema({
