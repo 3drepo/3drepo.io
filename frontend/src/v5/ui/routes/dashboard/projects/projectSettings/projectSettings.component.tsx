@@ -60,7 +60,7 @@ export const ProjectSettings = () => {
 		setSubmitWasSuccessful(false);
 		if (projectAlreadyExists(error)) {
 			const { projectName } = getValues();
-			setExistingNames(existingNames.concat(projectName.toLocaleLowerCase()));
+			setExistingNames(existingNames.concat(projectName));
 		}
 	};
 

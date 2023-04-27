@@ -193,7 +193,7 @@ export const SettingsModal = ({
 
 	const onSubmitError = (err) => {
 		if (nameAlreadyExists(err)) {
-			setAlreadyExistingNames([getValues('name').toLocaleLowerCase(), ...alreadyExistingNames]);
+			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
 			trigger('name');
 		}
 	};

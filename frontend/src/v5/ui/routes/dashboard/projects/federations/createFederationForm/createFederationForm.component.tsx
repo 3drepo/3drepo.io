@@ -68,7 +68,7 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	const onSubmitError = (err) => {
 		setIsSubmitting(false);
 		if (nameAlreadyExists(err)) {
-			setAlreadyExistingNames([getValues('name').toLocaleLowerCase(), ...alreadyExistingNames]);
+			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
 			setModalPhase('settings');
 			trigger('name');
 		}

@@ -68,7 +68,7 @@ export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): J
 
 	const onSubmitError = (err) => {
 		if (nameAlreadyExists(err)) {
-			setAlreadyExistingNames([getValues('name').toLocaleLowerCase(), ...alreadyExistingNames]);
+			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
 			trigger('name');
 		}
 	};
