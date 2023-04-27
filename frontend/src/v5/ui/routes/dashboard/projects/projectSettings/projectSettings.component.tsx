@@ -77,7 +77,7 @@ export const ProjectSettings = () => {
 		setIsSubmitting(false);
 	};
 
-	const nameWasChanged = () => watch('projectName')?.trim().toLocaleLowerCase() !== currentProject.name.toLocaleLowerCase();
+	const nameWasChanged = () => watch('projectName')?.trim() !== currentProject.name;
 
 	useEffect(() => {
 		reset(defaultValues);

@@ -171,7 +171,7 @@ export const SettingsModal = ({
 	const containerOrFederationName = isContainer ? 'Container' : 'Federation';
 	const EMPTY_GIS_VALUES = { latitude: 0, longitude: 0, angleFromNorth: 0 };
 
-	const nameWasChanged = () => watch('name')?.trim().toLocaleLowerCase() !== containerOrFederation.name.toLocaleLowerCase();
+	const nameWasChanged = () => watch('name')?.trim() !== containerOrFederation.name;
 
 	const getGisValues = (obj) => defaults(pick(
 		omitBy(obj, (val) => val === ''),
