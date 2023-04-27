@@ -296,11 +296,9 @@ const testSerialiseTicket = () => {
 					[modName]: {
 						[propName]: {
 							state: {
-								highlightedGroups: times(5, () => generateUUID()),
-								colorOverrideGroups: times(2, () => generateUUID()),
-								hiddenGroups: [],
-								shownGroups: times(1, () => generateUUID()),
-								transformGroups: times(10, () => generateUUID()),
+								colored: times(2, () => ({ group: generateUUID() })),
+								hidden: [],
+								transformed: times(10, () => ({ group: generateUUID() })),
 							},
 						},
 						[imageProp]: generateUUID(),
@@ -324,7 +322,7 @@ const testSerialiseTicket = () => {
 			res._id = UUIDToString(res._id);
 			Object.keys(res.modules[modName][propName].state).forEach((fieldName) => {
 				res.modules[modName][propName].state[fieldName] = res.modules[modName][propName].state[fieldName]
-					.map(UUIDToString);
+					.map((entry) => ({ ...entry, group: UUIDToString(entry.group) }));
 			});
 
 			res.properties[imageProp] = UUIDToString(res.properties[imageProp]);
