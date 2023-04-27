@@ -43,11 +43,9 @@ export const ProjectSettings = () => {
 	const defaultValues = { projectName: currentProject.name || '' };
 	const {
 		control,
-		formState: { errors, isValid },
+		formState: { errors, isValid, dirtyFields },
 		handleSubmit,
 		getValues,
-		watch,
-		trigger,
 		reset,
 	} = useForm<IFormInput>({
 		mode: 'onChange',
@@ -77,16 +75,10 @@ export const ProjectSettings = () => {
 		setIsSubmitting(false);
 	};
 
-	const nameWasChanged = () => watch('projectName')?.trim() !== currentProject.name;
-
 	useEffect(() => {
 		reset(defaultValues);
 		setSubmitWasSuccessful(false);
 	}, [currentProject]);
-
-	useEffect(() => {
-		if (existingNames.length) trigger('projectName');
-	}, [existingNames]);
 
 	if (_.isEmpty(currentProject)) return (<></>);
 
@@ -102,7 +94,7 @@ export const ProjectSettings = () => {
 					disabled={!currentProject.isAdmin}
 				/>
 				<SubmitButton
-					disabled={!nameWasChanged() || !isValid || !currentProject.isAdmin}
+					disabled={_.isEmpty(dirtyFields) || !isValid || !currentProject.isAdmin}
 					isPending={isSubmitting}
 				>
 					<FormattedMessage id="project.settings.form.save" defaultMessage="Save" />
