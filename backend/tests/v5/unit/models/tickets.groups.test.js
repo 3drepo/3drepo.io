@@ -64,6 +64,87 @@ const testAddGroups = () => {
 	});
 };
 
+const testDeleteGroups = () => {
+	describe('Delete groups', () => {
+		test('Should insert all the groups', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const ticket = generateRandomString();
+			const groupIds = times(6, generateRandomString());
+
+			await Groups.deleteGroups(teamspace, project, model, ticket, groupIds);
+
+			expect(db.deleteMany).toHaveBeenCalledTimes(1);
+			expect(db.deleteMany).toHaveBeenCalledWith(teamspace, groupCol,
+				{ teamspace, project, model, ticket, _id: { $in: groupIds } });
+		});
+
+		test('Should relay the error if deleteMany failed', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const ticket = generateRandomString();
+			const groupIds = times(6, generateRandomString());
+
+			const err = generateRandomString();
+			db.deleteMany.mockRejectedValueOnce(err);
+
+			await expect(Groups.deleteGroups(teamspace, project, model, ticket, groupIds)).rejects.toEqual(err);
+
+			expect(db.deleteMany).toHaveBeenCalledTimes(1);
+			expect(db.deleteMany).toHaveBeenCalledWith(teamspace, groupCol,
+				{ teamspace, project, model, ticket, _id: { $in: groupIds } });
+		});
+	});
+};
+
+const testGetGroupsByIds = () => {
+	describe('Get groups by Ids', () => {
+		test('Should get all the groups', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const ticket = generateRandomString();
+			const groupIds = times(6, generateRandomString());
+			const projection = { [generateRandomString()]: 1 };
+
+			const expectedVal = [{ [generateRandomString()]: generateRandomString() }];
+
+			db.find.mockResolvedValueOnce(expectedVal);
+
+			await expect(Groups.getGroupsByIds(teamspace, project, model, ticket, groupIds, projection))
+				.resolves.toEqual(expectedVal);
+
+			expect(db.find).toHaveBeenCalledTimes(1);
+			expect(db.find).toHaveBeenCalledWith(teamspace, groupCol,
+				{ teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
+		});
+
+		test('Should relay the error if find failed', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const ticket = generateRandomString();
+			const groupIds = times(6, generateRandomString());
+			const projection = { [generateRandomString()]: 1 };
+
+			const err = generateRandomString();
+
+			db.find.mockRejectedValueOnce(err);
+
+			await expect(Groups.getGroupsByIds(teamspace, project, model, ticket, groupIds, projection))
+				.rejects.toEqual(err);
+
+			expect(db.find).toHaveBeenCalledTimes(1);
+			expect(db.find).toHaveBeenCalledWith(teamspace, groupCol,
+				{ teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
+		});
+	});
+};
+
 describe('models/tickets.groups', () => {
 	testAddGroups();
+	testDeleteGroups();
+	testGetGroupsByIds();
 });
