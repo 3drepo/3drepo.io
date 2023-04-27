@@ -300,9 +300,10 @@ const addTicketGroupTests = () => {
 			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(testData.template);
 
 			expect(TicketGroupsModel.addGroups).toHaveBeenCalledTimes(1);
-			expect(TicketGroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, model, expect.any(Array));
+			expect(TicketGroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project,
+				model, expectedOutput, expect.any(Array));
 
-			const groupIDsToSave = TicketGroupsModel.addGroups.mock.calls[0][3].map(({ _id }) => _id);
+			const groupIDsToSave = TicketGroupsModel.addGroups.mock.calls[0][4].map(({ _id }) => _id);
 
 			expect(groupIDsToSave.length).toBe(newGroups.length);
 			expect(groupIDsToSave).toEqual(expect.arrayContaining(newGroups));
@@ -364,9 +365,10 @@ const updateTicketGroupTests = () => {
 			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(testData.template);
 
 			expect(TicketGroupsModel.addGroups).toHaveBeenCalledTimes(1);
-			expect(TicketGroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, model, expect.any(Array));
+			expect(TicketGroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, model,
+				testData.ticket._id, expect.any(Array));
 
-			const groupIDsToSave = TicketGroupsModel.addGroups.mock.calls[0][3].map(({ _id }) => _id);
+			const groupIDsToSave = TicketGroupsModel.addGroups.mock.calls[0][4].map(({ _id }) => _id);
 
 			expect(groupIDsToSave.length).toBe(newGroups.length);
 			expect(groupIDsToSave).toEqual(expect.arrayContaining(newGroups));
@@ -420,7 +422,8 @@ const updateTicketGroupTests = () => {
 			expect(TicketGroupsModel.addGroups).not.toHaveBeenCalled();
 
 			expect(TicketGroupsModel.deleteGroups).toHaveBeenCalledTimes(1);
-			expect(TicketGroupsModel.deleteGroups).toHaveBeenCalledWith(teamspace, project, model, groupsToRemove);
+			expect(TicketGroupsModel.deleteGroups).toHaveBeenCalledWith(teamspace, project, model,
+				testData.ticket._id, groupsToRemove);
 		});
 
 		test('Old groups are removed if they are no longer referenced and new groups should be added', async () => {
@@ -488,15 +491,17 @@ const updateTicketGroupTests = () => {
 			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(testData.template);
 
 			expect(TicketGroupsModel.addGroups).toHaveBeenCalledTimes(1);
-			expect(TicketGroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, model, expect.any(Array));
+			expect(TicketGroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, model,
+				testData.ticket._id, expect.any(Array));
 
-			const groupIDsToSave = TicketGroupsModel.addGroups.mock.calls[0][3].map(({ _id }) => _id);
+			const groupIDsToSave = TicketGroupsModel.addGroups.mock.calls[0][4].map(({ _id }) => _id);
 
 			expect(groupIDsToSave.length).toBe(newGroups.length);
 			expect(groupIDsToSave).toEqual(expect.arrayContaining(newGroups));
 
 			expect(TicketGroupsModel.deleteGroups).toHaveBeenCalledTimes(1);
-			expect(TicketGroupsModel.deleteGroups).toHaveBeenCalledWith(teamspace, project, model, toRemove);
+			expect(TicketGroupsModel.deleteGroups).toHaveBeenCalledWith(teamspace, project, model,
+				testData.ticket._id, toRemove);
 		});
 		test('Throw an error if retained groups contains group ids that does not exist', async () => {
 			const teamspace = generateRandomString();
