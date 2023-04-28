@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import { ChangeEvent, useEffect, useMemo } from 'react';
 
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
@@ -25,7 +25,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { SidebarSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { MenuItem } from '@mui/material';
-import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
+import { FormNumberField, FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
 
 type ISidebarForm = {
@@ -85,7 +85,7 @@ export const SidebarForm = ({
 					name="containerUnit"
 					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
 					defaultValue="mm"
-					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+					onChange={(e: ChangeEvent<HTMLInputElement>) => {
 						setValue('containerUnit', e.target.value);
 						updateValue('containerUnit');
 					}}
@@ -142,6 +142,20 @@ export const SidebarForm = ({
 				name="revisionDesc"
 				label={formatMessage({ id: 'uploads.sidebar.revisionDesc', defaultMessage: 'Revision Description' })}
 				formError={errors.revisionDesc}
+			/>
+
+			<FormNumberField
+				control={control}
+				name="quality"
+				label={formatMessage({ id: 'uploads.sidebar.quality', defaultMessage: 'Quality' })}
+				formError={errors.quality}
+			/>
+
+			<FormNumberField
+				control={control}
+				name="vertexCount"
+				label={formatMessage({ id: 'uploads.sidebar.vertexCount', defaultMessage: 'Vertex Count' })}
+				formError={errors.vertexCount}
 			/>
 
 			{isSpm && (
