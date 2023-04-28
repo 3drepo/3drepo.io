@@ -26,8 +26,8 @@ import { FormHelperText } from '@mui/material';
 import { theme } from '@/v5/ui/themes/theme';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { PinAction, PinActions, PinName, SettingLocationText } from './pinDetails.styles';
 import { CustomInput } from '@controls/inputs/customInput/customInput.styles';
+import { PinAction, PinActions, PinName, SettingLocationText } from './pinDetails.styles';
 
 export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText, disabled }: FormInputProps) => {
 	const [editMode, setEditMode] = useState(false);
