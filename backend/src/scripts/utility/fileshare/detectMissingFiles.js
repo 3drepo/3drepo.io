@@ -53,7 +53,14 @@ const checkFile = (db, col, { _id, link, size }) => {
 
 const checkFilesInCol = async (database, col) => {
 	const refs = await find(database, col, { type: 'fs' }, { link: 1, size: 1 });
-	await Promise.all(refs.map((ref) => checkFile(database, col, ref)));
+	const maxSize = 20000;
+
+	for (let i = 0; i < refs.length; i += maxSize) {
+		const endIndx = i + maxSize > refs.length ? refs.length : i + maxSize;
+		const refsToProcess = refs.slice(i, i + endIndx);
+		// eslint-disable-next-line no-await-in-loop
+		await Promise.all(refsToProcess.map((ref) => checkFile(database, col, ref)));
+	}
 };
 
 const processTeamspace = async (database) => {
