@@ -122,3 +122,7 @@ export const revisionDesc = Yup.lazy((value) => (
 				defaultMessage: 'Revision Description is limited to 660 characters',
 			}))
 ));
+
+export const quality = Yup.number();
+
+export const vertexCount = Yup.number().integer();
