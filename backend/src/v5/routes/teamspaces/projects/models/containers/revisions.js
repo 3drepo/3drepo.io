@@ -187,6 +187,14 @@ const establishRoutes = () => {
 	 *                 description: Timezone of the revision
 	 *                 type: string
 	 *                 example: Europe/Berlin
+	 *               quality:
+	 *                 description: Mesh optimisation value
+	 *                 type: number
+	 *                 example: 0
+	 *               vertexCount:
+	 *                 description: Mesh optimisation value
+	 *                 type: integer
+	 *                 example: 0
 	 *               file:
 	 *                 type: string
 	 *                 format: binary
