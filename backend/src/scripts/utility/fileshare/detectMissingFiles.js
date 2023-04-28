@@ -54,8 +54,10 @@ const checkFile = (db, col, { _id, link, size }) => {
 const checkFilesInCol = async (database, col) => {
 	const refs = await find(database, col, { type: 'fs' }, { link: 1, size: 1 });
 	const maxSize = 20000;
+	logger.logDebug(`\t\t${col}`);
 
 	for (let i = 0; i < refs.length; i += maxSize) {
+		logger.logDebug(`\t\t\t[${i}/${refs.length}]`);
 		const endIndx = i + maxSize > refs.length ? refs.length : i + maxSize;
 		const refsToProcess = refs.slice(i, i + endIndx);
 		// eslint-disable-next-line no-await-in-loop
