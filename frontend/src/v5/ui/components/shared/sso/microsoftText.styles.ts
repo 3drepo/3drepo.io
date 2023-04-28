@@ -58,17 +58,3 @@ export const Link = styled(BaseLink)`
 		font-weight: ${FONT_WEIGHT.BOLD};
 	}
 `;
-
-export const NewSticker = styled.div`
-	color: ${({ theme }) => theme.palette.primary.main};
-	border: solid 1.5px ${({ theme }) => theme.palette.primary.main}; 
-	border-radius: 5px;
-	padding: 4px 6px;
-	font-size: 10px;
-	font-weight: 700;
-	margin-left: 8px;
-	height: 12px;
-	display: inline-flex;
-	justify-content: center;
-	align-items: center;
-`;

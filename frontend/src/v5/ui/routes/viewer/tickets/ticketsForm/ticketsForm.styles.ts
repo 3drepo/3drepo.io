@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CardContentContainer } from '@components/viewer/cards/card.styles';
-import { CardContent as CardContentPadded } from '@components/viewer/cards/cardContent.component';
+import { CardContent as CardContentPadded } from '@components/viewer/cards/card.styles';
 import { Gap } from '@controls/gap';
 import styled from 'styled-components';
 
@@ -52,7 +51,5 @@ export const PropertiesListContainer = styled.div`
 
 export const CardContent = styled(CardContentPadded)`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	${CardContentContainer} {
-		padding: 0;
-	}
+	padding: 0;
 `;

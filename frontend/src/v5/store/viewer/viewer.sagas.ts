@@ -18,14 +18,15 @@ import * as API from '@/v5/services/api';
 import { FetchContainersResponse } from '@/v5/services/api/containers';
 import { FetchFederationsResponse } from '@/v5/services/api/federations';
 import { formatMessage } from '@/v5/services/intl';
-import { put, select, take, takeLatest } from 'redux-saga/effects';
+import { cancel, put, race, select, take, takeLatest } from 'redux-saga/effects';
 import { prepareContainersData } from '../containers/containers.helpers';
 import { ContainersActions, ContainersTypes } from '../containers/containers.redux';
-import { DialogsActions } from '../dialogs/dialogs.redux';
+import { DialogsActions, DialogsTypes } from '../dialogs/dialogs.redux';
 import { prepareFederationsData } from '../federations/federations.helpers';
 import { FederationsActions, FederationsTypes } from '../federations/federations.redux';
 import { selectFederationById } from '../federations/federations.selectors';
 import { IFederation } from '../federations/federations.types';
+import { TicketsActions } from '../tickets/tickets.redux';
 import { FetchDataAction, ViewerActions, ViewerTypes } from './viewer.redux';
 
 function* fetchData({ teamspace, containerOrFederation, project }: FetchDataAction) {
@@ -40,28 +41,43 @@ function* fetchData({ teamspace, containerOrFederation, project }: FetchDataActi
 		yield put(ContainersActions.fetchContainersSuccess(project, containersWithoutStats));
 
 		const isFederation = federationsWithoutStats.some(({ _id }) => _id === containerOrFederation);
+		let containerToFetchStatsOf;
 
 		if (isFederation) {
 			yield put(FederationsActions.fetchFederationStats(teamspace, project, containerOrFederation));
 			yield take(FederationsTypes.FETCH_FEDERATION_STATS_SUCCESS);
 			const federation: IFederation = yield select(selectFederationById, containerOrFederation);
-
-			for (const containerId of federation.containers) {
-				yield put(ContainersActions.fetchContainerStats(teamspace, project, containerId));
-				yield take(ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS);
-			}
+			containerToFetchStatsOf = federation.containers;
 		} else {
-			yield put(ContainersActions.fetchContainerStats(teamspace, project, containerOrFederation));
-			yield take(ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS);
+			containerToFetchStatsOf = [containerOrFederation];
 		}
+
+		for (const containerId of containerToFetchStatsOf) {
+			yield put(ContainersActions.fetchContainerStats(
+				teamspace,
+				project,
+				containerId,
+			));
+			const result = yield race({
+				fail: take(DialogsTypes.OPEN),
+				success: take(ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS),
+			});
+
+			if (result.fail) {
+				yield cancel();
+			}
+		}
+
+		yield put(TicketsActions.fetchTickets(teamspace, project, containerOrFederation, isFederation));
+		yield put(TicketsActions.fetchTemplates(teamspace, project, containerOrFederation, isFederation));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'viewer.fetch.error', defaultMessage: 'trying to fetch viewer data' }),
 			error,
 		}));
+	} finally {
+		yield put(ViewerActions.setFetching(false));
 	}
-
-	yield put(ViewerActions.setFetching(false));
 }
 
 export default function* ViewerSaga() {

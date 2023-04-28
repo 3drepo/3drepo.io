@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { get } from 'lodash';
@@ -32,12 +33,12 @@ interface PropertiesListProps {
 
 export const PropertiesList = ({ module, properties, onPropertyBlur }: PropertiesListProps) => {
 	const { formState } = useFormContext();
+	const isReadOnly = TicketsCardHooksSelectors.selectReadOnly();
 	return (
 		<PropertiesListContainer>
 			{properties.map(({
 				name,
 				type,
-				default: defaultValue,
 				readOnly: disabled,
 				required,
 				values,
@@ -50,11 +51,10 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 						<InputController
 							Input={PropertyComponent}
 							label={name}
-							disabled={disabled}
+							disabled={disabled || isReadOnly}
 							required={required}
 							name={inputName}
 							formError={formError}
-							defaultValue={defaultValue}
 							onBlur={onPropertyBlur}
 							// @ts-ignore
 							values={values}

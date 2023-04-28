@@ -18,7 +18,6 @@
 import styled from 'styled-components';
 import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
 import { TableVirtuoso } from 'react-virtuoso';
-import { ScrollArea } from '@controls/scrollArea';
 
 export const Accordion = styled(AccordionBase)`
 	&& {
@@ -29,16 +28,6 @@ export const Accordion = styled(AccordionBase)`
 				margin-top: 0;
 			}
 		}
-	}
-`;
-
-export const VirtuosoScroller = styled(ScrollArea).attrs({
-	hideHorizontal: true,
-	autoHide: true,
-})`
-	& > :first-child {
-		margin-bottom: 0 !important;
-		overflow-x: hidden !important;
 	}
 `;
 
@@ -53,10 +42,12 @@ export const VirtualisedList = styled(TableVirtuoso)`
 	table {
 		display: flex;
 		justify-content: center;
+		margin-right: -16px;
 
 		tr {
 			display: flex;
 			flex-direction: column;
+			width: 320px;
 		}
 	}
 `;

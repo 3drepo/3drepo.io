@@ -21,8 +21,6 @@ import { MicrosoftTitleText } from '@components/shared/sso/microsoftText.styles'
 export const MicrosoftText = styled(MicrosoftTextBase)`
 	${MicrosoftTitleText} {
 		margin-top: 10px;
-		span {
-			${({ theme }) => theme.typography.h3}
-		}
+		${({ theme }) => theme.typography.h3}
 	}
 `;

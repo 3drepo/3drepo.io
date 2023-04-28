@@ -57,7 +57,9 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 
 	const getTemplatesForFilter = () => templates.filter(({ _id }) => getTicketsByTemplateId(_id).length > 0);
 
-	const onTicketClick = (ticket: ITicket) => {
+	const onTicketClick = (ticket: ITicket, event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+		event.stopPropagation();
+
 		const wasSelected = ticketIsSelected(ticket);
 
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
@@ -86,7 +88,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 					<TicketItem
 						ticket={ticket}
 						key={ticket._id}
-						onClick={() => onTicketClick(ticket)}
+						onClick={(e) => onTicketClick(ticket, e)}
 						selected={ticketIsSelected(ticket)}
 					/>
 				))}

@@ -16,11 +16,11 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
 import { CreationInfo } from '@components/shared/creationInfo/creationInfo.component';
 import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
-import { filter } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
@@ -42,6 +42,7 @@ export const TicketsTopPanel = ({
 	onPropertyBlur,
 }: ITicketsTopPanel) => {
 	const { formState, getValues } = useFormContext();
+	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 
 	const owner = getValues(`properties.${BaseProperties.OWNER}`);
 	const createdAt = getValues(`properties.${BaseProperties.CREATED_AT}`);
@@ -49,7 +50,8 @@ export const TicketsTopPanel = ({
 
 	const hasIssueProperties = properties.some((property) => property.name === IssueProperties.PRIORITY);
 	const topPanelProperties: string[] = Object.values({ ...BaseProperties, ...IssueProperties });
-	const extraProperties = filter(properties, ({ name }) => !topPanelProperties.includes(name));
+	const extraProperties = properties.filter(({ name }) => !topPanelProperties.includes(name));
+
 	return (
 		<TopPanel>
 			<BaseTicketInfo>
@@ -59,6 +61,7 @@ export const TicketsTopPanel = ({
 					formError={formState.errors[BaseProperties.TITLE]}
 					inputProps={{ autoFocus: focusOnTitle }}
 					onBlur={onPropertyBlur}
+					disabled={readOnly}
 				/>
 				{createdAt && (
 					<CreationInfo
@@ -75,11 +78,12 @@ export const TicketsTopPanel = ({
 							id: 'customTicket.topPanel.description',
 							defaultMessage: 'Description',
 						})}
+						disabled={readOnly}
 					/>
 				</DescriptionProperty>
 				<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
 			</BaseTicketInfo>
-			{hasIssueProperties && <IssuePropertiesRow onBlur={onPropertyBlur} />}
+			{hasIssueProperties && <IssuePropertiesRow onBlur={onPropertyBlur} readOnly={readOnly} />}
 		</TopPanel>
 	);
 };

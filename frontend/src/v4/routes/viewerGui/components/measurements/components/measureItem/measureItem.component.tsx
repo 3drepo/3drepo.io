@@ -113,7 +113,10 @@ export const MeasureItem = ({
 
 	const handleSave = ({ target: { value: newName }}) => props.setMeasurementName(uuid, newName, type);
 
-	const handleSubmit = () => textFieldRef.current.saveChange();
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		textFieldRef.current.saveChange();
+	};
 
 	const isPointTypeMeasure = type === MEASURE_TYPE.POINT;
 
@@ -121,10 +124,10 @@ export const MeasureItem = ({
 		<Container tall={Number(isPointTypeMeasure)}>
 			<Formik
 				initialValues={{ newName: name }}
-				onSubmit={handleSubmit}
+				onSubmit={() => {}}
 			>
 				<Tooltip title={name} placement="bottom">
-					<StyledForm>
+					<StyledForm onSubmitCapture={handleSubmit}>
 						<StyledTextField
 							ref={textFieldRef}
 							requiredConfirm

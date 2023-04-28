@@ -50,7 +50,6 @@ const { fileExists } = require("./fileRef");
 const {v5Path} = require("../../interop");
 const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
-const TeamspaceProcessorV5 = require(`${v5Path}/processors/teamspaces/teamspaces`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
 
 const COLL_NAME = "system.users";
@@ -457,7 +456,6 @@ User.verify = async function (username, token, options) {
 	options = options || {};
 
 	const allowRepeatedVerify = options.allowRepeatedVerify;
-	const skipImportToyModel = true; // As of 4.28 we no longer import a toy project for users // options.skipImportToyModel;
 
 	const user = await User.findByUserName(username);
 
@@ -491,22 +489,6 @@ User.verify = async function (username, token, options) {
 			subscribed, company /* , jobTitle, phoneNumber, industry, howDidYouFindUs */);
 	} catch (err) {
 		systemLogger.logError("Failed to create contact in intercom when verifying user", username, err);
-	}
-
-	if (!skipImportToyModel) {
-
-		// import toy model
-		const ModelHelper = require("./helper/model");
-
-		ModelHelper.importToyProject(username, username).catch(err => {
-			systemLogger.logError("Failed to import toy model", { err: err && err.stack ? err.stack : err });
-		});
-	}
-
-	try {
-		await TeamspaceProcessorV5.initTeamspace(username);
-	} catch(err) {
-		systemLogger.logError("Failed to init teamspace settings for ", username, err);
 	}
 };
 

@@ -33,7 +33,9 @@ describe('Teamspaces: sagas', () => {
 
 			await expectSaga(TeamspacesSaga.default)
 					.dispatch(TeamspacesActions.fetch())
+					.dispatch(TeamspacesActions.setTeamspacesArePending(true))
 					.put(TeamspacesActions.fetchSuccess(teamspaces))
+					.dispatch(TeamspacesActions.setTeamspacesArePending(false))
 					.silentRun();
 		});
 
@@ -44,6 +46,8 @@ describe('Teamspaces: sagas', () => {
 
 			await expectSaga(TeamspacesSaga.default)
 				.dispatch(TeamspacesActions.fetch())
+				.dispatch(TeamspacesActions.setTeamspacesArePending(true))
+				.dispatch(TeamspacesActions.setTeamspacesArePending(false))
 				.silentRun();
 		});
 	});

@@ -27,7 +27,7 @@ import {
 	selectShowDetails,
 	ActivitiesActions,
 } from '../../../../modules/activities';
-import { selectIsLoadingFrameState, SequencesActions } from '../../../../modules/sequences';
+import { selectIsLoadingFrameState } from '../../../../modules/sequences';
 import { Activities } from './activities.component';
 
 const mapStateToProps = createStructuredSelector({

@@ -46,7 +46,7 @@ export const BasicTicketImage = ({
 
 	return (
 		<FormControl error={error} required={required}>
-			<Container className={className} error={error}>
+			<Container className={className} error={error} disabled={disabled}>
 				<ActionsSide>
 					<Label>{label}</Label>
 					<ActionsList>{children}</ActionsList>

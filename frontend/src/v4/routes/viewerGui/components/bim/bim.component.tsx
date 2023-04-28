@@ -177,7 +177,7 @@ export class Bim extends PureComponent<IProps, any> {
 					<Tab label={isV5() ? 'All data' : 'All'} />
 					<Tab label="Starred" />
 				</Tabs>
-				<ViewerPanelContent autoHeight autoHeightMax={'100%'}>
+				<ViewerPanelContent>
 					<Container>
 						{this.renderMetadata()}
 						{this.renderEmptyState(!areFiltersActive && !hasMetadata)}
