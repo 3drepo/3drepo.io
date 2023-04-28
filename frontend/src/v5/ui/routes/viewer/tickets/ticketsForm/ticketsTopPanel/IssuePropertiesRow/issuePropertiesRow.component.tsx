@@ -27,9 +27,10 @@ import { ColumnSeparator, FloatRight, IssuePropertiesContainer, PropertyColumn, 
 
 type IIssuePropertiesRow = {
 	onBlur: () => void;
+	readOnly: boolean;
 };
 
-export const IssuePropertiesRow = ({ onBlur }: IIssuePropertiesRow) => (
+export const IssuePropertiesRow = ({ onBlur, readOnly }: IIssuePropertiesRow) => (
 	<IssuePropertiesContainer>
 		<PropertyColumn>
 			<PropertyTitle>
@@ -48,7 +49,7 @@ export const IssuePropertiesRow = ({ onBlur }: IIssuePropertiesRow) => (
 				onBlur={onBlur}
 				key={IssueProperties.PRIORITY}
 				values={PRIORITY_LEVELS_MAP}
-				defaultValue={PRIORITY_LEVELS_MAP.Low.label}
+				disabled={readOnly}
 			/>
 		</PropertyColumn>
 		<ColumnSeparator />
@@ -67,6 +68,7 @@ export const IssuePropertiesRow = ({ onBlur }: IIssuePropertiesRow) => (
 				name={`properties[${IssueProperties.DUE_DATE}]`}
 				onBlur={onBlur}
 				key={IssueProperties.DUE_DATE}
+				disabled={readOnly}
 			/>
 		</PropertyColumn>
 		<ColumnSeparator />
@@ -87,7 +89,7 @@ export const IssuePropertiesRow = ({ onBlur }: IIssuePropertiesRow) => (
 				onBlur={onBlur}
 				key={IssueProperties.STATUS}
 				values={STATUS_MAP}
-				defaultValue={STATUS_MAP.Open.label}
+				disabled={readOnly}
 			/>
 		</PropertyColumn>
 		<FloatRight>
@@ -96,6 +98,7 @@ export const IssuePropertiesRow = ({ onBlur }: IIssuePropertiesRow) => (
 				name={`properties[${IssueProperties.ASSIGNEES}]`}
 				onBlur={onBlur}
 				key={IssueProperties.ASSIGNEES}
+				disabled={readOnly}
 			/>
 		</FloatRight>
 	</IssuePropertiesContainer>

@@ -49,6 +49,10 @@ const trelloBoardStyles = css`
 	.react-trello-board {
 		padding: 0;
 		overflow: unset;
+
+		& > div {
+			overflow-x: scroll;
+		}
 	}
 
 	.react-trello-lane {

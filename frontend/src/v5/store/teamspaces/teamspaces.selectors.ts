@@ -28,6 +28,10 @@ export const selectCurrentTeamspace = createSelector(
 	selectTeamspacesDomain, (state) => state.currentTeamspace,
 );
 
+export const selectTeamspacesArePending = createSelector(
+	selectTeamspacesDomain, (state) => state.teamspacesArePending,
+);
+
 export const selectCurrentTeamspaceDetails = createSelector(
 	selectTeamspacesDomain,
 	selectCurrentTeamspace,
@@ -40,5 +44,5 @@ export const selectCurrentQuota = createSelector(
 
 export const selectIsTeamspaceAdmin = createSelector(
 	selectCurrentTeamspaceDetails,
-	(teamspace): boolean => teamspace?.isAdmin || null,
+	(teamspace): boolean => !!teamspace?.isAdmin,
 );

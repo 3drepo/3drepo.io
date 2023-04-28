@@ -16,7 +16,6 @@
  */
 
 import { memoize } from 'lodash';
-import { WHITE } from '../styles';
 
 export const parseHex = (hex) => {
 	if (Array.isArray(hex)) { // if is already a rgb array return it
@@ -72,7 +71,7 @@ export const getGroupHexColor = (groupColor) => {
 	if (groupColor) {
 		return '#' + groupColor.map(componentToHex).join('');
 	}
-	return WHITE;
+	return '#ffffff'; // Removed the import that created a circular dependency
 };
 
 export const getRandomColor = () => {

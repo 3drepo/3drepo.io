@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isEqual, omitBy, orderBy, values } from 'lodash';
+import { map, omitBy, orderBy, keys, sum } from 'lodash';
 import { createSelector } from 'reselect';
 import { COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE } from '../../constants/compare';
 import { searchByFilters } from '../../helpers/searching';
+import { selectModels } from '../teamspaces';
 import { selectIsModelLoaded } from '../viewerGui';
 
 export const selectCompareDomain = (state) => ({...state.compare});
@@ -145,13 +146,14 @@ export const selectBaseModelsList = createSelector(
 	}
 );
 
-const isAllSelected = (allModels, selectedModelsMap) => isEqual(
-	allModels.length,
-	values(selectedModelsMap).filter((selectedModel) => selectedModel).length
-);
+const isAllSelected = (allModels, selectedModelsMap) => {
+	const filteredSelectedModels = Object.entries(selectedModelsMap).filter(([_, value]) => value).map(([key]) => key);
+	const allModelsId = map(allModels, '_id');
+	return !allModelsId.some((model) => !filteredSelectedModels.includes(model));
+};
 
 export const selectIsAllSelected = createSelector(
-	selectCompareModels, selectSelectedModelsMap,
+	selectFilteredCompareModels, selectSelectedModelsMap,
 	(compareModels, selectedModelsMap) => isAllSelected(compareModels, selectedModelsMap)
 );
 
@@ -164,9 +166,17 @@ export const selectIsPending = createSelector(
 );
 
 export const selectIsCompareButtonDisabled = createSelector(
-	selectSelectedModelsMap, selectIsCompareProcessed, selectIsModelLoaded,
-	(selectedModelsMap, isCompareProcessed, isModelLoaded) => {
-		const areSelectedModels = values(selectedModelsMap).filter((selectedModel) => selectedModel).length;
-		return !areSelectedModels || isCompareProcessed || !isModelLoaded;
+	selectSelectedModelsMap, selectIsCompareProcessed, selectIsModelLoaded, selectModels,
+	(selectedModelsMap, isCompareProcessed, isModelLoaded, models) => {
+		const selectedModels = keys(selectedModelsMap).filter((m) => selectedModelsMap[m]).map((id) => models[id]);
+
+		const totalRevisions = sum(selectedModels.map((model) => {
+			if (!model.federate) {
+				return model.nRevisions;
+			}
+			return sum(model.subModels.map((subModel) => models[subModel.model].nRevisions));
+		}));
+
+		return !selectedModels.length || totalRevisions <= 1 || isCompareProcessed || !isModelLoaded;
 	}
 );

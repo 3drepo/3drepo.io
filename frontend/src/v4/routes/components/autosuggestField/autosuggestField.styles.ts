@@ -53,3 +53,9 @@ export const SuggestionsList = styled(Popper)`
 		flex: 1;
 	}
 `;
+
+export const OptionsContainer = styled.div`
+	width: 100%;
+	height: 100%;
+	overflow: hidden ${isV5() ? 'overlay' : 'auto'};
+`;

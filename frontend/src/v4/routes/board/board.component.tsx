@@ -28,11 +28,9 @@ import TrelloBoard from 'react-trello';
 import { isV5 } from '@/v4/helpers/isV5';
 import { BOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
-import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
-import { ScrollArea as ScrollAreaStyles } from '@controls/scrollArea/scrollArea.styles';
 
-import { ContainersHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ISSUE_FILTERS, ISSUES_ACTIONS_MENU } from '../../constants/issues';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ISSUE_FILTERS } from '../../constants/issues';
 import { RISK_FILTERS } from '../../constants/risks';
 import { ROUTES, RouteParams } from '../../constants/routes';
 import { filtersValuesMap as issuesFilters, getHeaderMenuItems as getIssueMenuItems } from '../../helpers/issues';
@@ -411,7 +409,7 @@ export function Board(props: IProps) {
 			aria-label="Add new card"
 			aria-haspopup="true"
 			onClick={handleAddNewCard}
-			disabled={props.isPending || !modelId || !project}
+			disabled={props.isPending || !modelId || !project || hasViewerPermissions}
 		>
 			<Add />
 			{isV5() && isIssuesBoard && formatMessage({ id: 'board.newIssue.button', defaultMessage: 'New issue' })}
@@ -458,26 +456,20 @@ export function Board(props: IProps) {
 
 	const components = {
 		Card:  isIssuesBoard ? IssueBoardCard : RiskBoardCard,
-		...(isV5() && { ScrollableLane: (args) => <ScrollAreaStyles {...args} /> }),
 	};
 
 	const renderBoard = renderWhenTrue(() => (
 		<BoardContainer>
 			<div ref={boardRef}>
-				<ConditionalV5Wrapper
-					v5Wrapper={ScrollAreaStyles}
-					v5WrapperProps={{ style: { height: '100%' } }}
-				>
-					<TrelloBoard
-						data={boardData}
-						hideCardDeleteIcon
-						handleDragEnd={handleCardDrop}
-						onCardClick={handleOpenDialog}
-						onCardMoveAcrossLanes={handleCardMove}
-						components={components}
-						cardDraggable
-					/>
-				</ConditionalV5Wrapper>
+				<TrelloBoard
+					data={boardData}
+					hideCardDeleteIcon
+					handleDragEnd={handleCardDrop}
+					onCardClick={handleOpenDialog}
+					onCardMoveAcrossLanes={handleCardMove}
+					components={components}
+					cardDraggable
+				/>
 			</div>
 		</BoardContainer>
 	));

@@ -120,4 +120,20 @@ export const GlobalStyle = createGlobalStyle`
 		text-decoration: none;
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	}
+
+	// scrollbar
+	* {
+		&::-webkit-scrollbar,
+		&::-webkit-scrollbar-thumb {
+			width: 11px;
+			height: 11px;
+			border-radius: 11px;
+			border: 3px solid transparent;
+		}
+	
+		&:hover::-webkit-scrollbar-thumb {
+			background: ${({ theme }) => theme.palette.base.lightest};
+			background-clip: padding-box;
+		}
+	}
 `;

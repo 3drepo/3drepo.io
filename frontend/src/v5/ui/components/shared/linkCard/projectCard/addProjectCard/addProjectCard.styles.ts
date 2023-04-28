@@ -23,7 +23,7 @@ export const Container = styled(Card)`
 	color: ${({ theme }) => theme.palette.primary.main};
 	${({ theme }) => theme.typography.h3};
 	width: 246px;
-	height: 190px;
+	height: 194px;
 	display: flex;
 	flex-flow: column;
 	align-items: center;

@@ -17,13 +17,16 @@
 
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
+import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Quota, QuotaUnit } from './teamspaces.redux';
 
 export const DEFAULT_TEAMSPACE_IMG_SRC = 'assets/images/teamspace_placeholder.svg';
 
-export const getTeamspaceImgSrc = (teamspace: string) => (
-	generateV5ApiUrl(`teamspaces/${teamspace}/avatar`, clientConfigService.GET_API)
-);
+export const getTeamspaceImgSrc = (teamspace: string) => {
+	const { username, avatarUrl } = CurrentUserHooksSelectors.selectCurrentUser();
+	const isPersonalTeamspace = teamspace === username;
+	return isPersonalTeamspace ? avatarUrl : generateV5ApiUrl(`teamspaces/${teamspace}/avatar`, clientConfigService.GET_API);
+};
 
 export const isQuotaUnitUnlimited = (quotaUnit: QuotaUnit) => quotaUnit.available === 'unlimited';
 

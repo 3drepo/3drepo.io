@@ -19,7 +19,6 @@ import EventEmitter from 'eventemitter3';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { isString } from 'lodash';
-import { de } from 'make-plural';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -681,8 +680,13 @@ export class ViewerService {
 		} else {
 			UnityUtil.dropBookmarkPin(id, position, norm, colour);
 		}
+	}
+
+	public setSelectionPin({id, isSelected}) {
 		if (isSelected) {
 			UnityUtil.selectPin(id);
+		} else {
+			UnityUtil.deselectPin(id);
 		}
 	}
 

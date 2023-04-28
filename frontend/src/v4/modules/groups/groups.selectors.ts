@@ -136,9 +136,8 @@ export const selectAllOverridesDict = createSelector(
 				const group = filteredGroupsMap[groupId];
 				addToGroupDictionary(overrides.colors, group, group.color);
 
-				if (hasTransparency(group.color)) {
-					addToGroupDictionary(overrides.transparencies, group, getTransparency(group.color));
-				}
+				const transparency = hasTransparency(group.color) ? getTransparency(group.color) : 1;
+				addToGroupDictionary(overrides.transparencies, group, transparency);
 			}
 			return overrides;
 		}, {colors: {}, transparencies: {} });
