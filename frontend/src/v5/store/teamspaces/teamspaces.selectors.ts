@@ -44,5 +44,5 @@ export const selectCurrentQuota = createSelector(
 
 export const selectIsTeamspaceAdmin = createSelector(
 	selectCurrentTeamspaceDetails,
-	(teamspace): boolean => teamspace?.isAdmin || null,
+	(teamspace): boolean => !!teamspace?.isAdmin,
 );

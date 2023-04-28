@@ -21,7 +21,6 @@ import {
 	PreviewDetails as PreviewDetailsRisk,
 	TabContent as TabContentRisks,
 	Content as ContentRisks,
-	Container as TabsContainer,
 } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import {
 	HorizontalView as HorizontalViewIssue,
@@ -34,7 +33,7 @@ import { ShowModelButtonContainer } from '@/v4/routes/components/openInViewerBut
 import { CollapsableContent, Container as PreviewDetailsContainer } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { FilterWrapper, Container as CommentListContainer } from '@/v4/routes/components/messagesList/messagesList.styles';
 import { Counter, Actions, Container as AddNewCommentContainer } from '@/v4/routes/viewerGui/components/commentForm/commentForm.styles';
-import { BoardDialogTitle, FormWrapper } from '@/v4/routes/board/board.styles';
+import { BoardDialogTitle } from '@/v4/routes/board/board.styles';
 import { UserAndModelDetails, Details } from '@/v4/routes/viewerGui/components/previewItemInfo/previewItemInfo.styles';
 import { UserIndicator } from '@/v4/routes/components/messagesList/components/message/components/userMarker/userMarker.styles';
 import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
@@ -62,23 +61,6 @@ const EditIssue = css`
 
 			svg {
 				color: ${({ theme }) => theme.palette.primary.contrast};
-			}
-		}
-	}
-
-	/* voids parent custom-scrollbar hiding content */
-	${FormWrapper} {
-		& > ${TabsContainer} {
-			${CollapsableContent} {
-				height: min(50vh, 100%);
-			}
-
-			& > div > div {
-				position: unset !important;
-
-				&:nth-of-type(2) {
-					height: 0 !important;
-				}
 			}
 		}
 	}

@@ -455,6 +455,7 @@ export const theme = createTheme({
 					// This is necessary for overriding styles of v4 tooltips
 					container: () => document.getElementById('v4Overrides'),
 				},
+				disableInteractive: true,
 			},
 			styleOverrides: {
 				tooltip: {
@@ -578,6 +579,16 @@ export const theme = createTheme({
 		MuiPaper: {
 			defaultProps: {
 				elevation: 8,
+			},
+			styleOverrides: {
+				root: {
+					'&:has(> .MuiList-root)': {
+						overflow: 'overlay',
+						'& > MuiList-root': {
+							position: 'unset',
+						},
+					},
+				},
 			},
 		},
 		MuiCard: {

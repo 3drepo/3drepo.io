@@ -19,7 +19,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { ShareTextField } from '@controls/shareTextField';
 import { ModalHeader } from '@controls/formModal/modalHeader/modalHeader.component';
-import { ModalBody } from '@controls/formModal/modalBody/modalBody.component';
+import { ModalBody } from '@controls/formModal/modalBody/modalBody.styles';
 import { Modal } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { Form } from '@controls/formModal/formModal.styles';
 import { MailToButton } from './shareModal.styles';

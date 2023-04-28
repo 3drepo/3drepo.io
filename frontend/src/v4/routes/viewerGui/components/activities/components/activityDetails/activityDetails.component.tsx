@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
-import { ScrollArea } from '@controls/scrollArea';
 import Grid from '@mui/material/Grid';
 import { isString } from 'lodash';
 
@@ -66,17 +64,15 @@ export const ActivityDetails = ({ isPending, activityDetails, setSelectedDate }:
 	}
 
 	return (
-		<ConditionalV5Wrapper v5Wrapper={ScrollArea}>
-			<Container container direction="row" alignItems="center">
-				{activityDetails.data.map(({value, key}) => (
-					<Grid key={key} item xs={12} >
-						<Row container justifyContent="center">
-							<Grid item xs={6}>{key}</Grid>
-							{renderValue(key, value, setSelectedDate)}
-						</Row>
-					</Grid>
-				))}
-			</Container>
-		</ConditionalV5Wrapper>
+		<Container container direction="row" alignItems="center">
+			{activityDetails.data.map(({value, key}) => (
+				<Grid key={key} item xs={12} >
+					<Row container justifyContent="center">
+						<Grid item xs={6}>{key}</Grid>
+						{renderValue(key, value, setSelectedDate)}
+					</Row>
+				</Grid>
+			))}
+		</Container>
 	);
 };
