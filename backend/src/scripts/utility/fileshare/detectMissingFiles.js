@@ -47,7 +47,7 @@ const checkFile = (db, col, { _id, link, size }) => {
 			logger.logError(`[${db}.${col}][${_id}][${link}] File size mismatched (expected ${size}, got ${fileSize})`);
 		}
 	} catch (err) {
-		logger.logError(`[${db}.${col}.${_id}][${link}] Failed to verify file: ${err.message ?? err}`);
+		logger.logError(`[${db}.${col}[${_id}][${link}] Failed to verify file: ${err.message ?? err}`);
 	}
 };
 
@@ -58,7 +58,10 @@ const checkFilesInCol = async (database, col) => {
 
 const processTeamspace = async (database) => {
 	const cols = await getCollectionsEndsWith(database, '.ref');
-	await Promise.all(cols.map(({ name }) => checkFilesInCol(database, name)));
+	for (const { name } of cols) {
+		// eslint-disable-next-line no-await-in-loop
+		await checkFilesInCol(database, name);
+	}
 };
 
 const run = async () => {
