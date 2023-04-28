@@ -85,9 +85,6 @@ export const theme = createTheme(
 									borderWidth: '1px !important',
 								},
 							},
-							// '& input': {
-							// 	padding: '0px 12px !important',
-							// },
 						},
 						formControl: {
 							'&&& .MuiInputBase-input::placeholder': {
