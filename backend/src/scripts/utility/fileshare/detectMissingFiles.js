@@ -68,8 +68,10 @@ const checkFilesInCol = async (database, col) => {
 const processTeamspace = async (database) => {
 	const cols = await getCollectionsEndsWith(database, '.ref');
 	for (const { name } of cols) {
+		if (!name.endsWith('.scene.ref')) {
 		// eslint-disable-next-line no-await-in-loop
-		await checkFilesInCol(database, name);
+			await checkFilesInCol(database, name);
+		}
 	}
 };
 
