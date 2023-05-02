@@ -38,24 +38,24 @@ export const TicketGroupsCard = () => {
 			</CardHeader>
 			<CardContent>
 				<GroupsAccordion
-					title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'coloured' })}
+					title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
 					groups={groups.colored}
 					colored
 				>
 					<NewGroupButton startIcon={<AddCircleIcon />}>
 						<FormattedMessage
-							id="ticketCard.groups.coloured.addGroup"
+							id="ticketCard.groups.addGroup"
 							defaultMessage="Add group"
 						/>
 					</NewGroupButton>
 				</GroupsAccordion>
 				<GroupsAccordion
-					title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'hidden' })}
+					title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
 					groups={groups.hidden}
 				>
 					<NewGroupButton startIcon={<AddCircleIcon />}>
 						<FormattedMessage
-							id="ticketCard.groups.coloured.addGroup"
+							id="ticketCard.groups.addGroup"
 							defaultMessage="Add group"
 						/>
 					</NewGroupButton>
