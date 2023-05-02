@@ -30,7 +30,6 @@ export const Container = styled(Breadcrumbs)`
 			overflow: hidden;
 			display: block;
 			white-space: nowrap;
-			height: 31px;
 		}
 
 		.MuiBreadcrumbs-li {
@@ -70,6 +69,7 @@ export const Breadcrumb: typeof Link = styled(Button).attrs({
 		padding: 5px;
 		margin: 0;
 		min-width: auto;
+		height: 31px;
 
 		&:hover {
 			text-decoration: none;
