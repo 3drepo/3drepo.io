@@ -32,17 +32,12 @@ export const ColorCircle = styled.div<{ $size: number, $color?: string }>`
 		border: solid 1px ${theme.palette.base.lightest};
 	`}
 
-	${({ $color, $size, theme }) => !$color && css`
-		transform: rotate(135deg);
-		background-color: transparent;
-
-		&::after {
-			content: '';
-			width: 100%;
-			height: 1px;
-			display: flex;
-			margin-top: ${$size / 2 - 1.5}px;
-			background-color: ${theme.palette.error.main};
-		}
+	${({ $color, theme }) => !$color && css`
+		background: linear-gradient(
+			to top left,
+			${theme.palette.primary.contrast} calc(50% - 0.5px),
+			${theme.palette.error.main} 50%,
+			${theme.palette.primary.contrast} calc(50% + 0.5px)
+		);
 	`}
 `;
