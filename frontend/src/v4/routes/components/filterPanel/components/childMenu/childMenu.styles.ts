@@ -17,7 +17,6 @@
 
 import styled from 'styled-components';
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { COLOR } from '../../../../../styles';
 
 const getDirection = ({ left }) => left ? 'right: 100%' : 'right: 100%';

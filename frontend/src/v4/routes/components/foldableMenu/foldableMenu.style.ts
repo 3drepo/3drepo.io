@@ -20,7 +20,6 @@ import styled from 'styled-components';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { COLOR } from '../../../styles';
 import { FileUploadInvoker } from '../../viewerGui/components/commentForm/commentForm.styles';
 
