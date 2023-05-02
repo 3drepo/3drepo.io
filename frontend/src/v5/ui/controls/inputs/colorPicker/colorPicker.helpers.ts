@@ -42,7 +42,6 @@ export const getColorIsValid = (color: string) => !color || /[0-9a-f]{6}/.test(c
 export const UNSET_RGB_COLOR: RgbArray = [120, 120, 120];
 export const UNSET_HEX_COLOR = '#787878';
 export const DEFAULT_SUGGESTED_HEX_COLORS = [
-	// transparent,
 	'#ffffff',
 	'#75140c',
 	'#d32c1f',
