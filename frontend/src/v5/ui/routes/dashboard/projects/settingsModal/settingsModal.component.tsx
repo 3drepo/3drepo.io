@@ -152,6 +152,7 @@ export const SettingsModal = ({
 		reset,
 		getValues,
 		watch,
+		trigger,
 		control,
 		formState,
 		formState: { errors, dirtyFields },
@@ -191,6 +192,7 @@ export const SettingsModal = ({
 	const onSubmitError = (err) => {
 		if (nameAlreadyExists(err)) {
 			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
+			trigger('name');
 		}
 	};
 
@@ -225,7 +227,7 @@ export const SettingsModal = ({
 		reset(getDefaultValues(containerOrFederation, isContainer));
 	}, [containerOrFederation]);
 
-	useEffect(() => { setIsValid(formState.isValid && fieldsHaveChanged()); }, [JSON.stringify(watch())]);
+	useEffect(() => { setIsValid(formState.isValid && fieldsHaveChanged()); }, [watch()]);
 
 	return (
 		<FormModal

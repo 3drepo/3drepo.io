@@ -47,6 +47,7 @@ export const ProjectSettings = () => {
 		handleSubmit,
 		getValues,
 		reset,
+		trigger,
 	} = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(ProjectSchema),
@@ -79,6 +80,10 @@ export const ProjectSettings = () => {
 		reset(defaultValues);
 		setSubmitWasSuccessful(false);
 	}, [currentProject]);
+
+	useEffect(() => {
+		if (existingNames.length) trigger('projectName');
+	}, [existingNames.length]);
 
 	if (_.isEmpty(currentProject)) return (<></>);
 
