@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import Checkers from '@assets/images/checkers.svg';
 import { ComponentToString } from '@/v5/helpers/react.helper';
 import { TextField } from '@mui/material';
@@ -25,11 +25,11 @@ import { ColorCircle } from '../colorCircle/colorCircle.styles';
 
 export const ColorGrid = styled.div`
 	display: grid;
+	place-items: center;
 	grid-template-columns: repeat(6, 1fr);
-	grid-template-rows: repeat(4, 1fr);
-	width: 230px;
-	height: 152px;
 	grid-gap: 20px;
+	width: 210px;
+	height: 152px;
 	margin-bottom: 10px;
 `;
 
@@ -60,22 +60,24 @@ export const BottomBar = styled.div`
 	justify-content: space-between;
 	width: 100%;
 `;
-
-export const SquaredColorOption = styled.div<{ $color: string, $opacity: number }>`
+export const SquaredColorOption = styled(ColorCircle).attrs({
+	$size: 24,
+})<{ $opacity: number }>`
 	border-radius: 5px;
-	height: 24px;
-	width: 24px;
-	background: url('data:image/svg+xml;utf8,${ComponentToString(Checkers)}');
 
-	&::before {
-		content: '';
-		background: ${({ $color }) => $color};
-		opacity: ${({ $opacity }) => $opacity};
-		position: absolute;
-		border-radius: 5px;
-		width: 24px;
-		height: 24px;
-	}
+	${({ $color, $opacity = 1, theme }) => $color && css`
+		&::before {
+			content: '';
+			background: url('data:image/svg+xml;utf8,${ComponentToString(Checkers)}');
+			background-color: ${theme.palette.primary.contrast};
+			opacity: ${1 - $opacity};
+			position: absolute;
+			border-radius: 0 5px 5px 0;
+			margin-left: 12px;
+			width: 12px;
+			height: 24px;
+		}
+	`};
 `;
 
 export const HexTextField = styled(TextField).attrs({
