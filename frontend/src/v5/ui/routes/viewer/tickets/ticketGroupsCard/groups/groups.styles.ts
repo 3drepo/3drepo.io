@@ -24,6 +24,7 @@ const GroupStyling = css`
 	border: 0;
 	border-radius: 8px;
 	height: 42px;
+	width: 100%;
 	box-sizing: border-box;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	padding: 7px;
@@ -32,10 +33,19 @@ const GroupStyling = css`
 `;
 
 export const GroupItemButtons = styled.div`
-	width: 100%;
+	margin-left: auto;
 	display: flex;
 	justify-content: flex-end;
 	height: 100%;
+`;
+
+export const NameContainer = styled.div`
+	display: flex;
+	flex-direction: column;
+	margin-left: 10px;
+	flex-shrink: 2;
+	max-width: 100%;
+	min-width: 0;
 `;
 
 export const GroupItemContainer = styled.div`
@@ -76,8 +86,8 @@ export const GroupCollectionAccordion = styled(Accordion)`
 			background-color: ${({ theme }) => theme.palette.secondary.main};
 			color: ${({ theme }) => theme.palette.primary.contrast};
 			border-radius: 50%;
-			width: 16px;
-			height: 16px;
+			min-width: 16px;
+			min-height: 16px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -98,6 +108,11 @@ export const GroupCollectionAccordion = styled(Accordion)`
 			padding: 9px 0 0 16px;
 			overflow: hidden;
 		}
+	
+		.MuiAccordionSummary-content {
+			width: 100%;
+			overflow: hidden;
+		}
 	}
 `;
 
@@ -105,7 +120,8 @@ export const GroupTitle = styled.span`
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	width: 100%;
+	justify-content: flex-start;
+	width: calc(100% - 49px);
 `;
 
 export const GroupCollectionTitle = styled(GroupTitle)`
@@ -122,18 +138,14 @@ export const Icon = styled.div`
 	border-radius: 5px;
 `;
 
-export const NameContainer = styled.div`
-	display: flex;
-	flex-direction: column;
-	margin-left: 10px;
-`;
-
 export const Name = styled(Typography).attrs({
 	variant: 'body1',
 })`
 	cursor: pointer;
-	width: max-content;
 	color: ${({ theme }) => theme.palette.secondary.main};
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 `;
 
 export const GroupsCount = styled(Typography).attrs({

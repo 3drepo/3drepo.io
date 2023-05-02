@@ -117,12 +117,14 @@ export const Groups = ({ groups, colored }: GroupsProps) => {
 			{collections.map((collection) => (
 				<GroupCollectionAccordion
 					title={(
-						<GroupCollectionTitle>
-							<NameContainer>
-								<Name>{collection[0].prefix[0]}</Name>
-							</NameContainer>
+						<>
+							<GroupCollectionTitle>
+								<NameContainer>
+									<Name>{collection[0].prefix[0]}</Name>
+								</NameContainer>
+							</GroupCollectionTitle>
 							<GroupToggle colored={colored} onClick={(e) => e.stopPropagation()} />
-						</GroupCollectionTitle>
+						</>
 					)}
 				>
 					<GroupCollectionContainer>
