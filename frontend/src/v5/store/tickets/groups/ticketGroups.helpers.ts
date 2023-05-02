@@ -19,7 +19,7 @@ import { IGroupFromApi, IViewState } from './ticketGroups.types';
 
 const smartGroup: IGroupFromApi = {
 	_id: 'a2045aa0-d9d1-11ed-8443-77f52ace17bf',
-	name: 'Untitled group 1',
+	name: 'Untitled group 1 but with a very long name12345',
 	objects: [{
 		container: '134a7cb0-d916-11ed-bc43-5ba0d73424c9',
 	}],
@@ -68,7 +68,7 @@ export const MOCK_DATA: IViewState = {
 		{
 			color: [1, 230, 255],
 			group: smartGroup,
-			prefix: ['____ROOT'],
+			prefix: ['_____VERY LOOOOOOOOONG NAME FOR A GROUP INNIT?'],
 		},
 		{
 			color: [1, 230, 255],
@@ -168,7 +168,7 @@ export const MOCK_DATA: IViewState = {
 			opacity: 0.01,
 			color: [1, 230, 255],
 			group: normalGroups[2],
-			prefix: ['root', 'leaf2'],
+			prefix: ['root', 'leaf2 has a very looooooooooooooooooooooong'],
 		},
 	],
 	hidden: [{
