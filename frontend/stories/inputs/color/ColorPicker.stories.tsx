@@ -40,19 +40,19 @@ const Controlled: ComponentStory<typeof ColorPicker> = (args) => (
 	</FormContainer>
 );
 
-export const ControlledFormColorPicker = Controlled.bind({});
+export const ControlledFormColorPickerDefault = Controlled.bind({});
 
-export const ControlledFormColorPickerColorAndOpacity = Controlled.bind({});
-ControlledFormColorPickerColorAndOpacity.args = {
+export const ControlledFormColorPickerColorAndOpacitySet = Controlled.bind({});
+ControlledFormColorPickerColorAndOpacitySet.args = {
 	defaultValue: { color: [210, 89, 159], opacity: 0.4 },
 };
 
-export const ControlledFormColorPickerColorOnly = Controlled.bind({});
-ControlledFormColorPickerColorOnly.args = {
+export const ControlledFormColorPickerOnlyColorSet = Controlled.bind({});
+ControlledFormColorPickerOnlyColorSet.args = {
 	defaultValue: { opacity: 0.4 },
 };
 
-export const ControlledFormColorPickerOpacityOnly = Controlled.bind({});
-ControlledFormColorPickerOpacityOnly.args = {
+export const ControlledFormColorPickerOnlyOpacitySet = Controlled.bind({});
+ControlledFormColorPickerOnlyOpacitySet.args = {
 	defaultValue: { color: [34, 189, 230] },
 };
