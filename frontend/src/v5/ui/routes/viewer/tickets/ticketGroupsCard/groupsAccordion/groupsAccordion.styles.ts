@@ -19,7 +19,8 @@ import styled, { css } from 'styled-components';
 import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
 import { CentredContainer } from '@controls/centredContainer';
 import CheckBoxBase from '@mui/material/Checkbox';
-import { GroupCollectionAccordion, GroupItemContainer } from '../groups/groups.styles';
+import { CollectionAccordion } from '../groups/groups.styles';
+import { Container as GroupItemContainer } from '../groups/groupItem/groupItem.styles';
 
 export const Accordion = styled(AccordionBase)<{ $groupsCount?: number }>`
 	background: transparent;
@@ -47,8 +48,8 @@ export const Accordion = styled(AccordionBase)<{ $groupsCount?: number }>`
 	}
 
 	/* stylelint-disable selector-type-no-unknown */
-	${GroupCollectionAccordion} ${GroupCollectionAccordion},
-	${GroupCollectionAccordion} ${GroupItemContainer} {
+	${CollectionAccordion} ${CollectionAccordion},
+	${CollectionAccordion} ${GroupItemContainer} {
 		position: relative;
 
 		&::after {

@@ -15,54 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Typography } from '@controls/typography';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { Accordion } from '@controls/accordion/accordion.component';
-import { GroupIcon } from '../../../groups/groupItem/groupIcon/groupIcon.styles';
+import { GroupStyling, Headline } from './groupItem/groupItem.styles';
 
-const GroupStyling = css`
-	border: 0;
-	border-radius: 8px;
-	height: 42px;
-	width: 100%;
-	box-sizing: border-box;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	padding: 7px;
-	display: flex;
-	align-items: center;
-`;
-
-export const GroupItemButtons = styled.div`
-	margin-left: auto;
-	display: flex;
-	justify-content: flex-end;
-	height: 100%;
-`;
-
-export const NameContainer = styled.div`
-	display: flex;
-	flex-direction: column;
-	margin-left: 10px;
-	flex-shrink: 2;
-	max-width: 100%;
-	min-width: 0;
-`;
-
-export const GroupItemContainer = styled.div`
-	${GroupStyling}
-	flex-direction: row;
-	margin-bottom: 4px;
-
-	&:not(:hover) ${GroupItemButtons} {
-		display: none;
-	}
-
-	${/* sc-selector */ GroupIcon}::after {
-		border-color: ${({ theme }) => theme.palette.secondary.lightest};
-	}
-`;
-
-export const GroupCollectionAccordion = styled(Accordion)`
+export const CollectionAccordion = styled(Accordion)`
 	&& {
 		border: 0;
 		background-color: transparent;
@@ -116,19 +73,11 @@ export const GroupCollectionAccordion = styled(Accordion)`
 	}
 `;
 
-export const GroupTitle = styled.span`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: flex-start;
-	width: calc(100% - 49px);
-`;
-
-export const GroupCollectionTitle = styled(GroupTitle)`
+export const CollectionHeadline = styled(Headline)`
 	justify-content: space-between;
 `;
 
-export const GroupCollectionContainer = styled.div`
+export const GroupsContainer = styled.div`
 	margin: 0;
 	padding-left: 0;
 	position: relative;
@@ -136,20 +85,4 @@ export const GroupCollectionContainer = styled.div`
 
 export const Icon = styled.div`
 	border-radius: 5px;
-`;
-
-export const Name = styled(Typography).attrs({
-	variant: 'body1',
-})`
-	cursor: pointer;
-	color: ${({ theme }) => theme.palette.secondary.main};
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-`;
-
-export const GroupsCount = styled(Typography).attrs({
-	variant: 'caption',
-})`
-	color: ${({ theme }) => theme.palette.base.main};
 `;
