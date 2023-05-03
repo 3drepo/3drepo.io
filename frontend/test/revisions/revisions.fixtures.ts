@@ -33,6 +33,8 @@ export const mockCreateRevisionBody = (overrides?: Partial<CreateRevisionBody>):
 	revisionDesc: faker.random.words(3),
 	file: new File(['file'], 'filename.obj'),
 	importAnimations: false,
+	quality: faker.datatype.number(),
+	vertexCount: faker.datatype.number(),
 	timezone: 'Europe/London',
 	containerId: faker.datatype.uuid(),
 	containerName: faker.random.words(1),
