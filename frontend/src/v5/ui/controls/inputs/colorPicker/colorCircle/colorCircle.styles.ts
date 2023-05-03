@@ -21,7 +21,6 @@ import { contrastColor } from 'contrast-color';
 export const isLight = (bgColor) => contrastColor({ bgColor, threshold: 220 }) !== '#FFFFFF';
 
 export const ColorCircle = styled.div<{ $size: number, $color?: string }>`
-	cursor: pointer;
 	height: ${({ $size }) => $size}px;
 	width: ${({ $size }) => $size}px;
 	border-radius: ${({ $size }) => $size}px;

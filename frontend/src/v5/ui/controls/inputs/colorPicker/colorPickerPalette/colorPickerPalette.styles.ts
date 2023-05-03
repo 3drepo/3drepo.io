@@ -51,7 +51,9 @@ export const ColorActionMenu = styled(ActionMenu).attrs({
 
 export const ColorOption = styled(ColorCircle).attrs({
 	$size: 18,
-})``;
+})`
+	cursor: pointer;
+`;
 
 export const BottomBar = styled.div`
 	display: flex;
@@ -61,9 +63,11 @@ export const BottomBar = styled.div`
 	width: 100%;
 `;
 export const SquaredColorOption = styled(ColorCircle).attrs({
-	$size: 24,
+	$size: 26,
 })<{ $opacity: number }>`
 	border-radius: 5px;
+	overflow: hidden;
+	position: relative;
 
 	${({ $color, $opacity = 1, theme }) => $color && css`
 		&::before {
@@ -73,9 +77,9 @@ export const SquaredColorOption = styled(ColorCircle).attrs({
 			opacity: ${1 - $opacity};
 			position: absolute;
 			border-radius: 0 5px 5px 0;
-			margin-left: 12px;
-			width: 12px;
-			height: 24px;
+			margin-left: 13px;
+			width: 13px;
+			height: 26px;
 		}
 	`};
 `;
@@ -122,7 +126,7 @@ export const PercentageTextField = styled(NumberField).attrs({
 export const GradientButton = styled.div`
 	cursor: pointer;
 	background: conic-gradient(#0047FF, #DB00FF, #FF0000, #FFE600, #14FF00, #0047FF);
-	height: 31px;
-	width: 31px;
-	border-radius: 31px;
+	height: 26px;
+	width: 26px;
+	border-radius: 26px;
 `;
