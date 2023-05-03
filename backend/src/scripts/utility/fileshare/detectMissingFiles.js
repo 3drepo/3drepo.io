@@ -78,7 +78,7 @@ const organiseRefsToProcess = (entries, maxParallelSizeMB, maxParallelFiles) => 
 
 const checkFilesInCol = async (database, col, maxFiles, maxParallelSizeMB) => {
 	const refs = await find(database, col, { type: 'fs' }, { link: 1, size: 1 });
-	logger.logDebug(`\t\t${col}`);
+	logger.logDebug(`\t\t${col} ${refs.length} FS References found`);
 
 	const groupRefs = organiseRefsToProcess(refs, maxParallelSizeMB, maxFiles);
 
@@ -122,7 +122,7 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 		{
 			describe: 'Maximum amount of files to process in parallel',
 			type: 'number',
-			default: 2000,
+			default: 10000,
 		});
 	return yargs.command(
 		commandName,
