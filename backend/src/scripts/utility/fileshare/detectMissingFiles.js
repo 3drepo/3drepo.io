@@ -51,49 +51,84 @@ const checkFile = (db, col, { _id, link, size }) => {
 	}
 };
 
-const checkFilesInCol = async (database, col) => {
+const organiseRefsToProcess = (entries, maxParallelSizeMB, maxParallelFiles) => {
+	const groups = [];
+
+	const maxMem = maxParallelSizeMB * 1024 * 1024;
+
+	let currentGroup = [];
+	let currentGroupSize = 0;
+	for (const entry of entries) {
+		if ((entry.size + currentGroupSize) > maxMem || currentGroup.length >= maxParallelFiles) {
+			groups.push(currentGroup);
+			currentGroupSize = 0;
+			currentGroup = [];
+		}
+
+		currentGroup.push(entry);
+		currentGroupSize += entry.size;
+	}
+
+	if (currentGroup.length) {
+		groups.push(currentGroup);
+	}
+
+	return groups;
+};
+
+const checkFilesInCol = async (database, col, maxFiles, maxParallelSizeMB) => {
 	const refs = await find(database, col, { type: 'fs' }, { link: 1, size: 1 });
-	const maxSize = 20000;
 	logger.logDebug(`\t\t${col}`);
 
-	for (let i = 0; i < refs.length; i += maxSize) {
-		logger.logDebug(`\t\t\t[${i}/${refs.length}]`);
-		const endIndx = i + maxSize > refs.length ? refs.length : i + maxSize;
-		const refsToProcess = refs.slice(i, i + endIndx);
+	const groupRefs = organiseRefsToProcess(refs, maxParallelSizeMB, maxFiles);
+
+	for (let i = 0; i < groupRefs.length; ++i) {
+		const group = groupRefs[i];
+		logger.logDebug(`\t\t\t[${i}/${groupRefs.length}] Checking ${group.length} references...`);
 		// eslint-disable-next-line no-await-in-loop
-		await Promise.all(refsToProcess.map((ref) => checkFile(database, col, ref)));
+		await Promise.all(group.map((ref) => checkFile(database, col, ref)));
 	}
 };
 
-const processTeamspace = async (database) => {
+const processTeamspace = async (database, maxSize, maxFiles) => {
 	const cols = await getCollectionsEndsWith(database, '.ref');
 	for (const { name } of cols) {
 		if (!name.endsWith('.scene.ref')) {
 		// eslint-disable-next-line no-await-in-loop
-			await checkFilesInCol(database, name);
+			await checkFilesInCol(database, name, maxFiles, maxSize);
 		}
 	}
 };
 
-const run = async () => {
+const run = async (maxSize, maxFiles) => {
 	logger.logInfo('Checking all FS references are pointing to a file');
 
 	const teamspaces = await getTeamspaceList();
 	for (const ts of teamspaces) {
 		logger.logInfo(`\t-${ts}`);
 		// eslint-disable-next-line no-await-in-loop
-		await processTeamspace(ts);
+		await processTeamspace(ts, maxSize, maxFiles);
 	}
 };
 
 const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
-	const argsSpec = (subYargs) => subYargs;
+	const argsSpec = (subYargs) => subYargs.options('maxParallelSizeMB',
+		{
+			describe: 'Maximum amount of file size to process in parallel',
+			type: 'number',
+			default: 2048,
+		}).option('maxParallelFiles',
+		{
+			describe: 'Maximum amount of files to process in parallel',
+			type: 'number',
+			default: 2000,
+		});
 	return yargs.command(
 		commandName,
 		'Identify any missing file(s) in fileshare',
 		argsSpec,
-		run,
+		({ maxParallelSizeMB, maxParallelFiles }) => run(maxParallelSizeMB, maxParallelFiles),
 	);
 };
 
