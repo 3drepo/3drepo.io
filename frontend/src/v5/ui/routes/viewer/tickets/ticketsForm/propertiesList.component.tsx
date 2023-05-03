@@ -29,9 +29,10 @@ interface PropertiesListProps {
 	properties: PropertyDefinition[];
 	module: string;
 	onPropertyBlur?: (...args) => void;
+	onGroupsClick?: () => void;
 }
 
-export const PropertiesList = ({ module, properties, onPropertyBlur }: PropertiesListProps) => {
+export const PropertiesList = ({ module, properties, onPropertyBlur, onGroupsClick }: PropertiesListProps) => {
 	const { formState } = useFormContext();
 	const isReadOnly = TicketsCardHooksSelectors.selectReadOnly();
 	return (
@@ -58,6 +59,7 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 							onBlur={onPropertyBlur}
 							// @ts-ignore
 							values={values}
+							onGroupsClick={onGroupsClick}
 						/>
 						{formError && <ErrorTextGap />}
 					</Fragment>

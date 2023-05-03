@@ -22,45 +22,47 @@ import { ArrowBack, CardContainer, CardHeader } from '@components/viewer/cards/c
 import { FormattedMessage } from 'react-intl';
 import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import { MOCK_DATA } from '@/v5/store/tickets/groups/ticketGroups.helpers';
-import { CardContent, NewGroupButton } from './ticketGroupsCard.styles';
+import { CardContent, NewGroupButton } from './ticketGroups.styles';
 import { TicketsCardViews } from '../tickets.constants';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 
-export const TicketGroupsCard = () => {
+export const TicketGroups = () => {
 	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
 	const groups = MOCK_DATA;
 
 	return (
-		<CardContainer>
-			<CardHeader>
-				<ArrowBack onClick={() => TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details)} />
-				{ticket.title}: <FormattedMessage id="ticketCard.groups" defaultMessage="Groups" />
-			</CardHeader>
-			<CardContent>
-				<GroupsAccordion
-					title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
-					groups={groups.colored}
-					colored
-				>
-					<NewGroupButton startIcon={<AddCircleIcon />}>
-						<FormattedMessage
-							id="ticketCard.groups.addGroup"
-							defaultMessage="Add group"
-						/>
-					</NewGroupButton>
-				</GroupsAccordion>
-				<GroupsAccordion
-					title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
-					groups={groups.hidden}
-				>
-					<NewGroupButton startIcon={<AddCircleIcon />}>
-						<FormattedMessage
-							id="ticketCard.groups.addGroup"
-							defaultMessage="Add group"
-						/>
-					</NewGroupButton>
-				</GroupsAccordion>
-			</CardContent>
-		</CardContainer>
+		// <CardContainer>
+		// 	<CardHeader>
+		// 		<ArrowBack onClick={() => TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details)} />
+		// 		{ticket.title}: <FormattedMessage id="ticketCard.groups" defaultMessage="Groups" />
+		// 	</CardHeader>
+		// 	<CardContent>
+		<>
+			<GroupsAccordion
+				title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
+				groups={groups.colored}
+				colored
+			>
+				<NewGroupButton startIcon={<AddCircleIcon />}>
+					<FormattedMessage
+						id="ticketCard.groups.addGroup"
+						defaultMessage="Add group"
+					/>
+				</NewGroupButton>
+			</GroupsAccordion>
+			<GroupsAccordion
+				title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
+				groups={groups.hidden}
+			>
+				<NewGroupButton startIcon={<AddCircleIcon />}>
+					<FormattedMessage
+						id="ticketCard.groups.addGroup"
+						defaultMessage="Add group"
+					/>
+				</NewGroupButton>
+			</GroupsAccordion>
+		</>
+		// 	</CardContent>
+		// </CardContainer>
 	);
 };

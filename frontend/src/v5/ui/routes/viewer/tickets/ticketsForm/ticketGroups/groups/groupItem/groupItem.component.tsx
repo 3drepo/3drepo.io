@@ -25,8 +25,8 @@ import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
 import { rgbaToHex } from '@/v4/helpers/colors';
 import { FormattedMessage } from 'react-intl';
-import { GroupIconComponent } from '../../../../groups/groupItem/groupIcon/groupIcon.component';
-import { ErrorTicketButton, PrimaryTicketButton } from '../../../ticketButton/ticketButton.styles';
+import { GroupIconComponent } from '@/v5/ui/routes/viewer/groups/groupItem/groupIcon/groupIcon.component';
+import { ErrorTicketButton, PrimaryTicketButton } from '@/v5/ui/routes/viewer/tickets/ticketButton/ticketButton.styles';
 import {
 	Buttons,
 	NameContainer,

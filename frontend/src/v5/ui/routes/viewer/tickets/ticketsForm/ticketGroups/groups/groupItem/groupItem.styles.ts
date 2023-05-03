@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { GroupIcon } from '@/v5/ui/routes/viewer/groups/groupItem/groupIcon/groupIcon.styles';
 import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
-import { GroupIcon } from '../../../../groups/groupItem/groupIcon/groupIcon.styles';
 
 export const GroupStyling = css`
 	border: 0;

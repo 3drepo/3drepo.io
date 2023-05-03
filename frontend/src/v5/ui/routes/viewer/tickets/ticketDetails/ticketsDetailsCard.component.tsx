@@ -16,7 +16,7 @@
  */
 
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -30,11 +30,14 @@ import { dirtyValues, filterErrors, nullifyEmptyStrings, removeEmptyObjects } fr
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { theme } from '@/v5/ui/themes/theme';
+import { FormattedMessage } from 'react-intl';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
+import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
 
 export const TicketDetailsCard = () => {
+	const [showGroups, setShowGroups] = useState(false);
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
@@ -42,7 +45,11 @@ export const TicketDetailsCard = () => {
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 
 	const goBack = () => {
-		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
+		if (showGroups) {
+			setShowGroups(false);
+		} else {
+			TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
+		}
 	};
 
 	const changeTicketIndex = (delta: number) => {
@@ -106,14 +113,20 @@ export const TicketDetailsCard = () => {
 		<CardContainer>
 			<CardHeader>
 				<ArrowBack onClick={goBack} />
-				{template.code}:{ticket.number}
-				<HeaderButtons>
-					<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
-					<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
-				</HeaderButtons>
+				{template.code}:{ticket.number}{showGroups && (<>:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" /></>)}
+				{!showGroups && (
+					<HeaderButtons>
+						<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
+						<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
+					</HeaderButtons>
+				)}
 			</CardHeader>
 			<FormProvider {...formData}>
-				<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
+				{showGroups ? (
+					<TicketGroups />
+				) : (
+					<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} onGroupsClick={() => setShowGroups(true)} />
+				)}
 			</FormProvider>
 		</CardContainer>
 	);

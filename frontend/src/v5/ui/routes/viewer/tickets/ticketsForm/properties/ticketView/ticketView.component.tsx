@@ -28,8 +28,6 @@ import { isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TicketsCardViews } from '../../../tickets.constants';
 import { BasicTicketImage } from '../basicTicketImage/basicTicketImage.component';
 import { ActionMenu, TicketImageAction } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
 import { TicketImageActionMenu } from '../basicTicketImage/ticketImageActionMenu.component';
@@ -42,6 +40,7 @@ type ITicketView = {
 	required: boolean;
 	onBlur: () => void;
 	onChange: (newValue) => void;
+	onGroupsClick: () => void;
 	disabled?: boolean;
 };
 
@@ -49,6 +48,7 @@ export const TicketView = ({
 	value,
 	onBlur,
 	onChange,
+	onGroupsClick,
 	disabled,
 	...props
 }: ITicketView) => {
@@ -84,7 +84,7 @@ export const TicketView = ({
 			{...props}
 		>
 			{/* //TODO - delete after refactoring */}
-			<TicketImageAction onClick={() => TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Groups)}>
+			<TicketImageAction onClick={onGroupsClick}>
 				<b>GROUPS</b>
 			</TicketImageAction>
 			<TicketImageAction onClick={goToViewpoint} disabled={disabled || !(value?.camera)}>
