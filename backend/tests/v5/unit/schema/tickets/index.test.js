@@ -853,12 +853,18 @@ const testDeserialiseUUIDsInTicket = () => {
 	describe('Deserialise UUIDs in a ticket', () => {
 		test('Should deserialise as expected', () => {
 			const viewProp = generateRandomString();
+			const numberProp = generateRandomString();
 			const viewModProp = generateRandomString();
 			const template = {
 				properties: [{
 					type: propTypes.VIEW,
 					name: viewProp,
-				}],
+				},
+				{
+					type: propTypes.NUMBER,
+					name: numberProp,
+				},
+				],
 				modules: [
 					{
 						type: presetModules.SEQUENCING,
@@ -896,8 +902,8 @@ const testDeserialiseUUIDsInTicket = () => {
 					[viewProp]:
 				{
 					state: generateStateObject(),
-				}
-					,
+				},
+					[numberProp]: 1,
 				},
 				modules: {
 					[presetModules.SEQUENCING]: {
