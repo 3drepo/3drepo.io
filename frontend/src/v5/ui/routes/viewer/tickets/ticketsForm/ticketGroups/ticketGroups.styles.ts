@@ -16,12 +16,10 @@
  */
 
 import styled from 'styled-components';
-import { CardContent as CardContentBase } from '@components/viewer/cards/card.styles';
 import { Button } from '@controls/button';
 
-export const CardContent = styled(CardContentBase)`
-	padding: 0;
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+export const Container = styled.div`
+	overflow: overlay;
 `;
 
 export const NewGroupButton = styled(Button).attrs({

@@ -30,6 +30,7 @@ const TicketButtonStyling = styled.button`
 
 	& > svg {
 		max-width: 14px;
+		max-height: 17px;
 	}
 `;
 

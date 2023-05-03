@@ -113,8 +113,10 @@ export const TicketDetailsCard = () => {
 		<CardContainer>
 			<CardHeader>
 				<ArrowBack onClick={goBack} />
-				{template.code}:{ticket.number}{showGroups && (<>:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" /></>)}
-				{!showGroups && (
+				{template.code}:{ticket.number}
+				{showGroups ? (
+					<>:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" /></>
+				) : (
 					<HeaderButtons>
 						<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
 						<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>

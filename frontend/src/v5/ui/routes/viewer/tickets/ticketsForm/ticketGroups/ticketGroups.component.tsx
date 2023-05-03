@@ -15,29 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ArrowBack, CardContainer, CardHeader } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
 import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import { MOCK_DATA } from '@/v5/store/tickets/groups/ticketGroups.helpers';
-import { CardContent, NewGroupButton } from './ticketGroups.styles';
-import { TicketsCardViews } from '../tickets.constants';
+import { Container, NewGroupButton } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 
 export const TicketGroups = () => {
-	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
 	const groups = MOCK_DATA;
 
 	return (
-		// <CardContainer>
-		// 	<CardHeader>
-		// 		<ArrowBack onClick={() => TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details)} />
-		// 		{ticket.title}: <FormattedMessage id="ticketCard.groups" defaultMessage="Groups" />
-		// 	</CardHeader>
-		// 	<CardContent>
-		<>
+		<Container>
 			<GroupsAccordion
 				title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
 				groups={groups.colored}
@@ -61,8 +50,6 @@ export const TicketGroups = () => {
 					/>
 				</NewGroupButton>
 			</GroupsAccordion>
-		</>
-		// 	</CardContent>
-		// </CardContainer>
+		</Container>
 	);
 };
