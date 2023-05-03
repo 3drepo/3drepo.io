@@ -88,6 +88,8 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 		formData.append('desc', body.revisionDesc || undefined);
 		formData.append('importAnimations', body.importAnimations.toString());
 		formData.append('timezone', body.timezone);
+		formData.append('quality', body.quality.toString());
+		formData.append('vertexCount', body.vertexCount.toString());
 
 		yield put(RevisionsActions.setUploadComplete(uploadId, false));
 		const updateProgress = (val: number) => {
