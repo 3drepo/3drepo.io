@@ -17,7 +17,7 @@
 
 const GROUPS_COL = 'tickets.groups';
 
-const { deleteMany, find, insertMany } = require('../handler/db');
+const { deleteMany, find, findOne, insertMany } = require('../handler/db');
 
 const Groups = {};
 
@@ -33,4 +33,6 @@ Groups.deleteGroups = async (teamspace, project, model, ticket, groupIds) => {
 Groups.getGroupsByIds = (teamspace, project, model, ticket, groupIds, projection) => find(
 	teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
 
+Groups.getGroupById = (teamspace, project, model, ticket, groupId, projection = { teamspace: 0, project: 0, model: 0, ticket: 0 }) => findOne(
+	teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: groupId }, projection);
 module.exports = Groups;
