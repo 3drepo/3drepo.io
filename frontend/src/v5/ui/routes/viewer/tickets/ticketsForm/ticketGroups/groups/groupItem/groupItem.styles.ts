@@ -56,7 +56,7 @@ export const Container = styled.div`
 		display: none;
 	}
 
-	${/* sc-selector */ GroupIcon}::after {
+	${GroupIcon} {
 		border-color: ${({ theme }) => theme.palette.secondary.lightest};
 	}
 `;
