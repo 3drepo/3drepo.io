@@ -36,11 +36,6 @@ export const ColorPickerPalette = ({ value, onClose }: ColorPickerPaletteProps) 
 	const handleColorChange = (newColor) => setColor(`#${newColor}`);
 	const handleOpacityChange = (newOpacityPercentage) => setOpacity(Math.max(Math.min(100, newOpacityPercentage), 0) / 100);
 
-	const handleColorOptionClick = (newColor, newOpacity = 1) => {
-		setColor(newColor);
-		setOpacity(newOpacity);
-	};
-
 	useEffect(() => () => {
 		if (colorisValid && !ref.current) {
 			onClose({ color, opacity });
@@ -51,9 +46,9 @@ export const ColorPickerPalette = ({ value, onClose }: ColorPickerPaletteProps) 
 		<span ref={ref}>
 			<ColorPickerMenu title={formatMessage({ id: 'colorPicker.palette.title', defaultMessage: 'Select colour' })}>
 				<ColorGrid>
-					<ColorOption onClick={() => handleColorOptionClick(null, 1)} />
+					<ColorOption onClick={() => setColor(null)} />
 					{DEFAULT_SUGGESTED_HEX_COLORS.map((suggestedColor) => (
-						<ColorOption $color={suggestedColor} onClick={() => handleColorOptionClick(suggestedColor)} />
+						<ColorOption $color={suggestedColor} onClick={() => setColor(suggestedColor)} />
 					))}
 				</ColorGrid>
 				<BottomBar>
