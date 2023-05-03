@@ -41,7 +41,7 @@ export const PrivacyLegalPaper = () => (
 			<h3>Controller</h3>
 			<p>We are Asite 3D Repo Limited and Asite 3D Repo Limited is the controller and is responsible for your personal data.
 				Our address is 7th Floor, Leconfield House, Curzon Street, London, England, W1J 5JA . We are registered with the Information Commissioner
-				as a data controller and our registration number is ZA059890.
+				as a data controller and our registration number is ZB538538.
 			</p>
 			<p>If you have any questions about this policy or about your rights regarding your personal data, you can
 				contact us by emailing <SupportEmail />.
