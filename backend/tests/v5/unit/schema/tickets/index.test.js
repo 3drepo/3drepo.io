@@ -35,6 +35,8 @@ jest.mock('../../../../../src/v5/models/jobs');
 const JobsModel = require(`${src}/models/jobs`);
 
 const { isEqual, deleteIfUndefined } = require(`${src}/utils/helper/objects`);
+const { stringToUUID } = require(`${src}/utils/helper/uuids`);
+const { isString } = require(`${src}/utils/helper/typeCheck`);
 
 jest.mock('../../../../../src/v5/models/teamspaceSettings');
 const TeamspaceModel = require(`${src}/models/teamspaceSettings`);
@@ -46,7 +48,8 @@ const {
 	propTypes,
 	riskLevels,
 	presetEnumValues,
-	presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+	presetModules,
+	viewGroups } = require(`${src}/schemas/tickets/templates.constants`);
 
 TemplateSchema.generateFullSchema.mockImplementation((t) => t);
 
@@ -846,7 +849,91 @@ const testProcessReadOnlyValues = () => {
 	});
 };
 
+const testDeserialiseUUIDsInTicket = () => {
+	describe('Deserialise UUIDs in a ticket', () => {
+		test('Should deserialise as expected', () => {
+			const viewProp = generateRandomString();
+			const viewModProp = generateRandomString();
+			const template = {
+				properties: [{
+					type: propTypes.VIEW,
+					name: viewProp,
+				}],
+				modules: [
+					{
+						type: presetModules.SEQUENCING,
+						properties: [{
+							type: propTypes.VIEW,
+							name: viewModProp,
+						}],
+					},
+				],
+			};
+
+			const groupNames = Object.values(viewGroups);
+
+			const generateStateObject = () => {
+				const res = {};
+				groupNames.forEach((groupName) => {
+					res[groupName] = times(3, (i) => {
+						let group = generateUUIDString();
+
+						if (i === 0) {
+							group = {
+								objects: [{ _ids: times(3, generateUUIDString) }],
+							};
+						}
+						return { group };
+					});
+				});
+
+				return res;
+			};
+
+			const newTicket = {
+				title: generateRandomString(),
+				properties: {
+					[viewProp]:
+				{
+					state: generateStateObject(),
+				}
+					,
+				},
+				modules: {
+					[presetModules.SEQUENCING]: {
+						[viewModProp]: {
+							state: generateStateObject(),
+						},
+					},
+				},
+			};
+
+			const deserialisedTicket = TicketSchema.deserialiseUUIDsInTicket(newTicket, template);
+
+			const expectedData = cloneDeep(newTicket);
+			groupNames.forEach((groupName) => {
+				/* eslint-disable no-param-reassign, no-underscore-dangle */
+				[
+					...expectedData.properties[viewProp].state[groupName],
+					...expectedData.modules[presetModules.SEQUENCING][viewModProp].state[groupName],
+				].forEach((groupEntry) => {
+					if (isString(groupEntry.group)) {
+						groupEntry.group = stringToUUID(groupEntry.group);
+					} else {
+						groupEntry.group.objects[0]._ids = groupEntry.group.objects[0]._ids.map(stringToUUID);
+					}
+				});
+
+				/* eslint-enable no-param-reassign, no-underscore-dangle */
+			});
+
+			expect(deserialisedTicket).toEqual(expectedData);
+		});
+	});
+};
+
 describe('schema/tickets/validators', () => {
 	testValidateTicket();
 	testProcessReadOnlyValues();
+	testDeserialiseUUIDsInTicket();
 });
