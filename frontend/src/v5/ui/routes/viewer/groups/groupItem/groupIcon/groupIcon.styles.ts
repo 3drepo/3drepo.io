@@ -20,47 +20,34 @@ import styled, { css } from 'styled-components';
 import Checkers from '@assets/images/checkers.svg';
 import { ComponentToString } from '@/v5/helpers/react.helper';
 
-const IconSize = css`
+export const Container = styled.div`
+	display: grid;
+	box-sizing: border-box;
 	min-width: 30px;
 	height: 28px;
+	
+	& > * {
+		grid-column-start: 1;
+		grid-row-start: 1;
+		border-radius: ${isV5() ? '3px' : '0'};
+	}
 `;
 
-const PseudoElement = css`
-	${IconSize}
-	content: '';
-	position: absolute;
-	border-radius: ${isV5() ? '3px' : '0'};
-	box-sizing: border-box;
+export const Background = styled.div`
+	background-image: url('data:image/svg+xml;utf8,${ComponentToString(Checkers)}');
 `;
 
-export const GroupIcon = styled.div<{$color?: string, $variant?: 'light' | 'dark' }>`
-	${IconSize}
-	padding: 0;
+export const GroupIcon = styled.div<{ $color?: string, $variant?: 'light' | 'dark' }>`
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: ${isV5() ? '3px' : '0'};
 	box-sizing: border-box;
+	background-color: ${({ $color }) => $color};
 	
-	${({ $variant }) => ($variant === 'light' ? css`
-		color: ${({ theme }) => (isV5() ? theme.palette.base.main : '#6B778C')};
-		border: 1px solid  ${({ theme }) => (isV5() ? theme.palette.base.mid : '#E0E5F0')};`
-		: css` color: ${({ theme }) => (isV5() ? theme.palette.primary.contrast : '#fff')};`)};
-
-	& svg {
-		z-index: 2;
-	}
-
-	&::after {
-		background-color: ${({ $color }) => $color};
-		${PseudoElement}
-		${({ $variant }) => ($variant === 'light' ? css`
-		border: 1px solid  ${({ theme }) => (isV5() ? theme.palette.base.mid : '#E0E5F0')};`
-		: 'border: 0')};
-	}
-
-	&::before {
-		background-image:url('data:image/svg+xml;utf8,${ComponentToString(Checkers)}');
-		${PseudoElement}
-	}
+	${({ $variant, theme }) => ($variant === 'light' ? css`
+		color: ${isV5() ? theme.palette.base.main : '#6B778C'};
+		border: 1px solid ${isV5() ? theme.palette.base.mid : '#E0E5F0'};
+	` : css`
+		color: ${isV5() ? theme.palette.primary.contrast : '#fff'};
+	`)};
 `;
