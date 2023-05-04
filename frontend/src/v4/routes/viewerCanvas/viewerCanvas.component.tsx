@@ -16,7 +16,6 @@
  */
 import { PureComponent, createRef } from 'react';
 import { difference, differenceBy, isEqual } from 'lodash';
-import { isV5 } from '@/v4/helpers/isV5';
 import { dispatch } from '@/v4/modules/store';
 import { DialogActions } from '@/v4/modules/dialog';
 import {queuableFunction} from '../../helpers/async';
@@ -98,9 +97,6 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 	public componentDidMount() {
 		const { viewer } = this.props;
 		viewer.setupInstance(this.containerRef.current, this.handleUnityError);
-		if (isV5()) {
-			viewer.setBackgroundColor([0.949, 0.965, 0.988, 1])
-		}
 	}
 
 	public renderGisCoordinates(coordinates) {
