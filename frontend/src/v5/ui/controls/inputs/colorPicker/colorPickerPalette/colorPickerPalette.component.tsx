@@ -17,6 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { useEffect, useRef, useState } from 'react';
+import { clamp } from 'lodash';
 import { ColorGrid, BottomBar, HexTextField, PercentageTextField, SquaredColorOption, GradientButton, ColorOption, ColorActionMenu } from './colorPickerPalette.styles';
 import { ColorPickerMenu } from '../colorPickerMenu/colorPickerMenu.component';
 import { ColorPickerGradient } from '../colorPickerGradient/colorPickerGradient.component';
@@ -32,9 +33,17 @@ export const ColorPickerPalette = ({ value, onClose }: ColorPickerPaletteProps) 
 	const ref = useRef();
 
 	const colorisValid = getColorIsValid(color);
+	const opacityInPercentage = Math.round((opacity ?? 1) * 100);
 
 	const handleColorChange = (newColor) => setColor(`#${newColor}`);
-	const handleOpacityChange = (newOpacityPercentage) => setOpacity(Math.max(Math.min(100, newOpacityPercentage), 0) / 100);
+	const handleOpacityChange = (e) => {
+		const valueInRange = clamp(e.currentTarget.value, 0, 100) / 100;
+		setOpacity(valueInRange);
+	};
+
+	const handleOpacityKeyDown = (e) => {
+		if (e.key === '.') e.preventDefault();
+	};
 
 	useEffect(() => () => {
 		if (colorisValid && !ref.current) {
@@ -61,8 +70,10 @@ export const ColorPickerPalette = ({ value, onClose }: ColorPickerPaletteProps) 
 					/>
 					<PercentageTextField
 						label={formatMessage({ id: 'colorPicker.palette.opacity', defaultMessage: 'Opacity' })}
-						value={(opacity ?? 1) * 100}
-						onChange={(e) => handleOpacityChange(e.currentTarget.value)}
+						// stringify to remove leading 0
+						value={opacityInPercentage.toString()}
+						onKeyDown={handleOpacityKeyDown}
+						onChange={handleOpacityChange}
 					/>
 					<ColorActionMenu TriggerButton={<GradientButton />}>
 						<ColorPickerGradient value={color || UNSET_HEX_COLOR} onChange={setColor} />
