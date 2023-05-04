@@ -15,12 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString } = require('../utils/helper/uuids');
 const db = require('../handler/db');
+const { generateQueriesFromRules } = require('./metadata.rules');
 const { templates } = require('../utils/responseCodes');
 
 const Metadata = {};
 
 const collectionName = (model) => `${model}.scene`;
+
+const constructQueriesFromRules = (revId, rules) => {
+	const { positives, negatives } = generateQueriesFromRules(rules);
+
+	const positiveQuery = { $and: [{ rev_id: revId, type: 'meta' }, ...positives] };
+	const negativeQuery = negatives.length ? { $or: negatives } : undefined;
+
+	return { positiveQuery, negativeQuery };
+};
 
 Metadata.getMetadataById = async (teamspace, model, metadataId, projection) => {
 	const metadata = await db.findOne(teamspace, collectionName(model), { _id: metadataId }, projection);
@@ -52,6 +63,22 @@ Metadata.updateCustomMetadata = async (teamspace, model, metadataId, changeSet) 
 	const updatedMetadata = metadata.filter((m) => m.value !== null);
 
 	await db.updateOne(teamspace, collectionName(model), { _id: metadataId }, { $set: { metadata: updatedMetadata } });
+};
+
+Metadata.getMetadataByRules = async (teamspace, project, model, revId, rules, projection) => {
+	const { positiveQuery, negativeQuery } = constructQueriesFromRules(revId, rules);
+
+	const [posRes, negRes] = await Promise.all([
+		db.find(teamspace, collectionName(model), positiveQuery, projection),
+		negativeQuery ? db.find(teamspace, collectionName(model), negativeQuery, { _id: 1 }) : Promise.resolve([]),
+	]);
+
+	const unwantedIds = {};
+	negRes.forEach(({ _id }) => {
+		unwantedIds[UUIDToString(_id)] = 1;
+	});
+
+	return posRes.filter(({ _id }) => !unwantedIds[UUIDToString(_id)]);
 };
 
 module.exports = Metadata;

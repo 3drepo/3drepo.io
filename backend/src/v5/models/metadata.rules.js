@@ -21,6 +21,37 @@ const { templates } = require('../utils/responseCodes');
 
 const Rules = {};
 
+const negToPosOp = {
+	IS_NOT: 'IS',
+	NOT_CONTAINS: 'CONTAINS',
+	NOT_EQUALS: 'EQUALS',
+	NOT_IN_RANGE: 'IN_RANGE',
+	IS_EMPTY: 'IS_NOT_EMPTY',
+};
+
+Rules.generateQueriesFromRules = (rules) => {
+	const positives = [];
+	const negatives = [];
+
+	rules.forEach((rule) => {
+		const { field, values, operator } = rule;
+		if (!negToPosOp[operator]) {
+			// This is a positive rule
+			positives.push(Rules.toQuery(rule));
+		} else {
+			if (operator !== 'IS_EMPTY') {
+			// For any negative rule where we're not checking for empty, we need to a positive rule
+			// to ensure the field exists
+				positives.push(Rules.toQuery({ operator: 'IS_NOT_EMPTY', field }));
+			}
+
+			negatives.push(Rules.toQuery({ operator: negToPosOp[operator], field, values }));
+		}
+	});
+
+	return { positives, negatives };
+};
+
 Rules.toQuery = (rule) => {
 	let valueClause;
 	switch (rule.operator) {
