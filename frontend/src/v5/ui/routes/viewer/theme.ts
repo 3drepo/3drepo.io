@@ -169,10 +169,7 @@ export const theme = createTheme(
 				MuiAvatar: {
 					styleOverrides: {
 						root: {
-							height: '32 !important',
-							width: '32 !important',
 							border: 'none',
-							margin: '0 !important',
 							alignSelf: 'flex-start',
 						},
 					},

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,12 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { StyledIconButton } from '@controls/avatar/avatar.styles';
+import { COLOR } from '@/v5/ui/themes/theme';
+import { getUserNamesInitials } from '@controls/avatar/avatar.component';
+import { PopoverCircle } from '../popoverCircle.styles';
 
-export const Container = styled(StyledIconButton)`
-	.MuiAvatar-root {
-		background-color: ${({ theme }) => theme.palette.base.main};
-		color: ${({ theme }) => theme.palette.primary.contrast};
-	}
-`;
+export const UserCircle = ({ user, ...props }) => (
+	<PopoverCircle
+		src={user.hasAvatar ? user.avatarUrl : ''}
+		backgroundColor={COLOR.SECONDARY_MAIN}
+		{...props}
+	>
+		{getUserNamesInitials(user)}
+	</PopoverCircle>
+);

@@ -20,7 +20,7 @@ import { ICurrentUser } from '@/v5/store/currentUser/currentUser.types';
 import { IUser } from '@/v5/store/users/users.redux';
 import { StyledIconButton } from './avatar.styles';
 
-const getUserNamesInitials = ({ firstName, lastName }: ICurrentUser | IUser) => {
+export const getUserNamesInitials = ({ firstName, lastName }: ICurrentUser | IUser) => {
 	if (!(firstName || lastName)) return '';
 
 	return [firstName, lastName]

@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { IUser } from '@/v5/store/users/users.redux';
-import { Avatar } from '@controls/avatar';
 import { compact } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { AvatarWrapper, PopoverContainer, Employment, Username, Heading, Data } from './userPopover.styles';
+import { UserCircle } from '../userCircle.component';
 
 interface IUserPopover {
 	user: IUser;
@@ -44,7 +44,7 @@ export const UserPopover = ({ user }: IUserPopover) => {
 	return (
 		<PopoverContainer>
 			<AvatarWrapper>
-				<Avatar user={user} />
+				<UserCircle user={user} />
 			</AvatarWrapper>
 			<Data>
 				<Heading>{firstName} {lastName}</Heading>

@@ -15,20 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
-import { IUser } from '@/v5/store/users/users.redux';
-import { UserCircle } from './userCirlcePopover.styles';
+import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { memo } from 'react';
+import { IPopoverCircle } from '../popoverCircle.styles';
+import { UserPopover } from './userPopover/userPopover.component';
+import { UserCircle } from './userCircle.component';
 
-type UserCirclePopoverProps = {
-	user: IUser;
+type UserPopoverCircleProps = IPopoverCircle & {
+	username: string;
 	className?: string;
 };
-export const UserCirclePopover = ({ user, className }: UserCirclePopoverProps) => (
-	<HoverPopover
-		className={className}
-		anchor={(props) => <UserCircle user={user} {...props} />}
-	>
-		<UserPopover user={user} />
-	</HoverPopover>
-);
+export const UserPopoverCircle = memo(({ username, ...props }: UserPopoverCircleProps) => {
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const user = UsersHooksSelectors.selectUser(teamspace, username);
+	if (!user) return null;
+	return (
+		<HoverPopover
+			anchor={() => (
+				<UserCircle user={user} {...props} />
+			)}
+		>
+			<UserPopover user={user} />
+		</HoverPopover>
+	);
+});

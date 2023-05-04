@@ -15,20 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { JobAvatar } from '@controls/jobAvatar/jobAvatar.component';
-import { AvatarWrapper, PopoverContainer, Heading, Data } from '../userPopover/userPopover.styles';
+import { getJobAbbreviation } from '@/v5/store/jobs/jobs.helpers';
+import { IJob } from '@/v5/store/jobs/jobs.types';
+import { AvatarWrapper, Data, Heading, PopoverContainer } from '../userPopoverCircle/userPopover/userPopover.styles';
+import { PopoverCircle } from '../popoverCircle.styles';
 
 interface IJobPopover {
-	job: string;
+	job: IJob;
 }
 
 export const JobPopover = ({ job }: IJobPopover) => (
 	<PopoverContainer>
 		<AvatarWrapper>
-			<JobAvatar job={job} />
+			<PopoverCircle backgroundColor={job.color}>{getJobAbbreviation(job._id)}</PopoverCircle>
 		</AvatarWrapper>
 		<Data>
-			<Heading>{job}</Heading>
+			<Heading>{job._id}</Heading>
 		</Data>
 	</PopoverContainer>
 );
