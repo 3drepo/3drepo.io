@@ -38,12 +38,12 @@ const { serialiseGroup } = require('../../../../../middleware/dataConverter/outp
 const { templates } = require('../../../../../utils/responseCodes');
 
 const getGroup = (isFed) => async (req, res, next) => {
-	const { params } = req;
+	const { params, query } = req;
 	const { teamspace, project, model, ticket, group } = params;
 
 	try {
 		const getGroupById = isFed ? getFedGroup : getConGroup;
-		req.groupData = await getGroupById(teamspace, project, model, ticket, group);
+		req.groupData = await getGroupById(teamspace, project, model, query.revId, ticket, group);
 		await next();
 	} catch (err) {
 		// istanbul ignore next
@@ -178,6 +178,11 @@ const establishRoutes = (isFed) => {
 	 *         description: Group ID
 	 *         in: path
 	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: revId
+	 *         description: Revision ID to get objects. By default it will query base on the latest revision
+	 *         in: query
 	 *         schema:
 	 *           type: string
 	 *     requestBody:
