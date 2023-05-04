@@ -236,12 +236,13 @@ const testUpdateProject = () => {
 const testGetProjectByName = () => {
 	describe('Get Project by Name', () => {
 		test('should return a project', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue('project');
-			await Project.getProjectByName('someTS', 'project name');
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual('someTS');
-			expect(fn.mock.calls[0][1]).toEqual('projects');
-			expect(fn.mock.calls[0][2]).toEqual({ name: 'project name' });
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce('project');
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			await Project.getProjectByName(teamspace, project);
+			expect(fn).toHaveBeenCalledTimes(1);
+			// eslint-disable-next-line security/detect-non-literal-regexp
+			expect(fn).toHaveBeenCalledWith(teamspace, 'projects', { name: new RegExp(`^${project}$`, 'i') }, undefined);
 		});
 
 		test('should return error if project is not found', async () => {
