@@ -173,11 +173,18 @@ JSONAssets.getSuperMeshMapping = function(account, model, id) {
 const addSuperMeshMappingsToStream = async (account, model, jsonFiles, outStream) => {
 	const regex = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})[^/]*$/;
 	outStream.write(`{"model":"${model}","supermeshes":[`);
-	for(let i = 0; i < jsonFiles.length; ++i) {
-		const fileName = jsonFiles[i];
+
+	const files = await Promise.all(
+		jsonFiles.map(async (fileName) => {
+			const regexRes = fileName.match(regex);
+			return {fileName, file: await FileRef.getJSONFileStream(account, model, regexRes[0])};
+		}));
+
+	for(let i = 0; i < files.length; ++i) {
+		const {fileName, file} = files[i];
+
 		const regexRes = fileName.match(regex);
 		const id = regexRes[1];
-		const file = await FileRef.getJSONFileStream(account, model, regexRes[0]);
 		if(file) {
 			outStream.write(`{"id":"${id}","data":`);
 			const { readStream } = file;
