@@ -1195,9 +1195,10 @@ export const theme = createTheme({
 					fontWeight: FONT_WEIGHT.BOLD,
 					minWidth: null,
 					transition: 'none',
+					height: '35px',
 				},
 				contained: {
-					height: '35px',
+					padding: '10px 15px',
 					boxShadow: 'none',
 					[`&:hover,
 					  &:active`]: {
@@ -1250,7 +1251,7 @@ export const theme = createTheme({
 					fontSize: null, // null value means it will use the size from button.root
 				},
 				outlined: {
-					height: '35px',
+					padding: '10px 15px',
 					backgroundColor: 'transparent',
 					'.Mui-focusVisible': {
 						backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
