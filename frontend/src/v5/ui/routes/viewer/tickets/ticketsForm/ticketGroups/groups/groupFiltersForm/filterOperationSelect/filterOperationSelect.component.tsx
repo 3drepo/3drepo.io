@@ -25,7 +25,8 @@ export const FilterOperationSelect = () => (
 		placeholder={formatMessage({ id: 'ticket.groups.operation.placeholder', defaultMessage: 'Set operation'})}
 		name='operation'
 		label={formatMessage({ id: 'tickets.groups.operation.label', defaultMessage: 'Operation' })}
->
+		required
+	>
 		{/* Field */}
 		<ListSubheader>
 			<FormattedMessage id="ticket.groups.operation.field" defaultMessage="Field" />

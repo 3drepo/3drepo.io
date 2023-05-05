@@ -30,7 +30,10 @@ import { FilterValueField } from './filterValueField/filterValueField.component'
 
 type IGroupFilters = { value?: IFilterForm };
 export const GroupFiltersForm = ({ value }: IGroupFilters) => {
-	const formData = useForm<IFilterForm>({ defaultValues: value });
+	const formData = useForm<IFilterForm>({
+		defaultValues: value,
+		mode: 'all',
+	});
 
 	const {
 		handleSubmit,
@@ -48,6 +51,7 @@ export const GroupFiltersForm = ({ value }: IGroupFilters) => {
 					placeholder={formatMessage({ id: 'ticket.groups.field.placeholder', defaultMessage: 'Set field'})}
 					name='field'
 					label={formatMessage({ id: 'tickets.groups.field', defaultMessage: 'Field' })}
+					required
 				>
 					{getFields().map((value) => (
 						<MenuItem value={value} key={value}>

@@ -52,7 +52,7 @@ export const FilterValueField = () => {
 			<>
 				{fields.map((field, i) => (
 					<ValuesContainer>
-						<FormValueField label={VALUE_LABEL} name={`value.${i}`} key={field.id} />
+						<FormValueField label={VALUE_LABEL} name={`value.${i}`} key={field.id} required/>
 						<Button variant="contained" onClick={() => remove(i)}>-</Button>
 						<Button variant="contained" onClick={() => append(null)} disabled={i !== (fields.length-1)}>+</Button>
 					</ValuesContainer>
@@ -64,15 +64,23 @@ export const FilterValueField = () => {
 
 	// single value type
 	if (['regex', 'numberComparison'].includes(operationType)) {
-		return (<FormValueField label={VALUE_LABEL} name="value" />);
+		return (<FormValueField label={VALUE_LABEL} name="value" required />);
 	}
 
 	// range value type
 	if (operationType === 'numberRange') {
 		return (
 			<ValuesContainer>
-				<FormNumberField label={formatMessage({ id: 'ticket.groups.rangeValue1.label', defaultMessage: 'Value 1'})} name="value.0" />
-				<FormNumberField label={formatMessage({ id: 'ticket.groups.rangeValue2.label', defaultMessage: 'Value 2'})} name="value.1" />
+				<FormNumberField
+					label={formatMessage({ id: 'ticket.groups.rangeValue1.label', defaultMessage: 'Value 1'})}
+					name="value.0"
+					required
+				/>
+				<FormNumberField
+					label={formatMessage({ id: 'ticket.groups.rangeValue2.label', defaultMessage: 'Value 2'})}
+					name="value.1"
+					required
+				/>
 			</ValuesContainer>
 		);
 	}
