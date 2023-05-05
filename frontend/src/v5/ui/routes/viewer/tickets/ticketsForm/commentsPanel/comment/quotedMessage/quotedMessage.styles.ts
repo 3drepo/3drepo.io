@@ -26,7 +26,7 @@ export const secondaryQuotedMessageStyles = css`
 export const QuotedMessage = styled.div<{ variant?: 'primary' | 'secondary', shortMessage?: boolean }>`
 	border: solid 0 ${({ theme }) => theme.palette.primary.main};
 	border-left-width: 4px;
-	border-radius: 5px;
+	border-radius: 8px;
 	padding: 6px 6px 6px 9px;
 	margin-bottom: 5px;
 	overflow-x: hidden;

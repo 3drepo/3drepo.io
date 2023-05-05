@@ -29,7 +29,7 @@ export type NewOrExisting = '' | 'new' | 'existing';
 export const DestinationInput = styled(TextField)<{ neworexisting: NewOrExisting }>`
 	margin: 0;
 	border: none;
-	border-radius: 6px;
+	border-radius: 8px;
 	
 	& > .MuiInputBase-root {
 		&, &.Mui-focused, &.Mui-error, &.Mui-focused.Mui-error {

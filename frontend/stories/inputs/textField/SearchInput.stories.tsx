@@ -22,6 +22,12 @@ import { SearchContextComponent } from '@controls/search/searchContext';
 export default {
 	title: 'Inputs/Textfield/SearchInput',
 	component: SearchInput,
+	argTypes: {
+		variant: {
+			options: ['filled', 'outlined'],
+			control: { type: 'select' },
+		},
+	},
 	parameters: { controls: { exclude: ['ref', 'hiddenLabel', 'onClear'] } },
 } as ComponentMeta<typeof SearchInput>;
 

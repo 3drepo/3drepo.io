@@ -32,7 +32,7 @@ import { NewJobForm } from '../components/newJobForm/newJobForm.component';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
 import { LoaderContainer } from '../userManagement/userManagement.styles';
 import { Panel } from '../components/floatingActionPanel/floatingActionPanel.styles';
-import { Container, NewJobBottomButton } from './jobs.styles';
+import { Container } from './jobs.styles';
 
 const JOBS_TABLE_CELLS = [{
 	name: 'Job name',
@@ -162,13 +162,6 @@ export class Jobs extends PureComponent<IProps, IState> {
 		const { jobs, colors, isPending, currentTeamspace } =  this.props;
 		const { containerElement, panelBottomAnchorEl } = this.state;
 
-		const openNewJobForm = ({ currentTarget }: React.MouseEvent<HTMLDivElement>) => {
-			this.setState({
-				...this.state,
-				panelBottomAnchorEl: currentTarget,
-			});
-		};
-
 		const closeNewJobForm = () => {
 			this.setState({
 				...this.state,
@@ -198,27 +191,21 @@ export class Jobs extends PureComponent<IProps, IState> {
 				</UserManagementTab>
 				{containerElement && this.renderNewJobForm(containerElement)}
 				{isV5() && (
-					<>
-						<NewJobBottomButton onClick={openNewJobForm}>
-							<AddCircleIcon />
-							<FormattedMessage id="jobs.addJobButton" defaultMessage="Add new Job" />
-						</NewJobBottomButton>
-						<Panel
-							open={Boolean(panelBottomAnchorEl)}
-							anchorEl={panelBottomAnchorEl}
-							onClose={closeNewJobForm}
-							anchorOrigin={{
-								vertical: 'top',
-								horizontal: 'center',
-							}}
-							transformOrigin={{
-								vertical: 'center',
-								horizontal: 'center',
-							}}
-						>
-							{this.renderNewJobFormPanel({ closePanel: () => {} })}
-						</Panel>
-					</>
+					<Panel
+						open={Boolean(panelBottomAnchorEl)}
+						anchorEl={panelBottomAnchorEl}
+						onClose={closeNewJobForm}
+						anchorOrigin={{
+							vertical: 'top',
+							horizontal: 'center',
+						}}
+						transformOrigin={{
+							vertical: 'center',
+							horizontal: 'center',
+						}}
+					>
+						{this.renderNewJobFormPanel({ closePanel: () => {} })}
+					</Panel>
 				)}
 			</Container>
 		);

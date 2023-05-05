@@ -36,9 +36,9 @@ export const TextField = styled(TextFieldComponent)`
 	.MuiInputBase-adornedEnd {
 		padding-right: 0;
 	}
-
-	.MuiOutlinedInput-root {
-		margin: 0;
+	.MuiInputBase-input::placeholder {
+		opacity: 1;
+		color: ${({ theme }) => theme.palette.base.main};
 	}
 `;
 
