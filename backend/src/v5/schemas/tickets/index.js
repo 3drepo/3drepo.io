@@ -30,6 +30,7 @@ const { getAllUsersInTeamspace, getRiskCategories } = require('../../models/team
 const { isDate, isObject, isUUIDString } = require('../../utils/helper/typeCheck');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
+const { deserialiseGroupSchema } = require('./tickets.groups');
 const { generateFullSchema } = require('./templates');
 const { getJobNames } = require('../../models/jobs');
 const { logger } = require('../../utils/logger');
@@ -269,11 +270,7 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 const genToUUIDSchema = ({ properties, modules }) => {
 	const uuidObj = Yup.mixed().transform(stringToUUID);
 	const groupCast = Yup.lazy((val) => (isUUIDString(val) ? uuidObj
-		: Yup.object({
-			objects: Yup.array().of(Yup.object({
-				_ids: Yup.array().of(uuidObj),
-			})),
-		})));
+		: deserialiseGroupSchema));
 	const groupStateArrays = Yup.array().of(Yup.object({
 		group: groupCast,
 	}));

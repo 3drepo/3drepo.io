@@ -15,12 +15,52 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { UUIDToString } = require('../../utils/helper/uuids');
+const { UUIDToString, stringToUUID } = require('../../utils/helper/uuids');
 const Yup = require('yup');
+const { isUUIDString } = require('../../utils/helper/typeCheck');
+const { schema: rulesSchema } = require('../rules');
+const { types } = require('../../utils/helper/yup');
 
 const Groups = {};
 
 const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal));
+
+Groups.schema = (allowIds, fieldsOptional) => {
+	let group = Yup.object({
+		name: types.strings.title,
+		description: types.strings.longDescription,
+		rules: Yup.lazy((val) => (val ? rulesSchema : Yup.mixed())),
+		objects: Yup.array().of(Yup.object({
+			container: Yup.string().test('Container id', 'Container ID must be an UUID string', isUUIDString).required(),
+			_ids: Yup.array().of(types.id).min(1).required(),
+
+		})).min(1),
+	});
+
+	if (fieldsOptional) {
+		group = group.test(
+			'Rules and objects', 'Groups cannot contain both objects and rules.',
+			({ rules, objects }) => !(rules && objects),
+		);
+	} else {
+		group = group.test(
+			'Rules and objects', 'Groups must contain either rules or objects, but not both',
+			({ rules, objects }) => (rules || objects) && !(rules && objects));
+	}
+
+	if (allowIds) return Yup.lazy((val) => (val?.name ? group.required() : types.id.required()));
+
+	return group.required();
+};
+
+const uuidObj = Yup.mixed().transform(stringToUUID);
+
+Groups.deserialiseGroupSchema = Yup.object({
+	objects: Yup.array().of(Yup.object({
+		_ids: Yup.array().of(uuidObj),
+	})) });
+
+Groups.deserialiseGroup = (group) => Groups.deserialiseGroupSchema.cast(group);
 
 Groups.serialiseGroup = (group) => {
 	const caster = Yup.object({

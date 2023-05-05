@@ -23,7 +23,6 @@ const {
 	getTicketGroupById: getFedGroup,
 	updateTicketGroup: updateFedGroup,
 } = require('../../../../../processors/teamspaces/projects/models/federations');
-// const { canUpdateGroup, validateNewGroup, validateUpdateGroup } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets.groups');
 const {
 	hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation,
@@ -37,6 +36,7 @@ const { respond } = require('../../../../../utils/responder');
 const { serialiseGroup } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets.groups');
 const { stringToUUID } = require('../../../../../utils/helper/uuids');
 const { templates } = require('../../../../../utils/responseCodes');
+const { validateUpdateGroup } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets.groups');
 
 const getGroup = (isFed) => async (req, res, next) => {
 	const { params, query } = req;
@@ -53,12 +53,12 @@ const getGroup = (isFed) => async (req, res, next) => {
 };
 
 const updateGroup = (isFed) => async (req, res) => {
-	const { params, body: updateData, groupData } = req;
+	const { params, body: updateData } = req;
 	const { teamspace, project, model, ticket } = params;
 
 	try {
-		const updateComm = isFed ? updateFedGroup : updateConGroup;
-		await updateComm(teamspace, project, model, ticket, groupData, updateData);
+		const updateFn = isFed ? updateFedGroup : updateConGroup;
+		await updateFn(teamspace, project, model, ticket, updateData);
 
 		respond(req, res, templates.ok);
 	} catch (err) {
@@ -117,6 +117,11 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *       - name: revId
+	 *         description: Revision ID to get objects. By default it will query base on the latest revision
+	 *         in: query
+	 *         schema:
+	 *           type: string
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -127,12 +132,10 @@ const establishRoutes = (isFed) => {
 	 *         content:
 	 *           application/json:
 	 *             schema:
-	 *               type: array
-	 *               items:
-	 *                 type: object
-	 *                 properties:
-	 *                   groups:
-   	 *                     $ref: "#/components/schemas/ticketGroup"
+	 *               type: object
+	 *               properties:
+	 *                 groups:
+   	 *                   $ref: "#/components/schemas/ticketGroup"
 	 */
 	router.get('/:group', hasReadAccess, checkTicketExists, getGroup(isFed), serialiseGroup);
 
@@ -140,7 +143,7 @@ const establishRoutes = (isFed) => {
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/groups/{group}:
 	 *   put:
-	 *     description: Update a ticket group. The current images or group are inserted into the history array of the group
+	 *     description: Update a group
 	 *     tags: [Tickets]
 	 *     operationId: updateGroup
 	 *     parameters:
@@ -181,27 +184,14 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *       - name: revId
-	 *         description: Revision ID to get objects. By default it will query base on the latest revision
-	 *         in: query
-	 *         schema:
-	 *           type: string
 	 *     requestBody:
 	 *       content:
 	 *         application/json:
 	 *           schema:
 	 *             type: object
 	 *             properties:
-	 *                 message:
-	 *                   type: string
-	 *                   description: Content of the group
-	 *                   example: Example message
-	 *                 images:
-	 *                   description: Images of the group
-	 *                   type: array
-	 *                   items:
-	 *                     type: string
-	 *                     description: Image in a Base64 format or an ID of an image currently used in the group
+	 *               groups:
+   	 *                 $ref: "#/components/schemas/ticketGroup"
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -210,7 +200,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: group has been successfully updated
 	 */
-	//	router.put('/:group', hasCommenterAccess, validateUpdateGroup, updateGroup(isFed));
+	router.patch('/:group', hasCommenterAccess, validateUpdateGroup, updateGroup(isFed));
 	return router;
 };
 
