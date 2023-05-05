@@ -15,25 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { StyledIconButton } from '@controls/avatar/avatar.styles';
-import styled from 'styled-components';
-import { BaseCircle } from '../assigneeListItem/assigneeListItem.styles';
+import { COLOR } from '@/v5/ui/themes/theme';
+import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.styles';
 
-export const ExtraAssigneesList = styled.ul`
-	padding: 8px 10px;
-	margin: 0;
-`;
+type IExtraAssignees = {
+	overflowValue: number;
+};
 
-export const ExtraAssigneesListItem = styled.li`
-	${({ theme }) => theme.typography.body1};
-	color: ${({ theme }) => theme.palette.secondary.main};
-	list-style-type: none;
-`;
-
-export const ExtraAssigneesContainer = styled(StyledIconButton)`
-	${BaseCircle}
-	.MuiAvatar-root {
-		background-color: ${({ theme }) => theme.palette.primary.main};
-		color: ${({ theme }) => theme.palette.primary.contrast};
-	}
-`;
+export const ExtraAssigneesCircle = ({ overflowValue, ...props }: IExtraAssignees) => (
+	<PopoverCircle
+		size="small"
+		backgroundColor={COLOR.PRIMARY_MAIN}
+		{...props}
+	>
+		+{overflowValue}
+	</PopoverCircle>
+);

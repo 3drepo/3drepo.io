@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.styles';
 import styled from 'styled-components';
 
 export const AssigneesListContainer = styled.div`
+	display: inline-flex;
 	position: relative;
 	width: fit-content;
 	user-select: none;
@@ -25,9 +27,12 @@ export const AssigneesListContainer = styled.div`
 	font-size: 10px;
 	height: 28px;
 	line-height: 28px;
+	cursor: pointer;
 
-	.MuiButtonBase-root {
+	.MuiAvatar-root {
 		z-index: 11;
+		margin-right: -8px;
+		border: 2px solid ${({ theme }) => theme.palette.primary.contrast};
 		&:hover {
 			z-index: 12; /* avatar appears on top when hovered */
 		}
@@ -45,11 +50,11 @@ export const AssigneesListContainer = styled.div`
 			z-index: 10;
 		}
 	}
-	span:last-child .MuiButtonBase-root {
+	span:last-child .MuiAvatar-root {
 		margin: 0;
 	}
 
-	&:hover .MuiButtonBase-root {
+	&:hover .MuiAvatar-root {
 		&::before {
 			opacity: 0.3;
 		}
@@ -57,4 +62,16 @@ export const AssigneesListContainer = styled.div`
 			opacity: 0;
 		}
 	}
+`;
+
+export const AddUserButton = styled(PopoverCircle).attrs({
+	size: 'small',
+})`
+	&& {
+		border: 1px dashed ${({ theme }) => theme.palette.base.light};
+		margin: 2px 0 0 13px;
+	}
+	padding: 5px;
+	box-sizing: border-box;
+	color: ${({ theme }) => theme.palette.base.main};
 `;

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { MultiSelect } from '@controls/inputs/multiSelect/multiSelect.component';
-import styled from 'styled-components';
+import { useState } from 'react';
+import { AssigneesSelect, IAssigneesSelect } from './assigneesSelect.component';
 
-export const HiddenSearchSelect = styled(MultiSelect)`
-	height: 0;
-	width: 0;
-	overflow: hidden;
-	position: absolute;
-	right: 0;
-`;
+type ControlledAssigneesSelectProps = Omit<IAssigneesSelect, 'onBlur'> & {
+	onBlur: (values) => void;
+};
+
+export const ControlledAssigneesSelect = ({
+	value: initialValue,
+	onBlur,
+	disabled,
+	...props
+}: ControlledAssigneesSelectProps) => {
+	const [values, setValues] = useState(initialValue);
+	const handleClose = () => {
+		onBlur(values);
+	};
+	const onChange = (e) => setValues(e?.target?.value);
+
+	return (
+		<AssigneesSelect value={values} onBlur={handleClose} onChange={onChange} {...props} />
+	);
+};

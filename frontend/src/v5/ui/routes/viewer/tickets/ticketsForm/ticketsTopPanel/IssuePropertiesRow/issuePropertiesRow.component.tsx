@@ -16,10 +16,8 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { TicketDetailsAssignees } from '@controls/assignees/ticketDetailsAssignees/ticketDetailsAssignees.component';
 import { PRIORITY_LEVELS_MAP, STATUS_MAP } from '@controls/chip/chip.types';
-import { FormChipSelect, FormDueDateWithIcon } from '@controls/inputs/formInputs.component';
-import { InputController } from '@controls/inputs/inputController.component';
+import { FormAssigneeSelect, FormChipSelect, FormDueDateWithIcon } from '@controls/inputs/formInputs.component';
 
 import { FormattedMessage } from 'react-intl';
 import { IssueProperties } from '../../../tickets.constants';
@@ -93,12 +91,12 @@ export const IssuePropertiesRow = ({ onBlur, readOnly }: IIssuePropertiesRow) =>
 			/>
 		</PropertyColumn>
 		<FloatRight>
-			<InputController
-				Input={TicketDetailsAssignees}
+			<FormAssigneeSelect
 				name={`properties[${IssueProperties.ASSIGNEES}]`}
 				onBlur={onBlur}
 				key={IssueProperties.ASSIGNEES}
 				disabled={readOnly}
+				showAddButton
 			/>
 		</FloatRight>
 	</IssuePropertiesContainer>

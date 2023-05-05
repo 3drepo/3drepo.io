@@ -24,8 +24,10 @@ import { MenuItem } from '@mui/material';
 import { get, partition } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { useSelector } from 'react-redux';
+import { SelectProps } from '@controls/inputs/select/select.component';
+import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
+import { JobPopoverCircle } from '@components/shared/popoverCircles/jobPopoverCircle/jobPopoverCircle.component';
 import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSelectMenuItem.component';
-import { AssigneeListItem } from '../assigneesList/assigneeListItem/assigneeListItem.component';
 import { HiddenSelect, HorizontalRule, ListHeading, SearchInput } from './assigneesSelectMenu.styles';
 
 const isUser = (assignee) => get(assignee, 'user');
@@ -39,10 +41,9 @@ const preventPropagation = (e) => {
 export const AssigneesSelectMenu = ({
 	open,
 	value,
-	values,
 	onClick,
 	...props
-}) => {
+}: SelectProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const jobs = useSelector(selectJobs);
 	const users = UsersHooksSelectors.selectUsersByTeamspace(teamspace);
@@ -52,7 +53,7 @@ export const AssigneesSelectMenu = ({
 
 	const onClickList = (e) => {
 		preventPropagation(e);
-		onClick();
+		onClick?.(e);
 	};
 	return (
 		<SearchContextComponent filteringFunction={filterItems} items={[...jobs, ...users]}>
@@ -62,7 +63,7 @@ export const AssigneesSelectMenu = ({
 					return (
 						<HiddenSelect
 							open={open}
-							value={value}
+							value={value || []}
 							multiple
 							MenuProps={{
 								disableAutoFocusItem: true,
@@ -83,12 +84,12 @@ export const AssigneesSelectMenu = ({
 							<ListHeading>
 								{formatMessage({ id: 'assigneesSelectMenu.jobsHeading', defaultMessage: 'Jobs' })}
 							</ListHeading>
-							{filteredJobs.length > 0 && filteredJobs.map(({ _id }) => (
+							{filteredJobs.length > 0 && filteredJobs.map((job) => (
 								<AssigneesSelectMenuItem
-									key={_id}
-									value={_id}
-									icon={() => <AssigneeListItem assignee={_id} />}
-									title={_id}
+									key={job._id}
+									value={job._id}
+									icon={() => <JobPopoverCircle job={job} />}
+									title={job._id}
 								/>
 							))}
 							{!filteredJobs.length && (
@@ -107,7 +108,7 @@ export const AssigneesSelectMenu = ({
 								<AssigneesSelectMenuItem
 									key={user}
 									value={user}
-									icon={() => <AssigneeListItem assignee={user} />}
+									icon={() => <UserPopoverCircle username={user} />}
 									title={`${firstName} ${lastName}`}
 									subtitle={job}
 								/>

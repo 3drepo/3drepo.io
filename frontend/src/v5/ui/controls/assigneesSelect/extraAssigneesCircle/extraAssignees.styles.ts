@@ -15,19 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Avatar } from '@mui/material';
-import { ExtraAssigneesContainer } from './extraAssignees.styles';
+import styled from 'styled-components';
 
-type IExtraAssignees = {
-	overflowValue: number;
-};
+export const ExtraAssigneesList = styled.ul`
+	padding: 8px 10px;
+	margin: 0;
+`;
 
-export const ExtraAssigneesCircle = ({ overflowValue, ...props }: IExtraAssignees) => (
-	<ExtraAssigneesContainer
-		{...props}
-	>
-		<Avatar>
-			+{overflowValue}
-		</Avatar>
-	</ExtraAssigneesContainer>
-);
+export const ExtraAssigneesListItem = styled.li`
+	${({ theme }) => theme.typography.body1};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	list-style-type: none;
+`;
