@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -20,6 +20,7 @@ const db = require("../handler/db");
 const ExternalServices = require("../handler/externalServices");
 const ResponseCodes = require("../response_codes");
 const utils = require("../utils");
+const { systemLogger} = require("../logger");
 
 const ORIGINAL_FILE_REF_EXT = ".history.ref";
 const UNITY_BUNDLE_REF_EXT = ".stash.unity3d.ref";
@@ -59,13 +60,20 @@ async function _fetchFile(account, model, ext, fileName, metadata = false) {
 }
 
 async function fetchFileStream(account,collection, fileName) {
-
+	const refStart = Date.now();
 	const entry = await getRefEntry(account, collection, fileName);
+	const refEnd = Date.now();
 	if(!entry) {
 		throw ResponseCodes.NO_FILE_FOUND;
 	}
 
+	const fetchStart = Date.now();
 	const stream  = await ExternalServices.getFileStream(account, collection, entry.type, entry.link);
+
+	stream.on("end", () => {
+		systemLogger.logInfo(`[TIMER] File (${account}.${collection}.${fileName}) fetch took: ${refEnd - refStart}ms (db fetch), ${Date.now() - fetchStart}ms (fs io)`);
+	});
+
 	return {readStream: stream, size: entry.size };
 }
 

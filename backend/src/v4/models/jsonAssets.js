@@ -25,6 +25,7 @@ const { getRefNodes } = require("./ref");
 const C = require("../constants");
 const { hasReadAccessToModelHelper } = require("../middlewares/checkPermissions");
 const Stream = require("stream");
+const { systemLogger } = require("../logger");
 
 const JSONAssets = {};
 
@@ -173,10 +174,12 @@ JSONAssets.getSuperMeshMapping = function(account, model, id) {
 const addSuperMeshMappingsToStream = async (account, model, jsonFiles, outStream) => {
 	const regex = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})[^/]*$/;
 	outStream.write(`{"model":"${model}","supermeshes":[`);
+	let fileFetchTimer = 0;
 	for(let i = 0; i < jsonFiles.length; ++i) {
 		const fileName = jsonFiles[i];
 		const regexRes = fileName.match(regex);
 		const id = regexRes[1];
+		const fetchStart = Date.now();
 		const file = await FileRef.getJSONFileStream(account, model, regexRes[0]);
 		if(file) {
 			outStream.write(`{"id":"${id}","data":`);
@@ -188,22 +191,33 @@ const addSuperMeshMappingsToStream = async (account, model, jsonFiles, outStream
 				readStream.on("error", err => outStream.emit("error", err));
 			});
 
+			fileFetchTimer += Date.now() - fetchStart;
+
 			outStream.write(`}${i !== jsonFiles.length - 1 ? "," : "" }`);
 		}
 	}
 	outStream.write("]}");
 
+	systemLogger.logInfo(`[TIMER] addSuperMeshMappingtoStream (${account}.${model}) took ${fileFetchTimer}ms`);
+
 };
 
 const getSuperMeshMappingForModels = async (modelsToProcess, outStream) => {
 
+	let assetListTimer = 0;
+	let getMappingTimer = 0;
+
 	for(let i = 0; i < modelsToProcess.length; ++i) {
 		const entry = modelsToProcess[i];
 		if(entry) {
+			const assetStart = Date.now();
 			const assetList = await DB.findOne(
 				entry.account, `${entry.model}.stash.unity3d`, {_id: entry.rev}, {jsonFiles: 1});
+			assetListTimer += Date.now() - assetStart;
 			if(assetList) {
+				const mappingStart = Date.now();
 				await addSuperMeshMappingsToStream(entry.account, entry.model, assetList.jsonFiles, outStream);
+				getMappingTimer += Date.now() - mappingStart;
 			}
 
 			if(i !== modelsToProcess.length - 1) {
@@ -211,10 +225,14 @@ const getSuperMeshMappingForModels = async (modelsToProcess, outStream) => {
 			}
 		}
 	}
+
+	systemLogger.logInfo(`[TIMER] Asset lists took ${assetListTimer}ms, mappings took ${getMappingTimer}ms`);
 };
 
 JSONAssets.getAllSuperMeshMapping = async (account, model, branch, rev) => {
 	let modelsToProcess;
+
+	const start = Date.now();
 
 	const subModelRefs = await getRefNodes(account, model, branch, rev);
 
@@ -247,6 +265,9 @@ JSONAssets.getAllSuperMeshMapping = async (account, model, branch, rev) => {
 		outStream.end();
 	}).catch((err) => outStream.emit("error", err));
 
+	const end = Date.now();
+
+	systemLogger.logInfo(`[TIMER] GetAllSuperMeshMappings init stream process took : ${(end - start)}ms`);
 	return { readStream: outStream, isFed};
 
 };

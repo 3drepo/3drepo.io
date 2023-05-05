@@ -188,6 +188,8 @@ APIService.createApp = (config, v5Init = true) => {
 	app.use(function (req, res, next) {
 		// record start time of the request
 		req.startTime = Date.now();
+
+		systemLogger.logInfo(`[REQ IN] - ${req.method} ${req.originalUrl}`);
 		// intercept OPTIONS method
 		if ("OPTIONS" === req.method) {
 			res.sendStatus(200);
