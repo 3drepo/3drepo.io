@@ -21,7 +21,7 @@ import { FormNumberField, FormTextField } from '@controls/inputs/formInputs.comp
 import { formatMessage } from '@/v5/services/intl';
 import { useEffect } from 'react';
 import { ValuesContainer, HiddenFormTextField } from './filterValueField.styles';
-import { IFilterForm, OPERATIONS_TYPES } from '../groupFilters.helpers';
+import { IFilterForm, OPERATIONS_TYPES } from '../groupFiltersForm.helpers';
 
 const VALUE_LABEL = formatMessage({ id: 'ticket.groups.value.label', defaultMessage: 'Value' });
 export const FilterValueField = () => {

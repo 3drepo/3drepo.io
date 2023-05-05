@@ -26,7 +26,7 @@ import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
 import { AdditionalProperties, TicketsCardViews } from '../tickets.constants';
-import { GroupFilters } from '../ticketsForm/ticketGroups/groups/groupFilters/groupFilters.component';
+import { GroupFiltersWithTriggerButton } from '../ticketsForm/ticketGroups/groups/groupFilterTemporaryFile';
 
 type TicketsListProps = {
 	tickets: ITicket[];
@@ -94,7 +94,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 					/>
 				))}
 			</List>
-			<GroupFilters />
+			<GroupFiltersWithTriggerButton />
 		</>
 	);
 };

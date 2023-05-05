@@ -15,36 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ActionMenu } from '@controls/actionMenu';
-import { Typography } from '@controls/typography';
 import styled from 'styled-components';
-
-export const FiltersActionMenu = styled(ActionMenu).attrs({
-	PopoverProps: {
-		anchorOrigin: {
-			vertical: 'top',
-			horizontal: 'right',
-		},
-		transformOrigin: {
-			vertical: 'top',
-			horizontal: 'left',
-		},
-	}
-})`
-	padding: 16px;
-	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
-	display: flex;
-	flex-direction: column;
-	width: 328px;
-	border-radius: 10px;
-`;
-
-export const TriggerButton = styled(Typography).attrs({
-	variant: 'link',
-})`
-	cursor: pointer;
-	margin-left: auto;
-`;
 
 export const Buttons = styled.div`
 	display: flex;
@@ -57,7 +28,7 @@ export const Buttons = styled.div`
 	}
 `;
 
-export const FloatingPanelForm = styled.form`
+export const Form = styled.form`
 	.MuiFormControl-root {
 		margin: 0 0 10px;
 	}
