@@ -17,32 +17,14 @@
 
 const { utils: { stripWhen }, types } = require('../../utils/helper/yup');
 const Yup = require('yup');
-const { isUUIDString } = require('../../utils/helper/typeCheck');
+const { schema: groupSchema } = require('./tickets.groups');
 const { propTypes } = require('./templates.constants');
-const { schema: rulesSchema } = require('../rules');
 
 const Validators = {};
 
 const CameraType = {
 	ORTHOGRAPHIC: 'orthographic',
 	PERSPECTIVE: 'perspective',
-};
-
-const groupSchema = (allowIds) => {
-	const group = Yup.object({
-		name: types.strings.title,
-		description: types.strings.longDescription,
-		rules: Yup.lazy((val) => (val ? rulesSchema : Yup.mixed())),
-		objects: Yup.array().of(Yup.object({
-			container: Yup.string().test('Container id', 'Container ID must be an UUID string', isUUIDString).required(),
-			_ids: Yup.array().of(types.id).min(1).required(),
-
-		})).min(1),
-	}).test(('Rules and objects', 'Groups must contain either rules or objects, but not both', ({ rules, objects }) => (rules || objects) && !(rules && objects)));
-
-	if (allowIds) return Yup.lazy((val) => (val?.name ? group.required() : types.id.required()));
-
-	return group.required();
 };
 
 const generateViewValidator = (isUpdate, isNullable) => {
