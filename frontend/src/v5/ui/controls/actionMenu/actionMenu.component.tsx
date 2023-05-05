@@ -66,7 +66,6 @@ export const ActionMenu = ({
 			<Popover
 				open={Boolean(anchorEl)}
 				anchorEl={anchorEl}
-				className={className}
 				anchorOrigin={{
 					vertical: 'bottom',
 					horizontal: 'center',
@@ -75,6 +74,7 @@ export const ActionMenu = ({
 					vertical: 'top',
 					horizontal: 'center',
 				}}
+				PaperProps={{ className }}
 				{...PopoverProps}
 				onClick={handlePopoverClick}
 			>
