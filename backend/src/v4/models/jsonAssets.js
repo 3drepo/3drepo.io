@@ -170,34 +170,59 @@ JSONAssets.getSuperMeshMapping = function(account, model, id) {
 	return FileRef.getJSONFile(account, model, name);
 };
 
+const splitEntriesToGroups = (entries, maxParallelFiles = 100) => {
+	const groups = [];
+
+	let currentGroup = [];
+	for (const entry of entries) {
+		if (currentGroup.length >= maxParallelFiles) {
+			groups.push(currentGroup);
+			currentGroup = [];
+		}
+
+		currentGroup.push(entry);
+	}
+
+	if (currentGroup.length) {
+		groups.push(currentGroup);
+	}
+
+	return groups;
+};
+
 const addSuperMeshMappingsToStream = async (account, model, jsonFiles, outStream) => {
 	const regex = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})[^/]*$/;
 	outStream.write(`{"model":"${model}","supermeshes":[`);
 
-	const files = await Promise.all(
-		jsonFiles.map(async (fileName) => {
+	const fileGroups = splitEntriesToGroups(jsonFiles);
+	for(let j = 0; j < fileGroups.length; ++j) {
+		const filesToProcess = fileGroups[j];
+		const files = await Promise.all(
+			filesToProcess.map(async (fileName) => {
+				const regexRes = fileName.match(regex);
+				return {fileName, file: await FileRef.getJSONFileStream(account, model, regexRes[0])};
+			}));
+
+		for(let i = 0; i < files.length; ++i) {
+			const {fileName, file} = files[i];
+
 			const regexRes = fileName.match(regex);
-			return {fileName, file: await FileRef.getJSONFileStream(account, model, regexRes[0])};
-		}));
+			const id = regexRes[1];
+			if(file) {
+				outStream.write(`{"id":"${id}","data":`);
+				const { readStream } = file;
 
-	for(let i = 0; i < files.length; ++i) {
-		const {fileName, file} = files[i];
+				await new Promise((resolve) => {
+					readStream.on("data", d => outStream.write(d));
+					readStream.on("end", ()=> resolve());
+					readStream.on("error", err => outStream.emit("error", err));
+				});
 
-		const regexRes = fileName.match(regex);
-		const id = regexRes[1];
-		if(file) {
-			outStream.write(`{"id":"${id}","data":`);
-			const { readStream } = file;
-
-			await new Promise((resolve) => {
-				readStream.on("data", d => outStream.write(d));
-				readStream.on("end", ()=> resolve());
-				readStream.on("error", err => outStream.emit("error", err));
-			});
-
-			outStream.write(`}${i !== jsonFiles.length - 1 ? "," : "" }`);
+				outStream.write(`}${i !== jsonFiles.length - 1 ? "," : "" }`);
+			}
 		}
 	}
+
 	outStream.write("]}");
 
 };
