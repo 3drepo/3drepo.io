@@ -20,11 +20,6 @@ import { FormContainer } from '../FormInput.styles';
 
 export default {
 	title: 'Inputs/Color/ColorPicker',
-	argTypes: {
-		disabled: {
-			type: 'boolean',
-		},
-	},
 	component: ColorPicker,
 	parameters: { controls: { exclude: [
 		'onBlur',
