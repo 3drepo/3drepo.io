@@ -57,7 +57,7 @@ export const Buttons = styled.div`
 	}
 `;
 
-export const FloatingPanel = styled.div`
+export const FloatingPanelForm = styled.form`
 	.MuiFormControl-root {
 		margin: 0 0 10px;
 	}

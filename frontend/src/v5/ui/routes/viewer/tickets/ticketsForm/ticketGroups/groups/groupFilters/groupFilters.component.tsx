@@ -22,7 +22,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { FormSearchSelect } from '@controls/inputs/formInputs.component';
 import { formatMessage } from '@/v5/services/intl';
 import { MenuItem } from '@mui/material';
-import { Buttons, FiltersActionMenu, TriggerButton, FloatingPanel } from './groupFilters.styles';
+import { Buttons, FiltersActionMenu, TriggerButton, FloatingPanelForm } from './groupFilters.styles';
 import { SubmitButton } from '@controls/submitButton';
 import { IFilterForm, getFields } from './groupFilters.helpers';
 import { FilterOperationSelect } from './filterOperationSelect/filterOperationSelect.component';
@@ -47,37 +47,35 @@ export const GroupFilters = ({ value }: IGroupFilters) => {
 				<FormattedMessage id="tickets.groups.addFilter" defaultMessage="Add filter" />
 			</TriggerButton>
 		)}>
-			<form onSubmit={handleSubmit(onSubmit)}>
+			<FloatingPanelForm onSubmit={handleSubmit(onSubmit)}>
 				<FormProvider {...formData}>
-					<FloatingPanel>
-						<FormSearchSelect
-							placeholder={formatMessage({ id: 'ticket.groups.field.placeholder', defaultMessage: 'Set field'})}
-							name='field'
-							label={formatMessage({ id: 'tickets.groups.field', defaultMessage: 'Field' })}
-						>
-							{getFields().map((value) => (
-								<MenuItem value={value} key={value}>
-									{value}
-								</MenuItem>
-							))}
-						</FormSearchSelect>
-						<FilterOperationSelect/>
-						<FilterValueField />
-						<Buttons>
-							<ActionMenuItem>
-								<Button variant="text" color="secondary">
-									<FormattedMessage id="tickets.groups.filterPanel.cancel" defaultMessage="Cancel" />
-								</Button>
-							</ActionMenuItem>
-							<ActionMenuItem disabled={isValid}>
-								<SubmitButton variant="contained" color="primary" fullWidth={false} disabled={isValid}>
-									<FormattedMessage id="tickets.groups.filterPanel.createGroup" defaultMessage="Create group" />
-								</SubmitButton>
-							</ActionMenuItem>
-						</Buttons>
-					</FloatingPanel>
+					<FormSearchSelect
+						placeholder={formatMessage({ id: 'ticket.groups.field.placeholder', defaultMessage: 'Set field'})}
+						name='field'
+						label={formatMessage({ id: 'tickets.groups.field', defaultMessage: 'Field' })}
+					>
+						{getFields().map((value) => (
+							<MenuItem value={value} key={value}>
+								{value}
+							</MenuItem>
+						))}
+					</FormSearchSelect>
+					<FilterOperationSelect/>
+					<FilterValueField />
+					<Buttons>
+						<ActionMenuItem>
+							<Button variant="text" color="secondary">
+								<FormattedMessage id="tickets.groups.filterPanel.cancel" defaultMessage="Cancel" />
+							</Button>
+						</ActionMenuItem>
+						<ActionMenuItem disabled={isValid}>
+							<SubmitButton variant="contained" color="primary" fullWidth={false} disabled={isValid}>
+								<FormattedMessage id="tickets.groups.filterPanel.createGroup" defaultMessage="Create group" />
+							</SubmitButton>
+						</ActionMenuItem>
+					</Buttons>
 				</FormProvider>
-			</form>
+			</FloatingPanelForm>
 		</FiltersActionMenu>
 	);
 };
