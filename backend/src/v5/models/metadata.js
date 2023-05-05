@@ -73,12 +73,16 @@ Metadata.getMetadataByRules = async (teamspace, project, model, revId, rules, pr
 		negativeQuery ? db.find(teamspace, collectionName(model), negativeQuery, { _id: 1 }) : Promise.resolve([]),
 	]);
 
-	const unwantedIds = {};
-	negRes.forEach(({ _id }) => {
-		unwantedIds[UUIDToString(_id)] = 1;
-	});
+	if (negRes.length) {
+		const unwantedIds = {};
+		negRes.forEach(({ _id }) => {
+			unwantedIds[UUIDToString(_id)] = 1;
+		});
 
-	return posRes.filter(({ _id }) => !unwantedIds[UUIDToString(_id)]);
+		return posRes.filter(({ _id }) => !unwantedIds[UUIDToString(_id)]);
+	}
+
+	return posRes;
 };
 
 module.exports = Metadata;
