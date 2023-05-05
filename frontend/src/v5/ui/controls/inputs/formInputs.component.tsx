@@ -17,6 +17,7 @@
 
 import { ChipSelect } from '@controls/chip/chipSelect/chipSelect.component';
 import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
+import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 import { forwardRef, ComponentProps } from 'react';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { Checkbox } from './checkbox/checkbox.component';
@@ -54,6 +55,7 @@ export const FormSelectView = (props: FormType<typeof SelectView>) => (<InputCon
 export const FormSelect = (props: FormType<typeof Select>) => (<InputController Input={Select} {...props} />);
 export const FormChipSelect = (props: FormType<typeof ChipSelect>) => (<InputController Input={ChipSelect} {...props} />);
 export const FormAssigneeSelect = (props: FormType<typeof AssigneesSelect>) => (<InputController Input={AssigneesSelect} {...props} />);
+export const FormSearchSelect = (props: FormType<typeof SearchSelect>) => (<InputController Input={SearchSelect} {...props} />);
 
 // control inputs
 export const FormCheckbox = (props: FormType<typeof Checkbox>) => (<InputController Input={Checkbox} {...props} />);
