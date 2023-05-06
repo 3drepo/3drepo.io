@@ -219,7 +219,6 @@ const generateSuperMeshMappings = async (account, model, jsonFiles, outStream) =
 						outStream.write(d);
 					});
 					readStream.on("end", ()=> {
-						outStream.end();
 						resolve();
 					});
 					readStream.on("error", err => {
@@ -235,6 +234,7 @@ const generateSuperMeshMappings = async (account, model, jsonFiles, outStream) =
 
 	const endingStr = "]}";
 	outStream.write(endingStr);
+	outStream.end();
 
 };
 
