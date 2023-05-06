@@ -103,6 +103,16 @@ async function insertRef(account, collection, user, name, refInfo) {
 	return ref;
 }
 
+const storeFileStream = async function(account, collection, user, name, data, extraFields = null) {
+	let refInfo = await ExternalServices.storeFileStream(account, collection, data);
+	refInfo = {...refInfo ,...(extraFields || {}) };
+	return await insertRef(account, collection, user, name, refInfo);
+};
+
+FileRef.storeJSONFileStream = async (account, model, data, user, name, extraFields = {}) =>  {
+	return storeFileStream(account, `${model}${JSON_FILE_REF_EXT}`, user, name, data, { _id: name, ...extraFields});
+};
+
 FileRef.fileExists = async (account, collection, id) => {
 	const fileEntry = await getRefEntry(account, collection, id, { _id: 1 });
 	return !!fileEntry;
@@ -172,6 +182,10 @@ FileRef.getSequenceActivitiesFile = function(account, model, fileName) {
 
 FileRef.getSequenceStateFile = function(account, model, fileName) {
 	return _fetchFile(account, model, STATE_FILE_REF_EXT, fileName, false, false);
+};
+
+FileRef.jsonFileExists = function(account, model, fileName) {
+	return FileRef.fileExists(account, `${model}${JSON_FILE_REF_EXT}`, fileName);
 };
 
 FileRef.getJSONFile = function(account, model, fileName) {
