@@ -73,17 +73,19 @@ class FSHandler {
 		});
 	}
 
-	storeFileStream(stream, dataSize) {
+	storeFileStream(stream) {
 		const _id = utils.generateUUID({string: true});
 		const folderNames = utils.generateFoldernames(config.fs.levels);
 		const link = path.posix.join(folderNames, _id);
 
 		return new Promise((resolve, reject) => {
 			createFoldersIfNecessary(this.getFullPath(folderNames)).then(() =>{
-				const writeStream = fs.createWriteStream(this.getFullPath(link));
+				const filePath = this.getFullPath(link);
+				const writeStream = fs.createWriteStream(filePath);
 
 				writeStream.on("finish", () => {
-					resolve({_id, link, size: dataSize, type: "fs"});
+					const {size}  = fs.statSync(filePath);
+					resolve({_id, link, size: size, type: "fs"});
 				});
 
 				writeStream.on("errored", reject);
