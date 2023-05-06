@@ -226,7 +226,7 @@ const generateSuperMeshMappings = async (account, model, jsonFiles, outStream) =
 					});
 				});
 
-				const eofStr = `}${i !== jsonFiles.length - 1 ? "," : "" }`;
+				const eofStr = `}${fileName !== jsonFiles[jsonFiles.length - 1] ? "," : "" }`;
 				outStream.write(eofStr);
 			}
 		}
@@ -241,8 +241,7 @@ const generateSuperMeshMappings = async (account, model, jsonFiles, outStream) =
 const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, outStream) => {
 	const cacheFileName = `${utils.uuidToString(revId)}/supermeshes.json`;
 	const fileRef = await FileRef.jsonFileExists(account, model, cacheFileName);
-	// it's possible that the caching was interrupted
-	if(fileRef?.size) {
+	if(false) {// fileRef?.size) {
 		const { readStream } = await FileRef.getJSONFileStream(account, model, cacheFileName);
 
 		await new Promise((resolve) => {
