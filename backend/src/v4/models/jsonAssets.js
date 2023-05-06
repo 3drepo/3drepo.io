@@ -21,7 +21,6 @@ const FileRef = require("./fileRef");
 const History = require("./history");
 const DB = require("../handler/db");
 const utils = require("../utils");
-const {systemLogger} = require("../logger");
 const { getRefNodes } = require("./ref");
 const C = require("../constants");
 const { hasReadAccessToModelHelper } = require("../middlewares/checkPermissions");
@@ -242,9 +241,7 @@ const generateSuperMeshMappings = async (account, model, jsonFiles, outStream) =
 const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, outStream) => {
 	const cacheFileName = `${utils.uuidToString(revId)}/supermeshes.json`;
 	const fileRef = await FileRef.jsonFileExists(account, model, cacheFileName);
-	const startDate = Date.now();
 	if(fileRef?.size) {
-
 		const { readStream } = await FileRef.getJSONFileStream(account, model, cacheFileName);
 
 		await new Promise((resolve) => {
@@ -258,8 +255,6 @@ const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, ou
 				outStream.emit("error", err);
 			});
 		});
-		systemLogger.logInfo(`[TIMER] obtained ${account}.${model}.${cacheFileName} from cache in ${Date.now() - startDate}ms`);
-
 	} else {
 
 		if(fileRef) {
@@ -284,7 +279,6 @@ const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, ou
 
 		await generateSuperMeshMappings(account, model, jsonFiles, passThruStr);
 		await cacheWriteProm;
-		systemLogger.logInfo(`[TIMER] generated ${account}.${model}.${cacheFileName} from scratch in ${Date.now() - startDate}ms`);
 
 	}
 
