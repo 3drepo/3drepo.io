@@ -324,7 +324,7 @@ JSONAssets.getAllSuperMeshMapping = async (account, model, branch, rev) => {
 		});
 		modelsToProcess = await Promise.all(getSubModelInfoProms);
 	} else {
-		const history = await History.getHistory(account, model, branch, rev);
+		const history = await History.getHistory(account, model, branch, rev, {_id: 1});
 		modelsToProcess = [{account, model, rev: history._id}];
 	}
 
