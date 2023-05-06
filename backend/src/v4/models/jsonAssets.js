@@ -240,7 +240,9 @@ const generateSuperMeshMappings = async (account, model, jsonFiles, outStream) =
 
 const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, outStream) => {
 	const cacheFileName = `${utils.uuidToString(revId)}/supermeshes.json`;
-	if(await FileRef.jsonFileExists(account, model, cacheFileName)) {
+	const fileRef = await FileRef.jsonFileExists(account, model, cacheFileName);
+	// it's possible that the caching was interrupted
+	if(fileRef?.size) {
 		const { readStream } = await FileRef.getJSONFileStream(account, model, cacheFileName);
 
 		await new Promise((resolve) => {
@@ -256,6 +258,9 @@ const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, ou
 		});
 	} else {
 
+		if(fileRef) {
+			await FileRef.removeJSONFile(account, model, cacheFileName);
+		}
 		const passThruStr = Stream.PassThrough();
 		const cacheStream = Stream.PassThrough();
 
