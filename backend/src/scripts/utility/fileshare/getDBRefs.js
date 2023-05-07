@@ -56,9 +56,9 @@ const run = async (dbNames, outFile = DEFAULT_OUT_FILE) => {
 
 		for (let i = 0; i < collections.length; ++i) {
 			// eslint-disable-next-line no-await-in-loop
-			const coll = await find(dbName, collections[i].name, { type: 'fs' }, { link: 1 });
+			const coll = await find(dbName, collections[i].name, { type: 'fs' }, { link: 1, size: 1 });
 			for (let j = 0; j < coll.length; ++j) {
-				results.push(coll[j].link);
+				results.push(`${coll[j].link},${coll[j].size}`);
 			}
 		}
 	}

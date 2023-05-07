@@ -43,22 +43,24 @@ const processLine = async (line) => {
 	try {
 		return `${line},${await generateCheckSum(line)}`;
 	} catch (err) {
-		return `${line},ERROR: ${err.message}`;
+		return `${line},FAILED`;
 	}
 };
 
-let processProms = [];
-
-const processBatch = async (outStream) => {
+const processBatch = async (outStream, processProms) => {
 	const lineItems = await Promise.all(processProms);
 	outStream.write(`${lineItems.join('\n')}\n`);
 };
 
-const run = async (inFile, outFile, maxFiles) => {
+const run = async (inFile, outFile, maxFiles, maxSize) => {
 	logger.logInfo('Generating MD5 sums for all files');
 	const input = (await open(inFile)).createReadStream();
 	const outFD = await open(outFile, 'w');
 	const output = outFD.createWriteStream();
+
+	let processProms = [];
+	let processSize = 0;
+	let count = 0;
 
 	const lineReader = createInterface({
 		input,
@@ -66,14 +68,22 @@ const run = async (inFile, outFile, maxFiles) => {
 	});
 
 	for await (const line of lineReader) {
-		processProms.push(processLine(line));
-		if (processProms.length === maxFiles) {
-			await processBatch(output);
+		const [link, sizeStr] = line.split(',');
+		const size = Number(sizeStr);
+
+		if (processProms.length === maxFiles || maxSize <= (processSize + size)) {
+			logger.logInfo(`Processing ${processProms.length} files (${(processSize / 1024).toFixed(2)})MB. (${count}) files completed`);
+			await processBatch(output, processProms);
 			processProms = [];
+			processSize = 0;
 		}
+
+		count++;
+		processProms.push(processLine(link));
+		processSize += size;
 	}
 
-	await processBatch(output);
+	await processBatch(output, processProms);
 
 	output.end();
 	await outFD.close();
@@ -83,7 +93,12 @@ const run = async (inFile, outFile, maxFiles) => {
 
 const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
-	const argsSpec = (subYargs) => subYargs.options('maxParallelFiles',
+	const argsSpec = (subYargs) => subYargs.options('maxParallelSizeMB',
+		{
+			describe: 'Maximum amount of file size to process in parallel',
+			type: 'number',
+			default: 2048,
+		}).options('maxParallelFiles',
 		{
 			describe: 'Maximum amount of files to process in parallel',
 			type: 'number',
@@ -101,10 +116,10 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 		});
 	return yargs.command(
 		commandName,
-		'Given a list of file paths, return their md5 sums',
+		'Given an output of getDbRefs, return their md5 sums',
 		argsSpec,
-		({ maxParallelFiles, inFile, outFile }) => run(
-			inFile, outFile, maxParallelFiles),
+		({ maxParallelSizeMB, maxParallelFiles, inFile, outFile }) => run(
+			inFile, outFile, maxParallelFiles, maxParallelSizeMB * 1024),
 	);
 };
 
