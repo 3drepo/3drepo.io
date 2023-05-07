@@ -45,13 +45,18 @@ const run = async (dbNames, outFile = DEFAULT_OUT_FILE) => {
 	const results = [];
 	const dbList = dbNames.split(',');
 
+	const targetCols = ['.stash.json_mpc.ref', '.stash.unity3d.ref'];
+
 	for (const dbName of dbList) {
 		// eslint-disable-next-line no-await-in-loop
-		const collections = await getCollectionsEndsWith(dbName, '.ref');
+		const collections = (await Promise.all(
+			targetCols.map((ext) => getCollectionsEndsWith(dbName, ext)),
+		)).flat();
+		// getCollectionsEndsWith(dbName, '.ref');
 
 		for (let i = 0; i < collections.length; ++i) {
 			// eslint-disable-next-line no-await-in-loop
-			const coll = await find(dbName, collections[i].name, {}, { link: 1 });
+			const coll = await find(dbName, collections[i].name, { type: 'fs' }, { link: 1 });
 			for (let j = 0; j < coll.length; ++j) {
 				results.push(coll[j].link);
 			}
