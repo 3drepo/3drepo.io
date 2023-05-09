@@ -21,7 +21,7 @@ import styled, { css } from 'styled-components';
 export const CustomInput = styled(FormControl)<{ selected?: boolean }>`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	border: solid 1px;
-	border-radius: 5px;
+	border-radius: 8px;
 	padding: 10px 15px;
 	width: 100%;
 

@@ -69,9 +69,6 @@ export const theme = createTheme(
 				MuiInputBase: {
 					styleOverrides: {
 						root: {
-							'&&': {
-								borderRadius: 5,
-							},
 							'&.Mui-focused': {
 								'.MuiSelect-select': {
 									border: `1px solid ${COLOR.PRIMARY_MAIN}`,
@@ -142,9 +139,6 @@ export const theme = createTheme(
 				},
 				MuiPaper: {
 					styleOverrides: {
-						rounded: {
-							borderRadius: 6,
-						},
 						root: {
 							'.react-autosuggest__suggestions-list': {
 								margin: 0,
@@ -161,6 +155,14 @@ export const theme = createTheme(
 				MuiPopover: {
 					defaultProps: {
 						container: () => document.getElementById('v4DialogsOverrides'),
+					},
+					styleOverrides: {
+						paper: {
+							borderRadius: 8,
+							'>ul': {
+								borderRadius: 'inherit',
+							},
+						},
 					},
 				},
 				MuiAvatar: {
@@ -224,7 +226,6 @@ export const theme = createTheme(
 				MuiList: {
 					styleOverrides: {
 						root: {
-							borderRadius: '6px !important',
 							boxShadow: `0px 9px 28px 8px rgb(0 0 0 / 5%),
 										0px 6px 16px 0px rgb(0 0 0 / 8%),
 										0px 3px 6px -4px rgb(0 0 0 / 12%) !important`,
@@ -258,7 +259,7 @@ export const theme = createTheme(
 								[`& ${Wrapper}`]: {
 									overflow: 'hidden',
 									left: '100%',
-									borderRadius: '6px',
+									borderRadius: 10,
 								},
 							},
 							// filter panel menu
