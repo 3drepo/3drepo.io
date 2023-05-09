@@ -17,7 +17,6 @@
 
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { memo } from 'react';
 import { IPopoverCircle } from '../popoverCircle.styles';
 import { UserPopover } from './userPopover/userPopover.component';
 import { UserCircle } from './userCircle.component';
@@ -26,7 +25,7 @@ type UserPopoverCircleProps = IPopoverCircle & {
 	username: string;
 	className?: string;
 };
-export const UserPopoverCircle = memo(({ username, ...props }: UserPopoverCircleProps) => {
+export const UserPopoverCircle = ({ username, ...props }: UserPopoverCircleProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const user = UsersHooksSelectors.selectUser(teamspace, username);
 	if (!user) return null;
@@ -39,4 +38,4 @@ export const UserPopoverCircle = memo(({ username, ...props }: UserPopoverCircle
 			<UserPopover user={user} />
 		</HoverPopover>
 	);
-});
+};

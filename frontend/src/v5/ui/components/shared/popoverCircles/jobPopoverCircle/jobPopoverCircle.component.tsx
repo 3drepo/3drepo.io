@@ -16,7 +16,6 @@
  */
 
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
-import { memo } from 'react';
 import { getJobAbbreviation } from '@/v5/store/jobs/jobs.helpers';
 import { IJob } from '@/v5/store/jobs/jobs.types';
 import { IPopoverCircle, PopoverCircle } from '../popoverCircle.styles';
@@ -27,11 +26,11 @@ type JobPopoverCircleProps = IPopoverCircle & {
 	className?: string;
 };
 
-export const JobPopoverCircle = memo(({ job, size, className }: JobPopoverCircleProps) => (
+export const JobPopoverCircle = ({ job, size, className }: JobPopoverCircleProps) => (
 	<HoverPopover
 		className={className}
 		anchor={(props) => <PopoverCircle size={size} backgroundColor={job.color} {...props}>{getJobAbbreviation(job._id)}</PopoverCircle>}
 	>
 		<JobPopover job={job} />
 	</HoverPopover>
-));
+);

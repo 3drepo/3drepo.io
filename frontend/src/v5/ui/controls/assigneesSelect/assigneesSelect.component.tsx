@@ -19,7 +19,7 @@ import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { intersection } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { SelectProps } from '@controls/inputs/select/select.component';
 import { Tooltip } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
@@ -60,15 +60,15 @@ export const AssigneesSelect = ({
 	const listedAssignees = overflowRequired ? filteredValues.slice(0, maxItems - 1) : filteredValues;
 	const overflowValue = overflowRequired ? filteredValues.slice(maxItems - 1).length : 0;
 
-	const handleOpen = (e) => {
+	const handleOpen = useCallback((e) => {
 		if (disabled) return;
 		e.stopPropagation();
 		setOpen(true);
-	};
-	const handleClose = () => {
+	}, []);
+	const handleClose = useCallback(() => {
 		setOpen(false);
 		onBlur();
-	};
+	}, []);
 
 	return (
 		<AssigneesListContainer onClick={handleOpen} className={className}>
