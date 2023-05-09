@@ -17,6 +17,22 @@
 
 import styled from 'styled-components';
 
+export const Form = styled.form`
+	padding: 2px;
+
+	.MuiFormControl-root {
+		margin: 0 0 10px;
+	}
+`;
+
+export const InputsContainer = styled.div`
+	max-height: 400px;
+	overflow-y: overlay;
+	padding: 2px;
+	margin-right: -13px;
+	padding-right: 13px;
+`;
+
 export const Buttons = styled.div`
 	display: flex;
 	flex-direction: row;
@@ -25,11 +41,5 @@ export const Buttons = styled.div`
 	button {
 		margin-bottom: 0;
 		margin-top: 5px
-	}
-`;
-
-export const Form = styled.form`
-	.MuiFormControl-root {
-		margin: 0 0 10px;
 	}
 `;

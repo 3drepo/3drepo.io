@@ -36,15 +36,12 @@ export const OPERATIONS_TYPES = {
 export type Operation = keyof typeof OPERATIONS_TYPES;
 export type OperationType = typeof OPERATIONS_TYPES[Operation];
 
-export type IFilterForm = {
+export type IFilter = {
 	field: string,
 	operation: Operation,
-	value: (number | string)[],
+	values?: (number | string)[],
 };
 
-export const getFields = () => [
-	'W la pizza',
-	'Che buona la pasta',
-	'Er guanciale e` meglio della pancetta',
-	'Italia forever',
-];
+export type IFilterForm = Omit<IFilter, 'values'> & {
+	values: { value: number | string }[],
+};
