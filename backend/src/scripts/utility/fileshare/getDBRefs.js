@@ -41,7 +41,7 @@ const run = async (dbNames, outFile = DEFAULT_OUT_FILE) => {
 
 	const writeStream = FS.createWriteStream(parsePath(outFile));
 
-	const excludeCols = [];// ['.stash.json_mpc.ref', '.stash.unity3d.ref', '.scene.ref'];
+	const excludeCols = ['.stash.json_mpc.ref', '.stash.unity3d.ref', '.scene.ref'];
 
 	for (const dbName of dbList) {
 		logger.logInfo(`-${dbName}`);
