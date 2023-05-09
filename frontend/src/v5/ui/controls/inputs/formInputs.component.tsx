@@ -17,9 +17,9 @@
 
 import { ChipSelect } from '@controls/chip/chipSelect/chipSelect.component';
 import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
-import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 import { forwardRef, ComponentProps } from 'react';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
+import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 import { Checkbox } from './checkbox/checkbox.component';
 import { DatePicker } from './datePicker/datePicker.component';
 import { DateTimePicker } from './datePicker/dateTimePicker.component';
