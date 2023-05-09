@@ -29,7 +29,7 @@ const FS = require('fs');
 
 const DEFAULT_OUT_FILE = 'links.csv';
 
-const ENTRIES_TO_PROCESS = 10000;
+const ENTRIES_TO_PROCESS = 50000;
 
 const run = async (dbNames, outFile = DEFAULT_OUT_FILE) => {
 	if (!dbNames?.length) {
