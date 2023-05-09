@@ -23,7 +23,7 @@ import { CommentWithButtonsContainer } from '../../basicComment/basicComment.sty
 
 export const DeletedComment = ({ user, author, isFirstOfBlock }) => (
 	<CommentWithButtonsContainer>
-		{isFirstOfBlock && <AuthorAvatar user={user} />}
+		{isFirstOfBlock && <AuthorAvatar username={user.user} />}
 		<Comment
 			author={author}
 			isFirstOfBlock={isFirstOfBlock}
