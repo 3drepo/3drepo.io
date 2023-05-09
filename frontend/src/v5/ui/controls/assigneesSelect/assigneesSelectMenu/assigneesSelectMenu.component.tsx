@@ -55,6 +55,7 @@ export const AssigneesSelectMenu = ({
 		preventPropagation(e);
 		onClick?.(e);
 	};
+
 	return (
 		<SearchContextComponent filteringFunction={filterItems} items={[...jobs, ...users]}>
 			<SearchContext.Consumer>
@@ -82,7 +83,7 @@ export const AssigneesSelectMenu = ({
 								/>
 							</SearchInputContainer>
 							<ListHeading>
-								{formatMessage({ id: 'assigneesSelectMenu.jobsHeading', defaultMessage: 'Jobs' })}
+								<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
 							</ListHeading>
 							{filteredJobs.length > 0 && filteredJobs.map((job) => (
 								<AssigneesSelectMenuItem
@@ -102,7 +103,7 @@ export const AssigneesSelectMenu = ({
 							)}
 							<HorizontalRule />
 							<ListHeading>
-								{formatMessage({ id: 'assigneesSelectMenu.usersHeading', defaultMessage: 'Users' })}
+								<FormattedMessage id="assigneesSelectMenu.usersHeading" defaultMessage="Users" />
 							</ListHeading>
 							{filteredUsers.length > 0 && filteredUsers.map(({ user, firstName, lastName, job }) => (
 								<AssigneesSelectMenuItem

@@ -21,13 +21,12 @@ import styled from 'styled-components';
 export const AssigneesListContainer = styled.div`
 	display: inline-flex;
 	position: relative;
-	width: fit-content;
+	align-items: center;
 	user-select: none;
+	cursor: pointer;
 	color: ${({ theme }) => theme.palette.base.main};
 	font-size: 10px;
-	height: 28px;
-	line-height: 28px;
-	cursor: pointer;
+	line-height: 100%;
 
 	.MuiAvatar-root {
 		z-index: 11;

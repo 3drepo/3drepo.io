@@ -58,6 +58,7 @@ export const ChipList = styled.div`
 
 export const Assignees = styled(ControlledAssigneesSelect)`
 	margin-left: auto;
+	height: 28px;
 `;
 
 export const IssuePropertiesRow = styled.div`
