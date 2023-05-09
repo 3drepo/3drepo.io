@@ -38,7 +38,7 @@ export const ListHeading = styled.div`
 
 export const SearchInput = styled(SearchInputBase)`
 	width: auto;
-	margin: 2px 12px 12px 12px;
+	margin: 2px 12px 12px;
 `;
 
 export const HorizontalRule = styled.hr`
