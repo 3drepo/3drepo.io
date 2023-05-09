@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormTextField } from '@controls/inputs/formInputs.component';
 import styled from 'styled-components';
 
 export const ValuesContainer = styled.div`
@@ -25,6 +24,8 @@ export const ValuesContainer = styled.div`
 	gap: 10px;
 `;
 
-export const HiddenFormTextField = styled(FormTextField)`
-	display: none;
+export const ValueIconContainer = styled.div<{ disabled?: boolean }>`
+	color: ${({ theme: { palette }, disabled }) => disabled ? palette.base.light : palette.secondary.main};
+	margin-bottom: 10px;
+	cursor: pointer;
 `;
