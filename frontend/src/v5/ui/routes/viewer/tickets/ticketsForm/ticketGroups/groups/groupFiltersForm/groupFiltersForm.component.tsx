@@ -81,6 +81,7 @@ export const GroupFiltersForm = ({ onBlur }: IGroupFilters) => {
 					/>
 					<FilterOperationSelect/>
 					<FilterValueField />
+				</InputsContainer>
 				<Buttons>
 					<ActionMenuItem>
 						<Button variant="text" color="secondary">
