@@ -489,7 +489,7 @@ export const theme = createTheme({
 		MuiAutocomplete: {
 			defaultProps: {
 				clearIcon: createElement(ClearIcon),
-				popupIcon: createElement(ChevronIcon),
+				popupIcon: createElement(ThinChevronIcon),
 				openText: '',
 				closeText: '',
 				clearText: '',
