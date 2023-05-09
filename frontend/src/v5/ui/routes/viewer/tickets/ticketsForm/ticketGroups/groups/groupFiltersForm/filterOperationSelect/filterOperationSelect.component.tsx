@@ -22,10 +22,8 @@ import { formatMessage } from '@/v5/services/intl';
 
 export const FilterOperationSelect = () => (
 	<FormSelect
-		placeholder={formatMessage({ id: 'ticket.groups.operation.placeholder', defaultMessage: 'Set operation'})}
 		name='operation'
 		label={formatMessage({ id: 'tickets.groups.operation.label', defaultMessage: 'Operation' })}
-		required
 	>
 		{/* Field */}
 		<ListSubheader>

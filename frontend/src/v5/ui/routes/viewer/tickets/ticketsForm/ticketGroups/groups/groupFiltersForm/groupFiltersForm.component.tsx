@@ -72,10 +72,6 @@ export const GroupFiltersForm = ({ onBlur }: IGroupFilters) => {
 								{...formTextFieldProps}
 								label={formatMessage({ id: 'tickets.groups.field', defaultMessage: 'Field' })}
 								name='field'
-								inputProps={{
-									...formTextFieldProps.inputProps,
-									placeholder: formatMessage({ id: 'ticket.groups.field.placeholder', defaultMessage: 'Set field'}),
-								}}
 							/>
 						)}
 					/>
@@ -88,7 +84,7 @@ export const GroupFiltersForm = ({ onBlur }: IGroupFilters) => {
 							<FormattedMessage id="tickets.groups.filterPanel.cancel" defaultMessage="Cancel" />
 						</Button>
 					</ActionMenuItem>
-					<ActionMenuItem disabled={isValid}>
+					<ActionMenuItem disabled={!isValid}>
 						<SubmitButton variant="contained" color="primary" fullWidth={false} disabled={!isValid}>
 							<FormattedMessage id="tickets.groups.filterPanel.createGroup" defaultMessage="Create group" />
 						</SubmitButton>
