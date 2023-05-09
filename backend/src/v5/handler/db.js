@@ -186,11 +186,13 @@ DBHandler.findOne = async (database, colName, query, projection, sort) => {
 	return collection.findOne(query, options);
 };
 
-DBHandler.find = async (database, colName, query, projection, sort, limit) => {
+DBHandler.find = async (database, colName, query, projection, sort, limit, skip) => {
 	const collection = await getCollection(database, colName);
 	const options = deleteIfUndefined({ projection, sort });
-	const cmd = collection.find(query, options);
-	return limit ? cmd.limit(limit).toArray() : cmd.toArray();
+	let cmd = collection.find(query, options);
+	cmd = limit ? cmd.limit(limit) : cmd;
+	cmd = skip ? cmd.skip(skip) : cmd;
+	return cmd.toArray();
 };
 
 DBHandler.insertOne = async (database, colName, data) => {

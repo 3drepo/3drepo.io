@@ -20,7 +20,7 @@ const { v5Path } = require('../../../interop');
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getCollectionsEndsWith, parsePath } = require('../../utils');
 
-const { find } = require(`${v5Path}/handler/db`);
+const { find, count } = require(`${v5Path}/handler/db`);
 
 const { some } = require('lodash');
 
@@ -28,6 +28,8 @@ const Path = require('path');
 const FS = require('fs');
 
 const DEFAULT_OUT_FILE = 'links.csv';
+
+const ENTRIES_TO_PROCESS = 10000;
 
 const run = async (dbNames, outFile = DEFAULT_OUT_FILE) => {
 	if (!dbNames?.length) {
@@ -39,21 +41,28 @@ const run = async (dbNames, outFile = DEFAULT_OUT_FILE) => {
 
 	const writeStream = FS.createWriteStream(parsePath(outFile));
 
-	const excludeCols = ['.stash.json_mpc.ref', '.stash.unity3d.ref', '.scene.ref'];
+	const excludeCols = [];// ['.stash.json_mpc.ref', '.stash.unity3d.ref', '.scene.ref'];
 
 	for (const dbName of dbList) {
 		logger.logInfo(`-${dbName}`);
 		// eslint-disable-next-line no-await-in-loop
 		const collections = await getCollectionsEndsWith(dbName, '.ref');
 
-		for (let i = 0; i < collections.length; ++i) {
-			if (!some(excludeCols, (colExt) => collections[i].name.endsWith(colExt))) {
-				logger.logInfo(`\t-${collections[i].name}`);
+		for (const { name: colName } of collections) {
+			if (!some(excludeCols, (colExt) => colName.endsWith(colExt))) {
 				// eslint-disable-next-line no-await-in-loop
-				const res = await find(dbName, collections[i].name, { type: 'fs' }, { link: 1, size: 1 });
-				res.forEach(({ link, size }) => {
-					writeStream.write(`${link},${size}\n`);
-				});
+				const nItems = await count(dbName, colName, { type: 'fs' }, { _id: 1 });
+
+				if (nItems) {
+					logger.logInfo(`\t-${colName}`);
+					for (let i = 0; i < nItems; i += ENTRIES_TO_PROCESS) {
+						// eslint-disable-next-line no-await-in-loop
+						const res = await find(dbName, colName, { type: 'fs' }, { link: 1, size: 1 }, { _id: 1 }, ENTRIES_TO_PROCESS, i);
+						res.forEach(({ link, size }) => {
+							writeStream.write(`${link},${size}\n`);
+						});
+					}
+				}
 			}
 		}
 	}
