@@ -56,7 +56,9 @@ Projects.findProjectByModelId = async (teamspace, modelId, projection) => {
 	}
 	return data;
 };
-Projects.getProjectByName = (ts, name, projection) => getProjectByQuery(ts, { name }, projection);
+
+// eslint-disable-next-line security/detect-non-literal-regexp
+Projects.getProjectByName = (ts, name, projection) => getProjectByQuery(ts, { name: new RegExp(`^${name}$`, 'i') }, projection);
 
 Projects.getProjectById = (ts, id, projection) => getProjectByQuery(ts, { _id: id }, projection);
 

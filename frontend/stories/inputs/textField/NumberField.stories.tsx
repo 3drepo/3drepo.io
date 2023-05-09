@@ -33,6 +33,10 @@ export default {
 		value: {
 			type: 'number',
 		},
+		variant: {
+			options: ['filled', 'outlined'],
+			control: { type: 'select' },
+		},
 	},
 	component: NumberField,
 	parameters: { controls: { exclude: [

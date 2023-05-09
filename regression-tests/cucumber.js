@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
-import { CardListItem } from '../../linkCard.styles';
-import { AddTeamspaceIcon, Container } from './addTeamspaceCard.styles';
-
-export const AddTeamspaceCard = (): JSX.Element => (
-	<CardListItem>
-		<a href="https://3drepo.com/pricing/" target="_blank" rel="noreferrer">
-			<Container>
-				<AddTeamspaceIcon />
-				<FormattedMessage id="teamspaceSelect.addNewTeamspace" defaultMessage="New Teamspace" />
-			</Container>
-		</a>
-	</CardListItem>
-);
+module.exports = {
+	default: [
+		'--require-module ts-node/register',
+		'--require features/**/*.ts',
+		'--publish-quiet',
+	].join(' '),
+};

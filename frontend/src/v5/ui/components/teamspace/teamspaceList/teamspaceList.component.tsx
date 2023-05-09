@@ -16,9 +16,10 @@
  */
 
 import { flatten, partition } from 'lodash';
-import { AddTeamspaceCard, TeamspaceCard, TeamspacePlaceholderCard } from '@components/shared/linkCard/teamspaceCard';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TeamspacesHooksSelectors, CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TeamspaceCard } from '@components/shared/linkCard/teamspaceCard/teamspaceCard.component';
+import { TeamspacePlaceholderCard } from '@components/shared/linkCard/teamspaceCard/teamspacePlaceholderCard/teamspacePlaceholderCard.component';
 import { CardList } from './teamspaceList.styles';
 
 type ITeamspaceList = {
@@ -28,27 +29,25 @@ type ITeamspaceList = {
 export const TeamspaceList = ({ className }: ITeamspaceList): JSX.Element => {
 	const username = CurrentUserHooksSelectors.selectUsername();
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
+	const teamspacesArePending = TeamspacesHooksSelectors.selectTeamspacesArePending();
+
 	const sortedTeamspaces = flatten(partition(teamspaces, (ts) => ts.name === username));
 
 	return (
 		<CardList className={className}>
-			{
-				teamspaces.length ? (
-					sortedTeamspaces.map((teamspace) => (
-						<TeamspaceCard
-							key={teamspace.name}
-							teamspaceName={teamspace.name}
-						/>
-					))
-				) : (
-					<>
-						<TeamspacePlaceholderCard />
-						<TeamspacePlaceholderCard />
-						<TeamspacePlaceholderCard />
-					</>
-				)
-			}
-			{ !!teamspaces.length && (<AddTeamspaceCard />) }
+			{sortedTeamspaces.map((teamspace) => (
+				<TeamspaceCard
+					key={teamspace.name}
+					teamspaceName={teamspace.name}
+				/>
+			))}
+			{teamspacesArePending && (
+				<>
+					<TeamspacePlaceholderCard />
+					<TeamspacePlaceholderCard />
+					<TeamspacePlaceholderCard />
+				</>
+			)}
 		</CardList>
 	);
 };

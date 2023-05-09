@@ -61,7 +61,9 @@ const modelNameType = (teamspace, project, model) => types.strings.title.test('n
 		if (model) {
 			models = models.flatMap((modelId) => (modelId === model ? [] : modelId));
 		}
-		const query = { _id: { $in: models }, name: value };
+
+		// eslint-disable-next-line security/detect-non-literal-regexp
+		const query = { _id: { $in: models }, name: new RegExp(`^${value}$`, 'i') };
 		await getModelByQuery(teamspace, query, { _id: 1 });
 		return false;
 	} catch (err) {
