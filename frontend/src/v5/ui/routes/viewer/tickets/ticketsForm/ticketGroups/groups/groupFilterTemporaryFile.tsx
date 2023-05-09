@@ -33,7 +33,7 @@ export const FiltersActionMenu = styled(ActionMenu).attrs({
 		},
 	}
 })`
-	padding: 16px;
+	padding: 14px;
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
 	display: flex;
 	flex-direction: column;
