@@ -15,34 +15,37 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button } from '@controls/button';
 import { useFormContext, useFieldArray } from 'react-hook-form';
 import { FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
 import { formatMessage } from '@/v5/services/intl';
 import { useEffect } from 'react';
-import { ValuesContainer, HiddenFormTextField } from './filterValueField.styles';
+import AddValueIcon from '@assets/icons/outlined/add_circle-outlined.svg';
+import RemoveValueIcon from '@assets/icons/outlined/remove_circle-outlined.svg';
+import { ValueIconContainer, ValuesContainer } from './filterValueField.styles';
 import { IFilterForm, OPERATIONS_TYPES } from '../groupFiltersForm.helpers';
 
 const VALUE_LABEL = formatMessage({ id: 'ticket.groups.value.label', defaultMessage: 'Value' });
 export const FilterValueField = () => {
-	const { control, watch, getValues } = useFormContext<IFilterForm>();
+	const { control, watch, reset, getValues } = useFormContext<IFilterForm>();
 	const { fields, append, remove } = useFieldArray({
 		control,
-		name: 'value',
+		name: 'values',
 	});
 
 	const operation = watch('operation');
 	const operationType = OPERATIONS_TYPES[operation];
 
-	useEffect(() => { remove(); }, [operationType]);
+	useEffect(() => {
+		remove();
+		const { values, ...resetData } = getValues();
+		reset(resetData);
+	}, [operationType]);
 
 	useEffect(() => {
-		if (!fields.length) {
-			append('');
+		if (!fields.length && operationType !== 'field') {
+			append({ value: '' });
 		}
-	}, [fields.length]);
-
-	useEffect(() => () => console.log("CLOSING"), []);
+	}, [fields]);
 
 	const FormValueField = ['text', 'regex'].includes(operationType) ? FormTextField : FormNumberField;
 
@@ -52,19 +55,22 @@ export const FilterValueField = () => {
 			<>
 				{fields.map((field, i) => (
 					<ValuesContainer>
-						<FormValueField label={VALUE_LABEL} name={`value.${i}`} key={field.id} required/>
-						<Button variant="contained" onClick={() => remove(i)}>-</Button>
-						<Button variant="contained" onClick={() => append(null)} disabled={i !== (fields.length-1)}>+</Button>
+						<FormValueField label={VALUE_LABEL} name={`values.${i}.value`} key={field.id} />
+						<ValueIconContainer onClick={() => remove(i)}>
+							<RemoveValueIcon />
+						</ValueIconContainer>
+						<ValueIconContainer onClick={() => append({ value: '' })} disabled={i !== (fields.length-1)}>
+							<AddValueIcon />
+						</ValueIconContainer>
 					</ValuesContainer>
 				))}
-				<Button onClick={() => console.log(getValues(), operationType)}>Log</Button>
 			</>
 		);
 	}
 
 	// single value type
 	if (['regex', 'numberComparison'].includes(operationType)) {
-		return (<FormValueField label={VALUE_LABEL} name="value" required />);
+		return (<FormValueField label={VALUE_LABEL} name="values.0.value" />);
 	}
 
 	// range value type
@@ -73,18 +79,16 @@ export const FilterValueField = () => {
 			<ValuesContainer>
 				<FormNumberField
 					label={formatMessage({ id: 'ticket.groups.rangeValue1.label', defaultMessage: 'Value 1'})}
-					name="value.0"
-					required
+					name="values.0.value"
 				/>
 				<FormNumberField
 					label={formatMessage({ id: 'ticket.groups.rangeValue2.label', defaultMessage: 'Value 2'})}
-					name="value.1"
-					required
+					name="values.1.value"
 				/>
 			</ValuesContainer>
 		);
 	}
 
-	// empty
-	return (<HiddenFormTextField label="" name="value.0" />);
+	// field value type
+	return (<></>);
 };
