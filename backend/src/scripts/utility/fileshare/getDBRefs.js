@@ -29,42 +29,35 @@ const FS = require('fs');
 
 const DEFAULT_OUT_FILE = 'links.csv';
 
-const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
-	logger.logInfo(`Writing results to ${outFile}`);
-	const writeStream = FS.createWriteStream(outFile);
-	results.forEach((record) => {
-		writeStream.write(`${record}\n`);
-	});
-
-	writeStream.end(resolve);
-});
-
 const run = async (dbNames, outFile = DEFAULT_OUT_FILE) => {
 	if (!dbNames?.length) {
 		throw new Error('Database name must be provided to execute this script');
 	}
 
-	const results = [];
 	const dbList = dbNames.split(',');
+	logger.logInfo(`Dump out a list of links and their file size on ${dbList.length} teamspaces`);
+
+	const writeStream = FS.createWriteStream(parsePath(outFile));
 
 	const excludeCols = ['.stash.json_mpc.ref', '.stash.unity3d.ref'];
 
 	for (const dbName of dbList) {
+		logger.logInfo(`-${dbName}`);
 		// eslint-disable-next-line no-await-in-loop
 		const collections = await getCollectionsEndsWith(dbName, '.ref');
 
 		for (let i = 0; i < collections.length; ++i) {
 			if (!some(excludeCols, (colExt) => collections[i].name.endsWith(colExt))) {
+				logger.logInfo(`\t-${collections[i].name}`);
 				// eslint-disable-next-line no-await-in-loop
-				const coll = await find(dbName, collections[i].name, { type: 'fs' }, { link: 1, size: 1 });
-				for (let j = 0; j < coll.length; ++j) {
-					results.push(`${coll[j].link},${coll[j].size}`);
-				}
+				const res = await find(dbName, collections[i].name, { type: 'fs' }, { link: 1, size: 1 });
+				res.forEach(({ link, size }) => {
+					writeStream.write(`${link},${size}\n`);
+				});
 			}
 		}
 	}
-
-	await writeResultsToFile(results, parsePath(outFile));
+	writeStream.end();
 };
 
 const genYargs =/* istanbul ignore next */ (yargs) => {
