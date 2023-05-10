@@ -16,24 +16,22 @@
  */
 
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import EditViewpointIcon from '@assets/icons/outlined/rotate_arrow-outlined.svg';
-import CreateViewpointIcon from '@assets/icons/outlined/add_circle-outlined.svg';
-import GotoViewpointIcon from '@assets/icons/outlined/aim-outlined.svg';
-
+import CameraIcon from '@assets/icons/outlined/camera-outlined.svg';
+import GroupsIcon from '@mui/icons-material/GroupWork';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
-import { MenuItem } from '@mui/material';
 import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
-import { ActionMenuItem } from '@controls/actionMenu';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 import { getViewerState, viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
 import { ViewpointsActions } from '@/v4/modules/viewpoints';
 import { useDispatch } from 'react-redux';
 import { BasicTicketImage } from '../basicTicketImage/basicTicketImage.component';
-import { ActionMenu, TicketImageAction } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
+import { EllipsisMenuItemDelete, ViewActionMenu } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
 import { TicketImageActionMenu } from '../basicTicketImage/ticketImageActionMenu.component';
+import { EllipsisMenu } from '@controls/ellipsisMenu';
+import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 
 type ITicketView = {
 	value: Viewpoint | undefined;
@@ -83,6 +81,7 @@ export const TicketView = ({
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
 
 	const imgSrc = getImgSrc(value?.screenshot);
+	const hasCamera = !!value?.camera;
 	return (
 		<BasicTicketImage
 			value={imgSrc}
@@ -90,39 +89,48 @@ export const TicketView = ({
 			disabled={disabled}
 			{...props}
 		>
-			{/* //TODO - delete after refactoring */}
-			<TicketImageAction onClick={onGroupsClick}>
-				<b>GROUPS</b>
-			</TicketImageAction>
-			<TicketImageAction onClick={goToViewpoint} disabled={disabled || !(value?.camera)}>
-				<GotoViewpointIcon />
-				<FormattedMessage id="viewer.card.ticketView.action.gotToViewpoint" defaultMessage="Go to viewpoint" />
-			</TicketImageAction>
-			{ !!(value?.camera) && (
-				<ActionMenu TriggerButton={(
-					<TicketImageAction disabled={disabled}>
-						<EditViewpointIcon />
-						<FormattedMessage id="viewer.card.ticketView.action.editViewpoint" defaultMessage="Edit viewpoint" />
-					</TicketImageAction>
-				)}
-				>
-					<ActionMenuItem>
-						<MenuItem onClick={updateViewpoint}>
-							<FormattedMessage id="viewer.card.ticketView.action.editMenu.updateViewpoint" defaultMessage="Update viewpoint" />
-						</MenuItem>
-						<MenuItem onClick={deleteViewpoint}>
-							<FormattedMessage id="viewer.card.ticketImage.action.editMenu.deleteViewpoint" defaultMessage="Delete viewpoint" />
-						</MenuItem>
-					</ActionMenuItem>
-				</ActionMenu>
-			)}
-			{ !(value?.camera) && (
-				<TicketImageAction onClick={updateViewpoint} disabled={disabled}>
-					<CreateViewpointIcon />
-					<FormattedMessage id="viewer.card.ticketView.action.createViewpoint" defaultMessage="Create viewpoint" />
-				</TicketImageAction>
-			)}
-			{ !disabled && (<TicketImageActionMenu value={imgSrc} onChange={onImageChange} />)}
+			{/* Image */}
+			{!disabled && (<TicketImageActionMenu value={imgSrc} onChange={onImageChange} />)}
+			{/* Camera */}
+			<ViewActionMenu>
+				<CameraIcon />
+				<FormattedMessage id="viewer.card.ticketView.actionMenu.camera" defaultMessage="Camera" />
+				<EllipsisMenu disabled={disabled}>
+					<EllipsisMenuItem
+						hidden={hasCamera}
+						title={(<FormattedMessage id="viewer.card.ticketView.action.createViewpoint" defaultMessage="Create viewpoint" />)}
+						onClick={updateViewpoint}
+					/>
+					<EllipsisMenuItem
+						hidden={!hasCamera}
+						title={(<FormattedMessage id="viewer.card.ticketView.action.gotToViewpoint" defaultMessage="Go to viewpoint" />)}
+						onClick={goToViewpoint}
+						disabled={!hasCamera}
+					/>
+					<EllipsisMenuItem
+						hidden={!hasCamera}
+						title={(<FormattedMessage id="viewer.card.ticketView.action.updateViewpoint" defaultMessage="Update viewpoint" />)}
+						onClick={updateViewpoint}
+					/>
+					<EllipsisMenuItemDelete
+						hidden={!hasCamera}
+						title={<FormattedMessage id="viewer.card.ticketImage.action.editMenu.deleteViewpoint" defaultMessage="Delete viewpoint" />}
+						onClick={deleteViewpoint}
+					/>
+				</EllipsisMenu>
+			</ViewActionMenu>
+			{/* Groups */}
+			<ViewActionMenu>
+				<GroupsIcon />
+				<FormattedMessage id="viewer.card.ticketView.actionMenu.groups" defaultMessage="Groups" />
+				<EllipsisMenu>
+					{/* use conditional text for title when groups can be retreived */}
+					<EllipsisMenuItem
+						title={(<FormattedMessage id="viewer.card.ticketView.action.gotToViewpoint" defaultMessage="Create / Edit groups" />)}
+						onClick={onGroupsClick}
+					/>
+				</EllipsisMenu>
+			</ViewActionMenu>
 		</BasicTicketImage>
 	);
 };

@@ -19,7 +19,7 @@ import { getSupportedImageExtensions, convertFileToImageSrc } from '@controls/fi
 import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { FormControl, FormHelperText } from '@mui/material';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ActionsList, ActionsSide, Container, Label } from './basicTicketImage.styles';
+import { Actions, Container, Content, Label } from './basicTicketImage.styles';
 import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplayer.component';
 
 type BasicTicketImageProps = Omit<FormInputProps, 'onBlur'> & {
@@ -47,15 +47,17 @@ export const BasicTicketImage = ({
 	return (
 		<FormControl error={error} required={required}>
 			<Container className={className} error={error} disabled={disabled}>
-				<ActionsSide>
-					<Label>{label}</Label>
-					<ActionsList>{children}</ActionsList>
-				</ActionsSide>
-				<TicketImageDisplayer
-					imgSrc={value}
-					disabled={disabled || !isProjectAdmin}
-					onEmptyImageClick={uploadImage}
-				/>
+				<Label>{label}</Label>
+				<Content>
+					<TicketImageDisplayer
+						imgSrc={value}
+						disabled={disabled || !isProjectAdmin}
+						onEmptyImageClick={uploadImage}
+					/>
+					<Actions>
+						{children}
+					</Actions>
+				</Content>
 			</Container>
 			<FormHelperText>{helperText}</FormHelperText>
 		</FormControl>

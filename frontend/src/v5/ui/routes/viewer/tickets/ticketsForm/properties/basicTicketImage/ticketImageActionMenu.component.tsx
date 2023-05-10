@@ -16,34 +16,14 @@
  */
 
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import { ActionMenuItem } from '@controls/actionMenu';
 import { getSupportedImageExtensions, convertFileToImageSrc } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
-import { MenuItem } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import AddImageIcon from '@assets/icons/outlined/add_image-outlined.svg';
-import EditImageIcon from '@assets/icons/outlined/edit-outlined.svg';
-import { ActionMenu, MenuItemDelete, TicketImageAction } from './ticketImageAction/ticketImageAction.styles';
+import FileIcon from '@assets/icons/outlined/file-outlined.svg';
+import { EllipsisMenu } from '@controls/ellipsisMenu';
+import { EllipsisMenuItemDelete, EllipsisMenuItem, ViewActionMenu } from './ticketImageAction/ticketImageAction.styles';
 
-const TriggerButton = ({ hasImage }) => {
-	if (!hasImage) {
-		return (
-			<TicketImageAction>
-				<AddImageIcon />
-				<FormattedMessage id="viewer.card.ticketImage.action.addImage" defaultMessage="Add image" />
-			</TicketImageAction>
-		);
-	}
-
-	return (
-		<TicketImageAction>
-			<EditImageIcon />
-			<FormattedMessage id="viewer.card.ticketImage.action.editImage" defaultMessage="Edit image" />
-		</TicketImageAction>
-	);
-};
-
-export const TicketImageActionMenu = ({ value, onChange }) => {
+export const TicketImageActionMenu = ({ value, onChange, disabled = false }) => {
 	const uploadScreenshot = async () => onChange(await ViewerService.getScreenshot());
 
 	const uploadImage = async () => {
@@ -54,22 +34,28 @@ export const TicketImageActionMenu = ({ value, onChange }) => {
 
 	const deleteImage = () => onChange(null);
 
-	const hasImage = !!value;
 	return (
-		<ActionMenu TriggerButton={<div><TriggerButton hasImage={hasImage} /></div>}>
-			<ActionMenuItem>
-				<MenuItem onClick={uploadScreenshot}>
-					<FormattedMessage id="viewer.card.ticketImage.action.createScreenshot" defaultMessage="Create screenshot" />
-				</MenuItem>
-				<MenuItem onClick={uploadImage}>
-					<FormattedMessage id="viewer.card.ticketImage.action.uploadImage" defaultMessage="Upload image" />
-				</MenuItem>
-				{hasImage && (
-					<MenuItemDelete onClick={deleteImage}>
-						<FormattedMessage id="viewer.card.ticketImage.action.deleteImage" defaultMessage="Delete image" />
-					</MenuItemDelete>
-				)}
-			</ActionMenuItem>
-		</ActionMenu>
+		<ViewActionMenu>
+			<FileIcon />
+			<FormattedMessage id="viewer.card.ticketView.actionMenu.image" defaultMessage="Image" />
+			<EllipsisMenu>
+				<EllipsisMenuItem
+					title={<FormattedMessage id="viewer.card.ticketImage.action.createScreenshot" defaultMessage="Create screenshot" />}
+					onClick={uploadScreenshot}
+					disabled={disabled}
+				/>
+				<EllipsisMenuItem
+					title={<FormattedMessage id="viewer.card.ticketImage.action.uploadImage" defaultMessage="Upload image" />}
+					onClick={uploadImage}
+					disabled={disabled}
+				/>
+				<EllipsisMenuItemDelete
+					title={<FormattedMessage id="viewer.card.ticketImage.action.deleteImage" defaultMessage="Delete image" />}
+					onClick={deleteImage}
+					disabled={disabled}
+					hidden={!value}
+				/>
+			</EllipsisMenu>
+		</ViewActionMenu>
 	);
 };

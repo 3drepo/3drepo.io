@@ -31,8 +31,7 @@ export const Container = styled.div<{ error?: boolean, disabled?: boolean; }>`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	border-radius: 8px;
 	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
+	flex-direction: column;
 
 	${({ error, theme }) => error && css`
 		border: solid 1px ${theme.palette.error.main};
@@ -43,20 +42,25 @@ export const Container = styled.div<{ error?: boolean, disabled?: boolean; }>`
 export const Label = styled(InputLabel)`
 	${({ theme }) => theme.typography.h5}
 	color: inherit;
-	margin-bottom: 2px;
+	margin-bottom: 8px;
 	max-width: 100%;
 	word-wrap: break-word;
 	text-overflow: ellipsis;
 `;
 
-export const ActionsSide = styled.div`
+export const Content = styled.div`
 	display: flex;
-	flex-direction: column;
-	max-width: 40%;
+	flex-direction: row;
+	justify-content: space-between;
+	gap: 11px;
+
+	& > * {
+		width: 50%;
+	}
 `;
 
-export const ActionsList = styled.ul`
-	list-style-type: none;
-	padding: 0;
-	margin: 0;
+export const Actions = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
 `;

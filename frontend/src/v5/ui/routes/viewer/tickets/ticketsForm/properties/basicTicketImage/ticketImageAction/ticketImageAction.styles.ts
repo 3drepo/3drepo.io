@@ -1,4 +1,4 @@
-/**
+  /**
  *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -15,59 +15,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
-import { Menu } from '@controls/actionMenu/actionMenu.styles';
-import MenuItemBase from '@mui/material/MenuItem';
+import styled from 'styled-components';
+import { EllipsisMenuItem as EllipsisMenuItemBase } from '@controls/ellipsisMenu/ellipsisMenuItem';
+import { MenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenuItem.styles';
 
-export const TicketImageAction = styled.li<{ disabled?: boolean }>`
-	line-height: 20px;
-	font-weight: 500;
-	font-size: 10px;
-	color: ${({ theme }) => theme.palette.base.main};
-	display: flex;
-	align-items: center;
-
-	& svg {
-		margin-right: 4px;
-		width: 12px;
-	}
-	
-	&:hover {
-		cursor: pointer;
-		color: ${({ theme }) => theme.palette.secondary.main};
-	}
-
-	${({ disabled, theme }) => disabled && css`
-		&, &:hover {
-			cursor: default;
-			pointer-events: none;
-			color: ${theme.palette.secondary.lightest};
-		}
-	`}
-`;
-
-export const ActionMenu = styled(ActionMenuBase).attrs({
-	PopoverProps: {
-		anchorOrigin: {
-			vertical: 'bottom',
-			horizontal: 'left',
-		},
-		transformOrigin: {
-			vertical: 'top',
-			horizontal: 'left',
-		},
-	},
-})`
-	${Menu} {
-		padding: 4px 0;
-	}
-`;
-
-export const MenuItem = styled(MenuItemBase)`
+export const EllipsisMenuItem = styled(EllipsisMenuItemBase)`
 	padding: 5px 12px;
 `;
 
-export const MenuItemDelete = styled(MenuItem)`
+export const EllipsisMenuItemDelete = styled(EllipsisMenuItem)`
 	color: ${({ theme }) => theme.palette.error.main};
+`;
+
+export const ViewActionMenu = styled.li`
+	line-height: 20px;
+	font-weight: 500;
+	font-size: 12px;
+	color: ${({ theme }) => theme.palette.secondary.main};
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	border-radius: 5px;
+    display: grid;
+	align-items: center;
+    grid-template-columns: auto 1fr auto;
+	padding-left: 11px;
+	box-sizing: border-box;
+	height: 36px;
+	
+	& > svg {
+		margin: 0 4px 2px 0;
+		width: 13px;
+		height: 13px;
+	}
+
+	${MenuItem} {
+		margin-left: auto;
+	}
 `;
