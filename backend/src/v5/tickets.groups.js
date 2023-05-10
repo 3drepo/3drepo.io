@@ -39,10 +39,6 @@ const validateGroup = async (req, res, next) => {
 		req.body = await schema(false, true).validate(req.body, { stripUnknown: true });
 		req.body = deserialiseGroup(req.body);
 
-		if (!Object.keys(req.body).length) {
-			throw createResponseCode(templates.invalidArguments, 'No valid property to update');
-		}
-
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err.message));

@@ -17,7 +17,7 @@
 
 const GROUPS_COL = 'tickets.groups';
 
-const { deleteMany, find, findOne, insertMany } = require('../handler/db');
+const { deleteMany, find, findOne, insertMany, updateOne } = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
 
 const Groups = {};
@@ -33,6 +33,18 @@ Groups.deleteGroups = async (teamspace, project, model, ticket, groupIds) => {
 
 Groups.getGroupsByIds = (teamspace, project, model, ticket, groupIds, projection) => find(
 	teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
+
+Groups.updateGroup = (teamspace, project, model, ticket, groupId, data) => {
+	const updates = { $set: data };
+
+	if (data.rules) {
+		updates.$unset = { objects: 1 };
+	} else if (data.objects) {
+		updates.$unset = { rules: 1 };
+	}
+	return updateOne(
+		teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: groupId }, updates);
+};
 
 Groups.getGroupById = async (teamspace, project, model, ticket, groupId,
 	projection = { teamspace: 0, project: 0, model: 0, ticket: 0 }) => {
