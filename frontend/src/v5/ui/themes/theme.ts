@@ -752,6 +752,19 @@ export const theme = createTheme({
 				},
 			},
 		},
+		MuiListSubheader: {
+			styleOverrides: {
+				root: {
+					fontWeight: 700,
+					padding: '5px 12px 0',
+					lineHeight: '35px',
+
+					'&:first-of-type': {
+						paddingTop: 0,
+					},
+				},
+			},
+		},
 		MuiListItem: {
 			styleOverrides: {
 				root: {
