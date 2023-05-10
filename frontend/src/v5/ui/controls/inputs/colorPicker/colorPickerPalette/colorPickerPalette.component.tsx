@@ -57,7 +57,7 @@ export const ColorPickerPalette = ({ value, onClose }: ColorPickerPaletteProps) 
 				<ColorGrid>
 					<ColorOption onClick={() => setColor(null)} />
 					{DEFAULT_SUGGESTED_HEX_COLORS.map((suggestedColor) => (
-						<ColorOption $color={suggestedColor} onClick={() => setColor(suggestedColor)} />
+						<ColorOption $color={suggestedColor} onClick={() => setColor(suggestedColor)} key={suggestedColor} />
 					))}
 				</ColorGrid>
 				<BottomBar>
