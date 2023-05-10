@@ -60,7 +60,8 @@ const determineColList = async (dbName, toInclude, toExclude) => {
 	return collections.filter(({ name }) => !colsToExclude.includes(name));
 };
 
-const run = async (includeDB, excludeDB, includeCol, excludeCol, outFile = DEFAULT_OUT_FILE) => {
+const run = async (includeDB, excludeDB, includeCol, excludeCol,
+	outFile = DEFAULT_OUT_FILE, refsInParallel = ENTRIES_TO_PROCESS) => {
 	const dbList = await determineDBList(includeDB, excludeDB);
 
 	logger.logInfo(`Dump out a list of links and their file size on ${dbList.length} teamspaces`);
@@ -81,7 +82,7 @@ const run = async (includeDB, excludeDB, includeCol, excludeCol, outFile = DEFAU
 				const query = lastId ? { type: 'fs', _id: { $gt: lastId } } : { type: 'fs' };
 				// eslint-disable-next-line no-await-in-loop
 				const res = await find(dbName, colName, query,
-					{ link: 1, size: 1 }, { _id: 1 }, ENTRIES_TO_PROCESS);
+					{ link: 1, size: 1 }, { _id: 1 }, refsInParallel);
 				if (!res.length) break;
 				res.forEach(({ link, size }) => {
 					writeStream.write(`${link},${size}\n`);
@@ -109,6 +110,11 @@ const genYargs =/* istanbul ignore next */ (yargs) => {
 		describe: 'list of collection extensions to exclude (comma separated)',
 		type: 'string',
 	})
+		.option('refsInParallel', {
+			describe: 'list of collection extensions to exclude (comma separated)',
+			type: 'number',
+			default: ENTRIES_TO_PROCESS,
+		})
 		.option('outFile', {
 			describe: 'Name of output file',
 			type: 'string',
@@ -118,8 +124,8 @@ const genYargs =/* istanbul ignore next */ (yargs) => {
 		commandName,
 		'Get all ref links from database and output to console',
 		argsSpec,
-		({ includeDB, excludeDB, includeCol, excludeCol, outFile }) => run(
-			includeDB, excludeDB, includeCol, excludeCol, outFile),
+		({ includeDB, excludeDB, includeCol, excludeCol, outFile, refsInParallel }) => run(
+			includeDB, excludeDB, includeCol, excludeCol, outFile, refsInParallel),
 	);
 };
 
