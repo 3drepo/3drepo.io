@@ -25,14 +25,15 @@ export interface IEllipsisMenu {
 	selected?: boolean;
 	children: any;
 	className?: string;
+	disabled?: boolean;
 }
 
-export const EllipsisMenu = ({ selected, children, className }: IEllipsisMenu): JSX.Element => (
+export const EllipsisMenu = ({ selected, children, className, disabled }: IEllipsisMenu): JSX.Element => (
 	<ActionMenu
 		TriggerButton={(
 			<Tooltip title={formatMessage({ id: 'ellipsisMenu.tooltip', defaultMessage: 'More options' })}>
 				<div>
-					<EllipsisButton variant={selected ? 'secondary' : 'primary'}>
+					<EllipsisButton variant={selected ? 'secondary' : 'primary'} disabled={disabled}>
 						<EllipsisIcon />
 					</EllipsisButton>
 				</div>
