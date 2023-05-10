@@ -34,9 +34,13 @@ export const FiltersActionMenu = styled(ActionMenu).attrs({
 		},
 	},
 })`
+	.MuiPaper-root {
+		margin-left: 15px;
+		box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
+	}
+
 	${Menu} {
 		padding: 14px;
-		box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
 		display: flex;
 		flex-direction: column;
 		width: 328px;
