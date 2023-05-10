@@ -26,11 +26,11 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { GroupFiltersSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { selectMetaKeys } from '@/v4/modules/model';
 import { useSelector } from 'react-redux';
+import { Autocomplete } from '@mui/material';
 import { Buttons, Form, InputsContainer } from './groupFiltersForm.styles';
 import { IFilter, IFilterForm } from './groupFiltersForm.helpers';
 import { FilterOperationSelect } from './filterOperationSelect/filterOperationSelect.component';
 import { FilterValueField } from './filterValueField/filterValueField.component';
-import { Autocomplete } from '@mui/material';
 
 const DEFAULT_VALUES: IFilterForm = {
 	field: null,
@@ -52,7 +52,7 @@ export const GroupFiltersForm = ({ onBlur }: IGroupFilters) => {
 		formState: { isValid },
 	} = formData;
 
-	const onSubmit = ({ field, operation, values}: IFilterForm) => {
+	const onSubmit = ({ field, operation, values }: IFilterForm) => {
 		const filterData: IFilter = { field, operation };
 		if (values?.length) {
 			filterData.values = values.map((v) => v.value);
@@ -71,11 +71,11 @@ export const GroupFiltersForm = ({ onBlur }: IGroupFilters) => {
 							<FormTextField
 								{...formTextFieldProps}
 								label={formatMessage({ id: 'tickets.groups.field', defaultMessage: 'Field' })}
-								name='field'
+								name="field"
 							/>
 						)}
 					/>
-					<FilterOperationSelect/>
+					<FilterOperationSelect />
 					<FilterValueField />
 				</InputsContainer>
 				<Buttons>

@@ -22,7 +22,7 @@ import { formatMessage } from '@/v5/services/intl';
 
 export const FilterOperationSelect = () => (
 	<FormSelect
-		name='operation'
+		name="operation"
 		label={formatMessage({ id: 'tickets.groups.operation.label', defaultMessage: 'Operation' })}
 	>
 		{/* Field */}

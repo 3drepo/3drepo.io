@@ -16,21 +16,21 @@
  */
 
 export const OPERATIONS_TYPES = {
-	"EXISTS": 'field',
-	"NOT_EXISTS": 'field',
-	"IS": 'text',
-	"IS_NOT": 'text',
-	"CONTAINS": 'text',
-	"NOT_CONTAINS": 'text',
-	"REGEX": 'regex',
-	"EQUALS": 'number',
-	"NOT_EQUALS": 'number',
-	"GT": 'numberComparison',
-	"GTE": 'numberComparison',
-	"LT": 'numberComparison',
-	"LTE": 'numberComparison',
-	"IN_RANGE": 'numberRange',
-	"NOT_IN_RANGE": 'numberRange',
+	EXISTS: 'field',
+	NOT_EXISTS: 'field',
+	IS: 'text',
+	IS_NOT: 'text',
+	CONTAINS: 'text',
+	NOT_CONTAINS: 'text',
+	REGEX: 'regex',
+	EQUALS: 'number',
+	NOT_EQUALS: 'number',
+	GT: 'numberComparison',
+	GTE: 'numberComparison',
+	LT: 'numberComparison',
+	LTE: 'numberComparison',
+	IN_RANGE: 'numberRange',
+	NOT_IN_RANGE: 'numberRange',
 } as const;
 
 export type Operation = keyof typeof OPERATIONS_TYPES;

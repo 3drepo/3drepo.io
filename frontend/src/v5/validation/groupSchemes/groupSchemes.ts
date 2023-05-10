@@ -30,5 +30,5 @@ const valueType = Yup.object({ value: requiredTrimmedString });
 export const GroupFiltersSchema = Yup.object().shape({
 	field: requiredTrimmedString,
 	operation: requiredTrimmedString,
-	values: Yup.array(valueType),
+	values: Yup.array().of(valueType),
 });

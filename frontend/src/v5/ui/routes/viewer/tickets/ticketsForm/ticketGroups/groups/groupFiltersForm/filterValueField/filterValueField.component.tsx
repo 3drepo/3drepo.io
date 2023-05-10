@@ -59,7 +59,7 @@ export const FilterValueField = () => {
 						<ValueIconContainer onClick={() => remove(i)}>
 							<RemoveValueIcon />
 						</ValueIconContainer>
-						<ValueIconContainer onClick={() => append({ value: '' })} disabled={i !== (fields.length-1)}>
+						<ValueIconContainer onClick={() => append({ value: '' })} disabled={i !== (fields.length - 1)}>
 							<AddValueIcon />
 						</ValueIconContainer>
 					</ValuesContainer>
@@ -78,11 +78,11 @@ export const FilterValueField = () => {
 		return (
 			<ValuesContainer>
 				<FormNumberField
-					label={formatMessage({ id: 'ticket.groups.rangeValue1.label', defaultMessage: 'Value 1'})}
+					label={formatMessage({ id: 'ticket.groups.rangeValue1.label', defaultMessage: 'Value 1' })}
 					name="values.0.value"
 				/>
 				<FormNumberField
-					label={formatMessage({ id: 'ticket.groups.rangeValue2.label', defaultMessage: 'Value 2'})}
+					label={formatMessage({ id: 'ticket.groups.rangeValue2.label', defaultMessage: 'Value 2' })}
 					name="values.1.value"
 				/>
 			</ValuesContainer>

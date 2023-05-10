@@ -20,12 +20,12 @@ import styled from 'styled-components';
 export const ValuesContainer = styled.div`
 	display: flex;
 	flex-direction: row;
-    align-items: end;
+	align-items: end;
 	gap: 10px;
 `;
 
 export const ValueIconContainer = styled.div<{ disabled?: boolean }>`
-	color: ${({ theme: { palette }, disabled }) => disabled ? palette.base.light : palette.secondary.main};
+	color: ${({ theme: { palette }, disabled }) => (disabled ? palette.base.light : palette.secondary.main)};
 	margin-bottom: 10px;
 	cursor: pointer;
 `;
