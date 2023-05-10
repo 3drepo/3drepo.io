@@ -26,6 +26,7 @@ export const Form = styled.form`
 `;
 
 export const InputsContainer = styled.div`
+	min-height: 112px;
 	max-height: 400px;
 	overflow-y: overlay;
 	padding: 2px;
