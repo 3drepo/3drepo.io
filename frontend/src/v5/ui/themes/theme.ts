@@ -542,6 +542,7 @@ export const theme = createTheme({
 					padding: '2px',
 				},
 				listbox: {
+					overflow: 'overlay',
 					'.MuiAutocomplete-option': {
 						height: 'auto',
 						alignItems: 'baseline',
