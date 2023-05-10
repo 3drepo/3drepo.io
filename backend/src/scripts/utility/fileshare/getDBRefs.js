@@ -20,9 +20,7 @@ const { v5Path } = require('../../../interop');
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getCollectionsEndsWith, parsePath } = require('../../utils');
 
-const { find, count } = require(`${v5Path}/handler/db`);
-
-const { some } = require('lodash');
+const { find, listDatabases } = require(`${v5Path}/handler/db`);
 
 const Path = require('path');
 const FS = require('fs');
@@ -31,39 +29,66 @@ const DEFAULT_OUT_FILE = 'links.csv';
 
 const ENTRIES_TO_PROCESS = 50000;
 
-const run = async (dbNames, outFile = DEFAULT_OUT_FILE) => {
-	if (!dbNames?.length) {
-		throw new Error('Database name must be provided to execute this script');
+const determineDBList = async (toInclude, toExclude) => {
+	if (toInclude?.length && toExclude?.length) {
+		throw new Error('Cannot specify both databases to include and exclude.');
 	}
 
-	const dbList = dbNames.split(',');
+	if (toInclude) {
+		return toInclude.split(',');
+	}
+
+	const dbsToExclude = toExclude ? toExclude.split(',') : [];
+
+	const dbList = await listDatabases();
+
+	return dbList.flatMap(({ name }) => (dbsToExclude.includes(name) ? [] : name));
+};
+
+const determineColList = async (dbName, toInclude, toExclude) => {
+	if (toInclude?.length && toExclude?.length) {
+		throw new Error('Cannot specify both collections to include and exclude.');
+	}
+
+	if (toInclude) {
+		const cols = await Promise.all(toInclude.split(',').map((ext) => getCollectionsEndsWith(dbName, ext)));
+		return cols.flat();
+	}
+
+	const colsToExclude = toExclude ? toExclude.split(',') : [];
+	const collections = await getCollectionsEndsWith(dbName, '.ref');
+	return collections.filter(({ name }) => !colsToExclude.includes(name));
+};
+
+const run = async (includeDB, excludeDB, includeCol, excludeCol, outFile = DEFAULT_OUT_FILE) => {
+	const dbList = await determineDBList(includeDB, excludeDB);
+
 	logger.logInfo(`Dump out a list of links and their file size on ${dbList.length} teamspaces`);
 
 	const writeStream = FS.createWriteStream(parsePath(outFile));
 
-	const excludeCols = ['.stash.json_mpc.ref', '.stash.unity3d.ref', '.scene.ref'];
-
 	for (const dbName of dbList) {
 		logger.logInfo(`-${dbName}`);
 		// eslint-disable-next-line no-await-in-loop
-		const collections = await getCollectionsEndsWith(dbName, '.ref');
+		const collections = await determineColList(dbName, includeCol, excludeCol);
 
 		for (const { name: colName } of collections) {
-			if (!some(excludeCols, (colExt) => colName.endsWith(colExt))) {
-				// eslint-disable-next-line no-await-in-loop
-				const nItems = await count(dbName, colName, { type: 'fs' }, { _id: 1 });
+			logger.logInfo(`\t-${colName}`);
 
-				if (nItems) {
-					logger.logInfo(`\t-${colName}`);
-					for (let i = 0; i < nItems; i += ENTRIES_TO_PROCESS) {
-						// eslint-disable-next-line no-await-in-loop
-						const res = await find(dbName, colName, { type: 'fs' }, { link: 1, size: 1 }, { _id: 1 }, ENTRIES_TO_PROCESS, i);
-						res.forEach(({ link, size }) => {
-							writeStream.write(`${link},${size}\n`);
-						});
-					}
-				}
+			let lastId;
+			// eslint-disable-next-line no-constant-condition
+			while (true) {
+				const query = lastId ? { type: 'fs', _id: { $gt: lastId } } : { type: 'fs' };
+				// eslint-disable-next-line no-await-in-loop
+				const res = await find(dbName, colName, query,
+					{ link: 1, size: 1 }, { _id: 1 }, ENTRIES_TO_PROCESS);
+				if (!res.length) break;
+				res.forEach(({ link, size }) => {
+					writeStream.write(`${link},${size}\n`);
+				});
+				lastId = res[res.length - 1]._id;
 			}
+			// }
 		}
 	}
 	writeStream.end();
@@ -71,20 +96,30 @@ const run = async (dbNames, outFile = DEFAULT_OUT_FILE) => {
 
 const genYargs =/* istanbul ignore next */ (yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
-	const argsSpec = (subYargs) => subYargs.option('database', {
-		describe: 'Database name (comma separated)',
+	const argsSpec = (subYargs) => subYargs.option('includeDB', {
+		describe: 'list of databases extensions to include (comma separated)',
 		type: 'string',
-		demandOption: true,
-	}).option('outFile', {
-		describe: 'Name of output file',
+	}).option('excludeDB', {
+		describe: 'list of databases extensions to exclude (comma separated)',
 		type: 'string',
-		default: DEFAULT_OUT_FILE,
-	});
+	}).option('includeCol', {
+		describe: 'list of collection extensions to include (comma separated)',
+		type: 'string',
+	}).option('excludeCol', {
+		describe: 'list of collection extensions to exclude (comma separated)',
+		type: 'string',
+	})
+		.option('outFile', {
+			describe: 'Name of output file',
+			type: 'string',
+			default: DEFAULT_OUT_FILE,
+		});
 	return yargs.command(
 		commandName,
 		'Get all ref links from database and output to console',
 		argsSpec,
-		(argv) => run(argv.database, argv.outFile),
+		({ includeDB, excludeDB, includeCol, excludeCol, outFile }) => run(
+			includeDB, excludeDB, includeCol, excludeCol, outFile),
 	);
 };
 
