@@ -20,7 +20,7 @@ const { v5Path } = require('../../../interop');
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getCollectionsEndsWith, parsePath } = require('../../utils');
 
-const { find, listDatabases } = require(`${v5Path}/handler/db`);
+const { find, listDatabases, count } = require(`${v5Path}/handler/db`);
 
 const Path = require('path');
 const FS = require('fs');
@@ -68,13 +68,17 @@ const run = async (includeDB, excludeDB, includeCol, excludeCol,
 
 	const writeStream = FS.createWriteStream(parsePath(outFile));
 
+	let refCount = 0;
+
 	for (const dbName of dbList) {
 		logger.logInfo(`-${dbName}`);
 		// eslint-disable-next-line no-await-in-loop
 		const collections = await determineColList(dbName, includeCol, excludeCol);
 
 		for (const { name: colName } of collections) {
-			logger.logInfo(`\t-${colName}`);
+			// eslint-disable-next-line no-await-in-loop
+			const refsExpected = await count(dbName, colName, { type: 'fs' });
+			logger.logInfo(`\t-${colName} [${refsExpected} refs]`);
 
 			let lastId;
 			// eslint-disable-next-line no-constant-condition
@@ -84,10 +88,13 @@ const run = async (includeDB, excludeDB, includeCol, excludeCol,
 				const res = await find(dbName, colName, query,
 					{ link: 1, size: 1 }, { _id: 1 }, refsInParallel);
 				if (!res.length) break;
+				logger.logInfo(`\t\t\tWriting ${res.length} entries. (${refCount} completed)`);
 				res.forEach(({ link, size }) => {
 					writeStream.write(`${link},${size}\n`);
 				});
 				lastId = res[res.length - 1]._id;
+
+				refCount += res.length;
 			}
 			// }
 		}
