@@ -78,25 +78,33 @@ const run = async (includeDB, excludeDB, includeCol, excludeCol,
 		for (const { name: colName } of collections) {
 			// eslint-disable-next-line no-await-in-loop
 			const refsExpected = await count(dbName, colName, { type: 'fs' });
-			logger.logInfo(`\t-${colName} [${refsExpected} refs]`);
 
-			let lastId;
-			// eslint-disable-next-line no-constant-condition
-			while (true) {
-				const query = lastId ? { type: 'fs', _id: { $gt: lastId } } : { type: 'fs' };
-				// eslint-disable-next-line no-await-in-loop
-				const res = await find(dbName, colName, query,
-					{ link: 1, size: 1 }, { _id: 1 }, refsInParallel);
-				if (!res.length) break;
-				logger.logInfo(`\t\t\tWriting ${res.length} entries. (${refCount} completed)`);
-				res.forEach(({ link, size }) => {
-					writeStream.write(`${link},${size}\n`);
+			if (refsExpected) {
+				logger.logInfo(`\t-${colName} [${refsExpected} refs]`);
+				const drainProm = new Promise((resolve) => {
+					writeStream.once('drain', resolve);
 				});
-				lastId = res[res.length - 1]._id;
 
-				refCount += res.length;
+				let lastId;
+				// eslint-disable-next-line no-constant-condition
+				while (true) {
+					const query = lastId ? { type: 'fs', _id: { $gt: lastId } } : { type: 'fs' };
+					// eslint-disable-next-line no-await-in-loop
+					const res = await find(dbName, colName, query,
+						{ link: 1, size: 1 }, { _id: 1 }, refsInParallel);
+					if (!res.length) break;
+					logger.logInfo(`\t\t\tWriting ${res.length} entries. (${refCount} completed)`);
+					res.forEach(({ link, size }) => {
+						writeStream.write(`${link},${size}\n`);
+					});
+					lastId = res[res.length - 1]._id;
+
+					refCount += res.length;
+				}
+
+				// eslint-disable-next-line no-await-in-loop
+				await drainProm;
 			}
-			// }
 		}
 	}
 	writeStream.end();
