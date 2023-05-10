@@ -16,7 +16,7 @@
  */
 
 import { COLOR } from '@/v5/ui/themes/theme';
-import { getUserNamesInitials } from '@controls/avatar/avatar.component';
+import { getUserInitials } from '@/v5/store/users/users.helpers';
 import { PopoverCircle } from '../popoverCircle.styles';
 
 export const UserCircle = ({ user, ...props }) => (
@@ -25,6 +25,6 @@ export const UserCircle = ({ user, ...props }) => (
 		backgroundColor={COLOR.SECONDARY_MAIN}
 		{...props}
 	>
-		{getUserNamesInitials(user)}
+		{getUserInitials(user)}
 	</PopoverCircle>
 );
