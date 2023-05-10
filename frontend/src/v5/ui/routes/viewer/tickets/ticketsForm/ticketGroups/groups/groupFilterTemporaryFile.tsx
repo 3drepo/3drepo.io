@@ -17,6 +17,7 @@
 
 import { FormattedMessage } from 'react-intl';
 import { ActionMenu } from '@controls/actionMenu';
+import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 import { GroupFiltersForm } from './groupFiltersForm/groupFiltersForm.component';
@@ -31,14 +32,16 @@ export const FiltersActionMenu = styled(ActionMenu).attrs({
 			vertical: 'top',
 			horizontal: 'left',
 		},
-	}
+	},
 })`
-	padding: 14px;
-	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
-	display: flex;
-	flex-direction: column;
-	width: 328px;
-	border-radius: 10px;
+	${Menu} {
+		padding: 14px;
+		box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
+		display: flex;
+		flex-direction: column;
+		width: 328px;
+		border-radius: 10px;
+	}
 `;
 
 export const TriggerButton = styled(Typography).attrs({
@@ -50,11 +53,13 @@ export const TriggerButton = styled(Typography).attrs({
 `;
 
 export const GroupFiltersWithTriggerButton = () => (
-	<FiltersActionMenu TriggerButton={(
-		<TriggerButton>
-			<FormattedMessage id="tickets.groups.addFilter" defaultMessage="Add filter" />
-		</TriggerButton>
-	)}>
+	<FiltersActionMenu
+		TriggerButton={(
+			<TriggerButton>
+				<FormattedMessage id="tickets.groups.addFilter" defaultMessage="Add filter" />
+			</TriggerButton>
+		)}
+	>
 		<GroupFiltersForm />
 	</FiltersActionMenu>
 );

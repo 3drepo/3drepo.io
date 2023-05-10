@@ -74,7 +74,7 @@ export const ActionMenu = ({
 					vertical: 'top',
 					horizontal: 'center',
 				}}
-				PaperProps={{ className }}
+				className={className}
 				{...PopoverProps}
 				onClick={handlePopoverClick}
 			>

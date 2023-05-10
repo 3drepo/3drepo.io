@@ -21,18 +21,22 @@ import { ActionMenuContext } from '../actionMenuContext';
 type ActionMenuItemProps = {
 	className?: string;
 	children?: React.ReactNode;
+	disabled?: boolean;
 	onClick?: (e) => void;
 };
 
 export const ActionMenuItem = ({
 	onClick,
+	disabled,
 	...props
 }: ActionMenuItemProps) => {
 	const { close } = useContext(ActionMenuContext);
 
 	const handleClick = (e) => {
 		onClick?.(e);
-		close(e);
+		if (!disabled) {
+			close();
+		}
 	};
 
 	return (<MenuItem onClick={handleClick} {...props} />);
