@@ -20,7 +20,7 @@ import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { BasicTicketImage } from '../basicTicketImage.component';
-import { TicketViewActionMenu } from '../ticketImageActionMenu.component';
+import { TicketImageActionMenu } from '../ticketImageActionMenu.component';
 
 export const TicketImage = ({ value, onChange, onBlur, ...props }: FormInputProps) => {
 	const onImageChange = (newValue) => onChange(newValue ? stripBase64Prefix(newValue) : null);
@@ -34,7 +34,7 @@ export const TicketImage = ({ value, onChange, onBlur, ...props }: FormInputProp
 			onChange={onImageChange}
 			{...props}
 		>
-			<TicketViewActionMenu value={imgSrc} onChange={onImageChange} />
+			<TicketImageActionMenu value={imgSrc} onChange={onImageChange} />
 		</BasicTicketImage>
 	);
 };
