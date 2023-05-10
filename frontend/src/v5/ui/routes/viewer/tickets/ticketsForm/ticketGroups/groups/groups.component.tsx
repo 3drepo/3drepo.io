@@ -39,7 +39,7 @@ export const Groups = ({ groups, colored }: GroupsProps) => {
 
 	return (
 		<>
-			{groupItems.map((group) => (<GroupItem {...group} colored={colored} />))}
+			{groupItems.map((group) => (<GroupItem {...group} colored={colored} key={group.group._id} />))}
 			{collections.map((collection) => (
 				<CollectionAccordion
 					title={(
