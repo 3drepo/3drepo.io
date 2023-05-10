@@ -56,7 +56,7 @@ export const FilterValueField = () => {
 				{fields.map((field, i) => (
 					<ValuesContainer>
 						<FormValueField label={VALUE_LABEL} name={`values.${i}.value`} key={field.id} />
-						<ValueIconContainer onClick={() => remove(i)}>
+						<ValueIconContainer onClick={() => remove(i)} disabled={fields.length === 1}>
 							<RemoveValueIcon />
 						</ValueIconContainer>
 						<ValueIconContainer onClick={() => append({ value: '' })} disabled={i !== (fields.length - 1)}>

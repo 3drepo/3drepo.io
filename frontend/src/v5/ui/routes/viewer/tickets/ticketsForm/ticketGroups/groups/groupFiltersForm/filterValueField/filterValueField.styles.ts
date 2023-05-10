@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const ValuesContainer = styled.div`
 	display: flex;
@@ -24,8 +24,16 @@ export const ValuesContainer = styled.div`
 	gap: 10px;
 `;
 
-export const ValueIconContainer = styled.div<{ disabled?: boolean }>`
-	color: ${({ theme: { palette }, disabled }) => (disabled ? palette.base.light : palette.secondary.main)};
-	margin-bottom: 10px;
+export const ValueIconContainer = styled.button<{ disabled?: boolean }>`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	${({ theme, disabled }) => disabled && css`
+		cursor: auto;
+		color: ${theme.palette.base.light};
+	`}
+	padding: 0;
+	height: 18px;
+	margin-bottom: 15px;
 	cursor: pointer;
+    border: none;
+    background: transparent;
 `;
