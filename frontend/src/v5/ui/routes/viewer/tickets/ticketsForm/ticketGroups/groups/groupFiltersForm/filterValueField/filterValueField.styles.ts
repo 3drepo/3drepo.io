@@ -34,6 +34,6 @@ export const ValueIconContainer = styled.button<{ disabled?: boolean }>`
 	height: 18px;
 	margin-bottom: 15px;
 	cursor: pointer;
-    border: none;
-    background: transparent;
+	border: none;
+	background: transparent;
 `;
