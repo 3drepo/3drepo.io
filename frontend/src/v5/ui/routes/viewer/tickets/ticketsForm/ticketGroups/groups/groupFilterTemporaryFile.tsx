@@ -46,6 +46,7 @@ export const TriggerButton = styled(Typography).attrs({
 })`
 	cursor: pointer;
 	margin-left: auto;
+	width: fit-content;
 `;
 
 export const GroupFiltersWithTriggerButton = () => (
