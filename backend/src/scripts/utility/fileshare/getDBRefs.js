@@ -111,7 +111,7 @@ const genYargs =/* istanbul ignore next */ (yargs) => {
 		type: 'string',
 	})
 		.option('refsInParallel', {
-			describe: 'list of collection extensions to exclude (comma separated)',
+			describe: 'the maximum number of references to process in parallel',
 			type: 'number',
 			default: ENTRIES_TO_PROCESS,
 		})
