@@ -52,8 +52,14 @@ const EmptyImage = (props) => (
 	</EmptyImageContainer>
 );
 
-export const TicketImageDisplayer = ({ onEmptyImageClick, imgSrc, disabled }) => (
-	<Container>
+type TicketImageDisplayerProps = {
+	onEmptyImageClick: () => void,
+	imgSrc: string,
+	disabled?: boolean,
+	className?: string,
+};
+export const TicketImageDisplayer = ({ onEmptyImageClick, imgSrc, disabled, className }: TicketImageDisplayerProps) => (
+	<Container className={className} >
 		{!imgSrc && <EmptyImage disabled={disabled} onClick={onEmptyImageClick} />}
 		{imgSrc && <LoadedImage imgSrc={imgSrc} />}
 	</Container>
