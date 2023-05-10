@@ -44,19 +44,6 @@ export const GlobalStyle = createGlobalStyle`
 
 	a {
 		color: currentColor;
-		
-		&:link {
-			text-decoration: none;
-		}
-
-		&:visited {
-			text-decoration: none;
-		}
-		&:hover {
-			text-decoration: none;
-		}
-
-		&:active { text-decoration: none; }
 	}
 
 	#viewer #unityViewer {

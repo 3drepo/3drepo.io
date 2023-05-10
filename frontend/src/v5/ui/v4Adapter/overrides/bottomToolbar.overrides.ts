@@ -26,7 +26,7 @@ export default css`
 	${Container} {
 		background-color: ${({ theme }) => hexToOpacity(theme.palette.secondary.main, 90)};
 		border: 0;
-		border-radius: 5px;
+		border-radius: 25px;
 		bottom: 30px;
 		height: 40px;
 		width: 554px;

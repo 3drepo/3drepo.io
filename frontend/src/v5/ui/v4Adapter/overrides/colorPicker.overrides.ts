@@ -43,7 +43,7 @@ export default css`
 	.color-picker__panel { // Colour picker modal
 		.MuiInput-root {
 			border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-			border-Radius: 5px;
+			border-Radius: 8px;
 			padding: 0 7px;
 			width: auto;
 

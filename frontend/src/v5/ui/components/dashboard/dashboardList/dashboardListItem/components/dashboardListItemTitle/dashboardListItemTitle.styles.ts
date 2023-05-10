@@ -19,22 +19,20 @@ import styled, { css } from 'styled-components';
 import { Typography } from '@mui/material';
 import { Button } from '@controls/button';
 
-export const Title = styled(Button).attrs({
-	variant: 'text',
-})<{ selected?: boolean }>`
-	${({ theme }) => theme.typography.h5};
-
+export const Title = styled(Button)<{ selected?: boolean }>`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	padding: 0;
 	margin: 0;
 	justify-content: flex-start;
 	max-width: 100%;
+	height: 19px;
 
 	${({ theme, selected }) => selected && css`
 		color: ${theme.palette.primary.contrast};
 	`}
 
 	a {
+		${({ theme }) => theme.typography.h5};
 		text-overflow: ellipsis;
 		overflow: hidden;
 		max-width: 100%;

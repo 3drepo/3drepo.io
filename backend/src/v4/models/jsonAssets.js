@@ -170,28 +170,117 @@ JSONAssets.getSuperMeshMapping = function(account, model, id) {
 	return FileRef.getJSONFile(account, model, name);
 };
 
-const addSuperMeshMappingsToStream = async (account, model, jsonFiles, outStream) => {
+const splitEntriesToGroups = (entries, maxParallelFiles = 100) => {
+	const groups = [];
+
+	let currentGroup = [];
+	for (const entry of entries) {
+		if (currentGroup.length >= maxParallelFiles) {
+			groups.push(currentGroup);
+			currentGroup = [];
+		}
+
+		currentGroup.push(entry);
+	}
+
+	if (currentGroup.length) {
+		groups.push(currentGroup);
+	}
+
+	return groups;
+};
+
+const generateSuperMeshMappings = async (account, model, jsonFiles, outStream) => {
 	const regex = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})[^/]*$/;
-	outStream.write(`{"model":"${model}","supermeshes":[`);
-	for(let i = 0; i < jsonFiles.length; ++i) {
-		const fileName = jsonFiles[i];
-		const regexRes = fileName.match(regex);
-		const id = regexRes[1];
-		const file = await FileRef.getJSONFileStream(account, model, regexRes[0]);
-		if(file) {
-			outStream.write(`{"id":"${id}","data":`);
-			const { readStream } = file;
 
-			await new Promise((resolve) => {
-				readStream.on("data", d => outStream.write(d));
-				readStream.on("end", ()=> resolve());
-				readStream.on("error", err => outStream.emit("error", err));
-			});
+	const startStr = `{"model":"${model}","supermeshes":[`;
+	outStream.write(startStr);
 
-			outStream.write(`}${i !== jsonFiles.length - 1 ? "," : "" }`);
+	const fileGroups = splitEntriesToGroups(jsonFiles);
+	for(let j = 0; j < fileGroups.length; ++j) {
+		const filesToProcess = fileGroups[j];
+		const files = await Promise.all(
+			filesToProcess.map(async (fileName) => {
+				const regexRes = fileName.match(regex);
+				return {fileName, file: await FileRef.getJSONFileStream(account, model, regexRes[0])};
+			}));
+
+		for(let i = 0; i < files.length; ++i) {
+			const {fileName, file} = files[i];
+
+			const regexRes = fileName.match(regex);
+			const id = regexRes[1];
+			if(file) {
+				outStream.write(`{"id":"${id}","data":`);
+				const { readStream } = file;
+
+				await new Promise((resolve) => {
+					readStream.on("data", d => {
+						outStream.write(d);
+					});
+					readStream.on("end", ()=> {
+						resolve();
+					});
+					readStream.on("error", err => {
+						outStream.emit("error", err);
+					});
+				});
+
+				const eofStr = `}${fileName !== jsonFiles[jsonFiles.length - 1] ? "," : "" }`;
+				outStream.write(eofStr);
+			}
 		}
 	}
-	outStream.write("]}");
+
+	const endingStr = "]}";
+	outStream.write(endingStr);
+	outStream.end();
+
+};
+
+const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, outStream) => {
+	const cacheFileName = `${utils.uuidToString(revId)}/supermeshes.json`;
+	const fileRef = await FileRef.jsonFileExists(account, model, cacheFileName);
+	if(fileRef?.size) {
+		const { readStream } = await FileRef.getJSONFileStream(account, model, cacheFileName);
+
+		await new Promise((resolve) => {
+			readStream.on("data", d => {
+				outStream.write(d);
+			});
+			readStream.on("end", ()=> {
+				resolve();
+			});
+			readStream.on("error", err => {
+				outStream.emit("error", err);
+			});
+		});
+	} else {
+
+		if(fileRef) {
+			await FileRef.removeJSONFile(account, model, cacheFileName);
+		}
+		const passThruStr = Stream.PassThrough();
+		const cacheStream = Stream.PassThrough();
+
+		const cacheWriteProm = FileRef.storeJSONFileStream(account, model, cacheStream, undefined, cacheFileName);
+
+		passThruStr.on("data", d => {
+			outStream.write(d);
+			cacheStream.write(d);
+		});
+		passThruStr.on("end", ()=> {
+			cacheStream.end();
+		});
+		passThruStr.on("error", err => {
+			outStream.emit("error", err);
+			cacheStream.emit("error", err);
+		});
+
+		await generateSuperMeshMappings(account, model, jsonFiles, passThruStr);
+		await cacheWriteProm;
+
+	}
 
 };
 
@@ -203,7 +292,7 @@ const getSuperMeshMappingForModels = async (modelsToProcess, outStream) => {
 			const assetList = await DB.findOne(
 				entry.account, `${entry.model}.stash.unity3d`, {_id: entry.rev}, {jsonFiles: 1});
 			if(assetList) {
-				await addSuperMeshMappingsToStream(entry.account, entry.model, assetList.jsonFiles, outStream);
+				await addSuperMeshMappingsToStream(entry.account, entry.model, entry.rev, assetList.jsonFiles, outStream);
 			}
 
 			if(i !== modelsToProcess.length - 1) {
@@ -229,7 +318,7 @@ JSONAssets.getAllSuperMeshMapping = async (account, model, branch, rev) => {
 		});
 		modelsToProcess = await Promise.all(getSubModelInfoProms);
 	} else {
-		const history = await History.getHistory(account, model, branch, rev);
+		const history = await History.getHistory(account, model, branch, rev, {_id: 1});
 		modelsToProcess = [{account, model, rev: history._id}];
 	}
 

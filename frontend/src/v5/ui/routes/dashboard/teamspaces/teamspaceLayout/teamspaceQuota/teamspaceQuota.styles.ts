@@ -40,7 +40,7 @@ export const QuotaValuesContainer = styled.div<{$disabled?:boolean, $error?: boo
 	column-gap: 4px;
 	align-items: center;
 	padding:${({ $error }) => ($error ? '5px 10px 5px 3px' : '5px 0px')};
-	border-radius: 5px;
+	border-radius: 8px;
 `;
 
 export const WarningIcon = styled(WarningIconSmall)`
