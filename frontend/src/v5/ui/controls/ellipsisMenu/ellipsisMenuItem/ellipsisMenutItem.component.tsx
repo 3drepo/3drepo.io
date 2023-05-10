@@ -18,6 +18,7 @@ import { ReactNode, SyntheticEvent, useContext } from 'react';
 import { Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { MenuItem } from './ellipsisMenuItem.styles';
+import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 
 type EllipsisMenuItemProps = {
 	title: ReactNode;
@@ -26,17 +27,24 @@ type EllipsisMenuItemProps = {
 	onClick?: (event: SyntheticEvent) => void;
 	disabled?: boolean;
 	hidden?: boolean;
+	className?: string;
 };
 
-export const EllipsisMenuItem = ({ to, title, key, disabled, hidden, onClick }: EllipsisMenuItemProps) => {
+export const EllipsisMenuItem = ({ to, title, hidden, onClick, ...props }: EllipsisMenuItemProps) => {
+	const { close } = useContext(ActionMenuContext);
+
+	const handleClick = (e) => {
+		onClick?.(e);
+		close();
+	};
+
 	if (hidden) return (<></>);
 	return (
 		<MenuItem
 			component={to ? Link : null}
 			to={to}
-			key={key}
-			onClick={onClick}
-			disabled={disabled}
+			onClick={handleClick}
+			{...props}
 		>
 			<Typography variant="body1" noWrap>
 				{title}
