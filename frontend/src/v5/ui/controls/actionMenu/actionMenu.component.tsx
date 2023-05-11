@@ -44,6 +44,7 @@ export const ActionMenu = ({
 		setAnchorEl(e.currentTarget.children[0]);
 		onOpen?.();
 		e.stopPropagation();
+		e.preventDefault();
 	};
 
 	const handleClose = () => {
@@ -55,6 +56,7 @@ export const ActionMenu = ({
 		PopoverProps?.onClick?.(e);
 		handleClose();
 		e.stopPropagation();
+		e.preventDefault();
 	};
 
 	return (
