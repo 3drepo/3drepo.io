@@ -38,7 +38,6 @@ const ModulePanel = ({ module, scrollPanelIntoView, defaultExpanded, ...rest }: 
 			{...accordionProps}
 			onChange={scrollPanelIntoView}
 			defaultExpanded={defaultExpanded}
-			required={required}
 			title={<ModuleTitle required={required}>{title}</ModuleTitle>}
 		>
 			<PropertiesList module={`modules.${module.name || module.type}`} properties={module.properties || []} {...rest} />
