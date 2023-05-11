@@ -1,4 +1,4 @@
-  /**
+/**
  *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,9 +34,9 @@ export const ViewActionMenu = styled.li`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	border-radius: 5px;
-    display: grid;
+	display: grid;
 	align-items: center;
-    grid-template-columns: auto 1fr auto;
+	grid-template-columns: auto 1fr auto;
 	padding-left: 11px;
 	box-sizing: border-box;
 	height: 36px;

@@ -59,7 +59,7 @@ type TicketImageDisplayerProps = {
 	className?: string,
 };
 export const TicketImageDisplayer = ({ onEmptyImageClick, imgSrc, disabled, className }: TicketImageDisplayerProps) => (
-	<Container className={className} >
+	<Container className={className}>
 		{!imgSrc && <EmptyImage disabled={disabled} onClick={onEmptyImageClick} />}
 		{imgSrc && <LoadedImage imgSrc={imgSrc} />}
 	</Container>
