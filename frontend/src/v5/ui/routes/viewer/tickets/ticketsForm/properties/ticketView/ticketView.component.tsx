@@ -27,11 +27,11 @@ import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 import { getViewerState, viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
 import { ViewpointsActions } from '@/v4/modules/viewpoints';
 import { useDispatch } from 'react-redux';
+import { EllipsisMenu } from '@controls/ellipsisMenu';
+import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { BasicTicketImage } from '../basicTicketImage/basicTicketImage.component';
 import { EllipsisMenuItemDelete, ViewActionMenu } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
 import { TicketImageActionMenu } from '../basicTicketImage/ticketImageActionMenu.component';
-import { EllipsisMenu } from '@controls/ellipsisMenu';
-import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 
 type ITicketView = {
 	value: Viewpoint | undefined;

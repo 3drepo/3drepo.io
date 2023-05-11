@@ -17,8 +17,8 @@
 import { ReactNode, SyntheticEvent, useContext } from 'react';
 import { Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { MenuItem } from './ellipsisMenuItem.styles';
 import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
+import { MenuItem } from './ellipsisMenuItem.styles';
 
 type EllipsisMenuItemProps = {
 	title: ReactNode;
@@ -39,6 +39,7 @@ export const EllipsisMenuItem = ({ to, title, hidden, onClick, ...props }: Ellip
 	};
 
 	if (hidden) return (<></>);
+
 	return (
 		<MenuItem
 			component={to ? Link : null}
