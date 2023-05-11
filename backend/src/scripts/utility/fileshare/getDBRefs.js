@@ -93,7 +93,7 @@ const run = async (includeDB, excludeDB, includeCol, excludeCol,
 				let lastId;
 				// eslint-disable-next-line no-constant-condition
 				while (true) {
-					const query = lastId ? { type: 'fs', _id: { $gt: lastId } } : { type: 'fs' };
+					const query = lastId ? { type: 'fs', _id: { $gt: lastId }, link: { $not: /^toy*/ } } : { type: 'fs' };
 					// eslint-disable-next-line no-await-in-loop
 					const res = await find(dbName, colName, query,
 						{ link: 1, size: 1 }, { _id: 1 }, refsInParallel);
