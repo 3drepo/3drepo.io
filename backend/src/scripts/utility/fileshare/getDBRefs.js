@@ -28,6 +28,7 @@ const FS = require('fs');
 const DEFAULT_OUT_FILE = 'links.csv';
 
 const ENTRIES_TO_PROCESS = 50000;
+const ENTRIES_BEFORE_DRAIN = 1000000;
 
 const determineDBList = async (toInclude, toExclude) => {
 	if (toInclude?.length && toExclude?.length) {
@@ -60,6 +61,10 @@ const determineColList = async (dbName, toInclude, toExclude) => {
 	return collections.filter(({ name }) => !colsToExclude.includes(name));
 };
 
+const generateDrainProm = (writeStream) => new Promise((resolve) => {
+	writeStream.once('drain', resolve);
+});
+
 const run = async (includeDB, excludeDB, includeCol, excludeCol,
 	outFile = DEFAULT_OUT_FILE, refsInParallel = ENTRIES_TO_PROCESS) => {
 	const dbList = await determineDBList(includeDB, excludeDB);
@@ -69,6 +74,9 @@ const run = async (includeDB, excludeDB, includeCol, excludeCol,
 	const writeStream = FS.createWriteStream(parsePath(outFile));
 
 	let refCount = 0;
+	let refsSinceLastDrain = 0;
+
+	let drainProm = generateDrainProm(writeStream);
 
 	for (const dbName of dbList) {
 		logger.logInfo(`-${dbName}`);
@@ -81,9 +89,6 @@ const run = async (includeDB, excludeDB, includeCol, excludeCol,
 
 			if (refsExpected) {
 				logger.logInfo(`\t-${colName} [${refsExpected} refs]`);
-				const drainProm = new Promise((resolve) => {
-					writeStream.once('drain', resolve);
-				});
 
 				let lastId;
 				// eslint-disable-next-line no-constant-condition
@@ -101,9 +106,14 @@ const run = async (includeDB, excludeDB, includeCol, excludeCol,
 
 					refCount += res.length;
 				}
-
-				// eslint-disable-next-line no-await-in-loop
-				await drainProm;
+				refsSinceLastDrain += refsExpected;
+				if (refsSinceLastDrain > ENTRIES_BEFORE_DRAIN) {
+					logger.logInfo('Waiting for writeStream drain...');
+					// eslint-disable-next-line no-await-in-loop
+					await drainProm;
+					drainProm = generateDrainProm(writeStream);
+					refsSinceLastDrain = 0;
+				}
 			}
 		}
 	}
