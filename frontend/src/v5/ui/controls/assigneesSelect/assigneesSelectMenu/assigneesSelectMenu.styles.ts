@@ -18,6 +18,7 @@
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 import { Select } from '@controls/inputs/select/select.component';
 import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
+import { Divider } from '@mui/material';
 import styled from 'styled-components';
 
 export const HiddenSelect = styled(Select)`
@@ -41,9 +42,6 @@ export const SearchInput = styled(SearchInputBase)`
 	margin: 2px 12px 12px;
 `;
 
-export const HorizontalRule = styled.hr`
-	background-color: ${({ theme }) => theme.palette.base.lightest};
-	height: 1px;
-	border: none;
+export const HorizontalRule = styled(Divider)`
 	margin: 10px 0;
 `;
