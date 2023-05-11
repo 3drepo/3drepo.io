@@ -16,6 +16,7 @@
  */
 
 import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.styles';
+import { Tooltip as TooltipBase } from '@mui/material';
 import styled from 'styled-components';
 
 export const AssigneesListContainer = styled.div`
@@ -68,9 +69,13 @@ export const AddUserButton = styled(PopoverCircle).attrs({
 })`
 	&& {
 		border: 1px dashed ${({ theme }) => theme.palette.base.light};
-		margin: 2px 0 0 13px;
+		margin: 0;
 	}
 	padding: 5px;
 	box-sizing: border-box;
 	color: ${({ theme }) => theme.palette.base.main};
+`;
+
+export const Tooltip = styled(TooltipBase)`
+	margin: 2px 0 0 13px;
 `;
