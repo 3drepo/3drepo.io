@@ -37,7 +37,9 @@ export const ListHeading = styled.div`
 	font-weight: ${FONT_WEIGHT.BOLD};
 `;
 
-export const SearchInput = styled(SearchInputBase)`
+export const SearchInput = styled(SearchInputBase).attrs({
+	variant: 'outlined',
+})`
 	width: auto;
 	margin: 2px 12px 12px;
 `;
