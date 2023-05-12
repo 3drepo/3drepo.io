@@ -493,6 +493,13 @@ const generateProperties = (propTemplate, internalType) => {
 	return properties;
 };
 
+ServiceHelper.generateRandomObject = () => ({
+	[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
+	[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
+	[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
+	[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
+});
+
 ServiceHelper.generateTicket = (template, internalType = false) => {
 	const modules = {};
 	template.modules.forEach(({ name, type, deprecated, properties }) => {
