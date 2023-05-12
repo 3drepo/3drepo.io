@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import { ActionMenu } from '@controls/actionMenu';
 import { Container } from './colorPicker.styles';
@@ -32,7 +32,7 @@ const ColorPickerPreview = ({ color, selected }) => (
 
 type ColorPickerProps = { value?: HexGroupColor, defaultValue: HexGroupColor, onChange?: (newVal: HexGroupColor) => void };
 export const ColorPicker = ({ value: inputValue, defaultValue, onChange }: ColorPickerProps) => {
-	const [value, setValue] = useState<RgbGroupColor>(rgbGroupColorToHex(defaultValue || inputValue || { color: UNSET_RGB_COLOR }));
+	const [value, setValue] = useState<RgbGroupColor>(rgbGroupColorToHex(inputValue || defaultValue || { color: UNSET_RGB_COLOR }));
 	const [selected, setSelected] = useState(false);
 
 	const handleChange = (hexValue) => {
