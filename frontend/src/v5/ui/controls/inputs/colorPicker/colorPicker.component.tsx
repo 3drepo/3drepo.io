@@ -40,6 +40,8 @@ export const ColorPicker = ({ value: inputValue, defaultValue, onChange }: Color
 		onChange?.(hexGroupColorToRgb(hexValue));
 	};
 
+	useEffect(() => { setValue(inputValue); }, [inputValue]);
+
 	return (
 		<ActionMenu
 			onOpen={() => setSelected(true)}
