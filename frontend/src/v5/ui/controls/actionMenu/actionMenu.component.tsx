@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ReactNode, useState } from 'react';
-import { ClickAwayListener, Popover } from '@mui/material';
+import { Popover } from '@mui/material';
 import { Menu, Container } from './actionMenu.styles';
 import { ActionMenuContext } from './actionMenuContext';
 
@@ -37,9 +37,15 @@ export const ActionMenu = ({
 }: ActionMenuProps) => {
 	const [anchorEl, setAnchorEl] = useState(null);
 
+	const stopClickPropagation = (e) => {
+		e.stopPropagation();
+		e.preventDefault();
+	};
+
 	const handleOpen = (e) => {
-		setAnchorEl(e.currentTarget);
+		setAnchorEl(e.currentTarget.children[0]);
 		onOpen?.(e);
+		stopClickPropagation(e);
 	};
 
 	const handleClose = (e) => {
@@ -47,8 +53,13 @@ export const ActionMenu = ({
 		onClose?.(e);
 	};
 
+	const handlePopoverClick = (e: Event) => {
+		PopoverProps?.onClick?.(e);
+		handleClose(e)
+	};
+
 	return (
-		<ActionMenuContext.Provider value={{ close: () => setAnchorEl(null) }}>
+		<ActionMenuContext.Provider value={{ close: handleClose }}>
 			<Container onClick={handleOpen}>
 				{TriggerButton}
 			</Container>
@@ -65,12 +76,11 @@ export const ActionMenu = ({
 					horizontal: 'center',
 				}}
 				{...PopoverProps}
+				onClick={handlePopoverClick}
 			>
-				<ClickAwayListener onClickAway={handleClose}>
-					<Menu>
-						{children}
-					</Menu>
-				</ClickAwayListener>
+				<Menu onClick={stopClickPropagation}>
+					{children}
+				</Menu>
 			</Popover>
 		</ActionMenuContext.Provider>
 	);

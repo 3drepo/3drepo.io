@@ -32,7 +32,7 @@ export const ActionMenuItem = ({
 
 	const handleClick = (e) => {
 		onClick?.(e);
-		close();
+		close(e);
 	};
 
 	return (<MenuItem onClick={handleClick} {...props} />);

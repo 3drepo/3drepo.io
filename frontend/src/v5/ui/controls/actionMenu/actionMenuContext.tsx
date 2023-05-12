@@ -17,6 +17,6 @@
 
 import { createContext } from 'react';
 
-type ActionMenuContextType = { close: () => void };
-export const ActionMenuContext = createContext<ActionMenuContextType>({ close: () => {} });
+type ActionMenuContextType = { close: (e) => void };
+export const ActionMenuContext = createContext<ActionMenuContextType>({ close: (e) => {} });
 ActionMenuContext.displayName = 'ActionMenuContext';
