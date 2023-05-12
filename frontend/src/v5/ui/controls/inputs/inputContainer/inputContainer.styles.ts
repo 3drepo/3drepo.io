@@ -18,7 +18,7 @@
 import { FormControl } from '@mui/material';
 import styled, { css } from 'styled-components';
 
-export const CustomInput = styled(FormControl)<{ selected?: boolean }>`
+export const InputContainer = styled(FormControl)<{ selected?: boolean }>`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	border: solid 1px;
 	border-radius: 8px;

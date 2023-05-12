@@ -26,7 +26,7 @@ import { FormHelperText } from '@mui/material';
 import { theme } from '@/v5/ui/themes/theme';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { CustomInput } from '@controls/inputs/customInput/customInput.styles';
+import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
 import { PinAction, PinActions, PinName, SettingLocationText } from './pinDetails.styles';
 
 export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText, disabled }: FormInputProps) => {
@@ -84,7 +84,7 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 	const hasPin = !!value;
 
 	return (
-		<CustomInput required={required} selected={editMode} error={error} disabled={disabled}>
+		<InputContainer required={required} selected={editMode} error={error} disabled={disabled}>
 			<PinName onClick={onClickEditPin} required={required}>
 				{label}
 			</PinName>
@@ -110,6 +110,6 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 				)}
 			</PinActions>
 			<FormHelperText>{helperText}</FormHelperText>
-		</CustomInput>
+		</InputContainer>
 	);
 };

@@ -16,9 +16,9 @@
  */
 
 import styled from 'styled-components';
-import { CustomInput } from '../customInput/customInput.styles';
+import { InputContainer } from '../inputContainer/inputContainer.styles';
 
-export const Container = styled(CustomInput)`
+export const Container = styled(InputContainer)`
 	display: flex;
 	flex-direction: row;
 	align-items: center;
