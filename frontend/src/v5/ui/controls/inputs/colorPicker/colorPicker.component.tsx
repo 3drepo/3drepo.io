@@ -30,9 +30,9 @@ const ColorPickerPreview = ({ color, selected }) => (
 	</Container>
 );
 
-type ColorPickerProps = { value?: HexGroupColor, defaultValue: HexGroupColor, onChange?: (newVal: HexGroupColor) => void };
+type ColorPickerProps = { value?: RgbGroupColor, defaultValue: RgbGroupColor, onChange?: (newVal: RgbGroupColor) => void };
 export const ColorPicker = ({ value: inputValue, defaultValue, onChange }: ColorPickerProps) => {
-	const [value, setValue] = useState<RgbGroupColor>(rgbGroupColorToHex(inputValue || defaultValue || { color: UNSET_RGB_COLOR }));
+	const [value, setValue] = useState<HexGroupColor>(rgbGroupColorToHex(inputValue || defaultValue || { color: UNSET_RGB_COLOR }));
 	const [selected, setSelected] = useState(false);
 
 	const handleChange = (hexValue) => {
@@ -42,7 +42,7 @@ export const ColorPicker = ({ value: inputValue, defaultValue, onChange }: Color
 
 	useEffect(() => {
 		if (!inputValue) return;
-		setValue(inputValue);
+		setValue(rgbGroupColorToHex(inputValue));
 	}, [inputValue]);
 
 	return (
