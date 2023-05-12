@@ -16,6 +16,8 @@
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
+import { useState } from 'react';
+import { HexGroupColor } from '@controls/inputs/colorPicker/colorPicker.helpers';
 import { FormContainer } from '../FormInput.styles';
 
 export default {
@@ -29,25 +31,41 @@ export default {
 	] } },
 } as ComponentMeta<typeof ColorPicker>;
 
-const Controlled: ComponentStory<typeof ColorPicker> = (args) => (
+const Default: ComponentStory<typeof ColorPicker> = (args) => (
 	<FormContainer>
 		<ColorPicker {...args} />
 	</FormContainer>
 );
 
-export const ControlledFormColorPickerDefault = Controlled.bind({});
+export const FormColorPickerDefault = Default.bind({});
 
-export const ControlledFormColorPickerColorAndOpacitySet = Controlled.bind({});
-ControlledFormColorPickerColorAndOpacitySet.args = {
+export const FormColorPickerColorAndOpacitySet = Default.bind({});
+FormColorPickerColorAndOpacitySet.args = {
 	defaultValue: { color: [210, 89, 159], opacity: 0.4 },
 };
 
-export const ControlledFormColorPickerOnlyColorSet = Controlled.bind({});
-ControlledFormColorPickerOnlyColorSet.args = {
+export const FormColorPickerOnlyColorSet = Default.bind({});
+FormColorPickerOnlyColorSet.args = {
+	defaultValue: { color: [34, 189, 230] },
+};
+
+export const FormColorPickerOnlyOpacitySet = Default.bind({});
+FormColorPickerOnlyOpacitySet.args = {
 	defaultValue: { opacity: 0.4 },
 };
 
-export const ControlledFormColorPickerOnlyOpacitySet = Controlled.bind({});
-ControlledFormColorPickerOnlyOpacitySet.args = {
-	defaultValue: { color: [34, 189, 230] },
+const Controlled: ComponentStory<typeof ColorPicker> = ({ value: inputValue, ...args }) => {
+	const [value, setValue] = useState<HexGroupColor>(inputValue);
+
+	const handleChange = (event) => {
+		setValue(event.target.value);
+	};
+
+	return (
+		<FormContainer>
+			<ColorPicker {...args} value={value} onChange={handleChange} />
+		</FormContainer>
+	);
 };
+
+export const ControlledFormColorPicker = Controlled.bind({});
