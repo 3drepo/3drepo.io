@@ -20,7 +20,7 @@ import ShowIcon from '@assets/icons/outlined/eye-outlined.svg';
 import HideIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { IGroupFromApi } from '@/v5/store/tickets/groups/ticketGroups.types';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
 import { rgbaToHex } from '@/v4/helpers/colors';
@@ -36,10 +36,12 @@ import {
 	GroupsCount,
 } from './groupItem.styles';
 import { GroupToggle } from '../../groupToggle/groupToggle.component';
+import { TicketGroupsContext } from '../../ticketGroupsContext';
 
-type GroupProps = { group: IGroupFromApi, color?: [number, number, number], opacity?: number, colored: boolean };
-export const GroupItem = ({ group, color, opacity, colored }: GroupProps) => {
+type GroupProps = { group: IGroupFromApi, color?: [number, number, number], opacity?: number };
+export const GroupItem = ({ group, color, opacity }: GroupProps) => {
 	const [groupIsVisible, setGroupIsVisible] = useState(false);
+	const { groupType } = useContext(TicketGroupsContext);
 
 	const deleteGroup = () => {
 		DialogsActionsDispatchers.open('delete', {
@@ -77,7 +79,7 @@ export const GroupItem = ({ group, color, opacity, colored }: GroupProps) => {
 						/>
 					</GroupsCount>
 				</NameContainer>
-				{colored && (
+				{groupType === 'colored' && (
 					<Buttons>
 						<ErrorTicketButton onClick={deleteGroup}>
 							<DeleteIcon />
@@ -91,7 +93,7 @@ export const GroupItem = ({ group, color, opacity, colored }: GroupProps) => {
 					</Buttons>
 				)}
 			</Headline>
-			<GroupToggle colored={colored} />
+			<GroupToggle />
 		</Container>
 	);
 };

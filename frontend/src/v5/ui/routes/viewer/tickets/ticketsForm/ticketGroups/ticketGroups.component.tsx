@@ -21,16 +21,14 @@ import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import { MOCK_DATA } from '@/v5/store/tickets/groups/ticketGroups.helpers';
 import { Container, NewGroupButton } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
+import { TicketGroupsContext } from './ticketGroupsContext';
 
-export const TicketGroups = () => {
-	const groups = MOCK_DATA;
-
-	return (
-		<Container>
+export const TicketGroups = () => (
+	<Container>
+		<TicketGroupsContext.Provider value={{ groupType: 'colored' }}>
 			<GroupsAccordion
 				title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
-				groups={groups.colored}
-				colored
+				groups={MOCK_DATA.colored}
 			>
 				<NewGroupButton startIcon={<AddCircleIcon />}>
 					<FormattedMessage
@@ -39,9 +37,11 @@ export const TicketGroups = () => {
 					/>
 				</NewGroupButton>
 			</GroupsAccordion>
+		</TicketGroupsContext.Provider>
+		<TicketGroupsContext.Provider value={{ groupType: 'hidden' }}>
 			<GroupsAccordion
 				title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
-				groups={groups.hidden}
+				groups={MOCK_DATA.hidden}
 			>
 				<NewGroupButton startIcon={<AddCircleIcon />}>
 					<FormattedMessage
@@ -50,6 +50,6 @@ export const TicketGroups = () => {
 					/>
 				</NewGroupButton>
 			</GroupsAccordion>
-		</Container>
-	);
-};
+		</TicketGroupsContext.Provider>
+	</Container>
+);

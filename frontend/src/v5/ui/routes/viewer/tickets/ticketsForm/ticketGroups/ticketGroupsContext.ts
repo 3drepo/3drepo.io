@@ -15,16 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import EyeIcon from '@assets/icons/outlined/eye-outlined.svg';
-import EyeDisabledIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
-import { CheckboxProps } from '@mui/material';
-import { useContext } from 'react';
-import { Checkbox, EyeCheckbox } from './groupToggle.styles';
-import { TicketGroupsContext } from '../ticketGroupsContext';
+import { createContext } from 'react';
 
-export const GroupToggle = (props: CheckboxProps) => {
-	const { groupType } = useContext(TicketGroupsContext);
-
-	if (groupType === 'colored') return (<Checkbox {...props} />);
-	return (<EyeCheckbox icon={<EyeDisabledIcon />} checkedIcon={<EyeIcon />} {...props} />);
-};
+type TicketGroupsContextType = { groupType: 'colored' | 'hidden' };
+export const TicketGroupsContext = createContext<TicketGroupsContextType>({ groupType: null });
+TicketGroupsContext.displayName = 'TicketGroupsContext';

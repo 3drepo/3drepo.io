@@ -17,7 +17,7 @@
 
 import { useState } from 'react';
 import GroupsIcon from '@mui/icons-material/GroupWork';
-import { IGroupCollection } from '@/v5/store/tickets/groups/ticketGroups.types';
+import { IGroup } from '@/v5/store/tickets/groups/ticketGroups.types';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { Accordion, NumberContainer, TitleContainer, Checkbox } from './groupsAccordion.styles';
@@ -25,11 +25,10 @@ import { Groups } from '../groups/groups.component';
 
 type GroupsAccordionProps = {
 	title: any;
-	groups: IGroupCollection[];
+	groups: IGroup[];
 	children: any;
-	colored?: boolean;
 };
-export const GroupsAccordion = ({ title, groups = [], children, colored }: GroupsAccordionProps) => {
+export const GroupsAccordion = ({ title, groups = [], children }: GroupsAccordionProps) => {
 	const [checked, setChecked] = useState(false);
 
 	const groupsCount = groups.length;
@@ -52,7 +51,7 @@ export const GroupsAccordion = ({ title, groups = [], children, colored }: Group
 			$groupsCount={groupsCount}
 		>
 			{groupsCount ? (
-				<Groups groups={groups} colored={colored} />
+				<Groups groups={groups} />
 			) : (
 				<EmptyListMessage>
 					<FormattedMessage
