@@ -30,7 +30,7 @@ const groupExists = async (req, res, next) => {
 
 		await next();
 	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err.message));
+		respond(req, res, err);
 	}
 };
 
