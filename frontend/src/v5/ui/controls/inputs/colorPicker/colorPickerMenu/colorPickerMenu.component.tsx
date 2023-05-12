@@ -18,11 +18,16 @@
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { Container, CloseButton, Header } from './colorPickerMenu.styles';
 
-export const ColorPickerMenu = ({ title, children }) => (
+type ColorPickerMenuProps = {
+	title: any;
+	children: any;
+	onClickClose?: () => void;
+};
+export const ColorPickerMenu = ({ title, children, onClickClose }: ColorPickerMenuProps) => (
 	<Container>
 		<Header>
 			{title}
-			<CloseButton>
+			<CloseButton onClick={onClickClose}>
 				<CloseIcon />
 			</CloseButton>
 		</Header>

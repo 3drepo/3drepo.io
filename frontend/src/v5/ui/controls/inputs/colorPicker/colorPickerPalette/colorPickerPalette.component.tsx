@@ -45,6 +45,11 @@ export const ColorPickerPalette = ({ value, onClose }: ColorPickerPaletteProps) 
 		if (e.key === '.') e.preventDefault();
 	};
 
+	const resetValues = () => {
+		setColor(value.color);
+		setOpacity(value.opacity);
+	};
+
 	useEffect(() => () => {
 		if (colorisValid && !ref.current) {
 			onClose({ color, opacity });
@@ -53,7 +58,10 @@ export const ColorPickerPalette = ({ value, onClose }: ColorPickerPaletteProps) 
 
 	return (
 		<span ref={ref}>
-			<ColorPickerMenu title={formatMessage({ id: 'colorPicker.palette.title', defaultMessage: 'Select colour' })}>
+			<ColorPickerMenu
+				title={formatMessage({ id: 'colorPicker.palette.title', defaultMessage: 'Select colour' })}
+				onClickClose={resetValues}
+			>
 				<ColorGrid>
 					<ColorOption onClick={() => setColor(null)} />
 					{DEFAULT_SUGGESTED_HEX_COLORS.map((suggestedColor) => (
@@ -76,7 +84,7 @@ export const ColorPickerPalette = ({ value, onClose }: ColorPickerPaletteProps) 
 						onChange={handleOpacityChange}
 					/>
 					<ColorActionMenu TriggerButton={<GradientButton />}>
-						<ColorPickerGradient value={color || UNSET_HEX_COLOR} onChange={setColor} />
+						<ColorPickerGradient value={color || UNSET_HEX_COLOR} onClose={setColor} />
 					</ColorActionMenu>
 				</BottomBar>
 			</ColorPickerMenu>

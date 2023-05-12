@@ -40,7 +40,10 @@ export const ColorPicker = ({ value: inputValue, defaultValue, onChange }: Color
 		onChange?.(hexGroupColorToRgb(hexValue));
 	};
 
-	useEffect(() => { setValue(inputValue); }, [inputValue]);
+	useEffect(() => {
+		if (!inputValue) return;
+		setValue(inputValue);
+	}, [inputValue]);
 
 	return (
 		<ActionMenu

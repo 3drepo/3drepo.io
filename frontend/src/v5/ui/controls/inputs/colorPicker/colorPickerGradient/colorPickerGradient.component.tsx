@@ -17,14 +17,29 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { HexColorPicker } from 'react-colorful';
+import { useEffect, useRef, useState } from 'react';
 import { ColorPickerMenu } from '../colorPickerMenu/colorPickerMenu.component';
 import { ColorPickerStyler } from './colorPickerGradient.styles';
 import { UNSET_HEX_COLOR } from '../colorPicker.helpers';
 
-export const ColorPickerGradient = ({ value = UNSET_HEX_COLOR, onChange }) => (
-	<ColorPickerMenu title={formatMessage({ id: 'colorPicker.gradient.title', defaultMessage: 'Custom colour' })}>
-		<ColorPickerStyler>
-			<HexColorPicker color={value} onChange={onChange} />
-		</ColorPickerStyler>
-	</ColorPickerMenu>
-);
+export const ColorPickerGradient = ({ value = UNSET_HEX_COLOR, onClose }) => {
+	const ref = useRef();
+	const [color, setColor] = useState(value);
+
+	useEffect(() => () => {
+		if (!ref.current) {
+			onClose(color);
+		}
+	}, [color]);
+	
+	return (
+		<ColorPickerMenu
+			title={formatMessage({ id: 'colorPicker.gradient.title', defaultMessage: 'Custom colour' })}
+			onClickClose={() => setColor(value)}
+		>
+			<ColorPickerStyler ref={ref}>
+				<HexColorPicker color={color} onChange={setColor} />
+			</ColorPickerStyler>
+		</ColorPickerMenu>
+	);
+};
