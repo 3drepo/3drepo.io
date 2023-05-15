@@ -16,10 +16,12 @@
  */
 
 const { times } = require('lodash');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../helper/services');
 const { src } = require('../../helper/path');
 
 const Groups = require(`${src}/models/tickets.groups`);
+
+const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
@@ -143,8 +145,98 @@ const testGetGroupsByIds = () => {
 	});
 };
 
+const testUpdateGroup = () => {
+	describe('Update Group', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const ticket = generateRandomString();
+		const groupId = generateRandomString();
+
+		test('Should update the group as expected', async () => {
+			const data = generateRandomObject();
+			await expect(Groups.updateGroup(teamspace, project, model, ticket, groupId, data)).resolves.toBeUndefined();
+
+			expect(db.updateOne).toHaveBeenCalledTimes(1);
+			expect(db.updateOne).toHaveBeenCalledWith(teamspace, groupCol,
+				{ teamspace, project, model, ticket, _id: groupId }, { $set: data });
+		});
+
+		test('Should unset objects if rules is being inserted/updated', async () => {
+			const data = generateRandomObject();
+			data.rules = generateRandomObject();
+			await expect(Groups.updateGroup(teamspace, project, model, ticket, groupId, data)).resolves.toBeUndefined();
+
+			expect(db.updateOne).toHaveBeenCalledTimes(1);
+			expect(db.updateOne).toHaveBeenCalledWith(teamspace, groupCol,
+				{ teamspace, project, model, ticket, _id: groupId }, { $set: data, $unset: { objects: 1 } });
+		});
+
+		test('Should unset rules if objects is being inserted/updated', async () => {
+			const data = generateRandomObject();
+			data.objects = generateRandomObject();
+			await expect(Groups.updateGroup(teamspace, project, model, ticket, groupId, data)).resolves.toBeUndefined();
+
+			expect(db.updateOne).toHaveBeenCalledTimes(1);
+			expect(db.updateOne).toHaveBeenCalledWith(teamspace, groupCol,
+				{ teamspace, project, model, ticket, _id: groupId }, { $set: data, $unset: { rules: 1 } });
+		});
+	});
+};
+
+const testGetGroupById = () => {
+	describe('Get group by Id', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const ticket = generateRandomString();
+		const groupId = generateRandomString();
+		test('Should return whatever the query returns', async () => {
+			const expectedData = generateRandomObject();
+			const projection = generateRandomObject();
+
+			db.findOne.mockResolvedValueOnce(expectedData);
+
+			await expect(Groups.getGroupById(teamspace, project, model, ticket, groupId, projection))
+				.resolves.toEqual(expectedData);
+
+			expect(db.findOne).toHaveBeenCalledTimes(1);
+			expect(db.findOne).toHaveBeenCalledWith(teamspace, groupCol,
+				{ teamspace, project, model, ticket, _id: groupId }, projection);
+		});
+
+		test('Should apply the default projection if it was not defined', async () => {
+			const expectedData = generateRandomObject();
+
+			db.findOne.mockResolvedValueOnce(expectedData);
+
+			await expect(Groups.getGroupById(teamspace, project, model, ticket, groupId))
+				.resolves.toEqual(expectedData);
+
+			expect(db.findOne).toHaveBeenCalledTimes(1);
+			expect(db.findOne).toHaveBeenCalledWith(teamspace, groupCol,
+				{ teamspace, project, model, ticket, _id: groupId },
+				{ teamspace: 0, project: 0, model: 0, ticket: 0 });
+		});
+
+		test(`Should throw with ${templates.groupNotFound.code} if group was not found`, async () => {
+			db.findOne.mockResolvedValueOnce(undefined);
+
+			await expect(Groups.getGroupById(teamspace, project, model, ticket, groupId))
+				.rejects.toEqual(templates.groupNotFound);
+
+			expect(db.findOne).toHaveBeenCalledTimes(1);
+			expect(db.findOne).toHaveBeenCalledWith(teamspace, groupCol,
+				{ teamspace, project, model, ticket, _id: groupId },
+				{ teamspace: 0, project: 0, model: 0, ticket: 0 });
+		});
+	});
+};
+
 describe('models/tickets.groups', () => {
 	testAddGroups();
 	testDeleteGroups();
 	testGetGroupsByIds();
+	testUpdateGroup();
+	testGetGroupById();
 });
