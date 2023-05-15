@@ -16,11 +16,11 @@
  */
 
 const Scene = {};
-const { find } = require('../handler/db');
+const db = require('../handler/db');
 
 const getCollection = (model) => `${model}.scene`;
 
-Scene.getNodesBySharedIds = (teamspace, project, model, revId, sharedIds, projection) => find(
+Scene.getNodesBySharedIds = (teamspace, project, model, revId, sharedIds, projection) => db.find(
 	teamspace, getCollection(model), { rev_id: revId, shared_id: { $in: sharedIds } }, projection);
 
 module.exports = Scene;
