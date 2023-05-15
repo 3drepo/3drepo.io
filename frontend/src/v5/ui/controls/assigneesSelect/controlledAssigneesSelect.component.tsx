@@ -25,7 +25,6 @@ type ControlledAssigneesSelectProps = Omit<IAssigneesSelect, 'onBlur'> & {
 export const ControlledAssigneesSelect = ({
 	value: initialValue,
 	onBlur,
-	disabled,
 	...props
 }: ControlledAssigneesSelectProps) => {
 	const [values, setValues] = useState(initialValue);
