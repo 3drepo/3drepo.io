@@ -54,7 +54,8 @@ Rules.generateQueriesFromRules = (rules) => {
 
 Rules.toQuery = (rule) => {
 	let valueClause;
-	switch (rule.operator) {
+	const operator = negToPosOp[rule.operator] ?? rule.operator;
+	switch (operator) {
 	case 'IS_NOT_EMPTY':
 		break;
 	case 'IS':
