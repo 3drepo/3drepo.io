@@ -26,6 +26,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { GroupFiltersSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { selectMetaKeys } from '@/v4/modules/model';
 import { useSelector } from 'react-redux';
+import { Highlight } from '@controls/highlight';
+import { useRef } from 'react';
 import { Autocomplete } from '@mui/material';
 import { Buttons, Form, InputsContainer } from './groupFiltersForm.styles';
 import { IFilter, IFilterForm } from './groupFiltersForm.helpers';
@@ -38,7 +40,9 @@ const DEFAULT_VALUES: IFilterForm = {
 	values: [],
 };
 
-type IGroupFilters = { onBlur?: (filter: IFilter) => void };
+type IGroupFilters = {
+	onBlur?: (filter: IFilter) => void;
+};
 export const GroupFiltersForm = ({ onBlur }: IGroupFilters) => {
 	const fields = useSelector(selectMetaKeys);
 	const formData = useForm<IFilterForm>({
@@ -51,6 +55,8 @@ export const GroupFiltersForm = ({ onBlur }: IGroupFilters) => {
 		handleSubmit,
 		formState: { isValid },
 	} = formData;
+
+	const fieldValue = formData.watch('field');
 
 	const onSubmit = ({ field, operation, values }: IFilterForm) => {
 		const filterData: IFilter = { field, operation };
@@ -66,6 +72,12 @@ export const GroupFiltersForm = ({ onBlur }: IGroupFilters) => {
 				<InputsContainer>
 					<Autocomplete
 						options={fields}
+						renderOption={(fieldProps, field: string) => (
+							<li {...fieldProps}>
+								<Highlight search={fieldValue}>{field}</Highlight>
+							</li>
+						)}
+						noOptionsText={formatMessage({ id: 'tickets.groups.field.noOptions', defaultMessage: 'No options' })}
 						onInputChange={(_, value) => formData.setValue('field', value)}
 						renderInput={(formTextFieldProps) => (
 							<FormTextField
@@ -86,7 +98,7 @@ export const GroupFiltersForm = ({ onBlur }: IGroupFilters) => {
 					</ActionMenuItem>
 					<ActionMenuItem disabled={!isValid}>
 						<SubmitButton variant="contained" color="primary" fullWidth={false} disabled={!isValid}>
-							<FormattedMessage id="tickets.groups.filterPanel.createGroup" defaultMessage="Create group" />
+								<FormattedMessage id="tickets.groups.filterPanel.updateFilter" defaultMessage="Update filter" />
 						</SubmitButton>
 					</ActionMenuItem>
 				</Buttons>
