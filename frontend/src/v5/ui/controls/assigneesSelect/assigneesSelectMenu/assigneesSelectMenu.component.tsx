@@ -20,7 +20,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SearchContext, SearchContextComponent, SearchContextType } from '@controls/search/searchContext';
 import { NoResults, SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
-import { MenuItem } from '@mui/material';
+import { ListSubheader, MenuItem } from '@mui/material';
 import { get, partition } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { useSelector } from 'react-redux';
@@ -28,7 +28,7 @@ import { SelectProps } from '@controls/inputs/select/select.component';
 import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
 import { JobPopoverCircle } from '@components/shared/popoverCircles/jobPopoverCircle/jobPopoverCircle.component';
 import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSelectMenuItem.component';
-import { HiddenSelect, HorizontalRule, ListHeading, SearchInput } from './assigneesSelectMenu.styles';
+import { HiddenSelect, HorizontalRule, SearchInput } from './assigneesSelectMenu.styles';
 
 const isUser = (assignee) => get(assignee, 'user');
 
@@ -76,9 +76,9 @@ export const AssigneesSelectMenu = ({
 									onKeyDown={preventPropagation}
 								/>
 							</SearchInputContainer>
-							<ListHeading>
+							<ListSubheader>
 								<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
-							</ListHeading>
+							</ListSubheader>
 							{filteredJobs.length > 0 && filteredJobs.map((job) => (
 								<AssigneesSelectMenuItem
 									key={job._id}
@@ -95,10 +95,12 @@ export const AssigneesSelectMenu = ({
 									/>
 								</NoResults>
 							)}
+
 							<HorizontalRule />
-							<ListHeading>
+
+							<ListSubheader>
 								<FormattedMessage id="assigneesSelectMenu.usersHeading" defaultMessage="Users" />
-							</ListHeading>
+							</ListSubheader>
 							{filteredUsers.length > 0 && filteredUsers.map(({ user, firstName, lastName, job }) => (
 								<AssigneesSelectMenuItem
 									key={user}

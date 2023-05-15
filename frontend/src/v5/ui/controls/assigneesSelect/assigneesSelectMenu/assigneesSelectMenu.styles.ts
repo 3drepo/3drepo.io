@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 import { Select } from '@controls/inputs/select/select.component';
 import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 import { Divider } from '@mui/material';
@@ -44,13 +43,6 @@ export const HiddenSelect = styled(Select).attrs({
 	position: absolute;
 	right: 0;
 	top: 0;
-`;
-
-export const ListHeading = styled.div`
-	${({ theme }) => theme.typography.h5};
-	color: ${({ theme }) => theme.palette.base.main};
-	padding: 4px 14px;
-	font-weight: ${FONT_WEIGHT.BOLD};
 `;
 
 export const SearchInput = styled(SearchInputBase).attrs({
