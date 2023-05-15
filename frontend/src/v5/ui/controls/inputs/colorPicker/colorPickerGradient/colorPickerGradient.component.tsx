@@ -31,7 +31,7 @@ export const ColorPickerGradient = ({ value = UNSET_HEX_COLOR, onClose }) => {
 			onClose(color);
 		}
 	}, [color]);
-	
+
 	return (
 		<ColorPickerMenu
 			title={formatMessage({ id: 'colorPicker.gradient.title', defaultMessage: 'Custom colour' })}

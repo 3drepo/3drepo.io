@@ -55,7 +55,7 @@ export const ActionMenu = ({
 
 	const handlePopoverClick = (e: Event) => {
 		PopoverProps?.onClick?.(e);
-		handleClose(e)
+		handleClose(e);
 	};
 
 	return (
