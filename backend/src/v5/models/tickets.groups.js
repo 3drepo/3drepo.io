@@ -34,7 +34,7 @@ Groups.deleteGroups = async (teamspace, project, model, ticket, groupIds) => {
 Groups.getGroupsByIds = (teamspace, project, model, ticket, groupIds, projection) => find(
 	teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
 
-Groups.updateGroup = (teamspace, project, model, ticket, groupId, data) => {
+Groups.updateGroup = async (teamspace, project, model, ticket, groupId, data) => {
 	const updates = { $set: data };
 
 	if (data.rules) {
@@ -42,7 +42,7 @@ Groups.updateGroup = (teamspace, project, model, ticket, groupId, data) => {
 	} else if (data.objects) {
 		updates.$unset = { rules: 1 };
 	}
-	return updateOne(
+	await updateOne(
 		teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: groupId }, updates);
 };
 
