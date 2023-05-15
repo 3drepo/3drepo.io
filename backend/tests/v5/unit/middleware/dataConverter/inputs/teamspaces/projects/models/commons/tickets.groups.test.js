@@ -15,21 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src, image } = require('../../../../../../../../helper/path');
+const { src } = require('../../../../../../../../helper/path');
 
-const { cloneDeep } = require(`${src}/utils/helper/objects`);
-const { determineTestGroup, generateRandomObject, generateRandomString, generateUUID } = require('../../../../../../../../helper/services');
-const FS = require('fs');
-const { UUIDToString } = require('../../../../../../../../../../src/v5/utils/helper/uuids');
+const { determineTestGroup, generateRandomObject, generateRandomString } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/models/tickets.groups');
 const TicketGroups = require(`${src}/models/tickets.groups`);
 
 jest.mock('../../../../../../../../../../src/v5/schemas/tickets/tickets.groups');
 const GroupsSchema = require(`${src}/schemas/tickets/tickets.groups`);
-
-jest.mock('../../../../../../../../../../src/v5/models/tickets');
-const Tickets = require(`${src}/models/tickets`);
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -78,13 +72,15 @@ const testValidateUpdateGroup = () => {
 
 			expect(next).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res, createResponseCode(templates.invalidArguments, errMsg));
+			expect(Responder.respond).toHaveBeenCalledWith(req, res,
+				createResponseCode(templates.invalidArguments, errMsg));
 		});
 
 		test(`Should fail with ${templates.invalidArguments.code} if deserialisation failed`, async () => {
 			TicketGroups.getGroupById.mockResolvedValueOnce();
 			const errMsg = generateRandomString();
-			const validateFn = jest.fn().mockResolvedValueOnce({});
+			const validatedObj = generateRandomObject();
+			const validateFn = jest.fn().mockResolvedValueOnce(validatedObj);
 			GroupsSchema.schema.mockReturnValueOnce({ validate: validateFn });
 			GroupsSchema.deserialiseGroup.mockImplementationOnce(() => { throw new Error(errMsg); });
 
@@ -95,14 +91,68 @@ const testValidateUpdateGroup = () => {
 			await Groups.validateUpdateGroup(req, res, next);
 
 			expect(GroupsSchema.deserialiseGroup).toHaveBeenCalledTimes(1);
-			expect(GroupsSchema.deserialiseGroup).toHaveBeenCalledWith(req.body, { stripUnknown: true });
+			expect(GroupsSchema.deserialiseGroup).toHaveBeenCalledWith(validatedObj);
 
-			expect().toHaveBeenCalledTimes(1);
+			expect(validateFn).toHaveBeenCalledTimes(1);
 			expect(validateFn).toHaveBeenCalledWith(req.body, { stripUnknown: true });
 
 			expect(next).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res, createResponseCode(templates.invalidArguments, errMsg));
+			expect(Responder.respond).toHaveBeenCalledWith(req, res,
+				createResponseCode(templates.invalidArguments, errMsg));
+		});
+
+		test(`Should fail with ${templates.invalidArguments.code} if there is no fields to update`, async () => {
+			TicketGroups.getGroupById.mockResolvedValueOnce();
+			const validatedObj = generateRandomObject();
+			const validateFn = jest.fn().mockResolvedValueOnce(validatedObj);
+			GroupsSchema.schema.mockReturnValueOnce({ validate: validateFn });
+			GroupsSchema.deserialiseGroup.mockReturnValueOnce({});
+
+			const body = generateRandomObject();
+			const req = { params, body };
+			const res = {};
+			const next = jest.fn();
+
+			await Groups.validateUpdateGroup(req, res, next);
+
+			expect(GroupsSchema.deserialiseGroup).toHaveBeenCalledTimes(1);
+			expect(GroupsSchema.deserialiseGroup).toHaveBeenCalledWith(validatedObj);
+
+			expect(validateFn).toHaveBeenCalledTimes(1);
+			expect(validateFn).toHaveBeenCalledWith(body, { stripUnknown: true });
+
+			expect(next).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res,
+				createResponseCode(templates.invalidArguments, 'No valid property to update'));
+		});
+
+		test('Should call next() if the data is valid', async () => {
+			TicketGroups.getGroupById.mockResolvedValueOnce();
+			const validatedObj = generateRandomObject();
+			const deSerialisedObj = generateRandomObject();
+			const validateFn = jest.fn().mockResolvedValueOnce(validatedObj);
+			GroupsSchema.schema.mockReturnValueOnce({ validate: validateFn });
+			GroupsSchema.deserialiseGroup.mockReturnValueOnce(deSerialisedObj);
+
+			const body = generateRandomObject();
+			const req = { params, body };
+			const res = {};
+			const next = jest.fn();
+
+			await Groups.validateUpdateGroup(req, res, next);
+
+			expect(req.body).toEqual(deSerialisedObj);
+
+			expect(GroupsSchema.deserialiseGroup).toHaveBeenCalledTimes(1);
+			expect(GroupsSchema.deserialiseGroup).toHaveBeenCalledWith(validatedObj);
+
+			expect(validateFn).toHaveBeenCalledTimes(1);
+			expect(validateFn).toHaveBeenCalledWith(body, { stripUnknown: true });
+
+			expect(next).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).not.toHaveBeenCalled();
 		});
 	});
 };
