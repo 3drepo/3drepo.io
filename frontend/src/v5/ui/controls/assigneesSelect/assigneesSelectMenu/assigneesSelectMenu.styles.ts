@@ -21,7 +21,23 @@ import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 import { Divider } from '@mui/material';
 import styled from 'styled-components';
 
-export const HiddenSelect = styled(Select)`
+export const HiddenSelect = styled(Select).attrs({
+	multiple: true,
+	MenuProps: {
+		disableAutoFocusItem: true,
+		PaperProps: {
+			style: { maxHeight: 400, maxWidth: 218 },
+		},
+		anchorOrigin: {
+			vertical: 'top',
+			horizontal: 'right',
+		},
+		transformOrigin: {
+			vertical: 'top',
+			horizontal: 'left',
+		},
+	},
+})`
 	height: 0;
 	width: 0;
 	overflow: hidden;

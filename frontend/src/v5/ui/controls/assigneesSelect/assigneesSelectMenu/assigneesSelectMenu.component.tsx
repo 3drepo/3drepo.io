@@ -62,16 +62,10 @@ export const AssigneesSelectMenu = ({
 				{ ({ filteredItems }: SearchContextType<typeof MenuItem>) => {
 					const [filteredUsers, filteredJobs] = partition(filteredItems, isUser);
 					return (
+						// @ts-ignore
 						<HiddenSelect
 							open={open}
 							value={value || []}
-							multiple
-							MenuProps={{
-								disableAutoFocusItem: true,
-								PaperProps: {
-									style: { maxHeight: 531, maxWidth: 218 },
-								},
-							}}
 							onClick={onClickList}
 							{...props}
 						>
