@@ -46,5 +46,5 @@ export const Subtitle = styled(Title)`
 
 export const Checkbox = styled(BaseCheckbox)`
 	position: absolute;
-	right: 3px;
+	right: 6px;
 `;
