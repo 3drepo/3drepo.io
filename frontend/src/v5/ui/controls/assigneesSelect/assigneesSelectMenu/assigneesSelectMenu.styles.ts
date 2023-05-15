@@ -25,7 +25,10 @@ export const HiddenSelect = styled(Select).attrs({
 	MenuProps: {
 		disableAutoFocusItem: true,
 		PaperProps: {
-			style: { maxHeight: 400, maxWidth: 218 },
+			style: {
+				maxHeight: 400,
+				maxWidth: 218,
+			},
 		},
 		anchorOrigin: {
 			vertical: 'top',
@@ -49,7 +52,12 @@ export const SearchInput = styled(SearchInputBase).attrs({
 	variant: 'outlined',
 })`
 	width: auto;
-	margin: 2px 12px 12px;
+	margin: -10px 0 0 0;
+	padding: 12px;
+	top: 0;
+	position: sticky;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	z-index: 1;
 `;
 
 export const HorizontalRule = styled(Divider)`
