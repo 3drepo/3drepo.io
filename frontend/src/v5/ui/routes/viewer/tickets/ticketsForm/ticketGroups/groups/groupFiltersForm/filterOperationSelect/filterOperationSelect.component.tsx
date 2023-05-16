@@ -30,61 +30,33 @@ export const FilterOperationSelect = () => (
 		<ListSubheader>
 			<FormattedMessage id="ticket.groups.operation.field" defaultMessage="Field" />
 		</ListSubheader>
-		<MenuItem value="EXISTS">
-			{OPERATION_DISPLAY_NAMES['EXISTS']}
-		</MenuItem>
-		<MenuItem value="NOT_EXISTS">
-			{OPERATION_DISPLAY_NAMES['NOT_EXISTS']}
-		</MenuItem>
+		<MenuItem value="EXISTS">{OPERATION_DISPLAY_NAMES.EXISTS}</MenuItem>
+		<MenuItem value="NOT_EXISTS">{OPERATION_DISPLAY_NAMES.NOT_EXISTS}</MenuItem>
+
 		{/* Text */}
 		<ListSubheader>
 			<FormattedMessage id="ticket.groups.operation.text" defaultMessage="Text" />
 		</ListSubheader>
-		<MenuItem value="IS">
-			{OPERATION_DISPLAY_NAMES['IS']}
-		</MenuItem>
-		<MenuItem value="IS_NOT">
-			{OPERATION_DISPLAY_NAMES['IS_NOT']}
-		</MenuItem>
-		<MenuItem value="CONTAINS">
-			{OPERATION_DISPLAY_NAMES['CONTAINS']}
-		</MenuItem>
-		<MenuItem value="NOT_CONTAINS">
-			{OPERATION_DISPLAY_NAMES['NOT_CONTAINS']}
-		</MenuItem>
+		<MenuItem value="IS">{OPERATION_DISPLAY_NAMES.IS}</MenuItem>
+		<MenuItem value="IS_NOT">{OPERATION_DISPLAY_NAMES.IS_NOT}</MenuItem>
+		<MenuItem value="CONTAINS">{OPERATION_DISPLAY_NAMES.CONTAINS}</MenuItem>
+		<MenuItem value="NOT_CONTAINS">{OPERATION_DISPLAY_NAMES.NOT_CONTAINS}</MenuItem>
 		{/* Text - Regex */}
-		<MenuItem value="REGEX">
-			{OPERATION_DISPLAY_NAMES['REGEX']}
-		</MenuItem>
+		<MenuItem value="REGEX">{OPERATION_DISPLAY_NAMES.REGEX}</MenuItem>
+
 		{/* Number */}
 		<ListSubheader>
 			<FormattedMessage id="ticket.groups.operation.number" defaultMessage="Number" />
 		</ListSubheader>
-		<MenuItem value="EQUALS">
-			{OPERATION_DISPLAY_NAMES['EQUALS']}
-		</MenuItem>
-		<MenuItem value="NOT_EQUALS">
-			{OPERATION_DISPLAY_NAMES['NOT_EQUALS']}
-		</MenuItem>
+		<MenuItem value="EQUALS">{OPERATION_DISPLAY_NAMES.EQUALS}</MenuItem>
+		<MenuItem value="NOT_EQUALS">{OPERATION_DISPLAY_NAMES.NOT_EQUALS}</MenuItem>
 		{/* Number - Comparison */}
-		<MenuItem value="GT">
-			{OPERATION_DISPLAY_NAMES['GT']}
-		</MenuItem>
-		<MenuItem value="GTE">
-			{OPERATION_DISPLAY_NAMES['GTE']}
-		</MenuItem>
-		<MenuItem value="LT">
-			{OPERATION_DISPLAY_NAMES['LT']}
-		</MenuItem>
-		<MenuItem value="LTE">
-			{OPERATION_DISPLAY_NAMES['LTE']}
-		</MenuItem>
+		<MenuItem value="GT">{OPERATION_DISPLAY_NAMES.GT}</MenuItem>
+		<MenuItem value="GTE">{OPERATION_DISPLAY_NAMES.GTE}</MenuItem>
+		<MenuItem value="LT">{OPERATION_DISPLAY_NAMES.LT}</MenuItem>
+		<MenuItem value="LTE">{OPERATION_DISPLAY_NAMES.LTE}</MenuItem>
 		{/* Number - Range */}
-		<MenuItem value="IN_RANGE">
-			{OPERATION_DISPLAY_NAMES['IN_RANGE']}
-		</MenuItem>
-		<MenuItem value="NOT_IN_RANGE">
-			{OPERATION_DISPLAY_NAMES['NOT_IN_RANGE']}
-		</MenuItem>
+		<MenuItem value="IN_RANGE">{OPERATION_DISPLAY_NAMES.IN_RANGE}</MenuItem>
+		<MenuItem value="NOT_IN_RANGE">{OPERATION_DISPLAY_NAMES.NOT_IN_RANGE}</MenuItem>
 	</FormSelect>
 );
