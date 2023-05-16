@@ -35,7 +35,7 @@ export const FilterValueField = () => {
 	const operation = watch('operation');
 	const operationType = OPERATIONS_TYPES[operation];
 
-	useEffect(() => {
+	useEffect(() => () => {
 		remove();
 		const { values, ...resetData } = getValues();
 		reset(resetData);
