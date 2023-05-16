@@ -74,7 +74,7 @@ export const Filters = styled.div`
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
-    gap: 4px;
+	gap: 4px;
 `;
 
 export const ChipWrapper = styled.div`
