@@ -26,7 +26,7 @@ import { IFilterForm, OPERATIONS_TYPES } from '../groupFiltersForm.helpers';
 
 const VALUE_LABEL = formatMessage({ id: 'ticket.groups.value.label', defaultMessage: 'Value' });
 export const FilterValueField = () => {
-	const { control, watch, reset, getValues } = useFormContext<IFilterForm>();
+	const { control, watch, formState: { errors } } = useFormContext<IFilterForm>();
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'values',
@@ -34,12 +34,9 @@ export const FilterValueField = () => {
 
 	const operation = watch('operation');
 	const operationType = OPERATIONS_TYPES[operation];
+	const error = errors.values || {};
 
-	useEffect(() => () => {
-		remove();
-		const { values, ...resetData } = getValues();
-		reset(resetData);
-	}, [operationType]);
+	useEffect(() => () => remove(), [operationType]);
 
 	useEffect(() => {
 		if (!fields.length && operationType !== 'field') {
@@ -55,7 +52,7 @@ export const FilterValueField = () => {
 			<>
 				{fields.map((field, i) => (
 					<ValuesContainer>
-						<FormValueField label={VALUE_LABEL} name={`values.${i}.value`} key={field.id} />
+						<FormValueField label={VALUE_LABEL} name={`values.${i}.value`} key={field.id} formError={error?.[i]} />
 						<ValueIconContainer onClick={() => remove(i)} disabled={fields.length === 1}>
 							<RemoveValueIcon />
 						</ValueIconContainer>
@@ -70,7 +67,7 @@ export const FilterValueField = () => {
 
 	// single value type
 	if (['regex', 'numberComparison'].includes(operationType)) {
-		return (<FormValueField label={VALUE_LABEL} name="values.0.value" />);
+		return (<FormValueField label={VALUE_LABEL} name="values.0.value" formError={error?.[0]} />);
 	}
 
 	// range value type
@@ -80,10 +77,12 @@ export const FilterValueField = () => {
 				<FormNumberField
 					label={formatMessage({ id: 'ticket.groups.rangeValue1.label', defaultMessage: 'Value 1' })}
 					name="values.0.value"
+					formError={error?.[0]}
 				/>
 				<FormNumberField
 					label={formatMessage({ id: 'ticket.groups.rangeValue2.label', defaultMessage: 'Value 2' })}
 					name="values.1.value"
+					formError={error?.[1]}
 				/>
 			</ValuesContainer>
 		);
