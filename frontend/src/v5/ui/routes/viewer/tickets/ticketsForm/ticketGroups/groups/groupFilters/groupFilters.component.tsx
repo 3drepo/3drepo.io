@@ -27,7 +27,7 @@ import { ChipWrapper, EditFilterActionMenu, FilterChip, Filters, NewFilterAction
 export const GroupFilters = () => {
 	const [selectedChip, setSelectedChip] = useState<number>(null);
 
-	// TODO - fix type here with the actual useForm once the whole form is ready
+	// TODO - fix type assigend to generic with the actual useForm<T> once the form is valid
 	const { control } = useFormContext<{ filters: IFilter[] }>();
 	const { fields: filters, append, remove, update } = useFieldArray({
 		control,
@@ -60,8 +60,7 @@ export const GroupFilters = () => {
 											{!!filter.values?.length && (<b>&nbsp;{filter.values.join()}</b>)}
 										</>
 									)}
-									deleteIcon={<CrossIcon />}
-									// TODO - fix this
+									deleteIcon={<div><CrossIcon /></div>}
 									onDelete={() => remove(i)}
 									$selected={selectedChip === i}
 								/>

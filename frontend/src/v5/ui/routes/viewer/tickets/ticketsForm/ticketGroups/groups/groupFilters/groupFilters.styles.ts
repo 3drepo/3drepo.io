@@ -98,13 +98,19 @@ export const FilterChip = styled(Chip).attrs(({
 		font-weight: initial;
 	}
 
-	svg.MuiChip-deleteIcon {
-		margin: 0 0 0 5px;
-		width: 9px;
-		height: 9px;
+	.MuiChip-deleteIcon {
+		margin: 0 -4px 0 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 
 		&:hover {
 			color: currentColor;
+		}
+
+		svg {
+			width: 9px;
+			height: 9px;
 		}
 	}
 `;
