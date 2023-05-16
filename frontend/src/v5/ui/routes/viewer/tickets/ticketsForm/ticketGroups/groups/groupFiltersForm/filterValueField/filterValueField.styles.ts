@@ -24,13 +24,16 @@ export const ValuesContainer = styled.div`
 	gap: 10px;
 `;
 
-export const ValueIconContainer = styled.span<{ disabled?: boolean }>`
+export const ValueIconContainer = styled.button.attrs({
+	type: 'button',
+})<{ disabled?: boolean }>`
 	cursor: pointer;
 	color: ${({ theme }) => theme.palette.secondary.main};
 	${({ theme, disabled }) => disabled && css`
 		cursor: auto;
 		color: ${theme.palette.base.light};
 	`}
+	display: inline-block;
 	padding: 0;
 	height: 18px;
 	margin-bottom: 15px;
