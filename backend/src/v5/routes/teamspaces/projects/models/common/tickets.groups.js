@@ -32,6 +32,7 @@ const {
 
 const { Router } = require('express');
 const { checkTicketExists } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { getUserFromSession } = require('../../../../../utils/sessions');
 const { respond } = require('../../../../../utils/responder');
 const { serialiseGroup } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets.groups');
 const { stringToUUID } = require('../../../../../utils/helper/uuids');
@@ -55,10 +56,11 @@ const getGroup = (isFed) => async (req, res, next) => {
 const updateGroup = (isFed) => async (req, res) => {
 	const { params, body: updateData } = req;
 	const { teamspace, project, model, ticket, group } = params;
+	const user = getUserFromSession(req.session);
 
 	try {
 		const updateFn = isFed ? updateFedGroup : updateConGroup;
-		await updateFn(teamspace, project, model, ticket, group, updateData);
+		await updateFn(teamspace, project, model, ticket, group, updateData, user);
 
 		respond(req, res, templates.ok);
 	} catch (err) {

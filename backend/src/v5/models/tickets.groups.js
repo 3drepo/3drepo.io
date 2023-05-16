@@ -18,6 +18,8 @@
 const GROUPS_COL = 'tickets.groups';
 
 const { deleteMany, find, findOne, insertMany, updateOne } = require('../handler/db');
+const { events } = require('../services/eventsManager/eventsManager.constants');
+const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
 const Groups = {};
@@ -34,7 +36,7 @@ Groups.deleteGroups = async (teamspace, project, model, ticket, groupIds) => {
 Groups.getGroupsByIds = (teamspace, project, model, ticket, groupIds, projection) => find(
 	teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
 
-Groups.updateGroup = async (teamspace, project, model, ticket, groupId, data) => {
+Groups.updateGroup = async (teamspace, project, model, ticket, groupId, data, author) => {
 	const updates = { $set: data };
 
 	if (data.rules) {
@@ -44,6 +46,8 @@ Groups.updateGroup = async (teamspace, project, model, ticket, groupId, data) =>
 	}
 	await updateOne(
 		teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: groupId }, updates);
+
+	publish(events.UPDATE_TICKET_GROUP, { _id: groupId, teamspace, project, model, ticket, changes: data, author });
 };
 
 Groups.getGroupById = async (teamspace, project, model, ticket, groupId,
