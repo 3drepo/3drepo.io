@@ -15,14 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
 import { ActionMenu } from '@controls/actionMenu';
 import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
-import { GroupFiltersForm } from './groupFiltersForm/groupFiltersForm.component';
+import { Chip } from '@controls/chip/chip.component';
 
-export const FiltersActionMenu = styled(ActionMenu).attrs({
+const BaseFilterActionMenu = styled(ActionMenu)`
+	${Menu} {
+		padding: 14px;
+		display: flex;
+		flex-direction: column;
+		width: 328px;
+		border-radius: 10px;
+	}
+`;
+
+export const EditFilterActionMenu = styled(BaseFilterActionMenu).attrs({
+	PopoverProps: {
+		anchorOrigin: {
+			vertical: 'bottom',
+			horizontal: 'left',
+		},
+		transformOrigin: {
+			vertical: 'top',
+			horizontal: 'left',
+		},
+	},
+})``;
+
+export const NewFilterActionMenu = styled(BaseFilterActionMenu).attrs({
 	PopoverProps: {
 		anchorOrigin: {
 			vertical: 'top',
@@ -38,14 +60,6 @@ export const FiltersActionMenu = styled(ActionMenu).attrs({
 		margin-left: 15px;
 		box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
 	}
-
-	${Menu} {
-		padding: 14px;
-		display: flex;
-		flex-direction: column;
-		width: 328px;
-		border-radius: 10px;
-	}
 `;
 
 export const TriggerButton = styled(Typography).attrs({
@@ -56,14 +70,41 @@ export const TriggerButton = styled(Typography).attrs({
 	width: fit-content;
 `;
 
-export const GroupFiltersWithTriggerButton = () => (
-	<FiltersActionMenu
-		TriggerButton={(
-			<TriggerButton>
-				<FormattedMessage id="tickets.groups.addFilter" defaultMessage="Add filter" />
-			</TriggerButton>
-		)}
-	>
-		<GroupFiltersForm />
-	</FiltersActionMenu>
-);
+export const Filters = styled.div`
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+    gap: 4px;
+`;
+
+export const ChipWrapper = styled.div`
+	max-width: 100%;
+`;
+
+export const ChipLabel = styled.div`
+	display: inline-flex;
+	flex-direction: row;
+`;
+
+export const FilterChip = styled(Chip).attrs(({
+	theme: { palette },
+	$selected,
+}: { theme: any, $selected: boolean }) => ({
+	color: $selected ? palette.tertiary.main : palette.secondary.main,
+	variant: 'filled',
+}))<{ $selected: boolean }>`
+	.MuiChip-label {
+		text-transform: initial;
+		font-weight: initial;
+	}
+
+	svg.MuiChip-deleteIcon {
+		margin: 0 0 0 5px;
+		width: 9px;
+		height: 9px;
+
+		&:hover {
+			color: currentColor;
+		}
+	}
+`;

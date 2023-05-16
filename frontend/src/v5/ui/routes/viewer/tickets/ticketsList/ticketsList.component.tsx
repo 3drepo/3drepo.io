@@ -26,7 +26,7 @@ import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
 import { AdditionalProperties, TicketsCardViews } from '../tickets.constants';
-import { GroupFiltersWithTriggerButton } from '../ticketsForm/ticketGroups/groups/groupFilterTemporaryFile';
+import { GroupFiltersWithTriggerButton } from '../ticketsForm/ticketGroups/groups/groupFilters/groupFilterTemporaryFile';
 
 type TicketsListProps = {
 	tickets: ITicket[];
