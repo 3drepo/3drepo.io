@@ -41,9 +41,9 @@ const DEFAULT_VALUES: IFilterForm = {
 
 type IGroupFilters = {
 	filter?: IFilter;
-	onBlur?: (filter: IFilter) => void;
+	onSave?: (filter: IFilter) => void;
 };
-export const GroupFiltersForm = ({ onBlur, filter }: IGroupFilters) => {
+export const GroupFiltersForm = ({ onSave, filter }: IGroupFilters) => {
 	const fields = useSelector(selectMetaKeys);
 	const formData = useForm<IFilterForm>({
 		defaultValues: filter ? prepareFilterForForm(filter) : DEFAULT_VALUES,
@@ -54,11 +54,12 @@ export const GroupFiltersForm = ({ onBlur, filter }: IGroupFilters) => {
 	const {
 		handleSubmit,
 		formState: { isValid },
+		setValue,
 	} = formData;
 
 	const fieldValue = formData.watch('field');
 
-	const onSubmit = (filter: IFilterForm) => onBlur(parseFilter(filter));
+	const onSubmit = (filter: IFilterForm) => onSave(parseFilter(filter));
 
 	return (
 		<Form onSubmit={handleSubmit(onSubmit)}>
@@ -80,6 +81,7 @@ export const GroupFiltersForm = ({ onBlur, filter }: IGroupFilters) => {
 								label={formatMessage({ id: 'tickets.groups.field', defaultMessage: 'Field' })}
 							/>
 						)}
+						onChange={(_, data) => setValue('field', data)}
 					/>
 					<FilterOperationSelect />
 					<FilterValueField />
