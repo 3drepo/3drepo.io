@@ -18,8 +18,8 @@
 import { ActionMenuItem } from '@controls/actionMenu';
 import { FormattedMessage } from 'react-intl';
 import { Button } from '@controls/button';
-import { useForm, FormProvider } from 'react-hook-form';
-import { FormTextField } from '@controls/inputs/formInputs.component';
+import { useForm, FormProvider, Controller } from 'react-hook-form';
+import { useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { SubmitButton } from '@controls/submitButton';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -27,7 +27,7 @@ import { GroupFiltersSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { selectMetaKeys } from '@/v4/modules/model';
 import { useSelector } from 'react-redux';
 import { Highlight } from '@controls/highlight';
-import { Autocomplete, AutocompleteRenderInputParams } from '@mui/material';
+import { Autocomplete, TextField } from '@mui/material';
 import { Buttons, Form, InputsContainer } from './groupFiltersForm.styles';
 import { IFilter, IFilterForm, parseFilter, prepareFilterForForm } from './groupFiltersForm.helpers';
 import { FilterOperationSelect } from './filterOperationSelect/filterOperationSelect.component';
@@ -44,6 +44,7 @@ type IGroupFilters = {
 	onSave?: (filter: IFilter) => void;
 };
 export const GroupFiltersForm = ({ onSave, filter }: IGroupFilters) => {
+	const [fieldValue, setFieldValue] = useState(filter?.field || '');
 	const fields = useSelector(selectMetaKeys);
 	const formData = useForm<IFilterForm>({
 		defaultValues: filter ? prepareFilterForForm(filter) : DEFAULT_VALUES,
@@ -53,11 +54,9 @@ export const GroupFiltersForm = ({ onSave, filter }: IGroupFilters) => {
 
 	const {
 		handleSubmit,
-		formState: { isValid },
-		setValue,
+		formState: { isValid, isDirty },
 	} = formData;
 
-	const fieldValue = formData.watch('field');
 
 	const onSubmit = (filter: IFilterForm) => onSave(parseFilter(filter));
 
@@ -65,23 +64,28 @@ export const GroupFiltersForm = ({ onSave, filter }: IGroupFilters) => {
 		<Form onSubmit={handleSubmit(onSubmit)}>
 			<FormProvider {...formData}>
 				<InputsContainer>
-					<Autocomplete
-						defaultValue={fieldValue}
-						options={fields}
-						renderOption={(fieldProps, field: string) => (
-							<li {...fieldProps}>
-								<Highlight search={fieldValue}>{field}</Highlight>
-							</li>
-						)}
-						noOptionsText={formatMessage({ id: 'tickets.groups.field.noOptions', defaultMessage: 'No options' })}
-						renderInput={(renderInputProps: AutocompleteRenderInputParams) => (
-							<FormTextField
-								name="field"
-								{...renderInputProps}
-								label={formatMessage({ id: 'tickets.groups.field', defaultMessage: 'Field' })}
+					<Controller
+						name="field"
+						render={({ field: { onChange, ...autocompleteProps } }) => (
+							<Autocomplete
+								{...autocompleteProps}
+								options={fields}
+								noOptionsText={formatMessage({ id: 'tickets.groups.field.noOptions', defaultMessage: 'No options' })}
+								onChange={(_, data) => onChange(data)}
+								onInputChange={(_, value) => setFieldValue(value)}
+								renderOption={(fieldProps, field: string) => (
+									<li {...fieldProps}>
+										<Highlight search={fieldValue}>{field}</Highlight>
+									</li>
+								)}
+								renderInput={(renderInputProps) => (
+									<TextField
+										{...renderInputProps}
+										label={formatMessage({ id: 'tickets.groups.field', defaultMessage: 'Field' })}
+									/>
+								)}
 							/>
 						)}
-						onChange={(_, data) => setValue('field', data)}
 					/>
 					<FilterOperationSelect />
 					<FilterValueField />
@@ -93,7 +97,12 @@ export const GroupFiltersForm = ({ onSave, filter }: IGroupFilters) => {
 						</Button>
 					</ActionMenuItem>
 					<ActionMenuItem disabled={!isValid}>
-						<SubmitButton variant="contained" color="primary" fullWidth={false} disabled={!isValid}>
+						<SubmitButton
+							variant="contained"
+							color="primary"
+							fullWidth={false}
+							disabled={!isValid || !isDirty}
+						>
 							{filter ? (
 								<FormattedMessage id="tickets.groups.filterPanel.updateFilter" defaultMessage="Update filter" />
 							) : (
