@@ -59,6 +59,7 @@ export const ActionMenu = ({
 			onOpen?.();
 			return () => onClose?.();
 		}
+		return () => {};
 	}, [anchorEl]);
 
 	const handlePopoverClick = (e: Event) => {
