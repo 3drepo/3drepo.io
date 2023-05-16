@@ -26,6 +26,10 @@ const { templates } = require(`${src}/utils/responseCodes`);
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
 
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+
 const groupCol = 'tickets.groups';
 
 const testAddGroups = () => {
@@ -152,6 +156,7 @@ const testUpdateGroup = () => {
 		const model = generateRandomString();
 		const ticket = generateRandomString();
 		const groupId = generateRandomString();
+		const author = generateRandomString();
 
 		test('Should update the group as expected', async () => {
 			const data = generateRandomObject();
@@ -160,6 +165,10 @@ const testUpdateGroup = () => {
 			expect(db.updateOne).toHaveBeenCalledTimes(1);
 			expect(db.updateOne).toHaveBeenCalledWith(teamspace, groupCol,
 				{ teamspace, project, model, ticket, _id: groupId }, { $set: data });
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET_GROUP,
+				{ _id: groupId, teamspace, project, model, ticket, changes: data, author });
 		});
 
 		test('Should unset objects if rules is being inserted/updated', async () => {
