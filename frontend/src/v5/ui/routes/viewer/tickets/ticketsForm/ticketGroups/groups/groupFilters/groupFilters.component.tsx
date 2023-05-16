@@ -17,36 +17,18 @@
 
 import { FormattedMessage } from 'react-intl';
 import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { FormProvider, useFieldArray, useForm, useFormContext } from 'react-hook-form';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
 import { useState } from 'react';
 import { IFilter, OPERATION_DISPLAY_NAMES } from '../groupFiltersForm/groupFiltersForm.helpers';
 import { GroupFiltersForm } from '../groupFiltersForm/groupFiltersForm.component';
 import { ChipWrapper, EditFilterActionMenu, FilterChip, Filters, NewFilterActionMenu, TriggerButton } from './groupFilters.styles';
 
-export const GroupFiltersWithTriggerButton = () => {
+export const GroupFilters = () => {
 	const [selectedChip, setSelectedChip] = useState<number>(null);
-	const defaultFilters: IFilter[] = [
-		{
-			field: 'Analytical Properties:Absorptance',
-			operation: 'CONTAINS',
-			values: ['1', '34'],
-		},
-		{
-			field: 'Absorptance',
-			operation: 'EXISTS',
-			values: [],
-		},
-		{
-			field: 'Absorptance',
-			operation: 'REGEX',
-			values: ['/\d.*{e}+$/'],
-		},
-	];
-	// TODO - replace with useFormContext
-	const { control } = useForm({
-		defaultValues: { filters: defaultFilters },
-	});
+
+	// TODO - fix type here with the actual useForm once the whole form is ready
+	const { control } = useFormContext<{ filters: IFilter[] }>();
 	const { fields: filters, append, remove, update } = useFieldArray({
 		control,
 		name: 'filters',
@@ -96,5 +78,33 @@ export const GroupFiltersWithTriggerButton = () => {
 					</EmptyCardMessage>
 			)}
 		</>
+	);
+};
+
+// TODO - delete me, I am here only to create a formContext
+export const GroupFiltersWithTriggerButton = () => {
+	const defaultFilters: IFilter[] = [
+		{
+			field: 'Analytical Properties:Absorptance',
+			operation: 'CONTAINS',
+			values: ['1', '34'],
+		},
+		{
+			field: 'Absorptance',
+			operation: 'EXISTS',
+			values: [],
+		},
+		{
+			field: 'Absorptance',
+			operation: 'REGEX',
+			values: ['/\d.*{e}+$/'],
+		},
+	];
+	const formData = useForm({ defaultValues: { filters: defaultFilters } });
+	
+	return (
+		<FormProvider {...formData}>
+			<GroupFilters />
+		</FormProvider>
 	);
 };
