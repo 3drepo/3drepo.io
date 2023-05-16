@@ -24,7 +24,8 @@ export const ValuesContainer = styled.div`
 	gap: 10px;
 `;
 
-export const ValueIconContainer = styled.button<{ disabled?: boolean }>`
+export const ValueIconContainer = styled.span<{ disabled?: boolean }>`
+	cursor: pointer;
 	color: ${({ theme }) => theme.palette.secondary.main};
 	${({ theme, disabled }) => disabled && css`
 		cursor: auto;
@@ -33,7 +34,6 @@ export const ValueIconContainer = styled.button<{ disabled?: boolean }>`
 	padding: 0;
 	height: 18px;
 	margin-bottom: 15px;
-	cursor: pointer;
 	border: none;
 	background: transparent;
 `;
