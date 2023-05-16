@@ -57,8 +57,7 @@ export const GroupFiltersForm = ({ onSave, filter }: IGroupFilters) => {
 		formState: { isValid, isDirty },
 	} = formData;
 
-
-	const onSubmit = (filter: IFilterForm) => onSave(parseFilter(filter));
+	const onSubmit = (body: IFilterForm) => onSave(parseFilter(body));
 
 	return (
 		<Form onSubmit={handleSubmit(onSubmit)}>

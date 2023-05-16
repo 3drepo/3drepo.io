@@ -56,12 +56,12 @@ export const GroupFilters = () => {
 								<FilterChip
 									label={(
 										<>
-											{filter.field}
-											&nbsp;{OPERATION_DISPLAY_NAMES[filter.operation]}
+											{filter.field} {OPERATION_DISPLAY_NAMES[filter.operation]}
 											{!!filter.values?.length && (<b>&nbsp;{filter.values.join()}</b>)}
 										</>
 									)}
 									deleteIcon={<CrossIcon />}
+									// TODO - fix this
 									onDelete={() => remove(i)}
 									$selected={selectedChip === i}
 								/>
@@ -74,8 +74,8 @@ export const GroupFilters = () => {
 			</Filters>
 			{!filters.length && (
 				<EmptyCardMessage>
-						<FormattedMessage id="tickets.groups.filters.empty" defaultMessage="No filters" />
-					</EmptyCardMessage>
+					<FormattedMessage id="tickets.groups.filters.empty" defaultMessage="No filters" />
+				</EmptyCardMessage>
 			)}
 		</>
 	);
@@ -97,11 +97,11 @@ export const GroupFiltersWithTriggerButton = () => {
 		{
 			field: 'Absorptance',
 			operation: 'REGEX',
-			values: ['/\d.*{e}+$/'],
+			values: ['/.*{e}+$/'],
 		},
 	];
 	const formData = useForm({ defaultValues: { filters: defaultFilters } });
-	
+
 	return (
 		<FormProvider {...formData}>
 			<GroupFilters />
