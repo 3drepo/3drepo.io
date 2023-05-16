@@ -27,10 +27,9 @@ import { GroupFiltersSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { selectMetaKeys } from '@/v4/modules/model';
 import { useSelector } from 'react-redux';
 import { Highlight } from '@controls/highlight';
-import { useRef } from 'react';
-import { Autocomplete } from '@mui/material';
+import { Autocomplete, AutocompleteRenderInputParams } from '@mui/material';
 import { Buttons, Form, InputsContainer } from './groupFiltersForm.styles';
-import { IFilter, IFilterForm } from './groupFiltersForm.helpers';
+import { IFilter, IFilterForm, parseFilter, prepareFilterForForm } from './groupFiltersForm.helpers';
 import { FilterOperationSelect } from './filterOperationSelect/filterOperationSelect.component';
 import { FilterValueField } from './filterValueField/filterValueField.component';
 
@@ -41,12 +40,13 @@ const DEFAULT_VALUES: IFilterForm = {
 };
 
 type IGroupFilters = {
+	filter?: IFilter;
 	onBlur?: (filter: IFilter) => void;
 };
-export const GroupFiltersForm = ({ onBlur }: IGroupFilters) => {
+export const GroupFiltersForm = ({ onBlur, filter }: IGroupFilters) => {
 	const fields = useSelector(selectMetaKeys);
 	const formData = useForm<IFilterForm>({
-		defaultValues: DEFAULT_VALUES,
+		defaultValues: filter ? prepareFilterForForm(filter) : DEFAULT_VALUES,
 		mode: 'all',
 		resolver: yupResolver(GroupFiltersSchema),
 	});
@@ -58,19 +58,14 @@ export const GroupFiltersForm = ({ onBlur }: IGroupFilters) => {
 
 	const fieldValue = formData.watch('field');
 
-	const onSubmit = ({ field, operation, values }: IFilterForm) => {
-		const filterData: IFilter = { field, operation };
-		if (values?.length) {
-			filterData.values = values.map((v) => v.value);
-		}
-		onBlur(filterData);
-	};
+	const onSubmit = (filter: IFilterForm) => onBlur(parseFilter(filter));
 
 	return (
 		<Form onSubmit={handleSubmit(onSubmit)}>
 			<FormProvider {...formData}>
 				<InputsContainer>
 					<Autocomplete
+						defaultValue={fieldValue}
 						options={fields}
 						renderOption={(fieldProps, field: string) => (
 							<li {...fieldProps}>
@@ -78,12 +73,11 @@ export const GroupFiltersForm = ({ onBlur }: IGroupFilters) => {
 							</li>
 						)}
 						noOptionsText={formatMessage({ id: 'tickets.groups.field.noOptions', defaultMessage: 'No options' })}
-						onInputChange={(_, value) => formData.setValue('field', value)}
-						renderInput={(formTextFieldProps) => (
+						renderInput={(renderInputProps: AutocompleteRenderInputParams) => (
 							<FormTextField
-								{...formTextFieldProps}
-								label={formatMessage({ id: 'tickets.groups.field', defaultMessage: 'Field' })}
 								name="field"
+								{...renderInputProps}
+								label={formatMessage({ id: 'tickets.groups.field', defaultMessage: 'Field' })}
 							/>
 						)}
 					/>
@@ -98,7 +92,11 @@ export const GroupFiltersForm = ({ onBlur }: IGroupFilters) => {
 					</ActionMenuItem>
 					<ActionMenuItem disabled={!isValid}>
 						<SubmitButton variant="contained" color="primary" fullWidth={false} disabled={!isValid}>
+							{filter ? (
 								<FormattedMessage id="tickets.groups.filterPanel.updateFilter" defaultMessage="Update filter" />
+							) : (
+								<FormattedMessage id="tickets.groups.filterPanel.createFilter" defaultMessage="Create filter" />
+							)}
 						</SubmitButton>
 					</ActionMenuItem>
 				</Buttons>

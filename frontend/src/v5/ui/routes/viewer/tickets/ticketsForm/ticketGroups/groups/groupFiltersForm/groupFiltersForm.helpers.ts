@@ -45,3 +45,18 @@ export type IFilter = {
 export type IFilterForm = Omit<IFilter, 'values'> & {
 	values: { value: number | string }[],
 };
+
+export const parseFilter = ({ values, ...filter }: IFilterForm): IFilter => {
+	if (values?.length) {
+		return {
+			...filter,
+			values: values.map((v) => v.value),
+		};
+	}
+	return filter;
+};
+
+export const prepareFilterForForm = ({ values = [], ...filter }: IFilter): IFilterForm => ({
+	...filter,
+	values: values.map((value) => ({ value })),
+});
