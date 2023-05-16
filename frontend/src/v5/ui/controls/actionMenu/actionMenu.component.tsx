@@ -31,6 +31,7 @@ type ActionMenuProps = {
 export const ActionMenu = ({
 	className,
 	TriggerButton,
+	className,
 	children,
 	PopoverProps,
 	onOpen,
