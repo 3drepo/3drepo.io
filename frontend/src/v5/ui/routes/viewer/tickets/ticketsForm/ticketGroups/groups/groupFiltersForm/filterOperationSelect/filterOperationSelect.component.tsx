@@ -19,6 +19,7 @@ import { FormattedMessage } from 'react-intl';
 import { FormSelect } from '@controls/inputs/formInputs.component';
 import { ListSubheader, MenuItem } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
+import { OPERATION_DISPLAY_NAMES } from '../groupFiltersForm.helpers';
 
 export const FilterOperationSelect = () => (
 	<FormSelect
@@ -30,60 +31,60 @@ export const FilterOperationSelect = () => (
 			<FormattedMessage id="ticket.groups.operation.field" defaultMessage="Field" />
 		</ListSubheader>
 		<MenuItem value="EXISTS">
-			<FormattedMessage id="filter.operation.exists" defaultMessage="exists" />
+			{OPERATION_DISPLAY_NAMES['EXISTS']}
 		</MenuItem>
 		<MenuItem value="NOT_EXISTS">
-			<FormattedMessage id="filter.operation.doesNotExist" defaultMessage="does not exist" />
+			{OPERATION_DISPLAY_NAMES['NOT_EXISTS']}
 		</MenuItem>
 		{/* Text */}
 		<ListSubheader>
 			<FormattedMessage id="ticket.groups.operation.text" defaultMessage="Text" />
 		</ListSubheader>
 		<MenuItem value="IS">
-			<FormattedMessage id="filter.operation.is" defaultMessage="is" />
+			{OPERATION_DISPLAY_NAMES['IS']}
 		</MenuItem>
 		<MenuItem value="IS_NOT">
-			<FormattedMessage id="filter.operation.isNot" defaultMessage="is not" />
+			{OPERATION_DISPLAY_NAMES['IS_NOT']}
 		</MenuItem>
 		<MenuItem value="CONTAINS">
-			<FormattedMessage id="filter.operation.contains" defaultMessage="contains" />
+			{OPERATION_DISPLAY_NAMES['CONTAINS']}
 		</MenuItem>
 		<MenuItem value="NOT_CONTAINS">
-			<FormattedMessage id="filter.operation.doesNotContain" defaultMessage="does not contain" />
+			{OPERATION_DISPLAY_NAMES['NOT_CONTAINS']}
 		</MenuItem>
 		{/* Text - Regex */}
 		<MenuItem value="REGEX">
-			<FormattedMessage id="filter.operation.regex" defaultMessage="regex" />
+			{OPERATION_DISPLAY_NAMES['REGEX']}
 		</MenuItem>
 		{/* Number */}
 		<ListSubheader>
 			<FormattedMessage id="ticket.groups.operation.number" defaultMessage="Number" />
 		</ListSubheader>
 		<MenuItem value="EQUALS">
-			<FormattedMessage id="filter.operation.equals" defaultMessage="equals" />
+			{OPERATION_DISPLAY_NAMES['EQUALS']}
 		</MenuItem>
 		<MenuItem value="NOT_EQUALS">
-			<FormattedMessage id="filter.operation.doesNotEqual" defaultMessage="does not equal" />
+			{OPERATION_DISPLAY_NAMES['NOT_EQUALS']}
 		</MenuItem>
 		{/* Number - Comparison */}
 		<MenuItem value="GT">
-			<FormattedMessage id="filter.operation.greaterThan" defaultMessage="greater than" />
+			{OPERATION_DISPLAY_NAMES['GT']}
 		</MenuItem>
 		<MenuItem value="GTE">
-			<FormattedMessage id="filter.operation.greaterOrTqualTo" defaultMessage="greater or equal to" />
+			{OPERATION_DISPLAY_NAMES['GTE']}
 		</MenuItem>
 		<MenuItem value="LT">
-			<FormattedMessage id="filter.operation.lessThan" defaultMessage="less than" />
+			{OPERATION_DISPLAY_NAMES['LT']}
 		</MenuItem>
 		<MenuItem value="LTE">
-			<FormattedMessage id="filter.operation.lessOrEqualTo" defaultMessage="less or equal to" />
+			{OPERATION_DISPLAY_NAMES['LTE']}
 		</MenuItem>
 		{/* Number - Range */}
 		<MenuItem value="IN_RANGE">
-			<FormattedMessage id="filter.operation.inRange" defaultMessage="in range" />
+			{OPERATION_DISPLAY_NAMES['IN_RANGE']}
 		</MenuItem>
 		<MenuItem value="NOT_IN_RANGE">
-			<FormattedMessage id="filter.operation.notInRange" defaultMessage="not in range" />
+			{OPERATION_DISPLAY_NAMES['NOT_IN_RANGE']}
 		</MenuItem>
 	</FormSelect>
 );

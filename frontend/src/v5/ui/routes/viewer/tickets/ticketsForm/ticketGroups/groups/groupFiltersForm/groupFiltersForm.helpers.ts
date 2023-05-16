@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { formatMessage } from '@/v5/services/intl';
+
 export const OPERATIONS_TYPES = {
 	EXISTS: 'field',
 	NOT_EXISTS: 'field',
@@ -32,6 +34,24 @@ export const OPERATIONS_TYPES = {
 	IN_RANGE: 'numberRange',
 	NOT_IN_RANGE: 'numberRange',
 } as const;
+
+export const OPERATION_DISPLAY_NAMES = {
+	EXISTS: formatMessage({ id: 'filter.operation.exists', defaultMessage: 'exists' }),
+	NOT_EXISTS: formatMessage({ id: 'filter.operation.doesNotExist', defaultMessage: 'does not exist' }),
+	IS: formatMessage({ id: 'filter.operation.is', defaultMessage: 'is' }),
+	IS_NOT: formatMessage({ id: 'filter.operation.isNot', defaultMessage: 'is not' }),
+	CONTAINS: formatMessage({ id: 'filter.operation.contains', defaultMessage: 'contains' }),
+	NOT_CONTAINS: formatMessage({ id: 'filter.operation.doesNotContain', defaultMessage: 'does not contain' }),
+	REGEX: formatMessage({ id: 'filter.operation.regex', defaultMessage: 'regex' }),
+	EQUALS: formatMessage({ id: 'filter.operation.equals', defaultMessage: 'equals' }),
+	NOT_EQUALS: formatMessage({ id: 'filter.operation.doesNotEqual', defaultMessage: 'does not equal' }),
+	GT: formatMessage({ id: 'filter.operation.greaterThan', defaultMessage: 'greater than' }),
+	GTE: formatMessage({ id: 'filter.operation.greaterOrTqualTo', defaultMessage: 'greater or equal to' }),
+	LT: formatMessage({ id: 'filter.operation.lessThan', defaultMessage: 'less than' }),
+	LTE: formatMessage({ id: 'filter.operation.lessOrEqualTo', defaultMessage: 'less or equal to' }),
+	IN_RANGE: formatMessage({ id: 'filter.operation.inRange', defaultMessage: 'in range' }),
+	NOT_IN_RANGE: formatMessage({ id: 'filter.operation.notInRange', defaultMessage: 'not in range' }),
+};
 
 export type Operation = keyof typeof OPERATIONS_TYPES;
 export type OperationType = typeof OPERATIONS_TYPES[Operation];
