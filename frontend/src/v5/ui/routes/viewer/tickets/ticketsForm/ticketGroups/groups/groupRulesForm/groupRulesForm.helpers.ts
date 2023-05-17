@@ -56,27 +56,27 @@ export const OPERATION_DISPLAY_NAMES = {
 export type Operation = keyof typeof OPERATIONS_TYPES;
 export type OperationType = typeof OPERATIONS_TYPES[Operation];
 
-export type IFilter = {
+export type IRule = {
 	field: string,
 	operation: Operation,
 	values?: (number | string)[],
 };
 
-export type IFilterForm = Omit<IFilter, 'values'> & {
+export type IRuleForm = Omit<IRule, 'values'> & {
 	values: { value: number | string }[],
 };
 
-export const parseFilter = ({ values, ...filter }: IFilterForm): IFilter => {
+export const parseRule = ({ values, ...rule }: IRuleForm): IRule => {
 	if (values?.length) {
 		return {
-			...filter,
+			...rule,
 			values: values.map((v) => v.value),
 		};
 	}
-	return filter;
+	return rule;
 };
 
-export const prepareFilterForForm = ({ values = [], ...filter }: IFilter): IFilterForm => ({
-	...filter,
+export const prepareRuleForForm = ({ values = [], ...rule }: IRule): IRuleForm => ({
+	...rule,
 	values: values.map((value) => ({ value })),
 });

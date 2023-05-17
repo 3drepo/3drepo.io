@@ -19,9 +19,9 @@ import { FormattedMessage } from 'react-intl';
 import { FormSelect } from '@controls/inputs/formInputs.component';
 import { ListSubheader, MenuItem } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
-import { OPERATION_DISPLAY_NAMES } from '../groupFiltersForm.helpers';
+import { OPERATION_DISPLAY_NAMES } from '../groupRulesForm.helpers';
 
-export const FilterOperationSelect = () => (
+export const RuleOperationSelect = () => (
 	<FormSelect
 		name="operation"
 		label={formatMessage({ id: 'tickets.groups.operation.label', defaultMessage: 'Operation' })}

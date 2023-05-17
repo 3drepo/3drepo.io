@@ -23,33 +23,33 @@ import { useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { SubmitButton } from '@controls/submitButton';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { GroupFiltersSchema } from '@/v5/validation/groupSchemes/groupSchemes';
+import { GroupRulesSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { selectMetaKeys } from '@/v4/modules/model';
 import { useSelector } from 'react-redux';
 import { Highlight } from '@controls/highlight';
 import { Autocomplete, TextField } from '@mui/material';
-import { Buttons, Form, InputsContainer } from './groupFiltersForm.styles';
-import { IFilter, IFilterForm, parseFilter, prepareFilterForForm } from './groupFiltersForm.helpers';
-import { FilterOperationSelect } from './filterOperationSelect/filterOperationSelect.component';
-import { FilterValueField } from './filterValueField/filterValueField.component';
+import { Buttons, Form, InputsContainer } from './groupRulesForm.styles';
+import { IRule, IRuleForm, parseRule, prepareRuleForForm } from './groupRulesForm.helpers';
+import { RuleOperationSelect } from './ruleOperationSelect/ruleOperationSelect.component';
+import { RuleValueField } from './ruleValueField/ruleValueField.component';
 
-const DEFAULT_VALUES: IFilterForm = {
+const DEFAULT_VALUES: IRuleForm = {
 	field: null,
 	operation: null,
 	values: [],
 };
 
-type IGroupFilters = {
-	filter?: IFilter;
-	onSave?: (filter: IFilter) => void;
+type IGroupRules = {
+	rule?: IRule;
+	onSave?: (rule: IRule) => void;
 };
-export const GroupFiltersForm = ({ onSave, filter }: IGroupFilters) => {
-	const [fieldValue, setFieldValue] = useState(filter?.field || '');
+export const GroupRulesForm = ({ onSave, rule }: IGroupRules) => {
+	const [fieldValue, setFieldValue] = useState(rule?.field || '');
 	const fields = useSelector(selectMetaKeys);
-	const formData = useForm<IFilterForm>({
-		defaultValues: filter ? prepareFilterForForm(filter) : DEFAULT_VALUES,
+	const formData = useForm<IRuleForm>({
+		defaultValues: rule ? prepareRuleForForm(rule) : DEFAULT_VALUES,
 		mode: 'all',
-		resolver: yupResolver(GroupFiltersSchema),
+		resolver: yupResolver(GroupRulesSchema),
 	});
 
 	const {
@@ -57,7 +57,7 @@ export const GroupFiltersForm = ({ onSave, filter }: IGroupFilters) => {
 		formState: { isValid, isDirty },
 	} = formData;
 
-	const onSubmit = (body: IFilterForm) => onSave(parseFilter(body));
+	const onSubmit = (body: IRuleForm) => onSave(parseRule(body));
 
 	return (
 		<Form onSubmit={handleSubmit(onSubmit)}>
@@ -86,8 +86,8 @@ export const GroupFiltersForm = ({ onSave, filter }: IGroupFilters) => {
 							/>
 						)}
 					/>
-					<FilterOperationSelect />
-					<FilterValueField />
+					<RuleOperationSelect />
+					<RuleValueField />
 				</InputsContainer>
 				<Buttons>
 					<ActionMenuItem>
@@ -102,7 +102,7 @@ export const GroupFiltersForm = ({ onSave, filter }: IGroupFilters) => {
 							fullWidth={false}
 							disabled={!isValid || !isDirty}
 						>
-							{filter ? (
+							{rule ? (
 								<FormattedMessage id="tickets.groups.filterPanel.updateFilter" defaultMessage="Update filter" />
 							) : (
 								<FormattedMessage id="tickets.groups.filterPanel.createFilter" defaultMessage="Create filter" />

@@ -21,7 +21,7 @@ import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 import { Chip } from '@controls/chip/chip.component';
 
-const BaseFilterActionMenu = styled(ActionMenu)`
+const BaseRuleActionMenu = styled(ActionMenu)`
 	${Menu} {
 		padding: 14px;
 		display: flex;
@@ -31,7 +31,7 @@ const BaseFilterActionMenu = styled(ActionMenu)`
 	}
 `;
 
-export const EditFilterActionMenu = styled(BaseFilterActionMenu).attrs({
+export const EditRuleActionMenu = styled(BaseRuleActionMenu).attrs({
 	PopoverProps: {
 		anchorOrigin: {
 			vertical: 'bottom',
@@ -44,7 +44,7 @@ export const EditFilterActionMenu = styled(BaseFilterActionMenu).attrs({
 	},
 })``;
 
-export const NewFilterActionMenu = styled(BaseFilterActionMenu).attrs({
+export const NewRuleActionMenu = styled(BaseRuleActionMenu).attrs({
 	PopoverProps: {
 		anchorOrigin: {
 			vertical: 'top',
@@ -70,7 +70,7 @@ export const TriggerButton = styled(Typography).attrs({
 	width: fit-content;
 `;
 
-export const Filters = styled.div`
+export const Rules = styled.div`
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
@@ -86,7 +86,7 @@ export const ChipLabel = styled.div`
 	flex-direction: row;
 `;
 
-export const FilterChip = styled(Chip).attrs(({
+export const RuleChip = styled(Chip).attrs(({
 	theme: { palette },
 	$selected,
 }: { theme: any, $selected: boolean }) => ({

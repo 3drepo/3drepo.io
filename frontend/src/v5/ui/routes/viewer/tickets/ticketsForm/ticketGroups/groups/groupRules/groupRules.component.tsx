@@ -20,44 +20,45 @@ import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormProvider, useFieldArray, useForm, useFormContext } from 'react-hook-form';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
 import { useState } from 'react';
-import { IFilter, OPERATION_DISPLAY_NAMES } from '../groupFiltersForm/groupFiltersForm.helpers';
-import { GroupFiltersForm } from '../groupFiltersForm/groupFiltersForm.component';
-import { ChipWrapper, EditFilterActionMenu, FilterChip, Filters, NewFilterActionMenu, TriggerButton } from './groupFilters.styles';
+import { IRule, OPERATION_DISPLAY_NAMES } from '../ruleFiltersForm/groupRulesForm.helpers';
+import { GroupRulesForm } from '../ruleFiltersForm/groupRulesForm.component';
+import { ChipWrapper, EditRuleActionMenu, RuleChip, Rules, NewRuleActionMenu, TriggerButton } from './groupRules';
+import { InputController } from '@controls/inputs/inputController.component';
 
-export const GroupFilters = () => {
+export const GroupRules = () => {
 	const [selectedChip, setSelectedChip] = useState<number>(null);
 
 	// TODO - fix type assigend to generic with the actual useForm<T> once the form is valid
-	const { control } = useFormContext<{ filters: IFilter[] }>();
-	const { fields: filters, append, remove, update } = useFieldArray({
+	const { control } = useFormContext<{ rules: IRule[] }>();
+	const { fields: rules, append, remove, update } = useFieldArray({
 		control,
-		name: 'filters',
+		name: 'rules',
 	});
 
 	return (
 		<>
-			<NewFilterActionMenu
+			<NewRuleActionMenu
 				TriggerButton={(
 					<TriggerButton>
 						<FormattedMessage id="tickets.groups.addFilter" defaultMessage="Add filter" />
 					</TriggerButton>
 				)}
 			>
-				<GroupFiltersForm onSave={append} />
-			</NewFilterActionMenu>
-			<Filters>
-				{filters.map((filter, i) => (
-					<EditFilterActionMenu
-						key={filter.id}
+				<GroupRulesForm onSave={append} />
+			</NewRuleActionMenu>
+			<Rules>
+				{rules.map((rule, i) => (
+					<EditRuleActionMenu
+						key={rule.id}
 						onOpen={() => setSelectedChip(i)}
 						onClose={() => setSelectedChip(null)}
 						TriggerButton={(
 							<ChipWrapper>
-								<FilterChip
+								<RuleChip
 									label={(
 										<>
-											{filter.field} {OPERATION_DISPLAY_NAMES[filter.operation]}
-											{!!filter.values?.length && (<b>&nbsp;{filter.values.join()}</b>)}
+											{rule.field} {OPERATION_DISPLAY_NAMES[rule.operation]}
+											{!!rule.values?.length && (<b>&nbsp;{rule.values.join()}</b>)}
 										</>
 									)}
 									deleteIcon={<div><CrossIcon /></div>}
@@ -67,11 +68,11 @@ export const GroupFilters = () => {
 							</ChipWrapper>
 						)}
 					>
-						<GroupFiltersForm filter={filter} onSave={(updatedFilter) => update(i, updatedFilter)} />
-					</EditFilterActionMenu>
+						<GroupRulesForm rule={rule} onSave={(updatedFilter) => update(i, updatedFilter)} />
+					</EditRuleActionMenu>
 				))}
-			</Filters>
-			{!filters.length && (
+			</Rules>
+			{!rules.length && (
 				<EmptyCardMessage>
 					<FormattedMessage id="tickets.groups.filters.empty" defaultMessage="No filters" />
 				</EmptyCardMessage>
@@ -81,8 +82,8 @@ export const GroupFilters = () => {
 };
 
 // TODO - delete me, I am here only to create a formContext
-export const GroupFiltersWithTriggerButton = () => {
-	const defaultFilters: IFilter[] = [
+export const AddNewGroupForm = () => {
+	const defaultRules: IRule[] = [
 		{
 			field: 'Analytical Properties:Absorptance',
 			operation: 'CONTAINS',
@@ -99,11 +100,13 @@ export const GroupFiltersWithTriggerButton = () => {
 			values: ['/.*{e}+$/'],
 		},
 	];
-	const formData = useForm({ defaultValues: { filters: defaultFilters } });
+	const formData = useForm({ defaultValues: { filters: defaultRules } });
 
 	return (
 		<FormProvider {...formData}>
-			<GroupFilters />
+			<InputController
+				Input={GroupRules}
+			/>
 		</FormProvider>
 	);
 };

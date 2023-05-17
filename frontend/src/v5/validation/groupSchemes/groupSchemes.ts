@@ -27,7 +27,7 @@ const requiredTrimmedString = Yup.string().trim().required(
 
 const valueType = Yup.object({ value: requiredTrimmedString });
 
-export const GroupFiltersSchema = Yup.object().shape({
+export const GroupRulesSchema = Yup.object().shape({
 	field: requiredTrimmedString,
 	operation: requiredTrimmedString,
 	values: Yup.array().of(valueType),

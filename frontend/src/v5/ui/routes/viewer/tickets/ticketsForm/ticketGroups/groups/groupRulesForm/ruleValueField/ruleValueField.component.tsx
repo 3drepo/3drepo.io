@@ -21,12 +21,12 @@ import { formatMessage } from '@/v5/services/intl';
 import { useEffect } from 'react';
 import AddValueIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import RemoveValueIcon from '@assets/icons/outlined/remove_circle-outlined.svg';
-import { ValueIconContainer, ValuesContainer } from './filterValueField.styles';
-import { IFilterForm, OPERATIONS_TYPES } from '../groupFiltersForm.helpers';
+import { ValueIconContainer, ValuesContainer } from './ruleValueField.styles';
+import { IRuleForm, OPERATIONS_TYPES } from '../groupRulesForm.helpers';
 
 const VALUE_LABEL = formatMessage({ id: 'ticket.groups.value.label', defaultMessage: 'Value' });
-export const FilterValueField = () => {
-	const { control, watch, formState: { errors } } = useFormContext<IFilterForm>();
+export const RuleValueField = () => {
+	const { control, watch, formState: { errors } } = useFormContext<IRuleForm>();
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'values',
