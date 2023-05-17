@@ -23,11 +23,12 @@ import { useCallback, useState } from 'react';
 import { SelectProps } from '@controls/inputs/select/select.component';
 import { formatMessage } from '@/v5/services/intl';
 import AddUserIcon from '@assets/icons/outlined/add_user-outlined.svg';
+import { SearchContextComponent } from '@controls/search/searchContext';
 import { AddUserButton, AssigneesListContainer, Tooltip } from './assigneesSelect.styles';
 import { AssigneesSelectMenu } from './assigneesSelectMenu/assigneesSelectMenu.component';
 import { AssigneeCircle } from './assigneeCircle/assigneeCircle.component';
-import { ExtraAssigneesCircle } from './extraAssigneesCircle/extraAssigneesCircle.component';
 import { ExtraAssigneesPopover } from './extraAssigneesCircle/extraAssigneesPopover.component';
+import { ExtraAssigneesCircle } from './extraAssigneesCircle/extraAssignees.styles';
 
 export type IAssigneesSelect = SelectProps & {
 	maxItems?: number;
@@ -49,8 +50,8 @@ export const AssigneesSelect = ({
 
 	// Must filter out users not included in this teamspace. This can occur when a user
 	// has been assigned to a ticket and later on is removed from the teamspace
-	const allUsersAndJobs = UsersHooksSelectors.selectAssigneesListItems();
-	const filteredValues = intersection(value, allUsersAndJobs.map((i) => i.value));
+	const allUsersAndJobs = UsersHooksSelectors.selectUsersAndJobs();
+	const filteredValues = intersection(value, allUsersAndJobs.map((i) => i.user || i._id));
 
 	// Using this logic instead of a simple partition because ExtraAssigneesCircle needs to occupy
 	// the last position when the overflow value is 2+. There is no point showing +1 overflow
@@ -64,50 +65,57 @@ export const AssigneesSelect = ({
 		e.stopPropagation();
 		setOpen(true);
 	}, []);
-	const handleClose = useCallback(() => {
+
+	const handleClose = () => {
 		setOpen(false);
 		onBlur();
-	}, []);
+	};
+
+	const filterItems = useCallback((items, query: string) => items
+		.filter(({ _id, firstName, lastName, job }) => [_id, firstName, lastName, job]
+			.some((string) => string?.toLowerCase().includes(query.toLowerCase()))), [filteredValues.length]);
 
 	return (
-		<AssigneesListContainer onClick={handleOpen} className={className}>
-			<AssigneesSelectMenu
-				open={open}
-				value={filteredValues}
-				onClose={handleClose}
-				onOpen={handleOpen}
-				disabled={disabled}
-				{...props}
-			/>
-			{listedAssignees.length ? (
-				listedAssignees.map((assignee) => (
-					<AssigneeCircle key={assignee} assignee={assignee} size="small" />
-				))
-			) : showEmptyText && (
-				<FormattedMessage id="assignees.circleList.unassigned" defaultMessage="Unassigned" />
-			)}
-			{overflowRequired && (
-				<HoverPopover
-					anchor={(extraProps) => <ExtraAssigneesCircle overflowValue={overflowValue} {...extraProps} />}
-				>
-					<ExtraAssigneesPopover assignees={filteredValues} />
-				</HoverPopover>
-			)}
-			{!disabled && showAddButton && (
-				<Tooltip
-					title={formatMessage({
-						id: 'customTicket.topPanel.addAssignees.tooltip',
-						defaultMessage: 'Assign',
-					})}
-					arrow
-				>
-					<div>
-						<AddUserButton>
-							<AddUserIcon />
-						</AddUserButton>
-					</div>
-				</Tooltip>
-			)}
-		</AssigneesListContainer>
+		<SearchContextComponent filteringFunction={filterItems} items={allUsersAndJobs}>
+			<AssigneesListContainer onClick={handleOpen} className={className}>
+				<AssigneesSelectMenu
+					open={open}
+					value={filteredValues}
+					onClose={handleClose}
+					onOpen={handleOpen}
+					disabled={disabled}
+					{...props}
+				/>
+				{listedAssignees.length ? (
+					listedAssignees.map((assignee) => (
+						<AssigneeCircle key={assignee} assignee={assignee} size="small" />
+					))
+				) : showEmptyText && (
+					<FormattedMessage id="assignees.circleList.unassigned" defaultMessage="Unassigned" />
+				)}
+				{overflowRequired && (
+					<HoverPopover
+						anchor={(attrs) => <ExtraAssigneesCircle {...attrs}> +{overflowValue} </ExtraAssigneesCircle>}
+					>
+						<ExtraAssigneesPopover assignees={filteredValues} />
+					</HoverPopover>
+				)}
+				{!disabled && showAddButton && (
+					<Tooltip
+						title={formatMessage({
+							id: 'customTicket.topPanel.addAssignees.tooltip',
+							defaultMessage: 'Assign',
+						})}
+						arrow
+					>
+						<div>
+							<AddUserButton>
+								<AddUserIcon />
+							</AddUserButton>
+						</div>
+					</Tooltip>
+				)}
+			</AssigneesListContainer>
+		</SearchContextComponent>
 	);
 };

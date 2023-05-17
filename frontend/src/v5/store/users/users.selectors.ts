@@ -50,11 +50,8 @@ export const selectCurrentTeamspaceUsers = createSelector(
 	},
 );
 
-export const selectAssigneesListItems = createSelector(
+export const selectUsersAndJobs = createSelector(
 	selectCurrentTeamspaceUsers,
 	selectJobs,
-	(users, jobs) => [
-		...users.map(({ user, firstName, lastName }) => ({ value: user, label: `${firstName} ${lastName}` })),
-		...jobs.map(({ _id }) => ({ value: _id, label: _id })),
-	],
+	(users, jobs) => [...users, ...jobs],
 );

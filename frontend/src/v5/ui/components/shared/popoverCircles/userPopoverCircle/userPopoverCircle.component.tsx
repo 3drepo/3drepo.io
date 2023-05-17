@@ -16,25 +16,19 @@
  */
 
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
-import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { IUser } from '@/v5/store/users/users.redux';
 import { IPopoverCircle } from '../popoverCircle.styles';
 import { UserPopover } from './userPopover/userPopover.component';
-import { UserCircle } from './userCircle.component';
+import { UserCircle } from './userPopoverCircle.styles';
 
 type UserPopoverCircleProps = IPopoverCircle & {
-	username: string;
+	user: IUser;
 	className?: string;
 };
-export const UserPopoverCircle = ({ username, ...props }: UserPopoverCircleProps) => {
-	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const user = UsersHooksSelectors.selectUser(teamspace, username);
+export const UserPopoverCircle = ({ user, ...props }: UserPopoverCircleProps) => {
 	if (!user) return null;
 	return (
-		<HoverPopover
-			anchor={() => (
-				<UserCircle user={user} {...props} />
-			)}
-		>
+		<HoverPopover anchor={() => <UserCircle user={user} {...props} />}>
 			<UserPopover user={user} />
 		</HoverPopover>
 	);

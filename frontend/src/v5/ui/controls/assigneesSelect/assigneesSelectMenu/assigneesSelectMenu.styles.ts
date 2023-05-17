@@ -52,7 +52,7 @@ export const SearchInput = styled(SearchInputBase).attrs({
 	variant: 'outlined',
 })`
 	width: auto;
-	margin: -10px 0 0 0;
+	margin: -10px 0 0;
 	padding: 12px;
 	top: 0;
 	position: sticky;

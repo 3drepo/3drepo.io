@@ -18,7 +18,7 @@ import { IUser } from '@/v5/store/users/users.redux';
 import { compact } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { AvatarWrapper, PopoverContainer, Employment, Username, Heading, Data } from './userPopover.styles';
-import { UserCircle } from '../userCircle.component';
+import { UserCircle } from '../userPopoverCircle.styles';
 
 interface IUserPopover {
 	user: IUser;

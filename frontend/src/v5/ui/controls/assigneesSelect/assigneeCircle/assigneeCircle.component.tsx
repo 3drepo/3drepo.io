@@ -20,15 +20,19 @@ import { selectJobs } from '@/v4/modules/jobs/jobs.selectors';
 import { JobPopoverCircle } from '@components/shared/popoverCircles/jobPopoverCircle/jobPopoverCircle.component';
 import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
 import { IPopoverCircle } from '@components/shared/popoverCircles/popoverCircle.styles';
+import { UsersHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { memo } from 'react';
 
 type IAssigneeCircle = IPopoverCircle & {
 	assignee: string;
 };
 
-export const AssigneeCircle = ({ assignee, ...props }: IAssigneeCircle) => {
+export const AssigneeCircle = memo(({ assignee, ...props }: IAssigneeCircle) => {
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const jobsInTeamspace = useSelector(selectJobs);
 	const isJob = jobsInTeamspace.some(({ _id }) => _id === assignee);
 
-	if (!isJob) return (<UserPopoverCircle username={assignee} {...props} />);
-	return <JobPopoverCircle job={jobsInTeamspace.find(({ _id }) => _id === assignee)} {...props} />;
-};
+	if (isJob) return <JobPopoverCircle job={jobsInTeamspace.find(({ _id }) => _id === assignee)} {...props} />;
+	const user = UsersHooksSelectors.selectUser(teamspace, assignee);
+	return (<UserPopoverCircle user={user} {...props} />);
+});

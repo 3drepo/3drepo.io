@@ -15,18 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { selectJobs } from '@/v4/modules/jobs';
 import { formatMessage } from '@/v5/services/intl';
-import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { SearchContext, SearchContextComponent, SearchContextType } from '@controls/search/searchContext';
+import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { NoResults, SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
-import { ListSubheader, MenuItem } from '@mui/material';
+import { ListSubheader } from '@mui/material';
 import { get, partition } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { useSelector } from 'react-redux';
 import { SelectProps } from '@controls/inputs/select/select.component';
-import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
-import { JobPopoverCircle } from '@components/shared/popoverCircles/jobPopoverCircle/jobPopoverCircle.component';
+import { useCallback, useContext, useState, useEffect } from 'react';
+import { IUser } from '@/v5/store/users/users.redux';
+import { IJob } from '@/v5/store/jobs/jobs.types';
 import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSelectMenuItem.component';
 import { HiddenSelect, HorizontalRule, SearchInput } from './assigneesSelectMenu.styles';
 
@@ -44,84 +42,76 @@ export const AssigneesSelectMenu = ({
 	onClick,
 	...props
 }: SelectProps) => {
-	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const jobs = useSelector(selectJobs);
-	const users = UsersHooksSelectors.selectUsersByTeamspace(teamspace);
-	const filterItems = (items, query: string) => items
-		.filter(({ _id, firstName, lastName, job }) => [_id, firstName, lastName, job]
-			.some((string) => string?.toLowerCase().includes(query.toLowerCase())));
-
-	const onClickList = (e) => {
+	const [users, setUsers] = useState([]);
+	const [jobs, setJobs] = useState([]);
+	const { filteredItems } = useContext<SearchContextType<IJob | IUser>>(SearchContext);
+	const onClickList = useCallback((e) => {
 		preventPropagation(e);
 		onClick?.(e);
-	};
+	}, []);
+	useEffect(() => {
+		const [filteredUsers, filteredJobs] = partition(filteredItems, isUser);
+		setUsers(filteredUsers);
+		setJobs(filteredJobs);
+	}, [filteredItems.length]);
 
 	return (
-		<SearchContextComponent filteringFunction={filterItems} items={[...jobs, ...users]}>
-			<SearchContext.Consumer>
-				{ ({ filteredItems }: SearchContextType<typeof MenuItem>) => {
-					const [filteredUsers, filteredJobs] = partition(filteredItems, isUser);
-					return (
-						// @ts-ignore
-						<HiddenSelect
-							open={open}
-							value={value || []}
-							onClick={onClickList}
-							{...props}
-						>
-							<SearchInputContainer>
-								<SearchInput
-									placeholder={formatMessage({ id: 'searchSelect.searchInput.placeholder', defaultMessage: 'Search...' })}
-									onClick={preventPropagation}
-									onKeyDown={preventPropagation}
-								/>
-							</SearchInputContainer>
-							<ListSubheader>
-								<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
-							</ListSubheader>
-							{filteredJobs.length > 0 && filteredJobs.map((job) => (
-								<AssigneesSelectMenuItem
-									key={job._id}
-									value={job._id}
-									icon={() => <JobPopoverCircle job={job} />}
-									title={job._id}
-								/>
-							))}
-							{!filteredJobs.length && (
-								<NoResults>
-									<FormattedMessage
-										id="form.searchSelect.menuContent.emptyList"
-										defaultMessage="No results"
-									/>
-								</NoResults>
-							)}
+		// @ts-ignore
+		<HiddenSelect
+			open={open}
+			value={value || []}
+			onClick={onClickList}
+			{...props}
+		>
+			<SearchInputContainer>
+				<SearchInput
+					placeholder={formatMessage({ id: 'searchSelect.searchInput.placeholder', defaultMessage: 'Search...' })}
+					onClick={preventPropagation}
+					onKeyDown={preventPropagation}
+				/>
+			</SearchInputContainer>
+			<ListSubheader>
+				<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
+			</ListSubheader>
+			{jobs.length > 0 && jobs.map(({ _id }) => (
+				<AssigneesSelectMenuItem
+					key={_id}
+					assignee={_id}
+					value={_id}
+					title={_id}
+				/>
+			))}
+			{!jobs.length && (
+				<NoResults>
+					<FormattedMessage
+						id="form.searchSelect.menuContent.emptyList"
+						defaultMessage="No results"
+					/>
+				</NoResults>
+			)}
 
-							<HorizontalRule />
+			<HorizontalRule />
 
-							<ListSubheader>
-								<FormattedMessage id="assigneesSelectMenu.usersHeading" defaultMessage="Users" />
-							</ListSubheader>
-							{filteredUsers.length > 0 && filteredUsers.map(({ user, firstName, lastName, job }) => (
-								<AssigneesSelectMenuItem
-									key={user}
-									value={user}
-									icon={() => <UserPopoverCircle username={user} />}
-									title={`${firstName} ${lastName}`}
-									subtitle={job}
-								/>
-							))}
-							{!filteredUsers.length && (
-								<NoResults>
-									<FormattedMessage
-										id="form.searchSelect.menuContent.emptyList"
-										defaultMessage="No results"
-									/>
-								</NoResults>
-							)}
-						</HiddenSelect>
-					);
-				}}
-			</SearchContext.Consumer>
-		</SearchContextComponent>
+			<ListSubheader>
+				<FormattedMessage id="assigneesSelectMenu.usersHeading" defaultMessage="Users" />
+			</ListSubheader>
+			{users.length > 0 && users.map((user) => (
+				<AssigneesSelectMenuItem
+					key={user.user}
+					value={user.user}
+					assignee={user.user}
+					title={`${user.firstName} ${user.lastName}`}
+					subtitle={user.job}
+				/>
+			))}
+			{!users.length && (
+				<NoResults>
+					<FormattedMessage
+						id="form.searchSelect.menuContent.emptyList"
+						defaultMessage="No results"
+					/>
+				</NoResults>
+			)}
+		</HiddenSelect>
 	);
 };
