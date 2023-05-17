@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { EllipsisMenuItem as EllipsisMenuItemBase } from '@controls/ellipsisMenu/ellipsisMenuItem';
+import { EllipsisMenu } from '@controls/ellipsisMenu';
+import { TitleContainer, ViewActionMenu } from './viewActionEllipsisMenu.styles';
 
-export const EllipsisMenuItem = styled(EllipsisMenuItemBase)`
-	padding: 5px 12px;
-`;
-
-export const EllipsisMenuItemDelete = styled(EllipsisMenuItem)`
-	color: ${({ theme }) => theme.palette.error.main};
-`;
+type ViewActionEllipsisMenuProps = {
+	hasValue: boolean;
+	disabled: boolean;
+	onClick: () => any;
+	Icon: any;
+	title: any;
+	children: any;
+};
+export const ViewActionEllipsisMenu = ({ hasValue, disabled, Icon, title, children, onClick }: ViewActionEllipsisMenuProps) => (
+	<ViewActionMenu>
+		<TitleContainer disabled={!hasValue} onClick={hasValue ? onClick : () => {}}>
+			<Icon />
+			{title}
+		</TitleContainer>
+		<EllipsisMenu disabled={disabled}>
+			{children}
+		</EllipsisMenu>
+	</ViewActionMenu>
+);
