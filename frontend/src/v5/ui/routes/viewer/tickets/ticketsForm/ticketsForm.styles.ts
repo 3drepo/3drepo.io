@@ -25,8 +25,8 @@ export const PanelsContainer = styled.div`
 	padding: 14px 15px;
 	.MuiAccordion-root {
 		&:first-of-type {
-			border-top-left-radius: 6px;
-			border-top-right-radius: 6px;
+			border-top-left-radius: 8px;
+			border-top-right-radius: 8px;
 		}
 
 		&:not(:first-of-type) {
@@ -34,8 +34,8 @@ export const PanelsContainer = styled.div`
 		}
 
 		&:last-of-type {
-			border-bottom-left-radius: 6px;
-			border-bottom-right-radius: 6px;
+			border-bottom-left-radius: 8px;
+			border-bottom-right-radius: 8px;
 		}
 	}
 `;

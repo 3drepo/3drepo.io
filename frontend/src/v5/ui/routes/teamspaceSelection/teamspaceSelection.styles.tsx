@@ -17,31 +17,51 @@
 
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
-import { hexToOpacity } from '@/v5/ui/themes/theme';
+import { Link } from 'react-router-dom';
 import { DashboardScrollArea } from '@controls/scrollArea/dashboardScrollArea.styles';
 
-export const ScrollArea = styled(DashboardScrollArea)`
-	background: ${({ theme }) => theme.palette.gradient.secondary};
-	border-top: 1px solid ${({ theme }) => hexToOpacity(theme.palette.primary.main, 10)};
+const WELCOME_TEXT_MARGIN = 50;
+const NAVBAR_AND_FOOTER_HEIGHT = 104;
+
+export const ScrollBar = styled(DashboardScrollArea).attrs({
+	variant: 'secondary',
+})`
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 `;
 
-export const HomeContent = styled.div`
-	box-sizing: border-box;
+export const Content = styled.div`
+	min-height: calc(100vh - ${NAVBAR_AND_FOOTER_HEIGHT}px);
+    align-content: center;
+    flex-flow: column;
 	display: flex;
-	flex-flow: column;
-	align-items: center;
+    flex-wrap: wrap;
+	justify-content: center;
+	padding: 50px;
+	box-sizing: border-box;
 `;
 
 export const FadeMessageTrigger = styled.div`
 	height: 1px;
+	margin-top: -${WELCOME_TEXT_MARGIN}px;
+    margin-bottom: ${2 * WELCOME_TEXT_MARGIN}px;
 `;
 
 export const WelcomeMessage = styled(Typography).attrs({
 	variant: 'h1',
 })<{ $visible: boolean; }>`
-	color: ${({ theme }) => theme.palette.primary.contrast};
+	color: ${({ theme }) => theme.palette.secondary.main};
 	text-align: center;
 	transition: opacity 0.5s ease-out;
 	opacity: ${({ $visible }) => ($visible ? 1 : 0)};
-	transform: translateY(75px);
+	transform: translateY(${WELCOME_TEXT_MARGIN}px);
+	pointer-events: ${({ $visible }) => ($visible ? 'auto' : 'none')};
+	user-select: none;
+`;
+
+export const PricingLink = styled(Link).attrs({
+	target: '_blank',
+})`
+	${({ theme }) => theme.typography.link};
+	display: block;
+	margin-top: 3px;
 `;

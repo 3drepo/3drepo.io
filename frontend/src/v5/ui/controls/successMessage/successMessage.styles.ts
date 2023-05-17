@@ -24,7 +24,7 @@ export const PostSubmitSuccessfulMessage = styled.div`
 	border: solid 1px currentColor;
 	padding: 10px 15px;
 	margin-top: 19px;
-	border-radius: 5px;
+	border-radius: 8px;
 	display: grid;
 	align-items: center;
 	grid-template-columns: 33px 1fr;

@@ -19,6 +19,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { LinkCard } from '@components/shared/linkCard/linkCard.component';
 import { BrowserRouter } from 'react-router-dom';
 import { COLOR } from '@/v5/ui/themes/theme';
+import { Button } from '@controls/button';
 
 export default {
 	title: 'Dashboard/LinkCard',
@@ -53,25 +54,35 @@ const PrimaryTemplate: ComponentStory<typeof LinkCard> = (args) => (
 	</BrowserRouter>
 );
 
-const ImgPlaceholder = (
-	<img
-		src="https://cdn.photographycourse.net/wp-content/uploads/2014/11/Landscape-Photography-steps.jpg"
-		width="100%"
-		alt="placeholder"
-	/>
+const ChildExample = (
+	<div style={{ textAlign: 'center' }}>
+		<Button variant="contained">
+			I am a child element
+		</Button>
+	</div>
 );
-
-export const SecondaryWithEllipsisHeading = SecondaryTemplate.bind({});
-SecondaryWithEllipsisHeading.args = {
-	variant: 'secondary',
-	heading: 'I am a heading looooooooooooooong enough to wrap and use ellipsis',
-	children: ImgPlaceholder,
-};
 
 export const PrimaryWithHeadingAndSubheading = PrimaryTemplate.bind({});
 PrimaryWithHeadingAndSubheading.args = {
 	variant: 'primary',
 	heading: 'I am a heading',
 	subheading: 'I am a subheading',
-	children: ImgPlaceholder,
+	imgSrc: 'https://cdn.photographycourse.net/wp-content/uploads/2014/11/Landscape-Photography-steps.jpg',
+};
+
+export const PrimaryWithDefaultImage = PrimaryTemplate.bind({});
+PrimaryWithDefaultImage.args = {
+	variant: 'primary',
+	heading: 'This image defaults to defaultImgSrc',
+	subheading: 'This is useful if the image is a response from an API request which could fail',
+	imgSrc: 'this img will error',
+	defaultImgSrc: 'https://learn.microsoft.com/en-us/windows/win32/uxguide/images/mess-error-image15.png',
+};
+
+export const SecondaryWithChild = SecondaryTemplate.bind({});
+SecondaryWithChild.args = {
+	variant: 'secondary',
+	heading: 'I am a heading looooooooooooooong enough to wrap and use ellipsis',
+	imgSrc: 'https://cdn.photographycourse.net/wp-content/uploads/2014/11/Landscape-Photography-steps.jpg',
+	children: ChildExample,
 };

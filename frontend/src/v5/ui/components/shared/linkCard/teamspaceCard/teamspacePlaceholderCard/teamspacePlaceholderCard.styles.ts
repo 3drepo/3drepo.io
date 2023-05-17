@@ -16,31 +16,25 @@
  */
 
 import styled, { css } from 'styled-components';
+import { LinkCard } from '../../linkCard.component';
+import { CardImage } from '../../linkCard.styles';
 
 const PlaceholderStyle = css`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	background-color: ${({ theme }) => theme.palette.secondary.light};
 	opacity: 0.1;
 	border-radius: 3px;
-`;
-
-export const ListItem = styled.li`
-	list-style-type: none;
-	float: left;
-	margin: 10px;
-`;
-
-export const ImagePlaceholder = styled.img`
-	${PlaceholderStyle}
-	position: relative;
-	height: 175px;
-	width: 222px;
-	object-fit: cover;
-	margin-bottom: -5px;
 `;
 
 export const TextPlaceholder = styled.div<{ width?: string;}>`
 	${PlaceholderStyle}
 	height: 10px;
 	width: ${({ width }) => width || '100%'};
-	margin-top: 13px;
+	margin-top: 9px;
+`;
+
+export const Card = styled(LinkCard)`
+	pointer-events: none;
+	${CardImage} {
+		${PlaceholderStyle}
+	}
 `;

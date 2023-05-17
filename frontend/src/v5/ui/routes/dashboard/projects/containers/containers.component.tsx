@@ -92,7 +92,6 @@ export const Containers = (): JSX.Element => {
 							collapsed: <FormattedMessage id="containers.all.collapse.tooltip.show" defaultMessage="Show all" />,
 							visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
 						}}
-						showBottomButton
 						onClickCreate={onClickCreate}
 						emptyMessage={(
 							<>

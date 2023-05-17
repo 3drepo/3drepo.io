@@ -158,7 +158,7 @@ export const colorPickerStyling = css`
 	${ColorSelect} {
 		width: unset;
 		padding-left: 8px;
-		border-radius: 5px;
+		border-radius: 8px;
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 
 		${Dot} {
