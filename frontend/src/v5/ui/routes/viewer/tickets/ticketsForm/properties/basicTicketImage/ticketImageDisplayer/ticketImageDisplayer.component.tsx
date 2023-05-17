@@ -43,12 +43,14 @@ const LoadedImage = ({ imgSrc }) => (
 	</OverlappingContainer>
 );
 
-const EmptyImage = (props) => (
-	<EmptyImageContainer {...props}>
+const EmptyImage = ({ disabled, onClick }) => (
+	<EmptyImageContainer disabled={disabled} onClick={onClick}>
 		<EmptyImageIcon />
-		<IconText>
-			<FormattedMessage id="viewer.cards.ticketImage.addImage" defaultMessage="Add image" />
-		</IconText>
+		{!disabled && (
+			<IconText>
+				<FormattedMessage id="viewer.cards.ticketImage.addImage" defaultMessage="Add image" />
+			</IconText>
+		)}
 	</EmptyImageContainer>
 );
 

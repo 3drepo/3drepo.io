@@ -27,11 +27,11 @@ export const EllipsisMenuItemDelete = styled(EllipsisMenuItem)`
 	color: ${({ theme }) => theme.palette.error.main};
 `;
 
-export const ViewActionMenu = styled.li`
+export const ViewActionMenu = styled.li<{ disabled?: boolean }>`
 	line-height: 20px;
 	font-weight: 500;
 	font-size: 12px;
-	color: ${({ theme }) => theme.palette.secondary.main};
+	color: ${({ theme: { palette }, disabled }) => (disabled ? palette.base.lightest : palette.secondary.main)};
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	border-radius: 5px;
 	display: grid;

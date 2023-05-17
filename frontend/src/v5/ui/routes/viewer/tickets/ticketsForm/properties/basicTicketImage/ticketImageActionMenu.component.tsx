@@ -35,24 +35,21 @@ export const TicketImageActionMenu = ({ value, onChange, disabled = false }) => 
 	const deleteImage = () => onChange(null);
 
 	return (
-		<ViewActionMenu>
+		<ViewActionMenu disabled={disabled}>
 			<FileIcon />
 			<FormattedMessage id="viewer.card.ticketView.actionMenu.image" defaultMessage="Image" />
-			<EllipsisMenu>
+			<EllipsisMenu disabled={disabled}>
 				<EllipsisMenuItem
-					title={<FormattedMessage id="viewer.card.ticketImage.action.createScreenshot" defaultMessage="Create screenshot" />}
+					title={<FormattedMessage id="viewer.card.ticketImage.action.takeScreenshot" defaultMessage="Take screenshot" />}
 					onClick={uploadScreenshot}
-					disabled={disabled}
 				/>
 				<EllipsisMenuItem
 					title={<FormattedMessage id="viewer.card.ticketImage.action.uploadImage" defaultMessage="Upload image" />}
 					onClick={uploadImage}
-					disabled={disabled}
 				/>
 				<EllipsisMenuItemDelete
 					title={<FormattedMessage id="viewer.card.ticketImage.action.deleteImage" defaultMessage="Delete image" />}
 					onClick={deleteImage}
-					disabled={disabled}
 					hidden={!value}
 				/>
 			</EllipsisMenu>
