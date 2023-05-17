@@ -29,10 +29,11 @@ import { ViewpointsActions } from '@/v4/modules/viewpoints';
 import { useDispatch } from 'react-redux';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
+import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { BasicTicketImage } from '../basicTicketImage/basicTicketImage.component';
 import { EllipsisMenuItemDelete } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
 import { TicketImageActionMenu } from '../basicTicketImage/ticketImageActionMenu.component';
-import { ViewActionEllipsisMenu } from './viewActionEllipsisMenu/viewActionEllipsisMenu.component';
+import { ViewActionMenu } from './viewActionMenu/viewActionMenu.component';
 
 type ITicketView = {
 	value: Viewpoint | undefined;
@@ -95,61 +96,63 @@ export const TicketView = ({
 			{/* Image */}
 			<TicketImageActionMenu value={imgSrc} onChange={onImageChange} disabled={disabled} />
 			{/* Camera */}
-			<ViewActionEllipsisMenu
-				disabled={disabled}
+			<ViewActionMenu
+				disabled={!hasCamera}
 				onClick={goToViewpoint}
 				Icon={CameraIcon}
-				hasValue={hasCamera}
 				title={<FormattedMessage id="viewer.card.ticketView.actionMenu.camera" defaultMessage="Camera" />}
 			>
-				<EllipsisMenuItem
-					hidden={hasCamera}
-					title={(<FormattedMessage id="viewer.card.ticketView.action.createCamera" defaultMessage="Create camera" />)}
-					onClick={updateViewpoint}
-				/>
-				<EllipsisMenuItem
-					hidden={!hasCamera}
-					title={(<FormattedMessage id="viewer.card.ticketView.action.changeCamera" defaultMessage="Change camera" />)}
-					onClick={updateViewpoint}
-					disabled={disabled}
-				/>
-				<EllipsisMenuItem
-					hidden={!hasCamera}
-					title={(<FormattedMessage id="viewer.card.ticketView.action.gotToCamera" defaultMessage="Go to camera" />)}
-					onClick={goToViewpoint}
-				/>
-				<EllipsisMenuItemDelete
-					hidden={!hasCamera}
-					title={<FormattedMessage id="viewer.card.ticketView.action.deleteCamera" defaultMessage="Delete camera" />}
-					onClick={deleteViewpoint}
-					disabled={disabled}
-				/>
-			</ViewActionEllipsisMenu>
+				<EllipsisMenu disabled={disabled && !hasCamera}>
+					<EllipsisMenuItem
+						hidden={hasCamera}
+						title={(<FormattedMessage id="viewer.card.ticketView.action.createCamera" defaultMessage="Create camera" />)}
+						onClick={updateViewpoint}
+					/>
+					<EllipsisMenuItem
+						hidden={!hasCamera}
+						title={(<FormattedMessage id="viewer.card.ticketView.action.changeCamera" defaultMessage="Change camera" />)}
+						onClick={updateViewpoint}
+						disabled={disabled}
+					/>
+					<EllipsisMenuItem
+						hidden={!hasCamera}
+						title={(<FormattedMessage id="viewer.card.ticketView.action.gotToCamera" defaultMessage="Go to camera" />)}
+						onClick={goToViewpoint}
+					/>
+					<EllipsisMenuItemDelete
+						hidden={!hasCamera}
+						title={<FormattedMessage id="viewer.card.ticketView.action.deleteCamera" defaultMessage="Delete camera" />}
+						onClick={deleteViewpoint}
+						disabled={disabled}
+					/>
+				</EllipsisMenu>
+			</ViewActionMenu>
 			{/* Groups */}
-			<ViewActionEllipsisMenu
-				disabled={disabled}
+			<ViewActionMenu
+				disabled={!hasGroups}
 				onClick={onGroupsClick}
 				Icon={GroupsIcon}
-				hasValue={hasGroups}
 				title={<FormattedMessage id="viewer.card.ticketView.actionMenu.groups" defaultMessage="Groups" />}
 			>
-				<EllipsisMenuItem
-					title={(<FormattedMessage id="viewer.card.ticketView.action.addNewGroup" defaultMessage="Add new group" />)}
-					onClick={onGroupsClick}
-					disabled={disabled}
-				/>
-				<EllipsisMenuItem
-					title={(<FormattedMessage id="viewer.card.ticketView.action.viewGroups" defaultMessage="View groups" />)}
-					onClick={onGroupsClick}
-					hidden={!hasGroups}
-				/>
-				<EllipsisMenuItemDelete
-					title={(<FormattedMessage id="viewer.card.ticketView.action.deleteGroups" defaultMessage="Delete groups" />)}
-					onClick={() => setHasGroups(false)}
-					hidden={!hasGroups}
-					disabled={disabled}
-				/>
-			</ViewActionEllipsisMenu>
+				<EllipsisMenu disabled={disabled && !hasGroups}>
+					<EllipsisMenuItem
+						title={(<FormattedMessage id="viewer.card.ticketView.action.addNewGroup" defaultMessage="Add new group" />)}
+						onClick={onGroupsClick}
+						disabled={disabled}
+					/>
+					<EllipsisMenuItem
+						title={(<FormattedMessage id="viewer.card.ticketView.action.viewGroups" defaultMessage="View groups" />)}
+						onClick={onGroupsClick}
+						hidden={!hasGroups}
+					/>
+					<EllipsisMenuItemDelete
+						title={(<FormattedMessage id="viewer.card.ticketView.action.deleteGroups" defaultMessage="Delete groups" />)}
+						onClick={() => setHasGroups(false)}
+						hidden={!hasGroups}
+						disabled={disabled}
+					/>
+				</EllipsisMenu>
+			</ViewActionMenu>
 		</BasicTicketImage>
 	);
 };

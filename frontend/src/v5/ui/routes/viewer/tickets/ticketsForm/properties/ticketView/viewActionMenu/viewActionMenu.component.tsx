@@ -15,25 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { EllipsisMenu } from '@controls/ellipsisMenu';
-import { TitleContainer, ViewActionMenu } from './viewActionEllipsisMenu.styles';
+import { TitleContainer, Container } from './viewActionMenu.styles';
 
-type ViewActionEllipsisMenuProps = {
-	hasValue: boolean;
+type ViewActionMenuProps = {
 	disabled: boolean;
 	onClick: () => any;
 	Icon: any;
 	title: any;
 	children: any;
 };
-export const ViewActionEllipsisMenu = ({ hasValue, disabled, Icon, title, children, onClick }: ViewActionEllipsisMenuProps) => (
-	<ViewActionMenu>
-		<TitleContainer disabled={!hasValue} onClick={hasValue ? onClick : () => {}}>
+export const ViewActionMenu = ({ disabled, Icon, title, children, onClick }: ViewActionMenuProps) => (
+	<Container>
+		<TitleContainer disabled={disabled} onClick={disabled ? () => {} : onClick}>
 			<Icon />
 			{title}
 		</TitleContainer>
-		<EllipsisMenu disabled={disabled}>
-			{children}
-		</EllipsisMenu>
-	</ViewActionMenu>
+		{children}
+	</Container>
 );

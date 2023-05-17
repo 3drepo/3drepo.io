@@ -17,7 +17,7 @@
 import styled, { css } from 'styled-components';
 import { MenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenuItem.styles';
 
-export const ViewActionMenu = styled.div`
+export const Container = styled.div`
 	line-height: 20px;
 	font-weight: 500;
 	font-size: 12px;

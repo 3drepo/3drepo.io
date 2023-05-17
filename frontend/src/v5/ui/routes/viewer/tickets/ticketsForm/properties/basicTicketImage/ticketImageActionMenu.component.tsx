@@ -20,9 +20,10 @@ import { getSupportedImageExtensions, convertFileToImageSrc } from '@controls/fi
 import { uploadFile } from '@controls/fileUploader/uploadFile';
 import { FormattedMessage } from 'react-intl';
 import FileIcon from '@assets/icons/outlined/file-outlined.svg';
+import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { EllipsisMenuItemDelete, EllipsisMenuItem } from './ticketImageAction/ticketImageAction.styles';
-import { ViewActionEllipsisMenu } from '../ticketView/viewActionEllipsisMenu/viewActionEllipsisMenu.component';
+import { ViewActionMenu } from '../ticketView/viewActionMenu/viewActionMenu.component';
 
 export const TicketImageActionMenu = ({ value, onChange, disabled = false }) => {
 	const uploadScreenshot = async () => onChange(await ViewerService.getScreenshot());
@@ -36,26 +37,27 @@ export const TicketImageActionMenu = ({ value, onChange, disabled = false }) => 
 	const deleteImage = () => onChange(null);
 
 	return (
-		<ViewActionEllipsisMenu
-			disabled={disabled}
-			hasValue={value}
+		<ViewActionMenu
+			disabled={!value}
 			onClick={() => DialogsActionsDispatchers.open('images', { images: [value] })}
 			Icon={FileIcon}
 			title={<FormattedMessage id="viewer.card.ticketView.actionMenu.image" defaultMessage="Image" />}
 		>
-			<EllipsisMenuItem
-				title={<FormattedMessage id="viewer.card.ticketImage.action.takeScreenshot" defaultMessage="Take screenshot" />}
-				onClick={uploadScreenshot}
-			/>
-			<EllipsisMenuItem
-				title={<FormattedMessage id="viewer.card.ticketImage.action.uploadImage" defaultMessage="Upload image" />}
-				onClick={uploadImage}
-			/>
-			<EllipsisMenuItemDelete
-				title={<FormattedMessage id="viewer.card.ticketImage.action.deleteImage" defaultMessage="Delete image" />}
-				onClick={deleteImage}
-				hidden={!value}
-			/>
-		</ViewActionEllipsisMenu>
+			<EllipsisMenu disabled={disabled}>
+				<EllipsisMenuItem
+					title={<FormattedMessage id="viewer.card.ticketImage.action.takeScreenshot" defaultMessage="Take screenshot" />}
+					onClick={uploadScreenshot}
+				/>
+				<EllipsisMenuItem
+					title={<FormattedMessage id="viewer.card.ticketImage.action.uploadImage" defaultMessage="Upload image" />}
+					onClick={uploadImage}
+				/>
+				<EllipsisMenuItemDelete
+					title={<FormattedMessage id="viewer.card.ticketImage.action.deleteImage" defaultMessage="Delete image" />}
+					onClick={deleteImage}
+					hidden={!value}
+				/>
+			</EllipsisMenu>
+		</ViewActionMenu>
 	);
 };
