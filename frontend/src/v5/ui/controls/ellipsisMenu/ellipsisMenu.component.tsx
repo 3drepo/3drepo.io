@@ -28,21 +28,31 @@ export interface IEllipsisMenu {
 	disabled?: boolean;
 }
 
-export const EllipsisMenu = ({ selected, children, className, disabled }: IEllipsisMenu): JSX.Element => (
-	<ActionMenu
-		TriggerButton={(
-			<Tooltip title={formatMessage({ id: 'ellipsisMenu.tooltip', defaultMessage: 'More options' })}>
-				<div>
-					<EllipsisButton variant={selected ? 'secondary' : 'primary'} disabled={disabled}>
-						<EllipsisIcon />
-					</EllipsisButton>
-				</div>
-			</Tooltip>
-		)}
-		className={className}
-	>
-		<MenuList>
-			{children}
-		</MenuList>
-	</ActionMenu>
-);
+export const EllipsisMenu = ({ selected, children, className, disabled }: IEllipsisMenu): JSX.Element => {
+	if (disabled) {
+		return (
+			<EllipsisButton variant={selected ? 'secondary' : 'primary'} disabled={disabled}>
+				<EllipsisIcon />
+			</EllipsisButton>
+		);
+	}
+
+	return (
+		<ActionMenu
+			TriggerButton={(
+				<Tooltip title={formatMessage({ id: 'ellipsisMenu.tooltip', defaultMessage: 'More options' })}>
+					<div>
+						<EllipsisButton variant={selected ? 'secondary' : 'primary'}>
+							<EllipsisIcon />
+						</EllipsisButton>
+					</div>
+				</Tooltip>
+			)}
+			className={className}
+		>
+			<MenuList>
+				{children}
+			</MenuList>
+		</ActionMenu>
+	);
+};
