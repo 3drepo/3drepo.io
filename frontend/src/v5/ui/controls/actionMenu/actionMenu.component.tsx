@@ -29,7 +29,6 @@ type ActionMenuProps = {
 	disabled?: boolean;
 };
 export const ActionMenu = ({
-	className,
 	TriggerButton,
 	className,
 	children,
