@@ -37,7 +37,7 @@ const processGroupsUpdate = (oldData, newData, fields, groupsState) => {
 		oldProp.forEach(({ group }) => {
 			groupsState.old.add(UUIDToString(group));
 
-			if (newData === undefined || newData.state === undefined) {
+			if (newData === undefined || (newData && newData.state === undefined)) {
 				// New data is not specified so we are preserving the old ones
 				groupsState.stillUsed.add(UUIDToString(group));
 			}

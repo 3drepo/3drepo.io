@@ -160,7 +160,8 @@ const testUpdateGroup = () => {
 
 		test('Should update the group as expected', async () => {
 			const data = generateRandomObject();
-			await expect(Groups.updateGroup(teamspace, project, model, ticket, groupId, data)).resolves.toBeUndefined();
+			await expect(Groups.updateGroup(teamspace, project, model, ticket, groupId, data,
+				author)).resolves.toBeUndefined();
 
 			expect(db.updateOne).toHaveBeenCalledTimes(1);
 			expect(db.updateOne).toHaveBeenCalledWith(teamspace, groupCol,
@@ -174,21 +175,30 @@ const testUpdateGroup = () => {
 		test('Should unset objects if rules is being inserted/updated', async () => {
 			const data = generateRandomObject();
 			data.rules = generateRandomObject();
-			await expect(Groups.updateGroup(teamspace, project, model, ticket, groupId, data)).resolves.toBeUndefined();
+			await expect(Groups.updateGroup(teamspace, project, model, ticket, groupId, data,
+				author)).resolves.toBeUndefined();
 
 			expect(db.updateOne).toHaveBeenCalledTimes(1);
 			expect(db.updateOne).toHaveBeenCalledWith(teamspace, groupCol,
 				{ teamspace, project, model, ticket, _id: groupId }, { $set: data, $unset: { objects: 1 } });
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET_GROUP,
+				{ _id: groupId, teamspace, project, model, ticket, changes: data, author });
 		});
 
 		test('Should unset rules if objects is being inserted/updated', async () => {
 			const data = generateRandomObject();
 			data.objects = generateRandomObject();
-			await expect(Groups.updateGroup(teamspace, project, model, ticket, groupId, data)).resolves.toBeUndefined();
+			await expect(Groups.updateGroup(teamspace, project, model, ticket, groupId, data,
+				author)).resolves.toBeUndefined();
 
 			expect(db.updateOne).toHaveBeenCalledTimes(1);
 			expect(db.updateOne).toHaveBeenCalledWith(teamspace, groupCol,
 				{ teamspace, project, model, ticket, _id: groupId }, { $set: data, $unset: { rules: 1 } });
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET_GROUP,
+				{ _id: groupId, teamspace, project, model, ticket, changes: data, author });
 		});
 	});
 };
