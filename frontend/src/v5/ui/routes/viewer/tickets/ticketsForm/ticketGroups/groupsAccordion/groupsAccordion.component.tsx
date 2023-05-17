@@ -22,14 +22,14 @@ import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { Accordion, NumberContainer, TitleContainer, Checkbox } from './groupsAccordion.styles';
 import { Groups } from '../groups/groups.component';
+import { AddGroupButton } from '../groups/addOrEditGroup/addGroupButton/addGroupButton.component';
 
 type GroupsAccordionProps = {
 	title: any;
 	groups: IGroupCollection[];
-	children: any;
 	colored?: boolean;
 };
-export const GroupsAccordion = ({ title, groups = [], children, colored }: GroupsAccordionProps) => {
+export const GroupsAccordion = ({ title, groups = [], colored }: GroupsAccordionProps) => {
 	const [checked, setChecked] = useState(false);
 
 	const groupsCount = groups.length;
@@ -61,7 +61,7 @@ export const GroupsAccordion = ({ title, groups = [], children, colored }: Group
 					/>
 				</EmptyListMessage>
 			)}
-			{children}
+			<AddGroupButton colored={colored} />
 		</Accordion>
 	);
 };

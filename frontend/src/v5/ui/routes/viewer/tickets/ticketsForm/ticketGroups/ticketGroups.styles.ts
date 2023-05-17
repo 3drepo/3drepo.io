@@ -16,16 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { Button } from '@controls/button';
 
 export const Container = styled.div`
 	overflow: overlay;
-`;
-
-export const NewGroupButton = styled(Button).attrs({
-	variant: 'outlined',
-	color: 'secondary',
-})`
-	align-self: flex-end;
-	margin: 14px 0 3px;
 `;
