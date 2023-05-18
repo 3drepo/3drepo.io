@@ -21,7 +21,7 @@ import { FormAssigneeSelect, FormChipSelect, FormDueDateWithIcon } from '@contro
 
 import { FormattedMessage } from 'react-intl';
 import { IssueProperties } from '../../../tickets.constants';
-import { ColumnSeparator, FloatRight, IssuePropertiesContainer, PropertyColumn, PropertyTitle } from './issuePropertiesRow.styles';
+import { ColumnSeparator, AssigneesWrapper, IssuePropertiesContainer, PropertyColumn, PropertyTitle } from './issuePropertiesRow.styles';
 
 type IIssuePropertiesRow = {
 	onBlur: () => void;
@@ -90,7 +90,7 @@ export const IssuePropertiesRow = ({ onBlur, readOnly }: IIssuePropertiesRow) =>
 				disabled={readOnly}
 			/>
 		</PropertyColumn>
-		<FloatRight>
+		<AssigneesWrapper>
 			<FormAssigneeSelect
 				name={`properties[${IssueProperties.ASSIGNEES}]`}
 				onBlur={onBlur}
@@ -98,6 +98,6 @@ export const IssuePropertiesRow = ({ onBlur, readOnly }: IIssuePropertiesRow) =>
 				disabled={readOnly}
 				showAddButton
 			/>
-		</FloatRight>
+		</AssigneesWrapper>
 	</IssuePropertiesContainer>
 );

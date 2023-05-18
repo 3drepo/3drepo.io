@@ -32,7 +32,7 @@ export const AssigneesListContainer = styled.div`
 	.MuiAvatar-root {
 		z-index: 11;
 		margin-right: -8px;
-		border: 2px solid ${({ theme }) => theme.palette.primary.contrast};
+		outline: 2px solid ${({ theme }) => theme.palette.primary.contrast};
 		&:hover {
 			z-index: 12; /* avatar appears on top when hovered */
 		}
@@ -77,5 +77,5 @@ export const AddUserButton = styled(PopoverCircle).attrs({
 `;
 
 export const Tooltip = styled(TooltipBase)`
-	margin: 2px 0 0 13px;
+	margin: 0 0 0 13px;
 `;
