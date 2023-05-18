@@ -22,11 +22,12 @@ import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import { FormControl, FormHelperText } from '@mui/material';
+import { FormHelperText } from '@mui/material';
 import { theme } from '@/v5/ui/themes/theme';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { PinAction, PinActions, PinContainer, PinName, SettingLocationText } from './pinDetails.styles';
+import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
+import { PinAction, PinActions, PinName, SettingLocationText } from './pinDetails.styles';
 
 export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText, disabled }: FormInputProps) => {
 	const [editMode, setEditMode] = useState(false);
@@ -83,34 +84,32 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 	const hasPin = !!value;
 
 	return (
-		<FormControl required={required} error={error}>
-			<PinContainer selected={editMode} error={error} disabled={disabled}>
-				<PinName onClick={onClickEditPin} required={required}>
-					{label}
-				</PinName>
-				<PinActions>
-					{editMode && (
-						<SettingLocationText onClick={cancelEdit}>
-							<FormattedMessage id="tickets.pin.selectLocation" defaultMessage="Select new location on model" /> <CrossIcon />
-						</SettingLocationText>
-					)}
+		<InputContainer required={required} selected={editMode} error={error} disabled={disabled}>
+			<PinName onClick={onClickEditPin} required={required}>
+				{label}
+			</PinName>
+			<PinActions>
+				{editMode && (
+					<SettingLocationText onClick={cancelEdit}>
+						<FormattedMessage id="tickets.pin.selectLocation" defaultMessage="Select new location on model" /> <CrossIcon />
+					</SettingLocationText>
+				)}
 
-					{!editMode && (
-						<PinAction onClick={onClickEditPin} disabled={disabled}>
-							{hasPin && (<><PinIcon /> <FormattedMessage id="tickets.pin.changeLocation" defaultMessage="Change pin location" /></>)}
-							{!hasPin && (<><CircledPlusIcon /> <FormattedMessage id="tickets.pin.addPin" defaultMessage="Add pin" /></>)}
-						</PinAction>
-					)}
+				{!editMode && (
+					<PinAction onClick={onClickEditPin} disabled={disabled}>
+						{hasPin && (<><PinIcon /> <FormattedMessage id="tickets.pin.changeLocation" defaultMessage="Change pin location" /></>)}
+						{!hasPin && (<><CircledPlusIcon /> <FormattedMessage id="tickets.pin.addPin" defaultMessage="Add pin" /></>)}
+					</PinAction>
+				)}
 
-					{hasPin && (
-						<PinAction onClick={onClickDelete} disabled={disabled}>
-							<DeleteIcon />
-							<FormattedMessage id="tickets.pin.deletePin" defaultMessage="Delete pin" />
-						</PinAction>
-					)}
-				</PinActions>
-			</PinContainer>
+				{hasPin && (
+					<PinAction onClick={onClickDelete} disabled={disabled}>
+						<DeleteIcon />
+						<FormattedMessage id="tickets.pin.deletePin" defaultMessage="Delete pin" />
+					</PinAction>
+				)}
+			</PinActions>
 			<FormHelperText>{helperText}</FormHelperText>
-		</FormControl>
+		</InputContainer>
 	);
 };
