@@ -51,8 +51,8 @@ export const RuleValueField = () => {
 		return (
 			<>
 				{fields.map((field, i) => (
-					<ValuesContainer>
-						<FormValueField label={VALUE_LABEL} name={`values.${i}.value`} key={field.id} formError={error?.[i]} />
+					<ValuesContainer key={field.id}>
+						<FormValueField label={VALUE_LABEL} name={`values.${i}.value`} formError={error?.[i]} />
 						<ValueIconContainer onClick={() => remove(i)} disabled={fields.length === 1}>
 							<RemoveValueIcon />
 						</ValueIconContainer>
