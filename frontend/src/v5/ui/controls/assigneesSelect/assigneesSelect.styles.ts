@@ -19,6 +19,8 @@ import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.s
 import { Tooltip as TooltipBase } from '@mui/material';
 import styled from 'styled-components';
 
+export const Tooltip = styled(TooltipBase)``;
+
 export const AssigneesListContainer = styled.div`
 	display: inline-flex;
 	position: relative;
@@ -29,6 +31,9 @@ export const AssigneesListContainer = styled.div`
 	line-height: 100%;
 	>* {
 		cursor: pointer;
+	}
+	span + ${Tooltip} {
+		margin-left: 13px;
 	}
 
 	.MuiAvatar-root {
@@ -80,8 +85,4 @@ export const AddUserButton = styled(PopoverCircle).attrs({
 			background-color: transparent;
 		}
 	}
-`;
-
-export const Tooltip = styled(TooltipBase)`
-	margin: 0 0 0 13px;
 `;
