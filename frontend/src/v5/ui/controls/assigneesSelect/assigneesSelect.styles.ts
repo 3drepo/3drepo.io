@@ -69,15 +69,17 @@ export const AssigneesListContainer = styled.div`
 export const AddUserButton = styled(PopoverCircle).attrs({
 	size: 'small',
 })`
+	padding: 5px;
+	box-sizing: border-box;
+	color: ${({ theme }) => theme.palette.base.main};
 	&& {
 		border: 1px dashed ${({ theme }) => theme.palette.base.light};
+		outline: none;
+		margin: 0;
 		&::before {
 			background-color: transparent;
 		}
 	}
-	padding: 5px;
-	box-sizing: border-box;
-	color: ${({ theme }) => theme.palette.base.main};
 `;
 
 export const Tooltip = styled(TooltipBase)`
