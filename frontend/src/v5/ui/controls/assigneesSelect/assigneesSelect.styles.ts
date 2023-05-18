@@ -24,10 +24,12 @@ export const AssigneesListContainer = styled.div`
 	position: relative;
 	align-items: center;
 	user-select: none;
-	cursor: pointer;
 	color: ${({ theme }) => theme.palette.base.main};
 	font-size: 10px;
 	line-height: 100%;
+	>* {
+		cursor: pointer;
+	}
 
 	.MuiAvatar-root {
 		z-index: 11;
@@ -69,7 +71,9 @@ export const AddUserButton = styled(PopoverCircle).attrs({
 })`
 	&& {
 		border: 1px dashed ${({ theme }) => theme.palette.base.light};
-		margin: 0;
+		&::before {
+			background-color: transparent;
+		}
 	}
 	padding: 5px;
 	box-sizing: border-box;
