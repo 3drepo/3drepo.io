@@ -17,6 +17,7 @@
 
 import styled from 'styled-components';
 import { Button } from '@controls/button';
+import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
 
 export const Container = styled.div`
 	overflow: overlay;
@@ -28,4 +29,22 @@ export const NewGroupButton = styled(Button).attrs({
 })`
 	align-self: flex-end;
 	margin: 14px 0 3px;
+`;
+
+export const ActionMenu = styled(ActionMenuBase).attrs({
+	PopoverProps: {
+		anchorOrigin: {
+			vertical: 'bottom',
+			horizontal: 'right',
+		},
+		transformOrigin: {
+			vertical: 'bottom',
+			horizontal: 'left',
+		},
+	},
+})`
+	.MuiPaper-root {
+		margin-left: 14px;
+		box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
+	}
 `;
