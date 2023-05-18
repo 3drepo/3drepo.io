@@ -18,7 +18,11 @@
 import styled from 'styled-components';
 
 export const Form = styled.form`
-	padding: 2px;
+	padding: 14px;
+	display: flex;
+	flex-direction: column;
+	width: 328px;
+	border-radius: 10px;
 
 	.MuiFormControl-root {
 		margin: 0 0 10px;
