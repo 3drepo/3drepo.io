@@ -36,8 +36,8 @@ export type InputControllerProps<T> = T & FormInputProps & {
 	onBlur?: () => void,
 };
 
-// eslint-disable-next-line
-export const InputController = forwardRef(<T,>({
+type InputControllerType = <T,>(Component: InputControllerProps<T>, ref) => any;
+export const InputController: InputControllerType = forwardRef(<T,>({
 	Input,
 	name,
 	control,
