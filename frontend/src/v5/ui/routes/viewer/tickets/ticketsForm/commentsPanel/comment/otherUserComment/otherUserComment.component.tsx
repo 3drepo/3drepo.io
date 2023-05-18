@@ -46,7 +46,7 @@ export const OtherUserComment = ({
 
 	return (
 		<CommentWithButtonsContainer>
-			{isFirstOfBlock && <AuthorAvatar username={author} />}
+			{isFirstOfBlock && <AuthorAvatar user={user} />}
 			<Comment
 				author={authorDisplayName}
 				isCurrentUserComment={false}
