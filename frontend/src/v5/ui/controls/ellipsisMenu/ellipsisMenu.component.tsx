@@ -31,7 +31,7 @@ export interface IEllipsisMenu {
 export const EllipsisMenu = ({ selected, children, className, disabled }: IEllipsisMenu): JSX.Element => {
 	if (disabled) {
 		return (
-			<EllipsisButton variant={selected ? 'secondary' : 'primary'} disabled={disabled}>
+			<EllipsisButton variant={selected ? 'secondary' : 'primary'} disabled>
 				<EllipsisIcon />
 			</EllipsisButton>
 		);
