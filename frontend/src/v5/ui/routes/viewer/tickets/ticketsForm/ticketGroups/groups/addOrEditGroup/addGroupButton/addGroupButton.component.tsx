@@ -18,19 +18,17 @@
 import { ActionMenu } from '@controls/actionMenu';
 import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import { FormattedMessage } from 'react-intl';
+import { ButtonProps } from '@mui/material';
 import { NewGroupButton } from './addGroupButton.styles';
 import { GroupSettingsForm } from './groupSettingsForm.component.tsx/groupSettingsForm.component';
+import { TicketsGroupActionMenu } from '../groupSettings.styles';
 
-type IAddGroupButton = {
-	colored: boolean;
-};
-
-export const AddGroupButton = ({ colored }: IAddGroupButton) => {
+export const AddGroupButton = (props: ButtonProps) => {
 	console.time('add group');
 	return (
-		<ActionMenu
+		<TicketsGroupActionMenu
 			TriggerButton={(
-				<NewGroupButton startIcon={<AddCircleIcon />}>
+				<NewGroupButton startIcon={<AddCircleIcon />} {...props}>
 					<FormattedMessage
 						id="ticketCard.groups.addGroup"
 						defaultMessage="Add group"
@@ -38,10 +36,7 @@ export const AddGroupButton = ({ colored }: IAddGroupButton) => {
 				</NewGroupButton>
 			)}
 		>
-			<span>
-				Create Group
-				<GroupSettingsForm />
-			</span>
-		</ActionMenu>
+			<GroupSettingsForm />
+		</TicketsGroupActionMenu>
 	);
 };
