@@ -65,6 +65,7 @@ Groups.deserialiseGroup = (group) => Groups.deserialiseGroupSchema.cast(group);
 Groups.serialiseGroup = (group) => {
 	const caster = Yup.object({
 		_id: uuidString,
+		ticket: uuidString,
 		objects: Yup.array().of(Yup.object({
 			_ids: Yup.array().of(uuidString),
 		})),
