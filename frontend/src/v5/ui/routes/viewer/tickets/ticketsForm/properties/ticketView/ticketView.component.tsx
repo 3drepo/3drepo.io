@@ -29,7 +29,6 @@ import { ViewpointsActions } from '@/v4/modules/viewpoints';
 import { useDispatch } from 'react-redux';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
-import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { BasicTicketImage } from '../basicTicketImage/basicTicketImage.component';
 import { EllipsisMenuItemDelete } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
 import { TicketImageActionMenu } from '../basicTicketImage/ticketImageActionMenu.component';

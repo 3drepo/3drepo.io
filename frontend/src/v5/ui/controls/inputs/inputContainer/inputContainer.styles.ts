@@ -24,24 +24,30 @@ export const InputContainer = styled(FormControl)<{ selected?: boolean }>`
 	border-radius: 8px;
 	padding: 10px 15px;
 	width: 100%;
-	color: ${({ theme }) => theme.palette.secondary.main};
+	position: relative;
+
+	${({ disabled, theme: { palette } }) => (disabled ? css`
+		border-color: ${palette.secondary.lightest};
+		color: ${palette.base.light};
+	` : css`
+		border-color: ${palette.base.lightest};
+		color: ${palette.secondary.main};
+	`)}
 
 	${({ selected, theme: { palette } }) => selected && css`
 		box-shadow: 0 0 4px ${palette.primary.main};
 		border-color: ${palette.primary.main};
 	`}
 
-	${({ error, theme: { palette } }) => error && css`
+	${({ error, selected, theme: { palette } }) => error && css`
 		color: ${palette.error.main};
 		background-color: ${palette.error.lightest};
 		border-color: ${palette.error.main};
-		box-shadow: 0 0 4px ${palette.error.main};
+		${selected && css`box-shadow: 0 0 4px ${palette.error.main}`};
 	`}
 
-	${({ disabled, theme: { palette } }) => disabled && css`
-		border-color: ${palette.secondary.lightest};
-		color: ${palette.base.light};
-		box-shadow: none;
-	`}
-
+	.MuiFormHelperText-root {
+		position: absolute;
+		left: 0px;
+	}
 `;
