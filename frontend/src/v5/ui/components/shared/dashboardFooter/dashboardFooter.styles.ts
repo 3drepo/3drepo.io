@@ -47,6 +47,9 @@ export const FooterItems = styled.span`
 
 export const FooterItem = styled.span`
 	line-height: ${FOOTER_HEIGHT}px;
+	* {
+		${({ theme }) => theme.typography.body1}
+	}
 
 	&:not(:last-child)&:after {
 		content: '\\2022';

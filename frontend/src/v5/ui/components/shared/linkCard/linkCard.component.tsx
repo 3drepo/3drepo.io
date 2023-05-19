@@ -14,21 +14,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Card, CardListItem, Link, Heading, Subheading, Details } from './linkCard.styles';
+import { Card, CardListItem, Link, Heading, Subheading, Details, CardImage } from './linkCard.styles';
 
 interface ILinkCard {
 	variant?: 'primary' | 'secondary',
 	className?: string;
-	children: any;
+	children?: any;
 	to: string;
 	heading?: string | JSX.Element;
 	subheading?: string | JSX.Element;
+	imgSrc?: string;
+	defaultImgSrc?: string;
 }
 
-export const LinkCard = ({ variant = 'primary', className, children, to, heading, subheading }: ILinkCard): JSX.Element => (
-	<CardListItem>
+export const LinkCard = ({ variant = 'primary', className, children, to, heading, subheading, imgSrc, defaultImgSrc }: ILinkCard): JSX.Element => (
+	<CardListItem className={className}>
 		<Link to={to}>
-			<Card $variant={variant} className={className}>
+			<Card $variant={variant}>
+				<CardImage imgSrc={imgSrc} defaultImgSrc={defaultImgSrc} />
 				{children}
 				<Details>
 					{heading && <Heading>{heading}</Heading>}

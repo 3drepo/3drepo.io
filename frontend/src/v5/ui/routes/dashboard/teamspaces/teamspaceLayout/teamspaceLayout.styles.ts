@@ -51,7 +51,7 @@ export const TopBar = styled.div`
 `;
 
 export const TeamspaceImage = styled(CoverImage)`
-	border-radius: 10px;
+	border-radius: 25px;
 	height: 142px;
 	width: 142px;
 `;
