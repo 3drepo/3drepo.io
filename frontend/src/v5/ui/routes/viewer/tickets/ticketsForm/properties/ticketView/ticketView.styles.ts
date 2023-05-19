@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,32 +14,36 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { EllipsisButton } from '@controls/ellipsisMenu/ellipsisMenu.styles';
+import { InputContainer as InputContainerBase } from '@controls/inputs/inputContainer/inputContainer.styles';
 import { InputLabel } from '@mui/material';
 import styled from 'styled-components';
+
+export const InputContainer = styled(InputContainerBase)`
+	padding: 0 13px 13px;
+`;
 
 export const Label = styled(InputLabel)`
 	${({ theme }) => theme.typography.h5}
 	color: inherit;
-	margin-bottom: 8px;
 	max-width: 100%;
 	word-wrap: break-word;
 	text-overflow: ellipsis;
 `;
 
-export const Content = styled.div`
+export const Header = styled.div`
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
-	gap: 11px;
-
-	& > * {
-		width: 50%;
-	}
+	align-items: center;
 `;
 
-export const Actions = styled.div`
+export const HeaderSection = styled.div`
 	display: flex;
-	flex-direction: column;
-	gap: 5px;
+	flex-direction: row;
+	align-items: center;
+
+	${EllipsisButton}:hover {
+		background-color: transparent;
+	}
 `;

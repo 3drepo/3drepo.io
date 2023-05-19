@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { EllipsisButton } from '@controls/ellipsisMenu/ellipsisMenu.styles';
 import styled, { css } from 'styled-components';
-import { MenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenuItem.styles';
 
 export const Container = styled.div`
 	line-height: 20px;
@@ -29,8 +29,8 @@ export const Container = styled.div`
 	box-sizing: border-box;
 	height: 36px;
 
-	${MenuItem} {
-		margin-left: auto;
+	${EllipsisButton}:hover {
+		background-color: transparent;
 	}
 `;
 

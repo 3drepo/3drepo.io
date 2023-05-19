@@ -23,7 +23,7 @@ import { hexToOpacity } from '@/v5/ui/themes/theme';
 export const Container = styled.div`
 	border-radius: 5px;
 	overflow: hidden;
-	height: 117px;
+	height: 118px;
 
 	& > * {
 		height: 100%;
