@@ -17,10 +17,11 @@
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { getSupportedImageExtensions, convertFileToImageSrc } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
-import { FormControl, FormHelperText } from '@mui/material';
+import { FormHelperText } from '@mui/material';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Actions, Container, Content, Label } from './basicTicketImage.styles';
+import { Actions, Content, Label } from './basicTicketImage.styles';
 import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplayer.component';
+import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
 
 type BasicTicketImageProps = Omit<FormInputProps, 'onBlur'> & {
 	children: any,
@@ -45,21 +46,19 @@ export const BasicTicketImage = ({
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	return (
-		<FormControl error={error} required={required}>
-			<Container className={className} error={error} disabled={disabled}>
-				<Label>{label}</Label>
-				<Content>
-					<TicketImageDisplayer
-						imgSrc={value}
-						disabled={disabled || !isProjectAdmin}
-						onEmptyImageClick={uploadImage}
-					/>
-					<Actions>
-						{children}
-					</Actions>
-				</Content>
-			</Container>
+		<InputContainer error={error} required={required} className={className} disabled={disabled}>
+			<Label>{label}</Label>
+			<Content>
+				<TicketImageDisplayer
+					imgSrc={value}
+					disabled={disabled || !isProjectAdmin}
+					onEmptyImageClick={uploadImage}
+				/>
+				<Actions>
+					{children}
+				</Actions>
+			</Content>
 			<FormHelperText>{helperText}</FormHelperText>
-		</FormControl>
+		</InputContainer>
 	);
 };

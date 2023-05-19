@@ -16,28 +16,7 @@
  */
 
 import { InputLabel } from '@mui/material';
-import styled, { css } from 'styled-components';
-
-export const Container = styled.div<{ error?: boolean, disabled?: boolean; }>`
-	padding: 13px;
-	border: solid 1px;
-	${({ disabled, theme: { palette } }) => (disabled ? css`
-		border-color: ${palette.secondary.lightest};
-		color: ${palette.base.light};
-	` : css`
-		border-color: ${palette.base.lightest};
-		color: ${palette.secondary.main};
-	`)}
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border-radius: 8px;
-	display: flex;
-	flex-direction: column;
-
-	${({ error, theme }) => error && css`
-		border: solid 1px ${theme.palette.error.main};
-		background-color: ${theme.palette.error.lightest};
-	`}
-`;
+import styled from 'styled-components';
 
 export const Label = styled(InputLabel)`
 	${({ theme }) => theme.typography.h5}
