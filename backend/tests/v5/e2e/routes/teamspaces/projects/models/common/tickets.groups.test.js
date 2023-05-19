@@ -169,6 +169,17 @@ const testUpdateGroup = () => {
 				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, payload, false, templates.ticketNotFound],
 				['the group does not exist', { ...baseRouteParams, groupId: ServiceHelper.generateRandomString() }, payload, false, templates.groupNotFound],
 				['the group id is valid', baseRouteParams, payload, true],
+				['the payload contains both rules and objects', baseRouteParams, { rules: [{
+					field: 'IFC Type',
+					operator: 'IS',
+					values: [
+						'IfcBeam',
+					],
+				}],
+				objects: [{
+					container: ServiceHelper.generateUUIDString(),
+					_ids: [ServiceHelper.generateUUIDString()],
+				}] }, false, templates.invalidArguments],
 			];
 		};
 
