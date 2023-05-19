@@ -20,7 +20,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/formModal/formModal.component';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CreateProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
+import { ProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
@@ -38,7 +38,7 @@ interface IFormInput {
 
 export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalProps) => {
 	const currentTeamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const [existingProjects, setExistingProjects] = useState([]);
+	const [existingNames, setExistingNames] = useState([]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const DEFAULT_VALUES = {
@@ -54,15 +54,14 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 		trigger,
 	} = useForm<IFormInput>({
 		mode: 'onChange',
-		resolver: yupResolver(CreateProjectSchema),
-		context: { existingProjects },
+		resolver: yupResolver(ProjectSchema),
+		context: { existingNames },
 		defaultValues: DEFAULT_VALUES,
 	});
 
 	const onSubmissionError = (error) => {
 		if (projectAlreadyExists(error)) {
-			const { projectName } = getValues();
-			setExistingProjects((currentValue) => [...currentValue, projectName]);
+			setExistingNames((currentValue) => [...currentValue, getValues('projectName')]);
 		}
 	};
 
@@ -72,8 +71,8 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 	};
 
 	useEffect(() => {
-		if (existingProjects.length) trigger('projectName');
-	}, [errors, JSON.stringify(existingProjects)]);
+		if (existingNames.length) trigger('projectName');
+	}, [errors, JSON.stringify(existingNames)]);
 
 	return (
 		<FormModal

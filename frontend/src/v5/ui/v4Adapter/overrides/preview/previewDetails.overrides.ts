@@ -101,7 +101,7 @@ export default css`
 					padding-left: 8px;
 					height: 22px;
 					font-size: 14px;
-					border-radius: 5px;
+					border-radius: 8px;
 				}
 
 				input::placeholder {

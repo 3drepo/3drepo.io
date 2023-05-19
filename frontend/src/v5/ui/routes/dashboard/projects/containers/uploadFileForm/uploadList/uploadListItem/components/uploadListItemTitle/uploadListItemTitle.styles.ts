@@ -28,6 +28,5 @@ export const DashboardListItemTitle = styled(ListItemTitle)`
 		text-decoration-line: none;
 		text-overflow: ellipsis;
 		overflow: hidden;
-		display: inline-block;
 	}
 `;

@@ -28,7 +28,7 @@ export const PinContainer = styled.div<{ selected: boolean, error: boolean, disa
 		border-color: ${palette.base.lightest};
 		color: ${palette.secondary.main};
 	`)}
-	border-radius: 5px;
+	border-radius: 8px;
 	padding: 10px 15px;
 
 	${({ selected, theme: { palette } }) => selected && css`

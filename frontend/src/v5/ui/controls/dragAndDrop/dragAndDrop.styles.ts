@@ -30,7 +30,6 @@ export const DropArea = styled(Dropzone)`
 `;
 
 export const DashedContainer = styled(DashedContainerBase).attrs(({ theme, $dragOverlay }: any) => ({
-	borderRadius: 10,
 	dashSize: 5,
 	strokeColor: theme.palette.primary.main,
 	gapSize: $dragOverlay ? 0 : 5,

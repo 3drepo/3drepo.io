@@ -95,7 +95,6 @@ const V5DropzoneContent = styled(DashedContainer).attrs<{ error?: boolean, isDra
 	error,
 	isDragActive,
 }) => ({
-	borderRadius: 5,
 	strokeWidth: 2,
 	dashSize: 5,
 	gapSize: 5,

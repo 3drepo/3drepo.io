@@ -19,6 +19,7 @@ import { Typography } from '@controls/typography';
 import { Link as DecoratedLink } from 'react-router-dom';
 import { Card as CardBase, CardContent } from '@mui/material';
 import styled, { css } from 'styled-components';
+import { CoverImage } from '@controls/coverImage/coverImage.component';
 
 export const CardListItem = styled.li`
 	list-style-type: none;
@@ -67,11 +68,19 @@ export const Card = styled(CardBase)<{ $variant: string; }>`
 		}
 		if ($variant === 'secondary') {
 			return css`
-				background-color: rgb(255 255 255 / 5%);
-				${Heading} { color: ${theme.palette.primary.contrast}; }
+				background-color: ${theme.palette.tertiary.lighter};
 			`;
 		}
 		return '';
 	}};
 	width: 246px;
+`;
+
+export const CardImage = styled(CoverImage)`
+	width: 100%;
+	height: 132px;
+	object-fit: cover;
+	margin-bottom: -5px;
+	border-radius: 5px;
+	user-select: none;
 `;

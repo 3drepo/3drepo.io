@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,25 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { usersProfiles } from '../../config.json';
 
-import { Card } from '@mui/material';
-import styled from 'styled-components';
-import AddCircleIcon from '@assets/icons/twoToned/add_circle-two_toned.svg';
+export interface UserProfile {
+	username: string,
+	password: string
+}
 
-export const Container = styled(Card)`
-	color: ${({ theme }) => theme.palette.primary.main};
-	${({ theme }) => theme.typography.h3};
-	background-color: rgb(255 255 255 / 5%);
-	width: 246px;
-	height: 256px;
-	display: flex;
-	flex-flow: column;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-`;
-
-export const AddTeamspaceIcon = styled(AddCircleIcon)`
-	width: 37px;
-	height: 37px;
-`;
+export const getUserForRole = (role):UserProfile => usersProfiles[role];
