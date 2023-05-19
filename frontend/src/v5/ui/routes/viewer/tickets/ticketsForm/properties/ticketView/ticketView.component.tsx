@@ -176,7 +176,7 @@ export const TicketView = ({
 					<EllipsisMenu disabled={disabled && !hasCamera}>
 						<EllipsisMenuItem
 							hidden={hasCamera}
-							title={(<FormattedMessage id="viewer.card.ticketView.action.createCamera" defaultMessage="Create camera" />)}
+							title={(<FormattedMessage id="viewer.card.ticketView.action.saveCamera" defaultMessage="Save camera" />)}
 							onClick={updateCamera}
 						/>
 						<EllipsisMenuItem
