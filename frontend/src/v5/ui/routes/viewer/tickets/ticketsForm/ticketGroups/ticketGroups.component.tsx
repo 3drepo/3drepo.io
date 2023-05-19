@@ -19,21 +19,21 @@ import { formatMessage } from '@/v5/services/intl';
 import { MOCK_DATA } from '@/v5/store/tickets/groups/ticketGroups.helpers';
 import { Container } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
+import { TicketGroupsContext } from './ticketGroupsContext';
 
-export const TicketGroups = () => {
-	const groups = MOCK_DATA;
-
-	return (
-		<Container>
+export const TicketGroups = () => (
+	<Container>
+		<TicketGroupsContext.Provider value={{ groupType: 'colored' }}>
 			<GroupsAccordion
 				title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
-				groups={groups.colored}
-				colored
+				groups={MOCK_DATA.colored}
 			/>
+		</TicketGroupsContext.Provider>
+		<TicketGroupsContext.Provider value={{ groupType: 'hidden' }}>
 			<GroupsAccordion
 				title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
-				groups={groups.hidden}
+				groups={MOCK_DATA.hidden}
 			/>
-		</Container>
-	);
-};
+		</TicketGroupsContext.Provider>
+	</Container>
+);

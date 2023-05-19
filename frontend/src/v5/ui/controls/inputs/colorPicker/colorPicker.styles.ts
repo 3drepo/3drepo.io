@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,22 +16,18 @@
  */
 
 import styled from 'styled-components';
+import { InputContainer } from '../inputContainer/inputContainer.styles';
 
-export const Container = styled.span`
+export const Container = styled(InputContainer)`
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 	width: fit-content;
-`;
+	padding: 7px 9px;
+	cursor: pointer;
 
-export const ActionMenuSection = styled.div`
-	display: flex;
-	flex-direction: column;
-	padding: 11px;
-
-	&:not(:last-of-type) {
-		border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	svg {
+		margin-left: 8px;
+		color: ${({ theme }) => theme.palette.base.main};
 	}
-`;
-
-export const Menu = styled.div`
-	display: flex;
-	flex-direction: column;
 `;

@@ -78,6 +78,7 @@ export default css`
 
 		${InputContainer} .react-autosuggest__container input {
 			height: 50px;
+			padding: 0 12px;
 		}
 	}
 	

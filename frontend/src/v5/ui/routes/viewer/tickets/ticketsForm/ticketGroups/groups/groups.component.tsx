@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IGroupCollection } from '@/v5/store/tickets/groups/ticketGroups.types';
+import { IGroup } from '@/v5/store/tickets/groups/ticketGroups.types';
 import { groupBy, partition, values } from 'lodash';
 import {
 	CollectionHeadline,
@@ -26,8 +26,8 @@ import { GroupToggle } from '../groupToggle/groupToggle.component';
 import { Name, NameContainer } from './groupItem/groupItem.styles';
 import { GroupItem } from './groupItem/groupItem.component';
 
-type GroupsProps = { groups: IGroupCollection[], colored: boolean };
-export const Groups = ({ groups, colored }: GroupsProps) => {
+type GroupsProps = { groups: IGroup[] };
+export const Groups = ({ groups }: GroupsProps) => {
 	const [groupBatches, groupItems] = partition(groups, (g) => g.prefix?.length);
 	const collectionsDict = groupBy(groupBatches, (g) => g.prefix[0]);
 	const collections = values(collectionsDict);
@@ -39,7 +39,7 @@ export const Groups = ({ groups, colored }: GroupsProps) => {
 
 	return (
 		<>
-			{groupItems.map((group) => (<GroupItem {...group} colored={colored} />))}
+			{groupItems.map((group) => (<GroupItem {...group} key={group.group._id} />))}
 			{collections.map((collection) => (
 				<CollectionAccordion
 					title={(
@@ -49,12 +49,12 @@ export const Groups = ({ groups, colored }: GroupsProps) => {
 									<Name>{collection[0].prefix[0]}</Name>
 								</NameContainer>
 							</CollectionHeadline>
-							<GroupToggle colored={colored} onClick={(e) => e.stopPropagation()} />
+							<GroupToggle onClick={(e) => e.stopPropagation()} />
 						</>
 					)}
 				>
 					<GroupsContainer>
-						<Groups groups={collectionToGroup(collection)} colored={colored} />
+						<Groups groups={collectionToGroup(collection)} />
 					</GroupsContainer>
 				</CollectionAccordion>
 			))}

@@ -35,23 +35,23 @@ export interface IGroupFromApi {
 	rules?: IGroupRule[],
 }
 
-interface BaseGroupCollection {
+interface BaseGroup {
 	prefix?: string[],
 	group: IGroupFromApi,
 }
 
-export interface IColoredGroupCollection extends BaseGroupCollection {
+export interface IColoredGroup extends BaseGroup {
 	// at least 1 of the following is required, but not necessarily both
 	color?: [number, number, number],
 	opacity?: number,
 }
 
-export interface IHiddenGroupCollection extends BaseGroupCollection { }
+export interface IHiddenGroup extends BaseGroup { }
 
-export type IGroupCollection = IColoredGroupCollection | IHiddenGroupCollection;
+export type IGroup = IColoredGroup | IHiddenGroup;
 
 export interface IViewState {
 	showDefaultHidden: boolean,
-	colored: IColoredGroupCollection[],
-	hidden: IHiddenGroupCollection[],
+	colored: IColoredGroup[],
+	hidden: IHiddenGroup[],
 }
