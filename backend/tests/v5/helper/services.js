@@ -424,7 +424,7 @@ ServiceHelper.generateRandomModelProperties = (isFed = false) => ({
 	defaultLegend: ServiceHelper.generateUUIDString(),
 });
 
-ServiceHelper.generateTemplate = (deprecated) => ({
+ServiceHelper.generateTemplate = (deprecated, hasView = false) => ({
 	_id: ServiceHelper.generateUUIDString(),
 	code: ServiceHelper.generateRandomString(3),
 	name: ServiceHelper.generateRandomString(),
@@ -445,11 +445,11 @@ ServiceHelper.generateTemplate = (deprecated) => ({
 			type: propTypes.NUMBER,
 			default: ServiceHelper.generateRandomNumber(),
 		},
-		{
+		...(hasView ? [{
 			name: ServiceHelper.generateRandomString(),
 			type: propTypes.VIEW,
 			default: ServiceHelper.generateRandomNumber(),
-		},
+		}] : []),
 	],
 	modules: [
 		{
@@ -475,11 +475,11 @@ ServiceHelper.generateTemplate = (deprecated) => ({
 					type: propTypes.NUMBER,
 					default: ServiceHelper.generateRandomNumber(),
 				},
-				{
+				...(hasView ? [{
 					name: ServiceHelper.generateRandomString(),
 					type: propTypes.VIEW,
 					default: ServiceHelper.generateRandomNumber(),
-				},
+				}] : []),
 			],
 		},
 	],

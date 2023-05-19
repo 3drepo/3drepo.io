@@ -26,7 +26,7 @@ let server;
 let agent;
 
 const generateBasicData = () => {
-	const template = ServiceHelper.generateTemplate();
+	const template = ServiceHelper.generateTemplate(false, true);
 
 	return ({
 		users: {
