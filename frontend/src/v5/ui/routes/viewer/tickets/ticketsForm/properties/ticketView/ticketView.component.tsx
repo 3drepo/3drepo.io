@@ -26,8 +26,9 @@ import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
-import { FormHelperText } from '@mui/material';
+import { FormHelperText, Tooltip } from '@mui/material';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
+import { formatMessage } from '@/v5/services/intl';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { TicketImageContent } from '../ticketImageContent/ticketImageContent.component';
 import { EllipsisMenuItemDelete } from '../ticketImageContent/ticketImageAction/ticketImageAction.styles';
@@ -122,9 +123,16 @@ export const TicketView = ({
 				<Label>{label}</Label>
 				<HeaderSection>
 					{!hasViewpoint ? (
-						<PrimaryTicketButton onClick={updateViewpoint}>
-							<PlusIcon />
-						</PrimaryTicketButton>
+						<Tooltip
+							placement="right"
+							title={(formatMessage({ id: 'viewer.card.button.saveCurrentView', defaultMessage: 'Save current view' }))}
+						>
+							<div>
+								<PrimaryTicketButton onClick={updateViewpoint}>
+									<PlusIcon />
+								</PrimaryTicketButton>
+							</div>
+						</Tooltip>
 					) : (
 						<PrimaryTicketButton onClick={goToViewpoint}>
 							<ViewpointIcon />
