@@ -202,7 +202,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: group has been successfully updated
 	 */
-	router.patch('/:group', hasCommenterAccess, validateUpdateGroup, updateGroup(isFed));
+	router.patch('/:group', hasCommenterAccess, checkTicketExists, validateUpdateGroup, updateGroup(isFed));
 	return router;
 };
 
