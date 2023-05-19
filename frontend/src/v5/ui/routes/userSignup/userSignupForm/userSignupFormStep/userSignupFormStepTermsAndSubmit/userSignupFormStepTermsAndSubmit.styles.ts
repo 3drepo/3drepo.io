@@ -32,7 +32,7 @@ export const TermsContainer = styled.div`
 	width: 100%;
 	/*TODO - fix when new palette will be implemented*/
 	background-color: #edf0f8;
-	border-radius: 5px;
+	border-radius: 8px;
 	padding: 14px;
 	margin-top: 22px;
 	box-sizing: border-box;

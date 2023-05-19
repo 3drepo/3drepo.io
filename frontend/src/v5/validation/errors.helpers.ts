@@ -45,6 +45,6 @@ export const isPathNotFound = (error): boolean => getErrorCode(error).endsWith('
 export const isPathNotAuthorized = (error): boolean => getErrorCode(error).endsWith('NOT_AUTHORIZED');
 
 export const isProjectNotFound = (code: string): boolean => code === 'PROJECT_NOT_FOUND';
-export const isResourceNotFound = (code: string): boolean => code === 'RESOURCE_NOT_FOUND';
+export const isModelNotFound = (code: string): boolean => ['RESOURCE_NOT_FOUND', 'CONTAINER_NOT_FOUND'].includes(code);
 
 export const isContainerPartOfFederation = (error): boolean => getErrorCode(error).endsWith('CONTAINER_IS_SUB_MODEL');

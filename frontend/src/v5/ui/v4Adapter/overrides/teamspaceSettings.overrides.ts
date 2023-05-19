@@ -37,6 +37,7 @@ export const V5TeamspaceSettingsOverrides = styled.div<{ isAdmin: boolean }>`
 		border: none;
 		box-shadow: none;
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		height: unset;
 		${LoaderContainer} {
 			padding: 50px 0;
 			${LoadingText} {

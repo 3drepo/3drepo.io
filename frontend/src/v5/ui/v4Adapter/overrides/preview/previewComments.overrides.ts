@@ -120,7 +120,7 @@ export const CommentListStyling = css`
 		}
 
 		${CommentContainer} {
-			border-radius: 5px;
+			border-radius: 8px;
 			margin: 0 10px;
 			padding: 8px 14px 0 14px;
 

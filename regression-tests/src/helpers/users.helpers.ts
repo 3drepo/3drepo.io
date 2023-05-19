@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,18 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { usersProfiles } from '../../config.json';
 
-import { FormattedMessage } from 'react-intl';
-import { CardListItem } from '../../linkCard.styles';
-import { AddTeamspaceIcon, Container } from './addTeamspaceCard.styles';
+export interface UserProfile {
+	username: string,
+	password: string
+}
 
-export const AddTeamspaceCard = (): JSX.Element => (
-	<CardListItem>
-		<a href="https://3drepo.com/pricing/" target="_blank" rel="noreferrer">
-			<Container>
-				<AddTeamspaceIcon />
-				<FormattedMessage id="teamspaceSelect.addNewTeamspace" defaultMessage="New Teamspace" />
-			</Container>
-		</a>
-	</CardListItem>
-);
+export const getUserForRole = (role):UserProfile => usersProfiles[role];

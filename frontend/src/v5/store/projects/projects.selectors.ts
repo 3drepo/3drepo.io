@@ -45,5 +45,5 @@ export const selectCurrentProjectName = createSelector(
 
 export const selectIsProjectAdmin = createSelector(
 	selectCurrentProjectDetails,
-	(project): boolean => project?.isAdmin || null,
+	(project): boolean => !!project?.isAdmin,
 );

@@ -54,7 +54,7 @@ export const name = trimmedString
 			defaultMessage: 'This name is already used within this project',
 		}),
 		(nameValue, testContext) => (
-			!testContext.options.context.alreadyExistingNames.map((n) => n.trim()).includes(nameValue)
+			!testContext.options.context.alreadyExistingNames.map((n) => n.trim().toLocaleLowerCase()).includes(nameValue.toLocaleLowerCase())
 		),
 	);
 

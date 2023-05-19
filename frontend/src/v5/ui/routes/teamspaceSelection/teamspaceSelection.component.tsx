@@ -21,7 +21,7 @@ import { DashboardFooter } from '@components/shared/dashboardFooter';
 import { TeamspaceList } from '@components/teamspace/teamspaceList';
 import { useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { FadeMessageTrigger, HomeContent, ScrollBar, WelcomeMessage } from './teamspaceSelection.styles';
+import { FadeMessageTrigger, Content, PricingLink, ScrollBar, WelcomeMessage } from './teamspaceSelection.styles';
 
 export const TeamspaceSelection = (): JSX.Element => {
 	const firstName = CurrentUserHooksSelectors.selectFirstName();
@@ -41,21 +41,26 @@ export const TeamspaceSelection = (): JSX.Element => {
 		<>
 			<AppBar />
 			<ScrollBar>
-				<HomeContent>
-					<FadeMessageTrigger ref={welcomeRef}>
-						<WelcomeMessage $visible={isVisible}>
-							{
-								firstName ? (
-									<FormattedMessage id="teamspaces.welcome.name" defaultMessage="Welcome back, {firstName}!" values={{ firstName }} />
-								) : (
-									<FormattedMessage id="teamspaces.welcome.noName" defaultMessage="Welcome back!" />
-								)
-							}
-						</WelcomeMessage>
-					</FadeMessageTrigger>
-					<TeamspaceList />
-				</HomeContent>
-				<DashboardFooter variant="dark" />
+				<div>
+					<Content>
+						<FadeMessageTrigger ref={welcomeRef}>
+							<WelcomeMessage $visible={isVisible}>
+								{
+									firstName ? (
+										<FormattedMessage id="teamspaces.welcome.name" defaultMessage="Welcome back, {firstName}!" values={{ firstName }} />
+									) : (
+										<FormattedMessage id="teamspaces.welcome.noName" defaultMessage="Welcome back!" />
+									)
+								}
+								<PricingLink to={{ pathname: 'https://3drepo.com/pricing/' }}>
+									<FormattedMessage id="teamspaces.welcome.addTeamspace" defaultMessage="Add new Teamspace" />
+								</PricingLink>
+							</WelcomeMessage>
+						</FadeMessageTrigger>
+						<TeamspaceList />
+					</Content>
+				</div>
+				<DashboardFooter variant="light" />
 			</ScrollBar>
 		</>
 	);

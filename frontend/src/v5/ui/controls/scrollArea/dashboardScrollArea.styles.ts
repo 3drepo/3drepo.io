@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,24 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Card } from '@mui/material';
 import styled from 'styled-components';
-import AddCircleIcon from '@assets/icons/twoToned/add_circle-two_toned.svg';
 
-export const Container = styled(Card)`
-	color: ${({ theme }) => theme.palette.primary.main};
-	${({ theme }) => theme.typography.h3};
-	background-color: rgb(255 255 255 / 5%);
-	width: 246px;
-	height: 253px;
+export const DashboardScrollArea = styled.div`
+	height: 100%;
+	width: 100%;
+	overflow: overlay;
+	position: relative;
+	z-index: 0;
 	display: flex;
-	flex-flow: column;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-`;
-
-export const AddTeamspaceIcon = styled(AddCircleIcon)`
-	width: 37px;
-	height: 37px;
+	flex-direction: column;
 `;

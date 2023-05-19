@@ -29,7 +29,6 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { isV5 } from '@/v4/helpers/isV5';
-import { ConditionalV5OrViewerScrollArea } from '@/v5/ui/v4Adapter/components/conditionalV5OrViewerScrollArea.component';
 import {GROUP_PANEL_NAME} from '../../../../constants/groups';
 import { TextField as TextFieldBase } from '../../../components/textField/textField.component';
 
@@ -192,7 +191,6 @@ export const MainInfoContainer = styled.div`
 `;
 
 const expandedStyles = css`
-	overflow: auto;
 	position: static;
 
 	${MessageListContainer} {
@@ -217,13 +215,12 @@ const unexpandedStyles  = css`
 	}
 `;
 
-export const ScrollableContainer = styled(ConditionalV5OrViewerScrollArea).attrs({
-	autoHeight: true,
-	autoHeightMax: '100%',
-})`
+export const ScrollableContainer = styled.div`
 	${({ expanded }: { expanded: boolean }) => expanded ? expandedStyles : unexpandedStyles};
 	display: flex;
 	flex-direction: column;
+	max-height: 100%;
+	overflow: overlay;
 `;
 
 export const TextField = styled(TextFieldBase)<{ mutable: boolean }>`

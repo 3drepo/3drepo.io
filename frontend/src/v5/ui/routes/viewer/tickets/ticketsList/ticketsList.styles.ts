@@ -23,11 +23,11 @@ import { Ticket } from './ticketItem/ticketItem.styles';
 
 export const List = styled.div`
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
-	border-radius: 6px;
+	border-radius: 8px;
 	overflow: hidden;
 	display: inline-block;
 	width: 100%;
-	margin-bottom: 15px;
+	margin-bottom: 0;
 	${/* sc-selector */ Ticket}:not(:last-child) {
 		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	}
