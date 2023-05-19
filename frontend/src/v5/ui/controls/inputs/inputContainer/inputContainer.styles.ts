@@ -48,6 +48,6 @@ export const InputContainer = styled(FormControl)<{ selected?: boolean }>`
 
 	.MuiFormHelperText-root {
 		position: absolute;
-		left: 0px;
+		left: 0;
 	}
 `;

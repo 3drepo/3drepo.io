@@ -43,7 +43,7 @@ export const HeaderSection = styled.div`
 	flex-direction: row;
 	align-items: center;
 
-	${EllipsisButton}:hover {
+	${/* sc-selector */ EllipsisButton}:hover {
 		background-color: transparent;
 	}
 `;

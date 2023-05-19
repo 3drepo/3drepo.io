@@ -29,7 +29,7 @@ export const Container = styled.div`
 	box-sizing: border-box;
 	height: 36px;
 
-	${EllipsisButton}:hover {
+	${/* sc-selector */ EllipsisButton}:hover {
 		background-color: transparent;
 	}
 `;
