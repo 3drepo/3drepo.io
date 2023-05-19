@@ -445,6 +445,11 @@ ServiceHelper.generateTemplate = (deprecated) => ({
 			type: propTypes.NUMBER,
 			default: ServiceHelper.generateRandomNumber(),
 		},
+		{
+			name: ServiceHelper.generateRandomString(),
+			type: propTypes.VIEW,
+			default: ServiceHelper.generateRandomNumber(),
+		},
 	],
 	modules: [
 		{
@@ -470,6 +475,11 @@ ServiceHelper.generateTemplate = (deprecated) => ({
 					type: propTypes.NUMBER,
 					default: ServiceHelper.generateRandomNumber(),
 				},
+				{
+					name: ServiceHelper.generateRandomString(),
+					type: propTypes.VIEW,
+					default: ServiceHelper.generateRandomNumber(),
+				},
 			],
 		},
 	],
@@ -487,6 +497,15 @@ const generateProperties = (propTemplate, internalType) => {
 			properties[name] = internalType ? new Date() : Date.now();
 		} else if (type === propTypes.NUMBER) {
 			properties[name] = ServiceHelper.generateRandomNumber();
+		} else if (type === propTypes.VIEW) {
+			properties[name] = {
+				state: {
+					hidden: [
+						{ group: ServiceHelper.generateGroup(true, { serialised: true, hasId: false }) },
+						{ group: ServiceHelper.generateGroup(false, { serialised: true, hasId: false }) },
+					],
+				},
+			};
 		}
 	});
 

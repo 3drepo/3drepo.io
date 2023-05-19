@@ -503,6 +503,69 @@ const updateTicketGroupTests = () => {
 			expect(TicketGroupsModel.deleteGroups).toHaveBeenCalledWith(teamspace, project, model,
 				testData.ticket._id, toRemove);
 		});
+		test('Old groups are retained if the update doesn\'t update the field', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+
+			const testData = generateGroupsTestData(true);
+
+			const newGroups = [];
+			const toRemove = [];
+
+			const updatedPropData = cloneDeep(testData.ticket.properties[testData.propName]);
+
+			TicketGroupsModel.getGroupsByIds.mockImplementationOnce(
+				(ts, proj, mod, ticket, ids) => Promise.resolve(ids.map(
+					(_id) => ({ _id }))));
+
+			Object.keys(updatedPropData.state).forEach((key) => {
+				const groupArr = updatedPropData.state[key];
+
+				toRemove.push(groupArr[0].group);
+				groupArr[0].group = generateGroup(true, { hasId: false });
+			});
+
+			const toUpdate = {
+				properties: {
+					[testData.propName]: updatedPropData,
+				},
+			};
+
+			TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
+
+			await expect(Tickets.updateTicket(teamspace, project, model, testData.template,
+				testData.ticket, toUpdate)).resolves.toBeUndefined();
+
+			expect(TicketsModel.updateTicket).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.updateTicket).toHaveBeenCalledWith(teamspace, project, model,
+				testData.ticket, expect.any(Object), undefined);
+
+			const processedTicket = TicketsModel.updateTicket.mock.calls[0][4];
+			const propData = processedTicket.properties[testData.propName];
+			[propData].forEach(({ state }) => {
+				Object.keys(state).forEach((key) => {
+					newGroups.push(state[key][0].group);
+				});
+			});
+
+			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(testData.template);
+
+			expect(TicketGroupsModel.addGroups).toHaveBeenCalledTimes(1);
+			expect(TicketGroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, model,
+				testData.ticket._id, expect.any(Array));
+
+			const groupIDsToSave = TicketGroupsModel.addGroups.mock.calls[0][4].map(({ _id }) => _id);
+
+			expect(groupIDsToSave.length).toBe(newGroups.length);
+			expect(groupIDsToSave).toEqual(expect.arrayContaining(newGroups));
+
+			expect(TicketGroupsModel.deleteGroups).toHaveBeenCalledTimes(1);
+			expect(TicketGroupsModel.deleteGroups).toHaveBeenCalledWith(teamspace, project, model,
+				testData.ticket._id, toRemove);
+		});
+
 		test('Throw an error if retained groups contains group ids that does not exist', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
