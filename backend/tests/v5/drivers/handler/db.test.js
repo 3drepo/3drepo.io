@@ -386,7 +386,7 @@ const testFind = () => {
 		});
 
 		test('Should return matching documents skipping defined amount', async () => {
-			await expect(DB.find(dbName, col, { }, { }, { n: 1 }, 1, 1));
+			await expect(DB.find(dbName, col, { }, { }, { n: 1 }, 1, 1))
 				.resolves.toEqual(data.slice(1, 2));
 		});
 
