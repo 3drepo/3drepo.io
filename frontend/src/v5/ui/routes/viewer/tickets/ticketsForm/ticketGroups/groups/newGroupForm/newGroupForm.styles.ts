@@ -14,37 +14,31 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import { ActionMenu } from '@controls/actionMenu';
-import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
-import { Chip } from '@controls/chip/chip.component';
 
-const BaseRuleActionMenu = styled(ActionMenu)`
-	${Menu} {
-		padding: 14px;
-		display: flex;
-		flex-direction: column;
-		width: 328px;
-		border-radius: 10px;
-	}
+export const Form = styled.form`
+	padding: 15px;
+	display: flex;
+	flex-direction: column;
+	width: 393px;
 `;
 
-export const EditRuleActionMenu = styled(BaseRuleActionMenu).attrs({
-	PopoverProps: {
-		anchorOrigin: {
-			vertical: 'bottom',
-			horizontal: 'left',
-		},
-		transformOrigin: {
-			vertical: 'top',
-			horizontal: 'left',
-		},
-	},
-})``;
+export const SectionTitle = styled.div`
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	color: ${({ theme }) => theme.palette.secondary.main};
+	margin: 15px 0 11px;
+`;
 
-export const NewRuleActionMenu = styled(BaseRuleActionMenu).attrs({
+export const InputsSection = styled.div`
+	border-radius: 8px;
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+`;
+
+export const NewRuleActionMenu = styled(ActionMenu).attrs({
 	PopoverProps: {
 		anchorOrigin: {
 			vertical: 'top',
@@ -74,43 +68,11 @@ export const Rules = styled.div`
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
+	padding: 10px;
 	gap: 4px;
-`;
-
-export const ChipWrapper = styled.div`
-	max-width: 100%;
 `;
 
 export const ChipLabel = styled.div`
 	display: inline-flex;
 	flex-direction: row;
-`;
-
-export const RuleChip = styled(Chip).attrs(({
-	theme: { palette },
-	$selected,
-}: { theme: any, $selected: boolean }) => ({
-	color: $selected ? palette.tertiary.main : palette.secondary.main,
-	variant: 'filled',
-}))<{ $selected: boolean }>`
-	.MuiChip-label {
-		text-transform: initial;
-		font-weight: initial;
-	}
-
-	.MuiChip-deleteIcon {
-		margin: 0 -4px 0 0;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-
-		&:hover {
-			color: currentColor;
-		}
-
-		svg {
-			width: 9px;
-			height: 9px;
-		}
-	}
 `;
