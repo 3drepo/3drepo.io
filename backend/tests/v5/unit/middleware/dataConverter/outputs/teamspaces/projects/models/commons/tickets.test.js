@@ -27,7 +27,7 @@ const TicketTemplateHelper = require(`${src}/middleware/dataConverter/outputs/co
 
 jest.mock('../../../../../../../../../../src/v5/schemas/tickets/templates');
 const TicketTemplateSchema = require(`${src}/schemas/tickets/templates`);
-const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
+const { propTypes, viewGroups } = require(`${src}/schemas/tickets/templates.constants`);
 
 jest.mock('../../../../../../../../../../src/v5/models/tickets.templates');
 const TemplateModel = require(`${src}/models/tickets.templates`);
@@ -296,9 +296,9 @@ const testSerialiseTicket = () => {
 					[modName]: {
 						[propName]: {
 							state: {
-								colored: times(2, () => ({ group: generateUUID() })),
-								hidden: [],
-								transformed: times(10, () => ({ group: generateUUID() })),
+								[viewGroups.COLORED]: times(2, () => ({ group: generateUUID() })),
+								[viewGroups.HIDDEN]: [],
+								[viewGroups.TRANSFORMED]: times(10, () => ({ group: generateUUID() })),
 							},
 						},
 						[imageProp]: generateUUID(),

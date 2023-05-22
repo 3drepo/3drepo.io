@@ -267,102 +267,111 @@ const testGroups = () => {
 			convertToTestParams('Empty state object', true, { state: {} }),
 			convertToTestParams('Have all groups', true, {
 				state: {
-					hidden: [{ group: generateGroup(false, { hasId: false }) }],
-					colored: [{ group: generateGroup(false, { hasId: false }), color: times(3, () => 0), opacity: 1 }],
-					transformed: [{ group: generateGroup(false, { hasId: false }),
+					[viewGroups.HIDDEN]: [{ group: generateGroup(false, { hasId: false }) }],
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 0),
+						opacity: 1 }],
+					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
 						transformation: times(16, () => 0) }],
 				},
 			}),
 
 			convertToTestParams('Smart groups', true, {
 				state: {
-					hidden: [{ group: generateGroup(true, { hasId: false }) }],
-					colored: [{ group: generateGroup(true, { hasId: false }), color: times(3, () => 0), opacity: 1 }],
-					transformed: [{ group: generateGroup(true, { hasId: false }),
+					[viewGroups.HIDDEN]: [{ group: generateGroup(true, { hasId: false }) }],
+					[viewGroups.COLORED]: [{ group: generateGroup(true, { hasId: false }),
+						color: times(3, () => 0),
+						opacity: 1 }],
+					[viewGroups.TRANSFORMED]: [{ group: generateGroup(true, { hasId: false }),
 						transformation: times(16, () => 0) }],
 				},
 			}),
 			convertToTestParams('Empty group', false, {
 				state: {
-					hidden: [{ group: {} }],
+					[viewGroups.HIDDEN]: [{ group: {} }],
 				},
 			}),
 			convertToTestParams('Have prefix', true, {
 				state: {
-					hidden: [{ group: generateGroup(false, { hasId: false }),
+					[viewGroups.HIDDEN]: [{ group: generateGroup(false, { hasId: false }),
 						prefix: times(2, () => generateRandomString) }],
-					colored: [{ group: generateGroup(false, { hasId: false }),
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
 						color: times(3, () => 0),
 						opacity: 1,
 						prefix: times(2, () => generateRandomString) }],
-					transformed: [{ group: generateGroup(false, { hasId: false }),
+					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
 						transformation: times(16, () => 0),
 						prefix: times(2, () => generateRandomString) }],
 				},
 			}),
 			convertToTestParams('Invalid prefix type', false, {
 				state: {
-					hidden: [{ group: generateGroup(false, { hasId: false }), prefix: generateRandomString() }],
+					[viewGroups.HIDDEN]: [{ group: generateGroup(false, { hasId: false }),
+						prefix: generateRandomString() }],
 				},
 			}),
 			convertToTestParams('Colored groups', true, {
 				state: {
-					colored: [{ group: generateGroup(false, { hasId: false }),
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
 						color: times(3, () => 0),
 						opacity: 1 }],
 				},
 			}),
 			convertToTestParams('Colored groups no color or opacity', false, {
 				state: {
-					colored: [{ group: generateGroup(false, { hasId: false }) }],
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }) }],
 				},
 			}),
 			convertToTestParams('Colored groups - just colours', true, {
 				state: {
-					colored: [{ group: generateGroup(false, { hasId: false }), color: times(3, () => 0) }],
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 0) }],
 				},
 			}),
 			convertToTestParams('Colored groups - not enough elemnts in the color array', false, {
 				state: {
-					colored: [{ group: generateGroup(false, { hasId: false }), color: times(2, () => 0) }],
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
+						color: times(2, () => 0) }],
 				},
 			}),
 			convertToTestParams('Colored groups - value too big', false, {
 				state: {
-					colored: [{ group: generateGroup(false, { hasId: false }), color: times(3, () => 1000) }],
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 1000) }],
 				},
 			}),
 			convertToTestParams('Colored groups - just opacity', true, {
 				state: {
-					colored: [{ group: generateGroup(false, { hasId: false }), opacity: 0.5 }],
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }), opacity: 0.5 }],
 				},
 			}),
 			convertToTestParams('Colored groups - opacity is 0', false, {
 				state: {
 
-					colored: [{ group: generateGroup(false, { hasId: false }), opacity: 0 }],
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }), opacity: 0 }],
 				},
 			}),
 			convertToTestParams('Transformed groups', true, {
 				state: {
-					transformed: [{ group: generateGroup(false, { hasId: false }),
+					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
 						transformation: times(16, () => 1) }],
 				},
 			}),
 			convertToTestParams('Transformed groups - no matrix', false, {
 				state: {
 
-					transformed: [{ group: generateGroup(false, { hasId: false }) }],
+					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }) }],
 				},
 			}),
 			convertToTestParams('Transformed groups - wrong type', false, {
 				state: {
-					transformed: [{ group: generateGroup(false, { hasId: false }), transformation: false }],
+					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
+						transformation: false }],
 				},
 			}),
 			convertToTestParams('Transformed groups - wrong array size', false, {
 				state: {
-					transformed: [{ group: generateGroup(false, { hasId: false }),
+					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
 						transformation: times(15, () => 1) }],
 				},
 			}),
@@ -372,7 +381,7 @@ const testGroups = () => {
 		const updateOnlyTestCase = (isUpdate) => [
 			convertToTestParams('Use group id instead of data', isUpdate, {
 				state: {
-					transformed: [{ group: generateUUIDString(),
+					[viewGroups.TRANSFORMED]: [{ group: generateUUIDString(),
 						transformation: times(16, () => 1) }],
 				},
 			}),
@@ -403,7 +412,7 @@ const testValidateTicket = () => {
 				camera: { position: [1, 1, 1], forward: [1, 1, 1], up: [1, 1, 1] },
 				clippingPlanes: [{ normal: [1, 1, 1], clipDirection: -1, distance: 100 }],
 				state: {
-					hidden: [
+					[viewGroups.HIDDEN]: [
 						{
 							group: generateGroup(false, { hasId: false }),
 							prefix: [generateRandomString()],
