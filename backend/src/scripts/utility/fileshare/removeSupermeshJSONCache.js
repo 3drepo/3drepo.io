@@ -18,12 +18,11 @@
 const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
-const { getCollectionsEndsWith, parsePath } = require('../../utils');
+const { getCollectionsEndsWith } = require('../../utils');
 
 const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
 
 const Path = require('path');
-const FS = require('fs');
 
 const run = async (teamspaces) => {
 	logger.logInfo(`Removing supermesh caches from ${teamspaces.split(',').length} teamspaces`);
