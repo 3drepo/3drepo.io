@@ -50,5 +50,5 @@ export const ChipRule = ({ value: rule, onChange, onDelete }: ChipRuleProps) => 
 		>
 			<GroupRulesForm rule={rule} onSave={onChange} />
 		</RuleActionMenu>
-	)
+	);
 };
