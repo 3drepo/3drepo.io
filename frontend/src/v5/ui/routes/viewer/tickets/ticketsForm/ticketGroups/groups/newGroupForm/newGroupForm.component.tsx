@@ -36,17 +36,18 @@ export const NewGroupForm = () => {
 	});
 
 	const onSubmit = (body) => {
+		// eslint-disable-next-line
 		console.log(body);
 	};
 
 	return (
 		<Form onSubmit={formData.handleSubmit(onSubmit)}>
 			<FormProvider {...formData}>
-				<Typography variant='h3'>
+				<Typography variant="h3">
 					<FormattedMessage id="tickets.groups.newGroupForm.addNewGroup" defaultMessage="Add new group" />
 				</Typography>
 				<SectionTitle>
-					<Typography variant='h5'>
+					<Typography variant="h5">
 						<FormattedMessage id="tickets.groups.newGroupForm.filters" defaultMessage="Filters" />
 					</Typography>
 					<NewRuleActionMenu

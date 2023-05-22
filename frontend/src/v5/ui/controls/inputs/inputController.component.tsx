@@ -36,9 +36,9 @@ export type InputControllerProps<T> = T & FormInputProps & {
 	onBlur?: () => void,
 };
 
-// eslint-disable-next-line comma-dangle
+// eslint-disable-next-line @typescript-eslint/comma-dangle
 type InputControllerType = <T,>(Component: InputControllerProps<T>, ref) => any;
-// eslint-disable-next-line comma-dangle
+// eslint-disable-next-line @typescript-eslint/comma-dangle
 export const InputController: InputControllerType = forwardRef(<T,>({
 	Input,
 	name,
