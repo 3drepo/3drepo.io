@@ -46,7 +46,7 @@ export const OPERATION_DISPLAY_NAMES = {
 	EQUALS: formatMessage({ id: 'filter.operation.equals', defaultMessage: 'equals' }),
 	NOT_EQUALS: formatMessage({ id: 'filter.operation.doesNotEqual', defaultMessage: 'does not equal' }),
 	GT: formatMessage({ id: 'filter.operation.greaterThan', defaultMessage: 'greater than' }),
-	GTE: formatMessage({ id: 'filter.operation.greaterOrTqualTo', defaultMessage: 'greater or equal to' }),
+	GTE: formatMessage({ id: 'filter.operation.greaterOrEqualTo', defaultMessage: 'greater or equal to' }),
 	LT: formatMessage({ id: 'filter.operation.lessThan', defaultMessage: 'less than' }),
 	LTE: formatMessage({ id: 'filter.operation.lessOrEqualTo', defaultMessage: 'less or equal to' }),
 	IN_RANGE: formatMessage({ id: 'filter.operation.inRange', defaultMessage: 'in range' }),
