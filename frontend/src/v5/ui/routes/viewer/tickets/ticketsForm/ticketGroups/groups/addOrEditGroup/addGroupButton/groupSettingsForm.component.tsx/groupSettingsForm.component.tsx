@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormColorPicker, FormTextField, FormToggle } from '@controls/inputs/formInputs.component';
-import { useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 import { SubmitButton } from '@controls/submitButton';
@@ -26,7 +26,12 @@ import { Button } from '@controls/button';
 import { Buttons, LabelAndColor, FormBox, Heading, Instruction, CreateCollectionLink, Subheading } from './groupSettingsForm.styles';
 
 type IFormInput = {
-	title: string;
+	name: string;
+	color: any;
+	description: string;
+	collection: any;
+	type: boolean; // ???
+	filters: any;
 };
 
 type IGroupSettingsForm = {
@@ -46,11 +51,11 @@ export const GroupSettingsForm = ({ defaultValues }: IGroupSettingsForm) => {
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const isNewGroup = !!get(defaultValues, '_id');
 
-	const onSubmit = (args) => {
+	const onSubmit: SubmitHandler<IFormInput> = (args) => {
 		console.log({ args });
 	};
 	return (
-		<form onSubmit={handleSubmit(onSubmit)}>
+		<form>
 			<Heading>
 				{isNewGroup ? (
 					<FormattedMessage
@@ -97,7 +102,7 @@ export const GroupSettingsForm = ({ defaultValues }: IGroupSettingsForm) => {
 						id: 'ticketsGroupSettings.form.desc',
 						defaultMessage: 'Description',
 					})}
-					formError={errors.desc}
+					formError={errors.description}
 					disabled={!isAdmin}
 				/>
 				<FormTextField
@@ -155,9 +160,8 @@ export const GroupSettingsForm = ({ defaultValues }: IGroupSettingsForm) => {
 					<FormattedMessage id="tickets.groups.settings.cancel" defaultMessage="Cancel" />
 				</Button>
 				<SubmitButton
-					variant="contained"
-					color="primary"
 					fullWidth={false}
+					onClick={handleSubmit(onSubmit)}
 					disabled={!isValid || !isDirty}
 				>
 					{isNewGroup ? (
