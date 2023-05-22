@@ -24,7 +24,9 @@ const {
 	presetModules,
 	propTypes,
 	riskLevels,
-	riskLevelsToNum } = require('./templates.constants');
+	riskLevelsToNum,
+	viewGroups,
+} = require('./templates.constants');
 const { deleteIfUndefined, isEqual } = require('../../utils/helper/objects');
 const { getAllUsersInTeamspace, getRiskCategories } = require('../../models/teamspaceSettings');
 const { isDate, isObject, isUUIDString } = require('../../utils/helper/typeCheck');
@@ -236,9 +238,9 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 				res[name] = Yup.object({
 					screenshot: uuidString,
 					state: Yup.object({
-						colored: groupCast,
-						hidden: groupCast,
-						transformed: groupCast,
+						[viewGroups.COLORED]: groupCast,
+						[viewGroups.HIDDEN]: groupCast,
+						[viewGroups.TRANSFORMED]: groupCast,
 					}).default(undefined),
 				}).nullable().default(undefined);
 			} else if (type === propTypes.IMAGE) {
@@ -280,9 +282,9 @@ const genToUUIDSchema = ({ properties, modules }) => {
 			if (type === propTypes.VIEW) {
 				res[name] = Yup.object({
 					state: Yup.object({
-						colored: groupStateArrays,
-						hidden: groupStateArrays,
-						transformed: groupStateArrays,
+						[viewGroups.COLORED]: groupStateArrays,
+						[viewGroups.HIDDEN]: groupStateArrays,
+						[viewGroups.TRANSFORMED]: groupStateArrays,
 					}).default(undefined).nullable(),
 				}).nullable().default(undefined);
 			}

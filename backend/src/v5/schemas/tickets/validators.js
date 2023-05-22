@@ -16,9 +16,9 @@
  */
 
 const { utils: { stripWhen }, types } = require('../../utils/helper/yup');
+const { propTypes, viewGroups } = require('./templates.constants');
 const Yup = require('yup');
 const { schema: groupSchema } = require('./tickets.groups');
-const { propTypes } = require('./templates.constants');
 
 const Validators = {};
 
@@ -41,12 +41,12 @@ const generateViewValidator = (isUpdate, isNullable) => {
 	};
 	const state = imposeNullableRule(Yup.object({
 		showHidden: Yup.boolean().default(false),
-		colored: generateGroupArraySchema({
+		[viewGroups.COLORED]: generateGroupArraySchema({
 			color: types.color3Arr,
 			opacity: Yup.number().max(1).test('opacity value', 'Opacity value must be bigger than 0', (val) => val === undefined || val > 0),
 		}, (sch) => sch.test('color and opacity', 'Must define a colour or opacity override', ({ color, opacity }) => color || opacity)),
-		hidden: generateGroupArraySchema(),
-		transformed: generateGroupArraySchema({
+		[viewGroups.HIDDEN]: generateGroupArraySchema(),
+		[viewGroups.TRANSFORMED]: generateGroupArraySchema({
 			transformation: Yup.array().of(Yup.number()).length(16).required(),
 		}),
 	}).default(undefined));

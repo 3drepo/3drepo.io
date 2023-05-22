@@ -18,7 +18,13 @@
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, deleteGroups, getGroupsByIds } = require('../../../../../models/tickets.groups');
 const { addTicket, getAllTickets, getTicketById, updateTicket } = require('../../../../../models/tickets');
-const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = require('../../../../../schemas/tickets/templates.constants');
+const {
+	basePropertyLabels,
+	modulePropertyLabels,
+	presetModules,
+	propTypes,
+	viewGroups,
+} = require('../../../../../schemas/tickets/templates.constants');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getFileWithMetaAsStream, removeFile, storeFile } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
@@ -105,7 +111,9 @@ const processSpecialProperties = (template, oldTicket, updatedTicket) => {
 			} else if (type === propTypes.VIEW) {
 				// Make constants out of these
 				processImageUpdate('screenshot');
-				processGroupsUpdate(oldProperties[name], updatedProperties[name], ['state.colored', 'state.hidden', 'state.transformed'], res.groups);
+				processGroupsUpdate(oldProperties[name], updatedProperties[name],
+					Object.values(viewGroups).map((groupName) => `state.${groupName}`),
+					res.groups);
 			}
 		});
 	};

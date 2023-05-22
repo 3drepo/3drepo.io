@@ -21,7 +21,7 @@ const { generateUUID, generateRandomString, generateTemplate, generateTicket, ge
 
 const Tickets = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
 
-const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes } = require(`${src}/schemas/tickets/templates.constants`);
+const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes, viewGroups } = require(`${src}/schemas/tickets/templates.constants`);
 
 const { isUUID } = require(`${src}/utils/helper/typeCheck`);
 
@@ -237,11 +237,11 @@ const generateGroupsTestData = (useGroupsUUID = false) => {
 
 	const generateStatesData = () => (
 		{ state: {
-			colored: times(3, () => ({ group: useGroupsUUID ? generateUUID()
+			[viewGroups.COLORED]: times(3, () => ({ group: useGroupsUUID ? generateUUID()
 				: generateGroup(true, { hasId: false }) })),
-			hidden: times(3, () => ({ group: useGroupsUUID ? generateUUID()
+			[viewGroups.HIDDEN]: times(3, () => ({ group: useGroupsUUID ? generateUUID()
 				: generateGroup(false, { hasId: false }) })),
-			transformed: times(3, () => ({ group: useGroupsUUID ? generateUUID()
+			[viewGroups.TRANSFORMED]: times(3, () => ({ group: useGroupsUUID ? generateUUID()
 				: generateGroup(false, { hasId: false }) })),
 		} }
 	);
