@@ -37,21 +37,15 @@ export const ActionMenu = ({
 }: ActionMenuProps) => {
 	const [anchorEl, setAnchorEl] = useState(null);
 
-	const stopClickPropagation = (e) => {
-		e.stopPropagation();
-		e.preventDefault();
-	};
-
 	const handleOpen = (e) => {
 		setAnchorEl(e.currentTarget.children[0]);
 		onOpen?.();
-		stopClickPropagation(e);
+		e.stopPropagation();
 	};
 
-	const handleClose = (e) => {
+	const handleClose = () => {
 		setAnchorEl(null);
 		onClose?.();
-		stopClickPropagation(e);
 	};
 
 	useEffect(() => {
@@ -64,7 +58,8 @@ export const ActionMenu = ({
 
 	const handlePopoverClick = (e: Event) => {
 		PopoverProps?.onClick?.(e);
-		handleClose(e);
+		handleClose();
+		e.stopPropagation();
 	};
 
 	return (
@@ -87,7 +82,7 @@ export const ActionMenu = ({
 				{...PopoverProps}
 				onClick={handlePopoverClick}
 			>
-				<Menu onClick={stopClickPropagation}>
+				<Menu onClick={(e) => e.stopPropagation()}>
 					{children}
 				</Menu>
 			</Popover>
