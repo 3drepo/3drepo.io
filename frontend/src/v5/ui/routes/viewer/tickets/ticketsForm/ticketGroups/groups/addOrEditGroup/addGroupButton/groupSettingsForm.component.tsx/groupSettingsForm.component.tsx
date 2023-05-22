@@ -17,13 +17,13 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { FormTextField, FormToggle } from '@controls/inputs/formInputs.component';
+import { FormColorPicker, FormTextField, FormToggle } from '@controls/inputs/formInputs.component';
 import { useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 import { SubmitButton } from '@controls/submitButton';
 import { Button } from '@controls/button';
-import { Buttons, FormBox, Heading, Instruction, CreateCollectionLink, Subheading } from './groupSettingsForm.styles';
+import { Buttons, LabelAndColor, FormBox, Heading, Instruction, CreateCollectionLink, Subheading } from './groupSettingsForm.styles';
 
 type IFormInput = {
 	title: string;
@@ -71,17 +71,25 @@ export const GroupSettingsForm = ({ defaultValues }: IGroupSettingsForm) => {
 				/>
 			</Subheading>
 			<FormBox>
-				<FormTextField
-					control={control}
-					name="title"
-					label={formatMessage({
-						id: 'ticketsGroupSettings.form.label',
-						defaultMessage: 'Label',
-					})}
-					required
-					formError={errors.label}
-					disabled={!isAdmin}
-				/>
+				<LabelAndColor>
+					<FormTextField
+						control={control}
+						name="title"
+						label={formatMessage({
+							id: 'ticketsGroupSettings.form.label',
+							defaultMessage: 'Label',
+						})}
+						required
+						formError={errors.name}
+						disabled={!isAdmin}
+					/>
+					<FormColorPicker
+						control={control}
+						name="color"
+						formError={errors.color}
+						disabled={!isAdmin}
+					/>
+				</LabelAndColor>
 				<FormTextField
 					control={control}
 					name="desc"

@@ -30,7 +30,7 @@ const ColorPickerPreview = ({ color, selected }) => (
 	</Container>
 );
 
-type ColorPickerProps = { value?: RgbGroupColor, defaultValue: RgbGroupColor, onChange?: (newVal: RgbGroupColor) => void };
+type ColorPickerProps = { value?: RgbGroupColor, defaultValue?: RgbGroupColor, onChange?: (newVal: RgbGroupColor) => void };
 export const ColorPicker = ({ value: inputValue, defaultValue, onChange }: ColorPickerProps) => {
 	const [value, setValue] = useState<HexGroupColor>(rgbGroupColorToHex(inputValue || defaultValue || { color: UNSET_RGB_COLOR }));
 	const [selected, setSelected] = useState(false);

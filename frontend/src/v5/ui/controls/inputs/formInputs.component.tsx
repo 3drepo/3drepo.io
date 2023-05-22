@@ -31,6 +31,7 @@ import { TextArea } from './textArea/textArea.component';
 import { TextAreaFixedSize } from './textArea/textAreaFixedSize.component';
 import { TextField } from './textField/textField.component';
 import { Toggle } from './toggle/toggle.component';
+import { ColorPicker } from './colorPicker/colorPicker.component';
 
 // @ts-ignore
 type FormType<T> = Omit<InputControllerProps<ComponentProps<T>>, 'Input'>;
@@ -52,6 +53,7 @@ export const FormMultiSelect = (props: FormType<typeof MultiSelect>) => (<InputC
 export const FormSelectView = (props: FormType<typeof SelectView>) => (<InputController Input={SelectView} {...props} />);
 export const FormSelect = (props: FormType<typeof Select>) => (<InputController Input={Select} {...props} />);
 export const FormChipSelect = (props: FormType<typeof ChipSelect>) => (<InputController Input={ChipSelect} {...props} />);
+export const FormColorPicker = (props: FormType<typeof ColorPicker>) => (<InputController Input={ColorPicker} {...props} />);
 
 // control inputs
 export const FormCheckbox = (props: FormType<typeof Checkbox>) => (<InputController Input={Checkbox} {...props} />);

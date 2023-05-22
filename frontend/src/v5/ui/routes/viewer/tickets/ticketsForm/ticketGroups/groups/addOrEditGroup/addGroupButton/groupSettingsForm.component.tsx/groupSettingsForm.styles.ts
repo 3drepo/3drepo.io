@@ -23,6 +23,14 @@ export const FormBox = styled(Box)`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	border-radius: 8px;
 	padding: 10px 15px;
+	margin-bottom: 5px;
+`;
+
+export const LabelAndColor = styled.div`
+	width: 100%;
+    display: inline-flex;
+    gap: 10px;
+    align-items: end;
 `;
 
 export const Heading = styled.div`
