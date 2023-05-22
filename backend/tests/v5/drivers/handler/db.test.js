@@ -385,6 +385,11 @@ const testFind = () => {
 				.resolves.toEqual(data.slice(0, 2));
 		});
 
+		test('Should return matching documents skipping defined amount', async () => {
+			await expect(DB.find(dbName, col, { }, { }, { n: 1 }, 1, 1));
+				.resolves.toEqual(data.slice(1, 2));
+		});
+
 		test('Should return empty array if no document is found', async () => {
 			await expect(DB.find(dbName, col, { [generateRandomString()]: generateRandomString() }))
 				.resolves.toEqual([]);
