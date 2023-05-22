@@ -20,6 +20,8 @@ import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButto
 import { ButtonWrapper } from '@/v4/routes/viewerGui/components/panelButton/panelButton.styles';
 import { LeftPanels, LeftPanelsButtons, RightPanels } from '@/v4/routes/viewerGui/viewerGui.styles';
 import { InputContainer } from '@/v4/routes/components/filterPanel/filterPanel.styles';
+import { Wrapper as ChildMenu } from '@/v4/routes/components/filterPanel/components/childMenu/childMenu.styles';
+import { Wrapper as FoldableMenu } from '@/v4/routes/components/foldableMenu/foldableMenu.style';
 
 // all the buttons on the left hand side of the viewer
 export default css`
@@ -77,5 +79,9 @@ export default css`
 		${InputContainer} .react-autosuggest__container input {
 			height: 50px;
 		}
+	}
+	
+	${ChildMenu}, ${FoldableMenu} {
+		border-radius: 8px;
 	}
 `;

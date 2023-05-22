@@ -27,6 +27,10 @@ export default {
 		disabled: {
 			type: 'boolean',
 		},
+		variant: {
+			options: ['filled', 'outlined'],
+			control: { type: 'select' },
+		},
 	},
 	component: ShareTextField,
 	parameters: { controls: { exclude: ['className'] } },

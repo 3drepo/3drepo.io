@@ -34,7 +34,6 @@ import { FederationListItem } from '@/v5/ui/routes/dashboard/projects/federation
 import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { Button } from '@controls/button';
-import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { formatMessage } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
@@ -48,7 +47,6 @@ type IFederationsList = {
 		collapsed: ReactNode;
 		visible: ReactNode;
 	},
-	showBottomButton?: boolean;
 	onClickCreate: () => void;
 };
 
@@ -57,7 +55,6 @@ export const FederationsList = ({
 	title,
 	titleTooltips,
 	onClickCreate,
-	showBottomButton = false,
 }: IFederationsList): JSX.Element => {
 	// eslint-disable-next-line max-len
 	const { items: federations, filteredItems: filteredFederations } = useContext<SearchContextType<IFederation>>(SearchContext);
@@ -132,14 +129,6 @@ export const FederationsList = ({
 						</DashboardListEmptyContainer>
 					)}
 				</DashboardList>
-				{showBottomButton && !isListPending && hasFederations && isProjectAdmin && (
-					<DashboardListButton
-						startIcon={<AddCircleIcon />}
-						onClick={onClickCreate}
-					>
-						<FormattedMessage id="federations.addFederationButton" defaultMessage="Add new Federation" />
-					</DashboardListButton>
-				)}
 			</DashboardListCollapse>
 		</Container>
 	);

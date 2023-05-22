@@ -257,13 +257,18 @@ export class Compare extends PureComponent<IProps, any> {
 	private handleAllItemsSelect = (event, selected) => {
 		const { selectedItemsMap, setComponentState, compareModels, componentState } = this.props;
 		const changedMap = this.isDiffTabActive ? 'selectedDiffModelsMap' : 'selectedClashModelsMap';
+		const targetChangedMap = this.isDiffTabActive ? 'targetDiffModels' : 'targetClashModels';
 
 		const newComponentState = {
 			...componentState,
-			[changedMap]: { ...selectedItemsMap }
+			[changedMap]: { ...selectedItemsMap },
+			[targetChangedMap]: {...componentState[targetChangedMap]}
 		};
 
-		compareModels.forEach(({ _id }) => newComponentState[changedMap][_id] = selected);
+		compareModels.forEach(({ _id }) => {
+			newComponentState[changedMap][_id] = selected;
+			newComponentState[targetChangedMap][_id] = selected;
+		});
 
 		setComponentState(newComponentState);
 	}

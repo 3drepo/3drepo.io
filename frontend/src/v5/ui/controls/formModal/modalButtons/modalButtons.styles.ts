@@ -28,11 +28,9 @@ export const FormModalActions = styled(DialogActions)`
 export const CancelButton = styled(Button).attrs({
 	variant: 'outlined',
 	color: 'secondary',
-	size: 'medium',
 })``;
 
 export const SubmitButton = styled(SubmitButtonBase).attrs({
-	size: 'medium',
 	fullWidth: false,
 })`
 	margin: 8px;

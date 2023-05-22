@@ -91,7 +91,7 @@ const trelloBoardStyles = css`
 		}
 
 		${BoardItem} {
-			border-radius: 5px;
+			border-radius: 8px;
 			border-color: ${({ theme }) => theme.palette.base.lightest};
 
 			${ThumbnailPlaceholder} {
@@ -175,10 +175,10 @@ const boardContainerStyles = css`
 		margin-left: 0;
 		height: 35px;
 		width: fit-content;
-		border-radius: 6px;
+		border-radius: 8px;
 		font-size: 0.75rem;
 		font-weight: 600;
-		padding: 10px 15px 10px 8px;
+		padding: 8px 16px;
 		border: none;
 
 		svg {
