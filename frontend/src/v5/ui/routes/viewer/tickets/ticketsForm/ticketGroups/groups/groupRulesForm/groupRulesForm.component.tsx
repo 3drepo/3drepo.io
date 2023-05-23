@@ -52,15 +52,18 @@ export const GroupRulesForm = ({ onSave, rule }: IGroupRules) => {
 		resolver: yupResolver(GroupRulesSchema),
 	});
 
-	const {
-		handleSubmit,
-		formState: { isValid, isDirty },
-	} = formData;
+	const { formState: { isValid, isDirty } } = formData;
 
-	const onSubmit = (body: IRuleForm) => onSave(parseRule(body));
+	const handleSave = (body: IRuleForm) => onSave(parseRule(body));
+
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		formData.handleSubmit(handleSave)(e);
+	};
 
 	return (
-		<Form onSubmit={handleSubmit(onSubmit)}>
+		<Form onSubmit={handleSubmit}>
 			<FormProvider {...formData}>
 				<InputsContainer>
 					<Controller
