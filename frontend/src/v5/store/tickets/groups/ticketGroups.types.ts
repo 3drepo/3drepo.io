@@ -40,15 +40,21 @@ interface BaseGroup {
 	group: IGroupFromApi,
 }
 
-export interface IColoredGroup extends BaseGroup {
+interface ColorAndOpacity {
 	// at least 1 of the following is required, but not necessarily both
 	color?: [number, number, number],
 	opacity?: number,
 }
 
+export interface IColoredGroup extends BaseGroup, ColorAndOpacity { }
+
 export interface IHiddenGroup extends BaseGroup { }
 
 export type IGroup = IColoredGroup | IHiddenGroup;
+
+export type IGroupSettingsForm = Partial<IGroupFromApi> & ColorAndOpacity & {
+	prefix?: string[],
+};
 
 export interface IViewState {
 	showDefaultHidden: boolean,

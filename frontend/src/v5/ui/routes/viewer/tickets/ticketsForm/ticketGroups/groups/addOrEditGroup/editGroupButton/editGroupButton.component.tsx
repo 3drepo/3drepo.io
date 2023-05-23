@@ -15,24 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
-import { FormattedMessage } from 'react-intl';
-import { ButtonProps } from '@mui/material';
-import { NewGroupButton } from './addGroupButton.styles';
-import { GroupSettingsForm } from '../groupSettingsForm.component.tsx/groupSettingsForm.component';
+import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
+import { IGroupSettingsForm } from '@/v5/store/tickets/groups/ticketGroups.types';
+import { PrimaryTicketButton } from '../../../../../ticketButton/ticketButton.styles';
 import { TicketsGroupActionMenu } from '../groupSettings.styles';
+import { GroupSettingsForm } from '../groupSettingsForm.component.tsx/groupSettingsForm.component';
 
-export const AddGroupButton = (props: ButtonProps) => (
+export const EditGroupButton = ({ defaultValues }: { defaultValues: IGroupSettingsForm }) => (
 	<TicketsGroupActionMenu
 		TriggerButton={(
-			<NewGroupButton startIcon={<AddCircleIcon />} {...props}>
-				<FormattedMessage
-					id="ticketCard.groups.addGroup"
-					defaultMessage="Add group"
-				/>
-			</NewGroupButton>
+			<PrimaryTicketButton>
+				<EditIcon />
+			</PrimaryTicketButton>
 		)}
 	>
-		<GroupSettingsForm />
+		<GroupSettingsForm defaultValues={defaultValues} />
 	</TicketsGroupActionMenu>
 );

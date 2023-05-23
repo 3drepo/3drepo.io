@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import ShowIcon from '@assets/icons/outlined/eye-outlined.svg';
 import HideIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
@@ -37,6 +36,7 @@ import {
 } from './groupItem.styles';
 import { GroupToggle } from '../../groupToggle/groupToggle.component';
 import { TicketGroupsContext } from '../../ticketGroupsContext';
+import { EditGroupButton } from '../addOrEditGroup/editGroupButton/editGroupButton.component';
 
 type GroupProps = { group: IGroupFromApi, color?: [number, number, number], opacity?: number };
 export const GroupItem = ({ group, color, opacity }: GroupProps) => {
@@ -58,8 +58,6 @@ export const GroupItem = ({ group, color, opacity }: GroupProps) => {
 	const toggleShowGroup = () => {
 		setGroupIsVisible(!groupIsVisible);
 	};
-
-	const editGroup = () => {};
 
 	const alphaColor = (color || [255, 255, 255]).concat(opacity);
 	const alphaHexColor = rgbaToHex(alphaColor.join());
@@ -87,9 +85,7 @@ export const GroupItem = ({ group, color, opacity }: GroupProps) => {
 						<PrimaryTicketButton onClick={toggleShowGroup}>
 							{groupIsVisible ? (<ShowIcon />) : (<HideIcon />)}
 						</PrimaryTicketButton>
-						<PrimaryTicketButton onClick={editGroup}>
-							<EditIcon />
-						</PrimaryTicketButton>
+						<EditGroupButton defaultValues={{ color, opacity, ...group }} />
 					</Buttons>
 				)}
 			</Headline>

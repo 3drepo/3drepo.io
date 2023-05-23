@@ -20,38 +20,25 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormColorPicker, FormTextField, FormToggle } from '@controls/inputs/formInputs.component';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
-import { get } from 'lodash';
 import { SubmitButton } from '@controls/submitButton';
 import { Button } from '@controls/button';
+import { IGroupSettingsForm } from '@/v5/store/tickets/groups/ticketGroups.types';
 import { Buttons, LabelAndColor, FormBox, Heading, Instruction, CreateCollectionLink, Subheading } from './groupSettingsForm.styles';
 
-type IFormInput = {
-	name: string;
-	color: any;
-	description: string;
-	collection: any;
-	type: boolean; // ???
-	filters: any;
-};
-
-type IGroupSettingsForm = {
-	defaultValues?: any;
-};
-
-export const GroupSettingsForm = ({ defaultValues }: IGroupSettingsForm) => {
+export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSettingsForm }) => {
 	const {
 		control,
 		handleSubmit,
 		formState: { errors, isValid, isDirty },
-	} = useForm<IFormInput>({
+	} = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
 		// resolver: yupResolver(CreateContainerSchema), TODO Create Resolver
 		defaultValues,
 	});
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const isNewGroup = !!get(defaultValues, '_id');
+	const isNewGroup = !defaultValues?._id;
 
-	const onSubmit: SubmitHandler<IFormInput> = (args) => {
+	const onSubmit: SubmitHandler<IGroupSettingsForm> = (args) => {
 		console.log({ args });
 	};
 	return (
@@ -79,40 +66,40 @@ export const GroupSettingsForm = ({ defaultValues }: IGroupSettingsForm) => {
 				<LabelAndColor>
 					<FormTextField
 						control={control}
-						name="title"
+						name="name"
 						label={formatMessage({
 							id: 'ticketsGroupSettings.form.label',
 							defaultMessage: 'Label',
 						})}
 						required
-						formError={errors.name}
+						formError={errors?.name}
 						disabled={!isAdmin}
 					/>
 					<FormColorPicker
 						control={control}
 						name="color"
-						formError={errors.color}
+						formError={errors?.color}
 						disabled={!isAdmin}
 					/>
 				</LabelAndColor>
 				<FormTextField
 					control={control}
-					name="desc"
+					name="description"
 					label={formatMessage({
-						id: 'ticketsGroupSettings.form.desc',
+						id: 'ticketsGroupSettings.form.description',
 						defaultMessage: 'Description',
 					})}
-					formError={errors.description}
+					formError={errors?.description}
 					disabled={!isAdmin}
 				/>
 				<FormTextField
 					control={control}
-					name="collection"
+					name="prefix"
 					label={formatMessage({
 						id: 'ticketsGroupSettings.form.collection',
 						defaultMessage: 'Add group to collection',
 					})}
-					formError={errors.collection}
+					formError={errors?.prefix}
 					disabled={!isAdmin}
 				/>
 				<CreateCollectionLink>
@@ -136,7 +123,7 @@ export const GroupSettingsForm = ({ defaultValues }: IGroupSettingsForm) => {
 						id: 'ticketsGroupSettings.form.type',
 						defaultMessage: 'Manual Group',
 					})}
-					formError={errors.type}
+					formError={errors?.type}
 					disabled={!isAdmin}
 				/>
 				<Instruction>
