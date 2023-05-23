@@ -27,12 +27,14 @@ import { useContext, useState } from 'react';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
+import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { Buttons, LabelAndColor, FormBox, Heading, Instruction, CreateCollectionLink, Subheading, ToggleLabel, ToggleWrapper, Toggle, FormRow } from './groupSettingsForm.styles';
 import { TicketGroupsContext } from '../../../ticketGroupsContext';
 
 export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSettingsForm }) => {
 	const [isSmart, setIsSmart] = useState(!!defaultValues?.rules?.length);
 	const isHidden = useContext(TicketGroupsContext).groupType === 'hidden';
+	const { close } = useContext(ActionMenuContext);
 	const {
 		control,
 		handleSubmit,
@@ -176,7 +178,7 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSett
 				)
 			}
 			<Buttons>
-				<Button variant="text" color="secondary">
+				<Button variant="text" color="secondary" onClick={close}>
 					<FormattedMessage id="tickets.groups.settings.cancel" defaultMessage="Cancel" />
 				</Button>
 				<SubmitButton
