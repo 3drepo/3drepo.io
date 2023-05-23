@@ -24,11 +24,10 @@ import { SubmitButton } from '@controls/submitButton';
 import { Button } from '@controls/button';
 import { IGroupSettingsForm } from '@/v5/store/tickets/groups/ticketGroups.types';
 import { useContext, useState } from 'react';
-import { Toggle } from '@controls/inputs/toggle/toggle.component';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
-import { Buttons, LabelAndColor, FormBox, Heading, Instruction, CreateCollectionLink, Subheading } from './groupSettingsForm.styles';
+import { Buttons, LabelAndColor, FormBox, Heading, Instruction, CreateCollectionLink, Subheading, ToggleLabel, ToggleWrapper, Toggle, FormRow } from './groupSettingsForm.styles';
 import { TicketGroupsContext } from '../../../ticketGroupsContext';
 
 export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSettingsForm }) => {
@@ -47,6 +46,7 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSett
 	const isNewGroup = !defaultValues?._id;
 
 	const onSubmit: SubmitHandler<IGroupSettingsForm> = (args) => {
+		// eslint-disable-next-line no-console
 		console.log({ args, isHidden });
 	};
 	return (
@@ -90,26 +90,31 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSett
 						disabled={!isAdmin}
 					/>
 				</LabelAndColor>
-				<FormTextField
-					control={control}
-					name="description"
-					label={formatMessage({
-						id: 'ticketsGroupSettings.form.description',
-						defaultMessage: 'Description',
-					})}
-					formError={errors?.description}
-					disabled={!isAdmin}
-				/>
-				<FormTextField
-					control={control}
-					name="prefix"
-					label={formatMessage({
-						id: 'ticketsGroupSettings.form.collection',
-						defaultMessage: 'Add group to collection',
-					})}
-					formError={errors?.prefix}
-					disabled={!isAdmin}
-				/>
+				<FormRow>
+					<FormTextField
+						control={control}
+						name="description"
+						label={formatMessage({
+							id: 'ticketsGroupSettings.form.description',
+							defaultMessage: 'Description',
+						})}
+						formError={errors?.description}
+						disabled={!isAdmin}
+					/>
+				</FormRow>
+				<FormRow>
+					<FormTextField
+						control={control}
+						name="prefix"
+						label={formatMessage({
+							id: 'ticketsGroupSettings.form.collection',
+							defaultMessage: 'Add group to collection',
+						})}
+						formError={errors?.prefix}
+						disabled={!isAdmin}
+					/>
+
+				</FormRow>
 				<CreateCollectionLink>
 					<FormattedMessage
 						id="ticketsGroupSettings.link.createCollection"
@@ -124,15 +129,19 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSett
 				/>
 			</Subheading>
 			<FormBox>
-				<Toggle
-					value={isSmart}
-					label={formatMessage({
-						id: 'ticketsGroupSettings.form.type',
-						defaultMessage: 'Manual Group',
-					})}
-					onClick={() => setIsSmart((prev) => !prev)}
-					disabled={!isAdmin}
-				/>
+				<ToggleWrapper>
+					<ToggleLabel>
+						<FormattedMessage id="ticketsGroupSettings.form.type.manual" defaultMessage="Manual group" />
+					</ToggleLabel>
+					<Toggle
+						value={isSmart}
+						onClick={() => setIsSmart((prev) => !prev)}
+						disabled={!isAdmin}
+					/>
+					<ToggleLabel>
+						<FormattedMessage id="ticketsGroupSettings.form.type.smart" defaultMessage="Smart group" />
+					</ToggleLabel>
+				</ToggleWrapper>
 				<Instruction>
 					<FormattedMessage
 						id="ticketsGroupSettings.smartGroupInstruction"

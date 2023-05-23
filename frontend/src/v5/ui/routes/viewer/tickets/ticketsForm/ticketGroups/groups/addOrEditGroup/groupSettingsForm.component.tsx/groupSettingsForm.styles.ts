@@ -16,19 +16,22 @@
  */
 
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
+import { Toggle as BaseToggle } from '@controls/inputs/toggle/toggle.component';
 import { Box } from '@mui/material';
 import styled from 'styled-components';
 
 export const FormBox = styled(Box)`
-	display: grid;
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	border-radius: 8px;
 	padding: 10px 15px;
 	margin-bottom: 5px;
-	gap: 12px;
 `;
 
-export const LabelAndColor = styled.div`
+export const FormRow = styled.div`
+	margin-bottom: 12px;
+`;
+
+export const LabelAndColor = styled(FormRow)`
 	width: 100%;
     display: inline-flex;
     gap: 10px;
@@ -68,4 +71,17 @@ export const Buttons = styled.div`
 		margin-bottom: 0;
 		margin-top: 5px
 	}
+`;
+
+export const ToggleLabel = styled.div`
+	${({ theme }) => theme.typography.body1};
+	color: ${({ theme }) => theme.palette.secondary.main};
+`;
+
+export const Toggle = styled(BaseToggle)`
+	margin: 0 7px;
+`;
+
+export const ToggleWrapper = styled.div`
+	display: flex;
 `;
