@@ -20,10 +20,12 @@ import { Box } from '@mui/material';
 import styled from 'styled-components';
 
 export const FormBox = styled(Box)`
+	display: grid;
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	border-radius: 8px;
 	padding: 10px 15px;
 	margin-bottom: 5px;
+	gap: 12px;
 `;
 
 export const LabelAndColor = styled.div`
