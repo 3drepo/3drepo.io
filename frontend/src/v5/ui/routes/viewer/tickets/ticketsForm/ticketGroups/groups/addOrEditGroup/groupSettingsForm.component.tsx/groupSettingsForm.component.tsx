@@ -17,15 +17,18 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { FormColorPicker, FormTextField, FormToggle } from '@controls/inputs/formInputs.component';
+import { FormColorPicker, FormTextField } from '@controls/inputs/formInputs.component';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { SubmitButton } from '@controls/submitButton';
 import { Button } from '@controls/button';
 import { IGroupSettingsForm } from '@/v5/store/tickets/groups/ticketGroups.types';
+import { useState } from 'react';
+import { Toggle } from '@controls/inputs/toggle/toggle.component';
 import { Buttons, LabelAndColor, FormBox, Heading, Instruction, CreateCollectionLink, Subheading } from './groupSettingsForm.styles';
 
 export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSettingsForm }) => {
+	const [isSmart, setIsSmart] = useState(!!defaultValues?.rules?.length);
 	const {
 		control,
 		handleSubmit,
@@ -116,14 +119,13 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSett
 				/>
 			</Subheading>
 			<FormBox>
-				<FormToggle
-					control={control}
-					name="type"
+				<Toggle
+					value={isSmart}
 					label={formatMessage({
 						id: 'ticketsGroupSettings.form.type',
 						defaultMessage: 'Manual Group',
 					})}
-					formError={errors?.type}
+					onClick={() => setIsSmart((prev) => !prev)}
 					disabled={!isAdmin}
 				/>
 				<Instruction>
@@ -133,15 +135,21 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSett
 					/>
 				</Instruction>
 			</FormBox>
-			<Subheading>
-				<FormattedMessage
-					id="ticketsGroupSettings.subHeading.filters"
-					defaultMessage="Filters"
-				/>
-			</Subheading>
-			<FormBox>
-				Filters here!
-			</FormBox>
+			{
+				isSmart && (
+					<>
+						<Subheading>
+							<FormattedMessage
+								id="ticketsGroupSettings.subHeading.filters"
+								defaultMessage="Filters"
+							/>
+						</Subheading>
+						<FormBox>
+							Filters here!
+						</FormBox>
+					</>
+				)
+			}
 			<Buttons>
 				<Button variant="text" color="secondary">
 					<FormattedMessage id="tickets.groups.settings.cancel" defaultMessage="Cancel" />

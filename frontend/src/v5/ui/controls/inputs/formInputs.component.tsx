@@ -30,7 +30,6 @@ import { SelectView } from './selectView/selectView.component';
 import { TextArea } from './textArea/textArea.component';
 import { TextAreaFixedSize } from './textArea/textAreaFixedSize.component';
 import { TextField } from './textField/textField.component';
-import { Toggle } from './toggle/toggle.component';
 import { ColorPicker } from './colorPicker/colorPicker.component';
 
 // @ts-ignore
@@ -57,4 +56,3 @@ export const FormColorPicker = (props: FormType<typeof ColorPicker>) => (<InputC
 
 // control inputs
 export const FormCheckbox = (props: FormType<typeof Checkbox>) => (<InputController Input={Checkbox} {...props} />);
-export const FormToggle = (props: FormType<typeof Toggle>) => (<InputController Input={Toggle} {...props} />);
