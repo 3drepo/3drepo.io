@@ -106,21 +106,28 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSett
 					<FormTextField
 						control={control}
 						name="prefix"
-						label={formatMessage({
+						label={isAdmin ? formatMessage({
 							id: 'ticketsGroupSettings.form.collection',
 							defaultMessage: 'Add group to collection',
+						}) : formatMessage({
+							id: 'ticketsGroupSettings.form.collection.disabled',
+							defaultMessage: 'Parent collection',
 						})}
 						formError={errors?.prefix}
 						disabled={!isAdmin}
 					/>
 
 				</FormRow>
-				<CreateCollectionLink>
-					<FormattedMessage
-						id="ticketsGroupSettings.link.createCollection"
-						defaultMessage="Create new collection"
-					/>
-				</CreateCollectionLink>
+				{
+					isAdmin && (
+						<CreateCollectionLink>
+							<FormattedMessage
+								id="ticketsGroupSettings.link.createCollection"
+								defaultMessage="Create new collection"
+							/>
+						</CreateCollectionLink>
+					)
+				}
 			</FormBox>
 			<Subheading>
 				<FormattedMessage
@@ -130,7 +137,7 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSett
 			</Subheading>
 			<FormBox>
 				<ToggleWrapper>
-					<ToggleLabel>
+					<ToggleLabel disabled={!isAdmin} onClick={() => setIsSmart(false)}>
 						<FormattedMessage id="ticketsGroupSettings.form.type.manual" defaultMessage="Manual group" />
 					</ToggleLabel>
 					<Toggle
@@ -138,16 +145,20 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSett
 						onClick={() => setIsSmart((prev) => !prev)}
 						disabled={!isAdmin}
 					/>
-					<ToggleLabel>
+					<ToggleLabel disabled={!isAdmin} onClick={() => setIsSmart(true)}>
 						<FormattedMessage id="ticketsGroupSettings.form.type.smart" defaultMessage="Smart group" />
 					</ToggleLabel>
 				</ToggleWrapper>
-				<Instruction>
-					<FormattedMessage
-						id="ticketsGroupSettings.smartGroupInstruction"
-						defaultMessage="Use filters below to create smart group"
-					/>
-				</Instruction>
+				{
+					isAdmin && (
+						<Instruction>
+							<FormattedMessage
+								id="ticketsGroupSettings.smartGroupInstruction"
+								defaultMessage="Use filters below to create smart group"
+							/>
+						</Instruction>
+					)
+				}
 			</FormBox>
 			{
 				isSmart && (

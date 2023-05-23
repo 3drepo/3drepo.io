@@ -18,13 +18,13 @@
 import styled from 'styled-components';
 import { InputContainer } from '../inputContainer/inputContainer.styles';
 
-export const Container = styled(InputContainer)`
+export const Container = styled(InputContainer)<{ disabled: boolean; }>`
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	width: fit-content;
 	padding: 7px 9px;
-	cursor: pointer;
+	cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
 
 	svg {
 		margin-left: 8px;

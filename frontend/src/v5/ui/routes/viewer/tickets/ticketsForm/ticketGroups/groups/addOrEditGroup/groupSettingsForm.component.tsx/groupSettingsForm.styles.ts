@@ -17,7 +17,7 @@
 
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 import { Toggle as BaseToggle } from '@controls/inputs/toggle/toggle.component';
-import { Box } from '@mui/material';
+import { Box, InputLabel } from '@mui/material';
 import styled from 'styled-components';
 
 export const FormBox = styled(Box)`
@@ -73,13 +73,17 @@ export const Buttons = styled.div`
 	}
 `;
 
-export const ToggleLabel = styled.div`
+export const ToggleLabel = styled(InputLabel)<{ disabled: boolean }>`
 	${({ theme }) => theme.typography.body1};
 	color: ${({ theme }) => theme.palette.secondary.main};
+	position: unset;
+	user-select: none;
+	pointer-events: ${({ disabled }) => (disabled ? 'none' : 'auto')};
 `;
 
 export const Toggle = styled(BaseToggle)`
 	margin: 0 7px;
+	user-select: none;
 `;
 
 export const ToggleWrapper = styled.div`

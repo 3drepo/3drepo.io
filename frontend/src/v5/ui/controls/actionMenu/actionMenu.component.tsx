@@ -26,6 +26,7 @@ type ActionMenuProps = {
 	PopoverProps?: any;
 	onOpen?: (e) => void;
 	onClose?: (e) => void;
+	disabled?: boolean;
 };
 export const ActionMenu = ({
 	className,
@@ -34,6 +35,7 @@ export const ActionMenu = ({
 	PopoverProps,
 	onOpen,
 	onClose,
+	disabled,
 }: ActionMenuProps) => {
 	const [anchorEl, setAnchorEl] = useState(null);
 
@@ -64,7 +66,7 @@ export const ActionMenu = ({
 				{TriggerButton}
 			</Container>
 			<Popover
-				open={Boolean(anchorEl)}
+				open={!disabled && Boolean(anchorEl)}
 				anchorEl={anchorEl}
 				className={className}
 				anchorOrigin={{
