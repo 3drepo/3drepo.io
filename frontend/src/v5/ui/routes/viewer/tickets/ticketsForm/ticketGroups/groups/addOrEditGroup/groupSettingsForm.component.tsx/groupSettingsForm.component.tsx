@@ -25,6 +25,9 @@ import { Button } from '@controls/button';
 import { IGroupSettingsForm } from '@/v5/store/tickets/groups/ticketGroups.types';
 import { useContext, useState } from 'react';
 import { Toggle } from '@controls/inputs/toggle/toggle.component';
+import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { isEmpty } from 'lodash';
 import { Buttons, LabelAndColor, FormBox, Heading, Instruction, CreateCollectionLink, Subheading } from './groupSettingsForm.styles';
 import { TicketGroupsContext } from '../../../ticketGroupsContext';
 
@@ -34,10 +37,10 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSett
 	const {
 		control,
 		handleSubmit,
-		formState: { errors, isValid, isDirty },
+		formState: { errors, isValid, dirtyFields },
 	} = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
-		// resolver: yupResolver(CreateContainerSchema), TODO Create Resolver
+		resolver: yupResolver(GroupSettingsSchema),
 		defaultValues,
 	});
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
@@ -159,7 +162,7 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSett
 				<SubmitButton
 					fullWidth={false}
 					onClick={handleSubmit(onSubmit)}
-					disabled={!isValid || !isDirty}
+					disabled={!isValid || isEmpty(dirtyFields)}
 				>
 					{isNewGroup ? (
 						<FormattedMessage id="tickets.groups.settings.createGroup" defaultMessage="Create group" />
