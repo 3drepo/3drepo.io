@@ -23,12 +23,14 @@ import { FormattedMessage } from 'react-intl';
 import { SubmitButton } from '@controls/submitButton';
 import { Button } from '@controls/button';
 import { IGroupSettingsForm } from '@/v5/store/tickets/groups/ticketGroups.types';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Toggle } from '@controls/inputs/toggle/toggle.component';
 import { Buttons, LabelAndColor, FormBox, Heading, Instruction, CreateCollectionLink, Subheading } from './groupSettingsForm.styles';
+import { TicketGroupsContext } from '../../../ticketGroupsContext';
 
 export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSettingsForm }) => {
 	const [isSmart, setIsSmart] = useState(!!defaultValues?.rules?.length);
+	const isHidden = useContext(TicketGroupsContext).groupType === 'hidden';
 	const {
 		control,
 		handleSubmit,
@@ -42,7 +44,7 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues: IGroupSett
 	const isNewGroup = !defaultValues?._id;
 
 	const onSubmit: SubmitHandler<IGroupSettingsForm> = (args) => {
-		console.log({ args });
+		console.log({ args, isHidden });
 	};
 	return (
 		<form>
