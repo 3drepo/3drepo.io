@@ -42,6 +42,7 @@ export const CollectionAccordion = styled(Accordion)`
 		.MuiAccordionSummary-expandIconWrapper {
 			background-color: ${({ theme }) => theme.palette.secondary.main};
 			color: ${({ theme }) => theme.palette.primary.contrast};
+			border: solid 1px ${({ theme }) => theme.palette.secondary.main};
 			border-radius: 50%;
 			min-width: 16px;
 			min-height: 16px;
@@ -58,6 +59,8 @@ export const CollectionAccordion = styled(Accordion)`
 
 			&:not(.Mui-expanded) {
 				transform: rotate(270deg);
+				color: ${({ theme }) => theme.palette.secondary.main};
+				background-color: ${({ theme }) => theme.palette.primary.contrast};
 			}
 		}
 
