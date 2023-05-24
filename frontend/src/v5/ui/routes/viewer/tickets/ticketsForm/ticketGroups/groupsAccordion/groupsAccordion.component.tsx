@@ -21,15 +21,16 @@ import { GroupOverride } from '@/v5/store/tickets/tickets.types';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { AccordionProps } from '@controls/accordion/accordion.component';
 import { Accordion, NumberContainer, TitleContainer, Checkbox } from './groupsAccordion.styles';
 import { Groups } from '../groups/groups.component';
 import { AddGroupButton } from '../groups/groupActionMenu/addGroupButton/addGroupButton.component';
 
-type GroupsAccordionProps = {
+type GroupsAccordionProps = Omit<AccordionProps, 'Icon'> & {
 	title: any;
 	groups: GroupOverride[];
 };
-export const GroupsAccordion = ({ title, groups = [] }: GroupsAccordionProps) => {
+export const GroupsAccordion = ({ title, groups = [], ...props }: GroupsAccordionProps) => {
 	const [checked, setChecked] = useState(false);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
@@ -51,6 +52,7 @@ export const GroupsAccordion = ({ title, groups = [] }: GroupsAccordionProps) =>
 				</TitleContainer>
 			)}
 			$groupsCount={groupsCount}
+			{...props}
 		>
 			{groupsCount ? (
 				<Groups groups={groups} />
