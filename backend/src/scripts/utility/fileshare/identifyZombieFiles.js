@@ -104,9 +104,9 @@ const findFilesOlderThanTime = async (currTime, parallelFiles) => {
 
 	while (list.length) {
 		const subDir = list.pop();
-		logger.logInfo(`\tChecking ${subDir}`);
 		const dir = joinPath(fsPath, subDir);
 		const data = readdirSync(dir, { withFileTypes: true });
+		logger.logInfo(`\tChecking ${subDir} (${data.length} entries)`);
 		const chunks = splitArrayIntoChunks(data, parallelFiles);
 
 		for (const group of chunks) {
