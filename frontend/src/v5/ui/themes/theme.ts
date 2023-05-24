@@ -1039,7 +1039,7 @@ export const theme = createTheme({
 				},
 				multiline: {
 					'&&': {
-						padding: '5px 10px',
+						padding: '4px 10px',
 						'& fieldset': {
 							height: '100%',
 						},
