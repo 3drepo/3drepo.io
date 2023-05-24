@@ -127,7 +127,7 @@ export const TicketView = ({
 							placement="right"
 							title={(formatMessage({ id: 'viewer.card.button.saveCurrentView', defaultMessage: 'Save current view' }))}
 						>
-							<div>
+							<div hidden={disabled}>
 								<PrimaryTicketButton onClick={updateViewpoint}>
 									<PlusIcon />
 								</PrimaryTicketButton>
@@ -140,18 +140,18 @@ export const TicketView = ({
 					)}
 					<EllipsisMenu disabled={!hasViewpoint}>
 						<EllipsisMenuItem
-							hidden={!hasCamera}
+							hidden={!hasViewpoint}
 							title={(<FormattedMessage id="viewer.card.ticketView.action.updateViewpoint" defaultMessage="Update to current view" />)}
 							onClick={updateViewpoint}
 							disabled={disabled}
 						/>
 						<EllipsisMenuItem
-							hidden={!hasCamera}
+							hidden={!hasViewpoint}
 							title={(<FormattedMessage id="viewer.card.ticketView.action.gotToView" defaultMessage="Go to view" />)}
 							onClick={goToViewpoint}
 						/>
 						<EllipsisMenuItemDelete
-							hidden={!hasCamera}
+							hidden={!hasViewpoint}
 							title={<FormattedMessage id="viewer.card.ticketView.action.deleteView" defaultMessage="Delete view" />}
 							onClick={deleteViewpoint}
 							disabled={disabled}
