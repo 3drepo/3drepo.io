@@ -33,7 +33,8 @@ export const Accordion = styled(AccordionBase)<{ $groupsCount?: number }>`
 	.MuiAccordionSummary-root {
 		border-bottom: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		max-height: 37px;
+		height: 42px;
+		padding-left: 17px;
 	}
 
 	.MuiAccordionDetails-root {
@@ -83,12 +84,13 @@ export const TitleContainer = styled.div`
 `;
 
 export const NumberContainer = styled(CentredContainer)`
-	border-radius: 26px;
-	width: 26px;
-	height: 26px;
-	margin-left: 3px;
+	border-radius: 24px;
+	width: 24px;
+	height: 24px;
+	margin-left: 5px;
 	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	color: currentColor;
+	font-size: 11px;
 `;
 
 export const Checkbox = styled(CheckBoxBase)`
