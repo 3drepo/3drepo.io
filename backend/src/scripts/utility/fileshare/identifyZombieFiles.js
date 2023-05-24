@@ -35,6 +35,8 @@ const failedToCheck = {};
 
 const PARALLEL_BATCHES = 10000;
 
+let fileCount = 0;
+
 const updateLastModified = async (link) => {
 	try {
 		const date = new Date();
@@ -108,15 +110,18 @@ const findFilesOlderThanTime = async (currTime, parallelFiles) => {
 		const chunks = splitArrayIntoChunks(data, parallelFiles);
 
 		for (const group of chunks) {
-			// eslint-disable-next-line no-await-in-loop
+			// eslint-disable-next-line no-await-in-loop, no-loop-func
 			await Promise.all(group.map(async (entry) => {
 				const link = joinPath(subDir, entry.name);
 				if (entry.isDirectory()) {
 					if (!entry.name.startsWith('toy_')) {
 						list.push(link);
 					}
-				} else if (!(await isUpdatedLater(link, currTime))) {
-					res.push(link);
+				} else {
+					++fileCount;
+					if (!(await isUpdatedLater(link, currTime))) {
+						res.push(link);
+					}
 				}
 			}));
 		}
@@ -155,7 +160,7 @@ const run = async (outFile, removeFiles = false, maxParallelRefs = PARALLEL_BATC
 	// Any files that had a reference would've been touched(i.e. updated last modified time) during checkRefs()
 	const zombies = await findFilesOlderThanTime(currTime, maxParallelRefs);
 
-	logger.logInfo(`${zombies.length} zombies found`);
+	logger.logInfo(`${fileCount} files checked. ${zombies.length} zombies found`);
 
 	if (zombies.length) {
 		logger.logInfo(`Writing all links to ${outFile}...`);
