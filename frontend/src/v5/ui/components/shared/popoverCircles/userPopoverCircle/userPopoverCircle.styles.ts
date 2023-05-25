@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { JobAvatar } from '@controls/jobAvatar/jobAvatar.component';
-import { AvatarWrapper, PopoverContainer, Heading, Data } from '../userPopover/userPopover.styles';
+import { getUserInitials } from '@/v5/store/users/users.helpers';
+import styled from 'styled-components';
+import { IUser } from '@/v5/store/users/users.redux';
+import { IPopoverCircle, PopoverCircle } from '../popoverCircle.styles';
 
-interface IJobPopover {
-	job: string;
-}
+type IUserCircle = Omit<IPopoverCircle, 'children'> & {
+	user: IUser;
+	children?: any;
+};
 
-export const JobPopover = ({ job }: IJobPopover) => (
-	<PopoverContainer>
-		<AvatarWrapper>
-			<JobAvatar job={job} />
-		</AvatarWrapper>
-		<Data>
-			<Heading>{job}</Heading>
-		</Data>
-	</PopoverContainer>
-);
+export const UserCircle = styled(PopoverCircle).attrs(({ user }: IUserCircle) => ({
+	src: user.hasAvatar ? user.avatarUrl : '',
+	children: getUserInitials(user),
+}))<IUserCircle>`
+	background-color: ${({ theme }) => theme.palette.secondary.main};
+	color: ${({ theme }) => theme.palette.primary.contrast};
+`;

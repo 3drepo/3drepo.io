@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,19 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Avatar } from '@mui/material';
-import { ExtraAssigneesContainer } from './extraAssignees.styles';
+import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
+import { IUser } from '@/v5/store/users/users.redux';
+import { IPopoverCircle } from '../popoverCircle.styles';
+import { UserPopover } from './userPopover/userPopover.component';
+import { UserCircle } from './userPopoverCircle.styles';
 
-type IExtraAssignees = {
-	overflowValue: number;
+type UserPopoverCircleProps = IPopoverCircle & {
+	user: IUser;
+	className?: string;
 };
-
-export const ExtraAssigneesCircle = ({ overflowValue, ...props }: IExtraAssignees) => (
-	<ExtraAssigneesContainer
-		{...props}
-	>
-		<Avatar>
-			+{overflowValue}
-		</Avatar>
-	</ExtraAssigneesContainer>
-);
+export const UserPopoverCircle = ({ user, ...props }: UserPopoverCircleProps) => {
+	if (!user) return null;
+	return (
+		<HoverPopover anchor={() => <UserCircle user={user} {...props} />}>
+			<UserPopover user={user} />
+		</HoverPopover>
+	);
+};
