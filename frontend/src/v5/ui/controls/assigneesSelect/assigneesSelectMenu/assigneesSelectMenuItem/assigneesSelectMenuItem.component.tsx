@@ -15,20 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UserPopover } from '@components/shared/userPopover/userPopover.component';
-import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
-import { IUser } from '@/v5/store/users/users.redux';
-import { UserCircle } from './userCirlcePopover.styles';
+import { MenuItemProps } from '@mui/material';
+import { AssigneeCircle } from '@controls/assigneesSelect/assigneeCircle/assigneeCircle.component';
+import { ListItemContainer, Subtitle, Title, Checkbox } from './assigneesSelectMenuItem.styles';
 
-type UserCirclePopoverProps = {
-	user: IUser;
-	className?: string;
+type IAssigneesSelectMenuItem = MenuItemProps & {
+	title: string;
+	subtitle?: string;
+	assignee: string;
 };
-export const UserCirclePopover = ({ user, className }: UserCirclePopoverProps) => (
-	<HoverPopover
-		className={className}
-		anchor={(props) => <UserCircle user={user} {...props} />}
-	>
-		<UserPopover user={user} />
-	</HoverPopover>
+
+export const AssigneesSelectMenuItem = ({ assignee, title, subtitle, selected, ...props }: IAssigneesSelectMenuItem) => (
+	<ListItemContainer {...props}>
+		<AssigneeCircle assignee={assignee} />
+		<div>
+			<Title>{title}</Title>
+			<Subtitle>{subtitle}</Subtitle>
+		</div>
+		<Checkbox checked={selected} />
+	</ListItemContainer>
 );

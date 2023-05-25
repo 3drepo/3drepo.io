@@ -22,6 +22,7 @@ import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { FetchUsersAction, UsersActions, UsersTypes } from './users.redux';
 import { selectUsersByTeamspace } from './users.selectors';
+import { getMemberImgSrc } from './users.helpers';
 
 export function* fetchUsers({ teamspace }: FetchUsersAction) {
 	try {
@@ -29,8 +30,8 @@ export function* fetchUsers({ teamspace }: FetchUsersAction) {
 
 		if (isEmpty(users)) {
 			const { data: { members } } = yield API.Users.fetchTeamspaceMembers(teamspace);
-
-			yield put(UsersActions.fetchUsersSuccess(teamspace, members));
+			const membersWithImg = members.map((member) => ({ ...member, avatarUrl: getMemberImgSrc(teamspace, member.user), hasAvatar: true }));
+			yield put(UsersActions.fetchUsersSuccess(teamspace, membersWithImg));
 		}
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {

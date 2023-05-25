@@ -15,12 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { StyledIconButton } from '@controls/avatar/avatar.styles';
+import { getJobAbbreviation } from '@/v5/store/jobs/jobs.helpers';
+import { IJob } from '@/v5/store/jobs/jobs.types';
+import { AvatarWrapper, Data, Heading, PopoverContainer } from '../userPopoverCircle/userPopover/userPopover.styles';
+import { PopoverCircle } from '../popoverCircle.styles';
 
-export const Container = styled(StyledIconButton)`
-	.MuiAvatar-root {
-		background-color: ${({ theme }) => theme.palette.base.main};
-		color: ${({ theme }) => theme.palette.primary.contrast};
-	}
-`;
+interface IJobPopover {
+	job: IJob;
+}
+
+export const JobPopover = ({ job }: IJobPopover) => (
+	<PopoverContainer>
+		<AvatarWrapper>
+			<PopoverCircle backgroundColor={job.color}>{getJobAbbreviation(job._id)}</PopoverCircle>
+		</AvatarWrapper>
+		<Data>
+			<Heading>{job._id}</Heading>
+		</Data>
+	</PopoverContainer>
+);
