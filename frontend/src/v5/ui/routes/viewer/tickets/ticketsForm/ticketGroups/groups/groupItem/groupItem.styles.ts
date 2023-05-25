@@ -53,7 +53,8 @@ export const Container = styled.div`
 	margin-bottom: 4px;
 
 	&:not(:hover) ${Buttons} {
-		display: none;
+		width: 0;
+		overflow: hidden;
 	}
 
 	${GroupIcon} {
