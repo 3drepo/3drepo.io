@@ -26,6 +26,7 @@ import { rgbaToHex } from '@/v4/helpers/colors';
 import { FormattedMessage } from 'react-intl';
 import { GroupIconComponent } from '@/v5/ui/routes/viewer/groups/groupItem/groupIcon/groupIcon.component';
 import { ErrorTicketButton, PrimaryTicketButton } from '@/v5/ui/routes/viewer/tickets/ticketButton/ticketButton.styles';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import {
 	Buttons,
 	NameContainer,
@@ -42,6 +43,7 @@ type GroupProps = { group: IGroupFromApi, color?: [number, number, number], opac
 export const GroupItem = ({ group, color, opacity }: GroupProps) => {
 	const [groupIsVisible, setGroupIsVisible] = useState(false);
 	const { groupType } = useContext(TicketGroupsContext);
+	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	const deleteGroup = () => {
 		DialogsActionsDispatchers.open('delete', {
@@ -79,9 +81,11 @@ export const GroupItem = ({ group, color, opacity }: GroupProps) => {
 				</NameContainer>
 				{groupType === 'colored' && (
 					<Buttons>
-						<ErrorTicketButton onClick={deleteGroup}>
-							<DeleteIcon />
-						</ErrorTicketButton>
+						{isAdmin && (
+							<ErrorTicketButton onClick={deleteGroup}>
+								<DeleteIcon />
+							</ErrorTicketButton>
+						)}
 						<PrimaryTicketButton onClick={toggleShowGroup}>
 							{groupIsVisible ? (<ShowIcon />) : (<HideIcon />)}
 						</PrimaryTicketButton>
