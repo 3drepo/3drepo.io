@@ -65,11 +65,9 @@ export const Instruction = styled.div`
 
 export const Buttons = styled.div`
 	display: flex;
-	flex-direction: row;
 	justify-content: flex-end;
 	button {
-		margin-bottom: 0;
-		margin-top: 5px
+		margin: 10px 0 0;
 	}
 `;
 

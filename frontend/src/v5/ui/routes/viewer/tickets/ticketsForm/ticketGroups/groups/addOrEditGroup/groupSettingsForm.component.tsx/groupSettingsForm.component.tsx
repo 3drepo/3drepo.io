@@ -182,19 +182,23 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues?: IGroupSet
 						<FormattedMessage id="tickets.groups.settings.cancel" defaultMessage="Cancel" />
 					</Button>
 				</ActionMenuItem>
-				<SubmitButton
-					size="medium"
-					fullWidth={false}
-					onClick={handleSubmit(onSubmit)}
-					disabled={!isValid || isEmpty(dirtyFields)}
-				>
-					{isNewGroup ? (
-						<FormattedMessage id="tickets.groups.settings.createGroup" defaultMessage="Create group" />
+				{ isAdmin && (
+					<ActionMenuItem>
+						<SubmitButton
+							size="medium"
+							fullWidth={false}
+							onClick={handleSubmit(onSubmit)}
+							disabled={!isValid || isEmpty(dirtyFields)}
+						>
+							{isNewGroup ? (
+								<FormattedMessage id="tickets.groups.settings.createGroup" defaultMessage="Create group" />
 
-					) : (
-						<FormattedMessage id="tickets.groups.settings.updateGroup" defaultMessage="Update group" />
-					)}
-				</SubmitButton>
+							) : (
+								<FormattedMessage id="tickets.groups.settings.updateGroup" defaultMessage="Update group" />
+							)}
+						</SubmitButton>
+					</ActionMenuItem>
+				)}
 			</Buttons>
 		</form>
 	);

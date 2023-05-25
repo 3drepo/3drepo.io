@@ -45,6 +45,7 @@ export const ActionMenu = ({
 	};
 
 	const handleOpen = (e) => {
+		if (disabled) return;
 		setAnchorEl(e.currentTarget.children[0]);
 		onOpen?.(e);
 		stopClickPropagation(e);
@@ -66,7 +67,7 @@ export const ActionMenu = ({
 				{TriggerButton}
 			</Container>
 			<Popover
-				open={!disabled && Boolean(anchorEl)}
+				open={Boolean(anchorEl)}
 				anchorEl={anchorEl}
 				className={className}
 				anchorOrigin={{
