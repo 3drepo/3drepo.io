@@ -174,7 +174,7 @@ const run = async (outFile, removeFiles = false, maxParallelRefs = PARALLEL_BATC
 			logger.logInfo(`Deleting files (${chunks.length} batches`);
 			for (let i = 0; i < chunks.length; ++i) {
 				const group = chunks[i];
-				logger.logIno(`[${i}/${chunks.length}] Deleting ${group.length} files...`);
+				logger.logInfo(`[${i}/${chunks.length}] Deleting ${group.length} files...`);
 				// eslint-disable-next-line no-await-in-loop
 				await Promise.all(group.map((name) => unlink(joinPath(fsPath, name))));
 			}
