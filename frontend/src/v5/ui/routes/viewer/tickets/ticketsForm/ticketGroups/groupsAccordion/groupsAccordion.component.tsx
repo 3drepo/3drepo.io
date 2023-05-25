@@ -23,7 +23,7 @@ import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emp
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Accordion, NumberContainer, TitleContainer, Checkbox } from './groupsAccordion.styles';
 import { Groups } from '../groups/groups.component';
-import { AddGroupButton } from '../groups/addOrEditGroup/addGroupButton/addGroupButton.component';
+import { AddGroupButton } from '../groups/groupActionMenu/addGroupButton/addGroupButton.component';
 
 type GroupsAccordionProps = {
 	title: any;

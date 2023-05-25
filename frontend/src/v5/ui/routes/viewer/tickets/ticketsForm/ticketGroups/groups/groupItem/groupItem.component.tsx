@@ -37,7 +37,7 @@ import {
 } from './groupItem.styles';
 import { GroupToggle } from '../../groupToggle/groupToggle.component';
 import { TicketGroupsContext } from '../../ticketGroupsContext';
-import { EditGroupButton } from '../addOrEditGroup/editGroupButton/editGroupButton.component';
+import { EditGroupButton } from '../groupActionMenu/editGroupButton/editGroupButton.component';
 
 type GroupProps = { group: IGroupFromApi, color?: [number, number, number], opacity?: number };
 export const GroupItem = ({ group, color, opacity }: GroupProps) => {
