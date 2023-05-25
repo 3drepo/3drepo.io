@@ -17,10 +17,10 @@
 
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 import { Toggle as BaseToggle } from '@controls/inputs/toggle/toggle.component';
-import { Box, InputLabel } from '@mui/material';
+import { InputLabel } from '@mui/material';
 import styled from 'styled-components';
 
-export const FormBox = styled(Box)`
+export const FormBox = styled.div`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	border-radius: 8px;
 	padding: 10px 15px;
@@ -33,9 +33,9 @@ export const FormRow = styled.div`
 
 export const LabelAndColor = styled(FormRow)`
 	width: 100%;
-    display: inline-flex;
-    gap: 10px;
-    align-items: end;
+	display: inline-flex;
+	gap: 10px;
+	align-items: end;
 `;
 
 export const Heading = styled.div`
@@ -48,7 +48,7 @@ export const Subheading = styled.div`
 	${({ theme }) => theme.typography.h5};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	padding: 10px 3px;
-	`;
+`;
 
 export const CreateCollectionLink = styled.div`
 	${({ theme }) => theme.typography.link};
