@@ -171,7 +171,7 @@ const run = async (outFile, removeFiles = false, maxParallelRefs = PARALLEL_BATC
 			logger.logInfo(`Verification complete, ${finalList.length} files are confirmed zombies. Deleting...`);
 
 			const chunks = splitArrayIntoChunks(finalList, maxParallelRefs);
-			logger.logInfo(`Deleting files (${chunks.length} batches`);
+			logger.logInfo(`Deleting files (${chunks.length} batches)`);
 			for (let i = 0; i < chunks.length; ++i) {
 				const group = chunks[i];
 				logger.logInfo(`[${i}/${chunks.length}] Deleting ${group.length} files...`);
