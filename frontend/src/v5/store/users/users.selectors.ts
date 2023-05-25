@@ -19,7 +19,6 @@ import { sortBy } from 'lodash';
 import { selectJobs } from '@/v4/modules/jobs';
 import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
 import { IUser, IUsersState } from './users.redux';
-import { getMemberImgSrc } from './users.helpers';
 
 const selectUsersDomain = (state): IUsersState => state?.users || {};
 
@@ -31,12 +30,10 @@ export const selectUsersByTeamspace = createSelector(
 
 export const selectUser = createSelector(
 	selectUsersByTeamspace,
-	(_, teamspace, userName) => [teamspace, userName],
-	(usersInTeamspace, [teamspace, userName]): IUser => {
+	(_, teamspace, userName) => userName,
+	(usersInTeamspace, userName): IUser => {
 		const user = usersInTeamspace.find((teamspaceUser) => teamspaceUser.user === userName);
-		if (user) {
-			return { ...user, avatarUrl: getMemberImgSrc(teamspace, user.user), hasAvatar: true };
-		}
+		if (user) return user;
 		return { user: userName, firstName: userName, lastName: '', avatarUrl: '', isNotTeamspaceMember: true };
 	},
 );
@@ -50,11 +47,8 @@ export const selectCurrentTeamspaceUsers = createSelector(
 	},
 );
 
-export const selectAssigneesListItems = createSelector(
+export const selectUsersAndJobs = createSelector(
 	selectCurrentTeamspaceUsers,
 	selectJobs,
-	(users, jobs) => [
-		...users.map(({ user, firstName, lastName }) => ({ value: user, label: `${firstName} ${lastName}` })),
-		...jobs.map(({ _id }) => ({ value: _id, label: _id })),
-	],
+	(users, jobs) => [...users, ...jobs],
 );

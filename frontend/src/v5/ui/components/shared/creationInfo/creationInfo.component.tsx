@@ -18,10 +18,10 @@
 import { formatLongDateTime, getRelativeTime } from '@/v5/helpers/intl.helper';
 import { formatDate } from '@/v5/services/intl';
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { UserPopover } from '@components/shared/userPopover/userPopover.component';
-import { PopoverContainer } from '@components/shared/userPopover/userPopover.styles';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { FormattedMessage } from 'react-intl';
+import { UserPopover } from '../popoverCircles/userPopoverCircle/userPopover/userPopover.component';
+import { PopoverContainer } from '../popoverCircles/userPopoverCircle/userPopover/userPopover.styles';
 import { CreationInfoContainer, TruncateName } from './creationInfo.styles';
 
 type ICreationInfo = {
