@@ -17,8 +17,9 @@
 
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
+import { trimmedString } from '../shared/validators';
 
-const requiredTrimmedString = Yup.string().trim().required(
+const requiredTrimmedString = trimmedString.required(
 	formatMessage({
 		id: 'validation.ticket.groupFilters.error.required',
 		defaultMessage: 'This is a required field',
