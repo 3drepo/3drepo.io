@@ -33,9 +33,10 @@ export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
 	let items = [];
 
 	if (values === 'jobsAndUsers') {
-		items = UsersHooksSelectors.selectAssigneesListItems();
+		const jobsAndUsers = UsersHooksSelectors.selectUsersAndJobs();
+		items = jobsAndUsers.map((jobOrUser) => jobOrUser._id || jobOrUser.user);
 	} else {
-		items = (values as string[]).map((value) => ({ value, label: value }));
+		items = (values as string[]);
 	}
 	// Must filter out users not included in this teamspace. This can occur when a user
 	// has been assigned to a ticket and later on is removed from the teamspace
@@ -43,8 +44,8 @@ export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
 
 	return (
 		<MultiSelect {...props} value={validValues ?? []}>
-			{(items).map(({ value, label }) => (
-				<MultiSelectMenuItem key={value} value={value}>{label}</MultiSelectMenuItem>
+			{(items).map((value) => (
+				<MultiSelectMenuItem key={value} value={value}>{value}</MultiSelectMenuItem>
 			))}
 		</MultiSelect>
 	);

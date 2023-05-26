@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,19 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Avatar } from '@mui/material';
-import { ExtraAssigneesContainer } from './extraAssignees.styles';
+import { getUserInitials } from '@/v5/store/users/users.helpers';
+import styled from 'styled-components';
+import { IUser } from '@/v5/store/users/users.redux';
+import { IPopoverCircle, PopoverCircle } from '../popoverCircle.styles';
 
-type IExtraAssignees = {
-	overflowValue: number;
+type IUserCircle = Omit<IPopoverCircle, 'children'> & {
+	user: IUser;
+	children?: any;
 };
 
-export const ExtraAssigneesCircle = ({ overflowValue, ...props }: IExtraAssignees) => (
-	<ExtraAssigneesContainer
-		{...props}
-	>
-		<Avatar>
-			+{overflowValue}
-		</Avatar>
-	</ExtraAssigneesContainer>
-);
+export const UserCircle = styled(PopoverCircle).attrs(({ user }: IUserCircle) => ({
+	src: user.hasAvatar ? user.avatarUrl : '',
+	children: getUserInitials(user),
+}))<IUserCircle>`
+	background-color: ${({ theme }) => theme.palette.secondary.main};
+	color: ${({ theme }) => theme.palette.primary.contrast};
+`;

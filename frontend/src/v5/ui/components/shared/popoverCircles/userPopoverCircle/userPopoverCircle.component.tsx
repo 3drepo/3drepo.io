@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,24 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Card } from '@mui/material';
-import styled from 'styled-components';
-import AddCircleIcon from '@assets/icons/twoToned/add_circle-two_toned.svg';
+import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
+import { IUser } from '@/v5/store/users/users.redux';
+import { IPopoverCircle } from '../popoverCircle.styles';
+import { UserPopover } from './userPopover/userPopover.component';
+import { UserCircle } from './userPopoverCircle.styles';
 
-export const Container = styled(Card)`
-	color: ${({ theme }) => theme.palette.primary.main};
-	${({ theme }) => theme.typography.h3};
-	background-color: rgb(255 255 255 / 5%);
-	width: 246px;
-	height: 256px;
-	display: flex;
-	flex-flow: column;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-`;
-
-export const AddTeamspaceIcon = styled(AddCircleIcon)`
-	width: 37px;
-	height: 37px;
-`;
+type UserPopoverCircleProps = IPopoverCircle & {
+	user: IUser;
+	className?: string;
+};
+export const UserPopoverCircle = ({ user, ...props }: UserPopoverCircleProps) => {
+	if (!user) return null;
+	return (
+		<HoverPopover anchor={() => <UserCircle user={user} {...props} />}>
+			<UserPopover user={user} />
+		</HoverPopover>
+	);
+};

@@ -62,6 +62,7 @@ export const V4ModelsPermissions = styled(ModelsPermissions)`
 		background: rgba(255, 255, 255, 0.89);
 		${({ theme }) => theme.typography.h4};
 		color: ${({ theme }) => theme.palette.secondary.main};
+		border-radius: 10px;
 	}
 `;
 

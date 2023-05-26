@@ -15,17 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
-import { CardListItem } from '../../linkCard.styles';
-import { AddTeamspaceIcon, Container } from './addTeamspaceCard.styles';
+import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.styles';
+import styled from 'styled-components';
 
-export const AddTeamspaceCard = (): JSX.Element => (
-	<CardListItem>
-		<a href="https://3drepo.com/pricing/" target="_blank" rel="noreferrer">
-			<Container>
-				<AddTeamspaceIcon />
-				<FormattedMessage id="teamspaceSelect.addNewTeamspace" defaultMessage="New Teamspace" />
-			</Container>
-		</a>
-	</CardListItem>
-);
+export const ExtraAssigneesList = styled.ul`
+	padding: 8px 10px;
+	margin: 0;
+`;
+
+export const ExtraAssigneesListItem = styled.li`
+	${({ theme }) => theme.typography.body1};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	list-style-type: none;
+`;
+
+export const ExtraAssigneesCircle = styled(PopoverCircle).attrs(({ theme }) => ({
+	size: 'small',
+	backgroundColor: theme.palette.primary.main,
+}))``;

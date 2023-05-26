@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,24 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import AvatarIcon from '@mui/material/Avatar';
-import { getAbbreviation } from '@/v5/store/jobs/jobs.helpers';
-import { Container } from './jobAvatar.styles';
-
-type JobAvatarProps = {
-	job: string;
-	size?: 'small' | 'medium' | 'large';
-	isButton?: boolean;
-	className?: string;
+export type IJob = {
+	_id: string;
+	color: string;
 };
-
-export const JobAvatar = ({ job, isButton, ...props }: JobAvatarProps) => (
-	<Container
-		$isButton={isButton}
-		{...props}
-	>
-		<AvatarIcon>
-			{getAbbreviation(job)}
-		</AvatarIcon>
-	</Container>
-);

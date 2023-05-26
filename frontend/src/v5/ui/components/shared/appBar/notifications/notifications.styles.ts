@@ -28,8 +28,20 @@ const navbarButtonStyles = css`
 		width: inherit;
 	}
 
-	.MuiBadge-root > svg {
-		height: 17px;
+	.MuiBadge-root {
+		> svg {
+			height: 17px;
+			width: 17px;
+		}
+		.MuiBadge-badge {
+			font-size: 0;
+			height: 11px;
+			width: 11px;
+			padding: 0;
+			min-width: unset;
+			top: -6px;
+			right: -3px;
+		}
 	}
 `;
 
@@ -191,11 +203,6 @@ export const Container = styled(NavbarButton)`
 
 	.MuiListItem-root.MuiListItem-root {
 		padding: 0;
-	}
-
-	.MuiBadge-root > svg {
-		height: 17px;
-		width: 17px;
 	}
 
 	${navbarButtonStyles}

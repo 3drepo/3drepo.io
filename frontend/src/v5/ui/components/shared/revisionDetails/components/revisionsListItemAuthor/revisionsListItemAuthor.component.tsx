@@ -17,11 +17,11 @@
 import { useParams } from 'react-router';
 
 import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
-import { UserPopover } from '@components/shared/userPopover/userPopover.component';
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IUser } from '@/v5/store/users/users.redux';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
+import { UserPopover } from '@components/shared/popoverCircles/userPopoverCircle/userPopover/userPopover.component';
 import { Text, Name, FixedOrGrowContainer } from './revisionsListItemAuthor.styles';
 
 interface IRevisionsListItemAuthor extends FixedOrGrowContainerProps {

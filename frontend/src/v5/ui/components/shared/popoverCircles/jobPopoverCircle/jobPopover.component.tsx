@@ -15,6 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { TeamspaceCard } from './teamspaceCard.component';
-export { AddTeamspaceCard } from './addTeamspaceCard/addTeamspaceCard.component';
-export { TeamspacePlaceholderCard } from './teamspacePlaceholderCard/teamspacePlaceholderCard.component';
+import { getJobAbbreviation } from '@/v5/store/jobs/jobs.helpers';
+import { IJob } from '@/v5/store/jobs/jobs.types';
+import { AvatarWrapper, Data, Heading, PopoverContainer } from '../userPopoverCircle/userPopover/userPopover.styles';
+import { PopoverCircle } from '../popoverCircle.styles';
+
+interface IJobPopover {
+	job: IJob;
+}
+
+export const JobPopover = ({ job }: IJobPopover) => (
+	<PopoverContainer>
+		<AvatarWrapper>
+			<PopoverCircle backgroundColor={job.color}>{getJobAbbreviation(job._id)}</PopoverCircle>
+		</AvatarWrapper>
+		<Data>
+			<Heading>{job._id}</Heading>
+		</Data>
+	</PopoverContainer>
+);

@@ -23,7 +23,7 @@ import { Container as ButtonContainer } from '@/v4/routes/viewerGui/components/p
 export default css`
 	#risks-card-details {
 		${DescriptionImage} img {
-			border-radius: 5px;
+			border-radius: 8px;
 		}
 		${UpdateButtonsContainer} {
 			justify-content: left;

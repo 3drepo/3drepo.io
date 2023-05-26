@@ -76,9 +76,8 @@ export const AuthParagraph = styled.div`
 
 export const ReturnLinkContainer = styled.div`
 	color: ${({ theme }) => theme.palette.primary.main};
-	text-decoration: none;
 	height: 15px;
-	&:hover, &:visited {
-		color: ${({ theme }) => theme.palette.primary.main};
+	* {
+		${({ theme }) => theme.typography.body1};
 	}
 `;
