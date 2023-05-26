@@ -16,6 +16,7 @@
  */
 import { EllipsisButton } from '@controls/ellipsisMenu/ellipsisMenu.styles';
 import { InputContainer as InputContainerBase } from '@controls/inputs/inputContainer/inputContainer.styles';
+import TooltipBase from '@mui/material/Tooltip';
 import { InputLabel } from '@mui/material';
 import styled from 'styled-components';
 
@@ -47,3 +48,13 @@ export const HeaderSection = styled.div`
 		background-color: transparent;
 	}
 `;
+
+export const Tooltip = styled(TooltipBase).attrs({
+	componentsProps: {
+		popper: {
+			sx: {
+				marginLeft: '-10px !important',
+			},
+		},
+	},
+})``;

@@ -26,19 +26,19 @@ import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
-import { FormHelperText, Tooltip } from '@mui/material';
+import { FormHelperText } from '@mui/material';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { formatMessage } from '@/v5/services/intl';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
+import { ViewpointsActions } from '@/v4/modules/viewpoints';
+import { getViewerState, viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
+import { useDispatch } from 'react-redux';
 import { TicketImageContent } from '../ticketImageContent/ticketImageContent.component';
 import { EllipsisMenuItemDelete } from '../ticketImageContent/ticketImageAction/ticketImageAction.styles';
 import { TicketImageActionMenu } from '../ticketImageContent/ticketImageActionMenu.component';
 import { ViewActionMenu } from './viewActionMenu/viewActionMenu.component';
 import { PrimaryTicketButton } from '../../../ticketButton/ticketButton.styles';
-import { Header, HeaderSection, Label, InputContainer } from './ticketView.styles';
-import { ViewpointsActions } from '@/v4/modules/viewpoints';
-import { getViewerState, viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
-import { useDispatch } from 'react-redux';
+import { Header, HeaderSection, Label, InputContainer, Tooltip } from './ticketView.styles';
 
 type ITicketView = {
 	value: Viewpoint | undefined;
@@ -134,9 +134,16 @@ export const TicketView = ({
 							</div>
 						</Tooltip>
 					) : (
-						<PrimaryTicketButton onClick={goToViewpoint}>
-							<ViewpointIcon />
-						</PrimaryTicketButton>
+						<Tooltip
+							placement="right"
+							title={(formatMessage({ id: 'viewer.card.button.gotToView', defaultMessage: 'Go to view' }))}
+						>
+							<div>
+								<PrimaryTicketButton onClick={goToViewpoint}>
+									<ViewpointIcon />
+								</PrimaryTicketButton>
+							</div>
+						</Tooltip>
 					)}
 					<EllipsisMenu disabled={!hasViewpoint}>
 						<EllipsisMenuItem
