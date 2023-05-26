@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { MultiSelect } from '@controls/inputs/multiSelect/multiSelect.component';
 import { FormInputProps } from '@controls/inputs/inputController.component';
@@ -35,6 +35,8 @@ export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
 	if (values === 'jobsAndUsers') {
 		const jobsAndUsers = UsersHooksSelectors.selectUsersAndJobs();
 		items = jobsAndUsers.map((jobOrUser) => jobOrUser._id || jobOrUser.user);
+	} else if (values === 'riskCategories') {
+		items = TicketsHooksSelectors.selectRiskCategories() || [];
 	} else {
 		items = (values as string[]);
 	}
