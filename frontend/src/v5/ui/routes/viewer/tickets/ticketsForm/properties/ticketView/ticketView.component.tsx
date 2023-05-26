@@ -18,7 +18,7 @@
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import CameraIcon from '@assets/icons/outlined/camera-outlined.svg';
 import ViewpointIcon from '@assets/icons/outlined/aim-outlined.svg';
-import PlusIcon from '@assets/icons/outlined/plus-outlined.svg';
+import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import GroupsIcon from '@mui/icons-material/GroupWork';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useEffect, useState } from 'react';
@@ -129,7 +129,7 @@ export const TicketView = ({
 						>
 							<div hidden={disabled}>
 								<PrimaryTicketButton onClick={updateViewpoint}>
-									<PlusIcon />
+									<TickIcon />
 								</PrimaryTicketButton>
 							</div>
 						</Tooltip>
