@@ -84,13 +84,13 @@ export const TitleContainer = styled.div`
 `;
 
 export const NumberContainer = styled(CentredContainer)`
-	border-radius: 24px;
-	width: 24px;
-	height: 24px;
+	border-radius: 22px;
+	width: 22px;
+	height: 22px;
 	margin-left: 5px;
 	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
-	color: currentColor;
-	font-size: 11px;
+	color: ${({ theme }) => theme.palette.base.main};
+	font-size: 10px;
 `;
 
 export const Checkbox = styled(CheckBoxBase)`

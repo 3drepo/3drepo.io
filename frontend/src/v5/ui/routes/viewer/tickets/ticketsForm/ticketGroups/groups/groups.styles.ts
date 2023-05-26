@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 import { Accordion } from '@controls/accordion/accordion.component';
-import { GroupStyling, Headline } from './groupItem/groupItem.styles';
+import { GroupStyling, Headline, Name as NameBase } from './groupItem/groupItem.styles';
 
 export const CollectionAccordion = styled(Accordion)`
 	&& {
@@ -92,4 +92,8 @@ export const GroupsContainer = styled.div`
 
 export const Icon = styled.div`
 	border-radius: 5px;
+`;
+
+export const Name = styled(NameBase)`
+	font-weight: 500;
 `;
