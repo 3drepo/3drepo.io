@@ -38,15 +38,13 @@ export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
 	} else {
 		items = (values as string[]);
 	}
-	// Must filter out users not included in this teamspace. This can occur when a user
+	// For jobsAndUser. Must filter out users not included in this teamspace. This can occur when a user
 	// has been assigned to a ticket and later on is removed from the teamspace
-	const validValues = intersection(props.value, items.map((i) => i.value));
+	const validValues = intersection(props.value, items);
 
 	return (
 		<MultiSelect {...props} value={validValues ?? []}>
-			{(items).map((value) => (
-				<MultiSelectMenuItem key={value} value={value}>{value}</MultiSelectMenuItem>
-			))}
+			{(items).map((value) => <MultiSelectMenuItem key={value} value={value}>{value}</MultiSelectMenuItem>)}
 		</MultiSelect>
 	);
 };
