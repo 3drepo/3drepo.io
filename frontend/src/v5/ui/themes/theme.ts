@@ -753,15 +753,15 @@ export const theme = createTheme({
 			},
 		},
 		MuiListSubheader: {
+			defaultProps: {
+				disableSticky: true,
+			},
 			styleOverrides: {
 				root: {
-					fontWeight: 700,
-					padding: '5px 12px 0',
-					lineHeight: '35px',
-
-					'&:first-of-type': {
-						paddingTop: 0,
-					},
+					...typography.h5,
+					color: COLOR.BASE_MAIN,
+					padding: '4px 14px',
+					fontWeight: FONT_WEIGHT.BOLD,
 				},
 			},
 		},
@@ -783,19 +783,6 @@ export const theme = createTheme({
 				padding: {
 					paddingTop: 8,
 					paddingBottom: 8,
-				},
-			},
-		},
-		MuiListSubheader: {
-			defaultProps: {
-				disableSticky: true,
-			},
-			styleOverrides: {
-				root: {
-					...typography.h5,
-					color: COLOR.BASE_MAIN,
-					padding: '4px 14px',
-					fontWeight: FONT_WEIGHT.BOLD,
 				},
 			},
 		},

@@ -17,9 +17,10 @@
 
 import { FormattedMessage } from 'react-intl';
 import { FormSelect } from '@controls/inputs/formInputs.component';
-import { ListSubheader, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
 import { OPERATION_DISPLAY_NAMES } from '../groupRulesForm.helpers';
+import { ListSubheader } from './ruleOpertionSelect.styles';
 
 export const RuleOperationSelect = () => (
 	<FormSelect
