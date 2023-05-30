@@ -17,7 +17,7 @@
 
 import { ViewpointGroupHierarchy } from '@/v5/store/tickets/tickets.types';
 import { Select } from '@controls/inputs/select/select.component';
-import { FormControl, InputLabel, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
 import { uniqBy } from 'lodash';
 import { MenuItemPrefix } from './groupsCollectionSelect.styles';
@@ -49,27 +49,25 @@ type GroupsCollectionSelectProps = {
 	value?: string[];
 	onChange?: (value: string[]) => void;
 	hierarchies: ViewpointGroupHierarchy[];
+	disabled?: boolean;
 };
-export const GroupsCollectionSelect = ({ label, value = [], onChange, hierarchies }: GroupsCollectionSelectProps) => {
+export const GroupsCollectionSelect = ({ value = [], onChange, hierarchies, ...props }: GroupsCollectionSelectProps) => {
 	const prefixesCombinations = getAllPrefixesCombinations(hierarchies);
 
 	return (
-		<FormControl>
-			<InputLabel>{label}</InputLabel>
-			<Select value={JSON.stringify(value)} onChange={(e) => onChange(JSON.parse(e.target.value))}>
-				<MenuItem value={JSON.stringify([])}>{NONE}</MenuItem>
-				{prefixesCombinations.map((prefix) => (
-					<MenuItemPrefix
-						key={JSON.stringify(prefix)}
-						selected={JSON.stringify(prefix) === JSON.stringify(value)}
-						value={JSON.stringify(prefix)}
-						$depth={prefix.length - 1}
-					>
-						{/* @ts-ignore */}
-						<span>{prefix.at(-1)}</span>
-					</MenuItemPrefix>
-				))}
-			</Select>
-		</FormControl>
+		<Select value={JSON.stringify(value)} onChange={(e) => onChange(JSON.parse(e.target.value))} {...props}>
+			<MenuItem value={JSON.stringify([])}>{NONE}</MenuItem>
+			{prefixesCombinations.map((prefix) => (
+				<MenuItemPrefix
+					key={JSON.stringify(prefix)}
+					selected={JSON.stringify(prefix) === JSON.stringify(value)}
+					value={JSON.stringify(prefix)}
+					$depth={prefix.length - 1}
+				>
+					{/* @ts-ignore */}
+					<span>{prefix.at(-1)}</span>
+				</MenuItemPrefix>
+			))}
+		</Select>
 	);
 };

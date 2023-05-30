@@ -120,6 +120,7 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues?: IGroupSet
 							defaultMessage: 'Parent collection',
 						})}
 						formError={errors?.prefix}
+						disabled={!isAdmin}
 					/>
 				</FormRow>
 				{
