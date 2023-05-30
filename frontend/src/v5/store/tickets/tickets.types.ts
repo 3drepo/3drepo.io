@@ -77,8 +77,43 @@ export type ClippingPlane = {
 	clipDirection: 1 | -1;
 };
 
+export type ViewpointGroup = {
+	_id?: string,
+	name: string,
+	description?: string,
+	objects?: { container: string, _ids: string[] }[],
+	rules?: object[],
+};
+
+export enum ViewpointGroupHierarchyType {
+	Colour,
+	Hidden,
+	Transform,
+}
+
+type ColorAndOpacity = {
+	// at least 1 of the following is required, but not necessarily both
+	color?: [number, number, number],
+	opacity?: number,
+};
+
+export type ViewpointGroupHierarchy = ColorAndOpacity & {
+	prefix?: string[],
+	group: string | ViewpointGroup,
+};
+
+export type ViewpointState = {
+	showDefaultHidden: boolean;
+	hidden?: ViewpointGroupHierarchy[],
+	colored?: ViewpointGroupHierarchy[],
+	transformed?: ViewpointGroupHierarchy[],
+};
+
 export type Viewpoint = {
 	screenshot?: any;
 	camera: Camera;
 	clippingPlanes?: ClippingPlane[];
+	state?: ViewpointState;
 };
+
+export type IGroupSettingsForm = Omit<ViewpointGroupHierarchy, 'group'> & ViewpointGroup;

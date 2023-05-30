@@ -17,7 +17,7 @@
 
 import { useState } from 'react';
 import GroupsIcon from '@mui/icons-material/GroupWork';
-import { IGroup } from '@/v5/store/tickets/groups/ticketGroups.types';
+import { ViewpointGroupHierarchy } from '@/v5/store/tickets/tickets.types';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -27,7 +27,7 @@ import { AddGroupButton } from '../groups/groupActionMenu/addGroupButton/addGrou
 
 type GroupsAccordionProps = {
 	title: any;
-	groups: IGroup[];
+	groups: ViewpointGroupHierarchy[];
 };
 export const GroupsAccordion = ({ title, groups = [] }: GroupsAccordionProps) => {
 	const [checked, setChecked] = useState(false);
