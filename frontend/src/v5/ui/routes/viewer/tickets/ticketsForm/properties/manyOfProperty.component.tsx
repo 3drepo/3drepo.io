@@ -15,12 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { MultiSelect } from '@controls/inputs/multiSelect/multiSelect.component';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
-import { intersection } from 'lodash';
+import { FormControl, FormHelperText, InputLabel } from '@mui/material';
+import { AssigneesMultiSelect } from '@controls/assigneesSelect/assigneesMultiSelect.component';
 
 type ManyOfPropertyProps = FormInputProps & {
 	open?: boolean;
@@ -33,19 +34,27 @@ export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
 	let items = [];
 
 	if (values === 'jobsAndUsers') {
-		const jobsAndUsers = UsersHooksSelectors.selectUsersAndJobs();
-		items = jobsAndUsers.map((jobOrUser) => jobOrUser._id || jobOrUser.user);
-	} else if (values === 'riskCategories') {
+		return (
+			<FormControl required={props.required} disabled={props.disabled} error={props.error} className={props.className}>
+				<InputLabel id={`${props.name}-label`}>{props.label}</InputLabel>
+				<AssigneesMultiSelect
+					maxItems={20}
+					showAddButton
+					multiple
+					{...props}
+				/>
+				<FormHelperText>{props.helperText}</FormHelperText>
+			</FormControl>
+
+		);
+	} if (values === 'riskCategories') {
 		items = TicketsHooksSelectors.selectRiskCategories() || [];
 	} else {
 		items = (values as string[]);
 	}
-	// For jobsAndUser. Must filter out users not included in this teamspace. This can occur when a user
-	// has been assigned to a ticket and later on is removed from the teamspace
-	const validValues = intersection(props.value, items);
 
 	return (
-		<MultiSelect {...props} value={validValues ?? []}>
+		<MultiSelect {...props} value={props.value || []}>
 			{(items).map((value) => <MultiSelectMenuItem key={value} value={value}>{value}</MultiSelectMenuItem>)}
 		</MultiSelect>
 	);

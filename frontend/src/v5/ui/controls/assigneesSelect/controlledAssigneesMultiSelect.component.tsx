@@ -16,24 +16,23 @@
  */
 
 import { useState } from 'react';
-import { AssigneesSelect, IAssigneesSelect } from './assigneesSelect.component';
+import { AssigneesMultiSelect, IAssigneesMultiSelect } from './assigneesMultiSelect.component';
 
-type ControlledAssigneesSelectProps = Omit<IAssigneesSelect, 'onBlur'> & {
+type ControlledAssigneesMultiSelectProps = Omit<IAssigneesMultiSelect, 'onBlur'> & {
 	onBlur: (values) => void;
 };
 
-export const ControlledAssigneesSelect = ({
+export const ControlledAssigneesMultiSelect = ({
 	value: initialValue,
 	onBlur,
 	...props
-}: ControlledAssigneesSelectProps) => {
+}: ControlledAssigneesMultiSelectProps) => {
 	const [values, setValues] = useState(initialValue);
 	const handleClose = () => {
 		onBlur(values);
 	};
 	const onChange = (e) => setValues(e?.target?.value);
-
 	return (
-		<AssigneesSelect value={values} onBlur={handleClose} onChange={onChange} {...props} />
+		<AssigneesMultiSelect value={values} onBlur={handleClose} onChange={onChange} {...props} />
 	);
 };

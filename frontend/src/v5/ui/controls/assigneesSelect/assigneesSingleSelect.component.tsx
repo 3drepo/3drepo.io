@@ -16,8 +16,6 @@
  */
 
 import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
-import { intersection } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { useCallback, useState } from 'react';
 import { SelectProps } from '@controls/inputs/select/select.component';
@@ -27,38 +25,29 @@ import { SearchContextComponent } from '@controls/search/searchContext';
 import { AddUserButton, AssigneesListContainer, Tooltip } from './assigneesSelect.styles';
 import { AssigneesSelectMenu } from './assigneesSelectMenu/assigneesSelectMenu.component';
 import { AssigneeCircle } from './assigneeCircle/assigneeCircle.component';
-import { ExtraAssigneesPopover } from './extraAssigneesCircle/extraAssigneesPopover.component';
-import { ExtraAssigneesCircle } from './extraAssigneesCircle/extraAssignees.styles';
 
-export type IAssigneesSelect = SelectProps & {
+export type IAssigneesSingleSelect = SelectProps & {
 	maxItems?: number;
 	showAddButton?: boolean;
 	showEmptyText?: boolean;
 };
 
-export const AssigneesSelect = ({
+export const AssigneesSingleSelect = ({
 	value,
-	maxItems = 3,
 	showAddButton = false,
 	showEmptyText = false,
 	disabled,
 	onBlur,
 	className,
 	...props
-}: IAssigneesSelect) => {
+}: IAssigneesSingleSelect) => {
 	const [open, setOpen] = useState(false);
 
 	// Must filter out users not included in this teamspace. This can occur when a user
 	// has been assigned to a ticket and later on is removed from the teamspace
 	const allUsersAndJobs = UsersHooksSelectors.selectUsersAndJobs();
-	const filteredValues = intersection(value, allUsersAndJobs.map((i) => i.user || i._id));
-
-	// Using this logic instead of a simple partition because ExtraAssigneesCircle needs to occupy
-	// the last position when the overflow value is 2+. There is no point showing +1 overflow
-	// since the overflowing assignee could just be displayed instead
-	const overflowRequired = filteredValues.length > maxItems;
-	const listedAssignees = overflowRequired ? filteredValues.slice(0, maxItems - 1) : filteredValues;
-	const overflowValue = overflowRequired ? filteredValues.slice(maxItems - 1).length : 0;
+	// eslint-disable-next-line max-len
+	const userIsValid = allUsersAndJobs.some(({ _id, user }) => [_id, user].includes(value)) ?? '';
 
 	const handleOpen = useCallback((e) => {
 		if (disabled) return;
@@ -67,38 +56,30 @@ export const AssigneesSelect = ({
 	}, []);
 
 	const handleClose = () => {
-		setOpen(false);
 		onBlur();
+		setOpen(false);
 	};
 
 	const filterItems = useCallback((items, query: string) => items
 		.filter(({ _id, firstName, lastName, job }) => [_id, firstName, lastName, job]
-			.some((string) => string?.toLowerCase().includes(query.toLowerCase()))), [filteredValues.length]);
+			.some((string) => string?.toLowerCase().includes(query.toLowerCase()))), []);
 
 	return (
 		<SearchContextComponent filteringFunction={filterItems} items={allUsersAndJobs}>
 			<AssigneesListContainer onClick={handleOpen} className={className}>
 				<AssigneesSelectMenu
 					open={open}
-					value={filteredValues}
+					value={userIsValid ? value : ''}
 					onClose={handleClose}
 					onOpen={handleOpen}
 					disabled={disabled}
 					{...props}
+					multiple={false}
 				/>
-				{listedAssignees.length ? (
-					listedAssignees.map((assignee) => (
-						<AssigneeCircle key={assignee} assignee={assignee} size="small" />
-					))
+				{value ? (
+					<AssigneeCircle assignee={value} size="small" />
 				) : showEmptyText && (
 					<FormattedMessage id="assignees.circleList.unassigned" defaultMessage="Unassigned" />
-				)}
-				{overflowRequired && (
-					<HoverPopover
-						anchor={(attrs) => <ExtraAssigneesCircle {...attrs}> +{overflowValue} </ExtraAssigneesCircle>}
-					>
-						<ExtraAssigneesPopover assignees={filteredValues} />
-					</HoverPopover>
 				)}
 				{!disabled && showAddButton && (
 					<Tooltip

@@ -15,28 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
+import { AssigneesSingleSelect } from '@controls/assigneesSelect/assigneesSingleSelect.component';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { Select } from '@controls/inputs/select/select.component';
-import { MenuItem } from '@mui/material';
+import { FormControl, FormHelperText, InputLabel, MenuItem } from '@mui/material';
 
 type OneOfPropertyProps = FormInputProps & { values: PropertyDefinition['values'] };
 export const OneOfProperty = ({ values, value, ...props }: OneOfPropertyProps) => {
 	let items = [];
 	if (values === 'jobsAndUsers') {
-		const jobsAndUsers = UsersHooksSelectors.selectUsersAndJobs();
-		items = jobsAndUsers.map((jobOrUser) => jobOrUser._id || jobOrUser.user);
-	} else if (values === 'riskCategories') {
+		return (
+			<FormControl required={props.required} disabled={props.disabled} error={props.error} className={props.className}>
+				<InputLabel id={`${props.name}-label`}>{props.label}</InputLabel>
+				<AssigneesSingleSelect
+					value={value}
+					showAddButton
+					{...props}
+				/>
+				<FormHelperText>{props.helperText}</FormHelperText>
+			</FormControl>
+		);
+	} if (values === 'riskCategories') {
 		items = TicketsHooksSelectors.selectRiskCategories() || [];
 	} else {
 		items = (values as string[]);
 	}
-	// For jobsAndUser. Must filter out users not included in this teamspace. This can occur when a user
-	// has been assigned to a ticket and later on is removed from the teamspace
-	const valueIsValid = items.includes(value);
 	return (
-		<Select {...props} value={valueIsValid ? value : ''}>
+		<Select {...props} value={value ?? ''}>
 			{(items as string[]).map((propValue) => (
 				<MenuItem key={propValue} value={propValue}>
 					{propValue}

@@ -59,7 +59,7 @@ export const AssigneesSelectMenu = ({
 		// @ts-ignore
 		<HiddenSelect
 			open={open}
-			value={value || []}
+			value={value}
 			onClick={onClickList}
 			{...props}
 		>
