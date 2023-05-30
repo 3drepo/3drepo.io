@@ -16,12 +16,12 @@
  */
 
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
-import { IGroupSettingsForm } from '@/v5/store/tickets/groups/ticketGroups.types';
+import { IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { PrimaryTicketButton } from '../../../../../ticketButton/ticketButton.styles';
 import { TicketsGroupActionMenu } from '../groupActionMenu.styles';
 import { GroupSettingsForm } from '../groupSettingsForm/groupSettingsForm.component';
 
-export const EditGroupButton = ({ defaultValues }: { defaultValues: IGroupSettingsForm }) => (
+export const EditGroupButton = ({ defaultValues }: { defaultValues?: IGroupSettingsForm }) => (
 	<TicketsGroupActionMenu
 		TriggerButton={(
 			<PrimaryTicketButton>
