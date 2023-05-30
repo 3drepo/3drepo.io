@@ -48,14 +48,6 @@ export const ActionMenu = ({
 		onClose?.();
 	};
 
-	useEffect(() => {
-		if (anchorEl) {
-			onOpen?.();
-			return () => onClose?.();
-		}
-		return () => {};
-	}, [anchorEl]);
-
 	const handlePopoverClick = (e: Event) => {
 		PopoverProps?.onClick?.(e);
 		handleClose();
