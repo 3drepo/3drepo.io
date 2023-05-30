@@ -91,13 +91,13 @@ export const MOCK_DATA: ViewpointState = {
 			prefix: ['____ROOT', 'level 1', 'level 2', 'level 3'],
 		},
 		{
-			opacity: .3,
+			opacity: 0.3,
 			group: {
 				_id: '1d345c50-de89-11ed-8a9c-23f681ce1274',
 				name: 'opacity 0.01',
 				objects: [],
 			},
-		}
+		},
 	],
 	hidden: [{
 		group: smartGroup,
