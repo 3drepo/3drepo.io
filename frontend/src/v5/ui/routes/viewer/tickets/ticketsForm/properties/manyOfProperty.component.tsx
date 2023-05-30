@@ -38,7 +38,7 @@ export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
 			<FormControl required={props.required} disabled={props.disabled} error={props.error} className={props.className}>
 				<InputLabel id={`${props.name}-label`}>{props.label}</InputLabel>
 				<AssigneesMultiSelect
-					maxItems={20}
+					maxItems={17}
 					showAddButton
 					multiple
 					{...props}
