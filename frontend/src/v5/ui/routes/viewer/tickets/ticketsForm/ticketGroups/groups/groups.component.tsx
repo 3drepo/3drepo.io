@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IGroup } from '@/v5/store/tickets/groups/ticketGroups.types';
-import { groupBy, partition, values } from 'lodash';
+import { ViewpointGroupHierarchy, ViewpointGroup } from '@/v5/store/tickets/tickets.types';
+import { groupBy, partition, tail, values } from 'lodash';
 import {
 	CollectionHeadline,
 	CollectionAccordion,
@@ -26,20 +26,20 @@ import { GroupToggle } from '../groupToggle/groupToggle.component';
 import { Name, NameContainer } from './groupItem/groupItem.styles';
 import { GroupItem } from './groupItem/groupItem.component';
 
-type GroupsProps = { groups: IGroup[] };
-export const Groups = ({ groups }: GroupsProps) => {
+type GroupsProps = { currentPrefix?: string[], groups: ViewpointGroupHierarchy[] };
+export const Groups = ({ currentPrefix = [], groups }: GroupsProps) => {
 	const [groupBatches, groupItems] = partition(groups, (g) => g.prefix?.length);
 	const collectionsDict = groupBy(groupBatches, (g) => g.prefix[0]);
 	const collections = values(collectionsDict);
 
 	const collectionToGroup = (collection) => collection.map(({ prefix, ...group }) => ({
 		...group,
-		prefix: prefix.slice(1),
+		prefix: tail(prefix),
 	}));
 
 	return (
 		<>
-			{groupItems.map((group) => (<GroupItem {...group} key={group.group._id} />))}
+			{groupItems.map((group) => (<GroupItem {...group} currentPrefix={currentPrefix} key={(group.group as ViewpointGroup)._id} />))}
 			{collections.map((collection) => (
 				<CollectionAccordion
 					title={(
@@ -54,7 +54,10 @@ export const Groups = ({ groups }: GroupsProps) => {
 					)}
 				>
 					<GroupsContainer>
-						<Groups groups={collectionToGroup(collection)} />
+						<Groups
+							groups={collectionToGroup(collection)}
+							currentPrefix={currentPrefix.concat(collection[0].prefix[0])}
+						/>
 					</GroupsContainer>
 				</CollectionAccordion>
 			))}
