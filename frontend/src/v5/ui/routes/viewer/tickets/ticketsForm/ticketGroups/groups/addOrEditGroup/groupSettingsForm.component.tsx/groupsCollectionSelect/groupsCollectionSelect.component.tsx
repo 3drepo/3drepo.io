@@ -51,11 +51,11 @@ type GroupsCollectionSelectProps = {
 	hierarchies: ViewpointGroupHierarchy[];
 	disabled?: boolean;
 };
-export const GroupsCollectionSelect = ({ value = [], onChange, hierarchies, ...props }: GroupsCollectionSelectProps) => {
+export const GroupsCollectionSelect = ({ value, onChange, hierarchies, ...props }: GroupsCollectionSelectProps) => {
 	const prefixesCombinations = getAllPrefixesCombinations(hierarchies);
 
 	return (
-		<Select value={JSON.stringify(value)} onChange={(e) => onChange(JSON.parse(e.target.value))} {...props}>
+		<Select value={JSON.stringify(value || [])} onChange={(e) => onChange(JSON.parse(e.target.value))} {...props}>
 			<MenuItem value={JSON.stringify([])}>{NONE}</MenuItem>
 			{prefixesCombinations.map((prefix) => (
 				<MenuItemPrefix
