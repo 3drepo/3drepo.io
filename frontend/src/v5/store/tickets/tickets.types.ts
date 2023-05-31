@@ -27,15 +27,15 @@ export interface PropertyDefinition {
 	deprecated?: boolean;
 }
 
-type Property = Record<string, any>;
+export type Properties = Record<string, any>;
 
 export interface ITicket {
 	_id: string,
 	title: string,
 	number: number,
 	type: string,
-	properties: Property,
-	modules?: Record<string, Property>,
+	properties: Properties,
+	modules?: Record<string, Properties>,
 }
 
 export interface TemplateModule {

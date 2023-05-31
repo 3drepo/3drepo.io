@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { SnackbarActions } from '@/v4/modules/snackbar';
+import { isString } from 'lodash';
 import {
 	TicketsTypes,
 	TicketsActions,
@@ -29,9 +30,14 @@ import {
 	CreateTicketAction,
 	FetchTemplateAction,
 	FetchRiskCategoriesAction,
+	FetchTicketGroupsAction,
+	UpsertTicketAndFetchGroupsAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
+import { ITicket, ViewpointState } from './tickets.types';
+import { selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
+import { selectContainersByFederationId } from '../federations/federations.selectors';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsAction) {
 	try {
@@ -58,6 +64,7 @@ export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFedera
 			: API.Tickets.fetchContainerTicket;
 		const ticket = yield fetchModelTicket(teamspace, projectId, modelId, ticketId);
 		yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
+		yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticketId));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
@@ -161,6 +168,74 @@ export function* createTicket({ teamspace, projectId, modelId, ticket, isFederat
 	}
 }
 
+const getViewGroupsIds = (state: ViewpointState): string[] => {
+	const colored = state.colored || [];
+	const hidden = state.hidden || [];
+	const transformed = state.transformed || [];
+
+	return [...colored, ...hidden, ...transformed].map((val) => val.group as unknown as string);
+};
+
+const appendPropertiesGroupsIds = (properties: object, groupsIds: any[]) => {
+	Object.keys(properties).forEach((propName) => {
+		const { state } = properties[propName] || {};
+		if (state) {
+			Array.prototype.push.apply(groupsIds, getViewGroupsIds(state));
+		}
+	});
+};
+
+const getTicketsGroupsIds = (ticket:ITicket) => {
+	const groupsIds = [];
+
+	appendPropertiesGroupsIds(ticket.properties, groupsIds);
+
+	Object.keys(ticket.modules || {}).forEach((module) => {
+		const properties = ticket.modules[module];
+		appendPropertiesGroupsIds(properties, groupsIds);
+	});
+
+	return groupsIds;
+};
+
+export function* fetchTicketGroups({ teamspace, projectId, modelId, ticketId }: FetchTicketGroupsAction) {
+	try {
+		const ticket: ITicket = yield select(selectTicketByIdRaw, modelId, ticketId);
+		const fetchedGroups = yield select(selectTicketsGroups);
+		const isFed = !!(yield select(selectContainersByFederationId, modelId)).length;
+
+		// The filter is to avoid re-fetching groups that were already fetched
+		const groupsIds = getTicketsGroupsIds(ticket).filter((id) => isString(id) && !fetchedGroups[id]);
+
+		const groups = yield all(
+			groupsIds.map((groupId) => API.Tickets.fetchTicketGroup(teamspace, projectId, modelId, ticketId, groupId, isFed)),
+		);
+
+		yield put(TicketsActions.fetchTicketGroupsSuccess(groups));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.fetchTicketGroups.error', defaultMessage: 'trying to fetch the groups for ticket' },
+			),
+			error,
+		}));
+	}
+}
+
+export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, ticket }: UpsertTicketAndFetchGroupsAction) {
+	try {
+		yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
+		yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.fetchTicketGroups.error', defaultMessage: 'trying to fetch the groups for ticket' },
+			),
+			error,
+		}));
+	}
+}
+
 export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.FETCH_TICKETS, fetchTickets);
 	yield takeLatest(TicketsTypes.FETCH_TICKET, fetchTicket);
@@ -169,4 +244,6 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.UPDATE_TICKET, updateTicket);
 	yield takeLatest(TicketsTypes.CREATE_TICKET, createTicket);
 	yield takeLatest(TicketsTypes.FETCH_RISK_CATEGORIES, fetchRiskCategories);
+	yield takeLatest(TicketsTypes.FETCH_TICKET_GROUPS, fetchTicketGroups);
+	yield takeLatest(TicketsTypes.UPSERT_TICKET_AND_FETCH_GROUPS, upsertTicketAndFetchGroups);
 }
