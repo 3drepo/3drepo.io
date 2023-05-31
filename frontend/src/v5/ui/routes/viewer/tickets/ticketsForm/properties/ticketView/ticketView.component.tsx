@@ -28,6 +28,7 @@ import { isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
+import { getViewerState } from '@/v5/helpers/viewpoint.helpers';
 import { BasicTicketImage } from '../basicTicketImage/basicTicketImage.component';
 import { ActionMenu, TicketImageAction } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
 import { TicketImageActionMenu } from '../basicTicketImage/ticketImageActionMenu.component';
@@ -53,9 +54,10 @@ export const TicketView = ({
 	...props
 }: ITicketView) => {
 	const updateViewpoint = async () => {
-		const currentViewpoint = await ViewerService.getViewpoint();
+		const currentCameraAndClipping = await ViewerService.getViewpoint();
 		const screenshot = stripBase64Prefix(await ViewerService.getScreenshot());
-		onChange?.({ screenshot, ...currentViewpoint });
+		const state = await getViewerState();
+		onChange?.({ screenshot, ...currentCameraAndClipping, state });
 	};
 
 	const goToViewpoint = async () => {
