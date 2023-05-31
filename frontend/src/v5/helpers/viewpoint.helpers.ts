@@ -14,10 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { rgbaToHex } from '@/v4/helpers/colors';
-import { generateViewpoint as generateViewpointV4, getNodesIdsFromSharedIds } from '@/v4/helpers/viewpoints';
-import { formatMessage } from '../services/intl';
-import { ViewpointGroupHierarchyType, ViewpointGroupHierarchy, ViewpointGroup, ViewpointState } from '../store/tickets/tickets.types';
+import { Viewpoint, ViewpointGroupHierarchy, ViewpointGroupHierarchyType, ViewpointGroup, ViewpointState } from '@/v5/store/tickets/tickets.types';
+import { getGroupHexColor, rgbaToHex } from '@/v4/helpers/colors';
+import { generateViewpoint as generateViewpointV4, getNodesIdsFromSharedIds, toSharedIds } from '@/v4/helpers/viewpoints';
+import { formatMessage } from '@/v5/services/intl';
+import { getState } from '@/v4/modules/store';
+import { isEmpty, isString } from 'lodash';
+import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors';
 
 const convertToV5GroupHierarchy = (group: any, type: ViewpointGroupHierarchyType): ViewpointGroupHierarchy => {
 	let description = '';
@@ -79,4 +82,63 @@ export const getViewerState = async () => {
 	}
 
 	return state;
+};
+
+const mergeGroups = (groups: any[]) => {
+	const objects = groups.reduce((partialObjects, group) => [...partialObjects, ...group.objects], []);
+	return { objects };
+};
+
+const convertToV4Group = (groupsHierarchy: ViewpointGroupHierarchy) => {
+	const account = selectCurrentTeamspace(getState());
+	const { color, opacity, group: v5Group } = groupsHierarchy;
+
+	if (isString(v5Group)) {
+		return { objects: [] };
+	}
+
+	const group:any = {
+		objects: v5Group.objects.map(({ container: model, _ids }) => ({ account, model, shared_ids: toSharedIds(_ids) })),
+	};
+
+	if (color) {
+		group.color = getGroupHexColor([...color, (opacity ?? 1) * 255]);
+	}
+
+	if (opacity) {
+		group.opacity = opacity;
+	}
+
+	return group;
+};
+
+export const viewpointV5ToV4 = (viewpoint: Viewpoint) => {
+	let v4Viewpoint:any = {};
+	if (viewpoint.camera) {
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		const { position, up, forward: view_dir, type, size: orthographicSize } = viewpoint.camera;
+		v4Viewpoint = { position, up, view_dir, type, orthographicSize, look_at: null, account: null, model: null };
+	}
+
+	if (!isEmpty(viewpoint.state)) {
+		v4Viewpoint.hideIfc = !viewpoint.state.hidden;
+	}
+
+	if (!isEmpty(viewpoint.clippingPlanes)) {
+		v4Viewpoint.clippingPlanes = viewpoint.clippingPlanes;
+	}
+
+	if (!isEmpty(viewpoint.state?.colored)) {
+		v4Viewpoint.override_groups = viewpoint.state.colored.map(convertToV4Group);
+	}
+
+	if (!isEmpty(viewpoint.state?.transformed)) {
+		v4Viewpoint.transformation_groups = viewpoint.state.transformed.map(convertToV4Group);
+	}
+
+	if (!isEmpty(viewpoint.state?.hidden)) {
+		v4Viewpoint.hidden_group = mergeGroups(viewpoint.state.hidden.map(convertToV4Group));
+	}
+
+	return { viewpoint: v4Viewpoint };
 };
