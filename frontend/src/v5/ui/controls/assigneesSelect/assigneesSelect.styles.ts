@@ -15,19 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.styles';
+import { Tooltip as TooltipBase } from '@mui/material';
 import styled from 'styled-components';
 
+export const Tooltip = styled(TooltipBase)``;
+
 export const AssigneesListContainer = styled.div`
+	display: inline-flex;
 	position: relative;
-	width: fit-content;
+	align-items: center;
 	user-select: none;
 	color: ${({ theme }) => theme.palette.base.main};
 	font-size: 10px;
-	height: 28px;
-	line-height: 28px;
+	line-height: 100%;
+	>* {
+		cursor: pointer;
+	}
+	span + ${Tooltip} {
+		margin-left: 13px;
+	}
 
-	.MuiButtonBase-root {
+	.MuiAvatar-root {
 		z-index: 11;
+		margin-right: -8px;
+		outline: 2px solid ${({ theme }) => theme.palette.primary.contrast};
 		&:hover {
 			z-index: 12; /* avatar appears on top when hovered */
 		}
@@ -45,16 +57,32 @@ export const AssigneesListContainer = styled.div`
 			z-index: 10;
 		}
 	}
-	span:last-child .MuiButtonBase-root {
+	span:last-child .MuiAvatar-root {
 		margin: 0;
 	}
 
-	&:hover .MuiButtonBase-root {
+	&:hover .MuiAvatar-root {
 		&::before {
 			opacity: 0.3;
 		}
 		&:hover::before {
 			opacity: 0;
+		}
+	}
+`;
+
+export const AddUserButton = styled(PopoverCircle).attrs({
+	size: 'small',
+})`
+	padding: 5px;
+	box-sizing: border-box;
+	color: ${({ theme }) => theme.palette.base.main};
+	&& {
+		border: 1px dashed ${({ theme }) => theme.palette.base.light};
+		outline: none;
+		margin: 0;
+		&::before {
+			background-color: transparent;
 		}
 	}
 `;

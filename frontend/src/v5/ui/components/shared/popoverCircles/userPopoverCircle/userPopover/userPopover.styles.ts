@@ -24,14 +24,14 @@ export const AvatarWrapper = styled.div`
 `;
 
 export const PopoverContainer = styled.div`
-	padding: 6px 11px 6px 7px;
+	padding: 10px;
 	display: flex;
 	font-family: ${({ theme }) => theme.typography.fontFamily};
 	color: ${({ theme }) => theme.palette.secondary.main};
 `;
 
 export const Data = styled.div`
-	padding: 7px 3px;
+	padding: 0 0 0 10px;
 	height: auto;
 	align-self: center;
 	overflow: hidden;

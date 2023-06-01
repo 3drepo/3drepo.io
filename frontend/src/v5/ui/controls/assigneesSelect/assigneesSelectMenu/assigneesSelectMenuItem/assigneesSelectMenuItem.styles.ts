@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,25 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { StyledIconButton } from '@controls/avatar/avatar.styles';
+import { Checkbox as BaseCheckbox, MenuItem } from '@mui/material';
 import styled from 'styled-components';
-import { BaseCircle } from '../assigneeListItem/assigneeListItem.styles';
 
-export const ExtraAssigneesList = styled.ul`
-	padding: 8px 10px;
-	margin: 0;
+export const ListItemContainer = styled(MenuItem)`
+	width: auto;
+	height: 44px;
+	gap: 7px;
+	padding: 6px 12px;
+	display: flex;
+	align-items: center;
+	box-sizing: border-box;
 `;
 
-export const ExtraAssigneesListItem = styled.li`
+export const Title = styled.div`
 	${({ theme }) => theme.typography.body1};
 	color: ${({ theme }) => theme.palette.secondary.main};
-	list-style-type: none;
+	line-height: 15px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	width: 135px;
 `;
 
-export const ExtraAssigneesContainer = styled(StyledIconButton)`
-	${BaseCircle}
-	.MuiAvatar-root {
-		background-color: ${({ theme }) => theme.palette.primary.main};
-		color: ${({ theme }) => theme.palette.primary.contrast};
-	}
+export const Subtitle = styled(Title)`
+	${({ theme }) => theme.typography.body1};
+	font-size: 11px;
+	color: ${({ theme }) => theme.palette.base.main};
+`;
+
+export const Checkbox = styled(BaseCheckbox)`
+	position: absolute;
+	right: 6px;
 `;
