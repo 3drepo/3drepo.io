@@ -94,7 +94,7 @@ const convertToV4Group = (groupsHierarchy: ViewpointGroupHierarchy) => {
 	const { color, opacity, group: v5Group } = groupsHierarchy;
 
 	if (isString(v5Group)) {
-		return { objects: [] };
+		return { color: [0, 0, 0, 0], objects: [] }; // theres no info yet so I say us an empty group
 	}
 
 	const group:any = {
