@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState } from 'react';
 import { Popover } from '@mui/material';
 import { Menu, Container } from './actionMenu.styles';
 import { ActionMenuContext } from './actionMenuContext';
