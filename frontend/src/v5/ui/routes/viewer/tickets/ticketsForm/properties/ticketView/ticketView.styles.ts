@@ -53,7 +53,7 @@ export const Tooltip = styled(TooltipBase).attrs({
 	componentsProps: {
 		popper: {
 			sx: {
-				marginLeft: '-10px !important',
+				left: -10,
 			},
 		},
 	},
