@@ -31,8 +31,8 @@ export const AssigneeCircle = memo(({ assignee, ...props }: IAssigneeCircle) => 
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const jobsInTeamspace = useSelector(selectJobs);
 	const isJob = jobsInTeamspace.some(({ _id }) => _id === assignee);
+	const user = UsersHooksSelectors.selectUser(teamspace, assignee);
 
 	if (isJob) return <JobPopoverCircle job={jobsInTeamspace.find(({ _id }) => _id === assignee)} {...props} />;
-	const user = UsersHooksSelectors.selectUser(teamspace, assignee);
 	return (<UserPopoverCircle user={user} {...props} />);
 });
