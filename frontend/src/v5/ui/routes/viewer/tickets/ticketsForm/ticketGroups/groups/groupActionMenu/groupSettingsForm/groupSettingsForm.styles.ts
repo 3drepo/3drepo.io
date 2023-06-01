@@ -48,6 +48,7 @@ export const Subheading = styled.div`
 	${({ theme }) => theme.typography.h5};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	padding: 10px 3px;
+	font-weight: ${FONT_WEIGHT.BOLD};
 `;
 
 export const CreateCollectionLink = styled.div`

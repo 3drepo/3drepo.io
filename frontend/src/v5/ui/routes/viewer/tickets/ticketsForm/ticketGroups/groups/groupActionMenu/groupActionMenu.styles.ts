@@ -35,7 +35,7 @@ export const TicketsGroupActionMenu = styled(ActionMenu).attrs({
 		padding: 14px;
 		display: flex;
 		flex-direction: column;
-		width: 328px;
+		width: 362px;
 		border-radius: 10px;
 	}
 	.MuiPaper-root {
