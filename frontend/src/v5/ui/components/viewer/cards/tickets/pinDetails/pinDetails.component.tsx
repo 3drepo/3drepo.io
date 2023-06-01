@@ -85,7 +85,7 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 	return (
 		<FormControl required={required} error={error}>
 			<PinContainer selected={editMode} error={error} disabled={disabled}>
-				<PinName onClick={onClickEditPin} required={required}>
+				<PinName required={required}>
 					{label}
 				</PinName>
 				<PinActions>
