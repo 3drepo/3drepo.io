@@ -42,26 +42,30 @@ import { TicketGroupsContext } from '../../ticketGroupsContext';
 import { EditGroupButton } from '../groupActionMenu/editGroupButton/editGroupButton.component';
 
 type GroupProps = GroupOverride & {
-	currentPrefix: string[],
+	index: number;
 };
-export const GroupItem = ({ group, color, opacity, currentPrefix }: GroupProps) => {
+export const GroupItem = ({ group, color, opacity, prefix, index }: GroupProps) => {
 	const [groupIsVisible, setGroupIsVisible] = useState(false);
-	const { groupType } = useContext(TicketGroupsContext);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+	const { groupType, onGroupChange } = useContext(TicketGroupsContext);
 
-	const deleteGroup = () => {
+	const deleteGroup = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
 		DialogsActionsDispatchers.open('delete', {
 			name: (group as Group).name,
 			message: formatMessage({
 				id: 'deleteModal.groups.message',
-				defaultMessage: 'By deleting this Collection your data will be lost permanently and will not be recoverable.',
+				defaultMessage: 'By deleting this group your data will be lost permanently and will not be recoverable.',
 			}),
-			onClickConfirm: () => {},
-			confirmLabel: formatMessage({ id: 'deleteModal.groups.confirmButton', defaultMessage: 'Delete Collection' }),
+			onClickConfirm: () => onGroupChange(index, null),
+			confirmLabel: formatMessage({ id: 'deleteModal.groups.confirmButton', defaultMessage: 'Delete Group' }),
 		});
 	};
 
-	const toggleShowGroup = () => {
+	const toggleShowGroup = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
 		setGroupIsVisible(!groupIsVisible);
 	};
 
@@ -95,7 +99,7 @@ export const GroupItem = ({ group, color, opacity, currentPrefix }: GroupProps) 
 						<PrimaryTicketButton onClick={toggleShowGroup}>
 							{groupIsVisible ? (<ShowIcon />) : (<HideIcon />)}
 						</PrimaryTicketButton>
-						<EditGroupButton defaultValues={{ color, opacity, ...group, prefix: currentPrefix }} />
+						<EditGroupButton defaultValues={{ color, opacity, ...group, prefix }} />
 					</Buttons>
 				)}
 			</Headline>

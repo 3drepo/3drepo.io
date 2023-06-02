@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { GroupOverride, Group } from '@/v5/store/tickets/tickets.types';
-import { groupBy, partition, tail, values } from 'lodash';
+import { GroupOverride } from '@/v5/store/tickets/tickets.types';
+import { groupBy, isString, partition, values } from 'lodash';
 import {
 	CollectionHeadline,
 	CollectionAccordion,
@@ -26,27 +26,25 @@ import { GroupToggle } from '../groupToggle/groupToggle.component';
 import { Name, NameContainer } from './groupItem/groupItem.styles';
 import { GroupItem } from './groupItem/groupItem.component';
 
-type GroupsProps = { currentPrefix?: string[], groups: GroupOverride[] };
-export const Groups = ({ currentPrefix = [], groups }: GroupsProps) => {
-	const [groupBatches, groupItems] = partition(groups, (g) => g.prefix?.length);
-	const collectionsDict = groupBy(groupBatches, (g) => g.prefix[0]);
+type GroupsProps = {
+	groups: (GroupOverride & { index: number})[],
+	level?: number,
+};
+export const Groups = ({ groups, level = 0 }: GroupsProps) => {
+	const [groupItems, groupBatches] = partition(groups, (g) => (g.prefix?.length || 0) === level);
+	const collectionsDict = groupBy(groupBatches, (g) => g.prefix[level]);
 	const collections = values(collectionsDict);
-
-	const collectionToGroup = (collection) => collection.map(({ prefix, ...group }) => ({
-		...group,
-		prefix: tail(prefix),
-	}));
 
 	return (
 		<>
-			{groupItems.map((group) => (<GroupItem {...group} currentPrefix={currentPrefix} key={(group.group as Group)._id} />))}
+			{groupItems.map((group) => (<GroupItem {...group} key={isString(group.group) ? group.group : group.group._id || group.index} />))}
 			{collections.map((collection) => (
 				<CollectionAccordion
 					title={(
 						<>
 							<CollectionHeadline>
 								<NameContainer>
-									<Name>{collection[0].prefix[0]}</Name>
+									<Name>{collection[0].prefix[level]}</Name>
 								</NameContainer>
 							</CollectionHeadline>
 							<GroupToggle onClick={(e) => e.stopPropagation()} />
@@ -54,10 +52,7 @@ export const Groups = ({ currentPrefix = [], groups }: GroupsProps) => {
 					)}
 				>
 					<GroupsContainer>
-						<Groups
-							groups={collectionToGroup(collection)}
-							currentPrefix={currentPrefix.concat(collection[0].prefix[0])}
-						/>
+						<Groups groups={collection} level={level + 1} />
 					</GroupsContainer>
 				</CollectionAccordion>
 			))}

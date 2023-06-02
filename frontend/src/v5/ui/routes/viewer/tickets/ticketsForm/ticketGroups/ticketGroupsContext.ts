@@ -17,6 +17,6 @@
 
 import { createContext } from 'react';
 
-type TicketGroupsContextType = { groupType: 'colored' | 'hidden' };
-export const TicketGroupsContext = createContext<TicketGroupsContextType>({ groupType: null });
+type TicketGroupsContextType = { groupType: 'colored' | 'hidden', onGroupChange?: (index: number, value)=> void, };
+export const TicketGroupsContext = createContext<TicketGroupsContextType>({ groupType: null, onGroupChange: () => {} });
 TicketGroupsContext.displayName = 'TicketGroupsContext';

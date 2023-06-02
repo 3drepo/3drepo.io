@@ -17,11 +17,10 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
-import { cloneDeep } from 'lodash';
 import { useEffect } from 'react';
+import { cloneDeep } from 'lodash';
 import { Container } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
-import { TicketGroupsContext } from './ticketGroupsContext';
 
 interface TicketGroupsProps {
 	value: Viewpoint;
@@ -32,32 +31,26 @@ interface TicketGroupsProps {
 export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => {
 	const groups: Partial<ViewpointState> = value.state || {};
 
-	const changeState = () => {
-		if (value.state.colored.length) {
-			const newVal = cloneDeep(value);
-			newVal.state.colored.pop();
-
-			onChange?.(newVal);
-		}
+	const onColoredChanged = (colored) => {
+		const newVal = cloneDeep(value);
+		newVal.state.colored = colored;
+		onChange?.(newVal);
 	};
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
+
 	return (
 		<Container>
-			<TicketGroupsContext.Provider value={{ groupType: 'colored' }}>
-				<GroupsAccordion
-					title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
-					groups={groups.colored || []}
-				/>
-			</TicketGroupsContext.Provider>
-			<TicketGroupsContext.Provider value={{ groupType: 'hidden' }}>
-				<GroupsAccordion
-					title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
-					groups={groups.hidden || []}
-				/>
-			</TicketGroupsContext.Provider>
-
-			<button onClick={changeState} type="button">Change Stuff</button>
+			<GroupsAccordion
+				title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
+				overrides={groups.colored || []}
+				colored
+				onChange={onColoredChanged}
+			/>
+			<GroupsAccordion
+				title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
+				overrides={groups.hidden || []}
+			/>
 		</Container>
 	);
 };
