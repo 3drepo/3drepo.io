@@ -29,7 +29,6 @@ import { ErrorTicketButton, PrimaryTicketButton } from '@/v5/ui/routes/viewer/ti
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CircularProgress } from '@mui/material';
 import { isString } from 'lodash';
-import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { useDispatch } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
 import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
@@ -43,14 +42,15 @@ import {
 } from './groupItem.styles';
 import { GroupToggle } from '../../groupToggle/groupToggle.component';
 import { TicketGroupsContext } from '../../ticketGroupsContext';
+import { EditGroupButton } from '../groupActionMenu/editGroupButton/editGroupButton.component';
 
 type GroupProps = GroupOverride & {
 	index: number;
 };
-export const GroupItem = ({ group, color, opacity, index }: GroupProps) => {
+export const GroupItem = ({ group, color, opacity, prefix, index }: GroupProps) => {
 	const [groupIsVisible, setGroupIsVisible] = useState(false);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const { groupType, onGroupDelete, onGroupEdit } = useContext(TicketGroupsContext);
+	const { groupType, onGroupDelete } = useContext(TicketGroupsContext);
 	const dispatch = useDispatch();
 
 	const deleteGroup = (e) => {
@@ -78,8 +78,6 @@ export const GroupItem = ({ group, color, opacity, index }: GroupProps) => {
 		dispatch(TreeActions.showNodesBySharedIds(objects));
 		dispatch(TreeActions.selectNodesBySharedIds(objects, color.map((c) => c / 255)));
 	};
-
-	const editGroup = () => onGroupEdit(index);
 
 	const alphaColor = (color || [255, 255, 255]).concat(opacity);
 	const alphaHexColor = rgbaToHex(alphaColor.join());
@@ -111,9 +109,7 @@ export const GroupItem = ({ group, color, opacity, index }: GroupProps) => {
 						<PrimaryTicketButton onClick={toggleShowGroup}>
 							{groupIsVisible ? (<ShowIcon />) : (<HideIcon />)}
 						</PrimaryTicketButton>
-						<PrimaryTicketButton onClick={editGroup}>
-							<EditIcon />
-						</PrimaryTicketButton>
+						<EditGroupButton defaultValues={{ color, opacity, ...group, prefix }} />
 					</Buttons>
 				)}
 			</Headline>

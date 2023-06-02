@@ -43,11 +43,10 @@ const addIndex = ((overrides: GroupOverride[]) => overrides.map((h, index) => ({
 export const GroupsAccordion = ({ title, overrides = [], colored, onChange }: GroupsAccordionProps) => {
 	const [checked, setChecked] = useState(false);
 	const [editGroupIndex, setEditGroupIndex] = useState<number>(-1);
-	const leftPanels = useSelector(selectLeftPanels);
-	const isSecondaryCard = leftPanels[0] !== VIEWER_PANELS.TICKETS;
-
 	const [indexedGroups, setIndexedGroups] = useState(addIndex(overrides));
+	const leftPanels = useSelector(selectLeftPanels);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+	const isSecondaryCard = leftPanels[0] !== VIEWER_PANELS.TICKETS;
 
 	const groupsCount = overrides.length;
 
@@ -98,7 +97,6 @@ export const GroupsAccordion = ({ title, overrides = [], colored, onChange }: Gr
 					</EmptyListMessage>
 				)}
 				{ isAdmin && <AddGroupButton /> }
-
 				<Popper
 					open={editGroupIndex !== -1}
 					style={{ /* style is required to override the default positioning style Popper gets */
