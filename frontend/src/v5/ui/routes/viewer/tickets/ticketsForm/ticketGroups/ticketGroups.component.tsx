@@ -16,24 +16,48 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { MOCK_DATA } from '@/v5/store/tickets/groups/ticketGroups.helpers';
+import { Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
+import { cloneDeep } from 'lodash';
+import { useEffect } from 'react';
 import { Container } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContext } from './ticketGroupsContext';
 
-export const TicketGroups = () => (
-	<Container>
-		<TicketGroupsContext.Provider value={{ groupType: 'colored' }}>
-			<GroupsAccordion
-				title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
-				groups={MOCK_DATA.colored}
-			/>
-		</TicketGroupsContext.Provider>
-		<TicketGroupsContext.Provider value={{ groupType: 'hidden' }}>
-			<GroupsAccordion
-				title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
-				groups={MOCK_DATA.hidden}
-			/>
-		</TicketGroupsContext.Provider>
-	</Container>
-);
+interface TicketGroupsProps {
+	value: Viewpoint;
+	onChange?: (newvalue) => void;
+	onBlur?: () => void;
+}
+
+export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => {
+	const groups: Partial<ViewpointState> = value.state || {};
+
+	const changeState = () => {
+		if (value.state.colored.length) {
+			const newVal = cloneDeep(value);
+			newVal.state.colored.pop();
+
+			onChange?.(newVal);
+		}
+	};
+
+	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
+	return (
+		<Container>
+			<TicketGroupsContext.Provider value={{ groupType: 'colored' }}>
+				<GroupsAccordion
+					title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
+					groups={groups.colored || []}
+				/>
+			</TicketGroupsContext.Provider>
+			<TicketGroupsContext.Provider value={{ groupType: 'hidden' }}>
+				<GroupsAccordion
+					title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
+					groups={groups.hidden || []}
+				/>
+			</TicketGroupsContext.Provider>
+
+			<button onClick={changeState} type="button">Change Stuff</button>
+		</Container>
+	);
+};

@@ -17,10 +17,10 @@
 
 import { useState } from 'react';
 import GroupsIcon from '@mui/icons-material/GroupWork';
-import { GroupOverride } from '@/v5/store/tickets/tickets.types';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { GroupOverride } from '@/v5/store/tickets/tickets.types';
 import { Accordion, NumberContainer, TitleContainer, Checkbox } from './groupsAccordion.styles';
 import { Groups } from '../groups/groups.component';
 import { AddGroupButton } from '../groups/groupActionMenu/addGroupButton/addGroupButton.component';

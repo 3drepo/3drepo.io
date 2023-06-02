@@ -16,7 +16,7 @@
  */
 
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -28,13 +28,14 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyStrings, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { FormattedMessage } from 'react-intl';
+import { InputController } from '@controls/inputs/inputController.component';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
+import { TicketContext, TicketDetailsView } from '../ticket.context';
 
 export const TicketDetailsCard = () => {
-	const [showGroups, setShowGroups] = useState(false);
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
@@ -42,11 +43,7 @@ export const TicketDetailsCard = () => {
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 
 	const goBack = () => {
-		if (showGroups) {
-			setShowGroups(false);
-		} else {
-			TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
-		}
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
 	};
 
 	const changeTicketIndex = (delta: number) => {
@@ -88,6 +85,7 @@ export const TicketDetailsCard = () => {
 			ticket._id,
 			isFederation,
 		);
+
 		if (!templateAlreadyFetched(template)) {
 			TicketsActionsDispatchers.fetchTemplate(
 				teamspace,
@@ -101,25 +99,38 @@ export const TicketDetailsCard = () => {
 
 	if (!ticket) return (<></>);
 
+	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
+
 	return (
 		<CardContainer>
-			<CardHeader>
-				<ArrowBack onClick={goBack} />
-				{template.code}:{ticket.number}
-				{showGroups ? (
-					<>:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" /></>
-				) : (
-					<HeaderButtons>
-						<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
-						<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
-					</HeaderButtons>
-				)}
-			</CardHeader>
 			<FormProvider {...formData}>
-				{showGroups ? (
-					<TicketGroups />
-				) : (
-					<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} onGroupsClick={() => setShowGroups(true)} />
+				{view === TicketDetailsView.Groups
+					&& (
+						<>
+							<CardHeader>
+								<ArrowBack onClick={() => setDetailViewAndProps(TicketDetailsView.Form)} />
+								{ticket.title}:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" />
+							</CardHeader>
+							<InputController
+								Input={TicketGroups}
+								name={viewProps.name}
+								onBlur={onBlurHandler}
+							/>
+						</>
+					)}
+				{view === TicketDetailsView.Form
+				&& (
+					<>
+						<CardHeader>
+							<ArrowBack onClick={goBack} />
+							{template.code}:{ticket.number}
+							<HeaderButtons>
+								<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
+								<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
+							</HeaderButtons>
+						</CardHeader>
+						<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
+					</>
 				)}
 			</FormProvider>
 		</CardContainer>
