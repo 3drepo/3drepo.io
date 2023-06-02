@@ -22,7 +22,7 @@ import GotoViewpointIcon from '@assets/icons/outlined/aim-outlined.svg';
 
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { MenuItem } from '@mui/material';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
@@ -34,6 +34,7 @@ import { useDispatch } from 'react-redux';
 import { BasicTicketImage } from '../basicTicketImage/basicTicketImage.component';
 import { ActionMenu, TicketImageAction } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
 import { TicketImageActionMenu } from '../basicTicketImage/ticketImageActionMenu.component';
+import { TicketContext, TicketDetailsView } from '../../../ticket.context';
 
 type ITicketView = {
 	value: Viewpoint | undefined;
@@ -43,7 +44,6 @@ type ITicketView = {
 	required: boolean;
 	onBlur: () => void;
 	onChange: (newValue) => void;
-	onGroupsClick: () => void;
 	disabled?: boolean;
 };
 
@@ -51,10 +51,10 @@ export const TicketView = ({
 	value,
 	onBlur,
 	onChange,
-	onGroupsClick,
 	disabled,
 	...props
 }: ITicketView) => {
+	const context = useContext(TicketContext);
 	const dispatch = useDispatch();
 
 	const updateViewpoint = async () => {
@@ -82,6 +82,10 @@ export const TicketView = ({
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
 
+	const onGroupsClick = () => {
+		context.setDetailViewAndProps(TicketDetailsView.Groups, props);
+	};
+
 	const imgSrc = getImgSrc(value?.screenshot);
 	return (
 		<BasicTicketImage
@@ -90,7 +94,6 @@ export const TicketView = ({
 			disabled={disabled}
 			{...props}
 		>
-			{/* //TODO - delete after refactoring */}
 			<TicketImageAction onClick={onGroupsClick}>
 				<b>GROUPS</b>
 			</TicketImageAction>

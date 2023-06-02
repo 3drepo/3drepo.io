@@ -32,7 +32,6 @@ type ITicketsTopPanel = {
 	title: string;
 	properties: PropertyDefinition[];
 	onPropertyBlur?: (...args) => void;
-	onGroupsClick?: () => void;
 	focusOnTitle?: boolean;
 };
 
@@ -41,7 +40,6 @@ export const TicketsTopPanel = ({
 	properties,
 	focusOnTitle,
 	onPropertyBlur,
-	onGroupsClick,
 }: ITicketsTopPanel) => {
 	const { formState, getValues } = useFormContext();
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
@@ -83,7 +81,7 @@ export const TicketsTopPanel = ({
 						disabled={readOnly}
 					/>
 				</DescriptionProperty>
-				<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} onGroupsClick={onGroupsClick} />
+				<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
 			</BaseTicketInfo>
 			{hasIssueProperties && <IssuePropertiesRow onBlur={onPropertyBlur} readOnly={readOnly} />}
 		</TopPanel>
