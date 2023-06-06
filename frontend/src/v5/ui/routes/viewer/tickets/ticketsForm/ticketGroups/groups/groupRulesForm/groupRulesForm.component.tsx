@@ -26,12 +26,12 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { GroupRulesSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { selectMetaKeys } from '@/v4/modules/model';
 import { useSelector } from 'react-redux';
-import { Highlight } from '@controls/highlight';
 import { Autocomplete, TextField } from '@mui/material';
 import { Buttons, Form, InputsContainer } from './groupRulesForm.styles';
 import { IRule, IRuleForm, parseRule, prepareRuleForForm } from './groupRulesForm.helpers';
 import { RuleOperationSelect } from './ruleOperationSelect/ruleOperationSelect.component';
 import { RuleValueField } from './ruleValueField/ruleValueField.component';
+import { ListboxComponent } from './listboxComponent/listboxComponent.component';
 
 const DEFAULT_VALUES: IRuleForm = {
 	field: null,
@@ -44,7 +44,7 @@ type IGroupRules = {
 	onSave?: (rule: IRule) => void;
 };
 export const GroupRulesForm = ({ onSave, rule }: IGroupRules) => {
-	const [fieldValue, setFieldValue] = useState(rule?.field || '');
+	const [value, setValue] = useState(rule?.field || '');
 	const fields = useSelector(selectMetaKeys);
 	const formData = useForm<IRuleForm>({
 		defaultValues: rule ? prepareRuleForForm(rule) : DEFAULT_VALUES,
@@ -71,15 +71,13 @@ export const GroupRulesForm = ({ onSave, rule }: IGroupRules) => {
 						render={({ field: { onChange, ...autocompleteProps } }) => (
 							<Autocomplete
 								{...autocompleteProps}
+								renderOption={(props, option) => [props, option, value]}
+								disableListWrap
+								ListboxComponent={ListboxComponent}
 								options={fields}
 								noOptionsText={formatMessage({ id: 'tickets.groups.field.noOptions', defaultMessage: 'No options' })}
 								onChange={(_, data) => onChange(data)}
-								onInputChange={(_, value) => setFieldValue(value)}
-								renderOption={(fieldProps, field: string) => (
-									<li {...fieldProps}>
-										<Highlight search={fieldValue}>{field}</Highlight>
-									</li>
-								)}
+								onInputChange={(_, newValue) => setValue(newValue)}
 								renderInput={(renderInputProps) => (
 									<TextField
 										{...renderInputProps}
