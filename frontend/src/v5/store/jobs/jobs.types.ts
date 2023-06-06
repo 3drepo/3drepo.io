@@ -15,25 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
-import { BasicComment } from '../basicComment/basicComment.component';
-
-export const AuthorAvatar = styled(UserPopoverCircle)`
-	position: absolute;
-	top: 0;
-
-	.MuiAvatar-root {
-		border: none;
-	}
-`;
-
-export const Comment = styled(BasicComment)<{ isFirstOfBlock: boolean }>`
-	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
-	color: ${({ theme }) => theme.palette.secondary.main};
-	margin-left: 39px;
-
-	${({ isFirstOfBlock }) => isFirstOfBlock && css`
-		border-top-left-radius: 0;
-	`}
-`;
+export type IJob = {
+	_id: string;
+	color: string;
+};

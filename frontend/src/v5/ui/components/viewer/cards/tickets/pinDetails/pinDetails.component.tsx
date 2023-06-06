@@ -28,10 +28,10 @@ import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { PinAction, PinActions, PinContainer, PinName, SettingLocationText } from './pinDetails.styles';
 
-export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText, disabled }: FormInputProps) => {
+export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
-	const pinId = `new-${label}`;
+	const pinId = name;
 
 	const cancelEdit = () => {
 		if (!editMode) return;
@@ -85,7 +85,7 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 	return (
 		<FormControl required={required} error={error}>
 			<PinContainer selected={editMode} error={error} disabled={disabled}>
-				<PinName onClick={onClickEditPin} required={required}>
+				<PinName required={required}>
 					{label}
 				</PinName>
 				<PinActions>
