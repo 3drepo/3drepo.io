@@ -26,7 +26,6 @@ import { SearchContextComponent } from '@controls/search/searchContext';
 import { Tooltip } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { identity, pickBy } from 'lodash';
 import { useContainersData } from '../../../containers/containers.hooks';
 import { IconContainer, IncludeIcon, RemoveIcon } from './editFederation.styles';
 import { ActionButtonProps, EditFederationContainers } from './editFederationContainersList/editFederationContainersList.component';
@@ -53,7 +52,7 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 	}, [containers]);
 
 	useEffect(() => {
-		onContainersChange(pickBy(includedContainers, identity)); // filter out 'undefined' which are unassigned containers
+		onContainersChange(includedContainers.filter(Boolean)); // filter out 'undefined' which are unassigned containers
 		setAvailableContainers(containers.filter((container) => !includedContainers.includes(container)));
 	}, [includedContainers]);
 
