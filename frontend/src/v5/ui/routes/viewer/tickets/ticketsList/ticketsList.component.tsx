@@ -17,14 +17,16 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { flatMap } from 'lodash';
+import { flatMap, get } from 'lodash';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
+import { TicketStatuses, TreatmentLevels } from '@controls/chip/chip.types';
+import { formatMessage } from '@/v5/services/intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
-import { List, Filters } from './ticketsList.styles';
+import { List, Filters, CompletedFilterChip } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
 import { AdditionalProperties, TicketsCardViews } from '../tickets.constants';
 
@@ -33,6 +35,7 @@ type TicketsListProps = {
 };
 
 export const TicketsList = ({ tickets }: TicketsListProps) => {
+	const [showingCompleted, setShowingCompleted] = useState(false);
 	const [selectedTemplates, setSelectedTemplates] = useState<Set<string>>(new Set());
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
@@ -49,11 +52,21 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		setSelectedTemplates(new Set(selectedTemplates));
 	};
 
+	const filterCompleted = (ticket) => {
+		const issuePropertyStatus = get(ticket, 'properties.Status');
+		const treatmentStatus = get(ticket, 'modules.safetibase.Treatment Status');
+
+		const isCompletedIssueProperty = [TicketStatuses.CLOSED, TicketStatuses.VOID].includes(issuePropertyStatus);
+		const isCompletedTreatmentStatus = [TreatmentLevels.AGREED_FULLY, TreatmentLevels.VOID].includes(treatmentStatus);
+
+		return (isCompletedIssueProperty || isCompletedTreatmentStatus) === showingCompleted;
+	};
+
 	const getTicketsByTemplateId = (templateId: string) => tickets.filter(({ type }) => type === templateId);
 
 	const getFilteredTickets = () => {
-		if (selectedTemplates.size === 0) return tickets;
-		return flatMap([...selectedTemplates], getTicketsByTemplateId);
+		if (selectedTemplates.size === 0) return tickets.filter(filterCompleted);
+		return flatMap([...selectedTemplates], getTicketsByTemplateId).filter(filterCompleted);
 	};
 
 	const getTemplatesForFilter = () => templates.filter(({ _id }) => getTicketsByTemplateId(_id).length > 0);
@@ -80,6 +93,12 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	return (
 		<>
 			<Filters>
+				<CompletedFilterChip
+					key="completed"
+					selected={showingCompleted}
+					onClick={() => setShowingCompleted((prev) => !prev)}
+					label={formatMessage({ id: 'ticketsList.filters.completed', defaultMessage: 'Completed' })}
+				/>
 				{getTemplatesForFilter().map(({ name, _id }) => (
 					<FilterChip
 						key={_id}
