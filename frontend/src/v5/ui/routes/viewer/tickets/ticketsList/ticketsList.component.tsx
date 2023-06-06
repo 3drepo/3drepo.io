@@ -23,7 +23,7 @@ import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers'
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
-import { TicketStatuses, TreatmentLevels } from '@controls/chip/chip.types';
+import { TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters, CompletedFilterChip } from './ticketsList.styles';
@@ -57,7 +57,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		const treatmentStatus = get(ticket, 'modules.safetibase.Treatment Status');
 
 		const isCompletedIssueProperty = [TicketStatuses.CLOSED, TicketStatuses.VOID].includes(issuePropertyStatus);
-		const isCompletedTreatmentStatus = [TreatmentLevels.AGREED_FULLY, TreatmentLevels.VOID].includes(treatmentStatus);
+		const isCompletedTreatmentStatus = [TreatmentStatuses.AGREED_FULLY, TreatmentStatuses.VOID].includes(treatmentStatus);
 
 		return (isCompletedIssueProperty || isCompletedTreatmentStatus) === showingCompleted;
 	};
