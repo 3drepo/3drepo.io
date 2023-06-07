@@ -50,6 +50,9 @@ export const CompletedFilterChip = styled(FilterChip)<{ selected: boolean }>`
 		${({ selected, theme: { palette } }) => selected && css`
 			color: ${palette.primary.contrast};
 			background-color: ${palette.success.main};
+			&:hover {
+				background-color: ${palette.success.main};
+			}
 		`}
 	}
 `;
