@@ -21,7 +21,7 @@ import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
 import { ModelId, TeamspaceId, TeamspaceProjectAndModel } from '../store.types';
-import { ITemplate, ITicket, NewTicket, ViewpointGroup } from './tickets.types';
+import { ITemplate, ITicket, NewTicket, Group } from './tickets.types';
 
 const mergeWithArray = (objValue, srcValue) => mergeWith(objValue, srcValue, (target, src) => {
 	if (isArray(target)) return src; // If its an array that is merging just use the newest
@@ -115,7 +115,7 @@ export interface ITicketsState {
 	ticketsByModelId: Record<string, ITicket[]>,
 	templatesByModelId: Record<string, ITemplate[]>,
 	riskCategories: string[],
-	groupsByGroupId: Record<string, ViewpointGroup>,
+	groupsByGroupId: Record<string, Group>,
 }
 
 export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean };
@@ -132,7 +132,7 @@ export type FetchTemplatesSuccessAction = Action<'FETCH_TEMPLATES_SUCCESS'> & Mo
 export type FetchRiskCategoriesAction = Action<'FETCH_RISK_CATEGORIES'> & TeamspaceId;
 export type FetchRiskCategoriesSuccessAction = Action<'FETCH_RISK_CATEGORIES_SUCCESS'> & { riskCategories: string[] };
 export type FetchTicketGroupsAction = Action<'FETCH_TICKET_GROUPS'> & TeamspaceProjectAndModel & { ticketId:string, groupId: string };
-export type FetchTicketGroupsSuccessAction = Action<'FETCH_TICKET_GROUPS_SUCCESS'> & { groups: ViewpointGroup[] };
+export type FetchTicketGroupsSuccessAction = Action<'FETCH_TICKET_GROUPS_SUCCESS'> & { groups: Group[] };
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -194,6 +194,6 @@ export interface ITicketsActionCreators {
 		ticketId: string,
 	) => FetchTicketGroupsAction;
 	fetchTicketGroupsSuccess: (
-		groups: ViewpointGroup[],
+		groups: Group[],
 	) => FetchTicketGroupsSuccessAction;
 }

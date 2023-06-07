@@ -16,29 +16,29 @@
  */
 
 import { isString } from 'lodash';
-import { ViewpointGroup, ViewpointGroupHierarchy, ViewpointState, Properties } from './tickets.types';
+import { Group, GroupOverride, ViewpointState, Properties } from './tickets.types';
 
-const hierarchyWithGroups = (groups: Record<string, ViewpointGroup>) => (hierarchy: ViewpointGroupHierarchy) => {
-	const hierarchyToReturn = { ...hierarchy };
-	if (isString(hierarchy.group) && groups[hierarchy.group]) {
-		hierarchyToReturn.group = groups[hierarchy.group];
+const overrideWithGroups = (groups: Record<string, Group>) => (override: GroupOverride) => {
+	const overrideToReturn = { ...override };
+	if (isString(override.group) && groups[override.group]) {
+		overrideToReturn.group = groups[override.group];
 	}
-	return hierarchyToReturn;
+	return overrideToReturn;
 };
 
-const createStateWithGroup = (state: ViewpointState, groups: Record<string, ViewpointGroup>) => {
+const createStateWithGroup = (state: ViewpointState, groups: Record<string, Group>) => {
 	const stateToReturn = { ...state };
 
 	if (state.colored) {
-		stateToReturn.colored = stateToReturn.colored.map(hierarchyWithGroups(groups));
+		stateToReturn.colored = stateToReturn.colored.map(overrideWithGroups(groups));
 	}
 
 	if (state.transformed) {
-		stateToReturn.transformed = stateToReturn.transformed.map(hierarchyWithGroups(groups));
+		stateToReturn.transformed = stateToReturn.transformed.map(overrideWithGroups(groups));
 	}
 
 	if (state.hidden) {
-		stateToReturn.hidden = stateToReturn.hidden.map(hierarchyWithGroups(groups));
+		stateToReturn.hidden = stateToReturn.hidden.map(overrideWithGroups(groups));
 	}
 
 	return stateToReturn;

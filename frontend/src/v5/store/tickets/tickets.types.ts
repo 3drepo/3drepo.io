@@ -77,7 +77,7 @@ export type ClippingPlane = {
 	clipDirection: 1 | -1;
 };
 
-export type ViewpointGroup = {
+export type Group = {
 	_id?: string,
 	name: string,
 	description: string,
@@ -85,24 +85,24 @@ export type ViewpointGroup = {
 	rules?: object[]
 };
 
-export enum ViewpointGroupHierarchyType {
+export enum ViewpointGroupOverrideType {
 	COLORED,
 	HIDDEN,
 	TRANSFORMED,
 }
 
-export type ViewpointGroupHierarchy = {
+export type GroupOverride = {
 	prefix?: string[],
-	group: string | ViewpointGroup,
+	group: string | Group,
 	color?: [number, number, number],
 	opacity?: number,
 };
 
 export type ViewpointState = {
 	showDefaultHidden: boolean;
-	hidden?: ViewpointGroupHierarchy[],
-	colored?: ViewpointGroupHierarchy[],
-	transformed?: ViewpointGroupHierarchy[],
+	hidden?: GroupOverride[],
+	colored?: GroupOverride[],
+	transformed?: GroupOverride[],
 };
 
 export type Viewpoint = {
