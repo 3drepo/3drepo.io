@@ -21,6 +21,7 @@ import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { GroupOverride } from '@/v5/store/tickets/tickets.types';
+import { useForm } from 'react-hook-form';
 import { Accordion, NumberContainer, TitleContainer, Checkbox } from './groupsAccordion.styles';
 import { Groups } from '../groups/groups.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
@@ -37,6 +38,9 @@ const addIndex = ((overrides: GroupOverride[]) => overrides.map((h, index) => ({
 
 export const GroupsAccordion = ({ title, overrides: groups = [], colored, onChange }: GroupsAccordionProps) => {
 	const [checked, setChecked] = useState(false);
+	const [editGroup, setEditGroup] = useState<number | null>(null);
+	const { register, handleSubmit, setValue } = useForm();
+
 	const [indexedGroups, setIndexedGroups] = useState(addIndex(groups));
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
@@ -47,21 +51,27 @@ export const GroupsAccordion = ({ title, overrides: groups = [], colored, onChan
 		setChecked(!checked);
 	};
 
-	const onGroupChange = (index, value) => {
+	const onGroupDelete = (index) => {
 		const newGroupsValue = [...groups];
+		newGroupsValue.splice(index, 1);
+		onChange?.(newGroupsValue);
+	};
 
-		if (value) {
-			newGroupsValue[index] = value;
-		} else {
-			newGroupsValue.splice(index, 1);
-		}
+	const onGroupEdit = (index) => {
+		setEditGroup(index);
+		setValue('group', JSON.stringify(groups[index], null, '\t'));
+	};
+
+	const onSubmit = ({ group }) => {
+		const newGroupsValue = [...groups];
+		newGroupsValue[editGroup] = JSON.parse(group);
+		setEditGroup(null);
 		onChange?.(newGroupsValue);
 	};
 
 	useEffect(() => setIndexedGroups(addIndex(groups)), [groups]);
-
 	return (
-		<TicketGroupsContext.Provider value={{ groupType: colored ? 'colored' : 'hidden', onGroupChange }}>
+		<TicketGroupsContext.Provider value={{ groupType: colored ? 'colored' : 'hidden', onGroupDelete, onGroupEdit }}>
 			<Accordion
 				Icon={GroupsIcon}
 				title={(
@@ -84,6 +94,14 @@ export const GroupsAccordion = ({ title, overrides: groups = [], colored, onChan
 					</EmptyListMessage>
 				)}
 				{ isAdmin && <AddGroupButton /> }
+				{editGroup !== null && (
+					<>
+						<form onSubmit={handleSubmit(onSubmit)}>
+							<textarea {...register('group')} />
+							<button type="submit">Save change</button>
+						</form>
+					</>
+				)}
 			</Accordion>
 		</TicketGroupsContext.Provider>
 	);

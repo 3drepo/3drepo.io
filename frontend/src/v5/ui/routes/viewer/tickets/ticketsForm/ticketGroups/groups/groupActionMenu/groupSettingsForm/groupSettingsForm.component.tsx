@@ -30,7 +30,6 @@ import { ActionMenuItem } from '@controls/actionMenu';
 import { GroupOverride, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
-import { MOCK_DATA } from '@/v5/store/tickets/groups/ticketGroups.helpers';
 import { GroupsCollectionSelect } from '../../addOrEditGroup/groupSettingsForm.component.tsx/groupsCollectionSelect/groupsCollectionSelect.component';
 import { TicketGroupsContext } from '../../../ticketGroupsContext';
 import {
@@ -78,7 +77,7 @@ type GroupSettingsFormProps = {
 };
 export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => {
 	const [isSmart, setIsSmart] = useState(!!defaultValues?.rules?.length);
-	const [prefixesCombinations] = useState(getAllPrefixesCombinations(MOCK_DATA.colored));
+	const [prefixesCombinations] = useState(getAllPrefixesCombinations([]));
 	const [newCollection, setNewCollection] = useState([]);
 	const isHidden = useContext(TicketGroupsContext).groupType === 'hidden';
 	const formData = useForm<IGroupSettingsForm>({
