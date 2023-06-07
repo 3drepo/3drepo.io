@@ -28,6 +28,11 @@ export const ListItemContainer = styled(MenuItem)`
 	box-sizing: border-box;
 `;
 
+export const Titles = styled.div`
+	width: calc(100% - 60px);
+    overflow: hidden;
+`;
+
 export const Title = styled.div`
 	${({ theme }) => theme.typography.body1};
 	color: ${({ theme }) => theme.palette.secondary.main};
@@ -35,7 +40,6 @@ export const Title = styled.div`
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;
-	width: 135px;
 `;
 
 export const Subtitle = styled(Title)`
