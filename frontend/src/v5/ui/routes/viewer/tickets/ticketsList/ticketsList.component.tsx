@@ -27,6 +27,7 @@ import { TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
 import { formatMessage } from '@/v5/services/intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
+import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters, CompletedFilterChip } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
@@ -98,6 +99,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 				<CompletedFilterChip
 					key="completed"
 					selected={showingCompleted}
+					icon={<TickIcon />}
 					onClick={() => setShowingCompleted((prev) => !prev)}
 					label={formatMessage({ id: 'ticketsList.filters.completed', defaultMessage: 'Completed' })}
 				/>
