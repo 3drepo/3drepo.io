@@ -43,7 +43,7 @@ export const TicketsListCard = () => {
 					<TicketsList tickets={tickets} />
 				) : (
 					<EmptyListMessage>
-						<FormattedMessage id="viewer.cards.tickets.emptyList" defaultMessage="No tickets have been created yet" />
+						<FormattedMessage id="viewer.cards.tickets.noTickets" defaultMessage="No tickets have been created yet" />
 					</EmptyListMessage>
 				)}
 			</CardContent>

@@ -17,7 +17,7 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { flatMap, get } from 'lodash';
+import { flatMap, get, isEmpty } from 'lodash';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
@@ -25,6 +25,8 @@ import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
 import { formatMessage } from '@/v5/services/intl';
+import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
+import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters, CompletedFilterChip } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
@@ -64,10 +66,10 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 
 	const getTicketsByTemplateId = (templateId: string) => tickets.filter(({ type }) => type === templateId);
 
-	const getFilteredTickets = () => {
+	const getFilteredTickets = (() => {
 		if (selectedTemplates.size === 0) return tickets.filter(filterCompleted);
 		return flatMap([...selectedTemplates], getTicketsByTemplateId).filter(filterCompleted);
-	};
+	})();
 
 	const getTemplatesForFilter = () => templates.filter(({ _id }) => getTicketsByTemplateId(_id).length > 0);
 
@@ -109,7 +111,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 				))}
 			</Filters>
 			<List>
-				{getFilteredTickets().map((ticket) => (
+				{getFilteredTickets.map((ticket) => (
 					<TicketItem
 						ticket={ticket}
 						key={ticket._id}
@@ -117,6 +119,11 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 						selected={ticketIsSelected(ticket)}
 					/>
 				))}
+				{isEmpty(getFilteredTickets) && (
+					<EmptyListMessage>
+						<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
+					</EmptyListMessage>
+				)}
 			</List>
 		</>
 	);
