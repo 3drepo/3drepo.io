@@ -27,15 +27,15 @@ export interface PropertyDefinition {
 	deprecated?: boolean;
 }
 
-type Property = Record<string, any>;
+export type Properties = Record<string, any>;
 
 export interface ITicket {
 	_id: string,
 	title: string,
 	number: number,
 	type: string,
-	properties: Property,
-	modules?: Record<string, Property>,
+	properties: Properties,
+	modules?: Record<string, Properties>,
 }
 
 export interface TemplateModule {
@@ -77,8 +77,37 @@ export type ClippingPlane = {
 	clipDirection: 1 | -1;
 };
 
+export type Group = {
+	_id?: string,
+	name: string,
+	description: string,
+	objects?: { container: string, _ids: [] }[]
+	rules?: object[]
+};
+
+export enum ViewpointGroupOverrideType {
+	COLORED,
+	HIDDEN,
+	TRANSFORMED,
+}
+
+export type GroupOverride = {
+	prefix?: string[],
+	group: string | Group,
+	color?: [number, number, number],
+	opacity?: number,
+};
+
+export type ViewpointState = {
+	showDefaultHidden: boolean;
+	hidden?: GroupOverride[],
+	colored?: GroupOverride[],
+	transformed?: GroupOverride[],
+};
+
 export type Viewpoint = {
 	screenshot?: any;
-	camera: Camera;
+	camera?: Camera;
 	clippingPlanes?: ClippingPlane[];
+	state?: ViewpointState;
 };

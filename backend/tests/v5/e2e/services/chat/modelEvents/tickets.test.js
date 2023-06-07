@@ -372,6 +372,99 @@ const commentUpdatedTest = () => {
 	});
 };
 
+const groupUpdatedTest = () => {
+	describe('Updating a group', () => {
+		const templateWithView = ServiceHelper.generateTemplate(false, true);
+		const containerTicketWithView = ServiceHelper.generateTicket(templateWithView);
+		const federationTicketWithView = ServiceHelper.generateTicket(templateWithView);
+
+		beforeAll(async () => {
+			await ServiceHelper.db.createTemplates(teamspace, [templateWithView]);
+			const addTicketRoute = (modelType, modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${user.apiKey}`;
+			const getTicketRoute = (modelType, modelId, ticketId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets/${ticketId}?key=${user.apiKey}`;
+
+			const [{ body: { _id: conTickId } }, { body: { _id: fedTickId } }] = await Promise.all([
+				agent.post(addTicketRoute('container', container._id)).send(containerTicketWithView),
+				agent.post(addTicketRoute('federation', federation._id)).send(federationTicketWithView),
+			]);
+
+			const [{ body: conTickRes }, { body: fedTicketRes }] = await Promise.all([
+				agent.get(getTicketRoute('container', container._id, conTickId)),
+				agent.get(getTicketRoute('federation', federation._id, fedTickId)),
+			]);
+
+			containerTicketWithView._id = conTickId;
+			federationTicketWithView._id = fedTickId;
+
+			[conTickRes, fedTicketRes].forEach((getRes) => {
+				for (const field in getRes.properties) {
+					if (getRes.properties[field]?.state) {
+						const groupId = getRes.properties[field].state.hidden[1].group;
+						const t = getRes === conTickRes ? containerTicketWithView : federationTicketWithView;
+						t.group = groupId;
+					}
+				}
+			});
+		});
+
+		test(`should trigger a ${EVENTS.CONTAINER_UPDATE_TICKET_GROUP} event when a container ticket group has been updated`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: container._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.CONTAINER_UPDATE_TICKET_GROUP, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			const updateData = { name: generateRandomString() };
+			await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/${containerTicketWithView._id}/groups/${containerTicketWithView.group}?key=${user.apiKey}`)
+				.send(updateData)
+				.expect(templates.ok.status);
+
+			await expect(socketPromise).resolves.toEqual({
+				...data,
+				data: {
+					_id: containerTicketWithView.group,
+					ticket: containerTicketWithView._id,
+					...updateData,
+				},
+			});
+
+			socket.close();
+		});
+
+		test(`should trigger a ${EVENTS.FEDERATION_UPDATE_TICKET_GROUP} event when a federation ticket group has been updated`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: federation._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const socketPromise = new Promise((resolve, reject) => {
+				socket.on(EVENTS.FEDERATION_UPDATE_TICKET_GROUP, resolve);
+				setTimeout(reject, 1000);
+			});
+
+			const updateData = { name: generateRandomString() };
+			await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}/tickets/${federationTicketWithView._id}/groups/${federationTicketWithView.group}?key=${user.apiKey}`)
+				.send(updateData)
+				.expect(templates.ok.status);
+
+			await expect(socketPromise).resolves.toEqual({
+				...data,
+				data: {
+					_id: federationTicketWithView.group,
+					ticket: federationTicketWithView._id,
+					...updateData,
+				},
+			});
+
+			socket.close();
+		});
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	let server;
 	let chatApp;
@@ -389,4 +482,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	ticketUpdatedTest();
 	commentAddedTest();
 	commentUpdatedTest();
+	groupUpdatedTest();
 });
