@@ -47,7 +47,7 @@ type GroupProps = GroupOverride & {
 export const GroupItem = ({ group, color, opacity, prefix, index }: GroupProps) => {
 	const [groupIsVisible, setGroupIsVisible] = useState(false);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const { groupType, onGroupChange } = useContext(TicketGroupsContext);
+	const { groupType, onGroupDelete, onGroupEdit } = useContext(TicketGroupsContext);
 
 	const deleteGroup = (e) => {
 		e.preventDefault();
@@ -58,7 +58,7 @@ export const GroupItem = ({ group, color, opacity, prefix, index }: GroupProps) 
 				id: 'deleteModal.groups.message',
 				defaultMessage: 'By deleting this group your data will be lost permanently and will not be recoverable.',
 			}),
-			onClickConfirm: () => onGroupChange(index, null),
+			onClickConfirm: () => onGroupDelete(index),
 			confirmLabel: formatMessage({ id: 'deleteModal.groups.confirmButton', defaultMessage: 'Delete Group' }),
 		});
 	};
@@ -68,6 +68,8 @@ export const GroupItem = ({ group, color, opacity, prefix, index }: GroupProps) 
 		e.stopPropagation();
 		setGroupIsVisible(!groupIsVisible);
 	};
+
+	const editGroup = () => onGroupEdit(index);
 
 	const alphaColor = (color || [255, 255, 255]).concat(opacity);
 	const alphaHexColor = rgbaToHex(alphaColor.join());
