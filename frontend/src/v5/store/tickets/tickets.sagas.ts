@@ -176,7 +176,7 @@ const getViewGroupsIds = (state: ViewpointState): string[] => {
 	return [...colored, ...hidden, ...transformed].map((val) => val.group as unknown as string);
 };
 
-const appendPropertiesGroupsIds = (properties: object, groupsIds: any[]) => {
+const appendPropertiesGroupsToArray = (groupsIds: any[], properties: object) => {
 	Object.keys(properties).forEach((propName) => {
 		const { state } = properties[propName] || {};
 		if (state) {
@@ -188,11 +188,11 @@ const appendPropertiesGroupsIds = (properties: object, groupsIds: any[]) => {
 const getTicketsGroupsIds = (ticket:ITicket) => {
 	const groupsIds = [];
 
-	appendPropertiesGroupsIds(ticket.properties, groupsIds);
+	appendPropertiesGroupsToArray(groupsIds, ticket.properties);
 
 	Object.keys(ticket.modules || {}).forEach((module) => {
 		const properties = ticket.modules[module];
-		appendPropertiesGroupsIds(properties, groupsIds);
+		appendPropertiesGroupsToArray(groupsIds, properties);
 	});
 
 	return groupsIds;

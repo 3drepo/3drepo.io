@@ -64,7 +64,7 @@ export const TicketView = ({
 		onChange?.({ screenshot, ...currentCameraAndClipping, state });
 	};
 
-	const goToViewpoint = async () => {
+	const goToViewpoint = () => {
 		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(value)));
 	};
 

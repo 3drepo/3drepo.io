@@ -86,9 +86,9 @@ export type ViewpointGroup = {
 };
 
 export enum ViewpointGroupHierarchyType {
-	Colour,
-	Hidden,
-	Transform,
+	COLORED,
+	HIDDEN,
+	TRANSFORMED,
 }
 
 export type ViewpointGroupHierarchy = {
