@@ -15,12 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const DayJS = require('dayjs');
+
 const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getCollectionsEndsWith, parsePath } = require('../../utils');
 
 const { getTeamspaceActiveLicenses } = require(`${v5Path}/models/teamspaceSettings`);
+const { getLastLoginDate } = require(`${v5Path}/models/loginRecords`);
 
 const { aggregate, listDatabases } = require(`${v5Path}/handler/db`);
 
@@ -28,6 +31,8 @@ const Path = require('path');
 const FS = require('fs');
 
 const DEFAULT_OUT_FILE = 'fsReport.csv';
+
+const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
 
 const determineDBList = async (toInclude, toExclude) => {
 	if (toInclude?.length && toExclude?.length) {
@@ -72,8 +77,12 @@ const run = async (includeDB, excludeDB, outFile) => {
 		const sizeMB = size / (1024 * 1024);
 		logger.logInfo(`-${dbName} ( ${nFiles} files, ${sizeMB.toFixed(2)}MiB)`);
 		// eslint-disable-next-line no-await-in-loop
-		const license = await getTeamspaceActiveLicenses(dbName);
-		writeStream.write(`${dbName},${nFiles},${sizeMB},${license ? 'Yes' : 'No'}\n`);
+		const [license, lastLogin] = await Promise.all([
+			getTeamspaceActiveLicenses(dbName),
+			getLastLoginDate(dbName),
+		]);
+		logger.logInfo(`\t${dbName},${nFiles},${sizeMB},${lastLogin ? formatDate(lastLogin) : 'NEVER'},${license ? 'Yes' : 'No'}`);
+		writeStream.write(`${dbName},${nFiles},${sizeMB},${lastLogin ? formatDate(lastLogin) : 'NEVER'},${license ? 'Yes' : 'No'}\n`);
 	}
 	writeStream.end();
 };
