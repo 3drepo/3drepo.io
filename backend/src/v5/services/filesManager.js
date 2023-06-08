@@ -137,8 +137,7 @@ const getFileAsStream = async (teamspace, collection, refEntry, chunkInfo) => {
 		readStream = await FSHandler.getFileStream(link, chunkInfo);
 		break;
 	case 'gridfs':
-		// fixme
-		readStream = await GridFSHandler.getFileStream(teamspace, collection, link);
+		readStream = await GridFSHandler.getFileStream(teamspace, collection, link, chunkInfo);
 		break;
 	default:
 		logger.logError(`Unrecognised external service: ${type}`);
