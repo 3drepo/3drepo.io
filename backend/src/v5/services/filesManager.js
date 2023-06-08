@@ -128,15 +128,16 @@ FilesManager.getFile = async (teamspace, collection, fileName) => {
 	}
 };
 
-const getFileAsStream = async (teamspace, collection, refEntry) => {
+const getFileAsStream = async (teamspace, collection, refEntry, chunkInfo) => {
 	const { type, link, size, mimeType = DEFAULT_MIME_TYPE } = refEntry;
 	let readStream;
 
 	switch (type) {
 	case 'fs':
-		readStream = await FSHandler.getFileStream(link);
+		readStream = await FSHandler.getFileStream(link, chunkInfo);
 		break;
 	case 'gridfs':
+		// fixme
 		readStream = await GridFSHandler.getFileStream(teamspace, collection, link);
 		break;
 	default:
@@ -151,9 +152,9 @@ FilesManager.getFileWithMetaAsStream = async (teamspace, collection, file, meta)
 	return getFileAsStream(teamspace, collection, refEntry);
 };
 
-FilesManager.getFileAsStream = async (teamspace, collection, fileName) => {
+FilesManager.getFileAsStream = async (teamspace, collection, fileName, chunkInfo) => {
 	const refEntry = await getRefEntry(teamspace, collection, fileName);
-	return getFileAsStream(teamspace, collection, refEntry);
+	return getFileAsStream(teamspace, collection, refEntry, chunkInfo);
 };
 
 FilesManager.removeFile = async (teamspace, collection, id) => {
