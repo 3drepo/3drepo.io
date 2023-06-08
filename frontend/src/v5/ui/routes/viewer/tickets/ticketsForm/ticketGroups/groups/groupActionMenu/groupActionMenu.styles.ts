@@ -15,31 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ActionMenu } from '@controls/actionMenu';
-import { Menu } from '@controls/actionMenu/actionMenu.styles';
+import { Popper as BasePopper } from '@mui/material';
 import styled from 'styled-components';
 
-export const TicketsGroupActionMenu = styled(ActionMenu).attrs({
-	PopoverProps: {
-		anchorOrigin: {
-			vertical: 'top',
-			horizontal: 'right',
-		},
-		transformOrigin: {
-			vertical: 'top',
-			horizontal: 'left',
-		},
-	},
-})`
-	${Menu} {
-		padding: 14px;
-		display: flex;
-		flex-direction: column;
-		width: 362px;
-		border-radius: 10px;
-	}
-	.MuiPaper-root {
-		margin-left: 15px;
-		box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
-	}
+export const Popper = styled(BasePopper)`
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	padding: 14px;
+	border-radius: 10px;
+	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
+	z-index: 1;
+	width: 390px;
 `;
