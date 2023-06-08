@@ -125,7 +125,7 @@ const processModelStash = async (teamspace, model, revIds) => {
 		removeFilesHelper(teamspace, `${model}.stash.json_mpc.ref`, { _id: revIdsRegex }),
 		removeRecords(teamspace, `${model}.stash.unity3d`, { _id: { $in: revIds } }),
 		removeRecords(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds } }, '_extRef'),
-		removeRecords(teamspace, `${model}.stash.3drepo.ref`, { rev_id: { $in: revIds } }), // to remove new version of references (instead of _extRef) as of ISSUE #4260
+		removeRecords(teamspace, `${model}.stash.3drepo.ref`, { rev_id: { $in: revIds } }), // to remove new version of references (instead of _extRef) see ISSUE #4260
 	];
 
 	await Promise.all(proms);
@@ -164,8 +164,8 @@ const removeRevisions = async (teamspace, model, revNodes) => {
 
 	logger.logInfo('\t\t\tRemoving scene objects');
 	// We can't remove mesh nodes until we've processed the stashes
-	await removeRecords(teamspace, `${model}.scene`, { rev_id: { $in: revIds } }, '_extRef'); // to remove new version of references (instead of _extRef) see ISSUE #4260
-	await removeRecords(teamspace, `${model}.scene.ref`, { rev_id: { $in: revIds } });
+	await removeRecords(teamspace, `${model}.scene`, { rev_id: { $in: revIds } }, '_extRef');
+	await removeRecords(teamspace, `${model}.scene.ref`, { rev_id: { $in: revIds } }); // to remove new version of references (instead of _extRef) see ISSUE #4260
 };
 
 const cleanUpRevisions = async (teamspace, colName, filter) => {
