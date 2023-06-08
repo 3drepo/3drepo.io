@@ -27,9 +27,6 @@ import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyStrings, removeEmptyObjects } from '@/v5/helpers/form.helper';
-import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import { hexToGLColor } from '@/v4/helpers/colors';
-import { theme } from '@/v5/ui/themes/theme';
 import { FormattedMessage } from 'react-intl';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
@@ -84,11 +81,6 @@ export const TicketDetailsCard = () => {
 	};
 
 	useEffect(() => {
-		if (ticket.properties?.Pin) {
-			ViewerService.addPin({
-				id: 'new-Pin', position: ticket.properties.Pin, colour: hexToGLColor(theme.palette.primary.main), type: 'issue' });
-		}
-
 		TicketsActionsDispatchers.fetchTicket(
 			teamspace,
 			project,

@@ -29,10 +29,10 @@ import { FormInputProps } from '@controls/inputs/inputController.component';
 import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
 import { PinAction, PinActions, PinName, SettingLocationText } from './pinDetails.styles';
 
-export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText, disabled }: FormInputProps) => {
+export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
-	const pinId = `new-${label}`;
+	const pinId = name;
 
 	const cancelEdit = () => {
 		if (!editMode) return;
@@ -85,7 +85,7 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 
 	return (
 		<InputContainer required={required} selected={editMode} error={error} disabled={disabled}>
-			<PinName onClick={onClickEditPin} required={required}>
+			<PinName required={required}>
 				{label}
 			</PinName>
 			<PinActions>
@@ -94,7 +94,6 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 						<FormattedMessage id="tickets.pin.selectLocation" defaultMessage="Select new location on model" /> <CrossIcon />
 					</SettingLocationText>
 				)}
-
 				{!editMode && (
 					<PinAction onClick={onClickEditPin} disabled={disabled}>
 						{hasPin && (<><PinIcon /> <FormattedMessage id="tickets.pin.changeLocation" defaultMessage="Change pin location" /></>)}

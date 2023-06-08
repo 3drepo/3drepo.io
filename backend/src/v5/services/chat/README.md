@@ -27,6 +27,7 @@ Note: This is currently a work in progress, new events will be added as they are
     + [Container Update Ticket](#container-update-ticket)
     + [Container New Ticket Comment](#container-new-ticket-comment)
     + [Container Update Ticket Comment](#container-update-ticket-comment)
+    + [Container Update Ticket Group](#container-update-ticket-group)
     + [Federation Settings Update](#federation-settings-update)
     + [Federation New Revision](#federation-new-revision)
     + [Federation Removed](#federation-removed)
@@ -34,6 +35,7 @@ Note: This is currently a work in progress, new events will be added as they are
     + [Federation Update Ticket ](#federation-update-ticket)
     + [Federation New Ticket Comment](#federation-new-ticket-comment)
     + [Federation Update Ticket Comment](#federation-update-ticket-comment)
+    + [Federation Update Ticket Group](#federation-update-ticket-group)
   * [Project events](#project-events)
     + [New Container](#new-container)
     + [New Federation](#new-federation)
@@ -188,6 +190,11 @@ The following events will be emitted if the user has subscribed to [Container/Fe
   - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { ticket: "ticket id" , /* fields that has been updated */ }}`
   - Description: Used to notify the user of a comment update in a container ticket.
 
+#### Container Update Ticket Group
+  - Event name: `containerUpdateTicketGroup`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "container id", data: { ticket: "ticket id" , _id: "group id",/* fields that has been updated */ }}`
+  - Description: Used to notify the user of a group update in a container ticket.
+
 #### Federation Settings Update
   - Event name: `federationSettingsUpdate`
   - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { /* Changes on federation settings */}}`
@@ -222,6 +229,11 @@ The following events will be emitted if the user has subscribed to [Container/Fe
   - Event name: `federationUpdateTicketComment`
   - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { ticket: "ticket id" , /* fields that has been updated */ }}`
   - Description: Used to notify the user of a comment update in a federation ticket.
+
+#### Federation Update Ticket Group
+  - Event name: `federationUpdateTicketGroup`
+  - Data format: `{ teamspace: "teamspace name", project: "project id", model: "federation id", data: { ticket: "ticket id" , _id: "group id",/* fields that has been updated */ }}`
+  - Description: Used to notify the user of a group update in a federation ticket.
 
 ### Project events
 The following events will be emitted if the user has subscribed to [Project notifications](#project-notifications).

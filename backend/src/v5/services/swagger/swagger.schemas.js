@@ -111,7 +111,7 @@ Schemas.schemas.group = {
 		_id: {
 			type: 'string',
 			format: 'uuid',
-			description: 'Unique indentifier for the group',
+			description: 'Unique identifier for the group',
 		},
 		color: {
 			type: 'array',
@@ -211,6 +211,79 @@ Schemas.schemas.group = {
 							type: 'string',
 							description: 'IFC GUIDS that belong in this group',
 							example: 'P6hfZFcXRWKz/AAALJY/Zg',
+						},
+					},
+				},
+			},
+		},
+
+	},
+};
+
+Schemas.schemas.ticketGroup = {
+	description: 'Group data',
+	type: 'object',
+	properties: {
+		_id: {
+			type: 'string',
+			format: 'uuid',
+			description: 'Unique identifier for the group',
+		},
+		name: {
+			type: 'string',
+			description: 'name of the group',
+			example: 'Level 1 Facades',
+		},
+		description: {
+			type: 'string',
+			description: 'Description of the group',
+			example: 'All facades on level 1',
+		},
+		rules: {
+			type: 'array',
+			items: {
+				type: 'object',
+				properties: {
+					prop: {
+						type: 'string',
+						description: 'The BIM data prop to query',
+						example: 'Floor',
+					},
+					operator: {
+						type: 'string',
+						enum: ['IS_EMPTY', 'IS_NOT_EMPTY', 'IS', 'IS_NOT', 'CONTAINS', 'NOT_CONTAINS', 'REGEX', 'EQUALS', 'NOT_EQUALS', 'GT', 'GTE', 'LT', 'LTE', 'IN_RANGE', 'NOT_IN_RANGE'],
+						description: 'Operator value on this prop',
+						example: 'EQUALS',
+					},
+					value: {
+						type: 'array',
+						description: 'The values to use in respective of the operator. This is evaluated under the union (OR) logic',
+						items: {
+							type: 'number',
+							example: 1,
+						},
+
+					},
+				},
+			},
+			description: 'List of rules for the smart group. Rules are evaluated under a intersection (AND) logic',
+		},
+		objects: {
+			type: 'array',
+			items: {
+				type: 'object',
+				properties: {
+					container: {
+						type: 'string',
+						format: 'uuid',
+						description: 'Model ID',
+					},
+					_ids: {
+						type: 'array',
+						items: {
+							type: 'string',
+							format: 'uuid',
+							description: '_ids of the meshes that belong in this group',
 						},
 					},
 				},

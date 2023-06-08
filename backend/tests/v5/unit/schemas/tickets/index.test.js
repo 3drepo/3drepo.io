@@ -17,7 +17,15 @@
 const { times, cloneDeep } = require('lodash');
 
 const { src, image } = require('../../../helper/path');
-const { generateRandomString, generateRandomNumber, generateUUID, generateRandomDate } = require('../../../helper/services');
+const {
+	generateGroup,
+	generateRandomString,
+	generateRandomNumber,
+	generateUUID,
+	generateUUIDString,
+	generateRandomDate,
+} = require('../../../helper/services');
+
 const FS = require('fs');
 
 jest.mock('../../../../../src/v5/schemas/tickets/templates');
@@ -27,6 +35,8 @@ jest.mock('../../../../../src/v5/models/jobs');
 const JobsModel = require(`${src}/models/jobs`);
 
 const { isEqual, deleteIfUndefined } = require(`${src}/utils/helper/objects`);
+const { stringToUUID } = require(`${src}/utils/helper/uuids`);
+const { isString } = require(`${src}/utils/helper/typeCheck`);
 
 jest.mock('../../../../../src/v5/models/teamspaceSettings');
 const TeamspaceModel = require(`${src}/models/teamspaceSettings`);
@@ -38,12 +48,13 @@ const {
 	propTypes,
 	riskLevels,
 	presetEnumValues,
-	presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+	presetModules,
+	viewGroups } = require(`${src}/schemas/tickets/templates.constants`);
 
 TemplateSchema.generateFullSchema.mockImplementation((t) => t);
 
 const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
-	describe.each(testData)(`${moduleProperty ? '[Modules] ' : ''}Property types`,
+	describe.each(testData)(`${moduleProperty ? '[Modules] ' : ' '}Property types`,
 		(desc, schema, goodTest, badTest) => {
 			test(desc, async () => {
 				const teamspace = generateRandomString();
@@ -85,16 +96,12 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 						} : {},
 					});
 
-					try {
-						await TicketSchema.validateTicket(teamspace, template, fullData, oldTicket);
-					} catch (err) {
-						throw undefined;
-					}
+					await TicketSchema.validateTicket(teamspace, template, fullData, oldTicket);
 				};
 
-				await expect(runTest(goodTest)).resolves.toBeUndefined();
+				if (goodTest !== undefined) await expect(runTest(goodTest)).resolves.toBeUndefined();
 
-				if (badTest !== undefined) await expect(runTest(badTest)).rejects.toBeUndefined();
+				if (badTest !== undefined) await expect(runTest(badTest)).rejects.not.toBeUndefined();
 			});
 		});
 };
@@ -250,6 +257,143 @@ const testPresetValues = () => {
 	});
 };
 
+const testGroups = () => {
+	describe('Groups (Inside views)', () => {
+		const convertToTestParams = (desc, shouldPass, data) => [desc, { type: propTypes.VIEW },
+			shouldPass ? data : undefined, shouldPass ? undefined : data];
+
+		const testCases = [
+			convertToTestParams('Undefined state object', true, { state: undefined }),
+			convertToTestParams('Empty state object', true, { state: {} }),
+			convertToTestParams('Have all groups', true, {
+				state: {
+					[viewGroups.HIDDEN]: [{ group: generateGroup(false, { hasId: false }) }],
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 0),
+						opacity: 1 }],
+					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
+						transformation: times(16, () => 0) }],
+				},
+			}),
+
+			convertToTestParams('Smart groups', true, {
+				state: {
+					[viewGroups.HIDDEN]: [{ group: generateGroup(true, { hasId: false }) }],
+					[viewGroups.COLORED]: [{ group: generateGroup(true, { hasId: false }),
+						color: times(3, () => 0),
+						opacity: 1 }],
+					[viewGroups.TRANSFORMED]: [{ group: generateGroup(true, { hasId: false }),
+						transformation: times(16, () => 0) }],
+				},
+			}),
+			convertToTestParams('Empty group', false, {
+				state: {
+					[viewGroups.HIDDEN]: [{ group: {} }],
+				},
+			}),
+			convertToTestParams('Have prefix', true, {
+				state: {
+					[viewGroups.HIDDEN]: [{ group: generateGroup(false, { hasId: false }),
+						prefix: times(2, () => generateRandomString) }],
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 0),
+						opacity: 1,
+						prefix: times(2, () => generateRandomString) }],
+					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
+						transformation: times(16, () => 0),
+						prefix: times(2, () => generateRandomString) }],
+				},
+			}),
+			convertToTestParams('Invalid prefix type', false, {
+				state: {
+					[viewGroups.HIDDEN]: [{ group: generateGroup(false, { hasId: false }),
+						prefix: generateRandomString() }],
+				},
+			}),
+			convertToTestParams('Colored groups', true, {
+				state: {
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 0),
+						opacity: 1 }],
+				},
+			}),
+			convertToTestParams('Colored groups no color or opacity', false, {
+				state: {
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }) }],
+				},
+			}),
+			convertToTestParams('Colored groups - just colours', true, {
+				state: {
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 0) }],
+				},
+			}),
+			convertToTestParams('Colored groups - not enough elemnts in the color array', false, {
+				state: {
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
+						color: times(2, () => 0) }],
+				},
+			}),
+			convertToTestParams('Colored groups - value too big', false, {
+				state: {
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 1000) }],
+				},
+			}),
+			convertToTestParams('Colored groups - just opacity', true, {
+				state: {
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }), opacity: 0.5 }],
+				},
+			}),
+			convertToTestParams('Colored groups - opacity is 0', false, {
+				state: {
+
+					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }), opacity: 0 }],
+				},
+			}),
+			convertToTestParams('Transformed groups', true, {
+				state: {
+					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
+						transformation: times(16, () => 1) }],
+				},
+			}),
+			convertToTestParams('Transformed groups - no matrix', false, {
+				state: {
+
+					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }) }],
+				},
+			}),
+			convertToTestParams('Transformed groups - wrong type', false, {
+				state: {
+					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
+						transformation: false }],
+				},
+			}),
+			convertToTestParams('Transformed groups - wrong array size', false, {
+				state: {
+					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
+						transformation: times(15, () => 1) }],
+				},
+			}),
+
+		];
+
+		const updateOnlyTestCase = (isUpdate) => [
+			convertToTestParams('Use group id instead of data', isUpdate, {
+				state: {
+					[viewGroups.TRANSFORMED]: [{ group: generateUUIDString(),
+						transformation: times(16, () => 1) }],
+				},
+			}),
+		];
+
+		testPropertyTypes([...testCases, ...updateOnlyTestCase(false)], false, true);
+		testPropertyTypes([...testCases, ...updateOnlyTestCase(false)], true, true);
+		testPropertyTypes([...testCases, ...updateOnlyTestCase(true)], false, false);
+		testPropertyTypes([...testCases, ...updateOnlyTestCase(true)], true, false);
+	});
+};
+
 const testValidateTicket = () => {
 	describe('Validate ticket', () => {
 		const propertyTypeSetData = [
@@ -264,7 +408,18 @@ const testValidateTicket = () => {
 			['Image', { type: propTypes.IMAGE }, FS.readFileSync(image, { encoding: 'base64' }), generateRandomString()],
 			['View (empty)', { type: propTypes.VIEW }, {}, 123],
 			['View (Image only)', { type: propTypes.VIEW }, { screenshot: FS.readFileSync(image, { encoding: 'base64' }) }, { screenshot: 'abc' }],
-			['View', { type: propTypes.VIEW }, { camera: { position: [1, 1, 1], forward: [1, 1, 1], up: [1, 1, 1] }, clippingPlanes: [{ normal: [1, 1, 1], clipDirection: -1, distance: 100 }] }, { camera: {} }],
+			['View', { type: propTypes.VIEW }, {
+				camera: { position: [1, 1, 1], forward: [1, 1, 1], up: [1, 1, 1] },
+				clippingPlanes: [{ normal: [1, 1, 1], clipDirection: -1, distance: 100 }],
+				state: {
+					[viewGroups.HIDDEN]: [
+						{
+							group: generateGroup(false, { hasId: false }),
+							prefix: [generateRandomString()],
+						},
+					],
+				},
+			}, { camera: {} }],
 			['View (orthographic)', { type: propTypes.VIEW }, { camera: { type: 'orthographic', size: 5, position: [1, 1, 1], forward: [1, 1, 1], up: [1, 1, 1] } }, { camera: { type: 'orthographic' } }],
 			['Measurements', { type: propTypes.MEASUREMENTS }, [
 				{
@@ -294,6 +449,8 @@ const testValidateTicket = () => {
 		testPropertyTypes(propertyTypeSetData, true, true);
 		testPropertyTypes(propertyTypeUnsetData, false, false);
 		testPropertyTypes(propertyTypeUnsetData, true, false);
+
+		testGroups();
 		const randomData = generateRandomString();
 
 		const commonPropertyConditionTests = [
@@ -701,7 +858,97 @@ const testProcessReadOnlyValues = () => {
 	});
 };
 
+const testDeserialiseUUIDsInTicket = () => {
+	describe('Deserialise UUIDs in a ticket', () => {
+		test('Should deserialise as expected', () => {
+			const viewProp = generateRandomString();
+			const numberProp = generateRandomString();
+			const viewModProp = generateRandomString();
+			const template = {
+				properties: [{
+					type: propTypes.VIEW,
+					name: viewProp,
+				},
+				{
+					type: propTypes.NUMBER,
+					name: numberProp,
+				},
+				],
+				modules: [
+					{
+						type: presetModules.SEQUENCING,
+						properties: [{
+							type: propTypes.VIEW,
+							name: viewModProp,
+						}],
+					},
+				],
+			};
+
+			const groupNames = Object.values(viewGroups);
+
+			const generateStateObject = () => {
+				const res = {};
+				groupNames.forEach((groupName) => {
+					res[groupName] = times(3, (i) => {
+						let group = generateUUIDString();
+
+						if (i === 0) {
+							group = {
+								objects: [{ _ids: times(3, generateUUIDString) }],
+							};
+						}
+						return { group };
+					});
+				});
+
+				return res;
+			};
+
+			const newTicket = {
+				title: generateRandomString(),
+				properties: {
+					[viewProp]:
+				{
+					state: generateStateObject(),
+				},
+					[numberProp]: 1,
+				},
+				modules: {
+					[presetModules.SEQUENCING]: {
+						[viewModProp]: {
+							state: generateStateObject(),
+						},
+					},
+				},
+			};
+
+			const deserialisedTicket = TicketSchema.deserialiseUUIDsInTicket(newTicket, template);
+
+			const expectedData = cloneDeep(newTicket);
+			groupNames.forEach((groupName) => {
+				/* eslint-disable no-param-reassign, no-underscore-dangle */
+				[
+					...expectedData.properties[viewProp].state[groupName],
+					...expectedData.modules[presetModules.SEQUENCING][viewModProp].state[groupName],
+				].forEach((groupEntry) => {
+					if (isString(groupEntry.group)) {
+						groupEntry.group = stringToUUID(groupEntry.group);
+					} else {
+						groupEntry.group.objects[0]._ids = groupEntry.group.objects[0]._ids.map(stringToUUID);
+					}
+				});
+
+				/* eslint-enable no-param-reassign, no-underscore-dangle */
+			});
+
+			expect(deserialisedTicket).toEqual(expectedData);
+		});
+	});
+};
+
 describe('schema/tickets/validators', () => {
 	testValidateTicket();
 	testProcessReadOnlyValues();
+	testDeserialiseUUIDsInTicket();
 });
