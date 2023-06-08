@@ -754,9 +754,11 @@ const getMeshDataFromRef = async (account, model, refObj) => {
 
 	const { elements, buffer} = refObj;
 
+	// nodejs API on createReadStream : start and end index are inclusive, thus we need -1 on end
 	const verticeRegion = {
 		start: buffer.start + elements.vertices.start,
-		end: buffer.start + elements.vertices.start +  elements.vertices.size - 1};
+		end: buffer.start + elements.vertices.start +  elements.vertices.size - 1
+	};
 	const faceRegion = {
 		start: buffer.start + elements.faces.start,
 		end: buffer.start + elements.faces.start +  elements.faces.size - 1
