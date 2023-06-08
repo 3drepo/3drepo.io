@@ -799,34 +799,14 @@ async function getMeshById(account, model, meshId) {
 	}
 
 	const { vertices, faces } = res;
-	/*
-	if (!("primitive" in mesh)) { // if the primitive type is missing, then set it to triangles for backwards compatibility. this matches the behaviour of the bouncer api.
-		mesh.primitive = 3;
-	}
 
-	const writeStream = fs.createWriteStream("secret.txt");
-	const onFinish = new Promise((resolve) => {
-
-		vertices.pipe(writeStream);
-
-		// the finish event is emitted when all data has been flushed from the stream
-		writeStream.on("finish", () => {
-			console.log("wrote all data to file");
-			resolve();
-		});
-	});
-
-	await onFinish;
-	// close the stream
-	writeStream.end();
-	*/
 	const combinedStream = CombinedStream.create();
 	combinedStream.append(stringToStream(["{\"matrix\":", JSON.stringify(mesh.matrix)].join("")));
 	combinedStream.append(stringToStream([",\"primitive\":", mesh.primitive].join("")));
 	combinedStream.append(stringToStream(",\"vertices\":["));
 	combinedStream.append(vertices.pipe(new BinToVector3dStringStream({isLittleEndian: true})));
 	combinedStream.append(stringToStream("],\"faces\":["));
-	//	combinedStream.append(faces.pipe(new BinToFaceStringStream({isLittleEndian: true})));
+	combinedStream.append(faces.pipe(new BinToFaceStringStream({isLittleEndian: true})));
 	combinedStream.append(stringToStream("]}"));
 	return 	combinedStream;
 }
