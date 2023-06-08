@@ -41,6 +41,7 @@ const normalGroups: IGroupFromApi[] = [
 	{
 		_id: '114035e0-de89-11ed-8a9c-23f681ce1274',
 		name: 'opacity 0.5',
+		description: 'this group has color, opacity, and a description',
 		objects: [{
 			container: '134a7cb0-d916-11ed-bc43-5ba0d73424c9',
 		}],

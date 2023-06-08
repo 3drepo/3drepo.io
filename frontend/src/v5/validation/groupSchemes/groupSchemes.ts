@@ -15,19 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { InputContainer } from '../inputContainer/inputContainer.styles';
+import * as Yup from 'yup';
+import { formatMessage } from '@/v5/services/intl';
+import { trimmedString } from '../shared/validators';
 
-export const Container = styled(InputContainer)<{ disabled: boolean; }>`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	width: fit-content;
-	padding: 7px 9px;
-	cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
+const requiredTrimmedString = trimmedString.required(
+	formatMessage({
+		id: 'validation.ticket.groupFilters.error.required',
+		defaultMessage: 'This is a required field',
+	}),
+);
 
-	svg {
-		margin-left: 8px;
-		color: ${({ theme }) => theme.palette.base.main};
-	}
-`;
+export const GroupSettingsSchema = Yup.object().shape({
+	name: requiredTrimmedString,
+	description: Yup.string().max(1200, formatMessage({
+		id: 'validation.model.name.error.max',
+		defaultMessage: 'Description is limited to 1200 characters',
+	})),
+});

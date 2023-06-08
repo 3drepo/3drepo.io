@@ -26,6 +26,7 @@ type ActionMenuProps = {
 	PopoverProps?: any;
 	onOpen?: (e) => void;
 	onClose?: (e) => void;
+	disabled?: boolean;
 };
 export const ActionMenu = ({
 	className,
@@ -34,6 +35,7 @@ export const ActionMenu = ({
 	PopoverProps,
 	onOpen,
 	onClose,
+	disabled,
 }: ActionMenuProps) => {
 	const [anchorEl, setAnchorEl] = useState(null);
 
@@ -43,6 +45,7 @@ export const ActionMenu = ({
 	};
 
 	const handleOpen = (e) => {
+		if (disabled) return;
 		setAnchorEl(e.currentTarget.children[0]);
 		onOpen?.(e);
 		stopClickPropagation(e);

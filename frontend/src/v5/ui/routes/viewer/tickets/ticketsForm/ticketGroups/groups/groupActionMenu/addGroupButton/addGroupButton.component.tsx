@@ -15,19 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { InputContainer } from '../inputContainer/inputContainer.styles';
+import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
+import { FormattedMessage } from 'react-intl';
+import { ButtonProps } from '@mui/material';
+import { NewGroupButton } from './addGroupButton.styles';
+import { GroupSettingsForm } from '../groupSettingsForm/groupSettingsForm.component';
+import { TicketsGroupActionMenu } from '../groupActionMenu.component';
 
-export const Container = styled(InputContainer)<{ disabled: boolean; }>`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	width: fit-content;
-	padding: 7px 9px;
-	cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
-
-	svg {
-		margin-left: 8px;
-		color: ${({ theme }) => theme.palette.base.main};
-	}
-`;
+export const AddGroupButton = (props: ButtonProps) => (
+	<TicketsGroupActionMenu
+		TriggerButton={(
+			<NewGroupButton startIcon={<AddCircleIcon />} {...props}>
+				<FormattedMessage
+					id="ticketCard.groups.addGroup"
+					defaultMessage="Add group"
+				/>
+			</NewGroupButton>
+		)}
+	>
+		<GroupSettingsForm />
+	</TicketsGroupActionMenu>
+);

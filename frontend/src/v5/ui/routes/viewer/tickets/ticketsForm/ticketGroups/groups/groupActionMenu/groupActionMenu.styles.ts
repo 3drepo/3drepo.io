@@ -15,19 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Popper as BasePopper } from '@mui/material';
 import styled from 'styled-components';
-import { InputContainer } from '../inputContainer/inputContainer.styles';
 
-export const Container = styled(InputContainer)<{ disabled: boolean; }>`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	width: fit-content;
-	padding: 7px 9px;
-	cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
-
-	svg {
-		margin-left: 8px;
-		color: ${({ theme }) => theme.palette.base.main};
-	}
+export const Popper = styled(BasePopper)`
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	padding: 14px;
+	border-radius: 10px;
+	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
+	z-index: 1;
+	width: 390px;
 `;

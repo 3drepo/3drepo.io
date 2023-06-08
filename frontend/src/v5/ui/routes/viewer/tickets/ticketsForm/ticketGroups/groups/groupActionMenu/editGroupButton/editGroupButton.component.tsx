@@ -15,19 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { InputContainer } from '../inputContainer/inputContainer.styles';
+import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
+import { IGroupSettingsForm } from '@/v5/store/tickets/groups/ticketGroups.types';
+import { PrimaryTicketButton } from '../../../../../ticketButton/ticketButton.styles';
+import { GroupSettingsForm } from '../groupSettingsForm/groupSettingsForm.component';
+import { TicketsGroupActionMenu } from '../groupActionMenu.component';
 
-export const Container = styled(InputContainer)<{ disabled: boolean; }>`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	width: fit-content;
-	padding: 7px 9px;
-	cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
-
-	svg {
-		margin-left: 8px;
-		color: ${({ theme }) => theme.palette.base.main};
-	}
-`;
+export const EditGroupButton = ({ defaultValues }: { defaultValues: IGroupSettingsForm }) => (
+	<TicketsGroupActionMenu
+		TriggerButton={(
+			<PrimaryTicketButton>
+				<EditIcon />
+			</PrimaryTicketButton>
+		)}
+	>
+		<GroupSettingsForm defaultValues={defaultValues} />
+	</TicketsGroupActionMenu>
+);

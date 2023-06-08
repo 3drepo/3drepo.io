@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import ShowIcon from '@assets/icons/outlined/eye-outlined.svg';
 import HideIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
@@ -27,6 +26,7 @@ import { rgbaToHex } from '@/v4/helpers/colors';
 import { FormattedMessage } from 'react-intl';
 import { GroupIconComponent } from '@/v5/ui/routes/viewer/groups/groupItem/groupIcon/groupIcon.component';
 import { ErrorTicketButton, PrimaryTicketButton } from '@/v5/ui/routes/viewer/tickets/ticketButton/ticketButton.styles';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import {
 	Buttons,
 	NameContainer,
@@ -37,11 +37,13 @@ import {
 } from './groupItem.styles';
 import { GroupToggle } from '../../groupToggle/groupToggle.component';
 import { TicketGroupsContext } from '../../ticketGroupsContext';
+import { EditGroupButton } from '../groupActionMenu/editGroupButton/editGroupButton.component';
 
 type GroupProps = { group: IGroupFromApi, color?: [number, number, number], opacity?: number };
 export const GroupItem = ({ group, color, opacity }: GroupProps) => {
 	const [groupIsVisible, setGroupIsVisible] = useState(false);
 	const { groupType } = useContext(TicketGroupsContext);
+	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	const deleteGroup = () => {
 		DialogsActionsDispatchers.open('delete', {
@@ -58,8 +60,6 @@ export const GroupItem = ({ group, color, opacity }: GroupProps) => {
 	const toggleShowGroup = () => {
 		setGroupIsVisible(!groupIsVisible);
 	};
-
-	const editGroup = () => {};
 
 	const alphaColor = (color || [255, 255, 255]).concat(opacity);
 	const alphaHexColor = rgbaToHex(alphaColor.join());
@@ -81,15 +81,15 @@ export const GroupItem = ({ group, color, opacity }: GroupProps) => {
 				</NameContainer>
 				{groupType === 'colored' && (
 					<Buttons>
-						<ErrorTicketButton onClick={deleteGroup}>
-							<DeleteIcon />
-						</ErrorTicketButton>
+						{isAdmin && (
+							<ErrorTicketButton onClick={deleteGroup}>
+								<DeleteIcon />
+							</ErrorTicketButton>
+						)}
 						<PrimaryTicketButton onClick={toggleShowGroup}>
 							{groupIsVisible ? (<ShowIcon />) : (<HideIcon />)}
 						</PrimaryTicketButton>
-						<PrimaryTicketButton onClick={editGroup}>
-							<EditIcon />
-						</PrimaryTicketButton>
+						<EditGroupButton defaultValues={{ color, opacity, ...group }} />
 					</Buttons>
 				)}
 			</Headline>
