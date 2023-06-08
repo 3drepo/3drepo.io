@@ -802,6 +802,10 @@ async function getMeshById(account, model, meshId) {
 
 	const { vertices, faces } = res;
 
+	if (!("primitive" in mesh)) { // if the primitive type is missing, then set it to triangles for backwards compatibility. this matches the behaviour of the bouncer api.
+		mesh.primitive = 3;
+	}
+
 	const combinedStream = CombinedStream.create();
 	combinedStream.append(stringToStream(["{\"matrix\":", JSON.stringify(mesh.matrix)].join("")));
 	combinedStream.append(stringToStream([",\"primitive\":", mesh.primitive].join("")));
