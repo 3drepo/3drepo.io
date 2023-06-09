@@ -54,7 +54,7 @@ export const AssigneesSelect = ({
 	const allUsersAndJobs = UsersHooksSelectors.selectUsersAndJobs();
 	const filteredValue = multiple ? (
 		intersection(value, allUsersAndJobs.map((i) => i.user || i._id)) ?? []
-	) : allUsersAndJobs.some((i) => i.user === value) && value;
+	) : allUsersAndJobs.some(({ user, _id }) => [user, _id].includes(value)) && value;
 	// Using this logic instead of a simple partition because ExtraAssigneesCircle needs to occupy
 	// the last position when the overflow value is 2+. There is no point showing +1 overflow
 	// since the overflowing assignee could just be displayed instead
