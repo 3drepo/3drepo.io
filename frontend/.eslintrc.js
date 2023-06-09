@@ -60,5 +60,6 @@ module.exports = {
 		'react/jsx-uses-react': 'off',
 		'react/react-in-jsx-scope': 'off',
 		'react/jsx-filename-extension': ['warn', { 'extensions': ['.ts', '.tsx'] }], 
+		'no-case-declarations': 'off',
 	}
 };

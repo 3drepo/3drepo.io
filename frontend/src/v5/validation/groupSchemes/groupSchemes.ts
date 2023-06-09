@@ -17,8 +17,9 @@
 
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
+import { trimmedString } from '../shared/validators';
 
-const requiredTrimmedString = Yup.string().trim().required(
+const requiredTrimmedString = trimmedString.required(
 	formatMessage({
 		id: 'validation.ticket.groupFilters.error.required',
 		defaultMessage: 'This is a required field',
@@ -31,4 +32,12 @@ export const GroupRulesSchema = Yup.object().shape({
 	field: requiredTrimmedString,
 	operation: requiredTrimmedString,
 	values: Yup.array().of(valueType),
+});
+
+export const GroupSettingsSchema = Yup.object().shape({
+	name: requiredTrimmedString,
+	description: Yup.string().max(1200, formatMessage({
+		id: 'validation.model.name.error.max',
+		defaultMessage: 'Description is limited to 1200 characters',
+	})),
 });

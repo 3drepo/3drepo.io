@@ -20,18 +20,11 @@ import styled, { css } from 'styled-components';
 
 export const InputContainer = styled(FormControl)<{ selected?: boolean }>`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border: solid 1px;
+	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 8px;
 	padding: 10px 15px;
 	width: 100%;
-
-	${({ disabled, theme: { palette } }) => (disabled ? css`
-		border-color: ${palette.secondary.lightest};
-		color: ${palette.base.light};
-	` : css`
-		border-color: ${palette.base.lightest};
-		color: ${palette.secondary.main};
-	`)}
+	color: ${({ theme }) => theme.palette.secondary.main};
 
 	${({ selected, theme: { palette } }) => selected && css`
 		box-shadow: 0 0 4px ${palette.primary.main};
@@ -43,6 +36,12 @@ export const InputContainer = styled(FormControl)<{ selected?: boolean }>`
 		background-color: ${palette.error.lightest};
 		border-color: ${palette.error.main};
 		box-shadow: 0 0 4px ${palette.error.main};
+	`}
+
+	${({ disabled, theme: { palette } }) => disabled && css`
+		border-color: ${palette.secondary.lightest};
+		color: ${palette.base.light};
+		box-shadow: none;
 	`}
 
 `;

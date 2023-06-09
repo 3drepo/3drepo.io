@@ -16,13 +16,10 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { FormattedMessage } from 'react-intl';
-import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import { MOCK_DATA } from '@/v5/store/tickets/groups/ticketGroups.helpers';
-import { Container, NewGroupButton, ActionMenu } from './ticketGroups.styles';
+import { Container } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContext } from './ticketGroupsContext';
-import { NewGroupForm } from './groups/newGroupForm/newGroupForm.component';
 
 export const TicketGroups = () => (
 	<Container>
@@ -30,39 +27,13 @@ export const TicketGroups = () => (
 			<GroupsAccordion
 				title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
 				groups={MOCK_DATA.colored}
-			>
-				<ActionMenu
-					TriggerButton={(
-						<NewGroupButton startIcon={<AddCircleIcon />}>
-							<FormattedMessage
-								id="ticketCard.groups.addGroup"
-								defaultMessage="Add group"
-							/>
-						</NewGroupButton>
-					)}
-				>
-					<NewGroupForm />
-				</ActionMenu>
-			</GroupsAccordion>
+			/>
 		</TicketGroupsContext.Provider>
 		<TicketGroupsContext.Provider value={{ groupType: 'hidden' }}>
 			<GroupsAccordion
 				title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
 				groups={MOCK_DATA.hidden}
-			>
-				<ActionMenu
-					TriggerButton={(
-						<NewGroupButton startIcon={<AddCircleIcon />}>
-							<FormattedMessage
-								id="ticketCard.groups.addGroup"
-								defaultMessage="Add group"
-							/>
-						</NewGroupButton>
-					)}
-				>
-					<NewGroupForm />
-				</ActionMenu>
-			</GroupsAccordion>
+			/>
 		</TicketGroupsContext.Provider>
 	</Container>
 );

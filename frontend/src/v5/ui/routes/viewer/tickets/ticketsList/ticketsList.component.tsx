@@ -16,12 +16,14 @@
  */
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
-import { useState } from 'react';
-import { flatMap } from 'lodash';
+import { useEffect, useState } from 'react';
+import { flatMap, isEmpty } from 'lodash';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
+import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
+import { ViewpointsActions } from '@/v4/modules/viewpoints/viewpoints.redux';
+import { useDispatch } from 'react-redux';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
@@ -32,12 +34,13 @@ type TicketsListProps = {
 };
 
 export const TicketsList = ({ tickets }: TicketsListProps) => {
+	const dispatch = useDispatch();
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const [selectedTemplates, setSelectedTemplates] = useState<Set<string>>(new Set());
-	const { containerOrFederation } = useParams<ViewerParams>();
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
 
-	const ticketIsSelected = (ticket: ITicket) => selectedTicket === ticket;
+	const ticketIsSelected = (ticket: ITicket) => selectedTicket?._id === ticket._id;
 
 	const toggleTemplate = (templateId: string) => {
 		if (selectedTemplates.has(templateId)) {
@@ -63,13 +66,22 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		const wasSelected = ticketIsSelected(ticket);
 
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
+
 		if (wasSelected) {
 			TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
 		}
+
 		const view = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 		if (!(view?.camera)) return;
-		ViewerService.setViewpoint(view);
+
+		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
 	};
+
+	useEffect(() => {
+		const view = selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
+		if (isEmpty(view)) return;
+		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
+	}, [selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state]);
 
 	return (
 		<>

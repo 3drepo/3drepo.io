@@ -23,15 +23,16 @@ import { ColorPickerPalette } from './colorPickerPalette/colorPickerPalette.comp
 import { HexGroupColor, RgbGroupColor, UNSET_RGB_COLOR, hexGroupColorToRgb, rgbGroupColorToHex } from './colorPicker.helpers';
 import { ColorCircle } from './colorCircle/colorCircle.styles';
 
-const ColorPickerPreview = ({ color, selected }) => (
-	<Container selected={selected}>
+type ColorPickerPreviewProps = { color: string, selected: boolean, disabled?: boolean };
+const ColorPickerPreview = ({ color, selected, disabled }: ColorPickerPreviewProps) => (
+	<Container selected={selected} disabled={disabled}>
 		<ColorCircle $size={10} $color={color} />
-		<ChevronIcon />
+		{!disabled && <ChevronIcon />}
 	</Container>
 );
 
-type ColorPickerProps = { value?: RgbGroupColor, defaultValue: RgbGroupColor, onChange?: (newVal: RgbGroupColor) => void };
-export const ColorPicker = ({ value: inputValue, defaultValue, onChange }: ColorPickerProps) => {
+type ColorPickerProps = { value?: RgbGroupColor, defaultValue?: RgbGroupColor, onChange?: (newVal: RgbGroupColor) => void, disabled?: boolean };
+export const ColorPicker = ({ value: inputValue, defaultValue, onChange, disabled }: ColorPickerProps) => {
 	const [value, setValue] = useState<HexGroupColor>(rgbGroupColorToHex(inputValue || defaultValue || { color: UNSET_RGB_COLOR }));
 	const [selected, setSelected] = useState(false);
 
@@ -49,7 +50,7 @@ export const ColorPicker = ({ value: inputValue, defaultValue, onChange }: Color
 		<ActionMenu
 			onOpen={() => setSelected(true)}
 			onClose={() => setSelected(false)}
-			TriggerButton={<ColorPickerPreview selected={selected} color={value?.color} />}
+			TriggerButton={<ColorPickerPreview selected={selected} color={value?.color} disabled={disabled} />}
 			PopoverProps={{
 				anchorOrigin: {
 					vertical: 'bottom',
@@ -60,6 +61,7 @@ export const ColorPicker = ({ value: inputValue, defaultValue, onChange }: Color
 					horizontal: 'left',
 				},
 			}}
+			disabled={disabled}
 		>
 			<ColorPickerPalette value={value} onClose={handleChange} />
 		</ActionMenu>
