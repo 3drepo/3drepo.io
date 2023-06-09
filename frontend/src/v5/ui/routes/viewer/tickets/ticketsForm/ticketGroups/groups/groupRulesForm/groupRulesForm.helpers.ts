@@ -16,24 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-
-export const OPERATIONS_TYPES = {
-	EXISTS: 'field',
-	NOT_EXISTS: 'field',
-	IS: 'text',
-	IS_NOT: 'text',
-	CONTAINS: 'text',
-	NOT_CONTAINS: 'text',
-	REGEX: 'regex',
-	EQUALS: 'number',
-	NOT_EQUALS: 'number',
-	GT: 'numberComparison',
-	GTE: 'numberComparison',
-	LT: 'numberComparison',
-	LTE: 'numberComparison',
-	IN_RANGE: 'numberRange',
-	NOT_IN_RANGE: 'numberRange',
-} as const;
+import { IGroupRule } from '@/v5/store/tickets/groups/ticketGroups.types';
 
 export const OPERATION_DISPLAY_NAMES = {
 	EXISTS: formatMessage({ id: 'filter.operation.exists', defaultMessage: 'exists' }),
@@ -53,20 +36,11 @@ export const OPERATION_DISPLAY_NAMES = {
 	NOT_IN_RANGE: formatMessage({ id: 'filter.operation.notInRange', defaultMessage: 'not in range' }),
 };
 
-export type Operation = keyof typeof OPERATIONS_TYPES;
-export type OperationType = typeof OPERATIONS_TYPES[Operation];
-
-export type IRule = {
-	field: string,
-	operation: Operation,
-	values?: (number | string)[],
-};
-
-export type IRuleForm = Omit<IRule, 'values'> & {
+export type IRuleForm = Omit<IGroupRule, 'values'> & {
 	values: { value: number | string }[],
 };
 
-export const parseRule = ({ values, ...rule }: IRuleForm): IRule => {
+export const parseRule = ({ values, ...rule }: IRuleForm): IGroupRule => {
 	if (values?.length) {
 		return {
 			...rule,
@@ -76,7 +50,7 @@ export const parseRule = ({ values, ...rule }: IRuleForm): IRule => {
 	return rule;
 };
 
-export const prepareRuleForForm = ({ values = [], ...rule }: IRule): IRuleForm => ({
+export const prepareRuleForForm = ({ values = [], ...rule }: IGroupRule): IRuleForm => ({
 	...rule,
 	values: values.map((value) => ({ value })),
 });
