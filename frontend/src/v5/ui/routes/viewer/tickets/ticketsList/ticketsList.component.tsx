@@ -66,7 +66,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		return (isCompletedIssueProperty || isCompletedTreatmentStatus) === showingCompleted;
 	};
 
-	const getFilteredTickets = tickets.filter((ticket) => (!selectedTemplates.size || selectedTemplates.has(ticket.type)) && filterCompleted(ticket));
+	const filteredTickets = tickets.filter((ticket) => (!selectedTemplates.size || selectedTemplates.has(ticket.type)) && filterCompleted(ticket));
 
 	useEffect(() => {
 		const reducedTemplates = templates.reduce((partial, { _id, name }) => {
@@ -116,7 +116,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 				))}
 			</Filters>
 			<List>
-				{getFilteredTickets.map((ticket) => (
+				{filteredTickets.map((ticket) => (
 					<TicketItem
 						ticket={ticket}
 						key={ticket._id}
@@ -124,7 +124,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 						selected={ticketIsSelected(ticket)}
 					/>
 				))}
-				{isEmpty(getFilteredTickets) && (
+				{isEmpty(filteredTickets) && (
 					<EmptyListMessage>
 						<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
 					</EmptyListMessage>
