@@ -29,6 +29,7 @@ export const AssigneesListContainer = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
 	font-size: 10px;
 	line-height: 100%;
+	width: fit-content;
 	>* {
 		cursor: pointer;
 	}

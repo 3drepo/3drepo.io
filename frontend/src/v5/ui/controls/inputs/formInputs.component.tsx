@@ -18,8 +18,7 @@
 import { ChipSelect } from '@controls/chip/chipSelect/chipSelect.component';
 import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
 import { forwardRef, ComponentProps } from 'react';
-import { AssigneesMultiSelect } from '@controls/assigneesSelect/assigneesMultiSelect.component';
-import { AssigneesSingleSelect } from '@controls/assigneesSelect/assigneesSingleSelect.component';
+import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { Checkbox } from './checkbox/checkbox.component';
 import { DatePicker } from './datePicker/datePicker.component';
 import { DateTimePicker } from './datePicker/dateTimePicker.component';
@@ -54,8 +53,7 @@ export const FormMultiSelect = (props: FormType<typeof MultiSelect>) => (<InputC
 export const FormSelectView = (props: FormType<typeof SelectView>) => (<InputController Input={SelectView} {...props} />);
 export const FormSelect = (props: FormType<typeof Select>) => (<InputController Input={Select} {...props} />);
 export const FormChipSelect = (props: FormType<typeof ChipSelect>) => (<InputController Input={ChipSelect} {...props} />);
-export const FormAssigneesMultiSelect = (props: FormType<typeof AssigneesMultiSelect>) => (<InputController Input={AssigneesMultiSelect} {...props} />);
-export const FormAssigneesSingleSelect = (props: FormType<typeof AssigneesSingleSelect>) => (<InputController Input={AssigneesSingleSelect} {...props} />);
+export const FormAssigneesSelect = (props: FormType<typeof AssigneesSelect>) => (<InputController Input={AssigneesSelect} {...props} />);
 
 // control inputs
 export const FormCheckbox = (props: FormType<typeof Checkbox>) => (<InputController Input={Checkbox} {...props} />);

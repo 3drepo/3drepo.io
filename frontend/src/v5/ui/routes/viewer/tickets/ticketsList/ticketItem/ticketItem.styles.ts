@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ControlledAssigneesMultiSelect } from '@controls/assigneesSelect/controlledAssigneesMultiSelect.component';
+import { ControlledAssigneesSelect } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
 import styled from 'styled-components';
 
 export const Id = styled.div`
@@ -56,7 +56,7 @@ export const ChipList = styled.div`
 	margin: 8px 0 0;
 `;
 
-export const Assignees = styled(ControlledAssigneesMultiSelect)`
+export const Assignees = styled(ControlledAssigneesSelect)`
 	margin-left: auto;
 	height: 28px;
 `;

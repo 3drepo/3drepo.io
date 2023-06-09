@@ -21,7 +21,7 @@ import { MultiSelect } from '@controls/inputs/multiSelect/multiSelect.component'
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { FormControl, FormHelperText, InputLabel } from '@mui/material';
-import { AssigneesMultiSelect } from '@controls/assigneesSelect/assigneesMultiSelect.component';
+import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 
 type ManyOfPropertyProps = FormInputProps & {
 	open?: boolean;
@@ -37,7 +37,7 @@ export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {
 		return (
 			<FormControl required={props.required} disabled={props.disabled} error={props.error} className={props.className}>
 				<InputLabel id={`${props.name}-label`}>{props.label}</InputLabel>
-				<AssigneesMultiSelect
+				<AssigneesSelect
 					maxItems={17}
 					showAddButton
 					multiple

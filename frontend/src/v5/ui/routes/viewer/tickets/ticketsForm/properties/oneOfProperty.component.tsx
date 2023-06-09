@@ -17,7 +17,7 @@
 
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
-import { AssigneesSingleSelect } from '@controls/assigneesSelect/assigneesSingleSelect.component';
+import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { Select } from '@controls/inputs/select/select.component';
 import { FormControl, FormHelperText, InputLabel, MenuItem } from '@mui/material';
@@ -29,7 +29,7 @@ export const OneOfProperty = ({ values, value, ...props }: OneOfPropertyProps) =
 		return (
 			<FormControl required={props.required} disabled={props.disabled} error={props.error} className={props.className}>
 				<InputLabel id={`${props.name}-label`}>{props.label}</InputLabel>
-				<AssigneesSingleSelect
+				<AssigneesSelect
 					value={value}
 					showAddButton
 					{...props}
