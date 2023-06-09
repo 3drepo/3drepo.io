@@ -16,7 +16,9 @@
  */
 
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
+import { ActionMenu } from '@controls/actionMenu';
 import { Toggle as BaseToggle } from '@controls/inputs/toggle/toggle.component';
+import { Typography } from '@controls/typography';
 import { InputLabel } from '@mui/material';
 import styled from 'styled-components';
 
@@ -25,6 +27,10 @@ export const FormBox = styled.div`
 	border-radius: 8px;
 	padding: 10px 15px;
 	margin-bottom: 5px;
+`;
+
+export const FormRulesBox = styled(FormBox)`
+	padding: 10px;
 `;
 
 export const FormRow = styled.div`
@@ -49,6 +55,8 @@ export const Subheading = styled.div`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	padding: 10px 3px;
 	font-weight: ${FONT_WEIGHT.BOLD};
+	display: flex;
+	justify-content: space-between;
 `;
 
 export const CreateCollectionLink = styled.div`
@@ -87,4 +95,44 @@ export const Toggle = styled(BaseToggle)`
 
 export const ToggleWrapper = styled.div`
 	display: flex;
+`;
+
+export const Rules = styled.div`
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 4px;
+`;
+
+export const AddFilterTitle = styled.div`
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	color: ${({ theme }) => theme.palette.secondary.main};
+`;
+
+export const NewRuleActionMenu = styled(ActionMenu).attrs({
+	PopoverProps: {
+		anchorOrigin: {
+			vertical: 'top',
+			horizontal: 'right',
+		},
+		transformOrigin: {
+			vertical: 'top',
+			horizontal: 'left',
+		},
+	},
+})`
+	.MuiPaper-root {
+		margin-left: 15px;
+		box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
+	}
+`;
+
+export const TriggerButton = styled(Typography).attrs({
+	variant: 'link',
+})`
+	cursor: pointer;
+	margin-left: auto;
+	width: fit-content;
 `;

@@ -25,7 +25,7 @@ const smartGroup: IGroupFromApi = {
 	}],
 	rules: [{
 		field: 'Absorptance',
-		operator: 'IS_NOT',
+		operation: 'IS_NOT',
 		values: ['2'],
 	}],
 };

@@ -27,8 +27,9 @@ import { GroupRulesSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { selectMetaKeys } from '@/v4/modules/model';
 import { useSelector } from 'react-redux';
 import { Autocomplete, TextField } from '@mui/material';
+import { IGroupRule } from '@/v5/store/tickets/groups/ticketGroups.types';
 import { Buttons, Form, InputsContainer } from './groupRulesForm.styles';
-import { IRule, IRuleForm, parseRule, prepareRuleForForm } from './groupRulesForm.helpers';
+import { IRuleForm, parseRule, prepareRuleForForm } from './groupRulesForm.helpers';
 import { RuleOperationSelect } from './ruleOperationSelect/ruleOperationSelect.component';
 import { RuleValueField } from './ruleValueField/ruleValueField.component';
 import { ListboxComponent } from './listboxComponent/listboxComponent.component';
@@ -40,8 +41,8 @@ const DEFAULT_VALUES: IRuleForm = {
 };
 
 type IGroupRules = {
-	rule?: IRule;
-	onSave?: (rule: IRule) => void;
+	rule?: IGroupRule;
+	onSave?: (rule: IGroupRule) => void;
 };
 export const GroupRulesForm = ({ onSave, rule }: IGroupRules) => {
 	const [value, setValue] = useState(rule?.field || '');
