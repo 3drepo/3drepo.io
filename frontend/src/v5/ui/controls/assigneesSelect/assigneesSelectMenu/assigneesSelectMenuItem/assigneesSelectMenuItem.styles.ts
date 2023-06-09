@@ -30,7 +30,7 @@ export const ListItemContainer = styled(MenuItem)`
 
 export const Titles = styled.div`
 	width: calc(100% - 60px);
-    overflow: hidden;
+	overflow: hidden;
 `;
 
 export const Title = styled.div`

@@ -17,7 +17,7 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { flatMap, get, isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
@@ -38,6 +38,7 @@ type TicketsListProps = {
 };
 
 export const TicketsList = ({ tickets }: TicketsListProps) => {
+	const [availableTemplates, setAvailableTemplates] = useState([]);
 	const [showingCompleted, setShowingCompleted] = useState(false);
 	const [selectedTemplates, setSelectedTemplates] = useState<Set<string>>(new Set());
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -65,14 +66,16 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		return (isCompletedIssueProperty || isCompletedTreatmentStatus) === showingCompleted;
 	};
 
-	const getTicketsByTemplateId = (templateId: string) => tickets.filter(({ type }) => type === templateId);
+	const getFilteredTickets = tickets.filter((ticket) => (!selectedTemplates.size || selectedTemplates.has(ticket.type)) && filterCompleted(ticket));
 
-	const getFilteredTickets = (() => {
-		if (selectedTemplates.size === 0) return tickets.filter(filterCompleted);
-		return flatMap([...selectedTemplates], getTicketsByTemplateId).filter(filterCompleted);
-	})();
-
-	const getTemplatesForFilter = () => templates.filter(({ _id }) => getTicketsByTemplateId(_id).length > 0);
+	useEffect(() => {
+		const reducedTemplates = templates.reduce((partial, { _id, name }) => {
+			const { length } = tickets.filter(({ type }) => _id === type);
+			if (!length) return partial;
+			return [...partial, { _id, name, length }];
+		}, []);
+		setAvailableTemplates(reducedTemplates);
+	}, [tickets, templates]);
 
 	const onTicketClick = (ticket: ITicket, event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		event.stopPropagation();
@@ -103,12 +106,12 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 					onClick={() => setShowingCompleted((prev) => !prev)}
 					label={formatMessage({ id: 'ticketsList.filters.completed', defaultMessage: 'Completed' })}
 				/>
-				{getTemplatesForFilter().map(({ name, _id }) => (
+				{availableTemplates.map(({ name, _id, length }) => (
 					<FilterChip
 						key={_id}
 						selected={selectedTemplates.has(_id)}
 						onClick={() => toggleTemplate(_id)}
-						label={`${name} (${getTicketsByTemplateId(_id).length})`}
+						label={`${name} (${length})`}
 					/>
 				))}
 			</Filters>
