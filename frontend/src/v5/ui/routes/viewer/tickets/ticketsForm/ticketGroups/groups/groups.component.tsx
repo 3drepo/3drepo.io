@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ViewpointGroupHierarchy, ViewpointGroup } from '@/v5/store/tickets/tickets.types';
+import { GroupOverride, Group } from '@/v5/store/tickets/tickets.types';
 import { groupBy, partition, tail, values } from 'lodash';
 import {
 	CollectionHeadline,
@@ -26,7 +26,7 @@ import { GroupToggle } from '../groupToggle/groupToggle.component';
 import { Name, NameContainer } from './groupItem/groupItem.styles';
 import { GroupItem } from './groupItem/groupItem.component';
 
-type GroupsProps = { currentPrefix?: string[], groups: ViewpointGroupHierarchy[] };
+type GroupsProps = { currentPrefix?: string[], groups: GroupOverride[] };
 export const Groups = ({ currentPrefix = [], groups }: GroupsProps) => {
 	const [groupBatches, groupItems] = partition(groups, (g) => g.prefix?.length);
 	const collectionsDict = groupBy(groupBatches, (g) => g.prefix[0]);
@@ -39,7 +39,7 @@ export const Groups = ({ currentPrefix = [], groups }: GroupsProps) => {
 
 	return (
 		<>
-			{groupItems.map((group) => (<GroupItem {...group} currentPrefix={currentPrefix} key={(group.group as ViewpointGroup)._id} />))}
+			{groupItems.map((group) => (<GroupItem {...group} currentPrefix={currentPrefix} key={(group.group as Group)._id} />))}
 			{collections.map((collection) => (
 				<CollectionAccordion
 					title={(

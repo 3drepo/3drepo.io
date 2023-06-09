@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ViewpointGroup, ViewpointState } from '../tickets.types';
+import { Group, ViewpointState } from '../tickets.types';
 
-const smartGroup: ViewpointGroup = {
+const smartGroup: Group = {
 	_id: 'a2045aa0-d9d1-11ed-8443-77f52ace17bf',
 	name: 'Untitled group 1 but with a very long name12345',
 	objects: [{
@@ -31,7 +31,7 @@ const smartGroup: ViewpointGroup = {
 	}],
 };
 
-const normalGroups: ViewpointGroup[] = [
+const normalGroups: Group[] = [
 	{
 		_id: '59115750-ddf8-11ed-84f4-8d3c6f6ad8c6',
 		name: 'opacity 1',

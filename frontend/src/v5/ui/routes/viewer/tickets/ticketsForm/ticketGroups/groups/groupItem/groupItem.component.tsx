@@ -18,7 +18,7 @@
 import ShowIcon from '@assets/icons/outlined/eye-outlined.svg';
 import HideIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
-import { ViewpointGroup, ViewpointGroupHierarchy } from '@/v5/store/tickets/tickets.types';
+import { Group, GroupOverride } from '@/v5/store/tickets/tickets.types';
 import { useContext, useState } from 'react';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
@@ -41,7 +41,7 @@ import { GroupToggle } from '../../groupToggle/groupToggle.component';
 import { TicketGroupsContext } from '../../ticketGroupsContext';
 import { EditGroupButton } from '../groupActionMenu/editGroupButton/editGroupButton.component';
 
-type GroupProps = ViewpointGroupHierarchy & {
+type GroupProps = GroupOverride & {
 	currentPrefix: string[],
 };
 export const GroupItem = ({ group, color, opacity, currentPrefix }: GroupProps) => {
@@ -51,7 +51,7 @@ export const GroupItem = ({ group, color, opacity, currentPrefix }: GroupProps) 
 
 	const deleteGroup = () => {
 		DialogsActionsDispatchers.open('delete', {
-			name: (group as ViewpointGroup).name,
+			name: (group as Group).name,
 			message: formatMessage({
 				id: 'deleteModal.groups.message',
 				defaultMessage: 'By deleting this Collection your data will be lost permanently and will not be recoverable.',

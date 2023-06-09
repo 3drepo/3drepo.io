@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ViewpointGroupHierarchy } from '@/v5/store/tickets/tickets.types';
+import { GroupOverride } from '@/v5/store/tickets/tickets.types';
 import { Select } from '@controls/inputs/select/select.component';
 import { MenuItem } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
@@ -27,7 +27,7 @@ const NONE = formatMessage({
 	defaultMessage: 'None',
 });
 
-const getAllPrefixesCombinations = (hierarchies: ViewpointGroupHierarchy[]): string[][] => {
+const getAllPrefixesCombinations = (hierarchies: GroupOverride[]): string[][] => {
 	const prefixes = hierarchies.map(({ prefix }) => (prefix)).filter(Boolean);
 	const uniquePrefixes = uniqBy(prefixes, JSON.stringify);
 	const allPrefixesWithDuplicates: string[][] = [];
@@ -48,7 +48,7 @@ type GroupsCollectionSelectProps = {
 	label: string,
 	value?: string[];
 	onChange?: (value: string[]) => void;
-	hierarchies: ViewpointGroupHierarchy[];
+	hierarchies: GroupOverride[];
 	disabled?: boolean;
 };
 export const GroupsCollectionSelect = ({ value, onChange, hierarchies, ...props }: GroupsCollectionSelectProps) => {
