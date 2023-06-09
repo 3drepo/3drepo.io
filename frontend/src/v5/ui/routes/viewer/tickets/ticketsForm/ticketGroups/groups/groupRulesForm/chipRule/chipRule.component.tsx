@@ -15,14 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
+import { IGroupRule } from '@/v5/store/tickets/groups/ticketGroups.types';
 import { useState } from 'react';
-import { IRule, OPERATION_DISPLAY_NAMES } from '../../groupRulesForm/groupRulesForm.helpers';
-import { GroupRulesForm } from '../../groupRulesForm/groupRulesForm.component';
+import { OPERATION_DISPLAY_NAMES } from '../groupRulesForm.helpers';
+import { GroupRulesForm } from '../groupRulesForm.component';
 import { ChipWrapper, RuleActionMenu, RuleChip } from './chipRule.styles';
 
 type ChipRuleProps = {
-	value: IRule,
-	onChange?: (rule: IRule) => void;
+	value: IGroupRule,
+	onChange?: (rule: IGroupRule) => void;
 	onDelete: () => void;
 };
 export const ChipRule = ({ value: rule, onChange, onDelete }: ChipRuleProps) => {
