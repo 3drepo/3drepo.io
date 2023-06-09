@@ -27,15 +27,15 @@ export interface PropertyDefinition {
 	deprecated?: boolean;
 }
 
-type Property = Record<string, any>;
+export type Properties = Record<string, any>;
 
 export interface ITicket {
 	_id: string,
 	title: string,
 	number: number,
 	type: string,
-	properties: Property,
-	modules?: Record<string, Property>,
+	properties: Properties,
+	modules?: Record<string, Properties>,
 }
 
 export interface TemplateModule {
@@ -77,7 +77,7 @@ export type ClippingPlane = {
 	clipDirection: 1 | -1;
 };
 
-export type ViewpointGroup = {
+export type Group = {
 	_id?: string,
 	name: string,
 	description?: string,
@@ -85,35 +85,34 @@ export type ViewpointGroup = {
 	rules?: object[],
 };
 
-export enum ViewpointGroupHierarchyType {
-	Colour,
-	Hidden,
-	Transform,
+export enum ViewpointGroupOverrideType {
+	COLORED,
+	HIDDEN,
+	TRANSFORMED,
 }
 
 type ColorAndOpacity = {
-	// at least 1 of the following is required, but not necessarily both
 	color?: [number, number, number],
 	opacity?: number,
 };
 
-export type ViewpointGroupHierarchy = ColorAndOpacity & {
+export type GroupOverride = ColorAndOpacity & {
 	prefix?: string[],
-	group: string | ViewpointGroup,
+	group: string | Group,
 };
 
 export type ViewpointState = {
 	showDefaultHidden: boolean;
-	hidden?: ViewpointGroupHierarchy[],
-	colored?: ViewpointGroupHierarchy[],
-	transformed?: ViewpointGroupHierarchy[],
+	hidden?: GroupOverride[],
+	colored?: GroupOverride[],
+	transformed?: GroupOverride[],
 };
 
 export type Viewpoint = {
 	screenshot?: any;
-	camera: Camera;
+	camera?: Camera;
 	clippingPlanes?: ClippingPlane[];
 	state?: ViewpointState;
 };
 
-export type IGroupSettingsForm = Omit<ViewpointGroupHierarchy, 'group'> & ViewpointGroup;
+export type IGroupSettingsForm = Omit<GroupOverride, 'group'> & Group;

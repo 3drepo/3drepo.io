@@ -43,7 +43,7 @@ import { Display } from '@/v5/ui/themes/media';
 import { formatDate } from '@/v5/services/intl';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
-import { IsMainList } from '../../containers.component';
+import { IsMainList } from '../../mainList.context';
 
 interface IContainerListItem {
 	isSelected: boolean;

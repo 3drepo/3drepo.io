@@ -19,8 +19,8 @@ import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { ButtonProps } from '@mui/material';
 import { NewGroupButton } from './addGroupButton.styles';
-import { TicketsGroupActionMenu } from '../groupActionMenu.styles';
 import { GroupSettingsForm } from '../groupSettingsForm/groupSettingsForm.component';
+import { TicketsGroupActionMenu } from '../groupActionMenu.component';
 
 export const AddGroupButton = (props: ButtonProps) => (
 	<TicketsGroupActionMenu

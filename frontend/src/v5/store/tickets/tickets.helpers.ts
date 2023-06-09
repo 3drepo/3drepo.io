@@ -168,7 +168,7 @@ const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
 		const definition = propertiesDefinitions.find((def) => def.name === key);
 		if (definition?.type === 'view') {
 			const viewValue:Viewpoint | undefined = values[key];
-			const oldValue:Viewpoint | undefined = oldValues[key];
+			const oldValue:Viewpoint | undefined = oldValues?.[key];
 
 			if (isResourceId(viewValue?.screenshot)) {
 				delete viewValue.screenshot;
@@ -177,6 +177,10 @@ const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
 			if (viewValue && !viewValue.camera && oldValue?.camera) {
 				viewValue.camera = null;
 				viewValue.clippingPlanes = null;
+			}
+
+			if (viewValue && !viewValue.state && oldValue?.state) {
+				viewValue.state = null;
 			}
 		}
 	});

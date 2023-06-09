@@ -18,12 +18,14 @@
 import { isEqual, omit, pick } from 'lodash';
 import { select } from 'redux-saga/effects';
 import { GROUP_TYPES_ICONS, GROUPS_TYPES } from '../constants/groups';
-import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds, selectGetNumNodesByMeshSharedIdsArray } from '../modules/tree';
+import { selectGetMeshesByIds, selectGetNumNodesByMeshSharedIdsArray } from '../modules/tree';
 import { COLOR } from '../styles';
+import { getState } from '../modules/store';
 import { hasSameElements } from './arrays';
 import { getGroupHexColor, hexToArray } from './colors';
 import { prepareCriterion } from './criteria';
 import { calculateTotalMeshes } from './tree';
+import { getNodesIdsFromSharedIds } from './viewpoints';
 
 export const prepareGroup = (group) => {
 	const isSmartGroup = group.rules && group.rules.length;
@@ -101,10 +103,11 @@ export const mergeGroupData = (source, data = source) => {
 	};
 };
 
-export function* createModelBySharedIdDictionary(sharedIdnodes) {
+export function createModelBySharedIdDictionary(sharedIdnodes) {
+	const state = getState()
 	// Converts shareIds to nodeIds
-	const nodes = yield select(selectGetNodesIdsFromSharedIds([{shared_ids: sharedIdnodes}]));
-	const meshesInfo = yield select(selectGetMeshesByIds(nodes));
+	const nodes = getNodesIdsFromSharedIds([{shared_ids: sharedIdnodes}]);
+	const meshesInfo: any[] = selectGetMeshesByIds(nodes)(state);
 
 	// This generates a dictionary to get the teamspace and model from the sharedId: sharedId => {teamspace, modelId}
 	return meshesInfo.reduce((dict, meshesByModel) => {
@@ -118,9 +121,9 @@ export function* createModelBySharedIdDictionary(sharedIdnodes) {
 	}, {});
 }
 
-export function* createGroupsByColor(overrides) {
+export function createGroupsByColor(overrides) {
 	const sharedIdnodes = Object.keys(overrides);
-	const modelsDict = yield createModelBySharedIdDictionary(sharedIdnodes);
+	const modelsDict = createModelBySharedIdDictionary(sharedIdnodes);
 
 	// This creates an array of groups grouped by colour
 	// // for example:
@@ -194,9 +197,9 @@ export function* createGroupsByColor(overrides) {
 		}, []);
 }
 
-export function* createGroupsByTransformations(transformations) {
+export function createGroupsByTransformations(transformations) {
 	const sharedIdnodes = Object.keys(transformations);
-	const modelsDict = yield createModelBySharedIdDictionary(sharedIdnodes);
+	const modelsDict = createModelBySharedIdDictionary(sharedIdnodes);
 
 	return sharedIdnodes.reduce((arr, objectId, i) =>  {
 		const { teamspace, modelId } = modelsDict[objectId];

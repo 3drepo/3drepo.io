@@ -80,8 +80,8 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues?: IGroupSet
 						control={control}
 						name="name"
 						label={formatMessage({
-							id: 'ticketsGroupSettings.form.label',
-							defaultMessage: 'Label',
+							id: 'ticketsGroupSettings.form.title',
+							defaultMessage: 'Title',
 						})}
 						required
 						formError={errors?.name}

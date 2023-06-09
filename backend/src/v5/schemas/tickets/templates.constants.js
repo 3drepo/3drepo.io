@@ -52,13 +52,19 @@ const presetEnumValues = createConstantMapping([
 	'riskCategories',
 ]);
 
+const viewGroups = createConstantMapping([
+	'colored',
+	'hidden',
+	'transformed',
+]);
+
 const riskLevelsArr = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'];
 const riskLevels = createConstantMapping(riskLevelsArr);
 
 const createPropertyEntry = (name, type, values, defaultVal, readOnly, availableIf) => deleteIfUndefined({
 	name, type, values, default: defaultVal, readOnly, availableIf });
 
-const TemplateConstants = { propTypes, presetEnumValues, presetModules, riskLevels };
+const TemplateConstants = { propTypes, presetEnumValues, presetModules, riskLevels, viewGroups };
 
 TemplateConstants.riskLevelsToNum = (value) => riskLevelsArr.indexOf(value);
 

@@ -28,6 +28,9 @@ import { isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
+import { getViewerState, viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
+import { ViewpointsActions } from '@/v4/modules/viewpoints';
+import { useDispatch } from 'react-redux';
 import { BasicTicketImage } from '../basicTicketImage/basicTicketImage.component';
 import { ActionMenu, TicketImageAction } from '../basicTicketImage/ticketImageAction/ticketImageAction.styles';
 import { TicketImageActionMenu } from '../basicTicketImage/ticketImageActionMenu.component';
@@ -52,15 +55,19 @@ export const TicketView = ({
 	disabled,
 	...props
 }: ITicketView) => {
+	const dispatch = useDispatch();
+
 	const updateViewpoint = async () => {
-		const currentViewpoint = await ViewerService.getViewpoint();
+		const currentCameraAndClipping = await ViewerService.getViewpoint();
 		const screenshot = stripBase64Prefix(await ViewerService.getScreenshot());
-		onChange?.({ screenshot, ...currentViewpoint });
+		const state = await getViewerState();
+		onChange?.({ screenshot, ...currentCameraAndClipping, state });
 	};
 
-	const goToViewpoint = async () => {
-		await ViewerService.setViewpoint(value);
+	const goToViewpoint = () => {
+		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(value)));
 	};
+
 	const deleteViewpoint = () => {
 		let view = null;
 		if (value?.screenshot) view = { screenshot: value.screenshot };

@@ -17,7 +17,16 @@
 
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
+import { ICurrentUser } from '../currentUser/currentUser.types';
+import { IUser } from './users.redux';
 
 export const getMemberImgSrc = (teamspace: string, member: string) => (
 	generateV5ApiUrl(`teamspaces/${teamspace}/members/${member}/avatar`, clientConfigService.GET_API)
 );
+
+export const getUserInitials = ({ firstName, lastName }: ICurrentUser | IUser) => {
+	if (!(firstName || lastName)) return '';
+	return [firstName, lastName]
+		.map((name) => name.trim().charAt(0).toUpperCase())
+		.join('');
+};
