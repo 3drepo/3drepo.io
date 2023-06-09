@@ -22,7 +22,7 @@ export const Container = styled(InputContainer)<{ disabled: boolean; }>`
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	width: fit-content;
+	width: 55px;
 	padding: 7px 9px;
 	cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
 
