@@ -57,11 +57,7 @@ export const Viewer = () => {
 
 	useEffect(() => {
 		ViewerService.on(VIEWER_EVENTS.CLICK_PIN, handlePinClick);
-		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, TicketsCardActionsDispatchers.resetState);
-		return () => {
-			ViewerService.off(VIEWER_EVENTS.CLICK_PIN, handlePinClick);
-			ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, TicketsCardActionsDispatchers.resetState);
-		};
+		return () => ViewerService.off(VIEWER_EVENTS.CLICK_PIN, handlePinClick);
 	}, [tickets]);
 
 	useEffect(() => {
