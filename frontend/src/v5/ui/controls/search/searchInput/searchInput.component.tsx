@@ -19,6 +19,7 @@ import { TextFieldProps } from '@mui/material';
 import SearchIcon from '@assets/icons/outlined/search-outlined.svg';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { ChangeEvent, useContext } from 'react';
+import { formatMessage } from '@/v5/services/intl';
 import { IconButton, TextField, StartAdornment, EndAdornment } from './searchInput.styles';
 import { SearchContext } from '../searchContext';
 
@@ -68,6 +69,7 @@ export const SearchInput = ({ onClear, value, variant = 'filled', ...props }: IS
 				),
 			}}
 			variant={variant}
+			placeholder={formatMessage({ id: 'searchInput.defaultPlaceholder', defaultMessage: 'Search...' })}
 			{...props}
 			onChange={onChange}
 		/>
