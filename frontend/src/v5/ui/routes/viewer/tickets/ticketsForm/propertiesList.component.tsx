@@ -57,7 +57,6 @@ export const PropertiesList = ({ module, properties, onPropertyBlur, onGroupsCli
 							name={inputName}
 							formError={formError}
 							onBlur={onPropertyBlur}
-							// @ts-ignore
 							values={values}
 							onGroupsClick={onGroupsClick}
 						/>

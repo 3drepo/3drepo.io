@@ -17,14 +17,21 @@
 
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
-import { trimmedString } from '../shared/validators';
 
-const requiredTrimmedString = trimmedString.required(
+const requiredTrimmedString = Yup.string().trim().required(
 	formatMessage({
 		id: 'validation.ticket.groupFilters.error.required',
 		defaultMessage: 'This is a required field',
 	}),
 );
+
+const valueType = Yup.object({ value: requiredTrimmedString });
+
+export const GroupRulesSchema = Yup.object().shape({
+	field: requiredTrimmedString,
+	operation: requiredTrimmedString,
+	values: Yup.array().of(valueType),
+});
 
 export const GroupSettingsSchema = Yup.object().shape({
 	name: requiredTrimmedString,

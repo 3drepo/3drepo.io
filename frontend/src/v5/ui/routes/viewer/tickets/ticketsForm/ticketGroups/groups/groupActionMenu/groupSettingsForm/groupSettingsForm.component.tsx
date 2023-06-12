@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormColorPicker, FormTextField } from '@controls/inputs/formInputs.component';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { SubmitButton } from '@controls/submitButton';
 import { Button } from '@controls/button';
@@ -28,21 +28,45 @@ import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { Buttons, LabelAndColor, FormBox, Heading, Instruction, CreateCollectionLink, Subheading, ToggleLabel, ToggleWrapper, Toggle, FormRow } from './groupSettingsForm.styles';
+import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
 import { TicketGroupsContext } from '../../../ticketGroupsContext';
+import {
+	Buttons,
+	LabelAndColor,
+	FormBox,
+	Heading,
+	Instruction,
+	CreateCollectionLink,
+	Subheading,
+	ToggleLabel,
+	ToggleWrapper,
+	Toggle,
+	FormRow,
+	Rules,
+	AddFilterTitle,
+	NewRuleActionMenu,
+	TriggerButton,
+	FormRulesBox,
+} from './groupSettingsForm.styles';
+import { GroupRulesForm } from '../../groupRulesForm/groupRulesForm.component';
+import { ChipRule } from '../../groupRulesForm/chipRule/chipRule.component';
 
 export const GroupSettingsForm = ({ defaultValues }: { defaultValues?: IGroupSettingsForm }) => {
 	const [isSmart, setIsSmart] = useState(!!defaultValues?.rules?.length);
 	const isHidden = useContext(TicketGroupsContext).groupType === 'hidden';
-	const {
-		control,
-		handleSubmit,
-		formState: { errors, isValid, dirtyFields },
-	} = useForm<IGroupSettingsForm>({
+	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
 		resolver: yupResolver(GroupSettingsSchema),
 		defaultValues,
 	});
+	const { fields: rules, append, remove, update } = useFieldArray({
+		control: formData.control,
+		name: 'rules',
+	});
+	const {
+		handleSubmit,
+		formState: { errors, isValid, dirtyFields },
+	} = formData;
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const isNewGroup = !defaultValues?._id;
 
@@ -52,154 +76,180 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues?: IGroupSet
 	};
 	return (
 		<form>
-			<Heading>
-				{isNewGroup ? (
+			<FormProvider {...formData}>
+				<Heading>
+					{isNewGroup ? (
+						<FormattedMessage
+							id="ticketsGroupSettings.heading.addGroup"
+							defaultMessage="Add new group"
+						/>
+					) : (
+						<FormattedMessage
+							id="ticketsGroupSettings.heading.editGroup"
+							defaultMessage="Edit group"
+						/>
+					)}
+				</Heading>
+				<Subheading>
 					<FormattedMessage
-						id="ticketsGroupSettings.heading.addGroup"
-						defaultMessage="Add new group"
+						id="ticketsGroupSettings.subHeading.groupInformation"
+						defaultMessage="Group information"
 					/>
-				) : (
-					<FormattedMessage
-						id="ticketsGroupSettings.heading.editGroup"
-						defaultMessage="Edit group"
-					/>
-				)}
-			</Heading>
-			<Subheading>
-				<FormattedMessage
-					id="ticketsGroupSettings.subHeading.groupInformation"
-					defaultMessage="Group information"
-				/>
-			</Subheading>
-			<FormBox>
-				<LabelAndColor>
-					<FormTextField
-						control={control}
-						name="name"
-						label={formatMessage({
-							id: 'ticketsGroupSettings.form.title',
-							defaultMessage: 'Title',
-						})}
-						required
-						formError={errors?.name}
-						disabled={!isAdmin}
-					/>
-					<FormColorPicker
-						control={control}
-						name="color"
-						formError={errors?.color}
-						disabled={!isAdmin}
-					/>
-				</LabelAndColor>
-				<FormRow>
-					<FormTextField
-						control={control}
-						name="description"
-						label={formatMessage({
-							id: 'ticketsGroupSettings.form.description',
-							defaultMessage: 'Description',
-						})}
-						formError={errors?.description}
-						disabled={!isAdmin}
-					/>
-				</FormRow>
-				<FormRow>
-					<FormTextField
-						control={control}
-						name="prefix"
-						label={isAdmin ? formatMessage({
-							id: 'ticketsGroupSettings.form.collection',
-							defaultMessage: 'Add group to collection',
-						}) : formatMessage({
-							id: 'ticketsGroupSettings.form.collection.disabled',
-							defaultMessage: 'Parent collection',
-						})}
-						formError={errors?.prefix}
-						disabled={!isAdmin}
-					/>
+				</Subheading>
+				<FormBox>
+					<LabelAndColor>
+						<FormTextField
+							name="name"
+							label={formatMessage({
+								id: 'ticketsGroupSettings.form.title',
+								defaultMessage: 'Title',
+							})}
+							required
+							formError={errors?.name}
+							disabled={!isAdmin}
+						/>
+						<FormColorPicker
+							name="color"
+							formError={errors?.color}
+							disabled={!isAdmin}
+						/>
+					</LabelAndColor>
+					<FormRow>
+						<FormTextField
+							name="description"
+							label={formatMessage({
+								id: 'ticketsGroupSettings.form.description',
+								defaultMessage: 'Description',
+							})}
+							formError={errors?.description}
+							disabled={!isAdmin}
+						/>
+					</FormRow>
+					<FormRow>
+						<FormTextField
+							name="prefix"
+							label={isAdmin ? formatMessage({
+								id: 'ticketsGroupSettings.form.collection',
+								defaultMessage: 'Add group to collection',
+							}) : formatMessage({
+								id: 'ticketsGroupSettings.form.collection.disabled',
+								defaultMessage: 'Parent collection',
+							})}
+							formError={errors?.prefix}
+							disabled={!isAdmin}
+						/>
 
-				</FormRow>
-				{
-					isAdmin && (
-						<CreateCollectionLink>
-							<FormattedMessage
-								id="ticketsGroupSettings.link.createCollection"
-								defaultMessage="Create new collection"
-							/>
-						</CreateCollectionLink>
-					)
-				}
-			</FormBox>
-			<Subheading>
-				<FormattedMessage
-					id="ticketsGroupSettings.subHeading.groupType"
-					defaultMessage="Group type"
-				/>
-			</Subheading>
-			<FormBox>
-				<ToggleWrapper>
-					<ToggleLabel disabled={!isAdmin} onClick={() => setIsSmart(false)}>
-						<FormattedMessage id="ticketsGroupSettings.form.type.manual" defaultMessage="Manual group" />
-					</ToggleLabel>
-					<Toggle
-						value={isSmart}
-						onClick={() => setIsSmart((prev) => !prev)}
-						disabled={!isAdmin}
+					</FormRow>
+					{
+						isAdmin && (
+							<CreateCollectionLink>
+								<FormattedMessage
+									id="ticketsGroupSettings.link.createCollection"
+									defaultMessage="Create new collection"
+								/>
+							</CreateCollectionLink>
+						)
+					}
+				</FormBox>
+				<Subheading>
+					<FormattedMessage
+						id="ticketsGroupSettings.subHeading.groupType"
+						defaultMessage="Group type"
 					/>
-					<ToggleLabel disabled={!isAdmin} onClick={() => setIsSmart(true)}>
-						<FormattedMessage id="ticketsGroupSettings.form.type.smart" defaultMessage="Smart group" />
-					</ToggleLabel>
-				</ToggleWrapper>
+				</Subheading>
+				<FormBox>
+					<ToggleWrapper>
+						<ToggleLabel disabled={!isAdmin} onClick={() => setIsSmart(false)}>
+							<FormattedMessage id="ticketsGroupSettings.form.type.manual" defaultMessage="Manual group" />
+						</ToggleLabel>
+						<Toggle
+							value={isSmart}
+							onClick={() => setIsSmart((prev) => !prev)}
+							disabled={!isAdmin}
+						/>
+						<ToggleLabel disabled={!isAdmin} onClick={() => setIsSmart(true)}>
+							<FormattedMessage id="ticketsGroupSettings.form.type.smart" defaultMessage="Smart group" />
+						</ToggleLabel>
+					</ToggleWrapper>
+					{
+						isAdmin && (
+							<Instruction>
+								<FormattedMessage
+									id="ticketsGroupSettings.smartGroupInstruction"
+									defaultMessage="Use filters below to create smart group"
+								/>
+							</Instruction>
+						)
+					}
+				</FormBox>
 				{
-					isAdmin && (
-						<Instruction>
-							<FormattedMessage
-								id="ticketsGroupSettings.smartGroupInstruction"
-								defaultMessage="Use filters below to create smart group"
-							/>
-						</Instruction>
+					isSmart && (
+						<>
+							<Subheading>
+								<FormattedMessage
+									id="ticketsGroupSettings.subHeading.filters"
+									defaultMessage="Filters"
+								/>
+								<AddFilterTitle>
+									<NewRuleActionMenu
+										TriggerButton={(
+											<TriggerButton>
+												<FormattedMessage id="tickets.groups.newGroupForm.addFilter" defaultMessage="Add filter" />
+											</TriggerButton>
+										)}
+									>
+										<GroupRulesForm onSave={append} />
+									</NewRuleActionMenu>
+								</AddFilterTitle>
+							</Subheading>
+							<FormRulesBox>
+								<Rules>
+									{rules.map(({ id, ...value }, i) => (
+										<ChipRule
+											value={value}
+											key={id}
+											onDelete={() => remove(i)}
+											onChange={(val) => update(i, val)}
+										/>
+									))}
+									{!rules.length && (
+										<EmptyCardMessage>
+											<FormattedMessage
+												id="tickets.groups.newGroupForm.rules.empty"
+												defaultMessage="No Filters"
+											/>
+										</EmptyCardMessage>
+									)}
+								</Rules>
+							</FormRulesBox>
+						</>
 					)
 				}
-			</FormBox>
-			{
-				isSmart && (
-					<>
-						<Subheading>
-							<FormattedMessage
-								id="ticketsGroupSettings.subHeading.filters"
-								defaultMessage="Filters"
-							/>
-						</Subheading>
-						<FormBox>
-							Filters here!
-						</FormBox>
-					</>
-				)
-			}
-			<Buttons>
-				<ActionMenuItem>
-					<Button variant="text" color="secondary" size="medium">
-						<FormattedMessage id="tickets.groups.settings.cancel" defaultMessage="Cancel" />
-					</Button>
-				</ActionMenuItem>
-				{ isAdmin && (
+				<Buttons>
 					<ActionMenuItem>
-						<SubmitButton
-							size="medium"
-							fullWidth={false}
-							onClick={handleSubmit(onSubmit)}
-							disabled={!isValid || isEmpty(dirtyFields)}
-						>
-							{isNewGroup ? (
-								<FormattedMessage id="tickets.groups.settings.createGroup" defaultMessage="Create group" />
-
-							) : (
-								<FormattedMessage id="tickets.groups.settings.updateGroup" defaultMessage="Update group" />
-							)}
-						</SubmitButton>
+						<Button variant="text" color="secondary" size="medium">
+							<FormattedMessage id="tickets.groups.settings.cancel" defaultMessage="Cancel" />
+						</Button>
 					</ActionMenuItem>
-				)}
-			</Buttons>
+					{ isAdmin && (
+						<ActionMenuItem>
+							<SubmitButton
+								size="medium"
+								fullWidth={false}
+								onClick={handleSubmit(onSubmit)}
+								disabled={!isValid || isEmpty(dirtyFields)}
+							>
+								{isNewGroup ? (
+									<FormattedMessage id="tickets.groups.settings.createGroup" defaultMessage="Create group" />
+
+								) : (
+									<FormattedMessage id="tickets.groups.settings.updateGroup" defaultMessage="Update group" />
+								)}
+							</SubmitButton>
+						</ActionMenuItem>
+					)}
+				</Buttons>
+			</FormProvider>
 		</form>
 	);
 };
