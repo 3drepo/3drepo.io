@@ -16,12 +16,13 @@
  */
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { flatMap } from 'lodash';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
+import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
@@ -70,6 +71,11 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		if (!(view?.camera)) return;
 		ViewerService.setViewpoint(view);
 	};
+
+	useEffect(() => {
+		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => TicketsCardActionsDispatchers.setSelectedTicket(null));
+		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED);
+	}, []);
 
 	return (
 		<>
