@@ -1,5 +1,5 @@
 require('fake-indexeddb/auto');
-const nock = require('nock');
+import * as nock from 'nock'
 import axios from 'axios';
 import clientConfigMock from './clientConfig.mock';
 
@@ -26,6 +26,7 @@ const nockCleanup = () => {
 
 afterEach(() => {
 	if (!nock.isDone()) {
+		console.log('Missing Nocks:', nock.pendingMocks())
 		nockCleanup();
 		throw new Error('Not all nock interceptors were used!');
 	}
