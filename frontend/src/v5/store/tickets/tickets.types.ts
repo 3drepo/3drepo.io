@@ -77,12 +77,39 @@ export type ClippingPlane = {
 	clipDirection: 1 | -1;
 };
 
+export const OPERATIONS_TYPES = {
+	EXISTS: 'field',
+	NOT_EXISTS: 'field',
+	IS: 'text',
+	IS_NOT: 'text',
+	CONTAINS: 'text',
+	NOT_CONTAINS: 'text',
+	REGEX: 'regex',
+	EQUALS: 'number',
+	NOT_EQUALS: 'number',
+	GT: 'numberComparison',
+	GTE: 'numberComparison',
+	LT: 'numberComparison',
+	LTE: 'numberComparison',
+	IN_RANGE: 'numberRange',
+	NOT_IN_RANGE: 'numberRange',
+} as const;
+
+export type Operation = keyof typeof OPERATIONS_TYPES;
+export type OperationType = typeof OPERATIONS_TYPES[Operation];
+
+export interface IGroupRule {
+	field: string,
+	operation: Operation,
+	values?: (number | string)[],
+}
+
 export type Group = {
 	_id?: string,
 	name: string,
-	description: string,
-	objects?: { container: string, _ids: [] }[]
-	rules?: object[]
+	description?: string,
+	objects?: { container: string, _ids: string[] }[],
+	rules?: IGroupRule[],
 };
 
 export enum ViewpointGroupOverrideType {
@@ -91,11 +118,14 @@ export enum ViewpointGroupOverrideType {
 	TRANSFORMED,
 }
 
-export type GroupOverride = {
-	prefix?: string[],
-	group: string | Group,
+type ColorAndOpacity = {
 	color?: [number, number, number],
 	opacity?: number,
+};
+
+export type GroupOverride = ColorAndOpacity & {
+	prefix?: string[],
+	group: string | Group,
 };
 
 export type ViewpointState = {
@@ -111,3 +141,5 @@ export type Viewpoint = {
 	clippingPlanes?: ClippingPlane[];
 	state?: ViewpointState;
 };
+
+export type IGroupSettingsForm = Omit<GroupOverride, 'group'> & Group;

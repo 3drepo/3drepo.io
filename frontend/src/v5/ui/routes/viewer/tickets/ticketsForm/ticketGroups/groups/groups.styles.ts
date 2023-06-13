@@ -81,6 +81,10 @@ export const GroupsContainer = styled.div`
 	margin: 0;
 	padding-left: 0;
 	position: relative;
+
+	& > *:first-child {
+		margin-top: 0;
+	}
 `;
 
 export const Icon = styled.div`

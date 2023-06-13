@@ -18,7 +18,7 @@
 import ShowIcon from '@assets/icons/outlined/eye-outlined.svg';
 import HideIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
-import { IGroupFromApi } from '@/v5/store/tickets/groups/ticketGroups.types';
+import { Group, GroupOverride } from '@/v5/store/tickets/tickets.types';
 import { useContext, useState } from 'react';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
@@ -27,6 +27,8 @@ import { FormattedMessage } from 'react-intl';
 import { GroupIconComponent } from '@/v5/ui/routes/viewer/groups/groupItem/groupIcon/groupIcon.component';
 import { ErrorTicketButton, PrimaryTicketButton } from '@/v5/ui/routes/viewer/tickets/ticketButton/ticketButton.styles';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CircularProgress } from '@mui/material';
+import { isString } from 'lodash';
 import {
 	Buttons,
 	NameContainer,
@@ -39,15 +41,17 @@ import { GroupToggle } from '../../groupToggle/groupToggle.component';
 import { TicketGroupsContext } from '../../ticketGroupsContext';
 import { EditGroupButton } from '../groupActionMenu/editGroupButton/editGroupButton.component';
 
-type GroupProps = { group: IGroupFromApi, color?: [number, number, number], opacity?: number };
-export const GroupItem = ({ group, color, opacity }: GroupProps) => {
+type GroupProps = GroupOverride & {
+	currentPrefix: string[],
+};
+export const GroupItem = ({ group, color, opacity, currentPrefix }: GroupProps) => {
 	const [groupIsVisible, setGroupIsVisible] = useState(false);
 	const { groupType } = useContext(TicketGroupsContext);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	const deleteGroup = () => {
 		DialogsActionsDispatchers.open('delete', {
-			name: group.name,
+			name: (group as Group).name,
 			message: formatMessage({
 				id: 'deleteModal.groups.message',
 				defaultMessage: 'By deleting this Collection your data will be lost permanently and will not be recoverable.',
@@ -63,6 +67,8 @@ export const GroupItem = ({ group, color, opacity }: GroupProps) => {
 
 	const alphaColor = (color || [255, 255, 255]).concat(opacity);
 	const alphaHexColor = rgbaToHex(alphaColor.join());
+
+	if (isString(group)) return (<CircularProgress />);
 
 	return (
 		<Container>
@@ -89,7 +95,7 @@ export const GroupItem = ({ group, color, opacity }: GroupProps) => {
 						<PrimaryTicketButton onClick={toggleShowGroup}>
 							{groupIsVisible ? (<ShowIcon />) : (<HideIcon />)}
 						</PrimaryTicketButton>
-						<EditGroupButton defaultValues={{ color, opacity, ...group }} />
+						<EditGroupButton defaultValues={{ color, opacity, ...group, prefix: currentPrefix }} />
 					</Buttons>
 				)}
 			</Headline>

@@ -21,7 +21,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { useEffect } from 'react';
 import AddValueIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import RemoveValueIcon from '@assets/icons/outlined/remove_circle-outlined.svg';
-import { OPERATIONS_TYPES } from '@/v5/store/tickets/groups/ticketGroups.types';
+import { OPERATIONS_TYPES } from '@/v5/store/tickets/tickets.types';
 import { ValueIconContainer, ValuesContainer } from './ruleValueField.styles';
 import { IRuleForm } from '../groupRulesForm.helpers';
 

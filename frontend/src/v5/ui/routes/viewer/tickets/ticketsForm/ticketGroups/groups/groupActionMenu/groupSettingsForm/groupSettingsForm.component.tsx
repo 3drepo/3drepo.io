@@ -18,17 +18,20 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormColorPicker, FormTextField } from '@controls/inputs/formInputs.component';
-import { SubmitHandler, useForm, FormProvider, useFieldArray } from 'react-hook-form';
+import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { SubmitButton } from '@controls/submitButton';
 import { Button } from '@controls/button';
-import { IGroupSettingsForm } from '@/v5/store/tickets/groups/ticketGroups.types';
 import { useContext, useState } from 'react';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
+import { IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
+import { InputController } from '@controls/inputs/inputController.component';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
+import { MOCK_DATA } from '@/v5/store/tickets/groups/ticketGroups.helpers';
+import { GroupsCollectionSelect } from '../../addOrEditGroup/groupSettingsForm.component.tsx/groupsCollectionSelect/groupsCollectionSelect.component';
 import { TicketGroupsContext } from '../../../ticketGroupsContext';
 import {
 	Buttons,
@@ -51,7 +54,10 @@ import {
 import { GroupRulesForm } from '../../groupRulesForm/groupRulesForm.component';
 import { ChipRule } from '../../groupRulesForm/chipRule/chipRule.component';
 
-export const GroupSettingsForm = ({ defaultValues }: { defaultValues?: IGroupSettingsForm }) => {
+type GroupSettingsFormProps = {
+	defaultValues?: IGroupSettingsForm,
+};
+export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => {
 	const [isSmart, setIsSmart] = useState(!!defaultValues?.rules?.length);
 	const isHidden = useContext(TicketGroupsContext).groupType === 'hidden';
 	const formData = useForm<IGroupSettingsForm>({
@@ -70,9 +76,9 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues?: IGroupSet
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const isNewGroup = !defaultValues?._id;
 
-	const onSubmit: SubmitHandler<IGroupSettingsForm> = (args) => {
+	const onSubmit = (body: IGroupSettingsForm) => {
 		// eslint-disable-next-line no-console
-		console.log({ args, isHidden });
+		console.log({ body, isHidden });
 	};
 	return (
 		<form>
@@ -126,7 +132,8 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues?: IGroupSet
 						/>
 					</FormRow>
 					<FormRow>
-						<FormTextField
+						<InputController
+							Input={GroupsCollectionSelect}
 							name="prefix"
 							label={isAdmin ? formatMessage({
 								id: 'ticketsGroupSettings.form.collection',
@@ -137,8 +144,8 @@ export const GroupSettingsForm = ({ defaultValues }: { defaultValues?: IGroupSet
 							})}
 							formError={errors?.prefix}
 							disabled={!isAdmin}
+							hierarchies={MOCK_DATA.colored}
 						/>
-
 					</FormRow>
 					{
 						isAdmin && (

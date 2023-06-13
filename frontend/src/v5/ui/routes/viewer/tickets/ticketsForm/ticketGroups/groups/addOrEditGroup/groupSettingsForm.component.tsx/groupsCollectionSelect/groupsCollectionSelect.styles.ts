@@ -15,20 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
-import { IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
-import { PrimaryTicketButton } from '../../../../../ticketButton/ticketButton.styles';
-import { GroupSettingsForm } from '../groupSettingsForm/groupSettingsForm.component';
-import { TicketsGroupActionMenu } from '../groupActionMenu.component';
+import { MenuItem as MenuItemBase } from '@mui/material';
+import styled, { css } from 'styled-components';
 
-export const EditGroupButton = ({ defaultValues }: { defaultValues?: IGroupSettingsForm }) => (
-	<TicketsGroupActionMenu
-		TriggerButton={(
-			<PrimaryTicketButton>
-				<EditIcon />
-			</PrimaryTicketButton>
-		)}
-	>
-		<GroupSettingsForm defaultValues={defaultValues} />
-	</TicketsGroupActionMenu>
-);
+export const MenuItemPrefix = styled(MenuItemBase)<{ $depth: number }>`
+	${({ $depth }) => css`
+		& > * {
+			font-weight: ${$depth === 0 ? 600 : 400};
+			margin-left: ${$depth * 12}px;
+		}
+	`}
+`;

@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
-import { IGroupRule } from '@/v5/store/tickets/groups/ticketGroups.types';
 import { useState } from 'react';
+import { IGroupRule } from '@/v5/store/tickets/tickets.types';
 import { OPERATION_DISPLAY_NAMES } from '../groupRulesForm.helpers';
 import { GroupRulesForm } from '../groupRulesForm.component';
 import { ChipWrapper, RuleActionMenu, RuleChip } from './chipRule.styles';
