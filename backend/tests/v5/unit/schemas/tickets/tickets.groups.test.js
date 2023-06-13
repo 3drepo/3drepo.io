@@ -46,7 +46,7 @@ const testDeserialiseGroup = () => {
 };
 
 const testSerialiseGroup = () => {
-	describe('Deserialise', () => {
+	describe('Serialise', () => {
 		test('Should convert all uuid into uuids strings', () => {
 			const obj = generateRandomObject();
 			obj.objects = times(3, () => ({

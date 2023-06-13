@@ -244,7 +244,7 @@ Schemas.schemas.ticketGroup = {
 			items: {
 				type: 'object',
 				properties: {
-					prop: {
+					field: {
 						type: 'string',
 						description: 'The BIM data prop to query',
 						example: 'Floor',
