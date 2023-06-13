@@ -18,8 +18,9 @@
 import { TextFieldProps } from '@mui/material';
 import SearchIcon from '@assets/icons/outlined/search-outlined.svg';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { ChangeEvent, useContext } from 'react';
+import { ChangeEvent, useContext, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
+import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 import { IconButton, TextField, StartAdornment, EndAdornment } from './searchInput.styles';
 import { SearchContext } from '../searchContext';
 
@@ -29,36 +30,52 @@ type ISearchInput = {
 	 * Note: the clear button only appears when the controls is controlled (read more https://reactjs.org/docs/forms.html#controlled-components)
 	 */
 	onClear?: () => void;
+	multiple?: boolean;
 } & TextFieldProps;
 
-export const SearchInput = ({ onClear, value, variant = 'filled', ...props }: ISearchInput): JSX.Element => {
-	const { query, setQuery } = useContext(SearchContext);
+export const SearchInput = ({ onClear, value, variant = 'filled', multiple, ...props }: ISearchInput): JSX.Element => {
+	const { queries, setQueries } = useContext(SearchContext);
+	const [val, setVal] = useState('');
 
 	const onChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-		setQuery(event.currentTarget.value);
-		if (props.onChange) {
-			props.onChange(event);
-		}
+		setVal(event.currentTarget.value);
+		props.onChange?.(event);
+		if (multiple) return;
+		setQueries([event.currentTarget.value]);
 	};
 
 	const onClickClear = () => {
-		if (onClear) {
-			onClear();
-		}
-
-		setQuery('');
+		onClear?.();
+		setQueries([]);
+		setVal('');
 	};
 
-	const val = query || value || '';
+	const onKeyDown = (event) => {
+		if (event.key === 'Enter') {
+			props.onSubmit?.(event);
+			if (!multiple) return;
+			event.preventDefault();
+			setQueries((prev: string[]) => prev.concat([val]));
+			setVal('');
+		}
+	};
 
 	return (
 		<TextField
 			value={val}
 			InputProps={{
 				startAdornment: (
-					<StartAdornment>
-						<SearchIcon />
-					</StartAdornment>
+					<>
+						<StartAdornment>
+							<SearchIcon />
+						</StartAdornment>
+						{!!queries.length && multiple && queries.map((query) => (
+							<FilterChip
+								key={query}
+								label={query}
+							/>
+						))}
+					</>
 				),
 				endAdornment: (
 					<EndAdornment $isVisible={Boolean(val)}>
@@ -70,6 +87,8 @@ export const SearchInput = ({ onClear, value, variant = 'filled', ...props }: IS
 			}}
 			variant={variant}
 			placeholder={formatMessage({ id: 'searchInput.defaultPlaceholder', defaultMessage: 'Search...' })}
+			onKeyDown={onKeyDown}
+			multiline={multiple}
 			{...props}
 			onChange={onChange}
 		/>

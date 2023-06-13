@@ -20,6 +20,7 @@ import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import MenuItemBase from '@mui/material/MenuItem';
 import { Button } from '@controls/button';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
+import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 import { Ticket } from './ticketItem/ticketItem.styles';
 
 export const List = styled.div`
@@ -87,4 +88,9 @@ export const ActionMenu = styled(ActionMenuBase).attrs({
 
 export const MenuItem = styled(MenuItemBase)`
 	padding: 5px 12px;
+`;
+
+export const SearchInput = styled(SearchInputBase)`
+	margin: 0 0 12px;
+	color: ${({ theme }) => theme.palette.primary.main};
 `;
