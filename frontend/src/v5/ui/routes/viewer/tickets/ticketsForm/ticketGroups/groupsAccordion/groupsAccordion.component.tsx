@@ -26,7 +26,7 @@ import { Accordion, NumberContainer, TitleContainer, Checkbox } from './groupsAc
 import { Groups } from '../groups/groups.component';
 import { AddGroupButton } from '../groups/groupActionMenu/addGroupButton/addGroupButton.component';
 
-type GroupsAccordionProps = Omit<AccordionProps, 'Icon'> & {
+type GroupsAccordionProps = Omit<AccordionProps, 'Icon' | 'children'> & {
 	title: any;
 	groups: GroupOverride[];
 };
