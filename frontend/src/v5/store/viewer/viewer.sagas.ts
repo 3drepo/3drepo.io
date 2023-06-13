@@ -24,8 +24,7 @@ import { ContainersActions, ContainersTypes } from '../containers/containers.red
 import { DialogsActions, DialogsTypes } from '../dialogs/dialogs.redux';
 import { prepareFederationsData } from '../federations/federations.helpers';
 import { FederationsActions, FederationsTypes } from '../federations/federations.redux';
-import { selectFederationById } from '../federations/federations.selectors';
-import { IFederation } from '../federations/federations.types';
+import { selectContainersByFederationId } from '../federations/federations.selectors';
 import { TicketsActions } from '../tickets/tickets.redux';
 import { FetchDataAction, ViewerActions, ViewerTypes } from './viewer.redux';
 
@@ -46,13 +45,15 @@ function* fetchData({ teamspace, containerOrFederation, project }: FetchDataActi
 		if (isFederation) {
 			yield put(FederationsActions.fetchFederationStats(teamspace, project, containerOrFederation));
 			yield take(FederationsTypes.FETCH_FEDERATION_STATS_SUCCESS);
-			const federation: IFederation = yield select(selectFederationById, containerOrFederation);
-			containerToFetchStatsOf = federation.containers;
+			// selectContainersByFederationId only returns containers user has permissions to
+			const assignedContainers = yield select(selectContainersByFederationId, containerOrFederation);
+			containerToFetchStatsOf = assignedContainers.map((cont) => cont._id);
 		} else {
 			containerToFetchStatsOf = [containerOrFederation];
 		}
 
 		for (const containerId of containerToFetchStatsOf) {
+			// stats are needed to determine whether to show the model is empty overlay
 			yield put(ContainersActions.fetchContainerStats(
 				teamspace,
 				project,
