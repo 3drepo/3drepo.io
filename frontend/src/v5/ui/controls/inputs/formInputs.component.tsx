@@ -53,7 +53,7 @@ export const FormMultiSelect = (props: FormType<typeof MultiSelect>) => (<InputC
 export const FormSelectView = (props: FormType<typeof SelectView>) => (<InputController Input={SelectView} {...props} />);
 export const FormSelect = (props: FormType<typeof Select>) => (<InputController Input={Select} {...props} />);
 export const FormChipSelect = (props: FormType<typeof ChipSelect>) => (<InputController Input={ChipSelect} {...props} />);
-export const FormAssigneeSelect = (props: FormType<typeof AssigneesSelect>) => (<InputController Input={AssigneesSelect} {...props} />);
+export const FormAssigneesSelect = (props: FormType<typeof AssigneesSelect>) => (<InputController Input={AssigneesSelect} {...props} />);
 
 // control inputs
 export const FormCheckbox = (props: FormType<typeof Checkbox>) => (<InputController Input={Checkbox} {...props} />);
