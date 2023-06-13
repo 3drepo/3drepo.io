@@ -24,6 +24,7 @@ import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
 import { ViewpointsActions } from '@/v4/modules/viewpoints/viewpoints.redux';
 import { useDispatch } from 'react-redux';
+import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
@@ -82,6 +83,11 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		if (isEmpty(view)) return;
 		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
 	}, [selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state]);
+	
+	useEffect(() => {
+	ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => TicketsCardActionsDispatchers.setSelectedTicket(null));
+		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED);
+	}, []);
 
 	return (
 		<>
