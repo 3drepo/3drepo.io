@@ -91,6 +91,27 @@ export const theme = createTheme(
 						},
 					},
 				},
+				MuiAutocomplete: {
+					styleOverrides: {
+						root: {
+							'.MuiOutlinedInput-root .MuiAutocomplete-input': {
+								padding: 0,
+							},
+						},
+						endAdornment: {
+							marginRight: 5,
+
+							'& > button:last-child svg': {
+								width: 10,
+								pointerEvents: 'none',
+								color: COLOR.BASE_MAIN,
+							},
+						},
+						inputRoot: {
+							height: 26,
+						},
+					},
+				},
 				MuiFormControl: {
 					styleOverrides: {
 						root: {

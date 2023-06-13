@@ -24,3 +24,7 @@ export const KickerTypography = styled(Typography)`
 export const KickerTitleTypography = styled(Typography)`
 	${({ theme }) => theme.typography.kickerTitle};
 `;
+
+export const LinkTypography = styled(Typography)`
+	${({ theme }) => theme.typography.link};
+`;

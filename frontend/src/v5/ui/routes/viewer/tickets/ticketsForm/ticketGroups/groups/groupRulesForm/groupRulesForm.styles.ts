@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,30 +14,37 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useContext } from 'react';
-import { MenuItem } from './actionMenuItem.styles';
-import { ActionMenuContext } from '../actionMenuContext';
 
-type ActionMenuItemProps = {
-	className?: string;
-	children?: React.ReactNode;
-	disabled?: boolean;
-	onClick?: (e) => void;
-};
+import styled from 'styled-components';
 
-export const ActionMenuItem = ({
-	onClick,
-	disabled,
-	...props
-}: ActionMenuItemProps) => {
-	const { close } = useContext(ActionMenuContext);
+export const Form = styled.form`
+	padding: 14px;
+	display: flex;
+	flex-direction: column;
+	width: 328px;
+	border-radius: 10px;
 
-	const handleClick = (e) => {
-		onClick?.(e);
-		if (!disabled) {
-			close();
-		}
-	};
+	.MuiFormControl-root {
+		margin: 0 0 10px;
+	}
+`;
 
-	return (<MenuItem onClick={handleClick} {...props} />);
-};
+export const InputsContainer = styled.div`
+	min-height: 112px;
+	max-height: 400px;
+	overflow-y: overlay;
+	padding: 2px;
+	margin-right: -13px;
+	padding-right: 13px;
+`;
+
+export const Buttons = styled.div`
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+
+	button {
+		margin-bottom: 0;
+		margin-top: 5px
+	}
+`;

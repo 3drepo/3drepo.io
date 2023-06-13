@@ -24,8 +24,8 @@ type ActionMenuProps = {
 	children: ReactNode;
 	TriggerButton: any;
 	PopoverProps?: any;
-	onOpen?: (e) => void;
-	onClose?: (e) => void;
+	onOpen?: () => void;
+	onClose?: () => void;
 	disabled?: boolean;
 };
 export const ActionMenu = ({
@@ -39,26 +39,22 @@ export const ActionMenu = ({
 }: ActionMenuProps) => {
 	const [anchorEl, setAnchorEl] = useState(null);
 
-	const stopClickPropagation = (e) => {
-		e.stopPropagation();
-		e.preventDefault();
-	};
-
 	const handleOpen = (e) => {
 		if (disabled) return;
 		setAnchorEl(e.currentTarget.children[0]);
-		onOpen?.(e);
-		stopClickPropagation(e);
+		onOpen?.();
+		e.stopPropagation();
 	};
 
-	const handleClose = (e) => {
+	const handleClose = () => {
 		setAnchorEl(null);
-		onClose?.(e);
+		onClose?.();
 	};
 
 	const handlePopoverClick = (e: Event) => {
 		PopoverProps?.onClick?.(e);
-		handleClose(e);
+		handleClose();
+		e.stopPropagation();
 	};
 
 	return (
@@ -69,7 +65,6 @@ export const ActionMenu = ({
 			<Popover
 				open={Boolean(anchorEl)}
 				anchorEl={anchorEl}
-				className={className}
 				anchorOrigin={{
 					vertical: 'bottom',
 					horizontal: 'center',
@@ -78,10 +73,11 @@ export const ActionMenu = ({
 					vertical: 'top',
 					horizontal: 'center',
 				}}
+				className={className}
 				{...PopoverProps}
 				onClick={handlePopoverClick}
 			>
-				<Menu onClick={stopClickPropagation}>
+				<Menu onClick={(e) => e.stopPropagation()}>
 					{children}
 				</Menu>
 			</Popover>

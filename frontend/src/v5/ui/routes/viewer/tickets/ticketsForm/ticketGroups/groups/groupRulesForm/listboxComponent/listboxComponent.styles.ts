@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,30 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useContext } from 'react';
-import { MenuItem } from './actionMenuItem.styles';
-import { ActionMenuContext } from '../actionMenuContext';
 
-type ActionMenuItemProps = {
-	className?: string;
-	children?: React.ReactNode;
-	disabled?: boolean;
-	onClick?: (e) => void;
-};
+import styled from 'styled-components';
 
-export const ActionMenuItem = ({
-	onClick,
-	disabled,
-	...props
-}: ActionMenuItemProps) => {
-	const { close } = useContext(ActionMenuContext);
+export const OverflowContainer = styled.div`
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	display: inline-block;
+`;
 
-	const handleClick = (e) => {
-		onClick?.(e);
-		if (!disabled) {
-			close();
-		}
-	};
-
-	return (<MenuItem onClick={handleClick} {...props} />);
-};
+export const InnerElementType = styled.ul`
+	padding: 0;
+	margin: 0;
+	overflow-y: overlay;
+	width: 350px;
+`;
