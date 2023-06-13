@@ -27,7 +27,7 @@ import { GroupRulesSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { selectMetaKeys } from '@/v4/modules/model';
 import { useSelector } from 'react-redux';
 import { Autocomplete, TextField } from '@mui/material';
-import { IGroupRule } from '@/v5/store/tickets/groups/ticketGroups.types';
+import { IGroupRule } from '@/v5/store/tickets/tickets.types';
 import { Buttons, Form, InputsContainer } from './groupRulesForm.styles';
 import { IRuleForm, parseRule, prepareRuleForForm } from './groupRulesForm.helpers';
 import { RuleOperationSelect } from './ruleOperationSelect/ruleOperationSelect.component';

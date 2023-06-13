@@ -77,12 +77,39 @@ export type ClippingPlane = {
 	clipDirection: 1 | -1;
 };
 
+export const OPERATIONS_TYPES = {
+	EXISTS: 'field',
+	NOT_EXISTS: 'field',
+	IS: 'text',
+	IS_NOT: 'text',
+	CONTAINS: 'text',
+	NOT_CONTAINS: 'text',
+	REGEX: 'regex',
+	EQUALS: 'number',
+	NOT_EQUALS: 'number',
+	GT: 'numberComparison',
+	GTE: 'numberComparison',
+	LT: 'numberComparison',
+	LTE: 'numberComparison',
+	IN_RANGE: 'numberRange',
+	NOT_IN_RANGE: 'numberRange',
+} as const;
+
+export type Operation = keyof typeof OPERATIONS_TYPES;
+export type OperationType = typeof OPERATIONS_TYPES[Operation];
+
+export interface IGroupRule {
+	field: string,
+	operation: Operation,
+	values?: (number | string)[],
+}
+
 export type Group = {
 	_id?: string,
 	name: string,
 	description?: string,
 	objects?: { container: string, _ids: string[] }[],
-	rules?: object[],
+	rules?: IGroupRule[],
 };
 
 export enum ViewpointGroupOverrideType {

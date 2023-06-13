@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { IGroupRule } from '@/v5/store/tickets/groups/ticketGroups.types';
+import { IGroupRule } from '@/v5/store/tickets/tickets.types';
 
 export const OPERATION_DISPLAY_NAMES = {
 	EXISTS: formatMessage({ id: 'filter.operation.exists', defaultMessage: 'exists' }),

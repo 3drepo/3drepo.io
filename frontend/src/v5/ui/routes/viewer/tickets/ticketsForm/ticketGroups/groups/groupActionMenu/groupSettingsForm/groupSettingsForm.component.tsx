@@ -27,9 +27,10 @@ import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { GroupOverride, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
+import { IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
+import { MOCK_DATA } from '@/v5/store/tickets/groups/ticketGroups.helpers';
 import { GroupsCollectionSelect } from '../../addOrEditGroup/groupSettingsForm.component.tsx/groupsCollectionSelect/groupsCollectionSelect.component';
 import { TicketGroupsContext } from '../../../ticketGroupsContext';
 import {
@@ -55,9 +56,8 @@ import { ChipRule } from '../../groupRulesForm/chipRule/chipRule.component';
 
 type GroupSettingsFormProps = {
 	defaultValues?: IGroupSettingsForm,
-	overrides: GroupOverride[],
 };
-export const GroupSettingsForm = ({ defaultValues, overrides }: GroupSettingsFormProps) => {
+export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => {
 	const [isSmart, setIsSmart] = useState(!!defaultValues?.rules?.length);
 	const isHidden = useContext(TicketGroupsContext).groupType === 'hidden';
 	const formData = useForm<IGroupSettingsForm>({
@@ -144,7 +144,7 @@ export const GroupSettingsForm = ({ defaultValues, overrides }: GroupSettingsFor
 							})}
 							formError={errors?.prefix}
 							disabled={!isAdmin}
-							overrides={overrides}
+							hierarchies={MOCK_DATA.colored}
 						/>
 					</FormRow>
 					{
