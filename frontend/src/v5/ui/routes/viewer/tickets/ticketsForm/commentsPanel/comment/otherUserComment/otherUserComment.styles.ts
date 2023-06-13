@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UserCirclePopover } from '@components/shared/userCirclePopover/userCirclePopover.component';
 import styled, { css } from 'styled-components';
+import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
 import { BasicComment } from '../basicComment/basicComment.component';
 
-export const AuthorAvatar = styled(UserCirclePopover)`
+export const AuthorAvatar = styled(UserPopoverCircle)`
 	position: absolute;
 	top: 0;
 

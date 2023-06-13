@@ -23,7 +23,6 @@ export const CardList = styled.ul`
 	padding: 0;
 	display: flex;
 	flex-wrap: wrap;
-	width: clamp(40px, 85vw, 798px);
-	margin-bottom: auto;
-	margin-top: 150px;
+	width: clamp(246px, 85vw, 1064px);
+	margin: 50px 0;
 `;

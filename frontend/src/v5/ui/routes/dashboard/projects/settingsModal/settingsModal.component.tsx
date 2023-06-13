@@ -151,8 +151,8 @@ export const SettingsModal = ({
 		handleSubmit,
 		reset,
 		getValues,
-		trigger,
 		watch,
+		trigger,
 		control,
 		formState,
 		formState: { errors, dirtyFields },
@@ -227,7 +227,7 @@ export const SettingsModal = ({
 		reset(getDefaultValues(containerOrFederation, isContainer));
 	}, [containerOrFederation]);
 
-	useEffect(() => { setIsValid(formState.isValid && fieldsHaveChanged()); }, [JSON.stringify(watch())]);
+	useEffect(() => { setIsValid(formState.isValid && fieldsHaveChanged()); }, [watch()]);
 
 	return (
 		<FormModal

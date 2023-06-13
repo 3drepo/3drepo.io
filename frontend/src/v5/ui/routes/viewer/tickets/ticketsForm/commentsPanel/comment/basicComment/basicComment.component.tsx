@@ -56,7 +56,6 @@ export const BasicComment = ({
 			{author && (<CommentAuthor>{author}</CommentAuthor>)}
 			{metadata && (
 				<CommentReply
-					isCurrentUserComment={isCurrentUserComment}
 					variant={isCurrentUserComment ? 'secondary' : 'primary'}
 					{...metadata}
 				/>

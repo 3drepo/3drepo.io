@@ -27,7 +27,7 @@ export const FormTextField = styled(FormTextFieldBase)<{ $selectedrow: boolean }
 
 	.MuiOutlinedInput-root {
 		height: 100%;
-		border-radius: 6px;
+		border-radius: 8px;
 
 		&.Mui-error {
 			svg {

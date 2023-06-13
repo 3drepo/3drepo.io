@@ -72,7 +72,7 @@ export const EditableFieldStyles = css`
 	}
 	${StyledMarkdownField} {
 		border: 1px solid ${({ theme }) => theme.palette.base.lighter};
-		border-radius: 5px;
+		border-radius: 8px;
 		min-height: 32px;
 		padding: 4px 10px;
 		margin-top: 0px;

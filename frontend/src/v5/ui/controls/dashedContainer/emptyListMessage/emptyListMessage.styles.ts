@@ -20,7 +20,6 @@ import { DashedContainer } from '../dashedContainer.component';
 
 export const EmptyListMessage = styled(DashedContainer).attrs({
 	strokeColor: '#c0c8d5', // TODO - fix when new palette is released
-	borderRadius: 5,
 	dashSize: 2,
 	gapSize: 2,
 	strokeWidth: 2,

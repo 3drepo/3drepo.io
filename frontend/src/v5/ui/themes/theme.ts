@@ -99,31 +99,37 @@ const typography: TypographyOptions = {
 		fontWeight: FONT_WEIGHT.MEDIUM,
 		fontSize: '1.5rem',
 		lineHeight: '1.875rem',
+		textDecoration: 'none',
 	},
 	h2: {
 		fontWeight: FONT_WEIGHT.MEDIUM,
 		fontSize: '1.125rem',
 		lineHeight: '1.5rem',
+		textDecoration: 'none',
 	},
 	h3: {
 		fontWeight: FONT_WEIGHT.MEDIUM,
 		fontSize: '0.938rem',
 		lineHeight: '1.313rem',
+		textDecoration: 'none',
 	},
 	h4: {
 		fontWeight: FONT_WEIGHT.REGULAR,
 		fontSize: '0.938rem',
 		lineHeight: '1.313rem',
+		textDecoration: 'none',
 	},
 	h5: {
 		fontWeight: FONT_WEIGHT.MEDIUM,
 		fontSize: '0.8125rem',
 		lineHeight: '1.188rem',
+		textDecoration: 'none',
 	},
 	body1: {
 		fontWeight: FONT_WEIGHT.REGULAR,
 		fontSize: '0.75rem',
 		lineHeight: '1.125rem',
+		textDecoration: 'none',
 	},
 	body2: {
 		fontWeight: FONT_WEIGHT.BOLD,
@@ -131,6 +137,7 @@ const typography: TypographyOptions = {
 		lineHeight: '0.75rem',
 		letterSpacing: '0.18em',
 		textTransform: 'uppercase',
+		textDecoration: 'none',
 	},
 	link: {
 		fontWeight: FONT_WEIGHT.MEDIUM,
@@ -142,6 +149,7 @@ const typography: TypographyOptions = {
 		fontWeight: FONT_WEIGHT.MEDIUM,
 		fontSize: '0.625rem',
 		lineHeight: '1rem',
+		textDecoration: 'none',
 	},
 	kickerTitle: {
 		fontWeight: FONT_WEIGHT.BOLDER,
@@ -149,6 +157,7 @@ const typography: TypographyOptions = {
 		lineHeight: '1rem',
 		letterSpacing: '0.1em',
 		textTransform: 'uppercase',
+		textDecoration: 'none',
 	},
 	kicker: {
 		fontWeight: FONT_WEIGHT.BOLD,
@@ -156,6 +165,13 @@ const typography: TypographyOptions = {
 		lineHeight: '0.75rem',
 		letterSpacing: '0.1em',
 		textTransform: 'uppercase',
+		textDecoration: 'none',
+	},
+	label: {
+		fontWeight: FONT_WEIGHT.REGULAR,
+		fontSize: '0.625rem',
+		lineHeight: '1rem',
+		textDecoration: 'none',
 	},
 };
 
@@ -298,6 +314,9 @@ export const theme = createTheme({
 					'&, *': {
 						color: 'currentColor',
 					},
+					'&.MuiInputAdornment-filled.MuiInputAdornment-positionStart:not(.MuiInputAdornment-hiddenLabel)': {
+						margin: 0,
+					},
 				},
 			},
 		},
@@ -333,18 +352,6 @@ export const theme = createTheme({
 						marginTop: 40,
 						position: 'absolute',
 						pointerEvents: 'none',
-					},
-				},
-			},
-		},
-		MuiInputBase: {
-			styleOverrides: {
-				multiline: {
-					'&&': {
-						padding: '5px 10px',
-						'& fieldset': {
-							height: '100%',
-						},
 					},
 				},
 			},
@@ -448,6 +455,11 @@ export const theme = createTheme({
 				// This is necessary for overriding styles of v4 dialogs
 				container: () => document.getElementById('v4Overrides'),
 			},
+			styleOverrides: {
+				paper: {
+					borderRadius: 10,
+				},
+			},
 		},
 		MuiTooltip: {
 			defaultProps: {
@@ -455,12 +467,13 @@ export const theme = createTheme({
 					// This is necessary for overriding styles of v4 tooltips
 					container: () => document.getElementById('v4Overrides'),
 				},
+				disableInteractive: true,
 			},
 			styleOverrides: {
 				tooltip: {
 					backgroundColor: COLOR.SECONDARY_DARK,
 					padding: '7px 10px 8px 10px',
-					borderRadius: '3px',
+					borderRadius: '8px',
 					...typography.caption,
 				},
 				tooltipPlacementBottom: {
@@ -497,6 +510,7 @@ export const theme = createTheme({
 				},
 				inputRoot: {
 					height: '100%',
+					borderRadius: 8,
 					'&.Mui-disabled': {
 						backgroundColor: COLOR.TERTIARY_LIGHTEST,
 						'.MuiAutocomplete-endAdornment': {
@@ -553,8 +567,8 @@ export const theme = createTheme({
 			},
 			styleOverrides: {
 				root: {
-					borderRadius: '5px',
-					height: '18px',
+					borderRadius: 5,
+					height: 18,
 					margin: 'auto 10px',
 				},
 				barColorPrimary: {
@@ -579,12 +593,22 @@ export const theme = createTheme({
 			defaultProps: {
 				elevation: 8,
 			},
+			styleOverrides: {
+				root: {
+					'&:has(> .MuiList-root)': {
+						overflow: 'overlay',
+						'& > MuiList-root': {
+							position: 'unset',
+						},
+					},
+				},
+			},
 		},
 		MuiCard: {
 			styleOverrides: {
 				root: {
-					padding: '12px',
-					borderRadius: '5px',
+					padding: 12,
+					borderRadius: 10,
 					boxShadow: 'none',
 					boxSizing: 'border-box',
 				},
@@ -666,6 +690,7 @@ export const theme = createTheme({
 					justifyContent: 'space-between',
 					background: GRADIENT.SECONDARY,
 					zIndex: 10,
+					borderRadius: 0,
 					'>*': {
 						maxHeight: '100%',
 					},
@@ -714,7 +739,7 @@ export const theme = createTheme({
 		MuiList: {
 			styleOverrides: {
 				root: {
-					borderRadius: 5,
+					borderRadius: 10,
 					boxShadow: SHADOW.LEVEL_5,
 					padding: '10px 0px',
 					// multiSelect
@@ -744,6 +769,19 @@ export const theme = createTheme({
 				padding: {
 					paddingTop: 8,
 					paddingBottom: 8,
+				},
+			},
+		},
+		MuiListSubheader: {
+			defaultProps: {
+				disableSticky: true,
+			},
+			styleOverrides: {
+				root: {
+					...typography.h5,
+					color: COLOR.BASE_MAIN,
+					padding: '4px 14px',
+					fontWeight: FONT_WEIGHT.BOLD,
 				},
 			},
 		},
@@ -866,17 +904,81 @@ export const theme = createTheme({
 				},
 			},
 		},
+		MuiFilledInput: {
+			styleOverrides: {
+				root: {
+					backgroundColor: COLOR.TERTIARY_LIGHTER,
+					border: '1px solid transparent',
+					borderRadius: 8,
+					lineHeight: '35px',
+					height: 35,
+					boxSizing: 'border-box',
+					'&.Mui-focused': {
+						backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
+					},
+					'&:hover:not(.Mui-focused)': {
+						backgroundColor: COLOR.TERTIARY_LIGHTER,
+						'.MuiInputBase-input::placeholder': {
+							color: COLOR.SECONDARY_MAIN,
+						},
+					},
+					'&, &:hover, &.Mui-focused': {
+						'&:not(.Mui-disabled):before, &:not(.Mui-disabled):after': {
+							border: 'none',
+						},
+					},
+				},
+				input: {
+					padding: '0 12px',
+				},
+			},
+		},
 		MuiOutlinedInput: {
 			styleOverrides: {
 				root: {
 					color: COLOR.SECONDARY_MAIN,
 					background: COLOR.PRIMARY_MAIN_CONTRAST,
-					borderRadius: 5,
-
+					borderRadius: 8,
+					'&, &:focus, &:active, &:hover': {
+						'.MuiOutlinedInput-notchedOutline': {
+							borderRadius: 8,
+							border: `1px solid ${COLOR.BASE_LIGHTEST}`,
+						},
+						'&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
+							borderColor: COLOR.SECONDARY_LIGHTEST,
+						},
+						'&.Mui-error .MuiOutlinedInput-notchedOutline': {
+							borderColor: COLOR.ERROR_MAIN,
+						},
+					},
 					input: {
 						padding: '0px 15px',
 						height: 35,
 						lineHeight: '35px',
+					},
+				},
+				notchedOutline: {
+					height: 35,
+					bottom: 0,
+					position: 'absolute',
+					top: 'unset',
+					boxSizing: 'border-box',
+					border: `1px solid ${COLOR.BASE_LIGHTEST}`,
+					legend: {
+						display: 'none',
+					},
+				},
+			},
+		},
+		MuiInputBase: {
+			styleOverrides: {
+				root: {
+
+					input: {
+
+						'&:-webkit-autofill': { // Remove input background colour on chrome
+							'-webkit-box-shadow': `0 0 0 18px ${COLOR.PRIMARY_MAIN_CONTRAST} inset`,
+						},
 					},
 					'input, textarea': {
 						...typography.body1,
@@ -885,21 +987,14 @@ export const theme = createTheme({
 					'.MuiInputAdornment-root': {
 						color: COLOR.BASE_MAIN,
 					},
-					'&.Mui-focused:not(.Mui-disabled) .MuiOutlinedInput-notchedOutline, .Mui-focused .MuiSelect-select': {
-						border: `1px solid ${COLOR.PRIMARY_MAIN}`,
-						borderRadius: 5,
-						boxShadow: `0 0 2px ${COLOR.PRIMARY_MAIN}`,
-					},
-					'&, &:focus, &:active, &:hover': {
-						'.MuiOutlinedInput-notchedOutline': {
-							borderRadius: 5,
-							border: `1px solid ${COLOR.BASE_LIGHTEST}`,
-						},
-						'&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
-							borderColor: COLOR.SECONDARY_LIGHTEST,
-						},
-						'&.Mui-error .MuiOutlinedInput-notchedOutline': {
-							borderColor: COLOR.ERROR_MAIN,
+					'&.Mui-focused:not(.Mui-disabled)': {
+						[`.MuiOutlinedInput-notchedOutline,
+							.MuiSelect-select,
+							&.MuiFilledInput-root`
+						]: {
+							border: `1px solid ${COLOR.PRIMARY_MAIN}`,
+							borderRadius: 8,
+							boxShadow: `0 0 2px ${COLOR.PRIMARY_MAIN}`,
 						},
 					},
 					'&.Mui-disabled': {
@@ -933,15 +1028,12 @@ export const theme = createTheme({
 						},
 					},
 				},
-				notchedOutline: {
-					height: 35,
-					bottom: 0,
-					position: 'absolute',
-					top: 'unset',
-					boxSizing: 'border-box',
-					border: `1px solid ${COLOR.BASE_LIGHTEST}`,
-					legend: {
-						display: 'none',
+				multiline: {
+					'&&': {
+						padding: '5px 10px',
+						'& fieldset': {
+							height: '100%',
+						},
 					},
 				},
 			},
@@ -953,7 +1045,7 @@ export const theme = createTheme({
 			},
 			styleOverrides: {
 				select: {
-					borderRadius: 5,
+					borderRadius: 8,
 					color: COLOR.SECONDARY_MAIN,
 					background: COLOR.PRIMARY_MAIN_CONTRAST,
 					lineHeight: '35px',
@@ -1080,6 +1172,9 @@ export const theme = createTheme({
 			},
 		},
 		MuiButton: {
+			defaultProps: {
+				size: 'large',
+			},
 			styleOverrides: {
 				iconSizeMedium: {
 					'& > *:first-child': {
@@ -1092,17 +1187,16 @@ export const theme = createTheme({
 					},
 				},
 				root: {
-					borderRadius: 5,
+					borderRadius: 8,
 					disableRipple: true,
 					textTransform: 'initial',
-					padding: '10px 15px',
+					padding: '8px 16px',
 					fontSize: '0.75rem',
 					fontWeight: FONT_WEIGHT.BOLD,
 					minWidth: null,
 					transition: 'none',
 				},
 				contained: {
-					padding: '10px 15px',
 					height: '35px',
 					boxShadow: 'none',
 					[`&:hover,
@@ -1138,14 +1232,25 @@ export const theme = createTheme({
 						backgroundColor: COLOR.SECONDARY_DARK,
 					},
 				},
-				containedSizeSmall: {
-					height: '30px',
-					padding: '7.5px 15px',
+				sizeSmall: {
+					padding: '4px 8px',
+					height: '22px',
+					lineHeight: '22px',
+					fontSize: null, // null value means it will use the size from button.root
+				},
+				sizeMedium: {
+					padding: '5px 16px',
+					height: '28px',
+					lineHeight: '28px',
+					fontSize: null, // null value means it will use the size from button.root
+				},
+				sizeLarge: {
+					height: '35px',
+					lineHeight: '35px',
 					fontSize: null, // null value means it will use the size from button.root
 				},
 				outlined: {
 					height: '35px',
-					padding: '10px 15px',
 					backgroundColor: 'transparent',
 					'.Mui-focusVisible': {
 						backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
@@ -1186,13 +1291,7 @@ export const theme = createTheme({
 						backgroundColor: COLOR.SECONDARY_DARK,
 					},
 				},
-				outlinedSizeSmall: {
-					height: '30px',
-					padding: '7.5px 15px',
-					fontSize: null, // null value means it will use the size from button.root
-				},
 				text: {
-					padding: '10px 15px',
 					[`&:hover,
 					  &:active`]: {
 						boxShadow: 'none',
@@ -1307,6 +1406,7 @@ export const theme = createTheme({
 		MuiCalendarPicker: {
 			styleOverrides: {
 				root: {
+					borderRadius: 10,
 					// header section
 					'.MuiPickersCalendarHeader-root': {
 						padding: 0,

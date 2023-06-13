@@ -31,7 +31,7 @@ import { Autocomplete, DestinationInput, NewOrExisting } from './uploadListItemD
 import { NewContainer } from './options/newContainer/newContainer.component';
 import { AlreadyUsedName } from './options/alreadyUsedName/alreadyUsedName.component';
 import { ExistingContainer } from './options/existingContainer/existingContainer.component';
-import { OptionsBox } from './options/optionsBox.component';
+import { OptionsBox } from './options/optionsBox.styles';
 
 const NO_OPTIONS_TEXT_ADMIN = formatMessage({
 	id: 'uploads.destination.noOptions.admin',

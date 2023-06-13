@@ -150,6 +150,12 @@ TeamspaceSetting.getTeamspaceActiveLicenses = (teamspace) => {
 	return teamspaceSettingQuery(teamspace, query, { _id: 1, subscriptions: 1 });
 };
 
+TeamspaceSetting.getTeamspaceExpiredLicenses = (teamspace) => {
+	const currentDate = new Date();
+	const query = { $or: SUBSCRIPTION_TYPES.map((type) => ({ [`subscriptions.${type}.expiryDate`]: { $lt: currentDate } })) };
+	return teamspaceSettingQuery(teamspace, query, { _id: 1, subscriptions: 1 });
+};
+
 TeamspaceSetting.createTeamspaceSettings = async (teamspace) => {
 	const settings = { _id: teamspace,
 		topicTypes: DEFAULT_TOPIC_TYPES,
