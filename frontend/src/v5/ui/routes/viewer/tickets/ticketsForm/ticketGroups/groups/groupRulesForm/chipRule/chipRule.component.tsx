@@ -25,14 +25,16 @@ type ChipRuleProps = {
 	value: IGroupRule,
 	onChange?: (rule: IGroupRule) => void;
 	onDelete: () => void;
+	disabled?: boolean;
 };
-export const ChipRule = ({ value: rule, onChange, onDelete }: ChipRuleProps) => {
+export const ChipRule = ({ value: rule, disabled, onChange, onDelete }: ChipRuleProps) => {
 	const [isSelected, setIsSelected] = useState(false);
 
 	return (
 		<RuleActionMenu
 			onOpen={() => setIsSelected(true)}
 			onClose={() => setIsSelected(false)}
+			disabled={disabled}
 			TriggerButton={(
 				<ChipWrapper>
 					<RuleChip
@@ -42,8 +44,9 @@ export const ChipRule = ({ value: rule, onChange, onDelete }: ChipRuleProps) => 
 								{!!rule.values?.length && (<b>&nbsp;{rule.values.join()}</b>)}
 							</>
 						)}
+						disabled={disabled}
 						deleteIcon={<div><CrossIcon /></div>}
-						onDelete={onDelete}
+						onDelete={disabled ? null : onDelete}
 						$selected={isSelected}
 					/>
 				</ChipWrapper>

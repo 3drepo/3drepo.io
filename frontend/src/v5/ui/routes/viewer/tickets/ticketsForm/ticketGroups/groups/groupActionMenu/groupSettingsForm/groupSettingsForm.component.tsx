@@ -58,12 +58,19 @@ type GroupSettingsFormProps = {
 	defaultValues?: IGroupSettingsForm,
 };
 export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => {
-	const [isSmart, setIsSmart] = useState(!!defaultValues?.rules?.length);
+	const [isSmart, setIsSmart] = useState(true);//!!defaultValues?.rules?.length);
 	const isHidden = useContext(TicketGroupsContext).groupType === 'hidden';
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
 		resolver: yupResolver(GroupSettingsSchema),
-		defaultValues,
+		defaultValues: {
+			...defaultValues,
+			rules: [{
+				field: 's',
+				operation: 'CONTAINS',
+				values: [1]
+			}]
+		},
 	});
 	const { fields: rules, append, remove, update } = useFieldArray({
 		control: formData.control,
@@ -197,17 +204,19 @@ export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => 
 									id="ticketsGroupSettings.subHeading.filters"
 									defaultMessage="Filters"
 								/>
-								<AddFilterTitle>
-									<NewRuleActionMenu
-										TriggerButton={(
-											<TriggerButton>
-												<FormattedMessage id="tickets.groups.newGroupForm.addFilter" defaultMessage="Add filter" />
-											</TriggerButton>
-										)}
-									>
-										<GroupRulesForm onSave={append} />
-									</NewRuleActionMenu>
-								</AddFilterTitle>
+								{isAdmin && (
+									<AddFilterTitle>
+										<NewRuleActionMenu
+											TriggerButton={(
+												<TriggerButton>
+													<FormattedMessage id="tickets.groups.newGroupForm.addFilter" defaultMessage="Add filter" />
+												</TriggerButton>
+											)}
+										>
+											<GroupRulesForm onSave={append} />
+										</NewRuleActionMenu>
+									</AddFilterTitle>
+								)}
 							</Subheading>
 							<FormRulesBox>
 								<Rules>
@@ -217,6 +226,7 @@ export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => 
 											key={id}
 											onDelete={() => remove(i)}
 											onChange={(val) => update(i, val)}
+											disabled={!isAdmin}
 										/>
 									))}
 									{!rules.length && (
