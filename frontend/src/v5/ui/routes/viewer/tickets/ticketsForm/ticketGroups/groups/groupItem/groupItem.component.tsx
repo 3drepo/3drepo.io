@@ -44,16 +44,15 @@ import { GroupToggle } from '../../groupToggle/groupToggle.component';
 import { TicketGroupsContext } from '../../ticketGroupsContext';
 import { EditGroupButton } from '../groupActionMenu/editGroupButton/editGroupButton.component';
 
-type GroupProps = GroupOverride & {
-	index: number;
-};
-export const GroupItem = ({ group, color, opacity, prefix, index }: GroupProps) => {
+type GroupProps = { override: GroupOverride, index: number };
+export const GroupItem = ({ override, index }: GroupProps) => {
 	const [groupIsVisible, setGroupIsVisible] = useState(false);
+	const { groupType, selectedIndexes, toggleGroupState, deleteGroup } = useContext(TicketGroupsContext);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const { groupType, onGroupDelete } = useContext(TicketGroupsContext);
 	const dispatch = useDispatch();
+	const { group, color, opacity } = override;
 
-	const deleteGroup = (e) => {
+	const handleDeleteGroup = (e) => {
 		e.preventDefault();
 		e.stopPropagation();
 		DialogsActionsDispatchers.open('delete', {
@@ -62,7 +61,7 @@ export const GroupItem = ({ group, color, opacity, prefix, index }: GroupProps) 
 				id: 'deleteModal.groups.message',
 				defaultMessage: 'By deleting this group your data will be lost permanently and will not be recoverable.',
 			}),
-			onClickConfirm: () => onGroupDelete(index),
+			onClickConfirm: () => deleteGroup(index),
 			confirmLabel: formatMessage({ id: 'deleteModal.groups.confirmButton', defaultMessage: 'Delete Group' }),
 		});
 	};
@@ -102,18 +101,21 @@ export const GroupItem = ({ group, color, opacity, prefix, index }: GroupProps) 
 				{groupType === 'colored' && (
 					<Buttons>
 						{isAdmin && (
-							<ErrorTicketButton onClick={deleteGroup}>
+							<ErrorTicketButton onClick={handleDeleteGroup}>
 								<DeleteIcon />
 							</ErrorTicketButton>
 						)}
 						<PrimaryTicketButton onClick={toggleShowGroup}>
 							{groupIsVisible ? (<ShowIcon />) : (<HideIcon />)}
 						</PrimaryTicketButton>
-						<EditGroupButton defaultValues={{ color, opacity, ...group, prefix }} />
+						<EditGroupButton defaultValues={{ color, opacity, ...group }} />
 					</Buttons>
 				)}
 			</Headline>
-			<GroupToggle />
+			<GroupToggle
+				checked={selectedIndexes.includes(index)}
+				onClick={() => toggleGroupState(index)}
+			/>
 		</Container>
 	);
 };

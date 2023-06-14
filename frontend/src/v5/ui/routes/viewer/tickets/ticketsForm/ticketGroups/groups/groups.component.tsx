@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { GroupOverride } from '@/v5/store/tickets/tickets.types';
 import { groupBy, isString, partition } from 'lodash';
+import { getGroupOfGroupsCheckboxState } from '@/v5/store/tickets/ticketsGroups.helpers';
+import { useContext } from 'react';
 import {
 	CollectionHeadline,
 	CollectionAccordion,
@@ -25,27 +26,33 @@ import {
 import { GroupToggle } from '../groupToggle/groupToggle.component';
 import { Name, NameContainer } from './groupItem/groupItem.styles';
 import { GroupItem } from './groupItem/groupItem.component';
+import { TicketGroupsContext } from '../ticketGroupsContext';
+import { IndexedOverride } from '../ticketGroupsContext.helper';
 
 type GroupsProps = {
-	indexedOverrides: (GroupOverride & { index: number})[],
+	indexedOverrides: IndexedOverride[],
 	level?: number,
 };
 export const Groups = ({ indexedOverrides, level = 0 }: GroupsProps) => {
-	const [overrideItems, overrideBatches] = partition(indexedOverrides, (g) => (g.prefix?.length || 0) === level);
-	const overridesByPrefix = groupBy(overrideBatches, (g) => g.prefix[level]);
+	const { getGroupOfGroupsState, toggleGroupOfGroupsState } = useContext(TicketGroupsContext);
+	const [overrideItems, overrideBatches] = partition(indexedOverrides, (o) => (o.prefix?.length || 0) === level);
+	const overridesByPrefix = groupBy(overrideBatches, (o) => o.prefix[level]);
 
-	const a = overridesByPrefix[2];
+	const handleCheckboxClick = (e, prefix: string[]) => {
+		e.stopPropagation();
+		toggleGroupOfGroupsState(prefix);
+	};
 
 	return (
 		<>
 			{overrideItems.map(({ index, ...override }) => (
 				<GroupItem
-					group={override.group}
+					override={override}
 					key={isString(override.group) ? override.group : override.group._id || index}
 					index={index}
 				/>
 			))}
-			{Object.keys(overridesByPrefix).map((prefix) => (
+			{Object.entries(overridesByPrefix).map(([prefix, overrides]) => (
 				<CollectionAccordion
 					title={(
 						<>
@@ -54,12 +61,15 @@ export const Groups = ({ indexedOverrides, level = 0 }: GroupsProps) => {
 									<Name>{prefix}</Name>
 								</NameContainer>
 							</CollectionHeadline>
-							<GroupToggle onClick={(e) => e.stopPropagation()} />
+							<GroupToggle
+								onClick={(e) => handleCheckboxClick(e, overrides[0].prefix)}
+								{...getGroupOfGroupsCheckboxState(getGroupOfGroupsState(overrides[0].prefix))}
+							/>
 						</>
 					)}
 				>
 					<GroupsContainer>
-						<Groups indexedOverrides={overridesByPrefix[prefix]} level={level + 1} />
+						<Groups indexedOverrides={overrides} level={level + 1} />
 					</GroupsContainer>
 				</CollectionAccordion>
 			))}
