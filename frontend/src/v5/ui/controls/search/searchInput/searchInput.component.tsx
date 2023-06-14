@@ -33,12 +33,12 @@ type ISearchInput = {
 	multiple?: boolean;
 } & TextFieldProps;
 
-export const SearchInput = ({ onClear, value, variant = 'filled', multiple, ...props }: ISearchInput): JSX.Element => {
+export const SearchInput = ({ onClear, variant = 'filled', multiple, ...props }: ISearchInput): JSX.Element => {
 	const { queries, setQueries } = useContext(SearchContext);
-	const [val, setVal] = useState('');
+	const [value, setValue] = useState('');
 
 	const onChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-		setVal(event.currentTarget.value);
+		setValue(event.currentTarget.value);
 		props.onChange?.(event);
 		if (multiple) return;
 		setQueries([event.currentTarget.value]);
@@ -47,7 +47,7 @@ export const SearchInput = ({ onClear, value, variant = 'filled', multiple, ...p
 	const onClickClear = () => {
 		onClear?.();
 		setQueries([]);
-		setVal('');
+		setValue('');
 	};
 
 	const onKeyDown = (event) => {
@@ -55,30 +55,32 @@ export const SearchInput = ({ onClear, value, variant = 'filled', multiple, ...p
 			props.onSubmit?.(event);
 			if (!multiple) return;
 			event.preventDefault();
-			setQueries((prev: string[]) => prev.concat([val]));
-			setVal('');
+			setQueries((prev) => prev.concat([value]));
+			setValue('');
 		}
 	};
 
+	const removeQuery = (index) => setQueries((prev) => prev.filter((el, i) => index !== i));
 	return (
 		<TextField
-			value={val}
+			value={value}
 			InputProps={{
 				startAdornment: (
 					<>
 						<StartAdornment>
 							<SearchIcon />
 						</StartAdornment>
-						{!!queries.length && multiple && queries.map((query) => (
+						{!!queries.length && multiple && queries.map((query, index) => (
 							<FilterChip
 								key={query}
 								label={query}
+								onDelete={() => removeQuery(index)}
 							/>
 						))}
 					</>
 				),
 				endAdornment: (
-					<EndAdornment $isVisible={Boolean(val)}>
+					<EndAdornment $isVisible={Boolean(value)}>
 						<IconButton onClick={onClickClear} size="large">
 							<CloseIcon />
 						</IconButton>
