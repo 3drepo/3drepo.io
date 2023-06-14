@@ -30,6 +30,9 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CircularProgress } from '@mui/material';
 import { isString } from 'lodash';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
+import { useDispatch } from 'react-redux';
+import { TreeActions } from '@/v4/modules/tree';
+import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
 import {
 	Buttons,
 	NameContainer,
@@ -48,6 +51,7 @@ export const GroupItem = ({ group, color, opacity, index }: GroupProps) => {
 	const [groupIsVisible, setGroupIsVisible] = useState(false);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const { groupType, onGroupDelete, onGroupEdit } = useContext(TicketGroupsContext);
+	const dispatch = useDispatch();
 
 	const deleteGroup = (e) => {
 		e.preventDefault();
@@ -69,6 +73,12 @@ export const GroupItem = ({ group, color, opacity, index }: GroupProps) => {
 		setGroupIsVisible(!groupIsVisible);
 	};
 
+	const highlightGroup = () => {
+		const objects = convertToV4GroupNodes((group as Group).objects);
+		dispatch(TreeActions.showNodesBySharedIds(objects));
+		dispatch(TreeActions.selectNodesBySharedIds(objects, color.map((c) => c / 255)));
+	};
+
 	const editGroup = () => onGroupEdit(index);
 
 	const alphaColor = (color || [255, 255, 255]).concat(opacity);
@@ -77,7 +87,7 @@ export const GroupItem = ({ group, color, opacity, index }: GroupProps) => {
 	if (isString(group)) return (<CircularProgress />);
 
 	return (
-		<Container>
+		<Container onClick={highlightGroup}>
 			<Headline>
 				<GroupIconComponent rules={group.rules} color={alphaHexColor} />
 				<NameContainer>
