@@ -42,19 +42,13 @@ export const ActionMenu = ({
 	const handleOpen = (e) => {
 		if (disabled) return;
 		setAnchorEl(e.currentTarget.children[0]);
-		onOpen?.();
 		e.stopPropagation();
 		e.preventDefault();
 	};
 
-	const handleClose = () => {
-		setAnchorEl(null);
-		onClose?.();
-	};
-
 	const handlePopoverClick = (e: Event) => {
 		PopoverProps?.onClick?.(e);
-		handleClose();
+		setAnchorEl(null);
 		e.stopPropagation();
 		e.preventDefault();
 	};
@@ -68,7 +62,7 @@ export const ActionMenu = ({
 	}, [anchorEl]);
 
 	return (
-		<ActionMenuContext.Provider value={{ close: handleClose }}>
+		<ActionMenuContext.Provider value={{ close: () => setAnchorEl(null) }}>
 			<Container onClick={handleOpen}>
 				{TriggerButton}
 			</Container>
