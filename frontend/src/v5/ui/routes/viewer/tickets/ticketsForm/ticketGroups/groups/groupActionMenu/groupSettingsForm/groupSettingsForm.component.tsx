@@ -17,12 +17,12 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { FormColorPicker, FormTextField } from '@controls/inputs/formInputs.component';
+import { FormTextField } from '@controls/inputs/formInputs.component';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { SubmitButton } from '@controls/submitButton';
 import { Button } from '@controls/button';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty, uniqBy } from 'lodash';
@@ -30,8 +30,8 @@ import { ActionMenuItem } from '@controls/actionMenu';
 import { GroupOverride, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
+import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
 import { GroupsCollectionSelect } from '../../addOrEditGroup/groupSettingsForm.component.tsx/groupsCollectionSelect/groupsCollectionSelect.component';
-import { TicketGroupsContext } from '../../../ticketGroupsContext';
 import {
 	Buttons,
 	LabelAndColor,
@@ -73,33 +73,41 @@ const getAllPrefixesCombinations = (overrides: GroupOverride[]): string[][] => {
 };
 
 type GroupSettingsFormProps = {
-	defaultValues?: IGroupSettingsForm,
+	value?: IGroupSettingsForm,
+	onSubmit?: (value: IGroupSettingsForm) => void,
 };
-export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => {
-	const [isSmart, setIsSmart] = useState(!!defaultValues?.rules?.length);
+export const GroupSettingsForm = ({ value, onSubmit }: GroupSettingsFormProps) => {
+	const [isSmart, setIsSmart] = useState(!!value?.group?.rules?.length);
 	const [prefixesCombinations] = useState(getAllPrefixesCombinations([]));
 	const [newCollection, setNewCollection] = useState([]);
-	const isHidden = useContext(TicketGroupsContext).groupType === 'hidden';
+
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
 		resolver: yupResolver(GroupSettingsSchema),
-		defaultValues,
+		defaultValues: value,
 	});
+
 	const { fields: rules, append, remove, update } = useFieldArray({
 		control: formData.control,
-		name: 'rules',
+		name: 'group.rules',
 	});
+
 	const {
 		handleSubmit,
 		formState: { errors, isValid, dirtyFields },
 		setValue,
+		getValues,
 	} = formData;
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const isNewGroup = !defaultValues?._id;
+	const isNewGroup = !value.group?._id;
 
-	const onSubmit = (body: IGroupSettingsForm) => {
-		// eslint-disable-next-line no-console
-		console.log({ body, isHidden });
+	const onClickSubmit = (newValues:IGroupSettingsForm) => {
+		if (!isSmart) {
+			// eslint-disable-next-line no-param-reassign
+			delete newValues.group.rules;
+		}
+
+		onSubmit?.(newValues);
 	};
 
 	const handleNewCollectionChange = (collection: string[]) => {
@@ -132,29 +140,33 @@ export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => 
 				<FormBox>
 					<LabelAndColor>
 						<FormTextField
-							name="name"
+							name="group.name"
 							label={formatMessage({
 								id: 'ticketsGroupSettings.form.title',
 								defaultMessage: 'Title',
 							})}
 							required
-							formError={errors?.name}
+							formError={errors?.group?.name}
 							disabled={!isAdmin}
 						/>
-						<FormColorPicker
-							name="color"
-							formError={errors?.color}
+
+						<ColorPicker
+							onChange={({ color, opacity }) => {
+								setValue('color', color);
+								setValue('opacity', opacity);
+							}}
+							value={({ color: getValues('color'), opacity: getValues('opacity') })}
 							disabled={!isAdmin}
 						/>
 					</LabelAndColor>
 					<FormRow>
 						<FormTextField
-							name="description"
+							name="group.description"
 							label={formatMessage({
 								id: 'ticketsGroupSettings.form.description',
 								defaultMessage: 'Description',
 							})}
-							formError={errors?.description}
+							formError={errors?.group?.description}
 							disabled={!isAdmin}
 						/>
 					</FormRow>
@@ -257,9 +269,9 @@ export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => 
 							</Subheading>
 							<FormRulesBox>
 								<Rules>
-									{rules.map(({ id, ...value }, i) => (
+									{rules.map(({ id, ...ruleValue }, i) => (
 										<ChipRule
-											value={value}
+											value={ruleValue}
 											key={id}
 											onDelete={() => remove(i)}
 											onChange={(val) => update(i, val)}
@@ -290,7 +302,7 @@ export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => 
 							<SubmitButton
 								size="medium"
 								fullWidth={false}
-								onClick={handleSubmit(onSubmit)}
+								onClick={handleSubmit(onClickSubmit)}
 								disabled={!isValid || isEmpty(dirtyFields)}
 							>
 								{isNewGroup ? (

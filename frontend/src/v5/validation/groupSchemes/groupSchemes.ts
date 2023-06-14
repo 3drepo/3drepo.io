@@ -34,7 +34,7 @@ export const GroupRulesSchema = Yup.object().shape({
 	values: Yup.array().of(valueType),
 });
 
-export const GroupSettingsSchema = Yup.object().shape({
+const GroupSchema = Yup.object().shape({
 	name: requiredTrimmedString,
 	description: Yup.string().max(1200, formatMessage({
 		id: 'validation.model.name.error.max',
@@ -61,4 +61,8 @@ export const NewCollectionSchema = Yup.object().shape({
 				return !prefixesCombinations.some((prefix) => _.isEqual(prefix, newValue));
 			},
 		),
+});
+
+export const GroupSettingsSchema = Yup.object().shape({
+	group: GroupSchema,
 });

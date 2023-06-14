@@ -20,12 +20,16 @@ import GroupsIcon from '@mui/icons-material/GroupWork';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { GroupOverride } from '@/v5/store/tickets/tickets.types';
-import { useForm } from 'react-hook-form';
+import { GroupOverride, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
+import { useSelector } from 'react-redux';
+import { selectLeftPanels } from '@/v4/modules/viewerGui';
+import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { Accordion, NumberContainer, TitleContainer, Checkbox } from './groupsAccordion.styles';
 import { Groups } from '../groups/groups.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
 import { AddGroupButton } from '../groups/groupActionMenu/addGroupButton/addGroupButton.component';
+import { Popper } from '../groups/groupActionMenu/groupActionMenu.styles';
+import { GroupSettingsForm } from '../groups/groupActionMenu/groupSettingsForm/groupSettingsForm.component';
 
 type GroupsAccordionProps = {
 	title: any;
@@ -36,15 +40,16 @@ type GroupsAccordionProps = {
 
 const addIndex = ((overrides: GroupOverride[]) => overrides.map((h, index) => ({ index, ...h })));
 
-export const GroupsAccordion = ({ title, overrides: groups = [], colored, onChange }: GroupsAccordionProps) => {
+export const GroupsAccordion = ({ title, overrides = [], colored, onChange }: GroupsAccordionProps) => {
 	const [checked, setChecked] = useState(false);
-	const [editGroup, setEditGroup] = useState<number | null>(null);
-	const { register, handleSubmit, setValue } = useForm();
+	const [editGroupIndex, setEditGroupIndex] = useState<number>(-1);
+	const leftPanels = useSelector(selectLeftPanels);
+	const isSecondaryCard = leftPanels[0] !== VIEWER_PANELS.TICKETS;
 
-	const [indexedGroups, setIndexedGroups] = useState(addIndex(groups));
+	const [indexedGroups, setIndexedGroups] = useState(addIndex(overrides));
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
-	const groupsCount = groups.length;
+	const groupsCount = overrides.length;
 
 	const toggleCheckbox = (e) => {
 		e.stopPropagation();
@@ -52,26 +57,25 @@ export const GroupsAccordion = ({ title, overrides: groups = [], colored, onChan
 	};
 
 	const onGroupDelete = (index) => {
-		const newGroupsValue = [...groups];
+		const newGroupsValue = [...overrides];
 		newGroupsValue.splice(index, 1);
 		onChange?.(newGroupsValue);
 	};
 
 	const onGroupEdit = (index) => {
-		setEditGroup(index);
-		setValue('group', JSON.stringify(groups[index], null, '\t'));
+		setEditGroupIndex(index);
 	};
 
-	const onSubmit = ({ group }) => {
-		const newGroupsValue = [...groups];
-		newGroupsValue[editGroup] = JSON.parse(group);
-		setEditGroup(null);
+	const onSubmit = (group) => {
+		const newGroupsValue = [...overrides];
+		newGroupsValue[editGroupIndex] = group;
+		setEditGroupIndex(-1);
 		onChange?.(newGroupsValue);
 	};
 
-	useEffect(() => setIndexedGroups(addIndex(groups)), [groups]);
+	useEffect(() => setIndexedGroups(addIndex(overrides)), [overrides]);
 	return (
-		<TicketGroupsContext.Provider value={{ groupType: colored ? 'colored' : 'hidden', onGroupDelete, onGroupEdit }}>
+		<TicketGroupsContext.Provider value={{ groupType: colored ? 'colored' : 'hidden', overrides, onGroupDelete, onGroupEdit }}>
 			<Accordion
 				Icon={GroupsIcon}
 				title={(
@@ -94,14 +98,17 @@ export const GroupsAccordion = ({ title, overrides: groups = [], colored, onChan
 					</EmptyListMessage>
 				)}
 				{ isAdmin && <AddGroupButton /> }
-				{editGroup !== null && (
-					<>
-						<form onSubmit={handleSubmit(onSubmit)}>
-							<textarea {...register('group')} />
-							<button type="submit">Save change</button>
-						</form>
-					</>
-				)}
+
+				<Popper
+					open={editGroupIndex !== -1}
+					style={{ /* style is required to override the default positioning style Popper gets */
+						left: 460,
+						top: isSecondaryCard ? 'unset' : 80,
+						bottom: isSecondaryCard ? 40 : 'unset',
+					}}
+				>
+					<GroupSettingsForm value={overrides[editGroupIndex] as IGroupSettingsForm} onSubmit={onSubmit} />
+				</Popper>
 			</Accordion>
 		</TicketGroupsContext.Provider>
 	);

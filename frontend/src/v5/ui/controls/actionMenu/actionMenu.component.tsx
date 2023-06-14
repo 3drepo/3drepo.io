@@ -27,6 +27,7 @@ type ActionMenuProps = {
 	onOpen?: () => void;
 	onClose?: () => void;
 	disabled?: boolean;
+	closeOnBlur?: boolean;
 };
 export const ActionMenu = ({
 	className,
