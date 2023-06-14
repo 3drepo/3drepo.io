@@ -21,7 +21,7 @@ import ViewpointIcon from '@assets/icons/outlined/aim-outlined.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import GroupsIcon from '@mui/icons-material/GroupWork';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
@@ -63,9 +63,9 @@ export const TicketView = ({
 	...props
 }: ITicketView) => {
 	const dispatch = useDispatch();
-	// TODO - use actual data
-	const [hasGroups, setHasGroups] = useState(true);
-	const [hasViewpoint, setHasViewpoint] = useState(false);
+
+	const hasGroups = !!value?.state;
+	const hasViewpoint = !value ? false : ![value.camera, value.clippingPlanes, value.state].some((val) => !val);
 
 	// Viewpoint
 	const updateViewpoint = async () => {
@@ -73,7 +73,6 @@ export const TicketView = ({
 		const screenshot = stripBase64Prefix(await ViewerService.getScreenshot());
 		const state = await getViewerState();
 		onChange?.({ screenshot, ...currentCameraAndClipping, state });
-		setHasViewpoint(true);
 	};
 
 	const goToViewpoint = () => {
@@ -86,7 +85,6 @@ export const TicketView = ({
 			view = { screenshot: value.screenshot };
 		}
 		onChange?.(view);
-		setHasViewpoint(false);
 	};
 
 	// Image
@@ -110,6 +108,12 @@ export const TicketView = ({
 
 	const goToCamera = async () => {
 		await ViewerService.setViewpoint(value);
+	};
+
+	// State
+	const deleteGroups = () => {
+		const { state, ...view } = value || {};
+		onChange?.(view);
 	};
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
@@ -225,7 +229,7 @@ export const TicketView = ({
 						/>
 						<EllipsisMenuItemDelete
 							title={(<FormattedMessage id="viewer.card.ticketView.action.deleteGroups" defaultMessage="Delete groups" />)}
-							onClick={() => setHasGroups(false)}
+							onClick={deleteGroups}
 							hidden={!hasGroups}
 							disabled={disabled}
 						/>
