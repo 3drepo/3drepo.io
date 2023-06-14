@@ -17,7 +17,24 @@
 
 import { GroupOverride } from '@/v5/store/tickets/tickets.types';
 import { createContext } from 'react';
+import { GroupState } from './ticketGroupsContext.helper';
 
-type TicketGroupsContextType = { groupType: 'colored' | 'hidden', onGroupDelete?: (index: number) => void, onGroupEdit : (index: number) => void, overrides: GroupOverride[]};
-export const TicketGroupsContext = createContext<TicketGroupsContextType>({ groupType: null, overrides: [], onGroupDelete: () => {}, onGroupEdit: () => {} });
+type TicketGroupsContextType = {
+	indexedOverrides: (GroupOverride & { index: number })[],
+	groupType: 'colored' | 'hidden',
+	selectedIndexes: number[],
+	deleteGroup: (index: number) => void,
+	toggleGroupState: (index: number) => void,
+	toggleGroupOfGroupsState: (prefix?: string[]) => void,
+	getGroupOfGroupsState: (prefix?: string[]) => GroupState,
+};
+export const TicketGroupsContext = createContext<TicketGroupsContextType>({
+	indexedOverrides: [],
+	groupType: null,
+	selectedIndexes: [],
+	deleteGroup: () => {},
+	toggleGroupState: () => {},
+	toggleGroupOfGroupsState: () => {},
+	getGroupOfGroupsState: () => null,
+});
 TicketGroupsContext.displayName = 'TicketGroupsContext';
