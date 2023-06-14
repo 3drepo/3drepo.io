@@ -40,6 +40,7 @@ export const AssigneesSelectMenu = ({
 	open,
 	value,
 	onClick,
+	multiple,
 	...props
 }: SelectProps) => {
 	const [users, setUsers] = useState([]);
@@ -59,8 +60,9 @@ export const AssigneesSelectMenu = ({
 		// @ts-ignore
 		<HiddenSelect
 			open={open}
-			value={value || []}
+			value={value}
 			onClick={onClickList}
+			multiple={multiple}
 			{...props}
 		>
 			<SearchInputContainer>
@@ -79,6 +81,7 @@ export const AssigneesSelectMenu = ({
 					assignee={_id}
 					value={_id}
 					title={_id}
+					multiple={multiple}
 				/>
 			))}
 			{!jobs.length && (
@@ -102,6 +105,7 @@ export const AssigneesSelectMenu = ({
 					assignee={user.user}
 					title={`${user.firstName} ${user.lastName}`}
 					subtitle={user.job}
+					multiple={multiple}
 				/>
 			))}
 			{!users.length && (
