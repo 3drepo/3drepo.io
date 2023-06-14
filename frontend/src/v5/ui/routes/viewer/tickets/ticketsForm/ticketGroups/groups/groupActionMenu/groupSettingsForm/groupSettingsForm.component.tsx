@@ -63,14 +63,7 @@ export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => 
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
 		resolver: yupResolver(GroupSettingsSchema),
-		defaultValues: {
-			...defaultValues,
-			rules: [{
-				field: 's',
-				operation: 'CONTAINS',
-				values: [1]
-			}]
-		},
+		defaultValues,
 	});
 	const { fields: rules, append, remove, update } = useFieldArray({
 		control: formData.control,
