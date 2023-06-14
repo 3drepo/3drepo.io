@@ -22,6 +22,11 @@ import { getState } from '@/v4/modules/store';
 import { isEmpty, isString } from 'lodash';
 import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors';
 
+export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
+	container: object.model as string,
+	_ids: getNodesIdsFromSharedIds([object]),
+}));
+
 const convertToV5GroupOverride = (group: any, type: ViewpointGroupOverrideType): GroupOverride => {
 	let description = '';
 	let name = '';
@@ -43,9 +48,7 @@ const convertToV5GroupOverride = (group: any, type: ViewpointGroupOverrideType):
 
 	const override:GroupOverride = { group: { description, name } };
 
-	(override.group as Group).objects = group.objects.map((object) => (
-		{ container: object.model as string, _ids: getNodesIdsFromSharedIds([object]) }
-	));
+	(override.group as Group).objects = convertToV5GroupNodes(group.objects);
 
 	if (group.color) {
 		const { color } = group;
