@@ -27,16 +27,24 @@ import { Name, NameContainer } from './groupItem/groupItem.styles';
 import { GroupItem } from './groupItem/groupItem.component';
 
 type GroupsProps = {
-	groups: (GroupOverride & { index: number})[],
+	indexedOverrides: (GroupOverride & { index: number})[],
 	level?: number,
 };
-export const Groups = ({ groups, level = 0 }: GroupsProps) => {
-	const [groupItems, groupBatches] = partition(groups, (g) => (g.prefix?.length || 0) === level);
-	const overridesByPrefix = groupBy(groupBatches, (g) => g.prefix[level]);
+export const Groups = ({ indexedOverrides, level = 0 }: GroupsProps) => {
+	const [overrideItems, overrideBatches] = partition(indexedOverrides, (g) => (g.prefix?.length || 0) === level);
+	const overridesByPrefix = groupBy(overrideBatches, (g) => g.prefix[level]);
+
+	const a = overridesByPrefix[2];
 
 	return (
 		<>
-			{groupItems.map((group) => (<GroupItem {...group} key={isString(group.group) ? group.group : group.group._id || group.index} />))}
+			{overrideItems.map(({ index, ...override }) => (
+				<GroupItem
+					group={override.group}
+					key={isString(override.group) ? override.group : override.group._id || index}
+					index={index}
+				/>
+			))}
 			{Object.keys(overridesByPrefix).map((prefix) => (
 				<CollectionAccordion
 					title={(
@@ -51,7 +59,7 @@ export const Groups = ({ groups, level = 0 }: GroupsProps) => {
 					)}
 				>
 					<GroupsContainer>
-						<Groups groups={overridesByPrefix[prefix]} level={level + 1} />
+						<Groups indexedOverrides={overridesByPrefix[prefix]} level={level + 1} />
 					</GroupsContainer>
 				</CollectionAccordion>
 			))}
