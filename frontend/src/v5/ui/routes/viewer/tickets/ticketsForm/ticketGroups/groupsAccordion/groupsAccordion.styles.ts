@@ -22,7 +22,7 @@ import CheckBoxBase from '@mui/material/Checkbox';
 import { CollectionAccordion } from '../groups/groups.styles';
 import { Container as GroupItemContainer } from '../groups/groupItem/groupItem.styles';
 
-export const Accordion = styled(AccordionBase)<{ $groupsCount?: number }>`
+export const Accordion = styled(AccordionBase)<{ $overridesCount?: number }>`
 	background: transparent;
 
 	&& {
@@ -61,10 +61,10 @@ export const Accordion = styled(AccordionBase)<{ $groupsCount?: number }>`
 			width: 9px;
 			left: -9px;
 			position: absolute;
-			${({ $groupsCount = 0 }) => css`
-				border-right: ${($groupsCount + 1)}px;
-				height: ${($groupsCount + 1) * 61}px;
-				top: -${($groupsCount + 1) * 61 - 22}px;
+			${({ $overridesCount = 0 }) => css`
+				border-right: ${($overridesCount + 1)}px;
+				height: ${($overridesCount + 1) * 61}px;
+				top: -${($overridesCount + 1) * 61 - 22}px;
 			`}
 		}
 

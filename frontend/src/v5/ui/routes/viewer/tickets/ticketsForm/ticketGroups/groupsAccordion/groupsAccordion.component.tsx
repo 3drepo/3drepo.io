@@ -48,7 +48,7 @@ export const GroupsAccordion = ({ title, overrides = [], colored, onChange }: Gr
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const isSecondaryCard = leftPanels[0] !== VIEWER_PANELS.TICKETS;
 
-	const groupsCount = overrides.length;
+	const overridesCount = overrides.length;
 
 	const toggleCheckbox = (e) => {
 		e.stopPropagation();
@@ -80,14 +80,14 @@ export const GroupsAccordion = ({ title, overrides = [], colored, onChange }: Gr
 				title={(
 					<TitleContainer>
 						{title}
-						<NumberContainer>{groupsCount}</NumberContainer>
+						<NumberContainer>{overridesCount}</NumberContainer>
 						<Checkbox checked={checked} onClick={toggleCheckbox} />
 					</TitleContainer>
 				)}
-				$groupsCount={groupsCount}
+				$overridesCount={overridesCount}
 			>
-				{groupsCount ? (
-					<Groups groups={indexedGroups} />
+				{overridesCount ? (
+					<Groups indexedOverrides={indexedGroups} />
 				) : (
 					<EmptyListMessage>
 						<FormattedMessage
