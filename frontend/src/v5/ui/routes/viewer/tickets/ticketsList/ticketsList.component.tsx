@@ -23,6 +23,7 @@ import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/s
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
 import { ViewpointsActions } from '@/v4/modules/viewpoints/viewpoints.redux';
+import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { useDispatch } from 'react-redux';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { TicketItem } from './ticketItem/ticketItem.component';
@@ -85,7 +86,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	}, [selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state]);
 	
 	useEffect(() => {
-	ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => TicketsCardActionsDispatchers.setSelectedTicket(null));
+		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => TicketsCardActionsDispatchers.setSelectedTicket(null));
 		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED);
 	}, []);
 
