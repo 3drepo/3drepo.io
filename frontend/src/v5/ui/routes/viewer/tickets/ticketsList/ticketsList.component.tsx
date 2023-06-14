@@ -25,6 +25,7 @@ import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
 import { ViewpointsActions } from '@/v4/modules/viewpoints/viewpoints.redux';
 import { useDispatch } from 'react-redux';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
+import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
