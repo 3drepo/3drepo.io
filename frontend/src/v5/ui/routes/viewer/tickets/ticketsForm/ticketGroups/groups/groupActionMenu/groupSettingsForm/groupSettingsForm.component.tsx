@@ -58,7 +58,7 @@ type GroupSettingsFormProps = {
 	defaultValues?: IGroupSettingsForm,
 };
 export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => {
-	const [isSmart, setIsSmart] = useState(true);//!!defaultValues?.rules?.length);
+	const [isSmart, setIsSmart] = useState(!!defaultValues?.rules?.length);
 	const isHidden = useContext(TicketGroupsContext).groupType === 'hidden';
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
