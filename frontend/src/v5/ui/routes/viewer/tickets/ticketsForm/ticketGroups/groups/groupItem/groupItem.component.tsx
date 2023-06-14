@@ -29,6 +29,7 @@ import { ErrorTicketButton, PrimaryTicketButton } from '@/v5/ui/routes/viewer/ti
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CircularProgress } from '@mui/material';
 import { isString } from 'lodash';
+import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import {
 	Buttons,
 	NameContainer,
@@ -39,12 +40,11 @@ import {
 } from './groupItem.styles';
 import { GroupToggle } from '../../groupToggle/groupToggle.component';
 import { TicketGroupsContext } from '../../ticketGroupsContext';
-import { EditGroupButton } from '../groupActionMenu/editGroupButton/editGroupButton.component';
 
 type GroupProps = GroupOverride & {
 	index: number;
 };
-export const GroupItem = ({ group, color, opacity, prefix, index }: GroupProps) => {
+export const GroupItem = ({ group, color, opacity, index }: GroupProps) => {
 	const [groupIsVisible, setGroupIsVisible] = useState(false);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const { groupType, onGroupDelete, onGroupEdit } = useContext(TicketGroupsContext);
@@ -101,7 +101,9 @@ export const GroupItem = ({ group, color, opacity, prefix, index }: GroupProps) 
 						<PrimaryTicketButton onClick={toggleShowGroup}>
 							{groupIsVisible ? (<ShowIcon />) : (<HideIcon />)}
 						</PrimaryTicketButton>
-						<EditGroupButton defaultValues={{ color, opacity, ...group, prefix }} />
+						<PrimaryTicketButton onClick={editGroup}>
+							<EditIcon />
+						</PrimaryTicketButton>
 					</Buttons>
 				)}
 			</Headline>

@@ -142,4 +142,4 @@ export type Viewpoint = {
 	state?: ViewpointState;
 };
 
-export type IGroupSettingsForm = Omit<GroupOverride, 'group'> & Group;
+export type IGroupSettingsForm = GroupOverride & { group: Group };

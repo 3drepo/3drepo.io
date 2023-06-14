@@ -49,7 +49,7 @@ export const TicketsGroupActionMenu = ({ TriggerButton, onClose, children }: ITi
 				style={{ /* style is required to override the default positioning style Popper gets */
 					left: 460,
 					top: isSecondaryCard ? 'unset' : 80,
-					bottom: isSecondaryCard ? 97 : 'unset',
+					bottom: isSecondaryCard ? 40 : 'unset',
 				}}
 			>
 				{children}
