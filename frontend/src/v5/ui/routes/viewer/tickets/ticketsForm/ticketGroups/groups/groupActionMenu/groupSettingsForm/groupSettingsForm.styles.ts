@@ -59,11 +59,31 @@ export const Subheading = styled.div`
 	justify-content: space-between;
 `;
 
-export const CreateCollectionLink = styled.div`
+export const NewCollectionActionMenu = styled(ActionMenu).attrs({
+	PopoverProps: {
+		anchorOrigin: {
+			vertical: 'top',
+			horizontal: 'right',
+		},
+		transformOrigin: {
+			vertical: 'top',
+			horizontal: 'left',
+		},
+	},
+})`
+	.MuiPaper-root {
+		margin-left: 27px;
+		box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
+	}
+`;
+
+export const NewCollectionLink = styled.div`
 	${({ theme }) => theme.typography.link};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	font-weight: ${FONT_WEIGHT.BOLD};
 	padding: 10px 1px;
+	cursor: pointer;
+	width: 100%;
 `;
 
 export const Instruction = styled.div`

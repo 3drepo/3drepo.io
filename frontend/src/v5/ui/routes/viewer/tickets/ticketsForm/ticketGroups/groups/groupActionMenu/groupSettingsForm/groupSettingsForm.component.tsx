@@ -25,9 +25,9 @@ import { Button } from '@controls/button';
 import { useContext, useState } from 'react';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { isEmpty } from 'lodash';
+import { isEmpty, uniqBy } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
+import { GroupOverride, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
 import { MOCK_DATA } from '@/v5/store/tickets/groups/ticketGroups.helpers';
@@ -39,7 +39,7 @@ import {
 	FormBox,
 	Heading,
 	Instruction,
-	CreateCollectionLink,
+	NewCollectionLink,
 	Subheading,
 	ToggleLabel,
 	ToggleWrapper,
@@ -50,15 +50,36 @@ import {
 	NewRuleActionMenu,
 	TriggerButton,
 	FormRulesBox,
+	NewCollectionActionMenu,
 } from './groupSettingsForm.styles';
 import { GroupRulesForm } from '../../groupRulesForm/groupRulesForm.component';
 import { ChipRule } from '../../groupRulesForm/chipRule/chipRule.component';
+import { NewCollectionForm } from '../newCollectionForm/newCollectionForm.component';
+
+const getAllPrefixesCombinations = (overrides: GroupOverride[]): string[][] => {
+	const prefixes = overrides.map(({ prefix }) => (prefix)).filter(Boolean);
+	const uniquePrefixes = uniqBy(prefixes, JSON.stringify);
+	const allPrefixesWithDuplicates: string[][] = [];
+
+	uniquePrefixes.forEach((prefix) => {
+		const usedSegments: string[] = [];
+		prefix.forEach((segment) => {
+			allPrefixesWithDuplicates.push(usedSegments.concat(segment));
+			usedSegments.push(segment);
+		});
+	});
+
+	const allPrefixes = uniqBy(allPrefixesWithDuplicates, JSON.stringify);
+	return allPrefixes.sort();
+};
 
 type GroupSettingsFormProps = {
 	defaultValues?: IGroupSettingsForm,
 };
 export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => {
 	const [isSmart, setIsSmart] = useState(!!defaultValues?.rules?.length);
+	const [prefixesCombinations] = useState(getAllPrefixesCombinations(MOCK_DATA.colored));
+	const [newCollection, setNewCollection] = useState([]);
 	const isHidden = useContext(TicketGroupsContext).groupType === 'hidden';
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
@@ -72,6 +93,7 @@ export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => 
 	const {
 		handleSubmit,
 		formState: { errors, isValid, dirtyFields },
+		setValue,
 	} = formData;
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const isNewGroup = !defaultValues?._id;
@@ -80,6 +102,12 @@ export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => 
 		// eslint-disable-next-line no-console
 		console.log({ body, isHidden });
 	};
+
+	const handleNewCollectionChange = (collection: string[]) => {
+		setNewCollection(collection);
+		setValue('prefix', collection);
+	};
+
 	return (
 		<form>
 			<FormProvider {...formData}>
@@ -144,17 +172,34 @@ export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => 
 							})}
 							formError={errors?.prefix}
 							disabled={!isAdmin}
-							hierarchies={MOCK_DATA.colored}
+							prefixesCombinations={prefixesCombinations.concat([newCollection]).sort()}
 						/>
 					</FormRow>
 					{
 						isAdmin && (
-							<CreateCollectionLink>
-								<FormattedMessage
-									id="ticketsGroupSettings.link.createCollection"
-									defaultMessage="Create new collection"
+							<NewCollectionActionMenu
+								TriggerButton={(
+									<NewCollectionLink>
+										{newCollection?.length ? (
+											<FormattedMessage
+												id="ticketsGroupSettings.link.editCollection"
+												defaultMessage="Edit new collection"
+											/>
+										) : (
+											<FormattedMessage
+												id="ticketsGroupSettings.link.createCollection"
+												defaultMessage="Create new collection"
+											/>
+										)}
+									</NewCollectionLink>
+								)}
+							>
+								<NewCollectionForm
+									value={newCollection}
+									onChange={handleNewCollectionChange}
+									prefixesCombinations={prefixesCombinations}
 								/>
-							</CreateCollectionLink>
+							</NewCollectionActionMenu>
 						)
 					}
 				</FormBox>
