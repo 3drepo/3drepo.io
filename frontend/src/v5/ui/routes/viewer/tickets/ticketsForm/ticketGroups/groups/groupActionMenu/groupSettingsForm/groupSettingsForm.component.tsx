@@ -105,7 +105,7 @@ export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => 
 
 	const handleNewCollectionChange = (collection: string[]) => {
 		setNewCollection(collection);
-		setValue('prefix', collection);
+		setValue('prefix', collection, { shouldDirty: true });
 	};
 
 	return (
