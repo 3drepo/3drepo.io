@@ -57,6 +57,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				overrides={state.colored || []}
 			>
 				<GroupsAccordion
+					onChange={onChange}
 					title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
 				/>
 			</TicketGroupsContextComponent>
@@ -65,6 +66,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				overrides={state.hidden || []}
 			>
 				<GroupsAccordion
+					onChange={onChange}
 					title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
 				/>
 			</TicketGroupsContextComponent>
