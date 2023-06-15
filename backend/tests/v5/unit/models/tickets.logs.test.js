@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../helper/services');
 
 const TicketLogs = require(`${src}/models/tickets.logs`);
 const db = require(`${src}/handler/db`);
@@ -40,6 +40,46 @@ const testAddTicketLog = () => {
 	});
 };
 
-describe('models/tickets.logs', () => {
+const testAddGroupUpdateLog = () => {
+	describe('Add ticket group update log', () => {
+		test('Should add group update log', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const ticket = generateRandomString();
+			const changes = generateRandomObject();
+			const author = generateRandomString();
+			const timestamp = new Date();
+			const groupId = generateRandomString();
+			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
+
+			await TicketLogs.addGroupUpdateLog(teamspace, project, model, ticket, groupId,
+				{ author, timestamp, changes });
+
+			const expectedDoc = {
+				teamspace,
+				project,
+				model,
+				ticket,
+				author,
+				timestamp,
+				changes: {
+					group: {
+						_id: groupId,
+						to: changes,
+					},
+				},
+			};
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'tickets.logs',
+				{ ...expectedDoc, _id: fn.mock.calls[0][2]._id });
+			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testAddTicketLog();
+	testAddGroupUpdateLog();
 });

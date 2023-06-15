@@ -21,6 +21,7 @@ const { getContainerById, getContainers, updateModelSettings } = require('../../
 const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Comments = require('./commons/tickets.comments');
 const Groups = require('./commons/groups');
+const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
 const fs = require('fs/promises');
@@ -31,7 +32,7 @@ const { queueModelUpload } = require('../../../../services/modelProcessing');
 const { templates } = require('../../../../utils/responseCodes');
 const { timestampToString } = require('../../../../utils/helper/dates');
 
-const Containers = { ...Groups, ...Views, ...Tickets, ...Comments };
+const Containers = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups };
 
 Containers.addContainer = addModel;
 

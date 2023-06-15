@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// NOTE: this is for v4 groups which we will most likely deprecate in the future. Groups that live in tickets,
+// see tickets.groups.js
+
 const EventsManager = require('../services/eventsManager/eventsManager');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
