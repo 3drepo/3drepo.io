@@ -84,9 +84,9 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		if (isEmpty(view)) return;
 		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
 	}, [selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state]);
-	
+
 	useEffect(() => {
-	ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => TicketsCardActionsDispatchers.setSelectedTicket(null));
+		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => TicketsCardActionsDispatchers.setSelectedTicket(null));
 		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED);
 	}, []);
 
