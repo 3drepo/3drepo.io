@@ -17,6 +17,7 @@
 
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
+import _ from 'lodash';
 
 const requiredTrimmedString = Yup.string().trim().required(
 	formatMessage({
@@ -39,4 +40,25 @@ export const GroupSettingsSchema = Yup.object().shape({
 		id: 'validation.model.name.error.max',
 		defaultMessage: 'Description is limited to 1200 characters',
 	})),
+});
+
+export const NewCollectionSchema = Yup.object().shape({
+	collection: requiredTrimmedString
+		.max(120, formatMessage({
+			id: 'validation.groupCollection.name.error.max',
+			defaultMessage: 'Collection title is limited to 120 characters',
+		}))
+		.test(
+			'alreadyExistingCollection',
+			formatMessage({
+				id: 'validation.groupCollection.name.alreadyExisting',
+				defaultMessage: 'Collection already exists in parent',
+			}),
+			(collection, testContext) => {
+				const { parent } = testContext.parent;
+				const { prefixesCombinations } = testContext.options.context;
+				const newValue = parent.concat(collection);
+				return !prefixesCombinations.some((prefix) => _.isEqual(prefix, newValue));
+			},
+		),
 });
