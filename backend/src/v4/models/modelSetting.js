@@ -120,8 +120,6 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 				// This is unexpected but we shouldn't throw an error
 				return;
 			} else {
-
-				console.log("in here", err);
 				throw err;
 			}
 		}
