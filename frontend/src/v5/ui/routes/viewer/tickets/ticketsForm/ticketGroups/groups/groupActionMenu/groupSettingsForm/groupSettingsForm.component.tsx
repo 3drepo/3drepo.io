@@ -197,17 +197,19 @@ export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => 
 									id="ticketsGroupSettings.subHeading.filters"
 									defaultMessage="Filters"
 								/>
-								<AddFilterTitle>
-									<NewRuleActionMenu
-										TriggerButton={(
-											<TriggerButton>
-												<FormattedMessage id="tickets.groups.newGroupForm.addFilter" defaultMessage="Add filter" />
-											</TriggerButton>
-										)}
-									>
-										<GroupRulesForm onSave={append} />
-									</NewRuleActionMenu>
-								</AddFilterTitle>
+								{isAdmin && (
+									<AddFilterTitle>
+										<NewRuleActionMenu
+											TriggerButton={(
+												<TriggerButton>
+													<FormattedMessage id="tickets.groups.newGroupForm.addFilter" defaultMessage="Add filter" />
+												</TriggerButton>
+											)}
+										>
+											<GroupRulesForm onSave={append} />
+										</NewRuleActionMenu>
+									</AddFilterTitle>
+								)}
 							</Subheading>
 							<FormRulesBox>
 								<Rules>
@@ -217,6 +219,7 @@ export const GroupSettingsForm = ({ defaultValues }: GroupSettingsFormProps) => 
 											key={id}
 											onDelete={() => remove(i)}
 											onChange={(val) => update(i, val)}
+											disabled={!isAdmin}
 										/>
 									))}
 									{!rules.length && (

@@ -16,7 +16,7 @@
  */
 
 import { ActionMenu } from '@controls/actionMenu';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Chip } from '@controls/chip/chip.component';
 
 export const RuleActionMenu = styled(ActionMenu).attrs({
@@ -42,7 +42,7 @@ export const RuleChip = styled(Chip).attrs(({
 }: { theme: any, $selected: boolean }) => ({
 	color: $selected ? palette.tertiary.main : palette.secondary.main,
 	variant: 'filled',
-}))<{ $selected: boolean }>`
+}))<{ $selected: boolean, disabled?: boolean }>`
 	.MuiChip-label {
 		text-transform: initial;
 		font-weight: initial;
@@ -62,5 +62,9 @@ export const RuleChip = styled(Chip).attrs(({
 			width: 9px;
 			height: 9px;
 		}
+	}
+
+	.MuiChip-root {
+		${({ disabled }) => disabled && css`cursor: default;`}
 	}
 `;
