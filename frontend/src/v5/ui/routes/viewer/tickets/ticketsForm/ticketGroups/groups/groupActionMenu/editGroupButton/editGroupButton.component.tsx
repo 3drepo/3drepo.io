@@ -29,6 +29,6 @@ export const EditGroupButton = ({ defaultValues }: { defaultValues?: IGroupSetti
 			</PrimaryTicketButton>
 		)}
 	>
-		<GroupSettingsForm values={defaultValues} />
+		<GroupSettingsForm value={defaultValues} />
 	</TicketsGroupActionMenu>
 );

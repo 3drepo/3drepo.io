@@ -122,7 +122,7 @@ export const GroupSettingsForm = ({ value, onSubmit }: GroupSettingsFormProps) =
 		getValues,
 	} = formData;
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const isNewGroup = !value.group?._id;
+	const isNewGroup = !value?.group?._id;
 
 	const onClickSubmit = (newValues:IGroupSettingsForm) => {
 		if (!isSmart) {

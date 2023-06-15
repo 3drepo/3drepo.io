@@ -108,7 +108,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 						<PrimaryTicketButton onClick={toggleShowGroup}>
 							{groupIsVisible ? (<ShowIcon />) : (<HideIcon />)}
 						</PrimaryTicketButton>
-						<EditGroupButton defaultValues={{ color, opacity, ...group }} />
+						<EditGroupButton defaultValues={{ color, opacity, group }} />
 					</Buttons>
 				)}
 			</Headline>
