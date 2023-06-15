@@ -21,6 +21,7 @@ import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { ChangeEvent, useContext, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
+import { trim } from 'lodash';
 import { IconButton, TextField, StartAdornment, EndAdornment } from './searchInput.styles';
 import { SearchContext } from '../searchContext';
 
@@ -52,10 +53,11 @@ export const SearchInput = ({ onClear, variant = 'filled', multiple, ...props }:
 
 	const onKeyDown = (event) => {
 		if (event.key === 'Enter') {
-			props.onSubmit?.(event);
-			if (!multiple) return;
 			event.preventDefault();
-			setQueries((prev) => prev.concat([value]));
+			props.onSubmit?.(event);
+			const trimmedValue = trim(value);
+			if (!multiple || !trimmedValue) return;
+			setQueries((prev) => prev.concat([trimmedValue]));
 			setValue('');
 		}
 	};
