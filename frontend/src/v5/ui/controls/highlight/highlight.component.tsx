@@ -20,14 +20,14 @@ import { Tag } from './highlight.styles';
 
 interface IHighlight {
 	children: string;
-	search: string;
+	search: string[];
 }
 
 const HighlightTag = (props) => <Tag {...props} />;
 
-export const Highlight = ({ search, children = '' }: IHighlight): JSX.Element => (
+export const Highlight = ({ search = [], children = '' }: IHighlight): JSX.Element => (
 	<Highlighter
-		searchWords={[trim(search)]}
+		searchWords={search.map(trim)}
 		autoEscape
 		textToHighlight={children}
 		highlightTag={HighlightTag}
