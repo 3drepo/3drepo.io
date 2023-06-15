@@ -24,7 +24,7 @@ import { IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { useSelector } from 'react-redux';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
-import { getGroupOfGroupsCheckboxState } from '@/v5/store/tickets/ticketsGroups.helpers';
+import { getCollectionCheckboxState } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { Accordion, NumberContainer, TitleContainer, Checkbox } from './groupsAccordion.styles';
 import { Groups } from '../groups/groups.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
@@ -36,8 +36,8 @@ import { IndexedOverride } from '../ticketGroupsContext.helper';
 type GroupsAccordionProps = { title: any, onChange };
 export const GroupsAccordion = ({ title, onChange }: GroupsAccordionProps) => {
 	const {
-		getGroupOfGroupsState,
-		toggleGroupOfGroupsState,
+		getCollectionState,
+		toggleCollectionState,
 		indexedOverrides,
 	} = useContext(TicketGroupsContext);
 	const [editGroupIndex, setEditGroupIndex] = useState<number>(-1);
@@ -45,12 +45,12 @@ export const GroupsAccordion = ({ title, onChange }: GroupsAccordionProps) => {
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const isSecondaryCard = leftPanels[0] !== VIEWER_PANELS.TICKETS;
 
-	const state = getGroupOfGroupsState([]);
+	const state = getCollectionState([]);
 	const overridesCount = indexedOverrides.length;
 
 	const toggleCheckbox = (e) => {
 		e.stopPropagation();
-		toggleGroupOfGroupsState();
+		toggleCollectionState();
 	};
 
 	const getOverrideGroupWithoutIndex = ({ index, ...override }: IndexedOverride) => override;
@@ -69,7 +69,7 @@ export const GroupsAccordion = ({ title, onChange }: GroupsAccordionProps) => {
 				<TitleContainer>
 					{title}
 					<NumberContainer>{overridesCount}</NumberContainer>
-					<Checkbox {...getGroupOfGroupsCheckboxState(state)} onClick={toggleCheckbox} />
+					<Checkbox {...getCollectionCheckboxState(state)} onClick={toggleCheckbox} />
 				</TitleContainer>
 			)}
 			$overridesCount={overridesCount}

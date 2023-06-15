@@ -60,7 +60,7 @@ export const createPropertiesWithGroups = (properties, groups) => Object.keys(pr
 }, {} as Properties);
 /* eslint-enable no-param-reassign */
 
-export const getGroupOfGroupsCheckboxState = (state: GroupState) => {
+export const getCollectionCheckboxState = (state: GroupState) => {
 	switch (state) {
 		case null:
 			return { checked: false };
