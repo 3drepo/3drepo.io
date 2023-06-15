@@ -15,11 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { GroupOverride } from '@/v5/store/tickets/tickets.types';
 import { Select } from '@controls/inputs/select/select.component';
 import { MenuItem } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
-import { uniqBy } from 'lodash';
 import { MenuItemPrefix } from './groupsCollectionSelect.styles';
 
 const NONE = formatMessage({
@@ -27,47 +25,26 @@ const NONE = formatMessage({
 	defaultMessage: 'None',
 });
 
-const getAllPrefixesCombinations = (hierarchies: GroupOverride[]): string[][] => {
-	const prefixes = hierarchies.map(({ prefix }) => (prefix)).filter(Boolean);
-	const uniquePrefixes = uniqBy(prefixes, JSON.stringify);
-	const allPrefixesWithDuplicates: string[][] = [];
-
-	uniquePrefixes.forEach((prefix) => {
-		const usedSegments: string[] = [];
-		prefix.forEach((segment) => {
-			allPrefixesWithDuplicates.push(usedSegments.concat(segment));
-			usedSegments.push(segment);
-		});
-	});
-
-	const allPrefixes = uniqBy(allPrefixesWithDuplicates, JSON.stringify);
-	return allPrefixes.sort();
-};
-
 type GroupsCollectionSelectProps = {
 	label: string,
 	value?: string[];
 	onChange?: (value: string[]) => void;
-	hierarchies: GroupOverride[];
+	prefixesCombinations: string[][];
 	disabled?: boolean;
 };
-export const GroupsCollectionSelect = ({ value, onChange, hierarchies, ...props }: GroupsCollectionSelectProps) => {
-	const prefixesCombinations = getAllPrefixesCombinations(hierarchies);
-
-	return (
-		<Select value={JSON.stringify(value || [])} onChange={(e) => onChange(JSON.parse(e.target.value))} {...props}>
-			<MenuItem value={JSON.stringify([])}>{NONE}</MenuItem>
-			{prefixesCombinations.map((prefix) => (
-				<MenuItemPrefix
-					key={JSON.stringify(prefix)}
-					selected={JSON.stringify(prefix) === JSON.stringify(value)}
-					value={JSON.stringify(prefix)}
-					$depth={prefix.length - 1}
-				>
-					{/* @ts-ignore */}
-					<span>{prefix.at(-1)}</span>
-				</MenuItemPrefix>
-			))}
-		</Select>
-	);
-};
+export const GroupsCollectionSelect = ({ value, onChange, prefixesCombinations, ...props }: GroupsCollectionSelectProps) => (
+	<Select value={JSON.stringify(value || [])} onChange={(e) => onChange(JSON.parse(e.target.value))} {...props}>
+		<MenuItem value={JSON.stringify([])}>{NONE}</MenuItem>
+		{prefixesCombinations.map((prefix) => (
+			<MenuItemPrefix
+				key={JSON.stringify(prefix)}
+				selected={JSON.stringify(prefix) === JSON.stringify(value)}
+				value={JSON.stringify(prefix)}
+				$depth={prefix.length - 1}
+			>
+				{/* @ts-ignore */}
+				<span>{prefix.at(-1)}</span>
+			</MenuItemPrefix>
+		))}
+	</Select>
+);
