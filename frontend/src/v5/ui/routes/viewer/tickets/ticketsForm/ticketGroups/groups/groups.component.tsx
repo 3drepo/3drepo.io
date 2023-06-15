@@ -16,7 +16,7 @@
  */
 
 import { groupBy, isString, partition } from 'lodash';
-import { getGroupOfGroupsCheckboxState } from '@/v5/store/tickets/ticketsGroups.helpers';
+import { getCollectionCheckboxState } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { useContext } from 'react';
 import {
 	CollectionHeadline,
@@ -34,13 +34,13 @@ type GroupsProps = {
 	level?: number,
 };
 export const Groups = ({ indexedOverrides, level = 0 }: GroupsProps) => {
-	const { getGroupOfGroupsState, toggleGroupOfGroupsState } = useContext(TicketGroupsContext);
+	const { getCollectionState, toggleCollectionState } = useContext(TicketGroupsContext);
 	const [overrideItems, overrideBatches] = partition(indexedOverrides, (o) => (o.prefix?.length || 0) === level);
 	const overridesByPrefix = groupBy(overrideBatches, (o) => o.prefix[level]);
 
 	const handleCheckboxClick = (e, prefix: string[]) => {
 		e.stopPropagation();
-		toggleGroupOfGroupsState(prefix);
+		toggleCollectionState(prefix);
 	};
 
 	return (
@@ -63,7 +63,7 @@ export const Groups = ({ indexedOverrides, level = 0 }: GroupsProps) => {
 							</CollectionHeadline>
 							<GroupToggle
 								onClick={(e) => handleCheckboxClick(e, overrides[0].prefix)}
-								{...getGroupOfGroupsCheckboxState(getGroupOfGroupsState(overrides[0].prefix))}
+								{...getCollectionCheckboxState(getCollectionState(overrides[0].prefix))}
 							/>
 						</>
 					)}

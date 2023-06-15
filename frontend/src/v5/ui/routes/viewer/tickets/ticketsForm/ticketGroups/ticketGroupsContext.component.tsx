@@ -53,7 +53,7 @@ export const TicketGroupsContextComponent = ({
 
 	const getGroupLeaf = (index) => getNodeParent(index).children.find((c) => c.index === index);
 
-	const getGroupOfGroupsState = (prefix?) => getGroupNode(prefix)?.state ?? null;
+	const getCollectionState = (prefix?) => getGroupNode(prefix)?.state ?? null;
 
 	const backpropagateNodeUpdate = (node: GroupNode) => {
 		if (node.children.length) {
@@ -89,7 +89,7 @@ export const TicketGroupsContextComponent = ({
 		updateTree(groupLeaf);
 	};
 
-	const toggleGroupOfGroupsState = (prefix = []) => {
+	const toggleCollectionState = (prefix = []) => {
 		const groupNode: GroupNode = getGroupNode(prefix);
 		const newState = groupNode.state === GroupState.CHECKED ? GroupState.UNCHECKED : GroupState.CHECKED;
 		groupNode.children.forEach((node) => setGroupNodeState(node, newState));
@@ -149,8 +149,8 @@ export const TicketGroupsContextComponent = ({
 			value={{
 				...contextValue,
 				toggleGroupState,
-				toggleGroupOfGroupsState,
-				getGroupOfGroupsState,
+				toggleCollectionState,
+				getCollectionState,
 				selectedIndexes,
 				indexedOverrides,
 				deleteGroup,
