@@ -95,6 +95,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
 		resolver: yupResolver(GroupSettingsSchema),
+		context: { isSmart },
 	});
 
 	const { fields: rules, append, remove, update } = useFieldArray({
@@ -113,6 +114,8 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 		if (!isSmart) {
 			delete newValues.group.rules;
 			newValues.group.objects = convertToV5GroupNodes(selectSelectedNodes(store.getState()));
+		} else {
+			delete newValues.group.objects;
 		}
 		onSubmit?.(newValues);
 	};
