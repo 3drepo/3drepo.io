@@ -35,7 +35,7 @@ type GroupsCollectionSelectProps = {
 export const GroupsCollectionSelect = ({ value, onChange, prefixesCombinations, ...props }: GroupsCollectionSelectProps) => (
 	<Select value={JSON.stringify(value || [])} onChange={(e) => onChange(JSON.parse(e.target.value))} {...props}>
 		<MenuItem value={JSON.stringify([])}>{NONE}</MenuItem>
-		{prefixesCombinations.map((prefix) => (
+		{prefixesCombinations.filter((prefix) => prefix.length).map((prefix) => (
 			<MenuItemPrefix
 				key={JSON.stringify(prefix)}
 				selected={JSON.stringify(prefix) === JSON.stringify(value)}

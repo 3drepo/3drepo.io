@@ -31,6 +31,7 @@ import { TicketGroupsContext } from '../ticketGroupsContext';
 import { AddGroupButton } from '../groups/groupActionMenu/addGroupButton/addGroupButton.component';
 import { Popper } from '../groups/groupActionMenu/groupActionMenu.styles';
 import { GroupSettingsForm } from '../groups/groupActionMenu/groupSettingsForm/groupSettingsForm.component';
+import { IndexedOverride } from '../ticketGroupsContext.helper';
 
 type GroupsAccordionProps = { title: any, onChange };
 export const GroupsAccordion = ({ title, onChange }: GroupsAccordionProps) => {
@@ -52,7 +53,7 @@ export const GroupsAccordion = ({ title, onChange }: GroupsAccordionProps) => {
 		toggleGroupOfGroupsState();
 	};
 
-	const getOverrideGroupWithoutIndex = ({ index, ...override }) => override;
+	const getOverrideGroupWithoutIndex = ({ index, ...override }: IndexedOverride) => override;
 
 	const onSubmit = (group) => {
 		const newGroupsValue = indexedOverrides.map(getOverrideGroupWithoutIndex);
@@ -83,17 +84,22 @@ export const GroupsAccordion = ({ title, onChange }: GroupsAccordionProps) => {
 					/>
 				</EmptyListMessage>
 			)}
-			{ isAdmin && <AddGroupButton /> }
-			<Popper
-				open={editGroupIndex !== -1}
-				style={{ /* style is required to override the default positioning style Popper gets */
-					left: 460,
-					top: isSecondaryCard ? 'unset' : 80,
-					bottom: isSecondaryCard ? 40 : 'unset',
-				}}
-			>
-				<GroupSettingsForm value={getOverrideGroupWithoutIndex(indexedOverrides[editGroupIndex]) as IGroupSettingsForm} onSubmit={onSubmit} />
-			</Popper>
+			{isAdmin && <AddGroupButton />}
+			{editGroupIndex !== -1 && (
+				<Popper
+					open
+					style={{ /* style is required to override the default positioning style Popper gets */
+						left: 460,
+						top: isSecondaryCard ? 'unset' : 80,
+						bottom: isSecondaryCard ? 40 : 'unset',
+					}}
+				>
+					<GroupSettingsForm
+						value={getOverrideGroupWithoutIndex(indexedOverrides[editGroupIndex]) as IGroupSettingsForm}
+						onSubmit={onSubmit}
+					/>
+				</Popper>
+			)}
 		</Accordion>
 	);
 };
