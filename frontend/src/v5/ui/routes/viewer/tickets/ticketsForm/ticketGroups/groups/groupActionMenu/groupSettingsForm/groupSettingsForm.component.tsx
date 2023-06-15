@@ -171,11 +171,10 @@ export const GroupSettingsForm = ({ value, onSubmit }: GroupSettingsFormProps) =
 							formError={errors?.group?.name}
 							disabled={!isAdmin}
 						/>
-
 						<ColorPicker
 							onChange={({ color, opacity }) => {
-								setValue('color', color);
-								setValue('opacity', opacity);
+								setValue('color', color, { shouldDirty: true });
+								setValue('opacity', opacity, { shouldDirty: true });
 							}}
 							value={({ color: getValues('color'), opacity: getValues('opacity') })}
 							disabled={!isAdmin}
