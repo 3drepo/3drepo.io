@@ -23,7 +23,6 @@ import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/s
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
 import { ViewpointsActions } from '@/v4/modules/viewpoints/viewpoints.redux';
-import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { useDispatch } from 'react-redux';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
