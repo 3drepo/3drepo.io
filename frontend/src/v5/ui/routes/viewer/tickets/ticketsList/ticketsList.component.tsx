@@ -42,7 +42,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const [availableTemplates, setAvailableTemplates] = useState([]);
 	const [showingCompleted, setShowingCompleted] = useState(false);
 	const [selectedTemplates, setSelectedTemplates] = useState<Set<string>>(new Set());
-	const [filteredTickets, setFilteredTickets] = useState<ITicket[]>(tickets);
+	const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
@@ -79,10 +79,10 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	}, [selectedTemplates, showingCompleted]);
 
 	useEffect(() => {
-		const reducedTemplates = templates.reduce((partial, { _id, name }) => {
+		const reducedTemplates = templates.reduce((partial, { _id, ...other }) => {
 			const { length } = tickets.filter(({ type }) => _id === type);
 			if (!length) return partial;
-			return [...partial, { _id, name, length }];
+			return [...partial, { _id, length, ...other }];
 		}, []);
 		setAvailableTemplates(reducedTemplates);
 	}, [tickets, templates]);
@@ -106,8 +106,11 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED);
 	}, []);
 
-	const filterItems = (items, queries: string[]) => items
-		.filter((ticket) => queries.every((query) => ticket.title.toLowerCase().includes(query.toLowerCase())));
+	const filterItems = (items, queries: string[]) => items.filter((ticket) => {
+		const templateCode = availableTemplates.find((template) => template._id === ticket.type).code;
+		const ticketCode = `${templateCode.toLowerCase()}:${ticket.number}`;
+		return queries.every((query) => [ticketCode, ticket.title].some((str) => str.includes(query.toLowerCase())));
+	});
 
 	return (
 		<SearchContextComponent filteringFunction={filterItems} items={filteredTickets}>
