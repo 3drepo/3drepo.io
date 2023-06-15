@@ -17,7 +17,7 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { get, isEmpty } from 'lodash';
+import { get } from 'lodash';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
@@ -115,21 +115,22 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 					/>
 				))}
 			</Filters>
-			<List>
-				{filteredTickets.map((ticket) => (
-					<TicketItem
-						ticket={ticket}
-						key={ticket._id}
-						onClick={(e) => onTicketClick(ticket, e)}
-						selected={ticketIsSelected(ticket)}
-					/>
-				))}
-				{isEmpty(filteredTickets) && (
-					<EmptyListMessage>
-						<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
-					</EmptyListMessage>
-				)}
-			</List>
+			{filteredTickets.length ? (
+				<List>
+					{filteredTickets.map((ticket) => (
+						<TicketItem
+							ticket={ticket}
+							key={ticket._id}
+							onClick={(e) => onTicketClick(ticket, e)}
+							selected={ticketIsSelected(ticket)}
+						/>
+					))}
+				</List>
+			) : (
+				<EmptyListMessage>
+					<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
+				</EmptyListMessage>
+			)}
 		</>
 	);
 };
