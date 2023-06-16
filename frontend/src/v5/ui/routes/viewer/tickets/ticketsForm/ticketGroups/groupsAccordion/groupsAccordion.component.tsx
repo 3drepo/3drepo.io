@@ -26,7 +26,7 @@ import { Accordion, NumberContainer, TitleContainer, Checkbox, NewGroupButton } 
 import { Groups } from '../groups/groups.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
 
-type GroupsAccordionProps = { title: any, onChange };
+type GroupsAccordionProps = { title: any };
 export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 	const {
 		getCollectionState,
