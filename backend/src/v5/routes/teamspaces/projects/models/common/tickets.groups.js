@@ -134,10 +134,7 @@ const establishRoutes = (isFed) => {
 	 *         content:
 	 *           application/json:
 	 *             schema:
-	 *               type: object
-	 *               properties:
-	 *                 groups:
-   	 *                   $ref: "#/components/schemas/ticketGroup"
+   	 *               $ref: "#/components/schemas/ticketGroup"
 	 */
 	router.get('/:group', hasReadAccess, checkTicketExists, getGroup(isFed), serialiseGroup);
 
@@ -190,10 +187,7 @@ const establishRoutes = (isFed) => {
 	 *       content:
 	 *         application/json:
 	 *           schema:
-	 *             type: object
-	 *             properties:
-	 *               groups:
-   	 *                 $ref: "#/components/schemas/ticketGroup"
+   	 *             $ref: "#/components/schemas/ticketGroup"
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"

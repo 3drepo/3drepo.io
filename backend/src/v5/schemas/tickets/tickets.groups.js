@@ -35,17 +35,15 @@ Groups.schema = (allowIds, fieldsOptional) => {
 			_ids: Yup.array().of(types.id).min(1).required(),
 
 		})).min(1),
-	});
+	}).test(
+		'Rules and objects', 'Groups cannot contain both objects and rules.',
+		({ rules, objects }) => !(rules && objects),
+	);
 
-	if (fieldsOptional) {
+	if (!fieldsOptional) {
 		group = group.test(
-			'Rules and objects', 'Groups cannot contain both objects and rules.',
-			({ rules, objects }) => !(rules && objects),
-		);
-	} else {
-		group = group.test(
-			'Rules and objects', 'Groups must contain either rules or objects, but not both',
-			({ rules, objects }) => (rules || objects) && !(rules && objects));
+			'Rules and objects', 'Groups must contain either rules or objects',
+			({ rules, objects }) => (rules || objects));
 	}
 
 	if (allowIds) return Yup.lazy((val) => (val?.name ? group.required() : types.id.required()));
