@@ -69,6 +69,9 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		const newVal = cloneDeep(value);
 		newVal.state.colored.splice(index, 1);
 		onChange?.(newVal);
+		if (highlightedIndex === index && highlightedGroupType === 'colored') {
+			setHighlightedIndex(-1);
+		}
 	};
 
 	const onSetEditGroup = (colored:boolean) => (index: number) => {
