@@ -118,9 +118,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		dispatch(TreeActions.showNodesBySharedIds(objects));
 		dispatch(TreeActions.selectNodesBySharedIds(objects, color.map((c) => c / 255)));
 
-		return () => {
-			dispatch(TreeActions.deselectNodesBySharedIds(objects));
-		}
+		return () => dispatch(TreeActions.deselectNodesBySharedIds(objects));
 	}, [highlightedIndex, highlightedGroupType]);
 
 	return (
