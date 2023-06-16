@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../../../../../../../helper/path');
-const { generateGroup } = require('../../../../../../../../helper/services');
+const { generateLegacyGroup } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -30,7 +30,7 @@ const GroupsOutputMiddlewares = require(`${src}/middleware/dataConverter/outputs
 const respondFn = Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const testSerialiseGroupArray = () => {
-	const badRuleCast = generateGroup('a', 'b', true, false, false);
+	const badRuleCast = generateLegacyGroup('a', 'b', true, false, false);
 	badRuleCast.rules = [{
 		field: 'Element ID',
 		operator: 'IS_NOT_EMPTY',
@@ -43,14 +43,14 @@ const testSerialiseGroupArray = () => {
 		[[], 'empty array'],
 		[
 			[
-				generateGroup('a', 'b', false, false, false),
-				generateGroup('a', 'b', true, false, false),
-				generateGroup('a', 'b', false, true, false),
+				generateLegacyGroup('a', 'b', false, false, false),
+				generateLegacyGroup('a', 'b', true, false, false),
+				generateLegacyGroup('a', 'b', false, true, false),
 			],
 			'3 different group types',
 		],
 		[[badRuleCast], 'Bad schema'],
-		[[{ ...generateGroup('a', 'b', true, false, false), updatedAt: undefined }], 'group with no updatedAt'],
+		[[{ ...generateLegacyGroup('a', 'b', true, false, false), updatedAt: undefined }], 'group with no updatedAt'],
 	])('Serialise Group array data', (data, desc) => {
 		test(`should serialise correctly with ${desc}`,
 			() => {
