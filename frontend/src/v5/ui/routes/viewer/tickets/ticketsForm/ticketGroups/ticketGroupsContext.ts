@@ -28,6 +28,9 @@ type TicketGroupsContextType = {
 	toggleCollectionState: (prefix?: string[]) => void,
 	getCollectionState: (prefix?: string[]) => GroupState,
 	editGroup: (index: number) => void
+	highlightedIndex: number,
+	setHighlightedIndex: (index: number) => void,
+
 };
 export const TicketGroupsContext = createContext<TicketGroupsContextType>({
 	indexedOverrides: [],
@@ -38,5 +41,7 @@ export const TicketGroupsContext = createContext<TicketGroupsContextType>({
 	toggleCollectionState: () => {},
 	getCollectionState: () => null,
 	editGroup: () => null,
+	highlightedIndex: -1,
+	setHighlightedIndex: () => {},
 });
 TicketGroupsContext.displayName = 'TicketGroupsContext';

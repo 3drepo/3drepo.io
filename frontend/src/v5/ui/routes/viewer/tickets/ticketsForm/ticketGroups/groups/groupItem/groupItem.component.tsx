@@ -28,10 +28,10 @@ import { ErrorTicketButton, PrimaryTicketButton } from '@/v5/ui/routes/viewer/ti
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CircularProgress } from '@mui/material';
 import { isString } from 'lodash';
-import { useDispatch } from 'react-redux';
-import { TreeActions } from '@/v4/modules/tree';
-import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
+import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
+import { TreeActions } from '@/v4/modules/tree';
+import { useDispatch } from 'react-redux';
 import {
 	Buttons,
 	NameContainer,
@@ -45,15 +45,22 @@ import { TicketGroupsContext } from '../../ticketGroupsContext';
 
 type GroupProps = { override: GroupOverride, index: number };
 export const GroupItem = ({ override, index }: GroupProps) => {
-	const { groupType, selectedIndexes, toggleGroupState, deleteGroup, editGroup } = useContext(TicketGroupsContext);
-	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const dispatch = useDispatch();
-
+	const { groupType, selectedIndexes, highlightedIndex, setHighlightedIndex, toggleGroupState, deleteGroup, editGroup } = useContext(TicketGroupsContext);
+	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const { group, color, opacity } = override;
 
-	const handleDeleteGroup = (e) => {
+	const containEvent = (e) => {
 		e.preventDefault();
 		e.stopPropagation();
+	};
+
+	const handleClick = (e) => {
+		containEvent(e);
+		setHighlightedIndex(index);
+	};
+
+	const handleDeleteGroup = () => {
 		DialogsActionsDispatchers.open('delete', {
 			name: (group as Group).name,
 			message: formatMessage({
@@ -82,7 +89,6 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const onEditGroup = (e) => {
 		e.preventDefault();
 		e.stopPropagation();
-		highlightGroup();
 		editGroup(index);
 	};
 
@@ -92,7 +98,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	if (isString(group)) return (<CircularProgress />);
 
 	return (
-		<Container onClick={highlightGroup}>
+		<Container onClick={handleClick} $highlighted={highlightedIndex === index}>
 			<Headline>
 				<GroupIconComponent rules={group.rules} color={alphaHexColor} />
 				<NameContainer>
@@ -107,7 +113,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 					</GroupsCount>
 				</NameContainer>
 				{groupType === 'colored' && (
-					<Buttons>
+					<Buttons onClick={containEvent}>
 						{isAdmin && (
 							<ErrorTicketButton onClick={handleDeleteGroup}>
 								<DeleteIcon />
