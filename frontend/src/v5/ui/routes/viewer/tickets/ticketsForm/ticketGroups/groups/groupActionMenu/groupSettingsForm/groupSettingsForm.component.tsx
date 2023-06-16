@@ -324,7 +324,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 						</Button>
 					</ActionMenuItem>
 					{ isAdmin && (
-						<ActionMenuItem>
+						<ActionMenuItem disabled={!isValid || isEmpty(dirtyFields)}>
 							<SubmitButton
 								size="medium"
 								fullWidth={false}
