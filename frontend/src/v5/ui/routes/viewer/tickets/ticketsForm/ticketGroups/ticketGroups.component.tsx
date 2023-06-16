@@ -110,22 +110,16 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
 
 	useEffect(() => {
+		dispatch(TreeActions.clearCurrentlySelected());
 		if (highlightedIndex === -1) return () => {};
 		const { group, color } = state[highlightedGroupType][highlightedIndex];
-		// const objects = convertToV4GroupNodes((override.group as Group).objects);
-		// dispatch(TreeActions.selectNodesBySharedIds(objects, (override.color || DEFAULT_HIGHLIGHT_COLOR).map((c) => c / 255)));
-		// dispatch(TreeActions.showNodesBySharedIds(objects));
-		
+
 		const objects = convertToV4GroupNodes((group as Group).objects);
-		dispatch(TreeActions.clearCurrentlySelected());
 		dispatch(TreeActions.showNodesBySharedIds(objects));
 		dispatch(TreeActions.selectNodesBySharedIds(objects, color.map((c) => c / 255)));
 
 		return () => {
-			// dispatch(TreeActions.deselectNodesBySharedIds(objects));
-			// dispatch(TreeActions.hideNodesBySharedIds(objects));
-			
-			dispatch(TreeActions.clearCurrentlySelected());
+			dispatch(TreeActions.deselectNodesBySharedIds(objects));
 		}
 	}, [highlightedIndex, highlightedGroupType]);
 
