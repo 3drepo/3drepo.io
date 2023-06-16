@@ -16,7 +16,7 @@
  */
 
 import { GroupOverride } from '@/v5/store/tickets/tickets.types';
-import { groupBy, isString, partition, values } from 'lodash';
+import { groupBy, isString, partition } from 'lodash';
 import {
 	CollectionHeadline,
 	CollectionAccordion,
@@ -32,19 +32,18 @@ type GroupsProps = {
 };
 export const Groups = ({ groups, level = 0 }: GroupsProps) => {
 	const [groupItems, groupBatches] = partition(groups, (g) => (g.prefix?.length || 0) === level);
-	const collectionsDict = groupBy(groupBatches, (g) => g.prefix[level]);
-	const collections = values(collectionsDict);
+	const overridesByPrefix = groupBy(groupBatches, (g) => g.prefix[level]);
 
 	return (
 		<>
 			{groupItems.map((group) => (<GroupItem {...group} key={isString(group.group) ? group.group : group.group._id || group.index} />))}
-			{collections.map((collection) => (
+			{Object.keys(overridesByPrefix).map((prefix) => (
 				<CollectionAccordion
 					title={(
 						<>
 							<CollectionHeadline>
 								<NameContainer>
-									<Name>{collection[0].prefix[level]}</Name>
+									<Name>{prefix}</Name>
 								</NameContainer>
 							</CollectionHeadline>
 							<GroupToggle onClick={(e) => e.stopPropagation()} />
@@ -52,7 +51,7 @@ export const Groups = ({ groups, level = 0 }: GroupsProps) => {
 					)}
 				>
 					<GroupsContainer>
-						<Groups groups={collection} level={level + 1} />
+						<Groups groups={overridesByPrefix[prefix]} level={level + 1} />
 					</GroupsContainer>
 				</CollectionAccordion>
 			))}
