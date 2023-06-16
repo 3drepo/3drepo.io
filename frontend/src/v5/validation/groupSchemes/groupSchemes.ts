@@ -42,10 +42,8 @@ const GroupSchema = Yup.object().shape({
 	})),
 	rules: Yup.array().when(
 		'$isSmart',
-		(isSmart, schema) => {
-			if (isSmart) return schema.min(1);
-		}
-	)
+		(isSmart, schema) => (isSmart ? schema.min(1) : schema),
+	),
 });
 
 export const NewCollectionSchema = Yup.object().shape({
