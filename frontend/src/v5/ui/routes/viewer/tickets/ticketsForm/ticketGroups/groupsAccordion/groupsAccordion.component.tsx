@@ -15,51 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import GroupsIcon from '@mui/icons-material/GroupWork';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
-import { useSelector } from 'react-redux';
-import { selectLeftPanels } from '@/v4/modules/viewerGui';
-import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { getCollectionCheckboxState } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { Accordion, NumberContainer, TitleContainer, Checkbox } from './groupsAccordion.styles';
 import { Groups } from '../groups/groups.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
 import { AddGroupButton } from '../groups/groupActionMenu/addGroupButton/addGroupButton.component';
-import { Popper } from '../groups/groupActionMenu/groupActionMenu.styles';
-import { GroupSettingsForm } from '../groups/groupActionMenu/groupSettingsForm/groupSettingsForm.component';
-import { IndexedOverride } from '../ticketGroupsContext.helper';
 
 type GroupsAccordionProps = { title: any, onChange };
-export const GroupsAccordion = ({ title, onChange }: GroupsAccordionProps) => {
+export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 	const {
 		getCollectionState,
 		toggleCollectionState,
 		indexedOverrides,
 	} = useContext(TicketGroupsContext);
-	const [editGroupIndex, setEditGroupIndex] = useState<number>(-1);
-	const leftPanels = useSelector(selectLeftPanels);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const isSecondaryCard = leftPanels[0] !== VIEWER_PANELS.TICKETS;
-
 	const state = getCollectionState([]);
 	const overridesCount = indexedOverrides.length;
 
 	const toggleCheckbox = (e) => {
 		e.stopPropagation();
 		toggleCollectionState();
-	};
-
-	const getOverrideGroupWithoutIndex = ({ index, ...override }: IndexedOverride) => override;
-
-	const onSubmit = (group) => {
-		const newGroupsValue = indexedOverrides.map(getOverrideGroupWithoutIndex);
-		newGroupsValue[editGroupIndex] = group;
-		setEditGroupIndex(-1);
-		onChange?.(newGroupsValue);
 	};
 
 	return (
@@ -85,21 +65,6 @@ export const GroupsAccordion = ({ title, onChange }: GroupsAccordionProps) => {
 				</EmptyListMessage>
 			)}
 			{isAdmin && <AddGroupButton />}
-			{editGroupIndex !== -1 && (
-				<Popper
-					open
-					style={{ /* style is required to override the default positioning style Popper gets */
-						left: 460,
-						top: isSecondaryCard ? 'unset' : 80,
-						bottom: isSecondaryCard ? 40 : 'unset',
-					}}
-				>
-					<GroupSettingsForm
-						value={getOverrideGroupWithoutIndex(indexedOverrides[editGroupIndex]) as IGroupSettingsForm}
-						onSubmit={onSubmit}
-					/>
-				</Popper>
-			)}
 		</Accordion>
 	);
 };

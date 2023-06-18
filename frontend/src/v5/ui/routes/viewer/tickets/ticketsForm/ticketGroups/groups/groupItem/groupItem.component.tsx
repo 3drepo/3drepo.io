@@ -32,6 +32,7 @@ import { isString } from 'lodash';
 import { useDispatch } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
 import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
+import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import {
 	Buttons,
 	NameContainer,
@@ -42,12 +43,11 @@ import {
 } from './groupItem.styles';
 import { GroupToggle } from '../../groupToggle/groupToggle.component';
 import { TicketGroupsContext } from '../../ticketGroupsContext';
-import { EditGroupButton } from '../groupActionMenu/editGroupButton/editGroupButton.component';
 
 type GroupProps = { override: GroupOverride, index: number };
 export const GroupItem = ({ override, index }: GroupProps) => {
 	const [groupIsVisible, setGroupIsVisible] = useState(false);
-	const { groupType, selectedIndexes, toggleGroupState, deleteGroup } = useContext(TicketGroupsContext);
+	const { groupType, selectedIndexes, toggleGroupState, deleteGroup, editGroup } = useContext(TicketGroupsContext);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const dispatch = useDispatch();
 	const { group, color, opacity } = override;
@@ -70,6 +70,12 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		e.preventDefault();
 		e.stopPropagation();
 		setGroupIsVisible(!groupIsVisible);
+	};
+
+	const onEditGroup = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		editGroup(index);
 	};
 
 	const highlightGroup = () => {
@@ -108,7 +114,9 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 						<PrimaryTicketButton onClick={toggleShowGroup}>
 							{groupIsVisible ? (<ShowIcon />) : (<HideIcon />)}
 						</PrimaryTicketButton>
-						<EditGroupButton defaultValues={{ color, opacity, group }} />
+						<PrimaryTicketButton onClick={onEditGroup}>
+							<EditIcon />
+						</PrimaryTicketButton>
 					</Buttons>
 				)}
 			</Headline>

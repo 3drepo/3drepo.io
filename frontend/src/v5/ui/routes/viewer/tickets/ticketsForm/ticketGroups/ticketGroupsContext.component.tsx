@@ -28,12 +28,14 @@ type TicketGroupsContextComponentProps = {
 	children: any,
 	onSelectedGroupsChange?: (selectedGroups: GroupOverride[]) => void,
 	onDeleteGroup?: (index: number) => void,
+	onEditGroup?: (index: number) => void
 };
 export const TicketGroupsContextComponent = ({
 	children,
 	overrides,
 	onDeleteGroup,
 	onSelectedGroupsChange,
+	onEditGroup: editGroup,
 	...contextValue
 }: TicketGroupsContextComponentProps) => {
 	const [indexedOverrides, setIndexedOverrides] = useState(addIndex(overrides));
@@ -154,6 +156,7 @@ export const TicketGroupsContextComponent = ({
 				selectedIndexes,
 				indexedOverrides,
 				deleteGroup,
+				editGroup,
 			}}
 		>
 			{children}
