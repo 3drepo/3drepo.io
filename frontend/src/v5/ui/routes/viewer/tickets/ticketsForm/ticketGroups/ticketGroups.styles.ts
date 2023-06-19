@@ -20,6 +20,7 @@ import { Popper as BasePopper } from '@mui/material';
 
 export const Container = styled.div`
 	overflow: overlay;
+	height: 100%;
 `;
 
 export const Popper = styled(BasePopper)`
