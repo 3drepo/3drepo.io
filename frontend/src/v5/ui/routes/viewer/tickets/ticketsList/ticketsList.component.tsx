@@ -108,13 +108,13 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 
 	const filterItems = (items, queries: string[]) => items.filter((ticket) => {
 		const templateCode = availableTemplates.find((template) => template._id === ticket.type).code;
-		const ticketCode = `${templateCode.toLowerCase()}:${ticket.number}`;
+		const ticketCode = `${templateCode}:${ticket.number}`;
 		return queries.every((query) => [ticketCode, ticket.title].some((str) => str.toLowerCase().includes(query.toLowerCase())));
 	});
 
 	return (
 		<SearchContextComponent filteringFunction={filterItems} items={filteredTickets}>
-			<SearchInput multiple />
+			<SearchInput multiple size="small" />
 			<Filters>
 				<CompletedFilterChip
 					key="completed"
