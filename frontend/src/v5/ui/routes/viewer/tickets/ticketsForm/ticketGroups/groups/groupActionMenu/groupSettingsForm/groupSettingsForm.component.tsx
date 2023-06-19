@@ -43,7 +43,7 @@ import { Button } from '@controls/button';
 import { useEffect, useState } from 'react';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { isEmpty, uniqBy } from 'lodash';
+import { isEmpty, uniqBy, cloneDeep } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { GroupOverride, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
@@ -108,14 +108,6 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
 		resolver: yupResolver(GroupSettingsSchema),
-		defaultValues: {
-			prefix: [],
-			color: [255, 0, 0],
-			opacity: 1,
-			group: {
-				objects: [],
-			},
-		},
 	});
 
 	const { fields: rules, append, remove, update } = useFieldArray({
@@ -146,8 +138,8 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 	};
 
 	useEffect(() => {
-		formData.reset(value);
-	}, [JSON.stringify(value)]);
+		formData.reset(cloneDeep(value));
+	}, [value]);
 
 	return (
 		<form>
