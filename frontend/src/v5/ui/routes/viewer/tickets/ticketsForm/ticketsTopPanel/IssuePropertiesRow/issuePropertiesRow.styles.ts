@@ -52,6 +52,7 @@ export const ColumnSeparator = styled.div`
 	margin: 0 10px;
 `;
 
-export const FloatRight = styled.span`
+export const AssigneesWrapper = styled.span`
 	margin-left: auto;
+	display: flex;
 `;

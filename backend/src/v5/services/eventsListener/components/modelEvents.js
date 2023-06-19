@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
+const { addGroupUpdateLog, addTicketLog } = require('../../../models/tickets.logs');
 const { createModelMessage, createProjectMessage } = require('../../chat');
 const { isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
-const { addTicketLog } = require('../../../models/tickets.logs');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
@@ -25,6 +25,7 @@ const { getRevisionByIdOrTag } = require('../../../models/revisions');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
+const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
 const { setNestedProperty } = require('../../../utils/helper/objects');
 const { subscribe } = require('../../eventsManager/eventsManager');
@@ -86,7 +87,7 @@ const modelDeleted = async ({ teamspace, project, model, sender, isFederation })
 	await createModelMessage(event, {}, teamspace, project, model, sender);
 };
 
-const modelTicketAdded = async ({ teamspace, project, model, ticket }) => {
+const ticketAdded = async ({ teamspace, project, model, ticket }) => {
 	const [isFed, template] = await Promise.all([
 		isFederationCheck(teamspace, model),
 		getTemplateById(teamspace, ticket.type),
@@ -116,7 +117,7 @@ const constructUpdatedObject = (changes) => {
 	return updateData;
 };
 
-const modelTicketUpdated = async ({ teamspace, project, model, ticket, author, changes, timestamp }) => {
+const ticketUpdated = async ({ teamspace, project, model, ticket, author, changes, timestamp }) => {
 	try {
 		const [isFed, template] = await Promise.all([
 			isFederationCheck(teamspace, model),
@@ -130,6 +131,21 @@ const modelTicketUpdated = async ({ teamspace, project, model, ticket, author, c
 		await createModelMessage(event, serialisedTicket, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to process ticket updated event ${err.message}`);
+	}
+};
+
+const ticketGroupUpdated = async ({ teamspace, project, model, ticket, _id, author, changes, timestamp }) => {
+	try {
+		const [isFed] = await Promise.all([
+			isFederationCheck(teamspace, model),
+			addGroupUpdateLog(teamspace, project, model, ticket._id, _id, { author, changes, timestamp }),
+		]);
+
+		const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET_GROUP : chatEvents.CONTAINER_UPDATE_TICKET_GROUP;
+		const serialisedMsg = serialiseGroup({ _id, ticket, ...changes });
+		await createModelMessage(event, serialisedMsg, teamspace, project, model);
+	} catch (err) {
+		logger.logError(`Failed to process group updated event ${err.message}`);
 	}
 };
 
@@ -166,10 +182,11 @@ ModelEventsListener.init = () => {
 	subscribe(events.REVISION_UPDATED, revisionUpdated);
 	subscribe(events.NEW_MODEL, modelAdded);
 	subscribe(events.DELETE_MODEL, modelDeleted);
-	subscribe(events.NEW_TICKET, modelTicketAdded);
-	subscribe(events.UPDATE_TICKET, modelTicketUpdated);
+	subscribe(events.NEW_TICKET, ticketAdded);
+	subscribe(events.UPDATE_TICKET, ticketUpdated);
 	subscribe(events.NEW_COMMENT, ticketCommentAdded);
 	subscribe(events.UPDATE_COMMENT, ticketCommentUpdated);
+	subscribe(events.UPDATE_TICKET_GROUP, ticketGroupUpdated);
 };
 
 module.exports = ModelEventsListener;

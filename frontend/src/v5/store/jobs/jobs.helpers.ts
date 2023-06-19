@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const getAbbreviation = (string: string) => {
+export const getJobAbbreviation = (string: string) => {
 	const words = string.split(' ');
 	return words.length > 1 ? words.map((word) => word[0]).join('').substring(0, 2) : string.substring(0, 2);
 };

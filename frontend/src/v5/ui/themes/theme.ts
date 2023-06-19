@@ -772,6 +772,19 @@ export const theme = createTheme({
 				},
 			},
 		},
+		MuiListSubheader: {
+			defaultProps: {
+				disableSticky: true,
+			},
+			styleOverrides: {
+				root: {
+					...typography.h5,
+					color: COLOR.BASE_MAIN,
+					padding: '4px 14px',
+					fontWeight: FONT_WEIGHT.BOLD,
+				},
+			},
+		},
 		MuiStepper: {
 			styleOverrides: {
 				root: {

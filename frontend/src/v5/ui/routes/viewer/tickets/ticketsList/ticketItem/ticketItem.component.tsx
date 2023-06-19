@@ -74,7 +74,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 				<IssuePropertiesRow>
 					<DueDateWithLabel value={dueDate} onBlur={onBlurDueDate} disabled={readOnly} />
 					<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" label="" />
-					<Assignees values={assignees} onBlur={onBlurAssignees} disabled={readOnly} />
+					<Assignees value={assignees} onBlur={onBlurAssignees} disabled={readOnly} />
 				</IssuePropertiesRow>
 			)}
 		</Ticket>

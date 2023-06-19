@@ -16,14 +16,12 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { TicketDetailsAssignees } from '@controls/assignees/ticketDetailsAssignees/ticketDetailsAssignees.component';
 import { PRIORITY_LEVELS_MAP, STATUS_MAP } from '@controls/chip/chip.types';
-import { FormChipSelect, FormDueDateWithIcon } from '@controls/inputs/formInputs.component';
-import { InputController } from '@controls/inputs/inputController.component';
+import { FormAssigneesSelect, FormChipSelect, FormDueDateWithIcon } from '@controls/inputs/formInputs.component';
 
 import { FormattedMessage } from 'react-intl';
 import { IssueProperties } from '../../../tickets.constants';
-import { ColumnSeparator, FloatRight, IssuePropertiesContainer, PropertyColumn, PropertyTitle } from './issuePropertiesRow.styles';
+import { ColumnSeparator, AssigneesWrapper, IssuePropertiesContainer, PropertyColumn, PropertyTitle } from './issuePropertiesRow.styles';
 
 type IIssuePropertiesRow = {
 	onBlur: () => void;
@@ -92,14 +90,15 @@ export const IssuePropertiesRow = ({ onBlur, readOnly }: IIssuePropertiesRow) =>
 				disabled={readOnly}
 			/>
 		</PropertyColumn>
-		<FloatRight>
-			<InputController
-				Input={TicketDetailsAssignees}
+		<AssigneesWrapper>
+			<FormAssigneesSelect
 				name={`properties[${IssueProperties.ASSIGNEES}]`}
 				onBlur={onBlur}
 				key={IssueProperties.ASSIGNEES}
 				disabled={readOnly}
+				showAddButton
+				multiple
 			/>
-		</FloatRight>
+		</AssigneesWrapper>
 	</IssuePropertiesContainer>
 );

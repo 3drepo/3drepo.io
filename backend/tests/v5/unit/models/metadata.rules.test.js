@@ -17,15 +17,18 @@
 
 const { src } = require('../../helper/path');
 
+const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../helper/services');
+
 const MetaRules = require(`${src}/models/metadata.rules`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
+const generateRule = (field, operator, values) => ({ field, operator, values });
+
 const testToQuery = () => {
-	const generateRule = (field, operator, values) => ({ field, operator, values });
 	const createQuery = (field, valueQuery) => ({
 		metadata: { $elemMatch: { key: field, ...(valueQuery ? { value: valueQuery } : {}) } } });
 
-	const fieldName = 'abc';
+	const fieldName = generateRandomString;
 	const testCases = [
 		{
 			desc: 'operator IS_NOT_EMPTY with no operands',
@@ -154,6 +157,48 @@ const testToQuery = () => {
 	});
 };
 
-describe('models/metadata.rules', () => {
+const testGenerateQueriesFromRules = () => {
+	test('Should identify positive/negative rules correctly and convert them to mongo queries', () => {
+		const posRules = [
+			generateRule(generateRandomString(), 'IS_NOT_EMPTY'),
+			generateRule(generateRandomString(), 'IS', [generateRandomString()]),
+			generateRule(generateRandomString(), 'CONTAINS', [generateRandomString()]),
+			generateRule(generateRandomString(), 'REGEX', [generateRandomString()]),
+			generateRule(generateRandomString(), 'EQUALS', [generateRandomNumber()]),
+			generateRule(generateRandomString(), 'GT', [generateRandomNumber()]),
+			generateRule(generateRandomString(), 'GTE', [generateRandomNumber()]),
+			generateRule(generateRandomString(), 'LT', [generateRandomNumber()]),
+			generateRule(generateRandomString(), 'LTE', [generateRandomNumber()]),
+			generateRule(generateRandomString(), 'IN_RANGE', [0, 199]),
+
+		];
+
+		const negRules = [
+			generateRule(generateRandomString(), 'IS_NOT', [generateRandomString()]),
+			generateRule(generateRandomString(), 'NOT_CONTAINS', [generateRandomString()]),
+			generateRule(generateRandomString(), 'NOT_EQUALS', [generateRandomNumber()]),
+			generateRule(generateRandomString(), 'NOT_IN_RANGE', [2, 255]),
+		];
+
+		const emptyRule = generateRule(generateRandomString(), 'IS_EMPTY');
+
+		const expectedData = {
+			positives: posRules.map(MetaRules.toQuery),
+		};
+
+		expectedData.negatives = negRules.map((rule) => {
+			expectedData.positives.push(MetaRules.toQuery({ field: rule.field, operator: 'IS_NOT_EMPTY' }));
+			return MetaRules.toQuery(rule);
+		});
+
+		expectedData.negatives.push(MetaRules.toQuery(emptyRule));
+
+		const rules = [...posRules, ...negRules, emptyRule];
+		expect(MetaRules.generateQueriesFromRules(rules)).toEqual(expectedData);
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testToQuery();
+	testGenerateQueriesFromRules();
 });
