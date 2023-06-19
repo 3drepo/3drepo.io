@@ -40,8 +40,8 @@ interface TicketGroupsProps {
 }
 
 enum OverrideType {
-	COLORED,
-	HIDDEN,
+	COLORED = 'colored',
+	HIDDEN = 'hidden',
 }
 
 export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => {
@@ -128,8 +128,8 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				onSelectedGroupsChange={onSelectedColoredGroupChange}
 				overrides={state.colored || []}
 				onEditGroup={onSetEditGroup(true)}
-				highlightedIndex={getHighlightedIndex('colored')}
-				setHighlightedIndex={handleSetHighlightedIndex('colored')}
+				highlightedIndex={getHighlightedIndex(OverrideType.COLORED)}
+				setHighlightedIndex={handleSetHighlightedIndex(OverrideType.COLORED)}
 			>
 				<GroupsAccordion
 					title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
@@ -139,8 +139,8 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				groupType="hidden"
 				overrides={state.hidden || []}
 				onEditGroup={onSetEditGroup(false)}
-				highlightedIndex={getHighlightedIndex('hidden')}
-				setHighlightedIndex={handleSetHighlightedIndex('hidden')}
+				highlightedIndex={getHighlightedIndex(OverrideType.COLORED)}
+				setHighlightedIndex={handleSetHighlightedIndex(OverrideType.COLORED)}
 			>
 				<GroupsAccordion
 					title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
