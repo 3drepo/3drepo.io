@@ -22,8 +22,8 @@ import { useContext } from 'react';
 import { SearchPhrase } from './dashboardListEmptySearchResults.styles';
 
 export const DashboardListEmptySearchResults = (): JSX.Element => {
-	const { query: searchPhrase } = useContext(SearchContext);
-
+	const { queries } = useContext(SearchContext);
+	const searchPhrase = queries[0];
 	return (
 		<DashboardListEmptyText>
 			<FormattedMessage

@@ -37,11 +37,11 @@ export const DashboardListItemFederationTitle = ({
 	federation,
 }: IFederationTitle): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
-	const { query: filterQuery } = useContext(SearchContext);
+	const { queries } = useContext(SearchContext);
 
 	const { status, desc, name } = federation;
 	const uploadStatus = status === UploadStatuses.OK
-		? <Highlight search={filterQuery}>{desc}</Highlight>
+		? <Highlight search={queries}>{desc}</Highlight>
 		: <RevisionStatus status={status} name={name} />;
 
 	return (
@@ -52,7 +52,7 @@ export const DashboardListItemFederationTitle = ({
 			}
 		>
 			<Link to={viewerRoute(teamspace, project, federation)}>
-				<Highlight search={filterQuery}>
+				<Highlight search={queries}>
 					{name}
 				</Highlight>
 			</Link>

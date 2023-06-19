@@ -71,12 +71,8 @@ export const AssigneesSelect = ({
 		onBlur();
 	};
 
-	const filterItems = useCallback((items, query: string) => items
-		.filter(({ _id, firstName, lastName, job }) => [_id, firstName, lastName, job]
-			.some((string) => string?.toLowerCase().includes(query.toLowerCase()))), [filteredValues.length]);
-
 	return (
-		<SearchContextComponent filteringFunction={filterItems} items={allUsersAndJobs}>
+		<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job']} items={allUsersAndJobs}>
 			<AssigneesListContainer onClick={handleOpen} className={className}>
 				<AssigneesSelectMenu
 					open={open}

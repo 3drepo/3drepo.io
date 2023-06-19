@@ -35,7 +35,7 @@ export type IconButtonProps = {
 type EditFederationContainersListItemProps = {
 	isSelected: boolean;
 	container: IContainer;
-	filterQuery?: string;
+	filterQueries?: string[];
 	icon: ComponentType<IconButtonProps>;
 	onSelectOrToggleItem: (id: string) => void;
 };
@@ -44,7 +44,7 @@ export const EditFederationContainersListItem = memo(({
 	icon: Icon,
 	isSelected,
 	container,
-	filterQuery,
+	filterQueries,
 	onSelectOrToggleItem,
 }: EditFederationContainersListItemProps) => (
 	<DashboardListItem
@@ -62,7 +62,6 @@ export const EditFederationContainersListItem = memo(({
 				minWidth={116}
 				container={container}
 				isSelected={isSelected}
-				filterQuery={filterQuery}
 				openInNewTab
 			/>
 			<DashboardListItemButton
@@ -83,7 +82,7 @@ export const EditFederationContainersListItem = memo(({
 				width={160}
 				selected={isSelected}
 			>
-				<Highlight search={filterQuery}>
+				<Highlight search={filterQueries}>
 					{container.code}
 				</Highlight>
 			</DashboardListItemText>
@@ -92,7 +91,7 @@ export const EditFederationContainersListItem = memo(({
 				hideWhenSmallerThan={Display.Tablet}
 				selected={isSelected}
 			>
-				<Highlight search={filterQuery}>
+				<Highlight search={filterQueries}>
 					{container.type}
 				</Highlight>
 			</DashboardListItemText>

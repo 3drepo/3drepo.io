@@ -31,10 +31,10 @@ import { LinkCard } from '../linkCard.component';
 interface IProjectCard {
 	project: IProject;
 	className?: string;
-	filterQuery?: string;
+	filterQueries?: string[];
 }
 
-export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) => {
+export const ProjectCard = ({ project, filterQueries, ...props }: IProjectCard) => {
 	const DEFAULT_IMAGE = 'assets/images/project_placeholder.png';
 	const { teamspace } = useParams<TeamspaceParams>();
 	const to = projectRoute(teamspace, project);
@@ -82,7 +82,7 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 		<LinkCard
 			{...props}
 			to={to}
-			heading={<Highlight search={filterQuery}>{project.name}</Highlight>}
+			heading={<Highlight search={filterQueries}>{project.name}</Highlight>}
 			imgSrc={DEFAULT_IMAGE}
 		>
 			<EllipsisMenuContainer onClick={preventNavigation}>

@@ -68,7 +68,7 @@ export const EditFederationContainers = ({
 	iconButton: IconButton,
 }: EditFederationContainersProps) => {
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-	const { items: containers, filteredItems, query } = useContext<SearchContextType<IContainer>>(SearchContext);
+	const { items: containers, filteredItems, queries } = useContext<SearchContextType<IContainer>>(SearchContext);
 	const hasContainers = containers.length > 0;
 
 	const { sortedList, setSortConfig } = useOrderedList(
@@ -97,7 +97,7 @@ export const EditFederationContainers = ({
 				sideElement={(
 					<CollapseSideElementGroup>
 						<ActionButton disabled={isEmpty(containers)} filteredContainers={sortedList}>
-							{isEmpty(query)
+							{isEmpty(queries)
 								? actionButtonTexts.allResults
 								: actionButtonTexts.filteredResults}
 						</ActionButton>
@@ -134,7 +134,7 @@ export const EditFederationContainers = ({
 								key={container._id}
 								isSelected={container._id === selectedItemId}
 								container={container}
-								filterQuery={query}
+								filterQueries={queries}
 								onSelectOrToggleItem={selectOrToggleItem}
 							/>
 						)))

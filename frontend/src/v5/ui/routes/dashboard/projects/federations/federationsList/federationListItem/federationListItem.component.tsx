@@ -125,7 +125,7 @@ export const FederationListItem = memo(({
 					<DashboardListItemText width={188}>
 						{federation.code}
 					</DashboardListItemText>
-					<DashboardListItemText width={97} minWidth={73}>
+					<DashboardListItemText width={97} minWidth={73} dontHighlight>
 						{federation.lastUpdated ? formatDate(federation.lastUpdated) : ''}
 					</DashboardListItemText>
 					<DashboardListItemIcon>

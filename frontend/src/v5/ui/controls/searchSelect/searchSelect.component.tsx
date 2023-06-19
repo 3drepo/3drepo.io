@@ -30,9 +30,12 @@ export const SearchSelect = ({ children, ...props }: SelectProps) => {
 		}
 	};
 
-	const filterItems = (items, query: string) => items
-		.filter((node) => onlyText(node).toLowerCase()
-			.includes(query.toLowerCase()));
+	const filterItems = (items, queries: string[]) => {
+		if (!queries.length) return items;
+		return items
+			.filter((node) => queries.some((query) => onlyText(node).toLowerCase()
+				.includes(query.toLowerCase())));
+	};
 
 	return (
 		<SearchContextComponent filteringFunction={filterItems} items={children as ReactNode[]}>
