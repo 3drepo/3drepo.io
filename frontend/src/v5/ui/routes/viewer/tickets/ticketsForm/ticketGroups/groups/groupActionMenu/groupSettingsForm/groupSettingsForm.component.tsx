@@ -52,6 +52,8 @@ import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component'
 import { useStore } from 'react-redux';
 import { selectSelectedNodes } from '@/v4/modules/tree/tree.selectors';
 import { convertToV5GroupNodes } from '@/v5/helpers/viewpoint.helpers';
+import { DEFAULT_SUGGESTED_HEX_COLORS, getRandomSuggestedColor } from '@controls/inputs/colorPicker/colorPicker.helpers';
+import { hexToArray } from '@/v4/helpers/colors';
 import { GroupsCollectionSelect } from '../../addOrEditGroup/groupSettingsForm.component.tsx/groupsCollectionSelect/groupsCollectionSelect.component';
 import {
 	Buttons,
@@ -138,9 +140,19 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 	};
 
 	useEffect(() => {
-		const { group, ...rest } = value;
-		const { objects, ...restGroup } = group as Group;
-		const newValue = cloneDeep({ ...rest, group: restGroup });
+		if (!value) {
+			formData.reset({
+				color: hexToArray(getRandomSuggestedColor()),
+				opacity: 1,
+				prefix: [],
+				group: {},
+			});
+
+			return;
+		}
+
+		const { objects, ...restGroup } = value.group as Group;
+		const newValue = cloneDeep({ ...value, group: restGroup });
 		formData.reset(newValue);
 	}, [value]);
 

@@ -116,7 +116,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				}}
 			>
 				<GroupSettingsForm
-					value={value.state?.[((editingOverride.type === OverrideType.COLORED) ? 'colored' : 'hidden')][editingOverride.index] as IGroupSettingsForm}
+					value={value.state?.[((editingOverride.type === OverrideType.COLORED) ? 'colored' : 'hidden')]?.[editingOverride.index] as IGroupSettingsForm}
 					onSubmit={onSubmit}
 					onCancel={onCancel}
 				/>
