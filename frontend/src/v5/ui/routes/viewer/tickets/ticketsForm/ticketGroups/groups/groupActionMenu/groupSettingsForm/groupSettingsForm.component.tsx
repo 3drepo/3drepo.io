@@ -45,7 +45,7 @@ import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty, uniqBy, cloneDeep } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { GroupOverride, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
+import { Group, GroupOverride, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
 import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
@@ -99,11 +99,13 @@ type GroupSettingsFormProps = {
 	onCancel?: () => void,
 };
 export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFormProps) => {
-	const store = useStore();
-
 	const [isSmart, setIsSmart] = useState(!!value?.group?.rules?.length);
 	const [prefixesCombinations] = useState(getAllPrefixesCombinations([]));
 	const [newCollection, setNewCollection] = useState([]);
+	const store = useStore();
+
+	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+	const isNewGroup = !value?.group?._id;
 
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
@@ -121,8 +123,6 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 		setValue,
 		getValues,
 	} = formData;
-	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const isNewGroup = !value?.group?._id;
 
 	const onClickSubmit = (newValues:IGroupSettingsForm) => {
 		if (!isSmart) {
@@ -138,7 +138,10 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 	};
 
 	useEffect(() => {
-		formData.reset(cloneDeep(value));
+		const { group, ...rest } = value;
+		const { objects, ...restGroup } = group as Group;
+		const newValue = cloneDeep({ ...rest, group: restGroup });
+		formData.reset(newValue);
 	}, [value]);
 
 	return (
