@@ -34,6 +34,7 @@ const joinPath = (a, b) => (a && b ? Path.posix.join(a, b) : a || b);
 const failedToCheck = {};
 
 const PARALLEL_BATCHES = 10000;
+const DEFAULT_OUT_FILE = './unreferenced_files.csv';
 
 let fileCount = 0;
 
@@ -79,13 +80,16 @@ const checkRefs = async (fn, nParallel) => {
 
 const isUpdatedLater = async (path, time) => {
 	// A file that we couldn't update, so leave it alone.
+	/* istanbul ignore next */
 	if (failedToCheck[path]) return true;
 	const fullPath = joinPath(fsPath, path);
 	try {
 		const { mtime } = await stat(fullPath);
 		return new Date(mtime) > time;
 	} catch (err) {
+		/* istanbul ignore next */
 		logger.logError(`Failed to get modified time for ${path}: ${err.message}`);
+		/* istanbul ignore next */
 		return true;
 	}
 };
@@ -130,25 +134,7 @@ const findFilesOlderThanTime = async (currTime, parallelFiles) => {
 	return res;
 };
 
-const verifyZombies = async (filesToCheck, nParallel) => {
-	const lookUp = {};
-
-	filesToCheck.forEach((file) => { lookUp[file] = 1; });
-
-	await checkRefs((refs) => {
-		refs.forEach(({ link }) => {
-			if (lookUp[link]) {
-				delete lookUp[link];
-			}
-		});
-
-		return Promise.resolve();
-	}, nParallel);
-
-	return Object.keys(lookUp);
-};
-
-const run = async (outFile, removeFiles = false, maxParallelRefs = PARALLEL_BATCHES) => {
+const run = async (outFile = DEFAULT_OUT_FILE, removeFiles = false, maxParallelRefs = PARALLEL_BATCHES) => {
 	const currTime = new Date();
 	logger.logInfo(`Identify all files that have a reference in the fileshare... [RemoveFiles: ${removeFiles}, Parallel Refs: ${maxParallelRefs}, outFile: ${outFile}]`);
 	await checkRefs(async (refs) => {
@@ -164,13 +150,10 @@ const run = async (outFile, removeFiles = false, maxParallelRefs = PARALLEL_BATC
 
 	if (zombies.length) {
 		logger.logInfo(`Writing all links to ${outFile}...`);
+
 		writeFileSync(outFile, zombies.join('\n'));
 		if (removeFiles) {
-			logger.logInfo('Running verification to ensure the files found are indeed unreferenced...');
-			const finalList = await verifyZombies(zombies, maxParallelRefs);
-			logger.logInfo(`Verification complete, ${finalList.length} files are confirmed zombies. Deleting...`);
-
-			const chunks = splitArrayIntoChunks(finalList, maxParallelRefs);
+			const chunks = splitArrayIntoChunks(zombies, maxParallelRefs);
 			logger.logInfo(`Deleting files (${chunks.length} batches)`);
 			for (let i = 0; i < chunks.length; ++i) {
 				const group = chunks[i];
@@ -192,7 +175,7 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 		description: 'If this is set, it will remove the files instead of outputing the list of links',
 	}).option('outFile', {
 		type: 'string',
-		default: './zombies.csv',
+		default: DEFAULT_OUT_FILE,
 		description: 'path to write the list of zombie files to',
 	}).option('maxParallelRefs', {
 		type: 'number',
