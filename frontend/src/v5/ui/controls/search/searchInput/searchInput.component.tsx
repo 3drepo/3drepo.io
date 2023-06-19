@@ -82,7 +82,7 @@ export const SearchInput = ({ onClear, variant = 'filled', multiple, ...props }:
 					</>
 				),
 				endAdornment: (
-					<EndAdornment $isVisible={Boolean(value)}>
+					<EndAdornment $isVisible={!!value || !!queries.length}>
 						<IconButton onClick={onClickClear} size="large">
 							<CloseIcon />
 						</IconButton>
