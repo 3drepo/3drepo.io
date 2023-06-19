@@ -160,7 +160,7 @@ db.createSequence = async (teamspace, model, { sequence, states, activities, act
 	]);
 };
 
-db.createGroups = (teamspace, modelId, groups = []) => {
+db.createLegacyGroups = (teamspace, modelId, groups = []) => {
 	const toInsert = groups.map((entry) => {
 		const converted = {
 			...entry,
@@ -424,7 +424,7 @@ ServiceHelper.generateRandomModelProperties = (isFed = false) => ({
 	defaultLegend: ServiceHelper.generateUUIDString(),
 });
 
-ServiceHelper.generateTemplate = (deprecated) => ({
+ServiceHelper.generateTemplate = (deprecated, hasView = false) => ({
 	_id: ServiceHelper.generateUUIDString(),
 	code: ServiceHelper.generateRandomString(3),
 	name: ServiceHelper.generateRandomString(),
@@ -445,6 +445,10 @@ ServiceHelper.generateTemplate = (deprecated) => ({
 			type: propTypes.NUMBER,
 			default: ServiceHelper.generateRandomNumber(),
 		},
+		...(hasView ? [{
+			name: ServiceHelper.generateRandomString(),
+			type: propTypes.VIEW,
+		}] : []),
 	],
 	modules: [
 		{
@@ -470,6 +474,11 @@ ServiceHelper.generateTemplate = (deprecated) => ({
 					type: propTypes.NUMBER,
 					default: ServiceHelper.generateRandomNumber(),
 				},
+				...(hasView ? [{
+					name: ServiceHelper.generateRandomString(),
+					type: propTypes.VIEW,
+					default: ServiceHelper.generateRandomNumber(),
+				}] : []),
 			],
 		},
 	],
@@ -487,11 +496,27 @@ const generateProperties = (propTemplate, internalType) => {
 			properties[name] = internalType ? new Date() : Date.now();
 		} else if (type === propTypes.NUMBER) {
 			properties[name] = ServiceHelper.generateRandomNumber();
+		} else if (type === propTypes.VIEW) {
+			properties[name] = {
+				state: {
+					hidden: [
+						{ group: ServiceHelper.generateGroup(true, { serialised: true, hasId: false }) },
+						{ group: ServiceHelper.generateGroup(false, { serialised: true, hasId: false }) },
+					],
+				},
+			};
 		}
 	});
 
 	return properties;
 };
+
+ServiceHelper.generateRandomObject = () => ({
+	[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
+	[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
+	[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
+	[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
+});
 
 ServiceHelper.generateTicket = (template, internalType = false) => {
 	const modules = {};
@@ -525,7 +550,41 @@ ServiceHelper.generateComment = (author = ServiceHelper.generateRandomString()) 
 	};
 };
 
-ServiceHelper.generateGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
+// This generates groups for v5 schema (used for tickets), use generateLegacyGroup if you need v4 compatible groups
+ServiceHelper.generateGroup = (isSmart = false, {
+	serialised = false,
+	hasId = true,
+	container = ServiceHelper.generateUUIDString(),
+	nObjects = 3,
+} = {}) => {
+	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
+	const group = deleteIfUndefined({
+		_id: hasId ? genId() : undefined,
+		name: ServiceHelper.generateRandomString(),
+	});
+
+	if (isSmart) {
+		group.rules = [
+			{
+				field: 'IFC GUID',
+				operator: 'IS',
+				values: [
+					'1rbbJcnUDEEA_ArpSqk3B7',
+				],
+			},
+		];
+	} else {
+		group.objects = [{
+			container,
+			_ids: times(nObjects, genId),
+		}];
+	}
+
+	return group;
+};
+
+// This generates groups with v4 schema. use generateGroup for v5 (tickets) schema
+ServiceHelper.generateLegacyGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
 	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());
 	const group = {
 		_id: genId(),

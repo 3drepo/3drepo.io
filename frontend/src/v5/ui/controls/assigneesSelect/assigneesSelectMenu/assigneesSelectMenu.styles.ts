@@ -21,7 +21,6 @@ import { Divider } from '@mui/material';
 import styled from 'styled-components';
 
 export const HiddenSelect = styled(Select).attrs({
-	multiple: true,
 	MenuProps: {
 		disableAutoFocusItem: true,
 		PaperProps: {

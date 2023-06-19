@@ -41,6 +41,7 @@ export const AssigneesSelect = ({
 	maxItems = 3,
 	showAddButton = false,
 	showEmptyText = false,
+	multiple,
 	disabled,
 	onBlur,
 	className,
@@ -51,15 +52,15 @@ export const AssigneesSelect = ({
 	// Must filter out users not included in this teamspace. This can occur when a user
 	// has been assigned to a ticket and later on is removed from the teamspace
 	const allUsersAndJobs = UsersHooksSelectors.selectUsersAndJobs();
-	const filteredValues = intersection(value, allUsersAndJobs.map((i) => i.user || i._id));
-
+	const filteredValue = multiple ? (
+		intersection(value, allUsersAndJobs.map((i) => i.user || i._id)) ?? []
+	) : allUsersAndJobs.some(({ user, _id }) => [user, _id].includes(value)) && value;
 	// Using this logic instead of a simple partition because ExtraAssigneesCircle needs to occupy
 	// the last position when the overflow value is 2+. There is no point showing +1 overflow
 	// since the overflowing assignee could just be displayed instead
-	const overflowRequired = filteredValues.length > maxItems;
-	const listedAssignees = overflowRequired ? filteredValues.slice(0, maxItems - 1) : filteredValues;
-	const overflowValue = overflowRequired ? filteredValues.slice(maxItems - 1).length : 0;
-
+	const overflowRequired = multiple && filteredValue.length > maxItems;
+	const listedAssignees = overflowRequired ? filteredValue.slice(0, maxItems - 1) : filteredValue;
+	const overflowValue = overflowRequired ? filteredValue.slice(maxItems - 1).length : 0;
 	const handleOpen = useCallback((e) => {
 		if (disabled) return;
 		e.stopPropagation();
@@ -71,29 +72,35 @@ export const AssigneesSelect = ({
 		onBlur();
 	};
 
+	const emptyValue = multiple ? [] : '';
+
 	return (
 		<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job']} items={allUsersAndJobs}>
 			<AssigneesListContainer onClick={handleOpen} className={className}>
 				<AssigneesSelectMenu
 					open={open}
-					value={filteredValues}
+					value={filteredValue ?? emptyValue}
 					onClose={handleClose}
 					onOpen={handleOpen}
 					disabled={disabled}
+					multiple={multiple}
 					{...props}
 				/>
-				{listedAssignees.length ? (
+				{!listedAssignees.length && showEmptyText && (
+					<FormattedMessage id="assignees.circleList.unassigned" defaultMessage="Unassigned" />
+				)}
+				{multiple ? (
 					listedAssignees.map((assignee) => (
 						<AssigneeCircle key={assignee} assignee={assignee} size="small" />
 					))
-				) : showEmptyText && (
-					<FormattedMessage id="assignees.circleList.unassigned" defaultMessage="Unassigned" />
+				) : (
+					<AssigneeCircle key={listedAssignees} assignee={listedAssignees} size="small" />
 				)}
 				{overflowRequired && (
 					<HoverPopover
 						anchor={(attrs) => <ExtraAssigneesCircle {...attrs}> +{overflowValue} </ExtraAssigneesCircle>}
 					>
-						<ExtraAssigneesPopover assignees={filteredValues} />
+						<ExtraAssigneesPopover assignees={filteredValue} />
 					</HoverPopover>
 				)}
 				{!disabled && showAddButton && (
