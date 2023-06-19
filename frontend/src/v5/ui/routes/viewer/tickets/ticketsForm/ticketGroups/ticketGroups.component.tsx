@@ -64,6 +64,10 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
 	};
 
+	const onCancel = () => {
+		setEditingOverride({ index: -1, type: OverrideType.COLORED });
+	};
+
 	const onSubmit = (overrideValue) => {
 		const newVal = cloneDeep(value);
 		if (editingOverride.type === OverrideType.COLORED) {
@@ -74,7 +78,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 			newVal.state.hidden[editingOverride.index] = overrideValue;
 		}
 		onChange?.(newVal);
-		setEditingOverride({ index: -1, type: OverrideType.COLORED });
+		onCancel();
 	};
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
@@ -114,6 +118,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				<GroupSettingsForm
 					value={value.state?.[((editingOverride.type === OverrideType.COLORED) ? 'colored' : 'hidden')][editingOverride.index] as IGroupSettingsForm}
 					onSubmit={onSubmit}
+					onCancel={onCancel}
 				/>
 			</Popper>
 		</Container>

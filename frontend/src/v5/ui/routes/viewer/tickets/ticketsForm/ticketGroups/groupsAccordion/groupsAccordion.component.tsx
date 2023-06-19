@@ -21,10 +21,10 @@ import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getCollectionCheckboxState } from '@/v5/store/tickets/ticketsGroups.helpers';
-import { Accordion, NumberContainer, TitleContainer, Checkbox } from './groupsAccordion.styles';
+import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
+import { Accordion, NumberContainer, TitleContainer, Checkbox, NewGroupButton } from './groupsAccordion.styles';
 import { Groups } from '../groups/groups.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
-import { AddGroupButton } from '../groups/groupActionMenu/addGroupButton/addGroupButton.component';
 
 type GroupsAccordionProps = { title: any, onChange };
 export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
@@ -32,6 +32,7 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 		getCollectionState,
 		toggleCollectionState,
 		indexedOverrides,
+		editGroup,
 	} = useContext(TicketGroupsContext);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const state = getCollectionState([]);
@@ -40,6 +41,10 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 	const toggleCheckbox = (e) => {
 		e.stopPropagation();
 		toggleCollectionState();
+	};
+
+	const addNewGroup = () => {
+		editGroup(overridesCount); // Set the edit mode with a new index
 	};
 
 	return (
@@ -64,7 +69,15 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 					/>
 				</EmptyListMessage>
 			)}
-			{isAdmin && <AddGroupButton />}
+			{isAdmin
+			&& (
+				<NewGroupButton startIcon={<AddCircleIcon />} onClick={addNewGroup}>
+					<FormattedMessage
+						id="ticketCard.groups.addGroup"
+						defaultMessage="Add group"
+					/>
+				</NewGroupButton>
+			)}
 		</Accordion>
 	);
 };

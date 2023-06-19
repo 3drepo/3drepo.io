@@ -40,7 +40,7 @@ import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { SubmitButton } from '@controls/submitButton';
 import { Button } from '@controls/button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty, uniqBy } from 'lodash';
@@ -96,8 +96,9 @@ const getAllPrefixesCombinations = (overrides: GroupOverride[]): string[][] => {
 type GroupSettingsFormProps = {
 	value?: IGroupSettingsForm,
 	onSubmit?: (value: IGroupSettingsForm) => void,
+	onCancel?: () => void,
 };
-export const GroupSettingsForm = ({ value, onSubmit }: GroupSettingsFormProps) => {
+export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFormProps) => {
 	const store = useStore();
 
 	const [isSmart, setIsSmart] = useState(!!value?.group?.rules?.length);
@@ -107,7 +108,14 @@ export const GroupSettingsForm = ({ value, onSubmit }: GroupSettingsFormProps) =
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
 		resolver: yupResolver(GroupSettingsSchema),
-		defaultValues: value,
+		defaultValues: {
+			prefix: [],
+			color: [255, 0, 0],
+			opacity: 1,
+			group: {
+				objects: [],
+			},
+		},
 	});
 
 	const { fields: rules, append, remove, update } = useFieldArray({
@@ -136,6 +144,10 @@ export const GroupSettingsForm = ({ value, onSubmit }: GroupSettingsFormProps) =
 		setNewCollection(collection);
 		setValue('prefix', collection, { shouldDirty: true });
 	};
+
+	useEffect(() => {
+		formData.reset(value);
+	}, [JSON.stringify(value)]);
 
 	return (
 		<form>
@@ -314,7 +326,7 @@ export const GroupSettingsForm = ({ value, onSubmit }: GroupSettingsFormProps) =
 				}
 				<Buttons>
 					<ActionMenuItem>
-						<Button variant="text" color="secondary" size="medium">
+						<Button variant="text" color="secondary" size="medium" onClick={onCancel}>
 							<FormattedMessage id="tickets.groups.settings.cancel" defaultMessage="Cancel" />
 						</Button>
 					</ActionMenuItem>
