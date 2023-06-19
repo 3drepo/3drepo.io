@@ -20,6 +20,7 @@ import {
 	TextField as TextFieldComponent,
 	InputAdornment as InputAdornmentComponent,
 } from '@mui/material';
+import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 
 export const IconButton = styled(IconButtonComponent)`
 	padding: 6px;
@@ -30,23 +31,48 @@ export const IconButton = styled(IconButtonComponent)`
 	}
 `;
 
-export const TextField = styled(TextFieldComponent)`
+export const SearchChip = styled(FilterChip)`
+	.MuiChip-root {
+		color: ${({ theme }) => theme.palette.primary.main};
+		border-color: ${({ theme }) => theme.palette.primary.main};
+		background-color: ${({ theme }) => theme.palette.primary.lightest};
+		padding-right: 3px;
+	}
+	& + & >.MuiChip-root {
+		margin-left: 3px;
+	}
+`;
+
+export const TextField = styled(TextFieldComponent)<{multiline: boolean }>`
 	margin: 8px;
+	gap: 3px;
+	${({ multiline }) => multiline && css`
+		.MuiInputBase-root {
+			height: unset
+		}
+	`}
 
 	.MuiInputBase-adornedEnd {
 		padding-right: 0;
 	}
-	.MuiInputBase-input::placeholder {
-		opacity: 1;
-		color: ${({ theme }) => theme.palette.base.main};
+	.MuiInputBase-input {
+		padding: 0 7px;
+		::placeholder {
+			min-width: fit-content;
+			opacity: 1;
+			color: ${({ theme }) => theme.palette.base.main};
+		}
+		.MuiInputAdornment-root + & {
+			padding-left: 4px;
+		}
 	}
 `;
 
 export const StartAdornment = styled(InputAdornmentComponent).attrs({
 	position: 'start',
 })`
-	margin-right: 0;
 	svg {
+		margin-right: 7px;
 		color: ${({ theme }) => theme.palette.base.main};
 	}
 `;

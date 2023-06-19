@@ -16,13 +16,14 @@
  */
 
 import { Chip as MuiChip, Tooltip } from '@mui/material';
+import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
 import { ChipWrapper } from './chip.styles';
 import { IChip } from './chip.types';
 
-export const Chip = ({ color, variant, tooltip = '', disabled, ...props }: IChip) => (
-	<ChipWrapper variant={variant} color={color} disabled={disabled}>
+export const Chip = ({ color, variant, tooltip = '', disabled, className, ...props }: IChip) => (
+	<ChipWrapper variant={variant} color={color} disabled={disabled} className={className}>
 		<Tooltip title={disabled ? '' : tooltip} arrow>
-			<MuiChip clickable={false} {...props} />
+			<MuiChip clickable={false} deleteIcon={<CrossIcon />} {...props} />
 		</Tooltip>
 	</ChipWrapper>
 );

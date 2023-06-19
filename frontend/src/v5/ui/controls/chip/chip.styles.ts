@@ -28,7 +28,7 @@ const outlinedStyles = (color: string) => css`
 	color: ${color};
 	border: 1px solid ${color};
 	background: transparent;
-	svg {
+	svg:not(.MuiChip-deleteIcon) {
 		color: ${color};
 	}
 `;
@@ -51,7 +51,7 @@ export const ChipWrapper = styled.div<{ variant: string; color: string; disabled
 		text-transform: uppercase;
 		padding: 3px 7px;
 		border-width: 1px;
-		border-radius: 6px;
+		border-radius: 25px;
 		height: 20px;
 		gap: 4px;
 		user-select: none;
@@ -62,14 +62,22 @@ export const ChipWrapper = styled.div<{ variant: string; color: string; disabled
 		svg {
 			height: 11px;
 			width: 11px;
+			&.MuiChip-icon {
+				color: inherit;
+				margin: 0;
+			}
+			&.MuiChip-deleteIcon {
+				margin: 0 2px 0 0;
+				height: 7px;
+				width: 7px;
+				&:hover {
+					color: inherit;
+				}
+			}
 		}
 		.MuiChip-label {
 			padding: 0;
 			line-height: 100%;
-		}
-		.MuiChip-icon {
-			color: inherit;
-			margin: 0;
 		}
 		${({ variant, color }) => {
 		switch (variant) {

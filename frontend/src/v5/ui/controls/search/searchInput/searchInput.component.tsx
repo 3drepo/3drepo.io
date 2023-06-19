@@ -20,9 +20,8 @@ import SearchIcon from '@assets/icons/outlined/search-outlined.svg';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { ChangeEvent, useContext, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 import { trim } from 'lodash';
-import { IconButton, TextField, StartAdornment, EndAdornment } from './searchInput.styles';
+import { IconButton, TextField, StartAdornment, EndAdornment, SearchChip } from './searchInput.styles';
 import { SearchContext } from '../searchContext';
 
 type ISearchInput = {
@@ -63,6 +62,7 @@ export const SearchInput = ({ onClear, variant = 'filled', multiple, ...props }:
 	};
 
 	const removeQuery = (index) => setQueries((prev) => prev.filter((el, i) => index !== i));
+
 	return (
 		<TextField
 			value={value}
@@ -73,7 +73,7 @@ export const SearchInput = ({ onClear, variant = 'filled', multiple, ...props }:
 							<SearchIcon />
 						</StartAdornment>
 						{!!queries.length && multiple && queries.map((query, index) => (
-							<FilterChip
+							<SearchChip
 								key={query}
 								label={query}
 								onDelete={() => removeQuery(index)}

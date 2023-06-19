@@ -45,7 +45,7 @@ export const Filters = styled.div`
 `;
 
 export const CompletedFilterChip = styled(FilterChip)<{ selected: boolean }>`
-	&& {
+	.MuiChip-root {
 		color: ${({ theme }) => theme.palette.success.main};
 		border: 1px solid ${({ theme }) => theme.palette.success.main};
 		${({ selected, theme: { palette } }) => selected && css`
@@ -92,5 +92,4 @@ export const MenuItem = styled(MenuItemBase)`
 
 export const SearchInput = styled(SearchInputBase)`
 	margin: 0 0 12px;
-	color: ${({ theme }) => theme.palette.primary.main};
 `;
