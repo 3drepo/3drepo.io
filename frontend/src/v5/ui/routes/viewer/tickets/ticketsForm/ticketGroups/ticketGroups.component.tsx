@@ -139,8 +139,8 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				groupType="hidden"
 				overrides={state.hidden || []}
 				onEditGroup={onSetEditGroup(false)}
-				highlightedIndex={getHighlightedIndex(OverrideType.COLORED)}
-				setHighlightedIndex={handleSetHighlightedIndex(OverrideType.COLORED)}
+				highlightedIndex={getHighlightedIndex(OverrideType.HIDDEN)}
+				setHighlightedIndex={handleSetHighlightedIndex(OverrideType.HIDDEN)}
 			>
 				<GroupsAccordion
 					title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
