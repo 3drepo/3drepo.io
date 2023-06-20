@@ -18,10 +18,10 @@
 import styled, { css } from 'styled-components';
 import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
 import { CentredContainer } from '@controls/centredContainer';
-import CheckBoxBase from '@mui/material/Checkbox';
 import { Button } from '@controls/button';
 import { CollectionAccordion } from '../groups/groups.styles';
 import { Container as GroupItemContainer } from '../groups/groupItem/groupItem.styles';
+import { GroupToggle } from '../groupToggle/groupToggle.component';
 
 export const Accordion = styled(AccordionBase)<{ $overridesCount?: number }>`
 	background: transparent;
@@ -94,7 +94,7 @@ export const NumberContainer = styled(CentredContainer)`
 	font-size: 10px;
 `;
 
-export const Checkbox = styled(CheckBoxBase)`
+export const Checkbox = styled(GroupToggle)`
 	margin: 0 8px 0 auto;
 `;
 
