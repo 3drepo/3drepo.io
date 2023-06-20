@@ -104,34 +104,26 @@ ModelSetting.changePermissions = async function(account, model, permissions) {
 
 	// get list of valid permission name
 	permissions = _.uniq(permissions, "user");
-	const dbUser = await findByUserName(account);
+	return findByUserName(account).then(dbUser => {
+		const promises = [];
 
-	await Promise.all(permissions.map(async permission => {
-		checkPermissionIsValid(permission);
-		checkUserHasPermissionTemplate(dbUser, permission);
+		permissions.forEach(permission => {
+			checkPermissionIsValid(permission);
+			checkUserHasPermissionTemplate(dbUser, permission);
 
-		try {
-			await teamspaceMemberCheck(permission.user, account);
-		} catch (err) {
-			if (err === responseCodes.USER_NOT_FOUND ||
-				err === responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE
-			) {
-				// There's a user with permissions when they're not a member of teamspace
-				// This is unexpected but we shouldn't throw an error
-				return;
-			} else {
-				throw err;
-			}
-		}
-		const perm = setting.permissions.find(_perm => _perm.user === permission.user);
+			promises.push(teamspaceMemberCheck(permission.user, dbUser.user).then(() => {
+				const perm = setting.permissions.find(_perm => _perm.user === permission.user);
 
-		if (perm) {
-			perm.permission = permission.permission;
-		}
-	}));
+				if (perm) {
+					perm.permission = permission.permission;
+				}
+			}));
+		});
 
-	return ModelSetting.updateModelSetting(account, model, { permissions });
-
+		return Promise.all(promises).then(() => {
+			return ModelSetting.updateModelSetting(account, model, { permissions });
+		});
+	});
 };
 
 ModelSetting.prepareDefaultView = async function(account, model, dataToClean) {
