@@ -19,7 +19,7 @@ import { GroupOverride } from '@/v5/store/tickets/tickets.types';
 import _, { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
 import { TicketGroupsContext } from './ticketGroupsContext';
-import { GroupNode, GroupState, addIndex, groupOverridesToTree } from './ticketGroupsContext.helper';
+import { GroupNode, GroupState, addIndex, createTreeNode, groupOverridesToTree } from './ticketGroupsContext.helper';
 
 /* eslint-disable no-param-reassign */
 type TicketGroupsContextComponentProps = {
@@ -147,6 +147,27 @@ export const TicketGroupsContextComponent = ({
 			.map(({ index, ...override }) => override);
 		onSelectedGroupsChange?.(selectedOverrides);
 	}, [groupsTree]);
+
+	useEffect(() => {
+		// overrides length increased as a new override was added
+		if (overrides.length > indexedOverrides.length) {
+			const index = overrides.length - 1;
+			const newOverride = overrides[index];
+			const firstPrefixSegments = newOverride.prefix.slice(0, -1);
+			// @ts-ignore
+			const lastPrefixSegment = newOverride.prefix.at(-1);
+
+			let parent = getGroupNode(firstPrefixSegments);
+			if (lastPrefixSegment) {
+				const child = parent.children.find(({ prefixSegment }) => prefixSegment === lastPrefixSegment);
+				parent = child || createTreeNode(null, lastPrefixSegment, parent, GroupState.CHECKED, []);
+			}
+			const newNode = createTreeNode(index, null, parent, GroupState.CHECKED, newOverride);
+			parent.children.push(newNode);
+			updateTree(parent);
+		}
+		setIndexedOverrides(addIndex(overrides));
+	}, [overrides]);
 
 	return (
 		<TicketGroupsContext.Provider

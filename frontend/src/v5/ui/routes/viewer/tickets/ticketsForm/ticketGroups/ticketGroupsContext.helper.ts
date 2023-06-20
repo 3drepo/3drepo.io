@@ -36,7 +36,7 @@ export type GroupNode = {
 	children: GroupNode[],
 };
 
-const createTreeNode = (index, prefixSegment, parent, state, override): GroupNode => ({
+export const createTreeNode = (index, prefixSegment, parent, state, override): GroupNode => ({
 	index,
 	prefixSegment,
 	parent,
