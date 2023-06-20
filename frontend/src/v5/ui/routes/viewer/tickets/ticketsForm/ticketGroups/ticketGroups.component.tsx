@@ -153,6 +153,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 					top: isSecondaryCard ? 'unset' : 80,
 					bottom: isSecondaryCard ? 40 : 'unset',
 				}}
+				onClick={(e) => e.stopPropagation()}
 			>
 				<GroupSettingsForm
 					value={value.state?.[((editingOverride.type === OverrideType.COLORED) ? 'colored' : 'hidden')]?.[editingOverride.index] as IGroupSettingsForm}
