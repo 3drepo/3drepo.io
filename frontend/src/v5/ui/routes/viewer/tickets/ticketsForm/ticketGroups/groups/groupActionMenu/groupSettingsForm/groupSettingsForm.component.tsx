@@ -52,7 +52,7 @@ import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component'
 import { useStore } from 'react-redux';
 import { selectSelectedNodes } from '@/v4/modules/tree/tree.selectors';
 import { convertToV5GroupNodes } from '@/v5/helpers/viewpoint.helpers';
-import { DEFAULT_SUGGESTED_HEX_COLORS, getRandomSuggestedColor } from '@controls/inputs/colorPicker/colorPicker.helpers';
+import { getRandomSuggestedColor } from '@controls/inputs/colorPicker/colorPicker.helpers';
 import { hexToArray } from '@/v4/helpers/colors';
 import { GroupsCollectionSelect } from '../../addOrEditGroup/groupSettingsForm.component.tsx/groupsCollectionSelect/groupsCollectionSelect.component';
 import {

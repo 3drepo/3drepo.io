@@ -66,6 +66,12 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		});
 	};
 
+	const highlightGroup = () => {
+		const objects = convertToV4GroupNodes((group as Group).objects);
+		dispatch(TreeActions.showNodesBySharedIds(objects));
+		dispatch(TreeActions.selectNodesBySharedIds(objects, color.map((c) => c / 255)));
+	};
+
 	const toggleShowGroup = (e) => {
 		e.preventDefault();
 		e.stopPropagation();
@@ -77,12 +83,6 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		e.stopPropagation();
 		highlightGroup();
 		editGroup(index);
-	};
-
-	const highlightGroup = () => {
-		const objects = convertToV4GroupNodes((group as Group).objects);
-		dispatch(TreeActions.showNodesBySharedIds(objects));
-		dispatch(TreeActions.selectNodesBySharedIds(objects, color.map((c) => c / 255)));
 	};
 
 	const alphaColor = (color || [255, 255, 255]).concat(opacity);
