@@ -17,7 +17,7 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { flatMap, isEmpty } from 'lodash';
+import { isEmpty, get } from 'lodash';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
@@ -26,9 +26,13 @@ import { ViewpointsActions } from '@/v4/modules/viewpoints/viewpoints.redux';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { useDispatch } from 'react-redux';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
-import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
+import { formatMessage } from '@/v5/services/intl';
+import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
+import { FormattedMessage } from 'react-intl';
+import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { TicketItem } from './ticketItem/ticketItem.component';
-import { List, Filters } from './ticketsList.styles';
+import { List, Filters, CompletedFilterChip } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
 import { AdditionalProperties, TicketsCardViews } from '../tickets.constants';
 
@@ -39,6 +43,8 @@ type TicketsListProps = {
 export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const dispatch = useDispatch();
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const [availableTemplates, setAvailableTemplates] = useState([]);
+	const [showingCompleted, setShowingCompleted] = useState(false);
 	const [selectedTemplates, setSelectedTemplates] = useState<Set<string>>(new Set());
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
@@ -54,14 +60,26 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		setSelectedTemplates(new Set(selectedTemplates));
 	};
 
-	const getTicketsByTemplateId = (templateId: string) => tickets.filter(({ type }) => type === templateId);
+	const filterCompleted = (ticket) => {
+		const issuePropertyStatus = get(ticket, 'properties.Status');
+		const treatmentStatus = get(ticket, 'modules.safetibase.Treatment Status');
 
-	const getFilteredTickets = () => {
-		if (selectedTemplates.size === 0) return tickets;
-		return flatMap([...selectedTemplates], getTicketsByTemplateId);
+		const isCompletedIssueProperty = [TicketStatuses.CLOSED, TicketStatuses.VOID].includes(issuePropertyStatus);
+		const isCompletedTreatmentStatus = [TreatmentStatuses.AGREED_FULLY, TreatmentStatuses.VOID].includes(treatmentStatus);
+
+		return (isCompletedIssueProperty || isCompletedTreatmentStatus) === showingCompleted;
 	};
 
-	const getTemplatesForFilter = () => templates.filter(({ _id }) => getTicketsByTemplateId(_id).length > 0);
+	const filteredTickets = tickets.filter((ticket) => (!selectedTemplates.size || selectedTemplates.has(ticket.type)) && filterCompleted(ticket));
+
+	useEffect(() => {
+		const reducedTemplates = templates.reduce((partial, { _id, name }) => {
+			const { length } = tickets.filter(({ type }) => _id === type);
+			if (!length) return partial;
+			return [...partial, { _id, name, length }];
+		}, []);
+		setAvailableTemplates(reducedTemplates);
+	}, [tickets, templates]);
 
 	const onTicketClick = (ticket: ITicket, event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		event.stopPropagation();
@@ -94,25 +112,38 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	return (
 		<>
 			<Filters>
-				{getTemplatesForFilter().map(({ name, _id }) => (
+				<CompletedFilterChip
+					key="completed"
+					selected={showingCompleted}
+					icon={<TickIcon />}
+					onClick={() => setShowingCompleted((prev) => !prev)}
+					label={formatMessage({ id: 'ticketsList.filters.completed', defaultMessage: 'Completed' })}
+				/>
+				{availableTemplates.map(({ name, _id, length }) => (
 					<FilterChip
 						key={_id}
 						selected={selectedTemplates.has(_id)}
 						onClick={() => toggleTemplate(_id)}
-						label={`${name} (${getTicketsByTemplateId(_id).length})`}
+						label={`${name} (${length})`}
 					/>
 				))}
 			</Filters>
-			<List>
-				{getFilteredTickets().map((ticket) => (
-					<TicketItem
-						ticket={ticket}
-						key={ticket._id}
-						onClick={(e) => onTicketClick(ticket, e)}
-						selected={ticketIsSelected(ticket)}
-					/>
-				))}
-			</List>
+			{filteredTickets.length ? (
+				<List>
+					{filteredTickets.map((ticket) => (
+						<TicketItem
+							ticket={ticket}
+							key={ticket._id}
+							onClick={(e) => onTicketClick(ticket, e)}
+							selected={ticketIsSelected(ticket)}
+						/>
+					))}
+				</List>
+			) : (
+				<EmptyListMessage>
+					<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
+				</EmptyListMessage>
+			)}
 		</>
 	);
 };
