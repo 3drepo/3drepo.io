@@ -75,6 +75,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const onEditGroup = (e) => {
 		e.preventDefault();
 		e.stopPropagation();
+		highlightGroup();
 		editGroup(index);
 	};
 
