@@ -91,6 +91,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const isNewGroup = !value?.group?._id;
+	const selectedNodes = convertToV5GroupNodes(selectSelectedNodes(store.getState()));
 
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
@@ -109,6 +110,8 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 		setValue,
 		getValues,
 	} = formData;
+
+	const getFormIsValid = () => (isSmart || selectedNodes.length) && isValid && !isEmpty(dirtyFields);
 
 	const onClickSubmit = (newValues:IGroupSettingsForm) => {
 		if (!isSmart) {
@@ -324,12 +327,12 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 						</Button>
 					</ActionMenuItem>
 					{ isAdmin && (
-						<ActionMenuItem disabled={!isValid || isEmpty(dirtyFields)}>
+						<ActionMenuItem disabled={!getFormIsValid()}>
 							<SubmitButton
 								size="medium"
 								fullWidth={false}
 								onClick={handleSubmit(onClickSubmit)}
-								disabled={!isValid || isEmpty(dirtyFields)}
+								disabled={!getFormIsValid()}
 							>
 								{isNewGroup ? (
 									<FormattedMessage id="tickets.groups.settings.createGroup" defaultMessage="Create group" />
