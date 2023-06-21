@@ -60,7 +60,8 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		setHighlightedIndex(index);
 	};
 
-	const handleDeleteGroup = () => {
+	const handleDeleteGroup = (e) => {
+		containEvent(e);
 		DialogsActionsDispatchers.open('delete', {
 			name: (group as Group).name,
 			message: formatMessage({
@@ -80,17 +81,12 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	};
 
 	const isolateGroup = (e) => {
-		e.preventDefault();
-		e.stopPropagation();
+		containEvent(e);
 		highlightGroup();
 		dispatch(TreeActions.isolateSelectedNodes());
 	};
 
-	const onEditGroup = (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-		editGroup(index);
-	};
+	const onEditGroup = () => editGroup(index);
 
 	const alphaColor = (color || [255, 255, 255]).concat(opacity);
 	const alphaHexColor = rgbaToHex(alphaColor.join());
@@ -113,7 +109,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 					</GroupsCount>
 				</NameContainer>
 				{groupType === 'colored' && (
-					<Buttons onClick={containEvent}>
+					<Buttons>
 						{isAdmin && (
 							<ErrorTicketButton onClick={handleDeleteGroup}>
 								<DeleteIcon />

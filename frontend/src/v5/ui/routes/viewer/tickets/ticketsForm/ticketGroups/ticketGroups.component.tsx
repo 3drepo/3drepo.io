@@ -75,7 +75,6 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const onSetEditGroup = (colored:boolean) => (index: number) => {
 		const type = colored ? OverrideType.COLORED : OverrideType.HIDDEN;
 		setEditingOverride({ index, type });
-		setHighlightedOverride({ index, type });
 	};
 
 	const onSelectedColoredGroupChange = (colored) => {
