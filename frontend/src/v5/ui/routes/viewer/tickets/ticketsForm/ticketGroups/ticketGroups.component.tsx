@@ -137,6 +137,10 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		if (highlightedOverride.index === -1) {
 			dispatch(TreeActions.clearCurrentlySelected());
 		}
+		const override = state[highlightedOverride.type][highlightedOverride.index];
+		const objects = convertToV4GroupNodes((override.group as Group).objects);
+		dispatch(TreeActions.showNodesBySharedIds(objects));
+		dispatch(TreeActions.selectNodesBySharedIds(objects, (override.color || [255, 255, 255]).map((c) => c / 255)));
 	}, [highlightedOverride]);
 
 	const onSelectedColoredGroupsChange = (indexes) => {
