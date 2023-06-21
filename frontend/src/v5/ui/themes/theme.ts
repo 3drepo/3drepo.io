@@ -364,6 +364,14 @@ export const theme = createTheme({
 				indeterminateIcon: createElement(CheckboxIndeterminatedIcon, { borderColor: COLOR.BASE_LIGHT }),
 			},
 			styleOverrides: {
+				root: {
+					'&:hover': {
+						background: 'transparent',
+						'&:not(.Mui-checked) path': {
+							fill: COLOR.PRIMARY_MAIN,
+						},
+					},
+				},
 				colorPrimary: {
 					color: COLOR.BASE_LIGHTEST,
 					'& svg': {
@@ -1031,7 +1039,7 @@ export const theme = createTheme({
 				},
 				multiline: {
 					'&&': {
-						padding: '5px 10px',
+						padding: '4px 10px',
 						'& fieldset': {
 							height: '100%',
 						},

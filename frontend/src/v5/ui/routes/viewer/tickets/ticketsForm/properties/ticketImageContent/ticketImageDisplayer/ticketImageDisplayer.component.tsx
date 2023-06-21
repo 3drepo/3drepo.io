@@ -43,17 +43,25 @@ const LoadedImage = ({ imgSrc }) => (
 	</OverlappingContainer>
 );
 
-const EmptyImage = (props) => (
-	<EmptyImageContainer {...props}>
+const EmptyImage = ({ disabled, onClick }) => (
+	<EmptyImageContainer disabled={disabled} onClick={onClick}>
 		<EmptyImageIcon />
-		<IconText>
-			<FormattedMessage id="viewer.cards.ticketImage.addImage" defaultMessage="Add image" />
-		</IconText>
+		{!disabled && (
+			<IconText>
+				<FormattedMessage id="viewer.cards.ticketImage.addImage" defaultMessage="Add image" />
+			</IconText>
+		)}
 	</EmptyImageContainer>
 );
 
-export const TicketImageDisplayer = ({ onEmptyImageClick, imgSrc, disabled }) => (
-	<Container>
+type TicketImageDisplayerProps = {
+	onEmptyImageClick: () => void,
+	imgSrc: string,
+	disabled?: boolean,
+	className?: string,
+};
+export const TicketImageDisplayer = ({ onEmptyImageClick, imgSrc, disabled, className }: TicketImageDisplayerProps) => (
+	<Container className={className}>
 		{!imgSrc && <EmptyImage disabled={disabled} onClick={onEmptyImageClick} />}
 		{imgSrc && <LoadedImage imgSrc={imgSrc} />}
 	</Container>

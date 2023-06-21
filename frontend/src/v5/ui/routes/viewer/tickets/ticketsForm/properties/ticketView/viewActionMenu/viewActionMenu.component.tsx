@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { CircleButton as CircleButtonBase } from '@controls/circleButton';
+import { TitleContainer, Container } from './viewActionMenu.styles';
 
-export const CircleButton = styled(CircleButtonBase)`
-	margin: 0;
-
-	svg {
-		height: 13px;
-	}
-`;
+type ViewActionMenuProps = {
+	disabled: boolean;
+	onClick: () => any;
+	Icon: any;
+	title: any;
+	children: any;
+};
+export const ViewActionMenu = ({ disabled, Icon, title, children, onClick }: ViewActionMenuProps) => (
+	<Container>
+		<TitleContainer disabled={disabled} onClick={disabled ? () => {} : onClick}>
+			<Icon />
+			{title}
+		</TitleContainer>
+		{children}
+	</Container>
+);

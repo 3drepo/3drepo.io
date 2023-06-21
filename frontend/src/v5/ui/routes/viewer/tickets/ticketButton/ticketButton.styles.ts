@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 
-const TicketButtonStyling = styled.button`
+const TicketButtonStyling = styled.button<{ disabled?: boolean }>`
 	height: 24px;
 	width: 24px;
 	margin: 2px;
@@ -32,20 +32,40 @@ const TicketButtonStyling = styled.button`
 		max-width: 14px;
 		max-height: 17px;
 	}
+
+	${({ theme, disabled }) => disabled && css`
+		&&, &&:hover {
+			color: ${theme.palette.primary.contrast};
+			background-color: ${theme.palette.base.lightest};
+			cursor: initial;
+		}
+	`}
 `;
 
-export const PrimaryTicketButton = styled(TicketButtonStyling)<{ disabled?: boolean }>`
+export const PrimaryTicketButton = styled(TicketButtonStyling)`
 	color: ${({ theme }) => theme.palette.primary.main};
 	background-color: ${({ theme }) => theme.palette.primary.lightest};
 
-	${({ theme, disabled }) => disabled && css`
-		color: ${theme.palette.primary.contrast};
-		background-color: ${theme.palette.base.lightest};
-		cursor: initial;
-	`}
+	&:hover {
+		color: ${({ theme }) => theme.palette.primary.contrast};
+		background-color: ${({ theme }) => theme.palette.primary.main};
+	}
+
+	&:active {
+		background-color: ${({ theme }) => theme.palette.primary.dark};
+	}
 `;
 
 export const ErrorTicketButton = styled(TicketButtonStyling)`
 	color: ${({ theme }) => theme.palette.error.main};
 	background-color: ${({ theme }) => theme.palette.error.lightest};
+
+	&:hover {
+		color: ${({ theme }) => theme.palette.primary.contrast};
+		background-color: ${({ theme }) => theme.palette.error.main};
+	}
+
+	&:active {
+		background-color: ${({ theme }) => theme.palette.error.dark};
+	}
 `;

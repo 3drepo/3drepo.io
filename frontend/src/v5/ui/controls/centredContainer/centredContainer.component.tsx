@@ -18,6 +18,7 @@
 import { MarginWrapper, PositionedWrapper } from './centredContainer.styles';
 
 export type ICentredContainer = {
+	onClick?: (e) => void;
 	vertical?: boolean;
 	horizontal?: boolean;
 	className?: string;
