@@ -20,12 +20,12 @@ import { GroupOverride, IGroupSettingsForm, Viewpoint, ViewpointState } from '@/
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { ViewpointsActions } from '@/v4/modules/viewpoints';
-import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
-import { cloneDeep, uniqBy } from 'lodash';
+import { TreeActions } from '@/v4/modules/tree';
+import { viewpointV5ToV4, convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
+import { cloneDeep, differenceBy, uniqBy } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
 import { selectHiddenGeometryVisible } from '@/v4/modules/tree/tree.selectors';
-import { TreeActions } from '@/v4/modules/tree';
 import { Container, Popper } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContextComponent } from './ticketGroupsContext.component';
@@ -62,6 +62,9 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const dispatch = useDispatch();
 	const [editingOverride, setEditingOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: OverrideType.COLORED });
 	const [highlightedOverride, setHighlightedOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: null });
+	const [selectedColoredIndexes, setSelectedColoredIndexes] = useState([]);
+	const [selectedHiddenOverrides, setSelectedHiddenOverrides] = useState<GroupOverride[]>([]);
+	const [selectedColoredOverrides, setSelectedColoredOverrides] = useState<GroupOverride[]>([]);
 
 	const state: Partial<ViewpointState> = value.state || {};
 	const leftPanels = useSelector(selectLeftPanels);
@@ -89,6 +92,20 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 
 	const onSetEditGroup = (type) => (index) => {
 		setEditingOverride({ index, type });
+	};
+
+	const onSelectedHiddenGroupChange = (indexes: number[]) => {
+		const hidden = indexes.map((index) => state.hidden[index]);
+		setSelectedHiddenOverrides(hidden);
+		const hideNodes = hidden.length > selectedHiddenOverrides.length;
+		const [nodesToKeep, nodesToRemove] = hideNodes ? [hidden, selectedHiddenOverrides] : [selectedHiddenOverrides, hidden];
+		const diffGroups = differenceBy(nodesToKeep, nodesToRemove, (o) => (o.group as Group)._id);
+		const objects = diffGroups.flatMap((override) => convertToV4GroupNodes((override.group as Group).objects));
+		if (hideNodes) {
+			dispatch(TreeActions.hideNodesBySharedIds(objects));
+		} else {
+			dispatch(TreeActions.showNodesBySharedIds(objects));
+		}
 	};
 
 	const onCancel = () => {
@@ -128,6 +145,11 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
 	};
 
+	useEffect(() => {
+		const view = { state: { colored: selectedColoredOverrides, hidden: selectedHiddenOverrides } } as Viewpoint;
+		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
+	}, [selectedColoredOverrides]);
+
 	return (
 		<Container onClick={() => setHighlightedOverride({ index: -1, type: OverrideType.COLORED })}>
 			<TicketGroupsContextComponent
@@ -149,6 +171,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				onEditGroup={onSetEditGroup(OverrideType.HIDDEN)}
 				highlightedIndex={getHighlightedIndex(OverrideType.HIDDEN)}
 				setHighlightedIndex={onSetHighlightedIndex(OverrideType.HIDDEN)}
+				onSelectedGroupsChange={onSelectedHiddenGroupChange}
 			>
 				<GroupsAccordion
 					title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
