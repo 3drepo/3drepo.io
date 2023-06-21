@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { Popover } from '@mui/material';
 import { Menu, Container } from './actionMenu.styles';
 import { ActionMenuContext } from './actionMenuContext';
@@ -29,8 +29,8 @@ type ActionMenuProps = {
 	disabled?: boolean;
 };
 export const ActionMenu = ({
-	TriggerButton,
 	className,
+	TriggerButton,
 	children,
 	PopoverProps,
 	onOpen,
@@ -42,27 +42,23 @@ export const ActionMenu = ({
 	const handleOpen = (e) => {
 		if (disabled) return;
 		setAnchorEl(e.currentTarget.children[0]);
+		onOpen?.();
 		e.stopPropagation();
-		e.preventDefault();
+	};
+
+	const handleClose = () => {
+		setAnchorEl(null);
+		onClose?.();
 	};
 
 	const handlePopoverClick = (e: Event) => {
 		PopoverProps?.onClick?.(e);
-		setAnchorEl(null);
+		handleClose();
 		e.stopPropagation();
-		e.preventDefault();
 	};
 
-	useEffect(() => {
-		if (anchorEl) {
-			onOpen?.();
-			return () => onClose?.();
-		}
-		return () => {};
-	}, [anchorEl]);
-
 	return (
-		<ActionMenuContext.Provider value={{ close: () => setAnchorEl(null) }}>
+		<ActionMenuContext.Provider value={{ close: handleClose }}>
 			<Container onClick={handleOpen}>
 				{TriggerButton}
 			</Container>
