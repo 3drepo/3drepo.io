@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useState } from 'react';
 
 export enum TicketDetailsView {
 	Form,
@@ -34,22 +34,16 @@ TicketContext.displayName = 'TicketContext';
 export const TicketContextComponent = ({ children }) => {
 	const [view, setView] = useState(TicketDetailsView.Form);
 	const [viewProps, setViewProps] = useState();
-	const [contextValue, setContextValue] = useState<TicketContextType>({ view, setDetailViewAndProps: () => null });
 
-	useEffect(() => {
-		setContextValue({ view,
-			viewProps,
-			setDetailViewAndProps: (viewParam, props) => {
-				if (props) {
-					setViewProps(props);
-				}
-				setView(viewParam);
-			},
-		});
-	}, [view, viewProps]);
+	const setDetailViewAndProps = (viewParam, props) => {
+		if (props) {
+			setViewProps(props);
+		}
+		setView(viewParam);
+	};
 
 	return (
-		<TicketContext.Provider value={contextValue}>
+		<TicketContext.Provider value={{ view, viewProps, setDetailViewAndProps }}>
 			{children}
 		</TicketContext.Provider>
 	);
