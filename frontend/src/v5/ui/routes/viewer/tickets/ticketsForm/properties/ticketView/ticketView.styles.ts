@@ -50,6 +50,7 @@ export const HeaderSection = styled.div`
 `;
 
 export const Tooltip = styled(TooltipBase).attrs({
+	placement: 'right',
 	componentsProps: {
 		popper: {
 			sx: {

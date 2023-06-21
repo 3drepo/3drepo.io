@@ -124,10 +124,7 @@ export const TicketView = ({
 				<Label>{label}</Label>
 				<HeaderSection>
 					{!hasViewpoint ? (
-						<Tooltip
-							placement="right"
-							title={(formatMessage({ id: 'viewer.card.button.saveCurrentView', defaultMessage: 'Save current view' }))}
-						>
+						<Tooltip title={(formatMessage({ id: 'viewer.card.button.saveCurrentView', defaultMessage: 'Save current view' }))}>
 							<div hidden={disabled}>
 								<PrimaryTicketButton onClick={updateViewpoint}>
 									<TickIcon />
@@ -135,10 +132,7 @@ export const TicketView = ({
 							</div>
 						</Tooltip>
 					) : (
-						<Tooltip
-							placement="right"
-							title={(formatMessage({ id: 'viewer.card.button.gotToView', defaultMessage: 'Go to view' }))}
-						>
+						<Tooltip title={(formatMessage({ id: 'viewer.card.button.gotToView', defaultMessage: 'Go to view' }))}>
 							<div>
 								<PrimaryTicketButton onClick={goToViewpoint}>
 									<ViewpointIcon />
