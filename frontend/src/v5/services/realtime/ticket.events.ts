@@ -25,7 +25,7 @@ export const enableRealtimeContainerUpdateTicket = (teamspace: string, project: 
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
 		'containerUpdateTicket',
-		(ticket: Partial<EditableTicket>) => TicketsActionsDispatchers.upsertTicketSuccess(containerId, ticket),
+		(ticket: Partial<EditableTicket>) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket),
 	)
 );
 
@@ -33,7 +33,7 @@ export const enableRealtimeContainerNewTicket = (teamspace: string, project: str
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
 		'containerNewTicket',
-		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketSuccess(containerId, ticket),
+		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket),
 	)
 );
 
@@ -42,7 +42,7 @@ export const enableRealtimeFederationUpdateTicket = (teamspace: string, project:
 	subscribeToRoomEvent(
 		{ teamspace, project, model: federationId },
 		'federationUpdateTicket',
-		(ticket: Partial<EditableTicket>) => TicketsActionsDispatchers.upsertTicketSuccess(federationId, ticket),
+		(ticket: Partial<EditableTicket>) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, federationId, ticket),
 	)
 );
 
@@ -50,6 +50,6 @@ export const enableRealtimeFederationNewTicket = (teamspace: string, project: st
 	subscribeToRoomEvent(
 		{ teamspace, project, model: federationId },
 		'federationNewTicket',
-		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketSuccess(federationId, ticket),
+		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, federationId, ticket),
 	)
 );

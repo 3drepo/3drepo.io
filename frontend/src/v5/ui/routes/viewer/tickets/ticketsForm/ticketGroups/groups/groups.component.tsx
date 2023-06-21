@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { GroupOverride, Group } from '@/v5/store/tickets/tickets.types';
-import { groupBy, partition, tail, values } from 'lodash';
+import { groupBy, isString, partition } from 'lodash';
+import { getCollectionCheckboxState } from '@/v5/store/tickets/ticketsGroups.helpers';
+import { useContext } from 'react';
 import {
 	CollectionHeadline,
 	CollectionAccordion,
@@ -26,39 +27,50 @@ import {
 import { GroupToggle } from '../groupToggle/groupToggle.component';
 import { NameContainer } from './groupItem/groupItem.styles';
 import { GroupItem } from './groupItem/groupItem.component';
+import { TicketGroupsContext } from '../ticketGroupsContext';
+import { IndexedOverride } from '../ticketGroupsContext.helper';
 
-type GroupsProps = { currentPrefix?: string[], groups: GroupOverride[] };
-export const Groups = ({ currentPrefix = [], groups }: GroupsProps) => {
-	const [groupBatches, groupItems] = partition(groups, (g) => g.prefix?.length);
-	const collectionsDict = groupBy(groupBatches, (g) => g.prefix[0]);
-	const collections = values(collectionsDict);
+type GroupsProps = {
+	indexedOverrides: IndexedOverride[],
+	level?: number,
+};
+export const Groups = ({ indexedOverrides, level = 0 }: GroupsProps) => {
+	const { getCollectionState, toggleCollectionState } = useContext(TicketGroupsContext);
+	const [overrideItems, overrideBatches] = partition(indexedOverrides, (o) => (o.prefix?.length || 0) === level);
+	const overridesByPrefix = groupBy(overrideBatches, (o) => o.prefix[level]);
 
-	const collectionToGroup = (collection) => collection.map(({ prefix, ...group }) => ({
-		...group,
-		prefix: tail(prefix),
-	}));
+	const handleCheckboxClick = (e, prefix: string[]) => {
+		e.stopPropagation();
+		toggleCollectionState(prefix);
+	};
 
 	return (
 		<>
-			{groupItems.map((group) => (<GroupItem {...group} currentPrefix={currentPrefix} key={(group.group as Group)._id} />))}
-			{collections.map((collection) => (
+			{overrideItems.map(({ index, ...override }) => (
+				<GroupItem
+					override={override}
+					key={isString(override.group) ? override.group : override.group._id || index}
+					index={index}
+				/>
+			))}
+			{Object.entries(overridesByPrefix).map(([prefix, overrides]) => (
 				<CollectionAccordion
 					title={(
 						<>
 							<CollectionHeadline>
 								<NameContainer>
-									<Name>{collection[0].prefix[0]}</Name>
+									<Name>{prefix}</Name>
 								</NameContainer>
 							</CollectionHeadline>
-							<GroupToggle onClick={(e) => e.stopPropagation()} />
+							<GroupToggle
+								onClick={(e) => handleCheckboxClick(e, overrides[0].prefix)}
+								{...getCollectionCheckboxState(getCollectionState(overrides[0].prefix))}
+							/>
 						</>
 					)}
 				>
 					<GroupsContainer>
-						<Groups
-							groups={collectionToGroup(collection)}
-							currentPrefix={currentPrefix.concat(collection[0].prefix[0])}
-						/>
+						<Groups indexedOverrides={overrides} level={level + 1} />
 					</GroupsContainer>
 				</CollectionAccordion>
 			))}

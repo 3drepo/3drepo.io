@@ -15,29 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useContext } from 'react';
 import GroupsIcon from '@mui/icons-material/GroupWork';
-import { GroupOverride } from '@/v5/store/tickets/tickets.types';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Accordion, NumberContainer, TitleContainer, Checkbox } from './groupsAccordion.styles';
+import { getCollectionCheckboxState } from '@/v5/store/tickets/ticketsGroups.helpers';
+import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
+import { Accordion, NumberContainer, TitleContainer, Checkbox, NewGroupButton } from './groupsAccordion.styles';
 import { Groups } from '../groups/groups.component';
-import { AddGroupButton } from '../groups/groupActionMenu/addGroupButton/addGroupButton.component';
+import { TicketGroupsContext } from '../ticketGroupsContext';
 
-type GroupsAccordionProps = {
-	title: any;
-	groups: GroupOverride[];
-};
-export const GroupsAccordion = ({ title, groups = [] }: GroupsAccordionProps) => {
-	const [checked, setChecked] = useState(false);
+type GroupsAccordionProps = { title: any, onChange };
+export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
+	const {
+		getCollectionState,
+		toggleCollectionState,
+		indexedOverrides,
+		editGroup,
+	} = useContext(TicketGroupsContext);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-
-	const groupsCount = groups.length;
+	const state = getCollectionState([]);
+	const overridesCount = indexedOverrides.length;
 
 	const toggleCheckbox = (e) => {
 		e.stopPropagation();
-		setChecked(!checked);
+		toggleCollectionState();
+	};
+
+	const addNewGroup = () => {
+		editGroup(overridesCount); // Set the edit mode with a new index
 	};
 
 	return (
@@ -46,14 +53,14 @@ export const GroupsAccordion = ({ title, groups = [] }: GroupsAccordionProps) =>
 			title={(
 				<TitleContainer>
 					{title}
-					<NumberContainer>{groupsCount}</NumberContainer>
-					<Checkbox checked={checked} onClick={toggleCheckbox} />
+					<NumberContainer>{overridesCount}</NumberContainer>
+					<Checkbox {...getCollectionCheckboxState(state)} onClick={toggleCheckbox} />
 				</TitleContainer>
 			)}
-			$groupsCount={groupsCount}
+			$overridesCount={overridesCount}
 		>
-			{groupsCount ? (
-				<Groups groups={groups} />
+			{overridesCount ? (
+				<Groups indexedOverrides={indexedOverrides} />
 			) : (
 				<EmptyListMessage>
 					<FormattedMessage
@@ -62,7 +69,15 @@ export const GroupsAccordion = ({ title, groups = [] }: GroupsAccordionProps) =>
 					/>
 				</EmptyListMessage>
 			)}
-			{ isAdmin && <AddGroupButton /> }
+			{isAdmin
+			&& (
+				<NewGroupButton startIcon={<AddCircleIcon />} onClick={addNewGroup}>
+					<FormattedMessage
+						id="ticketCard.groups.addGroup"
+						defaultMessage="Add group"
+					/>
+				</NewGroupButton>
+			)}
 		</Accordion>
 	);
 };

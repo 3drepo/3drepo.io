@@ -32,6 +32,7 @@ import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component';
 import { NewTicketCard } from './newTicket/newTicket.component';
 import { ViewerParams } from '../../routes.constants';
+import { TicketContextComponent } from './ticket.context';
 
 export const Tickets = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
@@ -67,8 +68,8 @@ export const Tickets = () => {
 	return (
 		<>
 			{view === TicketsCardViews.List && <TicketsListCard />}
-			{view === TicketsCardViews.Details && <TicketDetailsCard />}
-			{view === TicketsCardViews.New && <NewTicketCard />}
+			{view === TicketsCardViews.Details && <TicketContextComponent><TicketDetailsCard /></TicketContextComponent>}
+			{view === TicketsCardViews.New && <TicketContextComponent><NewTicketCard /></TicketContextComponent>}
 		</>
 	);
 };

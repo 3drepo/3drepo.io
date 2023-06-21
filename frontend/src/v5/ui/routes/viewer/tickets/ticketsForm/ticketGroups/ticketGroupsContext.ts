@@ -15,8 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { GroupOverride } from '@/v5/store/tickets/tickets.types';
 import { createContext } from 'react';
+import { GroupState } from './ticketGroupsContext.helper';
 
-type TicketGroupsContextType = { groupType: 'colored' | 'hidden' };
-export const TicketGroupsContext = createContext<TicketGroupsContextType>({ groupType: null });
+type TicketGroupsContextType = {
+	indexedOverrides: (GroupOverride & { index: number })[],
+	groupType: 'colored' | 'hidden',
+	selectedIndexes: number[],
+	deleteGroup: (index: number) => void,
+	toggleGroupState: (index: number) => void,
+	toggleCollectionState: (prefix?: string[]) => void,
+	getCollectionState: (prefix?: string[]) => GroupState,
+	editGroup: (index: number) => void
+};
+export const TicketGroupsContext = createContext<TicketGroupsContextType>({
+	indexedOverrides: [],
+	groupType: null,
+	selectedIndexes: [],
+	deleteGroup: () => {},
+	toggleGroupState: () => {},
+	toggleCollectionState: () => {},
+	getCollectionState: () => null,
+	editGroup: () => null,
+});
 TicketGroupsContext.displayName = 'TicketGroupsContext';

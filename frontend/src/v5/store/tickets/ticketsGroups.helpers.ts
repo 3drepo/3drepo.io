@@ -16,6 +16,7 @@
  */
 
 import { isString } from 'lodash';
+import { GroupState } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketGroups/ticketGroupsContext.helper';
 import { Group, GroupOverride, ViewpointState, Properties } from './tickets.types';
 
 const overrideWithGroups = (groups: Record<string, Group>) => (override: GroupOverride) => {
@@ -58,3 +59,14 @@ export const createPropertiesWithGroups = (properties, groups) => Object.keys(pr
 	return partialProps;
 }, {} as Properties);
 /* eslint-enable no-param-reassign */
+
+export const getCollectionCheckboxState = (state: GroupState) => {
+	switch (state) {
+		case null:
+			return { checked: false };
+		case GroupState.INDETERMINATE:
+			return { checked: false, indeterminate: true };
+		default:
+			return { checked: state === GroupState.CHECKED };
+	}
+};

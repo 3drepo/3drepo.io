@@ -19,10 +19,11 @@ import styled, { css } from 'styled-components';
 import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
 import { CentredContainer } from '@controls/centredContainer';
 import CheckBoxBase from '@mui/material/Checkbox';
+import { Button } from '@controls/button';
 import { CollectionAccordion } from '../groups/groups.styles';
 import { Container as GroupItemContainer } from '../groups/groupItem/groupItem.styles';
 
-export const Accordion = styled(AccordionBase)<{ $groupsCount?: number }>`
+export const Accordion = styled(AccordionBase)<{ $overridesCount?: number }>`
 	background: transparent;
 
 	&& {
@@ -62,10 +63,10 @@ export const Accordion = styled(AccordionBase)<{ $groupsCount?: number }>`
 			width: 9px;
 			left: -9px;
 			position: absolute;
-			${({ $groupsCount = 0 }) => css`
-				border-right: ${($groupsCount + 1)}px;
-				height: ${($groupsCount + 1) * 61}px;
-				top: -${($groupsCount + 1) * 61 - 22}px;
+			${({ $overridesCount = 0 }) => css`
+				border-right: ${($overridesCount + 1)}px;
+				height: ${($overridesCount + 1) * 61}px;
+				top: -${($overridesCount + 1) * 61 - 22}px;
 			`}
 		}
 
@@ -95,4 +96,12 @@ export const NumberContainer = styled(CentredContainer)`
 
 export const Checkbox = styled(CheckBoxBase)`
 	margin: 0 8px 0 auto;
+`;
+
+export const NewGroupButton = styled(Button).attrs({
+	variant: 'outlined',
+	color: 'secondary',
+})`
+	align-self: flex-end;
+	margin: 14px 0 3px;
 `;

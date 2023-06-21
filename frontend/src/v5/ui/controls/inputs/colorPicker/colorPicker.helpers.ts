@@ -69,3 +69,5 @@ export const DEFAULT_SUGGESTED_HEX_COLORS = [
 	'#57b89d',
 	'#65c978',
 ];
+
+export const getRandomSuggestedColor = () => DEFAULT_SUGGESTED_HEX_COLORS[Math.round(Math.random() * (DEFAULT_SUGGESTED_HEX_COLORS.length - 1))];

@@ -22,6 +22,17 @@ import { getState } from '@/v4/modules/store';
 import { isEmpty, isString } from 'lodash';
 import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors';
 
+export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
+	container: object.model as string,
+	_ids: getNodesIdsFromSharedIds([object]),
+}));
+
+export const convertToV4GroupNodes = (objects) => objects.map(({ container: model, _ids }) => ({
+	account: selectCurrentTeamspace(getState()),
+	model,
+	shared_ids: toSharedIds(_ids),
+}));
+
 const convertToV5GroupOverride = (group: any, type: ViewpointGroupOverrideType): GroupOverride => {
 	let description = '';
 	let name = '';
@@ -43,9 +54,7 @@ const convertToV5GroupOverride = (group: any, type: ViewpointGroupOverrideType):
 
 	const override:GroupOverride = { group: { description, name } };
 
-	(override.group as Group).objects = group.objects.map((object) => (
-		{ container: object.model as string, _ids: getNodesIdsFromSharedIds([object]) }
-	));
+	(override.group as Group).objects = convertToV5GroupNodes(group.objects);
 
 	if (group.color) {
 		const { color } = group;
@@ -86,7 +95,6 @@ export const getViewerState = async () => {
 const mergeGroups = (groups: any[]) => ({ objects: groups.flatMap((group) => group.objects) });
 
 const convertToV4Group = (groupOverride: GroupOverride) => {
-	const account = selectCurrentTeamspace(getState());
 	const { color, opacity, group: v5Group } = groupOverride;
 
 	if (isString(v5Group)) {
@@ -94,7 +102,7 @@ const convertToV4Group = (groupOverride: GroupOverride) => {
 	}
 
 	const group:any = {
-		objects: v5Group.objects.map(({ container: model, _ids }) => ({ account, model, shared_ids: toSharedIds(_ids) })),
+		objects: convertToV4GroupNodes(v5Group.objects),
 	};
 
 	if (color) {

@@ -16,7 +16,17 @@
  */
 
 import styled from 'styled-components';
+import { Popper as BasePopper } from '@mui/material';
 
 export const Container = styled.div`
 	overflow: overlay;
+`;
+
+export const Popper = styled(BasePopper)`
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	padding: 14px;
+	border-radius: 10px;
+	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
+	z-index: 1;
+	width: 390px;
 `;

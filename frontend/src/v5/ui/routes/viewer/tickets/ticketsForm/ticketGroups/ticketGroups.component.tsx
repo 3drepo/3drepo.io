@@ -16,24 +16,110 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { MOCK_DATA } from '@/v5/store/tickets/groups/ticketGroups.helpers';
-import { Container } from './ticketGroups.styles';
+import { IGroupSettingsForm, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
+import { useEffect, useState } from 'react';
+import { dispatch } from '@/v4/modules/store';
+import { ViewpointsActions } from '@/v4/modules/viewpoints';
+import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
+import { cloneDeep } from 'lodash';
+import { useSelector } from 'react-redux';
+import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
+import { selectLeftPanels } from '@/v4/modules/viewerGui';
+import { Container, Popper } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
-import { TicketGroupsContext } from './ticketGroupsContext';
+import { TicketGroupsContextComponent } from './ticketGroupsContext.component';
+import { GroupSettingsForm } from './groups/groupActionMenu/groupSettingsForm/groupSettingsForm.component';
 
-export const TicketGroups = () => (
-	<Container>
-		<TicketGroupsContext.Provider value={{ groupType: 'colored' }}>
-			<GroupsAccordion
-				title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
-				groups={MOCK_DATA.colored}
-			/>
-		</TicketGroupsContext.Provider>
-		<TicketGroupsContext.Provider value={{ groupType: 'hidden' }}>
-			<GroupsAccordion
-				title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
-				groups={MOCK_DATA.hidden}
-			/>
-		</TicketGroupsContext.Provider>
-	</Container>
-);
+interface TicketGroupsProps {
+	value?: Viewpoint;
+	onChange?: (newvalue) => void;
+	onBlur?: () => void;
+}
+
+enum OverrideType {
+	COLORED,
+	HIDDEN,
+}
+
+export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => {
+	const [editingOverride, setEditingOverride] = useState<{index:number, type: OverrideType}>({ index: -1, type: OverrideType.COLORED });
+	const state: Partial<ViewpointState> = value.state || {};
+	const leftPanels = useSelector(selectLeftPanels);
+	const isSecondaryCard = leftPanels[0] !== VIEWER_PANELS.TICKETS;
+
+	const onDeleteColoredGroup = (index) => {
+		const newVal = cloneDeep(value);
+		newVal.state.colored.splice(index, 1);
+		onChange?.(newVal);
+	};
+
+	const onSetEditGroup = (colored:boolean) => (index: number) => {
+		const type = colored ? OverrideType.COLORED : OverrideType.HIDDEN;
+		setEditingOverride({ index, type });
+	};
+
+	const onSelectedColoredGroupChange = (colored) => {
+		const view = { state: { colored } } as Viewpoint;
+		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
+	};
+
+	const onCancel = () => {
+		setEditingOverride({ index: -1, type: OverrideType.COLORED });
+	};
+
+	const onSubmit = (overrideValue) => {
+		const newVal = cloneDeep(value);
+		if (editingOverride.type === OverrideType.COLORED) {
+			if (!newVal.state.colored) newVal.state.colored = [];
+			newVal.state.colored[editingOverride.index] = overrideValue;
+		} else {
+			if (!newVal.state.hidden) newVal.state.hidden = [];
+			newVal.state.hidden[editingOverride.index] = overrideValue;
+		}
+		onChange?.(newVal);
+		onCancel();
+	};
+
+	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
+
+	return (
+		<Container>
+			<TicketGroupsContextComponent
+				groupType="colored"
+				onDeleteGroup={onDeleteColoredGroup}
+				onSelectedGroupsChange={onSelectedColoredGroupChange}
+				overrides={state.colored || []}
+				onEditGroup={onSetEditGroup(true)}
+			>
+				<GroupsAccordion
+					onChange={onChange}
+					title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
+				/>
+			</TicketGroupsContextComponent>
+			<TicketGroupsContextComponent
+				groupType="hidden"
+				overrides={state.hidden || []}
+				onEditGroup={onSetEditGroup(false)}
+			>
+				<GroupsAccordion
+					onChange={onChange}
+					title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
+				/>
+			</TicketGroupsContextComponent>
+			<Popper
+				open={editingOverride.index !== -1}
+				style={{ /* style is required to override the default positioning style Popper gets */
+					left: 460,
+					top: isSecondaryCard ? 'unset' : 80,
+					bottom: isSecondaryCard ? 40 : 'unset',
+				}}
+			>
+				<GroupSettingsForm
+					value={value.state?.[((editingOverride.type === OverrideType.COLORED) ? 'colored' : 'hidden')]?.[editingOverride.index] as IGroupSettingsForm}
+					onSubmit={onSubmit}
+					onCancel={onCancel}
+				/>
+			</Popper>
+		</Container>
+	);
+};

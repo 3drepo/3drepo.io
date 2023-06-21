@@ -49,11 +49,10 @@ interface Props {
 	template: Partial<ITemplate>;
 	ticket: Partial<ITicket>;
 	onPropertyBlur?: (...args) => void;
-	onGroupsClick?: () => void;
 	focusOnTitle?: boolean;
 }
 
-export const TicketForm = ({ template, ticket, focusOnTitle, onGroupsClick, ...rest }: Props) => {
+export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) => {
 	const scrollPanelIntoView = ({ target }, isExpanding) => {
 		if (!isExpanding) return;
 		const panel = target.closest('.MuiAccordion-root');
@@ -72,7 +71,6 @@ export const TicketForm = ({ template, ticket, focusOnTitle, onGroupsClick, ...r
 				title={ticket.title}
 				properties={template.properties || []}
 				focusOnTitle={focusOnTitle}
-				onGroupsClick={onGroupsClick}
 				{...rest}
 			/>
 			<PanelsContainer>

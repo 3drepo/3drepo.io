@@ -29,6 +29,10 @@ import { ErrorTicketButton, PrimaryTicketButton } from '@/v5/ui/routes/viewer/ti
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CircularProgress } from '@mui/material';
 import { isString } from 'lodash';
+import { useDispatch } from 'react-redux';
+import { TreeActions } from '@/v4/modules/tree';
+import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
+import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import {
 	Buttons,
 	NameContainer,
@@ -39,30 +43,46 @@ import {
 } from './groupItem.styles';
 import { GroupToggle } from '../../groupToggle/groupToggle.component';
 import { TicketGroupsContext } from '../../ticketGroupsContext';
-import { EditGroupButton } from '../groupActionMenu/editGroupButton/editGroupButton.component';
 
-type GroupProps = GroupOverride & {
-	currentPrefix: string[],
-};
-export const GroupItem = ({ group, color, opacity, currentPrefix }: GroupProps) => {
+type GroupProps = { override: GroupOverride, index: number };
+export const GroupItem = ({ override, index }: GroupProps) => {
 	const [groupIsVisible, setGroupIsVisible] = useState(false);
-	const { groupType } = useContext(TicketGroupsContext);
+	const { groupType, selectedIndexes, toggleGroupState, deleteGroup, editGroup } = useContext(TicketGroupsContext);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+	const dispatch = useDispatch();
+	const { group, color, opacity } = override;
 
-	const deleteGroup = () => {
+	const handleDeleteGroup = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
 		DialogsActionsDispatchers.open('delete', {
 			name: (group as Group).name,
 			message: formatMessage({
 				id: 'deleteModal.groups.message',
-				defaultMessage: 'By deleting this Collection your data will be lost permanently and will not be recoverable.',
+				defaultMessage: 'By deleting this group your data will be lost permanently and will not be recoverable.',
 			}),
-			onClickConfirm: () => {},
-			confirmLabel: formatMessage({ id: 'deleteModal.groups.confirmButton', defaultMessage: 'Delete Collection' }),
+			onClickConfirm: () => deleteGroup(index),
+			confirmLabel: formatMessage({ id: 'deleteModal.groups.confirmButton', defaultMessage: 'Delete Group' }),
 		});
 	};
 
-	const toggleShowGroup = () => {
+	const highlightGroup = () => {
+		const objects = convertToV4GroupNodes((group as Group).objects);
+		dispatch(TreeActions.showNodesBySharedIds(objects));
+		dispatch(TreeActions.selectNodesBySharedIds(objects, color.map((c) => c / 255)));
+	};
+
+	const toggleShowGroup = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
 		setGroupIsVisible(!groupIsVisible);
+	};
+
+	const onEditGroup = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		highlightGroup();
+		editGroup(index);
 	};
 
 	const alphaColor = (color || [255, 255, 255]).concat(opacity);
@@ -71,7 +91,7 @@ export const GroupItem = ({ group, color, opacity, currentPrefix }: GroupProps) 
 	if (isString(group)) return (<CircularProgress />);
 
 	return (
-		<Container>
+		<Container onClick={highlightGroup}>
 			<Headline>
 				<GroupIconComponent rules={group.rules} color={alphaHexColor} />
 				<NameContainer>
@@ -88,18 +108,23 @@ export const GroupItem = ({ group, color, opacity, currentPrefix }: GroupProps) 
 				{groupType === 'colored' && (
 					<Buttons>
 						{isAdmin && (
-							<ErrorTicketButton onClick={deleteGroup}>
+							<ErrorTicketButton onClick={handleDeleteGroup}>
 								<DeleteIcon />
 							</ErrorTicketButton>
 						)}
 						<PrimaryTicketButton onClick={toggleShowGroup}>
 							{groupIsVisible ? (<ShowIcon />) : (<HideIcon />)}
 						</PrimaryTicketButton>
-						<EditGroupButton defaultValues={{ color, opacity, ...group, prefix: currentPrefix }} />
+						<PrimaryTicketButton onClick={onEditGroup}>
+							<EditIcon />
+						</PrimaryTicketButton>
 					</Buttons>
 				)}
 			</Headline>
-			<GroupToggle />
+			<GroupToggle
+				checked={selectedIndexes.includes(index)}
+				onClick={() => toggleGroupState(index)}
+			/>
 		</Container>
 	);
 };

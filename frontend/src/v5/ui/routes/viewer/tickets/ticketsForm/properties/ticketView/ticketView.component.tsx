@@ -19,7 +19,7 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import ViewpointIcon from '@assets/icons/outlined/aim-outlined.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
@@ -31,6 +31,7 @@ import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { ViewpointsActions } from '@/v4/modules/viewpoints';
 import { getViewerState, viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
 import { useDispatch } from 'react-redux';
+import { TicketContext, TicketDetailsView } from '../../../ticket.context';
 import { TicketImageContent } from '../ticketImageContent/ticketImageContent.component';
 import { EllipsisMenuItemDelete } from '../ticketImageContent/ticketImageAction/ticketImageAction.styles';
 import { TicketImageActionMenu } from '../ticketImageContent/ticketImageActionMenu.component';
@@ -47,7 +48,6 @@ type ITicketView = {
 	required: boolean;
 	onBlur: () => void;
 	onChange: (newValue) => void;
-	onGroupsClick: () => void;
 	disabled?: boolean;
 };
 
@@ -55,12 +55,12 @@ export const TicketView = ({
 	value,
 	onBlur,
 	onChange,
-	onGroupsClick,
 	disabled,
 	helperText,
 	label,
 	...props
 }: ITicketView) => {
+	const context = useContext(TicketContext);
 	const dispatch = useDispatch();
 
 	const hasViewpoint = !value ? false : ![value.camera, value.clippingPlanes, value.state].some((val) => !val);
@@ -115,6 +115,10 @@ export const TicketView = ({
 	};
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
+
+	const onGroupsClick = () => {
+		context.setDetailViewAndProps(TicketDetailsView.Groups, props);
+	};
 
 	const imgSrc = getImgSrc(value?.screenshot);
 
