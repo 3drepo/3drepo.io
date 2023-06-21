@@ -25,7 +25,8 @@ import { DialogsActionsDispatchers, ProjectsActionsDispatchers } from '@/v5/serv
 import { IProject } from '@/v5/store/projects/projects.types';
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { EllipsisMenuContainer, EllipsisMenu } from './projectCard.styles';
+import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
+import { EllipsisMenuContainer } from './projectCard.styles';
 import { LinkCard } from '../linkCard.component';
 
 interface IProjectCard {

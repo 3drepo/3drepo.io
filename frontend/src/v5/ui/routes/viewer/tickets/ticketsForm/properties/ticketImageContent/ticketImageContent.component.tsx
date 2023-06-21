@@ -17,26 +17,20 @@
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { getSupportedImageExtensions, convertFileToImageSrc } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
-import { FormControl, FormHelperText } from '@mui/material';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ActionsList, ActionsSide, Container, Label } from './basicTicketImage.styles';
+import { Actions, Content } from './ticketImageContent.styles';
 import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplayer.component';
 
-type BasicTicketImageProps = Omit<FormInputProps, 'onBlur'> & {
+type TicketImageContentProps = Omit<FormInputProps, 'onBlur'> & {
 	children: any,
 };
 
-export const BasicTicketImage = ({
+export const TicketImageContent = ({
 	children,
 	value,
-	label,
-	className,
-	error,
-	helperText,
-	required,
 	disabled,
 	onChange,
-}: BasicTicketImageProps) => {
+}: TicketImageContentProps) => {
 	const uploadImage = async () => {
 		const file = await uploadFile(getSupportedImageExtensions());
 		const imgSrc = await convertFileToImageSrc(file);
@@ -45,19 +39,15 @@ export const BasicTicketImage = ({
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	return (
-		<FormControl error={error} required={required}>
-			<Container className={className} error={error} disabled={disabled}>
-				<ActionsSide>
-					<Label>{label}</Label>
-					<ActionsList>{children}</ActionsList>
-				</ActionsSide>
-				<TicketImageDisplayer
-					imgSrc={value}
-					disabled={disabled || !isProjectAdmin}
-					onEmptyImageClick={uploadImage}
-				/>
-			</Container>
-			<FormHelperText>{helperText}</FormHelperText>
-		</FormControl>
+		<Content>
+			<TicketImageDisplayer
+				imgSrc={value}
+				disabled={disabled || !isProjectAdmin}
+				onEmptyImageClick={uploadImage}
+			/>
+			<Actions>
+				{children}
+			</Actions>
+		</Content>
 	);
 };

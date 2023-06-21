@@ -19,22 +19,28 @@ import { useEffect } from 'react';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
-import { BasicTicketImage } from '../basicTicketImage.component';
+import { FormHelperText } from '@mui/material';
+import { TicketImageContent } from '../ticketImageContent.component';
 import { TicketImageActionMenu } from '../ticketImageActionMenu.component';
+import { InputContainer, Label } from './ticketImage.styles';
 
-export const TicketImage = ({ value, onChange, onBlur, ...props }: FormInputProps) => {
+export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperText, ...props }: FormInputProps) => {
 	const onImageChange = (newValue) => onChange(newValue ? stripBase64Prefix(newValue) : null);
 	const imgSrc = getImgSrc(value);
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
 
 	return (
-		<BasicTicketImage
-			value={imgSrc}
-			onChange={onImageChange}
-			{...props}
-		>
-			<TicketImageActionMenu value={imgSrc} onChange={onImageChange} />
-		</BasicTicketImage>
+		<InputContainer disabled={disabled} {...props}>
+			<Label>{label}</Label>
+			<TicketImageContent
+				value={imgSrc}
+				onChange={onImageChange}
+				disabled={disabled}
+			>
+				<TicketImageActionMenu value={imgSrc} onChange={onImageChange} disabled={disabled} />
+			</TicketImageContent>
+			<FormHelperText>{helperText}</FormHelperText>
+		</InputContainer>
 	);
 };

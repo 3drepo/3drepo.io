@@ -16,16 +16,14 @@
  */
 
 import { Typography } from '@mui/material';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { CentredContainer } from '@controls/centredContainer';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
 
 export const Container = styled.div`
 	border-radius: 5px;
 	overflow: hidden;
-	height: 101px;
-	width: 60%;
-	min-width: 60%;
+	height: 118px;
 
 	& > * {
 		height: 100%;
@@ -56,7 +54,11 @@ export const EmptyImageContainer = styled(CentredContainer)<{ disabled: boolean 
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	color: ${({ theme }) => theme.palette.base.main};
 	text-align: center;
-	${({ disabled }) => `cursor: ${disabled ? 'unset' : 'pointer'}`};
+	cursor: pointer;
+	${({ disabled }) => disabled && css`
+		cursor: 'unset';
+		pointer-events: none;
+	`};
 `;
 
 export const IconText = styled(Typography).attrs({ variant: 'body1' })``;

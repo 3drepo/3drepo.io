@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,12 +16,20 @@
  */
 
 import styled from 'styled-components';
-import { CircleButton } from '@controls/circleButton';
 
-export const EllipsisButton = styled(CircleButton)`
-	margin: 0;
+export const Content = styled.div`
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	gap: 11px;
 
-	svg {
-		height: 13px;
+	& > * {
+		width: 50%;
 	}
+`;
+
+export const Actions = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
 `;

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,49 +14,48 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { EllipsisButton } from '@controls/ellipsisMenu/ellipsisMenu.styles';
+import { InputContainer as InputContainerBase } from '@controls/inputs/inputContainer/inputContainer.styles';
+import TooltipBase from '@mui/material/Tooltip';
 import { InputLabel } from '@mui/material';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
-export const Container = styled.div<{ error?: boolean, disabled?: boolean; }>`
-	padding: 13px;
-	border: solid 1px;
-	${({ disabled, theme: { palette } }) => (disabled ? css`
-		border-color: ${palette.secondary.lightest};
-		color: ${palette.base.light};
-	` : css`
-		border-color: ${palette.base.lightest};
-		color: ${palette.secondary.main};
-	`)}
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border-radius: 8px;
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-
-	${({ error, theme }) => error && css`
-		border: solid 1px ${theme.palette.error.main};
-		background-color: ${theme.palette.error.lightest};
-	`}
+export const InputContainer = styled(InputContainerBase)`
+	padding: 0 13px 13px;
 `;
 
 export const Label = styled(InputLabel)`
 	${({ theme }) => theme.typography.h5}
 	color: inherit;
-	margin-bottom: 2px;
 	max-width: 100%;
 	word-wrap: break-word;
 	text-overflow: ellipsis;
 `;
 
-export const ActionsSide = styled.div`
+export const Header = styled.div`
 	display: flex;
-	flex-direction: column;
-	max-width: 40%;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
 `;
 
-export const ActionsList = styled.ul`
-	list-style-type: none;
-	padding: 0;
-	margin: 0;
+export const HeaderSection = styled.div`
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+
+	${/* sc-selector */ EllipsisButton}:hover {
+		background-color: transparent;
+	}
 `;
+
+export const Tooltip = styled(TooltipBase).attrs({
+	placement: 'right',
+	componentsProps: {
+		popper: {
+			sx: {
+				left: -10,
+			},
+		},
+	},
+})``;

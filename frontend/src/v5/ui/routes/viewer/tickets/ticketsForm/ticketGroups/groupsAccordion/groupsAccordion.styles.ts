@@ -34,7 +34,8 @@ export const Accordion = styled(AccordionBase)<{ $overridesCount?: number }>`
 	.MuiAccordionSummary-root {
 		border-bottom: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
-		max-height: 37px;
+		height: 42px;
+		padding-left: 17px;
 	}
 
 	.MuiAccordionDetails-root {
@@ -84,12 +85,13 @@ export const TitleContainer = styled.div`
 `;
 
 export const NumberContainer = styled(CentredContainer)`
-	border-radius: 26px;
-	width: 26px;
-	height: 26px;
-	margin-left: 3px;
+	border-radius: 22px;
+	width: 22px;
+	height: 22px;
+	margin-left: 5px;
 	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
-	color: currentColor;
+	color: ${({ theme }) => theme.palette.base.main};
+	font-size: 10px;
 `;
 
 export const Checkbox = styled(CheckBoxBase)`

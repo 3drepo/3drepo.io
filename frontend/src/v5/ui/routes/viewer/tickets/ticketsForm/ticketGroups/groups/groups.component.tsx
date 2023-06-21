@@ -22,9 +22,10 @@ import {
 	CollectionHeadline,
 	CollectionAccordion,
 	GroupsContainer,
+	Name,
 } from './groups.styles';
 import { GroupToggle } from '../groupToggle/groupToggle.component';
-import { Name, NameContainer } from './groupItem/groupItem.styles';
+import { NameContainer } from './groupItem/groupItem.styles';
 import { GroupItem } from './groupItem/groupItem.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
 import { IndexedOverride } from '../ticketGroupsContext.helper';

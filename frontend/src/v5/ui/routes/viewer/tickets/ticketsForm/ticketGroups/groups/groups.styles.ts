@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 import { Accordion } from '@controls/accordion/accordion.component';
-import { GroupStyling, Headline } from './groupItem/groupItem.styles';
+import { GroupStyling, Headline, Name as NameBase } from './groupItem/groupItem.styles';
 
 export const CollectionAccordion = styled(Accordion)`
 	&& {
@@ -42,6 +42,7 @@ export const CollectionAccordion = styled(Accordion)`
 		.MuiAccordionSummary-expandIconWrapper {
 			background-color: ${({ theme }) => theme.palette.secondary.main};
 			color: ${({ theme }) => theme.palette.primary.contrast};
+			border: solid 1px ${({ theme }) => theme.palette.secondary.main};
 			border-radius: 50%;
 			min-width: 16px;
 			min-height: 16px;
@@ -58,6 +59,8 @@ export const CollectionAccordion = styled(Accordion)`
 
 			&:not(.Mui-expanded) {
 				transform: rotate(270deg);
+				color: ${({ theme }) => theme.palette.secondary.main};
+				background-color: ${({ theme }) => theme.palette.primary.contrast};
 			}
 		}
 
@@ -89,4 +92,8 @@ export const GroupsContainer = styled.div`
 
 export const Icon = styled.div`
 	border-radius: 5px;
+`;
+
+export const Name = styled(NameBase)`
+	font-weight: 500;
 `;

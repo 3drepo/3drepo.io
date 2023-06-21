@@ -14,9 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ReactNode, SyntheticEvent } from 'react';
+import { ReactNode, SyntheticEvent, useContext } from 'react';
 import { Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { MenuItem } from './ellipsisMenuItem.styles';
 
 type EllipsisMenuItemProps = {
@@ -26,17 +27,25 @@ type EllipsisMenuItemProps = {
 	onClick?: (event: SyntheticEvent) => void;
 	disabled?: boolean;
 	hidden?: boolean;
+	className?: string;
 };
 
-export const EllipsisMenuItem = ({ to, title, key, disabled, hidden, onClick }: EllipsisMenuItemProps) => {
-	if (hidden) return <></>;
+export const EllipsisMenuItem = ({ to, title, hidden, onClick, ...props }: EllipsisMenuItemProps) => {
+	const { close } = useContext(ActionMenuContext);
+
+	const handleClick = (e) => {
+		onClick?.(e);
+		close();
+	};
+
+	if (hidden) return (<></>);
+
 	return (
 		<MenuItem
 			component={to ? Link : null}
 			to={to}
-			key={key}
-			onClick={onClick}
-			disabled={disabled}
+			onClick={handleClick}
+			{...props}
 		>
 			<Typography variant="body1" noWrap>
 				{title}
