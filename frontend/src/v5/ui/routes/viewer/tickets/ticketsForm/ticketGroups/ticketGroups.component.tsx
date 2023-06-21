@@ -25,10 +25,9 @@ import { cloneDeep } from 'lodash';
 import { useSelector } from 'react-redux';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
-import { Container } from './ticketGroups.styles';
+import { Container, Popper } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContextComponent } from './ticketGroupsContext.component';
-import { Popper } from './groups/groupActionMenu/groupActionMenu.styles';
 import { GroupSettingsForm } from './groups/groupActionMenu/groupSettingsForm/groupSettingsForm.component';
 
 interface TicketGroupsProps {
