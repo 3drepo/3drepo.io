@@ -26,7 +26,7 @@ import { Button } from '@controls/button';
 import { useEffect, useState } from 'react';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { isEmpty, uniqBy, cloneDeep } from 'lodash';
+import { uniqBy, cloneDeep } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { Group, GroupOverride, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
@@ -91,7 +91,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const isNewGroup = !value?.group?._id;
-	const selectedNodes = convertToV5GroupNodes(selectSelectedNodes(store.getState()));
+	const selectedNodes = selectSelectedNodes(store.getState());
 
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
@@ -106,17 +106,22 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 
 	const {
 		handleSubmit,
-		formState: { errors, isValid, dirtyFields },
+		formState: { errors, isValid, isDirty },
 		setValue,
 		getValues,
 	} = formData;
 
-	const getFormIsValid = () => (isSmart || selectedNodes.length) && isValid && !isEmpty(dirtyFields);
+	const getFormIsValid = () => {
+		if (!isValid) return false;
+		if (isSmart) return isDirty;
+		if (!selectedNodes.length) return false;
+		return isDirty;
+	};
 
 	const onClickSubmit = (newValues:IGroupSettingsForm) => {
 		if (!isSmart) {
 			delete newValues.group.rules;
-			newValues.group.objects = convertToV5GroupNodes(selectSelectedNodes(store.getState()));
+			newValues.group.objects = convertToV5GroupNodes(selectedNodes);
 		} else {
 			delete newValues.group.objects;
 		}

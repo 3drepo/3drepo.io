@@ -42,7 +42,7 @@ const GroupSchema = Yup.object().shape({
 	})),
 	rules: Yup.array().when(
 		'$isSmart',
-		(isSmart, schema) => (isSmart ? schema.min(1) : schema),
+		(isSmart, schema) => (isSmart ? schema.required().min(1) : schema),
 	),
 });
 
