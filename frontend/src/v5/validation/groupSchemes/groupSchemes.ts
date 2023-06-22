@@ -30,7 +30,7 @@ const valueType = Yup.object({ value: requiredTrimmedString });
 
 export const GroupRulesSchema = Yup.object().shape({
 	field: requiredTrimmedString,
-	operation: requiredTrimmedString,
+	operator: requiredTrimmedString,
 	values: Yup.array().of(valueType),
 });
 

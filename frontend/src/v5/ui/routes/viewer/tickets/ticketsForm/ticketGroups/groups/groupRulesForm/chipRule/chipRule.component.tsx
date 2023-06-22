@@ -40,7 +40,7 @@ export const ChipRule = ({ value: rule, disabled, onChange, onDelete }: ChipRule
 					<RuleChip
 						label={(
 							<>
-								{rule.field} {OPERATION_DISPLAY_NAMES[rule.operation]}
+								{rule.field} {OPERATION_DISPLAY_NAMES[rule.operator]}
 								{!!rule.values?.length && (<b>&nbsp;{rule.values.join()}</b>)}
 							</>
 						)}

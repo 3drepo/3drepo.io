@@ -22,9 +22,10 @@ import { dispatch } from '@/v4/modules/store';
 import { ViewpointsActions } from '@/v4/modules/viewpoints';
 import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
 import { cloneDeep } from 'lodash';
-import { useSelector } from 'react-redux';
+import { useSelector, useStore } from 'react-redux';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
+import { selectHiddenGeometryVisible } from '@/v4/modules/tree/tree.selectors';
 import { Container, Popper } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContextComponent } from './ticketGroupsContext.component';
@@ -46,6 +47,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const state: Partial<ViewpointState> = value.state || {};
 	const leftPanels = useSelector(selectLeftPanels);
 	const isSecondaryCard = leftPanels[0] !== VIEWER_PANELS.TICKETS;
+	const store = useStore();
 
 	const onDeleteColoredGroup = (index) => {
 		const newVal = cloneDeep(value);
@@ -68,7 +70,11 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	};
 
 	const onSubmit = (overrideValue) => {
-		const newVal = cloneDeep(value);
+		const newVal = cloneDeep(value || {});
+		if (!newVal.state) {
+			newVal.state = { showDefaultHidden: selectHiddenGeometryVisible(store.getState()) };
+		}
+
 		if (editingOverride.type === OverrideType.COLORED) {
 			if (!newVal.state.colored) newVal.state.colored = [];
 			newVal.state.colored[editingOverride.index] = overrideValue;

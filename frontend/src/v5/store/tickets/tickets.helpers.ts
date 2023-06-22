@@ -25,7 +25,7 @@ import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
-import { EditableTicket, ITemplate, ITicket, Viewpoint } from './tickets.types';
+import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 
 export const modelIsFederation = (modelId: string) => (
 	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
@@ -161,6 +161,13 @@ export const getImgSrc = (imgData) => {
 	return addBase64Prefix(imgData);
 };
 
+const sanitizeGroupVal = (override: GroupOverride) => {
+	if ((override.group as Group)?.rules) {
+		// eslint-disable-next-line no-param-reassign
+		delete (override.group as Group).objects;
+	}
+};
+
 const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
 	if (!values) return values;
 
@@ -181,6 +188,14 @@ const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
 
 			if (viewValue && !viewValue.state && oldValue?.state) {
 				viewValue.state = null;
+			}
+
+			if (viewValue.state?.colored) {
+				viewValue.state.colored.forEach(sanitizeGroupVal);
+			}
+
+			if (viewValue.state?.hidden) {
+				viewValue.state.colored.forEach(sanitizeGroupVal);
 			}
 		}
 	});

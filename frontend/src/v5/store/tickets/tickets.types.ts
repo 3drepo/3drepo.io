@@ -100,7 +100,7 @@ export type OperationType = typeof OPERATIONS_TYPES[Operation];
 
 export interface IGroupRule {
 	field: string,
-	operation: Operation,
+	operator: Operation,
 	values?: (number | string)[],
 }
 

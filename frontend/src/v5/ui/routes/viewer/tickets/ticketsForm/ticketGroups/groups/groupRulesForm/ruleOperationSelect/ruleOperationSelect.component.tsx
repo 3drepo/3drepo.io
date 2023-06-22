@@ -24,7 +24,7 @@ import { ListSubheader } from './ruleOpertionSelect.styles';
 
 export const RuleOperationSelect = () => (
 	<FormSelect
-		name="operation"
+		name="operator"
 		label={formatMessage({ id: 'tickets.groups.operation.label', defaultMessage: 'Operation' })}
 	>
 		{/* Field */}

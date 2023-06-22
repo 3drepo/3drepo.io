@@ -36,7 +36,7 @@ import { ListboxComponent } from './listboxComponent/listboxComponent.component'
 
 const DEFAULT_VALUES: IRuleForm = {
 	field: null,
-	operation: null,
+	operator: null,
 	values: [],
 };
 

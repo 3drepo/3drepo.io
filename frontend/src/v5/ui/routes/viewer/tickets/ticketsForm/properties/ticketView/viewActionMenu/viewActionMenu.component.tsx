@@ -18,7 +18,7 @@
 import { TitleContainer, Container } from './viewActionMenu.styles';
 
 type ViewActionMenuProps = {
-	disabled: boolean;
+	disabled?: boolean;
 	onClick: () => any;
 	Icon: any;
 	title: any;

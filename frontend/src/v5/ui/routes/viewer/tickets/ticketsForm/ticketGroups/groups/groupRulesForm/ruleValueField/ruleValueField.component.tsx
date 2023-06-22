@@ -33,8 +33,8 @@ export const RuleValueField = () => {
 		name: 'values',
 	});
 
-	const operation = watch('operation');
-	const operationType = OPERATIONS_TYPES[operation];
+	const operator = watch('operator');
+	const operationType = OPERATIONS_TYPES[operator];
 	const error = errors.values || {};
 
 	useEffect(() => () => remove(), [operationType]);
