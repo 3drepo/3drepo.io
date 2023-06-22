@@ -88,6 +88,11 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 
 	const onEditGroup = () => editGroup(index);
 
+	const handleToggleClick = (e) => {
+		containEvent(e);
+		toggleGroupState(index);
+	};
+
 	const alphaColor = (color || [255, 255, 255]).concat(opacity);
 	const alphaHexColor = rgbaToHex(alphaColor.join());
 
@@ -126,7 +131,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 			</Headline>
 			<GroupToggle
 				checked={selectedIndexes.includes(index)}
-				onClick={() => toggleGroupState(index)}
+				onClick={handleToggleClick}
 			/>
 		</Container>
 	);
