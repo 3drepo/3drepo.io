@@ -16,71 +16,64 @@
  */
 import styled, { css } from 'styled-components';
 import {
-	IconButton as IconButtonComponent,
+	InputAdornment as BaseInputAdornment,
+	Autocomplete as BaseAutocomplete,
 	TextField as TextFieldComponent,
-	InputAdornment as InputAdornmentComponent,
 } from '@mui/material';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 
-export const IconButton = styled(IconButtonComponent)`
-	padding: 6px;
-	width: 22px;
-
-	svg {
-		height: 9px;
-	}
+export const Autocomplete = styled(BaseAutocomplete)`
+	margin: 8px;
 `;
 
 export const SearchChip = styled(FilterChip)`
 	.MuiChip-root {
 		color: ${({ theme }) => theme.palette.primary.main};
-		border-color: ${({ theme }) => theme.palette.primary.main};
 		background-color: ${({ theme }) => theme.palette.primary.lightest};
 		padding-right: 3px;
 	}
-	& + & >.MuiChip-root {
-		margin-left: 3px;
-	}
 `;
 
-export const TextField = styled(TextFieldComponent)<{multiline: boolean }>`
-	margin: 8px;
-	gap: 3px;
-	${({ multiline }) => multiline && css`
-		.MuiInputBase-root {
-			height: unset
+export const TextField = styled(TextFieldComponent)<{ multiline: boolean }>`
+	margin: 0;
+	&.MuiFormControl-root .MuiInputBase-root.MuiAutocomplete-inputRoot {
+		padding: 5px 5px 5px 32px;
+		gap: 3px;
+		${({ multiline }) => multiline && css`
+			height: unset;
+			min-height: 32px;
+		`}
+		.MuiInputBase-input {
+			height: 1rem;
 		}
-	`}
-
-	.MuiInputBase-adornedEnd {
-		padding-right: 0;
-	}
-	.MuiInputBase-input {
-		padding: 0 7px;
-		::placeholder {
-			min-width: fit-content;
-			opacity: 1;
-			color: ${({ theme }) => theme.palette.base.main};
-		}
-		.MuiInputAdornment-root + & {
-			padding-left: 4px;
+		.MuiAutocomplete-endAdornment {
+			margin: 0 0 0 auto;
+			svg {
+				color: ${({ theme }) => theme.palette.base.main};
+				height: 10px;
+				width: 10px;
+			}
 		}
 	}
+	.MuiInputBase-root .MuiInputBase-input {
+		padding: 0;
+		min-width: 55px;
+	}
+	${SearchChip} + .MuiInputBase-input {
+		padding-left: 7px;
+		box-sizing: border-box;
+	}
+	.MuiInputAdornment-root + ${/* sc-selector */ SearchChip} .MuiChip-root, .MuiInputAdornment-root + .MuiInputBase-input {
+		margin-left: -3px;
+	} 	
 `;
 
-export const StartAdornment = styled(InputAdornmentComponent).attrs({
+export const StartAdornment = styled(BaseInputAdornment).attrs({
 	position: 'start',
 })`
+	margin: 0;
 	svg {
-		margin-right: 7px;
+		margin: 0 0 0 -21px;
 		color: ${({ theme }) => theme.palette.base.main};
 	}
-`;
-
-export const EndAdornment = styled(InputAdornmentComponent).attrs({
-	position: 'end',
-})<{ $isVisible?: boolean }>`
-	${({ $isVisible }) => !$isVisible && css`
-		visibility: hidden;
-	`}
 `;

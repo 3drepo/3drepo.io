@@ -114,7 +114,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 
 	return (
 		<SearchContextComponent filteringFunction={filterItems} items={filteredTickets}>
-			<SearchInput multiple size="small" />
+			<SearchInput multiple />
 			<Filters>
 				<CompletedFilterChip
 					key="completed"

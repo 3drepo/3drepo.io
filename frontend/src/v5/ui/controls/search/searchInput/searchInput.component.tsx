@@ -15,86 +15,75 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextFieldProps } from '@mui/material';
+import { AutocompleteProps, TextFieldProps } from '@mui/material';
 import SearchIcon from '@assets/icons/outlined/search-outlined.svg';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { ChangeEvent, useContext, useState } from 'react';
+import { ChangeEvent, useContext } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { trim } from 'lodash';
-import { IconButton, TextField, StartAdornment, EndAdornment, SearchChip } from './searchInput.styles';
+import { TextField, StartAdornment, SearchChip, Autocomplete } from './searchInput.styles';
 import { SearchContext } from '../searchContext';
 
 type ISearchInput = {
-	/**
-	 * Callback when the clear button is clicked.
-	 * Note: the clear button only appears when the controls is controlled (read more https://reactjs.org/docs/forms.html#controlled-components)
-	 */
-	onClear?: () => void;
-	multiple?: boolean;
-} & TextFieldProps;
+	variant?: 'filled' | 'outlined',
+	placeholder?: string,
+} & Partial<AutocompleteProps<TextFieldProps, boolean, undefined, undefined, typeof SearchChip>>;
 
-export const SearchInput = ({ onClear, variant = 'filled', multiple, ...props }: ISearchInput): JSX.Element => {
+export const SearchInput = ({ variant = 'filled', multiple, placeholder, ...props }: ISearchInput): JSX.Element => {
 	const { queries, setQueries } = useContext(SearchContext);
-	const [value, setValue] = useState('');
 
-	const onChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-		setValue(event.currentTarget.value);
-		props.onChange?.(event);
+	const onChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, newValue) => {
+		// This is for when enter is pressed and the chips change
+		if (!multiple) return;
+		setQueries(newValue);
+	};
+
+	const onInputChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, newValue) => {
+		// This is for when the textfield value changes by typing
 		if (multiple) return;
-		setQueries([event.currentTarget.value]);
-	};
-
-	const onClickClear = () => {
-		onClear?.();
-		setQueries([]);
-		setValue('');
-	};
-
-	const onKeyDown = (event) => {
-		if (event.key === 'Enter') {
-			event.preventDefault();
-			props.onSubmit?.(event);
-			const trimmedValue = trim(value);
-			if (!multiple || !trimmedValue) return;
-			setQueries((prev) => prev.concat([trimmedValue]));
-			setValue('');
-		}
+		setQueries([newValue]);
 	};
 
 	const removeQuery = (index) => setQueries((prev) => prev.filter((el, i) => index !== i));
 
 	return (
-		<TextField
-			value={value}
-			InputProps={{
-				startAdornment: (
-					<>
-						<StartAdornment>
-							<SearchIcon />
-						</StartAdornment>
-						{!!queries.length && multiple && queries.map((query, index) => (
-							<SearchChip
-								key={query}
-								label={query}
-								onDelete={() => removeQuery(index)}
-							/>
-						))}
-					</>
-				),
-				endAdornment: (
-					<EndAdornment $isVisible={!!value || !!queries.length}>
-						<IconButton onClick={onClickClear} size="large">
-							<CloseIcon />
-						</IconButton>
-					</EndAdornment>
-				),
-			}}
-			variant={variant}
-			placeholder={formatMessage({ id: 'searchInput.defaultPlaceholder', defaultMessage: 'Search...' })}
-			onKeyDown={onKeyDown}
-			multiline={multiple}
-			{...props}
+		<Autocomplete
+			value={queries}
+			open={false}
+			freeSolo
+			multiple={multiple}
+			options={[]}
+			clearIcon={<CloseIcon />}
+			renderTags={(
+				valueFoo: any[],
+			) => valueFoo.map((query: any, index: number) => (
+				<SearchChip
+					key={query}
+					label={query}
+					onDelete={() => removeQuery(index)}
+				/>
+			))}
 			onChange={onChange}
+			onInputChange={onInputChange}
+			{...props}
+			renderInput={(params: any) => (
+				<TextField
+					variant={variant}
+					multiline={multiple}
+					placeholder={placeholder || formatMessage({ id: 'searchInput.defaultPlaceholder', defaultMessage: 'Search...' })}
+					{...params}
+					InputProps={{
+						...params.InputProps,
+						startAdornment: (
+							<>
+								<StartAdornment>
+									<SearchIcon />
+								</StartAdornment>
+									{...(params?.InputProps?.startAdornment || [])}
+							</>
+						),
+					}}
+				/>
+			)}
 		/>
 	);
 };
