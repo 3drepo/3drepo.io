@@ -21,6 +21,12 @@ import { useEffect, useState } from 'react';
 import { TicketGroupsContext } from './ticketGroupsContext';
 import { GroupNode, GroupState, addIndex, createTreeNode, groupOverridesToTree } from './ticketGroupsContext.helper';
 
+const OPPOSITE_GROUP_STATE = {
+	[GroupState.CHECKED]: GroupState.UNCHECKED,
+	[GroupState.UNCHECKED]: GroupState.CHECKED,
+	[GroupState.INDETERMINATE]: GroupState.CHECKED,
+} as const;
+
 /* eslint-disable no-param-reassign */
 type TicketGroupsContextComponentProps = {
 	overrides: GroupOverride[],
@@ -89,13 +95,13 @@ export const TicketGroupsContextComponent = ({
 
 	const toggleGroupState = (index) => {
 		const groupLeaf = getGroupLeaf(index);
-		setGroupNodeState(groupLeaf, groupLeaf.state * (-1));
+		setGroupNodeState(groupLeaf, OPPOSITE_GROUP_STATE[groupLeaf.state]);
 		updateTree(groupLeaf);
 	};
 
 	const toggleCollectionState = (prefix = []) => {
 		const groupNode: GroupNode = getGroupNode(prefix);
-		const newState = groupNode.state === GroupState.CHECKED ? GroupState.UNCHECKED : GroupState.CHECKED;
+		const newState = OPPOSITE_GROUP_STATE[groupNode.state];
 		groupNode.children.forEach((node) => setGroupNodeState(node, newState));
 		updateTree(groupNode);
 	};
@@ -106,6 +112,13 @@ export const TicketGroupsContextComponent = ({
 			return;
 		}
 		node.children.forEach((n) => shiftIndex(n, removedIndex));
+	};
+
+	const deleteCollectionIfEmpty = (node: GroupNode) => {
+		if (node.children.length || !node.parent) return node;
+		const { parent } = node;
+		parent.children = parent.children.filter((c) => c !== node);
+		return deleteCollectionIfEmpty(parent);
 	};
 
 	const deleteGroup = (index: number) => {
@@ -121,7 +134,9 @@ export const TicketGroupsContextComponent = ({
 				if (override.index < index) return override;
 				return { ...override, index: override.index - 1 };
 			}));
-			updateTree(parent);
+
+			const closestAncestorWithChildren = deleteCollectionIfEmpty(parent);
+			updateTree(closestAncestorWithChildren);
 			onDeleteGroup(index);
 		}
 	};
@@ -160,7 +175,13 @@ export const TicketGroupsContextComponent = ({
 			let parent = getGroupNode(firstPrefixSegments);
 			if (lastPrefixSegment) {
 				const child = parent.children.find(({ prefixSegment }) => prefixSegment === lastPrefixSegment);
-				parent = child || createTreeNode(null, lastPrefixSegment, parent, GroupState.CHECKED, []);
+				if (!child) {
+					const newColletionNode = createTreeNode(null, lastPrefixSegment, parent, GroupState.CHECKED, null);
+					parent.children.push(newColletionNode);
+					parent = newColletionNode;
+				} else {
+					parent = child;
+				}
 			}
 			const newNode = createTreeNode(index, null, parent, GroupState.CHECKED, newOverride);
 			parent.children.push(newNode);
