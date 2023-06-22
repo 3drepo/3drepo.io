@@ -25,11 +25,11 @@ import { cloneDeep, uniqBy } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
 import { selectHiddenGeometryVisible } from '@/v4/modules/tree/tree.selectors';
+import { TreeActions } from '@/v4/modules/tree';
 import { Container, Popper } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContextComponent } from './ticketGroupsContext.component';
 import { GroupSettingsForm } from './groups/groupActionMenu/groupSettingsForm/groupSettingsForm.component';
-import { TreeActions } from '@/v4/modules/tree';
 
 const getAllPrefixesCombinations = (overrides: GroupOverride[]): string[][] => {
 	const prefixes = overrides.map(({ prefix }) => (prefix)).filter(Boolean);
@@ -122,6 +122,12 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	};
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
+
+	useEffect(() => {
+		if (highglightedOverride.index === -1) {
+			dispatch(TreeActions.clearCurrentlySelected());
+		}
+	}, [highglightedOverride]);
 
 	return (
 		<Container onClick={() => setHighlightedOverride({ index: -1, type: OverrideType.COLORED })}>

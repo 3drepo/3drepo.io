@@ -55,11 +55,6 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		e.stopPropagation();
 	};
 
-	const handleClick = (e) => {
-		containEvent(e);
-		setHighlightedIndex(index);
-	};
-
 	const handleDeleteGroup = (e) => {
 		containEvent(e);
 		DialogsActionsDispatchers.open('delete', {
@@ -80,8 +75,15 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		dispatch(TreeActions.selectNodesBySharedIds(objects, color.map((c) => c / 255)));
 	};
 
+	const handleClick = (e) => {
+		containEvent(e);
+		highlightGroup();
+		setHighlightedIndex(index);
+	};
+
 	const isolateGroup = (e) => {
 		containEvent(e);
+		setHighlightedIndex(index);
 		highlightGroup();
 		dispatch(TreeActions.isolateSelectedNodes());
 	};
