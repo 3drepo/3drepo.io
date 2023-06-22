@@ -16,13 +16,12 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { Group, IGroupSettingsForm, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
+import { GroupOverride, IGroupSettingsForm, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { ViewpointsActions } from '@/v4/modules/viewpoints';
-import { TreeActions } from '@/v4/modules/tree';
-import { viewpointV5ToV4, convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
-import { cloneDeep } from 'lodash';
+import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
+import { cloneDeep, uniqBy } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
 import { selectHiddenGeometryVisible } from '@/v4/modules/tree/tree.selectors';
@@ -31,7 +30,22 @@ import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContextComponent } from './ticketGroupsContext.component';
 import { GroupSettingsForm } from './groups/groupActionMenu/groupSettingsForm/groupSettingsForm.component';
 
-const DEFAULT_HIGHLIGHT_COLOR = [255, 255, 255];
+const getAllPrefixesCombinations = (overrides: GroupOverride[]): string[][] => {
+	const prefixes = overrides.map(({ prefix }) => (prefix)).filter(Boolean);
+	const uniquePrefixes = uniqBy(prefixes, JSON.stringify);
+	const allPrefixesWithDuplicates: string[][] = [];
+
+	uniquePrefixes.forEach((prefix) => {
+		const usedSegments: string[] = [];
+		prefix.forEach((segment) => {
+			allPrefixesWithDuplicates.push(usedSegments.concat(segment));
+			usedSegments.push(segment);
+		});
+	});
+
+	const allPrefixes = uniqBy(allPrefixesWithDuplicates, JSON.stringify);
+	return allPrefixes.sort();
+};
 
 interface TicketGroupsProps {
 	value?: Viewpoint;
@@ -53,6 +67,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const leftPanels = useSelector(selectLeftPanels);
 	const isSecondaryCard = leftPanels[0] !== VIEWER_PANELS.TICKETS;
 	const store = useStore();
+	const settingsFormGroups = value.state?.[((editingOverride.type === OverrideType.COLORED) ? 'colored' : 'hidden')];
 
 	const handleSetHighlightedIndex = (type) => (index) => {
 		setHighlightedOverride({ type, index });
@@ -107,18 +122,6 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
 
-	useEffect(() => {
-		dispatch(TreeActions.clearCurrentlySelected());
-		if (highglightedOverride.index === -1) return () => {};
-		const override = state[highglightedOverride.type][highglightedOverride.index];
-		const objects = convertToV4GroupNodes((override.group as Group).objects);
-		dispatch(TreeActions.selectNodesBySharedIds(objects, (override.color || DEFAULT_HIGHLIGHT_COLOR).map((c) => c / 255)));
-		dispatch(TreeActions.showNodesBySharedIds(objects));
-		dispatch(TreeActions.selectNodesBySharedIds(objects, override.color.map((c) => c / 255)));
-
-		return () => dispatch(TreeActions.deselectNodesBySharedIds(objects));
-	}, [highglightedOverride]);
-
 	return (
 		<Container onClick={() => setHighlightedOverride({ index: -1, type: OverrideType.COLORED })}>
 			<TicketGroupsContextComponent
@@ -155,9 +158,10 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				onClick={(e) => e.stopPropagation()}
 			>
 				<GroupSettingsForm
-					value={value.state?.[((editingOverride.type === OverrideType.COLORED) ? 'colored' : 'hidden')]?.[editingOverride.index] as IGroupSettingsForm}
+					value={settingsFormGroups?.[editingOverride.index] as IGroupSettingsForm}
 					onSubmit={onSubmit}
 					onCancel={onCancel}
+					prefixesCombinations={getAllPrefixesCombinations(settingsFormGroups)}
 				/>
 			</Popper>
 		</Container>

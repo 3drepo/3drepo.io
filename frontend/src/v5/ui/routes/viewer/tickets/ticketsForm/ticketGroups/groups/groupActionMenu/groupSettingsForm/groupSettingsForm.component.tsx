@@ -26,13 +26,13 @@ import { Button } from '@controls/button';
 import { useEffect, useState } from 'react';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { uniqBy, cloneDeep } from 'lodash';
+import _, { cloneDeep } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { Group, GroupOverride, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
+import { Group, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
 import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
-import { useStore } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { selectSelectedNodes } from '@/v4/modules/tree/tree.selectors';
 import { convertToV5GroupNodes } from '@/v5/helpers/viewpoint.helpers';
 import { getRandomSuggestedColor } from '@controls/inputs/colorPicker/colorPicker.helpers';
@@ -61,31 +61,14 @@ import { GroupRulesForm } from '../../groupRulesForm/groupRulesForm.component';
 import { ChipRule } from '../../groupRulesForm/chipRule/chipRule.component';
 import { NewCollectionForm } from '../newCollectionForm/newCollectionForm.component';
 
-const getAllPrefixesCombinations = (overrides: GroupOverride[]): string[][] => {
-	const prefixes = overrides.map(({ prefix }) => (prefix)).filter(Boolean);
-	const uniquePrefixes = uniqBy(prefixes, JSON.stringify);
-	const allPrefixesWithDuplicates: string[][] = [];
-
-	uniquePrefixes.forEach((prefix) => {
-		const usedSegments: string[] = [];
-		prefix.forEach((segment) => {
-			allPrefixesWithDuplicates.push(usedSegments.concat(segment));
-			usedSegments.push(segment);
-		});
-	});
-
-	const allPrefixes = uniqBy(allPrefixesWithDuplicates, JSON.stringify);
-	return allPrefixes.sort();
-};
-
 type GroupSettingsFormProps = {
 	value?: IGroupSettingsForm,
 	onSubmit?: (value: IGroupSettingsForm) => void,
 	onCancel?: () => void,
+	prefixesCombinations: string[][];
 };
-export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFormProps) => {
+export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinations }: GroupSettingsFormProps) => {
 	const [isSmart, setIsSmart] = useState(!!value?.group?.rules?.length);
-	const [prefixesCombinations] = useState(getAllPrefixesCombinations([]));
 	const [newCollection, setNewCollection] = useState([]);
 	const store = useStore();
 
