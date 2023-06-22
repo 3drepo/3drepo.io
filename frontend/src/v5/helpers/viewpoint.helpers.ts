@@ -94,7 +94,7 @@ export const getViewerState = async () => {
 
 const mergeGroups = (groups: any[]) => ({ objects: groups.flatMap((group) => group.objects) });
 
-const convertToV4Group = (groupOverride: GroupOverride) => {
+export const convertToV4Group = (groupOverride: GroupOverride) => {
 	const { color, opacity, group: v5Group } = groupOverride;
 
 	if (isString(v5Group)) {
@@ -111,6 +111,10 @@ const convertToV4Group = (groupOverride: GroupOverride) => {
 
 	if (opacity) {
 		group.opacity = opacity;
+	}
+
+	if (v5Group._id) {
+		group._id = v5Group._id;
 	}
 
 	return group;

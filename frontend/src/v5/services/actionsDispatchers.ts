@@ -38,6 +38,7 @@ interface IGroupsActionCreators {
 	isolateGroups: (groupIds: string[]) => Action;
 	setActiveGroup: (group: any) => Action;
 	showDetails: (group: any) => Action;
+	resetActiveGroup: () => Action;
 }
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
