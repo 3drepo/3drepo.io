@@ -31,7 +31,7 @@ import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContextComponent } from './ticketGroupsContext.component';
 import { GroupSettingsForm } from './groups/groupActionMenu/groupSettingsForm/groupSettingsForm.component';
 
-const getAllPrefixesCombinations = (overrides: GroupOverride[]): string[][] => {
+const getAllPrefixesCombinations = (overrides: GroupOverride[] = []): string[][] => {
 	const prefixes = overrides.map(({ prefix }) => (prefix)).filter(Boolean);
 	const uniquePrefixes = uniqBy(prefixes, JSON.stringify);
 	const allPrefixesWithDuplicates: string[][] = [];
