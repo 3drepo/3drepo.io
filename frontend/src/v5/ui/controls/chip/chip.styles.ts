@@ -26,11 +26,8 @@ const filledStyles = (color: string) => css`
 
 const outlinedStyles = (color: string) => css`
 	color: ${color};
-	border: 1px solid ${color};
+	border: 1px solid currentColor;
 	background: transparent;
-	svg:not(.MuiChip-deleteIcon) {
-		color: ${color};
-	}
 `;
 
 const textStyles = (color: string) => css`
@@ -62,6 +59,7 @@ export const ChipWrapper = styled.div<{ variant: string; color: string; disabled
 		svg {
 			height: 11px;
 			width: 11px;
+			color: currentColor;
 			&.MuiChip-icon {
 				color: inherit;
 				margin: 0;

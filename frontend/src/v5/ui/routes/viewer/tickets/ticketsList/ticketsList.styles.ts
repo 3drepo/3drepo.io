@@ -44,16 +44,16 @@ export const Filters = styled.div`
 	margin-bottom: 13px;
 `;
 
-export const CompletedFilterChip = styled(FilterChip)<{ selected: boolean }>`
-	.MuiChip-root {
+export const CompletedFilterChip = styled(FilterChip).attrs(({ selected, theme }: any) => ({
+	color: theme.palette.success.main,
+	variant: selected ? 'filled' : 'outlined',
+}))<{ selected: boolean }>`
+	.MuiChip-root, .MuiChip-root:hover {
 		color: ${({ theme }) => theme.palette.success.main};
 		border: 1px solid ${({ theme }) => theme.palette.success.main};
 		${({ selected, theme: { palette } }) => selected && css`
 			color: ${palette.primary.contrast};
 			background-color: ${palette.success.main};
-			&:hover {
-				background-color: ${palette.success.main};
-			}
 		`}
 	}
 `;
