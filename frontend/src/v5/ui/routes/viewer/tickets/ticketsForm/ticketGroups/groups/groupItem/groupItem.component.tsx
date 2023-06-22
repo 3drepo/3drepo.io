@@ -16,10 +16,9 @@
  */
 
 import ShowIcon from '@assets/icons/outlined/eye-outlined.svg';
-import HideIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { Group, GroupOverride } from '@/v5/store/tickets/tickets.types';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
 import { rgbaToHex } from '@/v4/helpers/colors';
@@ -46,10 +45,10 @@ import { TicketGroupsContext } from '../../ticketGroupsContext';
 
 type GroupProps = { override: GroupOverride, index: number };
 export const GroupItem = ({ override, index }: GroupProps) => {
-	const [groupIsVisible, setGroupIsVisible] = useState(false);
 	const { groupType, selectedIndexes, toggleGroupState, deleteGroup, editGroup } = useContext(TicketGroupsContext);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const dispatch = useDispatch();
+
 	const { group, color, opacity } = override;
 
 	const handleDeleteGroup = (e) => {
@@ -68,14 +67,16 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 
 	const highlightGroup = () => {
 		const objects = convertToV4GroupNodes((group as Group).objects);
+		dispatch(TreeActions.clearCurrentlySelected());
 		dispatch(TreeActions.showNodesBySharedIds(objects));
 		dispatch(TreeActions.selectNodesBySharedIds(objects, color.map((c) => c / 255)));
 	};
 
-	const toggleShowGroup = (e) => {
+	const isolateGroup = (e) => {
 		e.preventDefault();
 		e.stopPropagation();
-		setGroupIsVisible(!groupIsVisible);
+		highlightGroup();
+		dispatch(TreeActions.isolateSelectedNodes());
 	};
 
 	const onEditGroup = (e) => {
@@ -112,8 +113,8 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 								<DeleteIcon />
 							</ErrorTicketButton>
 						)}
-						<PrimaryTicketButton onClick={toggleShowGroup}>
-							{groupIsVisible ? (<ShowIcon />) : (<HideIcon />)}
+						<PrimaryTicketButton onClick={isolateGroup}>
+							<ShowIcon />
 						</PrimaryTicketButton>
 						<PrimaryTicketButton onClick={onEditGroup}>
 							<EditIcon />
