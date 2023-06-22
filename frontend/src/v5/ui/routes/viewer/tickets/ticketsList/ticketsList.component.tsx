@@ -17,7 +17,7 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { get, isEmpty } from 'lodash';
+import { get } from 'lodash';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
@@ -28,7 +28,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
-import { SearchContext, SearchContextComponent, SearchContextType } from '@controls/search/searchContext';
+import { SearchContextComponent } from '@controls/search/searchContext';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters, CompletedFilterChip, SearchInput } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
@@ -132,27 +132,22 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 					/>
 				))}
 			</Filters>
-			<List>
-				<SearchContext.Consumer>
-					{ ({ filteredItems }: SearchContextType<ITicket>) => (
-						<>
-							{filteredItems.map((ticket) => (
-								<TicketItem
-									ticket={ticket}
-									key={ticket._id}
-									onClick={(e) => onTicketClick(ticket, e)}
-									selected={ticketIsSelected(ticket)}
-								/>
-							))}
-							{isEmpty(filteredItems) && (
-								<EmptyListMessage>
-									<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
-								</EmptyListMessage>
-							)}
-						</>
-					)}
-				</SearchContext.Consumer>
-			</List>
+			{filteredTickets.length ? (
+				<List>
+					{filteredTickets.map((ticket) => (
+						<TicketItem
+							ticket={ticket}
+							key={ticket._id}
+							onClick={(e) => onTicketClick(ticket, e)}
+							selected={ticketIsSelected(ticket)}
+						/>
+					))}
+				</List>
+			) : (
+				<EmptyListMessage>
+					<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
+				</EmptyListMessage>
+			)}
 		</SearchContextComponent>
 	);
 };
