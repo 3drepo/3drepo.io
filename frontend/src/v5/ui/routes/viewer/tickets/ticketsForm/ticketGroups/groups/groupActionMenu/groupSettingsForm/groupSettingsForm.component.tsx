@@ -70,11 +70,10 @@ type GroupSettingsFormProps = {
 export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinations }: GroupSettingsFormProps) => {
 	const [isSmart, setIsSmart] = useState(!!value?.group?.rules?.length);
 	const [newCollection, setNewCollection] = useState([]);
-	const store = useStore();
 
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const isNewGroup = !value?.group?._id;
-	const selectedNodes = selectSelectedNodes(store.getState());
+	const selectedNodes = useSelector(selectSelectedNodes);
 
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
@@ -98,7 +97,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinati
 		if (!isValid) return false;
 		if (isSmart) return isDirty;
 		if (!selectedNodes.length) return false;
-		return isDirty;
+		return (isDirty || !_.isEqual(convertToV5GroupNodes(selectedNodes), value?.group?.objects || []));
 	};
 
 	const onClickSubmit = (newValues:IGroupSettingsForm) => {
