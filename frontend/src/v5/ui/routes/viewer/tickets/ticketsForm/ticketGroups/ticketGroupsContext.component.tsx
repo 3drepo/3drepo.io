@@ -141,9 +141,12 @@ export const TicketGroupsContextComponent = ({
 		}
 	};
 
-	const getSelectedIndexes = ({ children: nodeChildren, index, state } = groupsTree, indexes = []) => {
-		if (!nodeChildren.length && state === GroupState.CHECKED) return index;
-		return nodeChildren.flatMap((c) => getSelectedIndexes(c, indexes));
+	const getSelectedIndexes = (node = groupsTree, indexes = []) => {
+		if (!node.children.length) {
+			if (node === groupsTree) return [];
+			return node.state === GroupState.CHECKED ? node.index : [];
+		}
+		return node.children.flatMap((c) => getSelectedIndexes(c, indexes));
 	};
 
 	useEffect(() => {
