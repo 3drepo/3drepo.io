@@ -162,10 +162,13 @@ export const getImgSrc = (imgData) => {
 };
 
 const sanitizeGroupVal = (override: GroupOverride) => {
-	if ((override.group as Group)?.rules) {
-		// eslint-disable-next-line no-param-reassign
-		delete (override.group as Group).objects;
+	if ((override.group as Group)?.rules && (override.group as Group)?.objects) {
+		const group = { ...(override.group as Group) };
+		delete group.objects;
+
+		return ({ ...override, group });
 	}
+	return override;
 };
 
 const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
@@ -191,11 +194,11 @@ const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
 			}
 
 			if (viewValue.state?.colored) {
-				viewValue.state.colored.forEach(sanitizeGroupVal);
+				viewValue.state.colored = viewValue.state.colored.map(sanitizeGroupVal);
 			}
 
 			if (viewValue.state?.hidden) {
-				viewValue.state.colored.forEach(sanitizeGroupVal);
+				viewValue.state.hidden = viewValue.state.hidden.map(sanitizeGroupVal);
 			}
 		}
 	});
