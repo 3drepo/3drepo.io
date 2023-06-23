@@ -142,11 +142,19 @@ export const TicketGroupsContextComponent = ({
 	};
 
 	const getSelectedIndexes = (node = groupsTree, indexes = []) => {
-		if (!node.children.length) {
+		if (!node?.children.length) {
 			if (node === groupsTree) return [];
 			return node.state === GroupState.CHECKED ? node.index : [];
 		}
 		return node.children.flatMap((c) => getSelectedIndexes(c, indexes));
+	};
+
+	const getOverridesFromIndexes = (indexes) => {
+		if (!groupsTree) return [];
+		return indexes.map((idx) => {
+			const { index, ...override } = indexedOverrides[idx];
+			return override;
+		});
 	};
 
 	useEffect(() => {
@@ -156,13 +164,10 @@ export const TicketGroupsContextComponent = ({
 	}, []);
 
 	useEffect(() => {
-		if (!groupsTree) return;
 		const newSelectedIndexes = getSelectedIndexes();
 		if (isEqual(newSelectedIndexes, selectedIndexes)) return;
 		setSelectedIndexes(newSelectedIndexes);
-		const selectedOverrides = _.orderBy([...indexedOverrides], 'prefix', 'desc')
-			.filter(({ index }) => newSelectedIndexes.includes(index))
-			.map(({ index, ...override }) => override);
+		const selectedOverrides = _.orderBy(getOverridesFromIndexes(newSelectedIndexes), 'prefix', 'desc');
 		onSelectedGroupsChange?.(selectedOverrides);
 	}, [groupsTree]);
 
