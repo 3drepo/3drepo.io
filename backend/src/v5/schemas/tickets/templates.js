@@ -31,8 +31,10 @@ const { propTypesToValidator } = require('./validators');
 
 const defaultFalse = stripWhen(Yup.boolean().default(false), (v) => !v);
 
+const noFullStopRegex = /^[^.]*$/;
+
 const propSchema = Yup.object().shape({
-	name: types.strings.title.required().min(1),
+	name: types.strings.title.required().min(1).matches(noFullStopRegex),
 	type: Yup.string().oneOf(Object.values(propTypes)).required(),
 	deprecated: defaultFalse,
 	required: defaultFalse,
@@ -99,7 +101,7 @@ const propertyArray = Yup.array().of(propSchema).default([]).test('Property name
 });
 
 const moduleSchema = Yup.object().shape({
-	name: types.strings.title.notOneOf(Object.values(presetModules)),
+	name: types.strings.title.notOneOf(Object.values(presetModules)).matches(noFullStopRegex),
 	type: Yup.string().oneOf(Object.values(presetModules)),
 	deprecated: defaultFalse,
 	properties: propertyArray.when('type', (type, schema) => {

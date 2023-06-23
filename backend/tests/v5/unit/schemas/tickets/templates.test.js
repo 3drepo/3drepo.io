@@ -72,6 +72,13 @@ const testValidate = () => {
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 			}] }, true],
+		['property name contains fullstop', { name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: `${generateRandomString()}.`,
+				type: propTypes.TEXT,
+			}] }, false],
+
 		['property with enum type without values', { name: generateRandomString(),
 			code: generateRandomString(3),
 			properties: [{
@@ -220,6 +227,7 @@ const testValidate = () => {
 			}]),
 		}, false],
 		['module with both name and type are defined', createSkeleton([{ name: generateRandomString(), type: presetModules.SEQUENCING }]), false],
+		['module with name contains full stop', createSkeleton([{ name: `.${generateRandomString()}` }]), false],
 		['module with a property that has the same name as a root property', { ...createSkeleton([{ name: generateRandomString(), properties: [{ name: 'a', type: propTypes.TEXT }] }]), properties: [{ name: 'a', type: propTypes.TEXT }] }, true],
 		['all modules provided are valid', createSkeleton([
 			{ type: presetModules.SEQUENCING }, { name: generateRandomString() }]), true],
