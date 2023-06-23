@@ -69,6 +69,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	};
 
 	const highlightGroup = () => {
+		setHighlightedIndex(index);
 		const objects = convertToV4GroupNodes((group as Group).objects);
 		dispatch(TreeActions.clearCurrentlySelected());
 		dispatch(TreeActions.showNodesBySharedIds(objects));
@@ -78,12 +79,10 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const handleClick = (e) => {
 		containEvent(e);
 		highlightGroup();
-		setHighlightedIndex(index);
 	};
 
 	const isolateGroup = (e) => {
 		containEvent(e);
-		setHighlightedIndex(index);
 		highlightGroup();
 		dispatch(TreeActions.isolateSelectedNodes());
 	};
@@ -111,7 +110,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 							id="groups.item.numberOfMeshes"
 							defaultMessage="{count, plural, =0 {No objects} one {# object} other {# objects}}"
 							// TODO - fix with actual mesh count when logic is implemented
-							values={{ count: group.objects.length }}
+							values={{ count: (group.objects || []).length }}
 						/>
 					</GroupsCount>
 				</NameContainer>
