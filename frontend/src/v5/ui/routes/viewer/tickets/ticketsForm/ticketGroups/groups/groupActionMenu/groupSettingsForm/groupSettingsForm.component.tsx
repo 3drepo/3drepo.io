@@ -26,7 +26,7 @@ import { Button } from '@controls/button';
 import { useEffect, useState } from 'react';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
-import _, { cloneDeep } from 'lodash';
+import _, { cloneDeep, isEqual, sortBy } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { Group, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
@@ -97,7 +97,11 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinati
 		if (!isValid) return false;
 		if (isSmart) return isDirty;
 		if (!selectedNodes.length) return false;
-		return (isDirty || !_.isEqual(_.sortBy(convertToV5GroupNodes(selectedNodes)), _.sortBy(value?.group?.objects || [])));
+		const objectsAreDifferent = !isEqual(
+			sortBy(convertToV5GroupNodes(selectedNodes)),
+			sortBy(value?.group?.objects || []),
+		);
+		return (isDirty || objectsAreDifferent);
 	};
 
 	const onClickSubmit = (newValues:IGroupSettingsForm) => {
