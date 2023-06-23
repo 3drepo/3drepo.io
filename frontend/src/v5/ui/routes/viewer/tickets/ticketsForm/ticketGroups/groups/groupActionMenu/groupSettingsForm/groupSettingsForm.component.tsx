@@ -110,10 +110,11 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 	} = formData;
 
 	const onClickSubmit = (newValues:IGroupSettingsForm) => {
-		if (!isSmart) {
+		if (!newValues.group.rules.length) {
 			delete newValues.group.rules;
 			newValues.group.objects = convertToV5GroupNodes(selectSelectedNodes(store.getState()));
 		}
+
 		onSubmit?.(newValues);
 	};
 
