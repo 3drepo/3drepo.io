@@ -78,8 +78,8 @@ export type ClippingPlane = {
 };
 
 export const OPERATIONS_TYPES = {
-	EXISTS: 'field',
-	NOT_EXISTS: 'field',
+	IS_NOT_EMPTY: 'field',
+	IS_EMPTY: 'field',
 	IS: 'text',
 	IS_NOT: 'text',
 	CONTAINS: 'text',

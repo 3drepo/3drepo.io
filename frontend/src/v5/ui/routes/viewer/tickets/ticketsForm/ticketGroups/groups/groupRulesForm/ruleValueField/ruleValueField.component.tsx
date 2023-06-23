@@ -40,7 +40,7 @@ export const RuleValueField = () => {
 	useEffect(() => () => remove(), [operationType]);
 
 	useEffect(() => {
-		if (!fields.length && operationType !== 'field') {
+		if (!fields.length) {
 			append({ value: '' });
 		}
 	}, [fields]);
