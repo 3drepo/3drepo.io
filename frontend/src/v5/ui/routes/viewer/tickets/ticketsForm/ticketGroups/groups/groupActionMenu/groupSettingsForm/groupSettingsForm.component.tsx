@@ -97,7 +97,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinati
 		if (!isValid) return false;
 		if (isSmart) return isDirty;
 		if (!selectedNodes.length) return false;
-		return (isDirty || !_.isEqual(convertToV5GroupNodes(selectedNodes), value?.group?.objects || []));
+		return (isDirty || !_.isEqual(_.sortBy(convertToV5GroupNodes(selectedNodes)), _.sortBy(value?.group?.objects || [])));
 	};
 
 	const onClickSubmit = (newValues:IGroupSettingsForm) => {
