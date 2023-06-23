@@ -104,8 +104,6 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinati
 		if (!isSmart) {
 			delete newValues.group.rules;
 			newValues.group.objects = convertToV5GroupNodes(selectedNodes);
-		} else {
-			delete newValues.group.objects;
 		}
 		onSubmit?.(newValues);
 	};
