@@ -91,6 +91,10 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 
 	if (isString(group)) return (<CircularProgress />);
 
+	const calculateObjectsCount = (objects: Group['objects'] = []) => objects
+		// eslint-disable-next-line no-underscore-dangle
+		.reduce((accum, object) => accum + object._ids.length, 0);
+
 	return (
 		<Container onClick={highlightGroup}>
 			<Headline>
@@ -102,7 +106,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 							id="groups.item.numberOfMeshes"
 							defaultMessage="{count, plural, =0 {No objects} one {# object} other {# objects}}"
 							// TODO - fix with actual mesh count when logic is implemented
-							values={{ count: group.objects.length }}
+							values={{ count: calculateObjectsCount(group.objects) }}
 						/>
 					</GroupsCount>
 				</NameContainer>
