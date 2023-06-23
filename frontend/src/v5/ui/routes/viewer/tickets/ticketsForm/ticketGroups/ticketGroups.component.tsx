@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { GroupOverride, IGroupSettingsForm, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
+import { Group, GroupOverride, IGroupSettingsForm, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { ViewpointsActions } from '@/v4/modules/viewpoints';
@@ -93,7 +93,8 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		setEditingOverride({ index, type });
 	};
 
-	const onSelectedColoredGroupChange = (colored) => {
+	const onSelectedColoredGroupChange = (selectedColored: GroupOverride[]) => {
+		const colored = selectedColored.filter(c => (c.group as Group).objects);
 		const view = { state: { colored } } as Viewpoint;
 		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
 	};
