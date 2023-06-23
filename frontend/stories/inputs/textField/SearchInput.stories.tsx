@@ -27,6 +27,9 @@ export default {
 			options: ['filled', 'outlined'],
 			control: { type: 'select' },
 		},
+		multiple: {
+			type: 'boolean',
+		},
 	},
 	parameters: { controls: { exclude: ['ref', 'hiddenLabel', 'onClear'] } },
 } as ComponentMeta<typeof SearchInput>;

@@ -20,14 +20,16 @@ import { SearchContext, SearchContextComponent } from '@controls/search/searchCo
 import { SearchInput } from '@controls/search/searchInput';
 import { DashboardListCollapse, DashboardListEmptyContainer, DashboardListEmptySearchResults, DashboardListHeader, DashboardListHeaderLabel, DashboardListItem } from '@components/dashboard/dashboardList';
 import { CollapseSideElementGroup } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.styles';
-import { DashboardListItemRow, DashboardListItemText } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { useContext } from 'react';
+import { DashboardListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemRow/dashboardListItemRow.component';
+import { DashboardListItemText } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemText/dashboardListItemText.component';
 
 export default {
 	title: 'Dashboard/SearchContext',
 	component: SearchContextComponent,
 	argTypes: {
 		items: { control: 'object' },
+		multiple: { type: 'boolean' },
 	},
 } as ComponentMeta<typeof SearchContextComponent>;
 
@@ -39,59 +41,52 @@ const ObjectsListHeader = ({ columnNames, setSortConfig }) => (
 	</DashboardListHeader>
 );
 
-const ObjectsList = () => {
-	const { items, filteredItems } = useContext(SearchContext);
+const ObjectsList = ({ multiple }) => {
+	const { filteredItems } = useContext(SearchContext);
 
 	return (
 		<DashboardListCollapse
 			title={<>Searchable list</>}
 			sideElement={(
 				<CollapseSideElementGroup>
-					<SearchInput
-						placeholder="Search containers..."
-					/>
+					<SearchInput placeholder="Search containers..." multiple={multiple} />
 				</CollapseSideElementGroup>
 			)}
 		>
-			{items.length > 0
-			&& (
+			{filteredItems.length ? (
 				<>
-					<ObjectsListHeader setSortConfig={() => { }} columnNames={Object.keys(items[0])} />
-					{
-						filteredItems.map((item) => (
-							<DashboardListItem
-								key={JSON.stringify(item)}
-							>
-								<DashboardListItemRow>
-									{Object.keys(item).map((key) => (
-										<DashboardListItemText>
-											{item[key]}
-										</DashboardListItemText>
-									))}
-								</DashboardListItemRow>
-							</DashboardListItem>
-						))
-					}
+					<ObjectsListHeader setSortConfig={() => null} columnNames={Object.keys(filteredItems[0])} />
+					{filteredItems.map((item) => (
+						<DashboardListItem key={item.name}>
+							<DashboardListItemRow>
+								{Object.keys(item).map((key) => (
+									<DashboardListItemText>
+										{item[key]}
+									</DashboardListItemText>
+								))}
+							</DashboardListItemRow>
+						</DashboardListItem>
+					))}
 				</>
-			)}
-
-			{filteredItems.length === 0
-			&& (
+			) : (
 				<DashboardListEmptyContainer>
 					<DashboardListEmptySearchResults />
 				</DashboardListEmptyContainer>
 			)}
-
 		</DashboardListCollapse>
 	);
 };
-const Template: ComponentStory<typeof SearchContextComponent> = (args) => (
+const Template: ComponentStory<typeof SearchContextComponent> = ({ multiple, ...args }: any) => (
 	<SearchContextComponent {...args}>
-		<ObjectsList />
+		<ObjectsList multiple={multiple} />
 	</SearchContextComponent>
 );
 
 export const ListWithFilteredItems = Template.bind({});
 ListWithFilteredItems.args = {
-	items: [{ name: 'Winona' }, { name: 'David' }, { name: 'Millie' }],
+	items: [
+		{ name: 'Winona', nationality: 'American' },
+		{ name: 'David', nationality: 'American' },
+		{ name: 'Millie', nationality: 'British' },
+	],
 };
