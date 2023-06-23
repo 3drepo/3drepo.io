@@ -65,7 +65,7 @@ export const TextField = styled(TextFieldComponent)<{ multiline: boolean }>`
 	}
 	.MuiInputAdornment-root + ${/* sc-selector */ SearchChip} .MuiChip-root, .MuiInputAdornment-root + .MuiInputBase-input {
 		margin-left: -3px;
-	} 	
+	}
 `;
 
 export const StartAdornment = styled(BaseInputAdornment).attrs({

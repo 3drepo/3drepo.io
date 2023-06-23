@@ -53,9 +53,10 @@ export const SearchInput = ({ variant = 'filled', multiple, placeholder, ...prop
 			multiple={multiple}
 			options={[]}
 			clearIcon={<CloseIcon />}
+			getOptionLabel={(labelObject) => labelObject[0] ?? ''} // This silences a console error
 			renderTags={(
-				valueFoo: any[],
-			) => valueFoo.map((query: any, index: number) => (
+				values: any[],
+			) => values.map((query: any, index: number) => (
 				<SearchChip
 					key={query}
 					label={query}
@@ -78,7 +79,7 @@ export const SearchInput = ({ variant = 'filled', multiple, placeholder, ...prop
 								<StartAdornment>
 									<SearchIcon />
 								</StartAdornment>
-									{...(params?.InputProps?.startAdornment || [])}
+								{params?.InputProps?.startAdornment}
 							</>
 						),
 					}}
