@@ -31,8 +31,8 @@ export const RuleOperationSelect = () => (
 		<ListSubheader>
 			<FormattedMessage id="ticket.groups.operation.field" defaultMessage="Field" />
 		</ListSubheader>
-		<MenuItem value="EXISTS">{OPERATION_DISPLAY_NAMES.EXISTS}</MenuItem>
-		<MenuItem value="NOT_EXISTS">{OPERATION_DISPLAY_NAMES.NOT_EXISTS}</MenuItem>
+		<MenuItem value="IS_NOT_EMPTY">{OPERATION_DISPLAY_NAMES.IS_NOT_EMPTY}</MenuItem>
+		<MenuItem value="IS_EMPTY">{OPERATION_DISPLAY_NAMES.IS_EMPTY}</MenuItem>
 
 		{/* Text */}
 		<ListSubheader>

@@ -19,8 +19,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { IGroupRule } from '@/v5/store/tickets/tickets.types';
 
 export const OPERATION_DISPLAY_NAMES = {
-	EXISTS: formatMessage({ id: 'filter.operation.exists', defaultMessage: 'exists' }),
-	NOT_EXISTS: formatMessage({ id: 'filter.operation.doesNotExist', defaultMessage: 'does not exist' }),
+	IS_NOT_EMPTY: formatMessage({ id: 'filter.operation.exists', defaultMessage: 'exists' }),
+	IS_EMPTY: formatMessage({ id: 'filter.operation.doesNotExist', defaultMessage: 'does not exist' }),
 	IS: formatMessage({ id: 'filter.operation.is', defaultMessage: 'is' }),
 	IS_NOT: formatMessage({ id: 'filter.operation.isNot', defaultMessage: 'is not' }),
 	CONTAINS: formatMessage({ id: 'filter.operation.contains', defaultMessage: 'contains' }),

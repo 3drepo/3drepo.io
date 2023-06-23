@@ -18,6 +18,7 @@
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
+import { OPERATIONS_TYPES } from '@/v5/store/tickets/tickets.types';
 
 const requiredTrimmedString = Yup.string().trim().required(
 	formatMessage({
@@ -31,7 +32,10 @@ const valueType = Yup.object({ value: requiredTrimmedString });
 export const GroupRulesSchema = Yup.object().shape({
 	field: requiredTrimmedString,
 	operator: requiredTrimmedString,
-	values: Yup.array().of(valueType),
+	values: Yup.array().when(
+		'operator',
+		(operator, schema) => (OPERATIONS_TYPES[operator] === 'field' ? schema : schema.of(valueType)),
+	),
 });
 
 const GroupSchema = Yup.object().shape({
