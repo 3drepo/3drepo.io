@@ -23,7 +23,7 @@ import { IChip } from './chip.types';
 export const Chip = ({ color, variant, tooltip = '', disabled, className, ...props }: IChip) => (
 	<ChipWrapper variant={variant} color={color} disabled={disabled} className={className}>
 		<Tooltip title={disabled ? '' : tooltip} arrow>
-			<MuiChip clickable={false} deleteIcon={<CrossIcon />} {...props} />
+			<MuiChip clickable={false} deleteIcon={<span><CrossIcon /></span>} {...props} />
 		</Tooltip>
 	</ChipWrapper>
 );
