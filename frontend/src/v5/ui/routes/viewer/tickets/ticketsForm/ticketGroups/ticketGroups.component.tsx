@@ -62,7 +62,7 @@ enum OverrideType {
 export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => {
 	const dispatch = useDispatch();
 	const [editingOverride, setEditingOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: OverrideType.COLORED });
-	const [highglightedOverride, setHighlightedOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: null });
+	const [highlightedOverride, setHighlightedOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: null });
 	const [selectedColoredIndexes, setSelectedColoredIndexes] = useState([]);
 
 	const state: Partial<ViewpointState> = value.state || {};
@@ -76,15 +76,15 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	};
 
 	const getHighlightedIndex = (type) => {
-		if (highglightedOverride.type !== type) return -1;
-		return highglightedOverride.index;
+		if (highlightedOverride.type !== type) return -1;
+		return highlightedOverride.index;
 	};
 
 	const onDeleteColoredGroup = (index) => {
 		const newVal = cloneDeep(value);
 		newVal.state.colored.splice(index, 1);
 		onChange?.(newVal);
-		if (highglightedOverride.index === index) {
+		if (highlightedOverride.index === index) {
 			setHighlightedOverride({ index: -1, type: OverrideType.COLORED });
 		}
 	};
@@ -120,10 +120,10 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
 
 	useEffect(() => {
-		if (highglightedOverride.index === -1) {
+		if (highlightedOverride.index === -1) {
 			dispatch(TreeActions.clearCurrentlySelected());
 		}
-	}, [highglightedOverride]);
+	}, [highlightedOverride]);
 
 	useEffect(() => {
 		const colored = selectedColoredIndexes.map((i) => state.colored[i]).filter((c) => (c.group as Group).objects);
