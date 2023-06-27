@@ -29,13 +29,18 @@ import { isEmpty } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyStrings, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
-import { TicketsCardViews } from '../tickets.constants';
+import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
+import { useStore } from 'react-redux';
+import { AdditionalProperties, TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
 import { TicketContext, TicketDetailsView } from '../ticket.context';
+import { ViewpointsActions } from '@/v4/modules/viewpoints/viewpoints.redux';
 
 export const TicketDetailsCard = () => {
+	const { dispatch } = useStore();
+
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
@@ -100,6 +105,12 @@ export const TicketDetailsCard = () => {
 	if (!ticket) return (<></>);
 
 	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
+
+	useEffect(() => {
+		const defaultView = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
+		if (isEmpty(defaultView)) return;
+		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(defaultView)));
+	}, [ticket.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state]);
 
 	return (
 		<CardContainer>
