@@ -26,7 +26,7 @@ import { Button } from '@controls/button';
 import { useEffect, useState } from 'react';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
-import _, { cloneDeep, isEqual, sortBy } from 'lodash';
+import { cloneDeep, isEqual, sortBy } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { Group, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
