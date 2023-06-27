@@ -84,7 +84,7 @@ type GroupSettingsFormProps = {
 	onCancel?: () => void,
 };
 export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFormProps) => {
-	const [isSmart, setIsSmart] = useState(!!value?.group?.rules?.length);
+	const [isSmart, setIsSmart] = useState(false);
 	const [prefixesCombinations] = useState(getAllPrefixesCombinations([]));
 	const [newCollection, setNewCollection] = useState([]);
 	const store = useStore();
@@ -110,7 +110,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 	} = formData;
 
 	const onClickSubmit = (newValues:IGroupSettingsForm) => {
-		if (!newValues.group.rules.length) {
+		if (!isSmart) {
 			delete newValues.group.rules;
 			newValues.group.objects = convertToV5GroupNodes(selectSelectedNodes(store.getState()));
 		}
@@ -124,6 +124,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 	};
 
 	useEffect(() => {
+		// When no value is passed then the group is a new group
 		if (!value) {
 			formData.reset({
 				color: hexToArray(getRandomSuggestedColor()),
@@ -131,13 +132,14 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 				prefix: [],
 				group: {},
 			});
-
+			setIsSmart(false);
 			return;
 		}
 
 		const { objects, ...restGroup } = value.group as Group;
 		const newValue = cloneDeep({ ...value, group: restGroup });
 		formData.reset(newValue);
+		setIsSmart(!!value?.group?.rules?.length);
 	}, [value]);
 
 	return (
