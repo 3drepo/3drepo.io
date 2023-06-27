@@ -69,7 +69,7 @@ export const NewCollectionForm = ({ onChange, value = [], prefixesCombinations }
 						id: 'ticketsGroupSettings.form.newCollection',
 						defaultMessage: 'Parent collection (optional)',
 					})}
-					prefixesCombinations={prefixesCombinations}
+					prefixes={prefixesCombinations}
 				/>
 				<FormTextField
 					name="collection"

@@ -31,7 +31,7 @@ import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContextComponent } from './ticketGroupsContext.component';
 import { GroupSettingsForm } from './groups/groupActionMenu/groupSettingsForm/groupSettingsForm.component';
 
-const getAllPrefixesCombinations = (overrides: GroupOverride[] = []): string[][] => {
+const getPossiblePrefixes = (overrides: GroupOverride[] = []): string[][] => {
 	const prefixes = overrides.map(({ prefix }) => (prefix)).filter(Boolean);
 	const uniquePrefixes = uniqBy(prefixes, JSON.stringify);
 	const allPrefixesWithDuplicates: string[][] = [];
@@ -44,8 +44,7 @@ const getAllPrefixesCombinations = (overrides: GroupOverride[] = []): string[][]
 		});
 	});
 
-	const allPrefixes = uniqBy(allPrefixesWithDuplicates, JSON.stringify);
-	return allPrefixes.sort();
+	return uniqBy(allPrefixesWithDuplicates, JSON.stringify);
 };
 
 interface TicketGroupsProps {
@@ -169,7 +168,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 					value={settingsFormGroups?.[editingOverride.index] as IGroupSettingsForm}
 					onSubmit={onSubmit}
 					onCancel={onCancel}
-					prefixesCombinations={getAllPrefixesCombinations(settingsFormGroups)}
+					prefixes={getPossiblePrefixes(settingsFormGroups)}
 				/>
 			</Popper>
 		</Container>

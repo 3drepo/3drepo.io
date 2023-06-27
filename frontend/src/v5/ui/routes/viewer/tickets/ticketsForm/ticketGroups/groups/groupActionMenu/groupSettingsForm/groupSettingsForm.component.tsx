@@ -65,11 +65,11 @@ type GroupSettingsFormProps = {
 	value?: IGroupSettingsForm,
 	onSubmit?: (value: IGroupSettingsForm) => void,
 	onCancel?: () => void,
-	prefixesCombinations: string[][];
+	prefixes: string[][];
 };
-export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinations }: GroupSettingsFormProps) => {
+export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes }: GroupSettingsFormProps) => {
 	const [isSmart, setIsSmart] = useState(false);
-	const [newCollection, setNewCollection] = useState([]);
+	const [newPrefix, setNewPrefix] = useState([]);
 	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
 
 	const isNewGroup = !value?.group?._id;
@@ -114,7 +114,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinati
 	};
 
 	const handleNewCollectionChange = (collection: string[]) => {
-		setNewCollection(collection);
+		setNewPrefix(collection);
 		setValue('prefix', collection, { shouldDirty: true });
 	};
 
@@ -204,7 +204,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinati
 							})}
 							formError={errors?.prefix}
 							disabled={!isAdmin}
-							prefixesCombinations={prefixesCombinations.concat([newCollection]).sort()}
+							prefixes={prefixes.concat(newPrefix).sort()}
 						/>
 					</FormRow>
 					{
@@ -212,7 +212,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinati
 							<NewCollectionActionMenu
 								TriggerButton={(
 									<NewCollectionLink>
-										{newCollection?.length ? (
+										{newPrefix?.length ? (
 											<FormattedMessage
 												id="ticketsGroupSettings.link.editCollection"
 												defaultMessage="Edit new collection"
@@ -227,9 +227,9 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinati
 								)}
 							>
 								<NewCollectionForm
-									value={newCollection}
+									value={newPrefix}
 									onChange={handleNewCollectionChange}
-									prefixesCombinations={prefixesCombinations}
+									prefixesCombinations={prefixes}
 								/>
 							</NewCollectionActionMenu>
 						)
