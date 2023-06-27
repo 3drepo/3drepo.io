@@ -68,7 +68,7 @@ type GroupSettingsFormProps = {
 	prefixesCombinations: string[][];
 };
 export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinations }: GroupSettingsFormProps) => {
-	const [isSmart, setIsSmart] = useState(!!value?.group?.rules?.length);
+	const [isSmart, setIsSmart] = useState(false);
 	const [newCollection, setNewCollection] = useState([]);
 	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
 
@@ -109,6 +109,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinati
 			delete newValues.group.rules;
 			newValues.group.objects = convertToV5GroupNodes(selectedNodes);
 		}
+
 		onSubmit?.(newValues);
 	};
 
@@ -118,6 +119,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinati
 	};
 
 	useEffect(() => {
+		// When no value is passed then the group is a new group
 		if (!value) {
 			formData.reset({
 				color: hexToArray(getRandomSuggestedColor()),
@@ -125,13 +127,14 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinati
 				prefix: [],
 				group: {},
 			});
-
+			setIsSmart(false);
 			return;
 		}
 
 		const { objects, ...restGroup } = value.group as Group;
 		const newValue = cloneDeep({ ...value, group: restGroup });
 		formData.reset(newValue);
+		setIsSmart(!!value?.group?.rules?.length);
 	}, [value]);
 
 	return (
