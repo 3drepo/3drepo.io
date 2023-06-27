@@ -24,7 +24,7 @@ const { storeFile } = require(`${src}/services/filesManager`);
 const { getRefsByQuery, removeRefsByQuery } = require(`${src}/models/fileRefs`);
 const { fs: { path: fileShareRoot } } = require(`${src}/utils/config`);
 const Path = require('path');
-const { mkdirSync, writeFileSync } = require('fs');
+const { mkdirSync, writeFileSync, unlinkSync } = require('fs');
 
 const IdentifyZombieFiles = require(`${utilScripts}/fileshare/identifyZombieFiles`);
 
@@ -48,7 +48,8 @@ const setupData = async (data) => {
 	mkdirSync(toyPath);
 
 	/* eslint-disable no-param-reassign */
-	data.referencedLinks = await findRefs(teamspace, collection, data.referencedFiles);
+	const [noFileRef, ...others] = await findRefs(teamspace, collection, data.referencedFiles);
+	data.referencedLinks = others;
 	data.zombiedLinks = await findRefs(teamspace, collection, data.zombieFiles);
 	data.toyLinks = times(5, () => {
 		const toyFile = generateRandomString();
@@ -56,6 +57,9 @@ const setupData = async (data) => {
 		return Path.join(toyFolder, toyFile);
 	});
 	/* eslint-enable no-param-reassign */
+
+	// have a ref entry with no file to ensure this is handled without failure
+	unlinkSync(Path.join(fileShareRoot, noFileRef));
 
 	await removeRefsByQuery(teamspace, collection, { _id: { $in: data.zombieFiles } });
 };
@@ -77,14 +81,14 @@ const runTest = (data) => {
 		});
 
 		test('Should remove zombie files if flag is set', async () => {
-			await IdentifyZombieFiles.run(true);
+			await IdentifyZombieFiles.run(undefined, true);
 
 			checkFileExists(data.referencedLinks, true);
 			checkFileExists(data.toyLinks, true);
 			checkFileExists(data.zombiedLinks, false);
 
 			// re-run should not be removing any more files
-			await IdentifyZombieFiles.run(true);
+			await IdentifyZombieFiles.run(undefined, true);
 			checkFileExists(data.referencedLinks, true);
 			checkFileExists(data.toyLinks, true);
 			checkFileExists(data.zombiedLinks, false);
