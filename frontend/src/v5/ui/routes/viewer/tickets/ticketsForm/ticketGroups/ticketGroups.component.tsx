@@ -63,6 +63,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const dispatch = useDispatch();
 	const [editingOverride, setEditingOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: OverrideType.COLORED });
 	const [highglightedOverride, setHighlightedOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: null });
+	const [selectedColoredIndexes, setSelectedColoredIndexes] = useState([]);
 
 	const state: Partial<ViewpointState> = value.state || {};
 	const leftPanels = useSelector(selectLeftPanels);
@@ -91,12 +92,6 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const onSetEditGroup = (colored:boolean) => (index: number) => {
 		const type = colored ? OverrideType.COLORED : OverrideType.HIDDEN;
 		setEditingOverride({ index, type });
-	};
-
-	const onSelectedColoredGroupChange = (selectedColored: GroupOverride[]) => {
-		const colored = selectedColored.filter(c => (c.group as Group).objects);
-		const view = { state: { colored } } as Viewpoint;
-		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
 	};
 
 	const onCancel = () => {
@@ -130,12 +125,18 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		}
 	}, [highglightedOverride]);
 
+	useEffect(() => {
+		const colored = selectedColoredIndexes.map((i) => state.colored[i]).filter((c) => (c.group as Group).objects);
+		const view = { state: { colored } } as Viewpoint;
+		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
+	}, [selectedColoredIndexes]);
+
 	return (
 		<Container onClick={() => setHighlightedOverride({ index: -1, type: OverrideType.COLORED })}>
 			<TicketGroupsContextComponent
 				groupType="colored"
 				onDeleteGroup={onDeleteColoredGroup}
-				onSelectedGroupsChange={onSelectedColoredGroupChange}
+				onSelectedGroupsChange={setSelectedColoredIndexes}
 				overrides={state.colored || []}
 				onEditGroup={onSetEditGroup(true)}
 				highlightedIndex={getHighlightedIndex(OverrideType.COLORED)}
