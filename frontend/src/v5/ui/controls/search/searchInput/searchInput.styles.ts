@@ -63,7 +63,7 @@ export const TextField = styled(TextFieldComponent)<{ multiline: boolean }>`
 		padding-left: 7px;
 		box-sizing: border-box;
 	}
-	.MuiInputAdornment-root + ${/* sc-selector */ SearchChip} .MuiChip-root, .MuiInputAdornment-root + .MuiInputBase-input {
+	.MuiInputAdornment-root + :is(${/* sc-selector */ SearchChip} .MuiChip-root, .MuiInputBase-input) {
 		margin-left: -3px;
 	}
 `;
