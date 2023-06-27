@@ -46,9 +46,10 @@ import { TicketGroupsContext } from '../../ticketGroupsContext';
 type GroupProps = { override: GroupOverride, index: number };
 export const GroupItem = ({ override, index }: GroupProps) => {
 	const dispatch = useDispatch();
-	const { groupType, selectedIndexes, highlightedIndex, setHighlightedIndex, toggleGroupState, deleteGroup, editGroup } = useContext(TicketGroupsContext);
+	const { groupType, highlightedIndex, setHighlightedIndex, toggleGroupState, getGroupState, deleteGroup, editGroup } = useContext(TicketGroupsContext);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const { group, color, opacity } = override;
+	const checked = getGroupState(index);
 
 	const containEvent = (e) => {
 		e.preventDefault();
@@ -131,7 +132,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 				)}
 			</Headline>
 			<GroupToggle
-				checked={selectedIndexes.includes(index)}
+				checked={checked}
 				onClick={handleToggleClick}
 			/>
 		</Container>

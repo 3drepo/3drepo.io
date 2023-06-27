@@ -16,16 +16,10 @@
  */
 
 import { GroupOverride } from '@/v5/store/tickets/tickets.types';
-import _, { isEqual } from 'lodash';
+import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { TicketGroupsContext } from './ticketGroupsContext';
-import { GroupNode, GroupState, addIndex, createTreeNode, groupOverridesToTree } from './ticketGroupsContext.helper';
-
-const OPPOSITE_GROUP_STATE = {
-	[GroupState.CHECKED]: GroupState.UNCHECKED,
-	[GroupState.UNCHECKED]: GroupState.CHECKED,
-	[GroupState.INDETERMINATE]: GroupState.CHECKED,
-} as const;
+import { GroupState, IndexedOverride, addIndex } from './ticketGroupsContext.helper';
 
 /* eslint-disable no-param-reassign */
 type TicketGroupsContextComponentProps = {
@@ -43,172 +37,75 @@ export const TicketGroupsContextComponent = ({
 	overrides,
 	onDeleteGroup,
 	onSelectedGroupsChange,
-	onEditGroup: editGroup,
+	onEditGroup,
 	...contextValue
 }: TicketGroupsContextComponentProps) => {
-	const [indexedOverrides, setIndexedOverrides] = useState(addIndex(overrides));
-	const [groupsTree, setGroupTree] = useState<GroupNode>(null);
-	const [selectedIndexes, setSelectedIndexes] = useState<number[]>([]);
+	// overrides should arrive already indexed
+	const [indexedOverrides, setIndexedOverrides] = useState<IndexedOverride[]>(_.sortBy(addIndex(overrides), 'prefix'));
+	const [selectedIndexes, setSelectedIndexes] = useState<Set<number>>(new Set(indexedOverrides.map((o, i) => i)));
 
-	const getGroupNode = (prefix = []): GroupNode => {
-		if (!groupsTree) return null;
-		let currentNode = groupsTree;
-		prefix.forEach((prefixSegment) => {
-			currentNode = currentNode.children.find((c) => c.prefixSegment === prefixSegment);
-		});
-		return currentNode;
-	};
-
-	const getNodeParent = (index) => getGroupNode(indexedOverrides.find((g) => g.index === index).prefix);
-
-	const getGroupLeaf = (index) => getNodeParent(index).children.find((c) => c.index === index);
-
-	const getCollectionState = (prefix?) => getGroupNode(prefix)?.state ?? null;
-
-	const backpropagateNodeUpdate = (node: GroupNode) => {
-		if (node.children.length) {
-			const firstChildState = node.children[0].state;
-			const allChildrenStatesAreEqual = node.children.every((c) => c.state === firstChildState);
-			const newState = allChildrenStatesAreEqual ? firstChildState : GroupState.INDETERMINATE;
-			if (node.state === newState) return;
-			node.state = newState;
-		}
-		if (node.parent) {
-			backpropagateNodeUpdate(node.parent);
-		}
-	};
-
-	const updateTree = (currentNode) => {
-		backpropagateNodeUpdate(currentNode);
-		const newTree = { ...groupsTree };
-		// next line is necessary because after the line above the reference
-		// to the parent node in root's children does not match the root anymore
-		newTree.children.forEach((c) => { c.parent = newTree; });
-		setGroupTree(newTree);
-	};
-
-	const setGroupNodeState = (groupNode: GroupNode, newState: Exclude<GroupState, GroupState.INDETERMINATE>) => {
-		if (groupNode.state === newState) return;
-		groupNode.state = newState;
-		groupNode.children.forEach((c) => setGroupNodeState(c, newState));
-	};
+	const getGroupState = (index) => selectedIndexes.has(index);
 
 	const toggleGroupState = (index) => {
-		const groupLeaf = getGroupLeaf(index);
-		setGroupNodeState(groupLeaf, OPPOSITE_GROUP_STATE[groupLeaf.state]);
-		updateTree(groupLeaf);
-	};
-
-	const toggleCollectionState = (prefix = []) => {
-		const groupNode: GroupNode = getGroupNode(prefix);
-		const newState = OPPOSITE_GROUP_STATE[groupNode.state];
-		groupNode.children.forEach((node) => setGroupNodeState(node, newState));
-		updateTree(groupNode);
-	};
-
-	const shiftIndex = (node: GroupNode, removedIndex: number) => {
-		if (node.index && node.index > removedIndex) {
-			node.index--;
-			return;
+		if (selectedIndexes.has(index)) {
+			selectedIndexes.delete(index);
+		} else {
+			selectedIndexes.add(index);
 		}
-		node.children.forEach((n) => shiftIndex(n, removedIndex));
+		setSelectedIndexes(new Set(selectedIndexes));
 	};
 
-	const deleteCollectionIfEmpty = (node: GroupNode) => {
-		if (node.children.length || !node.parent) return node;
-		const { parent } = node;
-		parent.children = parent.children.filter((c) => c !== node);
-		return deleteCollectionIfEmpty(parent);
+	const getCollectionState = (indexes = []) => {
+		if (!indexes.length) return GroupState.UNCHECKED;
+		const firstDescendantState = getGroupState(indexes[0]);
+		if (!indexes.every((index) => getGroupState(index) === firstDescendantState)) return GroupState.INDETERMINATE;
+		return firstDescendantState ? GroupState.CHECKED : GroupState.UNCHECKED;
 	};
 
-	const deleteGroup = (index: number) => {
-		if (onDeleteGroup) {
-			const parent = getNodeParent(index);
-			// update tree
-			parent.children = parent.children.filter((c) => c.index !== index);
-			shiftIndex(groupsTree, index);
-			indexedOverrides.splice(index, 1);
-
-			// update the overrides
-			setIndexedOverrides(indexedOverrides.map((override) => {
-				if (override.index < index) return override;
-				return { ...override, index: override.index - 1 };
-			}));
-
-			const closestAncestorWithChildren = deleteCollectionIfEmpty(parent);
-			updateTree(closestAncestorWithChildren);
-			onDeleteGroup(index);
+	const toggleCollectionState = (indexes = []) => {
+		if (getCollectionState(indexes) === GroupState.CHECKED) {
+			indexes.forEach((i) => selectedIndexes.delete(i));
+		} else {
+			indexes.forEach((i) => selectedIndexes.add(i));
 		}
+		setSelectedIndexes(new Set(selectedIndexes));
 	};
 
-	const getSelectedIndexes = (node = groupsTree, indexes = []) => {
-		if (!node?.children.length) {
-			if (node === groupsTree) return [];
-			return node.state === GroupState.CHECKED ? node.index : [];
-		}
-		return node.children.flatMap((c) => getSelectedIndexes(c, indexes));
-	};
-
-	const getOverridesFromIndexes = (indexes) => {
-		if (!groupsTree) return [];
-		return indexes.map((idx) => {
-			const { index, ...override } = indexedOverrides[idx];
-			return override;
-		});
+	const deleteGroup = (index) => {
+		selectedIndexes.delete(index);
+		const shiftedIndexes = Array.from(selectedIndexes).map((idx) => (idx < index ? idx : idx - 1));
+		setSelectedIndexes(new Set(shiftedIndexes));
+		onDeleteGroup(index);
 	};
 
 	useEffect(() => {
-		const isColored = contextValue.groupType === 'colored';
-		const tree = groupOverridesToTree(indexedOverrides, isColored ? GroupState.CHECKED : GroupState.UNCHECKED);
-		setGroupTree(tree);
-	}, []);
-
-	useEffect(() => {
-		const newSelectedIndexes = getSelectedIndexes();
-		if (isEqual(newSelectedIndexes, selectedIndexes)) return;
-		setSelectedIndexes(newSelectedIndexes);
-		const selectedOverrides = _.orderBy(getOverridesFromIndexes(newSelectedIndexes), 'prefix', 'desc');
-		onSelectedGroupsChange?.(selectedOverrides);
-	}, [groupsTree]);
-
-	useEffect(() => {
-		// overrides length increased as a new override was added
+		const newIndexedOverrides = addIndex(overrides || []);
 		if (overrides.length > indexedOverrides.length) {
-			const index = overrides.length - 1;
-			const newOverride = overrides[index];
-			const firstPrefixSegments = newOverride.prefix.slice(0, -1);
-			// @ts-ignore
-			const lastPrefixSegment = newOverride.prefix.at(-1);
-
-			let parent = getGroupNode(firstPrefixSegments);
-			if (lastPrefixSegment) {
-				const child = parent.children.find(({ prefixSegment }) => prefixSegment === lastPrefixSegment);
-				if (!child) {
-					const newColletionNode = createTreeNode(null, lastPrefixSegment, parent, GroupState.CHECKED, null);
-					parent.children.push(newColletionNode);
-					parent = newColletionNode;
-				} else {
-					parent = child;
-				}
-			}
-			const newNode = createTreeNode(index, null, parent, GroupState.CHECKED, newOverride);
-			parent.children.push(newNode);
-			updateTree(parent);
+			// overrides length increased as new overrides were added
+			const indexesToSelect = Array.from({ length: overrides.length - indexedOverrides.length }, (el, i) => i + indexedOverrides.length);
+			indexesToSelect.forEach((i) => selectedIndexes.add(i));
+			setSelectedIndexes(new Set(selectedIndexes));
 		}
-		setIndexedOverrides(addIndex(overrides));
+		setIndexedOverrides(_.sortBy(newIndexedOverrides, 'prefix'));
 	}, [overrides]);
+
+	useEffect(() => {
+		if (!onSelectedGroupsChange) return;
+		const selectedOverrides = Array.from(selectedIndexes).map((index) => indexedOverrides[index]);
+		onSelectedGroupsChange(selectedOverrides);
+	}, [selectedIndexes]);
 
 	return (
 		<TicketGroupsContext.Provider
 			value={{
 				...contextValue,
+				deleteGroup,
+				editGroup: onEditGroup,
+				getGroupState,
 				toggleGroupState,
 				toggleCollectionState,
 				getCollectionState,
-				selectedIndexes,
 				indexedOverrides,
-				deleteGroup,
-				editGroup,
 			}}
 		>
 			{children}
