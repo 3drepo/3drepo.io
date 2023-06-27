@@ -17,7 +17,7 @@
 
 /* eslint-disable no-param-reassign */
 import { formatMessage } from '@/v5/services/intl';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
@@ -70,8 +70,8 @@ type GroupSettingsFormProps = {
 export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinations }: GroupSettingsFormProps) => {
 	const [isSmart, setIsSmart] = useState(!!value?.group?.rules?.length);
 	const [newCollection, setNewCollection] = useState([]);
+	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
 
-	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const isNewGroup = !value?.group?._id;
 	const selectedNodes = useSelector(selectSelectedNodes);
 
@@ -316,7 +316,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixesCombinati
 						</Button>
 					</ActionMenuItem>
 					{ isAdmin && (
-						<ActionMenuItem disabled={!getFormIsValid()}>
+						<ActionMenuItem>
 							<SubmitButton
 								size="medium"
 								fullWidth={false}
