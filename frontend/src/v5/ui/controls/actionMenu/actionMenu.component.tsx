@@ -40,10 +40,11 @@ export const ActionMenu = ({
 	const [anchorEl, setAnchorEl] = useState(null);
 
 	const handleOpen = (e) => {
+		e.stopPropagation();
+		e.preventDefault();
 		if (disabled) return;
 		setAnchorEl(e.currentTarget.children[0]);
 		onOpen?.();
-		e.stopPropagation();
 	};
 
 	const handleClose = () => {
@@ -52,9 +53,10 @@ export const ActionMenu = ({
 	};
 
 	const handlePopoverClick = (e: Event) => {
+		e.stopPropagation();
+		e.preventDefault();
 		PopoverProps?.onClick?.(e);
 		handleClose();
-		e.stopPropagation();
 	};
 
 	return (
