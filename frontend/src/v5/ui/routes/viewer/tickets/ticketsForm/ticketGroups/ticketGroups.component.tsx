@@ -71,7 +71,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const store = useStore();
 	const settingsFormGroups = value.state?.[((editingOverride.type === OverrideType.COLORED) ? 'colored' : 'hidden')];
 
-	const handleSetHighlightedIndex = (type) => (index) => {
+	const onSetHighlightedIndex = (type) => (index) => {
 		setHighlightedOverride({ type, index });
 	};
 
@@ -89,8 +89,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		}
 	};
 
-	const onSetEditGroup = (colored:boolean) => (index: number) => {
-		const type = colored ? OverrideType.COLORED : OverrideType.HIDDEN;
+	const onSetEditGroup = (type) => (index) => {
 		setEditingOverride({ index, type });
 	};
 
@@ -138,9 +137,9 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				onDeleteGroup={onDeleteColoredGroup}
 				onSelectedGroupsChange={setSelectedColoredIndexes}
 				overrides={state.colored || []}
-				onEditGroup={onSetEditGroup(true)}
+				onEditGroup={onSetEditGroup(OverrideType.COLORED)}
 				highlightedIndex={getHighlightedIndex(OverrideType.COLORED)}
-				setHighlightedIndex={handleSetHighlightedIndex(OverrideType.COLORED)}
+				setHighlightedIndex={onSetHighlightedIndex(OverrideType.COLORED)}
 			>
 				<GroupsAccordion
 					title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
@@ -149,9 +148,9 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 			<TicketGroupsContextComponent
 				groupType="hidden"
 				overrides={state.hidden || []}
-				onEditGroup={onSetEditGroup(false)}
+				onEditGroup={onSetEditGroup(OverrideType.HIDDEN)}
 				highlightedIndex={getHighlightedIndex(OverrideType.HIDDEN)}
-				setHighlightedIndex={handleSetHighlightedIndex(OverrideType.HIDDEN)}
+				setHighlightedIndex={onSetHighlightedIndex(OverrideType.HIDDEN)}
 			>
 				<GroupsAccordion
 					title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
