@@ -31,12 +31,12 @@ import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
 import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
 import { useStore } from 'react-redux';
+import { ViewpointsActions } from '@/v4/modules/viewpoints/viewpoints.redux';
 import { AdditionalProperties, TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
 import { TicketContext, TicketDetailsView } from '../ticket.context';
-import { ViewpointsActions } from '@/v4/modules/viewpoints/viewpoints.redux';
 
 export const TicketDetailsCard = () => {
 	const { dispatch } = useStore();
