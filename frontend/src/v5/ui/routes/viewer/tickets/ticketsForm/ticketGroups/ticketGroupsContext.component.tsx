@@ -42,18 +42,11 @@ export const TicketGroupsContextComponent = ({
 }: TicketGroupsContextComponentProps) => {
 	// overrides should arrive already indexed
 	const [indexedOverrides, setIndexedOverrides] = useState<IndexedOverride[]>(_.sortBy(addIndex(overrides), 'prefix'));
-	const [selectedIndexes, setSelectedIndexes] = useState<Set<number>>(new Set(indexedOverrides.map((o, i) => i)));
+	const [checkedIndexes, setCheckedIndexes] = useState<number[]>(overrides.map((o, i) => i));
 
-	const getGroupIsChecked = (index) => selectedIndexes.has(index);
+	const getGroupIsChecked = (index) => checkedIndexes.includes(index);
 
-	const toggleGroup = (index) => {
-		if (selectedIndexes.has(index)) {
-			selectedIndexes.delete(index);
-		} else {
-			selectedIndexes.add(index);
-		}
-		setSelectedIndexes(new Set(selectedIndexes));
-	};
+	const toggleGroup = (index) => setCheckedIndexes(_.xor(checkedIndexes, [index]));
 
 	const getCollectionState = (indexes = []) => {
 		if (!indexes.length) return GroupState.UNCHECKED;
@@ -62,38 +55,31 @@ export const TicketGroupsContextComponent = ({
 		return firstDescendantState ? GroupState.CHECKED : GroupState.UNCHECKED;
 	};
 
-	const toggleCollection = (indexes = []) => {
-		if (getCollectionState(indexes) === GroupState.CHECKED) {
-			indexes.forEach((i) => selectedIndexes.delete(i));
-		} else {
-			indexes.forEach((i) => selectedIndexes.add(i));
-		}
-		setSelectedIndexes(new Set(selectedIndexes));
-	};
+	const toggleCollection = (indexes = []) => setCheckedIndexes(
+		getCollectionState(indexes) === GroupState.CHECKED
+			? _.without(checkedIndexes, ...indexes)
+			: _.union(checkedIndexes, indexes),
+	);
 
 	const deleteGroup = (index) => {
-		selectedIndexes.delete(index);
-		const shiftedIndexes = Array.from(selectedIndexes).map((idx) => (idx < index ? idx : idx - 1));
-		setSelectedIndexes(new Set(shiftedIndexes));
+		const newSelectedIndexes = _.without(checkedIndexes, index).map((idx) => (idx < index ? idx : idx - 1));
+		setCheckedIndexes(newSelectedIndexes);
 		onDeleteGroup(index);
 	};
 
 	useEffect(() => {
-		const newIndexedOverrides = addIndex(overrides || []);
-		const newSelectedIndexes = selectedIndexes;
 		if (overrides.length > indexedOverrides.length) {
 			// overrides length increased as new overrides were added
-			const indexesToSelect = Array.from({ length: overrides.length - indexedOverrides.length }, (el, i) => i + indexedOverrides.length);
-			indexesToSelect.forEach((i) => newSelectedIndexes.add(i));
+			const newIndexesToSelect = Array.from({ length: overrides.length - indexedOverrides.length }, (el, i) => i + indexedOverrides.length);
+			setCheckedIndexes(_.union(checkedIndexes, newIndexesToSelect));
 		}
-		setSelectedIndexes(new Set(newSelectedIndexes));
-		setIndexedOverrides(_.sortBy(newIndexedOverrides, 'prefix'));
+		setIndexedOverrides(_.sortBy(addIndex(overrides || []), 'prefix'));
 	}, [overrides]);
 
 	useEffect(() => {
 		if (!onSelectedGroupsChange) return;
-		onSelectedGroupsChange(Array.from(selectedIndexes));
-	}, [selectedIndexes]);
+		onSelectedGroupsChange(Array.from(checkedIndexes));
+	}, [checkedIndexes]);
 
 	return (
 		<TicketGroupsContext.Provider
