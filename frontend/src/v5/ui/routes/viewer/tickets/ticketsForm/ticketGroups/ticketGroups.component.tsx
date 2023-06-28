@@ -123,7 +123,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	}, [highlightedOverride]);
 
 	const onSelectedColoredGroupsChange = (indexes) => {
-		const colored = indexes.map((i) => state.colored[i]).filter((c) => (c.group as Group).objects);
+		const colored = indexes.map((i) => state.colored[i]);
 		const view = { state: { colored } } as Viewpoint;
 		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
 	};
