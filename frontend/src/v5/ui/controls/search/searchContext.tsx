@@ -16,13 +16,13 @@
  */
 
 import { get, isString } from 'lodash';
-import { Dispatch, SetStateAction, createContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 
 export interface SearchContextType<T> {
 	items: T[];
 	filteredItems: T[];
 	query: string;
-	setQuery: Dispatch<SetStateAction<string>>;
+	setQuery: (query: string) => void;
 }
 
 const defaultValue: SearchContextType<any> = { items: [], filteredItems: [], query: '', setQuery: () => {} };
