@@ -34,7 +34,7 @@ import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
 import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
 import { useSelector } from 'react-redux';
 import { selectSelectedNodes } from '@/v4/modules/tree/tree.selectors';
-import { convertToV5GroupNodes } from '@/v5/helpers/viewpoint.helpers';
+import { convertToV4GroupNodes, convertToV5GroupNodes } from '@/v5/helpers/viewpoint.helpers';
 import { getRandomSuggestedColor } from '@controls/inputs/colorPicker/colorPicker.helpers';
 import { hexToArray } from '@/v4/helpers/colors';
 import { GroupsCollectionSelect } from '../../addOrEditGroup/groupSettingsForm.component.tsx/groupsCollectionSelect/groupsCollectionSelect.component';
@@ -70,10 +70,11 @@ type GroupSettingsFormProps = {
 export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes }: GroupSettingsFormProps) => {
 	const [isSmart, setIsSmart] = useState(false);
 	const [newPrefix, setNewPrefix] = useState([]);
+	const [inputObjects, setInputObjects] = useState([]);
 	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
 
 	const isNewGroup = !value?.group?._id;
-	const selectedNodes = convertToV5GroupNodes(useSelector(selectSelectedNodes));
+	const selectedNodes = useSelector(selectSelectedNodes);
 
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
@@ -99,7 +100,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes }: Group
 		if (!selectedNodes.length) return false;
 		const objectsAreDifferent = !isEqual(
 			sortBy(selectedNodes),
-			sortBy(value?.group?.objects || []),
+			inputObjects,
 		);
 		return (isDirty || objectsAreDifferent);
 	};
@@ -107,7 +108,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes }: Group
 	const onClickSubmit = (newValues:IGroupSettingsForm) => {
 		if (!isSmart) {
 			delete newValues.group.rules;
-			newValues.group.objects = selectedNodes;
+			newValues.group.objects = convertToV5GroupNodes(selectedNodes);
 		}
 
 		onSubmit?.(newValues);
@@ -135,6 +136,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes }: Group
 		const newValue = cloneDeep({ ...value, group: restGroup });
 		formData.reset(newValue);
 		setIsSmart(!!value?.group?.rules?.length);
+		setInputObjects(convertToV4GroupNodes(value?.group?.objects || []));
 	}, [value]);
 
 	return (
