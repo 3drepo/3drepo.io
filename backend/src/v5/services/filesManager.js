@@ -21,7 +21,6 @@ const {
 	getRefEntryByQuery,
 	getRefsByQuery,
 	insertRef,
-	removeRef,
 	removeRefsByQuery,
 } = require('../models/fileRefs');
 const FSHandler = require('../handler/fs');
@@ -156,15 +155,15 @@ FilesManager.getFileAsStream = async (teamspace, collection, fileName, chunkInfo
 	return getFileAsStream(teamspace, collection, refEntry, chunkInfo);
 };
 
-FilesManager.removeFile = async (teamspace, collection, id) => {
+FilesManager.removeFiles = async (teamspace, collection, ids) => {
 	try {
-		const existingRef = await getRefEntry(teamspace, collection, id);
-		await removeRef(teamspace, collection, id);
-		await removeFilesByStorageType(teamspace, collection, existingRef.type, [existingRef.link]);
+		await removeFilesWithQuery(teamspace, collection, { _id: { $in: ids } });
 	} catch {
-		// do nothing if file does not exist
+		// do nothing if files does not exist
 	}
 };
+
+FilesManager.removeFile = (teamspace, collection, id) => FilesManager.removeFiles(teamspace, collection, [id]);
 
 FilesManager.storeFile = async (teamspace, collection, id, data, meta = {}) => {
 	const mimeTypeProm = fileMimeFromBuffer(data);
@@ -184,6 +183,27 @@ FilesManager.storeFile = async (teamspace, collection, id, data, meta = {}) => {
 	}
 
 	const mimeType = (await mimeTypeProm) ?? DEFAULT_MIME_TYPE;
+	await insertRef(teamspace, collection, { ...meta, ...refInfo, _id: id, mimeType });
+};
+
+FilesManager.storeFileStream = async (teamspace, collection, id, dataStream, meta = {}) => {
+	await FilesManager.removeFile(teamspace, collection, id);
+	let refInfo;
+
+	switch (config.defaultStorage) {
+	case 'fs':
+		refInfo = await FSHandler.storeFileStream(dataStream);
+		break;
+	case 'gridfs':
+		logger.logError('storeFileStream is not supported on GridFS services');
+		throw templates.unknown;
+	default:
+		logger.logError(`Unrecognised external service: ${config.defaultStorage}`);
+		throw templates.unknown;
+	}
+
+	const mimeType = DEFAULT_MIME_TYPE;
+
 	await insertRef(teamspace, collection, { ...meta, ...refInfo, _id: id, mimeType });
 };
 
