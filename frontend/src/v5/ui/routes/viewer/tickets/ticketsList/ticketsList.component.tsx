@@ -106,8 +106,8 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	}, []);
 
 	const filterItems = (items, query: string) => {
-		if (!query.length) return items;
-		const queries = JSON.parse(query);
+		const queries = query ? JSON.parse(query) : [];
+		if (!queries.length) return items;
 		return items.filter((ticket) => {
 			const templateCode = availableTemplates.find((template) => template._id === ticket.type).code;
 			const ticketCode = `${templateCode}:${ticket.number}`;
