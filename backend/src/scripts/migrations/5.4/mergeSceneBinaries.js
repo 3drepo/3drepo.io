@@ -64,7 +64,7 @@ const copyDataToFile = async (teamspace, collection, id, extRefs, fileData) => {
 			name: fileData.fileName,
 			start: fileData.size,
 		},
-		element: {},
+		elements: {},
 	};
 	let meshSizeAccum = 0;
 	for (const elementName of Object.keys(extRefs)) {
@@ -73,7 +73,7 @@ const copyDataToFile = async (teamspace, collection, id, extRefs, fileData) => {
 
 			let elementSize = 0;
 
-			refEntry.element[elementName] = {
+			refEntry.elements[elementName] = {
 				start: meshSizeAccum,
 			};
 
@@ -87,7 +87,7 @@ const copyDataToFile = async (teamspace, collection, id, extRefs, fileData) => {
 				fileStream.readStream.on('error', reject);
 			});
 
-			refEntry.element[elementName].size = elementSize;
+			refEntry.elements[elementName].size = elementSize;
 			meshSizeAccum += elementSize;
 		} catch (err) {
 			if (err?.status === 404) {
@@ -151,7 +151,7 @@ const processCollection = async (teamspace, collection) => {
 		}
 	} while (records.length);
 
-	if (fileData.size) {
+	if (fileData?.size) {
 		logger.logInfo(`\t\t\tUpdating ${pendingIds.length} entries...`);
 		await commitFileStream(teamspace, collection, fileData);
 	}
