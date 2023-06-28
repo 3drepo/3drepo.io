@@ -58,7 +58,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		setSelectedTemplates(new Set(selectedTemplates));
 	};
 
-	const filterCompleted = (ticket) => {
+	const matchesCompletedState = (ticket) => {
 		const issuePropertyStatus = get(ticket, 'properties.Status');
 		const treatmentStatus = get(ticket, 'modules.safetibase.Treatment Status');
 
@@ -71,9 +71,8 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	useEffect(() => {
 		const filtered = [];
 		tickets.forEach((ticket) => {
-			const templateChipFilter = !selectedTemplates.size || selectedTemplates.has(ticket.type);
-			const completedChipFilter = filterCompleted(ticket);
-			if (templateChipFilter && completedChipFilter) filtered.push(ticket);
+			const matchesTemplateFilters = !selectedTemplates.size || selectedTemplates.has(ticket.type);
+			if (matchesTemplateFilters && matchesCompletedState(ticket)) filtered.push(ticket);
 		});
 		setFilteredTickets(filtered);
 	}, [selectedTemplates, showingCompleted]);
