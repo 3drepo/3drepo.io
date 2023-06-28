@@ -69,10 +69,9 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	};
 
 	useEffect(() => {
-		const filtered = [];
-		tickets.forEach((ticket) => {
+		const filtered = tickets.filter((ticket) => {
 			const matchesTemplateFilters = !selectedTemplates.size || selectedTemplates.has(ticket.type);
-			if (matchesTemplateFilters && matchesCompletedState(ticket)) filtered.push(ticket);
+			return (matchesTemplateFilters && matchesCompletedState(ticket));
 		});
 		setFilteredTickets(filtered);
 	}, [selectedTemplates, showingCompleted]);
