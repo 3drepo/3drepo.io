@@ -34,13 +34,13 @@ type GroupsProps = {
 	level?: number,
 };
 export const Groups = ({ indexedOverrides, level = 0 }: GroupsProps) => {
-	const { getCollectionState, toggleCollectionState } = useContext(TicketGroupsContext);
+	const { getCollectionState, toggleCollection } = useContext(TicketGroupsContext);
 	const [overrideItems, overrideBatches] = partition(indexedOverrides, (o) => (o.prefix?.length || 0) === level);
 	const overridesByPrefix = groupBy(overrideBatches, (o) => o.prefix[level]);
 
 	const handleCheckboxClick = (e, overrides) => {
 		e.stopPropagation();
-		toggleCollectionState(overrides.map(({ index }) => index));
+		toggleCollection(overrides.map(({ index }) => index));
 	};
 
 	return (

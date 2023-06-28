@@ -30,7 +30,7 @@ type GroupsAccordionProps = { title: any };
 export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 	const {
 		getCollectionState,
-		toggleCollectionState,
+		toggleCollection,
 		indexedOverrides,
 		editGroup,
 	} = useContext(TicketGroupsContext);
@@ -40,7 +40,7 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 
 	const toggleCheckbox = (e) => {
 		e.stopPropagation();
-		toggleCollectionState(indexes);
+		toggleCollection(indexes);
 	};
 
 	const addNewGroup = () => {
