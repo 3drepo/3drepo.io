@@ -33,7 +33,10 @@ class GridFSHandler {
 		});
 	}
 
-	getFile(account, col, file) {
+	getFile(account, col, file, chunkInfo) {
+		if(chunkInfo) {
+			return Promise.reject("Partial file read is not supported");
+		}
 		return DB.getFileFromGridFS(account, cleanColName(col), file);
 	}
 

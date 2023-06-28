@@ -320,7 +320,7 @@ const testGetFileAsStream = () => {
 			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
 
 			expect(FSHandler.getFileStream).toHaveBeenCalledTimes(1);
-			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link);
+			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link, undefined);
 		});
 
 		test('should return a stream of the reference is found (gridFs)', async () => {
@@ -340,7 +340,7 @@ const testGetFileAsStream = () => {
 			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
 
 			expect(GridFSHandler.getFileStream).toHaveBeenCalledTimes(1);
-			expect(GridFSHandler.getFileStream).toHaveBeenCalledWith(teamspace, collection, fileEntry.link);
+			expect(GridFSHandler.getFileStream).toHaveBeenCalledWith(teamspace, collection, fileEntry.link, undefined);
 		});
 	});
 };
@@ -381,7 +381,7 @@ const testGetFileWithMetaAsStream = () => {
 				.resolves.toEqual({ readStream, size: fileEntry.size, mimeType: DEFAULT_MIME_TYPE });
 
 			expect(FSHandler.getFileStream).toHaveBeenCalledTimes(1);
-			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link);
+			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link, undefined);
 		});
 
 		test('should return a stream of the reference is found (gridFs)', async () => {
@@ -394,7 +394,7 @@ const testGetFileWithMetaAsStream = () => {
 				.resolves.toEqual({ readStream, size: fileEntry.size, mimeType: DEFAULT_MIME_TYPE });
 
 			expect(GridFSHandler.getFileStream).toHaveBeenCalledTimes(1);
-			expect(GridFSHandler.getFileStream).toHaveBeenCalledWith(teamspace, collection, fileEntry.link);
+			expect(GridFSHandler.getFileStream).toHaveBeenCalledWith(teamspace, collection, fileEntry.link, undefined);
 		});
 	});
 };
