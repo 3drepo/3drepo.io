@@ -114,7 +114,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes }: Group
 	};
 
 	const handleNewCollectionChange = (collection: string[]) => {
-		setNewPrefix(collection);
+		setNewPrefix([collection]);
 		setValue('prefix', collection, { shouldDirty: true });
 	};
 
