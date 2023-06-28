@@ -64,6 +64,8 @@ export const SearchInputWithChips = ({ variant = 'filled', placeholder, ...props
 					InputProps={{
 						...params.InputProps,
 						startAdornment: (
+							// Mui Autocomplete sets the startAdornment to be the query chips
+							// therefore this is required to prevent the search icon and chips overwriting eachother
 							<>
 								<StartAdornment>
 									<SearchIcon />
