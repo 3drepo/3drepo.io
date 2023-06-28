@@ -16,14 +16,20 @@
  */
 import styled, { css } from 'styled-components';
 import {
+	IconButton as BaseIconButton,
 	InputAdornment as BaseInputAdornment,
 	Autocomplete as BaseAutocomplete,
-	TextField as TextFieldComponent,
+	TextField as BaseTextField,
 } from '@mui/material';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 
-export const Autocomplete = styled(BaseAutocomplete)`
-	margin: 8px;
+export const IconButton = styled(BaseIconButton)`
+	padding: 6px;
+	width: 22px;
+
+	svg {
+		height: 9px;
+	}
 `;
 
 export const SearchChip = styled(FilterChip)`
@@ -34,46 +40,74 @@ export const SearchChip = styled(FilterChip)`
 	}
 `;
 
-export const TextField = styled(TextFieldComponent)<{ multiline: boolean }>`
-	margin: 0;
-	&.MuiFormControl-root .MuiInputBase-root.MuiAutocomplete-inputRoot {
-		padding: 5px 5px 5px 32px;
-		gap: 3px;
-		${({ multiline }) => multiline && css`
+export const Autocomplete = styled(BaseAutocomplete)`
+	margin: 8px;
+	.MuiTextField-root {
+		margin: 0;
+		&.MuiFormControl-root .MuiInputBase-root.MuiAutocomplete-inputRoot {
+			padding: 5px 5px 5px 32px;
+			gap: 3px;
 			height: unset;
 			min-height: 32px;
-		`}
-		.MuiInputBase-input {
-			height: 1rem;
-		}
-		.MuiAutocomplete-endAdornment {
-			margin: 0 0 0 auto;
-			svg {
-				color: ${({ theme }) => theme.palette.base.main};
-				height: 10px;
-				width: 10px;
+			
+			.MuiInputBase-input {
+				height: 1rem;
+				padding: 0;
+				min-width: 55px;
+			}
+			.MuiInputAdornment-root {
+				margin: 0;
+				svg {
+					margin: 0 0 0 -21px;
+					color: ${({ theme }) => theme.palette.base.main};
+				}
+			}
+			.MuiAutocomplete-endAdornment {
+				margin: 0 0 0 auto;
+				svg {
+					color: ${({ theme }) => theme.palette.base.main};
+					height: 10px;
+					width: 10px;
+				}
+			}
+			${SearchChip} + .MuiInputBase-input {
+				padding-left: 7px;
+				box-sizing: border-box;
+			}
+			.MuiInputAdornment-root + :is(${/* sc-selector */ SearchChip} .MuiChip-root, .MuiInputBase-input) {
+				margin-left: -3px;
 			}
 		}
 	}
-	.MuiInputBase-root .MuiInputBase-input {
-		padding: 0;
-		min-width: 55px;
+`;
+
+export const TextField = styled(BaseTextField)`
+	
+
+	margin: 8px;
+
+	.MuiInputBase-adornedEnd {
+		padding-right: 0;
 	}
-	${SearchChip} + .MuiInputBase-input {
-		padding-left: 7px;
-		box-sizing: border-box;
-	}
-	.MuiInputAdornment-root + :is(${/* sc-selector */ SearchChip} .MuiChip-root, .MuiInputBase-input) {
-		margin-left: -3px;
+	.MuiInputBase-input::placeholder {
+		opacity: 1;
+		color: ${({ theme }) => theme.palette.base.main};
 	}
 `;
 
 export const StartAdornment = styled(BaseInputAdornment).attrs({
 	position: 'start',
 })`
-	margin: 0;
+	margin-right: 0;
 	svg {
-		margin: 0 0 0 -21px;
 		color: ${({ theme }) => theme.palette.base.main};
 	}
+`;
+
+export const EndAdornment = styled(BaseInputAdornment).attrs({
+	position: 'end',
+})<{ $isVisible?: boolean }>`
+	${({ $isVisible }) => !$isVisible && css`
+		visibility: hidden;
+	`}
 `;

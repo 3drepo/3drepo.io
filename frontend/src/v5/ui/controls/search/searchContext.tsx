@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { get, isEmpty, isString } from 'lodash';
+import { get, isString } from 'lodash';
 import { Dispatch, SetStateAction, createContext, useEffect, useState } from 'react';
 
 export interface SearchContextType<T> {
 	items: T[];
 	filteredItems: T[];
-	queries: string[];
-	setQueries: Dispatch<SetStateAction<string[]>>;
+	query: string;
+	setQuery: Dispatch<SetStateAction<string>>;
 }
 
-const defaultValue: SearchContextType<any> = { items: [], filteredItems: [], queries: [], setQueries: () => {} };
+const defaultValue: SearchContextType<any> = { items: [], filteredItems: [], query: '', setQuery: () => {} };
 export const SearchContext = createContext(defaultValue);
 SearchContext.displayName = 'SearchContext';
 
@@ -33,30 +33,29 @@ export interface Props {
 	items: any[];
 	children: any;
 	fieldsToFilter?: string[];
-	filteringFunction?: <T>(items: T[], queries: string[]) => T[];
+	filteringFunction?: <T>(items: T[], query: string) => T[];
 }
 
 export const SearchContextComponent = ({ items, children, fieldsToFilter, filteringFunction }: Props) => {
-	const [queries, setQueries] = useState([]);
-	const [contextValue, setContextValue] = useState({ items, filteredItems: items, queries, setQueries });
+	const [query, setQuery] = useState('');
+	const [contextValue, setContextValue] = useState({ items, filteredItems: items, query, setQuery });
 
 	useEffect(() => {
 		let filteredItems = items;
 		if (filteringFunction) {
-			filteredItems = filteringFunction(items || [], queries);
+			filteredItems = filteringFunction(items || [], query);
 		} else {
 			filteredItems = (items || []).filter((item) => (fieldsToFilter || Object.keys(item)).some(
 				(key) => {
 					const property = get(item, key);
 					if (!isString(property)) return false;
-					if (isEmpty(queries)) return true;
-					return queries.some((query) => property.toLowerCase().includes(query.toLowerCase()));
+					return property.toLowerCase().includes(query.toLowerCase());
 				},
 			));
 		}
 
-		setContextValue({ items, filteredItems, queries, setQueries });
-	}, [queries, items]);
+		setContextValue({ items, filteredItems, query, setQuery });
+	}, [query, items]);
 
 	return (
 		<SearchContext.Provider value={contextValue}>

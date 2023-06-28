@@ -30,7 +30,7 @@ import { FormattedMessage } from 'react-intl';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { SearchContextComponent, SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { TicketItem } from './ticketItem/ticketItem.component';
-import { List, Filters, CompletedFilterChip, SearchInput } from './ticketsList.styles';
+import { List, Filters, CompletedFilterChip, TicketSearchInput } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
 import { AdditionalProperties, TicketsCardViews } from '../tickets.constants';
 
@@ -106,15 +106,19 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED);
 	}, []);
 
-	const filterItems = (items, queries: string[]) => items.filter((ticket) => {
-		const templateCode = availableTemplates.find((template) => template._id === ticket.type).code;
-		const ticketCode = `${templateCode}:${ticket.number}`;
-		return queries.every((query) => [ticketCode, ticket.title].some((str) => str.toLowerCase().includes(query.toLowerCase())));
-	});
+	const filterItems = (items, query: string) => {
+		if (!query.length) return items;
+		const queries = JSON.parse(query);
+		return items.filter((ticket) => {
+			const templateCode = availableTemplates.find((template) => template._id === ticket.type).code;
+			const ticketCode = `${templateCode}:${ticket.number}`;
+			return queries.some((q) => [ticketCode, ticket.title].some((str) => str.toLowerCase().includes(q.toLowerCase())));
+		});
+	};
 
 	return (
 		<SearchContextComponent filteringFunction={filterItems} items={filteredTickets}>
-			<SearchInput multiple />
+			<TicketSearchInput />
 			<Filters>
 				<CompletedFilterChip
 					key="completed"

@@ -40,7 +40,7 @@ export const DashboardListItemContainerTitle = ({
 }: IContainerTitle): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const { queries } = useContext(SearchContext);
+	const { query } = useContext(SearchContext);
 
 	const hasRevisions = container.revisionsCount > 0;
 	const linkProps = {
@@ -54,7 +54,7 @@ export const DashboardListItemContainerTitle = ({
 			subtitle={(
 				<LatestRevision
 					name={(
-						<Highlight search={queries}>
+						<Highlight search={[query]}>
 							{container.latestRevision}
 						</Highlight>
 					)}
@@ -74,7 +74,7 @@ export const DashboardListItemContainerTitle = ({
 			disabled={!hasRevisions}
 		>
 			<Link {...linkProps}>
-				<Highlight search={queries}>
+				<Highlight search={[query]}>
 					{container.name}
 				</Highlight>
 			</Link>

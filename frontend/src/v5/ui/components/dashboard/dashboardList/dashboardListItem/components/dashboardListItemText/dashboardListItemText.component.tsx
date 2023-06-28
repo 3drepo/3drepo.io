@@ -32,14 +32,14 @@ export const DashboardListItemText = ({
 	dontHighlight,
 	...containerProps
 }: IDashboardListItemText): JSX.Element => {
-	const { queries } = useContext(SearchContext);
+	const { query } = useContext(SearchContext);
 	const shouldHighlight = isString(children) && !dontHighlight;
 
 	return (
 		<FixedOrGrowContainer {...containerProps}>
 			<Text selected={selected}>
 				{shouldHighlight && (
-					<Highlight search={queries}>
+					<Highlight search={[query]}>
 						{children as string}
 					</Highlight>
 				)}

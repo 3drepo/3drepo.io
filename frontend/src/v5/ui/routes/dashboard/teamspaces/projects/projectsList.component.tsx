@@ -49,11 +49,11 @@ export const ProjectsList = () => {
 			</Header>
 			<ProjectCardsList>
 				<SearchContext.Consumer>
-					{ ({ queries, filteredItems }: SearchContextType<IProject>) => (
+					{ ({ query, filteredItems }: SearchContextType<IProject>) => (
 						<>
 							{filteredItems.map((project) => (
 								<ProjectCard
-									filterQueries={queries}
+									filterQuery={query}
 									key={project._id}
 									project={project}
 								/>

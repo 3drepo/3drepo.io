@@ -22,15 +22,14 @@ import { useContext } from 'react';
 import { SearchPhrase } from './dashboardListEmptySearchResults.styles';
 
 export const DashboardListEmptySearchResults = (): JSX.Element => {
-	const { queries } = useContext(SearchContext);
-	const searchPhrase = queries[0];
+	const { query } = useContext(SearchContext);
 	return (
 		<DashboardListEmptyText>
 			<FormattedMessage
 				id="dashboardList.noSearchResults"
 				defaultMessage="We couldn't find a match for {searchPhrase}. Please try another search."
 				values={{
-					searchPhrase: <SearchPhrase>&quot;{searchPhrase}&quot;</SearchPhrase>,
+					searchPhrase: <SearchPhrase>&quot;{query}&quot;</SearchPhrase>,
 				}}
 			/>
 		</DashboardListEmptyText>

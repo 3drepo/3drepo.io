@@ -30,7 +30,7 @@ export const CollapseSideElementGroup = styled.div`
 		margin-right: 0;
 	}
 
-	.MuiInputBase-root {
+	.MuiTextField-root {
 		width: 405px;
 
 		@media (max-width: ${Display.Tablet}px) {

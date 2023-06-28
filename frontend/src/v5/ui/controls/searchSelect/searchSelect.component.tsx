@@ -30,11 +30,11 @@ export const SearchSelect = ({ children, ...props }: SelectProps) => {
 		}
 	};
 
-	const filterItems = (items, queries: string[]) => {
-		if (!queries.length) return items;
+	const filterItems = (items, query: string) => {
+		if (!query.length) return items;
 		return items
-			.filter((node) => queries.some((query) => onlyText(node).toLowerCase()
-				.includes(query.toLowerCase())));
+			.filter((node) => onlyText(node).toLowerCase()
+				.includes(query.toLowerCase()));
 	};
 
 	return (

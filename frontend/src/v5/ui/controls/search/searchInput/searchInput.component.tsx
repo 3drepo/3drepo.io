@@ -15,76 +15,56 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AutocompleteProps, TextFieldProps } from '@mui/material';
+import { TextFieldProps } from '@mui/material';
 import SearchIcon from '@assets/icons/outlined/search-outlined.svg';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { ChangeEvent, useContext } from 'react';
-import { formatMessage } from '@/v5/services/intl';
-import { TextField, StartAdornment, SearchChip, Autocomplete } from './searchInput.styles';
+import { IconButton, TextField, StartAdornment, EndAdornment } from './searchInput.styles';
 import { SearchContext } from '../searchContext';
 
 type ISearchInput = {
-	variant?: 'filled' | 'outlined',
-	placeholder?: string,
-} & Partial<AutocompleteProps<TextFieldProps, boolean, undefined, undefined, typeof SearchChip>>;
+	/**
+	 * Callback when the clear button is clicked.
+	 * Note: the clear button only appears when the controls is controlled (read more https://reactjs.org/docs/forms.html#controlled-components)
+	 */
+	onClear?: () => void;
+} & TextFieldProps;
 
-export const SearchInput = ({ variant = 'filled', multiple, placeholder, ...props }: ISearchInput): JSX.Element => {
-	const { queries, setQueries } = useContext(SearchContext);
+export const SearchInput = ({ onClear, value, variant = 'filled', ...props }: ISearchInput): JSX.Element => {
+	const { query, setQuery } = useContext(SearchContext);
 
-	const onChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, newValue) => {
-		// This is for when enter is pressed and the chips change
-		if (!multiple) return;
-		setQueries(newValue);
+	const onChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+		setQuery(event.currentTarget.value);
+		props.onChange?.(event);
 	};
 
-	const onInputChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, newValue) => {
-		// This is for when the textfield value changes by typing
-		if (multiple) return;
-		setQueries([newValue]);
+	const onClickClear = () => {
+		onClear?.();
+		setQuery('');
 	};
 
-	const removeQuery = (index) => setQueries((prev) => prev.filter((el, i) => index !== i));
+	const val = query || value || '';
 
 	return (
-		<Autocomplete
-			value={queries}
-			open={false}
-			freeSolo
-			multiple={multiple}
-			options={[]}
-			clearIcon={<CloseIcon />}
-			getOptionLabel={(labelObject) => labelObject[0] ?? ''} // This silences a console error
-			renderTags={(
-				values: any[],
-			) => values.map((query: any, index: number) => (
-				<SearchChip
-					key={query}
-					label={query}
-					onDelete={() => removeQuery(index)}
-				/>
-			))}
-			onChange={onChange}
-			onInputChange={onInputChange}
+		<TextField
+			value={val}
+			InputProps={{
+				startAdornment: (
+					<StartAdornment>
+						<SearchIcon />
+					</StartAdornment>
+				),
+				endAdornment: (
+					<EndAdornment $isVisible={Boolean(val)}>
+						<IconButton onClick={onClickClear} size="large">
+							<CloseIcon />
+						</IconButton>
+					</EndAdornment>
+				),
+			}}
+			variant={variant}
 			{...props}
-			renderInput={(params: any) => (
-				<TextField
-					variant={variant}
-					multiline={multiple}
-					placeholder={placeholder || formatMessage({ id: 'searchInput.defaultPlaceholder', defaultMessage: 'Search...' })}
-					{...params}
-					InputProps={{
-						...params.InputProps,
-						startAdornment: (
-							<>
-								<StartAdornment>
-									<SearchIcon />
-								</StartAdornment>
-								{params?.InputProps?.startAdornment}
-							</>
-						),
-					}}
-				/>
-			)}
+			onChange={onChange}
 		/>
 	);
 };

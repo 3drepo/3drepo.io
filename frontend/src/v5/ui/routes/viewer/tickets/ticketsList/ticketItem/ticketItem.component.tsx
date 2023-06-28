@@ -39,7 +39,8 @@ type TicketItemProps = {
 
 export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const { queries } = useContext(SearchContext);
+	const { query } = useContext(SearchContext);
+	const queries = query ? JSON.parse(query) : [];
 
 	const isFederation = modelIsFederation(containerOrFederation);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
