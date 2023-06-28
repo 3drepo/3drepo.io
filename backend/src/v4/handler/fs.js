@@ -95,10 +95,11 @@ class FSHandler {
 		});
 	}
 
-	getFileStream(key) {
+	getFileStream(key, partialInfo) {
 		try {
+
 			return fs.existsSync(this.getFullPath(key)) ?
-				Promise.resolve(fs.createReadStream(this.getFullPath(key))) :
+				Promise.resolve(fs.createReadStream(this.getFullPath(key), partialInfo)) :
 				Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		} catch (err) {
 			systemLogger.logError("Failed to get filestream: ", err);
