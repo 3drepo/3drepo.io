@@ -73,7 +73,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes }: Group
 	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
 
 	const isNewGroup = !value?.group?._id;
-	const selectedNodes = useSelector(selectSelectedNodes);
+	const selectedNodes = convertToV5GroupNodes(useSelector(selectSelectedNodes));
 
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
@@ -98,7 +98,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes }: Group
 		if (isSmart) return isDirty;
 		if (!selectedNodes.length) return false;
 		const objectsAreDifferent = !isEqual(
-			sortBy(convertToV5GroupNodes(selectedNodes)),
+			sortBy(selectedNodes),
 			sortBy(value?.group?.objects || []),
 		);
 		return (isDirty || objectsAreDifferent);
@@ -107,7 +107,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes }: Group
 	const onClickSubmit = (newValues:IGroupSettingsForm) => {
 		if (!isSmart) {
 			delete newValues.group.rules;
-			newValues.group.objects = convertToV5GroupNodes(selectedNodes);
+			newValues.group.objects = selectedNodes;
 		}
 
 		onSubmit?.(newValues);
