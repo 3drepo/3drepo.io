@@ -47,10 +47,14 @@ export const NameContainer = styled.div`
 	min-width: 0;
 `;
 
-export const Container = styled.div`
+export const Container = styled.div<{ $highlighted?: boolean }>`
 	${GroupStyling}
 	flex-direction: row;
 	margin-bottom: 4px;
+
+	${({ $highlighted }) => $highlighted && css`
+		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
+	`}
 
 	&:not(:hover) ${Buttons} {
 		width: 0;

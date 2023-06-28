@@ -22,21 +22,26 @@ import { GroupState } from './ticketGroupsContext.helper';
 type TicketGroupsContextType = {
 	indexedOverrides: (GroupOverride & { index: number })[],
 	groupType: 'colored' | 'hidden',
-	selectedIndexes: number[],
+	editGroup: (index: number) => void,
 	deleteGroup: (index: number) => void,
-	toggleGroupState: (index: number) => void,
-	toggleCollectionState: (prefix?: string[]) => void,
-	getCollectionState: (prefix?: string[]) => GroupState,
-	editGroup: (index: number) => void
+	getGroupIsChecked: (index: number) => boolean,
+	toggleGroup: (index: number) => void,
+	getCollectionState: (indexes: number[]) => GroupState,
+	toggleCollection: (indexes: number[]) => void,
+	highlightedIndex: number,
+	setHighlightedIndex: (index: number) => void,
+
 };
 export const TicketGroupsContext = createContext<TicketGroupsContextType>({
 	indexedOverrides: [],
 	groupType: null,
-	selectedIndexes: [],
 	deleteGroup: () => {},
-	toggleGroupState: () => {},
-	toggleCollectionState: () => {},
+	editGroup: () => {},
+	toggleGroup: () => {},
+	getGroupIsChecked: () => null,
+	toggleCollection: () => {},
 	getCollectionState: () => null,
-	editGroup: () => null,
+	highlightedIndex: -1,
+	setHighlightedIndex: () => {},
 });
 TicketGroupsContext.displayName = 'TicketGroupsContext';

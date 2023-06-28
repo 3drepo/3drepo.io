@@ -29,13 +29,13 @@ type GroupsCollectionSelectProps = {
 	label: string,
 	value?: string[];
 	onChange?: (value: string[]) => void;
-	prefixesCombinations: string[][];
+	prefixes: string[][];
 	disabled?: boolean;
 };
-export const GroupsCollectionSelect = ({ value, onChange, prefixesCombinations, ...props }: GroupsCollectionSelectProps) => (
+export const GroupsCollectionSelect = ({ value, onChange, prefixes, ...props }: GroupsCollectionSelectProps) => (
 	<Select value={JSON.stringify(value || [])} onChange={(e) => onChange(JSON.parse(e.target.value))} {...props}>
 		<MenuItem value={JSON.stringify([])}>{NONE}</MenuItem>
-		{prefixesCombinations.filter((prefix) => prefix.length).map((prefix) => (
+		{prefixes.map((prefix) => (
 			<MenuItemPrefix
 				key={JSON.stringify(prefix)}
 				selected={JSON.stringify(prefix) === JSON.stringify(value)}

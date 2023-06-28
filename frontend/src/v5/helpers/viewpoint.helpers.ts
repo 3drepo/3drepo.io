@@ -102,7 +102,7 @@ const convertToV4Group = (groupOverride: GroupOverride) => {
 	}
 
 	const group:any = {
-		objects: convertToV4GroupNodes(v5Group.objects),
+		objects: convertToV4GroupNodes(v5Group?.objects || []),
 	};
 
 	if (color) {

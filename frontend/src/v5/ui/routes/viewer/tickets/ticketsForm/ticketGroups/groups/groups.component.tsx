@@ -16,7 +16,6 @@
  */
 
 import { groupBy, isString, partition } from 'lodash';
-import { getCollectionCheckboxState } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { useContext } from 'react';
 import {
 	CollectionHeadline,
@@ -28,20 +27,21 @@ import { GroupToggle } from '../groupToggle/groupToggle.component';
 import { NameContainer } from './groupItem/groupItem.styles';
 import { GroupItem } from './groupItem/groupItem.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
-import { IndexedOverride } from '../ticketGroupsContext.helper';
+import { IndexedOverride, getCollectionCheckboxState } from '../ticketGroupsContext.helper';
 
 type GroupsProps = {
 	indexedOverrides: IndexedOverride[],
 	level?: number,
 };
 export const Groups = ({ indexedOverrides, level = 0 }: GroupsProps) => {
-	const { getCollectionState, toggleCollectionState } = useContext(TicketGroupsContext);
+	const { getCollectionState, toggleCollection } = useContext(TicketGroupsContext);
 	const [overrideItems, overrideBatches] = partition(indexedOverrides, (o) => (o.prefix?.length || 0) === level);
 	const overridesByPrefix = groupBy(overrideBatches, (o) => o.prefix[level]);
 
-	const handleCheckboxClick = (e, prefix: string[]) => {
+	const handleCheckboxClick = (e, overrides) => {
 		e.stopPropagation();
-		toggleCollectionState(prefix);
+		// toggling all the groups descendants of this collection
+		toggleCollection(overrides.map(({ index }) => index));
 	};
 
 	return (
@@ -63,8 +63,8 @@ export const Groups = ({ indexedOverrides, level = 0 }: GroupsProps) => {
 								</NameContainer>
 							</CollectionHeadline>
 							<GroupToggle
-								onClick={(e) => handleCheckboxClick(e, overrides[0].prefix)}
-								{...getCollectionCheckboxState(getCollectionState(overrides[0].prefix))}
+								onClick={(e) => handleCheckboxClick(e, overrides)}
+								{...getCollectionCheckboxState(getCollectionState(overrides.map(({ index }) => index)))}
 							/>
 						</>
 					)}

@@ -20,27 +20,27 @@ import GroupsIcon from '@mui/icons-material/GroupWork';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { getCollectionCheckboxState } from '@/v5/store/tickets/ticketsGroups.helpers';
 import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import { Accordion, NumberContainer, TitleContainer, Checkbox, NewGroupButton } from './groupsAccordion.styles';
 import { Groups } from '../groups/groups.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
+import { getCollectionCheckboxState } from '../ticketGroupsContext.helper';
 
-type GroupsAccordionProps = { title: any, onChange };
+type GroupsAccordionProps = { title: any };
 export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 	const {
 		getCollectionState,
-		toggleCollectionState,
+		toggleCollection,
 		indexedOverrides,
 		editGroup,
 	} = useContext(TicketGroupsContext);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const state = getCollectionState([]);
+	const indexes = indexedOverrides.map(({ index }) => index);
 	const overridesCount = indexedOverrides.length;
 
 	const toggleCheckbox = (e) => {
 		e.stopPropagation();
-		toggleCollectionState();
+		toggleCollection(indexes);
 	};
 
 	const addNewGroup = () => {
@@ -54,7 +54,7 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 				<TitleContainer>
 					{title}
 					<NumberContainer>{overridesCount}</NumberContainer>
-					<Checkbox {...getCollectionCheckboxState(state)} onClick={toggleCheckbox} />
+					<Checkbox {...getCollectionCheckboxState(getCollectionState(indexes))} onClick={toggleCheckbox} />
 				</TitleContainer>
 			)}
 			$overridesCount={overridesCount}

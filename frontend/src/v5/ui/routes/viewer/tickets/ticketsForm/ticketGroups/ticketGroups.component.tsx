@@ -16,20 +16,36 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { IGroupSettingsForm, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
+import { GroupOverride, IGroupSettingsForm, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
 import { useEffect, useState } from 'react';
-import { dispatch } from '@/v4/modules/store';
+import { useDispatch, useSelector, useStore } from 'react-redux';
 import { ViewpointsActions } from '@/v4/modules/viewpoints';
 import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
-import { cloneDeep } from 'lodash';
-import { useSelector, useStore } from 'react-redux';
+import { cloneDeep, uniqBy } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
 import { selectHiddenGeometryVisible } from '@/v4/modules/tree/tree.selectors';
+import { TreeActions } from '@/v4/modules/tree';
 import { Container, Popper } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContextComponent } from './ticketGroupsContext.component';
 import { GroupSettingsForm } from './groups/groupActionMenu/groupSettingsForm/groupSettingsForm.component';
+
+const getPossiblePrefixes = (overrides: GroupOverride[] = []): string[][] => {
+	const prefixes = overrides.map(({ prefix }) => (prefix)).filter(Boolean);
+	const uniquePrefixes = uniqBy(prefixes, JSON.stringify);
+	const allPrefixesWithDuplicates: string[][] = [];
+
+	uniquePrefixes.forEach((prefix) => {
+		const usedSegments: string[] = [];
+		prefix.forEach((segment) => {
+			allPrefixesWithDuplicates.push(usedSegments.concat(segment));
+			usedSegments.push(segment);
+		});
+	});
+
+	return uniqBy(allPrefixesWithDuplicates, JSON.stringify);
+};
 
 interface TicketGroupsProps {
 	value?: Viewpoint;
@@ -38,31 +54,41 @@ interface TicketGroupsProps {
 }
 
 enum OverrideType {
-	COLORED,
-	HIDDEN,
+	COLORED = 'colored',
+	HIDDEN = 'hidden',
 }
 
 export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => {
-	const [editingOverride, setEditingOverride] = useState<{index:number, type: OverrideType}>({ index: -1, type: OverrideType.COLORED });
+	const dispatch = useDispatch();
+	const [editingOverride, setEditingOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: OverrideType.COLORED });
+	const [highlightedOverride, setHighlightedOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: null });
+
 	const state: Partial<ViewpointState> = value.state || {};
 	const leftPanels = useSelector(selectLeftPanels);
 	const isSecondaryCard = leftPanels[0] !== VIEWER_PANELS.TICKETS;
 	const store = useStore();
+	const settingsFormGroups = value.state?.[((editingOverride.type === OverrideType.COLORED) ? 'colored' : 'hidden')];
+
+	const onSetHighlightedIndex = (type) => (index) => {
+		setHighlightedOverride({ type, index });
+	};
+
+	const getHighlightedIndex = (type) => {
+		if (highlightedOverride.type !== type) return -1;
+		return highlightedOverride.index;
+	};
 
 	const onDeleteColoredGroup = (index) => {
 		const newVal = cloneDeep(value);
 		newVal.state.colored.splice(index, 1);
 		onChange?.(newVal);
+		if (highlightedOverride.index === index) {
+			setHighlightedOverride({ index: -1, type: OverrideType.COLORED });
+		}
 	};
 
-	const onSetEditGroup = (colored:boolean) => (index: number) => {
-		const type = colored ? OverrideType.COLORED : OverrideType.HIDDEN;
+	const onSetEditGroup = (type) => (index) => {
 		setEditingOverride({ index, type });
-	};
-
-	const onSelectedColoredGroupChange = (colored) => {
-		const view = { state: { colored } } as Viewpoint;
-		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
 	};
 
 	const onCancel = () => {
@@ -82,33 +108,49 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 			if (!newVal.state.hidden) newVal.state.hidden = [];
 			newVal.state.hidden[editingOverride.index] = overrideValue;
 		}
+		newVal.state[editingOverride.type][editingOverride.index] = overrideValue;
 		onChange?.(newVal);
 		onCancel();
+		setHighlightedOverride(editingOverride);
 	};
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
 
+	useEffect(() => {
+		if (highlightedOverride.index === -1) {
+			dispatch(TreeActions.clearCurrentlySelected());
+		}
+	}, [highlightedOverride]);
+
+	const onSelectedColoredGroupsChange = (indexes) => {
+		const colored = indexes.map((i) => state.colored[i]);
+		const view = { state: { colored } } as Viewpoint;
+		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
+	};
+
 	return (
-		<Container>
+		<Container onClick={() => setHighlightedOverride({ index: -1, type: OverrideType.COLORED })}>
 			<TicketGroupsContextComponent
 				groupType="colored"
 				onDeleteGroup={onDeleteColoredGroup}
-				onSelectedGroupsChange={onSelectedColoredGroupChange}
+				onSelectedGroupsChange={onSelectedColoredGroupsChange}
 				overrides={state.colored || []}
-				onEditGroup={onSetEditGroup(true)}
+				onEditGroup={onSetEditGroup(OverrideType.COLORED)}
+				highlightedIndex={getHighlightedIndex(OverrideType.COLORED)}
+				setHighlightedIndex={onSetHighlightedIndex(OverrideType.COLORED)}
 			>
 				<GroupsAccordion
-					onChange={onChange}
 					title={formatMessage({ id: 'ticketCard.groups.coloured', defaultMessage: 'Coloured Groups' })}
 				/>
 			</TicketGroupsContextComponent>
 			<TicketGroupsContextComponent
 				groupType="hidden"
 				overrides={state.hidden || []}
-				onEditGroup={onSetEditGroup(false)}
+				onEditGroup={onSetEditGroup(OverrideType.HIDDEN)}
+				highlightedIndex={getHighlightedIndex(OverrideType.HIDDEN)}
+				setHighlightedIndex={onSetHighlightedIndex(OverrideType.HIDDEN)}
 			>
 				<GroupsAccordion
-					onChange={onChange}
 					title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
 				/>
 			</TicketGroupsContextComponent>
@@ -119,11 +161,13 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 					top: isSecondaryCard ? 'unset' : 80,
 					bottom: isSecondaryCard ? 40 : 'unset',
 				}}
+				onClick={(e) => e.stopPropagation()}
 			>
 				<GroupSettingsForm
-					value={value.state?.[((editingOverride.type === OverrideType.COLORED) ? 'colored' : 'hidden')]?.[editingOverride.index] as IGroupSettingsForm}
+					value={settingsFormGroups?.[editingOverride.index] as IGroupSettingsForm}
 					onSubmit={onSubmit}
 					onCancel={onCancel}
+					prefixes={getPossiblePrefixes(settingsFormGroups)}
 				/>
 			</Popper>
 		</Container>

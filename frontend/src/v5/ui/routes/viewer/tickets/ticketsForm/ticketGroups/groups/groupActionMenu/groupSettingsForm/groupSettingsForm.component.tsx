@@ -17,7 +17,7 @@
 
 /* eslint-disable no-param-reassign */
 import { formatMessage } from '@/v5/services/intl';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
@@ -26,15 +26,15 @@ import { Button } from '@controls/button';
 import { useEffect, useState } from 'react';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { isEmpty, uniqBy, cloneDeep } from 'lodash';
+import { cloneDeep, isEqual, sortBy } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { Group, GroupOverride, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
+import { Group, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
 import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
-import { useStore } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { selectSelectedNodes } from '@/v4/modules/tree/tree.selectors';
-import { convertToV5GroupNodes } from '@/v5/helpers/viewpoint.helpers';
+import { convertToV4GroupNodes, convertToV5GroupNodes } from '@/v5/helpers/viewpoint.helpers';
 import { getRandomSuggestedColor } from '@controls/inputs/colorPicker/colorPicker.helpers';
 import { hexToArray } from '@/v4/helpers/colors';
 import { GroupsCollectionSelect } from '../../addOrEditGroup/groupSettingsForm.component.tsx/groupsCollectionSelect/groupsCollectionSelect.component';
@@ -61,40 +61,25 @@ import { GroupRulesForm } from '../../groupRulesForm/groupRulesForm.component';
 import { ChipRule } from '../../groupRulesForm/chipRule/chipRule.component';
 import { NewCollectionForm } from '../newCollectionForm/newCollectionForm.component';
 
-const getAllPrefixesCombinations = (overrides: GroupOverride[]): string[][] => {
-	const prefixes = overrides.map(({ prefix }) => (prefix)).filter(Boolean);
-	const uniquePrefixes = uniqBy(prefixes, JSON.stringify);
-	const allPrefixesWithDuplicates: string[][] = [];
-
-	uniquePrefixes.forEach((prefix) => {
-		const usedSegments: string[] = [];
-		prefix.forEach((segment) => {
-			allPrefixesWithDuplicates.push(usedSegments.concat(segment));
-			usedSegments.push(segment);
-		});
-	});
-
-	const allPrefixes = uniqBy(allPrefixesWithDuplicates, JSON.stringify);
-	return allPrefixes.sort();
-};
-
 type GroupSettingsFormProps = {
 	value?: IGroupSettingsForm,
 	onSubmit?: (value: IGroupSettingsForm) => void,
 	onCancel?: () => void,
+	prefixes: string[][];
 };
-export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFormProps) => {
+export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes }: GroupSettingsFormProps) => {
 	const [isSmart, setIsSmart] = useState(false);
-	const [prefixesCombinations] = useState(getAllPrefixesCombinations([]));
-	const [newCollection, setNewCollection] = useState([]);
-	const store = useStore();
+	const [newPrefix, setNewPrefix] = useState([]);
+	const [inputObjects, setInputObjects] = useState([]);
+	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
 
-	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const isNewGroup = !value?.group?._id;
+	const selectedNodes = useSelector(selectSelectedNodes);
 
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
 		resolver: yupResolver(GroupSettingsSchema),
+		context: { isSmart },
 	});
 
 	const { fields: rules, append, remove, update } = useFieldArray({
@@ -104,22 +89,33 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 
 	const {
 		handleSubmit,
-		formState: { errors, isValid, dirtyFields },
+		formState: { errors, isValid, isDirty },
 		setValue,
 		getValues,
 	} = formData;
 
+	const getFormIsValid = () => {
+		if (!isValid) return false;
+		if (isSmart) return isDirty;
+		if (!selectedNodes.length) return false;
+		const objectsAreDifferent = !isEqual(
+			sortBy(selectedNodes),
+			inputObjects,
+		);
+		return (isDirty || objectsAreDifferent);
+	};
+
 	const onClickSubmit = (newValues:IGroupSettingsForm) => {
 		if (!isSmart) {
 			delete newValues.group.rules;
-			newValues.group.objects = convertToV5GroupNodes(selectSelectedNodes(store.getState()));
+			newValues.group.objects = convertToV5GroupNodes(selectedNodes);
 		}
 
 		onSubmit?.(newValues);
 	};
 
 	const handleNewCollectionChange = (collection: string[]) => {
-		setNewCollection(collection);
+		setNewPrefix([collection]);
 		setValue('prefix', collection, { shouldDirty: true });
 	};
 
@@ -140,6 +136,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 		const newValue = cloneDeep({ ...value, group: restGroup });
 		formData.reset(newValue);
 		setIsSmart(!!value?.group?.rules?.length);
+		setInputObjects(convertToV4GroupNodes(value?.group?.objects || []));
 	}, [value]);
 
 	return (
@@ -209,7 +206,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 							})}
 							formError={errors?.prefix}
 							disabled={!isAdmin}
-							prefixesCombinations={prefixesCombinations.concat([newCollection]).sort()}
+							prefixes={prefixes.concat(newPrefix).sort()}
 						/>
 					</FormRow>
 					{
@@ -217,7 +214,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 							<NewCollectionActionMenu
 								TriggerButton={(
 									<NewCollectionLink>
-										{newCollection?.length ? (
+										{newPrefix?.length ? (
 											<FormattedMessage
 												id="ticketsGroupSettings.link.editCollection"
 												defaultMessage="Edit new collection"
@@ -232,9 +229,9 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 								)}
 							>
 								<NewCollectionForm
-									value={newCollection}
+									value={newPrefix}
 									onChange={handleNewCollectionChange}
-									prefixesCombinations={prefixesCombinations}
+									prefixesCombinations={prefixes}
 								/>
 							</NewCollectionActionMenu>
 						)
@@ -329,7 +326,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel }: GroupSettingsFo
 								size="medium"
 								fullWidth={false}
 								onClick={handleSubmit(onClickSubmit)}
-								disabled={!isValid || isEmpty(dirtyFields)}
+								disabled={!getFormIsValid()}
 							>
 								{isNewGroup ? (
 									<FormattedMessage id="tickets.groups.settings.createGroup" defaultMessage="Create group" />

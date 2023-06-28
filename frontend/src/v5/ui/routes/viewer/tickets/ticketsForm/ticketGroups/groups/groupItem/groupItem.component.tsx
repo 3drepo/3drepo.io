@@ -28,10 +28,10 @@ import { ErrorTicketButton, PrimaryTicketButton } from '@/v5/ui/routes/viewer/ti
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CircularProgress } from '@mui/material';
 import { isString } from 'lodash';
-import { useDispatch } from 'react-redux';
-import { TreeActions } from '@/v4/modules/tree';
-import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
+import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
+import { TreeActions } from '@/v4/modules/tree';
+import { useDispatch } from 'react-redux';
 import {
 	Buttons,
 	NameContainer,
@@ -45,15 +45,19 @@ import { TicketGroupsContext } from '../../ticketGroupsContext';
 
 type GroupProps = { override: GroupOverride, index: number };
 export const GroupItem = ({ override, index }: GroupProps) => {
-	const { groupType, selectedIndexes, toggleGroupState, deleteGroup, editGroup } = useContext(TicketGroupsContext);
-	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const dispatch = useDispatch();
-
+	const { groupType, highlightedIndex, setHighlightedIndex, toggleGroup, getGroupIsChecked, deleteGroup, editGroup } = useContext(TicketGroupsContext);
+	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const { group, color, opacity } = override;
+	const checked = getGroupIsChecked(index);
 
-	const handleDeleteGroup = (e) => {
+	const preventPropagation = (e) => {
 		e.preventDefault();
 		e.stopPropagation();
+	};
+
+	const handleDeleteGroup = (e) => {
+		preventPropagation(e);
 		DialogsActionsDispatchers.open('delete', {
 			name: (group as Group).name,
 			message: formatMessage({
@@ -66,24 +70,29 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	};
 
 	const highlightGroup = () => {
+		setHighlightedIndex(index);
 		const objects = convertToV4GroupNodes((group as Group).objects);
 		dispatch(TreeActions.clearCurrentlySelected());
 		dispatch(TreeActions.showNodesBySharedIds(objects));
 		dispatch(TreeActions.selectNodesBySharedIds(objects, color.map((c) => c / 255)));
 	};
 
+	const handleClick = (e) => {
+		preventPropagation(e);
+		highlightGroup();
+	};
+
 	const isolateGroup = (e) => {
-		e.preventDefault();
-		e.stopPropagation();
+		preventPropagation(e);
 		highlightGroup();
 		dispatch(TreeActions.isolateSelectedNodes());
 	};
 
-	const onEditGroup = (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-		highlightGroup();
-		editGroup(index);
+	const onEditGroup = () => editGroup(index);
+
+	const handleToggleClick = (e) => {
+		preventPropagation(e);
+		toggleGroup(index);
 	};
 
 	const alphaColor = (color || [255, 255, 255]).concat(opacity);
@@ -96,7 +105,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		.reduce((accum, object) => accum + object._ids.length, 0);
 
 	return (
-		<Container onClick={highlightGroup}>
+		<Container onClick={handleClick} $highlighted={highlightedIndex === index}>
 			<Headline>
 				<GroupIconComponent rules={group.rules} color={alphaHexColor} />
 				<NameContainer>
@@ -105,7 +114,6 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 						<FormattedMessage
 							id="groups.item.numberOfMeshes"
 							defaultMessage="{count, plural, =0 {No objects} one {# object} other {# objects}}"
-							// TODO - fix with actual mesh count when logic is implemented
 							values={{ count: calculateObjectsCount(group.objects) }}
 						/>
 					</GroupsCount>
@@ -127,8 +135,8 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 				)}
 			</Headline>
 			<GroupToggle
-				checked={selectedIndexes.includes(index)}
-				onClick={() => toggleGroupState(index)}
+				checked={checked}
+				onClick={handleToggleClick}
 			/>
 		</Container>
 	);

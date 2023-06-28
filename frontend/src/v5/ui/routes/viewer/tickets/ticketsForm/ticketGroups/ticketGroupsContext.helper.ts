@@ -25,45 +25,15 @@ export enum GroupState {
 
 export type IndexedOverride = GroupOverride & { index: number };
 
-export type GroupNode = {
-	// for leaves
-	index: number,
-	// for internal nodes
-	prefixSegment: string,
-	parent: GroupNode,
-	state: GroupState,
-	override: IndexedOverride,
-	children: GroupNode[],
+export const getCollectionCheckboxState = (state: GroupState) => {
+	switch (state) {
+		case null:
+			return { checked: false };
+		case GroupState.INDETERMINATE:
+			return { checked: false, indeterminate: true };
+		default:
+			return { checked: state === GroupState.CHECKED };
+	}
 };
 
-const createTreeNode = (index, prefixSegment, parent, state, override): GroupNode => ({
-	index,
-	prefixSegment,
-	parent,
-	state,
-	override,
-	children: [],
-});
-
-export const groupOverridesToTree = (groupOverrides: IndexedOverride[], defaultState = GroupState.UNCHECKED): GroupNode => {
-	const root = createTreeNode(null, null, null, defaultState, null);
-
-	let currentNode: GroupNode;
-	groupOverrides.forEach((override) => {
-		currentNode = root;
-		const { prefix, index } = override;
-		prefix?.forEach((prefixSegment) => {
-			let child = currentNode.children.find((c) => c.prefixSegment === prefixSegment);
-			if (!child) {
-				child = createTreeNode(null, prefixSegment, currentNode, defaultState, override);
-				currentNode.children.push(child);
-			}
-			currentNode = child;
-		});
-		currentNode.children.push(createTreeNode(index, null, currentNode, defaultState, override));
-	});
-
-	return root;
-};
-
-export const addIndex = ((overrides: GroupOverride[]) => overrides.map((h, index) => ({ index, ...h })));
+export const addIndex = ((overrides: GroupOverride[]) => overrides.map((o, index) => ({ index, ...o })));
