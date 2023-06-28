@@ -62,7 +62,6 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const dispatch = useDispatch();
 	const [editingOverride, setEditingOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: OverrideType.COLORED });
 	const [highlightedOverride, setHighlightedOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: null });
-	const [selectedColoredIndexes, setSelectedColoredIndexes] = useState([]);
 
 	const state: Partial<ViewpointState> = value.state || {};
 	const leftPanels = useSelector(selectLeftPanels);
@@ -123,18 +122,18 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		}
 	}, [highlightedOverride]);
 
-	useEffect(() => {
-		const colored = selectedColoredIndexes.map((i) => state.colored[i]).filter((c) => (c.group as Group).objects);
+	const onSelectedColoredGroupsChange = (indexes) => {
+		const colored = indexes.map((i) => state.colored[i]).filter((c) => (c.group as Group).objects);
 		const view = { state: { colored } } as Viewpoint;
 		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
-	}, [selectedColoredIndexes]);
+	};
 
 	return (
 		<Container onClick={() => setHighlightedOverride({ index: -1, type: OverrideType.COLORED })}>
 			<TicketGroupsContextComponent
 				groupType="colored"
 				onDeleteGroup={onDeleteColoredGroup}
-				onSelectedGroupsChange={setSelectedColoredIndexes}
+				onSelectedGroupsChange={onSelectedColoredGroupsChange}
 				overrides={state.colored || []}
 				onEditGroup={onSetEditGroup(OverrideType.COLORED)}
 				highlightedIndex={getHighlightedIndex(OverrideType.COLORED)}
