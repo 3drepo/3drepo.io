@@ -51,13 +51,13 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const { group, color, opacity } = override;
 	const checked = getGroupIsChecked(index);
 
-	const containEvent = (e) => {
+	const preventPropagation = (e) => {
 		e.preventDefault();
 		e.stopPropagation();
 	};
 
 	const handleDeleteGroup = (e) => {
-		containEvent(e);
+		preventPropagation(e);
 		DialogsActionsDispatchers.open('delete', {
 			name: (group as Group).name,
 			message: formatMessage({
@@ -78,12 +78,12 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	};
 
 	const handleClick = (e) => {
-		containEvent(e);
+		preventPropagation(e);
 		highlightGroup();
 	};
 
 	const isolateGroup = (e) => {
-		containEvent(e);
+		preventPropagation(e);
 		highlightGroup();
 		dispatch(TreeActions.isolateSelectedNodes());
 	};
@@ -91,7 +91,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const onEditGroup = () => editGroup(index);
 
 	const handleToggleClick = (e) => {
-		containEvent(e);
+		preventPropagation(e);
 		toggleGroup(index);
 	};
 
