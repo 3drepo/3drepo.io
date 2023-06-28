@@ -15,21 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { difference, intersection } = require('lodash');
+const { src } = require('../../../helper/path');
+const { determineTestGroup } = require('../../../helper/services');
 
-const ArrayHelper = {};
+const ArrHelper = require(`${src}/utils/helper/arrays`);
 
-// Returns the elements of the second array that are not included in the first
-ArrayHelper.getArrayDifference = (firstArray, secondArray) => difference(secondArray, firstArray);
-
-ArrayHelper.getCommonElements = intersection;
-
-ArrayHelper.splitArrayIntoChunks = (array, maxLength) => {
-	const res = [];
-	for (let i = 0; i < array.length; i += maxLength) {
-		res.push(array.slice(i, i + maxLength));
-	}
-	return res;
+const testSplitArrayIntoChunks = () => {
+	describe.each([
+		[[1, 2, 3], 4, [[1, 2, 3]]],
+		[[1, 2, 3], 2, [[1, 2], [3]]],
+		[[1, 2, 3], 1, [[1], [2], [3]]],
+	])('Split array into chunks', (array, length, results) => {
+		test(`with ${array} should result in ${results}`, () => {
+			expect(ArrHelper.splitArrayIntoChunks(array, length)).toEqual(results);
+		});
+	});
 };
 
-module.exports = ArrayHelper;
+describe(determineTestGroup(__filename), () => {
+	testSplitArrayIntoChunks();
+});
