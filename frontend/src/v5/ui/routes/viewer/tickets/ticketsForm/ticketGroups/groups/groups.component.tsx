@@ -40,6 +40,7 @@ export const Groups = ({ indexedOverrides, level = 0 }: GroupsProps) => {
 
 	const handleCheckboxClick = (e, overrides) => {
 		e.stopPropagation();
+		// toggling all the groups descendants of this collection
 		toggleCollection(overrides.map(({ index }) => index));
 	};
 
