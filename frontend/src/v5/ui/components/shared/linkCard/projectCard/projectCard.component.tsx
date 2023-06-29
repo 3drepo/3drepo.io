@@ -82,7 +82,7 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 		<LinkCard
 			{...props}
 			to={to}
-			heading={<Highlight search={[filterQuery]}>{project.name}</Highlight>}
+			heading={<Highlight search={filterQuery}>{project.name}</Highlight>}
 			imgSrc={DEFAULT_IMAGE}
 		>
 			<EllipsisMenuContainer onClick={preventNavigation}>

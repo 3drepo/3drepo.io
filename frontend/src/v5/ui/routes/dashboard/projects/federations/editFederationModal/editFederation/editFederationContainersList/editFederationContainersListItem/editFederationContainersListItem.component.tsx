@@ -82,7 +82,7 @@ export const EditFederationContainersListItem = memo(({
 				width={160}
 				selected={isSelected}
 			>
-				<Highlight search={[filterQuery]}>
+				<Highlight search={filterQuery}>
 					{container.code}
 				</Highlight>
 			</DashboardListItemText>
@@ -91,7 +91,7 @@ export const EditFederationContainersListItem = memo(({
 				hideWhenSmallerThan={Display.Tablet}
 				selected={isSelected}
 			>
-				<Highlight search={[filterQuery]}>
+				<Highlight search={filterQuery}>
 					{container.type}
 				</Highlight>
 			</DashboardListItemText>

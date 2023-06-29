@@ -54,7 +54,7 @@ export const DashboardListItemContainerTitle = ({
 			subtitle={(
 				<LatestRevision
 					name={(
-						<Highlight search={[query]}>
+						<Highlight search={query}>
 							{container.latestRevision}
 						</Highlight>
 					)}
@@ -74,7 +74,7 @@ export const DashboardListItemContainerTitle = ({
 			disabled={!hasRevisions}
 		>
 			<Link {...linkProps}>
-				<Highlight search={[query]}>
+				<Highlight search={query}>
 					{container.name}
 				</Highlight>
 			</Link>

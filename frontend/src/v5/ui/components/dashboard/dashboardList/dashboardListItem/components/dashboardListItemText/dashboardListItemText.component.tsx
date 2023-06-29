@@ -39,7 +39,7 @@ export const DashboardListItemText = ({
 		<FixedOrGrowContainer {...containerProps}>
 			<Text selected={selected}>
 				{shouldHighlight && (
-					<Highlight search={[query]}>
+					<Highlight search={query}>
 						{children as string}
 					</Highlight>
 				)}
