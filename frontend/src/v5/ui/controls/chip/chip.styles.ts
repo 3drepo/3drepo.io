@@ -66,16 +66,16 @@ export const ChipWrapper = styled.div<{ variant: string; color: string; disabled
 			}
 		}
 		.MuiChip-deleteIcon {
-				display: contents;
-				&:hover {
-					color: inherit;
-				}
-				svg {
-					height: 8px;
-					min-width: 8px;
-					margin-right: 2px;
-				}
+			display: contents;
+			&:hover {
+				color: inherit;
 			}
+			svg {
+				height: 8px;
+				min-width: 8px;
+				margin-right: 2px;
+			}
+		}
 		.MuiChip-label {
 			padding: 0;
 			line-height: 100%;

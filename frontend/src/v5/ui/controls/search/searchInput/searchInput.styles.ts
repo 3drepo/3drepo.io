@@ -82,8 +82,6 @@ export const Autocomplete = styled(BaseAutocomplete)`
 `;
 
 export const TextField = styled(BaseTextField)`
-	
-
 	margin: 8px;
 
 	.MuiInputBase-adornedEnd {
