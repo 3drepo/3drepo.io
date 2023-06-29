@@ -27,7 +27,7 @@ const HighlightTag = (props) => <Tag {...props} />;
 
 export const Highlight = ({ search, children = '' }: IHighlight): JSX.Element => (
 	<Highlighter
-		searchWords={isArray(search) ? search.map(trim) : trim(search)}
+		searchWords={isArray(search) ? search.map(trim) : [trim(search)]}
 		autoEscape
 		textToHighlight={children}
 		highlightTag={HighlightTag}

@@ -17,19 +17,18 @@
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
-import { SearchInput } from '@controls/search/searchInput';
 import { DashboardListCollapse, DashboardListEmptyContainer, DashboardListEmptySearchResults, DashboardListHeader, DashboardListHeaderLabel, DashboardListItem } from '@components/dashboard/dashboardList';
 import { CollapseSideElementGroup } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.styles';
 import { useContext } from 'react';
 import { DashboardListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemRow/dashboardListItemRow.component';
 import { DashboardListItemText } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemText/dashboardListItemText.component';
+import { SearchInput } from '@controls/search/searchInput';
 
 export default {
 	title: 'Dashboard/SearchContext',
 	component: SearchContextComponent,
 	argTypes: {
 		items: { control: 'object' },
-		multiple: { type: 'boolean' },
 	},
 } as ComponentMeta<typeof SearchContextComponent>;
 
@@ -41,7 +40,7 @@ const ObjectsListHeader = ({ columnNames, setSortConfig }) => (
 	</DashboardListHeader>
 );
 
-const ObjectsList = ({ multiple }) => {
+const ObjectsList = () => {
 	const { filteredItems } = useContext(SearchContext);
 
 	return (
@@ -49,7 +48,7 @@ const ObjectsList = ({ multiple }) => {
 			title={<>Searchable list</>}
 			sideElement={(
 				<CollapseSideElementGroup>
-					<SearchInput placeholder="Search containers..." multiple={multiple} />
+					<SearchInput placeholder="Search containers..." />
 				</CollapseSideElementGroup>
 			)}
 		>
@@ -76,9 +75,9 @@ const ObjectsList = ({ multiple }) => {
 		</DashboardListCollapse>
 	);
 };
-const Template: ComponentStory<typeof SearchContextComponent> = ({ multiple, ...args }: any) => (
+const Template: ComponentStory<typeof SearchContextComponent> = (args) => (
 	<SearchContextComponent {...args}>
-		<ObjectsList multiple={multiple} />
+		<ObjectsList />
 	</SearchContextComponent>
 );
 

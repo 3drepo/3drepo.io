@@ -25,16 +25,20 @@ import { SearchContext } from '../searchContext';
 
 type ISearchInputWithChips = {
 	variant?: 'filled' | 'outlined',
+	onRemoveChip?: (index: number) => void,
 	placeholder?: string,
 } & Partial<AutocompleteProps<TextFieldProps, boolean, undefined, undefined, typeof SearchChip>>;
 
-export const SearchInputWithChips = ({ variant = 'filled', placeholder, ...props }: ISearchInputWithChips): JSX.Element => {
+export const SearchInputWithChips = ({ variant = 'filled', placeholder, onRemoveChip, ...props }: ISearchInputWithChips): JSX.Element => {
 	const { query, setQuery } = useContext(SearchContext);
 	const queries: string[] = query ? JSON.parse(query) : [];
 
 	const onChange = (e, newValue) => setQuery(JSON.stringify(newValue));
 
-	const removeQuery = (index) => setQuery(JSON.stringify(queries.filter((el, i) => index !== i)));
+	const removeQuery = (index) => {
+		onRemoveChip?.(index);
+		setQuery(JSON.stringify(queries.filter((el, i) => index !== i)));
+	};
 
 	return (
 		<Autocomplete
