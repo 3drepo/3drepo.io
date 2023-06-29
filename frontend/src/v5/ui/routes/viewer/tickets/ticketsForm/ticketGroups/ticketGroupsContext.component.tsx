@@ -76,10 +76,7 @@ export const TicketGroupsContextComponent = ({
 		setIndexedOverrides(_.sortBy(addIndex(overrides || []), 'prefix'));
 	}, [overrides]);
 
-	useEffect(() => {
-		if (!onSelectedGroupsChange) return;
-		onSelectedGroupsChange(Array.from(checkedIndexes));
-	}, [checkedIndexes]);
+	useEffect(() => { onSelectedGroupsChange(checkedIndexes); }, [checkedIndexes]);
 
 	return (
 		<TicketGroupsContext.Provider

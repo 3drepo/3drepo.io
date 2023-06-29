@@ -80,8 +80,8 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const handleClick = (e) => {
 		preventPropagation(e);
 		highlightGroup();
-		if (groupType === 'hidden' && !checked) {
-			toggleGroupState(index);
+		if (groupType === 'hidden' && checked) {
+			toggleGroup(index);
 		}
 	};
 
