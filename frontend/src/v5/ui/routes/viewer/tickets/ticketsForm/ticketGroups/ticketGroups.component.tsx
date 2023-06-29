@@ -16,13 +16,13 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { GroupOverride, IGroupSettingsForm, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
+import { Group, GroupOverride, IGroupSettingsForm, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { ViewpointsActions } from '@/v4/modules/viewpoints';
 import { TreeActions } from '@/v4/modules/tree';
 import { viewpointV5ToV4, convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
-import { cloneDeep, differenceBy, uniqBy } from 'lodash';
+import { cloneDeep, uniqBy, xor } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
 import { selectHiddenGeometryVisible } from '@/v4/modules/tree/tree.selectors';
@@ -62,9 +62,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const dispatch = useDispatch();
 	const [editingOverride, setEditingOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: OverrideType.COLORED });
 	const [highlightedOverride, setHighlightedOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: null });
-	const [selectedColoredIndexes, setSelectedColoredIndexes] = useState([]);
-	const [selectedHiddenOverrides, setSelectedHiddenOverrides] = useState<GroupOverride[]>([]);
-	const [selectedColoredOverrides, setSelectedColoredOverrides] = useState<GroupOverride[]>([]);
+	const [selectedHiddenIndexes, setSelectedHiddenIndexes] = useState([]);
 
 	const state: Partial<ViewpointState> = value.state || {};
 	const leftPanels = useSelector(selectLeftPanels);
@@ -95,17 +93,22 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	};
 
 	const onSelectedHiddenGroupChange = (indexes: number[]) => {
-		const hidden = indexes.map((index) => state.hidden[index]);
-		setSelectedHiddenOverrides(hidden);
-		const hideNodes = hidden.length > selectedHiddenOverrides.length;
-		const [nodesToKeep, nodesToRemove] = hideNodes ? [hidden, selectedHiddenOverrides] : [selectedHiddenOverrides, hidden];
-		const diffGroups = differenceBy(nodesToKeep, nodesToRemove, (o) => (o.group as Group)._id);
-		const objects = diffGroups.flatMap((override) => convertToV4GroupNodes((override.group as Group).objects));
+		setSelectedHiddenIndexes(indexes);
+		const diffIndexes = xor(indexes, selectedHiddenIndexes);
+		const hideNodes = indexes.length > selectedHiddenIndexes.length;
+		const objects = diffIndexes.flatMap((i) => convertToV4GroupNodes((state.hidden[i].group as Group).objects));
 		if (hideNodes) {
 			dispatch(TreeActions.hideNodesBySharedIds(objects));
 		} else {
 			dispatch(TreeActions.showNodesBySharedIds(objects));
 		}
+	};
+
+	const onSelectedColoredGroupsChange = (indexes) => {
+		const colored = indexes.map((i) => state.colored[i]);
+		const hidden = indexes.map((i) => state.hidden[i]);
+		const view = { state: { colored, hidden } } as Viewpoint;
+		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
 	};
 
 	const onCancel = () => {
@@ -118,13 +121,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 			newVal.state = { showDefaultHidden: selectHiddenGeometryVisible(store.getState()) };
 		}
 
-		if (editingOverride.type === OverrideType.COLORED) {
-			if (!newVal.state.colored) newVal.state.colored = [];
-			newVal.state.colored[editingOverride.index] = overrideValue;
-		} else {
-			if (!newVal.state.hidden) newVal.state.hidden = [];
-			newVal.state.hidden[editingOverride.index] = overrideValue;
-		}
+		if (!newVal.state[editingOverride.type]) newVal.state[editingOverride.type] = [];
 		newVal.state[editingOverride.type][editingOverride.index] = overrideValue;
 		onChange?.(newVal);
 		onCancel();
@@ -137,22 +134,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		if (highlightedOverride.index === -1) {
 			dispatch(TreeActions.clearCurrentlySelected());
 		}
-		const override = state[highlightedOverride.type][highlightedOverride.index];
-		const objects = convertToV4GroupNodes((override.group as Group).objects);
-		dispatch(TreeActions.showNodesBySharedIds(objects));
-		dispatch(TreeActions.selectNodesBySharedIds(objects, (override.color || [255, 255, 255]).map((c) => c / 255)));
 	}, [highlightedOverride]);
-
-	const onSelectedColoredGroupsChange = (indexes) => {
-		const colored = indexes.map((i) => state.colored[i]);
-		const view = { state: { colored } } as Viewpoint;
-		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
-	};
-
-	useEffect(() => {
-		const view = { state: { colored: selectedColoredOverrides, hidden: selectedHiddenOverrides } } as Viewpoint;
-		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
-	}, [selectedColoredOverrides]);
 
 	return (
 		<Container onClick={() => setHighlightedOverride({ index: -1, type: OverrideType.COLORED })}>

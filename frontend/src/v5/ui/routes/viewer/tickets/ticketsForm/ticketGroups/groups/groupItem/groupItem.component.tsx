@@ -74,7 +74,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		const objects = convertToV4GroupNodes((group as Group).objects);
 		dispatch(TreeActions.clearCurrentlySelected());
 		dispatch(TreeActions.showNodesBySharedIds(objects));
-		dispatch(TreeActions.selectNodesBySharedIds(objects, color.map((c) => c / 255)));
+		dispatch(TreeActions.selectNodesBySharedIds(objects, (color || [255, 255, 255]).map((c) => c / 255)));
 	};
 
 	const handleClick = (e) => {
