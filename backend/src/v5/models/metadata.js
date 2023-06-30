@@ -68,7 +68,7 @@ Metadata.getMetadataByRules = async (teamspace, project, model, revId, rules, pr
 
 	const [matched, unwanted] = await Promise.all([
 		db.find(teamspace, collectionName(model), positiveQuery, projection),
-		negativeQuery ? db.find(teamspace, collectionName(model), negativeQuery, { _id: 1 }) : Promise.resolve([]),
+		negativeQuery ? db.find(teamspace, collectionName(model), negativeQuery, projection) : Promise.resolve([]),
 	]);
 
 	return { matched, unwanted };
