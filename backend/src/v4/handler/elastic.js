@@ -64,8 +64,7 @@ const createElasticClient = async () => {
 	try {
 		const client = new Client(elasticConfig);
 		await client.cluster.health();
-		// systemLogger.logInfo(`Succesfully connected to ${elasticConfig.cloud.id.trim()}`);
-		systemLogger.logInfo(`Succesfully connected to ${elasticConfig.node.trim()}`);
+		systemLogger.logInfo(`Succesfully connected to ${elasticConfig.cloud.id.trim()}`);
 		await establishIndices(client);
 		return client;
 	} catch (err) {
