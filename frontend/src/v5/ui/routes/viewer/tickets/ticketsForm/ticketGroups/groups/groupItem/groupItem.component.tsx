@@ -87,8 +87,8 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 
 	const isolateGroup = (e) => {
 		preventPropagation(e);
-		highlightGroup();
-		dispatch(TreeActions.isolateSelectedNodes());
+		const objects = convertToV4GroupNodes((group as Group).objects);
+		dispatch(TreeActions.isolateNodesBySharedIds(objects));
 	};
 
 	const onEditGroup = () => editGroup(index);
@@ -121,7 +121,6 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 						/>
 					</GroupsCount>
 				</NameContainer>
-				{groupType === 'colored' && (
 					<Buttons>
 						{isAdmin && (
 							<ErrorTicketButton onClick={handleDeleteGroup}>
@@ -135,7 +134,6 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 							<EditIcon />
 						</PrimaryTicketButton>
 					</Buttons>
-				)}
 			</Headline>
 			<GroupToggle
 				checked={checked}
