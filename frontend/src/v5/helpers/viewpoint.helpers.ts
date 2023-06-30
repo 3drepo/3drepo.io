@@ -27,7 +27,7 @@ export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	_ids: getNodesIdsFromSharedIds([object]),
 }));
 
-export const convertToV4GroupNodes = (objects) => objects.map(({ container: model, _ids }) => ({
+export const convertToV4GroupNodes = (objects = []) => objects.map(({ container: model, _ids }) => ({
 	account: selectCurrentTeamspace(getState()),
 	model,
 	shared_ids: toSharedIds(_ids),
