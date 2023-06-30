@@ -52,10 +52,10 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules) 
 		matchedNodes,
 		unwantedNodes,
 	] = await Promise.all([
-		getNodesBySharedIds(teamspace, project, model, revision,
-			matched.flatMap(({ parents }) => parents), { _id: 1 }),
-		getNodesBySharedIds(teamspace, project, model, revision,
-			unwanted.flatMap(({ parents }) => parents), { _id: 1 }),
+		matched.length ? getNodesBySharedIds(teamspace, project, model, revision,
+			matched.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
+		unwanted.length ? getNodesBySharedIds(teamspace, project, model, revision,
+			unwanted.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
 	]);
 
 	const matchedMeshes = {};
