@@ -14,8 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-const { UUIDToString } = require('../utils/helper/uuids');
 const db = require('../handler/db');
 const { generateQueriesFromRules } = require('./metadata.rules');
 const { templates } = require('../utils/responseCodes');
@@ -68,21 +66,12 @@ Metadata.updateCustomMetadata = async (teamspace, model, metadataId, changeSet) 
 Metadata.getMetadataByRules = async (teamspace, project, model, revId, rules, projection) => {
 	const { positiveQuery, negativeQuery } = constructQueriesFromRules(revId, rules);
 
-	const [posRes, negRes] = await Promise.all([
+	const [matched, unwanted] = await Promise.all([
 		db.find(teamspace, collectionName(model), positiveQuery, projection),
 		negativeQuery ? db.find(teamspace, collectionName(model), negativeQuery, { _id: 1 }) : Promise.resolve([]),
 	]);
 
-	if (negRes.length) {
-		const unwantedIds = {};
-		negRes.forEach(({ _id }) => {
-			unwantedIds[UUIDToString(_id)] = 1;
-		});
-
-		return posRes.filter(({ _id }) => !unwantedIds[UUIDToString(_id)]);
-	}
-
-	return posRes;
+	return { matched, unwanted };
 };
 
 module.exports = Metadata;
