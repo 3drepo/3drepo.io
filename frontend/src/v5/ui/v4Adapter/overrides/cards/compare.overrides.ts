@@ -42,8 +42,13 @@ export default css`
 		min-width: 107px;
 	}
 
-	${FilterPanel} .MuiInputBase-root {
-		padding-left: 39px;
+	${FilterPanel} {
+		&&.react-autosuggest__container input {
+			padding: 0 14px;
+		}
+		.MuiInputBase-root {
+			padding-left: 39px;
+		}
 	}
 
 	${DiffModel}, ${ClashModel} {

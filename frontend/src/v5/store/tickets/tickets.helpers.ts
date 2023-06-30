@@ -25,7 +25,7 @@ import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
-import { EditableTicket, ITemplate, ITicket, Viewpoint } from './tickets.types';
+import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 
 export const modelIsFederation = (modelId: string) => (
 	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
@@ -125,7 +125,7 @@ const moduleTypeProperties = {
 	shapes: { title: formatMessage({ id: 'customTicket.panel.shapes', defaultMessage: 'Shapes' }), Icon: ShapesIcon },
 };
 
-export const getModulePanelTitle = (module) => {
+export const getModulePanelProps = (module) => {
 	if (module.name) return { title: module.name, Icon: CustomModuleIcon };
 	return moduleTypeProperties[module.type];
 };
@@ -161,6 +161,16 @@ export const getImgSrc = (imgData) => {
 	return addBase64Prefix(imgData);
 };
 
+const sanitizeGroupVal = (override: GroupOverride) => {
+	if ((override.group as Group)?.rules && (override.group as Group)?.objects) {
+		const group = { ...(override.group as Group) };
+		delete group.objects;
+
+		return ({ ...override, group });
+	}
+	return override;
+};
+
 const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
 	if (!values) return values;
 
@@ -168,7 +178,7 @@ const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
 		const definition = propertiesDefinitions.find((def) => def.name === key);
 		if (definition?.type === 'view') {
 			const viewValue:Viewpoint | undefined = values[key];
-			const oldValue:Viewpoint | undefined = oldValues[key];
+			const oldValue:Viewpoint | undefined = oldValues?.[key];
 
 			if (isResourceId(viewValue?.screenshot)) {
 				delete viewValue.screenshot;
@@ -177,6 +187,18 @@ const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
 			if (viewValue && !viewValue.camera && oldValue?.camera) {
 				viewValue.camera = null;
 				viewValue.clippingPlanes = null;
+			}
+
+			if (viewValue && !viewValue.state && oldValue?.state) {
+				viewValue.state = null;
+			}
+
+			if (viewValue.state?.colored) {
+				viewValue.state.colored = viewValue.state.colored.map(sanitizeGroupVal);
+			}
+
+			if (viewValue.state?.hidden) {
+				viewValue.state.hidden = viewValue.state.hidden.map(sanitizeGroupVal);
 			}
 		}
 	});

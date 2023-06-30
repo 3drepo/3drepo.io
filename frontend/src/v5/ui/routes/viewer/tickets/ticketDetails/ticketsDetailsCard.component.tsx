@@ -16,7 +16,7 @@
  */
 
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -27,11 +27,20 @@ import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyStrings, removeEmptyObjects } from '@/v5/helpers/form.helper';
-import { TicketsCardViews } from '../tickets.constants';
+import { FormattedMessage } from 'react-intl';
+import { InputController } from '@controls/inputs/inputController.component';
+import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
+import { useStore } from 'react-redux';
+import { ViewpointsActions } from '@/v4/modules/viewpoints/viewpoints.redux';
+import { AdditionalProperties, TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
+import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
+import { TicketContext, TicketDetailsView } from '../ticket.context';
 
 export const TicketDetailsCard = () => {
+	const { dispatch } = useStore();
+
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
@@ -81,6 +90,7 @@ export const TicketDetailsCard = () => {
 			ticket._id,
 			isFederation,
 		);
+
 		if (!templateAlreadyFetched(template)) {
 			TicketsActionsDispatchers.fetchTemplate(
 				teamspace,
@@ -94,18 +104,45 @@ export const TicketDetailsCard = () => {
 
 	if (!ticket) return (<></>);
 
+	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
+
+	useEffect(() => {
+		const defaultView = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
+		if (isEmpty(defaultView)) return;
+		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(defaultView)));
+	}, [ticket.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state]);
+
 	return (
 		<CardContainer>
-			<CardHeader>
-				<ArrowBack onClick={goBack} />
-				{template.code}:{ticket.number}
-				<HeaderButtons>
-					<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
-					<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
-				</HeaderButtons>
-			</CardHeader>
 			<FormProvider {...formData}>
-				<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
+				{view === TicketDetailsView.Groups
+					&& (
+						<>
+							<CardHeader>
+								<ArrowBack onClick={() => setDetailViewAndProps(TicketDetailsView.Form)} />
+								{ticket.title}:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" />
+							</CardHeader>
+							<InputController
+								Input={TicketGroups}
+								name={viewProps.name}
+								onBlur={onBlurHandler}
+							/>
+						</>
+					)}
+				{view === TicketDetailsView.Form
+				&& (
+					<>
+						<CardHeader>
+							<ArrowBack onClick={goBack} />
+							{template.code}:{ticket.number}
+							<HeaderButtons>
+								<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
+								<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
+							</HeaderButtons>
+						</CardHeader>
+						<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
+					</>
+				)}
 			</FormProvider>
 		</CardContainer>
 	);

@@ -20,8 +20,8 @@ import { isArray, mergeWith } from 'lodash';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
-import { TeamspaceAndProjectId, TeamspaceId } from '../store.types';
-import { ITemplate, ITicket, NewTicket } from './tickets.types';
+import { ModelId, TeamspaceId, TeamspaceProjectAndModel } from '../store.types';
+import { ITemplate, ITicket, NewTicket, Group } from './tickets.types';
 
 const mergeWithArray = (objValue, srcValue) => mergeWith(objValue, srcValue, (target, src) => {
 	if (isArray(target)) return src; // If its an array that is merging just use the newest
@@ -45,11 +45,15 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	upsertTicketSuccess: ['modelId', 'ticket'],
 	fetchRiskCategories: ['teamspace'],
 	fetchRiskCategoriesSuccess: ['riskCategories'],
+	fetchTicketGroups: ['teamspace', 'projectId', 'modelId', 'ticketId'],
+	fetchTicketGroupsSuccess: ['groups'],
+	upsertTicketAndFetchGroups: ['teamspace', 'projectId', 'modelId', 'ticket'],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
 export const INITIAL_STATE: ITicketsState = {
 	ticketsByModelId: {},
 	templatesByModelId: {},
+	groupsByGroupId: {},
 	riskCategories: [],
 };
 
@@ -82,6 +86,12 @@ export const replaceTemplateSuccess = (state: ITicketsState, { modelId, template
 	}
 };
 
+export const fetchTicketGroupsSuccess = (state: ITicketsState, { groups }: FetchTicketGroupsSuccessAction) => {
+	groups.forEach((group) => {
+		state.groupsByGroupId[group._id] = group;
+	});
+};
+
 export const fetchTemplatesSuccess = (state: ITicketsState, { modelId, templates }: FetchTemplatesSuccessAction) => {
 	state.templatesByModelId[modelId] = templates;
 };
@@ -98,26 +108,31 @@ export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.UPSERT_TICKET_SUCCESS]: upsertTicketSuccess,
 	[TicketsTypes.REPLACE_TEMPLATE_SUCCESS]: replaceTemplateSuccess,
 	[TicketsTypes.FETCH_RISK_CATEGORIES_SUCCESS]: fetchRiskCategoriesSuccess,
+	[TicketsTypes.FETCH_TICKET_GROUPS_SUCCESS]: fetchTicketGroupsSuccess,
 }));
 
 export interface ITicketsState {
 	ticketsByModelId: Record<string, ITicket[]>,
 	templatesByModelId: Record<string, ITemplate[]>,
 	riskCategories: string[],
+	groupsByGroupId: Record<string, Group>,
 }
 
-export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceAndProjectId & { modelId: string, isFederation: boolean };
-export type FetchTicketAction = Action<'FETCH_TICKET'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean };
-export type UpdateTicketAction = Action<'UPDATE_TICKET'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, ticket: Partial<ITicket>, isFederation: boolean };
-export type CreateTicketAction = Action<'CREATE_TICKET'> & TeamspaceAndProjectId & { modelId: string, ticket: NewTicket, isFederation: boolean, onSuccess: (ticketId) => void };
-export type FetchTicketsSuccessAction = Action<'FETCH_TICKETS_SUCCESS'> & { modelId: string, tickets: ITicket[] };
-export type UpsertTicketSuccessAction = Action<'UPSERT_TICKET_SUCCESS'> & { modelId: string, ticket: Partial<ITicket> };
-export type ReplaceTemplateSuccessAction = Action<'REPLACE_TEMPLATE_SUCCESS'> & { modelId: string, template: ITemplate };
-export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId & { modelId: string, isFederation: boolean };
-export type FetchTemplateAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId & { modelId: string, templateId: string, isFederation: boolean };
-export type FetchTemplatesSuccessAction = Action<'FETCH_TEMPLATES_SUCCESS'> & { modelId: string, templates: ITemplate[] };
+export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean };
+export type FetchTicketAction = Action<'FETCH_TICKET'> & TeamspaceProjectAndModel & { ticketId: string, isFederation: boolean};
+export type UpdateTicketAction = Action<'UPDATE_TICKET'> & TeamspaceProjectAndModel & { ticketId: string, ticket: Partial<ITicket>, isFederation: boolean};
+export type CreateTicketAction = Action<'CREATE_TICKET'> & TeamspaceProjectAndModel & { ticket: NewTicket, isFederation: boolean, onSuccess: (ticketId) => void };
+export type FetchTicketsSuccessAction = Action<'FETCH_TICKETS_SUCCESS'> & ModelId & {tickets: ITicket[] };
+export type UpsertTicketSuccessAction = Action<'UPSERT_TICKET_SUCCESS'> & ModelId & { ticket: Partial<ITicket> };
+export type UpsertTicketAndFetchGroupsAction = Action<'UPSERT_TICKET_AND_FETCH_GROUPS'> & TeamspaceProjectAndModel & { ticket: Partial<ITicket> };
+export type ReplaceTemplateSuccessAction = Action<'REPLACE_TEMPLATE_SUCCESS'> & ModelId & {template: ITemplate };
+export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceProjectAndModel & { isFederation: boolean };
+export type FetchTemplateAction = Action<'FETCH_TEMPLATES'> & TeamspaceProjectAndModel & { templateId: string, isFederation: boolean};
+export type FetchTemplatesSuccessAction = Action<'FETCH_TEMPLATES_SUCCESS'> & ModelId & { templates: ITemplate[] };
 export type FetchRiskCategoriesAction = Action<'FETCH_RISK_CATEGORIES'> & TeamspaceId;
 export type FetchRiskCategoriesSuccessAction = Action<'FETCH_RISK_CATEGORIES_SUCCESS'> & { riskCategories: string[] };
+export type FetchTicketGroupsAction = Action<'FETCH_TICKET_GROUPS'> & TeamspaceProjectAndModel & { ticketId:string, groupId: string };
+export type FetchTicketGroupsSuccessAction = Action<'FETCH_TICKET_GROUPS_SUCCESS'> & { groups: Group[] };
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -168,7 +183,17 @@ export interface ITicketsActionCreators {
 		isFederation: boolean,
 	) => FetchTemplateAction;
 	upsertTicketSuccess: (modelId: string, ticket: Partial<ITicket>) => UpsertTicketSuccessAction;
+	upsertTicketAndFetchGroups: (teamspace: string, projectId: string, modelId: string, ticket: Partial<ITicket>) => UpsertTicketAndFetchGroupsAction;
 	replaceTemplateSuccess: (modelId: string, ticket: ITemplate) => ReplaceTemplateSuccessAction;
 	fetchRiskCategories: (teamspace: string) => FetchRiskCategoriesAction;
 	fetchRiskCategoriesSuccess: (riskCategories: string[]) => FetchRiskCategoriesSuccessAction;
+	fetchTicketGroups: (
+		teamspace: string,
+		projectId: string,
+		modelId: string,
+		ticketId: string,
+	) => FetchTicketGroupsAction;
+	fetchTicketGroupsSuccess: (
+		groups: Group[],
+	) => FetchTicketGroupsSuccessAction;
 }
