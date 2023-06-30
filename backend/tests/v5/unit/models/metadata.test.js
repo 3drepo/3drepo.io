@@ -183,7 +183,7 @@ const testGetMetadataByRules = () => {
 			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
 
 			await expect(Metadata.getMetadataByRules(teamspace, project, model, revId, rules, projection))
-				.resolves.toEqual(expectedData);
+				.resolves.toEqual({ matched: expectedData, unwanted: [] });
 
 			expect(RulesModel.generateQueriesFromRules).toHaveBeenCalledTimes(1);
 			expect(RulesModel.generateQueriesFromRules).toHaveBeenCalledWith(rules);
@@ -194,7 +194,7 @@ const testGetMetadataByRules = () => {
 			expect(findFn).toHaveBeenCalledWith(teamspace, `${model}.scene`, expectedPosQuery, projection);
 		});
 
-		test('Should filter away any items that matches negative queries from the positive results', async () => {
+		test('xxxShould return all matching positive and negative query results', async () => {
 			const rules = times(5, generateRandomObject);
 			const posQueries = times(5, generateRandomObject);
 			const negQueries = times(5, generateRandomObject);
@@ -203,12 +203,12 @@ const testGetMetadataByRules = () => {
 			const positiveRes = times(10, () => ({ ...generateRandomObject(), _id: generateUUID() }));
 			const negativeRes = [];
 
-			const expectedData = [];
+			const expectedData = { matched: [], unwanted: [] };
 
 			positiveRes.forEach((entry, i) => {
-				if (i % 3) {
-					expectedData.push(entry);
-				} else {
+				expectedData.matched.push(entry);
+				if (i % 3 === 0) {
+					expectedData.unwanted.push(entry);
 					negativeRes.push(entry);
 				}
 			});
@@ -229,7 +229,7 @@ const testGetMetadataByRules = () => {
 
 			expect(findFn).toHaveBeenCalledTimes(2);
 			expect(findFn).toHaveBeenCalledWith(teamspace, `${model}.scene`, expectedPosQuery, projection);
-			expect(findFn).toHaveBeenCalledWith(teamspace, `${model}.scene`, expectedNegQuery, { _id: 1 });
+			expect(findFn).toHaveBeenCalledWith(teamspace, `${model}.scene`, expectedNegQuery, projection);
 		});
 	});
 };
