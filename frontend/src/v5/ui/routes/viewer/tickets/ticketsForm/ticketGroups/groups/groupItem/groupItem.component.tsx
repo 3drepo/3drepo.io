@@ -121,19 +121,19 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 						/>
 					</GroupsCount>
 				</NameContainer>
-					<Buttons>
-						{isAdmin && (
-							<ErrorTicketButton onClick={handleDeleteGroup}>
-								<DeleteIcon />
-							</ErrorTicketButton>
-						)}
-						<PrimaryTicketButton onClick={isolateGroup}>
-							<ShowIcon />
-						</PrimaryTicketButton>
-						<PrimaryTicketButton onClick={onEditGroup}>
-							<EditIcon />
-						</PrimaryTicketButton>
-					</Buttons>
+				<Buttons>
+					{isAdmin && (
+						<ErrorTicketButton onClick={handleDeleteGroup}>
+							<DeleteIcon />
+						</ErrorTicketButton>
+					)}
+					<PrimaryTicketButton onClick={isolateGroup}>
+						<ShowIcon />
+					</PrimaryTicketButton>
+					<PrimaryTicketButton onClick={onEditGroup}>
+						<EditIcon />
+					</PrimaryTicketButton>
+				</Buttons>
 			</Headline>
 			<GroupToggle
 				checked={checked}
