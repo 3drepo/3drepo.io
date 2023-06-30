@@ -80,11 +80,11 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		return highlightedOverride.index;
 	};
 
-	const onDeleteColoredGroup = (index) => {
+	const onDeleteGroup = (type) => (index) => {
 		const newVal = cloneDeep(value);
-		newVal.state.colored.splice(index, 1);
+		newVal.state[type].splice(index, 1);
 		onChange?.(newVal);
-		if (highlightedOverride.index === index) {
+		if (highlightedOverride.index === index && highlightedOverride.type === type) {
 			setHighlightedOverride({ index: -1, type: OverrideType.COLORED });
 		}
 	};
@@ -141,7 +141,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		<Container onClick={() => setHighlightedOverride({ index: -1, type: OverrideType.COLORED })}>
 			<TicketGroupsContextComponent
 				groupType="colored"
-				onDeleteGroup={onDeleteColoredGroup}
+				onDeleteGroup={onDeleteGroup(OverrideType.COLORED)}
 				onSelectedGroupsChange={setSelectedColorIndexes}
 				overrides={state.colored || []}
 				onEditGroup={onSetEditGroup(OverrideType.COLORED)}
@@ -154,6 +154,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 			</TicketGroupsContextComponent>
 			<TicketGroupsContextComponent
 				groupType="hidden"
+				onDeleteGroup={onDeleteGroup(OverrideType.HIDDEN)}
 				overrides={state.hidden || []}
 				onEditGroup={onSetEditGroup(OverrideType.HIDDEN)}
 				highlightedIndex={getHighlightedIndex(OverrideType.HIDDEN)}
@@ -178,6 +179,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 					onSubmit={onSubmit}
 					onCancel={onCancel}
 					prefixes={getPossiblePrefixes(settingsFormGroups)}
+					isColored={editingOverride.type === OverrideType.COLORED}
 				/>
 			</Popper>
 		</Container>
