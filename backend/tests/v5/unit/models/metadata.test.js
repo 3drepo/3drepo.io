@@ -194,7 +194,7 @@ const testGetMetadataByRules = () => {
 			expect(findFn).toHaveBeenCalledWith(teamspace, `${model}.scene`, expectedPosQuery, projection);
 		});
 
-		test('xxxShould return all matching positive and negative query results', async () => {
+		test('Should return all matching positive and negative query results', async () => {
 			const rules = times(5, generateRandomObject);
 			const posQueries = times(5, generateRandomObject);
 			const negQueries = times(5, generateRandomObject);
