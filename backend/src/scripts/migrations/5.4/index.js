@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,21 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { difference, intersection } = require('lodash');
+const mergeSceneBinaries = require('./mergeSceneBinaries');
 
-const ArrayHelper = {};
+const scripts = [
+	{ script: mergeSceneBinaries, desc: 'Merge scene binary files into bigger files' },
+];
 
-// Returns the elements of the second array that are not included in the first
-ArrayHelper.getArrayDifference = (firstArray, secondArray) => difference(secondArray, firstArray);
-
-ArrayHelper.getCommonElements = intersection;
-
-ArrayHelper.splitArrayIntoChunks = (array, maxLength) => {
-	const res = [];
-	for (let i = 0; i < array.length; i += maxLength) {
-		res.push(array.slice(i, i + maxLength));
-	}
-	return res;
-};
-
-module.exports = ArrayHelper;
+module.exports = scripts;
