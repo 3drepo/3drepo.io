@@ -106,7 +106,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		onChange?.(newVal);
 		onCancel();
 		setHighlightedOverride(editingOverride);
-		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(newVal)));
+		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4({ state: newVal.state })));
 	};
 
 	const onSelectedColoredGroupsChange = (indexes) => {
