@@ -44,7 +44,8 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 		setCollectionIsChecked(indexes, state !== GroupState.CHECKED);
 	};
 
-	const addNewGroup = () => {
+	const addNewGroup = (e) => {
+		e.stopPropagation();
 		editGroup(overridesCount); // Set the edit mode with a new index
 	};
 
