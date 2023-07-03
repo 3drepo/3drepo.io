@@ -50,11 +50,6 @@ export const ColorPickerPalette = ({ value, onClose }: ColorPickerPaletteProps) 
 		setOpacity(value.opacity);
 	};
 
-	const onEmptyColorClick = () => {
-		setColor(null);
-		setOpacity(opacity ?? 1);
-	};
-
 	useEffect(() => () => {
 		if (colorisValid && !ref.current) {
 			onClose({ color, opacity });
@@ -68,7 +63,7 @@ export const ColorPickerPalette = ({ value, onClose }: ColorPickerPaletteProps) 
 				onClickClose={resetValues}
 			>
 				<ColorGrid>
-					<ColorOption onClick={onEmptyColorClick} />
+					<ColorOption onClick={() => setColor(null)} />
 					{DEFAULT_SUGGESTED_HEX_COLORS.map((suggestedColor) => (
 						<ColorOption $color={suggestedColor} onClick={() => setColor(suggestedColor)} key={suggestedColor} />
 					))}
