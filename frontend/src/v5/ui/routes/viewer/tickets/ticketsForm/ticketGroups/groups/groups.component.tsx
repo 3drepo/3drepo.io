@@ -29,16 +29,17 @@ import { GroupItem } from './groupItem/groupItem.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
 import { GroupState, IndexedOverride, getCollectionCheckboxState } from '../ticketGroupsContext.helper';
 
+/* eslint-disable @typescript-eslint/no-use-before-define */
 const GroupCollection = ({ overrides, prefix, level }) => {
 	const { getCollectionState, setCollectionIsChecked } = useContext(TicketGroupsContext);
 	const state = getCollectionState(overrides.map(({ index }) => index));
 
-	const handleCheckboxClick = (e, overrides) => {
+	const handleCheckboxClick = (e) => {
 		e.stopPropagation();
-		// toggling all the groups descendants of this collection
+		// setting the state for all the groups descendants of this collection
 		setCollectionIsChecked(overrides.map(({ index }) => index), state !== GroupState.CHECKED);
 	};
-	
+
 	return (
 		<CollectionAccordion
 			title={(
@@ -49,7 +50,7 @@ const GroupCollection = ({ overrides, prefix, level }) => {
 						</NameContainer>
 					</CollectionHeadline>
 					<GroupToggle
-						onClick={(e) => handleCheckboxClick(e, overrides)}
+						onClick={handleCheckboxClick}
 						{...getCollectionCheckboxState(state)}
 					/>
 				</>
