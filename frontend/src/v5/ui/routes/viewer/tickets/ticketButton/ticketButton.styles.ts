@@ -17,7 +17,9 @@
 
 import styled, { css } from 'styled-components';
 
-const TicketButtonStyling = styled.button<{ disabled?: boolean }>`
+const TicketButtonStyling = styled.button.attrs({
+	type: 'button',
+})<{ disabled?: boolean }>`
 	height: 24px;
 	width: 24px;
 	margin: 2px;
