@@ -18,7 +18,7 @@
 import ShowIcon from '@assets/icons/outlined/eye-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { Group, GroupOverride } from '@/v5/store/tickets/tickets.types';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
 import { rgbaToHex } from '@/v4/helpers/colors';
@@ -69,22 +69,13 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		});
 	};
 
-	const highlightGroup = () => {
-		setHighlightedIndex(index);
-		const objects = convertToV4GroupNodes((group as Group).objects);
-		dispatch(TreeActions.clearCurrentlySelected());
-		dispatch(TreeActions.showNodesBySharedIds(objects));
-		dispatch(TreeActions.selectNodesBySharedIds(objects, color?.map((c) => c / 255)));
-	};
-
 	const handleClick = (e) => {
 		preventPropagation(e);
-		highlightGroup();
+		setHighlightedIndex(index);
 	};
 
 	const isolateGroup = (e) => {
 		preventPropagation(e);
-		highlightGroup();
 		dispatch(TreeActions.isolateSelectedNodes());
 	};
 
@@ -97,6 +88,14 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 
 	const alphaColor = (color || [255, 255, 255]).concat(opacity);
 	const alphaHexColor = rgbaToHex(alphaColor.join());
+
+	useEffect(() => {
+		if (highlightedIndex !== index) return;
+		const objects = convertToV4GroupNodes((group as Group).objects);
+		dispatch(TreeActions.clearCurrentlySelected());
+		dispatch(TreeActions.showNodesBySharedIds(objects));
+		dispatch(TreeActions.selectNodesBySharedIds(objects, color?.map((c) => c / 255)));
+	}, [override, highlightedIndex]);
 
 	if (isString(group)) return (<CircularProgress />);
 
