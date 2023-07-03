@@ -111,6 +111,10 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes }: Group
 			newValues.group.objects = convertToV5GroupNodes(selectedNodes);
 		}
 
+		if (!newValues.color) {
+			delete newValues.color;
+		}
+
 		onSubmit?.(newValues);
 	};
 
