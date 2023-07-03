@@ -17,6 +17,7 @@
 
 import { useState, useEffect } from 'react';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
+import _ from 'lodash';
 import { ActionMenu } from '@controls/actionMenu';
 import { Container } from './colorPicker.styles';
 import { ColorPickerPalette } from './colorPickerPalette/colorPickerPalette.component';
@@ -31,9 +32,11 @@ const ColorPickerPreview = ({ color, selected, disabled }: ColorPickerPreviewPro
 	</Container>
 );
 
+const DEFAULT_VALUE = { color: UNSET_RGB_COLOR, opacity: 1 };
+
 type ColorPickerProps = { value?: RgbGroupColor, defaultValue?: RgbGroupColor, onChange?: (newVal: RgbGroupColor) => void, disabled?: boolean };
 export const ColorPicker = ({ value: inputValue, defaultValue, onChange, disabled }: ColorPickerProps) => {
-	const [value, setValue] = useState<HexGroupColor>(rgbGroupColorToHex(inputValue || defaultValue || { color: UNSET_RGB_COLOR }));
+	const [value, setValue] = useState<HexGroupColor>();
 	const [selected, setSelected] = useState(false);
 
 	const handleChange = (hexValue) => {
@@ -42,8 +45,7 @@ export const ColorPicker = ({ value: inputValue, defaultValue, onChange, disable
 	};
 
 	useEffect(() => {
-		if (!inputValue) return;
-		setValue(rgbGroupColorToHex(inputValue));
+		setValue(_.defaults(rgbGroupColorToHex(inputValue || defaultValue), DEFAULT_VALUE));
 	}, [inputValue]);
 
 	return (
