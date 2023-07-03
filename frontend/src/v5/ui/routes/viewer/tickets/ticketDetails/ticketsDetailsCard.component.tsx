@@ -107,6 +107,7 @@ export const TicketDetailsCard = () => {
 	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
 
 	useEffect(() => {
+		if (view === TicketDetailsView.Groups) return;
 		const defaultView = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 		if (isEmpty(defaultView)) return;
 		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(defaultView)));
