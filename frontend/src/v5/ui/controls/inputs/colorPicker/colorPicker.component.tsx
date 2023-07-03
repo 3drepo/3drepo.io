@@ -17,7 +17,7 @@
 
 import { useState, useEffect } from 'react';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
-import { defaults, isEmpty } from 'lodash';
+import { defaults, isNumber } from 'lodash';
 import { ActionMenu } from '@controls/actionMenu';
 import { Container } from './colorPicker.styles';
 import { ColorPickerPalette } from './colorPickerPalette/colorPickerPalette.component';
@@ -45,7 +45,7 @@ export const ColorPicker = ({ value: inputValue, defaultValue, onChange, disable
 	};
 
 	useEffect(() => {
-		if (!isEmpty(inputValue)) {
+		if (isNumber(inputValue?.opacity)) {
 			setValue(rgbGroupColorToHex(inputValue));
 		} else {
 			setValue(defaults(rgbGroupColorToHex(inputValue || defaultValue), DEFAULT_VALUE));
