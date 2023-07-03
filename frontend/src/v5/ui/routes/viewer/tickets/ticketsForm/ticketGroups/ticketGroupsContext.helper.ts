@@ -18,9 +18,9 @@
 import { GroupOverride } from '@/v5/store/tickets/tickets.types';
 
 export enum GroupState {
-	CHECKED = 1,
-	INDETERMINATE = 0,
-	UNCHECKED = -1,
+	CHECKED,
+	INDETERMINATE,
+	UNCHECKED,
 }
 
 export type IndexedOverride = GroupOverride & { index: number };

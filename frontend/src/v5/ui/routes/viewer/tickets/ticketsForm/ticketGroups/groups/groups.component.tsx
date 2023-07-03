@@ -27,22 +27,48 @@ import { GroupToggle } from '../groupToggle/groupToggle.component';
 import { NameContainer } from './groupItem/groupItem.styles';
 import { GroupItem } from './groupItem/groupItem.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
-import { IndexedOverride, getCollectionCheckboxState } from '../ticketGroupsContext.helper';
+import { GroupState, IndexedOverride, getCollectionCheckboxState } from '../ticketGroupsContext.helper';
+
+const GroupCollection = ({ overrides, prefix, level }) => {
+	const { getCollectionState, setCollectionIsChecked } = useContext(TicketGroupsContext);
+	const state = getCollectionState(overrides.map(({ index }) => index));
+
+	const handleCheckboxClick = (e, overrides) => {
+		e.stopPropagation();
+		// toggling all the groups descendants of this collection
+		setCollectionIsChecked(overrides.map(({ index }) => index), state !== GroupState.CHECKED);
+	};
+	
+	return (
+		<CollectionAccordion
+			title={(
+				<>
+					<CollectionHeadline>
+						<NameContainer>
+							<Name>{prefix}</Name>
+						</NameContainer>
+					</CollectionHeadline>
+					<GroupToggle
+						onClick={(e) => handleCheckboxClick(e, overrides)}
+						{...getCollectionCheckboxState(state)}
+					/>
+				</>
+			)}
+		>
+			<GroupsContainer>
+				<Groups indexedOverrides={overrides} level={level + 1} />
+			</GroupsContainer>
+		</CollectionAccordion>
+	);
+};
 
 type GroupsProps = {
 	indexedOverrides: IndexedOverride[],
 	level?: number,
 };
 export const Groups = ({ indexedOverrides, level = 0 }: GroupsProps) => {
-	const { getCollectionState, toggleCollection } = useContext(TicketGroupsContext);
 	const [overrideItems, overrideBatches] = partition(indexedOverrides, (o) => (o.prefix?.length || 0) === level);
 	const overridesByPrefix = groupBy(overrideBatches, (o) => o.prefix[level]);
-
-	const handleCheckboxClick = (e, overrides) => {
-		e.stopPropagation();
-		// toggling all the groups descendants of this collection
-		toggleCollection(overrides.map(({ index }) => index));
-	};
 
 	return (
 		<>
@@ -54,25 +80,7 @@ export const Groups = ({ indexedOverrides, level = 0 }: GroupsProps) => {
 				/>
 			))}
 			{Object.entries(overridesByPrefix).map(([prefix, overrides]) => (
-				<CollectionAccordion
-					title={(
-						<>
-							<CollectionHeadline>
-								<NameContainer>
-									<Name>{prefix}</Name>
-								</NameContainer>
-							</CollectionHeadline>
-							<GroupToggle
-								onClick={(e) => handleCheckboxClick(e, overrides)}
-								{...getCollectionCheckboxState(getCollectionState(overrides.map(({ index }) => index)))}
-							/>
-						</>
-					)}
-				>
-					<GroupsContainer>
-						<Groups indexedOverrides={overrides} level={level + 1} />
-					</GroupsContainer>
-				</CollectionAccordion>
+				<GroupCollection overrides={overrides} prefix={prefix} level={level} />
 			))}
 		</>
 	);
