@@ -29,8 +29,9 @@ type TicketGroupsContextComponentProps = {
 	onSelectedGroupsChange?: (indexes: number[]) => void,
 	onDeleteGroup?: (index: number) => void,
 	onEditGroup?: (index: number) => void
-	highlightedIndex: number,
+	isHighlightedIndex: (index: number) => boolean,
 	setHighlightedIndex: (index: number) => void,
+	clearHighlightedIndex: () => void,
 };
 export const TicketGroupsContextComponent = ({
 	children,

@@ -58,10 +58,12 @@ enum OverrideType {
 	HIDDEN = 'hidden',
 }
 
+const NO_OVERRIDE_SELECTED = { index: -1, type: OverrideType.COLORED };
+
 export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => {
 	const dispatch = useDispatch();
-	const [editingOverride, setEditingOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: OverrideType.COLORED });
-	const [highlightedOverride, setHighlightedOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: null });
+	const [editingOverride, setEditingOverride] = useState(NO_OVERRIDE_SELECTED);
+	const [highlightedOverride, setHighlightedOverride] = useState(NO_OVERRIDE_SELECTED);
 	const [selectedHiddenIndexes, setSelectedHiddenIndexes] = useState([]);
 	const [selectedColorIndexes, setSelectedColorIndexes] = useState([]);
 
@@ -71,13 +73,13 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const store = useStore();
 	const settingsFormGroups = value.state?.[((editingOverride.type === OverrideType.COLORED) ? 'colored' : 'hidden')];
 
-	const onSetHighlightedIndex = (type) => (index) => {
-		setHighlightedOverride({ type, index });
-	};
+	const clearHighlightedIndex = () => setHighlightedOverride(NO_OVERRIDE_SELECTED);
 
-	const getHighlightedIndex = (type) => {
-		if (highlightedOverride.type !== type) return -1;
-		return highlightedOverride.index;
+	const onSetHighlightedIndex = (type) => (index) => setHighlightedOverride({ type, index });
+
+	const onIsHighlightedIndex = (type) => (index) => {
+		if (highlightedOverride.type !== type) return false;
+		return highlightedOverride.index === index;
 	};
 
 	const onDeleteGroup = (type) => (index) => {
@@ -85,13 +87,11 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		newVal.state[type].splice(index, 1);
 		onChange?.(newVal);
 		if (highlightedOverride.index === index && highlightedOverride.type === type) {
-			setHighlightedOverride({ index: -1, type: OverrideType.COLORED });
+			clearHighlightedIndex();
 		}
 	};
 
-	const onSetEditGroup = (type) => (index) => {
-		setEditingOverride({ index, type });
-	};
+	const onSetEditGroup = (type) => (index) => setEditingOverride({ index, type });
 
 	const onSelectedHiddenGroupChange = (indexes: number[]) => {
 		setSelectedHiddenIndexes(indexes);
@@ -105,9 +105,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		}
 	};
 
-	const onCancel = () => {
-		setEditingOverride({ index: -1, type: OverrideType.COLORED });
-	};
+	const onCancel = () => setEditingOverride(NO_OVERRIDE_SELECTED);
 
 	const onSubmit = (overrideValue) => {
 		const newVal = cloneDeep(value || {});
@@ -125,7 +123,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
 
 	useEffect(() => {
-		if (highlightedOverride.index === -1) {
+		if (highlightedOverride.index === NO_OVERRIDE_SELECTED.index) {
 			dispatch(TreeActions.clearCurrentlySelected());
 		}
 	}, [highlightedOverride]);
@@ -138,14 +136,15 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	}, [selectedColorIndexes]);
 
 	return (
-		<Container onClick={() => setHighlightedOverride({ index: -1, type: OverrideType.COLORED })}>
+		<Container onClick={clearHighlightedIndex}>
 			<TicketGroupsContextComponent
 				groupType="colored"
 				onDeleteGroup={onDeleteGroup(OverrideType.COLORED)}
 				onSelectedGroupsChange={setSelectedColorIndexes}
 				overrides={state.colored || []}
 				onEditGroup={onSetEditGroup(OverrideType.COLORED)}
-				highlightedIndex={getHighlightedIndex(OverrideType.COLORED)}
+				isHighlightedIndex={onIsHighlightedIndex(OverrideType.COLORED)}
+				clearHighlightedIndex={clearHighlightedIndex}
 				setHighlightedIndex={onSetHighlightedIndex(OverrideType.COLORED)}
 			>
 				<GroupsAccordion
@@ -157,8 +156,9 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				onDeleteGroup={onDeleteGroup(OverrideType.HIDDEN)}
 				overrides={state.hidden || []}
 				onEditGroup={onSetEditGroup(OverrideType.HIDDEN)}
-				highlightedIndex={getHighlightedIndex(OverrideType.HIDDEN)}
+				isHighlightedIndex={onIsHighlightedIndex(OverrideType.HIDDEN)}
 				setHighlightedIndex={onSetHighlightedIndex(OverrideType.HIDDEN)}
+				clearHighlightedIndex={clearHighlightedIndex}
 				onSelectedGroupsChange={onSelectedHiddenGroupChange}
 			>
 				<GroupsAccordion
@@ -166,7 +166,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				/>
 			</TicketGroupsContextComponent>
 			<Popper
-				open={editingOverride.index !== -1}
+				open={editingOverride.index !== NO_OVERRIDE_SELECTED.index}
 				style={{ /* style is required to override the default positioning style Popper gets */
 					left: 460,
 					top: isSecondaryCard ? 'unset' : 80,

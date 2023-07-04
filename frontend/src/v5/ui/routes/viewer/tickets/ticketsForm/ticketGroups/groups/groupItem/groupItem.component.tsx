@@ -46,7 +46,16 @@ import { TicketGroupsContext } from '../../ticketGroupsContext';
 type GroupProps = { override: GroupOverride, index: number };
 export const GroupItem = ({ override, index }: GroupProps) => {
 	const dispatch = useDispatch();
-	const { groupType, highlightedIndex, setHighlightedIndex, toggleGroup, getGroupIsChecked, deleteGroup, editGroup } = useContext(TicketGroupsContext);
+	const {
+		groupType,
+		isHighlightedIndex,
+		setHighlightedIndex,
+		clearHighlightedIndex,
+		toggleGroup,
+		getGroupIsChecked,
+		deleteGroup,
+		editGroup,
+	} = useContext(TicketGroupsContext);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const { group, color, opacity } = override;
 	const checked = getGroupIsChecked(index);
@@ -88,8 +97,8 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const handleToggleClick = (e) => {
 		preventPropagation(e);
 		toggleGroup(index);
-		if (groupType === 'hidden' && !checked && highlightedIndex === index) {
-			setHighlightedIndex(-1);
+		if (groupType === 'hidden' && !checked && isHighlightedIndex(index)) {
+			clearHighlightedIndex();
 		}
 	};
 
@@ -97,12 +106,12 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const alphaHexColor = rgbaToHex(alphaColor.join());
 
 	useEffect(() => {
-		if (highlightedIndex !== index) return;
+		if (!isHighlightedIndex(index)) return;
 		const objects = convertToV4GroupNodes((group as Group).objects);
 		dispatch(TreeActions.clearCurrentlySelected());
 		dispatch(TreeActions.showNodesBySharedIds(objects));
 		dispatch(TreeActions.selectNodesBySharedIds(objects, (color || [255, 255, 255]).map((c) => c / 255)));
-	}, [override, highlightedIndex]);
+	}, [override, isHighlightedIndex]);
 
 	if (isString(group)) return (<CircularProgress />);
 
@@ -111,7 +120,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		.reduce((accum, object) => accum + object._ids.length, 0);
 
 	return (
-		<Container onClick={handleClick} $highlighted={highlightedIndex === index}>
+		<Container onClick={handleClick} $highlighted={isHighlightedIndex(index)}>
 			<Headline>
 				<GroupIconComponent rules={group.rules} color={alphaHexColor} />
 				<NameContainer>
