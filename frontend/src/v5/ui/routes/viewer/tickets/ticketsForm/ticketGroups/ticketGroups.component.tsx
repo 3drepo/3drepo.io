@@ -71,7 +71,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const leftPanels = useSelector(selectLeftPanels);
 	const isSecondaryCard = leftPanels[0] !== VIEWER_PANELS.TICKETS;
 	const store = useStore();
-	const settingsFormGroups = value.state?.[((editingOverride.type === OverrideType.COLORED) ? 'colored' : 'hidden')];
+	const settingsFormGroups = state[editingOverride.type];
 
 	const clearHighlightedIndex = () => setHighlightedOverride(NO_OVERRIDE_SELECTED);
 
