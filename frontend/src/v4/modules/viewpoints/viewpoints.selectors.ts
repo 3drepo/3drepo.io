@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { isEmpty, orderBy, values } from 'lodash';
+import { isEmpty, isNumber, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { addToGroupDictionary } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
@@ -89,10 +89,13 @@ export const selectOverridesDict = createSelector(
 		const groups = viewpoint.override_groups ;
 
 		return groups.reduce((overrides, group) => {
-			addToGroupDictionary(overrides.colors, group, group.color);
+			const { color, opacity } = group;
+			if (color) {
+				addToGroupDictionary(overrides.colors, group, color);
+			}
 
-			if (hasTransparency(group.color)) {
-				addToGroupDictionary(overrides.transparencies, group, getTransparency(group.color));
+			if (isNumber(opacity) || hasTransparency(color)) {
+				addToGroupDictionary(overrides.transparencies, group, opacity ?? getTransparency(color));
 			}
 
 			return overrides;

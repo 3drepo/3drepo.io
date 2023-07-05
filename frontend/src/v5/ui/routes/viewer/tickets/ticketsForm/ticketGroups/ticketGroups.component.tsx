@@ -101,17 +101,18 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 			newVal.state = { showDefaultHidden: selectHiddenGeometryVisible(store.getState()) };
 		}
 
-		if (editingOverride.type === OverrideType.COLORED) {
-			if (!newVal.state.colored) newVal.state.colored = [];
-			newVal.state.colored[editingOverride.index] = overrideValue;
-		} else {
-			if (!newVal.state.hidden) newVal.state.hidden = [];
-			newVal.state.hidden[editingOverride.index] = overrideValue;
-		}
+		newVal.state[editingOverride.type] ||= [];
 		newVal.state[editingOverride.type][editingOverride.index] = overrideValue;
 		onChange?.(newVal);
 		onCancel();
 		setHighlightedOverride(editingOverride);
+		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4({ state: newVal.state })));
+	};
+
+	const onSelectedColoredGroupsChange = (indexes) => {
+		const colored = indexes.map((i) => state.colored[i]);
+		const view = { state: { colored } } as Viewpoint;
+		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
 	};
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
@@ -121,12 +122,6 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 			dispatch(TreeActions.clearCurrentlySelected());
 		}
 	}, [highlightedOverride]);
-
-	const onSelectedColoredGroupsChange = (indexes) => {
-		const colored = indexes.map((i) => state.colored[i]);
-		const view = { state: { colored } } as Viewpoint;
-		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
-	};
 
 	return (
 		<Container onClick={() => setHighlightedOverride({ index: -1, type: OverrideType.COLORED })}>

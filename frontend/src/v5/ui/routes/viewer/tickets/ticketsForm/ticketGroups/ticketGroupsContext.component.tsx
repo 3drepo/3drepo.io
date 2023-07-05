@@ -46,7 +46,9 @@ export const TicketGroupsContextComponent = ({
 
 	const getGroupIsChecked = (index) => checkedIndexes.includes(index);
 
-	const toggleGroup = (index) => setCheckedIndexes(_.xor(checkedIndexes, [index]));
+	const setGroupIsChecked = (index, state) => setCheckedIndexes(
+		state ? _.union(checkedIndexes, [index]) : _.without(checkedIndexes, index),
+	);
 
 	const getCollectionState = (indexes = []) => {
 		if (!indexes.length) return GroupState.UNCHECKED;
@@ -55,10 +57,8 @@ export const TicketGroupsContextComponent = ({
 		return firstDescendantState ? GroupState.CHECKED : GroupState.UNCHECKED;
 	};
 
-	const toggleCollection = (indexes = []) => setCheckedIndexes(
-		getCollectionState(indexes) === GroupState.CHECKED
-			? _.without(checkedIndexes, ...indexes)
-			: _.union(checkedIndexes, indexes),
+	const setCollectionIsChecked = (indexes = [], state) => setCheckedIndexes(
+		state ? _.union(checkedIndexes, indexes) : _.without(checkedIndexes, ...indexes),
 	);
 
 	const deleteGroup = (index) => {
@@ -88,8 +88,8 @@ export const TicketGroupsContextComponent = ({
 				deleteGroup,
 				editGroup: onEditGroup,
 				getGroupIsChecked,
-				toggleGroup,
-				toggleCollection,
+				setGroupIsChecked,
+				setCollectionIsChecked,
 				getCollectionState,
 				indexedOverrides,
 			}}

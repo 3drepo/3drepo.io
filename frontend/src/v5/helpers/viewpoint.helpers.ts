@@ -27,7 +27,7 @@ export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	_ids: getNodesIdsFromSharedIds([object]),
 }));
 
-export const convertToV4GroupNodes = (objects) => objects.map(({ container: model, _ids }) => ({
+export const convertToV4GroupNodes = (objects = []) => objects.map(({ container: model, _ids }) => ({
 	account: selectCurrentTeamspace(getState()),
 	model,
 	shared_ids: toSharedIds(_ids),
@@ -106,7 +106,7 @@ const convertToV4Group = (groupOverride: GroupOverride) => {
 	};
 
 	if (color) {
-		group.color = getGroupHexColor([...color, (opacity ?? 1) * 255]);
+		group.color = getGroupHexColor([...color, Math.round((opacity ?? 1) * 255)]);
 	}
 
 	if (opacity) {

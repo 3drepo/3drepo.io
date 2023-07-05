@@ -63,7 +63,7 @@ export const TicketView = ({
 	const context = useContext(TicketContext);
 	const dispatch = useDispatch();
 
-	const hasViewpoint = !value ? false : ![value.camera, value.clippingPlanes, value.state].some((val) => !val);
+	const hasViewpoint = value?.camera || value?.clippingPlanes || value?.state;
 
 	// Viewpoint
 	const updateViewpoint = async () => {
