@@ -132,7 +132,7 @@ export default ({ mainTree, subTrees, subModels, meshMap, treePath }) => new Pro
 
 			if (subModel) {
 				subModelsRootNodes[child.name] = child._id;
-				child.name = [modelTeamspace, subModel.name].join(':');
+				child.name = subModel.name;
 			} else if (child.type !== 'mesh') {
 				child.name = child.name || DEFAULT_NODE_NAME;
 			}
