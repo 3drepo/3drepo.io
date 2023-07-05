@@ -113,11 +113,12 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 			newVal.state = { showDefaultHidden: selectHiddenGeometryVisible(store.getState()) };
 		}
 
-		if (!newVal.state[editingOverride.type]) newVal.state[editingOverride.type] = [];
+		newVal.state[editingOverride.type] ||= [];
 		newVal.state[editingOverride.type][editingOverride.index] = overrideValue;
 		onChange?.(newVal);
 		onCancel();
 		setHighlightedOverride(editingOverride);
+		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4({ state: newVal.state })));
 	};
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);

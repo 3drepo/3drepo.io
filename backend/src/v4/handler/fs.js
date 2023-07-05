@@ -16,9 +16,11 @@
  */
 
 "use strict";
-
+const { v5Path } = require("../../interop");
+const { splitArrayIntoChunks } = require(`${v5Path}/utils/helper/arrays`);
 const config = require("../config.js");
 const fs = require("fs");
+const {unlink} = require("fs/promises");
 const path = require("path");
 const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger").systemLogger;
@@ -116,14 +118,22 @@ class FSHandler {
 		}
 	}
 
-	removeFiles(keys) {
-		keys.forEach((key) => {
-			fs.unlink(this.getFullPath(key), (err) => {
-				if (err && err.code !== "ENOENT") {
-					systemLogger.logError("File not removed:", {err, key});
+	async removeFiles(files) {
+		// only remove 10000 files at a time or we may crash the box
+		const removalGroups = splitArrayIntoChunks(files, 10000);
+		for(const keys of removalGroups) {
+			await Promise.all(keys.map(async (key) => {
+				try {
+					await unlink(this.getFullPath(key));
+				} catch (err) {
+					if (err && err.code !== "ENOENT") {
+						systemLogger.logError("File not removed:", {err, key});
+					}
+
 				}
-			});
-		});
+			}));
+
+		}
 	}
 
 	getFullPath(key = "") {

@@ -51,8 +51,8 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		isHighlightedIndex,
 		setHighlightedIndex,
 		clearHighlightedIndex,
-		toggleGroup,
 		getGroupIsChecked,
+		setGroupIsChecked,
 		deleteGroup,
 		editGroup,
 	} = useContext(TicketGroupsContext);
@@ -81,8 +81,8 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const handleClick = (e) => {
 		preventPropagation(e);
 		setHighlightedIndex(index);
-		if (groupType === 'hidden' && checked) {
-			toggleGroup(index);
+		if (groupType === 'hidden') {
+			setGroupIsChecked(index, false);
 		}
 	};
 
@@ -96,7 +96,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 
 	const handleToggleClick = (e) => {
 		preventPropagation(e);
-		toggleGroup(index);
+		setGroupIsChecked(index, !checked);
 		if (groupType === 'hidden' && !checked && isHighlightedIndex(index)) {
 			clearHighlightedIndex();
 		}
@@ -110,7 +110,8 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		const objects = convertToV4GroupNodes((group as Group).objects);
 		dispatch(TreeActions.clearCurrentlySelected());
 		dispatch(TreeActions.showNodesBySharedIds(objects));
-		dispatch(TreeActions.selectNodesBySharedIds(objects, (color || [255, 255, 255]).map((c) => c / 255)));
+		const selectionColor = groupType === 'hidden' ? [255, 255, 255] : color;
+		dispatch(TreeActions.selectNodesBySharedIds(objects, selectionColor?.map((c) => c / 255)));
 	}, [override, isHighlightedIndex]);
 
 	if (isString(group)) return (<CircularProgress />);

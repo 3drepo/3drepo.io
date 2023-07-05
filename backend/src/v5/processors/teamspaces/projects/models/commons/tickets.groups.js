@@ -15,12 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
+const { getFile } = require('../../../../../services/filesManager');
 const { getLatestRevision } = require('../../../../../models/revisions');
 const { getMetadataByRules } = require('../../../../../models/metadata');
 const { getNodesBySharedIds } = require('../../../../../models/scenes');
 
 const TicketGroups = {};
+
+const getIdToMeshesMapping = async (teamspace, model, revId) => {
+	const fileData = await getFile(teamspace, `${model}.stash.json_mpc`, `${UUIDToString(revId)}/idToMeshes.json`);
+	return JSON.parse(fileData);
+};
 
 const getObjectArrayFromRules = async (teamspace, project, model, revId, rules) => {
 	let revision = revId;
@@ -33,13 +40,43 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules) 
 		}
 	}
 
-	const matchedMeta = await getMetadataByRules(teamspace, project, model, revision, rules, { parents: 1 });
+	const [
+		{ matched, unwanted },
+		idToMeshes,
+	] = await Promise.all([
+		getMetadataByRules(teamspace, project, model, revision, rules, { parents: 1 }),
+		getIdToMeshesMapping(teamspace, model, revision),
+	]);
 
-	const sharedIds = matchedMeta.flatMap(({ parents }) => parents);
+	const [
+		matchedNodes,
+		unwantedNodes,
+	] = await Promise.all([
+		matched.length ? getNodesBySharedIds(teamspace, project, model, revision,
+			matched.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
+		unwanted.length ? getNodesBySharedIds(teamspace, project, model, revision,
+			unwanted.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
+	]);
 
-	const matchedNodes = await getNodesBySharedIds(teamspace, project, model, revision, sharedIds, { _id: 1 });
+	const matchedMeshes = {};
 
-	return { container: model, _ids: matchedNodes.map(({ _id }) => _id) };
+	matchedNodes.forEach(({ _id }) => {
+		const idStr = UUIDToString(_id);
+		if (idToMeshes[idStr]) {
+			idToMeshes[idStr].forEach((id) => {
+				matchedMeshes[id] = stringToUUID(id);
+			});
+		}
+	});
+
+	unwantedNodes.forEach(({ _id }) => {
+		const idStr = UUIDToString(_id);
+		if (idToMeshes[idStr]) {
+			idToMeshes[idStr].forEach((id) => delete matchedMeshes[id]);
+		}
+	});
+
+	return { container: model, _ids: Object.values(matchedMeshes) };
 };
 
 TicketGroups.updateTicketGroup = updateGroup;

@@ -106,7 +106,7 @@ const convertToV4Group = (groupOverride: GroupOverride) => {
 	};
 
 	if (color) {
-		group.color = getGroupHexColor([...color, (opacity ?? 1) * 255]);
+		group.color = getGroupHexColor([...color, Math.round((opacity ?? 1) * 255)]);
 	}
 
 	if (opacity) {
