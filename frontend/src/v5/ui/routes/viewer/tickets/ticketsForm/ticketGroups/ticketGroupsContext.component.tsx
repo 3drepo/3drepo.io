@@ -79,7 +79,7 @@ export const TicketGroupsContextComponent = ({
 	useEffect(() => {
 		if (!onSelectedGroupsChange) return;
 		onSelectedGroupsChange(Array.from(checkedIndexes));
-	}, [checkedIndexes]);
+	}, [checkedIndexes, overrides.length]);
 
 	return (
 		<TicketGroupsContext.Provider
