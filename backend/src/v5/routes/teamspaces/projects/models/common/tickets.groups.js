@@ -141,7 +141,7 @@ const establishRoutes = (isFed) => {
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/groups/{group}:
-	 *   put:
+	 *   patch:
 	 *     description: Update a group
 	 *     tags: [Tickets]
 	 *     operationId: updateGroup
