@@ -29,8 +29,9 @@ type TicketGroupsContextComponentProps = {
 	onSelectedGroupsChange?: (indexes: number[]) => void,
 	onDeleteGroup?: (index: number) => void,
 	onEditGroup?: (index: number) => void
-	highlightedIndex: number,
+	isHighlightedIndex: (index: number) => boolean,
 	setHighlightedIndex: (index: number) => void,
+	clearHighlightedIndex: () => void,
 };
 export const TicketGroupsContextComponent = ({
 	children,
@@ -68,7 +69,7 @@ export const TicketGroupsContextComponent = ({
 	};
 
 	useEffect(() => {
-		if (overrides.length > indexedOverrides.length) {
+		if (overrides.length > indexedOverrides.length && contextValue.groupType === 'colored') {
 			// overrides length increased as new overrides were added
 			const newIndexesToSelect = Array.from({ length: overrides.length - indexedOverrides.length }, (el, i) => i + indexedOverrides.length);
 			setCheckedIndexes(_.union(checkedIndexes, newIndexesToSelect));
@@ -76,10 +77,7 @@ export const TicketGroupsContextComponent = ({
 		setIndexedOverrides(_.sortBy(addIndex(overrides || []), 'prefix'));
 	}, [overrides]);
 
-	useEffect(() => {
-		if (!onSelectedGroupsChange) return;
-		onSelectedGroupsChange(Array.from(checkedIndexes));
-	}, [checkedIndexes, overrides.length]);
+	useEffect(() => { onSelectedGroupsChange(checkedIndexes); }, [checkedIndexes, overrides.length]);
 
 	return (
 		<TicketGroupsContext.Provider

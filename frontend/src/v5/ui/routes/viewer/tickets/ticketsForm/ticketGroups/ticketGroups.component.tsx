@@ -16,16 +16,16 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { GroupOverride, IGroupSettingsForm, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
+import { Group, GroupOverride, IGroupSettingsForm, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { ViewpointsActions } from '@/v4/modules/viewpoints';
-import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
-import { cloneDeep, uniqBy } from 'lodash';
+import { TreeActions } from '@/v4/modules/tree';
+import { viewpointV5ToV4, convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
+import { cloneDeep, uniqBy, xor } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
 import { selectHiddenGeometryVisible } from '@/v4/modules/tree/tree.selectors';
-import { TreeActions } from '@/v4/modules/tree';
 import { Container, Popper } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContextComponent } from './ticketGroupsContext.component';
@@ -58,42 +58,54 @@ enum OverrideType {
 	HIDDEN = 'hidden',
 }
 
+const NO_OVERRIDE_SELECTED = { index: -1, type: OverrideType.COLORED };
+
 export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => {
 	const dispatch = useDispatch();
-	const [editingOverride, setEditingOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: OverrideType.COLORED });
-	const [highlightedOverride, setHighlightedOverride] = useState<{ index: number, type: OverrideType }>({ index: -1, type: null });
+	const [editingOverride, setEditingOverride] = useState(NO_OVERRIDE_SELECTED);
+	const [highlightedOverride, setHighlightedOverride] = useState(NO_OVERRIDE_SELECTED);
+	const [selectedHiddenIndexes, setSelectedHiddenIndexes] = useState([]);
+	const [selectedColorIndexes, setSelectedColorIndexes] = useState([]);
 
 	const state: Partial<ViewpointState> = value.state || {};
 	const leftPanels = useSelector(selectLeftPanels);
 	const isSecondaryCard = leftPanels[0] !== VIEWER_PANELS.TICKETS;
 	const store = useStore();
-	const settingsFormGroups = value.state?.[((editingOverride.type === OverrideType.COLORED) ? 'colored' : 'hidden')];
+	const settingsFormGroups = state[editingOverride.type];
 
-	const onSetHighlightedIndex = (type) => (index) => {
-		setHighlightedOverride({ type, index });
+	const clearHighlightedIndex = () => setHighlightedOverride(NO_OVERRIDE_SELECTED);
+
+	const onSetHighlightedIndex = (type) => (index) => setHighlightedOverride({ type, index });
+
+	const onIsHighlightedIndex = (type) => (index) => {
+		if (highlightedOverride.type !== type) return false;
+		return highlightedOverride.index === index;
 	};
 
-	const getHighlightedIndex = (type) => {
-		if (highlightedOverride.type !== type) return -1;
-		return highlightedOverride.index;
-	};
-
-	const onDeleteColoredGroup = (index) => {
+	const onDeleteGroup = (type) => (index) => {
 		const newVal = cloneDeep(value);
-		newVal.state.colored.splice(index, 1);
+		newVal.state[type].splice(index, 1);
 		onChange?.(newVal);
-		if (highlightedOverride.index === index) {
-			setHighlightedOverride({ index: -1, type: OverrideType.COLORED });
+		if (highlightedOverride.index === index && highlightedOverride.type === type) {
+			clearHighlightedIndex();
 		}
 	};
 
-	const onSetEditGroup = (type) => (index) => {
-		setEditingOverride({ index, type });
+	const onSetEditGroup = (type) => (index) => setEditingOverride({ index, type });
+
+	const onSelectedHiddenGroupChange = (indexes: number[]) => {
+		setSelectedHiddenIndexes(indexes);
+		const diffIndexes = xor(indexes, selectedHiddenIndexes);
+		const hideNodes = indexes.length > selectedHiddenIndexes.length;
+		const objects = diffIndexes.flatMap((i) => convertToV4GroupNodes((state.hidden[i].group as Group).objects));
+		if (hideNodes) {
+			dispatch(TreeActions.hideNodesBySharedIds(objects));
+		} else {
+			dispatch(TreeActions.showNodesBySharedIds(objects));
+		}
 	};
 
-	const onCancel = () => {
-		setEditingOverride({ index: -1, type: OverrideType.COLORED });
-	};
+	const onCancel = () => setEditingOverride(NO_OVERRIDE_SELECTED);
 
 	const onSubmit = (overrideValue) => {
 		const newVal = cloneDeep(value || {});
@@ -109,29 +121,31 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4({ state: newVal.state })));
 	};
 
-	const onSelectedColoredGroupsChange = (indexes) => {
-		const colored = indexes.map((i) => state.colored[i]);
-		const view = { state: { colored } } as Viewpoint;
-		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
-	};
-
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
 
 	useEffect(() => {
-		if (highlightedOverride.index === -1) {
+		if (highlightedOverride.index === NO_OVERRIDE_SELECTED.index) {
 			dispatch(TreeActions.clearCurrentlySelected());
 		}
 	}, [highlightedOverride]);
 
+	useEffect(() => {
+		const colored = selectedColorIndexes.map((i) => state.colored[i]);
+		const hidden = selectedHiddenIndexes.map((i) => state.hidden[i]);
+		const view = { state: { colored, hidden } } as Viewpoint;
+		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
+	}, [selectedColorIndexes]);
+
 	return (
-		<Container onClick={() => setHighlightedOverride({ index: -1, type: OverrideType.COLORED })}>
+		<Container onClick={clearHighlightedIndex}>
 			<TicketGroupsContextComponent
 				groupType="colored"
-				onDeleteGroup={onDeleteColoredGroup}
-				onSelectedGroupsChange={onSelectedColoredGroupsChange}
+				onDeleteGroup={onDeleteGroup(OverrideType.COLORED)}
+				onSelectedGroupsChange={setSelectedColorIndexes}
 				overrides={state.colored || []}
 				onEditGroup={onSetEditGroup(OverrideType.COLORED)}
-				highlightedIndex={getHighlightedIndex(OverrideType.COLORED)}
+				isHighlightedIndex={onIsHighlightedIndex(OverrideType.COLORED)}
+				clearHighlightedIndex={clearHighlightedIndex}
 				setHighlightedIndex={onSetHighlightedIndex(OverrideType.COLORED)}
 			>
 				<GroupsAccordion
@@ -140,17 +154,20 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 			</TicketGroupsContextComponent>
 			<TicketGroupsContextComponent
 				groupType="hidden"
+				onDeleteGroup={onDeleteGroup(OverrideType.HIDDEN)}
 				overrides={state.hidden || []}
 				onEditGroup={onSetEditGroup(OverrideType.HIDDEN)}
-				highlightedIndex={getHighlightedIndex(OverrideType.HIDDEN)}
+				isHighlightedIndex={onIsHighlightedIndex(OverrideType.HIDDEN)}
 				setHighlightedIndex={onSetHighlightedIndex(OverrideType.HIDDEN)}
+				clearHighlightedIndex={clearHighlightedIndex}
+				onSelectedGroupsChange={onSelectedHiddenGroupChange}
 			>
 				<GroupsAccordion
 					title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}
 				/>
 			</TicketGroupsContextComponent>
 			<Popper
-				open={editingOverride.index !== -1}
+				open={editingOverride.index !== NO_OVERRIDE_SELECTED.index}
 				style={{ /* style is required to override the default positioning style Popper gets */
 					left: 460,
 					top: isSecondaryCard ? 'unset' : 80,
@@ -163,6 +180,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 					onSubmit={onSubmit}
 					onCancel={onCancel}
 					prefixes={getPossiblePrefixes(settingsFormGroups)}
+					isColored={editingOverride.type === OverrideType.COLORED}
 				/>
 			</Popper>
 		</Container>

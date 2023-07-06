@@ -27,11 +27,12 @@ type TicketGroupsContextType = {
 	getGroupIsChecked: (index: number) => boolean,
 	setGroupIsChecked: (index: number, isChecked: boolean) => void,
 	getCollectionState: (indexes: number[]) => GroupState,
+	isHighlightedIndex: (index: number) => boolean,
 	setCollectionIsChecked: (indexes: number[], isChecked: boolean) => void,
-	highlightedIndex: number,
 	setHighlightedIndex: (index: number) => void,
-
+	clearHighlightedIndex: () => void,
 };
+
 export const TicketGroupsContext = createContext<TicketGroupsContextType>({
 	indexedOverrides: [],
 	groupType: null,
@@ -41,7 +42,8 @@ export const TicketGroupsContext = createContext<TicketGroupsContextType>({
 	getGroupIsChecked: () => null,
 	setCollectionIsChecked: () => {},
 	getCollectionState: () => null,
-	highlightedIndex: -1,
+	isHighlightedIndex: () => null,
 	setHighlightedIndex: () => {},
+	clearHighlightedIndex: () => {},
 });
 TicketGroupsContext.displayName = 'TicketGroupsContext';

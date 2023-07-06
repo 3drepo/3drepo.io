@@ -46,7 +46,16 @@ import { TicketGroupsContext } from '../../ticketGroupsContext';
 type GroupProps = { override: GroupOverride, index: number };
 export const GroupItem = ({ override, index }: GroupProps) => {
 	const dispatch = useDispatch();
-	const { groupType, highlightedIndex, setHighlightedIndex, setGroupIsChecked, getGroupIsChecked, deleteGroup, editGroup } = useContext(TicketGroupsContext);
+	const {
+		groupType,
+		isHighlightedIndex,
+		setHighlightedIndex,
+		clearHighlightedIndex,
+		getGroupIsChecked,
+		setGroupIsChecked,
+		deleteGroup,
+		editGroup,
+	} = useContext(TicketGroupsContext);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const { group, color, opacity } = override;
 	const checked = getGroupIsChecked(index);
@@ -72,11 +81,15 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const handleClick = (e) => {
 		preventPropagation(e);
 		setHighlightedIndex(index);
+		if (groupType === 'hidden') {
+			setGroupIsChecked(index, false);
+		}
 	};
 
 	const isolateGroup = (e) => {
 		preventPropagation(e);
-		dispatch(TreeActions.isolateSelectedNodes());
+		const objects = convertToV4GroupNodes((group as Group).objects);
+		dispatch(TreeActions.isolateNodesBySharedIds(objects));
 	};
 
 	const onEditGroup = () => editGroup(index);
@@ -84,18 +97,22 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const handleToggleClick = (e) => {
 		preventPropagation(e);
 		setGroupIsChecked(index, !checked);
+		if (groupType === 'hidden' && !checked && isHighlightedIndex(index)) {
+			clearHighlightedIndex();
+		}
 	};
 
 	const alphaColor = (color || [255, 255, 255]).concat(opacity);
 	const alphaHexColor = rgbaToHex(alphaColor.join());
 
 	useEffect(() => {
-		if (highlightedIndex !== index) return;
+		if (!isHighlightedIndex(index)) return;
 		const objects = convertToV4GroupNodes((group as Group).objects);
 		dispatch(TreeActions.clearCurrentlySelected());
 		dispatch(TreeActions.showNodesBySharedIds(objects));
-		dispatch(TreeActions.selectNodesBySharedIds(objects, color?.map((c) => c / 255)));
-	}, [override, highlightedIndex]);
+		const selectionColor = groupType === 'hidden' ? [255, 255, 255] : color;
+		dispatch(TreeActions.selectNodesBySharedIds(objects, selectionColor?.map((c) => c / 255)));
+	}, [override, isHighlightedIndex]);
 
 	if (isString(group)) return (<CircularProgress />);
 
@@ -104,7 +121,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		.reduce((accum, object) => accum + object._ids.length, 0);
 
 	return (
-		<Container onClick={handleClick} $highlighted={highlightedIndex === index}>
+		<Container onClick={handleClick} $highlighted={isHighlightedIndex(index)}>
 			<Headline>
 				<GroupIconComponent rules={group.rules} color={alphaHexColor} />
 				<NameContainer>
@@ -117,21 +134,19 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 						/>
 					</GroupsCount>
 				</NameContainer>
-				{groupType === 'colored' && (
-					<Buttons>
-						{isAdmin && (
-							<ErrorTicketButton onClick={handleDeleteGroup}>
-								<DeleteIcon />
-							</ErrorTicketButton>
-						)}
-						<PrimaryTicketButton onClick={isolateGroup}>
-							<ShowIcon />
-						</PrimaryTicketButton>
-						<PrimaryTicketButton onClick={onEditGroup}>
-							<EditIcon />
-						</PrimaryTicketButton>
-					</Buttons>
-				)}
+				<Buttons>
+					{isAdmin && (
+						<ErrorTicketButton onClick={handleDeleteGroup}>
+							<DeleteIcon />
+						</ErrorTicketButton>
+					)}
+					<PrimaryTicketButton onClick={isolateGroup}>
+						<ShowIcon />
+					</PrimaryTicketButton>
+					<PrimaryTicketButton onClick={onEditGroup}>
+						<EditIcon />
+					</PrimaryTicketButton>
+				</Buttons>
 			</Headline>
 			<GroupToggle
 				checked={checked}
