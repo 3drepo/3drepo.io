@@ -20,7 +20,7 @@ import { useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
+import { findEditedGroup, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
@@ -74,11 +74,21 @@ export const TicketDetailsCard = () => {
 	const onBlurHandler = () => {
 		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
 		let validVals = removeEmptyObjects(nullifyEmptyStrings(filterErrors(values, formData.formState.errors)));
+
+		const editedGroup = findEditedGroup(validVals, ticket, template);
+		if (editedGroup) {
+			TicketsActionsDispatchers.updateTicketGroup(
+				teamspace,
+				project,
+				containerOrFederation,
+				ticket._id,
+				editedGroup,
+				isFederation,
+			);
+		}
+
 		validVals = sanitizeViewVals(validVals, ticket, template);
-
 		if (isEmpty(validVals)) return;
-
-		// eslint-disable-next-line max-len
 		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticket._id, validVals, isFederation);
 	};
 

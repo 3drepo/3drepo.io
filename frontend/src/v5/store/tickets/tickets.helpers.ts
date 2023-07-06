@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { camelCase, isEmpty, mapKeys } from 'lodash';
+import { camelCase, isEmpty, isEqual, mapKeys } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
@@ -161,15 +161,49 @@ export const getImgSrc = (imgData) => {
 	return addBase64Prefix(imgData);
 };
 
-const sanitizeGroupVal = (override: GroupOverride) => {
-	if ((override.group as Group)?.rules && (override.group as Group)?.objects) {
-		const group = { ...(override.group as Group) };
-		delete group.objects;
+const overrideHasEditedGroup = (override: GroupOverride, oldOverrides: GroupOverride[]) => {
+	const overrideId = (override.group as Group)._id;
+	if (!overrideId) return false;
 
-		return ({ ...override, group });
-	}
-	return override;
+	const oldGroup = oldOverrides.find(({ group }) => (group as Group)._id === overrideId).group;
+	return !isEqual(oldGroup, override.group);
 };
+
+const findOverrideWithEditedGroup = (values = {}, oldValues, propertiesDefinitions) => {
+	let overrideWithEditedGroup;
+	Object.keys(values).forEach((key) => {
+		const definition = propertiesDefinitions.find((def) => def.name === key);
+		if (definition?.type === 'view') {
+			const viewValue: Viewpoint | undefined = values[key];
+			const oldValue: Viewpoint | undefined = oldValues?.[key];
+	
+			overrideWithEditedGroup ||= viewValue?.state?.colored?.find((o) => overrideHasEditedGroup(o, oldValue?.state?.colored || []))
+				|| viewValue?.state?.hidden?.find((o) => overrideHasEditedGroup(o, oldValue?.state?.hidden || []));
+		}
+	})
+
+	return overrideWithEditedGroup;
+};
+
+const sanitizeSmartGroup = (group: Group) => {	
+	if (group?.rules && group?.objects) {
+		const { objects, ...rest } = group;
+		return rest;
+	}
+	return group;
+};
+
+export const findEditedGroup = (values: Partial<ITicket>, ticket: ITicket, template) => {
+	let overrideWithEditedGroup = findOverrideWithEditedGroup(values.properties, ticket.properties, template.properties);
+
+	template?.modules?.forEach(({ name, properties }) => {
+		overrideWithEditedGroup ||= findOverrideWithEditedGroup(values.modules[name], ticket.modules[name], properties);
+	});
+
+	return sanitizeSmartGroup(overrideWithEditedGroup?.group as Group);
+};
+
+const sanitizeOverride = ({ group, ...rest }: GroupOverride) => ({ ...rest, group: (group as Group)?._id || group });
 
 const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
 	if (!values) return values;
@@ -194,11 +228,11 @@ const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
 			}
 
 			if (viewValue.state?.colored) {
-				viewValue.state.colored = viewValue.state.colored.map(sanitizeGroupVal);
+				viewValue.state.colored = viewValue.state.colored.map(sanitizeOverride);
 			}
 
 			if (viewValue.state?.hidden) {
-				viewValue.state.hidden = viewValue.state.hidden.map(sanitizeGroupVal);
+				viewValue.state.hidden = viewValue.state.hidden.map(sanitizeOverride);
 			}
 		}
 	});
