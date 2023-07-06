@@ -48,6 +48,8 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTicketGroups: ['teamspace', 'projectId', 'modelId', 'ticketId'],
 	fetchTicketGroupsSuccess: ['groups'],
 	upsertTicketAndFetchGroups: ['teamspace', 'projectId', 'modelId', 'ticket'],
+	updateTicketGroup: ['teamspace', 'projectId', 'modelId', 'ticketId', 'group', 'isFederation'],
+	updateTicketGroupSuccess: ['group'],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
 export const INITIAL_STATE: ITicketsState = {
@@ -92,6 +94,10 @@ export const fetchTicketGroupsSuccess = (state: ITicketsState, { groups }: Fetch
 	});
 };
 
+export const updateTicketGroupSuccess = (state: ITicketsState, { group }: UpdateTicketGroupSuccessAction) => {
+	state.groupsByGroupId[group._id] = group;
+};
+
 export const fetchTemplatesSuccess = (state: ITicketsState, { modelId, templates }: FetchTemplatesSuccessAction) => {
 	state.templatesByModelId[modelId] = templates;
 };
@@ -109,6 +115,7 @@ export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.REPLACE_TEMPLATE_SUCCESS]: replaceTemplateSuccess,
 	[TicketsTypes.FETCH_RISK_CATEGORIES_SUCCESS]: fetchRiskCategoriesSuccess,
 	[TicketsTypes.FETCH_TICKET_GROUPS_SUCCESS]: fetchTicketGroupsSuccess,
+	[TicketsTypes.UPDATE_TICKET_GROUP_SUCCESS]: updateTicketGroupSuccess,
 }));
 
 export interface ITicketsState {
@@ -133,6 +140,8 @@ export type FetchRiskCategoriesAction = Action<'FETCH_RISK_CATEGORIES'> & Teamsp
 export type FetchRiskCategoriesSuccessAction = Action<'FETCH_RISK_CATEGORIES_SUCCESS'> & { riskCategories: string[] };
 export type FetchTicketGroupsAction = Action<'FETCH_TICKET_GROUPS'> & TeamspaceProjectAndModel & { ticketId:string, groupId: string };
 export type FetchTicketGroupsSuccessAction = Action<'FETCH_TICKET_GROUPS_SUCCESS'> & { groups: Group[] };
+export type UpdateTicketGroupAction = Action<'UPDATE_TICKET_GROUP'> & TeamspaceProjectAndModel & { ticketId: string, group: Group, isFederation: boolean };
+export type UpdateTicketGroupSuccessAction = Action<'UPDATE_TICKET_GROUP_SUCCESS'> & { group: Group };
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -195,5 +204,16 @@ export interface ITicketsActionCreators {
 	) => FetchTicketGroupsAction;
 	fetchTicketGroupsSuccess: (
 		groups: Group[],
+	) => FetchTicketGroupsSuccessAction;
+	updateTicketGroup: (
+		teamspace: string,
+		projectId: string,
+		modelId: string,
+		ticketId: string,
+		group: Group,
+		isFederation: boolean,
+	) => FetchTicketGroupsSuccessAction;
+	updateTicketGroupSuccess: (
+		group: Group,
 	) => FetchTicketGroupsSuccessAction;
 }

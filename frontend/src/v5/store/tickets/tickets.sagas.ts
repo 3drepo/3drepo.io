@@ -32,6 +32,7 @@ import {
 	FetchRiskCategoriesAction,
 	FetchTicketGroupsAction,
 	UpsertTicketAndFetchGroupsAction,
+	UpdateTicketGroupAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
@@ -124,6 +125,20 @@ export function* fetchRiskCategories({ teamspace }: FetchRiskCategoriesAction) {
 				id: 'tickets.fetchRiskCategories.error.action',
 				defaultMessage: 'trying to fetch the risk categories',
 			}),
+			error,
+		}));
+	}
+}
+
+export function* updateTicketGroup({ teamspace, projectId, modelId, ticketId, group, isFederation }: UpdateTicketGroupAction) {
+	try {
+		yield API.Tickets.updateTicketGroup(teamspace, projectId, modelId, ticketId, group._id, group, isFederation);
+		yield put(TicketsActions.updateTicketGroupSuccess(group));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.updateTicketGroup.error', defaultMessage: 'trying to update the group' },
+			),
 			error,
 		}));
 	}
@@ -246,4 +261,5 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.FETCH_RISK_CATEGORIES, fetchRiskCategories);
 	yield takeLatest(TicketsTypes.FETCH_TICKET_GROUPS, fetchTicketGroups);
 	yield takeLatest(TicketsTypes.UPSERT_TICKET_AND_FETCH_GROUPS, upsertTicketAndFetchGroups);
+	yield takeLatest(TicketsTypes.UPDATE_TICKET_GROUP, updateTicketGroup);
 }
