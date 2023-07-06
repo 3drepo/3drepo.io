@@ -65,9 +65,10 @@ type GroupSettingsFormProps = {
 	value?: IGroupSettingsForm,
 	onSubmit?: (value: IGroupSettingsForm) => void,
 	onCancel?: () => void,
-	prefixes: string[][];
+	prefixes: string[][],
+	isColored?: boolean,
 };
-export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes }: GroupSettingsFormProps) => {
+export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColored }: GroupSettingsFormProps) => {
 	const [isSmart, setIsSmart] = useState(false);
 	const [newPrefix, setNewPrefix] = useState([]);
 	const [inputObjects, setInputObjects] = useState([]);
@@ -127,7 +128,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes }: Group
 		// When no value is passed then the group is a new group
 		if (!value) {
 			formData.reset({
-				color: hexToArray(getRandomSuggestedColor()),
+				...(isColored ? { color: hexToArray(getRandomSuggestedColor()) } : {}),
 				opacity: 1,
 				prefix: [],
 				group: {},
@@ -140,7 +141,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes }: Group
 		const newValue = cloneDeep({ ...value, group: restGroup });
 		formData.reset(newValue);
 		setIsSmart(!!value?.group?.rules?.length);
-		setInputObjects(convertToV4GroupNodes(value?.group?.objects || []));
+		setInputObjects(convertToV4GroupNodes(value?.group?.objects));
 	}, [value]);
 
 	return (
@@ -177,14 +178,16 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes }: Group
 							formError={errors?.group?.name}
 							disabled={!isAdmin}
 						/>
-						<ColorPicker
-							onChange={({ color, opacity }) => {
-								setValue('color', color, { shouldDirty: true });
-								setValue('opacity', opacity, { shouldDirty: true });
-							}}
-							value={({ color: getValues('color'), opacity: getValues('opacity') })}
-							disabled={!isAdmin}
-						/>
+						{isColored && (
+							<ColorPicker
+								onChange={({ color, opacity }) => {
+									setValue('color', color, { shouldDirty: true });
+									setValue('opacity', opacity, { shouldDirty: true });
+								}}
+								value={({ color: getValues('color'), opacity: getValues('opacity') })}
+								disabled={!isAdmin}
+							/>
+						)}
 					</LabelAndColor>
 					<FormRow>
 						<FormTextField

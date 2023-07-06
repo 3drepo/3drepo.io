@@ -26,5 +26,5 @@ export const GroupToggle = (props: CheckboxProps) => {
 	const { groupType } = useContext(TicketGroupsContext);
 
 	if (groupType === 'colored') return (<Checkbox {...props} />);
-	return (<EyeCheckbox icon={<EyeDisabledIcon />} checkedIcon={<EyeIcon />} {...props} />);
+	return (<EyeCheckbox icon={<EyeIcon />} checkedIcon={<EyeDisabledIcon />} {...props} />);
 };
