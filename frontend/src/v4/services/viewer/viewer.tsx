@@ -670,7 +670,7 @@ export class ViewerService {
 	/**
 	 * Pins
 	 */
-	public addPin = async ({id, position, norm, colour, isSelected, type}: IPin) => {
+	public addPin = async ({id, position, norm, colour, type}: IPin) => {
 		await this.isViewerReady();
 		await this.isModelLoaded();
 		if (type === 'risk') {

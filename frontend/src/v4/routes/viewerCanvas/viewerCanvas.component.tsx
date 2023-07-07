@@ -22,7 +22,7 @@ import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
-import { pinsDiff, pinsSelectionChanged } from '../../helpers/pins';
+import { pinsDiff, pinsRemoved, pinsSelectionChanged } from '../../helpers/pins';
 import { PresentationMode } from '../../modules/presentation/presentation.constants';
 import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
 transformationDiffRemoves } from '../../modules/sequences/sequences.helper';
@@ -113,13 +113,18 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 		if (this.shouldBeVisible) {
 			const { viewer } = this.props;
 
-			const toAdd = pinsDiff(curr, prev);
-			const toRemove = pinsDiff(prev, curr);
+			const toEdit = pinsDiff(curr, prev);
+			const toRemove = pinsRemoved(prev, curr);
 			const toChangeSelection = pinsSelectionChanged(curr, prev);
 
 			toRemove.forEach(viewer.removePin.bind(viewer));
-			toAdd.forEach(viewer.addPin.bind(viewer));
-			toChangeSelection.forEach(viewer.setSelectionPin.bind(viewer));
+			toEdit.forEach(viewer.addPin.bind(viewer));
+
+			// If you try to change the selection to a pin that it was just added it doesnt work
+			// this delay is a workaround.
+			setTimeout(() => {
+				toChangeSelection.forEach(viewer.setSelectionPin.bind(viewer));
+			}, 100);
 		}
 	}
 
