@@ -240,20 +240,11 @@ export function* fetchTicketGroups({ teamspace, projectId, modelId, ticketId }: 
 }
 
 export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, ticket }: UpsertTicketAndFetchGroupsAction) {
-	try {
-		const { type } = yield select(selectSelectedTicket);
-		const template = yield select(selectTemplateById, modelId, type);
-		fillOverridesIfEmpty(ticket, template);
-		yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
-		yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id));
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage(
-				{ id: 'tickets.fetchTicketGroups.error', defaultMessage: 'trying to fetch the groups for ticket' },
-			),
-			error,
-		}));
-	}
+	const { type } = yield select(selectSelectedTicket);
+	const template = yield select(selectTemplateById, modelId, type);
+	fillOverridesIfEmpty(ticket, template);
+	yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
+	yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id));
 }
 
 export default function* ticketsSaga() {
