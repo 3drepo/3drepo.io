@@ -87,7 +87,7 @@ export const TicketDetailsCard = () => {
 			);
 		}
 
-		validVals = sanitizeViewVals(validVals, ticket, template);
+		sanitizeViewVals(validVals, ticket, template);
 		if (isEmpty(validVals)) return;
 		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticket._id, validVals, isFederation);
 	};

@@ -185,7 +185,7 @@ const findOverrideWithEditedGroup = (values = {}, oldValues, propertiesDefinitio
 	return overrideWithEditedGroup;
 };
 
-const sanitizeSmartGroup = (group: Group) => {
+const getSanitizedSmartGroup = (group: Group) => {
 	if (group?.rules && group?.objects) {
 		const { objects, ...rest } = group;
 		return rest;
@@ -200,13 +200,13 @@ export const findEditedGroup = (values: Partial<ITicket>, ticket: ITicket, templ
 		overrideWithEditedGroup ||= findOverrideWithEditedGroup(values.modules[name], ticket.modules[name], properties);
 	});
 
-	return sanitizeSmartGroup(overrideWithEditedGroup?.group as Group);
+	return getSanitizedSmartGroup(overrideWithEditedGroup?.group as Group);
 };
 
-const sanitizeOverride = ({ group, ...rest }: GroupOverride) => ({ ...rest, group: (group as Group)?._id || group });
+const getSanitizedOverride = ({ group, ...rest }: GroupOverride) => ({ ...rest, group: (group as Group)?._id || group });
 
 const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
-	if (!values) return values;
+	if (!values) return;
 
 	Object.keys(values).forEach((key) => {
 		const definition = propertiesDefinitions.find((def) => def.name === key);
@@ -228,15 +228,14 @@ const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
 			}
 
 			if (viewValue.state?.colored) {
-				viewValue.state.colored = viewValue.state.colored.map(sanitizeOverride);
+				viewValue.state.colored = viewValue.state.colored.map(getSanitizedOverride);
 			}
 
 			if (viewValue.state?.hidden) {
-				viewValue.state.hidden = viewValue.state.hidden.map(sanitizeOverride);
+				viewValue.state.hidden = viewValue.state.hidden.map(getSanitizedOverride);
 			}
 		}
 	});
-	return values;
 };
 
 export const sanitizeViewVals = (values:Partial<ITicket>, ticket:ITicket, template) => {
@@ -249,7 +248,6 @@ export const sanitizeViewVals = (values:Partial<ITicket>, ticket:ITicket, templa
 			sanitizeViewValues(values.modules[module.name], ticket.modules[module.name], module.properties);
 		}));
 	}
-	return values;
 };
 
 const fillEmptyOverrides = (values: Partial<ITicket>, propertiesDefinitions) => {
