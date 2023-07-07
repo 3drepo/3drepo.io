@@ -176,16 +176,16 @@ const findOverrideWithEditedGroup = (values = {}, oldValues, propertiesDefinitio
 		if (definition?.type === 'view') {
 			const viewValue: Viewpoint | undefined = values[key];
 			const oldValue: Viewpoint | undefined = oldValues?.[key];
-	
+
 			overrideWithEditedGroup ||= viewValue?.state?.colored?.find((o) => overrideHasEditedGroup(o, oldValue?.state?.colored || []))
 				|| viewValue?.state?.hidden?.find((o) => overrideHasEditedGroup(o, oldValue?.state?.hidden || []));
 		}
-	})
+	});
 
 	return overrideWithEditedGroup;
 };
 
-const sanitizeSmartGroup = (group: Group) => {	
+const sanitizeSmartGroup = (group: Group) => {
 	if (group?.rules && group?.objects) {
 		const { objects, ...rest } = group;
 		return rest;
@@ -250,6 +250,31 @@ export const sanitizeViewVals = (values:Partial<ITicket>, ticket:ITicket, templa
 		}));
 	}
 	return values;
+};
+
+const fillEmptyOverrides = (values: Partial<ITicket>, propertiesDefinitions) => {
+	Object.keys(values).forEach((key) => {
+		const definition = propertiesDefinitions.find((def) => def.name === key);
+		if (definition?.type === 'view') {
+			const viewValue:Viewpoint | undefined = values[key];
+
+			viewValue.state ||= {} as any;
+			viewValue.state.colored ||= [];
+			viewValue.state.hidden ||= [];
+		}
+	});
+};
+
+export const fillOverridesIfEmpty = (values: Partial<ITicket>, template) => {
+	if (values.properties) {
+		fillEmptyOverrides(values.properties, template.properties);
+	}
+
+	if (values.modules) {
+		template.modules.forEach(((module) => {
+			fillEmptyOverrides(values.modules[module.name], module.properties);
+		}));
+	}
 };
 
 export const templateAlreadyFetched = (template: ITemplate) => {

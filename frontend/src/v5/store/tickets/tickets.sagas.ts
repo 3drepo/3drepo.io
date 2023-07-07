@@ -37,8 +37,10 @@ import {
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 import { ITicket, ViewpointState } from './tickets.types';
-import { selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
+import { selectTemplateById, selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
+import { selectSelectedTicket } from './card/ticketsCard.selectors';
+import { fillOverridesIfEmpty } from './tickets.helpers';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsAction) {
 	try {
@@ -239,6 +241,9 @@ export function* fetchTicketGroups({ teamspace, projectId, modelId, ticketId }: 
 
 export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, ticket }: UpsertTicketAndFetchGroupsAction) {
 	try {
+		const { type } = yield select(selectSelectedTicket);
+		const template = yield select(selectTemplateById, modelId, type);
+		fillOverridesIfEmpty(ticket, template);
 		yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
 		yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id));
 	} catch (error) {

@@ -108,8 +108,8 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const onCancel = () => setEditingOverride(NO_OVERRIDE_SELECTED);
 
 	const getCurrentActiveView = () => {
-		const colored = selectedColorIndexes.map((i) => state.colored[i]);
-		const hidden = selectedHiddenIndexes.map((i) => state.hidden[i]);
+		const colored = selectedColorIndexes.map((i) => state.colored[i]).filter(Boolean);
+		const hidden = selectedHiddenIndexes.map((i) => state.hidden[i]).filter(Boolean);
 		return { state: { colored, hidden } } as Viewpoint;
 	};
 
