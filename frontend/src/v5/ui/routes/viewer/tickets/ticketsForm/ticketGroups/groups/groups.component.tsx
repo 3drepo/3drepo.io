@@ -81,7 +81,7 @@ export const Groups = ({ indexedOverrides, level = 0 }: GroupsProps) => {
 				/>
 			))}
 			{Object.entries(overridesByPrefix).map(([prefix, overrides]) => (
-				<GroupCollection overrides={overrides} prefix={prefix} level={level} />
+				<GroupCollection overrides={overrides} prefix={prefix} level={level} key={prefix} />
 			))}
 		</>
 	);
