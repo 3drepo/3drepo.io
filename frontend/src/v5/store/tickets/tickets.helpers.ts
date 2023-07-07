@@ -169,7 +169,7 @@ const overrideHasEditedGroup = (override: GroupOverride, oldOverrides: GroupOver
 	return !isEqual(oldGroup, override.group);
 };
 
-const findOverrideWithEditedGroup = (values = {}, oldValues, propertiesDefinitions) => {
+const findOverrideWithEditedGroup = (values, oldValues, propertiesDefinitions) => {
 	let overrideWithEditedGroup;
 	Object.keys(values).forEach((key) => {
 		const definition = propertiesDefinitions.find((def) => def.name === key);
@@ -194,11 +194,16 @@ const getSanitizedSmartGroup = (group: Group) => {
 };
 
 export const findEditedGroup = (values: Partial<ITicket>, ticket: ITicket, template) => {
-	let overrideWithEditedGroup = findOverrideWithEditedGroup(values.properties, ticket.properties, template.properties);
+	let overrideWithEditedGroup;
+	if (values.properties) {
+		overrideWithEditedGroup = sanitizeViewValues(values.properties, ticket.properties, template.properties);
+	}
 
-	template?.modules?.forEach(({ name, properties }) => {
-		overrideWithEditedGroup ||= findOverrideWithEditedGroup(values.modules[name], ticket.modules[name], properties);
-	});
+	if (values.modules) {
+		template?.modules?.forEach(({ name, properties }) => {
+			overrideWithEditedGroup ||= findOverrideWithEditedGroup(values.modules[name], ticket.modules[name], properties);
+		});
+	}
 
 	return getSanitizedSmartGroup(overrideWithEditedGroup?.group as Group);
 };
