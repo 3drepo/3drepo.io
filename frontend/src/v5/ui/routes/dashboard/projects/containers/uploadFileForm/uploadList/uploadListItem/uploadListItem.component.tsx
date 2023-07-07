@@ -22,6 +22,7 @@ import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import filesize from 'filesize';
 import { get } from 'lodash';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { InputController } from '@controls/inputs/inputController.component';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
@@ -31,10 +32,6 @@ import { UploadProgress } from './uploadProgress/uploadProgress.component';
 type IUploadListItem = {
 	item: UploadItemFields;
 	revisionPrefix: string;
-	defaultValues: {
-		containerName: string;
-		revisionTag: string;
-	}
 	isSelected: boolean;
 	isUploading: boolean;
 	onClickEdit: () => void;
@@ -44,13 +41,12 @@ type IUploadListItem = {
 export const UploadListItem = ({
 	item,
 	revisionPrefix,
-	defaultValues,
 	onClickEdit,
 	onClickDelete,
 	isSelected,
 	isUploading,
 }: IUploadListItem): JSX.Element => {
-	const { formState: { errors: formErrors } } = useFormContext();
+	const { control, formState: { errors: formErrors } } = useFormContext();
 	const errors = get(formErrors, revisionPrefix);
 
 	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(item.uploadId);
@@ -67,13 +63,14 @@ export const UploadListItem = ({
 				isSelected={isSelected}
 				errorMessage={errors?.file?.message}
 			/>
-			<Destination
+			<InputController
+				control={control}
+				name={`${revisionPrefix}.containerName`}
 				revisionPrefix={revisionPrefix}
+				Input={Destination}
 				disabled={isUploading}
-				defaultValue={defaultValues.containerName}
 			/>
 			<RevisionTag
-				defaultValue={defaultValues.revisionTag}
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
 				isSelected={isSelected}

@@ -53,22 +53,23 @@ const EMPTY_OPTION = prepareSingleContainerData({
 const getFilteredContainersOptions = createFilterOptions<IContainer>({ trim: true });
 
 interface IUploadListItemDestination {
-	revisionPrefix: string;
 	disabled?: boolean;
 	className?: string;
-	defaultValue: string;
+	revisionPrefix: string;
+	value?: string;
+	onChange?: (e, data) => void;
 }
 export const UploadListItemDestination = ({
 	disabled = false,
 	className,
 	revisionPrefix,
-	defaultValue,
+	value,
+	onChange,
+	...props
 }: IUploadListItemDestination): JSX.Element => {
-	const [selectedContainer, setSelectedContainer] = useState<IContainer>({ ...EMPTY_OPTION, name: defaultValue });
-	const [disableClearable, setDisableClearable] = useState(!defaultValue);
 	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>('');
 	const [error, setError] = useState('');
-	const { getValues, setValue, trigger } = useFormContext();
+	const { getValues, setValue } = useFormContext();
 
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -81,78 +82,44 @@ export const UploadListItemDestination = ({
 		.map(({ name }) => name);
 
 	const containersNamesInModal = getValues('uploads')
-		.map(({ containerName }) => containerName?.trim())
-		.filter(Boolean)
-		.filter((name) => name !== selectedContainer.name);
+		.map(({ containerName }) => containerName)
+		.filter(({ containerName }) => containerName !== value)
+		.filter(Boolean);
 
-	const containersNamesInUse = [
+	const takenContainerNames = [
 		...containersNamesInModal,
 		...processingContainersNames,
 		...federationsNames,
 	];
 
-	const getValidContainer = (baseContainer: IContainer): Partial<UploadItemFields> => ({
-		containerId: baseContainer._id,
-		containerName: baseContainer.name,
-		containerCode: baseContainer.code || '',
-		containerType: baseContainer.type || 'Uncategorised',
-		containerUnit: baseContainer.unit || 'mm',
-		containerDesc: baseContainer.desc || '',
+	const sanitiseContainer = (baseContainer: IContainer): Partial<UploadItemFields> => ({
+		containerId: baseContainer?._id || '',
+		containerName: baseContainer?.name?.trim() || '',
+		containerCode: baseContainer?.code || '',
+		containerType: baseContainer?.type || 'Uncategorised',
+		containerUnit: baseContainer?.unit || 'mm',
+		containerDesc: baseContainer?.desc || '',
 	});
 
 	const testName = (containerName) => {
 		try {
 			containerNameScheme.validateSync(
 				containerName,
-				{ context: { alreadyExistingNames: containersNamesInUse } },
+				{ context: { alreadyExistingNames: takenContainerNames } },
 			);
 			setError('');
 			setNewOrExisting(containers.find(({ name }) => name === containerName) ? 'existing' : 'new');
 		} catch (validationError) {
-			setError(validationError.message);
+			setError(`${validationError.message}`);
 			setNewOrExisting('');
 		}
 	};
 
-	const updateDestination = (containerName: string) => {
-		const container = containers.find(({ name }) => name === containerName);
-		setDisableClearable(!containerName);
-		if (!containerName) {
-			setNewOrExisting('');
-		} else {
-			setNewOrExisting(container ? 'existing' : 'new');
-		}
-
-		const newValueOrEmptyOption = container || {
-			...EMPTY_OPTION,
-			name: containerName,
-		};
-
-		setSelectedContainer(newValueOrEmptyOption);
-		Object.entries(getValidContainer(newValueOrEmptyOption)).forEach(([key, value]) => {
-			const name = `${revisionPrefix}.${key}`;
-			setValue(name, value);
-			trigger(name);
-		});
-
-		if (container) {
-			RevisionsActionsDispatchers.fetch(
-				teamspace,
-				projectId,
-				container._id,
-			);
-		}
+	const handleInputChange = (_, newValue: string) => {
+		testName(newValue?.trim());
 	};
 
-	const handleInputChange = (_, newValue: string, reason: 'clear' | 'reset' | 'input') => {
-		const containerName = newValue?.trim();
-		testName(containerName);
-		if (reason === 'input' || (reason === 'reset' && !newValue)) return;
-
-		updateDestination(containerName);
-	};
-
-	const getFilterOptions = (options: IContainer[], params) => {
+	const filterOptions = (options: IContainer[], params) => {
 		const inputValue = params.inputValue.trim();
 		if (containersNamesInModal.length === containers.length && !inputValue) {
 			// all the containers have been allocated already
@@ -161,10 +128,10 @@ export const UploadListItemDestination = ({
 
 		// filter out currently selected value and containers with insufficient permissions
 		const filteredOptions = getFilteredContainersOptions(options, params)
-			.filter(({ name }) => name !== selectedContainer.name)
-			.filter(({ role }) => isCollaboratorRole(role));
+			.filter(({ name, role }) => name !== value && isCollaboratorRole(role));
 
-		const containerNameExists = options.some(({ name }: IContainer) => inputValue === name);
+		const containerNameExists = options.some(({ name }) => inputValue.toLowerCase() === name.toLowerCase());
+
 		if (inputValue && !containerNameExists) {
 			// create an extra option to transform into a
 			// "add new container" OR "name already used" option
@@ -176,38 +143,29 @@ export const UploadListItemDestination = ({
 		return filteredOptions;
 	};
 
-	const optionIsUsed = ({ name }: IContainer) => {
-		const trimmedName = name.trim();
-		if (trimmedName === selectedContainer.name) return false;
-		return containersNamesInUse.includes(trimmedName);
-	};
+	const nameIsTaken = ({ name }) => takenContainerNames.map((n) => n.toLowerCase()).includes(name.toLowerCase());
 
-	const nameAlreadyExists = (name) => containersNamesInUse.concat(federationsNames).includes(name.trim());
+	const renderOption = (optionProps, option: IContainer) => {
+		const handleOptionClick = (...args) => optionProps.onClick?.(...args);
 
-	const getRenderOption = (optionProps, option: IContainer) => {
-		const trimmedName = option?.name?.trim();
-		const handleOptionClick = (...args) => {
-			optionProps.onClick?.(...args);
-			updateDestination(trimmedName);
-		};
-
-		if (option?._id === '') {
+		if (!option._id) {
 			// option is an extra
-			if (nameAlreadyExists(trimmedName)) {
+			if (nameIsTaken(option)) {
 				return (<AlreadyUsedName />);
 			}
 
-			if (isProjectAdmin && !error && !containers.map(({ name }) => name).includes(trimmedName)) {
-				return (<NewContainer containerName={trimmedName} {...optionProps} onClick={handleOptionClick} />);
+			if (isProjectAdmin) {
+				return (<NewContainer containerName={option.name} {...optionProps} onClick={handleOptionClick} />);
 			}
 		}
 
 		// option is an existing container
-		if (option._id || trimmedName === selectedContainer.name) {
+		if (option._id) {
 			return (
 				<ExistingContainer
+					key={option.name}
 					container={option}
-					inUse={optionIsUsed(option)}
+					inUse={nameIsTaken(option)}
 					{...optionProps}
 					onClick={handleOptionClick}
 				/>
@@ -216,24 +174,37 @@ export const UploadListItemDestination = ({
 		return (<></>);
 	};
 
+	const onSetDestinationChange = (e, newVal: IContainer | null) => {
+		const sanitisedValue = sanitiseContainer(newVal);
+		for (const [key, val] of Object.entries(sanitisedValue)) {
+			setValue(`${revisionPrefix}.${key}`, val);
+		}
+		if (newVal?._id) {
+			RevisionsActionsDispatchers.fetch(
+				teamspace,
+				projectId,
+				newVal._id,
+			);
+		}
+	};
+
 	return (
 		<Autocomplete
-			value={selectedContainer}
+			value={containers.find((c) => c.name === value)}
 			className={className}
-			disableClearable={disableClearable}
-			filterOptions={getFilterOptions}
-			getOptionDisabled={optionIsUsed}
-			getOptionLabel={({ name }: IContainer) => name}
+			filterOptions={filterOptions}
+			getOptionDisabled={nameIsTaken}
+			getOptionLabel={(option: IContainer) => option.name || ''}
 			ListboxComponent={OptionsBox}
 			noOptionsText={isProjectAdmin ? NO_OPTIONS_TEXT_ADMIN : NO_OPTIONS_TEXT_NON_ADMIN}
 			onInputChange={handleInputChange}
+			onChange={onSetDestinationChange}
 			options={containers}
-			renderOption={getRenderOption}
+			renderOption={renderOption}
 			renderInput={({ InputProps, ...params }) => (
 				<DestinationInput
 					error={!!error}
 					disabled={disabled}
-					value={selectedContainer}
 					{...params}
 					neworexisting={newOrExisting}
 					InputProps={{
@@ -242,6 +213,7 @@ export const UploadListItemDestination = ({
 					}}
 				/>
 			)}
+			{...props}
 		/>
 	);
 };

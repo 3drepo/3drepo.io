@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useFormContext } from 'react-hook-form';
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import { UploadListItem } from './uploadListItem/uploadListItem.component';
 import { Container } from './uploadList.styles';
@@ -36,32 +35,24 @@ export const UploadList = ({
 	onClickEdit,
 	onClickDelete,
 	getOriginalIndex,
-}: IUploadList): JSX.Element => {
-	const { getValues } = useFormContext();
-	return (
-		<Container>
-			{
-				values.map((item, index) => {
-					const originalIndex = getOriginalIndex(index);
-					const revisionPrefix = `uploads.${originalIndex}`;
-					const defaultInputValues = {
-						containerName: getValues(`${revisionPrefix}.containerName`) || item.containerName,
-						revisionTag: getValues(`${revisionPrefix}.revisionTag`) || item.revisionTag,
-					};
-					return (
-						<UploadListItem
-							revisionPrefix={revisionPrefix}
-							key={item.uploadId}
-							item={item}
-							defaultValues={defaultInputValues}
-							onClickEdit={() => onClickEdit(originalIndex)}
-							onClickDelete={() => onClickDelete(index)}
-							isSelected={index === selectedIndex}
-							isUploading={isUploading}
-						/>
-					);
-				})
-			}
-		</Container>
-	);
-};
+}: IUploadList): JSX.Element => (
+	<Container>
+		{
+			values.map((item, index) => {
+				const originalIndex = getOriginalIndex(index);
+				const revisionPrefix = `uploads.${originalIndex}`;
+				return (
+					<UploadListItem
+						revisionPrefix={revisionPrefix}
+						key={item.uploadId}
+						item={item}
+						onClickEdit={() => onClickEdit(originalIndex)}
+						onClickDelete={() => onClickDelete(index)}
+						isSelected={index === selectedIndex}
+						isUploading={isUploading}
+					/>
+				);
+			})
+		}
+	</Container>
+);

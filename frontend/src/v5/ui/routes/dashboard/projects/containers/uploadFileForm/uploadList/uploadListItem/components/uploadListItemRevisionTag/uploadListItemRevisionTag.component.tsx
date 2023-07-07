@@ -23,7 +23,6 @@ import { FormTextField } from './uploadListItemRevisionTag.styles';
 type IUploadListItemRevision = {
 	isSelected?: boolean;
 	errorMessage?: string;
-	defaultValue?: string;
 	disabled?: boolean;
 	revisionPrefix: string;
 };

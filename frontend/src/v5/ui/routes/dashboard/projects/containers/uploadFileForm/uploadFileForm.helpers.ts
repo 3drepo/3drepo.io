@@ -29,3 +29,5 @@ export const uploadToContainer = async (presetContainerId: string) => {
 	const file = await uploadFile(getSupportedFileExtensions());
 	onUpload(file);
 };
+
+export const extensionIsSpm = (extension: string) => extension === 'spm';

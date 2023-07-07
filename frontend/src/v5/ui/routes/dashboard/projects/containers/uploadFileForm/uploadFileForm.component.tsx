@@ -44,6 +44,7 @@ import { getSupportedFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadList } from './uploadList/uploadList.component';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
 import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
+import { extensionIsSpm } from './uploadFileForm.helpers';
 
 const DEFAULT_SORT_CONFIG = {
 	column: 'file',
@@ -138,8 +139,6 @@ export const UploadFileForm = ({
 		const noExceedingMax = noSpaces.substring(0, revTagMaxValue);
 		return noExceedingMax;
 	};
-
-	const extensionIsSpm = (extension: string) => extension === 'spm';
 
 	const addFilesToList = (files: File[], container?: IContainer): void => {
 		const filesToAppend = [];
