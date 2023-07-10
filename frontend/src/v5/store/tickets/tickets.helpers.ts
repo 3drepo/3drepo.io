@@ -196,7 +196,7 @@ const getSanitizedSmartGroup = (group: Group) => {
 export const findEditedGroup = (values: Partial<ITicket>, ticket: ITicket, template) => {
 	let overrideWithEditedGroup;
 	if (values.properties) {
-		overrideWithEditedGroup = sanitizeViewValues(values.properties, ticket.properties, template.properties);
+		overrideWithEditedGroup = findOverrideWithEditedGroup(values.properties, ticket.properties, template.properties);
 	}
 
 	if (values.modules) {
