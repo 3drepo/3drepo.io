@@ -39,7 +39,7 @@ export const BaseDueDate = ({ value, disabled, onBlur, onChange, ...props }: IBa
 		if (!open) setOpen(!disabled);
 	};
 	const onDateChange = (newValue) => {
-		const timestamp = !newValue ? null : newValue.toDate().getTime();
+		const timestamp = newValue?.toDate()?.getTime() || null;
 		setOpen(false);
 		onChange?.(timestamp);
 		onBlur?.(timestamp);
