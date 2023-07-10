@@ -109,22 +109,18 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 		}
 	}
 
-	public renderPins(prev, curr) {
+	public async renderPins(prev, curr) {
 		if (this.shouldBeVisible) {
 			const { viewer } = this.props;
 
-			const toEdit = pinsDiff(curr, prev);
+			const toShow = pinsDiff(curr, prev);
 			const toRemove = pinsRemoved(prev, curr);
 			const toChangeSelection = pinsSelectionChanged(curr, prev);
 
-			toRemove.forEach(viewer.removePin.bind(viewer));
-			toEdit.forEach(viewer.addPin.bind(viewer));
+			await Promise.all(toRemove.map(viewer.removePin.bind(viewer)));
+			await Promise.all(toShow.map(viewer.showPin.bind(viewer)));
 
-			// If you try to change the selection to a pin that it was just added it doesnt work
-			// this delay is a workaround.
-			setTimeout(() => {
-				toChangeSelection.forEach(viewer.setSelectionPin.bind(viewer));
-			}, 100);
+			toChangeSelection.forEach(viewer.setSelectionPin.bind(viewer));
 		}
 	}
 
