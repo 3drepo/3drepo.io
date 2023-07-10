@@ -754,6 +754,7 @@ export const theme = createTheme({
 		MuiList: {
 			styleOverrides: {
 				root: {
+					minWidth: 200,
 					borderRadius: 10,
 					boxShadow: SHADOW.LEVEL_5,
 					padding: '10px 0px',
