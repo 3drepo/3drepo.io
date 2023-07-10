@@ -96,13 +96,13 @@ export const SHADOW = {
 const typography: TypographyOptions = {
 	fontFamily: 'Inter, Arial, sans-serif',
 	h1: {
-		fontWeight: FONT_WEIGHT.MEDIUM,
+		fontWeight: FONT_WEIGHT.BOLDER,
 		fontSize: '1.5rem',
 		lineHeight: '1.875rem',
 		textDecoration: 'none',
 	},
 	h2: {
-		fontWeight: FONT_WEIGHT.MEDIUM,
+		fontWeight: FONT_WEIGHT.BOLDER,
 		fontSize: '1.125rem',
 		lineHeight: '1.5rem',
 		textDecoration: 'none',
