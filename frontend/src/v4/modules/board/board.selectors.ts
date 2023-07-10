@@ -73,15 +73,19 @@ const getProp = (item, prop) => {
 		if (Number(!!(new Date().valueOf() >= dueDate.valueOf()))) {
 			return 'overdue';
 		}
-		const secondWeekDate = getNextWeekTimestamp(2);
-		const firstWeekDate = getNextWeekTimestamp();
-		if (dueDate.isSameOrBefore(firstWeekDate, 'day')) {
-			return firstWeekDate;
+
+		let lowerDate = +new Date();
+		for (let i = 1; i <= 6 ; i++ ) {
+			const upperDate = getNextWeekTimestamp(i);
+
+			if (dueDate.isBetween(lowerDate, upperDate, 'day', '[)')) {
+				return upperDate;
+			}
+
+			lowerDate = upperDate;
 		}
-		if (dueDate.isBetween(firstWeekDate, secondWeekDate, 'day', '[)')) {
-			return secondWeekDate;
-		}
-		return getNextWeekTimestamp(3);
+
+		return getNextWeekTimestamp(7);
 	}
 	return item[prop];
 };
@@ -141,8 +145,20 @@ export const selectLanes = createSelector(
 			name: 'in 2 weeks',
 			value: getNextWeekTimestamp(2)
 		}, {
-			name: 'in 3 weeks+',
+			name: 'in 3 weeks',
 			value: getNextWeekTimestamp(3)
+		}, {
+			name: 'in 4 weeks',
+			value: getNextWeekTimestamp(4)
+		}, {
+			name: 'in 5 weeks',
+			value: getNextWeekTimestamp(5)
+		}, {
+			name: 'in 6 weeks',
+			value: getNextWeekTimestamp(6)
+		}, {
+			name: 'in 7 weeks+',
+			value: getNextWeekTimestamp(7)
 		}];
 
 		const issueFiltersMap = {
