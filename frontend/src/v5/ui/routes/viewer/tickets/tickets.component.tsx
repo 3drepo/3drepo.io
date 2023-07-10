@@ -22,8 +22,10 @@ import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import {
 	enableRealtimeContainerNewTicket,
 	enableRealtimeContainerUpdateTicket,
+	enableRealtimeContainerUpdateTicketGroup,
 	enableRealtimeFederationNewTicket,
 	enableRealtimeFederationUpdateTicket,
+	enableRealtimeFederationUpdateTicketGroup,
 } from '@/v5/services/realtime/ticket.events';
 import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -56,11 +58,13 @@ export const Tickets = () => {
 			combineSubscriptions(
 				enableRealtimeFederationNewTicket(teamspace, project, containerOrFederation),
 				enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation),
+				enableRealtimeFederationUpdateTicketGroup(teamspace, project, containerOrFederation),
 			);
 		} else {
 			combineSubscriptions(
 				enableRealtimeContainerNewTicket(teamspace, project, containerOrFederation),
 				enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation),
+				enableRealtimeContainerUpdateTicketGroup(teamspace, project, containerOrFederation),
 			);
 		}
 	}, [containerOrFederation]);

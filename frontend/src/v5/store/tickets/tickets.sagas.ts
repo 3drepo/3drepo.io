@@ -32,12 +32,14 @@ import {
 	FetchRiskCategoriesAction,
 	FetchTicketGroupsAction,
 	UpsertTicketAndFetchGroupsAction,
+	UpdateTicketGroupAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
-import { ITicket, ViewpointState } from './tickets.types';
-import { selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
+import { ITicket, Viewpoint, ViewpointState } from './tickets.types';
+import { selectTemplateById, selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
+import { selectSelectedTicket } from './card/ticketsCard.selectors';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsAction) {
 	try {
@@ -124,6 +126,20 @@ export function* fetchRiskCategories({ teamspace }: FetchRiskCategoriesAction) {
 				id: 'tickets.fetchRiskCategories.error.action',
 				defaultMessage: 'trying to fetch the risk categories',
 			}),
+			error,
+		}));
+	}
+}
+
+export function* updateTicketGroup({ teamspace, projectId, modelId, ticketId, group, isFederation }: UpdateTicketGroupAction) {
+	try {
+		yield API.Tickets.updateTicketGroup(teamspace, projectId, modelId, ticketId, group._id, group, isFederation);
+		yield put(TicketsActions.updateTicketGroupSuccess(group));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.updateTicketGroup.error', defaultMessage: 'trying to update the group' },
+			),
 			error,
 		}));
 	}
@@ -222,18 +238,37 @@ export function* fetchTicketGroups({ teamspace, projectId, modelId, ticketId }: 
 	}
 }
 
-export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, ticket }: UpsertTicketAndFetchGroupsAction) {
-	try {
-		yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
-		yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id));
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage(
-				{ id: 'tickets.fetchTicketGroups.error', defaultMessage: 'trying to fetch the groups for ticket' },
-			),
-			error,
+const fillEmptyOverrides = (values: Partial<ITicket>, propertiesDefinitions) => {
+	Object.keys(values).forEach((key) => {
+		const definition = propertiesDefinitions.find((def) => def.name === key);
+		if (definition?.type === 'view') {
+			const viewValue:Viewpoint | undefined = values[key];
+
+			viewValue.state ||= {} as any;
+			viewValue.state.colored ||= [];
+			viewValue.state.hidden ||= [];
+		}
+	});
+};
+
+const fillOverridesIfEmpty = (values: Partial<ITicket>, template) => {
+	if (values.properties) {
+		fillEmptyOverrides(values.properties, template.properties);
+	}
+
+	if (values.modules) {
+		template.modules.forEach(((module) => {
+			fillEmptyOverrides(values.modules[module.name], module.properties);
 		}));
 	}
+};
+
+export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, ticket }: UpsertTicketAndFetchGroupsAction) {
+	const { type } = yield select(selectSelectedTicket);
+	const template = yield select(selectTemplateById, modelId, type);
+	fillOverridesIfEmpty(ticket, template);
+	yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
+	yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id));
 }
 
 export default function* ticketsSaga() {
@@ -246,4 +281,5 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.FETCH_RISK_CATEGORIES, fetchRiskCategories);
 	yield takeLatest(TicketsTypes.FETCH_TICKET_GROUPS, fetchTicketGroups);
 	yield takeLatest(TicketsTypes.UPSERT_TICKET_AND_FETCH_GROUPS, upsertTicketAndFetchGroups);
+	yield takeLatest(TicketsTypes.UPDATE_TICKET_GROUP, updateTicketGroup);
 }

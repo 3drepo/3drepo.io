@@ -16,7 +16,7 @@
  */
 /* eslint-disable implicit-arrow-linebreak */
 
-import { EditableTicket, ITicket } from '@/v5/store/tickets/tickets.types';
+import { EditableTicket, Group, ITicket } from '@/v5/store/tickets/tickets.types';
 import { subscribeToRoomEvent } from './realtime.service';
 import { TicketsActionsDispatchers } from '../actionsDispatchers';
 
@@ -37,6 +37,14 @@ export const enableRealtimeContainerNewTicket = (teamspace: string, project: str
 	)
 );
 
+export const enableRealtimeContainerUpdateTicketGroup = (teamspace: string, project: string, containerId: string) => (
+	subscribeToRoomEvent(
+		{ teamspace, project, model: containerId },
+		'containerUpdateTicketGroup',
+		(group: Group) => TicketsActionsDispatchers.updateTicketGroupSuccess(group),
+	)
+);
+
 // Federation ticket
 export const enableRealtimeFederationUpdateTicket = (teamspace: string, project: string, federationId: string) => (
 	subscribeToRoomEvent(
@@ -51,5 +59,13 @@ export const enableRealtimeFederationNewTicket = (teamspace: string, project: st
 		{ teamspace, project, model: federationId },
 		'federationNewTicket',
 		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, federationId, ticket),
+	)
+);
+
+export const enableRealtimeFederationUpdateTicketGroup = (teamspace: string, project: string, federationId: string) => (
+	subscribeToRoomEvent(
+		{ teamspace, project, model: federationId },
+		'federationUpdateTicketGroup',
+		(group: Group) => TicketsActionsDispatchers.updateTicketGroupSuccess(group),
 	)
 );

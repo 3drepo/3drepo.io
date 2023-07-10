@@ -26,7 +26,7 @@ import { Button } from '@controls/button';
 import { useEffect, useState } from 'react';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { cloneDeep, isEqual, sortBy } from 'lodash';
+import { cloneDeep, isEqual, isUndefined, omitBy, sortBy } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { Group, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
@@ -116,7 +116,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 			delete newValues.color;
 		}
 
-		onSubmit?.(newValues);
+		onSubmit?.(omitBy(newValues, isUndefined) as IGroupSettingsForm);
 	};
 
 	const handleNewCollectionChange = (collection: string[]) => {

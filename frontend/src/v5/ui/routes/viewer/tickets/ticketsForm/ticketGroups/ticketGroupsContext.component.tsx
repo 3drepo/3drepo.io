@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { GroupOverride } from '@/v5/store/tickets/tickets.types';
+import { Group, GroupOverride } from '@/v5/store/tickets/tickets.types';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { TicketGroupsContext } from './ticketGroupsContext';
@@ -62,17 +62,22 @@ export const TicketGroupsContextComponent = ({
 		state ? _.union(checkedIndexes, indexes) : _.without(checkedIndexes, ...indexes),
 	);
 
-	const deleteGroup = (index) => {
-		const newSelectedIndexes = _.without(checkedIndexes, index).map((idx) => (idx < index ? idx : idx - 1));
-		setCheckedIndexes(newSelectedIndexes);
-		onDeleteGroup(index);
+	const handleDeleteGroup = (index) => {
+		const newCheckedIndexes = _.without(checkedIndexes, index).map((idx) => (idx < index ? idx : idx - 1));
+		setCheckedIndexes(newCheckedIndexes);
 	};
 
 	useEffect(() => {
 		if (overrides.length > indexedOverrides.length && contextValue.groupType === 'colored') {
 			// overrides length increased as new overrides were added
-			const newIndexesToSelect = Array.from({ length: overrides.length - indexedOverrides.length }, (el, i) => i + indexedOverrides.length);
-			setCheckedIndexes(_.union(checkedIndexes, newIndexesToSelect));
+			const newCheckedIndexes = Array.from({ length: overrides.length - indexedOverrides.length }, (el, i) => i + indexedOverrides.length);
+			setCheckedIndexes(_.union(checkedIndexes, newCheckedIndexes));
+		}
+		if (overrides.length < indexedOverrides.length) {
+			const deleteOverrideIndex = indexedOverrides.findIndex((o, i) => (o.group as Group)?._id !== (overrides[i]?.group as Group)?._id);
+			if (deleteOverrideIndex !== -1) {
+				handleDeleteGroup(deleteOverrideIndex);
+			}
 		}
 		setIndexedOverrides(_.sortBy(addIndex(overrides || []), 'prefix'));
 	}, [overrides]);
@@ -83,7 +88,7 @@ export const TicketGroupsContextComponent = ({
 		<TicketGroupsContext.Provider
 			value={{
 				...contextValue,
-				deleteGroup,
+				deleteGroup: onDeleteGroup,
 				editGroup: onEditGroup,
 				getGroupIsChecked,
 				setGroupIsChecked,
