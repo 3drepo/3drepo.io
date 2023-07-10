@@ -73,7 +73,7 @@ export const TicketDetailsCard = () => {
 
 	const onBlurHandler = () => {
 		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
-		let validVals = removeEmptyObjects(nullifyEmptyStrings(filterErrors(values, formData.formState.errors)));
+		const validVals = removeEmptyObjects(nullifyEmptyStrings(filterErrors(values, formData.formState.errors)));
 
 		const editedGroup = findEditedGroup(validVals, ticket, template);
 		if (editedGroup) {
