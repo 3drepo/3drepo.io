@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,14 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { SearchInput } from '@controls/search/searchInput';
+import { SearchInputWithChips } from '@controls/search/searchInput/searchInputWithChips.component';
 import { useState } from 'react';
 import { SearchContextComponent } from '@controls/search/searchContext';
 
 export default {
-	title: 'Inputs/Textfield/SearchInput',
-	component: SearchInput,
+	title: 'Inputs/Textfield/SearchInputWithChips',
+	component: SearchInputWithChips,
 	argTypes: {
 		variant: {
 			options: ['filled', 'outlined'],
@@ -29,11 +30,11 @@ export default {
 		},
 	},
 	parameters: { controls: { exclude: ['ref', 'hiddenLabel', 'onClear'] } },
-} as ComponentMeta<typeof SearchInput>;
+} as ComponentMeta<typeof SearchInputWithChips>;
 
-const Template: ComponentStory<typeof SearchInput> = (args) => (
+const Template: ComponentStory<typeof SearchInputWithChips> = (args) => (
 	<SearchContextComponent fieldsToFilter={[]} items={[]}>
-		<SearchInput {...args} />
+		<SearchInputWithChips {...args} />
 	</SearchContextComponent>
 );
 
@@ -42,18 +43,18 @@ Default.args = {
 	label: 'Search input',
 };
 
-const Controlled: ComponentStory<typeof SearchInput> = (args) => {
-	const [val, setVal] = useState('');
+const Controlled: ComponentStory<typeof SearchInputWithChips> = (args) => {
+	const [vals, setVals] = useState([]);
 
-	const onChange = (event) => {
-		setVal(event.target.value);
-	};
+	const onChange = (event, newVals) => setVals(newVals);
 
-	return (<SearchInput {...args} onChange={onChange} value={val} />);
+	const onRemoveChip = (index) => setVals(vals.filter((_, idx) => idx !== index));
+
+	return (<SearchInputWithChips {...args} onChange={onChange} onRemoveChip={onRemoveChip} value={vals} />);
 };
 
-export const ControlledSearchInput = Controlled.bind({});
+export const ControlledSearchInputWithChips = Controlled.bind({});
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledSearchInput.args = {
+ControlledSearchInputWithChips.args = {
 	label: 'Controlled Search input',
 };

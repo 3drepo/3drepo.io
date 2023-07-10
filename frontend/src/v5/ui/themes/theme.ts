@@ -296,6 +296,14 @@ export const theme = createTheme({
 						'&[type=number]': {
 							'-moz-appearance': 'textfield',
 						},
+
+						'::placeholder': {
+							opacity: 1,
+							color: COLOR.BASE_MAIN,
+							'&:hover': {
+								color: COLOR.SECONDARY_MAIN,
+							},
+						},
 					},
 					'.Mui-error': {
 						'.MuiOutlinedInput-notchedOutline': {
@@ -498,18 +506,16 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					'.MuiFormControl-root .MuiInputBase-root.MuiAutocomplete-inputRoot': {
-						padding: '0 0 0 10px',
+						padding: '0 0 0 12px',
 					},
 					'>*': {
 						height: '100%',
 					},
 				},
 				input: {
-					height: '100%',
 					padding: 0,
 				},
 				inputRoot: {
-					height: '100%',
 					borderRadius: 8,
 					'&.Mui-disabled': {
 						backgroundColor: COLOR.TERTIARY_LIGHTEST,

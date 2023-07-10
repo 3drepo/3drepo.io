@@ -62,7 +62,6 @@ export const EditFederationContainersListItem = memo(({
 				minWidth={116}
 				container={container}
 				isSelected={isSelected}
-				filterQuery={filterQuery}
 				openInNewTab
 			/>
 			<DashboardListItemButton
