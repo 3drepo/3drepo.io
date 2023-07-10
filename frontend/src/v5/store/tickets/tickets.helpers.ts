@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { camelCase, isEmpty, mapKeys } from 'lodash';
+import { camelCase, isEmpty, isEqual, mapKeys } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
@@ -159,6 +159,53 @@ export const getImgSrc = (imgData) => {
 		return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, imgData, isFederation);
 	}
 	return addBase64Prefix(imgData);
+};
+
+const overrideHasEditedGroup = (override: GroupOverride, oldOverrides: GroupOverride[]) => {
+	const overrideId = (override.group as Group)._id;
+	if (!overrideId) return false;
+
+	const oldGroup = oldOverrides.find(({ group }) => (group as Group)._id === overrideId).group;
+	return !isEqual(oldGroup, override.group);
+};
+
+const findOverrideWithEditedGroup = (values, oldValues, propertiesDefinitions) => {
+	let overrideWithEditedGroup;
+	Object.keys(values).forEach((key) => {
+		const definition = propertiesDefinitions.find((def) => def.name === key);
+		if (definition?.type === 'view') {
+			const viewValue: Viewpoint | undefined = values[key];
+			const oldValue: Viewpoint | undefined = oldValues?.[key];
+
+			overrideWithEditedGroup ||= viewValue?.state?.colored?.find((o) => overrideHasEditedGroup(o, oldValue?.state?.colored || []))
+				|| viewValue?.state?.hidden?.find((o) => overrideHasEditedGroup(o, oldValue?.state?.hidden || []));
+		}
+	});
+
+	return overrideWithEditedGroup;
+};
+
+const getSanitizedSmartGroup = (group: Group) => {
+	if (group?.rules && group?.objects) {
+		const { objects, ...rest } = group;
+		return rest;
+	}
+	return group;
+};
+
+export const findEditedGroup = (values: Partial<ITicket>, ticket: ITicket, template) => {
+	let overrideWithEditedGroup;
+	if (values.properties) {
+		overrideWithEditedGroup = findOverrideWithEditedGroup(values.properties, ticket.properties, template.properties);
+	}
+
+	if (values.modules) {
+		template?.modules?.forEach(({ name, properties }) => {
+			overrideWithEditedGroup ||= findOverrideWithEditedGroup(values.modules[name], ticket.modules[name], properties);
+		});
+	}
+
+	return getSanitizedSmartGroup(overrideWithEditedGroup?.group as Group);
 };
 
 const getSanitizedOverride = ({ group, ...rest }: GroupOverride) => ({ ...rest, group: (group as Group)?._id || group });
