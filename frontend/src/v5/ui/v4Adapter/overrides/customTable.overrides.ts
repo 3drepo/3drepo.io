@@ -35,12 +35,11 @@ export default css`
 		}
 
 		.simplebar-content {
-			border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 			border-radius: 10px;
 			background-color: ${({ theme }) => theme.palette.primary.contrast};
 
 			& > * {
-				border-color: ${({ theme }) => theme.palette.base.lightest};
+				border-color: ${({ theme }) => theme.palette.tertiary.lightest};
 			}
 		}
 
