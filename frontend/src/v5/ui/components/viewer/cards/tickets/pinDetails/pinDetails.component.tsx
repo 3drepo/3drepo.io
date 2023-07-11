@@ -67,7 +67,7 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 			}
 
 			if (value) {
-				ViewerService.addPin({
+				ViewerService.showPin({
 					id: pinId, position: value, colour: hexToGLColor(theme.palette.primary.main), type: 'issue' });
 			}
 		}

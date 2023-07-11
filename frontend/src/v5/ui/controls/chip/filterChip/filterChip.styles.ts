@@ -22,31 +22,23 @@ export const FilterChip = styled(Chip).attrs(({ theme }) => ({
 	color: theme.palette.base.main,
 	clickable: false,
 }))<{ selected?: boolean }>`
-	${({ theme }) => theme.typography.kicker};
-	cursor: pointer;
-	height: 18px;
-	border-radius: 5px;
-	padding: 3px 7px;
-	margin: 0;
-	font-size: 8px;
-	letter-spacing: 0.3px;
-	border: 1px solid;
-	.MuiChip-label {
-		padding: 0;
-	}
-	:hover {
-		color: ${({ theme }) => theme.palette.primary.main};
-		border-color: ${({ theme }) => theme.palette.primary.main};
-		background-color: inherit;
-	}
-	${({ selected }) => selected && css`
-		&& {
-			border-color: ${({ theme }) => theme.palette.primary.main};
-			color: ${({ theme }) => theme.palette.primary.main};
-			background-color: ${({ theme }) => theme.palette.primary.lightest};
-			:hover {
-				background-color: ${({ theme }) => theme.palette.primary.lightest};
-			}
+	.MuiChip-root {
+		${({ theme }) => theme.typography.kicker};
+		height: 18px;
+		font-size: 8px;
+		border: 1px solid currentColor;
+		.MuiChip-label {
+			padding: 0;
 		}
-	`}
+		&:hover {
+			color: ${({ theme }) => theme.palette.primary.main};
+		}
+		${({ selected }) => selected && css`
+				color: ${({ theme }) => theme.palette.primary.main};
+				border-color: currentColor;
+				&, &:hover {
+					background-color: ${({ theme }) => theme.palette.primary.lightest};
+				}
+		`}
+	}
 `;

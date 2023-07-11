@@ -34,6 +34,7 @@ export const BaseCalendarPicker = ({
 	error,
 	required,
 	value,
+	onChange,
 	...props
 }: BaseCalendarPickerProps) => {
 	const [open, setOpen] = useState(false);
@@ -66,7 +67,7 @@ export const BaseCalendarPicker = ({
 			)}
 			{...props}
 			// If value is 0 display it as null to prevent it showing as 1/1/1970
-			value={value || (defaultValue ? dayjs(defaultValue) : null)}
+			value={value ? dayjs(value) : null}
 			onOpen={() => setOpen(true)}
 			onClose={() => {
 				// This is to signal that the date has changed (we are using onblur to save changes)
@@ -76,13 +77,13 @@ export const BaseCalendarPicker = ({
 			disabled={disabled}
 			open={open}
 			dayOfWeekFormatter={formatDayOfWeek}
-			defaultValue={defaultValue ? dayjs(defaultValue) : null}
 			disableHighlightToday
 			componentsProps={{
 				actionBar: {
 					hidden: required,
 				},
 			}}
+			onChange={(dayJs) => onChange?.(dayJs.toDate().getTime())}
 		/>
 	);
 };

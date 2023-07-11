@@ -16,6 +16,8 @@
  */
 
 import { createSelector } from 'reselect';
+import { orderBy } from 'lodash';
+import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
 import { createPropertiesWithGroups } from './ticketsGroups.helpers';
 import { Properties } from './tickets.types';
@@ -25,7 +27,7 @@ const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
 export const selectTickets = createSelector(
 	selectTicketsDomain,
 	(state, modelId) => modelId,
-	(state, modelId) => state.ticketsByModelId[modelId] || [],
+	(state, modelId) => orderBy(state.ticketsByModelId[modelId] || [], `properties.${BaseProperties.CREATED_AT}`, 'desc'),
 );
 
 export const selectTemplates = createSelector(
