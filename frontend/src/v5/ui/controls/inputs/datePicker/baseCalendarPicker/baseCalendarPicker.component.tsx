@@ -83,7 +83,7 @@ export const BaseCalendarPicker = ({
 					hidden: required,
 				},
 			}}
-			onChange={(dayJs) => onChange?.(dayJs.toDate().getTime())}
+			onChange={(dayJs) => onChange?.(dayJs?.toDate().getTime() || null)}
 		/>
 	);
 };
