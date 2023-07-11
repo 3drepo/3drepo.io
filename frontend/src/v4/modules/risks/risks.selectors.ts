@@ -179,7 +179,10 @@ export const selectPins = createSelector(
 			} , []);
 		}
 
-		if (showDetails && detailedRisk && hasPin(detailedRisk)) {
+		// if is not showing pins show the pin while editing
+		// if is shoiwng the pins and is editing an existing risk, then dont add it here because is already been added in the if block 171
+		// if is a new risk show the pin.
+		if (showDetails && detailedRisk && (!showPins || !detailedRisk._id) && hasPin(detailedRisk)) {
 			pinsToShow.push(riskToPin(detailedRisk, true));
 		}
 
