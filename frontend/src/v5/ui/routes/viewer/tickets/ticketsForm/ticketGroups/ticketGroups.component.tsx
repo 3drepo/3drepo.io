@@ -82,11 +82,11 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		return highlightedOverride.index === index;
 	};
 
-	const onDeleteGroup = (type) => (index) => {
+	const onDeleteGroups = (type) => (indexes) => {
 		const newVal = cloneDeep(value);
-		newVal.state[type].splice(index, 1);
+		newVal.state[type] = newVal.state[type].filter((o, i) => !indexes.includes(i));
 		onChange?.(newVal);
-		if (highlightedOverride.index === index && highlightedOverride.type === type) {
+		if (highlightedOverride.type === type && indexes.includes(highlightedOverride.index)) {
 			clearHighlightedIndex();
 		}
 	};
@@ -145,7 +145,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		<Container onClick={clearHighlightedIndex}>
 			<TicketGroupsContextComponent
 				groupType="colored"
-				onDeleteGroup={onDeleteGroup(OverrideType.COLORED)}
+				onDeleteGroups={onDeleteGroups(OverrideType.COLORED)}
 				onSelectedGroupsChange={setSelectedColorIndexes}
 				overrides={state.colored || []}
 				onEditGroup={onSetEditGroup(OverrideType.COLORED)}
@@ -159,7 +159,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 			</TicketGroupsContextComponent>
 			<TicketGroupsContextComponent
 				groupType="hidden"
-				onDeleteGroup={onDeleteGroup(OverrideType.HIDDEN)}
+				onDeleteGroups={onDeleteGroups(OverrideType.HIDDEN)}
 				overrides={state.hidden || []}
 				onEditGroup={onSetEditGroup(OverrideType.HIDDEN)}
 				isHighlightedIndex={onIsHighlightedIndex(OverrideType.HIDDEN)}

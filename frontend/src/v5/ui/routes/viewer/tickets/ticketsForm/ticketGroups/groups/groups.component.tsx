@@ -16,6 +16,16 @@
  */
 
 import { groupBy, isString, partition } from 'lodash';
+import { formatMessage } from '@/v5/services/intl';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { Group } from '@/v5/store/tickets/tickets.types';
+import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
+import { useDispatch } from 'react-redux';
+import { TreeActions } from '@/v4/modules/tree';
+import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
+import ShowIcon from '@assets/icons/outlined/eye-outlined.svg';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ErrorTicketButton, PrimaryTicketButton } from '@/v5/ui/routes/viewer/tickets/ticketButton/ticketButton.styles';
 import { useContext } from 'react';
 import {
 	CollectionHeadline,
@@ -31,13 +41,34 @@ import { GroupState, IndexedOverride, getCollectionCheckboxState } from '../tick
 
 /* eslint-disable @typescript-eslint/no-use-before-define */
 const GroupCollection = ({ overrides, prefix, level }) => {
-	const { getCollectionState, setCollectionIsChecked } = useContext(TicketGroupsContext);
-	const state = getCollectionState(overrides.map(({ index }) => index));
+	const { getCollectionState, setCollectionIsChecked, deleteCollection } = useContext(TicketGroupsContext);
+	const overridesIndexes = overrides.map(({ index }) => index);
+	const state = getCollectionState(overridesIndexes);
+	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+	const dispatch = useDispatch();
 
 	const handleCheckboxClick = (e) => {
 		e.stopPropagation();
 		// setting the state for all the groups descendants of this collection
-		setCollectionIsChecked(overrides.map(({ index }) => index), state !== GroupState.CHECKED);
+		setCollectionIsChecked(overridesIndexes, state !== GroupState.CHECKED);
+	};
+	const handleDeleteCollection = (e) => {
+		e.stopPropagation();
+		DialogsActionsDispatchers.open('delete', {
+			name: prefix,
+			message: formatMessage({
+				id: 'deleteModal.groups.message',
+				defaultMessage: 'By deleting these groups your data will be lost permanently and will not be recoverable.',
+			}),
+			onClickConfirm: () => deleteCollection(overridesIndexes),
+			confirmLabel: formatMessage({ id: 'deleteModal.groupCollection.confirmButton', defaultMessage: 'Delete Groups' }),
+		});
+	};
+
+	const isolateCollection = (e) => {
+		e.stopPropagation();
+		const objects = overrides.flatMap((o) => convertToV4GroupNodes((o.group as Group).objects));
+		dispatch(TreeActions.isolateNodesBySharedIds(objects));
 	};
 
 	return (
@@ -49,6 +80,14 @@ const GroupCollection = ({ overrides, prefix, level }) => {
 							<Name>{prefix}</Name>
 						</NameContainer>
 					</CollectionHeadline>
+					{isAdmin && (
+						<ErrorTicketButton onClick={handleDeleteCollection}>
+							<DeleteIcon />
+						</ErrorTicketButton>
+					)}
+					<PrimaryTicketButton onClick={isolateCollection}>
+						<ShowIcon />
+					</PrimaryTicketButton>
 					<GroupToggle
 						onClick={handleCheckboxClick}
 						{...getCollectionCheckboxState(state)}

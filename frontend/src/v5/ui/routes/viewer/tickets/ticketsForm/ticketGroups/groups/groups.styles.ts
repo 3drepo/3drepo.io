@@ -71,7 +71,6 @@ export const CollectionAccordion = styled(Accordion)`
 	
 		.MuiAccordionSummary-content {
 			width: 100%;
-			overflow: hidden;
 		}
 	}
 `;
