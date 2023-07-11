@@ -35,30 +35,33 @@ export const GroupsActionMenu = ({
 	onDelete,
 	onClick,
 	disabled,
-}: IGroupsActionMenu) => (
-	<ViewActionMenu
-		disabled={!value}
-		onClick={onClick}
-		Icon={GroupsIcon}
-		title={<FormattedMessage id="viewer.card.ticketView.actionMenu.groups" defaultMessage="Groups" />}
-	>
-		<EllipsisMenu disabled={disabled && !value}>
-			<EllipsisMenuItem
-				title={(<FormattedMessage id="viewer.card.ticketView.action.addNewGroup" defaultMessage="Add new group" />)}
-				onClick={onClick}
-				disabled={disabled}
-			/>
-			<EllipsisMenuItem
-				title={(<FormattedMessage id="viewer.card.ticketView.action.viewGroups" defaultMessage="View groups" />)}
-				onClick={onClick}
-				hidden={!value}
-			/>
-			<EllipsisMenuItemDelete
-				title={(<FormattedMessage id="viewer.card.ticketView.action.deleteGroups" defaultMessage="Delete groups" />)}
-				onClick={onDelete}
-				hidden={!value}
-				disabled={disabled}
-			/>
-		</EllipsisMenu>
-	</ViewActionMenu>
-);
+}: IGroupsActionMenu) => {
+	const hasGroups = value?.colored?.length || value?.hidden?.length;
+	return (
+		<ViewActionMenu
+			disabled={!hasGroups}
+			onClick={onClick}
+			Icon={GroupsIcon}
+			title={<FormattedMessage id="viewer.card.ticketView.actionMenu.groups" defaultMessage="Groups" />}
+		>
+			<EllipsisMenu disabled={disabled && !hasGroups}>
+				<EllipsisMenuItem
+					title={(<FormattedMessage id="viewer.card.ticketView.action.addNewGroup" defaultMessage="Add new group" />)}
+					onClick={onClick}
+					disabled={disabled}
+				/>
+				<EllipsisMenuItem
+					title={(<FormattedMessage id="viewer.card.ticketView.action.viewGroups" defaultMessage="View groups" />)}
+					onClick={onClick}
+					hidden={!hasGroups}
+				/>
+				<EllipsisMenuItemDelete
+					title={(<FormattedMessage id="viewer.card.ticketView.action.deleteGroups" defaultMessage="Delete groups" />)}
+					onClick={onDelete}
+					hidden={!hasGroups}
+					disabled={disabled}
+				/>
+			</EllipsisMenu>
+		</ViewActionMenu>
+	);
+};
