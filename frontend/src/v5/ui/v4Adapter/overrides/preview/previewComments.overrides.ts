@@ -72,6 +72,10 @@ export const CommentListStyling = css`
 	${CommentListContainer} {
 		padding: 0;
 
+		${EmptyStateInfo} {
+			margin: 2px 0 0;
+		}
+
 		${SystemMessage} {
 			color: ${({ theme }) => theme.palette.base.main};
 			margin: 0 5px;
@@ -195,8 +199,7 @@ export default css`
 			}
 
 			${EmptyStateInfo} {
-				margin-left: 0;
-				margin-right: 0;
+				margin: 10px 0 17px;
 			}
 		}
 	}

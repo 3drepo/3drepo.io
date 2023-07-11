@@ -15,15 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
 import { Actions, Footer, Invitation, List } from '@/v4/routes/components/invitationsDialog/invitationsDialog.styles';
 import { css } from 'styled-components';
 import { secondaryButtonStyling } from '../resuableOverrides.styles';
 
 export default css`
-	${EmptyStateInfo} {
-		margin: 30px;
-	}
 	${List} {
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 		padding: 30px;
