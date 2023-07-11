@@ -83,7 +83,7 @@ export const theme = createTheme(
 								},
 							},
 							'& input:not(.MuiAutocomplete-input)': {
-								padding: '0px 12px !important',
+								padding: '0px 12px',
 							},
 						},
 						formControl: {

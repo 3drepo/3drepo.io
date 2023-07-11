@@ -96,7 +96,7 @@ export const HexTextField = styled(TextField).attrs({
 		padding-left: 10px;
 	}
 
-	input {
+	&& input {
 		padding-left: 0;
 	}
 `;
@@ -117,7 +117,7 @@ export const PercentageTextField = styled(NumberField).attrs({
 		padding-right: 13px;
 	}
 
-	input {
+	&& input {
 		padding: 0;
 		text-align: end;
 	}

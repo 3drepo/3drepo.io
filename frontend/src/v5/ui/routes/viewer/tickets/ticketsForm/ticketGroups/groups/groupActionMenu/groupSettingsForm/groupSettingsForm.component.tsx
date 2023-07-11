@@ -69,7 +69,7 @@ type GroupSettingsFormProps = {
 	isColored?: boolean,
 };
 export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColored }: GroupSettingsFormProps) => {
-	const [isSmart, setIsSmart] = useState(false);
+	const [isSmart, setIsSmart] = useState(true);
 	const [newPrefix, setNewPrefix] = useState([]);
 	const [inputObjects, setInputObjects] = useState([]);
 	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
@@ -133,7 +133,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 				prefix: [],
 				group: {},
 			});
-			setIsSmart(false);
+			setIsSmart(true);
 			return;
 		}
 
@@ -264,16 +264,14 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 							<FormattedMessage id="ticketsGroupSettings.form.type.smart" defaultMessage="Smart group" />
 						</ToggleLabel>
 					</ToggleWrapper>
-					{
-						isAdmin && (
-							<Instruction>
-								<FormattedMessage
-									id="ticketsGroupSettings.smartGroupInstruction"
-									defaultMessage="Use filters below to create smart group"
-								/>
-							</Instruction>
-						)
-					}
+					{isAdmin && isSmart && (
+						<Instruction>
+							<FormattedMessage
+								id="ticketsGroupSettings.smartGroupInstruction"
+								defaultMessage="Use filters below to create smart group"
+							/>
+						</Instruction>
+					)}
 				</FormBox>
 				{
 					isSmart && (
