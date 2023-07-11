@@ -77,13 +77,7 @@ export const TicketView = ({
 		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(value)));
 	};
 
-	const deleteViewpoint = () => {
-		let view = null;
-		if (value?.screenshot) {
-			view = { screenshot: value.screenshot };
-		}
-		onChange?.(view);
-	};
+	const deleteViewpoint = () => onChange?.(null);
 
 	// Image
 	const onImageChange = (newImg) => {
