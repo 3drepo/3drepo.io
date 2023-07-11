@@ -19,6 +19,7 @@ const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const config = require('../../../../src/v5/utils/config');
 const { generateRandomString } = require('../../helper/services');
+const { PassThrough } = require('stream');
 
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
@@ -461,6 +462,65 @@ const testStoreFile = () => {
 	});
 };
 
+const testStoreFileStream = () => {
+	describe('Store file stream in fileshare', () => {
+		test('should throw error if the default type is not recognised', async () => {
+			const { defaultStorage } = config;
+			config.defaultStorage = 'unrecognised storage type';
+
+			await expect(FilesManager.storeFileStream(
+				generateRandomString(),
+				generateRandomString(),
+				generateRandomString(),
+			)).rejects.toEqual(templates.unknown);
+
+			config.defaultStorage = defaultStorage;
+		});
+
+		test('should throw error if the default type is gridfs', async () => {
+			const { defaultStorage } = config;
+			config.defaultStorage = 'gridfs';
+
+			await expect(FilesManager.storeFileStream(
+				generateRandomString(),
+				generateRandomString(),
+				generateRandomString(),
+			)).rejects.toEqual(templates.unknown);
+
+			config.defaultStorage = defaultStorage;
+		});
+
+		test('should store file if default storage type is fs', async () => {
+			const { defaultStorage } = config;
+			config.defaultStorage = 'fs';
+
+			const refInfo = { _id: generateRandomString() };
+			FSHandler.storeFile.mockResolvedValueOnce(refInfo);
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+			const id = generateRandomString();
+			const data = generateRandomString();
+			const stream = PassThrough();
+
+			const execProm = expect(FilesManager.storeFileStream(teamspace, collection, id, stream))
+				.resolves.toEqual(undefined);
+
+			stream.write(data);
+			stream.end();
+
+			await execProm;
+
+			expect(FSHandler.storeFileStream).toHaveBeenCalledTimes(1);
+			expect(FSHandler.storeFileStream).toHaveBeenCalledWith(stream);
+			expect(FileRefs.insertRef).toHaveBeenCalledTimes(1);
+			expect(FileRefs.insertRef).toHaveBeenCalledWith(teamspace, collection,
+				{ ...refInfo, _id: id, mimeType: DEFAULT_MIME_TYPE });
+
+			config.defaultStorage = defaultStorage;
+		});
+	});
+};
+
 const testFileExists = () => {
 	describe('Check whether a file exists or not', () => {
 		test('should return fs if config.defaultStorage is set to fs', async () => {
@@ -556,5 +616,6 @@ describe('services/filesManager', () => {
 	testGetFileAsStream();
 	testGetFileWithMetaAsStream();
 	testStoreFile();
+	testStoreFileStream();
 	testFileExists();
 });

@@ -15,30 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { Chip } from '../chip.component';
+const mergeSceneBinaries = require('./mergeSceneBinaries');
 
-export const FilterChip = styled(Chip).attrs(({ theme }) => ({
-	color: theme.palette.base.main,
-	clickable: false,
-}))<{ selected?: boolean }>`
-	.MuiChip-root {
-		${({ theme }) => theme.typography.kicker};
-		height: 18px;
-		font-size: 8px;
-		border: 1px solid currentColor;
-		.MuiChip-label {
-			padding: 0;
-		}
-		&:hover {
-			color: ${({ theme }) => theme.palette.primary.main};
-		}
-		${({ selected }) => selected && css`
-				color: ${({ theme }) => theme.palette.primary.main};
-				border-color: currentColor;
-				&, &:hover {
-					background-color: ${({ theme }) => theme.palette.primary.lightest};
-				}
-		`}
-	}
-`;
+const scripts = [
+	{ script: mergeSceneBinaries, desc: 'Merge scene binary files into bigger files' },
+];
+
+module.exports = scripts;
