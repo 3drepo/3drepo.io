@@ -122,6 +122,7 @@ export const ContainerListItem = memo(({
 				<DashboardListItemText
 					width={78}
 					selected={isSelected}
+					dontHighlight
 				>
 					{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
 				</DashboardListItemText>

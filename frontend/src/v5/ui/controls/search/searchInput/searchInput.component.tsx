@@ -35,16 +35,11 @@ export const SearchInput = ({ onClear, value, variant = 'filled', ...props }: IS
 
 	const onChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
 		setQuery(event.currentTarget.value);
-		if (props.onChange) {
-			props.onChange(event);
-		}
+		props.onChange?.(event);
 	};
 
 	const onClickClear = () => {
-		if (onClear) {
-			onClear();
-		}
-
+		onClear?.();
 		setQuery('');
 	};
 

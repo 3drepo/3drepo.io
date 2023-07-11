@@ -82,7 +82,7 @@ export const theme = createTheme(
 									borderWidth: '1px !important',
 								},
 							},
-							'& input': {
+							'& input:not(.MuiAutocomplete-input)': {
 								padding: '0px 12px !important',
 							},
 						},
@@ -109,7 +109,6 @@ export const theme = createTheme(
 								fontSize: 10,
 							},
 							'& .MuiInputBase-root input': {
-								lineHeight: 22,
 								height: 26,
 							},
 						},

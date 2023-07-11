@@ -26,7 +26,7 @@ export const HiddenSelect = styled(Select).attrs({
 		PaperProps: {
 			style: {
 				maxHeight: 400,
-				maxWidth: 218,
+				width: 218,
 			},
 		},
 		anchorOrigin: {
@@ -50,7 +50,6 @@ export const HiddenSelect = styled(Select).attrs({
 export const SearchInput = styled(SearchInputBase).attrs({
 	variant: 'outlined',
 })`
-	width: auto;
 	margin: -10px 0 0;
 	padding: 12px;
 	top: 0;
