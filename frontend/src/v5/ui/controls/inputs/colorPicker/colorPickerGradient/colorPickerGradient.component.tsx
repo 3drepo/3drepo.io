@@ -35,7 +35,7 @@ export const ColorPickerGradient = ({ value = UNSET_HEX_COLOR, onChange }) => {
 		>
 			<ColorPickerStyler>
 				<HexColorPicker color={color} onChange={setColor} />
-			</ColorPickerStyler>	
+			</ColorPickerStyler>
 			<ActionMenuItem>
 				<UpdateButton onClick={() => onChange(color)} disabled={color === value}>
 					<FormattedMessage id="colorPicker.gradient.update" defaultMessage="Update" />
