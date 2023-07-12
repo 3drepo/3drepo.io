@@ -17,29 +17,30 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { HexColorPicker } from 'react-colorful';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import { FormattedMessage } from 'react-intl';
+import { ActionMenuItem } from '@controls/actionMenu';
 import { ColorPickerMenu } from '../colorPickerMenu/colorPickerMenu.component';
 import { ColorPickerStyler } from './colorPickerGradient.styles';
 import { UNSET_HEX_COLOR } from '../colorPicker.helpers';
+import { UpdateButton } from '../colorPickerPalette/colorPickerPalette.styles';
 
-export const ColorPickerGradient = ({ value = UNSET_HEX_COLOR, onClose }) => {
-	const ref = useRef();
+export const ColorPickerGradient = ({ value = UNSET_HEX_COLOR, onChange }) => {
 	const [color, setColor] = useState(value);
-
-	useEffect(() => () => {
-		if (!ref.current) {
-			onClose(color);
-		}
-	}, [color]);
 
 	return (
 		<ColorPickerMenu
 			title={formatMessage({ id: 'colorPicker.gradient.title', defaultMessage: 'Custom colour' })}
 			onClickClose={() => setColor(value)}
 		>
-			<ColorPickerStyler ref={ref}>
+			<ColorPickerStyler>
 				<HexColorPicker color={color} onChange={setColor} />
-			</ColorPickerStyler>
+			</ColorPickerStyler>	
+			<ActionMenuItem>
+				<UpdateButton onClick={() => onChange(color)} disabled={color === value}>
+					<FormattedMessage id="colorPicker.gradient.update" defaultMessage="Update" />
+				</UpdateButton>
+			</ActionMenuItem>
 		</ColorPickerMenu>
 	);
 };

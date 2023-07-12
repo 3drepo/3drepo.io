@@ -69,7 +69,7 @@ export const ColorPicker = ({ value: inputValue, defaultValue, onChange, disable
 			}}
 			disabled={disabled}
 		>
-			<ColorPickerPalette value={value} onClose={handleChange} />
+			<ColorPickerPalette value={value} onChange={handleChange} />
 		</ActionMenu>
 	);
 };

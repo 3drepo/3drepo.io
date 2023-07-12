@@ -21,6 +21,7 @@ import { ComponentToString } from '@/v5/helpers/react.helper';
 import { TextField } from '@mui/material';
 import { NumberField } from '@controls/inputs/numberField/numberField.component';
 import { ActionMenu } from '@controls/actionMenu';
+import { Button } from '@controls/button';
 import { ColorCircle } from '../colorCircle/colorCircle.styles';
 
 export const ColorGrid = styled.div`
@@ -62,6 +63,16 @@ export const BottomBar = styled.div`
 	justify-content: space-between;
 	width: 100%;
 `;
+
+export const UpdateButton = styled(Button).attrs({
+	color: 'primary',
+	variant: 'contained',
+	fullWidth: true,
+})`
+	height: 28px;
+    margin: 18px 0 0 auto;
+`;
+
 export const SquaredColorOption = styled(ColorCircle).attrs({
 	$size: 26,
 })<{ $opacity: number }>`

@@ -16,18 +16,20 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { useEffect, useRef, useState } from 'react';
-import { clamp } from 'lodash';
-import { ColorGrid, BottomBar, HexTextField, PercentageTextField, SquaredColorOption, GradientButton, ColorOption, ColorActionMenu } from './colorPickerPalette.styles';
+import { useRef, useState } from 'react';
+import { clamp, isEqual } from 'lodash';
+import { FormattedMessage } from 'react-intl';
+import { ActionMenuItem } from '@controls/actionMenu';
+import { ColorGrid, BottomBar, HexTextField, PercentageTextField, SquaredColorOption, GradientButton, ColorOption, ColorActionMenu, UpdateButton } from './colorPickerPalette.styles';
 import { ColorPickerMenu } from '../colorPickerMenu/colorPickerMenu.component';
 import { ColorPickerGradient } from '../colorPickerGradient/colorPickerGradient.component';
 import { HexGroupColor, getColorIsValid, DEFAULT_SUGGESTED_HEX_COLORS, UNSET_HEX_COLOR } from '../colorPicker.helpers';
 
 type ColorPickerPaletteProps = {
 	value: HexGroupColor,
-	onClose: (value: HexGroupColor) => void,
+	onChange: (value: HexGroupColor) => void,
 };
-export const ColorPickerPalette = ({ value, onClose }: ColorPickerPaletteProps) => {
+export const ColorPickerPalette = ({ value, onChange }: ColorPickerPaletteProps) => {
 	const [color, setColor] = useState<string>(value.color);
 	const [opacity, setOpacity] = useState<number>(value.opacity);
 	const ref = useRef();
@@ -49,12 +51,6 @@ export const ColorPickerPalette = ({ value, onClose }: ColorPickerPaletteProps) 
 		setColor(value.color);
 		setOpacity(value.opacity);
 	};
-
-	useEffect(() => () => {
-		if (colorisValid && !ref.current) {
-			onClose({ color, opacity });
-		}
-	}, [color, opacity]);
 
 	return (
 		<span ref={ref}>
@@ -84,9 +80,14 @@ export const ColorPickerPalette = ({ value, onClose }: ColorPickerPaletteProps) 
 						onChange={handleOpacityChange}
 					/>
 					<ColorActionMenu TriggerButton={<GradientButton />}>
-						<ColorPickerGradient value={color || UNSET_HEX_COLOR} onClose={setColor} />
+						<ColorPickerGradient value={color || UNSET_HEX_COLOR} onChange={setColor} />
 					</ColorActionMenu>
 				</BottomBar>
+				<ActionMenuItem>
+					<UpdateButton onClick={() => onChange({ color, opacity })} disabled={!colorisValid || isEqual({ color, opacity }, value)}>
+						<FormattedMessage id="colorPicker.update" defaultMessage="Update" />
+					</UpdateButton>
+				</ActionMenuItem>
 			</ColorPickerMenu>
 		</span>
 	);
