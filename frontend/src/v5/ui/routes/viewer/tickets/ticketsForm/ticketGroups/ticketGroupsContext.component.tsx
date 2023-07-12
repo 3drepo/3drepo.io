@@ -84,12 +84,11 @@ export const TicketGroupsContextComponent = ({
 			setCheckedIndexes(_.union(checkedIndexes, newCheckedIndexes));
 		}
 		if (overrides.length < indexedOverrides.length) {
-			let currentIndex = 0;
 			const deletedIndexes = [];
-			overrides.forEach((o) => {
-				while ((o.group as Group)?._id !== (indexedOverrides[currentIndex]?.group as Group)?._id) {
-					deletedIndexes.push(currentIndex);
-					currentIndex++;
+			const idsToKeep = overrides.map((o) => (o.group as Group)._id);
+			indexedOverrides.forEach(({ group, index }) => {
+				if (!idsToKeep.includes((group as Group)._id)) {
+					deletedIndexes.push(index);
 				}
 			});
 

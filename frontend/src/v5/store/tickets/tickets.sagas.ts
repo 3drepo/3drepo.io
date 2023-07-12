@@ -264,9 +264,11 @@ const fillOverridesIfEmpty = (values: Partial<ITicket>, template) => {
 };
 
 export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, ticket }: UpsertTicketAndFetchGroupsAction) {
-	const { type } = yield select(selectSelectedTicket);
-	const template = yield select(selectTemplateById, modelId, type);
-	fillOverridesIfEmpty(ticket, template);
+	const selectedTicket = yield select(selectSelectedTicket);
+	if (selectedTicket) {
+		const template = yield select(selectTemplateById, modelId, selectedTicket.type);
+		fillOverridesIfEmpty(ticket, template);
+	}
 	yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
 	yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id));
 }
