@@ -70,7 +70,7 @@ export const UpdateButton = styled(Button).attrs({
 	fullWidth: true,
 })`
 	height: 28px;
-    margin: 18px 0 0 auto;
+	margin: 18px 0 0 auto;
 `;
 
 export const SquaredColorOption = styled(ColorCircle).attrs({

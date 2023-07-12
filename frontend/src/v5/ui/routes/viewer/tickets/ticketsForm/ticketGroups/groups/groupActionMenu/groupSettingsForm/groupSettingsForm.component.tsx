@@ -60,6 +60,7 @@ import {
 import { GroupRulesForm } from '../../groupRulesForm/groupRulesForm.component';
 import { ChipRule } from '../../groupRulesForm/chipRule/chipRule.component';
 import { NewCollectionForm } from '../newCollectionForm/newCollectionForm.component';
+import { RulesOptionsMenu } from './rulesOptionsMenu/rulesOptionsMenu.component';
 
 type GroupSettingsFormProps = {
 	value?: IGroupSettingsForm,
@@ -296,6 +297,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								)}
 							</Subheading>
 							<FormRulesBox>
+								<RulesOptionsMenu value={rules} onPaste={append} onClear={() => remove()} />
 								<Rules>
 									{rules.map(({ id, ...ruleValue }, i) => (
 										<ChipRule
