@@ -95,12 +95,12 @@ export const OPERATIONS_TYPES = {
 	NOT_IN_RANGE: 'numberRange',
 } as const;
 
-export type Operation = keyof typeof OPERATIONS_TYPES;
-export type OperationType = typeof OPERATIONS_TYPES[Operation];
+export type Operator = keyof typeof OPERATIONS_TYPES;
+export type OperatorType = typeof OPERATIONS_TYPES[Operator];
 
 export interface IGroupRule {
 	field: string,
-	operator: Operation,
+	operator: Operator,
 	values?: (number | string)[],
 }
 

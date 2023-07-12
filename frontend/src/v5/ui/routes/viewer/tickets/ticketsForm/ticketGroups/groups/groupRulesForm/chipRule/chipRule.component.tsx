@@ -17,7 +17,7 @@
 import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
 import { useState } from 'react';
 import { IGroupRule } from '@/v5/store/tickets/tickets.types';
-import { OPERATION_DISPLAY_NAMES } from '../groupRulesForm.helpers';
+import { formatOperationLabel } from '../groupRulesForm.helpers';
 import { GroupRulesForm } from '../groupRulesForm.component';
 import { ChipWrapper, RuleActionMenu, RuleChip } from './chipRule.styles';
 
@@ -38,12 +38,7 @@ export const ChipRule = ({ value: rule, disabled, onChange, onDelete }: ChipRule
 			TriggerButton={(
 				<ChipWrapper>
 					<RuleChip
-						label={(
-							<>
-								{rule.field} {OPERATION_DISPLAY_NAMES[rule.operator]}
-								{!!rule.values?.length && (<b>&nbsp;{rule.values.join()}</b>)}
-							</>
-						)}
+						label={formatOperationLabel(rule)}
 						disabled={disabled}
 						deleteIcon={<div><CrossIcon /></div>}
 						onDelete={disabled ? null : onDelete}
