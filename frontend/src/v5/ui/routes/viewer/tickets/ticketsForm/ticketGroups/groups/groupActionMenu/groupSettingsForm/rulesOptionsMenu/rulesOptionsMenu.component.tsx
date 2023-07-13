@@ -30,7 +30,7 @@ import { prepareRuleForForm } from '../../../groupRulesForm/groupRulesForm.helpe
 export const RulesOptionsMenu = ({ value: rules, onClear, onPaste }) => {
 	const handlePaste = async () => {
 		try {
-			const [clipboardItem] = await navigator.clipboard.read();
+			const [clipboardItem] = await (navigator.clipboard as unknown as any).read();
 			const blob = await clipboardItem.getType('text/plain');
 			const newRules = JSON.parse(await blob.text());
 
