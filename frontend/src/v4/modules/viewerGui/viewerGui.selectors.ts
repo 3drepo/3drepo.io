@@ -16,6 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
+import { selectTicketOverrides, selectTicketTransparencies } from '@/v5/store/tickets/card/ticketsCard.selectors';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as Bim from '../bim';
 import { selectOverrides as selectGroupsOverrides,
@@ -89,15 +90,15 @@ export const selectClipNumber = createSelector(
 );
 
 export const selectColorOverrides = createSelector(
-	selectViewsOverrides, selectGroupsOverrides, selectSelectedFrameColors,
-		(viewsOverrides, groupsOverrides, sequenceFrameOverrides ) =>
-		({...viewsOverrides,  ...groupsOverrides, ...sequenceFrameOverrides})
+	selectViewsOverrides, selectGroupsOverrides, selectSelectedFrameColors, selectTicketOverrides,
+		(viewsOverrides, groupsOverrides, sequenceFrameOverrides, ticketsOverrides ) =>
+		({...viewsOverrides,  ...groupsOverrides, ...sequenceFrameOverrides, ...ticketsOverrides})
 );
 
 export const selectAllTransparencyOverrides = createSelector(
-	selectViewsTransparencies, selectGroupsTransparencies, selectSelectedFrameTransparencies,
-		(viewsTransparencies, groupsTransparencies, sequenceTransparencies) =>
-		({...viewsTransparencies, ...groupsTransparencies, ...sequenceTransparencies})
+	selectViewsTransparencies, selectGroupsTransparencies, selectSelectedFrameTransparencies, selectTicketTransparencies,
+		(viewsTransparencies, groupsTransparencies, sequenceTransparencies, ticketsTransparencies) =>
+		({...viewsTransparencies, ...groupsTransparencies, ...sequenceTransparencies, ...ticketsTransparencies})
 );
 
 export const selectTransformations = createSelector(

@@ -16,20 +16,22 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { Group, GroupOverride, IGroupSettingsForm, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
+import { Group, GroupOverride, IGroupSettingsForm, OverridesDicts, V4GroupObjects, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
-import { ViewpointsActions } from '@/v4/modules/viewpoints';
 import { TreeActions } from '@/v4/modules/tree';
-import { viewpointV5ToV4, convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
+import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
 import { cloneDeep, uniqBy, xor } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
 import { selectHiddenGeometryVisible } from '@/v4/modules/tree/tree.selectors';
+import { getGroupHexColor } from '@/v4/helpers/colors';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Container, Popper } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContextComponent } from './ticketGroupsContext.component';
 import { GroupSettingsForm } from './groups/groupActionMenu/groupSettingsForm/groupSettingsForm.component';
+import { GroupsActions } from '@/v4/modules/groups';
 
 const getPossiblePrefixes = (overrides: GroupOverride[] = []): string[][] => {
 	const prefixes = overrides.map(({ prefix }) => (prefix)).filter(Boolean);
@@ -107,10 +109,31 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 
 	const onCancel = () => setEditingOverride(NO_OVERRIDE_SELECTED);
 
-	const getCurrentActiveView = () => {
+	const getCurrentActiveOverride = () => {
+		const toMeshDictionary = (objects: V4GroupObjects, color: string, opacity: number): OverridesDicts => objects.shared_ids.reduce((dict, id) => {
+			// eslint-disable-next-line no-param-reassign
+			dict.overrides[id] = color;
+			// eslint-disable-next-line no-param-reassign
+			dict.transparencies[id] = opacity;
+			return dict;
+		}, { overrides: {}, transparencies: {} } as OverridesDicts);
+
 		const colored = selectedColorIndexes.map((i) => state.colored[i]).filter(Boolean);
-		const hidden = selectedHiddenIndexes.map((i) => state.hidden[i]).filter(Boolean);
-		return { state: { colored, hidden } } as Viewpoint;
+		return colored.reduce((acum, current) => {
+			const color = getGroupHexColor(current.color);
+			const { opacity } = current;
+			const v4Objects = convertToV4GroupNodes((current.group as Group)?.objects || []);
+
+			return v4Objects.reduce((dict, objects) => {
+				const overrideDict = toMeshDictionary(objects, color, opacity);
+
+				// eslint-disable-next-line no-param-reassign
+				dict.overrides = { ...dict.overrides, ...overrideDict.overrides };
+				// eslint-disable-next-line no-param-reassign
+				dict.transparencies = { ...dict.transparencies, ...overrideDict.transparencies };
+				return dict;
+			}, acum);
+		}, { overrides: {}, transparencies: {} } as OverridesDicts);
 	};
 
 	const onSubmit = (overrideValue) => {
@@ -122,11 +145,11 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		newVal.state[editingOverride.type] ||= [];
 		newVal.state[editingOverride.type][editingOverride.index] = overrideValue;
 		onChange?.(newVal);
-		onCancel();
-		setHighlightedOverride(editingOverride);
-		const updatedView = getCurrentActiveView();
-		updatedView.state[editingOverride.type][editingOverride.index] = overrideValue;
-		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(updatedView)));
+		// onCancel();
+		// setHighlightedOverride(editingOverride);
+		// const updatedView = getCurrentActiveView();
+		// updatedView.state[editingOverride.type][editingOverride.index] = overrideValue;
+		// dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(updatedView)));
 	};
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
@@ -138,8 +161,12 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	}, [highlightedOverride]);
 
 	useEffect(() => {
-		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(getCurrentActiveView())));
+		TicketsCardActionsDispatchers.setOverrides(getCurrentActiveOverride());
 	}, [selectedColorIndexes, value]);
+
+	useEffect(()=> {
+		dispatch(GroupsActions.clearColorOverrides());
+	}, []);
 
 	return (
 		<Container onClick={clearHighlightedIndex}>

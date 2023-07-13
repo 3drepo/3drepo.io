@@ -112,6 +112,12 @@ export type Group = {
 	rules?: IGroupRule[],
 };
 
+export type V4GroupObjects = {
+	account:string,
+	model: string,
+	shared_ids: string[],
+};
+
 export enum ViewpointGroupOverrideType {
 	COLORED,
 	HIDDEN,
@@ -143,3 +149,11 @@ export type Viewpoint = {
 };
 
 export type IGroupSettingsForm = GroupOverride & { group: Group };
+
+type MeshIdColorDict = Record<string, string>;
+type MeshIdTransparencyDict = Record<string, number>;
+
+export type OverridesDicts = {
+	overrides: MeshIdColorDict,
+	transparencies: MeshIdTransparencyDict
+};
