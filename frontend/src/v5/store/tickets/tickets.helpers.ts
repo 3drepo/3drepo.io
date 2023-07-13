@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { camelCase, isEmpty, isEqual, mapKeys } from 'lodash';
+import { camelCase, isEmpty, isEqual, isObject, mapKeys } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
@@ -261,3 +261,25 @@ export const templateAlreadyFetched = (template: ITemplate) => {
 };
 
 export const getPropertiesInCamelCase = (properties) => mapKeys(properties, (_, key) => camelCase(key));
+
+const fillEmptyOverrides = (values: Partial<ITicket>) => {
+	Object.values(values).forEach((value) => {
+		if (isObject(value) && 'state' in value) {
+			const viewValue: Viewpoint | undefined = value;
+
+			viewValue.state ||= {} as any;
+			viewValue.state.colored ||= [];
+			viewValue.state.hidden ||= [];
+		}
+	});
+};
+
+export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
+	if (values.properties) {
+		fillEmptyOverrides(values.properties);
+	}
+
+	if (values.modules) {
+		Object.values(values.modules).forEach(fillEmptyOverrides);
+	}
+};

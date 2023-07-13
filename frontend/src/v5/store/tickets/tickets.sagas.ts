@@ -36,10 +36,9 @@ import {
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
-import { ITicket, Viewpoint, ViewpointState } from './tickets.types';
-import { selectTemplateById, selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
+import { ITicket, ViewpointState } from './tickets.types';
+import { selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
-import { selectSelectedTicket } from './card/ticketsCard.selectors';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsAction) {
 	try {
@@ -238,37 +237,7 @@ export function* fetchTicketGroups({ teamspace, projectId, modelId, ticketId }: 
 	}
 }
 
-const fillEmptyOverrides = (values: Partial<ITicket>, propertiesDefinitions) => {
-	Object.keys(values).forEach((key) => {
-		const definition = propertiesDefinitions.find((def) => def.name === key);
-		if (definition?.type === 'view') {
-			const viewValue:Viewpoint | undefined = values[key];
-
-			viewValue.state ||= {} as any;
-			viewValue.state.colored ||= [];
-			viewValue.state.hidden ||= [];
-		}
-	});
-};
-
-const fillOverridesIfEmpty = (values: Partial<ITicket>, template) => {
-	if (values.properties) {
-		fillEmptyOverrides(values.properties, template.properties);
-	}
-
-	if (values.modules) {
-		template.modules.forEach(((module) => {
-			fillEmptyOverrides(values.modules[module.name], module.properties);
-		}));
-	}
-};
-
 export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, ticket }: UpsertTicketAndFetchGroupsAction) {
-	const selectedTicket = yield select(selectSelectedTicket);
-	if (selectedTicket) {
-		const template = yield select(selectTemplateById, modelId, selectedTicket.type);
-		fillOverridesIfEmpty(ticket, template);
-	}
 	yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
 	yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id));
 }

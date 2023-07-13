@@ -17,6 +17,7 @@
 /* eslint-disable implicit-arrow-linebreak */
 
 import { EditableTicket, Group, ITicket } from '@/v5/store/tickets/tickets.types';
+import { fillOverridesIfEmpty } from '@/v5/store/tickets/tickets.helpers';
 import { subscribeToRoomEvent } from './realtime.service';
 import { TicketsActionsDispatchers } from '../actionsDispatchers';
 
@@ -25,7 +26,10 @@ export const enableRealtimeContainerUpdateTicket = (teamspace: string, project: 
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
 		'containerUpdateTicket',
-		(ticket: Partial<EditableTicket>) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket),
+		(ticket: Partial<EditableTicket>) => {
+			fillOverridesIfEmpty(ticket);
+			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket);
+		},
 	)
 );
 
@@ -50,7 +54,10 @@ export const enableRealtimeFederationUpdateTicket = (teamspace: string, project:
 	subscribeToRoomEvent(
 		{ teamspace, project, model: federationId },
 		'federationUpdateTicket',
-		(ticket: Partial<EditableTicket>) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, federationId, ticket),
+		(ticket: Partial<EditableTicket>) => {
+			fillOverridesIfEmpty(ticket);
+			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, federationId, ticket);
+		},
 	)
 );
 
