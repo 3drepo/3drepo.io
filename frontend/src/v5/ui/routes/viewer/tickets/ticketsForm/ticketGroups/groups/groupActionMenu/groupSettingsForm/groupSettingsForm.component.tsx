@@ -36,6 +36,7 @@ import { useSelector } from 'react-redux';
 import { selectSelectedNodes } from '@/v4/modules/tree/tree.selectors';
 import { convertToV4GroupNodes, convertToV5GroupNodes, meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
 import { getRandomSuggestedColor } from '@controls/inputs/colorPicker/colorPicker.helpers';
+import { Gap } from '@controls/gap';
 import { hexToArray } from '@/v4/helpers/colors';
 import { getMeshIDsByQuery } from '@/v4/services/api';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
@@ -63,6 +64,8 @@ import {
 import { GroupRulesForm } from '../../groupRulesForm/groupRulesForm.component';
 import { ChipRule } from '../../groupRulesForm/chipRule/chipRule.component';
 import { NewCollectionForm } from '../newCollectionForm/newCollectionForm.component';
+import { RulesOptionsMenu } from './rulesOptionsMenu/rulesOptionsMenu.component';
+import { RulesField } from './rulesField/ruelsField.component';
 
 type GroupSettingsFormProps = {
 	value?: IGroupSettingsForm,
@@ -75,6 +78,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const [isSmart, setIsSmart] = useState(true);
 	const [newPrefix, setNewPrefix] = useState([]);
 	const [inputObjects, setInputObjects] = useState([]);
+	const [isPastingRules, setIsPastingRules] = useState(false);
 	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
 	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
 
@@ -131,6 +135,11 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		setValue('prefix', collection, { shouldDirty: true });
 	};
 
+	const handlePasteRules = (pastedRules) => {
+		setIsPastingRules(false);
+		append(pastedRules);
+	};
+
 	useEffect(() => {
 		// When no value is passed then the group is a new group
 		if (!value) {
@@ -149,6 +158,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		formData.reset(newValue);
 		setIsSmart(!!value?.group?.rules?.length);
 		setInputObjects(convertToV4GroupNodes(value?.group?.objects));
+		setIsPastingRules(false);
 	}, [value]);
 
 	return (
@@ -303,6 +313,9 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								)}
 							</Subheading>
 							<FormRulesBox>
+								<RulesOptionsMenu value={rules} onPaste={() => setIsPastingRules(true)} onClear={() => remove()} />
+								{isPastingRules && (<RulesField onSubmit={handlePasteRules} onClose={() => setIsPastingRules(false)} />)}
+								{isPastingRules && rules.length > 0 && (<Gap $height="5px" />)}
 								<Rules>
 									{rules.map(({ id, ...ruleValue }, i) => (
 										<ChipRule
@@ -313,7 +326,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 											disabled={!isAdmin}
 										/>
 									))}
-									{!rules.length && (
+									{!rules.length && !isPastingRules && (
 										<EmptyCardMessage>
 											<FormattedMessage
 												id="tickets.groups.newGroupForm.rules.empty"

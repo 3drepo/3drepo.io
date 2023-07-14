@@ -23,7 +23,7 @@ import { useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { SubmitButton } from '@controls/submitButton';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { GroupRulesSchema } from '@/v5/validation/groupSchemes/groupSchemes';
+import { GroupRuleSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { selectMetaKeys } from '@/v4/modules/model';
 import { useSelector } from 'react-redux';
 import { Autocomplete, TextField } from '@mui/material';
@@ -50,7 +50,7 @@ export const GroupRulesForm = ({ onSave, rule }: IGroupRules) => {
 	const formData = useForm<IRuleForm>({
 		defaultValues: rule ? prepareRuleForForm(rule) : DEFAULT_VALUES,
 		mode: 'all',
-		resolver: yupResolver(GroupRulesSchema),
+		resolver: yupResolver(GroupRuleSchema),
 	});
 
 	const { formState: { isValid, isDirty } } = formData;
