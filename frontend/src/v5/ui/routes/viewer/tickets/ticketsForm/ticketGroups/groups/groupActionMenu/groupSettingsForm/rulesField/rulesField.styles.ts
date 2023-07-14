@@ -15,10 +15,41 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Button as ButtonBase } from '@controls/button';
+import { FormTextField } from '@controls/inputs/formInputs.component';
 import styled from 'styled-components';
+import CloseIconBase from '@assets/icons/controls/clear_circle.svg';
 
-export const Float = styled.div`
-	float: right;
-	margin-top: -7px;
-	margin-right: -10px;
+export const TextField = styled(FormTextField)`
+	margin: 0;
+	padding-right: 7px;
+
+	input {
+		padding-right: 0;
+	}
+`;
+
+export const Container = styled.div`
+    display: flex;
+    align-items: center;
+    width: 342px;
+	margin-bottom: 10px;
+`;
+
+export const Button = styled(ButtonBase).attrs({
+	color: 'primary',
+	variant: 'contained'
+})`
+	height: 26px;
+	margin: 0 0 0 8px;
+	width: fit-content;
+`;
+
+export const CloseIcon = styled(CloseIconBase)`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	height: 15px;
+
+	&:hover {
+		cursor: pointer;
+	}
 `;

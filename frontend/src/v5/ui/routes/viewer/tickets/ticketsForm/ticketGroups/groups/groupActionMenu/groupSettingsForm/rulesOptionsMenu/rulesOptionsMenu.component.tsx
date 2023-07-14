@@ -19,54 +19,27 @@ import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { FormattedMessage } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
-import { GroupRuleSchema } from '@/v5/validation/groupSchemes/groupSchemes';
-import * as Yup from 'yup';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { formatMessage } from '@/v5/services/intl';
 import { Float } from './rulesOptionsMenu.styles';
 import { EllipsisMenuItemDelete } from '../../../../../properties/ticketImageContent/ticketImageAction/ticketImageAction.styles';
-import { prepareRuleForForm } from '../../../groupRulesForm/groupRulesForm.helpers';
 
-export const RulesOptionsMenu = ({ value: rules, onClear, onPaste }) => {
-	const handlePaste = async () => {
-		try {
-			const [clipboardItem] = await (navigator.clipboard as unknown as any).read();
-			const blob = await clipboardItem.getType('text/plain');
-			const newRules = JSON.parse(await blob.text());
-
-			const sanitizedRules = newRules.map(({ id, ...rest }) => rest);
-			Yup.array(GroupRuleSchema).min(1).validateSync(sanitizedRules.map(prepareRuleForForm));
-			onPaste(sanitizedRules);
-		} catch (error) {
-			DialogsActionsDispatchers.open('alert', {
-				currentActions: formatMessage({
-					id: 'tickets.groups.newGroupForm.rules.options.error',
-					defaultMessage: 'trying to paste the filters',
-				}),
-				error,
-			});
-		}
-	};
-
-	return (
-		<Float>
-			<EllipsisMenu>
-				<CopyToClipboard text={JSON.stringify(rules)}>
-					<EllipsisMenuItem
-						title={(<FormattedMessage id="tickets.groups.newGroupForm.rules.options.copy" defaultMessage="Copy filters" />)}
-						hidden={!rules.length}
-					/>
-				</CopyToClipboard>
+export const RulesOptionsMenu = ({ value: rules, onClear, onPaste }) => (
+	<Float>
+		<EllipsisMenu>
+			<CopyToClipboard text={JSON.stringify(rules.map(({ id, ...rest }) => rest))}>
 				<EllipsisMenuItem
-					title={(<FormattedMessage id="tickets.groups.newGroupForm.rules.options.paste" defaultMessage="Paste filters" />)}
-					onClick={handlePaste}
-				/>
-				<EllipsisMenuItemDelete
-					title={(<FormattedMessage id="tickets.groups.newGroupForm.rules.options.clear" defaultMessage="Clear All" />)}
-					onClick={onClear}
+					title={(<FormattedMessage id="tickets.groups.newGroupForm.rules.options.copy" defaultMessage="Copy filters" />)}
 					hidden={!rules.length}
 				/>
-			</EllipsisMenu>
-		</Float>
-	);
-};
+			</CopyToClipboard>
+			<EllipsisMenuItem
+				title={(<FormattedMessage id="tickets.groups.newGroupForm.rules.options.paste" defaultMessage="Paste filters" />)}
+				onClick={onPaste}
+			/>
+			<EllipsisMenuItemDelete
+				title={(<FormattedMessage id="tickets.groups.newGroupForm.rules.options.clear" defaultMessage="Clear All" />)}
+				onClick={onClear}
+				hidden={!rules.length}
+			/>
+		</EllipsisMenu>
+	</Float>
+);
