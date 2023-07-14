@@ -90,15 +90,16 @@ export const selectClipNumber = createSelector(
 );
 
 export const selectColorOverrides = createSelector(
-	selectViewsOverrides, selectGroupsOverrides, selectSelectedFrameColors, selectTicketOverrides,
-		(viewsOverrides, groupsOverrides, sequenceFrameOverrides, ticketsOverrides ) =>
-		({...viewsOverrides,  ...groupsOverrides, ...sequenceFrameOverrides, ...ticketsOverrides})
+	selectViewsOverrides, selectGroupsOverrides, selectTicketOverrides, selectSelectedFrameColors,
+		(viewsOverrides, groupsOverrides, ticketsOverrides, sequenceFrameOverrides ) =>
+		({...viewsOverrides,  ...groupsOverrides, ...ticketsOverrides, ...sequenceFrameOverrides})
 );
 
+
 export const selectAllTransparencyOverrides = createSelector(
-	selectViewsTransparencies, selectGroupsTransparencies, selectSelectedFrameTransparencies, selectTicketTransparencies,
-		(viewsTransparencies, groupsTransparencies, sequenceTransparencies, ticketsTransparencies) =>
-		({...viewsTransparencies, ...groupsTransparencies, ...sequenceTransparencies, ...ticketsTransparencies})
+	selectViewsTransparencies, selectGroupsTransparencies, selectTicketTransparencies, selectSelectedFrameTransparencies,
+		(viewsTransparencies, groupsTransparencies, ticketsTransparencies, sequenceTransparencies) =>
+		({...viewsTransparencies, ...groupsTransparencies, ...ticketsTransparencies, ...sequenceTransparencies})
 );
 
 export const selectTransformations = createSelector(
