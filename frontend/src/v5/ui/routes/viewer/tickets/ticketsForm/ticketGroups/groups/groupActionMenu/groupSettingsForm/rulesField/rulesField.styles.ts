@@ -30,15 +30,15 @@ export const TextField = styled(FormTextField)`
 `;
 
 export const Container = styled.div`
-    display: flex;
-    align-items: center;
-    width: 342px;
+	display: flex;
+	align-items: center;
+	width: 342px;
 	margin-bottom: 10px;
 `;
 
 export const Button = styled(ButtonBase).attrs({
 	color: 'primary',
-	variant: 'contained'
+	variant: 'contained',
 })`
 	height: 26px;
 	margin: 0 0 0 8px;
@@ -48,8 +48,5 @@ export const Button = styled(ButtonBase).attrs({
 export const CloseIcon = styled(CloseIconBase)`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	height: 15px;
-
-	&:hover {
-		cursor: pointer;
-	}
+	cursor: pointer;
 `;

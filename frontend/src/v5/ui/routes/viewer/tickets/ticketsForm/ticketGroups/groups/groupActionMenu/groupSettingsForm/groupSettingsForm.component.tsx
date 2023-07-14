@@ -128,9 +128,9 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		setValue('prefix', collection, { shouldDirty: true });
 	};
 
-	const handlePasteRules = (rules) => {
+	const handlePasteRules = (pastedRules) => {
 		setIsPastingRules(false);
-		append(rules);
+		append(pastedRules);
 	};
 
 	useEffect(() => {
@@ -308,7 +308,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 							<FormRulesBox>
 								<RulesOptionsMenu value={rules} onPaste={() => setIsPastingRules(true)} onClear={() => remove()} />
 								{isPastingRules && (<RulesField onSubmit={handlePasteRules} onClose={() => setIsPastingRules(false)} />)}
-								{isPastingRules && rules.length > 0 && (<Gap $height='5px' />)}
+								{isPastingRules && rules.length > 0 && (<Gap $height="5px" />)}
 								<Rules>
 									{rules.map(({ id, ...ruleValue }, i) => (
 										<ChipRule

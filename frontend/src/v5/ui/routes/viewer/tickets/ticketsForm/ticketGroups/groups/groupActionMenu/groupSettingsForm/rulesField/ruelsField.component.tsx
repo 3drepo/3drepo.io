@@ -19,7 +19,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { GroupRuleSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import * as Yup from 'yup';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers'
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { InputAdornment } from '@mui/material';
@@ -91,7 +91,7 @@ export const RulesField = ({ onSubmit: onSave, onClose }) => {
 				InputProps={{
 					endAdornment: (
 						<InputAdornment position="end" onClick={onClose}>
-							<CloseIcon/>
+							<CloseIcon />
 						</InputAdornment>
 					),
 				}}
