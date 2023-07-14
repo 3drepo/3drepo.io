@@ -44,11 +44,137 @@ const testValidate = () => {
 				issueProperties: true,
 				defaultView: true,
 				defaultImage: false,
+				pin: true,
 			},
 			deprecated: true,
 			properties: undefined,
 			modules: undefined,
 		}, true],
+		['pin with a colour defined', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: { color: [50, 50, 50] },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, true],
+		['pin with a colour logic defined', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: { color: {
+					property: {
+						name: generateRandomString(),
+					},
+					mapping: [
+						{
+							default: [255, 255, 255],
+						},
+						{
+							value: generateRandomString(),
+							color: [50, 50, 50],
+						},
+						{
+							value: generateRandomString(),
+							color: [0, 0, 50],
+						},
+					],
+				} },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, true],
+		['pin with a colour logic defined but no default specified', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: { color: {
+					property: {
+						name: generateRandomString(),
+					},
+					mapping: [
+						{
+							value: generateRandomString(),
+							color: [50, 50, 50],
+						},
+						{
+							value: generateRandomString(),
+							color: [0, 0, 50],
+						},
+					],
+				} },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['pin with a colour logic defined but more than 1 default specified', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: { color: {
+					property: {
+						name: generateRandomString(),
+					},
+					mapping: [
+						{
+							default: [50, 50, 50],
+						},
+						{
+							default: [0, 0, 50],
+						},
+					],
+				} },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['pin with a colour logic defined (module property)', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: { color: {
+					property: {
+						name: generateRandomString(),
+						module: generateRandomString(),
+					},
+					mapping: [
+						{
+							default: [255, 255, 255],
+						},
+						{
+							value: generateRandomString(),
+							color: [50, 50, 50],
+						},
+						{
+							value: generateRandomString(),
+							color: [0, 0, 50],
+						},
+					],
+				} },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, true],
+
+		['pin with an invalid colour', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: { color: 'hi' },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['pin defined with empty object', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: { },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
 		['properties is an empty array', { name: generateRandomString(), code: generateRandomString(3), properties: [] }, true],
 		['properties is of the wrong type', { name: generateRandomString(), code: generateRandomString(3), properties: 'a' }, false],
 		['property name is used by a default property', { name: generateRandomString(), code: generateRandomString(3), properties: [defaultProperties[0]] }, false],

@@ -23,16 +23,36 @@ const {
 	presetModulesProperties,
 	propTypes } = require('./templates.constants');
 
+const { isArray, isString } = require('../../utils/helper/typeCheck');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { cloneDeep } = require('../../utils/helper/objects');
-const { isString } = require('../../utils/helper/typeCheck');
 const { propTypesToValidator } = require('./validators');
 
 const defaultFalse = stripWhen(Yup.boolean().default(false), (v) => !v);
+const nameSchema = types.strings.title.min(1);
+
+const pinColSchema = Yup.lazy((val) => {
+	if (isArray(val)) {
+		return types.color3Arr;
+	}
+	return Yup.object({
+		property: Yup.object({
+			name: nameSchema.required(),
+			module: nameSchema,
+		}),
+
+		mapping: Yup.array().of(Yup.object({
+			default: types.color3Arr,
+			value: Yup.mixed().when('default', (def, schema) => (def ? schema.strip() : schema.required())),
+			color: types.color3Arr.when('default', (def, schema) => (def ? schema.strip() : schema.required())),
+		})).test('Color mapping', 'Must contain default entry', (arr) => arr.filter((obj) => !!obj.default).length === 1),
+
+	});
+});
 
 const propSchema = Yup.object().shape({
-	name: types.strings.title.required().min(1),
+	name: nameSchema,
 	type: Yup.string().oneOf(Object.values(propTypes)).required(),
 	deprecated: defaultFalse,
 	required: defaultFalse,
@@ -58,6 +78,7 @@ const propSchema = Yup.object().shape({
 		}
 		return schema.strip();
 	}),
+	//	color: Yup.mixed().when('type', (val, schema) => (val === propTypes.COORDS ? pinColSchema : schema.strip())),
 
 	default: Yup.mixed().when(['type', 'values'], (type, values) => {
 		const res = propTypesToValidator(type);
@@ -99,7 +120,7 @@ const propertyArray = Yup.array().of(propSchema).default([]).test('Property name
 });
 
 const moduleSchema = Yup.object().shape({
-	name: types.strings.title.notOneOf(Object.values(presetModules)),
+	name: nameSchema.notOneOf(Object.values(presetModules)),
 	type: Yup.string().oneOf(Object.values(presetModules)),
 	deprecated: defaultFalse,
 	properties: propertyArray.when('type', (type, schema) => {
@@ -127,12 +148,12 @@ const configSchema = Yup.object().shape({
 	attachments: defaultFalse,
 	defaultView: defaultFalse,
 	defaultImage: Yup.boolean().when('defaultView', (defaultView, schema) => (defaultView ? schema.strip() : defaultFalse)),
-	pin: defaultFalse,
+	pin: Yup.lazy((val) => (val?.color ? Yup.object({ color: pinColSchema }) : defaultFalse)),
 }).default({});
 
 const defaultPropertyNames = defaultProperties.map(({ name }) => name);
 const schema = Yup.object().shape({
-	name: types.strings.title.required(),
+	name: nameSchema.required(),
 	code: Yup.string().length(3).required(),
 	config: configSchema,
 	deprecated: defaultFalse,
