@@ -39,6 +39,7 @@ import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_E
 import { ITicket, ViewpointState } from './tickets.types';
 import { selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
+import { getSanitizedSmartGroup } from './tickets.helpers';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsAction) {
 	try {
@@ -132,7 +133,7 @@ export function* fetchRiskCategories({ teamspace }: FetchRiskCategoriesAction) {
 
 export function* updateTicketGroup({ teamspace, projectId, modelId, ticketId, group, isFederation }: UpdateTicketGroupAction) {
 	try {
-		yield API.Tickets.updateTicketGroup(teamspace, projectId, modelId, ticketId, group._id, group, isFederation);
+		yield API.Tickets.updateTicketGroup(teamspace, projectId, modelId, ticketId, group._id, getSanitizedSmartGroup(group), isFederation);
 		yield put(TicketsActions.updateTicketGroupSuccess(group));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
