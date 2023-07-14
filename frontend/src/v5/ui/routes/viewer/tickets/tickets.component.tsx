@@ -37,7 +37,7 @@ import { ViewerParams } from '../../routes.constants';
 import { TicketContextComponent } from './ticket.context';
 
 export const Tickets = () => {
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const view = TicketsCardHooksSelectors.selectView();
 
@@ -58,13 +58,13 @@ export const Tickets = () => {
 			combineSubscriptions(
 				enableRealtimeFederationNewTicket(teamspace, project, containerOrFederation),
 				enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation),
-				enableRealtimeFederationUpdateTicketGroup(teamspace, project, containerOrFederation),
+				enableRealtimeFederationUpdateTicketGroup(teamspace, project, containerOrFederation, revision),
 			);
 		} else {
 			combineSubscriptions(
 				enableRealtimeContainerNewTicket(teamspace, project, containerOrFederation),
 				enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation),
-				enableRealtimeContainerUpdateTicketGroup(teamspace, project, containerOrFederation),
+				enableRealtimeContainerUpdateTicketGroup(teamspace, project, containerOrFederation, revision),
 			);
 		}
 	}, [containerOrFederation]);
