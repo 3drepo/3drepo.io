@@ -55,7 +55,7 @@ const OPERATOR_SYMBOL = {
 const formatValues = (operatorType: OperatorType, values) => {
 	if (operatorType === 'regex') return `/ ${values} /`;
 	if (operatorType === 'numberRange') return `[ ${values.join(' : ')} ]`;
-	return values.join(', ');
+	return values ? values.join(', ') : '';
 };
 
 export const formatOperationLabel = ({ field, operator, values }: IGroupRule) => {
