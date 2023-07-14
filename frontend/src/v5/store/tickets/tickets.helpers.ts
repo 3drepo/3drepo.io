@@ -187,7 +187,7 @@ const findOverrideWithEditedGroup = (values, oldValues, propertiesDefinitions) =
 	return overrideWithEditedGroup;
 };
 
-const getSanitizedSmartGroup = (group: Group) => {
+export const getSanitizedSmartGroup = (group) => {
 	if (group?.rules && group?.objects) {
 		const { objects, ...rest } = group;
 		return rest;
@@ -207,10 +207,10 @@ export const findEditedGroup = (values: Partial<ITicket>, ticket: ITicket, templ
 		});
 	}
 
-	return getSanitizedSmartGroup(overrideWithEditedGroup?.group as Group);
+	return overrideWithEditedGroup?.group;
 };
 
-const getSanitizedOverride = ({ group, ...rest }: GroupOverride) => ({ ...rest, group: (group as Group)?._id || group });
+const getSanitizedOverride = ({ group, ...rest }: GroupOverride) => ({ ...rest, group: getSanitizedSmartGroup((group as Group)?._id || group) });
 
 const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
 	if (!values) return;
@@ -221,16 +221,18 @@ const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
 			const viewValue:Viewpoint | undefined = values[key];
 			const oldValue:Viewpoint | undefined = oldValues?.[key];
 
+			if (!viewValue) return;
+
 			if (isResourceId(viewValue?.screenshot)) {
 				delete viewValue.screenshot;
 			}
 
-			if (viewValue && !viewValue.camera && oldValue?.camera) {
+			if (!viewValue.camera && oldValue?.camera) {
 				viewValue.camera = null;
 				viewValue.clippingPlanes = null;
 			}
 
-			if (viewValue && !viewValue.state && oldValue?.state) {
+			if (!viewValue.state && oldValue?.state) {
 				viewValue.state = null;
 			}
 

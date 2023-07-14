@@ -146,3 +146,8 @@ export const viewpointV5ToV4 = (viewpoint: Viewpoint) => {
 
 	return { viewpoint: v4Viewpoint };
 };
+
+export const meshObjectsToV5GroupNode = (objects) => objects.map((obj) => ({
+	container: obj.model,
+	_ids: obj.mesh_ids,
+}));

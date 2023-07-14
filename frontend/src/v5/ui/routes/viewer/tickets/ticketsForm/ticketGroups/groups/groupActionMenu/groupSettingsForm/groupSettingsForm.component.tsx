@@ -34,9 +34,12 @@ import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
 import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
 import { useSelector } from 'react-redux';
 import { selectSelectedNodes } from '@/v4/modules/tree/tree.selectors';
-import { convertToV4GroupNodes, convertToV5GroupNodes } from '@/v5/helpers/viewpoint.helpers';
+import { convertToV4GroupNodes, convertToV5GroupNodes, meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
 import { getRandomSuggestedColor } from '@controls/inputs/colorPicker/colorPicker.helpers';
 import { hexToArray } from '@/v4/helpers/colors';
+import { getMeshIDsByQuery } from '@/v4/services/api';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { useParams } from 'react-router-dom';
 import { GroupsCollectionSelect } from '../../addOrEditGroup/groupSettingsForm.component.tsx/groupsCollectionSelect/groupsCollectionSelect.component';
 import {
 	Buttons,
@@ -73,6 +76,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const [newPrefix, setNewPrefix] = useState([]);
 	const [inputObjects, setInputObjects] = useState([]);
 	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
+	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
 
 	const isNewGroup = !value;
 	const selectedNodes = useSelector(selectSelectedNodes);
@@ -106,10 +110,13 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		return (isDirty || objectsAreDifferent);
 	};
 
-	const onClickSubmit = (newValues:IGroupSettingsForm) => {
+	const onClickSubmit = async (newValues:IGroupSettingsForm) => {
 		if (!isSmart) {
 			delete newValues.group.rules;
 			newValues.group.objects = convertToV5GroupNodes(selectedNodes);
+		} else if (!isEqual(newValues.group?.rules, value?.group?.rules)) {
+			const { data } = await getMeshIDsByQuery(teamspace, containerOrFederation, newValues.group.rules, revision);
+			newValues.group.objects = meshObjectsToV5GroupNode(data);
 		}
 
 		if (!newValues.color) {

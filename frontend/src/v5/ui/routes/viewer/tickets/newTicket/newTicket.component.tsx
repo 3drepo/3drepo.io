@@ -22,8 +22,8 @@ import { CircularProgress } from '@mui/material';
 import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
 import { CardContainer, CardHeader, ArrowBack } from '@/v5/ui/components/viewer/cards/card.styles';
 import CloseIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
-import { NewTicket } from '@/v5/store/tickets/tickets.types';
-import { filterEmptyTicketValues, getEditableProperties, getDefaultTicket, modelIsFederation, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
+import { ITicket, NewTicket } from '@/v5/store/tickets/tickets.types';
+import { filterEmptyTicketValues, getEditableProperties, getDefaultTicket, modelIsFederation, templateAlreadyFetched, sanitizeViewVals } from '@/v5/store/tickets/tickets.helpers';
 import { getTicketValidator } from '@/v5/store/tickets/tickets.validators';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -65,6 +65,7 @@ export const NewTicketCard = () => {
 		const ticket = { type: template._id, ...vals };
 
 		const parsedTicket = filterEmptyTicketValues(ticket) as NewTicket;
+		sanitizeViewVals(ticket, { modules: {} } as ITicket, template);
 		TicketsActionsDispatchers.createTicket(
 			teamspace,
 			project,
