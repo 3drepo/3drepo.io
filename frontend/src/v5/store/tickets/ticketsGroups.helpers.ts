@@ -58,3 +58,11 @@ export const createPropertiesWithGroups = (properties, groups) => Object.keys(pr
 	return partialProps;
 }, {} as Properties);
 /* eslint-enable no-param-reassign */
+
+export const getSanitizedSmartGroup = (group) => {
+	if (group?.rules && group?.objects) {
+		const { objects, ...rest } = group;
+		return rest;
+	}
+	return group;
+};

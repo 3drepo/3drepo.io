@@ -39,7 +39,7 @@ import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_E
 import { ITicket, ViewpointState } from './tickets.types';
 import { selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
-import { getSanitizedSmartGroup } from './tickets.helpers';
+import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsAction) {
 	try {

@@ -28,6 +28,7 @@ import { useParams } from 'react-router-dom';
 import { getGroupHexColor } from '@/v4/helpers/colors';
 import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, OverridesDicts, V4GroupObjects, Viewpoint } from './tickets.types';
+import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 
 export const modelIsFederation = (modelId: string) => (
 	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
@@ -185,14 +186,6 @@ const findOverrideWithEditedGroup = (values, oldValues, propertiesDefinitions) =
 	});
 
 	return overrideWithEditedGroup;
-};
-
-export const getSanitizedSmartGroup = (group) => {
-	if (group?.rules && group?.objects) {
-		const { objects, ...rest } = group;
-		return rest;
-	}
-	return group;
 };
 
 export const findEditedGroup = (values: Partial<ITicket>, ticket: ITicket, template) => {
