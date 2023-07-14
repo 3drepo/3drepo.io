@@ -74,7 +74,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const [inputObjects, setInputObjects] = useState([]);
 	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
 
-	const isNewGroup = !value?.group?._id;
+	const isNewGroup = !value;
 	const selectedNodes = useSelector(selectSelectedNodes);
 
 	const formData = useForm<IGroupSettingsForm>({
