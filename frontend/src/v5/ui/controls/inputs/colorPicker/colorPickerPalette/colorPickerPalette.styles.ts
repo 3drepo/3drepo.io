@@ -45,7 +45,7 @@ export const ColorActionMenu = styled(ActionMenu).attrs({
 			horizontal: 'left',
 		},
 		sx: {
-			margin: '26px 0 0 20px',
+			margin: '71px 0 0 20px',
 		},
 	},
 })``;
