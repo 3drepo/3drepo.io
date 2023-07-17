@@ -54,9 +54,6 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 		const hasOverrides = TicketsCardHooksSelectors.selectTicketHasOverrides();
 
 		useEffect(() => {
-			console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
-			console.log(JSON.stringify({ hasOverrides }, null, '\t'));
-
 			if (hasOverrides) return;
 			setCollectionIsChecked(indexes, false);
 		}, [hasOverrides]);

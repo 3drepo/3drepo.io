@@ -25,9 +25,7 @@ import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
-import { getGroupHexColor } from '@/v4/helpers/colors';
-import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
-import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, OverridesDicts, V4GroupObjects, Viewpoint } from './tickets.types';
+import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 
 export const modelIsFederation = (modelId: string) => (
