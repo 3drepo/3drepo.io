@@ -26,7 +26,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
-import { dirtyValues, filterErrors, nullifyEmptyStrings, removeEmptyObjects } from '@/v5/helpers/form.helper';
+import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
 import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
@@ -73,7 +73,7 @@ export const TicketDetailsCard = () => {
 
 	const onBlurHandler = () => {
 		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
-		const validVals = removeEmptyObjects(nullifyEmptyStrings(filterErrors(values, formData.formState.errors)));
+		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, formData.formState.errors)));
 
 		const editedGroup = findEditedGroup(validVals, ticket, template);
 		if (editedGroup) {
