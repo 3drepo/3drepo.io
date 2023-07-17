@@ -38,7 +38,7 @@ import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/
 import { Display } from '@/v5/ui/themes/media';
 import { formatMessage } from '@/v5/services/intl';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
-import { Container, CollapseSideElementGroup } from './containersList.styles';
+import { Container, CollapseSideElementGroup, CircledNumber } from './containersList.styles';
 import { UploadFileForm } from '../uploadFileForm/uploadFileForm.component';
 import { SkeletonListItem } from './skeletonListItem';
 
@@ -76,7 +76,7 @@ export const ContainersList = ({
 	return (
 		<Container>
 			<DashboardListCollapse
-				title={<>{title} {!isListPending && `(${containers.length})`}</>}
+				title={<>{title} {!isListPending && <CircledNumber>{containers.length}</CircledNumber>}</>}
 				tooltipTitles={titleTooltips}
 				isLoading={areStatsPending}
 				sideElement={(
