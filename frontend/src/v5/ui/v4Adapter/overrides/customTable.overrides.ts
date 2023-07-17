@@ -28,6 +28,7 @@ export default css`
 	${CustomTableBody} {
 		position: relative;
 		height: auto;
+		background: transparent;
 
 		div {
 			position: relative;

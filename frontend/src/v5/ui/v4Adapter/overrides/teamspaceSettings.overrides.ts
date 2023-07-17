@@ -36,7 +36,7 @@ export const V5TeamspaceSettingsOverrides = styled.div<{ isAdmin: boolean }>`
 	${Panel} {
 		border: none;
 		box-shadow: none;
-		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		background-color: transparent;
 		height: unset;
 		${LoaderContainer} {
 			padding: 50px 0;
@@ -69,8 +69,9 @@ export const V5TeamspaceSettingsOverrides = styled.div<{ isAdmin: boolean }>`
 				margin-top: 0;
 				.MuiAutocomplete-inputRoot {
 					padding: 0;
+					background-color: transparent;
 					.MuiAutocomplete-tag {
-						background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+						background-color: ${({ theme }) => theme.palette.primary.contrast};
 						color: ${({ theme }) => theme.palette.secondary.main};
 						border-radius: 5px;
 						font-weight: 600;
