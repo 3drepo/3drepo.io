@@ -17,6 +17,8 @@
 
 const TeamspaceConstants = {};
 
+TeamspaceConstants.SSO_RESTRICTED = 'ssoRestricted';
+
 TeamspaceConstants.SUBSCRIPTION_TYPES = [
 	'enterprise',
 	'pilot',

@@ -19,6 +19,7 @@ const {
 	ADD_ONS,
 	DEFAULT_RISK_CATEGORIES,
 	DEFAULT_TOPIC_TYPES,
+	SSO_RESTRICTED,
 	SUBSCRIPTION_TYPES,
 } = require('./teamspaces.constants');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
@@ -44,6 +45,19 @@ TeamspaceSetting.getTeamspaceSetting = async (ts, projection) => {
 		throw templates.teamspaceNotFound;
 	}
 	return tsDoc;
+};
+
+TeamspaceSetting.setSSORestriction = async (ts, isRESTRICTED, whiteListDomains) => {
+	const query = { _id: ts };
+	const action = isRESTRICTED ? { $set: { [SSO_RESTRICTED]: whiteListDomains ?? true } }
+		: { $unset: { [SSO_RESTRICTED]: 1 } };
+
+	await teamspaceSettingUpdate(ts, query, action);
+};
+
+TeamspaceSetting.viewSSORestriction = async (ts) => {
+	const data = await TeamspaceSetting.getTeamspaceSetting(ts, { [SSO_RESTRICTED]: 1 });
+	return data[SSO_RESTRICTED] ?? false;
 };
 
 TeamspaceSetting.getSubscriptions = async (ts) => {
