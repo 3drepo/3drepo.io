@@ -20,7 +20,7 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { setSSORestriction, viewSSORestriction } = require(`${v5Path}/models/teamspaceSettings`);
+const { updateSSORestriction, getSSORestriction } = require(`${v5Path}/models/teamspaceSettings`);
 
 const determineMessage = (teamspace, restriction) => {
 	let message = 'is not enforcing any authentication restriction';
@@ -36,15 +36,15 @@ const run = async (teamspace, view, update, enabled, whiteList) => {
 		throw new Error('Inconsistent options: cannot define a whitelist whilst trying to disable SSO restriction.');
 	}
 
-	const currRes = await viewSSORestriction(teamspace);
+	const currRes = await getSSORestriction(teamspace);
 	logger.logInfo(determineMessage(teamspace, currRes));
 
 	if (!update) return;
 
 	const domainArr = whiteList ? whiteList.toLowerCase().split(',') : undefined;
-	await setSSORestriction(teamspace, enabled, domainArr);
+	await updateSSORestriction(teamspace, enabled, domainArr);
 
-	const updatedRes = await viewSSORestriction(teamspace);
+	const updatedRes = await getSSORestriction(teamspace);
 	logger.logInfo(`${teamspace} has been updated. ${determineMessage(teamspace, updatedRes)}`);
 };
 

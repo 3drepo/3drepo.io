@@ -47,7 +47,7 @@ TeamspaceSetting.getTeamspaceSetting = async (ts, projection) => {
 	return tsDoc;
 };
 
-TeamspaceSetting.setSSORestriction = async (ts, isRESTRICTED, whiteListDomains) => {
+TeamspaceSetting.updateSSORestriction = async (ts, isRESTRICTED, whiteListDomains) => {
 	const query = { _id: ts };
 	const action = isRESTRICTED ? { $set: { [SSO_RESTRICTED]: whiteListDomains ?? true } }
 		: { $unset: { [SSO_RESTRICTED]: 1 } };
@@ -55,7 +55,7 @@ TeamspaceSetting.setSSORestriction = async (ts, isRESTRICTED, whiteListDomains) 
 	await teamspaceSettingUpdate(ts, query, action);
 };
 
-TeamspaceSetting.viewSSORestriction = async (ts) => {
+TeamspaceSetting.getSSORestriction = async (ts) => {
 	const data = await TeamspaceSetting.getTeamspaceSetting(ts, { [SSO_RESTRICTED]: 1 });
 	return data[SSO_RESTRICTED] ?? false;
 };
