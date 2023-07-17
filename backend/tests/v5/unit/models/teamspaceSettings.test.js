@@ -15,12 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
+
 const { src } = require('../../helper/path');
 
 const { generateRandomString } = require('../../helper/services');
 
 const Teamspace = require(`${src}/models/teamspaceSettings`);
-const { ADD_ONS, DEFAULT_TOPIC_TYPES, DEFAULT_RISK_CATEGORIES } = require(`${src}/models/teamspaces.constants`);
+const { ADD_ONS, DEFAULT_TOPIC_TYPES, DEFAULT_RISK_CATEGORIES, SSO_RESTRICTED } = require(`${src}/models/teamspaces.constants`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
@@ -483,6 +485,66 @@ const testGetRiskCategories = () => {
 	});
 };
 
+const testGetSSORestriction = () => {
+	describe('Get SSO Restriction', () => {
+		test('Should return false if there is no restriction', async () => {
+			const teamspace = generateRandomString();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({});
+			await expect(Teamspace.getSSORestriction(teamspace)).resolves.toBe(false);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
+				{ _id: teamspace }, { [SSO_RESTRICTED]: 1 }, undefined);
+		});
+
+		test('Should return restrictions should it exist', async () => {
+			const teamspace = generateRandomString();
+			const restriction = generateRandomString();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ [SSO_RESTRICTED]: restriction });
+			await expect(Teamspace.getSSORestriction(teamspace)).resolves.toBe(restriction);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
+				{ _id: teamspace }, { [SSO_RESTRICTED]: 1 }, undefined);
+		});
+	});
+};
+
+const testUpdateSSORestriction = () => {
+	describe('Update SSO Restriction', () => {
+		test('Should unset the property if it\'s disabled', async () => {
+			const teamspace = generateRandomString();
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce();
+			await expect(Teamspace.updateSSORestriction(teamspace, false)).resolves.toBeUndefined();
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
+				{ _id: teamspace }, { $unset: { [SSO_RESTRICTED]: 1 } });
+		});
+
+		test('Should update the property to true if whitelist is not provided', async () => {
+			const teamspace = generateRandomString();
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce();
+			await expect(Teamspace.updateSSORestriction(teamspace, true)).resolves.toBeUndefined();
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
+				{ _id: teamspace }, { $set: { [SSO_RESTRICTED]: true } });
+		});
+
+		test('Should update the property to the whitelist array', async () => {
+			const teamspace = generateRandomString();
+			const whiteList = times(10, generateRandomString());
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce();
+			await expect(Teamspace.updateSSORestriction(teamspace, true, whiteList)).resolves.toBeUndefined();
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL,
+				{ _id: teamspace }, { $set: { [SSO_RESTRICTED]: whiteList } });
+		});
+	});
+};
+
 describe('models/teamspaceSettings', () => {
 	testTeamspaceAdmins();
 	testHasAccessToTeamspace();
@@ -500,4 +562,6 @@ describe('models/teamspaceSettings', () => {
 	testGetTeamspaceExpiredLicenses();
 	testGetRiskCategories();
 	testGrantAdminPermissionToUser();
+	testGetSSORestriction();
+	testUpdateSSORestriction();
 });
