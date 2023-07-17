@@ -29,7 +29,7 @@ export const Container = styled.div`
 	& > * {
 		grid-column-start: 1;
 		grid-row-start: 1;
-		border-radius: ${isV5() ? '3px' : '0'};
+		border-radius: ${isV5() ? '5px' : '0'};
 	}
 `;
 
