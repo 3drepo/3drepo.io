@@ -16,27 +16,37 @@
  */
 
 import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
+import { useContext } from 'react';
+import { isNumber } from 'lodash';
 import { SidebarContainer, ExpandButton, SidebarContent } from './sidebar.styles';
+import { SidebarForm } from '../../routes/dashboard/projects/containers/uploadFileForm/sidebarForm/sidebarForm.component';
+import { UploadsContext } from '../../routes/dashboard/projects/containers/uploadFileForm/uploadFileFormContext.component';
 
 interface ISidebar {
-	open: boolean;
-	onClose: () => void;
 	className?: string;
-	children: JSX.Element;
 }
 
 export const Sidebar = ({
 	className,
-	open,
-	onClose,
-	children,
-}: ISidebar): JSX.Element => (
-	<SidebarContainer className={className} open={open}>
-		<ExpandButton onClick={onClose}>
-			<ExpandIcon />
-		</ExpandButton>
-		<SidebarContent>
-			{children}
-		</SidebarContent>
-	</SidebarContainer>
-);
+}: ISidebar): JSX.Element => {
+	const { selectedUploadId, setSelectedUploadId, originalIndex, setOriginalIndex } = useContext(UploadsContext);
+	const onClose = () => {
+		setSelectedUploadId('');
+		setOriginalIndex(null);
+	};
+	return (
+		<SidebarContainer className={className} open={isNumber(originalIndex)}>
+			<ExpandButton onClick={onClose}>
+				<ExpandIcon />
+			</ExpandButton>
+			<SidebarContent>
+				{isNumber(originalIndex) && (
+					<SidebarForm
+						key={selectedUploadId}
+						revisionPrefix={`uploads.${originalIndex}`}
+					/>
+				)}
+			</SidebarContent>
+		</SidebarContainer>
+	);
+};

@@ -15,34 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
 import { ErrorTooltip } from '@controls/errorTooltip';
-import { useFormContext } from 'react-hook-form';
+import { useFormState } from 'react-hook-form';
+import { get } from 'lodash';
 import { FormTextField } from './uploadListItemRevisionTag.styles';
 
 type IUploadListItemRevision = {
-	isSelected?: boolean;
-	errorMessage?: string;
-	disabled?: boolean;
 	revisionPrefix: string;
+	isSelected?: boolean;
+	disabled?: boolean;
 };
 
 export const UploadListItemRevisionTag = ({
-	isSelected = false,
-	errorMessage,
-	disabled = false,
 	revisionPrefix,
+	isSelected = false,
+	disabled = false,
 	...props
 }: IUploadListItemRevision): JSX.Element => {
-	const { setError, getValues } = useFormContext();
 	const name = `${revisionPrefix}.revisionTag`;
-
-	const handleChange = () => {
-		const largeFilesizeMessage = filesizeTooLarge(getValues(`${revisionPrefix}.file`));
-		if (largeFilesizeMessage) {
-			setError(`${revisionPrefix}.file`, { type: 'custom', message: largeFilesizeMessage });
-		}
-	};
+	const { errors } = useFormState();
+	const errorMessage = get(errors, name)?.message;
+	const errorAdornment = errorMessage ? {
+		InputProps: {
+			startAdornment: (
+				<ErrorTooltip>
+					{errorMessage}
+				</ErrorTooltip>
+			),
+		},
+	} : {};
 
 	return (
 		<FormTextField
@@ -51,14 +52,7 @@ export const UploadListItemRevisionTag = ({
 			required
 			$selectedrow={isSelected}
 			name={name}
-			onChange={handleChange}
-			InputProps={{
-				startAdornment: !!errorMessage && (
-					<ErrorTooltip>
-						{errorMessage}
-					</ErrorTooltip>
-				),
-			}}
+			{...errorAdornment}
 			{...props}
 		/>
 	);

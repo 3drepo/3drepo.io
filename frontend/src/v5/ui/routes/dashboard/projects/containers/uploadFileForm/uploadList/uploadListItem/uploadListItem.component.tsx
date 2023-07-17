@@ -17,12 +17,8 @@
 
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
-import { useFormContext } from 'react-hook-form';
-import { UploadItemFields } from '@/v5/store/containers/containers.types';
-import filesize from 'filesize';
-import { get } from 'lodash';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { InputController } from '@controls/inputs/inputController.component';
+import { memo } from 'react';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
@@ -30,54 +26,50 @@ import { Button, Destination, RevisionTag } from './uploadListItem.styles';
 import { UploadProgress } from './uploadProgress/uploadProgress.component';
 
 type IUploadListItem = {
-	item: UploadItemFields;
-	revisionPrefix: string;
+	uploadId: string;
+	origIndex: number;
 	isSelected: boolean;
 	isUploading: boolean;
 	onClickEdit: () => void;
 	onClickDelete: () => void;
 };
 
-export const UploadListItem = ({
-	item,
-	revisionPrefix,
+export const UploadListItem = memo(({
+	uploadId,
+	origIndex,
 	onClickEdit,
 	onClickDelete,
 	isSelected,
 	isUploading,
 }: IUploadListItem): JSX.Element => {
-	const { control, formState: { errors: formErrors } } = useFormContext();
-	const errors = get(formErrors, revisionPrefix);
-
-	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(item.uploadId);
-
+	const revisionPrefix = `uploads.${origIndex}`;
+	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(uploadId);
 	return (
 		<UploadListItemRow
-			key={item.uploadId}
+			key={uploadId}
 			selected={isSelected}
 		>
-			<UploadListItemFileIcon extension={item.extension} />
+			<UploadListItemFileIcon revisionPrefix={revisionPrefix} />
 			<UploadListItemTitle
-				name={item.file.name}
-				filesize={filesize(item.file.size)}
-				isSelected={isSelected}
-				errorMessage={errors?.file?.message}
-			/>
-			<InputController
-				control={control}
-				name={`${revisionPrefix}.containerName`}
+				key={`${revisionPrefix}.title`}
 				revisionPrefix={revisionPrefix}
-				Input={Destination}
+				isSelected={isSelected}
+			/>
+			<Destination
+				key={`${revisionPrefix}.dest`}
+				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
+
 			/>
 			<RevisionTag
+				key={`${revisionPrefix}.revTag`}
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
 				isSelected={isSelected}
-				errorMessage={errors?.revisionTag?.message}
+				// errorMessage={errors?.revisionTag?.message}
 			/>
 			{isUploading
-				? (<UploadProgress uploadId={item.uploadId} errorMessage={uploadErrorMessage} />)
+				? (<UploadProgress uploadId={uploadId} errorMessage={uploadErrorMessage} />)
 				: (
 					<>
 						<Button variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit}>
@@ -90,4 +82,8 @@ export const UploadListItem = ({
 				)}
 		</UploadListItemRow>
 	);
-};
+}, (prevProps, nextProps) => {
+	const isSame = prevProps.isSelected === nextProps.isSelected && prevProps.origIndex === nextProps.origIndex
+		&& prevProps.isUploading === nextProps.isUploading;
+	return isSame;
+});

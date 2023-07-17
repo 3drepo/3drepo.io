@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { IContainer, UploadItemFields } from '@/v5/store/containers/containers.types';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useFormContext } from 'react-hook-form';
@@ -53,38 +53,29 @@ const EMPTY_OPTION = prepareSingleContainerData({
 const getFilteredContainersOptions = createFilterOptions<IContainer>({ trim: true });
 
 interface IUploadListItemDestination {
+	revisionPrefix: string;
 	disabled?: boolean;
 	className?: string;
-	revisionPrefix: string;
-	value?: string;
-	onChange?: (e, data) => void;
 }
-export const UploadListItemDestination = ({
+export const UploadListItemDestination = memo(({
+	revisionPrefix,
 	disabled = false,
 	className,
-	revisionPrefix,
-	value,
-	onChange,
 	...props
 }: IUploadListItemDestination): JSX.Element => {
 	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>('');
 	const [error, setError] = useState('');
-	const { getValues, setValue } = useFormContext();
+	const { getValues, setValue, register } = useFormContext();
+	const value = getValues(`${revisionPrefix}.containerName`);
 
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const projectId = ProjectsHooksSelectors.selectCurrentProject();
-	const federationsNames = FederationsHooksSelectors.selectFederations().map(({ name }) => name);
+	const federationsNames = FederationsHooksSelectors.selectFederationsNames();
 	const containers = ContainersHooksSelectors.selectContainers();
 
-	const processingContainersNames = containers
-		.filter((container) => !canUploadToBackend(container.status))
-		.map(({ name }) => name);
-
-	const containersNamesInModal = getValues('uploads')
-		.map(({ containerName }) => containerName)
-		.filter(({ containerName }) => containerName !== value)
-		.filter(Boolean);
+	const [processingContainersNames, setProcessingContainersNames] = useState([]);
+	const [containersNamesInModal, setContainerNamesInModal] = useState([]);
 
 	const takenContainerNames = [
 		...containersNamesInModal,
@@ -125,6 +116,7 @@ export const UploadListItemDestination = ({
 			// all the containers have been allocated already
 			return [];
 		}
+		// if (!options.length && !inputValue) return [];
 
 		// filter out currently selected value and containers with insufficient permissions
 		const filteredOptions = getFilteredContainersOptions(options, params)
@@ -188,8 +180,23 @@ export const UploadListItemDestination = ({
 		}
 	};
 
+	const onOpen = () => {
+		setContainerNamesInModal(
+			getValues('uploads')
+				.map(({ containerName }) => containerName)
+				.filter(({ containerName }) => containerName !== value)
+				.filter(Boolean),
+		);
+		setProcessingContainersNames(
+			containers
+				.filter((container) => !canUploadToBackend(container.status))
+				.map(({ name }) => name),
+		);
+	};
+
 	return (
 		<Autocomplete
+			{...register(`${revisionPrefix}.containerName`)}
 			value={containers.find((c) => c.name === value)}
 			className={className}
 			filterOptions={filterOptions}
@@ -199,6 +206,7 @@ export const UploadListItemDestination = ({
 			noOptionsText={isProjectAdmin ? NO_OPTIONS_TEXT_ADMIN : NO_OPTIONS_TEXT_NON_ADMIN}
 			onInputChange={handleInputChange}
 			onChange={onSetDestinationChange}
+			onOpen={onOpen}
 			options={containers}
 			renderOption={renderOption}
 			renderInput={({ InputProps, ...params }) => (
@@ -216,4 +224,4 @@ export const UploadListItemDestination = ({
 			{...props}
 		/>
 	);
-};
+}, (prev, next) => prev.revisionPrefix === next.revisionPrefix);

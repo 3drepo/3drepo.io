@@ -16,43 +16,80 @@
  */
 
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
+import { useCallback, useContext } from 'react';
+import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
+import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList/dashboardListHeaderLabel';
+import { FormattedMessage } from 'react-intl';
+import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { UploadListItem } from './uploadListItem/uploadListItem.component';
 import { Container } from './uploadList.styles';
+import { UploadsContext } from '../uploadFileFormContext.component';
+import { UploadsListHeader } from '../uploadFileForm.styles';
 
 type IUploadList = {
-	onClickEdit: (index) => void;
-	onClickDelete: (index) => void;
 	values: UploadItemFields[];
-	selectedIndex: number | null;
+	removeUploadById: (id) => void;
 	isUploading: boolean;
-	getOriginalIndex: (index: number) => number;
 };
-
+const DEFAULT_SORT_CONFIG = {
+	column: 'file',
+	direction: SortingDirection.ASCENDING,
+};
 export const UploadList = ({
 	values,
-	selectedIndex,
+	removeUploadById,
 	isUploading,
-	onClickEdit,
-	onClickDelete,
-	getOriginalIndex,
-}: IUploadList): JSX.Element => (
-	<Container>
-		{
-			values.map((item, index) => {
-				const originalIndex = getOriginalIndex(index);
-				const revisionPrefix = `uploads.${originalIndex}`;
-				return (
-					<UploadListItem
-						revisionPrefix={revisionPrefix}
-						key={item.uploadId}
-						item={item}
-						onClickEdit={() => onClickEdit(originalIndex)}
-						onClickDelete={() => onClickDelete(index)}
-						isSelected={index === selectedIndex}
-						isUploading={isUploading}
-					/>
-				);
-			})
-		}
-	</Container>
-);
+}: IUploadList): JSX.Element => {
+	const { selectedUploadId, setSelectedUploadId, setOriginalIndex } = useContext(UploadsContext);
+	const { sortedList, setSortConfig }: any = useOrderedList(values || [], DEFAULT_SORT_CONFIG);
+
+	const onClickEdit = useCallback((uploadId, origIndex) => {
+		setSelectedUploadId(uploadId);
+		setOriginalIndex(origIndex);
+	}, [values.length]);
+
+	const onDelete = useCallback((uploadId) => {
+		setSelectedUploadId('');
+		setOriginalIndex(null);
+		removeUploadById(uploadId);
+	}, [removeUploadById]);
+	return (
+		<Container>
+			<UploadsListHeader
+				onSortingChange={setSortConfig}
+				defaultSortConfig={DEFAULT_SORT_CONFIG}
+			>
+				<DashboardListHeaderLabel key="file" name="file.name" minWidth={122}>
+					<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
+				</DashboardListHeaderLabel>
+				<DashboardListHeaderLabel key="destination" width={352}>
+					<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
+				</DashboardListHeaderLabel>
+				<DashboardListHeaderLabel key="revisionName" width={isUploading ? 359 : 399}>
+					<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
+				</DashboardListHeaderLabel>
+				<DashboardListHeaderLabel key="progress" width={297} hidden={!isUploading}>
+					<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
+				</DashboardListHeaderLabel>
+			</UploadsListHeader>
+			{
+				sortedList.map(({ uploadId }) => {
+					const origIndex = values.findIndex(({ uploadId: unsortedId }) => unsortedId === uploadId);
+					const blahEdit = () => onClickEdit(uploadId, origIndex);
+					const blahDelete = () => onDelete(uploadId);
+					return (
+						<UploadListItem
+							key={uploadId}
+							origIndex={origIndex}
+							uploadId={uploadId}
+							onClickEdit={blahEdit}
+							onClickDelete={blahDelete}
+							isSelected={uploadId === selectedUploadId}
+							isUploading={isUploading}
+						/>
+					);
+				})
+			}
+		</Container>
+	);
+};

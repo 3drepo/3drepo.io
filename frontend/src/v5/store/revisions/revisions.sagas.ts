@@ -58,15 +58,15 @@ export function* setVoidStatus({ teamspace, projectId, containerId, revisionId, 
 
 export function* createRevision({ teamspace, projectId, uploadId, body }: CreateRevisionAction) {
 	let { containerId } = body;
-	const newContainer = {
-		name: body.containerName,
-		unit: body.containerUnit,
-		type: body.containerType,
-		code: body.containerCode || undefined,
-		desc: body.containerDesc || undefined,
-	};
 	if (!containerId) {
 		try {
+			const newContainer = {
+				name: body.containerName,
+				unit: body.containerUnit,
+				type: body.containerType,
+				code: body.containerCode,
+				desc: body.containerDesc,
+			};
 			containerId = yield API.Containers.createContainer(teamspace, projectId, newContainer);
 			yield put(ContainersActions.createContainerSuccess(projectId, { _id: containerId, ...newContainer }));
 		} catch (error) {
@@ -85,9 +85,11 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 		const formData = new FormData();
 		formData.append('file', body.file);
 		formData.append('tag', body.revisionTag);
-		formData.append('desc', body.revisionDesc || undefined);
 		formData.append('importAnimations', body.importAnimations.toString());
 		formData.append('timezone', body.timezone);
+		if (body.revisionDesc) {
+			formData.append('desc', body.revisionDesc);
+		}
 
 		yield put(RevisionsActions.setUploadComplete(uploadId, false));
 		const updateProgress = (val: number) => {

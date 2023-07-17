@@ -31,6 +31,11 @@ export const selectFederations = createSelector(
 	(state, currentProject) => state?.federationsByProject[currentProject] ?? [],
 );
 
+export const selectFederationsNames = createSelector(
+	selectFederations,
+	(federations) => federations.map(({ name }) => name),
+);
+
 export const selectFavouriteFederations = createSelector(
 	selectFederations,
 	(federations) => federations.filter(({ isFavourite }) => isFavourite),
