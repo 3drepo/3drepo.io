@@ -29,6 +29,8 @@ const Yup = require('yup');
 const { cloneDeep } = require('../../utils/helper/objects');
 const { propTypesToValidator } = require('./validators');
 
+const TemplateSchema = {};
+
 const defaultFalse = stripWhen(Yup.boolean().default(false), (v) => !v);
 const nameSchema = types.strings.title.min(1);
 
@@ -152,6 +154,44 @@ const configSchema = Yup.object().shape({
 }).default({});
 
 const defaultPropertyNames = defaultProperties.map(({ name }) => name);
+
+const pinMappingTest = (val, context) => {
+	const template = TemplateSchema.generateFullSchema(val);
+	const activeProperties = new Set();
+	const activeCondPins = [];
+
+	const prependPrefix = (prefix, name) => `${prefix ? `${prefix}.` : ''}${name}`;
+
+	const collectProperties = (props, prefix = '') => {
+		props.forEach((entry) => {
+			if (!entry.deprecated) {
+				if (entry.type === propTypes.COORDS && entry?.color?.property) {
+					activeCondPins.push({ name: prependPrefix(prefix, entry.name), property: entry.color.property });
+				}
+
+				activeProperties.add(prependPrefix(prefix, entry.name));
+			}
+		});
+	};
+
+	collectProperties(template.properties);
+	template.modules.forEach(({ name, type, deprecated, properties }) => {
+		if (!deprecated) {
+			collectProperties(properties, name ?? type);
+		}
+	});
+
+	const badPins = activeCondPins.flatMap(({ name, property }) => {
+		const prop = prependPrefix(property.module, property.name);
+
+		return (activeProperties.has(prop)) ? [] : name;
+	});
+
+	if (badPins.length) return context.createError({ message: `The following COORDS properties have conditional mapping referencing a deprecated/invalid property: ${badPins.join(',')}` });
+
+	return true;
+};
+
 const schema = Yup.object().shape({
 	name: nameSchema.required(),
 	code: Yup.string().length(3).required(),
@@ -172,9 +212,7 @@ const schema = Yup.object().shape({
 		return true;
 	}),
 
-}).noUnknown();
-
-const TemplateSchema = {};
+}).test(pinMappingTest).noUnknown();
 
 TemplateSchema.validate = (template) => schema.validateSync(template, { stripUnknown: true });
 

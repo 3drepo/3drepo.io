@@ -356,28 +356,95 @@ const testValidate = () => {
 		['Coord property with color mapping defined', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
-			properties: [{
-				name: generateRandomString(),
-				type: propTypes.COORDS,
-				color: {
-					property: {
-						name: generateRandomString(),
-					},
-					mapping: [
-						{
-							default: [100, 100, 100],
-						},
-						{
-							value: generateRandomString(),
-							color: [50, 50, 50],
-						},
-						{
-							value: generateRandomString(),
-							color: [0, 0, 50],
-						},
-					],
+			properties: [
+				{
+					name: 'refMap',
+					type: propTypes.TEXT,
 				},
-			}] }, true],
+				{
+					name: generateRandomString(),
+					type: propTypes.COORDS,
+					color: {
+						property: {
+							name: 'refMap',
+						},
+						mapping: [
+							{
+								default: [100, 100, 100],
+							},
+							{
+								value: generateRandomString(),
+								color: [50, 50, 50],
+							},
+							{
+								value: generateRandomString(),
+								color: [0, 0, 50],
+							},
+						],
+					},
+				}] }, true],
+		['Coord property with color mapping defined but referencing a deprecated field', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [
+				{
+					name: 'refMap',
+					type: propTypes.TEXT,
+					deprecated: true,
+				},
+				{
+					name: generateRandomString(),
+					type: propTypes.COORDS,
+					color: {
+						property: {
+							name: 'refMap',
+						},
+						mapping: [
+							{
+								default: [100, 100, 100],
+							},
+							{
+								value: generateRandomString(),
+								color: [50, 50, 50],
+							},
+							{
+								value: generateRandomString(),
+								color: [0, 0, 50],
+							},
+						],
+					},
+				}] }, false],
+		['Coord property with color mapping defined but referencing a non existent field', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [
+				{
+					name: generateRandomString(),
+					type: propTypes.TEXT,
+					deprecated: true,
+				},
+				{
+					name: generateRandomString(),
+					type: propTypes.COORDS,
+					color: {
+						property: {
+							name: generateRandomString(),
+						},
+						mapping: [
+							{
+								default: [100, 100, 100],
+							},
+							{
+								value: generateRandomString(),
+								color: [50, 50, 50],
+							},
+							{
+								value: generateRandomString(),
+								color: [0, 0, 50],
+							},
+						],
+					},
+				}] }, false],
 		['Coord property with color mapping defined (module property)', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
@@ -386,8 +453,8 @@ const testValidate = () => {
 				type: propTypes.COORDS,
 				color: {
 					property: {
-						name: generateRandomString(),
-						module: generateRandomString(),
+						name: 'refMap',
+						module: 'mod',
 					},
 					mapping: [
 						{
@@ -403,7 +470,15 @@ const testValidate = () => {
 						},
 					],
 				},
-			}] }, true],
+			}],
+			modules: [{
+				name: 'mod',
+				properties: [{
+					name: 'refMap',
+					type: propTypes.TEXT,
+				}],
+			}],
+		}, true],
 		['Coord property with color mapping defined (no default)', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
