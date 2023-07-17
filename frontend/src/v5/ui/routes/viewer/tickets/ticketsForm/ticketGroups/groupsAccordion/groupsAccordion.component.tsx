@@ -16,7 +16,6 @@
  */
 
 import { useContext, useEffect } from 'react';
-import GroupsIcon from '@mui/icons-material/GroupWork';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { ProjectsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -25,6 +24,8 @@ import { Accordion, NumberContainer, TitleContainer, Checkbox, NewGroupButton } 
 import { Groups } from '../groups/groups.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
 import { GroupState, getCollectionCheckboxState } from '../ticketGroupsContext.helper';
+import ColoredGroupsIcon from '@assets/icons/outlined/boxes-outlined.svg';
+import HiddenGroupsIcon from '@assets/icons/outlined/boxes_disabled-outlined.svg';
 
 type GroupsAccordionProps = { title: any };
 export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
@@ -39,6 +40,7 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 	const indexes = indexedOverrides.map(({ index }) => index);
 	const overridesCount = indexedOverrides.length;
 	const state = getCollectionState(indexes);
+	const isColored = groupType === 'colored';
 
 	const toggleCheckbox = (e) => {
 		e.stopPropagation();
@@ -50,7 +52,7 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 		editGroup(overridesCount); // Set the edit mode with a new index
 	};
 
-	if (groupType === 'colored') {
+	if (isColored) {
 		const hasOverrides = TicketsCardHooksSelectors.selectTicketHasOverrides();
 
 		useEffect(() => {
@@ -61,7 +63,7 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 
 	return (
 		<Accordion
-			Icon={GroupsIcon}
+			Icon={isColored ? ColoredGroupsIcon : HiddenGroupsIcon}
 			title={(
 				<TitleContainer>
 					{title}
@@ -70,6 +72,7 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 				</TitleContainer>
 			)}
 			$overridesCount={overridesCount}
+			$isHiddenGroups={!isColored}
 		>
 			{overridesCount ? (
 				<Groups indexedOverrides={indexedOverrides} />

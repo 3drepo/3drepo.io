@@ -22,8 +22,9 @@ import { Button } from '@controls/button';
 import { CollectionAccordion } from '../groups/groups.styles';
 import { Container as GroupItemContainer } from '../groups/groupItem/groupItem.styles';
 import { GroupToggle } from '../groupToggle/groupToggle.component';
+import { IconContainer } from '@controls/accordion/accordion.styles';
 
-export const Accordion = styled(AccordionBase)<{ $overridesCount?: number }>`
+export const Accordion = styled(AccordionBase)<{ $overridesCount?: number, $isHiddenGroups: boolean }>`
 	background: transparent;
 
 	&& {
@@ -75,6 +76,14 @@ export const Accordion = styled(AccordionBase)<{ $overridesCount?: number }>`
 			border-bottom-left-radius: 5px;
 		}
 	}
+
+	${({ $isHiddenGroups }) => $isHiddenGroups && css`
+		${IconContainer} svg {
+			width: 21px;
+			height: 21px;
+			margin: -3px -2px 0 -3px;
+		}
+	`}
 `;
 
 export const TitleContainer = styled.div`
