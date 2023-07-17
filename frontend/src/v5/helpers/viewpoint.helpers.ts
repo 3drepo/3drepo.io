@@ -165,7 +165,7 @@ export const toColorAndTransparencyDicts = (overrides: GroupOverride[]): Overrid
 			// eslint-disable-next-line no-param-reassign
 			dict.transparencies[id] = opacity;
 		}
-		return dict; 
+		return dict;
 	}, { overrides: {}, transparencies: {} } as OverridesDicts);
 
 	return overrides.reduce((acum, current) => {
