@@ -29,9 +29,7 @@ import { isEmpty } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
-import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
-import { useStore } from 'react-redux';
-import { ViewpointsActions } from '@/v4/modules/viewpoints/viewpoints.redux';
+import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { AdditionalProperties, TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
@@ -39,8 +37,6 @@ import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component
 import { TicketContext, TicketDetailsView } from '../ticket.context';
 
 export const TicketDetailsCard = () => {
-	const { dispatch } = useStore();
-
 	const { teamspace, project, containerOrFederation } = useParams();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
@@ -120,7 +116,7 @@ export const TicketDetailsCard = () => {
 		if (view === TicketDetailsView.Groups) return;
 		const defaultView = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 		if (isEmpty(defaultView)) return;
-		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(defaultView)));
+		goToView(defaultView);
 	}, [ticket.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state]);
 
 	return (

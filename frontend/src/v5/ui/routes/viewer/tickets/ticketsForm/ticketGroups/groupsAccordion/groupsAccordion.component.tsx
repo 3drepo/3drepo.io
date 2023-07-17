@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import GroupsIcon from '@mui/icons-material/GroupWork';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import { Accordion, NumberContainer, TitleContainer, Checkbox, NewGroupButton } from './groupsAccordion.styles';
 import { Groups } from '../groups/groups.component';
@@ -33,6 +33,7 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 		setCollectionIsChecked,
 		indexedOverrides,
 		editGroup,
+		groupType,
 	} = useContext(TicketGroupsContext);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const indexes = indexedOverrides.map(({ index }) => index);
@@ -48,6 +49,18 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 		e.stopPropagation();
 		editGroup(overridesCount); // Set the edit mode with a new index
 	};
+
+	if (groupType === 'colored') {
+		const hasOverrides = TicketsCardHooksSelectors.selectTicketHasOverrides();
+
+		useEffect(() => {
+			console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
+			console.log(JSON.stringify({ hasOverrides }, null, '\t'));
+
+			if (hasOverrides) return;
+			setCollectionIsChecked(indexes, false);
+		}, [hasOverrides]);
+	}
 
 	return (
 		<Accordion

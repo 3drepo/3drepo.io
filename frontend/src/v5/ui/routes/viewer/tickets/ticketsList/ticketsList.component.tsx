@@ -21,9 +21,7 @@ import { isEmpty, get } from 'lodash';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
-import { viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
-import { ViewpointsActions } from '@/v4/modules/viewpoints/viewpoints.redux';
-import { useDispatch } from 'react-redux';
+import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
 import { formatMessage } from '@/v5/services/intl';
@@ -42,7 +40,6 @@ type TicketsListProps = {
 };
 
 export const TicketsList = ({ tickets }: TicketsListProps) => {
-	const dispatch = useDispatch();
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const [availableTemplates, setAvailableTemplates] = useState([]);
 	const [showingCompleted, setShowingCompleted] = useState(false);
@@ -100,16 +97,13 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 			TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
 		}
 
-		const view = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
-		if (!(view?.camera)) return;
-
 		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
 	};
 
 	useEffect(() => {
 		const view = selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 		if (isEmpty(view)) return;
-		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(view)));
+		goToView(view);
 	}, [selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state]);
 
 	useEffect(() => {

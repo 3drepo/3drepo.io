@@ -14,13 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Viewpoint, Group, ViewpointGroupOverrideType, GroupOverride, ViewpointState } from '@/v5/store/tickets/tickets.types';
+import { Viewpoint, Group, ViewpointGroupOverrideType, GroupOverride, ViewpointState, V4GroupObjects, OverridesDicts } from '@/v5/store/tickets/tickets.types';
 import { getGroupHexColor, rgbaToHex } from '@/v4/helpers/colors';
 import { generateViewpoint as generateViewpointV4, getNodesIdsFromSharedIds, toSharedIds } from '@/v4/helpers/viewpoints';
 import { formatMessage } from '@/v5/services/intl';
 import { getState } from '@/v4/modules/store';
 import { isEmpty, isString } from 'lodash';
+import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors';
+import { TicketsCardActionsDispatchers } from '../services/actionsDispatchers';
 
 export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	container: object.model as string,
@@ -151,3 +153,35 @@ export const meshObjectsToV5GroupNode = (objects) => objects.map((obj) => ({
 	container: obj.model,
 	_ids: obj.mesh_ids,
 }));
+
+export const toColorAndTransparencyDicts = (overrides: GroupOverride[]): OverridesDicts => {
+	const toMeshDictionary = (objects: V4GroupObjects, color: string, opacity: number): OverridesDicts => objects.shared_ids.reduce((dict, id) => {
+		// eslint-disable-next-line no-param-reassign
+		dict.overrides[id] = color;
+		// eslint-disable-next-line no-param-reassign
+		dict.transparencies[id] = opacity;
+		return dict;
+	}, { overrides: {}, transparencies: {} } as OverridesDicts);
+
+	return overrides.reduce((acum, current) => {
+		const color = getGroupHexColor(current.color);
+		const { opacity } = current;
+		const v4Objects = convertToV4GroupNodes((current.group as Group)?.objects || []);
+
+		return v4Objects.reduce((dict, objects) => {
+			const overrideDict = toMeshDictionary(objects, color, opacity);
+
+			// eslint-disable-next-line no-param-reassign
+			dict.overrides = { ...dict.overrides, ...overrideDict.overrides };
+			// eslint-disable-next-line no-param-reassign
+			dict.transparencies = { ...dict.transparencies, ...overrideDict.transparencies };
+			return dict;
+		}, acum);
+	}, { overrides: {}, transparencies: {} } as OverridesDicts);
+};
+
+export const goToView = async (view) => {
+	await ViewerService.setViewpoint(view);
+	const overrides = toColorAndTransparencyDicts(view?.state?.colored || []);
+	TicketsCardActionsDispatchers.setOverrides(overrides);
+};

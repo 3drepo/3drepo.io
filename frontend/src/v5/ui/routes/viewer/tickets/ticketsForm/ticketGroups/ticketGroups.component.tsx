@@ -20,14 +20,13 @@ import { Group, GroupOverride, IGroupSettingsForm, Viewpoint, ViewpointState } f
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
-import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
+import { convertToV4GroupNodes, toColorAndTransparencyDicts } from '@/v5/helpers/viewpoint.helpers';
 import { cloneDeep, uniqBy, xor } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
 import { selectHiddenGeometryVisible } from '@/v4/modules/tree/tree.selectors';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { GroupsActions } from '@/v4/modules/groups';
-import { toColorAndTransparencyDicts } from '@/v5/store/tickets/tickets.helpers';
+import { ViewpointsActions } from '@/v4/modules/viewpoints';
 import { Container, Popper } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContextComponent } from './ticketGroupsContext.component';
@@ -67,7 +66,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const [editingOverride, setEditingOverride] = useState(NO_OVERRIDE_SELECTED);
 	const [highlightedOverride, setHighlightedOverride] = useState(NO_OVERRIDE_SELECTED);
 	const [selectedHiddenIndexes, setSelectedHiddenIndexes] = useState([]);
-	const [selectedColorIndexes, setSelectedColorIndexes] = useState([]);
+	const [selectedColorIndexes, setSelectedColorIndexes] = useState((value.state?.colored || []).map((_, index) => index));
 
 	const state: Partial<ViewpointState> = value.state || {};
 	const leftPanels = useSelector(selectLeftPanels);
@@ -140,7 +139,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	}, [selectedColorIndexes, value]);
 
 	useEffect(() => {
-		dispatch(GroupsActions.clearColorOverrides());
+		dispatch(ViewpointsActions.setSelectedViewpoint(null));
 	}, []);
 
 	return (

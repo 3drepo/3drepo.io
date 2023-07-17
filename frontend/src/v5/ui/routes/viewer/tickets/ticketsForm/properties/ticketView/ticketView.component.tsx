@@ -28,9 +28,7 @@ import { FormHelperText } from '@mui/material';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { formatMessage } from '@/v5/services/intl';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
-import { ViewpointsActions } from '@/v4/modules/viewpoints';
-import { getViewerState, viewpointV5ToV4 } from '@/v5/helpers/viewpoint.helpers';
-import { useDispatch } from 'react-redux';
+import { getViewerState, goToView } from '@/v5/helpers/viewpoint.helpers';
 import { TicketContext, TicketDetailsView } from '../../../ticket.context';
 import { TicketImageContent } from '../ticketImageContent/ticketImageContent.component';
 import { EllipsisMenuItemDelete } from '../ticketImageContent/ticketImageAction/ticketImageAction.styles';
@@ -61,8 +59,6 @@ export const TicketView = ({
 	...props
 }: ITicketView) => {
 	const context = useContext(TicketContext);
-	const dispatch = useDispatch();
-
 	const hasViewpoint = value?.camera || value?.clippingPlanes || value?.state;
 
 	// Viewpoint
@@ -71,10 +67,6 @@ export const TicketView = ({
 		const screenshot = stripBase64Prefix(await ViewerService.getScreenshot());
 		const state = await getViewerState();
 		onChange?.({ screenshot, ...currentCameraAndClipping, state });
-	};
-
-	const goToViewpoint = () => {
-		dispatch(ViewpointsActions.setActiveViewpoint(null, null, viewpointV5ToV4(value)));
 	};
 
 	const deleteViewpoint = () => onChange?.(null);
@@ -100,6 +92,10 @@ export const TicketView = ({
 
 	const onGoToCamera = async () => {
 		await ViewerService.setViewpoint(value);
+	};
+
+	const goToViewpoint = async () => {
+		await goToView(value);
 	};
 
 	// State
