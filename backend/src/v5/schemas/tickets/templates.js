@@ -33,9 +33,9 @@ const defaultFalse = stripWhen(Yup.boolean().default(false), (v) => !v);
 const nameSchema = types.strings.title.min(1);
 
 const pinColSchema = Yup.lazy((val) => {
-	if (isArray(val)) {
-		return types.color3Arr;
-	}
+	if (val === undefined) return Yup.mixed().strip();
+	if (isArray(val)) return types.color3Arr;
+
 	return Yup.object({
 		property: Yup.object({
 			name: nameSchema.required(),
@@ -78,7 +78,7 @@ const propSchema = Yup.object().shape({
 		}
 		return schema.strip();
 	}),
-	//	color: Yup.mixed().when('type', (val, schema) => (val === propTypes.COORDS ? pinColSchema : schema.strip())),
+	color: Yup.mixed().when('type', (val, schema) => (val === propTypes.COORDS ? pinColSchema : schema.strip())),
 
 	default: Yup.mixed().when(['type', 'values'], (type, values) => {
 		const res = propTypesToValidator(type);
