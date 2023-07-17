@@ -60,6 +60,10 @@ const cleanActivityDetail = (activity) => {
 		activity.parent = utils.uuidToString(activity.parent);
 	}
 
+	if (activity?.resources?.shared_ids) {
+		activity.resources.shared_ids = activity.resources.shared_ids.map(utils.uuidToString);
+	}
+
 	return activity;
 };
 
