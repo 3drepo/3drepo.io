@@ -817,7 +817,6 @@ export class ViewerService {
 	}
 
 	public resetMeshColor(account, model, meshIDs) {
-		UnityUtil.resetMeshOpacity(account, model, meshIDs);
 		UnityUtil.resetMeshColor(account, model, meshIDs);
 	}
 

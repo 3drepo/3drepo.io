@@ -156,15 +156,20 @@ export const meshObjectsToV5GroupNode = (objects) => objects.map((obj) => ({
 
 export const toColorAndTransparencyDicts = (overrides: GroupOverride[]): OverridesDicts => {
 	const toMeshDictionary = (objects: V4GroupObjects, color: string, opacity: number): OverridesDicts => objects.shared_ids.reduce((dict, id) => {
-		// eslint-disable-next-line no-param-reassign
-		dict.overrides[id] = color;
-		// eslint-disable-next-line no-param-reassign
-		dict.transparencies[id] = opacity;
-		return dict;
+		if (color !== undefined) {
+			// eslint-disable-next-line no-param-reassign
+			dict.overrides[id] = color;
+		}
+
+		if (opacity !== undefined) {
+			// eslint-disable-next-line no-param-reassign
+			dict.transparencies[id] = opacity;
+		}
+		return dict; 
 	}, { overrides: {}, transparencies: {} } as OverridesDicts);
 
 	return overrides.reduce((acum, current) => {
-		const color = getGroupHexColor(current.color);
+		const color = current.color ? getGroupHexColor(current.color) : undefined;
 		const { opacity } = current;
 		const v4Objects = convertToV4GroupNodes((current.group as Group)?.objects || []);
 

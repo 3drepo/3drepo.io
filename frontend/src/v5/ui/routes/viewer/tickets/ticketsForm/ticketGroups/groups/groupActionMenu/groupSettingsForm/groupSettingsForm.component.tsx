@@ -127,6 +127,10 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 			delete newValues.color;
 		}
 
+		if (newValues.color && newValues.opacity === 1) {
+			delete newValues.opacity;
+		}
+
 		onSubmit?.(omitBy(newValues, isUndefined) as IGroupSettingsForm);
 	};
 
