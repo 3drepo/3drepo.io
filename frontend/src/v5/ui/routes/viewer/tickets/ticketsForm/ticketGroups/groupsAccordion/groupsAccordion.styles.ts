@@ -18,11 +18,11 @@
 import styled, { css } from 'styled-components';
 import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
 import { CentredContainer } from '@controls/centredContainer';
+import { IconContainer } from '@controls/accordion/accordion.styles';
 import { Button } from '@controls/button';
 import { CollectionAccordion } from '../groups/groups.styles';
 import { Container as GroupItemContainer } from '../groups/groupItem/groupItem.styles';
 import { GroupToggle } from '../groupToggle/groupToggle.component';
-import { IconContainer } from '@controls/accordion/accordion.styles';
 
 export const Accordion = styled(AccordionBase)<{ $overridesCount?: number, $isHiddenGroups: boolean }>`
 	background: transparent;

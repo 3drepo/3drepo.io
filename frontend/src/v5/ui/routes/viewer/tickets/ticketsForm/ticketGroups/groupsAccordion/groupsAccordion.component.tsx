@@ -20,12 +20,12 @@ import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { ProjectsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
+import ColoredGroupsIcon from '@assets/icons/outlined/boxes-outlined.svg';
+import HiddenGroupsIcon from '@assets/icons/outlined/boxes_disabled-outlined.svg';
 import { Accordion, NumberContainer, TitleContainer, Checkbox, NewGroupButton } from './groupsAccordion.styles';
 import { Groups } from '../groups/groups.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
 import { GroupState, getCollectionCheckboxState } from '../ticketGroupsContext.helper';
-import ColoredGroupsIcon from '@assets/icons/outlined/boxes-outlined.svg';
-import HiddenGroupsIcon from '@assets/icons/outlined/boxes_disabled-outlined.svg';
 
 type GroupsAccordionProps = { title: any };
 export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
