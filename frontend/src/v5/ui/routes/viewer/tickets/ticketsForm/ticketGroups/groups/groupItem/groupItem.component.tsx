@@ -30,8 +30,9 @@ import { CircularProgress } from '@mui/material';
 import { isString } from 'lodash';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { convertToV4GroupNodes } from '@/v5/helpers/viewpoint.helpers';
-import { TreeActions } from '@/v4/modules/tree';
-import { useDispatch } from 'react-redux';
+import { TreeActions, selectGetNumNodesByMeshSharedIdsArray } from '@/v4/modules/tree';
+import { toSharedIds } from '@/v4/helpers/viewpoints';
+import { useDispatch, useSelector } from 'react-redux';
 import {
 	Buttons,
 	NameContainer,
@@ -59,6 +60,9 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const { group, color, opacity } = override;
 	const checked = getGroupIsChecked(index);
+
+	const sharedIds = toSharedIds(((group as Group).objects || []).flatMap(({ _ids }) => _ids));
+	const objectsCount = useSelector(selectGetNumNodesByMeshSharedIdsArray(sharedIds));
 
 	const preventPropagation = (e) => {
 		e.preventDefault();
@@ -116,10 +120,6 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 
 	if (isString(group)) return (<CircularProgress />);
 
-	const calculateObjectsCount = (objects: Group['objects'] = []) => objects
-		// eslint-disable-next-line no-underscore-dangle
-		.reduce((accum, object) => accum + object._ids.length, 0);
-
 	return (
 		<Container onClick={handleClick} $highlighted={isHighlightedIndex(index)}>
 			<Headline>
@@ -130,7 +130,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 						<FormattedMessage
 							id="groups.item.numberOfMeshes"
 							defaultMessage="{count, plural, =0 {No objects} one {# object} other {# objects}}"
-							values={{ count: calculateObjectsCount(group.objects) }}
+							values={{ count: objectsCount }}
 						/>
 					</GroupsCount>
 				</NameContainer>
