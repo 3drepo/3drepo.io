@@ -32,6 +32,7 @@ import {
 	CollectionAccordion,
 	GroupsContainer,
 	Name,
+	Buttons,
 } from './groups.styles';
 import { GroupToggle } from '../groupToggle/groupToggle.component';
 import { NameContainer } from './groupItem/groupItem.styles';
@@ -80,14 +81,16 @@ const GroupCollection = ({ overrides, prefix, level }) => {
 							<Name>{prefix}</Name>
 						</NameContainer>
 					</CollectionHeadline>
-					{isAdmin && (
-						<ErrorTicketButton onClick={handleDeleteCollection}>
-							<DeleteIcon />
-						</ErrorTicketButton>
-					)}
-					<PrimaryTicketButton onClick={isolateCollection}>
-						<ShowIcon />
-					</PrimaryTicketButton>
+					<Buttons>
+						{isAdmin && (
+							<ErrorTicketButton onClick={handleDeleteCollection}>
+								<DeleteIcon />
+							</ErrorTicketButton>
+						)}
+						<PrimaryTicketButton onClick={isolateCollection}>
+							<ShowIcon />
+						</PrimaryTicketButton>
+					</Buttons>
 					<GroupToggle
 						onClick={handleCheckboxClick}
 						{...getCollectionCheckboxState(state)}

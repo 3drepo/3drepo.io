@@ -19,6 +19,11 @@ import styled from 'styled-components';
 import { Accordion } from '@controls/accordion/accordion.component';
 import { GroupStyling, Headline, Name as NameBase } from './groupItem/groupItem.styles';
 
+export const Buttons = styled.div`
+	display: contents;
+	visibility: hidden;
+`;
+
 export const CollectionAccordion = styled(Accordion)`
 	&& {
 		border: 0;
@@ -37,6 +42,9 @@ export const CollectionAccordion = styled(Accordion)`
 			${GroupStyling}
 			flex-direction: row-reverse;
 			padding-left: 14px;
+			&:hover ${Buttons} {
+				visibility: visible;
+			}
 		}
 
 		.MuiAccordionSummary-expandIconWrapper {
