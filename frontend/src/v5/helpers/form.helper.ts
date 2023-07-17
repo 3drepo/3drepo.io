@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import _, { isEmpty, isEqual } from 'lodash';
+import _, { isArray, isEmpty, isEqual, isObject, isString } from 'lodash';
 
 export const dirtyValues = (
 	allValues: object,
@@ -60,7 +60,7 @@ export const isBasicValue = (value: any) => _.isNull(value) || !!(value?.toDate)
 export const nullifyEmptyObjects = (tree) => Object.fromEntries(
 	Object.keys(tree).map((key) => {
 		const value = tree[key];
-		if (isEmpty(value)) {
+		if (isEmpty(value) && !isArray(value) && (isString(value) || isObject(value))) {
 			return [key, null];
 		}
 
