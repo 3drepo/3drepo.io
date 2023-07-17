@@ -29,13 +29,9 @@ export const Container = styled.div`
 
 export const Content = styled(ProjectContent)`
 	margin-top: 32px;
-	padding: 9px 30px 41px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border-radius: 10px;
 	flex-direction: column;
 	display: flex;
 	justify-content: flex-start;
-	box-sizing: border-box;
 	min-height: unset;
 	height: fit-content;
 `;
