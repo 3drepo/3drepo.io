@@ -146,16 +146,16 @@ export const SidebarForm = ({
 
 			<FormNumberField
 				control={control}
-				name="quality"
-				label={formatMessage({ id: 'uploads.sidebar.quality', defaultMessage: 'Quality' })}
-				formError={errors.quality}
+				name="surfaceTolerance"
+				label={formatMessage({ id: 'uploads.sidebar.surfaceTolerance', defaultMessage: 'Surface Tolerance' })}
+				formError={errors.surfaceTolerance}
 			/>
 
 			<FormNumberField
 				control={control}
-				name="vertexCount"
-				label={formatMessage({ id: 'uploads.sidebar.vertexCount', defaultMessage: 'Vertex Count' })}
-				formError={errors.vertexCount}
+				name="normalTolerance"
+				label={formatMessage({ id: 'uploads.sidebar.normalTolerance', defaultMessage: 'Normal Tolerance' })}
+				formError={errors.normalTolerance}
 			/>
 
 			{isSpm && (

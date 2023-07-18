@@ -123,6 +123,6 @@ export const revisionDesc = Yup.lazy((value) => (
 			}))
 ));
 
-export const quality = Yup.number();
+export const surfaceTolerance = Yup.number();
 
-export const vertexCount = Yup.number().integer();
+export const normalTolerance = Yup.number().integer();
