@@ -17,7 +17,6 @@
 
 import { PureComponent } from 'react';
 
-import Checkbox from '@mui/material/Checkbox';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { formatShortDate } from '../../../../../../services/formatting/formatDate';
 import { ArrowsAltH } from '../../../../../components/fontAwesomeIcon';
@@ -29,7 +28,8 @@ import {
 	ModelData,
 	Name,
 	Revisions,
-	RevisionTooltip
+	RevisionTooltip,
+	Checkbox,
 } from './compareDiffItem.styles';
 
 interface IProps {
@@ -83,9 +83,10 @@ export class CompareDiffItem extends PureComponent<IProps, any> {
 	}
 
 	private renderCheckbox = () => {
-		const { onSelectionChange, selected } = this.props;
+		const { onSelectionChange, selected, revisions } = this.props;
 		return (
 			<Checkbox
+				$hidden={revisions.length < 2}
 				checked={selected}
 				color="primary"
 				disabled={!this.props.baseRevision._id}
@@ -95,15 +96,17 @@ export class CompareDiffItem extends PureComponent<IProps, any> {
 	}
 
 	private renderModelData = () => {
-		const { name, selected } = this.props;
+		const { name, selected, revisions } = this.props;
+		const canSelect = revisions.length > 1;
+		const disabled = !canSelect || !selected;
 		return (
 			<ModelData>
-				<Name disabled={!selected}>{name}</Name>
+				<Name disabled={disabled}>{name}</Name>
 				<Revisions>
 					<RevisionTooltip title={this.currentRevisionName} >
-						<CurrentRevision disabled={!selected}>{this.currentRevisionName}</CurrentRevision>
+						<CurrentRevision disabled={disabled}>{this.currentRevisionName}</CurrentRevision>
 					</RevisionTooltip>
-					{this.renderRevisionsSettings(this.props.selected && this.props.revisions.length > 1)}
+					{this.renderRevisionsSettings(selected && canSelect)}
 				</Revisions>
 			</ModelData>
 		);
