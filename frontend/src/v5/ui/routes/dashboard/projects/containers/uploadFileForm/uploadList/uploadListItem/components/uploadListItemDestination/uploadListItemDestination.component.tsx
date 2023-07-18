@@ -96,7 +96,7 @@ export const UploadListItemDestination = memo(({
 		try {
 			containerNameScheme.validateSync(
 				containerName,
-				{ context: { alreadyExistingNames: takenContainerNames } },
+				{ context: { alreadyExistingNames: federationsNames } },
 			);
 			setError('');
 			setNewOrExisting(containers.find(({ name }) => name === containerName) ? 'existing' : 'new');
@@ -116,7 +116,7 @@ export const UploadListItemDestination = memo(({
 			// all the containers have been allocated already
 			return [];
 		}
-		// if (!options.length && !inputValue) return [];
+		if (!options.length && !inputValue) return [];
 
 		// filter out currently selected value and containers with insufficient permissions
 		const filteredOptions = getFilteredContainersOptions(options, params)
