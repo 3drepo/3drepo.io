@@ -56,6 +56,7 @@ export const TicketView = ({
 	disabled,
 	helperText,
 	label,
+	required,
 	...props
 }: ITicketView) => {
 	const context = useContext(TicketContext);
@@ -113,7 +114,7 @@ export const TicketView = ({
 	const imgSrc = getImgSrc(value?.screenshot);
 
 	return (
-		<InputContainer disabled={disabled} {...props}>
+		<InputContainer disabled={disabled} required={required} {...props}>
 			<Header>
 				<Label>{label}</Label>
 				<HeaderSection>
@@ -147,7 +148,7 @@ export const TicketView = ({
 							onClick={goToViewpoint}
 						/>
 						<EllipsisMenuItemDelete
-							hidden={!hasViewpoint}
+							hidden={!hasViewpoint || required}
 							title={<FormattedMessage id="viewer.card.ticketView.action.deleteView" defaultMessage="Delete view" />}
 							onClick={deleteViewpoint}
 							disabled={disabled}
