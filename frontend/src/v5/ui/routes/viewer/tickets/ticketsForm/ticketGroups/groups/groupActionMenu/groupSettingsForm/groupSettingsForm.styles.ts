@@ -59,6 +59,13 @@ export const Subheading = styled.div`
 	justify-content: space-between;
 `;
 
+export const ObjectsCount = styled.span`
+	${({ theme }) => theme.typography.h5};
+	color: ${({ theme }) => theme.palette.base.main};
+	font-weight: ${FONT_WEIGHT.BOLD};
+	margin-left: 5px;
+`;
+
 export const NewCollectionActionMenu = styled(ActionMenu).attrs({
 	PopoverProps: {
 		anchorOrigin: {

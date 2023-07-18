@@ -60,6 +60,7 @@ import {
 	TriggerButton,
 	FormRulesBox,
 	NewCollectionActionMenu,
+	ObjectsCount,
 } from './groupSettingsForm.styles';
 import { GroupRulesForm } from '../../groupRulesForm/groupRulesForm.component';
 import { ChipRule } from '../../groupRulesForm/chipRule/chipRule.component';
@@ -293,7 +294,26 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 							/>
 						</Instruction>
 					)}
+					{isAdmin && !isSmart && (
+						<Instruction>
+							<FormattedMessage
+								id="ticketsGroupSettings.manualGroupInstruction"
+								defaultMessage="Select objects to include in this group"
+							/>
+						</Instruction>
+					)}
 				</FormBox>
+				{!isSmart && (
+					<Subheading>
+						<span>
+							<FormattedMessage
+								id="ticketsGroupSettings.subHeading.selectedObjects"
+								defaultMessage="Selected Objects"
+							/>
+							<ObjectsCount>{selectedNodes.length}</ObjectsCount>
+						</span>
+					</Subheading>
+				)}
 				{
 					isSmart && (
 						<>
