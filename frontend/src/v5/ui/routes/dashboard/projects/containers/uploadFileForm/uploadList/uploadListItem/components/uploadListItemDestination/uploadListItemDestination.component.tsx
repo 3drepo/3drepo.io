@@ -65,7 +65,7 @@ export const UploadListItemDestination = memo(({
 }: IUploadListItemDestination): JSX.Element => {
 	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>('');
 	const [error, setError] = useState('');
-	const { getValues, setValue, register } = useFormContext();
+	const { getValues, setValue, register, trigger } = useFormContext();
 	const value = getValues(`${revisionPrefix}.containerName`);
 
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
@@ -178,6 +178,7 @@ export const UploadListItemDestination = memo(({
 				newVal._id,
 			);
 		}
+		trigger(`${revisionPrefix}.containerName`);
 	};
 
 	const onOpen = () => {

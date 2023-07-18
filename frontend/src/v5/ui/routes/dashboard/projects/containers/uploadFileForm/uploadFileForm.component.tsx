@@ -96,14 +96,14 @@ export const UploadFileForm = ({
 	const [fileError, setFileError] = useState(false);
 
 	const formMethods = useForm<UploadFieldArray>({
-		mode: 'onBlur',
+		mode: 'onChange',
 		resolver: yupResolver(UploadsSchema),
 		context: { alreadyExistingTags, alreadyExistingNames: [] },
 	});
 	const {
 		control,
 		handleSubmit,
-		formState: { isValid, errors, touchedFields },
+		formState: { isValid },
 		getValues,
 		trigger,
 	} = formMethods;
@@ -129,13 +129,13 @@ export const UploadFileForm = ({
 
 	const addFilesToList = (files: File[], container?: IContainer): void => {
 		const filesToAppend = [];
-		for (const file of files) {
-			const extension = file.name.split('.').slice(-1)[0].toLocaleLowerCase();
+		for (const { name, size } of files) {
+			const extension = name.split('.').slice(-1)[0].toLocaleLowerCase();
 			filesToAppend.push({
-				file,
+				file: { name, size },
 				progress: 0,
 				extension,
-				revisionTag: parseFilename(file.name),
+				revisionTag: parseFilename(name),
 				containerName: container?.name || '',
 				containerId: container?._id || '',
 				containerUnit: container?.unit || 'mm',
@@ -259,7 +259,6 @@ export const UploadFileForm = ({
 								</DropZone>
 								<Button onClick={() => console.log(getValues())}> Test values!</Button>
 								<Button onClick={() => trigger()}> Trigger!</Button>
-								<Button onClick={() => console.log({ errors, isValid, touchedFields })}> Test errors!</Button>
 							</Padding>
 						</UploadsListScroll>
 						{!isUploading && <Sidebar />}

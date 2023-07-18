@@ -22,6 +22,7 @@ import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containe
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { MenuItem } from '@mui/material';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
+import { get } from 'lodash';
 import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
 import { extensionIsSpm } from '../uploadFileForm.helpers';
 
@@ -55,7 +56,7 @@ export const SidebarForm = ({
 	const [containerId, extension, containerName] = getValues([`${revisionPrefix}.containerId`, `${revisionPrefix}.extension`, `${revisionPrefix}.containerName`]);
 
 	const isNewContainer = containerName && !containerId;
-
+	const getError = (field: string) => get(errors, `${revisionPrefix}.${field}`);
 	return (
 		<>
 			<Title>
@@ -96,13 +97,13 @@ export const SidebarForm = ({
 				control={control}
 				name={`${revisionPrefix}.containerCode`}
 				label={formatMessage({ id: 'uploads.sidebar.containerCode', defaultMessage: 'Container Code' })}
-				// formError={errors.containerCode}
+				formError={getError('containerCode')}
 				disabled={!isNewContainer}
 			/>
 			<FormTextField
 				name={`${revisionPrefix}.containerDesc`}
 				label={formatMessage({ id: 'uploads.sidebar.containerDesc', defaultMessage: 'Container Description' })}
-				// formError={errors.containerDesc}
+				formError={getError('containerDesc')}
 				disabled={!isNewContainer}
 			/>
 
@@ -113,7 +114,7 @@ export const SidebarForm = ({
 			<FormTextField
 				name={`${revisionPrefix}.revisionDesc`}
 				label={formatMessage({ id: 'uploads.sidebar.revisionDesc', defaultMessage: 'Revision Description' })}
-				// formError={errors.revisionDesc}
+				formError={getError('revisionDesc')}
 			/>
 
 			{extensionIsSpm(extension) && (
