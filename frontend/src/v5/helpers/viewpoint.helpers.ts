@@ -18,9 +18,10 @@ import { Viewpoint, Group, ViewpointGroupOverrideType, GroupOverride, ViewpointS
 import { getGroupHexColor, rgbaToHex } from '@/v4/helpers/colors';
 import { generateViewpoint as generateViewpointV4, getNodesIdsFromSharedIds, toSharedIds } from '@/v4/helpers/viewpoints';
 import { formatMessage } from '@/v5/services/intl';
-import { getState } from '@/v4/modules/store';
+import { dispatch, getState } from '@/v4/modules/store';
 import { isEmpty, isString } from 'lodash';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { TreeActions } from '@/v4/modules/tree';
 import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors';
 import { TicketsCardActionsDispatchers } from '../services/actionsDispatchers';
 
@@ -185,8 +186,19 @@ export const toColorAndTransparencyDicts = (overrides: GroupOverride[]): Overrid
 	}, { overrides: {}, transparencies: {} } as OverridesDicts);
 };
 
-export const goToView = async (view) => {
+export const goToView = async (view: Viewpoint) => {
 	await ViewerService.setViewpoint(view);
 	const overrides = toColorAndTransparencyDicts(view?.state?.colored || []);
 	TicketsCardActionsDispatchers.setOverrides(overrides);
+
+	if (view?.state) {
+		dispatch(TreeActions.setHiddenGeometryVisible(!!view.state.showDefaultHidden));
+	}
+
+	const v4HiddenObjects = convertToV4GroupNodes(view.state?.hidden?.flatMap((hiddenOverride) => (hiddenOverride.group as Group)?.objects || []));
+	if (v4HiddenObjects.length) {
+		dispatch(TreeActions.hideNodesBySharedIds(v4HiddenObjects, true));
+	} else {
+		dispatch(TreeActions.showAllNodes());
+	}
 };
