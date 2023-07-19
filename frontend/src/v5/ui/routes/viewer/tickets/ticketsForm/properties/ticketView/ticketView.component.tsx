@@ -147,12 +147,6 @@ export const TicketView = ({
 							title={(<FormattedMessage id="viewer.card.ticketView.action.gotToView" defaultMessage="Go to view" />)}
 							onClick={goToViewpoint}
 						/>
-						<EllipsisMenuItemDelete
-							hidden={!hasViewpoint || required}
-							title={<FormattedMessage id="viewer.card.ticketView.action.deleteView" defaultMessage="Delete view" />}
-							onClick={deleteViewpoint}
-							disabled={disabled}
-						/>
 					</EllipsisMenu>
 				</HeaderSection>
 			</Header>
