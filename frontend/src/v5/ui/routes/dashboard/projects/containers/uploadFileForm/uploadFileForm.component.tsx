@@ -247,8 +247,6 @@ export const UploadFileForm = ({
 										/>
 									</HelpText>
 								</DropZone>
-								<Button onClick={() => console.log(getValues())}> Test values!</Button>
-								<Button onClick={() => trigger()}> Trigger!</Button>
 							</Padding>
 						</UploadsListScroll>
 						{!isUploading && <Sidebar />}

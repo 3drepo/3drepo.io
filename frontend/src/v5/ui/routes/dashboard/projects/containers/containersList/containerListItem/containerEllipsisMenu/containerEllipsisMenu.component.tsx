@@ -25,8 +25,8 @@ import { boardRoute, viewerRoute } from '@/v5/services/routing/routing';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { ContainersHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
-import { uploadToContainer } from '../../../uploadFileForm/uploadFileForm.helpers';
 import { ContainerSettingsModal } from '../../../containerSettingsModal/containerSettingsModal.component';
+import { uploadToContainer } from '../../../uploadFileForm/uploadToContainer.component';
 
 type ContainerEllipsisMenuProps = {
 	selected: boolean,

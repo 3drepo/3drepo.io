@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,6 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const extensionIsSpm = (extension: string) => extension === 'spm';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { getSupportedFileExtensions, uploadFile } from '@controls/fileUploader/uploadFile';
+import { UploadFileForm } from './uploadFileForm.component';
 
-export const reduceFileData = (files) => files.map(({ file: { name, size }, ...rest }) => ({ file: { name, size }, ...rest }));
+export const uploadToContainer = async (presetContainerId: string) => {
+	const onUpload = (presetFile) => {
+		DialogsActionsDispatchers.open(UploadFileForm, {
+			presetFile,
+			presetContainerId,
+		});
+	};
+	const file = await uploadFile(getSupportedFileExtensions());
+	onUpload(file);
+};
