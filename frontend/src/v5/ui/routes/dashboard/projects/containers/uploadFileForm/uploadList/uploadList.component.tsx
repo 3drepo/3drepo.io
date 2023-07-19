@@ -43,12 +43,12 @@ export const UploadList = ({
 	const { selectedUploadId, setSelectedUploadId, setOriginalIndex } = useContext(UploadsContext);
 	const { sortedList, setSortConfig }: any = useOrderedList(values || [], DEFAULT_SORT_CONFIG);
 
-	const onClickEdit = useCallback((uploadId, origIndex) => {
+	const memoizedEdit = useCallback((uploadId, origIndex) => {
 		setSelectedUploadId(uploadId);
 		setOriginalIndex(origIndex);
 	}, [values.length]);
 
-	const onDelete = useCallback((uploadId) => {
+	const memoizedDelete = useCallback((uploadId) => {
 		setSelectedUploadId('');
 		setOriginalIndex(null);
 		removeUploadById(uploadId);
@@ -74,17 +74,18 @@ export const UploadList = ({
 			</UploadsListHeader>
 			<ListContainer>
 				{
-					sortedList.map(({ uploadId }) => {
+					sortedList.map(({ uploadId, file, extension }) => {
 						const origIndex = values.findIndex(({ uploadId: unsortedId }) => unsortedId === uploadId);
-						const blahEdit = () => onClickEdit(uploadId, origIndex);
-						const blahDelete = () => onDelete(uploadId);
+						const onClickEdit = () => memoizedEdit(uploadId, origIndex);
+						const onClickDelete = () => memoizedDelete(uploadId);
 						return (
 							<UploadListItem
 								key={uploadId}
+								fileData={{ ...file, extension }}
 								origIndex={origIndex}
 								uploadId={uploadId}
-								onClickEdit={blahEdit}
-								onClickDelete={blahDelete}
+								onClickEdit={onClickEdit}
+								onClickDelete={onClickDelete}
 								isSelected={uploadId === selectedUploadId}
 								isUploading={isUploading}
 							/>

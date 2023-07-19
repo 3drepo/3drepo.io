@@ -15,19 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useFormContext } from 'react-hook-form';
 import { StyledIconButton } from './uploadListItemFileIcon.styles';
 
 type IUploadListItemFileIcon = {
-	revisionPrefix: string;
+	extension?: string;
 };
 
-export const UploadListItemFileIcon = ({ revisionPrefix }: IUploadListItemFileIcon): JSX.Element => {
-	const { getValues } = useFormContext();
-	const extension = getValues(`${revisionPrefix}.extension`);
-	return (
-		<StyledIconButton extension={extension}>
-			{extension[0] || '?'}
-		</StyledIconButton>
-	);
-};
+export const UploadListItemFileIcon = ({ extension }: IUploadListItemFileIcon): JSX.Element => (
+	<StyledIconButton extension={extension}>
+		{extension[0] || '?'}
+	</StyledIconButton>
+);

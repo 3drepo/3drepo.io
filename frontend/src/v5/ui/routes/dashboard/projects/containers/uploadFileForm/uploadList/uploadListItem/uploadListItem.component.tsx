@@ -30,6 +30,11 @@ type IUploadListItem = {
 	origIndex: number;
 	isSelected: boolean;
 	isUploading: boolean;
+	fileData: {
+		size: number;
+		name: string;
+		extension: string;
+	}
 	onClickEdit: () => void;
 	onClickDelete: () => void;
 };
@@ -40,6 +45,7 @@ export const UploadListItem = memo(({
 	onClickEdit,
 	onClickDelete,
 	isSelected,
+	fileData,
 	isUploading,
 }: IUploadListItem): JSX.Element => {
 	const revisionPrefix = `uploads.${origIndex}`;
@@ -49,11 +55,13 @@ export const UploadListItem = memo(({
 			key={uploadId}
 			selected={isSelected}
 		>
-			<UploadListItemFileIcon revisionPrefix={revisionPrefix} />
+			<UploadListItemFileIcon extension={fileData.extension} />
 			<UploadListItemTitle
 				key={`${revisionPrefix}.title`}
 				revisionPrefix={revisionPrefix}
 				isSelected={isSelected}
+				name={fileData.name}
+				size={fileData.size}
 			/>
 			<Destination
 				key={`${revisionPrefix}.dest`}
@@ -66,7 +74,6 @@ export const UploadListItem = memo(({
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
 				isSelected={isSelected}
-				// errorMessage={errors?.revisionTag?.message}
 			/>
 			{isUploading
 				? (<UploadProgress uploadId={uploadId} errorMessage={uploadErrorMessage} />)
