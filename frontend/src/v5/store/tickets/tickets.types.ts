@@ -135,7 +135,7 @@ export type GroupOverride = ColorAndOpacity & {
 };
 
 export type ViewpointState = {
-	showDefaultHidden: boolean;
+	showHidden: boolean;
 	hidden?: GroupOverride[],
 	colored?: GroupOverride[],
 	transformed?: GroupOverride[],

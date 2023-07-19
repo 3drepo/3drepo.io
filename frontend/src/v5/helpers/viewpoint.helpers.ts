@@ -77,7 +77,7 @@ const convertToV5GroupOverride = (group: any, type: ViewpointGroupOverrideType):
 export const getViewerState = async () => {
 	const { viewpoint: viewpointV4 } = await generateViewpointV4();
 
-	const state: ViewpointState = { showDefaultHidden: !viewpointV4.hideIfc };
+	const state: ViewpointState = { showHidden: !viewpointV4.hideIfc };
 
 	if (viewpointV4.override_groups?.length) {
 		state.colored = viewpointV4.override_groups.map((group) => convertToV5GroupOverride(group, ViewpointGroupOverrideType.COLORED));

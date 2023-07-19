@@ -111,7 +111,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const onSubmit = (overrideValue) => {
 		const newVal = cloneDeep(value || {});
 		if (!newVal.state) {
-			newVal.state = { showDefaultHidden: selectHiddenGeometryVisible(store.getState()) };
+			newVal.state = { showHidden: selectHiddenGeometryVisible(store.getState()) };
 		}
 
 		newVal.state[editingOverride.type] ||= [];
