@@ -24,19 +24,20 @@ import { hexToOpacity } from '../../themes/theme';
 
 export default css`
 	${Container} {
-		background-color: ${({ theme }) => hexToOpacity(theme.palette.secondary.main, 90)};
+		background-color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 90)};
 		border: 0;
 		border-radius: 25px;
 		bottom: 30px;
-		height: 40px;
+		height: 47px;
 		width: 554px;
 		justify-content: space-evenly;
 		padding: 2px 10px;
 
 		${StyledIconButton} {
-			svg path,
-			svg circle {
-				fill: unset;
+			color: ${({ theme }) => theme.palette.base.main};
+
+			&:disabled :is(path, circle) {
+				fill: ${({ theme }) => theme.palette.base.light};
 			}
 		}
 		/* stylelint-disable-next-line */
@@ -52,7 +53,7 @@ export default css`
 		}
 
 		${Submenu} ${StyledIconButton} {
-			background-color: ${({ theme }) => hexToOpacity(theme.palette.secondary.main, 90)};
+			background-color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 90)};
 			margin: 8px 0;
 		}
 	}
