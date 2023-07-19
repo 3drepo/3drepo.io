@@ -109,7 +109,6 @@ export const revisionTag = Yup.string()
 		}),
 		(tagValue, testContext) => (
 			!(testContext.options.context.alreadyExistingTags[testContext.path] || [])
-				.map(({ tag }) => tag)
 				.includes(tagValue)
 		),
 	);

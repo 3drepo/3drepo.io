@@ -155,7 +155,7 @@ export const UploadFileForm = ({
 	// 	return sortedList.findIndex((r) => r.uploadId === selectedUploadId);
 	// };
 
-	// const containersNamesInModal = getValues('uploads')?.map(({ containerName }) => containerName);
+	const containersNamesInModal = getValues('uploads')?.map(({ containerName }) => containerName);
 
 	const removeUploadById = (uploadId) => {
 		remove(fields.findIndex((field) => field.uploadId === uploadId));
@@ -178,17 +178,17 @@ export const UploadFileForm = ({
 	// 	setFileError(fields.some(({ file }) => filesizeTooLarge(file)));
 	// }, [fields.length]);
 
-	// useEffect(() => {
-	// 	const tags = {};
-	// 	getValues('uploads').forEach(({ containerId }, index) => {
-	// 		tags[`uploads[${index}].revisionTag`] = revisionsByContainer?.[containerId] || [];
-	// 	});
-	// 	setAlreadyExistingTags(tags);
-	// }, [JSON.stringify(revisionsByContainer), JSON.stringify(containersNamesInModal)]);
+	useEffect(() => {
+		const tags = {};
+		getValues('uploads').forEach(({ containerId }, index) => {
+			tags[`uploads[${index}].revisionTag`] = revisionsByContainer?.[containerId]?.map(({ tag }) => tag) || [];
+		});
+		setAlreadyExistingTags(tags);
+	}, [JSON.stringify(revisionsByContainer), JSON.stringify(containersNamesInModal)]);
 
-	// useEffect(() => {
-	// 	trigger();
-	// }, [/* alreadyExistingTags */]);
+	useEffect(() => {
+		trigger();
+	}, [alreadyExistingTags]);
 
 	useEffect(() => {
 		if (presetFile) addFilesToList([presetFile], presetContainer);
