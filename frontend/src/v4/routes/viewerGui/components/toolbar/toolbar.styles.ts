@@ -18,6 +18,9 @@
 import styled from 'styled-components';
 import OrthogonalIconSVG from '@assets/icons/v4/orthogonal.svg';
 import PerspectiveIconSVG from '@assets/icons/v4/perspective.svg';
+import V5OrthogonalOutlined from '@assets/icons/outlined/orthogonal-outlined.svg';
+import V5PerspectiveOutlined from '@assets/icons/outlined/perspective-outlined.svg';
+import { isV5 } from '@/v4/helpers/isV5';
 import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
 
@@ -98,15 +101,17 @@ export const ToolbarButton = styled(TooltipButton)`
 	}
 ` as any;
 
-export const Icon = styled.img`
+export const V4Icon = (svg) => styled.img.attrs({
+	src: svg,
+})``;
+
+export const OrthogonalIcon = styled(isV5() ? V5OrthogonalOutlined : V4Icon(OrthogonalIconSVG))`
+	max-height: 20px;
+	max-width: 20px;
+
+`;
+
+export const PerspectiveIcon = styled(isV5() ? V5PerspectiveOutlined : V4Icon(PerspectiveIconSVG))`
 	max-height: 20px;
 	max-width: 20px;
 `;
-
-export const OrthogonalIcon = styled(Icon).attrs({
-	src: OrthogonalIconSVG,
-})``;
-
-export const PerspectiveIcon = styled(Icon).attrs({
-	src: PerspectiveIconSVG,
-})``;
