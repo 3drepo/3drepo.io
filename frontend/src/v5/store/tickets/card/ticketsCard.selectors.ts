@@ -62,6 +62,11 @@ export const selectSelectedTemplateId = createSelector(
 	(ticketCardState) => ticketCardState.selectedTemplateId,
 );
 
+export const selectTicketOverridesAreUnset = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.overrides === null,
+);
+
 export const selectTicketOverridesDict = createSelector(
 	selectTicketsCardDomain,
 	(ticketCardState) => ticketCardState.overrides || { overrides: {}, transparencies: {} },

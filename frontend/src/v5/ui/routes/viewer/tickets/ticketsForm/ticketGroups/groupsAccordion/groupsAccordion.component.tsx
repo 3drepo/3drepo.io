@@ -37,6 +37,7 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 		groupType,
 	} = useContext(TicketGroupsContext);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+	const overridesAreUnset = TicketsCardHooksSelectors.selectTicketOverridesAreUnset();
 	const indexes = indexedOverrides.map(({ index }) => index);
 	const overridesCount = indexedOverrides.length;
 	const state = getCollectionState(indexes);
@@ -52,14 +53,11 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 		editGroup(overridesCount); // Set the edit mode with a new index
 	};
 
-	if (isColored) {
-		const hasOverrides = TicketsCardHooksSelectors.selectTicketHasOverrides();
-
-		useEffect(() => {
-			if (hasOverrides) return;
+	useEffect(() => {
+		if (overridesAreUnset && isColored) {
 			setCollectionIsChecked(indexes, false);
-		}, [hasOverrides]);
-	}
+		}
+	}, [overridesAreUnset]);
 
 	return (
 		<Accordion
