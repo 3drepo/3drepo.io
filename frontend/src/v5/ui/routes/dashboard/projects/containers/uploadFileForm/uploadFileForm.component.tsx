@@ -38,7 +38,7 @@ import {
 import { getSupportedFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadList } from './uploadList/uploadList.component';
 import { UploadsContainer, DropZone, Modal, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
-import { extensionIsSpm } from './uploadFileForm.helpers';
+import { extensionIsSpm, reduceFileData } from './uploadFileForm.helpers';
 import { UploadsContextComponent } from './uploadFileFormContext.component';
 
 type UploadModalLabelTypes = {
@@ -129,13 +129,13 @@ export const UploadFileForm = ({
 
 	const addFilesToList = (files: File[], container?: IContainer): void => {
 		const filesToAppend = [];
-		for (const { name, size } of files) {
-			const extension = name.split('.').slice(-1)[0].toLocaleLowerCase();
+		for (const file of files) {
+			const extension = file.name.split('.').slice(-1)[0].toLocaleLowerCase();
 			filesToAppend.push({
-				file: { name, size },
+				file,
 				progress: 0,
 				extension,
-				revisionTag: parseFilename(name),
+				revisionTag: parseFilename(file.name),
 				containerName: container?.name || '',
 				containerId: container?._id || '',
 				containerUnit: container?.unit || 'mm',
@@ -172,7 +172,7 @@ export const UploadFileForm = ({
 				RevisionsActionsDispatchers.createRevision(teamspace, project, uploadId, revision);
 			});
 		}
-	}, []);
+	}, [fields]);
 
 	// useEffect(() => {
 	// 	setFileError(fields.some(({ file }) => filesizeTooLarge(file)));
@@ -212,7 +212,7 @@ export const UploadFileForm = ({
 							<Padding>
 								{!!fields.length && (
 									<UploadList
-										values={fields}
+										values={reduceFileData(fields)}
 										isUploading={isUploading}
 										removeUploadById={removeUploadById}
 									/>
