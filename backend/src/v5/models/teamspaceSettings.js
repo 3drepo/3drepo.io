@@ -137,7 +137,19 @@ TeamspaceSetting.getTeamspaceAdmins = async (teamspace) => {
 
 TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username) => {
 	const query = { user: username, 'roles.db': teamspace };
-	const userDoc = await teamspaceQuery(query, { _id: 1 });
+	const userDoc = await teamspaceQuery(query, { _id: 1, customData: { sso: 1, email: 1 } });
+	if (!userDoc) return false;
+
+	const ssoRestriction = await TeamspaceSetting.getSSORestriction(teamspace);
+
+	if (ssoRestriction) {
+		const userDomain = userDoc.customData.email.split('@')[1].toLowerCase();
+
+		const allowed = (ssoRestriction === true) ? !!userDoc.customData.sso : ssoRestriction.includes(userDomain);
+
+		if (!allowed) throw templates.ssoRestricted;
+	}
+
 	return !!userDoc;
 };
 
