@@ -19,8 +19,8 @@ import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import { useContext } from 'react';
 import { isNumber } from 'lodash';
 import { SidebarContainer, ExpandButton, SidebarContent } from './sidebar.styles';
-import { SidebarForm } from '../../routes/dashboard/projects/containers/uploadFileForm/sidebarForm/sidebarForm.component';
-import { UploadsContext } from '../../routes/dashboard/projects/containers/uploadFileForm/uploadFileFormContext.component';
+import { UploadsContext } from '../uploadFileFormContext.component';
+import { SidebarForm } from './sidebarForm/sidebarForm.component';
 
 interface ISidebar {
 	className?: string;

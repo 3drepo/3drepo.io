@@ -22,7 +22,6 @@ import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { RevisionsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Sidebar } from '@controls/sideBar/sidebar.component';
 import { Button } from '@controls/button';
 import { IContainer, UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { UploadsSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
@@ -40,6 +39,7 @@ import { UploadList } from './uploadList/uploadList.component';
 import { UploadsContainer, DropZone, Modal, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
 import { extensionIsSpm, reduceFileData } from './uploadFileForm.helpers';
 import { UploadsContextComponent } from './uploadFileFormContext.component';
+import { Sidebar } from './sideBar/sidebar.component';
 
 type UploadModalLabelTypes = {
 	isUploading: boolean;

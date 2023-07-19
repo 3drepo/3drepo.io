@@ -24,7 +24,7 @@ import { MenuItem } from '@mui/material';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { get } from 'lodash';
 import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
-import { extensionIsSpm } from '../uploadFileForm.helpers';
+import { extensionIsSpm } from '../../uploadFileForm.helpers';
 
 type ISidebarForm = {
 	revisionPrefix: string;
