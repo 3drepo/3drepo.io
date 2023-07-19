@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import _, { isArray, isEmpty, isEqual, isObject, isString } from 'lodash';
+import _ from 'lodash';
 
 export const dirtyValues = (
 	allValues: object,
@@ -111,7 +111,7 @@ export const diffObjects = (objec1, object2) => {
 
 	return Object.keys(objec1).reduce((accum, key) => {
 		if (keyObjc2.includes(key)) {
-			if (isEqual(objec1[key], object2[key])) {
+			if (_.isEqual(objec1[key], object2[key])) {
 				return accum;
 			} if (isBasicValue(objec1[key])) {
 				return { ...accum, [key]: objec1[key] };

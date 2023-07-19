@@ -31,7 +31,6 @@ import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { getViewerState, goToView } from '@/v5/helpers/viewpoint.helpers';
 import { TicketContext, TicketDetailsView } from '../../../ticket.context';
 import { TicketImageContent } from '../ticketImageContent/ticketImageContent.component';
-import { EllipsisMenuItemDelete } from '../ticketImageContent/ticketImageAction/ticketImageAction.styles';
 import { TicketImageActionMenu } from '../ticketImageContent/ticketImageActionMenu.component';
 import { PrimaryTicketButton } from '../../../ticketButton/ticketButton.styles';
 import { Header, HeaderSection, Label, InputContainer, Tooltip } from './ticketView.styles';
@@ -69,8 +68,6 @@ export const TicketView = ({
 		const state = await getViewerState();
 		onChange?.({ screenshot, ...currentCameraAndClipping, state });
 	};
-
-	const deleteViewpoint = () => onChange?.(null);
 
 	// Image
 	const onImageChange = (newImg) => {
