@@ -17,7 +17,7 @@
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { FormControlLabel, FormControlLabelProps, Checkbox as MuiCheckbox } from '@mui/material';
 
-export type CheckboxProps = FormInputProps & FormControlLabelProps & {
+export type CheckboxProps = FormInputProps & Omit<FormControlLabelProps, 'control'> & {
 	onClick?: (event) => any,
 };
 

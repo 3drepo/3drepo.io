@@ -181,7 +181,14 @@ export const UploadFileForm = ({
 	}, [alreadyExistingTags]);
 
 	useEffect(() => {
-		if (presetFile) addFilesToList([presetFile], presetContainer);
+		if (presetFile) {
+			addFilesToList([presetFile], presetContainer);
+			RevisionsActionsDispatchers.fetch(
+				teamspace,
+				project,
+				presetContainer._id,
+			);
+		}
 		FederationsActionsDispatchers.fetchFederations(teamspace, project);
 	}, []);
 
@@ -220,7 +227,7 @@ export const UploadFileForm = ({
 									</Typography>
 									<FileInputField
 										accept={getSupportedFileExtensions()}
-										onChange={addFilesToList}
+										onChange={(files) => addFilesToList(files)}
 									>
 										<Button component="span" variant="contained" color="primary">
 											<FormattedMessage
