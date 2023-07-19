@@ -22,7 +22,7 @@ import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList/da
 import { FormattedMessage } from 'react-intl';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { UploadListItem } from './uploadListItem/uploadListItem.component';
-import { Container } from './uploadList.styles';
+import { ListContainer } from './uploadList.styles';
 import { UploadsContext } from '../uploadFileFormContext.component';
 import { UploadsListHeader } from '../uploadFileForm.styles';
 
@@ -54,7 +54,7 @@ export const UploadList = ({
 		removeUploadById(uploadId);
 	}, [removeUploadById]);
 	return (
-		<Container>
+		<>
 			<UploadsListHeader
 				onSortingChange={setSortConfig}
 				defaultSortConfig={DEFAULT_SORT_CONFIG}
@@ -72,24 +72,26 @@ export const UploadList = ({
 					<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
 				</DashboardListHeaderLabel>
 			</UploadsListHeader>
-			{
-				sortedList.map(({ uploadId }) => {
-					const origIndex = values.findIndex(({ uploadId: unsortedId }) => unsortedId === uploadId);
-					const blahEdit = () => onClickEdit(uploadId, origIndex);
-					const blahDelete = () => onDelete(uploadId);
-					return (
-						<UploadListItem
-							key={uploadId}
-							origIndex={origIndex}
-							uploadId={uploadId}
-							onClickEdit={blahEdit}
-							onClickDelete={blahDelete}
-							isSelected={uploadId === selectedUploadId}
-							isUploading={isUploading}
-						/>
-					);
-				})
-			}
-		</Container>
+			<ListContainer>
+				{
+					sortedList.map(({ uploadId }) => {
+						const origIndex = values.findIndex(({ uploadId: unsortedId }) => unsortedId === uploadId);
+						const blahEdit = () => onClickEdit(uploadId, origIndex);
+						const blahDelete = () => onDelete(uploadId);
+						return (
+							<UploadListItem
+								key={uploadId}
+								origIndex={origIndex}
+								uploadId={uploadId}
+								onClickEdit={blahEdit}
+								onClickDelete={blahDelete}
+								isSelected={uploadId === selectedUploadId}
+								isUploading={isUploading}
+							/>
+						);
+					})
+				}
+			</ListContainer>
+		</>
 	);
 };
