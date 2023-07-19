@@ -93,7 +93,6 @@ export const UploadFileForm = ({
 
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 	const [alreadyExistingTags, setAlreadyExistingTags] = useState({});
-	const [fileError, setFileError] = useState(false);
 
 	const formMethods = useForm<UploadFieldArray>({
 		mode: 'onChange',
@@ -150,11 +149,6 @@ export const UploadFileForm = ({
 		append(filesToAppend);
 	};
 
-	// const getSortedListSelectedIndex = () => {
-	// 	if (!fields.length || !selectedUploadId) return null;
-	// 	return sortedList.findIndex((r) => r.uploadId === selectedUploadId);
-	// };
-
 	const containersNamesInModal = getValues('uploads')?.map(({ containerName }) => containerName);
 
 	const removeUploadById = (uploadId) => {
@@ -173,10 +167,6 @@ export const UploadFileForm = ({
 			});
 		}
 	}, [fields]);
-
-	// useEffect(() => {
-	// 	setFileError(fields.some(({ file }) => filesizeTooLarge(file)));
-	// }, [fields.length]);
 
 	useEffect(() => {
 		const tags = {};
@@ -203,7 +193,7 @@ export const UploadFileForm = ({
 				onClickClose={onClickClose}
 				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
 				maxWidth="xl"
-				isValid={(isValid && !fileError && !isUploading) || (isUploading && allUploadsComplete)}
+				isValid={!isUploading ? isValid : allUploadsComplete}
 				{...uploadModalLabels({ isUploading, fileCount: fields.length })}
 			>
 				<UploadsContextComponent>

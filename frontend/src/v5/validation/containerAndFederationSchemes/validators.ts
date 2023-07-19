@@ -17,6 +17,7 @@
 
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
+import filesize from 'filesize';
 import { trimmedString } from '../shared/validators';
 
 const stripIfBlankString = (value) => (
@@ -121,3 +122,12 @@ export const revisionDesc = Yup.lazy((value) => (
 				defaultMessage: 'Revision Description is limited to 660 characters',
 			}))
 ));
+
+export const uploadFile = Yup.mixed().nullable().test(
+	'fileSize',
+	formatMessage({
+		id: 'validation.revisions.file.error.tooLarge',
+		defaultMessage: 'File exceeds size limit of {sizeLimit}',
+	}, { sizeLimit: filesize(ClientConfig.uploadSizeLimit) }),
+	({ size }) => size && (size < ClientConfig.uploadSizeLimit),
+);
