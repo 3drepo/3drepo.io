@@ -18,13 +18,11 @@
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import { useCallback, useContext } from 'react';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
-import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList/dashboardListHeaderLabel';
-import { FormattedMessage } from 'react-intl';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { UploadListItem } from './uploadListItem/uploadListItem.component';
 import { ListContainer } from './uploadList.styles';
 import { UploadsContext } from '../uploadFileFormContext.component';
-import { UploadsListHeader } from '../uploadFileForm.styles';
+import { UploadListHeaders } from '../uploadListHeaders.component';
 
 type IUploadList = {
 	values: UploadItemFields[];
@@ -55,23 +53,11 @@ export const UploadList = ({
 	}, [removeUploadById]);
 	return (
 		<>
-			<UploadsListHeader
-				onSortingChange={setSortConfig}
+			<UploadListHeaders
 				defaultSortConfig={DEFAULT_SORT_CONFIG}
-			>
-				<DashboardListHeaderLabel key="file" name="file.name" minWidth={122}>
-					<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
-				</DashboardListHeaderLabel>
-				<DashboardListHeaderLabel key="destination" width={352}>
-					<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
-				</DashboardListHeaderLabel>
-				<DashboardListHeaderLabel key="revisionName" width={isUploading ? 359 : 399}>
-					<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
-				</DashboardListHeaderLabel>
-				<DashboardListHeaderLabel key="progress" width={297} hidden={!isUploading}>
-					<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
-				</DashboardListHeaderLabel>
-			</UploadsListHeader>
+				setSortConfig={setSortConfig}
+				isUploading={isUploading}
+			/>
 			<ListContainer>
 				{
 					sortedList.map(({ uploadId, file, extension }) => {
