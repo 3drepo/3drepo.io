@@ -24,10 +24,10 @@ export const CircledNumber = styled.span`
 	height: 24px;
 	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	color: ${({ theme }) => theme.palette.secondary.main};
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 50%;
 	font-size: 11px;
 `;
 
