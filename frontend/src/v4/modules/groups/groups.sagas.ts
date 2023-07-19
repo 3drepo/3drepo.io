@@ -376,7 +376,8 @@ function * clearColorOverrides() {
 
 function * setOverrideAll({overrideAll}) {
 	if (!overrideAll) {
-		yield put(GroupsActions.clearColorOverrides());
+		yield put(GroupsActions.clearColorOverridesSuccess());
+		yield put(ViewpointsActions.setSelectedViewpoint(null));
 	} else {
 		yield put(GroupsActions.setOverrideAllSuccess());
 	}
