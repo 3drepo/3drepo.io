@@ -60,7 +60,7 @@ export const isBasicValue = (value: any) => _.isNull(value) || !!(value?.toDate)
 export const nullifyEmptyObjects = (tree) => Object.fromEntries(
 	Object.keys(tree).map((key) => {
 		const value = tree[key];
-		if (isEmpty(value) && !isArray(value) && (isString(value) || isObject(value))) {
+		if (value === '') {
 			return [key, null];
 		}
 

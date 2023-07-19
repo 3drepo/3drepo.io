@@ -88,7 +88,7 @@ export const TicketView = ({
 
 	const onDeleteCamera = async () => {
 		const { camera, ...view } = value || {};
-		onChange?.(view);
+		onChange?.(isEmpty(view) ? null : view);
 	};
 
 	const onGoToCamera = async () => {
@@ -102,7 +102,7 @@ export const TicketView = ({
 	// State
 	const onDeleteGroups = () => {
 		const { state, ...view } = value || {};
-		onChange?.(view);
+		onChange?.(isEmpty(view) ? null : view);
 	};
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
