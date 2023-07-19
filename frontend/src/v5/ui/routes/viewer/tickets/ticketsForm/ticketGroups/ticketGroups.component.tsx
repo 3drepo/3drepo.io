@@ -21,7 +21,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
 import { convertToV4GroupNodes, toColorAndTransparencyDicts } from '@/v5/helpers/viewpoint.helpers';
-import { cloneDeep, uniqBy, xor } from 'lodash';
+import { cloneDeep, isString, uniqBy, xor } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
 import { selectHiddenGeometryVisible } from '@/v4/modules/tree/tree.selectors';
@@ -108,11 +108,6 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 
 	const cancelEdition = () => setEditingOverride(NO_OVERRIDE_SELECTED);
 
-	const getCurrentActiveOverride = () => {
-		const colored = selectedColorIndexes.map((i) => state.colored[i]).filter(Boolean);
-		return toColorAndTransparencyDicts(colored);
-	};
-
 	const onSubmit = (overrideValue) => {
 		const newVal = cloneDeep(value || {});
 		if (!newVal.state) {
@@ -135,7 +130,9 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	}, [highlightedOverride]);
 
 	useEffect(() => {
-		TicketsCardActionsDispatchers.setOverrides(getCurrentActiveOverride());
+		const colored = selectedColorIndexes.map((i) => state.colored[i]).filter(Boolean);
+		if (colored.some(({ group }) => isString(group))) return;
+		TicketsCardActionsDispatchers.setOverrides(toColorAndTransparencyDicts(colored));
 	}, [selectedColorIndexes, value]);
 
 	useEffect(() => {
