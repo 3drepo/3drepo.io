@@ -42,6 +42,7 @@ import { setSocketIdHeader } from './v4/services/api';
 import { setSocket } from './v4/modules/chat/chat.sagas';
 import { ROUTES } from './v4/constants/routes';
 import { LOGIN_PATH as V5_LOGIN_PATH, SIGN_UP_PATH as V5_SIGN_UP_PATH } from './v5/ui/routes/routes.constants';
+import configAxios from './v4/services/api/config-axios';
 
 window.UnityUtil = UnityUtil;
 
@@ -101,6 +102,8 @@ const initApp = () => {
 	}
 
 	clientConfigService.logAppVersion();
+
+	configAxios();
 };
 
 initApp();

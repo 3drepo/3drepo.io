@@ -17,9 +17,8 @@
 
 import { invoke } from 'lodash';
 import { takeLatest } from 'redux-saga/effects';
-import io from 'socket.io-client';
 
-import * as API from '../../services/api';
+import { setSocketIdHeader } from '@/v4/services/api/default';
 import { dispatch } from '../store';
 
 import { IS_DEVELOPMENT } from '../../constants/environment';
@@ -56,7 +55,7 @@ const channels = {};
 const joinedRooms = [] as any;
 
 function* handleConnect() {
-	API.setSocketIdHeader(socket.id);
+	setSocketIdHeader(socket.id);
 	for (let index = 0; index < joinedRooms.length; index++) {
 		const [teamspace, model] = joinedRooms[index].split('::');
 		socket.emit('join', { account: teamspace, model });

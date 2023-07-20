@@ -16,7 +16,7 @@
  */
 
 import { formatDate } from '../formatting/formatDate';
-import api from '.';
+import { API as api } from './default';
 
 const triggerDownloadWithJSON = (data, filename) => {
 	const content = JSON.stringify(data, null, 2);

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import api from './';
+import { API as api } from './default';
 const HEAD = 'master/head';
 
 export const getSequence = (teamspace, modelId, sequenceId): Promise<any> => {
