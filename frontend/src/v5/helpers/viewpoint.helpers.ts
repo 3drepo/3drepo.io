@@ -84,6 +84,10 @@ export const getViewerState = async () => {
 		state.colored = viewpointV4.override_groups.map((group) => convertToV5GroupOverride(group, ViewpointGroupOverrideType.COLORED));
 	}
 
+	if (viewpointV4.highlighted_group) {
+		state.colored = (state.colored || []).concat(convertToV5GroupOverride(viewpointV4.highlighted_group, ViewpointGroupOverrideType.COLORED));
+	}
+
 	if (viewpointV4.hidden_group) {
 		state.hidden = [convertToV5GroupOverride(viewpointV4.hidden_group, ViewpointGroupOverrideType.HIDDEN)];
 	}
