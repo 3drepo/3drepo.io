@@ -166,7 +166,7 @@ export const UploadFileForm = ({
 				RevisionsActionsDispatchers.createRevision(teamspace, project, uploadId, revision);
 			});
 		}
-	}, [fields]);
+	}, [fields, isUploading]);
 
 	useEffect(() => {
 		const tags = {};

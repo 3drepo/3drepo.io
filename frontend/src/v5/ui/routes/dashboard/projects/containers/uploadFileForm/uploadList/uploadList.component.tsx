@@ -72,7 +72,7 @@ export const UploadList = ({
 								uploadId={uploadId}
 								onClickEdit={onClickEdit}
 								onClickDelete={onClickDelete}
-								isSelected={uploadId === selectedUploadId}
+								isSelected={!isUploading && uploadId === selectedUploadId}
 								isUploading={isUploading}
 							/>
 						);

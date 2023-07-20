@@ -67,7 +67,6 @@ export const UploadListItem = memo(({
 				key={`${revisionPrefix}.dest`}
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
-
 			/>
 			<RevisionTag
 				key={`${revisionPrefix}.revTag`}

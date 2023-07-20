@@ -59,7 +59,6 @@ interface IUploadListItemDestination {
 }
 export const UploadListItemDestination = memo(({
 	revisionPrefix,
-	disabled = false,
 	className,
 	...props
 }: IUploadListItemDestination): JSX.Element => {
@@ -143,11 +142,11 @@ export const UploadListItemDestination = memo(({
 		if (!option._id) {
 			// option is an extra
 			if (nameIsTaken(option)) {
-				return (<AlreadyUsedName />);
+				return (<AlreadyUsedName key="alreadyUsed" />);
 			}
 
 			if (isProjectAdmin) {
-				return (<NewContainer containerName={option.name} {...optionProps} onClick={handleOptionClick} />);
+				return (<NewContainer key="newContainer" containerName={option.name} {...optionProps} onClick={handleOptionClick} />);
 			}
 		}
 
@@ -213,7 +212,6 @@ export const UploadListItemDestination = memo(({
 			renderInput={({ InputProps, ...params }) => (
 				<DestinationInput
 					error={!!error}
-					disabled={disabled}
 					{...params}
 					neworexisting={newOrExisting}
 					InputProps={{
@@ -225,4 +223,4 @@ export const UploadListItemDestination = memo(({
 			{...props}
 		/>
 	);
-}, (prev, next) => prev.revisionPrefix === next.revisionPrefix);
+}, (prev, next) => prev.revisionPrefix === next.revisionPrefix && prev.disabled === next.disabled);
