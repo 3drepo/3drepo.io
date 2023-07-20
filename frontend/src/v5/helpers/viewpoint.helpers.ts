@@ -192,7 +192,7 @@ export const goToView = async (view: Viewpoint) => {
 	TicketsCardActionsDispatchers.setOverrides(overrides);
 
 	if (view?.state) {
-		dispatch(TreeActions.setHiddenGeometryVisible(!!view.state.showDefaultHidden));
+		dispatch(TreeActions.setHiddenGeometryVisible(!!view.state.showHidden));
 	}
 
 	const v4HiddenObjects = convertToV4GroupNodes(view.state?.hidden?.flatMap((hiddenOverride) => (hiddenOverride.group as Group)?.objects || []));
