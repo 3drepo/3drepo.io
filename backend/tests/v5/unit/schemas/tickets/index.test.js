@@ -664,6 +664,102 @@ const testValidateTicket = () => {
 				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
 					.resolves.toEqual({ ...input, properties: {}, modules: {} });
 			});
+
+			test('Should succeed if a required view only have a camera', async () => {
+				const teamspace = generateRandomString();
+				const propName = generateRandomString();
+				const template = {
+					properties: [{
+						name: propName,
+						type: propTypes.VIEW,
+						required: true,
+					}],
+					modules: [],
+				};
+
+				const input = {
+					title: generateRandomString(),
+					type: generateUUID(),
+					properties: {
+						[propName]: {
+							camera: {
+								position: [1, 2, 3],
+								forward: [1, 2, 3],
+								up: [1, 2, 3],
+								type: 'perspective',
+							},
+						},
+					},
+				};
+
+				await TicketSchema.validateTicket(teamspace, template, input);
+				await expect(TicketSchema.validateTicket(teamspace, template, input))
+					.resolves.toEqual({ ...input, modules: {} });
+			});
+
+			test('Should fail if a required view property has no camera on creation', async () => {
+				const teamspace = generateRandomString();
+				const propName = generateRandomString();
+				const template = {
+					properties: [{
+						name: propName,
+						type: propTypes.VIEW,
+						required: true,
+					}],
+					modules: [],
+				};
+
+				const input = {
+					title: generateRandomString(),
+					type: generateUUID(),
+					properties: {
+						[propName]: {
+							clippingPlanes: [{ normal: [1, 1, 1], clipDirection: -1, distance: 100 }],
+						},
+					},
+				};
+				await expect(TicketSchema.validateTicket(teamspace, template, input))
+					.rejects.not.toBeUndefined();
+			});
+
+			test('Should fail if we are trying to remove the camera from a required view', async () => {
+				const teamspace = generateRandomString();
+				const propName = generateRandomString();
+				const template = {
+					properties: [{
+						name: propName,
+						type: propTypes.VIEW,
+						required: true,
+					}],
+					modules: [],
+				};
+
+				const input = {
+					properties: {
+						[propName]: {
+							camera: null,
+						},
+					},
+				};
+
+				const oldTicket = {
+					title: generateRandomString(),
+					type: generateUUID(),
+					properties: {
+						[propName]: {
+							camera: {
+								type: 'perspective',
+								position: [1, 2, 3],
+								forward: [1, 2, 3],
+								up: [1, 2, 3],
+							},
+							clippingPlanes: [{ normal: [1, 1, 1], clipDirection: -1, distance: 100 }],
+						},
+					},
+				};
+				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
+					.rejects.not.toBeUndefined();
+			});
 		});
 
 		testPresetValues();
