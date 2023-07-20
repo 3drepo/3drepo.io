@@ -28,7 +28,10 @@ const CameraType = {
 };
 
 const generateViewValidator = (isUpdate, isNullable) => {
-	const imposeNullableRule = (val) => (isNullable ? val.nullable() : val);
+	const imposeNullableRule = (val, optional) => {
+		const canBeNull = optional ? isUpdate : isNullable;
+		return canBeNull ? val.nullable() : val;
+	};
 
 	const generateGroupArraySchema = (extraFields, testCB = (v) => v) => {
 		const arrSchema = Yup.array().of(testCB(Yup.object({
@@ -49,7 +52,7 @@ const generateViewValidator = (isUpdate, isNullable) => {
 		[viewGroups.TRANSFORMED]: generateGroupArraySchema({
 			transformation: Yup.array().of(Yup.number()).length(16).required(),
 		}),
-	}).default(undefined));
+	}, true).default(undefined));
 
 	const camera = imposeNullableRule(Yup.object({
 		type: Yup.string().oneOf([CameraType.PERSPECTIVE, CameraType.ORTHOGRAPHIC])
@@ -58,7 +61,7 @@ const generateViewValidator = (isUpdate, isNullable) => {
 		forward: types.position.required(),
 		up: types.position.required(),
 		size: Yup.number().when('type', (type, schema) => (type === CameraType.ORTHOGRAPHIC ? schema.required() : schema.strip())),
-	}).default(undefined));
+	}, false).default(undefined));
 
 	const clippingPlanes = imposeNullableRule(Yup.array().of(
 		Yup.object().shape({
@@ -66,10 +69,10 @@ const generateViewValidator = (isUpdate, isNullable) => {
 			distance: Yup.number().required(),
 			clipDirection: Yup.number().oneOf([-1, 1]).required(),
 		}),
-	)).default(undefined);
+	), true).default(undefined);
 
 	const validator = Yup.object().shape({
-		screenshot: types.embeddedImage(isNullable),
+		screenshot: types.embeddedImage(isUpdate),
 		state,
 		camera,
 		clippingPlanes,
