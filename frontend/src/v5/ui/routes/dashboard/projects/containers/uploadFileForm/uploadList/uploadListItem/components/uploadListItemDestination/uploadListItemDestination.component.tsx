@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { IContainer, UploadItemFields } from '@/v5/store/containers/containers.types';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useFormContext } from 'react-hook-form';
@@ -26,7 +26,7 @@ import { createFilterOptions } from '@mui/material';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { name as containerNameScheme } from '@/v5/validation/containerAndFederationSchemes/validators';
 import { isCollaboratorRole } from '@/v5/store/store.helpers';
-import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ContainersActionsDispatchers, RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DestinationAutocomplete, DestinationInput, NewOrExisting } from './uploadListItemDestination.styles';
 import { NewContainer } from './options/newContainer/newContainer.component';
 import { AlreadyUsedName } from './options/alreadyUsedName/alreadyUsedName.component';
@@ -53,25 +53,27 @@ const EMPTY_OPTION = prepareSingleContainerData({
 const getFilteredContainersOptions = createFilterOptions<IContainer>({ trim: true });
 
 interface IUploadListItemDestination {
+	value: string;
 	revisionPrefix: string;
 	disabled?: boolean;
 	className?: string;
 }
 export const UploadListItemDestination = memo(({
+	value,
 	revisionPrefix,
 	className,
 	...props
 }: IUploadListItemDestination): JSX.Element => {
 	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>('');
 	const [error, setError] = useState('');
-	const { getValues, setValue, register, trigger } = useFormContext();
-	const value = getValues(`${revisionPrefix}.containerName`);
+	const { getValues, setValue, trigger } = useFormContext();
 
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const projectId = ProjectsHooksSelectors.selectCurrentProject();
 	const federationsNames = FederationsHooksSelectors.selectFederationsNames();
 	const containers = ContainersHooksSelectors.selectContainers();
+	const selectedContainer = containers.find((c) => c.name === value);
 
 	const [processingContainersNames, setProcessingContainersNames] = useState([]);
 	const [containersNamesInModal, setContainerNamesInModal] = useState([]);
@@ -88,7 +90,6 @@ export const UploadListItemDestination = memo(({
 		containerCode: baseContainer?.code || '',
 		containerType: baseContainer?.type || 'Uncategorised',
 		containerUnit: baseContainer?.unit || 'mm',
-		containerDesc: baseContainer?.desc || '',
 	});
 
 	const testName = (containerName) => {
@@ -167,17 +168,23 @@ export const UploadListItemDestination = memo(({
 
 	const onSetDestinationChange = (e, newVal: IContainer | null) => {
 		const sanitisedValue = sanitiseContainer(newVal);
-		for (const [key, val] of Object.entries(sanitisedValue)) {
-			setValue(`${revisionPrefix}.${key}`, val);
-		}
+
 		if (newVal?._id) {
 			RevisionsActionsDispatchers.fetch(
 				teamspace,
 				projectId,
 				newVal._id,
 			);
+			ContainersActionsDispatchers.fetchContainerSettings(
+				teamspace,
+				projectId,
+				newVal._id,
+			);
 		}
-		trigger(`${revisionPrefix}.containerName`);
+
+		for (const [key, val] of Object.entries(sanitisedValue)) {
+			setValue(`${revisionPrefix}.${key}`, val);
+		}
 	};
 
 	const onOpen = () => {
@@ -194,10 +201,21 @@ export const UploadListItemDestination = memo(({
 		);
 	};
 
+	useEffect(() => {
+		// This updates the container desc after it is fetched in the fetchContainerSettings
+		setValue(`${revisionPrefix}.containerDesc`, selectedContainer?.desc);
+	}, [selectedContainer]);
+
+	useEffect(() => {
+		// this triggers the check to see if revision name already used in container
+		// after the revisions fetch is made
+		trigger(`${revisionPrefix}.containerName`);
+	}, [value]);
+
 	return (
 		<DestinationAutocomplete
-			{...register(`${revisionPrefix}.containerName`)}
-			value={containers.find((c) => c.name === value)}
+			{...props}
+			value={selectedContainer}
 			className={className}
 			filterOptions={filterOptions}
 			getOptionDisabled={nameIsTaken}
@@ -220,7 +238,6 @@ export const UploadListItemDestination = memo(({
 					}}
 				/>
 			)}
-			{...props}
 		/>
 	);
 }, (prev, next) => prev.revisionPrefix === next.revisionPrefix && prev.disabled === next.disabled);

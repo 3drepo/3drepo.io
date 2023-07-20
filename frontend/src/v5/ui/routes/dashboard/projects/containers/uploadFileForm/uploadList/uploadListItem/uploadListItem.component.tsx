@@ -20,6 +20,7 @@ import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { memo } from 'react';
 import { isEqual } from 'lodash';
+import { InputController } from '@controls/inputs/inputController.component';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
@@ -66,8 +67,11 @@ export const UploadListItem = memo(({
 				name={fileData.name}
 				size={fileData.size}
 			/>
-			<UploadListItemDestination
+			<InputController
+				Input={UploadListItemDestination}
+				name={`${revisionPrefix}.containerName`}
 				key={`${revisionPrefix}.dest`}
+				// @ts-ignore
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
 			/>

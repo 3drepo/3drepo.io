@@ -52,7 +52,7 @@ const TimezoneOptions = () => {
 export const SidebarForm = ({
 	revisionPrefix,
 }: ISidebarForm): JSX.Element => {
-	const { control, getValues, formState: { errors } } = useFormContext();
+	const { getValues, formState: { errors } } = useFormContext();
 	const [containerId, extension, containerName] = getValues([`${revisionPrefix}.containerId`, `${revisionPrefix}.extension`, `${revisionPrefix}.containerName`]);
 
 	const isNewContainer = containerName && !containerId;
@@ -94,7 +94,6 @@ export const SidebarForm = ({
 				</FormSelect>
 			</FlexContainer>
 			<FormTextField
-				control={control}
 				name={`${revisionPrefix}.containerCode`}
 				label={formatMessage({ id: 'uploads.sidebar.containerCode', defaultMessage: 'Container Code' })}
 				formError={getError('containerCode')}
