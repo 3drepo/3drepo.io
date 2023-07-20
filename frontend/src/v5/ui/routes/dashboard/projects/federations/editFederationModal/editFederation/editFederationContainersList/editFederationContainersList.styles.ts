@@ -26,7 +26,6 @@ export const Container = styled.div`
 	margin: 16px 0;
 	width: 100%;
 	min-width: 720px;
-	padding-right: 24px;
 
 	${DashboardListEmptyContainer} {
 		background-color: transparent;

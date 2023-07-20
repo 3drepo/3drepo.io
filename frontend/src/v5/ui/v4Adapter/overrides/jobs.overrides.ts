@@ -15,17 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled, { css } from 'styled-components';
-import { Footer } from '@/v4/routes/components/userManagementTab/userManagementTab.styles';
+import { Footer, Container } from '@/v4/routes/components/userManagementTab/userManagementTab.styles';
 import { Head, Row, Cell } from '@/v4/routes/components/customTable/customTable.styles';
 import { SearchField } from '@/v4/routes/components/customTable/components/cellUserSearch/cellUserSearch.styles';
 import { LoaderContainer } from '@/v4/routes/userManagement/userManagement.styles';
 import { FloatingButtonContainer } from '@/v4/routes/components/floatingActionPanel/floatingActionPanel.styles';
-import { NewJobBottomButton } from '@/v4/routes/jobs/jobs.styles';
 import { ColorSelect } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 import { primaryButtonStyling } from '../resuableOverrides.styles';
 
 export const V5JobsOverrides = styled.div<{ isAdmin: boolean }>`
 	position: relative;
+
+	${Container} {
+		height: unset;
+	}
 
 	.simplebar-wrapper,
 	${LoaderContainer} {
@@ -46,7 +49,7 @@ export const V5JobsOverrides = styled.div<{ isAdmin: boolean }>`
 			border: 0;
 			border-radius: 6px;
 			width: fit-content;
-			padding: 11px 16px;
+			padding: 8px 16px;
 			text-transform: none;
 			font-size: 12px;
 			height: 35px;
@@ -113,12 +116,12 @@ export const V5JobsOverrides = styled.div<{ isAdmin: boolean }>`
 			${({ theme }) => theme.typography.h5}
 		}
 		& > :first-child {
-			border-top-left-radius: 5px;
-			border-top-right-radius: 5px;
+			border-top-left-radius: 10px;
+			border-top-right-radius: 10px;
 		}
 		& > :last-child {
-			border-bottom-left-radius: 5px;
-			border-bottom-right-radius: 5px;
+			border-bottom-left-radius: 10px;
+			border-bottom-right-radius: 10px;
 			border: none;
 		}
 		&:empty {
@@ -156,12 +159,6 @@ export const V5JobsOverrides = styled.div<{ isAdmin: boolean }>`
 			}
 		}
 	}
-
-	${({ isAdmin }) => !isAdmin && css`
-		${NewJobBottomButton} {
-			display: none;
-		}
-	`}
 
 	${Footer} {
 		display: none;

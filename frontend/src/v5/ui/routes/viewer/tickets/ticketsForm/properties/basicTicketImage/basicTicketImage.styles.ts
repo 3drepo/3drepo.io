@@ -29,7 +29,7 @@ export const Container = styled.div<{ error?: boolean, disabled?: boolean; }>`
 		color: ${palette.secondary.main};
 	`)}
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border-radius: 5px;
+	border-radius: 8px;
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;

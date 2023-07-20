@@ -22,7 +22,7 @@ export interface SearchContextType<T> {
 	items: T[];
 	filteredItems: T[];
 	query: string;
-	setQuery: (query: string) => void
+	setQuery: (query: string) => void;
 }
 
 const defaultValue: SearchContextType<any> = { items: [], filteredItems: [], query: '', setQuery: () => {} };

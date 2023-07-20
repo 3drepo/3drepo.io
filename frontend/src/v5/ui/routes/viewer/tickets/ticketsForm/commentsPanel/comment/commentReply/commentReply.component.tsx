@@ -20,12 +20,13 @@ import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tick
 import { TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { CommentMarkDown, CommentReplyContainer, ExpandableImage, OriginalMessage, CameraIcon } from './commentReply.styles';
+import { formatMessage } from '@/v5/services/intl';
+import { CommentMarkDown, ExpandableImage, OriginalMessage, CameraIcon } from './commentReply.styles';
 import { CommentAuthor } from '../basicComment/basicComment.styles';
+import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
 
 type CommentReplyProps = TicketCommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',
-	isCurrentUserComment?: boolean,
 	shortMessage?: boolean,
 	images?: string[],
 };
@@ -33,7 +34,6 @@ export const CommentReply = ({
 	message,
 	author,
 	variant = 'primary',
-	isCurrentUserComment = true,
 	images = [],
 	...props
 }: CommentReplyProps) => {
@@ -43,7 +43,9 @@ export const CommentReply = ({
 	const currentUser = CurrentUserHooksSelectors.selectUsername();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
 
-	const authorDisplayName = (isCurrentUserComment && author === currentUser) ? '' : `${user.firstName} ${user.lastName}`;
+	const authorDisplayName = (author === currentUser)
+		? formatMessage({ id: 'comment.currentUser.author', defaultMessage: 'You' })
+		: `${user.firstName} ${user.lastName}`;
 	const imagesSrcs = images.map((image) => getTicketResourceUrl(
 		teamspace,
 		project,
@@ -56,7 +58,7 @@ export const CommentReply = ({
 	if (!message && images.length === 0) return (<></>);
 
 	return (
-		<CommentReplyContainer variant={variant} {...props}>
+		<QuotedMessage variant={variant} {...props}>
 			<div>
 				{authorDisplayName && (<CommentAuthor>{authorDisplayName}</CommentAuthor>)}
 				<OriginalMessage>
@@ -67,6 +69,6 @@ export const CommentReply = ({
 				</OriginalMessage>
 			</div>
 			{images.length > 0 && (<ExpandableImage images={imagesSrcs} showExtraImagesValue />)}
-		</CommentReplyContainer>
+		</QuotedMessage>
 	);
 };

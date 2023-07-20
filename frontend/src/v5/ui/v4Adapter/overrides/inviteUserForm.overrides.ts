@@ -97,8 +97,8 @@ const ProjectSelectorStyles = css`
 		}
 		${IconButton} {
 			border: 1px solid ${({ theme }) => theme.palette.secondary.main};
-			border-radius: 5px;
-			padding: 8px 15px;
+			border-radius: 8px;
+			padding: 8px 16px;
 			color: ${({ theme }) => theme.palette.secondary.main};
 			${({ theme }) => theme.typography.body1};
 			font-weight: 600;
@@ -169,9 +169,9 @@ const PermissionsTableStyles = css`
 
 const AddPermissionsButton = css`
 	${AddButton} {
-		border-radius: 5px;
+		border-radius: 8px;
 		background-color: ${({ theme }) => theme.palette.primary.main};
-		padding: 10px 15px;
+		padding: 8px 16px;
 		margin: 4px 0;
 		color: ${({ theme }) => theme.palette.primary.contrast};
 		user-select: none;

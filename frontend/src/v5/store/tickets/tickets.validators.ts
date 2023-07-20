@@ -59,7 +59,7 @@ const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 			validator = nullableNumber;
 			break;
 		case 'date':
-			validator = Yup.date().nullable();
+			validator = nullableNumber;
 			break;
 		default:
 			validator = Yup.object().nullable();

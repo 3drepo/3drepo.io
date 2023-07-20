@@ -72,5 +72,6 @@ declare module '@mui/material/styles/createTypography' {
 		link?: CSSProperties;
 		kickerTitle?: CSSProperties;
 		kicker?: CSSProperties;
+		label?: CSSProperties;
 	}
 }

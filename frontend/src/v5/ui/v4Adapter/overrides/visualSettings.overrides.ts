@@ -33,7 +33,7 @@ import { css } from 'styled-components';
 const sharedInputStyles = css`
 	.MuiInputBase-root, .MuiGrid-container {
 		border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-		border-radius: 5px;
+		border-radius: 8px;
 		box-sizing: content-box;
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		height: 24px;

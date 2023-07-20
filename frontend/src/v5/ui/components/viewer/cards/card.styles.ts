@@ -59,16 +59,16 @@ export const HeaderButtons = styled.span`
 `;
 
 // TODO - fix after new palette is released
-export const CardContentContainer = styled.div`
+export const CardContent = styled.div`
 	padding: 15px;
 	box-sizing: border-box;
 	background-color: #f9faff;
-	min-height: 100%;
+	overflow: overlay;
+	height: 100%;
 `;
 
 export const EmptyCardMessage = styled(DashedContainer).attrs({
 	strokeColor: '#c0c8d5', // TODO - fix when new palette is released
-	borderRadius: 5,
 	dashSize: 2,
 	gapSize: 2,
 	strokeWidth: 2,

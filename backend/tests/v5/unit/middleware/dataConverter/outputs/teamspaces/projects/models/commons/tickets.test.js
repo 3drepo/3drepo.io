@@ -27,7 +27,7 @@ const TicketTemplateHelper = require(`${src}/middleware/dataConverter/outputs/co
 
 jest.mock('../../../../../../../../../../src/v5/schemas/tickets/templates');
 const TicketTemplateSchema = require(`${src}/schemas/tickets/templates`);
-const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
+const { propTypes, viewGroups } = require(`${src}/schemas/tickets/templates.constants`);
 
 jest.mock('../../../../../../../../../../src/v5/models/tickets.templates');
 const TemplateModel = require(`${src}/models/tickets.templates`);
@@ -296,11 +296,9 @@ const testSerialiseTicket = () => {
 					[modName]: {
 						[propName]: {
 							state: {
-								highlightedGroups: times(5, () => generateUUID()),
-								colorOverrideGroups: times(2, () => generateUUID()),
-								hiddenGroups: [],
-								shownGroups: times(1, () => generateUUID()),
-								transformGroups: times(10, () => generateUUID()),
+								[viewGroups.COLORED]: times(2, () => ({ group: generateUUID() })),
+								[viewGroups.HIDDEN]: [],
+								[viewGroups.TRANSFORMED]: times(10, () => ({ group: generateUUID() })),
 							},
 						},
 						[imageProp]: generateUUID(),
@@ -324,7 +322,7 @@ const testSerialiseTicket = () => {
 			res._id = UUIDToString(res._id);
 			Object.keys(res.modules[modName][propName].state).forEach((fieldName) => {
 				res.modules[modName][propName].state[fieldName] = res.modules[modName][propName].state[fieldName]
-					.map(UUIDToString);
+					.map((entry) => ({ ...entry, group: UUIDToString(entry.group) }));
 			});
 
 			res.properties[imageProp] = UUIDToString(res.properties[imageProp]);

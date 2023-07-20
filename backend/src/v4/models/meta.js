@@ -469,6 +469,7 @@ const findModelMeshIdsByRulesQueries = async (account, model, posRuleQueries, ne
 
 	if (posRuleQueries.length !== 0) {
 		const eachPosRuleResults = await Promise.all(posRuleQueries.map(ruleQuery => getRuleQueryResults(account, model, idToMeshesDict, history._id, ruleQuery)));
+
 		allRulesResults = intersection(eachPosRuleResults);
 	} else {
 		const rootQuery =  { $match: { rev_id: history._id, "parents": {$exists: false} } };
@@ -537,7 +538,9 @@ const getRuleQueryResults = async (account, model, idToMeshesDict, revId, query)
 			const { type, _id } = resBatch[j];
 			const idStr = utils.uuidToString(_id);
 			if (type === "transformation") {
-				idToMeshesDict[idStr].forEach((meshId) => ids.add(meshId));
+				if(idToMeshesDict[idStr]) {
+					idToMeshesDict[idStr].forEach((meshId) => ids.add(meshId));
+				}
 			} else {
 				ids.add(idStr);
 			}

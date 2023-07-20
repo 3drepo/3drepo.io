@@ -39,6 +39,7 @@ export const BackToLogin = styled(LoginLink)`
 	margin: 35px auto 10px;
 	text-align: center;
 	&& {
+		${({ theme }) => theme.typography.body1}
 		color: ${({ theme }) => theme.palette.primary.main};
 	}
 `;

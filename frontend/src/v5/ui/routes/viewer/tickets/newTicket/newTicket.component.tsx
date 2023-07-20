@@ -20,8 +20,7 @@ import { useParams } from 'react-router-dom';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
-import { CardContainer, CardHeader } from '@/v5/ui/components/viewer/cards/card.styles';
-import { CardContent } from '@/v5/ui/components/viewer/cards/cardContent.component';
+import { CardContainer, CardHeader, CardContent } from '@/v5/ui/components/viewer/cards/card.styles';
 import CloseIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
 import { NewTicket } from '@/v5/store/tickets/tickets.types';
 import { filterEmptyTicketValues, getEditableProperties, getDefaultTicket, modelIsFederation, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
@@ -82,6 +81,10 @@ export const NewTicketCard = () => {
 			isFederation,
 		);
 	}, []);
+
+	useEffect(() => {
+		formData.reset(defaultTicket);
+	}, [JSON.stringify(defaultTicket)]);
 
 	return (
 		<CardContainer>
