@@ -195,6 +195,8 @@ export const goToView = async (view: Viewpoint) => {
 	const overrides = toColorAndTransparencyDicts(view?.state?.colored || []);
 	TicketsCardActionsDispatchers.setOverrides(overrides);
 
+	await ViewerService.clearHighlights();
+
 	if (view?.state) {
 		dispatch(TreeActions.setHiddenGeometryVisible(!!view.state.showHidden));
 	}

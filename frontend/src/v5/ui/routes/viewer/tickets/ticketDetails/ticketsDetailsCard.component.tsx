@@ -117,7 +117,7 @@ export const TicketDetailsCard = () => {
 		const defaultView = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 		if (isEmpty(defaultView)) return;
 		goToView(defaultView);
-	}, [ticket.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state]);
+	}, [JSON.stringify(ticket.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state)]);
 
 	return (
 		<CardContainer>
