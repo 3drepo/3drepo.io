@@ -18,7 +18,7 @@
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { useFormState } from 'react-hook-form';
 import { get } from 'lodash';
-import { FormTextField } from './uploadListItemRevisionTag.styles';
+import { RevisionTagField } from './uploadListItemRevisionTag.styles';
 
 type IUploadListItemRevision = {
 	revisionPrefix: string;
@@ -46,7 +46,7 @@ export const UploadListItemRevisionTag = ({
 	} : {};
 
 	return (
-		<FormTextField
+		<RevisionTagField
 			disabled={disabled}
 			formError={errorMessage}
 			required

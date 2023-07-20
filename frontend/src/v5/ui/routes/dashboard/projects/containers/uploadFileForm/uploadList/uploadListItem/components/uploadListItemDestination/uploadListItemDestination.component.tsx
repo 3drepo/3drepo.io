@@ -27,7 +27,7 @@ import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { name as containerNameScheme } from '@/v5/validation/containerAndFederationSchemes/validators';
 import { isCollaboratorRole } from '@/v5/store/store.helpers';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Autocomplete, DestinationInput, NewOrExisting } from './uploadListItemDestination.styles';
+import { DestinationAutocomplete, DestinationInput, NewOrExisting } from './uploadListItemDestination.styles';
 import { NewContainer } from './options/newContainer/newContainer.component';
 import { AlreadyUsedName } from './options/alreadyUsedName/alreadyUsedName.component';
 import { ExistingContainer } from './options/existingContainer/existingContainer.component';
@@ -195,7 +195,7 @@ export const UploadListItemDestination = memo(({
 	};
 
 	return (
-		<Autocomplete
+		<DestinationAutocomplete
 			{...register(`${revisionPrefix}.containerName`)}
 			value={containers.find((c) => c.name === value)}
 			className={className}

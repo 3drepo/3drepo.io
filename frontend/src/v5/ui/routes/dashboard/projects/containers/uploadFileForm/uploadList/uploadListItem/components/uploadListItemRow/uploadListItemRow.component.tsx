@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DashboardListItem as UploadListItem } from '@components/dashboard/dashboardList';
-import { Content } from './uploadListItemRow.styles';
+import { DashboardListItemRow as UploadListRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
+import { UploadListItem } from './uploadListItemRow.styles';
 
 type IUploadListItemRow = {
 	selected: boolean;
@@ -28,8 +28,8 @@ export const UploadListItemRow = ({
 	children,
 }: IUploadListItemRow): JSX.Element => (
 	<UploadListItem selected={selected}>
-		<Content selected={selected}>
+		<UploadListRow selected={selected}>
 			{children}
-		</Content>
+		</UploadListRow>
 	</UploadListItem>
 );

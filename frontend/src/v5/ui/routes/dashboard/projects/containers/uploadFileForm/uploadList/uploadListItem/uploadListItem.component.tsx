@@ -19,11 +19,14 @@ import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { memo } from 'react';
+import { isEqual } from 'lodash';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
-import { Button, Destination, RevisionTag } from './uploadListItem.styles';
-import { UploadProgress } from './uploadProgress/uploadProgress.component';
+import { UploadProgress } from './components/uploadProgress/uploadProgress.component';
+import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
+import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag/uploadListItemRevisionTag.component';
+import { UploadListItemButton } from './components/uploadListItemRow/uploadListItemRow.styles';
 
 type IUploadListItem = {
 	uploadId: string;
@@ -63,12 +66,12 @@ export const UploadListItem = memo(({
 				name={fileData.name}
 				size={fileData.size}
 			/>
-			<Destination
+			<UploadListItemDestination
 				key={`${revisionPrefix}.dest`}
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
 			/>
-			<RevisionTag
+			<UploadListItemRevisionTag
 				key={`${revisionPrefix}.revTag`}
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
@@ -78,18 +81,18 @@ export const UploadListItem = memo(({
 				? (<UploadProgress uploadId={uploadId} errorMessage={uploadErrorMessage} />)
 				: (
 					<>
-						<Button variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit}>
+						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit}>
 							<EditIcon />
-						</Button>
-						<Button variant={isSelected ? 'secondary' : 'primary'} onClick={onClickDelete}>
+						</UploadListItemButton>
+						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickDelete}>
 							<DeleteIcon />
-						</Button>
+						</UploadListItemButton>
 					</>
 				)}
 		</UploadListItemRow>
 	);
-}, (prevProps, nextProps) => {
-	const isSame = prevProps.isSelected === nextProps.isSelected && prevProps.origIndex === nextProps.origIndex
-		&& prevProps.isUploading === nextProps.isUploading;
-	return isSame;
+},
+(prevProps, nextProps) => {
+	const filterProperties = ({ isSelected, origIndex, isUploading }) => ({ isSelected, origIndex, isUploading });
+	return isEqual(filterProperties(prevProps), filterProperties(nextProps));
 });

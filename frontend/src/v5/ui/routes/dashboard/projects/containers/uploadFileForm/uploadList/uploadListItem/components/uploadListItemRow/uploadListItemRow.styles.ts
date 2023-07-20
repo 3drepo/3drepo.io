@@ -15,12 +15,52 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DashboardListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import { CircleButton } from '@controls/circleButton';
+import { Container as ItemRowContainer } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemRow/dashboardListItemRow.styles';
+import { DashboardListItem } from '@components/dashboard/dashboardList';
+import { DestinationAutocomplete } from '../uploadListItemDestination/uploadListItemDestination.styles';
+import { RevisionTagField } from '../uploadListItemRevisionTag/uploadListItemRevisionTag.styles';
 
-export const Content = styled(DashboardListItemRow)`
-	padding: 8px 15px 8px 5px;
-	height: auto;
-	cursor: default;
-	overflow: hidden;
+export const UploadListItemButton = styled(CircleButton)`
+	margin: 0;
+	&:hover, &.Mui-focusVisible { 
+		box-shadow: none;
+	}
+`;
+
+const DestinationAndTagDimensions = css`
+	width: 340px;
+	height: 35px;
+	min-width: 80px;
+`;
+
+export const UploadListItem = styled(DashboardListItem)<{ selected: boolean }>`
+	${ItemRowContainer} {
+		padding: 8px 15px 8px 5px;
+		height: auto;
+		cursor: default;
+		overflow: hidden;
+
+		${DestinationAutocomplete} {
+			${DestinationAndTagDimensions}
+		}
+
+		${RevisionTagField} {
+			${DestinationAndTagDimensions}
+			${({ selected, theme }) => selected && css`
+				fieldset, &:hover fieldset {
+					border: 0;
+				}
+
+				&.MuiOutlinedInput-root:not(.Mui-error) {
+					background-color: ${theme.palette.secondary.light};
+
+					input {
+						color: ${theme.palette.primary.contrast};
+					}
+				}
+			`}
+		}
+	}
 `;
