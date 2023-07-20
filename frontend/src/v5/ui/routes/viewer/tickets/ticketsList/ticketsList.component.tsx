@@ -100,8 +100,9 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	};
 
 	useEffect(() => {
-		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => TicketsCardActionsDispatchers.setSelectedTicket(null));
-		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED);
+		const unselectTicket = () => TicketsCardActionsDispatchers.setSelectedTicket(null);
+		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, unselectTicket);
+		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, unselectTicket);
 	}, []);
 
 	const filterItems = (items, query: string) => {
