@@ -28,7 +28,7 @@ import { ProjectsHooksSelectors, RevisionsHooksSelectors, TeamspacesHooksSelecto
 import { FormattedMessage } from 'react-intl';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
-import { uploadToContainer } from '@/v5/ui/routes/dashboard/projects/containers/uploadFileForm/uploadFileForm.helpers';
+import { uploadToContainer } from '@/v5/ui/routes/dashboard/projects/containers/uploadFileForm/uploadToContainer.component';
 import {
 	Container,
 	RevisionsListHeaderContainer,
