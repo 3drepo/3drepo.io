@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ViewerActions, ViewerTypes } from '@/v5/store/viewer/viewer.redux';
+import { ViewerActions } from '@/v5/store/viewer/viewer.redux';
 import { times } from 'lodash';
-import { containerMockFactory, prepareMockBaseContainer, prepareMockStatsReply } from '../containers/containers.fixtures';
+import { containerMockFactory, prepareMockBaseContainer, getMockStats } from '../containers/containers.fixtures';
 import { federationMockFactory, prepareMockBaseFederation, prepareMockFederationStatsReply } from '../federations/federations.fixtures';
 import { mockServer } from '../../internals/testing/mockServer';
 import { createTestStore, findById } from '../test.helpers';
@@ -36,7 +36,7 @@ describe('Viewer: sagas', () => {
 	let dispatch, getState, waitForActions;
 
 	beforeEach(() => {
-		({ dispatch, getState,  waitForActions } = createTestStore());
+		({ dispatch, getState, waitForActions } = createTestStore());
 		dispatch(ProjectsActions.setCurrentProject(projectId));
 	});	
 
@@ -45,7 +45,7 @@ describe('Viewer: sagas', () => {
 			const containers = times(3, () => containerMockFactory());
 			const federations  = times(3, () => federationMockFactory());
 			const baseContainers = containers.map(prepareMockBaseContainer); 
-			const containerStat = prepareMockStatsReply(containers[1]);
+			const containerStat = getMockStats(containers[1]);
 			const containerOrFederationId = containers[1]._id;
 
 			mockServer
@@ -73,7 +73,7 @@ describe('Viewer: sagas', () => {
 			const containers = times(6, () => containerMockFactory());
 			const federations = times(3, () => federationMockFactory());
 			const baseFederations = federations.map(prepareMockBaseFederation);
-			const containersStats = containers.map(prepareMockStatsReply);
+			const containersStats = containers.map(getMockStats);
 			const baseContainers = containers.map(prepareMockBaseContainer);
 			const containersInState = baseContainers.map((base, index) => prepareSingleContainerData(base, containersStats[index]));
 			const theFederation = federations[1];
