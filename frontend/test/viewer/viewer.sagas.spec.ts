@@ -17,8 +17,8 @@
 
 import { ViewerActions } from '@/v5/store/viewer/viewer.redux';
 import { times } from 'lodash';
-import { containerMockFactory, prepareMockBaseContainer, getMockStats } from '../containers/containers.fixtures';
-import { federationMockFactory, prepareMockBaseFederation, prepareMockFederationStatsReply } from '../federations/federations.fixtures';
+import { containerMockFactory, prepareMockBaseContainer, getMockStats as getContainerMockStats } from '../containers/containers.fixtures';
+import { federationMockFactory, prepareMockBaseFederation, getMockStats as getFederationMockStats } from '../federations/federations.fixtures';
 import { mockServer } from '../../internals/testing/mockServer';
 import { createTestStore, findById } from '../test.helpers';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
@@ -45,7 +45,7 @@ describe('Viewer: sagas', () => {
 			const containers = times(3, () => containerMockFactory());
 			const federations  = times(3, () => federationMockFactory());
 			const baseContainers = containers.map(prepareMockBaseContainer); 
-			const containerStat = getMockStats(containers[1]);
+			const containerStat = getContainerMockStats(containers[1]);
 			const containerOrFederationId = containers[1]._id;
 
 			mockServer
@@ -73,7 +73,7 @@ describe('Viewer: sagas', () => {
 			const containers = times(6, () => containerMockFactory());
 			const federations = times(3, () => federationMockFactory());
 			const baseFederations = federations.map(prepareMockBaseFederation);
-			const containersStats = containers.map(getMockStats);
+			const containersStats = containers.map(getContainerMockStats);
 			const baseContainers = containers.map(prepareMockBaseContainer);
 			const containersInState = baseContainers.map((base, index) => prepareSingleContainerData(base, containersStats[index]));
 			const theFederation = federations[1];
@@ -90,7 +90,7 @@ describe('Viewer: sagas', () => {
 
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${containerOrFederationId}/stats`)
-				.reply(200, prepareMockFederationStatsReply(theFederation));
+				.reply(200, getFederationMockStats(theFederation));
 
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${baseContainers[0]._id}/stats`)
