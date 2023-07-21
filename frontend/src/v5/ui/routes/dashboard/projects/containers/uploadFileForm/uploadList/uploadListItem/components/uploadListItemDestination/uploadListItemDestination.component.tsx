@@ -123,8 +123,7 @@ export const UploadListItemDestination = memo(({
 			.filter(({ name, role }) => name !== value && isCollaboratorRole(role));
 
 		const containerNameExists = options.some(({ name }) => inputValue.toLowerCase() === name.toLowerCase());
-
-		if (inputValue && !containerNameExists) {
+		if (inputValue && !containerNameExists && isProjectAdmin) {
 			// create an extra option to transform into a
 			// "add new container" OR "name already used" option
 			filteredOptions.unshift({
