@@ -1184,14 +1184,6 @@ export class ViewerService {
 		UnityUtil.toggleVisibility(account, model, ids, visibility);
 	}
 
-	public startAreaSelect() {
-		UnityUtil.startAreaSelection();
-	}
-
-	public stopAreaSelect() {
-		UnityUtil.stopAreaSelection();
-	}
-
 	public setShadows = (type: string) => {
 		switch (type) {
 			case 'soft':
