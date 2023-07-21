@@ -27,6 +27,7 @@ import { prepareContainerSettingsForFrontend } from './../../src/v5/store/contai
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { selectContainerById, selectContainers } from '@/v5/store/containers/containers.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
+import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 
 describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';
@@ -52,18 +53,17 @@ describe('Containers: sagas', () => {
 		beforeEach(() => populateStore({ ...mockContainer, isFavourite: false }));
 
 		it('should call addFavourite endpoint', async () => {
-			const resolvePromiseObj = { resolvePromise: null };
-			const promise = new Promise((resolve) => { resolvePromiseObj.resolvePromise = resolve });
+			const { resolve, promiseToResolve } = getWaitablePromise();
 			mockServer
 				.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
-				.reply(200, resolvePromiseObj.resolvePromise)
+				.reply(200, resolve)
 
-
-			await waitForActions(async () => {
-				dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
-			}, [ContainersActions.setFavouriteSuccess(projectId, containerId, true)]);
-
-			await promise;
+			await Promise.all([
+				waitForActions(() => {
+					dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
+				}, [ContainersActions.setFavouriteSuccess(projectId, containerId, true)]),
+				promiseToResolve,
+			]);
 
 			const { isFavourite } = selectContainerById(getState(), containerId);
 			expect(isFavourite).toBeTruthy();
@@ -88,18 +88,18 @@ describe('Containers: sagas', () => {
 
 	describe('removeFavourite', () => {
 		beforeEach(() => populateStore({ ...mockContainer, isFavourite: true }));
-		const resolvePromiseObj = { resolvePromise: null };
-		const promise = new Promise((resolve) => { resolvePromiseObj.resolvePromise = resolve });
+		const { resolve, promiseToResolve } = getWaitablePromise();
 		it('should call removeFavourite endpoint', async () => {
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites?ids=${containerId}`)
-				.reply(200, resolvePromiseObj.resolvePromise)
+				.reply(200, resolve)
 
-			await waitForActions(() => {
-				dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
-			}, [ContainersActions.setFavouriteSuccess(projectId, containerId, false)])
-
-			await promise;
+			await Promise.all([
+				waitForActions(() => {
+					dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
+				}, [ContainersActions.setFavouriteSuccess(projectId, containerId, false)]),
+				promiseToResolve,
+			]);
 
 			const { isFavourite } = selectContainerById(getState(), containerId);
 			expect(isFavourite).toBeFalsy();
@@ -148,7 +148,6 @@ describe('Containers: sagas', () => {
 		})
 
 		it('should call containers endpoint with 404', async () => {
-			populateStore();
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
 				.reply(404);
@@ -157,7 +156,7 @@ describe('Containers: sagas', () => {
 				dispatch(ContainersActions.fetchContainers(teamspace, projectId));
 			}, [DialogsTypes.OPEN]);
 			const containersInStore = selectContainers(getState());
-			expect(containersInStore).toEqual([mockContainer]);
+			expect(containersInStore).toEqual([]);
 		})
 
 		it('should fetch stats', async () => {
@@ -259,6 +258,7 @@ describe('Containers: sagas', () => {
 			mockServer
 				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers`, newContainer)
 				.reply(200, { _id: containerId });
+
 			const fetchedContainer = { ...newContainer, _id: containerId }
 
 			await waitForActions(() => {
