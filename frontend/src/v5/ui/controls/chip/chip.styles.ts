@@ -78,7 +78,6 @@ export const ChipWrapper = styled.div<{ variant: string; color: string; disabled
 		}
 		.MuiChip-label {
 			padding: 0;
-			line-height: 100%;
 		}
 		${({ variant, color }) => {
 		switch (variant) {

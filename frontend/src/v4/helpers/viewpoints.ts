@@ -15,6 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { UnityUtil } from "@/globals/unity-util";
+import { getState } from "../modules/store";
+import { selectHiddenGeometryVisible, selectNodesBySharedIdsMap, selectTreeNodesList } from "../modules/tree";
+import { selectColorOverrides, selectTransformations } from "../modules/viewerGui";
+import { Viewer } from "../services/viewer/viewer";
+import { createGroupsByColor, createGroupsByTransformations } from "./groups";
+
 // This merges a viewpoint
 // TO BE REVIEWED.
 
@@ -128,4 +135,91 @@ export const isViewpointLoaded = (viewpoint, groups) => {
 	}
 
 	return areGroupsLoaded;
+};
+
+
+export async function generateViewpoint(name = '', withScreenshot = false) {
+	const state = getState();
+
+	const hiddenGeometryVisible = selectHiddenGeometryVisible(state);
+
+	const viewpoint = await Viewer.getCurrentViewpoint();
+
+	const generatedObject = {
+		name,
+		viewpoint:  {
+			...viewpoint,
+			hideIfc: !hiddenGeometryVisible
+		}
+	} as any;
+
+	if (withScreenshot) {
+		generatedObject.viewpoint.screenshot = await Viewer.getScreenshot();
+	}
+
+	const objectInfo: any = await Viewer.getObjectsStatus();
+
+	const colorOverrides = selectColorOverrides(state);
+	const newOverrideGroups = createGroupsByColor(colorOverrides);
+
+	const transformations = selectTransformations(state);
+	const newTransformationsGroups = createGroupsByTransformations(transformations);
+
+	if (newOverrideGroups.length) {
+		generatedObject.viewpoint.override_groups = newOverrideGroups;
+	}
+
+	if (newTransformationsGroups.length) {
+		generatedObject.viewpoint.transformation_groups = newTransformationsGroups;
+	}
+
+	if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
+		const { highlightedNodes, hiddenNodes } = objectInfo;
+
+		if (highlightedNodes.length > 0) {
+			generatedObject.viewpoint.highlighted_group = {
+				objects: highlightedNodes,
+				color: UnityUtil.defaultHighlightColor.map((c) => c * 255)
+			} ;
+		}
+
+		if (hiddenNodes.length > 0) {
+			generatedObject.viewpoint.hidden_group = {
+				objects: hiddenNodes
+			};
+		}
+
+	}
+	return generatedObject;
+}
+
+
+export const getNodesIdsFromSharedIds = (objects) => {
+	const nodesBySharedIds = selectNodesBySharedIdsMap(getState());
+
+	if (!objects.length) {
+		return [];
+	}
+
+	const ids = new Set<string>();
+	objects.forEach((obj) => {
+		obj.shared_ids.forEach((sharedId) => {
+			const id = nodesBySharedIds[sharedId];
+			if (id) {
+				ids.add(id);
+			}
+		});
+	});
+	return Array.from(ids);
+};
+
+export const toSharedIds = (node_ids: string[]) => {
+	const nodesSet = new Set(node_ids);
+	const nodesList = selectTreeNodesList(getState());
+	return nodesList.reduce((sharedIds, currentNode) => {
+		if (nodesSet.has(currentNode._id)) {
+			sharedIds.push(currentNode.shared_id);
+		}
+		return sharedIds;
+	}, []);
 };

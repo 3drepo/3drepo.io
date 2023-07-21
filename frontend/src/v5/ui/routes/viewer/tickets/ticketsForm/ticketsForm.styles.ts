@@ -16,6 +16,7 @@
  */
 
 import { CardContent as CardContentPadded } from '@components/viewer/cards/card.styles';
+import { FormLabel } from '@mui/material';
 import { Gap } from '@controls/gap';
 import styled from 'styled-components';
 
@@ -50,6 +51,10 @@ export const PropertiesListContainer = styled.div`
 `;
 
 export const CardContent = styled(CardContentPadded)`
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	padding: 0;
+`;
+
+export const ModuleTitle = styled(FormLabel)`
+	font-weight: 500;
+	color: inherit;
 `;

@@ -27,15 +27,15 @@ export interface PropertyDefinition {
 	deprecated?: boolean;
 }
 
-type Property = Record<string, any>;
+export type Properties = Record<string, any>;
 
 export interface ITicket {
 	_id: string,
 	title: string,
 	number: number,
 	type: string,
-	properties: Property,
-	modules?: Record<string, Property>,
+	properties: Properties,
+	modules?: Record<string, Properties>,
 }
 
 export interface TemplateModule {
@@ -77,8 +77,83 @@ export type ClippingPlane = {
 	clipDirection: 1 | -1;
 };
 
+export const OPERATIONS_TYPES = {
+	IS_NOT_EMPTY: 'field',
+	IS_EMPTY: 'field',
+	IS: 'text',
+	IS_NOT: 'text',
+	CONTAINS: 'text',
+	NOT_CONTAINS: 'text',
+	REGEX: 'regex',
+	EQUALS: 'number',
+	NOT_EQUALS: 'number',
+	GT: 'numberComparison',
+	GTE: 'numberComparison',
+	LT: 'numberComparison',
+	LTE: 'numberComparison',
+	IN_RANGE: 'numberRange',
+	NOT_IN_RANGE: 'numberRange',
+} as const;
+
+export type Operator = keyof typeof OPERATIONS_TYPES;
+export type OperatorType = typeof OPERATIONS_TYPES[Operator];
+
+export interface IGroupRule {
+	field: string,
+	operator: Operator,
+	values?: (number | string)[],
+}
+
+export type Group = {
+	_id?: string,
+	name: string,
+	description?: string,
+	objects?: { container: string, _ids: string[] }[],
+	rules?: IGroupRule[],
+};
+
+export type V4GroupObjects = {
+	account:string,
+	model: string,
+	shared_ids: string[],
+};
+
+export enum ViewpointGroupOverrideType {
+	COLORED,
+	HIDDEN,
+	TRANSFORMED,
+}
+
+type ColorAndOpacity = {
+	color?: [number, number, number],
+	opacity?: number,
+};
+
+export type GroupOverride = ColorAndOpacity & {
+	prefix?: string[],
+	group: string | Group,
+};
+
+export type ViewpointState = {
+	showHidden: boolean;
+	hidden?: GroupOverride[],
+	colored?: GroupOverride[],
+	transformed?: GroupOverride[],
+};
+
 export type Viewpoint = {
 	screenshot?: any;
-	camera: Camera;
+	camera?: Camera;
 	clippingPlanes?: ClippingPlane[];
+	state?: ViewpointState;
+};
+
+export type IGroupSettingsForm = GroupOverride & { group: Group };
+
+type MeshIdColorDict = Record<string, string>;
+type MeshIdTransparencyDict = Record<string, number>;
+
+export type OverridesDicts = {
+	overrides: MeshIdColorDict,
+	transparencies: MeshIdTransparencyDict
 };

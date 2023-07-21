@@ -372,6 +372,14 @@ export const theme = createTheme({
 				indeterminateIcon: createElement(CheckboxIndeterminatedIcon, { borderColor: COLOR.BASE_LIGHT }),
 			},
 			styleOverrides: {
+				root: {
+					'&:hover': {
+						background: 'transparent',
+						'&:not(.Mui-checked) path': {
+							fill: COLOR.PRIMARY_MAIN,
+						},
+					},
+				},
 				colorPrimary: {
 					color: COLOR.BASE_LIGHTEST,
 					'& svg': {
@@ -497,7 +505,7 @@ export const theme = createTheme({
 		MuiAutocomplete: {
 			defaultProps: {
 				clearIcon: createElement(ClearIcon),
-				popupIcon: createElement(ChevronIcon),
+				popupIcon: createElement(ThinChevronIcon),
 				openText: '',
 				closeText: '',
 				clearText: '',
@@ -548,6 +556,7 @@ export const theme = createTheme({
 					padding: '2px',
 				},
 				listbox: {
+					overflow: 'overlay',
 					'.MuiAutocomplete-option': {
 						height: 'auto',
 						alignItems: 'baseline',
@@ -757,6 +766,19 @@ export const theme = createTheme({
 				},
 			},
 		},
+		MuiListSubheader: {
+			defaultProps: {
+				disableSticky: true,
+			},
+			styleOverrides: {
+				root: {
+					...typography.h5,
+					color: COLOR.BASE_MAIN,
+					padding: '4px 14px',
+					fontWeight: FONT_WEIGHT.BOLD,
+				},
+			},
+		},
 		MuiListItem: {
 			styleOverrides: {
 				root: {
@@ -775,19 +797,6 @@ export const theme = createTheme({
 				padding: {
 					paddingTop: 8,
 					paddingBottom: 8,
-				},
-			},
-		},
-		MuiListSubheader: {
-			defaultProps: {
-				disableSticky: true,
-			},
-			styleOverrides: {
-				root: {
-					...typography.h5,
-					color: COLOR.BASE_MAIN,
-					padding: '4px 14px',
-					fontWeight: FONT_WEIGHT.BOLD,
 				},
 			},
 		},
@@ -1036,7 +1045,7 @@ export const theme = createTheme({
 				},
 				multiline: {
 					'&&': {
-						padding: '5px 10px',
+						padding: '4px 10px',
 						'& fieldset': {
 							height: '100%',
 						},
@@ -1201,9 +1210,10 @@ export const theme = createTheme({
 					fontWeight: FONT_WEIGHT.BOLD,
 					minWidth: null,
 					transition: 'none',
+					height: '35px',
 				},
 				contained: {
-					height: '35px',
+					padding: '10px 15px',
 					boxShadow: 'none',
 					[`&:hover,
 					  &:active`]: {
@@ -1256,7 +1266,7 @@ export const theme = createTheme({
 					fontSize: null, // null value means it will use the size from button.root
 				},
 				outlined: {
-					height: '35px',
+					padding: '10px 15px',
 					backgroundColor: 'transparent',
 					'.Mui-focusVisible': {
 						backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,

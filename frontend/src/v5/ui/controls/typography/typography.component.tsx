@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Typography as MuiTypography, TypographyProps, TypographyVariant } from '@mui/material';
-import { KickerTypography, KickerTitleTypography } from './typography.styles';
+import { KickerTypography, KickerTitleTypography, LinkTypography } from './typography.styles';
 
-type ITypographyVariants = TypographyVariant | 'kicker' | 'kickerTitle';
+type ITypographyVariants = TypographyVariant | 'kicker' | 'kickerTitle' | 'link';
 
 type ITypography = Omit<TypographyProps, 'variant'> & {
 	variant: ITypographyVariants;
@@ -29,6 +29,9 @@ export const Typography = ({ variant, children, ...props }: ITypography): JSX.El
 	}
 	if (variant === 'kickerTitle') {
 		return <KickerTitleTypography {...props}>{children}</KickerTitleTypography>;
+	}
+	if (variant === 'link') {
+		return <LinkTypography {...props}>{children}</LinkTypography>;
 	}
 	return <MuiTypography variant={variant} {...props}>{children}</MuiTypography>;
 };
