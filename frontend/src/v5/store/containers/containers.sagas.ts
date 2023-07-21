@@ -160,10 +160,6 @@ export function* updateContainerSettings({
 		yield put(ContainersActions.updateContainerSettingsSuccess(projectId, containerId, settings));
 		onSuccess();
 	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'containers.updateSettings.error', defaultMessage: 'trying to update container settings' }),
-			error,
-		}));
 		onError(error);
 	}
 }
@@ -179,10 +175,6 @@ export function* createContainer({ teamspace, projectId, newContainer, onSuccess
 		));
 		onSuccess();
 	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'containers.create.error', defaultMessage: 'trying to create the container' }),
-			error,
-		}));
 		onError(error);
 	}
 }
@@ -193,10 +185,6 @@ export function* deleteContainer({ teamspace, projectId, containerId, onSuccess,
 		yield put(ContainersActions.deleteContainerSuccess(projectId, containerId));
 		onSuccess();
 	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'containers.delete.error', defaultMessage: 'trying to delete the container' }),
-			error,
-		}));
 		onError(error);
 	}
 }

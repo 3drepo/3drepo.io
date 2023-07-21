@@ -254,7 +254,6 @@ describe('Containers: sagas', () => {
 			unit: 'mm',
 		};
 		it('should call createContainer endpoint', async () => {
-
 			mockServer
 				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers`, newContainer)
 				.reply(200, { _id: containerId });
@@ -269,17 +268,25 @@ describe('Containers: sagas', () => {
 
 			expect(onError).not.toHaveBeenCalled();
 			expect(containersInStore.length).toBe(1);
-			expect(onSuccess).toHaveBeenCalled();
+			expect(onSuccess).toHaveBeenCalled();	
 		})
 		
 		it('should call createContainer endpoint with 400', async () => {
+			const { resolve, promiseToResolve } = getWaitablePromise();
+			
 			mockServer
 				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
 				.reply(400);
-				
-			await waitForActions(() => {
-				dispatch(ContainersActions.createContainer(teamspace, projectId, mockContainer, onSuccess, onError))
-			}, [DialogsTypes.OPEN]);
+
+			dispatch(ContainersActions.createContainer(
+				teamspace,
+				projectId,
+				newContainer,
+				onSuccess,
+				() => { onError(); resolve()},
+			));
+
+			await promiseToResolve;
 
 			const containersInStore = selectContainers(getState());
 
@@ -323,20 +330,22 @@ describe('Containers: sagas', () => {
 		})
 
 		it('should call container settings endpoint with 404', async () => {
+			const { resolve, promiseToResolve } = getWaitablePromise();
+
 			mockServer
 				.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
 				.reply(404);
 				
-			await waitForActions(() => {
-				dispatch(ContainersActions.updateContainerSettings(
-					teamspace,
-					projectId,
-					containerId,
-					mockSettings,
-					onSuccess,
-					onError,
-				));
-			}, [DialogsTypes.OPEN]);
+			dispatch(ContainersActions.updateContainerSettings(
+				teamspace,
+				projectId,
+				containerId,
+				mockSettings,
+				onSuccess,
+				() => { onError(); resolve(); },
+			));
+
+			await promiseToResolve;
 
 			const containersInStore = selectContainers(getState());
 			expect(containersInStore).toEqual([mockContainer]);
@@ -366,15 +375,22 @@ describe('Containers: sagas', () => {
 		})
 
 		it('should call deleteContainer endpoint with 404 and open alert modal', async () => {
+			const { resolve, promiseToResolve } = getWaitablePromise();
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
 				.reply(404);
 
 			const containersBefore = selectContainers(getState());
 
-			await waitForActions(() => {
-				dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId, onSuccess, onError));
-			}, [DialogsTypes.OPEN]);
+			dispatch(ContainersActions.deleteContainer(
+				teamspace,
+				projectId,
+				containerId,
+				onSuccess,
+				() => { onError(); resolve(); },
+			));
+
+			await promiseToResolve;
 
 			const containersAfter = selectContainers(getState());
 			expect(containersBefore).toEqual(containersAfter);
