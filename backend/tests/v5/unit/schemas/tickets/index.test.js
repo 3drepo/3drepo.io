@@ -760,6 +760,47 @@ const testValidateTicket = () => {
 				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
 					.rejects.not.toBeUndefined();
 			});
+
+			test('Should succeed if we are trying to remove the state/clip from a required view', async () => {
+				const teamspace = generateRandomString();
+				const propName = generateRandomString();
+				const template = {
+					properties: [{
+						name: propName,
+						type: propTypes.VIEW,
+						required: true,
+					}],
+					modules: [],
+				};
+
+				const input = {
+					properties: {
+						[propName]: {
+							clippingPlanes: null,
+							state: null,
+						},
+					},
+				};
+
+				const oldTicket = {
+					title: generateRandomString(),
+					type: generateUUID(),
+					properties: {
+						[propName]: {
+							camera: {
+								type: 'perspective',
+								position: [1, 2, 3],
+								forward: [1, 2, 3],
+								up: [1, 2, 3],
+							},
+							clippingPlanes: [{ normal: [1, 1, 1], clipDirection: -1, distance: 100 }],
+							state: { showHidden: true },
+						},
+					},
+				};
+				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
+					.resolves.toEqual({ ...input, modules: {} });
+			});
 		});
 
 		testPresetValues();
