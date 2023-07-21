@@ -48,7 +48,7 @@ const pinColSchema = Yup.lazy((val) => {
 			default: types.color3Arr,
 			value: Yup.mixed().when('default', (def, schema) => (def ? schema.strip() : schema.required())),
 			color: types.color3Arr.when('default', (def, schema) => (def ? schema.strip() : schema.required())),
-		})).test('Color mapping', 'Must contain default entry', (arr) => arr.filter((obj) => !!obj.default).length === 1),
+		})).test('Color mapping', 'Must contain one default entry', (arr) => arr.filter((obj) => !!obj.default).length === 1),
 
 	});
 });
