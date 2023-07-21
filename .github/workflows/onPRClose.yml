@@ -58,5 +58,5 @@ jobs:
       with:
         azure-devops-project-url: https://dev.azure.com/3drepo/3drepo.io
         azure-pipeline-name: 'destroy'
-        azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN }}
+        azure-devops-token: ${{ secrets.AZURE_DEVOPS_TOKEN_JUL23 }}
         azure-pipeline-variables:  '{"branchName": "issue-${{ needs.get-details.outputs.issue-number }}"}'
