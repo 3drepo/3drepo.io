@@ -21,11 +21,11 @@ import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effect
 import { generatePath } from 'react-router-dom';
 import { isV5 } from '@/v4/helpers/isV5';
 
-import { UnityUtil } from '@/globals/unity-util';
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
+import { getAPIUrl } from '@/v4/services/api/default';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { ROUTES } from '../../constants/routes';
-import { createGroupsByColor, createGroupsByTransformations, prepareGroup } from '../../helpers/groups';
+import { prepareGroup } from '../../helpers/groups';
 import { createGroupsFromViewpoint, generateViewpoint, groupsOfViewpoint,
 	isViewpointLoaded,
 	mergeGroupsDataFromViewpoint, setGroupData } from '../../helpers/viewpoints';
@@ -48,7 +48,7 @@ import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
 import { selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
 
-export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
+export const getThumbnailUrl = (thumbnail) => getAPIUrl(thumbnail);
 
 export function* fetchViewpoints({ teamspace, modelId }) {
 	try {

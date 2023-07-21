@@ -16,11 +16,12 @@
  */
 
 import { UnityUtil } from "@/globals/unity-util";
+import { isEqual } from "lodash";
 import { getState } from "../modules/store";
-import { selectHiddenGeometryVisible, selectNodesBySharedIdsMap, selectTreeNodesList } from "../modules/tree";
+import { selectGetMeshesByIds, selectHiddenGeometryVisible, selectNodesBySharedIdsMap, selectTreeNodesList } from "../modules/tree";
 import { selectColorOverrides, selectTransformations } from "../modules/viewerGui";
 import { Viewer } from "../services/viewer/viewer";
-import { createGroupsByColor, createGroupsByTransformations } from "./groups";
+import { hexToArray } from "./colors";
 
 // This merges a viewpoint
 // TO BE REVIEWED.
@@ -33,6 +34,131 @@ const groupPropNameMap = {
 	transformation_group_ids: 'transformation_groups'
 };
 
+function createModelBySharedIdDictionary(sharedIdnodes) {
+	const state = getState()
+	// Converts shareIds to nodeIds
+	const nodes = getNodesIdsFromSharedIds([{shared_ids: sharedIdnodes}]);
+	const meshesInfo: any[] = selectGetMeshesByIds(nodes)(state);
+
+	// This generates a dictionary to get the teamspace and model from the sharedId: sharedId => {teamspace, modelId}
+	return meshesInfo.reduce((dict, meshesByModel) => {
+		const { teamspace, modelId } = meshesByModel;
+		const model = { teamspace, modelId};
+		return meshesByModel.meshes.reduce((d, mesh) => {
+			const index = nodes.indexOf(mesh);
+			d[sharedIdnodes[index]] = model;
+			return d;
+		}, dict);
+	}, {});
+}
+
+function createGroupsByColor(overrides) {
+	const sharedIdnodes = Object.keys(overrides);
+	const modelsDict = createModelBySharedIdDictionary(sharedIdnodes);
+
+	// This creates an array of groups grouped by colour
+	// // for example:
+	// [
+	// 	{
+	// 		"color": [
+	// 			149,
+	// 			0,
+	// 			255,
+	// 			103
+	// 		],
+	// 		"objects": [
+	// 			{
+	// 				"shared_ids": [
+	// 					"375b918f-0b25-4f3a-8edc-239ef5abf2e4",
+	// 					"3a9cfe9d-e96f-4242-979a-26ddbbc5226d",
+	// 					"e7a69a79-fe94-4fce-9ce2-60e999e3e1d4"
+	// 				],
+	// 				"account": "carmen",
+	// 				"model": "81b0b900-f80c-11ea-970b-03c55a1e1b3a"
+	// 			}
+	// 		],
+	// 		"totalSavedMeshes": 1
+	// 	},
+	// 	{
+	// 		"color": [
+	// 			0,
+	// 			255,
+	// 			0
+	// 		],
+	// 		"objects": [
+	// 			{
+	// 				"shared_ids": [
+	// 					"cab0b20f-a0e1-439a-9982-67bf032583ca",
+	// 					"997a1909-0cf6-43a9-af2b-bb232ce887c7",
+	// 					"525f8fd6-19b4-4739-96f6-cef8c7bac55b"
+	// 				],
+	// 				"account": "carmen",
+	// 				"model": "81b0b900-f80c-11ea-970b-03c55a1e1b3a"
+	// 			}
+	// 		],
+	// 		"totalSavedMeshes": 1
+	// 	}
+	// ]
+	//
+	return sharedIdnodes
+		.filter((objectId) => objectId in modelsDict)
+		.reduce((arr, objectId, i) =>  {
+			const { teamspace, modelId } = modelsDict[objectId];
+
+			// if there is a group with that color already use that one
+			let colorGroup = arr.find(({color}) => color.join(',') === hexToArray(overrides[objectId]).join(','));
+
+			if (!colorGroup) {
+				// Otherwise create a group with that color
+				colorGroup = { color: hexToArray(overrides[objectId]), objects: [] , totalSavedMeshes: 0};
+
+				arr.push(colorGroup);
+			}
+
+			let sharedIdsItem =  colorGroup.objects.find(({model, account}) => model === modelId && account === teamspace);
+
+			if (!sharedIdsItem) {
+				sharedIdsItem = { shared_ids: [], account: teamspace, model: modelId};
+				colorGroup.objects.push(sharedIdsItem);
+				colorGroup.totalSavedMeshes ++;
+			}
+
+			sharedIdsItem.shared_ids.push(objectId);
+			return arr;
+		}, []);
+}
+
+
+function createGroupsByTransformations(transformations) {
+	const sharedIdnodes = Object.keys(transformations);
+	const modelsDict = createModelBySharedIdDictionary(sharedIdnodes);
+
+	return sharedIdnodes.reduce((arr, objectId, i) =>  {
+		const { teamspace, modelId } = modelsDict[objectId];
+
+		// 1 . Use or create the transform group with that transformation value
+
+		// if there is group with that transformation already use that one
+		let transformGroup = arr.find(({ transformation }) => isEqual(transformation, transformations[objectId]));
+
+		if (!transformGroup) {
+			transformGroup = { transformation: transformations[objectId], objects: [] };
+			arr.push(transformGroup);
+		}
+
+		// 2. Add to objects the new or existing model/teamspace objects object
+		let sharedIdsItem =  transformGroup.objects.find(({model, account}) => model === modelId && account === teamspace);
+
+		if (!sharedIdsItem) {
+			sharedIdsItem = { shared_ids: [], account: teamspace, model: modelId};
+			transformGroup.objects.push(sharedIdsItem);
+		}
+
+		sharedIdsItem.shared_ids.push(objectId);
+		return arr;
+	}, []);
+
+}
 export const mergeGroupsDataFromViewpoint = (viewpointTarget, viewpointOrigin) => {
 
 	Object.keys(groupPropNameMap).forEach((groupPropNameById) => {
