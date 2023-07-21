@@ -17,12 +17,12 @@
 
 import filesize from 'filesize';
 import { EXTENSION_RE } from '../constants/resources';
-import * as API from '../services/api';
+import { getAPIUrl } from '../services/api/default';
 import { sortByDate } from './sorting';
 
 export const prepareResource = (teamspace, modelId, resource, propertyOverride = {}) => {
 	if (!resource.link) {
-		resource.link = API.getAPIUrl(`${teamspace}/${modelId}/resources/${resource._id}`);
+		resource.link = getAPIUrl(`${teamspace}/${modelId}/resources/${resource._id}`);
 		resource.type = (resource.name.match(EXTENSION_RE) || ['', ''])[1].toLowerCase();
 		resource.size = filesize(resource.size, {round: 0}).replace(' ', '');
 	} else {
