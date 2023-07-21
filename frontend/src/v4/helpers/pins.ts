@@ -26,6 +26,17 @@ export const pinsDiff = (pinsA: any[], pinsB: any[]): any[] => {
 	const pinsMap = pinsById(pinsB);
 
 	return pinsA.reduce( (diffPins, pin) => {
+		if (!isEqual(pin, pinsMap[pin.id])) {
+			diffPins.push(pin);
+		}
+		return diffPins;
+	}, []);
+};
+
+export const pinsRemoved = (pinsA: any[], pinsB: any[]): any[] => {
+	const pinsMap = pinsById(pinsB);
+
+	return pinsA.reduce((diffPins, pin) => {
 		if (!pinsMap[pin.id]) {
 			diffPins.push(pin);
 		}
@@ -66,11 +77,8 @@ export const ticketToPin = (ticket, type, isSelected, color) =>
 		id: ticket._id || 'newPin',
 		type,
 		isSelected,
-		account: ticket.account,
-		model: ticket.model,
 		position: ticket.position,
 		colour: color,
-		viewpoint: ticket.viewpoint
 	});
 
 export const issueToPin = (issue, isSelectedPin ) =>

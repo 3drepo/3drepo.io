@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatMessage } from '@/v5/services/intl';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { NoResults, SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { ListSubheader } from '@mui/material';
@@ -66,11 +65,7 @@ export const AssigneesSelectMenu = ({
 			{...props}
 		>
 			<SearchInputContainer>
-				<SearchInput
-					placeholder={formatMessage({ id: 'searchSelect.searchInput.placeholder', defaultMessage: 'Search...' })}
-					onClick={preventPropagation}
-					onKeyDown={preventPropagation}
-				/>
+				<SearchInput onClick={preventPropagation} onKeyDown={preventPropagation} />
 			</SearchInputContainer>
 			<ListSubheader>
 				<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />

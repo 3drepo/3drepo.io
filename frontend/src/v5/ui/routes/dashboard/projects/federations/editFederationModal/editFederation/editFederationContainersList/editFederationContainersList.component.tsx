@@ -97,7 +97,7 @@ export const EditFederationContainers = ({
 				sideElement={(
 					<CollapseSideElementGroup>
 						<ActionButton disabled={isEmpty(containers)} filteredContainers={sortedList}>
-							{isEmpty(query)
+							{!query.length
 								? actionButtonTexts.allResults
 								: actionButtonTexts.filteredResults}
 						</ActionButton>

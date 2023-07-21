@@ -14,20 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { trim } from 'lodash';
+import { isArray, trim } from 'lodash';
 import Highlighter from 'react-highlight-words';
 import { Tag } from './highlight.styles';
 
 interface IHighlight {
 	children: string;
-	search: string;
+	search: string | string[];
 }
 
 const HighlightTag = (props) => <Tag {...props} />;
 
 export const Highlight = ({ search, children = '' }: IHighlight): JSX.Element => (
 	<Highlighter
-		searchWords={[trim(search)]}
+		searchWords={isArray(search) ? search.map(trim) : [trim(search)]}
 		autoEscape
 		textToHighlight={children}
 		highlightTag={HighlightTag}

@@ -175,7 +175,10 @@ export const selectPins = createSelector(
 		} , []);
 	}
 
-	if (showDetails && detailedIssue && hasPin(detailedIssue)) {
+	// if is not showing pins show the pin while editing
+	// if is shoiwng the pins and is editing an existing issue, then dont add it here because is already been added in the if block 167
+	// if is a new issue show the pin.
+	if (showDetails && detailedIssue && (!showPins || !detailedIssue._id)  && hasPin(detailedIssue)) {
 		pinsToShow = pinsToShow.filter(({id}) => id !== detailedIssue._id);
 		pinsToShow.push(issueToPin(detailedIssue, true));
 	}

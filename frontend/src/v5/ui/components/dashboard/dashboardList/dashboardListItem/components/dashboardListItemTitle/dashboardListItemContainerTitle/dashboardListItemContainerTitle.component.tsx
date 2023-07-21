@@ -30,7 +30,6 @@ import { DashboardListItemTitle } from '../dashboardListItemTitle.component';
 interface IContainerTitle extends FixedOrGrowContainerProps {
 	container: IContainer;
 	isSelected?: boolean;
-	filterQuery?: string;
 	openInNewTab?: boolean;
 }
 
@@ -41,7 +40,7 @@ export const DashboardListItemContainerTitle = ({
 }: IContainerTitle): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const { query: filterQuery } = useContext(SearchContext);
+	const { query } = useContext(SearchContext);
 
 	const hasRevisions = container.revisionsCount > 0;
 	const linkProps = {
@@ -55,7 +54,7 @@ export const DashboardListItemContainerTitle = ({
 			subtitle={(
 				<LatestRevision
 					name={(
-						<Highlight search={filterQuery}>
+						<Highlight search={query}>
 							{container.latestRevision}
 						</Highlight>
 					)}
@@ -75,7 +74,7 @@ export const DashboardListItemContainerTitle = ({
 			disabled={!hasRevisions}
 		>
 			<Link {...linkProps}>
-				<Highlight search={filterQuery}>
+				<Highlight search={query}>
 					{container.name}
 				</Highlight>
 			</Link>
