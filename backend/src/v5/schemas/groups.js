@@ -22,6 +22,8 @@ const { types } = require('../utils/helper/yup');
 
 const Group = {};
 
+// NOTE: this is the v4 legacy schema - If you're after groups in tickets, see tickets schema.
+
 const objectEntryValidator = Yup.object().shape({
 	account: types.strings.username.required(),
 	model: types.id.required(),

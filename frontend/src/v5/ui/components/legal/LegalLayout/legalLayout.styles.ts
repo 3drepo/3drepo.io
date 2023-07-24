@@ -18,6 +18,11 @@
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 import styled from 'styled-components';
 
+export const Container = styled.div`
+	height: 100%;
+	overflow: overlay;
+`;
+
 export const LegalContent = styled.div`
 	width: 90%;
 	max-width: 800px;

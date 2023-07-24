@@ -1,0 +1,15 @@
+{
+	"domain":"https://3drepo.lan/",
+	"apiDomain": "https://3drepo.lan:443/api", 
+	"browserSize": {
+		"width": 1024,
+		"height": 768
+	},
+	"usersProfiles" : {
+		"viewer": {
+			"username":  "username",
+			"password": "password",
+			"email": "username@3drepo.orgs"
+		}
+	}
+}

@@ -17,8 +17,8 @@
 import { ITemplate, ITicket, TemplateModule } from '@/v5/store/tickets/tickets.types';
 import { some } from 'lodash';
 import { Accordion } from '@controls/accordion/accordion.component';
-import { getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
-import { CardContent, PanelsContainer } from './ticketsForm.styles';
+import { getModulePanelProps } from '@/v5/store/tickets/tickets.helpers';
+import { CardContent, PanelsContainer, ModuleTitle } from './ticketsForm.styles';
 import { TicketsTopPanel } from './ticketsTopPanel/ticketsTopPanel.component';
 import { PropertiesList } from './propertiesList.component';
 import { CommentsPanel } from './commentsPanel/commentsPanel.component';
@@ -32,9 +32,14 @@ interface ModulePanelProps {
 
 const ModulePanel = ({ module, scrollPanelIntoView, defaultExpanded, ...rest }: ModulePanelProps) => {
 	const required = some(module.properties, 'required');
+	const { title, ...accordionProps } = getModulePanelProps(module);
 	return (
-		// eslint-disable-next-line max-len
-		<Accordion {...getModulePanelTitle(module)} onChange={scrollPanelIntoView} defaultExpanded={defaultExpanded} required={required}>
+		<Accordion
+			{...accordionProps}
+			onChange={scrollPanelIntoView}
+			defaultExpanded={defaultExpanded}
+			title={<ModuleTitle required={required}>{title}</ModuleTitle>}
+		>
 			<PropertiesList module={`modules.${module.name || module.type}`} properties={module.properties || []} {...rest} />
 		</Accordion>
 	);
@@ -52,7 +57,7 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 		if (!isExpanding) return;
 		const panel = target.closest('.MuiAccordion-root');
 		if (!panel) return;
-		const scrollableContainer = panel.closest(`#${SCROLLBAR_ID}`).firstChild;
+		const scrollableContainer = panel.closest(`#${SCROLLBAR_ID}`);
 		setTimeout(() => {
 			scrollableContainer.scrollTo({
 				top: panel.offsetTop - 65,

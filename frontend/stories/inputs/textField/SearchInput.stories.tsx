@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -22,6 +22,12 @@ import { SearchContextComponent } from '@controls/search/searchContext';
 export default {
 	title: 'Inputs/Textfield/SearchInput',
 	component: SearchInput,
+	argTypes: {
+		variant: {
+			options: ['filled', 'outlined'],
+			control: { type: 'select' },
+		},
+	},
 	parameters: { controls: { exclude: ['ref', 'hiddenLabel', 'onClear'] } },
 } as ComponentMeta<typeof SearchInput>;
 

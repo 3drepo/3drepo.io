@@ -22,7 +22,7 @@ import { NumberField } from '@controls/inputs/numberField/numberField.component'
 import { PinDetails } from '@components/viewer/cards/tickets/pinDetails/pinDetails.component';
 import { ManyOfProperty } from './manyOfProperty.component';
 import { OneOfProperty } from './oneOfProperty.component';
-import { TicketImage } from './basicTicketImage/ticketImage/ticketImage.component';
+import { TicketImage } from './ticketImageContent/ticketImage/ticketImage.component';
 import { TicketView } from './ticketView/ticketView.component';
 
 export const TicketProperty = {
@@ -37,5 +37,3 @@ export const TicketProperty = {
 	image: TicketImage,
 	view: TicketView,
 };
-
-export const NEW_PIN_ID = 'new-Pin';

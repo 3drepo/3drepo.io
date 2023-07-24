@@ -16,19 +16,12 @@
  */
 import styled from 'styled-components';
 import { Display } from '@/v5/ui/themes/media';
-import { ScrollArea } from '@controls/scrollArea';
-
-export const DashboardScroll = styled(ScrollArea)`
-	>div {
-		display: flex;
-		flex-direction: column;
-	}
-`;
 
 export const Content = styled.div`
 	max-width: 1289px;
 	margin: 18px auto;
 	height: auto;
+	min-height: calc(100% - 78px);
 	width: 90vw;
 
 	@media (max-width: ${Display.Desktop}px) {

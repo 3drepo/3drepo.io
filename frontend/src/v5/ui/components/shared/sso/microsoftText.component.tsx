@@ -20,7 +20,6 @@ import { PRIVACY_ROUTE, TERMS_ROUTE } from '@/v5/ui/routes/routes.constants';
 import {
 	Container,
 	MicrosoftTitleText,
-	NewSticker,
 	MicrosoftInstructionsText,
 	MicrosoftInstructionsRemarkText,
 	MicrosoftInstructionsTermsText,
@@ -34,13 +33,7 @@ type MicrosoftTextProps = {
 export const MicrosoftText = ({ title, className }: MicrosoftTextProps) => (
 	<Container className={className}>
 		<MicrosoftTitleText>
-			<span>{title}</span>
-			<NewSticker>
-				<FormattedMessage
-					id="Microsoft.sso.new"
-					defaultMessage="New"
-				/>
-			</NewSticker>
+			{title}
 		</MicrosoftTitleText>
 		<MicrosoftInstructionsText>
 			<FormattedMessage

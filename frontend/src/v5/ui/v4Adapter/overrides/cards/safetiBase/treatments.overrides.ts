@@ -53,7 +53,7 @@ export default css`
 				
 				& ~ * {
 					position: relative;
-					border-radius: 4px;
+					border-radius: 8px;
 					background: ${({ theme }) => theme.palette.primary.contrast};
 					min-height: 25px;
 					box-sizing: border-box;

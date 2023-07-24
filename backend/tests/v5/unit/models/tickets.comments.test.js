@@ -132,7 +132,6 @@ const testAddComment = () => {
 			};
 
 			const fn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(newComment);
-			const publishFn = EventsManager.publish.mockResolvedValueOnce(undefined);
 
 			const _id = await Comments.addComment(teamspace, project, model, ticket, newComment, author);
 
@@ -142,8 +141,8 @@ const testAddComment = () => {
 			expect(fn).toHaveBeenCalledWith(teamspace, commentCol,
 				{ _id, teamspace, project, model, ticket, author, ...newComment, updatedAt, createdAt });
 
-			expect(publishFn).toHaveBeenCalledTimes(1);
-			expect(publishFn).toHaveBeenCalledWith(events.NEW_COMMENT, { teamspace,
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_COMMENT, { teamspace,
 				project,
 				model,
 				data: { ticket, _id, author, createdAt, ...newComment } });

@@ -15,25 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { EllipsisMenu as EllipsisMenuBase } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import styled from 'styled-components';
-
-export const ProjectImage = styled.img`
-	width: 100%;
-	height: 132px;
-	object-fit: cover;
-	margin-bottom: -5px;
-`;
 
 export const EllipsisMenuContainer = styled.div`
 	right: -7px;
 	top: 6px;
 	position: relative;
 	float: right;
-`;
-
-export const EllipsisMenu = styled(EllipsisMenuBase)`
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
-	}
 `;

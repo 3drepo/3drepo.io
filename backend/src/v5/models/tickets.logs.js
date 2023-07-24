@@ -21,6 +21,26 @@ const { generateUUID } = require('../utils/helper/uuids');
 const TicketLogs = {};
 const TICKET_LOGS_COL = 'tickets.logs';
 
+TicketLogs.addGroupUpdateLog = async (teamspace, project, model, ticket, groupId, { author, changes, timestamp }) => {
+	const ticketLog = {
+		_id: generateUUID(),
+		teamspace,
+		project,
+		model,
+		ticket,
+		author,
+		timestamp,
+		changes: {
+			group: {
+				_id: groupId,
+				to: changes,
+			},
+		},
+	};
+	await DB.insertOne(teamspace,
+		TICKET_LOGS_COL, ticketLog);
+};
+
 TicketLogs.addTicketLog = (teamspace, project, model, ticket, ticketLog) => DB.insertOne(teamspace,
 	TICKET_LOGS_COL, { ...ticketLog, _id: generateUUID(), teamspace, project, model, ticket });
 

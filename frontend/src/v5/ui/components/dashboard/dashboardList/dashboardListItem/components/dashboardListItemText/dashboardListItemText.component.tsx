@@ -36,9 +36,7 @@ export const DashboardListItemText = ({
 	const shouldHighlight = isString(children) && !dontHighlight;
 
 	return (
-		<FixedOrGrowContainer
-			{...containerProps}
-		>
+		<FixedOrGrowContainer {...containerProps}>
 			<Text selected={selected}>
 				{shouldHighlight && (
 					<Highlight search={query}>

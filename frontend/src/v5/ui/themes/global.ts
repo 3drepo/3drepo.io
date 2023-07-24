@@ -44,19 +44,6 @@ export const GlobalStyle = createGlobalStyle`
 
 	a {
 		color: currentColor;
-		
-		&:link {
-			text-decoration: none;
-		}
-
-		&:visited {
-			text-decoration: none;
-		}
-		&:hover {
-			text-decoration: none;
-		}
-
-		&:active { text-decoration: none; }
 	}
 
 	#viewer #unityViewer {
@@ -119,5 +106,21 @@ export const GlobalStyle = createGlobalStyle`
 	.rta__entity--selected {
 		text-decoration: none;
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	}
+
+	// scrollbar
+	* {
+		&::-webkit-scrollbar,
+		&::-webkit-scrollbar-thumb {
+			width: 11px;
+			height: 11px;
+			border-radius: 11px;
+			border: 3px solid transparent;
+		}
+	
+		&:hover::-webkit-scrollbar-thumb {
+			background: ${({ theme }) => theme.palette.base.lightest};
+			background-clip: padding-box;
+		}
 	}
 `;

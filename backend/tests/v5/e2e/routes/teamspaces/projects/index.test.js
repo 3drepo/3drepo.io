@@ -108,6 +108,12 @@ const testCreateProject = () => {
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
+		test('should fail if the new project name is taken by another project (case insensitive)', async () => {
+			const res = await agent.post(`${route}?key=${tsAdmin.apiKey}`)
+				.send({ name: testProject.name.toUpperCase() }).expect(templates.invalidArguments.status);
+			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		});
+
 		test('should create new project if new project data are valid', async () => {
 			const res = await agent.post(`${route}?key=${tsAdmin.apiKey}`)
 				.send({ name: 'Valid Name' }).expect(templates.ok.status);
@@ -160,6 +166,21 @@ const testUpdateProject = () => {
 
 			const projectsRes = await agent.patch(`${route}?key=${tsAdmin.apiKey}`)
 				.send({ name }).expect(templates.invalidArguments.status);
+			expect(projectsRes.body.code).toEqual(templates.invalidArguments.code);
+
+			// Delete test project afterwards
+			await agent.delete(`/v5/teamspaces/${teamspace}/projects/${res.body._id}?key=${tsAdmin.apiKey}`)
+				.expect(templates.ok.status);
+		});
+
+		test('should fail if the project name is taken by another project (case insensitive)', async () => {
+			const name = ServiceHelper.generateRandomString();
+			// create test project
+			const res = await agent.post(`/v5/teamspaces/${teamspace}/projects/?key=${tsAdmin.apiKey}`)
+				.send({ name }).expect(templates.ok.status);
+
+			const projectsRes = await agent.patch(`${route}?key=${tsAdmin.apiKey}`)
+				.send({ name: name.toUpperCase() }).expect(templates.invalidArguments.status);
 			expect(projectsRes.body.code).toEqual(templates.invalidArguments.code);
 
 			// Delete test project afterwards

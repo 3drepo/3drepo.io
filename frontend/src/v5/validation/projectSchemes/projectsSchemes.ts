@@ -19,27 +19,25 @@ import * as Yup from 'yup';
 import { trimmedString } from '../shared/validators';
 import { formatMessage } from '../../services/intl';
 
-const project = trimmedString
-	.max(120, formatMessage({
-		id: 'projectForm.name.error.max',
-		defaultMessage: 'Project name is limited to 120 characters',
-	}))
-	.required(
-		formatMessage({
-			id: 'projectForm.name.error.required',
-			defaultMessage: 'Project name is required',
-		}),
-	)
-	.matches(
-		/^[^/?=#+]{0,119}[^/?=#+ ]{1}$/,
-		formatMessage({
-			id: 'projectForm.name.error.illegalCharacters',
-			defaultMessage: 'Project name cannot contain the following characters: / ? = # +',
-		}),
-	);
-
-export const EditProjectSchema = Yup.object().shape({
-	projectName: project
+export const ProjectSchema = Yup.object().shape({
+	projectName: trimmedString
+		.max(120, formatMessage({
+			id: 'projectForm.name.error.max',
+			defaultMessage: 'Project name is limited to 120 characters',
+		}))
+		.required(
+			formatMessage({
+				id: 'projectForm.name.error.required',
+				defaultMessage: 'Project name is required',
+			}),
+		)
+		.matches(
+			/^[^/?=#+]{0,119}[^/?=#+ ]{1}$/,
+			formatMessage({
+				id: 'projectForm.name.error.illegalCharacters',
+				defaultMessage: 'Project name cannot contain the following characters: / ? = # +',
+			}),
+		)
 		.test(
 			'alreadyExistingProject',
 			formatMessage({
@@ -48,29 +46,7 @@ export const EditProjectSchema = Yup.object().shape({
 			}),
 			(projectName, { options }) => {
 				const existingNames = options.context.existingNames || [];
-				return !existingNames.includes(projectName);
-			},
-		),
-});
-
-export const CreateProjectSchema = Yup.object().shape({
-	teamspace: Yup.string()
-		.required(
-			formatMessage({
-				id: 'projectForm.teamspace.error.required',
-				defaultMessage: 'Teamspace is required',
-			}),
-		),
-	projectName: project
-		.test(
-			'alreadyExistingProject',
-			formatMessage({
-				id: 'projectForm.name.error.alreadyExisting',
-				defaultMessage: 'This name is already taken',
-			}),
-			(projectName, { options, parent }) => {
-				const existingNames = options.context.existingProjectsByTeamspace[parent.teamspace] || [];
-				return !existingNames.map((name) => name.trim()).includes(projectName);
+				return !existingNames.map((name) => name.trim().toLocaleLowerCase()).includes(projectName.toLocaleLowerCase());
 			},
 		),
 });

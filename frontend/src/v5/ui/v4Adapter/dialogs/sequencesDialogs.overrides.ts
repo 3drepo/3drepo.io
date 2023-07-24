@@ -133,7 +133,6 @@ export default css`
 	${ActivityDetailsStyles}
 	${SequenceTasksListItem} {
 		margin: 0;
-		padding: 0;
 	}
 	${LegendDialogStyles}
 `;

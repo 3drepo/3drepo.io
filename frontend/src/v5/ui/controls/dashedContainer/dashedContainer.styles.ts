@@ -26,7 +26,7 @@ export const Container = styled.div<{
 	gapSize?: number;
 	zeroPadding?: boolean;
 }>`
-	${({ theme, borderRadius = 5, strokeColor, strokeWidth = 3, dashSize = 5, gapSize = 5, zeroPadding }) => `
+	${({ theme, borderRadius = 8, strokeColor, strokeWidth = 3, dashSize = 5, gapSize = 5, zeroPadding }) => `
 		background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='${borderRadius}' ry='${borderRadius}' stroke='%23${getStrokeColor(strokeColor ?? theme.palette.base.lightest)}FF' stroke-width='${strokeWidth}' stroke-dasharray='${dashSize}%2c${gapSize}' stroke-linecap='butt'/%3e%3c/svg%3e");
 		border-radius: ${borderRadius}px;
 		background-color: ${theme.palette.primary.contrast};

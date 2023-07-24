@@ -33,6 +33,10 @@ export default {
 		value: {
 			type: 'string',
 		},
+		variant: {
+			options: ['filled', 'outlined'],
+			control: { type: 'select' },
+		},
 	},
 	component: TextField,
 	parameters: { controls: { exclude: [

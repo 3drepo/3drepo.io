@@ -25,7 +25,8 @@ import { DialogsActionsDispatchers, ProjectsActionsDispatchers } from '@/v5/serv
 import { IProject } from '@/v5/store/projects/projects.types';
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ProjectImage, EllipsisMenuContainer, EllipsisMenu } from './projectCard.styles';
+import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
+import { EllipsisMenuContainer } from './projectCard.styles';
 import { LinkCard } from '../linkCard.component';
 
 interface IProjectCard {
@@ -83,8 +84,8 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 			{...props}
 			to={to}
 			heading={<Highlight search={filterQuery}>{project.name}</Highlight>}
+			imgSrc={DEFAULT_IMAGE}
 		>
-			<ProjectImage src={DEFAULT_IMAGE} />
 			<EllipsisMenuContainer onClick={preventNavigation}>
 				<EllipsisMenu>
 					<EllipsisMenuItem

@@ -39,7 +39,6 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 			{properties.map(({
 				name,
 				type,
-				default: defaultValue,
 				readOnly: disabled,
 				required,
 				values,
@@ -56,9 +55,7 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 							required={required}
 							name={inputName}
 							formError={formError}
-							defaultValue={defaultValue}
 							onBlur={onPropertyBlur}
-							// @ts-ignore
 							values={values}
 						/>
 						{formError && <ErrorTextGap />}

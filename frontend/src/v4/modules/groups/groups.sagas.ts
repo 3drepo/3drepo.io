@@ -18,11 +18,11 @@
 import { cloneDeep } from 'lodash';
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
+import { TicketsCardActions } from '@/v5/store/tickets/card/ticketsCard.redux';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { GROUPS_TYPES } from '../../constants/groups';
 import { getRandomColor, hexToGLColor } from '../../helpers/colors';
 import { normalizeGroup, prepareGroup, prepareGroupWithCount } from '../../helpers/groups';
-import { searchByFilters } from '../../helpers/searching';
 import { calculateTotalMeshes } from '../../helpers/tree';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
@@ -371,11 +371,13 @@ function* setNewGroup() {
 function * clearColorOverrides() {
 	yield put(GroupsActions.clearColorOverridesSuccess());
 	yield put(ViewpointsActions.setSelectedViewpoint(null));
+	yield put(TicketsCardActions.setOverrides(null));
 }
 
 function * setOverrideAll({overrideAll}) {
 	if (!overrideAll) {
-		yield put(GroupsActions.clearColorOverrides());
+		yield put(GroupsActions.clearColorOverridesSuccess());
+		yield put(ViewpointsActions.setSelectedViewpoint(null));
 	} else {
 		yield put(GroupsActions.setOverrideAllSuccess());
 	}

@@ -17,6 +17,7 @@
 
 import { put, select, takeLatest } from 'redux-saga/effects';
 
+import { generateViewpoint } from '@/v4/helpers/viewpoints';
 import { CHAT_CHANNELS } from '../../constants/chat';
 
 import * as API from '../../services/api';
@@ -26,7 +27,6 @@ import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectUrlParams } from '../router/router.selectors';
 import { dispatch, getState } from '../store';
 import { ViewpointsActions } from '../viewpoints';
-import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import {  selectIsPaused, selectIsPresenting, selectJoinedPresentation,
 	selectSessionCode, PresentationActions, PresentationTypes } from './index';
 
@@ -41,7 +41,7 @@ function * streamViewpoint() {
 	const model = yield select(selectCurrentModel);
 	const code = yield select(selectSessionCode);
 
-	const view = yield generateViewpoint(teamspace, model, 'stream');
+	const view = yield generateViewpoint('stream');
 
 	try {
 		yield API.streamPresentation(teamspace, model, code, view);

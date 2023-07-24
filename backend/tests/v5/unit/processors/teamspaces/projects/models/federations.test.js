@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../../../../helper/path');
-const { generateRandomString } = require('../../../../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../../../../helper/services');
 
 jest.mock('../../../../../../../src/v5/models/projectSettings');
 const ProjectSettings = require(`${src}/models/projectSettings`);
@@ -30,6 +30,7 @@ jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
+const TicketGroup = require(`${src}/processors/teamspaces/projects/models/commons/tickets.groups`);
 const Federations = require(`${src}/processors/teamspaces/projects/models/federations`);
 const Views = require(`${src}/models/views`);
 jest.mock('../../../../../../../src/v5/models/views');
@@ -322,6 +323,36 @@ const testGetSettings = () => {
 	});
 };
 
+const testGetTicketGroupById = () => {
+	describe('Get ticket group by Id', () => {
+		const teamspace = generateRandomString();
+		const projectId = generateRandomString();
+		const federation = generateRandomString();
+		const revId = generateRandomString();
+		const ticket = generateRandomString();
+		const groupId = generateRandomString();
+
+		test('Should retrieve containers then call the general getTicketGroupById', async () => {
+			const containers = [generateRandomString(), generateRandomString()];
+
+			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: containers });
+
+			const expectedData = generateRandomObject();
+			const fn = jest.spyOn(TicketGroup, 'getTicketGroupById').mockResolvedValueOnce(expectedData);
+
+			await expect(Federations.getTicketGroupById(teamspace, projectId, federation, revId, ticket, groupId))
+				.resolves.toEqual(expectedData);
+
+			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federation,
+				{ subModels: 1 });
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, containers);
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/federations', () => {
 	testGetFederationList();
 	testAppendFavourites();
@@ -330,4 +361,5 @@ describe('processors/teamspaces/projects/federations', () => {
 	testAddFederation();
 	testDeleteFederation();
 	testGetSettings();
+	testGetTicketGroupById();
 });

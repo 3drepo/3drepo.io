@@ -219,7 +219,7 @@ const AttachResourcesLink = css`
 			text-decoration: none !important;
 			padding: 4px 19px;
 			margin: 0;
-			border-radius: 5px;
+			border-radius: 8px;
 		}
 	}
 `;
