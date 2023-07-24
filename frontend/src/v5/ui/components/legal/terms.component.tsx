@@ -40,7 +40,7 @@ export const TermsLegalPaper = () => (
 				<strong> us</strong> or <strong>we</strong>). We are a limited company registered in England and Wales
 				under company number 14772861, whose registered
 				office is at, <strong>7th Floor, Leconfield House, Curzon Street, London, England, W1J 5JA.</strong> Our registered
-				<strong> VAT reg TBC.</strong>
+				<strong> VAT number is GB 882 0009 44</strong>
 			</p>
 		</Clause>
 		<Clause><ClauseNo id="1.3.">1.3.</ClauseNo>
