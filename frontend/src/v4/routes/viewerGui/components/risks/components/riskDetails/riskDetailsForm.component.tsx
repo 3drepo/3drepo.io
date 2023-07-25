@@ -21,7 +21,6 @@ import Tooltip from '@mui/material/Tooltip';
 import { withFormik, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
 import { isV5 } from '@/v4/helpers/isV5';
-import * as Yup from 'yup';
 
 import {
 	ATTACHMENTS_RISK_TYPE,
@@ -32,16 +31,16 @@ import {
 	SHAPES_RISK_TYPE,
 	TREATMENT_RISK_TYPE,
 } from '../../../../../../constants/risks';
-import { LONG_TEXT_CHAR_LIM, VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
+import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { calculateLevelOfRisk } from '../../../../../../helpers/risks';
 import { canComment } from '../../../../../../helpers/risks';
-import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { AttachmentsFormTab } from '../attachmentsFormTab/attachmentsFormTab.component';
 import { MainRiskFormTab } from '../mainRiskFormTab/mainRiskFormTab.component';
 import { SequencingFormTab } from '../sequencingFormTab/sequencingFormTab.component';
 import { ShapesFormTab } from '../shapesFormTab/shapesFormTab.component';
 import { TreatmentRiskFormTab } from '../treatmentFormTab/treatmentFormTab.component';
 import { StyledTab, StyledTabs, TabContent } from './riskDetails.styles';
+import { RiskSchema } from './riskDetails.schema';
 
 interface IProps {
 	risk: any;
@@ -94,13 +93,6 @@ interface IState {
 	isSaving: boolean;
 	activeTab: string;
 }
-
-export const RiskSchema = Yup.object().shape({
-	desc: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
-	mitigation_desc: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
-	mitigation_detail: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
-	residual_risk: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
-});
 
 const RISK_TABS = isV5() ? V5_RISK_TABS : V4_RISK_TABS;
 class RiskDetailsFormComponent extends PureComponent<IProps, IState> {
