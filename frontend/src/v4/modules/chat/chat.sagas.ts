@@ -23,9 +23,9 @@ import { dispatch } from '../store';
 
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import { clientConfigService } from '../../services/clientConfig';
-import { Channel } from './channel';
 import { ChatActions, ChatTypes } from './chat.redux';
 import { Subscriptions } from './subscriptions';
+import { ChannelSelector } from './channelsSelector';
 
 const { host, path, reconnectionAttempts } = clientConfigService.chatConfig;
 // const socket = io(host, {
@@ -81,7 +81,7 @@ const getChannel = (teamspace, model = '') => {
 	const channelId: string = `${teamspace}${model ? `::${model}` : ''}`;
 
 	if (!channels[channelId]) {
-		channels[channelId] = new Channel(socket, teamspace, model, () => {
+		channels[channelId] = new ChannelSelector(socket, teamspace, model, () => {
 			dispatch(ChatActions.joinRoom(teamspace, model));
 		});
 	}
