@@ -59,7 +59,7 @@ export const TicketView = ({
 	...props
 }: ITicketView) => {
 	const context = useContext(TicketContext);
-	const hasViewpoint = value?.camera || value?.clippingPlanes || value?.state;
+	const hasViewpoint = value?.camera || value?.clippingPlanes;
 
 	// Viewpoint
 	const updateViewpoint = async () => {
