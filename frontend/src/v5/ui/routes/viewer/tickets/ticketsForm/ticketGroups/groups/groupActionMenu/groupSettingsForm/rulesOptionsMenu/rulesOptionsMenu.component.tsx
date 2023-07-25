@@ -19,27 +19,33 @@ import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { FormattedMessage } from 'react-intl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Float } from './rulesOptionsMenu.styles';
 import { EllipsisMenuItemDelete } from '../../../../../properties/ticketImageContent/ticketImageAction/ticketImageAction.styles';
 
-export const RulesOptionsMenu = ({ value: rules, onClear, onPaste }) => (
-	<Float>
-		<EllipsisMenu>
-			<CopyToClipboard text={JSON.stringify(rules.map(({ id, ...rest }) => rest))}>
+export const RulesOptionsMenu = ({ value: rules, onClear, onPaste }) => {
+	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
+
+	return (
+		<Float>
+			<EllipsisMenu>
+				<CopyToClipboard text={JSON.stringify(rules.map(({ id, ...rest }) => rest))}>
+					<EllipsisMenuItem
+						title={(<FormattedMessage id="tickets.groups.newGroupForm.rules.options.copy" defaultMessage="Copy filters" />)}
+						hidden={!rules.length}
+					/>
+				</CopyToClipboard>
 				<EllipsisMenuItem
-					title={(<FormattedMessage id="tickets.groups.newGroupForm.rules.options.copy" defaultMessage="Copy filters" />)}
-					hidden={!rules.length}
+					title={(<FormattedMessage id="tickets.groups.newGroupForm.rules.options.paste" defaultMessage="Paste filters" />)}
+					onClick={onPaste}
+					hidden={!isAdmin}
 				/>
-			</CopyToClipboard>
-			<EllipsisMenuItem
-				title={(<FormattedMessage id="tickets.groups.newGroupForm.rules.options.paste" defaultMessage="Paste filters" />)}
-				onClick={onPaste}
-			/>
-			<EllipsisMenuItemDelete
-				title={(<FormattedMessage id="tickets.groups.newGroupForm.rules.options.clear" defaultMessage="Clear All" />)}
-				onClick={onClear}
-				hidden={!rules.length}
-			/>
-		</EllipsisMenu>
-	</Float>
-);
+				<EllipsisMenuItemDelete
+					title={(<FormattedMessage id="tickets.groups.newGroupForm.rules.options.clear" defaultMessage="Clear All" />)}
+					onClick={onClear}
+					hidden={!rules.length || !isAdmin}
+				/>
+			</EllipsisMenu>
+		</Float>
+	);
+};
