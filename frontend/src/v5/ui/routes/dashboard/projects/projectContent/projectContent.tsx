@@ -32,6 +32,7 @@ import { ProjectPermissions } from '../projectPermissions/projectPermissions.com
 import { Content } from './projectContent.styles';
 import { ProjectSettings } from '../projectSettings/projectSettings.component';
 import { Board } from '../board/board.component';
+import { TicketsTable } from '../tickets/tickets.components';
 
 export const ProjectContent = () => {
 	const { teamspace } = useParams<DashboardParams>();
@@ -62,8 +63,8 @@ export const ProjectContent = () => {
 					<Route title={formatMessage({ id: 'pageTitle.issuesAndRisks', defaultMessage: ':project - Issues and risks' })} exact path={`${path}/t/board`}>
 						<Redirect to={`${discardSlash(pathname)}/issues`} />
 					</Route>
-					<Route title={formatMessage({ id: 'pageTitle.tasks', defaultMessage: ':project - Tasks' })} exact path={`${path}/t/tasks`}>
-						Tasks
+					<Route title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Ticket' })} exact path={`${path}/t/tickets`}>
+						<TicketsTable />
 					</Route>
 					<Route title={formatMessage({ id: 'pageTitle.projectSettings', defaultMessage: ':project - Project Settings' })} exact path={`${path}/t/project_settings`}>
 						<ProjectSettings />

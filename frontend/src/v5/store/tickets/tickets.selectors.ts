@@ -30,6 +30,15 @@ export const selectTickets = createSelector(
 	(state, modelId) => orderBy(state.ticketsByModelId[modelId] || [], `properties.${BaseProperties.CREATED_AT}`, 'desc'),
 );
 
+export const selectTicketsByFedAndContainers = createSelector(
+	selectTicketsDomain,
+	(state, fedOrContainersIds: string[]) => fedOrContainersIds,
+	(state, fedOrContainersIds) => {
+		const tickets = fedOrContainersIds.flatMap((modelId) => state.ticketsByModelId[modelId] || []);
+		return orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
+	},
+);
+
 export const selectTemplates = createSelector(
 	selectTicketsDomain,
 	(state, modelId) => modelId,
