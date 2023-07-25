@@ -18,7 +18,7 @@
 import EventEmitter from 'eventemitter3';
 
 import { UnityUtil } from '@/globals/unity-util';
-import { isString } from 'lodash';
+import { isEmpty, isString } from 'lodash';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -670,7 +670,7 @@ export class ViewerService {
 	/**
 	 * Pins
 	 */
-	public addPin = async ({id, position, norm, colour, isSelected, type}: IPin) => {
+	public showPin = async ({id, position, norm, colour, type}: IPin) => {
 		await this.isViewerReady();
 		await this.isModelLoaded();
 		if (type === 'risk') {
@@ -682,7 +682,9 @@ export class ViewerService {
 		}
 	}
 
-	public setSelectionPin({id, isSelected}) {
+	public setSelectionPin = async ({id, isSelected}) => {
+		await this.isViewerReady();
+		await this.isModelLoaded();
 		if (isSelected) {
 			UnityUtil.selectPin(id);
 		} else {
@@ -690,7 +692,9 @@ export class ViewerService {
 		}
 	}
 
-	public removePin(pin: IPin | string) {
+	public removePin = async (pin: IPin | string) => {
+		await this.isViewerReady();
+		await this.isModelLoaded();
 		UnityUtil.removePin(isString(pin) ? pin : pin.id);
 	}
 
@@ -813,7 +817,6 @@ export class ViewerService {
 	}
 
 	public resetMeshColor(account, model, meshIDs) {
-		UnityUtil.resetMeshOpacity(account, model, meshIDs);
 		UnityUtil.resetMeshColor(account, model, meshIDs);
 	}
 
@@ -1078,11 +1081,13 @@ export class ViewerService {
 
 	// This is for v5, matching the view schema
 	public async setViewpoint(viewpoint) {
-		const { position, up, forward: view_dir, type, size: orthographicSize } = viewpoint.camera;
-		const camera =  { position, up, view_dir, type, orthographicSize, look_at: null,  account: null, model: null };
+		if (!isEmpty(viewpoint.camera)) {
+			const { position, up, forward: view_dir, type, size: orthographicSize } = viewpoint.camera;
+			const camera =  { position, up, view_dir, type, orthographicSize, look_at: null,  account: null, model: null };
+			await this.setCamera(camera);
+		}
 
 		this.updateClippingPlanes(viewpoint.clippingPlanes, '', '');
-		await this.setCamera(camera);
 	}
 
 	public async goToDefaultViewpoint() {

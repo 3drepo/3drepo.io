@@ -24,4 +24,12 @@ ArrayHelper.getArrayDifference = (firstArray, secondArray) => difference(secondA
 
 ArrayHelper.getCommonElements = intersection;
 
+ArrayHelper.splitArrayIntoChunks = (array, maxLength) => {
+	const res = [];
+	for (let i = 0; i < array.length; i += maxLength) {
+		res.push(array.slice(i, i + maxLength));
+	}
+	return res;
+};
+
 module.exports = ArrayHelper;

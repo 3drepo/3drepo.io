@@ -18,33 +18,6 @@
 import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
 
-export const PinContainer = styled.div<{ selected: boolean, error: boolean, disabled: boolean }>`
-	width: auto;
-	border: solid 1px;
-	${({ disabled, theme: { palette } }) => (disabled ? css`
-		border-color: ${palette.secondary.lightest};
-		color: ${palette.base.light};
-	` : css`
-		border-color: ${palette.base.lightest};
-		color: ${palette.secondary.main};
-	`)}
-	border-radius: 8px;
-	padding: 10px 15px;
-
-	${({ selected, theme: { palette } }) => selected && css`
-		box-shadow: 0 0 4px ${palette.primary.main};
-		border-color: ${palette.primary.main};
-	`}
-
-	${({ error, theme: { palette } }) => error && css`
-		color: ${palette.error.main};
-		background-color: ${palette.error.lightest};
-		border-color: ${palette.error.main};
-		box-shadow: 0 0 4px ${palette.error.main};
-	`}
-
-`;
-
 export const PinActions = styled.div`
 	display: flex;
 	gap: 14px;

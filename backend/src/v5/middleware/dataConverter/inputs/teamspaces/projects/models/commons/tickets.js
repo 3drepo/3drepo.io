@@ -16,7 +16,7 @@
  */
 
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
-const { processReadOnlyValues, validateTicket: validateTicketSchema } = require('../../../../../../../schemas/tickets');
+const { deserialiseUUIDsInTicket, processReadOnlyValues, validateTicket: validateTicketSchema } = require('../../../../../../../schemas/tickets');
 const { checkTicketTemplateExists } = require('../../../settings');
 const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 const { getTicketById } = require('../../../../../../../models/tickets');
@@ -46,7 +46,9 @@ const validateTicket = (isNewTicket) => async (req, res, next) => {
 			throw createResponseCode(templates.invalidArguments, 'No valid properties to update.');
 		}
 
+		req.body = deserialiseUUIDsInTicket(req.body, template);
 		processReadOnlyValues(req.ticketData, req.body, user);
+
 		await next();
 	} catch (err) {
 		const response = codeExists(err.code) ? err : createResponseCode(templates.invalidArguments, err.message);

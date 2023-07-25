@@ -21,7 +21,7 @@ import { PaperTitle, SupportEmail } from './LegalLayout/legalLayout.styles';
 
 export const PrivacyLegalPaper = () => (
 	<>
-		<PaperTitle>3D Repo Ltd Privacy Policy</PaperTitle>
+		<PaperTitle>Asite 3D Repo Ltd Privacy Policy</PaperTitle>
 		<p>At 3D Repo, we respect your privacy and we are committed to protecting your personal data.
 			This privacy notice informs you about how we look after your personal data when you visit our website,
 			use our services or otherwise conduct business with us, and
@@ -39,15 +39,15 @@ export const PrivacyLegalPaper = () => (
 			</p>
 			<p>This website is not intended for children and we do not knowingly collect data relating to children.</p>
 			<h3>Controller</h3>
-			<p>We are 3D Repo Limited and 3D Repo Limited is the controller and is responsible for your personal data.
-				Our address is 307 Euston Road, London NW1 3AD, UK. We are registered with the Information Commissioner
-				as a data controller and our registration number is ZA059890.
+			<p>We are Asite 3D Repo Limited and Asite 3D Repo Limited is the controller and is responsible for your personal data.
+				Our address is 7th Floor, Leconfield House, Curzon Street, London, England, W1J 5JA . We are registered with the Information Commissioner
+				as a data controller and our registration number is ZB538538.
 			</p>
 			<p>If you have any questions about this policy or about your rights regarding your personal data, you can
 				contact us by emailing <SupportEmail />.
 			</p>
 			<h3>Changes to the privacy notice and your duty to inform us of changes</h3>
-			<p>This version of our privacy policy was last updated on 17 March 2021.</p>
+			<p>This version of our privacy policy was last updated on 19 April 2023.</p>
 			<p>It is important that the personal data we hold about you is accurate and current. Please keep us informed
 				if your personal data changes during your relationship with us.
 			</p>

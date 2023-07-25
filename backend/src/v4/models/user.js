@@ -741,7 +741,7 @@ async function _createAccounts(roles, userName) {
 
 									if (!project) {
 										project = {
-											_id: projectObj._id,
+											_id: utils.uuidToString(projectObj._id),
 											name: projectObj.name,
 											permissions: [],
 											models: []
@@ -838,23 +838,16 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove) 
 		});
 	} else {
 
-		const promises = [];
+		await Promise.all([
+			teamspacePerm ? AccountPermissions.remove(teamspace, userToRemove) : Promise.resolve(),
+			...models.map(model =>	changePermissions(teamspace.user, model._id, model.permissions.filter(p => p.user !== userToRemove))),
+			removeUserFromProjects(teamspace.user, userToRemove),
+			removeUserFromAnyJob(teamspace.user, userToRemove)
 
-		if (teamspacePerm) {
-			promises.push(AccountPermissions.remove(teamspace, userToRemove));
-		}
-
-		promises.push(models.map(model =>
-			changePermissions(teamspace.user, model._id, model.permissions.filter(p => p.user !== userToRemove))));
-
-		promises.push(removeUserFromProjects(teamspace.user, userToRemove));
-
-		promises.push(removeUserFromAnyJob(teamspace.user, userToRemove));
-
-		await Promise.all(promises);
+		]);
 	}
 
-	return await Role.revokeTeamSpaceRoleFromUser(userToRemove, teamspace.user);
+	return Role.revokeTeamSpaceRoleFromUser(userToRemove, teamspace.user);
 };
 
 User.addTeamMember = async function(teamspace, userToAdd, job, permissions) {

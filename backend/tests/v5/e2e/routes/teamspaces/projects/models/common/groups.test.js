@@ -44,9 +44,9 @@ const testExportGroups = () => {
 	const fedNoGroups = ServiceHelper.generateRandomModel({ isFederation: true });
 
 	const groups = [
-		ServiceHelper.generateGroup(teamspace, container._id),
-		ServiceHelper.generateGroup(teamspace, container._id, false, true),
-		ServiceHelper.generateGroup(teamspace, container._id, true, false),
+		ServiceHelper.generateLegacyGroup(teamspace, container._id),
+		ServiceHelper.generateLegacyGroup(teamspace, container._id, false, true),
+		ServiceHelper.generateLegacyGroup(teamspace, container._id, true, false),
 	];
 
 	const postData = { groups: groups.map(({ _id }) => _id) };
@@ -104,8 +104,8 @@ const testExportGroups = () => {
 				...userProms,
 				...modelProms,
 				ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
-				ServiceHelper.db.createGroups(teamspace, container._id, groups),
-				ServiceHelper.db.createGroups(teamspace, fed._id, groups),
+				ServiceHelper.db.createLegacyGroups(teamspace, container._id, groups),
+				ServiceHelper.db.createLegacyGroups(teamspace, fed._id, groups),
 			]);
 		});
 		describe.each(generateTestData(true))('Federations', runTest);
@@ -131,15 +131,15 @@ const testImportGroups = () => {
 	const fed = ServiceHelper.generateRandomModel({ isFederation: true });
 
 	const groups = [
-		ServiceHelper.generateGroup(teamspace, container._id),
-		ServiceHelper.generateGroup(teamspace, container._id, false, true),
-		ServiceHelper.generateGroup(teamspace, container._id, true, false),
+		ServiceHelper.generateLegacyGroup(teamspace, container._id),
+		ServiceHelper.generateLegacyGroup(teamspace, container._id, false, true),
+		ServiceHelper.generateLegacyGroup(teamspace, container._id, true, false),
 	];
 
 	const postData = { groups };
 
 	const changedGroup = { ...groups[0], name: ServiceHelper.generateRandomString() };
-	const newGroup = ServiceHelper.generateGroup(teamspace, container._id, true, false);
+	const newGroup = ServiceHelper.generateLegacyGroup(teamspace, container._id, true, false);
 	const partialGroupUpdateTestData = [changedGroup, newGroup];
 
 	const generateTestData = (isFed) => {

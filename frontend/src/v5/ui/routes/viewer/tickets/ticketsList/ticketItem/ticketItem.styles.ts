@@ -56,7 +56,11 @@ export const ChipList = styled.div`
 	margin: 8px 0 0;
 `;
 
-export const Assignees = styled(ControlledAssigneesSelect)`
+export const Assignees = styled(ControlledAssigneesSelect).attrs({
+	maxItems: 7,
+	showEmptyText: true,
+	multiple: true,
+})`
 	margin-left: auto;
 	height: 28px;
 `;

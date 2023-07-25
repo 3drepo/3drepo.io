@@ -17,21 +17,22 @@
 
 import { MenuItemProps } from '@mui/material';
 import { AssigneeCircle } from '@controls/assigneesSelect/assigneeCircle/assigneeCircle.component';
-import { ListItemContainer, Subtitle, Title, Checkbox } from './assigneesSelectMenuItem.styles';
+import { ListItemContainer, Subtitle, Title, Checkbox, Titles } from './assigneesSelectMenuItem.styles';
 
 type IAssigneesSelectMenuItem = MenuItemProps & {
 	title: string;
 	subtitle?: string;
 	assignee: string;
+	multiple: boolean;
 };
 
-export const AssigneesSelectMenuItem = ({ assignee, title, subtitle, selected, ...props }: IAssigneesSelectMenuItem) => (
-	<ListItemContainer {...props}>
+export const AssigneesSelectMenuItem = ({ assignee, title, subtitle, selected, multiple, ...props }: IAssigneesSelectMenuItem) => (
+	<ListItemContainer selected={!multiple && selected} {...props}>
 		<AssigneeCircle assignee={assignee} />
-		<div>
+		<Titles>
 			<Title>{title}</Title>
 			<Subtitle>{subtitle}</Subtitle>
-		</div>
-		<Checkbox checked={selected} />
+		</Titles>
+		{ multiple && <Checkbox checked={selected} /> }
 	</ListItemContainer>
 );

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import _, { isEqual } from 'lodash';
+import _ from 'lodash';
 
 export const dirtyValues = (
 	allValues: object,
@@ -39,7 +39,7 @@ export const isBasicValue = (value: any) => _.isNull(value) || !!(value?.toDate)
 // value.toDate assumes that is a wrapped date type.
 
 /**
- * returns the tree but if the the leaf is an empty string, it changes it to null
+ * returns the tree but if the the leaf is empty, it changes it to null
  * example:
  * const tree = {
  *    properties: {
@@ -57,7 +57,7 @@ export const isBasicValue = (value: any) => _.isNull(value) || !!(value?.toDate)
  *
  */
 
-export const nullifyEmptyStrings = (tree) => Object.fromEntries(
+export const nullifyEmptyObjects = (tree) => Object.fromEntries(
 	Object.keys(tree).map((key) => {
 		const value = tree[key];
 		if (value === '') {
@@ -68,7 +68,7 @@ export const nullifyEmptyStrings = (tree) => Object.fromEntries(
 			return [key, value];
 		}
 
-		return [key, nullifyEmptyStrings(value)];
+		return [key, nullifyEmptyObjects(value)];
 	}),
 );
 
@@ -111,7 +111,7 @@ export const diffObjects = (objec1, object2) => {
 
 	return Object.keys(objec1).reduce((accum, key) => {
 		if (keyObjc2.includes(key)) {
-			if (isEqual(objec1[key], object2[key])) {
+			if (_.isEqual(objec1[key], object2[key])) {
 				return accum;
 			} if (isBasicValue(objec1[key])) {
 				return { ...accum, [key]: objec1[key] };

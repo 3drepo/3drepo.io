@@ -32,7 +32,6 @@ export const ControlledAssigneesSelect = ({
 		onBlur(values);
 	};
 	const onChange = (e) => setValues(e?.target?.value);
-
 	return (
 		<AssigneesSelect value={values} onBlur={handleClose} onChange={onChange} {...props} />
 	);

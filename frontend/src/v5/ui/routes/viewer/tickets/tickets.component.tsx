@@ -22,8 +22,10 @@ import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import {
 	enableRealtimeContainerNewTicket,
 	enableRealtimeContainerUpdateTicket,
+	enableRealtimeContainerUpdateTicketGroup,
 	enableRealtimeFederationNewTicket,
 	enableRealtimeFederationUpdateTicket,
+	enableRealtimeFederationUpdateTicketGroup,
 } from '@/v5/services/realtime/ticket.events';
 import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -32,9 +34,10 @@ import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component';
 import { NewTicketCard } from './newTicket/newTicket.component';
 import { ViewerParams } from '../../routes.constants';
+import { TicketContextComponent } from './ticket.context';
 
 export const Tickets = () => {
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const view = TicketsCardHooksSelectors.selectView();
 
@@ -55,11 +58,13 @@ export const Tickets = () => {
 			combineSubscriptions(
 				enableRealtimeFederationNewTicket(teamspace, project, containerOrFederation),
 				enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation),
+				enableRealtimeFederationUpdateTicketGroup(teamspace, project, containerOrFederation, revision),
 			);
 		} else {
 			combineSubscriptions(
 				enableRealtimeContainerNewTicket(teamspace, project, containerOrFederation),
 				enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation),
+				enableRealtimeContainerUpdateTicketGroup(teamspace, project, containerOrFederation, revision),
 			);
 		}
 	}, [containerOrFederation]);
@@ -67,8 +72,8 @@ export const Tickets = () => {
 	return (
 		<>
 			{view === TicketsCardViews.List && <TicketsListCard />}
-			{view === TicketsCardViews.Details && <TicketDetailsCard />}
-			{view === TicketsCardViews.New && <NewTicketCard />}
+			{view === TicketsCardViews.Details && <TicketContextComponent><TicketDetailsCard /></TicketContextComponent>}
+			{view === TicketsCardViews.New && <TicketContextComponent><NewTicketCard /></TicketContextComponent>}
 		</>
 	);
 };

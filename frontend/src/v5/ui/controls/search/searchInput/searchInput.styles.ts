@@ -16,12 +16,14 @@
  */
 import styled, { css } from 'styled-components';
 import {
-	IconButton as IconButtonComponent,
-	TextField as TextFieldComponent,
-	InputAdornment as InputAdornmentComponent,
+	IconButton as BaseIconButton,
+	InputAdornment as BaseInputAdornment,
+	Autocomplete as BaseAutocomplete,
+	TextField as BaseTextField,
 } from '@mui/material';
+import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 
-export const IconButton = styled(IconButtonComponent)`
+export const IconButton = styled(BaseIconButton)`
 	padding: 6px;
 	width: 22px;
 
@@ -30,7 +32,56 @@ export const IconButton = styled(IconButtonComponent)`
 	}
 `;
 
-export const TextField = styled(TextFieldComponent)`
+export const SearchChip = styled(FilterChip)`
+	.MuiChip-root {
+		color: ${({ theme }) => theme.palette.primary.main};
+		background-color: ${({ theme }) => theme.palette.primary.lightest};
+		padding-right: 3px;
+	}
+`;
+
+export const Autocomplete = styled(BaseAutocomplete)`
+	margin: 8px;
+	.MuiTextField-root {
+		margin: 0;
+		&.MuiFormControl-root .MuiInputBase-root.MuiAutocomplete-inputRoot {
+			padding: 5px 5px 5px 32px;
+			gap: 3px;
+			height: unset;
+			min-height: 32px;
+			
+			.MuiInputBase-input {
+				height: 1rem;
+				padding: 0;
+				min-width: 55px;
+			}
+			.MuiInputAdornment-root {
+				margin: 0;
+				svg {
+					margin: 0 0 0 -21px;
+					color: ${({ theme }) => theme.palette.base.main};
+				}
+			}
+			.MuiAutocomplete-endAdornment {
+				margin: 0 0 0 auto;
+				svg {
+					color: ${({ theme }) => theme.palette.base.main};
+					height: 10px;
+					width: 10px;
+				}
+			}
+			${SearchChip} + .MuiInputBase-input {
+				padding-left: 7px;
+				box-sizing: border-box;
+			}
+			.MuiInputAdornment-root + :is(${/* sc-selector */ SearchChip} .MuiChip-root, .MuiInputBase-input) {
+				margin-left: -3px;
+			}
+		}
+	}
+`;
+
+export const TextField = styled(BaseTextField)`
 	margin: 8px;
 
 	.MuiInputBase-adornedEnd {
@@ -42,7 +93,7 @@ export const TextField = styled(TextFieldComponent)`
 	}
 `;
 
-export const StartAdornment = styled(InputAdornmentComponent).attrs({
+export const StartAdornment = styled(BaseInputAdornment).attrs({
 	position: 'start',
 })`
 	margin-right: 0;
@@ -51,7 +102,7 @@ export const StartAdornment = styled(InputAdornmentComponent).attrs({
 	}
 `;
 
-export const EndAdornment = styled(InputAdornmentComponent).attrs({
+export const EndAdornment = styled(BaseInputAdornment).attrs({
 	position: 'end',
 })<{ $isVisible?: boolean }>`
 	${({ $isVisible }) => !$isVisible && css`

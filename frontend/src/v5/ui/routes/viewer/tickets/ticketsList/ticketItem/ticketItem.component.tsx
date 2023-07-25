@@ -25,8 +25,11 @@ import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, STATUS_MAP, TREATMENT_LEVELS_MAP 
 import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
 import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
-import { IssueProperties, SafetibaseProperties, TicketsCardViews } from '../../tickets.constants';
+import { Highlight } from '@controls/highlight';
+import { useContext } from 'react';
+import { SearchContext } from '@controls/search/searchContext';
 import { Ticket, Id, Title, ChipList, Assignees, IssuePropertiesRow } from './ticketItem.styles';
+import { IssueProperties, SafetibaseProperties, TicketsCardViews } from '../../tickets.constants';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -36,6 +39,9 @@ type TicketItemProps = {
 
 export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const { query } = useContext(SearchContext);
+	const queries = query ? JSON.parse(query) : [];
+
 	const isFederation = modelIsFederation(containerOrFederation);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
@@ -63,8 +69,16 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			key={ticket._id}
 			$selected={selected}
 		>
-			<Id>{template?.code}:{ticket.number}</Id>
-			<Title onClick={expandTicket}>{ticket.title}</Title>
+			<Id>
+				<Highlight search={queries}>
+					{`${template?.code}:${ticket.number}`}
+				</Highlight>
+			</Id>
+			<Title onClick={expandTicket}>
+				<Highlight search={queries}>
+					{ticket.title}
+				</Highlight>
+			</Title>
 			<ChipList>
 				{status && <Chip {...STATUS_MAP[status]} variant="outlined" />}
 				{riskLevel && <Chip {...RISK_LEVELS_MAP[riskLevel]} variant="filled" />}
@@ -74,7 +88,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 				<IssuePropertiesRow>
 					<DueDateWithLabel value={dueDate} onBlur={onBlurDueDate} disabled={readOnly} />
 					<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" label="" />
-					<Assignees maxItems={7} showEmptyText value={assignees} onBlur={onBlurAssignees} disabled={readOnly} />
+					<Assignees value={assignees} onBlur={onBlurAssignees} disabled={readOnly} />
 				</IssuePropertiesRow>
 			)}
 		</Ticket>

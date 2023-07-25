@@ -64,7 +64,7 @@ export enum TicketStatuses {
 	CLOSED = 'Closed',
 	VOID = 'Void',
 }
-export enum TreatmentLevels {
+export enum TreatmentStatuses {
 	UNTREATED = 'Untreated',
 	PROPOSED = 'Proposed',
 	AGREED_PARTIAL = 'Agreed (Partial)',
@@ -156,27 +156,27 @@ export const STATUS_MAP = {
 };
 
 export const TREATMENT_LEVELS_MAP = {
-	[TreatmentLevels.UNTREATED]: {
+	[TreatmentStatuses.UNTREATED]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.untreated', defaultMessage: 'Untreated' }),
 		color: COLOR.BASE_LIGHT,
 	},
-	[TreatmentLevels.PROPOSED]: {
+	[TreatmentStatuses.PROPOSED]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.proposed', defaultMessage: 'Proposed' }),
 		color: '#0288D1',
 	},
-	[TreatmentLevels.AGREED_PARTIAL]: {
+	[TreatmentStatuses.AGREED_PARTIAL]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.agreedPartial', defaultMessage: 'Agreed (Partial)' }),
 		color: '#4CAF50',
 	},
-	[TreatmentLevels.AGREED_FULLY]: {
+	[TreatmentStatuses.AGREED_FULLY]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.agreedFully', defaultMessage: 'Agreed (Fully)' }),
 		color: '#2E7D32',
 	},
-	[TreatmentLevels.REJECTED]: {
+	[TreatmentStatuses.REJECTED]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.rejected', defaultMessage: 'Rejected' }),
 		color: COLOR.ERROR_MAIN,
 	},
-	[TreatmentLevels.VOID]: {
+	[TreatmentStatuses.VOID]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.void', defaultMessage: 'Void' }),
 		color: '#000000',
 	},

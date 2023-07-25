@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatMessage } from '@/v5/services/intl';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { NoResults, SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { ListSubheader } from '@mui/material';
@@ -40,6 +39,7 @@ export const AssigneesSelectMenu = ({
 	open,
 	value,
 	onClick,
+	multiple,
 	...props
 }: SelectProps) => {
 	const [users, setUsers] = useState([]);
@@ -59,16 +59,13 @@ export const AssigneesSelectMenu = ({
 		// @ts-ignore
 		<HiddenSelect
 			open={open}
-			value={value || []}
+			value={value}
 			onClick={onClickList}
+			multiple={multiple}
 			{...props}
 		>
 			<SearchInputContainer>
-				<SearchInput
-					placeholder={formatMessage({ id: 'searchSelect.searchInput.placeholder', defaultMessage: 'Search...' })}
-					onClick={preventPropagation}
-					onKeyDown={preventPropagation}
-				/>
+				<SearchInput onClick={preventPropagation} onKeyDown={preventPropagation} />
 			</SearchInputContainer>
 			<ListSubheader>
 				<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
@@ -79,6 +76,7 @@ export const AssigneesSelectMenu = ({
 					assignee={_id}
 					value={_id}
 					title={_id}
+					multiple={multiple}
 				/>
 			))}
 			{!jobs.length && (
@@ -102,6 +100,7 @@ export const AssigneesSelectMenu = ({
 					assignee={user.user}
 					title={`${user.firstName} ${user.lastName}`}
 					subtitle={user.job}
+					multiple={multiple}
 				/>
 			))}
 			{!users.length && (

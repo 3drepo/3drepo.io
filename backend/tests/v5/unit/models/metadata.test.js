@@ -15,9 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
+
 const { src } = require('../../helper/path');
 
-const { generateRandomString } = require('../../helper/services');
+const { determineTestGroup, generateUUID, generateRandomString, generateRandomObject } = require('../../helper/services');
+
+jest.mock('../../../../src/v5/models/metadata.rules');
+const RulesModel = require(`${src}/models/metadata.rules`);
 
 const Metadata = require(`${src}/models/metadata`);
 const db = require(`${src}/handler/db`);
@@ -160,7 +165,77 @@ const testUpdateCustomMetadata = () => {
 	});
 };
 
-describe('models/metadata', () => {
+const testGetMetadataByRules = () => {
+	describe('Get metadata by rules', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const revId = generateRandomString();
+
+		test('Should return all matching positive query results (no negative queries)', async () => {
+			const rules = times(5, generateRandomObject);
+			const posQueries = times(5, generateRandomObject);
+			const expectedData = times(10, generateRandomObject);
+			const projection = generateRandomObject();
+
+			RulesModel.generateQueriesFromRules.mockReturnValueOnce({ positives: posQueries, negatives: [] });
+
+			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
+
+			await expect(Metadata.getMetadataByRules(teamspace, project, model, revId, rules, projection))
+				.resolves.toEqual({ matched: expectedData, unwanted: [] });
+
+			expect(RulesModel.generateQueriesFromRules).toHaveBeenCalledTimes(1);
+			expect(RulesModel.generateQueriesFromRules).toHaveBeenCalledWith(rules);
+
+			const expectedPosQuery = { $and: [{ rev_id: revId, type: 'meta' }, ...posQueries] };
+
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, `${model}.scene`, expectedPosQuery, projection);
+		});
+
+		test('Should return all matching positive and negative query results', async () => {
+			const rules = times(5, generateRandomObject);
+			const posQueries = times(5, generateRandomObject);
+			const negQueries = times(5, generateRandomObject);
+			const projection = generateRandomObject();
+
+			const positiveRes = times(10, () => ({ ...generateRandomObject(), _id: generateUUID() }));
+			const negativeRes = [];
+
+			const expectedData = { matched: [], unwanted: [] };
+
+			positiveRes.forEach((entry, i) => {
+				expectedData.matched.push(entry);
+				if (i % 3 === 0) {
+					expectedData.unwanted.push(entry);
+					negativeRes.push(entry);
+				}
+			});
+
+			RulesModel.generateQueriesFromRules.mockReturnValueOnce({ positives: posQueries, negatives: negQueries });
+
+			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce(positiveRes);
+			jest.spyOn(db, 'find').mockResolvedValueOnce(negativeRes);
+
+			await expect(Metadata.getMetadataByRules(teamspace, project, model, revId, rules, projection))
+				.resolves.toEqual(expectedData);
+
+			expect(RulesModel.generateQueriesFromRules).toHaveBeenCalledTimes(1);
+			expect(RulesModel.generateQueriesFromRules).toHaveBeenCalledWith(rules);
+
+			const expectedPosQuery = { $and: [{ rev_id: revId, type: 'meta' }, ...posQueries] };
+			const expectedNegQuery = { $or: negQueries };
+
+			expect(findFn).toHaveBeenCalledTimes(2);
+			expect(findFn).toHaveBeenCalledWith(teamspace, `${model}.scene`, expectedPosQuery, projection);
+			expect(findFn).toHaveBeenCalledWith(teamspace, `${model}.scene`, expectedNegQuery, projection);
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testGetMetadataById();
 	testUpdateCustomMetadata();
+	testGetMetadataByRules();
 });
