@@ -71,9 +71,7 @@ export const TicketView = ({
 
 	// Image
 	const onImageChange = (newImg) => {
-		const { screenshot, ...viewpoint } = value || {};
-		if (!newImg && isEmpty(viewpoint)) onChange(null);
-		onChange({ ...value, screenshot: newImg ? stripBase64Prefix(newImg) : null });
+		onChange({ ...value, screenshot: newImg ? stripBase64Prefix(newImg) : '' });
 	};
 
 	// Camera
