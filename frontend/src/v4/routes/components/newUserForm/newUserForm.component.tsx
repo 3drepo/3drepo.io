@@ -26,6 +26,7 @@ import Grid from '@mui/material/Grid';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { JobItem } from '../jobItem/jobItem.component';
 import { UserItem } from '../userItem/userItem.component';
@@ -164,6 +165,13 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 		</UserNotExistsContainer>
 	));
 
+	public handleSubmit = () => {
+		this.handleSave();
+		if (isV5()) {
+			this.props.onCancel();
+		}
+	};
+
 	public render() {
 		const { clearSuggestions, jobs, users, title } = this.props;
 		return (
@@ -228,7 +236,7 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 							color="secondary"
 							disabled={this.state.userNotExists || !this.state.name || !this.state.job || this.state.job.length === 0}
 							aria-label="Save"
-							onClick={this.handleSave}>
+							onClick={this.handleSubmit}>
 							+ Add user
 						</SaveButton>
 					</Grid>
