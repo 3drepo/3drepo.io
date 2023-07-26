@@ -69,8 +69,10 @@ const buttonContainerStyling = css`
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 
 		.MuiButtonBase-root.MuiButtonBase-root:last-child {
-			${primaryButtonStyling}
 			line-height: 1;
+			&:not(:disabled) {
+				${primaryButtonStyling}
+			}
 
 			&, &:hover, &:active {
 				border: 0;
