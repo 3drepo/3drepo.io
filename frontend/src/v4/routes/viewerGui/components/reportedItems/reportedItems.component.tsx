@@ -30,9 +30,9 @@ import { FilterPanel } from '../../../components/filterPanel/filterPanel.compone
 import { ListNavigation } from '../listNavigation/listNavigation.component';
 import { PanelBarActions } from '../panelBarActions';
 import { PreviewListItem } from '../previewListItem/previewListItem.component';
-import { ListContainer, Summary } from '../risks/risks.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
+import { ListContainer, Summary } from './reportedItems.styles';
 
 interface IProps {
 	className?: string;
