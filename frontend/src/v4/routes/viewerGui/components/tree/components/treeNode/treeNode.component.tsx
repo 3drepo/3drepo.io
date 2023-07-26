@@ -178,7 +178,7 @@ export class TreeNode extends PureComponent<IProps, any> {
 		const { expanded, isSearchResult, style, key, active, hasFederationRoot } = this.props;
 
 		return (
-			<Tooltip title={this.node.name} placement="bottom">
+			<Tooltip title={this.node.name.trim()} placement="bottom">
 				<Container
 					style={style}
 					key={key}
