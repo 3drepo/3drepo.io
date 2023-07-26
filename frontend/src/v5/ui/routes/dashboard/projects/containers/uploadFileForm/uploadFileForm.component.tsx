@@ -46,8 +46,8 @@ import { SidebarForm } from './sidebarForm/sidebarForm.component';
 import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
 
 const DEFAULT_SORT_CONFIG = {
-	column: 'file',
-	direction: SortingDirection.ASCENDING,
+	column: ['file'],
+	direction: [SortingDirection.ASCENDING],
 };
 
 type UploadModalLabelTypes = {

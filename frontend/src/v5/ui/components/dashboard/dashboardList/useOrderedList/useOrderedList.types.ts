@@ -18,11 +18,11 @@
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 
 export type ISortConfig = {
-	column: string;
-	direction: SortingDirection;
+	column: string[];
+	direction: SortingDirection[];
 };
 
 export const DEFAULT_SORT_CONFIG = {
-	column: 'lastUpdated',
-	direction: SortingDirection.DESCENDING,
+	column: ['lastUpdated', 'name'],
+	direction: [SortingDirection.DESCENDING, SortingDirection.ASCENDING],
 };
