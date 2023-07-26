@@ -16,6 +16,7 @@
  */
 
 import { Dispatch, useState, cloneElement } from 'react';
+import { slice } from 'lodash';
 import { SortingDirection } from '../dashboardList.types';
 import { ISortConfig } from '../useOrderedList';
 import { DashboardListHeaderContainer } from './dashboardListHeader.styles';
@@ -39,20 +40,19 @@ export const DashboardListHeader = ({
 		if (!colName) {
 			return {};
 		}
-
 		const onClick = () => {
-			let { direction: directionState } = sort;
-			if (colName === sort.column) {
-				directionState = directionState === SortingDirection.ASCENDING
+			const { direction: directionState } = sort;
+			let newDirection: SortingDirection = SortingDirection.DESCENDING;
+			if (colName === sort.column[0]) {
+				newDirection = directionState[0] === SortingDirection.ASCENDING
 					? SortingDirection.DESCENDING : SortingDirection.ASCENDING;
-			} else {
-				directionState = SortingDirection.DESCENDING;
 			}
-			setSort({ column: colName, direction: directionState });
-			onSortingChange({ column: colName, direction: directionState });
+			setSort((prev) => ({ column: [colName, ...slice(prev.column, 1)], direction: [newDirection, ...slice(prev.direction, 1)] }));
+			// @ts-ignore
+			onSortingChange((prev) => ({ column: [colName, ...slice(prev.column, 1)], direction: [newDirection, ...slice(prev.direction, 1)] }));
 		};
 
-		const sortingDirection = (colName === sort?.column ? sort.direction : undefined);
+		const sortingDirection = (colName === sort?.column[0] ? sort.direction : undefined);
 
 		return { sortingDirection, onClick, sort: true };
 	};
