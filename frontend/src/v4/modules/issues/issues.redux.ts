@@ -147,12 +147,6 @@ export const fetchIssueFailure = (state = INITIAL_STATE) => {
 
 export const saveIssueSuccess = (state = INITIAL_STATE, { issue, resetComponentState = true }) => {
 	const issuesMap = updateIssueProps(state.issuesMap, issue._id, issue);
-	const oldPosition = state.issuesMap[state.componentState.activeIssue]?.position;
-	const newPosition = issuesMap[state.componentState.activeIssue]?.position;
-
-	if (!isEqual(oldPosition, newPosition)) {
-		issuesMap[state.componentState.activeIssue].position = oldPosition;
-	}
 
 	const newComponentState = { ...state.componentState };
 
