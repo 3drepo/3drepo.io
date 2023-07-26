@@ -168,9 +168,10 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 		</UserNotExistsContainer>
 	));
 
-	public handleSubmit = () => {
+	public handleSubmit = async () => {
 		this.handleSave();
-		if (isV5()) {
+		await new Promise(r => setTimeout(r, 200));
+		if (isV5() && !this.state.userNotExists) {
 			this.props.onCancel();
 		}
 	};
