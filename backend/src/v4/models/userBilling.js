@@ -488,7 +488,7 @@ UserBilling.getSubscriptionLimits = async (teamspace) => {
 			} else {
 				if(!subscriptions[key].expiryDate ||
 					subscriptions[key].expiryDate > Date.now()) {
-					sumLimits.spaceLimit += subscriptions[key].data;
+					sumLimits.spaceLimit += subscriptions[key].data ?? 0;
 					if(sumLimits.collaboratorLimit !== "unlimited") {
 						sumLimits.collaboratorLimit = subscriptions[key].collaborators === "unlimited" ?
 							"unlimited" : sumLimits.collaboratorLimit + subscriptions[key].collaborators;
