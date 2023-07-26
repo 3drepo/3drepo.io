@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2018 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,28 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
 
-import { List } from '@mui/material';
-import Notifications from '@mui/icons-material/Notifications';
-import { COLOR } from '../../../styles';
-import { NotificationsPanelHeader } from './components/panelHeader/panelHeader.component';
-
-export const NotificationsList = styled(List)`
-	&& {
-		height: 100%;
-		width: 300px;
-	}
-`;
-
-export const NotificationsIcon = styled(Notifications)`
-	&& {
-		color: ${COLOR.WHITE};
-		font-size: 24px;
-		filter: drop-shadow(0 0 2px ${COLOR.BLACK_30});
-	}
-`;
-
-export const NotificationWeekHeader = styled(NotificationsPanelHeader)`
-	padding-bottom: 0;
-`;
+export const TREE_LEVELS = {
+	TEAMSPACE: 1,
+	PROJECT: 2,
+	MODEL: 3
+};
