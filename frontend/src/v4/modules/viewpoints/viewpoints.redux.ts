@@ -50,6 +50,7 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	toggleSortOrder: [],
 	fetchViewpointGroups: ['teamspace', 'modelId', 'view'],
 	addViewpointGroupsBeingLoaded: ['ids'],
+	reset: [],
 }, { prefix: 'VIEWPOINTS/' });
 
 export interface IViewpointsComponentState {
@@ -161,6 +162,8 @@ const toggleSortOrder = (state = INITIAL_STATE) => {
 	return fetchViewpointsSuccess(state,  {viewpoints});
 };
 
+export const reset = () => ({...INITIAL_STATE});
+
 export const reducer = createReducer(INITIAL_STATE, {
 	[ViewpointsTypes.SET_PENDING_STATE]: setPendingState,
 	[ViewpointsTypes.FETCH_VIEWPOINTS_SUCCESS]: fetchViewpointsSuccess,
@@ -173,4 +176,5 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewpointsTypes.FETCH_GROUP_SUCCESS]: fetchGroupSuccess,
 	[ViewpointsTypes.TOGGLE_SORT_ORDER]: toggleSortOrder,
 	[ViewpointsTypes.ADD_VIEWPOINT_GROUPS_BEING_LOADED]: addViewpointGroupsBeingLoaded,
+	[ViewpointsTypes.RESET]: reset,
 });
