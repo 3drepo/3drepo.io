@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as FederationsSaga from '@/v5/store/federations/federations.sagas';
-import { expectSaga } from 'redux-saga-test-plan';
 import { FederationsActions } from '@/v5/store/federations/federations.redux';
 import { mockServer } from '../../internals/testing/mockServer';
 import { omit } from 'lodash';
@@ -25,6 +23,7 @@ import {
 	prepareMockStats,
 	prepareMockRawSettingsReply,
 	prepareMockSettingsReply,
+	prepareMockBaseFederation,
 } from './federations.fixtures';
 import { prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
 import { prepareMockContainers } from './federations.fixtures';
@@ -208,19 +207,24 @@ describe('Federations: sagas', () => {
 
 		it('should fetch federation settings', async () => {
 			populateStore();
-			const settings = prepareMockRawSettingsReply(federationMockFactory());
+			const baseFederation = prepareMockBaseFederation(mockFederation)
+			const rawSettings = prepareMockRawSettingsReply(mockFederation);
+			const settings = prepareFederationSettingsForFrontend(rawSettings);
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
-				.reply(200, settings);
+				.reply(200, rawSettings);
+			
+			populateStore(baseFederation);
+			await waitForActions(() => {
+				dispatch(FederationsActions.fetchFederationSettings(teamspace, projectId, federationId))
+			}, [FederationsActions.fetchFederationSettingsSuccess(
+				projectId,
+				federationId,
+				settings,
+			)]);
 
-			await expectSaga(FederationsSaga.default)
-				.dispatch(FederationsActions.fetchFederationSettings(teamspace, projectId, federationId))
-				.put(FederationsActions.fetchFederationSettingsSuccess(
-					projectId,
-					federationId,
-					prepareFederationSettingsForFrontend(settings),
-				))
-				.silentRun();
+			const federationInStore = selectFederationById(getState(), federationId);
+			expect(federationInStore).toEqual({ ...baseFederation, ...settings });
 		})
 	})
 
