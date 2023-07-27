@@ -582,8 +582,7 @@ function* setSelectedNodesVisibility({ nodeId, visibility }) {
 
 	const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
 	const hasSelectedNodes = !!fullySelectedNodes.length;
-	const nodesIds = hasSelectedNodes ? fullySelectedNodes : [nodeId];
-	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, hasSelectedNodes));
+	yield put(TreeActions.setTreeNodesVisibility([nodeId], visibility, hasSelectedNodes));
 }
 
 function* collapseNodes({ nodesIds }) {
