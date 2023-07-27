@@ -55,18 +55,17 @@ export const Tickets = () => {
 
 	useEffect(() => {
 		if (isFederation) {
-			combineSubscriptions(
+			return combineSubscriptions(
 				enableRealtimeFederationNewTicket(teamspace, project, containerOrFederation),
 				enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation),
 				enableRealtimeFederationUpdateTicketGroup(teamspace, project, containerOrFederation, revision),
 			);
-		} else {
-			combineSubscriptions(
-				enableRealtimeContainerNewTicket(teamspace, project, containerOrFederation),
-				enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation),
-				enableRealtimeContainerUpdateTicketGroup(teamspace, project, containerOrFederation, revision),
-			);
 		}
+		return combineSubscriptions(
+			enableRealtimeContainerNewTicket(teamspace, project, containerOrFederation),
+			enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation),
+			enableRealtimeContainerUpdateTicketGroup(teamspace, project, containerOrFederation, revision),
+		);
 	}, [containerOrFederation]);
 
 	return (
