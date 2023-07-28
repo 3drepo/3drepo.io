@@ -15,46 +15,54 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DialogsActions, DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
+import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 import { UsersActions } from '@/v5/store/users/users.redux';
-import * as UsersSaga from '@/v5/store/users/users.sagas';
+import { selectUsersByTeamspace } from '@/v5/store/users/users.selectors';
 import { expectSaga } from 'redux-saga-test-plan';
 import { mockServer } from '../../internals/testing/mockServer';
+import { createTestStore } from '../test.helpers';
+import { userWithAvatarMockFactory } from './users.fixtures';
 
 expectSaga.DEFAULT_TIMEOUT = 100;
 
 describe('Users: sagas', () => {
-	const members = [];
-	const teamspace = 'myTeamspace'
+	const teamspace = 'myTeamspace';
+	const user = userWithAvatarMockFactory(teamspace);
+	const members = [user];
+	let dispatch, getState, waitForActions;
 
-	// This action creator is being hijacked becayse we actually dont care about the props for testing,
-	// only that a dialog of type alert is being dispatched.
-	const spy = jest.spyOn(DialogsActions, 'open').mockImplementation((modalType,props) => {
-		return ({ type: DialogsTypes.OPEN, modalType, props:{}});
-	});
+	beforeEach(() => {
+		({ dispatch, getState, waitForActions } = createTestStore());
+	})
 
 	describe('fetch', () => {
 		it('should fetch users data and dispatch FETCH_SUCCESS', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/members`)
 				.reply(200, { members });
+			
+			await waitForActions(() => {
+				dispatch(UsersActions.fetchUsers(teamspace));
+			}, [UsersActions.fetchUsersSuccess(teamspace, members)]);
 
-			await expectSaga(UsersSaga.default)
-					.dispatch(UsersActions.fetchUsers(teamspace))
-					.put(UsersActions.fetchUsersSuccess(teamspace, members))
-					.silentRun();
+			const usersInStore = selectUsersByTeamspace(getState(), teamspace);
+			expect(usersInStore).toEqual(members);
 		});
 
 		it('should handle fetch users api error and dispatch a dialog opening for an alert', async () => {
-			const nonExistentTeamspace = 'nonExistentTeamspace';
-			mockServer
-				.get(`/teamspaces/${nonExistentTeamspace}/members`)
-				.reply(404)
+			dispatch(UsersActions.fetchUsersSuccess(teamspace, []));
 
-			await expectSaga(UsersSaga.default)
-					.dispatch(UsersActions.fetchUsers(nonExistentTeamspace))
-					.put(DialogsActions.open('alert'))
-					.silentRun();
+			const nonExistingTeamspace = 'nonExistingTeamspace';
+			mockServer
+				.get(`/teamspaces/${nonExistingTeamspace}/members`)
+				.reply(404)
+			
+			await waitForActions(() => {
+				dispatch(UsersActions.fetchUsers(nonExistingTeamspace));
+			}, [DialogsTypes.OPEN]);
+
+			const usersInStore = selectUsersByTeamspace(getState(), teamspace);
+			expect(usersInStore).toEqual([]);
 		});
 
 	});
