@@ -15,9 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { expectSaga } from 'redux-saga-test-plan';
-
-import * as ProjectsSaga from '@/v5/store/projects/projects.sagas';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { mockServer } from '../../internals/testing/mockServer';
 import { createTestStore } from '../test.helpers';
