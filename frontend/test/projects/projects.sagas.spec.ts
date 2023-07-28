@@ -20,24 +20,43 @@ import { expectSaga } from 'redux-saga-test-plan';
 import * as ProjectsSaga from '@/v5/store/projects/projects.sagas';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { mockServer } from '../../internals/testing/mockServer';
-import { alertAction } from '../test.helpers';
+import { createTestStore } from '../test.helpers';
+import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
+import { projectMockFactory } from './projects.fixtures';
+import { selectCurrentProjects } from '@/v5/store/projects/projects.selectors';
+import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
+import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 
 describe('Teamspaces: sagas', () => {
-	const teamspace = 'teamspaceName';
-	const projectId = 'projectId';
+	const teamspace = 'teamspace';
+	const projectId = 'project';
+	const mockProject = projectMockFactory({ _id: projectId });
+	let onSuccess, onError;
+	let dispatch, getState, waitForActions;
+	let resolve, promiseToResolve;
+
+	beforeEach(() => {
+		onSuccess = jest.fn();
+		onError = jest.fn();
+		({ dispatch, getState, waitForActions } = createTestStore());
+		({ resolve, promiseToResolve } = getWaitablePromise());
+		dispatch(TeamspacesActions.setCurrentTeamspace(teamspace));
+	});
 
 	describe('fetch', () => {
 		it('should fetch projects data and dispatch FETCH_SUCCESS', async () => {
-			const projects = [];
+			const projects = [mockProject];
 
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects`)
 				.reply(200, { projects })
 
-			await expectSaga(ProjectsSaga.default)
-				.dispatch(ProjectsActions.fetch(teamspace))
-				.put(ProjectsActions.fetchSuccess(teamspace, projects))
-				.silentRun();
+			await waitForActions(() => {
+				dispatch(ProjectsActions.fetch(teamspace));
+			}, [ProjectsActions.fetchSuccess(teamspace, projects)]);
+
+			const projectsInStore = selectCurrentProjects(getState());
+			expect(projectsInStore).toEqual(projects);
 		});
 
 		it('should handle projects api error and dispatch FETCH_FAILURE', async () => {
@@ -45,39 +64,50 @@ describe('Teamspaces: sagas', () => {
 				.get(`/teamspaces/${teamspace}/projects`)
 				.reply(404)
 
-			await expectSaga(ProjectsSaga.default)
-				.dispatch(ProjectsActions.fetch(teamspace))
-				.put.like(alertAction('trying to fetch projects'))
-				.put(ProjectsActions.fetchFailure())
-				.silentRun();
+			await waitForActions(() => {
+				dispatch(ProjectsActions.fetch(teamspace));
+			}, [DialogsTypes.OPEN]);
+				
+			const projectsInStore = selectCurrentProjects(getState());
+			expect(projectsInStore).toEqual([]);
 		});
 	});
 
 	describe('delete Project', () => {
-		const onSuccess = jest.fn();
-		const onError = jest.fn();
+		beforeEach(() => {
+			dispatch(ProjectsActions.fetchSuccess(teamspace, [mockProject]));
+		});
 		it('should call deleteProject endpoint', async () => {
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}`)
 				.reply(200)
 
-			await expectSaga(ProjectsSaga.default)
-				.dispatch(ProjectsActions.deleteProject(teamspace, projectId, onSuccess, onError))
-				.put(ProjectsActions.deleteProjectSuccess(teamspace, projectId))
-				.silentRun();
-
-			expect(onSuccess).toBeCalled();
+			await waitForActions(() => {
+				dispatch(ProjectsActions.deleteProject(teamspace, projectId, onSuccess, onError));
+			}, [ProjectsActions.deleteProjectSuccess(teamspace, projectId)]);
+				
+			const projectsInStore = selectCurrentProjects(getState());
+			expect(projectsInStore).toEqual([]);
+			expect(onSuccess).toHaveBeenCalled();
+			expect(onError).not.toHaveBeenCalled();
 		});
 		it('should call deleteProject endpoint with 404 and open alert modal', async () => {
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}`)
 				.reply(404)
 
-			await expectSaga(ProjectsSaga.default)
-				.dispatch(ProjectsActions.deleteProject(teamspace, projectId, onSuccess, onError))
-				.silentRun();
-
-			expect(onError).toBeCalled();
+			dispatch(ProjectsActions.deleteProject(
+				teamspace,
+				projectId,
+				onSuccess,
+				() => { onError(); resolve(); },
+			));
+			await promiseToResolve;
+					
+			const projectsInStore = selectCurrentProjects(getState());
+			expect(projectsInStore).toEqual([mockProject]);
+			expect(onSuccess).not.toHaveBeenCalled();
+			expect(onError).toHaveBeenCalled();
 		});
 	});
 
@@ -89,62 +119,84 @@ describe('Teamspaces: sagas', () => {
 			_id,
 			isAdmin: true,
 		};
-		const onSuccess = jest.fn();
-		const onError = jest.fn();
+
+		beforeEach(() => {
+			dispatch(ProjectsActions.fetchSuccess(teamspace, []));
+		});
 
 		it('should create a project', async () => {
 			mockServer
-					.post(`/teamspaces/${teamspace}/projects`, { name })
-					.reply(200, { _id });
+				.post(`/teamspaces/${teamspace}/projects`, { name })
+				.reply(200, { _id });
 
-			await expectSaga(ProjectsSaga.default)
-					.dispatch(ProjectsActions.createProject(teamspace, name, onSuccess, onError))
-					.put(ProjectsActions.createProjectSuccess(teamspace, newProject))
-					.silentRun();
+			await waitForActions(() => {
+					dispatch(ProjectsActions.createProject(teamspace, name, onSuccess, onError))
+			}, [ProjectsActions.createProjectSuccess(teamspace, newProject)]);
 
-			expect(onSuccess).toBeCalled();
+			const projectsInStore = selectCurrentProjects(getState());
+			expect(projectsInStore).toEqual([newProject]);
+			expect(onSuccess).toHaveBeenCalled();
+			expect(onError).not.toHaveBeenCalled();
 		});
 
 		it('should call error callback when API call errors', async () => {
 			mockServer
-					.post(`/teamspaces/${teamspace}/projects`, { name })
-					.reply(404)
+				.post(`/teamspaces/${teamspace}/projects`, { name })
+				.reply(404)
 
-			await expectSaga(ProjectsSaga.default)
-					.dispatch(ProjectsActions.createProject(teamspace, name, onSuccess, onError))
-					.silentRun();
-			
-			expect(onError).toBeCalled();
+			dispatch(ProjectsActions.createProject(
+				teamspace,
+				name,
+				onSuccess, 
+				() => { onError(); resolve(); },
+			));
+			await promiseToResolve;
+
+			const projectsInStore = selectCurrentProjects(getState());
+			expect(projectsInStore).toEqual([]);
+			expect(onSuccess).not.toHaveBeenCalled();
+			expect(onError).toHaveBeenCalled();
 		});
 	});
 
 	describe('updateProject', () => {
-		const onSuccess = jest.fn();
-		const onError = jest.fn();
-		const project = { name: 'newName' };
+		const updatedProject = { ...mockProject, name: mockProject + "new" };
+		beforeEach(() => {
+			dispatch(ProjectsActions.fetchSuccess(teamspace, [mockProject]));
+		});
 
 		it('should call updateProject endpoint', async () => {
 			mockServer
 				.patch(`/teamspaces/${teamspace}/projects/${projectId}`)
 				.reply(200)
 
-			await expectSaga(ProjectsSaga.default)
-				.dispatch(ProjectsActions.updateProject(teamspace, projectId, project, onSuccess, onError))
-				.put(ProjectsActions.updateProjectSuccess(teamspace, projectId, project))
-				.silentRun();
+			await waitForActions(() => {
+				dispatch(ProjectsActions.updateProject(teamspace, projectId, updatedProject, onSuccess, onError));
+			}, [ProjectsActions.updateProjectSuccess(teamspace, projectId, updatedProject)])
 
-			expect(onSuccess).toBeCalled();
+			const projectsInStore = selectCurrentProjects(getState());
+			expect(projectsInStore).toEqual([updatedProject]);
+			expect(onSuccess).toHaveBeenCalled();
+			expect(onError).not.toHaveBeenCalled();
 		});
 		it('should call updateProject endpoint with 404 and open alert modal', async () => {
 			mockServer
 				.patch(`/teamspaces/${teamspace}/projects/${projectId}`)
 				.reply(404)
 
-			await expectSaga(ProjectsSaga.default)
-				.dispatch(ProjectsActions.updateProject(teamspace, projectId, project, onSuccess, onError))
-				.silentRun();
+			dispatch(ProjectsActions.updateProject(
+				teamspace,
+				projectId,
+				updatedProject,
+				onSuccess, 
+				() => { onError(); resolve(); },
+			));
+			await promiseToResolve;
 
-			expect(onError).toBeCalled();
+			const projectsInStore = selectCurrentProjects(getState());
+			expect(projectsInStore).toEqual([mockProject]);
+			expect(onSuccess).not.toHaveBeenCalled();
+			expect(onError).toHaveBeenCalled();
 		});
 	});
 });
