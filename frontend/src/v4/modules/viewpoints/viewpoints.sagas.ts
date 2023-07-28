@@ -217,7 +217,6 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 		yield put(ViewpointsActions.setSelectedViewpoint(viewpoint));
 	}
-
 }
 
 export function * deselectViewsAndLeaveClipping() {
