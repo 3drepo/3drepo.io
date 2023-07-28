@@ -269,6 +269,9 @@ function* startComparisonOfFederation() {
 
 		if (isTargetModel && isSelectedModel) {
 			const targetRevision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
+			if (!model.baseRevision) {
+				return
+			}
 			keepModelShown = model.baseRevision.name === targetRevision.name && !isDiff;
 
 			if (keepModelShown) {
