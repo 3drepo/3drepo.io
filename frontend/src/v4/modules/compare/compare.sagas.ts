@@ -97,7 +97,7 @@ function* getCompareModelData({ isFederation, revision }) {
 			});
 
 			const selectedModelsMap = compareModels.reduce((map, model) => {
-				map[model._id] = true;
+				map[model._id] = model.revisions?.length > 1;
 				return map;
 			}, {});
 
