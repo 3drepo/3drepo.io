@@ -42,6 +42,7 @@ export const TicketDetailsCard = () => {
 	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
+	const defaultView = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 
 	const goBack = () => {
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
@@ -113,11 +114,15 @@ export const TicketDetailsCard = () => {
 	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
 
 	useEffect(() => {
-		if (view === TicketDetailsView.Groups) return;
-		const defaultView = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
-		if (isEmpty(defaultView)) return;
+		if (view === TicketDetailsView.Groups || isEmpty(defaultView)) return;
 		goToView(defaultView);
-	}, [JSON.stringify(ticket.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state)]);
+	}, [JSON.stringify(defaultView?.camera)]);
+
+	useEffect(() => {
+		if (view === TicketDetailsView.Groups || isEmpty(defaultView)) return;
+		const { state } = defaultView;
+		goToView({ state });
+	}, [JSON.stringify(defaultView?.state)]);
 
 	return (
 		<CardContainer>
