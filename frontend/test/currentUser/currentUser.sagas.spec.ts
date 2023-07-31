@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as CurrentUserSaga from '@/v5/store/currentUser/currentUser.sagas';
-import { expectSaga } from 'redux-saga-test-plan';
 import { CurrentUserActions, INITIAL_STATE } from '@/v5/store/currentUser/currentUser.redux';
 import { UpdatePersonalData } from '@/v5/store/currentUser/currentUser.types';
 import api from '@/v5/services/api/default';
