@@ -20,7 +20,6 @@ import { GlobalStyle } from '@/v5/ui/themes/global';
 import { formatMessage } from '@/v5/services/intl';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
-import { DashboardLayout } from '@components/dashboard/dashboardLayout/dashboardLayout.component';
 import { DashboardProjectLayout } from '@components/dashboard/dashboardProjectLayout/dashboardProjectLayout.component';
 import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
 import { Route } from '@/v5/services/routing/route.component';
@@ -125,9 +124,7 @@ export const MainRoute = () => {
 					<Redirect to={`${discardSlash(pathname)}/dashboard`} />
 				</AuthenticatedRoute>
 				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })} path="*">
-					<DashboardLayout>
-						<NotFound />
-					</DashboardLayout>
+					<NotFound />
 				</AuthenticatedRoute>
 			</Switch>
 		</>

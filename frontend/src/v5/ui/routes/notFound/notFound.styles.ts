@@ -25,6 +25,7 @@ export const Container = styled.div`
 	justify-content: center;
 	align-items: center;
 	height: 100%;
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 `;
 
 export const WrapperContainer = styled.div``;
