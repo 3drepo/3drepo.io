@@ -17,6 +17,6 @@
 
 export const getWaitablePromise = () => {
 	let resolve;
-	const promiseToResolve = new Promise((res) => resolve = res);
+	const promiseToResolve = new Promise((res) => { resolve = res; });
 	return { promiseToResolve, resolve };
 };
