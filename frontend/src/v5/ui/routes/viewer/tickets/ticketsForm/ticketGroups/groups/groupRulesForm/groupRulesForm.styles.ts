@@ -18,7 +18,6 @@
 import styled from 'styled-components';
 
 export const Form = styled.form`
-	padding: 14px;
 	display: flex;
 	flex-direction: column;
 	width: 328px;
@@ -31,7 +30,7 @@ export const Form = styled.form`
 
 export const InputsContainer = styled.div`
 	min-height: 112px;
-	max-height: 400px;
+	max-height: 500px;
 	overflow-y: overlay;
 	padding: 2px;
 	margin-right: -13px;

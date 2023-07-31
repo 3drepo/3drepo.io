@@ -174,7 +174,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				style={{ /* style is required to override the default positioning style Popper gets */
 					left: 460,
 					top: isSecondaryCard ? 'unset' : 80,
-					bottom: isSecondaryCard ? 40 : 'unset',
+					bottom: isSecondaryCard ? 95 : 'unset',
 				}}
 				onClick={(e) => e.stopPropagation()}
 			>

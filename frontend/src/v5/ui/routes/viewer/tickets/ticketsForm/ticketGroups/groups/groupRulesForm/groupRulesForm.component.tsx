@@ -42,9 +42,11 @@ const DEFAULT_VALUES: IRuleForm = {
 
 type IGroupRules = {
 	rule?: IGroupRule;
-	onSave?: (rule: IGroupRule) => void;
+	onSave: (rule: IGroupRule) => void;
+	onClose: () => void;
 };
-export const GroupRulesForm = ({ onSave, rule }: IGroupRules) => {
+
+export const GroupRulesForm = ({ onSave, onClose, rule }: IGroupRules) => {
 	const [value, setValue] = useState(rule?.field || '');
 	const fields = useSelector(selectMetaKeys);
 	const formData = useForm<IRuleForm>({
@@ -93,7 +95,7 @@ export const GroupRulesForm = ({ onSave, rule }: IGroupRules) => {
 				</InputsContainer>
 				<Buttons>
 					<ActionMenuItem>
-						<Button variant="text" color="secondary">
+						<Button variant="text" color="secondary" onClick={onClose}>
 							<FormattedMessage id="tickets.groups.filterPanel.cancel" defaultMessage="Cancel" />
 						</Button>
 					</ActionMenuItem>
