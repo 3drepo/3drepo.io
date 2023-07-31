@@ -19,8 +19,9 @@ import { useRouteMatch, useLocation, Switch, Redirect } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { formatMessage } from '@/v5/services/intl';
 import { NotFound } from '@/v5/ui/routes/notFound';
-import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
+import { DashboardLayout } from '@components/dashboard/dashboardLayout/dashboardLayout.component';
+import { DashboardProjectLayout } from '@components/dashboard/dashboardProjectLayout/dashboardProjectLayout.component';
 import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
 import { Route } from '@/v5/services/routing/route.component';
 import { AuthenticatedRoute } from '@/v5/services/routing/authenticatedRoute.component';
@@ -29,7 +30,7 @@ import { PasswordForgot } from '../login/passwordForgot';
 import { PasswordChange } from '../login/passwordChange';
 import { TeamspaceSelection } from '../teamspaceSelection';
 import { TeamspaceContent } from './teamspaces/teamspaceContent/teamspaceContent.component';
-import { ProjectContent } from './projects';
+import { ProjectContent } from './projects/projectContent/projectContent';
 import { Login } from '../login';
 import { Viewer } from '../viewer/viewer';
 import { VIEWER_ROUTE } from '../routes.constants';
@@ -88,7 +89,7 @@ export const MainRoute = () => {
 					</TeamspaceLayout>
 				</AuthenticatedRoute>
 				<AuthenticatedRoute path={`${path}/dashboard/:teamspace/:project`}>
-					<DashboardLayout>
+					<DashboardProjectLayout>
 						<Switch>
 							<Route exact path={`${path}/dashboard/:teamspace/:project`}>
 								<Redirect to={`${discardSlash(pathname)}/t/federations`} />
@@ -100,7 +101,7 @@ export const MainRoute = () => {
 								<ProjectContent />
 							</Route>
 						</Switch>
-					</DashboardLayout>
+					</DashboardProjectLayout>
 				</AuthenticatedRoute>
 				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.viewer', defaultMessage: ':containerOrFederation :revision - Viewer' })} path={VIEWER_ROUTE}>
 					<DashboardViewerLayout>

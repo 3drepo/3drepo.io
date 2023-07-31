@@ -15,4 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { DashboardLayout } from './dashboardLayout.component';
+import styled from 'styled-components';
+
+export const Content = styled.div`
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	overflow-y: auto;
+	flex-grow: 1;
+	height: 100%;
+`;

@@ -19,15 +19,16 @@ import { ReactNode, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { AppBar } from '@components/shared/appBar';
+import { ProjectNavigation } from '@components/shared/navigationTabs';
 import { TeamspacesActionsDispatchers, ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { Content } from './dashboardLayout.styles';
+import { Content } from './dashboardProjectLayout.styles';
 
-interface IDashboardLayout {
+interface IDashboardProjectLayout {
 	children: ReactNode;
 }
 
-export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => {
+export const DashboardProjectLayout = ({ children }: IDashboardProjectLayout): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
 
 	useEffect(() => {
@@ -46,6 +47,7 @@ export const DashboardLayout = ({ children }: IDashboardLayout): JSX.Element => 
 	return (
 		<>
 			<AppBar />
+			<ProjectNavigation />
 			<Content>
 				{children}
 			</Content>
