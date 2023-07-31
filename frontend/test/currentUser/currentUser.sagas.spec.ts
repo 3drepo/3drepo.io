@@ -216,8 +216,6 @@ describe('Current User: sagas', () => {
 				.delete('/user/key')
 				.reply(200);
 
-			console.log("", selectApiKey(getState()));
-
 			await waitForActions(() => {
 				dispatch(CurrentUserActions.deleteApiKey())
 			}, [
