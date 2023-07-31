@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Button, DialogContentText, DialogTitle } from '@mui/material';
+import { DialogContentText, DialogTitle } from '@mui/material';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import {
@@ -37,6 +37,9 @@ import { isContainerPartOfFederation } from '@/v5/validation/errors.helpers';
 import { useErrorInterceptor } from '@controls/errorMessage/useErrorInterceptor';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
 import { formatMessage } from '@/v5/services/intl';
+import { useState } from 'react';
+import { Gap } from '@controls/gap';
+import { Button } from '@controls/button';
 
 interface IDeleteModal {
 	onClickClose?: () => void,
@@ -59,20 +62,25 @@ export const DeleteModal = ({
 	confirmLabel,
 	open,
 }: IDeleteModal) => {
-	const error = useErrorInterceptor();
+	const [isPending, setIsPending] = useState(false);
+	const [submitError, setSubmitError] = useState(null);
+	const interceptorError = useErrorInterceptor();
 	const { control, watch, handleSubmit } = useForm({
 		mode: 'onChange',
 		defaultValues: { retypedName: '' },
 	});
 	const isValid = confidenceCheck ? (watch('retypedName') === name) : true;
+	const error = interceptorError || submitError;
 
 	const onSubmit = async () => {
+		setIsPending(true);
 		try {
 			await onClickConfirm();
 			onClickClose();
 		} catch (e) {
-			// do nothing
+			setSubmitError(e);
 		}
+		setIsPending(false);
 	};
 
 	return (
@@ -113,47 +121,50 @@ export const DeleteModal = ({
 							<RetypeCheckField
 								control={control}
 								name="retypedName"
+								disabled={isPending}
 							/>
 						</RetypeCheck>
 					)}
 					<UnhandledErrorInterceptor expectedErrorValidators={[isContainerPartOfFederation]} />
-					{ isContainerPartOfFederation(error)
-						&& (
-							<ErrorMessage title={formatMessage({ id: 'containers.delete.partOfFederation', defaultMessage: 'Part of a federation' })}>
-								<FormattedMessage id="containers.delete.partOfFederationDetail" defaultMessage="The container is currently being used as part of a federation. Please remove the container from the federation before deletion." />
-							</ErrorMessage>
-						)}
+					{ isContainerPartOfFederation(interceptorError) && (
+						<ErrorMessage title={formatMessage({ id: 'containers.delete.partOfFederation', defaultMessage: 'Part of a federation' })}>
+							<FormattedMessage id="containers.delete.partOfFederationDetail" defaultMessage="The container is currently being used as part of a federation. Please remove the container from the federation before deletion." />
+						</ErrorMessage>
+					)}
 				</Message>
+				{isPending && (
+					<Instruction>
+						<FormattedMessage
+							id="deleteModal.isProcessing"
+							defaultMessage="The delete action is being processed. This may take some time."
+						/>
+						<Gap $height="10px" />
+					</Instruction>
+				)}
 				<Actions>
-					{ !error
-						&& (
-							<>
-								<Button onClick={onClickClose} variant="contained" color="primary">
-									<FormattedMessage
-										id="deleteModal.action.cancel"
-										defaultMessage="Cancel"
-									/>
-								</Button>
-								<Button autoFocus type="submit" onClick={handleSubmit(onSubmit)} variant="outlined" color="secondary" disabled={!isValid}>
-									{ confirmLabel || (
-										<FormattedMessage
-											id="deleteModal.action.confirm"
-											defaultMessage="Delete"
-										/>
-									)}
-								</Button>
-							</>
+					<Button onClick={onClickClose} variant="contained" color="primary">
+						{(error || isPending) ? (
+							<FormattedMessage
+								id="deleteModal.action.close"
+								defaultMessage="Close"
+							/>
+						) : (
+							<FormattedMessage
+								id="deleteModal.action.cancel"
+								defaultMessage="Cancel"
+							/>
 						)}
-
-					{error
-						&& (
-							<Button onClick={onClickClose} variant="contained" color="primary">
+					</Button>
+					{!error && (
+						<Button autoFocus type="submit" onClick={handleSubmit(onSubmit)} variant="outlined" color="secondary" disabled={!isValid || isPending} isPending={isPending}>
+							{ confirmLabel || (
 								<FormattedMessage
-									id="deleteModal.action.close"
-									defaultMessage="Close"
+									id="deleteModal.action.confirm"
+									defaultMessage="Delete"
 								/>
-							</Button>
-						)}
+							)}
+						</Button>
+					)}
 				</Actions>
 			</ModalContent>
 		</Modal>
