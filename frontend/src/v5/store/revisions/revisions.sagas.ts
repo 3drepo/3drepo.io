@@ -87,10 +87,10 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 		);
 		yield put(ContainersActions.setContainerStatus(projectId, containerId, UploadStatuses.QUEUED));
 		yield put(RevisionsActions.setUploadComplete(uploadId, true));
-	} catch ({ message, response }) {
-		let errorMessage = message;
-		if (response) {
-			const { message, status, code } = response.data;
+	} catch (error) {
+		let errorMessage = error.message;
+		if (error.response) {
+			const { message, status, code } = error.response.data;
 			errorMessage = `${status} - ${code} (${message})`;
 		}
 		yield put(RevisionsActions.setUploadComplete(uploadId, true, errorMessage));
