@@ -28,6 +28,7 @@ import {
 	Instruction,
 	ModalContent,
 	CloseButton,
+	SubmitButton,
 } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { CircledIcon } from '@controls/circledIcon';
 import { useForm } from 'react-hook-form';
@@ -40,7 +41,6 @@ import { formatMessage } from '@/v5/services/intl';
 import { useState } from 'react';
 import { Gap } from '@controls/gap';
 import { Button } from '@controls/button';
-import { SubmitButton } from '@controls/submitButton';
 
 interface IDeleteModal {
 	onClickClose?: () => void,
