@@ -40,6 +40,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { useState } from 'react';
 import { Gap } from '@controls/gap';
 import { Button } from '@controls/button';
+import { SubmitButton } from '@controls/submitButton';
 
 interface IDeleteModal {
 	onClickClose?: () => void,
@@ -62,10 +63,9 @@ export const DeleteModal = ({
 	confirmLabel,
 	open,
 }: IDeleteModal) => {
-	const [isPending, setIsPending] = useState(false);
 	const [submitError, setSubmitError] = useState(null);
 	const interceptorError = useErrorInterceptor();
-	const { control, watch, handleSubmit } = useForm({
+	const { control, watch, handleSubmit, formState: { isSubmitting } } = useForm({
 		mode: 'onChange',
 		defaultValues: { retypedName: '' },
 	});
@@ -73,14 +73,12 @@ export const DeleteModal = ({
 	const error = interceptorError || submitError;
 
 	const onSubmit = async () => {
-		setIsPending(true);
 		try {
 			await onClickConfirm();
 			onClickClose();
 		} catch (e) {
 			setSubmitError(e);
 		}
-		setIsPending(false);
 	};
 
 	return (
@@ -121,7 +119,7 @@ export const DeleteModal = ({
 							<RetypeCheckField
 								control={control}
 								name="retypedName"
-								disabled={isPending}
+								disabled={isSubmitting}
 							/>
 						</RetypeCheck>
 					)}
@@ -132,7 +130,7 @@ export const DeleteModal = ({
 						</ErrorMessage>
 					)}
 				</Message>
-				{isPending && (
+				{isSubmitting && (
 					<Instruction>
 						<FormattedMessage
 							id="deleteModal.isProcessing"
@@ -143,7 +141,7 @@ export const DeleteModal = ({
 				)}
 				<Actions>
 					<Button onClick={onClickClose} variant="contained" color="primary">
-						{(error || isPending) ? (
+						{(error || isSubmitting) ? (
 							<FormattedMessage
 								id="deleteModal.action.close"
 								defaultMessage="Close"
@@ -156,14 +154,14 @@ export const DeleteModal = ({
 						)}
 					</Button>
 					{!error && (
-						<Button autoFocus type="submit" onClick={handleSubmit(onSubmit)} variant="outlined" color="secondary" disabled={!isValid || isPending} isPending={isPending}>
+						<SubmitButton autoFocus type="submit" onClick={handleSubmit(onSubmit)} variant="outlined" color="secondary" disabled={!isValid} isPending={isSubmitting}>
 							{ confirmLabel || (
 								<FormattedMessage
 									id="deleteModal.action.confirm"
 									defaultMessage="Delete"
 								/>
 							)}
-						</Button>
+						</SubmitButton>
 					)}
 				</Actions>
 			</ModalContent>
