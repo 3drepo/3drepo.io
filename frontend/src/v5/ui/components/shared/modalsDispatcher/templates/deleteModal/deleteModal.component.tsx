@@ -81,8 +81,13 @@ export const DeleteModal = ({
 		}
 	};
 
+	const close = () => {
+		if (isSubmitting) return;
+		onClickClose();
+	};
+
 	return (
-		<Modal open={open} onClose={onClickClose}>
+		<Modal open={open} onClose={close}>
 			<ModalContent>
 				<CircledIcon variant="error" size="large">
 					<DeleteIcon />
@@ -98,7 +103,7 @@ export const DeleteModal = ({
 						)}
 					</TruncatableTitle>
 				</DialogTitle>
-				<CloseButton onClick={onClickClose}>
+				<CloseButton onClick={close} disabled={isSubmitting}>
 					<CloseIcon />
 				</CloseButton>
 				<Message>
@@ -140,18 +145,11 @@ export const DeleteModal = ({
 					</Instruction>
 				)}
 				<Actions>
-					<Button onClick={onClickClose} variant="contained" color="primary">
-						{(error || isSubmitting) ? (
-							<FormattedMessage
-								id="deleteModal.action.close"
-								defaultMessage="Close"
-							/>
-						) : (
-							<FormattedMessage
-								id="deleteModal.action.cancel"
-								defaultMessage="Cancel"
-							/>
-						)}
+					<Button onClick={close} variant="contained" color="primary" disabled={isSubmitting}>
+						<FormattedMessage
+							id="deleteModal.action.cancel"
+							defaultMessage="Cancel"
+						/>
 					</Button>
 					{!error && (
 						<SubmitButton autoFocus type="submit" onClick={handleSubmit(onSubmit)} variant="outlined" color="secondary" disabled={!isValid} isPending={isSubmitting}>
