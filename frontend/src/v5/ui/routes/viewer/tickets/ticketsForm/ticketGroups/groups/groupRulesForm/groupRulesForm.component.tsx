@@ -43,7 +43,7 @@ const DEFAULT_VALUES: IRuleForm = {
 type IGroupRules = {
 	rule?: IGroupRule;
 	onSave: (rule: IGroupRule) => void;
-	onClose?: () => void;
+	onClose: () => void;
 };
 
 export const GroupRulesForm = ({ onSave, onClose, rule }: IGroupRules) => {
@@ -63,6 +63,7 @@ export const GroupRulesForm = ({ onSave, onClose, rule }: IGroupRules) => {
 		e.preventDefault();
 		e.stopPropagation();
 		formData.handleSubmit(handleSave)(e);
+		onClose();
 	};
 
 	return (

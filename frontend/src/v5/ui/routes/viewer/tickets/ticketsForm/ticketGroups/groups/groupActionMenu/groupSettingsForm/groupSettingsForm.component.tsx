@@ -82,8 +82,10 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const [filterMenuOpen, setFilterMenuOpen] = useState(false);
 	const [inputObjects, setInputObjects] = useState([]);
 	const [isPastingRules, setIsPastingRules] = useState(false);
+	const [selectedRule, setSelectedRule] = useState(null);
 	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
 	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
+	const formRef = useRef(null);
 
 	const isNewGroup = !value;
 	const selectedNodes = useSelector(selectSelectedNodes);
@@ -147,8 +149,14 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		append(pastedRules);
 	};
 
+	const resetFilterMenu = () => {
+		setSelectedRule(null);
+		setFilterMenuOpen(false);
+	};
+
 	useEffect(() => {
 		// When no value is passed then the group is a new group
+		resetFilterMenu();
 		if (!value) {
 			formData.reset({
 				...(isColored ? { color: hexToArray(getRandomSuggestedColor()) } : {}),
@@ -168,20 +176,18 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		setIsPastingRules(false);
 	}, [value]);
 
-	const ref = useRef(null);
-
 	useEffect(() => {
-		if (!ref.current) return;
+		if (!formRef.current) return;
 		const viewportHeight = window.innerHeight;
 		const PADDING = 14;
-		const rect = ref.current.getBoundingClientRect();
+		const rect = formRef.current.getBoundingClientRect();
 		setFilterMenuCoords({
 			bottom: viewportHeight - rect.y - rect.height - PADDING,
 			left: rect.x + rect.width + PADDING,
 		});
 	}, []);
 	return (
-		<form ref={ref}>
+		<form ref={formRef}>
 			<FormProvider {...formData}>
 				<Heading>
 					{isNewGroup ? (
@@ -331,6 +337,17 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 				{
 					isSmart && (
 						<>
+							<Popper
+								open={filterMenuOpen}
+								style={{ /* style is required to override the default positioning style Popper gets */
+									top: 'unset',
+									right: 'unset',
+									width: 'auto',
+									...filterMenuCoords,
+								}}
+							>
+								<GroupRulesForm rule={selectedRule?.value} onSave={selectedRule ? (val) => update(selectedRule.index, val) : append} onClose={resetFilterMenu} />
+							</Popper>
 							<Subheading>
 								<FormattedMessage
 									id="ticketsGroupSettings.subHeading.filters"
@@ -338,17 +355,6 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								/>
 								{isAdmin && (
 									<AddFilterTitle>
-										<Popper
-											open={filterMenuOpen}
-											style={{ /* style is required to override the default positioning style Popper gets */
-												top: 'unset',
-												right: 'unset',
-												width: 'auto',
-												...filterMenuCoords,
-											}}
-										>
-											<GroupRulesForm onSave={append} onClose={() => setFilterMenuOpen(false)} />
-										</Popper>
 										<TriggerButton onClick={() => setFilterMenuOpen(true)}>
 											<FormattedMessage id="tickets.groups.newGroupForm.addFilter" defaultMessage="Add filter" />
 										</TriggerButton>
@@ -356,7 +362,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								)}
 							</Subheading>
 							<FormRulesBox>
-								<RulesOptionsMenu value={rules} onPaste={() => setIsPastingRules(true)} onClear={() => remove()} />
+								<RulesOptionsMenu value={rules} onPaste={() => setIsPastingRules(true)} onClear={() => { remove(); resetFilterMenu(); }} />
 								{isPastingRules && (<RulesField onSubmit={handlePasteRules} onClose={() => setIsPastingRules(false)} />)}
 								{isPastingRules && rules.length > 0 && (<Gap $height="5px" />)}
 								<Rules>
@@ -364,9 +370,16 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 										<ChipRule
 											value={ruleValue}
 											key={id}
-											onDelete={() => remove(i)}
-											onChange={(val) => update(i, val)}
+											isSelected={selectedRule === ruleValue}
+											onDelete={() => {
+												remove(i);
+												resetFilterMenu();
+											}}
 											disabled={!isAdmin}
+											onClick={() => {
+												setSelectedRule({ index: i, value: ruleValue });
+												setFilterMenuOpen(true);
+											}}
 										/>
 									))}
 									{!rules.length && !isPastingRules && (
