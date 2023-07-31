@@ -25,13 +25,13 @@ import { DashboardFooter } from '@components/shared/dashboardFooter';
 import { formatMessage } from '@/v5/services/intl';
 import { Route } from '@/v5/services/routing/route.component';
 import { discardSlash } from '@/v5/helpers/url.helper';
-import { Federations } from './federations';
-import { Containers } from './containers';
-import { UserPermissions } from './userPermissions/userPermissions.component';
-import { ProjectPermissions } from './projectPermissions/projectPermissions.component';
-import { Content } from './projects.styles';
-import { ProjectSettings } from './projectSettings/projectSettings.component';
-import { Board } from './board/board.component';
+import { Federations } from '../federations';
+import { Containers } from '../containers';
+import { UserPermissions } from '../userPermissions/userPermissions.component';
+import { ProjectPermissions } from '../projectPermissions/projectPermissions.component';
+import { Content } from './projectContent.styles';
+import { ProjectSettings } from '../projectSettings/projectSettings.component';
+import { Board } from '../board/board.component';
 
 export const ProjectContent = () => {
 	const { teamspace } = useParams<DashboardParams>();
