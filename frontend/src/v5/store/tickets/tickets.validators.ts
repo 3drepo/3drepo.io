@@ -92,7 +92,7 @@ const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 		}
 		if (type === 'view') {
 			validator = Yup.object().nullable().test({
-				test: (view: Viewpoint) => !!view && Object.keys(view).some((field) => !isEmpty(view[field])),
+				test: (view: Viewpoint) => view?.camera && !isEmpty(view.camera),
 				message: formatMessage({
 					id: 'validation.ticket.requiredField',
 					defaultMessage: '{name} is a required field',

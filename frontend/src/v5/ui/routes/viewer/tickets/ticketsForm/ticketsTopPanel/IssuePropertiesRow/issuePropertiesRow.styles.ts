@@ -30,7 +30,7 @@ export const IssuePropertiesContainer = styled.div`
 	position: sticky;
 	top: -1px; /* -1 stops border combining with header border making double thick border */
 	box-sizing: border-box;
-	z-index: 2;
+	z-index: 4;
 `;
 
 export const PropertyColumn = styled.span`

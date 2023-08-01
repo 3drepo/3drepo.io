@@ -258,7 +258,6 @@ export const InvitationDialog = (props: IProps) => {
 		<Formik
 			validationSchema={invitationSchema}
 			onSubmit={handleSubmit}
-			isInitialValid
 			initialValues={{ email: props.email, job: props.job, isAdmin: props.isAdmin, permissions: props.permissions }}
 			render={renderForm}
 			ref={formRef}

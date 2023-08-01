@@ -193,8 +193,9 @@ export const findEditedGroup = (values: Partial<ITicket>, ticket: ITicket, templ
 	}
 
 	if (values.modules) {
-		template?.modules?.forEach(({ name, properties }) => {
-			overrideWithEditedGroup ||= findOverrideWithEditedGroup(values.modules[name], ticket.modules[name], properties);
+		template?.modules?.forEach(({ type, name, properties }) => {
+			const module = type || name;
+			overrideWithEditedGroup ||= findOverrideWithEditedGroup(values.modules[module], ticket.modules[module], properties);
 		});
 	}
 

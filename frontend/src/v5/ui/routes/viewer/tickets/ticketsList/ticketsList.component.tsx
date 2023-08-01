@@ -75,7 +75,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 			return (matchesTemplateFilters && matchesCompletedState(ticket));
 		});
 		setFilteredTickets(filtered);
-	}, [selectedTemplates, showingCompleted]);
+	}, [tickets, selectedTemplates, showingCompleted]);
 
 	useEffect(() => {
 		const reducedTemplates = templates.reduce((partial, { _id, ...other }) => {

@@ -26,6 +26,7 @@ import Grid from '@mui/material/Grid';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
+import { isV5 } from '@/v4/helpers/isV5';
 
 import { JobItem } from '../jobItem/jobItem.component';
 import { UserItem } from '../userItem/userItem.component';
@@ -126,6 +127,9 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 	private debounceUsersSuggestion = debounce(this.props.getUsersSuggestions, 1000);
 
 	public onSuggestionsFetchRequested = ({value}) => {
+		if (value.substring('/')) {
+			return
+		}
 		this.debounceUsersSuggestion(value);
 	}
 
@@ -163,6 +167,14 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 			<UserNotExistsButton onClick={this.openInvitationDialog}>Send invitation?</UserNotExistsButton>
 		</UserNotExistsContainer>
 	));
+
+	public handleSubmit = async () => {
+		this.handleSave();
+		await new Promise(r => setTimeout(r, 200));
+		if (isV5() && !this.state.userNotExists) {
+			this.props.onCancel();
+		}
+	};
 
 	public render() {
 		const { clearSuggestions, jobs, users, title } = this.props;
@@ -228,7 +240,7 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 							color="secondary"
 							disabled={this.state.userNotExists || !this.state.name || !this.state.job || this.state.job.length === 0}
 							aria-label="Save"
-							onClick={this.handleSave}>
+							onClick={this.handleSubmit}>
 							+ Add user
 						</SaveButton>
 					</Grid>

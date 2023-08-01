@@ -14,40 +14,25 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
-import { useState } from 'react';
 import { IGroupRule } from '@/v5/store/tickets/tickets.types';
 import { formatOperationLabel } from '../groupRulesForm.helpers';
-import { GroupRulesForm } from '../groupRulesForm.component';
-import { ChipWrapper, RuleActionMenu, RuleChip } from './chipRule.styles';
+import { ChipWrapper, RuleChip } from './chipRule.styles';
 
 type ChipRuleProps = {
 	value: IGroupRule,
-	onChange?: (rule: IGroupRule) => void;
+	isSelected: boolean;
+	onClick?: () => void;
 	onDelete: () => void;
 	disabled?: boolean;
 };
-export const ChipRule = ({ value: rule, disabled, onChange, onDelete }: ChipRuleProps) => {
-	const [isSelected, setIsSelected] = useState(false);
-
-	return (
-		<RuleActionMenu
-			onOpen={() => setIsSelected(true)}
-			onClose={() => setIsSelected(false)}
+export const ChipRule = ({ value: rule, isSelected, disabled, onDelete, onClick }: ChipRuleProps) => (
+	<ChipWrapper>
+		<RuleChip
+			label={formatOperationLabel(rule)}
 			disabled={disabled}
-			TriggerButton={(
-				<ChipWrapper>
-					<RuleChip
-						label={formatOperationLabel(rule)}
-						disabled={disabled}
-						deleteIcon={<div><CrossIcon /></div>}
-						onDelete={disabled ? null : onDelete}
-						$selected={isSelected}
-					/>
-				</ChipWrapper>
-			)}
-		>
-			<GroupRulesForm rule={rule} onSave={onChange} />
-		</RuleActionMenu>
-	);
-};
+			onClick={onClick}
+			onDelete={disabled ? null : onDelete}
+			$selected={isSelected}
+		/>
+	</ChipWrapper>
+);
