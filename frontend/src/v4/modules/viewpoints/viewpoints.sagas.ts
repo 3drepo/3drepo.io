@@ -23,6 +23,7 @@ import { isV5 } from '@/v4/helpers/isV5';
 
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { getAPIUrl } from '@/v4/services/api/default';
+import { CHAT_CHANNELS } from '@/v4/constants/chat';
 import { ROUTES } from '../../constants/routes';
 import { prepareGroup } from '../../helpers/groups';
 import { createGroupsFromViewpoint, generateViewpoint,
@@ -41,6 +42,7 @@ import { dispatch } from '../store';
 import { TreeActions } from '../tree';
 import { waitForTreeToBeReady } from '../tree/tree.sagas';
 import { ViewerGuiActions } from '../viewerGui';
+import { ChatActions } from '../chat/chat.redux';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
 import { groupsOfViewpoint, isViewpointLoaded, selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
