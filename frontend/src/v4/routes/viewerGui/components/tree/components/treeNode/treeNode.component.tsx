@@ -178,7 +178,7 @@ export class TreeNode extends PureComponent<IProps, any> {
 		const { expanded, isSearchResult, style, key, active, hasFederationRoot } = this.props;
 
 		return (
-			<Tooltip title={this.node.name} placement="bottom">
+			<Tooltip title={this.node.name.trim()} placement="bottom">
 				<Container
 					style={style}
 					key={key}
@@ -238,9 +238,8 @@ export class TreeNode extends PureComponent<IProps, any> {
 	}
 
 	private handleOpenModelClick = () => {
-		const { project } = this.props.match.params;
-		const [teamspace, name] = this.node.name.split(':');
-		const { model } = this.props.settings.subModels.find((subModel) => subModel.name === name);
+		const { teamspace, project } = this.props.match.params;
+		const { model } = this.props.settings.subModels.find((subModel) => subModel.name === this.node.name);
 
 		const url = isV5() ? `${window.location.origin}/v5/viewer/${teamspace}/${project}/${model}`
 			: `${window.location.origin}/viewer/${teamspace}/${model}`;

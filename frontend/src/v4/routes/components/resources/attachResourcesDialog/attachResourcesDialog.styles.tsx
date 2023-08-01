@@ -19,7 +19,6 @@ import Dropzone from 'react-dropzone';
 import styled, { css } from 'styled-components';
 import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 import { isV5 } from '@/v4/helpers/isV5';
-import { ConditionalV5OrViewerScrollArea } from '@/v5/ui/v4Adapter/components/conditionalV5OrViewerScrollArea.component';
 import { COLOR } from '../../../../styles';
 
 const dropZoneColors = (normalColour, dragColour, errorColour) => (props: any) =>
@@ -50,20 +49,19 @@ export const StyledDropZone = styled(Dropzone)`
 `;
 
 export const ResourcesListContainer = styled.div`
-	overflow: hidden;
+	overflow: hidden scroll;
 	width: 500px;
 	& >:last-child {
 		height: 55px;
 	}
+	${!isV5() && css`
+		max-height: 114px;
+	`}
 `;
 
-export const ResourcesListScroller = styled(ConditionalV5OrViewerScrollArea).attrs({
-	autoHeight: true,
-	autoHeightMax: isV5() ? 200 : 114,
-})`
+export const ResourcesListScroller = styled.div`
 	margin-top: 20px;
 	overflow: hidden;
-	max-height: 114px;
 `;
 
 export const ResourceListItem = styled.div`
@@ -97,7 +95,6 @@ const V5DropzoneContent = styled(DashedContainer).attrs<{ error?: boolean, isDra
 	error,
 	isDragActive,
 }) => ({
-	borderRadius: 5,
 	strokeWidth: 2,
 	dashSize: 5,
 	gapSize: 5,

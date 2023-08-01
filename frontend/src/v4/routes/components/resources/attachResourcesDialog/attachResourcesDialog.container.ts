@@ -16,23 +16,13 @@
  */
 
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import {
-	selectCurrentTeamspace,
-	selectSpaceLeft,
-	CurrentUserActions
-} from '../../../../modules/currentUser';
+import { selectCurrentTeamspace } from '../../../../modules/currentUser';
 import { AttachResourcesDialog } from './attachResourcesDialog.component';
 
 const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,
-	quotaLeft: selectSpaceLeft
 });
 
-export const mapDispatchToProps = (dispatch) => bindActionCreators({
-	fetchQuota: CurrentUserActions.fetchQuotaInfo
-}, dispatch);
-
-export default connect(mapStateToProps, mapDispatchToProps)(AttachResourcesDialog);
+export default connect(mapStateToProps)(AttachResourcesDialog);

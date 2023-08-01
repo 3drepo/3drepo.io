@@ -34,10 +34,10 @@ const AddUserButton = css`
 				${({ theme }) => theme.typography.body1};
 				margin-left: 8px;
 			}
-			border-radius: 5px;
+			border-radius: 8px;
 			width: auto;
 			text-transform: none;
-			padding: 10px 15px;
+			padding: 8px 16px;
 			margin: 0;
 			background-color: ${({ theme }) => theme.palette.primary.main};
 			color: ${({ theme }) => theme.palette.primary.contrast};
@@ -94,6 +94,7 @@ export const V5UserListOverrides = styled.div`
 	}
 	${UserTable}{
 		background-color: transparent;
+		height: unset;
 		${Head} {
 			min-height: unset;
 			height: 40px;

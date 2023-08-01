@@ -16,23 +16,25 @@
  */
 
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
+import { findEditedGroup, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty } from 'lodash';
-import { dirtyValues, filterErrors, nullifyEmptyStrings, removeEmptyObjects } from '@/v5/helpers/form.helper';
-import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import { hexToGLColor } from '@/v4/helpers/colors';
-import { theme } from '@/v5/ui/themes/theme';
-import { TicketsCardViews } from '../tickets.constants';
+import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
+import { FormattedMessage } from 'react-intl';
+import { InputController } from '@controls/inputs/inputController.component';
+import { goToView } from '@/v5/helpers/viewpoint.helpers';
+import { AdditionalProperties, TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
+import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
+import { TicketContext, TicketDetailsView } from '../ticket.context';
 
 export const TicketDetailsCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
@@ -40,6 +42,7 @@ export const TicketDetailsCard = () => {
 	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
+	const defaultView = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 
 	const goBack = () => {
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
@@ -67,21 +70,26 @@ export const TicketDetailsCard = () => {
 
 	const onBlurHandler = () => {
 		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
-		let validVals = removeEmptyObjects(nullifyEmptyStrings(filterErrors(values, formData.formState.errors)));
-		validVals = sanitizeViewVals(validVals, ticket, template);
+		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, formData.formState.errors)));
 
+		const editedGroup = findEditedGroup(validVals, ticket, template);
+		if (editedGroup) {
+			TicketsActionsDispatchers.updateTicketGroup(
+				teamspace,
+				project,
+				containerOrFederation,
+				ticket._id,
+				editedGroup,
+				isFederation,
+			);
+		}
+
+		sanitizeViewVals(validVals, ticket, template);
 		if (isEmpty(validVals)) return;
-
-		// eslint-disable-next-line max-len
 		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticket._id, validVals, isFederation);
 	};
 
 	useEffect(() => {
-		if (ticket.properties?.Pin) {
-			ViewerService.addPin({
-				id: 'new-Pin', position: ticket.properties.Pin, colour: hexToGLColor(theme.palette.primary.main), type: 'issue' });
-		}
-
 		TicketsActionsDispatchers.fetchTicket(
 			teamspace,
 			project,
@@ -89,6 +97,7 @@ export const TicketDetailsCard = () => {
 			ticket._id,
 			isFederation,
 		);
+
 		if (!templateAlreadyFetched(template)) {
 			TicketsActionsDispatchers.fetchTemplate(
 				teamspace,
@@ -102,18 +111,50 @@ export const TicketDetailsCard = () => {
 
 	if (!ticket) return (<></>);
 
+	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
+
+	useEffect(() => {
+		if (view === TicketDetailsView.Groups || isEmpty(defaultView)) return;
+		goToView(defaultView);
+	}, [JSON.stringify(defaultView?.camera)]);
+
+	useEffect(() => {
+		if (view === TicketDetailsView.Groups || isEmpty(defaultView)) return;
+		const { state } = defaultView;
+		goToView({ state });
+	}, [JSON.stringify(defaultView?.state)]);
+
 	return (
 		<CardContainer>
-			<CardHeader>
-				<ArrowBack onClick={goBack} />
-				{template.code}:{ticket.number}
-				<HeaderButtons>
-					<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
-					<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
-				</HeaderButtons>
-			</CardHeader>
 			<FormProvider {...formData}>
-				<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
+				{view === TicketDetailsView.Groups
+					&& (
+						<>
+							<CardHeader>
+								<ArrowBack onClick={() => setDetailViewAndProps(TicketDetailsView.Form)} />
+								{ticket.title}:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" />
+							</CardHeader>
+							<InputController
+								Input={TicketGroups}
+								name={viewProps.name}
+								onBlur={onBlurHandler}
+							/>
+						</>
+					)}
+				{view === TicketDetailsView.Form
+				&& (
+					<>
+						<CardHeader>
+							<ArrowBack onClick={goBack} />
+							{template.code}:{ticket.number}
+							<HeaderButtons>
+								<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
+								<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
+							</HeaderButtons>
+						</CardHeader>
+						<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
+					</>
+				)}
 			</FormProvider>
 		</CardContainer>
 	);

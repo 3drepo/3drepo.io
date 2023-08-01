@@ -453,6 +453,22 @@ const testGetTeamspaceActiveLicenses = () => {
 	});
 };
 
+const testGetTeamspaceExpiredLicenses = () => {
+	describe('Get active licenses in teamspace', () => {
+		test('Should perform a query to find all active subscriptions', async () => {
+			const teamspace = generateRandomString();
+			const dayMS = 1000 * 60 * 60 * 24;
+			const validDate = new Date(new Date().getTime() + dayMS);
+			const expectedRes = { subscription: {
+				discretionary: { expiryDate: validDate },
+				enterprise: { expiryDate: validDate },
+			} };
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedRes);
+			await expect(Teamspace.getTeamspaceExpiredLicenses(teamspace)).resolves.toEqual(expectedRes);
+			expect(fn).toHaveBeenCalledTimes(1);
+		});
+	});
+};
 const testGetRiskCategories = () => {
 	describe('Get risk categories', () => {
 		test('should return a list of risk categories', async () => {
@@ -481,6 +497,7 @@ describe('models/teamspaceSettings', () => {
 	testGetAllUsersInTeamspace();
 	testRemoveUserFromAdminPrivileges();
 	testGetTeamspaceActiveLicenses();
+	testGetTeamspaceExpiredLicenses();
 	testGetRiskCategories();
 	testGrantAdminPermissionToUser();
 });

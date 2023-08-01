@@ -23,7 +23,9 @@ export const SearchInputContainer = styled.div`
 	padding: 0;
 `;
 
-export const SearchInput = styled(SearchInputBase)`
+export const SearchInput = styled(SearchInputBase).attrs({
+	variant: 'outlined',
+})`
 	margin: -10px 0 0;
 	padding: 12px;
 	background: ${({ theme }) => theme.palette.primary.contrast};

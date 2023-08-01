@@ -20,9 +20,8 @@ import IconButton from '@mui/material/IconButton';
 import Popper from '@mui/material/Popper';
 import TextField from '@mui/material/TextField';
 import Copy from '@mui/icons-material/FileCopy';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { isV5 } from '@/v4/helpers/isV5';
-import { ConditionalV5OrViewerScrollArea } from '@/v5/ui/v4Adapter/components/conditionalV5OrViewerScrollArea.component';
 import { COLOR } from './../../../styles/colors';
 
 interface IContainer {
@@ -64,10 +63,16 @@ export const Chips = styled.div<IChips>`
 	}
 `;
 
+export const FiltersContainer = styled.div<{ empty: boolean }>`
+	max-height: 240px;
+	min-height: ${({ empty }) => empty ? 0 : 45}px;
+	overflow: hidden ${isV5() ? 'overlay' : 'auto'};
+`;
+
 export const SelectedFilters = styled.div<ISelectedFilters>`
 	display: flex;
 	flex-wrap: wrap;
-	overflow: ${(props) => props.filtersOpen ? 'hidden' : 'auto'};
+	overflow: ${(props) => props.filtersOpen ? 'hidden' : 'auto'} hidden;
 	position: relative;
 	box-sizing: border-box;
 	
@@ -75,15 +80,15 @@ export const SelectedFilters = styled.div<ISelectedFilters>`
 		padding: ${(props) => props.empty ? '0 40px 0 8px' : '4px 40px 0 8px'};
 	}
 
-	${({ theme, empty, filtersOpen}) => isV5() && `
-		${!empty && `
+	${({ theme, empty, filtersOpen}) => isV5() && css`
+		${!empty && css`
 			border-bottom: solid 1px ${theme.palette.base.lightest};
 			${Chips} {
 				padding: 9px 40px 9px 15px;
 			}
 		`}
 
-		${!empty && filtersOpen && `
+		${!empty && filtersOpen && css`
 			& .MuiChip-root {
 				margin-bottom: 11px !important;
 			}
@@ -145,10 +150,10 @@ export const SuggestionsList = styled(Popper)`
 	}
 `;
 
-export const SuggestionsScrollArea = styled(ConditionalV5OrViewerScrollArea).attrs({
-	autoHeight: true,
-	autoHeightMax: 250,
-})`
+export const SuggestionsScrollArea = styled.div`
+	max-height: 250px;
+	overflow: ${isV5() ? 'overlay' : 'auto'};
+
 	.react-autosuggest__suggestions-list {
 		max-height: unset;
 	}

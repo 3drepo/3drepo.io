@@ -24,7 +24,7 @@ export const Link = styled(LinkBase)`
 	box-sizing: border-box;
 	cursor: pointer;
 	transition: all 0s;
-	border-radius: 3px;
+	border-radius: 8px;
 	height: 39px;
 	padding: 0 11px;
 	display: flex;

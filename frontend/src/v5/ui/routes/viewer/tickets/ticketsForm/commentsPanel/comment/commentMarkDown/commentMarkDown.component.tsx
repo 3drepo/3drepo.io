@@ -18,6 +18,7 @@
 import { desanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import ReactMarkdown from 'react-markdown';
 import { CommentMessage } from '../basicComment/basicComment.styles';
+import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
 import { OverflowContainer } from './commentMarkDown.styles';
 
 const ImageMarkdown = ({ src }) => (<>![image]({src})</>);
@@ -27,6 +28,7 @@ const RENDERERS = {
 	paragraph: CommentMessage,
 	image: ImageMarkdown,
 	code: CodeMarkdown,
+	blockquote: QuotedMessage,
 };
 
 type CommentMarkDownProps = {

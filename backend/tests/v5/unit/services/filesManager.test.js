@@ -19,6 +19,7 @@ const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const config = require('../../../../src/v5/utils/config');
 const { generateRandomString } = require('../../helper/services');
+const { PassThrough } = require('stream');
 
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
@@ -320,7 +321,7 @@ const testGetFileAsStream = () => {
 			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
 
 			expect(FSHandler.getFileStream).toHaveBeenCalledTimes(1);
-			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link);
+			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link, undefined);
 		});
 
 		test('should return a stream of the reference is found (gridFs)', async () => {
@@ -340,7 +341,7 @@ const testGetFileAsStream = () => {
 			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
 
 			expect(GridFSHandler.getFileStream).toHaveBeenCalledTimes(1);
-			expect(GridFSHandler.getFileStream).toHaveBeenCalledWith(teamspace, collection, fileEntry.link);
+			expect(GridFSHandler.getFileStream).toHaveBeenCalledWith(teamspace, collection, fileEntry.link, undefined);
 		});
 	});
 };
@@ -381,7 +382,7 @@ const testGetFileWithMetaAsStream = () => {
 				.resolves.toEqual({ readStream, size: fileEntry.size, mimeType: DEFAULT_MIME_TYPE });
 
 			expect(FSHandler.getFileStream).toHaveBeenCalledTimes(1);
-			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link);
+			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link, undefined);
 		});
 
 		test('should return a stream of the reference is found (gridFs)', async () => {
@@ -394,7 +395,7 @@ const testGetFileWithMetaAsStream = () => {
 				.resolves.toEqual({ readStream, size: fileEntry.size, mimeType: DEFAULT_MIME_TYPE });
 
 			expect(GridFSHandler.getFileStream).toHaveBeenCalledTimes(1);
-			expect(GridFSHandler.getFileStream).toHaveBeenCalledWith(teamspace, collection, fileEntry.link);
+			expect(GridFSHandler.getFileStream).toHaveBeenCalledWith(teamspace, collection, fileEntry.link, undefined);
 		});
 	});
 };
@@ -452,6 +453,65 @@ const testStoreFile = () => {
 				.resolves.toEqual(undefined);
 			expect(GridFSHandler.storeFile).toHaveBeenCalledTimes(1);
 			expect(GridFSHandler.storeFile).toHaveBeenCalledWith(teamspace, collection, data);
+			expect(FileRefs.insertRef).toHaveBeenCalledTimes(1);
+			expect(FileRefs.insertRef).toHaveBeenCalledWith(teamspace, collection,
+				{ ...refInfo, _id: id, mimeType: DEFAULT_MIME_TYPE });
+
+			config.defaultStorage = defaultStorage;
+		});
+	});
+};
+
+const testStoreFileStream = () => {
+	describe('Store file stream in fileshare', () => {
+		test('should throw error if the default type is not recognised', async () => {
+			const { defaultStorage } = config;
+			config.defaultStorage = 'unrecognised storage type';
+
+			await expect(FilesManager.storeFileStream(
+				generateRandomString(),
+				generateRandomString(),
+				generateRandomString(),
+			)).rejects.toEqual(templates.unknown);
+
+			config.defaultStorage = defaultStorage;
+		});
+
+		test('should throw error if the default type is gridfs', async () => {
+			const { defaultStorage } = config;
+			config.defaultStorage = 'gridfs';
+
+			await expect(FilesManager.storeFileStream(
+				generateRandomString(),
+				generateRandomString(),
+				generateRandomString(),
+			)).rejects.toEqual(templates.unknown);
+
+			config.defaultStorage = defaultStorage;
+		});
+
+		test('should store file if default storage type is fs', async () => {
+			const { defaultStorage } = config;
+			config.defaultStorage = 'fs';
+
+			const refInfo = { _id: generateRandomString() };
+			FSHandler.storeFile.mockResolvedValueOnce(refInfo);
+			const teamspace = generateRandomString();
+			const collection = generateRandomString();
+			const id = generateRandomString();
+			const data = generateRandomString();
+			const stream = PassThrough();
+
+			const execProm = expect(FilesManager.storeFileStream(teamspace, collection, id, stream))
+				.resolves.toEqual(undefined);
+
+			stream.write(data);
+			stream.end();
+
+			await execProm;
+
+			expect(FSHandler.storeFileStream).toHaveBeenCalledTimes(1);
+			expect(FSHandler.storeFileStream).toHaveBeenCalledWith(stream);
 			expect(FileRefs.insertRef).toHaveBeenCalledTimes(1);
 			expect(FileRefs.insertRef).toHaveBeenCalledWith(teamspace, collection,
 				{ ...refInfo, _id: id, mimeType: DEFAULT_MIME_TYPE });
@@ -556,5 +616,6 @@ describe('services/filesManager', () => {
 	testGetFileAsStream();
 	testGetFileWithMetaAsStream();
 	testStoreFile();
+	testStoreFileStream();
 	testFileExists();
 });

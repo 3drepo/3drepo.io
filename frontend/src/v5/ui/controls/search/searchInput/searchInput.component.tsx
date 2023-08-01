@@ -30,21 +30,16 @@ type ISearchInput = {
 	onClear?: () => void;
 } & TextFieldProps;
 
-export const SearchInput = ({ onClear, value, ...props }: ISearchInput): JSX.Element => {
+export const SearchInput = ({ onClear, value, variant = 'filled', ...props }: ISearchInput): JSX.Element => {
 	const { query, setQuery } = useContext(SearchContext);
 
 	const onChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
 		setQuery(event.currentTarget.value);
-		if (props.onChange) {
-			props.onChange(event);
-		}
+		props.onChange?.(event);
 	};
 
 	const onClickClear = () => {
-		if (onClear) {
-			onClear();
-		}
-
+		onClear?.();
 		setQuery('');
 	};
 
@@ -67,6 +62,7 @@ export const SearchInput = ({ onClear, value, ...props }: ISearchInput): JSX.Ele
 					</EndAdornment>
 				),
 			}}
+			variant={variant}
 			{...props}
 			onChange={onChange}
 		/>

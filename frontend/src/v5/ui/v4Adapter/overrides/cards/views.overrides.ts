@@ -37,7 +37,7 @@ export default css`
 			width: 70px;
 			min-width: 70px;
 			height: 70px;
-			border-radius: 5px;
+			border-radius: 8px;
 			overflow: hidden;
 		}
 

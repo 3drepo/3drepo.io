@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CardContentContainer } from '@components/viewer/cards/card.styles';
-import { CardContent as CardContentPadded } from '@components/viewer/cards/cardContent.component';
+import { CardContent as CardContentPadded } from '@components/viewer/cards/card.styles';
+import { FormLabel } from '@mui/material';
 import { Gap } from '@controls/gap';
 import styled from 'styled-components';
 
@@ -26,8 +26,8 @@ export const PanelsContainer = styled.div`
 	padding: 14px 15px;
 	.MuiAccordion-root {
 		&:first-of-type {
-			border-top-left-radius: 6px;
-			border-top-right-radius: 6px;
+			border-top-left-radius: 8px;
+			border-top-right-radius: 8px;
 		}
 
 		&:not(:first-of-type) {
@@ -35,8 +35,8 @@ export const PanelsContainer = styled.div`
 		}
 
 		&:last-of-type {
-			border-bottom-left-radius: 6px;
-			border-bottom-right-radius: 6px;
+			border-bottom-left-radius: 8px;
+			border-bottom-right-radius: 8px;
 		}
 	}
 `;
@@ -51,8 +51,10 @@ export const PropertiesListContainer = styled.div`
 `;
 
 export const CardContent = styled(CardContentPadded)`
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	${CardContentContainer} {
-		padding: 0;
-	}
+	padding: 0;
+`;
+
+export const ModuleTitle = styled(FormLabel)`
+	font-weight: 500;
+	color: inherit;
 `;

@@ -28,8 +28,6 @@ import TrelloBoard from 'react-trello';
 import { isV5 } from '@/v4/helpers/isV5';
 import { BOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
-import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
-import { ScrollArea as ScrollAreaStyles } from '@controls/scrollArea/scrollArea.styles';
 
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ISSUE_FILTERS } from '../../constants/issues';
@@ -177,6 +175,7 @@ export function Board(props: IProps) {
 		resetIssues,
 		resetRisks,
 	} = props;
+
 	useEffect(() => {
 		if (type !== props.boardType) {
 			props.setBoardType(type);
@@ -204,16 +203,20 @@ export function Board(props: IProps) {
 		props.fetchData(type, teamspace, project, modelId);
 	}, [type, teamspace, project, modelId]);
 
+	const removeReactTrelloTooltip = () => {
+		const board = boardRef.current;
+		const lanes = board.getElementsByClassName('react-trello-lane');
+
+		setTimeout(() => {
+			[...lanes].forEach((lane) => lane.removeAttribute('title'));
+		});
+	};
+
 	useEffect(() => {
 		if (boardRef.current) {
-			const board = boardRef.current;
-			const lanes = board.getElementsByClassName('react-trello-lane');
-
-			setTimeout(() => {
-				[...lanes].forEach((lane) => lane.removeAttribute('title'));
-			});
+			removeReactTrelloTooltip();
 		}
-	}, [boardRef, props.isPending]);
+	}, [props.cards, props.isPending]);
 
 	useEffect(() => {
 		return () => {
@@ -458,26 +461,20 @@ export function Board(props: IProps) {
 
 	const components = {
 		Card:  isIssuesBoard ? IssueBoardCard : RiskBoardCard,
-		...(isV5() && { ScrollableLane: (args) => <ScrollAreaStyles {...args} /> }),
 	};
 
 	const renderBoard = renderWhenTrue(() => (
 		<BoardContainer>
 			<div ref={boardRef}>
-				<ConditionalV5Wrapper
-					v5Wrapper={ScrollAreaStyles}
-					v5WrapperProps={{ style: { height: '100%' } }}
-				>
-					<TrelloBoard
-						data={boardData}
-						hideCardDeleteIcon
-						handleDragEnd={handleCardDrop}
-						onCardClick={handleOpenDialog}
-						onCardMoveAcrossLanes={handleCardMove}
-						components={components}
-						cardDraggable
-					/>
-				</ConditionalV5Wrapper>
+				<TrelloBoard
+					data={boardData}
+					hideCardDeleteIcon
+					handleDragEnd={handleCardDrop}
+					onCardClick={handleOpenDialog}
+					onCardMoveAcrossLanes={handleCardMove}
+					components={components}
+					cardDraggable
+				/>
 			</div>
 		</BoardContainer>
 	));

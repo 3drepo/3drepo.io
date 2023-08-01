@@ -29,7 +29,7 @@ export const CardContainer = styled.div`
 	height: 100%;
 	flex-direction: column;
 	color: ${({ theme }) => theme.palette.secondary.main};
-	background: ${({ theme }) => theme.palette.primary.contrast};
+	background: ${({ theme }) => theme.palette.tertiary.lightest};
 	border-radius: 10px;
 	margin-bottom: 20px;
 	overflow: hidden;
@@ -44,6 +44,7 @@ export const CardContainer = styled.div`
 
 export const CardHeader = styled.div`
 	${({ theme }) => theme.typography.h3}
+	background: ${({ theme }) => theme.palette.primary.contrast};
 	display: flex;
 	align-items: center;
 	min-height: 48px;
@@ -58,17 +59,15 @@ export const HeaderButtons = styled.span`
 	margin-left: auto;
 `;
 
-// TODO - fix after new palette is released
-export const CardContentContainer = styled.div`
+export const CardContent = styled.div`
 	padding: 15px;
 	box-sizing: border-box;
-	background-color: #f9faff;
-	min-height: 100%;
+	overflow: overlay;
+	height: 100%;
 `;
 
 export const EmptyCardMessage = styled(DashedContainer).attrs({
 	strokeColor: '#c0c8d5', // TODO - fix when new palette is released
-	borderRadius: 5,
 	dashSize: 2,
 	gapSize: 2,
 	strokeWidth: 2,

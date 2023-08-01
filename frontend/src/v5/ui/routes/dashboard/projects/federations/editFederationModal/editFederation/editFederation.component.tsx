@@ -52,7 +52,7 @@ export const EditFederation = ({ federation, onContainersChange }: EditFederatio
 	}, [containers]);
 
 	useEffect(() => {
-		onContainersChange(includedContainers);
+		onContainersChange(includedContainers.filter(Boolean)); // filter out 'undefined' which are unassigned containers
 		setAvailableContainers(containers.filter((container) => !includedContainers.includes(container)));
 	}, [includedContainers]);
 

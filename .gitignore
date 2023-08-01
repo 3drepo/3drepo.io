@@ -110,3 +110,4 @@ backend/globalConfig.json
 .vs/
 *.swm
 backend/bouncer_worker.log
+*.swl

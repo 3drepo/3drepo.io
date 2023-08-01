@@ -28,8 +28,20 @@ const navbarButtonStyles = css`
 		width: inherit;
 	}
 
-	.MuiBadge-root > svg {
-		height: 17px;
+	.MuiBadge-root {
+		> svg {
+			height: 17px;
+			width: 17px;
+		}
+		.MuiBadge-badge {
+			font-size: 0;
+			height: 11px;
+			width: 11px;
+			padding: 0;
+			min-width: unset;
+			top: -6px;
+			right: -3px;
+		}
 	}
 `;
 
@@ -44,19 +56,24 @@ const containerStyles = css`
 			cursor: initial;
 			height: unset;
 			width: 100%;
-			padding: 15px 20px 10px 25px;
+			padding: 15px 25px 10px;
 			box-sizing: border-box;
 			color: ${({ theme }) => theme.palette.secondary.main};
+
+			& > :nth-child(2) {
+				margin-top: 44px;
+			}
 		}
 	}
 `;
 
 const headerStyles = css`
 	.MuiListSubheader-root {
-		position: relative;
-		top: -15px;
-		left: -25px;
-		width: calc(100% + 45px);
+		position: fixed;
+		top: 0;
+		margin-left: -25px;
+		width: 520px;
+		z-index: 2;
 	}
 
 	.MuiToolbar-root {
@@ -187,11 +204,6 @@ export const Container = styled(NavbarButton)`
 
 	.MuiListItem-root.MuiListItem-root {
 		padding: 0;
-	}
-
-	.MuiBadge-root > svg {
-		height: 17px;
-		width: 17px;
 	}
 
 	${navbarButtonStyles}
