@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatMessage } from '@/v5/services/intl';
 import { SearchContext, SearchContextComponent, SearchContextType } from '@controls/search/searchContext';
 import { Select, SelectProps } from '@controls/inputs/select/select.component';
 import { MenuItem } from '@mui/material';
@@ -31,9 +30,12 @@ export const SearchSelect = ({ children, ...props }: SelectProps) => {
 		}
 	};
 
-	const filterItems = (items, query: string) => items
-		.filter((node) => onlyText(node).toLowerCase()
-			.includes(query.toLowerCase()));
+	const filterItems = (items, query: string) => {
+		if (!query.length) return items;
+		return items
+			.filter((node) => onlyText(node).toLowerCase()
+				.includes(query.toLowerCase()));
+	};
 
 	return (
 		<SearchContextComponent filteringFunction={filterItems} items={children as ReactNode[]}>
@@ -50,7 +52,6 @@ export const SearchSelect = ({ children, ...props }: SelectProps) => {
 					>
 						<SearchInputContainer>
 							<SearchInput
-								placeholder={formatMessage({ id: 'searchSelect.searchInput.placeholder', defaultMessage: 'Search...' })}
 								onClick={preventPropagation}
 								onKeyDown={preventPropagation}
 							/>

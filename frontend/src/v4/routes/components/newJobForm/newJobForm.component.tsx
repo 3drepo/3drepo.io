@@ -118,6 +118,7 @@ export class NewJobForm extends PureComponent<IProps, any> {
 							<SaveButton
 								type="submit"
 								variant="contained"
+								onClick={isV5() ? this.props.onCancel : undefined}
 								color={isV5() ? 'primary' : 'secondary'}
 								disabled={!form.isValid || form.isValidating}
 								aria-label="Add new job"

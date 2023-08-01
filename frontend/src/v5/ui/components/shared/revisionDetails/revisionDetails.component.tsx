@@ -60,7 +60,7 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 		}
 	}, []);
 
-	if (revisionsCount === 0) {
+	if (!revisionsCount && !isLoading && !revisions.length) {
 		return (
 			<RevisionsListEmptyWrapper>
 				<RevisionsListEmptyContainer>
@@ -100,7 +100,7 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 			</RevisionsListHeaderContainer>
 			<RevisionsList>
 				{isLoading ? (
-					range(revisionsCount).map((key) => <SkeletonListItem key={key} />)
+					range(revisionsCount || 1).map((key) => <SkeletonListItem key={key} />)
 				) : (
 					revisions.map((revision, i) => (
 						<RevisionsListItemWrapper

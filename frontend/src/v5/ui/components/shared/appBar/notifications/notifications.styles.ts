@@ -73,6 +73,7 @@ const headerStyles = css`
 		top: 0;
 		margin-left: -25px;
 		width: 520px;
+		z-index: 2;
 	}
 
 	.MuiToolbar-root {

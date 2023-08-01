@@ -18,7 +18,8 @@ import { createElement } from 'react';
 import { Tooltip } from '@mui/material';
 import { TooltipProps } from '@mui/material/Tooltip';
 import { omit } from 'lodash';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import CheckboxBase from '@mui/material/Checkbox';
 import { COLOR } from '../../../../../../styles';
 
 interface IContainer {
@@ -32,6 +33,13 @@ interface IName {
 interface ICurrentRevision {
 	disabled: boolean;
 }
+
+export const Checkbox = styled(CheckboxBase)<{ $hidden?: boolean }>`
+	${({ $hidden }) => $hidden && css`
+		visibility: hidden;
+		cursor: initial;
+	`}
+`;
 
 export const Container = styled.div<IContainer>`
 	display: flex;

@@ -34,6 +34,9 @@ const MetaModel = require(`${src}/models/metadata`);
 jest.mock('../../../../../../../../src/v5/models/scenes');
 const ScenesModel = require(`${src}/models/scenes`);
 
+jest.mock('../../../../../../../../src/v5/services/filesManager');
+const FilesManager = require(`${src}/services/filesManager`);
+
 const testGetTicketGroupById = () => {
 	describe('Get ticket group by Id', () => {
 		const teamspace = generateRandomString();
@@ -59,10 +62,16 @@ const testGetTicketGroupById = () => {
 			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
 
 			const metaRes = times(10, () => ({ parents: times(2, () => generateRandomString()) }));
-			MetaModel.getMetadataByRules.mockResolvedValueOnce(metaRes);
+			MetaModel.getMetadataByRules.mockResolvedValueOnce({ matched: metaRes, unwanted: [] });
 
 			const nodeRes = times(10, () => ({ _id: generateRandomString() }));
 			ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes);
+
+			const idMapMock = {};
+
+			nodeRes.forEach(({ _id }) => { idMapMock[_id] = [_id]; });
+
+			FilesManager.getFile.mockResolvedValueOnce(JSON.stringify(idMapMock));
 
 			const expectedData = cloneDeep(groupData);
 			expectedData.objects = [{
@@ -97,10 +106,16 @@ const testGetTicketGroupById = () => {
 			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
 
 			const metaRes = times(10, () => ({ parents: times(2, () => generateRandomString()) }));
-			MetaModel.getMetadataByRules.mockResolvedValueOnce(metaRes);
+			MetaModel.getMetadataByRules.mockResolvedValueOnce({ matched: metaRes, unwanted: [] });
 
 			const nodeRes = times(10, () => ({ _id: generateRandomString() }));
 			ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes);
+
+			const idMapMock = {};
+
+			nodeRes.forEach(({ _id }) => { idMapMock[_id] = [_id]; });
+
+			FilesManager.getFile.mockResolvedValueOnce(JSON.stringify(idMapMock));
 
 			const expectedData = cloneDeep(groupData);
 			expectedData.objects = [{
@@ -147,6 +162,114 @@ const testGetTicketGroupById = () => {
 			expect(RevsModel.getLatestRevision).toHaveBeenCalledWith(teamspace, container, { _id: 1 });
 
 			expect(MetaModel.getMetadataByRules).not.toHaveBeenCalled();
+			expect(ScenesModel.getNodesBySharedIds).not.toHaveBeenCalled();
+		});
+
+		test('[Smart group] should return the group found with the query results (negative query)', async () => {
+			const groupData = { ...generateRandomObject(), rules: generateRandomObject() };
+			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
+
+			const metaRes = times(10, () => ({ parents: times(2, () => generateRandomString()) }));
+			const rejected = times(10, () => ({ parents: times(2, () => generateRandomString()) }));
+			MetaModel.getMetadataByRules.mockResolvedValueOnce({ matched: metaRes, unwanted: rejected });
+
+			const nodeRes = times(10, () => ({ _id: generateRandomString() }));
+			ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes);
+			ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes.slice(5));
+
+			const idMapMock = {};
+
+			nodeRes.forEach(({ _id }) => { idMapMock[_id] = [_id]; });
+
+			FilesManager.getFile.mockResolvedValueOnce(JSON.stringify(idMapMock));
+
+			const expectedData = cloneDeep(groupData);
+			expectedData.objects = [{
+				container: model,
+				_ids: nodeRes.slice(0, 5).map(({ _id }) => _id),
+			}];
+
+			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group))
+				.resolves.toEqual(expectedData);
+
+			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.getGroupById).toHaveBeenCalledWith(teamspace, project, model, ticket, group);
+
+			expect(RevsModel.getLatestRevision).not.toHaveBeenCalled();
+
+			expect(MetaModel.getMetadataByRules).toHaveBeenCalledTimes(1);
+			expect(MetaModel.getMetadataByRules).toHaveBeenCalledWith(teamspace, project, model, revId,
+				groupData.rules, { parents: 1 });
+
+			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledTimes(2);
+			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledWith(teamspace, project, model,
+				revId, metaRes.flatMap(({ parents }) => parents), { _id: 1 });
+		});
+
+		test('[Smart group] should return the group found with the query results (idmap not found)', async () => {
+			const groupData = { ...generateRandomObject(), rules: generateRandomObject() };
+			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
+
+			const metaRes = times(10, () => ({ parents: times(2, () => generateRandomString()) }));
+			const rejected = times(10, () => ({ parents: times(2, () => generateRandomString()) }));
+			MetaModel.getMetadataByRules.mockResolvedValueOnce({ matched: metaRes, unwanted: rejected });
+
+			const nodeRes = times(10, () => ({ _id: generateRandomString() }));
+			ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes);
+			ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes.slice(5));
+
+			const idMapMock = {};
+
+			nodeRes.slice(1, nodeRes.length - 1).forEach(({ _id }) => { idMapMock[_id] = [_id]; });
+
+			FilesManager.getFile.mockResolvedValueOnce(JSON.stringify(idMapMock));
+
+			const expectedData = cloneDeep(groupData);
+			expectedData.objects = [{
+				container: model,
+				_ids: nodeRes.slice(1, 5).map(({ _id }) => _id),
+			}];
+
+			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group))
+				.resolves.toEqual(expectedData);
+
+			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.getGroupById).toHaveBeenCalledWith(teamspace, project, model, ticket, group);
+
+			expect(RevsModel.getLatestRevision).not.toHaveBeenCalled();
+
+			expect(MetaModel.getMetadataByRules).toHaveBeenCalledTimes(1);
+			expect(MetaModel.getMetadataByRules).toHaveBeenCalledWith(teamspace, project, model, revId,
+				groupData.rules, { parents: 1 });
+
+			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledTimes(2);
+			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledWith(teamspace, project, model,
+				revId, metaRes.flatMap(({ parents }) => parents), { _id: 1 });
+		});
+
+		test('[Smart group] should return the group found with the query results (no match)', async () => {
+			const groupData = { ...generateRandomObject(), rules: generateRandomObject() };
+			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
+
+			MetaModel.getMetadataByRules.mockResolvedValueOnce({ matched: [], unwanted: [] });
+
+			FilesManager.getFile.mockResolvedValueOnce(JSON.stringify({}));
+
+			const expectedData = cloneDeep(groupData);
+			expectedData.objects = [];
+
+			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group))
+				.resolves.toEqual(expectedData);
+
+			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.getGroupById).toHaveBeenCalledWith(teamspace, project, model, ticket, group);
+
+			expect(RevsModel.getLatestRevision).not.toHaveBeenCalled();
+
+			expect(MetaModel.getMetadataByRules).toHaveBeenCalledTimes(1);
+			expect(MetaModel.getMetadataByRules).toHaveBeenCalledWith(teamspace, project, model, revId,
+				groupData.rules, { parents: 1 });
+
 			expect(ScenesModel.getNodesBySharedIds).not.toHaveBeenCalled();
 		});
 	});

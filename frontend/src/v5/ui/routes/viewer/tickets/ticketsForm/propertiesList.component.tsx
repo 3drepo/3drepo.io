@@ -56,7 +56,6 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 							name={inputName}
 							formError={formError}
 							onBlur={onPropertyBlur}
-							// @ts-ignore
 							values={values}
 						/>
 						{formError && <ErrorTextGap />}

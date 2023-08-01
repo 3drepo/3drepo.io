@@ -20,7 +20,7 @@ import { CircleButton } from '@controls/circleButton';
 import styled from 'styled-components';
 
 export const Form = styled.form`
-	height: calc(100% - 49px);
+	height: 100%;
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
@@ -36,6 +36,7 @@ export const BottomArea = styled.div`
 	z-index: 2;
 	display: flex;
 	justify-content: flex-end;
+	background: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
 export const CloseButton = styled(CircleButton).attrs({

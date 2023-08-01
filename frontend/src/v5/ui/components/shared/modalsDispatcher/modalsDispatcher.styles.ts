@@ -22,6 +22,7 @@ import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import WarningIconBase from '@assets/icons/outlined/warning-outlined.svg';
+import { SubmitButton as SubmitButtonBase } from '@controls/submitButton';
 
 export const Modal = styled(Dialog).attrs(({ maxWidth = 'md' }: DialogProps) => ({ maxWidth }))``;
 
@@ -100,4 +101,8 @@ export const ConfirmationPhrase = styled.span`
 
 export const WarningIcon = styled(WarningIconBase)`
 	color: ${({ theme }) => theme.palette.favourite.main};
+`;
+
+export const SubmitButton = styled(SubmitButtonBase)`
+	margin: 8px;
 `;
