@@ -30,8 +30,8 @@ type IUploadList = {
 	isUploading: boolean;
 };
 const DEFAULT_SORT_CONFIG = {
-	column: 'file',
-	direction: SortingDirection.ASCENDING,
+	column: ['file'],
+	direction: [SortingDirection.ASCENDING],
 };
 export const UploadList = ({
 	values,
