@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import api, { getAPIUrl } from './';
+import { API as api, getAPIUrl } from './default';
 
 /**
  * Get users

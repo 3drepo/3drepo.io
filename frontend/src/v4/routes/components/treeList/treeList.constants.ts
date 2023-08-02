@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,28 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { API as api } from './default';
 
-/**
- * Get invitations
- * @param teamspace
- */
-export const fetchInvitations = (teamspace) => {
-	return api.get(`${teamspace}/invitations`);
-};
-
-/**
- * Create/Update invitations
- * @param teamspace
- */
-export const sendInvitation = (teamspace, invitation) => {
-	return api.post(`${teamspace}/invitations`, invitation);
-};
-
-/**
- * Delete invitation
- * @param teamspace
- */
-export const removeInvitation = (teamspace, email) => {
-	return api.delete(`${teamspace}/invitations/${email}`);
+export const TREE_LEVELS = {
+	TEAMSPACE: 1,
+	PROJECT: 2,
+	MODEL: 3
 };

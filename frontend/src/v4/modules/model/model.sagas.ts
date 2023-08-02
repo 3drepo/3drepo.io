@@ -18,6 +18,7 @@
 import { cloneDeep } from 'lodash';
 import { put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 
+import { getAPIUrl } from '@/v4/services/api/default';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import * as API from '../../services/api';
 import { clientConfigService } from '../../services/clientConfig';
@@ -110,7 +111,7 @@ export function* waitForSettingsAndFetchRevisions({ teamspace, modelId }) {
 
 export function* downloadModel({ teamspace, modelId }) {
 	try {
-		const url = yield API.getAPIUrl(`${teamspace}/${modelId}/download/latest`);
+		const url = yield getAPIUrl(`${teamspace}/${modelId}/download/latest`);
 		window.open(url, '_blank');
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('download', 'model', e));

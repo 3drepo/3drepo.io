@@ -16,7 +16,7 @@
  */
 
 import { splitValuesIfNecessary } from '../../helpers/requests';
-import api from './';
+import { API as api } from './default';
 
 /**
  * Get groups list
