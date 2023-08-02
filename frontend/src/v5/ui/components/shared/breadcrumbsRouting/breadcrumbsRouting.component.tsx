@@ -18,7 +18,15 @@ import { useParams, generatePath, matchPath } from 'react-router-dom';
 import { TeamspacesHooksSelectors, ProjectsHooksSelectors, FederationsHooksSelectors, ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { IProject } from '@/v5/store/projects/projects.types';
-import { FEDERATIONS_ROUTE, matchesPath, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE, VIEWER_ROUTE, TEAMSPACE_ROUTE, BOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
+import {
+	TEAMSPACE_ROUTE,
+	TEAMSPACE_ROUTE_BASE,
+	PROJECT_ROUTE_BASE,
+	FEDERATIONS_ROUTE,
+	VIEWER_ROUTE,
+	matchesPath,
+	matchesSubPath,
+} from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
 import { selectRevisions } from '@/v4/modules/model/model.selectors';
 import { formatMessage } from '@/v5/services/intl';
@@ -54,45 +62,25 @@ export const BreadcrumbsRouting = () => {
 		breadcrumbs = [{ options }];
 	}
 
-	if (matchesPath(PROJECT_ROUTE)) {
+	if (matchesSubPath(PROJECT_ROUTE_BASE)) {
 		breadcrumbs = [
 			{
 				title: teamspace,
 				to: generatePath(TEAMSPACE_ROUTE_BASE, { teamspace }),
 			},
 		];
-
 		// eslint-disable-next-line no-restricted-globals
-		const { params: projectParams } = matchPath(location.pathname, { path: PROJECT_ROUTE });
+		const { params: projectParams } = matchPath(location.pathname, { path: PROJECT_ROUTE_BASE });
 
 		options = projects.map(({ name, _id }) => ({
 			title: name,
-			to: generatePath(PROJECT_ROUTE, { ...projectParams, project: _id }),
+			to: generatePath(PROJECT_ROUTE_BASE, { ...projectParams, project: _id }),
 			selected: project?._id === _id,
 		}));
 
 		breadcrumbs.push({ options });
 	}
 
-	if (matchesPath(BOARD_ROUTE)) {
-		breadcrumbs = [
-			{
-				title: teamspace,
-				to: generatePath(TEAMSPACE_ROUTE_BASE, { teamspace }),
-			},
-		];
-
-		// eslint-disable-next-line no-restricted-globals
-		const { params: projectParams } = matchPath(location.pathname, { path: BOARD_ROUTE });
-
-		options = projects.map(({ name, _id }) => ({
-			title: name,
-			to: generatePath(BOARD_ROUTE, { ...projectParams, project: _id }),
-			selected: project?._id === _id,
-		}));
-
-		breadcrumbs.push({ options });
-	}
 
 	if (matchesPath(VIEWER_ROUTE)) {
 		breadcrumbs = [

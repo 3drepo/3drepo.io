@@ -45,6 +45,7 @@ export const RELEASE_NOTES_ROUTE = 'https://help.3drepo.io/en/collections/335823
 
 // eslint-disable-next-line no-restricted-globals
 export const matchesPath = (path) => Boolean(matchPath(location.pathname, { path, exact: true }));
+export const matchesSubPath = (path) => Boolean(matchPath(location.pathname, { path }));
 
 export interface TeamspaceParams {
 	teamspace?: string;
