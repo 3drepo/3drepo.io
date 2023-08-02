@@ -78,9 +78,9 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 	}
 	try {
 		if (!containerId) {
-			throw new Error(
-				formatMessage({ id: 'revisions.error.noContainer', defaultMessage: 'Failed to create Container' }),
-			);
+			yield put(RevisionsActions.setUploadComplete(uploadId, true,
+				formatMessage({ id: 'revisions.error.noContainer', defaultMessage: 'Failed to create Container' })));
+			return;
 		}
 		const formData = new FormData();
 		formData.append('file', body.file);
@@ -106,11 +106,11 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 		yield put(ContainersActions.setContainerStatus(projectId, containerId, UploadStatuses.QUEUED));
 		yield put(RevisionsActions.setUploadComplete(uploadId, true));
 	} catch (error) {
-		let errorMessage = '';
-		if (Object.prototype.hasOwnProperty.call(error, 'response')) {
-			const { response: { data: { message, status, code } } } = error;
+		let errorMessage = error.message;
+		if (error.response) {
+			const { message, status, code } = error.response.data;
 			errorMessage = `${status} - ${code} (${message})`;
-		} else errorMessage = error.message;
+		}
 		yield put(RevisionsActions.setUploadComplete(uploadId, true, errorMessage));
 	}
 }
