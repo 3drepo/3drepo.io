@@ -157,3 +157,5 @@ export type OverridesDicts = {
 	overrides: MeshIdColorDict,
 	transparencies: MeshIdTransparencyDict
 };
+
+export type TicketWithModelId = ITicket & { containerOrFederation: string };
