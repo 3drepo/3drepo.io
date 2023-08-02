@@ -106,13 +106,13 @@ export const TicketsTable = () => {
 				</SelectorsContainer>
 				<FlexContainer>
 					<SearchInput
-						placeholder={formatMessage({ id: 'ticketTable.search.placeholder', defaultMessage: 'Search...' })}
+						placeholder={formatMessage({ id: 'ticketsTable.search.placeholder', defaultMessage: 'Search...' })}
 					/>
 					<NewTicketButton
 						startIcon={<AddCircleIcon />}
 						onClick={() => onSetEditingTicket(null)}
 					>
-						<FormattedMessage id="ticketTable.button.newTicket" defaultMessage="New Ticket" />
+						<FormattedMessage id="ticketsTable.button.newTicket" defaultMessage="New Ticket" />
 					</NewTicketButton>
 				</FlexContainer>
 			</InputsContainer>
@@ -121,7 +121,7 @@ export const TicketsTable = () => {
 				<SlidePanelHeader>
 					<OpenInViewerButton disabled={!editingTicket?._id}>
 						<FormattedMessage
-							id="ticketTable.button.openInViewer"
+							id="ticketsTable.button.openInViewer"
 							defaultMessage="Open in viewer"
 						/>
 					</OpenInViewerButton>
