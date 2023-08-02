@@ -35,9 +35,12 @@ export const ListSubheader = styled(ListSubheaderBase)`
 	${({ theme }) => theme.typography.h3}
 `;
 
-export const SelectorsContainer = styled.div`
+export const FlexContainer = styled.div`
 	display: flex;
 	flex-direction: row;
+`;
+
+export const SelectorsContainer = styled(FlexContainer)`
 	gap: 5px;
 
 	& > * {

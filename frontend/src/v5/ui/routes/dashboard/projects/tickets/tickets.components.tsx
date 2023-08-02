@@ -15,90 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TeamspacesActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TicketsHooksSelectors, FederationsHooksSelectors, ContainersHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
-import { Box, MenuItem } from '@mui/material';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useEffect, useState } from 'react';
 import { useStore } from 'react-redux';
 import { selectFederationById } from '@/v5/store/federations/federations.selectors';
-import { useContainersData } from '../containers/containers.hooks';
-import { useFederationsData } from '../federations/federations.hooks';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams, generatePath, useHistory } from 'react-router-dom';
-import { InputsContainer, ListSubheader, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton } from './tickets.styles';
-import { Select, SelectProps } from '@controls/inputs/select/select.component';
 import { SearchContextComponent } from '@controls/search/searchContext';
-import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
-import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
-import { TicketsList } from './ticketsList/ticketsList.component';
-import { TicketSlide } from './ticketSlide/ticketSlide.component';
-import { IssueProperties } from '../../../viewer/tickets/tickets.constants';
-import { ITemplate, TicketWithModelId } from '@/v5/store/tickets/tickets.types';
+import { TicketWithModelId } from '@/v5/store/tickets/tickets.types';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
 import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import { CircleButton } from '@controls/circleButton';
+import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
+import { useContainersData } from '../containers/containers.hooks';
+import { useFederationsData } from '../federations/federations.hooks';
+import { TicketsList } from './ticketsList/ticketsList.component';	
+import { TicketSlide } from './slides/ticketSlide.component';
 import { useSearchParam } from '../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE } from '../../../routes.constants';
-
-const FederationsAndContainerSelect = (props) => {
-	const containers = ContainersHooksSelectors.selectContainers();
-	const federations = FederationsHooksSelectors.selectFederations();
-
-	return (
-		<SearchSelect
-			multiple
-			{...props}
-			placeholder={formatMessage({ id: 'ticketTable.modelSelection.placeholder', defaultMessage: 'Select something' })}
-			renderValue={(ids: any[] | null = []) => {
-				const itemsLength = ids.length;
-				if (itemsLength === 1) {
-					const [id] = ids;
-					return (containers.find(({ _id }) => _id === id) || federations.find(({ _id }) => _id === id)).name;
-				}
-
-				return formatMessage({
-					id: 'ticketTable.modelSelection.selected',
-					defaultMessage: '{itemsLength} selected',
-				}, { itemsLength });
-			}}
-		>
-			<ListSubheader>
-				<FormattedMessage id="ticketTable.modelSelection.federations" defaultMessage="Federations" />
-			</ListSubheader>
-			{federations.map((federation) => (
-				<MultiSelectMenuItem value={federation._id}>{federation.name}</MultiSelectMenuItem>
-			))}
-			<ListSubheader>
-				<FormattedMessage id="ticketTable.modelSelection.containers" defaultMessage="Containers" />
-			</ListSubheader>
-			{containers.map((container) => (
-				<MultiSelectMenuItem value={container._id}>{container.name}</MultiSelectMenuItem>
-			))}
-		</SearchSelect>
-	);
-};
-
-type GroupBySelectType = SelectProps & { values: string[] };
-const GroupBySelect = ({ values, onChange, ...props }: GroupBySelectType) => (
-	<Select {...props} onChange={(e) => onChange(e.target.value)}>
-		{values.map((val) => (<MenuItem value={val.toLocaleLowerCase()}>{val}</MenuItem>))}
-	</Select>
-);
-
-type TemplateSelectType = SelectProps & { values: ITemplate[] }
-const TemplateSelect = ({ values, onChange, ...props }: TemplateSelectType) => (
-	<Select {...props} onChange={(e) => onChange(e.target.value)}>
-		{values.map(({ _id, name }) => (<MenuItem value={_id}>{name}</MenuItem>))}
-	</Select>
-);
+import { ContainersAndFederationsSelect } from './selectMenus/containersAndFederationsSelect.component';
+import { GroupBySelect } from './selectMenus/groupBySelect.component';
+import { TemplateSelect } from './selectMenus/templateSelect.component';
+import { InputsContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer } from './tickets.styles';
 
 export const TicketsTable = () => {
 	const history = useHistory();
 	const { teamspace, project, groupBy, template } = useParams<DashboardTicketsParams>();
-	const templates = TeamspacesHooksSelectors.selectCurrentTeamspaceTemplates();
 	const [models, setModels] = useSearchParam('models');
 	const selectedContainersAndFederations = models?.split(',') || [];
 	const { getState } = useStore();
@@ -136,10 +81,7 @@ export const TicketsTable = () => {
 		});
 	}, [selectedContainersAndFederations.length, isLoading]);
 
-	useEffect(() => {
-		TeamspacesActionsDispatchers.fetchTemplates(teamspace);
-		return () => setModels('');
-	}, []);
+	useEffect(() => () => setModels(''), []);
 
 	if (isLoading) return (<Loader />);
 
@@ -147,24 +89,22 @@ export const TicketsTable = () => {
 		<SearchContextComponent items={tickets} fieldsToFilter={['title']}>
 			<InputsContainer>
 				<SelectorsContainer>
-					<FederationsAndContainerSelect
-						onChange={(event) => setModels(event.target.value?.join(',') || '')}
+					<ContainersAndFederationsSelect
+						onChange={(value) => setModels(value.join(','))}
 						value={selectedContainersAndFederations}
 					/>
 					<TemplateSelect
 						onChange={(newTemplate) => updateURL({ template: newTemplate, groupBy })}
 						value={template}
 						defaultValue="none"
-						values={templates}
 					/>
 					<GroupBySelect
 						onChange={(newGroupBy) => updateURL({ template, groupBy: newGroupBy })}
 						value={groupBy}
 						defaultValue="none"
-						values={Object.values(IssueProperties)}
 					/>
 				</SelectorsContainer>
-				<Box>
+				<FlexContainer>
 					<SearchInput
 						placeholder={formatMessage({ id: 'ticketTable.search.placeholder', defaultMessage: 'Search...' })}
 					/>
@@ -174,7 +114,7 @@ export const TicketsTable = () => {
 					>
 						<FormattedMessage id="ticketTable.button.newTicket" defaultMessage="New Ticket" />
 					</NewTicketButton>
-				</Box>
+				</FlexContainer>
 			</InputsContainer>
 			<TicketsList onSelectTicket={onSetEditingTicket} />
 			<SidePanel open={isEditingTicket}>
