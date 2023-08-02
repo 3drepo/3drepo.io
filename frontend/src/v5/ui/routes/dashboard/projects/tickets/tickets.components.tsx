@@ -15,16 +15,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TeamspacesHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors, FederationsHooksSelectors, ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TeamspacesActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsHooksSelectors, FederationsHooksSelectors, ContainersHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
-import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
-import { Drawer, MenuItem, Select, SelectProps } from '@mui/material';
+import { Box, MenuItem } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useStore } from 'react-redux';
-import { selectContainersByFederationId } from '@/v5/store/federations/federations.selectors';
+import { selectFederationById } from '@/v5/store/federations/federations.selectors';
 import { useContainersData } from '../containers/containers.hooks';
 import { useFederationsData } from '../federations/federations.hooks';
+import { FormattedMessage } from 'react-intl';
+import { formatMessage } from '@/v5/services/intl';
+import { useParams, generatePath, useHistory } from 'react-router-dom';
+import { InputsContainer, ListSubheader, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton } from './tickets.styles';
+import { Select, SelectProps } from '@controls/inputs/select/select.component';
+import { SearchContextComponent } from '@controls/search/searchContext';
+import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
+import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
+import { TicketsList } from './ticketsList/ticketsList.component';
+import { TicketSlide } from './ticketSlide/ticketSlide.component';
+import { IssueProperties } from '../../../viewer/tickets/tickets.constants';
+import { ITemplate, TicketWithModelId } from '@/v5/store/tickets/tickets.types';
+import { Loader } from '@/v4/routes/components/loader/loader.component';
+import { selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
+import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
+import { CircleButton } from '@controls/circleButton';
+import { useSearchParam } from '../../../useSearchParam';
+import { DashboardTicketsParams, TICKETS_ROUTE } from '../../../routes.constants';
 
 const FederationsAndContainerSelect = (props) => {
 	const containers = ContainersHooksSelectors.selectContainers();
@@ -34,132 +51,147 @@ const FederationsAndContainerSelect = (props) => {
 		<SearchSelect
 			multiple
 			{...props}
-			renderValue={(val) => {
-				const itemsSelected = (val as (any[] | null) || []).length;
-				if (itemsSelected === 1) {
-					const id = val[0];
+			placeholder={formatMessage({ id: 'ticketTable.modelSelection.placeholder', defaultMessage: 'Select something' })}
+			renderValue={(ids: any[] | null = []) => {
+				const itemsLength = ids.length;
+				if (itemsLength === 1) {
+					const [id] = ids;
 					return (containers.find(({ _id }) => _id === id) || federations.find(({ _id }) => _id === id)).name;
 				}
 
-				if (itemsSelected > 1) {
-					return `${itemsSelected} selected`;
-				}
-				return 'Select something';
+				return formatMessage({
+					id: 'ticketTable.modelSelection.selected',
+					defaultMessage: '{itemsLength} selected',
+				}, { itemsLength });
 			}}
 		>
-			{/* Clicking here should select all other items? */}
-			<MultiSelectMenuItem value="all">
-				ALL
-			</MultiSelectMenuItem>
-			<h2>Federations:</h2>
-			{ federations.map((federation) => (
-				<MultiSelectMenuItem value={federation._id}>{federation.name}</MultiSelectMenuItem>))}
-			<h2>Containers:</h2>
-			{ containers.map((container) => (
-				<MultiSelectMenuItem value={container._id}>{container.name}</MultiSelectMenuItem>))}
+			<ListSubheader>
+				<FormattedMessage id="ticketTable.modelSelection.federations" defaultMessage="Federations" />
+			</ListSubheader>
+			{federations.map((federation) => (
+				<MultiSelectMenuItem value={federation._id}>{federation.name}</MultiSelectMenuItem>
+			))}
+			<ListSubheader>
+				<FormattedMessage id="ticketTable.modelSelection.containers" defaultMessage="Containers" />
+			</ListSubheader>
+			{containers.map((container) => (
+				<MultiSelectMenuItem value={container._id}>{container.name}</MultiSelectMenuItem>
+			))}
 		</SearchSelect>
 	);
 };
 
-const TemplatesSelect = (props: SelectProps<string>) => (
-	<Select
-		{...props}
-	>
-		{/* Clicking here should select all other items? */}
-		<MenuItem value="none">
-			None
-		</MenuItem>
-		<MenuItem value="id-template1">
-			A template
-		</MenuItem>
-		<MenuItem value="id-template2">
-			Another template
-		</MenuItem>
+type GroupBySelectType = SelectProps & { values: string[] };
+const GroupBySelect = ({ values, onChange, ...props }: GroupBySelectType) => (
+	<Select {...props} onChange={(e) => onChange(e.target.value)}>
+		{values.map((val) => (<MenuItem value={val.toLocaleLowerCase()}>{val}</MenuItem>))}
 	</Select>
 );
 
-const GroupBySelect = (props: SelectProps<string>) => (
-	<Select
-		{...props}
-	>
-		{/* Clicking here should select all other items? */}
-		<MenuItem value="none">
-			None
-		</MenuItem>
-		<MenuItem value="Ass">
-			Assignee
-		</MenuItem>
-		<MenuItem value="id-template2">
-			Due date
-		</MenuItem>
-		<MenuItem value="id-template2">
-			Priority
-		</MenuItem>
-		<MenuItem value="id-template2">
-			Status
-		</MenuItem>
-		<MenuItem value="id-template2">
-			Owner
-		</MenuItem>
-		<MenuItem value="id-template2">
-			Level of risk
-		</MenuItem>
-		<MenuItem value="id-template2">
-			Treatment status
-		</MenuItem>
+type TemplateSelectType = SelectProps & { values: ITemplate[] }
+const TemplateSelect = ({ values, onChange, ...props }: TemplateSelectType) => (
+	<Select {...props} onChange={(e) => onChange(e.target.value)}>
+		{values.map(({ _id, name }) => (<MenuItem value={_id}>{name}</MenuItem>))}
 	</Select>
 );
 
 export const TicketsTable = () => {
-	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const history = useHistory();
+	const { teamspace, project, groupBy, template } = useParams<DashboardTicketsParams>();
+	const templates = TeamspacesHooksSelectors.selectCurrentTeamspaceTemplates();
+	const [models, setModels] = useSearchParam('models');
+	const selectedContainersAndFederations = models?.split(',') || [];
 	const { getState } = useStore();
 
-	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const [selectedFedOrContainers, setSelectedFedOrContainers] = useState([]);
-	const [selectedTemplate, setSelectedTemplate] = useState(undefined);
-	const [selectedGroupBy, setSelectedGroupBy] = useState(undefined);
-	const tickets = TicketsHooksSelectors.selectTicketsByFedAndContainers(selectedFedOrContainers);
+	const tickets = TicketsHooksSelectors.selectTicketsByContainersAndFederations(selectedContainersAndFederations);
 	const { isListPending: areContainersPending } = useContainersData();
 	const { isListPending: areFederationsPending } = useFederationsData();
-	const [onEdition, setOnEdition] = useState(false);
-	const [editingTicket, setEditingTicket] = useState(null);
+	const isLoading = areContainersPending || areFederationsPending;
+	const [editingTicket, setEditingTicket] = useState<TicketWithModelId>(undefined);
+	const [isEditingTicket, setIsEditingTicket] = useState(false);
+
+	const onSetEditingTicket = (ticket: TicketWithModelId) => {
+		setEditingTicket(ticket);
+		setIsEditingTicket(true);
+	};
+
+	const updateURL = ({ groupBy, template }: any) => {
+		const newURL = generatePath(TICKETS_ROUTE, {
+			teamspace,
+			project,
+			groupBy,
+			template,
+		});
+		history.push(newURL);
+	};
 
 	useEffect(() => {
-		setOnEdition(false);
-		if (areContainersPending || areFederationsPending) return;
-		const isFed = (modelId) => !!selectContainersByFederationId(getState(), modelId).length;
+		if (isLoading || !selectedContainersAndFederations.length) return;
 
-		selectedFedOrContainers.forEach((modelId) => {
+		const isFed = (modelId) => !!selectFederationById(getState(), modelId);
+
+		selectedContainersAndFederations.forEach((modelId) => {
+			if (selectTicketsHaveBeenFetched(getState(), modelId)) return;
 			TicketsActionsDispatchers.fetchTickets(teamspace, project, modelId, isFed(modelId));
 		});
-	}, [teamspace, project, selectedFedOrContainers, areContainersPending, areFederationsPending]);
+	}, [selectedContainersAndFederations.length, isLoading]);
 
-	const editTicket = (ticket) => {
-		setEditingTicket(ticket);
-		setOnEdition(true);
-	};
+	useEffect(() => {
+		TeamspacesActionsDispatchers.fetchTemplates(teamspace);
+		return () => setModels('');
+	}, []);
+
+	if (isLoading) return (<Loader />);
+
 	return (
-		<>
-			<div>
-				<FederationsAndContainerSelect onChange={(event) => setSelectedFedOrContainers(event.target.value)} value={selectedFedOrContainers} />
-				<TemplatesSelect onChange={(event) => setSelectedTemplate(event.target.value)} value={selectedTemplate} defaultValue="none" />
-				<GroupBySelect onChange={(event) => setSelectedGroupBy(event.target.value)} value={selectedGroupBy} defaultValue="none" />
-				<button onClick={() => editTicket(null)}> New ticket</button>
-			</div>
-			{tickets.map((t) => (
-				<h1>{t.title} <button onClick={() => editTicket(t)}> edit </button>
-				</h1>
-			))}
-			<Drawer
-				variant="persistent"
-				anchor="right"
-				open={onEdition}
-				onClose={() => setOnEdition(false)}
-				SlideProps={{ unmountOnExit: true }}
-			>
-				{editingTicket?._id && <>Editing form for {editingTicket.title}</>}
-				{!editingTicket?._id && <>Editing form for a new ticket</>}
-			</Drawer>
-		</>
+		<SearchContextComponent items={tickets} fieldsToFilter={['title']}>
+			<InputsContainer>
+				<SelectorsContainer>
+					<FederationsAndContainerSelect
+						onChange={(event) => setModels(event.target.value?.join(',') || '')}
+						value={selectedContainersAndFederations}
+					/>
+					<TemplateSelect
+						onChange={(newTemplate) => updateURL({ template: newTemplate, groupBy })}
+						value={template}
+						defaultValue="none"
+						values={templates}
+					/>
+					<GroupBySelect
+						onChange={(newGroupBy) => updateURL({ template, groupBy: newGroupBy })}
+						value={groupBy}
+						defaultValue="none"
+						values={Object.values(IssueProperties)}
+					/>
+				</SelectorsContainer>
+				<Box>
+					<SearchInput
+						placeholder={formatMessage({ id: 'ticketTable.search.placeholder', defaultMessage: 'Search...' })}
+					/>
+					<NewTicketButton
+						startIcon={<AddCircleIcon />}
+						onClick={() => onSetEditingTicket(null)}
+					>
+						<FormattedMessage id="ticketTable.button.newTicket" defaultMessage="New Ticket" />
+					</NewTicketButton>
+				</Box>
+			</InputsContainer>
+			<TicketsList onSelectTicket={onSetEditingTicket} />
+			<SidePanel open={isEditingTicket}>
+				<SlidePanelHeader>
+					<OpenInViewerButton disabled={!editingTicket?._id}>
+						<FormattedMessage
+							id="ticketTable.button.openInViewer"
+							defaultMessage="Open in viewer"
+						/>
+					</OpenInViewerButton>
+					<CircleButton onClick={() => setIsEditingTicket(false)}>
+						<ExpandIcon />
+					</CircleButton>
+				</SlidePanelHeader>
+				{editingTicket?._id && (<TicketSlide ticketWithModelId={editingTicket} />)}
+				{/* {!editingTicket?._id && <NewTicketSlide>Editing form for a new ticket</NewTicketSlide>} */}
+			</SidePanel>
+		</SearchContextComponent>
 	);
 };
