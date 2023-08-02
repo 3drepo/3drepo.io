@@ -57,7 +57,41 @@ export function* fetchQuota({ teamspace }) {
 	}
 }
 
+export function* fetchTemplates({ teamspace }) {
+	try {
+		const { data: { templates } } = yield API.Teamspaces.fetchTemplates(teamspace);
+		yield put(TeamspacesActions.fetchTemplatesSuccess(teamspace, templates));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'teamspaces.fetchTemplates.error.action',
+				defaultMessage: 'fetching the templates',
+			}),
+			error,
+			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
+		}));
+	}
+}
+
+export function* fetchTemplate({ teamspace, templateId }) {
+	try {
+		const { data } = yield API.Teamspaces.fetchTemplate(teamspace, templateId);
+		yield put(TeamspacesActions.replaceTemplateSuccess(teamspace, data));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'teamspaces.fetchQuota.error.action',
+				defaultMessage: 'fetching the template details',
+			}),
+			error,
+			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
+		}));
+	}
+}
+
 export default function* TeamspacesSaga() {
 	yield takeLatest(TeamspacesTypes.FETCH as any, fetch);
 	yield takeLatest(TeamspacesTypes.FETCH_QUOTA as any, fetchQuota);
+	yield takeLatest(TeamspacesTypes.FETCH_TEMPLATES as any, fetchTemplates);
+	yield takeLatest(TeamspacesTypes.FETCH_TEMPLATE as any, fetchTemplate);
 }

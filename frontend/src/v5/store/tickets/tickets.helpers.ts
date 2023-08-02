@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { camelCase, isEmpty, isEqual, isObject, mapKeys } from 'lodash';
+import { camelCase, isEmpty, isEqual, isObject, mapKeys, orderBy, isArray, mergeWith } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
@@ -281,3 +281,8 @@ export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
 		Object.values(values.modules).forEach(fillEmptyOverrides);
 	}
 };
+
+export const mergeWithArray = (objValue, srcValue) => mergeWith(objValue, srcValue, (target, src) => {
+	if (isArray(target)) return src; // If its an array that is merging just use the newest
+	return undefined;
+});

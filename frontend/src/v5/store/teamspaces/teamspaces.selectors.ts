@@ -42,6 +42,16 @@ export const selectCurrentQuota = createSelector(
 	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => state.quota[teamspace],
 );
 
+export const selectCurrentTeamspaceTemplates = createSelector(
+	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => state.templatesByTeamspace[teamspace] || [],
+);
+
+export const selectTemplateById = createSelector(
+	selectCurrentTeamspaceTemplates,
+	(_, templateId) => templateId,
+	(templates, templateId) => templates.find(({ _id }) => _id === templateId),
+);
+
 export const selectIsTeamspaceAdmin = createSelector(
 	selectCurrentTeamspaceDetails,
 	(teamspace): boolean => !!teamspace?.isAdmin,
