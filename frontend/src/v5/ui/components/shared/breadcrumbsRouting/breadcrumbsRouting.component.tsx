@@ -26,6 +26,9 @@ import {
 	VIEWER_ROUTE,
 	matchesPath,
 	matchesSubPath,
+	PROJECT_ROUTE,
+	BOARD_ROUTE,
+	TICKETS_ROUTE,
 } from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
 import { selectRevisions } from '@/v4/modules/model/model.selectors';
@@ -69,12 +72,20 @@ export const BreadcrumbsRouting = () => {
 				to: generatePath(TEAMSPACE_ROUTE_BASE, { teamspace }),
 			},
 		];
+		let path = PROJECT_ROUTE;
+		if (matchesPath(BOARD_ROUTE)) {
+			path = BOARD_ROUTE;
+		}
+		if (matchesPath(TICKETS_ROUTE)) {
+			path = TICKETS_ROUTE;
+		}
+
 		// eslint-disable-next-line no-restricted-globals
-		const { params: projectParams } = matchPath(location.pathname, { path: PROJECT_ROUTE_BASE });
+		const { params: projectParams } = matchPath(location.pathname, { path });
 
 		options = projects.map(({ name, _id }) => ({
 			title: name,
-			to: generatePath(PROJECT_ROUTE_BASE, { ...projectParams, project: _id }),
+			to: generatePath(path, { ...projectParams, project: _id }),
 			selected: project?._id === _id,
 		}));
 
