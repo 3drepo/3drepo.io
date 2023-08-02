@@ -16,26 +16,33 @@
  */
 
 import { createSelector } from 'reselect';
-import { orderBy } from 'lodash';
-import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
 import { createPropertiesWithGroups } from './ticketsGroups.helpers';
 import { Properties } from './tickets.types';
+import { sortTicketsByCreationDate } from './tickets.helpers';
 
 const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
+
+export const selectTicketsHaveBeenFetched = createSelector(
+	selectTicketsDomain,
+	(state, modelId) => modelId,
+	(state, modelId) => modelId in state.ticketsByModelId,
+);
 
 export const selectTickets = createSelector(
 	selectTicketsDomain,
 	(state, modelId) => modelId,
-	(state, modelId) => orderBy(state.ticketsByModelId[modelId] || [], `properties.${BaseProperties.CREATED_AT}`, 'desc'),
+	(state, modelId) => sortTicketsByCreationDate(state.ticketsByModelId[modelId] || []),
 );
 
-export const selectTicketsByFedAndContainers = createSelector(
+export const selectTicketsByContainersAndFederations = createSelector(
 	selectTicketsDomain,
-	(state, fedOrContainersIds: string[]) => fedOrContainersIds,
-	(state, fedOrContainersIds) => {
-		const tickets = fedOrContainersIds.flatMap((modelId) => state.ticketsByModelId[modelId] || []);
-		return orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
+	(state, containersAndFederationsIds: string[]) => containersAndFederationsIds,
+	(state, containersAndFederationsIds) => {
+		const tickets = containersAndFederationsIds.flatMap((modelId) => (
+			(state.ticketsByModelId[modelId] || []).map((ticket) => ({ modelId, ...ticket }))
+		));
+		return sortTicketsByCreationDate(tickets);
 	},
 );
 
