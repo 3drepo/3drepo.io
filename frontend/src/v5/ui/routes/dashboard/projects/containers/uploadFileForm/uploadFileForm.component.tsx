@@ -94,7 +94,7 @@ export const UploadFileForm = ({
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 	const [alreadyExistingTags, setAlreadyExistingTags] = useState({});
 
-	const formMethods = useForm<UploadFieldArray>({
+	const formData = useForm<UploadFieldArray>({
 		mode: 'onChange',
 		resolver: yupResolver(UploadsSchema),
 		context: { alreadyExistingTags, alreadyExistingNames: [] },
@@ -105,7 +105,7 @@ export const UploadFileForm = ({
 		formState: { isValid },
 		getValues,
 		trigger,
-	} = formMethods;
+	} = formData;
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'uploads',
@@ -193,7 +193,7 @@ export const UploadFileForm = ({
 	}, []);
 
 	return (
-		<FormProvider {...formMethods}>
+		<FormProvider {...formData}>
 			<Modal
 				open={open}
 				onSubmit={handleSubmit(onSubmit)}
