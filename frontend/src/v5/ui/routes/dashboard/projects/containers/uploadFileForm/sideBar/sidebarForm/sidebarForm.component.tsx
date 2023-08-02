@@ -30,7 +30,7 @@ type ISidebarForm = {
 	revisionPrefix: string;
 };
 
-const TimezoneOptions = () => {
+const getTimezoneOptions = () => {
 	type ITimezone = { name: string; label: string; utcOffset: number; };
 	const tzList: ITimezone[] = [];
 	const tzData = countriesAndTimezones.getAllTimezones();
@@ -126,7 +126,7 @@ export const SidebarForm = ({
 						name={`${revisionPrefix}.timezone`}
 						label={formatMessage({ id: 'uploads.sidebar.timezone', defaultMessage: 'Timezone' })}
 					>
-						{TimezoneOptions().map((opt) => (
+						{getTimezoneOptions().map((opt) => (
 							<MenuItem key={opt.name} value={opt.name}>
 								{opt.label}
 							</MenuItem>
