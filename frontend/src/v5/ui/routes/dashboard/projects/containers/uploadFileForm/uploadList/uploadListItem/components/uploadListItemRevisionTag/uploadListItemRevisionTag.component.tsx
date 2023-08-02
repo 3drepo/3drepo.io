@@ -50,7 +50,7 @@ export const UploadListItemRevisionTag = ({
 			disabled={disabled}
 			formError={errorMessage}
 			required
-			$selectedrow={isSelected}
+			$selected={isSelected}
 			name={name}
 			{...errorAdornment}
 			{...props}

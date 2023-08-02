@@ -41,6 +41,9 @@ export const DestinationInput = styled(TextField)<{ neworexisting: NewOrExisting
 					-webkit-text-fill-color: ${({ theme }) => theme.palette.secondary.main};
 				}
 			}
+			fieldset {
+				height: 36px;
+			}
 		}
 		${({ neworexisting, theme }) => {
 		if (neworexisting === 'new') {
