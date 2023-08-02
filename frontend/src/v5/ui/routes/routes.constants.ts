@@ -35,7 +35,7 @@ export const PROJECT_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/:tab`;
 export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/containers`;
 export const FEDERATIONS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/federations`;
 export const BOARD_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/board/:type?/:containerOrFederation?`;
-export const TICKETS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/tickets/:groupBy?/:template?`;
+export const TICKETS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/tickets/:groupBy/:template?`;
 
 export const PRIVACY_ROUTE = '/v5/privacy';
 export const COOKIES_ROUTE = '/v5/cookies';
