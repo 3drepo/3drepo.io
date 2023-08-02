@@ -32,16 +32,16 @@ const defaultValue: UploadsContextType = {
 	originalIndex: null,
 	setOriginalIndex: () => {},
 };
-export const UploadsContext = createContext(defaultValue);
-UploadsContext.displayName = 'UploadsContext';
+export const UploadFileFormContext = createContext(defaultValue);
+UploadFileFormContext.displayName = 'UploadFileFormContext';
 
-export const UploadsContextComponent = ({ children }) => {
+export const UploadFileFormContextComponent = ({ children }) => {
 	const [selectedUploadId, setSelectedUploadId] = useState('');
 	const [originalIndex, setOriginalIndex] = useState(null);
 
 	return (
-		<UploadsContext.Provider value={{ selectedUploadId, setSelectedUploadId, originalIndex, setOriginalIndex }}>
+		<UploadFileFormContext.Provider value={{ selectedUploadId, setSelectedUploadId, originalIndex, setOriginalIndex }}>
 			{children}
-		</UploadsContext.Provider>
+		</UploadFileFormContext.Provider>
 	);
 };

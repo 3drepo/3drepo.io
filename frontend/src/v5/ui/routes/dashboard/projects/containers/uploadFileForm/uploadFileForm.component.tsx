@@ -38,7 +38,7 @@ import { getSupportedFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadList } from './uploadList/uploadList.component';
 import { UploadsContainer, DropZone, Modal, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
 import { extensionIsSpm, reduceFileData } from './uploadFileForm.helpers';
-import { UploadsContextComponent } from './uploadFileFormContext.component';
+import { UploadFileFormContextComponent } from './uploadFileFormContext';
 import { Sidebar } from './sideBar/sidebar.component';
 
 type UploadModalLabelTypes = {
@@ -203,7 +203,7 @@ export const UploadFileForm = ({
 				isValid={!isUploading ? isValid : allUploadsComplete}
 				{...uploadModalLabels({ isUploading, fileCount: fields.length })}
 			>
-				<UploadsContextComponent>
+				<UploadFileFormContextComponent>
 					<UploadsContainer>
 						<UploadsListScroll>
 							<Padding>
@@ -258,7 +258,7 @@ export const UploadFileForm = ({
 						</UploadsListScroll>
 						{!isUploading && <Sidebar />}
 					</UploadsContainer>
-				</UploadsContextComponent>
+				</UploadFileFormContextComponent>
 			</Modal>
 		</FormProvider>
 	);

@@ -21,7 +21,7 @@ import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedLi
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { UploadListItem } from './uploadListItem/uploadListItem.component';
 import { ListContainer } from './uploadList.styles';
-import { UploadsContext } from '../uploadFileFormContext.component';
+import { UploadFileFormContext } from '../uploadFileFormContext';
 import { UploadListHeaders } from '../uploadListHeaders.component';
 
 type IUploadList = {
@@ -38,7 +38,7 @@ export const UploadList = ({
 	removeUploadById,
 	isUploading,
 }: IUploadList): JSX.Element => {
-	const { selectedUploadId, setSelectedUploadId, setOriginalIndex } = useContext(UploadsContext);
+	const { selectedUploadId, setSelectedUploadId, setOriginalIndex } = useContext(UploadFileFormContext);
 	const { sortedList, setSortConfig }: any = useOrderedList(values || [], DEFAULT_SORT_CONFIG);
 
 	const memoizedEdit = useCallback((uploadId, origIndex) => {

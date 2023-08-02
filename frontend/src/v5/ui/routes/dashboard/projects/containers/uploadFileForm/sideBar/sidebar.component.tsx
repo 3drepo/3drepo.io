@@ -19,7 +19,7 @@ import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import { useContext } from 'react';
 import { isNumber } from 'lodash';
 import { SidebarContainer, ExpandButton, SidebarContent } from './sidebar.styles';
-import { UploadsContext } from '../uploadFileFormContext.component';
+import { UploadFileFormContext } from '../uploadFileFormContext';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
 
 interface ISidebar {
@@ -29,7 +29,7 @@ interface ISidebar {
 export const Sidebar = ({
 	className,
 }: ISidebar): JSX.Element => {
-	const { selectedUploadId, setSelectedUploadId, originalIndex, setOriginalIndex } = useContext(UploadsContext);
+	const { selectedUploadId, setSelectedUploadId, originalIndex, setOriginalIndex } = useContext(UploadFileFormContext);
 	const onClose = () => {
 		setSelectedUploadId('');
 		setOriginalIndex(null);
