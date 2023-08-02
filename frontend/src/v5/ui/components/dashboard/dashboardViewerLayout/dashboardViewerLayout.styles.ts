@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,4 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const MAIN_HEADER_PORTAL_TARGET_ID = 'main-header-portal-target';
+import styled from 'styled-components';
+
+export const Content = styled.div`
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	overflow-y: auto;
+	flex-grow: 1;
+	height: 100%;
+`;
