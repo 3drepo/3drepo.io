@@ -48,9 +48,9 @@ TeamspacePerms.isTeamspaceMember = async (req, res, next) => {
 	try {
 		const hasAccess = await hasAccessToTeamspace(teamspace, user);
 		if (teamspace && user && hasAccess) {
-			next();
+			await next();
 		} else {
-			respond(req, res, templates.teamspaceNotFound);
+			throw templates.teamspaceNotFound;
 		}
 	} catch (err) {
 		respond(req, res, err);
