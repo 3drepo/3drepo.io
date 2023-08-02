@@ -34,13 +34,14 @@ export const Sidebar = ({
 		setSelectedUploadId('');
 		setOriginalIndex(null);
 	};
+	const isOpen = isNumber(originalIndex);
 	return (
-		<SidebarContainer className={className} open={isNumber(originalIndex)}>
+		<SidebarContainer className={className} open={isOpen}>
 			<ExpandButton onClick={onClose}>
 				<ExpandIcon />
 			</ExpandButton>
 			<SidebarContent>
-				{isNumber(originalIndex) && (
+				{isOpen && (
 					<SidebarForm
 						key={selectedUploadId}
 						revisionPrefix={`uploads.${originalIndex}`}
