@@ -32,16 +32,79 @@ const USER_COL = 'system.users';
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
 
 const testHasAccessToTeamspace = () => {
-	test('should return true if the user has access to teamspace', async () => {
-		jest.spyOn(db, 'findOne').mockResolvedValue({ _id: 'admin.userName' });
-		const res = await Teamspace.hasAccessToTeamspace('teamspace', 'user');
-		expect(res).toBeTruthy();
-	});
+	describe('Has access to teamspace', () => {
+		const teamspace = generateRandomString();
+		const user = generateRandomString();
+		test('should return true if the user has access to teamspace', async () => {
+			const findFn = jest.spyOn(db, 'findOne');
+			// first call fetches the user data
+			findFn.mockResolvedValueOnce({ _id: user });
+			// second call fetches teamspace settings
+			findFn.mockResolvedValueOnce({});
 
-	test('should return false if the user do not have access to teamspace', async () => {
-		jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
-		const res = await Teamspace.hasAccessToTeamspace('teamspace', 'user');
-		expect(res).toBeFalsy();
+			const res = await Teamspace.hasAccessToTeamspace(teamspace, user);
+			expect(res).toBeTruthy();
+			expect(findFn).toHaveBeenCalledTimes(2);
+		});
+
+		test('should return false if the user do not have access to teamspace', async () => {
+			const findFn = jest.spyOn(db, 'findOne');
+			findFn.mockResolvedValueOnce();
+
+			const res = await Teamspace.hasAccessToTeamspace(teamspace, user);
+
+			expect(res).toBeFalsy();
+			expect(findFn).toHaveBeenCalledTimes(1);
+		});
+
+		test(`should throw ${templates.ssoRestricted} if non SSO-user has access to the teamspace but it is SSO restricted`, async () => {
+			const findFn = jest.spyOn(db, 'findOne');
+			// first call fetches the user data
+			findFn.mockResolvedValueOnce({ _id: user, customData: { email: `${generateRandomString}@xyz.com` } });
+			// second call fetches teamspace settings
+			findFn.mockResolvedValueOnce({ [SSO_RESTRICTED]: true });
+
+			await expect(Teamspace.hasAccessToTeamspace(teamspace, user)).rejects.toEqual(templates.ssoRestricted);
+
+			expect(findFn).toHaveBeenCalledTimes(2);
+		});
+
+		test('should return true if SSO-user has access to the teamspace and it is SSO restricted', async () => {
+			const findFn = jest.spyOn(db, 'findOne');
+			// first call fetches the user data
+			findFn.mockResolvedValueOnce({ _id: user, customData: { email: `${generateRandomString}@xyz.com`, sso: { something: 1 } } });
+			// second call fetches teamspace settings
+			findFn.mockResolvedValueOnce({ [SSO_RESTRICTED]: true });
+
+			await expect(Teamspace.hasAccessToTeamspace(teamspace, user)).resolves.toBeTruthy();
+
+			expect(findFn).toHaveBeenCalledTimes(2);
+		});
+
+		test(`should throw ${templates.ssoRestricted} if SSO-user has access to the teamspace but it is SSO restricted and the user is not in the whitelisted domain`, async () => {
+			const findFn = jest.spyOn(db, 'findOne');
+			// first call fetches the user data
+			findFn.mockResolvedValueOnce({ _id: user, customData: { email: `${generateRandomString}@xyz.com` } });
+			// second call fetches teamspace settings
+			findFn.mockResolvedValueOnce({ [SSO_RESTRICTED]: [generateRandomString()] });
+
+			await expect(Teamspace.hasAccessToTeamspace(teamspace, user)).rejects.toEqual(templates.ssoRestricted);
+
+			expect(findFn).toHaveBeenCalledTimes(2);
+		});
+
+		test('should return true if SSO-user has access to the teamspace and it is SSO restricted and the user is in the whitelisted domain', async () => {
+			const findFn = jest.spyOn(db, 'findOne');
+			const domain = `${generateRandomString()}.com`;
+			// first call fetches the user data
+			findFn.mockResolvedValueOnce({ _id: user, customData: { email: `${generateRandomString}@${domain}` } });
+			// second call fetches teamspace settings
+			findFn.mockResolvedValueOnce({ [SSO_RESTRICTED]: [generateRandomString(), domain] });
+
+			await expect(Teamspace.hasAccessToTeamspace(teamspace, user)).resolves.toBeTruthy();
+
+			expect(findFn).toHaveBeenCalledTimes(2);
+		});
 	});
 };
 
