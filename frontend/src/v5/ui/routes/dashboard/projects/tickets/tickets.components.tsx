@@ -33,7 +33,6 @@ import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { useContainersData } from '../containers/containers.hooks';
 import { useFederationsData } from '../federations/federations.hooks';
 import { TicketsList } from './ticketsList/ticketsList.component';	
-import { TicketSlide } from './slides/ticketSlide.component';
 import { useSearchParam } from '../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE } from '../../../routes.constants';
 import { ContainersAndFederationsSelect } from './selectMenus/containersAndFederationsSelect.component';
@@ -129,8 +128,8 @@ export const TicketsTable = () => {
 						<ExpandIcon />
 					</CircleButton>
 				</SlidePanelHeader>
-				{editingTicket?._id && (<TicketSlide ticketWithModelId={editingTicket} />)}
-				{/* {!editingTicket?._id && <NewTicketSlide>Editing form for a new ticket</NewTicketSlide>} */}
+				{editingTicket?._id && (<div>Editing ticket {editingTicket.title}</div>)}
+				{!editingTicket?._id && (<div>attempting to create a new ticket</div>)}
 			</SidePanel>
 		</SearchContextComponent>
 	);
