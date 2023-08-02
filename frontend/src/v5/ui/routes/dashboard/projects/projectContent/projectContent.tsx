@@ -33,6 +33,7 @@ import { Content } from './projectContent.styles';
 import { ProjectSettings } from '../projectSettings/projectSettings.component';
 import { Board } from '../board/board.component';
 import { TicketsTable } from '../tickets/tickets.components';
+import { TicketsSelection } from '../tickets/ticketsSelection/ticketsSelection.component';
 
 export const ProjectContent = () => {
 	const { teamspace } = useParams<DashboardParams>();
@@ -48,9 +49,6 @@ export const ProjectContent = () => {
 		<>
 			<Content>
 				<Switch>
-					<Route exact path={path}>
-						project content
-					</Route>
 					<Route title={formatMessage({ id: 'pageTitle.federations', defaultMessage: ':project - Federations' })} exact path={`${path}/t/federations`}>
 						<Federations />
 					</Route>
@@ -63,11 +61,15 @@ export const ProjectContent = () => {
 					<Route title={formatMessage({ id: 'pageTitle.issuesAndRisks', defaultMessage: ':project - Issues and risks' })} exact path={`${path}/t/board`}>
 						<Redirect to={`${discardSlash(pathname)}/issues`} />
 					</Route>
-					<Route title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Ticket' })} exact path={`${path}/t/tickets/`}>
-						<Redirect to={`${discardSlash(pathname)}/priority`} />
-					</Route>
-					<Route title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Ticket' })} exact path={`${path}/t/tickets/:groupBy/:template?`}>
-						<TicketsTable />
+					<Route title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Ticket' })} path={`${path}/t/tickets`}>
+						<Switch>
+							<Route exact path={`${path}/t/tickets/:groupBy/:template`}>
+								<TicketsTable />
+							</Route>
+							<Route path='*'>
+								<TicketsSelection />
+							</Route>
+						</Switch>
 					</Route>
 					<Route title={formatMessage({ id: 'pageTitle.projectSettings', defaultMessage: ':project - Project Settings' })} exact path={`${path}/t/project_settings`}>
 						<ProjectSettings />
