@@ -20,24 +20,26 @@ import { TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { Link, generatePath, useParams } from 'react-router-dom'; 
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsSelect.component';
-import { GroupBySelect } from '../selectMenus/groupBySelect.component';
 import { useContainersData } from '../../containers/containers.hooks';
 import { useFederationsData } from '../../federations/federations.hooks';
+import { TemplateSelect } from '../selectMenus/templateSelect.component';
+import { GROUP_BY_NONE_OPTION } from '../selectMenus/groupBySelect.component';
 
 export const TicketsSelection = () => {
 	const { teamspace, project } = useParams();
 	const { isListPending: areContainersPending } = useContainersData();
 	const { isListPending: areFederationsPending } = useFederationsData();
 	const [containersAndFederations, setContainersAndFederations] = useState([]);
-	const [groupBy, setGroupBy] = useState('');
-	const isValid = groupBy && containersAndFederations.length;
+	const [template, setTemplate] = useState('');
+	const isValid = template && containersAndFederations.length;
 
 	const getPathname = () => {
 		if (!isValid) return '';
 		return generatePath(TICKETS_ROUTE, {
 			teamspace,
 			project,
-			groupBy,
+			template,
+			groupBy: GROUP_BY_NONE_OPTION
 		});
 	};
 
@@ -49,7 +51,7 @@ export const TicketsSelection = () => {
 				value={containersAndFederations}
 				onChange={setContainersAndFederations}
 			/>
-			<GroupBySelect value={groupBy} onChange={setGroupBy} />
+			<TemplateSelect value={template} onChange={setTemplate} />
 			<button disabled={!isValid}>
 				<Link
 					style={{ height: '100%', width: '100%' }}
