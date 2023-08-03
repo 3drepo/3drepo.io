@@ -66,7 +66,7 @@ export const TicketsTable = () => {
 			groupBy,
 			template,
 		});
-		history.push(newURL);
+		history.push(`${newURL}?models=${models}`);
 	};
 
 	useEffect(() => {
