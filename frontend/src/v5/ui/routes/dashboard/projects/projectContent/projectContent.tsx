@@ -63,7 +63,7 @@ export const ProjectContent = () => {
 					</Route>
 					<Route title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Ticket' })} path={`${path}/t/tickets`}>
 						<Switch>
-							<Route exact path={`${path}/t/tickets/:groupBy/:template?`}>
+							<Route exact path={`${path}/t/tickets/:template/:groupBy?`}>
 								<TicketsTable />
 							</Route>
 							<Route path={`${path}/t/tickets`}>
