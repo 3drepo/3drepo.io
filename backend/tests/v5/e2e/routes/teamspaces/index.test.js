@@ -21,7 +21,8 @@ const { src } = require('../../../helper/path');
 const { generateRandomNumber, generateRandomModel, generateRandomProject, generateRandomString } = require('../../../helper/services');
 
 const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
-const config = require('../../../../../src/v5/utils/config');
+const config = require(`${src}/utils/config`);
+const { updateSSORestriction } = require(`${src}/models/teamspaceSettings`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -481,6 +482,59 @@ const testGetMemberAvatar = () => {
 	});
 };
 
+const testSSORestriction = () => {
+	describe('On SSO Restricted teamspace', () => {
+		const route = (ts, key) => `/v5/teamspaces/${ts}/members?key=${key}`;
+		const user = ServiceHelper.generateUserCredentials();
+		const userSso = ServiceHelper.generateUserCredentials();
+		const userSsoWL = ServiceHelper.generateUserCredentials();
+		const teamspaceData = {
+			ssoRestricted: generateRandomString(),
+			whiteListedSso: generateRandomString(),
+		};
+
+		const approvedDomain = userSsoWL.basicData.email.split('@')[1];
+
+		beforeAll(async () => {
+			await Promise.all([
+				ServiceHelper.db.createTeamspace(teamspaceData.ssoRestricted, [user.user, userSso.user]),
+				ServiceHelper.db.createTeamspace(teamspaceData.whiteListedSso,
+					[user.user, userSso.user, userSsoWL.user]),
+			]);
+
+			await Promise.all([
+				ServiceHelper.db.createUser(user, Object.values(teamspaceData)),
+				ServiceHelper.db.createUser(userSso, Object.values(teamspaceData)),
+				ServiceHelper.db.createUser(userSsoWL, Object.values(teamspaceData)),
+			]);
+
+			await Promise.all([
+				ServiceHelper.db.addSSO(userSso.user),
+				updateSSORestriction(teamspaceData.ssoRestricted, true),
+				updateSSORestriction(teamspaceData.whiteListedSso, true, [approvedDomain]),
+			]);
+		});
+
+		const testCases = [
+			['a non SSO user tries to access teamspace endpoints', false, user.apiKey, false],
+			['a SSO user tries to access teamspace endpoints', false, userSso.apiKey, true],
+			['a non SSO user tries to access teamspace endpoints', true, user.apiKey, false],
+			['a SSO user not in the white listed domain tries to access teamspace endpoints', true, userSso.apiKey, false],
+			['a SSO user in the white listed domain tries to access teamspace endpoints', true, userSsoWL.apiKey, true],
+		];
+
+		testCases.forEach(([desc, isWLTeamspace, key, success]) => {
+			test(`Should ${success ? 'succeed' : `fail with ${templates.ssoRestricted.code}`} on a SSO restricted teamspace ${isWLTeamspace ? 'with white list' : ''} if ${desc}`, async () => {
+				const teamspaceName = isWLTeamspace ? teamspaceData.whiteListedSso : teamspaceData.ssoRestricted;
+				const res = await agent.get(route(teamspaceName, key)).expect(
+					success ? templates.ok.status : templates.ssoRestricted.status);
+
+				if (!success) expect(res.body.code).toEqual(templates.ssoRestricted.code);
+			});
+		});
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -494,4 +548,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testGetQuotaInfo();
 	testRemoveTeamspaceMember();
 	testGetMemberAvatar();
+	testSSORestriction();
 });
