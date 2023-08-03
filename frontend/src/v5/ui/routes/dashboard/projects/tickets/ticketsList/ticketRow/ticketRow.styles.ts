@@ -15,15 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CentredContainer } from '@controls/centredContainer';
 import styled from 'styled-components';
 
-export const EmptyTicketsList = styled(CentredContainer)`
-	color: ${({ theme }) => theme.palette.base.main};
-	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
-	${({ theme }) => theme.typography.h2}
-	border-radius: 20px;
-	width: calc(100% - 35px);
-	height: calc(100vh - 275px);
-	margin: 28.5px auto 0;
+export const TicketContainer = styled.div`
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	height: 30px;
+	background: white;
+	cursor: pointer;
+	margin-bottom: 5px;
 `;

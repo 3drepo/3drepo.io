@@ -17,10 +17,9 @@
 
 import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
-import { EmptyTicketsList, TicketContainer } from './ticketsList.styles';
+import { EmptyTicketsList } from './ticketsList.styles';
 import { FormattedMessage } from 'react-intl';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
@@ -29,33 +28,7 @@ import { Accordion } from '@controls/accordion/accordion.component';
 import { PriorityLevels, RiskLevels, TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
 import { GROUP_BY_NONE_OPTION } from '../selectMenus/groupBySelect.component';
 import { formatMessage } from '@/v5/services/intl';
-
-const TicketRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
-	const { _id, title, properties } = ticket;
-
-	if (!properties) return (<span>Loading</span>);
-
-	const {
-		owner,
-		assignees,
-		priority,
-		status,
-	} = getPropertiesInCamelCase(properties);
-
-	return (
-		<TicketContainer key={_id} onClick={onClick}>
-			<span><b>title:</b>{title} ~ </span>
-			<span>
-				<b>assignees:</b>
-				{assignees?.length || 0}
-				~
-			</span>
-			<span><b>owner:</b>{owner} ~ </span>
-			<span><b>priority:</b>{priority} ~ </span>
-			<span><b>status:</b>{status}</span>
-		</TicketContainer>
-	)
-};
+import { TicketRow } from './ticketRow/ticketRow.component';
 
 const TicketGroup = ({ tickets, onTicketClick }) => (
 	<>
