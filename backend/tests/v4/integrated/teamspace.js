@@ -22,6 +22,7 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const responseCodes = require("../../../src/v4/response_codes");
+const responseCodesV5 = require("../../../src/v5/utils/responseCodes");
 
 describe("Teamspace", function() {
 	let server;
@@ -374,7 +375,7 @@ describe("Teamspace", function() {
 		it("as a non-member of the teamspace should fail", function(done) {
 			agent.get(`/${mixedUser1.user}/addOns?key=${imsharedTeamspace.key}`)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+					expect(res.body.code).to.equal(responseCodesV5.TEAMSPACE_NOT_FOUND.code);
 					done(err);
 				});
 		});
@@ -447,7 +448,7 @@ describe("Teamspace", function() {
 		it("should fail if the request user is not a member of the teamspace", function(done) {
 			agent.get(`/${mixedUser3.user}/members/${mixedUser1.user}`)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+					expect(res.body.code).to.equal(responseCodesV5.TEAMSPACE_NOT_FOUND.code);
 					done(err);
 				});
 		});
@@ -455,7 +456,7 @@ describe("Teamspace", function() {
 		it("should fail if the teamspace does not exist", function(done) {
 			agent.get(`/blah30489723985723/members/${mixedUser1.user}`)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+					expect(res.body.code).to.equal(responseCodesV5.TEAMSPACE_NOT_FOUND.code);
 					done(err);
 				});
 		});
@@ -731,7 +732,7 @@ describe("Teamspace", function() {
 		it("if user is not member of teamspace should fail", function(done) {
 			agent.get(`/${notMemberOfTeamspace}/settings`)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+					expect(res.body.code).to.equal(responseCodesV5.TEAMSPACE_NOT_FOUND.code);
 					done(err);
 				});
 		});
@@ -739,7 +740,7 @@ describe("Teamspace", function() {
 		it("if teamspace doesn't exist should fail", function(done) {
 			agent.get(`/${fakeTeamspace}/settings`)
 				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+					expect(res.body.code).to.equal(responseCodesV5.TEAMSPACE_NOT_FOUND.code);
 					done(err);
 				});
 		});
