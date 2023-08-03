@@ -25,6 +25,7 @@ export const InputsContainer = styled.div`
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
+	align-items: flex-end;
 `;
 
 export const ListSubheader = styled(ListSubheaderBase)`
@@ -44,8 +45,8 @@ export const SelectorsContainer = styled(FlexContainer)`
 	gap: 5px;
 
 	& > * {
-		margin-top: 8px;
 		width: 225px;
+		margin: 8px 0;
 
 		&:last-child(3) {
 			width: 205px;

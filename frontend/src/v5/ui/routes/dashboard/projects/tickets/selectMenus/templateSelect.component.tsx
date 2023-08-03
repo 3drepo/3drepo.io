@@ -29,8 +29,12 @@ export const TemplateSelect = ({ onChange, ...props }: SelectProps) => {
 	useEffect(() => { TeamspacesActionsDispatchers.fetchTemplates(teamspace); }, []);
 
 	return (
-		<Select {...props} onChange={(e) => onChange(e.target.value)}>
-			{templates.map(({ _id, name }) => (<MenuItem value={_id}>{name}</MenuItem>))}
+		<Select
+			{...props}
+			onChange={(e) => onChange(e.target.value)}
+			label='Select Ticket type'
+		>
+			{templates.map(({ _id, name }) => (<MenuItem key={_id} value={_id}>{name}</MenuItem>))}
 		</Select>
 	);
 };

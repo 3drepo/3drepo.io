@@ -32,7 +32,7 @@ export const ContainersAndFederationsSelect = ({ onChange, ...props }) => {
 			multiple
 			onChange={(e) => onChange(e.target.value)}
 			{...props}
-			placeholder={formatMessage({ id: 'ticketTable.modelSelection.placeholder', defaultMessage: 'Select something' })}
+			label={formatMessage({ id: 'ticketTable.modelSelection.placeholder', defaultMessage: 'Select Federation / Container' })}
 			renderValue={(ids: any[] | null = []) => {
 				const itemsLength = ids.length;
 				if (itemsLength === 1) {
@@ -49,14 +49,14 @@ export const ContainersAndFederationsSelect = ({ onChange, ...props }) => {
 			<ListSubheader>
 				<FormattedMessage id="ticketTable.modelSelection.federations" defaultMessage="Federations" />
 			</ListSubheader>
-			{federations.map((federation) => (
-				<MultiSelectMenuItem value={federation._id}>{federation.name}</MultiSelectMenuItem>
+			{federations.map(({ name, _id }) => (
+				<MultiSelectMenuItem key={_id} value={_id}>{name}</MultiSelectMenuItem>
 			))}
 			<ListSubheader>
 				<FormattedMessage id="ticketTable.modelSelection.containers" defaultMessage="Containers" />
 			</ListSubheader>
-			{containers.map((container) => (
-				<MultiSelectMenuItem value={container._id}>{container.name}</MultiSelectMenuItem>
+			{containers.map(({ name, _id }) => (
+				<MultiSelectMenuItem key={_id} value={_id}>{name}</MultiSelectMenuItem>
 			))}
 		</SearchSelect>
 	);
