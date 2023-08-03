@@ -17,11 +17,14 @@
 
 "use strict";
 
+const { v5Path } = require("../../interop");
+
 const db = require("../handler/db");
 const User = require("./user");
 const Job = require("./job");
 const { changePermissions, findModelSettings } = require("./modelSetting");
 const { findProjectsById, setUserAsProjectAdminById } = require("./project");
+const { getSSORestriction }  = require(`${v5Path}/models/teamspaceSettings`);
 const systemLogger = require("../logger.js").systemLogger;
 const Mailer = require("../mailer/mailer");
 
@@ -75,8 +78,9 @@ const sendInvitationEmail = async (email, username, teamspace) => {
 	const { customData: {firstName, lastName, billing} } = await User.findByUserName(username);
 	const name = firstName + " " + lastName;
 	const company = ((billing || {}).billingInfo || {}).company || username;
+	const needSSO = !!await getSSORestriction(teamspace);
 
-	Mailer.sendTeamspaceInvitation(email, {name, company, teamspace});
+	Mailer.sendTeamspaceInvitation(email, {name, company, teamspace, needSSO});
 };
 
 invitations.create = async (email, teamspace, job, username, permissions = {}) => {
