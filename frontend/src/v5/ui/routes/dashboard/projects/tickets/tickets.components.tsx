@@ -60,13 +60,16 @@ export const TicketsTable = () => {
 	};
 
 	const updateURL = ({ groupBy, template }: any) => {
-		const newURL = generatePath(TICKETS_ROUTE, {
+		let newURL = generatePath(TICKETS_ROUTE, {
 			teamspace,
 			project,
 			groupBy,
 			template,
 		});
-		history.push(`${newURL}?models=${models}`);
+		if (models) {
+			newURL = `${newURL}?models=${models || ''}`;
+		}
+		history.push(newURL);
 	};
 
 	useEffect(() => {
@@ -100,7 +103,6 @@ export const TicketsTable = () => {
 					<GroupBySelect
 						onChange={(newGroupBy) => updateURL({ template, groupBy: newGroupBy })}
 						value={groupBy}
-						defaultValue="none"
 					/>
 				</SelectorsContainer>
 				<FlexContainer>
@@ -115,7 +117,7 @@ export const TicketsTable = () => {
 					</NewTicketButton>
 				</FlexContainer>
 			</InputsContainer>
-			<TicketsList onSelectTicket={onSetEditingTicket} />
+			<TicketsList onTicketClick={onSetEditingTicket} />
 			<SidePanel open={isEditingTicket}>
 				<SlidePanelHeader>
 					<OpenInViewerButton disabled={!editingTicket?._id}>

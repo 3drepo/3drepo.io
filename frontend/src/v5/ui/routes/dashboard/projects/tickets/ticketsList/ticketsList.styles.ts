@@ -27,3 +27,12 @@ export const EmptyTicketsList = styled(CentredContainer)`
 	height: calc(100vh - 275px);
 	margin: 28.5px auto 0;
 `;
+
+export const TicketContainer = styled.div`
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	height: 30px;
+	background: white;
+	cursor: pointer;
+	margin-bottom: 5px;
+`;

@@ -17,12 +17,18 @@
 
 import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
-import { EmptyTicketsList } from './ticketsList.styles';
+import { EmptyTicketsList, TicketContainer } from './ticketsList.styles';
 import { FormattedMessage } from 'react-intl';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import _ from 'lodash';
+import { Accordion } from '@controls/accordion/accordion.component';
+import { PriorityLevels, RiskLevels, TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
+import { GROUP_BY_NONE_OPTION } from '../selectMenus/groupBySelect.component';
+import { formatMessage } from '@/v5/services/intl';
 
 const TicketRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
 	const { _id, title, properties } = ticket;
@@ -33,23 +39,88 @@ const TicketRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }
 		owner,
 		assignees,
 		priority,
-		status
+		status,
 	} = getPropertiesInCamelCase(properties);
 
 	return (
-		<>
-			<div key={_id} onClick={onClick}>
-				<span>{title} ~ </span>
-				<span>{assignees} ~ </span>
-				<span>{owner} ~ </span>
-				<span>{priority} ~ </span>
-				<span>{status} ~ </span>
-			</div>
-		</>
+		<TicketContainer key={_id} onClick={onClick}>
+			<span><b>title:</b>{title} ~ </span>
+			<span>
+				<b>assignees:</b>
+				{assignees?.length || 0}
+				~
+			</span>
+			<span><b>owner:</b>{owner} ~ </span>
+			<span><b>priority:</b>{priority} ~ </span>
+			<span><b>status:</b>{status}</span>
+		</TicketContainer>
 	)
-}
+};
 
-export const TicketsList = ({ onSelectTicket }) => {
+const TicketGroup = ({ tickets, onTicketClick }) => (
+	<>
+		{tickets.map((ticket: ITicket) => (
+			<TicketRow
+				key={ticket._id}
+				ticket={ticket}
+				onClick={() => onTicketClick(ticket)}
+			/>
+		))}
+	</>
+);
+
+const NO_DUE_DATE = formatMessage({ id: 'groupBy.dueDate.unset', defaultMessage: 'No due date' });
+const OVERDUE = formatMessage({ id: 'groupBy.dueDate.overdue', defaultMessage: 'Overdue' });
+
+const getOptionsForGroupsWithDueDate = () => [
+	OVERDUE,
+	formatMessage({ id: 'groupBy.dueDate.inOneWeek', defaultMessage: 'in 1 week' }),
+	formatMessage({ id: 'groupBy.dueDate.inTwoWeeks', defaultMessage: 'in 2 weeks' }),
+	formatMessage({ id: 'groupBy.dueDate.inThreeWeeks', defaultMessage: 'in 3 weeks' }),
+	formatMessage({ id: 'groupBy.dueDate.inFourWeeks', defaultMessage: 'in 4 weeks' }),
+	formatMessage({ id: 'groupBy.dueDate.inFiveWeeks', defaultMessage: 'in 5 weeks' }),
+	formatMessage({ id: 'groupBy.dueDate.inSixPlusWeeks', defaultMessage: 'in 6+ weeks' }),
+];
+
+const groupByDate = (tickets: ITicket[]) => {
+	const groups = {};
+	let [ticketsWithUnsetDueDate, remainingTickets] = _.partition(tickets, ({ properties }) => !properties[IssueProperties.DUE_DATE]);
+	groups[NO_DUE_DATE] = ticketsWithUnsetDueDate;
+
+	const dueDateOptions = getOptionsForGroupsWithDueDate();
+	const endOfCurrentWeek = new Date();
+
+	const ticketDueDateIsPassed = (ticket: ITicket) => ticket.properties.dueDate < endOfCurrentWeek.getTime();
+
+	let currentWeekTickets;
+	while (dueDateOptions.length) {
+		[currentWeekTickets, remainingTickets] = _.partition(remainingTickets, ticketDueDateIsPassed);
+		groups[dueDateOptions.shift()] = currentWeekTickets;
+		endOfCurrentWeek.setDate(endOfCurrentWeek.getDate() +  7);
+	}
+	return groups;
+};
+
+const UNSET = formatMessage({ id: 'groupBy.property.unset', defaultMessage: 'Unset' });
+const groupByList = (tickets: ITicket[], groupType: string, groupNamesWithoutUnset: string[]) => {
+	const groupNames = groupNamesWithoutUnset.concat(UNSET);
+	const groups = Object.fromEntries(groupNames.map((groupName) => [_.capitalize(groupName), []]));
+	tickets.forEach((ticket) => {
+		const { properties } = ticket;
+		const groupName = (groupType in properties) ? properties[groupType] : UNSET;
+		groups[groupName].push(ticket);
+	});
+	return groups;
+};
+
+const GROUP_NAMES_BY_TYPE = {
+	[IssueProperties.PRIORITY]: _.keys(PriorityLevels),
+	[IssueProperties.STATUS]: _.keys(TicketStatuses),
+	[SafetibaseProperties.LEVEL_OF_RISK]: _.keys(RiskLevels),
+	[SafetibaseProperties.TREATMENT_STATUS]: _.keys(TreatmentStatuses),
+};
+
+export const TicketsList = (props: { onTicketClick: (ticket: ITicket) => void }) => {
 	const { filteredItems } = useContext(SearchContext);
 	const { groupBy } = useParams<DashboardTicketsParams>();
 
@@ -63,14 +134,29 @@ export const TicketsList = ({ onSelectTicket }) => {
 			</EmptyTicketsList>
 		);
 	}
+
+	if (groupBy === GROUP_BY_NONE_OPTION) {
+		return (<TicketGroup tickets={filteredItems} {...props} />);
+	}
+
+	let groups;
+	switch(groupBy) {
+		case BaseProperties.OWNER: 
+			groups = _.groupBy(filteredItems, `properties.${BaseProperties.OWNER}`);
+			break;
+		case IssueProperties.DUE_DATE:
+			groups = groupByDate(filteredItems);
+			break;
+		default:
+			groups = groupByList(filteredItems, groupBy, GROUP_NAMES_BY_TYPE[groupBy]);
+	}
+
 	return (
 		<>
-			{filteredItems.map((ticket: ITicket) => (
-				<TicketRow
-					key={ticket._id}
-					ticket={ticket}
-					onClick={() => onSelectTicket(ticket)}
-				/>
+			{_.entries(groups).map(([groupName, tickets]) => (
+				<Accordion title={groupName}>
+					<TicketGroup tickets={tickets} {...props} />
+				</Accordion>
 			))}
 		</>
 	);
