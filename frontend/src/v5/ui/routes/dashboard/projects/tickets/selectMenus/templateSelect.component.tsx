@@ -18,15 +18,11 @@
 import { MenuItem } from '@mui/material';
 import { Select, SelectProps } from '@controls/inputs/select/select.component';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useParams } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useParams } from 'react-router-dom'; 
 
 export const TemplateSelect = ({ onChange, ...props }: SelectProps) => {
-	const templates = TeamspacesHooksSelectors.selectCurrentTeamspaceTemplates();
 	const { teamspace } = useParams();
-
-	useEffect(() => { TeamspacesActionsDispatchers.fetchTemplates(teamspace); }, []);
+	const templates = TeamspacesHooksSelectors.selectTemplatesByTeamspace(teamspace);
 
 	return (
 		<Select

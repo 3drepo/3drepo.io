@@ -42,13 +42,15 @@ export const selectCurrentQuota = createSelector(
 	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => state.quota[teamspace],
 );
 
-export const selectCurrentTeamspaceTemplates = createSelector(
-	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => state.templatesByTeamspace[teamspace] || [],
+export const selectTemplatesByTeamspace = createSelector(
+	selectTeamspacesDomain,
+	(state, teamspace) => teamspace,
+	(state, teamspace) => state.templatesByTeamspace[teamspace] || [],
 );
 
-export const selectTemplateById = createSelector(
-	selectCurrentTeamspaceTemplates,
-	(_, templateId) => templateId,
+export const selectTeamspaceTemplateById = createSelector(
+	selectTemplatesByTeamspace,
+	(state, teamspace, templateId) => templateId,
 	(templates, templateId) => templates.find(({ _id }) => _id === templateId),
 );
 

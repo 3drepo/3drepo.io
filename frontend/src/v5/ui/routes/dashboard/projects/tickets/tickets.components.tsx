@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TeamspacesActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useEffect, useState } from 'react';
 import { useStore } from 'react-redux';
@@ -83,7 +83,10 @@ export const TicketsTable = () => {
 		});
 	}, [selectedContainersAndFederations.length, isLoading]);
 
-	useEffect(() => () => setModels(''), []);
+	useEffect(() => {
+		TeamspacesActionsDispatchers.fetchTemplates(teamspace);
+		return () => setModels('');
+	}, []);
 
 	if (isLoading) return (<Loader />);
 
