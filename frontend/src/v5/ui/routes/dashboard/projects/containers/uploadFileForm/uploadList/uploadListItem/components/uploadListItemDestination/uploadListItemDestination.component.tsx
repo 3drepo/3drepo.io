@@ -110,7 +110,7 @@ export const UploadListItemDestination = memo(({
 		testName(newValue?.trim());
 	};
 
-	const filterOptions = (options: IContainer[], params) => {
+	const getFilterOptions = (options: IContainer[], params) => {
 		const inputValue = params.inputValue.trim();
 		if (containersNamesInModal.length === containers.length && !inputValue) {
 			// all the containers have been allocated already
@@ -216,7 +216,7 @@ export const UploadListItemDestination = memo(({
 			{...props}
 			value={selectedContainer}
 			className={className}
-			filterOptions={filterOptions}
+			filterOptions={getFilterOptions}
 			getOptionDisabled={nameIsTaken}
 			getOptionLabel={(option: IContainer) => option.name || ''}
 			ListboxComponent={OptionsBox}
