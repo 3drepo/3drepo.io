@@ -21,7 +21,7 @@ import { IProject } from '@/v5/store/projects/projects.types';
 import {
 	TEAMSPACE_ROUTE,
 	TEAMSPACE_ROUTE_BASE,
-	PROJECT_ROUTE_BASE,
+	PROJECT_ROUTE_BASE_TAB,
 	FEDERATIONS_ROUTE,
 	VIEWER_ROUTE,
 	matchesPath,
@@ -65,7 +65,7 @@ export const BreadcrumbsRouting = () => {
 		breadcrumbs = [{ options }];
 	}
 
-	if (matchesSubPath(PROJECT_ROUTE_BASE)) {
+	if (matchesSubPath(PROJECT_ROUTE_BASE_TAB)) {
 		breadcrumbs = [
 			{
 				title: teamspace,
