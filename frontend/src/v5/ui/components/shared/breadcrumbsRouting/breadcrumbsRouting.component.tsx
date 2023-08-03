@@ -65,14 +65,17 @@ export const BreadcrumbsRouting = () => {
 		breadcrumbs = [{ options }];
 	}
 
-	if (matchesSubPath(PROJECT_ROUTE_BASE_TAB)) {
+	if (matchesPath(PROJECT_ROUTE_BASE_TAB)) {
 		breadcrumbs = [
 			{
 				title: teamspace,
 				to: generatePath(TEAMSPACE_ROUTE_BASE, { teamspace }),
 			},
 		];
-		let path = PROJECT_ROUTE;
+		let path = PROJECT_ROUTE_BASE_TAB;
+		if (matchesPath(PROJECT_ROUTE)) {
+			path = PROJECT_ROUTE;
+		}
 		if (matchesPath(BOARD_ROUTE)) {
 			path = BOARD_ROUTE;
 		}
