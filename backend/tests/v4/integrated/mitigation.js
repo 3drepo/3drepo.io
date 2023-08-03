@@ -264,7 +264,7 @@ describe("Mitigations", function () {
 		it("if user is not member of teamspace should fail", function(done) {
 			agent.get(`/${notMemberOfTeamspace}/mitigations/criteria`)
 				.expect(400, function(err, res) {
-					expect(res.body.code).to.equal(responseCodesV5.TEAMSPACE_NOT_FOUND.code);
+					expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -272,7 +272,7 @@ describe("Mitigations", function () {
 		it("if teamspace doesn't exist should fail", function(done) {
 			agent.get(`/${fakeTeamspace}/mitigations/criteria`)
 				.expect(400, function(err, res) {
-					expect(res.body.code).to.equal(responseCodesV5.TEAMSPACE_NOT_FOUND.code);
+					expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -334,7 +334,7 @@ describe("Mitigations", function () {
 			agent.post(`/${notMemberOfTeamspace}/mitigations`)
 				.send({})
 				.expect(400, function(err, res) {
-					expect(res.body.code).to.equal(responseCodesV5.TEAMSPACE_NOT_FOUND.code);
+					expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -343,7 +343,7 @@ describe("Mitigations", function () {
 			agent.post(`/${fakeTeamspace}/mitigations`)
 				.send({})
 				.expect(400, function(err, res) {
-					expect(res.body.code).to.equal(responseCodesV5.TEAMSPACE_NOT_FOUND.code);
+					expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
