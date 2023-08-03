@@ -137,16 +137,14 @@ export const UploadListItemDestination = memo(({
 	const nameIsTaken = ({ name }) => takenContainerNames.map((n) => n.toLowerCase()).includes(name.toLowerCase());
 
 	const renderOption = (optionProps, option: IContainer) => {
-		const handleOptionClick = (...args) => optionProps.onClick?.(...args);
-
 		if (!option._id) {
 			// option is an extra
 			if (nameIsTaken(option)) {
-				return (<AlreadyUsedName key="alreadyUsed" />);
+				return (<AlreadyUsedName key={option.name} />);
 			}
 
 			if (isProjectAdmin) {
-				return (<NewContainer key="newContainer" containerName={option.name} {...optionProps} onClick={handleOptionClick} />);
+				return (<NewContainer containerName={option.name} {...optionProps} />);
 			}
 		}
 
@@ -158,7 +156,6 @@ export const UploadListItemDestination = memo(({
 					container={option}
 					inUse={nameIsTaken(option)}
 					{...optionProps}
-					onClick={handleOptionClick}
 				/>
 			);
 		}
