@@ -25,7 +25,7 @@ const { expect } = chai;
 const app = require("../../../src/v4/services/api.js").createApp();
 const async = require("async");
 const responseCodes = require("../../../src/v4/response_codes");
-const responseCodesV5 = require("../../../src/v5/utils/responseCodes");
+const { templates : responseCodesV5 } = require("../../../src/v5/utils/responseCodes");
 
 describe("Mitigations", function () {
 

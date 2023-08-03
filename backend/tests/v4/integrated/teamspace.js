@@ -22,7 +22,7 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const responseCodes = require("../../../src/v4/response_codes");
-const responseCodesV5 = require("../../../src/v5/utils/responseCodes");
+const { templates: responseCodesV5 } = require("../../../src/v5/utils/responseCodes");
 
 describe("Teamspace", function() {
 	let server;
