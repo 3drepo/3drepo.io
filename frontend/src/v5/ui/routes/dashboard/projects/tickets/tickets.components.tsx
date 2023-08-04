@@ -17,7 +17,7 @@
 
 import { TeamspacesActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useStore } from 'react-redux';
 import { selectFederationById } from '@/v5/store/federations/federations.selectors';
 import { FormattedMessage } from 'react-intl';
@@ -39,10 +39,11 @@ import { ContainersAndFederationsSelect } from './selectMenus/containersAndFeder
 import { GroupBySelect } from './selectMenus/groupBySelect.component';
 import { TemplateSelect } from './selectMenus/templateSelect.component';
 import { InputsContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer } from './tickets.styles';
+import { NONE_OPTION } from './tickets.helper';
 
 export const TicketsTable = () => {
 	const history = useHistory();
-	const { teamspace, project, groupBy, template } = useParams<DashboardTicketsParams>();
+	const { teamspace, project, groupBy, template: templateId } = useParams<DashboardTicketsParams>();
 	const [models, setModels] = useSearchParam('models');
 	const selectedContainersAndFederations = models?.split(',') || [];
 	const { getState } = useStore();
@@ -53,6 +54,11 @@ export const TicketsTable = () => {
 	const isLoading = areContainersPending || areFederationsPending;
 	const [editingTicket, setEditingTicket] = useState<TicketWithModelId>(undefined);
 	const [isEditingTicket, setIsEditingTicket] = useState(false);
+
+	const ticketsFilteredByTemplate = useMemo(() => {
+		if (templateId === NONE_OPTION) return tickets;
+		return tickets.filter(({ type }) => type === templateId);
+	}, [templateId]);
 
 	const onSetEditingTicket = (ticket: TicketWithModelId) => {
 		setEditingTicket(ticket);
@@ -91,7 +97,7 @@ export const TicketsTable = () => {
 	if (isLoading) return (<Loader />);
 
 	return (
-		<SearchContextComponent items={tickets} fieldsToFilter={['title']}>
+		<SearchContextComponent items={ticketsFilteredByTemplate} fieldsToFilter={['title']}>
 			<InputsContainer>
 				<SelectorsContainer>
 					<ContainersAndFederationsSelect
@@ -100,11 +106,11 @@ export const TicketsTable = () => {
 					/>
 					<TemplateSelect
 						onChange={(newTemplate) => updateURL({ template: newTemplate, groupBy })}
-						value={template}
+						value={templateId}
 						defaultValue="none"
 					/>
 					<GroupBySelect
-						onChange={(newGroupBy) => updateURL({ template, groupBy: newGroupBy })}
+						onChange={(newGroupBy) => updateURL({ template: templateId, groupBy: newGroupBy })}
 						value={groupBy}
 					/>
 				</SelectorsContainer>
