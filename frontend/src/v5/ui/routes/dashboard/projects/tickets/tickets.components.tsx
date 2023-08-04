@@ -58,7 +58,7 @@ export const TicketsTable = () => {
 	const ticketsFilteredByTemplate = useMemo(() => {
 		if (templateId === NONE_OPTION) return tickets;
 		return tickets.filter(({ type }) => type === templateId);
-	}, [templateId]);
+	}, [templateId, tickets]);
 
 	const onSetEditingTicket = (ticket: TicketWithModelId) => {
 		setEditingTicket(ticket);

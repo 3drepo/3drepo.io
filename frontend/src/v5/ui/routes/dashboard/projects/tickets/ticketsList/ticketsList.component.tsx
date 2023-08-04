@@ -22,25 +22,12 @@ import { FormattedMessage } from 'react-intl';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
-import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import _ from 'lodash';
 import { Accordion } from '@controls/accordion/accordion.component';
-import { PriorityLevels, RiskLevels, TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
-import { GROUP_BY_NONE_OPTION } from '../selectMenus/groupBySelect.component';
 import { formatMessage } from '@/v5/services/intl';
-import { TicketRow } from './ticketRow/ticketRow.component';
-
-const TicketGroup = ({ tickets, onTicketClick }) => (
-	<>
-		{tickets.map((ticket: ITicket) => (
-			<TicketRow
-				key={ticket._id}
-				ticket={ticket}
-				onClick={() => onTicketClick(ticket)}
-			/>
-		))}
-	</>
-);
+import { TicketGroup } from './ticketGroup/ticketGroup.component';
+import { GROUP_NAMES_BY_TYPE, NONE_OPTION, UNSET, standardiseGroupName } from '../tickets.helper';
 
 const NO_DUE_DATE = formatMessage({ id: 'groupBy.dueDate.unset', defaultMessage: 'No due date' });
 const OVERDUE = formatMessage({ id: 'groupBy.dueDate.overdue', defaultMessage: 'Overdue' });
@@ -74,26 +61,41 @@ const groupByDate = (tickets: ITicket[]) => {
 	return groups;
 };
 
-const UNSET = formatMessage({ id: 'groupBy.property.unset', defaultMessage: 'Unset' });
+// const groupByList = (tickets: ITicket[], groupType: string, groupNamesWithoutUnset: string[]) => {
+// 	const groupNames = [UNSET, ...groupNamesWithoutUnset];
+// 	const groups = groupNames.reduce((acc, name) => {
+// 		acc[name] = [];
+// 		return acc;
+// 	}, {});
+// 	tickets.forEach((ticket) => {
+// 		const { properties, modules } = ticket;
+// 		const safetibaseProperties = modules?.safetibase;
+// 		const existingGroupByOptions = _.keys({ ...properties, ...safetibaseProperties })
+// 		const groupName = existingGroupByOptions.includes(_.capitalize(groupType)) ? properties[groupType] : UNSET;
+// 		groups[standardiseGroupName(groupName)].push(ticket);
+// 	});
+// 	return groups;
+// };
+
+const standardisedUnset = standardiseGroupName(UNSET);
 const groupByList = (tickets: ITicket[], groupType: string, groupNamesWithoutUnset: string[]) => {
-	const groupNames = groupNamesWithoutUnset.concat(UNSET);
-	const groups = Object.fromEntries(groupNames.map((groupName) => [_.capitalize(groupName), []]));
+	const groupNames = [standardisedUnset, ...groupNamesWithoutUnset];
+	const groups = groupNames.reduce((acc, name) => {
+		acc[name] = [];
+		return acc;
+	}, {});
 	tickets.forEach((ticket) => {
-		const { properties } = ticket;
-		const groupName = (groupType in properties) ? properties[groupType] : UNSET;
+		const { properties, modules } = ticket;
+		const safetibaseProperties = modules?.safetibase;
+		const existingGroupByOptions = _.mapKeys({ ...properties, ...safetibaseProperties }, (v, k) => standardiseGroupName(k));
+		const groupName = standardiseGroupName(existingGroupByOptions[groupType] ?? standardisedUnset);
 		groups[groupName].push(ticket);
 	});
 	return groups;
 };
 
-const GROUP_NAMES_BY_TYPE = {
-	[IssueProperties.PRIORITY]: _.keys(PriorityLevels),
-	[IssueProperties.STATUS]: _.keys(TicketStatuses),
-	[SafetibaseProperties.LEVEL_OF_RISK]: _.keys(RiskLevels),
-	[SafetibaseProperties.TREATMENT_STATUS]: _.keys(TreatmentStatuses),
-};
-
-export const TicketsList = (props: { onTicketClick: (ticket: ITicket) => void }) => {
+type TicketsListProps = { onTicketClick: (ticket: ITicket) => void };
+export const TicketsList = (props: TicketsListProps) => {
 	const { filteredItems } = useContext(SearchContext);
 	const { groupBy } = useParams<DashboardTicketsParams>();
 
@@ -108,16 +110,16 @@ export const TicketsList = (props: { onTicketClick: (ticket: ITicket) => void })
 		);
 	}
 
-	if (groupBy === GROUP_BY_NONE_OPTION) {
+	if (groupBy === NONE_OPTION) {
 		return (<TicketGroup tickets={filteredItems} {...props} />);
 	}
 
-	let groups;
+	let groups: Record<string, ITicket[]>;
 	switch(groupBy) {
-		case BaseProperties.OWNER: 
+		case standardiseGroupName(BaseProperties.OWNER): 
 			groups = _.groupBy(filteredItems, `properties.${BaseProperties.OWNER}`);
 			break;
-		case IssueProperties.DUE_DATE:
+		case standardiseGroupName(IssueProperties.DUE_DATE):
 			groups = groupByDate(filteredItems);
 			break;
 		default:
@@ -127,7 +129,7 @@ export const TicketsList = (props: { onTicketClick: (ticket: ITicket) => void })
 	return (
 		<>
 			{_.entries(groups).map(([groupName, tickets]) => (
-				<Accordion title={groupName}>
+				<Accordion title={groupName} defaultExpanded={!!tickets.length} key={groupBy+groupName}>
 					<TicketGroup tickets={tickets} {...props} />
 				</Accordion>
 			))}

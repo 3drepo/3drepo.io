@@ -19,13 +19,13 @@ import { useEffect, useState } from 'react';
 import { TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { Link, generatePath, useParams } from 'react-router-dom'; 
 import { Loader } from '@/v4/routes/components/loader/loader.component';
+import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsSelect.component';
 import { useContainersData } from '../../containers/containers.hooks';
 import { useFederationsData } from '../../federations/federations.hooks';
 import { TemplateSelect } from '../selectMenus/templateSelect.component';
-import { GROUP_BY_NONE_OPTION } from '../selectMenus/groupBySelect.component';
-import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { NONE_OPTION } from '../tickets.helper';
 
 export const TicketsSelection = () => {
 	const { teamspace, project } = useParams();
@@ -33,7 +33,7 @@ export const TicketsSelection = () => {
 	const { isListPending: areFederationsPending } = useFederationsData();
 	const templates = TeamspacesHooksSelectors.selectTemplatesByTeamspace(teamspace);
 	const [containersAndFederations, setContainersAndFederations] = useState([]);
-	const [template, setTemplate] = useState('');
+	const [template, setTemplate] = useState(NONE_OPTION);
 	const isValid = template && containersAndFederations.length;
 
 	const getPathname = () => {
@@ -42,7 +42,7 @@ export const TicketsSelection = () => {
 			teamspace,
 			project,
 			template,
-			groupBy: GROUP_BY_NONE_OPTION
+			groupBy: NONE_OPTION,
 		});
 	};
 	
