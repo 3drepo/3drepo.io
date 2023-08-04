@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { formatMessage } from '@/v5/services/intl';
-import { uniqWith, isArray, isEqual } from 'lodash';
+import { uniqWith, isArray, isEqual, mergeWith } from 'lodash';
 import { IContainer } from './containers/containers.types';
 import { Role } from './currentUser/currentUser.types';
 import { IFederation } from './federations/federations.types';
@@ -59,3 +59,8 @@ export const getContainerOrFederationFormattedText = (isFederation) => (
 
 export const isCollaboratorRole = (role: Role): boolean => [Role.ADMIN, Role.COLLABORATOR].includes(role);
 export const isCommenterRole = (role: Role): boolean => [Role.ADMIN, Role.COLLABORATOR, Role.COMMENTER].includes(role);
+
+export const mergeWithArray = (objValue, srcValue) => mergeWith(objValue, srcValue, (target, src) => {
+	if (isArray(target)) return src; // If its an array that is merging just use the newest
+	return undefined;
+});

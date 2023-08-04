@@ -21,7 +21,7 @@ import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
 import { ModelId, TeamspaceId, TeamspaceProjectAndModel } from '../store.types';
 import { ITemplate, ITicket, NewTicket, Group } from './tickets.types';
-import { mergeWithArray } from './tickets.helpers';
+import { mergeWithArray } from '../store.helpers';
 
 const getTicketByModelId = (state, modelId, ticketId) => (
 	state.ticketsByModelId?.[modelId].find(({ _id }) => _id === ticketId)
@@ -77,7 +77,7 @@ export const replaceTemplateSuccess = (state: ITicketsState, { modelId, template
 		.find((loadedTemplate) => loadedTemplate._id === template._id);
 
 	if (modelTemplate) {
-		mergeWithArray(modelTemplate, template);
+		mergeWithArray(modelTemplate, template);	
 	} else {
 		state.templatesByModelId[modelId].push(template);
 	}

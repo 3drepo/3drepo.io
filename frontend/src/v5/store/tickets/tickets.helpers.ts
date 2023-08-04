@@ -284,8 +284,3 @@ export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
 };
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
-
-export const mergeWithArray = (objValue, srcValue) => mergeWith(objValue, srcValue, (target, src) => {
-	if (isArray(target)) return src; // If its an array that is merging just use the newest
-	return undefined;
-});
