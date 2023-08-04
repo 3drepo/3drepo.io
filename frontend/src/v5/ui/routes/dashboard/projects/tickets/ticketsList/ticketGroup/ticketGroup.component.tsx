@@ -17,13 +17,13 @@
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
-import { TicketContainer } from './ticketRow.styles';
+import { ColumnsContainer, TicketRowContainer } from './ticketGroup.styles';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router-dom';
 
 export const TicketRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
 	const { teamspace } = useParams();
-	const { _id, title, properties, number, type } = ticket;
+	const { _id, title, properties, number, type, modules } = ticket;
 	const template = TeamspacesHooksSelectors.selectTeamspaceTemplateById(teamspace, type);
 
 	if (!properties || !template?.code) return (<span>Loading</span>);
@@ -36,19 +36,51 @@ export const TicketRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () =>
 		dueDate
 	} = getPropertiesInCamelCase(properties);
 
+	const {
+		treatmentStatus,
+		levelOfRisk,
+	} = getPropertiesInCamelCase(modules?.safetibase || {});
+
 	return (
-		<TicketContainer key={_id} onClick={onClick}>
-			<span><b>id:</b>{template.code}:{number} ~ </span>
-			<span><b>title:</b>{title} ~ </span>
-			<span>
-				<b>assignees:</b>
-				{assignees?.length || 0}
-				~
-			</span>
-			<span><b>owner:</b>{owner} ~ </span>
-			<span><b>due date:</b>{dueDate} ~ </span>
-			<span><b>priority:</b>{priority} ~ </span>
-			<span><b>status:</b>{status}</span>
-		</TicketContainer>
+		<TicketRowContainer key={_id} onClick={onClick}>
+			<span>{template.code}:{number}</span>
+			<span>{title}</span>
+			<span>{assignees?.length || 0}</span>
+			<span>{owner}</span>
+			<span>{dueDate}</span>
+			<span>{priority}</span>
+			<span>{status}</span>
+			<span>{levelOfRisk}</span>
+			<span>{treatmentStatus}</span>
+		</TicketRowContainer>
 	)
+};
+
+export const TicketGroup = ({ tickets, onTicketClick }) => {
+	if (!tickets?.length) return (<button> create new ticket </button>);
+
+	return (
+		<>
+			<ColumnsContainer>
+				<b>id</b>
+				<b>title</b>
+				<b>assignees</b>
+				<b>owner</b>
+				<b>due date</b>
+				<b>priority</b>
+				<b>status</b>
+				<b>level of risk</b>
+				<b>treatment status</b>
+			</ColumnsContainer>
+			<div>
+				{tickets.map((ticket: ITicket) => (
+					<TicketRow
+						key={ticket._id}
+						ticket={ticket}
+						onClick={() => onTicketClick(ticket)}
+					/>
+				))}
+			</div>
+		</>
+	);
 };
