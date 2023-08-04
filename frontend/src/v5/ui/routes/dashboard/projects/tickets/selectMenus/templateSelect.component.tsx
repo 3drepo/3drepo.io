@@ -19,6 +19,7 @@ import { MenuItem } from '@mui/material';
 import { Select, SelectProps } from '@controls/inputs/select/select.component';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router-dom'; 
+import { NONE_OPTION, NoneOptionMessage } from '../tickets.helper';
 
 export const TemplateSelect = ({ onChange, ...props }: SelectProps) => {
 	const { teamspace } = useParams();
@@ -30,6 +31,7 @@ export const TemplateSelect = ({ onChange, ...props }: SelectProps) => {
 			onChange={(e) => onChange(e.target.value)}
 			label='Select Ticket type'
 		>
+			<MenuItem value={NONE_OPTION}>{NoneOptionMessage}</MenuItem>
 			{templates.map(({ _id, name }) => (<MenuItem key={_id} value={_id}>{name}</MenuItem>))}
 		</Select>
 	);
