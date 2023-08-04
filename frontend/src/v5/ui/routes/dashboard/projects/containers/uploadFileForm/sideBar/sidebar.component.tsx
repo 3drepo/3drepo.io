@@ -29,12 +29,11 @@ interface ISidebar {
 export const Sidebar = ({
 	className,
 }: ISidebar): JSX.Element => {
-	const { selectedUploadId, setSelectedUploadId, originalIndex, setOriginalIndex } = useContext(UploadFileFormContext);
+	const { fields, selectedIndex, setSelectedIndex } = useContext(UploadFileFormContext);
 	const onClose = () => {
-		setSelectedUploadId('');
-		setOriginalIndex(null);
+		setSelectedIndex(null);
 	};
-	const isOpen = isNumber(originalIndex);
+	const isOpen = isNumber(selectedIndex);
 	return (
 		<SidebarContainer className={className} open={isOpen}>
 			<ExpandButton onClick={onClose}>
@@ -43,8 +42,8 @@ export const Sidebar = ({
 			<SidebarContent>
 				{isOpen && (
 					<SidebarForm
-						key={selectedUploadId}
-						revisionPrefix={`uploads.${originalIndex}`}
+						key={fields[selectedIndex].uploadId}
+						revisionPrefix={`uploads.${selectedIndex}`}
 					/>
 				)}
 			</SidebarContent>

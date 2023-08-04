@@ -17,7 +17,11 @@
 
 import styled from 'styled-components';
 
-export const ListContainer = styled.ul`
+export const ListContainer = styled.ul<{ ascending: boolean }>`
 	padding: 0;
 	margin: 0 0 20px;
+	display: flex;
+	flex-direction: ${({ ascending }) => (ascending ? 'column' : 'column-reverse')};
+	border-radius: 10px;
+	overflow: hidden;
 `;

@@ -203,7 +203,7 @@ export const UploadFileForm = ({
 				isValid={!isUploading ? isValid : allUploadsComplete}
 				{...uploadModalLabels({ isUploading, fileCount: fields.length })}
 			>
-				<UploadFileFormContextComponent>
+				<UploadFileFormContextComponent fields={fields}>
 					<UploadsContainer>
 						<UploadsListScroll>
 							<Padding>

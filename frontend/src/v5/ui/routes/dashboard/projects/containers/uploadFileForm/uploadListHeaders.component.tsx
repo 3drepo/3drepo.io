@@ -20,24 +20,20 @@ import { FormattedMessage } from 'react-intl';
 import { UploadsListHeader } from './uploadFileForm.styles';
 
 export const UploadListHeaders = ({
-	defaultSortConfig,
-	setSortConfig,
+	onClick,
 	isUploading,
 }) => (
-	<UploadsListHeader
-		onSortingChange={setSortConfig}
-		defaultSortConfig={defaultSortConfig}
-	>
-		<DashboardListHeaderLabel name="file.name" minWidth={122}>
+	<UploadsListHeader>
+		<DashboardListHeaderLabel name="file.name" minWidth={122} onClick={onClick}>
 			<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
 		</DashboardListHeaderLabel>
-		<DashboardListHeaderLabel width={352}>
+		<DashboardListHeaderLabel key="destination" width={352}>
 			<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
 		</DashboardListHeaderLabel>
-		<DashboardListHeaderLabel width={isUploading ? 359 : 399}>
+		<DashboardListHeaderLabel key="revisionTag" width={isUploading ? 359 : 399}>
 			<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
 		</DashboardListHeaderLabel>
-		<DashboardListHeaderLabel width={297} hidden={!isUploading}>
+		<DashboardListHeaderLabel key="progress" width={297} hidden={!isUploading}>
 			<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
 		</DashboardListHeaderLabel>
 	</UploadsListHeader>

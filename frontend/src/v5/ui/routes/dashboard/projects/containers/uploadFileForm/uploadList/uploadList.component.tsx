@@ -16,9 +16,7 @@
  */
 
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
-import { useCallback, useContext } from 'react';
-import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
-import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+import { useCallback, useContext, useState } from 'react';
 import { UploadListItem } from './uploadListItem/uploadListItem.component';
 import { ListContainer } from './uploadList.styles';
 import { UploadFileFormContext } from '../uploadFileFormContext';
@@ -29,50 +27,38 @@ type IUploadList = {
 	removeUploadById: (id) => void;
 	isUploading: boolean;
 };
-const DEFAULT_SORT_CONFIG = {
-	column: ['file'],
-	direction: [SortingDirection.ASCENDING],
-};
+
 export const UploadList = ({
 	values,
 	removeUploadById,
 	isUploading,
 }: IUploadList): JSX.Element => {
-	const { selectedUploadId, setSelectedUploadId, setOriginalIndex } = useContext(UploadFileFormContext);
-	const { sortedList, setSortConfig }: any = useOrderedList(values || [], DEFAULT_SORT_CONFIG);
+	const { selectedIndex, setSelectedIndex } = useContext(UploadFileFormContext);
+	const [isAscending, setIsAscending] = useState(true);
 
-	const memoizedEdit = useCallback((uploadId, origIndex) => {
-		setSelectedUploadId(uploadId);
-		setOriginalIndex(origIndex);
-	}, [values.length]);
+	const memoizedEdit = useCallback((id) => setSelectedIndex(values.findIndex(({ uploadId }) => uploadId === id)), [values.length]);
 
 	const memoizedDelete = useCallback((uploadId) => {
-		setSelectedUploadId('');
-		setOriginalIndex(null);
+		setSelectedIndex(null);
 		removeUploadById(uploadId);
 	}, [removeUploadById]);
 	return (
 		<>
-			<UploadListHeaders
-				defaultSortConfig={DEFAULT_SORT_CONFIG}
-				setSortConfig={setSortConfig}
-				isUploading={isUploading}
-			/>
-			<ListContainer>
+			<UploadListHeaders onClick={() => setIsAscending(!isAscending)} isUploading={isUploading} />
+			<ListContainer ascending={isAscending}>
 				{
-					sortedList.map(({ uploadId, file, extension }) => {
-						const origIndex = values.findIndex(({ uploadId: unsortedId }) => unsortedId === uploadId);
-						const onClickEdit = () => memoizedEdit(uploadId, origIndex);
+					values.map(({ uploadId, file, extension }, index) => {
+						const onClickEdit = () => memoizedEdit(uploadId);
 						const onClickDelete = () => memoizedDelete(uploadId);
 						return (
 							<UploadListItem
 								key={uploadId}
 								fileData={{ ...file, extension }}
-								origIndex={origIndex}
+								origIndex={index}
 								uploadId={uploadId}
 								onClickEdit={onClickEdit}
 								onClickDelete={onClickDelete}
-								isSelected={!isUploading && uploadId === selectedUploadId}
+								isSelected={!isUploading && index === selectedIndex}
 								isUploading={isUploading}
 							/>
 						);

@@ -15,32 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { createContext, useState } from 'react';
 
 export interface UploadsContextType {
-	selectedUploadId: string;
-	setSelectedUploadId: (id: string) => void;
-	originalIndex: number
-	setOriginalIndex: (index: number) => void;
-
-	props?: any;
+	fields: UploadFieldArray;
+	selectedIndex: number;
+	setSelectedIndex: (index: number) => void;
 }
 
 const defaultValue: UploadsContextType = {
-	selectedUploadId: '',
-	setSelectedUploadId: () => {},
-	originalIndex: null,
-	setOriginalIndex: () => {},
+	fields: { uploads: [] },
+	selectedIndex: null,
+	setSelectedIndex: () => {},
 };
 export const UploadFileFormContext = createContext(defaultValue);
 UploadFileFormContext.displayName = 'UploadFileFormContext';
 
-export const UploadFileFormContextComponent = ({ children }) => {
-	const [selectedUploadId, setSelectedUploadId] = useState('');
-	const [originalIndex, setOriginalIndex] = useState(null);
+export const UploadFileFormContextComponent = ({ fields, children }) => {
+	const [selectedIndex, setSelectedIndex] = useState(null);
 
 	return (
-		<UploadFileFormContext.Provider value={{ selectedUploadId, setSelectedUploadId, originalIndex, setOriginalIndex }}>
+		<UploadFileFormContext.Provider value={{ fields, selectedIndex, setSelectedIndex }}>
 			{children}
 		</UploadFileFormContext.Provider>
 	);
