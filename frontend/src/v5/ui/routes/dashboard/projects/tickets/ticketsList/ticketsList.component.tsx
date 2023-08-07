@@ -31,7 +31,7 @@ import { getGroupByOptions, groupByDate, groupByList, NONE_OPTION } from '../tic
 type TicketsListProps = { onTicketClick: (ticket: ITicket) => void };
 export const TicketsList = (props: TicketsListProps) => {
 	const { filteredItems } = useContext(SearchContext);
-	const groupBy = _.startCase(useParams<DashboardTicketsParams>().groupBy);
+	let { groupBy } = useParams<DashboardTicketsParams>();
 
 	if (!filteredItems.length) {
 		return (
@@ -44,9 +44,9 @@ export const TicketsList = (props: TicketsListProps) => {
 		);
 	}
 
-	if (groupBy === NONE_OPTION) {
-		return (<TicketGroup tickets={filteredItems} {...props} />);
-	}
+	if (groupBy === NONE_OPTION) return (<TicketGroup tickets={filteredItems} {...props} />);
+
+	groupBy = _.startCase(groupBy);
 
 	let groups: Record<string, ITicket[]>;
 	switch(groupBy) {
