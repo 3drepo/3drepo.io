@@ -25,79 +25,13 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import _ from 'lodash';
 import { Accordion } from '@controls/accordion/accordion.component';
-import { formatMessage } from '@/v5/services/intl';
 import { TicketGroup } from './ticketGroup/ticketGroup.component';
-import { GROUP_NAMES_BY_TYPE, NONE_OPTION, UNSET, standardiseGroupName } from '../tickets.helper';
-
-const NO_DUE_DATE = formatMessage({ id: 'groupBy.dueDate.unset', defaultMessage: 'No due date' });
-const OVERDUE = formatMessage({ id: 'groupBy.dueDate.overdue', defaultMessage: 'Overdue' });
-
-const getOptionsForGroupsWithDueDate = () => [
-	OVERDUE,
-	formatMessage({ id: 'groupBy.dueDate.inOneWeek', defaultMessage: 'in 1 week' }),
-	formatMessage({ id: 'groupBy.dueDate.inTwoWeeks', defaultMessage: 'in 2 weeks' }),
-	formatMessage({ id: 'groupBy.dueDate.inThreeWeeks', defaultMessage: 'in 3 weeks' }),
-	formatMessage({ id: 'groupBy.dueDate.inFourWeeks', defaultMessage: 'in 4 weeks' }),
-	formatMessage({ id: 'groupBy.dueDate.inFiveWeeks', defaultMessage: 'in 5 weeks' }),
-	formatMessage({ id: 'groupBy.dueDate.inSixPlusWeeks', defaultMessage: 'in 6+ weeks' }),
-];
-
-const groupByDate = (tickets: ITicket[]) => {
-	const groups = {};
-	let [ticketsWithUnsetDueDate, remainingTickets] = _.partition(tickets, ({ properties }) => !properties[IssueProperties.DUE_DATE]);
-	groups[NO_DUE_DATE] = ticketsWithUnsetDueDate;
-
-	const dueDateOptions = getOptionsForGroupsWithDueDate();
-	const endOfCurrentWeek = new Date();
-
-	const ticketDueDateIsPassed = (ticket: ITicket) => ticket.properties.dueDate < endOfCurrentWeek.getTime();
-
-	let currentWeekTickets;
-	while (dueDateOptions.length) {
-		[currentWeekTickets, remainingTickets] = _.partition(remainingTickets, ticketDueDateIsPassed);
-		groups[dueDateOptions.shift()] = currentWeekTickets;
-		endOfCurrentWeek.setDate(endOfCurrentWeek.getDate() +  7);
-	}
-	return groups;
-};
-
-// const groupByList = (tickets: ITicket[], groupType: string, groupNamesWithoutUnset: string[]) => {
-// 	const groupNames = [UNSET, ...groupNamesWithoutUnset];
-// 	const groups = groupNames.reduce((acc, name) => {
-// 		acc[name] = [];
-// 		return acc;
-// 	}, {});
-// 	tickets.forEach((ticket) => {
-// 		const { properties, modules } = ticket;
-// 		const safetibaseProperties = modules?.safetibase;
-// 		const existingGroupByOptions = _.keys({ ...properties, ...safetibaseProperties })
-// 		const groupName = existingGroupByOptions.includes(_.capitalize(groupType)) ? properties[groupType] : UNSET;
-// 		groups[standardiseGroupName(groupName)].push(ticket);
-// 	});
-// 	return groups;
-// };
-
-const standardisedUnset = standardiseGroupName(UNSET);
-const groupByList = (tickets: ITicket[], groupType: string, groupNamesWithoutUnset: string[]) => {
-	const groupNames = [standardisedUnset, ...groupNamesWithoutUnset];
-	const groups = groupNames.reduce((acc, name) => {
-		acc[name] = [];
-		return acc;
-	}, {});
-	tickets.forEach((ticket) => {
-		const { properties, modules } = ticket;
-		const safetibaseProperties = modules?.safetibase;
-		const existingGroupByOptions = _.mapKeys({ ...properties, ...safetibaseProperties }, (v, k) => standardiseGroupName(k));
-		const groupName = standardiseGroupName(existingGroupByOptions[groupType] ?? standardisedUnset);
-		groups[groupName].push(ticket);
-	});
-	return groups;
-};
+import { getGroupByOptions, groupByDate, groupByList, NONE_OPTION } from '../ticketsTable.helper';
 
 type TicketsListProps = { onTicketClick: (ticket: ITicket) => void };
 export const TicketsList = (props: TicketsListProps) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { groupBy } = useParams<DashboardTicketsParams>();
+	const groupBy = _.startCase(useParams<DashboardTicketsParams>().groupBy);
 
 	if (!filteredItems.length) {
 		return (
@@ -116,14 +50,14 @@ export const TicketsList = (props: TicketsListProps) => {
 
 	let groups: Record<string, ITicket[]>;
 	switch(groupBy) {
-		case standardiseGroupName(BaseProperties.OWNER): 
+		case BaseProperties.OWNER: 
 			groups = _.groupBy(filteredItems, `properties.${BaseProperties.OWNER}`);
 			break;
-		case standardiseGroupName(IssueProperties.DUE_DATE):
+		case IssueProperties.DUE_DATE:
 			groups = groupByDate(filteredItems);
 			break;
 		default:
-			groups = groupByList(filteredItems, groupBy, GROUP_NAMES_BY_TYPE[groupBy]);
+			groups = groupByList(filteredItems, groupBy, getGroupByOptions(groupBy));
 	}
 
 	return (

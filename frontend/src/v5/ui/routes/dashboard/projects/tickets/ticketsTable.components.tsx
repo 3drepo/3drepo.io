@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TeamspacesActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from 'react-redux';
 import { selectFederationById } from '@/v5/store/federations/federations.selectors';
@@ -25,13 +25,10 @@ import { formatMessage } from '@/v5/services/intl';
 import { useParams, generatePath, useHistory } from 'react-router-dom';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { TicketWithModelId } from '@/v5/store/tickets/tickets.types';
-import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
 import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import { CircleButton } from '@controls/circleButton';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
-import { useContainersData } from '../containers/containers.hooks';
-import { useFederationsData } from '../federations/federations.hooks';
 import { TicketsList } from './ticketsList/ticketsList.component';	
 import { useSearchParam } from '../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE } from '../../../routes.constants';
@@ -39,7 +36,7 @@ import { ContainersAndFederationsSelect } from './selectMenus/containersAndFeder
 import { GroupBySelect } from './selectMenus/groupBySelect.component';
 import { TemplateSelect } from './selectMenus/templateSelect.component';
 import { InputsContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer } from './tickets.styles';
-import { NONE_OPTION } from './tickets.helper';
+import { NONE_OPTION } from './ticketsTable.helper';
 
 export const TicketsTable = () => {
 	const history = useHistory();
@@ -49,9 +46,7 @@ export const TicketsTable = () => {
 	const { getState } = useStore();
 
 	const tickets = TicketsHooksSelectors.selectTicketsByContainersAndFederations(selectedContainersAndFederations);
-	const { isListPending: areContainersPending } = useContainersData();
-	const { isListPending: areFederationsPending } = useFederationsData();
-	const isLoading = areContainersPending || areFederationsPending;
+	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const [editingTicket, setEditingTicket] = useState<TicketWithModelId>(undefined);
 	const [isEditingTicket, setIsEditingTicket] = useState(false);
 
@@ -79,7 +74,7 @@ export const TicketsTable = () => {
 	};
 
 	useEffect(() => {
-		if (isLoading || !selectedContainersAndFederations.length) return;
+		if (!selectedContainersAndFederations.length) return;
 
 		const isFed = (modelId) => !!selectFederationById(getState(), modelId);
 
@@ -87,14 +82,9 @@ export const TicketsTable = () => {
 			if (selectTicketsHaveBeenFetched(getState(), modelId)) return;
 			TicketsActionsDispatchers.fetchTickets(teamspace, project, modelId, isFed(modelId));
 		});
-	}, [selectedContainersAndFederations.length, isLoading]);
+	}, [selectedContainersAndFederations.length]);
 
-	useEffect(() => {
-		TeamspacesActionsDispatchers.fetchTemplates(teamspace);
-		return () => setModels('');
-	}, []);
-
-	if (isLoading) return (<Loader />);
+	useEffect(() => () => setModels(''), []);
 
 	return (
 		<SearchContextComponent items={ticketsFilteredByTemplate} fieldsToFilter={['title']}>
@@ -121,6 +111,7 @@ export const TicketsTable = () => {
 					<NewTicketButton
 						startIcon={<AddCircleIcon />}
 						onClick={() => onSetEditingTicket(null)}
+						disabled={!templates.length}
 					>
 						<FormattedMessage id="ticketsTable.button.newTicket" defaultMessage="New Ticket" />
 					</NewTicketButton>

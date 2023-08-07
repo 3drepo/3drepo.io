@@ -15,25 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { Link, generatePath, useParams } from 'react-router-dom'; 
 import { Loader } from '@/v4/routes/components/loader/loader.component';
-import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { Button } from '@controls/button';
 import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsSelect.component';
-import { useContainersData } from '../../containers/containers.hooks';
-import { useFederationsData } from '../../federations/federations.hooks';
 import { TemplateSelect } from '../selectMenus/templateSelect.component';
-import { NONE_OPTION } from '../tickets.helper';
+import { NONE_OPTION } from '../ticketsTable.helper';
 
 export const TicketsSelection = () => {
 	const { teamspace, project } = useParams();
-	const { isListPending: areContainersPending } = useContainersData();
-	const { isListPending: areFederationsPending } = useFederationsData();
-	const templates = TeamspacesHooksSelectors.selectTemplatesByTeamspace(teamspace);
+	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const [containersAndFederations, setContainersAndFederations] = useState([]);
-	const [template, setTemplate] = useState(NONE_OPTION);
+	const [template, setTemplate] = useState<string>(NONE_OPTION);
 	const isValid = template && containersAndFederations.length;
 
 	const getPathname = () => {
@@ -45,12 +41,8 @@ export const TicketsSelection = () => {
 			groupBy: NONE_OPTION,
 		});
 	};
-	
-	useEffect(() => {
-		TeamspacesActionsDispatchers.fetchTemplates(teamspace);
-	}, []);
 
-	if (!teamspace || !project || areFederationsPending || areContainersPending || !templates) return (<Loader />);
+	if (!teamspace || !project || !templates) return (<Loader />);
 
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column'}}>
@@ -59,17 +51,18 @@ export const TicketsSelection = () => {
 				onChange={setContainersAndFederations}
 			/>
 			<TemplateSelect value={template} onChange={setTemplate} />
-			<button disabled={!isValid}>
-				<Link
-					style={{ height: '100%', width: '100%' }}
-					to={{
-						pathname: getPathname(),
-						search: `?models=${containersAndFederations.join(',')}`,
-					}}
-				>
+			<Link
+				disabled={!isValid}
+				style={{ margin: '30px auto', width: 'fit-content' }}
+				to={{
+					pathname: getPathname(),
+					search: `?models=${containersAndFederations.join(',')}`,
+				}}
+			>
+				<Button variant="contained" disabled={!isValid}>
 					Go to table
-				</Link>
-			</button>
+				</Button>
+			</Link>
 		</div>
 	);
 };
