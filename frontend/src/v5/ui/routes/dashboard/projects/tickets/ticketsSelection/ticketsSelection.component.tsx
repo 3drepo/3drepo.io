@@ -15,21 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
 import { TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { Link, generatePath, useParams } from 'react-router-dom'; 
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Button } from '@controls/button';
-import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsSelect.component';
-import { TemplateSelect } from '../selectMenus/templateSelect.component';
+import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAndFederationsSelect.component';
+import { TemplateFormSelect } from '../selectMenus/templateSelect.component';
 import { NONE_OPTION } from '../ticketsTable.helper';
+import { FormProvider, useForm } from 'react-hook-form';
 
+type FormType = {
+	containersAndFederations: string[],
+	template: string,
+};
 export const TicketsSelection = () => {
 	const { teamspace, project } = useParams();
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
-	const [containersAndFederations, setContainersAndFederations] = useState([]);
-	const [template, setTemplate] = useState<string>(NONE_OPTION);
+
+	const formData = useForm<FormType>({
+		defaultValues: {
+			containersAndFederations: [],
+			template: NONE_OPTION,
+		}
+	});
+
+	const template = formData.watch('template');
+	const containersAndFederations = formData.watch('containersAndFederations');
+
 	const isValid = template && containersAndFederations.length;
 
 	const getPathname = () => {
@@ -45,24 +58,23 @@ export const TicketsSelection = () => {
 	if (!teamspace || !project || !templates) return (<Loader />);
 
 	return (
-		<div style={{ display: 'flex', flexDirection: 'column'}}>
-			<ContainersAndFederationsSelect
-				value={containersAndFederations}
-				onChange={setContainersAndFederations}
-			/>
-			<TemplateSelect value={template} onChange={setTemplate} />
-			<Link
-				disabled={!isValid}
-				style={{ margin: '30px auto', width: 'fit-content' }}
-				to={{
-					pathname: getPathname(),
-					search: `?models=${containersAndFederations.join(',')}`,
-				}}
-			>
-				<Button variant="contained" disabled={!isValid}>
-					Go to table
-				</Button>
-			</Link>
-		</div>
+		<FormProvider {...formData}>
+			<div style={{ display: 'flex', flexDirection: 'column'}}>
+				<ContainersAndFederationsFormSelect name="containersAndFederations" />
+				<TemplateFormSelect name="template" />
+				<Link
+					disabled={!isValid}
+					style={{ margin: '30px auto', width: 'fit-content' }}
+					to={{
+						pathname: getPathname(),
+						search: `?models=${containersAndFederations.join(',')}`,
+					}}
+				>
+					<Button variant="contained" disabled={!isValid}>
+						Go to table
+					</Button>
+				</Link>
+			</div>
+		</FormProvider>
 	);
 };
