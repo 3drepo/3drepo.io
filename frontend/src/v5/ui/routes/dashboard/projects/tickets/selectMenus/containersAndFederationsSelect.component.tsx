@@ -18,19 +18,17 @@
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
-import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
+import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FormSearchSelect } from '@controls/inputs/formInputs.component';
 import { ListSubheader } from '../tickets.styles';
-import { useContainersData } from '../../containers/containers.hooks';
-import { useFederationsData } from '../../federations/federations.hooks';
 
-export const ContainersAndFederationsSelect = ({ onChange, ...props }) => {
-	const { containers } = useContainersData();
-	const { federations } = useFederationsData();
+export const ContainersAndFederationsFormSelect = (props) => {
+	const containers = ContainersHooksSelectors.selectContainers();
+	const federations = FederationsHooksSelectors.selectFederations();
 
 	return (
-		<SearchSelect
+		<FormSearchSelect
 			multiple
-			onChange={(e) => onChange(e.target.value)}
 			{...props}
 			label={formatMessage({ id: 'ticketTable.modelSelection.placeholder', defaultMessage: 'Select Federation / Container' })}
 			renderValue={(ids: any[] | null = []) => {
@@ -58,6 +56,6 @@ export const ContainersAndFederationsSelect = ({ onChange, ...props }) => {
 			{containers.map(({ name, _id }) => (
 				<MultiSelectMenuItem key={_id} value={_id}>{name}</MultiSelectMenuItem>
 			))}
-		</SearchSelect>
+		</FormSearchSelect>
 	);
 };

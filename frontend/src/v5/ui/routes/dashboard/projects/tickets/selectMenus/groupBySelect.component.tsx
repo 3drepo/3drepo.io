@@ -16,36 +16,22 @@
  */
 
 import { MenuItem } from '@mui/material';
-import { Select, SelectProps } from '@controls/inputs/select/select.component';
-import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { FormattedMessage } from 'react-intl';
-import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
-import { NONE_OPTION, NoneOptionMessage, standardiseGroupName } from '../tickets.helper';
+import { FormSelect } from '@controls/inputs/formInputs.component';
+import { GROUP_BY_OPTIONS, NONE_OPTION, NoneOptionMessage } from '../ticketsTable.helper';
 
-const GROUP_BY_OPTIONS = _.mapKeys({
-	[BaseProperties.OWNER]: formatMessage({ id: 'groupBy.owner', defaultMessage: 'Owner'}),
-	[IssueProperties.DUE_DATE]: formatMessage({ id: 'groupBy.dueDate', defaultMessage: 'Due date'}),
-	[IssueProperties.PRIORITY]: formatMessage({ id: 'groupBy.priority', defaultMessage: 'Priority'}),
-	[IssueProperties.STATUS]: formatMessage({ id: 'groupBy.status', defaultMessage: 'Status'}),
-	[SafetibaseProperties.LEVEL_OF_RISK]: formatMessage({ id: 'groupBy.levelOfRisk', defaultMessage: 'Level of risk'}),
-	[SafetibaseProperties.TREATMENT_STATUS]: formatMessage({ id: 'groupBy.treatmentStatus', defaultMessage: 'Treatment status'}),
-}, (val, key) => standardiseGroupName(key));
-
-export const GroupBySelect = ({ onChange, defaultValue = null, ...props }: SelectProps) => (
-	<Select
+export const GroupByFormSelect = (props) => (
+	<FormSelect
 		{...props}
-		defaultValue={defaultValue}
-		onChange={(e) => onChange(e.target.value)}
 		label={<FormattedMessage id="ticketTable.groupBy.placeholder" defaultMessage="group by:" />}
 		renderValue={(groupBy: string | null) => (
 			<>
 				<FormattedMessage id="ticketTable.groupBy.renderValue" defaultMessage="Group by:" />
-				<b> {groupBy || NoneOptionMessage}</b>
+				<b> {groupBy === NONE_OPTION ? NoneOptionMessage : _.capitalize(_.startCase(groupBy))}</b>
 			</>
 		)}
 	>
-		<MenuItem value={NONE_OPTION}>{NoneOptionMessage}</MenuItem>
-		{Object.entries(GROUP_BY_OPTIONS).map(([key, val]) => (<MenuItem value={key} key={key}>{val}</MenuItem>))}
-	</Select>
+		{Object.entries(GROUP_BY_OPTIONS).map(([key, val]) => (<MenuItem value={_.snakeCase(key)} key={key}>{val}</MenuItem>))}
+	</FormSelect>
 );

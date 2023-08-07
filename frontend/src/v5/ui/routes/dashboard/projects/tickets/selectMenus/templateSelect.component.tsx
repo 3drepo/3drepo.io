@@ -16,21 +16,17 @@
  */
 
 import { MenuItem } from '@mui/material';
-import { Select, SelectProps } from '@controls/inputs/select/select.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { NONE_OPTION, NoneOptionMessage } from '../ticketsTable.helper';
+import { FormSelect } from '@controls/inputs/formInputs.component';
 
-export const TemplateSelect = ({ onChange, ...props }: SelectProps) => {
+export const TemplateFormSelect = (props) => {
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 
 	return (
-		<Select
-			{...props}
-			onChange={(e) => onChange(e.target.value)}
-			label='Select Ticket type'
-		>
+		<FormSelect label='Select Ticket type' {...props}>
 			<MenuItem value={NONE_OPTION}>{NoneOptionMessage}</MenuItem>
 			{templates.map(({ _id, name }) => (<MenuItem key={_id} value={_id}>{name}</MenuItem>))}
-		</Select>
+		</FormSelect>
 	);
 };
