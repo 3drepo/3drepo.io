@@ -22,8 +22,7 @@ export const useSearchParam = (name: string) => {
 	const location = useLocation();
 	const searchParams = new URLSearchParams(location.search);
 	const value = searchParams.get(name);
-  
-	// Function to handle setting search parameters
+
 	const setParam = (newValue = '') => {
 		if (newValue) {
 			searchParams.set(name, newValue);
