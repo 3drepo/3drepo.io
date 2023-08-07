@@ -16,15 +16,14 @@
  */
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
+import { UnsetOptionMessage } from '../../ticketsTable.helper';
 import { ColumnsContainer, TicketRowContainer } from './ticketGroup.styles';
-import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useParams } from 'react-router-dom';
 
 export const TicketRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
-	const { teamspace } = useParams();
 	const { _id, title, properties, number, type, modules } = ticket;
-	const template = TeamspacesHooksSelectors.selectTeamspaceTemplateById(teamspace, type);
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
 
 	if (!properties || !template?.code) return (<span>Loading</span>);
 
@@ -47,7 +46,7 @@ export const TicketRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () =>
 			<span>{title}</span>
 			<span>{assignees?.length || 0}</span>
 			<span>{owner}</span>
-			<span>{dueDate}</span>
+			<span>{dueDate ? new Date(dueDate).toLocaleDateString() : UnsetOptionMessage}</span>
 			<span>{priority}</span>
 			<span>{status}</span>
 			<span>{levelOfRisk}</span>
