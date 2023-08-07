@@ -33,9 +33,9 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { TicketsList } from './ticketsList/ticketsList.component';	
 import { useSearchParam } from '../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE } from '../../../routes.constants';
-import { ContainersAndFederationsFormSelect } from './selectMenus/containersAndFederationsSelect.component';
-import { GroupByFormSelect } from './selectMenus/groupBySelect.component';
-import { TemplateFormSelect } from './selectMenus/templateSelect.component';
+import { ContainersAndFederationsFormSelect } from './selectMenus/containersAndFederationsFormSelect.component';
+import { GroupByFormSelect } from './selectMenus/groupByFormSelect.component';
+import { TemplateFormSelect } from './selectMenus/templateFormSelect.component';
 import { InputsContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer } from './tickets.styles';
 import { NONE_OPTION } from './ticketsTable.helper';
 

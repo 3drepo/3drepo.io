@@ -20,8 +20,8 @@ import { Link, generatePath, useParams } from 'react-router-dom';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Button } from '@controls/button';
-import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAndFederationsSelect.component';
-import { TemplateFormSelect } from '../selectMenus/templateSelect.component';
+import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
+import { TemplateFormSelect } from '../selectMenus/templateFormSelect.component';
 import { NONE_OPTION } from '../ticketsTable.helper';
 import { FormProvider, useForm } from 'react-hook-form';
 
