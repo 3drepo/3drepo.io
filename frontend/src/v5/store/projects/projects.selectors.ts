@@ -19,7 +19,6 @@ import { createSelector } from 'reselect';
 import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
 import { IProjectsState } from './projects.redux';
 import { IProject } from './projects.types';
-import _ from 'lodash';
 
 const selectProjectsDomain = (state): IProjectsState => state?.projects;
 

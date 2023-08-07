@@ -20,7 +20,6 @@ import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
 import { ITemplate } from '../tickets/tickets.types';
-import { mergeWithArray } from '../store.helpers';
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	fetch: [],
