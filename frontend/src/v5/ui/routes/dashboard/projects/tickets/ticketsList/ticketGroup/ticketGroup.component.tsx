@@ -18,7 +18,7 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
-import { UnsetOptionMessage } from '../../ticketsTable.helper';
+import { UNSET_OPTION, UnsetOptionMessage } from '../../ticketsTable.helper';
 import { ColumnsContainer, TicketRowContainer } from './ticketGroup.styles';
 
 export const TicketRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
@@ -46,7 +46,7 @@ export const TicketRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () =>
 			<span>{title}</span>
 			<span>{assignees?.length || 0}</span>
 			<span>{owner}</span>
-			<span>{dueDate ? new Date(dueDate).toLocaleDateString() : UnsetOptionMessage}</span>
+			<span>{dueDate === UNSET_OPTION ? UnsetOptionMessage : new Date(dueDate).toLocaleDateString()}</span>
 			<span>{priority}</span>
 			<span>{status}</span>
 			<span>{levelOfRisk}</span>

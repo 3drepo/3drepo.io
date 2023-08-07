@@ -21,9 +21,9 @@ import _ from 'lodash';
 import { PriorityLevels, RiskLevels, TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 
-export const NONE_OPTION = 'None';
+export const NONE_OPTION = 'none';
 export const NoneOptionMessage = formatMessage({ id: 'tickets.selectOption.none', defaultMessage: 'None' });
-export const UNSET_OPTION = 'Unset'
+export const UNSET_OPTION = 'unset'
 export const UnsetOptionMessage = formatMessage({ id: 'tickets.selectOption.property.unset', defaultMessage: 'Unset' });
 
 const NO_DUE_DATE = formatMessage({ id: 'groupBy.dueDate.unset', defaultMessage: 'No due date' });
@@ -58,26 +58,22 @@ export const groupByDate = (tickets: ITicket[]) => {
 	return groups;
 };
 
-export const groupByList = (tickets: ITicket[], groupType: string, groupNames: string[]) => {
+export const groupByList = (tickets: ITicket[], groupType: string, groupValues: string[]) => {
 	const groups = {};
-	groupNames.forEach((name) => { groups[name] = [] });
-	const unsetOptions = [];
-	tickets.forEach((ticket) => {
-		const { properties, modules } = ticket;
-		const safetibaseProperties = modules?.safetibase;
-		const existingGroupByOptions = { ...properties, ...safetibaseProperties };
-		const value = existingGroupByOptions[groupType];
-		if (value in groupNames) {
-			groups[value].push(ticket);
-		} else {
-			unsetOptions.push(ticket);
-		}
+	let remainingTickets = tickets;
+	let currentTickets = [];
+	groupValues.forEach((groupValue) => {
+		[currentTickets, remainingTickets] = _.partition(remainingTickets, ({ properties, modules }) => (
+			{ ...modules?.safetibase, ...properties }?.[groupType] === groupValue
+		));
+		groups[groupValue] = currentTickets;
 	});
-	groups[UNSET_OPTION] = unsetOptions;
+	groups[UNSET_OPTION] = remainingTickets;
 	return groups;
 };
 
 export const GROUP_BY_OPTIONS = {
+	[NONE_OPTION]: NoneOptionMessage,
 	[BaseProperties.OWNER]: formatMessage({ id: 'groupBy.owner', defaultMessage: 'Owner'}),
 	[IssueProperties.DUE_DATE]: formatMessage({ id: 'groupBy.dueDate', defaultMessage: 'Due date'}),
 	[IssueProperties.PRIORITY]: formatMessage({ id: 'groupBy.priority', defaultMessage: 'Priority'}),
