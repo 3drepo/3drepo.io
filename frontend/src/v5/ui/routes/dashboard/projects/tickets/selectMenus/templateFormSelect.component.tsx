@@ -17,14 +17,23 @@
 
 import { MenuItem } from '@mui/material';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { NONE_OPTION, NoneOptionMessage } from '../ticketsTable.helper';
 import { FormSelect } from '@controls/inputs/formInputs.component';
+import { formatMessage } from '@/v5/services/intl';
+import { NONE_OPTION, NoneOptionMessage } from '../ticketsTable.helper';
 
 export const TemplateFormSelect = (props) => {
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 
 	return (
-		<FormSelect label='Select Ticket type' {...props}>
+		<FormSelect
+			label={formatMessage({ id: 'tickets.select.template', defaultMessage: 'Select Ticket type' })}
+			renderValue={(val) => {
+				if (val === NONE_OPTION) return (<b>{NoneOptionMessage}</b>);
+				const { name } = templates.find(({ _id }) => _id === val);
+				return (<b>{name}</b>);
+			}}
+			{...props}
+		>
 			<MenuItem value={NONE_OPTION}>{NoneOptionMessage}</MenuItem>
 			{templates.map(({ _id, name }) => (<MenuItem key={_id} value={_id}>{name}</MenuItem>))}
 		</FormSelect>

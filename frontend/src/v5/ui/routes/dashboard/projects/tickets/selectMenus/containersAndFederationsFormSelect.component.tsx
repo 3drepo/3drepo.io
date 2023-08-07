@@ -26,23 +26,25 @@ export const ContainersAndFederationsFormSelect = (props) => {
 	const containers = ContainersHooksSelectors.selectContainers();
 	const federations = FederationsHooksSelectors.selectFederations();
 
+	const getRenderText = (ids: any[] | null = []) => {
+		const itemsLength = ids.length;
+		if (itemsLength === 1) {
+			const [id] = ids;
+			return (containers.find(({ _id }) => _id === id) || federations.find(({ _id }) => _id === id)).name;
+		}
+
+		return formatMessage({
+			id: 'ticketTable.modelSelection.selected',
+			defaultMessage: '{itemsLength} selected',
+		}, { itemsLength });
+	};
+
 	return (
 		<FormSearchSelect
 			multiple
 			{...props}
 			label={formatMessage({ id: 'ticketTable.modelSelection.placeholder', defaultMessage: 'Select Federation / Container' })}
-			renderValue={(ids: any[] | null = []) => {
-				const itemsLength = ids.length;
-				if (itemsLength === 1) {
-					const [id] = ids;
-					return (containers.find(({ _id }) => _id === id) || federations.find(({ _id }) => _id === id)).name;
-				}
-
-				return formatMessage({
-					id: 'ticketTable.modelSelection.selected',
-					defaultMessage: '{itemsLength} selected',
-				}, { itemsLength });
-			}}
+			renderValue={(ids: any[] | null = []) => (<b>{getRenderText(ids)}</b>)}
 		>
 			<ListSubheader>
 				<FormattedMessage id="ticketTable.modelSelection.federations" defaultMessage="Federations" />

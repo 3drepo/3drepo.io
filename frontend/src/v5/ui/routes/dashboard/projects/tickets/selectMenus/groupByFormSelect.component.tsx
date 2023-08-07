@@ -19,16 +19,17 @@ import { MenuItem } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import _ from 'lodash';
 import { FormSelect } from '@controls/inputs/formInputs.component';
-import { GROUP_BY_OPTIONS, NONE_OPTION, NoneOptionMessage } from '../ticketsTable.helper';
+import { formatMessage } from '@/v5/services/intl';
+import { GROUP_BY_OPTIONS } from '../ticketsTable.helper';
 
 export const GroupByFormSelect = (props) => (
 	<FormSelect
 		{...props}
-		label={<FormattedMessage id="ticketTable.groupBy.placeholder" defaultMessage="group by:" />}
+		label={formatMessage({ id: 'ticketTable.groupBy.placeholder', defaultMessage: 'group by:' })}
 		renderValue={(groupBy: string | null) => (
 			<>
 				<FormattedMessage id="ticketTable.groupBy.renderValue" defaultMessage="Group by:" />
-				<b> {groupBy === NONE_OPTION ? NoneOptionMessage : _.capitalize(_.startCase(groupBy))}</b>
+				<b> {_.capitalize(_.startCase(groupBy))}</b>
 			</>
 		)}
 	>
