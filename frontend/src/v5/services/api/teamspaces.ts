@@ -20,7 +20,3 @@ import api from './default';
 export const fetchTeamspaces = (): Promise<any> => api.get('teamspaces');
 
 export const fetchQuota = (teamspace: string): Promise<any> => api.get(`teamspaces/${teamspace}/quota`);
-
-export const fetchTemplates = (teamspace: string): Promise<any> => api.get(`teamspaces/${teamspace}/settings/tickets/templates`);
-
-export const fetchTemplate = (teamspace: string, templateId: string): Promise<any> => api.get(`teamspaces/${teamspace}/settings/tickets/templates/${templateId}`);

@@ -19,12 +19,18 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
-import { OnError, OnSuccess, TeamspaceAndProjectId } from '../store.types';
+import { OnError, OnSuccess, ProjectId, TeamspaceAndProjectId, TeamspaceProjectAndModel } from '../store.types';
 import { IProject } from './projects.types';
+import { ITemplate } from '../tickets/tickets.types';
+import { mergeWithArray } from '../store.helpers';
 
 export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions({
 	fetch: ['teamspace'],
 	fetchSuccess: ['teamspace', 'projects'],
+	fetchTemplates: ['teamspace', 'projectId'],
+	fetchTemplatesSuccess: ['projectId', 'templates'],
+	fetchTemplate: ['teamspace', 'projectId', 'modelId', 'templateId', 'isFederation'],
+	replaceTemplateSuccess: ['projectId', 'template'],
 	fetchFailure: [],
 	setCurrentProject: ['projectId'],
 	createProject: ['teamspace', 'projectName', 'onSuccess', 'onError'],
@@ -38,6 +44,7 @@ export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions
 export const INITIAL_STATE: IProjectsState = {
 	projectsByTeamspace: {},
 	currentProject: '',
+	templatesByProject: {},
 };
 
 export const fetchSuccess = (state, { teamspace, projects }: FetchProjectsSuccessAction) => {
@@ -63,12 +70,29 @@ export const deleteProjectSuccess = (state, { teamspace, projectId }: DeleteProj
 	);
 };
 
+export const fetchTemplatesSuccess = (state, { projectId, templates }: FetchTemplatesSuccessAction) => {
+	state.templatesByProject[projectId] = templates;
+};
+
+export const replaceTemplateSuccess = (state, { projectId, template }: ReplaceTemplateSuccessAction) => {
+	state.templatesByProjects[projectId] ||= [];
+	const teamspaceTemplate = state.templatesByProjects[projectId].find((loadedTemplate) => loadedTemplate._id === template._id);
+
+	if (teamspaceTemplate) {
+		mergeWithArray(teamspaceTemplate, template);
+	} else {
+		state.templatesByProjects[projectId].push(template);
+	}
+};
+
 export const projectsReducer = createReducer(INITIAL_STATE, produceAll({
 	[ProjectsTypes.FETCH_SUCCESS]: fetchSuccess,
 	[ProjectsTypes.SET_CURRENT_PROJECT]: setCurrentProject,
 	[ProjectsTypes.CREATE_PROJECT_SUCCESS]: createProjectSuccess,
 	[ProjectsTypes.UPDATE_PROJECT_SUCCESS]: updateProjectSuccess,
 	[ProjectsTypes.DELETE_PROJECT_SUCCESS]: deleteProjectSuccess,
+	[ProjectsTypes.FETCH_TEMPLATES_SUCCESS]: fetchTemplatesSuccess,
+	[ProjectsTypes.REPLACE_TEMPLATE_SUCCESS]: replaceTemplateSuccess,
 })) as (state: IProjectsState, action: any) => IProjectsState;
 
 /**
@@ -77,6 +101,7 @@ export const projectsReducer = createReducer(INITIAL_STATE, produceAll({
 export interface IProjectsState {
 	projectsByTeamspace: Record<string, IProject[]>;
 	currentProject: string;
+	templatesByProject: Record<string, ITemplate[]>;
 }
 export type FetchProjectsAction = Action<'FETCH_PROJECTS'> & { teamspace: string };
 export type FetchProjectsSuccessAction = Action<'FETCH_PROJECTS_SUCCESS'> & { teamspace: string, projects: IProject[] };
@@ -90,6 +115,10 @@ export type UpdateProjectAction = Action<'UPDATE_PROJECT'> & TeamspaceAndProject
 export type UpdateProjectSuccessAction = Action<'UPDATE_PROJECT_SUCCESS'> & TeamspaceAndProjectId & { project: Partial<IProject> };
 export type DeleteProjectAction = Action<'DELETE_PROJECT'> & TeamspaceAndProjectId & OnSuccess & OnError;
 export type DeleteProjectSuccessAction = Action<'DELETE_PROJECT_SUCCESS'> & TeamspaceAndProjectId;
+export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId;
+export type FetchTemplatesSuccessAction = Action<'FETCH_TEMPLATES_SUCCESS'> & ProjectId & { templates: ITemplate[] };
+export type FetchTemplateAction = Action<'FETCH_TEMPLATE'> & TeamspaceProjectAndModel & { templateId: string, isFederation: boolean };
+export type ReplaceTemplateSuccessAction = Action<'REPLACE_TEMPLATE_SUCCESS'> & ProjectId & { template: ITemplate };
 
 export interface IProjectsActions {
 	fetch: (teamspace: string) => FetchProjectsAction;
@@ -122,4 +151,8 @@ export interface IProjectsActions {
 		onError: (error) => void,
 	) => DeleteProjectAction;
 	deleteProjectSuccess: (teamspace: string, projectId: string) => DeleteProjectSuccessAction;
+	fetchTemplates: (teamspace: string, projectId: string) => FetchTemplatesAction;
+	fetchTemplatesSuccess: (projectId: string, templates: ITemplate[]) => FetchTemplatesSuccessAction;
+	fetchTemplate: (teamspace: string, projectId: string, modelId: string, templateId: string, isFederation: boolean) => FetchTemplateAction;
+	replaceTemplateSuccess: (projectId: string, template: ITemplate) => ReplaceTemplateSuccessAction;
 }

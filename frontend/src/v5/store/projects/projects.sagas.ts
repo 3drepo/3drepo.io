@@ -15,12 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { put, select, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { ProjectsActions, ProjectsTypes } from './projects.redux';
 import { IProject } from './projects.types';
+import { RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
+import { selectContainers } from '../containers/containers.selectors';
+import { selectFederations } from '../federations/federations.selectors';
 
 export function* fetch({ teamspace }) {
 	try {
@@ -70,9 +73,60 @@ export function* deleteProject({ teamspace, projectId, onSuccess, onError }) {
 	}
 }
 
+export function* fetchTemplates({ teamspace, projectId }) {
+	try {
+		let isFed = false;
+		let model = (yield select(selectContainers))?.[0];
+		if (!model) {
+			isFed = true;
+			model = (yield select(selectFederations))?.[0];
+		}
+		if (!model) {
+			throw new Error(
+				formatMessage({
+					id: 'projects.error.noModels',
+					defaultMessage: 'The project must contain at least one container or federation to fetch the templates'
+				}),
+			);
+		}
+		const fetchTemplates = isFed ? API.Tickets.fetchFederationTemplates : API.Tickets.fetchContainerTemplates;
+		const templates = yield fetchTemplates(teamspace, projectId, model._id);
+		yield put(ProjectsActions.fetchTemplatesSuccess(projectId, templates));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'projects.fetchTemplates.error.action',
+				defaultMessage: 'fetching the templates',
+			}),
+			error,
+		}));
+	}
+}
+
+export function* fetchTemplate({ teamspace, projectId, modelId, templateId, isFederation }) {
+	try {
+		const fetchTicketsTemplate = isFederation
+			? API.Tickets.fetchFederationTemplate
+			: API.Tickets.fetchContainerTemplate;
+		const template = yield fetchTicketsTemplate(teamspace, projectId, modelId, templateId);
+		yield put(ProjectsActions.replaceTemplateSuccess(projectId, template));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'projects.fetchQuota.error.action',
+				defaultMessage: 'fetching the template details',
+			}),
+			error,
+			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
+		}));
+	}
+}
+
 export default function* ProjectsSaga() {
 	yield takeLatest(ProjectsTypes.FETCH as any, fetch);
 	yield takeLatest(ProjectsTypes.CREATE_PROJECT as any, createProject);
 	yield takeLatest(ProjectsTypes.UPDATE_PROJECT as any, updateProject);
 	yield takeLatest(ProjectsTypes.DELETE_PROJECT as any, deleteProject);
+	yield takeLatest(ProjectsTypes.FETCH_TEMPLATES as any, fetchTemplates);
+	yield takeLatest(ProjectsTypes.FETCH_TEMPLATE as any, fetchTemplate);
 }

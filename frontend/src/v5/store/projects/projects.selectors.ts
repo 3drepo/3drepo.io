@@ -19,6 +19,7 @@ import { createSelector } from 'reselect';
 import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
 import { IProjectsState } from './projects.redux';
 import { IProject } from './projects.types';
+import _ from 'lodash';
 
 const selectProjectsDomain = (state): IProjectsState => state?.projects;
 
@@ -46,4 +47,16 @@ export const selectCurrentProjectName = createSelector(
 export const selectIsProjectAdmin = createSelector(
 	selectCurrentProjectDetails,
 	(project): boolean => !!project?.isAdmin,
+);
+
+export const selectCurrentProjectTemplates = createSelector(
+	selectProjectsDomain,
+	selectCurrentProject,
+	(state, currentProject) => state.templatesByProject[currentProject] || [],
+);
+
+export const selectCurrentProjectTemplateById = createSelector(
+	selectCurrentProjectTemplates,
+	(templates, templateId) => templateId,
+	(templates, templateId) => templates.find(({ _id }) => _id === templateId),
 );
