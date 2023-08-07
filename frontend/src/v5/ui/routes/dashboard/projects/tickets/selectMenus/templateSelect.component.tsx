@@ -17,13 +17,11 @@
 
 import { MenuItem } from '@mui/material';
 import { Select, SelectProps } from '@controls/inputs/select/select.component';
-import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useParams } from 'react-router-dom'; 
-import { NONE_OPTION, NoneOptionMessage } from '../tickets.helper';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { NONE_OPTION, NoneOptionMessage } from '../ticketsTable.helper';
 
 export const TemplateSelect = ({ onChange, ...props }: SelectProps) => {
-	const { teamspace } = useParams();
-	const templates = TeamspacesHooksSelectors.selectTemplatesByTeamspace(teamspace);
+	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 
 	return (
 		<Select
