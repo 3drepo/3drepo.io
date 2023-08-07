@@ -20,31 +20,24 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { updateSSORestriction, getSSORestriction } = require(`${v5Path}/models/teamspaceSettings`);
+const { updateSecurityRestrictions, getSecurityRestrictions } = require(`${v5Path}/models/teamspaceSettings`);
+const { SECURITY_SETTINGS } = require(`${v5Path}/models/teamspaces.constants`);
 
-const determineMessage = (teamspace, restriction) => {
-	let message = 'is not enforcing any authentication restriction';
-
-	if (restriction) {
-		message = restriction?.length ? `only allow SSO authenticated users from the following domain(s): ${restriction.join(',')}` : 'allow any users who is SSO authenticated';
-	}
-	return `${teamspace} ${message}`;
+const determineMessage = (teamspace, config) => {
+	const message = `SSO only - ${!!config[SECURITY_SETTINGS.SSO_RESTRICTED]}, Domains allowed: ${config[SECURITY_SETTINGS.DOMAIN_WHITELIST] ?? 'Any'}`;
+	return `${teamspace}: ${message}`;
 };
 
-const run = async (teamspace, view, update, enabled, whiteList) => {
-	if (update && !enabled && whiteList) {
-		throw new Error('Inconsistent options: cannot define a whitelist whilst trying to disable SSO restriction.');
-	}
-
-	const currRes = await getSSORestriction(teamspace);
+const run = async (teamspace, view, update, ssoEnabled, whiteList) => {
+	const currRes = await getSecurityRestrictions(teamspace);
 	logger.logInfo(determineMessage(teamspace, currRes));
 
 	if (!update) return;
 
-	const domainArr = whiteList ? whiteList.toLowerCase().split(',') : undefined;
-	await updateSSORestriction(teamspace, enabled, domainArr);
+	const domainArr = whiteList === 'null' ? null : (whiteList || '').toLowerCase().split(',');
+	await updateSecurityRestrictions(teamspace, ssoEnabled, whiteList ? domainArr : undefined);
 
-	const updatedRes = await getSSORestriction(teamspace);
+	const updatedRes = await getSecurityRestrictions(teamspace);
 	logger.logInfo(`${teamspace} has been updated. ${determineMessage(teamspace, updatedRes)}`);
 };
 
@@ -52,21 +45,22 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('view',
 		{
-			describe: 'View the current SSO restriction on the teamspace',
+			describe: 'View the current security restrictions on the teamspace',
 			type: 'boolean',
 			default: true,
 		}).option('update',
 		{
-			describe: 'update the SSO restriction',
+			describe: 'update the restrictions',
 			type: 'boolean',
 			default: false,
-		}).option('enabled',
+		}).option('ssoEnabled',
 		{
 			describe: 'If enabled, only users who are SSO authenticated can access the data',
 			type: 'boolean',
+			default: undefined,
 		}).option('whiteList',
 		{
-			describe: 'Specify the list of domains, comma separated, allowed within the teamspace (if none specified, there is no restriction)',
+			describe: 'Specify the list of domains, comma separated, allowed within the teamspace (set to null to reset the list)',
 			type: 'string',
 		})
 		.option('teamspace',
@@ -76,9 +70,9 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 				demandOption: true,
 			});
 	return yargs.command(commandName,
-		'View/Update the SSO restriction on a teamspace (Whether users needs to be SSO authenticated to access the data)',
+		'View/Update the Security restrictions on a teamspace',
 		argsSpec,
-		({ teamspace, view, update, enabled, whiteList }) => run(teamspace, view, update, enabled, whiteList));
+		({ teamspace, view, update, ssoEnabled, whiteList }) => run(teamspace, view, update, ssoEnabled, whiteList));
 };
 
 module.exports = {

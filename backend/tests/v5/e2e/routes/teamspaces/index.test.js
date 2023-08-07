@@ -22,7 +22,7 @@ const { generateRandomNumber, generateRandomModel, generateRandomProject, genera
 
 const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
 const config = require(`${src}/utils/config`);
-const { updateSSORestriction } = require(`${src}/models/teamspaceSettings`);
+const { updateSecurityRestrictions } = require(`${src}/models/teamspaceSettings`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -491,14 +491,18 @@ const testSSORestriction = () => {
 		const teamspaceData = {
 			ssoRestricted: generateRandomString(),
 			whiteListedSso: generateRandomString(),
+			whiteListed: generateRandomString(),
 		};
 
-		const approvedDomain = userSsoWL.basicData.email.split('@')[1];
+		const approvedDomainSSO = userSsoWL.basicData.email.split('@')[1];
+		const approvedDomain = user.basicData.email.split('@')[1];
 
 		beforeAll(async () => {
 			await Promise.all([
 				ServiceHelper.db.createTeamspace(teamspaceData.ssoRestricted, [user.user, userSso.user]),
 				ServiceHelper.db.createTeamspace(teamspaceData.whiteListedSso,
+					[user.user, userSso.user, userSsoWL.user]),
+				ServiceHelper.db.createTeamspace(teamspaceData.whiteListed,
 					[user.user, userSso.user, userSsoWL.user]),
 			]);
 
@@ -510,26 +514,29 @@ const testSSORestriction = () => {
 
 			await Promise.all([
 				ServiceHelper.db.addSSO(userSso.user),
-				updateSSORestriction(teamspaceData.ssoRestricted, true),
-				updateSSORestriction(teamspaceData.whiteListedSso, true, [approvedDomain]),
+				updateSecurityRestrictions(teamspaceData.ssoRestricted, true),
+				updateSecurityRestrictions(teamspaceData.whiteListedSso, true, [approvedDomainSSO]),
+				updateSecurityRestrictions(teamspaceData.whiteListed, undefined, [approvedDomain, approvedDomainSSO]),
 			]);
 		});
 
 		const testCases = [
-			['a non SSO user tries to access teamspace endpoints', false, user.apiKey, false],
-			['a SSO user tries to access teamspace endpoints', false, userSso.apiKey, true],
-			['a non SSO user tries to access teamspace endpoints', true, user.apiKey, false],
-			['a SSO user not in the white listed domain tries to access teamspace endpoints', true, userSso.apiKey, false],
-			['a SSO user in the white listed domain tries to access teamspace endpoints', true, userSsoWL.apiKey, true],
+			['a non SSO user tries to access teamspace endpoints', teamspaceData.ssoRestricted, user.apiKey, false, templates.ssoRestricted],
+			['a SSO user tries to access teamspace endpoints', teamspaceData.ssoRestricted, userSso.apiKey, true],
+			['a non SSO user tries to access teamspace endpoints', teamspaceData.whiteListedSso, user.apiKey, false, templates.ssoRestricted],
+			['a SSO user not in the white listed domain tries to access teamspace endpoints', teamspaceData.whiteListedSso, userSso.apiKey, false, templates.domainRestricted],
+			['a SSO user in the white listed domain tries to access teamspace endpoints', teamspaceData.whiteListedSso, userSsoWL.apiKey, true],
+			['a non SSO user in the white listed domain tries to access teamspace endpoints', teamspaceData.whiteListed, user.apiKey, true],
+			['a SSO user not in the white listed domain tries to access teamspace endpoints', teamspaceData.whiteListed, userSso.apiKey, false, templates.domainRestricted],
+			['a SSO user in the white listed domain tries to access teamspace endpoints', teamspaceData.whiteListed, userSsoWL.apiKey, true],
 		];
 
-		testCases.forEach(([desc, isWLTeamspace, key, success]) => {
-			test(`Should ${success ? 'succeed' : `fail with ${templates.ssoRestricted.code}`} on a SSO restricted teamspace ${isWLTeamspace ? 'with white list' : ''} if ${desc}`, async () => {
-				const teamspaceName = isWLTeamspace ? teamspaceData.whiteListedSso : teamspaceData.ssoRestricted;
+		testCases.forEach(([desc, teamspaceName, key, success, retVal]) => {
+			test(`Should ${success ? 'succeed' : `fail with ${retVal.code}`} on a SSO restricted teamspace ${teamspaceName !== teamspaceData.ssoRestricted ? 'with white list' : ''} if ${desc}`, async () => {
 				const res = await agent.get(route(teamspaceName, key)).expect(
-					success ? templates.ok.status : templates.ssoRestricted.status);
+					success ? templates.ok.status : retVal.status);
 
-				if (!success) expect(res.body.code).toEqual(templates.ssoRestricted.code);
+				if (!success) expect(res.body.code).toEqual(retVal.code);
 			});
 		});
 	});

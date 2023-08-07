@@ -19,7 +19,8 @@ const {
 	ADD_ONS,
 	DEFAULT_RISK_CATEGORIES,
 	DEFAULT_TOPIC_TYPES,
-	SSO_RESTRICTED,
+	SECURITY,
+	SECURITY_SETTINGS,
 	SUBSCRIPTION_TYPES,
 } = require('./teamspaces.constants');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
@@ -47,17 +48,37 @@ TeamspaceSetting.getTeamspaceSetting = async (ts, projection) => {
 	return tsDoc;
 };
 
-TeamspaceSetting.updateSSORestriction = async (ts, isRestricted, whiteListDomains) => {
+TeamspaceSetting.updateSecurityRestrictions = async (ts, ssoRestricted, whiteListDomains) => {
 	const query = { _id: ts };
-	const action = isRestricted ? { $set: { [SSO_RESTRICTED]: whiteListDomains ?? true } }
-		: { $unset: { [SSO_RESTRICTED]: 1 } };
 
-	await teamspaceSettingUpdate(ts, query, action);
+	const action = {};
+
+	if (ssoRestricted !== undefined) {
+		if (ssoRestricted) {
+			action.$set = { [`${SECURITY}.${SECURITY_SETTINGS.SSO_RESTRICTED}`]: true };
+		} else {
+			action.$unset = { [`${SECURITY}.${SECURITY_SETTINGS.SSO_RESTRICTED}`]: 1 };
+		}
+	}
+
+	if (whiteListDomains !== undefined) {
+		if (whiteListDomains) {
+			action.$set = action.$set ?? {};
+			action.$set[`${SECURITY}.${SECURITY_SETTINGS.DOMAIN_WHITELIST}`] = whiteListDomains;
+		} else {
+			action.$unset = action.$unset ?? {};
+			action.$unset[`${SECURITY}.${SECURITY_SETTINGS.DOMAIN_WHITELIST}`] = 1;
+		}
+	}
+
+	if (Object.keys(action).length) {
+		await teamspaceSettingUpdate(ts, query, action);
+	}
 };
 
-TeamspaceSetting.getSSORestriction = async (ts) => {
-	const data = await TeamspaceSetting.getTeamspaceSetting(ts, { [SSO_RESTRICTED]: 1 });
-	return data[SSO_RESTRICTED] ?? false;
+TeamspaceSetting.getSecurityRestrictions = async (ts) => {
+	const data = await TeamspaceSetting.getTeamspaceSetting(ts, { [SECURITY]: 1 });
+	return data[SECURITY] ?? {};
 };
 
 TeamspaceSetting.getSubscriptions = async (ts) => {
@@ -140,14 +161,17 @@ TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username) => {
 	const userDoc = await teamspaceQuery(query, { _id: 1, customData: { sso: 1, email: 1 } });
 	if (!userDoc) return false;
 
-	const ssoRestriction = await TeamspaceSetting.getSSORestriction(teamspace);
+	const restrictions = (await TeamspaceSetting.getSecurityRestrictions(teamspace));
 
-	if (ssoRestriction) {
+	if (restrictions[SECURITY_SETTINGS.SSO_RESTRICTED] && !userDoc.customData.sso) {
+		throw templates.ssoRestricted;
+	}
+
+	if (restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST]) {
 		const userDomain = userDoc.customData.email.split('@')[1].toLowerCase();
-
-		const allowed = (ssoRestriction === true) ? !!userDoc.customData.sso : ssoRestriction.includes(userDomain);
-
-		if (!allowed) throw templates.ssoRestricted;
+		if (!restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST].includes(userDomain)) {
+			throw templates.domainRestricted;
+		}
 	}
 
 	return !!userDoc;

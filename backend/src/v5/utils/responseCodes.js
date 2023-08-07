@@ -44,7 +44,8 @@ ResponseCodes.templates = {
 
 	// Teamspace related error
 	teamspaceNotFound: { message: 'Teamspace not found.', status: 404 },
-	ssoRestricted: { message: 'This teamspace has elevated security. Please ensure your account is linked with an approved Microsoft account.', status: 401 },
+	ssoRestricted: { message: 'This teamspace only accepts Single Signed On users. Please link your account with an authority.', status: 401 },
+	domainRestricted: { message: 'Your email does not belong in a domain that is accepted by this teamspace. Please contact your teamspace administrator.', status: 401 },
 
 	// Project related error
 	projectNotFound: { message: 'Project not found.', status: 404 },

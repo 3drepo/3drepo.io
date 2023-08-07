@@ -25,11 +25,12 @@ const {
 const { times } = require('lodash');
 const { src, utilScripts } = require('../../helper/path');
 
-const SSORestrictions = require(`${utilScripts}/teamspaces/ssoRestriction`);
+const SecurityRestrictionss = require(`${utilScripts}/teamspaces/securitySettings`);
 
-const { getSSORestriction, updateSSORestriction } = require(`${src}/models/teamspaceSettings`);
-const { SSO_RESTRICTED } = require(`${src}/models/teamspaces.constants`);
+const { getSecurityRestrictions, updateSecurityRestrictions } = require(`${src}/models/teamspaceSettings`);
+const { SECURITY_SETTINGS } = require(`${src}/models/teamspaces.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
 const { disconnect } = require(`${src}/handler/db`);
 
@@ -37,28 +38,36 @@ const setupData = async (data) => {
 	await Promise.all(Object.keys(data).map(async (index) => {
 		const entry = data[index];
 		await createTeamspace(entry.name);
-		if (entry[SSO_RESTRICTED]) {
-			await updateSSORestriction(entry.name, !!entry[SSO_RESTRICTED],
-				entry[SSO_RESTRICTED]?.length ? entry[SSO_RESTRICTED] : undefined);
+		if (entry.restricted) {
+			await updateSecurityRestrictions(entry.name, true, entry.whiteList);
 		}
 	}));
 };
 
 const runTest = (data) => {
 	const determineExpectedResults = (ts, update, enabled, whiteList) => {
-		if (!update) return ts[SSO_RESTRICTED];
+		const isSSO = update && enabled !== undefined ? enabled : ts.restricted;
+		let domains = ts.whiteList;
 
-		return whiteList ? whiteList.toLowerCase().split(',') : enabled;
+		if (update && whiteList !== undefined) {
+			if (whiteList === 'null') domains = undefined;
+			else domains = whiteList.split(',');
+		}
+
+		return deleteIfUndefined({
+			[SECURITY_SETTINGS.SSO_RESTRICTED]: isSSO === true ? true : undefined,
+			[SECURITY_SETTINGS.DOMAIN_WHITELIST]: domains,
+		});
 	};
 	describe.each([
 		['teamspace does not exist', false, templates.teamspaceNotFound, generateRandomString()],
-		['turning off restriction whilst providing a whitelist', false,
-			new Error('Inconsistent options: cannot define a whitelist whilst trying to disable SSO restriction.'),
-			data.noRestriction, true, false, generateRandomString()],
-		['view only', true, undefined, data.hasSSO],
-		['update to true', true, undefined, data.noRestriction, true, true],
-		['update to whiteList', true, undefined, data.hasSSO, true, true, times(10, () => generateRandomString()).join(',')],
-		['turn off', true, undefined, data.hasWhiteList, true, false],
+		['view only', true, undefined, data.hasAllRestrictions],
+		['update to sso restriction to true', true, undefined, data.noRestriction, true, true],
+		['update to whiteList', true, undefined, data.noRestriction, true, undefined, times(10, () => generateRandomString()).join(',')],
+		['update both', true, undefined, data.hasAllRestrictions, true, true, times(10, () => generateRandomString()).join(',')],
+		['turn off whitelist', true, undefined, data.hasAllRestrictions, true, undefined, 'null'],
+		['turn off sso restriction', true, undefined, data.hasAllRestrictions, true, false],
+		['turn off both', true, undefined, data.hasAllRestrictions, true, false, 'null'],
 
 	])('View/Update SSO restriction', (desc, success, expectedOutput, teamspace, update, enabled, whiteList) => {
 		beforeEach(async () => {
@@ -68,10 +77,10 @@ const runTest = (data) => {
 		});
 
 		test(`Should ${success ? 'succeed' : 'fail with an error'} if ${desc}`, async () => {
-			const exe = SSORestrictions.run(teamspace.name, !update, update, enabled, whiteList);
+			const exe = SecurityRestrictionss.run(teamspace.name, !update, update, enabled, whiteList);
 			if (success) {
 				await exe;
-				await expect(getSSORestriction(teamspace.name)).resolves
+				await expect(getSecurityRestrictions(teamspace.name)).resolves
 					.toEqual(determineExpectedResults(teamspace, update, enabled, whiteList));
 			} else {
 				await expect(exe).rejects.toEqual(expectedOutput);
@@ -84,13 +93,10 @@ const createData = () => ({
 	noRestriction: {
 		name: generateRandomString(),
 	},
-	hasSSO: {
+	hasAllRestrictions: {
 		name: generateRandomString(),
-		[SSO_RESTRICTED]: true,
-	},
-	hasWhiteList: {
-		name: generateRandomString(),
-		[SSO_RESTRICTED]: times(5, generateRandomString()),
+		restricted: true,
+		whiteList: times(3, () => generateRandomString()),
 	},
 
 });

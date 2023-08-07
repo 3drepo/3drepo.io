@@ -17,7 +17,11 @@
 
 const TeamspaceConstants = {};
 
-TeamspaceConstants.SSO_RESTRICTED = 'ssoRestricted';
+TeamspaceConstants.SECURITY = 'security';
+TeamspaceConstants.SECURITY_SETTINGS = {
+	SSO_RESTRICTED: 'ssoRestricted',
+	DOMAIN_WHITELIST: 'allowedDomains',
+};
 
 TeamspaceConstants.SUBSCRIPTION_TYPES = [
 	'enterprise',
