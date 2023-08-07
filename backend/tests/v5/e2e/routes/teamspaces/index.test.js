@@ -483,7 +483,7 @@ const testGetMemberAvatar = () => {
 };
 
 const testSSORestriction = () => {
-	describe('On SSO Restricted teamspace', () => {
+	describe('On security restricted teamspace', () => {
 		const route = (ts, key) => `/v5/teamspaces/${ts}/members?key=${key}`;
 		const user = ServiceHelper.generateUserCredentials();
 		const userSso = ServiceHelper.generateUserCredentials();
@@ -514,6 +514,7 @@ const testSSORestriction = () => {
 
 			await Promise.all([
 				ServiceHelper.db.addSSO(userSso.user),
+				ServiceHelper.db.addSSO(userSsoWL.user),
 				updateSecurityRestrictions(teamspaceData.ssoRestricted, true),
 				updateSecurityRestrictions(teamspaceData.whiteListedSso, true, [approvedDomainSSO]),
 				updateSecurityRestrictions(teamspaceData.whiteListed, undefined, [approvedDomain, approvedDomainSSO]),
@@ -532,7 +533,7 @@ const testSSORestriction = () => {
 		];
 
 		testCases.forEach(([desc, teamspaceName, key, success, retVal]) => {
-			test(`Should ${success ? 'succeed' : `fail with ${retVal.code}`} on a SSO restricted teamspace ${teamspaceName !== teamspaceData.ssoRestricted ? 'with white list' : ''} if ${desc}`, async () => {
+			test(`Should ${success ? 'succeed' : `fail with ${retVal.code}`} on a ${teamspaceData.whiteListed === teamspaceName ? 'un' : 'SSO '}restricted teamspace ${teamspaceName !== teamspaceData.ssoRestricted ? 'with white list' : ''} if ${desc}`, async () => {
 				const res = await agent.get(route(teamspaceName, key)).expect(
 					success ? templates.ok.status : retVal.status);
 
