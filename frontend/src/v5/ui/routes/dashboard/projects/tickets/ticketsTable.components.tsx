@@ -56,13 +56,11 @@ export const TicketsTable = () => {
 			groupBy: groupByURLParam || NONE_OPTION,
 		},
 	});
-	const containersAndFederations = formData.watch('containersAndFederations');
-	const groupBy = formData.watch('groupBy');
-	const template = formData.watch('template');
+	const { containersAndFederations, groupBy, template } = formData.watch();
 
 	const tickets = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
-	const [editingTicket, setEditingTicket] = useState<ITicket>(undefined);
+	const [editingTicket, setEditingTicket] = useState<ITicket>(null);
 	const [isEditingTicket, setIsEditingTicket] = useState(false);
 
 	const ticketsFilteredByTemplate = useMemo(() => {
@@ -94,7 +92,7 @@ export const TicketsTable = () => {
 			template,
 		});
 		if (models) {
-			newURL = `${newURL}?models=${models || ''}`;
+			newURL += `?models=${models}`;
 		}
 		history.push(newURL);
 	}, [groupBy, template]);
