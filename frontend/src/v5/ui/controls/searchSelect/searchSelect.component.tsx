@@ -34,7 +34,7 @@ export const SearchSelect = ({ children, placeholder, ...props }: SelectProps) =
 		if (!query.length) return items;
 		return items
 			.filter((node) => onlyText(node).toLowerCase()
-			.includes(query.toLowerCase()));
+				.includes(query.toLowerCase()));
 	};
 
 	return (
