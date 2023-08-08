@@ -17,15 +17,8 @@
 
 import styled from 'styled-components';
 
-export const ColumnsContainer = styled.div`
+export const Headers = styled.div`
 	display: grid;
 	grid-template-columns: 80fr 493fr 96fr 62fr 90fr 90fr 100fr 137fr 134fr;
 	justify-content: flex-start;
-`;
-
-export const TicketRowContainer = styled(ColumnsContainer)`
-	height: 30px;
-	background: #fff;
-	cursor: pointer;
-	margin-bottom: 5px;
 `;

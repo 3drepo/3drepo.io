@@ -24,7 +24,7 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import _ from 'lodash';
 import { Accordion } from '@controls/accordion/accordion.component';
-import { TicketGroup } from './ticketGroup/ticketGroup.component';
+import { TicketsGroup } from './ticketsGroup/ticketsGroups.component';
 import { getGroupByOptions, groupByDate, groupByList, NONE_OPTION } from '../ticketsTable.helper';
 import { EmptyTicketsList } from './ticketsList.styles';
 
@@ -44,7 +44,7 @@ export const TicketsList = (props: TicketsListProps) => {
 		);
 	}
 
-	if (groupBy === NONE_OPTION) return (<TicketGroup tickets={filteredItems} {...props} />);
+	if (groupBy === NONE_OPTION) return (<TicketsGroup tickets={filteredItems} {...props} />);
 
 	let groups: Record<string, ITicket[]>;
 	switch (groupBy) {
@@ -62,7 +62,7 @@ export const TicketsList = (props: TicketsListProps) => {
 		<>
 			{_.entries(groups).map(([groupName, tickets]) => (
 				<Accordion title={groupName} defaultExpanded={!!tickets.length} key={groupBy + groupName}>
-					<TicketGroup tickets={tickets} {...props} />
+					<TicketTableGroup tickets={tickets} {...props} />
 				</Accordion>
 			))}
 		</>

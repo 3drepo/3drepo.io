@@ -18,9 +18,9 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
-import { ColumnsContainer, TicketRowContainer } from './ticketGroup.styles';
+import { Row } from './ticketTableGroupRow.styles';
 
-export const TicketRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
+export const TicketsGroupsRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
 
@@ -40,7 +40,7 @@ export const TicketRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () =>
 	} = getPropertiesInCamelCase(modules?.safetibase || {});
 
 	return (
-		<TicketRowContainer key={id} onClick={onClick}>
+		<Row key={id} onClick={onClick}>
 			<span>{template.code}:{number}</span>
 			<span>{title}</span>
 			<span>{assignees?.length || 0}</span>
@@ -50,35 +50,6 @@ export const TicketRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () =>
 			<span>{status}</span>
 			<span>{levelOfRisk}</span>
 			<span>{treatmentStatus}</span>
-		</TicketRowContainer>
-	);
-};
-
-export const TicketGroup = ({ tickets, onTicketClick }) => {
-	if (!tickets?.length) return (<button type="button"> create new ticket </button>);
-
-	return (
-		<>
-			<ColumnsContainer>
-				<b>id</b>
-				<b>title</b>
-				<b>assignees</b>
-				<b>owner</b>
-				<b>due date</b>
-				<b>priority</b>
-				<b>status</b>
-				<b>level of risk</b>
-				<b>treatment status</b>
-			</ColumnsContainer>
-			<div>
-				{tickets.map((ticket: ITicket) => (
-					<TicketRow
-						key={ticket._id}
-						ticket={ticket}
-						onClick={() => onTicketClick(ticket)}
-					/>
-				))}
-			</div>
-		</>
+		</Row>
 	);
 };
