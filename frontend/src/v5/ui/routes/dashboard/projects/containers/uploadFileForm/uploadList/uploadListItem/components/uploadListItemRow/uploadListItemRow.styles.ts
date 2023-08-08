@@ -32,7 +32,6 @@ export const UploadListItemButton = styled(CircleButton)`
 const DestinationAndTagDimensions = css`
 	width: 340px;
 	height: 35px;
-	min-width: 80px;
 `;
 
 export const UploadListItem = styled(DashboardListItem)<{ selected: boolean }>`
@@ -41,6 +40,9 @@ export const UploadListItem = styled(DashboardListItem)<{ selected: boolean }>`
 		height: auto;
 		cursor: default;
 		overflow: hidden;
+		&:last-child, &:first-child {
+			border-radius: 0;
+		}
 
 		${DestinationAutocomplete} {
 			${DestinationAndTagDimensions}

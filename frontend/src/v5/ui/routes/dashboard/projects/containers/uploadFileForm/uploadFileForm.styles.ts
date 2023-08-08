@@ -30,6 +30,7 @@ export const Modal = styled(FormModal)`
 	}
 	padding: 0;
 	margin: 0;
+	min-width: 1024px;
 `;
 
 export const UploadsContainer = styled.div`
