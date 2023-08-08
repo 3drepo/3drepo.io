@@ -25,7 +25,7 @@ export const ColumnsContainer = styled.div`
 
 export const TicketRowContainer = styled(ColumnsContainer)`
 	height: 30px;
-	background: white;
+	background: #fff;
 	cursor: pointer;
 	margin-bottom: 5px;
 `;

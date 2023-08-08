@@ -20,10 +20,10 @@ import { Link, generatePath, useParams } from 'react-router-dom';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Button } from '@controls/button';
+import { FormProvider, useForm } from 'react-hook-form';
 import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { TemplateFormSelect } from '../selectMenus/templateFormSelect.component';
 import { NONE_OPTION } from '../ticketsTable.helper';
-import { FormProvider, useForm } from 'react-hook-form';
 
 type FormType = {
 	containersAndFederations: string[],
@@ -37,7 +37,7 @@ export const TicketsSelection = () => {
 		defaultValues: {
 			containersAndFederations: [],
 			template: NONE_OPTION,
-		}
+		},
 	});
 
 	const template = formData.watch('template');
@@ -59,7 +59,7 @@ export const TicketsSelection = () => {
 
 	return (
 		<FormProvider {...formData}>
-			<div style={{ display: 'flex', flexDirection: 'column'}}>
+			<div style={{ display: 'flex', flexDirection: 'column' }}>
 				<ContainersAndFederationsFormSelect name="containersAndFederations" />
 				<TemplateFormSelect name="template" />
 				<Link
