@@ -82,7 +82,7 @@ export const TicketsTable = () => {
 	const filterTickets = (items, query: string) => {
 		if (!query) return items;
 		return items.filter((ticket) => {
-			const templateCode = templates.find((template) => template._id === ticket.type).code;
+			const templateCode = templates.find(({ _id }) => _id === ticket.type).code;
 			const ticketCode = `${templateCode}:${ticket.number}`;
 			return [ticketCode, ticket.title].some((str) => str.toLowerCase().includes(query.toLowerCase()));
 		});
