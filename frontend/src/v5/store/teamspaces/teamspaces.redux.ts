@@ -19,7 +19,6 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
-import { ITemplate } from '../tickets/tickets.types';
 
 export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createActions({
 	fetch: [],
@@ -35,7 +34,6 @@ export const INITIAL_STATE: ITeamspacesState = {
 	currentTeamspace: null,
 	quota: {},
 	teamspacesArePending: false,
-	templatesByTeamspace: {},
 };
 
 export const setCurrentTeamspace = (state, { currentTeamspace }: SetCurrentTeamspaceAction) => {
@@ -69,7 +67,6 @@ export interface ITeamspacesState {
 	quota: Record<string, Quota>;
 	currentTeamspace: string;
 	teamspacesArePending: boolean;
-	templatesByTeamspace: Record<string, ITemplate[]>;
 }
 
 export type QuotaUnit = {
