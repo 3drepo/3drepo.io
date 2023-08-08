@@ -17,7 +17,6 @@
 
 import { MenuItem } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import _ from 'lodash';
 import { FormSelect } from '@controls/inputs/formInputs.component';
 import { formatMessage } from '@/v5/services/intl';
 import { GROUP_BY_OPTIONS } from '../ticketsTable.helper';
