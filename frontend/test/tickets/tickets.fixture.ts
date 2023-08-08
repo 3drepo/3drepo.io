@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- import { EMPTY_VIEW } from '@/v5/store/store.helpers';
+import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { ITemplate, ITicket, PropertyDefinition, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 import * as faker from 'faker';
 import { times } from 'lodash';
@@ -37,10 +37,13 @@ export const ticketMockFactory = (overrides?: ITicket): ITicket => ({
 	...overrides,
 });
 
-export const templateMockFactory = (overrides?: Partial<ITemplate>): Partial<ITemplate> => ({
+export const templateMockFactory = (overrides?: Partial<ITemplate>): ITemplate => ({
 	_id: faker.datatype.uuid(),
 	name: faker.random.word(),
 	code: faker.random.alpha({ count: 5, upcase: true }),
+	// TODO - replace null with faker values
+	config: null,
+	properties: null,
 	...overrides,
 });
 
