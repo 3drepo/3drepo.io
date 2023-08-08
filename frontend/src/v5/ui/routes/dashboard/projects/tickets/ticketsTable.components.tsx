@@ -24,7 +24,7 @@ import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams, generatePath, useHistory } from 'react-router-dom';
 import { SearchContextComponent } from '@controls/search/searchContext';
-import { TicketWithModelId } from '@/v5/store/tickets/tickets.types';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
 import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import { CircleButton } from '@controls/circleButton';
@@ -62,7 +62,7 @@ export const TicketsTable = () => {
 
 	const tickets = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
-	const [editingTicket, setEditingTicket] = useState<TicketWithModelId>(undefined);
+	const [editingTicket, setEditingTicket] = useState<ITicket>(undefined);
 	const [isEditingTicket, setIsEditingTicket] = useState(false);
 
 	const ticketsFilteredByTemplate = useMemo(() => {
@@ -70,7 +70,7 @@ export const TicketsTable = () => {
 		return tickets.filter(({ type }) => type === template);
 	}, [template, tickets]);
 
-	const onSetEditingTicket = (ticket: TicketWithModelId) => {
+	const onSetEditingTicket = (ticket: ITicket) => {
 		setEditingTicket(ticket);
 		setIsEditingTicket(true);
 	};
