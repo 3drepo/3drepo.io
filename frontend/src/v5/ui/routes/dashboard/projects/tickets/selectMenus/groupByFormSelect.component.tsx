@@ -29,7 +29,7 @@ export const GroupByFormSelect = (props) => (
 		renderValue={(groupBy: string | null) => (
 			<>
 				<FormattedMessage id="ticketTable.groupBy.renderValue" defaultMessage="Group by:" />
-				<b> {_.capitalize(_.startCase(groupBy))}</b>
+				<b> {GROUP_BY_OPTIONS[groupBy]}</b>
 			</>
 		)}
 	>
