@@ -23,9 +23,8 @@ import { ITicket } from '@/v5/store/tickets/tickets.types';
 
 export const NONE_OPTION = 'none';
 export const NoneOptionMessage = formatMessage({ id: 'tickets.selectOption.none', defaultMessage: 'None' });
-export const UNSET_OPTION = 'unset';
-export const UnsetOptionMessage = formatMessage({ id: 'tickets.selectOption.property.unset', defaultMessage: 'Unset' });
 
+const UNSET = formatMessage({ id: 'tickets.selectOption.property.unset', defaultMessage: 'Unset' });
 const NO_DUE_DATE = formatMessage({ id: 'groupBy.dueDate.unset', defaultMessage: 'No due date' });
 const OVERDUE = formatMessage({ id: 'groupBy.dueDate.overdue', defaultMessage: 'Overdue' });
 
@@ -69,7 +68,7 @@ export const groupByList = (tickets: ITicket[], groupType: string, groupValues: 
 		));
 		groups[groupValue] = currentTickets;
 	});
-	groups[UNSET_OPTION] = remainingTickets;
+	groups[UNSET] = remainingTickets;
 	return groups;
 };
 
@@ -91,6 +90,6 @@ const GROUP_NAMES_BY_TYPE = {
 };
 
 export const getGroupByOptions = (groupBy: string) => {
-	const optionsAsEnum = GROUP_NAMES_BY_TYPE[groupBy];
+	const optionsAsEnum = _.mapKeys(GROUP_NAMES_BY_TYPE, (v, key) => _.startCase(key))[groupBy];
 	return _.values(optionsAsEnum);
 };
