@@ -49,13 +49,13 @@ export const ContainersAndFederationsFormSelect = (props) => {
 			<ListSubheader>
 				<FormattedMessage id="ticketTable.modelSelection.federations" defaultMessage="Federations" />
 			</ListSubheader>
-			{federations.map(({ name, _id }) => (
+			{...federations.map(({ name, _id }) => (
 				<MultiSelectMenuItem key={_id} value={_id}>{name}</MultiSelectMenuItem>
 			))}
 			<ListSubheader>
 				<FormattedMessage id="ticketTable.modelSelection.containers" defaultMessage="Containers" />
 			</ListSubheader>
-			{containers.map(({ name, _id }) => (
+			{...containers.map(({ name, _id }) => (
 				<MultiSelectMenuItem key={_id} value={_id}>{name}</MultiSelectMenuItem>
 			))}
 		</FormSearchSelect>
