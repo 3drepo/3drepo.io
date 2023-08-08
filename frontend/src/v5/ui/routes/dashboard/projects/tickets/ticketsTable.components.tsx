@@ -73,6 +73,15 @@ export const TicketsTable = () => {
 		setIsEditingTicket(true);
 	};
 
+	const filterTickets = (items, query: string) => {
+		if (!query) return items;
+		return items.filter((ticket) => {
+			const templateCode = templates.find((template) => template._id === ticket.type).code;
+			const ticketCode = `${templateCode}:${ticket.number}`;
+			return [ticketCode, ticket.title].some((str) => str.toLowerCase().includes(query.toLowerCase()));
+		});
+	};
+
 	useEffect(() => {
 		if (!containersAndFederations.length) return;
 
@@ -102,7 +111,7 @@ export const TicketsTable = () => {
 	useEffect(() => () => setModels(''), []);
 
 	return (
-		<SearchContextComponent items={ticketsFilteredByTemplate} fieldsToFilter={['title']}>
+		<SearchContextComponent items={ticketsFilteredByTemplate} filteringFunction={filterTickets}>
 			<FormProvider {...formData}>
 				<InputsContainer>
 					<SelectorsContainer>

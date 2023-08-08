@@ -19,8 +19,12 @@ import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { Row } from './ticketsGroupRow.styles';
+import { useContext } from 'react';
+import { SearchContext } from '@controls/search/searchContext';
+import { Highlight } from '@controls/highlight';
 
 export const TicketsGroupsRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
+	const { query } = useContext(SearchContext);
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
 
@@ -41,8 +45,8 @@ export const TicketsGroupsRow = ({ ticket, onClick }: { ticket: ITicket, onClick
 
 	return (
 		<Row key={id} onClick={onClick}>
-			<span>{template.code}:{number}</span>
-			<span>{title}</span>
+			<Highlight search={query}>{`${template.code}:${number}`}</Highlight>
+			<Highlight search={query}>{title}</Highlight>
 			<span>{assignees?.length || 0}</span>
 			<span>{owner}</span>
 			<span>{dueDate ? new Date(dueDate).toLocaleDateString() : 'unset'}</span>
