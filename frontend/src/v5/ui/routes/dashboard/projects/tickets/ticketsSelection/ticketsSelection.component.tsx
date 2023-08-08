@@ -16,7 +16,7 @@
  */
 
 import { TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
-import { Link, generatePath, useParams } from 'react-router-dom'; 
+import { Link, generatePath, useParams } from 'react-router-dom';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Button } from '@controls/button';
