@@ -38,6 +38,8 @@ const getOptionsForGroupsWithDueDate = () => [
 	formatMessage({ id: 'groupBy.dueDate.inSixPlusWeeks', defaultMessage: 'in 6+ weeks' }),
 ];
 
+const mapKeysToSnakeCase = (properties) => _.mapKeys(properties, (val, key) => _.snakeCase(key));
+
 export const groupByDate = (tickets: ITicket[]) => {
 	const groups = {};
 	// eslint-disable-next-line prefer-const
@@ -64,7 +66,7 @@ export const groupByList = (tickets: ITicket[], groupType: string, groupValues: 
 	let currentTickets = [];
 	groupValues.forEach((groupValue) => {
 		[currentTickets, remainingTickets] = _.partition(remainingTickets, ({ properties, modules }) => (
-			{ ...modules?.safetibase, ...properties }?.[groupType] === groupValue
+			mapKeysToSnakeCase({ ...modules?.safetibase, ...properties })?.[_.snakeCase(groupType)] === groupValue
 		));
 		groups[groupValue] = currentTickets;
 	});
@@ -72,7 +74,7 @@ export const groupByList = (tickets: ITicket[], groupType: string, groupValues: 
 	return groups;
 };
 
-export const GROUP_BY_OPTIONS = {
+export const GROUP_BY_OPTIONS = mapKeysToSnakeCase({
 	[NONE_OPTION]: NoneOptionMessage,
 	[BaseProperties.OWNER]: formatMessage({ id: 'groupBy.owner', defaultMessage: 'Owner' }),
 	[IssueProperties.DUE_DATE]: formatMessage({ id: 'groupBy.dueDate', defaultMessage: 'Due date' }),
@@ -80,16 +82,16 @@ export const GROUP_BY_OPTIONS = {
 	[IssueProperties.STATUS]: formatMessage({ id: 'groupBy.status', defaultMessage: 'Status' }),
 	[SafetibaseProperties.LEVEL_OF_RISK]: formatMessage({ id: 'groupBy.levelOfRisk', defaultMessage: 'Level of risk' }),
 	[SafetibaseProperties.TREATMENT_STATUS]: formatMessage({ id: 'groupBy.treatmentStatus', defaultMessage: 'Treatment status' }),
-};
+});
 
-const GROUP_NAMES_BY_TYPE = {
+const GROUP_NAMES_BY_TYPE = mapKeysToSnakeCase({
 	[IssueProperties.PRIORITY]: PriorityLevels,
 	[IssueProperties.STATUS]: TicketStatuses,
 	[SafetibaseProperties.LEVEL_OF_RISK]: RiskLevels,
 	[SafetibaseProperties.TREATMENT_STATUS]: TreatmentStatuses,
-};
+});
 
 export const getGroupByOptions = (groupBy: string) => {
-	const optionsAsEnum = _.mapKeys(GROUP_NAMES_BY_TYPE, (v, key) => _.startCase(key))[groupBy];
+	const optionsAsEnum = GROUP_NAMES_BY_TYPE[groupBy];
 	return _.values(optionsAsEnum);
 };

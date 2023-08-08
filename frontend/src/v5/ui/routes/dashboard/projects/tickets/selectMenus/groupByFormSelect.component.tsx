@@ -33,6 +33,6 @@ export const GroupByFormSelect = (props) => (
 			</>
 		)}
 	>
-		{Object.entries(GROUP_BY_OPTIONS).map(([key, val]) => (<MenuItem value={_.snakeCase(key)} key={key}>{val}</MenuItem>))}
+		{Object.entries(GROUP_BY_OPTIONS).map(([key, val]) => (<MenuItem value={key} key={key}>{val}</MenuItem>))}
 	</FormSelect>
 );

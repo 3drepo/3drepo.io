@@ -31,7 +31,7 @@ import { EmptyTicketsList } from './ticketsList.styles';
 type TicketsListProps = { onTicketClick: (ticket: ITicket) => void };
 export const TicketsList = (props: TicketsListProps) => {
 	const { filteredItems } = useContext(SearchContext);
-	let { groupBy } = useParams<DashboardTicketsParams>();
+	const { groupBy } = useParams<DashboardTicketsParams>();
 
 	if (!filteredItems.length) {
 		return (
@@ -46,14 +46,12 @@ export const TicketsList = (props: TicketsListProps) => {
 
 	if (groupBy === NONE_OPTION) return (<TicketGroup tickets={filteredItems} {...props} />);
 
-	groupBy = _.startCase(groupBy);
-
 	let groups: Record<string, ITicket[]>;
 	switch (groupBy) {
-		case BaseProperties.OWNER:
+		case _.snakeCase(BaseProperties.OWNER):
 			groups = _.groupBy(filteredItems, `properties.${BaseProperties.OWNER}`);
 			break;
-		case IssueProperties.DUE_DATE:
+		case _.snakeCase(IssueProperties.DUE_DATE):
 			groups = groupByDate(filteredItems);
 			break;
 		default:
