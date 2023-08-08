@@ -64,10 +64,12 @@ export const groupByList = (tickets: ITicket[], groupType: string, groupValues: 
 	const groups = {};
 	let remainingTickets = tickets;
 	let currentTickets = [];
+
 	groupValues.forEach((groupValue) => {
-		[currentTickets, remainingTickets] = _.partition(remainingTickets, ({ properties, modules }) => (
-			mapKeysToSnakeCase({ ...modules?.safetibase, ...properties })?.[_.snakeCase(groupType)] === groupValue
-		));
+		[currentTickets, remainingTickets] = _.partition(
+			remainingTickets,
+			({ properties, modules }) => mapKeysToSnakeCase({ ...modules?.safetibase, ...properties })?.[groupType] === groupValue,
+		);
 		groups[groupValue] = currentTickets;
 	});
 	groups[UNSET] = remainingTickets;
