@@ -27,8 +27,10 @@ import { SearchContextComponent } from '@controls/search/searchContext';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
 import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
-import { CircleButton } from '@controls/circleButton';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
+import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
+import { CircleButton } from '@controls/circleButton';
+import { getTicketIsCompleted } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
 import { TicketsList } from './ticketsList/ticketsList.component';
 import { useSearchParam } from '../../../useSearchParam';
@@ -36,13 +38,14 @@ import { DashboardTicketsParams, TICKETS_ROUTE } from '../../../routes.constants
 import { ContainersAndFederationsFormSelect } from './selectMenus/containersAndFederationsFormSelect.component';
 import { GroupByFormSelect } from './selectMenus/groupByFormSelect.component';
 import { TemplateFormSelect } from './selectMenus/templateFormSelect.component';
-import { InputsContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer } from './tickets.styles';
+import { FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from './tickets.styles';
 import { NONE_OPTION } from './ticketsTable.helper';
 
 type FormType = {
 	containersAndFederations: string[],
 	template: string,
 	groupBy: string,
+	completed: boolean,
 };
 export const TicketsTable = () => {
 	const history = useHistory();
@@ -54,6 +57,7 @@ export const TicketsTable = () => {
 			containersAndFederations: models?.split(',') || [],
 			template: templateURLParam,
 			groupBy: groupByURLParam || NONE_OPTION,
+			completed: false,
 		},
 	});
 	const { containersAndFederations, groupBy, template } = formData.watch();
@@ -62,11 +66,13 @@ export const TicketsTable = () => {
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const [editingTicket, setEditingTicket] = useState<ITicket>(null);
 	const [isEditingTicket, setIsEditingTicket] = useState(false);
+	const [showCompleted, setShowCompleted] = useState(false);
 
 	const ticketsFilteredByTemplate = useMemo(() => {
-		if (template === NONE_OPTION) return tickets;
-		return tickets.filter(({ type }) => type === template);
-	}, [template, tickets]);
+		const ticketsToShow = tickets.filter((t) => getTicketIsCompleted(t) === showCompleted);
+		if (template === NONE_OPTION) return ticketsToShow;
+		return ticketsToShow.filter(({ type }) => type === template);
+	}, [template, tickets, showCompleted]);
 
 	const onSetEditingTicket = (ticket: ITicket) => {
 		setEditingTicket(ticket);
@@ -113,12 +119,20 @@ export const TicketsTable = () => {
 	return (
 		<SearchContextComponent items={ticketsFilteredByTemplate} filteringFunction={filterTickets}>
 			<FormProvider {...formData}>
-				<InputsContainer>
-					<SelectorsContainer>
-						<ContainersAndFederationsFormSelect name="containersAndFederations" />
-						<TemplateFormSelect name="template" />
-						<GroupByFormSelect name="groupBy" />
-					</SelectorsContainer>
+				<FiltersContainer>
+					<FlexContainer>
+						<SelectorsContainer>
+							<ContainersAndFederationsFormSelect name="containersAndFederations" />
+							<TemplateFormSelect name="template" />
+							<GroupByFormSelect name="groupBy" />
+						</SelectorsContainer>
+						<CompletedChip
+							selected={showCompleted}
+							icon={<TickIcon />}
+							onClick={() => setShowCompleted(!showCompleted)}
+							label={formatMessage({ id: 'ticketsTable.filters.completed', defaultMessage: 'Completed' })}
+						/>
+					</FlexContainer>
 					<FlexContainer>
 						<SearchInput
 							placeholder={formatMessage({ id: 'ticketsTable.search.placeholder', defaultMessage: 'Search...' })}
@@ -131,7 +145,7 @@ export const TicketsTable = () => {
 							<FormattedMessage id="ticketsTable.button.newTicket" defaultMessage="New Ticket" />
 						</NewTicketButton>
 					</FlexContainer>
-				</InputsContainer>
+				</FiltersContainer>
 			</FormProvider>
 			<TicketsList onTicketClick={onSetEditingTicket} />
 			<SidePanel open={isEditingTicket}>

@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { camelCase, isEmpty, isEqual, isObject, mapKeys, orderBy } from 'lodash';
+import _, { camelCase, isEmpty, isEqual, isObject, mapKeys, orderBy } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
@@ -26,6 +26,7 @@ import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 
@@ -284,3 +285,13 @@ export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
 };
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
+
+export const getTicketIsCompleted = (ticket) => {
+	const issuePropertyStatus = _.get(ticket, 'properties.Status');
+	const treatmentStatus = _.get(ticket, 'modules.safetibase.Treatment Status');
+
+	const isCompletedIssueProperty = [TicketStatuses.CLOSED, TicketStatuses.VOID].includes(issuePropertyStatus);
+	const isCompletedTreatmentStatus = [TreatmentStatuses.AGREED_FULLY, TreatmentStatuses.VOID].includes(treatmentStatus);
+
+	return (isCompletedIssueProperty || isCompletedTreatmentStatus);
+};

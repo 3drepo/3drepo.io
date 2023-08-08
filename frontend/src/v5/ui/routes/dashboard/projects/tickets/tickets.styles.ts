@@ -19,8 +19,9 @@ import ListSubheaderBase from '@mui/material/ListSubheader';
 import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 import styled from 'styled-components';
 import { Drawer } from '@mui/material';
+import { CompletedFilterChip } from '../../../viewer/tickets/ticketsList/ticketsList.styles';
 
-export const InputsContainer = styled.div`
+export const FiltersContainer = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: row;
@@ -96,4 +97,11 @@ export const SlidePanelHeader = styled.div`
 	justify-content: space-between;
 	align-items: center;
 	border-bottom: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
+`;
+
+export const CompletedChip = styled(CompletedFilterChip)`
+	.MuiChip-root {
+		align-self: flex-end;
+		margin: 0 0 18px 15px;
+	}
 `;
