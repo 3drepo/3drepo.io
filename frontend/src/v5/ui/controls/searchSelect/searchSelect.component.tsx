@@ -23,7 +23,7 @@ import { onlyText } from 'react-children-utilities';
 import { FormattedMessage } from 'react-intl';
 import { SearchInputContainer, SearchInput, NoResults } from './searchSelect.styles';
 
-export const SearchSelect = ({ children, placeholder, ...props }: SelectProps) => {
+export const SearchSelect = ({ children, ...props }: SelectProps) => {
 	const preventPropagation = (e) => {
 		if (e.key !== 'Escape') {
 			e.stopPropagation();
@@ -52,7 +52,6 @@ export const SearchSelect = ({ children, placeholder, ...props }: SelectProps) =
 					>
 						<SearchInputContainer>
 							<SearchInput
-								placeholder={placeholder}
 								onClick={preventPropagation}
 								onKeyDown={preventPropagation}
 							/>

@@ -23,9 +23,7 @@ import { mockServer } from '../../internals/testing/mockServer';
 import { quotaMockFactory } from './teamspaces.fixtures';
 
 describe('Teamspaces: sagas', () => {
-	const teamspaceName = 'teamspaceId';
-	const teamspace = { name: teamspaceName, isAdmin: true };
-	const teamspaces = [teamspace];
+	const teamspaces = [];
 
 	describe('fetch', () => {
 		it('should fetch teamspaces data and dispatch FETCH_SUCCESS', async () => {
