@@ -15,18 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 import { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { useRouteMatch, Switch } from 'react-router-dom';
-
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Route } from '@/v5/services/routing/route.component';
 import { discardSlash } from '@/v5/helpers/url.helper';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
-import { TicketsTable } from './ticketsTable.components';
-import { TicketsSelection } from '../tickets/ticketsSelection/ticketsSelection.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsTable } from './ticketsTable.components';
+import { TicketsSelection } from './ticketsSelection/ticketsSelection.component';
 import { useContainersData } from '../containers/containers.hooks';
 import { useFederationsData } from '../federations/federations.hooks';
 
