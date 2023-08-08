@@ -17,10 +17,11 @@
 
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import { useCallback, useContext, useState } from 'react';
+import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { UploadListItem } from './uploadListItem/uploadListItem.component';
 import { ListContainer } from './uploadList.styles';
 import { UploadFileFormContext } from '../uploadFileFormContext';
-import { UploadListHeaders } from '../uploadListHeaders.component';
+import { UploadListHeaders } from './uploadListHeaders/uploadListHeaders.component';
 
 type IUploadList = {
 	values: UploadItemFields[];
@@ -44,7 +45,11 @@ export const UploadList = ({
 	}, [removeUploadById]);
 	return (
 		<>
-			<UploadListHeaders onClick={() => setIsAscending(!isAscending)} isUploading={isUploading} />
+			<UploadListHeaders
+				sortingDirection={isAscending ? SortingDirection.ASCENDING : SortingDirection.DESCENDING}
+				onClickFilenameLabel={() => setIsAscending(!isAscending)}
+				isUploading={isUploading}
+			/>
 			<ListContainer ascending={isAscending}>
 				{
 					values.map(({ uploadId, file, extension }, index) => {

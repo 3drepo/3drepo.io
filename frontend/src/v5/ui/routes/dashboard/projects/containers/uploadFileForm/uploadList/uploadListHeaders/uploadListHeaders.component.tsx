@@ -17,15 +17,26 @@
 
 import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
-import { UploadsListHeader } from './uploadFileForm.styles';
+import { DashboardListHeaderContainer } from '@components/dashboard/dashboardList/dashboardListHeader/dashboardListHeader.styles';
+import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+import { FilenameLabelWrapper } from './uploadListHeaders.styles';
+
+type IUploadListHeaders = {
+	onClickFilenameLabel: () => void;
+	isUploading: boolean;
+	sortingDirection: SortingDirection;
+};
 
 export const UploadListHeaders = ({
-	onClick,
+	onClickFilenameLabel,
 	isUploading,
-}) => (
-	<UploadsListHeader>
-		<DashboardListHeaderLabel name="file.name" minWidth={122} onClick={onClick}>
-			<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
+	sortingDirection,
+}: IUploadListHeaders) => (
+	<DashboardListHeaderContainer>
+		<DashboardListHeaderLabel name="file.name" minWidth={122} sortingDirection={sortingDirection} sort>
+			<FilenameLabelWrapper onClick={onClickFilenameLabel}>
+				<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
+			</FilenameLabelWrapper>
 		</DashboardListHeaderLabel>
 		<DashboardListHeaderLabel key="destination" width={352}>
 			<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
@@ -36,5 +47,5 @@ export const UploadListHeaders = ({
 		<DashboardListHeaderLabel key="progress" width={297} hidden={!isUploading}>
 			<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
 		</DashboardListHeaderLabel>
-	</UploadsListHeader>
+	</DashboardListHeaderContainer>
 );
