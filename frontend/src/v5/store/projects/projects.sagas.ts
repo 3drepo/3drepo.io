@@ -85,12 +85,12 @@ export function* fetchTemplates({ teamspace, projectId }) {
 			throw new Error(
 				formatMessage({
 					id: 'projects.error.noModels',
-					defaultMessage: 'The project must contain at least one container or federation to fetch the templates'
+					defaultMessage: 'The project must contain at least one container or federation to fetch the templates',
 				}),
 			);
 		}
-		const fetchTemplates = isFed ? API.Tickets.fetchFederationTemplates : API.Tickets.fetchContainerTemplates;
-		const templates = yield fetchTemplates(teamspace, projectId, model._id);
+		const fetchModelTemplates = isFed ? API.Tickets.fetchFederationTemplates : API.Tickets.fetchContainerTemplates;
+		const templates = yield fetchModelTemplates(teamspace, projectId, model._id);
 		yield put(ProjectsActions.fetchTemplatesSuccess(projectId, templates));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {

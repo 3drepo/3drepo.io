@@ -22,7 +22,7 @@ import { UNSET_OPTION, UnsetOptionMessage } from '../../ticketsTable.helper';
 import { ColumnsContainer, TicketRowContainer } from './ticketGroup.styles';
 
 export const TicketRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
-	const { _id, title, properties, number, type, modules } = ticket;
+	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
 
 	if (!properties || !template?.code) return (<span>Loading</span>);
@@ -32,7 +32,7 @@ export const TicketRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () =>
 		assignees,
 		priority,
 		status,
-		dueDate
+		dueDate,
 	} = getPropertiesInCamelCase(properties);
 
 	const {
@@ -41,7 +41,7 @@ export const TicketRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () =>
 	} = getPropertiesInCamelCase(modules?.safetibase || {});
 
 	return (
-		<TicketRowContainer key={_id} onClick={onClick}>
+		<TicketRowContainer key={id} onClick={onClick}>
 			<span>{template.code}:{number}</span>
 			<span>{title}</span>
 			<span>{assignees?.length || 0}</span>
@@ -52,11 +52,11 @@ export const TicketRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () =>
 			<span>{levelOfRisk}</span>
 			<span>{treatmentStatus}</span>
 		</TicketRowContainer>
-	)
+	);
 };
 
 export const TicketGroup = ({ tickets, onTicketClick }) => {
-	if (!tickets?.length) return (<button> create new ticket </button>);
+	if (!tickets?.length) return (<button type="button"> create new ticket </button>);
 
 	return (
 		<>
