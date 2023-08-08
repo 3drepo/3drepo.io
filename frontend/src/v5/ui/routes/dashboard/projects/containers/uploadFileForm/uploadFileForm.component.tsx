@@ -171,7 +171,7 @@ export const UploadFileForm = ({
 	useEffect(() => {
 		const tags = {};
 		getValues('uploads').forEach(({ containerId }, index) => {
-			tags[`uploads[${index}].revisionTag`] = revisionsByContainer?.[containerId]?.map(({ tag }) => tag) || [];
+			tags[`uploads[${index}].revisionTag`] = revisionsByContainer?.[containerId]?.map(({ tag }) => tag);
 		});
 		setAlreadyExistingTags(tags);
 	}, [JSON.stringify(revisionsByContainer), JSON.stringify(containersNamesInModal)]);
