@@ -38,13 +38,13 @@ export const UploadListHeaders = ({
 				<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
 			</FilenameLabelWrapper>
 		</DashboardListHeaderLabel>
-		<DashboardListHeaderLabel key="destination" width={352}>
+		<DashboardListHeaderLabel width={352}>
 			<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
 		</DashboardListHeaderLabel>
-		<DashboardListHeaderLabel key="revisionTag" width={isUploading ? 359 : 399}>
+		<DashboardListHeaderLabel width={isUploading ? 359 : 399}>
 			<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
 		</DashboardListHeaderLabel>
-		<DashboardListHeaderLabel key="progress" width={297} hidden={!isUploading}>
+		<DashboardListHeaderLabel width={297} hidden={!isUploading}>
 			<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
 		</DashboardListHeaderLabel>
 	</DashboardListHeaderContainer>
