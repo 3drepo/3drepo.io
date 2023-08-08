@@ -19,7 +19,10 @@ import { MenuItem } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { FormSelect } from '@controls/inputs/formInputs.component';
 import { formatMessage } from '@/v5/services/intl';
-import { GROUP_BY_OPTIONS } from '../ticketsTable.helper';
+import _ from 'lodash';
+import { GROUP_BY_OPTIONS, NONE_OPTION, NoneOptionMessage } from '../ticketsTable.helper';
+
+const getEntriesSortedByValue = (obj) => _.sortBy(_.toPairs(obj), 1).reverse();
 
 export const GroupByFormSelect = (props) => (
 	<FormSelect
@@ -28,10 +31,11 @@ export const GroupByFormSelect = (props) => (
 		renderValue={(groupBy: string | null) => (
 			<>
 				<FormattedMessage id="ticketTable.groupBy.renderValue" defaultMessage="Group by:" />
-				<b> {GROUP_BY_OPTIONS[groupBy]}</b>
+				<b> {GROUP_BY_OPTIONS[groupBy] || NoneOptionMessage}</b>
 			</>
 		)}
 	>
-		{Object.entries(GROUP_BY_OPTIONS).map(([key, val]) => (<MenuItem value={key} key={key}>{val}</MenuItem>))}
+		<MenuItem value={NONE_OPTION}>{NoneOptionMessage}</MenuItem>
+		{getEntriesSortedByValue(GROUP_BY_OPTIONS).map(([key, val]) => (<MenuItem value={key} key={key}>{val}</MenuItem>))}
 	</FormSelect>
 );

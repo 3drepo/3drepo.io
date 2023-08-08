@@ -20,6 +20,7 @@ import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormSearchSelect } from '@controls/inputs/formInputs.component';
+import _ from 'lodash';
 import { ListSubheader } from '../tickets.styles';
 
 export const ContainersAndFederationsFormSelect = (props) => {
@@ -39,6 +40,8 @@ export const ContainersAndFederationsFormSelect = (props) => {
 		}, { itemsLength });
 	};
 
+	const sortByName = (models) => _.sortBy(models, ({ name }) => name.toLowerCase());
+
 	return (
 		<FormSearchSelect
 			multiple
@@ -49,13 +52,13 @@ export const ContainersAndFederationsFormSelect = (props) => {
 			<ListSubheader>
 				<FormattedMessage id="ticketTable.modelSelection.federations" defaultMessage="Federations" />
 			</ListSubheader>
-			{...federations.map(({ name, _id }) => (
+			{...sortByName(federations).map(({ name, _id }) => (
 				<MultiSelectMenuItem key={_id} value={_id}>{name}</MultiSelectMenuItem>
 			))}
 			<ListSubheader>
 				<FormattedMessage id="ticketTable.modelSelection.containers" defaultMessage="Containers" />
 			</ListSubheader>
-			{...containers.map(({ name, _id }) => (
+			{...sortByName(containers).map(({ name, _id }) => (
 				<MultiSelectMenuItem key={_id} value={_id}>{name}</MultiSelectMenuItem>
 			))}
 		</FormSearchSelect>

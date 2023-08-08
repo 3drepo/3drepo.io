@@ -19,10 +19,12 @@ import { MenuItem } from '@mui/material';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormSelect } from '@controls/inputs/formInputs.component';
 import { formatMessage } from '@/v5/services/intl';
+import _ from 'lodash';
 import { NONE_OPTION, NoneOptionMessage } from '../ticketsTable.helper';
 
 export const TemplateFormSelect = (props) => {
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
+	const sortByName = (template) => _.sortBy(template, 'name');
 
 	return (
 		<FormSelect
@@ -35,7 +37,7 @@ export const TemplateFormSelect = (props) => {
 			{...props}
 		>
 			<MenuItem value={NONE_OPTION}>{NoneOptionMessage}</MenuItem>
-			{templates.map(({ _id, name }) => (<MenuItem key={_id} value={_id}>{name}</MenuItem>))}
+			{sortByName(templates).map(({ _id, name }) => (<MenuItem key={_id} value={_id}>{name}</MenuItem>))}
 		</FormSelect>
 	);
 };

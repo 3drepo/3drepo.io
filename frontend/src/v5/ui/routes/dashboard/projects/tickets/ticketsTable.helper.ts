@@ -77,7 +77,6 @@ export const groupByList = (tickets: ITicket[], groupType: string, groupValues: 
 };
 
 export const GROUP_BY_OPTIONS = mapKeysToSnakeCase({
-	[NONE_OPTION]: NoneOptionMessage,
 	[BaseProperties.OWNER]: formatMessage({ id: 'groupBy.owner', defaultMessage: 'Owner' }),
 	[IssueProperties.DUE_DATE]: formatMessage({ id: 'groupBy.dueDate', defaultMessage: 'Due date' }),
 	[IssueProperties.PRIORITY]: formatMessage({ id: 'groupBy.priority', defaultMessage: 'Priority' }),
