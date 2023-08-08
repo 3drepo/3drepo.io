@@ -23,7 +23,7 @@ import { ITicket } from '@/v5/store/tickets/tickets.types';
 
 export const NONE_OPTION = 'none';
 export const NoneOptionMessage = formatMessage({ id: 'tickets.selectOption.none', defaultMessage: 'None' });
-export const UNSET_OPTION = 'unset'
+export const UNSET_OPTION = 'unset';
 export const UnsetOptionMessage = formatMessage({ id: 'tickets.selectOption.property.unset', defaultMessage: 'Unset' });
 
 const NO_DUE_DATE = formatMessage({ id: 'groupBy.dueDate.unset', defaultMessage: 'No due date' });
@@ -41,6 +41,7 @@ const getOptionsForGroupsWithDueDate = () => [
 
 export const groupByDate = (tickets: ITicket[]) => {
 	const groups = {};
+	// eslint-disable-next-line prefer-const
 	let [ticketsWithUnsetDueDate, remainingTickets] = _.partition(tickets, ({ properties }) => !properties[IssueProperties.DUE_DATE]);
 	groups[NO_DUE_DATE] = ticketsWithUnsetDueDate;
 
@@ -53,7 +54,7 @@ export const groupByDate = (tickets: ITicket[]) => {
 	while (dueDateOptions.length) {
 		[currentWeekTickets, remainingTickets] = _.partition(remainingTickets, ticketDueDateIsPassed);
 		groups[dueDateOptions.shift()] = currentWeekTickets;
-		endOfCurrentWeek.setDate(endOfCurrentWeek.getDate() +  7);
+		endOfCurrentWeek.setDate(endOfCurrentWeek.getDate() + 7);
 	}
 	return groups;
 };
@@ -74,12 +75,12 @@ export const groupByList = (tickets: ITicket[], groupType: string, groupValues: 
 
 export const GROUP_BY_OPTIONS = {
 	[NONE_OPTION]: NoneOptionMessage,
-	[BaseProperties.OWNER]: formatMessage({ id: 'groupBy.owner', defaultMessage: 'Owner'}),
-	[IssueProperties.DUE_DATE]: formatMessage({ id: 'groupBy.dueDate', defaultMessage: 'Due date'}),
-	[IssueProperties.PRIORITY]: formatMessage({ id: 'groupBy.priority', defaultMessage: 'Priority'}),
-	[IssueProperties.STATUS]: formatMessage({ id: 'groupBy.status', defaultMessage: 'Status'}),
-	[SafetibaseProperties.LEVEL_OF_RISK]: formatMessage({ id: 'groupBy.levelOfRisk', defaultMessage: 'Level of risk'}),
-	[SafetibaseProperties.TREATMENT_STATUS]: formatMessage({ id: 'groupBy.treatmentStatus', defaultMessage: 'Treatment status'}),
+	[BaseProperties.OWNER]: formatMessage({ id: 'groupBy.owner', defaultMessage: 'Owner' }),
+	[IssueProperties.DUE_DATE]: formatMessage({ id: 'groupBy.dueDate', defaultMessage: 'Due date' }),
+	[IssueProperties.PRIORITY]: formatMessage({ id: 'groupBy.priority', defaultMessage: 'Priority' }),
+	[IssueProperties.STATUS]: formatMessage({ id: 'groupBy.status', defaultMessage: 'Status' }),
+	[SafetibaseProperties.LEVEL_OF_RISK]: formatMessage({ id: 'groupBy.levelOfRisk', defaultMessage: 'Level of risk' }),
+	[SafetibaseProperties.TREATMENT_STATUS]: formatMessage({ id: 'groupBy.treatmentStatus', defaultMessage: 'Treatment status' }),
 };
 
 const GROUP_NAMES_BY_TYPE = {

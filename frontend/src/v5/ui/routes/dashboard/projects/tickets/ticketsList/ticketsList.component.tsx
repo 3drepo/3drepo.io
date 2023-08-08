@@ -13,11 +13,10 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
-import { EmptyTicketsList } from './ticketsList.styles';
 import { FormattedMessage } from 'react-intl';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
@@ -27,6 +26,7 @@ import _ from 'lodash';
 import { Accordion } from '@controls/accordion/accordion.component';
 import { TicketGroup } from './ticketGroup/ticketGroup.component';
 import { getGroupByOptions, groupByDate, groupByList, NONE_OPTION } from '../ticketsTable.helper';
+import { EmptyTicketsList } from './ticketsList.styles';
 
 type TicketsListProps = { onTicketClick: (ticket: ITicket) => void };
 export const TicketsList = (props: TicketsListProps) => {
@@ -49,8 +49,8 @@ export const TicketsList = (props: TicketsListProps) => {
 	groupBy = _.startCase(groupBy);
 
 	let groups: Record<string, ITicket[]>;
-	switch(groupBy) {
-		case BaseProperties.OWNER: 
+	switch (groupBy) {
+		case BaseProperties.OWNER:
 			groups = _.groupBy(filteredItems, `properties.${BaseProperties.OWNER}`);
 			break;
 		case IssueProperties.DUE_DATE:
@@ -63,7 +63,7 @@ export const TicketsList = (props: TicketsListProps) => {
 	return (
 		<>
 			{_.entries(groups).map(([groupName, tickets]) => (
-				<Accordion title={groupName} defaultExpanded={!!tickets.length} key={groupBy+groupName}>
+				<Accordion title={groupName} defaultExpanded={!!tickets.length} key={groupBy + groupName}>
 					<TicketGroup tickets={tickets} {...props} />
 				</Accordion>
 			))}

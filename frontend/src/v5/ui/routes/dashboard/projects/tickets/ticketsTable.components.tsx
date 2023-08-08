@@ -30,7 +30,7 @@ import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import { CircleButton } from '@controls/circleButton';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { FormProvider, useForm } from 'react-hook-form';
-import { TicketsList } from './ticketsList/ticketsList.component';	
+import { TicketsList } from './ticketsList/ticketsList.component';
 import { useSearchParam } from '../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE } from '../../../routes.constants';
 import { ContainersAndFederationsFormSelect } from './selectMenus/containersAndFederationsFormSelect.component';

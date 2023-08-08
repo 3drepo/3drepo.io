@@ -48,7 +48,7 @@ export const SelectorsContainer = styled(FlexContainer)`
 		width: 225px;
 		margin: 8px 0;
 
-		&:last-child(3) {
+		&:last-child() {
 			width: 205px;
 		}
 	}

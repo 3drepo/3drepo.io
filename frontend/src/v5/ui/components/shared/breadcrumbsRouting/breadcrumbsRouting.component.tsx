@@ -95,7 +95,6 @@ export const BreadcrumbsRouting = () => {
 		breadcrumbs.push({ options });
 	}
 
-
 	if (matchesPath(VIEWER_ROUTE)) {
 		breadcrumbs = [
 			{
