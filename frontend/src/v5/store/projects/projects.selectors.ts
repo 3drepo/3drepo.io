@@ -53,9 +53,3 @@ export const selectCurrentProjectTemplates = createSelector(
 	selectCurrentProject,
 	(state, currentProject) => state.templatesByProject[currentProject] || [],
 );
-
-export const selectCurrentProjectTemplateById = createSelector(
-	selectCurrentProjectTemplates,
-	(templates, templateId) => templateId,
-	(templates, templateId) => templates.find(({ _id }) => _id === templateId),
-);
