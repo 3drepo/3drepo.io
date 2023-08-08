@@ -15,13 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Actions, Footer, Invitation, List } from '@/v4/routes/components/invitationsDialog/invitationsDialog.styles';
+import { Actions, Footer, Invitation, List, Container } from '@/v4/routes/components/invitationsDialog/invitationsDialog.styles';
 import { css } from 'styled-components';
 import { secondaryButtonStyling } from '../resuableOverrides.styles';
 
 export default css`
-	${List} {
+	${Container} {
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	}
+	${List} {
 		padding: 30px;
 		${Invitation} {
 			padding: 0;
