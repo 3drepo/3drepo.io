@@ -198,11 +198,13 @@ export const UploadListItemDestination = memo(({
 	};
 
 	useEffect(() => {
+		if (!selectedContainer?.desc) return;
 		// This updates the container desc after it is fetched in the fetchContainerSettings
 		setValue(`${revisionPrefix}.containerDesc`, selectedContainer?.desc);
 	}, [selectedContainer]);
 
 	useEffect(() => {
+		if (!value) return;
 		// this triggers the check to see if revision name already used in container
 		// after the revisions fetch is made
 		trigger(`${revisionPrefix}.containerName`);
