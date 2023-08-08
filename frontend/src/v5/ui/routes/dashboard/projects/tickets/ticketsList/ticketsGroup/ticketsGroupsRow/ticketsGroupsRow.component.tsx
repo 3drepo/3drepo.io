@@ -18,7 +18,7 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
-import { Row } from './ticketTableGroupRow.styles';
+import { Row } from './ticketsGroupRow.styles';
 
 export const TicketsGroupsRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
 	const { _id: id, title, properties, number, type, modules } = ticket;

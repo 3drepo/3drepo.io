@@ -62,7 +62,7 @@ export const TicketsList = (props: TicketsListProps) => {
 		<>
 			{_.entries(groups).map(([groupName, tickets]) => (
 				<Accordion title={groupName} defaultExpanded={!!tickets.length} key={groupBy + groupName}>
-					<TicketTableGroup tickets={tickets} {...props} />
+					<TicketsGroup tickets={tickets} {...props} />
 				</Accordion>
 			))}
 		</>
