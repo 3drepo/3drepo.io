@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import _, { camelCase, isEmpty, isEqual, isObject, mapKeys, orderBy } from 'lodash';
+import { camelCase, isEmpty, isEqual, isObject, mapKeys, orderBy, get } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
@@ -287,8 +287,8 @@ export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
 export const getTicketIsCompleted = (ticket) => {
-	const issuePropertyStatus = _.get(ticket, 'properties.Status');
-	const treatmentStatus = _.get(ticket, 'modules.safetibase.Treatment Status');
+	const issuePropertyStatus = get(ticket, 'properties.Status');
+	const treatmentStatus = get(ticket, 'modules.safetibase.Treatment Status');
 
 	const isCompletedIssueProperty = [TicketStatuses.CLOSED, TicketStatuses.VOID].includes(issuePropertyStatus);
 	const isCompletedTreatmentStatus = [TreatmentStatuses.AGREED_FULLY, TreatmentStatuses.VOID].includes(treatmentStatus);

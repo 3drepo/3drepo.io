@@ -16,11 +16,14 @@
  */
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { sortBy } from 'lodash';
 import { Headers } from './ticketsGroup.styles';
 import { TicketsGroupsRow } from './ticketsGroupsRow/ticketsGroupsRow.component';
 
 export const TicketsGroup = ({ tickets, onTicketClick }) => {
 	if (!tickets?.length) return (<button type="button"> create new ticket </button>);
+
+	const sortById = (tckts) => sortBy(tckts, ({ type, _id }) => type + _id);
 
 	return (
 		<>
@@ -36,7 +39,7 @@ export const TicketsGroup = ({ tickets, onTicketClick }) => {
 				<b>treatment status</b>
 			</Headers>
 			<div>
-				{tickets.map((ticket: ITicket) => (
+				{sortById(tickets).map((ticket: ITicket) => (
 					<TicketsGroupsRow
 						key={ticket._id}
 						ticket={ticket}
