@@ -23,6 +23,9 @@ import { Route } from '@/v5/services/routing/route.component';
 import { discardSlash } from '@/v5/helpers/url.helper';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CentredContainer } from '@controls/centredContainer';
+import { Typography } from '@controls/typography';
+import { FormattedMessage } from 'react-intl';
 import { TicketsTable } from './ticketsTable.components';
 import { TicketsSelection } from './ticketsSelection/ticketsSelection.component';
 import { useContainersData } from '../containers/containers.hooks';
@@ -34,18 +37,40 @@ export const TicketContent = () => {
 	path = discardSlash(path);
 
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
-	const { isListPending: areContainersPending } = useContainersData();
-	const { isListPending: areFederationsPending } = useFederationsData();
-	const isLoading = areContainersPending || areFederationsPending;
+	const templatesArePending = ProjectsHooksSelectors.selectTemplatesArePending();
+	const { isListPending: containersArePending, containers } = useContainersData();
+	const { isListPending: federationsArePending, federations } = useFederationsData();
+	const isLoadingModels = containersArePending || federationsArePending;
+	const hasModels = [...containers, ...federations].length;
 
 	useEffect(() => {
-		if (isLoading || templates.length) return;
+		if (isLoadingModels || templates.length) return;
 		ProjectsActionsDispatchers.fetchTemplates(teamspace, project);
-	}, [isLoading]);
+	}, [isLoadingModels]);
 
-	if (isLoading) return (<Loader />);
+	if (isLoadingModels || (hasModels && templatesArePending)) return (<Loader />);
 
-	if (!templates.length) return (<p>There are no templates available</p>);
+	if (!hasModels && !templatesArePending) return (
+		<CentredContainer>
+			<Typography variant='h3'>
+				<FormattedMessage
+					id="ticketsTable.emptyModels"
+					defaultMessage="This project is empty. Please, proceed to create a container or a federation to access this content."
+				/>
+			</Typography>
+		</CentredContainer>
+	);
+
+	if (hasModels && !templatesArePending && !templates.length) return (
+		<CentredContainer>
+			<Typography variant='h3'>
+				<FormattedMessage
+					id="ticketsTable.emptyTemplates"
+					defaultMessage="There are no templates available for this project."
+				/>
+			</Typography>
+		</CentredContainer>
+	);
 
 	return (
 		<Switch>

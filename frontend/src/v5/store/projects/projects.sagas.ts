@@ -22,7 +22,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { ProjectsActions, ProjectsTypes } from './projects.redux';
 import { IProject } from './projects.types';
 import { selectContainers } from '../containers/containers.selectors';
-import { selectFederations } from '../federations/federations.selectors';
+import { selectContainersByFederationId, selectFederations } from '../federations/federations.selectors';
 
 export function* fetch({ teamspace }) {
 	try {
@@ -74,22 +74,15 @@ export function* deleteProject({ teamspace, projectId, onSuccess, onError }) {
 
 export function* fetchTemplates({ teamspace, projectId }) {
 	try {
-		let isFed = false;
-		let model = (yield select(selectContainers))?.[0];
-		if (!model) {
-			isFed = true;
-			model = (yield select(selectFederations))?.[0];
+		const models = [...(yield select(selectContainers)), ...(yield select(selectFederations))];
+		if (!models.length) {
+			yield put(ProjectsActions.fetchTemplatesSuccess(projectId, []));
+			return;
 		}
-		if (!model) {
-			throw new Error(
-				formatMessage({
-					id: 'projects.error.noModels',
-					defaultMessage: 'The project must contain at least one container or federation to fetch the templates',
-				}),
-			);
-		}
+		const modelId = models[0]._id;
+		const isFed = !!(yield select(selectContainersByFederationId, modelId)).length;
 		const fetchModelTemplates = isFed ? API.Tickets.fetchFederationTemplates : API.Tickets.fetchContainerTemplates;
-		const templates = yield fetchModelTemplates(teamspace, projectId, model._id);
+		const templates = yield fetchModelTemplates(teamspace, projectId, modelId);
 		yield put(ProjectsActions.fetchTemplatesSuccess(projectId, templates));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
