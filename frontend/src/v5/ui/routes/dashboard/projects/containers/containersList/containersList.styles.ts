@@ -18,18 +18,6 @@
 import styled from 'styled-components';
 import { Display } from '@/v5/ui/themes/media';
 
-export const CircledNumber = styled.span`
-	width: 24px;
-	height: 24px;
-	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
-	color: ${({ theme }) => theme.palette.secondary.main};
-	display: inline-flex;
-	justify-content: center;
-	align-items: center;
-	border-radius: 50%;
-	font-size: 11px;
-`;
-
 export const Container = styled.div`
 	margin: 16px 0;
 `;

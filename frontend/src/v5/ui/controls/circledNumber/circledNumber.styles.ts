@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,29 +16,15 @@
  */
 
 import styled from 'styled-components';
-import * as SearchInputStyles from '@controls/search/searchInput/searchInput.styles';
-import { Display } from '@/v5/ui/themes/media';
 
-export const Container = styled.div`
-	margin: 16px 0;
-	min-width: 380px;
-`;
-
-export const CollapseSideElementGroup = styled.div`
-	display: flex;
+export const CircledNumber = styled.span`
+	width: 24px;
+	height: 24px;
+	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	display: inline-flex;
+	justify-content: center;
 	align-items: center;
-	
-	> :last-child {
-		margin-right: 0;
-	}
-	
-	${SearchInputStyles.TextField} {
-		width: 405px;
-
-		@media (max-width: ${Display.Tablet}px) {
-			width: 367px;
-			padding-left: 25px;
-			box-sizing: border-box;
-		}
-	}
+	border-radius: 12px;
+	font-size: 11px;
 `;

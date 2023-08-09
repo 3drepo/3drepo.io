@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';	
+import styled from 'styled-components';
 
 export const Content = styled.div`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};

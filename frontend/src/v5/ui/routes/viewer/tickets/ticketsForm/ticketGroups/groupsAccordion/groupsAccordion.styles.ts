@@ -17,9 +17,9 @@
 
 import styled, { css } from 'styled-components';
 import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
-import { CentredContainer } from '@controls/centredContainer';
 import { IconContainer } from '@controls/accordion/accordion.styles';
 import { Button } from '@controls/button';
+import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { CollectionAccordion } from '../groups/groups.styles';
 import { Container as GroupItemContainer } from '../groups/groupItem/groupItem.styles';
 import { GroupToggle } from '../groupToggle/groupToggle.component';
@@ -93,14 +93,11 @@ export const TitleContainer = styled.div`
 	align-items: center;
 `;
 
-export const NumberContainer = styled(CentredContainer)`
-	border-radius: 22px;
+export const NumberContainer = styled(CircledNumber)`
 	width: 22px;
 	height: 22px;
-	margin-left: 5px;
-	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
-	color: ${({ theme }) => theme.palette.base.main};
 	font-size: 10px;
+	margin-left: 5px;
 `;
 
 export const Checkbox = styled(GroupToggle)`

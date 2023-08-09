@@ -38,7 +38,8 @@ import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/
 import { Display } from '@/v5/ui/themes/media';
 import { formatMessage } from '@/v5/services/intl';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
-import { Container, CollapseSideElementGroup, CircledNumber } from './containersList.styles';
+import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
+import { Container, CollapseSideElementGroup } from './containersList.styles';
 import { UploadFileForm } from '../uploadFileForm/uploadFileForm.component';
 import { SkeletonListItem } from './skeletonListItem';
 

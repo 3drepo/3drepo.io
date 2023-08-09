@@ -38,7 +38,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { SearchContextType, SearchContext } from '@controls/search/searchContext';
-import { CollapseSideElementGroup, Container, CircledNumber } from './federationsList.styles';
+import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
+import { CollapseSideElementGroup, Container } from './federationsList.styles';
 
 type IFederationsList = {
 	emptyMessage: ReactNode;
