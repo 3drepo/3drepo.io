@@ -29,7 +29,7 @@ import { selectCurrentProjectTemplates } from '@/v5/store/projects/projects.sele
 import { FederationsActions } from '@/v5/store/federations/federations.redux';
 import { federationMockFactory } from '../federations/federations.fixtures';
 
-describe('Teamspaces: sagas', () => {
+describe('Projects: sagas', () => {
 	const teamspace = 'teamspace';
 	const projectId = 'project';
 	const mockProject = projectMockFactory({ _id: projectId });
