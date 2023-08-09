@@ -45,7 +45,6 @@ type FormType = {
 	containersAndFederations: string[],
 	template: string,
 	groupBy: string,
-	completed: boolean,
 };
 export const TicketsTable = () => {
 	const history = useHistory();
@@ -57,7 +56,6 @@ export const TicketsTable = () => {
 			containersAndFederations: models?.split(',') || [],
 			template: templateURLParam,
 			groupBy: groupByURLParam || NONE_OPTION,
-			completed: false,
 		},
 	});
 	const { containersAndFederations, groupBy, template } = formData.watch();
@@ -114,7 +112,10 @@ export const TicketsTable = () => {
 
 	useEffect(() => { setModels(containersAndFederations.join(',')); }, [containersAndFederations]);
 
-	useEffect(() => () => setModels(''), []);
+	useEffect(() => () => {
+		setModels('');
+		formData.setValue('containersAndFederations', []);
+	}, [project]);
 
 	return (
 		<SearchContextComponent items={ticketsFilteredByTemplate} filteringFunction={filterTickets}>
