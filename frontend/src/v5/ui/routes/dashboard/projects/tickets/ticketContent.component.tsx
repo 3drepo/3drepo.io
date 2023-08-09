@@ -41,14 +41,14 @@ export const TicketContent = () => {
 	const { isListPending: containersArePending, containers } = useContainersData();
 	const { isListPending: federationsArePending, federations } = useFederationsData();
 	const isLoadingModels = containersArePending || federationsArePending;
-	const hasModels = [...containers, ...federations].length;
+	const hasModels = !![...containers, ...federations].length;
 
 	useEffect(() => {
 		if (isLoadingModels || templates.length) return;
 		ProjectsActionsDispatchers.fetchTemplates(teamspace, project);
 	}, [isLoadingModels]);
 
-	if (isLoadingModels || (hasModels && templatesArePending)) return (<Loader />);
+	if (isLoadingModels || templatesArePending) return (<Loader />);
 
 	if (!hasModels && !templatesArePending) return (
 		<CentredContainer>
