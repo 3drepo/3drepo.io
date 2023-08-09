@@ -43,7 +43,7 @@ export const TicketsSelection = () => {
 	const template = formData.watch('template');
 	const containersAndFederations = formData.watch('containersAndFederations');
 
-	const isValid = template && containersAndFederations.length;
+	const isValid = !!(template && containersAndFederations.length);
 
 	const getPathname = () => {
 		if (!isValid) return '';
