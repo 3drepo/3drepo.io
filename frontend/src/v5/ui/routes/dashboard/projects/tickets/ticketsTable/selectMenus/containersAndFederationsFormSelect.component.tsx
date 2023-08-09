@@ -21,7 +21,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormSearchSelect } from '@controls/inputs/formInputs.component';
 import { sortByName } from '@/v5/store/store.helpers';
-import { ListSubheader } from '../tickets.styles';
+import { ListSubheader } from '../../tickets.styles';
 
 export const ContainersAndFederationsFormSelect = (props) => {
 	const containers = ContainersHooksSelectors.selectContainers();

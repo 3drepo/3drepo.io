@@ -26,7 +26,7 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CentredContainer } from '@controls/centredContainer';
 import { Typography } from '@controls/typography';
 import { FormattedMessage } from 'react-intl';
-import { TicketsTable } from './ticketsTable.components';
+import { TicketsTable } from './ticketsTable/ticketsTable.components';
 import { TicketsSelection } from './ticketsSelection/ticketsSelection.component';
 import { useContainersData } from '../containers/containers.hooks';
 import { useFederationsData } from '../federations/federations.hooks';

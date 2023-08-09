@@ -32,13 +32,13 @@ import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { CircleButton } from '@controls/circleButton';
 import { getTicketIsCompleted } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
-import { TicketsList } from './ticketsList/ticketsList.component';
-import { useSearchParam } from '../../../useSearchParam';
-import { DashboardTicketsParams, TICKETS_ROUTE } from '../../../routes.constants';
+import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
+import { useSearchParam } from '../../../../useSearchParam';
+import { DashboardTicketsParams, TICKETS_ROUTE } from '../../../../routes.constants';
 import { ContainersAndFederationsFormSelect } from './selectMenus/containersAndFederationsFormSelect.component';
 import { GroupByFormSelect } from './selectMenus/groupByFormSelect.component';
 import { TemplateFormSelect } from './selectMenus/templateFormSelect.component';
-import { FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from './tickets.styles';
+import { FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from '../tickets.styles';
 import { NONE_OPTION } from './ticketsTable.helper';
 
 type FormType = {
@@ -148,7 +148,7 @@ export const TicketsTable = () => {
 					</FlexContainer>
 				</FiltersContainer>
 			</FormProvider>
-			<TicketsList onTicketClick={onSetEditingTicket} />
+			<TicketsTableContent onTicketClick={onSetEditingTicket} />
 			<SidePanel open={isEditingTicket}>
 				<SlidePanelHeader>
 					<OpenInViewerButton disabled={!editingTicket?._id}>

@@ -21,9 +21,9 @@ import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
 import { Highlight } from '@controls/highlight';
-import { Row } from './ticketsGroupRow.styles';
+import { Row } from './ticketsTableRow.styles';
 
-export const TicketsGroupsRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
+export const TicketsTableRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
 	const { query } = useContext(SearchContext);
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);

@@ -24,12 +24,12 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import _ from 'lodash';
 import { Accordion } from '@controls/accordion/accordion.component';
-import { TicketsGroup } from './ticketsGroup/ticketsGroups.component';
+import { TicketsTableGroup } from './ticketsTableGroup/ticketsTableGroup.component';
 import { getGroupByOptions, groupByDate, groupByList, NONE_OPTION } from '../ticketsTable.helper';
-import { EmptyTicketsList } from './ticketsList.styles';
+import { EmptyTicketsList } from './ticketsTableContent.styles';
 
-type TicketsListProps = { onTicketClick: (ticket: ITicket) => void };
-export const TicketsList = (props: TicketsListProps) => {
+type TicketsTableContentProps = { onTicketClick: (ticket: ITicket) => void };
+export const TicketsTableContent = (props: TicketsTableContentProps) => {
 	const { filteredItems } = useContext(SearchContext);
 	const { groupBy } = useParams<DashboardTicketsParams>();
 
@@ -44,7 +44,7 @@ export const TicketsList = (props: TicketsListProps) => {
 		);
 	}
 
-	if (groupBy === NONE_OPTION) return (<TicketsGroup tickets={filteredItems} {...props} />);
+	if (groupBy === NONE_OPTION) return (<TicketsTableGroup tickets={filteredItems} {...props} />);
 
 	let groups: Record<string, ITicket[]>;
 	switch (groupBy) {
@@ -62,7 +62,7 @@ export const TicketsList = (props: TicketsListProps) => {
 		<>
 			{_.entries(groups).map(([groupName, tickets]) => (
 				<Accordion title={groupName} defaultExpanded={!!tickets.length} key={groupBy + groupName}>
-					<TicketsGroup tickets={tickets} {...props} />
+					<TicketsTableGroup tickets={tickets} {...props} />
 				</Accordion>
 			))}
 		</>

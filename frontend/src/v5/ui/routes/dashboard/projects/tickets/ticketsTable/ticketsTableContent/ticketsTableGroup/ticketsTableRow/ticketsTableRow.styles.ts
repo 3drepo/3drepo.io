@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { Headers } from '../ticketsGroup.styles';
+import { Headers } from '../ticketsTableGroup.styles';
 
 export const Row = styled(Headers)`
 	height: 30px;
