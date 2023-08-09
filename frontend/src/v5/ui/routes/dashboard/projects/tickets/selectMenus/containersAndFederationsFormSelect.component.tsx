@@ -20,7 +20,7 @@ import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormSearchSelect } from '@controls/inputs/formInputs.component';
-import _ from 'lodash';
+import { sortByName } from '@/v5/store/store.helpers';
 import { ListSubheader } from '../tickets.styles';
 
 export const ContainersAndFederationsFormSelect = (props) => {
@@ -39,8 +39,6 @@ export const ContainersAndFederationsFormSelect = (props) => {
 			defaultMessage: '{itemsLength} selected',
 		}, { itemsLength });
 	};
-
-	const sortByName = (models) => _.sortBy(models, ({ name }) => name.toLowerCase());
 
 	return (
 		<FormSearchSelect

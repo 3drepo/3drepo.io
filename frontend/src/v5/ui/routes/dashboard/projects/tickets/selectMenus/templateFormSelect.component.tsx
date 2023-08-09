@@ -19,12 +19,11 @@ import { MenuItem } from '@mui/material';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormSelect } from '@controls/inputs/formInputs.component';
 import { formatMessage } from '@/v5/services/intl';
-import _ from 'lodash';
+import { sortByName } from '@/v5/store/store.helpers';
 import { NONE_OPTION, NoneOptionMessage } from '../ticketsTable.helper';
 
 export const TemplateFormSelect = (props) => {
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
-	const sortByName = (template) => _.sortBy(template, 'name');
 
 	return (
 		<FormSelect

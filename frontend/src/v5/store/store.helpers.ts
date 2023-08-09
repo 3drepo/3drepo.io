@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { formatMessage } from '@/v5/services/intl';
-import { uniqWith, isArray, isEqual, mergeWith } from 'lodash';
+import { uniqWith, isArray, isEqual, mergeWith, sortBy } from 'lodash';
 import { IContainer } from './containers/containers.types';
 import { Role } from './currentUser/currentUser.types';
 import { IFederation } from './federations/federations.types';
@@ -64,3 +64,5 @@ export const mergeWithArray = (objValue, srcValue) => mergeWith(objValue, srcVal
 	if (isArray(target)) return src; // If its an array that is merging just use the newest
 	return undefined;
 });
+
+export const sortByName = (list) => sortBy(list, ({ name }) => name.toLowerCase());
