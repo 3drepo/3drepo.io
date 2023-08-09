@@ -540,7 +540,7 @@ const testGetRiskCategories = () => {
 };
 
 const testGetSecurityRestrictions = () => {
-	describe('Get Security Resrictions', () => {
+	describe('Get Security Restrictions', () => {
 		test('Should return empty object if there is no restriction', async () => {
 			const teamspace = generateRandomString();
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({});
@@ -595,7 +595,7 @@ const testUpdateSecurityRestrictions = () => {
 				{ _id: teamspace }, { $unset: { [`${SECURITY}.${SECURITY_SETTINGS.DOMAIN_WHITELIST}`]: 1 } });
 		});
 
-		test('Should unset the both properites if they are disabled', async () => {
+		test('Should unset both properties if they are disabled', async () => {
 			const teamspace = generateRandomString();
 			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce();
 			await expect(Teamspace.updateSecurityRestrictions(teamspace, false, null)).resolves.toBeUndefined();

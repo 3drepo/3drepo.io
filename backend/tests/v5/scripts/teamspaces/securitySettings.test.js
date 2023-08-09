@@ -77,7 +77,7 @@ const runTest = (data) => {
 		});
 
 		test(`Should ${success ? 'succeed' : 'fail with an error'} if ${desc}`, async () => {
-			const exe = SecurityRestrictionss.run(teamspace.name, !update, update, enabled, whiteList);
+			const exe = SecurityRestrictionss.run(teamspace.name, update, enabled, whiteList);
 			if (success) {
 				await exe;
 				await expect(getSecurityRestrictions(teamspace.name)).resolves

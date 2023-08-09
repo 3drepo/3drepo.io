@@ -161,7 +161,7 @@ TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username) => {
 	const userDoc = await teamspaceQuery(query, { _id: 1, customData: { sso: 1, email: 1 } });
 	if (!userDoc) return false;
 
-	const restrictions = (await TeamspaceSetting.getSecurityRestrictions(teamspace));
+	const restrictions = await TeamspaceSetting.getSecurityRestrictions(teamspace);
 
 	if (restrictions[SECURITY_SETTINGS.SSO_RESTRICTED] && !userDoc.customData.sso) {
 		throw templates.ssoRestricted;

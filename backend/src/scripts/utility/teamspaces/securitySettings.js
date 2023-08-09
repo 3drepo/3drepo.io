@@ -28,14 +28,14 @@ const determineMessage = (teamspace, config) => {
 	return `${teamspace}: ${message}`;
 };
 
-const run = async (teamspace, view, update, ssoEnabled, whiteList) => {
+const run = async (teamspace, update, ssoRestricted, whiteList) => {
 	const currRes = await getSecurityRestrictions(teamspace);
 	logger.logInfo(determineMessage(teamspace, currRes));
 
 	if (!update) return;
 
 	const domainArr = whiteList === 'null' ? null : (whiteList || '').toLowerCase().split(',');
-	await updateSecurityRestrictions(teamspace, ssoEnabled, whiteList ? domainArr : undefined);
+	await updateSecurityRestrictions(teamspace, ssoRestricted, whiteList ? domainArr : undefined);
 
 	const updatedRes = await getSecurityRestrictions(teamspace);
 	logger.logInfo(`${teamspace} has been updated. ${determineMessage(teamspace, updatedRes)}`);
@@ -43,17 +43,12 @@ const run = async (teamspace, view, update, ssoEnabled, whiteList) => {
 
 const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
-	const argsSpec = (subYargs) => subYargs.option('view',
-		{
-			describe: 'View the current security restrictions on the teamspace',
-			type: 'boolean',
-			default: true,
-		}).option('update',
+	const argsSpec = (subYargs) => subYargs.option('update',
 		{
 			describe: 'update the restrictions',
 			type: 'boolean',
 			default: false,
-		}).option('ssoEnabled',
+		}).option('ssoRestricted',
 		{
 			describe: 'If enabled, only users who are SSO authenticated can access the data',
 			type: 'boolean',
@@ -72,7 +67,7 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 	return yargs.command(commandName,
 		'View/Update the Security restrictions on a teamspace',
 		argsSpec,
-		({ teamspace, view, update, ssoEnabled, whiteList }) => run(teamspace, view, update, ssoEnabled, whiteList));
+		({ teamspace, update, ssoRestricted, whiteList }) => run(teamspace, update, ssoRestricted, whiteList));
 };
 
 module.exports = {
