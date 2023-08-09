@@ -50,27 +50,31 @@ export const TicketContent = () => {
 
 	if (isLoadingModels || templatesArePending) return (<Loader />);
 
-	if (!hasModels && !templatesArePending) return (
-		<CentredContainer>
-			<Typography variant='h3'>
-				<FormattedMessage
-					id="ticketsTable.emptyModels"
-					defaultMessage="This project is empty. Please, proceed to create a container or a federation to access this content."
-				/>
-			</Typography>
-		</CentredContainer>
-	);
+	if (!hasModels && !templatesArePending) {
+		return (
+			<CentredContainer>
+				<Typography variant="h3">
+					<FormattedMessage
+						id="ticketsTable.emptyModels"
+						defaultMessage="This project is empty. Please, proceed to create a container or a federation to access this content."
+					/>
+				</Typography>
+			</CentredContainer>
+		);
+	}
 
-	if (hasModels && !templatesArePending && !templates.length) return (
-		<CentredContainer>
-			<Typography variant='h3'>
-				<FormattedMessage
-					id="ticketsTable.emptyTemplates"
-					defaultMessage="There are no templates available for this project."
-				/>
-			</Typography>
-		</CentredContainer>
-	);
+	if (hasModels && !templatesArePending && !templates.length) {
+		return (
+			<CentredContainer>
+				<Typography variant="h3">
+					<FormattedMessage
+						id="ticketsTable.emptyTemplates"
+						defaultMessage="There are no templates available for this project."
+					/>
+				</Typography>
+			</CentredContainer>
+		);
+	}
 
 	return (
 		<Switch>
