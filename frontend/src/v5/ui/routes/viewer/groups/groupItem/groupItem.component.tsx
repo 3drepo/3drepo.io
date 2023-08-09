@@ -16,21 +16,11 @@
  */
 import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks';
-import LightningIcon from '@assets/icons/filled/lightning-filled.svg';
-import { contrastColor } from 'contrast-color';
 import { FormattedMessage } from 'react-intl';
 import { getGroupNamePath } from '../groupsList.helpers';
-import { GroupIcon, GroupItemTextContainer, GroupItemName, GroupItemObjects } from './groupItem.styles';
+import { GroupItemTextContainer, GroupItemName, GroupItemObjects } from './groupItem.styles';
 import { GroupsTreeListItemComponent } from './groupItemContainer.component';
-
-const isSmart = (group) => (group.rules || []).length > 0;
-const isLight = (colour) => contrastColor({ bgColor: colour, threshold: 170 }) === '#FFFFFF';
-
-const GroupIconComponent = ({ group }) => (
-	<GroupIcon $color={group.color} $variant={isLight(group.color) ? 'dark' : 'light'}>
-		{isSmart(group) && <LightningIcon /> }
-	</GroupIcon>
-);
+import { GroupIconComponent } from './groupIcon/groupIcon.component';
 
 export const GroupItem = ({ group, disabled }) => {
 	const overridden = GroupsHooksSelectors.selectGroupsColourOverridesSet().has(group._id);
@@ -73,7 +63,7 @@ export const GroupItem = ({ group, disabled }) => {
 			disabled={disabled}
 			depth={depth}
 		>
-			<GroupIconComponent group={group} />
+			<GroupIconComponent rules={group.rules} color={group.color} />
 			<GroupItemTextContainer>
 				<GroupItemName>
 					{name}

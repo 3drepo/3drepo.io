@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
@@ -33,8 +33,7 @@ import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
 import { DashboardParams } from '../../../routes.constants';
-
-export const IsMainList = createContext(false);
+import { IsMainList } from './mainList.context';
 
 export const Containers = (): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();

@@ -17,6 +17,11 @@
 
 import styled from 'styled-components';
 
+export const Container = styled.span`
+	width: fit-content;
+	display: contents;
+`;
+
 export const ActionMenuSection = styled.div`
 	display: flex;
 	flex-direction: column;

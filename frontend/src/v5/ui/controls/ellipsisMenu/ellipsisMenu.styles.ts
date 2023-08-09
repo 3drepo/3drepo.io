@@ -16,8 +16,12 @@
  */
 
 import styled from 'styled-components';
-import { Popover as PopoverComponent } from '@mui/material';
+import { CircleButton } from '@controls/circleButton';
 
-export const Popover = styled(PopoverComponent)`
-	margin-left: 19px;
+export const EllipsisButton = styled(CircleButton)`
+	margin: 0;
+
+	svg {
+		height: 13px;
+	}
 `;

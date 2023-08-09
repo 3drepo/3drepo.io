@@ -15,78 +15,44 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState, cloneElement, MouseEvent } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { ClickAwayListener, Tooltip, MenuList } from '@mui/material';
-import { EllipsisButton } from '@controls/ellipsisButton';
-import { Popover } from './ellipsisMenu.styles';
+import { Tooltip, MenuList } from '@mui/material';
+import EllipsisIcon from '@assets/icons/outlined/ellipsis-outlined.svg';
+import { ActionMenu } from '@controls/actionMenu';
+import { EllipsisButton } from './ellipsisMenu.styles';
 
 export interface IEllipsisMenu {
 	selected?: boolean;
-	children: JSX.Element[];
+	children: any;
 	className?: string;
+	disabled?: boolean;
 }
 
-export const EllipsisMenu = ({ selected, children, className }: IEllipsisMenu): JSX.Element => {
-	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-	const handleClickDropdown = (event: MouseEvent<HTMLDivElement>) => {
-		event.stopPropagation();
-		event.preventDefault();
-		setAnchorEl(event.currentTarget);
-	};
-
-	const handleCloseDropdown = () => {
-		setAnchorEl(null);
-	};
-
-	const handleListKeyDown = (event) => {
-		if (event.key === 'Tab') {
-			event.preventDefault();
-			handleCloseDropdown();
-		}
-	};
+export const EllipsisMenu = ({ selected, children, className, disabled }: IEllipsisMenu): JSX.Element => {
+	if (disabled) {
+		return (
+			<EllipsisButton variant={selected ? 'secondary' : 'primary'} disabled>
+				<EllipsisIcon />
+			</EllipsisButton>
+		);
+	}
 
 	return (
-		<>
-			<Tooltip title={formatMessage({ id: 'ellipsisMenu.tooltip', defaultMessage: 'More options' })}>
-				<div onClick={handleClickDropdown} aria-hidden>
-					<EllipsisButton
-						aria-controls="ellipsis-menu-list"
-						aria-haspopup="true"
-						variant={selected ? 'secondary' : 'primary'}
-						className={className}
-					/>
-				</div>
-			</Tooltip>
-			<Popover
-				open={Boolean(anchorEl)}
-				anchorEl={anchorEl}
-				anchorOrigin={{
-					vertical: 'bottom',
-					horizontal: 'center',
-				}}
-				transformOrigin={{
-					vertical: 'top',
-					horizontal: 'right',
-				}}
-			>
-				<ClickAwayListener onClickAway={handleCloseDropdown}>
-					<MenuList autoFocusItem={Boolean(anchorEl)} id="ellipsis-menu-list" onKeyDown={handleListKeyDown}>
-						{children.map((child) => (
-							cloneElement(child, {
-								...child.props,
-								key: child.props.title,
-								onClick: (event) => {
-									event.stopPropagation();
-									child.props.onClick?.call(event);
-									handleCloseDropdown();
-								},
-							})
-						))}
-					</MenuList>
-				</ClickAwayListener>
-			</Popover>
-		</>
+		<ActionMenu
+			TriggerButton={(
+				<Tooltip title={formatMessage({ id: 'ellipsisMenu.tooltip', defaultMessage: 'More options' })}>
+					<div>
+						<EllipsisButton variant={selected ? 'secondary' : 'primary'}>
+							<EllipsisIcon />
+						</EllipsisButton>
+					</div>
+				</Tooltip>
+			)}
+			className={className}
+		>
+			<MenuList>
+				{children}
+			</MenuList>
+		</ActionMenu>
 	);
 };

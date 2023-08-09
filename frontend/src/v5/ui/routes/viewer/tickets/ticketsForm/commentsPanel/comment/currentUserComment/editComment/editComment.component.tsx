@@ -21,7 +21,7 @@ import { useForm } from 'react-hook-form';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { desanitiseMessage, sanitiseMessage, addReply } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { EditCommentButtons, EditCommentContainer, EditCommentInput } from './editComment.styles';
-import { ErrorCommentButton, PrimaryCommentButton } from '../../commentButton/commentButton.styles';
+import { ErrorTicketButton, PrimaryTicketButton } from '../../../../../ticketButton/ticketButton.styles';
 import { CommentReply } from '../../commentReply/commentReply.component';
 
 type EditCommentProps = Pick<ITicketComment, '_id' | 'author' | 'message' | 'images'> & {
@@ -58,12 +58,12 @@ export const EditComment = ({ _id, message, images, author, metadata, onEdit, on
 				/>
 			</EditCommentContainer>
 			<EditCommentButtons>
-				<ErrorCommentButton onClick={onClose}>
+				<ErrorTicketButton onClick={onClose}>
 					<CancelIcon />
-				</ErrorCommentButton>
-				<PrimaryCommentButton onClick={updateMessage} disabled={!canUpdate}>
+				</ErrorTicketButton>
+				<PrimaryTicketButton onClick={updateMessage} disabled={!canUpdate}>
 					<TickIcon />
-				</PrimaryCommentButton>
+				</PrimaryTicketButton>
 			</EditCommentButtons>
 		</>
 	);

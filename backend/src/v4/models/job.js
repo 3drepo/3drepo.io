@@ -46,7 +46,7 @@ Job.addJob = async function(teamspace, jobData) {
 		throw responseCodes.JOB_ID_INVALID;
 	}
 
-	const foundJob = await Job.findByJob(teamspace, jobData._id);
+	const foundJob = await Job.findByJob(teamspace, jobData._id, false);
 
 	if (foundJob) {
 		throw responseCodes.DUP_JOB;
@@ -82,8 +82,10 @@ Job.addUserToJob = async function(teamspace, jobName, user) {
 	return db.updateOne(teamspace, JOBS_COLLECTION_NAME, {_id: jobName}, {$set: {users: job.users}});
 };
 
-Job.findByJob = async function(teamspace, jobName) {
-	const foundJob = await db.findOne(teamspace, JOBS_COLLECTION_NAME, {_id: jobName});
+Job.findByJob = async function(teamspace, jobName, caseSensitive = true) {
+
+	const query = caseSensitive ? { _id: jobName } : { _id: new RegExp(jobName, "i")};
+	const foundJob = await db.findOne(teamspace, JOBS_COLLECTION_NAME, query);
 
 	if (foundJob && !foundJob.users) {
 		foundJob.users = [];

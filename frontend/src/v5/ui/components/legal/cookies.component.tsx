@@ -19,7 +19,7 @@ import { PaperTitle } from './LegalLayout/legalLayout.styles';
 
 export const CookiesLegalPaper = () => (
 	<>
-		<PaperTitle>3D Repo Ltd Cookies Policy</PaperTitle>
+		<PaperTitle>Asite 3D Repo Ltd Cookies Policy</PaperTitle>
 		<h1>Information about our use of cookies</h1>
 		<p>Our website and the 3D Repo platform (together the <strong>Service</strong>) uses cookies to distinguish
 			you from other users of our Service. This helps us to provide you with a good experience when you browse

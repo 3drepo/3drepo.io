@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { CoverImage } from '@controls/coverImage/coverImage.component';
-import { Content as ProjectContent } from '../../projects/projects.styles';
+import { Content as ProjectContent } from '../../projects/projectContent/projectContent.styles';
 
 export const Container = styled.div`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};

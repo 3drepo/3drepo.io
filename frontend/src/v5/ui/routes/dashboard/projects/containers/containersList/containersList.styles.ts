@@ -16,7 +16,6 @@
  */
 
 import styled from 'styled-components';
-import * as SearchInputStyles from '@controls/search/searchInput/searchInput.styles';
 import { Display } from '@/v5/ui/themes/media';
 
 export const CircledNumber = styled.span`
@@ -43,7 +42,7 @@ export const CollapseSideElementGroup = styled.div`
 		margin-right: 0;
 	}
 
-	${SearchInputStyles.TextField} {
+	.MuiTextField-root {
 		width: 405px;
 
 		@media (max-width: ${Display.Tablet}px) {

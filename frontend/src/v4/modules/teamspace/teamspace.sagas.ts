@@ -17,6 +17,7 @@
 
 import { put, takeLatest } from 'redux-saga/effects';
 
+import { getAPIUrl } from '@/v4/services/api/default';
 import * as API from '../../services/api';
 import { clientConfigService } from '../../services/clientConfig';
 import { DialogActions } from '../dialog';
@@ -95,7 +96,7 @@ export function* downloadTreatmentsTemplate() {
 
 export function* downloadTreatments({ teamspace }) {
 	try {
-		const url = yield API.getAPIUrl(`${teamspace}/settings/mitigations.csv`);
+		const url = yield getAPIUrl(`${teamspace}/settings/mitigations.csv`);
 		window.open(url, '_blank');
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'treatments', e));

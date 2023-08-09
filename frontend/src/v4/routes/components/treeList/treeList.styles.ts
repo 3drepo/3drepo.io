@@ -19,7 +19,7 @@ import Grid from '@mui/material/Grid';
 import styled from 'styled-components';
 
 import { ellipsis, COLOR } from '../../../styles';
-import { TREE_LEVELS } from './treeList.component';
+import { TREE_LEVELS } from './treeList.constants';
 
 const isActive = ({ active, disabled }) => active && !disabled;
 

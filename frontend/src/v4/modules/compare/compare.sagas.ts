@@ -97,7 +97,7 @@ function* getCompareModelData({ isFederation, revision }) {
 			});
 
 			const selectedModelsMap = compareModels.reduce((map, model) => {
-				map[model._id] = true;
+				map[model._id] = model.revisions?.length > 1;
 				return map;
 			}, {});
 
@@ -269,6 +269,9 @@ function* startComparisonOfFederation() {
 
 		if (isTargetModel && isSelectedModel) {
 			const targetRevision = isDiff ? model.targetDiffRevision : model.targetClashRevision;
+			if (!model.baseRevision) {
+				return
+			}
 			keepModelShown = model.baseRevision.name === targetRevision.name && !isDiff;
 
 			if (keepModelShown) {

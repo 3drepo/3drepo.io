@@ -18,6 +18,7 @@
 import { formatDayOfWeek } from '@controls/inputs/datePicker/dateFormatHelper';
 import { DatePicker } from '@mui/x-date-pickers';
 import { ReactElement, useState } from 'react';
+import dayjs from 'dayjs';
 import { StopBackgroundInteraction } from './dueDate.styles';
 
 type IBaseDueDate = {
@@ -25,11 +26,11 @@ type IBaseDueDate = {
 	disabled?: boolean;
 	onBlur: (newValue) => void;
 	renderInput: (props) => ReactElement;
+	onChange?: (value) => void;
 };
 
-export const BaseDueDate = ({ value: initialValue, disabled, onBlur, ...props }: IBaseDueDate) => {
+export const BaseDueDate = ({ value, disabled, onBlur, onChange, ...props }: IBaseDueDate) => {
 	const [open, setOpen] = useState(false);
-	const [value, setValue] = useState<number>(initialValue);
 
 	const preventPropagation = (e) => { if (e.key !== 'Escape') e.stopPropagation(); };
 	const handleClose = () => setOpen(false);
@@ -38,9 +39,10 @@ export const BaseDueDate = ({ value: initialValue, disabled, onBlur, ...props }:
 		if (!open) setOpen(!disabled);
 	};
 	const onDateChange = (newValue) => {
+		const timestamp = newValue?.toDate()?.getTime() || null;
 		setOpen(false);
-		setValue(new Date(newValue).getTime());
-		onBlur?.(newValue);
+		onChange?.(timestamp);
+		onBlur?.(timestamp);
 	};
 
 	return (
@@ -48,7 +50,7 @@ export const BaseDueDate = ({ value: initialValue, disabled, onBlur, ...props }:
 			<StopBackgroundInteraction open={open} onClick={handleClose} />
 			<DatePicker
 				// If value is 0 display it as null to prevent it showing as 1/1/1970
-				value={value || null}
+				value={value ? dayjs(value) : null}
 				open={open}
 				// onChange is a required prop in DatePicker, however it is not needed as onAccept works better
 				// (onChange triggers when changing year, onAccept only when a date is finally chosen)

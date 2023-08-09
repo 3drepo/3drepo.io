@@ -741,7 +741,7 @@ async function _createAccounts(roles, userName) {
 
 									if (!project) {
 										project = {
-											_id: projectObj._id,
+											_id: utils.uuidToString(projectObj._id),
 											name: projectObj.name,
 											permissions: [],
 											models: []

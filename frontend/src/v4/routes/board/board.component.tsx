@@ -175,6 +175,7 @@ export function Board(props: IProps) {
 		resetIssues,
 		resetRisks,
 	} = props;
+
 	useEffect(() => {
 		if (type !== props.boardType) {
 			props.setBoardType(type);
@@ -202,16 +203,20 @@ export function Board(props: IProps) {
 		props.fetchData(type, teamspace, project, modelId);
 	}, [type, teamspace, project, modelId]);
 
+	const removeReactTrelloTooltip = () => {
+		const board = boardRef.current;
+		const lanes = board.getElementsByClassName('react-trello-lane');
+
+		setTimeout(() => {
+			[...lanes].forEach((lane) => lane.removeAttribute('title'));
+		});
+	};
+
 	useEffect(() => {
 		if (boardRef.current) {
-			const board = boardRef.current;
-			const lanes = board.getElementsByClassName('react-trello-lane');
-
-			setTimeout(() => {
-				[...lanes].forEach((lane) => lane.removeAttribute('title'));
-			});
+			removeReactTrelloTooltip();
 		}
-	}, [boardRef, props.isPending]);
+	}, [props.cards, props.isPending]);
 
 	useEffect(() => {
 		return () => {

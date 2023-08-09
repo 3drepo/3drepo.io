@@ -25,7 +25,6 @@ import { ResourcesDropzone } from './attachResourcesDropzone';
 interface IProps {
 	files: any[];
 	uploadLimit: number;
-	validateQuota: (files: []) => boolean;
 	validateUploadLimit: (files: []) => boolean;
 }
 
@@ -43,7 +42,7 @@ export class AttachResourceFiles extends PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const {files, validateQuota, validateUploadLimit, uploadLimit} = this.props;
+		const {files, validateUploadLimit, uploadLimit} = this.props;
 		return (
 			<FieldArray
 				name="files"
@@ -65,9 +64,7 @@ export class AttachResourceFiles extends PureComponent<IProps, any> {
 						</ResourcesListScroller>
 					)}
 						<Field render={ ({ form }) => {
-								const errorMessage = !validateQuota(form.values.files) ?
-												'Quota exceeded! Try removing some files' :
-												!validateUploadLimit(form.values.files) ?
+								const errorMessage = !validateUploadLimit(form.values.files) ?
 												`File too large! Maximum attachment file size is ${filesize(uploadLimit, {fullform: true})}` : '';
 
 								return (<ResourcesDropzone onDrop={this.onAddFile(arrayHelpers)} errorMessage={errorMessage} />);
