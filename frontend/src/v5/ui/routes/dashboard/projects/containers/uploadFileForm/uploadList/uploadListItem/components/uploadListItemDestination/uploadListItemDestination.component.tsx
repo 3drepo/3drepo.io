@@ -53,7 +53,7 @@ const EMPTY_OPTION = prepareSingleContainerData({
 const getFilteredContainersOptions = createFilterOptions<IContainer>({ trim: true });
 
 interface IUploadListItemDestination {
-	value: string;
+	value?: string;
 	revisionPrefix: string;
 	disabled?: boolean;
 	className?: string;
