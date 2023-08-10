@@ -344,9 +344,7 @@ const testDeleteContainer = () => {
 
 const testGetRevisions = () => {
 	describe('Get container revisions', () => {
-		
-		const getRevisionList = () => 
-		[
+		const getRevisionList = () => [
 			{ _id: ServiceHelper.generateUUIDString(), author: 'user1', timestamp: new Date(), rFile: [`${ServiceHelper.generateUUIDString()}_${ServiceHelper.generateUUIDString()}_ifc`] },
 			{ _id: ServiceHelper.generateUUIDString(), author: 'user1', timestamp: new Date(), rFile: [`${ServiceHelper.generateUUIDString()}_${ServiceHelper.generateUUIDString()}_obj`] },
 			{ _id: ServiceHelper.generateUUIDString(), author: 'user1', timestamp: new Date() },
@@ -354,23 +352,27 @@ const testGetRevisions = () => {
 		];
 
 		const formatRevisions = (revisions) => {
-			revisions.map(r => {
+			revisions.map((r) => {
+				const formattedRevision = r;
 				if (r.rFile) {
-					r.format = '.'.concat(r.rFile[0].split('_').pop());
-					delete r.rFile;
+					if (formattedRevision.rFile) {
+						formattedRevision.format = '.'.concat(formattedRevision.rFile[0].split('_').pop());
+						delete formattedRevision.rFile;
+					}
 				}
+				return formattedRevision;
 			});
 
 			return revisions;
 		};
 
-		test('should return non-void revisions if the container exists', async () => {						
+		test('should return non-void revisions if the container exists', async () => {
 			const revisions = getRevisionList();
 			const teamspace = ServiceHelper.generateRandomString();
 			const container = ServiceHelper.generateRandomString();
 
 			Revisions.getRevisions.mockImplementationOnce(() => revisions);
-			
+
 			const res = await Containers.getRevisions(teamspace, container, false);
 			expect(Revisions.getRevisions).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisions).toHaveBeenCalledWith(teamspace, container, false,
@@ -385,7 +387,7 @@ const testGetRevisions = () => {
 			const container = ServiceHelper.generateRandomString();
 
 			Revisions.getRevisions.mockImplementationOnce(() => revisions);
-			
+
 			const res = await Containers.getRevisions(teamspace, container, true);
 			expect(Revisions.getRevisions).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisions).toHaveBeenCalledWith(teamspace, container, true,

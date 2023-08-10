@@ -84,11 +84,13 @@ Containers.getRevisions = async (teamspace, container, showVoid) => {
 	const revisions = await getRevisions(teamspace,
 		container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
 
-	revisions.map(r => {
-		if(r.rFile){
-			r.format = '.'.concat(r.rFile[0].split('_').pop());
-			delete r.rFile;
+	revisions.map((r) => {
+		const formattedRevision = r;
+		if (formattedRevision.rFile) {
+			formattedRevision.format = '.'.concat(formattedRevision.rFile[0].split('_').pop());
+			delete formattedRevision.rFile;
 		}
+		return formattedRevision;
 	});
 
 	return revisions;
