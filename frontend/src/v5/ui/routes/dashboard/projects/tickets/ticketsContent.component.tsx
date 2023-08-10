@@ -30,7 +30,7 @@ import { useContainersData } from '../containers/containers.hooks';
 import { useFederationsData } from '../federations/federations.hooks';
 import { EmptyTicketsView } from './emptyTicketsView/emptyTicketsView.styles';
 
-export const TicketContent = () => {
+export const TicketsContent = () => {
 	const { teamspace, project } = useParams();
 	let { path } = useRouteMatch();
 	path = discardSlash(path);
