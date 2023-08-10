@@ -16,11 +16,23 @@
  */
 
 import styled from 'styled-components';
-import { Headers } from '../ticketsTableGroup.styles';
 
-export const Row = styled(Headers)`
-	height: 30px;
-	background: #fff;
+export const Row = styled.div`
+	display: grid;
+	grid-template-columns: 80fr 493fr 96fr 62fr 90fr 90fr 100fr 137fr 134fr;
+	gap: 1px;
+	height: 37px;
+	background: transparent;
 	cursor: pointer;
-	margin-bottom: 5px;
+`;
+
+export const Cell = styled.div`
+	background: ${({ theme }) => theme.palette.primary.contrast};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	height: 100%;
+	padding-left: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	font-weight: 500;
 `;

@@ -21,7 +21,10 @@ import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
 import { Highlight } from '@controls/highlight';
-import { Row } from './ticketsTableRow.styles';
+import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
+import { Chip } from '@controls/chip/chip.component';
+import { RISK_LEVELS_MAP, STATUS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
+import { Row, Cell } from './ticketsTableRow.styles';
 
 export const TicketsTableRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
 	const { query } = useContext(SearchContext);
@@ -45,15 +48,27 @@ export const TicketsTableRow = ({ ticket, onClick }: { ticket: ITicket, onClick:
 
 	return (
 		<Row key={id} onClick={onClick}>
-			<Highlight search={query}>{`${template.code}:${number}`}</Highlight>
-			<Highlight search={query}>{title}</Highlight>
-			<span>{assignees?.length || 0}</span>
-			<span>{owner}</span>
-			<span>{dueDate ? new Date(dueDate).toLocaleDateString() : 'unset'}</span>
-			<span>{priority}</span>
-			<span>{status}</span>
-			<span>{levelOfRisk}</span>
-			<span>{treatmentStatus}</span>
+			<Cell>
+				<Highlight search={query}>{`${template.code}:${number}`}</Highlight>
+			</Cell>
+			<Cell>
+				<Highlight search={query}>{title}</Highlight>
+			</Cell>
+			<Cell>{assignees?.length || 0}</Cell>
+			<Cell>{owner}</Cell>
+			<Cell>
+				<DueDateWithIcon value={dueDate} />
+			</Cell>
+			<Cell>{priority}</Cell>
+			<Cell>
+				{status && (<Chip {...STATUS_MAP[status]} variant="outlined" />) }
+			</Cell>
+			<Cell>
+				{levelOfRisk && (<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />)}
+			</Cell>
+			<Cell>
+				{treatmentStatus && (<Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />)}
+			</Cell>
 		</Row>
 	);
 };
