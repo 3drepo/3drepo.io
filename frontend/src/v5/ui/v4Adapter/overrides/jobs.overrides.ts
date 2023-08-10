@@ -28,9 +28,9 @@ export const V5JobsOverrides = styled.div<{ isAdmin: boolean }>`
 
 	${Container} {
 		height: unset;
+		background-color: transparent;
 	}
 
-	.simplebar-wrapper,
 	${LoaderContainer} {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 	}
@@ -98,6 +98,7 @@ export const V5JobsOverrides = styled.div<{ isAdmin: boolean }>`
 	${Head}${Head} {
 		min-height: unset;
 		height: 40px;
+		background-color: transparent;
 
 		${Cell} {
 			${({ theme }) => theme.typography.kicker}
