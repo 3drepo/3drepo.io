@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const CircledNumber = styled.span`
+export const CircledNumber = styled.span<{ disabled?: boolean }>`
 	width: 24px;
 	height: 24px;
 	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
@@ -27,4 +27,11 @@ export const CircledNumber = styled.span`
 	align-items: center;
 	border-radius: 12px;
 	font-size: 11px;
+	box-sizing: border-box;
+
+	${({ disabled, theme }) => disabled && css`
+		background-color: transparent;
+		border: currentColor 1px solid;
+		color: ${theme.palette.base.lightest};
+	`}
 `;
