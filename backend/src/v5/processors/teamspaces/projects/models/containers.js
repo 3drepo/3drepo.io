@@ -80,8 +80,19 @@ Containers.getContainerStats = async (teamspace, container) => {
 	return stats;
 };
 
-Containers.getRevisions = (teamspace, container, showVoid) => getRevisions(teamspace,
-	container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1 });
+Containers.getRevisions = async (teamspace, container, showVoid) => {
+	const revisions = await getRevisions(teamspace,
+		container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
+
+	revisions.map(r => {
+		if(r.rFile){
+			r.format = '.'.concat(r.rFile[0].split('_').pop());
+			delete r.rFile;
+		}
+	});
+
+	return revisions;
+};
 
 Containers.newRevision = async (teamspace, container, data, file) => {
 	const { properties: { unit: units } = {} } = await getContainerById(teamspace, container, { 'properties.unit': 1 });
