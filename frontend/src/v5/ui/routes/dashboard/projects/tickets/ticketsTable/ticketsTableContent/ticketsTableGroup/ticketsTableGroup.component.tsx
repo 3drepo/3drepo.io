@@ -18,53 +18,60 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { FormattedMessage } from 'react-intl';
 import { sortBy } from 'lodash';
-import { Header, Headers, Group } from './ticketsTableGroup.styles';
+import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
+import { Header, Headers, Group, NewTicketRow, NewTicketText } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 
-export const TicketsTableGroup = ({ tickets, onTicketClick }) => {
-	if (!tickets?.length) return (<button type="button"> create new ticket </button>);
-
+export const TicketsTableGroup = ({ tickets, setEditingTicket }) => {
 	const sortById = (tckts) => sortBy(tckts, ({ type, _id }) => type + _id);
 
 	return (
 		<>
-			<Headers>
-				<Header>
-					<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
-				</Header>
-				<Header>
-					<FormattedMessage id="ticketTable.column.header.title" defaultMessage="title" />
-				</Header>
-				<Header>
-					<FormattedMessage id="ticketTable.column.header.assignees" defaultMessage="assignees" />
-				</Header>
-				<Header>
-					<FormattedMessage id="ticketTable.column.header.owner" defaultMessage="owner" />
-				</Header>
-				<Header>
-					<FormattedMessage id="ticketTable.column.header.dueDate" defaultMessage="due date" />
-				</Header>
-				<Header>
-					<FormattedMessage id="ticketTable.column.header.priority" defaultMessage="priority" />
-				</Header>
-				<Header>
-					<FormattedMessage id="ticketTable.column.header.status" defaultMessage="status" />
-				</Header>
-				<Header>
-					<FormattedMessage id="ticketTable.column.header.levelOfRisk" defaultMessage="level of risk" />
-				</Header>
-				<Header>
-					<FormattedMessage id="ticketTable.column.header.treatmentStatus" defaultMessage="treatment status" />
-				</Header>
-			</Headers>
+			{!!tickets.length && (
+				<Headers>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
+					</Header>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.title" defaultMessage="title" />
+					</Header>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.assignees" defaultMessage="assignees" />
+					</Header>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.owner" defaultMessage="owner" />
+					</Header>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.dueDate" defaultMessage="due date" />
+					</Header>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.priority" defaultMessage="priority" />
+					</Header>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.status" defaultMessage="status" />
+					</Header>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.levelOfRisk" defaultMessage="level of risk" />
+					</Header>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.treatmentStatus" defaultMessage="treatment status" />
+					</Header>
+				</Headers>
+			)}
 			<Group>
 				{sortById(tickets).map((ticket: ITicket) => (
 					<TicketsTableRow
 						key={ticket._id}
 						ticket={ticket}
-						onClick={() => onTicketClick(ticket)}
+						onClick={() => setEditingTicket(ticket)}
 					/>
 				))}
+				<NewTicketRow onClick={() => setEditingTicket(null)}>
+					<AddCircleIcon />
+					<NewTicketText>
+						<FormattedMessage id="ticketTable.row.newTicket" defaultMessage="New ticket" />
+					</NewTicketText>
+				</NewTicketRow>
 			</Group>
 		</>
 	);

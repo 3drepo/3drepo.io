@@ -22,7 +22,7 @@ export const Headers = styled.div`
 	display: grid;
 	grid-template-columns: 80fr 493fr 96fr 62fr 90fr 90fr 100fr 137fr 134fr;
 	justify-content: flex-start;
-	margin: 28px 0 10px; 
+	margin-bottom: 10px; 
 `;
 
 export const Header = styled(Typography).attrs({
@@ -38,4 +38,24 @@ export const Group = styled.div`
 	overflow: hidden;
 	gap: 1px;
 	background-color: transparent;
+	margin-top: 28px;
+`;
+
+export const NewTicketRow = styled.div`
+	width: 100%;
+	height: 37px;
+	font-weight: 600;
+	cursor: pointer;
+	color: ${({ theme }) => theme.palette.base.main};
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	display: flex;
+	align-items: center;
+	padding-left: 15px;
+	gap: 6px;
+`;
+
+export const NewTicketText = styled(Typography).attrs({
+	variant: 'body1',
+})`
+	font-weight: 600;
 `;
