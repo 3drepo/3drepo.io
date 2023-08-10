@@ -40,6 +40,8 @@ import { useSearchParam } from '../../../useSearchParam';
 export const TicketDetailsCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
 	const [ticketId, setTicketId] = useSearchParam('ticketId');
+	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
+
 	const isFederation = modelIsFederation(containerOrFederation);
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 	const ticket = tickets.find((t) => t._id === ticketId);
@@ -65,10 +67,6 @@ export const TicketDetailsCard = () => {
 		mode: 'onChange',
 		defaultValues: ticket,
 	});
-
-	useEffect(() => {
-		formData.reset(ticket);
-	}, [JSON.stringify(ticket)]);
 
 	const onBlurHandler = () => {
 		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
@@ -111,9 +109,9 @@ export const TicketDetailsCard = () => {
 		}
 	}, [ticket._id]);
 
-	if (!ticket) return (<></>);
-
-	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
+	useEffect(() => {
+		formData.reset(ticket);
+	}, [JSON.stringify(ticket)]);
 
 	useEffect(() => {
 		if (view === TicketDetailsView.Groups || isEmpty(defaultView)) return;
@@ -125,6 +123,10 @@ export const TicketDetailsCard = () => {
 		const { state } = defaultView;
 		goToView({ state });
 	}, [JSON.stringify(defaultView?.state)]);
+
+	useEffect(() => () => setTicketId(''), []);
+
+	if (!ticket || !template) return (<></>);
 
 	return (
 		<CardContainer>
