@@ -28,8 +28,9 @@ import { useParams } from 'react-router-dom';
 import { Highlight } from '@controls/highlight';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { Ticket, Id, Title, ChipList, Assignees, IssuePropertiesRow } from './ticketItem.styles';
-import { IssueProperties, SafetibaseProperties, TicketsCardViews } from '../../tickets.constants';
+import { IssueProperties, SafetibaseProperties } from '../../tickets.constants';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -41,6 +42,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const { query } = useContext(SearchContext);
 	const queries = query ? JSON.parse(query) : [];
+	const [, setTicketId] = useSearchParam('ticketId');
 
 	const isFederation = modelIsFederation(containerOrFederation);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
@@ -59,7 +61,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	};
 
 	const expandTicket = () => {
-		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
+		setTicketId(ticket._id);
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
 	};
 

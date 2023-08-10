@@ -29,6 +29,7 @@ import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/che
 import { ViewerParams } from '../routes.constants';
 import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
 import { TicketsCardViews } from './tickets/tickets.constants';
+import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -66,9 +67,7 @@ export const Viewer = () => {
 
 	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
 
-	if (isLoading) {
-		return (<></>);
-	}
+	if (isLoading) return null;
 
 	if (selectedContainer?.revisionsCount === 0) {
 		return <InvalidContainerOverlay status={selectedContainer.status} />;
@@ -89,6 +88,7 @@ export const Viewer = () => {
 
 	return (
 		<>
+			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />
 			<ViewerGui match={v4Match} key={containerOrFederation} />
 		</>

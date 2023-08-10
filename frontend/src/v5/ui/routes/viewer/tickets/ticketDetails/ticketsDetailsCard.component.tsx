@@ -18,7 +18,7 @@
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
 import { useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { findEditedGroup, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
@@ -35,12 +35,14 @@ import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
 import { TicketContext, TicketDetailsView } from '../ticket.context';
+import { useSearchParam } from '../../../useSearchParam';
 
 export const TicketDetailsCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
+	const [ticketId, setTicketId] = useSearchParam('ticketId');
 	const isFederation = modelIsFederation(containerOrFederation);
-	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
+	const ticket = tickets.find((t) => t._id === ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	const defaultView = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 
@@ -51,7 +53,7 @@ export const TicketDetailsCard = () => {
 	const changeTicketIndex = (delta: number) => {
 		const currentIndex = tickets.findIndex((tckt) => tckt._id === ticket._id);
 		const updatedId = tickets.slice((currentIndex + delta) % tickets.length)[0]._id;
-		TicketsCardActionsDispatchers.setSelectedTicket(updatedId);
+		setTicketId(updatedId);
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
 	};
 

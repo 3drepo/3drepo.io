@@ -34,6 +34,7 @@ import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters, CompletedFilterChip, TicketSearchInput } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
 import { AdditionalProperties, TicketsCardViews } from '../tickets.constants';
+import { useSearchParam } from '../../../useSearchParam';
 
 type TicketsListProps = {
 	tickets: ITicket[];
@@ -47,6 +48,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
+	const [, setTicketId] = useSearchParam('ticketId');
 
 	const ticketIsSelected = (ticket: ITicket) => selectedTicket?._id === ticket._id;
 
@@ -95,6 +97,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 
 		if (wasSelected) {
 			TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
+			setTicketId(ticket._id);
 		}
 
 		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
