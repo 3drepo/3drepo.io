@@ -20,7 +20,6 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormSelect } from '@controls/inputs/formInputs.component';
 import { formatMessage } from '@/v5/services/intl';
 import { sortByName } from '@/v5/store/store.helpers';
-import { NONE_OPTION, NoneOptionMessage } from '../ticketsTable.helper';
 
 export const TemplateFormSelect = (props) => {
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
@@ -29,13 +28,12 @@ export const TemplateFormSelect = (props) => {
 		<FormSelect
 			label={formatMessage({ id: 'tickets.select.template', defaultMessage: 'Select Ticket type' })}
 			renderValue={(val) => {
-				if (val === NONE_OPTION) return (<b>{NoneOptionMessage}</b>);
+				if (!val) return '';
 				const { name } = templates.find(({ _id }) => _id === val);
 				return (<b>{name}</b>);
 			}}
 			{...props}
 		>
-			<MenuItem value={NONE_OPTION}>{NoneOptionMessage}</MenuItem>
 			{sortByName(templates).map(({ _id, name }) => (<MenuItem key={_id} value={_id}>{name}</MenuItem>))}
 		</FormSelect>
 	);

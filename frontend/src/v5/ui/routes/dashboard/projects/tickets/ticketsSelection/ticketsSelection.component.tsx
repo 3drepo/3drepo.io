@@ -36,7 +36,7 @@ export const TicketsSelection = () => {
 	const formData = useForm<FormType>({
 		defaultValues: {
 			containersAndFederations: [],
-			template: NONE_OPTION,
+			template: '',
 		},
 	});
 
