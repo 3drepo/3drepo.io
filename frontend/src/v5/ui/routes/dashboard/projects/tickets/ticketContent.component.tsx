@@ -23,13 +23,12 @@ import { Route } from '@/v5/services/routing/route.component';
 import { discardSlash } from '@/v5/helpers/url.helper';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { CentredContainer } from '@controls/centredContainer';
-import { Typography } from '@controls/typography';
 import { FormattedMessage } from 'react-intl';
 import { TicketsTable } from './ticketsTable/ticketsTable.components';
 import { TicketsSelection } from './ticketsSelection/ticketsSelection.component';
 import { useContainersData } from '../containers/containers.hooks';
 import { useFederationsData } from '../federations/federations.hooks';
+import { EmptyTicketsView } from './emptyTicketsView/emptyTicketsView.styles';
 
 export const TicketContent = () => {
 	const { teamspace, project } = useParams();
@@ -52,27 +51,23 @@ export const TicketContent = () => {
 
 	if (!hasModels && !templatesArePending) {
 		return (
-			<CentredContainer>
-				<Typography variant="h3">
-					<FormattedMessage
-						id="ticketsTable.emptyModels"
-						defaultMessage="This project is empty. Please, proceed to create a container or a federation to access this content."
-					/>
-				</Typography>
-			</CentredContainer>
+			<EmptyTicketsView>
+				<FormattedMessage
+					id="ticketsTable.emptyModels"
+					defaultMessage="This project is empty. Please, proceed to create a container or a federation to access this content."
+				/>
+			</EmptyTicketsView>
 		);
 	}
 
 	if (hasModels && !templatesArePending && !templates.length) {
 		return (
-			<CentredContainer>
-				<Typography variant="h3">
-					<FormattedMessage
-						id="ticketsTable.emptyTemplates"
-						defaultMessage="There are no templates available for this project."
-					/>
-				</Typography>
-			</CentredContainer>
+			<EmptyTicketsView>
+				<FormattedMessage
+					id="ticketsTable.emptyTemplates"
+					defaultMessage="There are no templates available for this project."
+				/>
+			</EmptyTicketsView>
 		);
 	}
 

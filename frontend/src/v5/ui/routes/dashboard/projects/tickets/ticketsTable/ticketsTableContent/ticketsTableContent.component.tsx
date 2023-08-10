@@ -23,10 +23,10 @@ import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import _ from 'lodash';
-import { Accordion } from '@controls/accordion/accordion.component';
 import { TicketsTableGroup } from './ticketsTableGroup/ticketsTableGroup.component';
 import { getGroupByOptions, groupByDate, groupByList, NONE_OPTION } from '../ticketsTable.helper';
-import { EmptyTicketsList } from './ticketsTableContent.styles';
+import { EmptyTicketsView } from '../../emptyTicketsView/emptyTicketsView.styles';
+import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 
 type TicketsTableContentProps = { onTicketClick: (ticket: ITicket) => void };
 export const TicketsTableContent = (props: TicketsTableContentProps) => {
@@ -35,12 +35,12 @@ export const TicketsTableContent = (props: TicketsTableContentProps) => {
 
 	if (!filteredItems.length) {
 		return (
-			<EmptyTicketsList>
+			<EmptyTicketsView>
 				<FormattedMessage
 					id="ticketTable"
 					defaultMessage="We couldn't find any tickets to show. Please refine your selection."
 				/>
-			</EmptyTicketsList>
+			</EmptyTicketsView>
 		);
 	}
 
@@ -61,9 +61,13 @@ export const TicketsTableContent = (props: TicketsTableContentProps) => {
 	return (
 		<>
 			{_.entries(groups).map(([groupName, tickets]) => (
-				<Accordion title={groupName} defaultExpanded={!!tickets.length} key={groupBy + groupName}>
+				<DashboardListCollapse
+					title={<>{groupName} {tickets.length}</>}
+					defaultExpanded={!!tickets.length}
+					key={groupBy + groupName}
+				>
 					<TicketsTableGroup tickets={tickets} {...props} />
-				</Accordion>
+				</DashboardListCollapse>
 			))}
 		</>
 	);
