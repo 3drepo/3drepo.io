@@ -23,12 +23,14 @@ import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import _ from 'lodash';
+import { DashboardListCollapse } from '@components/dashboard/dashboardList';
+import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from './ticketsTableGroup/ticketsTableGroup.component';
 import { getGroupByOptions, groupByDate, groupByList, NONE_OPTION } from '../ticketsTable.helper';
 import { EmptyTicketsView } from '../../emptyTicketsView/emptyTicketsView.styles';
-import { DashboardListCollapse } from '@components/dashboard/dashboardList';
+import { Container } from './ticketsTableContent.styles';
 
-type TicketsTableContentProps = { onTicketClick: (ticket: ITicket) => void };
+type TicketsTableContentProps = { setEditingTicket: (ticket: ITicket) => void };
 export const TicketsTableContent = (props: TicketsTableContentProps) => {
 	const { filteredItems } = useContext(SearchContext);
 	const { groupBy } = useParams<DashboardTicketsParams>();
@@ -59,16 +61,16 @@ export const TicketsTableContent = (props: TicketsTableContentProps) => {
 	}
 
 	return (
-		<>
+		<Container>
 			{_.entries(groups).map(([groupName, tickets]) => (
 				<DashboardListCollapse
-					title={<>{groupName} {tickets.length}</>}
+					title={<>{groupName} <CircledNumber disabled={!tickets.length}>{tickets.length}</CircledNumber></>}
 					defaultExpanded={!!tickets.length}
 					key={groupBy + groupName}
 				>
 					<TicketsTableGroup tickets={tickets} {...props} />
 				</DashboardListCollapse>
 			))}
-		</>
+		</Container>
 	);
 };
