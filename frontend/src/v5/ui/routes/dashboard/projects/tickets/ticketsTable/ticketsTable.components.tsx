@@ -32,6 +32,7 @@ import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { CircleButton } from '@controls/circleButton';
 import { getTicketIsCompleted } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
+import { JobsActions } from '@/v4/modules/jobs';
 import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
 import { useSearchParam } from '../../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE } from '../../../../routes.constants';
@@ -50,7 +51,7 @@ export const TicketsTable = () => {
 	const history = useHistory();
 	const { teamspace, project, groupBy: groupByURLParam, template: templateURLParam } = useParams<DashboardTicketsParams>();
 	const [models, setModels] = useSearchParam('models');
-	const { getState } = useStore();
+	const { getState, dispatch } = useStore();
 	const formData = useForm<FormType>({
 		defaultValues: {
 			containersAndFederations: models?.split(',') || [],
@@ -117,6 +118,10 @@ export const TicketsTable = () => {
 		formData.setValue('containersAndFederations', []);
 	}, [project]);
 
+	useEffect(() => {
+		dispatch(JobsActions.fetchJobs(teamspace));
+	}, []);
+
 	return (
 		<SearchContextComponent items={ticketsFilteredByTemplate} filteringFunction={filterTickets}>
 			<FormProvider {...formData}>
@@ -148,7 +153,7 @@ export const TicketsTable = () => {
 					</FlexContainer>
 				</FiltersContainer>
 			</FormProvider>
-			<TicketsTableContent onTicketClick={onSetEditingTicket} />
+			<TicketsTableContent setEditingTicket={onSetEditingTicket} />
 			<SidePanel open={isEditingTicket}>
 				<SlidePanelHeader>
 					<OpenInViewerButton disabled={!editingTicket?._id}>
