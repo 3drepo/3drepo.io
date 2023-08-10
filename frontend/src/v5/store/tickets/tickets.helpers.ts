@@ -171,6 +171,8 @@ const overrideHasEditedGroup = (override: GroupOverride, oldOverrides: GroupOver
 };
 
 const findOverrideWithEditedGroup = (values, oldValues, propertiesDefinitions) => {
+	if (!values) return null;
+
 	let overrideWithEditedGroup;
 	Object.keys(values).forEach((key) => {
 		const definition = propertiesDefinitions.find((def) => def.name === key);

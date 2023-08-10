@@ -127,10 +127,9 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 	private debounceUsersSuggestion = debounce(this.props.getUsersSuggestions, 1000);
 
 	public onSuggestionsFetchRequested = ({value}) => {
-		if (value.substring('/')) {
-			return
+		if (!value.includes('/')) {
+			this.debounceUsersSuggestion(value);
 		}
-		this.debounceUsersSuggestion(value);
 	}
 
 	public openInvitationDialog = () => {
