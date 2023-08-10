@@ -15,10 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 
 export const Headers = styled.div`
 	display: grid;
 	grid-template-columns: 80fr 493fr 96fr 62fr 90fr 90fr 100fr 137fr 134fr;
 	justify-content: flex-start;
+	margin: 28px 0 10px; 
+`;
+
+export const Header = styled(Typography).attrs({
+	variant: 'kicker',
+})`
+	color: ${({ theme }) => theme.palette.base.main};
+	margin-left: 10px;
+`;
+
+export const Group = styled.div`
+	display: grid;
+	border-radius: 10px;
+	overflow: hidden;
+	gap: 1px;
+	background-color: transparent;
 `;

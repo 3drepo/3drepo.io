@@ -16,8 +16,9 @@
  */
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { FormattedMessage } from 'react-intl';
 import { sortBy } from 'lodash';
-import { Headers } from './ticketsTableGroup.styles';
+import { Header, Headers, Group } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 
 export const TicketsTableGroup = ({ tickets, onTicketClick }) => {
@@ -28,17 +29,35 @@ export const TicketsTableGroup = ({ tickets, onTicketClick }) => {
 	return (
 		<>
 			<Headers>
-				<b>id</b>
-				<b>title</b>
-				<b>assignees</b>
-				<b>owner</b>
-				<b>due date</b>
-				<b>priority</b>
-				<b>status</b>
-				<b>level of risk</b>
-				<b>treatment status</b>
+				<Header>
+					<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
+				</Header>
+				<Header>
+					<FormattedMessage id="ticketTable.column.header.title" defaultMessage="title" />
+				</Header>
+				<Header>
+					<FormattedMessage id="ticketTable.column.header.assignees" defaultMessage="assignees" />
+				</Header>
+				<Header>
+					<FormattedMessage id="ticketTable.column.header.owner" defaultMessage="owner" />
+				</Header>
+				<Header>
+					<FormattedMessage id="ticketTable.column.header.dueDate" defaultMessage="due date" />
+				</Header>
+				<Header>
+					<FormattedMessage id="ticketTable.column.header.priority" defaultMessage="priority" />
+				</Header>
+				<Header>
+					<FormattedMessage id="ticketTable.column.header.status" defaultMessage="status" />
+				</Header>
+				<Header>
+					<FormattedMessage id="ticketTable.column.header.levelOfRisk" defaultMessage="level of risk" />
+				</Header>
+				<Header>
+					<FormattedMessage id="ticketTable.column.header.treatmentStatus" defaultMessage="treatment status" />
+				</Header>
 			</Headers>
-			<div>
+			<Group>
 				{sortById(tickets).map((ticket: ITicket) => (
 					<TicketsTableRow
 						key={ticket._id}
@@ -46,7 +65,7 @@ export const TicketsTableGroup = ({ tickets, onTicketClick }) => {
 						onClick={() => onTicketClick(ticket)}
 					/>
 				))}
-			</div>
+			</Group>
 		</>
 	);
 };
