@@ -1,6 +1,6 @@
 {
 	"name": "3drepo.io-frontend",
-	"version": "5.3.2",
+	"version": "5.4.1",
 	"description": "The frontend for 3drepo.io",
 	"engines": {
 		"node": "18.x.x"
@@ -29,8 +29,7 @@
 		"extract": "node ./internals/intl/extract.js",
 		"compile": "node ./internals/intl/compile.js",
 		"storybook": "start-storybook -p 6006",
-		"build-storybook": "build-storybook -o ../public/storybook",
-		"circular:test": "yarn dpdm src/main.tsx --exclude node_modules/ --warning false --tree false"
+		"build-storybook": "build-storybook -o ../public/storybook"
 	},
 	"keywords": [
 		"3drepo",

@@ -531,7 +531,7 @@ const html = data => `
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
 
 
-                                        <img align="center" alt="" src="https://gallery.mailchimp.com/fa2aa09169a7d4049287e5bb3/images/7d31fd95-177f-47a2-b76a-d0935a88f7b6.png" width="250" style="max-width: 250px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 0%;" class="mcnImage">
+                                        <img align="center" alt="" src="https://www.3drepo.io/assets/images/logo.png" width="250" style="max-width: 250px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 0%;" class="mcnImage">
 
 
                             </td>
@@ -609,6 +609,14 @@ const html = data => `
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 150%; text-align: left;">
 
                             <p style="text-align: left; line-height: 150%;"><span style="color:#888888"><em><strong>${data.name}</strong> (${data.company})</em>&nbsp;invites&nbsp;you to join their teamspace <strong><em>${data.teamspace}</em></strong>. Please click on the button&nbsp;below to sign up and start collaborating.</span></p>
+
+                        </td>
+					</tr>
+											<tr>
+
+                        <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 150%; text-align: left;">
+
+							<p style="text-align: left; line-height: 150%;"><span style="color:#eb8a8a"><strong>${data.needSSO ? "This teamspace has elevated security settings in place. Please use the <em>Sign up with Microsoft</em> option in the registration page." : ""}</strong></span></p>
 
                         </td>
                     </tr>
