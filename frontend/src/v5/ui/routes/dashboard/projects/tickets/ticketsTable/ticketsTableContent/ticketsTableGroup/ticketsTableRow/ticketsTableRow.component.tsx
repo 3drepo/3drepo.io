@@ -16,15 +16,18 @@
  */
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
 import { Highlight } from '@controls/highlight';
 import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
 import { Chip } from '@controls/chip/chip.component';
-import { RISK_LEVELS_MAP, STATUS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
-import { Row, Cell } from './ticketsTableRow.styles';
+import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, STATUS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
+import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
+import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
+import { Tooltip } from '@mui/material';
+import { Row, Cell, CellChipText, CellOwner, OverflowContainer } from './ticketsTableRow.styles';
 
 export const TicketsTableRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
 	const { query } = useContext(SearchContext);
@@ -41,28 +44,48 @@ export const TicketsTableRow = ({ ticket, onClick }: { ticket: ITicket, onClick:
 		dueDate,
 	} = getPropertiesInCamelCase(properties);
 
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const ownerAsUser = UsersHooksSelectors.selectUser(teamspace, owner);
+
 	const {
 		treatmentStatus,
 		levelOfRisk,
 	} = getPropertiesInCamelCase(modules?.safetibase || {});
 
+	const handleClick = (e) => {
+		e.preventDefault();
+		onClick();
+	};
+
 	return (
-		<Row key={id} onClick={onClick}>
+		<Row key={id} onClickCapture={handleClick}>
 			<Cell>
 				<Highlight search={query}>{`${template.code}:${number}`}</Highlight>
 			</Cell>
 			<Cell>
-				<Highlight search={query}>{title}</Highlight>
+				<Tooltip title={title}>
+					<OverflowContainer>
+						<Highlight search={query}>
+							{title}
+						</Highlight>
+					</OverflowContainer>
+				</Tooltip>
 			</Cell>
-			<Cell>{assignees?.length || 0}</Cell>
-			<Cell>{owner}</Cell>
 			<Cell>
-				<DueDateWithIcon value={dueDate} />
+				<AssigneesSelect value={assignees} multiple disabled />
 			</Cell>
-			<Cell>{priority}</Cell>
+			<CellOwner>
+				<UserPopoverCircle user={ownerAsUser} />
+			</CellOwner>
 			<Cell>
-				{status && (<Chip {...STATUS_MAP[status]} variant="outlined" />) }
+				<DueDateWithIcon value={dueDate} disabled />
 			</Cell>
+			<CellChipText>
+				{priority && (<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />) }
+			</CellChipText>
+			<CellChipText>
+				{status && (<Chip {...STATUS_MAP[status]} variant="text" />) }
+			</CellChipText>
 			<Cell>
 				{levelOfRisk && (<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />)}
 			</Cell>

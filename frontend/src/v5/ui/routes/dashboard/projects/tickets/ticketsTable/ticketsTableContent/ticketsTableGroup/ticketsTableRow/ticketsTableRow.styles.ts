@@ -26,13 +26,34 @@ export const Row = styled.div`
 	cursor: pointer;
 `;
 
+export const OverflowContainer = styled.div`
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	display: inline-block;
+`;
+
 export const Cell = styled.div`
 	background: ${({ theme }) => theme.palette.primary.contrast};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	height: 100%;
-	padding-left: 15px;
+	padding: 0 10%;
 	display: flex;
 	align-items: center;
 	justify-content: flex-start;
 	font-weight: 500;
+	overflow: hidden;
+`;
+
+export const CellChipText = styled(Cell)`
+	.MuiChip-root {
+		padding-left: 0;
+	}
+`;
+
+export const CellOwner = styled(Cell)`
+	.MuiAvatar-root {
+		width: 24px;
+		height: 24px;
+	}
 `;
