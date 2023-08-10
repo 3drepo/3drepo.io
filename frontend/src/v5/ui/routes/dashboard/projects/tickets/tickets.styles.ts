@@ -27,6 +27,7 @@ export const FiltersContainer = styled.div`
 	flex-direction: row;
 	justify-content: space-between;
 	align-items: flex-end;
+	margin-bottom: 37px;
 `;
 
 export const ListSubheader = styled(ListSubheaderBase)`
