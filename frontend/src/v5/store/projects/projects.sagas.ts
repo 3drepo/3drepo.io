@@ -22,7 +22,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { ProjectsActions, ProjectsTypes } from './projects.redux';
 import { IProject } from './projects.types';
 import { selectContainers } from '../containers/containers.selectors';
-import { selectContainersByFederationId, selectFederations } from '../federations/federations.selectors';
+import { selectFederationById, selectFederations } from '../federations/federations.selectors';
 
 export function* fetch({ teamspace }) {
 	try {
@@ -80,7 +80,7 @@ export function* fetchTemplates({ teamspace, projectId }) {
 			return;
 		}
 		const modelId = models[0]._id;
-		const isFed = !!(yield select(selectContainersByFederationId, modelId)).length;
+		const isFed = !!(yield select(selectFederationById, modelId));
 		const fetchModelTemplates = isFed ? API.Tickets.fetchFederationTemplates : API.Tickets.fetchContainerTemplates;
 		const templates = yield fetchModelTemplates(teamspace, projectId, modelId);
 		yield put(ProjectsActions.fetchTemplatesSuccess(projectId, templates));
