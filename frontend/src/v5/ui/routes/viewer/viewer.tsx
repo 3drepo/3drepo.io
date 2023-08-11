@@ -30,11 +30,14 @@ import { ViewerParams } from '../routes.constants';
 import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
 import { TicketsCardViews } from './tickets/tickets.constants';
 import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
+import { useSearchParam } from '../useSearchParam';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
 
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
+	const [, setTicketId] = useSearchParam('ticketId');
+
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
 
 	const isLoading = isFetching || fetchPending;
@@ -51,7 +54,7 @@ export const Viewer = () => {
 	const handlePinClick = ({ id }) => {
 		if (!tickets.some((t) => t._id === id)) return;
 
-		TicketsCardActionsDispatchers.setSelectedTicket(id);
+		setTicketId(id);
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
 		dispatch(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.TICKETS, true));
 	};

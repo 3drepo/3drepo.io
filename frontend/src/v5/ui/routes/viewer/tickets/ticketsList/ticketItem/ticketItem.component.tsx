@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
@@ -60,10 +60,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 		if (newVal !== dueDate) updateTicketProperty({ [IssueProperties.DUE_DATE]: newVal });
 	};
 
-	const expandTicket = () => {
-		setTicketId(ticket._id);
-		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
-	};
+	const expandTicket = () => setTicketId(ticket._id);
 
 	return (
 		<Ticket

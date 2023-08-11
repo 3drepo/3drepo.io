@@ -52,9 +52,9 @@ export const selectReadOnly = createSelector(
 	(ticketCardState) => ticketCardState.readOnly,
 );
 
-export const selectSelectedTicketId = createSelector(
+export const selectHighlightedTicketId = createSelector(
 	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.selectedTicketId,
+	(ticketCardState) => ticketCardState.highlightedTicketId,
 );
 
 export const selectSelectedTemplateId = createSelector(
@@ -83,10 +83,10 @@ export const selectTicketHasOverrides = createSelector(
 	(overrides, transparencies) => !isEmpty(overrides) || !isEmpty(transparencies),
 );
 
-export const selectSelectedTicket = createSelector(
+export const selectHighlightedTicket = createSelector(
 	(state) => state,
 	selectCurrentModel,
-	selectSelectedTicketId,
+	selectHighlightedTicketId,
 	selectTicketById,
 );
 
@@ -100,12 +100,12 @@ export const selectSelectedTemplate = createSelector(
 export const selectTicketPins = createSelector(
 	selectCurrentTickets,
 	selectView,
-	selectSelectedTicketId,
-	(tickets, view, selectedTicketId) => {
+	selectHighlightedTicketId,
+	(tickets, view, highlightedTicketId) => {
 		if (view !== TicketsCardViews.List) return [];
 
 		return tickets.reduce(
-			(accum, ticket) => (ticket.properties?.Pin ? [...accum, ticketToPin(ticket, selectedTicketId)] : accum),
+			(accum, ticket) => (ticket.properties?.Pin ? [...accum, ticketToPin(ticket, highlightedTicketId)] : accum),
 			[],
 		);
 	},
