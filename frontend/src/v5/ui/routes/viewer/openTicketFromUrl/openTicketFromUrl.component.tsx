@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DialogsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
 import { useParams } from 'react-router-dom';
@@ -23,6 +23,7 @@ import { useEffect } from 'react';
 import { ViewerGuiActions } from '@/v4/modules/viewerGui';
 import { dispatch } from '@/v4/modules/store';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
+import { formatMessage } from '@/v5/services/intl';
 import { ViewerParams } from '../../routes.constants';
 import { useSearchParam } from '../../useSearchParam';
 import { TicketsCardViews } from '../tickets/tickets.constants';
@@ -38,7 +39,10 @@ export const OpenTicketFromUrl = () => {
 	useEffect(() => {
 		if (ticketId && hasTicketData) {
 			if (!tickets.some(({ _id }) => _id === ticketId)) {
-				console.log('ERROR NO SUCH TICKET');
+				DialogsActionsDispatchers.open('warning', {
+					title: formatMessage({ id: 'openTicketFromUrl.invalidTicketId.title', defaultMessage: 'Ticket not found' }),
+					message: formatMessage({ id: 'openTicketFromUrl.invalidTicketId.message', defaultMessage: 'A ticket with this ID could not be found. Ensure that you have the correct URL' }),
+				});
 				setTicketId('');
 				return;
 			}
