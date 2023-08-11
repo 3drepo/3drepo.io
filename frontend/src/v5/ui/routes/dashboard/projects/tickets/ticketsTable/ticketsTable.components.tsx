@@ -63,7 +63,7 @@ export const TicketsTable = () => {
 	});
 	const { containersAndFederations, groupBy, template } = formData.watch();
 
-	const tickets = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
+	const ticketsWithModelId = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const [sidePanelMode, setSidePanelMode] = useState<'edit' | 'new' | null>(null);
 	const [sidePanelModelId, setSidePanelModelId] = useState<string>(null);
@@ -71,9 +71,9 @@ export const TicketsTable = () => {
 	const [showCompleted, setShowCompleted] = useState(false);
 
 	const ticketsFilteredByTemplate = useMemo(() => {
-		const ticketsToShow = tickets.filter((t) => getTicketIsCompleted(t) === showCompleted);
+		const ticketsToShow = ticketsWithModelId.filter((t) => getTicketIsCompleted(t) === showCompleted);
 		return ticketsToShow.filter(({ type }) => type === template);
-	}, [template, tickets, showCompleted]);
+	}, [template, ticketsWithModelId, showCompleted]);
 
 	const setSidePanelModelIdAndTicket = (modelId: string, ticket: Partial<ITicket> = {}) => {
 		setSidePanelModelId(modelId);
@@ -188,7 +188,7 @@ export const TicketsTable = () => {
 					</CircleButton>
 				</SlidePanelHeader>
 				{sidePanelMode === 'edit' && (<div>Editing ticket {sidePanelTicket.title}</div>)}
-				{sidePanelMode === 'new' && (<div>Attempting to create a new ticket {}</div>)}
+				{sidePanelMode === 'new' && (<div>Attempting to create a new ticket for {sidePanelModelId}</div>)}
 			</SidePanel>
 		</SearchContextComponent>
 	);

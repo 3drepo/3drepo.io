@@ -30,7 +30,7 @@ import { EmptyTicketsView } from '../../emptyTicketsView/emptyTicketsView.styles
 import { Container } from './ticketsTableContent.styles';
 
 type TicketsTableContentProps = {
-	onEditTicket: (ticket: Partial<ITicket>) => void;
+	onEditTicket: (modelId: string, ticket: Partial<ITicket>) => void;
 	onNewTicket: (modelId: string, ticket?: Partial<ITicket>) => void;
 };
 export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableContentProps) => {
@@ -53,19 +53,19 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 		);
 	}
 
-	if (groupBy === NONE_OPTION) return (<TicketsTableGroup tickets={filteredItems} onNewTicket={onGroupNewTicket(null)}  {...props} />);
+	if (groupBy === NONE_OPTION) return (<TicketsTableGroup ticketsWithModelId={filteredItems} onNewTicket={onGroupNewTicket(null)}  {...props} />);
 
 	const groups = groupTickets(groupBy, filteredItems);
 
 	return (
 		<Container>
-			{_.entries(groups).map(([groupName, tickets]) => (
+			{_.entries(groups).map(([groupName, ticketsWithModelId]) => (
 				<DashboardListCollapse
-					title={<>{groupName} <CircledNumber disabled={!tickets.length}>{tickets.length}</CircledNumber></>}
-					defaultExpanded={!!tickets.length}
+					title={<>{groupName} <CircledNumber disabled={!ticketsWithModelId.length}>{ticketsWithModelId.length}</CircledNumber></>}
+					defaultExpanded={!!ticketsWithModelId.length}
 					key={groupBy + groupName}
 				>
-					<TicketsTableGroup tickets={tickets} onNewTicket={onGroupNewTicket} {...props} />
+					<TicketsTableGroup ticketsWithModelId={ticketsWithModelId} onNewTicket={onGroupNewTicket} {...props} />
 				</DashboardListCollapse>
 			))}
 		</Container>

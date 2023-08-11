@@ -24,16 +24,16 @@ import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 
 type TicketTableGroupProps = {
-	tickets: ITicket[];
-	onEditTicket: (ticket: Partial<ITicket>) => void;
+	ticketsWithModelId: (ITicket & { modelId: string })[];
+	onEditTicket: (modelId: string, ticket: Partial<ITicket>) => void;
 	onNewTicket: (modelId: string) => void;
 }
-export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket }: TicketTableGroupProps) => {
+export const TicketsTableGroup = ({ ticketsWithModelId, onEditTicket, onNewTicket }: TicketTableGroupProps) => {
 	const sortById = (tckts) => sortBy(tckts, ({ type, _id }) => type + _id);
 
 	return (
 		<>
-			{!!tickets.length && (
+			{!!ticketsWithModelId.length && (
 				<Headers>
 					<Header>
 						<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
@@ -65,11 +65,11 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket }: Ticket
 				</Headers>
 			)}
 			<Group>
-				{sortById(tickets).map((ticket: ITicket) => (
+				{sortById(ticketsWithModelId).map(({ modelId, ...ticket }) => (
 					<TicketsTableRow
 						key={ticket._id}
 						ticket={ticket}
-						onClick={onEditTicket}
+						onClick={() => onEditTicket(modelId, ticket)}
 					/>
 				))}
 				<NewTicketMenu

@@ -30,7 +30,11 @@ import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { Row, Cell, CellChipText, CellOwner, OverflowContainer, UnassignedAssignees, CellDate } from './ticketsTableRow.styles';
 
-export const TicketsTableRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
+type TicketsTableRowProps = {
+	ticket: ITicket,
+	onClick: () => void,
+};
+export const TicketsTableRow = ({ ticket, onClick }: TicketsTableRowProps) => {
 	const { query } = useContext(SearchContext);
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
