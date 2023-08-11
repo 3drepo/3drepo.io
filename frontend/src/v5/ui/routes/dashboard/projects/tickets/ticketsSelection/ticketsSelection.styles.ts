@@ -39,5 +39,6 @@ export const Title = styled(Typography).attrs({
 
 export const Image = styled.img`
 	width: 406px;
-	margin-top: -62px;
+    margin-top: -52px;
+    margin-bottom: -10px
 `;
