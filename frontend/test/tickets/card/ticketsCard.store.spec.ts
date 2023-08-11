@@ -1,5 +1,5 @@
 import { TicketsCardActions } from "@/v5/store/tickets/card/ticketsCard.redux";
-import { selectReadOnly, selectSelectedTemplateId, selectSelectedTicketId, selectView } from "@/v5/store/tickets/card/ticketsCard.selectors";
+import { selectReadOnly, selectSelectedTemplateId, selectHighlightedTicketId, selectView } from "@/v5/store/tickets/card/ticketsCard.selectors";
 import { TicketsCardViews } from "@/v5/ui/routes/viewer/tickets/tickets.constants";
 import { createTestStore } from "../../test.helpers";
 
@@ -13,9 +13,9 @@ describe('Tickets: store', () => {
 		({ dispatch, getState } = createTestStore());
 	});
 	describe('card', () => {
-		it('should set the selected ticket ID', () => {
-			dispatch(TicketsCardActions.setSelectedTicket(ticketId));
-			const selectedTicketIdFromState = selectSelectedTicketId(getState());
+		it('should set the highlighted ticket ID', () => {
+			dispatch(TicketsCardActions.setHighlightedTicket(ticketId));
+			const selectedTicketIdFromState = selectHighlightedTicketId(getState());
 		
 			expect(selectedTicketIdFromState).toEqual(ticketId);
 		});
@@ -40,10 +40,10 @@ describe('Tickets: store', () => {
 		});
 		it('should reset the state', () => {
 			dispatch(TicketsCardActions.setSelectedTemplate(templateId));
-			dispatch(TicketsCardActions.setSelectedTicket(ticketId));
+			dispatch(TicketsCardActions.setHighlightedTicket(ticketId));
 			dispatch(TicketsCardActions.resetState());
 
-			const selectedTicketIdFromState = selectSelectedTicketId(getState());
+			const selectedTicketIdFromState = selectHighlightedTicketId(getState());
 			const selectedTemplateIdFromState = selectSelectedTemplateId(getState());
 		
 			expect(selectedTicketIdFromState).toEqual(null);
