@@ -38,7 +38,6 @@ export const Group = styled.div`
 	overflow: hidden;
 	gap: 1px;
 	background-color: transparent;
-	margin-top: 28px;
 `;
 
 export const NewTicketRow = styled.div`

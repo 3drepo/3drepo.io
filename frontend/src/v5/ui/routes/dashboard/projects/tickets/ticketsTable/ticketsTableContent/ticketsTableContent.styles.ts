@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { Container as DashboardList } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
+import { CollapsedItemContainer, Container as DashboardList } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
 
 export const Container = styled.div`
 	${DashboardList} {
@@ -27,6 +27,10 @@ export const Container = styled.div`
 		&:not(:last-of-type) {
 			padding-bottom: 17px;
 			border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
+		}
+
+		${CollapsedItemContainer} {
+			margin-top: 28px;
 		}
 	}
 `;
