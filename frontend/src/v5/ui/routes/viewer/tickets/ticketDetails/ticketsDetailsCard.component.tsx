@@ -40,6 +40,7 @@ import { useSearchParam } from '../../../useSearchParam';
 export const TicketDetailsCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
 	const [ticketId, setTicketId] = useSearchParam('ticketId');
+	if (!ticketId) return null;
 	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
 
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -124,9 +125,10 @@ export const TicketDetailsCard = () => {
 		goToView({ state });
 	}, [JSON.stringify(defaultView?.state)]);
 
-	useEffect(() => () => setTicketId(''), []);
-
-	if (!ticket || !template) return (<></>);
+	useEffect(() => () => {
+		setTicketId('');
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
+	}, []);
 
 	return (
 		<CardContainer>
