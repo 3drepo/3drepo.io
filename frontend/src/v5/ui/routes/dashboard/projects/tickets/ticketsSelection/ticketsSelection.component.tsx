@@ -16,15 +16,17 @@
  */
 
 import { TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
-import { Link, generatePath, useParams } from 'react-router-dom';
+import { generatePath, useParams, useHistory } from 'react-router-dom';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Button } from '@controls/button';
 import { FormProvider, useForm } from 'react-hook-form';
 import _ from 'lodash';
+import { FormattedMessage } from 'react-intl';
+import { SubmitButton } from '@controls/submitButton';
 import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { TemplateFormSelect } from '../selectMenus/templateFormSelect.component';
 import { NONE_OPTION } from '../ticketsTable/ticketsTable.helper';
+import { Form, Title, Image } from './ticketsSelection.styles';
 
 type FormType = {
 	containersAndFederations: string[],
@@ -32,6 +34,7 @@ type FormType = {
 };
 export const TicketsSelection = () => {
 	const { teamspace, project } = useParams();
+	const history = useHistory();
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 
 	const formData = useForm<FormType>({
@@ -46,36 +49,40 @@ export const TicketsSelection = () => {
 
 	const isValid = !!(template && containersAndFederations.length);
 
-	const getPathname = () => {
+	const goToTableView = () => {
 		if (!isValid) return '';
-		return generatePath(TICKETS_ROUTE, {
+		const path = generatePath(TICKETS_ROUTE, {
 			teamspace,
 			project,
 			template,
 			groupBy: _.snakeCase(NONE_OPTION),
 		});
+		const searchParams = `?models=${containersAndFederations.join(',')}`; 
+		history.push(path + searchParams);
 	};
 
 	if (!teamspace || !project || !templates) return (<Loader />);
 
 	return (
-		<FormProvider {...formData}>
-			<div style={{ display: 'flex', flexDirection: 'column' }}>
+		<Form onSubmit={goToTableView}>
+			<FormProvider {...formData}>
+				<Image src="assets/images/tabular_view_preview.png" />
+				<Title>
+					<FormattedMessage
+						id="ticketsTable.select.title"
+						defaultMessage="Select a Federation/Container {br} and a Ticket type to view your Tickets"
+						values={{ br: <br /> }}
+					/>
+				</Title>
 				<ContainersAndFederationsFormSelect name="containersAndFederations" />
 				<TemplateFormSelect name="template" />
-				<Link
-					disabled={!isValid}
-					style={{ margin: '30px auto', width: 'fit-content' }}
-					to={{
-						pathname: getPathname(),
-						search: `?models=${containersAndFederations.join(',')}`,
-					}}
-				>
-					<Button variant="contained" disabled={!isValid}>
-						Go to table
-					</Button>
-				</Link>
-			</div>
-		</FormProvider>
+				<SubmitButton disabled={!isValid}>
+					<FormattedMessage
+						id="tickets.table.button"
+						defaultMessage="View Table"
+					/>
+				</SubmitButton>
+			</FormProvider>
+		</Form>
 	);
 };
