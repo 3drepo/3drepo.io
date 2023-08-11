@@ -77,7 +77,7 @@ export const TicketsTable = () => {
 	const setSidePanelModelIdAndTicket = (modelId: string, ticket: Partial<ITicket> = {}) => {
 		setSidePanelModelId(modelId);
 		setSidePanelTicket(ticket);
-	}
+	};
 
 	const onEditTicket = (modelId: string, ticket: Partial<ITicket>) => {
 		setSidePanelModelIdAndTicket(modelId, ticket);

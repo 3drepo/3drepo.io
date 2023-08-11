@@ -27,7 +27,7 @@ type TicketTableGroupProps = {
 	ticketsWithModelId: (ITicket & { modelId: string })[];
 	onEditTicket: (modelId: string, ticket: Partial<ITicket>) => void;
 	onNewTicket: (modelId: string) => void;
-}
+};
 export const TicketsTableGroup = ({ ticketsWithModelId, onEditTicket, onNewTicket }: TicketTableGroupProps) => {
 	const sortById = (tckts) => sortBy(tckts, ({ type, _id }) => type + _id);
 

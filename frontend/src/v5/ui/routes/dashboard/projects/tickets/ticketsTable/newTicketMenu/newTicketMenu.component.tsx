@@ -25,13 +25,13 @@ import { Label } from './newTicketMenu.styles';
 
 type NewTicketMenuProps = Omit<ActionMenuProps, 'children'> & {
 	onContainerOrFederationClick: (id: string) => void;
-}; 
+};
 export const NewTicketMenu = ({ onContainerOrFederationClick, ...props }: NewTicketMenuProps) => {
 	const containers = ContainersHooksSelectors.selectContainers();
 	const federations = FederationsHooksSelectors.selectFederations();
 
 	return (
-		<ActionMenu {...props} PopoverProps={{ style: { maxHeight: 400 }}}>
+		<ActionMenu {...props} PopoverProps={{ style: { maxHeight: 400 } }}>
 			<MenuList>
 				<Label onClick={(e) => e.preventDefault()}>
 					<FormattedMessage id="ticketTable.newTicket.select" defaultMessage="Select a Federation or Container" />
@@ -39,7 +39,7 @@ export const NewTicketMenu = ({ onContainerOrFederationClick, ...props }: NewTic
 				{sortByName([...containers, ...federations]).map(({ _id, name }) => (
 					<ActionMenuItem key={_id}>
 						<MenuItem onClick={() => onContainerOrFederationClick(_id)}>
-								{name}
+							{name}
 						</MenuItem>
 					</ActionMenuItem>
 				))}

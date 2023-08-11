@@ -50,14 +50,14 @@ export const TicketsSelection = () => {
 	const isValid = !!(template && containersAndFederations.length);
 
 	const goToTableView = () => {
-		if (!isValid) return '';
+		if (!isValid) return;
 		const path = generatePath(TICKETS_ROUTE, {
 			teamspace,
 			project,
 			template,
 			groupBy: _.snakeCase(NONE_OPTION),
 		});
-		const searchParams = `?models=${containersAndFederations.join(',')}`; 
+		const searchParams = `?models=${containersAndFederations.join(',')}`;
 		history.push(path + searchParams);
 	};
 

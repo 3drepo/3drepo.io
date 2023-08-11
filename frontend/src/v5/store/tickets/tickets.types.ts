@@ -158,4 +158,4 @@ export type OverridesDicts = {
 	transparencies: MeshIdTransparencyDict
 };
 
-export type TicketWithModelId = ITicket & { modelId: string }
+export type TicketWithModelId = ITicket & { modelId: string };

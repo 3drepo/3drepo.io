@@ -38,8 +38,8 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 	const { groupBy: groupByAsURLParam } = useParams<DashboardTicketsParams>();
 	const groupBy = GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByAsURLParam];
 
-	const onGroupNewTicket = (group: string) => (modelId: string) => {
-		// TODO - assign default group value to ticket instead of {} if !!group 
+	const onGroupNewTicket = (modelId: string) => {
+		// TODO - assign default group value to ticket instead of {} if !!group
 		onNewTicket(modelId, {});
 	};
 
@@ -54,7 +54,7 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 		);
 	}
 
-	if (groupBy === NONE_OPTION) return (<TicketsTableGroup ticketsWithModelId={filteredItems} onNewTicket={onGroupNewTicket(null)}  {...props} />);
+	if (groupBy === NONE_OPTION) return (<TicketsTableGroup ticketsWithModelId={filteredItems} onNewTicket={onGroupNewTicket} {...props} />);
 
 	const groups = groupTickets(groupBy, filteredItems);
 
@@ -66,7 +66,7 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 					defaultExpanded={!!ticketsWithModelId.length}
 					key={groupBy + groupName}
 				>
-					<TicketsTableGroup ticketsWithModelId={ticketsWithModelId} onNewTicket={onGroupNewTicket(null)} {...props} />
+					<TicketsTableGroup ticketsWithModelId={ticketsWithModelId} onNewTicket={onGroupNewTicket} {...props} />
 				</DashboardListCollapse>
 			))}
 		</Container>
