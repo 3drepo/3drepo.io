@@ -21,12 +21,11 @@ import { FormattedMessage } from 'react-intl';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
-import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import _ from 'lodash';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from './ticketsTableGroup/ticketsTableGroup.component';
-import { getGroupByOptions, GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, groupByDate, groupByList, NONE_OPTION } from '../ticketsTable.helper';
+import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, groupTickets, NONE_OPTION } from '../ticketsTable.helper';
 import { EmptyTicketsView } from '../../emptyTicketsView/emptyTicketsView.styles';
 import { Container } from './ticketsTableContent.styles';
 
@@ -41,7 +40,7 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 
 	const onGroupNewTicket = (group: string) => (modelId: string) => {
 		onNewTicket(modelId, {});
-	}
+	};
 
 	if (!filteredItems.length) {
 		return (
@@ -56,17 +55,7 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 
 	if (groupBy === NONE_OPTION) return (<TicketsTableGroup tickets={filteredItems} onNewTicket={onGroupNewTicket(null)}  {...props} />);
 
-	let groups: Record<string, ITicket[]>;
-	switch (groupBy) {
-		case BaseProperties.OWNER:
-			groups = _.groupBy(filteredItems, `properties.${BaseProperties.OWNER}`);
-			break;
-		case IssueProperties.DUE_DATE:
-			groups = groupByDate(filteredItems);
-			break;
-		default:
-			groups = groupByList(filteredItems, groupBy, getGroupByOptions(groupBy));
-	}
+	const groups = groupTickets(groupBy, filteredItems);
 
 	return (
 		<Container>

@@ -40,42 +40,6 @@ const getOptionsForGroupsWithDueDate = () => [
 
 const mapKeysToSnakeCase = (properties) => _.mapKeys(properties, (val, key) => _.snakeCase(key));
 
-export const groupByDate = (tickets: ITicket[]) => {
-	const groups = {};
-	// eslint-disable-next-line prefer-const
-	let [ticketsWithUnsetDueDate, remainingTickets] = _.partition(tickets, ({ properties }) => !properties[IssueProperties.DUE_DATE]);
-	groups[NO_DUE_DATE] = ticketsWithUnsetDueDate;
-
-	const dueDateOptions = getOptionsForGroupsWithDueDate();
-	const endOfCurrentWeek = new Date();
-
-	const ticketDueDateIsPassed = (ticket: ITicket) => ticket.properties[IssueProperties.DUE_DATE] < endOfCurrentWeek.getTime();
-
-	let currentWeekTickets;
-	while (dueDateOptions.length) {
-		[currentWeekTickets, remainingTickets] = _.partition(remainingTickets, ticketDueDateIsPassed);
-		groups[dueDateOptions.shift()] = currentWeekTickets;
-		endOfCurrentWeek.setDate(endOfCurrentWeek.getDate() + 7);
-	}
-	return groups;
-};
-
-export const groupByList = (tickets: ITicket[], groupType: string, groupValues: string[]) => {
-	const groups = {};
-	let remainingTickets = tickets;
-	let currentTickets = [];
-
-	groupValues.forEach((groupValue) => {
-		[currentTickets, remainingTickets] = _.partition(
-			remainingTickets,
-			({ properties, modules }) => ({ ...modules?.safetibase, ...properties })?.[groupType] === groupValue,
-		);
-		groups[groupValue] = currentTickets;
-	});
-	groups[UNSET] = remainingTickets;
-	return groups;
-};
-
 export const GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE = mapKeysToSnakeCase({
 	[NONE_OPTION]: NONE_OPTION,
 	[BaseProperties.OWNER]: BaseProperties.OWNER,
@@ -102,7 +66,49 @@ const GROUP_NAMES_BY_TYPE = mapKeysToSnakeCase({
 	[SafetibaseProperties.TREATMENT_STATUS]: TreatmentStatuses,
 });
 
-export const getGroupByOptions = (groupBy: string) => {
-	const optionsAsEnum = GROUP_NAMES_BY_TYPE[groupBy];
-	return _.values(optionsAsEnum);
+const groupByDate = (tickets: ITicket[]) => {
+	const groups = {};
+	// eslint-disable-next-line prefer-const
+	let [ticketsWithUnsetDueDate, remainingTickets] = _.partition(tickets, ({ properties }) => !properties[IssueProperties.DUE_DATE]);
+	groups[NO_DUE_DATE] = ticketsWithUnsetDueDate;
+
+	const dueDateOptions = getOptionsForGroupsWithDueDate();
+	const endOfCurrentWeek = new Date();
+
+	const ticketDueDateIsPassed = (ticket: ITicket) => ticket.properties[IssueProperties.DUE_DATE] < endOfCurrentWeek.getTime();
+
+	let currentWeekTickets;
+	while (dueDateOptions.length) {
+		[currentWeekTickets, remainingTickets] = _.partition(remainingTickets, ticketDueDateIsPassed);
+		groups[dueDateOptions.shift()] = currentWeekTickets;
+		endOfCurrentWeek.setDate(endOfCurrentWeek.getDate() + 7);
+	}
+	return groups;
+};
+
+const groupByList = (tickets: ITicket[], groupType: string, groupValues: string[]) => {
+	const groups = {};
+	let remainingTickets = tickets;
+	let currentTickets = [];
+
+	groupValues.forEach((groupValue) => {
+		[currentTickets, remainingTickets] = _.partition(
+			remainingTickets,
+			({ properties, modules }) => ({ ...modules?.safetibase, ...properties })?.[groupType] === groupValue,
+		);
+		groups[groupValue] = currentTickets;
+	});
+	groups[UNSET] = remainingTickets;
+	return groups;
+};
+
+export const groupTickets = (groupBy: string, tickets: ITicket[]): Record<string, ITicket[]> => {
+	switch (groupBy) {
+		case BaseProperties.OWNER:
+			return _.groupBy(tickets, `properties.${BaseProperties.OWNER}`);
+		case IssueProperties.DUE_DATE:
+			return groupByDate(tickets);
+		default:
+			return groupByList(tickets, groupBy, _.values(GROUP_NAMES_BY_TYPE[groupBy]));
+	}
 };
