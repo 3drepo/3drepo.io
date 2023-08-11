@@ -362,20 +362,13 @@ const testGetRevisions = () => {
 				void: true },
 		];
 
-		const formatRevisions = (revs) => {
-			revs.map((r) => {
-				const formattedRevision = r;
-				if (r.rFile) {
-					if (formattedRevision.rFile) {
-						formattedRevision.format = '.'.concat(formattedRevision.rFile[0].split('_').pop());
-						delete formattedRevision.rFile;
-					}
-				}
-				return formattedRevision;
-			});
-
-			return revs;
-		};
+		const formatRevisions = (revs) => revs.map(({ rFile, ...r }) => {
+			if (rFile) {
+				const format = '.'.concat(rFile[0].split('_').pop());
+				return { ...r, format };
+			}
+			return r;
+		});
 
 		test('should return non-void revisions if the container exists', async () => {
 			const teamspace = ServiceHelper.generateRandomString();

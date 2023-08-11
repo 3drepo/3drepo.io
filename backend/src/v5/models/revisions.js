@@ -23,7 +23,7 @@ const { templates } = require('../utils/responseCodes');
 const Revisions = {};
 
 const excludeVoids = { void: { $ne: true } };
-const excludeIncomplete = { incomplete: { $exists: false } };
+const excludeIncomplete = { incomplete: { $exists: true } };
 
 const collectionName = (model) => `${model}.history`;
 
