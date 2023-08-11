@@ -37,11 +37,11 @@ export const NewTicketMenu = ({ onContainerOrFederationClick, ...props }: NewTic
 					<FormattedMessage id="ticketTable.newTicket.select" defaultMessage="Select a Federation or Container" />
 				</Label>
 				{sortByName([...containers, ...federations]).map(({ _id, name }) => (
-					<MenuItem>
-						<ActionMenuItem onClick={() => onContainerOrFederationClick(_id)}>
-							{name}
-						</ActionMenuItem>
-					</MenuItem>
+					<ActionMenuItem key={_id}>
+						<MenuItem onClick={() => onContainerOrFederationClick(_id)}>
+								{name}
+						</MenuItem>
+					</ActionMenuItem>
 				))}
 			</MenuList>
 		</ActionMenu>
