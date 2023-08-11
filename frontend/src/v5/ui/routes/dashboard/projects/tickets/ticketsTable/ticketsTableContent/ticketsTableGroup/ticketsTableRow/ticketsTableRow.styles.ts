@@ -57,3 +57,8 @@ export const CellOwner = styled(Cell)`
 		height: 24px;
 	}
 `;
+
+export const UnassignedAssignees = styled.span`
+	color: ${({ theme }) => theme.palette.base.main};
+	font-size: 10px;
+`;

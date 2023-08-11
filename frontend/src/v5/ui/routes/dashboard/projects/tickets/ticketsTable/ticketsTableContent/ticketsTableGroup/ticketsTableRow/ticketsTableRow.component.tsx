@@ -27,7 +27,8 @@ import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, STATUS_MAP, TREATMENT_LEVELS_MAP 
 import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { Tooltip } from '@mui/material';
-import { Row, Cell, CellChipText, CellOwner, OverflowContainer } from './ticketsTableRow.styles';
+import { FormattedMessage } from 'react-intl';
+import { Row, Cell, CellChipText, CellOwner, OverflowContainer, UnassignedAssignees } from './ticketsTableRow.styles';
 
 export const TicketsTableRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
 	const { query } = useContext(SearchContext);
@@ -72,7 +73,14 @@ export const TicketsTableRow = ({ ticket, onClick }: { ticket: ITicket, onClick:
 				</Tooltip>
 			</Cell>
 			<Cell>
-				<AssigneesSelect value={assignees} multiple disabled />
+				{assignees?.length && (<AssigneesSelect value={assignees} multiple disabled />)}
+				{!assignees?.length && (
+					<OverflowContainer>
+						<UnassignedAssignees>
+							<FormattedMessage id="ticketsTable.row.assignees.unassigned" defaultMessage="Unassigned" />
+						</UnassignedAssignees>
+					</OverflowContainer>
+				)}
 			</Cell>
 			<CellOwner>
 				<UserPopoverCircle user={ownerAsUser} />
