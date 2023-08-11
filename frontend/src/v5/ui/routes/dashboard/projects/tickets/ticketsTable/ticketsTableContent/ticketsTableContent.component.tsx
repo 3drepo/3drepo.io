@@ -39,6 +39,7 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 	const groupBy = GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByAsURLParam];
 
 	const onGroupNewTicket = (group: string) => (modelId: string) => {
+		// TODO - assign default group value to ticket instead of {} if !!group 
 		onNewTicket(modelId, {});
 	};
 
@@ -65,7 +66,7 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 					defaultExpanded={!!ticketsWithModelId.length}
 					key={groupBy + groupName}
 				>
-					<TicketsTableGroup ticketsWithModelId={ticketsWithModelId} onNewTicket={onGroupNewTicket} {...props} />
+					<TicketsTableGroup ticketsWithModelId={ticketsWithModelId} onNewTicket={onGroupNewTicket(null)} {...props} />
 				</DashboardListCollapse>
 			))}
 		</Container>

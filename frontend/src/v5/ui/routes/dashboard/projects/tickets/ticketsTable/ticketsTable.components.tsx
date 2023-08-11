@@ -65,7 +65,6 @@ export const TicketsTable = () => {
 
 	const ticketsWithModelId = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
-	const [sidePanelMode, setSidePanelMode] = useState<'edit' | 'new' | null>(null);
 	const [sidePanelModelId, setSidePanelModelId] = useState<string>(null);
 	const [sidePanelTicket, setSidePanelTicket] = useState<Partial<ITicket>>({});
 	const [showCompleted, setShowCompleted] = useState(false);
@@ -82,17 +81,14 @@ export const TicketsTable = () => {
 
 	const onEditTicket = (modelId: string, ticket: Partial<ITicket>) => {
 		setSidePanelModelIdAndTicket(modelId, ticket);
-		setSidePanelMode('edit');
 	};
 
 	const onNewTicket = (modelId: string, ticket?: Partial<ITicket>) => {
 		setSidePanelModelIdAndTicket(modelId, ticket);
-		setSidePanelMode('new');
 	};
 
 	const onCloseSidePanel = () => {
 		setSidePanelModelIdAndTicket(null);
-		setSidePanelMode(null);
 	};
 
 	const filterTickets = (items, query: string) => {
@@ -175,9 +171,9 @@ export const TicketsTable = () => {
 				</FiltersContainer>
 			</FormProvider>
 			<TicketsTableContent onEditTicket={onEditTicket} onNewTicket={onNewTicket} />
-			<SidePanel open={!!sidePanelMode}>
+			<SidePanel open={!!sidePanelModelId}>
 				<SlidePanelHeader>
-					<OpenInViewerButton disabled={sidePanelMode !== 'edit'}>
+					<OpenInViewerButton disabled={!sidePanelTicket?._id}>
 						<FormattedMessage
 							id="ticketsTable.button.openInViewer"
 							defaultMessage="Open in viewer"
@@ -187,8 +183,8 @@ export const TicketsTable = () => {
 						<ExpandIcon />
 					</CircleButton>
 				</SlidePanelHeader>
-				{sidePanelMode === 'edit' && (<div>Editing ticket {sidePanelTicket.title}</div>)}
-				{sidePanelMode === 'new' && (<div>Attempting to create a new ticket for {sidePanelModelId}</div>)}
+				{sidePanelTicket?._id && (<div>Editing ticket {sidePanelTicket.title}</div>)}
+				{!sidePanelTicket?._id && (<div>Attempting to create a new ticket for {sidePanelModelId}</div>)}
 			</SidePanel>
 		</SearchContextComponent>
 	);
