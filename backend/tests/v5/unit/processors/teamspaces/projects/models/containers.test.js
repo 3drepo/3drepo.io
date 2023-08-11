@@ -344,15 +344,26 @@ const testDeleteContainer = () => {
 
 const testGetRevisions = () => {
 	describe('Get container revisions', () => {
-		const getRevisionList = () => [
-			{ _id: ServiceHelper.generateUUIDString(), author: 'user1', timestamp: new Date(), rFile: [`${ServiceHelper.generateUUIDString()}_${ServiceHelper.generateUUIDString()}_ifc`] },
-			{ _id: ServiceHelper.generateUUIDString(), author: 'user1', timestamp: new Date(), rFile: [`${ServiceHelper.generateUUIDString()}_${ServiceHelper.generateUUIDString()}_obj`] },
-			{ _id: ServiceHelper.generateUUIDString(), author: 'user1', timestamp: new Date() },
-			{ _id: ServiceHelper.generateUUIDString(), author: 'user1', timestamp: new Date(), void: true },
+		const revisions = [
+			{ _id: ServiceHelper.generateUUIDString(),
+				author: ServiceHelper.generateRandomString(),
+				timestamp: new Date(),
+				rFile: [`${ServiceHelper.generateUUIDString()}_${ServiceHelper.generateUUIDString()}_ifc`] },
+			{ _id: ServiceHelper.generateUUIDString(),
+				author: ServiceHelper.generateRandomString(),
+				timestamp: new Date(),
+				rFile: [`${ServiceHelper.generateUUIDString()}_${ServiceHelper.generateUUIDString()}_obj`] },
+			{ _id: ServiceHelper.generateUUIDString(),
+				author: ServiceHelper.generateRandomString(),
+				timestamp: new Date() },
+			{ _id: ServiceHelper.generateUUIDString(),
+				author: ServiceHelper.generateRandomString(),
+				timestamp: new Date(),
+				void: true },
 		];
 
-		const formatRevisions = (revisions) => {
-			revisions.map((r) => {
+		const formatRevisions = (revs) => {
+			revs.map((r) => {
 				const formattedRevision = r;
 				if (r.rFile) {
 					if (formattedRevision.rFile) {
@@ -363,11 +374,10 @@ const testGetRevisions = () => {
 				return formattedRevision;
 			});
 
-			return revisions;
+			return revs;
 		};
 
 		test('should return non-void revisions if the container exists', async () => {
-			const revisions = getRevisionList();
 			const teamspace = ServiceHelper.generateRandomString();
 			const container = ServiceHelper.generateRandomString();
 
@@ -382,7 +392,6 @@ const testGetRevisions = () => {
 		});
 
 		test('should return all revisions if the container exists', async () => {
-			const revisions = getRevisionList();
 			const teamspace = ServiceHelper.generateRandomString();
 			const container = ServiceHelper.generateRandomString();
 
