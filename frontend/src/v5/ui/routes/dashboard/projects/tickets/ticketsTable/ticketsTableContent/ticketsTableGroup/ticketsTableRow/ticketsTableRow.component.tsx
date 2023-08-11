@@ -28,7 +28,7 @@ import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopover
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { Row, Cell, CellChipText, CellOwner, OverflowContainer, UnassignedAssignees } from './ticketsTableRow.styles';
+import { Row, Cell, CellChipText, CellOwner, OverflowContainer, UnassignedAssignees, CellDate } from './ticketsTableRow.styles';
 
 export const TicketsTableRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
 	const { query } = useContext(SearchContext);
@@ -85,9 +85,9 @@ export const TicketsTableRow = ({ ticket, onClick }: { ticket: ITicket, onClick:
 			<CellOwner>
 				<UserPopoverCircle user={ownerAsUser} />
 			</CellOwner>
-			<Cell>
+			<CellDate>
 				<DueDateWithIcon value={dueDate} disabled />
-			</Cell>
+			</CellDate>
 			<CellChipText>
 				{priority && (<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />) }
 			</CellChipText>

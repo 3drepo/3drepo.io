@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { DueDateWithIconContainer } from '@controls/dueDate/dueDate.styles';
 import styled from 'styled-components';
 
 export const Row = styled.div`
@@ -37,7 +38,7 @@ export const Cell = styled.div`
 	background: ${({ theme }) => theme.palette.primary.contrast};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	height: 100%;
-	padding: 0 10%;
+	padding: 0 10px;
 	display: flex;
 	align-items: center;
 	justify-content: flex-start;
@@ -55,6 +56,12 @@ export const CellOwner = styled(Cell)`
 	.MuiAvatar-root {
 		width: 24px;
 		height: 24px;
+	}
+`;
+
+export const CellDate = styled(Cell)`
+	${DueDateWithIconContainer} {
+		height: 18px;
 	}
 `;
 
