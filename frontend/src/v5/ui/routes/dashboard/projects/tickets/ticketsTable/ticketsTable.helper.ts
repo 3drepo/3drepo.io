@@ -59,12 +59,12 @@ export const GROUP_BY_OPTIONS = {
 	[SafetibaseProperties.TREATMENT_STATUS]: formatMessage({ id: 'groupBy.treatmentStatus', defaultMessage: 'Treatment status' }),
 };
 
-const GROUP_NAMES_BY_TYPE = mapKeysToSnakeCase({
+const GROUP_NAMES_BY_TYPE = {
 	[IssueProperties.PRIORITY]: PriorityLevels,
 	[IssueProperties.STATUS]: TicketStatuses,
 	[SafetibaseProperties.LEVEL_OF_RISK]: RiskLevels,
 	[SafetibaseProperties.TREATMENT_STATUS]: TreatmentStatuses,
-});
+};
 
 const groupByDate = (tickets: TicketWithModelId[]) => {
 	const groups = {};
