@@ -21,6 +21,7 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Button } from '@controls/button';
 import { FormProvider, useForm } from 'react-hook-form';
+import _ from 'lodash';
 import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { TemplateFormSelect } from '../selectMenus/templateFormSelect.component';
 import { NONE_OPTION } from '../ticketsTable/ticketsTable.helper';
@@ -51,7 +52,7 @@ export const TicketsSelection = () => {
 			teamspace,
 			project,
 			template,
-			groupBy: NONE_OPTION,
+			groupBy: _.snakeCase(NONE_OPTION),
 		});
 	};
 

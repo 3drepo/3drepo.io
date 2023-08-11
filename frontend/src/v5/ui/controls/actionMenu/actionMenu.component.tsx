@@ -19,7 +19,7 @@ import { Popover } from '@mui/material';
 import { Menu, Container } from './actionMenu.styles';
 import { ActionMenuContext } from './actionMenuContext';
 
-type ActionMenuProps = {
+export type ActionMenuProps = {
 	className?: string;
 	children: ReactNode;
 	TriggerButton: any;

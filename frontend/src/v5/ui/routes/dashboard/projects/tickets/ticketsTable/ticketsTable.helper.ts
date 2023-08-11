@@ -21,8 +21,8 @@ import _ from 'lodash';
 import { PriorityLevels, RiskLevels, TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 
-export const NONE_OPTION = 'none';
-export const NoneOptionMessage = formatMessage({ id: 'tickets.selectOption.none', defaultMessage: 'None' });
+export const NONE_OPTION = 'None';
+export const NONE_OPTION_MESSAGE = formatMessage({ id: 'tickets.selectOption.none', defaultMessage: 'None' });
 
 const UNSET = formatMessage({ id: 'tickets.selectOption.property.unset', defaultMessage: 'Unset' });
 const NO_DUE_DATE = formatMessage({ id: 'groupBy.dueDate.unset', defaultMessage: 'No due date' });
@@ -68,7 +68,7 @@ export const groupByList = (tickets: ITicket[], groupType: string, groupValues: 
 	groupValues.forEach((groupValue) => {
 		[currentTickets, remainingTickets] = _.partition(
 			remainingTickets,
-			({ properties, modules }) => mapKeysToSnakeCase({ ...modules?.safetibase, ...properties })?.[groupType] === groupValue,
+			({ properties, modules }) => ({ ...modules?.safetibase, ...properties })?.[groupType] === groupValue,
 		);
 		groups[groupValue] = currentTickets;
 	});
@@ -76,14 +76,24 @@ export const groupByList = (tickets: ITicket[], groupType: string, groupValues: 
 	return groups;
 };
 
-export const GROUP_BY_OPTIONS = mapKeysToSnakeCase({
+export const GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE = mapKeysToSnakeCase({
+	[NONE_OPTION]: NONE_OPTION,
+	[BaseProperties.OWNER]: BaseProperties.OWNER,
+	[IssueProperties.DUE_DATE]: IssueProperties.DUE_DATE,
+	[IssueProperties.PRIORITY]: IssueProperties.PRIORITY,
+	[IssueProperties.STATUS]: IssueProperties.STATUS,
+	[SafetibaseProperties.LEVEL_OF_RISK]: SafetibaseProperties.LEVEL_OF_RISK,
+	[SafetibaseProperties.TREATMENT_STATUS]: SafetibaseProperties.TREATMENT_STATUS,
+});
+
+export const GROUP_BY_OPTIONS = {
 	[BaseProperties.OWNER]: formatMessage({ id: 'groupBy.owner', defaultMessage: 'Owner' }),
 	[IssueProperties.DUE_DATE]: formatMessage({ id: 'groupBy.dueDate', defaultMessage: 'Due date' }),
 	[IssueProperties.PRIORITY]: formatMessage({ id: 'groupBy.priority', defaultMessage: 'Priority' }),
 	[IssueProperties.STATUS]: formatMessage({ id: 'groupBy.status', defaultMessage: 'Status' }),
 	[SafetibaseProperties.LEVEL_OF_RISK]: formatMessage({ id: 'groupBy.levelOfRisk', defaultMessage: 'Level of risk' }),
 	[SafetibaseProperties.TREATMENT_STATUS]: formatMessage({ id: 'groupBy.treatmentStatus', defaultMessage: 'Treatment status' }),
-});
+};
 
 const GROUP_NAMES_BY_TYPE = mapKeysToSnakeCase({
 	[IssueProperties.PRIORITY]: PriorityLevels,

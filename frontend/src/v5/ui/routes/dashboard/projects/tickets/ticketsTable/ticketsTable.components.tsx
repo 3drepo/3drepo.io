@@ -32,6 +32,7 @@ import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { CircleButton } from '@controls/circleButton';
 import { getTicketIsCompleted } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
+import _ from 'lodash';
 import { JobsActions } from '@/v4/modules/jobs';
 import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
 import { useSearchParam } from '../../../../useSearchParam';
@@ -40,7 +41,8 @@ import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAnd
 import { GroupByFormSelect } from '../selectMenus/groupByFormSelect.component';
 import { TemplateFormSelect } from '../selectMenus/templateFormSelect.component';
 import { FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from '../tickets.styles';
-import { NONE_OPTION } from './ticketsTable.helper';
+import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE } from './ticketsTable.helper';
+import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 
 type FormType = {
 	containersAndFederations: string[],
@@ -56,26 +58,41 @@ export const TicketsTable = () => {
 		defaultValues: {
 			containersAndFederations: models?.split(',') || [],
 			template: templateURLParam,
-			groupBy: groupByURLParam || NONE_OPTION,
+			groupBy: GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByURLParam],
 		},
 	});
 	const { containersAndFederations, groupBy, template } = formData.watch();
 
 	const tickets = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
-	const [editingTicket, setEditingTicket] = useState<ITicket>(null);
-	const [isEditingTicket, setIsEditingTicket] = useState(false);
+	const [sidePanelMode, setSidePanelMode] = useState<'edit' | 'new' | null>(null);
+	const [sidePanelModelId, setSidePanelModelId] = useState<string>(null);
+	const [sidePanelTicket, setSidePanelTicket] = useState<Partial<ITicket>>({});
 	const [showCompleted, setShowCompleted] = useState(false);
 
 	const ticketsFilteredByTemplate = useMemo(() => {
 		const ticketsToShow = tickets.filter((t) => getTicketIsCompleted(t) === showCompleted);
-		if (template === NONE_OPTION) return ticketsToShow;
 		return ticketsToShow.filter(({ type }) => type === template);
 	}, [template, tickets, showCompleted]);
 
-	const onSetEditingTicket = (ticket: ITicket) => {
-		setEditingTicket(ticket);
-		setIsEditingTicket(true);
+	const setSidePanelModelIdAndTicket = (modelId: string, ticket: Partial<ITicket> = {}) => {
+		setSidePanelModelId(modelId);
+		setSidePanelTicket(ticket);
+	}
+
+	const onEditTicket = (modelId: string, ticket: Partial<ITicket>) => {
+		setSidePanelModelIdAndTicket(modelId, ticket);
+		setSidePanelMode('edit');
+	};
+
+	const onNewTicket = (modelId: string, ticket?: Partial<ITicket>) => {
+		setSidePanelModelIdAndTicket(modelId, ticket);
+		setSidePanelMode('new');
+	};
+
+	const onCloseSidePanel = () => {
+		setSidePanelModelIdAndTicket(null);
+		setSidePanelMode(null);
 	};
 
 	const filterTickets = (items, query: string) => {
@@ -102,7 +119,7 @@ export const TicketsTable = () => {
 		let newURL = generatePath(TICKETS_ROUTE, {
 			teamspace,
 			project,
-			groupBy,
+			groupBy: _.snakeCase(groupBy),
 			template,
 		});
 		if (models) {
@@ -143,31 +160,35 @@ export const TicketsTable = () => {
 						<SearchInput
 							placeholder={formatMessage({ id: 'ticketsTable.search.placeholder', defaultMessage: 'Search...' })}
 						/>
-						<NewTicketButton
-							startIcon={<AddCircleIcon />}
-							onClick={() => onSetEditingTicket(null)}
-							disabled={!templates.length}
-						>
-							<FormattedMessage id="ticketsTable.button.newTicket" defaultMessage="New Ticket" />
-						</NewTicketButton>
+						<NewTicketMenu
+							TriggerButton={(
+								<NewTicketButton
+									startIcon={<AddCircleIcon />}
+									disabled={!templates.length}
+								>
+									<FormattedMessage id="ticketsTable.button.newTicket" defaultMessage="New Ticket" />
+								</NewTicketButton>
+							)}
+							onContainerOrFederationClick={onNewTicket}
+						/>
 					</FlexContainer>
 				</FiltersContainer>
 			</FormProvider>
-			<TicketsTableContent setEditingTicket={onSetEditingTicket} />
-			<SidePanel open={isEditingTicket}>
+			<TicketsTableContent onEditTicket={onEditTicket} onNewTicket={onNewTicket} />
+			<SidePanel open={!!sidePanelMode}>
 				<SlidePanelHeader>
-					<OpenInViewerButton disabled={!editingTicket?._id}>
+					<OpenInViewerButton disabled={sidePanelMode !== 'edit'}>
 						<FormattedMessage
 							id="ticketsTable.button.openInViewer"
 							defaultMessage="Open in viewer"
 						/>
 					</OpenInViewerButton>
-					<CircleButton onClick={() => setIsEditingTicket(false)}>
+					<CircleButton onClick={onCloseSidePanel}>
 						<ExpandIcon />
 					</CircleButton>
 				</SlidePanelHeader>
-				{editingTicket?._id && (<div>Editing ticket {editingTicket.title}</div>)}
-				{!editingTicket?._id && (<div>attempting to create a new ticket</div>)}
+				{sidePanelMode === 'edit' && (<div>Editing ticket {sidePanelTicket.title}</div>)}
+				{sidePanelMode === 'new' && (<div>Attempting to create a new ticket {}</div>)}
 			</SidePanel>
 		</SearchContextComponent>
 	);

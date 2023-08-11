@@ -26,14 +26,22 @@ import _ from 'lodash';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from './ticketsTableGroup/ticketsTableGroup.component';
-import { getGroupByOptions, groupByDate, groupByList, NONE_OPTION } from '../ticketsTable.helper';
+import { getGroupByOptions, GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, groupByDate, groupByList, NONE_OPTION } from '../ticketsTable.helper';
 import { EmptyTicketsView } from '../../emptyTicketsView/emptyTicketsView.styles';
 import { Container } from './ticketsTableContent.styles';
 
-type TicketsTableContentProps = { setEditingTicket: (ticket: ITicket) => void };
-export const TicketsTableContent = (props: TicketsTableContentProps) => {
+type TicketsTableContentProps = {
+	onEditTicket: (ticket: Partial<ITicket>) => void;
+	onNewTicket: (modelId: string, ticket?: Partial<ITicket>) => void;
+};
+export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableContentProps) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { groupBy } = useParams<DashboardTicketsParams>();
+	const { groupBy: groupByAsURLParam } = useParams<DashboardTicketsParams>();
+	const groupBy = GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByAsURLParam];
+
+	const onGroupNewTicket = (group: string) => (modelId: string) => {
+		onNewTicket(modelId, {});
+	}
 
 	if (!filteredItems.length) {
 		return (
@@ -46,14 +54,14 @@ export const TicketsTableContent = (props: TicketsTableContentProps) => {
 		);
 	}
 
-	if (groupBy === NONE_OPTION) return (<TicketsTableGroup tickets={filteredItems} {...props} />);
+	if (groupBy === NONE_OPTION) return (<TicketsTableGroup tickets={filteredItems} onNewTicket={onGroupNewTicket(null)}  {...props} />);
 
 	let groups: Record<string, ITicket[]>;
 	switch (groupBy) {
-		case _.snakeCase(BaseProperties.OWNER):
+		case BaseProperties.OWNER:
 			groups = _.groupBy(filteredItems, `properties.${BaseProperties.OWNER}`);
 			break;
-		case _.snakeCase(IssueProperties.DUE_DATE):
+		case IssueProperties.DUE_DATE:
 			groups = groupByDate(filteredItems);
 			break;
 		default:
@@ -68,7 +76,7 @@ export const TicketsTableContent = (props: TicketsTableContentProps) => {
 					defaultExpanded={!!tickets.length}
 					key={groupBy + groupName}
 				>
-					<TicketsTableGroup tickets={tickets} {...props} />
+					<TicketsTableGroup tickets={tickets} onNewTicket={onGroupNewTicket} {...props} />
 				</DashboardListCollapse>
 			))}
 		</Container>

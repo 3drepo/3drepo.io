@@ -21,8 +21,14 @@ import { sortBy } from 'lodash';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { Header, Headers, Group, NewTicketRow, NewTicketText } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
+import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 
-export const TicketsTableGroup = ({ tickets, setEditingTicket }) => {
+type TicketTableGroupProps = {
+	tickets: ITicket[];
+	onEditTicket: (ticket: Partial<ITicket>) => void;
+	onNewTicket: (modelId: string) => void;
+}
+export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket }: TicketTableGroupProps) => {
 	const sortById = (tckts) => sortBy(tckts, ({ type, _id }) => type + _id);
 
 	return (
@@ -63,15 +69,20 @@ export const TicketsTableGroup = ({ tickets, setEditingTicket }) => {
 					<TicketsTableRow
 						key={ticket._id}
 						ticket={ticket}
-						onClick={() => setEditingTicket(ticket)}
+						onClick={onEditTicket}
 					/>
 				))}
-				<NewTicketRow onClick={() => setEditingTicket(null)}>
-					<AddCircleIcon />
-					<NewTicketText>
-						<FormattedMessage id="ticketTable.row.newTicket" defaultMessage="New ticket" />
-					</NewTicketText>
-				</NewTicketRow>
+				<NewTicketMenu
+					TriggerButton={(
+						<NewTicketRow>
+							<AddCircleIcon />
+							<NewTicketText>
+								<FormattedMessage id="ticketTable.row.newTicket" defaultMessage="New ticket" />
+							</NewTicketText>
+						</NewTicketRow>
+					)}
+					onContainerOrFederationClick={onNewTicket}
+				/>
 			</Group>
 		</>
 	);
