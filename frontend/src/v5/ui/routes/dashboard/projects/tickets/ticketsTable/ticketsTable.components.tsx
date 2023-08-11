@@ -36,9 +36,9 @@ import { JobsActions } from '@/v4/modules/jobs';
 import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
 import { useSearchParam } from '../../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE } from '../../../../routes.constants';
-import { ContainersAndFederationsFormSelect } from './selectMenus/containersAndFederationsFormSelect.component';
-import { GroupByFormSelect } from './selectMenus/groupByFormSelect.component';
-import { TemplateFormSelect } from './selectMenus/templateFormSelect.component';
+import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
+import { GroupByFormSelect } from '../selectMenus/groupByFormSelect.component';
+import { TemplateFormSelect } from '../selectMenus/templateFormSelect.component';
 import { FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from '../tickets.styles';
 import { NONE_OPTION } from './ticketsTable.helper';
 

@@ -20,7 +20,7 @@ import { FormattedMessage } from 'react-intl';
 import { FormSelect } from '@controls/inputs/formInputs.component';
 import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
-import { GROUP_BY_OPTIONS, NONE_OPTION, NoneOptionMessage } from '../ticketsTable.helper';
+import { GROUP_BY_OPTIONS, NONE_OPTION, NoneOptionMessage } from '../ticketsTable/ticketsTable.helper';
 
 const getEntriesSortedByValue = (obj) => _.sortBy(_.toPairs(obj), 1).reverse();
 

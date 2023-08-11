@@ -21,8 +21,8 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Button } from '@controls/button';
 import { FormProvider, useForm } from 'react-hook-form';
-import { ContainersAndFederationsFormSelect } from '../ticketsTable/selectMenus/containersAndFederationsFormSelect.component';
-import { TemplateFormSelect } from '../ticketsTable/selectMenus/templateFormSelect.component';
+import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
+import { TemplateFormSelect } from '../selectMenus/templateFormSelect.component';
 import { NONE_OPTION } from '../ticketsTable/ticketsTable.helper';
 
 type FormType = {
