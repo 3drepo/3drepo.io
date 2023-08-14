@@ -249,7 +249,7 @@ function* updateClipState({clipNumber}) {
 	}
 }
 
-function* goToExtent() {
+function* goToHomeView() {
 	try {
 		const defaultView = yield select(selectDefaultView);
 		if (defaultView) {
@@ -260,7 +260,7 @@ function* goToExtent() {
 			yield Viewer.goToExtent();
 		}
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('go', 'to extent', error));
+		yield put(DialogActions.showErrorDialog('go', 'to home view', error));
 	}
 }
 
@@ -443,7 +443,7 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.GET_HELICOPTER_SPEED, getHelicopterSpeed);
 	yield takeLatest(ViewerGuiTypes.INCREASE_HELICOPTER_SPEED, increaseHelicopterSpeed);
 	yield takeLatest(ViewerGuiTypes.DECREASE_HELICOPTER_SPEED, decreaseHelicopterSpeed);
-	yield takeLatest(ViewerGuiTypes.GO_TO_EXTENT, goToExtent);
+	yield takeLatest(ViewerGuiTypes.GO_TO_HOME_VIEW, goToHomeView);
 	yield takeLatest(ViewerGuiTypes.SET_CLIPPING_MODE, setClippingMode);
 	yield takeLatest(ViewerGuiTypes.UPDATE_CLIP_STATE, updateClipState);
 	yield takeLatest(ViewerGuiTypes.SET_CLIP_EDIT, setClipEdit);
