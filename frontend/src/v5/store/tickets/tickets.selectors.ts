@@ -19,6 +19,8 @@ import { createSelector } from 'reselect';
 import { orderBy } from 'lodash';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
+import { createPropertiesWithGroups } from './ticketsGroups.helpers';
+import { Properties } from './tickets.types';
 
 const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
 
@@ -41,10 +43,44 @@ export const selectTemplateById = createSelector(
 	(state, templates, templateId) => templates.find(({ _id }) => _id === templateId) || null,
 );
 
-export const selectTicketById = createSelector(
+export const selectTicketsGroups = createSelector(
+	selectTicketsDomain,
+	(state) => state.groupsByGroupId,
+);
+
+export const selectTicketByIdRaw = createSelector(
 	selectTickets,
 	(_, modelId, ticketId) => ticketId,
 	(tickets, ticketId) => tickets.find(({ _id }) => _id === ticketId) || null,
+);
+
+export const selectTicketById = createSelector(
+	selectTicketByIdRaw,
+	selectTicketsGroups,
+	(ticket, groups) => {
+		if (!ticket) {
+			return ticket;
+		}
+
+		let { properties } = ticket;
+		properties = createPropertiesWithGroups(properties, groups);
+		const finalTicket = {
+			...ticket,
+			properties,
+		};
+
+		if (ticket.modules) {
+			let { modules } = ticket;
+			modules = Object.keys(modules).reduce((partialModules, key) => {
+				// eslint-disable-next-line no-param-reassign
+				partialModules[key] = createPropertiesWithGroups(modules[key], groups);
+				return partialModules;
+			}, {} as Record<string, Properties>);
+
+			finalTicket.modules = modules;
+		}
+		return finalTicket;
+	},
 );
 
 export const selectRiskCategories = createSelector(

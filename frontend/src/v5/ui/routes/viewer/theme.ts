@@ -83,7 +83,7 @@ export const theme = createTheme(
 								},
 							},
 							'& input:not(.MuiAutocomplete-input)': {
-								padding: '0px 12px !important',
+								padding: '0px 12px',
 							},
 						},
 						formControl: {
@@ -91,6 +91,27 @@ export const theme = createTheme(
 								opacity: '1 !important',
 								color: COLOR.BASE_LIGHTER,
 							},
+						},
+					},
+				},
+				MuiAutocomplete: {
+					styleOverrides: {
+						root: {
+							'.MuiOutlinedInput-root .MuiAutocomplete-input': {
+								padding: 0,
+							},
+						},
+						endAdornment: {
+							marginRight: 5,
+
+							'& > button:last-child svg': {
+								width: 10,
+								pointerEvents: 'none',
+								color: COLOR.BASE_MAIN,
+							},
+						},
+						inputRoot: {
+							height: 26,
 						},
 					},
 				},

@@ -37,7 +37,7 @@ import {
 	StyledFormControl,
 	SuggestionButtonWrapper,
 } from '../riskDetails/riskDetails.styles';
-import { RiskSchema } from '../riskDetails/riskDetailsForm.component';
+import { RiskSchema } from '../riskDetails/riskDetails.schema';
 import { Content } from './treatmentFormTab.styles';
 
 const FIELDS_FOR_MITIGATION_SUGGESTIONS = [

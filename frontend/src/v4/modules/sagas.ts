@@ -56,6 +56,7 @@ import userManagementSaga from './userManagement/userManagement.sagas';
 import viewerSaga from './viewer/viewer.sagas';
 import viewerGuiSaga from './viewerGui/viewerGui.sagas';
 import viewpointsSaga from './viewpoints/viewpoints.sagas';
+import { sagaMiddleware } from './store';
 
 // <-- IMPORT MODULE SAGA -->
 

@@ -19,8 +19,8 @@ import { useRouteMatch, useLocation, Switch, Redirect } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { formatMessage } from '@/v5/services/intl';
 import { NotFound } from '@/v5/ui/routes/notFound';
-import { DashboardLayout } from '@components/dashboard/dashboardLayout';
 import { ViewerCanvas } from '@/v4/routes/viewerCanvas';
+import { DashboardProjectLayout } from '@components/dashboard/dashboardProjectLayout/dashboardProjectLayout.component';
 import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
 import { Route } from '@/v5/services/routing/route.component';
 import { AuthenticatedRoute } from '@/v5/services/routing/authenticatedRoute.component';
@@ -29,10 +29,23 @@ import { PasswordForgot } from '../login/passwordForgot';
 import { PasswordChange } from '../login/passwordChange';
 import { TeamspaceSelection } from '../teamspaceSelection';
 import { TeamspaceContent } from './teamspaces/teamspaceContent/teamspaceContent.component';
-import { ProjectContent } from './projects';
+import { ProjectContent } from './projects/projectContent/projectContent';
 import { Login } from '../login';
 import { Viewer } from '../viewer/viewer';
-import { VIEWER_ROUTE } from '../routes.constants';
+import {
+	DASHBOARD_ROUTE,
+	LOGIN_PATH,
+	PASSWORD_CHANGE_PATH,
+	PASSWORD_FORGOT_PATH,
+	PROJECT_ROUTE_BASE,
+	PROJECT_ROUTE_BASE_TAB,
+	REGISTER_VERIFY_PATH,
+	SIGN_UP_PATH,
+	SIGN_UP_SSO_PATH,
+	TEAMSPACE_ROUTE_BASE,
+	TEAMSPACE_ROUTE_BASE_TAB,
+	VIEWER_ROUTE,
+} from '../routes.constants';
 import { LegalRoutes } from '../legal';
 import { UserSignup } from '../userSignup/userSignup.component';
 import { UserVerification } from '../userVerification/userVerification.component';
@@ -48,59 +61,59 @@ export const MainRoute = () => {
 			<GlobalStyle />
 			<ViewerCanvas location={{ pathname }} />
 			<Switch>
-				<Route title={formatMessage({ id: 'pageTitle.login', defaultMessage: 'Log in' })} exact path={`${path}/login`}>
+				<Route title={formatMessage({ id: 'pageTitle.login', defaultMessage: 'Log in' })} exact path={LOGIN_PATH}>
 					<Login />
 				</Route>
-				<Route title={formatMessage({ id: 'pageTitle.signUp', defaultMessage: 'Create Account' })} exact path={`${path}/signup`}>
+				<Route title={formatMessage({ id: 'pageTitle.signUp', defaultMessage: 'Create Account' })} exact path={SIGN_UP_PATH}>
 					<UserSignup />
 				</Route>
-				<Route title={formatMessage({ id: 'pageTitle.signUp', defaultMessage: 'Create Account' })} exact path={`${path}/signup-sso`}>
+				<Route title={formatMessage({ id: 'pageTitle.signUp', defaultMessage: 'Create Account' })} exact path={SIGN_UP_SSO_PATH}>
 					<UserSignupSSO />
 				</Route>
-				<Route title={formatMessage({ id: 'pageTitle.userVerification', defaultMessage: 'Verify Email' })} exact path={`${path}/register-verify`}>
+				<Route title={formatMessage({ id: 'pageTitle.userVerification', defaultMessage: 'Verify Email' })} exact path={REGISTER_VERIFY_PATH}>
 					<UserVerification />
 				</Route>
-				<Route title={formatMessage({ id: 'pageTitle.passwordForgot', defaultMessage: 'Forgotten Password' })} exact path={`${path}/password-forgot`}>
+				<Route title={formatMessage({ id: 'pageTitle.passwordForgot', defaultMessage: 'Forgotten Password' })} exact path={PASSWORD_FORGOT_PATH}>
 					<PasswordForgot />
 				</Route>
-				<Route title={formatMessage({ id: 'pageTitle.passwordChange', defaultMessage: 'Change Password' })} exact path={`${path}/password-change`}>
+				<Route title={formatMessage({ id: 'pageTitle.passwordChange', defaultMessage: 'Change Password' })} exact path={PASSWORD_CHANGE_PATH}>
 					<PasswordChange />
 				</Route>
 				<Route exact path={`${path}/(terms|privacy|cookies)`}>
 					<LegalRoutes path={path} />
 				</Route>
-				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.teamspaceSelection', defaultMessage: 'Teamspaces' })} exact path={`${path}/dashboard/`}>
+				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.teamspaceSelection', defaultMessage: 'Teamspaces' })} exact path={DASHBOARD_ROUTE}>
 					<TeamspaceSelection />
 				</AuthenticatedRoute>
-				<AuthenticatedRoute exact path={`${path}/dashboard/:teamspace/(t|t/.*)?`}>
+				<AuthenticatedRoute exact path={`${TEAMSPACE_ROUTE_BASE}/(t|t/.*)?`}>
 					<TeamspaceLayout>
 						<Switch>
-							<Route exact path={`${path}/dashboard/:teamspace`}>
+							<Route exact path={TEAMSPACE_ROUTE_BASE}>
 								<Redirect to={`${discardSlash(pathname)}/t/projects`} />
 							</Route>
-							<Route exact path={`${path}/dashboard/:teamspace/t`}>
+							<Route exact path={TEAMSPACE_ROUTE_BASE_TAB}>
 								<Redirect to={`${discardSlash(pathname)}/projects`} />
 							</Route>
-							<Route path={`${path}/dashboard/:teamspace/`}>
+							<Route path={`${TEAMSPACE_ROUTE_BASE}/`}>
 								<TeamspaceContent />
 							</Route>
 						</Switch>
 					</TeamspaceLayout>
 				</AuthenticatedRoute>
-				<AuthenticatedRoute path={`${path}/dashboard/:teamspace/:project`}>
-					<DashboardLayout>
+				<AuthenticatedRoute path={PROJECT_ROUTE_BASE}>
+					<DashboardProjectLayout>
 						<Switch>
-							<Route exact path={`${path}/dashboard/:teamspace/:project`}>
+							<Route exact path={PROJECT_ROUTE_BASE}>
 								<Redirect to={`${discardSlash(pathname)}/t/federations`} />
 							</Route>
-							<Route exact path={`${path}/dashboard/:teamspace/:project/t`}>
+							<Route exact path={PROJECT_ROUTE_BASE_TAB}>
 								<Redirect to={`${discardSlash(pathname)}/federations`} />
 							</Route>
-							<Route path={`${path}/dashboard/:teamspace/:project`}>
+							<Route path={PROJECT_ROUTE_BASE}>
 								<ProjectContent />
 							</Route>
 						</Switch>
-					</DashboardLayout>
+					</DashboardProjectLayout>
 				</AuthenticatedRoute>
 				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.viewer', defaultMessage: ':containerOrFederation :revision - Viewer' })} path={VIEWER_ROUTE}>
 					<DashboardViewerLayout>
@@ -111,9 +124,7 @@ export const MainRoute = () => {
 					<Redirect to={`${discardSlash(pathname)}/dashboard`} />
 				</AuthenticatedRoute>
 				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })} path="*">
-					<DashboardLayout>
-						<NotFound />
-					</DashboardLayout>
+					<NotFound />
 				</AuthenticatedRoute>
 			</Switch>
 		</>

@@ -19,17 +19,28 @@ import { AuthTemplate } from '@components/authTemplate';
 import { Gap } from '@controls/gap';
 import { SubmitButton } from '@controls/submitButton';
 import { FormattedMessage } from 'react-intl';
+import { SSOErrorCode } from '@/v5/services/api/sso';
 import { UserSignupMain } from '../userSignup.styles';
 import { Title, Container as FormContainer, LoginPrompt, LoginPromptLink } from '../userSignupForm/userSignupForm.styles';
 import { Container, Link } from './userSignUpSSO.styles';
 
-export const UserSignupSSOError = () => (
+export const UserSignupSSOError = ({ error }: { error: string }) => (
 	<AuthTemplate>
 		<Container>
 			<UserSignupMain>
 				<FormContainer>
 					<Title>
-						<FormattedMessage id="userSignupSSO.error.alreadyRegistered" defaultMessage="It looks like you already have an account with us..." />
+						{error === SSOErrorCode.EXISTING_USERNAME ? (
+							<FormattedMessage
+								id="userSignupSSO.error.usernameAlreadyTaken"
+								defaultMessage="It looks like the selected username is already taken..."
+							/>
+						) : (
+							<FormattedMessage
+								id="userSignupSSO.error.alreadyRegistered"
+								defaultMessage="It looks like you already have an account with us..."
+							/>
+						)}
 					</Title>
 					<FormattedMessage
 						id="userSignupSSO.error.linkAccountMessage"
@@ -55,5 +66,4 @@ export const UserSignupSSOError = () => (
 			</UserSignupMain>
 		</Container>
 	</AuthTemplate>
-
 );

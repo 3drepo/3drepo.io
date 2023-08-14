@@ -38,6 +38,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { SearchContextType, SearchContext } from '@controls/search/searchContext';
+import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 
 type IFederationsList = {
@@ -68,7 +69,7 @@ export const FederationsList = ({
 	return (
 		<Container>
 			<DashboardListCollapse
-				title={<>{title} {!isListPending && `(${federations.length})`}</>}
+				title={<>{title} {!isListPending && <CircledNumber>{federations.length}</CircledNumber>}</>}
 				tooltipTitles={titleTooltips}
 				isLoading={areStatsPending}
 				sideElement={(

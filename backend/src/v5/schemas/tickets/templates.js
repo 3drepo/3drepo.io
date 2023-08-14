@@ -53,8 +53,10 @@ const pinColSchema = Yup.lazy((val) => {
 	});
 });
 
+const blackListedChrsRegex = /^[^.,[\]]*$/;
+
 const propSchema = Yup.object().shape({
-	name: nameSchema,
+	name: types.strings.title.required().min(1).matches(blackListedChrsRegex),
 	type: Yup.string().oneOf(Object.values(propTypes)).required(),
 	deprecated: defaultFalse,
 	required: defaultFalse,
@@ -122,7 +124,7 @@ const propertyArray = Yup.array().of(propSchema).default([]).test('Property name
 });
 
 const moduleSchema = Yup.object().shape({
-	name: nameSchema.notOneOf(Object.values(presetModules)),
+	name: types.strings.title.notOneOf(Object.values(presetModules)).matches(blackListedChrsRegex),
 	type: Yup.string().oneOf(Object.values(presetModules)),
 	deprecated: defaultFalse,
 	properties: propertyArray.when('type', (type, schema) => {

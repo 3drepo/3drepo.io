@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { camelCase, isEmpty, mapKeys } from 'lodash';
+import { camelCase, isEmpty, isEqual, isObject, mapKeys } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
@@ -25,7 +25,8 @@ import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
-import { EditableTicket, ITemplate, ITicket, Viewpoint } from './tickets.types';
+import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
+import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 
 export const modelIsFederation = (modelId: string) => (
 	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
@@ -125,7 +126,7 @@ const moduleTypeProperties = {
 	shapes: { title: formatMessage({ id: 'customTicket.panel.shapes', defaultMessage: 'Shapes' }), Icon: ShapesIcon },
 };
 
-export const getModulePanelTitle = (module) => {
+export const getModulePanelProps = (module) => {
 	if (module.name) return { title: module.name, Icon: CustomModuleIcon };
 	return moduleTypeProperties[module.type];
 };
@@ -161,26 +162,83 @@ export const getImgSrc = (imgData) => {
 	return addBase64Prefix(imgData);
 };
 
+const overrideHasEditedGroup = (override: GroupOverride, oldOverrides: GroupOverride[]) => {
+	const overrideId = (override.group as Group)._id;
+	if (!overrideId) return false;
+
+	const oldGroup = oldOverrides.find(({ group }) => (group as Group)._id === overrideId).group;
+	return !isEqual(oldGroup, override.group);
+};
+
+const findOverrideWithEditedGroup = (values, oldValues, propertiesDefinitions) => {
+	if (!values) return null;
+
+	let overrideWithEditedGroup;
+	Object.keys(values).forEach((key) => {
+		const definition = propertiesDefinitions.find((def) => def.name === key);
+		if (definition?.type === 'view') {
+			const viewValue: Viewpoint | undefined = values[key];
+			const oldValue: Viewpoint | undefined = oldValues?.[key];
+
+			overrideWithEditedGroup ||= viewValue?.state?.colored?.find((o) => overrideHasEditedGroup(o, oldValue?.state?.colored || []))
+				|| viewValue?.state?.hidden?.find((o) => overrideHasEditedGroup(o, oldValue?.state?.hidden || []));
+		}
+	});
+
+	return overrideWithEditedGroup;
+};
+
+export const findEditedGroup = (values: Partial<ITicket>, ticket: ITicket, template) => {
+	let overrideWithEditedGroup;
+	if (values.properties) {
+		overrideWithEditedGroup = findOverrideWithEditedGroup(values.properties, ticket.properties, template.properties);
+	}
+
+	if (values.modules) {
+		template?.modules?.forEach(({ type, name, properties }) => {
+			const module = type || name;
+			overrideWithEditedGroup ||= findOverrideWithEditedGroup(values.modules[module], ticket.modules[module], properties);
+		});
+	}
+
+	return overrideWithEditedGroup?.group;
+};
+
+const getSanitizedOverride = ({ group, ...rest }: GroupOverride) => ({ ...rest, group: getSanitizedSmartGroup((group as Group)?._id || group) });
+
 const sanitizeViewValues = (values, oldValues, propertiesDefinitions) => {
-	if (!values) return values;
+	if (!values) return;
 
 	Object.keys(values).forEach((key) => {
 		const definition = propertiesDefinitions.find((def) => def.name === key);
 		if (definition?.type === 'view') {
 			const viewValue:Viewpoint | undefined = values[key];
-			const oldValue:Viewpoint | undefined = oldValues[key];
+			const oldValue:Viewpoint | undefined = oldValues?.[key];
+
+			if (!viewValue) return;
 
 			if (isResourceId(viewValue?.screenshot)) {
 				delete viewValue.screenshot;
 			}
 
-			if (viewValue && !viewValue.camera && oldValue?.camera) {
+			if (!viewValue.camera && oldValue?.camera) {
 				viewValue.camera = null;
 				viewValue.clippingPlanes = null;
 			}
+
+			if (!viewValue.state && oldValue?.state) {
+				viewValue.state = null;
+			}
+
+			if (viewValue.state?.colored) {
+				viewValue.state.colored = viewValue.state.colored.map(getSanitizedOverride);
+			}
+
+			if (viewValue.state?.hidden) {
+				viewValue.state.hidden = viewValue.state.hidden.map(getSanitizedOverride);
+			}
 		}
 	});
-	return values;
 };
 
 export const sanitizeViewVals = (values:Partial<ITicket>, ticket:ITicket, template) => {
@@ -193,7 +251,6 @@ export const sanitizeViewVals = (values:Partial<ITicket>, ticket:ITicket, templa
 			sanitizeViewValues(values.modules[module.name], ticket.modules[module.name], module.properties);
 		}));
 	}
-	return values;
 };
 
 export const templateAlreadyFetched = (template: ITemplate) => {
@@ -202,3 +259,25 @@ export const templateAlreadyFetched = (template: ITemplate) => {
 };
 
 export const getPropertiesInCamelCase = (properties) => mapKeys(properties, (_, key) => camelCase(key));
+
+const fillEmptyOverrides = (values: Partial<ITicket>) => {
+	Object.values(values).forEach((value) => {
+		if (isObject(value) && 'state' in value) {
+			const viewValue: Viewpoint | undefined = value;
+
+			viewValue.state ||= {} as any;
+			viewValue.state.colored ||= [];
+			viewValue.state.hidden ||= [];
+		}
+	});
+};
+
+export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
+	if (values.properties) {
+		fillEmptyOverrides(values.properties);
+	}
+
+	if (values.modules) {
+		Object.values(values.modules).forEach(fillEmptyOverrides);
+	}
+};

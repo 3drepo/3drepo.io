@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import axios from 'axios';
-import api from './';
+import { API as api } from './default';
 
 /**
  * Get teamspace
