@@ -37,7 +37,7 @@ import { GroupsActions } from '../groups';
 import { selectIssuesMap, IssuesActions } from '../issues';
 import { JobsActions } from '../jobs';
 import { MeasurementsActions } from '../measurements';
-import { selectCurrentRevisionId, selectSettings, ModelActions, ModelTypes } from '../model';
+import { selectCurrentRevisionId, selectSettings, ModelActions, ModelTypes, selectDefaultView } from '../model';
 import { PresentationActions } from '../presentation';
 import { selectRisksMap, RisksActions } from '../risks';
 import { selectUrlParams } from '../router/router.selectors';
@@ -45,7 +45,7 @@ import { SequencesActions } from '../sequences';
 import { StarredActions } from '../starred';
 import { dispatch } from '../store';
 import { TreeActions } from '../tree';
-import { selectInitialView, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
+import { selectInitialView, selectViewpointsDomain, selectViewpointsList, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
 import { ViewerGuiActions, ViewerGuiTypes } from './viewerGui.redux';
 import {
 	selectClipNumber,
@@ -251,7 +251,14 @@ function* updateClipState({clipNumber}) {
 
 function* goToExtent() {
 	try {
-		yield Viewer.goToExtent();
+		const defaultView = yield select(selectDefaultView);
+		if (defaultView) {
+			const { teamspace, model } = yield select(selectUrlParams);
+			const { viewpointsMap } = yield select(selectViewpointsDomain);
+			yield put(ViewpointsActions.showViewpoint(teamspace, model, viewpointsMap[defaultView.id], false));
+		} else {
+			yield Viewer.goToExtent();
+		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('go', 'to extent', error));
 	}
