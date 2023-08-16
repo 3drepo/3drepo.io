@@ -16,7 +16,10 @@
  */
 /* eslint-disable implicit-arrow-linebreak */
 
-import { EditableTicket, ITicket } from '@/v5/store/tickets/tickets.types';
+import { EditableTicket, Group, ITicket } from '@/v5/store/tickets/tickets.types';
+import { fillOverridesIfEmpty } from '@/v5/store/tickets/tickets.helpers';
+import { getMeshIDsByQuery } from '@/v4/services/api';
+import { meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
 import { subscribeToRoomEvent } from './realtime.service';
 import { TicketsActionsDispatchers } from '../actionsDispatchers';
 
@@ -25,7 +28,10 @@ export const enableRealtimeContainerUpdateTicket = (teamspace: string, project: 
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
 		'containerUpdateTicket',
-		(ticket: Partial<EditableTicket>) => TicketsActionsDispatchers.upsertTicketSuccess(containerId, ticket),
+		(ticket: Partial<EditableTicket>) => {
+			fillOverridesIfEmpty(ticket);
+			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket);
+		},
 	)
 );
 
@@ -33,7 +39,22 @@ export const enableRealtimeContainerNewTicket = (teamspace: string, project: str
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
 		'containerNewTicket',
-		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketSuccess(containerId, ticket),
+		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket),
+	)
+);
+
+export const enableRealtimeContainerUpdateTicketGroup = (teamspace: string, project: string, containerId: string, revision: string) => (
+	subscribeToRoomEvent(
+		{ teamspace, project, model: containerId },
+		'containerUpdateTicketGroup',
+		async (group: Group) => {
+			if (group.rules) {
+				const { data } = await getMeshIDsByQuery(teamspace, containerId, group.rules, revision);
+				// eslint-disable-next-line no-param-reassign
+				group.objects = meshObjectsToV5GroupNode(data);
+			}
+			TicketsActionsDispatchers.updateTicketGroupSuccess(group);
+		},
 	)
 );
 
@@ -42,7 +63,10 @@ export const enableRealtimeFederationUpdateTicket = (teamspace: string, project:
 	subscribeToRoomEvent(
 		{ teamspace, project, model: federationId },
 		'federationUpdateTicket',
-		(ticket: Partial<EditableTicket>) => TicketsActionsDispatchers.upsertTicketSuccess(federationId, ticket),
+		(ticket: Partial<EditableTicket>) => {
+			fillOverridesIfEmpty(ticket);
+			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, federationId, ticket);
+		},
 	)
 );
 
@@ -50,6 +74,21 @@ export const enableRealtimeFederationNewTicket = (teamspace: string, project: st
 	subscribeToRoomEvent(
 		{ teamspace, project, model: federationId },
 		'federationNewTicket',
-		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketSuccess(federationId, ticket),
+		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, federationId, ticket),
+	)
+);
+
+export const enableRealtimeFederationUpdateTicketGroup = (teamspace: string, project: string, federationId: string, revision: string) => (
+	subscribeToRoomEvent(
+		{ teamspace, project, model: federationId },
+		'federationUpdateTicketGroup',
+		async (group: Group) => {
+			if (group.rules) {
+				const { data } = await getMeshIDsByQuery(teamspace, federationId, group.rules, revision);
+				// eslint-disable-next-line no-param-reassign
+				group.objects = meshObjectsToV5GroupNode(data);
+			}
+			TicketsActionsDispatchers.updateTicketGroupSuccess(group);
+		},
 	)
 );

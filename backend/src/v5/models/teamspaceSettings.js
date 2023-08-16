@@ -19,6 +19,8 @@ const {
 	ADD_ONS,
 	DEFAULT_RISK_CATEGORIES,
 	DEFAULT_TOPIC_TYPES,
+	SECURITY,
+	SECURITY_SETTINGS,
 	SUBSCRIPTION_TYPES,
 } = require('./teamspaces.constants');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
@@ -44,6 +46,39 @@ TeamspaceSetting.getTeamspaceSetting = async (ts, projection) => {
 		throw templates.teamspaceNotFound;
 	}
 	return tsDoc;
+};
+
+TeamspaceSetting.updateSecurityRestrictions = async (ts, ssoRestricted, whiteListDomains) => {
+	const query = { _id: ts };
+
+	const action = {};
+
+	if (ssoRestricted !== undefined) {
+		if (ssoRestricted) {
+			action.$set = { [`${SECURITY}.${SECURITY_SETTINGS.SSO_RESTRICTED}`]: true };
+		} else {
+			action.$unset = { [`${SECURITY}.${SECURITY_SETTINGS.SSO_RESTRICTED}`]: 1 };
+		}
+	}
+
+	if (whiteListDomains !== undefined) {
+		if (whiteListDomains) {
+			action.$set = action.$set ?? {};
+			action.$set[`${SECURITY}.${SECURITY_SETTINGS.DOMAIN_WHITELIST}`] = whiteListDomains;
+		} else {
+			action.$unset = action.$unset ?? {};
+			action.$unset[`${SECURITY}.${SECURITY_SETTINGS.DOMAIN_WHITELIST}`] = 1;
+		}
+	}
+
+	if (Object.keys(action).length) {
+		await teamspaceSettingUpdate(ts, query, action);
+	}
+};
+
+TeamspaceSetting.getSecurityRestrictions = async (ts) => {
+	const data = await TeamspaceSetting.getTeamspaceSetting(ts, { [SECURITY]: 1 });
+	return data[SECURITY] ?? {};
 };
 
 TeamspaceSetting.getSubscriptions = async (ts) => {
@@ -123,7 +158,22 @@ TeamspaceSetting.getTeamspaceAdmins = async (teamspace) => {
 
 TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username) => {
 	const query = { user: username, 'roles.db': teamspace };
-	const userDoc = await teamspaceQuery(query, { _id: 1 });
+	const userDoc = await teamspaceQuery(query, { _id: 1, customData: { sso: 1, email: 1 } });
+	if (!userDoc) return false;
+
+	const restrictions = await TeamspaceSetting.getSecurityRestrictions(teamspace);
+
+	if (restrictions[SECURITY_SETTINGS.SSO_RESTRICTED] && !userDoc.customData.sso) {
+		throw templates.ssoRestricted;
+	}
+
+	if (restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST]) {
+		const userDomain = userDoc.customData.email.split('@')[1].toLowerCase();
+		if (!restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST].includes(userDomain)) {
+			throw templates.domainRestricted;
+		}
+	}
+
 	return !!userDoc;
 };
 

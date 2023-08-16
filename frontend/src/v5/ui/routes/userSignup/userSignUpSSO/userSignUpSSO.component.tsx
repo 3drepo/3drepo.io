@@ -55,13 +55,15 @@ export const UserSignupSSO = () => {
 	const { captcha_client_key } = clientConfigService;
 
 	if (searchParams.get('signupPost')) {
-		if (!searchParams.get('error') || searchParams.get('error') === SSOErrorCode.EMAIL_EXISTS_WITH_SSO) {
+		const error = searchParams.get('error');
+		searchParams.get('error');
+		if (!error || error === SSOErrorCode.EMAIL_EXISTS_WITH_SSO) {
 			loginWithSSO();
 			return null;
 		}
 
-		if (searchParams.get('error')) {
-			return (<UserSignupSSOError />);
+		if (error) {
+			return (<UserSignupSSOError error={error} />);
 		}
 	}
 

@@ -30,7 +30,6 @@ import { viewerRoute } from '@/v5/services/routing/routing';
 
 import { FONT_WEIGHT } from '../../../../../styles';
 import { SmallIconButton } from '../../../../components/smallIconButon/smallIconButton.component';
-import notificationsContainer from '../../notifications.container';
 import { Container, Item, ItemSecondaryAction, ItemText } from './notificationItem.styles';
 
 export interface INotification {

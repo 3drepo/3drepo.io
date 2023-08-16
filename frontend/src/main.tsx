@@ -25,7 +25,7 @@ import '@/v4/services/fontAwesome';
 import 'simplebar/dist/simplebar.min.css';
 
 import 'simplebar';
-import { dispatch, history, store } from '@/v4/modules/store';
+import { dispatch, history, sagaMiddleware, store } from '@/v4/modules/store';
 import V4Root from '@/v4/routes/index';
 import { Root as V5Root } from '@/v5/ui/routes';
 
@@ -38,10 +38,12 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Version, VersionContext } from './versionContext';
 import { getSocket, initializeSocket, SocketEvents, subscribeToSocketEvent } from './v5/services/realtime/realtime.service';
-import { setSocketIdHeader } from './v4/services/api';
 import { setSocket } from './v4/modules/chat/chat.sagas';
 import { ROUTES } from './v4/constants/routes';
 import { LOGIN_PATH as V5_LOGIN_PATH, SIGN_UP_PATH as V5_SIGN_UP_PATH } from './v5/ui/routes/routes.constants';
+import configAxios from './v4/services/api/config-axios';
+import { setSocketIdHeader } from './v5/services/api/default';
+import rootSaga from './v4/modules/sagas';
 
 window.UnityUtil = UnityUtil;
 
@@ -101,6 +103,11 @@ const initApp = () => {
 	}
 
 	clientConfigService.logAppVersion();
+
+	configAxios();
+	if (process.env.NODE_ENV !== 'test') {
+		sagaMiddleware.run(rootSaga);
+	}
 };
 
 initApp();

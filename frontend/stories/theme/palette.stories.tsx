@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 /* eslint-disable max-len */
-import { GroupIcon } from '@/v5/ui/routes/viewer/groups/groupItem/groupItem.styles';
+import { GroupIcon } from '@/v5/ui/routes/viewer/groups/groupItem/groupIcon/groupIcon.styles';
 import { theme } from '@/v5/ui/themes/theme';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { capitalise, paletteVariants } from './helper';

@@ -17,11 +17,9 @@
 
 import { PureComponent } from 'react';
 
-import Tabs from '@mui/material/Tabs';
 import Tooltip from '@mui/material/Tooltip';
 import { withFormik, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
-import * as Yup from 'yup';
 import { isV5 } from '@/v4/helpers/isV5';
 
 import {
@@ -33,14 +31,14 @@ import {
 	ISSUE_TABS as V4_ISSUE_TABS,
 	V5_ISSUE_TABS,
 } from '../../../../../../constants/issues';
-import { LONG_TEXT_CHAR_LIM, VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
-import { canChangeAssigned, canChangeBasicProperty, canComment } from '../../../../../../helpers/issues';
-import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
+import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
+import { canChangeAssigned, canComment } from '../../../../../../helpers/issues';
 import { AttachmentsFormTab } from '../../../risks/components/attachmentsFormTab/attachmentsFormTab.component';
 import { SequencingFormTab } from '../../../risks/components/sequencingFormTab/sequencingFormTab.component';
 import { ShapesFormTab } from '../../../risks/components/shapesFormTab/shapesFormTab.component';
 import { MainIssueFormTab } from '../mainIssueFormTab/mainIssueFormTab.component';
 import { StyledTab, StyledTabs, TabContent } from './issueDetails.styles';
+import { IssueSchema } from './issueDetails.schema';
 
 interface IProps {
 	issue: any;
@@ -91,10 +89,6 @@ interface IState {
 	isSaving: boolean;
 	activeTab: string;
 }
-
-export const IssueSchema = Yup.object().shape({
-	desc: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
-});
 
 const ISSUE_TABS = isV5() ? V5_ISSUE_TABS : V4_ISSUE_TABS;
 class IssueDetailsFormComponent extends PureComponent<IProps, IState> {

@@ -17,6 +17,10 @@
 
 "use strict";
 
+const { v5Path } = require("../../interop");
+
+const { hasAccessToTeamspace } = require(`${v5Path}/models/teamspaceSettings`);
+
 const AccountPermissions = require("../models/accountPermissions");
 const PermissionTemplates = require("../models/permissionTemplates");
 
@@ -41,7 +45,9 @@ const PermissionTemplates = require("../models/permissionTemplates");
 				}
 			},
 
-			accountLevel: function(username) {
+			accountLevel: async function(username) {
+
+				await hasAccessToTeamspace(account, username);
 
 				return getTeamspaceSettings(account, { permissions: 1 }).then(settings => {
 					const permission = AccountPermissions.findByUser(settings, username);

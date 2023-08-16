@@ -14,8 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ITicket, ITemplate, NewTicket } from '@/v5/store/tickets/tickets.types';
+import { ITicket, ITemplate, NewTicket, Group } from '@/v5/store/tickets/tickets.types';
 import api from './default';
+
+export const modelType = (isFed: boolean) => (isFed ? 'federations' : 'containers');
 
 export const fetchContainerTemplates = async (
 	teamspace: string,
@@ -137,6 +139,31 @@ export const fetchRiskCategories = async (
 	teamspace: string,
 ): Promise<FetchRiskCategoriesResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/settings/tickets/riskCategories`);
+	return data;
+};
+
+export const fetchTicketGroup = async (
+	teamspace: string,
+	projectId: string,
+	modelId: string,
+	ticketId: string,
+	groupId: string,
+	isFed: boolean,
+) => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/${modelType(isFed)}/${modelId}/tickets/${ticketId}/groups/${groupId}`);
+	return data;
+};
+
+export const updateTicketGroup = async (
+	teamspace: string,
+	projectId: string,
+	modelId: string,
+	ticketId: string,
+	groupId: string,
+	group: Group,
+	isFed: boolean,
+) => {
+	const { data } = await api.patch(`teamspaces/${teamspace}/projects/${projectId}/${modelType(isFed)}/${modelId}/tickets/${ticketId}/groups/${groupId}`, group);
 	return data;
 };
 

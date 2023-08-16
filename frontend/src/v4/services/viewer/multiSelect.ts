@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Viewer } from './viewer';
+import { UnityUtil } from '@/globals/unity-util';
 
 const SHIFT_KEY = 16;
 const CTRL_KEY = 17;
@@ -91,9 +91,9 @@ export class MultiSelectService {
 		if (this.areaSelectMode !== on) {
 			this.areaSelectMode = on;
 			if (on) {
-				Viewer.startAreaSelect();
+				UnityUtil.startAreaSelection();
 			} else {
-				Viewer.stopAreaSelect();
+				UnityUtil.stopAreaSelection();
 			}
 			this.determineCursorIcon();
 		}

@@ -20,19 +20,23 @@ import { useParams } from 'react-router-dom';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircularProgress } from '@mui/material';
 import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
-import { CardContainer, CardHeader, CardContent } from '@/v5/ui/components/viewer/cards/card.styles';
+import { CardContainer, CardHeader, ArrowBack } from '@/v5/ui/components/viewer/cards/card.styles';
 import CloseIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
-import { NewTicket } from '@/v5/store/tickets/tickets.types';
-import { filterEmptyTicketValues, getEditableProperties, getDefaultTicket, modelIsFederation, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
+import { ITicket, NewTicket } from '@/v5/store/tickets/tickets.types';
+import { filterEmptyTicketValues, getEditableProperties, getDefaultTicket, modelIsFederation, templateAlreadyFetched, sanitizeViewVals } from '@/v5/store/tickets/tickets.helpers';
 import { getTicketValidator } from '@/v5/store/tickets/tickets.validators';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
+import { InputController } from '@controls/inputs/inputController.component';
 import { BottomArea, CloseButton, Form, SaveButton } from './newTicket.styles';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { TicketsCardViews } from '../tickets.constants';
 import { ViewerParams } from '../../../routes.constants';
+import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
+import { TicketContext, TicketDetailsView } from '../ticket.context';
+import { CardContent } from '../ticketsForm/ticketsForm.styles';
 
 export const NewTicketCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
@@ -61,6 +65,7 @@ export const NewTicketCard = () => {
 		const ticket = { type: template._id, ...vals };
 
 		const parsedTicket = filterEmptyTicketValues(ticket) as NewTicket;
+		sanitizeViewVals(ticket, { modules: {} } as ITicket, template);
 		TicketsActionsDispatchers.createTicket(
 			teamspace,
 			project,
@@ -86,40 +91,67 @@ export const NewTicketCard = () => {
 		formData.reset(defaultTicket);
 	}, [JSON.stringify(defaultTicket)]);
 
+	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
+
 	return (
 		<CardContainer>
-			<CardHeader>
-				<TicketsIcon />
-				<FormattedMessage
-					id="viewer.cards.newTicketTitle"
-					defaultMessage="New {template} ticket"
-					values={{ template: template.name }}
-				/>
-				<CloseButton onClick={goBack}>
-					<CloseIcon />
-				</CloseButton>
-			</CardHeader>
-			{isLoading ? (
-				<CardContent>
-					<CircularProgress />
-				</CardContent>
-			) : (
-				<FormProvider {...formData}>
-					<Form onSubmit={formData.handleSubmit(onSubmit)}>
-						<TicketForm
-							template={getEditableProperties(template)}
-							// Im not sure this is still needed here, because we are already depending on react-hook-form to fill the form
-							ticket={defaultTicket}
-							focusOnTitle
-						/>
-						<BottomArea>
-							<SaveButton disabled={!formData.formState.isValid}>
-								<FormattedMessage id="customTicket.button.saveTicket" defaultMessage="Save ticket" />
-							</SaveButton>
-						</BottomArea>
-					</Form>
-				</FormProvider>
-			)}
+			<FormProvider {...formData}>
+				<Form onSubmit={formData.handleSubmit(onSubmit)}>
+					{view === TicketDetailsView.Groups && (
+						<>
+							<CardHeader>
+								<ArrowBack onClick={() => setDetailViewAndProps(TicketDetailsView.Form)} />
+								<FormattedMessage
+									id="viewer.cards.newTicketTitleGroups"
+									defaultMessage="New {template} ticket:Groups"
+									values={{ template: template.name }}
+								/>
+							</CardHeader>
+							<CardContent>
+								<InputController
+									Input={TicketGroups}
+									name={viewProps.name}
+								/>
+							</CardContent>
+						</>
+					)}
+
+					{view === TicketDetailsView.Form && (
+						<>
+							<CardHeader>
+								<TicketsIcon />
+								<FormattedMessage
+									id="viewer.cards.newTicketTitle"
+									defaultMessage="New {template} ticket"
+									values={{ template: template.name }}
+								/>
+								<CloseButton onClick={goBack}>
+									<CloseIcon />
+								</CloseButton>
+							</CardHeader>
+							{isLoading ? (
+								<CardContent>
+									<CircularProgress />
+								</CardContent>
+							) : (
+								<>
+									<TicketForm
+										template={getEditableProperties(template)}
+										// Im not sure this is still needed here, because we are already depending on react-hook-form to fill the form
+										ticket={defaultTicket}
+										focusOnTitle
+									/>
+								</>
+							)}
+						</>
+					)}
+					<BottomArea>
+						<SaveButton disabled={!formData.formState.isValid}>
+							<FormattedMessage id="customTicket.button.saveTicket" defaultMessage="Save ticket" />
+						</SaveButton>
+					</BottomArea>
+				</Form>
+			</FormProvider>
 		</CardContainer>
 	);
 };

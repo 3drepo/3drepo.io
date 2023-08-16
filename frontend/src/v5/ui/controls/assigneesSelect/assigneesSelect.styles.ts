@@ -38,11 +38,11 @@ export const AssigneesListContainer = styled.div`
 	}
 
 	.MuiAvatar-root {
-		z-index: 11;
+		z-index: 2;
 		margin-right: -8px;
 		outline: 2px solid ${({ theme }) => theme.palette.primary.contrast};
 		&:hover {
-			z-index: 12; /* avatar appears on top when hovered */
+			z-index: 3; /* avatar appears on top when hovered */
 		}
 
 		::before {

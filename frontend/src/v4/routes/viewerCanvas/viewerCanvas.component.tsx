@@ -190,10 +190,12 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 		}
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
+			// console.log(JSON.stringify({prevcolorOverrides:  prevProps.colorOverrides, colorOverrides}, null, '\t'));
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
 		}
 
 		if (prevProps.transparencies && !isEqual(transparencies, prevProps.transparencies)) {
+			// console.log(JSON.stringify({prevtransparencies:  prevProps.transparencies, transparencies}, null, '\t'));
 			this.props.handleTransparencyOverridesChange(transparencies, prevProps.transparencies);
 		}
 

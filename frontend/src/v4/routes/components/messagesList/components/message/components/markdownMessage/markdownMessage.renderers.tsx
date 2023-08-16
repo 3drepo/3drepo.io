@@ -17,13 +17,13 @@
 
 import { cond, get, mapValues, stubTrue } from 'lodash';
 
+import { getAPIUrl } from '@/v4/services/api/default';
 import {
 	MARKDOWN_INTERNAL_IMAGE_PATH_REGEX,
 	MARKDOWN_RESOURCE_REFERENCE_REGEX,
 	MARKDOWN_TICKET_REFERENCE_REGEX,
 	MARKDOWN_USER_REFERENCE_REGEX
 } from '../../../../../../../helpers/comments';
-import { getAPIUrl } from '../../../../../../../services/api';
 import { Image } from '../screenshot/screenshot.styles';
 import { Blockquote, Paragraph } from './markdownMessage.styles';
 import { ResourceReference } from './resourceReference/';

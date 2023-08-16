@@ -22,6 +22,7 @@ import * as queryString from 'query-string';
 import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import { generatePath } from 'react-router';
+import { generateViewpoint } from '@/v4/helpers/viewpoints';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { RISK_DEFAULT_HIDDEN_LEVELS } from '../../constants/risks';
 import { ROUTES } from '../../constants/routes';
@@ -52,7 +53,6 @@ import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { TreeActions } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
-import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { RisksActions, RisksTypes } from './risks.redux';
 import {
 	selectActiveRiskDetails,
@@ -116,7 +116,7 @@ function* saveRisk({ teamspace, model, riskData, revision, finishSubmitting, ign
 		const userJob = yield select(selectMyJob);
 
 		let risk = !ignoreViewer ?
-			yield generateViewpoint( teamspace, model, riskData.name, !Boolean(riskData.descriptionThumbnail) ) :
+			yield generateViewpoint(riskData.name, !Boolean(riskData.descriptionThumbnail) ) :
 			{ viewpoint: {} };
 
 		if (riskData.descriptionThumbnail ) {
@@ -203,7 +203,7 @@ function* postComment({ teamspace, modelId, riskData, ignoreViewer, finishSubmit
 	yield put(RisksActions.togglePostCommentPendingState(true));
 	try {
 		const { _id, account, model } = yield select(selectActiveRiskDetails);
-		const { viewpoint } = !ignoreViewer ?  yield generateViewpoint( account, model, '', false) : {viewpoint: {}};
+		const { viewpoint } = !ignoreViewer ?  yield generateViewpoint('', false) : {viewpoint: {}};
 
 		riskData.viewpoint = {
 			...viewpoint,
@@ -623,8 +623,7 @@ function* showMitigationSuggestions({conditions, setFieldValue}) {
 }
 
 export function * updateActiveRiskViewpoint({ screenshot }) {
-	const { model, account } = yield select(selectActiveRiskDetails);
-	const { viewpoint } = yield generateViewpoint(account, model, '', false);
+	const { viewpoint } = yield generateViewpoint('', false);
 	viewpoint.screenshot = yield imageUrlToBase64IfNotAlready(screenshot);
 	yield put(RisksActions.updateRisk({viewpoint}));
 }

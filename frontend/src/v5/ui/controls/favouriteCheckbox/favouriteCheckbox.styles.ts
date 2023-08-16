@@ -26,6 +26,7 @@ const contrastStyles = css`
 
 export const Checkbox = styled(CheckboxComponent)<{ selected?: boolean }>`
 	padding: 10px;
+	background-color: transparent;
 
 	svg {
 		height: 16px;
@@ -38,23 +39,16 @@ export const Checkbox = styled(CheckboxComponent)<{ selected?: boolean }>`
 		}
 	}
 
-	&.Mui-checked  path {
+	&:is(:hover, :active, .Mui-focusVisible, .Mui-checked) path {
 		fill: ${({ theme }) => theme.palette.favourite.main};
 		stroke: ${({ theme }) => theme.palette.favourite.main};
 	}
 
-	&:hover, &.Mui-focusVisible {
-		background-color: transparent;
-		path {
-			stroke: ${({ theme }) => theme.palette.favourite.main};
-		}
-	}
-	
-	&:active {
-		background-color: transparent;
-		path {
-			fill: ${({ theme }) => theme.palette.favourite.main};
-			stroke: ${({ theme }) => theme.palette.favourite.main};
+	&:not(.Mui-checked):hover {
+		color: ${({ theme }) => theme.palette.favourite.main};
+
+		& path {
+			fill: transparent;
 		}
 	}
 

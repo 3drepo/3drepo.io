@@ -20,12 +20,7 @@ import { PureComponent } from 'react';
 
 import { Highlight } from '../highlight/highlight.component';
 import { ChildrenContainer, Container, Headline, IconContainer, Title } from './treeList.styles';
-
-export const TREE_LEVELS = {
-	TEAMSPACE: 1,
-	PROJECT: 2,
-	MODEL: 3
-};
+import { TREE_LEVELS } from './treeList.constants';
 
 const HeadlineIcon = ({IconOpened, IconClosed, active, ...iconProps}) => {
 	let Icon = IconClosed;

@@ -17,8 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
-import { NotificationsPanelItem } from '@/v4/routes/components/notifications/notifications.styles';
-import { Container as NotificationTeamspace } from '@/v4/routes/components/notifications/components/panel/panel.styles';
+import { Container as NotificationTeamspace, NotificationsPanelItem } from '@/v4/routes/components/notifications/components/panel/panel.styles';
 import { Item, ItemSecondaryAction } from '@/v4/routes/components/notifications/components/notificationItem/notificationItem.styles';
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
 
@@ -73,6 +72,7 @@ const headerStyles = css`
 		top: 0;
 		margin-left: -25px;
 		width: 520px;
+		z-index: 2;
 	}
 
 	.MuiToolbar-root {

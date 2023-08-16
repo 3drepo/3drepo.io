@@ -76,6 +76,8 @@ function* fetchData({ teamspace, model }) {
 	try {
 		const { username } = yield select(selectCurrentUser);
 
+		yield put(ViewpointsActions.reset());
+
 		yield all([
 			put(ModelActions.fetchRevisions(teamspace, model, false)),
 			put(CurrentUserActions.fetchUser(username)),

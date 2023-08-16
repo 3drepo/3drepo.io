@@ -19,8 +19,9 @@ import { formatMessage } from '@/v5/services/intl';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { nullableNumber, requiredNumber, trimmedString } from '@/v5/validation/shared/validators';
 import * as Yup from 'yup';
+import { isEmpty } from 'lodash';
 import { getEditableProperties } from './tickets.helpers';
-import { PropertyDefinition } from './tickets.types';
+import { PropertyDefinition, Viewpoint } from './tickets.types';
 
 const MAX_TEXT_LENGTH = 120;
 const MAX_LONG_TEXT_LENGTH = 1200;
@@ -91,7 +92,7 @@ const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 		}
 		if (type === 'view') {
 			validator = Yup.object().nullable().test({
-				test: (view) => view?.camera && view?.clippingPlanes && view?.screenshot,
+				test: (view: Viewpoint) => view?.camera && !isEmpty(view.camera),
 				message: formatMessage({
 					id: 'validation.ticket.requiredField',
 					defaultMessage: '{name} is a required field',

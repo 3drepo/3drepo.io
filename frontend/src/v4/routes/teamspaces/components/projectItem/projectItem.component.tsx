@@ -19,11 +19,12 @@ import Label from '@mui/icons-material/Label';
 import LabelOutlined from '@mui/icons-material/LabelOutlined';
 import { PureComponent } from 'react';
 
+import { TREE_LEVELS } from '@/v4/routes/components/treeList/treeList.constants';
 import { ROUTES } from '../../../../constants/routes';
 import { encodeElementId } from '../../../../helpers/html';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
+import { TreeList } from '../../../components/treeList/treeList.component';
 import { ROW_ACTIONS  } from '../../teamspaces.contants';
 import ProjectDialog from '../projectDialog/projectDialog.container';
 import { RowMenu } from '../rowMenu/rowMenu.component';
