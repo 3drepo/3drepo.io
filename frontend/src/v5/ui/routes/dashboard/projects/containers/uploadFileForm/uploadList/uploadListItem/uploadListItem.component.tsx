@@ -79,7 +79,6 @@ export const UploadListItem = memo(({
 				key={`${revisionPrefix}.revTag`}
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
-				isSelected={isSelected}
 			/>
 			{isUploading
 				? (<UploadProgress uploadId={uploadId} errorMessage={uploadErrorMessage} />)

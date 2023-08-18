@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { FormTextField as FormTextFieldBase } from '@controls/inputs/formInputs.component';
 
-export const RevisionTagField = styled(FormTextFieldBase)<{ $selected: boolean }>`
+export const RevisionTagField = styled(FormTextFieldBase)`
 	margin: 0 12px;
 
 	.MuiFormHelperText-root {
@@ -28,12 +28,6 @@ export const RevisionTagField = styled(FormTextFieldBase)<{ $selected: boolean }
 	.MuiOutlinedInput-root {
 		height: 100%;
 		border-radius: 8px;
-		${({ theme, $selected }) => $selected && css`
-			background-color: ${theme.palette.secondary.light};
-			input {
-				color: ${theme.palette.primary.contrast};
-			}
-		`};
 
 		&.Mui-error {
 			svg {

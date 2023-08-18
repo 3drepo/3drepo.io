@@ -28,7 +28,6 @@ type IUploadListItemRevision = {
 
 export const UploadListItemRevisionTag = ({
 	revisionPrefix,
-	isSelected = false,
 	disabled = false,
 	...props
 }: IUploadListItemRevision): JSX.Element => {
@@ -50,7 +49,6 @@ export const UploadListItemRevisionTag = ({
 			disabled={disabled}
 			formError={errorMessage}
 			required
-			$selected={isSelected}
 			name={name}
 			{...errorAdornment}
 			{...props}

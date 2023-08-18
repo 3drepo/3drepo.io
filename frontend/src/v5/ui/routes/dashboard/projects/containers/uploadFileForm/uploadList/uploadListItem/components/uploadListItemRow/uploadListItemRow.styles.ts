@@ -48,15 +48,13 @@ export const UploadListItem = styled(DashboardListItem)<{ selected: boolean }>`
 		${RevisionTagField} {
 			${DestinationAndTagDimensions}
 			${({ selected, theme }) => selected && css`
-				fieldset {
-					border: unset;
-				}
-
-				&.MuiOutlinedInput-root:not(.Mui-error) {
+				>.MuiOutlinedInput-root:not(.Mui-error) {
 					background-color: ${theme.palette.secondary.light};
-
 					input {
 						color: ${theme.palette.primary.contrast};
+					}
+					&:not(.Mui-focused) fieldset {
+						border: unset;
 					}
 				}
 			`}
