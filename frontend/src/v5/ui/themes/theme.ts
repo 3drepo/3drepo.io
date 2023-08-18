@@ -658,6 +658,7 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					backgroundColor: COLOR.TERTIARY_LIGHTEST,
+					zIndex: 0,
 				},
 			},
 		},
