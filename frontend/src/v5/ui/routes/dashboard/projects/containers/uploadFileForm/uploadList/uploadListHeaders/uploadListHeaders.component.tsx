@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
+import { DashboardListHeaderLabel as Label } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
-import { DashboardListHeaderContainer } from '@components/dashboard/dashboardList/dashboardListHeader/dashboardListHeader.styles';
+import { DashboardListHeaderContainer as Container } from '@components/dashboard/dashboardList/dashboardListHeader/dashboardListHeader.styles';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { FilenameLabelWrapper } from './uploadListHeaders.styles';
 
 type IUploadListHeaders = {
 	onClickFilenameLabel: () => void;
@@ -32,20 +31,18 @@ export const UploadListHeaders = ({
 	isUploading,
 	sortingDirection,
 }: IUploadListHeaders) => (
-	<DashboardListHeaderContainer>
-		<DashboardListHeaderLabel name="file.name" minWidth={122} sortingDirection={sortingDirection} sort>
-			<FilenameLabelWrapper onClick={onClickFilenameLabel}>
-				<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
-			</FilenameLabelWrapper>
-		</DashboardListHeaderLabel>
-		<DashboardListHeaderLabel width={352}>
+	<Container>
+		<Label name="file.name" minWidth={122} sortingDirection={sortingDirection} onClick={onClickFilenameLabel} sort>
+			<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
+		</Label>
+		<Label width={352}>
 			<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
-		</DashboardListHeaderLabel>
-		<DashboardListHeaderLabel width={isUploading ? 359 : 399}>
+		</Label>
+		<Label width={isUploading ? 359 : 399}>
 			<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
-		</DashboardListHeaderLabel>
-		<DashboardListHeaderLabel width={297} hidden={!isUploading}>
+		</Label>
+		<Label width={297} hidden={!isUploading}>
 			<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
-		</DashboardListHeaderLabel>
-	</DashboardListHeaderContainer>
+		</Label>
+	</Container>
 );
