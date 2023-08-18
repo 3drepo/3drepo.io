@@ -198,7 +198,7 @@ export const UploadListItemDestination = memo(({
 	};
 
 	useEffect(() => {
-		if (!selectedContainer?.desc) return;
+		// if (has(selectedContainer, 'desc')) return;
 		// This updates the container desc after it is fetched in the fetchContainerSettings
 		setValue(`${revisionPrefix}.containerDesc`, selectedContainer?.desc);
 	}, [selectedContainer]);
