@@ -40,9 +40,6 @@ export const UploadListItem = styled(DashboardListItem)<{ selected: boolean }>`
 		height: auto;
 		cursor: default;
 		overflow: hidden;
-		&:last-child, &:first-child {
-			border-radius: 0;
-		}
 
 		${DestinationAutocomplete} {
 			${DestinationAndTagDimensions}
