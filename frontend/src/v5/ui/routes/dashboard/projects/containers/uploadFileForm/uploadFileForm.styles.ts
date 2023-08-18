@@ -24,13 +24,12 @@ import { Typography } from '@controls/typography';
 const MODAL_PADDING = 35;
 
 export const Modal = styled(FormModal)`
-	.MuiDialogContent-root {
-		padding: 0;
-		margin: 0;
+	.MuiPaper-root {
+		min-width: 955px;
+		.MuiDialogContent-root {
+			padding: 0;
+		}
 	}
-	padding: 0;
-	margin: 0;
-	min-width: 1024px;
 `;
 
 export const UploadsContainer = styled.div`
