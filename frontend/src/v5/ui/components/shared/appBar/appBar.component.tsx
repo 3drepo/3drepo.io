@@ -21,6 +21,7 @@ import { UserMenu } from '../userMenu';
 import { AppBarContainer, Items, LogoIcon } from './appBar.styles';
 import { BreadcrumbsRouting } from '../breadcrumbsRouting/breadcrumbsRouting.component';
 import { Notifications } from './notifications/notifications.component';
+import { Intercom } from './intercom/intercom.component';
 
 export const AppBar = (): JSX.Element => {
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
@@ -34,6 +35,7 @@ export const AppBar = (): JSX.Element => {
 				<BreadcrumbsRouting />
 			</Items>
 			<Items>
+				<Intercom />
 				<Notifications />
 				<UserMenu user={user} />
 			</Items>
