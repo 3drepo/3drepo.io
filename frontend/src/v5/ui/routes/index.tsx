@@ -25,14 +25,16 @@ import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { AuthActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { enableKickedOutEvent } from '@/v5/services/realtime/auth.events';
 import { ModalsDispatcher } from '@components/shared/modalsDispatcher/modalsDispatcher.component';
-import { Intercom } from '@components/intercom/intercom.component';
 import { SSOResponseHandler } from '@components/shared/sso/ssoLinkingResponseHandler/ssoLinkingResponseHandler.component';
+import { IntercomProvider } from 'react-use-intercom';
+import { clientConfigService } from '@/v4/services/clientConfig';
 import { MainRoute } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
 
 export const Root = () => {
 	const isAuthenticated: boolean = AuthHooksSelectors.selectIsAuthenticated();
 	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
+	const { intercomLicense } = clientConfigService;
 
 	useEffect(() => {
 		if (!authenticationFetched) {
@@ -53,10 +55,11 @@ export const Root = () => {
 			<MuiThemeProvider theme={theme}>
 				<StylesProvider injectFirst>
 					<V4Adapter>
-						<MainRoute />
-						<SSOResponseHandler />
-						<ModalsDispatcher />
-						<Intercom />
+						<IntercomProvider appId={intercomLicense}>
+							<MainRoute />
+							<SSOResponseHandler />
+							<ModalsDispatcher />
+						</IntercomProvider>
 					</V4Adapter>
 				</StylesProvider>
 			</MuiThemeProvider>

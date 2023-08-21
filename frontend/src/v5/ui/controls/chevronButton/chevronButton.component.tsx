@@ -27,14 +27,17 @@ export type IChevronButton = IconButtonProps & {
 	size?: 'small' | 'medium' | 'large';
 };
 
-export const ChevronButton = forwardRef(
-	({ isOn, isLoading = false, className, size = 'medium', ...props }: IChevronButton, ref: Ref<HTMLButtonElement>): JSX.Element => (
-		<ChevronStyledIconButton $isOn={isOn} $isLoading={isLoading} {...props} ref={ref} $size={size}>
-			{isLoading ? (
-				<SpinnerLoader />
-			) : (
-				<ChevronIcon />
-			)}
-		</ChevronStyledIconButton>
-	),
-);
+export const ChevronButton = forwardRef(({
+	isOn,
+	isLoading = false,
+	size = 'medium',
+	...props
+}: IChevronButton, ref: Ref<HTMLButtonElement>): JSX.Element => (
+	<ChevronStyledIconButton $isOn={isOn} $isLoading={isLoading} {...props} ref={ref} $size={size}>
+		{isLoading ? (
+			<SpinnerLoader />
+		) : (
+			<ChevronIcon />
+		)}
+	</ChevronStyledIconButton>
+));

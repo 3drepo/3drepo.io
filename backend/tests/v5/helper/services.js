@@ -391,7 +391,7 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true) => {
 	};
 
 	if (hasFile) {
-		entry.rFile = [`${_id}${ServiceHelper.generateUUIDString()}`];
+		entry.rFile = [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
 		entry.refData = ServiceHelper.generateRandomString();
 	}
 

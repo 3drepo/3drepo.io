@@ -62,8 +62,10 @@ export const Card = styled(CardBase)<{ $variant: string; }>`
 	${({ $variant, theme }) => {
 		if ($variant === 'primary') {
 			return css`
-				background-color: ${theme.palette.tertiary.lightest};
-				${Heading} { color: ${theme.palette.secondary.main}; }
+				background-color: ${theme.palette.primary.contrast};
+				${Heading} {
+					color: ${theme.palette.secondary.main};
+				}
 			`;
 		}
 		if ($variant === 'secondary') {
