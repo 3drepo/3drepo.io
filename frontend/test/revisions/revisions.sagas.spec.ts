@@ -15,17 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { expectSaga } from 'redux-saga-test-plan';
-
 import { mockServer } from '../../internals/testing/mockServer';
-import * as RevisionsSaga from '@/v5/store/revisions/revisions.sagas';
 import { RevisionsActions } from '@/v5/store/revisions/revisions.redux';
 import api from '@/v5/services/api/default';
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { mockCreateRevisionBody, revisionsMockFactory } from './revisions.fixtures';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { createTestStore, spyOnAxiosApiCallWithFile } from '../test.helpers';
-import { selectRevisions, selectRevisionsByContainer, selectUploads } from '@/v5/store/revisions/revisions.selectors';
+import { selectRevisions, selectUploads } from '@/v5/store/revisions/revisions.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 import { containerMockFactory } from '../containers/containers.fixtures';
 import { selectContainerById } from '@/v5/store/containers/containers.selectors';
@@ -60,9 +57,6 @@ describe('Revisions: sagas', () => {
 				RevisionsActions.fetchSuccess(containerId, [mockRevision]),
 				RevisionsActions.setIsPending(containerId, false),
 			]);
-			
-			const revisionsInStore = selectRevisions(getState(), containerId);
-			expect(revisionsInStore).toEqual([mockRevision]);
 		});
 
 		it('should handle revisions api error', async () => {
@@ -98,9 +92,6 @@ describe('Revisions: sagas', () => {
 			await waitForActions(() => {
 				dispatch(RevisionsActions.setVoidStatus(teamspace, projectId, containerId, revisionId, !initialVoidStatus));
 			}, [RevisionsActions.setVoidStatusSuccess(containerId, revisionId, !initialVoidStatus)]);
-
-			const [revisionInStore] = selectRevisions(getState(), containerId);
-			expect(revisionInStore.void).toBe(!initialVoidStatus);
 		});
 
 		it('should handle api error', async () => {

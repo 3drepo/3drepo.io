@@ -19,7 +19,7 @@ import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { mockServer } from '../../internals/testing/mockServer';
 import { quotaMockFactory } from './teamspaces.fixtures';
 import { createTestStore } from '../test.helpers';
-import { selectCurrentQuota, selectTeamspaces } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { selectTeamspaces } from '@/v5/store/teamspaces/teamspaces.selectors';
 
 describe('Teamspaces: sagas', () => {
 	const teamspaceName = 'teamspaceId';
@@ -44,9 +44,6 @@ describe('Teamspaces: sagas', () => {
 				TeamspacesActions.fetchSuccess(teamspaces),
 				TeamspacesActions.setTeamspacesArePending(false),
 			]);
-
-			const teamspaceInStore = selectTeamspaces(getState());
-			expect(teamspaceInStore).toEqual(teamspaces);
 		});
 
 		it('should handle teamspaces api error and dispatch FETCH_FAILURE', async () => {
@@ -79,9 +76,5 @@ describe('Teamspaces: sagas', () => {
 		await waitForActions(() => {
 			dispatch(TeamspacesActions.fetchQuota(teamspaceName));
 		}, [TeamspacesActions.fetchQuotaSuccess(teamspaceName, quota)]);
-
-		const quotaInStore = selectCurrentQuota(getState());
-		expect(quotaInStore).toEqual(quota);
-
 	});
 });

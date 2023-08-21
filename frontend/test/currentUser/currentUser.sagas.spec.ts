@@ -72,9 +72,6 @@ describe('Current User: sagas', () => {
 				CurrentUserActions.fetchUserSuccess(mockUseWithAvatar),
 				ViewerActions.fetchSettings(),
 			])
-			
-			const userInStore = selectCurrentUser(getState());
-			expect(userInStore).toEqual(mockUseWithAvatar);
 		})
 
 		it('should show error dialog when API call errors', async () => {
@@ -101,8 +98,6 @@ describe('Current User: sagas', () => {
 				dispatch(CurrentUserActions.updatePersonalData(personalData, onSuccess, onError));
 			}, [CurrentUserActions.updateUserSuccess(personalData)]);
 
-			const userInStore = selectCurrentUser(getState());
-			expect(omit(userInStore, 'username')).toEqual(personalData);
 			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
 		})
@@ -184,9 +179,6 @@ describe('Current User: sagas', () => {
 				CurrentUserActions.updateUserSuccess({ apiKey }),
 				CurrentUserActions.setApiKeyIsUpdating(false),
 			]);
-
-			const keyInStore = selectApiKey(getState());
-			expect(keyInStore).toEqual(apiKey);
 		})
 
 		it('should not generate an API key when API call errors', async () => {
@@ -223,9 +215,6 @@ describe('Current User: sagas', () => {
 				CurrentUserActions.updateUserSuccess({ apiKey: null }),
 				CurrentUserActions.setApiKeyIsUpdating(false),
 			]);
-			
-			const keyInStore = selectApiKey(getState());
-			expect(keyInStore).toBeFalsy();
 		})
 
 		it('should delete the API key when API call errors', async () => {

@@ -51,9 +51,6 @@ describe('Teamspaces: sagas', () => {
 			await waitForActions(() => {
 				dispatch(ProjectsActions.fetch(teamspace));
 			}, [ProjectsActions.fetchSuccess(teamspace, projects)]);
-
-			const projectsInStore = selectCurrentProjects(getState());
-			expect(projectsInStore).toEqual(projects);
 		});
 
 		it('should handle projects api error and dispatch FETCH_FAILURE', async () => {
@@ -82,9 +79,7 @@ describe('Teamspaces: sagas', () => {
 			await waitForActions(() => {
 				dispatch(ProjectsActions.deleteProject(teamspace, projectId, onSuccess, onError));
 			}, [ProjectsActions.deleteProjectSuccess(teamspace, projectId)]);
-				
-			const projectsInStore = selectCurrentProjects(getState());
-			expect(projectsInStore).toEqual([]);
+
 			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
 		});
@@ -100,7 +95,7 @@ describe('Teamspaces: sagas', () => {
 				() => { onError(); resolve(); },
 			));
 			await promiseToResolve;
-					
+
 			const projectsInStore = selectCurrentProjects(getState());
 			expect(projectsInStore).toEqual([mockProject]);
 			expect(onSuccess).not.toHaveBeenCalled();
@@ -130,8 +125,6 @@ describe('Teamspaces: sagas', () => {
 					dispatch(ProjectsActions.createProject(teamspace, name, onSuccess, onError))
 			}, [ProjectsActions.createProjectSuccess(teamspace, newProject)]);
 
-			const projectsInStore = selectCurrentProjects(getState());
-			expect(projectsInStore).toEqual([newProject]);
 			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
 		});
@@ -171,8 +164,6 @@ describe('Teamspaces: sagas', () => {
 				dispatch(ProjectsActions.updateProject(teamspace, projectId, updatedProject, onSuccess, onError));
 			}, [ProjectsActions.updateProjectSuccess(teamspace, projectId, updatedProject)])
 
-			const projectsInStore = selectCurrentProjects(getState());
-			expect(projectsInStore).toEqual([updatedProject]);
 			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
 		});

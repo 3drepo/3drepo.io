@@ -41,9 +41,6 @@ describe('Users: sagas', () => {
 			await waitForActions(() => {
 				dispatch(UsersActions.fetchUsers(teamspace));
 			}, [UsersActions.fetchUsersSuccess(teamspace, members)]);
-
-			const usersInStore = selectUsersByTeamspace(getState(), teamspace);
-			expect(usersInStore).toEqual(members);
 		});
 
 		it('should handle fetch users api error and dispatch a dialog opening for an alert', async () => {

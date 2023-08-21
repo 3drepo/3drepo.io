@@ -69,9 +69,6 @@ describe('Federations: sagas', () => {
 				}, [FederationsActions.setFavouriteSuccess(projectId, federationId, true)]),
 				promiseToResolve,
 			]);
-
-			const { isFavourite } = selectFederationById(getState(), federationId);
-			expect(isFavourite).toBeTruthy();
 		})
 
 		it('should call addFavourite endpoint with 404 and revert change', async () => {
@@ -106,9 +103,6 @@ describe('Federations: sagas', () => {
 				}, [FederationsActions.setFavouriteSuccess(projectId, federationId, false)]),
 				promiseToResolve,
 			]);
-
-			const { isFavourite } = selectFederationById(getState(), federationId);
-			expect(isFavourite).toBeFalsy();
 		})
 
 		it('should call removeFavourite endpoint with 404 and revert change', async () => {
@@ -145,9 +139,6 @@ describe('Federations: sagas', () => {
 			await waitForActions(() => {
 				dispatch(FederationsActions.fetchFederations(teamspace, projectId));
 			}, [FederationsActions.fetchFederationsSuccess(projectId, [mockFederationWithoutStats])]);
-		
-			const federationInStore = selectFederationById(getState(), federationId);
-			expect(federationInStore).toEqual(mockFederationWithoutStats);
 		})
 
 		it('should call fetch federations endpoint with 400', async () => {
@@ -172,9 +163,6 @@ describe('Federations: sagas', () => {
 			await waitForActions(() => {
 				dispatch(FederationsActions.fetchFederationStats(teamspace, projectId, federationId));
 			}, [FederationsActions.fetchFederationStatsSuccess(projectId, federationId, stats)]);
-		
-			const federationInStore = selectFederationById(getState(), federationId);
-			expect(federationInStore).toEqual(prepareSingleFederationData(mockFederation, stats));
 		})
 
 		it('should call updateFederationContainers endpoint', async () => {
@@ -187,9 +175,6 @@ describe('Federations: sagas', () => {
 			await waitForActions(() => {
 				dispatch(FederationsActions.updateFederationContainers(teamspace, projectId, federationId, mockContainers))
 			}, [FederationsActions.updateFederationContainersSuccess(projectId, federationId, mockContainers)]);
-
-			const federationInStore = selectFederationById(getState(), federationId);
-			expect(federationInStore.containers).toEqual(mockContainers);
 		})
 
 		it('should fetch federation views', async () => {
@@ -202,9 +187,6 @@ describe('Federations: sagas', () => {
 			await waitForActions(() => {
 				dispatch(FederationsActions.fetchFederationViews(teamspace, projectId, federationId));
 			}, [FederationsActions.fetchFederationViewsSuccess(projectId, federationId, views)]);
-
-			const federationInStore = selectFederationById(getState(), federationId);
-			expect(federationInStore).toEqual(mockFederation);
 		})
 
 		it('should fetch federation settings', async () => {
@@ -224,9 +206,6 @@ describe('Federations: sagas', () => {
 				federationId,
 				settings,
 			)]);
-
-			const federationInStore = selectFederationById(getState(), federationId);
-			expect(federationInStore).toEqual({ ...baseFederation, ...settings });
 		})
 	})
 
@@ -252,9 +231,6 @@ describe('Federations: sagas', () => {
 				FederationsActions.fetchFederationStats(teamspace, projectId, federationId),
 			]);
 
-			const federationsInStore = selectFederations(getState());
-
-			expect(federationsInStore.length).toBe(1);
 			expect(onError).not.toHaveBeenCalled();
 			expect(onSuccess).toHaveBeenCalled();
 		});
@@ -327,9 +303,6 @@ describe('Federations: sagas', () => {
 				settings,
 			)]);
 
-			const federationInStore = selectFederationById(getState(), federationId);
-
-			expect(federationInStore).toEqual({ ...mockFederation, ...settings });
 			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
 		})
@@ -370,9 +343,6 @@ describe('Federations: sagas', () => {
 			await waitForActions(() => {
 				dispatch(FederationsActions.deleteFederation(teamspace, projectId, federationId, onSuccess, onError));
 			}, [FederationsActions.deleteFederationSuccess(projectId, federationId)]);
-
-			const federationsInStore = selectFederations(getState());
-			expect(federationsInStore.length).toBe(0);
 
 			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();

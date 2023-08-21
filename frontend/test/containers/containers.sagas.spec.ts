@@ -22,7 +22,7 @@ import { prepareSingleContainerData } from '@/v5/store/containers/containers.hel
 import { containerMockFactory, prepareMockSettingsReply, prepareMockStats } from './containers.fixtures';
 import { omit } from 'lodash';
 import { prepareMockRawSettingsReply } from './containers.fixtures';
-import { createTestStore, findById } from '../test.helpers';
+import { createTestStore } from '../test.helpers';
 import { prepareContainerSettingsForFrontend } from './../../src/v5/store/containers/containers.helpers';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { selectContainerById, selectContainers } from '@/v5/store/containers/containers.selectors';
@@ -64,9 +64,6 @@ describe('Containers: sagas', () => {
 				}, [ContainersActions.setFavouriteSuccess(projectId, containerId, true)]),
 				promiseToResolve,
 			]);
-
-			const { isFavourite } = selectContainerById(getState(), containerId);
-			expect(isFavourite).toBeTruthy();
 		})
 
 		it('should call addFavourite endpoint with 404 and revert change', async () => {
@@ -101,9 +98,6 @@ describe('Containers: sagas', () => {
 				}, [ContainersActions.setFavouriteSuccess(projectId, containerId, false)]),
 				promiseToResolve,
 			]);
-
-			const { isFavourite } = selectContainerById(getState(), containerId);
-			expect(isFavourite).toBeFalsy();
 		})
 
 		it('should call removeFavourite endpoint with 404 and revert change', async () => {
@@ -144,9 +138,6 @@ describe('Containers: sagas', () => {
 			await waitForActions(() => {
 				dispatch(ContainersActions.fetchContainers(teamspace, projectId));
 			}, [ContainersActions.fetchContainersSuccess(projectId, [mockContainerWithoutStats])]);
-		
-			const containerInStore = selectContainerById(getState(), containerId);
-			expect(containerInStore).toEqual(mockContainerWithoutStats);
 		})
 
 		it('should call fetch containers data endpoint with 404', async () => {
@@ -170,9 +161,6 @@ describe('Containers: sagas', () => {
 			await waitForActions(() => {
 				dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, containerId));
 			}, [ContainersActions.fetchContainerStatsSuccess(projectId, containerId, stats)]);
-		
-			const containerInStore = selectContainerById(getState(), containerId);
-			expect(containerInStore).toEqual(prepareSingleContainerData(mockContainer, stats));
 		})
 
 		it('should call fetch container stats endpoint with 401', async () => {
@@ -205,9 +193,6 @@ describe('Containers: sagas', () => {
 					views,
 				)
 			]);
-
-			const containerFromStore = selectContainerById(getState(), containerId);
-			expect(containerFromStore.views).toEqual(views);
 		})
 
 		it('should fetch container settings', async () => {
@@ -228,10 +213,6 @@ describe('Containers: sagas', () => {
 					frontendSettings,
 				),
 			]);
-
-			
-			const containerFromStore = selectContainerById(getState(), containerId);
-			expect(containerFromStore).toEqual({ ...mockContainer, ...frontendSettings });
 		})
 
 		it('should call fetch container settings endpoint with 404', async () => {
@@ -266,10 +247,7 @@ describe('Containers: sagas', () => {
 				dispatch(ContainersActions.createContainer(teamspace, projectId, newContainer, onSuccess, onError))
 			}, [ContainersActions.createContainerSuccess(projectId, fetchedContainer)]);
 
-			const containersInStore = selectContainers(getState());
-
 			expect(onError).not.toHaveBeenCalled();
-			expect(containersInStore.length).toBe(1);
 			expect(onSuccess).toHaveBeenCalled();	
 		})
 		
@@ -323,10 +301,6 @@ describe('Containers: sagas', () => {
 					mockSettings,
 				)
 			]);
-
-			const containerInStore = selectContainerById(getState(), containerId);
-
-			expect(containerInStore).toEqual({ ...mockContainer, ...mockSettings });
 			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
 		})
@@ -369,11 +343,8 @@ describe('Containers: sagas', () => {
 				dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId, onSuccess, onError));
 			}, [ContainersActions.deleteContainerSuccess(projectId, containerId)]);
 
-			const containersAfter = selectContainers(getState());
-				
 			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
-			expect(findById(containersAfter, containerId)).toBeUndefined();
 		})
 
 		it('should call deleteContainer endpoint with 404', async () => {

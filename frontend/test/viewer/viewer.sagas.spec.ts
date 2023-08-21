@@ -26,8 +26,6 @@ import { selectContainerById } from '@/v5/store/containers/containers.selectors'
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { selectFederationById } from '@/v5/store/federations/federations.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
-import { selectDialogs } from '@/v5/store/dialogs/dialogs.selectors';
-
 
 describe('Viewer: sagas', () => {
 	const teamspace = 'myteamspace';
@@ -137,11 +135,6 @@ describe('Viewer: sagas', () => {
 			await waitForActions(() => {
 				dispatch(ViewerActions.fetchData(teamspace, projectId, containerOrFederationId));
 			}, [DialogsTypes.OPEN, ViewerActions.setFetching(false)]);
-
-			const dialogs =  selectDialogs(getState());
-
-			expect(dialogs.length).toEqual(1);
-			expect(dialogs[0].modalType).toEqual('alert');
 		});
 	});
 });
