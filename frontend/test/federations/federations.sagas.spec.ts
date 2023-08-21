@@ -83,6 +83,7 @@ describe('Federations: sagas', () => {
 				dispatch(FederationsActions.addFavourite(teamspace, projectId, federationId))
 			}, [
 				FederationsActions.setFavouriteSuccess(projectId, federationId, true),
+				DialogsTypes.OPEN,
 				FederationsActions.setFavouriteSuccess(projectId, federationId, false),
 			])
 
@@ -119,6 +120,7 @@ describe('Federations: sagas', () => {
 				dispatch(FederationsActions.removeFavourite(teamspace, projectId, federationId))
 			}, [
 				FederationsActions.setFavouriteSuccess(projectId, federationId, false),
+				DialogsTypes.OPEN,
 				FederationsActions.setFavouriteSuccess(projectId, federationId, true),
 			])
 

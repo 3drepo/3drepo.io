@@ -78,6 +78,7 @@ describe('Containers: sagas', () => {
 				dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
 			}, [
 				ContainersActions.setFavouriteSuccess(projectId, containerId, true),
+				DialogsTypes.OPEN,
 				ContainersActions.setFavouriteSuccess(projectId, containerId, false),
 			])
 
@@ -114,6 +115,7 @@ describe('Containers: sagas', () => {
 				dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
 			}, [
 				ContainersActions.setFavouriteSuccess(projectId, containerId, false),
+				DialogsTypes.OPEN,
 				ContainersActions.setFavouriteSuccess(projectId, containerId, true),
 			])
 
