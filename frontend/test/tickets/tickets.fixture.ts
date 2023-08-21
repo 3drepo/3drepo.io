@@ -16,12 +16,13 @@
  */
 
  import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
+import { Group, IGroupSettingsForm, ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import * as faker from 'faker';
 import { times } from 'lodash';
 
-export const ticketMockFactory = (overrides?: ITicket): ITicket => ({
+export const ticketMockFactory = (overrides?: Partial<ITicket>): ITicket => ({
 	_id: faker.datatype.uuid(),
+	title: faker.random.words(3),
 	number: faker.datatype.number(),
 	type: faker.random.word(),
 	properties: {
@@ -30,7 +31,7 @@ export const ticketMockFactory = (overrides?: ITicket): ITicket => ({
 		pin: [],
 		status: faker.random.arrayElement(['None', 'Low', 'Medium', 'High']),
 		priority : faker.random.arrayElement(['Open', 'In progress', 'For approval', 'Closed', 'Void']),
-		assignes: [],
+		assignees: [],
 		...overrides?.properties,
 	},
 	modules: {},
@@ -45,3 +46,13 @@ export const templateMockFactory = (overrides?: ITemplate): ITemplate => ({
 });
 
 export const mockRiskCategories = (): string[] => times(5, () => faker.random.word())
+
+export const mockGroup = (overrides?: Group): Group => ({
+	_id: faker.datatype.uuid(),
+	name: faker.random.words(3),
+	description: faker.random.words(3),
+	objects: [{
+		_ids: times(5, () => faker.datatype.uuid()),
+		container: faker.datatype.uuid(),
+	}],
+})
