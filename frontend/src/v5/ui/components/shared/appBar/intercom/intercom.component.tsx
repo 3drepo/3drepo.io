@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,13 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect } from 'react';
-import { useIntercom, IntercomProvider } from 'react-use-intercom';
-import { clientConfigService } from '@/v4/services/clientConfig';
-import { CurrentUserHooksSelectors, AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 
-// Must be a separate component used as IntercomProvider child
-const IntercomButton = () => {
+import { AuthHooksSelectors, CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
+import QuestionMarkIcon from '@assets/icons/filled/question-filled.svg';
+import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
+import { useEffect } from 'react';
+import { useIntercom } from 'react-use-intercom';
+
+const intercomLauncherId = 'intercomLauncher';
+
+export const Intercom = () => {
 	const { boot, hardShutdown } = useIntercom();
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
@@ -34,6 +37,8 @@ const IntercomButton = () => {
 				name,
 				email,
 				userHash: intercomRef,
+				customLauncherSelector: `#${intercomLauncherId}`,
+				hideDefaultLauncher: true,
 			});
 		} catch (e) {
 			console.debug(`Intercom api error: ${e}`);
@@ -48,17 +53,11 @@ const IntercomButton = () => {
 		}
 	}, [isAuthenticated, currentUser.email]);
 
-	return <div />;
-};
-
-export const Intercom = () => {
-	const { intercomLicense } = clientConfigService;
+	if (!isAuthenticated || !currentUser.email) return null;
 
 	return (
-		intercomLicense ? (
-			<IntercomProvider appId={intercomLicense}>
-				<IntercomButton />
-			</IntercomProvider>
-		) : <></>
+		<NavbarButton id={intercomLauncherId}>
+			<QuestionMarkIcon />
+		</NavbarButton>
 	);
 };
