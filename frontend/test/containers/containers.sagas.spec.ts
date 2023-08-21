@@ -149,7 +149,7 @@ describe('Containers: sagas', () => {
 			expect(containerInStore).toEqual(mockContainerWithoutStats);
 		})
 
-		it('should call containers endpoint with 404', async () => {
+		it('should call fetch containers data endpoint with 404', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
 				.reply(404);
@@ -175,7 +175,7 @@ describe('Containers: sagas', () => {
 			expect(containerInStore).toEqual(prepareSingleContainerData(mockContainer, stats));
 		})
 
-		it('should call container stats endpoint with 401', async () => {
+		it('should call fetch container stats endpoint with 401', async () => {
 			populateStore();
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`)
@@ -234,7 +234,7 @@ describe('Containers: sagas', () => {
 			expect(containerFromStore).toEqual({ ...mockContainer, ...frontendSettings });
 		})
 
-		it('should call container settings endpoint with 404', async () => {
+		it('should call fetch container settings endpoint with 404', async () => {
 			populateStore();
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
@@ -331,7 +331,7 @@ describe('Containers: sagas', () => {
 			expect(onError).not.toHaveBeenCalled();
 		})
 
-		it('should call container settings endpoint with 404', async () => {
+		it('should call update container settings endpoint with 404', async () => {
 			const { resolve, promiseToResolve } = getWaitablePromise();
 
 			mockServer
@@ -376,7 +376,7 @@ describe('Containers: sagas', () => {
 			expect(findById(containersAfter, containerId)).toBeUndefined();
 		})
 
-		it('should call deleteContainer endpoint with 404 and open alert modal', async () => {
+		it('should call deleteContainer endpoint with 404', async () => {
 			const { resolve, promiseToResolve } = getWaitablePromise();
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)

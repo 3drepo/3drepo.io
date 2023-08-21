@@ -150,7 +150,7 @@ describe('Federations: sagas', () => {
 			expect(federationInStore).toEqual(mockFederationWithoutStats);
 		})
 
-		it('should call federations endpoint with 400', async () => {
+		it('should call fetch federations endpoint with 400', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations`)
 				.reply(400);
