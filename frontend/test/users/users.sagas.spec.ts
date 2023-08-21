@@ -18,12 +18,9 @@
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 import { UsersActions } from '@/v5/store/users/users.redux';
 import { selectUsersByTeamspace } from '@/v5/store/users/users.selectors';
-import { expectSaga } from 'redux-saga-test-plan';
 import { mockServer } from '../../internals/testing/mockServer';
 import { createTestStore } from '../test.helpers';
 import { userWithAvatarMockFactory } from './users.fixtures';
-
-expectSaga.DEFAULT_TIMEOUT = 100;
 
 describe('Users: sagas', () => {
 	const teamspace = 'myTeamspace';
