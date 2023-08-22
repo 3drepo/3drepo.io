@@ -16,13 +16,20 @@
  */
 
 const { castSchema } = require('../../../../../../../schemas/groups');
+const { castSchema: castRulesSchema } = require('../../../../../../../schemas/rules');
 const { respond } = require('../../../../../../../utils/responder');
 const { templates } = require('../../../../../../../utils/responseCodes');
 
 const Groups = {};
 
-Groups.serialiseGroup = (req, res) => {
-	respond(req, res, templates.ok, castSchema(req.outputData));
+Groups.convertGroupRules = (req, res) => {
+	const group = req.outputData;
+	
+	if(group.rules){
+		group.rules = castRulesSchema(group.rules);
+	}
+	
+	respond(req, res, templates.ok, group);
 };
 
 Groups.serialiseGroupArray = (req, res) => {

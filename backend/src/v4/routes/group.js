@@ -25,10 +25,10 @@ const Group = require("../models/group");
 const C = require("../constants");
 const {v5Path} = require("../../interop");
 const GroupsV5 = require(`${v5Path}/processors/teamspaces/projects/models/commons/groups`);
-const { serialiseGroup, serialiseGroupArray} = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
+const { convertGroupRules: convertOutputRules, serialiseGroupArray} = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
 const { validateGroupsExportData, validateGroupsImportData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
 const utils = require("../utils");
-const { convertGroupRules, convertGroupArrayRules } = require("../../v5/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups");
+const { convertGroupRules: convertInputRules, convertGroupArrayRules } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
 const systemLogger = require("../logger.js").systemLogger;
 
 /**
@@ -253,9 +253,9 @@ router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups, seria
  * 	"_id":"00000000-0000-0000-0000-000000000004"
  * }
  */
-router.get("/revision/master/head/groups/:uid", middlewares.issue.canView, findGroup, serialiseGroup);
+router.get("/revision/master/head/groups/:uid", middlewares.issue.canView, findGroup, convertOutputRules);
 
-router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup, serialiseGroup);
+router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup, convertOutputRules);
 
 /**
  * @api {put} /:teamspace/:model/revision(/master/head|/:revId)/groups/:groupId/ Update group
@@ -302,9 +302,9 @@ router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup, s
  * 	"_id":"00000000-0000-0000-0000-000000000002"
  * }
  */
-router.put("/revision/master/head/groups/:uid", middlewares.issue.canCreate, convertGroupRules, updateGroup);
+router.put("/revision/master/head/groups/:uid", middlewares.issue.canCreate, convertInputRules, updateGroup);
 
-router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, convertGroupRules, updateGroup);
+router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, convertInputRules, updateGroup);
 
 /**
  * @api {post} /:teamspace/:model/revision(/master/head|/:revId)/groups Create group
@@ -463,9 +463,9 @@ router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, convertGro
  * 	]
  * }
  */
-router.post("/revision/master/head/groups/", middlewares.issue.canCreate, convertGroupRules, createGroup);
+router.post("/revision/master/head/groups/", middlewares.issue.canCreate, convertInputRules, createGroup);
 
-router.post("/revision/:rid/groups/", middlewares.issue.canCreate, convertGroupRules, createGroup);
+router.post("/revision/:rid/groups/", middlewares.issue.canCreate, convertInputRules, createGroup);
 
 /**
  * @api {delete} /:teamspace/:model/groups?ids=[GROUPS] Delete groups

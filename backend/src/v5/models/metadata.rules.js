@@ -52,7 +52,48 @@ Rules.generateQueriesFromRules = (rules) => {
 	return { positives, negatives };
 };
 
-Rules.toQuery = (rule) => {
+const getFieldClause = (rule) => {
+	let fieldClause;
+
+	const operator = negToPosOp[rule.field.operator] ?? rule.field.operator;
+	const { values } = rule.field;
+
+	switch (operator) {
+	case 'IS':
+		fieldClause = values.length > 1 ? { $in: values } : values[0];
+		break;
+	case 'CONTAINS': {
+		const sanitisedValues = values.map(sanitiseRegex);
+		// eslint-disable-next-line security/detect-non-literal-regexp
+		fieldClause = { $regex: new RegExp(sanitisedValues.join('|')), $options: 'i' };
+	}
+		break;
+	case 'STARTS_WITH': {
+		const sanitisedValues = values.map(sanitiseRegex);
+		// eslint-disable-next-line security/detect-non-literal-regexp
+		fieldClause = { $regex: new RegExp(`^(${sanitisedValues.join('|')})`), $options: 'i' };
+	}
+		break;
+	case 'ENDS_WITH': {
+		const sanitisedValues = values.map(sanitiseRegex);
+		// eslint-disable-next-line security/detect-non-literal-regexp
+		fieldClause = { $regex: new RegExp(`.*(${sanitisedValues.join('|')})$`), $options: 'i' };
+	}
+		break;
+	case 'REGEX': {
+		const regexArr = values.map((val) => `(${val})`);
+		// eslint-disable-next-line security/detect-non-literal-regexp
+		fieldClause = { $regex: new RegExp(regexArr.join('|')) };
+	}
+		break;
+	default:
+		throw templates.invalidArguments;
+	}
+
+	return fieldClause;
+};
+
+const getValueClause = (rule) => {
 	let valueClause;
 	const operator = negToPosOp[rule.operator] ?? rule.operator;
 	switch (operator) {
@@ -105,10 +146,17 @@ Rules.toQuery = (rule) => {
 		throw templates.invalidArguments;
 	}
 
-	const createQuery = (value) => ({
+	return valueClause;
+};
+
+Rules.toQuery = (rule) => {
+	const valueClause = getValueClause(rule);
+	const fieldClause = getFieldClause(rule);
+
+	const createQuery = (field, value) => ({
 		metadata: {
 			$elemMatch: {
-				key: rule.field,
+				key: field,
 				...(value !== undefined ? { value } : {}),
 			},
 		},
@@ -120,10 +168,10 @@ Rules.toQuery = (rule) => {
 			return { $or: valueClause.map(createQuery) };
 		}
 
-		return createQuery(valueClause);
+		return createQuery(fieldClause, valueClause);
 	}
 
-	return createQuery();
+	return createQuery(fieldClause);
 };
 
 module.exports = Rules;
