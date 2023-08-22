@@ -17,10 +17,10 @@
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const { deserialiseGroup, schema } = require('../../../../../../../schemas/tickets/tickets.groups');
+const { convertGroupRules } = require('./groups');
 const { getGroupById } = require('../../../../../../../models/tickets.groups');
 const { respond } = require('../../../../../../../utils/responder');
 const { validateMany } = require('../../../../../../common');
-const { convertGroupRules } = require('./groups');
 
 const GroupsMiddleware = {};
 

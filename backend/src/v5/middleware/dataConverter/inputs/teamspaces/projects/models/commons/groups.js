@@ -17,16 +17,18 @@
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Yup = require('yup');
+const { castSchema } = require('../../../../../../../schemas/rules');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { types } = require('../../../../../../../utils/helper/yup');
+const { validateMany } = require('../../../../../../common');
 const { validateSchema } = require('../../../../../../../schemas/groups');
-const { castSchema } = require('../../../../../../../schemas/rules');
 
 const Groups = {};
 
 const convertRules = (group) => {
 	if (group?.rules) {
+		// eslint-disable-next-line no-param-reassign
 		group.rules = castSchema(group.rules);
 	}
 };

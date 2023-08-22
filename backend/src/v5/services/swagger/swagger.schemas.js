@@ -158,10 +158,30 @@ Schemas.schemas.group = {
 			items: {
 				type: 'object',
 				properties: {
-					prop: {
+					name: {
 						type: 'string',
-						description: 'The BIM data prop to query',
-						example: 'Floor',
+						description: 'name of the rule',
+						example: 'Rule 1',
+					},
+					field: {
+						type: 'object',
+						description: 'The BIM data field to query',
+						properties: {
+							operator: {
+								type: 'string',
+								enum: ['IS', 'CONTAINS', 'REGEX', 'EQUALS', 'STARTS_WITH', 'ENDS_WITH'],
+								description: 'Operator value on the field name',
+								example: 'IS',
+							},
+							values: {
+								type: 'array',
+								description: 'The values to use in respective of the operator. This is evaluated under the union (OR) logic',
+								items: {
+									type: 'string',
+									example: 'Family Name',
+								},
+							},
+						},
 					},
 					operator: {
 						type: 'string',
@@ -169,7 +189,7 @@ Schemas.schemas.group = {
 						description: 'Operator value on this prop',
 						example: 'EQUALS',
 					},
-					value: {
+					values: {
 						type: 'array',
 						description: 'The values to use in respective of the operator. This is evaluated under the union (OR) logic',
 						items: {
@@ -244,10 +264,30 @@ Schemas.schemas.ticketGroup = {
 			items: {
 				type: 'object',
 				properties: {
-					field: {
+					name: {
 						type: 'string',
-						description: 'The BIM data prop to query',
-						example: 'Floor',
+						description: 'name of the rule',
+						example: 'Rule 1',
+					},
+					field: {
+						type: 'object',
+						description: 'The BIM data field to query',
+						properties: {
+							operator: {
+								type: 'string',
+								enum: ['IS', 'CONTAINS', 'REGEX', 'EQUALS', 'STARTS_WITH', 'ENDS_WITH'],
+								description: 'Operator value on the field name',
+								example: 'IS',
+							},
+							values: {
+								type: 'array',
+								description: 'The values to use in respective of the operator. This is evaluated under the union (OR) logic',
+								items: {
+									type: 'string',
+									example: 'Family Name',
+								},
+							},
+						},
 					},
 					operator: {
 						type: 'string',

@@ -120,9 +120,9 @@ const ruleSchema = Yup.object().shape({
 		}
 		return res;
 	})
-	.transform((value) => ({ 
+	.transform((value) => ({
 		...value,
-		field: typeof value.field === 'string' ? { operator: 'IS', values: [value.field] } : value.field
+		field: typeof value.field === 'string' ? { operator: 'IS', values: [value.field] } : value.field,
 	}))
 	.test('Rules validation', 'values field is not valid with the operator selected',
 		(value) => validateValuesArray(fieldValueOperators, value.operator, value.values))

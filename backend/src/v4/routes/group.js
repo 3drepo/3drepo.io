@@ -229,12 +229,18 @@ router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups, seria
  * 	],
  * 	"rules":[
  * 		{
- * 			"field":"Area",
+ * 			"field": {
+ *            "operator": "IS",
+ *            "values": ["Area"]
+ * 			},
  * 			"operator":"GT",
  * 			"values":[5]
  * 		},
  * 		{
- * 			"field":"IFC Type",
+ * 			"field": {
+ *            "operator": "IS",
+ *            "values": ["IFC Type"]
+ * 			},
  * 			"operator":"IS",
  * 			"values":[
  *				"IfcWall",
@@ -366,12 +372,18 @@ router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, convertGro
  * 	"objects":[],
  * 	"rules":[
  * 		{
- * 			"field":"Area",
+ *			"field": {
+ *            "operator": "IS",
+ *            "values": ["Area"]
+ * 			},
  * 			"operator":"GT",
  * 			"values":[5]
  * 		},
  * 		{
- * 			"field":"IFC Type",
+ *			"field": {
+ *            "operator": "IS",
+ *            "values": ["IFC Type"]
+ * 			},
  * 			"operator":"IS",
  * 			"values":[
  *				"IfcWall",
@@ -430,12 +442,18 @@ router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, convertGro
  * 	],
  * 	"rules":[
  * 		{
- * 			"field":"Area",
+ *			"field": {
+ *            "operator": "IS",
+ *            "values": ["Area"]
+ * 			},
  * 			"operator":"GT",
  * 			"values":[5]
  * 		},
  * 		{
- * 			"field":"IFC Type",
+ *			"field": {
+ *            "operator": "IS",
+ *            "values": ["IFC Type"]
+ * 			},
  * 			"operator":"IS",
  * 			"values":[
  *				"IfcWall",
