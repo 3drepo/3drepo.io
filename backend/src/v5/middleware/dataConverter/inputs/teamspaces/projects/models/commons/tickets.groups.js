@@ -20,6 +20,7 @@ const { deserialiseGroup, schema } = require('../../../../../../../schemas/ticke
 const { getGroupById } = require('../../../../../../../models/tickets.groups');
 const { respond } = require('../../../../../../../utils/responder');
 const { validateMany } = require('../../../../../../common');
+const { convertGroupRules } = require('./groups');
 
 const GroupsMiddleware = {};
 
@@ -49,6 +50,6 @@ const validateGroup = async (req, res, next) => {
 	}
 };
 
-GroupsMiddleware.validateUpdateGroup = validateMany([groupExists, validateGroup]);
+GroupsMiddleware.validateUpdateGroup = validateMany([groupExists, convertGroupRules, validateGroup]);
 
 module.exports = GroupsMiddleware;

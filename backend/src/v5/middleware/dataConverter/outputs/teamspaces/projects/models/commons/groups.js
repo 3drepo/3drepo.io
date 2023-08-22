@@ -21,6 +21,10 @@ const { templates } = require('../../../../../../../utils/responseCodes');
 
 const Groups = {};
 
+Groups.serialiseGroup = (req, res) => {
+	respond(req, res, templates.ok, castSchema(req.outputData));
+};
+
 Groups.serialiseGroupArray = (req, res) => {
 	const groups = req.outputData.map(castSchema);
 	respond(req, res, templates.ok, { groups });

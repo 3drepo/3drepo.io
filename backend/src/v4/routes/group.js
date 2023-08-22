@@ -25,9 +25,10 @@ const Group = require("../models/group");
 const C = require("../constants");
 const {v5Path} = require("../../interop");
 const GroupsV5 = require(`${v5Path}/processors/teamspaces/projects/models/commons/groups`);
-const { serialiseGroupArray} = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
+const { serialiseGroup, serialiseGroupArray} = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
 const { validateGroupsExportData, validateGroupsImportData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
 const utils = require("../utils");
+const { convertGroupRules, convertGroupArrayRules } = require("../../v5/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups");
 const systemLogger = require("../logger.js").systemLogger;
 
 /**
@@ -147,9 +148,9 @@ const systemLogger = require("../logger.js").systemLogger;
  * 	}
  * ]
  */
-router.get("/revision/master/head/groups", middlewares.issue.canView, listGroups);
+router.get("/revision/master/head/groups", middlewares.issue.canView, listGroups, serialiseGroupArray);
 
-router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups);
+router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups, serialiseGroupArray);
 
 /**
  * @api {get} /:teamspace/:model/revision(/master/head|/:revId)/groups/:groupId?[query] Find group
@@ -246,9 +247,9 @@ router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups);
  * 	"_id":"00000000-0000-0000-0000-000000000004"
  * }
  */
-router.get("/revision/master/head/groups/:uid", middlewares.issue.canView, findGroup);
+router.get("/revision/master/head/groups/:uid", middlewares.issue.canView, findGroup, serialiseGroup);
 
-router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup);
+router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup, serialiseGroup);
 
 /**
  * @api {put} /:teamspace/:model/revision(/master/head|/:revId)/groups/:groupId/ Update group
@@ -295,9 +296,9 @@ router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup);
  * 	"_id":"00000000-0000-0000-0000-000000000002"
  * }
  */
-router.put("/revision/master/head/groups/:uid", middlewares.issue.canCreate, updateGroup);
+router.put("/revision/master/head/groups/:uid", middlewares.issue.canCreate, convertGroupRules, updateGroup);
 
-router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, updateGroup);
+router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, convertGroupRules, updateGroup);
 
 /**
  * @api {post} /:teamspace/:model/revision(/master/head|/:revId)/groups Create group
@@ -444,9 +445,9 @@ router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, updateGrou
  * 	]
  * }
  */
-router.post("/revision/master/head/groups/", middlewares.issue.canCreate, createGroup);
+router.post("/revision/master/head/groups/", middlewares.issue.canCreate, convertGroupRules, createGroup);
 
-router.post("/revision/:rid/groups/", middlewares.issue.canCreate, createGroup);
+router.post("/revision/:rid/groups/", middlewares.issue.canCreate, convertGroupRules, createGroup);
 
 /**
  * @api {delete} /:teamspace/:model/groups?ids=[GROUPS] Delete groups
@@ -484,7 +485,7 @@ router.post("/groups/export", middlewares.issue.canView, validateGroupsExportDat
  * @apiGroup Groups
  * @apiDescription This is a back-ported endpoint from V5. For details please see V5 documentation /docs/#/Federations/ImportFederationGroups
  */
-router.post("/groups/import", middlewares.issue.canView, validateGroupsImportData, importGroups);
+router.post("/groups/import", middlewares.issue.canView, validateGroupsImportData, convertGroupArrayRules,importGroups);
 
 function exportGroups(req, res, next) {
 	const place = utils.APIInfo(req);
@@ -529,8 +530,9 @@ function listGroups(req, res, next) {
 		}
 	}
 
-	Group.getList(account, model, branch, rid, ids, req.query, showIfcGuids).then(groups => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, groups);
+	Group.getList(account, model, branch, rid, ids, req.query, showIfcGuids).then(async groups => {
+		req.outputData = groups;
+		await next();
 	}).catch(err => {
 		systemLogger.logError(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -543,8 +545,9 @@ function findGroup(req, res, next) {
 	const branch = rid ? null : "master";
 	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
 
-	Group.findByUID(account, model, branch, rid, uid, showIfcGuids, false).then(group => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
+	Group.findByUID(account, model, branch, rid, uid, showIfcGuids, false).then(async group => {
+		req.outputData = group;
+		await next();
 	}).catch(err => {
 		systemLogger.logError(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

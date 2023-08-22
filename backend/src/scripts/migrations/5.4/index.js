@@ -16,9 +16,11 @@
  */
 
 const mergeSceneBinaries = require('./mergeSceneBinaries');
+const updateGroupsSchema = require('./updateGroupsSchema');
 
 const scripts = [
 	{ script: mergeSceneBinaries, desc: 'Merge scene binary files into bigger files' },
+	{ script: updateGroupsSchema, desc: 'Update groups schema' },
 ];
 
 module.exports = scripts;

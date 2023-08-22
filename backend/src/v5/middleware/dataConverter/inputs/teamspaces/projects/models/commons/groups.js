@@ -21,8 +21,26 @@ const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { types } = require('../../../../../../../utils/helper/yup');
 const { validateSchema } = require('../../../../../../../schemas/groups');
+const { castSchema } = require('../../../../../../../schemas/rules');
 
 const Groups = {};
+
+const convertRules = (group) => {
+	if (group?.rules) {
+		group.rules = castSchema(group.rules);
+	}
+};
+
+Groups.convertGroupArrayRules = async (req, res, next) => {
+	const { groups } = req.body;
+	groups?.map(convertRules);
+	await next();
+};
+
+Groups.convertGroupRules = async (req, res, next) => {
+	convertRules(req.body);
+	await next();
+};
 
 Groups.validateGroupsExportData = async (req, res, next) => {
 	const schema = Yup.object().shape({
@@ -43,7 +61,7 @@ Groups.validateGroupsExportData = async (req, res, next) => {
 	}
 };
 
-Groups.validateGroupsImportData = async (req, res, next) => {
+const validateImportData = async (req, res, next) => {
 	try {
 		const { groups } = req.body;
 		if (!groups?.length) throw createResponseCode(templates.invalidArguments, 'Groups array cannot be empty');
@@ -65,5 +83,7 @@ Groups.validateGroupsImportData = async (req, res, next) => {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
+
+Groups.validateGroupsImportData = validateMany([Groups.convertGroupArrayRules, validateImportData]);
 
 module.exports = Groups;
