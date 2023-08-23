@@ -97,6 +97,10 @@ const render = () => {
 };
 
 const initApp = () => {
+	if (process.env.NODE_ENV !== 'test') {
+		sagaMiddleware.run(rootSaga);
+	}
+
 	if (clientConfigService.isValid && !clientConfigService.isMaintenanceEnabled) {
 		clientConfigService.injectCustomCSS();
 		render();
@@ -105,9 +109,6 @@ const initApp = () => {
 	clientConfigService.logAppVersion();
 
 	configAxios();
-	if (process.env.NODE_ENV !== 'test') {
-		sagaMiddleware.run(rootSaga);
-	}
 };
 
 initApp();
