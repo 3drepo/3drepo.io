@@ -131,13 +131,6 @@ const ruleSchema = Yup.object().shape({
 
 Rules.castSchema = (rules) => rules.map((r) => ruleSchema.cast(r));
 
-// todo ask what should I do about that
-Rules.schema = Yup.array().of(ruleSchema).min(1).test(
-	'Rules validation', 'the same field cannot be used in more than one rule',
-	(rules) => {
-		const keys = new Set(rules.map(({ field }) => field));
-		return rules.length === keys.size;
-	},
-);
+Rules.schema = Yup.array().of(ruleSchema).min(1);
 
 module.exports = Rules;

@@ -77,23 +77,16 @@ RuleHelper.isValidRule = (rule) => {
 };
 
 RuleHelper.checkRulesValidity = (rules) => {
-	const fieldsWithRules = new Set();
 	let valid = rules.length > 0;
 	let it = 0;
+	
 	while (valid && it < rules.length) {
 		const rule = rules[it];
-		const hasDuplicate = fieldsWithRules.has(rule.field);
-		valid = rule &&
-			RuleHelper.isValidRule(rule) &&
-			!hasDuplicate;
-
-		if (valid) {
-			fieldsWithRules.add(rule.field);
-		} else if (hasDuplicate) {
-			throw responseCodes.MULTIPLE_RULES_PER_FIELD_NOT_ALLOWED;
-		}
+		valid = rule && RuleHelper.isValidRule(rule) 
+	
 		it++;
 	}
+
 	return valid;
 };
 
