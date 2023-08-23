@@ -17,7 +17,6 @@
 
 "use strict";
 
-const responseCodes = require("../../response_codes.js");
 const { v5Path } = require("../../../interop");
 const { toQuery } = require(`${v5Path}/models/metadata.rules`);
 const { schema: rulesSchema } = require(`${v5Path}/schemas/rules`);
@@ -79,11 +78,11 @@ RuleHelper.isValidRule = (rule) => {
 RuleHelper.checkRulesValidity = (rules) => {
 	let valid = rules.length > 0;
 	let it = 0;
-	
+
 	while (valid && it < rules.length) {
 		const rule = rules[it];
-		valid = rule && RuleHelper.isValidRule(rule) 
-	
+		valid = rule && RuleHelper.isValidRule(rule);
+
 		it++;
 	}
 

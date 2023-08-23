@@ -62,8 +62,7 @@ Groups.validateGroupsImportData = async (req, res, next) => {
 		if (!groups?.length) throw createResponseCode(templates.invalidArguments, 'Groups array cannot be empty');
 		await Promise.all(groups.map((g) => {
 			convertRules(g);
-			validateSchema(g);
-			return;
+			return validateSchema(g);
 		}));
 		for (let i = 0; i < groups.length; ++i) {
 			const group = groups[i];
