@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { castSchema } = require('../../../../../../../schemas/groups');
 const { castSchema: castRulesSchema } = require('../../../../../../../schemas/rules');
+const { castSchema } = require('../../../../../../../schemas/groups');
 const { respond } = require('../../../../../../../utils/responder');
 const { templates } = require('../../../../../../../utils/responseCodes');
 
@@ -24,11 +24,11 @@ const Groups = {};
 
 Groups.convertGroupRules = (req, res) => {
 	const group = req.outputData;
-	
-	if(group.rules){
+
+	if (group.rules) {
 		group.rules = castRulesSchema(group.rules);
 	}
-	
+
 	respond(req, res, templates.ok, group);
 };
 

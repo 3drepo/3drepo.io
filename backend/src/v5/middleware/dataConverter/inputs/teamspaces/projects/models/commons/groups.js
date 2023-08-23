@@ -21,7 +21,6 @@ const { castSchema } = require('../../../../../../../schemas/rules');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { types } = require('../../../../../../../utils/helper/yup');
-const { validateMany } = require('../../../../../../common');
 const { validateSchema } = require('../../../../../../../schemas/groups');
 
 const Groups = {};
@@ -31,12 +30,6 @@ const convertRules = (group) => {
 		// eslint-disable-next-line no-param-reassign
 		group.rules = castSchema(group.rules);
 	}
-};
-
-Groups.convertGroupArrayRules = async (req, res, next) => {
-	const { groups } = req.body;
-	groups?.map(convertRules);
-	await next();
 };
 
 Groups.convertGroupRules = async (req, res, next) => {
@@ -63,11 +56,15 @@ Groups.validateGroupsExportData = async (req, res, next) => {
 	}
 };
 
-const validateImportData = async (req, res, next) => {
+Groups.validateGroupsImportData = async (req, res, next) => {
 	try {
 		const { groups } = req.body;
 		if (!groups?.length) throw createResponseCode(templates.invalidArguments, 'Groups array cannot be empty');
-		await Promise.all(groups.map(validateSchema));
+		await Promise.all(groups.map((g) => {
+			convertRules(g);
+			validateSchema(g);
+			return;
+		}));
 		for (let i = 0; i < groups.length; ++i) {
 			const group = groups[i];
 			group._id = stringToUUID(group._id);
@@ -85,7 +82,5 @@ const validateImportData = async (req, res, next) => {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
-
-Groups.validateGroupsImportData = validateMany([Groups.convertGroupArrayRules, validateImportData]);
 
 module.exports = Groups;

@@ -28,7 +28,7 @@ const GroupsV5 = require(`${v5Path}/processors/teamspaces/projects/models/common
 const { convertGroupRules: convertOutputRules, serialiseGroupArray} = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
 const { validateGroupsExportData, validateGroupsImportData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
 const utils = require("../utils");
-const { convertGroupRules: convertInputRules, convertGroupArrayRules } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
+const { convertGroupRules: convertInputRules } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
 const systemLogger = require("../logger.js").systemLogger;
 
 /**
