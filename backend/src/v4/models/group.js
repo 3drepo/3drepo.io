@@ -45,7 +45,7 @@ const fieldTypes = {
 
 const embeddedObjectFields = {
 	"objects" : ["account", "model", "shared_ids", "ifc_guids"],
-	"rules" : ["field", "operator", "values"]
+	"rules" : ["name", "field", "operator", "values"]
 };
 
 function cleanEmbeddedObject(field, data) {

@@ -302,9 +302,9 @@ router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup, c
  * 	"_id":"00000000-0000-0000-0000-000000000002"
  * }
  */
-router.put("/revision/master/head/groups/:uid", middlewares.issue.canCreate, convertInputRules, updateGroup);
+router.put("/revision/master/head/groups/:uid", middlewares.issue.canCreate, convertInputRules, updateGroup,convertOutputRules);
 
-router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, convertInputRules, updateGroup);
+router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, convertInputRules, updateGroup,convertOutputRules);
 
 /**
  * @api {post} /:teamspace/:model/revision(/master/head|/:revId)/groups Create group
@@ -498,12 +498,12 @@ router.delete("/groups/", middlewares.issue.canCreate, deleteGroups);
 router.post("/groups/export", middlewares.issue.canView, validateGroupsExportData, exportGroups, serialiseGroupArray);
 
 /**
- * @api {post} /:teamspace/:model/groups/export Import Groups
- * @apiName exportGroups
+ * @api {post} /:teamspace/:model/groups/import Import Groups
+ * @apiName importGroups
  * @apiGroup Groups
  * @apiDescription This is a back-ported endpoint from V5. For details please see V5 documentation /docs/#/Federations/ImportFederationGroups
  */
-router.post("/groups/import", middlewares.issue.canView, validateGroupsImportData, convertGroupArrayRules,importGroups);
+router.post("/groups/import", middlewares.issue.canView, validateGroupsImportData, importGroups);
 
 function exportGroups(req, res, next) {
 	const place = utils.APIInfo(req);
@@ -612,8 +612,9 @@ function updateGroup(req, res, next) {
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
 
-	Group.update(account, model, branch, rid, sessionId, req.session.user.username, uid, req.body).then(group => {
-		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
+	Group.update(account, model, branch, rid, sessionId, req.session.user.username, uid, req.body).then(async group => {
+		req.outputData = group;
+		await next();
 	}).catch(err => {
 		systemLogger.logError(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
