@@ -31,21 +31,11 @@ type IDashboardListItemText = {
 };
 
 export const RevisionsListItemText = ({
-	children,
-	width,
-	tabletWidth,
-	mobileWidth,
-	className,
 	active = false,
-	hideWhenSmallerThan,
+	children,
+	...props
 }: IDashboardListItemText): JSX.Element => (
-	<FixedOrGrowContainer
-		width={width}
-		tabletWidth={tabletWidth}
-		mobileWidth={mobileWidth}
-		hideWhenSmallerThan={hideWhenSmallerThan}
-		className={className}
-	>
+	<FixedOrGrowContainer {...props}>
 		<Text $active={active}>
 			{children}
 		</Text>

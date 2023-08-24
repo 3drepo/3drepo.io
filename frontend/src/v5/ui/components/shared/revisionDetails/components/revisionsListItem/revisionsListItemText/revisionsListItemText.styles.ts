@@ -15,4 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { RevisionsListItemDate } from './revisionsListItemDate.component';
+import styled from 'styled-components';
+import { TextOverflow } from '@controls/textOverflow';
+
+export const Text = styled(TextOverflow)<{ $active: boolean }>`
+	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
+`;

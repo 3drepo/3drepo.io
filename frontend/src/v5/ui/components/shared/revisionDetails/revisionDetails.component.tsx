@@ -18,17 +18,17 @@
 import { useEffect } from 'react';
 import { range } from 'lodash';
 
-import { RevisionsListHeaderLabel } from '@components/shared/revisionDetails/components/revisionsListHeaderLabel';
 import { Button } from '@controls/button';
 import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
-import { RevisionsListItem } from '@components/shared/revisionDetails/components/revisionsListItem';
-import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ProjectsHooksSelectors, RevisionsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { uploadToContainer } from '@/v5/ui/routes/dashboard/projects/containers/uploadFileForm/uploadFileForm.helpers';
+import { SkeletonListItem } from './components/skeletonListItem/skeletonListItem.component';
+import { RevisionsListItem } from './components/revisionsListItem/revisionsListItem.component';
+import { RevisionsListHeaderLabel } from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.component';
 import {
 	Container,
 	RevisionsListHeaderContainer,

@@ -16,11 +16,6 @@
  */
 import { SyntheticEvent } from 'react';
 
-import { RevisionsListItemText } from '@components/shared/revisionDetails/components/revisionsListItemText';
-import { RevisionsListItemDate } from '@components/shared/revisionDetails/components/revisionsListItemDate';
-import { RevisionsListItemAuthor } from '@components/shared/revisionDetails/components/revisionsListItemAuthor';
-import { RevisionsListItemCode } from '@components/shared/revisionDetails/components/revisionsListItemCode';
-import { RevisionsListItemButton } from '@components/shared/revisionDetails/components/revisionsListItemButton';
 import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatDate } from '@/v5/services/intl';
@@ -30,6 +25,9 @@ import { Tooltip } from '@mui/material';
 import { getRevisionFileUrl } from '@/v5/services/api/revisions';
 import { ContainersHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Container, DownloadButton, DownloadIcon } from './revisionsListItem.styles';
+import { RevisionsListItemAuthor } from './revisionsListItemAuthor/revisionsListItemAuthor.component';
+import { RevisionsListItemText } from './revisionsListItemText/revisionsListItemText.component';
+import { RevisionsListItemButton } from './revisionsListItemButton/revisionsListItemButton.component';
 
 type IRevisionsListItem = {
 	revision: IRevision;
@@ -56,11 +54,11 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 
 	return (
 		<Container to={viewerRoute(teamspace, project, containerId, revision)}>
-			<RevisionsListItemDate width={130} tabletWidth={94} active={active}>
+			<RevisionsListItemText width={130} tabletWidth={94} active={active}>
 				{formatDate(timestamp)}
-			</RevisionsListItemDate>
+			</RevisionsListItemText>
 			<RevisionsListItemAuthor authorName={author} active={active} width={228} tabletWidth={155} />
-			<RevisionsListItemCode width="20%" tabletWidth={150}> {tag} </RevisionsListItemCode>
+			<RevisionsListItemText width="20%" tabletWidth={150}> {tag} </RevisionsListItemText>
 			<RevisionsListItemText hideWhenSmallerThan={887} active={active}> {desc} </RevisionsListItemText>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasCollaboratorAccess} />
 			{ hasCollaboratorAccess && (
