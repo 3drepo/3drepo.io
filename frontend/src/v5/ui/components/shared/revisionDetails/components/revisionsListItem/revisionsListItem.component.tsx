@@ -24,7 +24,7 @@ import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@mui/material';
 import { getRevisionFileUrl } from '@/v5/services/api/revisions';
 import { ContainersHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Container, DownloadButton, DownloadIcon } from './revisionsListItem.styles';
+import { Container, DownloadButton, DownloadIcon, RevisionsListItemFormat } from './revisionsListItem.styles';
 import { RevisionsListItemAuthor } from './revisionsListItemAuthor/revisionsListItemAuthor.component';
 import { RevisionsListItemText } from './revisionsListItemText/revisionsListItemText.component';
 import { RevisionsListItemButton } from './revisionsListItemButton/revisionsListItemButton.component';
@@ -38,7 +38,7 @@ type IRevisionsListItem = {
 export const RevisionsListItem = ({ revision, containerId, active = false }: IRevisionsListItem): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const { timestamp, desc, author, tag, void: voidStatus } = revision;
+	const { timestamp, desc, author, tag, void: voidStatus, format } = revision;
 
 	const toggleVoidStatus = (e: SyntheticEvent) => {
 		e.preventDefault();
@@ -60,6 +60,7 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 			<RevisionsListItemAuthor authorName={author} active={active} width={228} tabletWidth={155} />
 			<RevisionsListItemText width="20%" tabletWidth={150}> {tag} </RevisionsListItemText>
 			<RevisionsListItemText hideWhenSmallerThan={887} active={active}> {desc} </RevisionsListItemText>
+			<RevisionsListItemFormat active={active}> {format} </RevisionsListItemFormat>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasCollaboratorAccess} />
 			{ hasCollaboratorAccess && (
 				<Tooltip
