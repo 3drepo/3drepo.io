@@ -17,9 +17,11 @@
 
 import styled, { css } from 'styled-components';
 import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
-import { Display } from '@/v5/ui/themes/media';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
 import * as RevisionsListHeaderLabelStyles from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.styles';
+
+const BORDER_RADIUS = '8px';
+const ITEM_HEIGHT = '49px';
 
 export const Container = styled.div`
 	display: flex;
@@ -30,10 +32,6 @@ export const Container = styled.div`
 	position: relative;
 	max-height: 500px;
 	overflow: hidden;
-
-	@media (max-width: ${Display.Desktop}px) {
-		padding-left: 45px;
-	}
 `;
 
 export const RevisionsListEmptyWrapper = styled.div`
@@ -67,16 +65,12 @@ export const RevisionsList = styled.ul`
 	flex-direction: column;
 	padding: 0;
 	max-height: 260px;
-	margin-bottom: 40px;
+	margin-bottom: 51px;
 	overflow-y: auto;
 `;
 
 const selectedRevisionListItemStyles = css`
 	background-image: ${({ theme }) => `linear-gradient(${theme.palette.secondary.mid}, ${theme.palette.secondary.mid}), linear-gradient(to bottom, ${theme.palette.primary.main}, ${theme.palette.secondary.light})`};
-`;
-
-const beforeSelectedRevisionListItemStyles = css`
-	background-image: ${({ theme }) => `linear-gradient(${theme.palette.secondary.mid}, ${theme.palette.secondary.mid}), linear-gradient(to bottom, ${theme.palette.secondary.light}, ${theme.palette.primary.main})`};
 `;
 
 const singleRevisionListItemStyles = ({ theme, selected }) => css`
@@ -93,75 +87,68 @@ const singleRevisionListItemStyles = ({ theme, selected }) => css`
 	}
 `;
 
-const revisionListItemStylesLineStyles = ({ theme, selected, isBeforeSelected }) => css`
+const revisionListItemStylesLineStyles = ({ theme, selected }) => css`
 	&:after {
 		content: '';
 		display: block;
 		width: 25px;
-		height: 52px;
+		height: ${ITEM_HEIGHT};
 		position: absolute;
 		top: 50%;
 		left: -25px;
 		z-index: -1;
-		border: solid 2px transparent;
+		border: solid 1px transparent;
 		background-origin: border-box;
 		background-clip: content-box, border-box;
 		background-image: linear-gradient(${theme.palette.secondary.mid}, ${theme.palette.secondary.mid}), linear-gradient(to bottom, ${theme.palette.secondary.light}, ${theme.palette.secondary.light});
 		${selected && selectedRevisionListItemStyles};
-		${isBeforeSelected && beforeSelectedRevisionListItemStyles};
 	}
 `;
 
-export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected?: boolean, isBeforeSelected?: boolean }>`
+export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected?: boolean }>`
 	box-sizing: border-box;
-	background-color: ${({ theme }) => theme.palette.secondary.light};
-	height: 52px;
-	min-height: 52px;
+	height: ${ITEM_HEIGHT};
+	min-height: ${ITEM_HEIGHT};
 	width: calc(100% - 98px);
 	list-style: none;
-	border: 1px solid ${({ theme }) => theme.palette.secondary.mid};
-	border-bottom-style: none;
-	border-left-style: none;
 	position: relative;
 	margin-left: 66px;
 	cursor: pointer;
+
+	background-color: ${({ theme }) => theme.palette.secondary.mid};
+	border: solid 1px ${({ theme }) => theme.palette.secondary.light};
+	border-width: 1px 1px 0 8px;
+
+	&:first-child {
+		border-radius: ${BORDER_RADIUS} ${BORDER_RADIUS} 0 0;
+	}
+	&:last-child {
+		border-radius: 0 0 ${BORDER_RADIUS} ${BORDER_RADIUS};
+		border-bottom-width: 1px;
+	}
+	&:only-child {
+		border-radius: ${BORDER_RADIUS};
+	}
 
 	&:hover {
 		background-color: ${({ theme }) => theme.palette.secondary.main};
 	}
 
-	${({ isSingle }) => css`
-		${!isSingle && revisionListItemStylesLineStyles}
-		${isSingle && singleRevisionListItemStyles}
-
-		&:first-of-type:after {
-			border-top-left-radius: 5px;
-		}
-
-		&:nth-last-child(2):after {
-			border-bottom-left-radius: 5px;
-		}
-
-		&:last-of-type:after {
-			display: none;
-		}
-	`}
-
-	&:last-child {
-		border-radius: 0 0 8px 8px;
-		border-bottom-style: solid;
-	}
-
-	&:first-child {
-		border-radius: 8px 8px 0 0;
-		border-top-style: solid;
-	}
-
-	&:only-child {
-		border-radius: 8px;
-	}
-
 	${({ theme, selected }) => selected && css`
-		background-color: ${theme.palette.primary.main};
+		background-color: ${theme.palette.secondary.main};
+		border-left-color: ${theme.palette.primary.main};
 	`}
+	
+	// Left side connecting line styles
+	${({ isSingle }) => css`${isSingle ? singleRevisionListItemStyles : revisionListItemStylesLineStyles}`}
+	&:first-of-type:after {
+		border-top-left-radius: 10px;
+	}
+	&:nth-last-child(2):after {
+		border-bottom-left-radius: 10px;
+	}
+	&:last-of-type:after {
+		display: none;
+	}
+
 `;
