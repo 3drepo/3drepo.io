@@ -14,21 +14,30 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { LabelButton } from '@controls/button';
+import { hexToOpacity } from '@/v5/ui/themes/theme';
 
 export const Container = styled.div`
-	min-width: 80px;
+	min-width: 70px;
 	position: absolute;
 	right: 60px;
 `;
 
 export const Button = styled(LabelButton)<{ $isVoid: boolean }>`
 	margin: 0;
+	height: 26px;
 	width: 100%;
-	color: ${({ theme, $isVoid }) => ($isVoid ? theme.palette.error.main : theme.palette.primary.main)};
+	color: ${({ theme }) => theme.palette.primary.main};
 
 	&:hover {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		border-color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 50)};
+		color: ${({ theme }) => theme.palette.primary.main};
 	}
+
+	${({ theme, $isVoid }) => $isVoid && css`
+		color: ${theme.palette.primary.contrast};
+		background-color: transparent;
+		border: 1px solid currentColor;
+	`};
 `;
