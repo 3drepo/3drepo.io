@@ -58,6 +58,10 @@ export const DownloadButton = styled(IconButton)`
 	right: 0;
 `;
 
+export const RevisionsListItemTag = styled(RevisionsListItemText)`
+	text-decoration: underline;
+`;
+
 export const RevisionsListItemFormat = styled(RevisionsListItemText)`
 	margin-right: 72px;
 `;

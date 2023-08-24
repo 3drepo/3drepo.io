@@ -54,13 +54,7 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 
 	return (
 		<Container to={viewerRoute(teamspace, project, containerId, revision)}>
-			<RevisionsListItemText width={130} tabletWidth={94} active={active}>
-				{formatDate(timestamp)}
-			</RevisionsListItemText>
-			<RevisionsListItemAuthor authorName={author} active={active} width={228} tabletWidth={155} />
-			<RevisionsListItemText width="20%" tabletWidth={150}> {tag} </RevisionsListItemText>
-			<RevisionsListItemText hideWhenSmallerThan={887} active={active}> {desc} </RevisionsListItemText>
-			<RevisionsListItemFormat active={active}> {format} </RevisionsListItemFormat>
+			<RevisionsListItemTag width="20%" tabletWidth={150}> {tag} </RevisionsListItemTag>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasCollaboratorAccess} />
 			{ hasCollaboratorAccess && (
 				<Tooltip
