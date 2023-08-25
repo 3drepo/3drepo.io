@@ -43,6 +43,7 @@ export const Container = styled(Link)`
 
 export const DownloadIcon = styled(DownloadIconBase)`
 	color: ${({ theme }) => theme.palette.primary.contrast};
+	height: 18px;
 `;
 
 export const DownloadButton = styled(IconButton)`
@@ -63,5 +64,5 @@ export const RevisionsListItemTag = styled(RevisionsListItemText)`
 `;
 
 export const RevisionsListItemFormat = styled(RevisionsListItemText)`
-	margin-right: 72px;
+	margin-right: 140px;
 `;
