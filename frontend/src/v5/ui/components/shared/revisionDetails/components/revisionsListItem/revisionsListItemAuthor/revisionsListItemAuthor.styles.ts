@@ -16,26 +16,12 @@
  */
 
 import styled from 'styled-components';
-import { Typography } from '@mui/material';
-import { FixedOrGrowContainer as FixedOrGrowContainerBase } from '@controls/fixedOrGrowContainer';
+import { TextOverflow } from '@controls/textOverflow';
 
-export const Text = styled(Typography)<{ $active: boolean }>`
-	${({ theme }) => theme.typography.kicker};
-	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
-	display: inline;
-	cursor: pointer;
-`;
-
-export const Name = styled.span`
-	white-space: nowrap;
+export const Name = styled(TextOverflow)`
 	max-width: 100%;
-	overflow: hidden;
-	text-overflow: ellipsis;
 	padding-right: 10px;
 	box-sizing: border-box;
 	display: inline-block;
-`;
-
-export const FixedOrGrowContainer = styled(FixedOrGrowContainerBase)<{ $active }>`
-	color: ${({ theme, $active }) => ($active ? theme.palette.primary.contrast : theme.palette.base.light)};
+	vertical-align: middle;
 `;

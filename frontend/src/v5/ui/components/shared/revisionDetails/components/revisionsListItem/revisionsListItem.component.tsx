@@ -54,6 +54,7 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 
 	return (
 		<Container to={viewerRoute(teamspace, project, containerId, revision)}>
+			<RevisionsListItemAuthor authorName={author} width={228} tabletWidth={155} />
 			<RevisionsListItemTag width="20%" tabletWidth={150}> {tag} </RevisionsListItemTag>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasCollaboratorAccess} />
 			{ hasCollaboratorAccess && (
