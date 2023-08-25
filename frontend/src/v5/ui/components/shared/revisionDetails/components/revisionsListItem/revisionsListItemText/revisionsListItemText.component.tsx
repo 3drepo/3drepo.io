@@ -18,26 +18,24 @@
 import { ReactNode } from 'react';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Display } from '@/v5/ui/themes/media';
-import { Text } from './revisionsListItemText.styles';
+import { TextOverflow } from '@controls/textOverflow';
 
 type IDashboardListItemText = {
 	children: ReactNode;
-	width?: number;
+	width?: number | string;
 	tabletWidth?: number;
 	mobileWidth?: number;
 	className?: string;
-	active?: boolean;
 	hideWhenSmallerThan?: Display;
 };
 
 export const RevisionsListItemText = ({
-	active = false,
 	children,
 	...props
 }: IDashboardListItemText): JSX.Element => (
 	<FixedOrGrowContainer {...props}>
-		<Text $active={active}>
+		<TextOverflow>
 			{children}
-		</Text>
+		</TextOverflow>
 	</FixedOrGrowContainer>
 );

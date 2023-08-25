@@ -24,18 +24,18 @@ import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@mui/material';
 import { getRevisionFileUrl } from '@/v5/services/api/revisions';
 import { ContainersHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Container, DownloadButton, DownloadIcon, RevisionsListItemFormat } from './revisionsListItem.styles';
+import { Display } from '@/v5/ui/themes/media';
+import { Container, DownloadButton, DownloadIcon, RevisionsListItemFormat, RevisionsListItemTag } from './revisionsListItem.styles';
 import { RevisionsListItemAuthor } from './revisionsListItemAuthor/revisionsListItemAuthor.component';
 import { RevisionsListItemText } from './revisionsListItemText/revisionsListItemText.component';
 import { RevisionsListItemButton } from './revisionsListItemButton/revisionsListItemButton.component';
 
 type IRevisionsListItem = {
 	revision: IRevision;
-	active?: boolean;
 	containerId: string;
 };
 
-export const RevisionsListItem = ({ revision, containerId, active = false }: IRevisionsListItem): JSX.Element => {
+export const RevisionsListItem = ({ revision, containerId }: IRevisionsListItem): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const { timestamp, desc, author, tag, void: voidStatus, format } = revision;
@@ -54,8 +54,11 @@ export const RevisionsListItem = ({ revision, containerId, active = false }: IRe
 
 	return (
 		<Container to={viewerRoute(teamspace, project, containerId, revision)}>
+			<RevisionsListItemText width={130} tabletWidth={94}> {formatDate(timestamp)} </RevisionsListItemText>
 			<RevisionsListItemAuthor authorName={author} width={228} tabletWidth={155} />
 			<RevisionsListItemTag width="20%" tabletWidth={150}> {tag} </RevisionsListItemTag>
+			<RevisionsListItemText hideWhenSmallerThan={Display.Tablet}> {desc} </RevisionsListItemText>
+			<RevisionsListItemFormat> {format.toLowerCase()} </RevisionsListItemFormat>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasCollaboratorAccess} />
 			{ hasCollaboratorAccess && (
 				<Tooltip
