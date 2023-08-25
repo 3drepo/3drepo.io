@@ -21,6 +21,7 @@ const Path = require('path');
 const { STATUSES } = require('../../../../../../../models/modelSettings.constants');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../../utils/helper/yup');
+const { isString } = require('../../../../../../../utils/helper/typeCheck');
 const { isTagUnique } = require('../../../../../../../models/revisions');
 const { modelsExistInProject } = require('../../../../../../../models/projectSettings');
 const { respond } = require('../../../../../../../utils/responder');
@@ -103,16 +104,26 @@ const validateContainerRevisionUpload = async (req, res, next) => {
 };
 
 const validateFederationRevisionUpload = async (req, res, next) => {
+	const containerEntry = Yup.object({
+		id: YupHelper.types.id.required(),
+		group: YupHelper.types.strings.title,
+	}).transform((v, oldVal) => {
+		if (isString(oldVal)) {
+			return { id: oldVal };
+		}
+		return v;
+	});
 	const schemaBase = {
-		containers: Yup.array().of(YupHelper.types.id).min(1).required()
+		containers: Yup.array().of(containerEntry).min(1).required()
 			.test('containers-validation', 'Containers must exist within the same project', (value) => {
 				const { teamspace, project } = req.params;
-				return value?.length && modelsExistInProject(teamspace, project, value).catch(() => false);
+				return value?.length
+					&& modelsExistInProject(teamspace, project, value.map((v) => v?.id)).catch(() => false);
 			})
 			.test('containers-validation', 'IDs provided cannot be of type federation', async (value) => {
 				if (value?.length) {
 					const { teamspace } = req.params;
-					const foundContainers = await getContainers(teamspace, value, { _id: 1 });
+					const foundContainers = await getContainers(teamspace, value.map((v) => v?.id), { _id: 1 });
 					return foundContainers?.length === value?.length;
 				}
 				return false;

@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../../../../../../helper/path');
-const { generateUUIDString } = require('../../../../../../../helper/services');
+const { generateUUIDString, generateRandomString } = require('../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -63,7 +64,12 @@ const testValidateNewRevisionData = () => {
 		containers,
 	});
 	describe.each([
-		['Request with valid data', createBody([generateUUIDString(), generateUUIDString()])],
+		['Request with valid data (old schema)', createBody(times(3, () => generateUUIDString()))],
+		['Request with valid data (new schema)', createBody(times(3, () => ({ id: generateUUIDString() })))],
+		['Request with valid data (new schema with groups)', createBody(times(3, () => ({
+			id: generateUUIDString(),
+			group: generateRandomString(),
+		})))],
 		['Request with invalid model Ids (wrong type)', createBody([1, 2, 3]), true],
 		['Request with invalid model Ids (not uuid format', createBody(['model 1']), true],
 		['Request with empty container array', createBody([]), true],
