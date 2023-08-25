@@ -50,7 +50,7 @@ export const RevisionsListEmptyText = styled(DashboardListEmptyText)`
 
 export const RevisionsListHeaderContainer = styled.header`
 	display: flex;
-	padding: 13px 46px 10px 86px;
+	padding: 13px 186px 10px 94px;
 	margin-top: 17px;
 
 	${RevisionsListHeaderLabelStyles.Container} {
@@ -63,6 +63,7 @@ export const RevisionsListHeaderContainer = styled.header`
 export const RevisionsList = styled.ul`
 	display: flex;
 	flex-direction: column;
+	width: calc(100% - 98px);
 	padding: 0;
 	max-height: 260px;
 	margin-bottom: 51px;
@@ -109,7 +110,7 @@ export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected
 	box-sizing: border-box;
 	height: ${ITEM_HEIGHT};
 	min-height: ${ITEM_HEIGHT};
-	width: calc(100% - 98px);
+	width: auto;
 	list-style: none;
 	position: relative;
 	margin-left: 66px;

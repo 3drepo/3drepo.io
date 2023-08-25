@@ -26,7 +26,6 @@ import { FormattedMessage } from 'react-intl';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { uploadToContainer } from '@/v5/ui/routes/dashboard/projects/containers/uploadFileForm/uploadFileForm.helpers';
-import { Display } from '@/v5/ui/themes/media';
 import { SkeletonListItem } from './components/skeletonListItem/skeletonListItem.component';
 import { RevisionsListItem } from './components/revisionsListItem/revisionsListItem.component';
 import { RevisionsListHeaderLabel } from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.component';
@@ -95,10 +94,10 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 		<Container>
 			<RevisionsListHeaderContainer>
 				<RevisionsListHeaderLabel width={130} tabletWidth={94}><FormattedMessage id="revisionDetails.addedOn" defaultMessage="Added on" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={228} tabletWidth={155}><FormattedMessage id="revisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width="20%" tabletWidth={150}><FormattedMessage id="revisionDetails.revisionCode" defaultMessage="Revision code" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel hideWhenSmallerThan={Display.Tablet}><FormattedMessage id="revisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel><FormattedMessage id="revisionDetails.format" defaultMessage="Format" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={170} tabletWidth={155}><FormattedMessage id="revisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={150} tabletWidth={300}><FormattedMessage id="revisionDetails.revisionCode" defaultMessage="Revision name" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel hideWhenSmallerThan={1140}><FormattedMessage id="revisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={90} tabletWidth={45} hideWhenSmallerThan={800}><FormattedMessage id="revisionDetails.format" defaultMessage="Format" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
 			<RevisionsList>
 				{isLoading ? (

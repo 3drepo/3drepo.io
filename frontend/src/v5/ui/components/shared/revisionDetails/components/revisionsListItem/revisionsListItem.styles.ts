@@ -26,7 +26,7 @@ export const Container = styled(Link)`
 	align-items: center;
 	height: 100%;
 	padding-left: 20px;
-	padding-right: 13px;
+	padding-right: 153px;
 	color: ${({ theme }) => theme.palette.primary.contrast};
 
 	&:link { text-decoration: none; }
@@ -61,8 +61,4 @@ export const DownloadButton = styled(IconButton)`
 
 export const RevisionsListItemTag = styled(RevisionsListItemText)`
 	text-decoration: underline;
-`;
-
-export const RevisionsListItemFormat = styled(RevisionsListItemText)`
-	margin-right: 140px;
 `;

@@ -24,8 +24,7 @@ import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@mui/material';
 import { getRevisionFileUrl } from '@/v5/services/api/revisions';
 import { ContainersHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Display } from '@/v5/ui/themes/media';
-import { Container, DownloadButton, DownloadIcon, RevisionsListItemFormat, RevisionsListItemTag } from './revisionsListItem.styles';
+import { Container, DownloadButton, DownloadIcon, RevisionsListItemTag } from './revisionsListItem.styles';
 import { RevisionsListItemAuthor } from './revisionsListItemAuthor/revisionsListItemAuthor.component';
 import { RevisionsListItemText } from './revisionsListItemText/revisionsListItemText.component';
 import { RevisionsListItemButton } from './revisionsListItemButton/revisionsListItemButton.component';
@@ -55,10 +54,10 @@ export const RevisionsListItem = ({ revision, containerId }: IRevisionsListItem)
 	return (
 		<Container to={viewerRoute(teamspace, project, containerId, revision)}>
 			<RevisionsListItemText width={130} tabletWidth={94}> {formatDate(timestamp)} </RevisionsListItemText>
-			<RevisionsListItemAuthor authorName={author} width={228} tabletWidth={155} />
-			<RevisionsListItemTag width="20%" tabletWidth={150}> {tag} </RevisionsListItemTag>
-			<RevisionsListItemText hideWhenSmallerThan={Display.Tablet}> {desc} </RevisionsListItemText>
-			<RevisionsListItemFormat> {format.toLowerCase()} </RevisionsListItemFormat>
+			<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={author} />
+			<RevisionsListItemTag width={150} tabletWidth={300}> {tag} </RevisionsListItemTag>
+			<RevisionsListItemText hideWhenSmallerThan={1140}> {desc} </RevisionsListItemText>
+			<RevisionsListItemText width={90} tabletWidth={45} hideWhenSmallerThan={800}> {format.toLowerCase()} </RevisionsListItemText>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasCollaboratorAccess} />
 			{ hasCollaboratorAccess && (
 				<Tooltip

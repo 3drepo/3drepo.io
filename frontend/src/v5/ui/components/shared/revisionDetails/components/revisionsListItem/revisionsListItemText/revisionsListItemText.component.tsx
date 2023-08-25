@@ -15,24 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode } from 'react';
-import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { Display } from '@/v5/ui/themes/media';
+import { FixedOrGrowContainer, FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { TextOverflow } from '@controls/textOverflow';
-
-type IDashboardListItemText = {
-	children: ReactNode;
-	width?: number | string;
-	tabletWidth?: number;
-	mobileWidth?: number;
-	className?: string;
-	hideWhenSmallerThan?: Display;
-};
 
 export const RevisionsListItemText = ({
 	children,
 	...props
-}: IDashboardListItemText): JSX.Element => (
+}: FixedOrGrowContainerProps): JSX.Element => (
 	<FixedOrGrowContainer {...props}>
 		<TextOverflow>
 			{children}
