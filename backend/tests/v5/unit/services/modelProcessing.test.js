@@ -16,7 +16,9 @@
  */
 
 const { src, modelFolder, objModel } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+const { generateUUIDString, generateRandomString } = require('../../helper/services');
+
+const { times } = require('lodash');
 
 jest.mock('../../../../src/v5/handler/queue');
 const Queue = require(`${src}/handler/queue`);
@@ -82,7 +84,7 @@ const testQueueFederationUpdate = () => {
 		const teamspace = generateRandomString();
 		const federation = generateRandomString();
 		const data = {
-			containers: [generateRandomString(), generateRandomString(), generateRandomString()],
+			containers: times(4, () => ({ id: generateUUIDString(), group: generateRandomString() })),
 			owner: generateRandomString(),
 		};
 

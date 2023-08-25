@@ -115,7 +115,7 @@ ModelProcessing.queueFederationUpdate = async (teamspace, federation, info) => {
 			...info,
 			database: teamspace,
 			project: federation,
-			subProjects: info.containers.map((container) => ({ database: teamspace, project: container })),
+			subProjects: info.containers.map(({ id, group }) => ({ database: teamspace, project: id, group })),
 			revId,
 		};
 		delete data.containers;

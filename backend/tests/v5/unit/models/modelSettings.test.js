@@ -459,7 +459,64 @@ const testNewRevisionProcessed = () => {
 				const action = DBHandler.updateOne.mock.calls[0][3];
 				expect(action.$set.status).toBe(undefined);
 				expect(action.$set).toHaveProperty('timestamp');
-				expect(action.$set.subModels).toEqual(containers);
+				expect(action.$set.subModels).toEqual(containers.map((containerId) => ({ id: containerId })));
+
+				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
+
+				expect(EventsManager.publish).toHaveBeenCalledTimes(3);
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
+					{
+						teamspace,
+						model,
+						corId,
+						userErr,
+						message,
+						success,
+						errCode: retVal,
+						user,
+					});
+
+				const expectedData = { ...action.$set };
+				if (expectedData.subModels) {
+					expectedData.containers = expectedData.subModels;
+					delete expectedData.subModels;
+				}
+
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+					{
+						teamspace,
+						project,
+						model,
+						data: { ...expectedData, status: expectedData.status || 'ok' },
+						isFederation: true,
+					});
+
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
+					{
+						teamspace,
+						project,
+						model,
+						revision: corId,
+						isFederation: true,
+					});
+			});
+
+		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event (with groups)`,
+			async () => {
+				const containerData = containers.map((containerId) => ({
+					project: containerId, group: generateRandomString() }));
+
+				DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
+				EventsManager.publish.mockClear();
+				await expect(Model.newRevisionProcessed(
+					teamspace, project, model, corId, retVal, user, containerData,
+				)).resolves.toBe(undefined);
+
+				expect(DBHandler.updateOne.mock.calls.length).toBe(1);
+				const action = DBHandler.updateOne.mock.calls[0][3];
+				expect(action.$set.status).toBe(undefined);
+				expect(action.$set).toHaveProperty('timestamp');
+				expect(action.$set.subModels).toEqual(containerData.map(({ project: id, group }) => ({ id, group })));
 
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 

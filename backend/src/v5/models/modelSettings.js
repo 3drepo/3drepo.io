@@ -18,6 +18,7 @@
 const Models = {};
 const { SETTINGS_COL, getInfoFromCode } = require('./modelSettings.constants');
 const db = require('../handler/db');
+const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUIDString } = require('../utils/helper/uuids');
 const { publish } = require('../services/eventsManager/eventsManager');
@@ -150,7 +151,7 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, u
 			 *  containers used to be called models in v4, and models used to be called
 			 *  projects. This data came from 3drepobouncer, which still calls containers projects.
 			 */
-			set.subModels = containers.map(({ project: modelId }) => modelId);
+			set.subModels = containers.map(({ project: id, group }) => deleteIfUndefined({ id, group }));
 		}
 	} else {
 		set.status = 'failed';
