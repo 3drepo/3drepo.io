@@ -81,7 +81,7 @@ const runTest = (data) => {
 		});
 
 		test('Should remove zombie files if flag is set', async () => {
-			await IdentifyZombieFiles.run(undefined, true);
+			await IdentifyZombieFiles.run(undefined, true, 1);
 
 			checkFileExists(data.referencedLinks, true);
 			checkFileExists(data.toyLinks, true);

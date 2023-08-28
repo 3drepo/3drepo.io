@@ -110,50 +110,53 @@ const copyDataToFile = async (teamspace, collection, id, extRefs, fileData) => {
 	fileData.writeRequests.push(updateInstr);
 };
 
+const getRevList = async (teamspace, model) => {
+	const revs = await find(teamspace, `${model}.history`, {}, { _id: 1 }, { timestamp: -1 });
+	return revs.map(({ _id }) => _id);
+};
+
 const processCollection = async (teamspace, collection) => {
 	const query = { _extRef: { $exists: true } };
-	const projection = { _extRef: 1, rev_id: 1 };
-	const sort = { rev_id: 1, _id: 1 };
+	const projection = { _extRef: 1 };
+	const sort = { _id: 1 };
 
 	const limit = 10000;
 	const maxSizePerFile = 100 * 1024 * 1024; // 100MiB
 
-	let fileData;
-	let records;
-	let pendingIds = [];
+	const revList = await getRevList(teamspace, collection.split('.')[0]);
+	for (const revId of revList) {
+		const entryRev = UUIDToString(revId);
+		let records;
+		let pendingIds = [];
+		let fileData;
+		do {
+			records = await find(teamspace, collection, { ...query, _id: { $not: { $in: pendingIds } }, rev_id: revId },
+				projection, sort, limit);
+			if (records.length) {
+				for (const { _extRef: extRef, _id } of records) {
+					pendingIds.push(_id);
 
-	do {
-		records = await find(teamspace, collection, { ...query, _id: { $not: { $in: pendingIds } } },
-			projection, sort, limit);
+					const files = Object.values(extRef);
 
-		if (records.length) {
-			for (const { _extRef: extRef, rev_id: revId, _id } of records) {
-				const entryRev = UUIDToString(revId);
-				pendingIds.push(_id);
+					const dataSize = await calculateDataSize(teamspace, collection, files);
+					if (
+						!fileData || (dataSize + fileData.size) > maxSizePerFile
+					) {
+						logger.logInfo(`\t\t\tUpdating ${pendingIds.length} entries...`);
+						await commitFileStream(teamspace, collection, fileData);
 
-				const files = Object.values(extRef);
+						fileData = await establishNewFileData(teamspace, collection, entryRev);
+						pendingIds = [];
+					}
 
-				const dataSize = await calculateDataSize(teamspace, collection, files);
-				if (
-					!fileData
-				|| fileData.revId !== entryRev
-				|| (dataSize + fileData.size) > maxSizePerFile
-				) {
-					logger.logInfo(`\t\t\tUpdating ${pendingIds.length} entries...`);
-					await commitFileStream(teamspace, collection, fileData);
-
-					fileData = await establishNewFileData(teamspace, collection, entryRev);
-					pendingIds = [];
+					await copyDataToFile(teamspace, collection, _id, extRef, fileData);
 				}
-
-				await copyDataToFile(teamspace, collection, _id, extRef, fileData);
 			}
+		} while (records.length);
+		if (fileData?.size) {
+			logger.logInfo(`\t\t\tUpdating ${pendingIds.length} entries...`);
+			await commitFileStream(teamspace, collection, fileData);
 		}
-	} while (records.length);
-
-	if (fileData?.size) {
-		logger.logInfo(`\t\t\tUpdating ${pendingIds.length} entries...`);
-		await commitFileStream(teamspace, collection, fileData);
 	}
 };
 
