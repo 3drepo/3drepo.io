@@ -566,7 +566,16 @@ ServiceHelper.generateGroup = (isSmart = false, {
 	if (isSmart) {
 		group.rules = [
 			{
+				name: ServiceHelper.generateRandomString(),
 				field: 'IFC GUID',
+				operator: 'IS',
+				values: [
+					'1rbbJcnUDEEA_ArpSqk3B7',
+				],
+			},
+			{
+				name: ServiceHelper.generateRandomString(),
+				field: { operator: 'IS', values: ['IFC GUID'] },
 				operator: 'IS',
 				values: [
 					'1rbbJcnUDEEA_ArpSqk3B7',
@@ -599,7 +608,8 @@ ServiceHelper.generateLegacyGroup = (account, model, isSmart = false, isIfcGuids
 	if (isSmart) {
 		group.rules = [
 			{
-				field: 'IFC GUID',
+				name: ServiceHelper.generateRandomString(),
+				field: { operator: 'IS', values: ['IFC GUID'] },
 				operator: 'IS',
 				values: [
 					'1rbbJcnUDEEA_ArpSqk3B7',

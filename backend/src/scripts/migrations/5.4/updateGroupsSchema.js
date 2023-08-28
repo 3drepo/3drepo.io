@@ -16,7 +16,7 @@
  */
 
 const { v5Path } = require('../../../interop');
-const { castSchema } = require('../../../v5/schemas/rules');
+const { convertFieldToObject } = require('../../../v5/schemas/rules');
 
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
@@ -40,7 +40,7 @@ const processCollection = async (teamspace, collection) => {
 	const groups = await find(teamspace, collection, query, projection);
 
 	groups.forEach((group) => {
-		const formattedRules = castSchema(group.rules);
+		const formattedRules = group.rules.map(convertFieldToObject);
 		updatePromises.push(updateOne(teamspace, collection, { _id: group._id }, { $set: { rules: formattedRules } }));
 	});
 

@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../../../../../../../helper/path');
-const { generateLegacyGroup } = require('../../../../../../../../helper/services');
+const { generateLegacyGroup, generateRandomString } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -32,10 +32,19 @@ const respondFn = Responder.respond.mockImplementation((req, res, errCode) => er
 const testSerialiseGroupArray = () => {
 	const badRuleCast = generateLegacyGroup('a', 'b', true, false, false);
 	badRuleCast.rules = [{
-		field: 'Element ID',
+		field: { operator: 'IS', values: ['Element ID'] },
 		operator: 'IS_NOT_EMPTY',
 		values: [
 			'',
+		],
+	}];
+
+	const stringFieldSchema = generateLegacyGroup('a', 'b', true, false, false);
+	stringFieldSchema.rules = [{
+		field: 'Element ID',
+		operator: 'IS_NOT_EMPTY',
+		values: [
+			generateRandomString(),
 		],
 	}];
 
@@ -50,12 +59,13 @@ const testSerialiseGroupArray = () => {
 			'3 different group types',
 		],
 		[[badRuleCast], 'Bad schema'],
+		[[stringFieldSchema], 'Old schema (field is string)'],
 		[[{ ...generateLegacyGroup('a', 'b', true, false, false), updatedAt: undefined }], 'group with no updatedAt'],
 	])('Serialise Group array data', (data, desc) => {
 		test(`should serialise correctly with ${desc}`,
 			() => {
 				const nextIdx = respondFn.mock.calls.length;
-				GroupsOutputMiddlewares.serialiseGroupArray({ outputData: cloneDeep(data) }, {}, () => {});
+				GroupsOutputMiddlewares.serialiseGroupArray({ outputData: cloneDeep(data) }, {}, () => { });
 				expect(respondFn.mock.calls.length).toBe(nextIdx + 1);
 				expect(respondFn.mock.calls[nextIdx][2]).toEqual(templates.ok);
 
@@ -81,6 +91,9 @@ const testSerialiseGroupArray = () => {
 							if (entry.operator === 'IS_NOT_EMPTY') {
 								delete output.values;
 							}
+							if (typeof entry.field === 'string') {
+								output.field = { operator: 'IS', values: [entry.field] };
+							}
 							return output;
 						});
 					}
@@ -93,6 +106,37 @@ const testSerialiseGroupArray = () => {
 	});
 };
 
+const testConvertGroupRules = () => {
+	describe.each([
+		[generateLegacyGroup(generateRandomString(), generateRandomString(), false), 'group with no rules'],
+		[generateLegacyGroup(generateRandomString(), generateRandomString(), true), 'group with rules'],
+	])('Convert rules to new schema', (group, desc) => {
+		test(`should convert rules to new schema correctly with ${desc}`,
+			() => {
+				const nextIdx = respondFn.mock.calls.length;
+				GroupsOutputMiddlewares.convertGroupRules({ outputData: cloneDeep(group) }, {}, () => { });
+				expect(respondFn.mock.calls.length).toBe(nextIdx + 1);
+				expect(respondFn.mock.calls[nextIdx][2]).toEqual(templates.ok);
+
+				const res = { ...group };
+				if (group.rules) {
+					res.rules = group.rules.map((entry) => {
+						const output = { ...entry };
+
+						if (typeof entry.field === 'string') {
+							output.field = { operator: 'IS', values: [entry.field] };
+						}
+
+						return output;
+					});
+				}
+
+				expect(respondFn.mock.calls[nextIdx][3]).toEqual(res);
+			});
+	});
+};
+
 describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups', () => {
 	testSerialiseGroupArray();
+	testConvertGroupRules();
 });

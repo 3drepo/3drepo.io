@@ -17,7 +17,7 @@
 
 const _ = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
-const { generateLegacyGroup, generateUUIDString } = require('../../../../../../../../helper/services');
+const { generateLegacyGroup, generateUUIDString, generateRandomString } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
@@ -79,6 +79,13 @@ const deserialiseGroup = (group) => {
 		}
 	}
 
+	if (output?.rules) {
+		output.rules = output.rules.map((r) => ({
+			...r,
+			field: typeof r.field === 'string' ? { operator: 'IS', values: [r.field] } : r.field,
+		}));
+	}
+
 	return output;
 };
 
@@ -88,41 +95,53 @@ const testValidateGroupsImportData = () => {
 	const normalGroup = generateLegacyGroup('ab', generateUUIDString(), false, false);
 
 	const numberRule = {
+		name: generateRandomString(),
 		field: 'abc',
 		operator: 'EQUALS',
 		values: [2, 4],
 	};
 
 	const rangeRule = {
+		name: generateRandomString(),
 		field: 'abcd',
 		operator: 'IN_RANGE',
 		values: [2, 4, 5, 7],
 	};
 
+	const noNameRule = {
+		field: 'abc',
+		operator: 'IS_EMPTY',
+	};
+
 	const existRule = {
+		name: generateRandomString(),
 		field: 'abc',
 		operator: 'IS_EMPTY',
 	};
 
 	const badExistRule = {
+		name: generateRandomString(),
 		field: 'abcdef',
 		operator: 'IS_EMPTY',
 		values: [2, 4, 3],
 	};
 
 	const badRangeRule = {
+		name: generateRandomString(),
 		field: 'abc1',
 		operator: 'IN_RANGE',
 		values: [2, 4, 3],
 	};
 
 	const badRule = {
+		name: generateRandomString(),
 		field: 'abc2',
 		operator: 'EQUALS',
 		values: ['a', 'b'],
 	};
 
 	const wrongTypedRule = {
+		name: generateRandomString(),
 		field: 'abc3',
 		operator: 'EQUALS',
 		values: ['2', '4'],
@@ -139,6 +158,7 @@ const testValidateGroupsImportData = () => {
 		[{ body: { groups: [{ ...ruleGroup, rules: [] }] } }, false, 'with empty rules'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [existRule] }] } }, true, 'exists rule'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [badExistRule] }] } }, false, 'existsRule with parameters'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [noNameRule] }] } }, false, 'rule with no name'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [numberRule] }] } }, true, 'rule with number parameters'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [rangeRule] }] } }, true, 'rule with range parameters'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [badRangeRule] }] } }, false, 'rule with in correct amount of range parameters'],
@@ -147,7 +167,6 @@ const testValidateGroupsImportData = () => {
 		[{ body: { groups: [{ ...ruleGroup, rules: [badRule] }] } }, false, 'rule with invalidParameters'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [wrongTypedRule] }] } }, false, 'rule with wrong typed parameters'],
 		[{ body: { groups: [{ ...ifcGroup, objects: [] }] } }, false, 'with empty objects'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [existRule, numberRule] }] } }, false, 'two rules with the same key'],
 		[{ body: { groups: [{ ...ruleGroup, description: '123' }] } }, true, 'with description'],
 		[{ body: { groups: [_.omit(ruleGroup, ['updatedBy, updatedAt'])] } }, true, 'without updatedAt and updatedBy'],
 	])('Validate Groups import data', (data, shouldPass, desc) => {

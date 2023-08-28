@@ -98,6 +98,11 @@ const validateValuesArray = (operators, operator, values) => {
 	return (nParams <= arrLength) && ruleParametersTypeCheck(operator, values);
 };
 
+Rules.convertFieldToObject = (rule) => ({
+	...rule,
+	field: typeof rule.field === 'string' ? { operator: 'IS', values: [rule.field] } : rule.field,
+});
+
 const ruleSchema = Yup.object().shape({
 	name: Yup.string().min(1).required(),
 	field: Yup.object().shape({
@@ -120,16 +125,11 @@ const ruleSchema = Yup.object().shape({
 		}
 		return res;
 	})
-	.transform((value) => ({
-		...value,
-		field: typeof value.field === 'string' ? { operator: 'IS', values: [value.field] } : value.field,
-	}))
+	.transform(Rules.convertFieldToObject)
 	.test('Rules validation', 'values field is not valid with the operator selected',
 		(value) => validateValuesArray(fieldValueOperators, value.operator, value.values))
 	.test('Field rules validation', 'field values field is not valid with the field operator selected',
 		(value) => validateValuesArray(fieldNameOperators, value.field.operator, value.field.values));
-
-Rules.castSchema = (rules) => rules.map((r) => ruleSchema.cast(r));
 
 Rules.schema = Yup.array().of(ruleSchema).min(1);
 

@@ -55,10 +55,9 @@ Rules.generateQueriesFromRules = (rules) => {
 const getFieldClause = (rule) => {
 	let fieldClause;
 
-	const operator = negToPosOp[rule.field.operator] ?? rule.field.operator;
 	const { values } = rule.field;
 
-	switch (operator) {
+	switch (rule.field.operator) {
 	case 'IS':
 		fieldClause = values.length > 1 ? { $in: values } : values[0];
 		break;
@@ -165,7 +164,7 @@ Rules.toQuery = (rule) => {
 	// We need to capture the 0s and nulls
 	if (valueClause !== undefined) {
 		if (isArray(valueClause)) {
-			return { $or: valueClause.map(createQuery) };
+			return { $or: valueClause.map((v) => createQuery(fieldClause, v)) };
 		}
 
 		return createQuery(fieldClause, valueClause);
