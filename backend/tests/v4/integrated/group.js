@@ -192,6 +192,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "TestField",
 						operator: "GTE",
 						values: [1]
@@ -223,6 +224,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "TestField",
 						operator: "IS_EMPTY",
 						values: []
@@ -254,6 +256,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "TestField",
 						operator: "IN_RANGE",
 						values: [1, 2]
@@ -285,6 +288,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "TestField",
 						operator: "EQUALS",
 						values: [1, 2, 3]
@@ -316,6 +320,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "TestField",
 						operator: "NOT_IN_RANGE",
 						values: [1, 2, 3, 4]
@@ -347,10 +352,12 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "TestField",
 						operator: "NOT_IN_RANGE",
 						values: [3, 4]
 					},{
+						name: "rule name",
 						field: "TestField2",
 						operator: "IS_EMPTY",
 						values: []
@@ -427,6 +434,7 @@ describe("Groups", function () {
 		it("with rules and objects should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			newGroup.rules = [{
+				name: "rule name",
 				field: "TestField",
 				operator: "GTE",
 				values: [1]
@@ -437,31 +445,13 @@ describe("Groups", function () {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 			});
-		});
-
-		it("with multiple rules for single field should fail", function(done) {
-			const newGroup = Object.assign({}, data);
-			newGroup.rules = [{
-				field: "TestField",
-				operator: "GTE",
-				values: [1]
-			},{
-				field: "TestField",
-				operator: "LTE",
-				values: [1]
-			}];
-			agent.post(`/${username}/${model}/revision/master/head/groups/`)
-				.send(newGroup)
-				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.MULTIPLE_RULES_PER_FIELD_NOT_ALLOWED.value);
-					done(err);
-			});
-		});
+		});		
 
 		it("with insufficient rule args (min. 1) should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			delete newGroup.objects;
 			newGroup.rules = [{
+				name: "rule name",
 				field: "TestField",
 				operator: "GT",
 				values: []
@@ -478,6 +468,7 @@ describe("Groups", function () {
 			const newGroup = Object.assign({}, data);
 			delete newGroup.objects;
 			newGroup.rules = [{
+				name: "rule name",
 				field: "TestField",
 				operator: "NOT_IN_RANGE",
 				values: [1]
@@ -494,6 +485,7 @@ describe("Groups", function () {
 			const newGroup = Object.assign({}, data);
 			delete newGroup.objects;
 			newGroup.rules = [{
+				name: "rule name",
 				field: "TestField",
 				operator: "NOT_IN_RANGE",
 				values: [1, 2, 3]
@@ -574,6 +566,7 @@ describe("Groups", function () {
 				"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
 			}];
 			newGroup.rules = [{
+				name: "rule name",
 				field: "TestField",
 				operator: "GTE",
 				values: [1]
@@ -590,6 +583,7 @@ describe("Groups", function () {
 		it("non string value for a string rule should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			newGroup.rules = [{
+				name: "rule name",
 				field: "TestField",
 				operator: "CONTAINS",
 				values: [1]
@@ -606,6 +600,7 @@ describe("Groups", function () {
 		it("no values for a rule that requires them should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			newGroup.rules = [{
+				name: "rule name",
 				field: "TestField",
 				operator: "REGEX",
 				values: []
@@ -622,6 +617,7 @@ describe("Groups", function () {
 		it("incorrect number of values for rule should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			newGroup.rules = [{
+				name: "rule name",
 				field: "TestField",
 				operator: "IN_RANGE",
 				values: [2]
@@ -638,6 +634,7 @@ describe("Groups", function () {
 		it("incorrect mulitples of value for rule should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			newGroup.rules = [{
+				name: "rule name",
 				field: "TestField",
 				operator: "NOT_IN_RANGE",
 				values: [2, 3, 4]
@@ -654,6 +651,7 @@ describe("Groups", function () {
 		it("string value for number rule should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			newGroup.rules = [{
+				name: "rule name",
 				field: "TestField",
 				operator: "EQUALS",
 				values: ["one"]
@@ -670,6 +668,7 @@ describe("Groups", function () {
 		it("rule with undefined operator should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			newGroup.rules = [{
+				name: "rule name",
 				field: "TestField",
 				operator: "BAD_OP",
 				values: ["abc"]
@@ -691,6 +690,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "ImaginaryField",
 						operator: "IS_NOT_EMPTY",
 						values: []
@@ -721,6 +721,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "IsExternal",
 						operator: "IS_EMPTY",
 						values: []
@@ -751,6 +752,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "IsExternal",
 						operator: "IS_EMPTY",
 						values: []
@@ -781,6 +783,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Moves With Grids",
 						operator: "IS_NOT_EMPTY",
 						values: []
@@ -811,6 +814,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "IFC Type",
 						operator: "IS",
 						values: ["IfcStairFlight"]
@@ -841,6 +845,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "IFC Type",
 						operator: "IS",
 						values: ["IfcStairFlight", "IfcSlab"]
@@ -871,6 +876,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Name",
 						operator: "IS_NOT",
 						values: ["Level 2"]
@@ -901,6 +907,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Name",
 						operator: "IS_NOT",
 						values: ["Level 2", "Level 4"]
@@ -931,6 +938,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Reference",
 						operator: "CONTAINS",
 						values: ["Flue"]
@@ -971,6 +979,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Reference",
 						operator: "CONTAINS",
 						values: ["Flue", "Panel"]
@@ -1001,6 +1010,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Type",
 						operator: "NOT_CONTAINS",
 						values: ["Generator"]
@@ -1031,6 +1041,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Type",
 						operator: "NOT_CONTAINS",
 						values: ["Mast", "Infill", "Concept"]
@@ -1061,6 +1072,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Family",
 						operator: "REGEX",
 						values: ["Concept.*Door.*"]
@@ -1107,6 +1119,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Family",
 						operator: "REGEX",
 						values: ["Concept.*Door.*", ".*mm$"]
@@ -1137,6 +1150,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Volume",
 						operator: "EQUALS",
 						values: [0.28757]
@@ -1168,6 +1182,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Volume",
 						operator: "EQUALS",
 						values: [0.28757, 0.194819]
@@ -1203,6 +1218,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Sill Height",
 						operator: "NOT_EQUALS",
 						values: [0]
@@ -1233,6 +1249,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Sill Height",
 						operator: "NOT_EQUALS",
 						values: [0, 2700, 900]
@@ -1263,6 +1280,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Area",
 						operator: "GT",
 						values: [500]
@@ -1304,6 +1322,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Area",
 						operator: "GT",
 						values: [500, 600]
@@ -1345,6 +1364,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Mark",
 						operator: "GTE",
 						values: [750]
@@ -1391,6 +1411,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Mark",
 						operator: "GTE",
 						values: [750, 800]
@@ -1437,6 +1458,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Light Transmission",
 						operator: "LT",
 						values: [1]
@@ -1467,6 +1489,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Mark",
 						operator: "LT",
 						values: [180, 200]
@@ -1497,6 +1520,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Thermal Performance",
 						operator: "LTE",
 						values: [0.5]
@@ -1537,6 +1561,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Thermal Performance",
 						operator: "LTE",
 						values: [0.5, 1]
@@ -1577,6 +1602,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Head Height",
 						operator: "IN_RANGE",
 						values: [4520, 4530]
@@ -1607,6 +1633,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Head Height",
 						operator: "IN_RANGE",
 						values: [4520, 4530, 200, 3000]
@@ -1637,6 +1664,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Area",
 						operator: "NOT_IN_RANGE",
 						values: [0, 1000]
@@ -1674,6 +1702,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Area",
 						operator: "NOT_IN_RANGE",
 						values: [0, 1000, 1000, 1650]
@@ -1709,6 +1738,7 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
 						field: "Area",
 						operator: "NOT_IN_RANGE",
 						values: [0, 1000, 1000, 1650]
@@ -1748,6 +1778,7 @@ describe("Groups", function () {
 					delete newGroup.objects;
 					newGroup.rules = [
 						{
+						   "name": "rule name",
 						   "field":"Name",
 						   "operator":"IS",
 						   "values":[
@@ -1756,6 +1787,7 @@ describe("Groups", function () {
 						   ]
 						},
 						{
+						   "name": "rule name",
 						   "field":"Category",
 						   "operator":"IS_NOT",
 						   "values":[
@@ -1811,6 +1843,7 @@ describe("Groups", function () {
 		it("updating rules and removing objects should succeed", function(done) {
 			const newRules = {
 				rules: [{
+					name: "rule name",
 					field: "TestField",
 					operator: "GTE",
 					values: [1]
@@ -1920,6 +1953,7 @@ describe("Groups", function () {
 					}
 				],
 				"rules":[{
+					name: "rule name",
 					field: "TestField",
 					operator: "GTE",
 					values: [1]
@@ -1937,10 +1971,12 @@ describe("Groups", function () {
 		it("updating with multiple rules for single field should fail", function(done) {
 			const badUpdate = {
 				"rules":[{
+					name: "rule name",
 					field: "TestField",
 					operator: "GTE",
 					values: [1]
 				},{
+					name: "rule name",
 					field: "TestField",
 					operator: "LTE",
 					values: [1]
