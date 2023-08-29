@@ -20,13 +20,9 @@ import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import { ViewerGuiActions } from '@/v4/modules/viewerGui';
-import { dispatch } from '@/v4/modules/store';
-import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { formatMessage } from '@/v5/services/intl';
 import { ViewerParams } from '../../routes.constants';
 import { useSearchParam } from '../../useSearchParam';
-import { TicketsCardViews } from '../tickets/tickets.constants';
 
 export const OpenTicketFromUrl = () => {
 	const [ticketId, setTicketId] = useSearchParam('ticketId');
@@ -46,10 +42,9 @@ export const OpenTicketFromUrl = () => {
 				setTicketId('');
 				return;
 			}
-			dispatch(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.TICKETS, true));
-			TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
+			TicketsCardActionsDispatchers.openTicket(ticketId);
 		}
-	}, [ticketId, hasTicketData]);
+	}, [hasTicketData]);
 
 	return <></>;
 };

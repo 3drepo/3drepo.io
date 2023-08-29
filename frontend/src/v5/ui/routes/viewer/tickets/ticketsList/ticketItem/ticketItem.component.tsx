@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
@@ -28,7 +28,6 @@ import { useParams } from 'react-router-dom';
 import { Highlight } from '@controls/highlight';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { Ticket, Id, Title, ChipList, Assignees, IssuePropertiesRow } from './ticketItem.styles';
 import { IssueProperties, SafetibaseProperties } from '../../tickets.constants';
 
@@ -42,7 +41,6 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const { query } = useContext(SearchContext);
 	const queries = query ? JSON.parse(query) : [];
-	const [, setTicketId] = useSearchParam('ticketId');
 
 	const isFederation = modelIsFederation(containerOrFederation);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
@@ -60,7 +58,9 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 		if (newVal !== dueDate) updateTicketProperty({ [IssueProperties.DUE_DATE]: newVal });
 	};
 
-	const expandTicket = () => setTicketId(ticket._id);
+	const expandTicket = () => {
+		TicketsCardActionsDispatchers.openTicket(ticket._id);
+	};
 
 	return (
 		<Ticket

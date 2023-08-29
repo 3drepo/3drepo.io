@@ -33,8 +33,7 @@ import { SearchContextComponent, SearchContext, SearchContextType } from '@contr
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters, CompletedFilterChip, TicketSearchInput } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
-import { AdditionalProperties, TicketsCardViews } from '../tickets.constants';
-import { useSearchParam } from '../../../useSearchParam';
+import { AdditionalProperties } from '../tickets.constants';
 
 type TicketsListProps = {
 	tickets: ITicket[];
@@ -48,7 +47,6 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 	const highlightedTicket = TicketsCardHooksSelectors.selectHighlightedTicket();
-	const [, setTicketId] = useSearchParam('ticketId');
 
 	const ticketIsSelected = (ticket: ITicket) => highlightedTicket?._id === ticket._id;
 
@@ -96,8 +94,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		TicketsCardActionsDispatchers.setHighlightedTicket(ticket._id);
 
 		if (wasSelected) {
-			TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
-			setTicketId(ticket._id);
+			TicketsCardActionsDispatchers.openTicket(ticket._id);
 		}
 
 		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
