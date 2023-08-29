@@ -184,7 +184,7 @@ export const TicketsTable = () => {
 					</CircleButton>
 				</SlidePanelHeader>
 				{sidePanelTicket?._id && (<div>Editing ticket {sidePanelTicket.title}</div>)}
-				{!sidePanelTicket?._id && (<div>Attempting to create a new ticket for {sidePanelModelId}</div>)}
+				{!sidePanelTicket?._id && (<div>Attempting to create a new ticket for {sidePanelModelId} with {JSON.stringify(sidePanelTicket)}</div>)}
 			</SidePanel>
 		</SearchContextComponent>
 	);

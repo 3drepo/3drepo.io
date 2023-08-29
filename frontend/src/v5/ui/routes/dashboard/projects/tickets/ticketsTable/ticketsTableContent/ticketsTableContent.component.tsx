@@ -25,7 +25,7 @@ import _ from 'lodash';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from './ticketsTableGroup/ticketsTableGroup.component';
-import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, groupTickets, NONE_OPTION } from '../ticketsTable.helper';
+import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, groupTickets, ISSUE_PROPERTIES_GROUPS, NONE_OPTION, SAFETIBASE_PROPERTIES_GROUPS } from '../ticketsTable.helper';
 import { EmptyTicketsView } from '../../emptyTicketsView/emptyTicketsView.styles';
 import { Container } from './ticketsTableContent.styles';
 
@@ -38,9 +38,23 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 	const { groupBy: groupByAsURLParam } = useParams<DashboardTicketsParams>();
 	const groupBy = GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByAsURLParam];
 
-	const onGroupNewTicket = (modelId: string) => {
-		// TODO - assign default group value to ticket instead of {} if !!group
-		onNewTicket(modelId, {});
+	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
+		const defaultValue = {} as any;
+		const formattedGroupByValue = _.upperCase(_.snakeCase(groupByValue));
+
+		if (SAFETIBASE_PROPERTIES_GROUPS[groupBy]?.[formattedGroupByValue]) {
+			defaultValue.modules = {
+				safetibase: {
+					[groupBy]: SAFETIBASE_PROPERTIES_GROUPS[groupBy][formattedGroupByValue],
+				},
+			};
+		}
+
+		if (ISSUE_PROPERTIES_GROUPS[groupBy]?.[formattedGroupByValue]) {
+			defaultValue.properties = { [groupBy]: ISSUE_PROPERTIES_GROUPS[groupBy][formattedGroupByValue] };
+		}
+
+		onNewTicket(modelId, defaultValue);
 	};
 
 	if (!filteredItems.length) {
@@ -54,7 +68,7 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 		);
 	}
 
-	if (groupBy === NONE_OPTION) return (<TicketsTableGroup ticketsWithModelId={filteredItems} onNewTicket={onGroupNewTicket} {...props} />);
+	if (groupBy === NONE_OPTION) return (<TicketsTableGroup ticketsWithModelId={filteredItems} onNewTicket={onGroupNewTicket('')} {...props} />);
 
 	const groups = groupTickets(groupBy, filteredItems);
 
@@ -66,7 +80,7 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 					defaultExpanded={!!ticketsWithModelId.length}
 					key={groupBy + groupName}
 				>
-					<TicketsTableGroup ticketsWithModelId={ticketsWithModelId} onNewTicket={onGroupNewTicket} {...props} />
+					<TicketsTableGroup ticketsWithModelId={ticketsWithModelId} onNewTicket={onGroupNewTicket(groupName)} {...props} />
 				</DashboardListCollapse>
 			))}
 		</Container>
