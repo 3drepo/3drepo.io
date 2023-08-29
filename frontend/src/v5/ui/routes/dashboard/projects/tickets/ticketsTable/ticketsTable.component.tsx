@@ -43,6 +43,8 @@ import { TemplateFormSelect } from '../selectMenus/templateFormSelect.component'
 import { FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from '../tickets.styles';
 import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, NONE_OPTION } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
+import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
+import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
 
 type FormType = {
 	containersAndFederations: string[],
@@ -183,8 +185,8 @@ export const TicketsTable = () => {
 						<ExpandIcon />
 					</CircleButton>
 				</SlidePanelHeader>
-				{sidePanelTicket?._id && (<div>Editing ticket {sidePanelTicket.title}</div>)}
-				{!sidePanelTicket?._id && (<div>Attempting to create a new ticket for {sidePanelModelId} with {JSON.stringify(sidePanelTicket)}</div>)}
+				{sidePanelTicket?._id && (<TicketSlide ticket={sidePanelTicket as ITicket} containerOrFederationId={sidePanelModelId} />)}
+				{!sidePanelTicket?._id && (<NewTicketSlide ticket={sidePanelTicket} containerOrFederationId={sidePanelModelId} onSave={setSidePanelTicket}/>)}
 			</SidePanel>
 		</SearchContextComponent>
 	);
