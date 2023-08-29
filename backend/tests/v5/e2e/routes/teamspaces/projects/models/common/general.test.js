@@ -176,8 +176,8 @@ const testGetModelStats = () => {
 			conNoRev, conFailedProcessing1, conFailedProcessing2,
 		] = times(3, () => ServiceHelper.generateRandomModel());
 
-		fed.properties.subModels = [con._id, conNoRev._id];
-		fedWithNoRevInSubModel.properties.subModels = [conNoRev._id];
+		fed.properties.subModels = [{ id: con._id }, { id: conNoRev._id }];
+		fedWithNoRevInSubModel.properties.subModels = [{ id: conNoRev._id }];
 
 		conFailedProcessing1.properties = {
 			...conFailedProcessing1.properties,

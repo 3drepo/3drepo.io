@@ -335,7 +335,7 @@ const testGetTicketGroupById = () => {
 		test('Should retrieve containers then call the general getTicketGroupById', async () => {
 			const containers = [generateRandomString(), generateRandomString()];
 
-			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: containers });
+			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: containers.map((id) => ({ id })) });
 
 			const expectedData = generateRandomObject();
 			const fn = jest.spyOn(TicketGroup, 'getTicketGroupById').mockResolvedValueOnce(expectedData);

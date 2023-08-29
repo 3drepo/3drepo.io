@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, generateUUIDString } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -82,10 +83,25 @@ const testGetContainerById = () => {
 
 const testGetFederationById = () => {
 	describe('Get FederationById', () => {
-		test('should return content of federation settings if found', async () => {
+		test('should return content of federation settings if found (v4 schema)', async () => {
 			const expectedData = {
 				_id: 'abc',
 				name: 'federation name',
+				subModels: times(4, () => generateUUIDString()),
+			};
+			DBHandler.findOne.mockResolvedValueOnce({ ...expectedData });
+
+			const res = await Model.getFederationById('someTS', 'someFederation');
+			expect(res).toEqual({ ...expectedData,
+				subModels: expectedData.subModels.map((id) => ({ id })),
+			});
+		});
+
+		test('should return content of federation settings if found (v5 schema)', async () => {
+			const expectedData = {
+				_id: 'abc',
+				name: 'federation name',
+				subModels: times(4, () => ({ id: generateUUIDString(), group: generateRandomString() })),
 			};
 			DBHandler.findOne.mockResolvedValueOnce(expectedData);
 

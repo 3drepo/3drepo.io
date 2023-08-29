@@ -235,7 +235,7 @@ const queueFinishedTest = () => {
 			const modelUpdateResults = await modelUpdatePromise;
 			expect(modelUpdateResults?.data?.timestamp).not.toBeUndefined();
 			expect(modelUpdateResults).toEqual({ ...data,
-				data: { containers: [container._id], status: 'ok', timestamp: modelUpdateResults.data.timestamp } });
+				data: { containers: [{ id: container._id }], status: 'ok', timestamp: modelUpdateResults.data.timestamp } });
 
 			const newRevisionResults = await newRevisionPromise;
 			expect(newRevisionResults?.data?.timestamp).not.toBeUndefined();

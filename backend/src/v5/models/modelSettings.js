@@ -21,6 +21,7 @@ const db = require('../handler/db');
 const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUIDString } = require('../utils/helper/uuids');
+const { isString } = require('../utils/helper/typeCheck');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
@@ -72,6 +73,17 @@ Models.getModelByQuery = async (ts, query, projection) => {
 	const res = await findOneModel(ts, query, projection);
 	if (!res) {
 		throw templates.modelNotFound;
+	}
+
+	// For supporting old schema, to remove next release (5.8.0)
+	if (res.subModels) {
+		res.subModels = res.subModels.map((value) => {
+			if (isString(value)) {
+				return { id: value };
+			}
+
+			return value;
+		});
 	}
 
 	return res;
