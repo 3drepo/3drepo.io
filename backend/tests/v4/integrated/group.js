@@ -1873,6 +1873,7 @@ describe("Groups", function () {
 						operator: "NOT_IN_RANGE",
 						values: [0, 1000, 1000, 1650]
 					},{
+						name: "rule name",
 						field: { operator: "IS", values: ["Perimiter"] },
 						operator: "LT",
 						values: [238000]
@@ -1998,7 +1999,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(24);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
 							done(err);
 						});
 				}
@@ -2060,7 +2061,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(24);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
 							done(err);
 						});
 				}
@@ -2122,7 +2123,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(24);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
 							done(err);
 						});
 				}
@@ -2184,7 +2185,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(24);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
 							done(err);
 						});
 				}
