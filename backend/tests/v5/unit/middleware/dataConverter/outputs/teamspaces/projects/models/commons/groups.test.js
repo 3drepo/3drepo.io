@@ -138,7 +138,7 @@ const testConvertGroupRules = () => {
 						if (typeof entry.field === 'string') {
 							output.field = { operator: 'IS', values: [entry.field] };
 						}
-						
+
 						return output;
 					});
 				}
