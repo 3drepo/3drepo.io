@@ -61,7 +61,7 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 		return (
 			<EmptyTicketsView>
 				<FormattedMessage
-					id="ticketTable"
+					id="ticketTable.emptyView"
 					defaultMessage="We couldn't find any tickets to show. Please refine your selection."
 				/>
 			</EmptyTicketsView>
