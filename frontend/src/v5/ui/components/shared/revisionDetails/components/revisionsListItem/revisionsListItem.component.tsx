@@ -57,7 +57,7 @@ export const RevisionsListItem = ({ revision, containerId }: IRevisionsListItem)
 			<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={author} />
 			<RevisionsListItemTag width={150} tabletWidth={300}> {tag} </RevisionsListItemTag>
 			<RevisionsListItemText hideWhenSmallerThan={1140}> {desc} </RevisionsListItemText>
-			<RevisionsListItemText width={90} tabletWidth={45} hideWhenSmallerThan={800}> {format.toLowerCase()} </RevisionsListItemText>
+			<RevisionsListItemText width={90} tabletWidth={45} hideWhenSmallerThan={800}> {(format || '').toLowerCase()} </RevisionsListItemText>
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasCollaboratorAccess} />
 			{ hasCollaboratorAccess && (
 				<Tooltip
