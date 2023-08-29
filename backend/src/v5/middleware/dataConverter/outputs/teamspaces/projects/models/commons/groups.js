@@ -23,7 +23,7 @@ const { templates } = require('../../../../../../../utils/responseCodes');
 const Groups = {};
 
 const convertRules = (group) => {
-	const outputGroup = { ...group };
+	const outputGroup = group;
 
 	if (outputGroup?.rules) {
 		outputGroup.rules = outputGroup.rules.map(convertFieldToObject);

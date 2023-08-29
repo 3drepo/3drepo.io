@@ -122,7 +122,7 @@ const testConvertGroupRules = () => {
 		[generateLegacyGroup(generateRandomString(), generateRandomString(), false), 'group with no rules'],
 		[generateLegacyGroup(generateRandomString(), generateRandomString(), true), 'group with new schema rules'],
 		[oldSchemaGroup, 'group with old schema rules'],
-	])('Convert rules to new schema', (group, desc) => {
+	])('Convert group rules to new schema', (group, desc) => {
 		test(`should convert rules to new schema correctly with ${desc}`,
 			() => {
 				const nextIdx = respondFn.mock.calls.length;
@@ -130,15 +130,15 @@ const testConvertGroupRules = () => {
 				expect(respondFn.mock.calls.length).toBe(nextIdx + 1);
 				expect(respondFn.mock.calls[nextIdx][2]).toEqual(templates.ok);
 
-				const res = { ...group };
-				if (group.rules) {
-					res.rules = group.rules.map((entry) => {
-						const output = { ...entry };
+				const res = group;
+				if (res.rules) {
+					res.rules = res.rules.map((entry) => {
+						const output = entry;
 
 						if (typeof entry.field === 'string') {
 							output.field = { operator: 'IS', values: [entry.field] };
 						}
-
+						
 						return output;
 					});
 				}
@@ -148,7 +148,7 @@ const testConvertGroupRules = () => {
 	});
 };
 
-const testConvertGroupsRules = () => {
+const testConvertGroupArrayRules = () => {
 	const oldSchemaGroups = [
 		{
 			...generateLegacyGroup(generateRandomString(), generateRandomString(), false),
@@ -184,7 +184,7 @@ const testConvertGroupsRules = () => {
 			generateLegacyGroup(generateRandomString(), generateRandomString(), true),
 		], 'groups with new schema rules'],
 		[oldSchemaGroups, 'groups with old schema rules'],
-	])('Convert rules to new schema', (groups, desc) => {
+	])('Convert group array rules to new schema', (groups, desc) => {
 		test(`should convert rules to new schema correctly with ${desc}`,
 			() => {
 				const nextIdx = respondFn.mock.calls.length;
@@ -194,7 +194,7 @@ const testConvertGroupsRules = () => {
 
 				const res = groups;
 				res.map((group) => {
-					const outputGroup = { ...group };
+					const outputGroup = group;
 					if (outputGroup.rules) {
 						outputGroup.rules = outputGroup.rules.map((rule) => {
 							const outputRule = { ...rule };
@@ -218,5 +218,5 @@ const testConvertGroupsRules = () => {
 describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups', () => {
 	testSerialiseGroupArray();
 	testConvertGroupRules();
-	testConvertGroupsRules();
+	testConvertGroupArrayRules();
 });
