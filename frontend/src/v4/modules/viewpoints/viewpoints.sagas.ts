@@ -329,9 +329,9 @@ export function* setDefaultViewpoint({ teamspace, modelId, view }) {
 	try {
 		yield API.editModelSettings(teamspace, modelId, {defaultView: view._id});
 		yield put(ModelActions.updateSettingsSuccess({defaultView: {id: view._id, name: view.name}}));
-		yield put(SnackbarActions.show('View set as default'));
+		yield put(SnackbarActions.show('View set as home view'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('set the default viewpoint', ''));
+		yield put(DialogActions.showErrorDialog('set the home viewpoint', ''));
 	}
 }
 
