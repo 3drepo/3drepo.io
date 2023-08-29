@@ -16,7 +16,7 @@
  */
 
 import { useEffect } from 'react';
-import { range } from 'lodash';
+import { min, range } from 'lodash';
 
 import { Button } from '@controls/button';
 import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
@@ -101,7 +101,7 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 			</RevisionsListHeaderContainer>
 			<RevisionsList>
 				{isLoading ? (
-					range(revisionsCount || 1).map((key) => <SkeletonListItem key={key} />)
+					range(min([revisionsCount || 1, 5])).map((key) => <SkeletonListItem key={key} />)
 				) : (
 					revisions.map((revision, i) => (
 						<RevisionsListItemWrapper
