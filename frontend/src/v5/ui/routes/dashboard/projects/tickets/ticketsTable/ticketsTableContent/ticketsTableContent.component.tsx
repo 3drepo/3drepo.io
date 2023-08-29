@@ -35,7 +35,7 @@ type TicketsTableContentProps = {
 };
 export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableContentProps) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { groupBy: groupByAsURLParam } = useParams<DashboardTicketsParams>();
+	const { groupBy: groupByAsURLParam, template } = useParams<DashboardTicketsParams>();
 	const groupBy = GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByAsURLParam];
 
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
@@ -78,7 +78,7 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 				<DashboardListCollapse
 					title={<>{groupName} <CircledNumber disabled={!ticketsWithModelId.length}>{ticketsWithModelId.length}</CircledNumber></>}
 					defaultExpanded={!!ticketsWithModelId.length}
-					key={groupBy + groupName}
+					key={groupBy + groupName + template + ticketsWithModelId}
 				>
 					<TicketsTableGroup ticketsWithModelId={ticketsWithModelId} onNewTicket={onGroupNewTicket(groupName)} {...props} />
 				</DashboardListCollapse>
