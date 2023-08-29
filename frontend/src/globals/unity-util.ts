@@ -1798,11 +1798,17 @@ export class UnityUtil {
 	 * @hidden
 	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
 	 */
-	public static multipleCallInChunks(arrLength: number, func:(start: number, end: number) => any, chunkSize = 10000) {
+	public static multipleCallInChunks(arrLength: number, func:(start: number, end: number) => any, chunkSize = 5000) {
 		let index = 0;
+		let timer = 0;
 		while (index < arrLength) {
 			const end = index + chunkSize >= arrLength ? undefined : index + chunkSize;
-			func(index, end);
+			const i = index; // For closure
+			setTimeout(() => {
+				func(i, end);
+			},
+			timer);
+			timer += 200;
 			index += chunkSize;
 		}
 	}
