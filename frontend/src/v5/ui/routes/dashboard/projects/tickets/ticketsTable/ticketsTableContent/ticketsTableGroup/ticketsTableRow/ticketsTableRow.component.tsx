@@ -77,8 +77,9 @@ export const TicketsTableRow = ({ ticket, onClick }: TicketsTableRowProps) => {
 				</Tooltip>
 			</Cell>
 			<Cell>
-				{assignees?.length && (<AssigneesSelect value={assignees} multiple disabled />)}
-				{!assignees?.length && (
+				{assignees?.length ? (
+					<AssigneesSelect value={assignees} multiple disabled />
+				) : (
 					<OverflowContainer>
 						<UnassignedAssignees>
 							<FormattedMessage id="ticketsTable.row.assignees.unassigned" defaultMessage="Unassigned" />
