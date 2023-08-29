@@ -23,10 +23,14 @@ const { templates } = require('../../../../../../../utils/responseCodes');
 const Groups = {};
 
 const convertRules = (group) => {
-	if (group?.rules) {
-		group.rules = group.rules.map(convertFieldToObject);
+	const outputGroup = { ...group };
+
+	if (outputGroup?.rules) {
+		outputGroup.rules = outputGroup.rules.map(convertFieldToObject);
 	}
-}
+
+	return outputGroup;
+};
 
 Groups.convertGroupRules = (req, res) => {
 	const group = req.outputData;
