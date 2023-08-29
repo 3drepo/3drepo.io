@@ -68,7 +68,7 @@ const federationSettings = {
 			code: 'FED1',
 		},
 		status: 'ok',
-		subModels: ['container1', 'container2'],
+		subModels: [{ id: 'container1', group: generateRandomString() }, { id: 'container2' }],
 		defaultView: 2,
 		defaultLegend: 3,
 		permissions: [1, 2, 3],
@@ -349,6 +349,23 @@ const testGetTicketGroupById = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, containers);
+		});
+
+		test('Should retrieve containers then call the general getTicketGroupById even if there\'s no containers', async () => {
+			ModelSettings.getFederationById.mockResolvedValueOnce({ });
+
+			const expectedData = generateRandomObject();
+			const fn = jest.spyOn(TicketGroup, 'getTicketGroupById').mockResolvedValueOnce(expectedData);
+
+			await expect(Federations.getTicketGroupById(teamspace, projectId, federation, revId, ticket, groupId))
+				.resolves.toEqual(expectedData);
+
+			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federation,
+				{ subModels: 1 });
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, undefined);
 		});
 	});
 };
