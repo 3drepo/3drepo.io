@@ -28,6 +28,7 @@ const GroupsV5 = require(`${v5Path}/processors/teamspaces/projects/models/common
 const { convertGroupRules: convertOutputRules, serialiseGroupArray} = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
 const { validateGroupsExportData, validateGroupsImportData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
 const utils = require("../utils");
+const { convertGroupsRules } = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
 const { convertGroupRules: convertInputRules } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
 const systemLogger = require("../logger.js").systemLogger;
 
@@ -148,9 +149,9 @@ const systemLogger = require("../logger.js").systemLogger;
  * 	}
  * ]
  */
-router.get("/revision/master/head/groups", middlewares.issue.canView, listGroups, serialiseGroupArray);
+router.get("/revision/master/head/groups", middlewares.issue.canView, listGroups, convertGroupsRules);
 
-router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups, serialiseGroupArray);
+router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups, convertGroupsRules);
 
 /**
  * @api {get} /:teamspace/:model/revision(/master/head|/:revId)/groups/:groupId?[query] Find group

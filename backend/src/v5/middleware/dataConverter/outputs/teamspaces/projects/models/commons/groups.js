@@ -22,14 +22,24 @@ const { templates } = require('../../../../../../../utils/responseCodes');
 
 const Groups = {};
 
+const convertRules = (group) => {
+	if (group?.rules) {
+		group.rules = group.rules.map(convertFieldToObject);
+	}
+}
+
 Groups.convertGroupRules = (req, res) => {
 	const group = req.outputData;
 
-	if (group.rules) {
-		group.rules = group.rules.map(convertFieldToObject);
-	}
+	convertRules(group);
 
 	respond(req, res, templates.ok, group);
+};
+
+Groups.convertGroupsRules = (req, res) => {
+	const groups = req.outputData;
+	groups?.map(convertRules);
+	respond(req, res, templates.ok, groups);
 };
 
 Groups.serialiseGroupArray = (req, res) => {

@@ -107,9 +107,21 @@ const testSerialiseGroupArray = () => {
 };
 
 const testConvertGroupRules = () => {
+	const oldSchemaGroup = {
+		...generateLegacyGroup(generateRandomString(), generateRandomString(), false),
+		rules: [{
+			name: generateRandomString(),
+			field: generateRandomString(),
+			operator: 'IS',
+			values: [
+				'1rbbJcnUDEEA_ArpSqk3B7',
+			],
+		}]
+	}
 	describe.each([
 		[generateLegacyGroup(generateRandomString(), generateRandomString(), false), 'group with no rules'],
-		[generateLegacyGroup(generateRandomString(), generateRandomString(), true), 'group with rules'],
+		[generateLegacyGroup(generateRandomString(), generateRandomString(), true), 'group with new schema rules'],
+		[oldSchemaGroup, 'group with old schema rules'],
 	])('Convert rules to new schema', (group, desc) => {
 		test(`should convert rules to new schema correctly with ${desc}`,
 			() => {
@@ -136,7 +148,75 @@ const testConvertGroupRules = () => {
 	});
 };
 
+const testConvertGroupsRules = () => {
+	const oldSchemaGroups = [
+		{
+			...generateLegacyGroup(generateRandomString(), generateRandomString(), false),
+			rules: [{
+				name: generateRandomString(),
+				field: generateRandomString(),
+				operator: 'IS',
+				values: [
+					'1rbbJcnUDEEA_ArpSqk3B7',
+				],
+			}]
+		},
+		{
+			...generateLegacyGroup(generateRandomString(), generateRandomString(), false),
+			rules: [{
+				name: generateRandomString(),
+				field: generateRandomString(),
+				operator: 'IS',
+				values: [
+					'1rbbJcnUDEEA_ArpSqk3B7',
+				],
+			}]
+		}
+	];
+
+	describe.each([
+		[[
+			generateLegacyGroup(generateRandomString(), generateRandomString(), false),
+			generateLegacyGroup(generateRandomString(), generateRandomString(), false)
+		], 'groups with no rules'],
+		[[
+			generateLegacyGroup(generateRandomString(), generateRandomString(), true),
+			generateLegacyGroup(generateRandomString(), generateRandomString(), true)
+		], 'groups with new schema rules'],
+		[oldSchemaGroups, 'groups with old schema rules'],
+	])('Convert rules to new schema', (groups, desc) => {
+		test(`should convert rules to new schema correctly with ${desc}`,
+			() => {
+				const nextIdx = respondFn.mock.calls.length;
+				GroupsOutputMiddlewares.convertGroupRules({ outputData: cloneDeep(groups) }, {}, () => { });
+				expect(respondFn.mock.calls.length).toBe(nextIdx + 1);
+				expect(respondFn.mock.calls[nextIdx][2]).toEqual(templates.ok);
+
+				const res = groups;
+				res.map((group) => {
+					if (group.rules) {
+						res.rules = group.rules.map((entry) => {
+							const output = { ...entry };
+	
+							if (typeof entry.field === 'string') {
+								output.field = { operator: 'IS', values: [entry.field] };
+							}
+	
+							return output;
+						});
+					}
+
+					return group;
+				})
+				
+
+				expect(JSON.stringify(respondFn.mock.calls[nextIdx][3])).toEqual(JSON.stringify(res));
+			});
+	});
+};
+
 describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups', () => {
 	testSerialiseGroupArray();
 	testConvertGroupRules();
+	testConvertGroupsRules();
 });

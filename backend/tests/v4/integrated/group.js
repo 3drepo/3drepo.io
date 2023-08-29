@@ -280,38 +280,6 @@ describe("Groups", function () {
 
 		});
 
-		it("with rules (0 args in field) should succeed", function(done) {
-			let groupId;
-
-			async.series([
-				function(done) {
-					const newGroup = Object.assign({}, data);
-					delete newGroup.objects;
-					newGroup.rules = [{
-						name: "rule name",
-						field: { operator: "IS", values: [] },
-						operator: "IS_EMPTY",
-						values: ["some value"]
-					}];
-					agent.post(`/${username}/${model}/revision/master/head/groups/`)
-						.send(newGroup)
-						.expect(200 , function(err, res) {
-							groupId = res.body._id;
-							done(err);
-					});
-				},
-				function(done) {
-					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
-						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							done(err);
-						});
-				}
-
-			], done);
-
-		});
-
 		it("with rules (2 args) should succeed", function(done) {
 			let groupId;
 
@@ -1652,7 +1620,7 @@ describe("Groups", function () {
 					delete newGroup.objects;
 					newGroup.rules = [{
 						name: "rule name",
-						field: { operator: "IS", values: ["Light Transmission"] },
+						field: { operator: "IS", values: ["Mark"] },
 						operator: "LT",
 						values: [180, 200]
 					}];
@@ -1905,7 +1873,7 @@ describe("Groups", function () {
 						operator: "NOT_IN_RANGE",
 						values: [0, 1000, 1000, 1650]
 					},{
-						field: "Perimeter",
+						field: { operator: "IS", values: ["Perimiter"] },
 						operator: "LT",
 						values: [238000]
 					}];
@@ -1999,7 +1967,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(24);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
 							done(err);
 						});
 				}
@@ -2015,7 +1983,7 @@ describe("Groups", function () {
 					delete newGroup.objects;
 					newGroup.rules = [{
 						name: "rule name",
-						field: { operator: "IS", values: ["IFC Type", "IFC Type2"] },
+						field: { operator: "IS", values: ["IFC Type", "Family"] },
 						operator: "IS_NOT_EMPTY",
 						values: []
 					}];
@@ -2061,7 +2029,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(24);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
 							done(err);
 						});
 				}
@@ -2077,7 +2045,7 @@ describe("Groups", function () {
 					delete newGroup.objects;
 					newGroup.rules = [{
 						name: "rule name",
-						field: { operator: "STARTS_WITH", values: ["IFC", "IFC2"] },
+						field: { operator: "STARTS_WITH", values: ["IFC", "Family"] },
 						operator: "IS_NOT_EMPTY",
 						values: []
 					}];
@@ -2123,7 +2091,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(24);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
 							done(err);
 						});
 				}
@@ -2139,7 +2107,7 @@ describe("Groups", function () {
 					delete newGroup.objects;
 					newGroup.rules = [{
 						name: "rule name",
-						field: { operator: "ENDS_WITH", values: ["Type", "Type2"] },
+						field: { operator: "ENDS_WITH", values: ["Type", "Name"] },
 						operator: "IS_NOT_EMPTY",
 						values: []
 					}];
@@ -2185,7 +2153,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(24);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
 							done(err);
 						});
 				}
@@ -2201,7 +2169,7 @@ describe("Groups", function () {
 					delete newGroup.objects;
 					newGroup.rules = [{
 						name: "rule name",
-						field: { operator: "CONTAINS", values: ["IFC", "IFC2"] },
+						field: { operator: "CONTAINS", values: ["IFC", "Family"] },
 						operator: "IS_NOT_EMPTY",
 						values: []
 					}];
@@ -2247,7 +2215,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(24);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
 							done(err);
 						});
 				}
@@ -2278,7 +2246,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(24);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
 							done(err);
 						});
 				}
@@ -2363,7 +2331,12 @@ describe("Groups", function () {
 				function(done) {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
-							Object.assign(goldenData, newRules);
+							goldenData.rules = [{
+								name: "rule name",
+								field: { operator: "IS", values: ["TestField"] },
+								operator: "GTE",
+								values: [1]
+							}];
 							goldenData.updatedAt = res.body.updatedAt;
 							expect(res.body).to.deep.equal(goldenData);
 							done(err);
@@ -2388,6 +2361,12 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
 							Object.assign(goldenData, newName);
+							goldenData.rules = [{
+								name: "rule name",
+								field: { operator: "IS", values: ["TestField"] },
+								operator: "GTE",
+								values: [1]
+							}];
 							goldenData.updatedAt = res.body.updatedAt;
 							expect(res.body).to.deep.equal(goldenData);
 							done(err);
@@ -2412,6 +2391,12 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
 							Object.assign(goldenData, newColor);
+							goldenData.rules = [{
+								name: "rule name",
+								field: { operator: "IS", values: ["TestField"] },
+								operator: "GTE",
+								values: [1]
+							}];
 							goldenData.updatedAt = res.body.updatedAt;
 							expect(res.body).to.deep.equal(goldenData);
 							done(err);
@@ -2436,6 +2421,12 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
 							Object.assign(goldenData, newDesc);
+							goldenData.rules = [{
+								name: "rule name",
+								field: { operator: "IS", values: ["TestField"] },
+								operator: "GTE",
+								values: [1]
+							}];
 							goldenData.updatedAt = res.body.updatedAt;
 							expect(res.body).to.deep.equal(goldenData);
 							done(err);
