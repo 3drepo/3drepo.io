@@ -23,6 +23,7 @@ import { ProjectsActions, ProjectsTypes } from './projects.redux';
 import { IProject } from './projects.types';
 import { selectContainers } from '../containers/containers.selectors';
 import { selectFederationById, selectFederations } from '../federations/federations.selectors';
+import { RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 
 export function* fetch({ teamspace }) {
 	try {
@@ -95,10 +96,30 @@ export function* fetchTemplates({ teamspace, projectId }) {
 	}
 }
 
+export function* fetchTemplate({ teamspace, projectId, modelId, templateId, isFederation }) {
+	try {
+		const fetchTicketsTemplate = isFederation
+			? API.Tickets.fetchFederationTemplate
+			: API.Tickets.fetchContainerTemplate;
+		const template = yield fetchTicketsTemplate(teamspace, projectId, modelId, templateId);
+		yield put(ProjectsActions.replaceTemplateSuccess(projectId, template));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({
+				id: 'projects.fetchQuota.error.action',
+				defaultMessage: 'fetching the template details',
+			}),
+			error,
+			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
+		}));
+	}
+}
+
 export default function* ProjectsSaga() {
 	yield takeLatest(ProjectsTypes.FETCH as any, fetch);
 	yield takeLatest(ProjectsTypes.CREATE_PROJECT as any, createProject);
 	yield takeLatest(ProjectsTypes.UPDATE_PROJECT as any, updateProject);
 	yield takeLatest(ProjectsTypes.DELETE_PROJECT as any, deleteProject);
 	yield takeLatest(ProjectsTypes.FETCH_TEMPLATES as any, fetchTemplates);
+	yield takeLatest(ProjectsTypes.FETCH_TEMPLATE as any, fetchTemplate);
 }
