@@ -41,7 +41,7 @@ import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAnd
 import { GroupByFormSelect } from '../selectMenus/groupByFormSelect.component';
 import { TemplateFormSelect } from '../selectMenus/templateFormSelect.component';
 import { FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from '../tickets.styles';
-import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE } from './ticketsTable.helper';
+import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, NONE_OPTION } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 
 type FormType = {
@@ -58,7 +58,7 @@ export const TicketsTable = () => {
 		defaultValues: {
 			containersAndFederations: models?.split(',') || [],
 			template: templateURLParam,
-			groupBy: GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByURLParam],
+			groupBy: GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByURLParam] || NONE_OPTION,
 		},
 	});
 	const { containersAndFederations, groupBy, template } = formData.watch();
