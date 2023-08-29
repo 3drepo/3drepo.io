@@ -23,12 +23,12 @@ import { Header, Headers, Group, NewTicketRow, NewTicketText } from './ticketsTa
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 
-type TicketTableGroupProps = {
+type TicketsTableGroupProps = {
 	ticketsWithModelId: (ITicket & { modelId: string })[];
 	onEditTicket: (modelId: string, ticket: Partial<ITicket>) => void;
 	onNewTicket: (modelId: string) => void;
 };
-export const TicketsTableGroup = ({ ticketsWithModelId, onEditTicket, onNewTicket }: TicketTableGroupProps) => {
+export const TicketsTableGroup = ({ ticketsWithModelId, onEditTicket, onNewTicket }: TicketsTableGroupProps) => {
 	const sortById = (tckts) => sortBy(tckts, ({ type, _id }) => type + _id);
 
 	return (
