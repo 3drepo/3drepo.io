@@ -98,6 +98,10 @@ export const SlidePanelHeader = styled.div`
 	justify-content: space-between;
 	align-items: center;
 	border-bottom: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
 export const CompletedChip = styled(CompletedFilterChip)`
