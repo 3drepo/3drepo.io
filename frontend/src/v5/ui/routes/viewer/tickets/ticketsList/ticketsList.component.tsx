@@ -46,7 +46,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const [selectedTemplates, setSelectedTemplates] = useState<Set<string>>(new Set());
 	const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
-	const highlightedTicket = TicketsCardHooksSelectors.selectHighlightedTicket();
+	const highlightedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
 
 	const ticketIsSelected = (ticket: ITicket) => highlightedTicket?._id === ticket._id;
 
@@ -91,7 +91,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 
 		const wasSelected = ticketIsSelected(ticket);
 
-		TicketsCardActionsDispatchers.setHighlightedTicket(ticket._id);
+		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
 
 		if (wasSelected) {
 			TicketsCardActionsDispatchers.openTicket(ticket._id);
@@ -107,7 +107,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	}, [highlightedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state]);
 
 	useEffect(() => {
-		const unselectTicket = () => TicketsCardActionsDispatchers.setHighlightedTicket(null);
+		const unselectTicket = () => TicketsCardActionsDispatchers.setSelectedTicket(null);
 		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, unselectTicket);
 		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, unselectTicket);
 	}, []);

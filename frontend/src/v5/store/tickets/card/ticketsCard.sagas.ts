@@ -22,7 +22,7 @@ import { ViewerGuiActions } from '@/v4/modules/viewerGui/viewerGui.redux';
 import { OpenTicketAction, TicketsCardActions, TicketsCardTypes } from './ticketsCard.redux';
 
 export function* openTicket({ ticketId }: OpenTicketAction) {
-	yield put(TicketsCardActions.setHighlightedTicket(ticketId));
+	yield put(TicketsCardActions.setSelectedTicket(ticketId));
 	yield put(TicketsCardActions.setCardView(TicketsCardViews.Details));
 	yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.TICKETS, true));
 }

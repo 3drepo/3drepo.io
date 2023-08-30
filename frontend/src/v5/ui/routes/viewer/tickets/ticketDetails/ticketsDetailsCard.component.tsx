@@ -40,7 +40,7 @@ import { useSearchParam } from '../../../useSearchParam';
 export const TicketDetailsCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
 	const [, setTicketId] = useSearchParam('ticketId');
-	const ticketId = TicketsCardHooksSelectors.selectHighlightedTicketId();
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	if (!ticketId) return null;
 	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
 
@@ -57,7 +57,7 @@ export const TicketDetailsCard = () => {
 	const changeTicketIndex = (delta: number) => {
 		const currentIndex = tickets.findIndex((tckt) => tckt._id === ticket._id);
 		const updatedId = tickets.slice((currentIndex + delta) % tickets.length)[0]._id;
-		TicketsCardActionsDispatchers.setHighlightedTicket(updatedId);
+		TicketsCardActionsDispatchers.setSelectedTicket(updatedId);
 	};
 
 	const goPrev = () => changeTicketIndex(-1);

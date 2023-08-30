@@ -23,7 +23,7 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { OverridesDicts } from '../tickets.types';
 
 export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createActions({
-	setHighlightedTicket: ['ticketId'],
+	setSelectedTicket: ['ticketId'],
 	setSelectedTemplate: ['templateId'],
 	setCardView: ['view'],
 	openTicket: ['ticketId'],
@@ -33,7 +33,7 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 }, { prefix: 'TICKETS_CARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
 export interface ITicketsCardState {
-	highlightedTicketId: string | null,
+	selectedTicketId: string | null,
 	selectedTemplateId: string | null,
 	view: TicketsCardViews,
 	readOnly: boolean,
@@ -41,15 +41,15 @@ export interface ITicketsCardState {
 }
 
 export const INITIAL_STATE: ITicketsCardState = {
-	highlightedTicketId: null,
+	selectedTicketId: null,
 	selectedTemplateId: null,
 	view: TicketsCardViews.List,
 	overrides: null,
 	readOnly: false,
 };
 
-export const setHighlightedTicket = (state: ITicketsCardState, { ticketId }: SetHighlightedTicketAction) => {
-	state.highlightedTicketId = ticketId;
+export const setSelectedTicket = (state: ITicketsCardState, { ticketId }: SetSelectedTicketAction) => {
+	state.selectedTicketId = ticketId;
 };
 
 export const setSelectedTemplate = (state: ITicketsCardState, { templateId }: SetSelectedTemplateAction) => {
@@ -71,7 +71,7 @@ export const setOverrides = (state: ITicketsCardState, { overrides }: SetOverrid
 export const resetState = () => INITIAL_STATE;
 
 export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
-	[TicketsCardTypes.SET_HIGHLIGHTED_TICKET]: setHighlightedTicket,
+	[TicketsCardTypes.SET_SELECTED_TICKET]: setSelectedTicket,
 	[TicketsCardTypes.SET_SELECTED_TEMPLATE]: setSelectedTemplate,
 	[TicketsCardTypes.SET_CARD_VIEW]: setCardView,
 	[TicketsCardTypes.SET_READ_ONLY]: setReadOnly,
@@ -79,7 +79,7 @@ export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SET_OVERRIDES]: setOverrides,
 }));
 
-export type SetHighlightedTicketAction = Action<'SET_HIGHLIGHTED_TICKET'> & { ticketId: string };
+export type SetSelectedTicketAction = Action<'SET_SELECTED_TICKET'> & { ticketId: string };
 export type SetSelectedTemplateAction = Action<'SET_SELECTED_TEMPLATE'> & { templateId: string };
 export type SetCardViewAction = Action<'SET_CARD_VIEW'> & { view: TicketsCardViews };
 export type OpenTicketAction = Action<'OPEN_TICKET'> & { ticketId: string };
@@ -88,7 +88,7 @@ export type ResetStateAction = Action<'RESET_STATE'>;
 export type SetOverridesAction = Action<'SET_OVERRIDES'> & { overrides: OverridesDicts | null};
 
 export interface ITicketsCardActionCreators {
-	setHighlightedTicket: (ticketId: string) => SetHighlightedTicketAction,
+	setSelectedTicket: (ticketId: string) => SetSelectedTicketAction,
 	setSelectedTemplate: (templateId: string) => SetSelectedTemplateAction,
 	setCardView: (view: TicketsCardViews) => SetCardViewAction,
 	openTicket: (ticketId: string) => OpenTicketAction,
