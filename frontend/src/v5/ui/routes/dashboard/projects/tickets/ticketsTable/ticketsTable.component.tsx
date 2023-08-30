@@ -34,6 +34,8 @@ import { getTicketIsCompleted } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
 import _ from 'lodash';
 import { JobsActions } from '@/v4/modules/jobs';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { theme } from '@/v5/ui/routes/viewer/theme';
 import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
 import { useSearchParam } from '../../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE } from '../../../../routes.constants';
@@ -186,8 +188,10 @@ export const TicketsTable = () => {
 						<ExpandIcon />
 					</CircleButton>
 				</SlidePanelHeader>
-				{editingTicketId && (<TicketSlide ticketId={editingTicketId} containerOrFederationId={sidePanelModelId} />)}
-				{!editingTicketId && (<NewTicketSlide ticket={sidePanelTicket} containerOrFederationId={sidePanelModelId} onSave={setSidePanelTicket}/>)}
+				<MuiThemeProvider theme={theme}>
+					{editingTicketId && (<TicketSlide ticketId={editingTicketId} containerOrFederationId={sidePanelModelId} />)}
+					{!editingTicketId && (<NewTicketSlide ticket={sidePanelTicket} containerOrFederationId={sidePanelModelId} onSave={setSidePanelTicket}/>)}
+				</MuiThemeProvider>
 			</SidePanel>
 		</SearchContextComponent>
 	);
