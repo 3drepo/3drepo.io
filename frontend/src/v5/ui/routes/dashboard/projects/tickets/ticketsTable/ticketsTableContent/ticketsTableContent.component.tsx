@@ -24,8 +24,9 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import _ from 'lodash';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
+import { SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketsTableGroup } from './ticketsTableGroup/ticketsTableGroup.component';
-import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, groupTickets, ISSUE_PROPERTIES_GROUPS, NONE_OPTION, SAFETIBASE_PROPERTIES_GROUPS } from '../ticketsTable.helper';
+import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, groupTickets, ISSUE_PROPERTIES_GROUPS, NONE_OPTION, SAFETIBASE_PROPERTIES_GROUPS, UNSET } from '../ticketsTable.helper';
 import { EmptyTicketsView } from '../../emptyTicketsView/emptyTicketsView.styles';
 import { Container } from './ticketsTableContent.styles';
 
@@ -39,10 +40,15 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 	const groupBy = GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByAsURLParam];
 
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
-		const defaultValue = {} as any;
-		const formattedGroupByValue = _.upperCase(_.snakeCase(groupByValue));
+		if (groupByValue === UNSET) {
+			onNewTicket(modelId, {});
+			return;
+		}
 
-		if (SAFETIBASE_PROPERTIES_GROUPS[groupBy]?.[formattedGroupByValue]) {
+		const defaultValue = {} as any;
+		const formattedGroupByValue = _.upperCase(groupByValue).replaceAll(' ', '_');
+
+		if (groupBy === SafetibaseProperties.TREATMENT_STATUS) {
 			defaultValue.modules = {
 				safetibase: {
 					[groupBy]: SAFETIBASE_PROPERTIES_GROUPS[groupBy][formattedGroupByValue],
@@ -50,8 +56,10 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 			};
 		}
 
-		if (ISSUE_PROPERTIES_GROUPS[groupBy]?.[formattedGroupByValue]) {
-			defaultValue.properties = { [groupBy]: ISSUE_PROPERTIES_GROUPS[groupBy][formattedGroupByValue] };
+		if (groupBy in ISSUE_PROPERTIES_GROUPS) {
+			defaultValue.properties = {
+				[groupBy]: ISSUE_PROPERTIES_GROUPS[groupBy][formattedGroupByValue],
+			};
 		}
 
 		onNewTicket(modelId, defaultValue);
