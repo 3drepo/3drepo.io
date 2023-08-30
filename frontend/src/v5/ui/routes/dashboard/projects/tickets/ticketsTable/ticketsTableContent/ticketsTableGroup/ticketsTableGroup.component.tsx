@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { ITicket, TicketWithModelId } from '@/v5/store/tickets/tickets.types';
 import { FormattedMessage } from 'react-intl';
 import { sortBy } from 'lodash';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
@@ -24,7 +24,7 @@ import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 
 type TicketsTableGroupProps = {
-	ticketsWithModelId: (ITicket & { modelId: string })[];
+	ticketsWithModelId: TicketWithModelId[];
 	onEditTicket: (modelId: string, ticket: Partial<ITicket>) => void;
 	onNewTicket: (modelId: string) => void;
 };

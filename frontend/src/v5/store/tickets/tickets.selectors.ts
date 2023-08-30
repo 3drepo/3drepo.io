@@ -39,7 +39,7 @@ export const selectTicketsByContainersAndFederations = createSelector(
 	selectTicketsDomain,
 	(state, containersAndFederationsIds: string[]) => containersAndFederationsIds,
 	(state, containersAndFederationsIds) => {
-		const ticketsWithModelId: Array<TicketWithModelId> = containersAndFederationsIds.flatMap((modelId) => (
+		const ticketsWithModelId: TicketWithModelId[] = containersAndFederationsIds.flatMap((modelId) => (
 			(state.ticketsByModelId[modelId] || []).map((ticket) => ({ modelId, ...ticket }))
 		));
 		return sortTicketsByCreationDate(ticketsWithModelId);
