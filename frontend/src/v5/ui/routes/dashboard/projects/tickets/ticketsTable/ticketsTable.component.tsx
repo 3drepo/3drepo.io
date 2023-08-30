@@ -70,6 +70,7 @@ export const TicketsTable = () => {
 	const [sidePanelModelId, setSidePanelModelId] = useState<string>(null);
 	const [sidePanelTicket, setSidePanelTicket] = useState<Partial<ITicket>>({});
 	const [showCompleted, setShowCompleted] = useState(false);
+	const editingTicketId = sidePanelTicket?._id;
 
 	const ticketsFilteredByTemplate = useMemo(() => {
 		const ticketsToShow = ticketsWithModelId.filter((t) => getTicketIsCompleted(t) === showCompleted);
@@ -175,7 +176,7 @@ export const TicketsTable = () => {
 			<TicketsTableContent onEditTicket={onEditTicket} onNewTicket={onNewTicket} />
 			<SidePanel open={!!sidePanelModelId}>
 				<SlidePanelHeader>
-					<OpenInViewerButton disabled={!sidePanelTicket?._id}>
+					<OpenInViewerButton disabled={!editingTicketId}>
 						<FormattedMessage
 							id="ticketsTable.button.openInViewer"
 							defaultMessage="Open in viewer"
@@ -185,8 +186,8 @@ export const TicketsTable = () => {
 						<ExpandIcon />
 					</CircleButton>
 				</SlidePanelHeader>
-				{sidePanelTicket?._id && (<TicketSlide ticket={sidePanelTicket as ITicket} containerOrFederationId={sidePanelModelId} />)}
-				{!sidePanelTicket?._id && (<NewTicketSlide ticket={sidePanelTicket} containerOrFederationId={sidePanelModelId} onSave={setSidePanelTicket}/>)}
+				{editingTicketId && (<TicketSlide ticketId={editingTicketId} containerOrFederationId={sidePanelModelId} />)}
+				{!editingTicketId && (<NewTicketSlide ticket={sidePanelTicket} containerOrFederationId={sidePanelModelId} onSave={setSidePanelTicket}/>)}
 			</SidePanel>
 		</SearchContextComponent>
 	);

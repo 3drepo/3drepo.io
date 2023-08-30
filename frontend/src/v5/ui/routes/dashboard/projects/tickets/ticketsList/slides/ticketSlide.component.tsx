@@ -18,9 +18,8 @@
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { ProjectsActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { TicketForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketForm.component';
@@ -30,14 +29,15 @@ import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 
-type TicketSlideProps = { ticket: ITicket, containerOrFederationId: string };
-export const TicketSlide = ({ ticket, containerOrFederationId }: TicketSlideProps) => {
-	const { teamspace, project, template: templateId } = useParams<DashboardTicketsParams>();
+type TicketSlideProps = { ticketId: string, containerOrFederationId: string };
+export const TicketSlide = ({ ticketId, containerOrFederationId }: TicketSlideProps) => {
+	const { teamspace, project } = useParams<DashboardTicketsParams>();
 	const isFederation = modelIsFederation(containerOrFederationId);
-	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
+	const ticket = TicketsHooksSelectors.selectTicketByIdRaw(containerOrFederationId, ticketId);
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(ticket?.type);
 
 	const formData = useForm({
-		resolver: yupResolver(getValidators(templateId)),
+		resolver: yupResolver(getValidators(template._id)),
 		mode: 'onChange',
 		defaultValues: ticket,
 	});
@@ -46,17 +46,16 @@ export const TicketSlide = ({ ticket, containerOrFederationId }: TicketSlideProp
 		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
 		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, formData.formState.errors)));
 		sanitizeViewVals(validVals, ticket, template);
-		console.log(validVals);
 		if (isEmpty(validVals)) return;
 		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederationId, ticket._id, validVals, isFederation);
 	};
 
-	useEffect(() => { formData.reset(ticket); }, [ticket._id]);
+	useEffect(() => { formData.reset(ticket); }, [ticket]);
 
 	useEffect(() => {
 		if (template && templateAlreadyFetched(template)) return;
-		ProjectsActionsDispatchers.fetchTemplate(teamspace, project, containerOrFederationId, templateId, isFederation);
-	}, [templateId]);
+		ProjectsActionsDispatchers.fetchTemplate(teamspace, project, containerOrFederationId, template._id, isFederation);
+	}, [template._id]);
 
 	if (!template) return (<Loader />);
 
