@@ -25,11 +25,11 @@ const Group = require("../models/group");
 const C = require("../constants");
 const {v5Path} = require("../../interop");
 const GroupsV5 = require(`${v5Path}/processors/teamspaces/projects/models/commons/groups`);
-const { convertGroupRules: convertOutputRules, serialiseGroupArray} = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
+const { convertGroupRules: convertOutputGroupRules, serialiseGroupArray} = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
 const { validateGroupsExportData, validateGroupsImportData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
 const utils = require("../utils");
-const { convertGroupsRules } = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
-const { convertGroupRules: convertInputRules } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
+const { convertGroupArrayRules } = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
+const { convertGroupRules: convertInputGroupRules } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
 const systemLogger = require("../logger.js").systemLogger;
 
 /**
@@ -149,9 +149,9 @@ const systemLogger = require("../logger.js").systemLogger;
  * 	}
  * ]
  */
-router.get("/revision/master/head/groups", middlewares.issue.canView, listGroups, convertGroupsRules);
+router.get("/revision/master/head/groups", middlewares.issue.canView, listGroups, convertGroupArrayRules);
 
-router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups, convertGroupsRules);
+router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups, convertGroupArrayRules);
 
 /**
  * @api {get} /:teamspace/:model/revision(/master/head|/:revId)/groups/:groupId?[query] Find group
@@ -254,9 +254,9 @@ router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups, conve
  * 	"_id":"00000000-0000-0000-0000-000000000004"
  * }
  */
-router.get("/revision/master/head/groups/:uid", middlewares.issue.canView, findGroup, convertOutputRules);
+router.get("/revision/master/head/groups/:uid", middlewares.issue.canView, findGroup, convertOutputGroupRules);
 
-router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup, convertOutputRules);
+router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup, convertOutputGroupRules);
 
 /**
  * @api {put} /:teamspace/:model/revision(/master/head|/:revId)/groups/:groupId/ Update group
@@ -303,9 +303,9 @@ router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup, c
  * 	"_id":"00000000-0000-0000-0000-000000000002"
  * }
  */
-router.put("/revision/master/head/groups/:uid", middlewares.issue.canCreate, convertInputRules, updateGroup,convertOutputRules);
+router.put("/revision/master/head/groups/:uid", middlewares.issue.canCreate, convertInputGroupRules, updateGroup,convertOutputGroupRules);
 
-router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, convertInputRules, updateGroup,convertOutputRules);
+router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, convertInputGroupRules, updateGroup,convertOutputGroupRules);
 
 /**
  * @api {post} /:teamspace/:model/revision(/master/head|/:revId)/groups Create group
@@ -464,9 +464,9 @@ router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, convertInp
  * 	]
  * }
  */
-router.post("/revision/master/head/groups/", middlewares.issue.canCreate, convertInputRules, createGroup);
+router.post("/revision/master/head/groups/", middlewares.issue.canCreate, convertInputGroupRules, createGroup);
 
-router.post("/revision/:rid/groups/", middlewares.issue.canCreate, convertInputRules, createGroup);
+router.post("/revision/:rid/groups/", middlewares.issue.canCreate, convertInputGroupRules, createGroup);
 
 /**
  * @api {delete} /:teamspace/:model/groups?ids=[GROUPS] Delete groups

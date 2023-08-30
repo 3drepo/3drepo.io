@@ -34,13 +34,11 @@ const convertRules = (group) => {
 
 Groups.convertGroupRules = (req, res) => {
 	const group = req.outputData;
-
 	convertRules(group);
-
 	respond(req, res, templates.ok, group);
 };
 
-Groups.convertGroupsRules = (req, res) => {
+Groups.convertGroupArrayRules = (req, res) => {
 	const groups = req.outputData;
 	groups?.map(convertRules);
 	respond(req, res, templates.ok, groups);

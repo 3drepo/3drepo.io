@@ -188,7 +188,7 @@ const testConvertGroupArrayRules = () => {
 		test(`should convert rules to new schema correctly with ${desc}`,
 			() => {
 				const nextIdx = respondFn.mock.calls.length;
-				GroupsOutputMiddlewares.convertGroupsRules({ outputData: cloneDeep(groups) }, {}, () => { });
+				GroupsOutputMiddlewares.convertGroupArrayRules({ outputData: cloneDeep(groups) }, {}, () => { });
 				expect(respondFn.mock.calls.length).toBe(nextIdx + 1);
 				expect(respondFn.mock.calls[nextIdx][2]).toEqual(templates.ok);
 
