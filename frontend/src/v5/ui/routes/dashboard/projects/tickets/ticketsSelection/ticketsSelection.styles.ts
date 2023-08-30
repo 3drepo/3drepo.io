@@ -18,43 +18,27 @@
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 
-export const Headers = styled.div`
-	display: grid;
-	grid-template-columns: 80fr 493fr 96fr 62fr 90fr 90fr 100fr 137fr 134fr;
-	justify-content: flex-start;
-	margin-bottom: 10px; 
-`;
-
-export const Header = styled(Typography).attrs({
-	variant: 'kicker',
-})`
-	color: ${({ theme }) => theme.palette.base.main};
-	margin-left: 10px;
-`;
-
-export const Group = styled.div`
-	display: grid;
-	border-radius: 10px;
-	overflow: hidden;
-	gap: 1px;
-	background-color: transparent;
-`;
-
-export const NewTicketRow = styled.div`
-	width: 100%;
-	height: 37px;
-	font-weight: 600;
-	cursor: pointer;
-	color: ${({ theme }) => theme.palette.base.main};
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
+export const Form = styled.form`
+	width: 398px;
+	height: 402px;
 	display: flex;
-	align-items: center;
-	padding-left: 15px;
-	gap: 6px;
+	flex-direction: column;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	border-radius: 20px;
+	padding: 16px;
+	margin: 136px auto 0;
 `;
 
-export const NewTicketText = styled(Typography).attrs({
-	variant: 'body1',
+export const Title = styled(Typography).attrs({
+	variant: 'h2',
 })`
-	font-weight: 600;
+	margin-bottom: 11px;
+	text-align: center;
+	color: ${({ theme }) => theme.palette.secondary.main};
+`;
+
+export const Image = styled.img`
+	width: 406px;
+	margin-top: -52px;
+	margin-bottom: -10px
 `;

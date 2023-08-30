@@ -15,38 +15,75 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { ITicket, TicketWithModelId } from '@/v5/store/tickets/tickets.types';
+import { FormattedMessage } from 'react-intl';
 import { sortBy } from 'lodash';
-import { Headers } from './ticketsTableGroup.styles';
+import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
+import { Header, Headers, Group, NewTicketRow, NewTicketText } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
+import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 
-export const TicketsTableGroup = ({ tickets, onTicketClick }) => {
-	if (!tickets?.length) return (<button type="button"> create new ticket </button>);
-
+type TicketsTableGroupProps = {
+	ticketsWithModelId: TicketWithModelId[];
+	onEditTicket: (modelId: string, ticket: Partial<ITicket>) => void;
+	onNewTicket: (modelId: string) => void;
+};
+export const TicketsTableGroup = ({ ticketsWithModelId, onEditTicket, onNewTicket }: TicketsTableGroupProps) => {
 	const sortById = (tckts) => sortBy(tckts, ({ type, _id }) => type + _id);
 
 	return (
 		<>
-			<Headers>
-				<b>id</b>
-				<b>title</b>
-				<b>assignees</b>
-				<b>owner</b>
-				<b>due date</b>
-				<b>priority</b>
-				<b>status</b>
-				<b>level of risk</b>
-				<b>treatment status</b>
-			</Headers>
-			<div>
-				{sortById(tickets).map((ticket: ITicket) => (
+			{!!ticketsWithModelId.length && (
+				<Headers>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
+					</Header>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.title" defaultMessage="title" />
+					</Header>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.assignees" defaultMessage="assignees" />
+					</Header>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.owner" defaultMessage="owner" />
+					</Header>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.dueDate" defaultMessage="due date" />
+					</Header>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.priority" defaultMessage="priority" />
+					</Header>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.status" defaultMessage="status" />
+					</Header>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.levelOfRisk" defaultMessage="level of risk" />
+					</Header>
+					<Header>
+						<FormattedMessage id="ticketTable.column.header.treatmentStatus" defaultMessage="treatment status" />
+					</Header>
+				</Headers>
+			)}
+			<Group>
+				{sortById(ticketsWithModelId).map(({ modelId, ...ticket }) => (
 					<TicketsTableRow
 						key={ticket._id}
 						ticket={ticket}
-						onClick={() => onTicketClick(ticket)}
+						onClick={() => onEditTicket(modelId, ticket)}
 					/>
 				))}
-			</div>
+				<NewTicketMenu
+					TriggerButton={(
+						<NewTicketRow>
+							<AddCircleIcon />
+							<NewTicketText>
+								<FormattedMessage id="ticketTable.row.newTicket" defaultMessage="New ticket" />
+							</NewTicketText>
+						</NewTicketRow>
+					)}
+					onContainerOrFederationClick={onNewTicket}
+				/>
+			</Group>
 		</>
 	);
 };

@@ -15,12 +15,57 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { DueDateWithIconContainer } from '@controls/dueDate/dueDate.styles';
 import styled from 'styled-components';
-import { Headers } from '../ticketsTableGroup.styles';
 
-export const Row = styled(Headers)`
-	height: 30px;
-	background: #fff;
+export const Row = styled.div`
+	display: grid;
+	grid-template-columns: 80fr 493fr 96fr 62fr 90fr 90fr 100fr 137fr 134fr;
+	gap: 1px;
+	height: 37px;
+	background: transparent;
 	cursor: pointer;
-	margin-bottom: 5px;
+`;
+
+export const OverflowContainer = styled.div`
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	display: inline-block;
+`;
+
+export const Cell = styled.div`
+	background: ${({ theme }) => theme.palette.primary.contrast};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	height: 100%;
+	padding: 0 10px;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	font-weight: 500;
+	overflow: hidden;
+`;
+
+export const CellChipText = styled(Cell)`
+	.MuiChip-root {
+		padding-left: 0;
+	}
+`;
+
+export const CellOwner = styled(Cell)`
+	.MuiAvatar-root {
+		width: 24px;
+		height: 24px;
+	}
+`;
+
+export const CellDate = styled(Cell)`
+	${DueDateWithIconContainer} {
+		height: 18px;
+	}
+`;
+
+export const UnassignedAssignees = styled.span`
+	color: ${({ theme }) => theme.palette.base.main};
+	font-size: 10px;
 `;

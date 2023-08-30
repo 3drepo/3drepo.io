@@ -19,10 +19,10 @@ import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/r
 import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
 import { PriorityLevels, RiskLevels, TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { TicketWithModelId } from '@/v5/store/tickets/tickets.types';
 
-export const NONE_OPTION = 'none';
-export const NoneOptionMessage = formatMessage({ id: 'tickets.selectOption.none', defaultMessage: 'None' });
+export const NONE_OPTION = 'None';
+export const NONE_OPTION_MESSAGE = formatMessage({ id: 'tickets.selectOption.none', defaultMessage: 'None' });
 
 const UNSET = formatMessage({ id: 'tickets.selectOption.property.unset', defaultMessage: 'Unset' });
 const NO_DUE_DATE = formatMessage({ id: 'groupBy.dueDate.unset', defaultMessage: 'No due date' });
@@ -40,7 +40,41 @@ const getOptionsForGroupsWithDueDate = () => [
 
 const mapKeysToSnakeCase = (properties) => _.mapKeys(properties, (val, key) => _.snakeCase(key));
 
-export const groupByDate = (tickets: ITicket[]) => {
+export const GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE = mapKeysToSnakeCase({
+	[NONE_OPTION]: NONE_OPTION,
+	[BaseProperties.OWNER]: BaseProperties.OWNER,
+	[IssueProperties.DUE_DATE]: IssueProperties.DUE_DATE,
+	[IssueProperties.PRIORITY]: IssueProperties.PRIORITY,
+	[IssueProperties.STATUS]: IssueProperties.STATUS,
+	[SafetibaseProperties.LEVEL_OF_RISK]: SafetibaseProperties.LEVEL_OF_RISK,
+	[SafetibaseProperties.TREATMENT_STATUS]: SafetibaseProperties.TREATMENT_STATUS,
+});
+
+export const GROUP_BY_OPTIONS = {
+	[BaseProperties.OWNER]: formatMessage({ id: 'groupBy.owner', defaultMessage: 'Owner' }),
+	[IssueProperties.DUE_DATE]: formatMessage({ id: 'groupBy.dueDate', defaultMessage: 'Due date' }),
+	[IssueProperties.PRIORITY]: formatMessage({ id: 'groupBy.priority', defaultMessage: 'Priority' }),
+	[IssueProperties.STATUS]: formatMessage({ id: 'groupBy.status', defaultMessage: 'Status' }),
+	[SafetibaseProperties.LEVEL_OF_RISK]: formatMessage({ id: 'groupBy.levelOfRisk', defaultMessage: 'Level of risk' }),
+	[SafetibaseProperties.TREATMENT_STATUS]: formatMessage({ id: 'groupBy.treatmentStatus', defaultMessage: 'Treatment status' }),
+};
+
+export const ISSUE_PROPERTIES_GROUPS = {
+	[IssueProperties.PRIORITY]: PriorityLevels,
+	[IssueProperties.STATUS]: TicketStatuses,
+};
+
+export const SAFETIBASE_PROPERTIES_GROUPS = {
+	[SafetibaseProperties.LEVEL_OF_RISK]: RiskLevels,
+	[SafetibaseProperties.TREATMENT_STATUS]: TreatmentStatuses,
+};
+
+const GROUP_NAMES_BY_TYPE = {
+	...ISSUE_PROPERTIES_GROUPS,
+	...SAFETIBASE_PROPERTIES_GROUPS,
+};
+
+const groupByDate = (tickets: TicketWithModelId[]) => {
 	const groups = {};
 	// eslint-disable-next-line prefer-const
 	let [ticketsWithUnsetDueDate, remainingTickets] = _.partition(tickets, ({ properties }) => !properties[IssueProperties.DUE_DATE]);
@@ -49,7 +83,7 @@ export const groupByDate = (tickets: ITicket[]) => {
 	const dueDateOptions = getOptionsForGroupsWithDueDate();
 	const endOfCurrentWeek = new Date();
 
-	const ticketDueDateIsPassed = (ticket: ITicket) => ticket.properties[IssueProperties.DUE_DATE] < endOfCurrentWeek.getTime();
+	const ticketDueDateIsPassed = (ticket: TicketWithModelId) => ticket.properties[IssueProperties.DUE_DATE] < endOfCurrentWeek.getTime();
 
 	let currentWeekTickets;
 	while (dueDateOptions.length) {
@@ -60,7 +94,7 @@ export const groupByDate = (tickets: ITicket[]) => {
 	return groups;
 };
 
-export const groupByList = (tickets: ITicket[], groupType: string, groupValues: string[]) => {
+const groupByList = (tickets: TicketWithModelId[], groupType: string, groupValues: string[]) => {
 	const groups = {};
 	let remainingTickets = tickets;
 	let currentTickets = [];
@@ -68,7 +102,7 @@ export const groupByList = (tickets: ITicket[], groupType: string, groupValues: 
 	groupValues.forEach((groupValue) => {
 		[currentTickets, remainingTickets] = _.partition(
 			remainingTickets,
-			({ properties, modules }) => mapKeysToSnakeCase({ ...modules?.safetibase, ...properties })?.[groupType] === groupValue,
+			({ properties, modules }) => ({ ...modules?.safetibase, ...properties })?.[groupType] === groupValue,
 		);
 		groups[groupValue] = currentTickets;
 	});
@@ -76,23 +110,13 @@ export const groupByList = (tickets: ITicket[], groupType: string, groupValues: 
 	return groups;
 };
 
-export const GROUP_BY_OPTIONS = mapKeysToSnakeCase({
-	[BaseProperties.OWNER]: formatMessage({ id: 'groupBy.owner', defaultMessage: 'Owner' }),
-	[IssueProperties.DUE_DATE]: formatMessage({ id: 'groupBy.dueDate', defaultMessage: 'Due date' }),
-	[IssueProperties.PRIORITY]: formatMessage({ id: 'groupBy.priority', defaultMessage: 'Priority' }),
-	[IssueProperties.STATUS]: formatMessage({ id: 'groupBy.status', defaultMessage: 'Status' }),
-	[SafetibaseProperties.LEVEL_OF_RISK]: formatMessage({ id: 'groupBy.levelOfRisk', defaultMessage: 'Level of risk' }),
-	[SafetibaseProperties.TREATMENT_STATUS]: formatMessage({ id: 'groupBy.treatmentStatus', defaultMessage: 'Treatment status' }),
-});
-
-const GROUP_NAMES_BY_TYPE = mapKeysToSnakeCase({
-	[IssueProperties.PRIORITY]: PriorityLevels,
-	[IssueProperties.STATUS]: TicketStatuses,
-	[SafetibaseProperties.LEVEL_OF_RISK]: RiskLevels,
-	[SafetibaseProperties.TREATMENT_STATUS]: TreatmentStatuses,
-});
-
-export const getGroupByOptions = (groupBy: string) => {
-	const optionsAsEnum = GROUP_NAMES_BY_TYPE[groupBy];
-	return _.values(optionsAsEnum);
+export const groupTickets = (groupBy: string, tickets: TicketWithModelId[]): Record<string, TicketWithModelId[]> => {
+	switch (groupBy) {
+		case BaseProperties.OWNER:
+			return _.groupBy(tickets, `properties.${BaseProperties.OWNER}`);
+		case IssueProperties.DUE_DATE:
+			return groupByDate(tickets);
+		default:
+			return groupByList(tickets, groupBy, _.values(GROUP_NAMES_BY_TYPE[groupBy]));
+	}
 };

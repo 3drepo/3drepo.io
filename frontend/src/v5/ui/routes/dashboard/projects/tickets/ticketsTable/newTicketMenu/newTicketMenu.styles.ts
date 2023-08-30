@@ -15,22 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { MenuItem } from '@mui/material';
 import styled from 'styled-components';
-import { CollapsedItemContainer, Container as DashboardList } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
 
-export const Container = styled.div`
-	${DashboardList} {
-		&:not(:first-of-type) {
-			padding-top: 17px;
-		}
-		
-		&:not(:last-of-type) {
-			padding-bottom: 17px;
-			border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
-		}
-
-		${CollapsedItemContainer} {
-			margin-top: 28px;
-		}
+export const Label = styled(MenuItem).attrs({
+	disabled: true,
+})`
+	&&.Mui-disabled {
+		color: ${({ theme }) => theme.palette.base.main};
+		cursor: initial;
+		opacity: 1;
 	}
 `;

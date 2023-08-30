@@ -29,7 +29,7 @@ export const useSearchParam = (name: string) => {
 		} else {
 			searchParams.delete(name);
 		}
-		history.push({ search: searchParams.toString() });
+		history.replace({ search: searchParams.toString() });
 	};
 
 	return [value, setParam] as [string, (val: string) => void];

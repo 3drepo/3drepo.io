@@ -15,22 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { CentredContainer } from '@controls/centredContainer';
 import styled from 'styled-components';
-import { CollapsedItemContainer, Container as DashboardList } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
 
-export const Container = styled.div`
-	${DashboardList} {
-		&:not(:first-of-type) {
-			padding-top: 17px;
-		}
-		
-		&:not(:last-of-type) {
-			padding-bottom: 17px;
-			border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
-		}
-
-		${CollapsedItemContainer} {
-			margin-top: 28px;
-		}
-	}
+export const EmptyTicketsView = styled(CentredContainer)`
+	color: ${({ theme }) => theme.palette.base.main};
+	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
+	${({ theme }) => theme.typography.h2}
+	border-radius: 20px;
+	width: calc(100% - 35px);
+	height: 600px;
 `;

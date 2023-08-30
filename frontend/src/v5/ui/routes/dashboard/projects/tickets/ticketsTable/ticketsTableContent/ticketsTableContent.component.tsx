@@ -21,50 +21,68 @@ import { FormattedMessage } from 'react-intl';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
-import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import _ from 'lodash';
-import { Accordion } from '@controls/accordion/accordion.component';
+import { DashboardListCollapse } from '@components/dashboard/dashboardList';
+import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from './ticketsTableGroup/ticketsTableGroup.component';
-import { getGroupByOptions, groupByDate, groupByList, NONE_OPTION } from '../ticketsTable.helper';
-import { EmptyTicketsList } from './ticketsTableContent.styles';
+import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, groupTickets, ISSUE_PROPERTIES_GROUPS, NONE_OPTION, SAFETIBASE_PROPERTIES_GROUPS } from '../ticketsTable.helper';
+import { EmptyTicketsView } from '../../emptyTicketsView/emptyTicketsView.styles';
+import { Container } from './ticketsTableContent.styles';
 
-type TicketsTableContentProps = { onTicketClick: (ticket: ITicket) => void };
-export const TicketsTableContent = (props: TicketsTableContentProps) => {
+type TicketsTableContentProps = {
+	onEditTicket: (modelId: string, ticket: Partial<ITicket>) => void;
+	onNewTicket: (modelId: string, ticket?: Partial<ITicket>) => void;
+};
+export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableContentProps) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { groupBy } = useParams<DashboardTicketsParams>();
+	const { groupBy: groupByAsURLParam } = useParams<DashboardTicketsParams>();
+	const groupBy = GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByAsURLParam];
+
+	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
+		const defaultValue = {} as any;
+		const formattedGroupByValue = _.upperCase(_.snakeCase(groupByValue));
+
+		if (SAFETIBASE_PROPERTIES_GROUPS[groupBy]?.[formattedGroupByValue]) {
+			defaultValue.modules = {
+				safetibase: {
+					[groupBy]: SAFETIBASE_PROPERTIES_GROUPS[groupBy][formattedGroupByValue],
+				},
+			};
+		}
+
+		if (ISSUE_PROPERTIES_GROUPS[groupBy]?.[formattedGroupByValue]) {
+			defaultValue.properties = { [groupBy]: ISSUE_PROPERTIES_GROUPS[groupBy][formattedGroupByValue] };
+		}
+
+		onNewTicket(modelId, defaultValue);
+	};
 
 	if (!filteredItems.length) {
 		return (
-			<EmptyTicketsList>
+			<EmptyTicketsView>
 				<FormattedMessage
-					id="ticketTable"
+					id="ticketTable.emptyView"
 					defaultMessage="We couldn't find any tickets to show. Please refine your selection."
 				/>
-			</EmptyTicketsList>
+			</EmptyTicketsView>
 		);
 	}
 
-	if (groupBy === NONE_OPTION) return (<TicketsTableGroup tickets={filteredItems} {...props} />);
+	if (groupBy === NONE_OPTION) return (<TicketsTableGroup ticketsWithModelId={filteredItems} onNewTicket={onGroupNewTicket('')} {...props} />);
 
-	let groups: Record<string, ITicket[]>;
-	switch (groupBy) {
-		case _.snakeCase(BaseProperties.OWNER):
-			groups = _.groupBy(filteredItems, `properties.${BaseProperties.OWNER}`);
-			break;
-		case _.snakeCase(IssueProperties.DUE_DATE):
-			groups = groupByDate(filteredItems);
-			break;
-		default:
-			groups = groupByList(filteredItems, groupBy, getGroupByOptions(groupBy));
-	}
+	const groups = groupTickets(groupBy, filteredItems);
 
 	return (
-		<>
-			{_.entries(groups).map(([groupName, tickets]) => (
-				<Accordion title={groupName} defaultExpanded={!!tickets.length} key={groupBy + groupName}>
-					<TicketsTableGroup tickets={tickets} {...props} />
-				</Accordion>
+		<Container>
+			{_.entries(groups).map(([groupName, ticketsWithModelId]) => (
+				<DashboardListCollapse
+					title={<>{groupName} <CircledNumber disabled={!ticketsWithModelId.length}>{ticketsWithModelId.length}</CircledNumber></>}
+					defaultExpanded={!!ticketsWithModelId.length}
+					key={groupBy + groupName}
+				>
+					<TicketsTableGroup ticketsWithModelId={ticketsWithModelId} onNewTicket={onGroupNewTicket(groupName)} {...props} />
+				</DashboardListCollapse>
 			))}
-		</>
+		</Container>
 	);
 };

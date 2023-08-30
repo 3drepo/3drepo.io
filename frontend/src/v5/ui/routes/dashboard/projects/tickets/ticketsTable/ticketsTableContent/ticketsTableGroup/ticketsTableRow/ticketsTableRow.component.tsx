@@ -16,14 +16,25 @@
  */
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
 import { Highlight } from '@controls/highlight';
-import { Row } from './ticketsTableRow.styles';
+import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
+import { Chip } from '@controls/chip/chip.component';
+import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, STATUS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
+import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
+import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
+import { Tooltip } from '@mui/material';
+import { FormattedMessage } from 'react-intl';
+import { Row, Cell, CellChipText, CellOwner, OverflowContainer, UnassignedAssignees, CellDate } from './ticketsTableRow.styles';
 
-export const TicketsTableRow = ({ ticket, onClick }: { ticket: ITicket, onClick: () => void }) => {
+type TicketsTableRowProps = {
+	ticket: ITicket,
+	onClick: () => void,
+};
+export const TicketsTableRow = ({ ticket, onClick }: TicketsTableRowProps) => {
 	const { query } = useContext(SearchContext);
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
@@ -38,22 +49,62 @@ export const TicketsTableRow = ({ ticket, onClick }: { ticket: ITicket, onClick:
 		dueDate,
 	} = getPropertiesInCamelCase(properties);
 
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const ownerAsUser = UsersHooksSelectors.selectUser(teamspace, owner);
+
 	const {
 		treatmentStatus,
 		levelOfRisk,
 	} = getPropertiesInCamelCase(modules?.safetibase || {});
 
+	const handleClick = (e) => {
+		e.preventDefault();
+		onClick();
+	};
+
 	return (
-		<Row key={id} onClick={onClick}>
-			<Highlight search={query}>{`${template.code}:${number}`}</Highlight>
-			<Highlight search={query}>{title}</Highlight>
-			<span>{assignees?.length || 0}</span>
-			<span>{owner}</span>
-			<span>{dueDate ? new Date(dueDate).toLocaleDateString() : 'unset'}</span>
-			<span>{priority}</span>
-			<span>{status}</span>
-			<span>{levelOfRisk}</span>
-			<span>{treatmentStatus}</span>
+		<Row key={id} onClickCapture={handleClick}>
+			<Cell>
+				<Highlight search={query}>{`${template.code}:${number}`}</Highlight>
+			</Cell>
+			<Cell>
+				<Tooltip title={title}>
+					<OverflowContainer>
+						<Highlight search={query}>
+							{title}
+						</Highlight>
+					</OverflowContainer>
+				</Tooltip>
+			</Cell>
+			<Cell>
+				{assignees?.length ? (
+					<AssigneesSelect value={assignees} multiple disabled />
+				) : (
+					<OverflowContainer>
+						<UnassignedAssignees>
+							<FormattedMessage id="ticketsTable.row.assignees.unassigned" defaultMessage="Unassigned" />
+						</UnassignedAssignees>
+					</OverflowContainer>
+				)}
+			</Cell>
+			<CellOwner>
+				<UserPopoverCircle user={ownerAsUser} />
+			</CellOwner>
+			<CellDate>
+				<DueDateWithIcon value={dueDate} disabled />
+			</CellDate>
+			<CellChipText>
+				{priority && (<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />) }
+			</CellChipText>
+			<CellChipText>
+				{status && (<Chip {...STATUS_MAP[status]} variant="text" />) }
+			</CellChipText>
+			<Cell>
+				{levelOfRisk && (<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />)}
+			</Cell>
+			<Cell>
+				{treatmentStatus && (<Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />)}
+			</Cell>
 		</Row>
 	);
 };

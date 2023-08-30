@@ -18,7 +18,7 @@
 import { createSelector } from 'reselect';
 import { ITicketsState } from './tickets.redux';
 import { createPropertiesWithGroups } from './ticketsGroups.helpers';
-import { Properties } from './tickets.types';
+import { Properties, TicketWithModelId } from './tickets.types';
 import { sortTicketsByCreationDate } from './tickets.helpers';
 
 const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
@@ -39,10 +39,10 @@ export const selectTicketsByContainersAndFederations = createSelector(
 	selectTicketsDomain,
 	(state, containersAndFederationsIds: string[]) => containersAndFederationsIds,
 	(state, containersAndFederationsIds) => {
-		const tickets = containersAndFederationsIds.flatMap((modelId) => (
+		const ticketsWithModelId: TicketWithModelId[] = containersAndFederationsIds.flatMap((modelId) => (
 			(state.ticketsByModelId[modelId] || []).map((ticket) => ({ modelId, ...ticket }))
 		));
-		return sortTicketsByCreationDate(tickets);
+		return sortTicketsByCreationDate(ticketsWithModelId);
 	},
 );
 
