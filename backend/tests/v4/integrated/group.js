@@ -1874,7 +1874,7 @@ describe("Groups", function () {
 						values: [0, 1000, 1000, 1650]
 					},{
 						name: "rule name",
-						field: { operator: "IS", values: ["Perimiter"] },
+						field: { operator: "IS", values: ["Perimeter"] },
 						operator: "LT",
 						values: [238000]
 					}];
