@@ -1011,7 +1011,7 @@ bcf.importBCF = function(requester, account, model, dataBuffer, settings) {
 
 	if (settings.federate) {
 		for (let i = 0; settings.subModels && i < settings.subModels.length; i++) {
-			const subModelId = settings.subModels[i];
+			const {id: subModelId} = settings.subModels[i];
 			ifcToModelMapPromises.push(
 				Meta.getIfcGuids(account, subModelId).then(ifcGuidResults => {
 					for (let j = 0; j < ifcGuidResults.length; j++) {

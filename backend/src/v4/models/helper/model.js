@@ -653,7 +653,15 @@ function importModel(account, model, username, modelSetting, source, data) {
 }
 
 async function isSubModel(account, model) {
-	return (await findModelSettings(account, { subModels: model })).length > 0;
+
+	// Old schema support, to remove in 5.8
+
+	const query = {$or: [
+		{ subModels: model },
+		{ "subModels.id": model }
+	]};
+
+	return (await findModelSettings(account, query)).length > 0;
 }
 
 function removeModel(account, model, forceRemove, projectId) {

@@ -182,7 +182,7 @@ async function formatV5NewFedRevisionsData(req, res, next) {
 	}
 
 	if(req.body?.subModels?.length) {
-		req.body.containers = req.body.subModels.map(({model}) => model);
+		req.body.containers = req.body.subModels.map(({model}) => ({ id: model }));
 	}
 
 	next();
