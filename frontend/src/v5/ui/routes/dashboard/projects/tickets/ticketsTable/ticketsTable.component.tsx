@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ProjectsActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from 'react-redux';
@@ -24,13 +24,13 @@ import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams, generatePath, useHistory } from 'react-router-dom';
 import { SearchContextComponent } from '@controls/search/searchContext';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import { selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
 import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { CircleButton } from '@controls/circleButton';
-import { getTicketIsCompleted } from '@/v5/store/tickets/tickets.helpers';
+import { getTicketIsCompleted, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
 import _ from 'lodash';
 import { JobsActions } from '@/v4/modules/jobs';
@@ -69,43 +69,42 @@ export const TicketsTable = () => {
 
 	const ticketsWithModelId = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
-	const [sidePanelModelId, setSidePanelModelId] = useState<string>(null);
-	const [sidePanelTicket, setSidePanelTicket] = useState<Partial<ITicket>>({});
+	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
+	const [sidePanelModelIdAndTemplate, setSidePanelModelIdAndTemplate] = useState<{ modelId: string, template: ITemplate }>(null);
+	const [sidePanelTicket, setSidePanelTicket] = useState<Partial<ITicket>>(null);
 	const [showCompleted, setShowCompleted] = useState(false);
+	
 	const editingTicketId = sidePanelTicket?._id;
+	const templateIsFetched = templateAlreadyFetched(selectedTemplate || {} as any);
 
 	const ticketsFilteredByTemplate = useMemo(() => {
 		const ticketsToShow = ticketsWithModelId.filter((t) => getTicketIsCompleted(t) === showCompleted);
 		return ticketsToShow.filter(({ type }) => type === template);
 	}, [template, ticketsWithModelId, showCompleted]);
 
-	const setSidePanelModelIdAndTicket = (modelId: string, ticket: Partial<ITicket> = {}) => {
-		setSidePanelModelId(modelId);
+	const onSaveTicket = (ticket: ITicket) => onEditTicket(sidePanelModelIdAndTemplate.modelId, ticket);
+
+	const onEditTicket = (modelId: string, ticket: ITicket) => {
+		setSidePanelModelIdAndTemplate({ modelId, template: selectedTemplate });
 		setSidePanelTicket(ticket);
 	};
 
-	const onEditTicket = (modelId: string, ticket: Partial<ITicket>) => {
-		setSidePanelModelIdAndTicket(modelId, ticket);
-	};
-
 	const onNewTicket = (modelId: string, ticket?: Partial<ITicket>) => {
-		setSidePanelModelIdAndTicket(modelId, ticket);
+		setSidePanelModelIdAndTemplate({ modelId, template: selectedTemplate });
+		setSidePanelTicket(ticket);
 	};
 
-	const onCloseSidePanel = () => {
-		setSidePanelModelIdAndTicket(null);
-	};
+	const onCloseSidePanel = () => setSidePanelModelIdAndTemplate(null);
 
-	const filterTickets = (items, query: string) => {
-		if (!query) return items;
-		return items.filter((ticket) => {
-			const templateCode = templates.find(({ _id }) => _id === ticket.type).code;
-			const ticketCode = `${templateCode}:${ticket.number}`;
-			return [ticketCode, ticket.title].some((str) => str.toLowerCase().includes(query.toLowerCase()));
-		});
-	};
+	const filterTickets = (items, query: string) => items.filter((ticket) => {
+		const templateCode = templates.find(({ _id }) => _id === ticket.type).code;
+		const ticketCode = `${templateCode}:${ticket.number}`;
+		return [ticketCode, ticket.title].some((str) => str.toLowerCase().includes(query.toLowerCase()));
+	});
 
 	useEffect(() => {
+		setModels(containersAndFederations.join(','));
+
 		if (!containersAndFederations.length) return;
 
 		const isFed = (modelId) => !!selectFederationById(getState(), modelId);
@@ -115,6 +114,11 @@ export const TicketsTable = () => {
 			TicketsActionsDispatchers.fetchTickets(teamspace, project, modelId, isFed(modelId));
 		});
 	}, [containersAndFederations]);
+
+	useEffect(() => {
+		if (templateIsFetched) return;
+		ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);
+	}, [template]);
 
 	useEffect(() => {
 		let newURL = generatePath(TICKETS_ROUTE, {
@@ -128,8 +132,6 @@ export const TicketsTable = () => {
 		}
 		history.push(newURL);
 	}, [groupBy, template]);
-
-	useEffect(() => { setModels(containersAndFederations.join(',')); }, [containersAndFederations]);
 
 	useEffect(() => () => {
 		setModels('');
@@ -176,7 +178,7 @@ export const TicketsTable = () => {
 				</FiltersContainer>
 			</FormProvider>
 			<TicketsTableContent onEditTicket={onEditTicket} onNewTicket={onNewTicket} />
-			<SidePanel open={!!sidePanelModelId}>
+			<SidePanel open={!!sidePanelModelIdAndTemplate?.modelId}>
 				<SlidePanelHeader>
 					<OpenInViewerButton disabled={!editingTicketId}>
 						<FormattedMessage
@@ -189,8 +191,8 @@ export const TicketsTable = () => {
 					</CircleButton>
 				</SlidePanelHeader>
 				<MuiThemeProvider theme={theme}>
-					{editingTicketId && (<TicketSlide ticketId={editingTicketId} containerOrFederationId={sidePanelModelId} />)}
-					{!editingTicketId && (<NewTicketSlide ticket={sidePanelTicket} containerOrFederationId={sidePanelModelId} onSave={setSidePanelTicket}/>)}
+					{editingTicketId && (<TicketSlide ticketId={sidePanelTicket._id} {...sidePanelModelIdAndTemplate} />)}
+					{!editingTicketId && (<NewTicketSlide ticket={sidePanelTicket} {...sidePanelModelIdAndTemplate} onSave={onSaveTicket} />)}
 				</MuiThemeProvider>
 			</SidePanel>
 		</SearchContextComponent>

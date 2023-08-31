@@ -15,31 +15,41 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ProjectsActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { filterEmptyTicketValues, getDefaultTicket, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
-import { ITicket, NewTicket } from '@/v5/store/tickets/tickets.types';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { filterEmptyTicketValues, getDefaultTicket, getEditableProperties, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
+import { ITemplate, ITicket, NewTicket } from '@/v5/store/tickets/tickets.types';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { TicketForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketForm.component';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { merge } from 'lodash';
+import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { SaveButton } from './newTicketSlide.styles';
+
+// /TODO 1 - Level of risk must be splitted
+// TODO 2 - Not all the templates have level of risk or whatever
+const getGroupDefaultValue = (template, ticket) => {
+
+}
 
 type NewTicketSlideProps = {
 	ticket?: Partial<ITicket>,
-	containerOrFederationId: string,
+	modelId: string,
+	template: ITemplate,
 	onSave: (newTicket) => void,
 };
-export const NewTicketSlide = ({ ticket, containerOrFederationId, onSave }: NewTicketSlideProps) => {
+export const NewTicketSlide = ({ ticket, modelId, template, onSave }: NewTicketSlideProps) => {
 	const { teamspace, project, template: templateId } = useParams<DashboardTicketsParams>();
-	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const defaultValues = merge(getDefaultTicket(template), ticket);
-	const isFederation = modelIsFederation(containerOrFederationId);
+	const templateIsFetched = templateAlreadyFetched(template || {} as any);
+	let defaultValues = getDefaultTicket(template);
+	if (/* ticket is subset of template */true) {
+		defaultValues = merge(defaultValues, ticket);
+	}
+	const isFederation = modelIsFederation(modelId);
 
 	const formData = useForm({
 		resolver: yupResolver(getValidators(template)),
@@ -55,32 +65,29 @@ export const NewTicketSlide = ({ ticket, containerOrFederationId, onSave }: NewT
 		TicketsActionsDispatchers.createTicket(
 			teamspace,
 			project,
-			containerOrFederationId,
+			modelId,
 			parsedTicket,
 			isFederation,
-			(ticketId) => onSave({ ...ticket, _id: ticketId }), //TODO - refine this
+			// TODO - check if this component should be aware of what to pass to the method
+			// other than the id
+			(ticketId) => onSave({ _id: ticketId }),
 		);
 	};
 
-
-	useEffect(() => { formData.reset(ticket); }, [containerOrFederationId]);
-
 	useEffect(() => {
-		if (templateAlreadyFetched(template)) return;
-		ProjectsActionsDispatchers.fetchTemplate(teamspace, project, containerOrFederationId, templateId, isFederation);
-	}, [template._id]);
+		if (!templateIsFetched) return;
+		formData.reset(defaultValues);
+	}, [modelId, templateIsFetched]);
+	
+	if (!templateIsFetched) return (<Loader />);
 
 	return (
 		<form onSubmit={formData.handleSubmit(onSubmit)}>
 			<FormProvider {...formData}>
-				<TicketForm
-					template={template}
-					ticket={ticket}
-				/>
+				<TicketForm template={getEditableProperties(template)} ticket={ticket} />
 			</FormProvider>
 			<SaveButton disabled={!formData.formState.isValid}>
-				<FormattedMessage
-					id="ticketsTable.button.saveTicket" defaultMessage="Save ticket" />
+				<FormattedMessage id="ticketsTable.button.saveTicket" defaultMessage="Save ticket" />
 			</SaveButton>
 		</form>
 	);
