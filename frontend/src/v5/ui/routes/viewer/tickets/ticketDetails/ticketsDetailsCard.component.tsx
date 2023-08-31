@@ -40,13 +40,11 @@ import { useSearchParam } from '../../../useSearchParam';
 export const TicketDetailsCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
 	const [, setTicketId] = useSearchParam('ticketId');
-	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	if (!ticketId) return null;
 	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
 
 	const isFederation = modelIsFederation(containerOrFederation);
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
-	const ticket = tickets.find((t) => t._id === ticketId);
+	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	const defaultView = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 

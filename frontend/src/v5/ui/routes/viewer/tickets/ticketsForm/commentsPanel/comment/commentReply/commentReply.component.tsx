@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CurrentUserHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CurrentUserHooksSelectors, TicketsCardHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { CommentMarkDown, ExpandableImage, OriginalMessage, CameraIcon } from './commentReply.styles';
 import { CommentAuthor } from '../basicComment/basicComment.styles';
 import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
@@ -39,9 +38,9 @@ export const CommentReply = ({
 	...props
 }: CommentReplyProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const [ticketId] = useSearchParam('ticketId');
 
 	const isFederation = modelIsFederation(containerOrFederation);
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const currentUser = CurrentUserHooksSelectors.selectUsername();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
 

@@ -33,7 +33,6 @@ import { useEffect, useState } from 'react';
 import { Gap } from '@controls/gap';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { sanitiseMessage, stripMetadata } from '@/v5/store/tickets/comments/ticketComments.helpers';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { ViewerParams } from '../../../../routes.constants';
 import { Accordion, Comments, EmptyCommentsBox, VirtualisedList } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
@@ -43,10 +42,10 @@ type CommentsPanelProps = {
 	scrollPanelIntoView: (event, isExpanding) => void,
 };
 export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
-	const [ticketId] = useSearchParam('ticketId');
 	const [commentReply, setCommentReply] = useState<ITicketComment>(null);
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
 

@@ -19,7 +19,7 @@ import FileIcon from '@assets/icons/outlined/file-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
+import { CurrentUserHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { DialogsActionsDispatchers, TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { uuid } from '@/v4/helpers/uuid';
@@ -34,7 +34,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { MenuItem } from '@mui/material';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import {
 	Controls,
 	CharsCounter,
@@ -65,7 +64,6 @@ type CreateCommentBoxProps = {
 	deleteCommentReply: () => void;
 };
 export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCommentBoxProps) => {
-	const [ticketId] = useSearchParam('ticketId');
 	const [imagesToUpload, setImagesToUpload] = useState<ImageToUpload[]>([]);
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
@@ -76,6 +74,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 
 	const replyMetadata = createMetadata(commentReply);

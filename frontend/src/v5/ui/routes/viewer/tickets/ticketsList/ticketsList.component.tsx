@@ -46,9 +46,9 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const [selectedTemplates, setSelectedTemplates] = useState<Set<string>>(new Set());
 	const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
-	const highlightedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
+	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
 
-	const ticketIsSelected = (ticket: ITicket) => highlightedTicket?._id === ticket._id;
+	const ticketIsSelected = (ticket: ITicket) => selectedTicket?._id === ticket._id;
 
 	const toggleTemplate = (templateId: string) => {
 		if (selectedTemplates.has(templateId)) {
@@ -101,10 +101,10 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	};
 
 	useEffect(() => {
-		const view = highlightedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
+		const view = selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 		if (isEmpty(view)) return;
 		goToView(view);
-	}, [highlightedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state]);
+	}, [selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state]);
 
 	useEffect(() => {
 		const unselectTicket = () => TicketsCardActionsDispatchers.setSelectedTicket(null);
