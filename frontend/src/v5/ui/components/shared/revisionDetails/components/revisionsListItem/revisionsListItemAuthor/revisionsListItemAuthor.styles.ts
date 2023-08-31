@@ -16,12 +16,14 @@
  */
 
 import styled from 'styled-components';
-import { TextOverflow } from '@controls/textOverflow';
 
-export const Name = styled(TextOverflow)`
+export const Name = styled.div`
 	max-width: 100%;
 	padding-right: 10px;
 	box-sizing: border-box;
 	display: inline-block;
 	vertical-align: middle;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 `;
