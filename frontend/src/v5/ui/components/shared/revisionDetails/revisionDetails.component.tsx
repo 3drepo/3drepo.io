@@ -107,6 +107,7 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 						<RevisionsListItemWrapper
 							isSingle={isSingle}
 							selected={i === selected}
+							isBeforeSelected={i === selected - 1}
 							onClick={() => {}}
 							key={revision._id}
 						>

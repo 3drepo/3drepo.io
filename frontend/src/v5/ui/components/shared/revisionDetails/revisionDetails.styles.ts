@@ -74,6 +74,10 @@ const selectedRevisionListItemStyles = css`
 	background-image: ${({ theme }) => `linear-gradient(${theme.palette.secondary.mid}, ${theme.palette.secondary.mid}), linear-gradient(to bottom, ${theme.palette.primary.main}, ${theme.palette.secondary.light})`};
 `;
 
+const beforeSelectedRevisionListItemStyles = css`
+	background-image: ${({ theme }) => `linear-gradient(${theme.palette.secondary.mid}, ${theme.palette.secondary.mid}), linear-gradient(to bottom, ${theme.palette.secondary.light}, ${theme.palette.primary.main})`};
+`;
+
 const singleRevisionListItemStyles = ({ theme, selected }) => css`
 	&:after {
 		content: '';
@@ -88,7 +92,7 @@ const singleRevisionListItemStyles = ({ theme, selected }) => css`
 	}
 `;
 
-const revisionListItemStylesLineStyles = ({ theme, selected }) => css`
+const revisionListItemStylesLineStyles = ({ theme, selected, isBeforeSelected }) => css`
 	&:after {
 		content: '';
 		display: block;
@@ -103,10 +107,11 @@ const revisionListItemStylesLineStyles = ({ theme, selected }) => css`
 		background-clip: content-box, border-box;
 		background-image: linear-gradient(${theme.palette.secondary.mid}, ${theme.palette.secondary.mid}), linear-gradient(to bottom, ${theme.palette.secondary.light}, ${theme.palette.secondary.light});
 		${selected && selectedRevisionListItemStyles};
+		${isBeforeSelected && beforeSelectedRevisionListItemStyles}
 	}
 `;
 
-export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected?: boolean }>`
+export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected?: boolean, isBeforeSelected: boolean }>`
 	box-sizing: border-box;
 	height: ${ITEM_HEIGHT};
 	min-height: ${ITEM_HEIGHT};
