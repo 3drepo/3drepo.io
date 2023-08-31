@@ -33,8 +33,14 @@ import { SaveButton } from './newTicketSlide.styles';
 // /TODO 1 - Level of risk must be splitted
 // TODO 2 - Not all the templates have level of risk or whatever
 const getGroupDefaultValue = (template, ticket) => {
+	let defaultValues = getDefaultTicket(template);
 
-}
+	if ((defaultValues.modules.safetibase && ticket.modules.safetibase) || (defaultValues.properties && ticket.properties)) {
+		defaultValues = merge(defaultValues, ticket);
+	}
+	
+	return defaultValues;
+};
 
 type NewTicketSlideProps = {
 	ticket?: Partial<ITicket>,
@@ -43,12 +49,9 @@ type NewTicketSlideProps = {
 	onSave: (newTicket) => void,
 };
 export const NewTicketSlide = ({ ticket, modelId, template, onSave }: NewTicketSlideProps) => {
-	const { teamspace, project, template: templateId } = useParams<DashboardTicketsParams>();
+	const { teamspace, project } = useParams<DashboardTicketsParams>();
 	const templateIsFetched = templateAlreadyFetched(template || {} as any);
-	let defaultValues = getDefaultTicket(template);
-	if (/* ticket is subset of template */true) {
-		defaultValues = merge(defaultValues, ticket);
-	}
+	const defaultValues = getGroupDefaultValue(template, ticket);
 	const isFederation = modelIsFederation(modelId);
 
 	const formData = useForm({
