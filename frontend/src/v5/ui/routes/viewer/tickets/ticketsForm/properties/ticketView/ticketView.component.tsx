@@ -77,8 +77,7 @@ export const TicketView = ({
 	// Camera
 	const onUpdateCamera = async () => {
 		const currentCameraAndClipping = await ViewerService.getViewpoint();
-		const screenshot = stripBase64Prefix(await ViewerService.getScreenshot());
-		onChange?.({ screenshot, ...currentCameraAndClipping });
+		onChange?.({ ...value, ...currentCameraAndClipping });
 	};
 
 	const onDeleteCamera = async () => {
