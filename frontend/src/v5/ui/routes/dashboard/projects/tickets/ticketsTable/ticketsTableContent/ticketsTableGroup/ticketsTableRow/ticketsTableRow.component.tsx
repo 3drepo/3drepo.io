@@ -57,6 +57,9 @@ export const TicketsTableRow = ({ ticket, onClick }: TicketsTableRowProps) => {
 		levelOfRisk,
 	} = getPropertiesInCamelCase(modules?.safetibase || {});
 
+	const hasProperties = template?.config?.issueProperties;
+	const hasSafetibase = template?.modules?.some(({ type }) => type === 'safetibase');
+
 	const handleClick = (e) => {
 		e.preventDefault();
 		onClick();
@@ -91,19 +94,19 @@ export const TicketsTableRow = ({ ticket, onClick }: TicketsTableRowProps) => {
 				<UserPopoverCircle user={ownerAsUser} />
 			</CellOwner>
 			<CellDate>
-				<DueDateWithIcon value={dueDate} disabled />
+				{hasProperties && <DueDateWithIcon value={dueDate} disabled />}
 			</CellDate>
 			<CellChipText>
-				{priority && (<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />) }
+				{hasProperties && (<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />) }
 			</CellChipText>
 			<CellChipText>
-				{status && (<Chip {...STATUS_MAP[status]} variant="text" />) }
+				{hasProperties && (<Chip {...STATUS_MAP[status]} variant="text" />) }
 			</CellChipText>
 			<Cell>
-				{levelOfRisk && (<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />)}
+				{hasSafetibase && (<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />)}
 			</Cell>
 			<Cell>
-				{treatmentStatus && (<Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />)}
+				{hasSafetibase && (<Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />)}
 			</Cell>
 		</Row>
 	);
