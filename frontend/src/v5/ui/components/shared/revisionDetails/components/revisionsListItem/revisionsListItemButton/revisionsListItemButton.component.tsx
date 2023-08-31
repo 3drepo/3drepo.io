@@ -24,14 +24,12 @@ type IProps = IButton & {
 	status?: boolean;
 };
 
-const STATUSES = [
-	formatMessage({ id: 'revisionDetails.active', defaultMessage: 'active' }),
-	formatMessage({ id: 'revisionDetails.void', defaultMessage: 'void' }),
-];
+const VOID_STATUS = formatMessage({ id: 'revisionDetails.void', defaultMessage: 'void' });
+const ACTIVE_STATUS = formatMessage({ id: 'revisionDetails.active', defaultMessage: 'active' });
 
 export const RevisionsListItemButton = ({ status: isVoid, disabled, ...props }: IProps): JSX.Element => {
-	const currentStatus = STATUSES[+isVoid];
-	const oppositeStatus = STATUSES[+!isVoid];
+	const currentStatus = isVoid ? VOID_STATUS : ACTIVE_STATUS;
+	const oppositeStatus = isVoid ? ACTIVE_STATUS : VOID_STATUS;
 
 	return (
 		<Container>
@@ -39,7 +37,7 @@ export const RevisionsListItemButton = ({ status: isVoid, disabled, ...props }: 
 				title={disabled ? '' : (
 					<FormattedMessage
 						id="revisionDetails.list.item.button.tooltip"
-						defaultMessage={`Change to ${oppositeStatus}`}
+						defaultMessage="Change to {oppositeStatus}"
 						values={{ oppositeStatus }}
 					/>
 				)}
