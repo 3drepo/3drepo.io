@@ -94,7 +94,10 @@ export const TicketsTable = () => {
 		setSidePanelTicket(ticket);
 	};
 
-	const onCloseSidePanel = () => setSidePanelModelIdAndTemplate(null);
+	const onCloseSidePanel = () => {
+		setSidePanelModelIdAndTemplate(null);
+		setSidePanelTicket(null);
+	};
 
 	const filterTickets = (items, query: string) => items.filter((ticket) => {
 		const templateCode = templates.find(({ _id }) => _id === ticket.type).code;
@@ -178,7 +181,7 @@ export const TicketsTable = () => {
 				</FiltersContainer>
 			</FormProvider>
 			<TicketsTableContent onEditTicket={onEditTicket} onNewTicket={onNewTicket} />
-			<SidePanel open={!!sidePanelModelIdAndTemplate?.modelId}>
+			<SidePanel open={!!sidePanelModelIdAndTemplate}>
 				<SlidePanelHeader>
 					<OpenInViewerButton disabled={!editingTicketId}>
 						<FormattedMessage
@@ -190,10 +193,12 @@ export const TicketsTable = () => {
 						<ExpandIcon />
 					</CircleButton>
 				</SlidePanelHeader>
-				<MuiThemeProvider theme={theme}>
-					{editingTicketId && (<TicketSlide ticketId={sidePanelTicket._id} {...sidePanelModelIdAndTemplate} />)}
-					{!editingTicketId && (<NewTicketSlide ticket={sidePanelTicket} {...sidePanelModelIdAndTemplate} onSave={onSaveTicket} />)}
-				</MuiThemeProvider>
+				{sidePanelModelIdAndTemplate && (
+					<MuiThemeProvider theme={theme}>
+						{editingTicketId && (<TicketSlide ticketId={sidePanelTicket._id} {...sidePanelModelIdAndTemplate} />)}
+						{!editingTicketId && (<NewTicketSlide ticket={sidePanelTicket} {...sidePanelModelIdAndTemplate} onSave={onSaveTicket} />)}
+					</MuiThemeProvider>
+				)}
 			</SidePanel>
 		</SearchContextComponent>
 	);
