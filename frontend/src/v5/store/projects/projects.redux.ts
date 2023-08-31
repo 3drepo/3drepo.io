@@ -29,7 +29,7 @@ export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions
 	fetchSuccess: ['teamspace', 'projects'],
 	fetchTemplates: ['teamspace', 'projectId'],
 	fetchTemplatesSuccess: ['projectId', 'templates'],
-	fetchTemplate: ['teamspace', 'projectId', 'modelId', 'templateId', 'isFederation'],
+	fetchTemplate: ['teamspace', 'projectId', 'templateId'],
 	replaceTemplateSuccess: ['projectId', 'template'],
 	fetchFailure: [],
 	setCurrentProject: ['projectId'],
@@ -117,7 +117,7 @@ export type DeleteProjectAction = Action<'DELETE_PROJECT'> & TeamspaceAndProject
 export type DeleteProjectSuccessAction = Action<'DELETE_PROJECT_SUCCESS'> & TeamspaceAndProjectId;
 export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId;
 export type FetchTemplatesSuccessAction = Action<'FETCH_TEMPLATES_SUCCESS'> & ProjectId & { templates: ITemplate[] };
-export type FetchTemplateAction = Action<'FETCH_TEMPLATE'> & TeamspaceProjectAndModel & { templateId: string, isFederation: boolean };
+export type FetchTemplateAction = Action<'FETCH_TEMPLATE'> & TeamspaceAndProjectId & { templateId: string };
 export type ReplaceTemplateSuccessAction = Action<'REPLACE_TEMPLATE_SUCCESS'> & ProjectId & { template: ITemplate };
 
 export interface IProjectsActions {
@@ -153,6 +153,6 @@ export interface IProjectsActions {
 	deleteProjectSuccess: (teamspace: string, projectId: string) => DeleteProjectSuccessAction;
 	fetchTemplates: (teamspace: string, projectId: string) => FetchTemplatesAction;
 	fetchTemplatesSuccess: (projectId: string, templates: ITemplate[]) => FetchTemplatesSuccessAction;
-	fetchTemplate: (teamspace: string, projectId: string, modelId: string, templateId: string, isFederation: boolean) => FetchTemplateAction;
+	fetchTemplate: (teamspace: string, projectId: string, templateId: string) => FetchTemplateAction;
 	replaceTemplateSuccess: (projectId: string, template: ITemplate) => ReplaceTemplateSuccessAction;
 }

@@ -96,9 +96,16 @@ export function* fetchTemplates({ teamspace, projectId }) {
 	}
 }
 
-export function* fetchTemplate({ teamspace, projectId, modelId, templateId, isFederation }) {
+export function* fetchTemplate({ teamspace, projectId, templateId }) {
 	try {
-		const fetchTicketsTemplate = isFederation
+		const models = [...(yield select(selectContainers)), ...(yield select(selectFederations))];
+		if (!models.length) {
+			yield put(ProjectsActions.fetchTemplatesSuccess(projectId, []));
+			return;
+		}
+		const modelId = models[0]._id;
+		const isFed = !!(yield select(selectFederationById, modelId));
+		const fetchTicketsTemplate = isFed
 			? API.Tickets.fetchFederationTemplate
 			: API.Tickets.fetchContainerTemplate;
 		const template = yield fetchTicketsTemplate(teamspace, projectId, modelId, templateId);
