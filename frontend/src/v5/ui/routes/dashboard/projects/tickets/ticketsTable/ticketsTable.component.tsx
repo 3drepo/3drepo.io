@@ -197,7 +197,7 @@ export const TicketsTable = () => {
 							TriggerButton={(
 								<NewTicketButton
 									startIcon={<AddCircleIcon />}
-									disabled={!templates.length}
+									disabled={!containersAndFederations.length}
 								>
 									<FormattedMessage id="ticketsTable.button.newTicket" defaultMessage="New Ticket" />
 								</NewTicketButton>
