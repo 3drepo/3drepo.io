@@ -30,12 +30,10 @@ import { merge } from 'lodash';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { SaveButton } from './newTicketSlide.styles';
 
-// /TODO 1 - Level of risk must be splitted
-// TODO 2 - Not all the templates have level of risk or whatever
 const getGroupDefaultValue = (template, ticket) => {
 	let defaultValues = getDefaultTicket(template);
 
-	if ((defaultValues.modules.safetibase && ticket.modules.safetibase) || (defaultValues.properties && ticket.properties)) {
+	if ((defaultValues.modules?.safetibase && ticket?.modules?.safetibase) || (defaultValues.properties && ticket?.properties)) {
 		defaultValues = merge(defaultValues, ticket);
 	}
 	
