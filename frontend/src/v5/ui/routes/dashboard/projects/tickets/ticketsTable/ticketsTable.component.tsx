@@ -38,7 +38,7 @@ import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { theme } from '@/v5/ui/routes/viewer/theme';
 import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
 import { useSearchParam } from '../../../../useSearchParam';
-import { DashboardTicketsParams, TICKETS_ROUTE } from '../../../../routes.constants';
+import { DashboardTicketsParams, TICKETS_ROUTE, VIEWER_ROUTE } from '../../../../routes.constants';
 import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { GroupByFormSelect } from '../selectMenus/groupByFormSelect.component';
 import { TemplateFormSelect } from '../selectMenus/templateFormSelect.component';
@@ -104,6 +104,15 @@ export const TicketsTable = () => {
 		const ticketCode = `${templateCode}:${ticket.number}`;
 		return [ticketCode, ticket.title].some((str) => str.toLowerCase().includes(query.toLowerCase()));
 	});
+
+	const openInViewer = () => {
+		const pathname = generatePath(VIEWER_ROUTE, {
+			teamspace,
+			project,
+			containerOrFederation: sidePanelModelIdAndTemplate.modelId,
+		});
+		history.push({ pathname, search: `?ticketId=${sidePanelTicket._id }` });
+	};
 
 	useEffect(() => {
 		setModels(containersAndFederations.join(','));
@@ -183,7 +192,7 @@ export const TicketsTable = () => {
 			<TicketsTableContent onEditTicket={onEditTicket} onNewTicket={onNewTicket} />
 			<SidePanel open={!!sidePanelModelIdAndTemplate}>
 				<SlidePanelHeader>
-					<OpenInViewerButton disabled={!editingTicketId}>
+					<OpenInViewerButton disabled={!editingTicketId} onClick={openInViewer}>
 						<FormattedMessage
 							id="ticketsTable.button.openInViewer"
 							defaultMessage="Open in viewer"
