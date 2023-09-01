@@ -106,7 +106,6 @@ export class TreeNode extends PureComponent<IProps, any> {
 	}
 
 	get isModelRef() {
-		console.log(this.node);
 		return this.node.type === "ref";
 	}
 
