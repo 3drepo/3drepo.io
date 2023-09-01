@@ -36,6 +36,8 @@ import _ from 'lodash';
 import { JobsActions } from '@/v4/modules/jobs';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { theme } from '@/v5/ui/routes/viewer/theme';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import { enableRealtimeContainerNewTicket, enableRealtimeContainerUpdateTicket, enableRealtimeFederationNewTicket, enableRealtimeFederationUpdateTicket } from '@/v5/services/realtime/ticket.events';
 import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
 import { useSearchParam } from '../../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE, VIEWER_ROUTE } from '../../../../routes.constants';
@@ -114,12 +116,12 @@ export const TicketsTable = () => {
 		history.push({ pathname, search: `?ticketId=${sidePanelTicket._id }` });
 	};
 
+	const isFed = (modelId) => !!selectFederationById(getState(), modelId);
+
 	useEffect(() => {
 		setModels(containersAndFederations.join(','));
 
 		if (!containersAndFederations.length) return;
-
-		const isFed = (modelId) => !!selectFederationById(getState(), modelId);
 
 		containersAndFederations.forEach((modelId) => {
 			if (selectTicketsHaveBeenFetched(getState(), modelId)) return;
@@ -149,6 +151,22 @@ export const TicketsTable = () => {
 		setModels('');
 		formData.setValue('containersAndFederations', []);
 	}, [project]);
+
+	useEffect(() => {
+		const subscriptions = containersAndFederations.flatMap((modelId) => {
+			if (isFed(modelId)) {
+				return [
+					enableRealtimeFederationNewTicket(teamspace, project, modelId),
+					enableRealtimeFederationUpdateTicket(teamspace, project, modelId),
+				];
+			}
+			return [
+				enableRealtimeContainerNewTicket(teamspace, project, modelId),
+				enableRealtimeContainerUpdateTicket(teamspace, project, modelId),
+			];
+		});
+		return combineSubscriptions(...subscriptions)
+	}, [containersAndFederations]);
 
 	useEffect(() => {
 		dispatch(JobsActions.fetchJobs(teamspace));
