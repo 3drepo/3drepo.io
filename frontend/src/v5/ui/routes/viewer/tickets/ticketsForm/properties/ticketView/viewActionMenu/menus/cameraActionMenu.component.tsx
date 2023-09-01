@@ -20,6 +20,7 @@ import { FormattedMessage } from 'react-intl';
 import { Camera } from '@/v5/store/tickets/tickets.types';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
+import { isViewer } from '@/v5/ui/routes/routes.constants';
 import { EllipsisMenuItemDelete } from '../../../ticketImageContent/ticketImageAction/ticketImageAction.styles';
 import { ViewActionMenu } from '../viewActionMenu.component';
 
@@ -39,12 +40,12 @@ export const CameraActionMenu = ({
 	disabled,
 }: ICameraActionMenu) => (
 	<ViewActionMenu
-		disabled={!value}
+		disabled={!value || !isViewer()}
 		onClick={onGoTo}
 		Icon={CameraIcon}
 		title={<FormattedMessage id="viewer.card.ticketView.actionMenu.camera" defaultMessage="Camera" />}
 	>
-		<EllipsisMenu disabled={disabled && !value}>
+		<EllipsisMenu disabled={(disabled && !value) || !isViewer()}>
 			<EllipsisMenuItem
 				hidden={!!value}
 				title={(<FormattedMessage id="viewer.card.ticketView.action.saveCamera" defaultMessage="Save camera" />)}

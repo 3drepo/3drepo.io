@@ -38,7 +38,7 @@ export const TicketImageActionMenu = ({ value, onChange, disabled = false }) => 
 
 	return (
 		<ViewActionMenu
-			disabled={!value}
+			disabled={!value || disabled}
 			onClick={() => DialogsActionsDispatchers.open('images', { images: [value] })}
 			Icon={FileIcon}
 			title={<FormattedMessage id="viewer.card.ticketView.actionMenu.image" defaultMessage="Image" />}

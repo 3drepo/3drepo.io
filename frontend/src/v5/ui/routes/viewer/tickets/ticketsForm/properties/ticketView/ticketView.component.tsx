@@ -29,6 +29,7 @@ import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { formatMessage } from '@/v5/services/intl';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { getViewerState, goToView } from '@/v5/helpers/viewpoint.helpers';
+import { isViewer } from '@/v5/ui/routes/routes.constants';
 import { TicketContext, TicketDetailsView } from '../../../ticket.context';
 import { TicketImageContent } from '../ticketImageContent/ticketImageContent.component';
 import { TicketImageActionMenu } from '../ticketImageContent/ticketImageActionMenu.component';
@@ -52,7 +53,7 @@ export const TicketView = ({
 	value,
 	onBlur,
 	onChange,
-	disabled,
+	disabled: inputDisabled,
 	helperText,
 	label,
 	required,
@@ -60,6 +61,7 @@ export const TicketView = ({
 }: ITicketView) => {
 	const context = useContext(TicketContext);
 	const hasViewpoint = value?.camera;
+	const disabled = inputDisabled || !isViewer();
 
 	// Viewpoint
 	const updateViewpoint = async () => {
@@ -113,7 +115,7 @@ export const TicketView = ({
 			<Header>
 				<Label>{label}</Label>
 				<HeaderSection>
-					{!hasViewpoint ? (
+					{(isViewer() && !hasViewpoint) && (
 						<Tooltip title={(formatMessage({ id: 'viewer.card.button.saveCurrentView', defaultMessage: 'Save current view' }))}>
 							<div hidden={disabled}>
 								<PrimaryTicketButton onClick={updateViewpoint}>
@@ -121,7 +123,8 @@ export const TicketView = ({
 								</PrimaryTicketButton>
 							</div>
 						</Tooltip>
-					) : (
+					)}
+					{(isViewer() && hasViewpoint) && (
 						<Tooltip title={(formatMessage({ id: 'viewer.card.button.gotToView', defaultMessage: 'Go to view' }))}>
 							<div>
 								<PrimaryTicketButton onClick={goToViewpoint}>
@@ -130,7 +133,7 @@ export const TicketView = ({
 							</div>
 						</Tooltip>
 					)}
-					<EllipsisMenu disabled={!hasViewpoint}>
+					<EllipsisMenu disabled={!hasViewpoint || !isViewer()}>
 						<EllipsisMenuItem
 							hidden={!hasViewpoint}
 							title={(<FormattedMessage id="viewer.card.ticketView.action.updateViewpoint" defaultMessage="Update to current view" />)}

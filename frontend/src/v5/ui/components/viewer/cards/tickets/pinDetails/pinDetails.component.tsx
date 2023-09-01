@@ -27,12 +27,14 @@ import { theme } from '@/v5/ui/themes/theme';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
+import { isViewer } from '@/v5/ui/routes/routes.constants';
 import { PinAction, PinActions, PinName, SettingLocationText } from './pinDetails.styles';
 
-export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
+export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText, disabled: inputDisabled, name }: FormInputProps) => {
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
 	const pinId = name;
+	const disabled = inputDisabled || !isViewer();
 
 	const cancelEdit = () => {
 		if (!editMode) return;
