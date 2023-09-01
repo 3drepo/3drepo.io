@@ -85,7 +85,7 @@ export const NewTicketSlide = ({ ticket, modelId, template, onSave }: NewTicketS
 	return (
 		<form onSubmit={formData.handleSubmit(onSubmit)}>
 			<FormProvider {...formData}>
-				<TicketForm template={getEditableProperties(template)} ticket={ticket} />
+				<TicketForm template={getEditableProperties(template)} ticket={defaultValues} />
 			</FormProvider>
 			<SaveButton disabled={!formData.formState.isValid}>
 				<FormattedMessage id="ticketsTable.button.saveTicket" defaultMessage="Save ticket" />
