@@ -18,6 +18,7 @@
 import styled, { css } from 'styled-components';
 import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { hexToOpacity } from '@/v5/ui/themes/theme';
 import * as RevisionsListHeaderLabelStyles from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.styles';
 
 const BORDER_RADIUS = '8px';
@@ -137,7 +138,7 @@ export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected
 	}
 
 	&:hover {
-		background-color: ${({ theme }) => theme.palette.secondary.main};
+		background-color: ${({ theme }) => hexToOpacity(theme.palette.secondary.main, 50)};
 	}
 
 	${({ theme, selected }) => selected && css`
@@ -145,7 +146,7 @@ export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected
 		border-left-color: ${theme.palette.primary.main};
 	`}
 	
-	// Left side connecting line styles
+	/* Left side connecting line styles */
 	${({ isSingle }) => css`${isSingle ? singleRevisionListItemStyles : revisionListItemStylesLineStyles}`}
 	&:first-of-type:after {
 		border-top-left-radius: 10px;
