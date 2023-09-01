@@ -21,14 +21,18 @@ import { ActionMenu, ActionMenuItem } from '@controls/actionMenu';
 import { ActionMenuProps } from '@controls/actionMenu/actionMenu.component';
 import { FormattedMessage } from 'react-intl';
 import { MenuList, MenuItem } from '@mui/material';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { Label } from './newTicketMenu.styles';
 
 type NewTicketMenuProps = Omit<ActionMenuProps, 'children'> & {
 	onContainerOrFederationClick: (id: string) => void;
 };
 export const NewTicketMenu = ({ onContainerOrFederationClick, ...props }: NewTicketMenuProps) => {
+	const [models] = useSearchParam('models');
 	const containers = ContainersHooksSelectors.selectContainers();
 	const federations = FederationsHooksSelectors.selectFederations();
+
+	const selectableModels = [...containers, ...federations].filter(({ _id }) => models?.includes(_id));
 
 	return (
 		<ActionMenu {...props} PopoverProps={{ style: { maxHeight: 400 } }}>
@@ -36,7 +40,7 @@ export const NewTicketMenu = ({ onContainerOrFederationClick, ...props }: NewTic
 				<Label onClick={(e) => e.preventDefault()}>
 					<FormattedMessage id="ticketTable.newTicket.select" defaultMessage="Select a Federation or Container" />
 				</Label>
-				{sortByName([...containers, ...federations]).map(({ _id, name }) => (
+				{sortByName(selectableModels).map(({ _id, name }) => (
 					<ActionMenuItem key={_id}>
 						<MenuItem onClick={() => onContainerOrFederationClick(_id)}>
 							{name}
