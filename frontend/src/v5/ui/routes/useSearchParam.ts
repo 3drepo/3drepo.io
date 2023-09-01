@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 export const useSearchParam = (name: string) => {
 	const history = useHistory();
-	const location = useLocation();
-	const searchParams = new URLSearchParams(location.search);
-	const value = searchParams.get(name);
+	const { location } = window;
+	const value = new URLSearchParams(location.search).get(name);
 
 	const setParam = (newValue = '') => {
+		const searchParams = new URLSearchParams(location.search);
 		if (newValue) {
 			searchParams.set(name, newValue);
 		} else {
@@ -32,5 +32,5 @@ export const useSearchParam = (name: string) => {
 		history.replace({ search: searchParams.toString() });
 	};
 
-	return [value, setParam] as [string, (val: string) => void];
+	return [value, setParam] as [string, (val?: string) => void];
 };

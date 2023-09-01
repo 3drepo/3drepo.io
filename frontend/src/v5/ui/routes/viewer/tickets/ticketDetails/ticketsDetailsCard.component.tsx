@@ -44,7 +44,8 @@ export const TicketDetailsCard = () => {
 
 	const isFederation = modelIsFederation(containerOrFederation);
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
-	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const ticket = tickets.find((t) => t._id === ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	const defaultView = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 
@@ -89,14 +90,6 @@ export const TicketDetailsCard = () => {
 	};
 
 	useEffect(() => {
-		TicketsActionsDispatchers.fetchTicket(
-			teamspace,
-			project,
-			containerOrFederation,
-			ticket._id,
-			isFederation,
-		);
-
 		if (!templateAlreadyFetched(template)) {
 			TicketsActionsDispatchers.fetchTemplate(
 				teamspace,
@@ -125,7 +118,7 @@ export const TicketDetailsCard = () => {
 	}, [JSON.stringify(defaultView?.state)]);
 
 	useEffect(() => () => {
-		setTicketId('');
+		setTicketId();
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
 	}, []);
 
