@@ -16,7 +16,6 @@
  */
 import styled, { css } from 'styled-components';
 import { LabelButton } from '@controls/button';
-import { hexToOpacity } from '@/v5/ui/themes/theme';
 
 export const Container = styled.div`
 	min-width: 70px;
@@ -24,20 +23,31 @@ export const Container = styled.div`
 	right: 60px;
 `;
 
+const activeStyles = css`
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	color: ${({ theme }) => theme.palette.primary.main};
+`;
+
+const voidStyles = css`
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	border: 1px solid ${({ theme }) => theme.palette.primary.contrast};
+	background-color: transparent;
+`;
+
 export const Button = styled(LabelButton)<{ $isVoid: boolean }>`
 	margin: 0;
 	height: 26px;
 	width: 100%;
-	color: ${({ theme }) => theme.palette.primary.main};
-
+	${activeStyles}
+	
 	&:hover {
-		border-color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 50)};
-		color: ${({ theme }) => theme.palette.primary.main};
+		${voidStyles}
 	}
-
-	${({ theme, $isVoid }) => $isVoid && css`
-		color: ${theme.palette.primary.contrast};
-		background-color: transparent;
-		border: 1px solid currentColor;
+	
+	${({ $isVoid }) => $isVoid && css`
+		${voidStyles}
+		&:hover {
+			${activeStyles}
+		}
 	`};
 `;
