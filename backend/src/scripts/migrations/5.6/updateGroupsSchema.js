@@ -16,14 +16,65 @@
  */
 
 const { v5Path } = require('../../../interop');
+const { bulkWrite } = require('../../../v5/handler/db');
 const { convertFieldToObject } = require('../../../v5/schemas/rules');
 
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { find, updateOne } = require(`${v5Path}/handler/db`);
+const { find } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
+
 /* eslint-disable no-await-in-loop */
+
+const OPERATOR_SYMBOL = {
+	IS: ':',
+	IS_NOT: ': !',
+	CONTAINS: ': *',
+	NOT_CONTAINS: ': ! *',
+	REGEX: ':',
+	EQUALS: '=',
+	NOT_EQUALS: '= !',
+	GT: '>',
+	GTE: '>=',
+	LT: '<',
+	LTE: '<=',
+	IN_RANGE: '',
+	NOT_IN_RANGE: '!',
+};
+
+const OPERATIONS_TYPES = {
+	IS_NOT_EMPTY: 'field',
+	IS_EMPTY: 'field',
+	IS: 'text',
+	IS_NOT: 'text',
+	CONTAINS: 'text',
+	NOT_CONTAINS: 'text',
+	REGEX: 'regex',
+	EQUALS: 'number',
+	NOT_EQUALS: 'number',
+	GT: 'numberComparison',
+	GTE: 'numberComparison',
+	LT: 'numberComparison',
+	LTE: 'numberComparison',
+	IN_RANGE: 'numberRange',
+	NOT_IN_RANGE: 'numberRange',
+};
+
+
+const formatValues = (operatorType, values) => {
+	if (operatorType === 'regex') return `/ ${values} /`;
+	if (operatorType === 'numberRange') return `[ ${values.join(' : ')} ]`;
+	return values ? values.join(', ') : '';
+};
+
+const generateRuleName = ({ field, operator, values }) => {
+	const operatorType = OPERATIONS_TYPES[operator];
+	if (operatorType === 'field') return operator === 'IS_EMPTY' ? `! ${field}` : field;
+
+	const formattedValues = formatValues(operatorType, values);
+	return `${field} ${OPERATOR_SYMBOL[operator]} ${formattedValues}`;
+};
 
 const processCollection = async (teamspace, collection) => {
 	const query = {
@@ -36,15 +87,30 @@ const processCollection = async (teamspace, collection) => {
 	};
 	const projection = { rules: 1 };
 
-	const updatePromises = [];
+	const groupUpdates = [];
 	const groups = await find(teamspace, collection, query, projection);
 
 	groups.forEach((group) => {
-		const formattedRules = group.rules.map(convertFieldToObject);
-		updatePromises.push(updateOne(teamspace, collection, { _id: group._id }, { $set: { rules: formattedRules } }));
+		const formattedRules = group.rules.map(rule => {
+			const formattedRule = { ...rule, name: rule.name ||  generateRuleName(rule)}
+			return convertFieldToObject(formattedRule);
+		});
+
+		groupUpdates.push({
+			updateOne: {
+				filter: { _id: group._id },
+				update: { $set: { rules: formattedRules } },
+			},
+		});
 	});
 
-	await Promise.all(updatePromises);
+	if(groupUpdates.length){
+		try {
+			await bulkWrite(teamspace, collection, groupUpdates);
+		} catch (err) {
+			logger.logError(err);
+		}
+	}
 };
 
 const processTeamspace = async (teamspace) => {
