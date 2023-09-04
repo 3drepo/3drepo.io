@@ -19,7 +19,7 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
-import { OnError, OnSuccess, ProjectId, TeamspaceAndProjectId, TeamspaceProjectAndModel } from '../store.types';
+import { OnError, OnSuccess, ProjectId, TeamspaceAndProjectId } from '../store.types';
 import { IProject } from './projects.types';
 import { ITemplate } from '../tickets/tickets.types';
 import { mergeWithArray } from '../store.helpers';
