@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* eslint-disable security/detect-non-literal-regexp */
-
 const { OPERATORS } = require('../../../../src/v5/models/groups.constants');
 const { src } = require('../../helper/path');
 
@@ -166,11 +164,13 @@ const getFieldTestCases = () => {
 			desc: 'field operator CONTAINS with 1 operand',
 			data: generateRule({ operator: OPERATORS.CONTAINS.name, values: [fieldValues[0]] },
 				OPERATORS.IS.name, values),
+			// eslint-disable-next-line security/detect-non-literal-regexp
 			query: createQuery({ $regex: new RegExp(fieldValues[0]), $options: 'i' }, { $in: values }),
 		},
 		{
 			desc: 'field operator CONTAINS with 1+ operands',
 			data: generateRule({ operator: OPERATORS.CONTAINS.name, values: fieldValues }, OPERATORS.IS.name, values),
+			// eslint-disable-next-line security/detect-non-literal-regexp
 			query: createQuery({ $regex: new RegExp(fieldValues.join('|')), $options: 'i' }, { $in: values }),
 		},
 		{
@@ -181,30 +181,35 @@ const getFieldTestCases = () => {
 		{
 			desc: 'field operator REGEX with 1+ operands',
 			data: generateRule({ operator: OPERATORS.REGEX.name, values: ['(\\w)+$', `(${fieldValues.join('|')})*`] }, OPERATORS.IS.name, values),
+			// eslint-disable-next-line security/detect-non-literal-regexp
 			query: createQuery({ $regex: new RegExp(`((\\w)+$)|((${fieldValues.join('|')})*)`) }, { $in: values }),
 		},
 		{
 			desc: 'field operator STARTS_WITH with 1 operand',
 			data: generateRule({ operator: OPERATORS.STARTS_WITH.name, values: [fieldValues[0]] },
 				OPERATORS.IS.name, values),
+			// eslint-disable-next-line security/detect-non-literal-regexp
 			query: createQuery({ $regex: new RegExp(`^(${fieldValues[0]})`), $options: 'i' }, { $in: values }),
 		},
 		{
 			desc: 'field operator STARTS_WITH with 1+ operands',
 			data: generateRule({ operator: OPERATORS.STARTS_WITH.name, values: fieldValues },
 				OPERATORS.IS.name, values),
+			// eslint-disable-next-line security/detect-non-literal-regexp
 			query: createQuery({ $regex: new RegExp(`^(${fieldValues.join('|')})`), $options: 'i' }, { $in: values }),
 		},
 		{
 			desc: 'field operator ENDS_WITH with 1 operand',
 			data: generateRule({ operator: OPERATORS.ENDS_WITH.name, values: [fieldValues[0]] },
 				OPERATORS.IS.name, values),
+			// eslint-disable-next-line security/detect-non-literal-regexp
 			query: createQuery({ $regex: new RegExp(`.*(${fieldValues[0]})$`), $options: 'i' }, { $in: values }),
 		},
 		{
 			desc: 'field operator ENDS_WITH with 1+ operands',
 			data: generateRule({ operator: OPERATORS.ENDS_WITH.name, values: fieldValues },
 				OPERATORS.IS.name, values),
+			// eslint-disable-next-line security/detect-non-literal-regexp
 			query: createQuery({ $regex: new RegExp(`.*(${fieldValues.join('|')})$`), $options: 'i' }, { $in: values }),
 		},
 		{
@@ -281,8 +286,6 @@ const testGenerateQueriesFromRules = () => {
 		expect(MetaRules.generateQueriesFromRules(rules)).toEqual(expectedData);
 	});
 };
-
-/* eslint-disable security/detect-non-literal-regexp */
 
 describe(determineTestGroup(__filename), () => {
 	testToQuery();

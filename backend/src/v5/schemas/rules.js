@@ -57,7 +57,7 @@ const validateValuesArray = (operators, operator, values) => {
 
 Rules.convertFieldToObject = (rule) => ({
 	...rule,
-	field: typeof rule.field === 'string' ? { operator: OPERATORS.IS.name, values: [rule.field] } : rule.field,
+	field: isString(rule.field) ? { operator: OPERATORS.IS.name, values: [rule.field] } : rule.field,
 });
 
 const ruleSchema = Yup.object().shape({
