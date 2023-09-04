@@ -17,10 +17,9 @@
 
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
-import { enableRealtimeContainerNewTicket, enableRealtimeContainerUpdateTicket, enableRealtimeContainerUpdateTicketGroup, enableRealtimeFederationNewTicket, enableRealtimeFederationUpdateTicket, enableRealtimeFederationUpdateTicketGroup } from '@/v5/services/realtime/ticket.events';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { enableRealtimeContainerUpdateTicket, enableRealtimeFederationUpdateTicket } from '@/v5/services/realtime/ticket.events';
+import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
@@ -34,13 +33,15 @@ import { useParams } from 'react-router-dom';
 
 type TicketSlideProps = {
 	ticketId: string,
-	modelId: string,
 	template: ITemplate,
 };
-export const TicketSlide = ({ modelId, template, ticketId }: TicketSlideProps) => {
-	const { teamspace, project } = useParams<DashboardTicketsParams>();
-	const isFederation = modelIsFederation(modelId);
-	const ticket = TicketsHooksSelectors.selectTicketByIdRaw(modelId, ticketId);
+export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
+	const { teamspace, project, containerOrFederation } = useParams<DashboardTicketsParams>();
+	const isFederation = modelIsFederation(containerOrFederation);
+	const ticket = TicketsHooksSelectors.selectTicketByIdRaw(containerOrFederation, ticketId);
+	const readOnly = isFederation
+		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
+		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
 
 	const formData = useForm({
 		resolver: yupResolver(getValidators(template._id)),
@@ -53,17 +54,23 @@ export const TicketSlide = ({ modelId, template, ticketId }: TicketSlideProps) =
 		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, formData.formState.errors)));
 		sanitizeViewVals(validVals, ticket, template);
 		if (isEmpty(validVals)) return;
-		TicketsActionsDispatchers.updateTicket(teamspace, project, modelId, ticketId, validVals, isFederation);
+		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticketId, validVals, isFederation);
 	};
 
-	useEffect(() => { formData.reset(ticket); }, [ticket]);
-	
-	useEffect(() => (isFederation
-		? enableRealtimeFederationUpdateTicket(teamspace, project, modelId)
-		: enableRealtimeContainerUpdateTicket(teamspace, project, modelId)
-	), [modelId]);
+	useEffect(() => {
+		formData.reset(ticket);
+		TicketsCardActionsDispatchers.setSelectedTicket(ticketId);
+	}, [ticket]);
 
-	if (!templateAlreadyFetched(template)) return (<Loader />);
+	useEffect(() => {
+		if (!containerOrFederation) return null;
+		TicketsCardActionsDispatchers.setReadOnly(readOnly);
+		return isFederation
+			? enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation)
+			: enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation);
+	}, [containerOrFederation]);
+
+	if (!templateAlreadyFetched(template) || !ticket) return (<Loader />);
 
 	return (
 		<FormProvider {...formData}>

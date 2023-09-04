@@ -73,7 +73,7 @@ export const TicketsContent = () => {
 
 	return (
 		<Switch>
-			<Route exact path={`${path}/:template/:groupBy?`}>
+			<Route exact path={`${path}/:template/:groupBy/:containerOrFederation?`}>
 				<TicketsTable />
 			</Route>
 			<Route path={path}>

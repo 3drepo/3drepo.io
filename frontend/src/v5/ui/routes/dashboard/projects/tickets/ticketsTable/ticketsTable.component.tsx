@@ -57,7 +57,8 @@ type FormType = {
 };
 export const TicketsTable = () => {
 	const history = useHistory();
-	const { teamspace, project, groupBy: groupByURLParam, template: templateURLParam } = useParams<DashboardTicketsParams>();
+	const params = useParams<DashboardTicketsParams>();
+	const { teamspace, project, groupBy: groupByURLParam, template: templateURLParam } = params;
 	const [models, setModels] = useSearchParam('models');
 	const { getState, dispatch } = useStore();
 	const formData = useForm<FormType>({
@@ -75,7 +76,7 @@ export const TicketsTable = () => {
 	const [sidePanelModelIdAndTemplate, setSidePanelModelIdAndTemplate] = useState<{ modelId: string, template: ITemplate }>(null);
 	const [sidePanelTicket, setSidePanelTicket] = useState<Partial<ITicket>>(null);
 	const [showCompleted, setShowCompleted] = useState(false);
-	
+
 	const editingTicketId = sidePanelTicket?._id;
 	const templateIsFetched = templateAlreadyFetched(selectedTemplate || {} as any);
 
@@ -84,14 +85,14 @@ export const TicketsTable = () => {
 		return ticketsToShow.filter(({ type }) => type === template);
 	}, [template, ticketsWithModelId, showCompleted]);
 
-	const onSaveTicket = (ticket: ITicket) => onEditTicket(sidePanelModelIdAndTemplate.modelId, ticket);
-
-	const onEditTicket = (modelId: string, ticket: ITicket) => {
+	const onEditTicket = (modelId: string, ticket: Partial<ITicket>) => {
 		setSidePanelModelIdAndTemplate({ modelId, template: selectedTemplate });
 		setSidePanelTicket(ticket);
 	};
 
-	const onNewTicket = (modelId: string, ticket?: Partial<ITicket>) => {
+	const onSaveTicket = (ticketId: string) => onEditTicket(sidePanelModelIdAndTemplate.modelId, { _id: ticketId });
+
+	const onNewTicketClick = (modelId: string, ticket?: Partial<ITicket>) => {
 		setSidePanelModelIdAndTemplate({ modelId, template: selectedTemplate });
 		setSidePanelTicket(ticket);
 	};
@@ -113,7 +114,7 @@ export const TicketsTable = () => {
 			project,
 			containerOrFederation: sidePanelModelIdAndTemplate.modelId,
 		});
-		history.push({ pathname, search: `?ticketId=${sidePanelTicket._id }` });
+		history.push({ pathname, search: `?ticketId=${sidePanelTicket._id}` });
 	};
 
 	const isFed = (modelId) => !!selectFederationById(getState(), modelId);
@@ -130,29 +131,6 @@ export const TicketsTable = () => {
 	}, [containersAndFederations]);
 
 	useEffect(() => {
-		if (templateIsFetched) return;
-		ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);
-	}, [template]);
-
-	useEffect(() => {
-		let newURL = generatePath(TICKETS_ROUTE, {
-			teamspace,
-			project,
-			groupBy: _.snakeCase(groupBy),
-			template,
-		});
-		if (models) {
-			newURL += `?models=${models}`;
-		}
-		history.push(newURL);
-	}, [groupBy, template]);
-
-	useEffect(() => () => {
-		setModels('');
-		formData.setValue('containersAndFederations', []);
-	}, [project]);
-
-	useEffect(() => {
 		const subscriptions = containersAndFederations.flatMap((modelId) => {
 			if (isFed(modelId)) {
 				return [
@@ -165,8 +143,36 @@ export const TicketsTable = () => {
 				enableRealtimeContainerUpdateTicket(teamspace, project, modelId),
 			];
 		});
-		return combineSubscriptions(...subscriptions)
+		return combineSubscriptions(...subscriptions);
 	}, [containersAndFederations]);
+
+	useEffect(() => {
+		if (templateIsFetched) return;
+		ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);
+	}, [template]);
+
+	useEffect(() => {
+		const newURL = generatePath(TICKETS_ROUTE, {
+			...params,
+			groupBy: _.snakeCase(groupBy),
+			template,
+		});
+		history.push(newURL + window.location.search);
+	}, [groupBy, template]);
+
+	useEffect(() => () => {
+		setModels('');
+		formData.setValue('containersAndFederations', []);
+	}, [project]);
+
+	useEffect(() => {
+		const { containerOrFederation, ...newParams } = params;
+		if (sidePanelTicket?._id) {
+			newParams.containerOrFederation = sidePanelModelIdAndTemplate.modelId;
+		}
+		const path = generatePath(TICKETS_ROUTE, newParams);
+		history.replace(path + window.location.search);
+	}, [sidePanelTicket?._id]);
 
 	useEffect(() => {
 		dispatch(JobsActions.fetchJobs(teamspace));
@@ -202,12 +208,12 @@ export const TicketsTable = () => {
 									<FormattedMessage id="ticketsTable.button.newTicket" defaultMessage="New Ticket" />
 								</NewTicketButton>
 							)}
-							onContainerOrFederationClick={onNewTicket}
+							onContainerOrFederationClick={onNewTicketClick}
 						/>
 					</FlexContainer>
 				</FiltersContainer>
 			</FormProvider>
-			<TicketsTableContent onEditTicket={onEditTicket} onNewTicket={onNewTicket} />
+			<TicketsTableContent onEditTicket={onEditTicket} onNewTicket={onNewTicketClick} />
 			<SidePanel open={!!sidePanelModelIdAndTemplate}>
 				<SlidePanelHeader>
 					<OpenInViewerButton disabled={!editingTicketId} onClick={openInViewer}>
@@ -223,7 +229,7 @@ export const TicketsTable = () => {
 				{sidePanelModelIdAndTemplate && (
 					<MuiThemeProvider theme={theme}>
 						{editingTicketId && (<TicketSlide ticketId={sidePanelTicket._id} {...sidePanelModelIdAndTemplate} />)}
-						{!editingTicketId && (<NewTicketSlide ticket={sidePanelTicket} {...sidePanelModelIdAndTemplate} onSave={onSaveTicket} />)}
+						{!editingTicketId && (<NewTicketSlide defaultValue={sidePanelTicket} {...sidePanelModelIdAndTemplate} onSave={onSaveTicket} />)}
 					</MuiThemeProvider>
 				)}
 			</SidePanel>
