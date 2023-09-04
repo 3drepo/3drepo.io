@@ -58,7 +58,7 @@ export const TicketsTableRow = ({ ticket, onClick }: TicketsTableRowProps) => {
 	} = getPropertiesInCamelCase(modules?.safetibase || {});
 
 	const hasProperties = template?.config?.issueProperties;
-	const hasSafetibase = template?.modules?.some(({ type }) => type === 'safetibase');
+	const hasSafetibase = template?.modules?.some((module) => module.type === 'safetibase');
 
 	const handleClick = (e) => {
 		e.preventDefault();
