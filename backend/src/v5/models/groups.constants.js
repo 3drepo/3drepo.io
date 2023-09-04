@@ -18,32 +18,31 @@
 const GroupsConstants = {};
 
 const COMMON_OPERATORS = {
-	IS: { name: 'IS', valuesNumber: 1 },
-	CONTAINS: { name: 'CONTAINS', valuesNumber: 1 },
-	REGEX: { name: 'REGEX', valuesNumber: 1 },
+	IS: { name: 'IS', minValues: 1 },
+	CONTAINS: { name: 'CONTAINS', minValues: 1 },
+	REGEX: { name: 'REGEX', minValues: 1, maxValues: 1 },
 };
 
 GroupsConstants.FIELD_NAME_OPERATORS = {
 	...COMMON_OPERATORS,
-	STARTS_WITH: { name: 'STARTS_WITH', valuesNumber: 1 },
-	ENDS_WITH: { name: 'ENDS_WITH', valuesNumber: 1 },
-
+	STARTS_WITH: { name: 'STARTS_WITH', minValues: 1 },
+	ENDS_WITH: { name: 'ENDS_WITH', minValues: 1 },
 };
 
 GroupsConstants.FIELD_VALUE_OPERATORS = {
 	...COMMON_OPERATORS,
-	IS_NOT: { name: 'IS_NOT', valuesNumber: 1 },
-	NOT_CONTAINS: { name: 'NOT_CONTAINS', valuesNumber: 1 },
-	IS_EMPTY: { name: 'IS_EMPTY', valuesNumber: 0 },
-	IS_NOT_EMPTY: { name: 'IS_NOT_EMPTY', valuesNumber: 0 },
-	EQUALS: { name: 'EQUALS', valuesNumber: 1, isNumber: true },
-	NOT_EQUALS: { name: 'NOT_EQUALS', valuesNumber: 1, isNumber: true },
-	GT: { name: 'GT', valuesNumber: 1, isNumber: true },
-	GTE: { name: 'GTE', valuesNumber: 1, isNumber: true },
-	LT: { name: 'LT', valuesNumber: 1, isNumber: true },
-	LTE: { name: 'LTE', valuesNumber: 1, isNumber: true },
-	IN_RANGE: { name: 'IN_RANGE', valuesNumber: 2, isNumber: true },
-	NOT_IN_RANGE: { name: 'NOT_IN_RANGE', valuesNumber: 2, isNumber: true },
+	IS_NOT: { name: 'IS_NOT', minValues: 1 },
+	NOT_CONTAINS: { name: 'NOT_CONTAINS', minValues: 1 },
+	IS_EMPTY: { name: 'IS_EMPTY', minValues: 0, maxValues: 0 },
+	IS_NOT_EMPTY: { name: 'IS_NOT_EMPTY', minValues: 0, maxValues: 0 },
+	EQUALS: { name: 'EQUALS', minValues: 1, isNumber: true },
+	NOT_EQUALS: { name: 'NOT_EQUALS', minValues: 1, isNumber: true },
+	GT: { name: 'GT', minValues: 1, isNumber: true },
+	GTE: { name: 'GTE', minValues: 1, isNumber: true },
+	LT: { name: 'LT', minValues: 1, isNumber: true },
+	LTE: { name: 'LTE', minValues: 1, isNumber: true },
+	IN_RANGE: { name: 'IN_RANGE', minValues: 2, isNumber: true, isRange: true },
+	NOT_IN_RANGE: { name: 'NOT_IN_RANGE', minValues: 2, isNumber: true, isRange: true },
 };
 
 GroupsConstants.OPERATORS = {

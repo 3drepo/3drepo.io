@@ -20,39 +20,30 @@ const { isNumber, isString } = require('../utils/helper/typeCheck');
 const Yup = require('yup');
 
 const ruleParametersTypeCheck = (operator, values) => {
-	switch (operator) {
-	case FIELD_VALUE_OPERATORS.IS.name:
-	case FIELD_VALUE_OPERATORS.IS_NOT.name:
-	case FIELD_VALUE_OPERATORS.CONTAINS.name:
-	case FIELD_VALUE_OPERATORS.NOT_CONTAINS.name:
-	case FIELD_VALUE_OPERATORS.REGEX.name:
-	case FIELD_NAME_OPERATORS.STARTS_WITH.name:
-	case FIELD_NAME_OPERATORS.ENDS_WITH.name:
-		return values.every(isString);
-	case FIELD_VALUE_OPERATORS.EQUALS.name:
-	case FIELD_VALUE_OPERATORS.NOT_EQUALS.name:
-	case FIELD_VALUE_OPERATORS.GT.name:
-	case FIELD_VALUE_OPERATORS.GTE.name:
-	case FIELD_VALUE_OPERATORS.LT.name:
-	case FIELD_VALUE_OPERATORS.LTE.name:
-		return values.every(isNumber);
-	default:
-		// range checks
+	if (operator.isRange) {
 		return values.length % 2 === 0 && values.every(isNumber);
+	} else if (operator.isNumber) {
+		return values.every(isNumber);
+	} else {
+		return values.every(isString);
 	}
 };
 
 const Rules = {};
 
-const validateValuesArray = (operators, operator, values) => {
-	const nParams = operators[operator].valuesNumber;
+const validateValuesArray = (operatorName, values) => {
+	const operator = OPERATORS[operatorName];
+	const minValues= operator.minValues;
+	const maxValues = operator.maxValues;
+
 	const arrLength = (values || []).length;
 
-	if (nParams === 0 && arrLength === 0) {
+	if (maxValues === 0 && arrLength === 0) {
 		return true;
 	}
 
-	return (nParams <= arrLength) && ruleParametersTypeCheck(operator, values);
+	return arrLength >= minValues && (!maxValues || arrLength <= maxValues) && 
+			ruleParametersTypeCheck(operator, values);
 };
 
 Rules.convertFieldToObject = (rule) => ({
@@ -75,18 +66,18 @@ const ruleSchema = Yup.object().shape({
 })
 	.noUnknown()
 	.transform((value) => {
-		const nParams = FIELD_VALUE_OPERATORS[value.operator].valuesNumber;
+		const { maxValues } = OPERATORS[value.operator];
 		const res = { ...value };
-		if (nParams === 0) {
+		if (maxValues === 0) {
 			delete res.values;
 		}
 		return res;
 	})
 	.transform(Rules.convertFieldToObject)
 	.test('Rules validation', 'values field is not valid with the operator selected',
-		(value) => validateValuesArray(FIELD_VALUE_OPERATORS, value.operator, value.values))
+		(value) => validateValuesArray(value.operator, value.values))
 	.test('Field rules validation', 'field values field is not valid with the field operator selected',
-		(value) => validateValuesArray(FIELD_NAME_OPERATORS, value.field.operator, value.field.values));
+		(value) => validateValuesArray(value.field.operator, value.field.values));
 
 Rules.schema = Yup.array().of(ruleSchema).min(1);
 

@@ -97,55 +97,62 @@ const testValidateGroupsImportData = () => {
 
 	const numberRule = {
 		name: generateRandomString(),
-		field: 'abc',
+		field: { operator: 'IS', values:[generateRandomString()] },
 		operator: OPERATORS.EQUALS.name,
 		values: [2, 4],
 	};
 
 	const rangeRule = {
 		name: generateRandomString(),
-		field: 'abcd',
+		field: { operator: 'IS', values:[generateRandomString()] },
 		operator: OPERATORS.IN_RANGE.name,
 		values: [2, 4, 5, 7],
 	};
 
 	const noNameRule = {
-		field: 'abc',
+		field: { operator: 'IS', values:[generateRandomString()] },
 		operator: OPERATORS.IS_EMPTY.name,
 	};
 
 	const existRule = {
 		name: generateRandomString(),
-		field: 'abc',
+		field: { operator: 'IS', values:[generateRandomString()] },
 		operator: OPERATORS.IS_EMPTY.name,
 	};
 
 	const badExistRule = {
 		name: generateRandomString(),
-		field: 'abcdef',
+		field: { operator: 'IS', values:[generateRandomString()] },
 		operator: OPERATORS.IS_EMPTY.name,
 		values: [2, 4, 3],
 	};
 
 	const badRangeRule = {
 		name: generateRandomString(),
-		field: 'abc1',
+		field: { operator: 'IS', values:[generateRandomString()] },
 		operator: OPERATORS.IN_RANGE.name,
 		values: [2, 4, 3],
 	};
 
 	const badRule = {
 		name: generateRandomString(),
-		field: 'abc2',
+		field: { operator: 'IS', values:[generateRandomString()] },
 		operator: OPERATORS.EQUALS.name,
 		values: ['a', 'b'],
 	};
 
 	const wrongTypedRule = {
 		name: generateRandomString(),
-		field: 'abc3',
+		field: { operator: 'IS', values:[generateRandomString()] },
 		operator: OPERATORS.EQUALS.name,
 		values: ['2', '4'],
+	};
+
+	const regexWithMoreThan1Values = {
+		name: generateRandomString(),
+		field: { operator: 'IS', values:[generateRandomString()] },
+		operator: OPERATORS.REGEX.name,
+		values: [generateRandomString(), generateRandomString()],
 	};
 
 	describe.each([
@@ -167,6 +174,7 @@ const testValidateGroupsImportData = () => {
 		[{ body: { groups: [{ ...ruleGroup, rules: [...ruleGroup.rules, badRule, numberRule] }] } }, false, 'multiple rules where one is bad'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [badRule] }] } }, false, 'rule with invalidParameters'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [wrongTypedRule] }] } }, false, 'rule with wrong typed parameters'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [regexWithMoreThan1Values] }] } }, false, 'regex with more than 1 values'],
 		[{ body: { groups: [{ ...ifcGroup, objects: [] }] } }, false, 'with empty objects'],
 		[{ body: { groups: [{ ...ruleGroup, description: '123' }] } }, true, 'with description'],
 		[{ body: { groups: [_.omit(ruleGroup, ['updatedBy, updatedAt'])] } }, true, 'without updatedAt and updatedBy'],
