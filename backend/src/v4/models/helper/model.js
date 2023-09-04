@@ -658,7 +658,7 @@ async function isSubModel(account, model) {
 
 	const query = {$or: [
 		{ subModels: model },
-		{ "subModels.id": model }
+		{ "subModels._id": model }
 	]};
 
 	return (await findModelSettings(account, query)).length > 0;

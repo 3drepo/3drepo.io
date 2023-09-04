@@ -68,7 +68,7 @@ const federationSettings = {
 			code: 'FED1',
 		},
 		status: 'ok',
-		subModels: [{ id: 'container1', group: generateRandomString() }, { id: 'container2' }],
+		subModels: [{ _id: 'container1', group: generateRandomString() }, { _id: 'container2' }],
 		defaultView: 2,
 		defaultLegend: 3,
 		permissions: [1, 2, 3],
@@ -335,7 +335,7 @@ const testGetTicketGroupById = () => {
 		test('Should retrieve containers then call the general getTicketGroupById', async () => {
 			const containers = [generateRandomString(), generateRandomString()];
 
-			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: containers.map((id) => ({ id })) });
+			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: containers.map((_id) => ({ _id })) });
 
 			const expectedData = generateRandomObject();
 			const fn = jest.spyOn(TicketGroup, 'getTicketGroupById').mockResolvedValueOnce(expectedData);

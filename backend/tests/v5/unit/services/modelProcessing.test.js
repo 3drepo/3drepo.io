@@ -84,7 +84,7 @@ const testQueueFederationUpdate = () => {
 		const teamspace = generateRandomString();
 		const federation = generateRandomString();
 		const data = {
-			containers: times(4, () => ({ id: generateUUIDString(), group: generateRandomString() })),
+			containers: times(4, () => ({ _id: generateUUIDString(), group: generateRandomString() })),
 			owner: generateRandomString(),
 		};
 

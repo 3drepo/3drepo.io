@@ -79,7 +79,7 @@ Models.getModelByQuery = async (ts, query, projection) => {
 	if (res.subModels) {
 		res.subModels = res.subModels.map((value) => {
 			if (isString(value)) {
-				return { id: value };
+				return { _id: value };
 			}
 
 			return value;
@@ -163,7 +163,7 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, u
 			 *  containers used to be called models in v4, and models used to be called
 			 *  projects. This data came from 3drepobouncer, which still calls containers projects.
 			 */
-			set.subModels = containers.map(({ project: id, group }) => deleteIfUndefined({ id, group }));
+			set.subModels = containers.map(({ project: _id, group }) => deleteIfUndefined({ _id, group }));
 		}
 	} else {
 		set.status = 'failed';

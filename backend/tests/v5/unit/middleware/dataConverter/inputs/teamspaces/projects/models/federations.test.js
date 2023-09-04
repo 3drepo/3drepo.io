@@ -65,9 +65,9 @@ const testValidateNewRevisionData = () => {
 	});
 	describe.each([
 		['Request with valid data (old schema)', createBody(times(3, () => generateUUIDString()))],
-		['Request with valid data (new schema)', createBody(times(3, () => ({ id: generateUUIDString() })))],
+		['Request with valid data (new schema)', createBody(times(3, () => ({ _id: generateUUIDString() })))],
 		['Request with valid data (new schema with groups)', createBody(times(3, () => ({
-			id: generateUUIDString(),
+			_id: generateUUIDString(),
 			group: generateRandomString(),
 		})))],
 		['Request with invalid model Ids (wrong type)', createBody([1, 2, 3]), true],

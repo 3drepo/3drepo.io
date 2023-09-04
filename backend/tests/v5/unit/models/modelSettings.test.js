@@ -93,7 +93,7 @@ const testGetFederationById = () => {
 
 			const res = await Model.getFederationById('someTS', 'someFederation');
 			expect(res).toEqual({ ...expectedData,
-				subModels: expectedData.subModels.map((id) => ({ id })),
+				subModels: expectedData.subModels.map((_id) => ({ _id })),
 			});
 		});
 
@@ -101,7 +101,7 @@ const testGetFederationById = () => {
 			const expectedData = {
 				_id: 'abc',
 				name: 'federation name',
-				subModels: times(4, () => ({ id: generateUUIDString(), group: generateRandomString() })),
+				subModels: times(4, () => ({ _id: generateUUIDString(), group: generateRandomString() })),
 			};
 			DBHandler.findOne.mockResolvedValueOnce(expectedData);
 
@@ -475,7 +475,7 @@ const testNewRevisionProcessed = () => {
 				const action = DBHandler.updateOne.mock.calls[0][3];
 				expect(action.$set.status).toBe(undefined);
 				expect(action.$set).toHaveProperty('timestamp');
-				expect(action.$set.subModels).toEqual(containers.map((containerId) => ({ id: containerId })));
+				expect(action.$set.subModels).toEqual(containers.map((containerId) => ({ _id: containerId })));
 
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 
@@ -532,7 +532,7 @@ const testNewRevisionProcessed = () => {
 				const action = DBHandler.updateOne.mock.calls[0][3];
 				expect(action.$set.status).toBe(undefined);
 				expect(action.$set).toHaveProperty('timestamp');
-				expect(action.$set.subModels).toEqual(containerData.map(({ project: id, group }) => ({ id, group })));
+				expect(action.$set.subModels).toEqual(containerData.map(({ project: _id, group }) => ({ _id, group })));
 
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 

@@ -35,7 +35,7 @@ const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGro
 Federations.getTicketGroupById = async (teamspace, project, federation, revId, ticket, groupId) => {
 	const { subModels: containers } = await getFederationById(teamspace, federation, { subModels: 1 });
 	return TicketGroups.getTicketGroupById(teamspace, project, federation, revId,
-		ticket, groupId, containers ? containers.map(({ id }) => id) : undefined);
+		ticket, groupId, containers ? containers.map(({ _id }) => _id) : undefined);
 };
 
 Federations.addFederation = (teamspace, project, federation) => addModel(teamspace, project,
@@ -89,7 +89,7 @@ Federations.getFederationStats = async (teamspace, federation) => {
 	const [issueCount, riskCount, lastUpdates] = await Promise.all([
 		getIssuesCount(teamspace, federation),
 		getRisksCount(teamspace, federation),
-		getLastUpdatesFromModels(teamspace, containers ? containers.map(({ id }) => id) : containers),
+		getLastUpdatesFromModels(teamspace, containers ? containers.map(({ _id }) => _id) : containers),
 	]);
 
 	return {

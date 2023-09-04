@@ -33,7 +33,7 @@ Containers.canDeleteContainer = async (req, res, next) => {
 		// Support old schema, to remove in 5.8.0
 		const query = { $or: [
 			{ subModels: container },
-			{ 'subModels.id': container },
+			{ 'subModels._id': container },
 		] };
 
 		const fed = await getModelByQuery(teamspace, query, { _id: 1, name: 1 }).catch(() => {});

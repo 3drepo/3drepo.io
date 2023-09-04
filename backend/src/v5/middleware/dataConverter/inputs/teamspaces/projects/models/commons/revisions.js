@@ -105,11 +105,11 @@ const validateContainerRevisionUpload = async (req, res, next) => {
 
 const validateFederationRevisionUpload = async (req, res, next) => {
 	const containerEntry = Yup.object({
-		id: YupHelper.types.id.required(),
+		_id: YupHelper.types.id.required(),
 		group: YupHelper.types.strings.title,
 	}).transform((v, oldVal) => {
 		if (isString(oldVal)) {
-			return { id: oldVal };
+			return { _id: oldVal };
 		}
 		return v;
 	});
@@ -118,12 +118,12 @@ const validateFederationRevisionUpload = async (req, res, next) => {
 			.test('containers-validation', 'Containers must exist within the same project', (value) => {
 				const { teamspace, project } = req.params;
 				return value?.length
-					&& modelsExistInProject(teamspace, project, value.map((v) => v?.id)).catch(() => false);
+					&& modelsExistInProject(teamspace, project, value.map((v) => v?._id)).catch(() => false);
 			})
 			.test('containers-validation', 'IDs provided cannot be of type federation', async (value) => {
 				if (value?.length) {
 					const { teamspace } = req.params;
-					const foundContainers = await getContainers(teamspace, value.map((v) => v?.id), { _id: 1 });
+					const foundContainers = await getContainers(teamspace, value.map((v) => v?._id), { _id: 1 });
 					return foundContainers?.length === value?.length;
 				}
 				return false;

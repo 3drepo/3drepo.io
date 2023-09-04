@@ -777,7 +777,7 @@ async function _createAccounts(roles, userName) {
 					fed.subModels = fed.subModels.map(subModel => {
 						// backwards compatibility - we changed it from [{model: xyz}] to [xyz]
 						// 5.6 - we changed it from [xyz] to [{id: xyz}]
-						const subModelId = subModel?.model || subModel?.id || subModel;
+						const subModelId = subModel?.model || subModel?._id || subModel;
 						const foundModel = allModels.find(m => m.model === subModelId);
 						return { database: _account.account, model: subModelId, name: foundModel?.name};
 					});
