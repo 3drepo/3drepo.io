@@ -179,12 +179,6 @@ const getFieldTestCases = () => {
 			query: createQuery({ $regex: new RegExp('((\\w)+$)') }, { $in: values }),
 		},
 		{
-			desc: 'field operator REGEX with 1+ operands',
-			data: generateRule({ operator: OPERATORS.REGEX.name, values: ['(\\w)+$', `(${fieldValues.join('|')})*`] }, OPERATORS.IS.name, values),
-			// eslint-disable-next-line security/detect-non-literal-regexp
-			query: createQuery({ $regex: new RegExp(`((\\w)+$)|((${fieldValues.join('|')})*)`) }, { $in: values }),
-		},
-		{
 			desc: 'field operator STARTS_WITH with 1 operand',
 			data: generateRule({ operator: OPERATORS.STARTS_WITH.name, values: [fieldValues[0]] },
 				OPERATORS.IS.name, values),

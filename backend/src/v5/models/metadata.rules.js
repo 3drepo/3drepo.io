@@ -81,9 +81,8 @@ const getFieldClause = (rule) => {
 	}
 		break;
 	case OPERATORS.REGEX.name: {
-		const regexArr = values.map((val) => `(${val})`);
 		// eslint-disable-next-line security/detect-non-literal-regexp
-		fieldClause = { $regex: new RegExp(regexArr.join('|')) };
+		fieldClause = { $regex: new RegExp(`(${values[0]})`) };
 	}
 		break;
 	default:
