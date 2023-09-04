@@ -22,3 +22,14 @@ export const SaveButton = styled(SubmitButton)`
 	margin: 9px 15px;
 	width: fit-content;
 `;
+
+export const RequiresViewerContainer = styled.div`
+	padding: 27px;
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	place-items: center;
+	text-align: center;
+	${({ theme }) => theme.typography.h5}
+`;

@@ -28,7 +28,7 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { merge } from 'lodash';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
-import { SaveButton } from './newTicketSlide.styles';
+import { SaveButton, RequiresViewerContainer } from './newTicketSlide.styles';
 
 const getGroupDefaultValue = (template, ticket) => {
 	let defaultValues = getDefaultTicket(template);
@@ -36,20 +36,26 @@ const getGroupDefaultValue = (template, ticket) => {
 	if ((defaultValues.modules?.safetibase && ticket?.modules?.safetibase) || (defaultValues.properties && ticket?.properties)) {
 		defaultValues = merge(defaultValues, ticket);
 	}
-	
+
 	return defaultValues;
 };
 
+const hasRequiredViewerProperties = (template) => {
+	const modules = template.modules?.flatMap((module) => module.properties) || [];
+	const properties = modules.concat(template.properties || []);
+	return properties.some(({ required, type }) => required && ['view', 'coords', 'image'].includes(type));
+};
+
 type NewTicketSlideProps = {
-	ticket?: Partial<ITicket>,
+	defaultValue?: Partial<ITicket>,
 	modelId: string,
 	template: ITemplate,
-	onSave: (newTicket) => void,
+	onSave: (newTicketId: string) => void,
 };
-export const NewTicketSlide = ({ ticket, modelId, template, onSave }: NewTicketSlideProps) => {
+export const NewTicketSlide = ({ defaultValue, modelId, template, onSave }: NewTicketSlideProps) => {
 	const { teamspace, project } = useParams<DashboardTicketsParams>();
 	const templateIsFetched = templateAlreadyFetched(template || {} as any);
-	const defaultValues = getGroupDefaultValue(template, ticket);
+	const defaultValues = getGroupDefaultValue(template, defaultValue);
 	const isFederation = modelIsFederation(modelId);
 
 	const formData = useForm({
@@ -69,9 +75,7 @@ export const NewTicketSlide = ({ ticket, modelId, template, onSave }: NewTicketS
 			modelId,
 			parsedTicket,
 			isFederation,
-			// TODO - check if this component should be aware of what to pass to the method
-			// other than the id
-			(ticketId) => onSave({ _id: ticketId }),
+			onSave,
 		);
 	};
 
@@ -79,8 +83,19 @@ export const NewTicketSlide = ({ ticket, modelId, template, onSave }: NewTicketS
 		if (!templateIsFetched) return;
 		formData.reset(defaultValues);
 	}, [modelId, templateIsFetched]);
-	
+
 	if (!templateIsFetched) return (<Loader />);
+
+	if (hasRequiredViewerProperties(template)) {
+		return (
+			<RequiresViewerContainer>
+				<FormattedMessage
+					id="ticketsTable.cannotCreate"
+					defaultMessage="The selected template has required properties that must be set in the viewer."
+				/>
+			</RequiresViewerContainer>
+		);
+	}
 
 	return (
 		<form onSubmit={formData.handleSubmit(onSubmit)}>
