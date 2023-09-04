@@ -140,6 +140,7 @@ const getValueTestCases = () => {
 		{
 			desc: 'unknown value operator',
 			data: generateRule(field, 'INDSFDSF', [1000]),
+			error: templates.unknownOperator
 		},
 	];
 
@@ -207,9 +208,10 @@ const getFieldTestCases = () => {
 			query: createQuery({ $regex: new RegExp(`.*(${fieldValues.join('|')})$`), $options: 'i' }, { $in: values }),
 		},
 		{
-			desc: 'field unknown operator',
+			desc: 'unknown field operator',
 			data: generateRule({ operator: generateRandomString(), values: fieldValues },
 				OPERATORS.IS.name, values),
+			error: templates.unknownOperator
 		},
 	];
 
@@ -220,8 +222,8 @@ const testToQuery = () => {
 	const testCases = [...getFieldTestCases(), ...getValueTestCases()];
 
 	describe.each(
-		testCases.map(({ desc, data, query }) => [desc, data, query]),
-	)('Smart rule to query', (desc, data, query) => {
+		testCases.map(({ desc, data, query, error }) => [desc, data, query, error]),
+	)('Smart rule to query', (desc, data, query, error = templates.invalidArguments) => {
 		test(`${desc} ${query ? ' should convert to the expected query' : 'should throw invalid arguments'}`, () => {
 			if (query) {
 				expect(MetaRules.toQuery(data)).toEqual(query);
@@ -229,7 +231,7 @@ const testToQuery = () => {
 				try {
 					expect(MetaRules.toQuery(data)).toEqual(query);
 				} catch (err) {
-					expect(err.code).toEqual(templates.invalidArguments.code);
+					expect(err.code).toEqual(error.code);
 				}
 			}
 		});

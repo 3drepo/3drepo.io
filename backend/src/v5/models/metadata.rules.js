@@ -86,7 +86,7 @@ const getFieldClause = (rule) => {
 	}
 		break;
 	default:
-		throw templates.invalidArguments;
+		throw templates.unknownOperator;
 	}
 
 	return fieldClause;
@@ -142,7 +142,7 @@ const getValueClause = (rule) => {
 		}
 		break;
 	default:
-		throw templates.invalidArguments;
+		throw templates.unknownOperator;
 	}
 
 	return valueClause;
@@ -162,15 +162,11 @@ Rules.toQuery = (rule) => {
 	});
 
 	// We need to capture the 0s and nulls
-	if (valueClause !== undefined) {
-		if (isArray(valueClause)) {
-			return { $or: valueClause.map((v) => createQuery(fieldClause, v)) };
-		}
-
-		return createQuery(fieldClause, valueClause);
+	if (valueClause !== undefined && isArray(valueClause)) {
+		return { $or: valueClause.map((v) => createQuery(fieldClause, v)) };
 	}
 
-	return createQuery(fieldClause);
+	return createQuery(fieldClause, valueClause);
 };
 
 module.exports = Rules;
