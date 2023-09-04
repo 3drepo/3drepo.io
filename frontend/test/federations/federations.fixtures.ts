@@ -21,6 +21,7 @@ import {
 	FederationBackendSettings,
 	FederationSettings,
 	FederationStats,
+	GroupedContainer,
 	IFederation,
 	NewFederation,
 } from '@/v5/store/federations/federations.types';
@@ -63,8 +64,14 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 
 export const prepareMockBaseFederation = ({_id, name, role, isFavourite}: IFederation): Partial<IFederation> => ({_id, name, role, isFavourite});
 
+export const groupedContainerMockFactory = (overrides?: GroupedContainer): GroupedContainer => ({
+	_id: faker.datatype.uuid(),
+	group: faker.random.word(),
+	...overrides
+});
+
 export const prepareMockFederationStatsReply = (federation: IFederation): FederationStats => ({
-	containers: federation.containers,
+	containers: federation.containers.map(groupedContainerMockFactory),
 	tickets: {
 		issues: federation.issues,
 		risks: federation.risks,
@@ -76,8 +83,8 @@ export const prepareMockFederationStatsReply = (federation: IFederation): Federa
 	desc: federation.desc,
 });
 
-export const prepareMockContainers = (min = 1, max = 10): string[] => (
-	times(faker.datatype.number({ max, min }), () => faker.datatype.uuid()) 
+export const prepareMockContainers = (min = 1, max = 10): GroupedContainer[] => (
+	times(faker.datatype.number({ max, min }), () => groupedContainerMockFactory())
 );
 
 export const prepareMockViewsReply = (federation: IFederation): FetchFederationViewsResponse => ({
