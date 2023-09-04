@@ -21,6 +21,7 @@ const { deleteMany, find, findOne, insertMany, updateOne } = require('../handler
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
+const { convertFieldToObject } = require('../schemas/rules');
 
 const Groups = {};
 
@@ -57,6 +58,10 @@ Groups.getGroupById = async (teamspace, project, model, ticket, groupId,
 
 	if (!group) {
 		throw templates.groupNotFound;
+	}
+
+	if(group.rules){
+		group.rules = group.rules.map(convertFieldToObject);
 	}
 
 	return group;

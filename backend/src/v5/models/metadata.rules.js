@@ -77,7 +77,7 @@ const getFieldClause = (rule) => {
 	case OPERATORS.ENDS_WITH.name: {
 		const sanitisedValues = values.map(sanitiseRegex);
 		// eslint-disable-next-line security/detect-non-literal-regexp
-		fieldClause = { $regex: new RegExp(`.*(${sanitisedValues.join('|')})$`), $options: 'i' };
+		fieldClause = { $regex: new RegExp(`(${sanitisedValues.join('|')})$`), $options: 'i' };
 	}
 		break;
 	case OPERATORS.REGEX.name: {

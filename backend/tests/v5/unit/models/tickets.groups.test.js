@@ -224,6 +224,21 @@ const testGetGroupById = () => {
 				{ teamspace, project, model, ticket, _id: groupId }, projection);
 		});
 
+		test('Should convert group rules and return whatever the query returns', async () => {
+			const fieldName = generateRandomString()
+			const expectedData = { ...generateRandomObject(), rules: [{ field: fieldName }]};
+			const projection = generateRandomObject();
+
+			db.findOne.mockResolvedValueOnce(expectedData);
+
+			await expect(Groups.getGroupById(teamspace, project, model, ticket, groupId, projection))
+				.resolves.toEqual({ ...expectedData, rules: [{ field: { operator: 'IS', values: [fieldName] } }]});
+
+			expect(db.findOne).toHaveBeenCalledTimes(1);
+			expect(db.findOne).toHaveBeenCalledWith(teamspace, groupCol,
+				{ teamspace, project, model, ticket, _id: groupId }, projection);
+		});
+
 		test('Should apply the default projection if it was not defined', async () => {
 			const expectedData = generateRandomObject();
 

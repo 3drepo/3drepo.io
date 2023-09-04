@@ -198,14 +198,14 @@ const getFieldTestCases = () => {
 			data: generateRule({ operator: OPERATORS.ENDS_WITH.name, values: [fieldValues[0]] },
 				OPERATORS.IS.name, values),
 			// eslint-disable-next-line security/detect-non-literal-regexp
-			query: createQuery({ $regex: new RegExp(`.*(${fieldValues[0]})$`), $options: 'i' }, { $in: values }),
+			query: createQuery({ $regex: new RegExp(`(${fieldValues[0]})$`), $options: 'i' }, { $in: values }),
 		},
 		{
 			desc: 'field operator ENDS_WITH with 1+ operands',
 			data: generateRule({ operator: OPERATORS.ENDS_WITH.name, values: fieldValues },
 				OPERATORS.IS.name, values),
 			// eslint-disable-next-line security/detect-non-literal-regexp
-			query: createQuery({ $regex: new RegExp(`.*(${fieldValues.join('|')})$`), $options: 'i' }, { $in: values }),
+			query: createQuery({ $regex: new RegExp(`(${fieldValues.join('|')})$`), $options: 'i' }, { $in: values }),
 		},
 		{
 			desc: 'unknown field operator',

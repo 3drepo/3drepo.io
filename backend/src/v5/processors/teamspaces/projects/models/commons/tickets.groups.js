@@ -17,7 +17,6 @@
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
-const { convertFieldToObject } = require('../../../../../schemas/rules');
 const { getFile } = require('../../../../../services/filesManager');
 const { getLatestRevision } = require('../../../../../models/revisions');
 const { getMetadataByRules } = require('../../../../../models/metadata');
@@ -88,7 +87,7 @@ TicketGroups.getTicketGroupById = async (teamspace, project, model, revId, ticke
 	if (group.rules) {
 		const modelsToQuery = containers || [model];
 		const rev = containers ? undefined : revId;
-		group.rules = group.rules.map(convertFieldToObject);
+		
 		group.objects = (await Promise.all(
 			modelsToQuery.map(async (con) => {
 				const objs = await getObjectArrayFromRules(teamspace, project, con, rev, group.rules);
