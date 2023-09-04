@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { OPERATORS } = require('../../../../../../../../../../src/v5/models/groups.constants');
+const { isString } = require('../../../../../../../../../../src/v5/utils/helper/typeCheck');
 const { src } = require('../../../../../../../../helper/path');
 const { generateLegacyGroup, generateRandomString } = require('../../../../../../../../helper/services');
 
@@ -32,8 +34,8 @@ const respondFn = Responder.respond.mockImplementation((req, res, errCode) => er
 const testSerialiseGroupArray = () => {
 	const badRuleCast = generateLegacyGroup('a', 'b', true, false, false);
 	badRuleCast.rules = [{
-		field: { operator: 'IS', values: ['Element ID'] },
-		operator: 'IS_NOT_EMPTY',
+		field: { operator: OPERATORS.IS.name, values: ['Element ID'] },
+		operator: OPERATORS.IS_NOT_EMPTY.name,
 		values: [
 			'',
 		],
@@ -42,10 +44,8 @@ const testSerialiseGroupArray = () => {
 	const stringFieldSchema = generateLegacyGroup('a', 'b', true, false, false);
 	stringFieldSchema.rules = [{
 		field: 'Element ID',
-		operator: 'IS_NOT_EMPTY',
-		values: [
-			generateRandomString(),
-		],
+		operator: OPERATORS.IS_NOT_EMPTY.name,
+		values: [generateRandomString()],
 	}];
 
 	describe.each([
@@ -88,11 +88,11 @@ const testSerialiseGroupArray = () => {
 					if ((group.rules || []).length) {
 						res.rules = group.rules.map((entry) => {
 							const output = { ...entry };
-							if (entry.operator === 'IS_NOT_EMPTY') {
+							if (entry.operator === OPERATORS.IS_NOT_EMPTY.name) {
 								delete output.values;
 							}
-							if (typeof entry.field === 'string') {
-								output.field = { operator: 'IS', values: [entry.field] };
+							if (isString(entry.field)) {
+								output.field = { operator: OPERATORS.IS.name, values: [entry.field] };
 							}
 							return output;
 						});
@@ -112,10 +112,8 @@ const testConvertGroupRules = () => {
 		rules: [{
 			name: generateRandomString(),
 			field: generateRandomString(),
-			operator: 'IS',
-			values: [
-				'1rbbJcnUDEEA_ArpSqk3B7',
-			],
+			operator: OPERATORS.IS.name,
+			values: [generateRandomString()],
 		}],
 	};
 	describe.each([
@@ -136,7 +134,7 @@ const testConvertGroupRules = () => {
 						const output = entry;
 
 						if (typeof entry.field === 'string') {
-							output.field = { operator: 'IS', values: [entry.field] };
+							output.field = { operator: OPERATORS.IS.name, values: [entry.field] };
 						}
 
 						return output;
@@ -155,10 +153,8 @@ const testConvertGroupArrayRules = () => {
 			rules: [{
 				name: generateRandomString(),
 				field: generateRandomString(),
-				operator: 'IS',
-				values: [
-					'1rbbJcnUDEEA_ArpSqk3B7',
-				],
+				operator: OPERATORS.IS.name,
+				values: [generateRandomString()],
 			}],
 		},
 		{
@@ -166,10 +162,8 @@ const testConvertGroupArrayRules = () => {
 			rules: [{
 				name: generateRandomString(),
 				field: generateRandomString(),
-				operator: 'IS',
-				values: [
-					'1rbbJcnUDEEA_ArpSqk3B7',
-				],
+				operator: OPERATORS.IS.name,
+				values: [generateRandomString()],
 			}],
 		},
 	];
@@ -199,8 +193,8 @@ const testConvertGroupArrayRules = () => {
 						outputGroup.rules = outputGroup.rules.map((rule) => {
 							const outputRule = { ...rule };
 
-							if (typeof rule.field === 'string') {
-								outputRule.field = { operator: 'IS', values: [rule.field] };
+							if (isString(rule.field)) {
+								outputRule.field = { operator: OPERATORS.IS.name, values: [rule.field] };
 							}
 
 							return outputRule;

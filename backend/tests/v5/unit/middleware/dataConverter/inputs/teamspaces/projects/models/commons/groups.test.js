@@ -18,6 +18,7 @@
 const _ = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
 const { generateLegacyGroup, generateUUIDString, generateRandomString } = require('../../../../../../../../helper/services');
+const { OPERATORS } = require('../../../../../../../../../../src/v5/models/groups.constants');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
@@ -82,7 +83,7 @@ const deserialiseGroup = (group) => {
 	if (output?.rules) {
 		output.rules = output.rules.map((r) => ({
 			...r,
-			field: typeof r.field === 'string' ? { operator: 'IS', values: [r.field] } : r.field,
+			field: isString(r.field) ? { operator: OPERATORS.IS.name, values: [r.field] } : r.field,
 		}));
 	}
 
@@ -97,53 +98,53 @@ const testValidateGroupsImportData = () => {
 	const numberRule = {
 		name: generateRandomString(),
 		field: 'abc',
-		operator: 'EQUALS',
+		operator: OPERATORS.EQUALS.name,
 		values: [2, 4],
 	};
 
 	const rangeRule = {
 		name: generateRandomString(),
 		field: 'abcd',
-		operator: 'IN_RANGE',
+		operator: OPERATORS.IN_RANGE.name,
 		values: [2, 4, 5, 7],
 	};
 
 	const noNameRule = {
 		field: 'abc',
-		operator: 'IS_EMPTY',
+		operator: OPERATORS.IS_EMPTY.name,
 	};
 
 	const existRule = {
 		name: generateRandomString(),
 		field: 'abc',
-		operator: 'IS_EMPTY',
+		operator: OPERATORS.IS_EMPTY.name,
 	};
 
 	const badExistRule = {
 		name: generateRandomString(),
 		field: 'abcdef',
-		operator: 'IS_EMPTY',
+		operator: OPERATORS.IS_EMPTY.name,
 		values: [2, 4, 3],
 	};
 
 	const badRangeRule = {
 		name: generateRandomString(),
 		field: 'abc1',
-		operator: 'IN_RANGE',
+		operator: OPERATORS.IN_RANGE.name,
 		values: [2, 4, 3],
 	};
 
 	const badRule = {
 		name: generateRandomString(),
 		field: 'abc2',
-		operator: 'EQUALS',
+		operator: OPERATORS.EQUALS.name,
 		values: ['a', 'b'],
 	};
 
 	const wrongTypedRule = {
 		name: generateRandomString(),
 		field: 'abc3',
-		operator: 'EQUALS',
+		operator: OPERATORS.EQUALS.name,
 		values: ['2', '4'],
 	};
 

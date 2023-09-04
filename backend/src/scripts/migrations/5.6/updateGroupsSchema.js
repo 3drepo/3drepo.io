@@ -24,9 +24,6 @@ const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 const { find } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
-
-/* eslint-disable no-await-in-loop */
-
 const OPERATOR_SYMBOL = {
 	IS: ':',
 	IS_NOT: ': !',
@@ -61,7 +58,6 @@ const OPERATIONS_TYPES = {
 	NOT_IN_RANGE: 'numberRange',
 };
 
-
 const formatValues = (operatorType, values) => {
 	if (operatorType === 'regex') return `/ ${values} /`;
 	if (operatorType === 'numberRange') return `[ ${values.join(' : ')} ]`;
@@ -91,8 +87,8 @@ const processCollection = async (teamspace, collection) => {
 	const groups = await find(teamspace, collection, query, projection);
 
 	groups.forEach((group) => {
-		const formattedRules = group.rules.map(rule => {
-			const formattedRule = { ...rule, name: rule.name ||  generateRuleName(rule)}
+		const formattedRules = group.rules.map((rule) => {
+			const formattedRule = { ...rule, name: rule.name || generateRuleName(rule) };
 			return convertFieldToObject(formattedRule);
 		});
 
@@ -104,7 +100,7 @@ const processCollection = async (teamspace, collection) => {
 		});
 	});
 
-	if(groupUpdates.length){
+	if (groupUpdates.length) {
 		try {
 			await bulkWrite(teamspace, collection, groupUpdates);
 		} catch (err) {
@@ -119,6 +115,7 @@ const processTeamspace = async (teamspace) => {
 	for (let i = 0; i < collections.length; ++i) {
 		const { name: colName } = collections[i];
 		logger.logInfo(`\t-[${teamspace}]${colName} (${i + 1}/${collections.length})`);
+		// eslint-disable-next-line no-await-in-loop
 		await processCollection(teamspace, colName);
 	}
 };
@@ -127,9 +124,9 @@ const run = async () => {
 	const teamspaces = await getTeamspaceList();
 	for (const teamspace of teamspaces) {
 		logger.logInfo(`-${teamspace}`);
+		// eslint-disable-next-line no-await-in-loop
 		await processTeamspace(teamspace);
 	}
 };
 
-/* eslint-disable no-await-in-loop */
 module.exports = run;

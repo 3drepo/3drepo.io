@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require('../../models/groups.constants');
 const { presetModules, propTypes } = require('../../schemas/tickets/templates.constants');
 const { deleteIfUndefined } = require('../../utils/helper/objects');
 const { getSwaggerComponents } = require('../../utils/responseCodes');
@@ -169,9 +170,9 @@ Schemas.schemas.group = {
 						properties: {
 							operator: {
 								type: 'string',
-								enum: ['IS', 'CONTAINS', 'REGEX', 'EQUALS', 'STARTS_WITH', 'ENDS_WITH'],
+								enum: Object.keys(FIELD_NAME_OPERATORS),
 								description: 'Operator value on the field name',
-								example: 'IS',
+								example: FIELD_NAME_OPERATORS.IS.name,
 							},
 							values: {
 								type: 'array',
@@ -185,9 +186,9 @@ Schemas.schemas.group = {
 					},
 					operator: {
 						type: 'string',
-						enum: ['IS_EMPTY', 'IS_NOT_EMPTY', 'IS', 'IS_NOT', 'CONTAINS', 'NOT_CONTAINS', 'REGEX', 'EQUALS', 'NOT_EQUALS', 'GT', 'GTE', 'LT', 'LTE', 'IN_RANGE', 'NOT_IN_RANGE'],
+						enum: Object.keys(FIELD_VALUE_OPERATORS),
 						description: 'Operator value on this prop',
-						example: 'EQUALS',
+						example: FIELD_VALUE_OPERATORS.EQUALS.name,
 					},
 					values: {
 						type: 'array',
@@ -275,9 +276,9 @@ Schemas.schemas.ticketGroup = {
 						properties: {
 							operator: {
 								type: 'string',
-								enum: ['IS', 'CONTAINS', 'REGEX', 'EQUALS', 'STARTS_WITH', 'ENDS_WITH'],
+								enum: Object.keys(FIELD_NAME_OPERATORS),
 								description: 'Operator value on the field name',
-								example: 'IS',
+								example: FIELD_NAME_OPERATORS.IS.name,
 							},
 							values: {
 								type: 'array',
@@ -291,9 +292,9 @@ Schemas.schemas.ticketGroup = {
 					},
 					operator: {
 						type: 'string',
-						enum: ['IS_EMPTY', 'IS_NOT_EMPTY', 'IS', 'IS_NOT', 'CONTAINS', 'NOT_CONTAINS', 'REGEX', 'EQUALS', 'NOT_EQUALS', 'GT', 'GTE', 'LT', 'LTE', 'IN_RANGE', 'NOT_IN_RANGE'],
+						enum: Object.keys(FIELD_VALUE_OPERATORS),
 						description: 'Operator value on this prop',
-						example: 'EQUALS',
+						example: FIELD_VALUE_OPERATORS.EQUALS.name,
 					},
 					value: {
 						type: 'array',

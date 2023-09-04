@@ -15,53 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS, OPERATORS } = require('../models/groups.constants');
 const { isNumber, isString } = require('../utils/helper/typeCheck');
 const Yup = require('yup');
 
-const commonOperators = {
-	IS: 1,
-	CONTAINS: 1,
-	REGEX: 1,
-};
-
-const fieldNameOperators = {
-	...commonOperators,
-	STARTS_WITH: 1,
-	ENDS_WITH: 1,
-};
-
-const fieldValueOperators = {
-	...commonOperators,
-	IS_EMPTY: 0,
-	IS_NOT_EMPTY: 0,
-	IS_NOT: 1,
-	NOT_CONTAINS: 1,
-	EQUALS: 1,
-	NOT_EQUALS: 1,
-	GT: 1,
-	GTE: 1,
-	LT: 1,
-	LTE: 1,
-	IN_RANGE: 2,
-	NOT_IN_RANGE: 2,
-};
-
 const ruleParametersTypeCheck = (operator, values) => {
 	switch (operator) {
-	case 'IS':
-	case 'IS_NOT':
-	case 'CONTAINS':
-	case 'NOT_CONTAINS':
-	case 'STARTS_WITH':
-	case 'ENDS_WITH':
-	case 'REGEX':
+	case FIELD_VALUE_OPERATORS.IS.name:
+	case FIELD_VALUE_OPERATORS.IS_NOT.name:
+	case FIELD_VALUE_OPERATORS.CONTAINS.name:
+	case FIELD_VALUE_OPERATORS.NOT_CONTAINS.name:
+	case FIELD_VALUE_OPERATORS.REGEX.name:
+	case FIELD_NAME_OPERATORS.STARTS_WITH.name:
+	case FIELD_NAME_OPERATORS.ENDS_WITH.name:
 		return values.every(isString);
-	case 'EQUALS':
-	case 'NOT_EQUALS':
-	case 'GT':
-	case 'GTE':
-	case 'LT':
-	case 'LTE':
+	case FIELD_VALUE_OPERATORS.EQUALS.name:
+	case FIELD_VALUE_OPERATORS.NOT_EQUALS.name:
+	case FIELD_VALUE_OPERATORS.GT.name:
+	case FIELD_VALUE_OPERATORS.GTE.name:
+	case FIELD_VALUE_OPERATORS.LT.name:
+	case FIELD_VALUE_OPERATORS.LTE.name:
 		return values.every(isNumber);
 	default:
 		// range checks
@@ -69,26 +42,10 @@ const ruleParametersTypeCheck = (operator, values) => {
 	}
 };
 
-const numberOperator = (operator) => {
-	switch (operator) {
-	case 'EQUALS':
-	case 'NOT_EQUALS':
-	case 'GT':
-	case 'GTE':
-	case 'LT':
-	case 'LTE':
-	case 'IN_RANGE':
-	case 'NOT_IN_RANGE':
-		return true;
-	default:
-		return false;
-	}
-};
-
 const Rules = {};
 
 const validateValuesArray = (operators, operator, values) => {
-	const nParams = operators[operator];
+	const nParams = operators[operator].valuesNumber;
 	const arrLength = (values || []).length;
 
 	if (nParams === 0 && arrLength === 0) {
@@ -100,25 +57,25 @@ const validateValuesArray = (operators, operator, values) => {
 
 Rules.convertFieldToObject = (rule) => ({
 	...rule,
-	field: typeof rule.field === 'string' ? { operator: 'IS', values: [rule.field] } : rule.field,
+	field: typeof rule.field === 'string' ? { operator: OPERATORS.IS.name, values: [rule.field] } : rule.field,
 });
 
 const ruleSchema = Yup.object().shape({
 	name: Yup.string().min(1).required(),
 	field: Yup.object().shape({
-		operator: Yup.string().uppercase().oneOf(Object.keys(fieldNameOperators)).required(),
+		operator: Yup.string().uppercase().oneOf(Object.keys(FIELD_NAME_OPERATORS)).required(),
 		values: Yup.array().of(Yup.string().min(1)).required(),
 	}).required(),
-	operator: Yup.string().uppercase().oneOf(Object.keys(fieldValueOperators)).required(),
+	operator: Yup.string().uppercase().oneOf(Object.keys(FIELD_VALUE_OPERATORS)).required(),
 	values: Yup.array().when('operator', {
-		is: numberOperator,
+		is: (operator) => FIELD_VALUE_OPERATORS[operator].isNumber,
 		then: Yup.array().of(Yup.number()).min(1).required(),
 		otherwise: Yup.array().of(Yup.string().min(1)).optional(),
 	}),
 })
 	.noUnknown()
 	.transform((value) => {
-		const nParams = fieldValueOperators[value.operator];
+		const nParams = FIELD_VALUE_OPERATORS[value.operator].valuesNumber;
 		const res = { ...value };
 		if (nParams === 0) {
 			delete res.values;
@@ -127,9 +84,9 @@ const ruleSchema = Yup.object().shape({
 	})
 	.transform(Rules.convertFieldToObject)
 	.test('Rules validation', 'values field is not valid with the operator selected',
-		(value) => validateValuesArray(fieldValueOperators, value.operator, value.values))
+		(value) => validateValuesArray(FIELD_VALUE_OPERATORS, value.operator, value.values))
 	.test('Field rules validation', 'field values field is not valid with the field operator selected',
-		(value) => validateValuesArray(fieldNameOperators, value.field.operator, value.field.values));
+		(value) => validateValuesArray(FIELD_NAME_OPERATORS, value.field.operator, value.field.values));
 
 Rules.schema = Yup.array().of(ruleSchema).min(1);
 

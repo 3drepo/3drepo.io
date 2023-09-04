@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { OPERATORS } = require('./groups.constants');
 const { isArray } = require('../utils/helper/typeCheck');
 const { sanitiseRegex } = require('../utils/helper/strings');
 const { templates } = require('../utils/responseCodes');
@@ -22,11 +23,11 @@ const { templates } = require('../utils/responseCodes');
 const Rules = {};
 
 const negToPosOp = {
-	IS_NOT: 'IS',
-	NOT_CONTAINS: 'CONTAINS',
-	NOT_EQUALS: 'EQUALS',
-	NOT_IN_RANGE: 'IN_RANGE',
-	IS_EMPTY: 'IS_NOT_EMPTY',
+	[OPERATORS.IS_NOT.name]: OPERATORS.IS.name,
+	[OPERATORS.NOT_CONTAINS.name]: OPERATORS.CONTAINS.name,
+	[OPERATORS.NOT_EQUALS.name]: OPERATORS.EQUALS.name,
+	[OPERATORS.NOT_IN_RANGE.name]: OPERATORS.IN_RANGE.name,
+	[OPERATORS.IS_EMPTY.name]: OPERATORS.IS_NOT_EMPTY.name,
 };
 
 Rules.generateQueriesFromRules = (rules) => {
@@ -39,10 +40,10 @@ Rules.generateQueriesFromRules = (rules) => {
 			// This is a positive rule
 			positives.push(Rules.toQuery(rule));
 		} else {
-			if (operator !== 'IS_EMPTY') {
+			if (operator !== OPERATORS.IS_EMPTY.name) {
 			// For any negative rule where we're not checking for empty, we need to a positive rule
 			// to ensure the field exists
-				positives.push(Rules.toQuery({ operator: 'IS_NOT_EMPTY', field }));
+				positives.push(Rules.toQuery({ operator: OPERATORS.IS_NOT_EMPTY.name, field }));
 			}
 
 			negatives.push(Rules.toQuery({ operator: negToPosOp[operator], field, values }));
@@ -58,28 +59,28 @@ const getFieldClause = (rule) => {
 	const { values } = rule.field;
 
 	switch (rule.field.operator) {
-	case 'IS':
+	case OPERATORS.IS.name:
 		fieldClause = values.length > 1 ? { $in: values } : values[0];
 		break;
-	case 'CONTAINS': {
+	case OPERATORS.CONTAINS.name: {
 		const sanitisedValues = values.map(sanitiseRegex);
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		fieldClause = { $regex: new RegExp(sanitisedValues.join('|')), $options: 'i' };
 	}
 		break;
-	case 'STARTS_WITH': {
+	case OPERATORS.STARTS_WITH.name: {
 		const sanitisedValues = values.map(sanitiseRegex);
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		fieldClause = { $regex: new RegExp(`^(${sanitisedValues.join('|')})`), $options: 'i' };
 	}
 		break;
-	case 'ENDS_WITH': {
+	case OPERATORS.ENDS_WITH.name: {
 		const sanitisedValues = values.map(sanitiseRegex);
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		fieldClause = { $regex: new RegExp(`.*(${sanitisedValues.join('|')})$`), $options: 'i' };
 	}
 		break;
-	case 'REGEX': {
+	case OPERATORS.REGEX.name: {
 		const regexArr = values.map((val) => `(${val})`);
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		fieldClause = { $regex: new RegExp(regexArr.join('|')) };
@@ -96,39 +97,39 @@ const getValueClause = (rule) => {
 	let valueClause;
 	const operator = negToPosOp[rule.operator] ?? rule.operator;
 	switch (operator) {
-	case 'IS_NOT_EMPTY':
+	case OPERATORS.IS_NOT_EMPTY.name:
 		break;
-	case 'IS':
+	case OPERATORS.IS.name:
 		valueClause = rule.values.length > 1 ? { $in: rule.values } : rule.values[0];
 		break;
-	case 'CONTAINS': {
+	case OPERATORS.CONTAINS.name: {
 		const sanitisedValues = rule.values.map(sanitiseRegex);
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		valueClause = { $regex: new RegExp(sanitisedValues.join('|')), $options: 'i' };
 	}
 		break;
-	case 'REGEX': {
+	case OPERATORS.REGEX.name: {
 		const regexArr = rule.values.map((val) => `(${val})`);
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		valueClause = { $regex: new RegExp(regexArr.join('|')) };
 	}
 		break;
-	case 'EQUALS':
+	case OPERATORS.EQUALS.name:
 		valueClause = rule.values.length > 1 ? { $in: rule.values } : rule.values[0];
 		break;
-	case 'GT':
+	case OPERATORS.GT.name:
 		valueClause = { $gt: Math.min(...rule.values) };
 		break;
-	case 'GTE':
+	case OPERATORS.GTE.name:
 		valueClause = { $gte: Math.min(...rule.values) };
 		break;
-	case 'LT':
+	case OPERATORS.LT.name:
 		valueClause = { $lt: Math.max(...rule.values) };
 		break;
-	case 'LTE':
+	case OPERATORS.LTE.name:
 		valueClause = { $lte: Math.max(...rule.values) };
 		break;
-	case 'IN_RANGE':
+	case OPERATORS.IN_RANGE.name:
 		{
 			const rangeClauses = [];
 			for (let i = 0; i < rule.values.length; i += 2) {
