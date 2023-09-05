@@ -22,12 +22,12 @@ import { mockServer } from '../../internals/testing/mockServer';
 import { omit, times } from 'lodash';
 import {
 	federationMockFactory,
+	prepareMockFederationStatsReply,
 	prepareMockRawSettingsReply,
 	prepareMockSettingsReply,
 	prepareMockViewsReply,
 } from './federations.fixtures';
 import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
-import { FederationStats, IFederation } from '@/v5/store/federations/federations.types';
 import { prepareMockContainers } from './federations.fixtures';
 import { prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
 
@@ -66,7 +66,7 @@ describe('Federations: sagas', () => {
 			desc: 'This is a test federation',
 			unit: 'cm',
 		};
-		const newFederationContainers = ['containerIdOne', 'containerIdTwo'];
+		const newFederationContainers = [{ _id: 'containerIdOne' }, { _id: 'containerIdTwo' }];
 
 		it('should successfully create a new federation', async () => {
 			mockServer
@@ -158,30 +158,17 @@ describe('Federations: sagas', () => {
 		})
 
 		it('should fetch stats', async () => {
-			const prepareMockStatsReply = (federation: IFederation): FederationStats => ({
-				containers: federation.containers,
-				tickets: {
-					issues: federation.issues,
-					risks: federation.risks,
-				},
-				lastUpdated: federation.lastUpdated.valueOf(),
-				category: federation.category,
-				status: federation.status,
-				code: federation.code,
-				desc: federation.desc,
-			})
-
 			mockFederations.forEach((federation) => {
 				mockServer
 					.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federation._id}/stats`)
-					.reply(200, prepareMockStatsReply(federation));
+					.reply(200, prepareMockFederationStatsReply(federation));
 			})
 
 			await expectSaga(FederationsSaga.default)
 				.dispatch(FederationsActions.fetchFederationStats(teamspace, projectId, mockFederations[0]._id))
 				.dispatch(FederationsActions.fetchFederationStats(teamspace, projectId, mockFederations[1]._id))
-				.put(FederationsActions.fetchFederationStatsSuccess(projectId, mockFederations[0]._id, prepareMockStatsReply(mockFederations[0])))
-				.put(FederationsActions.fetchFederationStatsSuccess(projectId, mockFederations[1]._id, prepareMockStatsReply(mockFederations[1])))
+				.put(FederationsActions.fetchFederationStatsSuccess(projectId, mockFederations[0]._id, prepareMockFederationStatsReply(mockFederations[0])))
+				.put(FederationsActions.fetchFederationStatsSuccess(projectId, mockFederations[1]._id, prepareMockFederationStatsReply(mockFederations[1])))
 				.silentRun();
 		})
 

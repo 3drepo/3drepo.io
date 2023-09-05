@@ -77,7 +77,7 @@ describe('Viewer: sagas', () => {
 			const baseContainers = containers.map(prepareMockBaseContainer);
 			const containersInState = baseContainers.map((base, index) => prepareSingleContainerData(base, containersStats[index]));
 			const theFederation = federations[1];
-			theFederation.containers = [ baseContainers[2]._id, baseContainers[0]._id];
+			theFederation.containers = [{ _id: baseContainers[2]._id }, { _id: baseContainers[0]._id }];
 			const containerOrFederationId = theFederation._id;
 
 			mockServer
@@ -106,11 +106,11 @@ describe('Viewer: sagas', () => {
 
 
 			const federation = selectFederationById(getState(), containerOrFederationId);
-			const containersIds = [...federation.containers].sort();
+			const groupedContainers = [...federation.containers].sort();
 	
-			containersIds.forEach(containerId => {
-				const theFetchedContainer = findById(containersInState, containerId);
-				const container = selectContainerById(getState(), containerId);
+			groupedContainers.forEach(({ _id }) => {
+				const theFetchedContainer = findById(containersInState, _id);
+				const container = selectContainerById(getState(), _id);
 				expect(container).toEqual(theFetchedContainer);
 			})
 
