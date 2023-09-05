@@ -18,58 +18,47 @@
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CONTAINERS_SEARCH_FIELDS } from '@/v5/store/containers/containers.helpers';
-import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { Button } from '@controls/button';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { Tooltip } from '@mui/material';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
+import { IContainer } from '@/v5/store/containers/containers.types';
 import { useContainersData } from '../../../containers/containers.hooks';
 import { IconContainer, IncludeIcon, RemoveIcon } from './editFederation.styles';
 import { ActionButtonProps, EditFederationContainers } from './editFederationContainersList/editFederationContainersList.component';
 import { IconButtonProps } from './editFederationContainersList/editFederationContainersListItem/editFederationContainersListItem.component';
+import { EditFederationContext } from '../editFederationContext';
 
 type EditFederationProps = {
 	federation: IFederation;
-	onContainersChange: (includedContainers) => void;
 };
 
-export const EditFederation = ({ federation, onContainersChange }: EditFederationProps): JSX.Element => {
+export const EditFederation = ({ federation }: EditFederationProps): JSX.Element => {
 	const { containers } = useContainersData();
-	const getContainerById = (id: string) => containers.find((container: IContainer) => container._id === id);
-	const [includedContainers, setIncludedContainers] = useState<IContainer[]>([]);
-	const [availableContainers, setAvailableContainers] = useState<IContainer[]>([]);
+	const { includedContainers, setIncludedContainers } = useContext(EditFederationContext);
 	const isNewFederation = !federation._id;
 	const isCollaboratorFromId = FederationsHooksSelectors.selectHasCollaboratorAccess(federation._id);
-	const isCollaborator = isNewFederation ? true : isCollaboratorFromId;
-
-	useEffect(() => {
-		if (containers.length) {
-			setIncludedContainers(federation.containers.map(getContainerById));
-		}
-	}, [containers]);
-
-	useEffect(() => {
-		onContainersChange(includedContainers.filter(Boolean)); // filter out 'undefined' which are unassigned containers
-		setAvailableContainers(containers.filter((container) => !includedContainers.includes(container)));
-	}, [includedContainers]);
+	const isCollaborator = isNewFederation || isCollaboratorFromId;
+	const availableContainers = containers.filter(({ _id }) => !includedContainers.find((c) => c._id === _id));
 
 	const includeContainer = (container: IContainer) => {
-		setIncludedContainers((existingState) => [...existingState, container]);
+		setIncludedContainers((oldIncludedContainers) => [...oldIncludedContainers, container]);
 	};
 
-	const removeContainer = (containerToRemove: IContainer) => {
-		setIncludedContainers((existingState) => existingState.filter((container) => container !== containerToRemove));
+	const removeContainer = ({ _id }: IContainer) => {
+		setIncludedContainers((oldIncludedContainers) => oldIncludedContainers.filter((container) => container._id !== _id));
 	};
 
-	const includeContainers = (containersToInclude: IContainer[]) => {
-		setIncludedContainers([...includedContainers, ...containersToInclude]);
+	const includeContainers = (newContainers: IContainer[]) => {
+		setIncludedContainers((oldIncludedContainers) => [...oldIncludedContainers, ...newContainers]);
 	};
 
 	const removeContainers = (containersToRemove: IContainer[]) => {
-		setIncludedContainers(includedContainers.filter((container) => !containersToRemove.includes(container)));
+		const containersIds = containersToRemove.map(({ _id }) => _id);
+		setIncludedContainers((oldIncludedContainers) => oldIncludedContainers.filter(({ _id }) => !containersIds.includes(_id)));
 	};
 
 	return (
