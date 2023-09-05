@@ -25,15 +25,14 @@ const { validateSchema } = require('../../../../../../../schemas/groups');
 
 const Groups = {};
 
-const convertRules = (group) => {
+Groups.convertGroupRules = async (req, res, next) => {
+	const { group } = req.body;
+
 	if (group?.rules) {
 		// eslint-disable-next-line no-param-reassign
 		group.rules = group.rules.map(convertFieldToObject);
 	}
-};
 
-Groups.convertGroupRules = async (req, res, next) => {
-	convertRules(req.body);
 	await next();
 };
 
@@ -58,12 +57,11 @@ Groups.validateGroupsExportData = async (req, res, next) => {
 
 Groups.validateGroupsImportData = async (req, res, next) => {
 	try {
-		const { groups } = req.body;
+		let { groups } = req.body;
 		if (!groups?.length) throw createResponseCode(templates.invalidArguments, 'Groups array cannot be empty');
-		await Promise.all(groups.map((g) => {
-			convertRules(g);
-			return validateSchema(g);
-		}));
+		
+		groups = await Promise.all(groups.map(validateSchema));
+		
 		for (let i = 0; i < groups.length; ++i) {
 			const group = groups[i];
 			group._id = stringToUUID(group._id);
@@ -76,6 +74,8 @@ Groups.validateGroupsImportData = async (req, res, next) => {
 			}
 		}
 
+		req.body = { groups };
+		
 		next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

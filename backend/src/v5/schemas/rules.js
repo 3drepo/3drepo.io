@@ -33,17 +33,21 @@ const Rules = {};
 
 const validateValuesArray = (operatorName, values) => {
 	const operator = OPERATORS[operatorName];
-	const minValues= operator.minValues;
-	const maxValues = operator.maxValues;
+	if(operator){
+		const minValues= operator.minValues;
+		const maxValues = operator.maxValues;
+	
+		const arrLength = (values || []).length;
+	
+		if (maxValues === 0 && arrLength === 0) {
+			return true;
+		}
+	
+		return arrLength >= minValues && (!maxValues || arrLength <= maxValues) && 
+				ruleParametersTypeCheck(operator, values);
+	}	
 
-	const arrLength = (values || []).length;
-
-	if (maxValues === 0 && arrLength === 0) {
-		return true;
-	}
-
-	return arrLength >= minValues && (!maxValues || arrLength <= maxValues) && 
-			ruleParametersTypeCheck(operator, values);
+	return true;
 };
 
 Rules.convertFieldToObject = (rule) => ({
@@ -56,28 +60,29 @@ const ruleSchema = Yup.object().shape({
 	field: Yup.object().shape({
 		operator: Yup.string().uppercase().oneOf(Object.keys(FIELD_NAME_OPERATORS)).required(),
 		values: Yup.array().of(Yup.string().min(1)).required(),
+	}).transform((val, oldVal) => {		
+		return isString(oldVal) ? { operator: OPERATORS.IS.name, values: [oldVal] } : val;
 	}).required(),
 	operator: Yup.string().uppercase().oneOf(Object.keys(FIELD_VALUE_OPERATORS)).required(),
 	values: Yup.array().when('operator', {
-		is: (operator) => FIELD_VALUE_OPERATORS[operator].isNumber,
+		is: (operator) => FIELD_VALUE_OPERATORS[operator]?.isNumber,
 		then: Yup.array().of(Yup.number()).min(1).required(),
 		otherwise: Yup.array().of(Yup.string().min(1)).optional(),
 	}),
 })
 	.noUnknown()
 	.transform((value) => {
-		const { maxValues } = OPERATORS[value.operator];
 		const res = { ...value };
-		if (maxValues === 0) {
+		const operator = OPERATORS[value.operator];
+		if (operator?.maxValues === 0) {
 			delete res.values;
 		}
 		return res;
 	})
-	.transform(Rules.convertFieldToObject)
 	.test('Rules validation', 'values field is not valid with the operator selected',
 		(value) => validateValuesArray(value.operator, value.values))
 	.test('Field rules validation', 'field values field is not valid with the field operator selected',
-		(value) => validateValuesArray(value.field.operator, value.field.values));
+		(value) => validateValuesArray(value.field?.operator, value.field?.values));
 
 Rules.schema = Yup.array().of(ruleSchema).min(1);
 

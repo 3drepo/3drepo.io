@@ -85,9 +85,6 @@ ResponseCodes.templates = {
 	// Legend related error
 	legendNotFound: { message: 'Legend not found.', status: 404 },
 
-	// Group related error
-	unknownOperator: { message: 'The operator provided is not valid.', status: 400 },
-	
 	// Invalid Arguments
 	invalidArguments: { message: 'The arguments provided are not valid.', status: 400 },
 

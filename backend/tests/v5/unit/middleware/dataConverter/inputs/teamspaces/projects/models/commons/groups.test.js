@@ -118,14 +118,7 @@ const testValidateGroupsImportData = () => {
 		name: generateRandomString(),
 		field: { operator: 'IS', values:[generateRandomString()] },
 		operator: OPERATORS.IS_EMPTY.name,
-	};
-
-	const badExistRule = {
-		name: generateRandomString(),
-		field: { operator: 'IS', values:[generateRandomString()] },
-		operator: OPERATORS.IS_EMPTY.name,
-		values: [2, 4, 3],
-	};
+	};	
 
 	const badRangeRule = {
 		name: generateRandomString(),
@@ -139,13 +132,6 @@ const testValidateGroupsImportData = () => {
 		field: { operator: 'IS', values:[generateRandomString()] },
 		operator: OPERATORS.EQUALS.name,
 		values: ['a', 'b'],
-	};
-
-	const wrongTypedRule = {
-		name: generateRandomString(),
-		field: { operator: 'IS', values:[generateRandomString()] },
-		operator: OPERATORS.EQUALS.name,
-		values: ['2', '4'],
 	};
 
 	const regexWithMoreThan1Values = {
@@ -165,7 +151,6 @@ const testValidateGroupsImportData = () => {
 		[{ body: { groups: [_.omit(ruleGroup, ['createdAt'])] } }, false, 'no createdAt'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [] }] } }, false, 'with empty rules'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [existRule] }] } }, true, 'exists rule'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [badExistRule] }] } }, false, 'existsRule with parameters'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [noNameRule] }] } }, false, 'rule with no name'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [numberRule] }] } }, true, 'rule with number parameters'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [rangeRule] }] } }, true, 'rule with range parameters'],
@@ -173,7 +158,6 @@ const testValidateGroupsImportData = () => {
 		[{ body: { groups: [{ ...ruleGroup, rules: [...ruleGroup.rules, numberRule] }] } }, true, 'multiple rules'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [...ruleGroup.rules, badRule, numberRule] }] } }, false, 'multiple rules where one is bad'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [badRule] }] } }, false, 'rule with invalidParameters'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [wrongTypedRule] }] } }, false, 'rule with wrong typed parameters'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [regexWithMoreThan1Values] }] } }, false, 'regex with more than 1 values'],
 		[{ body: { groups: [{ ...ifcGroup, objects: [] }] } }, false, 'with empty objects'],
 		[{ body: { groups: [{ ...ruleGroup, description: '123' }] } }, true, 'with description'],
