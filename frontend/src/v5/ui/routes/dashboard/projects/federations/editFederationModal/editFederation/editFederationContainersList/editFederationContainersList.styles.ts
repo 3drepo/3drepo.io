@@ -32,8 +32,7 @@ export const Container = styled.div`
 	}
 
 	${DashboardListHeaderContainer} {
-		margin-left: 46px;
-		padding-right: 10px;
+		padding-right: 44px;
 	}
 
 	${ButtonContainer} {

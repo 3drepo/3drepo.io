@@ -17,7 +17,7 @@
 
 import { ComponentType, memo, useContext, useEffect } from 'react';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { DashboardListItemButton, DashboardListItemIcon, DashboardListItemText } from '@components/dashboard/dashboardList/dashboardListItem/components';
+import { DashboardListItemButton, DashboardListItemText } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { Highlight } from '@controls/highlight';
 import { RevisionDetails } from '@components/shared/revisionDetails';
 import { Display } from '@/v5/ui/themes/media';
@@ -74,9 +74,6 @@ export const EditFederationContainersListItem = memo(({
 				selected={isSelected}
 				onClick={() => onClick(container._id)}
 			>
-				<DashboardListItemIcon>
-					<Icon container={container} isSelected={isSelected} />
-				</DashboardListItemIcon>
 				<DashboardListItemContainerTitle
 					minWidth={116}
 					container={container}
@@ -143,6 +140,7 @@ export const EditFederationContainersListItem = memo(({
 				>
 					{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
 				</DashboardListItemText>
+				<Icon container={container} isSelected={isSelected} />
 			</DashboardListItemRow>
 			{isSelected && (
 				<RevisionDetails

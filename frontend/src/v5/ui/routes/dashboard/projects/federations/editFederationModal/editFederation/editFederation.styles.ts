@@ -16,65 +16,22 @@
  */
 
 import styled from 'styled-components';
-import IncludeIconBase from '@assets/icons/twoToned/add_circle-two_toned.svg';
-import RemoveIconBase from '@assets/icons/twoToned/remove_element-two_toned.svg';
+import { Button as ButtonBase } from '@controls/button';
 
-export const IconContainer = styled.div`
+export const Button = styled(ButtonBase)`
+	width: 100px;
+`;
+
+export const IconContainer = styled(ButtonBase)`
 	display: grid;
-	min-width: 46px;
-`;
+	place-content: center;
+	width: 20px;
+	min-width: 20px;
+	height: 20px;
+	border-radius: 5px;
+	padding: 0;
 
-export const IncludeIcon = styled(IncludeIconBase)<{ isSelected?: boolean }>`
-	&:hover {
-		circle {
-			fill: ${({ theme }) => theme.palette.primary.dark};
-		}
-	}
-
-	&:active {
-		circle {
-			fill: ${({ theme }) => theme.palette.primary.darkest};
-		}
-	}
-
-	${({ theme, isSelected }) => isSelected && `
-		circle {
-			fill: ${theme.palette.primary.lightest};
-		}
-		path {
-			fill: ${theme.palette.primary.dark};
-		}
-
-		&:hover {
-			circle {
-				fill: ${theme.palette.primary.dark};
-			}
-			path {
-				fill: ${theme.palette.primary.lightest};
-			}
-		}
-
-		&:active {
-			circle {
-				fill: ${theme.palette.primary.darkest};
-			}
-			path {
-				fill: ${theme.palette.primary.lightest};
-			}
-		}
-	`}
-`;
-
-export const RemoveIcon = styled(RemoveIconBase)`
-	&:hover {
-		circle {
-			fill: ${({ theme }) => theme.palette.error.dark};
-		}
-	}
-
-	&:active {
-		circle {
-			fill: ${({ theme }) => theme.palette.error.darkest};
-		}
+	&, &:hover, &:active, &:focus {
+		border-width: 2px;
 	}
 `;

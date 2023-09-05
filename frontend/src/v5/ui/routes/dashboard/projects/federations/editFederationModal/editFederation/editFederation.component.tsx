@@ -20,14 +20,15 @@ import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CONTAINERS_SEARCH_FIELDS } from '@/v5/store/containers/containers.helpers';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { Button } from '@controls/button';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { Tooltip } from '@mui/material';
+import RemoveIcon from '@assets/icons/outlined/minus_minimal-outline.svg';
+import IncludeIcon from '@assets/icons/outlined/plus_minimal-outline.svg';
 import { useCallback, useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { useContainersData } from '../../../containers/containers.hooks';
-import { IconContainer, IncludeIcon, RemoveIcon } from './editFederation.styles';
+import { IconContainer, Button } from './editFederation.styles';
 import { ActionButtonProps, EditFederationContainers } from './editFederationContainersList/editFederationContainersList.component';
 import { IconButtonProps } from './editFederationContainersList/editFederationContainersListItem/editFederationContainersListItem.component';
 import { EditFederationContext } from '../editFederationContext';
@@ -85,7 +86,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 					)}
 					actionButton={({ children, disabled, filteredContainers }: ActionButtonProps) => isCollaborator && (
 						<Button
-							errorButton
+							color="error"
 							onClick={() => removeContainers(filteredContainers)}
 							disabled={disabled}
 						>
@@ -103,6 +104,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 						})}
 						>
 							<IconContainer
+								color="error"
 								onClick={(event) => {
 									event.stopPropagation();
 									removeContainer(container);
@@ -137,8 +139,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 					)}
 					actionButton={({ children, disabled, filteredContainers, ...buttonProps }) => isCollaborator && (
 						<Button
-							variant="outlined"
-							color="primary"
+							color="success"
 							onClick={() => includeContainers(filteredContainers)}
 							disabled={disabled}
 							{...buttonProps}
@@ -150,19 +151,20 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 						allResults: <FormattedMessage id="modal.editFederation.available.includeAll" defaultMessage="Include all" />,
 						filteredResults: <FormattedMessage id="modal.editFederation.available.includeShown" defaultMessage="Include shown" />,
 					}}
-					iconButton={useCallback(({ container, isSelected }: IconButtonProps) => isCollaborator && (
+					iconButton={useCallback(({ container }: IconButtonProps) => isCollaborator && (
 						<Tooltip title={formatMessage({
 							id: 'modal.editFederation.available.include.tooltip',
 							defaultMessage: 'Include container',
 						})}
 						>
 							<IconContainer
+								color="success"
 								onClick={(event) => {
 									event.stopPropagation();
 									includeContainer(container);
 								}}
 							>
-								<IncludeIcon isSelected={isSelected} />
+								<IncludeIcon />
 							</IconContainer>
 						</Tooltip>
 					), [])}
