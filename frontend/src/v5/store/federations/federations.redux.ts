@@ -253,7 +253,7 @@ export interface IFederationsActionCreators {
 		teamspace: string,
 		projectId: string,
 		federationId: string,
-		containers: GroupedContainer[]
+		containers: GroupedContainer[],
 	) => UpdateFederationContainersAction;
 	updateFederationContainersSuccess: (
 		projectId: string,
