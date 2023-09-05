@@ -15,17 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ComponentType, memo } from 'react';
+import { ComponentType, memo, useContext, useEffect } from 'react';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { DashboardListItemButton, DashboardListItemIcon, DashboardListItemText } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { Highlight } from '@controls/highlight';
 import { RevisionDetails } from '@components/shared/revisionDetails';
 import { Display } from '@/v5/ui/themes/media';
-import { formatDate } from '@/v5/services/intl';
+import { formatDate, formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { DashboardListItemContainerTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
-import { DashboardListItemRow } from './editFederationContainersListItem.styles';
+import { uniq } from 'lodash';
+import { AutocompleteTextfield, DashboardListItemRow, Autocomplete } from './editFederationContainersListItem.styles';
+import { OptionsBox } from '../../../../../containers/uploadFileForm/uploadList/uploadListItem/components/uploadListItemDestination/options/optionsBox.styles';
+import { EditFederationContext } from '../../../editFederationContext';
+import { GroupOption } from './groupOption/groupOption.component';
 
 export type IconButtonProps = {
 	container: IContainer;
@@ -37,77 +41,116 @@ type EditFederationContainersListItemProps = {
 	container: IContainer;
 	filterQuery?: string;
 	icon: ComponentType<IconButtonProps>;
-	onSelectOrToggleItem: (id: string) => void;
+	onClick: (id: string) => void;
 };
-
 export const EditFederationContainersListItem = memo(({
 	icon: Icon,
 	isSelected,
 	container,
 	filterQuery,
-	onSelectOrToggleItem,
-}: EditFederationContainersListItemProps) => (
-	<DashboardListItem
-		selected={isSelected}
-		key={container._id}
-	>
-		<DashboardListItemRow
+	onClick,
+}: EditFederationContainersListItemProps) => {
+	const { setGroupsByContainer, groupsByContainer, groups, includedContainers } = useContext(EditFederationContext);
+
+	const isIncluded = includedContainers.includes(container);
+
+	const onGroupChange = (e, group) => {
+		setGroupsByContainer((existingGroups) => ({ ...existingGroups, [container._id]: group }));
+	};
+
+	useEffect(() => {
+		if (!isIncluded && groupsByContainer[container._id]) {
+			delete groupsByContainer[container._id];
+			setGroupsByContainer(groupsByContainer);
+		}
+	}, [isIncluded]);
+
+	return (
+		<DashboardListItem
 			selected={isSelected}
-			onClick={() => onSelectOrToggleItem(container._id)}
+			key={container._id}
 		>
-			<DashboardListItemIcon>
-				<Icon container={container} isSelected={isSelected} />
-			</DashboardListItemIcon>
-			<DashboardListItemContainerTitle
-				minWidth={116}
-				container={container}
-				isSelected={isSelected}
-				openInNewTab
-			/>
-			<DashboardListItemButton
-				width={186}
-				onClick={() => onSelectOrToggleItem(container._id)}
-				hideWhenSmallerThan={Display.Desktop}
-				tooltipTitle={
-					<FormattedMessage id="modal.editFederation.list.item.revisions.tooltip" defaultMessage="View revisions" />
-				}
+			<DashboardListItemRow
+				selected={isSelected}
+				onClick={() => onClick(container._id)}
 			>
-				<FormattedMessage
-					id="modal.editFederation.list.item.revisions"
-					defaultMessage="{count, plural, =0 {No revisions} one {# revision} other {# revisions}}"
-					values={{ count: container.revisionsCount }}
+				<DashboardListItemIcon>
+					<Icon container={container} isSelected={isSelected} />
+				</DashboardListItemIcon>
+				<DashboardListItemContainerTitle
+					minWidth={116}
+					container={container}
+					isSelected={isSelected}
+					openInNewTab
 				/>
-			</DashboardListItemButton>
-			<DashboardListItemText
-				width={160}
-				selected={isSelected}
-			>
-				<Highlight search={filterQuery}>
-					{container.code}
-				</Highlight>
-			</DashboardListItemText>
-			<DashboardListItemText
-				width={160}
-				hideWhenSmallerThan={Display.Tablet}
-				selected={isSelected}
-			>
-				<Highlight search={filterQuery}>
-					{container.type}
-				</Highlight>
-			</DashboardListItemText>
-			<DashboardListItemText
-				width={188}
-				selected={isSelected}
-			>
-				{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
-			</DashboardListItemText>
-		</DashboardListItemRow>
-		{isSelected && (
-			<RevisionDetails
-				containerId={container._id}
-				revisionsCount={container.revisionsCount}
-				status={container.status}
-			/>
-		)}
-	</DashboardListItem>
-));
+				<DashboardListItemButton
+					width={186}
+					onClick={() => onClick(container._id)}
+					hideWhenSmallerThan={Display.Desktop}
+					tooltipTitle={
+						<FormattedMessage id="modal.editFederation.list.item.revisions.tooltip" defaultMessage="View revisions" />
+					}
+				>
+					<FormattedMessage
+						id="modal.editFederation.list.item.revisions"
+						defaultMessage="{count, plural, =0 {No revisions} one {# revision} other {# revisions}}"
+						values={{ count: container.revisionsCount }}
+					/>
+				</DashboardListItemButton>
+				<DashboardListItemText
+					width={160}
+					selected={isSelected}
+				>
+					<Highlight search={filterQuery}>
+						{container.code}
+					</Highlight>
+				</DashboardListItemText>
+				{/* eslint-disable-next-line */}
+				<div onClick={(e) => e.stopPropagation()}>
+					<DashboardListItemText
+						width={160}
+						selected={isSelected}
+					>
+						{isIncluded && (
+							<Autocomplete
+								value={groupsByContainer[container._id]}
+								onChange={onGroupChange}
+								renderInput={(params) => <AutocompleteTextfield {...params} />}
+								options={groups}
+								getOptionLabel={(group: string) => group}
+								ListboxComponent={OptionsBox}
+								clearOnBlur
+								selectOnFocus
+								noOptionsText={formatMessage({ id: 'tickets.groups.field.noOptions', defaultMessage: 'No options' })}
+								renderOption={(optionProps, value: string) => (<GroupOption {...optionProps} value={value} />)}
+								filterOptions={(options, { inputValue }) => uniq([...options, inputValue])}
+							/>
+						)}
+					</DashboardListItemText>
+				</div>
+				<DashboardListItemText
+					width={160}
+					hideWhenSmallerThan={Display.Tablet}
+					selected={isSelected}
+				>
+					<Highlight search={filterQuery}>
+						{container.type}
+					</Highlight>
+				</DashboardListItemText>
+				<DashboardListItemText
+					width={100}
+					selected={isSelected}
+				>
+					{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
+				</DashboardListItemText>
+			</DashboardListItemRow>
+			{isSelected && (
+				<RevisionDetails
+					containerId={container._id}
+					revisionsCount={container.revisionsCount}
+					status={container.status}
+				/>
+			)}
+		</DashboardListItem>
+	);
+});

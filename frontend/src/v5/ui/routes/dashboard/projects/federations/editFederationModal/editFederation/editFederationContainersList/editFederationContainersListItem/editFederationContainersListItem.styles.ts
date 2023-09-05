@@ -20,11 +20,30 @@ import {
 	DashboardListItemRow as DashboardListItemRowBase,
 	DashboardListItemIcon,
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
+import { TextField, Autocomplete as AutocompleteBase } from '@mui/material';
 
 export const DashboardListItemRow = styled(DashboardListItemRowBase)`
 	padding-left: 20px;
 
 	${DashboardListItemIcon} {
 		margin-right: 20px;
+	}
+`;
+
+export const Autocomplete = styled(AutocompleteBase)`
+	margin-right: 10px;
+`;
+
+export const AutocompleteTextfield = styled(TextField)`
+	border: none;
+	border-radius: 8px;
+	margin: 0;
+
+	.MuiAutocomplete-endAdornment {
+		height: 35px;
+	}
+
+	.MuiOutlinedInput-root .MuiAutocomplete-input {
+		padding: 0;
 	}
 `;
