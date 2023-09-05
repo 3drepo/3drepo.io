@@ -65,6 +65,9 @@ export const COLOR = {
 	FAVOURITE_MID: '#F8D867',
 	FAVOURITE_LIGHT: '#FAE59A',
 	FAVOURITE_LIGHTEST: '#FEFAEB',
+	SUCCESS_MAIN: '#2E7D32',
+	SUCCESS_DARK: '#1B5E20',
+	SUCCESS_LIGHT: '#4CAF50',
 };
 
 export const FONT_WEIGHT = {
@@ -235,6 +238,11 @@ export const theme = createTheme({
 			light: COLOR.FAVOURITE_LIGHT,
 			lightest: COLOR.FAVOURITE_LIGHTEST,
 			contrastText: COLOR.FAVOURITE_LIGHTEST,
+		},
+		success: {
+			main: COLOR.SUCCESS_MAIN,
+			dark: COLOR.SUCCESS_DARK,
+			light: COLOR.SUCCESS_LIGHT,
 		},
 		gradient: {
 			main: GRADIENT.MAIN,

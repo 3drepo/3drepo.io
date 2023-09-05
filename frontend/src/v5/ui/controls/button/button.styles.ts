@@ -46,3 +46,28 @@ export const ErrorButton = styled(MuiButton).attrs({
 		background-color: ${({ theme }) => theme.palette.error.dark};
 	}
 `;
+
+export const SuccessButton = styled(MuiButton).attrs({
+	variant: 'outlined',
+})`
+	height: 35px;
+	color: ${({ theme }) => theme.palette.success.main};
+	border-color: ${({ theme }) => theme.palette.success.main};
+
+	&.Mui-focusVisible {
+		background-color: ${({ theme }) => theme.palette.success.main};
+	}
+
+	&:hover {
+		color: ${({ theme }) => theme.palette.success.contrastText};
+		background-color: ${({ theme }) => theme.palette.success.main};
+		border-color: ${({ theme }) => theme.palette.success.main};
+		text-decoration-line: none;
+	}
+
+	&:active {
+		color: ${({ theme }) => theme.palette.success.contrastText};
+		border-color: ${({ theme }) => theme.palette.success.dark};
+		background-color: ${({ theme }) => theme.palette.success.dark};
+	}
+`;
