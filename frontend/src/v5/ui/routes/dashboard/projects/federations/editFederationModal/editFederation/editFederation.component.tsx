@@ -69,7 +69,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 					title={
 						formatMessage({
 							id: 'modal.editFederation.containers.title',
-							defaultMessage: 'Containers included in {federationName}',
+							defaultMessage: 'Containers included',
 						}, { federationName: federation.name })
 					}
 					collapsableTooltips={{
@@ -122,7 +122,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 					title={
 						formatMessage({
 							id: 'modal.editFederation.containers.title',
-							defaultMessage: 'Available containers',
+							defaultMessage: 'Containers not included',
 						})
 					}
 					collapsableTooltips={{
@@ -148,13 +148,13 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 						</Button>
 					)}
 					actionButtonTexts={{
-						allResults: <FormattedMessage id="modal.editFederation.available.includeAll" defaultMessage="Include all" />,
-						filteredResults: <FormattedMessage id="modal.editFederation.available.includeShown" defaultMessage="Include shown" />,
+						allResults: <FormattedMessage id="modal.editFederation.available.addAll" defaultMessage="Add all" />,
+						filteredResults: <FormattedMessage id="modal.editFederation.available.addShown" defaultMessage="Add shown" />,
 					}}
 					iconButton={useCallback(({ container }: IconButtonProps) => isCollaborator && (
 						<Tooltip title={formatMessage({
-							id: 'modal.editFederation.available.include.tooltip',
-							defaultMessage: 'Include container',
+							id: 'modal.editFederation.available.add.tooltip',
+							defaultMessage: 'Add container',
 						})}
 						>
 							<IconContainer

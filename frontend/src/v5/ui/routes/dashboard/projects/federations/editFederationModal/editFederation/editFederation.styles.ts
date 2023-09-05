@@ -19,7 +19,7 @@ import styled from 'styled-components';
 import { Button as ButtonBase } from '@controls/button';
 
 export const Button = styled(ButtonBase)`
-	width: 100px;
+	min-width: 100px;
 `;
 
 export const IconContainer = styled(ButtonBase)`
