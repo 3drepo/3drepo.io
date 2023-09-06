@@ -34,10 +34,9 @@ import { useParams } from 'react-router-dom';
 type TicketSlideProps = {
 	ticketId: string,
 	template: ITemplate,
-	containerOrFederation: string,
 };
-export const TicketSlide = ({ template, ticketId, containerOrFederation }: TicketSlideProps) => {
-	const { teamspace, project } = useParams<DashboardTicketsParams>();
+export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
+	const { teamspace, project, containerOrFederation } = useParams<DashboardTicketsParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsHooksSelectors.selectTicketByIdRaw(containerOrFederation, ticketId);
 	const readOnly = isFederation
@@ -80,7 +79,7 @@ export const TicketSlide = ({ template, ticketId, containerOrFederation }: Ticke
 			: enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation);
 	}, [containerOrFederation]);
 
-	if (!templateAlreadyFetched(template) || !ticket) return (<Loader />);
+	if (!templateAlreadyFetched(template) || !ticket || !containerOrFederation) return (<Loader />);
 
 	return (
 		<FormProvider {...formData}>
