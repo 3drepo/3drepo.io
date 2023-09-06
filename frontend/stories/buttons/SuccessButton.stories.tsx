@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,67 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { Button } from '@controls/button';
+import { SuccessButton } from '@controls/button/successButton/successButton.styles';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
-	title: 'Buttons/Button',
-	component: Button,
+	title: 'Buttons/SuccessButton',
+	component: SuccessButton,
 	// More on argTypes: https://storybook.js.org/docs/react/api/argtypes
-
 	argTypes: {
-		variant: {
-			description: 'Variant of the button',
-			options: ['contained', 'outlined', 'text'],
-			control: { type: 'select' },
-		},
-		/**
-		 * The color of the component. It supports those theme colors that make sense for this component.
-		 */
-		color: {
-			options: [
-				'inherit',
-				'primary',
-				'secondary',
-				'success',
-				'error',
-				'info',
-				'warning',
-			],
-			control: { type: 'select' },
-		},
-		isPending: {
-			type: 'boolean',
-		},
-		disabled: {
+		dark: {
 			type: 'boolean',
 		},
 	},
-} as ComponentMeta<typeof Button>;
+} as ComponentMeta<typeof SuccessButton>;
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof Button> = (args) => <Button {...args}>Controls Button</Button>;
+const Template: ComponentStory<typeof SuccessButton> = (args) => (
+	<div style={{ background: '#F2F6FC' }}>
+		<SuccessButton {...args}>Success Button</SuccessButton>
+	</div>
+);
 
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-export const Contained = Template.bind({});
-Contained.args = {
-	variant: 'contained',
-	color: 'secondary',
-};
+export const Dark = Template.bind({});
+Dark.args = { dark: true };
 
-export const Outlined = Template.bind({});
-Outlined.args = {
-	variant: 'outlined',
-	color: 'secondary',
-};
-
-export const Text = Template.bind({});
-Text.args = {
-	variant: 'text',
-	color: 'primary',
-};
-
-export const Error = Template.bind({});
-Error.args = {
-	errorButton: true,
-};
+export const Light = Template.bind({});
+Light.args = { dark: false };
