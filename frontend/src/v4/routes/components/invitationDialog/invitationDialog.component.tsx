@@ -237,6 +237,7 @@ export const InvitationDialog = (props: IProps) => {
 					<CancelButton
 						type="button"
 						color="primary"
+						{...(isV5() && { variant: 'text' })}
 						onClick={props.handleClose}
 					>
 						Cancel

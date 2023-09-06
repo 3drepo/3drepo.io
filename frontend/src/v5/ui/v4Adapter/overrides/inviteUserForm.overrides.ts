@@ -33,7 +33,7 @@ import { Color as JobColorDot, Name as JobTitle } from '@/v4/routes/components/j
 import { Container as TableCell, Detail, Name } from '@/v4/routes/components/modelItem/modelItem.styles';
 import { EmptySelectValue } from '@/v4/routes/components/newUserForm/newUserForm.styles';
 import { css } from 'styled-components';
-import { secondaryButtonStyling } from '../resuableOverrides.styles';
+import { secondaryTextButtonStyling } from '../resuableOverrides.styles';
 
 const JobSelectStyles = css`
 	${JobColorDot} {
@@ -203,7 +203,7 @@ export default css`
 		}
 		${Footer} {
 			.MuiButtonBase-root.MuiButtonBase-root:first-child {
-				${secondaryButtonStyling}
+				${secondaryTextButtonStyling}
 			}
 		}
 	}
