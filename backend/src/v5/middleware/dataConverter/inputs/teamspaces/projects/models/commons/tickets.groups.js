@@ -17,7 +17,6 @@
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const { deserialiseGroup, schema } = require('../../../../../../../schemas/tickets/tickets.groups');
-const { convertGroupRules } = require('./groups');
 const { getGroupById } = require('../../../../../../../models/tickets.groups');
 const { respond } = require('../../../../../../../utils/responder');
 const { validateMany } = require('../../../../../../common');
@@ -50,6 +49,6 @@ const validateGroup = async (req, res, next) => {
 	}
 };
 
-GroupsMiddleware.validateUpdateGroup = validateMany([groupExists, convertGroupRules, validateGroup]);
+GroupsMiddleware.validateUpdateGroup = validateMany([groupExists, validateGroup]);
 
 module.exports = GroupsMiddleware;
