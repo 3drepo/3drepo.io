@@ -177,6 +177,7 @@ export const TicketsTable = () => {
 
 	useEffect(() => {
 		dispatch(JobsActions.fetchJobs(teamspace));
+		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
 	}, []);
 
 	return (
@@ -230,7 +231,7 @@ export const TicketsTable = () => {
 				{sidePanelModelIdAndTemplate && (
 					<MuiThemeProvider theme={theme}>
 						<TicketContextComponent isViewer={false}>
-							{editingTicketId && (<TicketSlide ticketId={sidePanelTicket._id} {...sidePanelModelIdAndTemplate} />)}
+							{editingTicketId && (<TicketSlide ticketId={sidePanelTicket._id} {...sidePanelModelIdAndTemplate} containerOrFederation={sidePanelModelIdAndTemplate.modelId} />)}
 							{!editingTicketId && (<NewTicketSlide defaultValue={sidePanelTicket} {...sidePanelModelIdAndTemplate} onSave={onSaveTicket} />)}
 						</TicketContextComponent>
 					</MuiThemeProvider>

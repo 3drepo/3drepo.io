@@ -34,9 +34,10 @@ import { useParams } from 'react-router-dom';
 type TicketSlideProps = {
 	ticketId: string,
 	template: ITemplate,
+	containerOrFederation: string,
 };
-export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
-	const { teamspace, project, containerOrFederation } = useParams<DashboardTicketsParams>();
+export const TicketSlide = ({ template, ticketId, containerOrFederation }: TicketSlideProps) => {
+	const { teamspace, project } = useParams<DashboardTicketsParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsHooksSelectors.selectTicketByIdRaw(containerOrFederation, ticketId);
 	const readOnly = isFederation
@@ -59,11 +60,20 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 
 	useEffect(() => {
 		formData.reset(ticket);
-		TicketsCardActionsDispatchers.setSelectedTicket(ticketId);
 	}, [ticket]);
 
 	useEffect(() => {
-		if (!containerOrFederation) return null;
+		TicketsActionsDispatchers.fetchTicket(
+			teamspace,
+			project,
+			containerOrFederation,
+			ticketId,
+			isFederation,
+		);
+		TicketsCardActionsDispatchers.setSelectedTicket(ticketId);
+	}, [ticketId, containerOrFederation]);
+
+	useEffect(() => {
 		TicketsCardActionsDispatchers.setReadOnly(readOnly);
 		return isFederation
 			? enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation)
