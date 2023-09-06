@@ -218,8 +218,8 @@ export const TicketsTable = () => {
 				<SlidePanelHeader>
 					<OpenInViewerButton disabled={!editingTicketId} onClick={openInViewer}>
 						<FormattedMessage
-							id="ticketsTable.button.openInViewer"
-							defaultMessage="Open in viewer"
+							id="ticketsTable.button.openIn3DViewer"
+							defaultMessage="Open in 3D viewer"
 						/>
 					</OpenInViewerButton>
 					<CircleButton onClick={onCloseSidePanel}>

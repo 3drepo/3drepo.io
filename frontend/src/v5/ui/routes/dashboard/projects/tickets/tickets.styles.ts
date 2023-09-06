@@ -71,7 +71,7 @@ export const OpenInViewerButton = styled(Button).attrs({
 	variant: 'contained',
 	color: 'primary',
 })`
-	width: 140px;
+	padding: 5px 16px;
 	height: 28px;
 	margin-left: 14px;
 `;
