@@ -50,11 +50,6 @@ const validateValuesArray = (operatorName, values) => {
 	return true;
 };
 
-Rules.convertFieldToObject = (rule) => ({
-	...rule,
-	field: isString(rule.field) ? { operator: OPERATORS.IS.name, values: [rule.field] } : rule.field,
-});
-
 const ruleSchema = Yup.object().shape({
 	name: Yup.string().min(1).required(),
 	field: Yup.object().shape({
@@ -83,6 +78,9 @@ const ruleSchema = Yup.object().shape({
 		(value) => validateValuesArray(value.operator, value.values))
 	.test('Field rules validation', 'field values field is not valid with the field operator selected',
 		(value) => validateValuesArray(value.field?.operator, value.field?.values));
+
+
+Rules.castSchema = (rule) => ruleSchema.cast(rule);
 
 Rules.schema = Yup.array().of(ruleSchema).min(1);
 

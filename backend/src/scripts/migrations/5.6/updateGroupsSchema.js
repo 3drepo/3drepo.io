@@ -17,7 +17,7 @@
 
 const { v5Path } = require('../../../interop');
 const { bulkWrite } = require('../../../v5/handler/db');
-const { convertFieldToObject } = require('../../../v5/schemas/rules');
+const { castSchema } = require('../../../v5/schemas/rules');
 
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
@@ -88,8 +88,7 @@ const processCollection = async (teamspace, collection) => {
 
 	groups.forEach((group) => {
 		const formattedRules = group.rules.map((rule) => {
-			const formattedRule = { ...rule, name: rule.name || generateRuleName(rule) };
-			return convertFieldToObject(formattedRule);
+			return { name: rule.name || generateRuleName(rule), ...castSchema(rule) };
 		});
 
 		groupUpdates.push({

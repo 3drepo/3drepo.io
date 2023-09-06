@@ -17,7 +17,7 @@
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Yup = require('yup');
-const { convertFieldToObject } = require('../../../../../../../schemas/rules');
+const { castSchema } = require('../../../../../../../schemas/rules');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { types } = require('../../../../../../../utils/helper/yup');
@@ -26,11 +26,11 @@ const { validateSchema } = require('../../../../../../../schemas/groups');
 const Groups = {};
 
 Groups.convertGroupRules = async (req, res, next) => {
-	const { group } = req.body;
+	const group = req.body;
 
 	if (group?.rules) {
 		// eslint-disable-next-line no-param-reassign
-		group.rules = group.rules.map(convertFieldToObject);
+		group.rules = await Promise.all(group.rules.map(castSchema));
 	}
 
 	await next();

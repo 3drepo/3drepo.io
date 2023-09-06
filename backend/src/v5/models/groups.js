@@ -22,10 +22,21 @@ const EventsManager = require('../services/eventsManager/eventsManager');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { templates } = require('../utils/responseCodes');
+const { castSchema } = require('../schemas/rules');
 
 const Groups = {};
 
-const findGroup = (teamspace, model, query, projection, sort) => db.find(teamspace, `${model}.groups`, query, projection, sort);
+const convertGroupRules = async (group) => {
+	if(group.rules){
+		group.rules = await Promise.all(group.rules.map(castSchema));
+	}
+}
+
+const findGroup = async (teamspace, model, query, projection, sort) => { 
+	const groups = await db.find(teamspace, `${model}.groups`, query, projection, sort);
+	await Promise.all(groups.map(convertGroupRules));
+	return groups;
+};
 
 Groups.getGroupsByIds = (teamspace, model, ids, projection) => {
 	const query = { _id: { $in: ids } };

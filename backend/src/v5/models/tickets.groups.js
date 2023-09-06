@@ -21,9 +21,15 @@ const { deleteMany, find, findOne, insertMany, updateOne } = require('../handler
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
-const { convertFieldToObject } = require('../schemas/rules');
+const { castSchema } = require('../schemas/rules');
 
 const Groups = {};
+
+const convertGroupRules = async (group) => {
+	if(group.rules){
+		group.rules = await Promise.all(group.rules.map(castSchema));
+	}
+}
 
 Groups.addGroups = async (teamspace, project, model, ticket, groups) => {
 	const data = groups.map((groupData) => ({ ...groupData, teamspace, project, model, ticket }));
@@ -34,8 +40,13 @@ Groups.deleteGroups = async (teamspace, project, model, ticket, groupIds) => {
 	await deleteMany(teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: { $in: groupIds } });
 };
 
-Groups.getGroupsByIds = (teamspace, project, model, ticket, groupIds, projection) => find(
-	teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
+Groups.getGroupsByIds = async (teamspace, project, model, ticket, groupIds, projection) => {
+	const groups = await find(teamspace, GROUPS_COL, 
+		{ teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
+
+	await Promise.all(groups.map(convertGroupRules));
+	return groups;
+};
 
 Groups.updateGroup = async (teamspace, project, model, ticket, groupId, data, author) => {
 	const updates = { $set: data };
@@ -60,9 +71,7 @@ Groups.getGroupById = async (teamspace, project, model, ticket, groupId,
 		throw templates.groupNotFound;
 	}
 
-	if(group.rules){
-		group.rules = group.rules.map(convertFieldToObject);
-	}
+	await convertGroupRules(group);
 
 	return group;
 };

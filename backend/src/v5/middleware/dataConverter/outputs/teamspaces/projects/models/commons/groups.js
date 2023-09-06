@@ -16,33 +16,10 @@
  */
 
 const { castSchema } = require('../../../../../../../schemas/groups');
-const { convertFieldToObject } = require('../../../../../../../schemas/rules');
 const { respond } = require('../../../../../../../utils/responder');
 const { templates } = require('../../../../../../../utils/responseCodes');
 
 const Groups = {};
-
-const convertRules = (group) => {
-	const outputGroup = group;
-
-	if (outputGroup?.rules) {
-		outputGroup.rules = outputGroup.rules.map(convertFieldToObject);
-	}
-
-	return outputGroup;
-};
-
-Groups.convertGroupRules = (req, res) => {
-	const group = req.outputData;
-	convertRules(group);
-	respond(req, res, templates.ok, group);
-};
-
-Groups.convertGroupArrayRules = (req, res) => {
-	const groups = req.outputData;
-	groups?.map(convertRules);
-	respond(req, res, templates.ok, groups);
-};
 
 Groups.serialiseGroupArray = (req, res) => {
 	const groups = req.outputData.map(castSchema);

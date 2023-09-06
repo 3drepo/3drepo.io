@@ -25,10 +25,9 @@ const Group = require("../models/group");
 const C = require("../constants");
 const {v5Path} = require("../../interop");
 const GroupsV5 = require(`${v5Path}/processors/teamspaces/projects/models/commons/groups`);
-const { convertGroupRules: convertOutputGroupRules, serialiseGroupArray} = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
+const { serialiseGroupArray} = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
 const { validateGroupsExportData, validateGroupsImportData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
 const utils = require("../utils");
-const { convertGroupArrayRules } = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
 const { convertGroupRules: convertInputGroupRules } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
 const systemLogger = require("../logger.js").systemLogger;
 
@@ -149,9 +148,9 @@ const systemLogger = require("../logger.js").systemLogger;
  * 	}
  * ]
  */
-router.get("/revision/master/head/groups", middlewares.issue.canView, listGroups, convertGroupArrayRules);
+router.get("/revision/master/head/groups", middlewares.issue.canView, listGroups);
 
-router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups, convertGroupArrayRules);
+router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups);
 
 /**
  * @api {get} /:teamspace/:model/revision(/master/head|/:revId)/groups/:groupId?[query] Find group
@@ -254,9 +253,9 @@ router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups, conve
  * 	"_id":"00000000-0000-0000-0000-000000000004"
  * }
  */
-router.get("/revision/master/head/groups/:uid", middlewares.issue.canView, findGroup, convertOutputGroupRules);
+router.get("/revision/master/head/groups/:uid", middlewares.issue.canView, findGroup);
 
-router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup, convertOutputGroupRules);
+router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup);
 
 /**
  * @api {put} /:teamspace/:model/revision(/master/head|/:revId)/groups/:groupId/ Update group
@@ -303,9 +302,9 @@ router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup, c
  * 	"_id":"00000000-0000-0000-0000-000000000002"
  * }
  */
-router.put("/revision/master/head/groups/:uid", middlewares.issue.canCreate, convertInputGroupRules, updateGroup,convertOutputGroupRules);
+router.put("/revision/master/head/groups/:uid", middlewares.issue.canCreate, convertInputGroupRules, updateGroup);
 
-router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, convertInputGroupRules, updateGroup,convertOutputGroupRules);
+router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, convertInputGroupRules, updateGroup);
 
 /**
  * @api {post} /:teamspace/:model/revision(/master/head|/:revId)/groups Create group
@@ -549,9 +548,8 @@ function listGroups(req, res, next) {
 		}
 	}
 
-	Group.getList(account, model, branch, rid, ids, req.query, showIfcGuids).then(async groups => {
-		req.outputData = groups;
-		await next();
+	Group.getList(account, model, branch, rid, ids, req.query, showIfcGuids).then(groups => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, groups);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -564,9 +562,8 @@ function findGroup(req, res, next) {
 	const branch = rid ? null : "master";
 	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
 
-	Group.findByUID(account, model, branch, rid, uid, showIfcGuids, false).then(async group => {
-		req.outputData = group;
-		await next();
+	Group.findByUID(account, model, branch, rid, uid, showIfcGuids, false).then(group => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -613,9 +610,8 @@ function updateGroup(req, res, next) {
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
 
-	Group.update(account, model, branch, rid, sessionId, req.session.user.username, uid, req.body).then(async group => {
-		req.outputData = group;
-		await next();
+	Group.update(account, model, branch, rid, sessionId, req.session.user.username, uid, req.body).then(group => {
+		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
