@@ -28,7 +28,7 @@ import { useCallback, useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { useContainersData } from '../../../containers/containers.hooks';
-import { IconContainer, Button } from './editFederation.styles';
+import { SuccessIconContainer, ErrorIconContainer, SuccessButton, ErrorButton } from './editFederation.styles';
 import { ActionButtonProps, EditFederationContainers } from './editFederationContainersList/editFederationContainersList.component';
 import { IconButtonProps } from './editFederationContainersList/editFederationContainersListItem/editFederationContainersListItem.component';
 import { EditFederationContext } from '../editFederationContext';
@@ -85,33 +85,32 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 						</DashboardListEmptyText>
 					)}
 					actionButton={({ children, disabled, filteredContainers }: ActionButtonProps) => isCollaborator && (
-						<Button
-							color="error"
+						<ErrorButton
 							onClick={() => removeContainers(filteredContainers)}
 							disabled={disabled}
 						>
 							{children}
-						</Button>
+						</ErrorButton>
 					)}
 					actionButtonTexts={{
 						allResults: <FormattedMessage id="modal.editFederation.included.removeAll" defaultMessage="Remove all" />,
 						filteredResults: <FormattedMessage id="modal.editFederation.included.removeShown" defaultMessage="Remove shown" />,
 					}}
-					iconButton={useCallback(({ container }: IconButtonProps) => isCollaborator && (
+					iconButton={useCallback(({ container, isSelected }: IconButtonProps) => isCollaborator && (
 						<Tooltip title={formatMessage({
 							id: 'modal.editFederation.available.remove.tooltip',
 							defaultMessage: 'Remove container',
 						})}
 						>
-							<IconContainer
-								color="error"
+							<ErrorIconContainer
 								onClick={(event) => {
 									event.stopPropagation();
 									removeContainer(container);
 								}}
+								dark={isSelected}
 							>
 								<RemoveIcon />
-							</IconContainer>
+							</ErrorIconContainer>
 						</Tooltip>
 					), [])}
 				/>
@@ -138,34 +137,33 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 						</DashboardListEmptyText>
 					)}
 					actionButton={({ children, disabled, filteredContainers, ...buttonProps }) => isCollaborator && (
-						<Button
-							color="success"
+						<SuccessButton
 							onClick={() => includeContainers(filteredContainers)}
 							disabled={disabled}
 							{...buttonProps}
 						>
 							{children}
-						</Button>
+						</SuccessButton>
 					)}
 					actionButtonTexts={{
 						allResults: <FormattedMessage id="modal.editFederation.available.addAll" defaultMessage="Add all" />,
 						filteredResults: <FormattedMessage id="modal.editFederation.available.addShown" defaultMessage="Add shown" />,
 					}}
-					iconButton={useCallback(({ container }: IconButtonProps) => isCollaborator && (
+					iconButton={useCallback(({ container, isSelected }: IconButtonProps) => isCollaborator && (
 						<Tooltip title={formatMessage({
 							id: 'modal.editFederation.available.add.tooltip',
 							defaultMessage: 'Add container',
 						})}
 						>
-							<IconContainer
-								color="success"
+							<SuccessIconContainer
 								onClick={(event) => {
 									event.stopPropagation();
 									includeContainer(container);
 								}}
+								dark={isSelected}
 							>
 								<IncludeIcon />
-							</IconContainer>
+							</SuccessIconContainer>
 						</Tooltip>
 					), [])}
 				/>

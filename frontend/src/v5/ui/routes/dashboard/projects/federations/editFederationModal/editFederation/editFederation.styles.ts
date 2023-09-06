@@ -15,14 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Button as ButtonBase } from '@controls/button';
+import styled, { css } from 'styled-components';
+import { SuccessButton as SuccessButtonBase } from '@controls/button/successButton/successButton.styles';
+import { ErrorButton as ErrorButtonBase } from '@controls/button/errorButton/errorButton.styles';
 
-export const Button = styled(ButtonBase)`
+export const SuccessButton = styled(SuccessButtonBase)`
+	min-width: 100px;
+`;
+export const ErrorButton = styled(ErrorButtonBase)`
 	min-width: 100px;
 `;
 
-export const IconContainer = styled(ButtonBase)`
+const iconContainerStyles = css`
 	display: grid;
 	place-content: center;
 	width: 20px;
@@ -34,4 +38,12 @@ export const IconContainer = styled(ButtonBase)`
 	&, &:hover, &:active, &:focus {
 		border-width: 2px;
 	}
+`;
+
+export const SuccessIconContainer = styled(SuccessButton)`
+	${iconContainerStyles}
+`;
+
+export const ErrorIconContainer = styled(ErrorButton)`
+	${iconContainerStyles}
 `;

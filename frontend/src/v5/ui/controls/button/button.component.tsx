@@ -18,7 +18,7 @@
 import { ElementType, forwardRef, Ref } from 'react';
 import { ButtonProps, ButtonTypeMap } from '@mui/material/Button';
 import { CircularProgress } from '@mui/material';
-import { MuiButton, ErrorButton, SuccessButton } from './button.styles';
+import { MuiButton } from './button.styles';
 
 export type IButton<T extends ElementType = ButtonTypeMap['defaultComponent']> = ButtonProps<T> & {
 	className?: string;
@@ -32,22 +32,6 @@ const ButtonBase = <T extends ElementType>({
 	isPending,
 	...props
 }: IButton<T>, ref: Ref<HTMLButtonElement>) => {
-	if (color === 'error') {
-		return (
-			<ErrorButton {...props} ref={ref}>
-				{children}
-			</ErrorButton>
-		);
-	}
-
-	if (color === 'success') {
-		return (
-			<SuccessButton {...props} ref={ref}>
-				{children}
-			</SuccessButton>
-		);
-	}
-
 	if (isPending) {
 		return (
 			<MuiButton variant={variant} {...props} startIcon="" ref={ref}>
