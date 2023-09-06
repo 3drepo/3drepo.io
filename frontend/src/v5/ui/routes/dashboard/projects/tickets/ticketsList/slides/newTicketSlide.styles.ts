@@ -23,6 +23,12 @@ export const SaveButton = styled(SubmitButton)`
 	width: fit-content;
 `;
 
+export const ButtonContainer = styled.div`
+	display: flex;
+	justify-content: end;
+	width: 100%;
+`;
+
 export const RequiresViewerContainer = styled.div`
 	padding: 27px;
 	box-sizing: border-box;

@@ -28,7 +28,7 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { merge } from 'lodash';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
-import { SaveButton, RequiresViewerContainer } from './newTicketSlide.styles';
+import { SaveButton, RequiresViewerContainer, ButtonContainer } from './newTicketSlide.styles';
 
 const getGroupDefaultValue = (template, ticket) => {
 	let defaultValues = getDefaultTicket(template);
@@ -102,9 +102,11 @@ export const NewTicketSlide = ({ defaultValue, modelId, template, onSave }: NewT
 			<FormProvider {...formData}>
 				<TicketForm template={getEditableProperties(template)} ticket={defaultValues} />
 			</FormProvider>
-			<SaveButton disabled={!formData.formState.isValid}>
-				<FormattedMessage id="ticketsTable.button.saveTicket" defaultMessage="Save ticket" />
-			</SaveButton>
+			<ButtonContainer>
+				<SaveButton disabled={!formData.formState.isValid}>
+					<FormattedMessage id="ticketsTable.button.saveTicket" defaultMessage="Save ticket" />
+				</SaveButton>
+			</ButtonContainer>
 		</form>
 	);
 };
