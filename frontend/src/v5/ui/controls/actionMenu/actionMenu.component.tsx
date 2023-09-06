@@ -27,6 +27,7 @@ export type ActionMenuProps = {
 	onOpen?: () => void;
 	onClose?: () => void;
 	disabled?: boolean;
+	useMousePosition?: boolean;
 };
 export const ActionMenu = ({
 	className,
@@ -36,14 +37,19 @@ export const ActionMenu = ({
 	onOpen,
 	onClose,
 	disabled,
+	useMousePosition,
 }: ActionMenuProps) => {
 	const [anchorEl, setAnchorEl] = useState(null);
+	const [anchorPosition, setAnchorPosition] = useState(null);
 
 	const handleOpen = (e) => {
 		e.stopPropagation();
 		e.preventDefault();
 		if (disabled) return;
 		setAnchorEl(e.currentTarget.children[0]);
+		if (useMousePosition) {
+			setAnchorPosition({ left: e.clientX, top: e.clientY });
+		}
 		onOpen?.();
 	};
 
@@ -67,6 +73,10 @@ export const ActionMenu = ({
 			<Popover
 				open={Boolean(anchorEl)}
 				anchorEl={anchorEl}
+				{...(useMousePosition && {
+					anchorReference: 'anchorPosition',
+					anchorPosition,
+				})}
 				anchorOrigin={{
 					vertical: 'bottom',
 					horizontal: 'center',
