@@ -138,5 +138,11 @@ export const BreadcrumbsRouting = () => {
 		}
 	}
 
+	if (breadcrumbs.length) {
+		const lastBreadCrumbIndex = breadcrumbs.length - 1;
+		// @ts-ignore
+		breadcrumbs[lastBreadCrumbIndex].options = _.sortBy(breadcrumbs[lastBreadCrumbIndex].options, ({ title }) => title.toLowerCase());
+	}
+
 	return (<Breadcrumbs breadcrumbs={breadcrumbs} />);
 };
