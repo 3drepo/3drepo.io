@@ -48,8 +48,6 @@ export const matchesPath = (path) => Boolean(matchPath(location.pathname, { path
 // eslint-disable-next-line no-restricted-globals
 export const matchesSubPath = (path) => Boolean(matchPath(location.pathname, { path }));
 
-export const isViewer = () => matchesPath(VIEWER_ROUTE);
-
 export interface TeamspaceParams {
 	teamspace?: string;
 }

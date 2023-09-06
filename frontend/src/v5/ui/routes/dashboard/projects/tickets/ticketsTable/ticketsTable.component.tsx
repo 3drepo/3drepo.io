@@ -38,6 +38,7 @@ import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { theme } from '@/v5/ui/routes/viewer/theme';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { enableRealtimeContainerNewTicket, enableRealtimeContainerUpdateTicket, enableRealtimeFederationNewTicket, enableRealtimeFederationUpdateTicket } from '@/v5/services/realtime/ticket.events';
+import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
 import { useSearchParam } from '../../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE, VIEWER_ROUTE } from '../../../../routes.constants';
@@ -228,8 +229,10 @@ export const TicketsTable = () => {
 				</SlidePanelHeader>
 				{sidePanelModelIdAndTemplate && (
 					<MuiThemeProvider theme={theme}>
-						{editingTicketId && (<TicketSlide ticketId={sidePanelTicket._id} {...sidePanelModelIdAndTemplate} />)}
-						{!editingTicketId && (<NewTicketSlide defaultValue={sidePanelTicket} {...sidePanelModelIdAndTemplate} onSave={onSaveTicket} />)}
+						<TicketContextComponent isViewer={false}>
+							{editingTicketId && (<TicketSlide ticketId={sidePanelTicket._id} {...sidePanelModelIdAndTemplate} />)}
+							{!editingTicketId && (<NewTicketSlide defaultValue={sidePanelTicket} {...sidePanelModelIdAndTemplate} onSave={onSaveTicket} />)}
+						</TicketContextComponent>
 					</MuiThemeProvider>
 				)}
 			</SidePanel>
