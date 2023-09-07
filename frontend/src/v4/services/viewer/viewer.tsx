@@ -30,8 +30,6 @@ import { uuid as UUID } from '../../helpers/uuid';
 import { clientConfigService } from '../clientConfig';
 import { MultiSelect } from './multiSelect';
 
-const UNITY_LOADER_PATH = 'unity/Build/unity.loader.js';
-
 declare const Module;
 
 interface IViewerConstructor {
@@ -210,7 +208,7 @@ export class ViewerService {
 			}, false);
 
 			// Event handlers MUST come first before setting src
-			this.unityLoaderScript.src = UNITY_LOADER_PATH;
+			this.unityLoaderScript.src = UnityUtil.unityLoaderPath();
 
 			// This kicks off the actual loading of Unity
 			this.unityLoaderScript.setAttribute('class', 'unity-loader');

@@ -67,10 +67,15 @@ export class UnityUtil {
 	/** @hidden */
 	public static unityInstance;
 
-	/** A URL pointing to the Unity folder of a distribution. E.g. www.3drepo.io/unity/.
-	 * This is where the Unity Build and the IndexedDb worker can be found. */
+	/** A URL pointing to the domain hosting a Unity distribution. E.g. www.3drepo.io/.
+	 * This is where the Unity Build folder and the IndexedDb worker can be found. */
 	/** @hidden */
-	public static unityUrl: URL;
+	public static unityDomain: URL;
+
+	/** A URL containing the subfolder under unityUrl where the Unity build and
+	 * its associated dependencies can be found.
+	 * This should usually be set to "/unity/Build" */
+	public static unityBuildSubdirectory : any;
 
 	/** @hidden */
 	public static readyPromise: Promise<void>;
@@ -121,6 +126,12 @@ export class UnityUtil {
 	public static verbose = false;
 
 	/**
+	 * Contains a list of calls to make during the Unity Update method. One
+	 * call is made per Unity frame.
+	 */
+	public static unityOnUpdateActions = [];
+
+	/**
 	* Initialise Unity.
 	* @category Configurations
 	* @param errorCallback - function to call when an error occurs.
@@ -132,6 +143,14 @@ export class UnityUtil {
 		UnityUtil.errorCallback = errorCallback;
 		UnityUtil.progressCallback = progressCallback;
 		UnityUtil.modelLoaderProgressCallback = modelLoaderProgressCallback;
+		UnityUtil.unityBuildSubdirectory = '/unity/Build';
+	}
+
+	/**
+	 * Call right after init(), in or to swap the viewer to the 2023 build
+	 */
+	public static useUnity2023(): void {
+		UnityUtil.unityBuildSubdirectory = '/unity/2023/unity/Build';
 	}
 
 	/** @hidden */
@@ -193,6 +212,13 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Returns the relative path of the Unity Loader to the current domain
+	 */
+	public static unityLoaderPath(): string {
+		return `${this.unityBuildSubdirectory}/unity.loader.js`;
+	}
+
+	/**
 	 * Launch the Unity Game.
  	 * @category Configurations
 	 * @param canvas - the html dom of the unity canvas
@@ -239,9 +265,9 @@ export class UnityUtil {
 			XMLHttpRequest.prototype.open = newOpen;
 		}
 
-		UnityUtil.unityUrl = new URL(domainURL || window.location.origin);
+		UnityUtil.unityDomain = new URL(domainURL || window.location.origin);
 
-		const buildUrl = new URL('/unity/Build', UnityUtil.unityUrl);
+		const buildUrl = new URL(UnityUtil.unityBuildSubdirectory, UnityUtil.unityDomain);
 
 		const config = {
 			dataUrl: `${buildUrl}/unity.data.unityweb`,
@@ -278,6 +304,16 @@ export class UnityUtil {
 		UnityUtil.modelLoaderProgressCallback = null;
 		UnityUtil.readyPromise = null;
 		UnityUtil.unityInstance.Quit();
+	}
+
+	/**
+	 * Called from within the viewer on each Unity frame.
+	 */
+	public static onUpdate() {
+		if (this.unityOnUpdateActions.length > 0) {
+			const action = this.unityOnUpdateActions.shift();
+			action();
+		}
 	}
 
 	/**
@@ -1800,15 +1836,12 @@ export class UnityUtil {
 	 */
 	public static multipleCallInChunks(arrLength: number, func:(start: number, end: number) => any, chunkSize = 5000) {
 		let index = 0;
-		let timer = 0;
 		while (index < arrLength) {
 			const end = index + chunkSize >= arrLength ? undefined : index + chunkSize;
-			const i = index; // For closure
-			setTimeout(() => {
+			const i = index; // For the closure
+			this.unityOnUpdateActions.push(() => {
 				func(i, end);
-			},
-			timer);
-			timer += 200;
+			});
 			index += chunkSize;
 		}
 	}
@@ -2051,6 +2084,6 @@ export class UnityUtil {
 	 * @param unityInstance
 	 */
 	public static createIndexedDbCache(gameObjectName: string) {
-		this.unityInstance.repoDbCache = new IndexedDbCache(this.unityInstance, gameObjectName, this.unityUrl);
+		this.unityInstance.repoDbCache = new IndexedDbCache(this.unityInstance, gameObjectName, this.unityDomain); // IndexedDbCache expects to find the worker at in [unityDomain]/unity/indexeddbworker.js
 	}
 }
