@@ -22,34 +22,6 @@ const { schema } = require("../../../v5/schemas/rules");
 const { toQuery } = require(`${v5Path}/models/metadata.rules`);
 const { schema: rulesSchema } = require(`${v5Path}/schemas/rules`);
 
-const commonOperators = {
-	"IS": 1,
-	"CONTAINS": 1,
-	"REGEX": 1
-};
-
-const fieldNameOperators = {
-	...commonOperators,
-	"STARTS_WITH": 1,
-	"ENDS_WITH": 1
-};
-
-const fieldValueOperators = {
-	...commonOperators,
-	"IS_EMPTY": 0,
-	"IS_NOT_EMPTY": 0,
-	"IS_NOT": 1,
-	"NOT_CONTAINS": 1,
-	"EQUALS": 1,
-	"NOT_EQUALS": 1,
-	"GT": 1,
-	"GTE": 1,
-	"LT": 1,
-	"LTE": 1,
-	"IN_RANGE": 2,
-	"NOT_IN_RANGE": 2
-};
-
 const notOperators = {
 	"IS_NOT": "IS",
 	"NOT_CONTAINS": "CONTAINS",
@@ -73,7 +45,7 @@ RuleHelper.checkRulesValidity = (rules) => {
 		return true;
 	} catch (err) {
 		return false;
-	};
+	}
 };
 
 RuleHelper.buildQueryFromRule = toQuery;

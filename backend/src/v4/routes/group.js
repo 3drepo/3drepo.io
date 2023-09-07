@@ -28,7 +28,7 @@ const GroupsV5 = require(`${v5Path}/processors/teamspaces/projects/models/common
 const { serialiseGroupArray} = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
 const { validateGroupsExportData, validateGroupsImportData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
 const utils = require("../utils");
-const { convertGroupRules: convertInputGroupRules } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
+const { castSchema } = require("../../v5/schemas/rules");
 const systemLogger = require("../logger.js").systemLogger;
 
 /**
@@ -302,9 +302,9 @@ router.get("/revision/:rid/groups/:uid", middlewares.issue.canView, findGroup);
  * 	"_id":"00000000-0000-0000-0000-000000000002"
  * }
  */
-router.put("/revision/master/head/groups/:uid", middlewares.issue.canCreate, convertInputGroupRules, updateGroup);
+router.put("/revision/master/head/groups/:uid", middlewares.issue.canCreate, updateGroup);
 
-router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, convertInputGroupRules, updateGroup);
+router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, updateGroup);
 
 /**
  * @api {post} /:teamspace/:model/revision(/master/head|/:revId)/groups Create group
@@ -463,9 +463,9 @@ router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, convertInp
  * 	]
  * }
  */
-router.post("/revision/master/head/groups/", middlewares.issue.canCreate, convertInputGroupRules, createGroup);
+router.post("/revision/master/head/groups/", middlewares.issue.canCreate, createGroup);
 
-router.post("/revision/:rid/groups/", middlewares.issue.canCreate, convertInputGroupRules, createGroup);
+router.post("/revision/:rid/groups/", middlewares.issue.canCreate, createGroup);
 
 /**
  * @api {delete} /:teamspace/:model/groups?ids=[GROUPS] Delete groups
@@ -570,14 +570,18 @@ function findGroup(req, res, next) {
 	});
 }
 
-function createGroup(req, res, next) {
+async function createGroup(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model } = req.params;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
+	const groupData = req.body;
+	if (groupData?.rules) {
+		groupData.rules = await Promise.all(groupData.rules.map(castSchema));
+	}
 
-	Group.create(account, model, branch, rid, sessionId, req.session.user.username, req.body).then(group => {
+	Group.create(account, model, branch, rid, sessionId, req.session.user.username, groupData).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
@@ -602,7 +606,7 @@ function deleteGroups(req, res, next) {
 	}
 }
 
-function updateGroup(req, res, next) {
+async function updateGroup(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, uid } = req.params;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
@@ -610,7 +614,12 @@ function updateGroup(req, res, next) {
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
 
-	Group.update(account, model, branch, rid, sessionId, req.session.user.username, uid, req.body).then(group => {
+	const groupData = req.body;
+	if (groupData?.rules) {
+		groupData.rules = await Promise.all(groupData.rules.map(castSchema));
+	}
+
+	Group.update(account, model, branch, rid, sessionId, req.session.user.username, uid, groupData).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);

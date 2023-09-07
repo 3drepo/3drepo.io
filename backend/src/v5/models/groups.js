@@ -20,19 +20,19 @@
 
 const EventsManager = require('../services/eventsManager/eventsManager');
 const db = require('../handler/db');
+const { castSchema } = require('../schemas/rules');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { templates } = require('../utils/responseCodes');
-const { castSchema } = require('../schemas/rules');
 
 const Groups = {};
 
 const convertGroupRules = async (group) => {
-	if(group.rules){
+	if (group.rules) {
 		group.rules = await Promise.all(group.rules.map(castSchema));
 	}
-}
+};
 
-const findGroup = async (teamspace, model, query, projection, sort) => { 
+const findGroup = async (teamspace, model, query, projection, sort) => {
 	const groups = await db.find(teamspace, `${model}.groups`, query, projection, sort);
 	await Promise.all(groups.map(convertGroupRules));
 	return groups;

@@ -18,18 +18,18 @@
 const GROUPS_COL = 'tickets.groups';
 
 const { deleteMany, find, findOne, insertMany, updateOne } = require('../handler/db');
+const { castSchema } = require('../schemas/rules');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
-const { castSchema } = require('../schemas/rules');
 
 const Groups = {};
 
 const convertGroupRules = async (group) => {
-	if(group.rules){
+	if (group.rules) {
 		group.rules = await Promise.all(group.rules.map(castSchema));
 	}
-}
+};
 
 Groups.addGroups = async (teamspace, project, model, ticket, groups) => {
 	const data = groups.map((groupData) => ({ ...groupData, teamspace, project, model, ticket }));
@@ -41,7 +41,7 @@ Groups.deleteGroups = async (teamspace, project, model, ticket, groupIds) => {
 };
 
 Groups.getGroupsByIds = async (teamspace, project, model, ticket, groupIds, projection) => {
-	const groups = await find(teamspace, GROUPS_COL, 
+	const groups = await find(teamspace, GROUPS_COL,
 		{ teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
 
 	await Promise.all(groups.map(convertGroupRules));

@@ -18,7 +18,7 @@
 const { OPERATORS } = require('./groups.constants');
 const { isArray } = require('../utils/helper/typeCheck');
 const { sanitiseRegex } = require('../utils/helper/strings');
-const { templates, createResponseCode } = require('../utils/responseCodes');
+const { createResponseCode, templates } = require('../utils/responseCodes');
 
 const Rules = {};
 
@@ -86,7 +86,7 @@ const getFieldClause = (rule) => {
 	}
 		break;
 	default:
-		throw createResponseCode(templates.invalidArguments, 'Rule operator is unknown.')
+		throw createResponseCode(templates.invalidArguments, 'Rule operator is unknown.');
 	}
 
 	return fieldClause;
@@ -142,7 +142,7 @@ const getValueClause = (rule) => {
 		}
 		break;
 	default:
-		throw createResponseCode(templates.invalidArguments, 'Rule operator is unknown.')
+		throw createResponseCode(templates.invalidArguments, 'Rule operator is unknown.');
 	}
 
 	return valueClause;

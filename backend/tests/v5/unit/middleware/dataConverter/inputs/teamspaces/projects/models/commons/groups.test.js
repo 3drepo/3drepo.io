@@ -95,49 +95,63 @@ const testValidateGroupsImportData = () => {
 	const ifcGroup = generateLegacyGroup('ab', generateUUIDString(), false, true);
 	const normalGroup = generateLegacyGroup('ab', generateUUIDString(), false, false);
 
+	const stringFieldRule = {
+		name: generateRandomString(),
+		field: generateRandomString(),
+		operator: OPERATORS.EQUALS.name,
+		values: [2, 4],
+	};
+
 	const numberRule = {
 		name: generateRandomString(),
-		field: { operator: 'IS', values:[generateRandomString()] },
+		field: { operator: 'IS', values: [generateRandomString()] },
 		operator: OPERATORS.EQUALS.name,
 		values: [2, 4],
 	};
 
 	const rangeRule = {
 		name: generateRandomString(),
-		field: { operator: 'IS', values:[generateRandomString()] },
+		field: { operator: 'IS', values: [generateRandomString()] },
 		operator: OPERATORS.IN_RANGE.name,
 		values: [2, 4, 5, 7],
 	};
 
 	const noNameRule = {
-		field: { operator: 'IS', values:[generateRandomString()] },
+		field: { operator: 'IS', values: [generateRandomString()] },
 		operator: OPERATORS.IS_EMPTY.name,
 	};
 
 	const existRule = {
 		name: generateRandomString(),
-		field: { operator: 'IS', values:[generateRandomString()] },
+		field: { operator: 'IS', values: [generateRandomString()] },
 		operator: OPERATORS.IS_EMPTY.name,
-	};	
+	};
 
 	const badRangeRule = {
 		name: generateRandomString(),
-		field: { operator: 'IS', values:[generateRandomString()] },
+		field: { operator: 'IS', values: [generateRandomString()] },
 		operator: OPERATORS.IN_RANGE.name,
 		values: [2, 4, 3],
 	};
 
 	const badRule = {
 		name: generateRandomString(),
-		field: { operator: 'IS', values:[generateRandomString()] },
+		field: { operator: 'IS', values: [generateRandomString()] },
 		operator: OPERATORS.EQUALS.name,
 		values: ['a', 'b'],
 	};
 
-	const regexWithMoreThan1Values = {
+	const regexWithMoreThan1ValuesRule = {
 		name: generateRandomString(),
-		field: { operator: 'IS', values:[generateRandomString()] },
+		field: { operator: 'IS', values: [generateRandomString()] },
 		operator: OPERATORS.REGEX.name,
+		values: [generateRandomString(), generateRandomString()],
+	};
+
+	const unknownOperatorRule = {
+		name: generateRandomString(),
+		field: { operator: 'IS', values: [generateRandomString()] },
+		operator: generateRandomString(),
 		values: [generateRandomString(), generateRandomString()],
 	};
 
@@ -150,6 +164,7 @@ const testValidateGroupsImportData = () => {
 		[{ body: { groups: [_.omit(ruleGroup, ['author'])] } }, false, 'no author'],
 		[{ body: { groups: [_.omit(ruleGroup, ['createdAt'])] } }, false, 'no createdAt'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [] }] } }, false, 'with empty rules'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [stringFieldRule] }] } }, true, 'rule with string field'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [existRule] }] } }, true, 'exists rule'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [noNameRule] }] } }, false, 'rule with no name'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [numberRule] }] } }, true, 'rule with number parameters'],
@@ -158,7 +173,8 @@ const testValidateGroupsImportData = () => {
 		[{ body: { groups: [{ ...ruleGroup, rules: [...ruleGroup.rules, numberRule] }] } }, true, 'multiple rules'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [...ruleGroup.rules, badRule, numberRule] }] } }, false, 'multiple rules where one is bad'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [badRule] }] } }, false, 'rule with invalidParameters'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [regexWithMoreThan1Values] }] } }, false, 'regex with more than 1 values'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [regexWithMoreThan1ValuesRule] }] } }, false, 'regex with more than 1 values'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [unknownOperatorRule] }] } }, false, 'rule with unknown operator'],
 		[{ body: { groups: [{ ...ifcGroup, objects: [] }] } }, false, 'with empty objects'],
 		[{ body: { groups: [{ ...ruleGroup, description: '123' }] } }, true, 'with description'],
 		[{ body: { groups: [_.omit(ruleGroup, ['updatedBy, updatedAt'])] } }, true, 'without updatedAt and updatedBy'],

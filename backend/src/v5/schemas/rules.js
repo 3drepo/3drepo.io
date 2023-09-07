@@ -22,30 +22,29 @@ const Yup = require('yup');
 const ruleParametersTypeCheck = (operator, values) => {
 	if (operator.isRange) {
 		return values.length % 2 === 0 && values.every(isNumber);
-	} else if (operator.isNumber) {
+	} if (operator.isNumber) {
 		return values.every(isNumber);
-	} else {
-		return values.every(isString);
 	}
+	return values.every(isString);
 };
 
 const Rules = {};
 
 const validateValuesArray = (operatorName, values) => {
 	const operator = OPERATORS[operatorName];
-	if(operator){
-		const minValues= operator.minValues;
-		const maxValues = operator.maxValues;
-	
+	if (operator) {
+		const { minValues } = operator;
+		const { maxValues } = operator;
+
 		const arrLength = (values || []).length;
-	
+
 		if (maxValues === 0 && arrLength === 0) {
 			return true;
 		}
-	
-		return arrLength >= minValues && (!maxValues || arrLength <= maxValues) && 
-				ruleParametersTypeCheck(operator, values);
-	}	
+
+		return arrLength >= minValues && (!maxValues || arrLength <= maxValues)
+			&& ruleParametersTypeCheck(operator, values);
+	}
 
 	return true;
 };
@@ -54,16 +53,16 @@ const ruleSchema = Yup.object().shape({
 	name: Yup.string().min(1).required(),
 	field: Yup.object().shape({
 		operator: Yup.string().uppercase().oneOf(Object.keys(FIELD_NAME_OPERATORS)).required(),
-		values: Yup.array().of(Yup.string().min(1)).required(),
-	}).transform((val, oldVal) => {		
-		return isString(oldVal) ? { operator: OPERATORS.IS.name, values: [oldVal] } : val;
-	}).required(),
+		values: Yup.array().required()
+			.when('operator', (operator, schema) => schema
+				.test('Field rules validation', 'field values field is not valid with the field operator selected',
+					(value) => validateValuesArray(operator, value))),
+	}).transform((val, oldVal) => (isString(oldVal) ? { operator: OPERATORS.IS.name, values: [oldVal] } : val)).required(),
 	operator: Yup.string().uppercase().oneOf(Object.keys(FIELD_VALUE_OPERATORS)).required(),
-	values: Yup.array().when('operator', {
-		is: (operator) => FIELD_VALUE_OPERATORS[operator]?.isNumber,
-		then: Yup.array().of(Yup.number()).min(1).required(),
-		otherwise: Yup.array().of(Yup.string().min(1)).optional(),
-	}),
+	values: Yup.array()
+		.when('operator', (operator, schema) => schema
+			.test('Rules validation', 'values field is not valid with the operator selected',
+				(value) => validateValuesArray(operator, value))),
 })
 	.noUnknown()
 	.transform((value) => {
@@ -73,12 +72,7 @@ const ruleSchema = Yup.object().shape({
 			delete res.values;
 		}
 		return res;
-	})
-	.test('Rules validation', 'values field is not valid with the operator selected',
-		(value) => validateValuesArray(value.operator, value.values))
-	.test('Field rules validation', 'field values field is not valid with the field operator selected',
-		(value) => validateValuesArray(value.field?.operator, value.field?.values));
-
+	});
 
 Rules.castSchema = (rule) => ruleSchema.cast(rule);
 

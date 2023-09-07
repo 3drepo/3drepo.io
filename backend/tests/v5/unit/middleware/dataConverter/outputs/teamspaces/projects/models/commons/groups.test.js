@@ -17,8 +17,8 @@
 
 const { OPERATORS } = require('../../../../../../../../../../src/v5/models/groups.constants');
 const { isString } = require('../../../../../../../../../../src/v5/utils/helper/typeCheck');
+const { generateLegacyGroup } = require('../../../../../../../../helper/services');
 const { src } = require('../../../../../../../../helper/path');
-const { generateLegacyGroup, generateRandomString } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -41,13 +41,6 @@ const testSerialiseGroupArray = () => {
 		],
 	}];
 
-	const stringFieldSchema = generateLegacyGroup('a', 'b', true, false, false);
-	stringFieldSchema.rules = [{
-		field: 'Element ID',
-		operator: OPERATORS.IS_NOT_EMPTY.name,
-		values: [generateRandomString()],
-	}];
-
 	describe.each([
 		[[], 'empty array'],
 		[
@@ -59,7 +52,6 @@ const testSerialiseGroupArray = () => {
 			'3 different group types',
 		],
 		[[badRuleCast], 'Bad schema'],
-		[[stringFieldSchema], 'Old schema (field is string)'],
 		[[{ ...generateLegacyGroup('a', 'b', true, false, false), updatedAt: undefined }], 'group with no updatedAt'],
 	])('Serialise Group array data', (data, desc) => {
 		test(`should serialise correctly with ${desc}`,

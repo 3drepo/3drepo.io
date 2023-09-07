@@ -225,14 +225,14 @@ const testGetGroupById = () => {
 		});
 
 		test('Should convert group rules and return whatever the query returns', async () => {
-			const fieldName = generateRandomString()
-			const expectedData = { ...generateRandomObject(), rules: [{ field: fieldName }]};
+			const fieldName = generateRandomString();
+			const expectedData = { ...generateRandomObject(), rules: [{ field: fieldName }] };
 			const projection = generateRandomObject();
 
 			db.findOne.mockResolvedValueOnce(expectedData);
 
 			await expect(Groups.getGroupById(teamspace, project, model, ticket, groupId, projection))
-				.resolves.toEqual({ ...expectedData, rules: [{ field: { operator: 'IS', values: [fieldName] } }]});
+				.resolves.toEqual({ ...expectedData, rules: [{ field: { operator: 'IS', values: [fieldName] } }] });
 
 			expect(db.findOne).toHaveBeenCalledTimes(1);
 			expect(db.findOne).toHaveBeenCalledWith(teamspace, groupCol,

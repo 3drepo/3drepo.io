@@ -17,24 +17,12 @@
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Yup = require('yup');
-const { castSchema } = require('../../../../../../../schemas/rules');
 const { respond } = require('../../../../../../../utils/responder');
 const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { types } = require('../../../../../../../utils/helper/yup');
 const { validateSchema } = require('../../../../../../../schemas/groups');
 
 const Groups = {};
-
-Groups.convertGroupRules = async (req, res, next) => {
-	const group = req.body;
-
-	if (group?.rules) {
-		// eslint-disable-next-line no-param-reassign
-		group.rules = await Promise.all(group.rules.map(castSchema));
-	}
-
-	await next();
-};
 
 Groups.validateGroupsExportData = async (req, res, next) => {
 	const schema = Yup.object().shape({
@@ -59,9 +47,9 @@ Groups.validateGroupsImportData = async (req, res, next) => {
 	try {
 		let { groups } = req.body;
 		if (!groups?.length) throw createResponseCode(templates.invalidArguments, 'Groups array cannot be empty');
-		
+
 		groups = await Promise.all(groups.map(validateSchema));
-		
+
 		for (let i = 0; i < groups.length; ++i) {
 			const group = groups[i];
 			group._id = stringToUUID(group._id);
@@ -75,7 +63,7 @@ Groups.validateGroupsImportData = async (req, res, next) => {
 		}
 
 		req.body = { groups };
-		
+
 		next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

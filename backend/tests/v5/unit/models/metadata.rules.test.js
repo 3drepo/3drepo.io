@@ -139,7 +139,7 @@ const getValueTestCases = () => {
 		},
 		{
 			desc: 'unknown value operator',
-			data: generateRule(field, 'INDSFDSF', [1000])
+			data: generateRule(field, 'INDSFDSF', [1000]),
 		},
 	];
 
@@ -209,7 +209,7 @@ const getFieldTestCases = () => {
 		{
 			desc: 'unknown field operator',
 			data: generateRule({ operator: generateRandomString(), values: fieldValues },
-				OPERATORS.IS.name, values)
+				OPERATORS.IS.name, values),
 		},
 	];
 

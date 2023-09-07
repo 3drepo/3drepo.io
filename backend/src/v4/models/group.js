@@ -315,10 +315,10 @@ Group.deleteGroupsByViewId = async function (account, model, view_id) {
 };
 
 const convertGroupRules = async (group) => {
-	if(group.rules){
+	if(group.rules) {
 		group.rules = await Promise.all(group.rules.map(castSchema));
 	}
-}
+};
 
 Group.findByUID = async function (account, model, branch, revId, uid, showIfcGuids = false, noClean = true, convertToIfcGuids = false) {
 	const foundGroup = await db.findOne(account, getGroupCollectionName(model), { _id: utils.stringToUUID(uid) });
@@ -383,7 +383,7 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 	}
 
 	const results = await db.find(account, getGroupCollectionName(model), query);
-	
+
 	await Promise.all(results.map(convertGroupRules));
 
 	const sharedIdConversionPromises = [];

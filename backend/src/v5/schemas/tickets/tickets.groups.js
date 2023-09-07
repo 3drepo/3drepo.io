@@ -66,7 +66,7 @@ Groups.serialiseGroup = (group) => {
 		ticket: uuidString,
 		objects: Yup.array().of(Yup.object({
 			_ids: Yup.array().of(uuidString),
-		}))
+		})),
 	});
 	return caster.cast(group);
 };
