@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import LoginBackground from '@assets/images/login_background.svg';
+import LoginBackground from '@assets/images/login_background.png';
 import DefaultLogoBase from '@assets/icons/filled/logo_text-filled.svg';
 import { Typography } from '@controls/typography';
 import { clientConfigService } from '@/v4/services/clientConfig';
@@ -63,7 +63,7 @@ export const Divider = styled(DividerBase)`
 	margin: 19px 0;
 `;
 
-export const BackgroundOverlay = styled(LoginBackground)`
+export const BackgroundOverlay = styled.img.attrs({ src: LoginBackground })`
 	width: 1585px;
 	height: 1040px;
 	margin: auto;
@@ -75,6 +75,8 @@ export const BackgroundOverlay = styled(LoginBackground)`
 	left: 0;
 	right: 0;
 	overflow: hidden;
+	object-fit: cover;
+	object-position: 0 0;
 `;
 
 export const Background = styled.div`
