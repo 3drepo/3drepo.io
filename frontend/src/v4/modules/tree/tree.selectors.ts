@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { flatten, pick, uniq, values } from 'lodash';
+import { orderBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 
 import { NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
@@ -24,7 +24,6 @@ import { searchByFilters } from '../../helpers/searching';
 import { calculateTotalMeshes } from '../../helpers/tree';
 
 import TreeProcessing from './treeProcessing/treeProcessing';
-import { ITreeProcessingData } from './treeProcessing/treeProcessing.constants';
 
 export const selectTreeDomain = (state) => ({...state.tree});
 
@@ -57,6 +56,11 @@ const selectTreeProccessing = () => TreeProcessing.data ;
 export const selectTreeNodesList = createSelector(
 	selectTreeProccessing, selectDataRevision,
 	(treeProcessingData) => treeProcessingData.nodesList || []
+);
+
+export const selectSortedTreeNodesList = createSelector(
+	selectTreeNodesList,
+	(nodesList) => orderBy(nodesList, 'name')
 );
 
 export const selectSubModelsRootNodes = createSelector(
@@ -119,11 +123,12 @@ export const selectSelectedFilters = createSelector(
 );
 
 export const selectFilteredNodesList = createSelector(
-	selectTreeNodesList, selectSelectedFilters, (nodes, selectedFilters) => {
+	selectTreeNodesList, selectSortedTreeNodesList, selectSelectedFilters,
+	(nodes, sortedNodes, selectedFilters) => {
 		if (!selectedFilters.length) {
 			return nodes;
 		}
-		return searchByFilters(nodes, selectedFilters, true);
+		return searchByFilters(sortedNodes, selectedFilters, true);
 	}
 );
 
