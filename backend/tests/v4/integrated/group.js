@@ -513,7 +513,6 @@ describe("Groups", function () {
 
 		it("with rules and objects should fail", function(done) {
 			const newGroup = Object.assign({}, data);
-			delete newGroup.objects;
 			newGroup.rules = [{
 				name: "rule name",
 				field: { operator: "IS", values: ["TestField"] },
