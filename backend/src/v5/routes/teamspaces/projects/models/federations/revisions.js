@@ -71,11 +71,21 @@ const establishRoutes = () => {
 	 *             type: object
 	 *             properties:
 	 *               containers:
-	 *                 description: array of container Ids to federate together
+	 *                 description: array of containers to federate together
 	 *                 type: array
 	 *                 items:
-	 *                   type: string
-	 *                   format: uuid
+	 *                   type: object
+	 *                   properties:
+	 *                     _id:
+	 *                       description: container id
+	 *                       type: string
+	 *                       format: uuid
+	 *                     group:
+	 *                       description: federation group it should go under (optional)
+	 *                       type: string
+	 *                       example: Structural
+	 *                   required:
+	 *                     - _id
 	 *             required:
 	 *               - containers
 	 *     responses:
