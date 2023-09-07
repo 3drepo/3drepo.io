@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, templates } = require('../utils/responseCodes');
 const { OPERATORS } = require('./groups.constants');
 const { isArray } = require('../utils/helper/typeCheck');
 const { sanitiseRegex } = require('../utils/helper/strings');
-const { createResponseCode, templates } = require('../utils/responseCodes');
 
 const Rules = {};
 
@@ -59,32 +59,33 @@ const getFieldClause = (rule) => {
 	const { values } = rule.field;
 
 	switch (rule.field.operator) {
-	case OPERATORS.IS.name:
+	case OPERATORS.IS.name: {
 		fieldClause = values.length > 1 ? { $in: values } : values[0];
 		break;
+	}
 	case OPERATORS.CONTAINS.name: {
 		const sanitisedValues = values.map(sanitiseRegex);
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		fieldClause = { $regex: new RegExp(sanitisedValues.join('|')), $options: 'i' };
-	}
 		break;
+	}
 	case OPERATORS.STARTS_WITH.name: {
 		const sanitisedValues = values.map(sanitiseRegex);
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		fieldClause = { $regex: new RegExp(`^(${sanitisedValues.join('|')})`), $options: 'i' };
-	}
 		break;
+	}
 	case OPERATORS.ENDS_WITH.name: {
 		const sanitisedValues = values.map(sanitiseRegex);
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		fieldClause = { $regex: new RegExp(`(${sanitisedValues.join('|')})$`), $options: 'i' };
-	}
 		break;
+	}
 	case OPERATORS.REGEX.name: {
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		fieldClause = { $regex: new RegExp(`(${values[0]})`) };
-	}
 		break;
+	}
 	default:
 		throw createResponseCode(templates.invalidArguments, 'Rule operator is unknown.');
 	}

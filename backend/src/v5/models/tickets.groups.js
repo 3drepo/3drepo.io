@@ -26,9 +26,13 @@ const { templates } = require('../utils/responseCodes');
 const Groups = {};
 
 const convertGroupRules = async (group) => {
-	if (group.rules) {
-		group.rules = await Promise.all(group.rules.map(castSchema));
+	const convertedGroup = { ...group };
+
+	if (convertedGroup.rules) {
+		convertedGroup.rules = await Promise.all(convertedGroup.rules.map(castSchema));
 	}
+
+	return convertedGroup;
 };
 
 Groups.addGroups = async (teamspace, project, model, ticket, groups) => {
@@ -41,10 +45,10 @@ Groups.deleteGroups = async (teamspace, project, model, ticket, groupIds) => {
 };
 
 Groups.getGroupsByIds = async (teamspace, project, model, ticket, groupIds, projection) => {
-	const groups = await find(teamspace, GROUPS_COL,
+	let groups = await find(teamspace, GROUPS_COL,
 		{ teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
 
-	await Promise.all(groups.map(convertGroupRules));
+	groups = await Promise.all(groups.map(convertGroupRules));
 	return groups;
 };
 
@@ -64,14 +68,14 @@ Groups.updateGroup = async (teamspace, project, model, ticket, groupId, data, au
 
 Groups.getGroupById = async (teamspace, project, model, ticket, groupId,
 	projection = { teamspace: 0, project: 0, model: 0, ticket: 0 }) => {
-	const group = await findOne(
+	let group = await findOne(
 		teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: groupId }, projection);
 
 	if (!group) {
 		throw templates.groupNotFound;
 	}
 
-	await convertGroupRules(group);
+	group = await convertGroupRules(group);
 
 	return group;
 };

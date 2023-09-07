@@ -19,22 +19,26 @@
 // see tickets.groups.js
 
 const EventsManager = require('../services/eventsManager/eventsManager');
-const db = require('../handler/db');
 const { castSchema } = require('../schemas/rules');
+const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { templates } = require('../utils/responseCodes');
 
 const Groups = {};
 
 const convertGroupRules = async (group) => {
-	if (group.rules) {
-		group.rules = await Promise.all(group.rules.map(castSchema));
+	const convertedGroup = { ...group };
+
+	if (convertedGroup.rules) {
+		convertedGroup.rules = await Promise.all(convertedGroup.rules.map(castSchema));
 	}
+
+	return convertedGroup;
 };
 
 const findGroup = async (teamspace, model, query, projection, sort) => {
-	const groups = await db.find(teamspace, `${model}.groups`, query, projection, sort);
-	await Promise.all(groups.map(convertGroupRules));
+	let groups = await db.find(teamspace, `${model}.groups`, query, projection, sort);
+	groups = await Promise.all(groups.map(convertGroupRules));
 	return groups;
 };
 

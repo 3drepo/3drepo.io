@@ -57,7 +57,8 @@ const ruleSchema = Yup.object().shape({
 			.when('operator', (operator, schema) => schema
 				.test('Field rules validation', 'field values field is not valid with the field operator selected',
 					(value) => validateValuesArray(operator, value))),
-	}).transform((val, oldVal) => (isString(oldVal) ? { operator: OPERATORS.IS.name, values: [oldVal] } : val)).required(),
+	}).transform((val, oldVal) => (isString(oldVal)
+		? { operator: OPERATORS.IS.name, values: [oldVal] } : val)).required(),
 	operator: Yup.string().uppercase().oneOf(Object.keys(FIELD_VALUE_OPERATORS)).required(),
 	values: Yup.array()
 		.when('operator', (operator, schema) => schema
