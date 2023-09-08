@@ -19,13 +19,17 @@ import { ViewerActions } from '@/v4/modules/viewer';
 import * as API from '@/v5/services/api';
 import { getUrl } from '@/v5/services/api/default';
 import { formatMessage } from '@/v5/services/intl';
-import { put, takeLatest } from 'redux-saga/effects';
+import { isEmpty, pick } from 'lodash';
+import { put, select, takeLatest } from 'redux-saga/effects';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import {
 	CurrentUserActions,
 	CurrentUserTypes,
 	UpdatePersonalDataAction,
 } from './currentUser.redux';
+import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
+import { UsersActions } from '../users/users.redux';
+import { selectUsername } from './currentUser.selectors';
 
 export function* fetchUser() {
 	try {
@@ -50,15 +54,23 @@ export function* updatePersonalData({
 	onError,
 }: UpdatePersonalDataAction) {
 	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const user = yield select(selectUsername);
+		let updateUserData = pick(restOfPersonalData, 'firstName', 'lastName');
 		yield API.CurrentUser.updateUser(restOfPersonalData);
 		if (avatarFile) {
 			const formData = new FormData();
 			formData.append('file', avatarFile);
 			yield API.CurrentUser.updateAvatar(formData);
 			const avatarUrl = URL.createObjectURL(avatarFile);
-			yield put(CurrentUserActions.updateUserSuccess({ avatarUrl, hasAvatar: true }));
+			const avatarData = { avatarUrl, hasAvatar: true };
+			yield put(CurrentUserActions.updateUserSuccess(avatarData));
+			updateUserData = { ...updateUserData, ...avatarData };
 		}
 		yield put(CurrentUserActions.updateUserSuccess(restOfPersonalData));
+		if (!isEmpty(updateUserData)) {
+			yield put(UsersActions.updateUserSuccess(teamspace, user, updateUserData));
+		}
 		onSuccess();
 	} catch (error) {
 		onError(error);
