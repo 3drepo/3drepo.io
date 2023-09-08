@@ -24,6 +24,7 @@ import {
 	generateFakeAvatarFile,
 	generateFakeAvatarUrl,
 	generatePersonalData,
+	userFromCurrentUser,
 } from './currentUser.fixtures';
 import { createTestStore, spyOnAxiosApiCallWithFile } from '../test.helpers';
 import { mockServer } from '../../internals/testing/mockServer';
@@ -31,8 +32,10 @@ import { selectApiKey, selectCurrentUser } from '@/v5/store/currentUser/currentU
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 import { ViewerActions } from '@/v4/modules/viewer';
 import MockDate from 'mockdate';
-import { omit } from 'lodash';
+import { omit, pick } from 'lodash';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
+import { UsersActions } from '@/v5/store/users/users.redux';
+import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 
 describe('Current User: sagas', () => {
 	let onSuccess, onError;
@@ -44,6 +47,7 @@ describe('Current User: sagas', () => {
 	const mockUser = currentUserMockFactory();
 	const personalData: UpdatePersonalData = generatePersonalData();
 	const personalDataWithAvatarFile: UpdatePersonalData = { ...personalData, avatarFile: generateFakeAvatarFile() };
+	const teamspace = 'teamspace';
 
 	beforeAll(() => {
 		// don't change this (WONDERFUL) date :)
@@ -89,6 +93,12 @@ describe('Current User: sagas', () => {
 	})
 
 	describe('updatePersonalData', () => {
+		beforeEach(() => {
+			dispatch(CurrentUserActions.fetchUserSuccess(mockUser));
+			dispatch(UsersActions.fetchUsersSuccess(teamspace, [userFromCurrentUser(mockUser)]));
+			dispatch(TeamspacesActions.setCurrentTeamspace(teamspace));
+		});
+
 		it('should update user data (without avatar)', async () => {
 			mockServer
 				.put('/user')
@@ -96,7 +106,10 @@ describe('Current User: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(CurrentUserActions.updatePersonalData(personalData, onSuccess, onError));
-			}, [CurrentUserActions.updateUserSuccess(personalData)]);
+			}, [
+				CurrentUserActions.updateUserSuccess(personalData),
+				UsersActions.updateUserSuccess(teamspace, mockUser.username, pick(personalData, ['firstName', 'lastName'])),
+			]);
 
 			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
@@ -113,7 +126,7 @@ describe('Current User: sagas', () => {
 
 			const userInStore = selectCurrentUser(getState());
 
-			expect(userInStore).toEqual(INITIAL_USER);			
+			expect(userInStore).toEqual(mockUser);			
 			expect(onSuccess).not.toHaveBeenCalled();
 			expect(onError).toHaveBeenCalled();
 		})
@@ -135,10 +148,11 @@ describe('Current User: sagas', () => {
 			}, [
 				CurrentUserActions.updateUserSuccess(avatarData),
 				CurrentUserActions.updateUserSuccess(personalData),
+				UsersActions.updateUserSuccess(teamspace, mockUser.username, { ...avatarData, ...pick(personalData, ['firstName', 'lastName']) }),
 			]);
 
 			const userInStore = selectCurrentUser(getState());
-			expect(omit(userInStore, 'username')).toEqual({ ...personalData, ...avatarData });
+			expect(userInStore).toEqual({ ...mockUser, ...personalData, ...avatarData });
 			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
 
@@ -159,7 +173,7 @@ describe('Current User: sagas', () => {
 
 			const userInStore = selectCurrentUser(getState());
 			
-			expect(userInStore).toEqual(INITIAL_USER);		
+			expect(userInStore).toEqual(mockUser);		
 			
 			expect(onSuccess).not.toHaveBeenCalled();
 			expect(onError).toHaveBeenCalled();
