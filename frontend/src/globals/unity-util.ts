@@ -139,18 +139,11 @@ export class UnityUtil {
 	* @param progressCallback
 	* @param modelLoaderProgressCallback
 	*/
-	public static init(errorCallback: any, progressCallback: any, modelLoaderProgressCallback: any) {
+	public static init(errorCallback: any, progressCallback: any, modelLoaderProgressCallback: any, useBetaViewer: boolean) {
 		UnityUtil.errorCallback = errorCallback;
 		UnityUtil.progressCallback = progressCallback;
 		UnityUtil.modelLoaderProgressCallback = modelLoaderProgressCallback;
-		UnityUtil.unityBuildSubdirectory = '/unity/Build';
-	}
-
-	/**
-	 * Call right after init(), in or to swap the viewer to the 2023 build
-	 */
-	public static useUnity2023(): void {
-		UnityUtil.unityBuildSubdirectory = '/unity/2023/unity/Build';
+		UnityUtil.unityBuildSubdirectory =  userBetaViewer? '/unity/2023/unity/Build' : '/unity/Build';
 	}
 
 	/** @hidden */
