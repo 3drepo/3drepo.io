@@ -143,7 +143,7 @@ export class UnityUtil {
 		UnityUtil.errorCallback = errorCallback;
 		UnityUtil.progressCallback = progressCallback;
 		UnityUtil.modelLoaderProgressCallback = modelLoaderProgressCallback;
-		UnityUtil.unityBuildSubdirectory =  userBetaViewer? '/unity/2023/unity/Build' : '/unity/Build';
+		UnityUtil.unityBuildSubdirectory =  useBetaViewer? '/unity/2023/unity/Build' : '/unity/Build';
 	}
 
 	/** @hidden */
