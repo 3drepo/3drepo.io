@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { flatten, pick, uniq, values } from 'lodash';
+import { values } from 'lodash';
 import { createSelector } from 'reselect';
 
 import { NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
@@ -24,7 +24,6 @@ import { searchByFilters } from '../../helpers/searching';
 import { calculateTotalMeshes } from '../../helpers/tree';
 
 import TreeProcessing from './treeProcessing/treeProcessing';
-import { ITreeProcessingData } from './treeProcessing/treeProcessing.constants';
 
 export const selectTreeDomain = (state) => ({...state.tree});
 
@@ -44,6 +43,12 @@ export const selectComponentState = createSelector(
 	selectTreeDomain, (state) => state.componentState
 );
 
+// This is used by other selectors, although the data seems not to be used.
+// The reason is that "dataRevision" acts as an ID that changes when
+// the visibility of some nodes changes. So doing, it forces the other
+// selectors to recompute the returned data as opposed to what they have
+// "cached" (selectors do a comparison on the data to return to decide whether
+// or not to trigger state refresh).
 export const selectDataRevision = createSelector(
 	selectTreeDomain, (state) => state.dataRevision
 );
