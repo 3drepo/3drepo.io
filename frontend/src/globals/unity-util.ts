@@ -139,11 +139,11 @@ export class UnityUtil {
 	* @param progressCallback
 	* @param modelLoaderProgressCallback
 	*/
-	public static init(errorCallback: any, progressCallback: any, modelLoaderProgressCallback: any, useBetaViewer: boolean) {
+	public static init(errorCallback: any, progressCallback: any, modelLoaderProgressCallback: any, useBetaViewer = false) {
 		UnityUtil.errorCallback = errorCallback;
 		UnityUtil.progressCallback = progressCallback;
 		UnityUtil.modelLoaderProgressCallback = modelLoaderProgressCallback;
-		UnityUtil.unityBuildSubdirectory =  useBetaViewer? '/unity/2023/unity/Build' : '/unity/Build';
+		UnityUtil.unityBuildSubdirectory = useBetaViewer ? '/unity/beta/Build' : '/unity/Build'; // These directories are determined by webpack.common.config.js
 	}
 
 	/** @hidden */
