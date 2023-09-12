@@ -79,21 +79,7 @@ const beforeSelectedRevisionListItemStyles = css`
 	background-image: ${({ theme }) => `linear-gradient(${theme.palette.secondary.mid}, ${theme.palette.secondary.mid}), linear-gradient(to bottom, ${theme.palette.secondary.light}, ${theme.palette.primary.main})`};
 `;
 
-const singleRevisionListItemStyles = ({ theme, selected }) => css`
-	&:after {
-		content: '';
-		display: block !important;
-		width: 12px;
-		height: 12px;
-		position: absolute;
-		border-radius: 50%;
-		background-color: ${selected ? theme.palette.primary.main : theme.palette.secondary.light};
-		top: calc(50% - 6px);
-		left: -26px;
-	}
-`;
-
-const revisionListItemStylesLineStyles = ({ theme, selected, isBeforeSelected }) => css`
+const revisionListItemConnectingLinesStyles = ({ theme, selected, isBeforeSelected }) => css`
 	&:after {
 		content: '';
 		display: block;
@@ -110,9 +96,18 @@ const revisionListItemStylesLineStyles = ({ theme, selected, isBeforeSelected })
 		${selected && selectedRevisionListItemStyles};
 		${isBeforeSelected && beforeSelectedRevisionListItemStyles}
 	}
+	&:first-of-type:after {
+		border-top-left-radius: 10px;
+	}
+	&:nth-last-child(2):after {
+		border-bottom-left-radius: 10px;
+	}
+	&:last-of-type:after {
+		display: none;
+	}
 `;
 
-export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected?: boolean, isBeforeSelected: boolean }>`
+export const RevisionsListItemWrapper = styled.li<{ selected?: boolean, isBeforeSelected: boolean }>`
 	box-sizing: border-box;
 	height: ${ITEM_HEIGHT};
 	min-height: ${ITEM_HEIGHT};
@@ -146,16 +141,5 @@ export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected
 		border-left-color: ${theme.palette.primary.main};
 	`}
 	
-	/* Left side connecting line styles */
-	${({ isSingle }) => css`${isSingle ? singleRevisionListItemStyles : revisionListItemStylesLineStyles}`}
-	&:first-of-type:after {
-		border-top-left-radius: 10px;
-	}
-	&:nth-last-child(2):after {
-		border-bottom-left-radius: 10px;
-	}
-	&:last-of-type:after {
-		display: none;
-	}
-
+	${revisionListItemConnectingLinesStyles}
 `;

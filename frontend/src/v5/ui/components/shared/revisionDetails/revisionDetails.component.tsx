@@ -52,7 +52,6 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 	const revisions = RevisionsHooksSelectors.selectRevisions(containerId)
 		.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 	const selected = revisions.findIndex((r) => !r.void);
-	const isSingle = revisions?.length === 1;
 
 	useEffect(() => {
 		if (!revisions.length) {
@@ -105,7 +104,6 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 				) : (
 					revisions.map((revision, i) => (
 						<RevisionsListItemWrapper
-							isSingle={isSingle}
 							selected={i === selected}
 							isBeforeSelected={i === selected - 1}
 							onClick={() => {}}
