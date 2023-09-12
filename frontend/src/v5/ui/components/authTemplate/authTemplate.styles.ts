@@ -64,8 +64,8 @@ export const Divider = styled(DividerBase)`
 `;
 
 export const BackgroundOverlay = styled.img.attrs({ src: LoginBackground })`
-	width: 1585px;
-	height: 1040px;
+	width: 100%;
+	height: 100%;
 	margin: auto;
 	max-width: 100vw;
 	max-height: 100vh;
