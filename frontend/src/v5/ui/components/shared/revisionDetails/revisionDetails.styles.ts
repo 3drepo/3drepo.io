@@ -83,7 +83,7 @@ const revisionListItemConnectingLinesStyles = ({ theme, selected, isBeforeSelect
 	&:after {
 		content: '';
 		display: block;
-		width: 25px;
+		width: 24px;
 		height: ${ITEM_HEIGHT};
 		position: absolute;
 		top: 50%;
