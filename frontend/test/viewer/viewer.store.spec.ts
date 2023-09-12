@@ -19,9 +19,6 @@ import { selectIsFetching } from '@/v5/store/viewer/viewer.selectors';
 import { createTestStore } from '../test.helpers';
 
 describe('Viewer: store', () => {
-	const teamspace = 'myteamspace';
-	const projectId = 'myprojectid';
-	
 	let dispatch, getState;
 
 	beforeEach(() => {

@@ -145,7 +145,7 @@ export const VIEWER_PROJECTION_MODES = {
 };
 
 export const VIEWER_TOOLBAR_ITEMS = {
-	EXTENT: 'Extent',
+	HOME: 'Home',
 	TURNTABLE: 'Turntable',
 	HELICOPTER: 'Helicopter',
 	PERSPECTIVE_VIEW: 'Perspective View',
