@@ -26,7 +26,7 @@ export const theme = {
 	fontWeights: FONT_WEIGHT,
 	mixins,
 	media,
-};
+} as any;
 
 export const MuiTheme = createTheme({
 	palette: {

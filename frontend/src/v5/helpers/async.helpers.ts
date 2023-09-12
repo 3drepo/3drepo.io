@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,21 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ConfigSelect, ConfigSelectItem } from '../board.styles';
 
-export const ConfigSelectComponent = ({value, items, handleChange}) => {
-	return (
-		<ConfigSelect
-			value={value || (items.length ? items[0].value : '')}
-			onChange={handleChange}
-			disabled={!items.length}>
-			{ items.length &&
-				items.map((p, index) => (
-					<ConfigSelectItem key={index} value={p.value} disabled={p.disabled}>
-						{p.displayName}
-					</ConfigSelectItem>
-				))
-			}
-		</ConfigSelect>
-	);
+export const getWaitablePromise = () => {
+	let resolve;
+	const promiseToResolve = new Promise((res) => { resolve = res; });
+	return { promiseToResolve, resolve };
 };
