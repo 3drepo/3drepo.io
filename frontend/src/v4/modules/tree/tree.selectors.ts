@@ -60,7 +60,7 @@ export const selectTreeNodesList = createSelector(
 
 export const selectSortedTreeNodesList = createSelector(
 	selectTreeNodesList,
-	(nodesList) => orderBy(nodesList, 'name')
+	(nodesList) => orderBy(nodesList, ({ name }) => name?.toLowerCase()),
 );
 
 export const selectSubModelsRootNodes = createSelector(

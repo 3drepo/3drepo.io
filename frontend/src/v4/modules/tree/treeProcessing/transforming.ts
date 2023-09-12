@@ -62,7 +62,7 @@ const getFlattenNested = (tree, maps, data = [], idx = 0, level = 1, parentId = 
 	maps.nodesIndexesMap[nodeID] = idx++;
 	let subTreeRoots = [];
 	if (tree.children) {
-		tree.children = _.orderBy(tree.children, 'name');
+		tree.children = _.orderBy(tree.children, ({ name }) => name?.toLowerCase());
 		const hasChildren = tree.children.length;
 		rowData.hasChildren = hasChildren;
 		rowData.expandable = tree.children.some((child) => Boolean(child.name) || child.type === NODE_TYPES.TRANSFORMATION);
