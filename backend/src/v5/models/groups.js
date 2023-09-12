@@ -26,16 +26,19 @@ const { templates } = require('../utils/responseCodes');
 
 const Groups = {};
 
-const convertGroupRules = async (group) => {
-	if (group?.rules) {
-		group.rules = group.rules.map(castSchema);
+const convertGroupRules = (group) => {
+	const convertedGroup = { ...group };
+
+	if (convertedGroup?.rules) {
+		convertedGroup.rules = convertedGroup.rules.map(castSchema);
 	}
+
+	return convertedGroup;
 };
 
 const findGroups = async (teamspace, model, query, projection, sort) => {
 	const groups = await db.find(teamspace, `${model}.groups`, query, projection, sort);
-	groups.map(convertGroupRules);
-	return groups;
+	return groups.map(convertGroupRules);
 };
 
 Groups.getGroupsByIds = (teamspace, model, ids, projection) => {

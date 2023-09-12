@@ -211,7 +211,7 @@ const testGetGroupById = () => {
 		const model = generateRandomString();
 		const ticket = generateRandomString();
 		const groupId = generateRandomString();
-		
+
 		test('Should convert group rules and return whatever the query returns', async () => {
 			const expectedData = generateGroup(true);
 

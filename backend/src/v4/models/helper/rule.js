@@ -41,7 +41,7 @@ const RuleHelper = {};
 
 RuleHelper.checkRulesValidity = (group) => {
 	try {
-		if(group?.rules){
+		if(group?.rules) {
 			group.rules = schema.validateSync(group.rules);
 		}
 

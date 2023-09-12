@@ -152,12 +152,14 @@ const getFieldTestCases = () => {
 	const fieldTestCases = [
 		{
 			desc: 'field operator IS with 1 operand',
-			data: generateRule({ operator: FIELD_NAME_OPERATORS.IS.name, values: [fieldValues[0]] }, FIELD_VALUE_OPERATORS.IS.name, values),
+			data: generateRule({ operator: FIELD_NAME_OPERATORS.IS.name, values: [fieldValues[0]] },
+				FIELD_VALUE_OPERATORS.IS.name, values),
 			query: createQuery(fieldValues[0], { $in: values }),
 		},
 		{
 			desc: 'field operator IS with 1+ operands',
-			data: generateRule({ operator: FIELD_NAME_OPERATORS.IS.name, values: fieldValues }, FIELD_VALUE_OPERATORS.IS.name, values),
+			data: generateRule({ operator: FIELD_NAME_OPERATORS.IS.name, values: fieldValues },
+				FIELD_VALUE_OPERATORS.IS.name, values),
 			query: createQuery({ $in: fieldValues }, { $in: values }),
 		},
 		{
@@ -169,13 +171,15 @@ const getFieldTestCases = () => {
 		},
 		{
 			desc: 'field operator CONTAINS with 1+ operands',
-			data: generateRule({ operator: FIELD_NAME_OPERATORS.CONTAINS.name, values: fieldValues }, FIELD_VALUE_OPERATORS.IS.name, values),
+			data: generateRule({ operator: FIELD_NAME_OPERATORS.CONTAINS.name, values: fieldValues },
+				FIELD_VALUE_OPERATORS.IS.name, values),
 			// eslint-disable-next-line security/detect-non-literal-regexp
 			query: createQuery({ $regex: new RegExp(fieldValues.join('|')), $options: 'i' }, { $in: values }),
 		},
 		{
 			desc: 'field operator REGEX with 1 operand',
-			data: generateRule({ operator: FIELD_NAME_OPERATORS.REGEX.name, values: ['(\\w)+$'] }, FIELD_VALUE_OPERATORS.IS.name, values),
+			data: generateRule({ operator: FIELD_NAME_OPERATORS.REGEX.name, values: ['(\\w)+$'] },
+				FIELD_VALUE_OPERATORS.IS.name, values),
 			query: createQuery({ $regex: new RegExp('((\\w)+$)') }, { $in: values }),
 		},
 		{

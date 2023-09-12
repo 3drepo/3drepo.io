@@ -571,7 +571,7 @@ ServiceHelper.generateGroup = (isSmart = false, {
 				field: 'IFC GUID',
 				operator: FIELD_VALUE_OPERATORS.IS.name,
 				values: [
-					'1rbbJcnUDEEA_ArpSqk3B7',
+					ServiceHelper.generateRandomString(),
 				],
 			},
 			{
@@ -579,7 +579,7 @@ ServiceHelper.generateGroup = (isSmart = false, {
 				field: { operator: FIELD_NAME_OPERATORS.IS.name, values: ['IFC GUID'] },
 				operator: FIELD_VALUE_OPERATORS.IS.name,
 				values: [
-					'1rbbJcnUDEEA_ArpSqk3B7',
+					ServiceHelper.generateRandomString(),
 				],
 			},
 		];
@@ -613,7 +613,7 @@ ServiceHelper.generateLegacyGroup = (account, model, isSmart = false, isIfcGuids
 				field: { operator: FIELD_NAME_OPERATORS.IS.name, values: ['IFC GUID'] },
 				operator: FIELD_VALUE_OPERATORS.IS.name,
 				values: [
-					'1rbbJcnUDEEA_ArpSqk3B7',
+					ServiceHelper.generateRandomString(),
 				],
 			},
 		];

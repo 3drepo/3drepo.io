@@ -81,9 +81,9 @@ const deserialiseGroup = (group) => {
 	}
 
 	if (output?.rules) {
-		output.rules = output.rules.map((r) => ({
-			...r,
-			field: isString(r.field) ? { operator: FIELD_NAME_OPERATORS.IS.name, values: [r.field] } : r.field,
+		output.rules = output.rules.map(({ field, ...rest }) => ({
+			...rest,
+			field: isString(field) ? { operator: FIELD_NAME_OPERATORS.IS.name, values: [field] } : field,
 		}));
 	}
 

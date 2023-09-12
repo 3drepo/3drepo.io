@@ -41,7 +41,10 @@ const testGetGroupsByIds = () => {
 
 			const res = await Group.getGroupsByIds(teamspace, model, groupIds, projection);
 
-			const convertedExpectedData = expectedData.map((g) => ({ ...g, rules: g.rules.map(castSchema) }));
+			const convertedExpectedData = expectedData.map(({ rules, ...otherData }) => ({
+				...otherData,
+				rules: rules.map(castSchema),
+			}));
 			expect(res).toEqual(convertedExpectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.groups`,
@@ -64,9 +67,9 @@ const testGetGroups = () => {
 			const model = generateRandomString();
 			const projection = { _id: 0 };
 			const res = await Group.getGroups(teamspace, model, true, projection);
-			const convertedExpectedData = expectedData.map((g) => ({
-				...g,
-				rules: g.rules?.map(castSchema) || undefined,
+			const convertedExpectedData = expectedData.map(({ rules, ...otherData }) => ({
+				...otherData,
+				rules: rules?.map(castSchema) || undefined,
 			}));
 			expect(res).toEqual(convertedExpectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
@@ -86,7 +89,10 @@ const testGetGroups = () => {
 			const model = generateRandomString();
 			const projection = { _id: 0 };
 			const res = await Group.getGroups(teamspace, model, false, projection);
-			const convertedExpectedData = expectedData.map((g) => ({ ...g, rules: g.rules.map(castSchema) }));
+			const convertedExpectedData = expectedData.map(({ rules, ...otherData }) => ({
+				...otherData,
+				rules: rules.map(castSchema),
+			}));
 			expect(res).toEqual(convertedExpectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.groups`,

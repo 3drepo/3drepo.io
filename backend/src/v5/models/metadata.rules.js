@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../utils/responseCodes');
 const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require('./metadata.rules.constants');
+const { createResponseCode, templates } = require('../utils/responseCodes');
 const { isArray } = require('../utils/helper/typeCheck');
 const { sanitiseRegex } = require('../utils/helper/strings');
 

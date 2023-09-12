@@ -16,16 +16,16 @@
  */
 
 const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require('../models/metadata.rules.constants');
-const { isNumber, isString } = require('../utils/helper/typeCheck');
 const Yup = require('yup');
+const { isString } = require('../utils/helper/typeCheck');
 
 const Rules = {};
 
-const formulateValueSchema = (operatorName, isFieldName) => {	
+const formulateValueSchema = (operatorName, isFieldName) => {
 	const operatorsList = isFieldName ? FIELD_NAME_OPERATORS : FIELD_VALUE_OPERATORS;
 	const { minValues, maxValues, isNumber } = operatorsList[operatorName];
 
-	if(maxValues === 0){
+	if (maxValues === 0) {
 		return Yup.mixed().strip();
 	}
 
@@ -33,19 +33,17 @@ const formulateValueSchema = (operatorName, isFieldName) => {
 		.of(isNumber ? Yup.number() : Yup.string())
 		.required()
 		.min(minValues);
-		
-	if(maxValues) {
+
+	if (maxValues) {
 		schema = schema.max(maxValues);
 	}
 
-	if(minValues === 2) {
-		schema = schema.test('is-even-number', 'values array must have an even number of items', (values) => {
-			return values.length % 2 === 0;
-		  });
+	if (minValues === 2) {
+		schema = schema.test('is-even-number', 'values array must have an even number of items', (values) => values.length % 2 === 0);
 	}
 
 	return schema;
-}
+};
 
 const ruleSchema = Yup.object().shape({
 	name: Yup.string().min(1).required(),
@@ -57,7 +55,7 @@ const ruleSchema = Yup.object().shape({
 		? { operator: FIELD_NAME_OPERATORS.IS.name, values: [oldVal] } : val)).required(),
 	operator: Yup.string().uppercase().oneOf(Object.keys(FIELD_VALUE_OPERATORS)).required(),
 	values: Yup.mixed()
-		.when('operator', (operator) => formulateValueSchema(operator))			
+		.when('operator', (operator) => formulateValueSchema(operator)),
 })
 	.noUnknown();
 

@@ -26,9 +26,13 @@ const { templates } = require('../utils/responseCodes');
 const Groups = {};
 
 const convertGroupRules = (group) => {
-	if (group?.rules) {
-		group.rules = group.rules.map(castSchema);
+	const convertedGroup = { ...group };
+
+	if (convertedGroup?.rules) {
+		convertedGroup.rules = convertedGroup.rules.map(castSchema);
 	}
+
+	return convertedGroup;
 };
 
 Groups.addGroups = async (teamspace, project, model, ticket, groups) => {
@@ -44,9 +48,7 @@ Groups.getGroupsByIds = async (teamspace, project, model, ticket, groupIds, proj
 	const groups = await find(teamspace, GROUPS_COL,
 		{ teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
 
-	groups.map(convertGroupRules);
-
-	return groups;
+	return groups.map(convertGroupRules);
 };
 
 Groups.updateGroup = async (teamspace, project, model, ticket, groupId, data, author) => {
@@ -72,9 +74,7 @@ Groups.getGroupById = async (teamspace, project, model, ticket, groupId,
 		throw templates.groupNotFound;
 	}
 
-	convertGroupRules(group);
-
-	return group;
+	return convertGroupRules(group);
 };
 
 module.exports = Groups;
