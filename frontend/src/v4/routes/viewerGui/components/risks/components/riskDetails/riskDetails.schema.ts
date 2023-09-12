@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,21 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ConfigSelect, ConfigSelectItem } from '../board.styles';
+import { LONG_TEXT_CHAR_LIM } from '@/v4/constants/viewerGui';
+import { VALIDATIONS_MESSAGES } from '@/v4/services/validation';
+import * as Yup from 'yup';
 
-export const ConfigSelectComponent = ({value, items, handleChange}) => {
-	return (
-		<ConfigSelect
-			value={value || (items.length ? items[0].value : '')}
-			onChange={handleChange}
-			disabled={!items.length}>
-			{ items.length &&
-				items.map((p, index) => (
-					<ConfigSelectItem key={index} value={p.value} disabled={p.disabled}>
-						{p.displayName}
-					</ConfigSelectItem>
-				))
-			}
-		</ConfigSelect>
-	);
-};
+export const RiskSchema = Yup.object().shape({
+	desc: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	mitigation_desc: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	mitigation_detail: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING),
+	residual_risk: Yup.string().max(LONG_TEXT_CHAR_LIM, VALIDATIONS_MESSAGES.TOO_LONG_STRING)
+});

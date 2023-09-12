@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,19 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
-import { AddProjectIcon, Container } from './addProjectCard.styles';
-import { CardListItem } from '../../linkCard.styles';
-
-type AddProjectCardProps = {
-	onClick: () => void,
+export const getWaitablePromise = () => {
+	let resolve;
+	const promiseToResolve = new Promise((res) => { resolve = res; });
+	return { promiseToResolve, resolve };
 };
-
-export const AddProjectCard = ({ onClick }: AddProjectCardProps) => (
-	<CardListItem onClick={onClick}>
-		<Container>
-			<AddProjectIcon />
-			<FormattedMessage id="projectCard.addNewProject" defaultMessage="New Project" />
-		</Container>
-	</CardListItem>
-);

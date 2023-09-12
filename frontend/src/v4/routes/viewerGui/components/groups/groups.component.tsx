@@ -48,11 +48,10 @@ import {
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
-import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
 import { PanelBarActions } from '../panelBarActions';
-import {  Summary } from '../risks/risks.styles';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
+import { Summary } from '../reportedItems/reportedItems.styles';
 import { GroupDetails } from './components/groupDetails';
 import { GroupsContainer, GroupIcon } from './groups.styles';
 

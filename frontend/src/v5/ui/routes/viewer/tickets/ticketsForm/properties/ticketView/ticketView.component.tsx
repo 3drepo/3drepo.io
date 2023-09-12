@@ -61,7 +61,7 @@ export const TicketView = ({
 	const context = useContext(TicketContext);
 	const hasViewpoint = value?.camera;
 
-	// Viewpointx`
+	// Viewpoint
 	const updateViewpoint = async () => {
 		const currentCameraAndClipping = await ViewerService.getViewpoint();
 		const screenshot = stripBase64Prefix(await ViewerService.getScreenshot());
@@ -76,9 +76,8 @@ export const TicketView = ({
 
 	// Camera
 	const onUpdateCamera = async () => {
-		const { camera } = await ViewerService.getViewpoint();
-		const screenshot = stripBase64Prefix(await ViewerService.getScreenshot());
-		onChange?.({ ...value, screenshot, camera });
+		const currentCameraAndClipping = await ViewerService.getViewpoint();
+		onChange?.({ ...value, ...currentCameraAndClipping });
 	};
 
 	const onDeleteCamera = async () => {

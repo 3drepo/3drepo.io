@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,5 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-export { ProjectCard } from './projectCard.component';
-export { AddProjectCard } from './addProjectCard/addProjectCard.component';
+
+export const TREE_LEVELS = {
+	TEAMSPACE: 1,
+	PROJECT: 2,
+	MODEL: 3
+};

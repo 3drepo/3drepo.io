@@ -52,7 +52,6 @@ import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
 import { TreeActions } from '../tree';
-import { ViewerGuiActions } from '../viewerGui';
 import { ViewpointsActions } from '../viewpoints';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {

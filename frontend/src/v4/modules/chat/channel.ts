@@ -15,15 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CHAT_CHANNELS } from '../../constants/chat';
-import { ChatEvents } from './chat.events';
-import { IssuesChatEvents } from './issues.chat.events';
-import { ModelChatEvents } from './models.chat.events';
-import { NotificationsChatEvents } from './notifications.chat.events';
-import { PresentationChatEvents } from './presentation.chat.events';
-import { RisksChatEvents } from './risks.chat.events';
 import { Subscriptions } from './subscriptions';
-import { TeamspacesChatEvents } from './teamspaces.chat.events';
 
 const getEventName = (teamspace: string, model: string, keys: string, event: string) => {
 	const eventName = [teamspace];
@@ -41,39 +33,7 @@ const getEventName = (teamspace: string, model: string, keys: string, event: str
 };
 
 export class Channel {
-	/**
-	 * This property contains the object to subscribe to the issues and comments for the issues chat events
-	 */
-	public issues: IssuesChatEvents;
 
-	/**
-	 * This property contains the object to subscribe to the risks and comments for the risks chat events
-	 */
-	public risks: RisksChatEvents;
-
-	/**
-	 * This property contains the object to subscribe to the groups chat events
-	 */
-	public groups: ChatEvents;
-
-	/**
-	 * This property contains the object to subscribe to the resources chat events
-	 */
-	public resources: ChatEvents;
-
-	/**
-	 * This property contains the object to subscribe to the views chat events
-	 */
-	public views: ChatEvents;
-
-	/**
-	 * This property contains the object to subscribe to the general model status chat events
-	 */
-	public model: ModelChatEvents;
-
-	public notifications: NotificationsChatEvents;
-
-	public teamspaces: TeamspacesChatEvents;
 
 	/**
 	 * This dictionary holds the callbacks for every event in the channel .
@@ -87,15 +47,6 @@ export class Channel {
 		private modelStr: string,
 		private onSubscribe: () => void
 	) {
-		this[CHAT_CHANNELS.GROUPS] = new ChatEvents(this, 'group');
-		this[CHAT_CHANNELS.ISSUES] = new IssuesChatEvents(this);
-		this[CHAT_CHANNELS.RISKS] = new RisksChatEvents(this);
-		this[CHAT_CHANNELS.MODEL] = new ModelChatEvents(this);
-		this[CHAT_CHANNELS.VIEWS] = new ChatEvents(this, 'view');
-		this[CHAT_CHANNELS.RESOURCES] = new ChatEvents(this, 'resource');
-		this[CHAT_CHANNELS.NOTIFICATIONS] = new NotificationsChatEvents(this);
-		this[CHAT_CHANNELS.PRESENTATION] = new PresentationChatEvents(this);
-		this[CHAT_CHANNELS.TEAMSPACES] = new TeamspacesChatEvents(this);
 	}
 
 	/**

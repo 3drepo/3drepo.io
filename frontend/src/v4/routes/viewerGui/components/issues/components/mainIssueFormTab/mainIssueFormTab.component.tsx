@@ -33,7 +33,7 @@ import {
 } from '../../../risks/components/riskDetails/riskDetails.styles';
 import { UpdateButtons } from '../../../updateButtons/updateButtons.component';
 import { Content, DescriptionImage } from '../issueDetails/issueDetails.styles';
-import { IssueSchema } from '../issueDetails/issueDetailsForm.component';
+import { IssueSchema } from '../issueDetails/issueDetails.schema';
 import { DateFieldContainer } from './mainIssueFormTab.styles';
 
 interface IProps {

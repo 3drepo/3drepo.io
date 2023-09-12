@@ -28,6 +28,7 @@ import { CreateRevisionAction,
 } from './revisions.redux';
 import { ContainersActions } from '../containers/containers.redux';
 import { UploadStatuses } from '../containers/containers.types';
+import { createContainerFromRevisionBody, createFormDataFromRevisionBody } from './revisions.helpers';
 
 export function* fetch({ teamspace, projectId, containerId }: FetchAction) {
 	yield put(RevisionsActions.setIsPending(containerId, true));
@@ -60,13 +61,7 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 	let { containerId } = body;
 	if (!containerId) {
 		try {
-			const newContainer = {
-				name: body.containerName,
-				unit: body.containerUnit,
-				type: body.containerType,
-				code: body.containerCode,
-				desc: body.containerDesc,
-			};
+			const newContainer = createContainerFromRevisionBody(body);
 			containerId = yield API.Containers.createContainer(teamspace, projectId, newContainer);
 			yield put(ContainersActions.createContainerSuccess(projectId, { _id: containerId, ...newContainer }));
 		} catch (error) {
@@ -82,26 +77,13 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 				formatMessage({ id: 'revisions.error.noContainer', defaultMessage: 'Failed to create Container' })));
 			return;
 		}
-		const formData = new FormData();
-		formData.append('file', body.file);
-		formData.append('tag', body.revisionTag);
-		formData.append('importAnimations', body.importAnimations.toString());
-		formData.append('timezone', body.timezone);
-		if (body.revisionDesc) {
-			formData.append('desc', body.revisionDesc);
-		}
-
 		yield put(RevisionsActions.setUploadComplete(uploadId, false));
-		const updateProgress = (val: number) => {
-			RevisionsActionsDispatchers.setUploadProgress(uploadId, val);
-		};
-
 		yield API.Revisions.createRevision(
 			teamspace,
 			projectId,
 			containerId,
-			(percent) => updateProgress(percent),
-			formData,
+			(percent) => RevisionsActionsDispatchers.setUploadProgress(uploadId, percent),
+			createFormDataFromRevisionBody(body),
 		);
 		yield put(ContainersActions.setContainerStatus(projectId, containerId, UploadStatuses.QUEUED));
 		yield put(RevisionsActions.setUploadComplete(uploadId, true));

@@ -25,6 +25,7 @@ const { expect } = chai;
 const app = require("../../../src/v4/services/api.js").createApp();
 const async = require("async");
 const responseCodes = require("../../../src/v4/response_codes");
+const { templates : responseCodesV5 } = require("../../../src/v5/utils/responseCodes");
 
 describe("Mitigations", function () {
 
@@ -262,16 +263,16 @@ describe("Mitigations", function () {
 
 		it("if user is not member of teamspace should fail", function(done) {
 			agent.get(`/${notMemberOfTeamspace}/mitigations/criteria`)
-				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+				.expect(responseCodesV5.teamspaceNotFound.status, function(err, res) {
+					expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
 
 		it("if teamspace doesn't exist should fail", function(done) {
 			agent.get(`/${fakeTeamspace}/mitigations/criteria`)
-				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+				.expect(responseCodesV5.teamspaceNotFound.status, function(err, res) {
+					expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -332,8 +333,8 @@ describe("Mitigations", function () {
 		it("if user is not member of teamspace should fail", function(done) {
 			agent.post(`/${notMemberOfTeamspace}/mitigations`)
 				.send({})
-				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+				.expect(responseCodesV5.teamspaceNotFound.status, function(err, res) {
+					expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -341,8 +342,8 @@ describe("Mitigations", function () {
 		it("if teamspace doesn't exist should fail", function(done) {
 			agent.post(`/${fakeTeamspace}/mitigations`)
 				.send({})
-				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
+				.expect(responseCodesV5.teamspaceNotFound.status, function(err, res) {
+					expect(res.body.code).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});

@@ -34,7 +34,7 @@ export const DashboardListEmptyContainer = styled(DashedContainer)`
 	display: flex;
 	align-items: center;
 	height: 80px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	background-color: transparent;
 	padding-left: 30px;
 `;
 
