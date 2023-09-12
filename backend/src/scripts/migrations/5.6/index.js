@@ -18,7 +18,7 @@
 const updateSubmodelSchema = require('./updateSubmodelSchema');
 
 const scripts = [
-	{ script: updateSubmodelSchema, desc: 'Spdate submodel schema in federation settings' },
+	{ script: updateSubmodelSchema, desc: 'Update submodel schema in federation settings' },
 ];
 
 module.exports = scripts;
