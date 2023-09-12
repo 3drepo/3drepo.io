@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const GroupsConstants = {};
+const RulesConstants = {};
 
 const COMMON_OPERATORS = {
 	IS: { name: 'IS', minValues: 1 },
@@ -23,13 +23,13 @@ const COMMON_OPERATORS = {
 	REGEX: { name: 'REGEX', minValues: 1, maxValues: 1 },
 };
 
-GroupsConstants.FIELD_NAME_OPERATORS = {
+RulesConstants.FIELD_NAME_OPERATORS = {
 	...COMMON_OPERATORS,
 	STARTS_WITH: { name: 'STARTS_WITH', minValues: 1 },
 	ENDS_WITH: { name: 'ENDS_WITH', minValues: 1 },
 };
 
-GroupsConstants.FIELD_VALUE_OPERATORS = {
+RulesConstants.FIELD_VALUE_OPERATORS = {
 	...COMMON_OPERATORS,
 	IS_NOT: { name: 'IS_NOT', minValues: 1 },
 	NOT_CONTAINS: { name: 'NOT_CONTAINS', minValues: 1 },
@@ -45,9 +45,9 @@ GroupsConstants.FIELD_VALUE_OPERATORS = {
 	NOT_IN_RANGE: { name: 'NOT_IN_RANGE', minValues: 2, isNumber: true, isRange: true },
 };
 
-GroupsConstants.OPERATORS = {
-	...GroupsConstants.FIELD_VALUE_OPERATORS,
-	...GroupsConstants.FIELD_NAME_OPERATORS,
+RulesConstants.OPERATORS = {
+	...RulesConstants.FIELD_VALUE_OPERATORS,
+	...RulesConstants.FIELD_NAME_OPERATORS,
 };
 
-module.exports = GroupsConstants;
+module.exports = RulesConstants;

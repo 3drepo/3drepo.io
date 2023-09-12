@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { OPERATORS } = require('../../../../../../../../../../src/v5/models/groups.constants');
+const { OPERATORS } = require('../../../../../../../../../../src/v5/models/metadata.rules.constants');
 const { isString } = require('../../../../../../../../../../src/v5/utils/helper/typeCheck');
 const { generateLegacyGroup } = require('../../../../../../../../helper/services');
 const { src } = require('../../../../../../../../helper/path');

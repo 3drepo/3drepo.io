@@ -16,7 +16,7 @@
  */
 
 const { createResponseCode, templates } = require('../utils/responseCodes');
-const { OPERATORS } = require('./groups.constants');
+const { OPERATORS } = require('./metadata.rules.constants');
 const { isArray } = require('../utils/helper/typeCheck');
 const { sanitiseRegex } = require('../utils/helper/strings');
 

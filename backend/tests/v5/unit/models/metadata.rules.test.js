@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { OPERATORS } = require('../../../../src/v5/models/groups.constants');
+const { OPERATORS } = require('../../../../src/v5/models/metadata.rules.constants');
 const { src } = require('../../helper/path');
 
 const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../helper/services');

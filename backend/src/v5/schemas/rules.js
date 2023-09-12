@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS, OPERATORS } = require('../models/groups.constants');
+const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS, OPERATORS } = require('../models/metadata.rules.constants');
 const { isNumber, isString } = require('../utils/helper/typeCheck');
 const Yup = require('yup');
 
@@ -33,8 +33,7 @@ const Rules = {};
 const validateValuesArray = (operatorName, values) => {
 	const operator = OPERATORS[operatorName];
 	if (operator) {
-		const { minValues } = operator;
-		const { maxValues } = operator;
+		const { minValues, maxValues } = operator;
 
 		const arrLength = (values || []).length;
 

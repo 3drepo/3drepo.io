@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require('../../models/groups.constants');
+const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require('../../models/metadata.rules.constants');
 const { presetModules, propTypes } = require('../../schemas/tickets/templates.constants');
 const { deleteIfUndefined } = require('../../utils/helper/objects');
 const { getSwaggerComponents } = require('../../utils/responseCodes');
