@@ -56,7 +56,7 @@ export function* updatePersonalData({
 	try {
 		const teamspace = yield select(selectCurrentTeamspace);
 		const user = yield select(selectUsername);
-		let updateUserData = pick(restOfPersonalData, 'firstName', 'lastName');
+		let updateUserData = pick(restOfPersonalData, 'firstName', 'lastName', 'company');
 		yield API.CurrentUser.updateUser(restOfPersonalData);
 		if (avatarFile) {
 			const formData = new FormData();
