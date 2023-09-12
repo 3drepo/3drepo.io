@@ -18,7 +18,7 @@
 const updateGroupsSchema = require('./updateGroupsSchema');
 
 const scripts = [
-	{ script: updateGroupsSchema, desc: 'Update groups schema' },
+	{ script: updateGroupsSchema, desc: 'Update groups schema to support variable field names' },
 ];
 
 module.exports = scripts;

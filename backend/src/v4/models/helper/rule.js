@@ -18,7 +18,7 @@
 "use strict";
 
 const { v5Path } = require("../../../interop");
-const { schema } = require("../../../v5/schemas/rules");
+const { schema } = require(`${v5Path}/schemas/rules`);
 const { toQuery } = require(`${v5Path}/models/metadata.rules`);
 const { schema: rulesSchema } = require(`${v5Path}/schemas/rules`);
 

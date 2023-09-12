@@ -74,22 +74,17 @@ const generateRuleName = ({ field, operator, values }) => {
 
 const processCollection = async (teamspace, collection) => {
 	const query = {
-		rules: {
-			$exists: true,
-			$elemMatch: {
-				field: { $type: 'string' },
-			},
-		},
+		'rules.field': { $type: 'string' },
 	};
+
 	const projection = { rules: 1 };
 
 	const groupUpdates = [];
 	const groups = await find(teamspace, collection, query, projection);
 
 	groups.forEach((group) => {
-		const formattedRules = group.rules.map((rule) => ({ name: rule.name
-			|| generateRuleName(rule),
-		...castSchema(rule) }));
+		const formattedRules = group.rules.map((rule) => (
+			{ name: rule.name || generateRuleName(rule), ...castSchema(rule) }));
 
 		groupUpdates.push({
 			updateOne: {

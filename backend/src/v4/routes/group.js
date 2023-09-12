@@ -230,16 +230,16 @@ router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups);
  * 	"rules":[
  * 		{
  * 			"field": {
- *            "operator": "IS",
- *            "values": ["Area"]
+ *				"operator": "IS",
+ *				"values": ["Area"]
  * 			},
  * 			"operator":"GT",
  * 			"values":[5]
  * 		},
  * 		{
  * 			"field": {
- *            "operator": "IS",
- *            "values": ["IFC Type"]
+ *				"operator": "IS",
+ *				"values": ["IFC Type"]
  * 			},
  * 			"operator":"IS",
  * 			"values":[
@@ -373,16 +373,16 @@ router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, updateGrou
  * 	"rules":[
  * 		{
  *			"field": {
- *            "operator": "IS",
- *            "values": ["Area"]
+ *				"operator": "IS",
+ *				"values": ["Area"]
  * 			},
  * 			"operator":"GT",
  * 			"values":[5]
  * 		},
  * 		{
  *			"field": {
- *            "operator": "IS",
- *            "values": ["IFC Type"]
+ *				"operator": "IS",
+ *				"values": ["IFC Type"]
  * 			},
  * 			"operator":"IS",
  * 			"values":[
@@ -443,16 +443,16 @@ router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, updateGrou
  * 	"rules":[
  * 		{
  *			"field": {
- *            "operator": "IS",
- *            "values": ["Area"]
+ *				"operator": "IS",
+ *				"values": ["Area"]
  * 			},
  * 			"operator":"GT",
  * 			"values":[5]
  * 		},
  * 		{
  *			"field": {
- *            "operator": "IS",
- *            "values": ["IFC Type"]
+ *				"operator": "IS",
+ *				"values": ["IFC Type"]
  * 			},
  * 			"operator":"IS",
  * 			"values":[
@@ -577,8 +577,9 @@ async function createGroup(req, res, next) {
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
 	const groupData = req.body;
+
 	if (groupData?.rules) {
-		groupData.rules = await Promise.all(groupData.rules.map(castSchema));
+		groupData.rules = groupData.rules.map(castSchema);
 	}
 
 	Group.create(account, model, branch, rid, sessionId, req.session.user.username, groupData).then(group => {
@@ -616,7 +617,7 @@ async function updateGroup(req, res, next) {
 
 	const groupData = req.body;
 	if (groupData?.rules) {
-		groupData.rules = await Promise.all(groupData.rules.map(castSchema));
+		groupData.rules = groupData.rules.map(castSchema);
 	}
 
 	Group.update(account, model, branch, rid, sessionId, req.session.user.username, uid, groupData).then(group => {

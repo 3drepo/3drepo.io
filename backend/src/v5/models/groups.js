@@ -27,24 +27,20 @@ const { templates } = require('../utils/responseCodes');
 const Groups = {};
 
 const convertGroupRules = async (group) => {
-	const convertedGroup = { ...group };
-
-	if (convertedGroup.rules) {
-		convertedGroup.rules = await Promise.all(convertedGroup.rules.map(castSchema));
+	if (group?.rules) {
+		group.rules = group.rules.map(castSchema);
 	}
-
-	return convertedGroup;
 };
 
-const findGroup = async (teamspace, model, query, projection, sort) => {
-	let groups = await db.find(teamspace, `${model}.groups`, query, projection, sort);
-	groups = await Promise.all(groups.map(convertGroupRules));
+const findGroups = async (teamspace, model, query, projection, sort) => {
+	const groups = await db.find(teamspace, `${model}.groups`, query, projection, sort);
+	groups.map(convertGroupRules);
 	return groups;
 };
 
 Groups.getGroupsByIds = (teamspace, model, ids, projection) => {
 	const query = { _id: { $in: ids } };
-	return findGroup(teamspace, model, query, projection);
+	return findGroups(teamspace, model, query, projection);
 };
 
 Groups.getGroups = (teamspace, model, includeHidden, projection) => {
@@ -57,7 +53,7 @@ Groups.getGroups = (teamspace, model, includeHidden, projection) => {
 			view_id: { $exists: false },
 		};
 
-	return findGroup(teamspace, model, query, projection);
+	return findGroups(teamspace, model, query, projection);
 };
 
 Groups.addGroups = async (teamspace, model, groups) => {

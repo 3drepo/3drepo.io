@@ -314,9 +314,9 @@ Group.deleteGroupsByViewId = async function (account, model, view_id) {
 	return await db.deleteMany(account, getGroupCollectionName(model), { view_id });
 };
 
-const convertGroupRules = async (group) => {
+const convertGroupRules = (group) => {
 	if(group.rules) {
-		group.rules = await Promise.all(group.rules.map(castSchema));
+		group.rules = group.rules.map(castSchema);
 	}
 };
 
@@ -327,7 +327,7 @@ Group.findByUID = async function (account, model, branch, revId, uid, showIfcGui
 		throw responseCodes.GROUP_NOT_FOUND;
 	}
 
-	await convertGroupRules(foundGroup);
+	convertGroupRules(foundGroup);
 
 	if (convertToIfcGuids) {
 		foundGroup.objects = await getObjectsArrayAsIfcGuids(foundGroup, false);
@@ -384,7 +384,7 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 
 	const results = await db.find(account, getGroupCollectionName(model), query);
 
-	await Promise.all(results.map(convertGroupRules));
+	results.map(convertGroupRules);
 
 	const sharedIdConversionPromises = [];
 
