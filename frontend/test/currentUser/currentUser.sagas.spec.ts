@@ -108,7 +108,7 @@ describe('Current User: sagas', () => {
 				dispatch(CurrentUserActions.updatePersonalData(personalData, onSuccess, onError));
 			}, [
 				CurrentUserActions.updateUserSuccess(personalData),
-				UsersActions.updateUserSuccess(teamspace, mockUser.username, pick(personalData, ['firstName', 'lastName'])),
+				UsersActions.updateUserSuccess(teamspace, mockUser.username, pick(personalData, ['firstName', 'lastName', 'company'])),
 			]);
 
 			expect(onSuccess).toHaveBeenCalled();
@@ -148,7 +148,7 @@ describe('Current User: sagas', () => {
 			}, [
 				CurrentUserActions.updateUserSuccess(avatarData),
 				CurrentUserActions.updateUserSuccess(personalData),
-				UsersActions.updateUserSuccess(teamspace, mockUser.username, { ...avatarData, ...pick(personalData, ['firstName', 'lastName']) }),
+				UsersActions.updateUserSuccess(teamspace, mockUser.username, { ...avatarData, ...pick(personalData, ['firstName', 'lastName', 'company']) }),
 			]);
 
 			const userInStore = selectCurrentUser(getState());
