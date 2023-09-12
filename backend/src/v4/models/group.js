@@ -265,7 +265,7 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 						}
 						break;
 					case "rules":
-						if (data.rules && !checkRulesValidity(data.rules)) {
+						if (!checkRulesValidity(data)) {
 							typeCorrect = false;
 						}
 						newGroup[key] = cleanEmbeddedObject(key, data[key]);
@@ -414,7 +414,7 @@ Group.update = async function (account, model, branch = "master", revId = null, 
 			if (utils.typeMatch(data[key], fieldTypes[key])) {
 				switch (key) {
 					case "rules":
-						if (!checkRulesValidity(data.rules)) {
+						if (!checkRulesValidity(data)) {
 							typeCorrect = false;
 							toUnset.objects = 1;
 							group.objects = undefined;

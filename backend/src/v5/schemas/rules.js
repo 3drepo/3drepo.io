@@ -15,64 +15,51 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS, OPERATORS } = require('../models/metadata.rules.constants');
+const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require('../models/metadata.rules.constants');
 const { isNumber, isString } = require('../utils/helper/typeCheck');
 const Yup = require('yup');
 
-const ruleParametersTypeCheck = (operator, values) => {
-	if (operator.isRange) {
-		return values.length % 2 === 0 && values.every(isNumber);
-	} if (operator.isNumber) {
-		return values.every(isNumber);
-	}
-	return values.every(isString);
-};
-
 const Rules = {};
 
-const validateValuesArray = (operatorName, values) => {
-	const operator = OPERATORS[operatorName];
-	if (operator) {
-		const { minValues, maxValues } = operator;
+const formulateValueSchema = (operatorName, isFieldName) => {	
+	const operatorsList = isFieldName ? FIELD_NAME_OPERATORS : FIELD_VALUE_OPERATORS;
+	const { minValues, maxValues, isNumber } = operatorsList[operatorName];
 
-		const arrLength = (values || []).length;
-
-		if (maxValues === 0 && arrLength === 0) {
-			return true;
-		}
-
-		return arrLength >= minValues && (!maxValues || arrLength <= maxValues)
-			&& ruleParametersTypeCheck(operator, values);
+	if(maxValues === 0){
+		return Yup.mixed().strip();
 	}
 
-	return true;
-};
+	let schema = Yup.array()
+		.of(isNumber ? Yup.number() : Yup.string())
+		.required()
+		.min(minValues);
+		
+	if(maxValues) {
+		schema = schema.max(maxValues);
+	}
+
+	if(minValues === 2) {
+		schema = schema.test('is-even-number', 'values array must have an even number of items', (values) => {
+			return values.length % 2 === 0;
+		  });
+	}
+
+	return schema;
+}
 
 const ruleSchema = Yup.object().shape({
 	name: Yup.string().min(1).required(),
 	field: Yup.object().shape({
 		operator: Yup.string().uppercase().oneOf(Object.keys(FIELD_NAME_OPERATORS)).required(),
-		values: Yup.array().required()
-			.when('operator', (operator, schema) => schema
-				.test('Field rules validation', 'field values field is not valid with the field operator selected',
-					(value) => validateValuesArray(operator, value))),
+		values: Yup.mixed()
+			.when('operator', (operator) => formulateValueSchema(operator, true)),
 	}).transform((val, oldVal) => (isString(oldVal)
-		? { operator: OPERATORS.IS.name, values: [oldVal] } : val)).required(),
+		? { operator: FIELD_NAME_OPERATORS.IS.name, values: [oldVal] } : val)).required(),
 	operator: Yup.string().uppercase().oneOf(Object.keys(FIELD_VALUE_OPERATORS)).required(),
-	values: Yup.array()
-		.when('operator', (operator, schema) => schema
-			.test('Rules validation', 'values field is not valid with the operator selected',
-				(value) => validateValuesArray(operator, value))),
+	values: Yup.mixed()
+		.when('operator', (operator) => formulateValueSchema(operator))			
 })
-	.noUnknown()
-	.transform((value) => {
-		const res = { ...value };
-		const operator = OPERATORS[value.operator];
-		if (operator?.maxValues === 0) {
-			delete res.values;
-		}
-		return res;
-	});
+	.noUnknown();
 
 Rules.castSchema = (rule) => ruleSchema.cast(rule);
 

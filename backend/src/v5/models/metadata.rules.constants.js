@@ -41,13 +41,8 @@ RulesConstants.FIELD_VALUE_OPERATORS = {
 	GTE: { name: 'GTE', minValues: 1, isNumber: true },
 	LT: { name: 'LT', minValues: 1, isNumber: true },
 	LTE: { name: 'LTE', minValues: 1, isNumber: true },
-	IN_RANGE: { name: 'IN_RANGE', minValues: 2, isNumber: true, isRange: true },
-	NOT_IN_RANGE: { name: 'NOT_IN_RANGE', minValues: 2, isNumber: true, isRange: true },
-};
-
-RulesConstants.OPERATORS = {
-	...RulesConstants.FIELD_VALUE_OPERATORS,
-	...RulesConstants.FIELD_NAME_OPERATORS,
+	IN_RANGE: { name: 'IN_RANGE', minValues: 2, isNumber: true },
+	NOT_IN_RANGE: { name: 'NOT_IN_RANGE', minValues: 2, isNumber: true },
 };
 
 module.exports = RulesConstants;

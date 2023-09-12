@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { OPERATORS } = require('../../../../../../../../../../src/v5/models/metadata.rules.constants');
+const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require('../../../../../../../../../../src/v5/models/metadata.rules.constants');
 const { isString } = require('../../../../../../../../../../src/v5/utils/helper/typeCheck');
 const { generateLegacyGroup } = require('../../../../../../../../helper/services');
 const { src } = require('../../../../../../../../helper/path');
@@ -34,8 +34,8 @@ const respondFn = Responder.respond.mockImplementation((req, res, errCode) => er
 const testSerialiseGroupArray = () => {
 	const badRuleCast = generateLegacyGroup('a', 'b', true, false, false);
 	badRuleCast.rules = [{
-		field: { operator: OPERATORS.IS.name, values: ['Element ID'] },
-		operator: OPERATORS.IS_NOT_EMPTY.name,
+		field: { operator: FIELD_NAME_OPERATORS.IS.name, values: ['Element ID'] },
+		operator: FIELD_VALUE_OPERATORS.IS_NOT_EMPTY.name,
 		values: [
 			'',
 		],
@@ -80,11 +80,11 @@ const testSerialiseGroupArray = () => {
 					if ((group.rules || []).length) {
 						res.rules = group.rules.map((entry) => {
 							const output = { ...entry };
-							if (entry.operator === OPERATORS.IS_NOT_EMPTY.name) {
+							if (entry.operator === FIELD_VALUE_OPERATORS.IS_NOT_EMPTY.name) {
 								delete output.values;
 							}
 							if (isString(entry.field)) {
-								output.field = { operator: OPERATORS.IS.name, values: [entry.field] };
+								output.field = { operator: FIELD_NAME_OPERATORS.IS.name, values: [entry.field] };
 							}
 							return output;
 						});

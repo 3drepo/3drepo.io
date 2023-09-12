@@ -39,9 +39,12 @@ const RuleHelper = {};
  * - The correct minimum/multiples of values if a value is required
  */
 
-RuleHelper.checkRulesValidity = (rules) => {
+RuleHelper.checkRulesValidity = (group) => {
 	try {
-		schema.validateSync(rules);
+		if(group?.rules){
+			group.rules = schema.validateSync(group.rules);
+		}
+
 		return true;
 	} catch (err) {
 		return false;

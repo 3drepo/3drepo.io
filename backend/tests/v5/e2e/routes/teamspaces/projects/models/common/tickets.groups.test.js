@@ -19,7 +19,7 @@ const { cloneDeep } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
-const { OPERATORS } = require('../../../../../../../../src/v5/models/groups.constants');
+const { FIELD_VALUE_OPERATORS } = require('../../../../../../../../src/v5/models/metadata.rules.constants');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -172,7 +172,7 @@ const testUpdateGroup = () => {
 				['the group id is valid', baseRouteParams, payload, true],
 				['the payload contains both rules and objects', baseRouteParams, { rules: [{
 					field: 'IFC Type',
-					operator: OPERATORS.IS.name,
+					operator: FIELD_VALUE_OPERATORS.IS.name,
 					values: [
 						'IfcBeam',
 					],

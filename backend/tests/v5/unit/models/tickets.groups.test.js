@@ -16,8 +16,9 @@
  */
 
 const { times } = require('lodash');
-const { generateRandomString, generateRandomObject } = require('../../helper/services');
+const { generateRandomString, generateRandomObject, generateGroup } = require('../../helper/services');
 const { src } = require('../../helper/path');
+const { castSchema } = require('../../../../src/v5/schemas/rules');
 
 const Groups = require(`${src}/models/tickets.groups`);
 
@@ -210,29 +211,16 @@ const testGetGroupById = () => {
 		const model = generateRandomString();
 		const ticket = generateRandomString();
 		const groupId = generateRandomString();
-		test('Should return whatever the query returns', async () => {
-			const expectedData = generateRandomObject();
-			const projection = generateRandomObject();
-
-			db.findOne.mockResolvedValueOnce(expectedData);
-
-			await expect(Groups.getGroupById(teamspace, project, model, ticket, groupId, projection))
-				.resolves.toEqual(expectedData);
-
-			expect(db.findOne).toHaveBeenCalledTimes(1);
-			expect(db.findOne).toHaveBeenCalledWith(teamspace, groupCol,
-				{ teamspace, project, model, ticket, _id: groupId }, projection);
-		});
-
+		
 		test('Should convert group rules and return whatever the query returns', async () => {
-			const fieldName = generateRandomString();
-			const expectedData = { ...generateRandomObject(), rules: [{ field: fieldName }] };
+			const expectedData = generateGroup(true);
+
 			const projection = generateRandomObject();
 
 			db.findOne.mockResolvedValueOnce(expectedData);
 
 			await expect(Groups.getGroupById(teamspace, project, model, ticket, groupId, projection))
-				.resolves.toEqual({ ...expectedData, rules: [{ field: { operator: 'IS', values: [fieldName] } }] });
+				.resolves.toEqual({ ...expectedData, rules: expectedData.rules.map(castSchema) });
 
 			expect(db.findOne).toHaveBeenCalledTimes(1);
 			expect(db.findOne).toHaveBeenCalledWith(teamspace, groupCol,

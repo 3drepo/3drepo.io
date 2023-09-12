@@ -28,7 +28,6 @@ const GroupsV5 = require(`${v5Path}/processors/teamspaces/projects/models/common
 const { serialiseGroupArray} = require(`${v5Path}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/groups`);
 const { validateGroupsExportData, validateGroupsImportData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups`);
 const utils = require("../utils");
-const { castSchema } = require("../../v5/schemas/rules");
 const systemLogger = require("../logger.js").systemLogger;
 
 /**
@@ -576,13 +575,8 @@ async function createGroup(req, res, next) {
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
-	const groupData = req.body;
 
-	if (groupData?.rules) {
-		groupData.rules = groupData.rules.map(castSchema);
-	}
-
-	Group.create(account, model, branch, rid, sessionId, req.session.user.username, groupData).then(group => {
+	Group.create(account, model, branch, rid, sessionId, req.session.user.username, req.body).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
@@ -615,12 +609,7 @@ async function updateGroup(req, res, next) {
 	const rid = req.params.rid ? req.params.rid : null;
 	const branch = rid ? null : "master";
 
-	const groupData = req.body;
-	if (groupData?.rules) {
-		groupData.rules = groupData.rules.map(castSchema);
-	}
-
-	Group.update(account, model, branch, rid, sessionId, req.session.user.username, uid, groupData).then(group => {
+	Group.update(account, model, branch, rid, sessionId, req.session.user.username, uid, req.body).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);

@@ -16,18 +16,18 @@
  */
 
 const { createResponseCode, templates } = require('../utils/responseCodes');
-const { OPERATORS } = require('./metadata.rules.constants');
+const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require('./metadata.rules.constants');
 const { isArray } = require('../utils/helper/typeCheck');
 const { sanitiseRegex } = require('../utils/helper/strings');
 
 const Rules = {};
 
 const negToPosOp = {
-	[OPERATORS.IS_NOT.name]: OPERATORS.IS.name,
-	[OPERATORS.NOT_CONTAINS.name]: OPERATORS.CONTAINS.name,
-	[OPERATORS.NOT_EQUALS.name]: OPERATORS.EQUALS.name,
-	[OPERATORS.NOT_IN_RANGE.name]: OPERATORS.IN_RANGE.name,
-	[OPERATORS.IS_EMPTY.name]: OPERATORS.IS_NOT_EMPTY.name,
+	[FIELD_VALUE_OPERATORS.IS_NOT.name]: FIELD_VALUE_OPERATORS.IS.name,
+	[FIELD_VALUE_OPERATORS.NOT_CONTAINS.name]: FIELD_VALUE_OPERATORS.CONTAINS.name,
+	[FIELD_VALUE_OPERATORS.NOT_EQUALS.name]: FIELD_VALUE_OPERATORS.EQUALS.name,
+	[FIELD_VALUE_OPERATORS.NOT_IN_RANGE.name]: FIELD_VALUE_OPERATORS.IN_RANGE.name,
+	[FIELD_VALUE_OPERATORS.IS_EMPTY.name]: FIELD_VALUE_OPERATORS.IS_NOT_EMPTY.name,
 };
 
 Rules.generateQueriesFromRules = (rules) => {
@@ -40,10 +40,10 @@ Rules.generateQueriesFromRules = (rules) => {
 			// This is a positive rule
 			positives.push(Rules.toQuery(rule));
 		} else {
-			if (operator !== OPERATORS.IS_EMPTY.name) {
+			if (operator !== FIELD_VALUE_OPERATORS.IS_EMPTY.name) {
 			// For any negative rule where we're not checking for empty, we need to a positive rule
 			// to ensure the field exists
-				positives.push(Rules.toQuery({ operator: OPERATORS.IS_NOT_EMPTY.name, field }));
+				positives.push(Rules.toQuery({ operator: FIELD_VALUE_OPERATORS.IS_NOT_EMPTY.name, field }));
 			}
 
 			negatives.push(Rules.toQuery({ operator: negToPosOp[operator], field, values }));
@@ -59,29 +59,29 @@ const getFieldClause = (rule) => {
 	const { values } = rule.field;
 
 	switch (rule.field.operator) {
-	case OPERATORS.IS.name: {
+	case FIELD_NAME_OPERATORS.IS.name: {
 		fieldClause = values.length > 1 ? { $in: values } : values[0];
 		break;
 	}
-	case OPERATORS.CONTAINS.name: {
+	case FIELD_NAME_OPERATORS.CONTAINS.name: {
 		const sanitisedValues = values.map(sanitiseRegex);
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		fieldClause = { $regex: new RegExp(sanitisedValues.join('|')), $options: 'i' };
 		break;
 	}
-	case OPERATORS.STARTS_WITH.name: {
+	case FIELD_NAME_OPERATORS.STARTS_WITH.name: {
 		const sanitisedValues = values.map(sanitiseRegex);
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		fieldClause = { $regex: new RegExp(`^(${sanitisedValues.join('|')})`), $options: 'i' };
 		break;
 	}
-	case OPERATORS.ENDS_WITH.name: {
+	case FIELD_NAME_OPERATORS.ENDS_WITH.name: {
 		const sanitisedValues = values.map(sanitiseRegex);
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		fieldClause = { $regex: new RegExp(`(${sanitisedValues.join('|')})$`), $options: 'i' };
 		break;
 	}
-	case OPERATORS.REGEX.name: {
+	case FIELD_NAME_OPERATORS.REGEX.name: {
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		fieldClause = { $regex: new RegExp(`(${values[0]})`) };
 		break;
@@ -97,39 +97,39 @@ const getValueClause = (rule) => {
 	let valueClause;
 	const operator = negToPosOp[rule.operator] ?? rule.operator;
 	switch (operator) {
-	case OPERATORS.IS_NOT_EMPTY.name:
+	case FIELD_VALUE_OPERATORS.IS_NOT_EMPTY.name:
 		break;
-	case OPERATORS.IS.name:
+	case FIELD_VALUE_OPERATORS.IS.name:
 		valueClause = rule.values.length > 1 ? { $in: rule.values } : rule.values[0];
 		break;
-	case OPERATORS.CONTAINS.name: {
+	case FIELD_VALUE_OPERATORS.CONTAINS.name: {
 		const sanitisedValues = rule.values.map(sanitiseRegex);
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		valueClause = { $regex: new RegExp(sanitisedValues.join('|')), $options: 'i' };
 	}
 		break;
-	case OPERATORS.REGEX.name: {
+	case FIELD_VALUE_OPERATORS.REGEX.name: {
 		const regexArr = rule.values.map((val) => `(${val})`);
 		// eslint-disable-next-line security/detect-non-literal-regexp
 		valueClause = { $regex: new RegExp(regexArr.join('|')) };
 	}
 		break;
-	case OPERATORS.EQUALS.name:
+	case FIELD_VALUE_OPERATORS.EQUALS.name:
 		valueClause = rule.values.length > 1 ? { $in: rule.values } : rule.values[0];
 		break;
-	case OPERATORS.GT.name:
+	case FIELD_VALUE_OPERATORS.GT.name:
 		valueClause = { $gt: Math.min(...rule.values) };
 		break;
-	case OPERATORS.GTE.name:
+	case FIELD_VALUE_OPERATORS.GTE.name:
 		valueClause = { $gte: Math.min(...rule.values) };
 		break;
-	case OPERATORS.LT.name:
+	case FIELD_VALUE_OPERATORS.LT.name:
 		valueClause = { $lt: Math.max(...rule.values) };
 		break;
-	case OPERATORS.LTE.name:
+	case FIELD_VALUE_OPERATORS.LTE.name:
 		valueClause = { $lte: Math.max(...rule.values) };
 		break;
-	case OPERATORS.IN_RANGE.name:
+	case FIELD_VALUE_OPERATORS.IN_RANGE.name:
 		{
 			const rangeClauses = [];
 			for (let i = 0; i < rule.values.length; i += 2) {

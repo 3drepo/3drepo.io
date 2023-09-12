@@ -41,7 +41,7 @@ Groups.deleteGroups = async (teamspace, project, model, ticket, groupIds) => {
 };
 
 Groups.getGroupsByIds = async (teamspace, project, model, ticket, groupIds, projection) => {
-	let groups = await find(teamspace, GROUPS_COL,
+	const groups = await find(teamspace, GROUPS_COL,
 		{ teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
 
 	groups.map(convertGroupRules);
@@ -65,7 +65,7 @@ Groups.updateGroup = async (teamspace, project, model, ticket, groupId, data, au
 
 Groups.getGroupById = async (teamspace, project, model, ticket, groupId,
 	projection = { teamspace: 0, project: 0, model: 0, ticket: 0 }) => {
-	let group = await findOne(
+	const group = await findOne(
 		teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: groupId }, projection);
 
 	if (!group) {
