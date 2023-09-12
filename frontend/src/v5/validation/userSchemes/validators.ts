@@ -40,7 +40,7 @@ export const username = trimmedString
 		}))
 	.matches(/^[a-zA-Z0-9_\w-]{2,63}$/, formatMessage({
 		id: 'user.username.error.characters',
-		defaultMessage: 'Username can only consist of letters, numbers, hypens, and underscores',
+		defaultMessage: 'Username can only consist of letters, numbers, hyphens, and underscores',
 	}))
 	.test(
 		'alreadyExistingUsernames',
