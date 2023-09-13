@@ -22,6 +22,7 @@ export interface IRevision {
 	author: string;
 	desc?: string;
 	void?: boolean;
+	format: string;
 }
 
 export interface IUploadStatus {
