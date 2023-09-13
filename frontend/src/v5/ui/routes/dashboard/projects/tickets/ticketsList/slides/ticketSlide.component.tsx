@@ -44,7 +44,7 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
 
 	const formData = useForm({
-		resolver: yupResolver(getValidators(template._id)),
+		resolver: yupResolver(getValidators(template)),
 		mode: 'onChange',
 		defaultValues: ticket,
 	});
