@@ -125,23 +125,23 @@ export default ({ mainTree, subTrees, subModels, meshMap, treePath }) => new Pro
 	try {
 		const subModelsRootNodes = {};
 
-		if(subModels.length) {
+		if (subModels.length) {
 			// main tree is a federation, find all the refs and identify root nodes for each reference.
 			const nodesToCheck = [...mainTree.children];
 
-			while(nodesToCheck.length) {
+			while (nodesToCheck.length) {
 				const currentNode = nodesToCheck.pop();
 				if (currentNode.type === "ref") {
 					const subModelId = currentNode.name;
-					const subModel = subModels.find(({model}) => subModelId === model);
-					if(subModel) {
+					const subModel = subModels.find(({ model }) => subModelId === model);
+					if (subModel) {
 						currentNode.name = subModel.name
 						subModelsRootNodes[subModelId] = currentNode;
 
 						const subTree = subTrees.find(({ nodes }) => nodes.project === subModelId);
 						currentNode.children = subTree ? [subTree.nodes] : [];
 					}
-				} else if(currentNode.children?.length) {
+				} else if (currentNode.children?.length) {
 					nodesToCheck.push(...currentNode.children);
 				}
 			}

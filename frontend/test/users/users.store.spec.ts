@@ -58,4 +58,18 @@ describe('Users: store', () => {
 		const user = selectUser(getState(), teamspace, username);
 		expect(user).toBeTruthy();
 	});
+
+	it('should update user', () => {
+		const mockUsers = [
+			userWithoutAvatarMockFactory({ user: username }),
+			userWithAvatarMockFactory({ user: username.toUpperCase() })
+		];
+		const newName = `NEW_${mockUsers[0].firstName}`;
+		dispatch(UsersActions.fetchUsersSuccess(teamspace, mockUsers));
+		dispatch(UsersActions.updateUserSuccess(teamspace, username, { firstName: newName }));
+
+		const users = selectUsersByTeamspace(getState(), teamspace);
+		expect(users[0]).toEqual({ ...mockUsers[0], firstName: newName });
+		expect(users[1]).toEqual(mockUsers[1]);
+	});
 });
