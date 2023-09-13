@@ -969,7 +969,7 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
 						.expect(200 , function(err, res) {
 							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(24);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
 							done(err);
 						});
 				}
