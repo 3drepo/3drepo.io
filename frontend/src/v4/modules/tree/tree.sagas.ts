@@ -327,6 +327,7 @@ function* showAllExceptMeshIDs(meshes = []) {
 		const {meshesToShow, meshesToHide } = yield TreeProcessing.showAllExceptMeshIDs(!hiddenGeometryVisible, meshes);
 		toggleMeshesVisibility(meshesToShow, true);
 		toggleMeshesVisibility(meshesToHide, false);
+		yield put(TreeActions.updateDataRevision());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('show', 'all except nodes', error));
 	}

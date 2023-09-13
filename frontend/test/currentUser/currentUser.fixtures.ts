@@ -18,6 +18,8 @@
 import * as faker from 'faker';
 import { ICurrentUser, UpdatePersonalData } from '@/v5/store/currentUser/currentUser.types';
 import { getUrl } from '@/v5/services/api/default';
+import { pick } from 'lodash';
+import { IUser } from '@/v5/store/users/users.redux';
 
 export const generateFakeApiKey = () => faker.datatype.uuid();
 
@@ -32,6 +34,11 @@ export const currentUserMockFactory = (overrides?: Partial<ICurrentUser>): ICurr
 	hasAvatar: faker.datatype.boolean(),
 	...overrides,
 });
+
+export const userFromCurrentUser = (currentUser: Partial<ICurrentUser>) => ({
+	...pick(currentUser, ['company', 'firstName', 'lastName', 'email', 'hasAvatar', 'avatarUrl']),
+	user: currentUser.username,
+}) as IUser;
 
 export const generatePersonalData = (): UpdatePersonalData => ({
 	firstName: faker.name.firstName(),
