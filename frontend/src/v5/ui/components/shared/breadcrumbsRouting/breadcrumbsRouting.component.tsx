@@ -36,6 +36,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { BreadcrumbItem } from '@controls/breadcrumbs/breadcrumbDropdown/breadcrumbDropdown.component';
 import { Breadcrumbs } from '@controls/breadcrumbs';
 import { BreadcrumbItemOrOptions } from '@controls/breadcrumbs/breadcrumbs.component';
+import { orderBy } from 'lodash';
 
 export const BreadcrumbsRouting = () => {
 	const params = useParams();
@@ -138,6 +139,13 @@ export const BreadcrumbsRouting = () => {
 			});
 		}
 	}
+
+	breadcrumbs.forEach((breadcrumb: any) => {
+		if (breadcrumb.options) {
+			// eslint-disable-next-line no-param-reassign
+			breadcrumb.options = orderBy(breadcrumb.options, ({ title }) => title.toLowerCase());
+		}
+	});
 
 	return (<Breadcrumbs breadcrumbs={breadcrumbs} />);
 };

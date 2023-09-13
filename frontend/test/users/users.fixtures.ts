@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { getMemberImgSrc } from '@/v5/store/users/users.helpers';
 import { IUser } from '@/v5/store/users/users.redux';
 import * as faker from 'faker';
 
-const mockUser = (overrides) => ({
+const mockUser = (overrides?: Partial<IUser>) => ({
 	user: faker.random.word(),
 	firstName: faker.random.word(),
 	lastName: faker.random.word(),
@@ -34,8 +35,11 @@ export const userWithoutAvatarMockFactory = (overrides?: Partial<IUser>): IUser 
 	avatarUrl: '',
 });
 
-export const userWithAvatarMockFactory = (overrides?: Partial<IUser>): IUser => ({
-	...mockUser(overrides),
-	hasAvatar: true,
-	avatarUrl: faker.image.image(),
-});
+export const userWithAvatarMockFactory = (teamspace, overrides?: Partial<IUser>): IUser => {
+	const user = mockUser(overrides);
+	return ({
+		...user,
+		hasAvatar: true,
+		avatarUrl: getMemberImgSrc(teamspace, user.user),
+	});
+};

@@ -25,7 +25,6 @@ import {
 	NewFederation,
 } from '@/v5/store/federations/federations.types';
 import { times } from 'lodash';
-import { FetchFederationViewsResponse } from '@/v5/services/api/federations';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
 
@@ -63,7 +62,25 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 
 export const prepareMockBaseFederation = ({_id, name, role, isFavourite}: IFederation): Partial<IFederation> => ({_id, name, role, isFavourite});
 
-export const prepareMockFederationStatsReply = (federation: IFederation): FederationStats => ({
+export const prepareMockContainers = (min = 1, max = 10): string[] => (
+	times(faker.datatype.number({ max, min }), () => faker.datatype.uuid()) 
+);
+
+export const prepareMockStats = (overrides?: Partial<FederationStats>) => ({
+	code: faker.datatype.uuid(),
+	desc: faker.random.words(3),
+	status: UploadStatuses.OK,
+	containers: prepareMockContainers(),
+	tickets: {
+		issues: faker.datatype.number(),
+		risks: faker.datatype.number(),
+	},
+	category: faker.random.word(),
+	lastUpdated: faker.datatype.number(),
+	...overrides,
+})
+
+export const getMockStats = (federation: IFederation): FederationStats => ({
 	containers: federation.containers,
 	tickets: {
 		issues: federation.issues,
@@ -74,14 +91,6 @@ export const prepareMockFederationStatsReply = (federation: IFederation): Federa
 	status: federation.status,
 	code: federation.code,
 	desc: federation.desc,
-});
-
-export const prepareMockContainers = (min = 1, max = 10): string[] => (
-	times(faker.datatype.number({ max, min }), () => faker.datatype.uuid()) 
-);
-
-export const prepareMockViewsReply = (federation: IFederation): FetchFederationViewsResponse => ({
-	views: federation.views,
 });
 
 const prepareMockSettingsWithoutSurveyPoint = (federation: IFederation): Omit<FederationSettings, 'surveyPoint'> => ({
@@ -109,17 +118,3 @@ export const prepareMockNewFederation = (federation: IFederation): NewFederation
 	code: federation.code,
 	desc: federation.desc,
 });
-
-export const federationMockStats = (overrides?: Partial<FederationStats>) => ({
-	code: faker.datatype.uuid(),
-	desc: faker.random.words(3),
-	status: UploadStatuses.OK,
-	containers: prepareMockContainers(),
-	tickets: {
-		issues: faker.datatype.number(),
-		risks: faker.datatype.number(),
-	},
-	category: faker.random.word(),
-	lastUpdated: faker.datatype.number(),
-	...overrides,
-})
