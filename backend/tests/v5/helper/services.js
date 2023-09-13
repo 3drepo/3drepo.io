@@ -568,7 +568,7 @@ ServiceHelper.generateGroup = (isSmart = false, {
 		group.rules = [
 			{
 				name: ServiceHelper.generateRandomString(),
-				field: 'IFC GUID',
+				field: { operator: FIELD_NAME_OPERATORS.CONTAINS.name, values: [ServiceHelper.generateRandomString()] },
 				operator: FIELD_VALUE_OPERATORS.IS.name,
 				values: [
 					ServiceHelper.generateRandomString(),
@@ -576,7 +576,7 @@ ServiceHelper.generateGroup = (isSmart = false, {
 			},
 			{
 				name: ServiceHelper.generateRandomString(),
-				field: { operator: FIELD_NAME_OPERATORS.IS.name, values: ['IFC GUID'] },
+				field: { operator: FIELD_NAME_OPERATORS.IS.name, values: [ServiceHelper.generateRandomString()] },
 				operator: FIELD_VALUE_OPERATORS.IS.name,
 				values: [
 					ServiceHelper.generateRandomString(),
