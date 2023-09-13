@@ -16,17 +16,24 @@
  */
 
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext } from 'react';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { UploadListItem } from './uploadListItem/uploadListItem.component';
 import { ListContainer } from './uploadList.styles';
 import { UploadFileFormContext } from '../uploadFileFormContext';
 import { UploadListHeaders } from './uploadListHeaders/uploadListHeaders.component';
+import { UploadListItemRowWrapper } from './uploadListItem/uploadListItem.styles';
 
 type IUploadList = {
 	values: UploadItemFields[];
-	removeUploadById: (id) => void;
+	removeUploadById: (id: string) => void;
 	isUploading: boolean;
+};
+
+const DEFAULT_SORT_CONFIG = {
+	column: ['file'],
+	direction: [SortingDirection.DESCENDING, SortingDirection.ASCENDING],
 };
 
 export const UploadList = ({
@@ -34,38 +41,43 @@ export const UploadList = ({
 	removeUploadById,
 	isUploading,
 }: IUploadList): JSX.Element => {
-	const { selectedIndex, setSelectedIndex } = useContext(UploadFileFormContext);
-	const [isAscending, setIsAscending] = useState(true);
+	const { selectedId, setSelectedId } = useContext(UploadFileFormContext);
+	const { sortedList, setSortConfig } = useOrderedList(values, DEFAULT_SORT_CONFIG);
 
-	const memoizedEdit = useCallback((id) => setSelectedIndex(values.findIndex(({ uploadId }) => uploadId === id)), [values.length]);
-
-	const memoizedDelete = useCallback((uploadId) => {
-		setSelectedIndex(null);
-		removeUploadById(uploadId);
-	}, [removeUploadById]);
+	const memoizedEdit = useCallback((id) => setSelectedId(id), []);
+	const memoizedDelete = useCallback((id, isSelected) => {
+		removeUploadById(id);
+		if (isSelected) setSelectedId();
+	}, []);
 	return (
 		<>
 			<UploadListHeaders
-				sortingDirection={isAscending ? SortingDirection.ASCENDING : SortingDirection.DESCENDING}
-				onClickFilenameLabel={() => setIsAscending(!isAscending)}
+				setSortConfig={setSortConfig}
+				defaultSortConfig={DEFAULT_SORT_CONFIG}
 				isUploading={isUploading}
 			/>
-			<ListContainer ascending={isAscending}>
+			<ListContainer>
 				{
 					values.map(({ uploadId, file, extension }, index) => {
 						const onClickEdit = () => memoizedEdit(uploadId);
-						const onClickDelete = () => memoizedDelete(uploadId);
+						const selected = !isUploading && uploadId === selectedId;
+						const onClickDelete = () => memoizedDelete(uploadId, selected);
 						return (
-							<UploadListItem
+							<UploadListItemRowWrapper
 								key={uploadId}
-								fileData={{ ...file, extension }}
-								origIndex={index}
-								uploadId={uploadId}
-								onClickEdit={onClickEdit}
-								onClickDelete={onClickDelete}
-								isSelected={!isUploading && index === selectedIndex}
-								isUploading={isUploading}
-							/>
+								selected={selected}
+								order={sortedList.findIndex((sortedItem) => sortedItem.uploadId === uploadId)}
+							>
+								<UploadListItem
+									index={index}
+									fileData={{ ...file, extension }}
+									uploadId={uploadId}
+									onClickEdit={onClickEdit}
+									onClickDelete={onClickDelete}
+									isSelected={selected}
+									isUploading={isUploading}
+								/>
+							</UploadListItemRowWrapper>
 						);
 					})
 				}

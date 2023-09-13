@@ -21,17 +21,17 @@ import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { memo } from 'react';
 import { isEqual } from 'lodash';
 import { InputController } from '@controls/inputs/inputController.component';
+import { DashboardListItemRow as UploadListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
-import { UploadListItemRow } from './components/uploadListItemRow/uploadListItemRow.component';
 import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
 import { UploadProgress } from './components/uploadProgress/uploadProgress.component';
 import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
 import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag/uploadListItemRevisionTag.component';
-import { UploadListItemButton } from './components/uploadListItemRow/uploadListItemRow.styles';
+import { UploadListItemButton } from './uploadListItem.styles';
 
 type IUploadListItem = {
 	uploadId: string;
-	origIndex: number;
+	index: number;
 	isSelected: boolean;
 	isUploading: boolean;
 	fileData: {
@@ -45,14 +45,14 @@ type IUploadListItem = {
 
 export const UploadListItem = memo(({
 	uploadId,
-	origIndex,
+	index,
 	onClickEdit,
 	onClickDelete,
 	isSelected,
 	fileData,
 	isUploading,
 }: IUploadListItem): JSX.Element => {
-	const revisionPrefix = `uploads.${origIndex}`;
+	const revisionPrefix = `uploads.${index}`;
 	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(uploadId);
 	return (
 		<UploadListItemRow
@@ -96,6 +96,6 @@ export const UploadListItem = memo(({
 	);
 },
 (prevProps, nextProps) => {
-	const filterProperties = ({ isSelected, origIndex, isUploading }) => ({ isSelected, origIndex, isUploading });
+	const filterProperties = ({ isSelected, index, isUploading }) => ({ isSelected, index, isUploading });
 	return isEqual(filterProperties(prevProps), filterProperties(nextProps));
 });

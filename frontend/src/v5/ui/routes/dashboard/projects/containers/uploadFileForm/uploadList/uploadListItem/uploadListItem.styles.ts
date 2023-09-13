@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -19,8 +19,8 @@ import styled, { css } from 'styled-components';
 import { CircleButton } from '@controls/circleButton';
 import { Container as ItemRowContainer } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemRow/dashboardListItemRow.styles';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
-import { DestinationAutocomplete } from '../uploadListItemDestination/uploadListItemDestination.styles';
-import { RevisionTagField } from '../uploadListItemRevisionTag/uploadListItemRevisionTag.styles';
+import { DestinationAutocomplete } from './components/uploadListItemDestination/uploadListItemDestination.styles';
+import { RevisionTagField } from './components/uploadListItemRevisionTag/uploadListItemRevisionTag.styles';
 
 export const UploadListItemButton = styled(CircleButton)`
 	margin: 0;
@@ -34,7 +34,8 @@ const DestinationAndTagDimensions = css`
 	height: 35px;
 `;
 
-export const UploadListItem = styled(DashboardListItem)<{ selected: boolean }>`
+export const UploadListItemRowWrapper = styled(DashboardListItem)<{ selected: boolean; order: number }>`
+	${({ order }) => css`order: ${order}`};
 	${ItemRowContainer} {
 		padding: 8px 15px 8px 5px;
 		height: auto;

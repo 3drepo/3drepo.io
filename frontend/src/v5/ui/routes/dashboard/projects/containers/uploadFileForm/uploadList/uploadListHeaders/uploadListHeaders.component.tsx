@@ -15,24 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DashboardListHeaderLabel as Label } from '@components/dashboard/dashboardList';
+import { DashboardListHeader, DashboardListHeaderLabel as Label } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
-import { DashboardListHeaderContainer as Container } from '@components/dashboard/dashboardList/dashboardListHeader/dashboardListHeader.styles';
-import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 
 type IUploadListHeaders = {
-	onClickFilenameLabel: () => void;
+	setSortConfig: any;
 	isUploading: boolean;
-	sortingDirection: SortingDirection;
+	defaultSortConfig: any;
 };
 
 export const UploadListHeaders = ({
-	onClickFilenameLabel,
+	setSortConfig,
 	isUploading,
-	sortingDirection,
+	defaultSortConfig,
 }: IUploadListHeaders) => (
-	<Container>
-		<Label name="file.name" minWidth={122} sortingDirection={sortingDirection} onClick={onClickFilenameLabel} sort>
+	<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={defaultSortConfig}>
+		<Label name="file.name" minWidth={122} sort>
 			<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
 		</Label>
 		<Label width={352}>
@@ -44,5 +42,5 @@ export const UploadListHeaders = ({
 		<Label width={297} hidden={!isUploading}>
 			<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
 		</Label>
-	</Container>
+	</DashboardListHeader>
 );

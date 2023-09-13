@@ -20,23 +20,23 @@ import { createContext, useState } from 'react';
 
 export interface UploadsContextType {
 	fields: UploadFieldArray;
-	selectedIndex: number;
-	setSelectedIndex: (index: number) => void;
+	selectedId: string;
+	setSelectedId: (id?: string) => void;
 }
 
 const defaultValue: UploadsContextType = {
 	fields: { uploads: [] },
-	selectedIndex: null,
-	setSelectedIndex: () => {},
+	selectedId: null,
+	setSelectedId: () => {},
 };
 export const UploadFileFormContext = createContext(defaultValue);
 UploadFileFormContext.displayName = 'UploadFileFormContext';
 
 export const UploadFileFormContextComponent = ({ fields, children }) => {
-	const [selectedIndex, setSelectedIndex] = useState(null);
+	const [selectedId, setSelectedId] = useState(null);
 
 	return (
-		<UploadFileFormContext.Provider value={{ fields, selectedIndex, setSelectedIndex }}>
+		<UploadFileFormContext.Provider value={{ fields, selectedId, setSelectedId }}>
 			{children}
 		</UploadFileFormContext.Provider>
 	);

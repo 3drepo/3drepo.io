@@ -17,7 +17,6 @@
 
 import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import { useContext } from 'react';
-import { isNumber } from 'lodash';
 import { SidebarContainer, ExpandButton, SidebarContent } from './sidebar.styles';
 import { UploadFileFormContext } from '../uploadFileFormContext';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
@@ -29,11 +28,13 @@ interface ISidebar {
 export const Sidebar = ({
 	className,
 }: ISidebar): JSX.Element => {
-	const { fields, selectedIndex, setSelectedIndex } = useContext(UploadFileFormContext);
+	const { fields, selectedId, setSelectedId } = useContext(UploadFileFormContext);
 	const onClose = () => {
-		setSelectedIndex(null);
+		setSelectedId(null);
 	};
-	const isOpen = isNumber(selectedIndex);
+	const isOpen = !!selectedId;
+	// @ts-ignore
+	const selectedIndex = fields.findIndex(({ uploadId }) => uploadId === selectedId);
 	return (
 		<SidebarContainer className={className} open={isOpen}>
 			<ExpandButton onClick={onClose}>
@@ -42,7 +43,7 @@ export const Sidebar = ({
 			<SidebarContent>
 				{isOpen && (
 					<SidebarForm
-						key={fields[selectedIndex].uploadId}
+						key={selectedId}
 						revisionPrefix={`uploads.${selectedIndex}`}
 					/>
 				)}
