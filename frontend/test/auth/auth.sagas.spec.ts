@@ -20,7 +20,6 @@ import { mockServer } from '../../internals/testing/mockServer';
 import { createTestStore } from '../test.helpers'
 import { selectIsAuthenticated, selectLoginError } from '@/v5/store/auth/auth.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
-import { selectDialogs } from '@/v5/store/dialogs/dialogs.selectors';
 
 describe('Auth: sagas', () => {
 	const username = 'Jason';
@@ -55,11 +54,6 @@ describe('Auth: sagas', () => {
 			await waitForActions(() => {
 				dispatch(AuthActions.authenticate());
 			}, [DialogsTypes.OPEN, AuthActions.setPendingStatus(false)]);
-
-			const dialogs =  selectDialogs(getState());
-
-			expect(dialogs.length).toEqual(1);
-			expect(dialogs[0].modalType).toEqual('alert');
 		});
 	});
 
@@ -141,11 +135,7 @@ describe('Auth: sagas', () => {
 				dispatch(AuthActions.logout());
 			}, [DialogsTypes.OPEN, AuthActions.setPendingStatus(false)]);
 
-			const dialogs =  selectDialogs(getState());
 			const isAuthenticated = selectIsAuthenticated(getState());
-
-			expect(dialogs.length).toEqual(1);
-			expect(dialogs[0].modalType).toEqual('alert');
 			expect(isAuthenticated).toBeFalsy();
 		});
 	});

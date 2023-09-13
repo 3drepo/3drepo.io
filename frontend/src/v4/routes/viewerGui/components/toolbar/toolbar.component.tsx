@@ -71,7 +71,7 @@ interface IProps {
 	isMetadataActive: boolean;
 	metaKeysExist: boolean;
 	isMetadataVisible: boolean;
-	goToExtent: () => void;
+	goToHomeView: () => void;
 	setProjectionMode: (mode) => void;
 	setNavigationMode: (navigationMode) => void;
 	initialiseToolbar: () => void;
@@ -113,9 +113,9 @@ export class Toolbar extends PureComponent<IProps, IState> {
 	public get toolbarList() {
 		return [
 			{
-				label: VIEWER_TOOLBAR_ITEMS.EXTENT,
+				label: VIEWER_TOOLBAR_ITEMS.HOME,
 				Icon: HomeIcon,
-				action: this.props.goToExtent
+				action: this.props.goToHomeView
 			},
 			{
 				label: VIEWER_TOOLBAR_ITEMS.PERSPECTIVE_VIEW,

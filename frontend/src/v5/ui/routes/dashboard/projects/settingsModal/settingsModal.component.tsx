@@ -314,7 +314,7 @@ export const SettingsModal = ({
 			<FormSelectView
 				control={control}
 				name="defaultView"
-				label={formatMessage({ id: 'settings.form.defaultView', defaultMessage: 'Default View' })}
+				label={formatMessage({ id: 'settings.form.defaultView', defaultMessage: 'Home View' })}
 				views={containerOrFederation.views}
 				containerOrFederationId={containerOrFederation._id}
 				isContainer={isContainer}
