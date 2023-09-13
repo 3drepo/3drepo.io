@@ -28,7 +28,7 @@ import {
 import { times } from 'lodash';
 import { createTestStore } from '../test.helpers';
 import { containerMockFactory } from '../containers/containers.fixtures';
-import { prepareRevisionData, revisionsMockFactory } from './revisions.fixtures';
+import { revisionsMockFactory } from './revisions.fixtures';
 
 describe('Revisions: store', () => {
 	const container = containerMockFactory();
@@ -92,7 +92,7 @@ describe('Revisions: store', () => {
 
 		it('should update revision', () => {
 			const mockRevision = revisionsMockFactory();
-			const mockRevisionData = prepareRevisionData({ _id: mockRevision._id });
+			const mockRevisionData = revisionsMockFactory({ _id: mockRevision._id });
 			dispatch(RevisionsActions.fetchSuccess(container._id, [mockRevision]));
 			dispatch(RevisionsActions.updateRevisionSuccess(container._id, mockRevisionData));
 

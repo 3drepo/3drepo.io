@@ -16,19 +16,19 @@
  */
 
 import { useEffect } from 'react';
-import { range } from 'lodash';
+import { min, range } from 'lodash';
 
-import { RevisionsListHeaderLabel } from '@components/shared/revisionDetails/components/revisionsListHeaderLabel';
 import { Button } from '@controls/button';
 import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
-import { RevisionsListItem } from '@components/shared/revisionDetails/components/revisionsListItem';
-import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ProjectsHooksSelectors, RevisionsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { uploadToContainer } from '@/v5/ui/routes/dashboard/projects/containers/uploadFileForm/uploadFileForm.helpers';
+import { SkeletonListItem } from './components/skeletonListItem/skeletonListItem.component';
+import { RevisionsListItem } from './components/revisionsListItem/revisionsListItem.component';
+import { RevisionsListHeaderLabel } from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.component';
 import {
 	Container,
 	RevisionsListHeaderContainer,
@@ -52,7 +52,6 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 	const revisions = RevisionsHooksSelectors.selectRevisions(containerId)
 		.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 	const selected = revisions.findIndex((r) => !r.void);
-	const isSingle = revisions?.length === 1;
 
 	useEffect(() => {
 		if (!revisions.length) {
@@ -94,27 +93,23 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 		<Container>
 			<RevisionsListHeaderContainer>
 				<RevisionsListHeaderLabel width={130} tabletWidth={94}><FormattedMessage id="revisionDetails.addedOn" defaultMessage="Added on" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width={228} tabletWidth={155}><FormattedMessage id="revisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel width="20%" tabletWidth={150}><FormattedMessage id="revisionDetails.revisionCode" defaultMessage="Revision code" /></RevisionsListHeaderLabel>
-				<RevisionsListHeaderLabel hideWhenSmallerThan={887}><FormattedMessage id="revisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={170} tabletWidth={155}><FormattedMessage id="revisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={150} tabletWidth={300}><FormattedMessage id="revisionDetails.revisionCode" defaultMessage="Revision name" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel hideWhenSmallerThan={1140}><FormattedMessage id="revisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={90} tabletWidth={45} hideWhenSmallerThan={800}><FormattedMessage id="revisionDetails.format" defaultMessage="Format" /></RevisionsListHeaderLabel>
 			</RevisionsListHeaderContainer>
 			<RevisionsList>
 				{isLoading ? (
-					range(revisionsCount || 1).map((key) => <SkeletonListItem key={key} />)
+					range(min([revisionsCount || 1, 5])).map((key) => <SkeletonListItem key={key} />)
 				) : (
 					revisions.map((revision, i) => (
 						<RevisionsListItemWrapper
-							isSingle={isSingle}
-							isBeforeSelected={i === selected - 1}
 							selected={i === selected}
+							isBeforeSelected={i === selected - 1}
 							onClick={() => {}}
 							key={revision._id}
 						>
-							<RevisionsListItem
-								revision={revision}
-								containerId={containerId}
-								active={i === selected}
-							/>
+							<RevisionsListItem revision={revision} containerId={containerId} />
 						</RevisionsListItemWrapper>
 					))
 				)}
