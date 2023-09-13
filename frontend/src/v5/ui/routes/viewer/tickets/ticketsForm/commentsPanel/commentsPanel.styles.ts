@@ -18,6 +18,7 @@
 import styled from 'styled-components';
 import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
 import { TableVirtuoso } from 'react-virtuoso';
+import { isFirefox } from '@/v4/styles';
 
 export const Accordion = styled(AccordionBase)`
 	&& {
@@ -35,19 +36,27 @@ export const Comments = styled.div`
 	height: 400px;
 `;
 
-export const VirtualisedList = styled(TableVirtuoso)`
+export const VirtualisedList = styled(TableVirtuoso).attrs({
+	style: { overflowY: 'scroll' },
+})`
 	box-sizing: border-box;
 	overflow-x: hidden;
 
 	table {
 		display: flex;
 		justify-content: center;
-		margin-right: -16px;
 
-		tr {
-			display: flex;
-			flex-direction: column;
-			width: 320px;
+		tbody {
+			width: 100%;
+			padding-left: 14px;
+
+			${isFirefox('padding-right: 14px;')}
+
+			tr {
+				display: flex;
+				flex-direction: column;
+				width: 100%;
+			}
 		}
 	}
 `;
