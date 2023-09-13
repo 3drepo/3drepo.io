@@ -27,15 +27,23 @@ import { Label } from './newTicketMenu.styles';
 type NewTicketMenuProps = Omit<ActionMenuProps, 'children'> & {
 	onContainerOrFederationClick: (id: string) => void;
 };
-export const NewTicketMenu = ({ onContainerOrFederationClick, ...props }: NewTicketMenuProps) => {
+export const NewTicketMenu = ({ onContainerOrFederationClick, TriggerButton, ...props }: NewTicketMenuProps) => {
 	const [models] = useSearchParam('models');
 	const containers = ContainersHooksSelectors.selectContainers();
 	const federations = FederationsHooksSelectors.selectFederations();
 
 	const selectableModels = [...containers, ...federations].filter(({ _id }) => models?.includes(_id));
 
+	if (selectableModels.length === 1) {
+		return (
+			<div onClick={() => onContainerOrFederationClick(selectableModels[0]._id)}>
+				{TriggerButton}
+			</div>
+		);
+	}
+
 	return (
-		<ActionMenu {...props} PopoverProps={{ style: { maxHeight: 400 } }}>
+		<ActionMenu TriggerButton={TriggerButton} PopoverProps={{ style: { maxHeight: 400 } }} {...props}>
 			<MenuList>
 				<Label onClick={(e) => e.preventDefault()}>
 					<FormattedMessage id="ticketTable.newTicket.select" defaultMessage="Select a Federation or Container" />
