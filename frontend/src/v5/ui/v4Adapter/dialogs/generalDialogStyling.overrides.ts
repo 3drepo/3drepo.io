@@ -21,15 +21,19 @@ import { Footer as InvitationsListFooter } from '@/v4/routes/components/invitati
 import { Footer as NewInviteFooter } from '@/v4/routes/components/invitationDialog/invitationDialog.styles';
 
 const titleStyling = css`
+	.MuiDialog-paper:has(.MuiTabs-root) ${DialogTitle} {
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+
 	${DialogTitle} {
-		color: ${({ theme }) => theme.palette.secondary.main};
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 		height: fit-content;
 		width: 100%;
 		box-sizing: border-box;
 		display: flex;
 		align-items: center;
 		padding: 16px 30px 11px;
+		color: ${({ theme }) => theme.palette.secondary.main};
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 
 		button {
 			display: grid;

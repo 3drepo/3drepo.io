@@ -29,6 +29,7 @@ export interface IFormModalNoButtons extends Omit<DetailedHTMLProps<FormHTMLAttr
 	open?: boolean;
 	maxWidth?: DialogProps['maxWidth'];
 	disableClosing?: boolean;
+	tabModal?: boolean;
 }
 
 export const FormModalNoButtons = ({
@@ -41,6 +42,7 @@ export const FormModalNoButtons = ({
 	className,
 	maxWidth = false,
 	disableClosing = false,
+	tabModal,
 	...formProps
 }: IFormModalNoButtons) => {
 	const handleClose = () => {
@@ -57,7 +59,7 @@ export const FormModalNoButtons = ({
 			fullWidth={!!maxWidth}
 		>
 			<Form {...formProps}>
-				<ModalHeader onClickClose={handleClose} title={title} subtitle={subtitle} disableClosing={disableClosing} />
+				<ModalHeader onClickClose={handleClose} title={title} subtitle={subtitle} disableClosing={disableClosing} tabModal={tabModal} />
 				<ModalBody>
 					{children}
 				</ModalBody>
