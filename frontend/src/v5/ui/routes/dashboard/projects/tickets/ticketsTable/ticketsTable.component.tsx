@@ -98,7 +98,7 @@ export const TicketsTable = () => {
 		setSidePanelTicket(ticket);
 	};
 
-	const onCloseSidePanel = () => {
+	const closeSidePanel = () => {
 		setSidePanelModelIdAndTemplate(null);
 		setSidePanelTicket(null);
 	};
@@ -180,14 +180,22 @@ export const TicketsTable = () => {
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
 	}, []);
 
+	useEffect(() => { closeSidePanel(); }, [template, containersAndFederations]);
+
 	return (
 		<SearchContextComponent items={ticketsFilteredByTemplate} filteringFunction={filterTickets}>
 			<FormProvider {...formData}>
 				<FiltersContainer>
 					<FlexContainer>
 						<SelectorsContainer>
-							<ContainersAndFederationsFormSelect name="containersAndFederations" />
-							<TemplateFormSelect name="template" />
+							<ContainersAndFederationsFormSelect
+								name="containersAndFederations"
+								isNewTicketOpen={sidePanelModelIdAndTemplate && !editingTicketId}
+							/>
+							<TemplateFormSelect
+								name="template"
+								isNewTicketOpen={sidePanelModelIdAndTemplate && !editingTicketId}
+							/>
 							<GroupByFormSelect name="groupBy" />
 						</SelectorsContainer>
 						<CompletedChip
@@ -224,7 +232,7 @@ export const TicketsTable = () => {
 							defaultMessage="Open in 3D viewer"
 						/>
 					</OpenInViewerButton>
-					<CircleButton onClick={onCloseSidePanel}>
+					<CircleButton onClick={closeSidePanel}>
 						<ExpandIcon />
 					</CircleButton>
 				</SlidePanelHeader>

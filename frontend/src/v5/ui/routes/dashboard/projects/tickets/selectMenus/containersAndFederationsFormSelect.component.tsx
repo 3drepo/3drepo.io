@@ -22,8 +22,10 @@ import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/servic
 import { FormSearchSelect } from '@controls/inputs/formInputs.component';
 import { sortByName } from '@/v5/store/store.helpers';
 import { ListSubheader } from '../tickets.styles';
+import { openUnsavedNewTicketWarningModal } from './selectMenus.helpers';
 
-export const ContainersAndFederationsFormSelect = (props) => {
+type ContainersAndFederationsFormSelectProps = { isNewTicketOpen?: boolean, name: string };
+export const ContainersAndFederationsFormSelect = ({ isNewTicketOpen, ...props }: ContainersAndFederationsFormSelectProps) => {
 	const containers = ContainersHooksSelectors.selectContainers();
 	const federations = FederationsHooksSelectors.selectFederations();
 
@@ -40,12 +42,18 @@ export const ContainersAndFederationsFormSelect = (props) => {
 		}, { itemsLength });
 	};
 
+	const handleOpen = () => {
+		if (!isNewTicketOpen) return;
+		openUnsavedNewTicketWarningModal();
+	};
+
 	return (
 		<FormSearchSelect
 			multiple
 			{...props}
 			label={formatMessage({ id: 'ticketTable.modelSelection.placeholder', defaultMessage: 'Select Federation / Container' })}
 			renderValue={(ids: any[] | null = []) => (<b>{getRenderText(ids)}</b>)}
+			onOpen={handleOpen}
 		>
 			<ListSubheader>
 				<FormattedMessage id="ticketTable.modelSelection.federations" defaultMessage="Federations" />
