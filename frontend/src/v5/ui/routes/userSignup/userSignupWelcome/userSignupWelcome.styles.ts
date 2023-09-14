@@ -57,14 +57,11 @@ export const EmailAddress = styled(ActionMessage)`
 `;
 
 export const InfoMessage = styled.div`
-	${({ theme }) => theme.typography.body};
+	${({ theme }) => theme.typography.body1};
 	color: ${({ theme }) => theme.palette.base.main};
 	line-height: 14.52px;
-	font-size: 12px;
-	font-weight: 400;
 	margin-top: 20px;
 	display: inline-block;
-	font-family: ${({ theme }) => theme.typography.fontFamily};
 `;
 
 export const HelpMessage = styled.div`

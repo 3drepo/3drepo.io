@@ -122,26 +122,7 @@ export const TitleActions = styled.div`
 	position: relative;
 `;
 
-export const TypesItem = styled(MenuItem)``;
-
 export const TypesSelect = styled(Select)``;
-
-export const ConfigSelectItem = styled(MenuItem)``;
-
-export const ConfigSelect = styled(Select).attrs({
-	classes: {
-		disabled: 'select--disabled'
-	}
-})`
-	&& {
-		margin-right: 10px;
-		width: ${(props) => props.theme.small ? '95px' : '150px'};
-
-		.select--disabled {
-			color: ${COLOR.BLACK_40};
-		}
-	}
-`;
 
 export const TitleContainer = styled.div`
 	align-items: center;

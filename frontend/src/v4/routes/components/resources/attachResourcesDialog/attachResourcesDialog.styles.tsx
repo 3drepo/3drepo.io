@@ -102,7 +102,7 @@ const V5DropzoneContent = styled(DashedContainer).attrs<{ error?: boolean, isDra
 	strokeColor: dropZoneColors(primary.main, primary.dark, errorPalette.main)({ error, isDragActive }),
 }))`
 	${({ theme: { palette: { primary, secondary, error } } }) => css`
-		background-color: ${dropZoneColors(primary.contrast, primary.accent, error.lightest)};
+		background-color: ${dropZoneColors(primary.contrast, primary.lightest, error.lightest)};
 		color: ${dropZoneColors(secondary.main, secondary.main, error.main)};
 	`}
 `;

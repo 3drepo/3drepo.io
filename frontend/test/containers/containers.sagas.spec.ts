@@ -137,7 +137,10 @@ describe('Containers: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(ContainersActions.fetchContainers(teamspace, projectId));
-			}, [ContainersActions.fetchContainersSuccess(projectId, [mockContainerWithoutStats])]);
+			}, [
+				ContainersActions.fetchContainersSuccess(projectId, [mockContainerWithoutStats]),
+				ContainersActions.fetchContainerStats(teamspace, projectId, mockContainer._id),
+			]);
 		})
 
 		it('should call fetch containers data endpoint with 404', async () => {

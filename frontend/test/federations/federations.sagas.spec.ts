@@ -138,7 +138,10 @@ describe('Federations: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(FederationsActions.fetchFederations(teamspace, projectId));
-			}, [FederationsActions.fetchFederationsSuccess(projectId, [mockFederationWithoutStats])]);
+			}, [
+				FederationsActions.fetchFederationsSuccess(projectId, [mockFederationWithoutStats]),
+				FederationsActions.fetchFederationStats(teamspace, projectId, mockFederation._id),
+			]);
 		})
 
 		it('should call fetch federations endpoint with 400', async () => {
