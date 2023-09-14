@@ -19,7 +19,6 @@ import { ComponentType, memo, useContext, useEffect } from 'react';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { DashboardListItemButton, DashboardListItemText } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { Highlight } from '@controls/highlight';
-import { RevisionDetails } from '@components/shared/revisionDetails';
 import { Display } from '@/v5/ui/themes/media';
 import { formatDate, formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
@@ -30,6 +29,7 @@ import { AutocompleteTextfield, DashboardListItemRow, Autocomplete } from './edi
 import { OptionsBox } from '../../../../../containers/uploadFileForm/uploadList/uploadListItem/components/uploadListItemDestination/options/optionsBox.styles';
 import { EditFederationContext } from '../../../editFederationContext';
 import { GroupOption } from './groupOption/groupOption.component';
+import { RevisionDetails } from '@components/shared/revisionDetails/revisionDetails.component';
 
 export type IconButtonProps = {
 	container: IContainer;

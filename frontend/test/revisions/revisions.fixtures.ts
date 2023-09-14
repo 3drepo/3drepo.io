@@ -25,6 +25,7 @@ export const revisionsMockFactory = (overrides?: Partial<IRevision>): IRevision 
 	author: faker.name.findName(),
 	desc: faker.random.words(3),
 	void: faker.datatype.boolean(),
+	format: faker.system.commonFileExt(),
 	...overrides,
 });
 
@@ -43,11 +44,3 @@ export const mockCreateRevisionBody = (overrides?: Partial<CreateRevisionBody>):
 	...overrides,
 });
 
-export const prepareRevisionData = (overrides?: IRevisionUpdate): IRevisionUpdate => ({
-	timestamp: faker.datatype.datetime(),
-	tag: faker.random.word(),
-	author: faker.random.word(),
-	desc: faker.random.word(),
-	void: faker.datatype.boolean(),
-	...overrides,
-});
