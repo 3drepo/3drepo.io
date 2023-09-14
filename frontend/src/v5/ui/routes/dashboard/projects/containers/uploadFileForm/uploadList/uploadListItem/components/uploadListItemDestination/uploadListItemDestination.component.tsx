@@ -159,7 +159,7 @@ export const UploadListItemDestination = memo(({
 		return (<></>);
 	};
 
-	const onSetDestinationChange = (e, newVal: IContainer | null) => {
+	const onDestinationChange = (e, newVal: IContainer | null) => {
 		const sanitisedValue = sanitiseContainer(newVal);
 
 		if (newVal?._id) {
@@ -195,7 +195,6 @@ export const UploadListItemDestination = memo(({
 	};
 
 	useEffect(() => {
-		// if (has(selectedContainer, 'desc')) return;
 		// This updates the container desc after it is fetched in the fetchContainerSettings
 		setValue(`${revisionPrefix}.containerDesc`, selectedContainer?.desc);
 	}, [selectedContainer]);
@@ -218,7 +217,7 @@ export const UploadListItemDestination = memo(({
 			ListboxComponent={OptionsBox}
 			noOptionsText={isProjectAdmin ? NO_OPTIONS_TEXT_ADMIN : NO_OPTIONS_TEXT_NON_ADMIN}
 			onInputChange={handleInputChange}
-			onChange={onSetDestinationChange}
+			onChange={onDestinationChange}
 			onOpen={onOpen}
 			options={containers}
 			renderOption={renderOption}
