@@ -23,6 +23,7 @@ import { Wrapper } from '@/v4/routes/components/filterPanel/components/childMenu
 import _ from 'lodash';
 import ThinChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import { createElement } from 'react';
+import { DefaultTheme } from 'styled-components';
 
 export const theme = createTheme(
 	_.merge(
@@ -379,4 +380,4 @@ export const theme = createTheme(
 			},
 		},
 	),
-);
+) as unknown as DefaultTheme;

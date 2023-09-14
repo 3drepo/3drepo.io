@@ -18,7 +18,6 @@
 import * as faker from 'faker';
 import { UploadStatuses, IContainer, ContainerStats } from '@/v5/store/containers/containers.types';
 import { EMPTY_VIEW } from './../../src/v5/store/store.helpers';
-import { FetchContainerViewsResponse } from '@/v5/services/api/containers';
 import { ContainerSettings } from '@/v5/store/containers/containers.types';
 import { ContainerBackendSettings } from '@/v5/store/containers/containers.types';
 import { View } from '@/v5/store/store.types';
@@ -53,7 +52,6 @@ export const containerMockFactory = (overrides?: Partial<IContainer>): IContaine
 		],
 	},
 	unit: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
-	
 	...overrides,
 });
 
@@ -72,6 +70,18 @@ export const prepareMockStats = (overrides?: Partial<ContainerStats>): Container
 	...overrides,
 });
 
+export const getMockStats = (container: IContainer): ContainerStats => ({
+	revisions: {
+		total: container.revisionsCount,
+		lastUpdated: container.lastUpdated.valueOf(),
+		latestRevision: container.latestRevision
+	},
+	type: container.type,
+	status: container.status,
+	code: container.code,
+	unit: container.unit
+});
+
 export const prepareMockViews = (): View[] => {
 	const views = [];
 	for(let i = 0; i < 3; i++) {
@@ -83,22 +93,6 @@ export const prepareMockViews = (): View[] => {
 	}
 	return views;
 };
-
-export const prepareMockStatsReply = (container: IContainer): ContainerStats => ({
-	revisions: {
-		total: container.revisionsCount,
-		lastUpdated: container.lastUpdated.valueOf(),
-		latestRevision: container.latestRevision,
-	},
-	type: container.type,
-	status: container.status,
-	code: container.code,
-	unit: container.unit,
-});
-
-export const prepareMockViewsReply = (container: IContainer): FetchContainerViewsResponse => ({
-	views: container.views,
-});
 
 const prepareMockSettingsWithoutSurveyPoint = (container: IContainer): Omit<ContainerSettings, 'surveyPoint'> => ({
 	angleFromNorth: container.angleFromNorth,

@@ -151,9 +151,12 @@ const run = async (outFile = DEFAULT_OUT_FILE, removeFiles = false, maxParallelR
 	if (zombies.length) {
 		logger.logInfo(`Writing all links to ${outFile}...`);
 
-		writeFileSync(outFile, zombies.join('\n'));
+		const chunks = splitArrayIntoChunks(zombies, maxParallelRefs);
+		for (let i = 0; i < chunks.length; ++i) {
+			writeFileSync(outFile, `${chunks[i].join('\n')}\n`, { flag: i === 0 ? 'w' : 'a' });
+			logger.logInfo(`[${i}/${chunks.length}] ${chunks[i].length} file paths written...`);
+		}
 		if (removeFiles) {
-			const chunks = splitArrayIntoChunks(zombies, maxParallelRefs);
 			logger.logInfo(`Deleting files (${chunks.length} batches)`);
 			for (let i = 0; i < chunks.length; ++i) {
 				const group = chunks[i];

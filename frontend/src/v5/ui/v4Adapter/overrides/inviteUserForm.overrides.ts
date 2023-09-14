@@ -41,9 +41,12 @@ const JobSelectStyles = css`
 		height: 10px;
 	}
 	${JobTitle}, ${EmptySelectValue} {
-		width: calc(100% - 22px);
 		${({ theme }) => theme.typography.body1}
 		color: ${({ theme }) => theme.palette.secondary.main};
+		width: calc(100% - 22px);
+		&:first-of-type {
+			width: 100%;
+		}
 	}
 	${SelectListItem} {
 		${({ theme }) => theme.typography.body1}
