@@ -21,7 +21,7 @@ import { Footer as InvitationsListFooter } from '@/v4/routes/components/invitati
 import { Footer as NewInviteFooter } from '@/v4/routes/components/invitationDialog/invitationDialog.styles';
 
 const titleStyling = css`
-	.MuiDialog-paper:has(.MuiTabs-root) ${DialogTitle} {
+	.MuiDialog-paper:has(> .MuiDialogContent-root > .MuiTabs-root) ${DialogTitle} {
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
 	}
 
