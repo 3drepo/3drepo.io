@@ -187,14 +187,10 @@ const establishRoutes = () => {
 	 *                 description: Timezone of the revision
 	 *                 type: string
 	 *                 example: Europe/Berlin
-	 *               surfaceTolerance:
-	 *                 description: Mesh optimisation value
+	 *               lod:
+	 *                 description: Level of Detail
 	 *                 type: number
-	 *                 example: 0.08
-	 *               normalTolerance:
-	 *                 description: Mesh optimisation value
-	 *                 type: integer
-	 *                 example: 15
+	 *                 example: 0
 	 *               file:
 	 *                 type: string
 	 *                 format: binary

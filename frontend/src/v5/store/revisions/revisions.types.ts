@@ -50,8 +50,7 @@ export type CreateRevisionBody = {
 	file: File;
 	importAnimations?: boolean;
 	timezone?: string;
-	surfaceTolerance?: number;
-	normalTolerance?: number;
+	lod?: number;
 
 	containerId?: string;
 	containerName: string;

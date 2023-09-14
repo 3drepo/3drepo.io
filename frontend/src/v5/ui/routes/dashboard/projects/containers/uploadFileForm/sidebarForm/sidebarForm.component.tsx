@@ -146,16 +146,9 @@ export const SidebarForm = ({
 
 			<FormNumberField
 				control={control}
-				name="surfaceTolerance"
-				label={formatMessage({ id: 'uploads.sidebar.surfaceTolerance', defaultMessage: 'Surface Tolerance' })}
-				formError={errors.surfaceTolerance}
-			/>
-
-			<FormNumberField
-				control={control}
-				name="normalTolerance"
-				label={formatMessage({ id: 'uploads.sidebar.normalTolerance', defaultMessage: 'Normal Tolerance' })}
-				formError={errors.normalTolerance}
+				name="lod"
+				label={formatMessage({ id: 'uploads.sidebar.lod', defaultMessage: 'Level of Detail' })}
+				formError={errors.lod}
 			/>
 
 			{isSpm && (
