@@ -20,7 +20,7 @@
 const utils = require("../utils");
 const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
-const { checkRulesValidity } = require("./helper/rule");
+const { validateRules } = require("./helper/rule");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 
@@ -265,10 +265,12 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 						}
 						break;
 					case "rules":
-						if (!checkRulesValidity(data)) {
+						try{
+							newGroup.rules = validateRules(data.rules);
+						} catch{
 							typeCorrect = false;
 						}
-						newGroup[key] = cleanEmbeddedObject(key, data[key]);
+
 						break;
 					case "color":
 						newGroup[key] = data[key].map((c) => parseInt(c, 10));
@@ -414,13 +416,14 @@ Group.update = async function (account, model, branch = "master", revId = null, 
 			if (utils.typeMatch(data[key], fieldTypes[key])) {
 				switch (key) {
 					case "rules":
-						if (!checkRulesValidity(data)) {
+						try{
+							toUpdate.rules = validateRules(data.rules);
+						} catch{
 							typeCorrect = false;
 							toUnset.objects = 1;
 							group.objects = undefined;
 						}
 
-						toUpdate[key] = cleanEmbeddedObject(key, data[key]);
 						break;
 					case "objects":
 						toUpdate.objects = cleanEmbeddedObject(key, convertedObjects);

@@ -20,7 +20,6 @@
 const { v5Path } = require("../../../interop");
 const { schema } = require(`${v5Path}/schemas/rules`);
 const { toQuery } = require(`${v5Path}/models/metadata.rules`);
-const { schema: rulesSchema } = require(`${v5Path}/schemas/rules`);
 
 const notOperators = {
 	"IS_NOT": "IS",
@@ -32,28 +31,11 @@ const notOperators = {
 
 const RuleHelper = {};
 
-/**
- * Returns true if given rule has:
- * - A field,
- * - A supported operator,
- * - The correct minimum/multiples of values if a value is required
- */
-
-RuleHelper.checkRulesValidity = (group) => {
-	try {
-		if(group?.rules) {
-			group.rules = schema.validateSync(group.rules);
-		}
-
-		return true;
-	} catch (err) {
-		return false;
-	}
-};
+RuleHelper.validateRules = (rules) => schema.validateSync(rules);
 
 RuleHelper.buildQueryFromRule = toQuery;
 RuleHelper.positiveRulesToQueries = (rulesRaw) => {
-	const rules = rulesSchema.cast(rulesRaw);
+	const rules = schema.cast(rulesRaw);
 
 	const posRules = rules.filter(r => !notOperators[r.operator]).map(RuleHelper.buildQueryFromRule);
 
@@ -69,7 +51,7 @@ RuleHelper.positiveRulesToQueries = (rulesRaw) => {
 };
 
 RuleHelper.negativeRulesToQueries = (rulesRaw) => {
-	const rules = rulesSchema.cast(rulesRaw);
+	const rules = schema.cast(rulesRaw);
 	return rules.filter(r => notOperators[r.operator]).map(({ field, values, operator }) => {
 		const negRule = {
 			field,

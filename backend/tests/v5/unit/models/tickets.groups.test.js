@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { src } = require('../../helper/path');
 const { times } = require('lodash');
 const { generateRandomString, generateRandomObject, generateGroup } = require('../../helper/services');
-const { src } = require('../../helper/path');
-const { castSchema } = require('../../../../src/v5/schemas/rules');
+const { castSchema } = require(`${src}/schemas/rules`);
 
 const Groups = require(`${src}/models/tickets.groups`);
 

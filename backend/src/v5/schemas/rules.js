@@ -21,28 +21,29 @@ const { isString } = require('../utils/helper/typeCheck');
 
 const Rules = {};
 
-const formulateValueSchema = (operatorName, isFieldName) => {
-	const operatorsList = isFieldName ? FIELD_NAME_OPERATORS : FIELD_VALUE_OPERATORS;
-	const { minValues, maxValues, isNumber } = operatorsList[operatorName];
+const formulateValueSchema = (operator) => {
+	if(operator){
+		const { minValues, maxValues, isNumber } = operator;
 
-	if (maxValues === 0) {
-		return Yup.mixed().strip();
-	}
-
-	let schema = Yup.array()
-		.of(isNumber ? Yup.number() : Yup.string())
-		.required()
-		.min(minValues);
-
-	if (maxValues) {
-		schema = schema.max(maxValues);
-	}
-
-	if (minValues === 2) {
-		schema = schema.test('is-even-number', 'values array must have an even number of items', (values) => values.length % 2 === 0);
-	}
-
-	return schema;
+		if (maxValues === 0) {
+			return Yup.mixed().strip();
+		}
+	
+		let schema = Yup.array()
+			.of(isNumber ? Yup.number() : Yup.string())
+			.required()
+			.min(minValues);
+	
+		if (maxValues) {
+			schema = schema.max(maxValues);
+		}
+	
+		if (minValues === 2) {
+			schema = schema.test('is-even-number', 'values array must have an even number of items', (values) => values.length % 2 === 0);
+		}
+	
+		return schema;
+	}	
 };
 
 const ruleSchema = Yup.object().shape({
@@ -50,12 +51,12 @@ const ruleSchema = Yup.object().shape({
 	field: Yup.object().shape({
 		operator: Yup.string().uppercase().oneOf(Object.keys(FIELD_NAME_OPERATORS)).required(),
 		values: Yup.mixed()
-			.when('operator', (operator) => formulateValueSchema(operator, true)),
+			.when('operator', (operator) => formulateValueSchema(FIELD_NAME_OPERATORS[operator])),
 	}).transform((val, oldVal) => (isString(oldVal)
 		? { operator: FIELD_NAME_OPERATORS.IS.name, values: [oldVal] } : val)).required(),
 	operator: Yup.string().uppercase().oneOf(Object.keys(FIELD_VALUE_OPERATORS)).required(),
 	values: Yup.mixed()
-		.when('operator', (operator) => formulateValueSchema(operator)),
+		.when('operator', (operator) => formulateValueSchema(FIELD_VALUE_OPERATORS[operator])),
 })
 	.noUnknown();
 

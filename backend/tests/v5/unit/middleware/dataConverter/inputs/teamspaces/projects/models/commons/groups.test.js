@@ -18,7 +18,7 @@
 const _ = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
 const { generateLegacyGroup, generateUUIDString, generateRandomString } = require('../../../../../../../../helper/services');
-const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require('../../../../../../../../../../src/v5/models/metadata.rules.constants');
+const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require(`${src}/models/metadata.rules.constants`);
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);

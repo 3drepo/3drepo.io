@@ -25,15 +25,7 @@ const { templates } = require('../utils/responseCodes');
 
 const Groups = {};
 
-const convertGroupRules = (group) => {
-	const convertedGroup = { ...group };
-
-	if (convertedGroup?.rules) {
-		convertedGroup.rules = convertedGroup.rules.map(castSchema);
-	}
-
-	return convertedGroup;
-};
+const convertGroupRules = (group) => (group.rules ? { ...group, rules: group.rules.map(castSchema) } : group);
 
 Groups.addGroups = async (teamspace, project, model, ticket, groups) => {
 	const data = groups.map((groupData) => ({ ...groupData, teamspace, project, model, ticket }));

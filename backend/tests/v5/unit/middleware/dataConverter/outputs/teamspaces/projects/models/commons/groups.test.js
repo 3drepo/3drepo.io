@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require('../../../../../../../../../../src/v5/models/metadata.rules.constants');
-const { isString } = require('../../../../../../../../../../src/v5/utils/helper/typeCheck');
-const { generateLegacyGroup } = require('../../../../../../../../helper/services');
 const { src } = require('../../../../../../../../helper/path');
+const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require(`${src}/models/metadata.rules.constants`);
+const { isString } = require(`${src}/utils/helper/typeCheck`);
+const { generateLegacyGroup } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);

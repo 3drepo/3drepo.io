@@ -51,7 +51,7 @@ const testExportGroups = () => {
 		ServiceHelper.generateLegacyGroup(teamspace, container._id, true, false),
 	];
 
-	const groupWithStringField = {
+	const legacyFieldSchema = {
 		...ServiceHelper.generateLegacyGroup(teamspace, container._id, true, false),
 		rules: [{
 			name: ServiceHelper.generateRandomString(),
@@ -83,7 +83,7 @@ const testExportGroups = () => {
 			['the groups requested exists (1)', createRoute(), true, { groups }],
 			['the groups requested exists (2)', createRoute(), true, { groups: [groups[0]] }, { groups: [groups[0]._id] }],
 			['the groups requested doesn\'t exist', createRoute({ modelId: modelWithNoGroups }), true, { groups: [] }],
-			['the groups requested have string field property', createRoute(), true, { groups: [{ ...groupWithStringField, rules: groupWithStringField.rules.map(castSchema) }] }, { groups: [groupWithStringField._id] }],
+			['the groups requested have legacy field schema', createRoute(), true, { groups: [{ ...legacyFieldSchema, rules: legacyFieldSchema.rules.map(castSchema) }] }, { groups: [legacyFieldSchema._id] }],
 		];
 	};
 
@@ -117,8 +117,8 @@ const testExportGroups = () => {
 				...userProms,
 				...modelProms,
 				ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
-				ServiceHelper.db.createLegacyGroups(teamspace, container._id, [...groups, groupWithStringField]),
-				ServiceHelper.db.createLegacyGroups(teamspace, fed._id, [...groups, groupWithStringField]),
+				ServiceHelper.db.createLegacyGroups(teamspace, container._id, [...groups, legacyFieldSchema]),
+				ServiceHelper.db.createLegacyGroups(teamspace, fed._id, [...groups, legacyFieldSchema]),
 			]);
 		});
 		describe.each(generateTestData(true))('Federations', runTest);
@@ -149,7 +149,7 @@ const testImportGroups = () => {
 		ServiceHelper.generateLegacyGroup(teamspace, container._id, true, false),
 	];
 
-	const groupWithStringField = {
+	const legacyFieldSchema = {
 		...ServiceHelper.generateLegacyGroup(teamspace, container._id, true, false),
 		rules: [{
 			name: ServiceHelper.generateRandomString(),
@@ -184,7 +184,7 @@ const testImportGroups = () => {
 			['the groups are valid', createRoute(), true, { post: { groups: postData.groups.map(({ _id }) => _id) }, data: groups }],
 			['the same groups are being imported again', createRoute(), true, { post: { groups: postData.groups.map(({ _id }) => _id) }, data: groups }],
 			['the user is updating only some of the groups', createRoute(), true, { post: { groups: [...groups.map(({ _id }) => _id), newGroup._id] }, data: expect.arrayContaining([changedGroup, ...groups.slice(1), newGroup]) }, { groups: partialGroupUpdateTestData }],
-			['the groups have string field property', createRoute(), true, { post: { groups: [groupWithStringField._id] }, data: [{ ...groupWithStringField, rules: groupWithStringField.rules.map(castSchema) }] }, { groups: [groupWithStringField] }],
+			['the groups have legacy field schema', createRoute(), true, { post: { groups: [legacyFieldSchema._id] }, data: [{ ...legacyFieldSchema, rules: legacyFieldSchema.rules.map(castSchema) }] }, { groups: [legacyFieldSchema] }],
 		];
 	};
 
