@@ -92,22 +92,19 @@ export const UploadListItemDestination = memo(({
 		containerUnit: baseContainer?.unit || 'mm',
 	});
 
-	const testName = (containerName) => {
+	const handleInputChange = (_, newValue: string) => {
+		const trimmedValue = newValue?.trim();
 		try {
 			containerNameScheme.validateSync(
-				containerName,
+				trimmedValue,
 				{ context: { alreadyExistingNames: federationsNames } },
 			);
 			setError('');
-			setNewOrExisting(containers.find(({ name }) => name === containerName) ? 'existing' : 'new');
+			setNewOrExisting(containers.find(({ name }) => name === trimmedValue) ? 'existing' : 'new');
 		} catch (validationError) {
-			setError(`${validationError.message}`);
+			setError(validationError.message);
 			setNewOrExisting('');
 		}
-	};
-
-	const handleInputChange = (_, newValue: string) => {
-		testName(newValue?.trim());
 	};
 
 	const getFilterOptions = (options: IContainer[], params) => {
