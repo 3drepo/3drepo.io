@@ -15,39 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode } from 'react';
-import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { Display } from '@/v5/ui/themes/media';
-import { Text } from './revisionsListItemText.styles';
-
-type IDashboardListItemText = {
-	children: ReactNode;
-	width?: number;
-	tabletWidth?: number;
-	mobileWidth?: number;
-	className?: string;
-	active?: boolean;
-	hideWhenSmallerThan?: Display;
-};
+import { FixedOrGrowContainer, FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
+import { TextOverflow } from '@controls/textOverflow';
 
 export const RevisionsListItemText = ({
 	children,
-	width,
-	tabletWidth,
-	mobileWidth,
-	className,
-	active = false,
-	hideWhenSmallerThan,
-}: IDashboardListItemText): JSX.Element => (
-	<FixedOrGrowContainer
-		width={width}
-		tabletWidth={tabletWidth}
-		mobileWidth={mobileWidth}
-		hideWhenSmallerThan={hideWhenSmallerThan}
-		className={className}
-	>
-		<Text $active={active}>
+	...props
+}: FixedOrGrowContainerProps): JSX.Element => (
+	<FixedOrGrowContainer {...props}>
+		<TextOverflow>
 			{children}
-		</Text>
+		</TextOverflow>
 	</FixedOrGrowContainer>
 );
