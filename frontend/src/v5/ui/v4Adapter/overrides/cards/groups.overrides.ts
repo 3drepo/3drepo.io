@@ -146,9 +146,10 @@ const expandedGroupItem = css`
 					
 					.MuiInputBase-root {
 						padding: 0;
+
 						& > textarea {
 							min-height: 2rem;
-							padding: 5px 10px;
+							padding: 5px 20px 5px 10px;
 						}
 						&.Mui-focused fieldset {
 							border: 1px solid ${({ theme }) => theme.palette.primary.main};
@@ -191,8 +192,8 @@ const expandedGroupItem = css`
 				${DetailsDescription} {
 					margin-top: 30px;
 					
-					> div {
-						min-height: 42px !important;
+					& > :first-child {
+						min-height: 42px;
 						margin: 0;
 					}
 					
@@ -210,8 +211,16 @@ const expandedGroupItem = css`
 					}
 
 					${ActionsLine} {
-						top: -5px;
+						top: 0;
 						bottom: unset;
+						display: flex;
+						flex-direction: column-reverse;
+
+						button {
+							margin: 2px 5px 2px 0;
+							height: 15px;
+							width: 15px;
+						}
 						
 						svg {
 							font-size: 1rem;
