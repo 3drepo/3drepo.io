@@ -16,6 +16,7 @@
  */
 
 const { src } = require('../../helper/path');
+
 const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require(`${src}/models/metadata.rules.constants`);
 const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../helper/services');
 

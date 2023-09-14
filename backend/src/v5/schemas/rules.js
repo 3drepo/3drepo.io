@@ -22,28 +22,26 @@ const { isString } = require('../utils/helper/typeCheck');
 const Rules = {};
 
 const formulateValueSchema = (operator) => {
-	if(operator){
-		const { minValues, maxValues, isNumber } = operator;
+	if (!operator || operator.maxValues === 0) {
+		return Yup.mixed().strip();
+	}
 
-		if (maxValues === 0) {
-			return Yup.mixed().strip();
-		}
-	
-		let schema = Yup.array()
-			.of(isNumber ? Yup.number() : Yup.string())
-			.required()
-			.min(minValues);
-	
-		if (maxValues) {
-			schema = schema.max(maxValues);
-		}
-	
-		if (minValues === 2) {
-			schema = schema.test('is-even-number', 'values array must have an even number of items', (values) => values.length % 2 === 0);
-		}
-	
-		return schema;
-	}	
+	const { minValues, maxValues, isNumber } = operator;
+
+	let schema = Yup.array()
+		.of(isNumber ? Yup.number() : Yup.string())
+		.required()
+		.min(minValues);
+
+	if (maxValues) {
+		schema = schema.max(maxValues);
+	}
+
+	if (minValues === 2) {
+		schema = schema.test('is-even-number', 'values array must have an even number of items', (values) => values.length % 2 === 0);
+	}
+
+	return schema;
 };
 
 const ruleSchema = Yup.object().shape({

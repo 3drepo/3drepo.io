@@ -18,6 +18,7 @@
 const { src } = require('../../helper/path');
 const { times } = require('lodash');
 const { generateRandomString, generateRandomObject, generateGroup } = require('../../helper/services');
+
 const { castSchema } = require(`${src}/schemas/rules`);
 
 const Groups = require(`${src}/models/tickets.groups`);
