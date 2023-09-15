@@ -25,11 +25,11 @@ import { FormattedMessage } from 'react-intl';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { DashboardListItemContainerTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
 import { uniq } from 'lodash';
+import { RevisionDetails } from '@components/shared/revisionDetails/revisionDetails.component';
 import { AutocompleteTextfield, DashboardListItemRow, Autocomplete } from './editFederationContainersListItem.styles';
 import { OptionsBox } from '../../../../../containers/uploadFileForm/uploadList/uploadListItem/components/uploadListItemDestination/options/optionsBox.styles';
 import { EditFederationContext } from '../../../editFederationContext';
 import { GroupOption } from './groupOption/groupOption.component';
-import { RevisionDetails } from '@components/shared/revisionDetails/revisionDetails.component';
 
 export type IconButtonProps = {
 	container: IContainer;

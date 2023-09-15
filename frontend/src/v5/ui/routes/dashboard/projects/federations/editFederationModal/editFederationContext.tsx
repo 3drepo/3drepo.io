@@ -64,7 +64,7 @@ export const EditFederationContextComponent = ({ federation, children }: Props) 
 	const groups = uniq(existingGroups.concat(Object.values(groupsByContainer))).filter(Boolean);
 
 	useEffect(() => {
-		if (!containers.length) return;
+		if (!containers.length || !federation?.containers) return;
 		setIncludedContainers(federation.containers.map(({ _id }) => containers.find((c) => c._id === _id)));
 	}, [containers]);
 
