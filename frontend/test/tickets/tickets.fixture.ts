@@ -47,7 +47,7 @@ export const templateMockFactory = (overrides?: ITemplate): ITemplate => ({
 
 export const mockRiskCategories = (): string[] => times(5, () => faker.random.word())
 
-export const mockGroup = (overrides?: Group): Group => ({
+export const mockGroup = (overrides?: Partial<Group>): Group => ({
 	_id: faker.datatype.uuid(),
 	name: faker.random.words(3),
 	description: faker.random.words(3),
@@ -55,4 +55,5 @@ export const mockGroup = (overrides?: Group): Group => ({
 		_ids: times(5, () => faker.datatype.uuid()),
 		container: faker.datatype.uuid(),
 	}],
+	...overrides,
 })

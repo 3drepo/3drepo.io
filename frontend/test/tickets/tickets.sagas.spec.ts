@@ -23,26 +23,46 @@ import { selectRiskCategories, selectTemplateById, selectTemplates, selectTicket
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
+import { getSanitizedSmartGroup } from '@/v5/store/tickets/ticketsGroups.helpers';
+import { FederationsActions } from '@/v5/store/federations/federations.redux';
+import { federationMockFactory, prepareMockBaseFederation } from '../federations/federations.fixtures';
+import { ContainersActions } from '@/v5/store/containers/containers.redux';
+import { containerMockFactory } from '../containers/containers.fixtures';
+import { IContainer } from '@/v5/store/containers/containers.types';
+import { IFederation } from '@/v5/store/federations/federations.types';
+import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 
 describe('Tickets: sagas', () => {
 	let onSuccess;
 	let dispatch, getState, waitForActions;
 	const group = mockGroup();
 	const groups = [group]
-	const ticket = ticketMockFactory({ properties: { defaultView: { coloured: [groups[0]._id] }}})
+	const ticket = ticketMockFactory({ properties: { defaultView: { state: { colored: [ { group: group._id, opacity: 1, color: [12, 12, 12] } ] }}}})
 	const tickets = [ticket];
 	const teamspace = 'teamspace';
 	const projectId = 'project';
 	const modelId = 'modelId';
 	
-	const populateStore = () => {
+	const populateTicketsStore = () => {
 		dispatch(TicketsActions.fetchTicketsSuccess(modelId, tickets));
+	}
+	const populateTicketsAndGroupsStore = () => {
+		populateTicketsStore();
+		dispatch(TicketsActions.fetchTicketGroupsSuccess(groups));
+	}
+	const populateFederationsStore = () => {
+		const containers: IContainer[] = [containerMockFactory()]
+		const federations: IFederation[] = [federationMockFactory({ _id: modelId, containers: [containers[0]._id] })];
+		dispatch(FederationsActions.fetchFederationsSuccess(projectId, federations));
+		dispatch(ContainersActions.fetchContainersSuccess(projectId, containers));
+
 	}
 	beforeEach(() => {
 		onSuccess = jest.fn();
 		({ dispatch, getState, waitForActions } = createTestStore());
 		dispatch(TeamspacesActions.setCurrentTeamspace(teamspace));
 		dispatch(ProjectsActions.setCurrentProject(projectId));
+		populateFederationsStore(); // TODO Move to federations section only
 	})
 
 	describe('tickets', () => {
@@ -107,7 +127,7 @@ describe('Tickets: sagas', () => {
 			])
 		})
 		it('should call updateContainerTicket with a 404', async () => {
-			populateStore();
+			populateTicketsStore();
 
 			mockServer
 				.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticket._id}`)
@@ -182,7 +202,6 @@ describe('Tickets: sagas', () => {
 		})
 
 		it('should call fetchFederationTicket endpoint', async () => {
-			const ticket = tickets[0];
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticket._id}`)
 				.reply(200, ticket);
@@ -195,7 +214,6 @@ describe('Tickets: sagas', () => {
 			])
 		})
 		it('should call fetchFederationTicket endpoint with a 404', async () => {
-			const ticket = tickets[0];
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticket._id}`)
 				.reply(404);
@@ -208,7 +226,6 @@ describe('Tickets: sagas', () => {
 		})
 
 		it('should call updateFederationTicket endpoint', async () => {
-			const ticket = tickets[0];
 			mockServer
 				.patch(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticket._id}`)
 				.reply(200, ticket);
@@ -221,8 +238,7 @@ describe('Tickets: sagas', () => {
 		})
 
 		it('should call updateFederationTicket endpoint with a 404', async () => {
-			populateStore();
-			const ticket = tickets[0];
+			populateTicketsStore();
 			mockServer
 				.patch(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticket._id}`)
 				.reply(404);
@@ -268,7 +284,147 @@ describe('Tickets: sagas', () => {
 			expect(ticketsFromState).toEqual([]);
 			expect(onSuccess).not.toHaveBeenCalled();
 		})
-	})
+		describe('groups', () => {
+			// it('should call upsertTicketAndFetchGroups', async () => {
+			// 	populateTicketsAndGroupsStore();
+
+			// 	const updateProp = {_id: ticket._id, title: 'updatedContainerTicketName'};
+
+			// 	await waitForActions(() => {
+			// 		dispatch(TicketsActions.upsertTicketAndFetchGroups(teamspace, projectId, modelId, updateProp))
+			// 	}, [
+			// 		TicketsActions.upsertTicketSuccess(modelId, updateProp),
+			// 		TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id),
+			// 	])
+			// });
+			describe('containers', () => {
+			// beforeEach(() => {
+			// 	populateStore();
+			// 	jest.setTimeout(2000)
+			// })
+			// it('should call fetchTicketGroups endpoint', async () => {
+			// 	mockServer
+			// 		.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticket._id}/groups/${group._id}`)
+			// 		.reply(200, { data: group });
+
+			// 	await waitForActions(() => {
+			// 		dispatch(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id))
+			// 	}, [TicketsActions.fetchTicketGroupsSuccess(groups)])
+			// 	const groupsFromState = selectTicketsGroups(getState());
+			// 	expect(groupsFromState).toEqual('foo');
+			// });
+
+			// it('should call fetchTicketGroups endpoint with a 404', async () => {
+			// 	populateTicketsStore();
+
+			// 	mockServer
+			// 		.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticket._id}/groups/${group._id}`)
+			// 		.reply(404);
+				
+			// 		dispatch(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id))
+			// 	// await waitForActions(() => {
+			// 	// 	dispatch(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id))
+			// 	// }, [DialogsTypes.OPEN])
+
+			// 	const groupsFromState = selectTicketsGroups(getState());
+			// 	expect(groupsFromState).toEqual({});
+			// });
+			
+			it('should call updateContainerTicketGroup', async () => {
+				populateTicketsAndGroupsStore()
+				const updatedGroup = mockGroup({ _id: group._id });
+				mockServer
+					.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticket._id}/groups/${group._id}`)
+					.reply(200);
+
+				await waitForActions(() => {
+					dispatch(TicketsActions.updateTicketGroup(teamspace, projectId, modelId, ticket._id, updatedGroup, false))
+				}, [
+					TicketsActions.updateTicketGroupSuccess(updatedGroup),
+				])
+
+				const groupsFromState = selectTicketsGroups(getState())
+				expect(groupsFromState[group._id]).toEqual(updatedGroup)
+			});
+			it('should call updateContainerTicketGroup with 404', async () => {
+				populateTicketsAndGroupsStore();
+				const updatedGroup = mockGroup({ _id: group._id });
+				mockServer
+					.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticket._id}/groups/${group._id}`)
+					.reply(404);
+
+				await waitForActions(() => {
+					dispatch(TicketsActions.updateTicketGroup(teamspace, projectId, modelId, ticket._id, updatedGroup, false))
+				}, [DialogsTypes.OPEN]);
+				const groupsFromState = selectTicketsGroups(getState())
+				expect(groupsFromState[group._id]).toEqual(group)
+			});
+		})
+		describe('federations', () => {
+			beforeEach(() => {
+				populateFederationsStore();
+			})
+			it('should call fetchTicketGroups endpoint', async () => {
+				populateTicketsAndGroupsStore()
+				const { resolve, promiseToResolve } = getWaitablePromise();
+				mockServer
+					.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticket._id}/groups/${group._id}`)
+					.reply(200, resolve);
+
+				console.log(`in test:: /teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticket._id}/groups/${group._id}`)
+				
+				dispatch(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id))
+				await promiseToResolve;
+				const groupsFromState = selectTicketsGroups(getState());
+				expect(groupsFromState).toEqual('foo');
+			});
+
+			// it('should call fetchTicketGroups endpoint with a 404', async () => {
+			// 	populateTicketsStore();
+
+			// 	mockServer
+			// 		.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticket._id}/groups/${group._id}`)
+			// 		.reply(404);
+				
+			// 	await waitForActions(() => {
+			// 		dispatch(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id))
+			// 	}, [DialogsTypes.OPEN])
+
+			// 	const groupsFromState = selectTicketsGroups(getState());
+			// 	expect(groupsFromState).toEqual({});
+			// });
+			it('should call updateFederationTicketGroup', async () => {
+				populateTicketsAndGroupsStore()
+				const updatedGroup = mockGroup({ _id: group._id });
+				mockServer
+					.patch(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticket._id}/groups/${group._id}`)
+					.reply(200);
+
+				await waitForActions(() => {
+					dispatch(TicketsActions.updateTicketGroup(teamspace, projectId, modelId, ticket._id, updatedGroup, true))
+				}, [
+					TicketsActions.updateTicketGroupSuccess(updatedGroup),
+				])
+
+				const groupsFromState = selectTicketsGroups(getState())
+				expect(groupsFromState[group._id]).toEqual(updatedGroup)
+			});
+			it('should call updateFederationTicketGroup with 404', async () => {
+				populateTicketsAndGroupsStore();
+				const updatedGroup = mockGroup({ _id: group._id });
+				mockServer
+					.patch(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticket._id}/groups/${group._id}`)
+					.reply(404);
+
+				await waitForActions(() => {
+					dispatch(TicketsActions.updateTicketGroup(teamspace, projectId, modelId, ticket._id, updatedGroup, true))
+				}, [DialogsTypes.OPEN]);
+				const groupsFromState = selectTicketsGroups(getState())
+				expect(groupsFromState[group._id]).toEqual(group)
+			});
+		})
+		})
+	}) 
 
 	describe('templates', () => {
 		const templates = [templateMockFactory()];
