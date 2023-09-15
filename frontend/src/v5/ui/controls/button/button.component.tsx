@@ -28,7 +28,6 @@ export type IButton<T extends ElementType = ButtonTypeMap['defaultComponent']> =
 const ButtonBase = <T extends ElementType>({
 	children,
 	variant,
-	color,
 	isPending,
 	...props
 }: IButton<T>, ref: Ref<HTMLButtonElement>) => {
