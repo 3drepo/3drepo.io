@@ -232,8 +232,12 @@ const createAssignedIssueNotification = (loggedUser, teamSpace, modelId, issueId
 			return null;
 		}
 
-		const canWrite = await hasWriteAccessToModelHelper(username, teamSpace, modelId);
-		if (!canWrite) {
+		try {
+			const canWrite = await hasWriteAccessToModelHelper(username, teamSpace, modelId);
+			if (!canWrite) {
+				return null;
+			}
+		} catch {
 			return null;
 		}
 
@@ -301,9 +305,13 @@ module.exports = {
 		const allUsers = await User.getAllUsersInTeamspace(teamSpace);
 		const users = [];
 		await Promise.all(allUsers.map(async user => {
-			const access = await hasReadAccessToModelHelper(user, teamSpace, modelId);
-			if (access) {
-				users.push(user);
+			try {
+				const access = await hasReadAccessToModelHelper(user, teamSpace, modelId);
+				if (access) {
+					users.push(user);
+				}
+			} catch {
+				// do nothing.
 			}
 		}));
 
