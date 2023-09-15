@@ -17,7 +17,9 @@
 
 const _ = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
-const { generateLegacyGroup, generateUUIDString } = require('../../../../../../../../helper/services');
+const { generateLegacyGroup, generateUUIDString, generateRandomString } = require('../../../../../../../../helper/services');
+
+const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require(`${src}/models/metadata.rules.constants`);
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
@@ -79,6 +81,13 @@ const deserialiseGroup = (group) => {
 		}
 	}
 
+	if (output?.rules) {
+		output.rules = output.rules.map(({ field, ...rest }) => ({
+			...rest,
+			field: isString(field) ? { operator: FIELD_NAME_OPERATORS.IS.name, values: [field] } : field,
+		}));
+	}
+
 	return output;
 };
 
@@ -87,45 +96,64 @@ const testValidateGroupsImportData = () => {
 	const ifcGroup = generateLegacyGroup('ab', generateUUIDString(), false, true);
 	const normalGroup = generateLegacyGroup('ab', generateUUIDString(), false, false);
 
+	const stringFieldRule = {
+		name: generateRandomString(),
+		field: generateRandomString(),
+		operator: FIELD_VALUE_OPERATORS.EQUALS.name,
+		values: [2, 4],
+	};
+
 	const numberRule = {
-		field: 'abc',
-		operator: 'EQUALS',
+		name: generateRandomString(),
+		field: { operator: FIELD_NAME_OPERATORS.IS.name, values: [generateRandomString()] },
+		operator: FIELD_VALUE_OPERATORS.EQUALS.name,
 		values: [2, 4],
 	};
 
 	const rangeRule = {
-		field: 'abcd',
-		operator: 'IN_RANGE',
+		name: generateRandomString(),
+		field: { operator: FIELD_NAME_OPERATORS.IS.name, values: [generateRandomString()] },
+		operator: FIELD_VALUE_OPERATORS.IN_RANGE.name,
 		values: [2, 4, 5, 7],
 	};
 
-	const existRule = {
-		field: 'abc',
-		operator: 'IS_EMPTY',
+	const noNameRule = {
+		field: { operator: FIELD_NAME_OPERATORS.IS.name, values: [generateRandomString()] },
+		operator: FIELD_VALUE_OPERATORS.IS_EMPTY.name,
 	};
 
-	const badExistRule = {
-		field: 'abcdef',
-		operator: 'IS_EMPTY',
-		values: [2, 4, 3],
+	const existRule = {
+		name: generateRandomString(),
+		field: { operator: FIELD_NAME_OPERATORS.IS.name, values: [generateRandomString()] },
+		operator: FIELD_VALUE_OPERATORS.IS_EMPTY.name,
 	};
 
 	const badRangeRule = {
-		field: 'abc1',
-		operator: 'IN_RANGE',
+		name: generateRandomString(),
+		field: { operator: FIELD_NAME_OPERATORS.IS.name, values: [generateRandomString()] },
+		operator: FIELD_VALUE_OPERATORS.IN_RANGE.name,
 		values: [2, 4, 3],
 	};
 
 	const badRule = {
-		field: 'abc2',
-		operator: 'EQUALS',
+		name: generateRandomString(),
+		field: { operator: FIELD_NAME_OPERATORS.IS.name, values: [generateRandomString()] },
+		operator: FIELD_VALUE_OPERATORS.EQUALS.name,
 		values: ['a', 'b'],
 	};
 
-	const wrongTypedRule = {
-		field: 'abc3',
-		operator: 'EQUALS',
-		values: ['2', '4'],
+	const regexWithMoreThan1ValuesRule = {
+		name: generateRandomString(),
+		field: { operator: FIELD_NAME_OPERATORS.IS.name, values: [generateRandomString()] },
+		operator: FIELD_VALUE_OPERATORS.REGEX.name,
+		values: [generateRandomString(), generateRandomString()],
+	};
+
+	const unknownOperatorRule = {
+		name: generateRandomString(),
+		field: { operator: FIELD_NAME_OPERATORS.IS.name, values: [generateRandomString()] },
+		operator: generateRandomString(),
+		values: [generateRandomString(), generateRandomString()],
 	};
 
 	describe.each([
@@ -137,17 +165,18 @@ const testValidateGroupsImportData = () => {
 		[{ body: { groups: [_.omit(ruleGroup, ['author'])] } }, false, 'no author'],
 		[{ body: { groups: [_.omit(ruleGroup, ['createdAt'])] } }, false, 'no createdAt'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [] }] } }, false, 'with empty rules'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [stringFieldRule] }] } }, true, 'rule with string field'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [existRule] }] } }, true, 'exists rule'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [badExistRule] }] } }, false, 'existsRule with parameters'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [numberRule] }] } }, true, 'rule with number parameters'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [noNameRule] }] } }, false, 'rule with no name'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [numberRule] }] } }, true, 'rule with number parameter'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [rangeRule] }] } }, true, 'rule with range parameters'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [badRangeRule] }] } }, false, 'rule with in correct amount of range parameters'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [...ruleGroup.rules, numberRule] }] } }, true, 'multiple rules'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [...ruleGroup.rules, badRule, numberRule] }] } }, false, 'multiple rules where one is bad'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [badRule] }] } }, false, 'rule with invalidParameters'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [wrongTypedRule] }] } }, false, 'rule with wrong typed parameters'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [regexWithMoreThan1ValuesRule] }] } }, false, 'regex with more than 1 values'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [unknownOperatorRule] }] } }, false, 'rule with unknown operator'],
 		[{ body: { groups: [{ ...ifcGroup, objects: [] }] } }, false, 'with empty objects'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [existRule, numberRule] }] } }, false, 'two rules with the same key'],
 		[{ body: { groups: [{ ...ruleGroup, description: '123' }] } }, true, 'with description'],
 		[{ body: { groups: [_.omit(ruleGroup, ['updatedBy, updatedAt'])] } }, true, 'without updatedAt and updatedBy'],
 	])('Validate Groups import data', (data, shouldPass, desc) => {

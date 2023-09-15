@@ -58,7 +58,7 @@ const testGetTicketGroupById = () => {
 		});
 
 		test('[Smart group] should return the group found with the query results (container)', async () => {
-			const groupData = { ...generateRandomObject(), rules: generateRandomObject() };
+			const groupData = { ...generateRandomObject(), rules: [generateRandomObject()] };
 			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
 
 			const metaRes = times(10, () => ({ parents: times(2, () => generateRandomString()) }));
@@ -102,7 +102,7 @@ const testGetTicketGroupById = () => {
 			const conRev = generateRandomString();
 			RevsModel.getLatestRevision.mockResolvedValueOnce({ _id: conRev });
 
-			const groupData = { ...generateRandomObject(), rules: generateRandomObject() };
+			const groupData = { ...generateRandomObject(), rules: [generateRandomObject()] };
 			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
 
 			const metaRes = times(10, () => ({ parents: times(2, () => generateRandomString()) }));
@@ -146,7 +146,7 @@ const testGetTicketGroupById = () => {
 
 			RevsModel.getLatestRevision.mockRejectedValueOnce(generateRandomString());
 
-			const groupData = { ...generateRandomObject(), rules: generateRandomObject() };
+			const groupData = { ...generateRandomObject(), rules: [generateRandomObject()] };
 			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
 
 			const expectedData = cloneDeep(groupData);
@@ -166,7 +166,7 @@ const testGetTicketGroupById = () => {
 		});
 
 		test('[Smart group] should return the group found with the query results (negative query)', async () => {
-			const groupData = { ...generateRandomObject(), rules: generateRandomObject() };
+			const groupData = { ...generateRandomObject(), rules: [generateRandomObject()] };
 			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
 
 			const metaRes = times(10, () => ({ parents: times(2, () => generateRandomString()) }));
@@ -207,7 +207,7 @@ const testGetTicketGroupById = () => {
 		});
 
 		test('[Smart group] should return the group found with the query results (idmap not found)', async () => {
-			const groupData = { ...generateRandomObject(), rules: generateRandomObject() };
+			const groupData = { ...generateRandomObject(), rules: [generateRandomObject()] };
 			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
 
 			const metaRes = times(10, () => ({ parents: times(2, () => generateRandomString()) }));
@@ -248,7 +248,7 @@ const testGetTicketGroupById = () => {
 		});
 
 		test('[Smart group] should return the group found with the query results (no match)', async () => {
-			const groupData = { ...generateRandomObject(), rules: generateRandomObject() };
+			const groupData = { ...generateRandomObject(), rules: [generateRandomObject()] };
 			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
 
 			MetaModel.getMetadataByRules.mockResolvedValueOnce({ matched: [], unwanted: [] });

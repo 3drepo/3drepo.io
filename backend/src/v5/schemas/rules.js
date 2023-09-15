@@ -15,99 +15,51 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { isNumber, isString } = require('../utils/helper/typeCheck');
+const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require('../models/metadata.rules.constants');
 const Yup = require('yup');
-
-const operators = {
-	IS_EMPTY: 0,
-	IS_NOT_EMPTY: 0,
-	IS: 1,
-	IS_NOT: 1,
-	CONTAINS: 1,
-	NOT_CONTAINS: 1,
-	REGEX: 1,
-	EQUALS: 1,
-	NOT_EQUALS: 1,
-	GT: 1,
-	GTE: 1,
-	LT: 1,
-	LTE: 1,
-	IN_RANGE: 2,
-	NOT_IN_RANGE: 2,
-};
-
-const ruleParametersTypeCheck = (operator, values) => {
-	switch (operator) {
-	case 'IS':
-	case 'IS_NOT':
-	case 'CONTAINS':
-	case 'NOT_CONTAINS':
-	case 'REGEX':
-		return values.every(isString);
-	case 'EQUALS':
-	case 'NOT_EQUALS':
-	case 'GT':
-	case 'GTE':
-	case 'LT':
-	case 'LTE':
-		return values.every(isNumber);
-	default:
-		// range checks
-		return values.length % 2 === 0 && values.every(isNumber);
-	}
-};
-
-const numberOperator = (operator) => {
-	switch (operator) {
-	case 'EQUALS':
-	case 'NOT_EQUALS':
-	case 'GT':
-	case 'GTE':
-	case 'LT':
-	case 'LTE':
-	case 'IN_RANGE':
-	case 'NOT_IN_RANGE':
-		return true;
-	default:
-		return false;
-	}
-};
+const { isString } = require('../utils/helper/typeCheck');
 
 const Rules = {};
 
-const ruleSchema = Yup.object().shape({
-	field: Yup.string().required().min(1),
-	operator: Yup.string().uppercase().oneOf(Object.keys(operators)).required(),
-	values: Yup.array().when('operator', {
-		is: numberOperator,
-		then: Yup.array().of(Yup.number()).min(1).required(),
-		otherwise: Yup.array().of(Yup.string().min(1)).optional(),
-	}),
-})
-	.noUnknown()
-	.transform((value) => {
-		const nParams = operators[value.operator];
-		const res = { ...value };
-		if (nParams === 0) {
-			delete res.values;
-		}
-		return res;
-	})
-	.test(
-		'Rules validation', 'values field is not valid with the operator selected',
-		(value) => {
-			const nParams = operators[value.operator];
-			const arrLength = (value.values || []).length;
-			return (nParams === 0 && arrLength === 0)
-				|| (nParams <= arrLength && ruleParametersTypeCheck(value.operator, value.values));
-		},
-	);
+const formulateValueSchema = (operator) => {
+	if (!operator || operator.maxValues === 0) {
+		return Yup.mixed().strip();
+	}
 
-Rules.schema = Yup.array().of(ruleSchema).min(1).test(
-	'Rules validation', 'the same field cannot be used in more than one rule',
-	(rules) => {
-		const keys = new Set(rules.map(({ field }) => field));
-		return rules.length === keys.size;
-	},
-);
+	const { minValues, maxValues, isNumber } = operator;
+
+	let schema = Yup.array()
+		.of(isNumber ? Yup.number() : Yup.string())
+		.required()
+		.min(minValues);
+
+	if (maxValues) {
+		schema = schema.max(maxValues);
+	}
+
+	if (minValues === 2) {
+		schema = schema.test('is-even-number', 'values array must have an even number of items', (values) => values.length % 2 === 0);
+	}
+
+	return schema;
+};
+
+const ruleSchema = Yup.object().shape({
+	name: Yup.string().min(1).required(),
+	field: Yup.object().shape({
+		operator: Yup.string().uppercase().oneOf(Object.keys(FIELD_NAME_OPERATORS)).required(),
+		values: Yup.mixed()
+			.when('operator', (operator) => formulateValueSchema(FIELD_NAME_OPERATORS[operator])),
+	}).transform((val, oldVal) => (isString(oldVal)
+		? { operator: FIELD_NAME_OPERATORS.IS.name, values: [oldVal] } : val)).required(),
+	operator: Yup.string().uppercase().oneOf(Object.keys(FIELD_VALUE_OPERATORS)).required(),
+	values: Yup.mixed()
+		.when('operator', (operator) => formulateValueSchema(FIELD_VALUE_OPERATORS[operator])),
+})
+	.noUnknown();
+
+Rules.castSchema = (rule) => ruleSchema.cast(rule);
+
+Rules.schema = Yup.array().of(ruleSchema).min(1);
+
 module.exports = Rules;

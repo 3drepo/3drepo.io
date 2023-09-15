@@ -20,11 +20,12 @@
 const utils = require("../utils");
 const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
-const { checkRulesValidity } = require("./helper/rule");
+const { validateRules } = require("./helper/rule");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 
 const { systemLogger } = require("../logger.js");
+const { castSchema } = require("../../v5/schemas/rules");
 
 const fieldTypes = {
 	"description": "[object String]",
@@ -45,7 +46,7 @@ const fieldTypes = {
 
 const embeddedObjectFields = {
 	"objects" : ["account", "model", "shared_ids", "ifc_guids"],
-	"rules" : ["field", "operator", "values"]
+	"rules" : ["name", "field", "operator", "values"]
 };
 
 function cleanEmbeddedObject(field, data) {
@@ -264,10 +265,12 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 						}
 						break;
 					case "rules":
-						if (data.rules && !checkRulesValidity(data.rules)) {
+						try{
+							newGroup.rules = validateRules(data.rules);
+						} catch{
 							typeCorrect = false;
 						}
-						newGroup[key] = cleanEmbeddedObject(key, data[key]);
+
 						break;
 					case "color":
 						newGroup[key] = data[key].map((c) => parseInt(c, 10));
@@ -313,12 +316,20 @@ Group.deleteGroupsByViewId = async function (account, model, view_id) {
 	return await db.deleteMany(account, getGroupCollectionName(model), { view_id });
 };
 
+const convertGroupRules = (group) => {
+	if(group.rules) {
+		group.rules = group.rules.map(castSchema);
+	}
+};
+
 Group.findByUID = async function (account, model, branch, revId, uid, showIfcGuids = false, noClean = true, convertToIfcGuids = false) {
 	const foundGroup = await db.findOne(account, getGroupCollectionName(model), { _id: utils.stringToUUID(uid) });
 
 	if (!foundGroup) {
 		throw responseCodes.GROUP_NOT_FOUND;
 	}
+
+	convertGroupRules(foundGroup);
 
 	if (convertToIfcGuids) {
 		foundGroup.objects = await getObjectsArrayAsIfcGuids(foundGroup, false);
@@ -374,6 +385,9 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 	}
 
 	const results = await db.find(account, getGroupCollectionName(model), query);
+
+	results.map(convertGroupRules);
+
 	const sharedIdConversionPromises = [];
 
 	results.forEach(result => {
@@ -402,13 +416,14 @@ Group.update = async function (account, model, branch = "master", revId = null, 
 			if (utils.typeMatch(data[key], fieldTypes[key])) {
 				switch (key) {
 					case "rules":
-						if (!checkRulesValidity(data.rules)) {
+						try{
+							toUpdate.rules = validateRules(data.rules);
+						} catch{
 							typeCorrect = false;
 							toUnset.objects = 1;
 							group.objects = undefined;
 						}
 
-						toUpdate[key] = cleanEmbeddedObject(key, data[key]);
 						break;
 					case "objects":
 						toUpdate.objects = cleanEmbeddedObject(key, convertedObjects);

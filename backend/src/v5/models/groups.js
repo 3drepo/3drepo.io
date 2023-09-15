@@ -19,17 +19,23 @@
 // see tickets.groups.js
 
 const EventsManager = require('../services/eventsManager/eventsManager');
+const { castSchema } = require('../schemas/rules');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { templates } = require('../utils/responseCodes');
 
 const Groups = {};
 
-const findGroup = (teamspace, model, query, projection, sort) => db.find(teamspace, `${model}.groups`, query, projection, sort);
+const convertGroupRules = (group) => (group.rules ? { ...group, rules: group.rules.map(castSchema) } : group);
+
+const findGroups = async (teamspace, model, query, projection, sort) => {
+	const groups = await db.find(teamspace, `${model}.groups`, query, projection, sort);
+	return groups.map(convertGroupRules);
+};
 
 Groups.getGroupsByIds = (teamspace, model, ids, projection) => {
 	const query = { _id: { $in: ids } };
-	return findGroup(teamspace, model, query, projection);
+	return findGroups(teamspace, model, query, projection);
 };
 
 Groups.getGroups = (teamspace, model, includeHidden, projection) => {
@@ -42,7 +48,7 @@ Groups.getGroups = (teamspace, model, includeHidden, projection) => {
 			view_id: { $exists: false },
 		};
 
-	return findGroup(teamspace, model, query, projection);
+	return findGroups(teamspace, model, query, projection);
 };
 
 Groups.addGroups = async (teamspace, model, groups) => {

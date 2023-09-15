@@ -192,6 +192,39 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
+						name: "rule name",
+						field: { operator: "IS", values: ["TestField"] },
+						operator: "GTE",
+						values: [1]
+					}];
+					agent.post(`/${username}/${model}/revision/master/head/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							done(err);
+						});
+				}
+
+			], done);
+
+		});
+
+		it("with rules and field name being string should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						name: "rule name",
 						field: "TestField",
 						operator: "GTE",
 						values: [1]
@@ -223,7 +256,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "TestField",
+						name: "rule name",
+						field: { operator: "IS", values: ["TestField"] },
 						operator: "IS_EMPTY",
 						values: []
 					}];
@@ -254,7 +288,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "TestField",
+						name: "rule name",
+						field: { operator: "IS", values: ["TestField"] },
 						operator: "IN_RANGE",
 						values: [1, 2]
 					}];
@@ -285,7 +320,40 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "TestField",
+						name: "rule name",
+						field: { operator: "IS", values: ["TestField"] },
+						operator: "EQUALS",
+						values: [1, 2, 3]
+					}];
+					agent.post(`/${username}/${model}/revision/master/head/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							done(err);
+						});
+				}
+
+			], done);
+
+		});
+
+		it("with rules (multi args in field) should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						name: "rule name",
+						field: { operator: "IS", values: ["TestField", "TestField2", "TestField3"] },
 						operator: "EQUALS",
 						values: [1, 2, 3]
 					}];
@@ -316,7 +384,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "TestField",
+						name: "rule name",
+						field: { operator: "IS", values: ["TestField"] },
 						operator: "NOT_IN_RANGE",
 						values: [1, 2, 3, 4]
 					}];
@@ -347,11 +416,13 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "TestField",
+						name: "rule name",
+						field: { operator: "IS", values: ["TestField"] },
 						operator: "NOT_IN_RANGE",
 						values: [3, 4]
 					},{
-						field: "TestField2",
+						name: "rule name",
+						field: { operator: "IS", values: ["TestField2"] },
 						operator: "IS_EMPTY",
 						values: []
 					}];
@@ -424,10 +495,11 @@ describe("Groups", function () {
 				});
 		});
 
-		it("with rules and objects should fail", function(done) {
+		it("with rule name should fail", function(done) {
 			const newGroup = Object.assign({}, data);
+			delete newGroup.objects;
 			newGroup.rules = [{
-				field: "TestField",
+				field: { operator: "IS", values: ["TestField"] },
 				operator: "GTE",
 				values: [1]
 			}];
@@ -437,34 +509,49 @@ describe("Groups", function () {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 			});
-		});
+		});	
 
-		it("with multiple rules for single field should fail", function(done) {
+		it("with rules and objects should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			newGroup.rules = [{
-				field: "TestField",
+				name: "rule name",
+				field: { operator: "IS", values: ["TestField"] },
 				operator: "GTE",
-				values: [1]
-			},{
-				field: "TestField",
-				operator: "LTE",
 				values: [1]
 			}];
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
-				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.MULTIPLE_RULES_PER_FIELD_NOT_ALLOWED.value);
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 			});
-		});
+		});		
 
 		it("with insufficient rule args (min. 1) should fail", function(done) {
 			const newGroup = Object.assign({}, data);
 			delete newGroup.objects;
 			newGroup.rules = [{
-				field: "TestField",
+				name: "rule name",
+				field: { operator: "IS", values: ["TestField"] },
 				operator: "GT",
 				values: []
+			}];
+			agent.post(`/${username}/${model}/revision/master/head/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+			});
+		});
+
+		it("with insufficient rule args in field (min. 1) should fail", function(done) {
+			const newGroup = Object.assign({}, data);
+			delete newGroup.objects;
+			newGroup.rules = [{
+				name: "rule name",
+				field: { operator: "IS", values: [] },
+				operator: "GT",
+				values: ["some value"]
 			}];
 			agent.post(`/${username}/${model}/revision/master/head/groups/`)
 				.send(newGroup)
@@ -478,7 +565,8 @@ describe("Groups", function () {
 			const newGroup = Object.assign({}, data);
 			delete newGroup.objects;
 			newGroup.rules = [{
-				field: "TestField",
+				name: "rule name",
+				field: { operator: "IS", values: ["TestField"] },
 				operator: "NOT_IN_RANGE",
 				values: [1]
 			}];
@@ -494,7 +582,8 @@ describe("Groups", function () {
 			const newGroup = Object.assign({}, data);
 			delete newGroup.objects;
 			newGroup.rules = [{
-				field: "TestField",
+				name: "rule name",
+				field: { operator: "IS", values: ["TestField"] },
 				operator: "NOT_IN_RANGE",
 				values: [1, 2, 3]
 			}];
@@ -524,7 +613,7 @@ describe("Groups", function () {
 			async.series([
 				function(done) {
 					const newGroup = Object.assign({}, data);
-					newGroup.object = [];
+					newGroup.objects = [];
 					agent.post(`/${username}/${model}/revision/master/head/groups/`)
 						.send(newGroup)
 						.expect(200 , function(err, res) {
@@ -574,7 +663,8 @@ describe("Groups", function () {
 				"shared_ids":["8b9259d2-316d-4295-9591-ae020bfcce48"]
 			}];
 			newGroup.rules = [{
-				field: "TestField",
+				name: "rule name",
+				field: { operator: "IS", values: ["TestField"] },
 				operator: "GTE",
 				values: [1]
 			}];
@@ -585,28 +675,14 @@ describe("Groups", function () {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
-		});
-
-		it("non string value for a string rule should fail", function(done) {
-			const newGroup = Object.assign({}, data);
-			newGroup.rules = [{
-				field: "TestField",
-				operator: "CONTAINS",
-				values: [1]
-			}];
-
-			agent.post(`/${username}/${model}/revision/master/head/groups/`)
-				.send(newGroup)
-				.expect(400 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
-					done(err);
-				});
-		});
+		});		
 
 		it("no values for a rule that requires them should fail", function(done) {
 			const newGroup = Object.assign({}, data);
+			delete newGroup.objects;
 			newGroup.rules = [{
-				field: "TestField",
+				name: "rule name",
+				field: { operator: "IS", values: ["TestField"] },
 				operator: "REGEX",
 				values: []
 			}];
@@ -621,8 +697,10 @@ describe("Groups", function () {
 
 		it("incorrect number of values for rule should fail", function(done) {
 			const newGroup = Object.assign({}, data);
+			delete newGroup.objects;
 			newGroup.rules = [{
-				field: "TestField",
+				name: "rule name",
+				field: { operator: "IS", values: ["TestField"] },
 				operator: "IN_RANGE",
 				values: [2]
 			}];
@@ -637,8 +715,10 @@ describe("Groups", function () {
 
 		it("incorrect mulitples of value for rule should fail", function(done) {
 			const newGroup = Object.assign({}, data);
+			delete newGroup.objects;
 			newGroup.rules = [{
-				field: "TestField",
+				name: "rule name",
+				field: { operator: "IS", values: ["TestField"] },
 				operator: "NOT_IN_RANGE",
 				values: [2, 3, 4]
 			}];
@@ -653,8 +733,10 @@ describe("Groups", function () {
 
 		it("string value for number rule should fail", function(done) {
 			const newGroup = Object.assign({}, data);
+			delete newGroup.objects;
 			newGroup.rules = [{
-				field: "TestField",
+				name: "rule name",
+				field: { operator: "IS", values: ["TestField"] },
 				operator: "EQUALS",
 				values: ["one"]
 			}];
@@ -667,11 +749,67 @@ describe("Groups", function () {
 				});
 		});
 
+		it("with multi value REGEX rule should fail", function(done) {
+			const newGroup = Object.assign({}, data);
+			delete newGroup.objects;
+			newGroup.rules = [{
+				name: "rule name",
+				field: { operator: "IS", values: ["Family"] },
+				operator: "REGEX",
+				values: ["Concept.*Door.*", ".*mm$"]
+			}];
+
+			agent.post(`/${username}/${model}/revision/master/head/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("with multi value REGEX rule in field should fail", function(done) {
+			const newGroup = Object.assign({}, data);
+			delete newGroup.objects;
+			newGroup.rules = [{
+				name: "rule name",
+				field: { operator: "REGEX", values: ["Concept.*Door.*", ".*mm$"] },
+				operator: "REGEX",
+				values: ["Concept.*Door.*"]
+			}];
+
+			agent.post(`/${username}/${model}/revision/master/head/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
 		it("rule with undefined operator should fail", function(done) {
 			const newGroup = Object.assign({}, data);
+			delete newGroup.objects;
 			newGroup.rules = [{
-				field: "TestField",
+				name: "rule name",
+				field: { operator: "IS", values: ["TestField"] },
 				operator: "BAD_OP",
+				values: ["abc"]
+			}];
+
+			agent.post(`/${username}/${model}/revision/master/head/groups/`)
+				.send(newGroup)
+				.expect(400 , function(err, res) {
+					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
+					done(err);
+				});
+		});
+
+		it("rule with undefined operator in field should fail", function(done) {
+			const newGroup = Object.assign({}, data);
+			delete newGroup.objects;
+			newGroup.rules = [{
+				name: "rule name",
+				field: { operator: "BAD_OP", values: ["TestField"] },
+				operator: "IS",
 				values: ["abc"]
 			}];
 
@@ -691,7 +829,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "ImaginaryField",
+						name: "rule name",
+						field: { operator: "IS", values: ["ImaginaryField"] },
 						operator: "IS_NOT_EMPTY",
 						values: []
 					}];
@@ -721,7 +860,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "IsExternal",
+						name: "rule name",
+						field: { operator: "IS", values: ["IsExternal"] },
 						operator: "IS_EMPTY",
 						values: []
 					}];
@@ -751,7 +891,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "IsExternal",
+						name: "rule name",
+						field: { operator: "IS", values: ["IsExternal"] },
 						operator: "IS_EMPTY",
 						values: []
 					}];
@@ -781,7 +922,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Moves With Grids",
+						name: "rule name",
+						field: { operator: "IS", values: ["Moves With Grids"] },
 						operator: "IS_NOT_EMPTY",
 						values: []
 					}];
@@ -802,6 +944,69 @@ describe("Groups", function () {
 				}
 			], done);
 		});
+		
+		it("non string value for a string rule should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						name: "rule name",
+						field: { operator: "CONTAINS", values: ["a"] },
+						operator: "CONTAINS",
+						values: [1]
+					}];
+					agent.post(`/${username}/${model}/revision/master/head/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							done(err);
+						});
+				}
+			], done);			
+		});
+
+		it("non string value for a string rule in field should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						name: "rule name",
+						field: { operator: "CONTAINS", values: [1] },
+						operator: "IS_NOT_EMPTY",
+						values: []
+					}];
+		
+					agent.post(`/${username}/${model}/revision/master/head/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							done(err);
+						});
+				}
+			], done);
+		});
 
 		it("with IS rule should succeed", function(done) {
 			let groupId;
@@ -811,7 +1016,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "IFC Type",
+						name: "rule name",
+						field: { operator: "IS", values: ["IFC Type"] },
 						operator: "IS",
 						values: ["IfcStairFlight"]
 					}];
@@ -841,7 +1047,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "IFC Type",
+						name: "rule name",
+						field: { operator: "IS", values: ["IFC Type"] },
 						operator: "IS",
 						values: ["IfcStairFlight", "IfcSlab"]
 					}];
@@ -871,7 +1078,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Name",
+						name: "rule name",
+						field: { operator: "IS", values: ["Name"] },
 						operator: "IS_NOT",
 						values: ["Level 2"]
 					}];
@@ -901,7 +1109,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Name",
+						name: "rule name",
+						field: { operator: "IS", values: ["Name"] },
 						operator: "IS_NOT",
 						values: ["Level 2", "Level 4"]
 					}];
@@ -931,7 +1140,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Reference",
+						name: "rule name",
+						field: { operator: "IS", values: ["Reference"] },
 						operator: "CONTAINS",
 						values: ["Flue"]
 					}];
@@ -971,7 +1181,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Reference",
+						name: "rule name",
+						field: { operator: "IS", values: ["Reference"] },						
 						operator: "CONTAINS",
 						values: ["Flue", "Panel"]
 					}];
@@ -1001,7 +1212,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Type",
+						name: "rule name",
+						field: { operator: "IS", values: ["Type"] },
 						operator: "NOT_CONTAINS",
 						values: ["Generator"]
 					}];
@@ -1031,7 +1243,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Type",
+						name: "rule name",
+						field: { operator: "IS", values: ["Type"] },
 						operator: "NOT_CONTAINS",
 						values: ["Mast", "Infill", "Concept"]
 					}];
@@ -1061,7 +1274,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Family",
+						name: "rule name",
+						field: { operator: "IS", values: ["Family"] },
 						operator: "REGEX",
 						values: ["Concept.*Door.*"]
 					}];
@@ -1097,37 +1311,7 @@ describe("Groups", function () {
 						});
 				}
 			], done);
-		});
-
-		it("with multi value REGEX rule should succeed", function(done) {
-			let groupId;
-
-			async.series([
-				function(done) {
-					const newGroup = Object.assign({}, data);
-					delete newGroup.objects;
-					newGroup.rules = [{
-						field: "Family",
-						operator: "REGEX",
-						values: ["Concept.*Door.*", ".*mm$"]
-					}];
-					agent.post(`/${username}/${model}/revision/master/head/groups/`)
-						.send(newGroup)
-						.expect(200 , function(err, res) {
-							groupId = res.body._id;
-							done(err);
-					});
-				},
-				function(done) {
-					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
-						.expect(200 , function(err, res) {
-							expect(res.body.author).to.equal(username);
-							expect(res.body.objects[0].shared_ids.length).to.equal(375);
-							done(err);
-						});
-				}
-			], done);
-		});
+		});		
 
 		it("with EQUALS rule should succeed", function(done) {
 			let groupId;
@@ -1137,7 +1321,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Volume",
+						name: "rule name",
+						field: { operator: "IS", values: ["Volume"] },
 						operator: "EQUALS",
 						values: [0.28757]
 					}];
@@ -1168,7 +1353,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Volume",
+						name: "rule name",
+						field: { operator: "IS", values: ["Volume"] },
 						operator: "EQUALS",
 						values: [0.28757, 0.194819]
 					}];
@@ -1203,7 +1389,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Sill Height",
+						name: "rule name",
+						field: { operator: "IS", values: ["Sill Height"] },
 						operator: "NOT_EQUALS",
 						values: [0]
 					}];
@@ -1233,7 +1420,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Sill Height",
+						name: "rule name",
+						field: { operator: "IS", values: ["Sill Height"] },
 						operator: "NOT_EQUALS",
 						values: [0, 2700, 900]
 					}];
@@ -1263,7 +1451,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Area",
+						name: "rule name",
+						field: { operator: "IS", values: ["Area"] },
 						operator: "GT",
 						values: [500]
 					}];
@@ -1304,7 +1493,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Area",
+						name: "rule name",
+						field: { operator: "IS", values: ["Area"] },
 						operator: "GT",
 						values: [500, 600]
 					}];
@@ -1345,7 +1535,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Mark",
+						name: "rule name",
+						field: { operator: "IS", values: ["Mark"] },
 						operator: "GTE",
 						values: [750]
 					}];
@@ -1391,7 +1582,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Mark",
+						name: "rule name",
+						field: { operator: "IS", values: ["Mark"] },
 						operator: "GTE",
 						values: [750, 800]
 					}];
@@ -1437,7 +1629,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Light Transmission",
+						name: "rule name",
+						field: { operator: "IS", values: ["Light Transmission"] },
 						operator: "LT",
 						values: [1]
 					}];
@@ -1467,7 +1660,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Mark",
+						name: "rule name",
+						field: { operator: "IS", values: ["Mark"] },
 						operator: "LT",
 						values: [180, 200]
 					}];
@@ -1497,7 +1691,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Thermal Performance",
+						name: "rule name",
+						field: { operator: "IS", values: ["Thermal Performance"] },
 						operator: "LTE",
 						values: [0.5]
 					}];
@@ -1537,7 +1732,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Thermal Performance",
+						name: "rule name",
+						field: { operator: "IS", values: ["Thermal Performance"] },
 						operator: "LTE",
 						values: [0.5, 1]
 					}];
@@ -1577,7 +1773,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Head Height",
+						name: "rule name",
+						field: { operator: "IS", values: ["Head Height"] },
 						operator: "IN_RANGE",
 						values: [4520, 4530]
 					}];
@@ -1607,7 +1804,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Head Height",
+						name: "rule name",
+						field: { operator: "IS", values: ["Head Height"] },
 						operator: "IN_RANGE",
 						values: [4520, 4530, 200, 3000]
 					}];
@@ -1637,7 +1835,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Area",
+						name: "rule name",
+						field: { operator: "IS", values: ["Area"] },
 						operator: "NOT_IN_RANGE",
 						values: [0, 1000]
 					}];
@@ -1674,7 +1873,8 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Area",
+						name: "rule name",
+						field: { operator: "IS", values: ["Area"] },
 						operator: "NOT_IN_RANGE",
 						values: [0, 1000, 1000, 1650]
 					}];
@@ -1709,11 +1909,13 @@ describe("Groups", function () {
 					const newGroup = Object.assign({}, data);
 					delete newGroup.objects;
 					newGroup.rules = [{
-						field: "Area",
+						name: "rule name",
+						field: { operator: "IS", values: ["Area"] },
 						operator: "NOT_IN_RANGE",
 						values: [0, 1000, 1000, 1650]
 					},{
-						field: "Perimeter",
+						name: "rule name",
+						field: { operator: "IS", values: ["Perimeter"] },
 						operator: "LT",
 						values: [238000]
 					}];
@@ -1748,7 +1950,8 @@ describe("Groups", function () {
 					delete newGroup.objects;
 					newGroup.rules = [
 						{
-						   "field":"Name",
+						   "name": "rule name",
+						   "field": { "operator": "IS", "values": ["Name"] },
 						   "operator":"IS",
 						   "values":[
 							  "Level 3",
@@ -1756,7 +1959,8 @@ describe("Groups", function () {
 						   ]
 						},
 						{
-						   "field":"Category",
+						   "name": "rule name",
+						   "field": { "operator": "IS", "values": ["Category"] },
 						   "operator":"IS_NOT",
 						   "values":[
 							  "Windows"
@@ -1781,7 +1985,285 @@ describe("Groups", function () {
 			], done);
 		});
 
-	});
+		it("with IS rule in field should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						name: "rule name",
+						field: { operator: "IS", values: ["IFC Type"] },
+						operator: "IS_NOT_EMPTY",
+						values: []
+					}];
+					agent.post(`/${username}/${model}/revision/master/head/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with multi value IS rule in field should succeed", function(done) {
+			let groupId;
+	
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						name: "rule name",
+						field: { operator: "IS", values: ["IFC Type", "Family"] },
+						operator: "IS_NOT_EMPTY",
+						values: []
+					}];
+					agent.post(`/${username}/${model}/revision/master/head/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with STARTS_WITH rule in field should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						name: "rule name",
+						field: { operator: "STARTS_WITH", values: ["IFC"] },
+						operator: "IS_NOT_EMPTY",
+						values: []
+					}];
+					agent.post(`/${username}/${model}/revision/master/head/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with multi value STARTS_WITH rule in field should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						name: "rule name",
+						field: { operator: "STARTS_WITH", values: ["IFC", "Family"] },
+						operator: "IS_NOT_EMPTY",
+						values: []
+					}];
+					agent.post(`/${username}/${model}/revision/master/head/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with ENDS_WITH rule in field should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						name: "rule name",
+						field: { operator: "ENDS_WITH", values: ["Type"] },
+						operator: "IS_NOT_EMPTY",
+						values: []
+					}];
+					agent.post(`/${username}/${model}/revision/master/head/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with multi value ENDS_WITH rule in field should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						name: "rule name",
+						field: { operator: "ENDS_WITH", values: ["Type", "Name"] },
+						operator: "IS_NOT_EMPTY",
+						values: []
+					}];
+					agent.post(`/${username}/${model}/revision/master/head/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with CONTAINS rule in field should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						name: "rule name",
+						field: { operator: "CONTAINS", values: ["IFC"] },
+						operator: "IS_NOT_EMPTY",
+						values: []
+					}];
+					agent.post(`/${username}/${model}/revision/master/head/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with multi value CONTAINS rule in field should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						name: "rule name",
+						field: { operator: "CONTAINS", values: ["IFC", "Family"] },
+						operator: "IS_NOT_EMPTY",
+						values: []
+					}];
+					agent.post(`/${username}/${model}/revision/master/head/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							done(err);
+						});
+				}
+			], done);
+		});
+
+		it("with REGEX rule in field should succeed", function(done) {
+			let groupId;
+
+			async.series([
+				function(done) {
+					const newGroup = Object.assign({}, data);
+					delete newGroup.objects;
+					newGroup.rules = [{
+						name: "rule name",
+						field: { operator: "REGEX", values: ["^IFC"] },
+						operator: "IS_NOT_EMPTY",
+						values: []
+					}];
+					agent.post(`/${username}/${model}/revision/master/head/groups/`)
+						.send(newGroup)
+						.expect(200 , function(err, res) {
+							groupId = res.body._id;
+							done(err);
+					});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${groupId}`)
+						.expect(200 , function(err, res) {
+							expect(res.body.author).to.equal(username);
+							expect(res.body.objects[0].shared_ids.length).to.equal(1106);
+							done(err);
+						});
+				}
+			], done);
+		});		
+});
 
 	describe("Updating a group ", function() {
 		it("updating only the objects should succeed", function(done) {
@@ -1811,7 +2293,8 @@ describe("Groups", function () {
 		it("updating rules and removing objects should succeed", function(done) {
 			const newRules = {
 				rules: [{
-					field: "TestField",
+					name: "rule name",
+					field: { operator: "IS", values: ["TestField"] },
 					operator: "GTE",
 					values: [1]
 				}]
@@ -1838,6 +2321,42 @@ describe("Groups", function () {
 			], done);
 		});
 
+		it("updating rules with string field should succeed", function(done) {
+			const newRules = {
+				rules: [{
+					name: "rule name",
+					field: "TestField",
+					operator: "GTE",
+					values: [1]
+				}]
+			};
+
+			async.series([
+				function(done) {
+					agent.put(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
+						.send(newRules)
+						.expect(200 , function(err, res) {
+							done(err);
+						});
+				},
+				function(done) {
+					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
+						.expect(200 , function(err, res) {
+							goldenData.rules = [{
+								name: "rule name",
+								field: { operator: "IS", values: ["TestField"] },
+								operator: "GTE",
+								values: [1]
+							}];
+							goldenData.updatedAt = res.body.updatedAt;
+							expect(res.body).to.deep.equal(goldenData);
+							done(err);
+						});
+				}
+
+			], done);
+		});
+
 		it("updating only the name should succeed", function(done) {
 			const newName = {name: "Updated name"};
 
@@ -1853,6 +2372,12 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
 							Object.assign(goldenData, newName);
+							goldenData.rules = [{
+								name: "rule name",
+								field: { operator: "IS", values: ["TestField"] },
+								operator: "GTE",
+								values: [1]
+							}];
 							goldenData.updatedAt = res.body.updatedAt;
 							expect(res.body).to.deep.equal(goldenData);
 							done(err);
@@ -1877,6 +2402,12 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
 							Object.assign(goldenData, newColor);
+							goldenData.rules = [{
+								name: "rule name",
+								field: { operator: "IS", values: ["TestField"] },
+								operator: "GTE",
+								values: [1]
+							}];
 							goldenData.updatedAt = res.body.updatedAt;
 							expect(res.body).to.deep.equal(goldenData);
 							done(err);
@@ -1901,6 +2432,12 @@ describe("Groups", function () {
 					agent.get(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
 						.expect(200 , function(err, res) {
 							Object.assign(goldenData, newDesc);
+							goldenData.rules = [{
+								name: "rule name",
+								field: { operator: "IS", values: ["TestField"] },
+								operator: "GTE",
+								values: [1]
+							}];
 							goldenData.updatedAt = res.body.updatedAt;
 							expect(res.body).to.deep.equal(goldenData);
 							done(err);
@@ -1920,7 +2457,8 @@ describe("Groups", function () {
 					}
 				],
 				"rules":[{
-					field: "TestField",
+					name: "rule name",
+					field: { operator: "IS", values: ["TestField"] },
 					operator: "GTE",
 					values: [1]
 				}]
@@ -1932,28 +2470,7 @@ describe("Groups", function () {
 					expect(res.body.value).to.equal(responseCodes.INVALID_ARGUMENTS.value);
 					done(err);
 				});
-		});
-
-		it("updating with multiple rules for single field should fail", function(done) {
-			const badUpdate = {
-				"rules":[{
-					field: "TestField",
-					operator: "GTE",
-					values: [1]
-				},{
-					field: "TestField",
-					operator: "LTE",
-					values: [1]
-				}]
-			};
-
-			agent.put(`/${username}/${model}/revision/master/head/groups/${goldenData._id}`)
-				.send(badUpdate)
-				.expect(400, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.MULTIPLE_RULES_PER_FIELD_NOT_ALLOWED.value);
-					done(err);
-				});
-		});
+		});		
 
 		it("updating invalid group ID should fail", function(done) {
 			agent.put(`/${username}/${model}/revision/master/head/groups/invalidID`)
