@@ -84,7 +84,10 @@ export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref: Ref<HTM
 				onOpen={search.onOpen}
 				onClose={search.onClose}
 			/>}
-			<IconButton onClick={handleClose} size="large"><CloseIcon htmlColor={COLOR.WHITE} /></IconButton>
+			<IconButton onClick={handleClose} size="large">
+				{/* @ts-ignore */}
+				<CloseIcon htmlColor={COLOR.WHITE} />
+			</IconButton>
 		</TopDialogActions>
 	);
 
