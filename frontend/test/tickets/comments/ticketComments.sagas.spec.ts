@@ -18,15 +18,17 @@
 import * as TicketCommentsSaga from '@/v5/store/tickets/comments/ticketComments.sagas';
 import { TicketCommentsActions } from '@/v5/store/tickets/comments/ticketComments.redux';
 import Mockdate from 'mockdate';
+import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
+import { selectComments } from '@/v5/store/tickets/comments/ticketComments.selectors';
 import { mockServer } from '../../../internals/testing/mockServer';
 import { commentHistoryMockFactory, commentMockFactory } from './ticketComments.fixture';
 import { createTestStore } from '../../test.helpers';
-import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
-import { selectComments } from '@/v5/store/tickets/comments/ticketComments.selectors';
 
 describe('Ticket Comments: sagas', () => {
-	let dispatch, getState, waitForActions;
-	let onSuccess, onError;
+	let dispatch; let getState; let
+		waitForActions;
+	let onSuccess; let
+		onError;
 	const teamspace = 'teamspace';
 	const projectId = 'project';
 	const modelId = 'modelId';
@@ -34,8 +36,8 @@ describe('Ticket Comments: sagas', () => {
 	const comment = commentMockFactory();
 
 	const populateStore = () => {
-		dispatch(TicketCommentsActions.fetchCommentsSuccess(ticketId, [comment]))
-	}
+		dispatch(TicketCommentsActions.fetchCommentsSuccess(ticketId, [comment]));
+	};
 
 	beforeEach(() => {
 		onSuccess = jest.fn();
@@ -53,20 +55,20 @@ describe('Ticket Comments: sagas', () => {
 				.reply(200, response);
 
 			await waitForActions(() => {
-				dispatch(TicketCommentsActions.fetchComments(teamspace, projectId, modelId, ticketId, false))
-			}, [TicketCommentsActions.fetchCommentsSuccess(ticketId, response.comments)])
+				dispatch(TicketCommentsActions.fetchComments(teamspace, projectId, modelId, ticketId, false));
+			}, [TicketCommentsActions.fetchCommentsSuccess(ticketId, response.comments)]);
 		});
 
 		it('should call fetch containers ticket\'s comments endpoint with a 404', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}/comments`)
 				.reply(404);
-			
-			await waitForActions(() => {
-				dispatch(TicketCommentsActions.fetchComments(teamspace, projectId, modelId, ticketId, false))
-			}, [DialogsTypes.OPEN])
 
-			const commentsFromState = selectComments(getState(), ticketId)
+			await waitForActions(() => {
+				dispatch(TicketCommentsActions.fetchComments(teamspace, projectId, modelId, ticketId, false));
+			}, [DialogsTypes.OPEN]);
+
+			const commentsFromState = selectComments(getState(), ticketId);
 			expect(commentsFromState).toEqual([]);
 		});
 
@@ -84,8 +86,8 @@ describe('Ticket Comments: sagas', () => {
 				.reply(200, commentToBeCreated);
 
 			await waitForActions(() => {
-				dispatch(TicketCommentsActions.createComment(teamspace, projectId, modelId, ticketId, false, inputComment, onSuccess, onError))
-			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: commentToBeCreated._id, ...commentToBeCreated })])
+				dispatch(TicketCommentsActions.createComment(teamspace, projectId, modelId, ticketId, false, inputComment, onSuccess, onError));
+			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: commentToBeCreated._id, ...commentToBeCreated })]);
 
 			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
@@ -93,21 +95,21 @@ describe('Ticket Comments: sagas', () => {
 
 		it('should call create container ticket\'s comment endpoint with 404', async () => {
 			const { _id, ...newComment } = comment;
-	
+
 			mockServer
 				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}/comments`, () => true)
 				.reply(404);
 
 			await waitForActions(() => {
-				dispatch(TicketCommentsActions.createComment(teamspace, projectId, modelId, ticketId, false, newComment, onSuccess, onError))
-			}, [DialogsTypes.OPEN])
+				dispatch(TicketCommentsActions.createComment(teamspace, projectId, modelId, ticketId, false, newComment, onSuccess, onError));
+			}, [DialogsTypes.OPEN]);
 
 			expect(onSuccess).not.toHaveBeenCalled();
 			expect(onError).toHaveBeenCalled();
-			const commentsFromState = selectComments(getState(), ticketId)
+			const commentsFromState = selectComments(getState(), ticketId);
 			expect(commentsFromState).toEqual([]);
 		});
-		
+
 		it('should call container\'s update ticket comment endpoint', async () => {
 			Mockdate.set(new Date());
 			mockServer
@@ -117,47 +119,47 @@ describe('Ticket Comments: sagas', () => {
 			const commentUpdate = { message: 'updatedMessage', history: [commentHistoryMockFactory()], updatedAt: new Date() };
 
 			await waitForActions(() => {
-				dispatch(TicketCommentsActions.updateComment(teamspace, projectId, modelId, ticketId, false, comment._id, commentUpdate))
-			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: comment._id, ...commentUpdate })])
+				dispatch(TicketCommentsActions.updateComment(teamspace, projectId, modelId, ticketId, false, comment._id, commentUpdate));
+			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: comment._id, ...commentUpdate })]);
 			Mockdate.reset();
 		});
-		
+
 		it('should call container\'s update ticket comment endpoint with 404', async () => {
-			populateStore()
+			populateStore();
 			mockServer
 				.put(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}/comments/${comment._id}`, () => true)
 				.reply(404);
 
 			const commentUpdate = { message: 'updatedMessage', history: [commentHistoryMockFactory()] };
-			
+
 			await waitForActions(() => {
-				dispatch(TicketCommentsActions.updateComment(teamspace, projectId, modelId, ticketId, false, comment._id, commentUpdate))
-			}, [DialogsTypes.OPEN])
-			
-			const commentsFromState = selectComments(getState(), ticketId)
+				dispatch(TicketCommentsActions.updateComment(teamspace, projectId, modelId, ticketId, false, comment._id, commentUpdate));
+			}, [DialogsTypes.OPEN]);
+
+			const commentsFromState = selectComments(getState(), ticketId);
 			expect(commentsFromState).toEqual([comment]);
 		});
-		
+
 		it('should call container\'s delete ticket comment endpoint', async () => {
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}/comments/${comment._id}`)
 				.reply(200);
 
 			await waitForActions(() => {
-				dispatch(TicketCommentsActions.deleteComment(teamspace, projectId, modelId, ticketId, false, comment._id))
-			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: comment._id, deleted: true })])
+				dispatch(TicketCommentsActions.deleteComment(teamspace, projectId, modelId, ticketId, false, comment._id));
+			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: comment._id, deleted: true })]);
 		});
-		
+
 		it('should call container\'s delete ticket comment endpoint with 404', async () => {
-			populateStore()
+			populateStore();
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}/comments/${comment._id}`)
 				.reply(404);
-			
+
 			await waitForActions(() => {
-				dispatch(TicketCommentsActions.deleteComment(teamspace, projectId, modelId, ticketId, false, comment._id))
-			}, [DialogsTypes.OPEN])
-			const commentsFromState = selectComments(getState(), ticketId)
+				dispatch(TicketCommentsActions.deleteComment(teamspace, projectId, modelId, ticketId, false, comment._id));
+			}, [DialogsTypes.OPEN]);
+			const commentsFromState = selectComments(getState(), ticketId);
 			expect(commentsFromState).toEqual([comment]);
 		});
 
@@ -170,20 +172,20 @@ describe('Ticket Comments: sagas', () => {
 				.reply(200, response);
 
 			await waitForActions(() => {
-				dispatch(TicketCommentsActions.fetchComments(teamspace, projectId, modelId, ticketId, true))
-			}, [TicketCommentsActions.fetchCommentsSuccess(ticketId, response.comments)])
+				dispatch(TicketCommentsActions.fetchComments(teamspace, projectId, modelId, ticketId, true));
+			}, [TicketCommentsActions.fetchCommentsSuccess(ticketId, response.comments)]);
 		});
 
 		it('should call fetch federation ticket\'s comments endpoint with a 404', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}/comments`)
 				.reply(404);
-			
-			await waitForActions(() => {
-				dispatch(TicketCommentsActions.fetchComments(teamspace, projectId, modelId, ticketId, true))
-			}, [DialogsTypes.OPEN])
 
-			const commentsFromState = selectComments(getState(), ticketId)
+			await waitForActions(() => {
+				dispatch(TicketCommentsActions.fetchComments(teamspace, projectId, modelId, ticketId, true));
+			}, [DialogsTypes.OPEN]);
+
+			const commentsFromState = selectComments(getState(), ticketId);
 			expect(commentsFromState).toEqual([]);
 		});
 
@@ -201,8 +203,8 @@ describe('Ticket Comments: sagas', () => {
 				.reply(200, commentToBeCreated);
 
 			await waitForActions(() => {
-				dispatch(TicketCommentsActions.createComment(teamspace, projectId, modelId, ticketId, true, inputComment, onSuccess, onError))
-			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: commentToBeCreated._id, ...commentToBeCreated })])
+				dispatch(TicketCommentsActions.createComment(teamspace, projectId, modelId, ticketId, true, inputComment, onSuccess, onError));
+			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: commentToBeCreated._id, ...commentToBeCreated })]);
 
 			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
@@ -210,21 +212,21 @@ describe('Ticket Comments: sagas', () => {
 
 		it('should call create federation ticket\'s comment endpoint with 404', async () => {
 			const { _id, ...newComment } = comment;
-	
+
 			mockServer
 				.post(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}/comments`, () => true)
 				.reply(404);
 
 			await waitForActions(() => {
-				dispatch(TicketCommentsActions.createComment(teamspace, projectId, modelId, ticketId, true, newComment, onSuccess, onError))
-			}, [DialogsTypes.OPEN])
+				dispatch(TicketCommentsActions.createComment(teamspace, projectId, modelId, ticketId, true, newComment, onSuccess, onError));
+			}, [DialogsTypes.OPEN]);
 
 			expect(onSuccess).not.toHaveBeenCalled();
 			expect(onError).toHaveBeenCalled();
-			const commentsFromState = selectComments(getState(), ticketId)
+			const commentsFromState = selectComments(getState(), ticketId);
 			expect(commentsFromState).toEqual([]);
 		});
-		
+
 		it('should call federation\'s update ticket comment endpoint', async () => {
 			Mockdate.set(new Date());
 			mockServer
@@ -234,12 +236,12 @@ describe('Ticket Comments: sagas', () => {
 			const commentUpdate = { message: 'updatedMessage', history: [commentHistoryMockFactory()], updatedAt: new Date() };
 
 			await waitForActions(() => {
-				dispatch(TicketCommentsActions.updateComment(teamspace, projectId, modelId, ticketId, true, comment._id, commentUpdate))
-			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: comment._id, ...commentUpdate })])
-			
+				dispatch(TicketCommentsActions.updateComment(teamspace, projectId, modelId, ticketId, true, comment._id, commentUpdate));
+			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: comment._id, ...commentUpdate })]);
+
 			Mockdate.reset();
 		});
-		
+
 		it('should call federation\'s update ticket comment endpoint with 404', async () => {
 			populateStore();
 			mockServer
@@ -249,35 +251,35 @@ describe('Ticket Comments: sagas', () => {
 			const commentUpdate = { message: 'updatedMessage', history: [commentHistoryMockFactory()] };
 
 			await waitForActions(() => {
-				dispatch(TicketCommentsActions.updateComment(teamspace, projectId, modelId, ticketId, true, comment._id, commentUpdate))
-			}, [DialogsTypes.OPEN])
+				dispatch(TicketCommentsActions.updateComment(teamspace, projectId, modelId, ticketId, true, comment._id, commentUpdate));
+			}, [DialogsTypes.OPEN]);
 
-			const commentsFromState = selectComments(getState(), ticketId)
+			const commentsFromState = selectComments(getState(), ticketId);
 			expect(commentsFromState).toEqual([comment]);
 		});
-		
+
 		it('should call federation\'s delete ticket comment endpoint', async () => {
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}/comments/${comment._id}`)
 				.reply(200);
 
 			await waitForActions(() => {
-				dispatch(TicketCommentsActions.deleteComment(teamspace, projectId, modelId, ticketId, true, comment._id))
-			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: comment._id, deleted: true })])
+				dispatch(TicketCommentsActions.deleteComment(teamspace, projectId, modelId, ticketId, true, comment._id));
+			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: comment._id, deleted: true })]);
 		});
-		
+
 		it('should call federation\'s delete ticket comment endpoint with 404', async () => {
-			populateStore()
+			populateStore();
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}/comments/${comment._id}`)
 				.reply(404);
 
 			await waitForActions(() => {
-				dispatch(TicketCommentsActions.deleteComment(teamspace, projectId, modelId, ticketId, true, comment._id))
-			}, [DialogsTypes.OPEN])
+				dispatch(TicketCommentsActions.deleteComment(teamspace, projectId, modelId, ticketId, true, comment._id));
+			}, [DialogsTypes.OPEN]);
 
-			const commentsFromState = selectComments(getState(), ticketId)
+			const commentsFromState = selectComments(getState(), ticketId);
 			expect(commentsFromState).toEqual([comment]);
 		});
 	});
-})
+});
