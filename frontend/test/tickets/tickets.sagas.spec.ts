@@ -17,7 +17,7 @@
 
 import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
 import { mockServer } from '../../internals/testing/mockServer';
-import { mockGroup, mockRiskCategories, templateMockFactory, ticketMockFactory } from './tickets.fixture';
+import { mockGroup, mockRiskCategories, templateMockFactory, ticketMockFactory, ticketWithGroupMockFactory } from './tickets.fixture';
 import { createTestStore } from '../test.helpers';
 import { selectRiskCategories, selectTemplateById, selectTemplates, selectTicketById, selectTickets, selectTicketsGroups } from '@/v5/store/tickets/tickets.selectors';
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
@@ -35,7 +35,7 @@ describe('Tickets: sagas', () => {
 	let dispatch, getState, waitForActions;
 	const group = mockGroup();
 	const groups = [group]
-	const ticket = ticketMockFactory({ properties: { defaultView: { state: { colored: [ { group: group._id, opacity: 1, color: [12, 12, 12] } ] }}}})
+	const ticket = ticketWithGroupMockFactory(group);
 	const tickets = [ticket];
 	const teamspace = 'teamspace';
 	const projectId = 'project';
@@ -361,8 +361,6 @@ describe('Tickets: sagas', () => {
 					await waitForActions(() => {
 						dispatch(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id))
 					}, [TicketsActions.fetchTicketGroupsSuccess(groups)]);
-
-					console.log(ticket._id, group._id)
 
 					const groupsFromState = selectTicketsGroups(getState());
 					expect(groupsFromState[group._id]).toEqual(group);

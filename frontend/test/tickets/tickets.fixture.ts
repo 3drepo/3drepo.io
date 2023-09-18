@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-import { Group, IGroupSettingsForm, ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
+import { EMPTY_VIEW } from '@/v5/store/store.helpers';
+import { Group, ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import * as faker from 'faker';
 import { times } from 'lodash';
 
@@ -37,6 +37,20 @@ export const ticketMockFactory = (overrides?: Partial<ITicket>): ITicket => ({
 	modules: {},
 	...overrides,
 });
+
+export const ticketWithGroupMockFactory = (group: Group) => ticketMockFactory({
+		properties: {
+			defaultView: {
+				state: {
+					colored: [
+						{
+							group: group._id,
+							opacity: faker.datatype.float({ min: 0, max: 1 }),
+							color: times(3, () => faker.datatype.number(255)),
+						}
+					],
+					showHidden: false,
+				}}}})
 
 export const templateMockFactory = (overrides?: ITemplate): ITemplate => ({
 	_id: faker.datatype.uuid(),
