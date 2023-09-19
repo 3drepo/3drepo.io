@@ -21,11 +21,11 @@ import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 export const openUnsavedNewTicketWarningModal = () => {
 	DialogsActionsDispatchers.open('warning', {
 		title: formatMessage({
-			id: 'ticketTable.warning.title',
+			id: 'ticketTable.warning.ticketNotSaved.title',
 			defaultMessage: 'New ticket is not saved',
 		}),
 		message: formatMessage({
-			id: 'ticketTable.warning.message',
+			id: 'ticketTable.warning.ticketNotSaved.message',
 			defaultMessage: 'Changing the value of this input will close the side panel and the ticket will not be saved.',
 		}),
 	});
