@@ -86,8 +86,12 @@ export const EditableFieldStyles = css`
 		margin-bottom: 0px;
 		font-size: 0.75rem;
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
+
 		p {
 			margin: 0;
+			max-width: calc(100% - 8px);
+			text-overflow: ellipsis;
+			overflow: hidden;
 		}
 	}
 `;

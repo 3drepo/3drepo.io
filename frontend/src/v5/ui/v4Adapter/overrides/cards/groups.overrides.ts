@@ -193,16 +193,18 @@ const expandedGroupItem = css`
 					margin-top: 30px;
 					
 					& > :first-child {
-						min-height: 42px;
+						min-height: 32px;
 						margin: 0;
 					}
 					
 					span {
-						display: table;
-						word-break: break-all;
+						display: inline-block;
 						height: 24px;
 						line-height: unset !important;
 						padding-top: 5px;
+						text-overflow: ellipsis;
+						overflow: hidden;
+						max-width: calc(100% - 30px);
 					}
 
 					.MuiFormHelperText-root {
