@@ -30,18 +30,15 @@ import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, groupTickets, ISSUE_PROPERTIES_GRO
 import { EmptyTicketsView } from '../../emptyTicketsView/emptyTicketsView.styles';
 import { Container } from './ticketsTableContent.styles';
 
-type TicketsTableContentProps = {
-	onEditTicket: (modelId: string, ticket: Partial<ITicket>) => void;
-	onNewTicket: (modelId: string, ticket?: Partial<ITicket>) => void;
-};
-export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableContentProps) => {
+type TicketsTableContentProps = { setSidePanelData: (modelId: string, ticket?: Partial<ITicket>) => void; };
+export const TicketsTableContent = ({ setSidePanelData }: TicketsTableContentProps) => {
 	const { filteredItems } = useContext(SearchContext);
 	const { groupBy: groupByAsURLParam, template } = useParams<DashboardTicketsParams>();
 	const groupBy = GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByAsURLParam];
 
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
 		if (groupByValue === UNSET) {
-			onNewTicket(modelId, {});
+			setSidePanelData(modelId, {});
 			return;
 		}
 
@@ -62,7 +59,7 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 			};
 		}
 
-		onNewTicket(modelId, defaultValue);
+		setSidePanelData(modelId, defaultValue);
 	};
 
 	if (!filteredItems.length) {
@@ -76,7 +73,7 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 		);
 	}
 
-	if (groupBy === NONE_OPTION) return (<TicketsTableGroup ticketsWithModelId={filteredItems} onNewTicket={onGroupNewTicket('')} {...props} />);
+	if (groupBy === NONE_OPTION) return (<TicketsTableGroup ticketsWithModelId={filteredItems} onNewTicket={onGroupNewTicket('')} onEditTicket={setSidePanelData} />);
 
 	const groups = groupTickets(groupBy, filteredItems);
 
@@ -88,7 +85,7 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 					defaultExpanded={!!ticketsWithModelId.length}
 					key={groupBy + groupName + template + ticketsWithModelId}
 				>
-					<TicketsTableGroup ticketsWithModelId={ticketsWithModelId} onNewTicket={onGroupNewTicket(groupName)} {...props} />
+					<TicketsTableGroup ticketsWithModelId={ticketsWithModelId} onNewTicket={onGroupNewTicket(groupName)} onEditTicket={setSidePanelData} />
 				</DashboardListCollapse>
 			))}
 		</Container>

@@ -24,7 +24,7 @@ import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams, generatePath, useHistory } from 'react-router-dom';
 import { SearchContextComponent } from '@controls/search/searchContext';
-import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
 import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
@@ -74,7 +74,7 @@ export const TicketsTable = () => {
 	const ticketsWithModelId = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
-	const [sidePanelModelIdAndTemplate, setSidePanelModelIdAndTemplate] = useState<{ modelId: string, template: ITemplate }>(null);
+	const [sidePanelModelId, setSidePanelModelId] = useState<string>(null);
 	const [sidePanelTicket, setSidePanelTicket] = useState<Partial<ITicket>>(null);
 	const [showCompleted, setShowCompleted] = useState(false);
 
@@ -86,22 +86,14 @@ export const TicketsTable = () => {
 		return ticketsToShow.filter(({ type }) => type === template);
 	}, [template, ticketsWithModelId, showCompleted]);
 
-	const onEditTicket = (modelId: string, ticket: Partial<ITicket>) => {
-		setSidePanelModelIdAndTemplate({ modelId, template: selectedTemplate });
+	const setSidePanelData = (modelId: string, ticket?: Partial<ITicket>) => {
+		setSidePanelModelId(modelId);
 		setSidePanelTicket(ticket);
 	};
 
-	const onSaveTicket = (ticketId: string) => onEditTicket(sidePanelModelIdAndTemplate.modelId, { _id: ticketId });
+	const onSaveTicket = (ticketId: string) => setSidePanelTicket({ _id: ticketId });
 
-	const onNewTicketClick = (modelId: string, ticket?: Partial<ITicket>) => {
-		setSidePanelModelIdAndTemplate({ modelId, template: selectedTemplate });
-		setSidePanelTicket(ticket);
-	};
-
-	const closeSidePanel = () => {
-		setSidePanelModelIdAndTemplate(null);
-		setSidePanelTicket(null);
-	};
+	const closeSidePanel = () => setSidePanelData(null, null);
 
 	const filterTickets = (items, query: string) => items.filter((ticket) => {
 		const templateCode = templates.find(({ _id }) => _id === ticket.type).code;
@@ -113,7 +105,7 @@ export const TicketsTable = () => {
 		const pathname = generatePath(VIEWER_ROUTE, {
 			teamspace,
 			project,
-			containerOrFederation: sidePanelModelIdAndTemplate.modelId,
+			containerOrFederation: sidePanelModelId,
 		});
 		history.push({ pathname, search: `?ticketId=${sidePanelTicket._id}` });
 	};
@@ -169,7 +161,7 @@ export const TicketsTable = () => {
 	useEffect(() => {
 		const { containerOrFederation, ...newParams } = params;
 		if (sidePanelTicket?._id) {
-			newParams.containerOrFederation = sidePanelModelIdAndTemplate.modelId;
+			newParams.containerOrFederation = sidePanelModelId;
 		}
 		const path = generatePath(TICKETS_ROUTE, newParams);
 		history.replace(path + window.location.search);
@@ -190,11 +182,11 @@ export const TicketsTable = () => {
 						<SelectorsContainer>
 							<ContainersAndFederationsFormSelect
 								name="containersAndFederations"
-								isNewTicketOpen={sidePanelModelIdAndTemplate && !editingTicketId}
+								isNewTicketOpen={sidePanelModelId && !editingTicketId}
 							/>
 							<TemplateFormSelect
 								name="template"
-								isNewTicketOpen={sidePanelModelIdAndTemplate && !editingTicketId}
+								isNewTicketOpen={sidePanelModelId && !editingTicketId}
 							/>
 							<GroupByFormSelect name="groupBy" />
 						</SelectorsContainer>
@@ -218,13 +210,13 @@ export const TicketsTable = () => {
 									<FormattedMessage id="ticketsTable.button.newTicket" defaultMessage="New Ticket" />
 								</NewTicketButton>
 							)}
-							onContainerOrFederationClick={onNewTicketClick}
+							onContainerOrFederationClick={setSidePanelData}
 						/>
 					</FlexContainer>
 				</FiltersContainer>
 			</FormProvider>
-			<TicketsTableContent onEditTicket={onEditTicket} onNewTicket={onNewTicketClick} />
-			<SidePanel open={!!sidePanelModelIdAndTemplate}>
+			<TicketsTableContent setSidePanelData={setSidePanelData} />
+			<SidePanel open={!!sidePanelModelId}>
 				<SlidePanelHeader>
 					<OpenInViewerButton disabled={!editingTicketId} onClick={openInViewer}>
 						<FormattedMessage
@@ -236,11 +228,18 @@ export const TicketsTable = () => {
 						<ExpandIcon />
 					</CircleButton>
 				</SlidePanelHeader>
-				{sidePanelModelIdAndTemplate && (
+				{sidePanelModelId && (
 					<MuiThemeProvider theme={theme}>
 						<TicketContextComponent isViewer={false}>
-							{editingTicketId && (<TicketSlide ticketId={sidePanelTicket._id} {...sidePanelModelIdAndTemplate} />)}
-							{!editingTicketId && (<NewTicketSlide defaultValue={sidePanelTicket} {...sidePanelModelIdAndTemplate} onSave={onSaveTicket} />)}
+							{editingTicketId && (<TicketSlide ticketId={sidePanelTicket._id} template={selectedTemplate} />)}
+							{!editingTicketId && (
+								<NewTicketSlide
+									defaultValue={sidePanelTicket}
+									modelId={sidePanelModelId}
+									template={selectedTemplate}
+									onSave={onSaveTicket}
+								/>
+							)}
 						</TicketContextComponent>
 					</MuiThemeProvider>
 				)}
