@@ -127,13 +127,14 @@ export const measurementsStying = css`
 
 		.MuiFormControl-root {
 			width: 113%;
-			margin-left: -15px;
 		}
 
 		${StyledTextField} {
-			overflow: visible;
+			overflow: hidden;
+
 			input {
 				margin: 0;
+				padding-right: 51px;
 			}
 
 			${StyledMarkdownField},
