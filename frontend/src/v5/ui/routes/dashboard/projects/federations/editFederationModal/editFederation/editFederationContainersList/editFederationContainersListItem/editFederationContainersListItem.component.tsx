@@ -58,6 +58,11 @@ export const EditFederationContainersListItem = memo(({
 		setGroupsByContainer((existingGroups) => ({ ...existingGroups, [container._id]: group }));
 	};
 
+	const filterOptions = (options, { inputValue }) => {
+		const filteredOptions = options.filter((option) => option.includes(inputValue));
+		return uniq([...filteredOptions, inputValue]);
+	};
+
 	useEffect(() => {
 		if (!isIncluded && groupsByContainer[container._id]) {
 			delete groupsByContainer[container._id];
@@ -118,9 +123,8 @@ export const EditFederationContainersListItem = memo(({
 								ListboxComponent={OptionsBox}
 								clearOnBlur
 								selectOnFocus
-								noOptionsText={formatMessage({ id: 'tickets.groups.field.noOptions', defaultMessage: 'No options' })}
 								renderOption={(optionProps, value: string) => (<GroupOption {...optionProps} value={value} />)}
-								filterOptions={(options, { inputValue }) => uniq([...options, inputValue])}
+								filterOptions={filterOptions}
 							/>
 						)}
 					</DashboardListItemText>
