@@ -210,7 +210,7 @@ export interface ITicketsActionCreators {
 		projectId: string,
 		modelId: string,
 		ticketId: string,
-		group: Partial<Group>,
+		group: Group,
 		isFederation: boolean,
 	) => UpdateTicketGroupAction;
 	updateTicketGroupSuccess: (
