@@ -34,6 +34,8 @@ export type IAssigneesSelect = SelectProps & {
 	maxItems?: number;
 	showAddButton?: boolean;
 	showEmptyText?: boolean;
+	value: any,
+	onBlur: () => void;
 };
 
 export const AssigneesSelect = ({

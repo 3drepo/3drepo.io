@@ -39,7 +39,7 @@ export const PinName = styled(Typography).attrs({
 	`}
 `;
 
-export const PinAction = styled.div<{disabled?: boolean}>`
+export const PinAction = styled.div<{ disabled?: boolean }>`
 	font-size: 10px;
 	font-weight: 500;
 	display: flex;

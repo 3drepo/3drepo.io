@@ -23,7 +23,7 @@ import { IChip, IChipMap, IChipMapItem } from '../chip.types';
 import { HiddenSelect, IconWrapper } from './chipSelect.styles';
 
 type IChipSelectItem = IChipMapItem & { value: string; };
-type IChipSelect = IChip & FormInputProps & { values: IChipMap, defaultValue?: string };
+type IChipSelect = IChip & FormInputProps & { values: IChipMap, defaultValue?: string, onBlur?: () => void; };
 
 const SelectItem = ({ label, icon, color, ...props }: IChipSelectItem) => (
 	<MenuItem {...props}>
