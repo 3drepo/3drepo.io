@@ -29,12 +29,10 @@ export const Form = styled.form`
 `;
 
 export const InputsContainer = styled.div`
-	min-height: 112px;
 	max-height: 500px;
-	overflow-y: overlay;
-	padding: 2px;
+	overflow-y: scroll;
 	margin-right: -13px;
-	padding-right: 13px;
+	padding: 2px 13px 2px 2px;
 `;
 
 export const Buttons = styled.div`
