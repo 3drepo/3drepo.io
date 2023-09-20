@@ -35,30 +35,18 @@ export default css`
 
 		${StyledIconButton} {
 			margin-right: -4px;
+			background-color: ${({ theme }) => theme.palette.secondary.main};
 
-			&, &:hover {
-				background-color: ${({ theme }) => theme.palette.primary.contrast};
-			}
-
-			svg path,
-			svg circle {
-				fill: ${({ theme }) => theme.palette.secondary.main};
-			}
-
-			&:hover {
-				svg path,
-				svg circle {
-					fill: ${({ theme }) => theme.palette.primary.main};
-				}
+			&:hover svg :is(path, circle) {
+				fill: ${({ theme }) => theme.palette.primary.main};
+				color: ${({ theme }) => theme.palette.primary.main};
 			}
 
 			&[active="1"] {
-				background-color: ${({ theme }) => theme.palette.secondary.main};
-
-				svg path,
-				svg circle {
-					fill: ${({ theme }) => theme.palette.primary.main};
-					color: ${({ theme }) => theme.palette.primary.main};
+				background-color: ${({ theme }) => theme.palette.primary.main};
+				svg :is(path, circle) {
+					fill: ${({ theme }) => theme.palette.primary.contrast};
+					color: ${({ theme }) => theme.palette.primary.contrast};
 				}
 			}
 		}
