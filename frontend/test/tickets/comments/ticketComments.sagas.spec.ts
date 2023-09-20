@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as TicketCommentsSaga from '@/v5/store/tickets/comments/ticketComments.sagas';
 import { TicketCommentsActions } from '@/v5/store/tickets/comments/ticketComments.redux';
 import Mockdate from 'mockdate';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
@@ -141,6 +140,7 @@ describe('Ticket Comments: sagas', () => {
 		});
 
 		it('should call container\'s delete ticket comment endpoint', async () => {
+			populateStore();
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}/comments/${comment._id}`)
 				.reply(200);
@@ -259,6 +259,7 @@ describe('Ticket Comments: sagas', () => {
 		});
 
 		it('should call federation\'s delete ticket comment endpoint', async () => {
+			populateStore();
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}/comments/${comment._id}`)
 				.reply(200);

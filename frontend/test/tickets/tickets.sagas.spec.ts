@@ -111,6 +111,7 @@ describe('Tickets: sagas', () => {
 		});
 
 		it('should call updateContainerTicket endpoint', async () => {
+			populateTicketsStore();
 			mockServer
 				.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticket._id}`)
 				.reply(200);
@@ -124,7 +125,6 @@ describe('Tickets: sagas', () => {
 		});
 		it('should call updateContainerTicket with a 404', async () => {
 			populateTicketsStore();
-
 			mockServer
 				.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticket._id}`)
 				.reply(404);
@@ -221,6 +221,7 @@ describe('Tickets: sagas', () => {
 		});
 
 		it('should call updateFederationTicket endpoint', async () => {
+			populateTicketsStore();
 			mockServer
 				.patch(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticket._id}`)
 				.reply(200, ticket);
