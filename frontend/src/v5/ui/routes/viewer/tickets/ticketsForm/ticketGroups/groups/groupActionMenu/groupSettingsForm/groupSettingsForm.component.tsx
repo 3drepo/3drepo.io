@@ -368,7 +368,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								<Rules>
 									{rules.map(({ id, ...ruleValue }, i) => (
 										<ChipRule
-											value={ruleValue}
+											label={ruleValue.name}
 											key={id}
 											isSelected={selectedRule === ruleValue}
 											onDelete={() => {
