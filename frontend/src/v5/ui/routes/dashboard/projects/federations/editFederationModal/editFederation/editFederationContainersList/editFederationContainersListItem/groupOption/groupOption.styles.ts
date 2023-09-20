@@ -15,16 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import AddCircleBase from '@assets/icons/filled/add_circle-filled.svg';
 
-export const Container = styled.div`
+export const Container = styled.div<{ disabled?: boolean }>`
 	&& {
-		display: inline-flex;
+
 		color: ${({ theme }) => theme.palette.primary.dark};
+		display: inline-flex;
 		flex-flow: row;
 		align-items: flex-start;
 		padding: 12px;
+		
+		${({ theme, disabled }) => disabled && css`
+			cursor: default;
+			pointer-events: none;
+			color: ${theme.palette.base.lighter};
+		`}
 	}
 `;
 

@@ -17,6 +17,7 @@
 import { useContext } from 'react';
 import { AddCircleIcon, Container, Message } from './groupOption.styles';
 import { EditFederationContext } from '../../../../editFederationContext';
+import { FormattedMessage } from 'react-intl';
 
 interface GroupOptionProps {
 	value: string;
@@ -27,6 +28,16 @@ export const GroupOption = ({ value, ...props }: GroupOptionProps) => {
 	const trimmedValue = value.trim();
 
 	const isNew = !groups.includes(trimmedValue);
+
+	if (!groups.length && !trimmedValue) {
+		return (
+			<Container {...props} disabled>
+				<Message>
+					<FormattedMessage id="tickets.groups.field.noOptions" defaultMessage="No options" />
+				</Message>
+			</Container>
+		);
+	}
 
 	if (!trimmedValue) return (<></>);
 
