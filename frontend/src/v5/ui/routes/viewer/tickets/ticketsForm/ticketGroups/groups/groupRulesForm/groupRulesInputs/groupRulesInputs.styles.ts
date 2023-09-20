@@ -16,6 +16,17 @@
  */
 
 import styled, { css } from 'styled-components';
+import { ListSubheader as ListSubheaderBase } from '@mui/material';
+
+export const ListSubheader = styled(ListSubheaderBase)`
+	font-weight: 700;
+	padding: 5px 12px 0;
+	line-height: 35px;
+
+	&:first-of-type {
+		padding-top: 0;
+	}
+`;
 
 export const ValuesContainer = styled.div`
 	display: flex;

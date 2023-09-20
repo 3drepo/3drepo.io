@@ -18,46 +18,56 @@
 import { ActionMenuItem } from '@controls/actionMenu';
 import { FormattedMessage } from 'react-intl';
 import { Button } from '@controls/button';
-import { useForm, FormProvider, Controller } from 'react-hook-form';
-import { useState } from 'react';
-import { formatMessage } from '@/v5/services/intl';
+import { useForm, FormProvider } from 'react-hook-form';
 import { SubmitButton } from '@controls/submitButton';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { GroupRuleSchema } from '@/v5/validation/groupSchemes/groupSchemes';
-import { selectMetaKeys } from '@/v4/modules/model';
-import { useSelector } from 'react-redux';
-import { Autocomplete, TextField } from '@mui/material';
 import { IGroupRule } from '@/v5/store/tickets/tickets.types';
+import { formatMessage } from '@/v5/services/intl';
+import { FormTextField } from '@controls/inputs/formInputs.component';
+import { useEffect } from 'react';
+import { isEqual } from 'lodash';
 import { Buttons, Form, InputsContainer } from './groupRulesForm.styles';
-import { IRuleForm, parseRule, prepareRuleForForm } from './groupRulesForm.helpers';
-import { RuleOperationSelect } from './ruleOperationSelect/ruleOperationSelect.component';
-import { RuleValueField } from './ruleValueField/ruleValueField.component';
-import { ListboxComponent } from './listboxComponent/listboxComponent.component';
+import { IFormRule, formRuleToGroupRule, groupRuleToFormRule } from './groupRulesForm.helpers';
+import { RuleFieldValues } from './groupRulesInputs/ruleFieldValues/ruleFieldValues.component';
+import { RuleFieldOperator } from './groupRulesInputs/ruleFieldOperator/ruleFieldOperator.component';
+import { RuleOperator } from './groupRulesInputs/ruleOperator/ruleOperator.component';
+import { RuleValues } from './groupRulesInputs/ruleValues/ruleValues.component';
 
-const DEFAULT_VALUES: IRuleForm = {
-	field: null,
+const DEFAULT_VALUES: IFormRule = {
+	name: '',
+	field: {
+		operator: null,
+		values: [],
+	},
 	operator: null,
 	values: [],
 };
 
 type IGroupRules = {
 	rule?: IGroupRule;
+	existingRules: IGroupRule[],
 	onSave: (rule: IGroupRule) => void;
 	onClose: () => void;
 };
 
-export const GroupRulesForm = ({ onSave, onClose, rule }: IGroupRules) => {
-	const [value, setValue] = useState(rule?.field || '');
-	const fields = useSelector(selectMetaKeys);
-	const formData = useForm<IRuleForm>({
-		defaultValues: rule ? prepareRuleForForm(rule) : DEFAULT_VALUES,
+export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [] }: IGroupRules) => {
+	const defaultValues = rule ? groupRuleToFormRule(rule) : DEFAULT_VALUES;
+
+	const formData = useForm<IFormRule>({
+		defaultValues,
 		mode: 'all',
 		resolver: yupResolver(GroupRuleSchema),
+		context: { alreadyExistingNames: existingRules.map((r) => r.name).filter((name) => name !== rule?.name) },
 	});
 
-	const { formState: { isValid, isDirty } } = formData;
+	const {
+		formState: { isValid, isDirty, errors },
+		getValues,
+		reset,
+	} = formData;
 
-	const handleSave = (body: IRuleForm) => onSave(parseRule(body));
+	const handleSave = (body: IFormRule) => onSave(formRuleToGroupRule(body));
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
@@ -66,33 +76,22 @@ export const GroupRulesForm = ({ onSave, onClose, rule }: IGroupRules) => {
 		onClose();
 	};
 
+	useEffect(() => { reset(defaultValues); }, [rule]);
+
 	return (
 		<Form onSubmit={handleSubmit}>
 			<FormProvider {...formData}>
 				<InputsContainer>
-					<Controller
-						name="field"
-						render={({ field: { onChange, ...autocompleteProps } }) => (
-							<Autocomplete
-								{...autocompleteProps}
-								renderOption={(props, option) => [props, option, value]}
-								disableListWrap
-								ListboxComponent={ListboxComponent}
-								options={fields}
-								noOptionsText={formatMessage({ id: 'tickets.groups.field.noOptions', defaultMessage: 'No options' })}
-								onChange={(_, data) => onChange(data)}
-								onInputChange={(_, newValue) => setValue(newValue)}
-								renderInput={(renderInputProps) => (
-									<TextField
-										{...renderInputProps}
-										label={formatMessage({ id: 'tickets.groups.field', defaultMessage: 'Field' })}
-									/>
-								)}
-							/>
-						)}
+					<FormTextField
+						required
+						name="name"
+						label={formatMessage({ id: 'tickets.groups.filterPanel.name', defaultMessage: 'Name' })}
+						formError={errors.name}
 					/>
-					<RuleOperationSelect />
-					<RuleValueField />
+					<RuleFieldOperator />
+					<RuleFieldValues />
+					<RuleOperator />
+					<RuleValues />
 				</InputsContainer>
 				<Buttons>
 					<ActionMenuItem>
@@ -105,7 +104,7 @@ export const GroupRulesForm = ({ onSave, onClose, rule }: IGroupRules) => {
 							variant="contained"
 							color="primary"
 							fullWidth={false}
-							disabled={!isValid || !isDirty}
+							disabled={!isValid || !isDirty || isEqual(rule, getValues())}
 						>
 							{rule ? (
 								<FormattedMessage id="tickets.groups.filterPanel.updateFilter" defaultMessage="Update filter" />
