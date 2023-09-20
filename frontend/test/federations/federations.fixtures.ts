@@ -109,16 +109,3 @@ export const prepareMockRawSettingsReply = (federation: IFederation): Federation
 	...prepareMockSettingsWithoutSurveyPoint(federation),
 	surveyPoints: [federation.surveyPoint],
 });
-
-// export const getMockStats = (federation: IFederation): FederationStats => ({
-// 	containers: federation.containers,
-// 	tickets: {
-// 		issues: federation.issues,
-// 		risks: federation.risks,
-// 	},
-// 	lastUpdated: federation.lastUpdated.valueOf(),
-// 	category: federation.category,
-// 	status: federation.status,
-// 	code: federation.code,
-// 	desc: federation.desc,
-// });
