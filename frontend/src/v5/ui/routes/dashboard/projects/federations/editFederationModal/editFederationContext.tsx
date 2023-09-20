@@ -18,7 +18,7 @@
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { GroupedContainer, IFederation } from '@/v5/store/federations/federations.types';
 import { createContext, useEffect, useState } from 'react';
-import { uniq } from 'lodash';
+import { orderBy, uniq } from 'lodash';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export interface EditFederationContextType {
@@ -61,7 +61,8 @@ export const EditFederationContextComponent = ({ federation, children }: Props) 
 	});
 
 	const existingGroups = federations.flatMap((f) => f.containers.map(({ group }) => group));
-	const groups = uniq(existingGroups.concat(Object.values(groupsByContainer))).filter(Boolean);
+	const unsortedGroups = uniq(existingGroups.concat(Object.values(groupsByContainer))).filter(Boolean);
+	const groups = orderBy(unsortedGroups, (g) => g.toLowerCase());
 
 	useEffect(() => {
 		if (!containers.length || !federation?.containers) return;
