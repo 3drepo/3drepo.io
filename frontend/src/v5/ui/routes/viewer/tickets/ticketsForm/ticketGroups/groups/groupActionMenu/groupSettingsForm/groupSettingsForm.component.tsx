@@ -346,7 +346,12 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 									...filterMenuCoords,
 								}}
 							>
-								<GroupRulesForm rule={selectedRule?.value} onSave={selectedRule ? (val) => update(selectedRule.index, val) : append} onClose={resetFilterMenu} />
+								<GroupRulesForm
+									rule={selectedRule?.value}
+									onSave={selectedRule ? (val) => update(selectedRule.index, val) : append}
+									onClose={resetFilterMenu}
+									existingRules={value?.group?.rules}
+								/>
 							</Popper>
 							<Subheading>
 								<FormattedMessage
