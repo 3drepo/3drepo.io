@@ -20,7 +20,7 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 import { DashboardListItemButton, DashboardListItemText } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { Highlight } from '@controls/highlight';
 import { Display } from '@/v5/ui/themes/media';
-import { formatDate, formatMessage } from '@/v5/services/intl';
+import { formatDate } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { DashboardListItemContainerTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
