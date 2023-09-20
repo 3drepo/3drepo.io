@@ -382,6 +382,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 											}}
 											disabled={!isAdmin}
 											onClick={() => {
+												if (filterMenuOpen) return;
 												setSelectedRule({ index: i, value: ruleValue });
 												setFilterMenuOpen(true);
 											}}
