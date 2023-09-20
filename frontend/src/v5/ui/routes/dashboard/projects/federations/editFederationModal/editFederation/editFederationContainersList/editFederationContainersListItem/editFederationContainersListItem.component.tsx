@@ -19,12 +19,12 @@ import { ComponentType, memo } from 'react';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { DashboardListItemButton, DashboardListItemIcon, DashboardListItemText } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { Highlight } from '@controls/highlight';
-import { RevisionDetails } from '@components/shared/revisionDetails';
 import { Display } from '@/v5/ui/themes/media';
 import { formatDate } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { DashboardListItemContainerTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
+import { RevisionDetails } from '@components/shared/revisionDetails/revisionDetails.component';
 import { DashboardListItemRow } from './editFederationContainersListItem.styles';
 
 export type IconButtonProps = {
@@ -62,7 +62,6 @@ export const EditFederationContainersListItem = memo(({
 				minWidth={116}
 				container={container}
 				isSelected={isSelected}
-				filterQuery={filterQuery}
 				openInNewTab
 			/>
 			<DashboardListItemButton

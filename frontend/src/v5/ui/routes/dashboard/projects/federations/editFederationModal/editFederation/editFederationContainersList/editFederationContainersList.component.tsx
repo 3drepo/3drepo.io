@@ -30,11 +30,11 @@ import { Display } from '@/v5/ui/themes/media';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { ButtonProps } from '@mui/material/Button';
-import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem';
 import { isEmpty } from 'lodash';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CollapseSideElementGroup } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.styles';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
+import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem/skeletonListItem.component';
 import { EditFederationContainersListItem, IconButtonProps } from './editFederationContainersListItem/editFederationContainersListItem.component';
 import { Container, ContainerListMainTitle, ContainerCount } from './editFederationContainersList.styles';
 
@@ -97,7 +97,7 @@ export const EditFederationContainers = ({
 				sideElement={(
 					<CollapseSideElementGroup>
 						<ActionButton disabled={isEmpty(containers)} filteredContainers={sortedList}>
-							{isEmpty(query)
+							{!query.length
 								? actionButtonTexts.allResults
 								: actionButtonTexts.filteredResults}
 						</ActionButton>

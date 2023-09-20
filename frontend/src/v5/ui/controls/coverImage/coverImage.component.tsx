@@ -25,7 +25,7 @@ type CoverImageProps = {
 
 export const CoverImage = ({ className, defaultImgSrc, imgSrc }: CoverImageProps) => {
 	const [src, setSrc] = useState(imgSrc);
-	const onError = () => { setSrc(defaultImgSrc); };
+	const onError = () => setSrc(defaultImgSrc || 'none');
 
 	useEffect(() => { setSrc(imgSrc); }, [imgSrc]);
 

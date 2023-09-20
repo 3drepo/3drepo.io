@@ -26,8 +26,8 @@ export const TeamspaceQuotaLayout = styled.div`
 	column-gap: 15px;
 `;
 
-export const QuotaValuesContainer = styled.div<{ $disabled?:boolean, $error?: boolean }>` 
-	${({ theme }) => (theme.typography.caption)}
+export const QuotaValuesContainer = styled.div<{ $disabled?:boolean, $error?: boolean }>`
+	${({ theme }) => (theme.typography.body1)}
 
 	color: ${({ $disabled, $error, theme }) => {
 		if ($error) return theme.palette.error.lightest;
@@ -40,7 +40,7 @@ export const QuotaValuesContainer = styled.div<{ $disabled?:boolean, $error?: bo
 	column-gap: 4px;
 	align-items: center;
 	padding:${({ $error }) => ($error ? '5px 10px 5px 3px' : '5px 0px')};
-	border-radius: 5px;
+	border-radius: 8px;
 `;
 
 export const WarningIcon = styled(WarningIconSmall)`

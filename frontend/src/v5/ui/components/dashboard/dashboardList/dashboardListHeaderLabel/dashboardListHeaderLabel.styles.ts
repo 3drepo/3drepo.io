@@ -48,6 +48,7 @@ export const Button = styled(ButtonComponent).attrs({
 	justify-content: flex-start;
 	padding: 0;
 	margin: 0;
+	height: 11px;
 
 	&:hover, &:active {
 		text-decoration-line: none;

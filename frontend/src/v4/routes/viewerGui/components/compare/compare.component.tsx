@@ -17,6 +17,7 @@
 
 import { PureComponent } from 'react';
 
+import _ from 'lodash';
 import { Tab, Tooltip } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 
@@ -65,6 +66,7 @@ interface IProps {
 	renderingType: number;
 	compareModels: any[];
 	sortType: string;
+	componentState: ICompareComponentState;
 	sortOrder: string;
 	isActive: boolean;
 	isPending: boolean;
@@ -253,19 +255,20 @@ export class Compare extends PureComponent<IProps, any> {
 	}
 
 	private handleAllItemsSelect = (event, selected) => {
-		const { setComponentState, compareModels } = this.props;
-		const newComponentState = {} as ICompareComponentState;
+		const { selectedItemsMap, setComponentState, compareModels, componentState } = this.props;
 		const changedMap = this.isDiffTabActive ? 'selectedDiffModelsMap' : 'selectedClashModelsMap';
+		const targetChangedMap = this.isDiffTabActive ? 'targetDiffModels' : 'targetClashModels';
 
-		newComponentState[changedMap] = compareModels.reduce((map, obj) => {
-			map[obj._id] = selected;
-			return map;
-		}, {});
+		const newComponentState = {
+			...componentState,
+			[changedMap]: { ...selectedItemsMap },
+			[targetChangedMap]: {...componentState[targetChangedMap]}
+		};
 
-		newComponentState.targetDiffModels = newComponentState[changedMap];
-		if (!selected) {
-			newComponentState.targetClashModels = newComponentState[changedMap];
-		}
+		compareModels.forEach(({ _id }) => {
+			newComponentState[changedMap][_id] = selected;
+			newComponentState[targetChangedMap][_id] = selected;
+		});
 
 		setComponentState(newComponentState);
 	}

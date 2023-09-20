@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CSSProperties } from 'react';
+import 'styled-components';
+import { palette, typography } from './theme';
 
 interface IGradient {
 	main: string;
@@ -35,42 +36,15 @@ interface IShadow {
 	level_10: string;
 }
 
-declare module '@mui/material/styles/createPalette' {
-	interface SimplePaletteColorOptions {
-		mid?: CSSProperties['color'],
-		lighter?: CSSProperties['color'],
-		lightest?: CSSProperties['color'],
-		darkest?: CSSProperties['color'],
-		contrast?: CSSProperties['color'],
-	}
+type TypographyInterface = { fontFamily: string } & {
+	[K in keyof typeof typography]: {
+		[P in keyof typeof typography[K]]: P extends 'textTransform' ? any : typeof typography[K][P];
+	};
+};
 
-	interface Palette {
-		tertiary?: SimplePaletteColorOptions;
-		base?: SimplePaletteColorOptions;
-		favourite?: SimplePaletteColorOptions;
-		gradient?: IGradient;
-		shadows?: IShadow;
-	}
-
-	interface PaletteOptions {
-		tertiary?: SimplePaletteColorOptions;
-		base?: SimplePaletteColorOptions;
-		favourite?: SimplePaletteColorOptions;
-		gradient?: IGradient;
-		shadows?: IShadow;
-	}
-}
-
-declare module '@mui/material/styles/createTypography' {
-	interface Typography {
-		link?: CSSProperties;
-		kickerTitle?: CSSProperties;
-		kicker?: CSSProperties;
-	}
-
-	interface TypographyOptions {
-		link?: CSSProperties;
-		kickerTitle?: CSSProperties;
-		kicker?: CSSProperties;
+declare module 'styled-components' {
+	interface DefaultTheme {
+		palette: typeof palette,
+		typography: TypographyInterface,
 	}
 }

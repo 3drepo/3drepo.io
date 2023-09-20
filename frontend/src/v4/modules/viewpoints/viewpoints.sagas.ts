@@ -21,17 +21,15 @@ import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effect
 import { generatePath } from 'react-router-dom';
 import { isV5 } from '@/v4/helpers/isV5';
 
-import { UnityUtil } from '@/globals/unity-util';
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
-import { CHAT_CHANNELS } from '../../constants/chat';
+import { getAPIUrl } from '@/v4/services/api/default';
+import { CHAT_CHANNELS } from '@/v4/constants/chat';
 import { ROUTES } from '../../constants/routes';
-import { createGroupsByColor, createGroupsByTransformations, prepareGroup } from '../../helpers/groups';
-import { createGroupsFromViewpoint, groupsOfViewpoint,
-	isViewpointLoaded,
+import { prepareGroup } from '../../helpers/groups';
+import { createGroupsFromViewpoint, generateViewpoint,
 	mergeGroupsDataFromViewpoint, setGroupData } from '../../helpers/viewpoints';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
-import { ChatActions } from '../chat';
 import { DialogActions } from '../dialog';
 import { GroupsActions } from '../groups';
 import { IssuesActions } from '../issues';
@@ -41,14 +39,15 @@ import { RisksActions } from '../risks';
 import { SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch } from '../store';
-import { selectHiddenGeometryVisible, TreeActions } from '../tree';
+import { TreeActions } from '../tree';
 import { waitForTreeToBeReady } from '../tree/tree.sagas';
-import { selectColorOverrides, selectTransformations, ViewerGuiActions } from '../viewerGui';
+import { ViewerGuiActions } from '../viewerGui';
+import { ChatActions } from '../chat/chat.redux';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
-import { selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
+import { groupsOfViewpoint, isViewpointLoaded, selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
 
-export const getThumbnailUrl = (thumbnail) => API.getAPIUrl(thumbnail);
+export const getThumbnailUrl = (thumbnail) => getAPIUrl(thumbnail);
 
 export function* fetchViewpoints({ teamspace, modelId }) {
 	try {
@@ -64,64 +63,6 @@ export function* fetchViewpoints({ teamspace, modelId }) {
 		yield put(ViewpointsActions.setPendingState(false));
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'model viewpoints', e.response));
-	}
-}
-
-export function* generateViewpoint(teamspace, modelId, name, withScreenshot = false) {
-	try {
-		const hiddenGeometryVisible = yield select(selectHiddenGeometryVisible);
-
-		const viewpoint = yield Viewer.getCurrentViewpoint();
-
-		const generatedObject = {
-			name,
-			viewpoint:  {
-				...viewpoint,
-				hideIfc: !hiddenGeometryVisible
-			}
-		} as any;
-
-		if (withScreenshot) {
-			generatedObject.viewpoint.screenshot = yield Viewer.getScreenshot();
-		}
-
-		const objectInfo = yield Viewer.getObjectsStatus();
-
-		const colorOverrides = yield select(selectColorOverrides);
-		const newOverrideGroups = yield createGroupsByColor(colorOverrides);
-
-		const transformations = yield select(selectTransformations);
-		const newTransformationsGroups = yield createGroupsByTransformations(transformations);
-
-		if (newOverrideGroups.length) {
-			generatedObject.viewpoint.override_groups = newOverrideGroups;
-		}
-
-		if (newTransformationsGroups.length) {
-			generatedObject.viewpoint.transformation_groups = newTransformationsGroups;
-		}
-
-		if (objectInfo && (objectInfo.highlightedNodes.length > 0 || objectInfo.hiddenNodes.length > 0)) {
-			const { highlightedNodes, hiddenNodes } = objectInfo;
-
-			if (highlightedNodes.length > 0) {
-				generatedObject.viewpoint.highlighted_group = {
-					objects: highlightedNodes,
-					color: UnityUtil.defaultHighlightColor.map((c) => c * 255)
-				} ;
-			}
-
-			if (hiddenNodes.length > 0) {
-				generatedObject.viewpoint.hidden_group = {
-					objects: hiddenNodes
-				};
-			}
-
-		}
-
-		return generatedObject;
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('generate', 'viewpoint', error));
 	}
 }
 
@@ -275,7 +216,6 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 		yield put(ViewpointsActions.setSelectedViewpoint(viewpoint));
 	}
-
 }
 
 export function * deselectViewsAndLeaveClipping() {
@@ -362,9 +302,9 @@ export function* setActiveViewpoint({ teamspace, modelId, view }) {
 	}
 }
 
-export function* prepareNewViewpoint({teamspace, modelId, viewpointName}) {
+export function* prepareNewViewpoint({ viewpointName}) {
 	try {
-		const newViewpoint = yield generateViewpoint(teamspace, modelId, viewpointName, true);
+		const newViewpoint = yield generateViewpoint(viewpointName, true);
 		yield put(ViewpointsActions.setComponentState({ newViewpoint, activeViewpoint: null, editMode: false }));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('prepare', 'new viewpoint'));
@@ -389,9 +329,9 @@ export function* setDefaultViewpoint({ teamspace, modelId, view }) {
 	try {
 		yield API.editModelSettings(teamspace, modelId, {defaultView: view._id});
 		yield put(ModelActions.updateSettingsSuccess({defaultView: {id: view._id, name: view.name}}));
-		yield put(SnackbarActions.show('View set as default'));
+		yield put(SnackbarActions.show('View set as home view'));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('set the default viewpoint', ''));
+		yield put(DialogActions.showErrorDialog('set the home viewpoint', ''));
 	}
 }
 

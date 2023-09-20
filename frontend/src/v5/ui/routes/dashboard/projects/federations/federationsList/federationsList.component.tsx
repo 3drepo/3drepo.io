@@ -34,11 +34,11 @@ import { FederationListItem } from '@/v5/ui/routes/dashboard/projects/federation
 import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { Button } from '@controls/button';
-import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { formatMessage } from '@/v5/services/intl';
 import { SkeletonListItem } from '@/v5/ui/routes/dashboard/projects/federations/federationsList/skeletonListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { SearchContextType, SearchContext } from '@controls/search/searchContext';
+import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
 
 type IFederationsList = {
@@ -48,7 +48,6 @@ type IFederationsList = {
 		collapsed: ReactNode;
 		visible: ReactNode;
 	},
-	showBottomButton?: boolean;
 	onClickCreate: () => void;
 };
 
@@ -57,7 +56,6 @@ export const FederationsList = ({
 	title,
 	titleTooltips,
 	onClickCreate,
-	showBottomButton = false,
 }: IFederationsList): JSX.Element => {
 	// eslint-disable-next-line max-len
 	const { items: federations, filteredItems: filteredFederations } = useContext<SearchContextType<IFederation>>(SearchContext);
@@ -71,7 +69,7 @@ export const FederationsList = ({
 	return (
 		<Container>
 			<DashboardListCollapse
-				title={<>{title} {!isListPending && `(${federations.length})`}</>}
+				title={<>{title} {!isListPending && <CircledNumber>{federations.length}</CircledNumber>}</>}
 				tooltipTitles={titleTooltips}
 				isLoading={areStatsPending}
 				sideElement={(
@@ -132,14 +130,6 @@ export const FederationsList = ({
 						</DashboardListEmptyContainer>
 					)}
 				</DashboardList>
-				{showBottomButton && !isListPending && hasFederations && isProjectAdmin && (
-					<DashboardListButton
-						startIcon={<AddCircleIcon />}
-						onClick={onClickCreate}
-					>
-						<FormattedMessage id="federations.addFederationButton" defaultMessage="Add new Federation" />
-					</DashboardListButton>
-				)}
 			</DashboardListCollapse>
 		</Container>
 	);

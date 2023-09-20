@@ -15,16 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { CardContent as CardContentPadded } from '@components/viewer/cards/card.styles';
+import { FormLabel } from '@mui/material';
 import { Gap } from '@controls/gap';
 import styled from 'styled-components';
 
 export const ErrorTextGap = styled(Gap)``;
 
 export const PanelsContainer = styled.div`
+	padding: 14px 15px;
 	.MuiAccordion-root {
 		&:first-of-type {
-			border-top-left-radius: 6px;
-			border-top-right-radius: 6px;
+			border-top-left-radius: 8px;
+			border-top-right-radius: 8px;
 		}
 
 		&:not(:first-of-type) {
@@ -32,25 +35,26 @@ export const PanelsContainer = styled.div`
 		}
 
 		&:last-of-type {
-			border-bottom-left-radius: 6px;
-			border-bottom-right-radius: 6px;
-		}
-
-		.MuiAccordionDetails-root > :not(:first-child) {
-			margin-top: 10px;
-			&${ErrorTextGap} {
-				margin: 0;
-			}
+			border-bottom-left-radius: 8px;
+			border-bottom-right-radius: 8px;
 		}
 	}
 `;
 
-export const TitleContainer = styled.div`
-	width: 100%;
-	padding: 10px 15px;
-	position: relative;
-	z-index: 1;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	box-sizing: border-box;
-	box-shadow: 0 6px 10px rgb(0 0 0 / 4%);
+export const PropertiesListContainer = styled.div`
+	> :not(:first-child) {
+		margin: 10px 0 0;
+		&${ErrorTextGap} {
+			margin: 0;
+		}
+	}
+`;
+
+export const CardContent = styled(CardContentPadded)`
+	padding: 0;
+`;
+
+export const ModuleTitle = styled(FormLabel)`
+	font-weight: 500;
+	color: inherit;
 `;

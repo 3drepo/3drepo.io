@@ -21,6 +21,7 @@ const { getContainerById, getContainers, updateModelSettings } = require('../../
 const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Comments = require('./commons/tickets.comments');
 const Groups = require('./commons/groups');
+const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
 const fs = require('fs/promises');
@@ -31,7 +32,7 @@ const { queueModelUpload } = require('../../../../services/modelProcessing');
 const { templates } = require('../../../../utils/responseCodes');
 const { timestampToString } = require('../../../../utils/helper/dates');
 
-const Containers = { ...Groups, ...Views, ...Tickets, ...Comments };
+const Containers = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups };
 
 Containers.addContainer = addModel;
 
@@ -79,13 +80,26 @@ Containers.getContainerStats = async (teamspace, container) => {
 	return stats;
 };
 
-Containers.getRevisions = (teamspace, container, showVoid) => getRevisions(teamspace,
-	container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1 });
+Containers.getRevisions = async (teamspace, container, showVoid) => {
+	const revisions = await getRevisions(teamspace,
+		container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
 
-Containers.newRevision = (teamspace, model, data, file) => queueModelUpload(teamspace, model, data, file)
-	.finally(() => fs.rm(file.path).catch((e) => {
+	return revisions.map(({ rFile, ...r }) => {
+		if (rFile) {
+			const format = '.'.concat(rFile[0].split('_').pop());
+			return { ...r, format };
+		}
+
+		return r;
+	});
+};
+
+Containers.newRevision = async (teamspace, container, data, file) => {
+	const { properties: { unit: units } = {} } = await getContainerById(teamspace, container, { 'properties.unit': 1 });
+	await queueModelUpload(teamspace, container, { ...data, units }, file).finally(() => fs.rm(file.path).catch((e) => {
 		logger.logError(`Failed to delete uploaded file: ${e.message}`);
 	}));
+};
 
 Containers.updateRevisionStatus = updateRevisionStatus;
 

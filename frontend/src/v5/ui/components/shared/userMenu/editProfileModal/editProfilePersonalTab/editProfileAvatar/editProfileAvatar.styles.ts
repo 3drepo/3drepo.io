@@ -16,21 +16,16 @@
  */
 import styled from 'styled-components';
 import UserIconBase from '@assets/icons/filled/user-filled.svg';
-import { ScrollArea as ScrollAreaBase } from '@controls/scrollArea';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { Avatar as AvatarBase } from '@controls/avatar';
 import { Button } from '@controls/button';
 import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
 import { getSupportedImageExtensions } from '@controls/fileUploader/imageFile.helper';
 
-export const ScrollArea = styled(ScrollAreaBase).attrs({
-	variant: 'base',
-})``;
-
 export const Header = styled.div`
 	display: flex;
 	flex-direction: row;
-	align-items: center;
+	align-items: flex-start;
 `;
 
 export const Avatar = styled(AvatarBase).attrs({
@@ -57,12 +52,15 @@ export const UserInfo = styled.div`
 	display: flex;
 	flex-direction: column;
 	margin-left: 20px;
+	flex: 1;
 `;
 
 export const TruncatableName = styled(Truncate).attrs({
 	lines: 1,
 	width: 274,
-})``;
+})`
+	width: fit-content;
+`;
 
 export const Username = styled.div`
 	font-size: ${({ theme }) => theme.typography.h3};

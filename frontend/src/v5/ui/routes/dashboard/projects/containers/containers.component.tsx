@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
@@ -33,8 +33,7 @@ import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
 import { DashboardParams } from '../../../routes.constants';
-
-export const IsMainList = createContext(false);
+import { IsMainList } from './mainList.context';
 
 export const Containers = (): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
@@ -72,7 +71,7 @@ export const Containers = (): JSX.Element => {
 						<DashboardListEmptyText>
 							<FormattedMessage
 								id="containers.favourites.emptyMessage"
-								defaultMessage="You haven’t added any Favourites. Click the star on a container to add your first favourite Container."
+								defaultMessage="Click on the star to mark a container as favourite"
 							/>
 						</DashboardListEmptyText>
 					)}
@@ -92,7 +91,6 @@ export const Containers = (): JSX.Element => {
 							collapsed: <FormattedMessage id="containers.all.collapse.tooltip.show" defaultMessage="Show all" />,
 							visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
 						}}
-						showBottomButton
 						onClickCreate={onClickCreate}
 						emptyMessage={(
 							<>

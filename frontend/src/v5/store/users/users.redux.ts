@@ -24,6 +24,7 @@ import { TeamspaceId } from '../store.types';
 export const { Types: UsersTypes, Creators: UsersActions } = createActions({
 	fetchUsers: ['teamspace'],
 	fetchUsersSuccess: ['teamspace', 'users'],
+	updateUserSuccess: ['teamspace', 'user', 'data'],
 }, { prefix: 'USERS/' }) as { Types: Constants<IUsersActions>; Creators: IUsersActions };
 
 export const INITIAL_STATE: IUsersState = {
@@ -34,8 +35,14 @@ export const fetchUsersSuccess = (state, { teamspace, users }: FetchUsersSuccess
 	state.usersByTeamspace[teamspace] = users;
 };
 
+export const updateUserSuccess = (state, { teamspace, user, data }: UpdateUserSuccessAction) => {
+	const users = state.usersByTeamspace[teamspace];
+	Object.assign(users.find((oldUser) => oldUser.user === user), data);
+};
+
 export const usersReducer = createReducer(INITIAL_STATE, produceAll({
 	[UsersTypes.FETCH_USERS_SUCCESS]: fetchUsersSuccess,
+	[UsersTypes.UPDATE_USER_SUCCESS]: updateUserSuccess,
 }));
 
 /**
@@ -59,8 +66,10 @@ export interface IUser {
 
 export type FetchUsersAction = Action<'FETCH_USERS'> & TeamspaceId;
 export type FetchUsersSuccessAction = Action<'FETCH_USERS_SUCCESS'> & TeamspaceId & { users: IUser[] };
+export type UpdateUserSuccessAction = Action<'UPDATE_USER_SUCCESS'> & TeamspaceId & { user: string, data: Partial<IUser> };
 
 export interface IUsersActions {
 	fetchUsers: (teamspace: string) => FetchUsersAction;
 	fetchUsersSuccess: (teamspace: string, users: IUser[]) => FetchUsersSuccessAction;
+	updateUserSuccess: (teamspace: string, user: string, data: Partial<IUser>) => UpdateUserSuccessAction;
 }

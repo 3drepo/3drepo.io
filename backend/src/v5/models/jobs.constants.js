@@ -20,16 +20,16 @@ const JobsConstants = {};
 JobsConstants.DEFAULT_OWNER_JOB = 'Admin';
 
 JobsConstants.DEFAULT_JOBS = [
-	{ _id: 'Admin', color: '#f7f7b2' },
-	{ _id: 'Client', color: '#a6cee3' },
-	{ _id: 'Architect', color: '#213f99' },
-	{ _id: 'Structural Engineer', color: '#33a02c' },
-	{ _id: 'MEP Engineer', color: '#fb9a99' },
-	{ _id: 'Project Manager', color: '#e31a1c' },
-	{ _id: 'Quantity Surveyor', color: '#ff7f00' },
-	{ _id: 'Asset Manager', color: '#ffff99' },
-	{ _id: 'Main Contractor', color: '#b15928' },
-	{ _id: 'Supplier', color: '#6a3d9a' },
+	{ _id: 'Admin', color: '#75140C' },
+	{ _id: 'Architect', color: '#D32C1F' },
+	{ _id: 'Asset Manager', color: '#B160E4' },
+	{ _id: 'Client', color: '#7356F6' },
+	{ _id: 'Main Contractor', color: '#0099FF' },
+	{ _id: 'MEP Engineer', color: '#65C978' },
+	{ _id: 'Project Manager', color: '#A87F3D' },
+	{ _id: 'Quantity Surveyor', color: '#EF7F31' },
+	{ _id: 'Structural Engineer', color: '#B6BCC1' },
+	{ _id: 'Supplier', color: '#697683' },
 ];
 
 module.exports = JobsConstants;

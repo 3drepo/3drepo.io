@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { getRelativeTime } from '@/v5/helpers/intl.helper';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
-import { stripMetadata, extractMetadata, getRelativeTime } from '@/v5/store/tickets/comments/ticketComments.helpers';
+import { stripMetadata, extractMetadata } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { Gap } from '@controls/gap';
 import { useEffect, useState } from 'react';
 import { CurrentUserComment } from './currentUserComment/currentUserComment.component';
@@ -60,6 +61,8 @@ export const Comment = ({
 			<Gap $height={isFirstOfBlock ? '12px' : '4px'} />
 			<UserComment
 				{...props}
+				updatedAt={updatedAt}
+				createdAt={createdAt}
 				author={author}
 				commentAge={commentAge}
 				metadata={metadata}

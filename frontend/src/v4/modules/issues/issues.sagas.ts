@@ -22,6 +22,7 @@ import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import * as queryString from 'query-string';
 import { generatePath } from 'react-router';
+import { generateViewpoint } from '@/v4/helpers/viewpoints';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import { DEFAULT_PROPERTIES, ISSUE_DEFAULT_HIDDEN_STATUSES, PRIORITIES, STATUSES } from '../../constants/issues';
 import { EXTENSION_RE } from '../../constants/resources';
@@ -51,9 +52,7 @@ import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
 import { TreeActions } from '../tree';
-import { ViewerGuiActions } from '../viewerGui';
 import { ViewpointsActions } from '../viewpoints';
-import { generateViewpoint } from '../viewpoints/viewpoints.sagas';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {
 	selectActiveIssueDetails,
@@ -103,7 +102,7 @@ function* saveIssue({ teamspace, model, issueData, revision, finishSubmitting, i
 		const userJob = yield select(selectMyJob);
 
 		let issue = !ignoreViewer ?
-			yield generateViewpoint( teamspace, model, issueData.name, !Boolean(issueData.descriptionThumbnail) ) :
+			yield generateViewpoint(issueData.name, !Boolean(issueData.descriptionThumbnail) ) :
 			{ viewpoint: {} };
 
 		if (issueData.descriptionThumbnail ) {
@@ -198,7 +197,7 @@ function* postComment({ issueData, ignoreViewer, finishSubmitting }) {
 	yield put(IssuesActions.togglePostCommentPendingState(true));
 	try {
 		const { _id, model, account } = yield select(selectActiveIssueDetails);
-		const { viewpoint } = !ignoreViewer ?  yield generateViewpoint( account, model, '', false) : {viewpoint: {}};
+		const { viewpoint } = !ignoreViewer ?  yield generateViewpoint('', false) : {viewpoint: {}};
 
 		issueData.viewpoint = {
 			...viewpoint,
@@ -658,8 +657,7 @@ export function* attachLinkResources({ links }) {
 }
 
 export function * updateActiveIssueViewpoint({screenshot}) {
-	const { model, account } = yield select(selectActiveIssueDetails);
-	const { viewpoint } = yield generateViewpoint(account, model, '', false);
+	const { viewpoint } = yield generateViewpoint( '', false);
 	viewpoint.screenshot = yield imageUrlToBase64IfNotAlready(screenshot);
 	yield put(IssuesActions.updateActiveIssue({viewpoint}));
 }

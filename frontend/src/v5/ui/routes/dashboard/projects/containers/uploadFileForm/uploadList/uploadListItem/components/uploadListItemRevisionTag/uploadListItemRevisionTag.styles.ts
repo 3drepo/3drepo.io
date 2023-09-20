@@ -20,9 +20,14 @@ import { FormTextField as FormTextFieldBase } from '@controls/inputs/formInputs.
 
 export const FormTextField = styled(FormTextFieldBase)<{ $selectedrow: boolean }>`
 	margin: 0 12px;
+
+	.MuiFormHelperText-root {
+		display: none;
+	}
+
 	.MuiOutlinedInput-root {
 		height: 100%;
-		border-radius: 6px;
+		border-radius: 8px;
 
 		&.Mui-error {
 			svg {
@@ -32,11 +37,15 @@ export const FormTextField = styled(FormTextFieldBase)<{ $selectedrow: boolean }
 				padding-left: 0;
 			}
 		}
+
 		&, &.Mui-focused, &.Mui-error, &.Mui-focused.Mui-error {
-			>.MuiInputBase-input {
+			& > .MuiInputBase-input {
 				border: 0;
 				box-shadow: none;
-				&.Mui-disabled { -webkit-text-fill-color: ${({ theme }) => theme.palette.secondary.main}; }
+
+				&.Mui-disabled {
+					-webkit-text-fill-color: ${({ theme }) => theme.palette.secondary.main};
+				}
 			}
 		}
 
@@ -44,18 +53,27 @@ export const FormTextField = styled(FormTextFieldBase)<{ $selectedrow: boolean }
 			fieldset, &:hover fieldset {
 				border: 0;
 			}
+
 			&.MuiOutlinedInput-root:not(.Mui-error) {
-				input { color: ${theme.palette.primary.contrast}; }
 				background-color: ${theme.palette.secondary.light};
+
+				input {
+					color: ${theme.palette.primary.contrast};
+				}
 			}
 		`}
+
 		&.Mui-disabled {
+			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+
 			input {
 				font-weight: bold;
 				-webkit-text-fill-color: ${({ theme }) => theme.palette.secondary.main};
 			}
-			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-			fieldset { border: 0; }
+
+			fieldset {
+				border: 0;
+			}
 		}
 	}
 `;

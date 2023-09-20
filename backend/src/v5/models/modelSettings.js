@@ -185,11 +185,13 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, u
 			data,
 			isFederation: !!containers });
 
-		publish(events.NEW_REVISION, { teamspace,
-			project,
-			model,
-			revision: corId,
-			isFederation: !!containers });
+		if (success) {
+			publish(events.NEW_REVISION, { teamspace,
+				project,
+				model,
+				revision: corId,
+				isFederation: !!containers });
+		}
 	}
 };
 

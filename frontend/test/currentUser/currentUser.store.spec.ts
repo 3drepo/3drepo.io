@@ -16,12 +16,8 @@
  */
 
 import { CurrentUserActions } from '@/v5/store/currentUser/currentUser.redux';
-import {
-	selectPersonalDataIsUpdating,
-	selectApiKeyIsUpdating,
-	selectCurrentUser,
-} from '@/v5/store/currentUser/currentUser.selectors';
-import { currentUserMockFactory, generatePersonalData } from './currentUser.fixtures';
+import { selectApiKeyIsUpdating, selectCurrentUser } from '@/v5/store/currentUser/currentUser.selectors';
+import { currentUserMockFactory, generateFakeApiKey, generatePersonalData } from './currentUser.fixtures';
 import { createTestStore } from '../test.helpers';
 
 describe('CurrentUser: store', () => {
@@ -42,29 +38,12 @@ describe('CurrentUser: store', () => {
 	})
 
 	describe('Updating currentUser attributes:', () => {
-		it('should update personal data', () => {
-			const mockCurrentUser = currentUserMockFactory();
+		const mockCurrentUser = currentUserMockFactory();
+
+		beforeEach(() => {
 			dispatch(CurrentUserActions.fetchUserSuccess(mockCurrentUser));
-			const { firstName: mockFirstName } = generatePersonalData();
-			dispatch(CurrentUserActions.updateUserSuccess({ firstName: mockFirstName }));
-			const currentUser = selectCurrentUser(getState());
-			expect(currentUser).toEqual({ ...mockCurrentUser, firstName: mockFirstName });
-		})
-	
-		// personalDataIsUpdating
-		it('should set updating personal data to true', () => {
-			dispatch(CurrentUserActions.setPersonalDataIsUpdating(true));
-			const personalDataIsUpdating = selectPersonalDataIsUpdating(getState());
-			expect(personalDataIsUpdating).toBe(true);
-		});
-	
-		it('should set updating personal data to false', () => {
-			dispatch(CurrentUserActions.setPersonalDataIsUpdating(false));
-			const personalDataIsUpdating = selectPersonalDataIsUpdating(getState());
-			expect(personalDataIsUpdating).toBe(false);
 		});
 
-		// apiKeyIsUpdating
 		it('should set api key data to true', () => {
 			dispatch(CurrentUserActions.setApiKeyIsUpdating(true));
 			const personalDataIsUpdating = selectApiKeyIsUpdating(getState());
@@ -75,6 +54,26 @@ describe('CurrentUser: store', () => {
 			dispatch(CurrentUserActions.setApiKeyIsUpdating(false));
 			const personalDataIsUpdating = selectApiKeyIsUpdating(getState());
 			expect(personalDataIsUpdating).toBe(false);
+		});
+
+		it('should update personal data', () => {
+			const { firstName: mockFirstName } = generatePersonalData();
+			dispatch(CurrentUserActions.updateUserSuccess({ firstName: mockFirstName }));
+			const currentUser = selectCurrentUser(getState());
+			expect(currentUser).toEqual({ ...mockCurrentUser, firstName: mockFirstName });
+		})
+	
+		it('should set api key', () => {
+			const newApiKey = generateFakeApiKey();
+			dispatch(CurrentUserActions.updateUserSuccess({ apiKey: newApiKey }));
+			const { apiKey } = selectCurrentUser(getState());
+			expect(apiKey).toEqual(newApiKey);
+		});
+	
+		it('should delete api key', () => {
+			dispatch(CurrentUserActions.updateUserSuccess({ apiKey: null }));
+			const { apiKey } = selectCurrentUser(getState());
+			expect(apiKey).toBeNull();
 		});
 	})
 })

@@ -36,8 +36,10 @@ export type InputControllerProps<T> = T & FormInputProps & {
 	onBlur?: () => void,
 };
 
-// eslint-disable-next-line
-export const InputController = forwardRef(<T,>({
+// eslint-disable-next-line @typescript-eslint/comma-dangle
+type InputControllerType = <T,>(Component: InputControllerProps<T>, ref) => any;
+// eslint-disable-next-line @typescript-eslint/comma-dangle
+export const InputController: InputControllerType = forwardRef(<T,>({
 	Input,
 	name,
 	control,
@@ -56,7 +58,7 @@ export const InputController = forwardRef(<T,>({
 			<Input
 				{...field}
 				{...props}
-				name={name}
+				value={field.value || ''}
 				onChange={(event) => {
 					field.onChange(event);
 					onChange?.(event);

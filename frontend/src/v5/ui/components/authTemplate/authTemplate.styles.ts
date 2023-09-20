@@ -16,13 +16,12 @@
  */
 
 import styled from 'styled-components';
-import LoginBackground from '@assets/images/login_background.svg';
+import LoginBackground from '@assets/images/login_background.png';
 import DefaultLogoBase from '@assets/icons/filled/logo_text-filled.svg';
 import { Typography } from '@controls/typography';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { Link } from 'react-router-dom';
 import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
-import { Display } from '@/v5/ui/themes/media';
 import { Divider as DividerBase } from '@mui/material';
 
 const customLogoPath = clientConfigService.getCustomLogoPath();
@@ -64,9 +63,9 @@ export const Divider = styled(DividerBase)`
 	margin: 19px 0;
 `;
 
-export const BackgroundOverlay = styled(LoginBackground)`
-	width: 1585px;
-	height: 1040px;
+export const BackgroundOverlay = styled.img.attrs({ src: LoginBackground })`
+	width: 100%;
+	height: 100%;
 	margin: auto;
 	max-width: 100vw;
 	max-height: 100vh;
@@ -76,6 +75,8 @@ export const BackgroundOverlay = styled(LoginBackground)`
 	left: 0;
 	right: 0;
 	overflow: hidden;
+	object-fit: cover;
+	object-position: 0 0;
 `;
 
 export const Background = styled.div`
@@ -111,23 +112,14 @@ export const BlueLogo = styled(Logo)`
 export const LoginLink = styled(Link).attrs({
 	to: LOGIN_PATH,
 })`
+`;
+
+export const LogoContainer = styled(LoginLink)`
 	width: fit-content;
 	margin-bottom: 28px;
 	position: absolute;
 	top: 40px;
 	left: 50px;
-`;
-
-export const LogoContainer = styled(LoginLink)`
-	margin-bottom: 72px;
-	display: none;
-
-	@media (max-width: ${Display.Tablet}px) {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-	}
 `;
 
 export const AuthSubHeader = styled.div`

@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { FormTextField } from '@controls/inputs/formInputs.component';
+import { TextField } from '@controls/inputs/textField/textField.component';
 import AutocompleteBase from '@mui/material/Autocomplete';
 
 export const Autocomplete = styled(AutocompleteBase)`
@@ -26,33 +26,49 @@ export const Autocomplete = styled(AutocompleteBase)`
 `;
 
 export type NewOrExisting = '' | 'new' | 'existing';
-export const DestinationInput = styled(FormTextField)<{ neworexisting: NewOrExisting }>`
+export const DestinationInput = styled(TextField)<{ neworexisting: NewOrExisting }>`
 	margin: 0;
 	border: none;
-	border-radius: 6px;
-	>.MuiInputBase-root {
+	border-radius: 8px;
+	
+	& > .MuiInputBase-root {
 		&, &.Mui-focused, &.Mui-error, &.Mui-focused.Mui-error {
-			>.MuiInputBase-input {
+			& > .MuiInputBase-input {
 				font-weight: bold;
 				padding: 0;
-				&.Mui-disabled { -webkit-text-fill-color: ${({ theme }) => theme.palette.secondary.main}; }
+
+				&.Mui-disabled {
+					-webkit-text-fill-color: ${({ theme }) => theme.palette.secondary.main};
+				}
 			}
 		}
 		${({ neworexisting, theme }) => {
 		if (neworexisting === 'new') {
 			return css`
-				>.MuiInputBase-input { color: ${theme.palette.primary.main}; };
 				color: ${theme.palette.primary.main};
 				background-color: ${theme.palette.primary.lightest};
-				fieldset, &:hover fieldset { border: none; }
+
+				& > .MuiInputBase-input {
+					color: ${theme.palette.primary.main};
+				}
+
+				fieldset, &:hover fieldset {
+					border: none;
+				}
 			`;
 		}
 		if (neworexisting === 'existing') {
 			return css`
-				>.MuiInputBase-input { color: ${theme.palette.secondary.main} };
 				color: ${theme.palette.secondary.main};
 				background-color: ${theme.palette.tertiary.lightest};
-				fieldset, &:hover fieldset { border: none; }
+
+				& > .MuiInputBase-input {
+					color: ${theme.palette.secondary.main};
+				}
+
+				fieldset, &:hover fieldset {
+					border: none;
+				}
 			`;
 		}
 		return '';

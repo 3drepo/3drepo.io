@@ -29,31 +29,14 @@ import {
 } from '@/v5/services/realtime/ticketComments.events';
 import { FormattedMessage } from 'react-intl';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
-import { forwardRef, MutableRefObject, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Gap } from '@controls/gap';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
-import { omit } from 'lodash';
 import { sanitiseMessage, stripMetadata } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { ViewerParams } from '../../../../routes.constants';
-import { Accordion, Comments, EmptyCommentsBox, VirtualisedList, VirtuosoScroller } from './commentsPanel.styles';
+import { Accordion, Comments, EmptyCommentsBox, VirtualisedList } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
 import { CreateCommentBox } from './createCommentBox/createCommentBox.component';
-
-const Scroller = forwardRef((props, ref: MutableRefObject<HTMLDivElement | null>) => (
-	<VirtuosoScroller
-		ref={(scrollerRef) => {
-			if (!scrollerRef) return;
-			const { container } = scrollerRef as any;
-			const scrollerContainer = container.childNodes[0];
-			scrollerContainer.setAttribute('data-test-id', 'virtuoso-scroller');
-			scrollerContainer.setAttribute('data-virtuoso-scroller', true);
-			scrollerContainer.setAttribute('tabindex', 0);
-			// eslint-disable-next-line no-param-reassign
-			ref.current = scrollerContainer;
-		}}
-		{...omit(props, ['data-test-id', 'data-virtuoso-scroller', 'tabindex', 'style'])}
-	/>
-));
 
 type CommentsPanelProps = {
 	scrollPanelIntoView: (event, isExpanding) => void,
@@ -62,6 +45,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 	const [commentReply, setCommentReply] = useState<ITicketComment>(null);
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
+	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
 
@@ -143,7 +127,6 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 						data={comments}
 						initialTopMostItemIndex={commentsLength - 1}
 						followOutput={() => true}
-						components={{ Scroller }}
 						overscan={800}
 						itemContent={(index, comment: ITicketComment) => (
 							<>
@@ -167,10 +150,12 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 					</EmptyCommentsBox>
 				)}
 			</Comments>
-			<CreateCommentBox
-				commentReply={commentReply}
-				deleteCommentReply={() => setCommentReply(null)}
-			/>
+			{!readOnly && (
+				<CreateCommentBox
+					commentReply={commentReply}
+					deleteCommentReply={() => setCommentReply(null)}
+				/>
+			)}
 		</Accordion>
 	);
 };

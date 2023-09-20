@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Assignees as AssigneesSelect } from '@controls/assignees/assignees.component';
-import { PriorityLevelChip as PriorityLevelChipBase } from '@controls/chip';
+import { ControlledAssigneesSelect } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
 import styled from 'styled-components';
 
 export const Id = styled.div`
@@ -57,8 +56,13 @@ export const ChipList = styled.div`
 	margin: 8px 0 0;
 `;
 
-export const Assignees = styled(AssigneesSelect)`
+export const Assignees = styled(ControlledAssigneesSelect).attrs({
+	maxItems: 7,
+	showEmptyText: true,
+	multiple: true,
+})`
 	margin-left: auto;
+	height: 28px;
 `;
 
 export const IssuePropertiesRow = styled.div`
@@ -66,10 +70,4 @@ export const IssuePropertiesRow = styled.div`
 	display: inline-flex;
 	width: 100%;
 	align-items: center;
-`;
-
-export const PriorityLevelChip = styled(PriorityLevelChipBase)`
-	.MuiChip-label {
-		display: none;
-	}
 `;

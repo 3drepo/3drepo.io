@@ -18,7 +18,7 @@
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision';
+import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/latestRevision.component';
 import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Highlight } from '@controls/highlight';
 import { SearchContext } from '@controls/search/searchContext';
@@ -30,7 +30,6 @@ import { DashboardListItemTitle } from '../dashboardListItemTitle.component';
 interface IContainerTitle extends FixedOrGrowContainerProps {
 	container: IContainer;
 	isSelected?: boolean;
-	filterQuery?: string;
 	openInNewTab?: boolean;
 }
 
@@ -41,7 +40,7 @@ export const DashboardListItemContainerTitle = ({
 }: IContainerTitle): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const { query: filterQuery } = useContext(SearchContext);
+	const { query } = useContext(SearchContext);
 
 	const hasRevisions = container.revisionsCount > 0;
 	const linkProps = {
@@ -55,12 +54,12 @@ export const DashboardListItemContainerTitle = ({
 			subtitle={(
 				<LatestRevision
 					name={(
-						<Highlight search={filterQuery}>
+						<Highlight search={query}>
 							{container.latestRevision}
 						</Highlight>
 					)}
 					status={container.status}
-					error={container.errorResponse}
+					error={container.errorReason}
 					hasRevisions={hasRevisions}
 				/>
 			)}
@@ -75,7 +74,7 @@ export const DashboardListItemContainerTitle = ({
 			disabled={!hasRevisions}
 		>
 			<Link {...linkProps}>
-				<Highlight search={filterQuery}>
+				<Highlight search={query}>
 					{container.name}
 				</Highlight>
 			</Link>

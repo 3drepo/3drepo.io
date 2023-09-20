@@ -17,25 +17,24 @@
 
 import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
-import { ContainersHooksSelectors, FederationsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useEffect, useState } from 'react';
-import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
-import { ViewerParams } from '../routes.constants';
+import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { VIEWER_EVENTS } from '@/v4/constants/viewer';
+import { ViewerGuiActions } from '@/v4/modules/viewerGui';
+import { dispatch } from '@/v4/modules/store';
+import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';
+import { ViewerParams } from '../routes.constants';
+import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
+import { TicketsCardViews } from './tickets/tickets.constants';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
 
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
-	TicketsCardActionsDispatchers.resetState();
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
-
-	useEffect(() => {
-		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
-	}, [teamspace, project, containerOrFederation]);
-
-	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
 
 	const isLoading = isFetching || fetchPending;
 
@@ -45,6 +44,27 @@ export const Viewer = () => {
 
 	const federationIsEmpty = selectedFederation?.containers?.length === 0
 		|| federationsContainers.every((container) => container?.revisionsCount === 0);
+
+	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
+
+	const handlePinClick = ({ id }) => {
+		if (!tickets.some((t) => t._id === id)) return;
+
+		TicketsCardActionsDispatchers.setSelectedTicket(id);
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
+		dispatch(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.TICKETS, true));
+	};
+
+	useEffect(() => {
+		ViewerService.on(VIEWER_EVENTS.CLICK_PIN, handlePinClick);
+		return () => ViewerService.off(VIEWER_EVENTS.CLICK_PIN, handlePinClick);
+	}, [tickets]);
+
+	useEffect(() => {
+		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
+	}, [teamspace, project, containerOrFederation]);
+
+	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
 
 	if (isLoading) {
 		return (<></>);

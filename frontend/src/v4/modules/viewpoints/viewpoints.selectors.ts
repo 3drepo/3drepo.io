@@ -14,16 +14,51 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { isEmpty, orderBy, values } from 'lodash';
+import { isEmpty, isNumber, values } from 'lodash';
 import { createSelector } from 'reselect';
 import { addToGroupDictionary } from '../../helpers/colorOverrides';
 import { getTransparency, hasTransparency } from '../../helpers/colors';
-import { groupsOfViewpoint, isViewpointLoaded } from '../../helpers/viewpoints';
 import { selectActiveIssue } from '../issues';
 import { selectDefaultView } from '../model';
 import { selectActiveRisk } from '../risks';
 import { selectQueryParams } from '../router/router.selectors';
 import { selectIsViewpointFrame, selectSelectedFrameViewpoint } from '../sequences';
+
+
+export const groupsOfViewpoint = function*(viewpoint) {
+	const groupsProperties = ['override_group_ids', 'transformation_group_ids',
+	'highlighted_group_id', 'hidden_group_id', 'shown_group_id'];
+
+	// This part discriminates which groups hasnt been loaded yet and add their ids to
+	// the groupsToFetch array
+	for (let i = 0; i < groupsProperties.length ; i++) {
+		const prop = groupsProperties[i];
+		if (viewpoint[prop]) {
+			if (Array.isArray(viewpoint[prop])) { // if the property is an array of groupId
+				const groupsIds: string[] = viewpoint[prop];
+				for (let j = 0; j < groupsIds.length; j++ ) {
+					yield groupsIds[j];
+				}
+			} else {// if the property is just a groupId
+				yield viewpoint[prop];
+			}
+		}
+	}
+};
+
+export const isViewpointLoaded = (viewpoint, groups) => {
+	let areGroupsLoaded = true;
+
+	for (const id of groupsOfViewpoint(viewpoint)) {
+		if (!groups[id]) {
+			areGroupsLoaded = false;
+			break;
+		}
+	}
+
+	return areGroupsLoaded;
+};
+
 
 export const selectViewpointsDomain = (state) => state.viewpoints;
 
@@ -89,10 +124,13 @@ export const selectOverridesDict = createSelector(
 		const groups = viewpoint.override_groups ;
 
 		return groups.reduce((overrides, group) => {
-			addToGroupDictionary(overrides.colors, group, group.color);
+			const { color, opacity } = group;
+			if (color) {
+				addToGroupDictionary(overrides.colors, group, color);
+			}
 
-			if (hasTransparency(group.color)) {
-				addToGroupDictionary(overrides.transparencies, group, getTransparency(group.color));
+			if (isNumber(opacity) || hasTransparency(color)) {
+				addToGroupDictionary(overrides.transparencies, group, opacity ?? getTransparency(color));
 			}
 
 			return overrides;

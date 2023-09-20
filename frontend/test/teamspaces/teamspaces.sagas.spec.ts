@@ -15,15 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { expectSaga } from 'redux-saga-test-plan';
-
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
-import * as TeamspacesSaga from '@/v5/store/teamspaces/teamspaces.sagas';
 import { mockServer } from '../../internals/testing/mockServer';
 import { quotaMockFactory } from './teamspaces.fixtures';
+import { createTestStore } from '../test.helpers';
+import { selectTeamspaces } from '@/v5/store/teamspaces/teamspaces.selectors';
 
 describe('Teamspaces: sagas', () => {
-	const teamspaces = [];
+	const teamspaceName = 'teamspaceId';
+	const teamspace = { name: teamspaceName, isAdmin: true };
+	const teamspaces = [teamspace];
+	let dispatch, getState, waitForActions;
+
+	beforeEach(() => {
+		({ dispatch, getState, waitForActions } = createTestStore());
+	});
 
 	describe('fetch', () => {
 		it('should fetch teamspaces data and dispatch FETCH_SUCCESS', async () => {
@@ -31,10 +37,13 @@ describe('Teamspaces: sagas', () => {
 				.get(`/teamspaces`)
 				.reply(200, { teamspaces });
 
-			await expectSaga(TeamspacesSaga.default)
-					.dispatch(TeamspacesActions.fetch())
-					.put(TeamspacesActions.fetchSuccess(teamspaces))
-					.silentRun();
+			await waitForActions(() => {
+				dispatch(TeamspacesActions.fetch());
+			}, [
+				TeamspacesActions.setTeamspacesArePending(true),
+				TeamspacesActions.fetchSuccess(teamspaces),
+				TeamspacesActions.setTeamspacesArePending(false),
+			]);
 		});
 
 		it('should handle teamspaces api error and dispatch FETCH_FAILURE', async () => {
@@ -42,23 +51,30 @@ describe('Teamspaces: sagas', () => {
 				.get(`/teamspaces`)
 				.reply(404);
 
-			await expectSaga(TeamspacesSaga.default)
-				.dispatch(TeamspacesActions.fetch())
-				.silentRun();
+			await waitForActions(() => {
+				dispatch(TeamspacesActions.fetch());
+			}, [
+				TeamspacesActions.setTeamspacesArePending(true),
+				TeamspacesActions.setTeamspacesArePending(false),
+			]);
+
+			const teamspacesInStore = selectTeamspaces(getState());
+			expect(teamspacesInStore).toEqual([]);
 		});
 	});
 
 	it('should fetch quota data and dispatch FETCH_QUOTA_SUCCESS', async () => {
-		const teamspace = 'MyTeamspace';
 		const quota = quotaMockFactory();
 
+		dispatch(TeamspacesActions.fetchSuccess(teamspaces));
+		dispatch(TeamspacesActions.setCurrentTeamspace(teamspaceName));
+
 		mockServer
-			.get(`/teamspaces/${teamspace}/quota`)
+			.get(`/teamspaces/${teamspaceName}/quota`)
 			.reply(200, quota);
 
-		await expectSaga(TeamspacesSaga.default)
-				.dispatch(TeamspacesActions.fetchQuota(teamspace))
-				.put(TeamspacesActions.fetchQuotaSuccess(teamspace, quota))
-				.silentRun();
+		await waitForActions(() => {
+			dispatch(TeamspacesActions.fetchQuota(teamspaceName));
+		}, [TeamspacesActions.fetchQuotaSuccess(teamspaceName, quota)]);
 	});
 });

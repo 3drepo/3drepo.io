@@ -16,9 +16,11 @@
  */
 
 "use strict";
-
+const { v5Path } = require("../../interop");
+const { splitArrayIntoChunks } = require(`${v5Path}/utils/helper/arrays`);
 const config = require("../config.js");
 const fs = require("fs");
+const {unlink} = require("fs/promises");
 const path = require("path");
 const ResponseCodes = require("../response_codes");
 const systemLogger = require("../logger").systemLogger;
@@ -73,17 +75,19 @@ class FSHandler {
 		});
 	}
 
-	storeFileStream(stream, dataSize) {
+	storeFileStream(stream) {
 		const _id = utils.generateUUID({string: true});
 		const folderNames = utils.generateFoldernames(config.fs.levels);
 		const link = path.posix.join(folderNames, _id);
 
 		return new Promise((resolve, reject) => {
 			createFoldersIfNecessary(this.getFullPath(folderNames)).then(() =>{
-				const writeStream = fs.createWriteStream(this.getFullPath(link));
+				const filePath = this.getFullPath(link);
+				const writeStream = fs.createWriteStream(filePath);
 
 				writeStream.on("finish", () => {
-					resolve({_id, link, size: dataSize, type: "fs"});
+					const {size}  = fs.statSync(filePath);
+					resolve({_id, link, size: size, type: "fs"});
 				});
 
 				writeStream.on("errored", reject);
@@ -93,10 +97,11 @@ class FSHandler {
 		});
 	}
 
-	getFileStream(key) {
+	getFileStream(key, partialInfo) {
 		try {
+
 			return fs.existsSync(this.getFullPath(key)) ?
-				Promise.resolve(fs.createReadStream(this.getFullPath(key))) :
+				Promise.resolve(fs.createReadStream(this.getFullPath(key), partialInfo)) :
 				Promise.reject(ResponseCodes.NO_FILE_FOUND);
 		} catch (err) {
 			systemLogger.logError("Failed to get filestream: ", err);
@@ -113,14 +118,22 @@ class FSHandler {
 		}
 	}
 
-	removeFiles(keys) {
-		keys.forEach((key) => {
-			fs.unlink(this.getFullPath(key), (err) => {
-				if (err && err.code !== "ENOENT") {
-					systemLogger.logError("File not removed:", {err, key});
+	async removeFiles(files) {
+		// only remove 10000 files at a time or we may crash the box
+		const removalGroups = splitArrayIntoChunks(files, 10000);
+		for(const keys of removalGroups) {
+			await Promise.all(keys.map(async (key) => {
+				try {
+					await unlink(this.getFullPath(key));
+				} catch (err) {
+					if (err && err.code !== "ENOENT") {
+						systemLogger.logError("File not removed:", {err, key});
+					}
+
 				}
-			});
-		});
+			}));
+
+		}
 	}
 
 	getFullPath(key = "") {

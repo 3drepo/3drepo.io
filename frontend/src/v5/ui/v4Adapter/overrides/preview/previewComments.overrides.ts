@@ -72,6 +72,10 @@ export const CommentListStyling = css`
 	${CommentListContainer} {
 		padding: 0;
 
+		${EmptyStateInfo} {
+			margin: 2px 0 0;
+		}
+
 		${SystemMessage} {
 			color: ${({ theme }) => theme.palette.base.main};
 			margin: 0 5px;
@@ -110,7 +114,7 @@ export const CommentListStyling = css`
 
 			// delete comment icon
 			[aria-label="Remove"] > button {
-				margin: 8px 48px 0 0;
+				margin: 0 48px 0 0;
 				padding: 3px;
 				
 				svg {
@@ -120,8 +124,8 @@ export const CommentListStyling = css`
 		}
 
 		${CommentContainer} {
-			border-radius: 5px;
-			margin: 0 10px;
+			border-radius: 8px;
+			margin: 0;
 			padding: 8px 14px 0 14px;
 
 			// just the text
@@ -195,8 +199,7 @@ export default css`
 			}
 
 			${EmptyStateInfo} {
-				margin-left: 0;
-				margin-right: 0;
+				margin: 10px 0 17px;
 			}
 		}
 	}

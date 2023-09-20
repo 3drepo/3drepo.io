@@ -327,6 +327,7 @@ function* showAllExceptMeshIDs(meshes = []) {
 		const {meshesToShow, meshesToHide } = yield TreeProcessing.showAllExceptMeshIDs(!hiddenGeometryVisible, meshes);
 		toggleMeshesVisibility(meshesToShow, true);
 		toggleMeshesVisibility(meshesToHide, false);
+		yield put(TreeActions.updateDataRevision());
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('show', 'all except nodes', error));
 	}
@@ -582,8 +583,7 @@ function* setSelectedNodesVisibility({ nodeId, visibility }) {
 
 	const fullySelectedNodes = yield select(selectFullySelectedNodesIds);
 	const hasSelectedNodes = !!fullySelectedNodes.length;
-	const nodesIds = hasSelectedNodes ? fullySelectedNodes : [nodeId];
-	yield put(TreeActions.setTreeNodesVisibility(nodesIds, visibility, hasSelectedNodes));
+	yield put(TreeActions.setTreeNodesVisibility([nodeId], visibility, hasSelectedNodes));
 }
 
 function* collapseNodes({ nodesIds }) {

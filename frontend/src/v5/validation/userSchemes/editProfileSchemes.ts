@@ -17,7 +17,7 @@
 
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
-import { firstName, lastName, email, company, countryCode, password, avatarFile } from './validators';
+import { firstName, lastName, email, company, countryCode, password } from './validators';
 
 export const EditProfileUpdatePersonalSchema = Yup.object().shape({
 	firstName,
@@ -25,7 +25,6 @@ export const EditProfileUpdatePersonalSchema = Yup.object().shape({
 	email,
 	company,
 	countryCode,
-	avatarFile,
 });
 
 export const EditProfileUpdatePasswordSchema = (incorrectPassword) => Yup.object().shape({

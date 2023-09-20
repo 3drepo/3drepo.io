@@ -55,7 +55,7 @@ Legends.checkLegendExists.mockImplementation((teamspace, model, legend) => {
 
 const existingModelName = 'Another model name';
 ModelSettingsModel.getModelByQuery.mockImplementation((teamspace, { _id, name } = {}) => {
-	if (existingModelName === name && _id?.$in?.length) return {};
+	if (existingModelName.match(name) && _id?.$in?.length) return {};
 	throw templates.modelNotFound;
 });
 
@@ -66,6 +66,7 @@ const testValidateUpdateSettingsData = () => {
 	describe.each([
 		[{ params, body: { name: null } }, false, 'with null name'],
 		[{ params, body: { name: existingModelName } }, false, 'with model name of some other model within the project'],
+		[{ params, body: { name: existingModelName.toUpperCase() } }, false, 'with model name of some other model within the project (different case)'],
 		[{ params: { ...params, container: '234' }, body: { name: existingModelName } }, true, 'with current model name of the model'],
 		[{ params, body: { name: 'valid' } }, true, 'with valid name'],
 		[{ params: _.omit(params, ['container']), body: { name: 'valid' } }, true, 'with valid name (federation test)'],
@@ -109,9 +110,9 @@ const testValidateUpdateSettingsData = () => {
 			const req = { ...cloneDeep(data) };
 			await ModelSettings.validateUpdateSettingsData(false)(req, {}, mockCB);
 			if (shouldPass) {
-				expect(mockCB.mock.calls.length).toBe(1);
+				expect(mockCB).toHaveBeenCalledTimes(1);
 			} else {
-				expect(mockCB.mock.calls.length).toBe(0);
+				expect(mockCB).not.toHaveBeenCalled();
 				expect(Responder.respond.mock.calls.length).toBe(1);
 				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
 			}

@@ -738,12 +738,45 @@ async function getModelPermission(username, setting, account) {
 	}
 }
 
+const getMeshDataFromLegacyRef = async (account, model, refObj) => {
+
+	const { fetchFileStream } = require("../fileRef");
+
+	const { readStream: vertices } =  await fetchFileStream(account, `${model}.scene` , refObj.vertices);
+	const { readStream: faces } = await fetchFileStream(account, `${model}.scene`, refObj.faces);
+
+	return { vertices, faces };
+};
+
+const getMeshDataFromRef = async (account, model, refObj) => {
+
+	const { getFileAsStream } = require(`${v5Path}/services/filesManager`);
+
+	const { elements, buffer} = refObj;
+
+	// nodejs API on createReadStream : start and end index are inclusive, thus we need -1 on end
+	const verticeRegion = {
+		start: buffer.start + elements.vertices.start,
+		end: buffer.start + elements.vertices.start +  elements.vertices.size - 1
+	};
+	const faceRegion = {
+		start: buffer.start + elements.faces.start,
+		end: buffer.start + elements.faces.start +  elements.faces.size - 1
+	};
+
+	const { readStream: vertices } =  await getFileAsStream(account, `${model}.scene` , buffer.name, verticeRegion);
+	const { readStream: faces } = await getFileAsStream(account, `${model}.scene`, buffer.name, faceRegion);
+
+	return { vertices, faces };
+};
+
 async function getMeshById(account, model, meshId) {
 	const projection = {
 		parents: 1,
 		vertices: 1,
 		faces: 1,
 		_extRef: 1,
+		_blobRef: 1,
 		primitive: 1,
 		rev_id: 1
 	};
@@ -755,10 +788,19 @@ async function getMeshById(account, model, meshId) {
 	}
 	mesh.matrix = await getParentMatrix(account, model, mesh.parents[0], [mesh.rev_id]);
 
-	const { fetchFileStream } = require("../fileRef");
+	let res;
 
-	const { readStream: vertices } =  await fetchFileStream(account, `${model}.scene` ,mesh._extRef.vertices);
-	const { readStream: faces } = await fetchFileStream(account, `${model}.scene`, mesh._extRef.faces);
+	if (mesh._blobRef) {
+		res = await getMeshDataFromRef(account, model, mesh._blobRef);
+
+	} else if(mesh._extRef) {
+		res =  await getMeshDataFromLegacyRef(account, model, mesh._extRef);
+
+	} else {
+		throw new Error(`Could not find mesh data for ${meshId}`);
+	}
+
+	const { vertices, faces } = res;
 
 	if (!("primitive" in mesh)) { // if the primitive type is missing, then set it to triangles for backwards compatibility. this matches the behaviour of the bouncer api.
 		mesh.primitive = 3;

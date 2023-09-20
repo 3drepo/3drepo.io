@@ -26,65 +26,148 @@ const { logger } = require(`${v5Path}/utils/logger`);
 const { fs: fsConfig } = require(`${v5Path}/utils/config`);
 const { path: fsPath } = fsConfig;
 const { find, listDatabases } = require(`${v5Path}/handler/db`);
-const { readdirSync } = require('fs');
-const { unlink } = require('fs/promises');
+const { unlink, utimes, stat } = require('fs/promises');
+const { readdirSync, writeFileSync } = require('fs');
 const Path = require('path');
 
 const joinPath = (a, b) => (a && b ? Path.posix.join(a, b) : a || b);
+const failedToCheck = {};
 
-const processDatabase = async (database, files) => {
+const PARALLEL_BATCHES = 10000;
+const DEFAULT_OUT_FILE = './unreferenced_files.csv';
+
+let fileCount = 0;
+
+const updateLastModified = async (link) => {
+	try {
+		const date = new Date();
+		await utimes(joinPath(fsPath, link), date, date);
+	} catch (err) {
+		logger.logError(`Failed to update file: ${err.message}`);
+		failedToCheck[link] = 1;
+	}
+};
+
+const processDatabase = async (database, fn, nParallel) => {
 	const cols = await getCollectionsEndsWith(database, '.ref');
-	await Promise.all(cols.map(async ({ name }) => {
-		const refs = await find(database, name, { type: 'fs' }, { link: 1 });
-		refs.forEach(({ link }) => files.delete(link));
-	}));
+
+	for (const { name } of cols) {
+		let lastId;
+		logger.logInfo(`\t\t${name}`);
+		// eslint-disable-next-line no-constant-condition
+		while (true) {
+			const baseQuery = { type: 'fs', link: { $not: /^toy/ } };
+			const query = lastId ? { ...baseQuery, _id: { $gt: lastId } } : baseQuery;
+			// eslint-disable-next-line no-await-in-loop
+			const refs = await find(database, name, query, { link: 1 }, { _id: 1 }, nParallel);
+
+			if (!refs.length) break;
+			// eslint-disable-next-line no-await-in-loop
+			await fn(refs);
+			lastId = refs[refs.length - 1]._id;
+		}
+	}
 };
 
-const removeEntriesWithRef = async (files) => {
-	const databases = (await listDatabases()).map(({ name }) => name);
-	for (const db of databases) {
+const checkRefs = async (fn, nParallel) => {
+	const databases = await listDatabases();
+	for (const { name: db } of databases) {
+		logger.logInfo(`\t${db}`);
 		// eslint-disable-next-line no-await-in-loop
-		await processDatabase(db, files);
+		await processDatabase(db, fn, nParallel);
 	}
 };
 
-const gatherFiles = (subPath, set) => {
-	const data = readdirSync(joinPath(fsPath, subPath), { withFileTypes: true });
-	data.forEach((entry) => {
-		const entryPath = joinPath(subPath, entry.name);
-		if (entry.isDirectory()) {
-			if (!entry.name.startsWith('toy_')) {
-				gatherFiles(entryPath, set);
-			}
-		} else {
-			set.add(entryPath);
+const isUpdatedLater = async (path, time) => {
+	// A file that we couldn't update, so leave it alone.
+	/* istanbul ignore next */
+	if (failedToCheck[path]) return true;
+	const fullPath = joinPath(fsPath, path);
+	try {
+		const { mtime } = await stat(fullPath);
+		return new Date(mtime) > time;
+	} catch (err) {
+		/* istanbul ignore next */
+		logger.logError(`Failed to get modified time for ${path}: ${err.message}`);
+		/* istanbul ignore next */
+		return true;
+	}
+};
+
+const splitArrayIntoChunks = (array, maxLength) => {
+	const res = [];
+	for (let i = 0; i < array.length; i += maxLength) {
+		res.push(array.slice(i, i + maxLength));
+	}
+	return res;
+};
+
+const findFilesOlderThanTime = async (currTime, parallelFiles) => {
+	const list = [undefined];
+	const res = [];
+
+	while (list.length) {
+		const subDir = list.pop();
+		const dir = joinPath(fsPath, subDir);
+		const data = readdirSync(dir, { withFileTypes: true });
+		logger.logInfo(`\tChecking ${subDir} (${data.length} entries)`);
+		const chunks = splitArrayIntoChunks(data, parallelFiles);
+
+		for (const group of chunks) {
+			// eslint-disable-next-line no-await-in-loop, no-loop-func
+			await Promise.all(group.map(async (entry) => {
+				const link = joinPath(subDir, entry.name);
+				if (entry.isDirectory()) {
+					if (!entry.name.startsWith('toy_')) {
+						list.push(link);
+					}
+				} else {
+					++fileCount;
+					if (!(await isUpdatedLater(link, currTime))) {
+						res.push(link);
+					}
+				}
+			}));
 		}
-	});
+	}
+
+	return res;
 };
 
-const getFileList = () => {
-	const results = new Set();
-	gatherFiles(undefined, results);
-	return results;
-};
+const run = async (outFile = DEFAULT_OUT_FILE, removeFiles = false, maxParallelRefs = PARALLEL_BATCHES) => {
+	const currTime = new Date();
+	logger.logInfo(`Identify all files that have a reference in the fileshare... [RemoveFiles: ${removeFiles}, Parallel Refs: ${maxParallelRefs}, outFile: ${outFile}]`);
+	await checkRefs(async (refs) => {
+		logger.logInfo(`\t\t\tupdating ${refs.length} files...`);
+		await Promise.all(refs.map(({ link }) => updateLastModified(link)));
+	}, maxParallelRefs);
 
-const run = async (removeFiles = false) => {
-	logger.logInfo('Gathering list of files from fileshare...');
-	const fileList = getFileList();
-	logger.logInfo(`Total files in fileshare: ${fileList.size}...`);
-	await removeEntriesWithRef(fileList);
-	logger.logInfo(`${fileList.size} zombie file(s) found`);
-	if (fileList.size) {
-		fileList.forEach((file) => {
-			logger.logInfo(`\t${file}`);
-		});
+	logger.logInfo('Identify all files that have not been referenced in the fileshare');
+	// Any files that had a reference would've been touched(i.e. updated last modified time) during checkRefs()
+	const zombies = await findFilesOlderThanTime(currTime, maxParallelRefs);
+
+	logger.logInfo(`${fileCount} files checked. ${zombies.length} zombies found`);
+
+	if (zombies.length) {
+		logger.logInfo(`Writing all links to ${outFile}...`);
+
+		const chunks = splitArrayIntoChunks(zombies, maxParallelRefs);
+		for (let i = 0; i < chunks.length; ++i) {
+			writeFileSync(outFile, `${chunks[i].join('\n')}\n`, { flag: i === 0 ? 'w' : 'a' });
+			logger.logInfo(`[${i}/${chunks.length}] ${chunks[i].length} file paths written...`);
+		}
 		if (removeFiles) {
-			await Promise.all(Array.from(fileList).map((name) => unlink(joinPath(fsPath, name))));
-			logger.logInfo(`${fileList.size} file(s) removed.`);
-		} else {
-			logger.logInfo('Set --removeFiles=true to remove these files.');
+			logger.logInfo(`Deleting files (${chunks.length} batches)`);
+			for (let i = 0; i < chunks.length; ++i) {
+				const group = chunks[i];
+				logger.logInfo(`[${i}/${chunks.length}] Deleting ${group.length} files...`);
+				// eslint-disable-next-line no-await-in-loop
+				await Promise.all(group.map((name) => unlink(joinPath(fsPath, name))));
+			}
 		}
 	}
+
+	logger.logInfo('done');
 };
 
 const genYargs = /* istanbul ignore next */(yargs) => {
@@ -92,13 +175,21 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 	const argsSpec = (subYargs) => subYargs.option('removeFiles', {
 		type: 'boolean',
 		default: false,
-		description: 'Delete all orphaned files',
+		description: 'If this is set, it will remove the files instead of outputing the list of links',
+	}).option('outFile', {
+		type: 'string',
+		default: DEFAULT_OUT_FILE,
+		description: 'path to write the list of zombie files to',
+	}).option('maxParallelRefs', {
+		type: 'number',
+		default: PARALLEL_BATCHES,
+		description: 'maximum number of files to process simulataenously',
 	});
 	return yargs.command(
 		commandName,
-		'Identify unreferenced files within the fileshare',
+		'Identify unreferenced files within the fileshare and outputs the list of links to a CSV',
 		argsSpec,
-		(argv) => run(argv.removeFiles),
+		(argv) => run(argv.outFile, argv.removeFiles, argv.maxParallelRefs),
 	);
 };
 

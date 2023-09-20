@@ -17,6 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import { Typography } from '@controls/typography';
+import { ChevronButton as ChevronButtonBase } from '@controls/chevronButton';
 
 export const Container = styled.div<{ isLoading?: boolean }>`
 	${({ isLoading }) => isLoading && css`
@@ -30,6 +31,10 @@ export const ButtonContainer = styled.div`
 	cursor: pointer;
 	width: max-content;
 	user-select: none;
+`;
+
+export const ChevronButton = styled(ChevronButtonBase)`
+	border-radius: 8px;
 `;
 
 export const Title = styled(Typography)`

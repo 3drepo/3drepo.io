@@ -17,12 +17,12 @@
 
 import styled, { css } from 'styled-components';
 import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
-import { Display } from '@/v5/ui/themes/media';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { ScrollArea as Scrollbar } from '@controls/scrollArea';
+import { hexToOpacity } from '@/v5/ui/themes/theme';
 import * as RevisionsListHeaderLabelStyles from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.styles';
 
-const revisionsListItemHeight = '52px';
+const BORDER_RADIUS = '8px';
+const ITEM_HEIGHT = '49px';
 
 export const Container = styled.div`
 	display: flex;
@@ -33,10 +33,6 @@ export const Container = styled.div`
 	position: relative;
 	max-height: 500px;
 	overflow: hidden;
-
-	@media (max-width: ${Display.Desktop}px) {
-		padding-left: 45px;
-	}
 `;
 
 export const RevisionsListEmptyWrapper = styled.div`
@@ -55,7 +51,7 @@ export const RevisionsListEmptyText = styled(DashboardListEmptyText)`
 
 export const RevisionsListHeaderContainer = styled.header`
 	display: flex;
-	padding: 13px 46px 10px 86px;
+	padding: 13px 186px 10px 94px;
 	margin-top: 17px;
 
 	${RevisionsListHeaderLabelStyles.Container} {
@@ -70,6 +66,9 @@ export const RevisionsList = styled.ul`
 	flex-direction: column;
 	width: calc(100% - 98px);
 	padding: 0;
+	max-height: 260px;
+	margin-bottom: 51px;
+	overflow-y: auto;
 `;
 
 const selectedRevisionListItemStyles = css`
@@ -80,94 +79,67 @@ const beforeSelectedRevisionListItemStyles = css`
 	background-image: ${({ theme }) => `linear-gradient(${theme.palette.secondary.mid}, ${theme.palette.secondary.mid}), linear-gradient(to bottom, ${theme.palette.secondary.light}, ${theme.palette.primary.main})`};
 `;
 
-const singleRevisionListItemStyles = ({ theme, selected }) => css`
-	&:after {
-		content: '';
-		display: block !important;
-		width: 12px;
-		height: 12px;
-		position: absolute;
-		border-radius: 50%;
-		background-color: ${selected ? theme.palette.primary.main : theme.palette.secondary.light};
-		top: calc(50% - 6px);
-		left: -26px;
-	}
-`;
-
-const revisionListItemStylesLineStyles = ({ theme, selected, isBeforeSelected }) => css`
+const revisionListItemConnectingLinesStyles = ({ theme, selected, isBeforeSelected }) => css`
 	&:after {
 		content: '';
 		display: block;
-		width: 25px;
-		height: 52px;
+		width: 24px;
+		height: ${ITEM_HEIGHT};
 		position: absolute;
 		top: 50%;
 		left: -25px;
 		z-index: -1;
-		border: solid 2px transparent;
+		border: solid 1px transparent;
 		background-origin: border-box;
 		background-clip: content-box, border-box;
 		background-image: linear-gradient(${theme.palette.secondary.mid}, ${theme.palette.secondary.mid}), linear-gradient(to bottom, ${theme.palette.secondary.light}, ${theme.palette.secondary.light});
 		${selected && selectedRevisionListItemStyles};
-		${isBeforeSelected && beforeSelectedRevisionListItemStyles};
+		${isBeforeSelected && beforeSelectedRevisionListItemStyles}
+	}
+	&:first-of-type:after {
+		border-top-left-radius: 10px;
+	}
+	&:nth-last-child(2):after {
+		border-bottom-left-radius: 10px;
+	}
+	&:last-of-type:after {
+		display: none;
 	}
 `;
 
-export const RevisionsListItemWrapper = styled.li<{ isSingle?: boolean, selected?: boolean, isBeforeSelected?: boolean }>`
+export const RevisionsListItemWrapper = styled.li<{ selected?: boolean, isBeforeSelected: boolean }>`
 	box-sizing: border-box;
-	background-color: ${({ theme }) => theme.palette.secondary.light};
-	height: ${revisionsListItemHeight};
-	width: 100%;
+	height: ${ITEM_HEIGHT};
+	min-height: ${ITEM_HEIGHT};
+	width: auto;
 	list-style: none;
-	border: 1px solid ${({ theme }) => theme.palette.secondary.mid};
-	border-bottom-style: none;
-	border-left-style: none;
 	position: relative;
 	margin-left: 66px;
 	cursor: pointer;
 
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.secondary.main};
-	}
-
-	${({ isSingle }) => css`
-		${!isSingle && revisionListItemStylesLineStyles}
-		${isSingle && singleRevisionListItemStyles}
-
-		&:first-of-type:after {
-			border-top-left-radius: 5px;
-		}
-
-		&:nth-last-child(2):after {
-			border-bottom-left-radius: 5px;
-		}
-
-		&:last-of-type:after {
-			display: none;
-		}
-	`}
-
-	&:last-child {
-		border-radius: 0 0 5px 5px;
-		border-bottom-style: solid;
-	}
+	background-color: ${({ theme }) => theme.palette.secondary.mid};
+	border: solid 1px ${({ theme }) => theme.palette.secondary.light};
+	border-width: 1px 1px 0 8px;
 
 	&:first-child {
-		border-radius: 5px 5px 0 0;
-		border-top-style: solid;
+		border-radius: ${BORDER_RADIUS} ${BORDER_RADIUS} 0 0;
+	}
+	&:last-child {
+		border-radius: 0 0 ${BORDER_RADIUS} ${BORDER_RADIUS};
+		border-bottom-width: 1px;
+	}
+	&:only-child {
+		border-radius: ${BORDER_RADIUS};
 	}
 
-	&:only-child {
-		border-radius: 5px;
+	&:hover {
+		background-color: ${({ theme }) => hexToOpacity(theme.palette.secondary.main, 50)};
 	}
 
 	${({ theme, selected }) => selected && css`
-		background-color: ${theme.palette.primary.main};
+		background-color: ${theme.palette.secondary.main};
+		border-left-color: ${theme.palette.primary.main};
 	`}
-`;
-
-export const ScrollArea = styled(Scrollbar).attrs({
-	autoHeightMax: `calc(${revisionsListItemHeight} * 5)`,
-})`
-	margin-bottom: 40px;
+	
+	${revisionListItemConnectingLinesStyles}
 `;

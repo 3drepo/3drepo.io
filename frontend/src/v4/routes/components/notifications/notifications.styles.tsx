@@ -16,21 +16,10 @@
  */
 import styled from 'styled-components';
 
-import { List, ListItem } from '@mui/material';
+import { List } from '@mui/material';
 import Notifications from '@mui/icons-material/Notifications';
 import { COLOR } from '../../../styles';
 import { NotificationsPanelHeader } from './components/panelHeader/panelHeader.component';
-
-export const NotificationsPanelItem = styled(ListItem)`
-	&& {
-		padding-left: 5px;
-		padding-right: 5px;
-		padding-bottom: 5px;
-		padding-top: 0;
-		width: 100%;
-		display: block;
-	}
-`;
 
 export const NotificationsList = styled(List)`
 	&& {

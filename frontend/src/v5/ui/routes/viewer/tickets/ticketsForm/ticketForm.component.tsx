@@ -14,88 +14,32 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ITemplate, ITicket, PropertyDefinition, TemplateModule } from '@/v5/store/tickets/tickets.types';
-import { get, some } from 'lodash';
-import { useFormContext } from 'react-hook-form';
-import { formatMessage } from '@/v5/services/intl';
-import PropetiesIcon from '@assets/icons/outlined/bullet_list-outlined.svg';
+import { ITemplate, ITicket, TemplateModule } from '@/v5/store/tickets/tickets.types';
+import { some } from 'lodash';
 import { Accordion } from '@controls/accordion/accordion.component';
-import { InputController } from '@controls/inputs/inputController.component';
-import { CardContent } from '@components/viewer/cards/cardContent.component';
-import { TITLE_INPUT_NAME, getModulePanelTitle } from '@/v5/store/tickets/tickets.helpers';
-import { UnsupportedProperty } from './properties/unsupportedProperty.component';
-import { TicketProperty } from './properties/properties.helper';
-import { TitleContainer, PanelsContainer, ErrorTextGap } from './ticketsForm.styles';
-import { TitleProperty } from './properties/titleProperty.component';
+import { getModulePanelProps } from '@/v5/store/tickets/tickets.helpers';
+import { CardContent, PanelsContainer, ModuleTitle } from './ticketsForm.styles';
+import { TicketsTopPanel } from './ticketsTopPanel/ticketsTopPanel.component';
+import { PropertiesList } from './propertiesList.component';
 import { CommentsPanel } from './commentsPanel/commentsPanel.component';
 
-interface PropertiesListProps {
-	properties: PropertyDefinition[];
-	module: string;
-	onPropertyBlur?: (...args) => void;
-}
-
-const PropertiesList = ({ module, properties, onPropertyBlur }: PropertiesListProps) => {
-	const { formState } = useFormContext();
-	return (
-		<>
-			{properties.map(({
-				name,
-				type,
-				default: defaultValue,
-				readOnly: disabled,
-				required,
-				values,
-			}) => {
-				const inputName = `${module}.${name}`;
-				const PropertyComponent = TicketProperty[type] || UnsupportedProperty;
-				const formError = get(formState.errors, inputName);
-				return (
-					<>
-						<InputController
-							Input={PropertyComponent}
-							label={name}
-							disabled={disabled}
-							required={required}
-							name={inputName}
-							formError={formError}
-							defaultValue={defaultValue}
-							key={name}
-							onBlur={onPropertyBlur}
-							// @ts-ignore
-							values={values}
-						/>
-						{formError && <ErrorTextGap />}
-					</>
-				);
-			})}
-		</>
-	);
-};
-
-const PropertiesPanel = ({ properties, ...props }: PropertiesListProps) => {
-	const required = some(properties, (property) => property.required);
-	return (
-		<Accordion
-			defaultExpanded
-			Icon={PropetiesIcon}
-			title={formatMessage({ id: 'customTicket.panel.properties', defaultMessage: 'Properties' })}
-			required={required}
-		>
-			<PropertiesList properties={properties} {...props} />
-		</Accordion>
-	);
-};
-
+const SCROLLBAR_ID = 'cardScrollbar';
 interface ModulePanelProps {
 	module: TemplateModule;
-	scrollPanelIntoView: (event, isExpanding) => void;
+	scrollPanelIntoView: (isExpanding, event) => void;
+	defaultExpanded: boolean;
 }
 
-const ModulePanel = ({ module, scrollPanelIntoView, ...rest }: ModulePanelProps) => {
-	const required = some(module.properties, (property) => property.required);
+const ModulePanel = ({ module, scrollPanelIntoView, defaultExpanded, ...rest }: ModulePanelProps) => {
+	const required = some(module.properties, 'required');
+	const { title, ...accordionProps } = getModulePanelProps(module);
 	return (
-		<Accordion {...getModulePanelTitle(module)} onChange={scrollPanelIntoView} required={required}>
+		<Accordion
+			{...accordionProps}
+			onChange={scrollPanelIntoView}
+			defaultExpanded={defaultExpanded}
+			title={<ModuleTitle required={required}>{title}</ModuleTitle>}
+		>
 			<PropertiesList module={`modules.${module.name || module.type}`} properties={module.properties || []} {...rest} />
 		</Accordion>
 	);
@@ -109,47 +53,40 @@ interface Props {
 }
 
 export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) => {
-	const { formState } = useFormContext();
-
 	const scrollPanelIntoView = ({ target }, isExpanding) => {
 		if (!isExpanding) return;
-		const panel = target.parentNode.parentNode;
-		const scrollableContainer = panel.parentNode.parentNode.parentNode;
+		const panel = target.closest('.MuiAccordion-root');
+		if (!panel) return;
+		const scrollableContainer = panel.closest(`#${SCROLLBAR_ID}`);
 		setTimeout(() => {
 			scrollableContainer.scrollTo({
-				top: panel.offsetTop - 15,
+				top: panel.offsetTop - 65,
 				behavior: 'smooth',
 			});
 		}, 400);
 	};
-
 	return (
-		<>
-			<TitleContainer>
-				<TitleProperty
-					name={TITLE_INPUT_NAME}
-					defaultValue={ticket[TITLE_INPUT_NAME]}
-					formError={formState.errors[TITLE_INPUT_NAME]}
-					inputProps={{ autoFocus: focusOnTitle }}
-					onBlur={rest?.onPropertyBlur}
-				/>
-			</TitleContainer>
-			<CardContent>
-				<PanelsContainer>
-					<PropertiesPanel module="properties" properties={template?.properties || []} {...rest} />
-					{
-						(template.modules || []).map((module) => (
-							<ModulePanel
-								key={module.name || module.type}
-								module={module}
-								scrollPanelIntoView={scrollPanelIntoView}
-								{...rest}
-							/>
-						))
-					}
-					{template?.config?.comments && (<CommentsPanel scrollPanelIntoView={scrollPanelIntoView} />)}
-				</PanelsContainer>
-			</CardContent>
-		</>
+		<CardContent id={SCROLLBAR_ID}>
+			<TicketsTopPanel
+				title={ticket.title}
+				properties={template.properties || []}
+				focusOnTitle={focusOnTitle}
+				{...rest}
+			/>
+			<PanelsContainer>
+				{
+					(template.modules || []).map((module, idx) => (
+						<ModulePanel
+							key={module.name || module.type}
+							module={module}
+							defaultExpanded={idx === 0}
+							scrollPanelIntoView={scrollPanelIntoView}
+							{...rest}
+						/>
+					))
+				}
+				{template?.config?.comments && (<CommentsPanel scrollPanelIntoView={scrollPanelIntoView} />)}
+			</PanelsContainer>
+		</CardContent>
 	);
 };

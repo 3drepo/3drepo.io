@@ -127,12 +127,15 @@ Scene.getMeshInfo = async (account, model, branch, rev, user) => {
 		const C = require("../constants");
 		const subModelMeshes = await Promise.all(refNodes.map(async ({project}) => {
 			if(await hasReadAccessToModelHelper(user, account, project)) {
-				const superMeshes = await Scene.getMeshInfo(account, project, C.MASTER_BRANCH_NAME, undefined, user);
-				return { teamspace: account, model: project, superMeshes };
+				try{
+					const superMeshes = await Scene.getMeshInfo(account, project, C.MASTER_BRANCH_NAME, undefined, user);
+					return { teamspace: account, model: project, superMeshes };
+				}catch{
+					return;
+				}
 			}
-
 		}));
-		return { subModels: subModelMeshes };
+		return { subModels: subModelMeshes.filter(Boolean) };
 
 	} else {
 		const Utils = require("../utils");

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import _ from 'lodash';
 import { BACKEND_VISIBILITY_STATES, NODE_TYPES, SELECTION_STATES, VISIBILITY_STATES } from '../../../constants/tree';
 import { DEFAULT_NODE_NAME, INode } from './treeProcessing.constants';
 
@@ -61,7 +62,7 @@ const getFlattenNested = (tree, maps, data = [], idx = 0, level = 1, parentId = 
 	maps.nodesIndexesMap[nodeID] = idx++;
 	let subTreeRoots = [];
 	if (tree.children) {
-
+		tree.children = _.orderBy(tree.children, ({ name }) => name?.toLowerCase());
 		const hasChildren = tree.children.length;
 		rowData.hasChildren = hasChildren;
 		rowData.expandable = tree.children.some((child) => Boolean(child.name) || child.type === NODE_TYPES.TRANSFORMATION);
@@ -132,7 +133,7 @@ export default ({ mainTree, subTrees, subModels, meshMap, treePath }) => new Pro
 
 			if (subModel) {
 				subModelsRootNodes[child.name] = child._id;
-				child.name = [modelTeamspace, subModel.name].join(':');
+				child.name = subModel.name;
 			} else if (child.type !== 'mesh') {
 				child.name = child.name || DEFAULT_NODE_NAME;
 			}

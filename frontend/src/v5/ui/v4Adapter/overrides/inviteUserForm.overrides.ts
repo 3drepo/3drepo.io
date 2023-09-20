@@ -41,9 +41,12 @@ const JobSelectStyles = css`
 		height: 10px;
 	}
 	${JobTitle}, ${EmptySelectValue} {
-		width: calc(100% - 22px);
 		${({ theme }) => theme.typography.body1}
 		color: ${({ theme }) => theme.palette.secondary.main};
+		width: calc(100% - 22px);
+		&:first-of-type {
+			width: 100%;
+		}
 	}
 	${SelectListItem} {
 		${({ theme }) => theme.typography.body1}
@@ -97,8 +100,8 @@ const ProjectSelectorStyles = css`
 		}
 		${IconButton} {
 			border: 1px solid ${({ theme }) => theme.palette.secondary.main};
-			border-radius: 5px;
-			padding: 8px 15px;
+			border-radius: 8px;
+			padding: 8px 16px;
 			color: ${({ theme }) => theme.palette.secondary.main};
 			${({ theme }) => theme.typography.body1};
 			font-weight: 600;
@@ -169,9 +172,9 @@ const PermissionsTableStyles = css`
 
 const AddPermissionsButton = css`
 	${AddButton} {
-		border-radius: 5px;
+		border-radius: 8px;
 		background-color: ${({ theme }) => theme.palette.primary.main};
-		padding: 10px 15px;
+		padding: 8px 16px;
 		margin: 4px 0;
 		color: ${({ theme }) => theme.palette.primary.contrast};
 		user-select: none;

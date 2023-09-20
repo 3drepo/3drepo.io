@@ -53,22 +53,21 @@ export default css`
 			right: 0;
 		}
 
-		${DescriptionImage} {
-			border-radius: 5px;
-		}
-
 		${IssuesDateFieldContainer} {
 			.MuiInputBase-root {
 				padding: 0;
 				input {
-					cursor: pointer;
 					height: 24px;
 					color: ${({ theme }) => theme.palette.secondary.main};
+
+					&:not(.Mui-disabled) {
+						cursor: pointer;
+					}
 				}
 			}
 		}
 		${DescriptionImage} img {
-			border-radius: 5px;
+			border-radius: 8px;
 		}
 	
 		${UpdateButtonsContainer} {

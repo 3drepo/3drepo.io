@@ -36,7 +36,6 @@ import { Container as PreviewDetailsContainer,
 	MainInfoContainer,
 } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { Container as FiltersContainer,
-	ChipsContainer,
 	InputLabel,
 	SelectedCriteria,
 	FormContainer,
@@ -131,7 +130,7 @@ const expandedGroupItem = css`
 				}
 				${TextFieldContainer} {
 					border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-					border-radius: 5px;
+					border-radius: 8px;
 					background-color: ${({ theme }) => theme.palette.primary.contrast};
 
 					label {
@@ -231,19 +230,17 @@ const expandedGroupItem = css`
 			${FiltersContainer} {
 				border: none;
 				background-color: #F7F8FA; // TODO - fix after new palette is released
+				position: initial;
 
 				${InputLabel} {
 					padding: 0 15px;
-					top: 23PX;
-					left: 0;
+					position: initial;
 				}
 				${SelectedCriteria} {
 					padding: 5px 15px 12px;
-					${ChipsContainer} {
-						padding-top: 20px;
-					}
 					${ButtonContainer} {
-						bottom: 6px;
+						top: -25px;
+						right: 14px;
 					}
 				}
 				// Field / Operation / Value box area

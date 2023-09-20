@@ -126,7 +126,7 @@ export function* fetchFederationStats({ teamspace, projectId, federationId }: Fe
 		}
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: 'trying to fetch federations',
+			currentActions: 'trying to fetch federations stats',
 			error,
 		}));
 	}

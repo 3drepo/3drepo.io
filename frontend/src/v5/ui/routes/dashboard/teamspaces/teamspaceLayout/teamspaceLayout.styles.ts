@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { CoverImage } from '@controls/coverImage/coverImage.component';
-import { Content as DashboardContent } from '../../projects/projects.styles';
+import { Content as ProjectContent } from '../../projects/projectContent/projectContent.styles';
 
 export const Container = styled.div`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
@@ -27,22 +27,13 @@ export const Container = styled.div`
 	flex-direction: column;
 `;
 
-export const Content = styled(DashboardContent)`
+export const Content = styled(ProjectContent)`
 	margin-top: 32px;
-	padding: 9px 30px 41px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	border-radius: 10px;
 	flex-direction: column;
 	display: flex;
 	justify-content: flex-start;
-	box-sizing: border-box;
-`;
-
-export const Section = styled.section`
-	min-height: 100%;
-	height: auto;
-	display: flex;
-	flex-direction: column;
+	min-height: unset;
+	height: fit-content;
 `;
 
 export const TopBar = styled.div`
@@ -56,7 +47,7 @@ export const TopBar = styled.div`
 `;
 
 export const TeamspaceImage = styled(CoverImage)`
-	border-radius: 10px;
+	border-radius: 25px;
 	height: 142px;
 	width: 142px;
 `;

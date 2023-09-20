@@ -18,10 +18,7 @@ import { PureComponent } from 'react';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 
-import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { clientConfigService } from '../../../../services/clientConfig';
-import { Loader as LoaderIndicator } from '../../loader/loader.component';
-import { LoaderContainer } from '../../messagesList/messagesList.styles';
 import { DialogTab, DialogTabs } from '../../topMenu/components/visualSettingsDialog/visualSettingsDialog.styles';
 import { AttachResourceFiles } from './attachResourceFiles.component';
 import { Container, Content } from './attachResourcesDialog.styles';
@@ -32,8 +29,6 @@ interface IProps {
 	handleClose: () => void;
 	onSaveFiles: any;
 	onSaveLinks: any;
-	quotaLeft: number;
-	fetchQuota: (teamspace: string) => void;
 	currentTeamspace: any;
 }
 
@@ -62,20 +57,10 @@ const schema = Yup.object().shape({
 		)
 	});
 
-const Loader = () => (
-		<LoaderContainer>
-			<LoaderIndicator size={18} />
-		</LoaderContainer>
-);
-
 export class AttachResourcesDialog extends PureComponent<IProps, IState> {
 	public state = {
 		selectedTab: 0
 	};
-
-	public componentDidMount = () => {
-		this.props.fetchQuota(this.props.currentTeamspace);
-	}
 
 	public handleTabChange = (event, selectedTab) => {
 		this.setState({ selectedTab });
@@ -97,26 +82,18 @@ export class AttachResourcesDialog extends PureComponent<IProps, IState> {
 		this.props.handleClose();
 	}
 
-	public validateQuota = (files: any[]) => {
-		const totalSize = files.reduce((p, file) => p + file.file.size , 0);
-		return totalSize < (this.props.quotaLeft * 1024 * 1024);
-	}
-
 	public validateUploadLimit = (files: any[]) => {
 		return files.map((f) => f.file.size)
 				.every((s) => s <= clientConfigService.resourceUploadSizeLimit);
 	}
 
-	private renderAttachResourceFiles = (values) => renderWhenTrueOtherwise(() => (
+	private renderAttachResourceFiles = (values) => (
 		<AttachResourceFiles
 			files={values.files}
-			validateQuota={this.validateQuota}
 			validateUploadLimit={this.validateUploadLimit}
 			uploadLimit={clientConfigService.resourceUploadSizeLimit}
 		/>
-		),
-		<Loader />
-	)
+	);
 
 	public render() {
 		const {selectedTab} = this.state;
@@ -139,12 +116,11 @@ export class AttachResourcesDialog extends PureComponent<IProps, IState> {
 					render={({ values }) => (
 						<Form>
 							<Content>
-								{selectedTab === 0 && this.renderAttachResourceFiles(values)(this.props.quotaLeft)}
+								{selectedTab === 0 && this.renderAttachResourceFiles(values)}
 								{selectedTab === 1 && <AttachResourceUrls links={values.links} />}
 							</Content>
 							<DialogButtons
 								onClickCancel={this.onCancel}
-								validateQuota={this.validateQuota}
 								validateUploadLimit={this.validateUploadLimit}
 							/>
 						</Form>

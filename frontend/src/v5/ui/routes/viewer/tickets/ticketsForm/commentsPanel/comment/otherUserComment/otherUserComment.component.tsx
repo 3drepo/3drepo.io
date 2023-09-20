@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TeamspacesHooksSelectors, TicketsCardHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
-import { PrimaryCommentButton } from '../commentButton/commentButton.styles';
+import { PrimaryTicketButton } from '../../../../ticketButton/ticketButton.styles';
 import { Comment, AuthorAvatar } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons, CommentWithButtonsContainer } from '../basicComment/basicComment.styles';
 
-type OtherUserCommentProps = Omit<ITicketComment, 'updatedAt' | 'createdAt'> & {
+type OtherUserCommentProps = ITicketComment & {
 	commentAge: string;
 	isFirstOfBlock: boolean;
 	metadata?: TicketCommentReplyMetadata;
@@ -39,6 +39,7 @@ export const OtherUserComment = ({
 }: OtherUserCommentProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const user = UsersHooksSelectors.selectUser(teamspace, author);
+	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const authorDisplayName = isFirstOfBlock ? `${user.firstName} ${user.lastName}` : null;
 
 	if (deleted) return (<DeletedComment user={user} author={authorDisplayName} isFirstOfBlock={isFirstOfBlock} />);
@@ -52,11 +53,13 @@ export const OtherUserComment = ({
 				isFirstOfBlock={isFirstOfBlock}
 				{...props}
 			/>
-			<CommentButtons>
-				<PrimaryCommentButton onClick={() => onReply(_id)}>
-					<ReplyIcon />
-				</PrimaryCommentButton>
-			</CommentButtons>
+			{!readOnly && (
+				<CommentButtons>
+					<PrimaryTicketButton onClick={() => onReply(_id)}>
+						<ReplyIcon />
+					</PrimaryTicketButton>
+				</CommentButtons>
+			)}
 		</CommentWithButtonsContainer>
 	);
 };

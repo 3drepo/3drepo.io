@@ -18,7 +18,7 @@
 import ButtonBase from '@mui/material/Button';
 import styled from 'styled-components';
 
-export const LabelButton = styled(ButtonBase)<{ color?: string, outlined?: any }>`
+export const LabelButton = styled(ButtonBase)`
 	white-space: nowrap;
 	align-items: center;
 	padding: 8px 12px 8px 15px;

@@ -51,7 +51,6 @@ export const BarIconButton = styled(IconButton)`
 
 const V5EmptyStateInfo = styled(DashedContainerBase).attrs({
 	strokeColor: '#c0c8d5', // TODO - fix when new palette is released
-	borderRadius: 5,
 	dashSize: 2,
 	gapSize: 2,
 	strokeWidth: 2,
@@ -61,7 +60,7 @@ const V5EmptyStateInfo = styled(DashedContainerBase).attrs({
 	font-size: 13px;
 	background-color: transparent;
 	color: ${({ theme }) => theme.palette.base.main};
-	margin: 12px;
+	margin: 15px;
 	padding: 10px;
 	box-sizing: border-box;
 `;

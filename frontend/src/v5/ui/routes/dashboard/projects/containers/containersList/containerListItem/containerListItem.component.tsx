@@ -36,14 +36,14 @@ import {
 	enableRealtimeContainerRevisionUpdate,
 	enableRealtimeNewRevisionUpdate,
 } from '@/v5/services/realtime/revision.events';
-import { RevisionDetails } from '@components/shared/revisionDetails';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Display } from '@/v5/ui/themes/media';
 import { formatDate } from '@/v5/services/intl';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { RevisionDetails } from '@components/shared/revisionDetails/revisionDetails.component';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
-import { IsMainList } from '../../containers.component';
+import { IsMainList } from '../../mainList.context';
 
 interface IContainerListItem {
 	isSelected: boolean;
@@ -122,6 +122,7 @@ export const ContainerListItem = memo(({
 				<DashboardListItemText
 					width={78}
 					selected={isSelected}
+					dontHighlight
 				>
 					{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
 				</DashboardListItemText>

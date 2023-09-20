@@ -19,16 +19,17 @@ import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
 import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import MenuItemBase from '@mui/material/MenuItem';
 import { Button } from '@controls/button';
-import { FilterChip } from '@controls/chip';
+import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
+import { SearchInputWithChips } from '@controls/search/searchInput/searchInputWithChips.component';
 import { Ticket } from './ticketItem/ticketItem.styles';
 
 export const List = styled.div`
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
-	border-radius: 6px;
+	border-radius: 8px;
 	overflow: hidden;
 	display: inline-block;
 	width: 100%;
-	margin-bottom: 15px;
+	margin-bottom: 0;
 	${/* sc-selector */ Ticket}:not(:last-child) {
 		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	}
@@ -43,14 +44,18 @@ export const Filters = styled.div`
 	margin-bottom: 13px;
 `;
 
-export const TemplateChip = styled(FilterChip)`
-	border-radius: 5px;
-	&:hover {
-		border-color: ${({ theme }) => theme.palette.primary.main};
+export const CompletedFilterChip = styled(FilterChip).attrs(({ selected, theme }: any) => ({
+	color: theme.palette.success.main,
+	variant: selected ? 'filled' : 'outlined',
+}))<{ selected: boolean }>`
+	.MuiChip-root, .MuiChip-root:hover {
+		color: ${({ theme }) => theme.palette.success.main};
+		border: 1px solid ${({ theme }) => theme.palette.success.main};
+		${({ selected, theme: { palette } }) => selected && css`
+			color: ${palette.primary.contrast};
+			background-color: ${palette.success.main};
+		`}
 	}
-	${({ selected }) => selected && css`
-		border-color: ${({ theme }) => theme.palette.primary.main};
-	`}
 `;
 
 export const NewTicketButton = styled(Button).attrs({
@@ -83,4 +88,8 @@ export const ActionMenu = styled(ActionMenuBase).attrs({
 
 export const MenuItem = styled(MenuItemBase)`
 	padding: 5px 12px;
+`;
+
+export const TicketSearchInput = styled(SearchInputWithChips)`
+	margin: 0 0 12px;
 `;

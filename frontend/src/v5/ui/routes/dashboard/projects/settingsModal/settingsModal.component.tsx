@@ -151,8 +151,8 @@ export const SettingsModal = ({
 		handleSubmit,
 		reset,
 		getValues,
-		trigger,
 		watch,
+		trigger,
 		control,
 		formState,
 		formState: { errors, dirtyFields },
@@ -227,7 +227,7 @@ export const SettingsModal = ({
 		reset(getDefaultValues(containerOrFederation, isContainer));
 	}, [containerOrFederation]);
 
-	useEffect(() => { setIsValid(formState.isValid && fieldsHaveChanged()); }, [JSON.stringify(watch())]);
+	useEffect(() => { setIsValid(formState.isValid && fieldsHaveChanged()); }, [watch()]);
 
 	return (
 		<FormModal
@@ -314,7 +314,7 @@ export const SettingsModal = ({
 			<FormSelectView
 				control={control}
 				name="defaultView"
-				label={formatMessage({ id: 'settings.form.defaultView', defaultMessage: 'Default View' })}
+				label={formatMessage({ id: 'settings.form.defaultView', defaultMessage: 'Home View' })}
 				views={containerOrFederation.views}
 				containerOrFederationId={containerOrFederation._id}
 				isContainer={isContainer}

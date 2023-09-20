@@ -37,8 +37,8 @@ import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashb
 import { ContainerListItem } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containerListItem';
 import { Display } from '@/v5/ui/themes/media';
 import { formatMessage } from '@/v5/services/intl';
-import { DashboardListButton } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
+import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 import { UploadFileForm } from '../uploadFileForm/uploadFileForm.component';
 import { SkeletonListItem } from './skeletonListItem';
@@ -50,7 +50,6 @@ interface IContainersList {
 		collapsed: ReactNode;
 		visible: ReactNode;
 	},
-	showBottomButton?: boolean;
 	onClickCreate: () => void;
 }
 
@@ -59,7 +58,6 @@ export const ContainersList = ({
 	title,
 	titleTooltips,
 	onClickCreate,
-	showBottomButton = false,
 }: IContainersList): JSX.Element => {
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 	// eslint-disable-next-line max-len
@@ -79,7 +77,7 @@ export const ContainersList = ({
 	return (
 		<Container>
 			<DashboardListCollapse
-				title={<>{title} {!isListPending && `(${containers.length})`}</>}
+				title={<>{title} {!isListPending && <CircledNumber>{containers.length}</CircledNumber>}</>}
 				tooltipTitles={titleTooltips}
 				isLoading={areStatsPending}
 				sideElement={(
@@ -147,15 +145,6 @@ export const ContainersList = ({
 						</DashboardListEmptyContainer>
 					)}
 				</DashboardList>
-				{showBottomButton && !isListPending && hasContainers && isProjectAdmin && (
-					<DashboardListButton
-						startIcon={<AddCircleIcon />}
-						onClick={onClickCreate}
-					>
-						<FormattedMessage id="containers.addContainerButton" defaultMessage="Add new Container" />
-					</DashboardListButton>
-				)}
-
 			</DashboardListCollapse>
 		</Container>
 	);

@@ -28,11 +28,9 @@ import TrelloBoard from 'react-trello';
 import { isV5 } from '@/v4/helpers/isV5';
 import { BOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
-import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
-import { ScrollArea as ScrollAreaStyles } from '@controls/scrollArea/scrollArea.styles';
 
-import { ContainersHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ISSUE_FILTERS, ISSUES_ACTIONS_MENU } from '../../constants/issues';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ISSUE_FILTERS } from '../../constants/issues';
 import { RISK_FILTERS } from '../../constants/risks';
 import { ROUTES, RouteParams } from '../../constants/routes';
 import { filtersValuesMap as issuesFilters, getHeaderMenuItems as getIssueMenuItems } from '../../helpers/issues';
@@ -161,6 +159,7 @@ const IssueBoardCard = ({ metadata, onClick }: any) => (
 
 export function Board(props: IProps) {
 	const boardRef = useRef(null);
+	const firstUpdate = useRef(true);
 	const { type, teamspace, project: projectId, modelId: v4Model, containerOrFederation } = useParams<RouteParams>();
 	const v5Project = ProjectsHooksSelectors.selectCurrentProjectName();
 	const project = isV5() ? v5Project : projectId;
@@ -176,6 +175,7 @@ export function Board(props: IProps) {
 		resetIssues,
 		resetRisks,
 	} = props;
+
 	useEffect(() => {
 		if (type !== props.boardType) {
 			props.setBoardType(type);
@@ -203,16 +203,20 @@ export function Board(props: IProps) {
 		props.fetchData(type, teamspace, project, modelId);
 	}, [type, teamspace, project, modelId]);
 
+	const removeReactTrelloTooltip = () => {
+		const board = boardRef.current;
+		const lanes = board.getElementsByClassName('react-trello-lane');
+
+		setTimeout(() => {
+			[...lanes].forEach((lane) => lane.removeAttribute('title'));
+		});
+	};
+
 	useEffect(() => {
 		if (boardRef.current) {
-			const board = boardRef.current;
-			const lanes = board.getElementsByClassName('react-trello-lane');
-
-			setTimeout(() => {
-				[...lanes].forEach((lane) => lane.removeAttribute('title'));
-			});
+			removeReactTrelloTooltip();
 		}
-	}, [boardRef, props.isPending]);
+	}, [props.cards, props.isPending]);
 
 	useEffect(() => {
 		return () => {
@@ -260,8 +264,11 @@ export function Board(props: IProps) {
 	};
 
 	useEffect(() => {
-		if (isV5() && boardRef.current) {
+		if (isV5() && boardRef.current && !firstUpdate.current) {
 			handleModelChange({ target: { value: null } });
+		}
+		if (firstUpdate.current) {
+			firstUpdate.current = false;
 		}
 	}, [projectId]);
 
@@ -407,7 +414,7 @@ export function Board(props: IProps) {
 			aria-label="Add new card"
 			aria-haspopup="true"
 			onClick={handleAddNewCard}
-			disabled={props.isPending || !modelId || !project}
+			disabled={props.isPending || !modelId || !project || hasViewerPermissions}
 		>
 			<Add />
 			{isV5() && isIssuesBoard && formatMessage({ id: 'board.newIssue.button', defaultMessage: 'New issue' })}
@@ -454,26 +461,20 @@ export function Board(props: IProps) {
 
 	const components = {
 		Card:  isIssuesBoard ? IssueBoardCard : RiskBoardCard,
-		...(isV5() && { ScrollableLane: (args) => <ScrollAreaStyles {...args} /> }),
 	};
 
 	const renderBoard = renderWhenTrue(() => (
 		<BoardContainer>
 			<div ref={boardRef}>
-				<ConditionalV5Wrapper
-					v5Wrapper={ScrollAreaStyles}
-					v5WrapperProps={{ style: { height: '100%' } }}
-				>
-					<TrelloBoard
-						data={boardData}
-						hideCardDeleteIcon
-						handleDragEnd={handleCardDrop}
-						onCardClick={handleOpenDialog}
-						onCardMoveAcrossLanes={handleCardMove}
-						components={components}
-						cardDraggable
-					/>
-				</ConditionalV5Wrapper>
+				<TrelloBoard
+					data={boardData}
+					hideCardDeleteIcon
+					handleDragEnd={handleCardDrop}
+					onCardClick={handleOpenDialog}
+					onCardMoveAcrossLanes={handleCardMove}
+					components={components}
+					cardDraggable
+				/>
 			</div>
 		</BoardContainer>
 	));
@@ -496,7 +497,7 @@ export function Board(props: IProps) {
 		const messagePrefix = 'You have to choose';
 		const messageSufix = noModelAndProject ? 'project and model' : noModel ? 'model' : 'project';
 		const chooseMessage = isV5()
-			? formatMessage({ defaultMessage: `Select the federation or container to show board`, id: 'board.emptyBoard.placeholder' })
+			? formatMessage({ defaultMessage: 'Please select a federation or container to proceed', id: 'board.emptyBoard.placeholder' })
 			: `${messagePrefix} ${messageSufix} to show board.`;
 		const areModels =
 			getProjectModels(props.teamspaces, props.projectsMap, props.modelsMap, teamspace, project).length > 1;

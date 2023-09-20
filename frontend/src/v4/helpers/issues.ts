@@ -27,7 +27,7 @@ import {
 	STATUSES_ICONS
 } from '../constants/issues';
 import { getFilterValues, UNASSIGNED_JOB } from '../constants/reportedItems';
-import { getAPIUrl } from '../services/api';
+import { getAPIUrl } from '../services/api/default';
 import { hasPermissions, isAdmin, PERMISSIONS } from './permissions';
 import { prepareResources } from './resources';
 import { setShapesUuids } from './shapes';

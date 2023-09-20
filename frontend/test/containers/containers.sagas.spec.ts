@@ -15,271 +15,319 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as ContainersSaga from '@/v5/store/containers/containers.sagas';
-import { expectSaga } from 'redux-saga-test-plan';
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
 import { mockServer } from '../../internals/testing/mockServer';
-import { pick, times } from 'lodash';
-import { prepareContainersData } from '@/v5/store/containers/containers.helpers';
-import { IContainer } from '@/v5/store/containers/containers.types';
-import { containerMockFactory, prepareMockSettingsReply } from './containers.fixtures';
+import { pick } from 'lodash';
+import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
+import { containerMockFactory, prepareMockSettingsReply, prepareMockStats } from './containers.fixtures';
 import { omit } from 'lodash';
-import { prepareMockViewsReply } from './containers.fixtures';
 import { prepareMockRawSettingsReply } from './containers.fixtures';
+import { createTestStore } from '../test.helpers';
 import { prepareContainerSettingsForFrontend } from './../../src/v5/store/containers/containers.helpers';
-import { alertAction } from '../test.helpers';
+import { ProjectsActions } from '@/v5/store/projects/projects.redux';
+import { selectContainerById, selectContainers } from '@/v5/store/containers/containers.selectors';
+import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
+import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 
 describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';
 	const projectId = 'projectId';
 	const containerId = 'containerId';
 	let onSuccess, onError;
+	let dispatch, getState, waitForActions;
+	const mockContainer = containerMockFactory({ _id: containerId }) as any;
+
+	const populateStore = (container = mockContainer) => {
+		dispatch(ContainersActions.fetchContainersSuccess(projectId, [container]));
+	};
 
 	beforeEach(() => {
 		onSuccess = jest.fn();
 		onError = jest.fn();
+		({ dispatch, getState, waitForActions } = createTestStore());
+		dispatch(ProjectsActions.setCurrentProject(projectId));
+		dispatch(ContainersActions.fetchContainersSuccess(projectId, []));
 	})
 
 	describe('addFavourite', () => {
-		it('should call addFavourite endpoint', async () => {
-			mockServer
-			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
-			.reply(200)
+		beforeEach(() => populateStore({ ...mockContainer, isFavourite: false }));
 
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
-				.put(ContainersActions.setFavouriteSuccess(projectId, containerId, true))
-				.silentRun();
+		it('should call addFavourite endpoint', async () => {
+			const { resolve, promiseToResolve } = getWaitablePromise();
+			mockServer
+				.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
+				.reply(200, resolve)
+
+			await Promise.all([
+				waitForActions(() => {
+					dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
+				}, [ContainersActions.setFavouriteSuccess(projectId, containerId, true)]),
+				promiseToResolve,
+			]);
 		})
 
 		it('should call addFavourite endpoint with 404 and revert change', async () => {
 			mockServer
-			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
-			.reply(404)
+				.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites`)
+				.reply(404)
 
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
-				.put(ContainersActions.setFavouriteSuccess(projectId, containerId, true))
-				.put(ContainersActions.setFavouriteSuccess(projectId, containerId, false))
-				.silentRun();
+			await waitForActions(() => {
+				dispatch(ContainersActions.addFavourite(teamspace, projectId, containerId))
+			}, [
+				ContainersActions.setFavouriteSuccess(projectId, containerId, true),
+				DialogsTypes.OPEN,
+				ContainersActions.setFavouriteSuccess(projectId, containerId, false),
+			])
+
+			const { isFavourite } = selectContainerById(getState(), containerId);
+			expect(isFavourite).toBeFalsy();
 		})
 	})
 
 	describe('removeFavourite', () => {
+		beforeEach(() => populateStore({ ...mockContainer, isFavourite: true }));
+		const { resolve, promiseToResolve } = getWaitablePromise();
 		it('should call removeFavourite endpoint', async () => {
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites?ids=${containerId}`)
-			.reply(200)
+				.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites?ids=${containerId}`)
+				.reply(200, resolve)
 
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
-				.put(ContainersActions.setFavouriteSuccess(projectId, containerId, false))
-				.silentRun();
+			await Promise.all([
+				waitForActions(() => {
+					dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
+				}, [ContainersActions.setFavouriteSuccess(projectId, containerId, false)]),
+				promiseToResolve,
+			]);
 		})
 
 		it('should call removeFavourite endpoint with 404 and revert change', async () => {
 			mockServer
-			.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites?ids=${containerId}`)
-			.reply(404)
+				.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/favourites?ids=${containerId}`)
+				.reply(404)
 
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
-				.put(ContainersActions.setFavouriteSuccess(projectId, containerId, false))
-				.put(ContainersActions.setFavouriteSuccess(projectId, containerId, true))
-				.silentRun();
+			await waitForActions(() => {
+				dispatch(ContainersActions.removeFavourite(teamspace, projectId, containerId))
+			}, [
+				ContainersActions.setFavouriteSuccess(projectId, containerId, false),
+				DialogsTypes.OPEN,
+				ContainersActions.setFavouriteSuccess(projectId, containerId, true),
+			])
+
+			const { isFavourite } = selectContainerById(getState(), containerId);
+			expect(isFavourite).toBeTruthy();
 		})
 	})
 
 	describe('fetchContainers', () => {
-		const mockContainers = times(2, () => containerMockFactory());
-		const mockContainersBaseResponse = mockContainers.map((container) => pick(container, ['_id', 'name', 'role', 'isFavourite']));
-		const mockContainersWithoutStats = prepareContainersData(mockContainers).map(
-			(container) => omit(container, ['views', 'defaultView', 'surveyPoint', 'angleFromNorth', 'desc'])
-		);
+		const stats = prepareMockStats();
 
-		it('should fetch containers data', async () => {
+		it('should fetch containers data', async () => {			
+			const mockContainerWithoutStats = omit(
+				prepareSingleContainerData(mockContainer),
+				['views', 'defaultView', 'surveyPoint', 'angleFromNorth', 'desc']
+			);
+
+			const mockContainerBaseResponse = pick(mockContainer, ['_id', 'name', 'role', 'isFavourite']);
+
 			mockServer
-			.get(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
-			.reply(200, {
-				containers: mockContainersBaseResponse
-			});
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
+				.reply(200, {
+					containers: [mockContainerBaseResponse]
+				});
 
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
-				.put(ContainersActions.fetchContainersSuccess(projectId, mockContainersWithoutStats))
-				.silentRun();
+			await waitForActions(() => {
+				dispatch(ContainersActions.fetchContainers(teamspace, projectId));
+			}, [
+				ContainersActions.fetchContainersSuccess(projectId, [mockContainerWithoutStats]),
+				ContainersActions.fetchContainerStats(teamspace, projectId, mockContainer._id),
+			]);
+		})
+
+		it('should call fetch containers data endpoint with 404', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
+				.reply(404);
+
+			await waitForActions(() => {
+				dispatch(ContainersActions.fetchContainers(teamspace, projectId));
+			}, [DialogsTypes.OPEN]);
+			const containersInStore = selectContainers(getState());
+			expect(containersInStore).toEqual([]);
 		})
 
 		it('should fetch stats', async () => {
-			const prepareMockStatsReply = (container: IContainer) => ({
-				revisions: {
-					total: container.revisionsCount,
-					lastUpdated: container.lastUpdated.valueOf(),
-					latestRevision: container.latestRevision
-				},
-				type: container.type,
-				status: container.status,
-				code: container.code,
-				unit: container.unit
-			})
+			populateStore();
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`)
+				.reply(200, stats);
 
-			mockContainers.forEach((container) => {
-				mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${container._id}/stats`)
-				.reply(200, prepareMockStatsReply(container));
-			})
-
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[0]._id))
-				.dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, mockContainers[1]._id))
-				.put(ContainersActions.fetchContainerStatsSuccess(projectId, mockContainers[0]._id, prepareMockStatsReply(mockContainers[0])))
-				.put(ContainersActions.fetchContainerStatsSuccess(projectId, mockContainers[1]._id, prepareMockStatsReply(mockContainers[1])))
-				.silentRun();
+			await waitForActions(() => {
+				dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, containerId));
+			}, [ContainersActions.fetchContainerStatsSuccess(projectId, containerId, stats)]);
 		})
 
-		it('should call containers endpoint with 404', async () => {
+		it('should call fetch container stats endpoint with 401', async () => {
+			populateStore();
 			mockServer
-			.get(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
-			.reply(404);
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`)
+				.reply(401);
 
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.fetchContainers(teamspace, projectId))
-				.silentRun();
+			await waitForActions(() => {
+				dispatch(ContainersActions.fetchContainerStats(teamspace, projectId, containerId));
+			}, [DialogsTypes.OPEN]);
+
+			const containersInStore = selectContainers(getState());
+			expect(containersInStore).toEqual([mockContainer]);
 		})
 
 		it('should fetch container views', async () => {
-			mockContainers.forEach((container) => {
-				mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${container._id}/views`)
-				.reply(200, prepareMockViewsReply(container));
-			});
+			populateStore();
+			const { views } = containerMockFactory();
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/views`)
+				.reply(200, { views });
 
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.fetchContainerViews(teamspace, projectId, mockContainers[0]._id))
-				.dispatch(ContainersActions.fetchContainerViews(teamspace, projectId, mockContainers[1]._id))
-				.put(ContainersActions.fetchContainerViewsSuccess(
+			await waitForActions(() => {
+				dispatch(ContainersActions.fetchContainerViews(teamspace, projectId, containerId));
+			}, [
+				ContainersActions.fetchContainerViewsSuccess(
 					projectId,
-					mockContainers[0]._id,
-					prepareMockViewsReply(mockContainers[0]).views)
-				).put(ContainersActions.fetchContainerViewsSuccess(
-					projectId,
-					mockContainers[1]._id,
-					prepareMockViewsReply(mockContainers[1]).views)
+					containerId,
+					views,
 				)
-				.silentRun();
+			]);
 		})
 
 		it('should fetch container settings', async () => {
-			mockContainers.forEach((container) => {
-				mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${container._id}`)
-				.reply(200, prepareMockRawSettingsReply(container));
-			});
+			populateStore();
+			const settings = prepareMockRawSettingsReply(containerMockFactory());
+			const frontendSettings = prepareContainerSettingsForFrontend(settings);
 
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.fetchContainerSettings(teamspace, projectId, mockContainers[0]._id))
-				.dispatch(ContainersActions.fetchContainerSettings(teamspace, projectId, mockContainers[1]._id))
-				.put(ContainersActions.fetchContainerSettingsSuccess(
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+				.reply(200, settings);
+
+			await waitForActions(() => {
+				dispatch(ContainersActions.fetchContainerSettings(teamspace, projectId, containerId));
+			}, [
+				ContainersActions.fetchContainerSettingsSuccess(
 					projectId,
-					mockContainers[0]._id,
-					prepareContainerSettingsForFrontend(prepareMockRawSettingsReply(mockContainers[0])),
-				))
-				.put(ContainersActions.fetchContainerSettingsSuccess(
-					projectId,
-					mockContainers[1]._id,
-					prepareContainerSettingsForFrontend(prepareMockRawSettingsReply(mockContainers[1])),
-				))
-				.silentRun();
+					containerId,
+					frontendSettings,
+				),
+			]);
 		})
 
-		it('should call container settings endpoint with 404', async () => {
-			const containerId = mockContainers[0]._id;
+		it('should call fetch container settings endpoint with 404', async () => {
+			populateStore();
 			mockServer
-			.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
-			.reply(404);
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+				.reply(404);
 
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.fetchContainerSettings(teamspace, projectId, containerId))
-				.silentRun();
+			await waitForActions(() => {
+				dispatch(ContainersActions.fetchContainerSettings(teamspace, projectId, containerId));
+			}, [DialogsTypes.OPEN]);
+
+			const containersInStore = selectContainers(getState());
+			expect(containersInStore).toEqual([mockContainer]);
 		})
 	})
 
 	describe('createContainer', () => {
-		const newContainer = { // improve this with containerMockFactory when Issue #2919 resolved
+		const newContainer = {
 			name: 'Test Container',
 			type: 'Other',
 			unit: 'mm',
-		}
-
+		};
 		it('should call createContainer endpoint', async () => {
 			mockServer
-			.post(`/teamspaces/${teamspace}/projects/${projectId}/containers`, newContainer)
-			.reply(200, {
-				_id: '12345'
-			});
-			const container = { ...newContainer, _id: '12345'}
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers`, newContainer)
+				.reply(200, { _id: containerId });
 
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.createContainer(teamspace, projectId, newContainer, onSuccess, onError))
-				.put(ContainersActions.createContainerSuccess( projectId, container))
-				.silentRun();
+			const fetchedContainer = { ...newContainer, _id: containerId }
 
-			expect(onSuccess).toHaveBeenCalled();
+			await waitForActions(() => {
+				dispatch(ContainersActions.createContainer(teamspace, projectId, newContainer, onSuccess, onError))
+			}, [ContainersActions.createContainerSuccess(projectId, fetchedContainer)]);
+
 			expect(onError).not.toHaveBeenCalled();
+			expect(onSuccess).toHaveBeenCalled();	
 		})
 		
 		it('should call createContainer endpoint with 400', async () => {
+			const { resolve, promiseToResolve } = getWaitablePromise();
+			
 			mockServer
-			.post(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
-			.reply(400);
+				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers`)
+				.reply(400);
 
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.createContainer(teamspace, projectId, newContainer, onSuccess, onError))
-				.silentRun();
+			dispatch(ContainersActions.createContainer(
+				teamspace,
+				projectId,
+				newContainer,
+				onSuccess,
+				() => { onError(); resolve()},
+			));
 
+			await promiseToResolve;
+
+			const containersInStore = selectContainers(getState());
+
+			expect(containersInStore).toEqual([]);
 			expect(onSuccess).not.toHaveBeenCalled();
 			expect(onError).toHaveBeenCalled();
 		})
 	})
 
 	describe('updateContainerSettings', () => {
-		const mockContainer = containerMockFactory();
+		beforeEach(() => populateStore());
 		const mockSettings = prepareMockSettingsReply(mockContainer);
 
 		it('should call updateContainerSettings endpoint', async () => {
 			mockServer
-			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
-			.reply(200);
-
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.updateContainerSettings(
+				.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+				.reply(200);
+				
+			await waitForActions(() => {
+				dispatch(ContainersActions.updateContainerSettings(
 					teamspace,
 					projectId,
 					containerId,
 					mockSettings,
 					onSuccess,
 					onError,
-				))
-				.put(ContainersActions.updateContainerSettingsSuccess(
+				));
+			}, [
+				ContainersActions.updateContainerSettingsSuccess(
 					projectId,
 					containerId,
 					mockSettings,
-				))
-				.silentRun();
-
+				)
+			]);
 			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
 		})
 
-		it('should call container settings endpoint with 404', async () => {
-			const containerId = mockContainer._id;
-			mockServer
-			.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
-			.reply(404);
+		it('should call update container settings endpoint with 404', async () => {
+			const { resolve, promiseToResolve } = getWaitablePromise();
 
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.updateContainerSettings(teamspace, projectId, containerId, mockSettings, onSuccess, onError))
-				.silentRun();
+			mockServer
+				.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
+				.reply(404);
+				
+			dispatch(ContainersActions.updateContainerSettings(
+				teamspace,
+				projectId,
+				containerId,
+				mockSettings,
+				onSuccess,
+				() => { onError(); resolve(); },
+			));
+
+			await promiseToResolve;
+
+			const containersInStore = selectContainers(getState());
+			expect(containersInStore).toEqual([mockContainer]);
 
 			expect(onSuccess).not.toHaveBeenCalled();
 			expect(onError).toHaveBeenCalled();
@@ -287,29 +335,42 @@ describe('Containers: sagas', () => {
 	})
 
 	describe('deleteContainer', () => {
+		beforeEach(() => populateStore());
+		
 		it('should call deleteContainer endpoint', async () => {
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
 				.reply(200);
 
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId, onSuccess, onError))
-				.put(ContainersActions.deleteContainerSuccess(projectId, containerId))
-				.silentRun();
-				
+			await waitForActions(() => {
+				dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId, onSuccess, onError));
+			}, [ContainersActions.deleteContainerSuccess(projectId, containerId)]);
+
 			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
 		})
 
-		it('should call deleteContainer endpoint with 404 and open alert modal', async () => {
+		it('should call deleteContainer endpoint with 404', async () => {
+			const { resolve, promiseToResolve } = getWaitablePromise();
 			mockServer
 				.delete(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)
 				.reply(404);
 
-			await expectSaga(ContainersSaga.default)
-				.dispatch(ContainersActions.deleteContainer(teamspace, projectId, containerId, onSuccess, onError))
-				.silentRun();
+			const containersBefore = selectContainers(getState());
 
+			dispatch(ContainersActions.deleteContainer(
+				teamspace,
+				projectId,
+				containerId,
+				onSuccess,
+				() => { onError(); resolve(); },
+			));
+
+			await promiseToResolve;
+
+			const containersAfter = selectContainers(getState());
+			expect(containersBefore).toEqual(containersAfter);
+				
 			expect(onSuccess).not.toHaveBeenCalled();
 			expect(onError).toHaveBeenCalled();
 		})

@@ -23,7 +23,7 @@ import { matchPath } from 'react-router';
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { ROUTES } from '../../constants/routes';
-import { INITIAL_HELICOPTER_SPEED, NEW_PIN_ID, VIEWER_CLIP_MODES, VIEWER_EVENTS } from '../../constants/viewer';
+import { INITIAL_HELICOPTER_SPEED, VIEWER_CLIP_MODES, VIEWER_EVENTS } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Viewer } from '../../services/viewer/viewer';
@@ -37,7 +37,7 @@ import { GroupsActions } from '../groups';
 import { selectIssuesMap, IssuesActions } from '../issues';
 import { JobsActions } from '../jobs';
 import { MeasurementsActions } from '../measurements';
-import { selectCurrentRevisionId, selectSettings, ModelActions, ModelTypes } from '../model';
+import { selectCurrentRevisionId, selectSettings, ModelActions, ModelTypes, selectDefaultView } from '../model';
 import { PresentationActions } from '../presentation';
 import { selectRisksMap, RisksActions } from '../risks';
 import { selectUrlParams } from '../router/router.selectors';
@@ -45,7 +45,7 @@ import { SequencesActions } from '../sequences';
 import { StarredActions } from '../starred';
 import { dispatch } from '../store';
 import { TreeActions } from '../tree';
-import { selectInitialView, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
+import { selectInitialView, selectViewpointsDomain, selectViewpointsList, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
 import { ViewerGuiActions, ViewerGuiTypes } from './viewerGui.redux';
 import {
 	selectClipNumber,
@@ -75,6 +75,8 @@ function* fetchData({ teamspace, model }) {
 
 	try {
 		const { username } = yield select(selectCurrentUser);
+
+		yield put(ViewpointsActions.reset());
 
 		yield all([
 			put(ModelActions.fetchRevisions(teamspace, model, false)),
@@ -247,11 +249,18 @@ function* updateClipState({clipNumber}) {
 	}
 }
 
-function* goToExtent() {
+function* goToHomeView() {
 	try {
-		yield Viewer.goToExtent();
+		const defaultView = yield select(selectDefaultView);
+		if (defaultView) {
+			const { teamspace, model } = yield select(selectUrlParams);
+			const { viewpointsMap } = yield select(selectViewpointsDomain);
+			yield put(ViewpointsActions.showViewpoint(teamspace, model, viewpointsMap[defaultView.id], false));
+		} else {
+			yield Viewer.goToExtent();
+		}
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('go', 'to extent', error));
+		yield put(DialogActions.showErrorDialog('go', 'to home view', error));
 	}
 }
 
@@ -434,7 +443,7 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.GET_HELICOPTER_SPEED, getHelicopterSpeed);
 	yield takeLatest(ViewerGuiTypes.INCREASE_HELICOPTER_SPEED, increaseHelicopterSpeed);
 	yield takeLatest(ViewerGuiTypes.DECREASE_HELICOPTER_SPEED, decreaseHelicopterSpeed);
-	yield takeLatest(ViewerGuiTypes.GO_TO_EXTENT, goToExtent);
+	yield takeLatest(ViewerGuiTypes.GO_TO_HOME_VIEW, goToHomeView);
 	yield takeLatest(ViewerGuiTypes.SET_CLIPPING_MODE, setClippingMode);
 	yield takeLatest(ViewerGuiTypes.UPDATE_CLIP_STATE, updateClipState);
 	yield takeLatest(ViewerGuiTypes.SET_CLIP_EDIT, setClipEdit);

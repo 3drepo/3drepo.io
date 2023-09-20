@@ -74,7 +74,7 @@ export const Federations = (): JSX.Element => {
 						<DashboardListEmptyText>
 							<FormattedMessage
 								id="federations.favourites.emptyMessage"
-								defaultMessage="You haven’t added any Favourites. Click the star on a Federation to add your first favourite Federation."
+								defaultMessage="Click on the star to mark a federation as favourite"
 							/>
 						</DashboardListEmptyText>
 					)}
@@ -94,7 +94,6 @@ export const Federations = (): JSX.Element => {
 						collapsed: <FormattedMessage id="federations.all.collapse.tooltip.show" defaultMessage="Show federations" />,
 						visible: <FormattedMessage id="federations.all.collapse.tooltip.hide" defaultMessage="Hide federations" />,
 					}}
-					showBottomButton
 					emptyMessage={(
 						<>
 							<DashboardListEmptyText>

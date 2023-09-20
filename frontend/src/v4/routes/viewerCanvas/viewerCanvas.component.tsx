@@ -16,14 +16,13 @@
  */
 import { PureComponent, createRef } from 'react';
 import { difference, differenceBy, isEqual } from 'lodash';
-import { isV5 } from '@/v4/helpers/isV5';
 import { dispatch } from '@/v4/modules/store';
 import { DialogActions } from '@/v4/modules/dialog';
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
 import { addColorOverrides, overridesColorDiff, removeColorOverrides } from '../../helpers/colorOverrides';
-import { pinsDiff } from '../../helpers/pins';
+import { pinsDiff, pinsRemoved, pinsSelectionChanged } from '../../helpers/pins';
 import { PresentationMode } from '../../modules/presentation/presentation.constants';
 import { moveMeshes, resetMovedMeshes, transformationDiffChanges,
 transformationDiffRemoves } from '../../modules/sequences/sequences.helper';
@@ -98,9 +97,6 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 	public componentDidMount() {
 		const { viewer } = this.props;
 		viewer.setupInstance(this.containerRef.current, this.handleUnityError);
-		if (isV5()) {
-			viewer.setBackgroundColor([0.949, 0.965, 0.988, 1])
-		}
 	}
 
 	public renderGisCoordinates(coordinates) {
@@ -113,15 +109,18 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 		}
 	}
 
-	public renderPins(prev, curr) {
+	public async renderPins(prev, curr) {
 		if (this.shouldBeVisible) {
 			const { viewer } = this.props;
 
-			const toAdd = pinsDiff(curr, prev);
-			const toRemove = pinsDiff(prev, curr);
+			const toShow = pinsDiff(curr, prev);
+			const toRemove = pinsRemoved(prev, curr);
+			const toChangeSelection = pinsSelectionChanged(curr, prev);
 
-			toRemove.forEach(viewer.removePin.bind(viewer));
-			toAdd.forEach(viewer.addPin.bind(viewer));
+			await Promise.all(toRemove.map(viewer.removePin.bind(viewer)));
+			await Promise.all(toShow.map(viewer.showPin.bind(viewer)));
+
+			toChangeSelection.forEach(viewer.setSelectionPin.bind(viewer));
 		}
 	}
 
@@ -191,10 +190,12 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 		}
 
 		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
+			// console.log(JSON.stringify({prevcolorOverrides:  prevProps.colorOverrides, colorOverrides}, null, '\t'));
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
 		}
 
 		if (prevProps.transparencies && !isEqual(transparencies, prevProps.transparencies)) {
+			// console.log(JSON.stringify({prevtransparencies:  prevProps.transparencies, transparencies}, null, '\t'));
 			this.props.handleTransparencyOverridesChange(transparencies, prevProps.transparencies);
 		}
 

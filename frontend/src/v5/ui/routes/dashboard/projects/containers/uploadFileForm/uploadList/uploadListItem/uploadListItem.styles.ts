@@ -17,8 +17,8 @@
 
 import styled, { css } from 'styled-components';
 import { CircleButton } from '@controls/circleButton';
-import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag';
-import { UploadListItemDestination } from './components/uploadListItemDestination';
+import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag/uploadListItemRevisionTag.component';
+import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
 
 export const Button = styled(CircleButton)`
 	margin: 0;

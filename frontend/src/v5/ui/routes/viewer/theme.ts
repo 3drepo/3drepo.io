@@ -23,6 +23,7 @@ import { Wrapper } from '@/v4/routes/components/filterPanel/components/childMenu
 import _ from 'lodash';
 import ThinChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import { createElement } from 'react';
+import { DefaultTheme } from 'styled-components';
 
 export const theme = createTheme(
 	_.merge(
@@ -69,9 +70,6 @@ export const theme = createTheme(
 				MuiInputBase: {
 					styleOverrides: {
 						root: {
-							'&&': {
-								borderRadius: 5,
-							},
 							'&.Mui-focused': {
 								'.MuiSelect-select': {
 									border: `1px solid ${COLOR.PRIMARY_MAIN}`,
@@ -85,8 +83,8 @@ export const theme = createTheme(
 									borderWidth: '1px !important',
 								},
 							},
-							'& input': {
-								padding: '0px 12px !important',
+							'& input:not(.MuiAutocomplete-input)': {
+								padding: '0px 12px',
 							},
 						},
 						formControl: {
@@ -94,6 +92,27 @@ export const theme = createTheme(
 								opacity: '1 !important',
 								color: COLOR.BASE_LIGHTER,
 							},
+						},
+					},
+				},
+				MuiAutocomplete: {
+					styleOverrides: {
+						root: {
+							'.MuiOutlinedInput-root .MuiAutocomplete-input': {
+								padding: 0,
+							},
+						},
+						endAdornment: {
+							marginRight: 5,
+
+							'& > button:last-child svg': {
+								width: 10,
+								pointerEvents: 'none',
+								color: COLOR.BASE_MAIN,
+							},
+						},
+						inputRoot: {
+							height: 26,
 						},
 					},
 				},
@@ -112,7 +131,6 @@ export const theme = createTheme(
 								fontSize: 10,
 							},
 							'& .MuiInputBase-root input': {
-								lineHeight: 22,
 								height: 26,
 							},
 						},
@@ -138,7 +156,6 @@ export const theme = createTheme(
 					styleOverrides: {
 						root: {
 							'&&': {
-								padding: '4px 10px',
 								fontSize: '12px',
 							},
 						},
@@ -146,9 +163,6 @@ export const theme = createTheme(
 				},
 				MuiPaper: {
 					styleOverrides: {
-						rounded: {
-							borderRadius: 6,
-						},
 						root: {
 							'.react-autosuggest__suggestions-list': {
 								margin: 0,
@@ -166,14 +180,19 @@ export const theme = createTheme(
 					defaultProps: {
 						container: () => document.getElementById('v4DialogsOverrides'),
 					},
+					styleOverrides: {
+						paper: {
+							borderRadius: 8,
+							'>ul': {
+								borderRadius: 'inherit',
+							},
+						},
+					},
 				},
 				MuiAvatar: {
 					styleOverrides: {
 						root: {
-							height: '32 !important',
-							width: '32 !important',
 							border: 'none',
-							margin: '0 !important',
 							alignSelf: 'flex-start',
 						},
 					},
@@ -228,7 +247,6 @@ export const theme = createTheme(
 				MuiList: {
 					styleOverrides: {
 						root: {
-							borderRadius: '6px !important',
 							boxShadow: `0px 9px 28px 8px rgb(0 0 0 / 5%),
 										0px 6px 16px 0px rgb(0 0 0 / 8%),
 										0px 3px 6px -4px rgb(0 0 0 / 12%) !important`,
@@ -262,7 +280,7 @@ export const theme = createTheme(
 								[`& ${Wrapper}`]: {
 									overflow: 'hidden',
 									left: '100%',
-									borderRadius: '6px',
+									borderRadius: 10,
 								},
 							},
 							// filter panel menu
@@ -362,4 +380,4 @@ export const theme = createTheme(
 			},
 		},
 	),
-);
+) as unknown as DefaultTheme;

@@ -764,10 +764,9 @@ class Ticket extends View {
 	async attachResourceFiles(account, model, id, username, sessionId, resourceNames, files) {
 		const spaceToBeUsed = files.reduce((size, file) => size + file.size, 0);
 
-		if (!User.hasSufficientQuota(account, spaceToBeUsed)) {
+		if (!(await User.hasSufficientQuota(account, spaceToBeUsed))) {
 			throw responseCodes.SIZE_LIMIT_PAY;
 		}
-
 		if (!files.every(f => f.size < config.resourceUploadSizeLimit)) {
 			throw responseCodes.SIZE_LIMIT;
 		}

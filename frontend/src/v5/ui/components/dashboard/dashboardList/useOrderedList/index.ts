@@ -16,5 +16,5 @@
  */
 
 export { useOrderedList } from './useOrderedList.hooks';
-export { DEFAULT_SORT_CONFIG } from './useOrderedList.constants';
+export { DEFAULT_SORT_CONFIG } from './useOrderedList.types';
 export type { ISortConfig } from './useOrderedList.types';

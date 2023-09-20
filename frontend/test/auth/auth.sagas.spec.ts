@@ -16,15 +16,20 @@
  */
 
 import { AuthActions } from '@/v5/store/auth/auth.redux';
-import * as AuthSaga from '@/v5/store/auth/auth.sagas';
-import { CurrentUserActions } from '@/v5/store/currentUser/currentUser.redux';
-import { expectSaga } from 'redux-saga-test-plan';
 import { mockServer } from '../../internals/testing/mockServer';
-import { alertAction } from '../test.helpers'
+import { createTestStore } from '../test.helpers'
+import { selectIsAuthenticated, selectLoginError } from '@/v5/store/auth/auth.selectors';
+import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 
 describe('Auth: sagas', () => {
 	const username = 'Jason';
 	const password = 'Friday13';
+	
+	let dispatch, getState, waitForActions;
+
+	beforeEach(() => {
+		({ dispatch, getState,  waitForActions } = createTestStore());
+	});	
 
 	describe('authenticate', () => {
 		it('should authenticate successfully', async () => {
@@ -32,13 +37,13 @@ describe('Auth: sagas', () => {
 				.get('/login')
 				.reply(200);
 
-			await expectSaga(AuthSaga.default)
-				.dispatch(AuthActions.authenticate())
-				.put(AuthActions.setPendingStatus(true))
-				.put(CurrentUserActions.fetchUser())
-				.put(AuthActions.setAuthenticationStatus(true))
-				.put(AuthActions.setPendingStatus(false))
-				.silentRun();
+			await waitForActions(() => {
+				dispatch(AuthActions.authenticate());
+			}, [AuthActions.setPendingStatus(false)]);
+
+			const isAuthenticated = selectIsAuthenticated(getState());
+
+			expect(isAuthenticated).toBeTruthy();
 		});
 
 		it('should fail to authenticate and open alert modal', async () => {
@@ -46,30 +51,25 @@ describe('Auth: sagas', () => {
 				.get('/login')
 				.reply(400);
 
-			await expectSaga(AuthSaga.default)
-				.dispatch(AuthActions.authenticate())
-				.put(AuthActions.setPendingStatus(true))
-				.put(AuthActions.setAuthenticationStatus(false))
-				.put.like(alertAction('trying to authenticate'))
-				.put(AuthActions.setPendingStatus(false))
-				.silentRun();
+			await waitForActions(() => {
+				dispatch(AuthActions.authenticate());
+			}, [DialogsTypes.OPEN, AuthActions.setPendingStatus(false)]);
 		});
 	});
 
 	describe('login', () => {
-
 		it('should login successfully', async () => {
 			mockServer
 				.post('/login')
 				.reply(200);
 
-			await expectSaga(AuthSaga.default)
-				.dispatch(AuthActions.login(username, password))
-				.put(AuthActions.setPendingStatus(true))
-				.put(CurrentUserActions.fetchUser())
-				.put(AuthActions.setAuthenticationStatus(true))
-				.put(AuthActions.setPendingStatus(false))
-				.silentRun();
+			await waitForActions(() => {
+				dispatch(AuthActions.login(username, password));
+			}, [AuthActions.setPendingStatus(false)]);
+
+			const isAuthenticated = selectIsAuthenticated(getState());
+
+			expect(isAuthenticated).toBeTruthy();
 		});
 
 		it('should fail to log in with unexpected error', async () => {
@@ -78,13 +78,14 @@ describe('Auth: sagas', () => {
 				.reply(500);
 			ClientConfig.loginPolicy = { lockoutDuration: 10 };
 
-			await expectSaga(AuthSaga.default)
-				.dispatch(AuthActions.login(username, password))
-				.put(AuthActions.setPendingStatus(true))
-				.put(AuthActions.loginFailed(null))
-				.put(AuthActions.setPendingStatus(false))
-				.silentRun();
-			
+			await waitForActions(() => {
+				dispatch(AuthActions.login(username, password));
+			}, [AuthActions.setPendingStatus(false)]);
+
+			const isAuthenticated = selectIsAuthenticated(getState());
+
+			expect(isAuthenticated).toBeFalsy();
+
 			delete ClientConfig.loginPolicy;
 		});
 
@@ -97,12 +98,15 @@ describe('Auth: sagas', () => {
 				.reply(400, errorCode);
 			ClientConfig.loginPolicy = { lockoutDuration: 10 };
 
-			await expectSaga(AuthSaga.default)
-				.dispatch(AuthActions.login(username, password))
-				.put(AuthActions.setPendingStatus(true))
-				.put(AuthActions.loginFailed(expectedErrorMessage))
-				.put(AuthActions.setPendingStatus(false))
-				.silentRun();
+			await waitForActions(() => {
+				dispatch(AuthActions.login(username, password));
+			}, [AuthActions.setPendingStatus(false)]);
+
+			const isAuthenticated = selectIsAuthenticated(getState());
+			const errorMessage = selectLoginError(getState());
+
+			expect(isAuthenticated).toBeFalsy();
+			expect(errorMessage).toEqual(expectedErrorMessage);
 
 			delete ClientConfig.loginPolicy;
 		});
@@ -114,27 +118,25 @@ describe('Auth: sagas', () => {
 				.post('/logout')
 				.reply(200);
 
-			await expectSaga(AuthSaga.default)
-				.dispatch(AuthActions.logout())
-				.put(AuthActions.setPendingStatus(true))
-				.put({ type: 'RESET_APP' })
-				.put(AuthActions.setAuthenticationStatus(false))
-				.put(AuthActions.setPendingStatus(false))
-				.silentRun();
+			await waitForActions(() => {
+				dispatch(AuthActions.logout());
+			}, [AuthActions.setPendingStatus(false)]);
+
+			const isAuthenticated = selectIsAuthenticated(getState());
+
+			expect(isAuthenticated).toBeFalsy();
 		});
 		it('should fail to logout and open alert modal', async () => {
 			mockServer
 				.post('/logout')
 				.reply(400);
 
-			await expectSaga(AuthSaga.default)
-				.dispatch(AuthActions.logout())
-				.put(AuthActions.setPendingStatus(true))
-				.put.like(alertAction('trying to log out'))
-				.put({ type: 'RESET_APP' })
-				.put(AuthActions.setAuthenticationStatus(false))
-				.put(AuthActions.setPendingStatus(false))
-				.silentRun();
+			await waitForActions(() => {
+				dispatch(AuthActions.logout());
+			}, [DialogsTypes.OPEN, AuthActions.setPendingStatus(false)]);
+
+			const isAuthenticated = selectIsAuthenticated(getState());
+			expect(isAuthenticated).toBeFalsy();
 		});
 	});
 });

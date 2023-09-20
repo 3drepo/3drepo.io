@@ -758,10 +758,10 @@ const testVerify = () => {
 				.expect(templates.ok.status);
 			await testSession.post('/v5/logout/');
 
-			// check that a teamspace has been created
+			// check that a teamspace has not been created (v5.2.1 behaviour)
 			const userTeamspaces = await agent.get(`/v5/teamspaces?key=${nonVerifiedUser.apiKey}`)
 				.expect(templates.ok.status);
-			expect(userTeamspaces.body.teamspaces.length).toEqual(2);
+			expect(userTeamspaces.body.teamspaces.length).toEqual(1);
 
 			// trying to verify the user again should fail
 			await agent.post('/v5/user/verify').send({ username: nonVerifiedUser.user, token: validEmailToken.token })
@@ -797,7 +797,6 @@ const testVerify = () => {
 
 			const teamspacesRes = await testSession.get('/v5/teamspaces');
 			const expectedList = [
-				{ name: nonVerifiedUser.user, isAdmin: true },
 				{ name: teamspace.name, isAdmin: true },
 			];
 			expect(teamspacesRes.body.teamspaces.length).toEqual(expectedList.length);
