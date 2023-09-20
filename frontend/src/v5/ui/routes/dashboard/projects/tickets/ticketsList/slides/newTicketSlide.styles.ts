@@ -15,52 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SubmitButton } from '@controls/submitButton';
 import styled from 'styled-components';
-import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
-import { TableVirtuoso } from 'react-virtuoso';
-import { isFirefox } from '@/v4/styles';
 
-export const Accordion = styled(AccordionBase)`
-	&& {
-		.MuiAccordionDetails-root {
-			padding: 0;
-
-			& > :not(:first-child) {
-				margin-top: 0;
-			}
-		}
-	}
+export const SaveButton = styled(SubmitButton)`
+	margin: 9px 15px;
+	width: fit-content;
 `;
 
-export const Comments = styled.div`
-	height: 400px;
+export const ButtonContainer = styled.div`
+	display: flex;
+	justify-content: end;
+	width: 100%;
 `;
 
-export const VirtualisedList = styled(TableVirtuoso).attrs({
-	style: { overflowY: 'scroll' },
-})`
+export const RequiresViewerContainer = styled.div`
+	padding: 27px;
 	box-sizing: border-box;
-	overflow-x: hidden;
-
-	table {
-		display: flex;
-		justify-content: center;
-
-		tbody {
-			width: 100%;
-			padding-left: 14px;
-
-			${isFirefox('padding-right: 14px;')}
-
-			tr {
-				display: flex;
-				flex-direction: column;
-				width: 100%;
-			}
-		}
-	}
-`;
-
-export const EmptyCommentsBox = styled.div`
-	padding: 15px;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	place-items: center;
+	text-align: center;
+	${({ theme }) => theme.typography.h5}
 `;

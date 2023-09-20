@@ -52,14 +52,15 @@ export const TicketView = ({
 	value,
 	onBlur,
 	onChange,
-	disabled,
+	disabled: inputDisabled,
 	helperText,
 	label,
 	required,
 	...props
 }: ITicketView) => {
-	const context = useContext(TicketContext);
+	const { setDetailViewAndProps, isViewer } = useContext(TicketContext);
 	const hasViewpoint = value?.camera;
+	const disabled = inputDisabled || !isViewer;
 
 	// Viewpoint
 	const updateViewpoint = async () => {
@@ -102,7 +103,7 @@ export const TicketView = ({
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
 
 	const onGroupsClick = () => {
-		context.setDetailViewAndProps(TicketDetailsView.Groups, props);
+		setDetailViewAndProps(TicketDetailsView.Groups, props);
 	};
 
 	const imgSrc = getImgSrc(value?.screenshot);
@@ -112,7 +113,7 @@ export const TicketView = ({
 			<Header>
 				<Label>{label}</Label>
 				<HeaderSection>
-					{!hasViewpoint ? (
+					{(isViewer && !hasViewpoint) && (
 						<Tooltip title={(formatMessage({ id: 'viewer.card.button.saveCurrentView', defaultMessage: 'Save current view' }))}>
 							<div hidden={disabled}>
 								<PrimaryTicketButton onClick={updateViewpoint}>
@@ -120,7 +121,8 @@ export const TicketView = ({
 								</PrimaryTicketButton>
 							</div>
 						</Tooltip>
-					) : (
+					)}
+					{(isViewer && hasViewpoint) && (
 						<Tooltip title={(formatMessage({ id: 'viewer.card.button.gotToView', defaultMessage: 'Go to view' }))}>
 							<div>
 								<PrimaryTicketButton onClick={goToViewpoint}>
@@ -129,7 +131,7 @@ export const TicketView = ({
 							</div>
 						</Tooltip>
 					)}
-					<EllipsisMenu disabled={!hasViewpoint}>
+					<EllipsisMenu disabled={!hasViewpoint || !isViewer}>
 						<EllipsisMenuItem
 							hidden={!hasViewpoint}
 							title={(<FormattedMessage id="viewer.card.ticketView.action.updateViewpoint" defaultMessage="Update to current view" />)}

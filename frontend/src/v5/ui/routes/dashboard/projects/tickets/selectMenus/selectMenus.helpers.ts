@@ -15,22 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useHistory } from 'react-router-dom';
+import { formatMessage } from '@/v5/services/intl';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
-export const useSearchParam = (name: string) => {
-	const history = useHistory();
-	const { location } = window;
-	const value = new URLSearchParams(location.search).get(name);
-
-	const setParam = (newValue = '') => {
-		const searchParams = new URLSearchParams(location.search);
-		if (newValue) {
-			searchParams.set(name, newValue);
-		} else {
-			searchParams.delete(name);
-		}
-		history.replace({ search: searchParams.toString() });
-	};
-
-	return [value, setParam] as [string, (val: string) => void];
+export const openUnsavedNewTicketWarningModal = () => {
+	DialogsActionsDispatchers.open('warning', {
+		title: formatMessage({
+			id: 'ticketTable.warning.ticketNotSaved.title',
+			defaultMessage: 'New ticket is not saved',
+		}),
+		message: formatMessage({
+			id: 'ticketTable.warning.ticketNotSaved.message',
+			defaultMessage: 'Changing the value of this input will close the side panel and the ticket will not be saved.',
+		}),
+	});
 };

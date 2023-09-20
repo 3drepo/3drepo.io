@@ -71,7 +71,7 @@ export const OpenInViewerButton = styled(Button).attrs({
 	variant: 'contained',
 	color: 'primary',
 })`
-	width: 140px;
+	padding: 5px 16px;
 	height: 28px;
 	margin-left: 14px;
 `;
@@ -85,7 +85,7 @@ export const SidePanel = styled(Drawer).attrs({
 			width: 410,
 			height: 'calc(100vh - 112px)',
 			top: 112,
-			zIndex: 0,
+			zIndex: 1,
 		},
 	},
 })``;
@@ -98,6 +98,10 @@ export const SlidePanelHeader = styled.div`
 	justify-content: space-between;
 	align-items: center;
 	border-bottom: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
+	position: sticky;
+	top: 0;
+	z-index: 5;
+	background: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
 export const CompletedChip = styled(CompletedFilterChip)`

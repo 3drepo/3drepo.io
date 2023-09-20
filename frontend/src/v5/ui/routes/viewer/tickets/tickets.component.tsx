@@ -71,8 +71,8 @@ export const Tickets = () => {
 	return (
 		<>
 			{view === TicketsCardViews.List && <TicketsListCard />}
-			{view === TicketsCardViews.Details && <TicketContextComponent><TicketDetailsCard /></TicketContextComponent>}
-			{view === TicketsCardViews.New && <TicketContextComponent><NewTicketCard /></TicketContextComponent>}
+			{view === TicketsCardViews.Details && <TicketContextComponent isViewer><TicketDetailsCard /></TicketContextComponent>}
+			{view === TicketsCardViews.New && <TicketContextComponent isViewer><NewTicketCard /></TicketContextComponent>}
 		</>
 	);
 };

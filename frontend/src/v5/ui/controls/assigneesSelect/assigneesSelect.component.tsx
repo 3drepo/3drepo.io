@@ -65,7 +65,7 @@ export const AssigneesSelect = ({
 		if (disabled) return;
 		e.stopPropagation();
 		setOpen(true);
-	}, []);
+	}, [disabled]);
 
 	const handleClose = () => {
 		setOpen(false);

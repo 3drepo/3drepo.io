@@ -81,6 +81,7 @@ export const TicketsTableGroup = ({ ticketsWithModelId, onEditTicket, onNewTicke
 							</NewTicketText>
 						</NewTicketRow>
 					)}
+					useMousePosition
 					onContainerOrFederationClick={onNewTicket}
 				/>
 			</Group>

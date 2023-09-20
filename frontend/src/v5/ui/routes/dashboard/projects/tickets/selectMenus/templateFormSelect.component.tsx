@@ -20,9 +20,16 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormSelect } from '@controls/inputs/formInputs.component';
 import { formatMessage } from '@/v5/services/intl';
 import { sortByName } from '@/v5/store/store.helpers';
+import { openUnsavedNewTicketWarningModal } from './selectMenus.helpers';
 
-export const TemplateFormSelect = (props) => {
+type TemplateFormSelectProps = { isNewTicketOpen?: boolean, name: string };
+export const TemplateFormSelect = ({ isNewTicketOpen, ...props }: TemplateFormSelectProps) => {
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
+
+	const handleOpen = () => {
+		if (!isNewTicketOpen) return;
+		openUnsavedNewTicketWarningModal();
+	};
 
 	return (
 		<FormSelect
@@ -33,6 +40,7 @@ export const TemplateFormSelect = (props) => {
 				return (<b>{name}</b>);
 			}}
 			{...props}
+			onOpen={handleOpen}
 		>
 			{sortByName(templates).map(({ _id, name }) => (<MenuItem key={_id} value={_id}>{name}</MenuItem>))}
 		</FormSelect>

@@ -24,25 +24,28 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import _ from 'lodash';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
+import { SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketsTableGroup } from './ticketsTableGroup/ticketsTableGroup.component';
-import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, groupTickets, ISSUE_PROPERTIES_GROUPS, NONE_OPTION, SAFETIBASE_PROPERTIES_GROUPS } from '../ticketsTable.helper';
+import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, groupTickets, ISSUE_PROPERTIES_GROUPS, NONE_OPTION, SAFETIBASE_PROPERTIES_GROUPS, UNSET } from '../ticketsTable.helper';
 import { EmptyTicketsView } from '../../emptyTicketsView/emptyTicketsView.styles';
 import { Container } from './ticketsTableContent.styles';
 
-type TicketsTableContentProps = {
-	onEditTicket: (modelId: string, ticket: Partial<ITicket>) => void;
-	onNewTicket: (modelId: string, ticket?: Partial<ITicket>) => void;
-};
-export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableContentProps) => {
+type TicketsTableContentProps = { setSidePanelData: (modelId: string, ticket?: Partial<ITicket>) => void; };
+export const TicketsTableContent = ({ setSidePanelData }: TicketsTableContentProps) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { groupBy: groupByAsURLParam } = useParams<DashboardTicketsParams>();
+	const { groupBy: groupByAsURLParam, template } = useParams<DashboardTicketsParams>();
 	const groupBy = GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByAsURLParam];
 
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
-		const defaultValue = {} as any;
-		const formattedGroupByValue = _.upperCase(_.snakeCase(groupByValue));
+		if (groupByValue === UNSET) {
+			setSidePanelData(modelId, {});
+			return;
+		}
 
-		if (SAFETIBASE_PROPERTIES_GROUPS[groupBy]?.[formattedGroupByValue]) {
+		const defaultValue = {} as any;
+		const formattedGroupByValue = _.upperCase(groupByValue).replaceAll(' ', '_');
+
+		if (groupBy === SafetibaseProperties.TREATMENT_STATUS) {
 			defaultValue.modules = {
 				safetibase: {
 					[groupBy]: SAFETIBASE_PROPERTIES_GROUPS[groupBy][formattedGroupByValue],
@@ -50,11 +53,13 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 			};
 		}
 
-		if (ISSUE_PROPERTIES_GROUPS[groupBy]?.[formattedGroupByValue]) {
-			defaultValue.properties = { [groupBy]: ISSUE_PROPERTIES_GROUPS[groupBy][formattedGroupByValue] };
+		if (groupBy in ISSUE_PROPERTIES_GROUPS) {
+			defaultValue.properties = {
+				[groupBy]: ISSUE_PROPERTIES_GROUPS[groupBy][formattedGroupByValue],
+			};
 		}
 
-		onNewTicket(modelId, defaultValue);
+		setSidePanelData(modelId, defaultValue);
 	};
 
 	if (!filteredItems.length) {
@@ -68,7 +73,7 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 		);
 	}
 
-	if (groupBy === NONE_OPTION) return (<TicketsTableGroup ticketsWithModelId={filteredItems} onNewTicket={onGroupNewTicket('')} {...props} />);
+	if (groupBy === NONE_OPTION) return (<TicketsTableGroup ticketsWithModelId={filteredItems} onNewTicket={onGroupNewTicket('')} onEditTicket={setSidePanelData} />);
 
 	const groups = groupTickets(groupBy, filteredItems);
 
@@ -78,9 +83,9 @@ export const TicketsTableContent = ({ onNewTicket, ...props }: TicketsTableConte
 				<DashboardListCollapse
 					title={<>{groupName} <CircledNumber disabled={!ticketsWithModelId.length}>{ticketsWithModelId.length}</CircledNumber></>}
 					defaultExpanded={!!ticketsWithModelId.length}
-					key={groupBy + groupName}
+					key={groupBy + groupName + template + ticketsWithModelId}
 				>
-					<TicketsTableGroup ticketsWithModelId={ticketsWithModelId} onNewTicket={onGroupNewTicket(groupName)} {...props} />
+					<TicketsTableGroup ticketsWithModelId={ticketsWithModelId} onNewTicket={onGroupNewTicket(groupName)} onEditTicket={setSidePanelData} />
 				</DashboardListCollapse>
 			))}
 		</Container>
