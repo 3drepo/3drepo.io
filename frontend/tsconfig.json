@@ -3,7 +3,7 @@
 	"isolatedModules": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-	"moduleResolution": "bundler",
+	"moduleResolution": "Bundler",
     "module": "commonjs",
     "target": "es6",
     "types": [
@@ -11,7 +11,8 @@
       "react-dom",
       "lodash",
       "node",
-      "jest"
+      "jest",
+      "webpack-env" 
     ],
     "lib": [
       "es2015",
