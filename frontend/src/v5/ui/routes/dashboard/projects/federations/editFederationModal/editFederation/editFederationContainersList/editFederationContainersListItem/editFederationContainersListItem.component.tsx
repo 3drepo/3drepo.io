@@ -52,7 +52,7 @@ export const EditFederationContainersListItem = memo(({
 }: EditFederationContainersListItemProps) => {
 	const { setGroupsByContainer, groupsByContainer, groups, includedContainers } = useContext(EditFederationContext);
 
-	const isIncluded = includedContainers.includes(container);
+	const isIncluded = !!includedContainers.find(({ _id }) => _id === container._id);
 
 	const onGroupChange = (e, group) => {
 		setGroupsByContainer((existingGroups) => ({ ...existingGroups, [container._id]: group }));
