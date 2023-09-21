@@ -14,17 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
 	title: 'Buttons/DueDate',
 	component: DueDateWithLabel,
-	// More on argTypes: https://storybook.js.org/docs/react/api/argtypes
-
 	argTypes: {
 		value: {
 			description: 'The due date',
@@ -36,28 +33,19 @@ export default {
 			type: 'boolean',
 		},
 	},
-} as ComponentMeta<typeof DueDateWithLabel>;
+	decorators: [
+		(Story) => (
+			<LocalizationProvider dateAdapter={AdapterDayjs}>
+				<Story />
+			</LocalizationProvider>
+		),
+	],
+	parameters: { controls: ['onBlur'] },
+} as Meta<typeof DueDateWithLabel>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof DueDateWithLabel> = (args) => (
-	<LocalizationProvider dateAdapter={AdapterDayjs}>
-		<DueDateWithLabel {...args} />
-	</LocalizationProvider>
-);
+type Story = StoryObj<typeof DueDateWithLabel>;
 
-export const Overdue = Template.bind({});
-Overdue.args = {
-	value: 1665572857000,
-};
-
-export const Due = Template.bind({});
-Due.args = {
-	value: 2020202020202,
-};
-
-export const Unset = Template.bind({});
-
-export const UnsetDisabled = Template.bind({});
-UnsetDisabled.args = {
-	disabled: true,
-};
+export const Overdue: Story = { args: { value: 1665572857000 } };
+export const Due: Story = { args: { value: 2020202020202 } };
+export const Unset: Story = {};
+export const UnsetDisabled: Story = { args: { disabled: true } };

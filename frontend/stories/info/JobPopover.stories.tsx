@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,31 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Meta, StoryObj } from '@storybook/react';
-import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
-import { AppBar as MuiAppBar } from '@mui/material';
-import NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
+import { JobPopoverCircle } from '@components/shared/popoverCircles/jobPopoverCircle/jobPopoverCircle.component';
 
 export default {
-	title: 'Buttons/NavbarButton',
-	component: NavbarButton,
-	parameters: {
-		docs: {
-			transformSource: (source) => source.replace(/__WEBPACK_DEFAULT_EXPORT__/g, 'Icon'),
-		},
-		controls: { exclude: ['onClick', 'formError', 'children'] },
-	},
-	decorators: [
-		(Story) => (
-			<MuiAppBar>
-				<Story />
-			</MuiAppBar>
-		),
-	],
+	title: 'Info/JobPopoverCircle',
+	component: JobPopoverCircle,
+	parameters: { controls: { exclude: [
+		'alt',
+		'children',
+		'classes',
+		'imgProps',
+		'sizes',
+		'src',
+		'srcSet',
+		'sx',
+		'variant',
+		'ref',
+		'backgroundColor',
+	] } },
+} as Meta<typeof JobPopoverCircle>;
+
+type Story = StoryObj<typeof JobPopoverCircle>;
+
+export const JobPopoverPink: Story = {
 	args: {
-		children: <NotificationsIcon />,
+		size: 'small',
+		job: {
+			_id: 'Front-end Developer',
+			color: '#DC1995',
+		},
 	},
-} as Meta<typeof NavbarButton>;
-
-type Story = StoryObj<typeof NavbarButton>;
-
-export const Default: Story = {};
+};

@@ -14,60 +14,45 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Avatar as Button } from '@controls/avatar/';
-import { ComponentProps } from 'react';
+import { Meta, StoryObj } from '@storybook/react';
+
+const defaultUser = {
+	firstName: 'Json',
+	lastName: 'Vorhees',
+	hasAvatar: false,
+	avatarUrl: '',
+	user: null,
+};
 
 export default {
 	title: 'Buttons/AvatarButton',
 	component: Button,
 	parameters: { controls: { exclude: ['onClick', 'className'] } },
-} as ComponentMeta<typeof Button>;
+	args: {
+		user: defaultUser,
+	}
+} as Meta<typeof Button>;
 
-type Props = ComponentProps<typeof Button>;
+type Story = StoryObj<typeof Button>;
 
-const Template: ComponentStory<typeof Button> = (args) => <Button {...args} />;
+export const AvatarWithInitials: Story = { args: { isButton: false } };
 
-export const AvatarWithInitials = Template.bind({});
-AvatarWithInitials.args = {
-	user: {
-		firstName: 'Json',
-		lastName: 'Vorhees',
-		hasAvatar: false,
-		avatarUrl: '',
+export const AvatarWithInitialsHoverStates: Story = { args: { isButton: true } };
+
+export const AvatarWithInitialsLargeSizeAndHoverStates: Story = {
+	args: {
+		size: 'large',
+		isButton: true,
 	},
-	isButton: false,
-} as Props;
+};
 
-export const AvatarWithInitialsHoverStates = Template.bind({});
-AvatarWithInitialsHoverStates.args = {
-	user: {
-		firstName: 'Json',
-		lastName: 'Vorhees',
-		hasAvatar: false,
-		avatarUrl: '',
+export const AvatarWithImage: Story = {
+	args: {
+		user: {
+			...defaultUser,
+			hasAvatar: true,
+			avatarUrl: 'https://i.pinimg.com/170x/26/5c/1c/265c1cc710304eb15607e18c6f591c85.jpg',
+		},
 	},
-	isButton: true,
-} as Props;
-
-export const AvatarWithInitialsLargeSizeAndHoverStates = Template.bind({});
-AvatarWithInitialsLargeSizeAndHoverStates.args = {
-	user: {
-		firstName: 'Json',
-		lastName: 'Vorhees',
-		hasAvatar: false,
-		avatarUrl: '',
-	},
-	size: 'large',
-	isButton: true,
-} as Props;
-
-export const AvatarWithImage = Template.bind({});
-AvatarWithImage.args = {
-	user: {
-		firstName: 'Json',
-		lastName: 'Vorhees',
-		hasAvatar: true,
-		avatarUrl: 'https://i.pinimg.com/170x/26/5c/1c/265c1cc710304eb15607e18c6f591c85.jpg',
-	},
-} as Props;
+};

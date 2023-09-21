@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,32 +14,28 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { Meta, StoryObj } from '@storybook/react';
-import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
-import { AppBar as MuiAppBar } from '@mui/material';
-import NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
+import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.styles';
 
 export default {
-	title: 'Buttons/NavbarButton',
-	component: NavbarButton,
-	parameters: {
-		docs: {
-			transformSource: (source) => source.replace(/__WEBPACK_DEFAULT_EXPORT__/g, 'Icon'),
-		},
-		controls: { exclude: ['onClick', 'formError', 'children'] },
+	title: 'Info/PopoverCircle',
+	component: PopoverCircle,
+	parameters: { controls: { exclude: ['PopoverComponent'] } },
+} as Meta<typeof PopoverCircle>;
+
+type Story = StoryObj<typeof PopoverCircle>;
+
+export const PopoverCircleWithImage: Story = {
+	args: {
+		src: 'https://i.pinimg.com/170x/26/5c/1c/265c1cc710304eb15607e18c6f591c85.jpg',
+		PopoverComponent: () => <div>I am a popover</div>,
 	},
 	decorators: [
 		(Story) => (
-			<MuiAppBar>
-				<Story />
-			</MuiAppBar>
-		),
+			<HoverPopover anchor={() => (<Story />)}>
+				<div>I am a popover</div>
+			</HoverPopover>
+		)
 	],
-	args: {
-		children: <NotificationsIcon />,
-	},
-} as Meta<typeof NavbarButton>;
-
-type Story = StoryObj<typeof NavbarButton>;
-
-export const Default: Story = {};
+};

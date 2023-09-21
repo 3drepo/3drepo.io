@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { CircleButton as Button } from '@controls/circleButton';
 import NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
 
@@ -28,28 +28,19 @@ export default {
 			control: { type: 'select' },
 		},
 	},
+	args: {
+		children: <NotificationsIcon />,
+	},
 	parameters: {
 		docs: {
 			transformSource: (source) => source.replace(/__WEBPACK_DEFAULT_EXPORT__/g, 'Icon'),
 		},
-		controls: { exclude: ['onClick'] },
+		controls: { exclude: ['onClick', 'children'] },
 	},
-} as ComponentMeta<typeof Button>;
+} as Meta<typeof Button>;
 
-const TemplateNotifications: ComponentStory<typeof Button> = (args) => (
-	<Button {...args}><NotificationsIcon /></Button>);
+type Story = StoryObj<typeof Button>;
 
-export const NotificationsPrimary = TemplateNotifications.bind({});
-NotificationsPrimary.args = {
-	variant: 'primary',
-};
-
-export const NotificationsSecondary = TemplateNotifications.bind({});
-NotificationsSecondary.args = {
-	variant: 'secondary',
-};
-
-export const NotificationsViewer = TemplateNotifications.bind({});
-NotificationsViewer.args = {
-	variant: 'viewer',
-};
+export const NotificationsPrimary: Story = { args: { variant: 'primary' } };
+export const NotificationsSecondary: Story = { args: { variant: 'secondary' } };
+export const NotificationsViewer: Story = { args: { variant: 'viewer' } };
