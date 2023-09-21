@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
 import { DashboardListCollapse, DashboardListEmptyContainer, DashboardListEmptySearchResults, DashboardListHeader, DashboardListHeaderLabel, DashboardListItem } from '@components/dashboard/dashboardList';
 import { CollapseSideElementGroup } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.styles';
@@ -30,7 +30,7 @@ export default {
 	argTypes: {
 		items: { control: 'object' },
 	},
-} as ComponentMeta<typeof SearchContextComponent>;
+} as Meta<typeof SearchContextComponent>;
 
 const ObjectsListHeader = ({ columnNames, setSortConfig }) => (
 	<DashboardListHeader onSortingChange={setSortConfig}>
@@ -75,17 +75,16 @@ const ObjectsList = () => {
 		</DashboardListCollapse>
 	);
 };
-const Template: ComponentStory<typeof SearchContextComponent> = (args) => (
-	<SearchContextComponent {...args}>
-		<ObjectsList />
-	</SearchContextComponent>
-);
 
-export const ListWithFilteredItems = Template.bind({});
-ListWithFilteredItems.args = {
-	items: [
-		{ name: 'Winona', nationality: 'American' },
-		{ name: 'David', nationality: 'American' },
-		{ name: 'Millie', nationality: 'British' },
-	],
+type Story = StoryObj<typeof SearchContextComponent>;
+
+export const ListWithFilteredItems: Story = {
+	args: {
+		items: [
+			{ name: 'Winona', nationality: 'American' },
+			{ name: 'David', nationality: 'American' },
+			{ name: 'Millie', nationality: 'British' },
+		],
+		children: <ObjectsList />,
+	},
 };
