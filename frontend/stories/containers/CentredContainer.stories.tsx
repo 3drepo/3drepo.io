@@ -15,9 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { StoryObj, Meta } from '@storybook/react';
 import { CentredContainer, ICentredContainer } from '@controls/centredContainer/centredContainer.component';
 import styled, { css } from 'styled-components';
+
+
+type ICentredContainerStory = ICentredContainer & {
+	parentHeight: string;
+	parentWidth: string;
+};
+const ParentComponent = styled.div<Pick<ICentredContainerStory, 'parentHeight' | 'parentWidth'>>`
+	${({ parentHeight, parentWidth }) => css`
+		height: ${parentHeight || '300px'};
+		width: ${parentWidth || '100%'};
+	`}
+	border: 2px solid hotpink;
+	background: ${({ theme }) => theme.palette.gradient.secondary};
+`;
+
+const TextContainer = styled.div`
+	padding: 20px;
+	border-radius: 5px;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	${({ theme }) => theme.typography.h3}
+`;
 
 export default {
 	title: 'Containers/CentredContainer',
@@ -47,67 +69,45 @@ export default {
 		},
 	},
 	parameters: { controls: { exclude: ['className'] } },
-} as ComponentMeta<typeof CentredContainer>;
+	render: ({ parentHeight, parentWidth, children, ...args }) => (
+		<ParentComponent parentHeight={parentHeight} parentWidth={parentWidth}>
+			<CentredContainer {...args}>
+				<TextContainer>{children}</TextContainer>
+			</CentredContainer>
+		</ParentComponent>
+	)
+} as Meta<ICentredContainerStory>;
 
-const ParentComponent = styled.div<{ parentHeight: string, parentWidth: string }>`
-	${({ parentHeight, parentWidth }) => css`
-		height: ${parentHeight || '300px'};
-		width: ${parentWidth || '100%'};
-	`}
-	border: 2px solid hotpink;
-	background: ${({ theme }) => theme.palette.gradient.secondary};
-`;
+type Story = StoryObj<ICentredContainerStory>;
 
-type ICentredContainerStory = ICentredContainer & {
-	parentHeight: string;
-	parentWidth: string;
+export const VerticalCentre: Story = {
+	args: {
+		vertical: true,
+		horizontal: false,
+		children: 'This is an example of a vertically centred container',
+	},
 };
 
-const TextContainer = styled.div`
-	padding: 20px;
-	border-radius: 5px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	color: ${({ theme }) => theme.palette.secondary.main};
-	${({ theme }) => theme.typography.h3}
-`;
-
-const Template: ComponentStory<typeof CentredContainer> = ({
-	children,
-	parentHeight,
-	parentWidth,
-	...args
-}: ICentredContainerStory) => (
-	<ParentComponent parentHeight={parentHeight} parentWidth={parentWidth}>
-		<CentredContainer {...args}>
-			<TextContainer>{children}</TextContainer>
-		</CentredContainer>
-	</ParentComponent>
-);
-
-export const VerticalCentre = Template.bind({});
-VerticalCentre.args = {
-	vertical: true,
-	horizontal: false,
-	children: 'This is an example of a vertically centred container',
+export const HorizontalCentre: Story = {
+	args: {
+		vertical: false,
+		horizontal: true,
+		children: 'This is an example of a horizontally centred container',
+	},
 };
 
-export const HorizontalCentre = Template.bind({});
-HorizontalCentre.args = {
-	vertical: false,
-	horizontal: true,
-	children: 'This is an example of a horizontally centred container',
+export const AllCentre: Story = {
+	args: {
+		vertical: true,
+		horizontal: true,
+		children: 'This is an example of a vertically and horizontally centred container',
+	},
 };
 
-export const AllCentre = Template.bind({});
-AllCentre.args = {
-	vertical: true,
-	horizontal: true,
-	children: 'This is an example of a vertically and horizontally centred container',
-};
-
-export const NoCentre = Template.bind({});
-NoCentre.args = {
-	vertical: false,
-	horizontal: false,
-	children: 'This is an example of no centering. Why would you want this? Do not use this.',
+export const NoCentre: Story = {
+	args: {
+		vertical: false,
+		horizontal: false,
+		children: 'This is an example of no centering. Why would you want this? Do not use this.',
+	},
 };
