@@ -80,17 +80,15 @@ Containers.getContainerStats = async (teamspace, container) => {
 	return stats;
 };
 
+Containers.getRevisionFormat = (rFile) => (rFile ? '.'.concat(rFile[0].split('_').pop()) : undefined);
+
 Containers.getRevisions = async (teamspace, container, showVoid) => {
 	const revisions = await getRevisions(teamspace,
 		container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
 
 	return revisions.map(({ rFile, ...r }) => {
-		if (rFile) {
-			const format = '.'.concat(rFile[0].split('_').pop());
-			return { ...r, format };
-		}
-
-		return r;
+		const format = Containers.getRevisionFormat(rFile);
+		return { ...r, ...(format ? { format } : {}) };
 	});
 };
 
