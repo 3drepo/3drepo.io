@@ -28,7 +28,7 @@ import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { cloneDeep, isEqual, isUndefined, omitBy, sortBy } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { Group, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
+import { Group, IGroupRule, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
 import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
@@ -96,10 +96,11 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		context: { isSmart },
 	});
 
-	const { fields: rules, append, remove, update } = useFieldArray({
+	const { fields, append, remove, update } = useFieldArray({
 		control: formData.control,
 		name: 'group.rules',
 	});
+	const rules = fields as Array<IGroupRule & { id: string }>;
 
 	const {
 		handleSubmit,

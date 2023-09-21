@@ -26,14 +26,17 @@ export type FormInputProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
 	className: string,
 }>;
 
-export type InputControllerProps<T> = T & FormInputProps & {
-	Input: (props: T) => JSX.Element,
+export type InputControllerProps<T> = FormInputProps & {
 	name: string,
 	control?: any,
 	formError?: any,
 	defaultValue?: any,
 	onChange?: (event) => void,
 	onBlur?: () => void,
+};
+
+type Props<T> = FormInputProps & InputControllerProps<T> & {
+	Input: (props: T) => JSX.Element,
 };
 
 // eslint-disable-next-line @typescript-eslint/comma-dangle
@@ -48,7 +51,7 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 	onChange,
 	onBlur,
 	...props
-}: InputControllerProps<T>, ref) => (
+}: Props<T>, ref) => (
 	<Controller
 		name={name}
 		control={control}
