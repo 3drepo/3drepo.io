@@ -319,7 +319,7 @@ export class ModelSettings extends PureComponent<IProps, IState> {
 							</FieldsRow>
 						</Grid>
 						<ViewContainer container direction="column" wrap="nowrap" alignItems="flex-start">
-							<SubHeadline color="textPrimary" variant="subtitle1">Default View</SubHeadline>
+							<SubHeadline color="textPrimary" variant="subtitle1">Home View</SubHeadline>
 							<Field name="defaultView" render={ ({ field }) => (
 									<DefaultViewField onSelectView={this.handleSelectView(field.onChange)} {...field} />
 							)} />

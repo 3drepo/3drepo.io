@@ -37,7 +37,7 @@ import { GroupsActions } from '../groups';
 import { selectIssuesMap, IssuesActions } from '../issues';
 import { JobsActions } from '../jobs';
 import { MeasurementsActions } from '../measurements';
-import { selectCurrentRevisionId, selectSettings, ModelActions, ModelTypes } from '../model';
+import { selectCurrentRevisionId, selectSettings, ModelActions, ModelTypes, selectDefaultView } from '../model';
 import { PresentationActions } from '../presentation';
 import { selectRisksMap, RisksActions } from '../risks';
 import { selectUrlParams } from '../router/router.selectors';
@@ -45,7 +45,7 @@ import { SequencesActions } from '../sequences';
 import { StarredActions } from '../starred';
 import { dispatch } from '../store';
 import { TreeActions } from '../tree';
-import { selectInitialView, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
+import { selectInitialView, selectViewpointsDomain, selectViewpointsList, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
 import { ViewerGuiActions, ViewerGuiTypes } from './viewerGui.redux';
 import {
 	selectClipNumber,
@@ -249,11 +249,18 @@ function* updateClipState({clipNumber}) {
 	}
 }
 
-function* goToExtent() {
+function* goToHomeView() {
 	try {
-		yield Viewer.goToExtent();
+		const defaultView = yield select(selectDefaultView);
+		if (defaultView) {
+			const { teamspace, model } = yield select(selectUrlParams);
+			const { viewpointsMap } = yield select(selectViewpointsDomain);
+			yield put(ViewpointsActions.showViewpoint(teamspace, model, viewpointsMap[defaultView.id], false));
+		} else {
+			yield Viewer.goToExtent();
+		}
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('go', 'to extent', error));
+		yield put(DialogActions.showErrorDialog('go', 'to home view', error));
 	}
 }
 
@@ -436,7 +443,7 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.GET_HELICOPTER_SPEED, getHelicopterSpeed);
 	yield takeLatest(ViewerGuiTypes.INCREASE_HELICOPTER_SPEED, increaseHelicopterSpeed);
 	yield takeLatest(ViewerGuiTypes.DECREASE_HELICOPTER_SPEED, decreaseHelicopterSpeed);
-	yield takeLatest(ViewerGuiTypes.GO_TO_EXTENT, goToExtent);
+	yield takeLatest(ViewerGuiTypes.GO_TO_HOME_VIEW, goToHomeView);
 	yield takeLatest(ViewerGuiTypes.SET_CLIPPING_MODE, setClippingMode);
 	yield takeLatest(ViewerGuiTypes.UPDATE_CLIP_STATE, updateClipState);
 	yield takeLatest(ViewerGuiTypes.SET_CLIP_EDIT, setClipEdit);
