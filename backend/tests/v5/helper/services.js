@@ -387,6 +387,7 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true) => {
 		tag: ServiceHelper.generateRandomString(),
 		author: ServiceHelper.generateRandomString(),
 		timestamp: ServiceHelper.generateRandomDate(),
+		description: ServiceHelper.generateRandomString(),
 		void: !!isVoid,
 	};
 

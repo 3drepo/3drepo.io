@@ -22,6 +22,7 @@ const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
 const { getRevisionByIdOrTag } = require('../../../models/revisions');
+const { getRevisionFormat } = require('../../../processors/teamspaces/projects/models/containers');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
@@ -66,12 +67,20 @@ const revisionUpdated = async ({ teamspace, project, model, data, sender }) => {
 
 const revisionAdded = async ({ teamspace, project, model, revision, isFederation }) => {
 	try {
-		const { tag, author, timestamp } = await getRevisionByIdOrTag(teamspace, model, stringToUUID(revision),
-			{ _id: 0, tag: 1, author: 1, timestamp: 1 });
+		const { tag, author, timestamp, description, rFile } = await getRevisionByIdOrTag(teamspace,
+			model, stringToUUID(revision),
+			{ _id: 0, tag: 1, author: 1, timestamp: 1, description: 1, rFile: 1 });
+
 		const event = isFederation ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
 
-		await createModelMessage(event, { _id: revision, tag, author, timestamp: timestamp.getTime() },
-			teamspace, project, model);
+		const format = getRevisionFormat(rFile);
+
+		await createModelMessage(event, { _id: revision,
+			tag,
+			author,
+			timestamp: timestamp.getTime(),
+			description,
+			...(format ? { format } : undefined) }, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
 	}
