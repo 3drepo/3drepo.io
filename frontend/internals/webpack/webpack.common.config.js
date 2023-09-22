@@ -39,8 +39,8 @@ module.exports = (options) => ({
 				{ from: 'node_modules/zxcvbn/dist/zxcvbn.js' },
 				{ from: 'manifest.json', to: '../' },
 				{ from: 'assets/**', to: '../' },
-				{ from: '**', context: 'unity/default/unity/', to: '../unity/' },
-				{ from: '**', context: 'unity/beta/unity/', to: '../unity/beta/' },
+				{ from: '**', context: 'unity/default/unity', to: '../unity/' },
+				{ from: '**', context: 'unity/beta/unity', to: '../unity/beta/' },
 				//backwards compatibility to Unity 2019 (added on 4.12)
 				{ from: 'unity/default/unity/Build/unity.loader.js', to: '../unity/Build/UnityLoader.js' },
 				{ from: 'assets/manifest-icons/*', to: '../' },

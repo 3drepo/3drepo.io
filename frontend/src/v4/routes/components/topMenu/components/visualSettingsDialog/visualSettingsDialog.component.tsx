@@ -56,7 +56,7 @@ const BasicSettings = (props) => {
 	return (
 		<List>
 			<FormListItem>
-				Use 4GB viewer (Experimental)
+				4GB viewer
 				<Field name="useBetaViewer" render={ ({ field }) => (
 					<Switch checked={field.value} onClick={props.onUseBetaViewerChange} {...field} value="true" color="secondary" />
 				)} />
