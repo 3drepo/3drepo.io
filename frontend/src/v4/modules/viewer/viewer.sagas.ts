@@ -23,6 +23,7 @@ import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
 import { ViewerActions, ViewerTypes } from './viewer.redux';
 import { selectSettings } from './viewer.selectors';
+import { USE_BETA_VIEWER, getUseBetaViewer, setUseBetaViewer } from './betaViewer.helpers';
 
 const BUNDLE_FADE_PREFIX = "phBundleFade";
 const updateHandlers = {
@@ -84,13 +85,15 @@ const callUpdateHandlers = (oldSettings, settings) => {
 	});
 };
 
-function* updateSettings({username,  settings }) {
+function* updateSettings({username, settings: { [USE_BETA_VIEWER]: useBetaViewer, ...newSettings } }) {
 	try {
 		const oldSettings = yield select(selectSettings);
-		callUpdateHandlers(oldSettings, settings);
+		callUpdateHandlers(oldSettings, newSettings);
 
-		window.localStorage.setItem(`${username}.visualSettings`, JSON.stringify(settings));
-		yield put(ViewerActions.updateSettingsSuccess(settings));
+		window.localStorage.setItem(`${username}.visualSettings`, JSON.stringify(newSettings));
+		setUseBetaViewer(useBetaViewer);
+
+		yield put(ViewerActions.updateSettingsSuccess(newSettings));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('initialise', 'viewer', error));
 	}
@@ -99,12 +102,15 @@ function* updateSettings({username,  settings }) {
 export function* fetchSettings() {
 	const { username } = yield select(selectCurrentUser);
 	const currentSettings  = {
-								...DEFAULT_SETTINGS,
-								...JSON.parse(window.localStorage.getItem(`${username}.visualSettings`) ||
-								// If a user has already saved settings in a prev version lets load these settings the first time
-										window.localStorage.getItem('visualSettings') ||
-										'{}')
-							};
+		...DEFAULT_SETTINGS,
+		...JSON.parse(
+			window.localStorage.getItem(`${username}.visualSettings`) ||
+			// If a user has already saved settings in a prev version lets load these settings the first time
+			window.localStorage.getItem('visualSettings') ||
+			'{}',
+		),
+		[USE_BETA_VIEWER]: getUseBetaViewer(),
+	};
 
 	// We have our settings ready to be saved to the new user local storage settings key, so we get rid of the old setting
 	window.localStorage.setItem('visualSettings', null);

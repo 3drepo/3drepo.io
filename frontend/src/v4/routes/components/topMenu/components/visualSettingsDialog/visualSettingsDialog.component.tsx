@@ -26,7 +26,7 @@ import { ColorPicker } from '../../../colorPicker/colorPicker.component';
 import { SelectField } from '../../../selectField/selectField.component';
 import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, Headline,
 	NegativeActionButton, NeutralActionButton,
-	ShortInput, V5Divider, V5ErrorText, VisualSettingsButtonsContainer,
+	ShortInput, SubHeading, V5Divider, V5ErrorText, VisualSettingsButtonsContainer,
 	VisualSettingsDialogContent, WarningMessage } from './visualSettingsDialog.styles';
 
 const SettingsSchema = Yup.object().shape({
@@ -50,12 +50,23 @@ const SettingsSchema = Yup.object().shape({
 	phElementRenderingRadius: schema.number(0, 1),
 	phElementFaceAlpha: schema.number(0, 1),
 	phElementLineAlpha: schema.number(0, 1),
-
 });
 
 const BasicSettings = (props) => {
 	return (
 		<List>
+			<FormListItem>
+				Use 4GB viewer (Experimental)
+				<Field name="useBetaViewer" render={ ({ field }) => (
+					<Switch checked={field.value} onClick={props.onUseBetaViewerChange} {...field} value="true" color="secondary" />
+				)} />
+				{props.showBetaViewerWarning && (
+					<SubHeading>
+						Changing this setting will require you to refresh your browser before taking effect.
+					</SubHeading>
+				)}
+			</FormListItem>
+			<V5Divider />
 			<FormListItem>
 				Shading
 				<Field name="shading" render={ ({ field }) => (
@@ -581,6 +592,7 @@ interface IState {
 	visualSettings: any;
 	flag: boolean;
 	showCacheWarning: boolean;
+	showBetaViewerWarning: boolean;
 }
 
 export class VisualSettingsDialog extends PureComponent<IProps, IState> {
@@ -588,7 +600,8 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 		selectedTab: 0,
 		visualSettings: null,
 		flag: false,
-		showCacheWarning: false
+		showCacheWarning: false,
+		showBetaViewerWarning: false,
 	};
 
 	public handleTabChange = (event, selectedTab) => {
@@ -597,6 +610,10 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 
 	public onCacheChange = (event) => {
 		this.setState({showCacheWarning : event.target.checked});
+	}
+
+	public onUseBetaViewerChange = (event) => {
+		this.setState({ showBetaViewerWarning : event.target.checked !== this.props.visualSettings.useBetaViewer });
 	}
 
 	public onSubmit = (values) => {
@@ -642,7 +659,13 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 					onSubmit={this.onSubmit}
 					>
 					<Form>
-						{selectedTab === 0 && <BasicSettings onCacheChange={this.onCacheChange} />}
+						{selectedTab === 0 && (
+							<BasicSettings
+								onCacheChange={this.onCacheChange}
+								onUseBetaViewerChange={this.onUseBetaViewerChange}
+								showBetaViewerWarning={this.state.showBetaViewerWarning}
+							/>
+						)}
 						{selectedTab === 1 && <AdvancedSettings />}
 						{selectedTab === 2 && <StreamingSettings />}
 						{selectedTab === 0 && showCacheWarning && <CacheWarning />}
