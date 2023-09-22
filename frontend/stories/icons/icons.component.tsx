@@ -64,14 +64,7 @@ const TemplateContainer = styled.div`
     overflow-y: scroll;
 `;
 
-export type IconsTemplateProps = {
-	backgroundColor: string,
-	color?: string,
-	icons: any[],
-	iconSize: number,
-};
-
-export const IconsTemplate = ({ backgroundColor = '#6d9ded', color, icons, iconSize }: IconsTemplateProps) => (
+export const IconsTemplate = ({ backgroundColor = '#6d9ded', color, icons, iconSize }) => (
 	<TemplateContainer style={{ backgroundColor, color }}>
 		{icons.map((icon) => <IconBox {...icon} $size={iconSize} key={icon.name} />)}
 	</TemplateContainer>
