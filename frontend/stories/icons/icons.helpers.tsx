@@ -68,7 +68,7 @@ export const metaColorlessIcon = {
 	args: {
 		iconSize: 10,
 	},
-	decorators: [(Story, { args }) => (<IconsTemplate {...args as IconsTemplateProps} />)],
+	render: (args) => (<IconsTemplate {...args as IconsTemplateProps} />),
 	parameters: { controls: { exclude: 'icons' } },
 };
 
