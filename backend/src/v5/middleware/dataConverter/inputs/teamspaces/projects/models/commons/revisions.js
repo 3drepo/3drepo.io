@@ -79,7 +79,7 @@ const validateContainerRevisionUpload = async (req, res, next) => {
 		timezone: Yup.string().test('valid-timezone',
 			'The timezone provided is not valid',
 			(value) => value === undefined || !!tz.getTimezone(value)),
-		lod: Yup.number(),
+		lod: Yup.number().min(0).max(6).default(0),
 	};
 
 	const schema = Yup.object().noUnknown().required().shape(schemaBase)
