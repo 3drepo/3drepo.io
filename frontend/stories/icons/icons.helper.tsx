@@ -14,6 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { IconsTemplate, IconsTemplateProps } from './icons.component';
+
 const groupIconsByType = (icons: string[]) => {
 	const svgIcons: string[] = [];
 	const svgTsxIcons: string[] = [];
@@ -52,4 +54,31 @@ export const getIcons = (context, dir?) => {
 		name: getDisplayName(name),
 	}));
 	return [...tsxIcons, ...svgIcons].sort((a, b) => a.name.localeCompare(b.name));
+};
+
+export const metaColorlessIcon = {
+	argTypes: {
+		backgroundColor: {
+			type: 'string',
+		},
+		iconSize: {
+			type: 'number',
+		},
+	},
+	args: {
+		iconSize: 10,
+	},
+	decorators: [(Story, { args }) => (<IconsTemplate {...args as IconsTemplateProps} />)],
+	parameters: { controls: { exclude: 'icons' } },
+};
+
+export const metaIcon = {
+	...metaColorlessIcon,
+	argTypes: {
+		...metaColorlessIcon.argTypes,
+		color: {
+			type: 'string',
+		},
+	},
+	parameters: { controls: { exclude: 'icons' } },
 };

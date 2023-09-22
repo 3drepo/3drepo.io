@@ -15,25 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ComponentMeta } from '@storybook/react';
-import { IconsTemplate } from '../icons.component';
-import { getIcons } from '../icons.helper';
+import { Meta } from '@storybook/react';
+import { getIcons, metaColorlessIcon } from '../icons.helper';
 
 export default {
-	title: 'Icons/\\v4',
-	argTypes: {
-		backgroundColor: {
-			type: 'string',
-		},
-		iconSize: {
-			type: 'number',
-			defaultValue: 10,
-		},
-	},
-	parameters: { controls: { exclude: 'icons' } },
-} as ComponentMeta<any>;
+	...metaColorlessIcon,
+	title: 'Icons/Icons',
+} as Meta<any>;
 
-export const Icons = IconsTemplate.bind({});
-Icons.args = {
-	icons: getIcons(require.context('@assets/icons/v4/', false, /\.*(svg)/), 'v4'),
+export const V4 = {
+	args: {
+		icons: getIcons(require.context('@assets/icons/v4/', false, /\.*(svg)/), 'v4'),
+	},
 };
