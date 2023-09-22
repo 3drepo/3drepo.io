@@ -15,22 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { PinDetails } from '@components/viewer/cards/tickets/pinDetails/pinDetails.component';
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
 	title: 'Inputs/PinDetails',
 	component: PinDetails,
 	parameters: { controls: { exclude: ['onChange', 'onBlur'] } },
-} as ComponentMeta<typeof PinDetails>;
+} as Meta<typeof PinDetails>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof PinDetails> = (args) => (
-	<PinDetails {...args} />
-);
+type Story = StoryObj<typeof PinDetails>;
 
-export const Default = Template.bind({});
-Default.args = {
-	pin: false,
-};
+export const Default: Story = { args: { pin: false } }
