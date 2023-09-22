@@ -17,7 +17,8 @@
 import { Meta, StoryObj } from '@storybook/react';
 import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
 import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
-import { DateController, DateDecorator } from './date.decorator';
+import { ControllerDecorator, LocalizationProviderDecorator } from './date.decorator';
+import { FormDecorator } from '../inputDecorators';
 
 export default {
 	title: 'Inputs/Calendar/DueDateWithLabel',
@@ -33,18 +34,14 @@ export default {
 		},
 	},
 	component: DueDateWithLabel,
-	parameters: {
-		controls: {
-			exclude: [
-				'onBlur',
-				'onChange',
-				'className',
-				'inputRef',
-				'PickerComponent',
-			],
-		},
-	},
-	decorators: [DateDecorator, DateController],
+	parameters: { controls: { exclude: [
+		'onBlur',
+		'onChange',
+		'className',
+		'inputRef',
+		'PickerComponent',
+	] } },
+	decorators: [LocalizationProviderDecorator, FormDecorator, ControllerDecorator],
 } as Meta<typeof DatePicker>;
 
 type Story = StoryObj<typeof DatePicker>;

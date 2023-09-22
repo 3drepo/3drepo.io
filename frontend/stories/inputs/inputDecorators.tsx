@@ -14,17 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { useState } from 'react';
+import { useState } from '@storybook/addons';
+import { FormContainer } from './FormInput.styles';
 
-export const LocalizationProviderDecorator = (Story) => (
-	<LocalizationProvider dateAdapter={AdapterDayjs}>
+export const FormDecorator = (Story) => (
+	<FormContainer>
 		<Story />
-	</LocalizationProvider>
+	</FormContainer>
 );
 
-export const ControllerDecorator = (Story, { args: { value: initialValue } }) => {
+export const EventControllerDecorator: any = (Story, { args: { value: initialValue } }) => {
 	const [value, setValue] = useState(initialValue);
-	return (<Story onBlur={setValue} value={value} />);
+	const handleChange = (event: any) => setValue(event.target.value as any);
+	return (<Story value={value} onChange={handleChange} />);
 };

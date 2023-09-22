@@ -17,9 +17,8 @@
 
 import { PriorityLevels, PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
 import { ChipSelect } from '@controls/chip/chipSelect/chipSelect.component';
-import { SelectChangeEvent } from '@mui/material';
 import { StoryObj, Meta } from '@storybook/react';
-import { useState } from 'react';
+import { EventControllerDecorator } from '../inputDecorators';
 
 export default {
 	title: 'Inputs/Chip/ChipSelect',
@@ -60,15 +59,7 @@ export default {
 				'deleteIcon', 'avatar', 'sx', 'classes', 'clickable', 'children', 'required', 'icon', 'ref']
 		}
 	},
-	decorators: [
-		(Story, { args: { value: initialValue } }) => {
-			const [value, setValue] = useState(initialValue);
-			const handleChange = (event: SelectChangeEvent<any[]>) => {
-				setValue(event.target.value as any);
-			};
-			return (<Story value={value} onChange={handleChange} />);
-		},
-	]
+	decorators: [EventControllerDecorator],
 } as Meta<typeof ChipSelect>;
 
 type Story = StoryObj<typeof ChipSelect>;

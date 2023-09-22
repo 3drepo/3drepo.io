@@ -16,7 +16,8 @@
  */
 import { Meta, StoryObj } from '@storybook/react';
 import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
-import { DateDecorator } from './date.decorator';
+import { LocalizationProviderDecorator } from './date.decorator';
+import { FormDecorator } from '../inputDecorators';
 
 export default {
 	title: 'Inputs/Calendar/DateTimePicker',
@@ -29,18 +30,14 @@ export default {
 		},
 	},
 	component: DateTimePicker,
-	parameters: {
-		controls: {
-			exclude: [
-				'onBlur',
-				'onChange',
-				'className',
-				'inputRef',
-				'PickerComponent',
-			]
-		}
-	},
-	decorators: [DateDecorator],
+	parameters: { controls: { exclude: [
+		'onBlur',
+		'onChange',
+		'className',
+		'inputRef',
+		'PickerComponent',
+	] } },
+	decorators: [LocalizationProviderDecorator, FormDecorator],
 } as Meta<typeof DateTimePicker>;
 
 type Story = StoryObj<typeof DateTimePicker>;
