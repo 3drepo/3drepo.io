@@ -19,10 +19,9 @@ type IProps = {
 };
 
 export default ({ className }: IProps) => (
-	<svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-		<path
-			d="M11.6667 4.66667H8.55556V0H3.88889V4.66667H0.777778L6.22222 10.8889L11.6667 4.66667ZM0 12.4444H12.4444V14H0V12.4444Z"
-			fill="currentColor"
-		/>
+	<svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+		<path d="M6.4 5.5L5 5.5C2.79086 5.5 1 7.29086 1 9.5L1 13.2C1 15.4091 2.79086 17.2 5 17.2L15 17.2C17.2091 17.2 19 15.4091 19 13.2L19 9.5C19 7.29086 17.2091 5.5 15 5.5L13.6 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+		<path d="M7.29993 10L9.29282 11.9929C9.68334 12.3834 10.3165 12.3834 10.707 11.9929L12.6999 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+		<path d="M9.99988 11.8L9.99988 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
 	</svg>
 );

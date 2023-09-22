@@ -14,43 +14,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useParams } from 'react-router';
-
-import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
-import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FixedOrGrowContainer, FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
+import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IUser } from '@/v5/store/users/users.redux';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { UserPopover } from '@components/shared/popoverCircles/userPopoverCircle/userPopover/userPopover.component';
-import { Text, Name, FixedOrGrowContainer } from './revisionsListItemAuthor.styles';
+import { Name } from './revisionsListItemAuthor.styles';
 
 interface IRevisionsListItemAuthor extends FixedOrGrowContainerProps {
 	authorName: string;
-	active?: boolean;
 }
 
-export const RevisionsListItemAuthor = ({
-	authorName,
-	active = false,
-	...rest
-}: IRevisionsListItemAuthor): JSX.Element => {
-	const { teamspace } = useParams<DashboardParams>();
+export const RevisionsListItemAuthor = ({ authorName, ...containerProps }: IRevisionsListItemAuthor): JSX.Element => {
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const author: IUser = UsersHooksSelectors.selectUser(teamspace, authorName);
-
+	const authorFullName = [author.firstName, author.lastName].join(' ');
 	return (
-		<FixedOrGrowContainer {...rest} $active={active}>
-			<HoverPopover
-				anchor={(props) => (
-					<Text
-						aria-haspopup="true"
-						$active={active}
-						{...props}
-					>
-						<Name>{author.firstName}</Name>
-						<Name>{author.lastName}</Name>
-					</Text>
-				)}
-			>
+		<FixedOrGrowContainer {...containerProps}>
+			<HoverPopover anchor={(props) => <Name aria-haspopup="true" {...props}>{authorFullName}</Name>}>
 				<UserPopover user={author} />
 			</HoverPopover>
 		</FixedOrGrowContainer>

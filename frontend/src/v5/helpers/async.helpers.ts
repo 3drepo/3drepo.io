@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,4 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { RevisionsListItemDate } from './revisionsListItemDate.component';
+export const getWaitablePromise = () => {
+	let resolve;
+	const promiseToResolve = new Promise((res) => { resolve = res; });
+	return { promiseToResolve, resolve };
+};

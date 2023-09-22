@@ -15,4 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { RevisionsListItemAuthor } from './revisionsListItemAuthor.component';
+import styled from 'styled-components';
+
+export const Name = styled.div`
+	max-width: 100%;
+	padding-right: 10px;
+	box-sizing: border-box;
+	display: inline-block;
+	vertical-align: middle;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+`;
