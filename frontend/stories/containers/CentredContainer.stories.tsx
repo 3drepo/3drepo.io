@@ -26,8 +26,8 @@ type ICentredContainerStory = ICentredContainer & {
 };
 const ParentComponent = styled.div<Pick<ICentredContainerStory, 'parentHeight' | 'parentWidth'>>`
 	${({ parentHeight, parentWidth }) => css`
-		height: ${parentHeight || '300px'};
-		width: ${parentWidth || '100%'};
+		height: ${parentHeight};
+		width: ${parentWidth};
 	`}
 	border: 2px solid hotpink;
 	background: ${({ theme }) => theme.palette.gradient.secondary};
@@ -53,29 +53,28 @@ export default {
 			description: 'If true, the container will be centred horizontally',
 			type: 'boolean',
 		},
-		parentHeight: {
-			description: 'Height of the component that surrounds the centred container',
-			defaultValue: '300px',
-			type: 'string',
-		},
-		parentWidth: {
-			description: 'Width of the component that surrounds the centred container',
-			defaultValue: '100%',
-			type: 'string',
-		},
 		children: {
 			description: 'The text, button, or component to contain inside the container',
 			defaultValue: 'Centred container\'s content',
 		},
 	},
-	parameters: { controls: { exclude: ['className'] } },
-	render: ({ parentHeight, parentWidth, children, ...args }) => (
-		<ParentComponent parentHeight={parentHeight} parentWidth={parentWidth}>
-			<CentredContainer {...args}>
-				<TextContainer>{children}</TextContainer>
-			</CentredContainer>
-		</ParentComponent>
-	)
+	parameters: {
+		parentHeight: '300px',
+		parentWidth: '100%',
+		controls: { exclude: ['className'] },
+	},
+	decorators: [
+		(Story, { parameters: { parentHeight, parentWidth }}) => (
+			<ParentComponent parentHeight={parentHeight} parentWidth={parentWidth}>
+				<Story />
+			</ParentComponent>
+		),
+	],
+	render: ({ children, ...args }) => (
+		<CentredContainer {...args}>
+			<TextContainer>{children}</TextContainer>
+		</CentredContainer>
+	),
 } as Meta<ICentredContainerStory>;
 
 type Story = StoryObj<ICentredContainerStory>;

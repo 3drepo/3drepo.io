@@ -14,9 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
-import { FormContainer } from '../FormInput.styles';
+import { FormDecorator } from '../inputDecorators';
 
 export default {
 	title: 'Inputs/Control/Checkbox',
@@ -40,16 +40,13 @@ export default {
 		'inputRef',
 		'ref',
 	] } },
-} as ComponentMeta<typeof Checkbox>;
+	decorators: [FormDecorator],
+} as Meta<typeof Checkbox>;
 
-const Controlled: ComponentStory<typeof Checkbox> = (args) => (
-	<FormContainer>
-		<Checkbox {...args} />
-	</FormContainer>
-);
+type Story = StoryObj<typeof Checkbox>
 
-export const ControlledFormCheckbox = Controlled.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledFormCheckbox.args = {
-	label: 'Controlled Checkbox input',
+export const ControlledFormCheckbox: Story = {
+	args: {
+		label: 'Controlled Checkbox input',
+	},
 };

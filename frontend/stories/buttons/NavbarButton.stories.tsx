@@ -16,8 +16,8 @@
  */
 import { Meta, StoryObj } from '@storybook/react';
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
-import { AppBar as MuiAppBar } from '@mui/material';
 import NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
+import { AppBarDecorator } from '../../stories/decorators';
 
 export default {
 	title: 'Buttons/NavbarButton',
@@ -28,13 +28,7 @@ export default {
 		},
 		controls: { exclude: ['onClick', 'formError', 'children'] },
 	},
-	decorators: [
-		(Story) => (
-			<MuiAppBar>
-				<Story />
-			</MuiAppBar>
-		),
-	],
+	decorators: [AppBarDecorator],
 	args: {
 		children: <NotificationsIcon />,
 	},

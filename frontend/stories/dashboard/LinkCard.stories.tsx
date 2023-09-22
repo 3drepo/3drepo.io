@@ -17,9 +17,9 @@
 
 import { Meta, StoryObj } from '@storybook/react';
 import { LinkCard } from '@components/shared/linkCard/linkCard.component';
-import { BrowserRouter } from 'react-router-dom';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { Button } from '@controls/button';
+import { BrowserRouterDecorator } from '../../stories/decorators';
 
 export default {
 	title: 'Dashboard/LinkCard',
@@ -36,12 +36,11 @@ export default {
 		},
 	},
 	decorators: [
+		BrowserRouterDecorator,
 		(Story, { args: { variant } }) => (
-			<BrowserRouter>
-				<div style={{ height: 500, width: '100%', backgroundColor: variant === 'primary' ? COLOR.PRIMARY_MAIN_CONTRAST : COLOR.SECONDARY_MAIN }}>
-					<Story />
-				</div>
-			</BrowserRouter>
+			<div style={{ height: 500, width: '100%', backgroundColor: variant === 'primary' ? COLOR.PRIMARY_MAIN_CONTRAST : COLOR.SECONDARY_MAIN }}>
+				<Story />
+			</div>
 		),
 	],
 	parameters: { controls: { exclude: ['to', 'className', 'children'] } },

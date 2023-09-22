@@ -14,11 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
-import { useState } from 'react';
-import { HexGroupColor } from '@controls/inputs/colorPicker/colorPicker.helpers';
-import { FormContainer } from '../FormInput.styles';
+import { RgbArray, UNSET_RGB_COLOR } from '@controls/inputs/colorPicker/colorPicker.helpers';
+import { EventControllerDecorator, FormDecorator } from '../inputDecorators';
 
 export default {
 	title: 'Inputs/Color/ColorPicker',
@@ -29,43 +28,35 @@ export default {
 		'className',
 		'inputRef',
 	] } },
-} as ComponentMeta<typeof ColorPicker>;
+	decorators: [FormDecorator],
+	args: {
+		// this should reflect DEFAULT_VALUE in ColorPicker file
+		defaultValue: { color: UNSET_RGB_COLOR, opacity: 1 },
+	}
+} as Meta<typeof ColorPicker>;
 
-const Default: ComponentStory<typeof ColorPicker> = (args) => (
-	<FormContainer>
-		<ColorPicker {...args} />
-	</FormContainer>
-);
+type Story = StoryObj<typeof ColorPicker>;
 
-export const FormColorPickerDefault = Default.bind({});
+export const FormColorPickerDefault: Story = {};
 
-export const FormColorPickerColorAndOpacitySet = Default.bind({});
-FormColorPickerColorAndOpacitySet.args = {
-	defaultValue: { color: [210, 89, 159], opacity: 0.4 },
+export const FormColorPickerColorAndOpacitySet: Story = {
+	args: {
+		value: { color: [210, 89, 159] as RgbArray, opacity: 0.4 },
+	},
 };
 
-export const FormColorPickerOnlyColorSet = Default.bind({});
-FormColorPickerOnlyColorSet.args = {
-	defaultValue: { color: [34, 189, 230] },
+export const FormColorPickerOnlyColorSet: Story = {
+	args: {
+		value: { color: [34, 189, 230] as RgbArray },
+	},
 };
 
-export const FormColorPickerOnlyOpacitySet = Default.bind({});
-FormColorPickerOnlyOpacitySet.args = {
-	defaultValue: { opacity: 0.4 },
+export const FormColorPickerOnlyOpacitySet: Story = {
+	args: {
+		value: { opacity: 0.4 },
+	},
 };
 
-const Controlled: ComponentStory<typeof ColorPicker> = ({ value: inputValue, ...args }) => {
-	const [value, setValue] = useState<HexGroupColor>(inputValue);
-
-	const handleChange = (event) => {
-		setValue(event.target.value);
-	};
-
-	return (
-		<FormContainer>
-			<ColorPicker {...args} value={value} onChange={handleChange} />
-		</FormContainer>
-	);
+export const ControlledFormColorPicker: Story = {
+	decorators: [FormDecorator, EventControllerDecorator],
 };
-
-export const ControlledFormColorPicker = Controlled.bind({});

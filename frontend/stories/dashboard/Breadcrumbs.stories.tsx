@@ -17,21 +17,12 @@
 
 import { Meta, StoryObj } from '@storybook/react';
 import { Breadcrumbs } from '@controls/breadcrumbs';
-import { AppBar as MuiAppBar } from '@mui/material';
-import { BrowserRouter } from 'react-router-dom';
+import { AppBarDecorator, BrowserRouterDecorator } from '../../stories/decorators';
 
 export default {
 	title: 'Dashboard/BreadCrumbs',
 	component: Breadcrumbs,
-	decorators: [
-		(Story) => (
-			<BrowserRouter>
-				<MuiAppBar>
-					<Story />
-				</MuiAppBar>
-			</BrowserRouter>
-		),
-	],
+	decorators: [AppBarDecorator, BrowserRouterDecorator],
 	parameters: { controls: { exclude: ['breadcrumbs'] } },
 } as Meta<typeof Breadcrumbs>;
 

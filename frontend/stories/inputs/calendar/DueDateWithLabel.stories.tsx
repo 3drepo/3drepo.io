@@ -17,7 +17,7 @@
 import { Meta, StoryObj } from '@storybook/react';
 import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
 import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
-import { ControllerDecorator, LocalizationProviderDecorator } from './date.decorator';
+import { LocalizationProviderDecorator } from './date.decorator';
 import { FormDecorator } from '../inputDecorators';
 
 export default {
@@ -41,7 +41,7 @@ export default {
 		'inputRef',
 		'PickerComponent',
 	] } },
-	decorators: [LocalizationProviderDecorator, FormDecorator, ControllerDecorator],
+	decorators: [LocalizationProviderDecorator, FormDecorator],
 } as Meta<typeof DatePicker>;
 
 type Story = StoryObj<typeof DatePicker>;

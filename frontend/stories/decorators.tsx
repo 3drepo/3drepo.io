@@ -14,11 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { AppBar } from '@mui/material';
+import { BrowserRouter } from 'react-router-dom';
 
-export const LocalizationProviderDecorator = (Story) => (
-	<LocalizationProvider dateAdapter={AdapterDayjs}>
+export const AppBarDecorator = (Story) => (
+	<AppBar>
 		<Story />
-	</LocalizationProvider>
+	</AppBar>
+);
+
+export const BrowserRouterDecorator = (Story) => (
+	<BrowserRouter>
+		<Story />
+	</BrowserRouter>
 );

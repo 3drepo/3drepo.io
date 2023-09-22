@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Select } from '@controls/inputs/select/select.component';
-import { MenuItem, SelectChangeEvent } from '@mui/material';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { useState } from 'react';
-import { FormContainer } from '../FormInput.styles';
+import { MenuItem } from '@mui/material';
+import { Meta, StoryObj } from '@storybook/react';
+import { EventControllerMultipleValuesDecorator, FormDecorator } from '../inputDecorators';
+import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 
 export default {
 	title: 'Inputs/Select/Select',
@@ -42,12 +42,19 @@ export default {
 			control: 'array',
 		},
 	},
+	args: {
+		label: 'Just a select with a label and error',
+		values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
+	},
 	component: Select,
 	parameters: { controls: { exclude: ['margin', 'hiddenLabel', 'ref'] } },
-} as ComponentMeta<typeof Select>;
+	decorators: [FormDecorator],
+} as Meta<typeof Select>;
 
-const SelectStory: ComponentStory<typeof Select> = ({ values, ...args }: any) => (
-	<FormContainer>
+type Story = StoryObj<typeof Select>;
+
+export const SingleSelect: Story = {
+	render: ({ values, ...args }: any) => (
 		<Select {...args}>
 			{values.map((value) => (
 				<MenuItem value={value} key={value} style={{ padding: '8px 14px' }}>
@@ -55,45 +62,22 @@ const SelectStory: ComponentStory<typeof Select> = ({ values, ...args }: any) =>
 				</MenuItem>
 			))}
 		</Select>
-	</FormContainer>
-);
-
-export const SelectExample = SelectStory.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-SelectExample.args = {
-	label: 'Just a select with a label and error',
-	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
+	),
 };
 
-const SelectControlledStory: ComponentStory<typeof Select> = ({ values, ...args }: any) => {
-	const [value, setValue] = useState([]);
-
-	const handleChange = (event: SelectChangeEvent<any[]>) => {
-		setValue(event.target.value as any[]);
-	};
-
-	return (
-		<FormContainer>
-			<Select
-				{...args}
-				value={value}
-				onChange={handleChange}
-			>
-				{values.map((valueItem) => (
-					<MenuItem value={valueItem} key={valueItem}>
-						{valueItem}
-					</MenuItem>
-				))}
-			</Select>
-		</FormContainer>
-	);
-};
-
-export const SelectMultipleExample = SelectControlledStory.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-SelectMultipleExample.args = {
-	label: 'Just a select with a label and error',
-	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
-	multiple: true,
-	value: [],
+export const MultiSelect: Story = {
+	args: {
+		multiple: true,
+		value: [],
+	},
+	decorators: [EventControllerMultipleValuesDecorator],
+	render: ({ values, value, ...args }: any) => (
+		<Select {...args} value={[]}>
+			{values.map((valueItem) => (
+				<MultiSelectMenuItem value={valueItem} key={valueItem}>
+					{valueItem}
+				</MultiSelectMenuItem>
+			))}
+		</Select>
+	),
 };
