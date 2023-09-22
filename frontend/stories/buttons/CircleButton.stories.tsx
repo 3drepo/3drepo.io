@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Meta, StoryObj } from '@storybook/react';
-import { CircleButton as Button } from '@controls/circleButton';
+import { CircleButton } from '@controls/circleButton';
 import NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
 
 export default {
 	title: 'Buttons/CircleButton',
-	component: Button,
+	component: CircleButton,
 	argTypes: {
 		variant: {
 			description: 'Variant of the button',
@@ -37,9 +37,9 @@ export default {
 		},
 		controls: { exclude: ['onClick', 'children'] },
 	},
-} as Meta<typeof Button>;
+} as Meta<typeof CircleButton>;
 
-type Story = StoryObj<typeof Button>;
+type Story = StoryObj<typeof CircleButton>;
 
 export const NotificationsPrimary: Story = { args: { variant: 'primary' } };
 export const NotificationsSecondary: Story = { args: { variant: 'secondary' } };

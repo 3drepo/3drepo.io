@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Meta, StoryObj } from '@storybook/react';
-import { LabelButton as Button } from '@controls/button';
+import { LabelButton } from '@controls/button';
 
 export default {
 	title: 'Buttons/Button',
-	component: Button,
+	component: LabelButton,
 	args: {
 		children: 'Label Button',
 	},
@@ -46,8 +46,8 @@ export default {
 		'startIcon',
 		'ref',
 	] } },
-} as Meta<typeof Button>;
+} as Meta<typeof LabelButton>;
 
-type Story = StoryObj<typeof Button>;
+type Story = StoryObj<typeof LabelButton>;
 
 export const Label: Story = {};

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Meta, StoryObj } from '@storybook/react';
-import { SubmitButton as Button } from '@controls/submitButton';
+import { SubmitButton } from '@controls/submitButton';
 
 import LoginIcon from '@assets/icons/outlined/login-outlined.svg';
 import EmailIcon from '@assets/icons/filled/email-filled.svg';
@@ -85,9 +85,9 @@ export default {
 	args: {
 		children: 'Submit',
 	},
-} as Meta<typeof Button>;
+} as Meta<typeof SubmitButton>;
 
-type Story = StoryObj<typeof Button>;
+type Story = StoryObj<typeof SubmitButton>;
 
 export const Primary: Story = {
 	args: {
