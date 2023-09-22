@@ -22,12 +22,7 @@ import { AppBarDecorator } from '../../stories/decorators';
 export default {
 	title: 'Buttons/NavbarButton',
 	component: NavbarButton,
-	parameters: {
-		docs: {
-			transformSource: (source) => source.replace(/__WEBPACK_DEFAULT_EXPORT__/g, 'Icon'),
-		},
-		controls: { exclude: ['onClick', 'formError', 'children'] },
-	},
+	parameters: { controls: { exclude: ['onClick', 'formError', 'children'] } },
 	decorators: [AppBarDecorator],
 	args: {
 		children: <NotificationsIcon />,

@@ -31,12 +31,7 @@ export default {
 	args: {
 		children: <NotificationsIcon />,
 	},
-	parameters: {
-		docs: {
-			transformSource: (source) => source.replace(/__WEBPACK_DEFAULT_EXPORT__/g, 'Icon'),
-		},
-		controls: { exclude: ['onClick', 'children'] },
-	},
+	parameters: { controls: { exclude: ['onClick', 'children'] } },
 } as Meta<typeof CircleButton>;
 
 type Story = StoryObj<typeof CircleButton>;
