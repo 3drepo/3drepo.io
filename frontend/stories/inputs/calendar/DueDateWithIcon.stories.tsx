@@ -14,13 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
-import { useState } from 'react';
-import { FormContainer } from '../FormInput.styles';
+import { DateController, DateDecorator } from './date.decorator';
 
 export default {
 	title: 'Inputs/Calendar/DueDateWithIcon',
@@ -33,41 +30,38 @@ export default {
 		},
 		tooltip: {
 			type: 'string',
-			defaultValue: 'Set date',
 		},
 	},
 	component: DueDateWithIcon,
-	parameters: { controls: { exclude: [
-		'onBlur',
-		'error',
-		'name',
-		'label',
-		'helperText',
-		'onChange',
-		'className',
-		'inputRef',
-		'PickerComponent',
-	] } },
-} as ComponentMeta<typeof DatePicker>;
+	parameters: {
+		controls: {
+			exclude: [
+				'onBlur',
+				'error',
+				'name',
+				'label',
+				'helperText',
+				'onChange',
+				'className',
+				'inputRef',
+				'PickerComponent',
+			]
+		}
+	},
+	decorators: [DateDecorator, DateController],
+} as Meta<typeof DatePicker>;
 
-const Template: ComponentStory<typeof DueDateWithIcon> = ({ value: initialValue, ...args }) => {
-	const [value, setValue] = useState(initialValue);
-	const onBlur = (newValue) => {
-		setValue(newValue);
-	};
-	return (
-		<LocalizationProvider dateAdapter={AdapterDayjs}>
-			<FormContainer>
-				<DueDateWithIcon {...args} onBlur={onBlur} value={value} />
-			</FormContainer>
-		</LocalizationProvider>
-	);
+type Story = StoryObj<typeof DatePicker>;
+
+export const UnsetValue: Story = {
+	args: {
+		tooltip: 'Set date',
+	},
 };
 
-export const UnsetValue = Template.bind({});
-
-export const PresetValue = Template.bind({});
-PresetValue.args = {
-	value: new Date(),
-	tooltip: 'this is a custom tooltip',
+export const PresetValue: Story = {
+	args: {
+		value: new Date(),
+		tooltip: 'this is a custom tooltip',
+	},
 };
