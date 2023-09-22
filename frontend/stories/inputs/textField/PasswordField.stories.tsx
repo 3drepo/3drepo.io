@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PasswordField } from '@controls/inputs/passwordField/passwordField.component';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormContainer } from '../formInput.styles';
+import { StoryObj, Meta } from '@storybook/react';
+import { FormDecorator } from '../inputDecorators';
 
 export default {
 	title: 'Inputs/TextField/PasswordField',
@@ -49,16 +49,12 @@ export default {
 		'className',
 		'inputRef',
 	] } },
-} as ComponentMeta<typeof PasswordField>;
+} as Meta<typeof PasswordField>;
 
-const Controlled: ComponentStory<typeof PasswordField> = (args) => (
-	<FormContainer>
-		<PasswordField {...args} />
-	</FormContainer>
-);
+type Story = StoryObj<typeof PasswordField>;
 
-export const ControlledFormPasswordField = Controlled.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledFormPasswordField.args = {
-	label: 'Controlled String input',
+export const ControlledFormPasswordField: Story = {
+	args: {
+		label: 'Controlled String input',
+	},
 };

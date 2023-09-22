@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { StoryObj, Meta } from '@storybook/react';
 import { SearchInputWithChips } from '@controls/search/searchInput/searchInputWithChips.component';
 import { useState } from 'react';
 import { SearchContextComponent } from '@controls/search/searchContext';
@@ -30,31 +30,26 @@ export default {
 		},
 	},
 	parameters: { controls: { exclude: ['ref', 'hiddenLabel', 'onClear'] } },
-} as ComponentMeta<typeof SearchInputWithChips>;
+	decorators: [
+		(Story) => (
+			<SearchContextComponent fieldsToFilter={[]} items={[]}>
+				<Story />
+			</SearchContextComponent>
+		),
+	],
+} as Meta<typeof SearchInputWithChips>;
 
-const Template: ComponentStory<typeof SearchInputWithChips> = (args) => (
-	<SearchContextComponent fieldsToFilter={[]} items={[]}>
-		<SearchInputWithChips {...args} />
-	</SearchContextComponent>
-);
+type Story = StoryObj<typeof SearchInputWithChips>;
 
-export const Default = Template.bind({});
-Default.args = {
-	label: 'Search input',
-};
+export const Default: Story = { };
 
-const Controlled: ComponentStory<typeof SearchInputWithChips> = (args) => {
-	const [vals, setVals] = useState([]);
+export const ControlledSearchInputWithChips: Story = {
+	render: (args) => {
+		const [vals, setVals] = useState([]);
 
-	const onChange = (event, newVals) => setVals(newVals);
-
-	const onRemoveChip = (index) => setVals(vals.filter((_, idx) => idx !== index));
-
-	return (<SearchInputWithChips {...args} onChange={onChange} onRemoveChip={onRemoveChip} value={vals} />);
-};
-
-export const ControlledSearchInputWithChips = Controlled.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledSearchInputWithChips.args = {
-	label: 'Controlled Search input',
+		const onChange = (event, newVals) => setVals(newVals);	
+		const onRemoveChip = (index) => setVals(vals.filter((_, idx) => idx !== index));
+	
+		return (<SearchInputWithChips {...args} onChange={onChange} onRemoveChip={onRemoveChip} value={vals} />);
+	},
 };

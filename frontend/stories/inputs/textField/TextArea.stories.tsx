@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { TextArea } from '@controls/inputs/textArea/textArea.component';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormContainer } from '../formInput.styles';
+import { StoryObj, Meta } from '@storybook/react';
+import { FormDecorator } from '../inputDecorators';
 
 export default {
 	title: 'Inputs/TextField/TextArea',
@@ -44,6 +44,7 @@ export default {
 		},
 	},
 	component: TextArea,
+	decorators: [FormDecorator],
 	parameters: { controls: { exclude: [
 		'margin',
 		'ref',
@@ -54,17 +55,13 @@ export default {
 		'className',
 		'inputRef',
 	] } },
-} as ComponentMeta<typeof TextArea>;
+} as Meta<typeof TextArea>;
 
-const Controlled: ComponentStory<typeof TextArea> = (args) => (
-	<FormContainer>
-		<TextArea {...args} />
-	</FormContainer>
-);
+type Story = StoryObj<typeof TextArea>;
 
-export const ControlledTextArea = Controlled.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledTextArea.args = {
-	label: 'Controlled Multi Line input',
-	minRows: 3,
+export const ControlledTextArea: Story = {
+	args: {
+		label: 'Controlled Multi Line input',
+		minRows: 3,
+	},
 };
