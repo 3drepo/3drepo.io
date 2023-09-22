@@ -34,6 +34,7 @@ const Icons = {
 
 export default {
 	title: 'Buttons/SubmitButton',
+	component: SubmitButton,
 	argTypes: {
 		variant: {
 			description: 'Variant of the button',
