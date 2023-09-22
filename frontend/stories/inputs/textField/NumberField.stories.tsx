@@ -16,7 +16,7 @@
  */
 import { NumberField } from '@controls/inputs/numberField/numberField.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormContainer } from '../FormInput.styles';
+import { FormContainer } from '../formInput.styles';
 
 export default {
 	title: 'Inputs/TextField/NumberField',

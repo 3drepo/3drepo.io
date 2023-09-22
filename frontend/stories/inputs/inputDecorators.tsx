@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { useState } from '@storybook/addons';
-import { FormContainer } from './FormInput.styles';
+import { FormContainer } from './formInput.styles';
 
 export const FormDecorator = (Story) => (
 	<FormContainer>

@@ -16,7 +16,7 @@
  */
 import { TextArea } from '@controls/inputs/textArea/textArea.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormContainer } from '../FormInput.styles';
+import { FormContainer } from '../formInput.styles';
 
 export default {
 	title: 'Inputs/TextField/TextArea',

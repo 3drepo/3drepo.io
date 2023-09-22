@@ -16,7 +16,7 @@
  */
 import { TextField } from '@controls/inputs/textField/textField.component';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormContainer } from '../FormInput.styles';
+import { FormContainer } from '../formInput.styles';
 
 export default {
 	title: 'Inputs/TextField/TextField',
