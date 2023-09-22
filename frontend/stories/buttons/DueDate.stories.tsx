@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Meta, StoryObj } from '@storybook/react';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
+import { LocalizationProviderDecorator } from '../../stories/inputs/calendar/date.decorator';
 
 export default {
 	title: 'Buttons/DueDate',
@@ -33,13 +32,7 @@ export default {
 			type: 'boolean',
 		},
 	},
-	decorators: [
-		(Story) => (
-			<LocalizationProvider dateAdapter={AdapterDayjs}>
-				<Story />
-			</LocalizationProvider>
-		),
-	],
+	decorators: [LocalizationProviderDecorator],
 	parameters: { controls: ['onBlur'] },
 } as Meta<typeof DueDateWithLabel>;
 
