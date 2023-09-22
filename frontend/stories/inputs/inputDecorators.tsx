@@ -25,6 +25,16 @@ export const FormDecorator = (Story) => (
 
 export const EventControllerDecorator: any = (Story, { args: { value: initialValue } }) => {
 	const [value, setValue] = useState(initialValue);
-	const handleChange = (event: any) => setValue(event.target.value as any);
+	const handleChange = (event: any) => {
+		setValue(event.target.value as any);
+	}
+	return (<Story value={value} onChange={handleChange} />);
+};
+
+export const EventControllerMultipleValuesDecorator: any = (Story, { args: { value: initialValue, ...args } }) => {
+	const [value, setValue] = useState(initialValue || []);
+	const handleChange = (event: any) => {
+		setValue(event.target.value as any)
+	};
 	return (<Story value={value} onChange={handleChange} />);
 };
