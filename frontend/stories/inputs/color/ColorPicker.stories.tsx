@@ -17,7 +17,8 @@
 import { Meta, StoryObj } from '@storybook/react';
 import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
 import { RgbArray, UNSET_RGB_COLOR } from '@controls/inputs/colorPicker/colorPicker.helpers';
-import { EventControllerDecorator, FormDecorator } from '../inputDecorators';
+import { useState } from 'react';
+import { FormDecorator } from '../inputDecorators';
 
 export default {
 	title: 'Inputs/Color/ColorPicker',
@@ -58,5 +59,9 @@ export const FormColorPickerOnlyOpacitySet: Story = {
 };
 
 export const ControlledFormColorPicker: Story = {
-	decorators: [FormDecorator, EventControllerDecorator],
+	render: ({ value: initialValue, ...args }) => {
+		const [value, setValue] = useState(initialValue);
+		const handleChange = (event) => setValue(event.target.value as any);
+		return (<ColorPicker value={value} onChange={handleChange} {...args} />);
+	},
 };

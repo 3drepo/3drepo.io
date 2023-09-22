@@ -17,7 +17,8 @@
 import { Select } from '@controls/inputs/select/select.component';
 import { MenuItem } from '@mui/material';
 import { Meta, StoryObj } from '@storybook/react';
-import { EventControllerMultipleValuesDecorator, FormDecorator } from '../inputDecorators';
+import { useState } from 'react';
+import { FormDecorator } from '../inputDecorators';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 
 export default {
@@ -70,14 +71,17 @@ export const MultiSelect: Story = {
 		multiple: true,
 		value: [],
 	},
-	decorators: [EventControllerMultipleValuesDecorator],
-	render: ({ values, value, ...args }: any) => (
-		<Select {...args} value={[]}>
-			{values.map((valueItem) => (
-				<MultiSelectMenuItem value={valueItem} key={valueItem}>
-					{valueItem}
-				</MultiSelectMenuItem>
-			))}
-		</Select>
-	),
+	render: ({ values, value: initialValue, ...args }) => {
+		const [value, setValue] = useState(initialValue || []);
+		const handleChange = (event) => setValue(event.target.value as any);
+		return (
+			<Select {...args} value={value} onChange={handleChange}>
+				{values.map((valueItem) => (
+					<MultiSelectMenuItem value={valueItem} key={valueItem}>
+						{valueItem}
+					</MultiSelectMenuItem>
+				))}
+			</Select>
+		);
+	},
 };

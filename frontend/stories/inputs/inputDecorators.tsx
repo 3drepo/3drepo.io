@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState } from '@storybook/addons';
 import { FormContainer } from './formInput.styles';
 
 export const FormDecorator = (Story) => (
@@ -22,19 +21,3 @@ export const FormDecorator = (Story) => (
 		<Story />
 	</FormContainer>
 );
-
-export const EventControllerDecorator: any = (Story, { args: { value: initialValue } }) => {
-	const [value, setValue] = useState(initialValue);
-	const handleChange = (event: any) => {
-		setValue(event.target.value as any);
-	}
-	return (<Story value={value} onChange={handleChange} />);
-};
-
-export const EventControllerMultipleValuesDecorator: any = (Story, { args: { value: initialValue, ...args } }) => {
-	const [value, setValue] = useState(initialValue || []);
-	const handleChange = (event: any) => {
-		setValue(event.target.value as any)
-	};
-	return (<Story value={value} onChange={handleChange} />);
-};

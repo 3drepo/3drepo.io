@@ -18,7 +18,8 @@ import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMen
 import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 import { MenuItem } from '@mui/material';
 import { Meta, StoryObj } from '@storybook/react';
-import { EventControllerMultipleValuesDecorator, FormDecorator } from '../inputDecorators';
+import { useState } from 'react';
+import { FormDecorator } from '../inputDecorators';
 
 export default {
 	title: 'Inputs/Select/SearchSelect',
@@ -70,14 +71,17 @@ export const SearchMultiSelect: Story = {
 		multiple: true,
 		renderValue: (val: any[]) => val.join(', '),
 	},
-	decorators: [EventControllerMultipleValuesDecorator],
-	render: ({ values, ...args }) => (
-		<SearchSelect {...args} value={[]}>
-			{values.map((valueItem) => (
-				<MultiSelectMenuItem value={valueItem} key={valueItem}>
-					{valueItem}
-				</MultiSelectMenuItem>
-			))}
-		</SearchSelect>
-	),
+	render: ({ values, value: initialValue, ...args }) => {
+		const [value, setValue] = useState(initialValue || []);
+		const handleChange = (event) => setValue(event.target.value as any);
+		return (
+			<SearchSelect {...args} value={value} onChange={handleChange}>
+				{values.map((valueItem) => (
+					<MultiSelectMenuItem value={valueItem} key={valueItem}>
+						{valueItem}
+					</MultiSelectMenuItem>
+				))}
+			</SearchSelect>
+		);
+	},
 };
