@@ -30,6 +30,7 @@ export default {
 	argTypes: {
 		items: { control: 'object' },
 	},
+	parameters: { controls: { exclude: 'children' } },
 } as Meta<typeof SearchContextComponent>;
 
 const ObjectsListHeader = ({ columnNames, setSortConfig }) => (
