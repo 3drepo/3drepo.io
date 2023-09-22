@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Avatar as Button } from '@controls/avatar/';
+import { Avatar } from '@controls/avatar/avatar.component';
 import { Meta, StoryObj } from '@storybook/react';
 
 const defaultUser = {
@@ -26,15 +26,15 @@ const defaultUser = {
 };
 
 export default {
-	title: 'Buttons/AvatarButton',
-	component: Button,
+	title: 'Info/Avatar',
+	component: Avatar,
 	parameters: { controls: { exclude: ['onClick', 'className'] } },
 	args: {
 		user: defaultUser,
 	}
-} as Meta<typeof Button>;
+} as Meta<typeof Avatar>;
 
-type Story = StoryObj<typeof Button>;
+type Story = StoryObj<typeof Avatar>;
 
 export const AvatarWithInitials: Story = { args: { isButton: false } };
 
