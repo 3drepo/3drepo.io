@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { IconsTemplate, IconsTemplateProps } from './icons.component';
+import { IconsTemplate } from './icons.component';
 
 const groupIconsByType = (icons: string[]) => {
 	const svgIcons: string[] = [];
@@ -68,7 +68,7 @@ export const metaColorlessIcon = {
 	args: {
 		iconSize: 10,
 	},
-	render: (args) => (<IconsTemplate {...args as IconsTemplateProps} />),
+	component: IconsTemplate,
 	parameters: { controls: { exclude: 'icons' } },
 };
 
