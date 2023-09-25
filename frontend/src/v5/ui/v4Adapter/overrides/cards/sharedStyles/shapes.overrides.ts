@@ -144,7 +144,9 @@ export const measurementsStying = css`
 			}
 
 			${ActionsLine} {
-				bottom: 0px;
+				&:not(:has(button + button)) {
+					bottom: 4px;
+				}
 
 				button { 
 					margin: 0;

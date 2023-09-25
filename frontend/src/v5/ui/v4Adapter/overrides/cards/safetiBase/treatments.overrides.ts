@@ -104,10 +104,14 @@ export default css`
 		}
 		
 		${ActionsLine} {
-			top: 18px;
 			bottom: unset;
 			display: flex;
 			flex-direction: column-reverse;
+			
+			top: 18px;
+			&:not(:has(button + button)) {
+				top: 20px;
+			}
 		}
 	}
 `;
