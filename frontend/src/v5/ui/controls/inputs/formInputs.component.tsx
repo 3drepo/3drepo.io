@@ -29,22 +29,21 @@ import { TextArea } from './textArea/textArea.component';
 import { TextAreaFixedSize } from './textArea/textAreaFixedSize.component';
 import { TextField } from './textField/textField.component';
 
-
 // text inputs
-export const FormNumberField = (props: InputControllerProps<typeof NumberField>) => (<InputController Input={NumberField} {...props} />);
-export const FormPasswordField = (props: InputControllerProps<typeof PasswordField>) => (<InputController Input={PasswordField} {...props} />);
-export const FormTextField = (props: InputControllerProps<typeof TextField>) => (<InputController Input={TextField} {...props} />);
-export const FormTextArea = (props: InputControllerProps<typeof TextArea>) => (<InputController Input={TextArea} {...props} />);
-export const FormTextAreaFixedSize = forwardRef((props: InputControllerProps<typeof TextAreaFixedSize>, ref) => (<InputController Input={TextAreaFixedSize} {...props} ref={ref} />));
+export const FormNumberField = (props: InputControllerProps) => (<InputController Input={NumberField} {...props} />);
+export const FormPasswordField = (props: InputControllerProps) => (<InputController Input={PasswordField} {...props} />);
+export const FormTextField = (props: InputControllerProps) => (<InputController Input={TextField} {...props} />);
+export const FormTextArea = (props: InputControllerProps) => (<InputController Input={TextArea} {...props} />);
+export const FormTextAreaFixedSize = forwardRef((props: InputControllerProps, ref) => (<InputController Input={TextAreaFixedSize} {...props} ref={ref} />));
 
 // calendar inputs
-export const FormDueDateWithIcon = (props: InputControllerProps<typeof DueDateWithIcon>) => (<InputController Input={DueDateWithIcon} {...props} />);
+export const FormDueDateWithIcon = (props: InputControllerProps) => (<InputController Input={DueDateWithIcon} {...props} />);
 
 // select inputs
-export const FormSelectView = (props: InputControllerProps<typeof SelectView>) => (<InputController Input={SelectView} {...props} />);
-export const FormSelect = (props: InputControllerProps<typeof Select>) => (<InputController Input={Select} {...props} />);
-export const FormChipSelect = (props: InputControllerProps<typeof ChipSelect>) => (<InputController Input={ChipSelect} {...props} />);
-export const FormAssigneesSelect = (props: InputControllerProps<typeof AssigneesSelect>) => (<InputController Input={AssigneesSelect} {...props} />);
+export const FormSelectView = (props: InputControllerProps) => (<InputController Input={SelectView} {...props} />);
+export const FormSelect = (props: InputControllerProps) => (<InputController Input={Select} {...props} />);
+export const FormChipSelect = (props: InputControllerProps) => (<InputController Input={ChipSelect} {...props} />);
+export const FormAssigneesSelect = (props: InputControllerProps) => (<InputController Input={AssigneesSelect} {...props} />);
 
 // control inputs
-export const FormCheckbox = (props: InputControllerProps<typeof Checkbox>) => (<InputController Input={Checkbox} {...props} />);
+export const FormCheckbox = (props: InputControllerProps) => (<InputController Input={Checkbox} {...props} />);
