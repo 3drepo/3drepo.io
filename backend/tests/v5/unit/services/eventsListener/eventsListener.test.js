@@ -368,6 +368,7 @@ const testModelEventsListener = () => {
 			const rFile = [`${generateRandomString()}_${format}`];
 			const timestamp = generateRandomDate();
 			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, description });
+			Revisions.getRevisionFormat.mockReturnValueOnce(`.${format}`);
 
 			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
 			const data = {

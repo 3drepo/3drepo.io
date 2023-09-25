@@ -18,12 +18,13 @@
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
-const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisionFormat, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Comments = require('./commons/tickets.comments');
 const Groups = require('./commons/groups');
 const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
+const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 const fs = require('fs/promises');
 const { getFileAsStream } = require('../../../../services/filesManager');
 const { getProjectById } = require('../../../../models/projectSettings');
@@ -80,15 +81,13 @@ Containers.getContainerStats = async (teamspace, container) => {
 	return stats;
 };
 
-Containers.getRevisionFormat = (rFile) => (rFile ? '.'.concat(rFile[0].split('_').pop()) : undefined);
-
 Containers.getRevisions = async (teamspace, container, showVoid) => {
 	const revisions = await getRevisions(teamspace,
 		container, showVoid, { _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
 
 	return revisions.map(({ rFile, ...r }) => {
-		const format = Containers.getRevisionFormat(rFile);
-		return { ...r, ...(format ? { format } : {}) };
+		const format = getRevisionFormat(rFile);
+		return { ...r, ...deleteIfUndefined({ format }) };
 	});
 };
 
