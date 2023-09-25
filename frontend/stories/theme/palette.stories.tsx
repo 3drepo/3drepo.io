@@ -14,46 +14,36 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/* eslint-disable max-len */
-import { GroupIcon } from '@/v5/ui/routes/viewer/groups/groupItem/groupIcon/groupIcon.styles';
-import { theme } from '@/v5/ui/themes/theme';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
-import { capitalise, paletteVariants } from './helper';
-import { PaletteColourSampleContainer, PaletteSampleContainer, PaletteName, PaletteContainer } from './palette.styles';
+import { palette } from '@/v5/ui/themes/theme';
+import { Meta, StoryObj } from '@storybook/react';
+import { paletteVariants } from './helper';
+import { ColorPreview, PaletteColorSampleContainer, PaletteSampleContainer, PaletteName, PaletteContainer } from './palette.styles';
 
-const PaletteColourSample = ({ name, color }) => (
-	<PaletteColourSampleContainer>
-		<GroupIcon $color={color} $variant="dark" /> {color} -  {name}
-	</PaletteColourSampleContainer>
+const PaletteColorSample = ({ name, hexValue }) => (
+	<PaletteColorSampleContainer>
+		<ColorPreview $color={hexValue} $variant="dark" /> &nbsp; {name} - {hexValue}
+	</PaletteColorSampleContainer>
 );
 
-const PaletteSample = ({ palette, name }) => (
+const PaletteSample = ({ item }) => (
 	<PaletteSampleContainer>
-		<PaletteName>{capitalise(name)}</PaletteName>{
-			Object.keys(palette).map((itemName) => (<PaletteColourSample name={itemName} color={palette[itemName]} />))
-		}
+		<PaletteName>{item}</PaletteName>
+		{Object.entries(palette[item]).map(([name, hexValue]) => (<PaletteColorSample name={name} hexValue={hexValue} />))}
 		<hr />
 	</PaletteSampleContainer>
 );
 
 const ThemePalette = () => (
 	<PaletteContainer>
-		{
-			paletteVariants()
-				.map((paletteItem) => (<PaletteSample palette={theme.palette[paletteItem]} name={paletteItem} />))
-		}
+		{paletteVariants().map((item) => (<PaletteSample item={item} />))}
 	</PaletteContainer>
 );
 
 export default {
 	title: 'Theme/Palette',
+	parameters: { layout: 'fullscreen' },
 	component: ThemePalette,
-	parameters: {
-		// More on Story layout: https://storybook.js.org/docs/react/configure/story-layout
-		layout: 'fullscreen',
-	},
-} as ComponentMeta<typeof ThemePalette>;
+} as Meta<typeof ThemePalette>;
 
-const Template: ComponentStory<typeof ThemePalette> = () => <ThemePalette />;
-
-export const Palette = Template.bind({});
+type Story = StoryObj<typeof ThemePalette>;
+export const Palette: Story = {};

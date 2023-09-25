@@ -16,26 +16,25 @@
  */
 /* eslint-disable max-len */
 
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { theme } from '@/v5/ui/themes/theme';
+import { Meta, StoryObj } from '@storybook/react';
+import { typography as typographies } from '@/v5/ui/themes/theme';
+import _ from 'lodash';
 import { TypographyContainer, TypographySampleContainer, TypographySampleText } from './typography.styles';
-import { capitalise, paletteVariants } from './helper';
+import { paletteVariants } from './helper';
 
 const TypographySample = ({ name, typography, variant }) => (
 	<TypographySampleContainer typography={typography} variant={variant}>
-		{capitalise(name)} - {Object.keys(typography).map((field) => `${field}: ${typography[field]}`).join(', ')}
+		{_.capitalize(name)} - {Object.keys(typography).map((field) => `${field}: ${typography[field]}`).join(', ')}
 		<TypographySampleText variant={variant}> The quick brown fox jumps over the lazy dog</TypographySampleText>
 	</TypographySampleContainer>
 );
 
-const NOT_TYPOGRAPHY = ['fontFamily', 'htmlFontSize', 'pxToRem', 'fontSize', 'fontWeightLight', 'fontWeightRegular', 'fontWeightMedium'];
-
 const TypographyComponent = ({ variant }) => (
 	<TypographyContainer>
 		{
-			Object.keys(theme.typography)
-				.filter((key) => !NOT_TYPOGRAPHY.includes(key))
-				.map((key) => (<TypographySample variant={variant} typography={theme.typography[key]} name={key} />))
+			Object.keys(typographies)
+				.filter((key) => key !== 'fontFamily')
+				.map((key) => (<TypographySample variant={variant} typography={typographies[key]} name={key} />))
 		}
 	</TypographyContainer>
 );
@@ -44,7 +43,6 @@ export default {
 	title: 'Theme/Typography',
 	component: TypographyComponent,
 	parameters: {
-		// More on Story layout: https://storybook.js.org/docs/react/configure/story-layout
 		layout: 'fullscreen',
 	},
 	argTypes: {
@@ -54,11 +52,11 @@ export default {
 			control: { type: 'select' },
 		},
 	},
-} as ComponentMeta<typeof TypographyComponent>;
+} as Meta<typeof TypographyComponent>;
 
-const Template: ComponentStory<typeof TypographyComponent> = (args) => <TypographyComponent {...args} />;
-
-export const Typography = Template.bind({});
-Typography.args = {
-	variant: 'main',
+type Story = StoryObj<typeof TypographyComponent>;
+export const Typography: Story = {
+	args: {
+		variant: 'main',
+	},
 };
