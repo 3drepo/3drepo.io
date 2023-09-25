@@ -45,7 +45,7 @@ export const VisualSettingsModal = ({
 				defaultMessage: 'Visual Settings',
 			})}
 			onClickClose={onClickClose}
-			tabModal
+			contrastColor
 		/>
 		<VisualSettingsModalContent>
 			<VisualSettingsDialog

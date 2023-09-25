@@ -23,7 +23,7 @@ export interface IModalHeader extends Omit<DetailedHTMLProps<FormHTMLAttributes<
 	title: any;
 	subtitle?: string;
 	disableClosing?: boolean;
-	tabModal?: boolean;
+	contrastColor?: boolean;
 }
 
 export const ModalHeader = ({
@@ -32,9 +32,9 @@ export const ModalHeader = ({
 	subtitle,
 	className,
 	disableClosing = false,
-	tabModal,
+	contrastColor,
 }: IModalHeader) => (
-	<Header className={className} $tabModal={tabModal}>
+	<Header className={className} $contrastColor={contrastColor}>
 		<div>
 			<Title>
 				{title}

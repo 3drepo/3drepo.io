@@ -96,7 +96,7 @@ export const EditProfileModal = ({ open, onClickClose, initialTab }: EditProfile
 			)}
 			onClickClose={onClickClose}
 			disableClosing={isSubmitting}
-			tabModal
+			contrastColorHeader
 		>
 			<TabContext value={activeTab}>
 				<TabList onChange={onTabChange} textColor="primary" indicatorColor="primary">

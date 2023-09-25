@@ -48,9 +48,9 @@ export const CloseButton = styled(IconButton)`
 	}
 `;
 
-export const Header = styled.div<{ $tabModal?: boolean }>`
+export const Header = styled.div<{ $contrastColor?: boolean }>`
 	color: ${({ theme }) => theme.palette.secondary.main};
-	background-color: ${({ $tabModal, theme }) => ($tabModal ? theme.palette.primary.contrast : 'transparent')};
+	background-color: ${({ $contrastColor, theme }) => ($contrastColor ? theme.palette.primary.contrast : 'transparent')};
 	height: fit-content;
 	width: 100%;
 	box-sizing: border-box;
