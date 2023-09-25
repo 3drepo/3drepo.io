@@ -70,6 +70,8 @@ const revisionAdded = async ({ teamspace, project, model, revision, isFederation
 			model, stringToUUID(revision),
 			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1 });
 
+		console.log({ tag, author, timestamp, desc, rFile });
+
 		const event = isFederation ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
 
 		const format = getRevisionFormat(rFile);
