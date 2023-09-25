@@ -63,12 +63,12 @@ type Story = StoryObj<typeof OverlappingContainer>;
 
 export const FixedText: Story = {
 	args: {
-		children: <FrontText>Always on text</FrontText>
-	}
+		children: <FrontText>Always on text</FrontText>,
+	},
 };
 
 export const OnHoverText: Story = {
 	args: {
-		children: <FrontTextOnHover>I display on hover</FrontTextOnHover>
-	}
+		children: <FrontTextOnHover>I display on hover</FrontTextOnHover>,
+	},
 };

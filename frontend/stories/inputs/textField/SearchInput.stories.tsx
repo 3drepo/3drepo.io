@@ -55,5 +55,5 @@ export const ControlledSearchInput: Story = {
 		const onChange = (event) => setVal(event.target.value);
 	
 		return (<SearchInput {...args} onChange={onChange} value={val} />);
-	}
+	},
 };

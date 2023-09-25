@@ -52,5 +52,5 @@ export const ControlledFormDatePickerDefaultDate: Story = {
 	args: {
 		label: 'Controlled Date with today as default date',
 		defaultValue: new Date('2020-01-30'),
-	}
+	},
 };

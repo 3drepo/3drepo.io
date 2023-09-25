@@ -64,7 +64,7 @@ export default {
 		controls: { exclude: ['className'] },
 	},
 	decorators: [
-		(Story, { parameters: { parentHeight, parentWidth }}) => (
+		(Story, { parameters: { parentHeight, parentWidth } }) => (
 			<ParentComponent parentHeight={parentHeight} parentWidth={parentWidth}>
 				<Story />
 			</ParentComponent>

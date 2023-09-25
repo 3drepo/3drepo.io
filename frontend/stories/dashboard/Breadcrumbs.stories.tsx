@@ -50,7 +50,7 @@ export const BreadCrumbsWithOptions: Story = {
 					{ title: 'A project', selected: true },
 					{ title: 'Yet another project' },
 				],
-			}
+			},
 		],
 	},
 };

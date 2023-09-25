@@ -56,8 +56,8 @@ export default {
 	parameters: {
 		controls: {
 			exclude: ['name', 'inputRef', 'helperText', 'error', 'size', 'onDelete',
-				'deleteIcon', 'avatar', 'sx', 'classes', 'clickable', 'children', 'required', 'icon', 'ref']
-		}
+				'deleteIcon', 'avatar', 'sx', 'classes', 'clickable', 'children', 'required', 'icon', 'ref'],
+		},
 	},
 	render: ({ value: initialValue, ...args }) => {
 		const [value, setValue] = useState(initialValue);

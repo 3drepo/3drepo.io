@@ -33,7 +33,7 @@ export default {
 	args: {
 		// this should reflect DEFAULT_VALUE in ColorPicker file
 		defaultValue: { color: UNSET_RGB_COLOR, opacity: 1 },
-	}
+	},
 } as Meta<typeof ColorPicker>;
 
 type Story = StoryObj<typeof ColorPicker>;

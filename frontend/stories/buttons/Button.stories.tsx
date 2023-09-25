@@ -49,7 +49,7 @@ export default {
 		},
 	},
 	args: {
-		children: "Controls Button",
+		children: 'Controls Button',
 	},
 } as Meta<typeof Button>;
 

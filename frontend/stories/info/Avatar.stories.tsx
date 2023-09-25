@@ -31,7 +31,7 @@ export default {
 	parameters: { controls: { exclude: ['onClick', 'className'] } },
 	args: {
 		user: defaultUser,
-	}
+	},
 } as Meta<typeof Avatar>;
 
 type Story = StoryObj<typeof Avatar>;

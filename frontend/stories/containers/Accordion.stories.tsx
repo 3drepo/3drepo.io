@@ -33,7 +33,7 @@ export default {
 	parameters: { controls: { exclude: ['ref', 'elevation', 'square', 'variant', 'Icon'] } },
 } as Meta<typeof Accordion>;
 
-type Story = StoryObj<typeof Accordion>
+type Story = StoryObj<typeof Accordion>;
 
 export const ControlledFormSelect: Story = {
 	args: {

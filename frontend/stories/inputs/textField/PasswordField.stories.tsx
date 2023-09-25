@@ -16,7 +16,6 @@
  */
 import { PasswordField } from '@controls/inputs/passwordField/passwordField.component';
 import { StoryObj, Meta } from '@storybook/react';
-import { FormDecorator } from '../inputDecorators';
 
 export default {
 	title: 'Inputs/TextField/PasswordField',

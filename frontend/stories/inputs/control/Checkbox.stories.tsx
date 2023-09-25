@@ -43,7 +43,7 @@ export default {
 	decorators: [FormDecorator],
 } as Meta<typeof Checkbox>;
 
-type Story = StoryObj<typeof Checkbox>
+type Story = StoryObj<typeof Checkbox>;
 
 export const ControlledFormCheckbox: Story = {
 	args: {

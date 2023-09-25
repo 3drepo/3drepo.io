@@ -47,7 +47,7 @@ export const ControlledSearchInputWithChips: Story = {
 	render: (args) => {
 		const [vals, setVals] = useState([]);
 
-		const onChange = (event, newVals) => setVals(newVals);	
+		const onChange = (event, newVals) => setVals(newVals);
 		const onRemoveChip = (index) => setVals(vals.filter((_, idx) => idx !== index));
 	
 		return (<SearchInputWithChips {...args} onChange={onChange} onRemoveChip={onRemoveChip} value={vals} />);
