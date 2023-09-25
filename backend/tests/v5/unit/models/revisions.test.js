@@ -175,6 +175,22 @@ const testIsTagUnique = () => {
 	});
 };
 
+const testGetRevisionFormat = () => {
+	describe('Get revision format', () => {
+		test('Should return undefined if revision has no file', async () => {
+			const res = Revisions.getRevisionFormat(undefined);
+			expect(res).toEqual(undefined);
+		});
+
+		test('Should return the format if revision has file', async () => {
+			const format = generateRandomString();
+			const file = [`${generateRandomString()}_${generateRandomString()}_${format}`];
+			const res = Revisions.getRevisionFormat(file);
+			expect(res).toEqual(`.${format}`);
+		});
+	});
+};
+
 describe('models/revisions', () => {
 	testGetRevisionCount();
 	testGetLatestRevision();
@@ -182,4 +198,5 @@ describe('models/revisions', () => {
 	testUpdateRevisionStatus();
 	testIsTagUnique();
 	testGetRevisionByIdOrTag();
+	testGetRevisionFormat();
 });
