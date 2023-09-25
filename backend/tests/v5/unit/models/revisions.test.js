@@ -177,12 +177,12 @@ const testIsTagUnique = () => {
 
 const testGetRevisionFormat = () => {
 	describe('Get revision format', () => {
-		test('Should return undefined if revision has no file', async () => {
+		test('Should return undefined if revision has no file', () => {
 			const res = Revisions.getRevisionFormat(undefined);
 			expect(res).toEqual(undefined);
 		});
 
-		test('Should return the format if revision has file', async () => {
+		test('Should return the format if revision has file', () => {
 			const format = generateRandomString();
 			const file = [`${generateRandomString()}_${generateRandomString()}_${format}`];
 			const res = Revisions.getRevisionFormat(file);
