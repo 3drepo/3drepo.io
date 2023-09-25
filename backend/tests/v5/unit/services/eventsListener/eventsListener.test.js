@@ -363,11 +363,11 @@ const testModelEventsListener = () => {
 		test(`Should create a ${chatEvents.CONTAINER_NEW_REVISION} chat event if there is a ${events.NEW_REVISION} (container)`, async () => {
 			const tag = generateRandomString();
 			const author = generateRandomString();
-			const description = generateRandomString();
+			const desc = generateRandomString();
 			const format = generateRandomString();
 			const rFile = [`${generateRandomString()}_${format}`];
 			const timestamp = generateRandomDate();
-			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, description });
+			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ tag, author, timestamp, rFile, desc });
 			Revisions.getRevisionFormat.mockReturnValueOnce(`.${format}`);
 
 			const waitOnEvent = eventTriggeredPromise(events.NEW_REVISION);
@@ -384,11 +384,11 @@ const testModelEventsListener = () => {
 
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
-				{ _id: 0, tag: 1, author: 1, timestamp: 1, description: 1, rFile: 1 });
+				{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1 });
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 				chatEvents.CONTAINER_NEW_REVISION,
-				{ _id: data.revision, tag, author, timestamp: timestamp.getTime(), description, format: `.${format}` },
+				{ _id: data.revision, tag, author, timestamp: timestamp.getTime(), desc, format: `.${format}` },
 				data.teamspace,
 				data.project,
 				data.model,
@@ -414,7 +414,7 @@ const testModelEventsListener = () => {
 			await waitOnEvent;
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
-				{ _id: 0, tag: 1, author: 1, timestamp: 1, description: 1, rFile: 1 });
+				{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1 });
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 				chatEvents.FEDERATION_NEW_REVISION,
@@ -442,7 +442,7 @@ const testModelEventsListener = () => {
 			await waitOnEvent;
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
-				{ _id: 0, tag: 1, author: 1, timestamp: 1, description: 1, rFile: 1 });
+				{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1 });
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
 		});
 
@@ -463,7 +463,7 @@ const testModelEventsListener = () => {
 			await waitOnEvent;
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(data.teamspace, data.model, data.revision,
-				{ _id: 0, tag: 1, author: 1, timestamp: 1, description: 1, rFile: 1 });
+				{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1 });
 			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(0);
 		});
 

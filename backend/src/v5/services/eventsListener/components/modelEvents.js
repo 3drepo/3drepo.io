@@ -66,9 +66,9 @@ const revisionUpdated = async ({ teamspace, project, model, data, sender }) => {
 
 const revisionAdded = async ({ teamspace, project, model, revision, isFederation }) => {
 	try {
-		const { tag, author, timestamp, description, rFile } = await getRevisionByIdOrTag(teamspace,
+		const { tag, author, timestamp, desc, rFile } = await getRevisionByIdOrTag(teamspace,
 			model, stringToUUID(revision),
-			{ _id: 0, tag: 1, author: 1, timestamp: 1, description: 1, rFile: 1 });
+			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1 });
 
 		const event = isFederation ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
 
@@ -78,7 +78,7 @@ const revisionAdded = async ({ teamspace, project, model, revision, isFederation
 			tag,
 			author,
 			timestamp: timestamp.getTime(),
-			description,
+			desc,
 			...deleteIfUndefined({ format }),
 		}, teamspace, project, model);
 	} catch (err) {
