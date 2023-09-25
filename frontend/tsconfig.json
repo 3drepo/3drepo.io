@@ -3,7 +3,6 @@
 	"isolatedModules": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-	"moduleResolution": "Bundler",
     "module": "commonjs",
     "target": "es6",
     "types": [
