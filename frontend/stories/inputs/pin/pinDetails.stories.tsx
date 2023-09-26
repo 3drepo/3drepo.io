@@ -16,7 +16,7 @@
  */
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { PinDetails } from '@components/viewer/cards/tickets/pinDetails/pinDetails.component';
+import { PinDetails } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/pinDetails/pinDetails.component';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
