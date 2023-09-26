@@ -141,6 +141,7 @@ export class Issues extends PureComponent<IProps, any> {
 	}
 
 	public componentWillUnmount() {
+		this.props.goToIssue(null);
 	}
 
 	public setActiveIssue = (item) => {
