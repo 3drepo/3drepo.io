@@ -45,7 +45,7 @@ import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAnd
 import { GroupByFormSelect } from '../selectMenus/groupByFormSelect.component';
 import { TemplateFormSelect } from '../selectMenus/templateFormSelect.component';
 import { FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from '../tickets.styles';
-import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, NONE_OPTION } from './ticketsTable.helper';
+import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, NONE_OPTION, hasRequiredViewerProperties } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
@@ -80,6 +80,7 @@ export const TicketsTable = () => {
 
 	const editingTicketId = sidePanelTicket?._id;
 	const templateIsFetched = templateAlreadyFetched(selectedTemplate || {} as any);
+	const isEditingValidTicket = sidePanelModelId && !editingTicketId && !hasRequiredViewerProperties(selectedTemplate);
 
 	const ticketsFilteredByTemplate = useMemo(() => {
 		const ticketsToShow = ticketsWithModelId.filter((t) => getTicketIsCompleted(t) === showCompleted);
@@ -107,7 +108,7 @@ export const TicketsTable = () => {
 			project,
 			containerOrFederation: sidePanelModelId,
 		});
-		history.push({ pathname, search: `?ticketId=${sidePanelTicket._id}` });
+		history.push({ pathname, search: sidePanelTicket?._id ? `?ticketId=${sidePanelTicket._id}` : '' });
 	};
 
 	// We are using getState here because is being used inside a function
@@ -219,7 +220,7 @@ export const TicketsTable = () => {
 			<TicketsTableContent setSidePanelData={setSidePanelData} />
 			<SidePanel open={!!sidePanelModelId}>
 				<SlidePanelHeader>
-					<OpenInViewerButton disabled={!editingTicketId} onClick={openInViewer}>
+					<OpenInViewerButton disabled={isEditingValidTicket} onClick={openInViewer}>
 						<FormattedMessage
 							id="ticketsTable.button.openIn3DViewer"
 							defaultMessage="Open in 3D viewer"
