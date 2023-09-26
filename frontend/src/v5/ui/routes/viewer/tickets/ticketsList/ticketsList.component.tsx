@@ -33,7 +33,7 @@ import { SearchContextComponent, SearchContext, SearchContextType } from '@contr
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters, CompletedFilterChip, TicketSearchInput } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
-import { AdditionalProperties, TicketsCardViews } from '../tickets.constants';
+import { AdditionalProperties } from '../tickets.constants';
 
 type TicketsListProps = {
 	tickets: ITicket[];
@@ -94,7 +94,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
 
 		if (wasSelected) {
-			TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
+			TicketsCardActionsDispatchers.openTicket(ticket._id);
 		}
 
 		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
