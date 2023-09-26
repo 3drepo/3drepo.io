@@ -32,5 +32,5 @@ export const useSearchParam = (name: string) => {
 		history.replace({ search: searchParams.toString() });
 	};
 
-	return [value, setParam] as [string, (val: string) => void];
+	return [value, setParam] as [string, (val?: string) => void];
 };

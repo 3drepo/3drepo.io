@@ -138,6 +138,7 @@ export const getTicketValidator = (template) => {
 };
 
 export const getValidators = (template: ITemplate) => {
+	if (!template) return null;
 	const { properties, modules } = template;
 	const validators: any = { title: getTitleValidator() };
 

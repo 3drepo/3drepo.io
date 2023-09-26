@@ -120,6 +120,7 @@ export class Risks extends PureComponent<IProps, any> {
 	}
 
 	public componentWillUnmount() {
+		this.props.goToRisk(null);
 	}
 
 	public setActiveRisk = (item) => {
