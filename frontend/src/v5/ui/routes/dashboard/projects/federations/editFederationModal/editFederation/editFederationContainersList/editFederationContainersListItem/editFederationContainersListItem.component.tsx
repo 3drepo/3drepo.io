@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ComponentType, memo, useContext, useEffect } from 'react';
+import { ComponentType, memo, useContext, useEffect, useState } from 'react';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { DashboardListItemButton, DashboardListItemText } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { Highlight } from '@controls/highlight';
@@ -51,11 +51,25 @@ export const EditFederationContainersListItem = memo(({
 	onClick,
 }: EditFederationContainersListItemProps) => {
 	const { setGroupsByContainer, groupsByContainer, groups, includedContainers } = useContext(EditFederationContext);
+	const [groupValue, setGroupValue] = useState(groupsByContainer[container._id] || null);
 
 	const isIncluded = !!includedContainers.find(({ _id }) => _id === container._id);
 
-	const onGroupChange = (e, group) => {
-		setGroupsByContainer((existingGroups) => ({ ...existingGroups, [container._id]: group }));
+	const updateGroupsByContainer = (newValue) => {
+		setGroupsByContainer((existingGroups) => ({ ...existingGroups, [container._id]: newValue }));
+	};
+
+	const onGroupClose = (e, reason) => {
+		if (reason !== 'blur') return;
+		updateGroupsByContainer(groupValue);
+	};
+
+	const onGroupChange = (e, val, reason) => {
+		setGroupValue(val);
+
+		if (['selectOption', 'blur', 'clear'].includes(reason)) {
+			updateGroupsByContainer(val);
+		}
 	};
 
 	const filterOptions = (options, { inputValue }) => {
@@ -115,15 +129,25 @@ export const EditFederationContainersListItem = memo(({
 					>
 						{isIncluded && (
 							<Autocomplete
-								value={groupsByContainer[container._id]}
-								onChange={onGroupChange}
+								value={groupValue}
+								onInputChange={onGroupChange}
+								onClose={onGroupClose}
 								renderInput={(params) => <AutocompleteTextfield {...params} />}
 								options={groups}
 								getOptionLabel={(group: string) => group}
 								ListboxComponent={OptionsBox}
-								clearOnBlur
+								disableClearable={!groupValue}
 								selectOnFocus
-								renderOption={(optionProps, value: string) => (<GroupOption {...optionProps} value={value} />)}
+								renderOption={(optionProps, value: string) => (
+									<GroupOption
+										{...optionProps}
+										value={value}
+										onClick={(e) => {
+											optionProps.onClick(e);
+											updateGroupsByContainer(value);
+										}}
+									/>
+								)}
 								filterOptions={filterOptions}
 							/>
 						)}

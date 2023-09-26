@@ -21,6 +21,7 @@ import { EditFederationContext } from '../../../../editFederationContext';
 
 interface GroupOptionProps {
 	value: string;
+	onClick: (e) => void;
 }
 
 export const GroupOption = ({ value, ...props }: GroupOptionProps) => {
