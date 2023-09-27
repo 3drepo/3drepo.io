@@ -29,7 +29,7 @@ import { Highlight } from '@controls/highlight';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
 import { Ticket, Id, Title, ChipList, Assignees, IssuePropertiesRow } from './ticketItem.styles';
-import { IssueProperties, SafetibaseProperties, TicketsCardViews } from '../../tickets.constants';
+import { IssueProperties, SafetibaseProperties } from '../../tickets.constants';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -59,8 +59,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	};
 
 	const expandTicket = () => {
-		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
-		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
+		TicketsCardActionsDispatchers.openTicket(ticket._id);
 	};
 
 	return (

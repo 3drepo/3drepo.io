@@ -45,8 +45,8 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 	const [commentReply, setCommentReply] = useState<ITicketComment>(null);
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const comments = TicketCommentsHooksSelectors.selectComments(ticketId);
 
 	const commentsLength = comments.length;
