@@ -98,7 +98,7 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 	const [emailUser, teamspaceJob, projects] = await Promise.all([
 		User.findByEmail(email),
 		Job.findByJob(teamspace, job),
-		findProjectsById(teamspace, projectIds)
+		findProjectsById(teamspace, projectIds),
 	]);
 
 	if (emailUser) { // If there is already a user registered with that email
