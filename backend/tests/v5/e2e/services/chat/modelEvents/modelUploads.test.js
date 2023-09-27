@@ -25,7 +25,7 @@ const { queueMessage } = require(`${src}/handler/queue`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 const { mkdirSync, writeFileSync } = require('fs');
 
-const { getRevisionFormat } = require(`${src}/processors/teamspaces/projects/models/containers`);
+const { getRevisionFormat } = require(`${src}/models/revisions`);
 
 const user = ServiceHelper.generateUserCredentials();
 const teamspace = ServiceHelper.generateRandomString();
@@ -215,7 +215,7 @@ const queueFinishedTest = () => {
 					tag: containerRevision.tag,
 					timestamp: newRevisionResults.data.timestamp,
 					format: getRevisionFormat(containerRevision.rFile),
-					description: containerRevision.description,
+					desc: containerRevision.desc,
 				} }));
 
 			socket.close();
@@ -250,7 +250,7 @@ const queueFinishedTest = () => {
 					tag: federationRevision.tag,
 					timestamp: newRevisionResults.data.timestamp,
 					format: getRevisionFormat(federationRevision.rFile),
-					description: federationRevision.description,
+					desc: federationRevision.desc,
 				} }));
 
 			socket.close();
