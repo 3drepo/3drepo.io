@@ -98,7 +98,8 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 	const [emailUser, teamspaceJob, projects] = await Promise.all([
 		User.findByEmail(email),
 		Job.findByJob(teamspace, job),
-		findProjectsById(teamspace, projectIds)
+		findProjectsById(teamspace, projectIds),
+		User.hasReachedLicenceLimitCheck(teamspace)
 	]);
 
 	if (emailUser) { // If there is already a user registered with that email
@@ -142,7 +143,6 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 		}
 
 	} else {
-		await User.hasReachedLicenceLimitCheck(teamspace);
 		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
 		await coll.insertOne(invitation);
 		await sendInvitationEmail(email, username, teamspace);
