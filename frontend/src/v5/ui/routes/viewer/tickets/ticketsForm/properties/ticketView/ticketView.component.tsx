@@ -36,6 +36,7 @@ import { PrimaryTicketButton } from '../../../ticketButton/ticketButton.styles';
 import { Header, HeaderSection, Label, InputContainer, Tooltip } from './ticketView.styles';
 import { CameraActionMenu } from './viewActionMenu/menus/cameraActionMenu.component';
 import { GroupsActionMenu } from './viewActionMenu/menus/groupsActionMenu.component';
+import { ViewerOnlyPropertyLabel } from '../viewerOnlyPropertyLabel.component';
 
 type ITicketView = {
 	value: Viewpoint | undefined;
@@ -111,7 +112,11 @@ export const TicketView = ({
 	return (
 		<InputContainer disabled={disabled} required={required} {...props}>
 			<Header>
-				<Label>{label}</Label>
+				<Label>
+					<ViewerOnlyPropertyLabel>
+						{label}
+					</ViewerOnlyPropertyLabel>
+				</Label>
 				<HeaderSection>
 					{(isViewer && !hasViewpoint) && (
 						<Tooltip title={(formatMessage({ id: 'viewer.card.button.saveCurrentView', defaultMessage: 'Save current view' }))}>
