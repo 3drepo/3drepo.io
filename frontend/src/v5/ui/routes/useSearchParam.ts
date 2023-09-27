@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2020 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,14 +14,23 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FC } from 'react';
-import { Link, Paragraph } from '../../presentationForm.styles';
 
-export const SectionBottom: FC = ({ children }) => {
-	return (
-		<Paragraph>
-			{children}<br /><br />
-			<Link href="https://help.3drepo.io/en/articles/4894459-presenter-mode" target="_blank">Read more...</Link>
-		</Paragraph>
-	);
+import { useHistory } from 'react-router-dom';
+
+export const useSearchParam = (name: string) => {
+	const history = useHistory();
+	const { location } = window;
+	const value = new URLSearchParams(location.search).get(name);
+
+	const setParam = (newValue = '') => {
+		const searchParams = new URLSearchParams(location.search);
+		if (newValue) {
+			searchParams.set(name, newValue);
+		} else {
+			searchParams.delete(name);
+		}
+		history.replace({ search: searchParams.toString() });
+	};
+
+	return [value, setParam] as [string, (val?: string) => void];
 };
