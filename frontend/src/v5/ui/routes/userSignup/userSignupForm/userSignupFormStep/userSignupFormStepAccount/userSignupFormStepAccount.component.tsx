@@ -87,6 +87,7 @@ export const UserSignupFormStepAccount = () => {
 				required
 				control={control}
 				formError={errors.password}
+				autoComplete="new-password"
 			/>
 			<FormPasswordField
 				InputProps={{
@@ -105,6 +106,7 @@ export const UserSignupFormStepAccount = () => {
 				disabled={!password}
 				control={control}
 				formError={errors.confirmPassword}
+				autoComplete="new-password"
 			/>
 
 			<NextStepButton>

@@ -142,6 +142,7 @@ export const EditProfileAuthenticationNonSSOTab = ({
 					})}
 					formError={errors.newPassword}
 					required
+					autoComplete="new-password"
 				/>
 				<FormPasswordField
 					control={control}
@@ -152,6 +153,7 @@ export const EditProfileAuthenticationNonSSOTab = ({
 					})}
 					formError={errors.confirmPassword}
 					required
+					autoComplete="new-password"
 				/>
 				<UnhandledError
 					error={unexpectedError}
