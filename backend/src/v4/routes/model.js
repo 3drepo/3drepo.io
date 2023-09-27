@@ -1617,7 +1617,7 @@ router.get("/:model/revision/:rev/searchtree.json", middlewares.hasReadAccessToM
 router.get("/:model/revision/master/head/subModelRevisions", middlewares.hasReadAccessToModel, getSubModelRevisions);
 
 /**
- * @api {get} /:teamspace/:model/revision/master/head/subModelRevisions Get submodel revisions by rev
+ * @api {get} /:teamspace/:model/revision/:revId/subModelRevisions Get submodel revisions by rev
  * @apiName getSubModelRevisionsByRev
  * @apiGroup Model
  * @apiDescription In a federation it returns the submodels revisions of a particular federation revision.
