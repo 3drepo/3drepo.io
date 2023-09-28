@@ -28,6 +28,12 @@ import { times } from 'lodash';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
 
+export const prepareMockBaseFederation = ({_id, name, role, isFavourite}: IFederation): Partial<IFederation> => ({_id, name, role, isFavourite});
+
+export const prepareMockContainers = (min = 1, max = 10): string[] => (
+	times(faker.datatype.number({ max, min }), () => faker.datatype.uuid()) 
+);
+
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({
 	_id: faker.datatype.uuid(),
 	name: faker.random.words(3),
@@ -59,12 +65,6 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	unit: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
 	...overrides,
 });
-
-export const prepareMockBaseFederation = ({_id, name, role, isFavourite}: IFederation): Partial<IFederation> => ({_id, name, role, isFavourite});
-
-export const prepareMockContainers = (min = 1, max = 10): string[] => (
-	times(faker.datatype.number({ max, min }), () => faker.datatype.uuid()) 
-);
 
 export const prepareMockStats = (overrides?: Partial<FederationStats>) => ({
 	code: faker.datatype.uuid(),
