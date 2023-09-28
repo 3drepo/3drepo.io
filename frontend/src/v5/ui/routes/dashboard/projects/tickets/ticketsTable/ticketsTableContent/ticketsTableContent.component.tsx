@@ -30,8 +30,11 @@ import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, groupTickets, ISSUE_PROPERTIES_GRO
 import { EmptyTicketsView } from '../../emptyTicketsView/emptyTicketsView.styles';
 import { Container } from './ticketsTableContent.styles';
 
-type TicketsTableContentProps = { setSidePanelData: (modelId: string, ticket?: Partial<ITicket>) => void; };
-export const TicketsTableContent = ({ setSidePanelData }: TicketsTableContentProps) => {
+type TicketsTableContentProps = {
+	setSidePanelData: (modelId: string, ticket?: Partial<ITicket>) => void;
+	selectedTicketId?: string;
+};
+export const TicketsTableContent = ({ setSidePanelData, selectedTicketId }: TicketsTableContentProps) => {
 	const { filteredItems } = useContext(SearchContext);
 	const { groupBy: groupByAsURLParam, template } = useParams<DashboardTicketsParams>();
 	const groupBy = GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByAsURLParam];
@@ -73,7 +76,16 @@ export const TicketsTableContent = ({ setSidePanelData }: TicketsTableContentPro
 		);
 	}
 
-	if (groupBy === NONE_OPTION) return (<TicketsTableGroup ticketsWithModelId={filteredItems} onNewTicket={onGroupNewTicket('')} onEditTicket={setSidePanelData} />);
+	if (groupBy === NONE_OPTION) {
+		return (
+			<TicketsTableGroup
+				ticketsWithModelId={filteredItems}
+				onNewTicket={onGroupNewTicket('')}
+				onEditTicket={setSidePanelData}
+				selectedTicketId={selectedTicketId}
+			/>
+		);
+	}
 
 	const groups = groupTickets(groupBy, filteredItems);
 
@@ -85,7 +97,12 @@ export const TicketsTableContent = ({ setSidePanelData }: TicketsTableContentPro
 					defaultExpanded={!!ticketsWithModelId.length}
 					key={groupBy + groupName + template + ticketsWithModelId}
 				>
-					<TicketsTableGroup ticketsWithModelId={ticketsWithModelId} onNewTicket={onGroupNewTicket(groupName)} onEditTicket={setSidePanelData} />
+					<TicketsTableGroup
+						ticketsWithModelId={ticketsWithModelId}
+						onNewTicket={onGroupNewTicket(groupName)}
+						onEditTicket={setSidePanelData}
+						selectedTicketId={selectedTicketId}
+					/>
 				</DashboardListCollapse>
 			))}
 		</Container>

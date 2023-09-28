@@ -25,8 +25,8 @@ export const ViewerOnlyPropertyLabel = ({ children }) => {
 	if (isViewer) return children;
 
 	return (
-		<div style={{ display: 'contents'}}>
-			[<FormattedMessage id="tickets.label.viewerProperty" defaultMessage="Requires viewer" />] - {children}
+		<div style={{ display: 'contents' }}>
+			<FormattedMessage id="tickets.label.viewerProperty" defaultMessage="Requires viewer" /> - {children}
 		</div>
 	);
 };

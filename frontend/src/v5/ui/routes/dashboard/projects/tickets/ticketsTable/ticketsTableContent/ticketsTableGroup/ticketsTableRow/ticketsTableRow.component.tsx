@@ -32,9 +32,10 @@ import { Row, Cell, CellChipText, CellOwner, OverflowContainer, UnassignedAssign
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
+	selected: boolean,
 	onClick: () => void,
 };
-export const TicketsTableRow = ({ ticket, onClick }: TicketsTableRowProps) => {
+export const TicketsTableRow = ({ ticket, onClick, selected }: TicketsTableRowProps) => {
 	const { query } = useContext(SearchContext);
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
@@ -66,7 +67,7 @@ export const TicketsTableRow = ({ ticket, onClick }: TicketsTableRowProps) => {
 	};
 
 	return (
-		<Row key={id} onClickCapture={handleClick}>
+		<Row key={id} onClickCapture={handleClick} $selected={selected}>
 			<Cell>
 				<Highlight search={query}>{`${template.code}:${number}`}</Highlight>
 			</Cell>

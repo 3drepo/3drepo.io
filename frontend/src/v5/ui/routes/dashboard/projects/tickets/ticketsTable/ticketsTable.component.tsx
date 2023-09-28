@@ -78,9 +78,9 @@ export const TicketsTable = () => {
 	const [showCompleted, setShowCompleted] = useState(false);
 	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
 
-	const editingTicketId = sidePanelTicket?._id;
+	const selectedTicketId = sidePanelTicket?._id;
 	const templateIsFetched = templateAlreadyFetched(selectedTemplate || {} as any);
-	const isEditingValidTicket = sidePanelModelId && !editingTicketId && !hasRequiredViewerProperties(selectedTemplate);
+	const isEditingValidTicket = sidePanelModelId && !selectedTicketId && !hasRequiredViewerProperties(selectedTemplate);
 
 	const ticketsFilteredByTemplate = useMemo(() => {
 		const ticketsToShow = ticketsWithModelId.filter((t) => getTicketIsCompleted(t) === showCompleted);
@@ -217,7 +217,7 @@ export const TicketsTable = () => {
 					</FlexContainer>
 				</FiltersContainer>
 			</FormProvider>
-			<TicketsTableContent setSidePanelData={setSidePanelData} />
+			<TicketsTableContent setSidePanelData={setSidePanelData} selectedTicketId={selectedTicketId} />
 			<SidePanel open={!!sidePanelModelId}>
 				<SlidePanelHeader>
 					<OpenInViewerButton disabled={isEditingValidTicket} onClick={openInViewer}>
@@ -233,8 +233,8 @@ export const TicketsTable = () => {
 				{sidePanelModelId && (
 					<MuiThemeProvider theme={theme}>
 						<TicketContextComponent isViewer={false}>
-							{editingTicketId && (<TicketSlide ticketId={sidePanelTicket._id} template={selectedTemplate} />)}
-							{!editingTicketId && (
+							{selectedTicketId && (<TicketSlide ticketId={selectedTicketId} template={selectedTemplate} />)}
+							{!selectedTicketId && (
 								<NewTicketSlide
 									defaultValue={sidePanelTicket}
 									modelId={sidePanelModelId}
