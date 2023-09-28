@@ -1474,7 +1474,7 @@ export const theme = createTheme({
 						'&': {
 							position: 'relative',
 							zIndex: 1,
-							background: COLOR.PRIMARY_MAIN_CONTRAST,	
+							background: COLOR.PRIMARY_MAIN_CONTRAST,
 						},
 						button: {
 							'&:not(.Mui-disabled)': {
