@@ -15,18 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
-import { FormattedMessage } from 'react-intl';
-import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
+import styled from 'styled-components';
 
-export const ViewerOnlyPropertyLabel = ({ children }) => {
-	const { isViewer } = useContext(TicketContext);
+export const Container = styled.div`
+	display: contents;
+`;
 
-	if (isViewer) return children;
-
-	return (
-		<div style={{ display: 'contents' }}>
-			<FormattedMessage id="tickets.label.viewerProperty" defaultMessage="Requires viewer" /> - {children}
-		</div>
-	);
-};
+export const Bold = styled.b`
+	font-weight: 800;
+`;

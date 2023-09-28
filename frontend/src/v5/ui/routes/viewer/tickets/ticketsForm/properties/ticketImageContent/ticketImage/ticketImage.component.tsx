@@ -22,8 +22,9 @@ import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { FormHelperText } from '@mui/material';
 import { TicketImageContent } from '../ticketImageContent.component';
 import { TicketImageActionMenu } from '../ticketImageActionMenu.component';
-import { InputContainer, Label } from './ticketImage.styles';
+import { Label } from './ticketImage.styles';
 import { TicketContext } from '../../../../ticket.context';
+import { ViewerInputContainer } from '../../viewerInputContainer/viewerInputContainer.component';
 
 export const TicketImage = ({ value, onChange, onBlur, disabled: inputDisabled, label, helperText, ...props }: FormInputProps) => {
 	const { isViewer } = useContext(TicketContext);
@@ -34,7 +35,7 @@ export const TicketImage = ({ value, onChange, onBlur, disabled: inputDisabled, 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
 
 	return (
-		<InputContainer disabled={disabled} {...props}>
+		<ViewerInputContainer disabled={disabled} {...props}>
 			<Label>{label}</Label>
 			<TicketImageContent
 				value={imgSrc}
@@ -44,6 +45,6 @@ export const TicketImage = ({ value, onChange, onBlur, disabled: inputDisabled, 
 				<TicketImageActionMenu value={imgSrc} onChange={onImageChange} disabled={disabled} />
 			</TicketImageContent>
 			<FormHelperText>{helperText}</FormHelperText>
-		</InputContainer>
+		</ViewerInputContainer>
 	);
 };
