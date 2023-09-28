@@ -37,8 +37,7 @@ export const Row = styled.div<{ $selected: boolean }>`
 	cursor: pointer;
 
 	${Cell} {
-		// TODO - fix after new palette has been released
-		background: ${({ $selected, theme }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
+		background: ${({ $selected, theme }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};  // TODO - fix when new palette is released
 	}
 `;
 
