@@ -16,13 +16,13 @@
  */
 
 import { memo, useEffect, useState } from 'react';
-import { IContainer, UploadItemFields } from '@/v5/store/containers/containers.types';
-import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useFormContext } from 'react-hook-form';
-import { canUploadToBackend, prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
-import { formatMessage } from '@/v5/services/intl';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { createFilterOptions } from '@mui/material';
+import { IContainer, UploadItemFields } from '@/v5/store/containers/containers.types';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { canUploadToBackend, prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
+import { formatMessage } from '@/v5/services/intl';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { name as containerNameScheme } from '@/v5/validation/containerAndFederationSchemes/validators';
 import { isCollaboratorRole } from '@/v5/store/store.helpers';
@@ -109,11 +109,10 @@ export const UploadListItemDestination = memo(({
 
 	const getFilterOptions = (options: IContainer[], params) => {
 		const inputValue = params.inputValue.trim();
-		if (containersNamesInModal.length === containers.length && !inputValue) {
-			// all the containers have been allocated already
+		if (!inputValue && (containersNamesInModal.length === containers.length || !options.length)) {
+			// if all the containers have been allocated already or there are no containers at all
 			return [];
 		}
-		if (!options.length && !inputValue) return [];
 
 		// filter out currently selected value and containers with insufficient permissions
 		const filteredOptions = getFilteredContainersOptions(options, params)
