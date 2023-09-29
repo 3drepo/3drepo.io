@@ -21,22 +21,45 @@ import { Footer as InvitationsListFooter } from '@/v4/routes/components/invitati
 import { Footer as NewInviteFooter } from '@/v4/routes/components/invitationDialog/invitationDialog.styles';
 
 const titleStyling = css`
+	.MuiDialog-paper:has(> .MuiDialogContent-root > .MuiTabs-root) ${DialogTitle} {
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+
 	${DialogTitle} {
-		background: ${({ theme }) => theme.palette.gradient.secondary};
-		color: ${({ theme }) => theme.palette.primary.contrast};
-		height: 74px;
+		height: fit-content;
 		width: 100%;
 		box-sizing: border-box;
-		align-items: center;
 		display: flex;
-		padding: 0 35px;
+		align-items: center;
+		padding: 16px 30px 11px;
+		color: ${({ theme }) => theme.palette.secondary.main};
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 
 		button {
+			display: grid;
+			place-content: center;
+
 			position: absolute;
-			top: 10px;
-			right: 10px;
-			width: 40px;
-			height: 40px;
+			top: 16px;
+			right: 14px;
+			padding: 0;
+			margin: 0;
+			height: 32px;
+			width: 32px;
+			border: none;
+			border-radius: 8px;
+			background: white;
+			box-sizing: border-box;
+
+			svg {
+				width: 12px;
+				height: 12px;
+
+				path {
+					stroke: ${({ theme }) => theme.palette.secondary.main};
+					fill: ${({ theme }) => theme.palette.secondary.main};
+				}
+			}
 		}
 
 		.MuiDialogContent-root {
@@ -63,10 +86,9 @@ const contentStyling = css`
 
 const buttonContainerStyling = css`
 	.MuiDialogActions-root, ${InvitationsListFooter}, ${NewInviteFooter} {
-		box-shadow: ${({ theme }) => theme.palette.shadows.level_7};
 		z-index: 0;
 		padding: 8px;
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 
 		.MuiButtonBase-root.MuiButtonBase-root:last-child {
 			line-height: 1;
