@@ -80,7 +80,7 @@ export const TicketsTable = () => {
 
 	const selectedTicketId = sidePanelTicket?._id;
 	const templateIsFetched = templateAlreadyFetched(selectedTemplate || {} as any);
-	const isEditingValidTicket = sidePanelModelId && !selectedTicketId && !hasRequiredViewerProperties(selectedTemplate);
+	const isCreatingNewTicket = sidePanelModelId && !selectedTicketId && !hasRequiredViewerProperties(selectedTemplate);
 
 	const ticketsFilteredByTemplate = useMemo(() => {
 		const ticketsToShow = ticketsWithModelId.filter((t) => getTicketIsCompleted(t) === showCompleted);
@@ -220,7 +220,7 @@ export const TicketsTable = () => {
 			<TicketsTableContent setSidePanelData={setSidePanelData} selectedTicketId={selectedTicketId} />
 			<SidePanel open={!!sidePanelModelId}>
 				<SlidePanelHeader>
-					<OpenInViewerButton disabled={isEditingValidTicket} onClick={openInViewer}>
+					<OpenInViewerButton disabled={isCreatingNewTicket} onClick={openInViewer}>
 						<FormattedMessage
 							id="ticketsTable.button.openIn3DViewer"
 							defaultMessage="Open in 3D viewer"
