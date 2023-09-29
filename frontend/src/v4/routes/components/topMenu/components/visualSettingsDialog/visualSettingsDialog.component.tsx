@@ -57,11 +57,13 @@ const BasicSettings = (props) => {
 	return (
 		<List>
 			<FormListItem>
-				Shading
-				<Field name="shading" render={ ({ field }) => (
-					<SelectField {...field}>
-						<MenuItem value="standard">Standard</MenuItem>
-					</SelectField>)} />
+				Viewer Background Color
+				<Field name="viewerBackgroundColor" render={ ({ field }) => (
+					<ColorPicker {...field} onChange={(val) => {
+						// this is because colorpicker doenst use the standard events for inputs
+						field.onChange({target: {name: field.name, value: val}});
+					}} />
+				)} />
 			</FormListItem>
 			<FormListItem>
 				Shadows
