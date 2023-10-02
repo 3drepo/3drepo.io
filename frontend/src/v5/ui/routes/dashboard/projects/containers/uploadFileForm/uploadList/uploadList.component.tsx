@@ -48,7 +48,7 @@ export const UploadList = ({
 	const memoizedDelete = useCallback((id, isSelected) => {
 		removeUploadById(id);
 		if (isSelected) setSelectedId();
-	}, []);
+	}, [values.length]);
 	return (
 		<>
 			<UploadListHeaders
