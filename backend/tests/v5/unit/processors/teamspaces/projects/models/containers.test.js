@@ -370,6 +370,8 @@ const testGetRevisions = () => {
 			return r;
 		});
 
+		Revisions.getRevisionFormat.mockImplementation((rFile) => (rFile ? '.'.concat(rFile[0].split('_').pop()) : undefined));
+
 		test('should return non-void revisions if the container exists', async () => {
 			const teamspace = ServiceHelper.generateRandomString();
 			const container = ServiceHelper.generateRandomString();
