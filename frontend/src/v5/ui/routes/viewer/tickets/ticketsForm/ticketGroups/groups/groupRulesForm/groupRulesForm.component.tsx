@@ -62,10 +62,18 @@ export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [] }: IG
 	});
 
 	const {
-		formState: { isValid, isDirty, errors },
+		formState: { isValid, errors },
 		getValues,
 		reset,
 	} = formData;
+
+	const getIsDirty = () => {
+		const formValues = getValues();
+		// @ts-ignore
+		formValues.field.values = formValues.field.values.map(({ value }) => ({ value }));
+		formValues.values = formValues.values.filter(({ value }) => value);
+		return !isEqual(defaultValues, formValues);
+	};
 
 	const handleSave = (body: IFormRule) => onSave(formRuleToGroupRule(body));
 
@@ -104,7 +112,7 @@ export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [] }: IG
 							variant="contained"
 							color="primary"
 							fullWidth={false}
-							disabled={!isValid || !isDirty || isEqual(rule, getValues())}
+							disabled={!isValid || !getIsDirty()}
 						>
 							{rule ? (
 								<FormattedMessage id="tickets.groups.filterPanel.updateFilter" defaultMessage="Update filter" />
