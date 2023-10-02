@@ -29,6 +29,7 @@ export const Cell = styled.div`
 	overflow: hidden;
 `;
 
+// TODO - fix when new palette is released
 export const Row = styled.div<{ $selected: boolean }>`
 	display: grid;
 	grid-template-columns: 80fr 493fr 96fr 62fr 90fr 90fr 100fr 137fr 134fr;
@@ -37,7 +38,7 @@ export const Row = styled.div<{ $selected: boolean }>`
 	cursor: pointer;
 
 	${Cell} {
-		background: ${({ $selected, theme }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};  // TODO - fix when new palette is released
+		background: ${({ $selected, theme }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
 	}
 `;
 
