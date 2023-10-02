@@ -15,30 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { css } from 'styled-components';
+import { useHistory } from 'react-router-dom';
 
-export const primaryButtonStyling = css`
-	color: ${({ theme }) => theme.palette.primary.contrast};
-	background-color: ${({ theme }) => theme.palette.primary.main};
+export const useSearchParam = (name: string) => {
+	const history = useHistory();
+	const { location } = window;
+	const value = new URLSearchParams(location.search).get(name);
 
-	&.Mui-focusVisible {
-		background-color: ${({ theme }) => theme.palette.primary.main};
-	}
+	const setParam = (newValue = '') => {
+		const searchParams = new URLSearchParams(location.search);
+		if (newValue) {
+			searchParams.set(name, newValue);
+		} else {
+			searchParams.delete(name);
+		}
+		history.replace({ search: searchParams.toString() });
+	};
 
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.primary.dark};
-		text-decoration-line: none;
-	}
-
-	&:active {
-		background-color: ${({ theme }) => theme.palette.primary.darkest};
-	}
-`;
-
-export const secondaryTextButtonStyling = css`
-	color: ${({ theme }) => theme.palette.secondary.main};
-	line-height: 1;
-	&:hover, &:active {
-		text-decoration: underline;
-	}
-`;
+	return [value, setParam] as [string, (val?: string) => void];
+};

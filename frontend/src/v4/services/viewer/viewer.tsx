@@ -835,15 +835,11 @@ export class ViewerService {
 		}
 	}
 
-	public setShading = (shading: string) => {
-		switch (shading) {
-			case 'standard':
-				UnityUtil.setRenderingQualityDefault();
-				break;
-			case 'architectural':
-				UnityUtil.setRenderingQualityHigh();
-				break;
+	public async setViewerBackgroundColor(color) {
+		if (color === undefined) {
+			return;
 		}
+		UnityUtil.setBackgroundColor(color);
 	}
 
 	public setXray = (xray: boolean) => {

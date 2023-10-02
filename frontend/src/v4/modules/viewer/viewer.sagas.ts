@@ -30,7 +30,7 @@ const updateHandlers = {
 	farPlaneAlgorithm: Viewer.setFarPlaneAlgorithm,
 	farPlaneSamplingPoints: Viewer.setFarPlaneSamplingPoints,
 	nearPlane: Viewer.setNearPlane,
-	shading: Viewer.setShading,
+	viewerBackgroundColor: Viewer.setViewerBackgroundColor,
 	shadows: Viewer.setShadows,
 	statistics: Viewer.setStats,
 	caching: Viewer.setModelCache,
@@ -57,16 +57,12 @@ const updateHandlers = {
 
 const callUpdateHandlers = (oldSettings, settings) => {
 	keys(oldSettings).forEach((key) => {
-		if (key === 'shading' && settings[key] === 'architectural') {
-			// We're disabling architectural rendering for now.
-			settings[key] = 'standard';
-		}
 		if (oldSettings[key] !== settings[key]) {
 			if (key.startsWith(BUNDLE_FADE_PREFIX)) {
 				const update = updateHandlers[BUNDLE_FADE_PREFIX];
-			if (!update) {
-				return;
-			}
+				if (!update) {
+					return;
+				}
 
 				update(
 					settings[`${BUNDLE_FADE_PREFIX}Distance`],
@@ -74,10 +70,10 @@ const callUpdateHandlers = (oldSettings, settings) => {
 					settings[`${BUNDLE_FADE_PREFIX}Power`]
 				);
 			} else {
-			const update = updateHandlers[key];
-			if (!update) {
-				return;
-			}
+				const update = updateHandlers[key];
+				if (!update) {
+					return;
+				}
 
 				update(settings[key]);
 			}
