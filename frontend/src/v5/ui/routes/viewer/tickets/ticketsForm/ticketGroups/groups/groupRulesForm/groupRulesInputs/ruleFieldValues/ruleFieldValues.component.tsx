@@ -16,32 +16,31 @@
  */
 
 import { useFormContext, useFieldArray } from 'react-hook-form';
-import { FormTextField } from '@controls/inputs/formInputs.component';
 import { useEffect } from 'react';
 import AddValueIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import RemoveValueIcon from '@assets/icons/outlined/remove_circle-outlined.svg';
 import { range } from 'lodash';
 import { ValueIconContainer, ValuesContainer } from '../groupRulesInputs.styles';
 import { IFormRule } from '../../groupRulesForm.helpers';
+import { FieldValueInput } from './fieldValueInput/fieldValueInput.component';
 
 export const RuleFieldValues = () => {
-	const { control, watch, formState: { errors } } = useFormContext<IFormRule>();
+	const { control, watch } = useFormContext<IFormRule>();
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'field.values',
 	});
 
 	const operator = watch('field.operator');
-	const error = errors.field?.values || {};
 
 	const appendEmptyValue = () => append({ value: '' });
 
 	useEffect(() => {
-		if (!fields.length) {
-			appendEmptyValue();
-			return;
-		}
+		if (fields.length) return;
+		appendEmptyValue();
+	}, [fields]);
 
+	useEffect(() => {
 		if (operator === 'REGEX') {
 			range(1, fields.length).forEach(remove);
 		}
@@ -54,7 +53,7 @@ export const RuleFieldValues = () => {
 			<>
 				{fields.map((field, i) => (
 					<ValuesContainer key={field.id}>
-						<FormTextField name={`field.values.${i}.value`} formError={error?.[i]} />
+						<FieldValueInput name={`field.values.${i}.value`} />
 						<ValueIconContainer onClick={() => remove(i)} disabled={fields.length === 1}>
 							<RemoveValueIcon />
 						</ValueIconContainer>
@@ -67,5 +66,5 @@ export const RuleFieldValues = () => {
 		);
 	}
 
-	return (<FormTextField name="field.values.0.value" formError={error?.[0]} />);
+	return (<FieldValueInput name="field.values.0.value" />);
 };
