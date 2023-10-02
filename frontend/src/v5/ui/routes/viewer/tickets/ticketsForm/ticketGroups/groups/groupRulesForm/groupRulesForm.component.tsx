@@ -37,7 +37,7 @@ import { RuleValues } from './groupRulesInputs/ruleValues/ruleValues.component';
 const DEFAULT_VALUES: IFormRule = {
 	name: '',
 	field: {
-		operator: null,
+		operator: 'IS',
 		values: [],
 	},
 	operator: null,
