@@ -84,14 +84,6 @@ export const UploadListItemDestination = memo(({
 		...federationsNames,
 	];
 
-	const sanitiseContainer = (baseContainer: IContainer): Partial<UploadItemFields> => ({
-		containerId: baseContainer?._id || '',
-		containerName: baseContainer?.name?.trim() || '',
-		containerCode: baseContainer?.code || '',
-		containerType: baseContainer?.type || 'Uncategorised',
-		containerUnit: baseContainer?.unit || 'mm',
-	});
-
 	const handleInputChange = (_, newValue: string) => {
 		const trimmedValue = newValue?.trim();
 		try {
@@ -158,9 +150,14 @@ export const UploadListItemDestination = memo(({
 		return (<></>);
 	};
 
+	const sanitiseContainer = (baseContainer: IContainer): Partial<UploadItemFields> => ({
+		containerCode: baseContainer?.code || '',
+		containerType: baseContainer?.type || 'Uncategorised',
+		containerUnit: baseContainer?.unit || 'mm',
+	});
+
 	const onDestinationChange = (e, newVal: IContainer | null) => {
 		const sanitisedValue = sanitiseContainer(newVal);
-
 		if (newVal?._id) {
 			RevisionsActionsDispatchers.fetch(
 				teamspace,
@@ -172,11 +169,12 @@ export const UploadListItemDestination = memo(({
 				projectId,
 				newVal._id,
 			);
+			for (const [key, val] of Object.entries(sanitisedValue)) {
+				setValue(`${revisionPrefix}.${key}`, val);
+			}
 		}
-
-		for (const [key, val] of Object.entries(sanitisedValue)) {
-			setValue(`${revisionPrefix}.${key}`, val);
-		}
+		setValue(`${revisionPrefix}.containerName`, newVal?.name?.trim() || '');
+		setValue(`${revisionPrefix}.containerId`, newVal?._id || '');
 	};
 
 	const onOpen = () => {
