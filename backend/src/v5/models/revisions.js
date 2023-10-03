@@ -85,4 +85,6 @@ Revisions.isTagUnique = async (teamspace, model, tag) => {
 	}
 };
 
+Revisions.getRevisionFormat = (rFile) => (rFile ? '.'.concat(rFile[0].split('_').pop()) : undefined);
+
 module.exports = Revisions;

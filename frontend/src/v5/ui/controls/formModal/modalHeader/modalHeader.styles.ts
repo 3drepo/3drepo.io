@@ -22,25 +22,41 @@ import { hexToOpacity } from '@/v5/ui/themes/theme';
 
 export const CloseButton = styled(IconButton)`
 	&& {
-		position: absolute;
-		top: 10.5px;
-		right: 11px;
+		display: grid;
+		place-content: center;
 
-		svg path {
-			stroke: ${({ theme }) => theme.palette.primary.contrast}
+		position: absolute;
+		top: 16px;
+		right: 14px;
+		padding: 0;
+		margin: 0;
+		height: 32px;
+		width: 32px;
+		border: none;
+		border-radius: 8px;
+		background: ${({ theme }) => theme.palette.primary.contrast};
+		box-sizing: border-box;
+
+		svg {
+			width: 12px;
+			height: 12px;
+
+			path {
+				stroke: ${({ theme }) => theme.palette.secondary.main};
+			}
 		}
 	}
 `;
 
-export const Header = styled.div`
-	background: ${({ theme }) => theme.palette.gradient.secondary};
-	color: ${({ theme }) => theme.palette.primary.contrast};
-	height: 74px;
+export const Header = styled.div<{ $contrastColor?: boolean }>`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	background-color: ${({ $contrastColor, theme }) => ($contrastColor ? theme.palette.primary.contrast : 'transparent')};
+	height: fit-content;
 	width: 100%;
 	box-sizing: border-box;
-	align-items: center;
 	display: flex;
-	padding: 0 35px;
+	align-items: center;
+	padding: 26px 30px 11px;
 `;
 
 export const Title = styled(Typography).attrs({
@@ -48,6 +64,7 @@ export const Title = styled(Typography).attrs({
 	component: 'div',
 })`
 	text-align: left;
+	font-weight: 600;
 `;
 
 export const Subtitle = styled(Typography).attrs({
@@ -55,5 +72,5 @@ export const Subtitle = styled(Typography).attrs({
 	component: 'div',
 })`
 	text-align: left;
-	color: ${({ theme }) => hexToOpacity(theme.palette.secondary.lightest, 60)};
+	color: ${({ theme }) => hexToOpacity(theme.palette.secondary.main, 60)};
 `;

@@ -201,6 +201,7 @@ export const UploadFileForm = ({
 				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
 				maxWidth="xl"
 				isValid={!isUploading ? isValid : allUploadsComplete}
+				contrastColorHeader
 				{...uploadModalLabels({ isUploading, fileCount: fields.length })}
 			>
 				<UploadFileFormContextComponent fields={fields}>

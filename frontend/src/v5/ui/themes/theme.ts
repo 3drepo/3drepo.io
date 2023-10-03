@@ -1471,6 +1471,11 @@ export const theme = createTheme({
 					},
 					// year selection
 					'.MuiYearPicker-root': {
+						'&': {
+							position: 'relative',
+							zIndex: 1,
+							background: COLOR.PRIMARY_MAIN_CONTRAST,
+						},
 						button: {
 							'&:not(.Mui-disabled)': {
 								color: COLOR.SECONDARY_MAIN,

@@ -71,7 +71,7 @@ const render = () => {
 							</Route>
 							<Route exact path={ROUTES.SIGN_UP}>
 								{/* Using this instead of <Redirect /> to force refresh so that isV5() is updated */}
-								{() => window.location.replace(V5_SIGN_UP_PATH)}
+								{() => window.location.replace(V5_SIGN_UP_PATH + window.location.search)}
 							</Route>
 							<Route exact path={ROUTES.LOGIN}>
 								{/* Using this instead of <Redirect /> to force refresh so that isV5() is updated */}

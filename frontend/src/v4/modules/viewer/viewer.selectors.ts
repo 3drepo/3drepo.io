@@ -38,8 +38,8 @@ export const selectFarPlaneAlgorithm = createSelector(
 	selectSettings, (state) => state.farPlaneAlgorithm
 );
 
-export const selectShadingSetting = createSelector(
-	selectSettings, (state) => state.shading
+export const selectViewerBackgroundColor = createSelector(
+	selectSettings, (state) => state.viewerBackgroundColor
 );
 
 export const selectXraySetting = createSelector(
