@@ -27,6 +27,8 @@ import { TitleProperty } from '../properties/titleProperty.component';
 import { PropertiesList } from '../propertiesList.component';
 import { IssuePropertiesRow } from './IssuePropertiesRow/issuePropertiesRow.component';
 import { BaseTicketInfo, DescriptionProperty, TopPanel } from './ticketsTopPanel.styles';
+import _ from 'lodash';
+import { ErrorTextGap } from '../ticketsForm.styles';
 
 type ITicketsTopPanel = {
 	title: string;
@@ -72,14 +74,16 @@ export const TicketsTopPanel = ({
 				)}
 				<DescriptionProperty>
 					<FormTextAreaFixedSize
-						name={`properties[${BaseProperties.DESCRIPTION}]`}
+						name={`properties.${BaseProperties.DESCRIPTION}`}
 						onBlur={onPropertyBlur}
 						placeholder={formatMessage({
 							id: 'customTicket.topPanel.description',
 							defaultMessage: 'Description',
 						})}
+						formError={_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`)}
 						disabled={readOnly}
 					/>
+					{_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`) && <ErrorTextGap />}
 				</DescriptionProperty>
 				<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
 			</BaseTicketInfo>
