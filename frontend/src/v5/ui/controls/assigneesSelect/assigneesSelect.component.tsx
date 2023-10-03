@@ -24,17 +24,17 @@ import { SelectProps } from '@controls/inputs/select/select.component';
 import { formatMessage } from '@/v5/services/intl';
 import AddUserIcon from '@assets/icons/outlined/add_user-outlined.svg';
 import { SearchContextComponent } from '@controls/search/searchContext';
+import { FormInputProps } from '@controls/inputs/inputController.component';
 import { AddUserButton, AssigneesListContainer, Tooltip } from './assigneesSelect.styles';
 import { AssigneesSelectMenu } from './assigneesSelectMenu/assigneesSelectMenu.component';
 import { AssigneeCircle } from './assigneeCircle/assigneeCircle.component';
 import { ExtraAssigneesPopover } from './extraAssigneesCircle/extraAssigneesPopover.component';
 import { ExtraAssigneesCircle } from './extraAssigneesCircle/extraAssignees.styles';
 
-export type IAssigneesSelect = SelectProps & {
+export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
 	maxItems?: number;
 	showAddButton?: boolean;
 	showEmptyText?: boolean;
-	value: any,
 	onBlur: () => void;
 };
 
@@ -48,7 +48,7 @@ export const AssigneesSelect = ({
 	onBlur,
 	className,
 	...props
-}: IAssigneesSelect) => {
+}: AssigneesSelectProps) => {
 	const [open, setOpen] = useState(false);
 
 	// Must filter out users not included in this teamspace. This can occur when a user
