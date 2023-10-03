@@ -26,4 +26,4 @@ export default {
 
 type Story = StoryObj<typeof PinDetails>;
 
-export const Default: Story = { args: { pin: false } };
+export const Default: Story = {};

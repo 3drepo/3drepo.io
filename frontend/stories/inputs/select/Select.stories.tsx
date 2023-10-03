@@ -50,9 +50,9 @@ export default {
 	component: Select,
 	parameters: { controls: { exclude: ['margin', 'hiddenLabel', 'ref'] } },
 	decorators: [FormDecorator],
-} as Meta<typeof Select>;
+} as Meta<typeof Select & { values: any[] }>;
 
-type Story = StoryObj<typeof Select>;
+type Story = StoryObj<typeof Select & { values: any[] }>;
 
 export const SingleSelect: Story = {
 	render: ({ values, ...args }: any) => (
@@ -71,7 +71,7 @@ export const MultiSelect: Story = {
 		multiple: true,
 		value: [],
 	},
-	render: ({ values, value: initialValue, ...args }) => {
+	render: ({ values, value: initialValue, ...args }: any) => {
 		const [value, setValue] = useState(initialValue || []);
 		const handleChange = (event) => setValue(event.target.value as any);
 		return (

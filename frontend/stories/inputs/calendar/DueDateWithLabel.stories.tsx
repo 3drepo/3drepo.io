@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Meta, StoryObj } from '@storybook/react';
-import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
 import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
 import { LocalizationProviderDecorator } from './date.decorator';
 import { FormDecorator } from '../inputDecorators';
@@ -42,19 +41,14 @@ export default {
 		'PickerComponent',
 	] } },
 	decorators: [LocalizationProviderDecorator, FormDecorator],
-} as Meta<typeof DatePicker>;
+} as Meta<typeof DueDateWithLabel>;
 
-type Story = StoryObj<typeof DatePicker>;
+type Story = StoryObj<typeof DueDateWithLabel>;
 
-export const UnsetValue: Story = {
-	args: {
-		tooltip: 'Set date',
-	},
-};
+export const UnsetValue: Story = {};
 
 export const PresetValue: Story = {
 	args: {
-		value: new Date(),
-		tooltip: 'this is a custom tooltip',
+		value: Number(new Date()),
 	},
 };

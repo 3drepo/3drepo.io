@@ -71,7 +71,7 @@ export const SearchMultiSelect: Story = {
 		multiple: true,
 		renderValue: (val: any[]) => val.join(', '),
 	},
-	render: ({ values, value: initialValue, ...args }) => {
+	render: ({ values, value: initialValue, ...args }: any) => {
 		const [value, setValue] = useState(initialValue || []);
 		const handleChange = (event) => setValue(event.target.value as any);
 		return (
