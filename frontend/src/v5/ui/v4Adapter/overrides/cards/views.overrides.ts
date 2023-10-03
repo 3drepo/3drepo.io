@@ -82,6 +82,7 @@ export default css`
 					input {
 						height: 23px;
 						font-size: 12px;
+						padding-right: 26px;
 					}
 
 					& > div:last-of-type {

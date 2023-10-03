@@ -53,6 +53,9 @@ const primaryButtonStyles = css`
 
 const EditIssue = css`
 	${BoardDialogTitle} > div {
+		display: flex;
+		gap: 5px;
+
 		button {
 			margin: 0;
 			position: relative;

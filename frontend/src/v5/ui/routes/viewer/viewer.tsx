@@ -22,18 +22,16 @@ import { TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/se
 import { useEffect, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
-import { ViewerGuiActions } from '@/v4/modules/viewerGui';
-import { dispatch } from '@/v4/modules/store';
-import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';
 import { ViewerParams } from '../routes.constants';
 import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
-import { TicketsCardViews } from './tickets/tickets.constants';
+import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
 
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
+
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
 
 	const isLoading = isFetching || fetchPending;
@@ -50,9 +48,7 @@ export const Viewer = () => {
 	const handlePinClick = ({ id }) => {
 		if (!tickets.some((t) => t._id === id)) return;
 
-		TicketsCardActionsDispatchers.setSelectedTicket(id);
-		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
-		dispatch(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.TICKETS, true));
+		TicketsCardActionsDispatchers.openTicket(id);
 	};
 
 	useEffect(() => {
@@ -66,9 +62,7 @@ export const Viewer = () => {
 
 	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
 
-	if (isLoading) {
-		return (<></>);
-	}
+	if (isLoading) return null;
 
 	if (selectedContainer?.revisionsCount === 0) {
 		return <InvalidContainerOverlay status={selectedContainer.status} />;
@@ -89,6 +83,7 @@ export const Viewer = () => {
 
 	return (
 		<>
+			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />
 			<ViewerGui match={v4Match} key={containerOrFederation} />
 		</>

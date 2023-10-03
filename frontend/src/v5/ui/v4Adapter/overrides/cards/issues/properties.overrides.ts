@@ -49,7 +49,8 @@ export default css`
 		}
 
 		${ActionsLine} {
-			bottom: 4px;
+			bottom: unset;
+			top: 4px;
 			right: 0;
 		}
 
