@@ -140,6 +140,7 @@ export const NameWrapper = styled.div`
 	display: flex;
 	overflow: hidden;
 	flex: 1;
+    align-items: center;
 `;
 
 export const ParentOfVisible = styled.span`
@@ -160,9 +161,12 @@ export const Container = styled.li<IContainer & { $truncateLeft: boolean }>`
 
 	${({ $truncateLeft }) => $truncateLeft && css`
 		${Name} {
-			direction: rtl;
-			margin-right: 9px;
-			margin-right: auto;
+			max-height: ${TREE_ITEM_SIZE}px;
+			word-break: break-word;
+			white-space: unset;
+			display: flex;
+			align-items: flex-end;
+			line-height: 13px;
 		}
 	`}
 
