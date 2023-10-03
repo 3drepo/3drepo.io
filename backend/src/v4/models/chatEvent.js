@@ -16,6 +16,8 @@
  */
 
 "use strict";
+const archiver = require('archiver');
+const fs = require('fs');
 const { v5Path } = require("../../interop");
 const EventsManager = require(`${v5Path}/services/eventsManager/eventsManager`);
 const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
@@ -222,19 +224,22 @@ const subscribeToV5Events = () => {
 			notes.forEach((note) => upsertedNotification(null, note));
 
 			if(!userErr) {
-				const attachments = [];
+				const archive = archiver('zip');				
+
 				const path = require("path");
 				const sharedSpacePath = require("../config").cn_queue.shared_storage;
 				const sharedDir = path.join(sharedSpacePath, corId);
-				const files = require("fs").readdirSync(sharedDir);
+				const files = fs.readdirSync(sharedDir);
 				files.forEach((file) => {
-					if(file.endsWith(".log")) {
-						attachments.push({
-							filename: file,
-							path: path.join(sharedDir, file)
-						});
+					if (file.endsWith(".log")) {
+						const fileStream = fs.createReadStream(path.join(sharedDir, file));
+						archive.append(fileStream, { name: file });
 					}
 				});
+
+				const zipPath = path.join(sharedDir, 'output.zip');
+				archive.pipe(fs.createWriteStream(zipPath));
+				archive.finalize();
 
 				Mailer.sendImportError({
 					account: teamspace,
@@ -243,7 +248,7 @@ const subscribeToV5Events = () => {
 					err: message,
 					corID: corId,
 					bouncerErr: errCode,
-					attachments
+					attachments: [{ filename: 'logs', path: zipPath }]
 				});
 			}
 		}
