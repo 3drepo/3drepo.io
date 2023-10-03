@@ -16,8 +16,8 @@
  */
 
 "use strict";
-const archiver = require('archiver');
-const fs = require('fs');
+const archiver = require("archiver");
+const fs = require("fs");
 const { v5Path } = require("../../interop");
 const EventsManager = require(`${v5Path}/services/eventsManager/eventsManager`);
 const EventsV5 = require(`${v5Path}/services/eventsManager/eventsManager.constants`).events;
@@ -224,7 +224,7 @@ const subscribeToV5Events = () => {
 			notes.forEach((note) => upsertedNotification(null, note));
 
 			if(!userErr) {
-				const archive = archiver('zip');				
+				const archive = archiver("zip");
 
 				const path = require("path");
 				const sharedSpacePath = require("../config").cn_queue.shared_storage;
@@ -237,7 +237,7 @@ const subscribeToV5Events = () => {
 					}
 				});
 
-				const zipPath = path.join(sharedDir, 'output.zip');
+				const zipPath = path.join(sharedDir, "output.zip");
 				archive.pipe(fs.createWriteStream(zipPath));
 				archive.finalize();
 
@@ -248,7 +248,7 @@ const subscribeToV5Events = () => {
 					err: message,
 					corID: corId,
 					bouncerErr: errCode,
-					attachments: [{ filename: 'logs', path: zipPath }]
+					attachments: [{ filename: "logs", path: zipPath }]
 				});
 			}
 		}
