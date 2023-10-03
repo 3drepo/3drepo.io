@@ -42,7 +42,7 @@ export const UploadsContainer = styled.div`
 `;
 
 export const UploadsListScroll = styled.div`
-	min-height: 64vh;
+	min-height: 100vh;
 	max-height: 200px;
 	width: 100%;
 	overflow-y: scroll;

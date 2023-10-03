@@ -231,4 +231,4 @@ export const UploadListItemDestination = memo(({
 			)}
 		/>
 	);
-});
+}, (prev, next) => prev.revisionPrefix === next.revisionPrefix && prev.value === next.value && prev.disabled === next.disabled);
