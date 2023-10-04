@@ -804,6 +804,88 @@ export class UnityUtil {
 	}
 
 	/**
+	* Move the clipping planes to the current selection (highlighted objects).
+	* In single plane mode this moves along the normal so that the selected
+	* object(s) are fully visible.
+	* In six plane mode, the planes move to encompass the selection exactly,
+	* retaining their orientation.
+	*/
+	public static ClipToolClipToSelection() {
+		UnityUtil.toUnity('ClipToolClipToSelection', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Puts the clip tool in Realign mode. In this mode the plane (or front of
+	 * the box in six plane mode) will snap to the position and orientation of
+	 * the first surface to be licked. If the background is clicked, the planes
+	 * or plane will reset to the scene bounding box.
+	 */
+	public static ClipToolRealign() {
+		UnityUtil.toUnity('ClipToolRealign', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/// <summary>
+	/// Flip the clip plane or box
+	/// </summary>
+	public static ClipToolFlip() {
+		UnityUtil.toUnity('ClipToolFlip', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Hide all the clip planes, and reset them to the scene bounding box
+	 */
+	public static ClipToolDelete() {
+		UnityUtil.toUnity('ClipToolDelete', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Puts the Clip Planes Gizmo into Translate mode.
+	 */
+	public static ClipToolTranslate() {
+		UnityUtil.toUnity('ClipToolTranslate', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Puts the Clip Planes Gizmo in Rotate mode.
+	 */
+	public static ClipToolRotate() {
+		UnityUtil.toUnity('ClipToolRotate', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Puts the Clip Planes Gizmo in Scale mode.
+	 */
+	public static ClipToolScale() {
+		UnityUtil.toUnity('ClipToolScale', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Increase or decrease the Gizmo Size on screen by the amount provided (in percent)
+	 */
+	public static ScaleClipGizmo(percent: number) {
+		UnityUtil.toUnity('ScaleClipGizmo', UnityUtil.LoadingState.VIEWER_READY, percent);
+	}
+
+	/**
+	* Set the coefficient linking the change in Clip Box Size to proportion
+	* of the screen covered by the cursor when scaling in all three axes.
+	*/
+	public static SetClipScaleSpeed(speed: number) {
+		UnityUtil.toUnity('SetClipScaleSpeed', UnityUtil.LoadingState.VIEWER_READY, speed);
+	}
+
+	/**
+	 * Sets the coefficient that defines how much the clip box should be
+	 * oversized when using the clip to selection function. The box is
+	 * oversized to prevent the clip border being immediately visible.
+	 * Setting this to 1 sets it to the default. Above 1 makes it larger
+	 * and below 1 makes it smaller. 0 disables the feature.
+	 */
+	public static SetClipSelectionBoxScalar(scalar: number) {
+		UnityUtil.toUnity('SetClipSelectionBoxScalar', UnityUtil.LoadingState.VIEWER_READY, scalar);
+	}
+
+	/**
 	 * Disable the Measuring tool.
 	 * @category Measuring tool
 	 */
