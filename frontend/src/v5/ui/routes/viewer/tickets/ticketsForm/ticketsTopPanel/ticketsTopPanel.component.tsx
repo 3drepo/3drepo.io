@@ -22,12 +22,12 @@ import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { CreationInfo } from '@components/shared/creationInfo/creationInfo.component';
 import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
 import { useFormContext } from 'react-hook-form';
+import _ from 'lodash';
 import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
 import { PropertiesList } from '../propertiesList.component';
 import { IssuePropertiesRow } from './IssuePropertiesRow/issuePropertiesRow.component';
 import { BaseTicketInfo, DescriptionProperty, TopPanel } from './ticketsTopPanel.styles';
-import _ from 'lodash';
 import { ErrorTextGap } from '../ticketsForm.styles';
 
 type ITicketsTopPanel = {
