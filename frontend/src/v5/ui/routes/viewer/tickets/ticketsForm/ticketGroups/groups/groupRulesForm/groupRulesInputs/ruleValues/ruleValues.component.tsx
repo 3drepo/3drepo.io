@@ -21,6 +21,7 @@ import { useEffect } from 'react';
 import AddValueIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import RemoveValueIcon from '@assets/icons/outlined/remove_circle-outlined.svg';
 import { OPERATIONS_TYPES } from '@/v5/store/tickets/tickets.types';
+import { Gap } from '@controls/gap';
 import { ValueIconContainer, ValuesContainer } from '../groupRulesInputs.styles';
 import { IFormRule } from '../../groupRulesForm.helpers';
 
@@ -86,5 +87,5 @@ export const RuleValues = () => {
 	}
 
 	// field value type
-	return (<></>);
+	return (<Gap $height="2px" />);
 };
