@@ -192,7 +192,7 @@ export class TreeNode extends PureComponent<IProps, any> {
 					hasFederationRoot={hasFederationRoot}
 					onClick={this.handleNodeClick}
 					onDoubleClick={this.handleDoubleClick}
-					$truncateLeft={this.level === (hasFederationRoot ? 2 : 1)}
+					$isContainer={this.level === (hasFederationRoot ? 2 : 1)}
 				>
 					{this.renderName()}
 					{this.renderActions(!this.node.isFederation)}

@@ -140,7 +140,7 @@ export const NameWrapper = styled.div`
 	display: flex;
 	overflow: hidden;
 	flex: 1;
-    align-items: center;
+	align-items: center;
 `;
 
 export const ParentOfVisible = styled.span`
@@ -148,7 +148,7 @@ export const ParentOfVisible = styled.span`
 	display: flex;
 `;
 
-export const Container = styled.li<IContainer & { $truncateLeft: boolean }>`
+export const Container = styled.li<IContainer & { $isContainer: boolean }>`
 	${containerBorder};
 	background-color: ${getBackgroundColor};
 	padding: 2px 12px 2px ${containerIndentation}px;
@@ -159,7 +159,7 @@ export const Container = styled.li<IContainer & { $truncateLeft: boolean }>`
 	box-sizing: border-box;
 	cursor: inherit;
 
-	${({ $truncateLeft }) => $truncateLeft && css`
+	${({ $isContainer }) => $isContainer && css`
 		${Name} {
 			max-height: ${TREE_ITEM_SIZE}px;
 			word-break: break-word;
