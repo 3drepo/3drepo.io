@@ -42,9 +42,11 @@ export const RuleFieldValues = () => {
 
 	useEffect(() => {
 		if (operator === 'REGEX') {
-			range(1, fields.length).forEach(remove);
+			remove(range(1, fields.length));
 		}
 	}, [operator]);
+
+	useEffect(() => () => { remove(); }, []);
 
 	if (!operator) return (<></>);
 
