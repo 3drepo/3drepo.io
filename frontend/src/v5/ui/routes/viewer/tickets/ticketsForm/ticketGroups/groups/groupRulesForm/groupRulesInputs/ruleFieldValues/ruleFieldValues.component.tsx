@@ -25,11 +25,9 @@ import { IFormRule } from '../../groupRulesForm.helpers';
 import { FieldValueInput } from './fieldValueInput/fieldValueInput.component';
 
 export const RuleFieldValues = () => {
-	const { control, watch } = useFormContext<IFormRule>();
-	const { fields, append, remove } = useFieldArray({
-		control,
-		name: 'field.values',
-	});
+	const name = 'field.values';
+	const { control, watch, setValue } = useFormContext<IFormRule>();
+	const { fields, append, remove } = useFieldArray({ control, name });
 
 	const operator = watch('field.operator');
 
@@ -46,7 +44,7 @@ export const RuleFieldValues = () => {
 		}
 	}, [operator]);
 
-	useEffect(() => () => { remove(); }, []);
+	useEffect(() => () => { setValue(name, []); }, []);
 
 	if (!operator) return (<></>);
 
