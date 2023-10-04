@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { formatMessage } from '@/v5/services/intl';
-import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useFormContext } from 'react-hook-form';
 import UserIcon from '@assets/icons/outlined/user-outlined.svg';
@@ -26,14 +25,7 @@ import { IconContainer } from './userSignupFormStepAccount.styles';
 import { NextStepButton } from '../userSignupFormNextButton/userSignupFormNextButton.component';
 
 export const UserSignupFormStepAccount = () => {
-	const { control, formState: { errors, dirtyFields }, watch, trigger } = useFormContext();
-	const password = watch('password');
-
-	useEffect(() => {
-		if (dirtyFields.password && dirtyFields.confirmPassword) {
-			trigger('confirmPassword');
-		}
-	}, [password]);
+	const { control, formState: { errors } } = useFormContext();
 
 	return (
 		<>
@@ -89,26 +81,6 @@ export const UserSignupFormStepAccount = () => {
 				formError={errors.password}
 				autoComplete="new-password"
 			/>
-			<FormPasswordField
-				InputProps={{
-					startAdornment: (
-						<IconContainer>
-							<PasswordIcon />
-						</IconContainer>
-					),
-				}}
-				name="confirmPassword"
-				label={formatMessage({
-					id: 'userSignup.form.confirmPassword',
-					defaultMessage: 'Confirm password',
-				})}
-				required
-				disabled={!password}
-				control={control}
-				formError={errors.confirmPassword}
-				autoComplete="new-password"
-			/>
-
 			<NextStepButton>
 				<FormattedMessage id="userSignup.form.button.next" defaultMessage="Next step" />
 			</NextStepButton>

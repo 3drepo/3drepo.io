@@ -38,7 +38,6 @@ import { MicrosoftText } from './editProfileAuthenticationTab.styles';
 export interface IUpdatePasswordInputs {
 	oldPassword: string;
 	newPassword: string;
-	confirmPassword: string;
 }
 
 type EditProfileAuthenticationNonSSOTabProps = {
@@ -69,7 +68,6 @@ export const EditProfileAuthenticationNonSSOTab = ({
 
 	const oldPassword = watch('oldPassword');
 	const newPassword = watch('newPassword');
-	const confirmPassword = watch('confirmPassword');
 
 	const onSubmit = async () => {
 		setIncorrectPassword(false);
@@ -108,7 +106,7 @@ export const EditProfileAuthenticationNonSSOTab = ({
 
 	useEffect(() => {
 		trigger(Object.keys(touchedFields) as Array<keyof IUpdatePasswordInputs>);
-	}, [oldPassword, newPassword, confirmPassword]);
+	}, [oldPassword, newPassword]);
 
 	return (
 		<>
@@ -141,17 +139,6 @@ export const EditProfileAuthenticationNonSSOTab = ({
 						defaultMessage: 'New Password',
 					})}
 					formError={errors.newPassword}
-					required
-					autoComplete="new-password"
-				/>
-				<FormPasswordField
-					control={control}
-					name="confirmPassword"
-					label={formatMessage({
-						id: 'editProfile.form.confirmPassword',
-						defaultMessage: 'Confirm Password',
-					})}
-					formError={errors.confirmPassword}
 					required
 					autoComplete="new-password"
 				/>

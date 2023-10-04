@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as Yup from 'yup';
-import { password } from './validators';
+import styled from 'styled-components';
 
-export const PasswordForgotSchema = Yup.object().shape({
-	username: Yup.string().required(),
-});
-
-export const PasswordChangeSchema = Yup.object().shape({
-	newPassword: password(),
-});
+export const IconContainer = styled.div`
+	cursor: pointer;
+	display: flex;
+`;

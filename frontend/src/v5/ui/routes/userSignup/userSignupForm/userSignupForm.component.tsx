@@ -57,7 +57,6 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 		username: '',
 		email: '',
 		password: '',
-		confirmPassword: '',
 		firstName: '',
 		lastName: '',
 		company: '',
@@ -102,7 +101,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 
 	const onSubmit = async (values) => {
 		try {
-			const newUser = omit(values, ['confirmPassword', 'termsAgreed']) as INewUser;
+			const newUser = omit(values, ['termsAgreed']) as INewUser;
 			newUser.email = newUser.email.trim();
 			captchaRef?.current?.reset();
 			newUser.captcha = captcha_client_key ? await captchaRef.current.executeAsync() : 'CAPTCHA_IS_DISABLED';
