@@ -224,7 +224,7 @@ const subscribeToV5Events = () => {
 			notes.forEach((note) => upsertedNotification(null, note));
 
 			if(!userErr) {
-				const archive = archiver("zip");
+				const archive = archiver('zip', { zlib: { level: 9 } })
 
 				const path = require("path");
 				const sharedSpacePath = require("../config").cn_queue.shared_storage;
@@ -237,7 +237,7 @@ const subscribeToV5Events = () => {
 					}
 				});
 
-				const zipPath = path.join(sharedDir, "output.zip");
+				const zipPath = path.join(sharedDir, "logs.zip");
 				archive.pipe(fs.createWriteStream(zipPath));
 				archive.finalize();
 
@@ -248,7 +248,7 @@ const subscribeToV5Events = () => {
 					err: message,
 					corID: corId,
 					bouncerErr: errCode,
-					attachments: [{ filename: "logs", path: zipPath }]
+					attachments: [{ filename: "logs.zip", path: zipPath }]
 				});
 			}
 		}
