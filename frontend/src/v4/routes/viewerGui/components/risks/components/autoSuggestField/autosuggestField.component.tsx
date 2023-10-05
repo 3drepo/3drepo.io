@@ -24,7 +24,7 @@ import { usePopper } from 'react-popper';
 
 import { Highlight } from '../../../../../components/highlight/highlight.component';
 import { getSuggestions } from './autosuggestField.helpers';
-import { Wrapper } from './autosuggestField.styles';
+import { Container, Wrapper } from './autosuggestField.styles';
 
 const renderInputComponent = (inputProps) => {
 	const { classes, inputRef = () => {}, ref, ...other } = inputProps;
@@ -72,9 +72,9 @@ export const AutoSuggestField: FunctionComponent<IProps> = ({
 }) => {
 	const [suggestions, setSuggestions] = useState([]);
 	const [value, setValue] = useState('');
-	const [nodeRef, setNodeRef] = useState(null);
 	const [popperElement, setPopperElement] = useState(null);
-	const { styles, attributes } = usePopper(nodeRef, popperElement, { placement: 'bottom-start' });
+	const [nodeRef, setNodeRef] = useState(null);
+	const { attributes } = usePopper(nodeRef, popperElement, { placement: 'bottom-start' });
 
 	useEffect(() => {
 		setValue(field.value);
@@ -107,6 +107,18 @@ export const AutoSuggestField: FunctionComponent<IProps> = ({
 		}
 	};
 
+	const getWrapperStyles = (): React.CSSProperties => {
+		if (!nodeRef) {
+			return {};
+		}
+		const { top, left } = nodeRef.getBoundingClientRect();
+		return {
+			position: 'absolute',
+			transform: `translate(${left}px, ${top}px)`,
+			inset: '0 auto auto 0',
+		};
+	};
+
 	const autosuggestProps = {
 		renderInputComponent,
 		suggestions,
@@ -118,36 +130,38 @@ export const AutoSuggestField: FunctionComponent<IProps> = ({
 	};
 
 	return (
-		<Autosuggest
-			{...autosuggestProps}
-			inputProps={{
-				label,
-				placeholder,
-				disabled,
-				value,
-				onChange: handleChange,
-				onBlur: handleBlur,
-				inputRef: setNodeRef,
-			}}
-			renderSuggestionsContainer={(options) => (
-				<Portal>
-					<Wrapper
-						ref={setPopperElement}
-						style={styles.popper}
-						{...attributes.popper}
-					>
-						<Paper
-							square
-							{...options.containerProps}
-							style={{
-								minWidth: nodeRef?.clientWidth,
-							}}
+		<Container>
+			<Autosuggest
+				{...autosuggestProps}
+				inputProps={{
+					label,
+					placeholder,
+					disabled,
+					value,
+					onChange: handleChange,
+					onBlur: handleBlur,
+				}}
+				renderSuggestionsContainer={(options) => (
+					<Portal>
+						<Wrapper
+							ref={setPopperElement}
+							style={getWrapperStyles()}
+							{...attributes.popper}
 						>
-							{options.children}
-						</Paper>
-					</Wrapper>
-				</Portal>
-			)}
-		/>
+							<Paper
+								square
+								{...options.containerProps}
+								style={{
+									minWidth: nodeRef?.clientWidth,
+								}}
+							>
+								{options.children}
+							</Paper>
+						</Wrapper>
+					</Portal>
+				)}
+			/>
+			<div ref={setNodeRef} />
+		</Container>
 	);
 };
