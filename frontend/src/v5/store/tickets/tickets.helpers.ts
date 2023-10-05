@@ -48,7 +48,7 @@ const templatePropertiesToTicketProperties = (properties = []) => (
 	properties.reduce(
 		(ticketProperties, prop) => ({
 			...ticketProperties,
-			[prop.name]: prop.default,
+			[prop.name]: prop.default ?? '',
 		}),
 		{},
 	)
