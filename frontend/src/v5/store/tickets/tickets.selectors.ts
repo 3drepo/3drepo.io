@@ -16,10 +16,13 @@
  */
 
 import { createSelector } from 'reselect';
+import { orderBy } from 'lodash';
+import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
 import { createPropertiesWithGroups } from './ticketsGroups.helpers';
 import { Properties, TicketWithModelId } from './tickets.types';
-import { sortTicketsByCreationDate } from './tickets.helpers';
+
+export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
 const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
 

@@ -282,8 +282,6 @@ export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
 	}
 };
 
-export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
-
 export const getTicketIsCompleted = (ticket) => {
 	const issuePropertyStatus = get(ticket, `properties.${IssueProperties.STATUS}`);
 	const treatmentStatus = get(ticket, `modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`);
