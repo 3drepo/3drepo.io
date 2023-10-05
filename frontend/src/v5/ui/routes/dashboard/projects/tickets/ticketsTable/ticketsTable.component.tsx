@@ -110,6 +110,7 @@ export const TicketsTable = () => {
 		history.push({ pathname, search: `?ticketId=${sidePanelTicket._id}` });
 	};
 
+	// We are using getState here because is being used inside a function
 	const isFed = (modelId) => !!selectFederationById(getState(), modelId);
 
 	useEffect(() => {
