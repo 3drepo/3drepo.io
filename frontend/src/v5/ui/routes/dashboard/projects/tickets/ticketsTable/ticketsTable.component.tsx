@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ProjectsActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from 'react-redux';
@@ -168,7 +168,7 @@ export const TicketsTable = () => {
 	}, [sidePanelTicket?._id]);
 
 	useEffect(() => {
-		dispatch(JobsActions.fetchJobs(teamspace));
+		JobsActionsDispatchers.fetchJobs(teamspace);
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
 	}, []);
 
