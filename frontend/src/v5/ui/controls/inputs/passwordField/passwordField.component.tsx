@@ -15,8 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import VisibleIcon from '@assets/icons/outlined/eye-outlined.svg';
+import HiddenIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
 import { TextField, TextFieldProps } from '@controls/inputs/textField/textField.component';
+import { useState } from 'react';
+import { IconContainer } from './passwordField.styles';
 
-export const PasswordField = (props: TextFieldProps) => (
-	<TextField type="password" {...props} />
-);
+export const PasswordField = (props: TextFieldProps) => {
+	const [visible, setVisible] = useState(false);
+	const Icon = visible ? VisibleIcon : HiddenIcon;
+
+	return (
+		<TextField
+			{...props}
+			type={visible ? 'text' : 'password'}
+			InputProps={{
+				endAdornment: (
+					<IconContainer onClick={() => setVisible(!visible)}>
+						<Icon />
+					</IconContainer>
+				),
+			}}
+		/>
+	);
+};

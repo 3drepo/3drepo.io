@@ -32,12 +32,6 @@ export const selectTicketsHaveBeenFetched = createSelector(
 	(state, modelId) => modelId in state.ticketsByModelId,
 );
 
-export const selectTickets = createSelector(
-	selectTicketsDomain,
-	(state, modelId) => modelId,
-	(state, modelId) => sortTicketsByCreationDate(state.ticketsByModelId[modelId] || []),
-);
-
 export const selectTicketsByContainersAndFederations = createSelector(
 	selectTicketsDomain,
 	(state, containersAndFederationsIds: string[]) => containersAndFederationsIds,
@@ -65,6 +59,25 @@ export const selectTemplateById = createSelector(
 export const selectTicketsGroups = createSelector(
 	selectTicketsDomain,
 	(state) => state.groupsByGroupId,
+);
+
+export const selectTickets = createSelector(
+	selectTicketsDomain,
+	(state, modelId) => modelId,
+	selectTicketsGroups,
+	(state, modelId, groups) => {
+		const tickets = [];
+		(state.ticketsByModelId[modelId] || []).forEach((ticket) => {
+			let { properties } = ticket;
+			properties = createPropertiesWithGroups(properties, groups);
+			tickets.push({
+				...ticket,
+				properties,
+			});
+		});
+
+		return orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
+	},
 );
 
 export const selectTicketByIdRaw = createSelector(

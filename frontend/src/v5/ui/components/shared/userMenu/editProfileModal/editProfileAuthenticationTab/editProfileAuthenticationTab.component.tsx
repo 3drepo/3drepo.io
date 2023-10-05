@@ -24,13 +24,11 @@ import { EditProfileAuthenticationNonSSOTab } from './editProfileAuthenticationN
 export interface IUpdatePasswordInputs {
 	oldPassword: string;
 	newPassword: string;
-	confirmPassword: string;
 }
 
 export const EMPTY_PASSWORDS = {
 	oldPassword: '',
 	newPassword: '',
-	confirmPassword: '',
 };
 
 type EditProfileAuthenticationTabProps = {
