@@ -33,7 +33,6 @@ import { CircleButton } from '@controls/circleButton';
 import { getTicketIsCompleted, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
 import _ from 'lodash';
-import { JobsActions } from '@/v4/modules/jobs';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { theme } from '@/v5/ui/routes/viewer/theme';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
@@ -61,7 +60,7 @@ export const TicketsTable = () => {
 	const params = useParams<DashboardTicketsParams>();
 	const { teamspace, project, groupBy: groupByURLParam, template: templateURLParam } = params;
 	const [models, setModels] = useSearchParam('models');
-	const { getState, dispatch } = useStore();
+	const { getState } = useStore();
 	const formData = useForm<FormType>({
 		defaultValues: {
 			containersAndFederations: models?.split(',') || [],
@@ -77,6 +76,7 @@ export const TicketsTable = () => {
 	const [sidePanelModelId, setSidePanelModelId] = useState<string>(null);
 	const [sidePanelTicket, setSidePanelTicket] = useState<Partial<ITicket>>(null);
 	const [showCompleted, setShowCompleted] = useState(false);
+	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
 
 	const editingTicketId = sidePanelTicket?._id;
 	const templateIsFetched = templateAlreadyFetched(selectedTemplate || {} as any);
@@ -183,11 +183,11 @@ export const TicketsTable = () => {
 						<SelectorsContainer>
 							<ContainersAndFederationsFormSelect
 								name="containersAndFederations"
-								isNewTicketOpen={sidePanelModelId && !editingTicketId}
+								isNewTicketDirty={isNewTicketDirty}
 							/>
 							<TemplateFormSelect
 								name="template"
-								isNewTicketOpen={sidePanelModelId && !editingTicketId}
+								isNewTicketDirty={isNewTicketDirty}
 							/>
 							<GroupByFormSelect name="groupBy" />
 						</SelectorsContainer>
@@ -239,6 +239,7 @@ export const TicketsTable = () => {
 									modelId={sidePanelModelId}
 									template={selectedTemplate}
 									onSave={onSaveTicket}
+									onDirtyStateChange={setIsNewTicketDirty}
 								/>
 							)}
 						</TicketContextComponent>
