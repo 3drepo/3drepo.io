@@ -38,12 +38,15 @@ export const EditableFieldStyles = css`
 
 	.MuiFormControl-root {
 		margin-top: 0;
+
 		.MuiInputBase-root {
 			padding: 0;
+
 			& > textarea {
 				min-height: 2rem;
-				padding: 5px 10px;
+				padding: 5px 20px 5px 10px;
 			}
+
 			.MuiOutlinedInput-notchedOutline {
 				height: calc(100%);
 				min-height: 42px;
@@ -52,7 +55,7 @@ export const EditableFieldStyles = css`
 	}
 
 	button {
-		margin: 0 10px 0 0;
+		margin: 0 5px 2px 0;
 		height: 15px;
 		width: 15px;
 		color: ${({ theme }) => theme.palette.secondary.main};
@@ -68,8 +71,12 @@ export const EditableFieldStyles = css`
 
 	${ActionsLine} {
 		top: 4px;
+		bottom: unset;
 		right: 0;
+		display: flex;
+		flex-direction: column-reverse;
 	}
+
 	${StyledMarkdownField} {
 		border: 1px solid ${({ theme }) => theme.palette.base.lighter};
 		border-radius: 8px;
@@ -79,8 +86,12 @@ export const EditableFieldStyles = css`
 		margin-bottom: 0px;
 		font-size: 0.75rem;
 		background-color: ${({ theme }) => theme.palette.primary.contrast};
+
 		p {
 			margin: 0;
+			max-width: calc(100% - 8px);
+			text-overflow: ellipsis;
+			overflow: hidden;
 		}
 	}
 `;

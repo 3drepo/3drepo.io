@@ -207,8 +207,8 @@ export interface ITicketsActionCreators {
 		ticketId: string,
 		group: Group,
 		isFederation: boolean,
-	) => FetchTicketGroupsSuccessAction;
+	) => UpdateTicketGroupAction;
 	updateTicketGroupSuccess: (
 		group: Group,
-	) => FetchTicketGroupsSuccessAction;
+	) => UpdateTicketGroupSuccessAction;
 }
