@@ -22,12 +22,12 @@ import { formatMessage } from '@/v5/services/intl';
 import { sortByName } from '@/v5/store/store.helpers';
 import { openUnsavedNewTicketWarningModal } from './selectMenus.helpers';
 
-type TemplateFormSelectProps = { isNewTicketOpen?: boolean, name: string };
-export const TemplateFormSelect = ({ isNewTicketOpen, ...props }: TemplateFormSelectProps) => {
+type TemplateFormSelectProps = { isNewTicketDirty?: boolean, name: string };
+export const TemplateFormSelect = ({ isNewTicketDirty, ...props }: TemplateFormSelectProps) => {
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 
 	const handleOpen = () => {
-		if (!isNewTicketOpen) return;
+		if (!isNewTicketDirty) return;
 		openUnsavedNewTicketWarningModal();
 	};
 

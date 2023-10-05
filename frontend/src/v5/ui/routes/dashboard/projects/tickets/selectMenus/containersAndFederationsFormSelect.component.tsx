@@ -24,8 +24,8 @@ import { sortByName } from '@/v5/store/store.helpers';
 import { ListSubheader } from '../tickets.styles';
 import { openUnsavedNewTicketWarningModal } from './selectMenus.helpers';
 
-type ContainersAndFederationsFormSelectProps = { isNewTicketOpen?: boolean, name: string };
-export const ContainersAndFederationsFormSelect = ({ isNewTicketOpen, ...props }: ContainersAndFederationsFormSelectProps) => {
+type ContainersAndFederationsFormSelectProps = { isNewTicketDirty?: boolean, name: string };
+export const ContainersAndFederationsFormSelect = ({ isNewTicketDirty, ...props }: ContainersAndFederationsFormSelectProps) => {
 	const containers = ContainersHooksSelectors.selectContainers();
 	const federations = FederationsHooksSelectors.selectFederations();
 
@@ -43,7 +43,7 @@ export const ContainersAndFederationsFormSelect = ({ isNewTicketOpen, ...props }
 	};
 
 	const handleOpen = () => {
-		if (!isNewTicketOpen) return;
+		if (!isNewTicketDirty) return;
 		openUnsavedNewTicketWarningModal();
 	};
 

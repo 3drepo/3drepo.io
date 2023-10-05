@@ -26,7 +26,7 @@ import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
-import { merge } from 'lodash';
+import { isEmpty, merge } from 'lodash';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { SaveButton, RequiresViewerContainer, ButtonContainer } from './newTicketSlide.styles';
 
@@ -51,8 +51,9 @@ type NewTicketSlideProps = {
 	modelId: string,
 	template: ITemplate,
 	onSave: (newTicketId: string) => void,
+	onDirtyStateChange: (isDirty: boolean) => void,
 };
-export const NewTicketSlide = ({ defaultValue, modelId, template, onSave }: NewTicketSlideProps) => {
+export const NewTicketSlide = ({ defaultValue, modelId, template, onSave, onDirtyStateChange }: NewTicketSlideProps) => {
 	const { teamspace, project } = useParams<DashboardTicketsParams>();
 	const templateIsFetched = templateAlreadyFetched(template || {} as any);
 	const defaultValues = getGroupDefaultValue(template, defaultValue);
@@ -63,6 +64,8 @@ export const NewTicketSlide = ({ defaultValue, modelId, template, onSave }: NewT
 		mode: 'onChange',
 		defaultValues,
 	});
+
+	const { reset, handleSubmit, formState: { isValid, dirtyFields } } = formData;
 
 	const onSubmit = (body) => {
 		const ticket = { type: template._id, ...body };
@@ -81,8 +84,14 @@ export const NewTicketSlide = ({ defaultValue, modelId, template, onSave }: NewT
 
 	useEffect(() => {
 		if (!templateIsFetched) return;
-		formData.reset(defaultValues);
+		reset(defaultValues);
 	}, [modelId, templateIsFetched]);
+
+	useEffect(() => {
+		onDirtyStateChange(!isEmpty(dirtyFields));
+	}, [JSON.stringify(dirtyFields)]);
+
+	useEffect(() => { onDirtyStateChange(false); }, []);
 
 	if (!templateIsFetched) return (<Loader />);
 
@@ -98,12 +107,12 @@ export const NewTicketSlide = ({ defaultValue, modelId, template, onSave }: NewT
 	}
 
 	return (
-		<form onSubmit={formData.handleSubmit(onSubmit)}>
+		<form onSubmit={handleSubmit(onSubmit)}>
 			<FormProvider {...formData}>
 				<TicketForm template={getEditableProperties(template)} ticket={defaultValues} />
 			</FormProvider>
 			<ButtonContainer>
-				<SaveButton disabled={!formData.formState.isValid}>
+				<SaveButton disabled={!isValid}>
 					<FormattedMessage id="ticketsTable.button.saveTicket" defaultMessage="Save ticket" />
 				</SaveButton>
 			</ButtonContainer>
