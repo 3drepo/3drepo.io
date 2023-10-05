@@ -39,6 +39,7 @@ import {
 import { UserSignupFormStep } from './userSignupFormStep/userSignupFormStep.component';
 import { UserSignupWelcomeProps } from '../userSignupWelcome/userSignupWelcome.component';
 import { UserSignupFormStepper, UserSignupFormStepperContextValue } from './userSignupFormStepper/userSignupFormStepper.component';
+import { useSearchParam } from '../../useSearchParam';
 
 type UserSignupFormProps = {
 	completeRegistration: (registrationCompleteData: UserSignupWelcomeProps) => void;
@@ -52,10 +53,11 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const { captcha_client_key } = clientConfigService;
 
 	const [contextValue, setContextValue] = useState<UserSignupFormStepperContextValue | null>();
+	const [emailParam] = useSearchParam('email');
 
 	const DEFAULT_FIELDS = {
 		username: '',
-		email: '',
+		email: emailParam,
 		password: '',
 		firstName: '',
 		lastName: '',

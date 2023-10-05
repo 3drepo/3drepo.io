@@ -33,7 +33,7 @@ import { InputController } from '@controls/inputs/inputController.component';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
 import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
 import { useSelector } from 'react-redux';
-import { selectSelectedNodes } from '@/v4/modules/tree/tree.selectors';
+import { selectGetNumNodesByMeshSharedIdsArray, selectSelectedNodes } from '@/v4/modules/tree/tree.selectors';
 import { convertToV4GroupNodes, convertToV5GroupNodes, meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
 import { getRandomSuggestedColor } from '@controls/inputs/colorPicker/colorPicker.helpers';
 import { Gap } from '@controls/gap';
@@ -89,6 +89,8 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 
 	const isNewGroup = !value;
 	const selectedNodes = useSelector(selectSelectedNodes);
+	const sharedIds = selectedNodes.flatMap((node) => node.shared_ids);
+	const objectsCount = useSelector(selectGetNumNodesByMeshSharedIdsArray(sharedIds));
 
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
@@ -330,7 +332,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								id="ticketsGroupSettings.subHeading.selectedObjects"
 								defaultMessage="Selected Objects"
 							/>
-							<ObjectsCount>{selectedNodes.length}</ObjectsCount>
+							<ObjectsCount>{objectsCount}</ObjectsCount>
 						</span>
 					</Subheading>
 				)}
