@@ -43,29 +43,18 @@ const AttachResourcesContainer = css`
 		display: flex;
 		justify-content: flex-end;
 		position: unset;
-		box-shadow: 0px 6px 10px rgb(0 0 0 / 14%),
-					0px 1px 18px rgb(0 0 0 / 12%),
-					0px 3px 5px rgb(0 0 0 / 20%);
 		padding: 8px;
 		margin: 0 -30px -30px;
 		width: unset;
 		box-sizing: border-box;
+		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 
 		${NeutralActionButton} {
 			color: ${({ theme }) => theme.palette.secondary.main};
 			background-color: transparent;
-			border: solid 1px currentColor;
 
-			&:hover {
-				background-color: ${({ theme }) => theme.palette.secondary.main};
-				border-color: ${({ theme }) => theme.palette.secondary.main};
-				color: ${({ theme }) => theme.palette.primary.contrast};
-			}
-
-			&:active {
-				background-color: ${({ theme }) => theme.palette.secondary.dark};
-				border-color: ${({ theme }) => theme.palette.secondary.dark};
-				color: ${({ theme }) => theme.palette.primary.contrast};
+			&:hover, &:active {
+				text-decoration: underline;
 			}
 		}
 	}
