@@ -113,7 +113,7 @@ export interface IRevisionsState {
 	revisionsUploadStatus: Record<string, IUploadStatus>;
 }
 
-type VoidParams = TeamspaceProjectAndContainerId & {revisionId: string, isVoid: boolean};
+type VoidParams = TeamspaceProjectAndContainerId & { revisionId: string, isVoid: boolean };
 
 export type SetRevisionVoidStatusAction = Action<'SET_REVISION_VOID_STATUS'> & VoidParams;
 export type SetRevisionVoidStatusSuccessAction = Action<'SET_REVISION_VOID_STATUS_SUCCESS'> & VoidParams;

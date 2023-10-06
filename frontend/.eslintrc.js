@@ -4,10 +4,23 @@ module.exports = {
 		es6: true,
 		node: true,
 	},
+	plugins: ['import'],
+	settings: {
+		'import/parsers': {
+		  '@typescript-eslint/parser': ['.ts', '.tsx']
+		},
+		'import/resolver': {
+			'typescript': {
+				'alwaysTryTypes': true,
+			},
+		},
+	},
 	extends: [
 		'airbnb-typescript',
 		'plugin:security/recommended',
 		'plugin:react/jsx-runtime',
+		'plugin:import/recommended',
+		'plugin:import/typescript',
 	],
 	parserOptions: {
 		ecmaVersion: 2020,
@@ -46,11 +59,14 @@ module.exports = {
 		'no-console': ['error', { allow: ['warn', 'error', 'debug'] }],
 		'security/detect-non-literal-fs-filename': 'off',
 		'security/detect-object-injection': 'off',
-		'@typescript-eslint/no-explicit-any': 'off',
-		'@typescript-eslint/explicit-module-boundary-types': 'off',
 		'indent': 'off',
 		'import/prefer-default-export': 'off',
+		'import/no-named-as-default': 'off',
+		'import/no-named-as-default-member': 'off',
+		'@typescript-eslint/no-explicit-any': 'off',
+		'@typescript-eslint/explicit-module-boundary-types': 'off',
 		'@typescript-eslint/indent': ['error', 'tab', { SwitchCase: 1 }],
+		'@typescript-eslint/no-unsafe-argument': 'off',
 		'react/jsx-indent': ['error', 'tab'],
 		'react/jsx-props-no-spreading': 'off',
 		'react/prop-types': 'off',

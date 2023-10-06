@@ -14,28 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
-import { AppBar as MuiAppBar } from '@mui/material';
 import NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
+import { AppBarDecorator } from '../../stories/decorators';
 
 export default {
 	title: 'Buttons/NavbarButton',
 	component: NavbarButton,
-	parameters: {
-		docs: {
-			transformSource: (source) => source.replace(/__WEBPACK_DEFAULT_EXPORT__/g, 'Icon'),
-		},
-		controls: { exclude: ['onClick', 'formError'] },
+	parameters: { controls: { exclude: ['onClick', 'formError', 'children'] } },
+	decorators: [AppBarDecorator],
+	args: {
+		children: <NotificationsIcon />,
 	},
-} as ComponentMeta<typeof NavbarButton>;
+} as Meta<typeof NavbarButton>;
 
-const TemplateNotifications: ComponentStory<typeof NavbarButton> = (args) => (
-	<MuiAppBar>
-		<NavbarButton {...args}>
-			<NotificationsIcon />
-		</NavbarButton>
-	</MuiAppBar>
-);
+type Story = StoryObj<typeof NavbarButton>;
 
-export const Default = TemplateNotifications.bind({});
+export const Default: Story = {};

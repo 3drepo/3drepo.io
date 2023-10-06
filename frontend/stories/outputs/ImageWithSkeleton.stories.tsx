@@ -14,24 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { ImageWithSkeleton } from '@controls/imageWithSkeleton/imageWithSkeleton.component';
 import styled from 'styled-components';
 
-export default {
-	title: 'Outputs/ImageWithSkeleton',
-	component: ImageWithSkeleton,
-	argTypes: {
-		variant: {
-			description: 'Variant of the skeleton',
-			options: ['primary', 'secondary'],
-			control: { type: 'select' },
-		},
-	},
-	parameters: { controls: { exclude: ['className', 'onClick', 'src'] } },
-} as ComponentMeta<typeof ImageWithSkeleton>;
-
-const Container = styled.div<{ $variant?: 'primary'|'secondary' }>`
+const Container = styled.div<{ $variant?: 'primary' | 'secondary' }>`
 	height: 200px;
 	width: 200px;
 	padding: 20px;
@@ -41,18 +28,33 @@ const Container = styled.div<{ $variant?: 'primary'|'secondary' }>`
 	)};
 `;
 
-const Template: ComponentStory<typeof ImageWithSkeleton> = ({ variant, ...args }) => (
-	<Container $variant={variant}>
-		<ImageWithSkeleton variant={variant} {...args} src="WRONG_URL_TO_FORCE_ENDLESS_LOADING_STATUS" />
-	</Container>
-);
+export default {
+	title: 'Outputs/ImageWithSkeleton',
+	argTypes: {
+		variant: {
+			description: 'Variant of the skeleton',
+			options: ['primary', 'secondary'],
+			control: { type: 'select' },
+		},
+	},
+	parameters: { controls: { exclude: ['className', 'onClick', 'src'] } },
+	render: ({ variant, ...args }) => (
+		<Container $variant={variant}>
+			<ImageWithSkeleton variant={variant} {...args} src="WRONG_URL_TO_FORCE_ENDLESS_LOADING_STATUS" />
+		</Container>
+	),
+} as Meta<typeof ImageWithSkeleton>;
 
-export const PrimarySkeleton = Template.bind({});
-PrimarySkeleton.args = {
-	variant: 'primary',
+type Story = StoryObj<typeof ImageWithSkeleton>;
+
+export const PrimarySkeleton: Story = {
+	args: {
+		variant: 'primary',
+	},
 };
 
-export const SecondarySkeleton = Template.bind({});
-SecondarySkeleton.args = {
-	variant: 'secondary',
+export const SecondarySkeleton: Story = {
+	args: {
+		variant: 'secondary',
+	},
 };

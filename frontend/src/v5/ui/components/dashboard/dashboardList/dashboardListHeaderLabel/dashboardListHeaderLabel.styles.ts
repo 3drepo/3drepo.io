@@ -22,7 +22,7 @@ import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { Typography } from '@controls/typography';
 import { Display } from '@/v5/ui/themes/media';
 
-export const Container = styled(FixedOrGrowContainer)<{ hideWhenSmallerThan?: Display; hidden: boolean; }>`
+export const Container = styled(FixedOrGrowContainer)<{ hideWhenSmallerThan?: Display | number; hidden: boolean; }>`
 	align-items: center;
 	display: flex;
 	

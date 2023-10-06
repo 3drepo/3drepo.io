@@ -16,7 +16,7 @@
  */
 import { createContext } from 'react';
 
-export const enum Version{
+export const enum Version {
 	V4,
 	V5,
 }
