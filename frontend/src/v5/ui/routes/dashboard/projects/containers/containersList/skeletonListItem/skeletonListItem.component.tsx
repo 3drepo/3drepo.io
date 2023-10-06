@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.component';
+import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { TitlesContainer, Container } from './skeletonListItem.styles';
-import { Skeleton } from '@mui/material';
 
 interface ISkeletonListItem {
 	delay?: number;
@@ -26,22 +25,21 @@ interface ISkeletonListItem {
 
 export const SkeletonListItem = ({ delay = 0 }: ISkeletonListItem): JSX.Element => (
 	<Container>
-		{/* <FixedOrGrowContainer>
+		<FixedOrGrowContainer>
 			<TitlesContainer>
-				<SkeletonBlock delay={delay} widthPercentage={90} />
-				<SkeletonBlock delay={delay + 0.05} widthPercentage={80} />
+				<SkeletonBlock delay={delay} width="90%" />
+				<SkeletonBlock delay={delay + 0.05} width="80%" />
 			</TitlesContainer>
 		</FixedOrGrowContainer>
 		<FixedOrGrowContainer width={186} />
 		<FixedOrGrowContainer>
-			<SkeletonBlock delay={delay} widthPercentage={75} />
+			<SkeletonBlock delay={delay} width="75%" />
 		</FixedOrGrowContainer>
 		<FixedOrGrowContainer width={188}>
 			<SkeletonBlock delay={delay} width={133} />
 		</FixedOrGrowContainer>
 		<FixedOrGrowContainer width={97}>
 			<SkeletonBlock delay={delay} width={65} />
-		</FixedOrGrowContainer> */}
-		<Skeleton variant="rounded" width={210} height={10} />
+		</FixedOrGrowContainer>
 	</Container>
 );
