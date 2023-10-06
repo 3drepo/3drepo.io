@@ -175,8 +175,8 @@ export const UploadFileForm = ({
 	const containersNamesInModal = getValues('uploads')?.map(({ containerName }) => containerName);
 	const sidebarOpen = !isNull(selectedIndex) && !isUploading;
 	const indexMap = new Map(fields.map(({ uploadId }, index) => [uploadId, index]));
-	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
-	const origIndex = sidebarOpen && getOriginalIndex(getSortedListSelectedIndex());
+	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId) as number;
+	const origIndex = sidebarOpen ? getOriginalIndex(selectedIndex) : 0;
 
 	const onClickDelete = (index: number) => {
 		const { uploadId } = sortedList[index];

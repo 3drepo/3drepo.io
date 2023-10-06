@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { StoryObj, Meta } from '@storybook/react';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
 
 export default {
@@ -23,29 +23,28 @@ export default {
 	argTypes: {
 		children: {
 			description: 'The text to display',
-			defaultValue: 'Success message\'s content',
 			type: 'string',
 		},
 	},
 	parameters: { controls: { exclude: ['className'] } },
-} as ComponentMeta<typeof SuccessMessage>;
+} as Meta<typeof SuccessMessage>;
 
-const Template: ComponentStory<typeof SuccessMessage> = ({ children, ...args }) => (
-	<SuccessMessage {...args}>{children}</SuccessMessage>
-);
+type Story = StoryObj<typeof SuccessMessage>;
 
-export const SingleLineMessage = Template.bind({});
-SingleLineMessage.args = {
-	children: 'This is the success message',
+export const SingleLineMessage: Story = {
+	args: {
+		children: 'This is the success message',
+	},
 };
 
-export const MultiLineMessage = Template.bind({});
-MultiLineMessage.args = {
-	children: (
-		<div>
-			This is the success message
-			<br />
-			over 2 lines
-		</div>
-	),
+export const MultiLineMessage: Story = {
+	args: {
+		children: (
+			<div>
+				This is the success message
+				<br />
+				over 2 lines
+			</div>
+		),
+	},
 };

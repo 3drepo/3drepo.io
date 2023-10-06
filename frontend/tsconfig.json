@@ -10,7 +10,8 @@
       "react-dom",
       "lodash",
       "node",
-      "jest"
+      "jest",
+      "webpack-env" 
     ],
     "lib": [
       "es2015",

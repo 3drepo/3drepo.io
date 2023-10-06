@@ -85,7 +85,7 @@ export type SetCardViewAction = Action<'SET_CARD_VIEW'> & { view: TicketsCardVie
 export type OpenTicketAction = Action<'OPEN_TICKET'> & { ticketId: string };
 export type SetReadOnlyAction = Action<'SET_READ_ONLY'> & { readOnly: boolean };
 export type ResetStateAction = Action<'RESET_STATE'>;
-export type SetOverridesAction = Action<'SET_OVERRIDES'> & { overrides: OverridesDicts | null};
+export type SetOverridesAction = Action<'SET_OVERRIDES'> & { overrides: OverridesDicts | null };
 
 export interface ITicketsCardActionCreators {
 	setSelectedTicket: (ticketId: string) => SetSelectedTicketAction,

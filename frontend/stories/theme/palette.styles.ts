@@ -16,13 +16,16 @@
  */
 
 import styled from 'styled-components';
+import { GroupIcon } from '@/v5/ui/routes/viewer/groups/groupItem/groupIcon/groupIcon.styles';
 
 export const PaletteName = styled.h1`
 	${(({ theme }) => theme.typography.h1)}
 `;
 
-export const PaletteColourSampleContainer = styled.h5`
+export const PaletteColorSampleContainer = styled.h5`
 	${(({ theme }) => theme.typography.h5)}
+	display: flex;
+	align-items: center;
 `;
 
 export const PaletteSampleContainer = styled.div`
@@ -31,4 +34,10 @@ export const PaletteSampleContainer = styled.div`
 
 export const PaletteContainer = styled.div`
 	margin: 50px;
+`;
+
+export const ColorPreview = styled(GroupIcon)`
+	width: 30px;
+	height: 30px;
+	border-radius: 6px;
 `;

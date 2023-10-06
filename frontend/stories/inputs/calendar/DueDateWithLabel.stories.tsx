@@ -14,13 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { useState } from 'react';
+import { Meta, StoryObj } from '@storybook/react';
 import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
-import { FormContainer } from '../FormInput.styles';
+import { LocalizationProviderDecorator } from './date.decorator';
+import { FormDecorator } from '../inputDecorators';
 
 export default {
 	title: 'Inputs/Calendar/DueDateWithLabel',
@@ -33,7 +30,6 @@ export default {
 		},
 		tooltip: {
 			type: 'string',
-			defaultValue: 'Set date',
 		},
 	},
 	component: DueDateWithLabel,
@@ -44,26 +40,15 @@ export default {
 		'inputRef',
 		'PickerComponent',
 	] } },
-} as ComponentMeta<typeof DatePicker>;
+	decorators: [LocalizationProviderDecorator, FormDecorator],
+} as Meta<typeof DueDateWithLabel>;
 
-const Template: ComponentStory<typeof DatePicker> = ({ value: initialValue, ...args }) => {
-	const [value, setValue] = useState(initialValue);
-	const onBlur = (newValue) => {
-		setValue(newValue);
-	};
-	return (
-		<LocalizationProvider dateAdapter={AdapterDayjs}>
-			<FormContainer>
-				<DueDateWithLabel {...args} onBlur={onBlur} value={value} />
-			</FormContainer>
-		</LocalizationProvider>
-	);
-};
+type Story = StoryObj<typeof DueDateWithLabel>;
 
-export const UnsetValue = Template.bind({});
+export const UnsetValue: Story = {};
 
-export const PresetValue = Template.bind({});
-PresetValue.args = {
-	value: new Date(),
-	tooltip: 'this is a custom tooltip',
+export const PresetValue: Story = {
+	args: {
+		value: Number(new Date()),
+	},
 };

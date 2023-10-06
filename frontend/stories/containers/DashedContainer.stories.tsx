@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
 import { Button as ControlsButton } from '@controls/button';
 
@@ -45,45 +45,49 @@ export default {
 		},
 		children: {
 			description: 'The text, button, or component to contain inside the container',
-			defaultValue: 'Dashed container\'s content',
 			type: 'string',
 		},
 	},
+	args: {
+		children: 'Dashed container\'s content',
+	},
 	parameters: { controls: { exclude: ['className'] } },
-} as ComponentMeta<typeof DashedContainer>;
+} as Meta<typeof DashedContainer>;
 
-const Template: ComponentStory<typeof DashedContainer> = ({ children, ...args }) => (
-	<DashedContainer {...args}>{children}</DashedContainer>
-);
+type Story = StoryObj<typeof DashedContainer>;
 
-export const NoRadius = Template.bind({});
-NoRadius.args = {
-	borderRadius: 0,
-	strokeColor: '#000000',
-	children: 'this is an example of a dashed container with 0 border radius',
+export const NoRadius: Story = {
+	args: {
+		borderRadius: 0,
+		strokeColor: '#000000',
+		children: 'this is an example of a dashed container with 0 border radius',
+	},
 };
 
-export const BigRadius = Template.bind({});
-BigRadius.args = {
-	borderRadius: 20,
-	strokeColor: '#fe27d8',
-	children: 'this is an example of a dashed container with big border radius',
+export const BigRadius: Story = {
+	args: {
+		borderRadius: 20,
+		strokeColor: '#fe27d8',
+		children: 'this is an example of a dashed container with big border radius',
+	},
 };
 
-export const Gapped = Template.bind({});
-Gapped.args = {
-	dashSize: 10,
-	gapSize: 10,
-	children: `
-		this is an example of a dashed container with longer dashes and more gap in between.
-		the content has not padding
-	`,
+export const Gapped: Story = {
+	args: {
+		dashSize: 10,
+		gapSize: 10,
+		children: `
+			this is an example of a dashed container with longer dashes and more gap in between.
+			the content has not padding
+		`,
+	},
 };
 
-export const Button = Template.bind({});
-Button.args = {
-	strokeColor: '#09c1d4',
-	strokeWidth: 6,
-	zeroPadding: true,
-	children: <ControlsButton variant="text">This is an example with a button</ControlsButton>,
+export const Button: Story = {
+	args: {
+		strokeColor: '#09c1d4',
+		strokeWidth: 6,
+		zeroPadding: true,
+		children: <ControlsButton variant="text">This is an example with a button</ControlsButton>,
+	},
 };
