@@ -26,8 +26,10 @@ import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.compo
 type ManyOfPropertyProps = FormInputProps & {
 	open?: boolean;
 	values: PropertyDefinition['values'];
+	value: any;
 	onClose: () => void;
 	onOpen: () => void;
+	onBlur: () => void;
 };
 
 export const ManyOfProperty = ({ values, ...props }: ManyOfPropertyProps) => {

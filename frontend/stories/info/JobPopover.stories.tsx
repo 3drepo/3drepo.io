@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,29 +14,35 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { ComponentMeta } from '@storybook/react';
-import { IconsTemplate } from '../icons.component';
-import { getIcons } from '../icons.helper';
+import { Meta, StoryObj } from '@storybook/react';
+import { JobPopoverCircle } from '@components/shared/popoverCircles/jobPopoverCircle/jobPopoverCircle.component';
 
 export default {
-	title: 'Icons/\\Outlined',
-	argTypes: {
-		backgroundColor: {
-			type: 'string',
-		},
-		iconSize: {
-			type: 'number',
-			defaultValue: 10,
-		},
-		color: {
-			type: 'string',
+	title: 'Info/JobPopoverCircle',
+	component: JobPopoverCircle,
+	parameters: { controls: { exclude: [
+		'alt',
+		'children',
+		'classes',
+		'imgProps',
+		'sizes',
+		'src',
+		'srcSet',
+		'sx',
+		'variant',
+		'ref',
+		'backgroundColor',
+	] } },
+} as Meta<typeof JobPopoverCircle>;
+
+type Story = StoryObj<typeof JobPopoverCircle>;
+
+export const JobPopoverPink: Story = {
+	args: {
+		size: 'small',
+		job: {
+			_id: 'Front-end Developer',
+			color: '#DC1995',
 		},
 	},
-	parameters: { controls: { exclude: 'icons' } },
-} as ComponentMeta<any>;
-
-export const Icons = IconsTemplate.bind({});
-Icons.args = {
-	icons: getIcons(require.context('@assets/icons/outlined/', false, /\.*(svg)/), 'outlined'),
 };

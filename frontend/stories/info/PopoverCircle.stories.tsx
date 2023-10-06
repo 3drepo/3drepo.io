@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,16 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { Meta, StoryObj } from '@storybook/react';
-import { PinDetails } from '@components/viewer/cards/tickets/pinDetails/pinDetails.component';
+import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.styles';
 
 export default {
-	title: 'Inputs/PinDetails',
-	component: PinDetails,
-	parameters: { controls: { exclude: ['onChange', 'onBlur'] } },
-} as Meta<typeof PinDetails>;
+	title: 'Info/PopoverCircle',
+	component: PopoverCircle,
+	parameters: { controls: { exclude: ['PopoverComponent'] } },
+} as Meta<typeof PopoverCircle>;
 
-type Story = StoryObj<typeof PinDetails>;
+type Story = StoryObj<typeof PopoverCircle>;
 
-export const Default: Story = {};
+export const PopoverCircleWithImage: Story = {
+	args: {
+		src: 'https://i.pinimg.com/170x/26/5c/1c/265c1cc710304eb15607e18c6f591c85.jpg',
+		PopoverComponent: () => <div>I am a popover</div>,
+	},
+	render: (args) => (
+		<HoverPopover anchor={() => (<PopoverCircle {...args} />)}>
+			<div>I am a popover</div>
+		</HoverPopover>
+	),
+};

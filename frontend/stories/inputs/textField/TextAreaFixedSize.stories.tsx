@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { TextAreaFixedSize } from '@controls/inputs/textArea/textAreaFixedSize.component';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormContainer } from '../FormInput.styles';
+import { StoryObj, Meta } from '@storybook/react';
+import { FormDecorator } from '../inputDecorators';
 
 export default {
 	title: 'Inputs/TextField/TextAreaFixedSize',
@@ -38,6 +38,7 @@ export default {
 		},
 	},
 	component: TextAreaFixedSize,
+	decorators: [FormDecorator],
 	parameters: { controls: { exclude: [
 		'margin',
 		'ref',
@@ -48,16 +49,12 @@ export default {
 		'className',
 		'inputRef',
 	] } },
-} as ComponentMeta<typeof TextAreaFixedSize>;
+} as Meta<typeof TextAreaFixedSize>;
 
-const Controlled: ComponentStory<typeof TextAreaFixedSize> = (args) => (
-	<FormContainer>
-		<TextAreaFixedSize {...args} />
-	</FormContainer>
-);
+type Story = StoryObj<typeof TextAreaFixedSize>;
 
-export const ControlledFormTextArea = Controlled.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledFormTextArea.args = {
-	label: 'Controlled Fixed Multi Line input',
+export const ControlledFormTextArea: Story = {
+	args: {
+		label: 'Controlled Fixed Multi Line input',
+	},
 };

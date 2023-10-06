@@ -6,6 +6,7 @@ module.exports = {
     "../**/*.stories.mdx",
     "../**/*.stories.@(js|jsx|ts|tsx)"
   ],
+
   "addons": [
     "@storybook/addon-links",
     "@storybook/addon-essentials",
@@ -13,12 +14,16 @@ module.exports = {
     "storybook-addon-material-ui5",
     "storybook-addon-styled-component-theme/dist/preset"
   ],
-  "framework": "@storybook/react",
-  "core": {
-    "builder": "webpack5",
-	"disableTelemetry": true
+
+  "framework": {
+    name: '@storybook/react-webpack5',
+    options: {}
   },
-  
+
+  "core": {
+    "disableTelemetry": true
+  },
+
   webpackFinal: async (config, { configType }) => {
     // `configType` has a value of 'DEVELOPMENT' or 'PRODUCTION'
     // You can change the configuration based on that.
@@ -52,4 +57,8 @@ module.exports = {
     // Return the altered config
     return config;
   },
+
+  docs: {
+    autodocs: true
+  }
 }

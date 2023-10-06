@@ -14,19 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { theme } from '@/v5/ui/themes/theme';
+import { palette } from '@/v5/ui/themes/theme';
 
-export const capitalise = (str: string) => str[0].toUpperCase() + str.substr(1);
-
-const NOT_COLORS = ['shadows',
-	'mode',
-	'gradient',
-	'contrastThreshold',
-	'getContrastText',
-	'augmentColor',
-	'tonalOffset',
-	'divider',
-];
-
-export const paletteVariants = () => Object.keys(theme.palette)
-	.filter((paletteItem) => !NOT_COLORS.includes(paletteItem));
+const NOT_COLORS = ['shadows', 'gradient'];
+export const paletteVariants = () => Object.keys(palette).filter((paletteItem) => !NOT_COLORS.includes(paletteItem));

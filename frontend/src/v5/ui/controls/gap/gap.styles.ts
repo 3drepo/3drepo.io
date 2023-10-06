@@ -18,6 +18,6 @@
 import styled from 'styled-components';
 
 const DEFAULT_GAP_SIZE = '1em';
-export const Gap = styled.div<{$height?: string}>`
+export const Gap = styled.div<{ $height?: string }>`
 	height: ${({ $height }) => $height || DEFAULT_GAP_SIZE};
 `;
