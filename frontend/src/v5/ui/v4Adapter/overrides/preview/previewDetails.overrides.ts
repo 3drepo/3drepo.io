@@ -121,6 +121,7 @@ export default css`
 					overflow: hidden;
 					display: inline-block;
 					line-height: 20px;
+					padding-right: 25px;
 				}
 
 				// weird floating legend

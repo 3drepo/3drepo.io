@@ -714,7 +714,7 @@ router.delete("/risks/:riskId/comments", middlewares.issue.canComment, deleteCom
 router.post("/risks/:riskId/resources",middlewares.issue.canComment, attachResourcesToRisk, middlewares.chat.onResourcesCreated, responseCodes.onSuccessfulOperation);
 
 /**
- * @api {delete} /:teamspace/:model/issues/:issueId/resources Detach a resource from a risk
+ * @api {delete} /:teamspace/:model/risks/:riskId/resources Detach a resource from a risk
  * @apiName detachResourceRisk
  * @apiGroup Risks
  * @apiDescription Detachs a resource from a risk. If the risk is the last entity

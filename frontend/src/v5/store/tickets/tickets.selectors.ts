@@ -24,12 +24,6 @@ import { Properties } from './tickets.types';
 
 const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
 
-export const selectTickets = createSelector(
-	selectTicketsDomain,
-	(state, modelId) => modelId,
-	(state, modelId) => orderBy(state.ticketsByModelId[modelId] || [], `properties.${BaseProperties.CREATED_AT}`, 'desc'),
-);
-
 export const selectTemplates = createSelector(
 	selectTicketsDomain,
 	(state, modelId) => modelId,
@@ -46,6 +40,25 @@ export const selectTemplateById = createSelector(
 export const selectTicketsGroups = createSelector(
 	selectTicketsDomain,
 	(state) => state.groupsByGroupId,
+);
+
+export const selectTickets = createSelector(
+	selectTicketsDomain,
+	(state, modelId) => modelId,
+	selectTicketsGroups,
+	(state, modelId, groups) => {
+		const tickets = [];
+		(state.ticketsByModelId[modelId] || []).forEach((ticket) => {
+			let { properties } = ticket;
+			properties = createPropertiesWithGroups(properties, groups);
+			tickets.push({
+				...ticket,
+				properties,
+			});
+		});
+
+		return orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
+	},
 );
 
 export const selectTicketByIdRaw = createSelector(

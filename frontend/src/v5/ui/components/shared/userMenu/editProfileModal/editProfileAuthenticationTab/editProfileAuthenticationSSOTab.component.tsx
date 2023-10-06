@@ -37,7 +37,6 @@ import { TabContent, MicrosoftTitleText } from '../editProfileModal.styles';
 
 type IUpdateSSOPasswordInputs = {
 	newPassword: string;
-	confirmPassword: string;
 };
 
 type EditProfileAuthenticationSSOTabProps = {
@@ -65,7 +64,6 @@ export const EditProfileAuthenticationSSOTab = ({
 	} = useFormContext();
 
 	const newPassword = watch('newPassword');
-	const confirmPassword = watch('confirmPassword');
 
 	const onSubmit = async () => {
 		await unlinkAccount({ password: newPassword });
@@ -78,7 +76,7 @@ export const EditProfileAuthenticationSSOTab = ({
 
 	useEffect(() => {
 		trigger(Object.keys(touchedFields) as Array<keyof IUpdateSSOPasswordInputs>);
-	}, [newPassword, confirmPassword]);
+	}, [newPassword]);
 
 	return (
 		<>
@@ -117,16 +115,6 @@ export const EditProfileAuthenticationSSOTab = ({
 						defaultMessage: 'New Password',
 					})}
 					formError={errors.newPassword}
-					required
-				/>
-				<FormPasswordField
-					control={control}
-					name="confirmPassword"
-					label={formatMessage({
-						id: 'editProfile.form.confirmPassword',
-						defaultMessage: 'Confirm Password',
-					})}
-					formError={errors.confirmPassword}
 					required
 				/>
 				<UnhandledError

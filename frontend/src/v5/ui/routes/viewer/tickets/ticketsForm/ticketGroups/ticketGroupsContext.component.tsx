@@ -58,7 +58,7 @@ export const TicketGroupsContextComponent = ({
 		return firstDescendantState ? GroupState.CHECKED : GroupState.UNCHECKED;
 	};
 
-	const setCollectionIsChecked = (indexes = [], state) => setCheckedIndexes(
+	const setCollectionIsChecked = (indexes, state) => setCheckedIndexes(
 		state ? _.union(checkedIndexes, indexes) : _.without(checkedIndexes, ...indexes),
 	);
 

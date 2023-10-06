@@ -118,6 +118,7 @@ const formatRevisions = (revs, includeVoid = false) => {
 			void: rev.void,
 			timestamp: rev.timestamp.getTime(),
 			...(!rev.rFile ? {} : { format: '.'.concat(rev.rFile[0].split('_').pop()) }),
+			desc: rev.desc,
 		} : []));
 	return { revisions: formattedRevisions };
 };

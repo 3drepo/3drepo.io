@@ -33,7 +33,7 @@ type GroupsCollectionSelectProps = {
 	disabled?: boolean;
 };
 export const GroupsCollectionSelect = ({ value, onChange, prefixes, ...props }: GroupsCollectionSelectProps) => (
-	<Select value={JSON.stringify(value || [])} onChange={(e) => onChange(JSON.parse(e.target.value))} {...props}>
+	<Select value={JSON.stringify(value || [])} onChange={(e) => onChange(JSON.parse(e.target.value as string))} {...props}>
 		<MenuItem value={JSON.stringify([])}>{NONE}</MenuItem>
 		{prefixes.map((prefix) => (
 			<MenuItemPrefix

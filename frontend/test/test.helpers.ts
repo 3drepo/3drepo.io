@@ -22,16 +22,6 @@ import rootSaga from '@/v4/modules/sagas';
 import { isEqual } from 'lodash';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 
-export const alertAction = (currentAction: string) => ({
-	action: {
-		type: 'MODALS/OPEN',
-		modalType: 'alert',
-		props: {
-			currentActions: currentAction,
-		},
-	},
-});
-
 // A different Node version between the backend and the frontend
 // is causing a problem with axios when files are sent to an endpoint.
 // This is a workaround for that.
