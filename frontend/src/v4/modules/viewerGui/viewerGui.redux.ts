@@ -35,7 +35,7 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	setIsModelLoaded: ['isModelLoaded'],
 	loadModel: [],
 	initialiseToolbar: [],
-	goToExtent: [],
+	goToHomeView: [],
 	setNavigationMode: ['mode'],
 	setNavigationModeSuccess: ['mode'],
 	setHelicopterSpeed: ['speed'],

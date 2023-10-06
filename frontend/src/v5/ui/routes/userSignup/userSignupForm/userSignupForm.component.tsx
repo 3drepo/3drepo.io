@@ -39,6 +39,7 @@ import {
 import { UserSignupFormStep } from './userSignupFormStep/userSignupFormStep.component';
 import { UserSignupWelcomeProps } from '../userSignupWelcome/userSignupWelcome.component';
 import { UserSignupFormStepper, UserSignupFormStepperContextValue } from './userSignupFormStepper/userSignupFormStepper.component';
+import { useSearchParam } from '../../useSearchParam';
 
 type UserSignupFormProps = {
 	completeRegistration: (registrationCompleteData: UserSignupWelcomeProps) => void;
@@ -52,12 +53,12 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 	const { captcha_client_key } = clientConfigService;
 
 	const [contextValue, setContextValue] = useState<UserSignupFormStepperContextValue | null>();
+	const [emailParam] = useSearchParam('email');
 
 	const DEFAULT_FIELDS = {
 		username: '',
-		email: '',
+		email: emailParam,
 		password: '',
-		confirmPassword: '',
 		firstName: '',
 		lastName: '',
 		company: '',
@@ -102,7 +103,7 @@ export const UserSignupForm = ({ completeRegistration }: UserSignupFormProps) =>
 
 	const onSubmit = async (values) => {
 		try {
-			const newUser = omit(values, ['confirmPassword', 'termsAgreed']) as INewUser;
+			const newUser = omit(values, ['termsAgreed']) as INewUser;
 			newUser.email = newUser.email.trim();
 			captchaRef?.current?.reset();
 			newUser.captcha = captcha_client_key ? await captchaRef.current.executeAsync() : 'CAPTCHA_IS_DISABLED';

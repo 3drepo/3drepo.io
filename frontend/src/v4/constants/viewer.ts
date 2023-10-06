@@ -97,7 +97,7 @@ export const VIEWER_ERRORS = {
 };
 
 export const DEFAULT_SETTINGS = {
-	shading: 'standard',
+	viewerBackgroundColor: [0.95, 0.96, 0.99],
 	shadows: 'none',
 	xray: true,
 	caching: false,
@@ -145,7 +145,7 @@ export const VIEWER_PROJECTION_MODES = {
 };
 
 export const VIEWER_TOOLBAR_ITEMS = {
-	EXTENT: 'Extent',
+	HOME: 'Home',
 	TURNTABLE: 'Turntable',
 	HELICOPTER: 'Helicopter',
 	PERSPECTIVE_VIEW: 'Perspective View',

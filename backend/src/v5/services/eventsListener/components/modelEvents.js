@@ -17,17 +17,17 @@
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const { addGroupUpdateLog, addTicketLog } = require('../../../models/tickets.logs');
 const { createModelMessage, createProjectMessage } = require('../../chat');
+const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/objects');
+const { getRevisionByIdOrTag, getRevisionFormat } = require('../../../models/revisions');
 const { isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
-const { getRevisionByIdOrTag } = require('../../../models/revisions');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
-const { setNestedProperty } = require('../../../utils/helper/objects');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
 const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
@@ -66,12 +66,21 @@ const revisionUpdated = async ({ teamspace, project, model, data, sender }) => {
 
 const revisionAdded = async ({ teamspace, project, model, revision, isFederation }) => {
 	try {
-		const { tag, author, timestamp } = await getRevisionByIdOrTag(teamspace, model, stringToUUID(revision),
-			{ _id: 0, tag: 1, author: 1, timestamp: 1 });
+		const { tag, author, timestamp, desc, rFile } = await getRevisionByIdOrTag(teamspace,
+			model, stringToUUID(revision),
+			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1 });
+
 		const event = isFederation ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
 
-		await createModelMessage(event, { _id: revision, tag, author, timestamp: timestamp.getTime() },
-			teamspace, project, model);
+		const format = getRevisionFormat(rFile);
+
+		await createModelMessage(event, { _id: revision,
+			tag,
+			author,
+			timestamp: timestamp.getTime(),
+			desc,
+			...deleteIfUndefined({ format }),
+		}, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
 	}

@@ -33,14 +33,14 @@ export const username = trimmedString
 			id: 'userRegistration.username.error.min',
 			defaultMessage: 'Username must be at least 2 characters',
 		}))
-	.max(65,
+	.max(63,
 		formatMessage({
 			id: 'userRegistration.username.error.max',
-			defaultMessage: 'Username is limited to 65 characters',
+			defaultMessage: 'Username is limited to 63 characters',
 		}))
-	.matches(/^[a-zA-Z][\w]{1,65}$/, formatMessage({
+	.matches(/^[a-zA-Z0-9_\w-]{2,63}$/, formatMessage({
 		id: 'user.username.error.characters',
-		defaultMessage: 'Username can only consist of letters, numbers and underscores',
+		defaultMessage: 'Username can only consist of letters, numbers, hyphens, and underscores',
 	}))
 	.test(
 		'alreadyExistingUsernames',
@@ -53,12 +53,12 @@ export const username = trimmedString
 		),
 	);
 
-export const password = (passwordName = 'Password') => Yup.string()
+export const password = () => Yup.string()
 	.required(
 		formatMessage({
 			id: 'validation.password.error.required',
-			defaultMessage: '{passwordName} is a required field',
-		}, { passwordName }),
+			defaultMessage: 'password is a required field',
+		}),
 	)
 	.min(8,
 		formatMessage({

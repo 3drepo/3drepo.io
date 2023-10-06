@@ -60,6 +60,8 @@ export const COLOR = {
 	ERROR_MID: '#C55656',
 	ERROR_LIGHT: '#CE7272',
 	ERROR_LIGHTEST: '#F9ECEC',
+	SUCCESS_MAIN: '#2E7D32',
+	WARNING_MAIN: '#ED6C02',
 	FAVOURITE_MAIN: '#F5CB34',
 	FAVOURITE_DARK: '#D4AE26',
 	FAVOURITE_MID: '#F8D867',
@@ -93,7 +95,7 @@ export const SHADOW = {
 	LEVEL_10: '0px 11px 15px rgba(0, 0, 0, 0.2), 0px 9px 46px rgba(0, 0, 0, 0.12), 0px 24px 38px rgba(0, 0, 0, 0.14)',
 };
 
-const typography: TypographyOptions = {
+export const typography = {
 	fontFamily: 'Inter, Arial, sans-serif',
 	h1: {
 		fontWeight: FONT_WEIGHT.BOLDER,
@@ -175,6 +177,84 @@ const typography: TypographyOptions = {
 	},
 };
 
+export const palette = {
+	primary: {
+		main: COLOR.PRIMARY_MAIN,
+		dark: COLOR.PRIMARY_DARK,
+		darkest: COLOR.PRIMARY_DARKEST,
+		mid: COLOR.PRIMARY_MID,
+		light: COLOR.PRIMARY_LIGHT,
+		lightest: COLOR.PRIMARY_LIGHTEST,
+		contrastText: COLOR.PRIMARY_LIGHTEST,
+		contrast: COLOR.PRIMARY_MAIN_CONTRAST,
+	},
+	secondary: {
+		main: COLOR.SECONDARY_MAIN,
+		dark: COLOR.SECONDARY_DARK,
+		mid: COLOR.SECONDARY_MID,
+		light: COLOR.SECONDARY_LIGHT,
+		lightest: COLOR.SECONDARY_LIGHTEST,
+		contrastText: COLOR.SECONDARY_LIGHTEST,
+	},
+	tertiary: {
+		main: COLOR.TERTIARY_MAIN,
+		dark: COLOR.TERTIARY_DARK,
+		mid: COLOR.TERTIARY_MID,
+		light: COLOR.TERTIARY_LIGHT,
+		lighter: COLOR.TERTIARY_LIGHTER,
+		lightest: COLOR.TERTIARY_LIGHTEST,
+		contrastText: COLOR.TERTIARY_LIGHTEST,
+	},
+	base: {
+		main: COLOR.BASE_MAIN,
+		dark: COLOR.BASE_DARK,
+		mid: COLOR.BASE_MID,
+		light: COLOR.BASE_LIGHT,
+		lighter: COLOR.BASE_LIGHTER,
+		lightest: COLOR.BASE_LIGHTEST,
+		contrastText: COLOR.BASE_LIGHTEST,
+	},
+	error: {
+		main: COLOR.ERROR_MAIN,
+		dark: COLOR.ERROR_DARK,
+		darkest: COLOR.ERROR_DARKEST,
+		mid: COLOR.ERROR_MID,
+		light: COLOR.ERROR_LIGHT,
+		lightest: COLOR.ERROR_LIGHTEST,
+		contrastText: COLOR.ERROR_LIGHTEST,
+	},
+	success: {
+		main: COLOR.SUCCESS_MAIN,
+	},
+	warning: {
+		main: COLOR.WARNING_MAIN,
+	},
+	favourite: {
+		main: COLOR.FAVOURITE_MAIN,
+		dark: COLOR.FAVOURITE_DARK,
+		mid: COLOR.FAVOURITE_MID,
+		light: COLOR.FAVOURITE_LIGHT,
+		lightest: COLOR.FAVOURITE_LIGHTEST,
+		contrastText: COLOR.FAVOURITE_LIGHTEST,
+	},
+	gradient: {
+		main: GRADIENT.MAIN,
+		secondary: GRADIENT.SECONDARY,
+	},
+	shadows: {
+		level_1: SHADOW.LEVEL_1,
+		level_2: SHADOW.LEVEL_2,
+		level_3: SHADOW.LEVEL_3,
+		level_4: SHADOW.LEVEL_4,
+		level_5: SHADOW.LEVEL_5,
+		level_6: SHADOW.LEVEL_6,
+		level_7: SHADOW.LEVEL_7,
+		level_8: SHADOW.LEVEL_8,
+		level_9: SHADOW.LEVEL_9,
+		level_10: SHADOW.LEVEL_10,
+	},
+};
+
 export const hexToOpacity = (hex: string, opacityInPercentage: number): string => {
 	const formattedOpacity = Math.floor((opacityInPercentage / 100) * 255)
 		.toString(16).padStart(2, '0');
@@ -182,78 +262,8 @@ export const hexToOpacity = (hex: string, opacityInPercentage: number): string =
 };
 
 export const theme = createTheme({
-	palette: {
-		primary: {
-			main: COLOR.PRIMARY_MAIN,
-			dark: COLOR.PRIMARY_DARK,
-			darkest: COLOR.PRIMARY_DARKEST,
-			mid: COLOR.PRIMARY_MID,
-			light: COLOR.PRIMARY_LIGHT,
-			lightest: COLOR.PRIMARY_LIGHTEST,
-			contrastText: COLOR.PRIMARY_LIGHTEST,
-			contrast: COLOR.PRIMARY_MAIN_CONTRAST,
-		},
-		secondary: {
-			main: COLOR.SECONDARY_MAIN,
-			dark: COLOR.SECONDARY_DARK,
-			mid: COLOR.SECONDARY_MID,
-			light: COLOR.SECONDARY_LIGHT,
-			lightest: COLOR.SECONDARY_LIGHTEST,
-			contrastText: COLOR.SECONDARY_LIGHTEST,
-		},
-		tertiary: {
-			main: COLOR.TERTIARY_MAIN,
-			dark: COLOR.TERTIARY_DARK,
-			mid: COLOR.TERTIARY_MID,
-			light: COLOR.TERTIARY_LIGHT,
-			lighter: COLOR.TERTIARY_LIGHTER,
-			lightest: COLOR.TERTIARY_LIGHTEST,
-			contrastText: COLOR.TERTIARY_LIGHTEST,
-		},
-		base: {
-			main: COLOR.BASE_MAIN,
-			dark: COLOR.BASE_DARK,
-			mid: COLOR.BASE_MID,
-			light: COLOR.BASE_LIGHT,
-			lighter: COLOR.BASE_LIGHTER,
-			lightest: COLOR.BASE_LIGHTEST,
-			contrastText: COLOR.BASE_LIGHTEST,
-		},
-		error: {
-			main: COLOR.ERROR_MAIN,
-			dark: COLOR.ERROR_DARK,
-			darkest: COLOR.ERROR_DARKEST,
-			mid: COLOR.ERROR_MID,
-			light: COLOR.ERROR_LIGHT,
-			lightest: COLOR.ERROR_LIGHTEST,
-			contrastText: COLOR.ERROR_LIGHTEST,
-		},
-		favourite: {
-			main: COLOR.FAVOURITE_MAIN,
-			dark: COLOR.FAVOURITE_DARK,
-			mid: COLOR.FAVOURITE_MID,
-			light: COLOR.FAVOURITE_LIGHT,
-			lightest: COLOR.FAVOURITE_LIGHTEST,
-			contrastText: COLOR.FAVOURITE_LIGHTEST,
-		},
-		gradient: {
-			main: GRADIENT.MAIN,
-			secondary: GRADIENT.SECONDARY,
-		},
-		shadows: {
-			level_1: SHADOW.LEVEL_1,
-			level_2: SHADOW.LEVEL_2,
-			level_3: SHADOW.LEVEL_3,
-			level_4: SHADOW.LEVEL_4,
-			level_5: SHADOW.LEVEL_5,
-			level_6: SHADOW.LEVEL_6,
-			level_7: SHADOW.LEVEL_7,
-			level_8: SHADOW.LEVEL_8,
-			level_9: SHADOW.LEVEL_9,
-			level_10: SHADOW.LEVEL_10,
-		},
-	},
-	typography,
+	palette,
+	typography: typography as TypographyOptions,
 	components: {
 		MuiTextField: {
 			defaultProps: {
@@ -1461,6 +1471,11 @@ export const theme = createTheme({
 					},
 					// year selection
 					'.MuiYearPicker-root': {
+						'&': {
+							position: 'relative',
+							zIndex: 1,
+							background: COLOR.PRIMARY_MAIN_CONTRAST,
+						},
 						button: {
 							'&:not(.Mui-disabled)': {
 								color: COLOR.SECONDARY_MAIN,
@@ -1574,4 +1589,4 @@ export const theme = createTheme({
 			},
 		},
 	},
-});
+}) as any;
