@@ -20,6 +20,10 @@ import styled, { css } from 'styled-components';
 
 import { COLOR } from '../../../../../../styles';
 
+export const Container = styled.div`
+	display: contents;
+`;
+
 export const Wrapper = styled.div`
 	z-index: 12323;
 

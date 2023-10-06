@@ -127,7 +127,28 @@ const containerBorder = css`
 	${({ active }: any) => active ? 'border-color: #757575' : ''};
 `;
 
-export const Container = styled.li<IContainer>`
+export const Name = styled.div<IName>`
+	align-self: center;
+	font-size: 13px;
+	margin-left: 12px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+`;
+
+export const NameWrapper = styled.div`
+	display: flex;
+	overflow: hidden;
+	flex: 1;
+	align-items: center;
+`;
+
+export const ParentOfVisible = styled.span`
+	color: ${COLOR.LIGHT_BLUE};
+	display: flex;
+`;
+
+export const Container = styled.li<IContainer & { $isContainer: boolean }>`
 	${containerBorder};
 	background-color: ${getBackgroundColor};
 	padding: 2px 12px 2px ${containerIndentation}px;
@@ -137,6 +158,17 @@ export const Container = styled.li<IContainer>`
 	height: ${TREE_ITEM_SIZE}px;
 	box-sizing: border-box;
 	cursor: inherit;
+
+	${({ $isContainer }) => $isContainer && css`
+		${Name} {
+			max-height: ${TREE_ITEM_SIZE}px;
+			word-break: break-word;
+			white-space: unset;
+			display: flex;
+			align-items: flex-end;
+			line-height: 13px;
+		}
+	`}
 
 	&:hover ${Actions} {
 		display: block;
@@ -165,24 +197,4 @@ export const Container = styled.li<IContainer>`
 			`
 		}
 	`}
-`;
-
-export const Name = styled.div<IName>`
-	align-self: center;
-	font-size: 13px;
-	margin-left: 12px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-`;
-
-export const NameWrapper = styled.div`
-	display: flex;
-	overflow: hidden;
-	flex: 1;
-`;
-
-export const ParentOfVisible = styled.span`
-	color: ${COLOR.LIGHT_BLUE};
-	display: flex;
 `;
