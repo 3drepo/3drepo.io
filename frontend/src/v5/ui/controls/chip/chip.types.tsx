@@ -41,7 +41,7 @@ export type IChipMapItem = {
 	color?: string;
 	tooltip?: string;
 };
-export type IChipMap = {[key: string]: IChipMapItem};
+export type IChipMap = { [key: string]: IChipMapItem };
 
 export enum PriorityLevels {
 	NONE = 'None',

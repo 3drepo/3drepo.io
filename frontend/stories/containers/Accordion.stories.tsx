@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { Accordion } from '@controls/accordion/accordion.component';
 import Icon from '@assets/icons/outlined/stepper_error-outlined.svg';
 
@@ -31,14 +31,15 @@ export default {
 		},
 	},
 	parameters: { controls: { exclude: ['ref', 'elevation', 'square', 'variant', 'Icon'] } },
-} as ComponentMeta<typeof Accordion>;
+} as Meta<typeof Accordion>;
 
-const Controlled: ComponentStory<typeof Accordion> = (args) => (<Accordion {...args} />);
+type Story = StoryObj<typeof Accordion>;
 
-export const ControlledFormSelect = Controlled.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledFormSelect.args = {
-	title: 'Accordion container',
-	children: <div>This is some content only visible once expanded</div>,
-	Icon,
+export const ControlledFormSelect: Story = {
+	args: {
+		title: 'Accordion container',
+		children: <div>This is some content only visible once expanded</div>,
+		Icon,
+	},
 };
+
