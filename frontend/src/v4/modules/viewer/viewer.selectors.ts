@@ -15,11 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createSelector } from 'reselect';
+import { USE_BETA_VIEWER, getUseBetaViewer } from './betaViewer.helpers';
 
 export const selectViewerDomain = (state) => ({...state.viewer});
 
 export const selectSettings = createSelector(
-	selectViewerDomain, (state) => state.settings
+	selectViewerDomain, (state) => ({
+		...state.settings,
+		[USE_BETA_VIEWER]: getUseBetaViewer(),
+	}),
 );
 
 export const selectShadowSetting = createSelector(
@@ -38,8 +42,8 @@ export const selectFarPlaneAlgorithm = createSelector(
 	selectSettings, (state) => state.farPlaneAlgorithm
 );
 
-export const selectShadingSetting = createSelector(
-	selectSettings, (state) => state.shading
+export const selectViewerBackgroundColor = createSelector(
+	selectSettings, (state) => state.viewerBackgroundColor
 );
 
 export const selectXraySetting = createSelector(

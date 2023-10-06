@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import * as queryString from 'query-string';
 import { FormattedMessage } from 'react-intl';
@@ -34,9 +34,9 @@ import { LOGIN_PATH } from '../../routes.constants';
 export const PasswordChange = () => {
 	const { token, username } = queryString.parse(window.location.search);
 	const [errorMessage, setErrorMessage] = useState('');
-	const { control, handleSubmit, formState: { isValid, isDirty, errors }, trigger } = useForm({
-		mode: 'onBlur',
-		defaultValues: { newPassword: '', newPasswordConfirm: '' },
+	const { control, handleSubmit, formState: { isValid, errors } } = useForm({
+		mode: 'onChange',
+		defaultValues: { newPassword: '' },
 		resolver: yupResolver(PasswordChangeSchema),
 	});
 	const history = useHistory();
@@ -48,10 +48,6 @@ export const PasswordChange = () => {
 			setErrorMessage(message);
 		}
 	};
-
-	useEffect(() => {
-		if (isDirty) trigger('newPasswordConfirm');
-	}, [isValid]);
 
 	return (
 		<AuthTemplate>
@@ -71,29 +67,18 @@ export const PasswordChange = () => {
 							formError={errors.newPassword}
 							required
 						/>
-						<FormPasswordField
-							control={control}
-							name="newPasswordConfirm"
-							label={formatMessage({
-								id: 'auth.passwordChange.confirmNewPassword',
-								defaultMessage: 'Confirm new password',
-							})}
-							formError={errors.newPasswordConfirm}
-							required
-						/>
 						<SubmitButton disabled={!isValid}>
 							<FormattedMessage id="auth.changePassword.buttonText" defaultMessage="Save changes" />
 						</SubmitButton>
 					</>
-				)
-					: (
-						<AuthParagraph>
-							<FormattedMessage
-								id="auth.changePassword.missingParams"
-								defaultMessage="Cannot change password due to URL is incomplete. Please ensure you have copied the whole link and try again."
-							/>
-						</AuthParagraph>
-					)}
+				) : (
+					<AuthParagraph>
+						<FormattedMessage
+							id="auth.changePassword.missingParams"
+							defaultMessage="Cannot change password due to URL is incomplete. Please ensure you have copied the whole link and try again."
+						/>
+					</AuthParagraph>
+				)}
 				{errorMessage && <ErrorMessage title={errorMessage} />}
 				<ReturnLink />
 			</AuthForm>

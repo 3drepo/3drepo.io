@@ -36,6 +36,7 @@ export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HT
 	maxWidth?: DialogProps['maxWidth'];
 	isSubmitting?: boolean;
 	disableClosing?: boolean;
+	contrastColorHeader?: boolean;
 }
 
 export const FormModal = ({
@@ -53,6 +54,7 @@ export const FormModal = ({
 	maxWidth = false,
 	isSubmitting = false,
 	disableClosing = false,
+	contrastColorHeader,
 	...formProps
 }: IFormModal) => {
 	const handleClose = () => {
@@ -69,7 +71,7 @@ export const FormModal = ({
 			fullWidth={!!maxWidth}
 		>
 			<Form {...formProps}>
-				<ModalHeader onClickClose={handleClose} title={title} subtitle={subtitle} disableClosing={disableClosing} />
+				<ModalHeader onClickClose={handleClose} title={title} subtitle={subtitle} disableClosing={disableClosing} contrastColor={contrastColorHeader} />
 				<ModalBody>
 					{children}
 				</ModalBody>

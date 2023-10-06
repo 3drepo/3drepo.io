@@ -13,7 +13,7 @@ describe('Tickets: store', () => {
 		({ dispatch, getState } = createTestStore());
 	});
 	describe('card', () => {
-		it('should set the selected ticket ID', () => {
+		it('should set the highlighted ticket ID', () => {
 			dispatch(TicketsCardActions.setSelectedTicket(ticketId));
 			const selectedTicketIdFromState = selectSelectedTicketId(getState());
 		

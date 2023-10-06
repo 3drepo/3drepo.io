@@ -16,27 +16,12 @@
  */
 
 import * as Yup from 'yup';
-import { formatMessage } from '@/v5/services/intl';
 import { firstName, lastName, email, company, countryCode, password, username } from './validators';
 
 export const UserSignupSchemaAccount = Yup.object().shape({
 	username,
 	email,
 	password: password(),
-	confirmPassword: Yup.string()
-		.required(
-			formatMessage({
-				id: 'userRegistration.confirmPassword.error.required',
-				defaultMessage: 'Confirm password is a required field',
-			}),
-		)
-		.oneOf(
-			[Yup.ref('password'), null],
-			formatMessage({
-				id: 'userRegistration.confirmPassword.error.notMatch',
-				defaultMessage: 'Password confirmation doesn\'t match the password',
-			}),
-		),
 });
 
 export const UserSignupSchemaPersonal = Yup.object().shape({
