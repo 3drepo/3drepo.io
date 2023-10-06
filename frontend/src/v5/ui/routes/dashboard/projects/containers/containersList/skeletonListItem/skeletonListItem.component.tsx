@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SkeletonBlock } from '@controls/skeletonBlock';
+import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.component';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { TitlesContainer, Container } from './skeletonListItem.styles';
+import { Skeleton } from '@mui/material';
 
 interface ISkeletonListItem {
 	delay?: number;
@@ -25,7 +26,7 @@ interface ISkeletonListItem {
 
 export const SkeletonListItem = ({ delay = 0 }: ISkeletonListItem): JSX.Element => (
 	<Container>
-		<FixedOrGrowContainer>
+		{/* <FixedOrGrowContainer>
 			<TitlesContainer>
 				<SkeletonBlock delay={delay} widthPercentage={90} />
 				<SkeletonBlock delay={delay + 0.05} widthPercentage={80} />
@@ -40,6 +41,7 @@ export const SkeletonListItem = ({ delay = 0 }: ISkeletonListItem): JSX.Element 
 		</FixedOrGrowContainer>
 		<FixedOrGrowContainer width={97}>
 			<SkeletonBlock delay={delay} width={65} />
-		</FixedOrGrowContainer>
+		</FixedOrGrowContainer> */}
+		<Skeleton variant="rounded" width={210} height={10} />
 	</Container>
 );

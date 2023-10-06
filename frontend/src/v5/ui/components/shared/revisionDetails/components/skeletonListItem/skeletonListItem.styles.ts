@@ -17,7 +17,7 @@
 import styled from 'styled-components';
 
 import { DashboardListSkeletonItem } from '@components/dashboard/dashboardList/dashboardListSkeletonItem';
-import { SkeletonBlock as SkeletonBlockComponent } from '@controls/skeletonBlock';
+import { SkeletonBlock as SkeletonBlockComponent } from '@controls/skeletonBlock/skeletonBlock.component';
 
 export const Container = styled(DashboardListSkeletonItem)`
 	height: 48px;

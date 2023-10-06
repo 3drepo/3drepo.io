@@ -16,7 +16,7 @@
  */
 
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { SkeletonBlock } from '@controls/skeletonBlock';
+import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.component';
 import { Container } from './skeletonListItem.styles';
 
 interface ISkeletonListItem {
