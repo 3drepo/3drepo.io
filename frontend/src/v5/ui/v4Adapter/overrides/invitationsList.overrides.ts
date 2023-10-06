@@ -17,7 +17,7 @@
 
 import { Actions, Footer, Invitation, List, Container } from '@/v4/routes/components/invitationsDialog/invitationsDialog.styles';
 import { css } from 'styled-components';
-import { secondaryButtonStyling } from '../resuableOverrides.styles';
+import { secondaryTextButtonStyling } from '../resuableOverrides.styles';
 
 export default css`
 	${Container} {
@@ -41,7 +41,7 @@ export default css`
 	}
 	${Footer} {
 		.MuiButtonBase-root.MuiButtonBase-root:first-child {
-			${secondaryButtonStyling}
+			${secondaryTextButtonStyling}
 		}
 	}
 `;

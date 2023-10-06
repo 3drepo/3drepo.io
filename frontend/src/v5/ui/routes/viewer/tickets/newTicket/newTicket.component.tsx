@@ -32,14 +32,15 @@ import { useContext, useEffect } from 'react';
 import { InputController } from '@controls/inputs/inputController.component';
 import { BottomArea, CloseButton, Form, SaveButton } from './newTicket.styles';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
-import { TicketsCardViews } from '../tickets.constants';
 import { ViewerParams } from '../../../routes.constants';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
 import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { CardContent } from '../ticketsForm/ticketsForm.styles';
+import { TicketsCardViews } from '../tickets.constants';
 
 export const NewTicketCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+
 	const isFederation = modelIsFederation(containerOrFederation);
 	const template = TicketsCardHooksSelectors.selectSelectedTemplate();
 	const isLoading = !('config' in template);
@@ -57,8 +58,7 @@ export const NewTicketCard = () => {
 	};
 
 	const goToTicketDetails = (ticketId) => {
-		TicketsCardActionsDispatchers.setSelectedTicket(ticketId);
-		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
+		TicketsCardActionsDispatchers.openTicket(ticketId);
 	};
 
 	const onSubmit = (vals) => {

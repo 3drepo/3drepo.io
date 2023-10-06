@@ -39,6 +39,8 @@ export const groupedContainerMockFactory = (overrides?: GroupedContainer): Group
 	...overrides
 });
 
+export const prepareMockBaseFederation = ({_id, name, role, isFavourite}: IFederation): Partial<IFederation> => ({_id, name, role, isFavourite});
+
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({
 	_id: faker.datatype.uuid(),
 	name: faker.random.words(3),
@@ -71,9 +73,7 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	...overrides,
 });
 
-export const prepareMockBaseFederation = ({_id, name, role, isFavourite}: IFederation): Partial<IFederation> => ({_id, name, role, isFavourite});
-
-export const prepareMockStats = (federation?: IFederation) => ({
+export const prepareMockStats = (overrides?: Partial<FederationStats>) => ({
 	code: faker.datatype.uuid(),
 	desc: faker.random.words(3),
 	status: UploadStatuses.OK,
@@ -84,7 +84,7 @@ export const prepareMockStats = (federation?: IFederation) => ({
 	},
 	category: faker.random.word(),
 	lastUpdated: faker.datatype.number(),
-	...federation,
+	...overrides,
 }) as unknown as FederationStats;
 
 export const prepareMockNewFederation = (federation: IFederation): NewFederation => ({

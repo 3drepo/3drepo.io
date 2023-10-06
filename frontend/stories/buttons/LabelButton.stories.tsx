@@ -14,13 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { LabelButton as Button } from '@controls/button';
+import { Meta, StoryObj } from '@storybook/react';
+import { LabelButton } from '@controls/button';
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
 	title: 'Buttons/Button',
-	component: Button,
+	component: LabelButton,
+	args: {
+		children: 'Label Button',
+	},
 	parameters: { controls: { exclude: [
 		'classes',
 		'tabIndex',
@@ -44,10 +46,8 @@ export default {
 		'startIcon',
 		'ref',
 	] } },
-} as ComponentMeta<typeof Button>;
+} as Meta<typeof LabelButton>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof Button> = (args) => <Button {...args}>Label Button</Button>;
+type Story = StoryObj<typeof LabelButton>;
 
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-export const Label = Template.bind({});
+export const Label: Story = {};
