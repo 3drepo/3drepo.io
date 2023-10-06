@@ -18,24 +18,7 @@
 import { DueDateWithIconContainer } from '@controls/dueDate/dueDate.styles';
 import styled from 'styled-components';
 
-export const Row = styled.div`
-	display: grid;
-	grid-template-columns: 80fr 493fr 96fr 62fr 90fr 90fr 100fr 137fr 134fr;
-	gap: 1px;
-	height: 37px;
-	background: transparent;
-	cursor: pointer;
-`;
-
-export const OverflowContainer = styled.div`
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	display: inline-block;
-`;
-
 export const Cell = styled.div`
-	background: ${({ theme }) => theme.palette.primary.contrast};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	height: 100%;
 	padding: 0 10px;
@@ -44,6 +27,26 @@ export const Cell = styled.div`
 	justify-content: flex-start;
 	font-weight: 500;
 	overflow: hidden;
+`;
+
+// TODO - fix when new palette is released
+export const Row = styled.div<{ $selected: boolean }>`
+	display: grid;
+	grid-template-columns: 80fr 493fr 96fr 62fr 90fr 90fr 100fr 137fr 134fr;
+	gap: 1px;
+	height: 37px;
+	cursor: pointer;
+
+	${Cell} {
+		background: ${({ $selected, theme }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
+	}
+`;
+
+export const OverflowContainer = styled.div`
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	display: inline-block;
 `;
 
 export const CellChipText = styled(Cell)`

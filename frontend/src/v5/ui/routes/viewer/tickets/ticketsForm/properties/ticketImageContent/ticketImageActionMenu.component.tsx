@@ -22,10 +22,14 @@ import { FormattedMessage } from 'react-intl';
 import FileIcon from '@assets/icons/outlined/file-outlined.svg';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useContext } from 'react';
 import { EllipsisMenuItemDelete, EllipsisMenuItem } from './ticketImageAction/ticketImageAction.styles';
 import { ViewActionMenu } from '../ticketView/viewActionMenu/viewActionMenu.component';
+import { TicketContext } from '../../../ticket.context';
 
 export const TicketImageActionMenu = ({ value, onChange, disabled = false }) => {
+	const { isViewer } = useContext(TicketContext);
+
 	const uploadScreenshot = async () => onChange(await ViewerService.getScreenshot());
 
 	const uploadImage = async () => {
@@ -47,6 +51,7 @@ export const TicketImageActionMenu = ({ value, onChange, disabled = false }) => 
 				<EllipsisMenuItem
 					title={<FormattedMessage id="viewer.card.ticketImage.action.takeScreenshot" defaultMessage="Take screenshot" />}
 					onClick={uploadScreenshot}
+					disabled={!isViewer}
 				/>
 				<EllipsisMenuItem
 					title={<FormattedMessage id="viewer.card.ticketImage.action.uploadImage" defaultMessage="Upload image" />}

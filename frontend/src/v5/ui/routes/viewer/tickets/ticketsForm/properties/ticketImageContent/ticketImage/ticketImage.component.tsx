@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
@@ -23,13 +23,10 @@ import { FormHelperText } from '@mui/material';
 import { TicketImageContent } from '../ticketImageContent.component';
 import { TicketImageActionMenu } from '../ticketImageActionMenu.component';
 import { InputContainer, Label } from './ticketImage.styles';
-import { TicketContext } from '../../../../ticket.context';
 
-export const TicketImage = ({ value, onChange, onBlur, disabled: inputDisabled, label, helperText, ...props }: FormInputProps) => {
-	const { isViewer } = useContext(TicketContext);
+export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperText, ...props }: FormInputProps) => {
 	const onImageChange = (newValue) => onChange(newValue ? stripBase64Prefix(newValue) : null);
 	const imgSrc = getImgSrc(value);
-	const disabled = inputDisabled || !isViewer;
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
 

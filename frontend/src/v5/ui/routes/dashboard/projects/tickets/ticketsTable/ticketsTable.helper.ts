@@ -120,3 +120,9 @@ export const groupTickets = (groupBy: string, tickets: TicketWithModelId[]): Rec
 			return groupByList(tickets, groupBy, _.values(GROUP_NAMES_BY_TYPE[groupBy]));
 	}
 };
+
+export const hasRequiredViewerProperties = (template) => {
+	const modules = template.modules?.flatMap((module) => module.properties) || [];
+	const properties = modules.concat(template.properties || []);
+	return properties.some(({ required, type }) => required && ['view', 'coords', 'image'].includes(type));
+};

@@ -22,11 +22,13 @@ import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { CreationInfo } from '@components/shared/creationInfo/creationInfo.component';
 import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
 import { useFormContext } from 'react-hook-form';
+import _ from 'lodash';
 import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
 import { PropertiesList } from '../propertiesList.component';
 import { IssuePropertiesRow } from './IssuePropertiesRow/issuePropertiesRow.component';
 import { BaseTicketInfo, DescriptionProperty, TopPanel } from './ticketsTopPanel.styles';
+import { ErrorTextGap } from '../ticketsForm.styles';
 
 type ITicketsTopPanel = {
 	title: string;
@@ -72,14 +74,16 @@ export const TicketsTopPanel = ({
 				)}
 				<DescriptionProperty>
 					<FormTextAreaFixedSize
-						name={`properties[${BaseProperties.DESCRIPTION}]`}
+						name={`properties.${BaseProperties.DESCRIPTION}`}
 						onBlur={onPropertyBlur}
 						placeholder={formatMessage({
 							id: 'customTicket.topPanel.description',
 							defaultMessage: 'Description',
 						})}
+						formError={_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`)}
 						disabled={readOnly}
 					/>
+					{_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`) && <ErrorTextGap />}
 				</DescriptionProperty>
 				<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
 			</BaseTicketInfo>

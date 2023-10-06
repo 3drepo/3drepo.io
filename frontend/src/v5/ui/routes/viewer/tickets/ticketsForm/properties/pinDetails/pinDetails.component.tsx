@@ -26,9 +26,10 @@ import { FormHelperText } from '@mui/material';
 import { theme } from '@/v5/ui/themes/theme';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { PinAction, PinActions, PinName, SettingLocationText } from './pinDetails.styles';
+import { ViewerOnlyPropertyLabel } from '../viewerOnlyPropertyLabel/viewerOnlyPropertyLabel.component';
+import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
 
 export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText, disabled: inputDisabled, name }: FormInputProps) => {
 	const [editMode, setEditMode] = useState(false);
@@ -87,9 +88,11 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 	const hasPin = !!value;
 
 	return (
-		<InputContainer required={required} selected={editMode} error={error} disabled={disabled}>
+		<ViewerInputContainer required={required} selected={editMode} error={error} disabled={disabled}>
 			<PinName required={required}>
-				{label}
+				<ViewerOnlyPropertyLabel>
+					{label}
+				</ViewerOnlyPropertyLabel>
 			</PinName>
 			<PinActions>
 				{editMode && (
@@ -112,6 +115,6 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 				)}
 			</PinActions>
 			<FormHelperText>{helperText}</FormHelperText>
-		</InputContainer>
+		</ViewerInputContainer>
 	);
 };

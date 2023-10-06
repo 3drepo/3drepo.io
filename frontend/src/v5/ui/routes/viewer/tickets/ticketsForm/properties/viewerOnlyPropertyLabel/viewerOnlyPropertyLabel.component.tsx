@@ -15,28 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { ErrorTextGap } from '../ticketsForm.styles';
+import { useContext } from 'react';
+import { FormattedMessage } from 'react-intl';
+import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
+import { Bold, Container } from './viewerOnlyPropertyLabel.styles';
 
-export const TopPanelShadow = css`box-shadow: 0 6px 10px rgb(0 0 0 / 4%);`;
+export const ViewerOnlyPropertyLabel = ({ children }) => {
+	const { isViewer } = useContext(TicketContext);
 
-export const TopPanel = styled.div`
-	width: 100%;
-	position: relative;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	box-sizing: border-box;
-	display: unset; /* This is necessary for sticky child elements */
-`;
+	if (isViewer) return children;
 
-export const BaseTicketInfo = styled.div`
-	padding: 10px 15px 15px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	${TopPanelShadow}
-`;
-
-export const DescriptionProperty = styled.div`
-	margin: 10px 0;
-	&${ErrorTextGap} {
-		margin: 0;
-	}
-`;
+	return (
+		<Container>
+			<Bold><FormattedMessage id="tickets.label.viewerProperty" defaultMessage="Requires viewer" /> - </Bold>
+			{children}
+		</Container>
+	);
+};

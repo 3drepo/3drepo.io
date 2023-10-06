@@ -29,6 +29,7 @@ import { useParams } from 'react-router-dom';
 import { isEmpty, merge } from 'lodash';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { SaveButton, RequiresViewerContainer, ButtonContainer } from './newTicketSlide.styles';
+import { hasRequiredViewerProperties } from '../../ticketsTable/ticketsTable.helper';
 
 const getGroupDefaultValue = (template, ticket) => {
 	let defaultValues = getDefaultTicket(template);
@@ -38,12 +39,6 @@ const getGroupDefaultValue = (template, ticket) => {
 	}
 
 	return defaultValues;
-};
-
-const hasRequiredViewerProperties = (template) => {
-	const modules = template.modules?.flatMap((module) => module.properties) || [];
-	const properties = modules.concat(template.properties || []);
-	return properties.some(({ required, type }) => required && ['view', 'coords', 'image'].includes(type));
 };
 
 type NewTicketSlideProps = {
