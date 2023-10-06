@@ -47,7 +47,7 @@ describe('Tickets: sagas', () => {
 
 	const populateFederationsStore = () => {
 		const containers: IContainer[] = [containerMockFactory()];
-		const federations: IFederation[] = [federationMockFactory({ _id: modelId, containers: [containers[0]._id] })];
+		const federations: IFederation[] = [federationMockFactory({ _id: modelId, containers: [{ _id: containers[0]._id }] })];
 		dispatch(FederationsActions.fetchFederationsSuccess(projectId, federations));
 		dispatch(ContainersActions.fetchContainersSuccess(projectId, containers));
 	};
