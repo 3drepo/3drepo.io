@@ -16,19 +16,12 @@
  */
 
 import { StoryObj, Meta } from '@storybook/react';
-import { CentredContainer, ICentredContainer } from '@controls/centredContainer/centredContainer.component';
-import styled, { css } from 'styled-components';
+import { CentredContainer } from '@controls/centredContainer/centredContainer.component';
+import styled from 'styled-components';
 
-
-type ICentredContainerStory = ICentredContainer & {
-	parentHeight: string;
-	parentWidth: string;
-};
-const ParentComponent = styled.div<Pick<ICentredContainerStory, 'parentHeight' | 'parentWidth'>>`
-	${({ parentHeight, parentWidth }) => css`
-		height: ${parentHeight};
-		width: ${parentWidth};
-	`}
+const ParentComponent = styled.div`
+	height: 300px;
+	width: 100%;
 	border: 2px solid hotpink;
 	background: ${({ theme }) => theme.palette.gradient.secondary};
 `;
@@ -58,14 +51,9 @@ export default {
 			defaultValue: 'Centred container\'s content',
 		},
 	},
-	parameters: {
-		parentHeight: '300px',
-		parentWidth: '100%',
-		controls: { exclude: ['className'] },
-	},
 	decorators: [
-		(Story, { parameters: { parentHeight, parentWidth } }) => (
-			<ParentComponent parentHeight={parentHeight} parentWidth={parentWidth}>
+		(Story) => (
+			<ParentComponent>
 				<Story />
 			</ParentComponent>
 		),
@@ -75,9 +63,9 @@ export default {
 			<TextContainer>{children}</TextContainer>
 		</CentredContainer>
 	),
-} as Meta<ICentredContainerStory>;
+} as Meta<typeof CentredContainer>;
 
-type Story = StoryObj<ICentredContainerStory>;
+type Story = StoryObj<typeof CentredContainer>;
 
 export const VerticalCentre: Story = {
 	args: {
