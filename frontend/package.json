@@ -28,8 +28,8 @@
 		"docs": "typedoc --out ./docs ./src/globals --options ./internals/typedoc.js --logger none",
 		"extract": "node ./internals/intl/extract.js",
 		"compile": "node ./internals/intl/compile.js",
-		"storybook": "cross-env NODE_OPTIONS=--openssl-legacy-provider storybook dev -p 6006",
-		"build-storybook": "cross-env NODE_OPTIONS=--openssl-legacy-provider storybook build -o ../public/storybook",
+		"storybook": "storybook dev -p 6006",
+		"build-storybook": "storybook build -o ../public/storybook",
 		"circular:test": "yarn dpdm src/main.tsx --exclude node_modules/ --warning false --tree false"
 	},
 	"keywords": [
