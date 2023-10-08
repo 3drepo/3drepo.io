@@ -23,7 +23,7 @@ export const PositionedWrapper = styled.div`
 	height: 100%;
 `;
 
-export const MarginWrapper = styled.div<{ vertical?: boolean, horizontal?: boolean}>`
+export const MarginWrapper = styled.div<{ vertical?: boolean, horizontal?: boolean }>`
 	position: absolute;
 	width: fit-content;
 	height: fit-content;

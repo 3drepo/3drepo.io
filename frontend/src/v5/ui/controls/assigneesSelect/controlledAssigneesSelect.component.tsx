@@ -16,9 +16,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import { AssigneesSelect, IAssigneesSelect } from './assigneesSelect.component';
+import { AssigneesSelect, AssigneesSelectProps } from './assigneesSelect.component';
 
-type ControlledAssigneesSelectProps = Omit<IAssigneesSelect, 'onBlur'> & {
+type ControlledAssigneesSelectProps = Omit<AssigneesSelectProps, 'onBlur'> & {
 	onBlur: (values) => void;
 };
 

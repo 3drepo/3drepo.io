@@ -53,12 +53,12 @@ export const username = trimmedString
 		),
 	);
 
-export const password = (passwordName = 'Password') => Yup.string()
+export const password = () => Yup.string()
 	.required(
 		formatMessage({
 			id: 'validation.password.error.required',
-			defaultMessage: '{passwordName} is a required field',
-		}, { passwordName }),
+			defaultMessage: 'password is a required field',
+		}),
 	)
 	.min(8,
 		formatMessage({

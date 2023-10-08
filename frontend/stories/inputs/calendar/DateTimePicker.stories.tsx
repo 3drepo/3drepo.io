@@ -14,11 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { FormContainer } from '../FormInput.styles';
+import { LocalizationProviderDecorator } from './date.decorator';
+import { FormDecorator } from '../inputDecorators';
 
 export default {
 	title: 'Inputs/Calendar/DateTimePicker',
@@ -38,23 +37,20 @@ export default {
 		'inputRef',
 		'PickerComponent',
 	] } },
-} as ComponentMeta<typeof DateTimePicker>;
+	decorators: [LocalizationProviderDecorator, FormDecorator],
+} as Meta<typeof DateTimePicker>;
 
-const Controlled: ComponentStory<typeof DateTimePicker> = (args) => (
-	<LocalizationProvider dateAdapter={AdapterDayjs}>
-		<FormContainer>
-			<DateTimePicker {...args} />
-		</FormContainer>
-	</LocalizationProvider>
-);
+type Story = StoryObj<typeof DateTimePicker>;
 
-export const ControlledFormDateTimePicker = Controlled.bind({});
-ControlledFormDateTimePicker.args = {
-	label: 'Controlled DateTime',
+export const ControlledFormDateTimePicker: Story = {
+	args: {
+		label: 'Controlled DateTime',
+	},
 };
 
-export const ControlledFormDateTimePickerDefaultDate = Controlled.bind({});
-ControlledFormDateTimePickerDefaultDate.args = {
-	label: 'Controlled DateTime with now as default date',
-	defaultValue: new Date('2020-01-30 16:30'),
+export const ControlledFormDateTimePickerDefaultDate: Story = {
+	args: {
+		label: 'Controlled DateTime with now as default date',
+		defaultValue: new Date('2020-01-30 16:30'),
+	},
 };

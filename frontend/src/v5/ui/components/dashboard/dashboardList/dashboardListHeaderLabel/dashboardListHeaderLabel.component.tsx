@@ -21,7 +21,7 @@ import { SortingDirection } from '@components/dashboard/dashboardList/dashboardL
 import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Container, Button, Indicator, Label } from './dashboardListHeaderLabel.styles';
 
-interface IDashboardListHeaderLabel extends FixedOrGrowContainerProps{
+interface IDashboardListHeaderLabel extends FixedOrGrowContainerProps {
 	children?: ReactNode;
 	sortingDirection?: SortingDirection;
 	sort?: boolean;
