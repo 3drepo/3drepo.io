@@ -4,7 +4,7 @@ import { IntlProvider } from 'react-intl';
 import { getIntlProviderProps } from '@/v5/services/intl';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
-import { ThemeProvider } from 'styled-components';
+import { ThemeProvider, createGlobalStyle } from 'styled-components';
 import React from 'react';
 import _ from 'lodash';
 
@@ -45,18 +45,25 @@ export const globalTypes = {
 	},
 };
 
-const getTheme = (context ) => {
+const getTheme = (context) => {
 	const theme = context.parameters.theme || context.globals.theme
 	return theme === V5_THEME ? V5Theme : V5ViewerTheme;
 };
 
-const withThemeProvider = (Story,context)=>{
+const GlobalStorybookStyle = createGlobalStyle`
+	body {
+		overflow-y: scroll;
+	}
+`;
+
+const withThemeProvider = (Story, context)=>{
 	const theme = getTheme(context);
 
 	return (
 		<ThemeProvider theme={theme}>
 			<MuiThemeProvider theme={theme}>
 				<GlobalStyle />
+				<GlobalStorybookStyle />
 				<Story {...context} />
 			</MuiThemeProvider>
 		</ThemeProvider>

@@ -22,7 +22,7 @@ import { FormInputProps } from '@controls/inputs/inputController.component';
 import { Select } from '@controls/inputs/select/select.component';
 import { FormControl, FormHelperText, InputLabel, MenuItem } from '@mui/material';
 
-type OneOfPropertyProps = FormInputProps & { values: PropertyDefinition['values'] };
+type OneOfPropertyProps = FormInputProps & { values: PropertyDefinition['values']; onBlur: () => void };
 export const OneOfProperty = ({ values, value, ...props }: OneOfPropertyProps) => {
 	let items = [];
 	if (values === 'jobsAndUsers') {

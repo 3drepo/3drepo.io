@@ -14,48 +14,45 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ShareTextField } from '@controls/shareTextField';
+import { Avatar } from '@controls/avatar/avatar.component';
 import { Meta, StoryObj } from '@storybook/react';
 
+const defaultUser = {
+	firstName: 'Json',
+	lastName: 'Vorhees',
+	hasAvatar: false,
+	avatarUrl: '',
+	user: null,
+};
+
 export default {
-	title: 'Inputs/ShareTextField',
-	argTypes: {
-		hideValue: {
-			type: 'boolean',
-		},
-		disabled: {
-			type: 'boolean',
-		},
-		variant: {
-			options: ['filled', 'outlined'],
-			control: { type: 'select' },
-		},
-	},
-	component: ShareTextField,
-	parameters: { controls: { exclude: ['className'] } },
-} as Meta<typeof ShareTextField>;
-
-type Story = StoryObj<typeof ShareTextField>;
-
-export const Default: Story = {
+	title: 'Info/Avatar',
+	component: Avatar,
+	parameters: { controls: { exclude: ['onClick', 'className'] } },
 	args: {
-		label: 'Textfield label',
-		value: 'https://3drepo.com/',
+		user: defaultUser,
+	},
+} as Meta<typeof Avatar>;
+
+type Story = StoryObj<typeof Avatar>;
+
+export const AvatarWithInitials: Story = { args: { isButton: false } };
+
+export const AvatarWithInitialsHoverStates: Story = { args: { isButton: true } };
+
+export const AvatarWithInitialsLargeSizeAndHoverStates: Story = {
+	args: {
+		size: 'large',
+		isButton: true,
 	},
 };
 
-export const HiddenValue: Story = {
+export const AvatarWithImage: Story = {
 	args: {
-		label: 'Textfield label',
-		value: 'https://3drepo.com/',
-		hideValue: true,
-	},
-};
-
-export const DisabledValue: Story = {
-	args: {
-		label: 'Textfield label',
-		value: 'https://3drepo.com/',
-		disabled: true,
+		user: {
+			...defaultUser,
+			hasAvatar: true,
+			avatarUrl: 'https://i.pinimg.com/170x/26/5c/1c/265c1cc710304eb15607e18c6f591c85.jpg',
+		},
 	},
 };
