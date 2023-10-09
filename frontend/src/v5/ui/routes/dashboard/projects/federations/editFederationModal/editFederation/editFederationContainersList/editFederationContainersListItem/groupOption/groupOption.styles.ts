@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,30 +14,34 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import styled, { css } from 'styled-components';
-import { alpha } from '@mui/material/styles';
-import { LabelButton } from '@controls/button';
+import AddCircleBase from '@assets/icons/filled/add_circle-filled.svg';
 
-export const Container = styled.div<{ selected?: boolean }>`
-	position: relative;
-	display: flex;
-	align-items: center;
-	height: 80px;
-	padding: 0 29px;
-	cursor: pointer;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
+export const Container = styled.div<{ disabled?: boolean }>`
+	&& {
 
-	${({ theme, selected }) => selected && css`
-		background-color: ${theme.palette.secondary.main};
+		color: ${({ theme }) => theme.palette.primary.dark};
+		display: inline-flex;
+		flex-flow: row;
+		align-items: flex-start;
+		padding: 12px;
+		
+		${({ theme, disabled }) => disabled && css`
+			cursor: default;
+			pointer-events: none;
+			color: ${theme.palette.base.lighter};
+		`}
+	}
+`;
 
-		::before {
-			background-color: ${theme.palette.secondary.main};
-			border: none;
-		}
+export const AddCircleIcon = styled(AddCircleBase)`
+	height: 18px;
+	width: 18px;
+	box-sizing: border-box;
+	margin-right: 6px;
+`;
 
-		${LabelButton} {
-			background-color: ${alpha(theme.palette.tertiary.lightest, 0.8)};
-			color: ${theme.palette.tertiary.main};
-		}
-	`}
+export const Message = styled.div`
+	width: calc(100% - 30px);
 `;

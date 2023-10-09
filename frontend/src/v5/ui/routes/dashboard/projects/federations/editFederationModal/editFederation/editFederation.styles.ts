@@ -15,66 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import IncludeIconBase from '@assets/icons/twoToned/add_circle-two_toned.svg';
-import RemoveIconBase from '@assets/icons/twoToned/remove_element-two_toned.svg';
+import styled, { css } from 'styled-components';
+import { SuccessButton as SuccessButtonBase } from '@controls/button/successButton/successButton.styles';
+import { ErrorButton as ErrorButtonBase } from '@controls/button/errorButton/errorButton.styles';
 
-export const IconContainer = styled.div`
+export const SuccessButton = styled(SuccessButtonBase)`
+	min-width: 100px;
+`;
+export const ErrorButton = styled(ErrorButtonBase)`
+	min-width: 100px;
+`;
+
+const iconContainerStyles = css`
 	display: grid;
-	min-width: 46px;
+	place-content: center;
+	width: 20px;
+	min-width: 20px;
+	height: 20px;
+	border-radius: 5px;
+	padding: 0;
+
+	&, &:hover, &:active, &:focus {
+		border-width: 2px;
+	}
 `;
 
-export const IncludeIcon = styled(IncludeIconBase)<{ isSelected?: boolean }>`
-	&:hover {
-		circle {
-			fill: ${({ theme }) => theme.palette.primary.dark};
-		}
-	}
-
-	&:active {
-		circle {
-			fill: ${({ theme }) => theme.palette.primary.darkest};
-		}
-	}
-
-	${({ theme, isSelected }) => isSelected && `
-		circle {
-			fill: ${theme.palette.primary.lightest};
-		}
-		path {
-			fill: ${theme.palette.primary.dark};
-		}
-
-		&:hover {
-			circle {
-				fill: ${theme.palette.primary.dark};
-			}
-			path {
-				fill: ${theme.palette.primary.lightest};
-			}
-		}
-
-		&:active {
-			circle {
-				fill: ${theme.palette.primary.darkest};
-			}
-			path {
-				fill: ${theme.palette.primary.lightest};
-			}
-		}
-	`}
+export const SuccessIconContainer = styled(SuccessButton)`
+	${iconContainerStyles}
 `;
 
-export const RemoveIcon = styled(RemoveIconBase)`
-	&:hover {
-		circle {
-			fill: ${({ theme }) => theme.palette.error.dark};
-		}
-	}
-
-	&:active {
-		circle {
-			fill: ${({ theme }) => theme.palette.error.darkest};
-		}
-	}
+export const ErrorIconContainer = styled(ErrorButton)`
+	${iconContainerStyles}
 `;
