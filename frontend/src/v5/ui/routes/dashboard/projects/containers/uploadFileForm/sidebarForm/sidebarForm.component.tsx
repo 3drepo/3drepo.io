@@ -25,7 +25,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { SidebarSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { MenuItem } from '@mui/material';
-import { FormNumberField, FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
+import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
+import { LOD_VALUES } from '@/v5/store/revisions/revisions.types';
 import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
 
 type ISidebarForm = {
@@ -143,13 +144,22 @@ export const SidebarForm = ({
 				label={formatMessage({ id: 'uploads.sidebar.revisionDesc', defaultMessage: 'Revision Description' })}
 				formError={errors.revisionDesc}
 			/>
-
-			<FormNumberField
+			<FormSelect
+				required
 				control={control}
 				name="lod"
 				label={formatMessage({ id: 'uploads.sidebar.lod', defaultMessage: 'Level of Detail' })}
-				formError={errors.lod}
-			/>
+				onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+					setValue('lod', e.target.value);
+					updateValue('lod');
+				}}
+			>
+				{LOD_VALUES.map((type) => (
+					<MenuItem key={type.value} value={type.value}>
+						{type.name}
+					</MenuItem>
+				))}
+			</FormSelect>
 
 			{isSpm && (
 				<>

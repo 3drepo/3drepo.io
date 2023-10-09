@@ -15,6 +15,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { formatMessage } from '@/v5/services/intl';
+
+export const LOD_VALUES = [
+	{
+		value: '0',
+		name: formatMessage({ id: 'revision.lod.default', defaultMessage: 'Default' }),
+	},
+	{
+		value: '1',
+		name: formatMessage({ id: 'revision.lod.veryLow', defaultMessage: 'Very Low' }),
+	},
+	{
+		value: '2',
+		name: formatMessage({ id: 'revision.lod.low', defaultMessage: 'Low' }),
+	},
+	{
+		value: '3',
+		name: formatMessage({ id: 'revision.lod.medium', defaultMessage: 'Medium' }),
+	},
+	{
+		value: '4',
+		name: formatMessage({ id: 'revision.lod.high', defaultMessage: 'High' }),
+	},
+	{
+		value: '5',
+		name: formatMessage({ id: 'revision.lod.veryHigh', defaultMessage: 'Very High' }),
+	},
+	{
+		value: '6',
+		name: formatMessage({ id: 'revision.lod.maximum', defaultMessage: 'Maximum' }),
+	},
+];
+
 export interface IRevision {
 	_id: string;
 	timestamp: Date;
@@ -50,7 +83,7 @@ export type CreateRevisionBody = {
 	file: File;
 	importAnimations?: boolean;
 	timezone?: string;
-	lod?: number;
+	lod?: string;
 
 	containerId?: string;
 	containerName: string;

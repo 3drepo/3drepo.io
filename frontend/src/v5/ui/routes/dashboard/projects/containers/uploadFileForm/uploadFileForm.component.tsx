@@ -157,7 +157,7 @@ export const UploadFileForm = ({
 				containerCode: container?.code || '',
 				containerDesc: container?.desc || '',
 				revisionDesc: '',
-				lod: 0,
+				lod: '0',
 				importAnimations: extensionIsSpm(extension),
 				timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London',
 			});
