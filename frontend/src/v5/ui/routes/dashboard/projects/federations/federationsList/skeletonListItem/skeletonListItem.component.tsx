@@ -16,7 +16,7 @@
  */
 
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
-import { SkeletonBlock } from '@controls/skeletonBlock';
+import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
 import { Container } from './skeletonListItem.styles';
 
 interface ISkeletonListItem {
@@ -26,7 +26,7 @@ interface ISkeletonListItem {
 export const SkeletonListItem = ({ delay = 0 }: ISkeletonListItem): JSX.Element => (
 	<Container>
 		<FixedOrGrowContainer>
-			<SkeletonBlock widthPercentage={80} />
+			<SkeletonBlock width="80%" />
 		</FixedOrGrowContainer>
 		<FixedOrGrowContainer width={495} />
 		<FixedOrGrowContainer width={188}>

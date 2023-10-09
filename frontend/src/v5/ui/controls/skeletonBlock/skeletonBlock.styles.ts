@@ -15,38 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import { Skeleton } from '@mui/material';
+import styled from 'styled-components';
 
-export const Block = styled.div<{ width?: number, widthPercentage?: number, delay?: number }>`
-	height: 15px;
-	width: ${({ width }) => width}px;
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+export const SkeletonBlock = styled(Skeleton)<{ delay?: number }>`
 	overflow: hidden;
 	position: relative;
-	border-radius: 3px;
-	
-	${({ widthPercentage }) => widthPercentage && css`
-			width: ${widthPercentage}%;
-	`};
-
-	::before {
-		position: absolute;
-		content: "";
-		height: 100%;
-		width: 100%;
-		background-image: ${({ theme }) => `linear-gradient(to bottom, ${theme.palette.tertiary.lightest} 0%, rgba(0, 0, 0, 0.05) 20%, ${theme.palette.tertiary.lightest} 40%, ${theme.palette.tertiary.lightest} 100%)`};
-		background-repeat: no-repeat;
-		background-size: 450px 400px;
-		animation: shimmer 1s linear infinite;
-		animation-delay: ${({ delay }) => `${delay}s`};
-	}
-
-	@keyframes shimmer {
-		0% {
-			background-position: 0 -150px;
-		}
-		100% {
-			background-position: 0 150px;
-		}
-	}
+	animation-delay: ${({ delay }) => `${delay || 0}s`};
 `;
