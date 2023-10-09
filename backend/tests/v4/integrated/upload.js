@@ -24,7 +24,7 @@ const app = require('../../../src/v4/services/api.js').createApp();
 const logger = require('../../../src/v4/logger.js');
 const C = require('../../../src/v4/constants');
 const responseCodes = require('../../../src/v4/response_codes.js');
-const { templates } = require('../../../src/v5/utils/responseCodes');
+const { templates:responseCodesV5 } = require('../../../src/v5/utils/responseCodes');
 const helpers = require('../helpers/signUp');
 const moment = require('moment');
 const async = require('async');
@@ -242,7 +242,7 @@ describe('Uploading a model', () => {
 						tag: 'rev0',
 					})
 					.expect(404, (err, res) => {
-						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+						expect(res.body.code).eq(responseCodesV5.MODEL_NOT_FOUND.code);
 						done(err);
 					});
 			});
@@ -345,7 +345,7 @@ describe('Uploading a model', () => {
 					.set('x-ms-transfer-mode', 'chunked')
 					.set('x-ms-content-length', 6425218)
 					.expect(404, (err, res) => {
-						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+						expect(res.body.code).to.equal(responseCodesV5.MODEL_NOT_FOUND.code);
 						done(err);
 					});
 			});
