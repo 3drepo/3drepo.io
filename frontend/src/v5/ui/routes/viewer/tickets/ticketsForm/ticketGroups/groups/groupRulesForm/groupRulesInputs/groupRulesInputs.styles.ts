@@ -14,8 +14,9 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import styled, { css } from 'styled-components';
 import { ListSubheader as ListSubheaderBase } from '@mui/material';
-import styled from 'styled-components';
 
 export const ListSubheader = styled(ListSubheaderBase)`
 	font-weight: 700;
@@ -25,4 +26,28 @@ export const ListSubheader = styled(ListSubheaderBase)`
 	&:first-of-type {
 		padding-top: 0;
 	}
+`;
+
+export const ValuesContainer = styled.div`
+	display: flex;
+	flex-direction: row;
+	align-items: end;
+	gap: 10px;
+`;
+
+export const ValueIconContainer = styled.button.attrs({
+	type: 'button',
+})<{ disabled?: boolean }>`
+	cursor: pointer;
+	color: ${({ theme }) => theme.palette.secondary.main};
+	${({ theme, disabled }) => disabled && css`
+		cursor: auto;
+		color: ${theme.palette.base.light};
+	`}
+	display: inline-block;
+	padding: 0;
+	height: 18px;
+	margin-bottom: 15px;
+	border: none;
+	background: transparent;
 `;

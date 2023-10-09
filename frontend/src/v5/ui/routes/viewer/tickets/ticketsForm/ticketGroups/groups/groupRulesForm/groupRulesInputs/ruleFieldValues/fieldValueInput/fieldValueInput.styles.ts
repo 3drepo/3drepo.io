@@ -15,28 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import { Autocomplete as AutocompleteBase, Paper } from '@mui/material';
+import styled from 'styled-components';
 
-export const ValuesContainer = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: end;
-	gap: 10px;
+const PaperComponent = styled(Paper).attrs({
+	elevation: 8,
+})`
+	transition: box-shadow 0s;
+	&:empty {
+		box-shadow: none;
+	}
 `;
 
-export const ValueIconContainer = styled.button.attrs({
-	type: 'button',
-})<{ disabled?: boolean }>`
-	cursor: pointer;
-	color: ${({ theme }) => theme.palette.secondary.main};
-	${({ theme, disabled }) => disabled && css`
-		cursor: auto;
-		color: ${theme.palette.base.light};
-	`}
-	display: inline-block;
-	padding: 0;
-	height: 18px;
-	margin-bottom: 15px;
-	border: none;
-	background: transparent;
+export const Autocomplete = styled(AutocompleteBase).attrs({ PaperComponent })`
+	width: 100%;
 `;

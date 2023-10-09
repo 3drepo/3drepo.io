@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { IGroupRule, OPERATIONS_TYPES, OperatorType } from '@/v5/store/tickets/tickets.types';
+import { FieldOperator, IGroupRule, Operator } from '@/v5/store/tickets/tickets.types';
 
 export const OPERATION_DISPLAY_NAMES = {
 	IS_NOT_EMPTY: formatMessage({ id: 'filter.operation.exists', defaultMessage: 'exists' }),
@@ -34,53 +34,34 @@ export const OPERATION_DISPLAY_NAMES = {
 	LTE: formatMessage({ id: 'filter.operation.lessOrEqualTo', defaultMessage: 'less or equal to' }),
 	IN_RANGE: formatMessage({ id: 'filter.operation.inRange', defaultMessage: 'in range' }),
 	NOT_IN_RANGE: formatMessage({ id: 'filter.operation.notInRange', defaultMessage: 'not in range' }),
+	STARTS_WITH: formatMessage({ id: 'filter.operation.startsWith', defaultMessage: 'starts with' }),
+	ENDS_WITH: formatMessage({ id: 'filter.operation.endsWith', defaultMessage: 'ends with' }),
 };
 
-const OPERATOR_SYMBOL = {
-	IS: ':',
-	IS_NOT: ': !',
-	CONTAINS: ': *',
-	NOT_CONTAINS: ': ! *',
-	REGEX: ':',
-	EQUALS: '=',
-	NOT_EQUALS: '= !',
-	GT: '>',
-	GTE: '>=',
-	LT: '<',
-	LTE: '<=',
-	IN_RANGE: '',
-	NOT_IN_RANGE: '!',
+export type IFormRule = {
+	name: string,
+	field: {
+		operator: FieldOperator,
+		values: { value: string }[],
+	},
+	operator: Operator,
+	values?: { value: number | string }[],
 };
 
-const formatValues = (operatorType: OperatorType, values) => {
-	if (operatorType === 'regex') return `/ ${values} /`;
-	if (operatorType === 'numberRange') return `[ ${values.join(' : ')} ]`;
-	return values ? values.join(', ') : '';
-};
-
-export const formatOperationLabel = ({ field, operator, values }: IGroupRule) => {
-	const operatorType = OPERATIONS_TYPES[operator];
-	if (operatorType === 'field') return operator === 'IS_EMPTY' ? `! ${field}` : field;
-
-	const formattedValues = formatValues(operatorType, values);
-	return `${field} ${OPERATOR_SYMBOL[operator]} ${formattedValues}`;
-};
-
-export type IRuleForm = Omit<IGroupRule, 'values'> & {
-	values: { value: number | string }[],
-};
-
-export const parseRule = ({ values, ...rule }: IRuleForm): IGroupRule => {
-	if (values?.length) {
-		return {
-			...rule,
-			values: values.map((v) => v.value),
-		};
-	}
-	return rule;
-};
-
-export const prepareRuleForForm = ({ values = [], ...rule }: IGroupRule): IRuleForm => ({
+export const formRuleToGroupRule = ({ values = [], field, ...rule }: IFormRule): IGroupRule => ({
 	...rule,
-	values: values.map((value) => ({ value })),
+	field: {
+		operator: field.operator,
+		values: field.values.map((v) => v.value),
+	},
+	values: values.map((v) => v.value),
+});
+
+export const groupRuleToFormRule = ({ values = [], field, ...rule }: IGroupRule): IFormRule => ({
+	...rule,
+	field: {
+		operator: field.operator,
+		values: field.values.map((value) => ({ value })),
+	},
+	values: (values || []).map((value) => ({ value })),
 });

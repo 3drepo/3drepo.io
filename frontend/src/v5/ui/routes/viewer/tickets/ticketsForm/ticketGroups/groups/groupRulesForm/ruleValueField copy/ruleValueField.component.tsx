@@ -22,12 +22,11 @@ import { useEffect } from 'react';
 import AddValueIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import RemoveValueIcon from '@assets/icons/outlined/remove_circle-outlined.svg';
 import { OPERATIONS_TYPES } from '@/v5/store/tickets/tickets.types';
-import { ValueIconContainer, ValuesContainer } from './ruleValueField.styles';
-import { IRuleForm } from '../groupRulesForm.helpers';
+import { ValueIconContainer, ValuesContainer } from '../groupRulesInputs/groupRulesInputs.styles';
+import { IFormRule } from '../groupRulesForm.helpers';
 
-const VALUE_LABEL = formatMessage({ id: 'ticket.groups.value.label', defaultMessage: 'Value' });
-export const RuleValueField = () => {
-	const { control, watch, formState: { errors } } = useFormContext<IRuleForm>();
+export const RuleValueTextfields = () => {
+	const { control, watch, formState: { errors } } = useFormContext<IFormRule>();
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'values',
@@ -53,7 +52,7 @@ export const RuleValueField = () => {
 			<>
 				{fields.map((field, i) => (
 					<ValuesContainer key={field.id}>
-						<FormValueField label={VALUE_LABEL} name={`values.${i}.value`} formError={error?.[i]} />
+						<FormValueField name={`values.${i}.value`} formError={error?.[i]} />
 						<ValueIconContainer onClick={() => remove(i)} disabled={fields.length === 1}>
 							<RemoveValueIcon />
 						</ValueIconContainer>
@@ -68,7 +67,7 @@ export const RuleValueField = () => {
 
 	// single value type
 	if (['regex', 'numberComparison'].includes(operationType)) {
-		return (<FormValueField label={VALUE_LABEL} name="values.0.value" formError={error?.[0]} />);
+		return (<FormValueField name="values.0.value" formError={error?.[0]} />);
 	}
 
 	// range value type
