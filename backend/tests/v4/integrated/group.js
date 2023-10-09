@@ -137,7 +137,7 @@ describe("Groups", function () {
 		it("with some other teamspace should fail", function(done){
 			agent.get(`/${noAccessUser}/${model}/revision/f640aa3dec2/groups/${groupID}`)
 				.expect(404 , function(err, res) {
-					expect(res.body.code).to.equal(responseCodesV5.MODEL_NOT_FOUND.code);
+					expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
 					done(err);
 				});
 		});

@@ -204,7 +204,7 @@ describe("Views", function () {
 				function(done) {
 					agent2.get(`/${teamSpace1Username}/invalidModelID/viewpoints/`)
 						.expect(404, function(err, res) {
-							expect(res.body.code).to.equal(responseCodesV5.MODEL_NOT_FOUND.code);
+							expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
 							return done(err);
 						});
 				}
