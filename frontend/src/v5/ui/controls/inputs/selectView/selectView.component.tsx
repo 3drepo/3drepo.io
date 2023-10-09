@@ -36,7 +36,7 @@ const getThumbnailBasicPath = (
 	);
 };
 
-type SelectViewProps = Omit<SelectProps, 'children'> & {
+export type SelectViewProps = Omit<SelectProps, 'children'> & {
 	views: View[];
 	containerOrFederationId: string;
 	isContainer?: boolean;

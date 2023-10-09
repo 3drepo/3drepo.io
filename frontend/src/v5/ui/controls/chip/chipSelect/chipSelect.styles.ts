@@ -18,7 +18,7 @@
 import { Select } from '@controls/inputs/select/select.component';
 import styled from 'styled-components';
 
-export const IconWrapper = styled.span<{color: string;}>`
+export const IconWrapper = styled.span<{ color: string; }>`
 	margin: 0 8px 0 0;
 	display: flex;
 	svg {

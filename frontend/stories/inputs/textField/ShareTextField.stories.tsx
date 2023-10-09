@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ShareTextField } from '@controls/shareTextField';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
 	title: 'Inputs/ShareTextField',
 	argTypes: {
@@ -34,28 +33,29 @@ export default {
 	},
 	component: ShareTextField,
 	parameters: { controls: { exclude: ['className'] } },
-} as ComponentMeta<typeof ShareTextField>;
+} as Meta<typeof ShareTextField>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof ShareTextField> = (args) => <ShareTextField {...args} />;
+type Story = StoryObj<typeof ShareTextField>;
 
-export const Default = Template.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-Default.args = {
-	label: 'Textfield label',
-	value: 'https://3drepo.com/',
+export const Default: Story = {
+	args: {
+		label: 'Textfield label',
+		value: 'https://3drepo.com/',
+	},
 };
 
-export const HiddenValue = Template.bind({});
-HiddenValue.args = {
-	label: 'Textfield label',
-	value: 'https://3drepo.com/',
-	hideValue: true,
+export const HiddenValue: Story = {
+	args: {
+		label: 'Textfield label',
+		value: 'https://3drepo.com/',
+		hideValue: true,
+	},
 };
 
-export const DisabledValue = Template.bind({});
-DisabledValue.args = {
-	label: 'Textfield label',
-	value: 'https://3drepo.com/',
-	disabled: true,
+export const DisabledValue: Story = {
+	args: {
+		label: 'Textfield label',
+		value: 'https://3drepo.com/',
+		disabled: true,
+	},
 };

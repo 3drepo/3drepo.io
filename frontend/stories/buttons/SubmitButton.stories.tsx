@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { SubmitButton as Button } from '@controls/submitButton';
+import { Meta, StoryObj } from '@storybook/react';
+import { SubmitButton } from '@controls/submitButton';
 
 import LoginIcon from '@assets/icons/outlined/login-outlined.svg';
 import EmailIcon from '@assets/icons/filled/email-filled.svg';
@@ -32,9 +32,9 @@ const Icons = {
 	none: <></>,
 };
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
 	title: 'Buttons/SubmitButton',
+	component: SubmitButton,
 	argTypes: {
 		variant: {
 			description: 'Variant of the button',
@@ -81,30 +81,27 @@ export default {
 		children: {
 			description: 'The text that appears on the button',
 			type: 'string',
-			defaultValue: 'Submit',
 		},
 	},
-} as ComponentMeta<typeof Button>;
+	args: {
+		children: 'Submit',
+	},
+} as Meta<typeof SubmitButton>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof Button> = (args) => {
-	const { children } = args;
-	return (
-		<Button {...args}>{children}</Button>
-	);
+type Story = StoryObj<typeof SubmitButton>;
+
+export const Primary: Story = {
+	args: {
+		variant: 'contained',
+		color: 'primary',
+		startIcon: <LoginIcon />,
+	},
 };
 
-export const Primary = Template.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-Primary.args = {
-	variant: 'contained',
-	color: 'primary',
-	startIcon: <LoginIcon />,
-};
-
-export const Secondary = Template.bind({});
-Secondary.args = {
-	variant: 'outlined',
-	color: 'secondary',
-	startIcon: <EmailIcon />,
+export const Secondary: Story = {
+	args: {
+		variant: 'outlined',
+		color: 'secondary',
+		startIcon: <EmailIcon />,
+	},
 };

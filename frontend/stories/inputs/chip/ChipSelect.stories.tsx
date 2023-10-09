@@ -17,8 +17,7 @@
 
 import { PriorityLevels, PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
 import { ChipSelect } from '@controls/chip/chipSelect/chipSelect.component';
-import { SelectChangeEvent } from '@mui/material';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { StoryObj, Meta } from '@storybook/react';
 import { useState } from 'react';
 
 export default {
@@ -30,7 +29,6 @@ export default {
 		variant: {
 			options: ['filled', 'outlined', 'text'],
 			control: { type: 'select' },
-			defaultValue: 'filled',
 		},
 		error: {
 			type: 'boolean',
@@ -43,39 +41,38 @@ export default {
 		},
 		values: {
 			control: 'object',
-			defaultValue: PRIORITY_LEVELS_MAP,
 		},
 		value: {
 			type: 'string',
-			defaultValue: PRIORITY_LEVELS_MAP[PriorityLevels.NONE].label,
-		},
-		onDelete: {
-			defaultValue: null,
 		},
 	},
+	args: {
+		variant: 'filled',
+		values: PRIORITY_LEVELS_MAP,
+		value: PRIORITY_LEVELS_MAP[PriorityLevels.NONE].label,
+		onDelete: null,
+	},
 	component: ChipSelect,
-	parameters: { controls: { exclude: ['name', 'inputRef', 'helperText', 'error', 'size', 'onDelete',
-		'deleteIcon', 'avatar', 'sx', 'classes', 'clickable', 'children', 'required', 'icon', 'ref'] } },
-} as ComponentMeta<typeof ChipSelect>;
+	parameters: {
+		controls: {
+			exclude: ['name', 'inputRef', 'helperText', 'error', 'size', 'onDelete',
+				'deleteIcon', 'avatar', 'sx', 'classes', 'clickable', 'children', 'required', 'icon', 'ref'],
+		},
+	},
+	render: ({ value: initialValue, ...args }) => {
+		const [value, setValue] = useState(initialValue);
+		const handleChange = (event) => setValue(event.target.value as any);
+		return (<ChipSelect value={value} onChange={handleChange} {...args} />);
+	},
+} as Meta<typeof ChipSelect>;
 
-const ChipSelectStory: ComponentStory<typeof ChipSelect> = ({ value: initialValue, ...args }: any) => {
-	const [value, setValue] = useState(initialValue);
-	const handleChange = (event: SelectChangeEvent<any[]>) => {
-		setValue(event.target.value as any);
-	};
-	return (
-		<ChipSelect
-			{...args}
-			value={value}
-			onChange={handleChange}
-		/>
-	);
-};
+type Story = StoryObj<typeof ChipSelect>;
 
-export const ControlledChipSelectExample = ChipSelectStory.bind({});
-export const NoLabelExample = ChipSelectStory.bind({});
-NoLabelExample.args = {
-	label: '',
-	variant: 'text',
-	tooltip: 'I am a custom tooltip',
+export const ControlledChipSelectExample: Story = {};
+export const NoLabelExample: Story = {
+	args: {
+		label: '',
+		variant: 'text',
+		tooltip: 'I am a custom tooltip',
+	},
 };

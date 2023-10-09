@@ -14,42 +14,45 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { DragAndDrop } from '@controls/dragAndDrop/dragAndDrop.component';
 import { FileInputField } from '@controls/fileInputField/fileInputField.component';
 import { Button } from '@controls/button';
+
+// eslint-disable-next-line
+const handleDropFiles = () => alert('Valid files have been dropped');
 
 export default {
 	title: 'Containers/DragAndDrop',
 	component: DragAndDrop,
 	parameters: { controls: { exclude: ['className', 'onDrop'] } },
-} as ComponentMeta<typeof DragAndDrop>;
+	args: {
+		onDrop: handleDropFiles,
+	},
+} as Meta<typeof DragAndDrop>;
 
-// eslint-disable-next-line
-const handleDropFiles = () => alert('Valid files have been dropped');
+type Story = StoryObj<typeof DragAndDrop>;
 
-const Template: ComponentStory<typeof DragAndDrop> = ({ children, ...args }) => (
-	<DragAndDrop onDrop={handleDropFiles} {...args}>{children}</DragAndDrop>
-);
-
-export const WithText = Template.bind({});
-WithText.args = {
-	children: 'Drop your files here',
+export const WithText: Story = {
+	args: {
+		children: 'Drop your files here',
+	},
 };
 
-export const WithButton = Template.bind({});
-WithButton.args = {
-	children: (
-		<div>
-			Drop your <i>.png</i> files here or
-			<FileInputField
-				accept=".png"
-				onChange={handleDropFiles}
-			>
-				<Button size="medium" variant="contained" color="primary" component="span">
-					Navigate
-				</Button>
-			</FileInputField>
-		</div>
-	),
+export const WithButton: Story = {
+	args: {
+		children: (
+			<div>
+				Drop your <i>.png</i> files here or
+				<FileInputField
+					accept=".png"
+					onChange={handleDropFiles}
+				>
+					<Button size="medium" variant="contained" color="primary" component="span">
+						Navigate
+					</Button>
+				</FileInputField>
+			</div>
+		),
+	},
 };

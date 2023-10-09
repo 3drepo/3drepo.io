@@ -15,10 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
 import styled from 'styled-components';
 import { hexToOpacity } from '@/v5/ui/themes/theme';
+
+const OverlappingContainerWithSize = styled(OverlappingContainer)`
+	width: 400px;
+	height: 200px;
+	margin: 100px auto;
+`;
 
 export default {
 	title: 'Containers/OverlappingContainer',
@@ -26,15 +32,16 @@ export default {
 	argTypes: {
 		text: {
 			description: 'example of combination with text',
-			defaultValue: 'Example text',
 		},
 	},
-	parameters: { controls: { exclude: ['className'] } },
-} as ComponentMeta<typeof OverlappingContainer>;
-
-const BackgroundImage = styled.img.attrs({
-	src: 'https://cdn.photographycourse.net/wp-content/uploads/2014/11/Landscape-Photography-steps.jpg',
-})``;
+	parameters: { controls: { exclude: ['className', 'children'] } },
+	render: ({ children }) => (
+		<OverlappingContainerWithSize>
+			<img src="https://cdn.photographycourse.net/wp-content/uploads/2014/11/Landscape-Photography-steps.jpg" />
+			{children}
+		</OverlappingContainerWithSize>
+	),
+} as Meta<typeof OverlappingContainer>;
 
 const FrontText = styled.div`
 	background-color: ${({ theme }) => hexToOpacity(theme.palette.secondary.main, 60)};
@@ -52,28 +59,16 @@ const FrontTextOnHover = styled(FrontText)`
 	}
 `;
 
-const OverlappingContainerWithSize = styled(OverlappingContainer)`
-	width: 400px;
-	height: 200px;
-	margin: 100px auto;
-`;
+type Story = StoryObj<typeof OverlappingContainer>;
 
-const FixedTextTemplate: ComponentStory<typeof OverlappingContainer> = ({ text }) => (
-	<OverlappingContainerWithSize>
-		<BackgroundImage />
-		<FrontText>{text}</FrontText>
-	</OverlappingContainerWithSize>
-);
+export const FixedText: Story = {
+	args: {
+		children: <FrontText>Always on text</FrontText>,
+	},
+};
 
-export const FixedText = FixedTextTemplate.bind({});
-FixedText.args = { text: 'Always on text' };
-
-const OnHoverTextTemplate: ComponentStory<typeof OverlappingContainer> = ({ text }) => (
-	<OverlappingContainerWithSize>
-		<BackgroundImage />
-		<FrontTextOnHover>{text}</FrontTextOnHover>
-	</OverlappingContainerWithSize>
-);
-
-export const OnHoverText = OnHoverTextTemplate.bind({});
-OnHoverText.args = { text: 'I display on hover' };
+export const OnHoverText: Story = {
+	args: {
+		children: <FrontTextOnHover>I display on hover</FrontTextOnHover>,
+	},
+};
