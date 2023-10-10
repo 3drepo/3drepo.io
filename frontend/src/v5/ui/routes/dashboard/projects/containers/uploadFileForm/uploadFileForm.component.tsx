@@ -46,8 +46,8 @@ import { SidebarForm } from './sidebarForm/sidebarForm.component';
 import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
 
 const DEFAULT_SORT_CONFIG = {
-	column: 'file',
-	direction: SortingDirection.ASCENDING,
+	column: ['file'],
+	direction: [SortingDirection.ASCENDING],
 };
 
 type UploadModalLabelTypes = {
@@ -176,8 +176,8 @@ export const UploadFileForm = ({
 	const containersNamesInModal = getValues('uploads')?.map(({ containerName }) => containerName);
 	const sidebarOpen = !isNull(selectedIndex) && !isUploading;
 	const indexMap = new Map(fields.map(({ uploadId }, index) => [uploadId, index]));
-	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
-	const origIndex = sidebarOpen && getOriginalIndex(getSortedListSelectedIndex());
+	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId) as number;
+	const origIndex = sidebarOpen ? getOriginalIndex(selectedIndex) : 0;
 
 	const onClickDelete = (index: number) => {
 		const { uploadId } = sortedList[index];
@@ -231,6 +231,7 @@ export const UploadFileForm = ({
 				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
 				maxWidth="xl"
 				isValid={(isValid && !fileError && !isUploading) || (isUploading && allUploadsComplete)}
+				contrastColorHeader
 				{...uploadModalLabels({ isUploading, fileCount: fields.length })}
 			>
 				<UploadsContainer>

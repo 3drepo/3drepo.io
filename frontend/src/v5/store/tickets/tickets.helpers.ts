@@ -171,6 +171,8 @@ const overrideHasEditedGroup = (override: GroupOverride, oldOverrides: GroupOver
 };
 
 const findOverrideWithEditedGroup = (values, oldValues, propertiesDefinitions) => {
+	if (!values) return null;
+
 	let overrideWithEditedGroup;
 	Object.keys(values).forEach((key) => {
 		const definition = propertiesDefinitions.find((def) => def.name === key);
@@ -193,8 +195,9 @@ export const findEditedGroup = (values: Partial<ITicket>, ticket: ITicket, templ
 	}
 
 	if (values.modules) {
-		template?.modules?.forEach(({ name, properties }) => {
-			overrideWithEditedGroup ||= findOverrideWithEditedGroup(values.modules[name], ticket.modules[name], properties);
+		template?.modules?.forEach(({ type, name, properties }) => {
+			const module = type || name;
+			overrideWithEditedGroup ||= findOverrideWithEditedGroup(values.modules[module], ticket.modules[module], properties);
 		});
 	}
 

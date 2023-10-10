@@ -15,17 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
-import DownloadIconBase from '@assets/icons/filled/download_arrow-filled.svg';
+import DownloadIconBase from '@assets/icons/outlined/download_arrow-outlined.svg';
 import { IconButton } from '@mui/material';
 import { Container as fixedOrGrowContainer } from '@/v5/ui/controls/fixedOrGrowContainer/fixedOrGrowContainer.styles';
 import { Link } from 'react-router-dom';
+import { RevisionsListItemText } from './revisionsListItemText/revisionsListItemText.component';
 
 export const Container = styled(Link)`
 	display: flex;
 	align-items: center;
 	height: 100%;
 	padding-left: 20px;
-	padding-right: 13px;
+	padding-right: 153px;
 	color: ${({ theme }) => theme.palette.primary.contrast};
 
 	&:link { text-decoration: none; }
@@ -42,6 +43,7 @@ export const Container = styled(Link)`
 
 export const DownloadIcon = styled(DownloadIconBase)`
 	color: ${({ theme }) => theme.palette.primary.contrast};
+	height: 18px;
 `;
 
 export const DownloadButton = styled(IconButton)`
@@ -55,4 +57,8 @@ export const DownloadButton = styled(IconButton)`
 
 	position: absolute;
 	right: 0;
+`;
+
+export const RevisionsListItemTag = styled(RevisionsListItemText)`
+	text-decoration: underline;
 `;

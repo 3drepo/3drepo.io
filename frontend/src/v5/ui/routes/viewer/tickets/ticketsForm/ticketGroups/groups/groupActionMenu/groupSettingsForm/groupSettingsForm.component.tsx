@@ -23,17 +23,17 @@ import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { SubmitButton } from '@controls/submitButton';
 import { Button } from '@controls/button';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { cloneDeep, isEqual, isUndefined, omitBy, sortBy } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { Group, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
+import { Group, IGroupRule, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
 import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
 import { useSelector } from 'react-redux';
-import { selectSelectedNodes } from '@/v4/modules/tree/tree.selectors';
+import { selectGetNumNodesByMeshSharedIdsArray, selectSelectedNodes } from '@/v4/modules/tree/tree.selectors';
 import { convertToV4GroupNodes, convertToV5GroupNodes, meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
 import { getRandomSuggestedColor } from '@controls/inputs/colorPicker/colorPicker.helpers';
 import { Gap } from '@controls/gap';
@@ -56,7 +56,6 @@ import {
 	FormRow,
 	Rules,
 	AddFilterTitle,
-	NewRuleActionMenu,
 	TriggerButton,
 	FormRulesBox,
 	NewCollectionActionMenu,
@@ -67,6 +66,7 @@ import { ChipRule } from '../../groupRulesForm/chipRule/chipRule.component';
 import { NewCollectionForm } from '../newCollectionForm/newCollectionForm.component';
 import { RulesOptionsMenu } from './rulesOptionsMenu/rulesOptionsMenu.component';
 import { RulesField } from './rulesField/ruelsField.component';
+import { Popper } from '../../../ticketGroups.styles';
 
 type GroupSettingsFormProps = {
 	value?: IGroupSettingsForm,
@@ -78,13 +78,19 @@ type GroupSettingsFormProps = {
 export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColored }: GroupSettingsFormProps) => {
 	const [isSmart, setIsSmart] = useState(true);
 	const [newPrefix, setNewPrefix] = useState([]);
+	const [filterMenuCoords, setFilterMenuCoords] = useState({ left: 0, bottom: 0 });
+	const [filterMenuOpen, setFilterMenuOpen] = useState(false);
 	const [inputObjects, setInputObjects] = useState([]);
 	const [isPastingRules, setIsPastingRules] = useState(false);
+	const [selectedRule, setSelectedRule] = useState(null);
 	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
 	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
+	const formRef = useRef(null);
 
 	const isNewGroup = !value;
 	const selectedNodes = useSelector(selectSelectedNodes);
+	const sharedIds = selectedNodes.flatMap((node) => node.shared_ids);
+	const objectsCount = useSelector(selectGetNumNodesByMeshSharedIdsArray(sharedIds));
 
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
@@ -92,10 +98,11 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		context: { isSmart },
 	});
 
-	const { fields: rules, append, remove, update } = useFieldArray({
+	const { fields, append, remove, update } = useFieldArray({
 		control: formData.control,
 		name: 'group.rules',
 	});
+	const rules = fields as Array<IGroupRule & { id: string }>;
 
 	const {
 		handleSubmit,
@@ -145,8 +152,14 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		append(pastedRules);
 	};
 
+	const resetFilterMenu = () => {
+		setSelectedRule(null);
+		setFilterMenuOpen(false);
+	};
+
 	useEffect(() => {
 		// When no value is passed then the group is a new group
+		resetFilterMenu();
 		if (!value) {
 			formData.reset({
 				...(isColored ? { color: hexToArray(getRandomSuggestedColor()) } : {}),
@@ -166,8 +179,18 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		setIsPastingRules(false);
 	}, [value]);
 
+	useEffect(() => {
+		if (!formRef.current) return;
+		const viewportHeight = window.innerHeight;
+		const PADDING = 14;
+		const rect = formRef.current.getBoundingClientRect();
+		setFilterMenuCoords({
+			bottom: viewportHeight - rect.y - rect.height - PADDING,
+			left: rect.x + rect.width + PADDING,
+		});
+	}, []);
 	return (
-		<form>
+		<form ref={formRef}>
 			<FormProvider {...formData}>
 				<Heading>
 					{isNewGroup ? (
@@ -310,13 +333,24 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								id="ticketsGroupSettings.subHeading.selectedObjects"
 								defaultMessage="Selected Objects"
 							/>
-							<ObjectsCount>{selectedNodes.length}</ObjectsCount>
+							<ObjectsCount>{objectsCount}</ObjectsCount>
 						</span>
 					</Subheading>
 				)}
 				{
 					isSmart && (
 						<>
+							<Popper
+								open={filterMenuOpen}
+								style={{ /* style is required to override the default positioning style Popper gets */
+									top: 'unset',
+									right: 'unset',
+									width: 'auto',
+									...filterMenuCoords,
+								}}
+							>
+								<GroupRulesForm rule={selectedRule?.value} onSave={selectedRule ? (val) => update(selectedRule.index, val) : append} onClose={resetFilterMenu} />
+							</Popper>
 							<Subheading>
 								<FormattedMessage
 									id="ticketsGroupSettings.subHeading.filters"
@@ -324,20 +358,14 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								/>
 								{isAdmin && (
 									<AddFilterTitle>
-										<NewRuleActionMenu
-											TriggerButton={(
-												<TriggerButton>
-													<FormattedMessage id="tickets.groups.newGroupForm.addFilter" defaultMessage="Add filter" />
-												</TriggerButton>
-											)}
-										>
-											<GroupRulesForm onSave={append} />
-										</NewRuleActionMenu>
+										<TriggerButton onClick={() => setFilterMenuOpen(true)}>
+											<FormattedMessage id="tickets.groups.newGroupForm.addFilter" defaultMessage="Add filter" />
+										</TriggerButton>
 									</AddFilterTitle>
 								)}
 							</Subheading>
 							<FormRulesBox>
-								<RulesOptionsMenu value={rules} onPaste={() => setIsPastingRules(true)} onClear={() => remove()} />
+								<RulesOptionsMenu value={rules} onPaste={() => setIsPastingRules(true)} onClear={() => { remove(); resetFilterMenu(); }} />
 								{isPastingRules && (<RulesField onSubmit={handlePasteRules} onClose={() => setIsPastingRules(false)} />)}
 								{isPastingRules && rules.length > 0 && (<Gap $height="5px" />)}
 								<Rules>
@@ -345,9 +373,16 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 										<ChipRule
 											value={ruleValue}
 											key={id}
-											onDelete={() => remove(i)}
-											onChange={(val) => update(i, val)}
+											isSelected={selectedRule === ruleValue}
+											onDelete={() => {
+												remove(i);
+												resetFilterMenu();
+											}}
 											disabled={!isAdmin}
+											onClick={() => {
+												setSelectedRule({ index: i, value: ruleValue });
+												setFilterMenuOpen(true);
+											}}
 										/>
 									))}
 									{!rules.length && !isPastingRules && (

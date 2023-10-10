@@ -50,13 +50,14 @@
 	router.get("/revision/:rev/meta/4DTaskSequence.json", middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
 
 	/**
-	 * @api {get} /:teamspace/:model/revision/master/head/meta/all.json Get all metadata
+	 * @api {get} /:teamspace/:model/revision/master/head/meta/all.json?filter=:filter Get all metadata
 	 * @apiName getAllMetadata
 	 * @apiGroup Meta
 	 * @apiDescription Get all objects in the tree with their metadata.
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} model Model ID
+	 * @apiParam {String} filter (optional) properties to filter for, comma separated
 	 *
 	 * @apiExample {get} Example usage:
 	 * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/meta/all.json HTTP/1.1
@@ -118,7 +119,7 @@
 	router.get("/revision/master/head/meta/all.json", middlewares.hasReadAccessToModel, getAllMetadata);
 
 	/**
-	 * @api {get} /:teamspace/:model/revision/:rev/meta/all.json Get all metadata by revision
+	 * @api {get} /:teamspace/:model/revision/:rev/meta/all.json?filter=:filter Get all metadata by revision
 	 * @apiName getAllMetadataByRev
 	 * @apiGroup Meta
 	 * @apiDescription Get all tree objects with their metadata tags by revision.
@@ -127,11 +128,12 @@
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} model Model ID
 	 * @apiParam {String} rev Revision to get metadata from
+	 * @apiParam {String} filter (optional) properties to filter for, comma separated
 	 */
 	router.get("/revision/:rev/meta/all.json", middlewares.hasReadAccessToModel, getAllMetadata);
 
 	/**
-	 * @api {post} /:teamspace/:model/revision(/master/head/|/:revId)/meta/rules Filter metadata by rules
+	 * @api {post} /:teamspace/:model/revision(/master/head/|/:revId)/meta/rules?filter=:filter Filter metadata by rules
 	 * @apiName queryMetadataByRules
 	 * @apiGroup Meta
 	 * @apiDescription Get all objects matching filter rules in the tree with their metadata.
@@ -139,6 +141,7 @@
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} model Model ID
 	 * @apiParam (Query) {Boolean} [meshids] Flag that returns Mesh IDs for matching rule queries
+	 * @apiParam {String} filter (optional) properties to filter for, comma separated
 	 *
 	 * @apiExample {post} Example usage (/master/head)
 	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/meta/rules HTTP/1.1

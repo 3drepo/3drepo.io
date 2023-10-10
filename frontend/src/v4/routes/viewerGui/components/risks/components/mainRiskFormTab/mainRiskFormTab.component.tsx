@@ -41,8 +41,8 @@ import {
 	FieldsRow,
 	StyledFormControl,
 } from '../riskDetails/riskDetails.styles';
-import { RiskSchema } from '../riskDetails/riskDetailsForm.component';
 import { RisksIcon } from '../riskIcon/riskIcon.component';
+import { RiskSchema } from '../riskDetails/riskDetails.schema';
 import { DateFieldContainer } from './mainRiskFormTab.styles';
 
 interface IProps {

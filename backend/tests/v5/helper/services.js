@@ -387,11 +387,12 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true) => {
 		tag: ServiceHelper.generateRandomString(),
 		author: ServiceHelper.generateRandomString(),
 		timestamp: ServiceHelper.generateRandomDate(),
+		desc: ServiceHelper.generateRandomString(),
 		void: !!isVoid,
 	};
 
 	if (hasFile) {
-		entry.rFile = [`${_id}${ServiceHelper.generateUUIDString()}`];
+		entry.rFile = [`${_id}_${ServiceHelper.generateRandomString()}_ifc`];
 		entry.refData = ServiceHelper.generateRandomString();
 	}
 

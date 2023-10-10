@@ -92,7 +92,7 @@ const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 		}
 		if (type === 'view') {
 			validator = Yup.object().nullable().test({
-				test: (view: Viewpoint) => !!view && Object.keys(view).some((field) => !isEmpty(view[field])),
+				test: (view: Viewpoint) => view?.camera && !isEmpty(view.camera),
 				message: formatMessage({
 					id: 'validation.ticket.requiredField',
 					defaultMessage: '{name} is a required field',
@@ -138,6 +138,7 @@ export const getTicketValidator = (template) => {
 };
 
 export const getValidators = (template) => {
+	if (!template) return null;
 	const { properties, modules } = template;
 	const validators: any = {
 		title: propertyValidator({

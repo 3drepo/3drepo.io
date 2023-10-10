@@ -17,16 +17,15 @@
 
 import { invoke } from 'lodash';
 import { takeLatest } from 'redux-saga/effects';
-import io from 'socket.io-client';
 
-import * as API from '../../services/api';
+import { setSocketIdHeader } from '@/v4/services/api/default';
 import { dispatch } from '../store';
 
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import { clientConfigService } from '../../services/clientConfig';
-import { Channel } from './channel';
 import { ChatActions, ChatTypes } from './chat.redux';
 import { Subscriptions } from './subscriptions';
+import { ChannelSelector } from './channelsSelector';
 
 const { host, path, reconnectionAttempts } = clientConfigService.chatConfig;
 // const socket = io(host, {
@@ -56,7 +55,7 @@ const channels = {};
 const joinedRooms = [] as any;
 
 function* handleConnect() {
-	API.setSocketIdHeader(socket.id);
+	setSocketIdHeader(socket.id);
 	for (let index = 0; index < joinedRooms.length; index++) {
 		const [teamspace, model] = joinedRooms[index].split('::');
 		socket.emit('join', { account: teamspace, model });
@@ -82,7 +81,7 @@ const getChannel = (teamspace, model = '') => {
 	const channelId: string = `${teamspace}${model ? `::${model}` : ''}`;
 
 	if (!channels[channelId]) {
-		channels[channelId] = new Channel(socket, teamspace, model, () => {
+		channels[channelId] = new ChannelSelector(socket, teamspace, model, () => {
 			dispatch(ChatActions.joinRoom(teamspace, model));
 		});
 	}

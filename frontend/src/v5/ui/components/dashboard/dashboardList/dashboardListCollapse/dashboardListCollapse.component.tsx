@@ -17,8 +17,7 @@
 
 import { ReactNode, useState } from 'react';
 import { Collapse, Tooltip } from '@mui/material';
-import { ChevronButton } from '@controls/chevronButton';
-import { Container, ButtonContainer, ControlsContainer, CollapsedItemContainer, Title } from './dashboardListCollapse.styles';
+import { Container, ButtonContainer, ControlsContainer, CollapsedItemContainer, Title, ChevronButton } from './dashboardListCollapse.styles';
 
 export type IDashboardListCollapse = {
 	children: ReactNode;

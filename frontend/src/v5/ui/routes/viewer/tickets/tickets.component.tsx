@@ -35,11 +35,13 @@ import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component'
 import { NewTicketCard } from './newTicket/newTicket.component';
 import { ViewerParams } from '../../routes.constants';
 import { TicketContextComponent } from './ticket.context';
+import { useSearchParam } from '../../useSearchParam';
 
 export const Tickets = () => {
 	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const view = TicketsCardHooksSelectors.selectView();
+	const [, setTicketId] = useSearchParam('ticketId');
 
 	const readOnly = isFederation
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
@@ -50,23 +52,25 @@ export const Tickets = () => {
 		UsersActionsDispatchers.fetchUsers(teamspace);
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
 
-		return () => { TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List); };
+		return () => {
+			TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
+			setTicketId('');
+		};
 	}, []);
 
 	useEffect(() => {
 		if (isFederation) {
-			combineSubscriptions(
+			return combineSubscriptions(
 				enableRealtimeFederationNewTicket(teamspace, project, containerOrFederation),
 				enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation),
 				enableRealtimeFederationUpdateTicketGroup(teamspace, project, containerOrFederation, revision),
 			);
-		} else {
-			combineSubscriptions(
-				enableRealtimeContainerNewTicket(teamspace, project, containerOrFederation),
-				enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation),
-				enableRealtimeContainerUpdateTicketGroup(teamspace, project, containerOrFederation, revision),
-			);
 		}
+		return combineSubscriptions(
+			enableRealtimeContainerNewTicket(teamspace, project, containerOrFederation),
+			enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation),
+			enableRealtimeContainerUpdateTicketGroup(teamspace, project, containerOrFederation, revision),
+		);
 	}, [containerOrFederation]);
 
 	return (

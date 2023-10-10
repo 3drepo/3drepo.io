@@ -23,7 +23,6 @@ import {
 	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
-import { COLOR } from '../../../../styles';
 import { ReportedItems } from '../reportedItems';
 
 export const RisksContainer = styled(ReportedItems).attrs({
@@ -32,14 +31,3 @@ export const RisksContainer = styled(ReportedItems).attrs({
 })`
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.RISKS]}px;
 ` as any;
-
-export const ListContainer = styled.ul`
-	height: auto;
-	padding: 0;
-	margin: 0;
-	cursor: pointer;
-`;
-
-export const Summary = styled.div`
-	color: ${COLOR.BLACK_40};
-`;

@@ -138,24 +138,6 @@ export const AddFilterTitle = styled.div`
 	color: ${({ theme }) => theme.palette.secondary.main};
 `;
 
-export const NewRuleActionMenu = styled(ActionMenu).attrs({
-	PopoverProps: {
-		anchorOrigin: {
-			vertical: 'top',
-			horizontal: 'right',
-		},
-		transformOrigin: {
-			vertical: 'top',
-			horizontal: 'left',
-		},
-	},
-})`
-	.MuiPaper-root {
-		margin-left: 15px;
-		box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
-	}
-`;
-
 export const TriggerButton = styled(Typography).attrs({
 	variant: 'link',
 })`

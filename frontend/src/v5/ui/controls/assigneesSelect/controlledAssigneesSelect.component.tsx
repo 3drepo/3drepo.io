@@ -15,23 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
-import { AssigneesSelect, IAssigneesSelect } from './assigneesSelect.component';
+import { useEffect, useState } from 'react';
+import { AssigneesSelect, AssigneesSelectProps } from './assigneesSelect.component';
 
-type ControlledAssigneesSelectProps = Omit<IAssigneesSelect, 'onBlur'> & {
+type ControlledAssigneesSelectProps = Omit<AssigneesSelectProps, 'onBlur'> & {
 	onBlur: (values) => void;
 };
 
 export const ControlledAssigneesSelect = ({
-	value: initialValue,
+	value: initialValues,
 	onBlur,
 	...props
 }: ControlledAssigneesSelectProps) => {
-	const [values, setValues] = useState(initialValue);
+	const [values, setValues] = useState(initialValues);
 	const handleClose = () => {
 		onBlur(values);
 	};
 	const onChange = (e) => setValues(e?.target?.value);
+
+	useEffect(() => setValues(initialValues), [initialValues]);
+
 	return (
 		<AssigneesSelect value={values} onBlur={handleClose} onChange={onChange} {...props} />
 	);

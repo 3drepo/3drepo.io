@@ -30,6 +30,6 @@ export const getTeamspaceImgSrc = (teamspace: string) => {
 
 export const isQuotaUnitUnlimited = (quotaUnit: QuotaUnit) => quotaUnit.available === 'unlimited';
 
-export const isQuotaUnitCapped = (quotaUnit: QuotaUnit) => quotaUnit.available <= quotaUnit.used;
+export const isQuotaUnitCapped = (quotaUnit: QuotaUnit) => +quotaUnit.available <= quotaUnit.used;
 
 export const isQuotaExpired = (quota:Quota) => quota.expiryDate >= +new Date();

@@ -27,7 +27,7 @@ export interface ContainerProps {
 	maxWidth?: WidthType;
 	tabletWidth?: WidthType;
 	mobileWidth?: WidthType;
-	hideWhenSmallerThan?: Display;
+	hideWhenSmallerThan?: Display | number;
 }
 
 const withDefaultUnits = (width: WidthType) => (isString(width) ? width : `${width}px`);

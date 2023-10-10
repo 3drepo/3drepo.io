@@ -16,7 +16,7 @@
  */
 import { FormattedMessage } from 'react-intl';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ProjectCard, AddProjectCard } from '@components/shared/linkCard/projectCard';
+import { ProjectCard } from '@components/shared/linkCard/projectCard/projectCard.component';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { IProject } from '@/v5/store/projects/projects.types';
@@ -61,7 +61,6 @@ export const ProjectsList = () => {
 						</>
 					)}
 				</SearchContext.Consumer>
-				{isAdmin && <AddProjectCard onClick={openNewProjectModal} />}
 			</ProjectCardsList>
 		</SearchContextComponent>
 	);

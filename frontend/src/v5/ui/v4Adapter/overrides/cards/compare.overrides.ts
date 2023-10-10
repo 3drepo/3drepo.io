@@ -20,6 +20,7 @@ import { Name as ClashName, Model as ClashModel, ClashTypeSwitch, ClashSettings 
 import { FilterPanel } from '@/v4/routes/viewerGui/components/compare/components/compareFilters/compareFilters.styles';
 import { SelectField } from '@/v4/routes/viewerGui/components/compare/components/revisionsSelect/revisionsSelect.styles';
 import { css } from 'styled-components';
+import { ViewerPanelButton, ViewerPanelFooter } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 
 export default css`
 	${Revisions} {
@@ -83,5 +84,12 @@ export default css`
 	${ClashTypeSwitch} {
 		min-width: 85px;
 		max-width: 85px;
+	}
+
+	${ViewerPanelFooter} ${ViewerPanelButton}[active="1"] {
+		background-color: ${({ theme }) => theme.palette.error.main};
+		&:hover {
+			background-color: ${({ theme }) => theme.palette.error.dark};
+		}
 	}
 `;

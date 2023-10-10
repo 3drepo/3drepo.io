@@ -26,8 +26,8 @@ export const TeamspaceQuotaLayout = styled.div`
 	column-gap: 15px;
 `;
 
-export const QuotaValuesContainer = styled.div<{$disabled?:boolean, $error?: boolean}>` 
-	${({ theme }) => (theme.typography.caption)}
+export const QuotaValuesContainer = styled.div<{ $disabled?:boolean, $error?: boolean }>`
+	${({ theme }) => (theme.typography.body1)}
 
 	color: ${({ $disabled, $error, theme }) => {
 		if ($error) return theme.palette.error.lightest;

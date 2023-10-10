@@ -21,7 +21,7 @@ import {
 	Container,
 } from '@/v4/routes/viewerGui/components/risks/components/riskDetails/riskDetails.styles';
 import { Content } from '@/v4/routes/viewerGui/components/risks/components/treatmentFormTab/treatmentFormTab.styles';
-import { Container as TextField, FieldWrapper } from '@/v4/routes/components/textField/textField.styles';
+import { Container as TextField, FieldWrapper, ActionsLine } from '@/v4/routes/components/textField/textField.styles';
 import { StyledSelect } from '@/v4/routes/components/customTable/components/cellSelect/cellSelect.styles';
 
 export default css`
@@ -31,10 +31,8 @@ export default css`
 		${TextField} {
 			margin: 8px 0 0;
 
-			.MuiFormControl-root {
-				label {
-					margin-top: -1px;
-				}
+			.MuiFormControl-root label {
+				margin-top: -1px;
 			}
 
 			label {
@@ -47,15 +45,16 @@ export default css`
 					margin-top: 0;
 					padding-top: 2px;
 					min-height: 26px;
+					padding-right: 29px;
 					border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-					word-break: break-word;
+					text-overflow: ellipsis;
 				}
 				
 				& ~ * {
 					position: relative;
 					border-radius: 8px;
 					background: ${({ theme }) => theme.palette.primary.contrast};
-					min-height: 25px;
+					min-height: 36px;
 					box-sizing: border-box;
 					line-height: 18px;
 					padding: 0 10px;
@@ -65,6 +64,7 @@ export default css`
 
 					& > textarea {
 						height: 100%;
+						padding-right: 20px;
 					}
 				}
 			}
@@ -101,6 +101,17 @@ export default css`
 
 		${SuggestionButtonWrapper} ~ * {
 			margin-top: -9px;
+		}
+		
+		${ActionsLine} {
+			bottom: unset;
+			display: flex;
+			flex-direction: column-reverse;
+			
+			top: 18px;
+			&:not(:has(button + button)) {
+				top: 20px;
+			}
 		}
 	}
 `;

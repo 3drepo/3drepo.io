@@ -38,7 +38,7 @@ export const useSSOParams = () => {
 	const searchParams = new URLSearchParams(omitBy({ error, [action]: actionParamValue }, isNull)).toString();
 
 	return [{ searchParams, error, action }, reset] as
-	[ {searchParams: string, error: string | null, action: string | null}, () => void ];
+	[{ searchParams: string, error: string | null, action: string | null }, () => void ];
 };
 
 export const useSSOLogin = () => {

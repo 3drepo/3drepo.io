@@ -237,6 +237,7 @@ export const InvitationDialog = (props: IProps) => {
 					<CancelButton
 						type="button"
 						color="primary"
+						{...(isV5() && { variant: 'text' })}
 						onClick={props.handleClose}
 					>
 						Cancel
@@ -254,11 +255,20 @@ export const InvitationDialog = (props: IProps) => {
 		</Form>
 	);
 
+	const getIsInitialValid = () => {
+		try {
+			invitationSchema.validateSync({ email: props.email, job: props.job });
+			return true;
+		} catch (e) {
+			return false;
+		}
+	}
+
 	return (
 		<Formik
 			validationSchema={invitationSchema}
 			onSubmit={handleSubmit}
-			isInitialValid
+			isInitialValid={getIsInitialValid()}
 			initialValues={{ email: props.email, job: props.job, isAdmin: props.isAdmin, permissions: props.permissions }}
 			render={renderForm}
 			ref={formRef}

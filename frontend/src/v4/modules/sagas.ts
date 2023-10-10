@@ -27,6 +27,7 @@ import revisionsSaga from '@/v5/store/revisions/revisions.sagas';
 import ticketsSaga from '@/v5/store/tickets/tickets.sagas';
 import ticketCommentsSaga from '@/v5/store/tickets/comments/ticketComments.sagas';
 import viewer2Saga from '@/v5/store/viewer/viewer.sagas';
+import ticketsCardSaga from '@/v5/store/tickets/card/ticketsCard.sagas';
 import activitiesSaga from './activities/activities.sagas';
 import authSaga from './auth/auth.sagas';
 import billingSaga from './billing/billing.sagas';
@@ -56,6 +57,7 @@ import userManagementSaga from './userManagement/userManagement.sagas';
 import viewerSaga from './viewer/viewer.sagas';
 import viewerGuiSaga from './viewerGui/viewerGui.sagas';
 import viewpointsSaga from './viewpoints/viewpoints.sagas';
+import { sagaMiddleware } from './store';
 
 // <-- IMPORT MODULE SAGA -->
 
@@ -98,6 +100,7 @@ export default function* rootSaga() {
 		fork(federationsSaga),
 		fork(revisionsSaga),
 		fork(ticketsSaga),
+		fork(ticketsCardSaga),
 		fork(ticketCommentsSaga),
 		fork(usersSaga),
 		fork(viewer2Saga),

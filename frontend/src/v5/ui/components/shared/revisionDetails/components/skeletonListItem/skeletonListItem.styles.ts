@@ -17,15 +17,18 @@
 import styled from 'styled-components';
 
 import { DashboardListSkeletonItem } from '@components/dashboard/dashboardList/dashboardListSkeletonItem';
-import { SkeletonBlock as SkeletonBlockComponent } from '@controls/skeletonBlock';
+import { SkeletonBlock as SkeletonBlockBase } from '@controls/skeletonBlock/skeletonBlock.styles';
 
 export const Container = styled(DashboardListSkeletonItem)`
-	height: 52px;
-	padding-left: 20px;
+	height: 48px;
 	background-color: ${({ theme }) => theme.palette.secondary.light};
+	padding-left: 20px;
+	margin-left: 66px;
+	margin-bottom: 1px;
+	width: auto;
 `;
 
-export const SkeletonBlock = styled(SkeletonBlockComponent)`
+export const SkeletonBlock = styled(SkeletonBlockBase)`
 	height: 8px;
 	background-color: ${({ theme }) => theme.palette.secondary.lightest};
 `;

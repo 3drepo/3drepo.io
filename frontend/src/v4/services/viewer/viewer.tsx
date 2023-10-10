@@ -19,6 +19,7 @@ import EventEmitter from 'eventemitter3';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { isEmpty, isString } from 'lodash';
+import { getUseBetaViewer } from '@/v4/modules/viewer/betaViewer.helpers';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -29,8 +30,6 @@ import {
 import { uuid as UUID } from '../../helpers/uuid';
 import { clientConfigService } from '../clientConfig';
 import { MultiSelect } from './multiSelect';
-
-const UNITY_LOADER_PATH = 'unity/Build/unity.loader.js';
 
 declare const Module;
 
@@ -95,9 +94,10 @@ export class ViewerService {
 		return !!this.element;
 	}
 
-	public setupInstance = (container, onError) => {
+	public setupInstance = async (container, onError) => {
 		this.element = container;
-		UnityUtil.init(onError, this.onUnityProgress, this.onModelProgress);
+
+		UnityUtil.init(onError, this.onUnityProgress, this.onModelProgress, getUseBetaViewer());
 		UnityUtil.hideProgressBar();
 
 		const unityHolder = document.createElement('canvas');
@@ -210,7 +210,7 @@ export class ViewerService {
 			}, false);
 
 			// Event handlers MUST come first before setting src
-			this.unityLoaderScript.src = UNITY_LOADER_PATH;
+			this.unityLoaderScript.src = UnityUtil.unityLoaderPath();
 
 			// This kicks off the actual loading of Unity
 			this.unityLoaderScript.setAttribute('class', 'unity-loader');
@@ -835,15 +835,11 @@ export class ViewerService {
 		}
 	}
 
-	public setShading = (shading: string) => {
-		switch (shading) {
-			case 'standard':
-				UnityUtil.setRenderingQualityDefault();
-				break;
-			case 'architectural':
-				UnityUtil.setRenderingQualityHigh();
-				break;
+	public async setViewerBackgroundColor(color) {
+		if (color === undefined) {
+			return;
 		}
+		UnityUtil.setBackgroundColor(color);
 	}
 
 	public setXray = (xray: boolean) => {
@@ -1182,14 +1178,6 @@ export class ViewerService {
 
 	public switchObjectVisibility(account, model, ids, visibility) {
 		UnityUtil.toggleVisibility(account, model, ids, visibility);
-	}
-
-	public startAreaSelect() {
-		UnityUtil.startAreaSelection();
-	}
-
-	public stopAreaSelect() {
-		UnityUtil.stopAreaSelection();
 	}
 
 	public setShadows = (type: string) => {

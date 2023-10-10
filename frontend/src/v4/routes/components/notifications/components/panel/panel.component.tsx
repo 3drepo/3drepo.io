@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, SyntheticEvent } from 'react';
-import { NotificationsPanelItem } from '../../notifications.styles';
 import { INotification, NotificationItem } from '../notificationItem/notificationItem.component';
 import { NotificationsPanelHeader } from '../panelHeader/panelHeader.component';
-import { List, Container } from './panel.styles';
+import { List, Container, NotificationsPanelItem } from './panel.styles';
 
 interface IProps {
 	labelLeft?: string;

@@ -201,13 +201,13 @@ export const SettingsModal = ({
 		x, y, z,
 		...otherSettings
 	}) => {
-		const settings: ContainerSettings | FederationSettings = {
+		const settings = {
 			surveyPoint: {
 				latLong: [latitude, longitude],
 				position: [x, y, z],
 			},
 			...otherSettings,
-		};
+		} as ContainerSettings | FederationSettings;
 		updateSettings(
 			teamspace,
 			project,
@@ -314,7 +314,7 @@ export const SettingsModal = ({
 			<FormSelectView
 				control={control}
 				name="defaultView"
-				label={formatMessage({ id: 'settings.form.defaultView', defaultMessage: 'Default View' })}
+				label={formatMessage({ id: 'settings.form.defaultView', defaultMessage: 'Home View' })}
 				views={containerOrFederation.views}
 				containerOrFederationId={containerOrFederation._id}
 				isContainer={isContainer}

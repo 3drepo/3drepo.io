@@ -17,8 +17,9 @@
 
 import { Avatar as AvatarComponent } from '@mui/material';
 import styled from 'styled-components';
+import { TREE_LEVELS } from '@/v4/routes/components/treeList/treeList.constants';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
-import { TreeList, TREE_LEVELS } from '../../../components/treeList/treeList.component';
+import { TreeList } from '../../../components/treeList/treeList.component';
 
 const DEFAULT_AVATAR_SIZE = 30;
 

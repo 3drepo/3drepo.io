@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cloneDeep, isEqual, keyBy } from 'lodash';
+import { cloneDeep, isEmpty, keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
@@ -147,12 +147,6 @@ export const fetchIssueFailure = (state = INITIAL_STATE) => {
 
 export const saveIssueSuccess = (state = INITIAL_STATE, { issue, resetComponentState = true }) => {
 	const issuesMap = updateIssueProps(state.issuesMap, issue._id, issue);
-	const oldPosition = state.issuesMap[state.componentState.activeIssue]?.position;
-	const newPosition = issuesMap[state.componentState.activeIssue]?.position;
-
-	if (!isEqual(oldPosition, newPosition)) {
-		issuesMap[state.componentState.activeIssue].position = oldPosition;
-	}
 
 	const newComponentState = { ...state.componentState };
 
@@ -179,7 +173,7 @@ export const updateSelectedIssuePin =  (state = INITIAL_STATE, { position }) => 
 		};
 	}
 
-	if (state.componentState.newIssue) {
+	if (!isEmpty(state.componentState.newIssue)) {
 		const componentState = state.componentState;
 
 		return {...state,

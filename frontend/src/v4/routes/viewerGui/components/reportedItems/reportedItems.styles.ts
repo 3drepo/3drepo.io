@@ -16,6 +16,7 @@
  */
 import styled from 'styled-components';
 import { DashedContainer as DashedContainerBase } from '@controls/dashedContainer/dashedContainer.component';
+import { COLOR } from '@/v4/styles';
 
 export const DashedContainer = styled(DashedContainerBase).attrs({
 	strokeColor: '#c0c8d5', // TODO - fix when new palette is released
@@ -26,4 +27,15 @@ export const DashedContainer = styled(DashedContainerBase).attrs({
 	zeroPadding: true,
 })`
 	margin: 12px 15px;
+`;
+
+export const ListContainer = styled.ul`
+	height: auto;
+	padding: 0;
+	margin: 0;
+	cursor: pointer;
+`;
+
+export const Summary = styled.div`
+	color: ${COLOR.BLACK_40};
 `;

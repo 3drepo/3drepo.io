@@ -100,7 +100,7 @@ const HamburgerMenu = ({onSetAsDefault, onDelete, isAdmin, defaultView}) => {
 				onClose={toggleMenu}
 			>
 				<MenuItem onClick={closeMenuAnd(onSetAsDefault)} disabled={!isAdmin} >
-					Set as Default
+					Set as Home View
 				</MenuItem>
 				{renderDeleteMenuItem(!defaultView)}
 			</Menu>
@@ -141,7 +141,7 @@ export class ViewItem extends PureComponent<IProps, any> {
 	));
 
 	public renderViewpointDefault = renderWhenTrue(() => (
-		<Small>(Default View)</Small>
+		<Small>(Home View)</Small>
 	));
 
 	public renderViewpointNameWithShare = renderWhenTrue(() => (

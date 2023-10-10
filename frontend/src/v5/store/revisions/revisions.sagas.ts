@@ -28,6 +28,7 @@ import { CreateRevisionAction,
 } from './revisions.redux';
 import { ContainersActions } from '../containers/containers.redux';
 import { UploadStatuses } from '../containers/containers.types';
+import { createContainerFromRevisionBody, createFormDataFromRevisionBody } from './revisions.helpers';
 
 export function* fetch({ teamspace, projectId, containerId }: FetchAction) {
 	yield put(RevisionsActions.setIsPending(containerId, true));
@@ -58,15 +59,9 @@ export function* setVoidStatus({ teamspace, projectId, containerId, revisionId, 
 
 export function* createRevision({ teamspace, projectId, uploadId, body }: CreateRevisionAction) {
 	let { containerId } = body;
-	const newContainer = {
-		name: body.containerName,
-		unit: body.containerUnit,
-		type: body.containerType,
-		code: body.containerCode || undefined,
-		desc: body.containerDesc || undefined,
-	};
 	if (!containerId) {
 		try {
+			const newContainer = createContainerFromRevisionBody(body);
 			containerId = yield API.Containers.createContainer(teamspace, projectId, newContainer);
 			yield put(ContainersActions.createContainerSuccess(projectId, { _id: containerId, ...newContainer }));
 		} catch (error) {
@@ -82,34 +77,22 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 				formatMessage({ id: 'revisions.error.noContainer', defaultMessage: 'Failed to create Container' }),
 			);
 		}
-		const formData = new FormData();
-		formData.append('file', body.file);
-		formData.append('tag', body.revisionTag);
-		formData.append('desc', body.revisionDesc || undefined);
-		formData.append('importAnimations', body.importAnimations.toString());
-		formData.append('timezone', body.timezone);
-		formData.append('lod', body.lod);
-
 		yield put(RevisionsActions.setUploadComplete(uploadId, false));
-		const updateProgress = (val: number) => {
-			RevisionsActionsDispatchers.setUploadProgress(uploadId, val);
-		};
-
 		yield API.Revisions.createRevision(
 			teamspace,
 			projectId,
 			containerId,
-			(percent) => updateProgress(percent),
-			formData,
+			(percent) => RevisionsActionsDispatchers.setUploadProgress(uploadId, percent),
+			createFormDataFromRevisionBody(body),
 		);
 		yield put(ContainersActions.setContainerStatus(projectId, containerId, UploadStatuses.QUEUED));
 		yield put(RevisionsActions.setUploadComplete(uploadId, true));
 	} catch (error) {
-		let errorMessage = '';
-		if (Object.prototype.hasOwnProperty.call(error, 'response')) {
-			const { response: { data: { message, status, code } } } = error;
+		let errorMessage = error.message;
+		if (error.response) {
+			const { message, status, code } = error.response.data;
 			errorMessage = `${status} - ${code} (${message})`;
-		} else errorMessage = error.message;
+		}
 		yield put(RevisionsActions.setUploadComplete(uploadId, true, errorMessage));
 	}
 }
