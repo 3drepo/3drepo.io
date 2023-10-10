@@ -41,6 +41,7 @@ export const selectTicketsByContainersAndFederations = createSelector(
 	selectFederations,
 	(state, containersAndFederationsIds, containers, federations) => {
 		const modelIdToName = [...containers, ...federations].reduce((acc, { _id, name }) => {
+			// eslint-disable-next-line no-param-reassign
 			acc[_id] = name;
 			return acc;
 		}, {});
