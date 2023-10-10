@@ -28,14 +28,15 @@ import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopover
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { Row, Cell, CellChipText, CellOwner, OverflowContainer, UnassignedAssignees, CellDate } from './ticketsTableRow.styles';
+import { Row, Cell, DoubleCell, CellChipText, CellOwner, OverflowContainer, UnassignedAssignees, CellDate } from './ticketsTableRow.styles';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
+	modelName: string,
 	selected: boolean,
 	onClick: () => void,
 };
-export const TicketsTableRow = ({ ticket, onClick, selected }: TicketsTableRowProps) => {
+export const TicketsTableRow = ({ ticket, onClick, modelName, selected }: TicketsTableRowProps) => {
 	const { query } = useContext(SearchContext);
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
@@ -71,15 +72,28 @@ export const TicketsTableRow = ({ ticket, onClick, selected }: TicketsTableRowPr
 			<Cell>
 				<Highlight search={query}>{`${template.code}:${number}`}</Highlight>
 			</Cell>
-			<Cell>
-				<Tooltip title={title}>
-					<OverflowContainer>
-						<Highlight search={query}>
-							{title}
-						</Highlight>
-					</OverflowContainer>
-				</Tooltip>
-			</Cell>
+			<DoubleCell>
+				<Cell>
+					<Tooltip title={title}>
+						<OverflowContainer>
+							<Highlight search={query}>
+								{title}
+							</Highlight>
+						</OverflowContainer>
+					</Tooltip>
+				</Cell>
+				{modelName && (
+					<Cell>
+						<Tooltip title={modelName}>
+							<OverflowContainer>
+								<Highlight search={query}>
+									{modelName}
+								</Highlight>
+							</OverflowContainer>
+						</Tooltip>
+					</Cell>
+				)}
+			</DoubleCell>
 			<Cell>
 				{assignees?.length ? (
 					<AssigneesSelect value={assignees} multiple disabled />

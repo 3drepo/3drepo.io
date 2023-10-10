@@ -70,7 +70,7 @@ export const TicketsTable = () => {
 	});
 	const { containersAndFederations, groupBy, template } = formData.watch();
 
-	const ticketsWithModelId = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
+	const ticketsWithModelIdAndName = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const [sidePanelModelId, setSidePanelModelId] = useState<string>(null);
@@ -83,9 +83,9 @@ export const TicketsTable = () => {
 	const isCreatingNewTicket = sidePanelModelId && !selectedTicketId && !hasRequiredViewerProperties(selectedTemplate);
 
 	const ticketsFilteredByTemplate = useMemo(() => {
-		const ticketsToShow = ticketsWithModelId.filter((t) => getTicketIsCompleted(t) === showCompleted);
+		const ticketsToShow = ticketsWithModelIdAndName.filter((t) => getTicketIsCompleted(t) === showCompleted);
 		return ticketsToShow.filter(({ type }) => type === template);
-	}, [template, ticketsWithModelId, showCompleted]);
+	}, [template, ticketsWithModelIdAndName, showCompleted]);
 
 	const setSidePanelData = (modelId: string, ticket?: Partial<ITicket>) => {
 		setSidePanelModelId(modelId);
@@ -99,7 +99,7 @@ export const TicketsTable = () => {
 	const filterTickets = (items, query: string) => items.filter((ticket) => {
 		const templateCode = templates.find(({ _id }) => _id === ticket.type).code;
 		const ticketCode = `${templateCode}:${ticket.number}`;
-		return [ticketCode, ticket.title].some((str) => str.toLowerCase().includes(query.toLowerCase()));
+		return [ticketCode, ticket.title, ticket.modelName].some((str) => str.toLowerCase().includes(query.toLowerCase()));
 	});
 
 	const openInViewer = () => {

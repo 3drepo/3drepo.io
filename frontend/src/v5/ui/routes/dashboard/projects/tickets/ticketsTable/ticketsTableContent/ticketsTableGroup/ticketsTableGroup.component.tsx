@@ -15,33 +15,43 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITicket, TicketWithModelId } from '@/v5/store/tickets/tickets.types';
+import { ITicket, TicketWithModelIdAndName } from '@/v5/store/tickets/tickets.types';
 import { FormattedMessage } from 'react-intl';
 import { sortBy } from 'lodash';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
-import { Header, Headers, Group, NewTicketRow, NewTicketText } from './ticketsTableGroup.styles';
+import { Header, Headers, Group, NewTicketRow, NewTicketText, DoubleHeader } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 type TicketsTableGroupProps = {
 	selectedTicketId?: string;
-	ticketsWithModelId: TicketWithModelId[];
+	ticketsWithModelIdAndName: TicketWithModelIdAndName[];
 	onEditTicket: (modelId: string, ticket: Partial<ITicket>) => void;
 	onNewTicket: (modelId: string) => void;
 };
-export const TicketsTableGroup = ({ ticketsWithModelId, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
+export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
 	const sortById = (tckts) => sortBy(tckts, ({ type, _id }) => type + _id);
+	const [models] = useSearchParam('models');
+	const showModelName = models.length > 1;
 
 	return (
 		<>
-			{!!ticketsWithModelId.length && (
+			{!!ticketsWithModelIdAndName.length && (
 				<Headers>
 					<Header>
 						<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
 					</Header>
-					<Header>
-						<FormattedMessage id="ticketTable.column.header.title" defaultMessage="title" />
-					</Header>
+					<DoubleHeader>
+						<Header>
+							<FormattedMessage id="ticketTable.column.header.title" defaultMessage="title" />
+						</Header>
+						{showModelName && (
+							<Header>
+								<FormattedMessage id="ticketTable.column.header.federationContainer" defaultMessage="federation / container" />
+							</Header>
+						)}
+					</DoubleHeader>
 					<Header>
 						<FormattedMessage id="ticketTable.column.header.assignees" defaultMessage="assignees" />
 					</Header>
@@ -66,10 +76,11 @@ export const TicketsTableGroup = ({ ticketsWithModelId, onEditTicket, onNewTicke
 				</Headers>
 			)}
 			<Group>
-				{sortById(ticketsWithModelId).map(({ modelId, ...ticket }) => (
+				{sortById(ticketsWithModelIdAndName).map(({ modelId, modelName, ...ticket }) => (
 					<TicketsTableRow
 						key={ticket._id}
 						ticket={ticket}
+						modelName={showModelName ? modelName : null}
 						onClick={() => onEditTicket(modelId, ticket)}
 						selected={selectedTicketId === ticket._id}
 					/>

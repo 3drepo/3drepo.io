@@ -29,6 +29,12 @@ export const Cell = styled.div`
 	overflow: hidden;
 `;
 
+export const DoubleCell = styled.div`
+	display: grid;
+	grid-template-columns: auto 38%;
+	gap: 1px;
+`;
+
 // TODO - fix when new palette is released
 export const Row = styled.div<{ $selected: boolean }>`
 	display: grid;

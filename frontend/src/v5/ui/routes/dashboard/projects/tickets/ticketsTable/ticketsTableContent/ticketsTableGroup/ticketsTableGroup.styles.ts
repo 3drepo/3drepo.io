@@ -32,6 +32,12 @@ export const Header = styled(Typography).attrs({
 	margin-left: 10px;
 `;
 
+export const DoubleHeader = styled.div`
+	display: grid;
+	grid-template-columns: auto 38%;
+	gap: 1px;
+`;
+
 export const Group = styled.div`
 	display: grid;
 	border-radius: 10px;
