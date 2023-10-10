@@ -19,10 +19,11 @@ import { ITicket, TicketWithModelIdAndName } from '@/v5/store/tickets/tickets.ty
 import { FormattedMessage } from 'react-intl';
 import { sortBy } from 'lodash';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { Header, Headers, Group, NewTicketRow, NewTicketText, DoubleHeader } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { getSelectedModelsNonViewerPermission } from '../../newTicketMenu/newTicketMenu.helpers';
 
 type TicketsTableGroupProps = {
 	selectedTicketId?: string;
@@ -88,7 +89,7 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 				))}
 				<NewTicketMenu
 					TriggerButton={(
-						<NewTicketRow>
+						<NewTicketRow disabled={getSelectedModelsNonViewerPermission().length === 0}>
 							<AddCircleIcon />
 							<NewTicketText>
 								<FormattedMessage id="ticketTable.row.newTicket" defaultMessage="New ticket" />

@@ -16,7 +16,7 @@
  */
 
 import { Typography } from '@controls/typography';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const Headers = styled.div`
 	display: grid;
@@ -46,7 +46,7 @@ export const Group = styled.div`
 	background-color: transparent;
 `;
 
-export const NewTicketRow = styled.div`
+export const NewTicketRow = styled.div<{ disabled?: boolean }>`
 	width: 100%;
 	height: 37px;
 	font-weight: 600;
@@ -57,6 +57,12 @@ export const NewTicketRow = styled.div`
 	align-items: center;
 	padding-left: 15px;
 	gap: 6px;
+
+	${({ disabled }) => disabled && css`
+		cursor: initial;
+		pointer-events: none;
+		color: ${({ theme }) => theme.palette.base.light};
+	`}
 `;
 
 export const NewTicketText = styled(Typography).attrs({

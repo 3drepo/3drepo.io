@@ -49,6 +49,7 @@ import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, NONE_OPTION, hasRequiredViewerProp
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
+import { getSelectedModelsNonViewerPermission } from './newTicketMenu/newTicketMenu.helpers';
 
 type FormType = {
 	containersAndFederations: string[],
@@ -212,7 +213,7 @@ export const TicketsTable = () => {
 							TriggerButton={(
 								<NewTicketButton
 									startIcon={<AddCircleIcon />}
-									disabled={!containersAndFederations.length}
+									disabled={!containersAndFederations.length || getSelectedModelsNonViewerPermission().length === 0}
 								>
 									<FormattedMessage id="ticketsTable.button.newTicket" defaultMessage="New Ticket" />
 								</NewTicketButton>
