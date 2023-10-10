@@ -95,7 +95,7 @@ export const TicketsTableRow = ({ ticket, onClick, modelName, selected }: Ticket
 				)}
 			</DoubleCell>
 			<Cell>
-				{assignees?.length ? (
+				{hasProperties && (assignees?.length ? (
 					<AssigneesSelect value={assignees} multiple disabled />
 				) : (
 					<OverflowContainer>
@@ -103,13 +103,13 @@ export const TicketsTableRow = ({ ticket, onClick, modelName, selected }: Ticket
 							<FormattedMessage id="ticketsTable.row.assignees.unassigned" defaultMessage="Unassigned" />
 						</UnassignedAssignees>
 					</OverflowContainer>
-				)}
+				))}
 			</Cell>
 			<CellOwner>
 				<UserPopoverCircle user={ownerAsUser} />
 			</CellOwner>
 			<CellDate>
-				{hasProperties && <DueDateWithIcon value={dueDate} disabled />}
+				{hasProperties && (<DueDateWithIcon value={dueDate} disabled />)}
 			</CellDate>
 			<CellChipText>
 				{hasProperties && (<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />) }
