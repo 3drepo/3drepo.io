@@ -86,7 +86,9 @@ export const NewTicketSlide = ({ defaultValue, modelId, template, onSave, onDirt
 		onDirtyStateChange(!isEmpty(dirtyFields));
 	}, [JSON.stringify(dirtyFields)]);
 
-	useEffect(() => { onDirtyStateChange(false); }, []);
+	useEffect(() => () => {
+		onDirtyStateChange(false);
+	}, []);
 
 	if (!templateIsFetched) return (<Loader />);
 
