@@ -33,7 +33,7 @@ type TicketsTableGroupProps = {
 export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
 	const sortById = (tckts) => sortBy(tckts, ({ type, _id }) => type + _id);
 	const [models] = useSearchParam('models');
-	const showModelName = models.length > 1;
+	const showModelName = models.split(',').length > 1;
 
 	return (
 		<>
@@ -80,7 +80,8 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 					<TicketsTableRow
 						key={ticket._id}
 						ticket={ticket}
-						modelName={showModelName ? modelName : null}
+						showModelName={showModelName}
+						modelName={modelName}
 						onClick={() => onEditTicket(modelId, ticket)}
 						selected={selectedTicketId === ticket._id}
 					/>

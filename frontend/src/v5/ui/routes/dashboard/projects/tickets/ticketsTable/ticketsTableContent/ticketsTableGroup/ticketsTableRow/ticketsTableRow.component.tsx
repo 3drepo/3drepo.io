@@ -32,11 +32,12 @@ import { Row, Cell, DoubleCell, CellChipText, CellOwner, OverflowContainer, Unas
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
+	showModelName: boolean,
 	modelName: string,
 	selected: boolean,
 	onClick: () => void,
 };
-export const TicketsTableRow = ({ ticket, onClick, modelName, selected }: TicketsTableRowProps) => {
+export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, selected }: TicketsTableRowProps) => {
 	const { query } = useContext(SearchContext);
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
@@ -72,7 +73,7 @@ export const TicketsTableRow = ({ ticket, onClick, modelName, selected }: Ticket
 			<Cell>
 				<Highlight search={query}>{`${template.code}:${number}`}</Highlight>
 			</Cell>
-			<DoubleCell>
+			<DoubleCell showModelName={showModelName}>
 				<Cell>
 					<Tooltip title={title}>
 						<OverflowContainer>
@@ -82,7 +83,7 @@ export const TicketsTableRow = ({ ticket, onClick, modelName, selected }: Ticket
 						</OverflowContainer>
 					</Tooltip>
 				</Cell>
-				{modelName && (
+				{showModelName && (
 					<Cell>
 						<Tooltip title={modelName}>
 							<OverflowContainer>

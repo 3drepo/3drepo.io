@@ -99,7 +99,12 @@ export const TicketsTable = () => {
 	const filterTickets = (items, query: string) => items.filter((ticket) => {
 		const templateCode = templates.find(({ _id }) => _id === ticket.type).code;
 		const ticketCode = `${templateCode}:${ticket.number}`;
-		return [ticketCode, ticket.title, ticket.modelName].some((str) => str.toLowerCase().includes(query.toLowerCase()));
+
+		const elementsToFilter = [ticketCode, ticket.title];
+		if (containersAndFederations.length > 1) {
+			elementsToFilter.push(ticket.modelName);
+		}
+		return elementsToFilter.some((str) => str.toLowerCase().includes(query.toLowerCase()));
 	});
 
 	const openInViewer = () => {

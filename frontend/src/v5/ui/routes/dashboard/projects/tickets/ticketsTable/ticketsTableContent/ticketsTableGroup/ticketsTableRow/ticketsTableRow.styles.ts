@@ -16,7 +16,7 @@
  */
 
 import { DueDateWithIconContainer } from '@controls/dueDate/dueDate.styles';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const Cell = styled.div`
 	color: ${({ theme }) => theme.palette.secondary.main};
@@ -29,10 +29,13 @@ export const Cell = styled.div`
 	overflow: hidden;
 `;
 
-export const DoubleCell = styled.div`
+export const DoubleCell = styled.div<{ showModelName: boolean }>`
 	display: grid;
-	grid-template-columns: auto 38%;
 	gap: 1px;
+
+	${({ showModelName }) => showModelName && css`
+		grid-template-columns: auto 38%;
+	`}
 `;
 
 // TODO - fix when new palette is released
