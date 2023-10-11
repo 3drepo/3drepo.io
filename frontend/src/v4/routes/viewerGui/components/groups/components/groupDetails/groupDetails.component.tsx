@@ -111,7 +111,6 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			label="Filters"
 			placeholder="Select first filter"
 			disabled={!this.props.canUpdate}
-			fieldNames={this.props.fieldNames}
 		/>
 	));
 
@@ -188,7 +187,6 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			currentUser={this.props.currentUser}
 			totalMeshes={this.props.totalMeshes}
 			canUpdate={this.props.canUpdate}
-			fieldNames={this.props.fieldNames}
 			handleChange={this.handleFieldChange}
 			selectedNodes={this.props.selectedNodes}
 		/>
