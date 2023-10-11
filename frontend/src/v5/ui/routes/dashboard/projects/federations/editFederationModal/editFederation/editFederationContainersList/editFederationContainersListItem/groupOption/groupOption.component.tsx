@@ -14,16 +14,17 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useContext } from 'react';
+import { HTMLAttributes, useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { AddCircleIcon, Container, Message } from './groupOption.styles';
 import { EditFederationContext } from '../../../../editFederationContext';
 
-interface GroupOptionProps {
+type GroupOptionProps = HTMLAttributes<HTMLLIElement> & {
 	value: string;
 	onClick: (e) => void;
 }
 
+// "props" include css styles and behaviours from Material-UI that are applied to the Option
 export const GroupOption = ({ value, ...props }: GroupOptionProps) => {
 	const { groups } = useContext(EditFederationContext);
 	const trimmedValue = value.trim();

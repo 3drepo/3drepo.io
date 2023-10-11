@@ -18,7 +18,7 @@
 import styled, { css } from 'styled-components';
 import AddCircleBase from '@assets/icons/filled/add_circle-filled.svg';
 
-export const Container = styled.div<{ disabled?: boolean }>`
+export const Container = styled.li<{ disabled?: boolean }>`
 	&& {
 
 		color: ${({ theme }) => theme.palette.primary.dark};
