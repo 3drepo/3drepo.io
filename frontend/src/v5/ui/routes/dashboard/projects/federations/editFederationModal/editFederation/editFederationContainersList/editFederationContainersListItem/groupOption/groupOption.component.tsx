@@ -22,7 +22,7 @@ import { EditFederationContext } from '../../../../editFederationContext';
 type GroupOptionProps = HTMLAttributes<HTMLLIElement> & {
 	value: string;
 	onClick: (e) => void;
-}
+};
 
 // "props" include css styles and behaviours from Material-UI that are applied to the Option
 export const GroupOption = ({ value, ...props }: GroupOptionProps) => {
