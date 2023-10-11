@@ -27,7 +27,7 @@ const getEntriesSortedByValue = (obj) => _.sortBy(_.toPairs(obj), 1).reverse();
 export const GroupByFormSelect = (props) => (
 	<FormSelect
 		{...props}
-		label={formatMessage({ id: 'ticketTable.groupBy.placeholder', defaultMessage: 'group by:' })}
+		label={formatMessage({ id: 'ticketTable.groupBy.placeholder', defaultMessage: 'Group by:' })}
 		renderValue={(groupBy: string | null) => (
 			<>
 				<FormattedMessage id="ticketTable.groupBy.renderValue" defaultMessage="Group by:" />
