@@ -45,14 +45,6 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 	const isCollaborator = isNewFederation || isCollaboratorFromId;
 	const availableContainers = containers.filter(({ _id }) => !includedContainers.find((c) => c._id === _id));
 
-	const includeContainer = (container: IContainer) => {
-		setIncludedContainers((oldIncludedContainers) => [...oldIncludedContainers, container]);
-	};
-
-	const removeContainer = ({ _id }: IContainer) => {
-		setIncludedContainers((oldIncludedContainers) => oldIncludedContainers.filter((container) => container._id !== _id));
-	};
-
 	const includeContainers = (newContainers: IContainer[]) => {
 		setIncludedContainers((oldIncludedContainers) => [...oldIncludedContainers, ...newContainers]);
 	};
@@ -105,7 +97,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 							<ErrorIconContainer
 								onClick={(event) => {
 									event.stopPropagation();
-									removeContainer(container);
+									removeContainers([container]);
 								}}
 								dark={isSelected}
 							>
@@ -158,7 +150,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 							<SuccessIconContainer
 								onClick={(event) => {
 									event.stopPropagation();
-									includeContainer(container);
+									includeContainers([container]);
 								}}
 								dark={isSelected}
 							>
