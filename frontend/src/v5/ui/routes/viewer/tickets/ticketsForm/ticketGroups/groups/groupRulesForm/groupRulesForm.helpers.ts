@@ -61,7 +61,7 @@ export const groupRuleToFormRule = ({ values = [], field, ...rule }: IGroupRule)
 	...rule,
 	field: {
 		operator: field.operator,
-		values: field.values.map((value) => ({ value })),
+		values: (field.values || []).map((value) => ({ value })),
 	},
 	values: (values || []).map((value) => ({ value })),
 });
