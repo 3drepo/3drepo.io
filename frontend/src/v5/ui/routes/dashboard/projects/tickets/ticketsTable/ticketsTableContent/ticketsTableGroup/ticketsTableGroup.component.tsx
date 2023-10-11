@@ -20,10 +20,11 @@ import { FormattedMessage } from 'react-intl';
 import { sortBy } from 'lodash';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { isCommenterRole } from '@/v5/store/store.helpers';
 import { Header, Headers, Group, NewTicketRow, NewTicketText, DoubleHeader } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
-import { getSelectedModelsNonViewerPermission } from '../../newTicketMenu/newTicketMenu.helpers';
+import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 
 type TicketsTableGroupProps = {
 	selectedTicketId?: string;
@@ -33,8 +34,10 @@ type TicketsTableGroupProps = {
 };
 export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
 	const sortById = (tckts) => sortBy(tckts, ({ type, _id }) => type + _id);
-	const [models] = useSearchParam('models');
-	const showModelName = models.split(',').length > 1;
+	const [modelsIds] = useSearchParam('models');
+	const showModelName = modelsIds.split(',').length > 1;
+	const models = useSelectedModels();
+	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
 
 	return (
 		<>
@@ -88,8 +91,9 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 					/>
 				))}
 				<NewTicketMenu
+					disabled={newTicketButtonIsDisabled}
 					TriggerButton={(
-						<NewTicketRow disabled={getSelectedModelsNonViewerPermission().length === 0}>
+						<NewTicketRow disabled={newTicketButtonIsDisabled}>
 							<AddCircleIcon />
 							<NewTicketText>
 								<FormattedMessage id="ticketTable.row.newTicket" defaultMessage="New ticket" />

@@ -38,6 +38,7 @@ import { theme } from '@/v5/ui/routes/viewer/theme';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { enableRealtimeContainerNewTicket, enableRealtimeContainerUpdateTicket, enableRealtimeFederationNewTicket, enableRealtimeFederationUpdateTicket } from '@/v5/services/realtime/ticket.events';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
+import { isCommenterRole } from '@/v5/store/store.helpers';
 import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
 import { useSearchParam } from '../../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE, VIEWER_ROUTE } from '../../../../routes.constants';
@@ -49,7 +50,7 @@ import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, NONE_OPTION, hasRequiredViewerProp
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
-import { getSelectedModelsNonViewerPermission } from './newTicketMenu/newTicketMenu.helpers';
+import { useSelectedModels } from './newTicketMenu/useSelectedModels';
 
 type FormType = {
 	containersAndFederations: string[],
@@ -60,11 +61,12 @@ export const TicketsTable = () => {
 	const history = useHistory();
 	const params = useParams<DashboardTicketsParams>();
 	const { teamspace, project, groupBy: groupByURLParam, template: templateURLParam } = params;
-	const [models, setModels] = useSearchParam('models');
+	const [modelsIds, setModelsIds] = useSearchParam('models');
+	const models = useSelectedModels();
 	const { getState } = useStore();
 	const formData = useForm<FormType>({
 		defaultValues: {
-			containersAndFederations: models?.split(',') || [],
+			containersAndFederations: modelsIds?.split(',') || [],
 			template: templateURLParam,
 			groupBy: GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByURLParam] || NONE_OPTION,
 		},
@@ -87,6 +89,7 @@ export const TicketsTable = () => {
 		const ticketsToShow = ticketsWithModelIdAndName.filter((t) => getTicketIsCompleted(t) === showCompleted);
 		return ticketsToShow.filter(({ type }) => type === template);
 	}, [template, ticketsWithModelIdAndName, showCompleted]);
+	const newTicketButtonIsDisabled = !containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0;
 
 	const setSidePanelData = (modelId: string, ticket?: Partial<ITicket>) => {
 		setSidePanelModelId(modelId);
@@ -121,7 +124,7 @@ export const TicketsTable = () => {
 	const isFed = (modelId) => !!selectFederationById(getState(), modelId);
 
 	useEffect(() => {
-		setModels(containersAndFederations.join(','));
+		setModelsIds(containersAndFederations.join(','));
 
 		if (!containersAndFederations.length) return;
 
@@ -162,7 +165,7 @@ export const TicketsTable = () => {
 	}, [groupBy, template]);
 
 	useEffect(() => () => {
-		setModels('');
+		setModelsIds('');
 		formData.setValue('containersAndFederations', []);
 	}, [project]);
 
@@ -213,11 +216,12 @@ export const TicketsTable = () => {
 							TriggerButton={(
 								<NewTicketButton
 									startIcon={<AddCircleIcon />}
-									disabled={!containersAndFederations.length || getSelectedModelsNonViewerPermission().length === 0}
+									disabled={newTicketButtonIsDisabled}
 								>
 									<FormattedMessage id="ticketsTable.button.newTicket" defaultMessage="New Ticket" />
 								</NewTicketButton>
 							)}
+							disabled={newTicketButtonIsDisabled}
 							onContainerOrFederationClick={setSidePanelData}
 						/>
 					</FlexContainer>
