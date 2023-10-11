@@ -90,19 +90,18 @@ export const TicketDetailsCard = () => {
 	};
 
 	useEffect(() => {
-		if (ticket?._id) {
-			if (!templateAlreadyFetched(template)) {
-				TicketsActionsDispatchers.fetchTemplate(
-					teamspace,
-					project,
-					containerOrFederation,
-					template._id,
-					isFederation,
-				);
-			}
-			TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
-			setTicketId(ticket._id);
+		if (!ticket?._id) return;
+		if (!templateAlreadyFetched(template)) {
+			TicketsActionsDispatchers.fetchTemplate(
+				teamspace,
+				project,
+				containerOrFederation,
+				template._id,
+				isFederation,
+			);
 		}
+		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
+		setTicketId(ticket._id);
 	}, [ticket?._id]);
 
 	useEffect(() => {
