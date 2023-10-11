@@ -62,7 +62,6 @@ const goldenColls = [
 	{ name: 'projects', options: {} },
 	{ name: 'settings', options: {} },
 	{ name: 'teamspace', options: {} },
-	{ name: 'views', options: {} },
 ];
 
 const goldenJobs = [
