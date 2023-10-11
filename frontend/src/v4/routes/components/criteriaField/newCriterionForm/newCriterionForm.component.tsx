@@ -36,7 +36,9 @@ export const NewCriterionForm = ({ criterion, onSubmit, alreadySelectedFilters =
 		onSubmit(data);
 	};
 
-	useEffect(() => { setKey(uniqueId()); }, [criterion?._id]);
+	useEffect(() => {
+		setKey(uniqueId());
+	}, [criterion?._id]);
 
 	return (
 		<Container>
