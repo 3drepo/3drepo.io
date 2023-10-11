@@ -17,33 +17,19 @@
 import { ThemeProvider } from 'styled-components';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { theme } from '@/v5/ui/routes/viewer/theme';
-import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 
 import { AppBar } from '@components/shared/appBar';
-import { TeamspacesActionsDispatchers, ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Content } from './dashboardViewerLayout.styles';
 
-export const DashboardViewerLayout = ({ children }) => {
-	const { teamspace, project } = useParams<DashboardParams>();
-
-	useEffect(() => {
-		ProjectsActionsDispatchers.fetch(teamspace);
-		TeamspacesActionsDispatchers.setCurrentTeamspace(teamspace);
-		ProjectsActionsDispatchers.setCurrentProject(project);
-	}, []);
-
-	return (
-		<>
-			<AppBar />
-			<Content>
-				<ThemeProvider theme={theme}>
-					<MuiThemeProvider theme={theme}>
-						{children}
-					</MuiThemeProvider>
-				</ThemeProvider>
-			</Content>
-		</>
-	);
-};
+export const DashboardViewerLayout = ({ children }) => (
+	<>
+		<AppBar />
+		<Content>
+			<ThemeProvider theme={theme}>
+				<MuiThemeProvider theme={theme}>
+					{children}
+				</MuiThemeProvider>
+			</ThemeProvider>
+		</Content>
+	</>
+);

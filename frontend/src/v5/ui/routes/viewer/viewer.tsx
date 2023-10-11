@@ -58,11 +58,11 @@ export const Viewer = () => {
 
 	useEffect(() => {
 		TeamspacesActionsDispatchers.setCurrentTeamspace(teamspace);
+		ProjectsActionsDispatchers.fetch(teamspace);
 	}, [teamspace]);
 
 	useEffect(() => {
 		ProjectsActionsDispatchers.setCurrentProject(project);
-		ProjectsActionsDispatchers.fetch(teamspace);
 	}, [project]);
 
 	useEffect(() => {
