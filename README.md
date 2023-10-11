@@ -28,7 +28,7 @@ Note: If using windows, please ensure cmd.exe was invoked as administrator (i.e.
 
 1. Clone the repository: `git clone https://github.com/3drepo/3drepo.io.git`
 2. Change directory: `cd 3drepo.io`
-3. Check out latest release: `git checkout tags/latest`
+3. Check out latest release, which should be the latest of our master branch
 5. Setup the configuration file for running the 3D Repo web app as per the `Configuration` section below.
 6. Install the required backend dependencies: `cd backend && yarn install`
 7. Install the required frontend dependencies: `cd frontend && yarn install`
