@@ -62,6 +62,7 @@ module.exports = {
 		'@typescript-eslint/no-unsafe-call': 'off',
 		'@typescript-eslint/no-unsafe-member-access': 'off',
 		'@typescript-eslint/no-unsafe-assignment': 'off',
+		'@typescript-eslint/no-unsafe-argument': 'off',
 		'@typescript-eslint/restrict-template-expressions': 'off',
 		'@typescript-eslint/await-thenable': 'error',
 		'@typescript-eslint/unbound-method': 'off',
@@ -83,8 +84,12 @@ module.exports = {
 		'import/order': [
 			'error',
 			{
-				'newlines-between': 'ignore'
-			}
+				'newlines-between': 'ignore',
+				"pathGroups": [{
+					"pattern": "@/**",
+					"group": "external"
+				}],
+			},
 		],
 		indent: ['off', 'tab', { SwitchCase: 1 }],
 		'max-classes-per-file': ['error', 1],

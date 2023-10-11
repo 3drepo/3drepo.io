@@ -46,13 +46,13 @@ export const GroupSetTitle = styled.div`
 	overflow: hidden;
 `;
 
-export const GroupsSetTreeListItemComponent = styled(GroupsTreeListItemComponent)<{$padding?: boolean}>`
+export const GroupsSetTreeListItemComponent = styled(GroupsTreeListItemComponent)<{ $padding?: boolean }>`
 	${ChevronStyledIconButton} {
 		margin: 0;
 	}
 `;
 
-export const CollapsibleIconV4 = styled(SmallChevron)<{$collapsed?: boolean}>`
+export const CollapsibleIconV4 = styled(SmallChevron)<{ $collapsed?: boolean }>`
 	color: #757575;
 	${({ $collapsed }) => (!$collapsed ? 'transform: rotate(90deg);' : '')};
 `;

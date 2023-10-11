@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { StoryObj, Meta } from '@storybook/react';
 import StarIcon from '@assets/icons/outlined/star-outlined.svg';
 import ClockIcon from '@assets/icons/outlined/clock-outlined.svg';
 import BellIcon from '@assets/icons/outlined/bell-outlined.svg';
@@ -28,11 +28,9 @@ const Icons = {
 	none: <></>,
 };
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
 	title: 'Inputs/Chip/Chip',
 	component: Chip,
-	// More on argTypes: https://storybook.js.org/docs/react/api/argtypes
 	argTypes: {
 		variant: {
 			description: 'Variant of the chip',
@@ -46,7 +44,6 @@ export default {
 		label: {
 			description: 'The text that appears inside the chip',
 			control: { type: 'text' },
-			defaultValue: 'Treatment',
 		},
 		icon: {
 			options: Object.keys(Icons), // An array of serializable values
@@ -55,31 +52,34 @@ export default {
 				type: 'select',
 			},
 		},
-		onDelete: {
-			defaultValue: null,
-		},
+	},
+	args: {
+		label: 'Treatment',
+		onDelete: null,
 	},
 	parameters: { controls: { exclude: ['size', 'onDelete', 'deleteIcon', 'avatar', 'sx', 'classes', 'clickable', 'children', 'ref'] } },
-} as ComponentMeta<typeof Chip>;
+} as Meta<typeof Chip>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof Chip> = Chip;
+type Story = StoryObj<typeof Chip>;
 
-export const Filled = Template.bind({});
-Filled.args = {
-	variant: 'filled',
-	color: '#00C1D4',
+export const Filled: Story = {
+	args: {
+		variant: 'filled',
+		color: '#00C1D4',
+	},
 };
 
-export const Text = Template.bind({});
-Text.args = {
-	variant: 'text',
-	color: '#172B4D',
+export const Text: Story = {
+	args: {
+		variant: 'text',
+		color: '#172B4D',
+	},
 };
 
-export const Outlined = Template.bind({});
-Outlined.args = {
-	variant: 'outlined',
-	color: 'hotpink',
-	tooltip: 'I am a tooltip!',
+export const Outlined: Story = {
+	args: {
+		variant: 'outlined',
+		color: 'hotpink',
+		tooltip: 'I am a tooltip!',
+	},
 };
