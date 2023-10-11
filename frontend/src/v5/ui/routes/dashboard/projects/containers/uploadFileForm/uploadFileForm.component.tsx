@@ -44,6 +44,7 @@ import { getSupportedFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadList } from './uploadList/uploadList.component';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
 import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
+import { extensionIsRevit } from './uploadFileForm.helpers';
 
 const DEFAULT_SORT_CONFIG = {
 	column: ['file'],
@@ -316,6 +317,7 @@ export const UploadFileForm = ({
 										value={getValues(`uploads.${origIndex}`)}
 										key={sortedList[getSortedListSelectedIndex()].uploadId}
 										isSpm={extensionIsSpm(sortedList[getSortedListSelectedIndex()].extension)}
+										isRevit={extensionIsRevit(sortedList[getSortedListSelectedIndex()].extension)} // fix to match isSpm method with #4258
 										onChange={(field: string, val: string | boolean) => {
 											// @ts-ignore
 											setValue(`uploads.${origIndex}.${field}`, val);

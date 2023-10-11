@@ -32,6 +32,7 @@ import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, Hidd
 type ISidebarForm = {
 	value: UploadItemFields,
 	isSpm: boolean;
+	isRevit: boolean; // fix to match isSpm method with #4258
 	onChange: (name: string, val: string | boolean) => void;
 };
 
@@ -39,6 +40,7 @@ export const SidebarForm = ({
 	value,
 	onChange,
 	isSpm,
+	isRevit, // fix to match isSpm method with #4258
 }: ISidebarForm): JSX.Element => {
 	const { control, formState: { errors }, getValues, setValue, reset } = useForm<UploadItemFields>({
 		defaultValues: value,
@@ -144,22 +146,24 @@ export const SidebarForm = ({
 				label={formatMessage({ id: 'uploads.sidebar.revisionDesc', defaultMessage: 'Revision Description' })}
 				formError={errors.revisionDesc}
 			/>
-			<FormSelect
-				required
-				control={control}
-				name="lod"
-				label={formatMessage({ id: 'uploads.sidebar.lod', defaultMessage: 'Level of Detail' })}
-				onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-					setValue('lod', e.target.value);
-					updateValue('lod');
-				}}
-			>
-				{LOD_VALUES.map((type) => (
-					<MenuItem key={type.value} value={type.value}>
-						{type.name}
-					</MenuItem>
-				))}
-			</FormSelect>
+			{isRevit && (
+				<FormSelect
+					required
+					control={control}
+					name="lod"
+					label={formatMessage({ id: 'uploads.sidebar.lod', defaultMessage: 'Level of Detail' })}
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+						setValue('lod', e.target.value);
+						updateValue('lod');
+					}}
+				>
+					{LOD_VALUES.map((type) => (
+						<MenuItem key={type.value} value={type.value}>
+							{type.name}
+						</MenuItem>
+					))}
+				</FormSelect>
+			)}
 
 			{isSpm && (
 				<>
