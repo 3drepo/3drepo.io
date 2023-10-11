@@ -48,7 +48,6 @@ interface IProps {
 	totalMeshes: number;
 	canUpdate: boolean;
 	selectedNodes: any;
-	fieldNames: any[];
 	criteriaFieldState: ICriteriaFieldState;
 	createGroup: (teamspace: any, modelId: any, revision: any) => void;
 	updateGroup: (teamspace: any, modelId: any, revision: any, groupId: any) => void;
