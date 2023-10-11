@@ -41,14 +41,14 @@ type EditFederationContainersListItemProps = {
 	container: IContainer;
 	filterQuery?: string;
 	icon: ComponentType<IconButtonProps>;
-	onClick: (id: string) => void;
+	onItemClick: (id: string) => void;
 };
 export const EditFederationContainersListItem = memo(({
 	icon: Icon,
 	isSelected,
 	container,
 	filterQuery,
-	onClick,
+	onItemClick,
 }: EditFederationContainersListItemProps) => {
 	const { setGroupsByContainer, groupsByContainer, groups, includedContainers } = useContext(EditFederationContext);
 	const [groupValue, setGroupValue] = useState(groupsByContainer[container._id] || null);
@@ -91,7 +91,7 @@ export const EditFederationContainersListItem = memo(({
 		>
 			<DashboardListItemRow
 				selected={isSelected}
-				onClick={() => onClick(container._id)}
+				onClick={() => onItemClick(container._id)}
 			>
 				<DashboardListItemContainerTitle
 					minWidth={116}
@@ -101,7 +101,7 @@ export const EditFederationContainersListItem = memo(({
 				/>
 				<DashboardListItemButton
 					width={186}
-					onClick={() => onClick(container._id)}
+					onClick={() => onItemClick(container._id)}
 					hideWhenSmallerThan={Display.Desktop}
 					tooltipTitle={
 						<FormattedMessage id="modal.editFederation.list.item.revisions.tooltip" defaultMessage="View revisions" />

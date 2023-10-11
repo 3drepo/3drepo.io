@@ -138,7 +138,7 @@ export const EditFederationContainers = ({
 								isSelected={container._id === selectedItemId}
 								container={container}
 								filterQuery={query}
-								onClick={selectOrToggleItem}
+								onItemClick={selectOrToggleItem}
 							/>
 						)))
 					) : (
