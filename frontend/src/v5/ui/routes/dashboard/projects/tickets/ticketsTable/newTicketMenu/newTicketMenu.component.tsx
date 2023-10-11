@@ -21,17 +21,22 @@ import { ActionMenuProps } from '@controls/actionMenu/actionMenu.component';
 import { FormattedMessage } from 'react-intl';
 import { MenuList, MenuItem } from '@mui/material';
 import { Label } from './newTicketMenu.styles';
-import { getSelectedModels } from './newTicketMenu.helpers';
+import { useSelectedModels } from './useSelectedModels';
 
 type NewTicketMenuProps = Omit<ActionMenuProps, 'children'> & {
 	onContainerOrFederationClick: (id: string) => void;
 };
 export const NewTicketMenu = ({ onContainerOrFederationClick, TriggerButton, ...props }: NewTicketMenuProps) => {
-	const selectableModels = getSelectedModels();
+	const selectableModels = useSelectedModels();
 
 	if (selectableModels.length === 1) {
+		const handleClick = () => {
+			if (props.disabled) return;
+			onContainerOrFederationClick(selectableModels[0]._id);
+		}
+
 		return (
-			<div onClick={() => onContainerOrFederationClick(selectableModels[0]._id)}>
+			<div onClick={handleClick}>
 				{TriggerButton}
 			</div>
 		);
