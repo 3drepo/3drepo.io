@@ -33,7 +33,7 @@ export const NewTicketMenu = ({ onContainerOrFederationClick, TriggerButton, ...
 		const handleClick = () => {
 			if (props.disabled) return;
 			onContainerOrFederationClick(selectableModels[0]._id);
-		}
+		};
 
 		return (
 			<div onClick={handleClick}>
