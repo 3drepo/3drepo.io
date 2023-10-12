@@ -16,7 +16,7 @@
  */
 
 import { ErrorTooltip } from '@controls/errorTooltip';
-import { useFormState } from 'react-hook-form';
+import { useFormContext, useFormState } from 'react-hook-form';
 import { get } from 'lodash';
 import { RevisionTagField } from './uploadListItemRevisionTag.styles';
 
@@ -43,15 +43,16 @@ export const UploadListItemRevisionTag = ({
 			),
 		},
 	} : {};
+	const { register } = useFormContext();
+
 
 	return (
 		<RevisionTagField
 			disabled={disabled}
 			formError={errorMessage}
-			required
-			name={name}
 			{...errorAdornment}
 			{...props}
+			{...register(name)}
 		/>
 	);
 };

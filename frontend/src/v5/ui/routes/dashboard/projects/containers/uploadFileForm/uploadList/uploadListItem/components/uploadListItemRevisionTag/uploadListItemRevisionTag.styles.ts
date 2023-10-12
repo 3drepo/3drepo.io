@@ -16,9 +16,9 @@
  */
 
 import styled from 'styled-components';
-import { FormTextField as FormTextFieldBase } from '@controls/inputs/formInputs.component';
+import { TextField } from '../../../inputs';
 
-export const RevisionTagField = styled(FormTextFieldBase)`
+export const RevisionTagField = styled(TextField)`
 	margin: 0 12px;
 
 	.MuiFormHelperText-root {
