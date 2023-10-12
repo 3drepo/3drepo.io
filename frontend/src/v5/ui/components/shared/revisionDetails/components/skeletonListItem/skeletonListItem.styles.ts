@@ -17,7 +17,7 @@
 import styled from 'styled-components';
 
 import { DashboardListSkeletonItem } from '@components/dashboard/dashboardList/dashboardListSkeletonItem';
-import { SkeletonBlock as SkeletonBlockComponent } from '@controls/skeletonBlock';
+import { SkeletonBlock as SkeletonBlockBase } from '@controls/skeletonBlock/skeletonBlock.styles';
 
 export const Container = styled(DashboardListSkeletonItem)`
 	height: 48px;
@@ -28,7 +28,7 @@ export const Container = styled(DashboardListSkeletonItem)`
 	width: auto;
 `;
 
-export const SkeletonBlock = styled(SkeletonBlockComponent)`
+export const SkeletonBlock = styled(SkeletonBlockBase)`
 	height: 8px;
 	background-color: ${({ theme }) => theme.palette.secondary.lightest};
 `;

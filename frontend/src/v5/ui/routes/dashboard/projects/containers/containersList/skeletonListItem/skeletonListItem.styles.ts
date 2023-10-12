@@ -18,6 +18,7 @@ import { DashboardListSkeletonItem } from '@components/dashboard/dashboardList/d
 import styled from 'styled-components';
 
 export const TitlesContainer = styled.div`
+	width: 100%;
 	& > :first-child {
 		margin-bottom: 8px;
 	}
