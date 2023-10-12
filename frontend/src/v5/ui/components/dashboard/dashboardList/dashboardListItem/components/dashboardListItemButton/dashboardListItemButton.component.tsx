@@ -21,7 +21,7 @@ import { Tooltip } from '@mui/material';
 import { Button } from './dashboardListItemButton.styles';
 
 interface IDashboardListItemButton extends FixedOrGrowContainerProps {
-	onClick: Dispatch<SyntheticEvent>;
+	onClick?: Dispatch<SyntheticEvent>;
 	tooltipTitle?: ReactNode;
 	disabled?: boolean
 }
