@@ -21,7 +21,8 @@ import { sortBy } from 'lodash';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { isCommenterRole } from '@/v5/store/store.helpers';
-import { Header, Headers, Group, NewTicketRow, NewTicketText, DoubleHeader } from './ticketsTableGroup.styles';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { Header, Headers, Group, NewTicketRow, NewTicketText } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
@@ -38,43 +39,42 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 	const showModelName = modelsIds.split(',').length > 1;
 	const models = useSelectedModels();
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(ticketsWithModelIdAndName[0].type);
+	const hasProperties = template?.config?.issueProperties;
+	const hasSafetibase = template?.modules?.some((module) => module.type === 'safetibase');
 
 	return (
 		<>
 			{!!ticketsWithModelIdAndName.length && (
 				<Headers>
-					<Header>
+					<Header width={80}>
 						<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
 					</Header>
-					<DoubleHeader>
-						<Header>
-							<FormattedMessage id="ticketTable.column.header.title" defaultMessage="title" />
-						</Header>
-						{showModelName && (
-							<Header>
-								<FormattedMessage id="ticketTable.column.header.federationContainer" defaultMessage="federation / container" />
-							</Header>
-						)}
-					</DoubleHeader>
 					<Header>
+						<FormattedMessage id="ticketTable.column.header.title" defaultMessage="title" />
+					</Header>
+					<Header width={187} hidden={!showModelName}>
+						<FormattedMessage id="ticketTable.column.header.federationContainer" defaultMessage="federation / container" />
+					</Header>
+					<Header width={96} hidden={!hasProperties}> 
 						<FormattedMessage id="ticketTable.column.header.assignees" defaultMessage="assignees" />
 					</Header>
-					<Header>
+					<Header width={62}>
 						<FormattedMessage id="ticketTable.column.header.owner" defaultMessage="owner" />
 					</Header>
-					<Header>
+					<Header width={90} hidden={!hasProperties}>
 						<FormattedMessage id="ticketTable.column.header.dueDate" defaultMessage="due date" />
 					</Header>
-					<Header>
+					<Header width={90} hidden={!hasProperties}>
 						<FormattedMessage id="ticketTable.column.header.priority" defaultMessage="priority" />
 					</Header>
-					<Header>
+					<Header width={100} hidden={!hasProperties}>
 						<FormattedMessage id="ticketTable.column.header.status" defaultMessage="status" />
 					</Header>
-					<Header>
+					<Header width={137} hidden={!hasSafetibase}>
 						<FormattedMessage id="ticketTable.column.header.levelOfRisk" defaultMessage="level of risk" />
 					</Header>
-					<Header>
+					<Header width={134} hidden={!hasSafetibase}>
 						<FormattedMessage id="ticketTable.column.header.treatmentStatus" defaultMessage="treatment status" />
 					</Header>
 				</Headers>

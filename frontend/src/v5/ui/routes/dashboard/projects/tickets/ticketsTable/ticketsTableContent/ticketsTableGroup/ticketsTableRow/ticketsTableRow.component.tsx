@@ -28,7 +28,7 @@ import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopover
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { Row, Cell, DoubleCell, CellChipText, CellOwner, OverflowContainer, UnassignedAssignees, CellDate } from './ticketsTableRow.styles';
+import { Row, Cell, CellChipText, CellOwner, OverflowContainer, UnassignedAssignees, CellDate } from './ticketsTableRow.styles';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
@@ -42,7 +42,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
 
-	if (!properties || !template?.code) return (<span>Loading</span>);
+	if (!properties || !template?.code) return null;
 
 	const {
 		owner,
@@ -70,33 +70,29 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 
 	return (
 		<Row key={id} onClickCapture={handleClick} $selected={selected}>
-			<Cell>
+			<Cell width={80}>
 				<Highlight search={query}>{`${template.code}:${number}`}</Highlight>
 			</Cell>
-			<DoubleCell showModelName={showModelName}>
-				<Cell>
-					<Tooltip title={title}>
-						<OverflowContainer>
-							<Highlight search={query}>
-								{title}
-							</Highlight>
-						</OverflowContainer>
-					</Tooltip>
-				</Cell>
-				{showModelName && (
-					<Cell>
-						<Tooltip title={modelName}>
-							<OverflowContainer>
-								<Highlight search={query}>
-									{modelName}
-								</Highlight>
-							</OverflowContainer>
-						</Tooltip>
-					</Cell>
-				)}
-			</DoubleCell>
 			<Cell>
-				{hasProperties && (assignees?.length ? (
+				<Tooltip title={title}>
+					<OverflowContainer>
+						<Highlight search={query}>
+							{title}
+						</Highlight>
+					</OverflowContainer>
+				</Tooltip>
+			</Cell>
+			<Cell width={187} hidden={!showModelName}>
+				<Tooltip title={modelName}>
+					<OverflowContainer>
+						<Highlight search={query}>
+							{modelName}
+						</Highlight>
+					</OverflowContainer>
+				</Tooltip>
+			</Cell>
+			<Cell width={96} hidden={!hasProperties}>
+				{assignees?.length ? (
 					<AssigneesSelect value={assignees} multiple disabled />
 				) : (
 					<OverflowContainer>
@@ -104,25 +100,25 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 							<FormattedMessage id="ticketsTable.row.assignees.unassigned" defaultMessage="Unassigned" />
 						</UnassignedAssignees>
 					</OverflowContainer>
-				))}
+				)}
 			</Cell>
-			<CellOwner>
+			<CellOwner width={62}>
 				<UserPopoverCircle user={ownerAsUser} />
 			</CellOwner>
-			<CellDate>
-				{hasProperties && (<DueDateWithIcon value={dueDate} disabled />)}
+			<CellDate width={90} hidden={!hasProperties}>
+				<DueDateWithIcon value={dueDate} disabled />
 			</CellDate>
-			<CellChipText>
-				{hasProperties && (<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />) }
+			<CellChipText width={90} hidden={!hasProperties}>
+				<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
 			</CellChipText>
-			<CellChipText>
-				{hasProperties && (<Chip {...STATUS_MAP[status]} variant="text" />) }
+			<CellChipText width={100} hidden={!hasProperties}>
+				<Chip {...STATUS_MAP[status]} variant="text" />
 			</CellChipText>
-			<Cell>
-				{hasSafetibase && (<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />)}
+			<Cell width={137} hidden={!hasSafetibase}>
+				<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />
 			</Cell>
-			<Cell>
-				{hasSafetibase && (<Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />)}
+			<Cell width={134} hidden={!hasSafetibase}>
+				<Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />
 			</Cell>
 		</Row>
 	);

@@ -15,27 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Container as FixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.styles';
 import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
 
 export const Headers = styled.div`
-	display: grid;
-	grid-template-columns: 80fr 493fr 96fr 62fr 90fr 90fr 100fr 137fr 134fr;
-	justify-content: flex-start;
-	margin-bottom: 10px; 
-`;
-
-export const Header = styled(Typography).attrs({
-	variant: 'kicker',
-})`
-	color: ${({ theme }) => theme.palette.base.main};
-	margin-left: 10px;
-`;
-
-export const DoubleHeader = styled.div`
-	display: grid;
-	grid-template-columns: auto 38%;
+	display: flex;
 	gap: 1px;
+	margin-bottom: 10px;
+	width: 100%;
+	width: min(90vw, 1289px);
+`;
+
+export const Header = styled(FixedOrGrowContainer)<{ hidden?: boolean }>`
+	${({ theme }) => theme.typography.kicker};
+	color: ${({ theme }) => theme.palette.base.main};
+	padding-left: 10px;
+	text-align: start;
+	box-sizing: border-box;
+
+	${({ width }) => width ? css`
+		flex: 0 0 ${width};
+	` : css`
+		flex: 1;
+		min-width: 300px;
+	`}
+
+	${({ hidden }) => hidden && css`
+		display: none;
+	`}
 `;
 
 export const Group = styled.div`

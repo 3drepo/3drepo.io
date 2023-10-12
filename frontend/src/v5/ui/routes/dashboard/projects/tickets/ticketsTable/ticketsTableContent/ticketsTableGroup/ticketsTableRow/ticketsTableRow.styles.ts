@@ -17,8 +17,9 @@
 
 import { DueDateWithIconContainer } from '@controls/dueDate/dueDate.styles';
 import styled, { css } from 'styled-components';
+import { Container as FixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.styles';
 
-export const Cell = styled.div`
+export const Cell = styled(FixedOrGrowContainer)<{ hidden?: boolean }>`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	height: 100%;
 	padding: 0 10px;
@@ -27,24 +28,27 @@ export const Cell = styled.div`
 	justify-content: flex-start;
 	font-weight: 500;
 	overflow: hidden;
-`;
+	box-sizing: border-box;
 
-export const DoubleCell = styled.div<{ showModelName: boolean }>`
-	display: grid;
-	gap: 1px;
+	${({ width }) => width ? css`
+		flex: 0 0 ${width};
+	` : css`
+		flex: 1;
+		min-width: 300px;
+	`}
 
-	${({ showModelName }) => showModelName && css`
-		grid-template-columns: auto 38%;
+	${({ hidden }) => hidden && css`
+		display: none;
 	`}
 `;
 
 // TODO - fix when new palette is released
-export const Row = styled.div<{ $selected: boolean }>`
-	display: grid;
-	grid-template-columns: 80fr 493fr 96fr 62fr 90fr 90fr 100fr 137fr 134fr;
+export const Row = styled.div<{ $selected?: boolean }>`
+	display: flex;
 	gap: 1px;
 	height: 37px;
 	cursor: pointer;
+	width: min(90vw, 1289px);
 
 	${Cell} {
 		background: ${({ $selected, theme }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
