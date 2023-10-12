@@ -179,28 +179,26 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 
 	public async componentDidUpdate(prevProps: IProps) {
 		const { colorOverrides, issuePins, riskPins, measurementPins, hasGisCoordinates,
-			gisCoordinates, gisLayers, transparencies, transformations: transformation,
+			gisCoordinates, gisLayers, transparencies, transformations,
 			sequenceHiddenNodes, viewerManipulationEnabled, viewer,
 			issuesShapes, issuesHighlightedShapes, risksShapes, risksHighlightedShapes,
 			ticketPins
 		} = this.props;
 
-		if (prevProps.transparencies && !isEqual(prevProps.sequenceHiddenNodes, sequenceHiddenNodes)) {
+		if (sequenceHiddenNodes && !isEqual(prevProps.sequenceHiddenNodes, sequenceHiddenNodes)) {
 			this.props.handleTransparenciesVisibility(sequenceHiddenNodes);
 		}
 
-		if (prevProps.colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
-			// console.log(JSON.stringify({prevcolorOverrides:  prevProps.colorOverrides, colorOverrides}, null, '\t'));
+		if (colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
 			this.renderColorOverrides(prevProps.colorOverrides, colorOverrides);
 		}
 
-		if (prevProps.transparencies && !isEqual(transparencies, prevProps.transparencies)) {
-			// console.log(JSON.stringify({prevtransparencies:  prevProps.transparencies, transparencies}, null, '\t'));
+		if (transparencies && !isEqual(transparencies, prevProps.transparencies)) {
 			this.props.handleTransparencyOverridesChange(transparencies, prevProps.transparencies);
 		}
 
-		if (prevProps.transformations && !isEqual(transformation, prevProps.transformations)) {
-			this.renderTransformations(prevProps.transformations, transformation);
+		if (transformations && !isEqual(transformations, prevProps.transformations)) {
+			this.renderTransformations(prevProps.transformations, transformations);
 		}
 
 		if (!isEqual(issuePins, prevProps.issuePins)) {
