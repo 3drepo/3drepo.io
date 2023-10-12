@@ -69,7 +69,10 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		return (isCompletedIssueProperty || isCompletedTreatmentStatus) === showingCompleted;
 	};
 
-	const applyTemplatesFilter = (items) => items.filter((ticket) => !selectedTemplates.size || selectedTemplates.has(ticket.type));
+	const filterByTemplates = (items) => {
+		if (!selectedTemplates.size) return items;
+		return items.filter((ticket) => selectedTemplates.has(ticket.type));
+	};
 
 	useEffect(() => {
 		const itemsFilteredByComplete = tickets.filter((ticket) => matchesCompletedState(ticket));
@@ -146,9 +149,9 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 								);
 							})}
 						</Filters>
-						{ applyTemplatesFilter(filteredItems).length ? (
+						{ filterByTemplates(filteredItems).length ? (
 							<List>
-								{applyTemplatesFilter(filteredItems).map((ticket) => (
+								{filterByTemplates(filteredItems).map((ticket) => (
 									<TicketItem
 										ticket={ticket}
 										key={ticket._id}
