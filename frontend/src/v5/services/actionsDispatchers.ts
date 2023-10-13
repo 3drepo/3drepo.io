@@ -25,6 +25,7 @@ import { FederationsActions, IFederationsActionCreators } from '@/v5/store/feder
 import { GroupsActions } from '@/v4/modules/groups';
 import { IProjectsActions, ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { IRevisionsActionCreators, RevisionsActions } from '@/v5/store/revisions/revisions.redux';
+import { SequencesActions } from '@/v4/modules/sequences';
 import { TicketsActions, ITicketsActionCreators } from '@/v5/store/tickets/tickets.redux';
 import { TicketsCardActions, ITicketsCardActionCreators } from '@/v5/store/tickets/card/ticketsCard.redux';
 import { ITeamspacesActionCreators, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
@@ -40,6 +41,10 @@ interface IGroupsActionCreators {
 	showDetails: (group: any) => Action;
 }
 
+interface ISequencesActionCreators {
+	showSequenceDate: (date: Date) => Action;
+}
+
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
 export const ContainersActionsDispatchers = createActionsDispatchers<IContainersActionCreators>(ContainersActions);
 export const CurrentUserActionsDispatchers = createActionsDispatchers<ICurrentUserActionCreators>(CurrentUserActions);
@@ -48,6 +53,7 @@ export const FederationsActionsDispatchers = createActionsDispatchers<IFederatio
 export const GroupsActionsDispatchers = createActionsDispatchers<IGroupsActionCreators>(GroupsActions);
 export const ProjectsActionsDispatchers = createActionsDispatchers<IProjectsActions>(ProjectsActions);
 export const RevisionsActionsDispatchers = createActionsDispatchers<IRevisionsActionCreators>(RevisionsActions);
+export const SequencesActionsDispatchers = createActionsDispatchers<ISequencesActionCreators>(SequencesActions);
 export const TeamspacesActionsDispatchers = createActionsDispatchers<ITeamspacesActionCreators>(TeamspacesActions);
 export const TicketsActionsDispatchers = createActionsDispatchers<ITicketsActionCreators>(TicketsActions);
 export const TicketsCardActionsDispatchers = createActionsDispatchers<ITicketsCardActionCreators>(TicketsCardActions);

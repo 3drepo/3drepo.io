@@ -21,6 +21,7 @@ import { InputController } from '@controls/inputs/inputController.component';
 import { get } from 'lodash';
 import { Fragment } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { SEQUENCING_MODULE } from '@/v5/store/tickets/tickets.helpers';
 import { TicketProperty } from './properties/properties.helper';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { ErrorTextGap, PropertiesListContainer } from './ticketsForm.styles';
@@ -38,12 +39,13 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 		<PropertiesListContainer>
 			{properties.map(({
 				name,
-				type,
+				type: basicType,
 				readOnly: disabled,
 				required,
 				values,
 			}) => {
 				const inputName = `${module}.${name}`;
+				const type = module === SEQUENCING_MODULE ? 'sequencing' : basicType;
 				const PropertyComponent = TicketProperty[type] || UnsupportedProperty;
 				const formError = get(formState.errors, inputName);
 				return (

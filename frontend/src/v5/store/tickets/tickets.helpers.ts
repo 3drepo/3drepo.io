@@ -28,6 +28,10 @@ import { useParams } from 'react-router-dom';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 
+export const SEQUENCING_MODULE = 'modules.sequencing';
+export const SEQUENCING_MODULE_START = `${SEQUENCING_MODULE}.Start Time`;
+export const SEQUENCING_MODULE_END = `${SEQUENCING_MODULE}.End Time`;
+
 export const modelIsFederation = (modelId: string) => (
 	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
 );
