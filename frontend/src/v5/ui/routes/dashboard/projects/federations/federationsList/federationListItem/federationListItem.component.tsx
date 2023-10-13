@@ -18,6 +18,7 @@
 import { memo, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { formatDate } from '@/v5/services/intl';
+import { useParams, useHistory } from 'react-router-dom';
 
 import {
 	DashboardListItemButton,
@@ -32,7 +33,6 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { Display } from '@/v5/ui/themes/media';
 import { EditFederationModal } from '@/v5/ui/routes/dashboard/projects/federations/editFederationModal/editFederationModal.component';
 
-import { useParams, Link } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { enableRealtimeFederationNewRevision, enableRealtimeFederationRemoved, enableRealtimeFederationUpdateSettings } from '@/v5/services/realtime/federation.events';
 import { DialogsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -48,6 +48,9 @@ export const FederationListItem = memo(({
 	federation,
 }: IFederationListItem): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
+	const history = useHistory();
+
+	const openBoardPage = (boardPage: 'issues' | 'risks') => history.push(boardRoute(teamspace, project, boardPage, federation._id));
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
 		if (checked) {
@@ -73,36 +76,33 @@ export const FederationListItem = memo(({
 						minWidth={90}
 						federation={federation}
 					/>
-					<Link to={boardRoute(teamspace, project, 'issues', federation._id)}>
-						<DashboardListItemButton
-							hideWhenSmallerThan={1080}
-							width={165}
-							tooltipTitle={
-								<FormattedMessage id="federations.list.item.issues.tooltip" defaultMessage="View issues" />
-							}
-						>
-							<FormattedMessage
-								id="federations.list.item.issues"
-								defaultMessage="{count, plural, =0 {No issues} one {# issue} other {# issues}}"
-								values={{ count: federation.issues }}
-							/>
-						</DashboardListItemButton>
-					</Link>
-					<Link to={boardRoute(teamspace, project, 'risks', federation._id)}>
-						<DashboardListItemButton
-							hideWhenSmallerThan={890}
-							width={165}
-							tooltipTitle={
-								<FormattedMessage id="federations.list.item.risks.tooltip" defaultMessage="View risks" />
-							}
-						>
-							<FormattedMessage
-								id="federations.list.item.risks"
-								defaultMessage="{count, plural, =0 {No risks} one {# risk} other {# risks}}"
-								values={{ count: federation.risks }}
-							/>
-						</DashboardListItemButton>
-					</Link>
+					{/* issues */}
+					<DashboardListItemButton
+						hideWhenSmallerThan={1080}
+						width={165}
+						onClick={() => openBoardPage('issues')}
+						tooltipTitle={<FormattedMessage id="federations.list.item.issues.tooltip" defaultMessage="View issues" />}
+					>
+						<FormattedMessage
+							id="federations.list.item.issues"
+							defaultMessage="{count, plural, =0 {No issues} one {# issue} other {# issues}}"
+							values={{ count: federation.issues }}
+						/>
+					</DashboardListItemButton>
+					<DashboardListItemButton
+						hideWhenSmallerThan={890}
+						onClick={() => openBoardPage('risks')}
+						width={165}
+						tooltipTitle={
+							<FormattedMessage id="federations.list.item.risks.tooltip" defaultMessage="View risks" />
+						}
+					>
+						<FormattedMessage
+							id="federations.list.item.risks"
+							defaultMessage="{count, plural, =0 {No risks} one {# risk} other {# risks}}"
+							values={{ count: federation.risks }}
+						/>
+					</DashboardListItemButton>
 					<DashboardListItemButton
 						hideWhenSmallerThan={Display.Tablet}
 						onClick={onClickEdit}
