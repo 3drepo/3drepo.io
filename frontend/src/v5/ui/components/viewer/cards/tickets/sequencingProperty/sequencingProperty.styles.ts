@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,36 +14,33 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
-import TextFieldBase from '@mui/material/TextField';
 
-export const TextField = styled(TextFieldBase)`
-	caret-color: transparent;
+import styled, { css } from 'styled-components';
+import { DateTimePicker as DateTimePickerBase } from '@controls/inputs/datePicker/dateTimePicker.component';
 
-	button, .MuiInputAdornment {
-		color: currentColor;
+export const DateTimePicker = styled(DateTimePickerBase)`
+	/* .MuiIconButton-root {
+		cursor: unset;
+	} */
+`;
+
+export const Icons = styled.div`
+	display: flex;
+	flex-direction: row;
+	place-content: center;
+	height: 100%;
+	gap: 8px;
+	z-index: 1;
+	cursor: initial;
+
+	svg {
+		width: 14px;
+		height: 14px;
 	}
+`;
 
-	.MuiInputBase-root {
-		padding: 0;
-
-		&, & input {
-			cursor: pointer;
-		}
-
-		&.Mui-disabled {
-			&, & * {
-				cursor: context-menu;
-			}
-		}
-	}
-
-	.MuiIconButton-edgeEnd {
-		margin: 0;
-		padding: 5px 10px;
-
-		&:hover {
-			background-color: transparent;
-		}
-	}
+export const IconContainer = styled.div`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	margin-top: -2px;
+	cursor: pointer;
 `;
