@@ -44,9 +44,6 @@ export default {
 		disabled: {
 			type: 'boolean',
 		},
-		errorButton: {
-			type: 'boolean',
-		},
 	},
 	args: {
 		children: 'Controls Button',
