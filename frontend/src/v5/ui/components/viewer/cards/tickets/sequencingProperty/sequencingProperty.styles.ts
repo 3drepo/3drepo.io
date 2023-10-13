@@ -15,14 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { DateTimePicker as DateTimePickerBase } from '@controls/inputs/datePicker/dateTimePicker.component';
-
-export const DateTimePicker = styled(DateTimePickerBase)`
-	/* .MuiIconButton-root {
-		cursor: unset;
-	} */
-`;
+import styled from 'styled-components';
 
 export const Icons = styled.div`
 	display: flex;
