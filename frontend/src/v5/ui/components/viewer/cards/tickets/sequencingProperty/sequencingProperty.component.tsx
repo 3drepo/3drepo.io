@@ -31,10 +31,7 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 
 	const openSequencesCard = () => SequencesActionsDispatchers.showSequenceDate(new Date(value));
 
-	const getDateTimeBoundary = (limit) => {
-		if (limit !== props.name) return undefined;
-		return new Date(getValues(limit));
-	};
+	const getDateTimeBoundary = (limit) => dayjs(limit === props.name ? null : getValues(limit));
 
 	const handleChange = (newValue) => onChange(newValue ? newValue?.toDate()?.getTime() : newValue);
 
@@ -54,14 +51,13 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 					</Icons>
 				)),
 			}}
-			// If value is 0 display it as null to prevent it showing as 1/1/1970
-			value={value ? dayjs(value) : 0}
+			value={value}
 			// onChange is a required prop in DatePicker, however it is not needed as onAccept works better
 			// (onChange triggers when changing year, onAccept only when a date is finally chosen)
 			onChange={() => true}
 			onAccept={handleChange}
-			// minDateTime={getDateTimeBoundary(SEQUENCING_MODULE_START)}
-			// maxDateTime={getDateTimeBoundary(SEQUENCING_MODULE_END)}
+			minDateTime={getDateTimeBoundary(SEQUENCING_MODULE_START)}
+			maxDateTime={getDateTimeBoundary(SEQUENCING_MODULE_END)}
 			{...props}
 		/>
 	);
