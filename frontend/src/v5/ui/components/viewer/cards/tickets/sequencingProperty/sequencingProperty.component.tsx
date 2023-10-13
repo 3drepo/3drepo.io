@@ -18,7 +18,8 @@
 import { DateTimePickerProps } from '@controls/inputs/datePicker/dateTimePicker.component';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import CloseIcon from '@assets/icons/controls/clear_circle.svg';
-import { IconContainer, Icons, DateTimePicker } from './sequencingProperty.styles';
+import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
+import { IconContainer, Icons } from './sequencingProperty.styles';
 import { useEffect } from 'react';
 import dayjs from 'dayjs';
 import { SequencesActionsDispatchers } from '@/v5/services/actionsDispatchers';
