@@ -15,24 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SyntheticEvent, useState } from 'react';
-import { IContainer } from '@/v5/store/containers/containers.types';
+import { SyntheticEvent } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { IFederation } from '@/v5/store/federations/federations.types';
 
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IFormModal } from '@controls/formModal/formModal.component';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEqual } from 'lodash';
-import { EditFederation } from './editFederation';
+import { IFederation } from '@/v5/store/federations/federations.types';
+import { EditFederation } from './editFederation/editFederation.component';
 import { FormModal } from './editFederationModal.styles';
+import { EditFederationContext, EditFederationContextComponent, EditFederationContextType } from './editFederationContext';
 
 type EditFederationModalProps = IFormModal & {
 	open: boolean;
 	federation: IFederation;
 	onClickClose?: () => void;
 };
-
 export const EditFederationModal = ({
 	open,
 	federation,
@@ -41,42 +40,41 @@ export const EditFederationModal = ({
 }: EditFederationModalProps): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const [includedContainers, setIncludedContainers] = useState<IContainer[]>([]);
 
-	const saveChanges = (event: SyntheticEvent) => {
+	const saveChanges = (event: SyntheticEvent, groupedContainers) => {
 		FederationsActionsDispatchers.updateFederationContainers(
 			teamspace,
 			project,
 			federation._id,
-			includedContainers.map((container) => container._id),
+			groupedContainers,
 		);
 		event.preventDefault();
 		onClickClose();
 	};
-	const formIsDirty = () => !isEqual(
-		includedContainers.map((c) => c._id),
-		federation.containers,
-	);
+
 	return (
-		<FormModal
-			open={open}
-			title={
-				formatMessage({
-					id: 'modal.editFederation.title',
-					defaultMessage: 'Edit {federationName}',
-				}, { federationName: federation.name })
-			}
-			confirmLabel={formatMessage({ id: 'modal.editFederation.confirm', defaultMessage: 'Save Changes' })}
-			onClickClose={onClickClose}
-			onSubmit={saveChanges}
-			isValid={includedContainers.length && formIsDirty()}
-			maxWidth="lg"
-			{...otherProps}
-		>
-			<EditFederation
-				federation={federation}
-				onContainersChange={setIncludedContainers}
-			/>
-		</FormModal>
+		<EditFederationContextComponent federation={federation}>
+			<EditFederationContext.Consumer>
+				{({ getGroupedContainers, includedContainers }: EditFederationContextType) => (
+					<FormModal
+						open={open}
+						title={
+							formatMessage({
+								id: 'modal.editFederation.title',
+								defaultMessage: 'Edit {federationName}',
+							}, { federationName: federation.name })
+						}
+						confirmLabel={formatMessage({ id: 'modal.editFederation.confirm', defaultMessage: 'Save Changes' })}
+						onClickClose={onClickClose}
+						onSubmit={(e) => saveChanges(e, getGroupedContainers())}
+						isValid={includedContainers.length && !isEqual(getGroupedContainers(), federation.containers)}
+						maxWidth="lg"
+						{...otherProps}
+					>
+						<EditFederation federation={federation} />
+					</FormModal>
+				)}
+			</EditFederationContext.Consumer>
+		</EditFederationContextComponent>
 	);
 };

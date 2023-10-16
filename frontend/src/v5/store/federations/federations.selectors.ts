@@ -56,7 +56,7 @@ export const selectContainersByFederationId = createSelector(
 	selectContainers,
 	selectFederationById,
 	(containers, federation) => compact(federation?.containers?.map(
-		(containerId) => containers.find((container) => container._id === containerId),
+		({ _id }) => containers.find((container) => container._id === _id),
 	)) ?? [],
 );
 

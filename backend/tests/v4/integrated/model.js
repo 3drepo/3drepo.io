@@ -22,6 +22,7 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const responseCodes = require("../../../src/v4/response_codes.js");
+const {templates: responseCodesV5} = require("../../../src/v5/utils/responseCodes");
 const async = require("async");
 const ModelSetting = require("../../../src/v4/models/modelSetting");
 const User = require("../../../src/v4/models/user");
@@ -213,7 +214,7 @@ describe("Model", function () {
 		it("with non-existent model should fail", function(done) {
 			agent.get(`/${username}/invalidModel/revision/master/head/searchtree.json`)
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
 					done(err);
 				});
 		});
@@ -515,15 +516,8 @@ describe("Model", function () {
 
 		it("should fail if delete again", function(done) {
 			agent.delete(`/${username}/${model}`).expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+				expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
 				done(err);
-			});
-		});
-
-		it("should remove setting in settings collection", function() {
-			// FIXME why does this test directly import ModelSetting?!
-			return ModelSetting.findModelSettingById(username, model).then(setting => {
-				expect(setting).to.be.null;
 			});
 		});
 

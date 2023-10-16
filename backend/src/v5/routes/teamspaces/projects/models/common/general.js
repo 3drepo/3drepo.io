@@ -454,8 +454,16 @@ const establishRoutes = (isFed) => {
 	 *                   type: array
 	 *                   description: The IDs of the models the model consists of
 	 *                   items:
-	 *                     type: string
-	 *                     format: uuid
+	 *                     type: object
+	 *                     properties:
+	 *                       _id:
+	 *                         description: container id
+	 *                         type: string
+	 *                         format: uuid
+	 *                       group:
+	 *                         description: federation group the container is under (optional)
+	 *                         type: string
+	 *                         example: Architectural
 	 *                 tickets:
 	 *                   type: object
 	 *                   properties:

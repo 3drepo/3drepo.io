@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import { ChangeEvent, useEffect, useMemo } from 'react';
 
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
@@ -26,11 +26,13 @@ import { SidebarSchema } from '@/v5/validation/containerAndFederationSchemes/con
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { MenuItem } from '@mui/material';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
+import { LOD_VALUES } from '@/v5/store/revisions/revisions.types';
 import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
 
 type ISidebarForm = {
 	value: UploadItemFields,
 	isSpm: boolean;
+	isRevit: boolean; // fix to match isSpm method with #4258
 	onChange: (name: string, val: string | boolean) => void;
 };
 
@@ -38,6 +40,7 @@ export const SidebarForm = ({
 	value,
 	onChange,
 	isSpm,
+	isRevit, // fix to match isSpm method with #4258
 }: ISidebarForm): JSX.Element => {
 	const { control, formState: { errors }, getValues, setValue, reset } = useForm<UploadItemFields>({
 		defaultValues: value,
@@ -85,7 +88,7 @@ export const SidebarForm = ({
 					name="containerUnit"
 					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
 					defaultValue="mm"
-					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+					onChange={(e: ChangeEvent<HTMLInputElement>) => {
 						setValue('containerUnit', e.target.value);
 						updateValue('containerUnit');
 					}}
@@ -143,6 +146,24 @@ export const SidebarForm = ({
 				label={formatMessage({ id: 'uploads.sidebar.revisionDesc', defaultMessage: 'Revision Description' })}
 				formError={errors.revisionDesc}
 			/>
+			{isRevit && (
+				<FormSelect
+					required
+					control={control}
+					name="lod"
+					label={formatMessage({ id: 'uploads.sidebar.lod', defaultMessage: 'Level of Detail' })}
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+						setValue('lod', e.target.value);
+						updateValue('lod');
+					}}
+				>
+					{LOD_VALUES.map((type) => (
+						<MenuItem key={type.value} value={type.value}>
+							{type.name}
+						</MenuItem>
+					))}
+				</FormSelect>
+			)}
 
 			{isSpm && (
 				<>

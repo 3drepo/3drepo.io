@@ -41,6 +41,11 @@ export type FederationBackendSettings = {
 
 export type FederationRevision = Pick<FederationBackendSettings, '_id' | 'timestamp' | 'author' >;
 
+export type GroupedContainer = {
+	_id: string;
+	group?: string;
+};
+
 export interface IFederation {
 	_id: string;
 	desc?: string;
@@ -49,7 +54,7 @@ export interface IFederation {
 	isFavourite: boolean;
 	code?: string;
 	status: UploadStatuses;
-	containers: string[];
+	containers: GroupedContainer[];
 	issues: number;
 	risks: number;
 	category: string;
@@ -84,7 +89,7 @@ export type FederationStats = {
 	code: string;
 	desc: string;
 	status: UploadStatuses;
-	containers: string[];
+	containers: GroupedContainer[];
 	tickets: {
 		issues: number;
 		risks: number;
