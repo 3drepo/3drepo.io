@@ -117,10 +117,13 @@ export const EditFederationContainers = ({
 					<DashboardListHeaderLabel name="code" width={160}>
 						<FormattedMessage id="modal.editFederation.list.header.containerCode" defaultMessage="Container code" />
 					</DashboardListHeaderLabel>
+					<DashboardListHeaderLabel name="group" width={160}>
+						<FormattedMessage id="modal.editFederation.list.header.group" defaultMessage="Group" />
+					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="type" width={160} hideWhenSmallerThan={Display.Tablet}>
 						<FormattedMessage id="modal.editFederation.list.header.category" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="lastUpdated" width={188}>
+					<DashboardListHeaderLabel name="lastUpdated" width={100}>
 						<FormattedMessage id="modal.editFederation.list.header.lastUpdated" defaultMessage="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
@@ -135,7 +138,7 @@ export const EditFederationContainers = ({
 								isSelected={container._id === selectedItemId}
 								container={container}
 								filterQuery={query}
-								onSelectOrToggleItem={selectOrToggleItem}
+								onItemClick={selectOrToggleItem}
 							/>
 						)))
 					) : (

@@ -21,6 +21,7 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const responseCodes = require("../../../src/v4/response_codes.js");
+const {templates: responseCodesV5} = require("../../../src/v5/utils/responseCodes");
 const async = require("async");
 
 describe("Views", function () {
@@ -203,7 +204,7 @@ describe("Views", function () {
 				function(done) {
 					agent2.get(`/${teamSpace1Username}/invalidModelID/viewpoints/`)
 						.expect(404, function(err, res) {
-							expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+							expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
 							return done(err);
 						});
 				}

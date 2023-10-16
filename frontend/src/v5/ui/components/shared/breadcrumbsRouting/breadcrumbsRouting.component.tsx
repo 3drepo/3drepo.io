@@ -36,7 +36,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { BreadcrumbItem } from '@controls/breadcrumbs/breadcrumbDropdown/breadcrumbDropdown.component';
 import { Breadcrumbs } from '@controls/breadcrumbs';
 import { BreadcrumbItemOrOptions } from '@controls/breadcrumbs/breadcrumbs.component';
-import { orderBy } from 'lodash';
+import { sortBreadcrumbOptions } from '@controls/breadcrumbs/breadcrumbs.helpers';
 
 export const BreadcrumbsRouting = () => {
 	const params = useParams();
@@ -115,14 +115,14 @@ export const BreadcrumbsRouting = () => {
 				selected: _id === containerOrFederationId,
 			}));
 
-			breadcrumbs.push({ options });
+			breadcrumbs.push({ options: sortBreadcrumbOptions(options) });
 		} else { // In the case that the user is viewing a container
 			options = containers.map(({ _id, name }) => ({
 				title: name,
 				to: generatePath(VIEWER_ROUTE, { ...params, containerOrFederation: _id, revision: null }),
 				selected: _id === containerOrFederationId,
 			}));
-			breadcrumbs.push({ options });
+			breadcrumbs.push({ options: sortBreadcrumbOptions(options) });
 
 			// Revisions options ( only containers have revisions)
 			const noName = formatMessage({ id: 'breadcrumbs.revisions.noName', defaultMessage: '(no name)' });
@@ -139,13 +139,6 @@ export const BreadcrumbsRouting = () => {
 			});
 		}
 	}
-
-	breadcrumbs.forEach((breadcrumb: any) => {
-		if (breadcrumb.options) {
-			// eslint-disable-next-line no-param-reassign
-			breadcrumb.options = orderBy(breadcrumb.options, ({ title }) => title.toLowerCase());
-		}
-	});
 
 	return (<Breadcrumbs breadcrumbs={breadcrumbs} />);
 };
