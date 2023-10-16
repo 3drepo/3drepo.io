@@ -226,8 +226,8 @@ export const TicketsTable = () => {
 						/>
 					</FlexContainer>
 				</FiltersContainer>
+				<TicketsTableContent setSidePanelData={setSidePanelData} selectedTicketId={selectedTicketId} />
 			</FormProvider>
-			<TicketsTableContent setSidePanelData={setSidePanelData} selectedTicketId={selectedTicketId} />
 			<SidePanel open={!!sidePanelModelId}>
 				<SlidePanelHeader>
 					<OpenInViewerButton disabled={isCreatingNewTicket} onClick={openInViewer}>
