@@ -18,6 +18,7 @@
 import { memo, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { formatDate } from '@/v5/services/intl';
+import { useParams, useHistory } from 'react-router-dom';
 
 import {
 	DashboardListItemButton,
@@ -32,11 +33,11 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { Display } from '@/v5/ui/themes/media';
 import { EditFederationModal } from '@/v5/ui/routes/dashboard/projects/federations/editFederationModal/editFederationModal.component';
 
-import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { enableRealtimeFederationNewRevision, enableRealtimeFederationRemoved, enableRealtimeFederationUpdateSettings } from '@/v5/services/realtime/federation.events';
 import { DialogsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import { boardRoute } from '@/v5/services/routing/routing';
 import { FederationEllipsisMenu } from './federationEllipsisMenu/federationEllipsisMenu.component';
 
 interface IFederationListItem {
@@ -47,6 +48,9 @@ export const FederationListItem = memo(({
 	federation,
 }: IFederationListItem): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
+	const history = useHistory();
+
+	const openBoardPage = (boardPage: 'issues' | 'risks') => history.push(boardRoute(teamspace, project, boardPage, federation._id));
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
 		if (checked) {
@@ -72,17 +76,12 @@ export const FederationListItem = memo(({
 						minWidth={90}
 						federation={federation}
 					/>
+					{/* issues */}
 					<DashboardListItemButton
 						hideWhenSmallerThan={1080}
-						onClick={() => {
-							// eslint-disable-next-line no-console
-							console.log('handle issues button');
-						}}
 						width={165}
-						tooltipTitle={
-							<FormattedMessage id="federations.list.item.issues.tooltip" defaultMessage="View issues" />
-						}
-						disabled
+						onClick={() => openBoardPage('issues')}
+						tooltipTitle={<FormattedMessage id="federations.list.item.issues.tooltip" defaultMessage="View issues" />}
 					>
 						<FormattedMessage
 							id="federations.list.item.issues"
@@ -92,15 +91,11 @@ export const FederationListItem = memo(({
 					</DashboardListItemButton>
 					<DashboardListItemButton
 						hideWhenSmallerThan={890}
-						onClick={() => {
-							// eslint-disable-next-line no-console
-							console.log('handle risks button');
-						}}
+						onClick={() => openBoardPage('risks')}
 						width={165}
 						tooltipTitle={
 							<FormattedMessage id="federations.list.item.risks.tooltip" defaultMessage="View risks" />
 						}
-						disabled
 					>
 						<FormattedMessage
 							id="federations.list.item.risks"
