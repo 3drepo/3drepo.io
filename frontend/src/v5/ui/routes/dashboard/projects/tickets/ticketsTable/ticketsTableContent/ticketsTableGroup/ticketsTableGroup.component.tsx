@@ -22,6 +22,7 @@ import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { isCommenterRole } from '@/v5/store/store.helpers';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useFormContext } from 'react-hook-form';
 import { Header, Headers, Group, NewTicketRow, NewTicketText } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
@@ -34,12 +35,17 @@ type TicketsTableGroupProps = {
 	onNewTicket: (modelId: string) => void;
 };
 export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
-	const sortById = (tckts) => sortBy(tckts, ({ type, _id }) => type + _id);
 	const [modelsIds] = useSearchParam('models');
+	const { getValues } = useFormContext();
+	
+	const sortById = (tckts) => sortBy(tckts, ({ type, _id }) => type + _id);
 	const showModelName = modelsIds.split(',').length > 1;
 	const models = useSelectedModels();
+
+	if (!ticketsWithModelIdAndName.length) return null;
+
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
-	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(ticketsWithModelIdAndName[0].type);
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(getValues('template'));
 	const hasProperties = template?.config?.issueProperties;
 	const hasSafetibase = template?.modules?.some((module) => module.type === 'safetibase');
 
