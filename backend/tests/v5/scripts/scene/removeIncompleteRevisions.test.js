@@ -63,10 +63,6 @@ const generateStashData = async (teamspace, model, rId) => {
 		_id: generateUUID(),
 		rev_id: rId,
 		type,
-		_extRef: type === 'mesh' ? {
-			[generateRandomString()]: generateRandomString(),
-			[generateRandomString()]: generateRandomString(),
-		} : generateRandomString(),
 	});
 
 	const superMeshes = times(5, () => createObject());
@@ -74,17 +70,14 @@ const generateStashData = async (teamspace, model, rId) => {
 
 	const allObjs = [...superMeshes, ...otherObjs];
 
-	const refs = [
-		...superMeshes.flatMap(({ _extRef }) => Object.values(_extRef)),
-		...otherObjs.map(({ _extRef }) => _extRef),
-	];
+	const refs = times(5, () => generateRandomString());
 
 	const stashCol = `${model}.stash.3drepo`;
 	await insertMany(teamspace, stashCol, allObjs);
 
 	await Promise.all(refs.map((ref) => {
 		const buffer = Buffer.from(generateRandomString(), 'utf-8');
-		return storeFile(teamspace, stashCol, ref, buffer);
+		return storeFile(teamspace, stashCol, ref, buffer, { rev_id: rId });
 	}));
 
 	return { objCount: allObjs.length, links: await findRefs(teamspace, stashCol, refs) };

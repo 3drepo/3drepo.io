@@ -28,9 +28,7 @@ const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 const Path = require('path');
 const readline = require('readline');
 
-const { isString, isObject } = require(`${v5Path}/utils/helper/typeCheck`);
-
-const { deleteMany, count, find } = require(`${v5Path}/handler/db`);
+const { deleteMany, find } = require(`${v5Path}/handler/db`);
 const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 
@@ -47,50 +45,7 @@ const removeFilesHelper = async (ts, col, query) => {
 	}
 };
 
-const removeRecords = async (teamspace, collection, filter, refAttribute) => {
-	if (refAttribute) {
-		const projection = { [refAttribute]: 1 };
-		const filesFilter = { ...filter, [refAttribute]: { $exists: true } };
-
-		const objsWithRefs = await count(teamspace, collection, filesFilter);
-		const batch = entriesLimit;
-		for (let j = 0; j < objsWithRefs; j += batch) {
-			// eslint-disable-next-line no-await-in-loop
-			const results = await find(teamspace, collection, filesFilter, projection, undefined, batch);
-			const filenames = results.flatMap((record) => {
-				const fileRefs = record[refAttribute];
-				// handle different ref formats
-				// record refs currently stored in the following formats:
-				// 1) { ref: 'refString' }
-				// 2) { ref: {
-				//        key1: 'key1RefString',
-				//        key2: 'key2RefString',
-				//    }
-				if (isString(fileRefs)) {
-					return fileRefs;
-				}
-				/* istanbul ignore else */
-				if (isObject(fileRefs)) {
-					return Object.values(fileRefs);
-				}
-				/* istanbul ignore next */
-				logger.logError(`Unsupported record type: ${Object.prototype.toString.call(fileRefs)}`);
-				/* istanbul ignore next */
-				return [];
-			});
-
-			for (let i = 0; i <= filenames.length; i += entriesLimit) {
-				const group = filenames.slice(i, i + entriesLimit);
-				const fileRemoveProms = [];
-				fileRemoveProms.push(removeFilesHelper(teamspace, collection, { _id: { $in: group } }));
-				// eslint-disable-next-line no-await-in-loop
-				await Promise.all(fileRemoveProms);
-			}
-
-			// eslint-disable-next-line no-await-in-loop
-			await deleteMany(teamspace, collection, { _id: { $in: results.map(({ _id }) => _id) } });
-		}
-	}
+const removeRecords = async (teamspace, collection, filter) => {
 	try {
 		await deleteMany(teamspace, collection, filter);
 	} catch (err) /* istanbul ignore next */{
@@ -124,8 +79,8 @@ const processModelStash = async (teamspace, model, revIds) => {
 	const proms = [
 		removeFilesHelper(teamspace, `${model}.stash.json_mpc.ref`, { _id: revIdsRegex }),
 		removeRecords(teamspace, `${model}.stash.unity3d`, { _id: { $in: revIds } }),
-		removeRecords(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds } }, '_extRef'),
-		removeRecords(teamspace, `${model}.stash.3drepo.ref`, { rev_id: { $in: revIds } }), // to remove new version of references (instead of _extRef) see ISSUE #4260
+		removeRecords(teamspace, `${model}.stash.3drepo`, { rev_id: { $in: revIds } }),
+		removeFilesHelper(teamspace, `${model}.stash.3drepo.ref`, { rev_id: { $in: revIds } }),
 	];
 
 	await Promise.all(proms);
@@ -164,8 +119,8 @@ const removeRevisions = async (teamspace, model, revNodes) => {
 
 	logger.logInfo('\t\t\tRemoving scene objects');
 	// We can't remove mesh nodes until we've processed the stashes
-	await removeRecords(teamspace, `${model}.scene`, { rev_id: { $in: revIds } }, '_extRef');
-	await removeRecords(teamspace, `${model}.scene.ref`, { rev_id: { $in: revIds } }); // to remove new version of references (instead of _extRef) see ISSUE #4260
+	await removeRecords(teamspace, `${model}.scene`, { rev_id: { $in: revIds } });
+	await removeRecords(teamspace, `${model}.scene.ref`, { rev_id: { $in: revIds } });
 };
 
 const cleanUpRevisions = async (teamspace, colName, filter) => {
