@@ -24,9 +24,9 @@ import {
 	prepareMockRawSettingsReply,
 	prepareMockSettingsReply,
 	prepareMockBaseFederation,
+	groupedContainerMockFactory,
 } from './federations.fixtures';
 import { prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
-import { prepareMockContainers } from './federations.fixtures';
 import { prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { selectFederationById, selectFederations } from '@/v5/store/federations/federations.selectors';
@@ -170,7 +170,7 @@ describe('Federations: sagas', () => {
 
 		it('should call updateFederationContainers endpoint', async () => {
 			populateStore();
-			const mockContainers = prepareMockContainers();
+			const mockContainers = [groupedContainerMockFactory()];
 			mockServer
 				.post(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/revisions`)
 				.reply(200);
@@ -219,7 +219,7 @@ describe('Federations: sagas', () => {
 			desc: 'This is a test federation',
 			unit: 'cm',
 		};
-		const newFederationContainers = ['containerIdOne', 'containerIdTwo'];
+		const newFederationContainers = [{ _id: 'containerIdOne' }, { _id: 'containerIdTwo' }];
 
 		it('should successfully create a new federation', async () => {
 			mockServer

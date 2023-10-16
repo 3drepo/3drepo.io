@@ -24,16 +24,16 @@ interface ISkeletonListItem {
 export const SkeletonListItem = ({ delay = 0 }: ISkeletonListItem): JSX.Element => (
 	<Container>
 		<FixedOrGrowContainer width={130}>
-			<SkeletonBlock delay={delay} widthPercentage={60} />
+			<SkeletonBlock delay={delay} width="60%" />
 		</FixedOrGrowContainer>
 		<FixedOrGrowContainer width={228}>
-			<SkeletonBlock delay={delay} widthPercentage={80} />
+			<SkeletonBlock delay={delay} width="80%" />
 		</FixedOrGrowContainer>
 		<FixedOrGrowContainer width={330}>
-			<SkeletonBlock delay={delay} widthPercentage={55} />
+			<SkeletonBlock delay={delay} width="55%" />
 		</FixedOrGrowContainer>
 		<FixedOrGrowContainer>
-			<SkeletonBlock delay={delay} widthPercentage={75} />
+			<SkeletonBlock delay={delay} width="75%" />
 		</FixedOrGrowContainer>
 	</Container>
 );

@@ -223,7 +223,7 @@ const convertToDictionary = (stateChanges) => {
 export const selectSelectedFrameColors = createSelector(
 	selectSelectedState, (state) => {
 		if (!state) {
-			return {};
+			return null;
 		}
 
 		try {
@@ -238,7 +238,7 @@ export const selectSelectedFrameColors = createSelector(
 export const selectSelectedFrameTransparencies = createSelector(
 	selectSelectedState, selectSelectedStartingDate, (state) => {
 		if (!state) {
-			return {};
+			return null;
 		}
 
 		try {
@@ -252,7 +252,7 @@ export const selectSelectedFrameTransparencies = createSelector(
 export const selectSelectedFrameTransformations = createSelector(
 	selectSelectedState, (state) => {
 		if (!state) {
-			return {};
+			return null;
 		}
 
 		try {
@@ -305,5 +305,5 @@ export const selectCurrentActivities = createSelector(
 
 export const selectSelectedHiddenNodes = createSelector(
 	selectSelectedFrameTransparencies, (transparencies) =>
-		Object.keys(transparencies).filter((nodeId) => transparencies[nodeId] === 0 )
+		transparencies ? Object.keys(transparencies).filter((nodeId) => transparencies[nodeId] === 0 ) : null
 );
