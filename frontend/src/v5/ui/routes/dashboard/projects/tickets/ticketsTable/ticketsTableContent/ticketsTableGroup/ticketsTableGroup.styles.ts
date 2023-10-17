@@ -27,12 +27,39 @@ export const Headers = styled.div`
 	width: min(90vw, 1289px);
 `;
 
-export const Header = styled(FixedOrGrowContainer)<{ hidden?: boolean }>`
+export const IconContainer = styled.div<{ $flip?: boolean, $hidden: boolean }>`
+	animation: all .2s;
+
+	svg {
+		margin-bottom: -1px;
+	}
+
+	${({ $flip }) => $flip && css`
+		transform: rotate(180deg);
+	`}
+
+	${({ $hidden }) => $hidden && css`
+		display: none;
+	`}
+`;
+
+export const Header = styled(FixedOrGrowContainer)<{ hidden?: boolean, $selected: boolean, $selectable: boolean }>`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
+	display: flex;
+	flex-direction: row;
 	padding-left: 10px;
 	text-align: start;
 	box-sizing: border-box;
+	user-select: none;
+
+	${({ $selected }) => $selected && css`
+		gap: 5px;
+	`}
+
+	${({ $selectable }) => $selectable && css`
+		cursor: pointer;
+	`}
 
 	${({ width }) => width ? css`
 		flex: 0 0 ${width};
