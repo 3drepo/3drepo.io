@@ -209,7 +209,7 @@ export const UploadListItemDestination = memo(({
 	return (
 		<DestinationAutocomplete
 			{...props}
-			value={selectedContainer}
+			defaultValue={selectedContainer}
 			className={className}
 			filterOptions={getFilterOptions}
 			getOptionDisabled={nameIsTaken}
