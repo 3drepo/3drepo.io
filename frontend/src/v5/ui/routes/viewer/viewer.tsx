@@ -57,12 +57,16 @@ export const Viewer = () => {
 	}, [tickets]);
 
 	useEffect(() => {
-		TeamspacesActionsDispatchers.setCurrentTeamspace(teamspace);
-		ProjectsActionsDispatchers.fetch(teamspace);
+		if (teamspace) {
+			TeamspacesActionsDispatchers.setCurrentTeamspace(teamspace);
+			ProjectsActionsDispatchers.fetch(teamspace);
+		}
 	}, [teamspace]);
 
 	useEffect(() => {
-		ProjectsActionsDispatchers.setCurrentProject(project);
+		if (project) {
+			ProjectsActionsDispatchers.setCurrentProject(project);
+		}
 	}, [project]);
 
 	useEffect(() => {
