@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import CircledPlusIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import PinIcon from '@assets/icons/outlined/pin-outlined.svg';
 import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
@@ -26,17 +26,13 @@ import { FormHelperText } from '@mui/material';
 import { theme } from '@/v5/ui/themes/theme';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { PinAction, PinActions, PinName, SettingLocationText } from './pinDetails.styles';
-import { ViewerOnlyPropertyLabel } from '../viewerOnlyPropertyLabel/viewerOnlyPropertyLabel.component';
 import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
 
-export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText, disabled: inputDisabled, name }: FormInputProps) => {
+export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
-	const { isViewer } = useContext(TicketContext);
 	const pinId = name;
-	const disabled = inputDisabled || !isViewer;
 
 	const cancelEdit = () => {
 		if (!editMode) return;
@@ -90,9 +86,7 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 	return (
 		<ViewerInputContainer required={required} selected={editMode} error={error} disabled={disabled}>
 			<PinName required={required}>
-				<ViewerOnlyPropertyLabel>
-					{label}
-				</ViewerOnlyPropertyLabel>
+				{label}
 			</PinName>
 			<PinActions>
 				{editMode && (

@@ -36,7 +36,6 @@ import { PrimaryTicketButton } from '../../../ticketButton/ticketButton.styles';
 import { Header, HeaderSection, Label, Tooltip } from './ticketView.styles';
 import { CameraActionMenu } from './viewActionMenu/menus/cameraActionMenu.component';
 import { GroupsActionMenu } from './viewActionMenu/menus/groupsActionMenu.component';
-import { ViewerOnlyPropertyLabel } from '../viewerOnlyPropertyLabel/viewerOnlyPropertyLabel.component';
 import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
 
 type ITicketView = {
@@ -54,15 +53,14 @@ export const TicketView = ({
 	value,
 	onBlur,
 	onChange,
-	disabled: inputDisabled,
+	disabled,
 	helperText,
 	label,
 	required,
 	...props
 }: ITicketView) => {
-	const { setDetailViewAndProps, isViewer } = useContext(TicketContext);
+	const { setDetailViewAndProps } = useContext(TicketContext);
 	const hasViewpoint = value?.camera;
-	const disabled = inputDisabled || !isViewer;
 
 	// Viewpoint
 	const updateViewpoint = async () => {
@@ -114,12 +112,10 @@ export const TicketView = ({
 		<ViewerInputContainer disabled={disabled} required={required} {...props}>
 			<Header>
 				<Label>
-					<ViewerOnlyPropertyLabel>
-						{label}
-					</ViewerOnlyPropertyLabel>
+					{label}
 				</Label>
 				<HeaderSection>
-					{(isViewer && !hasViewpoint) && (
+					{!hasViewpoint ? (
 						<Tooltip title={(formatMessage({ id: 'viewer.card.button.saveCurrentView', defaultMessage: 'Save current view' }))}>
 							<div hidden={disabled}>
 								<PrimaryTicketButton onClick={updateViewpoint}>
@@ -127,8 +123,7 @@ export const TicketView = ({
 								</PrimaryTicketButton>
 							</div>
 						</Tooltip>
-					)}
-					{(isViewer && hasViewpoint) && (
+					) : (
 						<Tooltip title={(formatMessage({ id: 'viewer.card.button.gotToView', defaultMessage: 'Go to view' }))}>
 							<div>
 								<PrimaryTicketButton onClick={goToViewpoint}>
@@ -137,7 +132,7 @@ export const TicketView = ({
 							</div>
 						</Tooltip>
 					)}
-					<EllipsisMenu disabled={!hasViewpoint || !isViewer}>
+					<EllipsisMenu disabled={!hasViewpoint}>
 						<EllipsisMenuItem
 							hidden={!hasViewpoint}
 							title={(<FormattedMessage id="viewer.card.ticketView.action.updateViewpoint" defaultMessage="Update to current view" />)}

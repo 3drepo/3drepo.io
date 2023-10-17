@@ -20,10 +20,8 @@ import { FormattedMessage } from 'react-intl';
 import { ViewpointState } from '@/v5/store/tickets/tickets.types';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
-import { useContext } from 'react';
 import { EllipsisMenuItemDelete } from '../../../ticketImageContent/ticketImageAction/ticketImageAction.styles';
 import { ViewActionMenu } from '../viewActionMenu.component';
-import { TicketContext } from '../../../../../ticket.context';
 
 type IGroupsActionMenu = {
 	value: ViewpointState;
@@ -38,17 +36,16 @@ export const GroupsActionMenu = ({
 	onClick,
 	disabled,
 }: IGroupsActionMenu) => {
-	const { isViewer } = useContext(TicketContext);
 	const hasGroups = value?.colored?.length || value?.hidden?.length;
 
 	return (
 		<ViewActionMenu
-			disabled={!hasGroups || !isViewer}
+			disabled={!hasGroups}
 			onClick={onClick}
 			Icon={GroupsIcon}
 			title={<FormattedMessage id="viewer.card.ticketView.actionMenu.groups" defaultMessage="Groups" />}
 		>
-			<EllipsisMenu disabled={(disabled && !hasGroups) || !isViewer}>
+			<EllipsisMenu disabled={disabled && !hasGroups}>
 				<EllipsisMenuItem
 					title={(<FormattedMessage id="viewer.card.ticketView.action.addNewGroup" defaultMessage="Add new group" />)}
 					onClick={onClick}

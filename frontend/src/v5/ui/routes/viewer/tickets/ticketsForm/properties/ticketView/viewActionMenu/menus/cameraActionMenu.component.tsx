@@ -39,39 +39,36 @@ export const CameraActionMenu = ({
 	onDelete,
 	onGoTo,
 	disabled,
-}: ICameraActionMenu) => {
-	const { isViewer } = useContext(TicketContext);
-	return (
-		<ViewActionMenu
-			disabled={!value || !isViewer}
-			onClick={onGoTo}
-			Icon={CameraIcon}
-			title={<FormattedMessage id="viewer.card.ticketView.actionMenu.camera" defaultMessage="Camera" />}
-		>
-			<EllipsisMenu disabled={(disabled && !value) || !isViewer}>
-				<EllipsisMenuItem
-					hidden={!!value}
-					title={(<FormattedMessage id="viewer.card.ticketView.action.saveCamera" defaultMessage="Save camera" />)}
-					onClick={onChange}
-				/>
-				<EllipsisMenuItem
-					hidden={!value}
-					title={(<FormattedMessage id="viewer.card.ticketView.action.changeCamera" defaultMessage="Change camera" />)}
-					onClick={onChange}
-					disabled={disabled}
-				/>
-				<EllipsisMenuItem
-					hidden={!value}
-					title={(<FormattedMessage id="viewer.card.ticketView.action.gotToCamera" defaultMessage="Go to camera" />)}
-					onClick={onGoTo}
-				/>
-				<EllipsisMenuItemDelete
-					hidden={!value}
-					title={<FormattedMessage id="viewer.card.ticketView.action.deleteCamera" defaultMessage="Delete camera" />}
-					onClick={onDelete}
-					disabled={disabled}
-				/>
-			</EllipsisMenu>
-		</ViewActionMenu>
-	);
-};
+}: ICameraActionMenu) => (
+	<ViewActionMenu
+		disabled={!value}
+		onClick={onGoTo}
+		Icon={CameraIcon}
+		title={<FormattedMessage id="viewer.card.ticketView.actionMenu.camera" defaultMessage="Camera" />}
+	>
+		<EllipsisMenu disabled={disabled && !value}>
+			<EllipsisMenuItem
+				hidden={!!value}
+				title={(<FormattedMessage id="viewer.card.ticketView.action.saveCamera" defaultMessage="Save camera" />)}
+				onClick={onChange}
+			/>
+			<EllipsisMenuItem
+				hidden={!value}
+				title={(<FormattedMessage id="viewer.card.ticketView.action.changeCamera" defaultMessage="Change camera" />)}
+				onClick={onChange}
+				disabled={disabled}
+			/>
+			<EllipsisMenuItem
+				hidden={!value}
+				title={(<FormattedMessage id="viewer.card.ticketView.action.gotToCamera" defaultMessage="Go to camera" />)}
+				onClick={onGoTo}
+			/>
+			<EllipsisMenuItemDelete
+				hidden={!value}
+				title={<FormattedMessage id="viewer.card.ticketView.action.deleteCamera" defaultMessage="Delete camera" />}
+				onClick={onDelete}
+				disabled={disabled}
+			/>
+		</EllipsisMenu>
+	</ViewActionMenu>
+);
