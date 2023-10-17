@@ -755,7 +755,7 @@ export class ViewerService {
 	public async isViewerReady() {
 		try {
 			return await this.initialisedPromise.promise;
-		} catch () {
+		} catch {
 			console.error('Error occurred when checking Viewer readiness')
 		}
 	}
