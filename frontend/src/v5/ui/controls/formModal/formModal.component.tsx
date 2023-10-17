@@ -33,6 +33,7 @@ export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HT
 	confirmLabel?: string;
 	cancelLabel?: string;
 	isValid?: boolean;
+	isReadOnly?: boolean;
 	maxWidth?: DialogProps['maxWidth'];
 	isSubmitting?: boolean;
 	disableClosing?: boolean;
@@ -51,6 +52,7 @@ export const FormModal = ({
 	children,
 	className,
 	isValid = true,
+	isReadOnly = false,
 	maxWidth = false,
 	isSubmitting = false,
 	disableClosing = false,
@@ -79,9 +81,11 @@ export const FormModal = ({
 					<ModalCancelButton onClick={handleClose} disabled={isSubmitting}>
 						{cancelLabel}
 					</ModalCancelButton>
-					<ModalSubmitButton disabled={!isValid} onClick={onSubmit} isPending={isSubmitting}>
-						{confirmLabel}
-					</ModalSubmitButton>
+					{!isReadOnly && (
+						<ModalSubmitButton disabled={!isValid} onClick={onSubmit} isPending={isSubmitting}>
+							{confirmLabel}
+						</ModalSubmitButton>
+					)}
 				</FormModalActions>
 			</Form>
 		</Dialog>
