@@ -27,8 +27,9 @@ import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, STATUS_MAP, TREATMENT_LEVELS_MAP 
 import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { Tooltip } from '@mui/material';
+import { formatDate } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { Row, Cell, CellChipText, CellOwner, OverflowContainer, UnassignedAssignees, CellDate } from './ticketsTableRow.styles';
+import { Row, Cell, CellChipText, CellOwner, OverflowContainer, SmallFont, CellDate } from './ticketsTableRow.styles';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
@@ -50,6 +51,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 		priority,
 		status,
 		dueDate,
+		createdAt,
 	} = getPropertiesInCamelCase(properties);
 
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -91,14 +93,19 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 					</OverflowContainer>
 				</Tooltip>
 			</Cell>
+			<Cell width={80}>
+				<SmallFont>
+					{formatDate(createdAt)}
+				</SmallFont>
+			</Cell>
 			<Cell width={96} hidden={!hasProperties}>
 				{assignees?.length ? (
 					<AssigneesSelect value={assignees} multiple disabled />
 				) : (
 					<OverflowContainer>
-						<UnassignedAssignees>
+						<SmallFont>
 							<FormattedMessage id="ticketsTable.row.assignees.unassigned" defaultMessage="Unassigned" />
-						</UnassignedAssignees>
+						</SmallFont>
 					</OverflowContainer>
 				)}
 			</Cell>

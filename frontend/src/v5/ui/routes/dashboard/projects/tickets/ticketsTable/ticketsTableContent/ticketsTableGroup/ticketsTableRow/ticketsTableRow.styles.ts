@@ -81,7 +81,7 @@ export const CellDate = styled(Cell)`
 	}
 `;
 
-export const UnassignedAssignees = styled.span`
+export const SmallFont = styled.span`
 	color: ${({ theme }) => theme.palette.base.main};
 	font-size: 10px;
 `;

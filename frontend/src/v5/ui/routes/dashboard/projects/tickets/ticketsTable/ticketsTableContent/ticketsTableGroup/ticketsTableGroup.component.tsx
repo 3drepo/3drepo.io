@@ -62,6 +62,9 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 					<Header width={187} hidden={!showModelName}>
 						<FormattedMessage id="ticketTable.column.header.federationContainer" defaultMessage="federation / container" />
 					</Header>
+					<Header width={80}>
+						<FormattedMessage id="ticketTable.column.header.createdAt" defaultMessage="created at" />
+					</Header>
 					<Header width={96} hidden={!hasProperties}> 
 						<FormattedMessage id="ticketTable.column.header.assignees" defaultMessage="assignees" />
 					</Header>
