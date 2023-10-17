@@ -21,15 +21,12 @@ import {
 	IconButton as IconButtonComponent,
 	InputLabel as InputLabelComponent,
 	List as ListComponent,
-	ListSubheader,
 	MenuItem as MenuItemComponent
 } from '@mui/material';
 import MoreIcon from '@mui/icons-material/MoreVert';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { COLOR } from '../../../styles';
-import { SelectField as SelectFieldComponent } from '../selectField/selectField.component';
 
 export const Container = styled.div`
 	height: 100%;
@@ -139,6 +136,7 @@ export const FormContainer = styled.div`
 	border-top: 1px solid ${COLOR.BLACK_20};
 	padding: 22px;
 	padding-top: 12px;
+	background-color: ${COLOR.WHITE};
 `;
 
 export const MenuItem = styled(MenuItemComponent)`

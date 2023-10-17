@@ -23,6 +23,12 @@ export const Container = styled.div`
 		padding: 0;
 		overflow: unset;
 		max-height: unset;
+		display: flex;
+		flex-direction: column;
+
+		.MuiFormControl-root.MuiTextField-root {
+			width: 285px;
+		}
 	}
 
 	${Buttons} {
