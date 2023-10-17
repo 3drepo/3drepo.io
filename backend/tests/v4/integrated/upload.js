@@ -24,7 +24,7 @@ const app = require('../../../src/v4/services/api.js').createApp();
 const logger = require('../../../src/v4/logger.js');
 const C = require('../../../src/v4/constants');
 const responseCodes = require('../../../src/v4/response_codes.js');
-const { templates } = require('../../../src/v5/utils/responseCodes');
+const { templates:responseCodesV5 } = require('../../../src/v5/utils/responseCodes');
 const helpers = require('../helpers/signUp');
 const moment = require('moment');
 const async = require('async');
@@ -111,7 +111,7 @@ describe('Uploading a model', () => {
 				.field('tag', 'no_quota')
 				.attach('file', `${__dirname}/../statics/3dmodels/8000cubes.obj`)
 				.expect(401, (err, res) => {
-					expect(res.body.code).to.equal(templates.quotaLimitExceeded.code);
+					expect(res.body.code).to.equal(responseCodesV5.quotaLimitExceeded.code);
 					done(err);
 				});
 		});
@@ -135,7 +135,7 @@ describe('Uploading a model', () => {
 				.field('tag', 'no_space')
 				.attach('file', `${__dirname}/../statics/3dmodels/8000cubes.obj`)
 				.expect(401, (err, res) => {
-					expect(res.body.code).to.equal(templates.quotaLimitExceeded.code);
+					expect(res.body.code).to.equal(responseCodesV5.quotaLimitExceeded.code);
 					done(err);
 				});
 		});
@@ -174,7 +174,7 @@ describe('Uploading a model', () => {
 			agent.post(`/${username}/${model1.id}/upload`)
 				.attach('file', `${__dirname}/../statics/3dmodels/8000cubes.obj`)
 				.expect(400, (err, res) => {
-					expect(res.body.code).to.equal(templates.invalidArguments.code);
+					expect(res.body.code).to.equal(responseCodesV5.invalidArguments.code);
 					done(err);
 				});
 		});
@@ -184,7 +184,7 @@ describe('Uploading a model', () => {
 				.field('tag', 'bad tag!')
 				.attach('file', `${__dirname}/../statics/3dmodels/8000cubes.obj`)
 				.expect(400, (err, res) => {
-					expect(res.body.code).to.equal(templates.invalidArguments.code);
+					expect(res.body.code).to.equal(responseCodesV5.invalidArguments.code);
 					done(err);
 				});
 		});
@@ -194,7 +194,7 @@ describe('Uploading a model', () => {
 				.field('tag', 'empty_file')
 				.attach('file', `${__dirname}/../statics/3dmodels/empty.ifc`)
 				.expect(400, (err, res) => {
-					expect(res.body.code).to.equal(templates.invalidArguments.code);
+					expect(res.body.code).to.equal(responseCodesV5.invalidArguments.code);
 					done(err);
 				});
 		});
@@ -204,7 +204,7 @@ describe('Uploading a model', () => {
 				.field('tag', 'unsupported_ext')
 				.attach('file', `${__dirname}/../statics/3dmodels/toy.abc`)
 				.expect(400, (err, res) => {
-					expect(res.body.code).to.equal(templates.unsupportedFileFormat.code);
+					expect(res.body.code).to.equal(responseCodesV5.unsupportedFileFormat.code);
 					done(err);
 				});
 		});
@@ -214,7 +214,7 @@ describe('Uploading a model', () => {
 				.field('tag', 'no_ext')
 				.attach('file', `${__dirname}/../statics/3dmodels/toy`)
 				.expect(400, (err, res) => {
-					expect(res.body.code).to.equal(templates.unsupportedFileFormat.code);
+					expect(res.body.code).to.equal(responseCodesV5.unsupportedFileFormat.code);
 					done(err);
 				});
 		});
@@ -224,7 +224,7 @@ describe('Uploading a model', () => {
 				.field('tag', 'too_big')
 				.attach('file', `${__dirname}/../statics/3dmodels/toy.ifc`)
 				.expect(400, (err, res) => {
-					expect(res.body.code).to.equal(templates.maxSizeExceeded.code);
+					expect(res.body.code).to.equal(responseCodesV5.maxSizeExceeded.code);
 					done(err);
 				});
 		});
@@ -242,7 +242,7 @@ describe('Uploading a model', () => {
 						tag: 'rev0',
 					})
 					.expect(404, (err, res) => {
-						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+						expect(res.body.code).eq(responseCodesV5.modelNotFound.code);
 						done(err);
 					});
 			});
@@ -345,7 +345,7 @@ describe('Uploading a model', () => {
 					.set('x-ms-transfer-mode', 'chunked')
 					.set('x-ms-content-length', 6425218)
 					.expect(404, (err, res) => {
-						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+						expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
 						done(err);
 					});
 			});

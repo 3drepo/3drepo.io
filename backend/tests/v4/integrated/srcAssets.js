@@ -20,6 +20,7 @@ const request = require("supertest");
 const {should, assert, expect, Assertion } = require("chai");
 const app = require("../../../src/v4/services/api.js").createApp();
 const responseCodes = require("../../../src/v4/response_codes.js");
+const {templates: responseCodesV5} = require("../../../src/v5/utils/responseCodes");
 const async = require("async");
 const { login } = require("../helpers/users.js");
 
@@ -92,7 +93,7 @@ describe("ModelAssets", function () {
 		it("from invalid model should fail", function(done) {
 			agent.get(`/${username}/dfsfdsg/revision/master/head/srcAssets.json`)
 				.expect(404, (err, res) => {
-					expect(res.body.value).eq(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.code).eq(responseCodesV5.modelNotFound.code);
 					done(err);
 				});
 
@@ -201,7 +202,7 @@ describe("ModelAssets", function () {
 		it("from invalid model should fail", function(done) {
 			agent.get(`/${username}/dfsfdsg/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
 				.expect(404, (err, res) => {
-					expect(res.body.value).eq(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.code).eq(responseCodesV5.modelNotFound.code);
 					done(err);
 				});
 

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,27 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 type IProps = {
-	className?: any;
+	className?: string,
 };
 
 export default ({ className }: IProps) => (
-	<svg
-		width="32"
-		height="32"
-		viewBox="0 0 32 32"
-		fill="none"
-		xmlns="http://www.w3.org/2000/svg"
-		className={className}
-	>
-		<circle cx="16" cy="16" r="16" fill="#00C1D4" />
-		<path d="M21 16.7143H16.7143V21H15.2857V16.7143H11V15.2857H15.2857V11H16.7143V15.2857H21V16.7143Z" fill="white" />
-		<path d="M21 16.7143H16.7143V21H15.2857V16.7143H11V15.2857H15.2857V11H16.7143V15.2857H21V16.7143Z" fill="url(#paint0_linear_3146_49406)" />
-		<defs>
-			<linearGradient id="paint0_linear_3146_49406" x1="16" y1="11" x2="16" y2="21" gradientUnits="userSpaceOnUse">
-				<stop stopColor="white" />
-				<stop offset="1" stopColor="white" stopOpacity="0" />
-			</linearGradient>
-		</defs>
+	<svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+		<path d="M1 4.5L7 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+		<path d="M4 1.49994L4 7.49994" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
 	</svg>
 );

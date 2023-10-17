@@ -68,15 +68,10 @@ const BasicSettings = (props) => {
 			</FormListItem>
 			<V5Divider />
 			<FormListItem>
-				Shading
-				<Field name="shading" render={ ({ field }) => (
-					<SelectField {...field}>
-						<MenuItem value="standard">Standard</MenuItem>
-					</SelectField>)} />
 				Viewer Background Color
 				<Field name="viewerBackgroundColor" render={ ({ field }) => (
 					<ColorPicker {...field} onChange={(val) => {
-						// this is because colorpicker doenst use the standard events for inputs
+						// this is because colorpicker doesn't use the standard events for inputs
 						field.onChange({target: {name: field.name, value: val}});
 					}} />
 				)} />
@@ -127,7 +122,7 @@ const BasicSettings = (props) => {
 				Clipping plane border color
 				<Field name="clipPlaneBorderColor" render={ ({ field }) => (
 					<ColorPicker {...field} onChange={(val) => {
-						// this is because colorpicker doenst use the standard events for inputs
+						// this is because colorpicker doesn't use the standard events for inputs
 						field.onChange({target: {name: field.name, value: val}});
 					}} />
 				)} />
@@ -425,7 +420,7 @@ const StreamingSettings = (props) => {
 				Color
 				<Field name="phBundleColor" render={ ({ field }) => (
 					<ColorPicker {...field} onChange={(val) => {
-						// this is because colorpicker doenst use the standard events for inputs
+						// this is because colorpicker doesn't use the standard events for inputs
 						field.onChange({target: {name: field.name, value: val}});
 					}} />
 				)} />

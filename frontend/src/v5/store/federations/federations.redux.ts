@@ -19,6 +19,7 @@ import { createActions, createReducer } from 'reduxsauce';
 import {
 	FederationSettings,
 	FederationStats,
+	GroupedContainer,
 	IFederation,
 	NewFederation,
 } from '@/v5/store/federations/federations.types';
@@ -165,7 +166,7 @@ export interface IFederationsState {
 	federationsByProject: Record<string, IFederation[]>;
 }
 
-export type CreateFederationAction = Action<'CREATE_FEDERATION'> & TeamspaceAndProjectId & { newFederation: NewFederation, containers?: string[], onSuccess: () => void, onError: (error) => void };
+export type CreateFederationAction = Action<'CREATE_FEDERATION'> & TeamspaceAndProjectId & { newFederation: NewFederation, containers?: GroupedContainer[], onSuccess: () => void, onError: (error) => void };
 export type CreateFederationSuccessAction = Action<'CREATE_FEDERATION_SUCCESS'> & { projectId: string, newFederation: NewFederation, federationId: string };
 export type FetchFederationsAction = Action<'FETCH_FEDERATIONS'> & TeamspaceAndProjectId;
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & TeamspaceProjectAndFederationId;
@@ -174,8 +175,8 @@ export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & Projec
 export type FetchFederationsSuccessAction = Action<'FETCH_FEDERATIONS_SUCCESS'> & { projectId: string, federations: IFederation[] };
 export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & TeamspaceProjectAndFederationId;
 export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & ProjectAndFederationId & { stats: FederationStats };
-export type UpdateFederationContainersAction = Action<'UPDATE_FEDERATION_CONTAINERS'> & TeamspaceProjectAndFederationId & { containers: string[] };
-export type UpdateFederationContainersActionSuccess = Action<'UPDATE_FEDERATION_CONTAINERS_SUCCESS'> & ProjectAndFederationId & { containers: string[] };
+export type UpdateFederationContainersAction = Action<'UPDATE_FEDERATION_CONTAINERS'> & TeamspaceProjectAndFederationId & { containers: GroupedContainer[] };
+export type UpdateFederationContainersActionSuccess = Action<'UPDATE_FEDERATION_CONTAINERS_SUCCESS'> & ProjectAndFederationId & { containers: GroupedContainer[] };
 export type FetchFederationViewsAction = Action<'FETCH_FEDERATION_VIEWS'> & TeamspaceProjectAndFederationId;
 export type FetchFederationViewsSuccessAction = Action<'FETCH_FEDERATION_VIEWS_SUCCESS'> & ProjectAndFederationId & { views: View[] };
 export type FetchFederationSettingsAction = Action<'FETCH_FEDERATION_SETTINGS'> & TeamspaceProjectAndFederationId;
@@ -191,7 +192,7 @@ export interface IFederationsActionCreators {
 		teamspace: string,
 		projectId: string,
 		newFederation: NewFederation,
-		containers: string[],
+		containers: GroupedContainer[],
 		onSuccess: () => void,
 		onError: (error) => void,
 	) => CreateFederationAction;
@@ -252,12 +253,12 @@ export interface IFederationsActionCreators {
 		teamspace: string,
 		projectId: string,
 		federationId: string,
-		containers: string[]
+		containers: GroupedContainer[],
 	) => UpdateFederationContainersAction;
 	updateFederationContainersSuccess: (
 		projectId: string,
 		federationId: string,
-		containers: string[],
+		containers: GroupedContainer[],
 	) => UpdateFederationContainersActionSuccess;
 	updateFederationSuccess: (
 		projectId: string,

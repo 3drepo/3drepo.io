@@ -131,3 +131,5 @@ export const uploadFile = Yup.mixed().nullable().test(
 	}, { sizeLimit: filesize(ClientConfig.uploadSizeLimit) }),
 	({ size }) => size && (size < ClientConfig.uploadSizeLimit),
 );
+
+export const lod = Yup.number();

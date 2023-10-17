@@ -23,8 +23,9 @@ import * as countriesAndTimezones from 'countries-and-timezones';
 import { MenuItem } from '@mui/material';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { get } from 'lodash';
+import { LOD_VALUES } from '@/v5/store/revisions/revisions.types';
 import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
-import { extensionIsSpm } from '../../uploadFileForm.helpers';
+import { extensionIsRevit, extensionIsSpm } from '../../uploadFileForm.helpers';
 
 type ISidebarForm = {
 	revisionPrefix: string;
@@ -115,6 +116,19 @@ export const SidebarForm = ({
 				label={formatMessage({ id: 'uploads.sidebar.revisionDesc', defaultMessage: 'Revision Description' })}
 				formError={getError('revisionDesc')}
 			/>
+			{extensionIsRevit(extension) && (
+				<FormSelect
+					required
+					name={`${revisionPrefix}.containerUnit`}
+					label={formatMessage({ id: 'uploads.sidebar.lod', defaultMessage: 'Level of Detail' })}
+				>
+					{LOD_VALUES.map((type) => (
+						<MenuItem key={type.value} value={type.value}>
+							{type.name}
+						</MenuItem>
+					))}
+				</FormSelect>
+			)}
 
 			{extensionIsSpm(extension) && (
 				<>
