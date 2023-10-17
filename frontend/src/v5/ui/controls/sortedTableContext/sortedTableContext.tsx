@@ -35,6 +35,7 @@ export interface Props<T> {
 	isDescendingOrder?: boolean;
 	children: any;
 }
+// eslint-disable-next-line @typescript-eslint/comma-dangle
 export const SortedTableComponent = <T,>({ items, sortingColumn: initialSortingColumn, isDescendingOrder: initialIsDescendingOrder, children }: Props<T>) => {
 	const [isDescendingOrder, setIsDescendingOrder] = useState(initialIsDescendingOrder ?? true);
 	const [sortingColumn, setSortingColumn] = useState(initialSortingColumn || '');
