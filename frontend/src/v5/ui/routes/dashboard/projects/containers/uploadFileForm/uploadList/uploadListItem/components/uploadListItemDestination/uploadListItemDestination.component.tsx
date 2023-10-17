@@ -119,6 +119,7 @@ export const UploadListItemDestination = memo(({
 				name: inputValue.trim(),
 			});
 		}
+
 		return filteredOptions;
 	};
 
@@ -169,10 +170,12 @@ export const UploadListItemDestination = memo(({
 				projectId,
 				newVal._id,
 			);
+
 			for (const [key, val] of Object.entries(sanitisedValue)) {
 				setValue(`${revisionPrefix}.${key}`, val);
 			}
 		}
+
 		setValue(`${revisionPrefix}.containerName`, newVal?.name?.trim() || '');
 		setValue(`${revisionPrefix}.containerId`, newVal?._id || '');
 	};

@@ -79,6 +79,7 @@ type IUploadFileForm = {
 	open: boolean;
 	onClickClose: () => void;
 };
+
 export const UploadFileForm = ({
 	presetContainerId,
 	presetFile,
@@ -99,6 +100,7 @@ export const UploadFileForm = ({
 		resolver: yupResolver(UploadsSchema),
 		context: { alreadyExistingTags, alreadyExistingNames: [] },
 	});
+
 	const {
 		control,
 		handleSubmit,
@@ -151,9 +153,9 @@ export const UploadFileForm = ({
 
 	const containersNamesInModal = getValues('uploads')?.map(({ containerName }) => containerName);
 
-	const removeUploadById = (uploadId) => {
+	const removeUploadById = useCallback((uploadId) => {
 		remove(fields.findIndex((field) => field.uploadId === uploadId));
-	};
+	}, [fields.length]);
 
 	const onSubmit = useCallback(async ({ uploads }: UploadFieldArray) => {
 		if (isUploading) {
@@ -202,6 +204,8 @@ export const UploadFileForm = ({
 				maxWidth="xl"
 				isValid={!isUploading ? isValid : allUploadsComplete}
 				contrastColorHeader
+				fields={fields}
+				isUploading={isUploading}
 				{...uploadModalLabels({ isUploading, fileCount: fields.length })}
 			>
 				<UploadFileFormContextComponent fields={fields}>

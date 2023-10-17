@@ -18,8 +18,6 @@
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { RevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { forwardRef, memo, useState } from 'react';
-import { isEqual } from 'lodash';
 import { InputController } from '@controls/inputs/inputController.component';
 import { DashboardListItemRow as UploadListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
@@ -28,9 +26,6 @@ import { UploadProgress } from './components/uploadProgress/uploadProgress.compo
 import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
 import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag/uploadListItemRevisionTag.component';
 import { UploadListItemButton } from './uploadListItem.styles';
-import { FormTextField } from '@controls/inputs/formInputs.component';
-import { useFormContext } from 'react-hook-form';
-import { TextField } from '@mui/material';
 
 type IUploadListItem = {
 	uploadId: string;
@@ -46,10 +41,6 @@ type IUploadListItem = {
 	onClickDelete: () => void;
 };
 
-const MyTextfield =  forwardRef((props, ref)=> {
-	return <TextField {...props} inputRef={ref} />;
-});
-
 export const UploadListItem = ({
 	uploadId,
 	index,
@@ -61,12 +52,8 @@ export const UploadListItem = ({
 }: IUploadListItem): JSX.Element => {
 	const revisionPrefix = `uploads.${index}`;
 	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(uploadId);
-	const { control, register } = useFormContext();
-	const [ count, setCount ] = useState(0);
-
 	return (
 		<UploadListItemRow
-			key={uploadId}
 			selected={isSelected}
 		>
 			<UploadListItemFileIcon extension={fileData.extension} />
@@ -77,27 +64,19 @@ export const UploadListItem = ({
 				name={fileData.name}
 				size={fileData.size}
 			/>
-			{/* <InputController
+			<InputController
 				Input={UploadListItemDestination}
 				name={`${revisionPrefix}.containerName`}
 				key={`${uploadId}.dest`}
 				// @ts-ignore
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
-			/> */}
-			{/* <UploadListItemRevisionTag
+			/>
+			<UploadListItemRevisionTag
 				key={`${uploadId}.revisionTag`}
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}
-			/> */}
-			<MyTextfield 
-				key={`${uploadId}.revisionTag`} 
-				{...register(`${revisionPrefix}.revisionTag`)}
 			/>
-			{`my count is ${count}`}
-			<button type='button' onClick={() => setCount(count + 1)}>+</button>
-
-
 			{isUploading
 				? (<UploadProgress uploadId={uploadId} errorMessage={uploadErrorMessage} />)
 				: (
