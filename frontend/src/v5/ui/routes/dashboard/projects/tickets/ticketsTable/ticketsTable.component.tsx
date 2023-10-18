@@ -16,7 +16,7 @@
  */
 
 import { JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from 'react-redux';
 import { selectFederationById } from '@/v5/store/federations/federations.selectors';
@@ -30,7 +30,7 @@ import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { CircleButton } from '@controls/circleButton';
-import { getTicketIsCompleted, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
+import { getTicketIsCompleted, modelIsFederation, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
 import _ from 'lodash';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
@@ -61,7 +61,7 @@ type FormType = {
 export const TicketsTable = () => {
 	const history = useHistory();
 	const params = useParams<DashboardTicketsParams>();
-	const { teamspace, project, groupBy: groupByURLParam, template: templateURLParam } = params;
+	const { teamspace, project, groupBy: groupByURLParam, template: templateURLParam, containerOrFederation } = params;
 	const [modelsIds, setModelsIds] = useSearchParam('models');
 	const models = useSelectedModels();
 	const { getState } = useStore();
@@ -82,6 +82,10 @@ export const TicketsTable = () => {
 	const [showCompleted, setShowCompleted] = useState(false);
 	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
 
+	const isFederation = modelIsFederation(containerOrFederation);
+	const readOnly = isFederation
+		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
+		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
 	const selectedTicketId = sidePanelTicket?._id;
 	const templateIsFetched = templateAlreadyFetched(selectedTemplate || {} as any);
 	const isCreatingNewTicket = sidePanelModelId && !selectedTicketId && !hasRequiredViewerProperties(selectedTemplate);
@@ -189,6 +193,10 @@ export const TicketsTable = () => {
 	}, []);
 
 	useEffect(() => { closeSidePanel(); }, [template, containersAndFederations]);
+
+	useEffect(() => {
+		TicketsCardActionsDispatchers.setReadOnly(readOnly);
+	}, [readOnly]);
 
 	return (
 		<SearchContextComponent items={ticketsFilteredByTemplate} filteringFunction={filterTickets}>

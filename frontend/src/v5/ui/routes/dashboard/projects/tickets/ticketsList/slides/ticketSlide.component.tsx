@@ -19,7 +19,7 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { enableRealtimeContainerUpdateTicket, enableRealtimeFederationUpdateTicket } from '@/v5/services/realtime/ticket.events';
-import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
@@ -39,9 +39,6 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<DashboardTicketsParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsHooksSelectors.selectTicketByIdRaw(containerOrFederation, ticketId);
-	const readOnly = isFederation
-		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
-		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
 
 	const formData = useForm({
 		resolver: yupResolver(getValidators(template)),
@@ -73,7 +70,6 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 	}, [ticketId, containerOrFederation]);
 
 	useEffect(() => {
-		TicketsCardActionsDispatchers.setReadOnly(readOnly);
 		return isFederation
 			? enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation)
 			: enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation);
