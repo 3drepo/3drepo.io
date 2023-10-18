@@ -15,28 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import { InputsContainer, Buttons } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketGroups/groups/groupRulesForm/groupRulesForm.styles';
+import styled from 'styled-components';
 
-export const ValuesContainer = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: end;
-	gap: 10px;
-`;
+export const Container = styled.div`
+	${InputsContainer} {
+		padding: 0;
+		overflow: unset;
+		max-height: unset;
+		display: flex;
+		flex-direction: column;
 
-export const ValueIconContainer = styled.button.attrs({
-	type: 'button',
-})<{ disabled?: boolean }>`
-	cursor: pointer;
-	color: ${({ theme }) => theme.palette.secondary.main};
-	${({ theme, disabled }) => disabled && css`
-		cursor: auto;
-		color: ${theme.palette.base.light};
-	`}
-	display: inline-block;
-	padding: 0;
-	height: 18px;
-	margin-bottom: 15px;
-	border: none;
-	background: transparent;
+		.MuiFormControl-root.MuiTextField-root {
+			width: max(285px, 100%);
+		}
+	}
+
+	${Buttons} {
+		& > :first-child {
+			display: none;
+		}
+		
+		& > :last-child {
+			margin: 14px -13px 0 0;
+		}
+	}
 `;
