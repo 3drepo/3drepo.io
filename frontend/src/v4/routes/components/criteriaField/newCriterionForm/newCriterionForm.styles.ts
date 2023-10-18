@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,27 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { uniqueId } from 'lodash';
+import { InputsContainer, Buttons } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketGroups/groups/groupRulesForm/groupRulesForm.styles';
+import styled from 'styled-components';
 
-export const getCriterionId = () => uniqueId('criterion-');
+export const Container = styled.div`
+	${InputsContainer} {
+		padding: 0;
+		overflow: unset;
+		max-height: unset;
+		display: flex;
+		flex-direction: column;
 
-export const prepareCriterion = (criterion) => ({
-	...criterion,
-	_id: getCriterionId()
-});
-
-export const getUpdatedCriteria = (selectedCriteria, newCriterion) => {
-	const isNewCriterion = !newCriterion._id;
-
-	if (!isNewCriterion) {
-		return selectedCriteria.map((criterion) => {
-			if (criterion._id === newCriterion._id) {
-				return newCriterion;
-			}
-			return criterion;
-		});
+		.MuiFormControl-root.MuiTextField-root {
+			width: max(285px, 100%);
+		}
 	}
 
-	const preparedCriterion = prepareCriterion(newCriterion);
-	return [...selectedCriteria, preparedCriterion];
-};
+	${Buttons} {
+		& > :first-child {
+			display: none;
+		}
+		
+		& > :last-child {
+			margin: 14px -13px 0 0;
+		}
+	}
+`;
