@@ -41,6 +41,9 @@ const TicketTemplates = require(`${src}/models/tickets.templates`);
 jest.mock('../../../../../src/v5/schemas/tickets');
 const TicketSchemas = require(`${src}/schemas/tickets`);
 
+jest.mock('../../../../../src/v5/schemas/tickets/templates');
+const TemplateSchemas = require(`${src}/schemas/tickets/templates`);
+
 jest.mock('../../../../../src/v5/schemas/tickets/tickets.comments');
 const CommentSchemas = require(`${src}/schemas/tickets/tickets.comments`);
 
@@ -479,6 +482,7 @@ const testModelEventsListener = () => {
 				changes,
 			};
 
+			TemplateSchemas.generateFullSchema.mockImplementationOnce(() => ({ }));
 			TicketSchemas.serialiseTicket.mockImplementationOnce(() => ({
 				_id: data.ticket._id, ...expectedData }));
 			ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
@@ -529,21 +533,21 @@ const testModelEventsListener = () => {
 		});
 
 		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
-				is a ${events.UPDATE_TICKET} (Container)`, async () => {
+				is a ${events.UPDATE_TICKET} and title has been updated (Container)`, async () => {
 			const changes = { title: { from: generateRandomString(), to: generateRandomString() } };
 			const expectedData = { title: changes.title.to };
 			await updateTicketTest(false, changes, expectedData);
 		});
 
 		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
-				is a ${events.UPDATE_TICKET} (Container)`, async () => {
+				is a ${events.UPDATE_TICKET} and a prop has been updated (Container)`, async () => {
 			const changes = { properties: { prop: { from: generateRandomString(), to: generateRandomString() } } };
 			const expectedData = { properties: { prop: changes.properties.prop.to } };
 			await updateTicketTest(false, changes, expectedData);
 		});
 
 		test(`Should trigger addTicketLog and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
-				is a ${events.UPDATE_TICKET} (Container)`, async () => {
+				is a ${events.UPDATE_TICKET} and a module prop has been updated (Container)`, async () => {
 			const changes = {
 				modules: {
 					mod: {
@@ -556,7 +560,7 @@ const testModelEventsListener = () => {
 		});
 
 		test(`Should trigger addTicketLog and create a ${chatEvents.FEDERATION_UPDATE_TICKET} if there
-				is a ${events.UPDATE_TICKET} (Federation)`, async () => {
+				is a ${events.UPDATE_TICKET} and title has been updated (Federation)`, async () => {
 			const changes = { title: { from: generateRandomString(), to: generateRandomString() } };
 			const expectedData = { title: changes.title.to };
 			await updateTicketTest(true, changes, expectedData);
