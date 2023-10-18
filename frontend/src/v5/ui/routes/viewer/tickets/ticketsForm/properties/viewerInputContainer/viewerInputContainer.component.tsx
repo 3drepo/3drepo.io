@@ -28,10 +28,9 @@ import { Overlay, Link } from './viewerInputContainer.styles';
 export const ViewerInputContainer = (props) => {
 	const { isViewer } = useContext(TicketContext);
 	const { teamspace, project, containerOrFederation } = useParams();
-
-	if (isViewer) return (<InputContainer {...props} />)
-
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+
+	if (isViewer) return (<InputContainer {...props} />);
 
 	const getOpenInViewerLink = () => {
 		if (!containerOrFederation) return '/';

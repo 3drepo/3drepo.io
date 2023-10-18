@@ -20,10 +20,8 @@ import { FormattedMessage } from 'react-intl';
 import { Camera } from '@/v5/store/tickets/tickets.types';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
-import { useContext } from 'react';
 import { EllipsisMenuItemDelete } from '../../../ticketImageContent/ticketImageAction/ticketImageAction.styles';
 import { ViewActionMenu } from '../viewActionMenu.component';
-import { TicketContext } from '../../../../../ticket.context';
 
 type ICameraActionMenu = {
 	value: Camera | undefined;

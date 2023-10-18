@@ -104,7 +104,7 @@ export const NewTicketSlide = ({ defaultValue, template, onSave, onDirtyStateCha
 					id="ticketsTable.cannotCreate"
 					defaultMessage="The selected template has required properties that can only be created in the viewer, please proceed to <Link>view this model</Link> to create the ticket."
 					values={{
-						Link: (text) => <Link to={viewerModelLink} target="_blank">{text}</Link>
+						Link: (text) => <Link to={viewerModelLink} target="_blank">{text}</Link>,
 					}}
 				/>
 			</RequiresViewerContainer>
