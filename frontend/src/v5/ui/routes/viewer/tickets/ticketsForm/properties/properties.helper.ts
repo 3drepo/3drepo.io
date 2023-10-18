@@ -19,7 +19,7 @@ import { TextAreaFixedSize } from '@controls/inputs/textArea/textAreaFixedSize.c
 import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
 import { Toggle } from '@controls/inputs/toggle/toggle.component';
 import { NumberField } from '@controls/inputs/numberField/numberField.component';
-import { PinDetails } from '@components/viewer/cards/tickets/pinDetails/pinDetails.component';
+import { CoordsProperty } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.component';
 import { ManyOfProperty } from './manyOfProperty.component';
 import { OneOfProperty } from './oneOfProperty.component';
 import { TicketImage } from './ticketImageContent/ticketImage/ticketImage.component';
@@ -32,7 +32,7 @@ export const TicketProperty = {
 	oneOf: OneOfProperty,
 	manyOf: ManyOfProperty,
 	boolean: Toggle,
-	coords: PinDetails,
+	coords: CoordsProperty,
 	number: NumberField,
 	image: TicketImage,
 	view: TicketView,

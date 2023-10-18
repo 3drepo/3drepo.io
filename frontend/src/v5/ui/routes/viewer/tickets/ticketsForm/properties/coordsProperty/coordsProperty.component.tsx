@@ -27,9 +27,9 @@ import { theme } from '@/v5/ui/themes/theme';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
-import { PinAction, PinActions, PinName, SettingLocationText } from './pinDetails.styles';
+import { PinAction, PinActions, PinName, SettingLocationText } from './coordsProperty.styles';
 
-export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
+export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
 	const pinId = name;

@@ -16,18 +16,18 @@
  */
 
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { PinDetails } from '@components/viewer/cards/tickets/pinDetails/pinDetails.component';
+import { CoordsProperty } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.component';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
-	title: 'Inputs/PinDetails',
-	component: PinDetails,
+	title: 'Inputs/CoordsProperty',
+	component: CoordsProperty,
 	parameters: { controls: { exclude: ['onChange', 'onBlur'] } },
-} as ComponentMeta<typeof PinDetails>;
+} as ComponentMeta<typeof CoordsProperty>;
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof PinDetails> = (args) => (
-	<PinDetails {...args} />
+const Template: ComponentStory<typeof CoordsProperty> = (args) => (
+	<CoordsProperty {...args} />
 );
 
 export const Default = Template.bind({});
