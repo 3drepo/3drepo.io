@@ -23,6 +23,6 @@ export const EmptyTicketsView = styled(CentredContainer)`
 	background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	${({ theme }) => theme.typography.h2}
 	border-radius: 20px;
-	width: calc(100% - 35px);
+	width: 100%;
 	height: 600px;
 `;
