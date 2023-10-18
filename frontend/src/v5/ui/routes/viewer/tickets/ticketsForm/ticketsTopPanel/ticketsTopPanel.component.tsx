@@ -22,6 +22,8 @@ import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { CreationInfo } from '@components/shared/creationInfo/creationInfo.component';
 import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
 import { useFormContext } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import _ from 'lodash';
 import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
@@ -44,7 +46,9 @@ export const TicketsTopPanel = ({
 	onPropertyBlur,
 }: ITicketsTopPanel) => {
 	const { formState, getValues } = useFormContext();
+	const { containerOrFederation } = useParams();
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
+	const [autoFocusKey, setAutoFocusKey] = useState(new Date());
 
 	const owner = getValues(`properties.${BaseProperties.OWNER}`);
 	const createdAt = getValues(`properties.${BaseProperties.CREATED_AT}`);
@@ -53,6 +57,8 @@ export const TicketsTopPanel = ({
 	const hasIssueProperties = properties.some((property) => property.name === IssueProperties.PRIORITY);
 	const topPanelProperties: string[] = Object.values({ ...BaseProperties, ...IssueProperties });
 	const extraProperties = properties.filter(({ name }) => !topPanelProperties.includes(name));
+
+	useEffect(() => { setTimeout(() => setAutoFocusKey(new Date()), 50); }, [containerOrFederation, formState]);
 
 	return (
 		<TopPanel>
@@ -64,6 +70,7 @@ export const TicketsTopPanel = ({
 					inputProps={{ autoFocus: focusOnTitle }}
 					onBlur={onPropertyBlur}
 					disabled={readOnly}
+					key={autoFocusKey}
 				/>
 				{createdAt && (
 					<CreationInfo
