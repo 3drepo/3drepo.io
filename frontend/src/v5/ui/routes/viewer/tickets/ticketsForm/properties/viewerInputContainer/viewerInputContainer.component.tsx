@@ -17,10 +17,46 @@
 
 import { useContext } from 'react';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
-import { InputContainer } from './viewerInputContainer.styles';
+import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
+import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
+import { FormattedMessage } from 'react-intl';
+import { generatePath, useParams } from 'react-router-dom';
+import { VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { Overlay, Link } from './viewerInputContainer.styles';
 
 export const ViewerInputContainer = (props) => {
 	const { isViewer } = useContext(TicketContext);
+	const { teamspace, project, containerOrFederation } = useParams();
 
-	return (<InputContainer isViewer={isViewer} {...props} />);
+	if (isViewer) return (<InputContainer {...props} />)
+
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+
+	const getOpenInViewerLink = () => {
+		if (!containerOrFederation) return '/';
+		const pathname = generatePath(VIEWER_ROUTE, {
+			teamspace,
+			project,
+			containerOrFederation,
+		});
+		return pathname + (ticketId ? `?ticketId=${ticketId}` : '');
+	};
+
+	return (
+		<OverlappingContainer>
+			<InputContainer {...props} />
+			{!isViewer && (
+				<Overlay>
+					<FormattedMessage
+						defaultMessage="Please&nbsp;<Link>Open Viewer</Link>&nbsp;to interact with this property."
+						id="ticket.property.requiresViewerOverlay"
+						values={{
+							Link: (text) => <Link to={getOpenInViewerLink()} target="_blank">{text}</Link>,
+						}}
+					/>
+				</Overlay>
+			)}
+		</OverlappingContainer>
+	);
 };

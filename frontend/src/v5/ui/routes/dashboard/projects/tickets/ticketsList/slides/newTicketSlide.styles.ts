@@ -17,6 +17,7 @@
 
 import { SubmitButton } from '@controls/submitButton';
 import styled from 'styled-components';
+import { Link as LinkBase } from 'react-router-dom';
 
 export const SaveButton = styled(SubmitButton)`
 	margin: 9px 15px;
@@ -32,10 +33,12 @@ export const ButtonContainer = styled.div`
 export const RequiresViewerContainer = styled.div`
 	padding: 27px;
 	box-sizing: border-box;
-	width: 100%;
-	height: 100%;
-	display: flex;
-	place-items: center;
-	text-align: center;
+	width: fit-content;
+	height: fit-content;
+	margin: auto;
 	${({ theme }) => theme.typography.h5}
+`;
+
+export const Link = styled(LinkBase)`
+	color: ${({ theme }) => theme.palette.primary.main};
 `;

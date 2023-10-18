@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from 'react-redux';
@@ -35,6 +35,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import _ from 'lodash';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { theme } from '@/v5/ui/routes/viewer/theme';
+import { Link } from 'react-router-dom';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { enableRealtimeContainerNewTicket, enableRealtimeContainerUpdateTicket, enableRealtimeFederationNewTicket, enableRealtimeFederationUpdateTicket } from '@/v5/services/realtime/ticket.events';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
@@ -111,13 +112,15 @@ export const TicketsTable = () => {
 		return elementsToFilter.some((str) => str.toLowerCase().includes(query.toLowerCase()));
 	});
 
-	const openInViewer = () => {
+	const getOpenInViewerLink = () => {
+		if (!sidePanelModelId) return '';
+
 		const pathname = generatePath(VIEWER_ROUTE, {
 			teamspace,
 			project,
-			containerOrFederation: sidePanelModelId,
+			containerOrFederation: sidePanelModelId || '',
 		});
-		history.push({ pathname, search: sidePanelTicket?._id ? `?ticketId=${sidePanelTicket._id}` : '' });
+		return pathname + (selectedTicketId ? `?ticketId=${selectedTicketId}` : '');
 	};
 
 	// We are using getState here because is being used inside a function
@@ -171,12 +174,14 @@ export const TicketsTable = () => {
 
 	useEffect(() => {
 		const { containerOrFederation, ...newParams } = params;
-		if (sidePanelTicket?._id) {
-			newParams.containerOrFederation = sidePanelModelId;
-		}
+		newParams.containerOrFederation = sidePanelModelId;
 		const path = generatePath(TICKETS_ROUTE, newParams);
 		history.replace(path + window.location.search);
-	}, [sidePanelTicket?._id]);
+	}, [sidePanelModelId]);
+
+	useEffect(() => {
+		TicketsCardActionsDispatchers.setSelectedTicket(selectedTicketId);
+	}, [selectedTicketId]);
 
 	useEffect(() => {
 		JobsActionsDispatchers.fetchJobs(teamspace);
@@ -230,12 +235,14 @@ export const TicketsTable = () => {
 			</FormProvider>
 			<SidePanel open={!!sidePanelModelId}>
 				<SlidePanelHeader>
-					<OpenInViewerButton disabled={isCreatingNewTicket} onClick={openInViewer}>
-						<FormattedMessage
-							id="ticketsTable.button.openIn3DViewer"
-							defaultMessage="Open in 3D viewer"
-						/>
-					</OpenInViewerButton>
+					<Link to={getOpenInViewerLink()} target="_blank">
+						<OpenInViewerButton disabled={isCreatingNewTicket}>
+							<FormattedMessage
+								id="ticketsTable.button.openIn3DViewer"
+								defaultMessage="Open in 3D viewer"
+							/>
+						</OpenInViewerButton>
+					</Link>
 					<CircleButton onClick={closeSidePanel}>
 						<ExpandIcon />
 					</CircleButton>
@@ -247,7 +254,6 @@ export const TicketsTable = () => {
 							{!selectedTicketId && (
 								<NewTicketSlide
 									defaultValue={sidePanelTicket}
-									modelId={sidePanelModelId}
 									template={selectedTemplate}
 									onSave={onSaveTicket}
 									onDirtyStateChange={setIsNewTicketDirty}

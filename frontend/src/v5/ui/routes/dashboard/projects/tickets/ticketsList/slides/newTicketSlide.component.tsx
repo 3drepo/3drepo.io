@@ -19,16 +19,16 @@ import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { filterEmptyTicketValues, getDefaultTicket, getEditableProperties, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { ITemplate, ITicket, NewTicket } from '@/v5/store/tickets/tickets.types';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
-import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { DashboardTicketsParams, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { TicketForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketForm.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
-import { useParams } from 'react-router-dom';
+import { useParams, generatePath } from 'react-router-dom';
 import { isEmpty, merge } from 'lodash';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
-import { SaveButton, RequiresViewerContainer, ButtonContainer } from './newTicketSlide.styles';
+import { SaveButton, RequiresViewerContainer, ButtonContainer, Link } from './newTicketSlide.styles';
 import { hasRequiredViewerProperties } from '../../ticketsTable/ticketsTable.helper';
 
 const getGroupDefaultValue = (template, ticket) => {
@@ -43,16 +43,15 @@ const getGroupDefaultValue = (template, ticket) => {
 
 type NewTicketSlideProps = {
 	defaultValue?: Partial<ITicket>,
-	modelId: string,
 	template: ITemplate,
 	onSave: (newTicketId: string) => void,
 	onDirtyStateChange: (isDirty: boolean) => void,
 };
-export const NewTicketSlide = ({ defaultValue, modelId, template, onSave, onDirtyStateChange }: NewTicketSlideProps) => {
-	const { teamspace, project } = useParams<DashboardTicketsParams>();
+export const NewTicketSlide = ({ defaultValue, template, onSave, onDirtyStateChange }: NewTicketSlideProps) => {
+	const { teamspace, project, containerOrFederation } = useParams<DashboardTicketsParams>();
 	const templateIsFetched = templateAlreadyFetched(template || {} as any);
 	const defaultValues = getGroupDefaultValue(template, defaultValue);
-	const isFederation = modelIsFederation(modelId);
+	const isFederation = modelIsFederation(containerOrFederation);
 
 	const formData = useForm({
 		resolver: yupResolver(getValidators(template)),
@@ -70,17 +69,23 @@ export const NewTicketSlide = ({ defaultValue, modelId, template, onSave, onDirt
 		TicketsActionsDispatchers.createTicket(
 			teamspace,
 			project,
-			modelId,
+			containerOrFederation,
 			parsedTicket,
 			isFederation,
 			onSave,
 		);
 	};
 
+	const viewerModelLink = !containerOrFederation ? '/' : generatePath(VIEWER_ROUTE, {
+		teamspace,
+		project,
+		containerOrFederation,
+	});
+
 	useEffect(() => {
 		if (!templateIsFetched) return;
 		reset(defaultValues);
-	}, [modelId, templateIsFetched]);
+	}, [containerOrFederation, templateIsFetched]);
 
 	useEffect(() => {
 		onDirtyStateChange(!isEmpty(dirtyFields));
@@ -97,7 +102,10 @@ export const NewTicketSlide = ({ defaultValue, modelId, template, onSave, onDirt
 			<RequiresViewerContainer>
 				<FormattedMessage
 					id="ticketsTable.cannotCreate"
-					defaultMessage="The selected template has required properties that must be set in the viewer."
+					defaultMessage="The selected template has required properties that can only be created in the viewer, please proceed to <Link>view this model</Link> to create the ticket."
+					values={{
+						Link: (text) => <Link to={viewerModelLink} target="_blank">{text}</Link>
+					}}
 				/>
 			</RequiresViewerContainer>
 		);
@@ -106,7 +114,7 @@ export const NewTicketSlide = ({ defaultValue, modelId, template, onSave, onDirt
 	return (
 		<form onSubmit={handleSubmit(onSubmit)}>
 			<FormProvider {...formData}>
-				<TicketForm template={getEditableProperties(template)} ticket={defaultValues} />
+				<TicketForm template={getEditableProperties(template)} ticket={defaultValues} focusOnTitle />
 			</FormProvider>
 			<ButtonContainer>
 				<SaveButton disabled={!isValid}>
