@@ -49,7 +49,7 @@ type NewTicketSlideProps = {
 };
 export const NewTicketSlide = ({ defaultValue, template, onSave, onDirtyStateChange }: NewTicketSlideProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<DashboardTicketsParams>();
-	const templateIsFetched = templateAlreadyFetched(template || {} as any);
+	const isLoading = !templateAlreadyFetched(template || {} as any) || !containerOrFederation;
 	const defaultValues = getGroupDefaultValue(template, defaultValue);
 	const isFederation = modelIsFederation(containerOrFederation);
 
@@ -83,9 +83,9 @@ export const NewTicketSlide = ({ defaultValue, template, onSave, onDirtyStateCha
 	});
 
 	useEffect(() => {
-		if (!templateIsFetched) return;
+		if (isLoading) return;
 		reset(defaultValues);
-	}, [containerOrFederation, templateIsFetched]);
+	}, [containerOrFederation, isLoading]);
 
 	useEffect(() => {
 		onDirtyStateChange(!isEmpty(dirtyFields));
@@ -95,7 +95,7 @@ export const NewTicketSlide = ({ defaultValue, template, onSave, onDirtyStateCha
 		onDirtyStateChange(false);
 	}, []);
 
-	if (!templateIsFetched) return (<Loader />);
+	if (isLoading) return (<Loader />);
 
 	if (hasRequiredViewerProperties(template)) {
 		return (
