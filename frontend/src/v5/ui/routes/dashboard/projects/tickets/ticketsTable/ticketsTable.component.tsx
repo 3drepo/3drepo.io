@@ -22,7 +22,7 @@ import { useStore } from 'react-redux';
 import { selectFederationById } from '@/v5/store/federations/federations.selectors';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
-import { useParams, generatePath, useHistory } from 'react-router-dom';
+import { useParams, generatePath, useHistory, Link } from 'react-router-dom';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
@@ -35,7 +35,6 @@ import { FormProvider, useForm } from 'react-hook-form';
 import _ from 'lodash';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { theme } from '@/v5/ui/routes/viewer/theme';
-import { Link } from 'react-router-dom';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { enableRealtimeContainerNewTicket, enableRealtimeContainerUpdateTicket, enableRealtimeFederationNewTicket, enableRealtimeFederationUpdateTicket } from '@/v5/services/realtime/ticket.events';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
@@ -177,8 +176,10 @@ export const TicketsTable = () => {
 	}, [project]);
 
 	useEffect(() => {
-		const { containerOrFederation, ...newParams } = params;
-		newParams.containerOrFederation = sidePanelModelId;
+		const newParams = {
+			...params,
+			containerOrFederation: sidePanelModelId,
+		};
 		const path = generatePath(TICKETS_ROUTE, newParams);
 		history.replace(path + window.location.search);
 	}, [sidePanelModelId]);
