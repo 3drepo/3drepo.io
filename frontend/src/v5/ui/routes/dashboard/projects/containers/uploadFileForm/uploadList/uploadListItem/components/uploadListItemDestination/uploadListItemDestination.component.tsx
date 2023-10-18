@@ -184,7 +184,7 @@ export const UploadListItemDestination = memo(({
 		setContainerNamesInModal(
 			getValues('uploads')
 				.map(({ containerName }) => containerName)
-				.filter(({ containerName }) => containerName !== value)
+				.filter((containerName) => containerName !== value)
 				.filter(Boolean),
 		);
 		setProcessingContainersNames(

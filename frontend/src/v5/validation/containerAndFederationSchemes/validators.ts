@@ -54,9 +54,9 @@ export const name = trimmedString
 			id: 'validation.model.name.alreadyExisting',
 			defaultMessage: 'This name is already used within this project',
 		}),
-		(nameValue, testContext) => (
-			!testContext.options.context.alreadyExistingNames.map((n) => n.trim().toLocaleLowerCase()).includes(nameValue.toLocaleLowerCase())
-		),
+		(nameValue, testContext) => {
+			return !testContext.options.context.alreadyExistingNames.map((n) => n.trim().toLocaleLowerCase()).includes(nameValue?.toLocaleLowerCase());
+		},
 	);
 
 export const unit = Yup.string().required().oneOf(['mm', 'cm', 'dm', 'm', 'ft']).default('mm');
