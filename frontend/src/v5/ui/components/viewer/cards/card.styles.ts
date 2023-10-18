@@ -63,6 +63,7 @@ export const CardContent = styled.div`
 	padding: 15px;
 	box-sizing: border-box;
 	overflow: overlay;
+	height: 100%;
 `;
 
 export const EmptyCardMessage = styled(DashedContainer).attrs({

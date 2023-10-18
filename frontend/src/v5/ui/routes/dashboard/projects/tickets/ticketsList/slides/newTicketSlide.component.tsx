@@ -28,7 +28,7 @@ import { FormattedMessage } from 'react-intl';
 import { useParams, generatePath } from 'react-router-dom';
 import { isEmpty, merge } from 'lodash';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
-import { SaveButton, RequiresViewerContainer, ButtonContainer, Link } from './newTicketSlide.styles';
+import { SaveButton, RequiresViewerContainer, ButtonContainer, Link, Form } from './newTicketSlide.styles';
 import { hasRequiredViewerProperties } from '../../ticketsTable/ticketsTable.helper';
 
 const getGroupDefaultValue = (template, ticket) => {
@@ -112,7 +112,7 @@ export const NewTicketSlide = ({ defaultValue, template, onSave, onDirtyStateCha
 	}
 
 	return (
-		<form onSubmit={handleSubmit(onSubmit)}>
+		<Form onSubmit={handleSubmit(onSubmit)}>
 			<FormProvider {...formData}>
 				<TicketForm template={getEditableProperties(template)} ticket={defaultValues} focusOnTitle />
 			</FormProvider>
@@ -121,6 +121,6 @@ export const NewTicketSlide = ({ defaultValue, template, onSave, onDirtyStateCha
 					<FormattedMessage id="ticketsTable.button.saveTicket" defaultMessage="Save ticket" />
 				</SaveButton>
 			</ButtonContainer>
-		</form>
+		</Form>
 	);
 };

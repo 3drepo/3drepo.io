@@ -25,9 +25,12 @@ export const SaveButton = styled(SubmitButton)`
 `;
 
 export const ButtonContainer = styled.div`
+	box-shadow: 0 -6px 10px rgb(0 0 0 / 4%);
 	display: flex;
 	justify-content: end;
 	width: 100%;
+	position: relative;
+	z-index: 2;
 `;
 
 export const RequiresViewerContainer = styled.div`
@@ -41,4 +44,8 @@ export const RequiresViewerContainer = styled.div`
 
 export const Link = styled(LinkBase)`
 	color: ${({ theme }) => theme.palette.primary.main};
+`;
+
+export const Form = styled.form`
+	height: calc(100% - 103px);
 `;
