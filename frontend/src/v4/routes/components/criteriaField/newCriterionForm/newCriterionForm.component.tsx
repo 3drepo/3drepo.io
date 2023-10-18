@@ -21,6 +21,7 @@ import _, { uniqueId } from 'lodash';
 import { ThemeProvider } from 'styled-components';
 import { palette } from '@/v5/ui/themes/theme';
 import { MuiTheme as v4Theme } from '@/v4/styles';
+import { isV5 } from '@/v4/helpers/isV5';
 import { Container } from './newCriterionForm.styles';
 
 interface IProps {
@@ -34,7 +35,7 @@ export const NewCriterionForm = ({ criterion, onSubmit, alreadySelectedFilters =
 	// used to clear the form after saving
 	const [key, setKey] = useState(uniqueId());
 
-	const theme = _.merge(_.cloneDeep(v4Theme), { palette });
+	const theme = isV5() ? {} : _.merge(_.cloneDeep(v4Theme), { palette });
 
 	const handleSubmit = (data) => {
 		setKey(uniqueId());

@@ -27,7 +27,7 @@ export const Container = styled.div`
 		flex-direction: column;
 
 		.MuiFormControl-root.MuiTextField-root {
-			width: 285px;
+			width: max(285px, 100%);
 		}
 	}
 
