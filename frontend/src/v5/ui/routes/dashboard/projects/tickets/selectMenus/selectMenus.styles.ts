@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import ListSubheaderBase from '@mui/material/ListSubheader';
-import styled from 'styled-components';
+import { MenuItem as MenuItemBase } from '@mui/material';
+import styled, { css } from 'styled-components';
 
 export const ListSubheader = styled(ListSubheaderBase)`
 	height: 40px;
@@ -23,4 +24,10 @@ export const ListSubheader = styled(ListSubheaderBase)`
 	margin: 5px 0 0;
 	color: ${({ theme }) => theme.palette.secondary.main};
 	${({ theme }) => theme.typography.h3}
+`;
+
+export const MenuItem = styled(MenuItemBase)`
+	${({ hidden }) => hidden && css`
+		display: none;
+	`}
 `;

@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { MenuItem } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { FormSelect } from '@controls/inputs/formInputs.component';
 import { formatMessage } from '@/v5/services/intl';
@@ -24,6 +23,7 @@ import { useFormContext } from 'react-hook-form';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useEffect } from 'react';
 import { NONE_OPTION } from '../ticketsTable/ticketsTable.helper';
+import { MenuItem } from './selectMenus.styles';
 
 const NONE_OPTION_MESSAGE = formatMessage({ id: 'tickets.selectOption.none', defaultMessage: 'None' });
 
@@ -67,19 +67,19 @@ export const GroupByFormSelect = (props) => {
 			<MenuItem value={BaseProperties.OWNER} key={BaseProperties.OWNER}>
 				{GROUP_OPTIONS[BaseProperties.OWNER]}
 			</MenuItem>
-			<MenuItem value={IssueProperties.DUE_DATE} key={IssueProperties.DUE_DATE} disabled={!hasProperties}>
+			<MenuItem value={IssueProperties.DUE_DATE} key={IssueProperties.DUE_DATE} hidden={!hasProperties}>
 				{GROUP_OPTIONS[IssueProperties.DUE_DATE]}
 			</MenuItem>
-			<MenuItem value={IssueProperties.PRIORITY} key={IssueProperties.PRIORITY} disabled={!hasProperties}>
+			<MenuItem value={IssueProperties.PRIORITY} key={IssueProperties.PRIORITY} hidden={!hasProperties}>
 				{GROUP_OPTIONS[IssueProperties.PRIORITY]}
 			</MenuItem>
-			<MenuItem value={IssueProperties.STATUS} key={IssueProperties.STATUS} disabled={!hasProperties}>
+			<MenuItem value={IssueProperties.STATUS} key={IssueProperties.STATUS} hidden={!hasProperties}>
 				{GROUP_OPTIONS[IssueProperties.STATUS]}
 			</MenuItem>
-			<MenuItem value={SafetibaseProperties.LEVEL_OF_RISK} key={SafetibaseProperties.LEVEL_OF_RISK} disabled={!hasSafetibase}>
+			<MenuItem value={SafetibaseProperties.LEVEL_OF_RISK} key={SafetibaseProperties.LEVEL_OF_RISK} hidden={!hasSafetibase}>
 				{GROUP_OPTIONS[SafetibaseProperties.LEVEL_OF_RISK]}
 			</MenuItem>
-			<MenuItem value={SafetibaseProperties.TREATMENT_STATUS} key={SafetibaseProperties.TREATMENT_STATUS} disabled={!hasSafetibase}>
+			<MenuItem value={SafetibaseProperties.TREATMENT_STATUS} key={SafetibaseProperties.TREATMENT_STATUS} hidden={!hasSafetibase}>
 				{GROUP_OPTIONS[SafetibaseProperties.TREATMENT_STATUS]}
 			</MenuItem>
 		</FormSelect>
