@@ -17,23 +17,28 @@
 
 import styled from 'styled-components';
 
-export const Icons = styled.div`
-	display: flex;
-	flex-direction: row;
-	place-content: center;
-	height: 100%;
-	gap: 8px;
-	z-index: 1;
-	cursor: initial;
-
-	svg {
-		width: 14px;
-		height: 14px;
-	}
+export const Container = styled.div`
+	position: relative;
 `;
 
 export const IconContainer = styled.div`
 	color: ${({ theme }) => theme.palette.secondary.main};
-	margin-top: -2px;
+	margin-top: -7px;
 	cursor: pointer;
+
+	svg {
+		width: 10px;
+		height: 10px;
+	}
+`;
+
+export const SequenceIconContainer = styled(IconContainer)`
+	position: absolute;
+	right: 28px;
+	bottom: 1.5px;
+
+	svg {
+		width: 12.5px;
+		height: 12.5px;
+	}
 `;
