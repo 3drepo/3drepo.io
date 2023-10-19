@@ -17,13 +17,13 @@
 
 import { DateTimePickerProps, DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
-import CloseIcon from '@assets/icons/controls/clear_circle.svg';
+import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { useEffect } from 'react';
 import dayjs from 'dayjs';
 import { SequencesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useFormContext } from 'react-hook-form';
 import { SEQUENCING_MODULE_END, SEQUENCING_MODULE_START } from '@/v5/store/tickets/tickets.helpers';
-import { IconContainer, Icons } from './sequencingProperty.styles';
+import { Container, IconContainer, SequenceIconContainer } from './sequencingProperty.styles';
 
 export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTimePickerProps) => {
 	const { getValues } = useFormContext();
@@ -38,30 +38,37 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 
 	const handleChange = (newValue) => onChange(newValue ? newValue?.toDate()?.getTime() : newValue);
 
+	const clearValue = (e) => {
+		(e) => e.stopPropagation();
+		handleChange(null);
+	};
+
 	useEffect(() => { onBlur(); }, [value]);
 
 	return (
-		<DateTimePicker
-			components={{
-				OpenPickerIcon: () => (value && (
-					<Icons onClick={(e) => e.stopPropagation()}>
-						<IconContainer onClick={openSequencesCard}>
-							<SequencingIcon />
-						</IconContainer>
-						<IconContainer onClick={() => handleChange(null)}>
+		<Container>
+			<DateTimePicker
+				components={{
+					OpenPickerIcon: () => value && (
+						<IconContainer onClick={clearValue}>
 							<CloseIcon />
 						</IconContainer>
-					</Icons>
-				)),
-			}}
-			value={value}
-			// onChange is a required prop in DatePicker, however it is not needed as onAccept works better
-			// (onChange triggers at every change: year, minutes, hours, etc., onAccept only when a date is finally chosen)
-			onChange={() => true}
-			onAccept={handleChange}
-			minDateTime={getDateTimeBoundary(SEQUENCING_MODULE_START)}
-			maxDateTime={getDateTimeBoundary(SEQUENCING_MODULE_END)}
-			{...props}
-		/>
+					),
+				}}
+				value={value}
+				// onChange is a required prop in DatePicker, however it is not needed as onAccept works better
+				// (onChange triggers at every change: year, minutes, hours, etc., onAccept only when a date is finally chosen)
+				onChange={() => true}
+				onAccept={handleChange}
+				minDateTime={getDateTimeBoundary(SEQUENCING_MODULE_START)}
+				maxDateTime={getDateTimeBoundary(SEQUENCING_MODULE_END)}
+				{...props}
+			/>
+			{value && (
+				<SequenceIconContainer onClick={openSequencesCard}>
+					<SequencingIcon />
+				</SequenceIconContainer>
+			)}
+		</Container>
 	);
 };
