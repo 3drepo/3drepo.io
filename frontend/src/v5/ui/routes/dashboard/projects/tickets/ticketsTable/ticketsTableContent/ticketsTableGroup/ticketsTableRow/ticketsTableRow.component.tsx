@@ -28,7 +28,6 @@ import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopover
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { Tooltip } from '@mui/material';
 import { formatDate } from '@/v5/services/intl';
-import { FormattedMessage } from 'react-intl';
 import { Row, Cell, CellChipText, CellOwner, OverflowContainer, SmallFont, CellDate } from './ticketsTableRow.styles';
 
 type TicketsTableRowProps = {
@@ -99,21 +98,13 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 				</SmallFont>
 			</Cell>
 			<Cell width={96} hidden={!hasProperties}>
-				{assignees?.length ? (
-					<AssigneesSelect value={assignees} multiple disabled />
-				) : (
-					<OverflowContainer>
-						<SmallFont>
-							<FormattedMessage id="ticketsTable.row.assignees.unassigned" defaultMessage="Unassigned" />
-						</SmallFont>
-					</OverflowContainer>
-				)}
+				{!!assignees?.length && (<AssigneesSelect value={assignees} multiple disabled />)}
 			</Cell>
 			<CellOwner width={62}>
 				<UserPopoverCircle user={ownerAsUser} />
 			</CellOwner>
 			<CellDate width={90} hidden={!hasProperties}>
-				<DueDateWithIcon value={dueDate} disabled />
+				{!!dueDate && (<DueDateWithIcon value={dueDate} disabled />)}
 			</CellDate>
 			<CellChipText width={90} hidden={!hasProperties}>
 				<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
