@@ -21,6 +21,7 @@ import { DashboardListHeader } from '@components/dashboard/dashboardList/dashboa
 import { FormModal } from '@controls/formModal/formModal.component';
 import { Typography } from '@controls/typography';
 import { memo } from 'react';
+import { MODAL_BODY_HEIGHT } from '@controls/formModal/modalBody/modalBody.styles';
 
 const MODAL_PADDING = 35;
 
@@ -30,6 +31,10 @@ export const Modal = memo(styled(FormModal)`
 		.MuiDialogContent-root {
 			padding: 0;
 		}
+	}
+
+	.MuiDialogContent-root {
+		overflow: hidden;
 	}
 `, (prevProps, nextProps) => {
 	const val = prevProps.isValid === nextProps.isValid
@@ -46,12 +51,11 @@ export const UploadsContainer = styled.div`
 	height: 100%;
 	width: 100%;
 	box-sizing: border-box;
-	overflow-x: hidden;
+	overflow: hidden;
 `;
 
 export const UploadsListScroll = styled.div`
-	min-height: 100vh;
-	max-height: 200px;
+	max-height: min(calc(100vh - 211px), ${MODAL_BODY_HEIGHT});
 	width: 100%;
 	overflow-y: scroll;
 `;
