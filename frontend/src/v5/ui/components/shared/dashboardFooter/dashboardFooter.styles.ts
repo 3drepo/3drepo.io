@@ -37,8 +37,8 @@ export const FooterContainer = styled(BottomNavigation)<{ variant: string }>`
 `;
 
 export const FooterLogo = styled(Logo)`
-	height: 20px;
-	padding-bottom: 7px;
+	height: 28px;
+	width: auto;
 `;
 
 export const FooterItems = styled.span`
