@@ -55,11 +55,14 @@ export const EditFederationModal = ({
 	return (
 		<EditFederationContextComponent federation={federation}>
 			<EditFederationContext.Consumer>
-				{({ getGroupedContainers, includedContainers }: EditFederationContextType) => (
+				{({ getGroupedContainers, includedContainers, isReadOnly }: EditFederationContextType) => (
 					<FormModal
 						open={open}
-						title={
+						title={ isReadOnly ? 
 							formatMessage({
+								id: 'modal.editFederation.title.readOnly',
+								defaultMessage: 'Viewing {federationName}',
+							}, { federationName: federation.name }) : formatMessage({
 								id: 'modal.editFederation.title',
 								defaultMessage: 'Edit {federationName}',
 							}, { federationName: federation.name })
@@ -69,6 +72,7 @@ export const EditFederationModal = ({
 						onSubmit={(e) => saveChanges(e, getGroupedContainers())}
 						isValid={includedContainers.length && !isEqual(getGroupedContainers(), federation.containers)}
 						maxWidth="lg"
+						isReadOnly={isReadOnly}
 						{...otherProps}
 					>
 						<EditFederation federation={federation} />
