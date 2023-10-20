@@ -39,7 +39,7 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 	const handleChange = (newValue) => onChange(newValue ? newValue?.toDate()?.getTime() : newValue);
 
 	const clearValue = (e) => {
-		(e) => e.stopPropagation();
+		e.stopPropagation();
 		handleChange(null);
 	};
 
