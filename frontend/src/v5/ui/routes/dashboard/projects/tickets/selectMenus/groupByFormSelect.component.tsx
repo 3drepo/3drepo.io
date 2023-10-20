@@ -45,7 +45,7 @@ export const GroupByFormSelect = (props) => {
 	const hasProperties = template?.config?.issueProperties;
 	const hasSafetibase = template?.modules?.some((module) => module.type === 'safetibase');
 
-	const teamplateAllowsGroup = () => {
+	const templateAllowsGroup = () => {
 		const groupBy = getValues('groupBy');
 		if (!hasProperties && [IssueProperties.DUE_DATE, IssueProperties.PRIORITY, IssueProperties.STATUS].includes(groupBy)) return false;
 		if (!hasSafetibase && [SafetibaseProperties.LEVEL_OF_RISK, SafetibaseProperties.TREATMENT_STATUS].includes(groupBy)) return false;
@@ -53,7 +53,7 @@ export const GroupByFormSelect = (props) => {
 	};
 
 	useEffect(() => {
-		if (!templateWasFetched || teamplateAllowsGroup()) return;
+		if (!templateWasFetched || templateAllowsGroup()) return;
 		setValue('groupBy', NONE_OPTION);
 	}, [template, templateWasFetched]);
 
