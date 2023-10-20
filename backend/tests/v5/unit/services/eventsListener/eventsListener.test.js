@@ -566,6 +566,13 @@ const testModelEventsListener = () => {
 			await updateTicketTest(true, changes, expectedData);
 		});
 
+		test(`Should serialise date values into timestamps and create a ${chatEvents.FEDERATION_UPDATE_TICKET} if there
+				is a ${events.UPDATE_TICKET} and a date prop has been updated (Container)`, async () => {
+			const changes = { properties: { prop: { from: generateRandomDate(), to: generateRandomDate() } } };
+			const expectedData = { properties: { prop: changes.properties.prop.to.getTime() } };
+			await updateTicketTest(false, changes, expectedData);
+		});
+
 		const addTicketTest = async (isFederation) => {
 			const waitOnEvent = eventTriggeredPromise(events.NEW_TICKET);
 			const template = generateRandomString();
