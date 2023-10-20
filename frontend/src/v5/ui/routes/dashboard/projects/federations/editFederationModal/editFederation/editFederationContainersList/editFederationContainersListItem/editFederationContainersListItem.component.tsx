@@ -50,7 +50,7 @@ export const EditFederationContainersListItem = memo(({
 	filterQuery,
 	onItemClick,
 }: EditFederationContainersListItemProps) => {
-	const { setGroupsByContainer, groupsByContainer, groups, includedContainers } = useContext(EditFederationContext);
+	const { setGroupsByContainer, groupsByContainer, groups, includedContainers, isReadOnly } = useContext(EditFederationContext);
 	const [groupValue, setGroupValue] = useState(groupsByContainer[container._id] || null);
 
 	const isIncluded = !!includedContainers.find(({ _id }) => _id === container._id);
@@ -149,6 +149,7 @@ export const EditFederationContainersListItem = memo(({
 									/>
 								)}
 								filterOptions={filterOptions}
+								disabled={isReadOnly}
 							/>
 						)}
 					</DashboardListItemText>
