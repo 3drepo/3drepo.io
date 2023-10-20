@@ -41,9 +41,13 @@ export const FieldValueInput = ({ name }) => {
 					onChange={(_, data) => onChange(data)}
 					onInputChange={(_, data) => onChange(data)}
 					noOptionsText={formatMessage({ id: 'tickets.groups.field.noOptions', defaultMessage: 'No options' })}
-					renderInput={(renderInputParams) => (
+					renderInput={({ InputProps, ...renderInputParams }) => (
 						<TextField
 							error={!!get(errors, name)}
+							InputProps={{
+								...InputProps,
+								autoFocus: true,
+							}}
 							{...renderInputParams}
 						/>
 					)}
