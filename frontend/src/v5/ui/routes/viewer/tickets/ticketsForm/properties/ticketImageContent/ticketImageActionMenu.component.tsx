@@ -50,7 +50,7 @@ export const TicketImageActionMenu = ({ value, onChange, disabled = false }) => 
 				<EllipsisMenuItem
 					title={<FormattedMessage id="viewer.card.ticketImage.action.takeScreenshot" defaultMessage="Take screenshot" />}
 					onClick={uploadScreenshot}
-					disabled={!	isViewer}
+					disabled={!isViewer}
 				/>
 				<EllipsisMenuItem
 					title={<FormattedMessage id="viewer.card.ticketImage.action.uploadImage" defaultMessage="Upload image" />}
