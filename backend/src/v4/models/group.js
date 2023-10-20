@@ -25,7 +25,7 @@ const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 
 const { systemLogger } = require("../logger.js");
-const { castSchema } = require("../../v5/schemas/rules");
+const { convertGroupRules } = require("../../v5/schemas/rules");
 
 const fieldTypes = {
 	"description": "[object String]",
@@ -316,20 +316,14 @@ Group.deleteGroupsByViewId = async function (account, model, view_id) {
 	return await db.deleteMany(account, getGroupCollectionName(model), { view_id });
 };
 
-const convertGroupRules = (group) => {
-	if(group.rules) {
-		group.rules = group.rules.map(castSchema);
-	}
-};
-
 Group.findByUID = async function (account, model, branch, revId, uid, showIfcGuids = false, noClean = true, convertToIfcGuids = false) {
-	const foundGroup = await db.findOne(account, getGroupCollectionName(model), { _id: utils.stringToUUID(uid) });
+	let foundGroup = await db.findOne(account, getGroupCollectionName(model), { _id: utils.stringToUUID(uid) });
 
 	if (!foundGroup) {
 		throw responseCodes.GROUP_NOT_FOUND;
 	}
 
-	convertGroupRules(foundGroup);
+	foundGroup = convertGroupRules(foundGroup);
 
 	if (convertToIfcGuids) {
 		foundGroup.objects = await getObjectsArrayAsIfcGuids(foundGroup, false);
@@ -384,9 +378,9 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 		query._id = {$in: utils.stringsToUUIDs(ids)};
 	}
 
-	const results = await db.find(account, getGroupCollectionName(model), query);
+	let results = await db.find(account, getGroupCollectionName(model), query);
 
-	results.map(convertGroupRules);
+	results = results.map(convertGroupRules);
 
 	const sharedIdConversionPromises = [];
 

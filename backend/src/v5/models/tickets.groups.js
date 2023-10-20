@@ -18,14 +18,12 @@
 const GROUPS_COL = 'tickets.groups';
 
 const { deleteMany, find, findOne, insertMany, updateOne } = require('../handler/db');
-const { castSchema } = require('../schemas/rules');
+const { convertGroupRules } = require('../schemas/rules');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
 const Groups = {};
-
-const convertGroupRules = (group) => (group.rules ? { ...group, rules: group.rules.map(castSchema) } : group);
 
 Groups.addGroups = async (teamspace, project, model, ticket, groups) => {
 	const data = groups.map((groupData) => ({ ...groupData, teamspace, project, model, ticket }));

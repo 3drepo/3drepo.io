@@ -569,7 +569,7 @@ function findGroup(req, res, next) {
 	});
 }
 
-async function createGroup(req, res, next) {
+function createGroup(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model } = req.params;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
@@ -601,7 +601,7 @@ function deleteGroups(req, res, next) {
 	}
 }
 
-async function updateGroup(req, res, next) {
+function updateGroup(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, uid } = req.params;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];

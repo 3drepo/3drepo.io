@@ -45,4 +45,38 @@ RulesConstants.FIELD_VALUE_OPERATORS = {
 	NOT_IN_RANGE: { name: 'NOT_IN_RANGE', minValues: 2, isNumber: true },
 };
 
+RulesConstants.OPERATOR_SYMBOL = {
+	[RulesConstants.FIELD_VALUE_OPERATORS.IS.name]: ':',
+	[RulesConstants.FIELD_VALUE_OPERATORS.IS_NOT.name]: ': !',
+	[RulesConstants.FIELD_VALUE_OPERATORS.CONTAINS.name]: ': *',
+	[RulesConstants.FIELD_VALUE_OPERATORS.NOT_CONTAINS.name]: ': ! *',
+	[RulesConstants.FIELD_VALUE_OPERATORS.REGEX.name]: ':',
+	[RulesConstants.FIELD_VALUE_OPERATORS.EQUALS.name]: '=',
+	[RulesConstants.FIELD_VALUE_OPERATORS.NOT_EQUALS.name]: '= !',
+	[RulesConstants.FIELD_VALUE_OPERATORS.GT.name]: '>',
+	[RulesConstants.FIELD_VALUE_OPERATORS.GTE.name]: '>=',
+	[RulesConstants.FIELD_VALUE_OPERATORS.LT.name]: '<',
+	[RulesConstants.FIELD_VALUE_OPERATORS.LTE.name]: '<=',
+	[RulesConstants.FIELD_VALUE_OPERATORS.IN_RANGE.name]: '',
+	[RulesConstants.FIELD_VALUE_OPERATORS.NOT_IN_RANGE.name]: '!',
+};
+
+RulesConstants.OPERATIONS_TYPES = {
+	[RulesConstants.FIELD_VALUE_OPERATORS.IS_NOT_EMPTY.name]: 'field',
+	[RulesConstants.FIELD_VALUE_OPERATORS.IS_EMPTY.name]: 'field',
+	[RulesConstants.FIELD_VALUE_OPERATORS.IS.name]: 'text',
+	[RulesConstants.FIELD_VALUE_OPERATORS.IS_NOT.name]: 'text',
+	[RulesConstants.FIELD_VALUE_OPERATORS.CONTAINS.name]: 'text',
+	[RulesConstants.FIELD_VALUE_OPERATORS.NOT_CONTAINS.name]: 'text',
+	[RulesConstants.FIELD_VALUE_OPERATORS.REGEX.name]: 'regex',
+	[RulesConstants.FIELD_VALUE_OPERATORS.EQUALS.name]: 'number',
+	[RulesConstants.FIELD_VALUE_OPERATORS.NOT_EQUALS.name]: 'number',
+	[RulesConstants.FIELD_VALUE_OPERATORS.GT.name]: 'numberComparison',
+	[RulesConstants.FIELD_VALUE_OPERATORS.GTE.name]: 'numberComparison',
+	[RulesConstants.FIELD_VALUE_OPERATORS.LT.name]: 'numberComparison',
+	[RulesConstants.FIELD_VALUE_OPERATORS.LTE.name]: 'numberComparison',
+	[RulesConstants.FIELD_VALUE_OPERATORS.IN_RANGE.name]: 'numberRange',
+	[RulesConstants.FIELD_VALUE_OPERATORS.NOT_IN_RANGE.name]: 'numberRange',
+};
+
 module.exports = RulesConstants;

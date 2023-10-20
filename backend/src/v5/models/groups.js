@@ -19,14 +19,12 @@
 // see tickets.groups.js
 
 const EventsManager = require('../services/eventsManager/eventsManager');
-const { castSchema } = require('../schemas/rules');
+const { convertGroupRules } = require('../schemas/rules');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { templates } = require('../utils/responseCodes');
 
 const Groups = {};
-
-const convertGroupRules = (group) => (group.rules ? { ...group, rules: group.rules.map(castSchema) } : group);
 
 const findGroups = async (teamspace, model, query, projection, sort) => {
 	const groups = await db.find(teamspace, `${model}.groups`, query, projection, sort);
