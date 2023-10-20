@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { CoverImage } from '@controls/coverImage/coverImage.component';
 import DefaultTeamspaceImg from '@assets/images/teamspace_placeholder.svg';
 
@@ -31,20 +31,23 @@ export default {
 		},
 	},
 	parameters: { controls: { exclude: ['className'] } },
-} as ComponentMeta<typeof CoverImage>;
+} as Meta<typeof CoverImage>;
 
-const Template: ComponentStory<typeof CoverImage> = (args) => <CoverImage {...args} />;
+type Story = StoryObj<typeof CoverImage>;
 
 const INVALID_TEAMSPACE_IMG_SRC = new Error();
 
-export const CoverImageWithoutError = Template.bind({});
-CoverImageWithoutError.args = {
-	imgSrc: 'https://i.pinimg.com/170x/26/5c/1c/265c1cc710304eb15607e18c6f591c85.jpg',
-	defaultImgSrc: DefaultTeamspaceImg,
+export const CoverImageWithoutError: Story = {
+	args: {
+		imgSrc: 'https://i.pinimg.com/170x/26/5c/1c/265c1cc710304eb15607e18c6f591c85.jpg',
+		defaultImgSrc: DefaultTeamspaceImg,
+	},
 };
 
-export const TeamspaceCoverImageUsingDefaultImg = Template.bind({});
-TeamspaceCoverImageUsingDefaultImg.args = {
-	imgSrc: INVALID_TEAMSPACE_IMG_SRC,
-	defaultImgSrc: DefaultTeamspaceImg,
+export const TeamspaceCoverImageUsingDefaultImg: Story = {
+	args: {
+		// @ts-ignore
+		imgSrc: INVALID_TEAMSPACE_IMG_SRC,
+		defaultImgSrc: DefaultTeamspaceImg,
+	},
 };

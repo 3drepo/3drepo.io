@@ -20,6 +20,7 @@ const request = require("supertest");
 const {should, assert, expect, Assertion } = require("chai");
 const app = require("../../../src/v4/services/api.js").createApp();
 const responseCodes = require("../../../src/v4/response_codes.js");
+const {templates: responseCodesV5} = require("../../../src/v5/utils/responseCodes");
 const async = require("async");
 const { login } = require("../helpers/users.js");
 const { createIssue } = require("../helpers/issues.js");
@@ -3361,7 +3362,7 @@ describe("Issues", function () {
 				agent.post(`/${altTeamspace}/${fakeModel}/issues.bcfzip`)
 					.attach("file", __dirname + bcf.path)
 					.expect(404, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+						expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
 						done(err);
 					});
 			});
@@ -3442,7 +3443,7 @@ describe("Issues", function () {
 			it("if model does not exist should fail", function(done) {
 				agent.get(`/${altTeamspace}/${fakeModel}/issues.bcfzip`)
 					.expect(404, function(err, res) {
-						expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+						expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
 						done(err);
 					});
 			});

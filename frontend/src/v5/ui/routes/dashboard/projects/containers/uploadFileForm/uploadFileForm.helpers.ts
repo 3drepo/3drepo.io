@@ -19,6 +19,8 @@ import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { getSupportedFileExtensions, uploadFile } from '@controls/fileUploader/uploadFile';
 import { UploadFileForm } from './uploadFileForm.component';
 
+export const extensionIsRevit = (extension: string) => ['rvt', 'rfa'].includes(extension);
+
 export const uploadToContainer = async (presetContainerId: string) => {
 	const onUpload = (presetFile) => {
 		DialogsActionsDispatchers.open(UploadFileForm, {

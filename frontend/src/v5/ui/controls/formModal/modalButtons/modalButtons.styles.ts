@@ -21,12 +21,11 @@ import { DialogActions } from '@mui/material';
 import { Button } from '@controls/button';
 
 export const FormModalActions = styled(DialogActions)`
-	background: ${({ theme }) => theme.palette.tertiary.lightest};
-	box-shadow: ${({ theme }) => theme.palette.shadows.level_7};
+	background: ${({ theme }) => theme.palette.tertiary.lighter};
 `;
 
 export const CancelButton = styled(Button).attrs({
-	variant: 'outlined',
+	variant: 'text',
 	color: 'secondary',
 })``;
 

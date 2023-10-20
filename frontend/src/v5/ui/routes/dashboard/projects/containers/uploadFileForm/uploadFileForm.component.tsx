@@ -44,6 +44,7 @@ import { getSupportedFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadList } from './uploadList/uploadList.component';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
 import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
+import { extensionIsRevit } from './uploadFileForm.helpers';
 
 const DEFAULT_SORT_CONFIG = {
 	column: ['file'],
@@ -157,6 +158,7 @@ export const UploadFileForm = ({
 				containerCode: container?.code || '',
 				containerDesc: container?.desc || '',
 				revisionDesc: '',
+				lod: '0',
 				importAnimations: extensionIsSpm(extension),
 				timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London',
 			});
@@ -175,8 +177,8 @@ export const UploadFileForm = ({
 	const containersNamesInModal = getValues('uploads')?.map(({ containerName }) => containerName);
 	const sidebarOpen = !isNull(selectedIndex) && !isUploading;
 	const indexMap = new Map(fields.map(({ uploadId }, index) => [uploadId, index]));
-	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId);
-	const origIndex = sidebarOpen && getOriginalIndex(getSortedListSelectedIndex());
+	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId) as number;
+	const origIndex = sidebarOpen ? getOriginalIndex(selectedIndex) : 0;
 
 	const onClickDelete = (index: number) => {
 		const { uploadId } = sortedList[index];
@@ -230,6 +232,7 @@ export const UploadFileForm = ({
 				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
 				maxWidth="xl"
 				isValid={(isValid && !fileError && !isUploading) || (isUploading && allUploadsComplete)}
+				contrastColorHeader
 				{...uploadModalLabels({ isUploading, fileCount: fields.length })}
 			>
 				<UploadsContainer>
@@ -314,6 +317,7 @@ export const UploadFileForm = ({
 										value={getValues(`uploads.${origIndex}`)}
 										key={sortedList[getSortedListSelectedIndex()].uploadId}
 										isSpm={extensionIsSpm(sortedList[getSortedListSelectedIndex()].extension)}
+										isRevit={extensionIsRevit(sortedList[getSortedListSelectedIndex()].extension)} // fix to match isSpm method with #4258
 										onChange={(field: string, val: string | boolean) => {
 											// @ts-ignore
 											setValue(`uploads.${origIndex}.${field}`, val);

@@ -53,6 +53,13 @@ export const NeutralActionButton = styled(Button)`
 	}
 `;
 
+export const SubHeading = styled.div`
+	font-size: 9px;
+	font-weight: 400;
+	line-height: 12px;
+	max-width: 259px;
+`;
+
 export const WarningMessage = styled.div`
 	text-align: left;
 	color: ${COLOR.VIVID_RED};
@@ -79,7 +86,8 @@ export const VisualSettingsDialogContent = styled(DialogContent)`
 `;
 
 export const FormListItem = styled(ListItem)`
-	display: flex;
+	display: grid;
+	grid-template-columns: auto auto;
 	&& {
 		justify-content: space-between;
 		height: 35px;

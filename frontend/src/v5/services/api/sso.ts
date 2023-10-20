@@ -48,10 +48,10 @@ export const postActions = {
 const SSO_ROUTE = 'sso';
 const AAD_ROUTE = `${SSO_ROUTE}/aad`;
 
-export const signup = (data): Promise<AxiosResponse<{link: string}>> => api.post(`${AAD_ROUTE}/signup?redirectUri=${getCurrentUrl(`?${postActions.SIGNUP_POST}=1`)}`, data);
+export const signup = (data): Promise<AxiosResponse<{ link: string }>> => api.post(`${AAD_ROUTE}/signup?redirectUri=${getCurrentUrl(`?${postActions.SIGNUP_POST}=1`)}`, data);
 
-export const signin = (redirect): Promise<AxiosResponse<{link: string}>> => api.get(`${AAD_ROUTE}/authenticate?redirectUri=${addParams(redirect, `${postActions.LOGIN_POST}=1`)}`);
+export const signin = (redirect): Promise<AxiosResponse<{ link: string }>> => api.get(`${AAD_ROUTE}/authenticate?redirectUri=${addParams(redirect, `${postActions.LOGIN_POST}=1`)}`);
 
-export const linkAccount = (): Promise<AxiosResponse<{link: string}>> => api.get(`${AAD_ROUTE}/link?redirectUri=${getCurrentUrl(`?${postActions.LINK_POST}=1`)}`);
+export const linkAccount = (): Promise<AxiosResponse<{ link: string }>> => api.get(`${AAD_ROUTE}/link?redirectUri=${getCurrentUrl(`?${postActions.LINK_POST}=1`)}`);
 
 export const unlinkAccount = (data): Promise<any> => api.post(`${SSO_ROUTE}/unlink`, data);

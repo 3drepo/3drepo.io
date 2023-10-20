@@ -105,6 +105,10 @@ export class TreeNode extends PureComponent<IProps, any> {
 		return this.props.selectionMap[this.node._id] === SELECTION_STATES.SELECTED;
 	}
 
+	get isModelRef() {
+		return this.node.type === "ref";
+	}
+
 	get isModelRoot() {
 		return !this.props.hasFederationRoot && this.level === 1;
 	}
@@ -150,8 +154,8 @@ export class TreeNode extends PureComponent<IProps, any> {
 
 	private renderActions = renderWhenTrue(() => (
 		<Actions>
-			{this.renderOpenModelAction(this.node.isModel && !this.isModelRoot)}
-			{this.renderGoTopAction(!this.node.isModel && !this.isModelRoot)}
+			{this.renderOpenModelAction(this.isModelRef)}
+			{this.renderGoTopAction(!this.node.isModel && !this.isModelRoot && !this.isModelRef)}
 			<SmallIconButton
 				Icon={IsolateIcon}
 				tooltip="Isolate"
@@ -192,6 +196,7 @@ export class TreeNode extends PureComponent<IProps, any> {
 					hasFederationRoot={hasFederationRoot}
 					onClick={this.handleNodeClick}
 					onDoubleClick={this.handleDoubleClick}
+					$isContainer={this.level === (hasFederationRoot ? 2 : 1)}
 				>
 					{this.renderName()}
 					{this.renderActions(!this.node.isFederation)}

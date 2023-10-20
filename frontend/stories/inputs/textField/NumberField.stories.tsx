@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { NumberField } from '@controls/inputs/numberField/numberField.component';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
-import { FormContainer } from '../FormInput.styles';
+import { StoryObj, Meta } from '@storybook/react';
+import { FormDecorator } from '../inputDecorators';
 
 export default {
 	title: 'Inputs/TextField/NumberField',
@@ -39,6 +39,7 @@ export default {
 		},
 	},
 	component: NumberField,
+	decorators: [FormDecorator],
 	parameters: { controls: { exclude: [
 		'margin',
 		'ref',
@@ -49,16 +50,12 @@ export default {
 		'className',
 		'inputRef',
 	] } },
-} as ComponentMeta<typeof NumberField>;
+} as Meta<typeof NumberField>;
 
-const Controlled: ComponentStory<typeof NumberField> = (args) => (
-	<FormContainer>
-		<NumberField {...args} />
-	</FormContainer>
-);
+type Story = StoryObj<typeof NumberField>;
 
-export const ControlledFormNumberField = Controlled.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-ControlledFormNumberField.args = {
-	label: 'Controlled Number input',
+export const ControlledFormNumberField: Story = {
+	args: {
+		label: 'Controlled Number input',
+	},
 };

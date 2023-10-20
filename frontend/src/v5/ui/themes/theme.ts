@@ -61,6 +61,8 @@ export const COLOR = {
 	ERROR_LIGHT: '#CE7272',
 	ERROR_LIGHTEST: '#F9ECEC',
 	SUCCESS_MAIN: '#2E7D32',
+	SUCCESS_DARK: '#1B5E20',
+	SUCCESS_LIGHT: '#4CAF50',
 	WARNING_MAIN: '#ED6C02',
 	FAVOURITE_MAIN: '#F5CB34',
 	FAVOURITE_DARK: '#D4AE26',
@@ -225,6 +227,8 @@ export const palette = {
 	},
 	success: {
 		main: COLOR.SUCCESS_MAIN,
+		dark: COLOR.SUCCESS_DARK,
+		light: COLOR.SUCCESS_LIGHT,
 	},
 	warning: {
 		main: COLOR.WARNING_MAIN,
@@ -1471,6 +1475,11 @@ export const theme = createTheme({
 					},
 					// year selection
 					'.MuiYearPicker-root': {
+						'&': {
+							position: 'relative',
+							zIndex: 1,
+							background: COLOR.PRIMARY_MAIN_CONTRAST,
+						},
 						button: {
 							'&:not(.Mui-disabled)': {
 								color: COLOR.SECONDARY_MAIN,

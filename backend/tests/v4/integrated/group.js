@@ -21,6 +21,7 @@ const request = require("supertest");
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const responseCodes = require("../../../src/v4/response_codes.js");
+const {templates: responseCodesV5} = require("../../../src/v5/utils/responseCodes");
 const async = require("async");
 
 describe("Groups", function () {
@@ -136,7 +137,7 @@ describe("Groups", function () {
 		it("with some other teamspace should fail", function(done){
 			agent.get(`/${noAccessUser}/${model}/revision/f640aa3dec2/groups/${groupID}`)
 				.expect(404 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
 					done(err);
 				});
 		});

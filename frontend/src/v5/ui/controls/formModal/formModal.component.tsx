@@ -33,9 +33,11 @@ export interface IFormModal extends Omit<DetailedHTMLProps<FormHTMLAttributes<HT
 	confirmLabel?: string;
 	cancelLabel?: string;
 	isValid?: boolean;
+	isReadOnly?: boolean;
 	maxWidth?: DialogProps['maxWidth'];
 	isSubmitting?: boolean;
 	disableClosing?: boolean;
+	contrastColorHeader?: boolean;
 }
 
 export const FormModal = ({
@@ -50,9 +52,11 @@ export const FormModal = ({
 	children,
 	className,
 	isValid = true,
+	isReadOnly = false,
 	maxWidth = false,
 	isSubmitting = false,
 	disableClosing = false,
+	contrastColorHeader,
 	...formProps
 }: IFormModal) => {
 	const handleClose = () => {
@@ -69,7 +73,7 @@ export const FormModal = ({
 			fullWidth={!!maxWidth}
 		>
 			<Form {...formProps}>
-				<ModalHeader onClickClose={handleClose} title={title} subtitle={subtitle} disableClosing={disableClosing} />
+				<ModalHeader onClickClose={handleClose} title={title} subtitle={subtitle} disableClosing={disableClosing} contrastColor={contrastColorHeader} />
 				<ModalBody>
 					{children}
 				</ModalBody>
@@ -77,9 +81,11 @@ export const FormModal = ({
 					<ModalCancelButton onClick={handleClose} disabled={isSubmitting}>
 						{cancelLabel}
 					</ModalCancelButton>
-					<ModalSubmitButton disabled={!isValid} onClick={onSubmit} isPending={isSubmitting}>
-						{confirmLabel}
-					</ModalSubmitButton>
+					{!isReadOnly && (
+						<ModalSubmitButton disabled={!isValid} onClick={onSubmit} isPending={isSubmitting}>
+							{confirmLabel}
+						</ModalSubmitButton>
+					)}
 				</FormModalActions>
 			</Form>
 		</Dialog>
