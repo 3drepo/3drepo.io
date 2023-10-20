@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { Tooltip } from '@mui/material';
 import { ChipWrapper, RuleChip } from './chipRule.styles';
 
 type ChipRuleProps = {
@@ -23,13 +24,16 @@ type ChipRuleProps = {
 	onDelete: () => void;
 	disabled?: boolean;
 };
-export const ChipRule = ({ isSelected, disabled, onDelete, ...props }: ChipRuleProps) => (
-	<ChipWrapper>
-		<RuleChip
-			disabled={disabled}
-			onDelete={disabled ? null : onDelete}
-			$selected={isSelected}
-			{...props}
-		/>
-	</ChipWrapper>
+export const ChipRule = ({ label, isSelected, disabled, onDelete, ...props }: ChipRuleProps) => (
+	<Tooltip title={label}>
+		<ChipWrapper>
+			<RuleChip
+				label={label}
+				disabled={disabled}
+				onDelete={disabled ? null : onDelete}
+				$selected={isSelected}
+				{...props}
+			/>
+		</ChipWrapper>
+	</Tooltip>
 );

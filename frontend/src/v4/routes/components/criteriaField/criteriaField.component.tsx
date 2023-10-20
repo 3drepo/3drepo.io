@@ -17,6 +17,7 @@
 import { PureComponent } from 'react';
 import { isEqual, uniqBy } from 'lodash';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { Tooltip } from '@mui/material';
 
 import { getUpdatedCriteria, prepareCriterion } from '../../../helpers/criteria';
 import { renderWhenTrue } from '../../../helpers/rendering';
@@ -242,14 +243,16 @@ export class CriteriaField extends PureComponent<IProps, IState> {
 	}
 
 	public renderCriterion = (criterion) => (
-		<Chip
-			key={criterion._id}
-			color={this.isCriterionActive(criterion) ? 'primary' : 'default'}
-			label={criterion.name}
-			onDelete={this.handleDelete(criterion)}
-			onClick={this.handleCriteriaClick(criterion)}
-			clickable
-		/>
+		<Tooltip title={criterion.name}>
+			<Chip
+				key={criterion._id}
+				color={this.isCriterionActive(criterion) ? 'primary' : 'default'}
+				label={criterion.name}
+				onDelete={this.handleDelete(criterion)}
+				onClick={this.handleCriteriaClick(criterion)}
+				clickable
+			/>
+		</Tooltip>
 	)
 
 	public renderCopyOption = (props) => (
