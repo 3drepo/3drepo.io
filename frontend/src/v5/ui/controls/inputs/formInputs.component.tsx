@@ -34,7 +34,7 @@ import { TextField, TextFieldProps } from './textField/textField.component';
 export const FormNumberField = (props: InputControllerProps<TextFieldProps>) => (<InputController Input={NumberField} {...props} />);
 export const FormPasswordField = (props: InputControllerProps<TextFieldProps>) => (<InputController Input={PasswordField} {...props} />);
 export const FormTextField = (props: InputControllerProps<TextFieldProps>) => (<InputController Input={TextField} {...props} />);
-export const FormTextArea = (props: InputControllerProps<TextAreaProps>) => (<InputController Input={TextArea} {...props} />);
+export const FormTextArea = forwardRef((props: InputControllerProps<TextAreaProps>, ref) => (<InputController Input={TextArea} {...props} ref={ref} />));
 export const FormTextAreaFixedSize = forwardRef((props: InputControllerProps<TextAreaFixedSizeProps>, ref) => (<InputController Input={TextAreaFixedSize} {...props} ref={ref} />));
 
 // calendar inputs
