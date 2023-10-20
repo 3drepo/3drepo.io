@@ -25,8 +25,11 @@ import { ListboxComponent } from './listboxComponent/listboxComponent.component'
 import { Autocomplete } from './fieldValueInput.styles';
 
 export const FieldValueInput = ({ name }) => {
-	const { formState: { errors } } = useFormContext();
+	const { formState: { errors }, getValues } = useFormContext();
 	const fields = useSelector(selectMetaKeys);
+
+	console.log(getValues())
+
 	return (
 		<Controller
 			name={name}
@@ -34,6 +37,7 @@ export const FieldValueInput = ({ name }) => {
 				<Autocomplete
 					{...field}
 					renderOption={(props, option) => [props, option]}
+					disableClearable={!field.value}
 					disableListWrap
 					freeSolo
 					ListboxComponent={ListboxComponent}
