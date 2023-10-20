@@ -158,7 +158,7 @@ export const UploadFileForm = ({
 		remove(fields.findIndex((field) => field.uploadId === uploadId));
 	}, [fields.length]);
 
-	const onSubmit = useCallback(async ({ uploads }: UploadFieldArray) => {
+	const onSubmit = useCallback(handleSubmit(async ({ uploads }: UploadFieldArray) => {
 		if (isUploading) {
 			setIsUploading(false);
 			onClickClose();
@@ -169,7 +169,14 @@ export const UploadFileForm = ({
 				RevisionsActionsDispatchers.createRevision(teamspace, project, uploadId, revision);
 			});
 		}
-	}, [fields, isUploading]);
+	}), [fields.length]);
+
+	const preventEnter = useCallback((e) => e.key === 'Enter' && e.preventDefault(), []);
+	const finishedSubmit = (e) => {
+		e.preventDefault();
+		setIsUploading(false);
+		onClickClose();
+	};
 
 	useEffect(() => {
 		const tags = {};
@@ -199,9 +206,9 @@ export const UploadFileForm = ({
 		<FormProvider {...formData}>
 			<Modal
 				open={open}
-				onSubmit={handleSubmit(onSubmit)}
+				onSubmit={!isUploading ? onSubmit : finishedSubmit}
 				onClickClose={onClickClose}
-				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
+				onKeyPress={preventEnter}
 				maxWidth="xl"
 				isValid={!isUploading ? isValid : allUploadsComplete}
 				contrastColorHeader
