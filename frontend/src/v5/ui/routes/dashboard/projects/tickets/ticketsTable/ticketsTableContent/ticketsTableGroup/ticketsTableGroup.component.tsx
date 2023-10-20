@@ -61,8 +61,6 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 	const showModelName = modelsIds.split(',').length > 1;
 	const models = useSelectedModels();
 
-	if (!ticketsWithModelIdAndName.length) return null;
-
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(getValues('template'));
 	const hasProperties = template?.config?.issueProperties;
