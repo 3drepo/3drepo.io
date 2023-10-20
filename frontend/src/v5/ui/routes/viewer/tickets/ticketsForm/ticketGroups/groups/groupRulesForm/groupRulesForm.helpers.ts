@@ -48,16 +48,16 @@ export type IFormRule = {
 	values?: { value: number | string }[],
 };
 
-export const formRuleToGroupRule = ({ values = [], field, ...rule }: IFormRule): IGroupRule => ({
+export const formRuleToGroupRule = ({ values, field, ...rule }: IFormRule): IGroupRule => ({
 	...rule,
 	field: {
 		operator: field.operator,
 		values: field.values.map((v) => v.value),
 	},
-	values: values.map((v) => v.value),
+	values: (values || []).map((v) => v.value),
 });
 
-export const groupRuleToFormRule = ({ values = [], field, ...rule }: IGroupRule): IFormRule => ({
+export const groupRuleToFormRule = ({ values, field, ...rule }: IGroupRule): IFormRule => ({
 	...rule,
 	field: {
 		operator: field.operator,

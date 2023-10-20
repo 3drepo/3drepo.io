@@ -68,7 +68,11 @@ const Starred = ({ data, starredMetaMap, toggleStarredRecord }) => {
 
 const MetaRecordData = ({ value, field, copyRules, selectAllSimilar }) => {
 	const rules = [{
-		field,
+		name: `Field: IS ${field} Operator: ${isNumber(value) ? 'EQUALS' : 'IS'} ${value}`,
+		field: {
+			operator: 'IS',
+			values: [field],
+		},
 		operator: isNumber(value) ? 'EQUALS' : 'IS',
 		values: [value],
 	}];
