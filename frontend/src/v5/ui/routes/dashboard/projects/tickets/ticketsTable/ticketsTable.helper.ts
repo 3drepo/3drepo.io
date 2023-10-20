@@ -78,7 +78,8 @@ const groupByDate = (tickets: TicketWithModelIdAndName[]) => {
 	let currentWeekTickets;
 	while (dueDateOptions.length) {
 		[currentWeekTickets, remainingTickets] = _.partition(remainingTickets, ticketDueDateIsPassed);
-		groups[dueDateOptions.shift()] = currentWeekTickets;
+		const currentDueDateOption = dueDateOptions.shift();
+		groups[currentDueDateOption] = dueDateOptions.length ? currentWeekTickets : currentWeekTickets.concat(remainingTickets);
 		endOfCurrentWeek.setDate(endOfCurrentWeek.getDate() + 7);
 	}
 	return groups;
