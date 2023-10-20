@@ -920,13 +920,6 @@ export class ViewerService {
 		UnityUtil.setStreamingMemoryThreshold(thresholdMB);
 	}
 
-	public setStreamingMemoryLimit = (limitMB: number) => {
-		if (limitMB === undefined) {
- 			return;
-		}
-		UnityUtil.setStreamingMemoryLimit(limitMB);
-	}
-
 	public setStreamingMeshFactor = (factor: number) => {
 		if (factor === undefined) {
  			return;
@@ -998,6 +991,12 @@ export class ViewerService {
 		UnityUtil.setStreamingElementsRadius(radius);
 	}
 
+	public setUnityMemory = (maxMemoryMb: number) => {
+		if (maxMemoryMb === undefined) {
+			return;
+		}
+		UnityUtil.setUnityMemory(maxMemoryMb);
+	}
 
 	/**
 	 * Map
