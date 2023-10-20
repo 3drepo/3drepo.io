@@ -18,7 +18,7 @@
 const GROUPS_COL = 'tickets.groups';
 
 const { deleteMany, find, findOne, insertMany, updateOne } = require('../handler/db');
-const { convertGroupRules } = require('../schemas/rules');
+const { convertLegacyRules } = require('../schemas/rules');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
@@ -38,7 +38,14 @@ Groups.getGroupsByIds = async (teamspace, project, model, ticket, groupIds, proj
 	const groups = await find(teamspace, GROUPS_COL,
 		{ teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
 
-	return groups.map(convertGroupRules);
+	return groups.map(({ rules, ...group }) => {
+		if (rules) {
+			// eslint-disable-next-line no-param-reassign
+			group.rules = convertLegacyRules(rules);
+		}
+
+		return group;
+	});
 };
 
 Groups.updateGroup = async (teamspace, project, model, ticket, groupId, data, author) => {
@@ -64,7 +71,10 @@ Groups.getGroupById = async (teamspace, project, model, ticket, groupId,
 		throw templates.groupNotFound;
 	}
 
-	return convertGroupRules(group);
+	if (group.rules) {
+		group.rules = convertLegacyRules(group.rules);
+	}
+	return group;
 };
 
 module.exports = Groups;

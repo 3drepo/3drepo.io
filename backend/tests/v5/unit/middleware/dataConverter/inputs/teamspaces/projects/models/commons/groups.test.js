@@ -18,7 +18,7 @@
 const _ = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
 const { generateLegacyGroup, generateUUIDString, generateRandomString } = require('../../../../../../../../helper/services');
-const { convertGroupRules } = require('../../../../../../../../../../src/v5/schemas/rules');
+const { convertLegacyRules } = require('../../../../../../../../../../src/v5/schemas/rules');
 
 const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require(`${src}/models/metadata.rules.constants`);
 
@@ -81,8 +81,11 @@ const deserialiseGroup = (group) => {
 			}
 		}
 	}
+	if (output.rules) {
+		output.rules = convertLegacyRules(output.rules);
+	}
 
-	return convertGroupRules(output);
+	return output;
 };
 
 const testValidateGroupsImportData = () => {

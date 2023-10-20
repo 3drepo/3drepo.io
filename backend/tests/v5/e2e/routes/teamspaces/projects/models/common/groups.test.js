@@ -19,7 +19,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 const { FIELD_VALUE_OPERATORS } = require('../../../../../../../../src/v5/models/metadata.rules.constants');
-const { convertGroupRules } = require('../../../../../../../../src/v5/schemas/rules');
+const { convertLegacyRules } = require('../../../../../../../../src/v5/schemas/rules');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -83,7 +83,7 @@ const testExportGroups = () => {
 			['the groups requested exists (1)', createRoute(), true, { groups }],
 			['the groups requested exists (2)', createRoute(), true, { groups: [groups[0]] }, { groups: [groups[0]._id] }],
 			['the groups requested doesn\'t exist', createRoute({ modelId: modelWithNoGroups }), true, { groups: [] }],
-			['the groups requested have legacy field schema', createRoute(), true, { groups: [convertGroupRules(legacyFieldSchema)] }, { groups: [legacyFieldSchema._id] }],
+			['the groups requested have legacy field schema', createRoute(), true, { groups: [{ ...legacyFieldSchema, rules: convertLegacyRules(legacyFieldSchema.rules) }] }, { groups: [legacyFieldSchema._id] }],
 		];
 	};
 
@@ -184,7 +184,7 @@ const testImportGroups = () => {
 			['the groups are valid', createRoute(), true, { post: { groups: postData.groups.map(({ _id }) => _id) }, data: groups }],
 			['the same groups are being imported again', createRoute(), true, { post: { groups: postData.groups.map(({ _id }) => _id) }, data: groups }],
 			['the user is updating only some of the groups', createRoute(), true, { post: { groups: [...groups.map(({ _id }) => _id), newGroup._id] }, data: expect.arrayContaining([changedGroup, ...groups.slice(1), newGroup]) }, { groups: partialGroupUpdateTestData }],
-			['the groups have legacy field schema', createRoute(), true, { post: { groups: [legacyFieldSchema._id] }, data: [convertGroupRules(legacyFieldSchema)] }, { groups: [legacyFieldSchema] }],
+			['the groups have legacy field schema', createRoute(), true, { post: { groups: [legacyFieldSchema._id] }, data: [{ ...legacyFieldSchema, rules: convertLegacyRules(legacyFieldSchema.rules) }] }, { groups: [legacyFieldSchema] }],
 		];
 	};
 

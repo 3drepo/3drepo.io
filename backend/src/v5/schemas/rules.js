@@ -73,8 +73,7 @@ const ruleSchema = Yup.object().shape({
 	.transform((val) => (isString(val.field) && !val.name ? { ...val, name: generateRuleName(val) } : val))
 	.noUnknown();
 
-Rules.convertGroupRules = (group) => (group.rules
-	? { ...group, rules: group.rules.map((r) => ruleSchema.cast(r)) } : group);
+Rules.convertLegacyRules = (rules) => rules.map((r) => ruleSchema.cast(r));
 
 Rules.schema = Yup.array().of(ruleSchema).min(1);
 
