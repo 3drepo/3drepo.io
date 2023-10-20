@@ -18,8 +18,7 @@
 const { src } = require('../../helper/path');
 const { times } = require('lodash');
 const { generateRandomString, generateRandomObject, generateGroup } = require('../../helper/services');
-
-const { castSchema } = require(`${src}/schemas/rules`);
+const { convertGroupRules } = require('../../../../src/v5/schemas/rules');
 
 const Groups = require(`${src}/models/tickets.groups`);
 
@@ -221,7 +220,7 @@ const testGetGroupById = () => {
 			db.findOne.mockResolvedValueOnce(expectedData);
 
 			await expect(Groups.getGroupById(teamspace, project, model, ticket, groupId, projection))
-				.resolves.toEqual({ ...expectedData, rules: expectedData.rules.map(castSchema) });
+				.resolves.toEqual(convertGroupRules(expectedData));
 
 			expect(db.findOne).toHaveBeenCalledTimes(1);
 			expect(db.findOne).toHaveBeenCalledWith(teamspace, groupCol,
