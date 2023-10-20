@@ -22,6 +22,7 @@ import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/r
 import { useFormContext } from 'react-hook-form';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useEffect } from 'react';
+import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { NONE_OPTION } from '../ticketsTable/ticketsTable.helper';
 import { MenuItem } from './selectMenus.styles';
 
@@ -40,15 +41,21 @@ export const GroupByFormSelect = (props) => {
 	const { getValues, setValue } = useFormContext();
 
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(getValues('template'));
+	const templateWasFetched = templateAlreadyFetched(template);
 	const hasProperties = template?.config?.issueProperties;
 	const hasSafetibase = template?.modules?.some((module) => module.type === 'safetibase');
 
-	useEffect(() => {
+	const teamplateAllowsGroup = () => {
 		const groupBy = getValues('groupBy');
-		if ([IssueProperties.DUE_DATE, IssueProperties.PRIORITY, IssueProperties.STATUS].includes(groupBy) && hasProperties) return;
-		if ([SafetibaseProperties.LEVEL_OF_RISK, SafetibaseProperties.TREATMENT_STATUS].includes(groupBy) && hasSafetibase) return;
+		if (!hasProperties && [IssueProperties.DUE_DATE, IssueProperties.PRIORITY, IssueProperties.STATUS].includes(groupBy)) return false;
+		if (!hasSafetibase && [SafetibaseProperties.LEVEL_OF_RISK, SafetibaseProperties.TREATMENT_STATUS].includes(groupBy)) return false;
+		return true;
+	};
+
+	useEffect(() => {
+		if (!templateWasFetched || teamplateAllowsGroup()) return;
 		setValue('groupBy', NONE_OPTION);
-	}, [template]);
+	}, [template, templateWasFetched]);
 
 	return (
 		<FormSelect
