@@ -24,16 +24,14 @@ import { AuthHooksSelectors } from './selectorsHooks';
 
 export const useSSOParams = () => {
 	const history = useHistory();
-	const { location } = window;
 	const allParams = getParams();
 	const error = allParams.get('error');
 	const action = values(postActions).filter((postAction) => allParams.get(postAction))[0];
 
 	const reset = () => {
-		const searchParams = new URLSearchParams(location.search);
-		searchParams.delete('error');
-		searchParams.delete(action);
-		history.replace({ search: searchParams.toString() });
+		allParams.delete('error');
+		allParams.delete(action);
+		history.replace({ search: allParams.toString() });
 	};
 
 	const actionParamValue = allParams.get(action);
