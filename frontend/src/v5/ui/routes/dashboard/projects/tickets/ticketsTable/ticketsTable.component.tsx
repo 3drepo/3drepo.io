@@ -22,7 +22,7 @@ import { useStore } from 'react-redux';
 import { selectFederationById } from '@/v5/store/federations/federations.selectors';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
-import { useParams, generatePath, useHistory, Link } from 'react-router-dom';
+import { useParams, generatePath, useHistory } from 'react-router-dom';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
@@ -45,7 +45,7 @@ import { DashboardTicketsParams, TICKETS_ROUTE, VIEWER_ROUTE } from '../../../..
 import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { GroupByFormSelect } from '../selectMenus/groupByFormSelect.component';
 import { TemplateFormSelect } from '../selectMenus/templateFormSelect.component';
-import { FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from '../tickets.styles';
+import { Link, FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from '../tickets.styles';
 import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, NONE_OPTION, hasRequiredViewerProperties } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
@@ -244,7 +244,7 @@ export const TicketsTable = () => {
 			</FormProvider>
 			<SidePanel open={!!sidePanelModelId}>
 				<SlidePanelHeader>
-					<Link to={getOpenInViewerLink()} target="_blank">
+					<Link to={getOpenInViewerLink()} target="_blank" disabled={isCreatingNewTicket}>
 						<OpenInViewerButton disabled={isCreatingNewTicket}>
 							<FormattedMessage
 								id="ticketsTable.button.openIn3DViewer"

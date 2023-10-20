@@ -17,9 +17,17 @@
 import { Button } from '@controls/button';
 import ListSubheaderBase from '@mui/material/ListSubheader';
 import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Drawer } from '@mui/material';
+import { Link as LinkBase } from 'react-router-dom';
 import { CompletedFilterChip } from '../../../viewer/tickets/ticketsList/ticketsList.styles';
+
+export const Link = styled(LinkBase)<{ disabled?: boolean }>`
+	${({ disabled }) => disabled && css`
+		pointer-events: none;
+		cursor: unset;
+	`}
+`;
 
 export const FiltersContainer = styled.div`
 	width: 100%;
