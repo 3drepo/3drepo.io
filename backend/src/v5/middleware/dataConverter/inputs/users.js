@@ -150,13 +150,11 @@ Users.validateUpdateData = async (req, res, next) => {
 };
 
 const validateAvatarData = async (req, res, next) => {
-	try {
-		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
-
-		await next();
-	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	if (!req.file) {
+		respond(req, res, templates.fileMustBeProvided);
 	}
+
+	await next();
 };
 
 Users.validateForgotPasswordData = async (req, res, next) => {

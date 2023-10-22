@@ -20,7 +20,9 @@ const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const Yup = require('yup');
 const { getProjectByName } = require('../../../../../models/projectSettings');
 const { respond } = require('../../../../../utils/responder');
+const { singleImageUpload } = require('../../../multer');
 const { types } = require('../../../../../utils/helper/yup');
+const { validateMany } = require('../../../../common');
 
 const Projects = {};
 
@@ -43,5 +45,15 @@ Projects.validateProjectData = async (req, res, next) => {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
+
+const validateProjectImage = async (req, res, next) => {
+	if (!req.file) {
+		respond(req, res, templates.fileMustBeProvided);
+	}
+
+	await next();
+};
+
+Projects.validateProjectImage = validateMany([singleImageUpload('file'), validateProjectImage]);
 
 module.exports = Projects;
