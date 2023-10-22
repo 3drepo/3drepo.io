@@ -69,7 +69,6 @@ ResponseCodes.templates = {
 	commentNotFound: { message: 'Comment not found.', status: 404 },
 
 	// File upload related error
-	fileMustBeProvided: { message: 'A file must be provided.', status: 400 },
 	unsupportedFileFormat: { message: 'The file format is not supported.', status: 400 },
 	maxSizeExceeded: { message: 'The file is bigger than the maximum size allowed.', status: 400 },
 	quotaLimitExceeded: { message: 'Insufficient quota.', status: 401 },

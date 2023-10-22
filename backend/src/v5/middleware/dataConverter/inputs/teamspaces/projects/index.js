@@ -47,11 +47,13 @@ Projects.validateProjectData = async (req, res, next) => {
 };
 
 const validateProjectImage = async (req, res, next) => {
-	if (!req.file) {
-		respond(req, res, templates.fileMustBeProvided);
-	}
+	try {
+		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
 
-	await next();
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
 };
 
 Projects.validateProjectImage = validateMany([singleImageUpload('file'), validateProjectImage]);
