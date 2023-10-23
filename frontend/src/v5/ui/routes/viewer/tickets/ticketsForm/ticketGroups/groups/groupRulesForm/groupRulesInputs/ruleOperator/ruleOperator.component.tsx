@@ -19,24 +19,24 @@ import { FormattedMessage } from 'react-intl';
 import { FormSelect } from '@controls/inputs/formInputs.component';
 import { MenuItem } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
-import { OPERATION_DISPLAY_NAMES } from '../groupRulesForm.helpers';
-import { ListSubheader } from './ruleOpertionSelect.styles';
+import { OPERATION_DISPLAY_NAMES } from '../../groupRulesForm.helpers';
+import { ListSubheader } from '../groupRulesInputs.styles';
 
-export const RuleOperationSelect = () => (
+export const RuleOperator = () => (
 	<FormSelect
 		name="operator"
-		label={formatMessage({ id: 'tickets.groups.operation.label', defaultMessage: 'Operation' })}
+		label={formatMessage({ id: 'tickets.groups.value.label', defaultMessage: 'Value' })}
 	>
 		{/* Field */}
 		<ListSubheader>
-			<FormattedMessage id="ticket.groups.operation.field" defaultMessage="Field" />
+			<FormattedMessage id="ticket.groups.value.field" defaultMessage="Field" />
 		</ListSubheader>
 		<MenuItem value="IS_NOT_EMPTY">{OPERATION_DISPLAY_NAMES.IS_NOT_EMPTY}</MenuItem>
 		<MenuItem value="IS_EMPTY">{OPERATION_DISPLAY_NAMES.IS_EMPTY}</MenuItem>
 
 		{/* Text */}
 		<ListSubheader>
-			<FormattedMessage id="ticket.groups.operation.text" defaultMessage="Text" />
+			<FormattedMessage id="ticket.groups.value.text" defaultMessage="Text" />
 		</ListSubheader>
 		<MenuItem value="IS">{OPERATION_DISPLAY_NAMES.IS}</MenuItem>
 		<MenuItem value="IS_NOT">{OPERATION_DISPLAY_NAMES.IS_NOT}</MenuItem>
@@ -47,7 +47,7 @@ export const RuleOperationSelect = () => (
 
 		{/* Number */}
 		<ListSubheader>
-			<FormattedMessage id="ticket.groups.operation.number" defaultMessage="Number" />
+			<FormattedMessage id="ticket.groups.value.number" defaultMessage="Number" />
 		</ListSubheader>
 		<MenuItem value="EQUALS">{OPERATION_DISPLAY_NAMES.EQUALS}</MenuItem>
 		<MenuItem value="NOT_EQUALS">{OPERATION_DISPLAY_NAMES.NOT_EQUALS}</MenuItem>

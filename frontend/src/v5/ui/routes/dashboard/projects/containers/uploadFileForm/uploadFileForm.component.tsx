@@ -140,6 +140,7 @@ export const UploadFileForm = ({
 	};
 
 	const extensionIsSpm = (extension: string) => extension === 'spm';
+	
 	const extensionIsRevit = (extension: string) => ['rvt', 'rfa'].includes(extension);
 
 	const addFilesToList = (files: File[], container?: IContainer): void => {

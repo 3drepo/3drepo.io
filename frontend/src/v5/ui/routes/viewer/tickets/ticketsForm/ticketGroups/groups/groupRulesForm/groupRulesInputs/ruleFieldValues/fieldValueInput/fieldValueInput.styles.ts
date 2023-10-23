@@ -14,15 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ListSubheader as ListSubheaderBase } from '@mui/material';
+
+import { Autocomplete as AutocompleteBase, Paper } from '@mui/material';
 import styled from 'styled-components';
 
-export const ListSubheader = styled(ListSubheaderBase)`
-	font-weight: 700;
-	padding: 5px 12px 0;
-	line-height: 35px;
-
-	&:first-of-type {
-		padding-top: 0;
+const PaperComponent = styled(Paper).attrs({
+	elevation: 8,
+})`
+	transition: box-shadow 0s;
+	&:empty {
+		box-shadow: none;
 	}
+`;
+
+export const Autocomplete = styled(AutocompleteBase).attrs({ PaperComponent })`
+	width: 100%;
 `;
