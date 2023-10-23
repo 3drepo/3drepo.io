@@ -23,7 +23,7 @@ export const SidebarContainer = styled.span<{ open: boolean }>`
 	position: relative;
 	width: ${({ open }) => (open ? '400px' : '0')};
 	transition: width 0.1s;
-	overflow: hidden;
+	overflow: auto;
 	flex-shrink: 0;
 `;
 

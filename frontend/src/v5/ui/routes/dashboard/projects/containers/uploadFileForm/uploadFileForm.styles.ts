@@ -48,7 +48,7 @@ export const Modal = memo(styled(FormModal)`
 export const UploadsContainer = styled.div`
 	display: flex;
 	flex-direction: row;
-	height: 100%;
+	max-height: min(calc(100vh - 211px), ${MODAL_BODY_HEIGHT});
 	width: 100%;
 	box-sizing: border-box;
 	overflow: hidden;
