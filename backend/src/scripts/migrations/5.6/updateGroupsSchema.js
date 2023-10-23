@@ -17,7 +17,7 @@
 
 const { v5Path } = require('../../../interop');
 const { bulkWrite } = require('../../../v5/handler/db');
-const { convertGroupRules } = require('../../../v5/schemas/rules');
+const { convertLegacyRules } = require('../../../v5/schemas/rules');
 
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
@@ -31,19 +31,14 @@ const processCollection = async (teamspace, collection) => {
 
 	const projection = { rules: 1 };
 
-	const groupUpdates = [];
 	const groups = await find(teamspace, collection, query, projection);
 
-	groups.forEach((group) => {
-		const { rules } = convertGroupRules(group);
-
-		groupUpdates.push({
-			updateOne: {
-				filter: { _id: group._id },
-				update: { $set: { rules } },
-			},
-		});
-	});
+	const groupUpdates = groups.map(({ rules, _id }) => ({
+		updateOne: {
+			filter: { _id },
+			update: { $set: { rules: convertLegacyRules(rules) } },
+		},
+	}));
 
 	if (groupUpdates.length) {
 		try {

@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { convertGroupRules } = require('../../../../src/v5/schemas/rules');
 const { cloneDeep } = require('../../../../src/v5/utils/helper/objects');
 const { src } = require('../../helper/path');
 const { generateRandomString, generateGroup } = require('../../helper/services');
@@ -41,8 +40,7 @@ const testGetGroupsByIds = () => {
 
 			const res = await Group.getGroupsByIds(teamspace, model, groupIds, projection);
 
-			const convertedExpectedData = expectedData.map(convertGroupRules);
-			expect(res).toEqual(convertedExpectedData);
+			expect(res).toEqual(expectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.groups`,
 				{ _id: { $in: groupIds } }, projection, undefined);
@@ -64,8 +62,7 @@ const testGetGroups = () => {
 			const model = generateRandomString();
 			const projection = { _id: 0 };
 			const res = await Group.getGroups(teamspace, model, true, projection);
-			const convertedExpectedData = expectedData.map(convertGroupRules);
-			expect(res).toEqual(convertedExpectedData);
+			expect(res).toEqual(expectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.groups`,
 				{ }, projection, undefined);
@@ -83,8 +80,7 @@ const testGetGroups = () => {
 			const model = generateRandomString();
 			const projection = { _id: 0 };
 			const res = await Group.getGroups(teamspace, model, false, projection);
-			const convertedExpectedData = expectedData.map(convertGroupRules);
-			expect(res).toEqual(convertedExpectedData);
+			expect(res).toEqual(expectedData);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.groups`,
 				{

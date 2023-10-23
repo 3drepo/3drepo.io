@@ -25,7 +25,7 @@ const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 
 const { systemLogger } = require("../logger.js");
-const { convertGroupRules } = require("../../v5/schemas/rules");
+const { convertLegacyRules } = require("../../v5/schemas/rules");
 
 const fieldTypes = {
 	"description": "[object String]",
@@ -317,13 +317,15 @@ Group.deleteGroupsByViewId = async function (account, model, view_id) {
 };
 
 Group.findByUID = async function (account, model, branch, revId, uid, showIfcGuids = false, noClean = true, convertToIfcGuids = false) {
-	let foundGroup = await db.findOne(account, getGroupCollectionName(model), { _id: utils.stringToUUID(uid) });
+	const {rules, ...foundGroup} = await db.findOne(account, getGroupCollectionName(model), { _id: utils.stringToUUID(uid) });
 
 	if (!foundGroup) {
 		throw responseCodes.GROUP_NOT_FOUND;
 	}
 
-	foundGroup = convertGroupRules(foundGroup);
+	if(rules) {
+		foundGroup.rules = convertLegacyRules(rules);
+	}
 
 	if (convertToIfcGuids) {
 		foundGroup.objects = await getObjectsArrayAsIfcGuids(foundGroup, false);
@@ -378,13 +380,14 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 		query._id = {$in: utils.stringsToUUIDs(ids)};
 	}
 
-	let results = await db.find(account, getGroupCollectionName(model), query);
-
-	results = results.map(convertGroupRules);
+	const results = await db.find(account, getGroupCollectionName(model), query);
 
 	const sharedIdConversionPromises = [];
 
 	results.forEach(result => {
+		if(result.rules) {
+			result.rules = convertLegacyRules(result.rules);
+		}
 		const getObjIdProm = getObjectIds(account, model, branch, revId, result, true, showIfcGuids)
 			.then((sharedIdObjects) => {
 				result.objects = sharedIdObjects;
