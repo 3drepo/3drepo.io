@@ -24,11 +24,11 @@ import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormHelperText, Tooltip } from '@mui/material';
-import { theme } from '@/v5/ui/themes/theme';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
 import { FlexRow, PinAction, PinActions, PinName, PinSelectContainer, SettingLocationText } from './coordsProperty.styles';
+import { getPinColorHex } from './pin.helpers.component';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
 
@@ -38,6 +38,8 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const pinId = name;
 	const { selectedPin, setSelectedPin } = useContext(TicketContext);
 	const isSelected = selectedPin === pinId;
+	
+	const colorHex = getPinColorHex(name);
 
 	const cancelEdit = () => {
 		if (!editMode) return;
@@ -83,7 +85,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 			if (value) {
 				ViewerService.showPin({
-					id: pinId, position: value, colour, type: 'ticket' });
+					id: pinId, position: value, colour: hexToGLColor(colorHex), type: 'ticket' });
 			}
 		}
 
@@ -99,7 +101,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 	useEffect(() => {
 		ViewerService.setSelectionPin({ id: pinId, isSelected });
-	}, [isSelected]);
+	}, [isSelected, value]);
 
 	const hasPin = !!value;
 
@@ -132,7 +134,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 					</PinActions>
 				</span>
 				<Tooltip title={getSelectedPinTooltip()}>
-					<PinSelectContainer color={hex} isSelected={isSelected} onClick={onClickSelectPin}>
+					<PinSelectContainer color={colorHex} isSelected={isSelected} onClick={onClickSelectPin}>
 						<PinIcon />
 					</PinSelectContainer>
 				</Tooltip>
