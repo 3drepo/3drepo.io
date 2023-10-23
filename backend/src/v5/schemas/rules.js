@@ -15,24 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { OPERATIONS_TYPES, OPERATOR_SYMBOL, fieldOperators, valueOperators } = require('../models/metadata.rules.constants');
+const { fieldOperators, opTypes, valueOperators } = require('../models/metadata.rules.constants');
 const Yup = require('yup');
 const { isString } = require('../utils/helper/typeCheck');
 
 const Rules = {};
 
 const formatValues = (operatorType, values) => {
-	if (operatorType === 'regex') return `/ ${values} /`;
-	if (operatorType === 'numberRange') return `[ ${values.join(' : ')} ]`;
+	if (operatorType === opTypes.REGEX) return `/ ${values} /`;
+	if (operatorType === opTypes.NUMBER_RANGE) return `[ ${values.join(' : ')} ]`;
 	return values ? values.join(', ') : '';
 };
 
 const generateRuleName = ({ field, operator, values }) => {
-	const operatorType = OPERATIONS_TYPES[operator];
-	if (operatorType === 'field') return operator === 'IS_EMPTY' ? `! ${field}` : field;
+	const operatorType = valueOperators[operator].type;
+	if (operatorType === opTypes.FIELD) return operator === valueOperators.IS_EMPTY.name ? `! ${field}` : field;
 
 	const formattedValues = formatValues(operatorType, values);
-	return `${field} ${OPERATOR_SYMBOL[operator]} ${formattedValues}`;
+	return `${field} ${valueOperators[operator].symbol} ${formattedValues}`;
 };
 
 const formulateValueSchema = (operator) => {

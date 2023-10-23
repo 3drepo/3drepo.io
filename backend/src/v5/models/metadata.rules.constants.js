@@ -17,66 +17,53 @@
 
 const RulesConstants = {};
 
+RulesConstants.opTypes = {
+	FIELD: 0,
+	TEXT: 1,
+	REGEX: 2,
+	// entries below this point are assumed to be numbers
+	NUMBER: 3,
+	NUMBER_COMP: 4,
+	NUMBER_RANGE: 5,
+
+};
+
+const opBuilder = (name, minValues, maxValues, type, symbol) => ({
+	name,
+	minValues,
+	maxValues,
+	type,
+	isNumber: type >= RulesConstants.opTypes.NUMBER,
+	symbol,
+
+});
+
 const commonOperators = {
-	IS: { name: 'IS', minValues: 1 },
-	CONTAINS: { name: 'CONTAINS', minValues: 1 },
-	REGEX: { name: 'REGEX', minValues: 1, maxValues: 1 },
+	IS: opBuilder('IS', 1, undefined, RulesConstants.opTypes.TEXT, ':'),
+	CONTAINS: opBuilder('CONTAINS', 1, undefined, RulesConstants.opTypes.TEXT, ': *'),
+	REGEX: opBuilder('REGEX', 1, 1, RulesConstants.opTypes.REGEX, ':'),
 };
 
 RulesConstants.fieldOperators = {
 	...commonOperators,
-	STARTS_WITH: { name: 'STARTS_WITH', minValues: 1 },
-	ENDS_WITH: { name: 'ENDS_WITH', minValues: 1 },
+	STARTS_WITH: opBuilder('STARTS_WITH', 1, undefined, RulesConstants.opTypes.TEXT),
+	ENDS_WITH: opBuilder('ENDS_WITH', 1, undefined, RulesConstants.opTypes.TEXT),
 };
 
 RulesConstants.valueOperators = {
 	...commonOperators,
-	IS_NOT: { name: 'IS_NOT', minValues: 1 },
-	NOT_CONTAINS: { name: 'NOT_CONTAINS', minValues: 1 },
-	IS_EMPTY: { name: 'IS_EMPTY', minValues: 0, maxValues: 0 },
-	IS_NOT_EMPTY: { name: 'IS_NOT_EMPTY', minValues: 0, maxValues: 0 },
-	EQUALS: { name: 'EQUALS', minValues: 1, isNumber: true },
-	NOT_EQUALS: { name: 'NOT_EQUALS', minValues: 1, isNumber: true },
-	GT: { name: 'GT', minValues: 1, isNumber: true },
-	GTE: { name: 'GTE', minValues: 1, isNumber: true },
-	LT: { name: 'LT', minValues: 1, isNumber: true },
-	LTE: { name: 'LTE', minValues: 1, isNumber: true },
-	IN_RANGE: { name: 'IN_RANGE', minValues: 2, isNumber: true },
-	NOT_IN_RANGE: { name: 'NOT_IN_RANGE', minValues: 2, isNumber: true },
-};
-
-RulesConstants.OPERATOR_SYMBOL = {
-	[RulesConstants.valueOperators.IS.name]: ':',
-	[RulesConstants.valueOperators.IS_NOT.name]: ': !',
-	[RulesConstants.valueOperators.CONTAINS.name]: ': *',
-	[RulesConstants.valueOperators.NOT_CONTAINS.name]: ': ! *',
-	[RulesConstants.valueOperators.REGEX.name]: ':',
-	[RulesConstants.valueOperators.EQUALS.name]: '=',
-	[RulesConstants.valueOperators.NOT_EQUALS.name]: '= !',
-	[RulesConstants.valueOperators.GT.name]: '>',
-	[RulesConstants.valueOperators.GTE.name]: '>=',
-	[RulesConstants.valueOperators.LT.name]: '<',
-	[RulesConstants.valueOperators.LTE.name]: '<=',
-	[RulesConstants.valueOperators.IN_RANGE.name]: '',
-	[RulesConstants.valueOperators.NOT_IN_RANGE.name]: '!',
-};
-
-RulesConstants.OPERATIONS_TYPES = {
-	[RulesConstants.valueOperators.IS_NOT_EMPTY.name]: 'field',
-	[RulesConstants.valueOperators.IS_EMPTY.name]: 'field',
-	[RulesConstants.valueOperators.IS.name]: 'text',
-	[RulesConstants.valueOperators.IS_NOT.name]: 'text',
-	[RulesConstants.valueOperators.CONTAINS.name]: 'text',
-	[RulesConstants.valueOperators.NOT_CONTAINS.name]: 'text',
-	[RulesConstants.valueOperators.REGEX.name]: 'regex',
-	[RulesConstants.valueOperators.EQUALS.name]: 'number',
-	[RulesConstants.valueOperators.NOT_EQUALS.name]: 'number',
-	[RulesConstants.valueOperators.GT.name]: 'numberComparison',
-	[RulesConstants.valueOperators.GTE.name]: 'numberComparison',
-	[RulesConstants.valueOperators.LT.name]: 'numberComparison',
-	[RulesConstants.valueOperators.LTE.name]: 'numberComparison',
-	[RulesConstants.valueOperators.IN_RANGE.name]: 'numberRange',
-	[RulesConstants.valueOperators.NOT_IN_RANGE.name]: 'numberRange',
+	IS_NOT: opBuilder('IS NOT', 1, undefined, RulesConstants.opTypes.TEXT, ': !'),
+	NOT_CONTAINS: opBuilder('NOT_CONTAINS', 1, undefined, RulesConstants.opTypes.TEXT, ': ! *'),
+	IS_EMPTY: opBuilder('IS_EMPTY', 0, 0, RulesConstants.opTypes.FIELD),
+	IS_NOT_EMPTY: opBuilder('IS_NOT_EMPTY', 0, 0, RulesConstants.opTypes.FIELD),
+	EQUALS: opBuilder('EQUALS', 1, undefined, RulesConstants.opTypes.NUMBER, '='),
+	NOT_EQUALS: opBuilder('NOT_EQUALS', 1, undefined, RulesConstants.opTypes.NUMBER, '='),
+	GT: opBuilder('GT', 1, undefined, RulesConstants.opTypes.NUMBER_COMP, '>'),
+	GTE: opBuilder('GTE', 1, undefined, RulesConstants.opTypes.NUMBER_COMP, '>='),
+	LT: opBuilder('LT', 1, undefined, RulesConstants.opTypes.NUMBER_COMP, '<'),
+	LTE: opBuilder('LTE', 1, undefined, RulesConstants.opTypes.NUMBER_COMP, '<='),
+	IN_RANGE: opBuilder('IN_RANGE', 2, undefined, RulesConstants.opTypes.NUMBER_RANGE, ''),
+	NOT_IN_RANGE: opBuilder('NOT_IN_RANGE', 2, undefined, RulesConstants.opTypes.NUMBER_RANGE, '!'),
 };
 
 module.exports = RulesConstants;
