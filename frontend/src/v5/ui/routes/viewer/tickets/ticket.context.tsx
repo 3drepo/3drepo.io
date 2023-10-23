@@ -25,15 +25,18 @@ export interface TicketContextType {
 	view: TicketDetailsView;
 	viewProps?: any;
 	setDetailViewAndProps: (view: TicketDetailsView, props?: any) => void;
+	selectedPin: string;
+	setSelectedPin: (pinId: string) => void
 }
 
-const defaultValue: TicketContextType = { view: TicketDetailsView.Form, setDetailViewAndProps: () => {} };
+const defaultValue: TicketContextType = { view: TicketDetailsView.Form, setDetailViewAndProps: () => {}, selectedPin: null, setSelectedPin: () => {} };
 export const TicketContext = createContext(defaultValue);
 TicketContext.displayName = 'TicketContext';
 
 export const TicketContextComponent = ({ children }) => {
 	const [view, setView] = useState(TicketDetailsView.Form);
 	const [viewProps, setViewProps] = useState();
+	const [selectedPin, setSelectedPin] = useState(null);
 
 	const setDetailViewAndProps = (viewParam, props) => {
 		if (props) {
@@ -43,7 +46,7 @@ export const TicketContextComponent = ({ children }) => {
 	};
 
 	return (
-		<TicketContext.Provider value={{ view, viewProps, setDetailViewAndProps }}>
+		<TicketContext.Provider value={{ view, viewProps, setDetailViewAndProps, selectedPin, setSelectedPin }}>
 			{children}
 		</TicketContext.Provider>
 	);

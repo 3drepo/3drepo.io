@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import CircledPlusIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
 import LocationIcon from '@assets/icons/outlined/pin-outlined.svg';
@@ -29,12 +29,15 @@ import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
 import { FlexRow, PinAction, PinActions, PinName, PinSelectContainer, SettingLocationText } from './coordsProperty.styles';
+import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
 	const pinId = name;
+	const { selectedPin, setSelectedPin } = useContext(TicketContext);
+	const isSelected = selectedPin === pinId;
 
 	const cancelEdit = () => {
 		if (!editMode) return;
@@ -56,6 +59,11 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		if (pin !== undefined) {
 			onChange?.(pin);
 		}
+	};
+
+	const onClickSelectPin = () => {
+		if (!value) return;
+		setSelectedPin(isSelected ? null : pinId);
 	};
 
 	const getSelectedPinTooltip = () => {
@@ -81,12 +89,17 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 		prevValue.current = value;
 	}, [value]);
+
 	useEffect(() => () => {
 		ViewerService.clearMeasureMode();
 		if (prevValue.current) {
 			ViewerService.removePin(pinId);
 		}
 	}, []);
+
+	useEffect(() => {
+		ViewerService.setSelectionPin({ id: pinId, isSelected });
+	}, [isSelected]);
 
 	const hasPin = !!value;
 
