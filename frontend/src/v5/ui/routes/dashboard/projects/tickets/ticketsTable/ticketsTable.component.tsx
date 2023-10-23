@@ -62,6 +62,8 @@ export const TicketsTable = () => {
 	const params = useParams<DashboardTicketsParams>();
 	const { teamspace, project, groupBy: groupByURLParam, template: templateURLParam, containerOrFederation } = params;
 	const [modelsIds, setModelsIds] = useSearchParam('models');
+	const [showCompletedAsString, setShowCompleted] = useSearchParam('showCompleted');
+	const showCompleted = showCompletedAsString === 'true';
 	const models = useSelectedModels();
 	const { getState } = useStore();
 	const formData = useForm<FormType>({
@@ -78,7 +80,6 @@ export const TicketsTable = () => {
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const [sidePanelModelId, setSidePanelModelId] = useState<string>(null);
 	const [sidePanelTicket, setSidePanelTicket] = useState<Partial<ITicket>>(null);
-	const [showCompleted, setShowCompleted] = useState(false);
 	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
 
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -218,7 +219,7 @@ export const TicketsTable = () => {
 						<CompletedChip
 							selected={showCompleted}
 							icon={<TickIcon />}
-							onClick={() => setShowCompleted(!showCompleted)}
+							onClick={() => setShowCompleted(showCompleted ? '' : 'true')}
 							label={formatMessage({ id: 'ticketsTable.filters.completed', defaultMessage: 'Completed' })}
 						/>
 					</FlexContainer>
