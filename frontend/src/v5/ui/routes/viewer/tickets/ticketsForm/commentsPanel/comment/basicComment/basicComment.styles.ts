@@ -87,7 +87,7 @@ export const CommentButtons = styled.div`
 `;
 
 export const CommentWithButtonsContainer = styled.div`
-	width: 320px;
+	width: 100%;
 	display: flex;
 	align-items: center;
 	flex-direction: row;

@@ -25,6 +25,14 @@ import { isNotLoggedIn } from '@/v5/validation/errors.helpers';
 import { addParams, pathName } from '@/v5/helpers/url.helper';
 import { Route, RouteProps } from './route.component';
 import { useSSOParams } from '../sso.hooks';
+import { postActions } from '../api/sso';
+
+const cleanSSOParams = (location) => {
+	const searchParams = new URLSearchParams(location.search);
+	searchParams.delete('error');
+	searchParams.delete(postActions.LOGIN_POST);
+	return { ...location, search: searchParams.toString() };
+};
 
 const WrapAuthenticationRedirect = ({ children }) => {
 	const history = useHistory();
@@ -35,7 +43,7 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	const location = useLocation();
 
 	useEffect(() => {
-		AuthActionsDispatchers.setReturnUrl(location);
+		AuthActionsDispatchers.setReturnUrl(cleanSSOParams(location));
 		if (!isAuthenticated && authenticationFetched) {
 			const url = ssoError ? pathName(addParams(LOGIN_PATH, searchParams)) : LOGIN_PATH;
 			history.replace(url);
@@ -50,12 +58,8 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	axios.interceptors.response.use(
 		(response) => response,
 		(error) => {
-			try {
-				if (isNotLoggedIn(error)) AuthActionsDispatchers.setAuthenticationStatus(false);
-				return Promise.reject(error);
-			} catch (e) {
-				return Promise.reject(error);
-			}
+			if (isNotLoggedIn(error)) AuthActionsDispatchers.setAuthenticationStatus(false);
+			return Promise.reject(error);
 		},
 	);
 
