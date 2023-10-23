@@ -17,37 +17,64 @@
 
 const { src } = require('../../helper/path');
 
+const { cloneDeep } = require(`${src}/utils/helper/objects`);
+const { generateRandomString, generateGroup } = require('../../helper/services');
+
 const Group = require(`${src}/models/groups`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
+const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
 const testGetGroupsByIds = () => {
 	describe('Get many groups by Ids', () => {
 		test('should return the list of Groups ', async () => {
 			const expectedData = [
-				{
-					_id: 'abc',
-					name: 'Group 1',
-				},
-				{
-					_id: '123',
-					name: 'Group 2',
-				},
+				generateGroup(true),
+				generateGroup(true),
 			];
 
-			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(cloneDeep(expectedData));
 
-			const teamspace = 'someTS';
-			const model = 'someModel';
+			const teamspace = generateRandomString();
+			const model = generateRandomString();
 			const groupIds = [1, 2, 3];
 			const projection = { _id: 0 };
+
 			const res = await Group.getGroupsByIds(teamspace, model, groupIds, projection);
+
 			expect(res).toEqual(expectedData);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual(teamspace);
-			expect(fn.mock.calls[0][1]).toEqual(`${model}.groups`);
-			expect(fn.mock.calls[0][2]).toEqual({ _id: { $in: groupIds } });
-			expect(fn.mock.calls[0][3]).toEqual(projection);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.groups`,
+				{ _id: { $in: groupIds } }, projection, undefined);
+		});
+
+		test('should return the list of Groups with legacy schema converted ', async () => {
+			const group = {
+				...generateGroup(true),
+				rules: [{ field: generateRandomString(), operator: valueOperators.IS_EMPTY.name }],
+			};
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce([group]);
+
+			const teamspace = generateRandomString();
+			const model = generateRandomString();
+			const groupIds = [1, 2, 3];
+			const projection = { _id: 0 };
+
+			const res = await Group.getGroupsByIds(teamspace, model, groupIds, projection);
+
+			const expectedData = cloneDeep(group);
+
+			expectedData.rules = expectedData.rules.map(({ field, ...rest }) => ({
+				field: { operator: fieldOperators.IS.name, values: [field] },
+				name: `! ${field}`,
+				...rest,
+			}));
+
+			expect(res).toEqual([expectedData]);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.groups`,
+				{ _id: { $in: groupIds } }, projection, undefined);
 		});
 	});
 };
@@ -56,59 +83,71 @@ const testGetGroups = () => {
 	describe('Get all groups', () => {
 		test('should return the list of Groups ', async () => {
 			const expectedData = [
-				{
-					_id: 'abc',
-					name: 'Group 1',
-				},
-				{
-					_id: '123',
-					name: 'Group 2',
-				},
+				generateGroup(true),
+				generateGroup(false),
 			];
 
-			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(cloneDeep(expectedData));
 
-			const teamspace = 'someTS';
-			const model = 'someModel';
+			const teamspace = generateRandomString();
+			const model = generateRandomString();
 			const projection = { _id: 0 };
 			const res = await Group.getGroups(teamspace, model, true, projection);
 			expect(res).toEqual(expectedData);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual(teamspace);
-			expect(fn.mock.calls[0][1]).toEqual(`${model}.groups`);
-			expect(fn.mock.calls[0][2]).toEqual({});
-			expect(fn.mock.calls[0][3]).toEqual(projection);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.groups`,
+				{ }, projection, undefined);
 		});
 
 		test('should return the list of Groups without hidden groups', async () => {
 			const expectedData = [
-				{
-					_id: 'abc',
-					name: 'Group 1',
-				},
-				{
-					_id: '123',
-					name: 'Group 2',
-				},
+				generateGroup(true),
+				generateGroup(true),
 			];
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValue(expectedData);
 
-			const teamspace = 'someTS';
-			const model = 'someModel';
+			const teamspace = generateRandomString();
+			const model = generateRandomString();
 			const projection = { _id: 0 };
 			const res = await Group.getGroups(teamspace, model, false, projection);
 			expect(res).toEqual(expectedData);
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][0]).toEqual(teamspace);
-			expect(fn.mock.calls[0][1]).toEqual(`${model}.groups`);
-			expect(fn.mock.calls[0][2]).toEqual({
-				issue_id: { $exists: false },
-				risk_id: { $exists: false },
-				sequence_id: { $exists: false },
-				view_id: { $exists: false },
-			});
-			expect(fn.mock.calls[0][3]).toEqual(projection);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.groups`,
+				{
+					issue_id: { $exists: false },
+					risk_id: { $exists: false },
+					sequence_id: { $exists: false },
+					view_id: { $exists: false },
+				}, projection, undefined);
+		});
+
+		test('should return the list of Groups with legacy schema converted ', async () => {
+			const group = {
+				...generateGroup(true),
+				rules: [{ field: generateRandomString(), operator: valueOperators.IS_NOT_EMPTY.name }],
+			};
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce([group]);
+
+			const teamspace = generateRandomString();
+			const model = generateRandomString();
+			const projection = { _id: 0 };
+
+			const res = await Group.getGroups(teamspace, model, true, projection);
+
+			const expectedData = cloneDeep(group);
+
+			expectedData.rules = expectedData.rules.map(({ field, ...rest }) => ({
+				field: { operator: fieldOperators.IS.name, values: [field] },
+				name: `${field}`,
+				...rest,
+			}));
+
+			expect(res).toEqual([expectedData]);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.groups`,
+				{ }, projection, undefined);
 		});
 	});
 };

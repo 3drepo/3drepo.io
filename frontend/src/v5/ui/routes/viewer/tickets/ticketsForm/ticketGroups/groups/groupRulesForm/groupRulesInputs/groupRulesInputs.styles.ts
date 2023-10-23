@@ -15,33 +15,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import { ListSubheader as ListSubheaderBase } from '@mui/material';
 
-export const Form = styled.form`
-	display: flex;
-	flex-direction: column;
-	width: 328px;
-	border-radius: 10px;
+export const ListSubheader = styled(ListSubheaderBase)`
+	font-weight: 700;
+	padding: 5px 12px 0;
+	line-height: 35px;
 
-	.MuiFormControl-root {
-		margin: 0 0 10px;
+	&:first-of-type {
+		padding-top: 0;
 	}
 `;
 
-export const InputsContainer = styled.div`
-	max-height: 500px;
-	overflow-y: scroll;
-	margin-right: -13px;
-	padding: 2px 13px 2px 2px;
-`;
-
-export const Buttons = styled.div`
+export const ValuesContainer = styled.div`
 	display: flex;
 	flex-direction: row;
-	justify-content: flex-end;
+	align-items: end;
+	gap: 10px;
+`;
 
-	button {
-		margin-bottom: 0;
-		margin-top: 5px
-	}
+export const ValueIconContainer = styled.button.attrs({
+	type: 'button',
+})<{ disabled?: boolean }>`
+	cursor: pointer;
+	color: ${({ theme }) => theme.palette.secondary.main};
+	${({ theme, disabled }) => disabled && css`
+		cursor: auto;
+		color: ${theme.palette.base.light};
+	`}
+	display: inline-block;
+	padding: 0;
+	height: 18px;
+	margin-bottom: 15px;
+	border: none;
+	background: transparent;
 `;
