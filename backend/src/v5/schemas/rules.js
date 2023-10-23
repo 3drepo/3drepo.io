@@ -24,7 +24,7 @@ const Rules = {};
 const formatValues = (operatorType, values) => {
 	if (operatorType === opTypes.REGEX) return `/ ${values} /`;
 	if (operatorType === opTypes.NUMBER_RANGE) return `[ ${values.join(' : ')} ]`;
-	/* istanbul ignore else */
+	/* istanbul ignore next */
 	return values ? values.join(', ') : ''; // values should also be defined, valid rules with no values should be catered for in the line before this call.
 };
 
