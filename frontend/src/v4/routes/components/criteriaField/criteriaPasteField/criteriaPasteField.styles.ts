@@ -20,8 +20,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
 import styled, { css } from 'styled-components';
 
-import { TextField } from '../../../textField/textField.component';
-import * as TextFieldStyles from '../../../textField/textField.styles';
+import { TextField } from '../../textField/textField.component';
+import * as TextFieldStyles from '../../textField/textField.styles';
 
 const pasteIconStyle = css`
 	&& {

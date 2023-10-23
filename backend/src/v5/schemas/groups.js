@@ -35,7 +35,7 @@ const objectEntryValidator = Yup.object().shape({
 	(value) => (value.shared_ids && !value.ifc_guids) || (!value.shared_ids && value.ifc_guids),
 );
 
-const schema = (group, strict = false) => {
+const schema = (group) => {
 	const rulesOrObjects = group.rules
 		? { rules: Rules.schema.required() }
 		: { objects: Yup.array().of(objectEntryValidator).min(1).required() };
@@ -51,7 +51,7 @@ const schema = (group, strict = false) => {
 		updatedBy: types.strings.username.optional().default(group.author),
 		...rulesOrObjects,
 
-	}).strict(strict).noUnknown()
+	}).noUnknown()
 		.required()
 		.test(
 			'Group validation',
@@ -62,7 +62,7 @@ const schema = (group, strict = false) => {
 	return output;
 };
 
-Group.validateSchema = (group) => schema(group, true).validate(group);
+Group.validateSchema = (group) => schema(group).validate(group);
 
 Group.castSchema = (group) => {
 	const groupToCast = { ...group };

@@ -48,7 +48,6 @@ interface IProps {
 	totalMeshes: number;
 	canUpdate: boolean;
 	selectedNodes: any;
-	fieldNames: any[];
 	criteriaFieldState: ICriteriaFieldState;
 	createGroup: (teamspace: any, modelId: any, revision: any) => void;
 	updateGroup: (teamspace: any, modelId: any, revision: any, groupId: any) => void;
@@ -111,7 +110,6 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			label="Filters"
 			placeholder="Select first filter"
 			disabled={!this.props.canUpdate}
-			fieldNames={this.props.fieldNames}
 		/>
 	));
 
@@ -188,7 +186,6 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			currentUser={this.props.currentUser}
 			totalMeshes={this.props.totalMeshes}
 			canUpdate={this.props.canUpdate}
-			fieldNames={this.props.fieldNames}
 			handleChange={this.handleFieldChange}
 			selectedNodes={this.props.selectedNodes}
 		/>

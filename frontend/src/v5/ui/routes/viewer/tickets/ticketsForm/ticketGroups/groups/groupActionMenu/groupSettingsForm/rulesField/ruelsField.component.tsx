@@ -25,9 +25,9 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { InputAdornment } from '@mui/material';
 import { IGroupRule } from '@/v5/store/tickets/tickets.types';
 import { Container, TextField, Button, CloseIcon } from './rulesField.styles';
-import { prepareRuleForForm } from '../../../groupRulesForm/groupRulesForm.helpers';
+import { groupRuleToFormRule } from '../../../groupRulesForm/groupRulesForm.helpers';
 
-const validateRules = (rules: IGroupRule[]) => Yup.array(GroupRuleSchema).min(1).validateSync(rules.map(prepareRuleForForm));
+const validateRules = (rules: IGroupRule[]) => Yup.array(GroupRuleSchema).min(1).validateSync(rules.map(groupRuleToFormRule));
 
 const resolver = Yup.object({
 	rules: Yup.string().test(

@@ -16,9 +16,11 @@
  */
 
 const updateSubmodelSchema = require('./updateSubmodelSchema');
+const updateGroupsSchema = require('./updateGroupsSchema');
 
 const scripts = [
 	{ script: updateSubmodelSchema, desc: 'Update submodel schema in federation settings' },
+	{ script: updateGroupsSchema, desc: 'Update groups schema to support variable field names' },
 ];
 
 module.exports = scripts;
