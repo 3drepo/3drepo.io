@@ -52,7 +52,7 @@ RulesConstants.fieldOperators = {
 
 RulesConstants.valueOperators = {
 	...commonOperators,
-	IS_NOT: opBuilder('IS NOT', 1, undefined, RulesConstants.opTypes.TEXT, ': !'),
+	IS_NOT: opBuilder('IS_NOT', 1, undefined, RulesConstants.opTypes.TEXT, ': !'),
 	NOT_CONTAINS: opBuilder('NOT_CONTAINS', 1, undefined, RulesConstants.opTypes.TEXT, ': ! *'),
 	IS_EMPTY: opBuilder('IS_EMPTY', 0, 0, RulesConstants.opTypes.FIELD),
 	IS_NOT_EMPTY: opBuilder('IS_NOT_EMPTY', 0, 0, RulesConstants.opTypes.FIELD),
