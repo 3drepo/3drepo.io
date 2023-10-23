@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import DEFAULT_LOGO from '@assets/images/3drepo-logo-white.png';
+import DEFAULT_LOGO from '@assets/images/logo-light.png';
 import { clientConfigService } from '../../../services/clientConfig';
 import { Image } from './logo.styles';
 
