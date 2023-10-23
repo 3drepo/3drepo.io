@@ -157,6 +157,11 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		setFilterMenuOpen(false);
 	};
 
+	const handleAddFilterClick = () => {
+		setSelectedRule(null);
+		setFilterMenuOpen(true);
+	};
+
 	useEffect(() => {
 		// When no value is passed then the group is a new group
 		resetFilterMenu();
@@ -363,7 +368,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								/>
 								{isAdmin && (
 									<AddFilterTitle>
-										<TriggerButton onClick={() => setFilterMenuOpen(true)}>
+										<TriggerButton onClick={handleAddFilterClick}>
 											<FormattedMessage id="tickets.groups.newGroupForm.addFilter" defaultMessage="Add filter" />
 										</TriggerButton>
 									</AddFilterTitle>
@@ -385,7 +390,6 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 											}}
 											disabled={!isAdmin}
 											onClick={() => {
-												if (filterMenuOpen) return;
 												setSelectedRule({ index: i, value: ruleValue });
 												setFilterMenuOpen(true);
 											}}
