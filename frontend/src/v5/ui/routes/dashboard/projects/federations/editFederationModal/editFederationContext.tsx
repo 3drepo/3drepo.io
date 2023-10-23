@@ -28,6 +28,7 @@ export interface EditFederationContextType {
 	setGroupsByContainer: (groupsByContainer) => void;
 	getGroupedContainers: () => GroupedContainer[];
 	groups: string[];
+	isReadOnly: boolean;
 }
 const defaultValue: EditFederationContextType = {
 	includedContainers: [],
@@ -36,6 +37,7 @@ const defaultValue: EditFederationContextType = {
 	setGroupsByContainer: () => {},
 	getGroupedContainers: () => [],
 	groups: [],
+	isReadOnly: false,
 };
 export const EditFederationContext = createContext(defaultValue);
 EditFederationContext.displayName = 'EditFederationContext';
@@ -63,6 +65,7 @@ export const EditFederationContextComponent = ({ federation, children }: Props) 
 	const existingGroups = federations.flatMap((f) => f.containers.map(({ group }) => group));
 	const unsortedGroups = uniq(existingGroups.concat(Object.values(groupsByContainer))).filter(Boolean);
 	const groups = orderBy(unsortedGroups, (g) => g.toLowerCase());
+	const isReadOnly = federation && !FederationsHooksSelectors.selectHasCommenterAccess(federation._id);
 
 	useEffect(() => {
 		if (!containers.length || !federation?.containers) return;
@@ -78,6 +81,7 @@ export const EditFederationContextComponent = ({ federation, children }: Props) 
 				setGroupsByContainer,
 				getGroupedContainers,
 				groups,
+				isReadOnly,
 			}}
 		>
 			{children}
