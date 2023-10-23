@@ -20,7 +20,7 @@ const { src } = require('../../../../../../../../helper/path');
 const { generateLegacyGroup, generateUUIDString, generateRandomString } = require('../../../../../../../../helper/services');
 const { convertLegacyRules } = require('../../../../../../../../../../src/v5/schemas/rules');
 
-const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require(`${src}/models/metadata.rules.constants`);
+const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
@@ -95,15 +95,15 @@ const testValidateGroupsImportData = () => {
 
 	const standardRule = {
 		name: generateRandomString(),
-		field: { operator: FIELD_NAME_OPERATORS.IS.name, values: [generateRandomString()] },
-		operator: FIELD_VALUE_OPERATORS.IS.name,
+		field: { operator: fieldOperators.IS.name, values: [generateRandomString()] },
+		operator: valueOperators.IS.name,
 		values: [generateRandomString()],
 	};
 
 	const badRule = {
 		name: generateRandomString(),
-		field: { operator: FIELD_NAME_OPERATORS.IS.name, values: [generateRandomString()] },
-		operator: FIELD_VALUE_OPERATORS.EQUALS.name,
+		field: { operator: fieldOperators.IS.name, values: [generateRandomString()] },
+		operator: valueOperators.EQUALS.name,
 		values: ['a', 'b'],
 	};
 
@@ -117,19 +117,19 @@ const testValidateGroupsImportData = () => {
 		[{ body: { groups: [_.omit(ruleGroup, ['createdAt'])] } }, false, 'no createdAt'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [] }] } }, false, 'with empty rules'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [{ ...standardRule, name: undefined, field: generateRandomString() }] }] } }, true, 'rule with old schema'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [{ ...standardRule, operator: FIELD_VALUE_OPERATORS.REGEX.name, name: undefined, field: generateRandomString() }] }] } }, true, 'rule with old schema and regex operator'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [{ operator: FIELD_VALUE_OPERATORS.IN_RANGE.name, values: [1, 2], name: undefined, field: generateRandomString() }] }] } }, true, 'rule with old schema and range operator'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [{ operator: FIELD_VALUE_OPERATORS.IS_EMPTY.name, values: undefined, name: undefined, field: generateRandomString() }] }] } }, true, 'rule with old schema and is empty operator'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [{ operator: FIELD_VALUE_OPERATORS.IS_NOT_EMPTY.name, values: undefined, name: undefined, field: generateRandomString() }] }] } }, true, 'rule with old schema and is not empty operator'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [{ ...standardRule, operator: FIELD_VALUE_OPERATORS.IS_EMPTY.name, values: undefined }] }] } }, true, 'exists rule'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [{ ...standardRule, operator: valueOperators.REGEX.name, name: undefined, field: generateRandomString() }] }] } }, true, 'rule with old schema and regex operator'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [{ operator: valueOperators.IN_RANGE.name, values: [1, 2], name: undefined, field: generateRandomString() }] }] } }, true, 'rule with old schema and range operator'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [{ operator: valueOperators.IS_EMPTY.name, values: undefined, name: undefined, field: generateRandomString() }] }] } }, true, 'rule with old schema and is empty operator'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [{ operator: valueOperators.IS_NOT_EMPTY.name, values: undefined, name: undefined, field: generateRandomString() }] }] } }, true, 'rule with old schema and is not empty operator'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [{ ...standardRule, operator: valueOperators.IS_EMPTY.name, values: undefined }] }] } }, true, 'exists rule'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [{ ...standardRule, name: undefined }] }] } }, false, 'rule with no name'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [{ ...standardRule, operator: FIELD_VALUE_OPERATORS.EQUALS.name, values: [2, 4] }] }] } }, true, 'rule with number parameter'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [{ ...standardRule, operator: FIELD_VALUE_OPERATORS.IN_RANGE.name, values: [2, 4, 5, 7] }] }] } }, true, 'rule with range parameters'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [{ ...standardRule, operator: FIELD_VALUE_OPERATORS.IN_RANGE.name, values: [2, 4, 3] }] }] } }, false, 'rule with in correct amount of range parameters'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [{ ...standardRule, operator: valueOperators.EQUALS.name, values: [2, 4] }] }] } }, true, 'rule with number parameter'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [{ ...standardRule, operator: valueOperators.IN_RANGE.name, values: [2, 4, 5, 7] }] }] } }, true, 'rule with range parameters'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [{ ...standardRule, operator: valueOperators.IN_RANGE.name, values: [2, 4, 3] }] }] } }, false, 'rule with in correct amount of range parameters'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [...ruleGroup.rules, standardRule] }] } }, true, 'multiple rules'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [...ruleGroup.rules, badRule] }] } }, false, 'multiple rules where one is bad'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [badRule] }] } }, false, 'rule with invalidParameters'],
-		[{ body: { groups: [{ ...ruleGroup, rules: [{ ...standardRule, operator: FIELD_VALUE_OPERATORS.REGEX.name, values: [generateRandomString(), generateRandomString()] }] }] } }, false, 'regex with more than 1 values'],
+		[{ body: { groups: [{ ...ruleGroup, rules: [{ ...standardRule, operator: valueOperators.REGEX.name, values: [generateRandomString(), generateRandomString()] }] }] } }, false, 'regex with more than 1 values'],
 		[{ body: { groups: [{ ...ruleGroup, rules: [{ ...standardRule, operator: generateRandomString() }] }] } }, false, 'rule with unknown operator'],
 		[{ body: { groups: [{ ...ifcGroup, objects: [] }] } }, false, 'with empty objects'],
 		[{ body: { groups: [{ ...ruleGroup, description: '123' }] } }, true, 'with description'],

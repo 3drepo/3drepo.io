@@ -20,7 +20,7 @@ const { times, cloneDeep } = require('lodash');
 const { generateRandomString, generateRandomObject, generateGroup } = require('../../helper/services');
 
 const Groups = require(`${src}/models/tickets.groups`);
-const { FIELD_NAME_OPERATORS } = require(`${src}/models/metadata.rules.constants`);
+const { fieldOperators } = require(`${src}/models/metadata.rules.constants`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -143,7 +143,7 @@ const testGetGroupsByIds = () => {
 			groupConverted.rules = groupConverted.rules.map(({ field, ...rest }) => ({ ...rest,
 				field: {
 					values: [field],
-					operator: FIELD_NAME_OPERATORS.IS.name,
+					operator: fieldOperators.IS.name,
 				} }));
 
 			db.find.mockResolvedValueOnce([group]);
@@ -271,7 +271,7 @@ const testGetGroupById = () => {
 			expectedData.rules = expectedData.rules.map(({ field, ...rest }) => ({ ...rest,
 				field: {
 					values: [field],
-					operator: FIELD_NAME_OPERATORS.IS.name,
+					operator: fieldOperators.IS.name,
 				} }));
 
 			const projection = generateRandomObject();

@@ -44,7 +44,7 @@ const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constant
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const FilesManager = require('../../../src/v5/services/filesManager');
 
-const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require(`${src}/models/metadata.rules.constants`);
+const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
 const { USERS_DB_NAME, USERS_COL, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
 const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
@@ -570,16 +570,16 @@ ServiceHelper.generateGroup = (isSmart = false, {
 		group.rules = [
 			{
 				name: ServiceHelper.generateRandomString(),
-				field: { operator: FIELD_NAME_OPERATORS.CONTAINS.name, values: [ServiceHelper.generateRandomString()] },
-				operator: FIELD_VALUE_OPERATORS.IS.name,
+				field: { operator: fieldOperators.CONTAINS.name, values: [ServiceHelper.generateRandomString()] },
+				operator: valueOperators.IS.name,
 				values: [
 					ServiceHelper.generateRandomString(),
 				],
 			},
 			{
 				name: ServiceHelper.generateRandomString(),
-				field: { operator: FIELD_NAME_OPERATORS.IS.name, values: [ServiceHelper.generateRandomString()] },
-				operator: FIELD_VALUE_OPERATORS.IS.name,
+				field: { operator: fieldOperators.IS.name, values: [ServiceHelper.generateRandomString()] },
+				operator: valueOperators.IS.name,
 				values: [
 					ServiceHelper.generateRandomString(),
 				],
@@ -612,8 +612,8 @@ ServiceHelper.generateLegacyGroup = (account, model, isSmart = false, isIfcGuids
 		group.rules = [
 			{
 				name: ServiceHelper.generateRandomString(),
-				field: { operator: FIELD_NAME_OPERATORS.IS.name, values: ['IFC GUID'] },
-				operator: FIELD_VALUE_OPERATORS.IS.name,
+				field: { operator: fieldOperators.IS.name, values: ['IFC GUID'] },
+				operator: valueOperators.IS.name,
 				values: [
 					ServiceHelper.generateRandomString(),
 				],

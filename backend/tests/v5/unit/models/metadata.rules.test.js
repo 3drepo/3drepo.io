@@ -17,7 +17,7 @@
 
 const { src } = require('../../helper/path');
 
-const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require(`${src}/models/metadata.rules.constants`);
+const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../helper/services');
 
 const MetaRules = require(`${src}/models/metadata.rules`);
@@ -30,108 +30,108 @@ const createQuery = (fieldQuery, valueQuery) => ({
 
 const getValueTestCases = () => {
 	const fieldValues = [generateRandomString(), generateRandomString()];
-	const field = { values: fieldValues, operator: FIELD_VALUE_OPERATORS.IS.name };
+	const field = { values: fieldValues, operator: valueOperators.IS.name };
 	const fieldQuery = { $in: fieldValues };
 	const valueTestCases = [
 		{
 			desc: 'value operator IS_NOT_EMPTY with no operands',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.IS_NOT_EMPTY.name),
+			data: generateRule(field, valueOperators.IS_NOT_EMPTY.name),
 			query: createQuery(fieldQuery),
 		},
 		{
 			desc: 'value operator IS_NOT_EMPTY with operands',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.IS_NOT_EMPTY.name, [1, 2, 3, 4]),
+			data: generateRule(field, valueOperators.IS_NOT_EMPTY.name, [1, 2, 3, 4]),
 			query: createQuery(fieldQuery),
 		},
 		{
 			desc: 'value operator IS with 1 operand',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.IS.name, ['abc']),
+			data: generateRule(field, valueOperators.IS.name, ['abc']),
 			query: createQuery(fieldQuery, 'abc'),
 		},
 		{
 			desc: 'value operator IS with 1+ operand',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.IS.name, ['abc', 'a']),
+			data: generateRule(field, valueOperators.IS.name, ['abc', 'a']),
 			query: createQuery(fieldQuery, { $in: ['abc', 'a'] }),
 		},
 		{
 			desc: 'value operator CONTAINS with 1 operand',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.CONTAINS.name, ['abc']),
+			data: generateRule(field, valueOperators.CONTAINS.name, ['abc']),
 			query: createQuery(fieldQuery, { $regex: new RegExp('abc'), $options: 'i' }),
 		},
 		{
 			desc: 'value operator CONTAINS with 1+ operand',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.CONTAINS.name, ['abc', 'def']),
+			data: generateRule(field, valueOperators.CONTAINS.name, ['abc', 'def']),
 			query: createQuery(fieldQuery, { $regex: new RegExp('abc|def'), $options: 'i' }),
 		},
 		{
 			desc: 'value operator REGEX with 1 operand',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.REGEX.name, ['$(\\w)+']),
+			data: generateRule(field, valueOperators.REGEX.name, ['$(\\w)+']),
 			query: createQuery(fieldQuery, { $regex: new RegExp('($(\\w)+)') }),
 		},
 		{
 			desc: 'value operator REGEX with 1+ operand',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.REGEX.name, ['(\\w)+$', '(a|b)*']),
+			data: generateRule(field, valueOperators.REGEX.name, ['(\\w)+$', '(a|b)*']),
 			query: createQuery(fieldQuery, { $regex: new RegExp('((\\w)+$)|((a|b)*)') }),
 		},
 		{
 			desc: 'value operator EQUALS with 1 operand',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.EQUALS.name, [1000]),
+			data: generateRule(field, valueOperators.EQUALS.name, [1000]),
 			query: createQuery(fieldQuery, 1000),
 		},
 		{
 			desc: 'value operator EQUALS with 1+ operand',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.EQUALS.name, [1000, 2000]),
+			data: generateRule(field, valueOperators.EQUALS.name, [1000, 2000]),
 			query: createQuery(fieldQuery, { $in: [1000, 2000] }),
 		},
 		{
 			desc: 'value operator GT with 1 operand',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.GT.name, [1000]),
+			data: generateRule(field, valueOperators.GT.name, [1000]),
 			query: createQuery(fieldQuery, { $gt: 1000 }),
 		},
 		{
 			desc: 'value operator GT with 1+ operand',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.GT.name, [1000, 2000]),
+			data: generateRule(field, valueOperators.GT.name, [1000, 2000]),
 			query: createQuery(fieldQuery, { $gt: 1000 }),
 		},
 		{
 			desc: 'value operator GTE with 1 operand',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.GTE.name, [1000]),
+			data: generateRule(field, valueOperators.GTE.name, [1000]),
 			query: createQuery(fieldQuery, { $gte: 1000 }),
 		},
 		{
 			desc: 'value operator GTE with 1+ operand',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.GTE.name, [1000, 2000]),
+			data: generateRule(field, valueOperators.GTE.name, [1000, 2000]),
 			query: createQuery(fieldQuery, { $gte: 1000 }),
 		},
 		{
 			desc: 'value operator LT with 1 operand',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.LT.name, [1000]),
+			data: generateRule(field, valueOperators.LT.name, [1000]),
 			query: createQuery(fieldQuery, { $lt: 1000 }),
 		},
 		{
 			desc: 'value operator LT with 1+ operand',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.LT.name, [1000, 2000]),
+			data: generateRule(field, valueOperators.LT.name, [1000, 2000]),
 			query: createQuery(fieldQuery, { $lt: 2000 }),
 		},
 		{
 			desc: 'value operator LTE with 1 operand',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.LTE.name, [1000]),
+			data: generateRule(field, valueOperators.LTE.name, [1000]),
 			query: createQuery(fieldQuery, { $lte: 1000 }),
 		},
 		{
 			desc: 'value operator LTE with 1+ operand',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.LTE.name, [1000, 2000]),
+			data: generateRule(field, valueOperators.LTE.name, [1000, 2000]),
 			query: createQuery(fieldQuery, { $lte: 2000 }),
 		},
 		{
 			desc: 'value operator IN_RANGE with 1 set of operands',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.IN_RANGE.name, [1000, 2000]),
+			data: generateRule(field, valueOperators.IN_RANGE.name, [1000, 2000]),
 			query: createQuery(fieldQuery, { $gte: 1000, $lte: 2000 }),
 		},
 
 		{
 			desc: 'value operator IN_RANGE with 1+ sets of operands',
-			data: generateRule(field, FIELD_VALUE_OPERATORS.IN_RANGE.name, [1000, 2000, 200, 100]),
+			data: generateRule(field, valueOperators.IN_RANGE.name, [1000, 2000, 200, 100]),
 			query: { $or: [
 				createQuery(fieldQuery, { $gte: 1000, $lte: 2000 }),
 				createQuery(fieldQuery, { $gte: 100, $lte: 200 }),
@@ -152,68 +152,68 @@ const getFieldTestCases = () => {
 	const fieldTestCases = [
 		{
 			desc: 'field operator IS with 1 operand',
-			data: generateRule({ operator: FIELD_NAME_OPERATORS.IS.name, values: [fieldValues[0]] },
-				FIELD_VALUE_OPERATORS.IS.name, values),
+			data: generateRule({ operator: fieldOperators.IS.name, values: [fieldValues[0]] },
+				valueOperators.IS.name, values),
 			query: createQuery(fieldValues[0], { $in: values }),
 		},
 		{
 			desc: 'field operator IS with 1+ operands',
-			data: generateRule({ operator: FIELD_NAME_OPERATORS.IS.name, values: fieldValues },
-				FIELD_VALUE_OPERATORS.IS.name, values),
+			data: generateRule({ operator: fieldOperators.IS.name, values: fieldValues },
+				valueOperators.IS.name, values),
 			query: createQuery({ $in: fieldValues }, { $in: values }),
 		},
 		{
 			desc: 'field operator CONTAINS with 1 operand',
-			data: generateRule({ operator: FIELD_NAME_OPERATORS.CONTAINS.name, values: [fieldValues[0]] },
-				FIELD_VALUE_OPERATORS.IS.name, values),
+			data: generateRule({ operator: fieldOperators.CONTAINS.name, values: [fieldValues[0]] },
+				valueOperators.IS.name, values),
 			// eslint-disable-next-line security/detect-non-literal-regexp
 			query: createQuery({ $regex: new RegExp(fieldValues[0]), $options: 'i' }, { $in: values }),
 		},
 		{
 			desc: 'field operator CONTAINS with 1+ operands',
-			data: generateRule({ operator: FIELD_NAME_OPERATORS.CONTAINS.name, values: fieldValues },
-				FIELD_VALUE_OPERATORS.IS.name, values),
+			data: generateRule({ operator: fieldOperators.CONTAINS.name, values: fieldValues },
+				valueOperators.IS.name, values),
 			// eslint-disable-next-line security/detect-non-literal-regexp
 			query: createQuery({ $regex: new RegExp(fieldValues.join('|')), $options: 'i' }, { $in: values }),
 		},
 		{
 			desc: 'field operator REGEX with 1 operand',
-			data: generateRule({ operator: FIELD_NAME_OPERATORS.REGEX.name, values: ['(\\w)+$'] },
-				FIELD_VALUE_OPERATORS.IS.name, values),
+			data: generateRule({ operator: fieldOperators.REGEX.name, values: ['(\\w)+$'] },
+				valueOperators.IS.name, values),
 			query: createQuery({ $regex: new RegExp('((\\w)+$)') }, { $in: values }),
 		},
 		{
 			desc: 'field operator STARTS_WITH with 1 operand',
-			data: generateRule({ operator: FIELD_NAME_OPERATORS.STARTS_WITH.name, values: [fieldValues[0]] },
-				FIELD_VALUE_OPERATORS.IS.name, values),
+			data: generateRule({ operator: fieldOperators.STARTS_WITH.name, values: [fieldValues[0]] },
+				valueOperators.IS.name, values),
 			// eslint-disable-next-line security/detect-non-literal-regexp
 			query: createQuery({ $regex: new RegExp(`^(${fieldValues[0]})`), $options: 'i' }, { $in: values }),
 		},
 		{
 			desc: 'field operator STARTS_WITH with 1+ operands',
-			data: generateRule({ operator: FIELD_NAME_OPERATORS.STARTS_WITH.name, values: fieldValues },
-				FIELD_VALUE_OPERATORS.IS.name, values),
+			data: generateRule({ operator: fieldOperators.STARTS_WITH.name, values: fieldValues },
+				valueOperators.IS.name, values),
 			// eslint-disable-next-line security/detect-non-literal-regexp
 			query: createQuery({ $regex: new RegExp(`^(${fieldValues.join('|')})`), $options: 'i' }, { $in: values }),
 		},
 		{
 			desc: 'field operator ENDS_WITH with 1 operand',
-			data: generateRule({ operator: FIELD_NAME_OPERATORS.ENDS_WITH.name, values: [fieldValues[0]] },
-				FIELD_VALUE_OPERATORS.IS.name, values),
+			data: generateRule({ operator: fieldOperators.ENDS_WITH.name, values: [fieldValues[0]] },
+				valueOperators.IS.name, values),
 			// eslint-disable-next-line security/detect-non-literal-regexp
 			query: createQuery({ $regex: new RegExp(`(${fieldValues[0]})$`), $options: 'i' }, { $in: values }),
 		},
 		{
 			desc: 'field operator ENDS_WITH with 1+ operands',
-			data: generateRule({ operator: FIELD_NAME_OPERATORS.ENDS_WITH.name, values: fieldValues },
-				FIELD_VALUE_OPERATORS.IS.name, values),
+			data: generateRule({ operator: fieldOperators.ENDS_WITH.name, values: fieldValues },
+				valueOperators.IS.name, values),
 			// eslint-disable-next-line security/detect-non-literal-regexp
 			query: createQuery({ $regex: new RegExp(`(${fieldValues.join('|')})$`), $options: 'i' }, { $in: values }),
 		},
 		{
 			desc: 'unknown field operator',
 			data: generateRule({ operator: generateRandomString(), values: fieldValues },
-				FIELD_VALUE_OPERATORS.IS.name, values),
+				valueOperators.IS.name, values),
 		},
 	];
 
@@ -243,30 +243,30 @@ const testToQuery = () => {
 const testGenerateQueriesFromRules = () => {
 	test('Should identify positive/negative rules correctly and convert them to mongo queries', () => {
 		const fieldValues = [generateRandomString(), generateRandomString()];
-		const field = { values: fieldValues, operator: FIELD_VALUE_OPERATORS.IS.name };
+		const field = { values: fieldValues, operator: valueOperators.IS.name };
 
 		const posRules = [
-			generateRule(field, FIELD_VALUE_OPERATORS.IS_NOT_EMPTY.name),
-			generateRule(field, FIELD_VALUE_OPERATORS.IS.name, [generateRandomString()]),
-			generateRule(field, FIELD_VALUE_OPERATORS.CONTAINS.name, [generateRandomString()]),
-			generateRule(field, FIELD_VALUE_OPERATORS.REGEX.name, [generateRandomString()]),
-			generateRule(field, FIELD_VALUE_OPERATORS.EQUALS.name, [generateRandomNumber()]),
-			generateRule(field, FIELD_VALUE_OPERATORS.GT.name, [generateRandomNumber()]),
-			generateRule(field, FIELD_VALUE_OPERATORS.GTE.name, [generateRandomNumber()]),
-			generateRule(field, FIELD_VALUE_OPERATORS.LT.name, [generateRandomNumber()]),
-			generateRule(field, FIELD_VALUE_OPERATORS.LTE.name, [generateRandomNumber()]),
-			generateRule(field, FIELD_VALUE_OPERATORS.IN_RANGE.name, [0, 199]),
+			generateRule(field, valueOperators.IS_NOT_EMPTY.name),
+			generateRule(field, valueOperators.IS.name, [generateRandomString()]),
+			generateRule(field, valueOperators.CONTAINS.name, [generateRandomString()]),
+			generateRule(field, valueOperators.REGEX.name, [generateRandomString()]),
+			generateRule(field, valueOperators.EQUALS.name, [generateRandomNumber()]),
+			generateRule(field, valueOperators.GT.name, [generateRandomNumber()]),
+			generateRule(field, valueOperators.GTE.name, [generateRandomNumber()]),
+			generateRule(field, valueOperators.LT.name, [generateRandomNumber()]),
+			generateRule(field, valueOperators.LTE.name, [generateRandomNumber()]),
+			generateRule(field, valueOperators.IN_RANGE.name, [0, 199]),
 
 		];
 
 		const negRules = [
-			generateRule(field, FIELD_VALUE_OPERATORS.IS_NOT.name, [generateRandomString()]),
-			generateRule(field, FIELD_VALUE_OPERATORS.NOT_CONTAINS.name, [generateRandomString()]),
-			generateRule(field, FIELD_VALUE_OPERATORS.NOT_EQUALS.name, [generateRandomNumber()]),
-			generateRule(field, FIELD_VALUE_OPERATORS.NOT_IN_RANGE.name, [2, 255]),
+			generateRule(field, valueOperators.IS_NOT.name, [generateRandomString()]),
+			generateRule(field, valueOperators.NOT_CONTAINS.name, [generateRandomString()]),
+			generateRule(field, valueOperators.NOT_EQUALS.name, [generateRandomNumber()]),
+			generateRule(field, valueOperators.NOT_IN_RANGE.name, [2, 255]),
 		];
 
-		const emptyRule = generateRule(field, FIELD_VALUE_OPERATORS.IS_EMPTY.name);
+		const emptyRule = generateRule(field, valueOperators.IS_EMPTY.name);
 
 		const expectedData = {
 			positives: posRules.map(MetaRules.toQuery),
@@ -274,7 +274,7 @@ const testGenerateQueriesFromRules = () => {
 
 		expectedData.negatives = negRules.map((rule) => {
 			expectedData.positives.push(MetaRules.toQuery({ field: rule.field,
-				operator: FIELD_VALUE_OPERATORS.IS_NOT_EMPTY.name }));
+				operator: valueOperators.IS_NOT_EMPTY.name }));
 			return MetaRules.toQuery(rule);
 		});
 

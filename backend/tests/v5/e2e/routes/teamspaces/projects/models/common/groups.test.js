@@ -18,7 +18,7 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
-const { FIELD_VALUE_OPERATORS } = require('../../../../../../../../src/v5/models/metadata.rules.constants');
+const { valueOperators } = require('../../../../../../../../src/v5/models/metadata.rules.constants');
 const { convertLegacyRules } = require('../../../../../../../../src/v5/schemas/rules');
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -56,7 +56,7 @@ const testExportGroups = () => {
 		rules: [{
 			name: ServiceHelper.generateRandomString(),
 			field: ServiceHelper.generateRandomString(),
-			operator: FIELD_VALUE_OPERATORS.IS.name,
+			operator: valueOperators.IS.name,
 			values: [ServiceHelper.generateRandomString()],
 		}],
 	};
@@ -154,7 +154,7 @@ const testImportGroups = () => {
 		rules: [{
 			name: ServiceHelper.generateRandomString(),
 			field: ServiceHelper.generateRandomString(),
-			operator: FIELD_VALUE_OPERATORS.IS.name,
+			operator: valueOperators.IS.name,
 			values: [ServiceHelper.generateRandomString()],
 		}],
 	};

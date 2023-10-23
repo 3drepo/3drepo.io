@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS } = require('../../models/metadata.rules.constants');
+const { fieldOperators, valueOperators } = require('../../models/metadata.rules.constants');
 const { presetModules, propTypes } = require('../../schemas/tickets/templates.constants');
 const { deleteIfUndefined } = require('../../utils/helper/objects');
 const { getSwaggerComponents } = require('../../utils/responseCodes');
@@ -170,9 +170,9 @@ Schemas.schemas.group = {
 						properties: {
 							operator: {
 								type: 'string',
-								enum: Object.keys(FIELD_NAME_OPERATORS),
+								enum: Object.keys(fieldOperators),
 								description: 'Operator value on the field name',
-								example: FIELD_NAME_OPERATORS.IS.name,
+								example: fieldOperators.IS.name,
 							},
 							values: {
 								type: 'array',
@@ -186,9 +186,9 @@ Schemas.schemas.group = {
 					},
 					operator: {
 						type: 'string',
-						enum: Object.keys(FIELD_VALUE_OPERATORS),
+						enum: Object.keys(valueOperators),
 						description: 'Operator value on this prop',
-						example: FIELD_VALUE_OPERATORS.EQUALS.name,
+						example: valueOperators.EQUALS.name,
 					},
 					values: {
 						type: 'array',
@@ -276,9 +276,9 @@ Schemas.schemas.ticketGroup = {
 						properties: {
 							operator: {
 								type: 'string',
-								enum: Object.keys(FIELD_NAME_OPERATORS),
+								enum: Object.keys(fieldOperators),
 								description: 'Operator value on the field name',
-								example: FIELD_NAME_OPERATORS.IS.name,
+								example: fieldOperators.IS.name,
 							},
 							values: {
 								type: 'array',
@@ -292,9 +292,9 @@ Schemas.schemas.ticketGroup = {
 					},
 					operator: {
 						type: 'string',
-						enum: Object.keys(FIELD_VALUE_OPERATORS),
+						enum: Object.keys(valueOperators),
 						description: 'Operator value on this prop',
-						example: FIELD_VALUE_OPERATORS.EQUALS.name,
+						example: valueOperators.EQUALS.name,
 					},
 					value: {
 						type: 'array',

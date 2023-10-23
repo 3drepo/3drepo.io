@@ -17,20 +17,20 @@
 
 const RulesConstants = {};
 
-const COMMON_OPERATORS = {
+const commonOperators = {
 	IS: { name: 'IS', minValues: 1 },
 	CONTAINS: { name: 'CONTAINS', minValues: 1 },
 	REGEX: { name: 'REGEX', minValues: 1, maxValues: 1 },
 };
 
-RulesConstants.FIELD_NAME_OPERATORS = {
-	...COMMON_OPERATORS,
+RulesConstants.fieldOperators = {
+	...commonOperators,
 	STARTS_WITH: { name: 'STARTS_WITH', minValues: 1 },
 	ENDS_WITH: { name: 'ENDS_WITH', minValues: 1 },
 };
 
-RulesConstants.FIELD_VALUE_OPERATORS = {
-	...COMMON_OPERATORS,
+RulesConstants.valueOperators = {
+	...commonOperators,
 	IS_NOT: { name: 'IS_NOT', minValues: 1 },
 	NOT_CONTAINS: { name: 'NOT_CONTAINS', minValues: 1 },
 	IS_EMPTY: { name: 'IS_EMPTY', minValues: 0, maxValues: 0 },
@@ -46,37 +46,37 @@ RulesConstants.FIELD_VALUE_OPERATORS = {
 };
 
 RulesConstants.OPERATOR_SYMBOL = {
-	[RulesConstants.FIELD_VALUE_OPERATORS.IS.name]: ':',
-	[RulesConstants.FIELD_VALUE_OPERATORS.IS_NOT.name]: ': !',
-	[RulesConstants.FIELD_VALUE_OPERATORS.CONTAINS.name]: ': *',
-	[RulesConstants.FIELD_VALUE_OPERATORS.NOT_CONTAINS.name]: ': ! *',
-	[RulesConstants.FIELD_VALUE_OPERATORS.REGEX.name]: ':',
-	[RulesConstants.FIELD_VALUE_OPERATORS.EQUALS.name]: '=',
-	[RulesConstants.FIELD_VALUE_OPERATORS.NOT_EQUALS.name]: '= !',
-	[RulesConstants.FIELD_VALUE_OPERATORS.GT.name]: '>',
-	[RulesConstants.FIELD_VALUE_OPERATORS.GTE.name]: '>=',
-	[RulesConstants.FIELD_VALUE_OPERATORS.LT.name]: '<',
-	[RulesConstants.FIELD_VALUE_OPERATORS.LTE.name]: '<=',
-	[RulesConstants.FIELD_VALUE_OPERATORS.IN_RANGE.name]: '',
-	[RulesConstants.FIELD_VALUE_OPERATORS.NOT_IN_RANGE.name]: '!',
+	[RulesConstants.valueOperators.IS.name]: ':',
+	[RulesConstants.valueOperators.IS_NOT.name]: ': !',
+	[RulesConstants.valueOperators.CONTAINS.name]: ': *',
+	[RulesConstants.valueOperators.NOT_CONTAINS.name]: ': ! *',
+	[RulesConstants.valueOperators.REGEX.name]: ':',
+	[RulesConstants.valueOperators.EQUALS.name]: '=',
+	[RulesConstants.valueOperators.NOT_EQUALS.name]: '= !',
+	[RulesConstants.valueOperators.GT.name]: '>',
+	[RulesConstants.valueOperators.GTE.name]: '>=',
+	[RulesConstants.valueOperators.LT.name]: '<',
+	[RulesConstants.valueOperators.LTE.name]: '<=',
+	[RulesConstants.valueOperators.IN_RANGE.name]: '',
+	[RulesConstants.valueOperators.NOT_IN_RANGE.name]: '!',
 };
 
 RulesConstants.OPERATIONS_TYPES = {
-	[RulesConstants.FIELD_VALUE_OPERATORS.IS_NOT_EMPTY.name]: 'field',
-	[RulesConstants.FIELD_VALUE_OPERATORS.IS_EMPTY.name]: 'field',
-	[RulesConstants.FIELD_VALUE_OPERATORS.IS.name]: 'text',
-	[RulesConstants.FIELD_VALUE_OPERATORS.IS_NOT.name]: 'text',
-	[RulesConstants.FIELD_VALUE_OPERATORS.CONTAINS.name]: 'text',
-	[RulesConstants.FIELD_VALUE_OPERATORS.NOT_CONTAINS.name]: 'text',
-	[RulesConstants.FIELD_VALUE_OPERATORS.REGEX.name]: 'regex',
-	[RulesConstants.FIELD_VALUE_OPERATORS.EQUALS.name]: 'number',
-	[RulesConstants.FIELD_VALUE_OPERATORS.NOT_EQUALS.name]: 'number',
-	[RulesConstants.FIELD_VALUE_OPERATORS.GT.name]: 'numberComparison',
-	[RulesConstants.FIELD_VALUE_OPERATORS.GTE.name]: 'numberComparison',
-	[RulesConstants.FIELD_VALUE_OPERATORS.LT.name]: 'numberComparison',
-	[RulesConstants.FIELD_VALUE_OPERATORS.LTE.name]: 'numberComparison',
-	[RulesConstants.FIELD_VALUE_OPERATORS.IN_RANGE.name]: 'numberRange',
-	[RulesConstants.FIELD_VALUE_OPERATORS.NOT_IN_RANGE.name]: 'numberRange',
+	[RulesConstants.valueOperators.IS_NOT_EMPTY.name]: 'field',
+	[RulesConstants.valueOperators.IS_EMPTY.name]: 'field',
+	[RulesConstants.valueOperators.IS.name]: 'text',
+	[RulesConstants.valueOperators.IS_NOT.name]: 'text',
+	[RulesConstants.valueOperators.CONTAINS.name]: 'text',
+	[RulesConstants.valueOperators.NOT_CONTAINS.name]: 'text',
+	[RulesConstants.valueOperators.REGEX.name]: 'regex',
+	[RulesConstants.valueOperators.EQUALS.name]: 'number',
+	[RulesConstants.valueOperators.NOT_EQUALS.name]: 'number',
+	[RulesConstants.valueOperators.GT.name]: 'numberComparison',
+	[RulesConstants.valueOperators.GTE.name]: 'numberComparison',
+	[RulesConstants.valueOperators.LT.name]: 'numberComparison',
+	[RulesConstants.valueOperators.LTE.name]: 'numberComparison',
+	[RulesConstants.valueOperators.IN_RANGE.name]: 'numberRange',
+	[RulesConstants.valueOperators.NOT_IN_RANGE.name]: 'numberRange',
 };
 
 module.exports = RulesConstants;

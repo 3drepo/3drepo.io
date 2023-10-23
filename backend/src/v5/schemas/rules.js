@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { FIELD_NAME_OPERATORS, FIELD_VALUE_OPERATORS, OPERATIONS_TYPES, OPERATOR_SYMBOL } = require('../models/metadata.rules.constants');
+const { OPERATIONS_TYPES, OPERATOR_SYMBOL, fieldOperators, valueOperators } = require('../models/metadata.rules.constants');
 const Yup = require('yup');
 const { isString } = require('../utils/helper/typeCheck');
 
@@ -61,14 +61,14 @@ const formulateValueSchema = (operator) => {
 const ruleSchema = Yup.object().shape({
 	name: Yup.string().min(1).required(),
 	field: Yup.object().shape({
-		operator: Yup.string().uppercase().oneOf(Object.keys(FIELD_NAME_OPERATORS)).required(),
+		operator: Yup.string().uppercase().oneOf(Object.keys(fieldOperators)).required(),
 		values: Yup.mixed()
-			.when('operator', (operator) => formulateValueSchema(FIELD_NAME_OPERATORS[operator])),
+			.when('operator', (operator) => formulateValueSchema(fieldOperators[operator])),
 	}).transform((val, oldVal) => (isString(oldVal)
-		? { operator: FIELD_NAME_OPERATORS.IS.name, values: [oldVal] } : val)).required(),
-	operator: Yup.string().uppercase().oneOf(Object.keys(FIELD_VALUE_OPERATORS)).required(),
+		? { operator: fieldOperators.IS.name, values: [oldVal] } : val)).required(),
+	operator: Yup.string().uppercase().oneOf(Object.keys(valueOperators)).required(),
 	values: Yup.mixed()
-		.when('operator', (operator) => formulateValueSchema(FIELD_VALUE_OPERATORS[operator])),
+		.when('operator', (operator) => formulateValueSchema(valueOperators[operator])),
 })
 	.transform((val) => (isString(val.field) && !val.name ? { ...val, name: generateRuleName(val) } : val))
 	.noUnknown();
