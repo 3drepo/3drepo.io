@@ -17,17 +17,19 @@
 
 import { useEffect, useRef, useState } from 'react';
 import CircledPlusIcon from '@assets/icons/outlined/add_circle-outlined.svg';
-import PinIcon from '@assets/icons/outlined/pin-outlined.svg';
+import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
+import LocationIcon from '@assets/icons/outlined/pin-outlined.svg';
 import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import { FormHelperText } from '@mui/material';
+import { FormHelperText, Tooltip } from '@mui/material';
 import { theme } from '@/v5/ui/themes/theme';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
-import { PinAction, PinActions, PinName, SettingLocationText } from './coordsProperty.styles';
+import { FlexRow, PinAction, PinActions, PinName, PinSelectContainer, SettingLocationText } from './coordsProperty.styles';
+import { formatMessage } from '@/v5/services/intl';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const [editMode, setEditMode] = useState(false);
@@ -54,6 +56,11 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		if (pin !== undefined) {
 			onChange?.(pin);
 		}
+	};
+
+	const getSelectedPinTooltip = () => {
+		if (!value) return '';
+		return isSelected ? formatMessage({ id: 'tickets.pin.deselectPin', defaultMessage: 'Deselect pin' }) : formatMessage({ id: 'tickets.pin.selectPin', defaultMessage: 'Select pin' });
 	};
 
 	useEffect(() => {
@@ -85,29 +92,38 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 	return (
 		<InputContainer required={required} selected={editMode} error={error} disabled={disabled}>
-			<PinName required={required}>
-				{label}
-			</PinName>
-			<PinActions>
-				{editMode && (
-					<SettingLocationText onClick={cancelEdit}>
-						<FormattedMessage id="tickets.pin.selectLocation" defaultMessage="Select new location on model" /> <CrossIcon />
-					</SettingLocationText>
-				)}
-				{!editMode && (
-					<PinAction onClick={onClickEditPin} disabled={disabled}>
-						{hasPin && (<><PinIcon /> <FormattedMessage id="tickets.pin.changeLocation" defaultMessage="Change pin location" /></>)}
-						{!hasPin && (<><CircledPlusIcon /> <FormattedMessage id="tickets.pin.addPin" defaultMessage="Add pin" /></>)}
-					</PinAction>
-				)}
+			<FlexRow>
+				<span>
+					<PinName required={required}>
+						{label}
+					</PinName>
+					<PinActions>
+						{editMode && (
+							<SettingLocationText onClick={cancelEdit}>
+								<FormattedMessage id="tickets.pin.selectLocation" defaultMessage="Select new location on model" /> <CrossIcon />
+							</SettingLocationText>
+						)}
+						{!editMode && (
+							<PinAction onClick={onClickEditPin} disabled={disabled}>
+								{hasPin && (<><LocationIcon /> <FormattedMessage id="tickets.pin.changeLocation" defaultMessage="Change pin location" /></>)}
+								{!hasPin && (<><CircledPlusIcon /> <FormattedMessage id="tickets.pin.addPin" defaultMessage="Add pin" /></>)}
+							</PinAction>
+						)}
 
-				{hasPin && (
-					<PinAction onClick={onClickDelete} disabled={disabled}>
-						<DeleteIcon />
-						<FormattedMessage id="tickets.pin.deletePin" defaultMessage="Delete pin" />
-					</PinAction>
-				)}
-			</PinActions>
+						{hasPin && (
+							<PinAction onClick={onClickDelete} disabled={disabled}>
+								<DeleteIcon />
+								<FormattedMessage id="tickets.pin.deletePin" defaultMessage="Delete pin" />
+							</PinAction>
+						)}
+					</PinActions>
+				</span>
+				<Tooltip title={getSelectedPinTooltip()}>
+					<PinSelectContainer color={hex} isSelected={isSelected} onClick={onClickSelectPin}>
+						<PinIcon />
+					</PinSelectContainer>
+				</Tooltip>
+			</FlexRow>
 			<FormHelperText>{helperText}</FormHelperText>
 		</InputContainer>
 	);

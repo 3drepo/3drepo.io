@@ -67,3 +67,25 @@ export const SettingLocationText = styled(PinAction)`
 		margin: 0 5px;
 	}
 `;
+
+export const FlexRow = styled.div`
+	display: flex;
+	flex-flow: row;
+`;
+
+export const PinSelectContainer = styled.div<{ color: string, isSelected: boolean; }>`
+	outline: 1px solid;
+	outline-color: ${({ color, isSelected, theme }) => isSelected ? color : theme.palette.secondary.lightest};
+	border-radius: 5px;
+	margin-left: auto;
+	height: 44px;
+	box-sizing: border-box;
+	padding: 12px;
+	cursor: pointer;
+
+	> svg {
+		color: ${({ color, theme }) => color || theme.palette.primary.main};
+		height: 20px;
+		width: auto;
+	}
+`;
