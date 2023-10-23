@@ -25,10 +25,8 @@ import { ListboxComponent } from './listboxComponent/listboxComponent.component'
 import { Autocomplete } from './fieldValueInput.styles';
 
 export const FieldValueInput = ({ name }) => {
-	const { formState: { errors }, getValues } = useFormContext();
+	const { formState: { errors } } = useFormContext();
 	const fields = useSelector(selectMetaKeys);
-
-	console.log(getValues())
 
 	return (
 		<Controller
