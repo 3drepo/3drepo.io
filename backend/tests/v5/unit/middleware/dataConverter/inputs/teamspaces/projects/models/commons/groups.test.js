@@ -18,7 +18,8 @@
 const _ = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
 const { generateLegacyGroup, generateUUIDString, generateRandomString } = require('../../../../../../../../helper/services');
-const { convertLegacyRules } = require('../../../../../../../../../../src/v5/schemas/rules');
+
+const { convertLegacyRules } = require(`${src}/schemas/rules`);
 
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 

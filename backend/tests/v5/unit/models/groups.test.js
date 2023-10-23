@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { cloneDeep } = require('../../../../src/v5/utils/helper/objects');
 const { src } = require('../../helper/path');
+
+const { cloneDeep } = require(`${src}/utils/helper/objects`);
 const { generateRandomString, generateGroup } = require('../../helper/services');
 
 const Group = require(`${src}/models/groups`);

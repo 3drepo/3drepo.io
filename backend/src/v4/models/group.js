@@ -317,14 +317,14 @@ Group.deleteGroupsByViewId = async function (account, model, view_id) {
 };
 
 Group.findByUID = async function (account, model, branch, revId, uid, showIfcGuids = false, noClean = true, convertToIfcGuids = false) {
-	const {rules, ...foundGroup} = await db.findOne(account, getGroupCollectionName(model), { _id: utils.stringToUUID(uid) });
+	const foundGroup = await db.findOne(account, getGroupCollectionName(model), { _id: utils.stringToUUID(uid) });
 
 	if (!foundGroup) {
 		throw responseCodes.GROUP_NOT_FOUND;
 	}
 
-	if(rules) {
-		foundGroup.rules = convertLegacyRules(rules);
+	if(foundGroup.rules) {
+		foundGroup.rules = convertLegacyRules(foundGroup.rules);
 	}
 
 	if (convertToIfcGuids) {

@@ -18,8 +18,9 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
-const { valueOperators } = require('../../../../../../../../src/v5/models/metadata.rules.constants');
-const { convertLegacyRules } = require('../../../../../../../../src/v5/schemas/rules');
+
+const { valueOperators } = require(`${src}/models/metadata.rules.constants`);
+const { convertLegacyRules } = require(`${src}/schemas/rules`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
