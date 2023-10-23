@@ -23,8 +23,7 @@ export const Container = styled.div<{ selected?: boolean }>`
 	display: flex;
 	align-items: center;
 	height: 80px;
-	padding-left: 30px;
-	padding-right: 10px;
+	padding: 0 29px;
 	cursor: pointer;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 

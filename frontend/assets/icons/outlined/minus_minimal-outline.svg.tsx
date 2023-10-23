@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,28 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ComponentMeta } from '@storybook/react';
-import { IconsTemplate } from '../icons.component';
-import { getIcons } from '../icons.helper';
-
-export default {
-	title: 'Icons/\\Filled',
-	argTypes: {
-		backgroundColor: {
-			type: 'string',
-		},
-		iconSize: {
-			type: 'number',
-			defaultValue: 10,
-		},
-		color: {
-			type: 'string',
-		},
-	},
-	parameters: { controls: { exclude: 'icons' } },
-} as ComponentMeta<any>;
-
-export const Icons = IconsTemplate.bind({});
-Icons.args = {
-	icons: getIcons(require.context('@assets/icons/filled/', false, /\.*(svg)/), 'filled'),
+type IProps = {
+	className?: string,
 };
+
+export default ({ className }: IProps) => (
+	<svg width="8" height="3" viewBox="0 0 8 3" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+		<path d="M1 1.5L7 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+	</svg>
+);

@@ -15,22 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { CoordsProperty } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.component';
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
 	title: 'Inputs/CoordsProperty',
 	component: CoordsProperty,
 	parameters: { controls: { exclude: ['onChange', 'onBlur'] } },
-} as ComponentMeta<typeof CoordsProperty>;
+} as Meta<typeof CoordsProperty>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof CoordsProperty> = (args) => (
-	<CoordsProperty {...args} />
-);
+type Story = StoryObj<typeof CoordsProperty>;
 
-export const Default = Template.bind({});
-Default.args = {
-	pin: false,
-};
+export const Default: Story = {};

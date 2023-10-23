@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,26 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
-import { ComponentMeta } from '@storybook/react';
-import { IconsTemplate } from '../icons.component';
-import { getIcons } from '../icons.helper';
-
-export default {
-	title: 'Icons/\\v4',
-	argTypes: {
-		backgroundColor: {
-			type: 'string',
-		},
-		iconSize: {
-			type: 'number',
-			defaultValue: 10,
-		},
-	},
-	parameters: { controls: { exclude: 'icons' } },
-} as ComponentMeta<any>;
-
-export const Icons = IconsTemplate.bind({});
-Icons.args = {
-	icons: getIcons(require.context('@assets/icons/v4/', false, /\.*(svg)/), 'v4'),
-};
+export const LocalizationProviderDecorator = (Story) => (
+	<LocalizationProvider dateAdapter={AdapterDayjs}>
+		<Story />
+	</LocalizationProvider>
+);

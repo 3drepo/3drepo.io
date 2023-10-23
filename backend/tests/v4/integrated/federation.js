@@ -317,7 +317,7 @@ describe("Federated Model", function () {
 				}]
 			})
 			.expect(404, function(err ,res) {
-				expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+				expect(res.body.code).to.equal(responseCodesV5.modelNotFound.code);
 				done(err);
 
 			});

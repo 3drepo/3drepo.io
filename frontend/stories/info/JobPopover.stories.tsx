@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,5 +14,35 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { Meta, StoryObj } from '@storybook/react';
+import { JobPopoverCircle } from '@components/shared/popoverCircles/jobPopoverCircle/jobPopoverCircle.component';
 
-export { EditFederation } from './editFederation.component';
+export default {
+	title: 'Info/JobPopoverCircle',
+	component: JobPopoverCircle,
+	parameters: { controls: { exclude: [
+		'alt',
+		'children',
+		'classes',
+		'imgProps',
+		'sizes',
+		'src',
+		'srcSet',
+		'sx',
+		'variant',
+		'ref',
+		'backgroundColor',
+	] } },
+} as Meta<typeof JobPopoverCircle>;
+
+type Story = StoryObj<typeof JobPopoverCircle>;
+
+export const JobPopoverPink: Story = {
+	args: {
+		size: 'small',
+		job: {
+			_id: 'Front-end Developer',
+			color: '#DC1995',
+		},
+	},
+};

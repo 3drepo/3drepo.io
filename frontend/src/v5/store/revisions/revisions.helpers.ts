@@ -42,5 +42,6 @@ export const createFormDataFromRevisionBody = (body: CreateRevisionBody) => {
 	formData.append('desc', body.revisionDesc || undefined);
 	formData.append('importAnimations', body.importAnimations.toString());
 	formData.append('timezone', body.timezone);
+	formData.append('lod', body.lod);
 	return formData;
 };

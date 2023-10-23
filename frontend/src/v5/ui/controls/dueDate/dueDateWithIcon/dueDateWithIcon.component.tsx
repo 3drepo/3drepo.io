@@ -23,12 +23,12 @@ import { BaseDueDate } from '../baseDueDate.component';
 import { CalendarIcon, DueDateWithIconContainer } from '../dueDate.styles';
 import { DateContainer, EmptyDateContainer } from '../dueDateWithLabel/dueDateLabel/dueDateLabel.styles';
 
-type IDueDateWithIcon = Omit<FormInputProps, 'onBlur'> & {
+export type DueDateWithIconProps = Omit<FormInputProps, 'onBlur'> & {
 	tooltip?: string;
 	onBlur: (newValue) => void;
 };
 
-export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: IDueDateWithIcon) => {
+export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: DueDateWithIconProps) => {
 	const isOverdue = value < Date.now();
 	return (
 		<DueDateWithIconContainer>

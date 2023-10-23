@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,25 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ComponentMeta } from '@storybook/react';
-import { IconsTemplate } from '../icons.component';
-import { getIcons } from '../icons.helper';
+const updateSubmodelSchema = require('./updateSubmodelSchema');
 
-export default {
-	title: 'Icons/\\TwoToned',
-	argTypes: {
-		backgroundColor: {
-			type: 'string',
-		},
-		iconSize: {
-			type: 'number',
-			defaultValue: 10,
-		},
-	},
-	parameters: { controls: { exclude: 'icons' } },
-} as ComponentMeta<any>;
+const scripts = [
+	{ script: updateSubmodelSchema, desc: 'Update submodel schema in federation settings' },
+];
 
-export const Icons = IconsTemplate.bind({});
-Icons.args = {
-	icons: getIcons(require.context('@assets/icons/twoToned/', false, /\.*(svg)/), 'twoToned'),
-};
+module.exports = scripts;

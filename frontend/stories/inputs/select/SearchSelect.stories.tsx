@@ -16,10 +16,10 @@
  */
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
-import { MenuItem, SelectChangeEvent } from '@mui/material';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { MenuItem } from '@mui/material';
+import { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import { FormContainer } from '../FormInput.styles';
+import { FormDecorator } from '../inputDecorators';
 
 export default {
 	title: 'Inputs/Select/SearchSelect',
@@ -43,12 +43,19 @@ export default {
 			type: 'boolean',
 		},
 	},
+	args: {
+		label: 'Select  search',
+		values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
+	},
 	component: SearchSelect,
 	parameters: { controls: { exclude: ['margin', 'hiddenLabel', 'ref'] } },
-} as ComponentMeta<typeof SearchSelect>;
+	decorators: [FormDecorator],
+} as Meta<typeof SearchSelect>;
 
-const Controlled: ComponentStory<typeof SearchSelect> = ({ values, ...args }: any) => (
-	<FormContainer>
+type Story = StoryObj<typeof SearchSelect>;
+
+export const SearchSingleSelect: Story = {
+	render: ({ values, ...args }: any) => (
 		<SearchSelect {...args}>
 			{values.map((value) => (
 				<MenuItem value={value} key={value} style={{ padding: '8px 14px' }}>
@@ -56,45 +63,25 @@ const Controlled: ComponentStory<typeof SearchSelect> = ({ values, ...args }: an
 				</MenuItem>
 			))}
 		</SearchSelect>
-	</FormContainer>
-);
-
-export const SelectWithSearchExample = Controlled.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-SelectWithSearchExample.args = {
-	label: 'Select  search',
-	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
+	),
 };
 
-const SearchSelectMultipleControlledStory: ComponentStory<typeof SearchSelect> = ({ values, ...args }: any) => {
-	const [value, setValue] = useState([]);
-
-	const handleChange = (event: SelectChangeEvent<any[]>) => {
-		setValue(event.target.value as any[]);
-	};
-
-	return (
-		<FormContainer>
-			<SearchSelect
-				{...args}
-				value={value}
-				onChange={handleChange}
-				multiple
-				renderValue={(val) => (val as any[]).join(', ')}
-			>
+export const SearchMultiSelect: Story = {
+	args: {
+		multiple: true,
+		renderValue: (val: any[]) => val.join(', '),
+	},
+	render: ({ values, value: initialValue, ...args }: any) => {
+		const [value, setValue] = useState(initialValue || []);
+		const handleChange = (event) => setValue(event.target.value as any);
+		return (
+			<SearchSelect {...args} value={value} onChange={handleChange}>
 				{values.map((valueItem) => (
 					<MultiSelectMenuItem value={valueItem} key={valueItem}>
 						{valueItem}
 					</MultiSelectMenuItem>
 				))}
 			</SearchSelect>
-		</FormContainer>
-	);
-};
-
-export const SelectWithSearchMultiple = SearchSelectMultipleControlledStory.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-SelectWithSearchMultiple.args = {
-	label: 'Select  search',
-	values: ['value 1', 'value 2', 'value 3', 'Longer value 4'],
+		);
+	},
 };
