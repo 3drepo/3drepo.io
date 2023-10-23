@@ -96,6 +96,7 @@ export const UploadListItemDestination = memo(({
 		} catch (validationError) {
 			setError(validationError.message);
 			setNewOrExisting('');
+			trigger(`${revisionPrefix}.containerName`);
 		}
 	};
 
