@@ -38,7 +38,7 @@ const ticketToPin = (ticket:ITicket, selectedId): IPin => ({
 	id: ticket._id,
 	position: ticket.properties.Pin,
 	isSelected: ticket._id === selectedId,
-	type: 'issue',
+	type: 'ticket',
 	colour: hexToGLColor(theme.palette.secondary.main),
 });
 

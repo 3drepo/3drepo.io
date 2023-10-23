@@ -83,7 +83,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 			if (value) {
 				ViewerService.showPin({
-					id: pinId, position: value, colour: hexToGLColor(theme.palette.primary.main), type: 'issue' });
+					id: pinId, position: value, colour, type: 'ticket' });
 			}
 		}
 

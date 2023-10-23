@@ -39,7 +39,7 @@ interface IViewerConstructor {
 
 export interface IPin {
 	id: string;
-	type?: 'issue' | 'risk' | 'bookmark' | null;
+	type?: 'issue' | 'risk' | 'bookmark' | 'ticket' | null;
 	position: number[];
 	norm?: number[];
 	colour: number[];
@@ -677,6 +677,8 @@ export class ViewerService {
 			UnityUtil.dropRiskPin(id, position, norm, colour);
 		} else if (type === 'issue') {
 			UnityUtil.dropIssuePin(id, position, norm, colour);
+		} else if (type === 'ticket') {
+			UnityUtil.dropTicketPin(id, position, norm, colour);
 		} else {
 			UnityUtil.dropBookmarkPin(id, position, norm, colour);
 		}
