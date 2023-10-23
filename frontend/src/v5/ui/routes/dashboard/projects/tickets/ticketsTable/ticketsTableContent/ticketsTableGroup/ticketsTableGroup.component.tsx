@@ -18,7 +18,7 @@
 import { ITicket, TicketWithModelIdAndName } from '@/v5/store/tickets/tickets.types';
 import { FormattedMessage } from 'react-intl';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { isCommenterRole } from '@/v5/store/store.helpers';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useFormContext } from 'react-hook-form';
@@ -55,10 +55,10 @@ type TicketsTableGroupProps = {
 	onNewTicket: (modelId: string) => void;
 };
 export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
-	const [modelsIds] = useSearchParam('models');
+	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
 	const { getValues } = useFormContext();
 
-	const showModelName = modelsIds.split(',').length > 1;
+	const showModelName = modelsIds.length > 1;
 	const models = useSelectedModels();
 
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;

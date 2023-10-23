@@ -40,7 +40,7 @@ import { enableRealtimeContainerNewTicket, enableRealtimeContainerUpdateTicket, 
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { isCommenterRole } from '@/v5/store/store.helpers';
 import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
-import { useSearchParam } from '../../../../useSearchParam';
+import { Transformers, useSearchParam } from '../../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE, VIEWER_ROUTE } from '../../../../routes.constants';
 import { ContainersAndFederationsFormSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { GroupByFormSelect } from '../selectMenus/groupByFormSelect.component';
@@ -61,14 +61,13 @@ export const TicketsTable = () => {
 	const history = useHistory();
 	const params = useParams<DashboardTicketsParams>();
 	const { teamspace, project, groupBy: groupByURLParam, template: templateURLParam, containerOrFederation } = params;
-	const [modelsIds, setModelsIds] = useSearchParam('models');
-	const [showCompletedAsString, setShowCompleted] = useSearchParam('showCompleted');
-	const showCompleted = showCompletedAsString === 'true';
+	const [modelsIds, setModelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
+	const [showCompleted, setShowCompleted] = useSearchParam('showCompleted', Transformers.BOOLEAN);
 	const models = useSelectedModels();
 	const { getState } = useStore();
 	const formData = useForm<FormType>({
 		defaultValues: {
-			containersAndFederations: modelsIds?.split(',') || [],
+			containersAndFederations: modelsIds,
 			template: templateURLParam,
 			groupBy: GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE[groupByURLParam] || NONE_OPTION,
 		},
@@ -131,7 +130,7 @@ export const TicketsTable = () => {
 	const isFed = (modelId) => !!selectFederationById(getState(), modelId);
 
 	useEffect(() => {
-		setModelsIds(containersAndFederations.join(','));
+		setModelsIds(containersAndFederations);
 
 		if (!containersAndFederations.length) return;
 
@@ -172,7 +171,7 @@ export const TicketsTable = () => {
 	}, [groupBy, template]);
 
 	useEffect(() => () => {
-		setModelsIds('');
+		setModelsIds();
 		formData.setValue('containersAndFederations', []);
 	}, [project]);
 
@@ -219,7 +218,7 @@ export const TicketsTable = () => {
 						<CompletedChip
 							selected={showCompleted}
 							icon={<TickIcon />}
-							onClick={() => setShowCompleted(showCompleted ? '' : 'true')}
+							onClick={() => setShowCompleted(!showCompleted)}
 							label={formatMessage({ id: 'ticketsTable.filters.completed', defaultMessage: 'Completed' })}
 						/>
 					</FlexContainer>

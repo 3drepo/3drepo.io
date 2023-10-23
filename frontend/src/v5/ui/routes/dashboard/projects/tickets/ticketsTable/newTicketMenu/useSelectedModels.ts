@@ -16,10 +16,10 @@
  */
 
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 export const useSelectedModels = () => {
-	const [modelsIds] = useSearchParam('models');
+	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
 	const containers = ContainersHooksSelectors.selectContainers();
 	const federations = FederationsHooksSelectors.selectFederations();
 	const models = [...containers, ...federations].filter(({ _id }) => modelsIds?.includes(_id));
