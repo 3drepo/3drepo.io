@@ -37,7 +37,7 @@ export const GroupRuleSchema = Yup.object().shape({
 			defaultMessage: 'This name already exists',
 		}),
 		(name, testContext) => (
-			!testContext.options.context.alreadyExistingNames.map((n) => n.trim().toLocaleLowerCase()).includes(name.toLocaleLowerCase())
+			!testContext.options.context?.alreadyExistingNames.map((n) => n.trim().toLocaleLowerCase()).includes(name.toLocaleLowerCase())
 		),
 	),
 	field: Yup.object().shape({
