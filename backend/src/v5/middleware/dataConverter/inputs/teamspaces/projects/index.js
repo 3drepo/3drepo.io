@@ -16,9 +16,9 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
+const { getProjectById, getProjectByName } = require('../../../../../models/projectSettings');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const Yup = require('yup');
-const { getProjectByName, getProjectById } = require('../../../../../models/projectSettings');
 const { respond } = require('../../../../../utils/responder');
 const { singleImageUpload } = require('../../../multer');
 const { types } = require('../../../../../utils/helper/yup');
