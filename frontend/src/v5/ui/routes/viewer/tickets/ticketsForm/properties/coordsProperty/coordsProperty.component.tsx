@@ -50,6 +50,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const onClickDelete = () => {
 		onChange?.(null);
 		cancelEdit();
+		if (isSelected) setSelectedPin(null);
 	};
 
 	const onClickEditPin = async () => {
