@@ -47,3 +47,21 @@ export const selectIsProjectAdmin = createSelector(
 	selectCurrentProjectDetails,
 	(project): boolean => !!project?.isAdmin,
 );
+
+export const selectTemplatesArePending = createSelector(
+	selectProjectsDomain,
+	selectCurrentProject,
+	(state, currentProject) => !state.templatesByProject[currentProject],
+);
+
+export const selectCurrentProjectTemplates = createSelector(
+	selectProjectsDomain,
+	selectCurrentProject,
+	(state, currentProject) => state.templatesByProject[currentProject] || [],
+);
+
+export const selectCurrentProjectTemplateById = createSelector(
+	selectCurrentProjectTemplates,
+	(state, templateId) => templateId,
+	(templates, templateId) => templates.find(({ _id }) => _id === templateId),
+);

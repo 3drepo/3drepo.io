@@ -15,12 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {  omit, pick } from 'lodash';
+import {  isEqual, omit, pick } from 'lodash';
 import { select } from 'redux-saga/effects';
 import { GROUP_TYPES_ICONS, GROUPS_TYPES } from '../constants/groups';
 import { selectGetNumNodesByMeshSharedIdsArray } from '../modules/tree';
 import { COLOR } from '../styles';
-import { hasSameElements } from './arrays';
 import { getGroupHexColor, hexToArray } from './colors';
 import { prepareCriterion } from './criteria';
 import { calculateTotalMeshes } from './tree';
@@ -103,10 +102,6 @@ export const mergeGroupData = (source, data = source) => {
 
 export const stripGroupRules = ({rules, ...restGroupFields}) => restGroupFields;
 
-const ruleIsEqual = (ruleA, ruleB) => {
-	return hasSameElements(ruleA.values, ruleB.values) && ruleA.field === ruleB.field && ruleA.operator === ruleB.operator;
-};
-
 export const rulesAreEqual = (groupA, groupB) => {
 	const rulesA: any[] = groupA.rules || [];
 	const rulesB: any[] = groupB.rules || [];
@@ -116,15 +111,15 @@ export const rulesAreEqual = (groupA, groupB) => {
 	}
 
 	const rulesADict = rulesA.reduce((dict, rule) => {
-		dict[rule.field] = rule;
+		dict[rule.name] = rule;
 		return dict;
 	}, {});
 
 	return rulesB.every((ruleB) => {
-		const ruleA = rulesADict[ruleB.field];
+		const ruleA = rulesADict[ruleB.name];
 		if (!ruleA) {
 			return false;
 		}
-		return ruleIsEqual(ruleA, ruleB);
+		return isEqual(ruleA, ruleB);
 	});
 };

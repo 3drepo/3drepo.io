@@ -134,14 +134,12 @@ export const NewTicketCard = () => {
 									<CircularProgress />
 								</CardContent>
 							) : (
-								<>
-									<TicketForm
-										template={getEditableProperties(template)}
-										// Im not sure this is still needed here, because we are already depending on react-hook-form to fill the form
-										ticket={defaultTicket}
-										focusOnTitle
-									/>
-								</>
+								<TicketForm
+									template={getEditableProperties(template)}
+									// Im not sure this is still needed here, because we are already depending on react-hook-form to fill the form
+									ticket={defaultTicket}
+									focusOnTitle
+								/>
 							)}
 						</>
 					)}

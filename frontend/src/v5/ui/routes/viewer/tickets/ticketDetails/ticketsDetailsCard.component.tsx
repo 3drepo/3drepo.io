@@ -99,6 +99,7 @@ export const TicketDetailsCard = () => {
 				isFederation,
 			);
 		}
+		TicketsActionsDispatchers.fetchTicket(teamspace, project, containerOrFederation, ticket._id, isFederation);
 		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
 		setTicketId(ticket._id);
 	}, [ticket._id]);

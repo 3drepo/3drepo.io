@@ -328,7 +328,7 @@ const testGroups = () => {
 						color: times(3, () => 0) }],
 				},
 			}),
-			convertToTestParams('Colored groups - not enough elemnts in the color array', false, {
+			convertToTestParams('Colored groups - not enough elements in the color array', false, {
 				state: {
 					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
 						color: times(2, () => 0) }],

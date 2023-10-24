@@ -23,11 +23,19 @@ import { projectMockFactory } from './projects.fixtures';
 import { selectCurrentProjects } from '@/v5/store/projects/projects.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
+import { templateMockFactory } from '../tickets/tickets.fixture';
+import { selectCurrentProjectTemplates } from '@/v5/store/projects/projects.selectors';
+import { FederationsActions } from '@/v5/store/federations/federations.redux';
+import { federationMockFactory } from '../federations/federations.fixtures';
 
 describe('Teamspaces: sagas', () => {
 	const teamspace = 'teamspace';
 	const projectId = 'project';
 	const mockProject = projectMockFactory({ _id: projectId });
+	const federationId = 'federationId';
+	const mockFederation = federationMockFactory({ _id: federationId });
+	const templateId = 'template';
+	const mockTemplate = templateMockFactory({ _id: templateId });
 	let onSuccess, onError;
 	let dispatch, getState, waitForActions;
 	let resolve, promiseToResolve;
@@ -187,4 +195,41 @@ describe('Teamspaces: sagas', () => {
 			expect(onError).toHaveBeenCalled();
 		});
 	});
+
+	describe('templates', () => {
+
+		beforeEach(() => { 
+			dispatch(ProjectsActions.fetchSuccess(teamspace, [mockProject]));
+			dispatch(ProjectsActions.setCurrentProject(projectId));
+			dispatch(FederationsActions.fetchFederationsSuccess(projectId, [mockFederation]));
+		});
+
+		describe('fetchTemplates', () => {
+			it('should call fetchTemplates endpoint', async () => {
+				mockServer
+					.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates`)
+					.reply(200, { templates: [mockTemplate] });
+	
+				await waitForActions(() => {
+					dispatch(ProjectsActions.fetchTemplates(teamspace, projectId));
+				}, [ProjectsActions.fetchTemplatesSuccess(projectId, [mockTemplate])]);
+	
+				const templatesInStore = selectCurrentProjectTemplates(getState());
+				expect(templatesInStore).toEqual([mockTemplate]);
+			})
+	
+			it('should call fetchTemplates endpoint with 404', async () => {
+				mockServer
+					.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates`)
+					.reply(404);
+	
+				await waitForActions(() => {
+					dispatch(ProjectsActions.fetchTemplates(teamspace, projectId));
+				}, [DialogsTypes.OPEN]);
+	
+				const templatesInStore = selectCurrentProjectTemplates(getState());
+				expect(templatesInStore).toEqual([]);
+			})
+		})
+	})
 });

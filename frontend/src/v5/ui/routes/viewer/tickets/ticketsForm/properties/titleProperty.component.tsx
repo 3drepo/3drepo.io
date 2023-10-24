@@ -16,9 +16,10 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
+import { forwardRef } from 'react';
 import { TitlePropertyBase } from './titleProperty.styles';
 
-export const TitleProperty = (props) => {
+export const TitleProperty = forwardRef((props: any, ref: any) => {
 	const handleKeyDown = (event) => {
 		if (event.key === 'Enter') event.preventDefault();
 	};
@@ -30,7 +31,8 @@ export const TitleProperty = (props) => {
 				id: 'customTicket.newTicket.titlePlaceholder',
 				defaultMessage: 'Ticket name (required)',
 			})}
+			ref={ref}
 			{...props}
 		/>
 	);
-};
+});
