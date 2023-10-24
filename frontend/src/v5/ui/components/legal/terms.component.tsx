@@ -21,7 +21,7 @@ import { Indent, Clause, ClauseNo, PaperTitle, SupportEmail, TermsForm } from '.
 
 export const TermsLegalPaper = () => (
 	<>
-		<PaperTitle>3D Repo Terms Of Use</PaperTitle>
+		<PaperTitle>Asite 3D Repo Ltd Terms Of Use</PaperTitle>
 		<h1>Please read these terms carefully before accessing 3D Repo</h1>
 		<ol>
 			<li>

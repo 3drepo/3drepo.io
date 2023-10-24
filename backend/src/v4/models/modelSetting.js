@@ -17,6 +17,8 @@
 
 "use strict";
 
+const { v5Path } = require("../../interop");
+const { getModelById: getModelByIdV5 } = require(`${v5Path}/models/modelSettings`);
 const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const utils = require("../utils");
@@ -229,7 +231,7 @@ ModelSetting.deleteModelSetting = function(account, model) {
 };
 
 ModelSetting.findModelSettingById = async function(account, model, projection, toClean = true) {
-	const foundSetting = await db.findOne(account, MODELS_COLL, {_id: model}, projection);
+	const foundSetting = await getModelByIdV5(account, model, projection);
 
 	return toClean ? clean(foundSetting) : foundSetting;
 };

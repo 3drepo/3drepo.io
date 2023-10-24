@@ -21,6 +21,7 @@ const db = require('../handler/db');
 
 const { events } = require('./eventsManager/eventsManager.constants');
 const expressSession = require('express-session');
+const { generateUUID } = require('../utils/helper/uuids');
 const { publish } = require('./eventsManager/eventsManager');
 
 const Sessions = { SESSION_HEADER: 'connect.sid' };
@@ -31,6 +32,7 @@ const initialiseSession = async () => {
 
 	// istanbul ignore next
 	const middleware = expressSession({
+		genid: () => generateUUID().toString('base64'),
 		secret,
 		resave: true,
 		rolling: true,

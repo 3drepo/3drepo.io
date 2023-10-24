@@ -28,12 +28,12 @@ import { GroupSettingsSchema } from '@/v5/validation/groupSchemes/groupSchemes';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { cloneDeep, isEqual, isUndefined, omitBy, sortBy } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { Group, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
+import { Group, IGroupRule, IGroupSettingsForm } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
 import { EmptyCardMessage } from '@components/viewer/cards/card.styles';
 import { ColorPicker } from '@controls/inputs/colorPicker/colorPicker.component';
 import { useSelector } from 'react-redux';
-import { selectSelectedNodes } from '@/v4/modules/tree/tree.selectors';
+import { selectGetNumNodesByMeshSharedIdsArray, selectSelectedNodes } from '@/v4/modules/tree/tree.selectors';
 import { convertToV4GroupNodes, convertToV5GroupNodes, meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
 import { getRandomSuggestedColor } from '@controls/inputs/colorPicker/colorPicker.helpers';
 import { Gap } from '@controls/gap';
@@ -89,6 +89,8 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 
 	const isNewGroup = !value;
 	const selectedNodes = useSelector(selectSelectedNodes);
+	const sharedIds = selectedNodes.flatMap((node) => node.shared_ids);
+	const objectsCount = useSelector(selectGetNumNodesByMeshSharedIdsArray(sharedIds));
 
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
@@ -96,10 +98,11 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		context: { isSmart },
 	});
 
-	const { fields: rules, append, remove, update } = useFieldArray({
+	const { fields, append, remove, update } = useFieldArray({
 		control: formData.control,
 		name: 'group.rules',
 	});
+	const rules = fields as Array<IGroupRule & { id: string }>;
 
 	const {
 		handleSubmit,
@@ -152,6 +155,11 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const resetFilterMenu = () => {
 		setSelectedRule(null);
 		setFilterMenuOpen(false);
+	};
+
+	const handleAddFilterClick = () => {
+		setSelectedRule(null);
+		setFilterMenuOpen(true);
 	};
 
 	useEffect(() => {
@@ -330,7 +338,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								id="ticketsGroupSettings.subHeading.selectedObjects"
 								defaultMessage="Selected Objects"
 							/>
-							<ObjectsCount>{selectedNodes.length}</ObjectsCount>
+							<ObjectsCount>{objectsCount}</ObjectsCount>
 						</span>
 					</Subheading>
 				)}
@@ -346,7 +354,12 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 									...filterMenuCoords,
 								}}
 							>
-								<GroupRulesForm rule={selectedRule?.value} onSave={selectedRule ? (val) => update(selectedRule.index, val) : append} onClose={resetFilterMenu} />
+								<GroupRulesForm
+									rule={selectedRule?.value}
+									onSave={selectedRule ? (val) => update(selectedRule.index, val) : append}
+									onClose={resetFilterMenu}
+									existingRules={value?.group?.rules}
+								/>
 							</Popper>
 							<Subheading>
 								<FormattedMessage
@@ -355,7 +368,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								/>
 								{isAdmin && (
 									<AddFilterTitle>
-										<TriggerButton onClick={() => setFilterMenuOpen(true)}>
+										<TriggerButton onClick={handleAddFilterClick}>
 											<FormattedMessage id="tickets.groups.newGroupForm.addFilter" defaultMessage="Add filter" />
 										</TriggerButton>
 									</AddFilterTitle>
@@ -368,7 +381,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								<Rules>
 									{rules.map(({ id, ...ruleValue }, i) => (
 										<ChipRule
-											value={ruleValue}
+											label={ruleValue.name}
 											key={id}
 											isSelected={selectedRule === ruleValue}
 											onDelete={() => {

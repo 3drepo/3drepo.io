@@ -1038,13 +1038,14 @@ For any queries please contact our support team at <a href="mailto:support@3drep
 
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
 
-                            <span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif"><span style="color:#696969"><em>Copyright © 2019 3D Repo, All rights reserved.</em><br>
+                            <span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif"><span style="color:#696969"><em>Copyright © 2019 Asite 3D Repo, All rights reserved.</em><br>
 <br>
 <strong>Our mailing address is:</strong><br>
-3D Repo<br>
-307 Euston Road<br>
-Bloomsbury<br>
-London, NW1 3AD<br>
+Asite 3D Repo<br>
+7th Floor<br>
+Leconfield House<br>
+Curzon Street<br>
+London, W1J 5JA<br>
 United Kingdom</span></span>
                         </td>
                     </tr>

@@ -14,24 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { Button } from '@controls/button';
 
-// More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
 	title: 'Buttons/Button',
 	component: Button,
-	// More on argTypes: https://storybook.js.org/docs/react/api/argtypes
-
 	argTypes: {
 		variant: {
 			description: 'Variant of the button',
 			options: ['contained', 'outlined', 'text'],
 			control: { type: 'select' },
 		},
-		/**
-		 * The color of the component. It supports those theme colors that make sense for this component.
-		 */
 		color: {
 			options: [
 				'inherit',
@@ -50,35 +44,37 @@ export default {
 		disabled: {
 			type: 'boolean',
 		},
-		errorButton: {
-			type: 'boolean',
-		},
 	},
-} as ComponentMeta<typeof Button>;
+	args: {
+		children: 'Controls Button',
+	},
+} as Meta<typeof Button>;
 
-// More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
-const Template: ComponentStory<typeof Button> = (args) => <Button {...args}>Controls Button</Button>;
+type Story = StoryObj<typeof Button>;
 
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-export const Contained = Template.bind({});
-Contained.args = {
-	variant: 'contained',
-	color: 'secondary',
+export const Contained: Story = {
+	args: {
+		variant: 'contained',
+		color: 'secondary',
+	},
 };
 
-export const Outlined = Template.bind({});
-Outlined.args = {
-	variant: 'outlined',
-	color: 'secondary',
+export const Outlined: Story = {
+	args: {
+		variant: 'outlined',
+		color: 'secondary',
+	},
 };
 
-export const Text = Template.bind({});
-Text.args = {
-	variant: 'text',
-	color: 'primary',
+export const Text: Story = {
+	args: {
+		variant: 'text',
+		color: 'primary',
+	},
 };
 
-export const Error = Template.bind({});
-Error.args = {
-	errorButton: true,
+export const Error: Story = {
+	args: {
+		errorButton: true,
+	},
 };

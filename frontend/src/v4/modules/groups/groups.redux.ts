@@ -74,7 +74,10 @@ export interface ICriteriaFieldState {
 	isPasteEnabled: boolean;
 	selectedCriterion: string;
 	criterionForm: {
-		field: string;
+		field: {
+			operator: string;
+			values: string[] | number[];
+		};
 		operator: string;
 		values: string[] | number[];
 	};
@@ -109,11 +112,7 @@ export const INITIAL_CRITERIA_FIELD_STATE = {
 	pastedCriteria: '',
 	isPasteEnabled: false,
 	selectedCriterion: '',
-	criterionForm: {
-		field: '',
-		operator: '',
-		values: []
-	}
+	criterionForm: null
 };
 
 export const INITIAL_STATE: IGroupState = {

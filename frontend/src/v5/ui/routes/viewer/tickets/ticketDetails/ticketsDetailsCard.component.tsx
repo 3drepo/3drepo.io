@@ -99,6 +99,8 @@ export const TicketDetailsCard = () => {
 				isFederation,
 			);
 		}
+		TicketsActionsDispatchers.fetchTicket(teamspace, project, containerOrFederation, ticket._id, isFederation);
+		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
 		setTicketId(ticket._id);
 	}, [ticket._id]);
 
@@ -140,19 +142,19 @@ export const TicketDetailsCard = () => {
 						</>
 					)}
 				{view === TicketDetailsView.Form
-				&& (
-					<>
-						<CardHeader>
-							<ArrowBack onClick={goBack} />
-							{template.code}:{ticket.number}
-							<HeaderButtons>
-								<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
-								<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
-							</HeaderButtons>
-						</CardHeader>
-						<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
-					</>
-				)}
+					&& (
+						<>
+							<CardHeader>
+								<ArrowBack onClick={goBack} />
+								{template.code}:{ticket.number}
+								<HeaderButtons>
+									<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
+									<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
+								</HeaderButtons>
+							</CardHeader>
+							<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
+						</>
+					)}
 			</FormProvider>
 		</CardContainer>
 	);
