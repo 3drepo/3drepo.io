@@ -105,6 +105,7 @@ export const UploadListItem = ({
 				Input={UploadListItemDestination}
 				name={`${revisionPrefix}.containerName`}
 				key={`${uploadId}.dest`}
+				index={index}
 				// @ts-ignore
 				revisionPrefix={revisionPrefix}
 				disabled={isUploading}

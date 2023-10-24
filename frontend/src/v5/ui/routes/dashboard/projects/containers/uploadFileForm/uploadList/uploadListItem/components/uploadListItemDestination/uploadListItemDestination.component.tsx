@@ -31,6 +31,7 @@ import { NewContainer } from './options/newContainer/newContainer.component';
 import { AlreadyUsedName } from './options/alreadyUsedName/alreadyUsedName.component';
 import { ExistingContainer } from './options/existingContainer/existingContainer.component';
 import { OptionsBox } from './options/optionsBox.styles';
+import { NewContainerInUse } from './options/NewContainerInUse/newContainerInUse.component';
 
 const NO_OPTIONS_TEXT_ADMIN = formatMessage({
 	id: 'uploads.destination.noOptions.admin',
@@ -49,6 +50,8 @@ const EMPTY_OPTION = prepareSingleContainerData({
 	isFavourite: false,
 });
 
+const NEW_ID = 'new';
+
 const getFilteredContainersOptions = createFilterOptions<IContainer>({ trim: true });
 
 interface IUploadListItemDestination {
@@ -56,11 +59,13 @@ interface IUploadListItemDestination {
 	revisionPrefix: string;
 	disabled?: boolean;
 	className?: string;
+	index: number;
 }
 export const UploadListItemDestination = memo(({
 	value,
 	revisionPrefix,
 	className,
+	index,
 	...props
 }: IUploadListItemDestination): JSX.Element => {
 	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>('');
@@ -73,7 +78,9 @@ export const UploadListItemDestination = memo(({
 	const selectedContainer = containers.find((c) => c.name === value);
 
 	const [processingContainersNames, setProcessingContainersNames] = useState([]);
+	const [newContainersInModal, setNewContainersInModal] = useState([]);
 	const [containersNamesInModal, setContainerNamesInModal] = useState([]);
+
 
 	const takenContainerNames = [
 		...containersNamesInModal,
@@ -98,7 +105,8 @@ export const UploadListItemDestination = memo(({
 
 	const getFilterOptions = (options: IContainer[], params) => {
 		const inputValue = params.inputValue.trim();
-		if (!inputValue && (containersNamesInModal.length === containers.length || !options.length)) {
+
+		if (!inputValue && (containersNamesInModal.length - newContainersInModal.length)  === containers.length || !options.length) {
 			// if all the containers have been allocated already or there are no containers at all
 			return [];
 		}
@@ -107,7 +115,8 @@ export const UploadListItemDestination = memo(({
 		const filteredOptions = getFilteredContainersOptions(options, params)
 			.filter(({ name, role }) => name !== value && isCollaboratorRole(role));
 
-		const containerNameExists = options.some(({ name }) => inputValue.toLowerCase() === name.toLowerCase());
+		const containerNameExists = options.some(({ name }) => inputValue.toLowerCase() === (name || '').toLowerCase());
+
 		if (inputValue && !containerNameExists && isProjectAdmin) {
 			// create an extra option to transform into a
 			// "add new container" OR "name already used" option
@@ -136,11 +145,15 @@ export const UploadListItemDestination = memo(({
 
 		// option is an existing container
 		if (option._id) {
+			if (option._id === NEW_ID) {
+				return (<NewContainerInUse containerName={option.name} {...optionProps}/>);
+			}
+
 			return (
 				<ExistingContainer
 					key={option.name}
 					container={option}
-					inUse={nameIsTaken(option)}
+					inUse={(nameIsTaken(option))}
 					{...optionProps}
 				/>
 			);
@@ -154,12 +167,19 @@ export const UploadListItemDestination = memo(({
 	};
 
 	const onOpen = () => {
+		setNewContainersInModal(
+			getValues('uploads')
+				.filter(({ containerId, containerName }, i) => !containerId && i !== index && !!containerName)
+				.map(({ containerName }) => ({ name:containerName, _id: NEW_ID, role: Role.COLLABORATOR })),
+		);
+
 		setContainerNamesInModal(
 			getValues('uploads')
 				.map(({ containerName }) => containerName)
 				.filter((containerName) => containerName !== value)
 				.filter(Boolean),
 		);
+
 		setProcessingContainersNames(
 			containers
 				.filter((container) => !canUploadToBackend(container.status))
@@ -180,7 +200,7 @@ export const UploadListItemDestination = memo(({
 			onInputChange={handleInputChange}
 			onChange={onDestinationChange}
 			onOpen={onOpen}
-			options={containers}
+			options={[...containers, ...newContainersInModal]}
 			renderOption={renderOption}
 			renderInput={({ InputProps, ...params }) => (
 				<DestinationInput
