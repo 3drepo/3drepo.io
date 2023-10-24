@@ -561,16 +561,15 @@ const testModelEventsListener = () => {
 
 		test(`Should serialise date values into timestamps and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
 				is a ${events.UPDATE_TICKET} and a module default date prop has been updated (Container)`, async () => {
-
 			TicketTemplates.getTemplateById.mockResolvedValueOnce({ ...generateTemplate(), modules: [{ type: 'sequencing', properties: [] }] });
 			const changes = {
 				modules: {
 					sequencing: {
-						"Start Time": { from: generateRandomDate(), to: generateRandomDate() }
-					}
-				}
+						'Start Time': { from: generateRandomDate(), to: generateRandomDate() },
+					},
+				},
 			};
-			const expectedData = { modules: { sequencing: { "Start Time": changes.modules.sequencing['Start Time'].to.getTime() } } };
+			const expectedData = { modules: { sequencing: { 'Start Time': changes.modules.sequencing['Start Time'].to.getTime() } } };
 			await updateTicketTest(false, changes, expectedData);
 		});
 
