@@ -34,7 +34,6 @@ const ModelHelper = require(`${src}/utils/helper/models`);
 const Projects = require(`${src}/processors/teamspaces/projects`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 
-
 const projectList = [
 	{ _id: '1', name: 'project1', permissions: [{ user: 'projAdmin', permissions: [PROJECT_ADMIN] }], models: ['modelA'] },
 	{ _id: '2', name: 'project2', permissions: [{ user: 'projAdmin', permissions: [PROJECT_ADMIN] }], models: ['modelB'] },
@@ -172,7 +171,7 @@ const testGetImage = () => {
 			const project = generateRandomString();
 			const stream = generateRandomString();
 			FilesManager.getFile.mockResolvedValueOnce(stream);
-			
+
 			const result = await Projects.getImage(teamspace, project);
 
 			expect(result).toEqual(stream);
@@ -185,7 +184,7 @@ const testGetImage = () => {
 			const project = generateRandomString();
 			const error = new Error(generateRandomString());
 			FilesManager.getFile.mockRejectedValueOnce(error);
-			
+
 			await expect(Projects.getImage(teamspace, project)).rejects.toEqual(error);
 			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
 			expect(FilesManager.getFile).toHaveBeenCalledWith(teamspace, COL_NAME, project);
@@ -199,7 +198,7 @@ const testUploadImage = () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const stream = generateRandomString();
-			
+
 			await Projects.uploadImage(teamspace, project, stream);
 
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
@@ -212,7 +211,7 @@ const testUploadImage = () => {
 			const stream = generateRandomString();
 			const error = new Error(generateRandomString());
 			FilesManager.storeFile.mockRejectedValueOnce(error);
-			
+
 			await expect(Projects.uploadImage(teamspace, project, stream)).rejects.toEqual(error);
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
 			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, COL_NAME, project, stream);
@@ -225,7 +224,7 @@ const testDeleteImage = () => {
 		test('should delete image', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
-			
+
 			await Projects.deleteImage(teamspace, project);
 
 			expect(FilesManager.removeFile).toHaveBeenCalledTimes(1);
@@ -237,7 +236,7 @@ const testDeleteImage = () => {
 			const project = generateRandomString();
 			const error = new Error(generateRandomString());
 			FilesManager.removeFile.mockRejectedValueOnce(error);
-			
+
 			await expect(Projects.deleteImage(teamspace, project)).rejects.toEqual(error);
 			expect(FilesManager.removeFile).toHaveBeenCalledTimes(1);
 			expect(FilesManager.removeFile).toHaveBeenCalledWith(teamspace, COL_NAME, project);
