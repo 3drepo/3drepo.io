@@ -14,25 +14,26 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { IGroupRule } from '@/v5/store/tickets/tickets.types';
-import { formatOperationLabel } from '../groupRulesForm.helpers';
+import { Tooltip } from '@mui/material';
 import { ChipWrapper, RuleChip } from './chipRule.styles';
 
 type ChipRuleProps = {
-	value: IGroupRule,
+	label: string,
 	isSelected: boolean;
 	onClick?: () => void;
 	onDelete: () => void;
 	disabled?: boolean;
 };
-export const ChipRule = ({ value: rule, isSelected, disabled, onDelete, onClick }: ChipRuleProps) => (
-	<ChipWrapper>
-		<RuleChip
-			label={formatOperationLabel(rule)}
-			disabled={disabled}
-			onClick={onClick}
-			onDelete={disabled ? null : onDelete}
-			$selected={isSelected}
-		/>
-	</ChipWrapper>
+export const ChipRule = ({ label, isSelected, disabled, onDelete, ...props }: ChipRuleProps) => (
+	<Tooltip title={label}>
+		<ChipWrapper>
+			<RuleChip
+				label={label}
+				disabled={disabled}
+				onDelete={disabled ? null : onDelete}
+				$selected={isSelected}
+				{...props}
+			/>
+		</ChipWrapper>
+	</Tooltip>
 );

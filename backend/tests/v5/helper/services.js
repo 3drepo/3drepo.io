@@ -44,6 +44,8 @@ const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constant
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const FilesManager = require('../../../src/v5/services/filesManager');
 
+const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
+
 const { USERS_DB_NAME, USERS_COL, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
 const { COL_NAME } = require(`${src}/models/projectSettings.constants`);
 const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
@@ -575,10 +577,19 @@ ServiceHelper.generateGroup = (isSmart = false, {
 	if (isSmart) {
 		group.rules = [
 			{
-				field: 'IFC GUID',
-				operator: 'IS',
+				name: ServiceHelper.generateRandomString(),
+				field: { operator: fieldOperators.CONTAINS.name, values: [ServiceHelper.generateRandomString()] },
+				operator: valueOperators.IS.name,
 				values: [
-					'1rbbJcnUDEEA_ArpSqk3B7',
+					ServiceHelper.generateRandomString(),
+				],
+			},
+			{
+				name: ServiceHelper.generateRandomString(),
+				field: { operator: fieldOperators.IS.name, values: [ServiceHelper.generateRandomString()] },
+				operator: valueOperators.IS.name,
+				values: [
+					ServiceHelper.generateRandomString(),
 				],
 			},
 		];
@@ -608,10 +619,11 @@ ServiceHelper.generateLegacyGroup = (account, model, isSmart = false, isIfcGuids
 	if (isSmart) {
 		group.rules = [
 			{
-				field: 'IFC GUID',
-				operator: 'IS',
+				name: ServiceHelper.generateRandomString(),
+				field: { operator: fieldOperators.IS.name, values: ['IFC GUID'] },
+				operator: valueOperators.IS.name,
 				values: [
-					'1rbbJcnUDEEA_ArpSqk3B7',
+					ServiceHelper.generateRandomString(),
 				],
 			},
 		];

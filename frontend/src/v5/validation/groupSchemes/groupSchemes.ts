@@ -17,7 +17,7 @@
 
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import { OPERATIONS_TYPES } from '@/v5/store/tickets/tickets.types';
 
 const requiredTrimmedString = Yup.string().trim().required(
@@ -30,7 +30,20 @@ const requiredTrimmedString = Yup.string().trim().required(
 const valueType = Yup.object({ value: requiredTrimmedString });
 
 export const GroupRuleSchema = Yup.object().shape({
-	field: requiredTrimmedString,
+	name: requiredTrimmedString.test(
+		'alreadyExistingName',
+		formatMessage({
+			id: 'validation.ticket.groupFilters.error.alreadyExistingName',
+			defaultMessage: 'This name already exists',
+		}),
+		(name, testContext) => (
+			!testContext.options.context?.alreadyExistingNames.map((n) => n.trim().toLocaleLowerCase()).includes(name.toLocaleLowerCase())
+		),
+	),
+	field: Yup.object().shape({
+		operator: requiredTrimmedString,
+		values: Yup.array().of(valueType),
+	}),
 	operator: requiredTrimmedString,
 	values: Yup.array().when(
 		'operator',
@@ -41,7 +54,7 @@ export const GroupRuleSchema = Yup.object().shape({
 const GroupSchema = Yup.object().shape({
 	name: requiredTrimmedString,
 	description: Yup.string().max(1200, formatMessage({
-		id: 'validation.model.name.error.max',
+		id: 'validation.group.description.error.max',
 		defaultMessage: 'Description is limited to 1200 characters',
 	})),
 	rules: Yup.array().when(
@@ -66,7 +79,7 @@ export const NewCollectionSchema = Yup.object().shape({
 				const { parent } = testContext.parent;
 				const { prefixesCombinations } = testContext.options.context;
 				const newValue = parent.concat(collection);
-				return !prefixesCombinations.some((prefix) => _.isEqual(prefix, newValue));
+				return !prefixesCombinations.some((prefix) => isEqual(prefix, newValue));
 			},
 		),
 });

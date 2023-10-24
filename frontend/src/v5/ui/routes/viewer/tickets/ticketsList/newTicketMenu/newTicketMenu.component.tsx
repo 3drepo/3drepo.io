@@ -20,7 +20,7 @@ import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers'
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import AddIcon from '@assets/icons/filled/add_circle-filled.svg';
-import { sortBy } from 'lodash';
+import { sortByName } from '@/v5/store/store.helpers';
 import { ActionMenu, MenuItem, NewTicketButton } from '../ticketsList.styles';
 import { TicketsCardViews } from '../../tickets.constants';
 import { ViewerParams } from '../../../../routes.constants';
@@ -43,7 +43,7 @@ export const NewTicketMenu = () => {
 				</NewTicketButton>
 			)}
 		>
-			{sortBy(templates, 'name').map((template) => (
+			{sortByName(templates).map((template) => (
 				<MenuItem onClick={() => goToNewTicket(template)} key={template._id}>
 					{template.name}
 				</MenuItem>

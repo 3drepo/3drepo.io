@@ -44,7 +44,6 @@ import { getSupportedFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadList } from './uploadList/uploadList.component';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
 import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
-import { extensionIsRevit } from './uploadFileForm.helpers';
 
 const DEFAULT_SORT_CONFIG = {
 	column: ['file'],
@@ -141,6 +140,8 @@ export const UploadFileForm = ({
 	};
 
 	const extensionIsSpm = (extension: string) => extension === 'spm';
+	
+	const extensionIsRevit = (extension: string) => ['rvt', 'rfa'].includes(extension);
 
 	const addFilesToList = (files: File[], container?: IContainer): void => {
 		const filesToAppend = [];
