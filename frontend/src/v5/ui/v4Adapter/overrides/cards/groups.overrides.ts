@@ -52,7 +52,6 @@ import {
 import { primaryButtonStyling } from '@/v5/ui/v4Adapter/resuableOverrides.styles';
 import { ViewerPanelContent } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 import { StyledTextField as AutoSuggestField } from '@/v4/routes/components/autosuggestField/autosuggestField.styles';
-import { MultipleInputsContainer } from '@/v4/routes/components/criteriaField/components/criteriaValueField/criteriaValueField.styles';
 
 const previewGroupItem = css`
 	${PreviewListItemContainer} {
@@ -269,10 +268,6 @@ const expandedGroupItem = css`
 						.MuiTextField-root {
 							margin: 0;
 						}
-					}
-
-					${MultipleInputsContainer} {
-						margin: 0;
 					}
 
 					.MuiTextField-root {

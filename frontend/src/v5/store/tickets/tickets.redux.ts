@@ -16,17 +16,12 @@
  */
 
 import { produceAll } from '@/v5/helpers/reducers.helper';
-import { isArray, mergeWith } from 'lodash';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
 import { ModelId, TeamspaceId, TeamspaceProjectAndModel } from '../store.types';
 import { ITemplate, ITicket, NewTicket, Group } from './tickets.types';
-
-const mergeWithArray = (objValue, srcValue) => mergeWith(objValue, srcValue, (target, src) => {
-	if (isArray(target)) return src; // If its an array that is merging just use the newest
-	return undefined;
-});
+import { mergeWithArray } from '../store.helpers';
 
 const getTicketByModelId = (state, modelId, ticketId) => (
 	state.ticketsByModelId?.[modelId].find(({ _id }) => _id === ticketId)

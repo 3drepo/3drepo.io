@@ -21,14 +21,15 @@ import { NewFederationSettingsSchema } from '@/v5/validation/containerAndFederat
 import { FormModal } from '@controls/formModal/formModal.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormProvider, useForm } from 'react-hook-form';
-import { NewFederation } from '@/v5/store/federations/federations.types';
+import { GroupedContainer, NewFederation } from '@/v5/store/federations/federations.types';
 import { prepareNewFederation } from '@/v5/store/federations/federations.helpers';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { EditFederation } from '../editFederationModal/editFederation';
+import { EditFederation } from '../editFederationModal/editFederation/editFederation.component';
 import { CreateFederationFormSettings } from './createFederationSettings';
+import { EditFederationContext, EditFederationContextComponent, EditFederationContextType } from '../editFederationModal/editFederationContext';
 
 interface ICreateFederation {
 	open: boolean;
@@ -45,6 +46,7 @@ const defaultValues = {
 export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation): JSX.Element => {
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isSettingsPhase, setIsSettingsPhase] = useState(true);
 
 	const methods = useForm<NewFederation>({
 		defaultValues,
@@ -62,31 +64,28 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 
-	const [modalPhase, setModalPhase] = useState('settings');
-	const [includedContainers, setIncludedContainers] = useState([]);
-
 	const onSubmitError = (err) => {
 		setIsSubmitting(false);
 		if (nameAlreadyExists(err)) {
 			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
-			setModalPhase('settings');
+			setIsSettingsPhase(true);
 			trigger('name');
 		}
 	};
 
 	const onClickBack = (): void => {
-		setModalPhase('settings');
+		setIsSettingsPhase(true);
 	};
 
-	const onClickContinue = (): void => setModalPhase('edit');
+	const onClickContinue = (): void => setIsSettingsPhase(false);
 
-	const onClickSubmit = (newFederation: NewFederation): void => {
+	const onClickSubmit = (newFederation: NewFederation, groupedContainers: GroupedContainer[]): void => {
 		setIsSubmitting(true);
 		FederationsActionsDispatchers.createFederation(
 			teamspace,
 			project,
 			newFederation,
-			includedContainers.map((container) => container._id),
+			groupedContainers,
 			onClickClose,
 			onSubmitError,
 		);
@@ -95,36 +94,39 @@ export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation):
 	const SettingsModalProps = {
 		title: formatMessage({ id: 'createFederation.modal.settings.title', defaultMessage: 'New Federation' }),
 		confirmLabel: formatMessage({ id: 'createFederation.modal.settings.submit', defaultMessage: 'Continue' }),
-		onSubmit: handleSubmit(onClickContinue),
 	};
+
 	const EditModalProps = {
 		title: formatMessage({ id: 'createFederation.modal.edit.title', defaultMessage: 'Edit Federation' }),
 		confirmLabel: formatMessage({ id: 'createFederation.modal.edit.submit', defaultMessage: 'Create Federation' }),
 		onClickCancel: onClickBack,
-		onSubmit: handleSubmit(onClickSubmit),
 		cancelLabel: formatMessage({ id: 'createFederation.modal.settings.cancel', defaultMessage: 'Back' }),
 		maxWidth: 'lg',
 	};
 
 	return (
-		<FormModal
-			open={open}
-			isValid={isValid}
-			onClickClose={onClickClose}
-			isSubmitting={isSubmitting}
-			{...(modalPhase === 'settings' ? SettingsModalProps : EditModalProps)}
-		>
-			{modalPhase === 'settings' ? (
-				<FormProvider {...methods}>
-					<CreateFederationFormSettings />
-				</FormProvider>
-			) : (
-				<EditFederation
-					federation={prepareNewFederation(getValues())}
-					onContainersChange={setIncludedContainers}
-				/>
-			)}
-			<UnhandledErrorInterceptor expectedErrorValidators={[nameAlreadyExists]} />
-		</FormModal>
+		<EditFederationContextComponent federation={null}>
+			<EditFederationContext.Consumer>
+				{({ getGroupedContainers }: EditFederationContextType) => (
+					<FormModal
+						open={open}
+						isValid={isValid}
+						onClickClose={onClickClose}
+						isSubmitting={isSubmitting}
+						onSubmit={handleSubmit(isSettingsPhase ? onClickContinue : (body) => onClickSubmit(body, getGroupedContainers()))}
+						{...(isSettingsPhase ? SettingsModalProps : EditModalProps)}
+					>
+						{isSettingsPhase ? (
+							<FormProvider {...methods}>
+								<CreateFederationFormSettings />
+							</FormProvider>
+						) : (
+							<EditFederation federation={prepareNewFederation(getValues())} />
+						)}
+						<UnhandledErrorInterceptor expectedErrorValidators={[nameAlreadyExists]} />
+					</FormModal>
+				)}
+			</EditFederationContext.Consumer>
+		</EditFederationContextComponent>
 	);
 };

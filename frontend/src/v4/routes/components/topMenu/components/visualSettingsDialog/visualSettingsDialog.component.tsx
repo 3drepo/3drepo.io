@@ -33,13 +33,12 @@ const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),
 	maxNearPlane: schema.number(-1, Number.POSITIVE_INFINITY),
 	maxFarPlane: schema.number(-1, Number.POSITIVE_INFINITY),
-	memory: schema.integer(16, 2032),
+	unityMemory: schema.integer(0, 4096),
 	farPlaneSamplingPoints: schema.integer(1, Number.POSITIVE_INFINITY),
 	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY),
 	numCacheThreads: schema.integer(1, 15),
 	clipPlaneBorderWidth: schema.number(0, Number.POSITIVE_INFINITY),
 	memoryThreshold: schema.number(0, 2032),
-	memoryLimit: schema.number(0, 2032),
 	fovWeight: schema.number(0, 10),
 	meshFactor: schema.number(1, Number.POSITIVE_INFINITY),
 	phBundleFadeDistance: schema.number(0, Number.POSITIVE_INFINITY),
@@ -68,15 +67,10 @@ const BasicSettings = (props) => {
 			</FormListItem>
 			<V5Divider />
 			<FormListItem>
-				Shading
-				<Field name="shading" render={ ({ field }) => (
-					<SelectField {...field}>
-						<MenuItem value="standard">Standard</MenuItem>
-					</SelectField>)} />
 				Viewer Background Color
 				<Field name="viewerBackgroundColor" render={ ({ field }) => (
 					<ColorPicker {...field} onChange={(val) => {
-						// this is because colorpicker doenst use the standard events for inputs
+						// this is because colorpicker doesn't use the standard events for inputs
 						field.onChange({target: {name: field.name, value: val}});
 					}} />
 				)} />
@@ -127,7 +121,7 @@ const BasicSettings = (props) => {
 				Clipping plane border color
 				<Field name="clipPlaneBorderColor" render={ ({ field }) => (
 					<ColorPicker {...field} onChange={(val) => {
-						// this is because colorpicker doenst use the standard events for inputs
+						// this is because colorpicker doesn't use the standard events for inputs
 						field.onChange({target: {name: field.name, value: val}});
 					}} />
 				)} />
@@ -145,10 +139,9 @@ const AdvancedSettings = (props) => {
 					<Switch checked={field.value} {...field} value="true" color="secondary" />
 				)} />
 			</FormListItem>
-			{!IS_FIREFOX &&
-				<FormListItem>
+			<FormListItem>
 					Memory for Unity
-					<Field name="memory" render={ ({ field, form }) => {
+					<Field name="unityMemory" render={ ({ field, form }) => {
 						return (
 							<div>
 								<ErrorTooltip title={form.errors.memory || ''} placement="bottom-end">
@@ -164,7 +157,6 @@ const AdvancedSettings = (props) => {
 						);
 					}} />
 				</FormListItem>
-			}
 			<FormListItem>
 				Number of Caching Threads
 				<Field name="numCacheThreads" render={ ({ field, form }) => {
@@ -313,24 +305,6 @@ const StreamingSettings = (props) => {
 				}} />
 			</FormListItem>
 			<FormListItem>
-				Limit
-				<Field name="memoryLimit" render={ ({ field, form }) => {
-					return (
-						<div>
-							<ErrorTooltip title={form.errors.memoryLimit || ''} placement="bottom-end">
-							<ShortInput
-								error={Boolean(form.errors.memoryLimit)}
-								{...field}
-								endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
-							</ErrorTooltip>
-							<V5ErrorText>
-								{form.errors.memoryLimit}
-							</V5ErrorText>
-						</div>
-					);
-				}} />
-			</FormListItem>
-			<FormListItem>
 				Mesh Factor
 				<Field name="meshFactor" render={ ({ field, form }) => {
 					return (
@@ -425,7 +399,7 @@ const StreamingSettings = (props) => {
 				Color
 				<Field name="phBundleColor" render={ ({ field }) => (
 					<ColorPicker {...field} onChange={(val) => {
-						// this is because colorpicker doenst use the standard events for inputs
+						// this is because colorpicker doesn't use the standard events for inputs
 						field.onChange({target: {name: field.name, value: val}});
 					}} />
 				)} />
@@ -627,15 +601,12 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 		const { updateSettings, currentUser} = this.props;
 
 		values.nearPlane = Number(values.nearPlane);
-		values.memory = Number(values.memory);
+		values.unityMemory = Number(values.unityMemory);
 		values.farPlaneSamplingPoints = Number(values.farPlaneSamplingPoints);
 		values.maxShadowDistance = Number(values.maxShadowDistance);
 
 		updateSettings(currentUser, values);
 
-		if (values.memory !== this.props.visualSettings.memory) {
-			location.reload();
-		}
 		this.props.handleClose();
 	}
 

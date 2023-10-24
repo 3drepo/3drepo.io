@@ -18,14 +18,25 @@ import { useParams, generatePath, matchPath } from 'react-router-dom';
 import { TeamspacesHooksSelectors, ProjectsHooksSelectors, FederationsHooksSelectors, ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { IProject } from '@/v5/store/projects/projects.types';
-import { FEDERATIONS_ROUTE, matchesPath, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE, VIEWER_ROUTE, TEAMSPACE_ROUTE, BOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
+import {
+	TEAMSPACE_ROUTE,
+	TEAMSPACE_ROUTE_BASE,
+	PROJECT_ROUTE_BASE_TAB,
+	FEDERATIONS_ROUTE,
+	VIEWER_ROUTE,
+	matchesPath,
+	matchesSubPath,
+	PROJECT_ROUTE,
+	BOARD_ROUTE,
+	TICKETS_ROUTE,
+} from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
 import { selectRevisions } from '@/v4/modules/model/model.selectors';
 import { formatMessage } from '@/v5/services/intl';
 import { BreadcrumbItem } from '@controls/breadcrumbs/breadcrumbDropdown/breadcrumbDropdown.component';
 import { Breadcrumbs } from '@controls/breadcrumbs';
 import { BreadcrumbItemOrOptions } from '@controls/breadcrumbs/breadcrumbs.component';
-import { orderBy } from 'lodash';
+import { sortBreadcrumbOptions } from '@controls/breadcrumbs/breadcrumbs.helpers';
 
 export const BreadcrumbsRouting = () => {
 	const params = useParams();
@@ -55,40 +66,30 @@ export const BreadcrumbsRouting = () => {
 		breadcrumbs = [{ options }];
 	}
 
-	if (matchesPath(PROJECT_ROUTE)) {
+	if (matchesSubPath(PROJECT_ROUTE_BASE_TAB)) {
 		breadcrumbs = [
 			{
 				title: teamspace,
 				to: generatePath(TEAMSPACE_ROUTE_BASE, { teamspace }),
 			},
 		];
+		let path = PROJECT_ROUTE_BASE_TAB;
+		if (matchesPath(PROJECT_ROUTE)) {
+			path = PROJECT_ROUTE;
+		}
+		if (matchesPath(BOARD_ROUTE)) {
+			path = BOARD_ROUTE;
+		}
+		if (matchesPath(TICKETS_ROUTE)) {
+			path = TICKETS_ROUTE;
+		}
 
 		// eslint-disable-next-line no-restricted-globals
-		const { params: projectParams } = matchPath(location.pathname, { path: PROJECT_ROUTE });
+		const { params: projectParams } = matchPath(location.pathname, { path });
 
 		options = projects.map(({ name, _id }) => ({
 			title: name,
-			to: generatePath(PROJECT_ROUTE, { ...projectParams, project: _id }),
-			selected: project?._id === _id,
-		}));
-
-		breadcrumbs.push({ options });
-	}
-
-	if (matchesPath(BOARD_ROUTE)) {
-		breadcrumbs = [
-			{
-				title: teamspace,
-				to: generatePath(TEAMSPACE_ROUTE_BASE, { teamspace }),
-			},
-		];
-
-		// eslint-disable-next-line no-restricted-globals
-		const { params: projectParams } = matchPath(location.pathname, { path: BOARD_ROUTE });
-
-		options = projects.map(({ name, _id }) => ({
-			title: name,
-			to: generatePath(BOARD_ROUTE, { ...projectParams, project: _id }),
+			to: generatePath(path, { ...projectParams, project: _id }),
 			selected: project?._id === _id,
 		}));
 
@@ -114,14 +115,14 @@ export const BreadcrumbsRouting = () => {
 				selected: _id === containerOrFederationId,
 			}));
 
-			breadcrumbs.push({ options });
+			breadcrumbs.push({ options: sortBreadcrumbOptions(options) });
 		} else { // In the case that the user is viewing a container
 			options = containers.map(({ _id, name }) => ({
 				title: name,
 				to: generatePath(VIEWER_ROUTE, { ...params, containerOrFederation: _id, revision: null }),
 				selected: _id === containerOrFederationId,
 			}));
-			breadcrumbs.push({ options });
+			breadcrumbs.push({ options: sortBreadcrumbOptions(options) });
 
 			// Revisions options ( only containers have revisions)
 			const noName = formatMessage({ id: 'breadcrumbs.revisions.noName', defaultMessage: '(no name)' });
@@ -138,13 +139,6 @@ export const BreadcrumbsRouting = () => {
 			});
 		}
 	}
-
-	breadcrumbs.forEach((breadcrumb: any) => {
-		if (breadcrumb.options) {
-			// eslint-disable-next-line no-param-reassign
-			breadcrumb.options = orderBy(breadcrumb.options, ({ title }) => title.toLowerCase());
-		}
-	});
 
 	return (<Breadcrumbs breadcrumbs={breadcrumbs} />);
 };

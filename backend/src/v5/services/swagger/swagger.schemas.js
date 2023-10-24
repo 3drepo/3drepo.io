@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { fieldOperators, valueOperators } = require('../../models/metadata.rules.constants');
 const { presetModules, propTypes } = require('../../schemas/tickets/templates.constants');
 const { deleteIfUndefined } = require('../../utils/helper/objects');
 const { getSwaggerComponents } = require('../../utils/responseCodes');
@@ -158,18 +159,38 @@ Schemas.schemas.group = {
 			items: {
 				type: 'object',
 				properties: {
-					prop: {
+					name: {
 						type: 'string',
-						description: 'The BIM data prop to query',
-						example: 'Floor',
+						description: 'name of the rule',
+						example: 'Rule 1',
+					},
+					field: {
+						type: 'object',
+						description: 'The BIM data field to query',
+						properties: {
+							operator: {
+								type: 'string',
+								enum: Object.keys(fieldOperators),
+								description: 'Operator value on the field name',
+								example: fieldOperators.IS.name,
+							},
+							values: {
+								type: 'array',
+								description: 'The values to use in respective of the operator. This is evaluated under the union (OR) logic',
+								items: {
+									type: 'string',
+									example: 'Family Name',
+								},
+							},
+						},
 					},
 					operator: {
 						type: 'string',
-						enum: ['IS_EMPTY', 'IS_NOT_EMPTY', 'IS', 'IS_NOT', 'CONTAINS', 'NOT_CONTAINS', 'REGEX', 'EQUALS', 'NOT_EQUALS', 'GT', 'GTE', 'LT', 'LTE', 'IN_RANGE', 'NOT_IN_RANGE'],
+						enum: Object.keys(valueOperators),
 						description: 'Operator value on this prop',
-						example: 'EQUALS',
+						example: valueOperators.EQUALS.name,
 					},
-					value: {
+					values: {
 						type: 'array',
 						description: 'The values to use in respective of the operator. This is evaluated under the union (OR) logic',
 						items: {
@@ -244,16 +265,36 @@ Schemas.schemas.ticketGroup = {
 			items: {
 				type: 'object',
 				properties: {
-					field: {
+					name: {
 						type: 'string',
-						description: 'The BIM data prop to query',
-						example: 'Floor',
+						description: 'name of the rule',
+						example: 'Rule 1',
+					},
+					field: {
+						type: 'object',
+						description: 'The BIM data field to query',
+						properties: {
+							operator: {
+								type: 'string',
+								enum: Object.keys(fieldOperators),
+								description: 'Operator value on the field name',
+								example: fieldOperators.IS.name,
+							},
+							values: {
+								type: 'array',
+								description: 'The values to use in respective of the operator. This is evaluated under the union (OR) logic',
+								items: {
+									type: 'string',
+									example: 'Family Name',
+								},
+							},
+						},
 					},
 					operator: {
 						type: 'string',
-						enum: ['IS_EMPTY', 'IS_NOT_EMPTY', 'IS', 'IS_NOT', 'CONTAINS', 'NOT_CONTAINS', 'REGEX', 'EQUALS', 'NOT_EQUALS', 'GT', 'GTE', 'LT', 'LTE', 'IN_RANGE', 'NOT_IN_RANGE'],
+						enum: Object.keys(valueOperators),
 						description: 'Operator value on this prop',
-						example: 'EQUALS',
+						example: valueOperators.EQUALS.name,
 					},
 					value: {
 						type: 'array',

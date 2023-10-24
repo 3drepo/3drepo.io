@@ -16,6 +16,9 @@
  */
 
 const { src } = require('../../../../../../../../helper/path');
+
+const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
+const { isString } = require(`${src}/utils/helper/typeCheck`);
 const { generateLegacyGroup } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
@@ -32,8 +35,8 @@ const respondFn = Responder.respond.mockImplementation((req, res, errCode) => er
 const testSerialiseGroupArray = () => {
 	const badRuleCast = generateLegacyGroup('a', 'b', true, false, false);
 	badRuleCast.rules = [{
-		field: 'Element ID',
-		operator: 'IS_NOT_EMPTY',
+		field: { operator: fieldOperators.IS.name, values: ['Element ID'] },
+		operator: valueOperators.IS_NOT_EMPTY.name,
 		values: [
 			'',
 		],
@@ -55,7 +58,7 @@ const testSerialiseGroupArray = () => {
 		test(`should serialise correctly with ${desc}`,
 			() => {
 				const nextIdx = respondFn.mock.calls.length;
-				GroupsOutputMiddlewares.serialiseGroupArray({ outputData: cloneDeep(data) }, {}, () => {});
+				GroupsOutputMiddlewares.serialiseGroupArray({ outputData: cloneDeep(data) }, {}, () => { });
 				expect(respondFn.mock.calls.length).toBe(nextIdx + 1);
 				expect(respondFn.mock.calls[nextIdx][2]).toEqual(templates.ok);
 
@@ -78,8 +81,11 @@ const testSerialiseGroupArray = () => {
 					if ((group.rules || []).length) {
 						res.rules = group.rules.map((entry) => {
 							const output = { ...entry };
-							if (entry.operator === 'IS_NOT_EMPTY') {
+							if (entry.operator === valueOperators.IS_NOT_EMPTY.name) {
 								delete output.values;
+							}
+							if (isString(entry.field)) {
+								output.field = { operator: fieldOperators.IS.name, values: [entry.field] };
 							}
 							return output;
 						});

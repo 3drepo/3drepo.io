@@ -140,6 +140,8 @@ export const UploadFileForm = ({
 	};
 
 	const extensionIsSpm = (extension: string) => extension === 'spm';
+	
+	const extensionIsRevit = (extension: string) => ['rvt', 'rfa'].includes(extension);
 
 	const addFilesToList = (files: File[], container?: IContainer): void => {
 		const filesToAppend = [];
@@ -157,6 +159,7 @@ export const UploadFileForm = ({
 				containerCode: container?.code || '',
 				containerDesc: container?.desc || '',
 				revisionDesc: '',
+				lod: '0',
 				importAnimations: extensionIsSpm(extension),
 				timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London',
 			});
@@ -315,6 +318,7 @@ export const UploadFileForm = ({
 										value={getValues(`uploads.${origIndex}`)}
 										key={sortedList[getSortedListSelectedIndex()].uploadId}
 										isSpm={extensionIsSpm(sortedList[getSortedListSelectedIndex()].extension)}
+										isRevit={extensionIsRevit(sortedList[getSortedListSelectedIndex()].extension)} // fix to match isSpm method with #4258
 										onChange={(field: string, val: string | boolean) => {
 											// @ts-ignore
 											setValue(`uploads.${origIndex}.${field}`, val);

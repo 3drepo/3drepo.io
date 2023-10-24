@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { times } = require('lodash');
-const { generateRandomString, generateRandomObject } = require('../../helper/services');
 const { src } = require('../../helper/path');
+const { times, cloneDeep } = require('lodash');
+const { generateRandomString, generateRandomObject, generateGroup } = require('../../helper/services');
 
 const Groups = require(`${src}/models/tickets.groups`);
+const { fieldOperators } = require(`${src}/models/metadata.rules.constants`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -115,12 +116,48 @@ const testGetGroupsByIds = () => {
 			const groupIds = times(6, generateRandomString());
 			const projection = { [generateRandomString()]: 1 };
 
-			const expectedVal = [{ [generateRandomString()]: generateRandomString() }];
+			const expectedVal = [generateGroup(true), generateGroup(false)];
 
 			db.find.mockResolvedValueOnce(expectedVal);
 
 			await expect(Groups.getGroupsByIds(teamspace, project, model, ticket, groupIds, projection))
 				.resolves.toEqual(expectedVal);
+
+			expect(db.find).toHaveBeenCalledTimes(1);
+			expect(db.find).toHaveBeenCalledWith(teamspace, groupCol,
+				{ teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
+		});
+
+		test('Should get all the groups, with legacy schema rules be converted to new schema', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const ticket = generateRandomString();
+			const groupIds = times(6, generateRandomString());
+			const projection = { [generateRandomString()]: 1 };
+
+			const group = generateGroup(true);
+			group.rules = group.rules.map(({ name, field, ...rest }) => ({ ...rest, field: generateRandomString() }));
+
+			const groupConverted = cloneDeep(group);
+			groupConverted.rules = groupConverted.rules.map(({ field, ...rest }) => ({ ...rest,
+				field: {
+					values: [field],
+					operator: fieldOperators.IS.name,
+				} }));
+
+			db.find.mockResolvedValueOnce([group]);
+
+			const result = await Groups.getGroupsByIds(teamspace, project, model, ticket, groupIds, projection);
+
+			expect(result.length).toBe(1);
+
+			for (let i = 0; i < result[0].rules.length; ++i) {
+				const resRule = result[0].rules[i];
+				const expectedRule = groupConverted.rules[i];
+
+				expect(resRule).toEqual(expect.objectContaining(expectedRule));
+			}
 
 			expect(db.find).toHaveBeenCalledTimes(1);
 			expect(db.find).toHaveBeenCalledWith(teamspace, groupCol,
@@ -210,8 +247,33 @@ const testGetGroupById = () => {
 		const model = generateRandomString();
 		const ticket = generateRandomString();
 		const groupId = generateRandomString();
+
 		test('Should return whatever the query returns', async () => {
-			const expectedData = generateRandomObject();
+			const expectedData = generateGroup(true);
+
+			const projection = generateRandomObject();
+
+			db.findOne.mockResolvedValueOnce(expectedData);
+
+			await expect(Groups.getGroupById(teamspace, project, model, ticket, groupId, projection))
+				.resolves.toEqual(expectedData);
+
+			expect(db.findOne).toHaveBeenCalledTimes(1);
+			expect(db.findOne).toHaveBeenCalledWith(teamspace, groupCol,
+				{ teamspace, project, model, ticket, _id: groupId }, projection);
+		});
+
+		test('Should convert legacy schema rules', async () => {
+			const group = generateGroup(true);
+			group.rules = group.rules.map(({ name, field, ...rest }) => ({ ...rest, field: generateRandomString() }));
+
+			const expectedData = cloneDeep(group);
+			expectedData.rules = expectedData.rules.map(({ field, ...rest }) => ({ ...rest,
+				field: {
+					values: [field],
+					operator: fieldOperators.IS.name,
+				} }));
+
 			const projection = generateRandomObject();
 
 			db.findOne.mockResolvedValueOnce(expectedData);

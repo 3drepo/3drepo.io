@@ -50,7 +50,6 @@ export enum PriorityLevels {
 	HIGH = 'High',
 }
 export enum RiskLevels {
-	UNSET = 'Unset',
 	VERY_LOW = 'Very Low',
 	LOW = 'Low',
 	MODERATE = 'Moderate',
@@ -101,10 +100,6 @@ export const PRIORITY_LEVELS_MAP = {
 };
 
 export const RISK_LEVELS_MAP = {
-	[RiskLevels.UNSET]: {
-		label: formatMessage({ id: 'chip.riskLevel.unset', defaultMessage: 'Unset Risk' }),
-		color: COLOR.BASE_LIGHT,
-	},
 	[RiskLevels.VERY_LOW]: {
 		label: formatMessage({ id: 'chip.riskLevel.veryLow', defaultMessage: 'Very Low Risk' }),
 		color: COLOR.FAVOURITE_MAIN,

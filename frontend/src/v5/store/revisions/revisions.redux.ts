@@ -20,7 +20,7 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { TeamspaceProjectAndContainerId, ContainerId } from '../store.types';
-import { IRevision, IRevisionUpdate, IUploadStatus } from './revisions.types';
+import { CreateRevisionBody, IRevision, IRevisionUpdate, IUploadStatus } from './revisions.types';
 
 export const { Types: RevisionsTypes, Creators: RevisionsActions } = createActions({
 	setVoidStatus: ['teamspace', 'projectId', 'containerId', 'revisionId', 'isVoid'],
@@ -114,21 +114,6 @@ export interface IRevisionsState {
 }
 
 type VoidParams = TeamspaceProjectAndContainerId & { revisionId: string, isVoid: boolean };
-
-export type CreateRevisionBody = {
-	revisionTag: string;
-	revisionDesc?: string;
-	file: File;
-	importAnimations?: boolean;
-	timezone?: string;
-
-	containerId?: string;
-	containerName: string;
-	containerType: string;
-	containerUnit: string;
-	containerDesc?: string;
-	containerCode?: string;
-};
 
 export type CreateRevisionPayload = {
 	teamspace: string;

@@ -190,6 +190,10 @@ const establishRoutes = () => {
 	 *                 description: Timezone of the revision
 	 *                 type: string
 	 *                 example: Europe/Berlin
+	 *               lod:
+	 *                 description: Level of Detail (0 - 6)
+	 *                 type: interger
+	 *                 example: 0
 	 *               file:
 	 *                 type: string
 	 *                 format: binary

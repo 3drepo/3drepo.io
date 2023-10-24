@@ -21,18 +21,25 @@ import {
 	FederationBackendSettings,
 	FederationSettings,
 	FederationStats,
+	GroupedContainer,
 	IFederation,
 	NewFederation,
 } from '@/v5/store/federations/federations.types';
-import { times } from 'lodash';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
-
-export const prepareMockBaseFederation = ({_id, name, role, isFavourite}: IFederation): Partial<IFederation> => ({_id, name, role, isFavourite});
+import { times } from 'lodash';
 
 export const prepareMockContainers = (min = 1, max = 10): string[] => (
 	times(faker.datatype.number({ max, min }), () => faker.datatype.uuid()) 
 );
+
+export const groupedContainerMockFactory = (overrides?: GroupedContainer): GroupedContainer => ({
+	_id: faker.datatype.uuid(),
+	group: faker.random.word(),
+	...overrides
+});
+
+export const prepareMockBaseFederation = ({_id, name, role, isFavourite}: IFederation): Partial<IFederation> => ({_id, name, role, isFavourite});
 
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({
 	_id: faker.datatype.uuid(),
@@ -43,7 +50,7 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	status: UploadStatuses.OK,
 	code: faker.datatype.uuid(),
 	category: faker.random.words(2),
-	containers: prepareMockContainers(),
+	containers: [groupedContainerMockFactory()],
 	isFavourite: faker.datatype.boolean(),
 	issues: faker.datatype.number(120),
 	risks: faker.datatype.number(120),
@@ -66,11 +73,11 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	...overrides,
 });
 
-export const prepareMockStats = (overrides?: Partial<FederationStats>) => ({
+export const prepareMockStats = (overrides?: Partial<IFederation>) => ({
 	code: faker.datatype.uuid(),
 	desc: faker.random.words(3),
 	status: UploadStatuses.OK,
-	containers: prepareMockContainers(),
+	containers: [groupedContainerMockFactory()],
 	tickets: {
 		issues: faker.datatype.number(),
 		risks: faker.datatype.number(),
@@ -78,17 +85,11 @@ export const prepareMockStats = (overrides?: Partial<FederationStats>) => ({
 	category: faker.random.word(),
 	lastUpdated: faker.datatype.number(),
 	...overrides,
-})
+}) as unknown as FederationStats;
 
-export const getMockStats = (federation: IFederation): FederationStats => ({
-	containers: federation.containers,
-	tickets: {
-		issues: federation.issues,
-		risks: federation.risks,
-	},
-	lastUpdated: federation.lastUpdated.valueOf(),
-	category: federation.category,
-	status: federation.status,
+export const prepareMockNewFederation = (federation: IFederation): NewFederation => ({
+	unit: federation.unit,
+	name: federation.name,
 	code: federation.code,
 	desc: federation.desc,
 });
@@ -96,10 +97,7 @@ export const getMockStats = (federation: IFederation): FederationStats => ({
 const prepareMockSettingsWithoutSurveyPoint = (federation: IFederation): Omit<FederationSettings, 'surveyPoint'> => ({
 	angleFromNorth: federation.angleFromNorth,
 	defaultView: federation.defaultView,
-	unit: federation.unit,
-	name: federation.name,
-	code: federation.code,
-	desc: federation.desc,
+	...prepareMockNewFederation(federation),
 });
 
 export const prepareMockSettingsReply = (federation: IFederation): FederationSettings => ({
@@ -110,11 +108,4 @@ export const prepareMockSettingsReply = (federation: IFederation): FederationSet
 export const prepareMockRawSettingsReply = (federation: IFederation): FederationBackendSettings => ({
 	...prepareMockSettingsWithoutSurveyPoint(federation),
 	surveyPoints: [federation.surveyPoint],
-});
-
-export const prepareMockNewFederation = (federation: IFederation): NewFederation => ({
-	unit: federation.unit,
-	name: federation.name,
-	code: federation.code,
-	desc: federation.desc,
 });
