@@ -118,7 +118,7 @@ export const LogoContainer = styled(LoginLink)`
 	width: fit-content;
 	margin-bottom: 28px;
 	position: absolute;
-	top: 40px;
+	top: 29px;
 	left: 50px;
 `;
 

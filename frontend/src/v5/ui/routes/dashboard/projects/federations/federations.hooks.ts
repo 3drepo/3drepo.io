@@ -16,14 +16,12 @@
  */
 
 import { useEffect } from 'react';
-import { useParams } from 'react-router';
-import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 
 export const useFederationsData = () => {
-	const { teamspace, project } = useParams<DashboardParams>();
-
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const federations = FederationsHooksSelectors.selectFederations();
 	const favouriteFederations = FederationsHooksSelectors.selectFavouriteFederations();
 	const isListPending = FederationsHooksSelectors.selectIsListPending();
