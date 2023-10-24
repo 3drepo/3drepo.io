@@ -74,21 +74,34 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		return isSelected ? formatMessage({ id: 'tickets.pin.deselectPin', defaultMessage: 'Deselect pin' }) : formatMessage({ id: 'tickets.pin.selectPin', defaultMessage: 'Select pin' });
 	};
 
+	const replacePin = () => {
+		if (prevValue.current) {
+			ViewerService.removePin(pinId);
+		}
+
+		if (value) {
+			ViewerService.showPin({
+				id: pinId, position: value, colour: hexToGLColor(colorHex), type: 'ticket' });
+		}
+	};
+
+	// Update pin when colour changes
+	useEffect(() => {
+		replacePin();
+		if (isSelected) ViewerService.setSelectionPin({ id: pinId, isSelected });
+	}, [colorHex]);
+
+	// Update pin when position changes
 	useEffect(() => {
 		// There seems to be some sort of race condition in react-hook-form
 		// so onBlur cant be called inmmediatly after onchange because the validation wont be there.
 		setTimeout(() => onBlur?.(), 200);
 
 		if (value !== prevValue.current) {
-			if (prevValue.current) {
-				ViewerService.removePin(pinId);
-			}
-
-			if (value) {
-				ViewerService.showPin({
-					id: pinId, position: value, colour: hexToGLColor(colorHex), type: 'ticket' });
-			}
+			replacePin();
 		}
+
+		if (isSelected) ViewerService.setSelectionPin({ id: pinId, isSelected });
 
 		prevValue.current = value;
 	}, [value]);
@@ -102,7 +115,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 	useEffect(() => {
 		ViewerService.setSelectionPin({ id: pinId, isSelected });
-	}, [isSelected, value]);
+	}, [isSelected]);
 
 	const hasPin = !!value;
 
