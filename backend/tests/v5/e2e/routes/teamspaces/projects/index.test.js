@@ -21,6 +21,7 @@ const ServiceHelper = require('../../../../helper/services');
 const { image, src } = require('../../../../helper/path');
 const { stringToUUID } = require('../../../../../../src/v5/utils/helper/uuids');
 const fs = require('fs');
+
 const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
@@ -29,7 +30,6 @@ let agent;
 // These are the users being used for tests
 const [tsAdmin, nonAdminUser, unlicencedUser, modelPermUser] = times(4, () => ServiceHelper.generateUserCredentials());
 
-
 const testProject = ServiceHelper.generateRandomProject();
 const projectWithGridFsImage = ServiceHelper.generateRandomProject();
 const projectWithFsImage = ServiceHelper.generateRandomProject();
@@ -37,8 +37,8 @@ const projectWithFsImage = ServiceHelper.generateRandomProject();
 const projects = [
 	testProject,
 	projectWithGridFsImage,
-	projectWithFsImage
-]
+	projectWithFsImage,
+];
 
 const fsImageData = ServiceHelper.generateRandomString();
 const gridFsImageData = ServiceHelper.generateRandomString();
@@ -82,12 +82,12 @@ const testGetProjectList = () => {
 		});
 		test('should return a project list if the user has a valid session and is admin of teamspace', async () => {
 			const res = await agent.get(`${route}?key=${tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual({ projects: projects.map(p => ({ _id: p.id, name: p.name, isAdmin: true })) });
+			expect(res.body).toEqual({ projects: projects.map((p) => ({ _id: p.id, name: p.name, isAdmin: true })) });
 		});
 
 		test('should return a project list if the user has a valid session and has access to a model within one of the project', async () => {
 			const res = await agent.get(`${route}?key=${modelPermUser.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual({ projects: [{ _id:testProject.id, name: testProject.name, isAdmin: false }] });
+			expect(res.body).toEqual({ projects: [{ _id: testProject.id, name: testProject.name, isAdmin: false }] });
 		});
 	});
 };
@@ -414,18 +414,19 @@ const testDeleteProjectImage = () => {
 			expect(res.body.code).toEqual(templates.projectNotFound.code);
 		});
 
-		test('should update project image', async () => {
-			await agent.delete(`${route(testProject.id)}?key=${tsAdmin.apiKey}`)
+		test('should delete project image', async () => {
+			await agent.put(`${route(testProject.id)}?key=${tsAdmin.apiKey}`)
 				.attach('file', image)
 				.expect(templates.ok.status);
 
-			const res = await agent.get(`${route(testProject.id)}?key=${tsAdmin.apiKey}`)
+			await agent.get(`${route(testProject.id)}?key=${tsAdmin.apiKey}`)
 				.expect(templates.ok.status);
-
-			expect(res.body).toEqual(fs.readFileSync(image));
 
 			await agent.delete(`${route(testProject.id)}?key=${tsAdmin.apiKey}`)
 				.expect(templates.ok.status);
+
+			await agent.get(`${route(testProject.id)}?key=${tsAdmin.apiKey}`)
+				.expect(templates.fileNotFound.status);
 		});
 	});
 };
@@ -444,4 +445,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testGetProject();
 	testGetProjectImage();
 	testUpdateProjectImage();
+	testDeleteProjectImage();
 });
