@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FederationsHooksSelectors, SequencesHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { camelCase, isEmpty, isEqual, isObject, mapKeys, get } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
@@ -31,7 +31,8 @@ import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } f
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 
 export const SEQUENCING_MODULE = 'modules.sequencing';
-export const SEQUENCING_MODULE_START = `${SEQUENCING_MODULE}.Start Time`;
+const START_TIME = 'Start Time';
+export const SEQUENCING_MODULE_START = `${SEQUENCING_MODULE}.${START_TIME}`;
 export const SEQUENCING_MODULE_END = `${SEQUENCING_MODULE}.End Time`;
 
 export const modelIsFederation = (modelId: string) => !!FederationsHooksSelectors.selectFederationById(modelId);
@@ -66,7 +67,14 @@ export const getDefaultTicket = (template: ITemplate): EditableTicket => {
 			[name || type]: templatePropertiesToTicketProperties(moduleProperties),
 		}),
 		{},
-	);
+	) as any;
+
+	const currentSequenceDateTime = SequencesHooksSelectors.selectSelectedDate();
+	
+	if (modules.sequencing && currentSequenceDateTime) {
+		modules.sequencing[START_TIME] = new Date(currentSequenceDateTime).getTime();
+	}
+
 	return ({
 		title: '',
 		type: template._id,

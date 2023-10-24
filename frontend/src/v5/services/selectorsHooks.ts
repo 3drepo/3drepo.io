@@ -23,6 +23,7 @@ import * as ProjectsSelectors from '@/v5/store/projects/projects.selectors';
 import * as FederationsSelectors from '@/v5/store/federations/federations.selectors';
 import * as GroupsSelectors from '@/v4/modules/groups/groups.selectors';
 import * as RevisionsSelectors from '@/v5/store/revisions/revisions.selectors';
+import * as SequencesSelctors from '@/v4/modules/sequences/sequences.selectors';
 import * as TicketsSelectors from '@/v5/store/tickets/tickets.selectors';
 import * as TicketsCardSelectors from '@/v5/store/tickets/card/ticketsCard.selectors';
 import * as TicketCommentsSelectors from '@/v5/store/tickets/comments/ticketComments.selectors';
@@ -37,6 +38,7 @@ export const FederationsHooksSelectors = createHooksSelectors(FederationsSelecto
 export const GroupsHooksSelectors = createHooksSelectors(GroupsSelectors);
 export const ProjectsHooksSelectors = createHooksSelectors(ProjectsSelectors);
 export const RevisionsHooksSelectors = createHooksSelectors(RevisionsSelectors);
+export const SequencesHooksSelectors = createHooksSelectors(SequencesSelctors);
 export const TicketsHooksSelectors = createHooksSelectors(TicketsSelectors);
 export const TicketsCardHooksSelectors = createHooksSelectors(TicketsCardSelectors);
 export const TicketCommentsHooksSelectors = createHooksSelectors(TicketCommentsSelectors);
