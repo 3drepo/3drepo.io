@@ -18,8 +18,9 @@
 const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../helper/services');
-const { src } = require('../../../../helper/path');
-
+const { image, src } = require('../../../../helper/path');
+const { stringToUUID } = require('../../../../../../src/v5/utils/helper/uuids');
+const fs = require('fs');
 const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
@@ -28,10 +29,19 @@ let agent;
 // These are the users being used for tests
 const [tsAdmin, nonAdminUser, unlicencedUser, modelPermUser] = times(4, () => ServiceHelper.generateUserCredentials());
 
-const testProject = {
-	_id: ServiceHelper.generateUUIDString(),
-	name: ServiceHelper.generateRandomString(),
-};
+
+const testProject = ServiceHelper.generateRandomProject();
+const projectWithGridFsImage = ServiceHelper.generateRandomProject();
+const projectWithFsImage = ServiceHelper.generateRandomProject();
+
+const projects = [
+	testProject,
+	projectWithGridFsImage,
+	projectWithFsImage
+]
+
+const fsImageData = ServiceHelper.generateRandomString();
+const gridFsImageData = ServiceHelper.generateRandomString();
 
 const teamspace = 'teamspace';
 const model = ServiceHelper.generateRandomModel({ viewers: [modelPermUser.user] });
@@ -46,8 +56,13 @@ const setupData = async () => {
 		ServiceHelper.db.createUser(modelPermUser, [teamspace]),
 	]);
 
-	await ServiceHelper.db.createProject(teamspace, testProject._id, testProject.name, [model._id]);
+	await ServiceHelper.db.createProject(teamspace, testProject.id, testProject.name, [model._id]);
 	await ServiceHelper.db.createModel(teamspace, model._id, model.name, model.properties);
+
+	await ServiceHelper.db.createProject(teamspace, projectWithGridFsImage.id, projectWithGridFsImage.name);
+	await ServiceHelper.db.createProject(teamspace, projectWithFsImage.id, projectWithFsImage.name);
+	await ServiceHelper.db.createProjectImage(teamspace, stringToUUID(projectWithFsImage.id), 'fs', fsImageData);
+	await ServiceHelper.db.createProjectImage(teamspace, stringToUUID(projectWithGridFsImage.id), 'gridfs', gridFsImageData);
 };
 
 const testGetProjectList = () => {
@@ -67,12 +82,12 @@ const testGetProjectList = () => {
 		});
 		test('should return a project list if the user has a valid session and is admin of teamspace', async () => {
 			const res = await agent.get(`${route}?key=${tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual({ projects: [{ ...testProject, isAdmin: true }] });
+			expect(res.body).toEqual({ projects: projects.map(p => ({ _id: p.id, name: p.name, isAdmin: true })) });
 		});
 
 		test('should return a project list if the user has a valid session and has access to a model within one of the project', async () => {
 			const res = await agent.get(`${route}?key=${modelPermUser.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual({ projects: [{ ...testProject, isAdmin: false }] });
+			expect(res.body).toEqual({ projects: [{ _id:testProject.id, name: testProject.name, isAdmin: false }] });
 		});
 	});
 };
@@ -130,7 +145,7 @@ const testCreateProject = () => {
 
 const testUpdateProject = () => {
 	describe('Update project', () => {
-		const route = `/v5/teamspaces/${teamspace}/projects/${testProject._id}`;
+		const route = `/v5/teamspaces/${teamspace}/projects/${testProject.id}`;
 
 		test('should fail without a valid session', async () => {
 			const res = await agent.patch(route).expect(templates.notLoggedIn.status);
@@ -138,7 +153,7 @@ const testUpdateProject = () => {
 		});
 
 		test('should fail without a valid teamspace', async () => {
-			const res = await agent.patch(`/v5/teamspaces/badTSName/projects/${testProject._id}?key=${tsAdmin.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.patch(`/v5/teamspaces/badTSName/projects/${testProject.id}?key=${tsAdmin.apiKey}`).expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
@@ -216,17 +231,17 @@ const testDeleteProject = () => {
 		const route = (projectId) => `/v5/teamspaces/${teamspace}/projects/${projectId}`;
 
 		test('should fail without a valid session', async () => {
-			const res = await agent.delete(route(testProject._id)).expect(templates.notLoggedIn.status);
+			const res = await agent.delete(route(testProject.id)).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
 		test('should fail without a valid teamspace', async () => {
-			const res = await agent.delete(`/v5/teamspaces/badTSName/projects/${testProject._id}?key=${tsAdmin.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.delete(`/v5/teamspaces/badTSName/projects/${testProject.id}?key=${tsAdmin.apiKey}`).expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
 		test('should fail if the user is not teamspace admin', async () => {
-			const res = await agent.delete(`${route(testProject._id)}?key=${nonAdminUser.apiKey}`).expect(templates.notAuthorized.status);
+			const res = await agent.delete(`${route(testProject.id)}?key=${nonAdminUser.apiKey}`).expect(templates.notAuthorized.status);
 			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 
@@ -253,17 +268,17 @@ const testGetProject = () => {
 		const route = (projectId) => `/v5/teamspaces/${teamspace}/projects/${projectId}`;
 
 		test('should fail without a valid session', async () => {
-			const res = await agent.get(route(testProject._id)).expect(templates.notLoggedIn.status);
+			const res = await agent.get(route(testProject.id)).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
 		test('should fail without a valid teamspace', async () => {
-			const res = await agent.get(`/v5/teamspaces/badTSName/projects/${testProject._id}?key=${tsAdmin.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.get(`/v5/teamspaces/badTSName/projects/${testProject.id}?key=${tsAdmin.apiKey}`).expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
 		test('should fail if the user is not teamspace member', async () => {
-			const res = await agent.delete(`${route(testProject._id)}?key=${unlicencedUser.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.get(`${route(testProject.id)}?key=${unlicencedUser.apiKey}`).expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
@@ -273,8 +288,144 @@ const testGetProject = () => {
 		});
 
 		test('should get project', async () => {
-			const res = await agent.get(`${route(testProject._id)}?key=${tsAdmin.apiKey}`).expect(templates.ok.status);
+			const res = await agent.get(`${route(testProject.id)}?key=${tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(res.body).toEqual({ name: testProject.name });
+		});
+	});
+};
+
+const testGetProjectImage = () => {
+	describe('Get project', () => {
+		const route = (projectId) => `/v5/teamspaces/${teamspace}/projects/${projectId}/image`;
+
+		test('should fail without a valid session', async () => {
+			const res = await agent.get(route(projectWithFsImage.id))
+				.expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail without a valid teamspace', async () => {
+			const res = await agent.get(`/v5/teamspaces/${ServiceHelper.generateRandomString()}/projects/${projectWithFsImage.id}/image?key=${tsAdmin.apiKey}`)
+				.expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the user is not teamspace member', async () => {
+			const res = await agent.get(`${route(projectWithFsImage.id)}?key=${unlicencedUser.apiKey}`)
+				.expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail without a valid project', async () => {
+			const res = await agent.get(`/v5/teamspaces/teamspace/projects/${ServiceHelper.generateRandomString()}/image?key=${tsAdmin.apiKey}`)
+				.expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should fail with a project that has no image', async () => {
+			const res = await agent.get(`/v5/teamspaces/teamspace/projects/${testProject.id}/image?key=${tsAdmin.apiKey}`)
+				.expect(templates.fileNotFound.status);
+			expect(res.body.code).toEqual(templates.fileNotFound.code);
+		});
+
+		test('should get project image stored in fs', async () => {
+			const res = await agent.get(`${route(projectWithFsImage.id)}?key=${tsAdmin.apiKey}`)
+				.expect(templates.ok.status);
+			expect(res.body).toEqual(Buffer.from(fsImageData));
+		});
+
+		test('should get project image stored in gridfs', async () => {
+			const res = await agent.get(`${route(projectWithGridFsImage.id)}?key=${tsAdmin.apiKey}`)
+				.expect(templates.ok.status);
+			expect(res.body).toEqual(Buffer.from(gridFsImageData));
+		});
+	});
+};
+
+const testUpdateProjectImage = () => {
+	describe('Update project', () => {
+		const route = (projectId) => `/v5/teamspaces/${teamspace}/projects/${projectId}/image`;
+
+		test('should fail without a valid session', async () => {
+			const res = await agent.put(route(testProject.id))
+				.expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail without a valid teamspace', async () => {
+			const res = await agent.put(`/v5/teamspaces/${ServiceHelper.generateRandomString()}/projects/${testProject.id}/image?key=${tsAdmin.apiKey}`)
+				.expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the user is not teamspace member', async () => {
+			const res = await agent.put(`${route(testProject.id)}?key=${unlicencedUser.apiKey}`)
+				.expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail without a valid project', async () => {
+			const res = await agent.put(`/v5/teamspaces/teamspace/projects/${ServiceHelper.generateRandomString()}/image?key=${tsAdmin.apiKey}`)
+				.expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should update project image', async () => {
+			await agent.put(`${route(testProject.id)}?key=${tsAdmin.apiKey}`)
+				.attach('file', image)
+				.expect(templates.ok.status);
+
+			const res = await agent.get(`${route(testProject.id)}?key=${tsAdmin.apiKey}`)
+				.expect(templates.ok.status);
+
+			expect(res.body).toEqual(fs.readFileSync(image));
+
+			await agent.delete(`${route(testProject.id)}?key=${tsAdmin.apiKey}`)
+				.expect(templates.ok.status);
+		});
+	});
+};
+
+const testDeleteProjectImage = () => {
+	describe('Delete project', () => {
+		const route = (projectId) => `/v5/teamspaces/${teamspace}/projects/${projectId}/image`;
+
+		test('should fail without a valid session', async () => {
+			const res = await agent.delete(route(testProject.id))
+				.expect(templates.notLoggedIn.status);
+			expect(res.body.code).toEqual(templates.notLoggedIn.code);
+		});
+
+		test('should fail without a valid teamspace', async () => {
+			const res = await agent.delete(`/v5/teamspaces/${ServiceHelper.generateRandomString()}/projects/${testProject.id}/image?key=${tsAdmin.apiKey}`)
+				.expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail if the user is not teamspace member', async () => {
+			const res = await agent.delete(`${route(testProject.id)}?key=${unlicencedUser.apiKey}`)
+				.expect(templates.teamspaceNotFound.status);
+			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
+		});
+
+		test('should fail without a valid project', async () => {
+			const res = await agent.delete(`/v5/teamspaces/teamspace/projects/${ServiceHelper.generateRandomString()}/image?key=${tsAdmin.apiKey}`)
+				.expect(templates.projectNotFound.status);
+			expect(res.body.code).toEqual(templates.projectNotFound.code);
+		});
+
+		test('should update project image', async () => {
+			await agent.delete(`${route(testProject.id)}?key=${tsAdmin.apiKey}`)
+				.attach('file', image)
+				.expect(templates.ok.status);
+
+			const res = await agent.get(`${route(testProject.id)}?key=${tsAdmin.apiKey}`)
+				.expect(templates.ok.status);
+
+			expect(res.body).toEqual(fs.readFileSync(image));
+
+			await agent.delete(`${route(testProject.id)}?key=${tsAdmin.apiKey}`)
+				.expect(templates.ok.status);
 		});
 	});
 };
@@ -291,4 +442,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testUpdateProject();
 	testDeleteProject();
 	testGetProject();
+	testGetProjectImage();
+	testUpdateProjectImage();
 });

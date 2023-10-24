@@ -47,6 +47,7 @@ const FilesManager = require('../../../src/v5/services/filesManager');
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
 const { USERS_DB_NAME, USERS_COL, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
+const { COL_NAME } = require(`${src}/models/projectSettings.constants`);
 const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
 const db = {};
@@ -251,6 +252,13 @@ db.createAvatar = async (username, type, avatarData) => {
 	const { defaultStorage } = config;
 	config.defaultStorage = type;
 	await FilesManager.storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarData);
+	config.defaultStorage = defaultStorage;
+};
+
+db.createProjectImage = async (teamspace, project, type, imageData) => {
+	const { defaultStorage } = config;
+	config.defaultStorage = type;
+	await FilesManager.storeFile(teamspace, COL_NAME, project, imageData);
 	config.defaultStorage = defaultStorage;
 };
 

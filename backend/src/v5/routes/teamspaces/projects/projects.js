@@ -16,7 +16,7 @@
  */
 
 const { hasAccessToTeamspace, isAdminToProject, isTeamspaceAdmin } = require('../../../middleware/permissions/permissions');
-const { validateProjectData, validateProjectImage } = require('../../../middleware/dataConverter/inputs/teamspaces/projects');
+const { validateProjectData, validateProjectImage, projectExists } = require('../../../middleware/dataConverter/inputs/teamspaces/projects');
 const Projects = require('../../../processors/teamspaces/projects');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../utils/helper/uuids');
@@ -357,7 +357,7 @@ const establishRoutes = () => {
 	 *               type: string
 	 *               format: binary
 	 */
-	router.get('/:project/image', hasAccessToTeamspace, getImage);
+	router.get('/:project/image', hasAccessToTeamspace, projectExists, getImage);
 
 	/**
 	 * @openapi
