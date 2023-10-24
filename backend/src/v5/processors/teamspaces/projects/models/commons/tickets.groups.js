@@ -87,6 +87,7 @@ TicketGroups.getTicketGroupById = async (teamspace, project, model, revId, ticke
 	if (group.rules) {
 		const modelsToQuery = containers || [model];
 		const rev = containers ? undefined : revId;
+
 		group.objects = (await Promise.all(
 			modelsToQuery.map(async (con) => {
 				const objs = await getObjectArrayFromRules(teamspace, project, con, rev, group.rules);

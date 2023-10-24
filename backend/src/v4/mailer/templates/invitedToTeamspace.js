@@ -531,7 +531,7 @@ const html = data => `
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
 
 
-                                        <img align="center" alt="" src="https://www.3drepo.io/assets/images/logo.png" width="250" style="max-width: 250px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 0%;" class="mcnImage">
+                                        <img align="center" alt="" src="https://www.3drepo.io/assets/images/logo-dark.png" width="250" style="max-width: 250px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 0%;" class="mcnImage">
 
 
                             </td>

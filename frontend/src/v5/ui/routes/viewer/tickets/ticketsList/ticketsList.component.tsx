@@ -17,13 +17,13 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { isEmpty, get } from 'lodash';
+import { isEmpty } from 'lodash';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
-import { TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
+import { getTicketIsCompleted } from '@/v5/store/tickets/tickets.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
@@ -59,29 +59,21 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		setSelectedTemplates(new Set(selectedTemplates));
 	};
 
-	const matchesCompletedState = (ticket) => {
-		const issuePropertyStatus = get(ticket, 'properties.Status');
-		const treatmentStatus = get(ticket, 'modules.safetibase.Treatment Status');
-
-		const isCompletedIssueProperty = [TicketStatuses.CLOSED, TicketStatuses.VOID].includes(issuePropertyStatus);
-		const isCompletedTreatmentStatus = [TreatmentStatuses.AGREED_FULLY, TreatmentStatuses.VOID].includes(treatmentStatus);
-
-		return (isCompletedIssueProperty || isCompletedTreatmentStatus) === showingCompleted;
-	};
-
 	const filterByTemplates = (items) => {
 		if (!selectedTemplates.size) return items;
 		return items.filter((ticket) => selectedTemplates.has(ticket.type));
 	};
 
+	const filterTicketByCompletedStatus = (ticket) => getTicketIsCompleted(ticket) === showingCompleted;
+
 	useEffect(() => {
-		const itemsFilteredByComplete = tickets.filter((ticket) => matchesCompletedState(ticket));
+		const itemsFilteredByComplete = tickets.filter(filterTicketByCompletedStatus);
 		setTicketsFilteredByComplete(itemsFilteredByComplete);
 
 		const reducedTemplates = templates.reduce((partial, { _id, ...other }) => {
 			const itemsFilteredByTemplate = tickets.filter((ticket) => _id === ticket.type);
 			if (!itemsFilteredByTemplate.length) return partial;
-			const { length } = itemsFilteredByTemplate.filter((ticket) => matchesCompletedState(ticket));
+			const { length } = itemsFilteredByTemplate.filter(filterTicketByCompletedStatus);
 			return [...partial, { _id, length, ...other }];
 		}, []);
 		setAvailableTemplates(reducedTemplates);
@@ -127,7 +119,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		<SearchContextComponent filteringFunction={filterItems} items={ticketsFilteredByComplete}>
 			<TicketSearchInput />
 			<SearchContext.Consumer>
-				{ ({ filteredItems }: SearchContextType<ITicket>) => (
+				{({ filteredItems }: SearchContextType<ITicket>) => (
 					<>
 						<Filters>
 							<CompletedFilterChip
@@ -149,7 +141,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 								);
 							})}
 						</Filters>
-						{ filterByTemplates(filteredItems).length ? (
+						{filterByTemplates(filteredItems).length ? (
 							<List>
 								{filterByTemplates(filteredItems).map((ticket) => (
 									<TicketItem

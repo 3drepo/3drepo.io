@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import _ from 'lodash';
+import { sortByName } from '@/v5/store/store.helpers';
 
 const splitPattern = /::+/g;
 const trimPattern = /(?=^)::+|::+(?=$)/g;
@@ -33,7 +33,7 @@ const getGroupNameParent = (group):string => {
 
 export const groupsToTree = (groups) => {
 	// eslint-disable-next-line no-param-reassign
-	groups = _.sortBy(groups, ({ name }) => name.toLowerCase());
+	groups = sortByName(groups);
 
 	groups.sort((groupA, groupB) => {
 		const parentA = getGroupNameParent(groupA);
