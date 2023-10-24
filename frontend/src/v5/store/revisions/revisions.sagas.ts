@@ -30,11 +30,11 @@ import { ContainersActions } from '../containers/containers.redux';
 import { UploadStatuses } from '../containers/containers.types';
 import { createContainerFromRevisionBody, createFormDataFromRevisionBody } from './revisions.helpers';
 
-export function* fetch({ teamspace, projectId, containerId }: FetchAction) {
+export function* fetch({ teamspace, projectId, containerId, onSuccess }: FetchAction) {
 	yield put(RevisionsActions.setIsPending(containerId, true));
 	try {
 		const { data: { revisions } } = yield API.Revisions.fetchRevisions(teamspace, projectId, containerId);
-
+		onSuccess?.();
 		yield put(RevisionsActions.fetchSuccess(containerId, revisions));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {

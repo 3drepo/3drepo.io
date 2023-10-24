@@ -26,7 +26,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { name as containerNameScheme } from '@/v5/validation/containerAndFederationSchemes/validators';
 import { isCollaboratorRole } from '@/v5/store/store.helpers';
-import { ContainersActionsDispatchers, RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DestinationAutocomplete, DestinationInput, NewOrExisting } from './uploadListItemDestination.styles';
 import { NewContainer } from './options/newContainer/newContainer.component';
 import { AlreadyUsedName } from './options/alreadyUsedName/alreadyUsedName.component';
@@ -66,7 +66,7 @@ export const UploadListItemDestination = memo(({
 }: IUploadListItemDestination): JSX.Element => {
 	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>('');
 	const [error, setError] = useState('');
-	const { getValues, setValue, trigger } = useFormContext();
+	const { getValues, setValue } = useFormContext();
 
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -96,7 +96,6 @@ export const UploadListItemDestination = memo(({
 		} catch (validationError) {
 			setError(validationError.message);
 			setNewOrExisting('');
-			trigger(`${revisionPrefix}.containerName`);
 		}
 	};
 
@@ -161,11 +160,7 @@ export const UploadListItemDestination = memo(({
 	const onDestinationChange = (e, newVal: IContainer | null) => {
 		const sanitisedValue = sanitiseContainer(newVal);
 		if (newVal?._id) {
-			RevisionsActionsDispatchers.fetch(
-				teamspace,
-				projectId,
-				newVal._id,
-			);
+
 			ContainersActionsDispatchers.fetchContainerSettings(
 				teamspace,
 				projectId,
@@ -200,12 +195,6 @@ export const UploadListItemDestination = memo(({
 		setValue(`${revisionPrefix}.containerDesc`, selectedContainer?.desc);
 	}, [selectedContainer]);
 
-	useEffect(() => {
-		if (!value) return;
-		// this triggers the check to see if revision name already used in container
-		// after the revisions fetch is made
-		trigger(`${revisionPrefix}.containerName`);
-	}, [value]);
 
 	return (
 		<DestinationAutocomplete

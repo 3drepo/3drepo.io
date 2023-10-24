@@ -19,6 +19,9 @@ import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import filesize from 'filesize';
 import { trimmedString } from '../shared/validators';
+import { getState } from '@/v4/modules/store';
+import { selectRevisions, selectRevisionsPending } from '@/v5/store/revisions/revisions.selectors';
+import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 const stripIfBlankString = (value) => (
 	value === ''
@@ -108,10 +111,21 @@ export const revisionTag = Yup.string()
 			id: 'validation.model.tag.alreadyExisting',
 			defaultMessage: 'This tag is already used within this container',
 		}),
-		(tagValue, testContext) => (
-			!(testContext.options.context.alreadyExistingTags[testContext.path] || [])
-				.includes(tagValue)
-		),
+		async (tagValue, testContext) => {
+			const { containerId } = testContext.parent;
+
+			if (!containerId) return true; // Is a new container, it has no revisions
+
+			const isPending = selectRevisionsPending(getState(), containerId);
+
+			if (isPending) {
+				const { teamspace, project }  = testContext.options.context;
+				await new Promise((resolve) => RevisionsActionsDispatchers.fetch(teamspace, project, containerId, resolve as any));
+			}
+
+			const revisions = selectRevisions(getState(), containerId);
+			return !revisions.find(({ tag }) => tagValue === tag);
+		},
 	);
 
 export const revisionDesc = Yup.lazy((value) => (

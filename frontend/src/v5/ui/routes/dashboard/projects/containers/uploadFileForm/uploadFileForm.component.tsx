@@ -88,25 +88,21 @@ export const UploadFileForm = ({
 }: IUploadFileForm): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const revisionsByContainer = RevisionsHooksSelectors.selectRevisionsByContainer();
 	const allUploadsComplete = RevisionsHooksSelectors.selectUploadIsComplete();
 	const presetContainer = ContainersHooksSelectors.selectContainerById(presetContainerId);
 
 	const [isUploading, setIsUploading] = useState<boolean>(false);
-	const [alreadyExistingTags, setAlreadyExistingTags] = useState({});
 
 	const formData = useForm<UploadFieldArray>({
 		mode: 'onChange',
 		resolver: yupResolver(UploadsSchema),
-		context: { alreadyExistingTags, alreadyExistingNames: [] },
+		context: { alreadyExistingNames: [], teamspace, project },
 	});
 
 	const {
 		control,
 		handleSubmit,
 		formState: { isValid },
-		getValues,
-		trigger,
 	} = formData;
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -115,7 +111,7 @@ export const UploadFileForm = ({
 	});
 
 	const revTagMaxValue = useMemo(() => {
-		const schemaDescription = Yup.reach(UploadsSchema, 'uploads.revisionTag').describe();
+		const schemaDescription =  Yup.reach(UploadsSchema, 'uploads.revisionTag').describe();
 		const revTagMax = schemaDescription.tests.find((t) => t.name === 'max');
 		return revTagMax.params.max;
 	}, []);
@@ -152,8 +148,6 @@ export const UploadFileForm = ({
 		append(filesToAppend);
 	};
 
-	const containersNamesInModal = getValues('uploads')?.map(({ containerName }) => containerName);
-
 	const removeUploadById = useCallback((uploadId) => {
 		remove(fields.findIndex((field) => field.uploadId === uploadId));
 	}, [fields.length]);
@@ -177,18 +171,6 @@ export const UploadFileForm = ({
 		setIsUploading(false);
 		onClickClose();
 	};
-
-	useEffect(() => {
-		const tags = {};
-		getValues('uploads').forEach(({ containerId }, index) => {
-			tags[`uploads[${index}].revisionTag`] = revisionsByContainer?.[containerId]?.map(({ tag }) => tag);
-		});
-		setAlreadyExistingTags(tags);
-	}, [JSON.stringify(revisionsByContainer), JSON.stringify(containersNamesInModal)]);
-
-	useEffect(() => {
-		trigger();
-	}, [alreadyExistingTags]);
 
 	useEffect(() => {
 		if (presetFile) {

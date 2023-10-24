@@ -26,6 +26,8 @@ import { UploadProgress } from './components/uploadProgress/uploadProgress.compo
 import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
 import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag/uploadListItemRevisionTag.component';
 import { UploadListItemButton } from './uploadListItem.styles';
+import { useFormContext } from 'react-hook-form';
+import { useEffect } from 'react';
 
 type IUploadListItem = {
 	uploadId: string;
@@ -52,6 +54,16 @@ export const UploadListItem = ({
 }: IUploadListItem): JSX.Element => {
 	const revisionPrefix = `uploads.${index}`;
 	const uploadErrorMessage: string = RevisionsHooksSelectors.selectUploadError(uploadId);
+	
+	const { watch, trigger } = useFormContext();
+
+	const contName = watch(`${revisionPrefix}.containerName`);
+
+	useEffect(() => {
+		trigger(`${revisionPrefix}.revisionTag`);
+	}, [contName]);
+
+
 	return (
 		<UploadListItemRow
 			selected={isSelected}

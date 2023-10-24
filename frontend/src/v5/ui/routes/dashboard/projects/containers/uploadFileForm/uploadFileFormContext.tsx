@@ -29,6 +29,7 @@ const defaultValue: UploadsContextType = {
 	selectedId: null,
 	setSelectedId: () => {},
 };
+
 export const UploadFileFormContext = createContext(defaultValue);
 UploadFileFormContext.displayName = 'UploadFileFormContext';
 

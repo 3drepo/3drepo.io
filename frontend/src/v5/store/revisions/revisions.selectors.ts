@@ -18,20 +18,27 @@
 import { createSelector } from 'reselect';
 import { prepareRevisionData } from './revisions.helpers';
 import { IRevisionsState } from './revisions.redux';
+import { selectContainerById } from '../containers/containers.selectors';
 
 const selectRevisionsDomain = (state): IRevisionsState => state.revisions;
 const selectContainerIdParam = (_, containerId: string) => containerId;
 
 export const selectRevisionsByContainer = createSelector(
 	selectRevisionsDomain,
-	(state) => state.revisionsByContainer || [],
+	(state) => state.revisionsByContainer || {},
 );
 
 export const selectRevisions = createSelector(
-	selectRevisionsDomain,
+	selectRevisionsByContainer,
 	selectContainerIdParam,
-	(state, containerId) => state.revisionsByContainer[containerId]?.map((revision) => prepareRevisionData(revision))
+	(revisionsByContainer, containerId) => revisionsByContainer[containerId]?.map((revision) => prepareRevisionData(revision))
 		|| [],
+);
+
+export const selectRevisionsPending = createSelector(
+	selectRevisions,
+	selectContainerById,
+	(revisions, container) => revisions.length !== container.revisionsCount,
 );
 
 export const selectIsPending: (any, string) => boolean = createSelector(
