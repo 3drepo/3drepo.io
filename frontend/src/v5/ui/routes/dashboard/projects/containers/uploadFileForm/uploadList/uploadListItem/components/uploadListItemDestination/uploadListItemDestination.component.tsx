@@ -32,6 +32,7 @@ import { AlreadyUsedName } from './options/alreadyUsedName/alreadyUsedName.compo
 import { ExistingContainer } from './options/existingContainer/existingContainer.component';
 import { OptionsBox } from './options/optionsBox.styles';
 import { NewContainerInUse } from './options/NewContainerInUse/newContainerInUse.component';
+import { orderBy } from 'lodash';
 
 const NO_OPTIONS_TEXT_ADMIN = formatMessage({
 	id: 'uploads.destination.noOptions.admin',
@@ -53,6 +54,8 @@ const EMPTY_OPTION = prepareSingleContainerData({
 const NEW_ID = 'new';
 
 const getFilteredContainersOptions = createFilterOptions<IContainer>({ trim: true });
+
+const sortByName = (options) => orderBy(options, ({ name }) => name.toLowerCase());
 
 interface IUploadListItemDestination {
 	value?: string;
@@ -200,7 +203,7 @@ export const UploadListItemDestination = memo(({
 			onInputChange={handleInputChange}
 			onChange={onDestinationChange}
 			onOpen={onOpen}
-			options={[...containers, ...newContainersInModal]}
+			options={sortByName([...containers, ...newContainersInModal])}
 			renderOption={renderOption}
 			renderInput={({ InputProps, ...params }) => (
 				<DestinationInput
