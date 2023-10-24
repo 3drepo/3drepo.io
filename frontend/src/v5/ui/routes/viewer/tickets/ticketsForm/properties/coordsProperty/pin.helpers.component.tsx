@@ -18,11 +18,14 @@ import { useParams } from 'react-router-dom';
 import { rgbaToHex } from '@/v4/helpers/colors';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { isArray } from 'lodash';
+import { get, isArray, isObject } from 'lodash';
 import { theme } from '@/v5/ui/themes/theme';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 
+const DEFAULT_COLOR = theme.palette.primary.main;
+
 const findByName = (array, name) => array.find(({ name: n }) => n === name);
+const rgbArrayToHex = (obj) => rgbaToHex(obj?.toString());
 
 type IGetPinSchema = {
 	name: string;
@@ -30,11 +33,19 @@ type IGetPinSchema = {
 };
 const getPinSchema = ({ name, template }: IGetPinSchema) => {
 	if (!template) return null;
-	if (name === 'properties.Pin') return template.config.pin;
+	if (name === 'properties.Pin') return template.config.pin; // Default Pin
 	const path = name.split('.');
 	if (path[0] === 'properties') return findByName(template.properties, path[1]);
 	const module = findByName(template.modules, path[1]);
 	return findByName(module.properties, path[2]);
+};
+
+const getColorFromMapping = (ticket, pinSchema) => {
+	const { property: { module = 'properties', name }, mapping } = pinSchema.color;
+	const linkedValue = module === 'properties' ? get(ticket.properties, name) : get(ticket.modules, [module, name]);
+	const defaultColorHex = rgbArrayToHex(mapping.find((option) => option.default)?.default) || DEFAULT_COLOR;
+	const rgb = mapping.find(({ value }) => value === linkedValue)?.color;
+	return rgb ? rgbArrayToHex(rgb) : defaultColorHex;
 };
 
 export const getPinColorHex = (name: string) => {
@@ -44,5 +55,8 @@ export const getPinColorHex = (name: string) => {
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
 	
 	const pinSchema = getPinSchema({ name, template });
-	return isArray(pinSchema?.color) ? rgbaToHex(pinSchema.color.toString()) : theme.palette.primary.main;
+
+	if (isArray(pinSchema?.color)) return rgbArrayToHex(pinSchema.color);
+	if (isObject(pinSchema?.color)) return getColorFromMapping(ticket, pinSchema);
+	return DEFAULT_COLOR;
 };
