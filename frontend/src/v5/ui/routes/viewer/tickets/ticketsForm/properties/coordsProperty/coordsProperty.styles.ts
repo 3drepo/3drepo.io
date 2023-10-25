@@ -76,6 +76,7 @@ export const FlexRow = styled.div`
 export const PinSelectContainer = styled.div<{ color: string, isSelected: boolean; }>`
 	outline: 1px solid;
 	outline-color: ${({ color, isSelected, theme }) => isSelected ? color : theme.palette.secondary.lightest};
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	border-radius: 5px;
 	margin-left: auto;
 	height: 44px;
