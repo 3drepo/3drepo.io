@@ -16,7 +16,7 @@
  */
 
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
-import { useCallback, useContext } from 'react';
+import { useContext } from 'react';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { UploadListItem } from './uploadListItem/uploadListItem.component';
@@ -44,11 +44,11 @@ export const UploadList = ({
 	const { selectedId, setSelectedId } = useContext(UploadFileFormContext);
 	const { sortedList, setSortConfig } = useOrderedList(values, DEFAULT_SORT_CONFIG);
 
-	const memoizedEdit = useCallback((id) => setSelectedId(id), []);
-	const memoizedDelete = useCallback((id, isSelected) => {
+	const deleteItem = (id, isSelected) => {
 		removeUploadById(id);
 		if (isSelected) setSelectedId();
-	}, [values.length]);
+	};
+
 	return (
 		<>
 			<UploadListHeaders
@@ -59,9 +59,9 @@ export const UploadList = ({
 			<ListContainer>
 				{
 					values.map(({ uploadId, file, extension }, index) => {
-						const onClickEdit = () => memoizedEdit(uploadId);
+						const onClickEdit = () => setSelectedId(uploadId);
 						const selected = !isUploading && uploadId === selectedId;
-						const onClickDelete = () => memoizedDelete(uploadId, selected);
+						const onClickDelete = () => deleteItem(uploadId, selected);
 						return (
 							<UploadListItemRowWrapper
 								key={uploadId}
