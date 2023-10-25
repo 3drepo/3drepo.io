@@ -22,12 +22,6 @@ import { forwardRef } from 'react';
 
 // These inputes are temporal. We are using them for the upload form for improved performance. With more testing 
 // we should replace the ones in  frominputs
-
-
-
-// error={!!formError}
-// helperText={formError?.message}
-
 type Props = TextFieldProps & {
 	formError?: any
 };

@@ -21,7 +21,7 @@ import { DashboardListHeader } from '@components/dashboard/dashboardList/dashboa
 import { FormModal } from '@controls/formModal/formModal.component';
 import { Typography } from '@controls/typography';
 import { memo } from 'react';
-import { MODAL_BODY_HEIGHT } from '@controls/formModal/modalBody/modalBody.styles';
+import { MODAL_BODY_MAX_HEIGHT } from '@controls/formModal/modalBody/modalBody.styles';
 
 const MODAL_PADDING = 35;
 
@@ -36,26 +36,25 @@ export const Modal = memo(styled(FormModal)`
 	.MuiDialogContent-root {
 		overflow: hidden;
 	}
-`, (prevProps, nextProps) => {
-	const val = prevProps.isValid === nextProps.isValid
+`, (prevProps, nextProps) => 
+	(prevProps.isValid === nextProps.isValid
 		&& (prevProps.fields.length === nextProps.fields.length )
 		&& prevProps.isUploading === nextProps.isUploading
-		&& prevProps.open === nextProps.open;
-
-	return val;
-});
+		&& prevProps.open === nextProps.open),
+);
 
 export const UploadsContainer = styled.div`
 	display: flex;
 	flex-direction: row;
-	max-height: min(calc(100vh - 211px), ${MODAL_BODY_HEIGHT});
+	max-height: min(calc(100vh - 211px), ${MODAL_BODY_MAX_HEIGHT});
 	width: 100%;
 	box-sizing: border-box;
 	overflow: hidden;
 `;
 
 export const UploadsListScroll = styled.div`
-	max-height: min(calc(100vh - 211px), ${MODAL_BODY_HEIGHT});
+	min-height: ${MODAL_BODY_MAX_HEIGHT};
+	max-height: min(calc(100vh - 211px), ${MODAL_BODY_MAX_HEIGHT});
 	width: 100%;
 	overflow-y: scroll;
 `;

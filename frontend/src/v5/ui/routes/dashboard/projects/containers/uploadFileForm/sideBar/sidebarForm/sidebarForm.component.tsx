@@ -56,7 +56,7 @@ export const SidebarForm = ({
 	const { getValues, formState: { errors } } = useFormContext();
 	const [containerId, extension, containerName] = getValues([`${revisionPrefix}.containerId`, `${revisionPrefix}.extension`, `${revisionPrefix}.containerName`]);
 
-	const isNewContainer = containerName && !containerId;
+	const isNewEditableContainer = containerName && !containerId;
 	const getError = (field: string) => get(errors, `${revisionPrefix}.${field}`);
 	return (
 		<>
@@ -66,7 +66,7 @@ export const SidebarForm = ({
 			<FlexContainer>
 				<FormSelect
 					required
-					disabled={!isNewContainer}
+					disabled={!isNewEditableContainer}
 					name={`${revisionPrefix}.containerUnit`}
 					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
 					defaultValue="mm"
@@ -79,7 +79,7 @@ export const SidebarForm = ({
 				</FormSelect>
 				<FormSelect
 					required
-					disabled={!isNewContainer}
+					disabled={!isNewEditableContainer}
 					name={`${revisionPrefix}.containerType`}
 					label={formatMessage({ id: 'containers.creation.form.type', defaultMessage: 'Category' })}
 					defaultValue="Uncategorised"
@@ -98,13 +98,13 @@ export const SidebarForm = ({
 				name={`${revisionPrefix}.containerCode`}
 				label={formatMessage({ id: 'uploads.sidebar.containerCode', defaultMessage: 'Container Code' })}
 				formError={getError('containerCode')}
-				disabled={!isNewContainer}
+				disabled={!isNewEditableContainer}
 			/>
 			<FormTextField
 				name={`${revisionPrefix}.containerDesc`}
 				label={formatMessage({ id: 'uploads.sidebar.containerDesc', defaultMessage: 'Container Description' })}
 				formError={getError('containerDesc')}
-				disabled={!isNewContainer}
+				disabled={!isNewEditableContainer}
 			/>
 
 			<Heading>
