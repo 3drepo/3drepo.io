@@ -78,7 +78,7 @@ export const UploadListItem = ({
 	}, [JSON.stringify(selectedContainer)]);
 
 	useEffect(() => {
-		if (!containerId.trim()) return;
+		if (!containerId?.trim()) return;
 
 		ContainersActionsDispatchers.fetchContainerSettings(
 			teamspace,
