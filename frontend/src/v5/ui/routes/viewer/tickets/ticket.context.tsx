@@ -22,6 +22,7 @@ export enum TicketDetailsView {
 }
 
 export interface TicketContextType {
+	isViewer?: boolean;
 	view: TicketDetailsView;
 	viewProps?: any;
 	setDetailViewAndProps: (view: TicketDetailsView, props?: any) => void;
@@ -29,11 +30,17 @@ export interface TicketContextType {
 	setSelectedPin: (pinId: string) => void
 }
 
-const defaultValue: TicketContextType = { view: TicketDetailsView.Form, setDetailViewAndProps: () => {}, selectedPin: null, setSelectedPin: () => {} };
+const defaultValue: TicketContextType = {
+	isViewer: false,
+	view: TicketDetailsView.Form,
+	setDetailViewAndProps: () => {},
+	selectedPin: null,
+	setSelectedPin: () => {},
+};
 export const TicketContext = createContext(defaultValue);
 TicketContext.displayName = 'TicketContext';
 
-export const TicketContextComponent = ({ children }) => {
+export const TicketContextComponent = ({ children, isViewer }) => {
 	const [view, setView] = useState(TicketDetailsView.Form);
 	const [viewProps, setViewProps] = useState();
 	const [selectedPin, setSelectedPin] = useState(null);
@@ -46,7 +53,7 @@ export const TicketContextComponent = ({ children }) => {
 	};
 
 	return (
-		<TicketContext.Provider value={{ view, viewProps, setDetailViewAndProps, selectedPin, setSelectedPin }}>
+		<TicketContext.Provider value={{ isViewer, view, viewProps, setDetailViewAndProps, selectedPin, setSelectedPin }}>
 			{children}
 		</TicketContext.Provider>
 	);

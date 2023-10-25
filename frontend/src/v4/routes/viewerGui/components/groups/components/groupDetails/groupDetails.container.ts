@@ -28,7 +28,7 @@ import {
 	selectFetchingDetailsIsPending,
 } from '../../../../../../modules/groups/groups.selectors';
 import { GroupsActions } from '../../../../../../modules/groups';
-import { selectMetaKeys, selectSettings } from '../../../../../../modules/model';
+import { selectSettings } from '../../../../../../modules/model';
 import { selectSelectedNodes, selectTotalMeshes } from '../../../../../../modules/tree';
 import { GroupDetails } from './groupDetails.component';
 
@@ -40,7 +40,6 @@ const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
 	totalMeshes: selectTotalMeshes,
 	selectedNodes: selectSelectedNodes,
-	fieldNames: selectMetaKeys,
 	criteriaFieldState: selectCriteriaFieldState,
 	isPending: selectFetchingDetailsIsPending,
 });

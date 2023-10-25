@@ -26,11 +26,11 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormHelperText, Tooltip } from '@mui/material';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
 import { FlexRow, PinAction, PinActions, PinName, PinSelectContainer, SettingLocationText } from './coordsProperty.styles';
 import { getPinColorHex } from './pin.helpers.component';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
+import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const [editMode, setEditMode] = useState(false);
@@ -120,7 +120,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const hasPin = !!value;
 
 	return (
-		<InputContainer required={required} selected={editMode} error={error} disabled={disabled}>
+		<ViewerInputContainer required={required} selected={editMode} error={error} disabled={disabled}>
 			<FlexRow>
 				<span>
 					<PinName required={required}>
@@ -154,6 +154,6 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 				</Tooltip>
 			</FlexRow>
 			<FormHelperText>{helperText}</FormHelperText>
-		</InputContainer>
+		</ViewerInputContainer>
 	);
 };
