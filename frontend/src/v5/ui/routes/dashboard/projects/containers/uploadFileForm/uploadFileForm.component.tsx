@@ -95,7 +95,7 @@ export const UploadFileForm = ({
 
 	const formData = useForm<UploadFieldArray>({
 		mode: 'onChange',
-		resolver: yupResolver(UploadsSchema),
+		resolver: !isUploading ? yupResolver(UploadsSchema) : undefined,
 		context: { alreadyExistingNames: [], teamspace, project },
 	});
 
