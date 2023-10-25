@@ -109,11 +109,6 @@ export const UploadListItemDestination = memo(({
 	const getFilterOptions = (options: IContainer[], params) => {
 		const inputValue = params.inputValue.trim();
 
-		if (!inputValue && (containersNamesInModal.length - newContainersInModal.length)  === containers.length || !options.length) {
-			// if all the containers have been allocated already or there are no containers at all
-			return [];
-		}
-
 		// filter out currently selected value and containers with insufficient permissions
 		const filteredOptions = getFilteredContainersOptions(options, params)
 			.filter(({ name, role }) => name !== value && isCollaboratorRole(role));
