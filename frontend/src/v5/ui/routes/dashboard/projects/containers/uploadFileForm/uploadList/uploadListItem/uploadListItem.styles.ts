@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,10 +17,12 @@
 
 import styled, { css } from 'styled-components';
 import { CircleButton } from '@controls/circleButton';
-import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag/uploadListItemRevisionTag.component';
-import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
+import { Container as ItemRowContainer } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemRow/dashboardListItemRow.styles';
+import { DashboardListItem } from '@components/dashboard/dashboardList';
+import { DestinationAutocomplete } from './components/uploadListItemDestination/uploadListItemDestination.styles';
+import { RevisionTagField } from './components/uploadListItemRevisionTag/uploadListItemRevisionTag.styles';
 
-export const Button = styled(CircleButton)`
+export const UploadListItemButton = styled(CircleButton)`
 	margin: 0;
 	&:hover, &.Mui-focusVisible { 
 		box-shadow: none;
@@ -30,13 +32,33 @@ export const Button = styled(CircleButton)`
 const DestinationAndTagDimensions = css`
 	width: 340px;
 	height: 35px;
-	min-width: 80px;
 `;
 
-export const Destination = styled(UploadListItemDestination)`
-	${DestinationAndTagDimensions}
-`;
+export const UploadListItemRowWrapper = styled(DashboardListItem)<{ selected: boolean; order: number }>`
+	${({ order }) => css`order: ${order}`};
+	${ItemRowContainer} {
+		padding: 8px 15px 8px 5px;
+		height: auto;
+		cursor: default;
+		overflow: hidden;
 
-export const RevisionTag = styled(UploadListItemRevisionTag)`
-	${DestinationAndTagDimensions}
+		${DestinationAutocomplete} {
+			${DestinationAndTagDimensions}
+		}
+
+		${RevisionTagField} {
+			${DestinationAndTagDimensions}
+			${({ selected, theme }) => selected && css`
+				>.MuiOutlinedInput-root:not(.Mui-error) {
+					background-color: ${theme.palette.secondary.light};
+					input {
+						color: ${theme.palette.primary.contrast};
+					}
+					&:not(.Mui-focused) fieldset {
+						border: unset;
+					}
+				}
+			`}
+		}
+	}
 `;

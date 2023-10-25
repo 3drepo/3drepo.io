@@ -15,25 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { RevisionsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Sidebar } from '@controls/sideBar/sidebar.component';
-import { isNull, isNumber } from 'lodash';
 import { Button } from '@controls/button';
 import { IContainer, UploadFieldArray } from '@/v5/store/containers/containers.types';
-import { filesizeTooLarge } from '@/v5/store/containers/containers.helpers';
 import { UploadsSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
-import { DashboardListHeaderLabel } from '@components/dashboard/dashboardList';
 import { FormattedMessage } from 'react-intl';
 import { Typography } from '@controls/typography';
 import { FileInputField } from '@controls/fileInputField/fileInputField.component';
-import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
-import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import {
 	TeamspacesHooksSelectors,
 	ProjectsHooksSelectors,
@@ -42,13 +36,10 @@ import {
 } from '@/v5/services/selectorsHooks';
 import { getSupportedFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadList } from './uploadList/uploadList.component';
-import { SidebarForm } from './sidebarForm/sidebarForm.component';
-import { UploadsContainer, DropZone, Modal, UploadsListHeader, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
-
-const DEFAULT_SORT_CONFIG = {
-	column: ['file'],
-	direction: [SortingDirection.ASCENDING],
-};
+import { UploadsContainer, DropZone, Modal, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
+import { extensionIsSpm, reduceFileData } from './uploadFileForm.helpers';
+import { UploadFileFormContextComponent } from './uploadFileFormContext';
+import { Sidebar } from './sideBar/sidebar.component';
 
 type UploadModalLabelTypes = {
 	isUploading: boolean;
@@ -88,6 +79,7 @@ type IUploadFileForm = {
 	open: boolean;
 	onClickClose: () => void;
 };
+
 export const UploadFileForm = ({
 	presetContainerId,
 	presetFile,
@@ -96,37 +88,30 @@ export const UploadFileForm = ({
 }: IUploadFileForm): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const revisionsByContainer = RevisionsHooksSelectors.selectRevisionsByContainer();
 	const allUploadsComplete = RevisionsHooksSelectors.selectUploadIsComplete();
 	const presetContainer = ContainersHooksSelectors.selectContainerById(presetContainerId);
 
-	const [selectedIndex, setSelectedIndex] = useState<number>(null);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
-	const [alreadyExistingTags, setAlreadyExistingTags] = useState({});
-	const [fileError, setFileError] = useState(false);
 
 	const formData = useForm<UploadFieldArray>({
 		mode: 'onChange',
-		resolver: yupResolver(UploadsSchema),
-		context: { alreadyExistingTags, alreadyExistingNames: [] },
+		resolver: !isUploading ? yupResolver(UploadsSchema) : undefined,
+		context: { alreadyExistingNames: [], teamspace, project },
 	});
+
 	const {
 		control,
 		handleSubmit,
 		formState: { isValid },
-		trigger,
-		getValues,
-		setValue,
 	} = formData;
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'uploads',
 		keyName: 'uploadId',
 	});
-	const { sortedList, setSortConfig }: any = useOrderedList(fields || [], DEFAULT_SORT_CONFIG);
 
 	const revTagMaxValue = useMemo(() => {
-		const schemaDescription = Yup.reach(UploadsSchema, 'uploads.revisionTag').describe();
+		const schemaDescription =  Yup.reach(UploadsSchema, 'uploads.revisionTag').describe();
 		const revTagMax = schemaDescription.tests.find((t) => t.name === 'max');
 		return revTagMax.params.max;
 	}, []);
@@ -138,10 +123,6 @@ export const UploadFileForm = ({
 		const noExceedingMax = noSpaces.substring(0, revTagMaxValue);
 		return noExceedingMax;
 	};
-
-	const extensionIsSpm = (extension: string) => extension === 'spm';
-	
-	const extensionIsRevit = (extension: string) => ['rvt', 'rfa'].includes(extension);
 
 	const addFilesToList = (files: File[], container?: IContainer): void => {
 		const filesToAppend = [];
@@ -167,60 +148,39 @@ export const UploadFileForm = ({
 		append(filesToAppend);
 	};
 
-	const getSortedListSelectedIndex = () => {
-		if (!fields.length || !isNumber(selectedIndex)) return null;
+	const removeUploadById = useCallback((uploadId) => {
+		remove(fields.findIndex((field) => field.uploadId === uploadId));
+	}, [fields.length]);
 
-		const { uploadId } = fields[selectedIndex];
-		const newIndex = sortedList.findIndex((r) => r.uploadId === uploadId);
-		return newIndex;
-	};
-
-	const containersNamesInModal = getValues('uploads')?.map(({ containerName }) => containerName);
-	const sidebarOpen = !isNull(selectedIndex) && !isUploading;
-	const indexMap = new Map(fields.map(({ uploadId }, index) => [uploadId, index]));
-	const getOriginalIndex = (sortedIndex) => indexMap.get(sortedList[sortedIndex].uploadId) as number;
-	const origIndex = sidebarOpen ? getOriginalIndex(selectedIndex) : 0;
-
-	const onClickDelete = (index: number) => {
-		const { uploadId } = sortedList[index];
-		const sortedIndex = fields.findIndex((r) => r.uploadId === uploadId);
-		if (sortedIndex < selectedIndex) setSelectedIndex(selectedIndex - 1);
-		if (sortedIndex === selectedIndex) setSelectedIndex(null);
-		remove(sortedIndex);
-	};
-
-	const onSubmit = async ({ uploads }: UploadFieldArray) => {
+	const onSubmit = useCallback(handleSubmit(async ({ uploads }: UploadFieldArray) => {
 		if (isUploading) {
 			setIsUploading(false);
 			onClickClose();
 		} else {
 			setIsUploading(true);
-			setSelectedIndex(null);
 			uploads.forEach((revision, index) => {
 				const { uploadId } = fields[index];
 				RevisionsActionsDispatchers.createRevision(teamspace, project, uploadId, revision);
 			});
 		}
+	}), [fields.length]);
+
+	const preventEnter = useCallback((e) => e.key === 'Enter' && e.preventDefault(), []);
+	const finishedSubmit = (e) => {
+		e.preventDefault();
+		setIsUploading(false);
+		onClickClose();
 	};
 
 	useEffect(() => {
-		setFileError(fields.some(({ file }) => filesizeTooLarge(file)));
-	}, [fields.length]);
-
-	useEffect(() => {
-		const tags = {};
-		getValues('uploads').forEach(({ containerId }, index) => {
-			tags[`uploads[${index}].revisionTag`] = revisionsByContainer?.[containerId] || [];
-		});
-		setAlreadyExistingTags(tags);
-	}, [JSON.stringify(revisionsByContainer), JSON.stringify(containersNamesInModal)]);
-
-	useEffect(() => {
-		trigger();
-	}, [alreadyExistingTags]);
-
-	useEffect(() => {
-		if (presetFile) addFilesToList([presetFile], presetContainer);
+		if (presetFile) {
+			addFilesToList([presetFile], presetContainer);
+			RevisionsActionsDispatchers.fetch(
+				teamspace,
+				project,
+				presetContainer._id,
+			);
+		}
 		FederationsActionsDispatchers.fetchFederations(teamspace, project);
 	}, []);
 
@@ -228,108 +188,72 @@ export const UploadFileForm = ({
 		<FormProvider {...formData}>
 			<Modal
 				open={open}
-				onSubmit={handleSubmit(onSubmit)}
+				onSubmit={!isUploading ? onSubmit : finishedSubmit}
 				onClickClose={onClickClose}
-				onKeyPress={(e) => e.key === 'Enter' && e.preventDefault()}
+				onKeyPress={preventEnter}
 				maxWidth="xl"
-				isValid={(isValid && !fileError && !isUploading) || (isUploading && allUploadsComplete)}
+				isValid={!isUploading ? isValid : allUploadsComplete}
 				contrastColorHeader
+				fields={fields}
+				isUploading={isUploading}
 				{...uploadModalLabels({ isUploading, fileCount: fields.length })}
 			>
-				<UploadsContainer>
-					<UploadsListScroll>
-						<Padding>
-							{!!fields.length && (
-								<>
-									<UploadsListHeader
-										onSortingChange={setSortConfig}
-										defaultSortConfig={DEFAULT_SORT_CONFIG}
-									>
-										<DashboardListHeaderLabel key="file" name="file.name" minWidth={122}>
-											<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
-										</DashboardListHeaderLabel>
-										<DashboardListHeaderLabel key="destination" width={352}>
-											<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
-										</DashboardListHeaderLabel>
-										<DashboardListHeaderLabel key="revisionName" width={isUploading ? 359 : 399}>
-											<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
-										</DashboardListHeaderLabel>
-										<DashboardListHeaderLabel key="progress" width={297} hidden={!isUploading}>
-											<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
-										</DashboardListHeaderLabel>
-									</UploadsListHeader>
+				<UploadFileFormContextComponent fields={fields}>
+					<UploadsContainer>
+						<UploadsListScroll>
+							<Padding>
+								{!!fields.length && (
 									<UploadList
-										values={sortedList}
-										selectedIndex={getSortedListSelectedIndex()}
+										values={reduceFileData(fields)}
 										isUploading={isUploading}
-										onClickEdit={setSelectedIndex}
-										onClickDelete={onClickDelete}
-										getOriginalIndex={getOriginalIndex}
+										removeUploadById={removeUploadById}
 									/>
-								</>
-							)}
-							<DropZone
-								hidden={isUploading}
-								onDrop={addFilesToList}
-								accept={getSupportedFileExtensions()}
-							>
-								<Typography variant="h3" color="secondary">
-									<FormattedMessage id="dragAndDrop.drop" defaultMessage="Drop files here" />
-								</Typography>
-								<Typography variant="h5" color="secondary">
-									<FormattedMessage id="dragAndDrop.or" defaultMessage="or" />
-								</Typography>
-								<FileInputField
+								)}
+								<DropZone
+									hidden={isUploading}
+									onDrop={addFilesToList}
 									accept={getSupportedFileExtensions()}
-									onChange={(files) => addFilesToList(files)}
 								>
-									<Button component="span" variant="contained" color="primary">
+									<Typography variant="h3" color="secondary">
+										<FormattedMessage id="dragAndDrop.drop" defaultMessage="Drop files here" />
+									</Typography>
+									<Typography variant="h5" color="secondary">
+										<FormattedMessage id="dragAndDrop.or" defaultMessage="or" />
+									</Typography>
+									<FileInputField
+										accept={getSupportedFileExtensions()}
+										onChange={(files) => addFilesToList(files)}
+									>
+										<Button component="span" variant="contained" color="primary">
+											<FormattedMessage
+												id="uploads.fileInput.browse"
+												defaultMessage="Browse"
+											/>
+										</Button>
+									</FileInputField>
+									<HelpText>
 										<FormattedMessage
-											id="uploads.fileInput.browse"
-											defaultMessage="Browse"
+											id="uploads.dropzone.message"
+											defaultMessage="Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>"
+											values={{
+												MoreLink: (child: string) => (
+													<a
+														href="https://help.3drepo.io/en/articles/4798885-supported-file-formats"
+														target="_blank"
+														rel="noreferrer"
+													>
+														{child}
+													</a>
+												),
+											}}
 										/>
-									</Button>
-								</FileInputField>
-								<HelpText>
-									<FormattedMessage
-										id="uploads.dropzone.message"
-										defaultMessage="Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>"
-										values={{
-											MoreLink: (child: string) => (
-												<a
-													href="https://help.3drepo.io/en/articles/4798885-supported-file-formats"
-													target="_blank"
-													rel="noreferrer"
-												>
-													{child}
-												</a>
-											),
-										}}
-									/>
-								</HelpText>
-							</DropZone>
-						</Padding>
-					</UploadsListScroll>
-					<Sidebar open={sidebarOpen} onClose={() => setSelectedIndex(null)}>
-						{
-							sidebarOpen
-								? (
-									<SidebarForm
-										value={getValues(`uploads.${origIndex}`)}
-										key={sortedList[getSortedListSelectedIndex()].uploadId}
-										isSpm={extensionIsSpm(sortedList[getSortedListSelectedIndex()].extension)}
-										isRevit={extensionIsRevit(sortedList[getSortedListSelectedIndex()].extension)} // fix to match isSpm method with #4258
-										onChange={(field: string, val: string | boolean) => {
-											// @ts-ignore
-											setValue(`uploads.${origIndex}.${field}`, val);
-											// @ts-ignore
-											trigger(`uploads.${origIndex}.${field}`);
-										}}
-									/>
-								) : (<></>)
-						}
-					</Sidebar>
-				</UploadsContainer>
+									</HelpText>
+								</DropZone>
+							</Padding>
+						</UploadsListScroll>
+						{!isUploading && <Sidebar />}
+					</UploadsContainer>
+				</UploadFileFormContextComponent>
 			</Modal>
 		</FormProvider>
 	);
