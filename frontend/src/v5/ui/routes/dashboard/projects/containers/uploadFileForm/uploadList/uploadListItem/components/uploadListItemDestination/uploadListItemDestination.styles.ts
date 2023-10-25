@@ -23,6 +23,8 @@ export const DestinationAutocomplete = styled(AutocompleteBase)`
 	.MuiFormHelperText-root {
 		display: none;
 	}
+
+	pointer-events: ${(props: any) => props.disabled ? 'none' : 'all'};
 `;
 
 export type NewOrExisting = '' | 'new' | 'existing';
