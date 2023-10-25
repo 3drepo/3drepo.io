@@ -166,7 +166,7 @@ export const UploadListItemDestination = memo(({
 
 	const onDestinationChange = (e, newVal: IContainer | null) => {
 		setValue(`${revisionPrefix}.containerName`, newVal?.name?.trim() || '');
-		setValue(`${revisionPrefix}.containerId`, newVal?._id || '');
+		setValue(`${revisionPrefix}.containerId`, newVal?._id || '', { shouldValidate: true });
 	};
 
 	const onOpen = () => {
