@@ -69,7 +69,11 @@ export const EditFederationContextComponent = ({ federation, children }: Props) 
 
 	useEffect(() => {
 		if (!containers.length || !federation?.containers) return;
-		setIncludedContainers(federation.containers.map(({ _id }) => containers.find((c) => c._id === _id)));
+		const containersToInclude = federation.containers
+			.map(({ _id }) => containers.find((c) => c._id === _id))
+			// filter containers for users without sufficient permission
+			.filter(Boolean);
+		setIncludedContainers(containersToInclude);
 	}, [containers]);
 
 	return (
