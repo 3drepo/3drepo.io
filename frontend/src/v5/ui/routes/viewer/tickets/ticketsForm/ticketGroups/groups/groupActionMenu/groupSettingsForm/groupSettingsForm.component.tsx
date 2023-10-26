@@ -388,7 +388,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 												remove(i);
 												resetFilterMenu();
 											}}
-											disabled={!isAdmin}
+											isReadOnly={!isAdmin}
 											onClick={() => {
 												setSelectedRule({ index: i, value: ruleValue });
 												setFilterMenuOpen(true);

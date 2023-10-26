@@ -33,6 +33,7 @@ import { RuleFieldValues } from './groupRulesInputs/ruleFieldValues/ruleFieldVal
 import { RuleFieldOperator } from './groupRulesInputs/ruleFieldOperator/ruleFieldOperator.component';
 import { RuleOperator } from './groupRulesInputs/ruleOperator/ruleOperator.component';
 import { RuleValues } from './groupRulesInputs/ruleValues/ruleValues.component';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 
 const DEFAULT_VALUES: IFormRule = {
 	name: '',
@@ -60,6 +61,8 @@ export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [] }: IG
 		resolver: yupResolver(GroupRuleSchema),
 		context: { alreadyExistingNames: existingRules.map((r) => r.name).filter((name) => name !== rule?.name) },
 	});
+
+	const isReadOnly = TicketsCardHooksSelectors.selectReadOnly();
 
 	const {
 		formState: { isValid, errors },
@@ -95,11 +98,12 @@ export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [] }: IG
 						name="name"
 						label={formatMessage({ id: 'tickets.groups.filterPanel.name', defaultMessage: 'Name' })}
 						formError={errors.name}
+						disabled={isReadOnly}
 					/>
-					<RuleFieldOperator />
-					<RuleFieldValues />
-					<RuleOperator />
-					<RuleValues />
+					<RuleFieldOperator disabled={isReadOnly} />
+					<RuleFieldValues disabled={isReadOnly} />
+					<RuleOperator disabled={isReadOnly} />
+					<RuleValues disabled={isReadOnly} />
 				</InputsContainer>
 				<Buttons>
 					<ActionMenuItem>
@@ -112,7 +116,7 @@ export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [] }: IG
 							variant="contained"
 							color="primary"
 							fullWidth={false}
-							disabled={!isValid || !getIsDirty()}
+							disabled={isReadOnly || !isValid || !getIsDirty()}
 						>
 							{rule ? (
 								<FormattedMessage id="tickets.groups.filterPanel.updateFilter" defaultMessage="Update filter" />

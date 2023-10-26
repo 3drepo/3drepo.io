@@ -248,7 +248,7 @@ export class CriteriaField extends PureComponent<IProps, IState> {
 				key={criterion._id}
 				color={this.isCriterionActive(criterion) ? 'primary' : 'default'}
 				label={criterion.name}
-				onDelete={this.handleDelete(criterion)}
+				onDelete={this.props.disabled ? null : this.handleDelete(criterion)}
 				onClick={this.handleCriteriaClick(criterion)}
 				clickable
 			/>
@@ -270,7 +270,8 @@ export class CriteriaField extends PureComponent<IProps, IState> {
 				disabled: !this.state.selectedCriteria?.length
 			}, {
 				label: 'Paste filters',
-				onClick: this.togglePasteMode
+				onClick: this.togglePasteMode,
+				disabled: this.props.disabled,
 			}, {
 				label: 'Deselect',
 				onClick: this.deselectCriterion,
@@ -278,7 +279,7 @@ export class CriteriaField extends PureComponent<IProps, IState> {
 			}, {
 				label: 'Clear all',
 				onClick: this.clearCriteria,
-				disabled: !this.state.selectedCriteria?.length
+				disabled: this.props.disabled || !this.state.selectedCriteria?.length,
 			}
 		];
 
