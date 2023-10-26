@@ -56,6 +56,7 @@ interface IProps {
 	resetToSavedSelection: () => void;
 	isPending: boolean;
 	deleteGroup: (id: string | null) => void;
+	isReadOnly: boolean;
 }
 
 interface IState {
@@ -93,7 +94,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 	public state = {
 		isFormValid: false,
 		isFormDirty: false,
-		scrolled: false
+		scrolled: false,
 	};
 
 	public formRef = createRef<HTMLElement>() as any;
@@ -109,7 +110,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			setState={this.props.setCriteriaState}
 			label="Filters"
 			placeholder="Select first filter"
-			disabled={!this.props.canUpdate}
+			disabled={!this.props.canUpdate || this.props.isReadOnly}
 		/>
 	));
 
