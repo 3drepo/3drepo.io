@@ -24,7 +24,7 @@ import { ValueIconContainer, ValuesContainer } from '../groupRulesInputs.styles'
 import { IFormRule } from '../../groupRulesForm.helpers';
 import { FieldValueInput } from './fieldValueInput/fieldValueInput.component';
 
-export const RuleFieldValues = () => {
+export const RuleFieldValues = ({ disabled }) => {
 	const name = 'field.values';
 	const { control, watch, setValue } = useFormContext<IFormRule>();
 	const { fields, append, remove } = useFieldArray({ control, name });
@@ -53,11 +53,11 @@ export const RuleFieldValues = () => {
 			<>
 				{fields.map((field, i) => (
 					<ValuesContainer key={field.id}>
-						<FieldValueInput name={`field.values.${i}.value`} />
-						<ValueIconContainer onClick={() => remove(i)} disabled={fields.length === 1}>
+						<FieldValueInput name={`field.values.${i}.value`} disabled={disabled} />
+						<ValueIconContainer onClick={() => remove(i)} disabled={disabled || fields.length === 1}>
 							<RemoveValueIcon />
 						</ValueIconContainer>
-						<ValueIconContainer onClick={appendEmptyValue} disabled={i !== (fields.length - 1)}>
+						<ValueIconContainer onClick={appendEmptyValue} disabled={disabled || i !== (fields.length - 1)}>
 							<AddValueIcon />
 						</ValueIconContainer>
 					</ValuesContainer>
@@ -66,5 +66,5 @@ export const RuleFieldValues = () => {
 		);
 	}
 
-	return (<FieldValueInput name="field.values.0.value" />);
+	return (<FieldValueInput name="field.values.0.value" disabled={disabled}/>);
 };
