@@ -21,6 +21,7 @@ const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUIDString } = require('../utils/helper/uuids');
 const geoip = require('geoip-lite');
 const { getUserAgentInfo } = require('../utils/helper/userAgent');
+const { logger } = require('../utils/logger');
 const { loginPolicy } = require('../utils/config');
 const { publish } = require('../services/eventsManager/eventsManager');
 
@@ -99,7 +100,23 @@ const generateRecord = (_id, ipAddr, userAgent, referer) => {
 
 LoginRecords.saveSuccessfulLoginRecord = async (user, sessionId, ipAddress, userAgent, referer) => {
 	const loginRecord = generateRecord(sessionId, ipAddress, userAgent, referer);
-	await db.insertOne(INTERNAL_DB, LOGIN_RECORDS_COL, { user, ...loginRecord });
+
+	// This is something we're trying to debug adding more info in the log so we can track
+	// Not worth adding more test cases for.
+	/* istanbul ignore next */
+	try {
+		await db.insertOne(INTERNAL_DB, LOGIN_RECORDS_COL, { user, ...loginRecord });
+	} catch (err) {
+		// E110000 is monogo's dup key error
+		if (err.message.includes('E11000')) {
+			const existingRec = await db.find(INTERNAL_DB, LOGIN_RECORDS_COL, { _id: sessionId });
+
+			logger.logError(`Session ID clash detected! Trying to add ${JSON.stringify({ user, ...loginRecord })}`);
+			logger.logError(`Existing record found ${JSON.stringify(existingRec)}`);
+		}
+
+		throw err;
+	}
 
 	publish(events.SUCCESSFUL_LOGIN_ATTEMPT, { username: user, loginRecord });
 };
