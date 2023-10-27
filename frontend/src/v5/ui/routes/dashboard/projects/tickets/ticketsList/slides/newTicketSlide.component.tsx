@@ -30,6 +30,7 @@ import { isEmpty, merge } from 'lodash';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { SaveButton, RequiresViewerContainer, ButtonContainer, Link, Form } from './newTicketSlide.styles';
 import { hasRequiredViewerProperties } from '../../ticketsTable/ticketsTable.helper';
+import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 
 const getGroupDefaultValue = (template, ticket) => {
 	let defaultValues = getDefaultTicket(template);
@@ -59,21 +60,28 @@ export const NewTicketSlide = ({ defaultValue, template, onSave, onDirtyStateCha
 		defaultValues,
 	});
 
-	const { reset, handleSubmit, formState: { isValid, dirtyFields } } = formData;
+	const { reset, handleSubmit, formState: { isValid, dirtyFields, isSubmitting } } = formData;
 
-	const onSubmit = (body) => {
+	const onSubmit = async (body) => {
 		const ticket = { type: template._id, ...body };
 
 		const parsedTicket = filterEmptyTicketValues(ticket) as NewTicket;
 		sanitizeViewVals(ticket, { modules: {} } as ITicket, template);
+
+		const { resolve, promiseToResolve } = getWaitablePromise();
 		TicketsActionsDispatchers.createTicket(
 			teamspace,
 			project,
 			containerOrFederation,
 			parsedTicket,
 			isFederation,
-			onSave,
+			(ticketId) => {
+				onSave(ticketId);
+				resolve();
+			},
 		);
+
+		await promiseToResolve;
 	};
 
 	const viewerModelLink = !containerOrFederation ? '/' : generatePath(VIEWER_ROUTE, {
@@ -117,7 +125,7 @@ export const NewTicketSlide = ({ defaultValue, template, onSave, onDirtyStateCha
 				<TicketForm template={getEditableProperties(template)} ticket={defaultValues} focusOnTitle />
 			</FormProvider>
 			<ButtonContainer>
-				<SaveButton disabled={!isValid}>
+				<SaveButton disabled={!isValid} isPending={isSubmitting}>
 					<FormattedMessage id="ticketsTable.button.saveTicket" defaultMessage="Save ticket" />
 				</SaveButton>
 			</ButtonContainer>
