@@ -843,8 +843,8 @@ export class UnityUtil {
 	// - The start/stop methods turn the tool on and off and change the mode.
 	// - The clipTool.. methods should be hooked up the equivalent buttons on 
 	// the toolbar.
-	// - The set/scale methods adjust the visuals and behaviour for fine tuning;
-	// they are not intended to be exposed in the UI, and are not saved.
+	// - The set/scale/enable methods adjust the visuals and behaviour for fine
+	// tuning; they are not intended to be exposed in the UI, and are not saved.
 
 	// Some of the toolbar buttons will be stateful, such as clipToolRealign.
 	// Use the `clipUpdated` callback to detect when the planes have been placed
@@ -937,6 +937,23 @@ export class UnityUtil {
 	 */
 	public static clipToolScale() {
 		UnityUtil.toUnity('ClipToolScale', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Enables the inbuilt Clip Tool Toolbar. The toolbar is always disabled by
+	 * default. This may need to be called on embedded viewers that don't have
+	 * the full frontend UX.
+	 */
+	public static enableClipToolbar(){
+		UnityUtil.toUnity('EnableClipToolToolbar', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+	
+	/**
+	 * Disables the inbuilt Clip Tool Toolbar, if it was previously enabled via
+	 * enableClipToolbar.
+	 */
+	public static disableClipToolbar(){
+		UnityUtil.toUnity('DisableClipToolToolbar', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
