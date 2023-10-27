@@ -838,6 +838,19 @@ export class UnityUtil {
 		UnityUtil.toUnity('DiffToolRenderTransAsDefault', undefined, undefined);
 	}
 
+	// The following methods are concerned with the clip tool. There are three
+	// types of method.
+	// - The start/stop methods turn the tool on and off and change the mode.
+	// - The clipTool.. methods should be hooked up the equivalent buttons on 
+	// the toolbar.
+	// - The set/scale methods adjust the visuals and behaviour for fine tuning;
+	// they are not intended to be exposed in the UI, and are not saved.
+
+	// Some of the toolbar buttons will be stateful, such as clipToolRealign.
+	// Use the `clipUpdated` callback to detect when the planes have been placed
+	// in this mode (do not use clipBroadcast - that is only called after
+	// setting the planes from the frontend).
+
 	/**
 	* Start clip editing in single plane mode
 	* @category Clipping Plane
@@ -877,7 +890,7 @@ export class UnityUtil {
 	* In six plane mode, the planes move to encompass the selection exactly,
 	* retaining their orientation.
 	*/
-	public static ClipToolClipToSelection() {
+	public static clipToolClipToSelection() {
 		UnityUtil.toUnity('ClipToolClipToSelection', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
@@ -887,49 +900,49 @@ export class UnityUtil {
 	 * the first surface to be licked. If the background is clicked, the planes
 	 * or plane will reset to the scene bounding box.
 	 */
-	public static ClipToolRealign() {
+	public static clipToolRealign() {
 		UnityUtil.toUnity('ClipToolRealign', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/// <summary>
 	/// Flip the clip plane or box
 	/// </summary>
-	public static ClipToolFlip() {
+	public static clipToolFlip() {
 		UnityUtil.toUnity('ClipToolFlip', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
 	 * Hide all the clip planes, and reset them to the scene bounding box
 	 */
-	public static ClipToolDelete() {
+	public static clipToolDelete() {
 		UnityUtil.toUnity('ClipToolDelete', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
 	 * Puts the Clip Planes Gizmo into Translate mode.
 	 */
-	public static ClipToolTranslate() {
+	public static clipToolTranslate() {
 		UnityUtil.toUnity('ClipToolTranslate', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
 	 * Puts the Clip Planes Gizmo in Rotate mode.
 	 */
-	public static ClipToolRotate() {
+	public static clipToolRotate() {
 		UnityUtil.toUnity('ClipToolRotate', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
 	 * Puts the Clip Planes Gizmo in Scale mode.
 	 */
-	public static ClipToolScale() {
+	public static clipToolScale() {
 		UnityUtil.toUnity('ClipToolScale', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
 	 * Increase or decrease the Gizmo Size on screen by the amount provided (in percent)
 	 */
-	public static ScaleClipGizmo(percent: number) {
+	public static scaleClipGizmo(percent: number) {
 		UnityUtil.toUnity('ScaleClipGizmo', UnityUtil.LoadingState.VIEWER_READY, percent);
 	}
 
@@ -937,7 +950,7 @@ export class UnityUtil {
 	* Set the coefficient linking the change in Clip Box Size to proportion
 	* of the screen covered by the cursor when scaling in all three axes.
 	*/
-	public static SetClipScaleSpeed(speed: number) {
+	public static setClipScaleSpeed(speed: number) {
 		UnityUtil.toUnity('SetClipScaleSpeed', UnityUtil.LoadingState.VIEWER_READY, speed);
 	}
 
@@ -948,7 +961,7 @@ export class UnityUtil {
 	 * Setting this to 1 sets it to the default. Above 1 makes it larger
 	 * and below 1 makes it smaller. 0 disables the feature.
 	 */
-	public static SetClipSelectionBoxScalar(scalar: number) {
+	public static setClipSelectionBoxScalar(scalar: number) {
 		UnityUtil.toUnity('SetClipSelectionBoxScalar', UnityUtil.LoadingState.VIEWER_READY, scalar);
 	}
 
