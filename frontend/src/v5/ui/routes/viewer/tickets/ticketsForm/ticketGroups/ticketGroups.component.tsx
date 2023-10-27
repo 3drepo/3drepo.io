@@ -27,6 +27,8 @@ import { selectLeftPanels } from '@/v4/modules/viewerGui';
 import { selectHiddenGeometryVisible } from '@/v4/modules/tree/tree.selectors';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ViewpointsActions } from '@/v4/modules/viewpoints';
+import { Loader } from '@/v4/routes/components/loader/loader.component';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Container, Popper } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContextComponent } from './ticketGroupsContext.component';
@@ -67,6 +69,8 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const [highlightedOverride, setHighlightedOverride] = useState(NO_OVERRIDE_SELECTED);
 	const [selectedHiddenIndexes, setSelectedHiddenIndexes] = useState([]);
 	const [selectedColorIndexes, setSelectedColorIndexes] = useState((value.state?.colored || []).map((_, index) => index));
+	const hasClearedOverrides = TicketsCardHooksSelectors.selectTicketHasClearedOverrides();
+	const [isLoading, setIsLoading] = useState(hasClearedOverrides);
 
 	const state: Partial<ViewpointState> = value.state || {};
 	const leftPanels = useSelector(selectLeftPanels);
@@ -136,8 +140,16 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	}, [selectedColorIndexes, value]);
 
 	useEffect(() => {
+		if (!isLoading || !hasClearedOverrides) return;
+		TicketsCardActionsDispatchers.setOverrides({ overrides: {}, transparencies: {} });
+		setIsLoading(false);
+	}, [hasClearedOverrides]);
+
+	useEffect(() => {
 		dispatch(ViewpointsActions.setSelectedViewpoint(null));
 	}, []);
+
+	if (isLoading) return (<Loader />);
 
 	return (
 		<Container onClick={clearHighlightedIndex}>
