@@ -1082,7 +1082,9 @@ export class ViewerService {
 			await this.setCamera(camera);
 		}
 
-		this.updateClippingPlanes(viewpoint.clippingPlanes, '', '');
+		if (viewpoint?.clippingPlanes) {
+			this.updateClippingPlanes(viewpoint.clippingPlanes, '', '');
+		}
 	}
 
 	public async goToDefaultViewpoint() {
