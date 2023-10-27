@@ -76,7 +76,7 @@ export const NewTicketCard = () => {
 			parsedTicket,
 			isFederation,
 			(ticketId) => {
-				resolve(),
+				resolve();
 				goToTicketDetails(ticketId);
 			},
 		);
