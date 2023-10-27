@@ -1080,9 +1080,7 @@ export class ViewerService {
 			const { position, up, forward: view_dir, type, size: orthographicSize } = viewpoint.camera;
 			const camera =  { position, up, view_dir, type, orthographicSize, look_at: null,  account: null, model: null };
 			await this.setCamera(camera);
-		}
 
-		if (viewpoint?.clippingPlanes) {
 			this.updateClippingPlanes(viewpoint.clippingPlanes, '', '');
 		}
 	}
