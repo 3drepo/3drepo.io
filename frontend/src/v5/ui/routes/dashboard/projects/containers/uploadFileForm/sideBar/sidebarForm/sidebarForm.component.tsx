@@ -15,83 +15,61 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ChangeEvent, useEffect, useMemo } from 'react';
-
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { useForm } from 'react-hook-form';
-import { CONTAINER_TYPES, CONTAINER_UNITS, UploadItemFields } from '@/v5/store/containers/containers.types';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { SidebarSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
+import { useFormContext } from 'react-hook-form';
+import { CONTAINER_TYPES, CONTAINER_UNITS } from '@/v5/store/containers/containers.types';
 import * as countriesAndTimezones from 'countries-and-timezones';
 import { MenuItem } from '@mui/material';
 import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
+import { get } from 'lodash';
 import { LOD_VALUES } from '@/v5/store/revisions/revisions.types';
 import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
+import { extensionIsRevit, extensionIsSpm } from '../../uploadFileForm.helpers';
 
 type ISidebarForm = {
-	value: UploadItemFields,
-	isSpm: boolean;
-	isRevit: boolean; // fix to match isSpm method with #4258
-	onChange: (name: string, val: string | boolean) => void;
+	revisionPrefix: string;
+};
+
+const getTimezoneOptions = () => {
+	type ITimezone = { name: string; label: string; utcOffset: number; };
+	const tzList: ITimezone[] = [];
+	const tzData = countriesAndTimezones.getAllTimezones();
+	Object.keys(tzData).forEach((tz) => {
+		const { name, utcOffset, utcOffsetStr } = tzData[tz];
+		const tzToAdd: ITimezone = {
+			name,
+			label: `(UTC${utcOffsetStr}) ${name}`,
+			utcOffset,
+		};
+
+		tzList.push(tzToAdd);
+	});
+
+	const allTimezones: ITimezone[] = tzList.sort((tz1, tz2) => tz1.utcOffset - tz2.utcOffset);
+	return allTimezones || [];
 };
 
 export const SidebarForm = ({
-	value,
-	onChange,
-	isSpm,
-	isRevit, // fix to match isSpm method with #4258
+	revisionPrefix,
 }: ISidebarForm): JSX.Element => {
-	const { control, formState: { errors }, getValues, setValue, reset } = useForm<UploadItemFields>({
-		defaultValues: value,
-		mode: 'onChange',
-		resolver: yupResolver(SidebarSchema),
-	});
+	const { getValues, formState: { errors } } = useFormContext();
+	const [containerId, extension, containerName] = getValues([`${revisionPrefix}.containerId`, `${revisionPrefix}.extension`, `${revisionPrefix}.containerName`]);
 
-	const isNewContainer = !value.containerId && !!value.containerName;
-
-	const TimezoneOptions = useMemo(() => {
-		type ITimezone = { name: string; label: string; utcOffset: number; };
-		const tzList: ITimezone[] = [];
-		const tzData = countriesAndTimezones.getAllTimezones();
-		Object.keys(tzData).forEach((tz) => {
-			const { name, utcOffset, utcOffsetStr } = tzData[tz];
-			const tzToAdd: ITimezone = {
-				name,
-				label: `(UTC${utcOffsetStr}) ${name}`,
-				utcOffset,
-			};
-
-			tzList.push(tzToAdd);
-		});
-
-		const allTimezones: ITimezone[] = tzList.sort((tz1, tz2) => tz1.utcOffset - tz2.utcOffset);
-		return allTimezones;
-	}, []);
-
-	const updateValue = (name) => onChange(name, getValues(name));
-
-	useEffect(() => {
-		reset(value);
-	}, [value]);
-
+	const isNewEditableContainer = containerName && !containerId;
+	const getError = (field: string) => get(errors, `${revisionPrefix}.${field}`);
 	return (
-		<div onChange={(e: any) => updateValue(e.target.name)}>
+		<>
 			<Title>
-				{value.containerName}
+				{containerName}
 			</Title>
 			<FlexContainer>
 				<FormSelect
 					required
-					control={control}
-					disabled={!isNewContainer}
-					name="containerUnit"
+					disabled={!isNewEditableContainer}
+					name={`${revisionPrefix}.containerUnit`}
 					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
 					defaultValue="mm"
-					onChange={(e: ChangeEvent<HTMLInputElement>) => {
-						setValue('containerUnit', e.target.value);
-						updateValue('containerUnit');
-					}}
 				>
 					{CONTAINER_UNITS.map((unit) => (
 						<MenuItem key={unit.value} value={unit.value}>
@@ -101,15 +79,10 @@ export const SidebarForm = ({
 				</FormSelect>
 				<FormSelect
 					required
-					control={control}
-					disabled={!isNewContainer}
-					name="containerType"
+					disabled={!isNewEditableContainer}
+					name={`${revisionPrefix}.containerType`}
 					label={formatMessage({ id: 'containers.creation.form.type', defaultMessage: 'Category' })}
 					defaultValue="Uncategorised"
-					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-						setValue('containerType', e.target.value);
-						updateValue('containerType');
-					}}
 				>
 					{CONTAINER_TYPES.map((type) => (
 						<MenuItem key={type.value} value={type.value}>
@@ -122,18 +95,16 @@ export const SidebarForm = ({
 				</FormSelect>
 			</FlexContainer>
 			<FormTextField
-				control={control}
-				name="containerCode"
+				name={`${revisionPrefix}.containerCode`}
 				label={formatMessage({ id: 'uploads.sidebar.containerCode', defaultMessage: 'Container Code' })}
-				formError={errors.containerCode}
-				disabled={!isNewContainer}
+				formError={getError('containerCode')}
+				disabled={!isNewEditableContainer}
 			/>
 			<FormTextField
-				control={control}
-				name="containerDesc"
+				name={`${revisionPrefix}.containerDesc`}
 				label={formatMessage({ id: 'uploads.sidebar.containerDesc', defaultMessage: 'Container Description' })}
-				formError={errors.containerDesc}
-				disabled={!isNewContainer}
+				formError={getError('containerDesc')}
+				disabled={!isNewEditableContainer}
 			/>
 
 			<Heading>
@@ -141,21 +112,15 @@ export const SidebarForm = ({
 			</Heading>
 
 			<FormTextField
-				control={control}
-				name="revisionDesc"
+				name={`${revisionPrefix}.revisionDesc`}
 				label={formatMessage({ id: 'uploads.sidebar.revisionDesc', defaultMessage: 'Revision Description' })}
-				formError={errors.revisionDesc}
+				formError={getError('revisionDesc')}
 			/>
-			{isRevit && (
+			{extensionIsRevit(extension) && (
 				<FormSelect
 					required
-					control={control}
-					name="lod"
+					name={`${revisionPrefix}.containerUnit`}
 					label={formatMessage({ id: 'uploads.sidebar.lod', defaultMessage: 'Level of Detail' })}
-					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-						setValue('lod', e.target.value);
-						updateValue('lod');
-					}}
 				>
 					{LOD_VALUES.map((type) => (
 						<MenuItem key={type.value} value={type.value}>
@@ -165,23 +130,17 @@ export const SidebarForm = ({
 				</FormSelect>
 			)}
 
-			{isSpm && (
+			{extensionIsSpm(extension) && (
 				<>
 					<AnimationsCheckbox
-						control={control}
-						name="importAnimations"
+						name={`${revisionPrefix}.importAnimations`}
 						label={formatMessage({ id: 'uploads.sidebar.importAnimations', defaultMessage: 'Import transformations' })}
 					/>
 					<TimezoneSelect
-						control={control}
-						name="timezone"
+						name={`${revisionPrefix}.timezone`}
 						label={formatMessage({ id: 'uploads.sidebar.timezone', defaultMessage: 'Timezone' })}
-						onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-							setValue('timezone', e.target.value);
-							updateValue('timezone');
-						}}
 					>
-						{TimezoneOptions.map((opt) => (
+						{getTimezoneOptions().map((opt) => (
 							<MenuItem key={opt.name} value={opt.name}>
 								{opt.label}
 							</MenuItem>
@@ -189,6 +148,6 @@ export const SidebarForm = ({
 					</TimezoneSelect>
 				</>
 			)}
-		</div>
+		</>
 	);
 };

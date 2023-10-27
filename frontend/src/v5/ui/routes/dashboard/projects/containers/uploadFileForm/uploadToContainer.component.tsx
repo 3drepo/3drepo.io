@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,27 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { CircleButton } from '@controls/circleButton';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { getSupportedFileExtensions, uploadFile } from '@controls/fileUploader/uploadFile';
+import { UploadFileForm } from './uploadFileForm.component';
 
-export const SidebarContainer = styled.span<{ open: boolean }>`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	position: relative;
-	width: ${({ open }) => (open ? '400px' : '0')};
-	transition: width 0.1s;
-	overflow: hidden;
-	flex-shrink: 0;
-`;
-
-export const SidebarContent = styled.div`
-	padding: 30px;
-	width: 100%;
-	box-sizing: border-box;
-`;
-
-export const ExpandButton = styled(CircleButton)`
-	position: absolute;
-	right: 11px;
-	top: 14px;
-	z-index: 1;
-`;
+export const uploadToContainer = async (presetContainerId: string) => {
+	const onUpload = (presetFile) => {
+		DialogsActionsDispatchers.open(UploadFileForm, {
+			presetFile,
+			presetContainerId,
+		});
+	};
+	const file = await uploadFile(getSupportedFileExtensions());
+	onUpload(file);
+};

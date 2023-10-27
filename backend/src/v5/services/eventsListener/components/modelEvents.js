@@ -23,6 +23,7 @@ const { isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
+const { generateFullSchema } = require('../../../schemas/tickets/templates');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
@@ -133,10 +134,11 @@ const ticketUpdated = async ({ teamspace, project, model, ticket, author, change
 			getTemplateById(teamspace, ticket.type),
 			addTicketLog(teamspace, project, model, ticket._id, { author, changes, timestamp }),
 		]);
+		const fullTemplate = generateFullSchema(template);
 
 		const updateData = constructUpdatedObject(changes);
 		const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET : chatEvents.CONTAINER_UPDATE_TICKET;
-		const serialisedTicket = serialiseTicket({ _id: ticket._id, ...updateData }, template);
+		const serialisedTicket = serialiseTicket({ _id: ticket._id, ...updateData }, fullTemplate);
 		await createModelMessage(event, serialisedTicket, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to process ticket updated event ${err.message}`);
