@@ -696,7 +696,7 @@ Please click on the button below to verify your email address.</span>
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 200%; text-align: left;">
 
                             <span style="font-size:15px">By verifying your email address you are agreeing to 3D Repo's <a href="https://www.3drepo.io/terms" target="_blank"><span style="color:#3452ff">Terms of Service</span></a><br>
-For any queries please contact our support team at <a href="mailto:support@3drepo.org?subject=Support%20Query" target="_blank"><span style="color:#3452ff">support@3drepo.org</span></a></span>
+For any queries please contact our support team at <a href="mailto:support@3drepo.com?subject=Support%20Query" target="_blank"><span style="color:#3452ff">support@3drepo.com</span></a></span>
                         </td>
                     </tr>
                 </tbody></table>
