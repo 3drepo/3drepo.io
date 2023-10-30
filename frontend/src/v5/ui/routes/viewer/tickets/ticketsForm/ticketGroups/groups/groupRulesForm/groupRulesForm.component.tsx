@@ -33,7 +33,9 @@ import { RuleFieldValues } from './groupRulesInputs/ruleFieldValues/ruleFieldVal
 import { RuleFieldOperator } from './groupRulesInputs/ruleFieldOperator/ruleFieldOperator.component';
 import { RuleOperator } from './groupRulesInputs/ruleOperator/ruleOperator.component';
 import { RuleValues } from './groupRulesInputs/ruleValues/ruleValues.component';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { RouteParams } from '@/v4/constants/routes';
+import { useParams } from 'react-router-dom';
 
 const DEFAULT_VALUES: IFormRule = {
 	name: '',
@@ -54,6 +56,7 @@ type IGroupRules = {
 
 export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [] }: IGroupRules) => {
 	const defaultValues = rule ? groupRuleToFormRule(rule) : DEFAULT_VALUES;
+	const { containerOrFederation } = useParams<RouteParams>();
 
 	const formData = useForm<IFormRule>({
 		defaultValues,
@@ -62,7 +65,9 @@ export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [] }: IG
 		context: { alreadyExistingNames: existingRules.map((r) => r.name).filter((name) => name !== rule?.name) },
 	});
 
-	const isReadOnly = TicketsCardHooksSelectors.selectReadOnly();
+	const isCommenterContainer = ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
+	const isCommenterFederation = FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation);
+	const isReadOnly = !(isCommenterContainer || isCommenterFederation); // Cannot use tickets redux state readOnly because groups card also uses this
 
 	const {
 		formState: { isValid, errors },
