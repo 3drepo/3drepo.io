@@ -19,10 +19,12 @@ import styled, { css } from 'styled-components';
 import { TextField } from '@controls/inputs/textField/textField.component';
 import AutocompleteBase from '@mui/material/Autocomplete';
 
-export const Autocomplete = styled(AutocompleteBase)`
+export const DestinationAutocomplete = styled(AutocompleteBase)`
 	.MuiFormHelperText-root {
 		display: none;
 	}
+
+	pointer-events: ${(props: any) => props.disabled ? 'none' : 'all'};
 `;
 
 export type NewOrExisting = '' | 'new' | 'existing';
@@ -40,6 +42,9 @@ export const DestinationInput = styled(TextField)<{ neworexisting: NewOrExisting
 				&.Mui-disabled {
 					-webkit-text-fill-color: ${({ theme }) => theme.palette.secondary.main};
 				}
+			}
+			fieldset {
+				height: 36px;
 			}
 		}
 		${({ neworexisting, theme }) => {

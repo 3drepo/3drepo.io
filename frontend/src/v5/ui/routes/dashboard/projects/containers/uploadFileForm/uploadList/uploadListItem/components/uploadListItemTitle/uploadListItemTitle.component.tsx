@@ -17,32 +17,35 @@
 
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { Tooltip } from '@mui/material';
+import { get, useFormState } from 'react-hook-form';
+import filesize from 'filesize';
 import { DashboardListItemTitle } from './uploadListItemTitle.styles';
 
 type IUploadListItemTitle = {
 	name: string;
-	filesize: string;
+	size: number;
+	revisionPrefix: string;
 	isSelected: boolean;
-	errorMessage: string;
 };
 
 export const UploadListItemTitle = ({
 	name,
-	filesize,
+	size,
+	revisionPrefix,
 	isSelected,
-	errorMessage,
-}: IUploadListItemTitle): JSX.Element => (
-	<DashboardListItemTitle
-		subtitle={filesize}
-		selected={isSelected}
-	>
-		<Tooltip title={name} placement="bottom-start">
-			<span>{name}</span>
-		</Tooltip>
-		{errorMessage && (
-			<ErrorTooltip>
-				{errorMessage}
-			</ErrorTooltip>
-		)}
-	</DashboardListItemTitle>
-);
+}: IUploadListItemTitle): JSX.Element => {
+	const { errors } = useFormState();
+	const errorMessage = get(errors, `${revisionPrefix}.file`)?.message;
+	return (
+		<DashboardListItemTitle key={revisionPrefix} subtitle={filesize(size)} selected={isSelected}>
+			<Tooltip title={name} placement="bottom-start">
+				<span>{name}</span>
+			</Tooltip>
+			{errorMessage && (
+				<ErrorTooltip>
+					{errorMessage}
+				</ErrorTooltip>
+			)}
+		</DashboardListItemTitle>
+	);
+};

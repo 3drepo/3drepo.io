@@ -26,6 +26,8 @@ export const ListContainer = styled.ul`
 	width: 100%;
 	margin: 0;
 	padding: 0;
+	border-radius: 10px;
+	overflow: hidden;
 `;
 
 export const DashboardListEmptyContainer = styled(DashedContainer)`
