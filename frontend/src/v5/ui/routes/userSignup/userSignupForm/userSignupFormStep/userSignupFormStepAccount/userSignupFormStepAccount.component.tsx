@@ -45,6 +45,7 @@ export const UserSignupFormStepAccount = () => {
 				control={control}
 				required
 				formError={errors.username}
+				autoComplete="UserName"
 			/>
 			<FormTextField
 				InputProps={{
@@ -62,6 +63,7 @@ export const UserSignupFormStepAccount = () => {
 				control={control}
 				required
 				formError={errors.email}
+				autoComplete="email"
 			/>
 			<FormPasswordField
 				InputProps={{
@@ -79,7 +81,7 @@ export const UserSignupFormStepAccount = () => {
 				required
 				control={control}
 				formError={errors.password}
-				autoComplete="new-password"
+				autoComplete="off"
 			/>
 			<NextStepButton>
 				<FormattedMessage id="userSignup.form.button.next" defaultMessage="Next step" />
