@@ -15,11 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Container as GroupDetails,
+import {
+	Container as GroupDetails,
 	Actions as BottomLeftButtons,
 	Description as DetailsDescription,
 	StyledTextField,
 	StyledFormControl,
+	FieldsRow,
 } from '@/v4/routes/viewerGui/components/groups/components/groupDetails/groupDetails.styles';
 import {
 	Container as PreviewListItemContainer,
@@ -127,6 +129,9 @@ const expandedGroupItem = css`
 				}
 				.MuiFormControl-root {
 					margin-top: -18px;
+				}
+				${FieldsRow} > :nth-child(2) {
+					width: 420px;
 				}
 				${TextFieldContainer} {
 					border: 1px solid ${({ theme }) => theme.palette.base.lightest};
