@@ -20,6 +20,7 @@ import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { orderBy } from 'lodash';
 import { CreateRevisionAction,
 	FetchAction,
 	RevisionsActions,
@@ -51,8 +52,15 @@ export function* setVoidStatus({ teamspace, projectId, containerId, revisionId, 
 		yield API.Revisions.setRevisionVoidStatus(teamspace, projectId, containerId, revisionId, isVoid);
 		yield put(RevisionsActions.setVoidStatusSuccess(containerId, revisionId, isVoid));
 		const revisions = yield select(selectRevisions, containerId);
-		const revisionsCount = revisions.filter((rev) => !rev.void).length;
-		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, { revisionsCount }));
+		const activeRevisions = revisions.filter((rev) => !rev.void);
+		const revisionsCount = activeRevisions.length;
+		const latestRevision = revisionsCount ? orderBy(activeRevisions, 'timestamp')[0].tag : null;
+		const updates = {
+			revisionsCount,
+			lastUpdated: new Date(),
+			latestRevision,
+		};
+		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, updates));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'revisions.setVoid.error', defaultMessage: 'trying to set revision void status' }),
