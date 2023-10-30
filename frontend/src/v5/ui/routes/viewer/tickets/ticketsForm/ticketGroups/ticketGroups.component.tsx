@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { Group, GroupOverride, IGroupSettingsForm, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
+import { Group, GroupOverride, Viewpoint, ViewpointState } from '@/v5/store/tickets/tickets.types';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
@@ -62,10 +62,13 @@ enum OverrideType {
 }
 
 const NO_OVERRIDE_SELECTED = { index: -1, type: OverrideType.COLORED };
+const NO_EDIT_OVERRIDE_SELECTED = { override: null, type: OverrideType.COLORED };
+
+let count = 0;
 
 export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => {
 	const dispatch = useDispatch();
-	const [editingOverride, setEditingOverride] = useState(NO_OVERRIDE_SELECTED);
+	const [editingOverride, setEditingOverride] = useState(NO_EDIT_OVERRIDE_SELECTED);
 	const [highlightedOverride, setHighlightedOverride] = useState(NO_OVERRIDE_SELECTED);
 	const [selectedHiddenIndexes, setSelectedHiddenIndexes] = useState([]);
 	const [selectedColorIndexes, setSelectedColorIndexes] = useState((value.state?.colored || []).map((_, index) => index));
@@ -96,7 +99,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		}
 	};
 
-	const onSetEditGroup = (type) => (index) => setEditingOverride({ index, type });
+	const onSetEditGroup = (type) => (index) => setEditingOverride({ override: cloneDeep(settingsFormGroups?.[index]) || { key: count++ }, type });
 
 	const onSelectedHiddenGroupChange = (indexes: number[]) => {
 		setSelectedHiddenIndexes(indexes);
@@ -110,7 +113,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		}
 	};
 
-	const cancelEdition = () => setEditingOverride(NO_OVERRIDE_SELECTED);
+	const cancelEdition = () => setEditingOverride(NO_EDIT_OVERRIDE_SELECTED);
 
 	const onSubmit = (overrideValue) => {
 		const newVal = cloneDeep(value || {});
@@ -118,11 +121,20 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 			newVal.state = { showHidden: selectHiddenGeometryVisible(store.getState()) };
 		}
 
+		let index = settingsFormGroups?.findIndex(({ group, key }) => 
+			((group as any)._id === overrideValue.group._id &&  overrideValue.key === undefined) || key === overrideValue.key) ;
+
+		if (index === -1 || index === undefined) {
+			// if index is undefined it means settingsFormGroups is undefined, so it goes first
+			index = settingsFormGroups?.length || 0;
+		}
+
 		newVal.state[editingOverride.type] ||= [];
-		newVal.state[editingOverride.type][editingOverride.index] = overrideValue;
+		newVal.state[editingOverride.type][index] = overrideValue;
+
 		onChange?.(newVal);
 		cancelEdition();
-		setHighlightedOverride(editingOverride);
+		setHighlightedOverride({ index, type: editingOverride.type });
 	};
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
@@ -182,7 +194,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				/>
 			</TicketGroupsContextComponent>
 			<Popper
-				open={editingOverride.index !== NO_OVERRIDE_SELECTED.index}
+				open={!!editingOverride.override}
 				style={{ /* style is required to override the default positioning style Popper gets */
 					left: 460,
 					top: isSecondaryCard ? 'unset' : 80,
@@ -191,7 +203,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				onClick={(e) => e.stopPropagation()}
 			>
 				<GroupSettingsForm
-					value={settingsFormGroups?.[editingOverride.index] as IGroupSettingsForm}
+					value={editingOverride.override}
 					onSubmit={onSubmit}
 					onCancel={cancelEdition}
 					prefixes={getPossiblePrefixes(settingsFormGroups)}

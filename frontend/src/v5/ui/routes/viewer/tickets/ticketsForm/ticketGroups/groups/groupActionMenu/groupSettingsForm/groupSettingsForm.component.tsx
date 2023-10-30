@@ -87,7 +87,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
 	const formRef = useRef(null);
 
-	const isNewGroup = !value;
+	const isNewGroup = !value?.group?._id;
 	const selectedNodes = useSelector(selectSelectedNodes);
 	const sharedIds = selectedNodes.flatMap((node) => node.shared_ids);
 	const objectsCount = useSelector(selectGetNumNodesByMeshSharedIdsArray(sharedIds));
@@ -165,12 +165,13 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	useEffect(() => {
 		// When no value is passed then the group is a new group
 		resetFilterMenu();
-		if (!value) {
+		if (isNewGroup) {
 			formData.reset({
 				...(isColored ? { color: hexToArray(getRandomSuggestedColor()) } : {}),
 				opacity: 1,
 				prefix: [],
 				group: {},
+				key: value.key,
 			});
 			setIsSmart(true);
 			return;
