@@ -43,18 +43,8 @@ import {
 } from './compare.selectors';
 
 const getNextRevision = (revisions, currentRevision) => {
-	if (!currentRevision) {
-		return revisions[0];
-	}
-
 	const index = revisions.findIndex((r) => r._id === currentRevision._id);
-	const lastRev = index + 1 === revisions.length;
-
-	if (lastRev) {
-		return revisions[index];
-	}
-
-	return revisions[index + 1];
+	return revisions[(index + 1) % revisions.length];
 };
 
 const prepareModelToCompare = (teamspace, modelId, name, isFederation, revisions, currentRevision?) => {
