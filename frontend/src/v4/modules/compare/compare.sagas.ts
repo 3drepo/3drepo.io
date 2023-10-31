@@ -226,8 +226,8 @@ function* setTargetModel({ modelId, isTarget, isTypeChange = false }) {
 		}
 
 		if (!isTarget) {
-			const { baseRevision } = compareModels.find((comparedModel) => comparedModel._id === modelId);
-			yield put(CompareActions.setTargetRevision(modelId, baseRevision, isDiff));
+			const { baseRevision, targetDiffRevision } = compareModels.find((comparedModel) => comparedModel._id === modelId);
+			yield put(CompareActions.setTargetRevision(modelId, isDiff ? targetDiffRevision : baseRevision, isDiff));
 		}
 
 		if (!isDiff) {
