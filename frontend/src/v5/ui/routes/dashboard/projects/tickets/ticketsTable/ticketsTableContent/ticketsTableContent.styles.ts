@@ -37,7 +37,7 @@ export const Container = styled.div`
 
 export const Title = styled.div`
 	display: inline;
-	max-width: calc(100% - 84px);
+	max-width: calc(100% - 30px);
 	text-overflow: ellipsis;
 	overflow: hidden;
 	margin-right: 5px;
