@@ -48,7 +48,14 @@ export const GroupByFormSelect = (props) => {
 
 	const templateAllowsGroup = () => {
 		const groupBy = getValues('groupBy');
-		if (!hasProperties && [IssueProperties.ASSIGNEES, IssueProperties.DUE_DATE, IssueProperties.PRIORITY, IssueProperties.STATUS].includes(groupBy)) return false;
+		if (
+			!hasProperties && [
+				IssueProperties.ASSIGNEES,
+				IssueProperties.DUE_DATE,
+				IssueProperties.PRIORITY,
+				IssueProperties.STATUS,
+			].includes(groupBy)
+		) return false;
 		if (!hasSafetibase && [SafetibaseProperties.LEVEL_OF_RISK, SafetibaseProperties.TREATMENT_STATUS].includes(groupBy)) return false;
 		return true;
 	};
