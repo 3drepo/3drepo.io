@@ -45,19 +45,19 @@ export interface IDetails {
 }
 
 export const createAttachResourceComments = (owner: string,  resources = []) =>
-	resources.map((r, i) =>
+	resources.map((r) =>
 	({
 		_id: +(new Date()),
-		guid: i,
+		guid: +(new Date()),
 		owner,
 		action: {property: 'resource', to: r.name},
 		sealed: true
 	}));
 
-export const createRemoveResourceComment = (owner: string, {name} ) =>
+export const createRemoveResourceComment = (owner: string, {name, ...rest} ) =>
 	({
 		_id: +(new Date()),
-		guid: 0,
+		guid: +(new Date()),
 		owner,
 		action: {property: 'resource', from: name},
 		sealed: true
