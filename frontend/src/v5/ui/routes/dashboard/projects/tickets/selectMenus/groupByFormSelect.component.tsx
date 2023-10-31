@@ -30,6 +30,7 @@ const NONE_OPTION_MESSAGE = formatMessage({ id: 'tickets.selectOption.none', def
 
 const GROUP_OPTIONS = {
 	[BaseProperties.OWNER]: formatMessage({ id: 'groupBy.owner', defaultMessage: 'Owner' }),
+	[IssueProperties.ASSIGNEES]: formatMessage({ id: 'groupBy.assignees', defaultMessage: 'Assignees' }),
 	[IssueProperties.DUE_DATE]: formatMessage({ id: 'groupBy.dueDate', defaultMessage: 'Due date' }),
 	[IssueProperties.PRIORITY]: formatMessage({ id: 'groupBy.priority', defaultMessage: 'Priority' }),
 	[IssueProperties.STATUS]: formatMessage({ id: 'groupBy.status', defaultMessage: 'Status' }),
@@ -73,6 +74,9 @@ export const GroupByFormSelect = (props) => {
 			</MenuItem>
 			<MenuItem value={BaseProperties.OWNER} key={BaseProperties.OWNER}>
 				{GROUP_OPTIONS[BaseProperties.OWNER]}
+			</MenuItem>
+			<MenuItem value={IssueProperties.ASSIGNEES} key={IssueProperties.ASSIGNEES}>
+				{GROUP_OPTIONS[IssueProperties.ASSIGNEES]}
 			</MenuItem>
 			<MenuItem value={IssueProperties.DUE_DATE} key={IssueProperties.DUE_DATE} hidden={!hasProperties}>
 				{GROUP_OPTIONS[IssueProperties.DUE_DATE]}
