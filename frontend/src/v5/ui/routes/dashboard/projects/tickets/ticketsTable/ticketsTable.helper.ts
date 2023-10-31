@@ -122,9 +122,6 @@ const groupByAssignees = (tickets: TicketWithModelIdAndName[]) => {
 
 	const groups = _.groupBy(ticketsSortedByAssignees, (ticket) => {
 		const assignees = getAssignees(ticket);
-		if (assignees.length > 1) {
-			return `${assignees.slice(0, -1).join(', ')} & ${assignees.at(-1)}`;
-		}
 		return assignees.join(', ');
 	});
 	if (unsetAssignees.length) {
