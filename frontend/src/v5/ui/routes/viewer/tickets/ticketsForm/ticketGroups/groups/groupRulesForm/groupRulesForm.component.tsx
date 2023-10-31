@@ -27,15 +27,15 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { useEffect } from 'react';
 import { isEqual } from 'lodash';
+import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { RouteParams } from '@/v4/constants/routes';
+import { useParams } from 'react-router-dom';
 import { Buttons, Form, InputsContainer } from './groupRulesForm.styles';
 import { IFormRule, formRuleToGroupRule, groupRuleToFormRule } from './groupRulesForm.helpers';
 import { RuleFieldValues } from './groupRulesInputs/ruleFieldValues/ruleFieldValues.component';
 import { RuleFieldOperator } from './groupRulesInputs/ruleFieldOperator/ruleFieldOperator.component';
 import { RuleOperator } from './groupRulesInputs/ruleOperator/ruleOperator.component';
 import { RuleValues } from './groupRulesInputs/ruleValues/ruleValues.component';
-import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { RouteParams } from '@/v4/constants/routes';
-import { useParams } from 'react-router-dom';
 
 const DEFAULT_VALUES: IFormRule = {
 	name: '',

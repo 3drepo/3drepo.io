@@ -97,6 +97,7 @@ export class CriteriaField extends PureComponent<IProps, IState> {
 			onChange={this.handlePaste}
 			setState={this.handlePasteFieldChange}
 			onCancel={this.togglePasteMode}
+			alreadySelectedFilters={this.props.value}
 		/>
 	));
 

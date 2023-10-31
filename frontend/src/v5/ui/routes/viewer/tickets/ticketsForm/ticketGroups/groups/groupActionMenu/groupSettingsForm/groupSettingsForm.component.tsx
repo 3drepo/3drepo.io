@@ -67,6 +67,7 @@ import { NewCollectionForm } from '../newCollectionForm/newCollectionForm.compon
 import { RulesOptionsMenu } from './rulesOptionsMenu/rulesOptionsMenu.component';
 import { RulesField } from './rulesField/ruelsField.component';
 import { Popper } from '../../../ticketGroups.styles';
+import { appendCopySuffixToDuplicateNames } from '../../groupRulesForm/groupRulesForm.helpers';
 
 type GroupSettingsFormProps = {
 	value?: IGroupSettingsForm,
@@ -149,7 +150,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 
 	const handlePasteRules = (pastedRules) => {
 		setIsPastingRules(false);
-		append(pastedRules);
+		append(appendCopySuffixToDuplicateNames(rules, pastedRules));
 	};
 
 	const resetFilterMenu = () => {
@@ -359,7 +360,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 									rule={selectedRule?.value}
 									onSave={selectedRule ? (val) => update(selectedRule.index, val) : append}
 									onClose={resetFilterMenu}
-									existingRules={value?.group?.rules}
+									existingRules={rules}
 								/>
 							</Popper>
 							<Subheading>
