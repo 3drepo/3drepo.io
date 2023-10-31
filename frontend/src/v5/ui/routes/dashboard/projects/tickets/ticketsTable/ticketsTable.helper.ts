@@ -103,11 +103,24 @@ const groupByList = (tickets: TicketWithModelIdAndName[], groupType: string, gro
 };
 const getAssignees = (t) => _.get(t, `properties.${IssueProperties.ASSIGNEES}`);
 const groupByAssignees = (tickets: TicketWithModelIdAndName[]) => {
-	const [withAssignees, unsetAssignees] = _.partition(tickets, (t) => getAssignees(t)?.length > 0);
+	const [ticketsWithAssignees, unsetAssignees] = _.partition(tickets, (ticket) => getAssignees(ticket)?.length > 0);
 
-	const sortedWithAssignees = _.orderBy(withAssignees, (t) => getAssignees(t).join());
+	const ticketsWithSortedAssignees = ticketsWithAssignees.map((ticket) => {
+		const ticketWithSortedAssignees = _.cloneDeep(ticket);
+		const sortedAssignees = _.orderBy(getAssignees(ticket), (assignee) => assignee.trim().toLowerCase());
+		ticketWithSortedAssignees.properties[IssueProperties.ASSIGNEES] = sortedAssignees;
+		return ticketWithSortedAssignees;
+	});
 
-	const groups = _.groupBy(sortedWithAssignees, (ticket) => {
+	const ticketsSortedByAssignees = _.orderBy(
+		ticketsWithSortedAssignees,
+		(ticket) => {
+			const assignees = getAssignees(ticket).map((assignee) => assignee.trim().toLowerCase());
+			return _.orderBy(assignees).join();
+		},
+	);
+
+	const groups = _.groupBy(ticketsSortedByAssignees, (ticket) => {
 		const assignees = getAssignees(ticket);
 		if (assignees.length > 1) {
 			return `${assignees.slice(0, -1).join(', ')} & ${assignees.at(-1)}`;
