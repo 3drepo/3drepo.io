@@ -42,6 +42,7 @@ const mapKeysToSnakeCase = (properties) => _.mapKeys(properties, (val, key) => _
 export const GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE = mapKeysToSnakeCase({
 	[NONE_OPTION]: NONE_OPTION,
 	[BaseProperties.OWNER]: BaseProperties.OWNER,
+	[IssueProperties.ASSIGNEES]: IssueProperties.ASSIGNEES,
 	[IssueProperties.DUE_DATE]: IssueProperties.DUE_DATE,
 	[IssueProperties.PRIORITY]: IssueProperties.PRIORITY,
 	[IssueProperties.STATUS]: IssueProperties.STATUS,
@@ -100,11 +101,31 @@ const groupByList = (tickets: TicketWithModelIdAndName[], groupType: string, gro
 	groups[UNSET] = remainingTickets;
 	return groups;
 };
+const getAssignees = (t) => _.get(t, `properties.${IssueProperties.ASSIGNEES}`);
+const groupByAssignees = (tickets: TicketWithModelIdAndName[]) => {
+	const [withAssignees, unsetAssignees] = _.partition(tickets, (t) => getAssignees(t)?.length > 0);
+
+	const sortedWithAssignees = _.orderBy(withAssignees, (t) => getAssignees(t).join());
+
+	const groups = _.groupBy(sortedWithAssignees, (ticket) => {
+		const assignees = getAssignees(ticket);
+		if (assignees.length > 1) {
+			return `${assignees.slice(0, -1).join(', ')} & ${assignees.at(-1)}`;
+		}
+		return assignees.join(', ');
+	});
+	if (unsetAssignees.length) {
+		groups[UNSET] = unsetAssignees;
+	}
+	return groups;
+};
 
 export const groupTickets = (groupBy: string, tickets: TicketWithModelIdAndName[]): Record<string, TicketWithModelIdAndName[]> => {
 	switch (groupBy) {
 		case BaseProperties.OWNER:
 			return _.groupBy(tickets, `properties.${BaseProperties.OWNER}`);
+		case IssueProperties.ASSIGNEES:
+			return groupByAssignees(tickets);
 		case IssueProperties.DUE_DATE:
 			return groupByDate(tickets);
 		default:

@@ -34,3 +34,11 @@ export const Container = styled.div`
 		}
 	}
 `;
+
+export const Title = styled.div`
+	display: inline;
+	max-width: calc(100% - 84px);
+	text-overflow: ellipsis;
+	overflow: hidden;
+	margin-right: 5px;
+`;
