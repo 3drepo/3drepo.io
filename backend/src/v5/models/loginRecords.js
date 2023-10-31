@@ -23,7 +23,9 @@ const geoip = require('geoip-lite');
 const { getUserAgentInfo } = require('../utils/helper/userAgent');
 const { logger } = require('../utils/logger');
 const { loginPolicy } = require('../utils/config');
+const { templates: mailTemplates } = require('../services/mailer/mailer.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
+const { sendSystemEmail } = require('../services/mailer');
 
 const LoginRecords = {};
 const LOGIN_RECORDS_COL = 'loginRecords';
@@ -113,9 +115,10 @@ LoginRecords.saveSuccessfulLoginRecord = async (user, sessionId, ipAddress, user
 
 			logger.logError(`Session ID clash detected! Trying to add ${JSON.stringify({ user, ...loginRecord })}`);
 			logger.logError(`Existing record found ${JSON.stringify(existingRec)}`);
+			await sendSystemEmail(mailTemplates.ERROR_NOTIFICATION.name, { err, title: 'Duplicate session ID found', message: `Duplicate session ID found\nSession ID clash detected! Trying to add ${JSON.stringify({ user, ...loginRecord })}\nExisting record found ${JSON.stringify(existingRec)}` });
+		} else {
+			throw err;
 		}
-
-		throw err;
 	}
 
 	publish(events.SUCCESSFUL_LOGIN_ATTEMPT, { username: user, loginRecord });
