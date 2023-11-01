@@ -50,8 +50,9 @@ const getColorFromMapping = (ticket, pinSchema) => {
 
 export const getPinColorHex = (name: string) => {
 	const { containerOrFederation } = useParams<ViewerParams>();
+	if (!containerOrFederation) return DEFAULT_COLOR; // if in tabular view
 	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
-	const selectedTemplateId = TicketsCardHooksSelectors.selectSelectedTemplateId() ?? ticket.type;
+	const selectedTemplateId = TicketsCardHooksSelectors.selectSelectedTemplateId() ?? ticket?.type;
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
 	
 	const pinSchema = getPinSchema({ name, template });

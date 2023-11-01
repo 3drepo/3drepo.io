@@ -36,7 +36,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
 	const pinId = name;
-	const { selectedPin, setSelectedPin } = useContext(TicketContext);
+	const { isViewer, selectedPin, setSelectedPin } = useContext(TicketContext);
 	const isSelected = selectedPin === pinId;
 	
 	const colorHex = getPinColorHex(name);
@@ -147,11 +147,13 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 						)}
 					</PinActions>
 				</span>
-				<Tooltip title={getSelectedPinTooltip()}>
-					<PinSelectContainer color={colorHex} isSelected={isSelected} onClick={onClickSelectPin}>
-						<PinIcon />
-					</PinSelectContainer>
-				</Tooltip>
+				{isViewer && (
+					<Tooltip title={getSelectedPinTooltip()}>
+						<PinSelectContainer color={colorHex} isSelected={isSelected} onClick={onClickSelectPin}>
+							<PinIcon />
+						</PinSelectContainer>
+					</Tooltip>
+				)}
 			</FlexRow>
 			<FormHelperText>{helperText}</FormHelperText>
 		</ViewerInputContainer>
