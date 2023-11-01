@@ -248,19 +248,18 @@ db.createLegends = (teamspace, modelId, legends) => {
 db.createMetadata = (teamspace, modelId, metadataId, metadata) => DbHandler.insertOne(teamspace, `${modelId}.scene`,
 	{ _id: stringToUUID(metadataId), type: 'meta', metadata });
 
-db.createAvatar = async (username, type, avatarData) => {
+const createImage = async (dbName, colName, type, imageId, imageData) => {
 	const { defaultStorage } = config;
 	config.defaultStorage = type;
-	await FilesManager.storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarData);
+	await FilesManager.storeFile(dbName, colName, imageId, imageData);
 	config.defaultStorage = defaultStorage;
 };
 
-db.createProjectImage = async (teamspace, project, type, imageData) => {
-	const { defaultStorage } = config;
-	config.defaultStorage = type;
-	await FilesManager.storeFile(teamspace, COL_NAME, project, imageData);
-	config.defaultStorage = defaultStorage;
-};
+db.createAvatar = (username, type, avatarData) => createImage(USERS_DB_NAME, AVATARS_COL_NAME,
+	type, username, avatarData);
+
+db.createProjectImage = (teamspace, project, type, imageData) => createImage(teamspace, COL_NAME,
+	type, project, imageData);
 
 db.addLoginRecords = async (records) => {
 	await DbHandler.insertMany(INTERNAL_DB, 'loginRecords', records);
