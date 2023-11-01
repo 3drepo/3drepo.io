@@ -21,16 +21,18 @@ import { InputController } from '@controls/inputs/inputController.component';
 import { get } from 'lodash';
 import { Fragment } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { SEQUENCING_MODULE_END, SEQUENCING_MODULE_START } from '@/v5/store/tickets/tickets.helpers';
 import { TicketProperty } from './properties/properties.helper';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { ErrorTextGap, PropertiesListContainer } from './ticketsForm.styles';
+import { SequencingProperties } from '../tickets.constants';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
 	module: string;
 	onPropertyBlur?: (...args) => void;
 }
+
+const isSequencingProperty = (inputName: string) => [`modules.${SequencingProperties.START_TIME}`, `modules.${SequencingProperties.END_TIME}`].includes(inputName);
 
 export const PropertiesList = ({ module, properties, onPropertyBlur }: PropertiesListProps) => {
 	const { formState } = useFormContext();
@@ -45,7 +47,7 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 				values,
 			}) => {
 				const inputName = `${module}.${name}`;
-				const type = [SEQUENCING_MODULE_START, SEQUENCING_MODULE_END].includes(inputName) ? 'sequencing' : basicType;
+				const type = isSequencingProperty(inputName) ? 'sequencing' : basicType;
 				const PropertyComponent = TicketProperty[type] || UnsupportedProperty;
 				const formError = get(formState.errors, inputName);
 				return (

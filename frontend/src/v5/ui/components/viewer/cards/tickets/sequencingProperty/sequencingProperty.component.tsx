@@ -22,7 +22,7 @@ import { useEffect } from 'react';
 import dayjs from 'dayjs';
 import { SequencesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useFormContext } from 'react-hook-form';
-import { SEQUENCING_MODULE_END, SEQUENCING_MODULE_START } from '@/v5/store/tickets/tickets.helpers';
+import { SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { Container, IconContainer, SequenceIconContainer } from './sequencingProperty.styles';
 
 export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTimePickerProps) => {
@@ -60,8 +60,8 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 				// (onChange triggers at every change: year, minutes, hours, etc., onAccept only when a date is finally chosen)
 				onChange={() => true}
 				onAccept={handleChange}
-				minDateTime={getDateTimeBoundary(SEQUENCING_MODULE_START)}
-				maxDateTime={getDateTimeBoundary(SEQUENCING_MODULE_END)}
+				minDateTime={getDateTimeBoundary(`modules.sequencing.${SequencingProperties.START_TIME}`)}
+				maxDateTime={getDateTimeBoundary(`modules.sequencing.${SequencingProperties.END_TIME}`)}
 				{...props}
 			/>
 			{value && (
