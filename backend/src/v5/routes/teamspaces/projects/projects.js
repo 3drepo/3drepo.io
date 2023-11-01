@@ -16,13 +16,14 @@
  */
 
 const { hasAccessToTeamspace, isAdminToProject, isTeamspaceAdmin } = require('../../../middleware/permissions/permissions');
-const { projectExists, validateProjectData, validateProjectImage } = require('../../../middleware/dataConverter/inputs/teamspaces/projects');
+const { projectExists, validateProjectData } = require('../../../middleware/dataConverter/inputs/teamspaces/projects');
 const Projects = require('../../../processors/teamspaces/projects');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../utils/helper/uuids');
 const { fileExtensionFromBuffer } = require('../../../utils/helper/typeCheck');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
+const { singleImageUpload } = require('../../../middleware/dataConverter/multer');
 const { templates } = require('../../../utils/responseCodes');
 
 const serialiseProject = (project) => ({ ...project, _id: UUIDToString(project._id) });
@@ -395,7 +396,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         description: Uploads a new image for the project
 	 */
-	router.put('/:project/image', isAdminToProject, validateProjectImage, uploadImage);
+	router.put('/:project/image', isAdminToProject, singleImageUpload('file'), uploadImage);
 
 	/**
 	 * @openapi

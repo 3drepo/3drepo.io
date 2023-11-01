@@ -60,13 +60,11 @@ const imageFilter = (req, file, cb) => {
 
 const ensureFileIsImage = async (req, res, next) => {
 	const fileBuffer = req.file?.buffer;
-	if (fileBuffer) {
-		const ext = await fileExtensionFromBuffer(fileBuffer);
+	const ext = await fileExtensionFromBuffer(fileBuffer);
 
-		if (!uploadConfig.imageExtensions.includes(ext)) {
-			respond(req, res, templates.unsupportedFileFormat);
-			return;
-		}
+	if (!uploadConfig.imageExtensions.includes(ext)) {
+		respond(req, res, templates.unsupportedFileFormat);
+		return;
 	}
 
 	await next();
@@ -76,6 +74,9 @@ MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = upload
 	storeInMemory = false) => async (req, res, next) => {
 	try {
 		await singleFileMulterPromise(req, fileName, fileFilter, maxSize, storeInMemory);
+
+		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
+
 		await next();
 	} catch (err) {
 		let response = err;

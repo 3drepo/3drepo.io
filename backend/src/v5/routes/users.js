@@ -17,13 +17,14 @@
 
 const { canLogin, isLoggedIn, validSession } = require('../middleware/auth');
 const { createSession, destroySession } = require('../middleware/sessions');
-const { validateAvatarFile, validateForgotPasswordData, validateLoginData,
+const { validateForgotPasswordData, validateLoginData,
 	validateResetPasswordData, validateSignUpData, validateUpdateData, validateVerifyData } = require('../middleware/dataConverter/inputs/users');
 const { Router } = require('express');
 const Users = require('../processors/users');
 const { fileExtensionFromBuffer } = require('../utils/helper/typeCheck');
 const { getUserFromSession } = require('../utils/sessions');
 const { respond } = require('../utils/responder');
+const { singleImageUpload } = require('../middleware/dataConverter/multer');
 const { templates } = require('../utils/responseCodes');
 
 const login = async (req, res, next) => {
@@ -420,7 +421,7 @@ const establishRoutes = () => {
 	*       200:
 	*         description: Uploads a new avatar for the user
 	*/
-	router.put('/user/avatar', isLoggedIn, validateAvatarFile, uploadAvatar);
+	router.put('/user/avatar', isLoggedIn, singleImageUpload('file'), uploadAvatar);
 
 	/**
 	* @openapi
