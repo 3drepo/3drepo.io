@@ -120,7 +120,7 @@ export const selectTicketPins = createSelector(
 						endDate && new Date(endDate) < new Date(selectedSequenceDate)
 					) return accum;
 				}
-				return [...accum, ticketToPin(ticket, selectedTicket._id)];
+				return [...accum, ticketToPin(ticket, selectedTicket?._id)];
 			},
 			[],
 		);
