@@ -42,6 +42,10 @@ interface IGroupsActionCreators {
 	showDetails: (group: any) => Action;
 }
 
+interface ISequencesActionCreators {
+	showSequenceDate: (date: Date) => Action;
+}
+
 interface IJobsActionCreators {
 	fetchJobs: (teamspace: string) => Action;
 }
