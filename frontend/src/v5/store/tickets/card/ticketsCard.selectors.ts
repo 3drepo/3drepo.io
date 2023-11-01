@@ -21,10 +21,12 @@ import { IPin } from '@/v4/services/viewer/viewer';
 import { TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { theme } from '@/v5/ui/themes/theme';
 import { createSelector } from 'reselect';
-import { isEmpty } from 'lodash';
+import _, { isEmpty } from 'lodash';
 import { selectTemplateById, selectTicketById, selectTickets } from '../tickets.selectors';
 import { ITicket } from '../tickets.types';
 import { ITicketsCardState } from './ticketsCard.redux';
+import { selectSelectedDate } from '@/v4/modules/sequences';
+import { END_TIME, SEQUENCING_MODULE, START_TIME } from '../tickets.helpers';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
@@ -34,7 +36,7 @@ export const selectCurrentTickets = createSelector(
 	selectTickets,
 );
 
-const ticketToPin = (ticket:ITicket, selectedId): IPin => ({
+const ticketToPin = (ticket: ITicket, selectedId): IPin => ({
 	id: ticket._id,
 	position: ticket.properties.Pin,
 	isSelected: ticket._id === selectedId,
@@ -100,12 +102,27 @@ export const selectSelectedTemplate = createSelector(
 export const selectTicketPins = createSelector(
 	selectCurrentTickets,
 	selectView,
-	selectSelectedTicketId,
-	(tickets, view, selectedTicketId) => {
+	selectSelectedTicket,
+	selectSelectedDate,
+	(tickets, view, selectedTicket, selectedSequenceDate): IPin[] => {
 		if (view !== TicketsCardViews.List) return [];
 
 		return tickets.reduce(
-			(accum, ticket) => (ticket.properties?.Pin ? [...accum, ticketToPin(ticket, selectedTicketId)] : accum),
+			(accum, ticket) => {
+				const pin = ticket.properties?.Pin;
+				if (!pin) return accum;
+				const sequencing = _.get(ticket, SEQUENCING_MODULE);
+				
+				if (sequencing && selectedSequenceDate) {
+					const startDate = sequencing[START_TIME];
+					const endDate = sequencing[END_TIME];
+					if (
+						startDate && new Date(startDate) > new Date(selectedSequenceDate) ||
+						endDate && new Date(endDate) < new Date(selectedSequenceDate)
+					) return accum;
+				}
+				return [...accum, ticketToPin(ticket, selectedTicket._id)];
+			},
 			[],
 		);
 	},
