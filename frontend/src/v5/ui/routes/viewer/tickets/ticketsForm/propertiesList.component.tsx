@@ -32,7 +32,10 @@ interface PropertiesListProps {
 	onPropertyBlur?: (...args) => void;
 }
 
-const isSequencingProperty = (inputName: string) => [`modules.${SequencingProperties.START_TIME}`, `modules.${SequencingProperties.END_TIME}`].includes(inputName);
+const isSequencingProperty = (inputName: string) => [
+	`modules.sequencing.${SequencingProperties.START_TIME}`,
+	`modules.sequencing.${SequencingProperties.END_TIME}`,
+].includes(inputName);
 
 export const PropertiesList = ({ module, properties, onPropertyBlur }: PropertiesListProps) => {
 	const { formState } = useFormContext();
