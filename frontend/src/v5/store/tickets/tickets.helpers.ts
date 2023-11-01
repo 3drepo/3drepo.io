@@ -30,12 +30,6 @@ import { TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 
-export const SEQUENCING_MODULE = 'modules.sequencing';
-export const START_TIME = 'Start Time';
-export const END_TIME = 'End Time';
-export const SEQUENCING_MODULE_START = `${SEQUENCING_MODULE}.${START_TIME}`;
-export const SEQUENCING_MODULE_END = `${SEQUENCING_MODULE}.${END_TIME}`;
-
 export const modelIsFederation = (modelId: string) => !!FederationsHooksSelectors.selectFederationById(modelId);
 
 export const getEditableProperties = (template) => {
