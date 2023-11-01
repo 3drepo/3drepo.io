@@ -16,16 +16,16 @@
  */
 
 import { createActions, createReducer } from 'reduxsauce';
+import { Action } from 'redux';
 import { Constants } from '@/v5/helpers/actions.helper';
 import { produceAll } from '@/v5/helpers/reducers.helper';
-import { Action } from 'redux';
-import { TeamspaceProjectAndContainerId, ContainerId } from '../store.types';
-import { CreateRevisionBody, IRevision, IRevisionUpdate, IUploadStatus } from './revisions.types';
+import { TeamspaceProjectAndContainerId, ContainerId, OnSuccess } from '../store.types';
+import { CreateRevisionBody, CreateRevisionPayload, IRevision, IRevisionUpdate, IUploadStatus } from './revisions.types';
 
 export const { Types: RevisionsTypes, Creators: RevisionsActions } = createActions({
 	setVoidStatus: ['teamspace', 'projectId', 'containerId', 'revisionId', 'isVoid'],
 	setVoidStatusSuccess: ['containerId', 'revisionId', 'isVoid'],
-	fetch: ['teamspace', 'projectId', 'containerId'],
+	fetch: ['teamspace', 'projectId', 'containerId', 'onSuccess'],
 	fetchSuccess: ['containerId', 'revisions'],
 	setIsPending: ['containerId', 'isPending'],
 	createRevision: ['teamspace', 'projectId', 'uploadId', 'body'],
@@ -115,16 +115,9 @@ export interface IRevisionsState {
 
 type VoidParams = TeamspaceProjectAndContainerId & { revisionId: string, isVoid: boolean };
 
-export type CreateRevisionPayload = {
-	teamspace: string;
-	projectId: string;
-	uploadId: string;
-	body: CreateRevisionBody;
-};
-
 export type SetRevisionVoidStatusAction = Action<'SET_REVISION_VOID_STATUS'> & VoidParams;
 export type SetRevisionVoidStatusSuccessAction = Action<'SET_REVISION_VOID_STATUS_SUCCESS'> & VoidParams;
-export type FetchAction = Action<'FETCH'> & TeamspaceProjectAndContainerId;
+export type FetchAction = Action<'FETCH'> & TeamspaceProjectAndContainerId & OnSuccess;
 export type FetchSuccessAction = Action<'FETCH_SUCCESS'> & ContainerId & { revisions: IRevision[] };
 export type SetIsPendingAction = Action<'SET_IS_PENDING'> & ContainerId & { isPending: boolean };
 export type CreateRevisionAction = Action<'CREATE_REVISION'> & CreateRevisionPayload;
@@ -138,7 +131,7 @@ export interface IRevisionsActionCreators {
 	SetRevisionVoidStatusAction;
 	setVoidStatusSuccess: (containerId: string, revisionId: string, isVoid: boolean) =>
 	SetRevisionVoidStatusSuccessAction;
-	fetch: (teamspace: string, projectId: string, containerId: string) => FetchAction;
+	fetch: (teamspace: string, projectId: string, containerId: string, onSuccess?: OnSuccess ) => FetchAction;
 	fetchSuccess: (containerId: string, revisions: IRevision[]) => FetchSuccessAction;
 	setIsPending: (containerId: string, isPending: boolean) => SetIsPendingAction;
 	createRevision: (teamspace: string,

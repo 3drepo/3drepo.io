@@ -18,7 +18,7 @@
 import { StyledIconButton } from './uploadListItemFileIcon.styles';
 
 type IUploadListItemFileIcon = {
-	extension: string;
+	extension?: string;
 };
 
 export const UploadListItemFileIcon = ({ extension }: IUploadListItemFileIcon): JSX.Element => (

@@ -30,11 +30,11 @@ import { ContainersActions } from '../containers/containers.redux';
 import { UploadStatuses } from '../containers/containers.types';
 import { createContainerFromRevisionBody, createFormDataFromRevisionBody } from './revisions.helpers';
 
-export function* fetch({ teamspace, projectId, containerId }: FetchAction) {
+export function* fetch({ teamspace, projectId, containerId, onSuccess }: FetchAction) {
 	yield put(RevisionsActions.setIsPending(containerId, true));
 	try {
 		const { data: { revisions } } = yield API.Revisions.fetchRevisions(teamspace, projectId, containerId);
-
+		onSuccess?.();
 		yield put(RevisionsActions.fetchSuccess(containerId, revisions));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -73,9 +73,9 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 	}
 	try {
 		if (!containerId) {
-			throw new Error(
-				formatMessage({ id: 'revisions.error.noContainer', defaultMessage: 'Failed to create Container' }),
-			);
+			yield put(RevisionsActions.setUploadComplete(uploadId, true,
+				formatMessage({ id: 'revisions.error.noContainer', defaultMessage: 'Failed to create Container' })));
+			return;
 		}
 		yield put(RevisionsActions.setUploadComplete(uploadId, false));
 		yield API.Revisions.createRevision(

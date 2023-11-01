@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,28 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
-import { SidebarContainer, ExpandButton, SidebarContent } from './sidebar.styles';
+import styled from 'styled-components';
+import { CircleButton } from '@controls/circleButton';
 
-interface ISidebar {
-	open: boolean;
-	onClose: () => void;
-	className?: string;
-	children: JSX.Element;
-}
+export const SidebarContainer = styled.span<{ open: boolean }>`
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	position: relative;
+	width: ${({ open }) => (open ? '400px' : '0')};
+	transition: width 0.1s;
+	overflow: auto;
+	flex-shrink: 0;
+`;
 
-export const Sidebar = ({
-	className,
-	open,
-	onClose,
-	children,
-}: ISidebar): JSX.Element => (
-	<SidebarContainer className={className} open={open}>
-		<ExpandButton onClick={onClose}>
-			<ExpandIcon />
-		</ExpandButton>
-		<SidebarContent>
-			{children}
-		</SidebarContent>
-	</SidebarContainer>
-);
+export const SidebarContent = styled.div`
+	padding: 30px;
+	width: 100%;
+	box-sizing: border-box;
+`;
+
+export const ExpandButton = styled(CircleButton)`
+	position: absolute;
+	right: 11px;
+	top: 14px;
+	z-index: 1;
+`;

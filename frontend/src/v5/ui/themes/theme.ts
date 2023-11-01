@@ -538,6 +538,7 @@ export const theme = createTheme({
 					padding: 0,
 				},
 				inputRoot: {
+					alignContent: 'center',
 					borderRadius: 8,
 					'&.Mui-disabled': {
 						backgroundColor: COLOR.TERTIARY_LIGHTEST,
@@ -548,11 +549,9 @@ export const theme = createTheme({
 				},
 				endAdornment: {
 					position: 'static',
-					height: '100%',
-					top: 'unset',
-					display: 'flex',
-					alignItems: 'center',
-					margin: '0 10px',
+					color: 'inherit',
+					paddingLeft: 3,
+					marginRight: 5,
 					'button:hover': {
 						backgroundColor: 'unset',
 					},
@@ -561,12 +560,12 @@ export const theme = createTheme({
 					width: '20px',
 					height: '20px',
 					margin: '8px 0px',
-					color: COLOR.SECONDARY_MAIN,
+					color: 'inherit',
 				},
 				clearIndicator: {
 					width: '20px',
 					height: '20px',
-					margin: '0 5px 0 0',
+					margin: 0,
 					padding: '2px',
 				},
 				listbox: {
@@ -672,6 +671,7 @@ export const theme = createTheme({
 			styleOverrides: {
 				root: {
 					backgroundColor: COLOR.TERTIARY_LIGHTEST,
+					zIndex: 0,
 				},
 			},
 		},
