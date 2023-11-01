@@ -21,6 +21,8 @@ const ServiceHelper = require('../../../../helper/services');
 const { image, oversizedImage, objModel, src } = require('../../../../helper/path');
 const { stringToUUID } = require('../../../../../../src/v5/utils/helper/uuids');
 const fs = require('fs');
+const { fileMimeFromBuffer } = require('../../../../../../src/v5/utils/helper/typeCheck');
+const Responder = require('../../../../../../src/v5/utils/responder');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -39,9 +41,12 @@ const setupBasicData = async ({ users, teamspace, projects, model, imageData }) 
 	]);
 
 	await ServiceHelper.db.createProject(teamspace, projects.testProject.id, projects.testProject.name, [model._id]);
-	await ServiceHelper.db.createProject(teamspace, projects.projectWithImage.id, projects.projectWithImage.name, [],
-		[users.projectAdmin.user]);
-	await ServiceHelper.db.createProjectImage(teamspace, stringToUUID(projects.projectWithImage.id), 'fs', imageData);
+	await ServiceHelper.db.createProject(teamspace, projects.projectWithPngImage.id,
+		projects.projectWithPngImage.name, [], [users.projectAdmin.user]);
+	await ServiceHelper.db.createProject(teamspace, projects.projectWithImage.id,
+		projects.projectWithImage.name, [], [users.projectAdmin.user]);
+	await ServiceHelper.db.createProjectImage(teamspace, stringToUUID(projects.projectWithPngImage.id), 'fs', fs.readFileSync(image));
+	await ServiceHelper.db.createProjectImage(teamspace, stringToUUID(projects.projectWithImage.id), 'fs', Buffer.from(imageData));
 	await ServiceHelper.db.createModel(teamspace, model._id, model.name, model.properties);
 };
 
@@ -53,14 +58,14 @@ const generateBasicData = () => {
 
 	const testProject = ServiceHelper.generateRandomProject();
 	const projectWithImage = ServiceHelper.generateRandomProject();
-	const imageData = ServiceHelper.generateRandomString();
+	const projectWithPngImage = ServiceHelper.generateRandomProject();
 
 	return ({
 		users: { tsAdmin, nonAdminUser, unlicencedUser, modelPermUser, projectAdmin },
 		teamspace: ServiceHelper.generateRandomString(),
-		projects: { testProject, projectWithImage },
+		projects: { testProject, projectWithPngImage, projectWithImage },
 		model,
-		imageData,
+		imageData: ServiceHelper.generateRandomString(),
 	});
 };
 
@@ -88,14 +93,18 @@ const testGetProjectList = () => {
 		});
 		test('should return a project list if the user has a valid session and is admin of teamspace', async () => {
 			const res = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual({ projects: Object.keys(projects).map((p) => (
-				{ _id: projects[p].id, name: projects[p].name, isAdmin: true })) });
+			expect(res.body).toEqual({
+				projects: Object.keys(projects).map((p) => (
+					{ _id: projects[p].id, name: projects[p].name, isAdmin: true })),
+			});
 		});
 
 		test('should return a project list if the user has a valid session and has access to a model within one of the project', async () => {
 			const res = await agent.get(`${route}?key=${users.modelPermUser.apiKey}`).expect(templates.ok.status);
-			expect(res.body).toEqual({ projects:
-				[{ _id: projects.testProject.id, name: projects.testProject.name, isAdmin: false }] });
+			expect(res.body).toEqual({
+				projects:
+					[{ _id: projects.testProject.id, name: projects.testProject.name, isAdmin: false }],
+			});
 		});
 	});
 };
@@ -346,10 +355,11 @@ const testGetProjectImage = () => {
 		['the user is not a member of the teamspace', { ...baseRouteParams, key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
 		['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 		['the project has no image', { ...baseRouteParams, projectId: projects.testProject.id }, false, templates.fileNotFound],
-		['the project has image', { ...baseRouteParams }, true, Buffer.from(imageData)],
+		['the project has image', { ...baseRouteParams }, true, Buffer.from(imageData), undefined],
+		['the project has image (PNG)', { ...baseRouteParams, projectId: projects.projectWithPngImage.id }, true, fs.readFileSync(image), Responder.mimeTypes.png],
 	];
 
-	const runTest = (desc, { ...routeParams }, success, expectedOutput) => {
+	const runTest = (desc, { ...routeParams }, success, expectedOutput, expectedFormat) => {
 		const route = ({ teamspace: ts, projectId, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/image${key ? `?key=${key}` : ''}`;
 
 		test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
@@ -359,6 +369,9 @@ const testGetProjectImage = () => {
 
 			if (success) {
 				expect(res.body).toEqual(expectedOutput);
+
+				const mimeType = await fileMimeFromBuffer(expectedOutput);
+				expect(mimeType).toEqual(expectedFormat);
 			} else {
 				expect(res.body.code).toEqual(expectedOutput.code);
 			}
@@ -379,7 +392,7 @@ const testUpdateProjectImage = () => {
 	const baseRouteParams = {
 		key: users.tsAdmin.apiKey,
 		teamspace,
-		projectId: projects.projectWithImage.id,
+		projectId: projects.projectWithPngImage.id,
 		image,
 	};
 
@@ -387,11 +400,12 @@ const testUpdateProjectImage = () => {
 		['the user does not have a valid session', { ...baseRouteParams, key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
 		['the teamspace does not exist', { ...baseRouteParams, teamspace: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
 		['the user is not a member of the teamspace', { ...baseRouteParams, key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
+		['the user does not have access to the project', { ...baseRouteParams, key: users.modelPermUser.apiKey }, false, templates.notAuthorized],
 		['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 		['an oversized image is provided', { ...baseRouteParams, image: oversizedImage }, false, templates.maxSizeExceeded],
 		['a wrong file type is provided', { ...baseRouteParams, image: objModel }, false, templates.unsupportedFileFormat],
-		['a valid image is provided and user is teamspace admin', { ...baseRouteParams }, true],
-		['a valid image is provided and user is project admin', { ...baseRouteParams, key: users.projectAdmin.apiKey }, true],
+		['the user is teamspace admin', { ...baseRouteParams }, true],
+		['the user is project admin', { ...baseRouteParams, key: users.projectAdmin.apiKey }, true],
 	];
 
 	const runTest = (desc, { ...routeParams }, success, expectedOutput) => {
@@ -408,7 +422,10 @@ const testUpdateProjectImage = () => {
 				const getRes = await agent.get(route({ ...routeParams }))
 					.expect(templates.ok.status);
 
-				expect(getRes.body).toEqual(fs.readFileSync(routeParams.image));
+				const buffer = fs.readFileSync(routeParams.image);
+				const mimeType = await fileMimeFromBuffer(buffer);
+				expect(getRes.body).toEqual(buffer);
+				expect(mimeType).toEqual(Responder.mimeTypes.png);
 			} else {
 				expect(putRes.body.code).toEqual(expectedOutput.code);
 			}
@@ -429,17 +446,18 @@ const testDeleteProjectImage = () => {
 	const baseRouteParams = {
 		key: users.tsAdmin.apiKey,
 		teamspace,
-		projectId: projects.projectWithImage.id,
+		projectId: projects.projectWithPngImage.id,
 	};
 
 	const testCases = [
 		['the user does not have a valid session', { ...baseRouteParams, key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
 		['the teamspace does not exist', { ...baseRouteParams, teamspace: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
 		['the user is not a member of the teamspace', { ...baseRouteParams, key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
+		['the user does not have access to the project', { ...baseRouteParams, key: users.modelPermUser.apiKey }, false, templates.notAuthorized],
 		['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 		['the project does not have an image', { ...baseRouteParams, projectId: projects.testProject.id }, true],
-		['the project has an image and user is teamspace admin', { ...baseRouteParams }, true],
-		['the project has an image and user is project admin', { ...baseRouteParams, key: users.projectAdmin.apiKey }, true],
+		['the user is teamspace admin', { ...baseRouteParams }, true],
+		['the user is project admin', { ...baseRouteParams, key: users.projectAdmin.apiKey }, true],
 	];
 
 	const runTest = (desc, { ...routeParams }, success, expectedOutput) => {

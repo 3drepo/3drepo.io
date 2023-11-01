@@ -166,7 +166,7 @@ const testGetAllTemplates = () => {
 
 const testGetImage = () => {
 	describe('Get image', () => {
-		test('should get image stream', async () => {
+		test('Should get image', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const stream = generateRandomString();
