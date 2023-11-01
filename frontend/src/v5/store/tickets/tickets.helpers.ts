@@ -25,7 +25,7 @@ import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
-import { IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { IssueProperties, SafetibaseProperties, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
@@ -36,9 +36,7 @@ export const END_TIME = 'End Time';
 export const SEQUENCING_MODULE_START = `${SEQUENCING_MODULE}.${START_TIME}`;
 export const SEQUENCING_MODULE_END = `${SEQUENCING_MODULE}.${END_TIME}`;
 
-export const modelIsFederation = (modelId: string) => (
-	!!FederationsHooksSelectors.selectContainersByFederationId(modelId).length
-);
+export const modelIsFederation = (modelId: string) => !!FederationsHooksSelectors.selectFederationById(modelId);
 
 export const getEditableProperties = (template) => {
 	const propertyIsEditable = ({ readOnly }) => !readOnly;
@@ -73,9 +71,8 @@ export const getDefaultTicket = (template: ITemplate): EditableTicket => {
 	) as any;
 
 	const currentSequenceDateTime = SequencesHooksSelectors.selectSelectedDate();
-	
 	if (modules.sequencing && currentSequenceDateTime) {
-		modules.sequencing[START_TIME] = new Date(currentSequenceDateTime).getTime();
+		modules.sequencing[SequencingProperties.START_TIME] = new Date(currentSequenceDateTime).getTime();
 	}
 
 	return ({
