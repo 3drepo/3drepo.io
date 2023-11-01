@@ -20,9 +20,7 @@ const { getProjectById, getProjectByName } = require('../../../../../models/proj
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const Yup = require('yup');
 const { respond } = require('../../../../../utils/responder');
-const { singleImageUpload } = require('../../../multer');
 const { types } = require('../../../../../utils/helper/yup');
-const { validateMany } = require('../../../../common');
 
 const Projects = {};
 
@@ -56,17 +54,5 @@ Projects.projectExists = async (req, res, next) => {
 		respond(req, res, err);
 	}
 };
-
-const validateProjectImage = async (req, res, next) => {
-	try {
-		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
-
-		await next();
-	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
-	}
-};
-
-Projects.validateProjectImage = validateMany([singleImageUpload('file'), validateProjectImage]);
 
 module.exports = Projects;
