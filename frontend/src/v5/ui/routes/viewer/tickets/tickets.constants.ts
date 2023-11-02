@@ -47,7 +47,7 @@ export enum SafetibaseProperties {
 	TREATED_LEVEL_OF_RISK = 'Treated Level of Risk',
 }
 
-enum SequencingProperties {
+export enum SequencingProperties {
 	START_TIME = 'Start Time',
 	END_TIME = 'End Time',
 }

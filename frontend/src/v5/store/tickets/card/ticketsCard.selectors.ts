@@ -18,7 +18,7 @@
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { selectCurrentModel } from '@/v4/modules/model';
 import { IPin } from '@/v4/services/viewer/viewer';
-import { SEQUENCING_END_TIME, SEQUENCING_START_TIME, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { SequencingProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { theme } from '@/v5/ui/themes/theme';
 import { createSelector } from 'reselect';
 import { isEmpty } from 'lodash';
@@ -113,8 +113,8 @@ export const selectTicketPins = createSelector(
 				const { sequencing } = ticket.modules;
 				
 				if (sequencing && selectedSequenceDate) {
-					const startDate = sequencing[SEQUENCING_START_TIME];
-					const endDate = sequencing[SEQUENCING_END_TIME];
+					const startDate = sequencing[SequencingProperties.START_TIME];
+					const endDate = sequencing[SequencingProperties.END_TIME];
 					if (
 						startDate && new Date(startDate) > new Date(selectedSequenceDate) ||
 						endDate && new Date(endDate) < new Date(selectedSequenceDate)
