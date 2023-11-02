@@ -50,10 +50,6 @@ interface IJobsActionCreators {
 	fetchJobs: (teamspace: string) => Action;
 }
 
-interface ISequencesActionCreators {
-	showSequenceDate: (date: Date) => Action;
-}
-
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
 export const ContainersActionsDispatchers = createActionsDispatchers<IContainersActionCreators>(ContainersActions);
 export const CurrentUserActionsDispatchers = createActionsDispatchers<ICurrentUserActionCreators>(CurrentUserActions);
