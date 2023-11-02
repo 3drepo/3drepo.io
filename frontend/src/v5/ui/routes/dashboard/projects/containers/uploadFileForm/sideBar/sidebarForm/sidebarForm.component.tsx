@@ -69,7 +69,6 @@ export const SidebarForm = ({
 					disabled={!isNewEditableContainer}
 					name={`${revisionPrefix}.containerUnit`}
 					label={formatMessage({ id: 'containers.creation.form.units', defaultMessage: 'Units' })}
-					defaultValue="mm"
 				>
 					{CONTAINER_UNITS.map((unit) => (
 						<MenuItem key={unit.value} value={unit.value}>
@@ -82,7 +81,6 @@ export const SidebarForm = ({
 					disabled={!isNewEditableContainer}
 					name={`${revisionPrefix}.containerType`}
 					label={formatMessage({ id: 'containers.creation.form.type', defaultMessage: 'Category' })}
-					defaultValue="Uncategorised"
 				>
 					{CONTAINER_TYPES.map((type) => (
 						<MenuItem key={type.value} value={type.value}>
@@ -119,7 +117,7 @@ export const SidebarForm = ({
 			{extensionIsRevit(extension) && (
 				<FormSelect
 					required
-					name={`${revisionPrefix}.containerUnit`}
+					name={`${revisionPrefix}.lod`}
 					label={formatMessage({ id: 'uploads.sidebar.lod', defaultMessage: 'Level of Detail' })}
 				>
 					{LOD_VALUES.map((type) => (

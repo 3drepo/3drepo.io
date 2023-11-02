@@ -20,10 +20,11 @@ import { MenuItem } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
 import { OPERATION_DISPLAY_NAMES } from '../../groupRulesForm.helpers';
 
-export const RuleFieldOperator = () => (
+export const RuleFieldOperator = ({ disabled }) => (
 	<FormSelect
 		name="field.operator"
 		label={formatMessage({ id: 'tickets.groups.field.label', defaultMessage: 'Field' })}
+		disabled={disabled}
 	>
 		<MenuItem value="IS">{OPERATION_DISPLAY_NAMES.IS}</MenuItem>
 		<MenuItem value="CONTAINS">{OPERATION_DISPLAY_NAMES.CONTAINS}</MenuItem>

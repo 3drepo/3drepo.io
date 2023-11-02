@@ -22,10 +22,11 @@ import { formatMessage } from '@/v5/services/intl';
 import { OPERATION_DISPLAY_NAMES } from '../../groupRulesForm.helpers';
 import { ListSubheader } from '../groupRulesInputs.styles';
 
-export const RuleOperator = () => (
+export const RuleOperator = ({ disabled }) => (
 	<FormSelect
 		name="operator"
 		label={formatMessage({ id: 'tickets.groups.value.label', defaultMessage: 'Value' })}
+		disabled={disabled}
 	>
 		{/* Field */}
 		<ListSubheader>

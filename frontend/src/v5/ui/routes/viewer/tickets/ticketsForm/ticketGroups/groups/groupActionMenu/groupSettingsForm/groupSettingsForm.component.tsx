@@ -67,6 +67,7 @@ import { NewCollectionForm } from '../newCollectionForm/newCollectionForm.compon
 import { RulesOptionsMenu } from './rulesOptionsMenu/rulesOptionsMenu.component';
 import { RulesField } from './rulesField/ruelsField.component';
 import { Popper } from '../../../ticketGroups.styles';
+import { appendCopySuffixToDuplicateNames } from '../../groupRulesForm/groupRulesForm.helpers';
 
 type GroupSettingsFormProps = {
 	value?: IGroupSettingsForm,
@@ -87,7 +88,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
 	const formRef = useRef(null);
 
-	const isNewGroup = !value;
+	const isNewGroup = !value?.group?._id;
 	const selectedNodes = useSelector(selectSelectedNodes);
 	const sharedIds = selectedNodes.flatMap((node) => node.shared_ids);
 	const objectsCount = useSelector(selectGetNumNodesByMeshSharedIdsArray(sharedIds));
@@ -149,7 +150,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 
 	const handlePasteRules = (pastedRules) => {
 		setIsPastingRules(false);
-		append(pastedRules);
+		append(appendCopySuffixToDuplicateNames(rules, pastedRules));
 	};
 
 	const resetFilterMenu = () => {
@@ -165,12 +166,13 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	useEffect(() => {
 		// When no value is passed then the group is a new group
 		resetFilterMenu();
-		if (!value) {
+		if (isNewGroup) {
 			formData.reset({
 				...(isColored ? { color: hexToArray(getRandomSuggestedColor()) } : {}),
 				opacity: 1,
 				prefix: [],
 				group: {},
+				key: value.key,
 			});
 			setIsSmart(true);
 			return;
@@ -358,7 +360,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 									rule={selectedRule?.value}
 									onSave={selectedRule ? (val) => update(selectedRule.index, val) : append}
 									onClose={resetFilterMenu}
-									existingRules={value?.group?.rules}
+									existingRules={rules}
 								/>
 							</Popper>
 							<Subheading>
@@ -388,7 +390,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 												remove(i);
 												resetFilterMenu();
 											}}
-											disabled={!isAdmin}
+											isReadOnly={!isAdmin}
 											onClick={() => {
 												setSelectedRule({ index: i, value: ruleValue });
 												setFilterMenuOpen(true);

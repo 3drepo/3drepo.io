@@ -18,7 +18,7 @@
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
 import { useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { findEditedGroup, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
@@ -41,7 +41,7 @@ export const TicketDetailsCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
 	const [, setTicketId] = useSearchParam('ticketId');
 	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
-
+	const treeNodesList = TreeHooksSelectors.selectTreeNodesList();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
@@ -103,6 +103,11 @@ export const TicketDetailsCard = () => {
 		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
 		setTicketId(ticket._id);
 	}, [ticket._id]);
+
+	useEffect(() => {
+		if (isEmpty(defaultView)) return;
+		goToView(defaultView);
+	}, [ticket._id, treeNodesList]);
 
 	useEffect(() => {
 		formData.reset(ticket);

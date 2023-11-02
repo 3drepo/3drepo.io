@@ -538,10 +538,10 @@ function* setSubmodelsVisibility({ models, visibility}) {
 		yield waitForTreeToBeReady();
 
 		const submodelsRootNodes = yield select(selectSubModelsRootNodes);
-		const rootNodes =  models.map(({teamspace, _id }) => submodelsRootNodes[teamspace + ':' + _id]);
+		const rootNodes =  models.map(({teamspace, _id }) => submodelsRootNodes[_id]);
 
 		if (rootNodes.length) {
-			yield put(TreeActions.setTreeNodesVisibility(rootNodes, visibility));
+			yield put(TreeActions.setTreeNodesVisibility(rootNodes.map(({_id}) => _id), visibility));
 		}
 
 	} catch (error) {

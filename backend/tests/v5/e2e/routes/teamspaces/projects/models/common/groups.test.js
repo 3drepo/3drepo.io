@@ -95,7 +95,8 @@ const testExportGroups = () => {
 				.send(post)
 				.expect(expectedStatus);
 			if (success) {
-				expect(res.body).toEqual(expectedRes);
+				expect(res.body.groups.length).toBe(expectedRes.groups.length);
+				expect(res.body.groups).toEqual(expect.arrayContaining(expectedRes.groups));
 			} else {
 				expect(res.body.code).toEqual(expectedRes.code);
 			}
@@ -184,7 +185,7 @@ const testImportGroups = () => {
 			['the groups array is empty', createRoute(), false, templates.invalidArguments, { groups: [] }],
 			['the groups are valid', createRoute(), true, { post: { groups: postData.groups.map(({ _id }) => _id) }, data: groups }],
 			['the same groups are being imported again', createRoute(), true, { post: { groups: postData.groups.map(({ _id }) => _id) }, data: groups }],
-			['the user is updating only some of the groups', createRoute(), true, { post: { groups: [...groups.map(({ _id }) => _id), newGroup._id] }, data: expect.arrayContaining([changedGroup, ...groups.slice(1), newGroup]) }, { groups: partialGroupUpdateTestData }],
+			['the user is updating only some of the groups', createRoute(), true, { post: { groups: [...groups.map(({ _id }) => _id), newGroup._id] }, data: [changedGroup, ...groups.slice(1), newGroup] }, { groups: partialGroupUpdateTestData }],
 			['the groups have legacy field schema', createRoute(), true, { post: { groups: [legacyFieldSchema._id] }, data: [{ ...legacyFieldSchema, rules: convertLegacyRules(legacyFieldSchema.rules) }] }, { groups: [legacyFieldSchema] }],
 		];
 	};
@@ -199,7 +200,7 @@ const testImportGroups = () => {
 				const exportRes = await agent.post(route.replace('/import', '/export'))
 					.send(expectedRes.post)
 					.expect(templates.ok.status);
-				expect(exportRes.body.groups).toEqual(expectedRes.data);
+				expect(exportRes.body.groups).toEqual(expect.arrayContaining(expectedRes.data));
 			} else {
 				expect(res.body.code).toEqual(expectedRes.code);
 			}

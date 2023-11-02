@@ -45,19 +45,19 @@ export interface IDetails {
 }
 
 export const createAttachResourceComments = (owner: string,  resources = []) =>
-	resources.map((r, i) =>
+	resources.map((r) =>
 	({
 		_id: +(new Date()),
-		guid: i,
+		guid: +(new Date()),
 		owner,
 		action: {property: 'resource', to: r.name},
 		sealed: true
 	}));
 
-export const createRemoveResourceComment = (owner: string, {name} ) =>
+export const createRemoveResourceComment = (owner: string, {name, ...rest} ) =>
 	({
 		_id: +(new Date()),
-		guid: 0,
+		guid: +(new Date()),
 		owner,
 		action: {property: 'resource', from: name},
 		sealed: true
@@ -107,15 +107,11 @@ const convertActionCommentToText = (comment: IComment) => {
 				break;
 			case 'consequence':
 				comment.action.propertyText = 'Consequence';
-				if (undefined !== comment.action.to) {
+				if (!comment.action.to || !!Number(comment.action.to)) {
 					comment.action.to = getRiskConsequenceName(parseInt(comment.action.to, 10));
 				}
-				if (undefined !== comment.action.from) {
+				if (!comment.action.from || !!Number(comment.action.from)) {
 					comment.action.from = getRiskConsequenceName(parseInt(comment.action.from, 10));
-				} else {
-					text = comment.action.propertyText + ' set to ' +
-						comment.action.to + ' by ' +
-						comment.owner;
 				}
 				break;
 			case 'element':
@@ -123,15 +119,11 @@ const convertActionCommentToText = (comment: IComment) => {
 				break;
 			case 'likelihood':
 				comment.action.propertyText = 'Likelihood';
-				if (undefined !== comment.action.to) {
+				if (!comment.action.to || !!Number(comment.action.to)) {
 					comment.action.to = getRiskLikelihoodName(parseInt(comment.action.to, 10));
 				}
-				if (undefined !== comment.action.from) {
+				if (!comment.action.from || !!Number(comment.action.from)) {
 					comment.action.from = getRiskLikelihoodName(parseInt(comment.action.from, 10));
-				} else {
-					text = comment.action.propertyText + ' set to ' +
-						comment.action.to + ' by ' +
-						comment.owner;
 				}
 				break;
 			case 'location_desc':
@@ -160,28 +152,20 @@ const convertActionCommentToText = (comment: IComment) => {
 				break;
 			case 'residual_consequence':
 				comment.action.propertyText = 'Treated consequence';
-				if (undefined !== comment.action.to) {
+				if (!comment.action.to || !!Number(comment.action.to)) {
 					comment.action.to = getRiskConsequenceName(parseInt(comment.action.to, 10));
 				}
-				if (undefined !== comment.action.from) {
+				if (!comment.action.from || !!Number(comment.action.from)) {
 					comment.action.from = getRiskConsequenceName(parseInt(comment.action.from, 10));
-				} else {
-					text = comment.action.propertyText + ' set to ' +
-						comment.action.to + ' by ' +
-						comment.owner;
 				}
 				break;
 			case 'residual_likelihood':
 				comment.action.propertyText = 'Treated likelihood';
-				if (undefined !== comment.action.to) {
+				if (!comment.action.to || !!Number(comment.action.to)) {
 					comment.action.to = getRiskLikelihoodName(parseInt(comment.action.to, 10));
 				}
-				if (undefined !== comment.action.from) {
+				if (!comment.action.from || !!Number(comment.action.from)) {
 					comment.action.from = getRiskLikelihoodName(parseInt(comment.action.from, 10));
-				} else {
-					text = comment.action.propertyText + ' set to ' +
-						comment.action.to + ' by ' +
-						comment.owner;
 				}
 				break;
 			case 'residual_risk':

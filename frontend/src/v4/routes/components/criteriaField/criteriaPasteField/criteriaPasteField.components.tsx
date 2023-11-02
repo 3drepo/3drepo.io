@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
+import { appendCopySuffixToDuplicateNames } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketGroups/groups/groupRulesForm/groupRulesForm.helpers';
 import { ENTER_KEY } from '../../../../constants/keys';
 import { PasteButton, PasteContainer, PasteField, StyledCloseIcon, StyledSaveIcon } from './criteriaPasteField.styles';
 interface IProps {
@@ -23,6 +24,7 @@ interface IProps {
 	setState: (currentValue) => void;
 	onChange: (pastedCriteria) => void;
 	onCancel: () => void;
+	alreadySelectedFilters: any[];
 }
 
 interface IState {
@@ -62,7 +64,8 @@ export class CriteriaPasteField extends PureComponent<IProps, IState> {
 		const isValidValue = areValidCriteria(data);
 
 		if (isValidValue) {
-			const newSelectedCriteria = JSON.parse(data);
+			const newFilters = JSON.parse(data);
+			const newSelectedCriteria = appendCopySuffixToDuplicateNames(this.props.alreadySelectedFilters, newFilters);
 			this.props.onChange(newSelectedCriteria);
 		}
 	}

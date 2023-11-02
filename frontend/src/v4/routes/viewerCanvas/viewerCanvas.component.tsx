@@ -117,8 +117,8 @@ export class ViewerCanvas extends PureComponent<IProps, any> {
 			const toRemove = pinsRemoved(prev, curr);
 			const toChangeSelection = pinsSelectionChanged(curr, prev);
 
-			await Promise.all(toRemove.map(viewer.removePin.bind(viewer)));
 			await Promise.all(toShow.map(viewer.showPin.bind(viewer)));
+			await Promise.all(toRemove.map(viewer.removePin.bind(viewer)));
 
 			toChangeSelection.forEach(viewer.setSelectionPin.bind(viewer));
 		}
