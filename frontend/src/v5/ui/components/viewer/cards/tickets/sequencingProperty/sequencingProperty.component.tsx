@@ -35,8 +35,8 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 
 	const startTime = watch(SEQUENCING_START_TIME);
 	const endTime = watch(SEQUENCING_END_TIME);
-	const minDateTime = props.name === SEQUENCING_START_TIME ? undefined : dayjs(startTime);
-	const maxDateTime = props.name === SEQUENCING_END_TIME ? undefined : dayjs(endTime);
+	const minDateTime = (props.name === SEQUENCING_START_TIME || !startTime) ? undefined : dayjs(startTime);
+	const maxDateTime = (props.name === SEQUENCING_END_TIME || !endTime) ? undefined : dayjs(endTime);
 
 	const openSequencesCard = () => SequencesActionsDispatchers.showSequenceDate(new Date(value));
 
