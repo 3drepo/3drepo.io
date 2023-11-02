@@ -21,7 +21,6 @@ import { Toggle } from '@controls/inputs/toggle/toggle.component';
 import { NumberField } from '@controls/inputs/numberField/numberField.component';
 import { SequencingProperty } from '@components/viewer/cards/tickets/sequencingProperty/sequencingProperty.component';
 import { PinDetails } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/pinDetails/pinDetails.component';
-import { SequencingProperty } from '@components/viewer/cards/tickets/sequencingProperty/sequencingProperty.component';
 import { ManyOfProperty } from './manyOfProperty.component';
 import { OneOfProperty } from './oneOfProperty.component';
 import { TicketImage } from './ticketImageContent/ticketImage/ticketImage.component';
