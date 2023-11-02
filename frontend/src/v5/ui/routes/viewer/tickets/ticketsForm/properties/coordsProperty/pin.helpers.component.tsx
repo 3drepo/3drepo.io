@@ -42,8 +42,9 @@ const getPinSchema = ({ name, template }: IGetPinSchema) => {
 
 const getColorFromMapping = (ticket, pinSchema) => {
 	const { property: { module = 'properties', name }, mapping } = pinSchema.color;
-	const linkedValue = module === 'properties' ? get(ticket.properties, name) : get(ticket.modules, [module, name]);
 	const defaultColorHex = rgbArrayToHex(mapping.find((option) => option.default)?.default) || DEFAULT_COLOR;
+	if (!ticket) return defaultColorHex;
+	const linkedValue = module === 'properties' ? get(ticket.properties, name) : get(ticket?.modules, [module, name]);
 	const rgb = mapping.find(({ value }) => value === linkedValue)?.color;
 	return rgb ? rgbArrayToHex(rgb) : defaultColorHex;
 };
