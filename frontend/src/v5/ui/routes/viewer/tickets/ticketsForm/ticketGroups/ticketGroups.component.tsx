@@ -99,6 +99,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		}
 	};
 
+	// If there is no  group it gets a key to get identified within the groups array
 	const onSetEditGroup = (type) => (index) => setEditingOverride({ override: cloneDeep(settingsFormGroups?.[index]) || { key: count++ }, type });
 
 	const onSelectedHiddenGroupChange = (indexes: number[]) => {
@@ -121,12 +122,29 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 			newVal.state = { showHidden: selectHiddenGeometryVisible(store.getState()) };
 		}
 
-		let index = settingsFormGroups?.findIndex(({ group, key }) => 
-			((group as any)._id === overrideValue.group._id &&  overrideValue.key === undefined) || key === overrideValue.key) ;
+		let index = settingsFormGroups?.findIndex(({ group, key }: any) =>  {
+			// Is updating an existing group
+			if (overrideValue.group._id) { 
+				return overrideValue.group._id === group._id;
+			}
 
-		if (index === -1 || index === undefined) {
-			// if index is undefined it means settingsFormGroups is undefined, so it goes first
-			index = settingsFormGroups?.length || 0;
+			// Is updating or creating a new group
+			return overrideValue.key === key;
+		});
+
+		// It the group is no longer there it will be saved as a new group
+		if ( index === -1 && overrideValue.group._id) {
+			delete overrideValue.group._id; 
+		}
+
+		// If the group was not found in the groups array is a new group so it goes last
+		if (index === -1) {
+			index = settingsFormGroups?.length;
+		}
+
+		// If settingsFormGroups is undefined then this is the first group in the list
+		if (!settingsFormGroups) {
+			index = 0;
 		}
 
 		newVal.state[editingOverride.type] ||= [];
