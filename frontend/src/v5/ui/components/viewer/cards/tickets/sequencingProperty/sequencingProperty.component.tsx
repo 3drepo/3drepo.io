@@ -18,11 +18,12 @@
 import { DateTimePickerProps, DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import dayjs from 'dayjs';
 import { SequencesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useFormContext } from 'react-hook-form';
 import { SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { Container, IconContainer, SequenceIconContainer } from './sequencingProperty.styles';
 
 const SEQUENCING_START_TIME = `modules.sequencing.${SequencingProperties.START_TIME}`;
@@ -30,6 +31,7 @@ const SEQUENCING_END_TIME = `modules.sequencing.${SequencingProperties.END_TIME}
 
 export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTimePickerProps) => {
 	const { watch } = useFormContext();
+	const { isViewer } = useContext(TicketContext);
 
 	const startTime = watch(SEQUENCING_START_TIME);
 	const endTime = watch(SEQUENCING_END_TIME);
@@ -66,7 +68,7 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 				maxDateTime={maxDateTime}
 				{...props}
 			/>
-			{value && (
+			{value && isViewer && (
 				<SequenceIconContainer onClick={openSequencesCard}>
 					<SequencingIcon />
 				</SequenceIconContainer>
