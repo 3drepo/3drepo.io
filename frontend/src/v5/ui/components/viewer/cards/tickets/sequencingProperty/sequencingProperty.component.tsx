@@ -25,16 +25,18 @@ import { useFormContext } from 'react-hook-form';
 import { SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { Container, IconContainer, SequenceIconContainer } from './sequencingProperty.styles';
 
+const SEQUENCING_START_TIME = `modules.sequencing.${SequencingProperties.START_TIME}`;
+const SEQUENCING_END_TIME = `modules.sequencing.${SequencingProperties.END_TIME}`;
+
 export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTimePickerProps) => {
-	const { getValues } = useFormContext();
+	const { watch } = useFormContext();
+
+	const startTime = watch(SEQUENCING_START_TIME);
+	const endTime = watch(SEQUENCING_END_TIME);
+	const minDateTime = props.name === SEQUENCING_START_TIME ? undefined : dayjs(startTime);
+	const maxDateTime = props.name === SEQUENCING_END_TIME ? undefined : dayjs(endTime);
 
 	const openSequencesCard = () => SequencesActionsDispatchers.showSequenceDate(new Date(value));
-
-	const getDateTimeBoundary = (limit) => {
-		const limitVal = getValues(limit);
-		if (limit === props.name || !limitVal) return undefined;
-		return dayjs(new Date(limitVal));
-	};
 
 	const handleChange = (newValue) => onChange(newValue ? newValue?.toDate()?.getTime() : newValue);
 
@@ -60,8 +62,8 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 				// (onChange triggers at every change: year, minutes, hours, etc., onAccept only when a date is finally chosen)
 				onChange={() => true}
 				onAccept={handleChange}
-				minDateTime={getDateTimeBoundary(`modules.sequencing.${SequencingProperties.START_TIME}`)}
-				maxDateTime={getDateTimeBoundary(`modules.sequencing.${SequencingProperties.END_TIME}`)}
+				minDateTime={minDateTime}
+				maxDateTime={maxDateTime}
 				{...props}
 			/>
 			{value && (
