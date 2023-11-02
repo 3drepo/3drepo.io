@@ -22,12 +22,10 @@ import { useContext, useEffect } from 'react';
 import dayjs from 'dayjs';
 import { SequencesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useFormContext } from 'react-hook-form';
-import { SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { SEQUENCING_START_TIME, SEQUENCING_END_TIME } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { Container, IconContainer, SequenceIconContainer } from './sequencingProperty.styles';
 
-const SEQUENCING_START_TIME = `modules.sequencing.${SequencingProperties.START_TIME}`;
-const SEQUENCING_END_TIME = `modules.sequencing.${SequencingProperties.END_TIME}`;
 
 export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTimePickerProps) => {
 	const { watch } = useFormContext();

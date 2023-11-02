@@ -25,7 +25,7 @@ import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
-import { IssueProperties, SafetibaseProperties, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { IssueProperties, SEQUENCING_START_TIME, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
@@ -66,7 +66,7 @@ export const getDefaultTicket = (template: ITemplate): EditableTicket => {
 
 	const currentSequenceDateTime = SequencesHooksSelectors.selectSelectedDate();
 	if (modules.sequencing && currentSequenceDateTime) {
-		modules.sequencing[SequencingProperties.START_TIME] = new Date(currentSequenceDateTime).getTime();
+		modules.sequencing[SEQUENCING_START_TIME] = new Date(currentSequenceDateTime).getTime();
 	}
 
 	return ({

@@ -24,7 +24,7 @@ import { useFormContext } from 'react-hook-form';
 import { TicketProperty } from './properties/properties.helper';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { ErrorTextGap, PropertiesListContainer } from './ticketsForm.styles';
-import { SequencingProperties } from '../tickets.constants';
+import { SEQUENCING_END_TIME, SEQUENCING_START_TIME } from '../tickets.constants';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
@@ -32,10 +32,7 @@ interface PropertiesListProps {
 	onPropertyBlur?: (...args) => void;
 }
 
-const isSequencingProperty = (inputName: string) => [
-	`modules.sequencing.${SequencingProperties.START_TIME}`,
-	`modules.sequencing.${SequencingProperties.END_TIME}`,
-].includes(inputName);
+const isSequencingProperty = (inputName: string) => [SEQUENCING_START_TIME, SEQUENCING_END_TIME].includes(inputName);
 
 export const PropertiesList = ({ module, properties, onPropertyBlur }: PropertiesListProps) => {
 	const { formState } = useFormContext();

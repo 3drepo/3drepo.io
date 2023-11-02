@@ -47,7 +47,10 @@ export enum SafetibaseProperties {
 	TREATED_LEVEL_OF_RISK = 'Treated Level of Risk',
 }
 
-export enum SequencingProperties {
+enum SequencingProperties {
 	START_TIME = 'Start Time',
 	END_TIME = 'End Time',
 }
+
+export const SEQUENCING_START_TIME = `modules.sequencing.${SequencingProperties.START_TIME}`;
+export const SEQUENCING_END_TIME = `modules.sequencing.${SequencingProperties.END_TIME}`;
