@@ -696,7 +696,7 @@ Please click on the button below to verify your email address.</span>
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 200%; text-align: left;">
 
                             <span style="font-size:15px">By verifying your email address you are agreeing to 3D Repo's <a href="https://www.3drepo.io/terms" target="_blank"><span style="color:#3452ff">Terms of Service</span></a><br>
-For any queries please contact our support team at <a href="mailto:support@3drepo.org?subject=Support%20Query" target="_blank"><span style="color:#3452ff">support@3drepo.org</span></a></span>
+For any queries please contact our support team at <a href="mailto:support@3drepo.com?subject=Support%20Query" target="_blank"><span style="color:#3452ff">support@3drepo.com</span></a></span>
                         </td>
                     </tr>
                 </tbody></table>
@@ -1038,13 +1038,14 @@ For any queries please contact our support team at <a href="mailto:support@3drep
 
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
 
-                            <span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif"><span style="color:#696969"><em>Copyright © 2019 3D Repo, All rights reserved.</em><br>
+                            <span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif"><span style="color:#696969"><em>Copyright © 2019 Asite 3D Repo, All rights reserved.</em><br>
 <br>
 <strong>Our mailing address is:</strong><br>
-3D Repo<br>
-307 Euston Road<br>
-Bloomsbury<br>
-London, NW1 3AD<br>
+Asite 3D Repo<br>
+7th Floor<br>
+Leconfield House<br>
+Curzon Street<br>
+London, W1J 5JA<br>
 United Kingdom</span></span>
                         </td>
                     </tr>

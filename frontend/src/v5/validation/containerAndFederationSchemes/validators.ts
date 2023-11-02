@@ -17,7 +17,11 @@
 
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
+import filesize from 'filesize';
 import { trimmedString } from '../shared/validators';
+import { getState } from '@/v4/modules/store';
+import { selectRevisions, selectRevisionsPending } from '@/v5/store/revisions/revisions.selectors';
+import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 const stripIfBlankString = (value) => (
 	value === ''
@@ -53,9 +57,9 @@ export const name = trimmedString
 			id: 'validation.model.name.alreadyExisting',
 			defaultMessage: 'This name is already used within this project',
 		}),
-		(nameValue, testContext) => (
-			!testContext.options.context.alreadyExistingNames.map((n) => n.trim().toLocaleLowerCase()).includes(nameValue.toLocaleLowerCase())
-		),
+		(nameValue, testContext) => {
+			return !testContext.options.context.alreadyExistingNames.map((n) => n.trim().toLocaleLowerCase()).includes(nameValue?.toLocaleLowerCase());
+		},
 	);
 
 export const unit = Yup.string().required().oneOf(['mm', 'cm', 'dm', 'm', 'ft']).default('mm');
@@ -107,11 +111,21 @@ export const revisionTag = Yup.string()
 			id: 'validation.model.tag.alreadyExisting',
 			defaultMessage: 'This tag is already used within this container',
 		}),
-		(tagValue, testContext) => (
-			!(testContext.options.context.alreadyExistingTags[testContext.path] || [])
-				.map(({ tag }) => tag)
-				.includes(tagValue)
-		),
+		async (tagValue, testContext) => {
+			const { containerId } = testContext.parent;
+
+			if (!containerId) return true; // Is a new container, it has no revisions
+
+			const isPending = selectRevisionsPending(getState(), containerId);
+
+			if (isPending) {
+				const { teamspace, project }  = testContext.options.context;
+				await new Promise((resolve) => RevisionsActionsDispatchers.fetch(teamspace, project, containerId, resolve as any));
+			}
+
+			const revisions = selectRevisions(getState(), containerId);
+			return !revisions.find(({ tag }) => tagValue === tag);
+		},
 	);
 
 export const revisionDesc = Yup.lazy((value) => (
@@ -122,3 +136,14 @@ export const revisionDesc = Yup.lazy((value) => (
 				defaultMessage: 'Revision Description is limited to 660 characters',
 			}))
 ));
+
+export const uploadFile = Yup.mixed().nullable().test(
+	'fileSize',
+	formatMessage({
+		id: 'validation.revisions.file.error.tooLarge',
+		defaultMessage: 'File exceeds size limit of {sizeLimit}',
+	}, { sizeLimit: filesize(ClientConfig.uploadSizeLimit) }),
+	({ size }) => size && (size < ClientConfig.uploadSizeLimit),
+);
+
+export const lod = Yup.number();

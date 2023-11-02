@@ -24,7 +24,7 @@ import { StopBackgroundInteraction } from './dueDate.styles';
 type IBaseDueDate = {
 	value: number;
 	disabled?: boolean;
-	onBlur: (newValue) => void;
+	onBlur?: (newValue) => void;
 	renderInput: (props) => ReactElement;
 	onChange?: (value) => void;
 };

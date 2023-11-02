@@ -17,28 +17,9 @@
 
 "use strict";
 
-const responseCodes = require("../../response_codes.js");
 const { v5Path } = require("../../../interop");
-const { toQuery } =  require(`${v5Path}/models/metadata.rules`);
-const { schema: rulesSchema} =  require(`${v5Path}/schemas/rules`);
-
-const ruleOperators = {
-	"IS_EMPTY":	0,
-	"IS_NOT_EMPTY":	0,
-	"IS":		1,
-	"IS_NOT":	1,
-	"CONTAINS":	1,
-	"NOT_CONTAINS":	1,
-	"REGEX":	1,
-	"EQUALS":	1,
-	"NOT_EQUALS":	1,
-	"GT":		1,
-	"GTE":		1,
-	"LT":		1,
-	"LTE":		1,
-	"IN_RANGE":	2,
-	"NOT_IN_RANGE":	2
-};
+const { schema } = require(`${v5Path}/schemas/rules`);
+const { toQuery } = require(`${v5Path}/models/metadata.rules`);
 
 const notOperators = {
 	"IS_NOT": "IS",
@@ -50,49 +31,16 @@ const notOperators = {
 
 const RuleHelper = {};
 
-/**
- * Returns true if given rule has:
- * - A field,
- * - A supported operator,
- * - The correct minimum/multiples of values if a value is required
- */
-RuleHelper.isValidRule = (rule) => {
-	return rule.field && rule.field.length > 0 &&
-		Object.keys(ruleOperators).includes(rule.operator) &&
-		(ruleOperators[rule.operator] === 0 ||
-		(rule.values.length && ruleOperators[rule.operator] <= rule.values.length && !rule.values.some((x) => x === "")) &&
-		rule.values.length % ruleOperators[rule.operator] === 0);
-};
-
-RuleHelper.checkRulesValidity = (rules) => {
-	const fieldsWithRules = new Set();
-	let valid = rules.length > 0;
-	let it = 0;
-	while (valid && it < rules.length) {
-		const rule = rules[it];
-		const hasDuplicate = fieldsWithRules.has(rule.field);
-		valid = rule &&
-			RuleHelper.isValidRule(rule) &&
-			!hasDuplicate;
-
-		if (valid) {
-			fieldsWithRules.add(rule.field);
-		} else if (hasDuplicate) {
-			throw responseCodes.MULTIPLE_RULES_PER_FIELD_NOT_ALLOWED;
-		}
-		it++;
-	}
-	return valid;
-};
+RuleHelper.validateRules = (rules) => schema.validateSync(rules);
 
 RuleHelper.buildQueryFromRule = toQuery;
 RuleHelper.positiveRulesToQueries = (rulesRaw) => {
-	const rules = rulesSchema.cast(rulesRaw);
+	const rules = schema.cast(rulesRaw);
 
-	const posRules = rules.filter(r=> !notOperators[r.operator]).map(RuleHelper.buildQueryFromRule);
+	const posRules = rules.filter(r => !notOperators[r.operator]).map(RuleHelper.buildQueryFromRule);
 
 	// Except IS_EMPTY every neg rule needs that the field exists
-	rules.forEach(({field, operator})=> {
+	rules.forEach(({ field, operator }) => {
 		if (notOperators[operator] && operator !== "IS_EMPTY") {
 			const rule = { field, operator: "IS_NOT_EMPTY" };
 			posRules.push(RuleHelper.buildQueryFromRule(rule));
@@ -103,8 +51,8 @@ RuleHelper.positiveRulesToQueries = (rulesRaw) => {
 };
 
 RuleHelper.negativeRulesToQueries = (rulesRaw) => {
-	const rules = rulesSchema.cast(rulesRaw);
-	return rules.filter(r=> notOperators[r.operator]).map(({field, values, operator}) => {
+	const rules = schema.cast(rulesRaw);
+	return rules.filter(r => notOperators[r.operator]).map(({ field, values, operator }) => {
 		const negRule = {
 			field,
 			values,

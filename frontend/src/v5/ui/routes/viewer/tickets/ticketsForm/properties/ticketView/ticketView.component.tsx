@@ -33,9 +33,10 @@ import { TicketContext, TicketDetailsView } from '../../../ticket.context';
 import { TicketImageContent } from '../ticketImageContent/ticketImageContent.component';
 import { TicketImageActionMenu } from '../ticketImageContent/ticketImageActionMenu.component';
 import { PrimaryTicketButton } from '../../../ticketButton/ticketButton.styles';
-import { Header, HeaderSection, Label, InputContainer, Tooltip } from './ticketView.styles';
+import { Header, HeaderSection, Label, Tooltip } from './ticketView.styles';
 import { CameraActionMenu } from './viewActionMenu/menus/cameraActionMenu.component';
 import { GroupsActionMenu } from './viewActionMenu/menus/groupsActionMenu.component';
+import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
 
 type ITicketView = {
 	value: Viewpoint | undefined;
@@ -58,7 +59,7 @@ export const TicketView = ({
 	required,
 	...props
 }: ITicketView) => {
-	const context = useContext(TicketContext);
+	const { setDetailViewAndProps } = useContext(TicketContext);
 	const hasViewpoint = value?.camera;
 
 	// Viewpoint
@@ -102,15 +103,17 @@ export const TicketView = ({
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
 
 	const onGroupsClick = () => {
-		context.setDetailViewAndProps(TicketDetailsView.Groups, props);
+		setDetailViewAndProps(TicketDetailsView.Groups, props);
 	};
 
 	const imgSrc = getImgSrc(value?.screenshot);
 
 	return (
-		<InputContainer disabled={disabled} required={required} {...props}>
+		<ViewerInputContainer disabled={disabled} required={required} {...props}>
 			<Header>
-				<Label>{label}</Label>
+				<Label>
+					{label}
+				</Label>
 				<HeaderSection>
 					{!hasViewpoint ? (
 						<Tooltip title={(formatMessage({ id: 'viewer.card.button.saveCurrentView', defaultMessage: 'Save current view' }))}>
@@ -165,6 +168,6 @@ export const TicketView = ({
 				/>
 			</TicketImageContent>
 			<FormHelperText>{helperText}</FormHelperText>
-		</InputContainer>
+		</ViewerInputContainer>
 	);
 };

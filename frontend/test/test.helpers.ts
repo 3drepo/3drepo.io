@@ -20,16 +20,7 @@ import reducers from '@/v5/store/reducers';
 import createSagaMiddleware from 'redux-saga';
 import rootSaga from '@/v4/modules/sagas';
 import { isEqual } from 'lodash';
-
-export const alertAction = (currentAction: string) => ({
-	action: {
-		type: 'MODALS/OPEN',
-		modalType: 'alert',
-		props: {
-			currentActions: currentAction,
-		},
-	},
-});
+import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 
 // A different Node version between the backend and the frontend
 // is causing a problem with axios when files are sent to an endpoint.
@@ -45,7 +36,7 @@ export const spyOnAxiosApiCallWithFile = (api, method) => {
 
 export const createTestStore = () => {
 	let waitingActions: Action[] | string[] = [];
-	let resolvePromiseObj = { resolvePromise: null };
+	let resolvePromise;
 
 	const sagaMiddleware = createSagaMiddleware();
 	const middlewares = applyMiddleware(sagaMiddleware);
@@ -64,11 +55,10 @@ export const createTestStore = () => {
 		{
 			...reducers,
 			spyActions: (state, action) => {
-				const { resolvePromise } = resolvePromiseObj;
 
 				if (discountMatchingActions(action) && resolvePromise) {
 					resolvePromise(true);
-					resolvePromiseObj.resolvePromise = null;
+					resolvePromise = null;
 				}
 				return {};
 			}
@@ -77,9 +67,10 @@ export const createTestStore = () => {
 	
 	const waitForActions = (func, waitActions) =>  { 
 		waitingActions = waitActions;
-		const promise = new Promise((resolve) => {resolvePromiseObj.resolvePromise = resolve;});
+		const { resolve, promiseToResolve } = getWaitablePromise();
+		resolvePromise = resolve;
 		func();
-		return promise;
+		return promiseToResolve;
 	}
 
 	sagaMiddleware.run(rootSaga);

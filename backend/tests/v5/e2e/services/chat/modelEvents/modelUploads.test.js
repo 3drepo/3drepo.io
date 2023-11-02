@@ -25,6 +25,8 @@ const { queueMessage } = require(`${src}/handler/queue`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 const { mkdirSync, writeFileSync } = require('fs');
 
+const { getRevisionFormat } = require(`${src}/models/revisions`);
+
 const user = ServiceHelper.generateUserCredentials();
 const teamspace = ServiceHelper.generateRandomString();
 const project = ServiceHelper.generateRandomProject();
@@ -212,6 +214,8 @@ const queueFinishedTest = () => {
 					author: user.user,
 					tag: containerRevision.tag,
 					timestamp: newRevisionResults.data.timestamp,
+					format: getRevisionFormat(containerRevision.rFile),
+					desc: containerRevision.desc,
 				} }));
 
 			socket.close();
@@ -235,7 +239,7 @@ const queueFinishedTest = () => {
 			const modelUpdateResults = await modelUpdatePromise;
 			expect(modelUpdateResults?.data?.timestamp).not.toBeUndefined();
 			expect(modelUpdateResults).toEqual({ ...data,
-				data: { containers: [container._id], status: 'ok', timestamp: modelUpdateResults.data.timestamp } });
+				data: { containers: [{ _id: container._id }], status: 'ok', timestamp: modelUpdateResults.data.timestamp } });
 
 			const newRevisionResults = await newRevisionPromise;
 			expect(newRevisionResults?.data?.timestamp).not.toBeUndefined();
@@ -245,6 +249,8 @@ const queueFinishedTest = () => {
 					author: user.user,
 					tag: federationRevision.tag,
 					timestamp: newRevisionResults.data.timestamp,
+					format: getRevisionFormat(federationRevision.rFile),
+					desc: federationRevision.desc,
 				} }));
 
 			socket.close();

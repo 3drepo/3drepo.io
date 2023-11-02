@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, generateUUIDString } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -82,10 +83,25 @@ const testGetContainerById = () => {
 
 const testGetFederationById = () => {
 	describe('Get FederationById', () => {
-		test('should return content of federation settings if found', async () => {
+		test('should return content of federation settings if found (v4 schema)', async () => {
 			const expectedData = {
 				_id: 'abc',
 				name: 'federation name',
+				subModels: times(4, () => generateUUIDString()),
+			};
+			DBHandler.findOne.mockResolvedValueOnce({ ...expectedData });
+
+			const res = await Model.getFederationById('someTS', 'someFederation');
+			expect(res).toEqual({ ...expectedData,
+				subModels: expectedData.subModels.map((_id) => ({ _id })),
+			});
+		});
+
+		test('should return content of federation settings if found (v5 schema)', async () => {
+			const expectedData = {
+				_id: 'abc',
+				name: 'federation name',
+				subModels: times(4, () => ({ _id: generateUUIDString(), group: generateRandomString() })),
 			};
 			DBHandler.findOne.mockResolvedValueOnce(expectedData);
 
@@ -459,7 +475,64 @@ const testNewRevisionProcessed = () => {
 				const action = DBHandler.updateOne.mock.calls[0][3];
 				expect(action.$set.status).toBe(undefined);
 				expect(action.$set).toHaveProperty('timestamp');
-				expect(action.$set.subModels).toEqual(containers);
+				expect(action.$set.subModels).toEqual(containers.map((containerId) => ({ _id: containerId })));
+
+				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
+
+				expect(EventsManager.publish).toHaveBeenCalledTimes(3);
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
+					{
+						teamspace,
+						model,
+						corId,
+						userErr,
+						message,
+						success,
+						errCode: retVal,
+						user,
+					});
+
+				const expectedData = { ...action.$set };
+				if (expectedData.subModels) {
+					expectedData.containers = expectedData.subModels;
+					delete expectedData.subModels;
+				}
+
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+					{
+						teamspace,
+						project,
+						model,
+						data: { ...expectedData, status: expectedData.status || 'ok' },
+						isFederation: true,
+					});
+
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_REVISION,
+					{
+						teamspace,
+						project,
+						model,
+						revision: corId,
+						isFederation: true,
+					});
+			});
+
+		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event (with groups)`,
+			async () => {
+				const containerData = containers.map((containerId) => ({
+					project: containerId, group: generateRandomString() }));
+
+				DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
+				EventsManager.publish.mockClear();
+				await expect(Model.newRevisionProcessed(
+					teamspace, project, model, corId, retVal, user, containerData,
+				)).resolves.toBe(undefined);
+
+				expect(DBHandler.updateOne.mock.calls.length).toBe(1);
+				const action = DBHandler.updateOne.mock.calls[0][3];
+				expect(action.$set.status).toBe(undefined);
+				expect(action.$set).toHaveProperty('timestamp');
+				expect(action.$set.subModels).toEqual(containerData.map(({ project: _id, group }) => ({ _id, group })));
 
 				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
 

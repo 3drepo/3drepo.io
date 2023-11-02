@@ -20,7 +20,7 @@ import { times } from 'lodash';
 import { selectAreStatsPending, selectContainersByFederationId, selectFavouriteFederations, selectFederationById, selectFederations, selectHasCollaboratorAccess, selectHasCommenterAccess, selectIsListPending } from '@/v5/store/federations/federations.selectors';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
-import { federationMockFactory, prepareMockContainers, prepareMockNewFederation, prepareMockSettingsReply, federationMockStats } from './federations.fixtures';
+import { federationMockFactory, prepareMockContainers, prepareMockNewFederation, prepareMockSettingsReply, groupedContainerMockFactory, prepareMockStats } from './federations.fixtures';
 import { createTestStore } from '../test.helpers';
 import { containerMockFactory, prepareMockViews } from '../containers/containers.fixtures';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
@@ -69,7 +69,7 @@ describe('Federations: store', () => {
 
 	it('should fetch a federation\'s stats', () => {
 		const mockFederation = createAndAddFederationToStore();
-		const stats = federationMockStats();
+		const stats = prepareMockStats();
 		dispatch(FederationsActions.fetchFederationStatsSuccess(projectId, mockFederation._id, stats));
 		const federationFromState = selectFederationById(getState(), mockFederation._id);
 		expect(federationFromState.code).toEqual(stats.code);
@@ -114,7 +114,7 @@ describe('Federations: store', () => {
 
 	it('should update a federation\'s containers', () => {
 		const { _id: federationId } = createAndAddFederationToStore();
-		const newContainers = prepareMockContainers();
+		const newContainers = [groupedContainerMockFactory()];
 		dispatch(FederationsActions.updateFederationContainersSuccess(projectId, federationId, newContainers));
 		const containerIds = selectFederations(getState())[0].containers;
 		expect(containerIds).toEqual(newContainers);
@@ -142,7 +142,7 @@ describe('Federations: store', () => {
 		const { _id: federationId } = createAndAddFederationToStore();
 		const newContainers = times(3, () => containerMockFactory());
 		dispatch(ContainersActions.fetchContainersSuccess(projectId, newContainers));
-		const newContainerIds = newContainers.map((c) => c._id);
+		const newContainerIds = newContainers.map(groupedContainerMockFactory);
 		dispatch(FederationsActions.updateFederationContainersSuccess(projectId, federationId, newContainerIds));
 		const containersFromState = selectContainersByFederationId(getState(), federationId);
 		expect(containersFromState).toEqual(newContainers);

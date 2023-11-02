@@ -67,10 +67,15 @@ export class UnityUtil {
 	/** @hidden */
 	public static unityInstance;
 
-	/** A URL pointing to the Unity folder of a distribution. E.g. www.3drepo.io/unity/.
-	 * This is where the Unity Build and the IndexedDb worker can be found. */
+	/** A URL pointing to the domain hosting a Unity distribution. E.g. www.3drepo.io/.
+	 * This is where the Unity Build folder and the IndexedDb worker can be found. */
 	/** @hidden */
-	public static unityUrl: URL;
+	public static unityDomain: URL;
+
+	/** A URL containing the subfolder under unityUrl where the Unity build and
+	 * its associated dependencies can be found.
+	 * This should usually be set to "/unity/Build" */
+	public static unityBuildSubdirectory : any;
 
 	/** @hidden */
 	public static readyPromise: Promise<void>;
@@ -120,6 +125,14 @@ export class UnityUtil {
 
 	public static verbose = false;
 
+	public static usingBetaViewer = false;
+
+	/**
+	 * Contains a list of calls to make during the Unity Update method. One
+	 * call is made per Unity frame.
+	 */
+	public static unityOnUpdateActions = [];
+
 	/**
 	* Initialise Unity.
 	* @category Configurations
@@ -128,10 +141,13 @@ export class UnityUtil {
 	* @param progressCallback
 	* @param modelLoaderProgressCallback
 	*/
-	public static init(errorCallback: any, progressCallback: any, modelLoaderProgressCallback: any) {
+	public static init(errorCallback: any, progressCallback: any, modelLoaderProgressCallback: any, useBetaViewer = false) {
 		UnityUtil.errorCallback = errorCallback;
 		UnityUtil.progressCallback = progressCallback;
 		UnityUtil.modelLoaderProgressCallback = modelLoaderProgressCallback;
+		UnityUtil.usingBetaViewer = useBetaViewer;
+		UnityUtil.unityBuildSubdirectory = useBetaViewer ? '/unity/beta/Build' : '/unity/Build'; // These directories are determined by webpack.common.config.js
+		UnityUtil.setUnityMemory(0); // This forces the browser to update the viewer with the autodetected memory. If the user has set it explicitly in viewer settings, it will be overridden later when they are processed.
 	}
 
 	/** @hidden */
@@ -193,6 +209,13 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Returns the relative path of the Unity Loader to the current domain
+	 */
+	public static unityLoaderPath(): string {
+		return `${this.unityBuildSubdirectory}/unity.loader.js`;
+	}
+
+	/**
 	 * Launch the Unity Game.
  	 * @category Configurations
 	 * @param canvas - the html dom of the unity canvas
@@ -239,9 +262,9 @@ export class UnityUtil {
 			XMLHttpRequest.prototype.open = newOpen;
 		}
 
-		UnityUtil.unityUrl = new URL(domainURL || window.location.origin);
+		UnityUtil.unityDomain = new URL(domainURL || window.location.origin);
 
-		const buildUrl = new URL('/unity/Build', UnityUtil.unityUrl);
+		const buildUrl = new URL(UnityUtil.unityBuildSubdirectory, UnityUtil.unityDomain);
 
 		const config = {
 			dataUrl: `${buildUrl}/unity.data.unityweb`,
@@ -278,6 +301,16 @@ export class UnityUtil {
 		UnityUtil.modelLoaderProgressCallback = null;
 		UnityUtil.readyPromise = null;
 		UnityUtil.unityInstance.Quit();
+	}
+
+	/**
+	 * Called from within the viewer on each Unity frame.
+	 */
+	public static onUpdate() {
+		if (this.unityOnUpdateActions.length > 0) {
+			const action = this.unityOnUpdateActions.shift();
+			action();
+		}
 	}
 
 	/**
@@ -323,11 +356,11 @@ export class UnityUtil {
 					<br><br> <code>${message}</code>
 					<br><br> This may due to insufficient memory. Please ensure you are using a modern 64bit web browser
 					(such as Chrome or Firefox), reduce your memory usage and try again.
-					If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error.
+					If you are unable to resolve this problem, please contact support@3drepo.com referencing the above error.
 					<br><md-container>`;
 		} else {
 			conf = `Something went wrong :( <br><br> <code>${message}</code><br><br>
-				If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error
+				If you are unable to resolve this problem, please contact support@3drepo.com referencing the above error
 				<br><br> Click OK to refresh this page<md-container>`;
 		}
 
@@ -604,6 +637,40 @@ export class UnityUtil {
 	/*
 	 * =============== TO UNITY ====================
 	 */
+
+	/**
+	 * Tells the viewer the maximum amount of memory it can expect to be able
+	 * to allocate for its heap. 0 means the maximum amount that the browser
+	 * can handle, determined by hueristics in this method.
+	 */
+	public static setUnityMemory(maxMemoryInMb: number) {
+		// This method is only supported on the 4GB viewer. The previous viewer
+		// will always use 2GB.
+		if (!this.usingBetaViewer) {
+			return;
+		}
+
+		let memory = Number(maxMemoryInMb);
+		if (memory === 0) {
+			// If the user has not set the memory explicitly, then attempt to
+			// determine it automatically
+
+			// The new viewer can handle 4GB on most browsers.
+			memory = 4032;
+
+			// Firefox currently has a bug in its WebGL APIs,
+			// https://bugzilla.mozilla.org/show_bug.cgi?id=1838218
+			// that causes a crash when the viewer uses more than 2GB. This snippet
+			// tells the viewer not to attempt to consume more than 2GB, even though
+			// the heap could grow into it. When Mozilla fixes the bug this can be
+			// removed, or masked based on the version string.
+			const match = window.navigator.userAgent.match(/Firefox\/([0-9]+)\./);
+			if (match) {
+				memory = 2032;
+			}
+		}
+		UnityUtil.toUnity('SetUnityMemory', UnityUtil.LoadingState.VIEWER_READY, memory);
+	}
 
 	/**
 	 * Move the pivot point to eh centre of the objects provided
@@ -955,17 +1022,6 @@ export class UnityUtil {
 	 */
 	public static setStreamingMemoryThreshold(thresholdInMb: number) {
 		UnityUtil.toUnity('SetStreamingMemoryThreshold', UnityUtil.LoadingState.VIEWER_READY, Number(thresholdInMb));
-	}
-
-	/**
-	 * Constrains the geometry streaming to use at most maxMemoryInMb
-	 * regardless of the available unmanaged memory allocated by
-	 * thresholdInMb.
-	 * Use this to improve performance on weaker platforms.
-	 * @category Streaming
-	 */
-	public static setStreamingMemoryLimit(maxMemoryInMb: number) {
-		UnityUtil.toUnity('SetStreamingMemoryLimit', UnityUtil.LoadingState.VIEWER_READY, Number(maxMemoryInMb));
 	}
 
 	/**
@@ -1798,11 +1854,14 @@ export class UnityUtil {
 	 * @hidden
 	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
 	 */
-	public static multipleCallInChunks(arrLength: number, func:(start: number, end: number) => any, chunkSize = 20000) {
+	public static multipleCallInChunks(arrLength: number, func:(start: number, end: number) => any, chunkSize = 5000) {
 		let index = 0;
 		while (index < arrLength) {
 			const end = index + chunkSize >= arrLength ? undefined : index + chunkSize;
-			func(index, end);
+			const i = index; // For the closure
+			this.unityOnUpdateActions.push(() => {
+				func(i, end);
+			});
 			index += chunkSize;
 		}
 	}
@@ -2045,6 +2104,6 @@ export class UnityUtil {
 	 * @param unityInstance
 	 */
 	public static createIndexedDbCache(gameObjectName: string) {
-		this.unityInstance.repoDbCache = new IndexedDbCache(this.unityInstance, gameObjectName, this.unityUrl);
+		this.unityInstance.repoDbCache = new IndexedDbCache(this.unityInstance, gameObjectName, this.unityDomain); // IndexedDbCache expects to find the worker at in [unityDomain]/unity/indexeddbworker.js
 	}
 }

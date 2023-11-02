@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import _ from 'lodash';
 import { BACKEND_VISIBILITY_STATES, NODE_TYPES, SELECTION_STATES, VISIBILITY_STATES } from '../../../constants/tree';
 import { DEFAULT_NODE_NAME, INode } from './treeProcessing.constants';
 
@@ -61,7 +62,7 @@ const getFlattenNested = (tree, maps, data = [], idx = 0, level = 1, parentId = 
 	maps.nodesIndexesMap[nodeID] = idx++;
 	let subTreeRoots = [];
 	if (tree.children) {
-
+		tree.children = _.orderBy(tree.children, ({ name }) => name?.toLowerCase());
 		const hasChildren = tree.children.length;
 		rowData.hasChildren = hasChildren;
 		rowData.expandable = tree.children.some((child) => Boolean(child.name) || child.type === NODE_TYPES.TRANSFORMATION);
@@ -125,25 +126,25 @@ export default ({ mainTree, subTrees, subModels, meshMap, treePath }) => new Pro
 	try {
 		const subModelsRootNodes = {};
 
-		for (let index = 0; index < mainTree.children.length; index++) {
-			const child = mainTree.children[index];
-			const [modelTeamspace, model] = (child.name || '').split(':');
-			const subModel = subModels.find((m) => m.model === model);
+		if (subModels.length) {
+			// main tree is a federation, find all the refs and identify root nodes for each reference.
+			const nodesToCheck = [...mainTree.children];
 
-			if (subModel) {
-				subModelsRootNodes[child.name] = child._id;
-				child.name = subModel.name;
-			} else if (child.type !== 'mesh') {
-				child.name = child.name || DEFAULT_NODE_NAME;
-			}
+			while (nodesToCheck.length) {
+				const currentNode = nodesToCheck.pop();
+				if (currentNode.type === "ref") {
+					const subModelId = currentNode.name;
+					const subModel = subModels.find(({ model }) => subModelId === model);
+					if (subModel) {
+						currentNode.name = subModel.name
+						subModelsRootNodes[subModelId] = currentNode;
 
-			if (subModel && child.children && child.children[0]) {
-				child.children[0].name = subModel.name;
-			}
-
-			if (subTrees.length) {
-				const subTree = subTrees.find(({ nodes }) => nodes.project === model);
-				child.children[0].children = subTree ? [subTree.nodes] : [];
+						const subTree = subTrees.find(({ nodes }) => nodes.project === subModelId);
+						currentNode.children = subTree ? [subTree.nodes] : [];
+					}
+				} else if (currentNode.children?.length) {
+					nodesToCheck.push(...currentNode.children);
+				}
 			}
 		}
 

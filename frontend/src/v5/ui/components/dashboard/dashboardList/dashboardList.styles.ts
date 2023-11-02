@@ -26,13 +26,15 @@ export const ListContainer = styled.ul`
 	width: 100%;
 	margin: 0;
 	padding: 0;
+	border-radius: 10px;
+	overflow: hidden;
 `;
 
 export const DashboardListEmptyContainer = styled(DashedContainer)`
 	display: flex;
 	align-items: center;
 	height: 80px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	background-color: transparent;
 	padding-left: 30px;
 `;
 

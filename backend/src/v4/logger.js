@@ -40,7 +40,7 @@ SystemLogger.formatResponseMsg = (
 			method,
 			originalUrl
 		} = resData;
-		return `${status}\t${code}\t${latency}\t${contentLength}\t${user}\t${method}\t${originalUrl}`;
+		return `[OUT] ${status}\t${code}\t${latency}\t${contentLength}\t${user}\t${method}\t${originalUrl}`;
 	}
 };
 function createLogger() {

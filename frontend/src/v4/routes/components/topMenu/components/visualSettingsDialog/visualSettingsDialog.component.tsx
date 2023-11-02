@@ -26,20 +26,19 @@ import { ColorPicker } from '../../../colorPicker/colorPicker.component';
 import { SelectField } from '../../../selectField/selectField.component';
 import { DialogTab, DialogTabs, ErrorTooltip, FormListItem, Headline,
 	NegativeActionButton, NeutralActionButton,
-	ShortInput, V5Divider, V5ErrorText, VisualSettingsButtonsContainer,
+	ShortInput, SubHeading, V5Divider, V5ErrorText, VisualSettingsButtonsContainer,
 	VisualSettingsDialogContent, WarningMessage } from './visualSettingsDialog.styles';
 
 const SettingsSchema = Yup.object().shape({
 	nearPlane: schema.number(0, Number.POSITIVE_INFINITY),
 	maxNearPlane: schema.number(-1, Number.POSITIVE_INFINITY),
 	maxFarPlane: schema.number(-1, Number.POSITIVE_INFINITY),
-	memory: schema.integer(16, 2032),
+	unityMemory: schema.integer(0, 4096),
 	farPlaneSamplingPoints: schema.integer(1, Number.POSITIVE_INFINITY),
 	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY),
 	numCacheThreads: schema.integer(1, 15),
 	clipPlaneBorderWidth: schema.number(0, Number.POSITIVE_INFINITY),
 	memoryThreshold: schema.number(0, 2032),
-	memoryLimit: schema.number(0, 2032),
 	fovWeight: schema.number(0, 10),
 	meshFactor: schema.number(1, Number.POSITIVE_INFINITY),
 	phBundleFadeDistance: schema.number(0, Number.POSITIVE_INFINITY),
@@ -50,18 +49,31 @@ const SettingsSchema = Yup.object().shape({
 	phElementRenderingRadius: schema.number(0, 1),
 	phElementFaceAlpha: schema.number(0, 1),
 	phElementLineAlpha: schema.number(0, 1),
-
 });
 
 const BasicSettings = (props) => {
 	return (
 		<List>
 			<FormListItem>
-				Shading
-				<Field name="shading" render={ ({ field }) => (
-					<SelectField {...field}>
-						<MenuItem value="standard">Standard</MenuItem>
-					</SelectField>)} />
+				4GB viewer
+				<Field name="useBetaViewer" render={ ({ field }) => (
+					<Switch checked={field.value} onClick={props.onUseBetaViewerChange} {...field} value="true" color="secondary" />
+				)} />
+				{props.showBetaViewerWarning && (
+					<SubHeading>
+						Changing this setting will require you to refresh your browser before taking effect.
+					</SubHeading>
+				)}
+			</FormListItem>
+			<V5Divider />
+			<FormListItem>
+				Viewer Background Color
+				<Field name="viewerBackgroundColor" render={ ({ field }) => (
+					<ColorPicker {...field} onChange={(val) => {
+						// this is because colorpicker doesn't use the standard events for inputs
+						field.onChange({target: {name: field.name, value: val}});
+					}} />
+				)} />
 			</FormListItem>
 			<FormListItem>
 				Shadows
@@ -109,7 +121,7 @@ const BasicSettings = (props) => {
 				Clipping plane border color
 				<Field name="clipPlaneBorderColor" render={ ({ field }) => (
 					<ColorPicker {...field} onChange={(val) => {
-						// this is because colorpicker doenst use the standard events for inputs
+						// this is because colorpicker doesn't use the standard events for inputs
 						field.onChange({target: {name: field.name, value: val}});
 					}} />
 				)} />
@@ -127,10 +139,9 @@ const AdvancedSettings = (props) => {
 					<Switch checked={field.value} {...field} value="true" color="secondary" />
 				)} />
 			</FormListItem>
-			{!IS_FIREFOX &&
-				<FormListItem>
+			<FormListItem>
 					Memory for Unity
-					<Field name="memory" render={ ({ field, form }) => {
+					<Field name="unityMemory" render={ ({ field, form }) => {
 						return (
 							<div>
 								<ErrorTooltip title={form.errors.memory || ''} placement="bottom-end">
@@ -146,7 +157,6 @@ const AdvancedSettings = (props) => {
 						);
 					}} />
 				</FormListItem>
-			}
 			<FormListItem>
 				Number of Caching Threads
 				<Field name="numCacheThreads" render={ ({ field, form }) => {
@@ -295,24 +305,6 @@ const StreamingSettings = (props) => {
 				}} />
 			</FormListItem>
 			<FormListItem>
-				Limit
-				<Field name="memoryLimit" render={ ({ field, form }) => {
-					return (
-						<div>
-							<ErrorTooltip title={form.errors.memoryLimit || ''} placement="bottom-end">
-							<ShortInput
-								error={Boolean(form.errors.memoryLimit)}
-								{...field}
-								endAdornment={<InputAdornment position="end">MB</InputAdornment>} />
-							</ErrorTooltip>
-							<V5ErrorText>
-								{form.errors.memoryLimit}
-							</V5ErrorText>
-						</div>
-					);
-				}} />
-			</FormListItem>
-			<FormListItem>
 				Mesh Factor
 				<Field name="meshFactor" render={ ({ field, form }) => {
 					return (
@@ -407,7 +399,7 @@ const StreamingSettings = (props) => {
 				Color
 				<Field name="phBundleColor" render={ ({ field }) => (
 					<ColorPicker {...field} onChange={(val) => {
-						// this is because colorpicker doenst use the standard events for inputs
+						// this is because colorpicker doesn't use the standard events for inputs
 						field.onChange({target: {name: field.name, value: val}});
 					}} />
 				)} />
@@ -581,6 +573,7 @@ interface IState {
 	visualSettings: any;
 	flag: boolean;
 	showCacheWarning: boolean;
+	showBetaViewerWarning: boolean;
 }
 
 export class VisualSettingsDialog extends PureComponent<IProps, IState> {
@@ -588,7 +581,8 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 		selectedTab: 0,
 		visualSettings: null,
 		flag: false,
-		showCacheWarning: false
+		showCacheWarning: false,
+		showBetaViewerWarning: false,
 	};
 
 	public handleTabChange = (event, selectedTab) => {
@@ -599,19 +593,20 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 		this.setState({showCacheWarning : event.target.checked});
 	}
 
+	public onUseBetaViewerChange = (event) => {
+		this.setState({ showBetaViewerWarning : event.target.checked !== this.props.visualSettings.useBetaViewer });
+	}
+
 	public onSubmit = (values) => {
 		const { updateSettings, currentUser} = this.props;
 
 		values.nearPlane = Number(values.nearPlane);
-		values.memory = Number(values.memory);
+		values.unityMemory = Number(values.unityMemory);
 		values.farPlaneSamplingPoints = Number(values.farPlaneSamplingPoints);
 		values.maxShadowDistance = Number(values.maxShadowDistance);
 
 		updateSettings(currentUser, values);
 
-		if (values.memory !== this.props.visualSettings.memory) {
-			location.reload();
-		}
 		this.props.handleClose();
 	}
 
@@ -642,7 +637,13 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 					onSubmit={this.onSubmit}
 					>
 					<Form>
-						{selectedTab === 0 && <BasicSettings onCacheChange={this.onCacheChange} />}
+						{selectedTab === 0 && (
+							<BasicSettings
+								onCacheChange={this.onCacheChange}
+								onUseBetaViewerChange={this.onUseBetaViewerChange}
+								showBetaViewerWarning={this.state.showBetaViewerWarning}
+							/>
+						)}
 						{selectedTab === 1 && <AdvancedSettings />}
 						{selectedTab === 2 && <StreamingSettings />}
 						{selectedTab === 0 && showCacheWarning && <CacheWarning />}

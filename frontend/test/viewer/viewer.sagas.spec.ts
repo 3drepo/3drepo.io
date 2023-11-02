@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ViewerActions, ViewerTypes } from '@/v5/store/viewer/viewer.redux';
+import { ViewerActions } from '@/v5/store/viewer/viewer.redux';
 import { times } from 'lodash';
-import { containerMockFactory, prepareMockBaseContainer, prepareMockStatsReply } from '../containers/containers.fixtures';
-import { federationMockFactory, prepareMockBaseFederation, prepareMockFederationStatsReply } from '../federations/federations.fixtures';
+import { containerMockFactory, prepareMockBaseContainer, getMockStats as getContainerMockStats } from '../containers/containers.fixtures';
+import { federationMockFactory, prepareMockBaseFederation, prepareMockStats as getFederationMockStats } from '../federations/federations.fixtures';
 import { mockServer } from '../../internals/testing/mockServer';
 import { createTestStore, findById } from '../test.helpers';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
@@ -26,8 +26,6 @@ import { selectContainerById } from '@/v5/store/containers/containers.selectors'
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { selectFederationById } from '@/v5/store/federations/federations.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
-import { selectDialogs } from '@/v5/store/dialogs/dialogs.selectors';
-
 
 describe('Viewer: sagas', () => {
 	const teamspace = 'myteamspace';
@@ -36,7 +34,7 @@ describe('Viewer: sagas', () => {
 	let dispatch, getState, waitForActions;
 
 	beforeEach(() => {
-		({ dispatch, getState,  waitForActions } = createTestStore());
+		({ dispatch, getState, waitForActions } = createTestStore());
 		dispatch(ProjectsActions.setCurrentProject(projectId));
 	});	
 
@@ -45,7 +43,7 @@ describe('Viewer: sagas', () => {
 			const containers = times(3, () => containerMockFactory());
 			const federations  = times(3, () => federationMockFactory());
 			const baseContainers = containers.map(prepareMockBaseContainer); 
-			const containerStat = prepareMockStatsReply(containers[1]);
+			const containerStat = getContainerMockStats(containers[1]);
 			const containerOrFederationId = containers[1]._id;
 
 			mockServer
@@ -73,11 +71,11 @@ describe('Viewer: sagas', () => {
 			const containers = times(6, () => containerMockFactory());
 			const federations = times(3, () => federationMockFactory());
 			const baseFederations = federations.map(prepareMockBaseFederation);
-			const containersStats = containers.map(prepareMockStatsReply);
+			const containersStats = containers.map(getContainerMockStats);
 			const baseContainers = containers.map(prepareMockBaseContainer);
 			const containersInState = baseContainers.map((base, index) => prepareSingleContainerData(base, containersStats[index]));
 			const theFederation = federations[1];
-			theFederation.containers = [ baseContainers[2]._id, baseContainers[0]._id];
+			theFederation.containers = [{ _id: baseContainers[2]._id }, { _id: baseContainers[0]._id }];
 			const containerOrFederationId = theFederation._id;
 
 			mockServer
@@ -90,7 +88,7 @@ describe('Viewer: sagas', () => {
 
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${containerOrFederationId}/stats`)
-				.reply(200, prepareMockFederationStatsReply(theFederation));
+				.reply(200, getFederationMockStats(theFederation));
 
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${baseContainers[0]._id}/stats`)
@@ -106,11 +104,11 @@ describe('Viewer: sagas', () => {
 
 
 			const federation = selectFederationById(getState(), containerOrFederationId);
-			const containersIds = [...federation.containers].sort();
+			const groupedContainers = [...federation.containers].sort();
 	
-			containersIds.forEach(containerId => {
-				const theFetchedContainer = findById(containersInState, containerId);
-				const container = selectContainerById(getState(), containerId);
+			groupedContainers.forEach(({ _id }) => {
+				const theFetchedContainer = findById(containersInState, _id);
+				const container = selectContainerById(getState(), _id);
 				expect(container).toEqual(theFetchedContainer);
 			})
 
@@ -137,11 +135,6 @@ describe('Viewer: sagas', () => {
 			await waitForActions(() => {
 				dispatch(ViewerActions.fetchData(teamspace, projectId, containerOrFederationId));
 			}, [DialogsTypes.OPEN, ViewerActions.setFetching(false)]);
-
-			const dialogs =  selectDialogs(getState());
-
-			expect(dialogs.length).toEqual(1);
-			expect(dialogs[0].modalType).toEqual('alert');
 		});
 	});
 });

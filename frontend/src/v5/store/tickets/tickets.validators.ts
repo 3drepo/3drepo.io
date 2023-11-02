@@ -21,7 +21,7 @@ import { nullableNumber, requiredNumber, trimmedString } from '@/v5/validation/s
 import * as Yup from 'yup';
 import { isEmpty } from 'lodash';
 import { getEditableProperties } from './tickets.helpers';
-import { PropertyDefinition, Viewpoint } from './tickets.types';
+import { ITemplate, PropertyDefinition, Viewpoint } from './tickets.types';
 
 const MAX_TEXT_LENGTH = 120;
 const MAX_LONG_TEXT_LENGTH = 1200;
@@ -116,14 +116,14 @@ const propertiesValidator = (properties = []) => {
 	return Yup.object().shape(validators);
 };
 
+const getTitleValidator = () => propertyValidator({
+	required: true,
+	type: 'text',
+	name: BaseProperties.TITLE,
+});
+
 export const getTicketValidator = (template) => {
-	const validators: any = {
-		title: propertyValidator({
-			required: true,
-			type: 'text',
-			name: BaseProperties.TITLE,
-		}),
-	};
+	const validators: any = { title: getTitleValidator() };
 	const editableTemplate = getEditableProperties(template);
 	validators.properties = propertiesValidator(editableTemplate.properties);
 
@@ -137,15 +137,10 @@ export const getTicketValidator = (template) => {
 	return Yup.object().shape(validators);
 };
 
-export const getValidators = (template) => {
+export const getValidators = (template: ITemplate) => {
+	if (!template) return null;
 	const { properties, modules } = template;
-	const validators: any = {
-		title: propertyValidator({
-			required: true,
-			type: 'longText',
-			name: BaseProperties.TITLE,
-		}),
-	};
+	const validators: any = { title: getTitleValidator() };
 
 	validators.properties = propertiesValidator(properties || []);
 

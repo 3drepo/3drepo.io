@@ -52,7 +52,6 @@ import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
 import { TreeActions } from '../tree';
-import { ViewerGuiActions } from '../viewerGui';
 import { ViewpointsActions } from '../viewpoints';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {
@@ -312,6 +311,14 @@ function* setActiveIssue({ issue, revision, ignoreViewer = false }) {
 function* goToIssue({ issue }) {
 	const params = yield select(selectUrlParams);
 	let queryParams =  yield select(selectQueryParams);
+
+	// Im not longer in the viewer or board
+	// this happens when unmounting the card which
+	// makes sense when you close the card in the viewer and want to remove the selected risk
+	// but when navigating back to the dashboard no, so. fixed here
+	if (!params) {
+		return;
+	}
 
 	const issueId = (issue || {})._id;
 

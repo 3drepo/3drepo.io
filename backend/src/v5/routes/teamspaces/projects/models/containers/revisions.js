@@ -135,7 +135,10 @@ const establishRoutes = () => {
 	 *                         type: string
 	 *                         description: Revision creation date
 	 *                         example: 2018-06-28T11:15:47.000Z
-	 *
+	 *                       format:
+	 *                         type: string
+	 *                         description: File format
+	 *                         example: .rvt
 	 *
 	 */
 	router.get('', hasReadAccessToContainer, getRevisions, serialiseRevisionArray);
@@ -187,6 +190,10 @@ const establishRoutes = () => {
 	 *                 description: Timezone of the revision
 	 *                 type: string
 	 *                 example: Europe/Berlin
+	 *               lod:
+	 *                 description: Level of Detail (0 - 6)
+	 *                 type: interger
+	 *                 example: 0
 	 *               file:
 	 *                 type: string
 	 *                 format: binary

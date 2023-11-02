@@ -48,11 +48,10 @@ import {
 	StyledListItem
 } from '../../../components/filterPanel/components/filtersMenu/filtersMenu.styles';
 import { FilterPanel } from '../../../components/filterPanel/filterPanel.component';
-import { TooltipButton } from '../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ListNavigation } from '../listNavigation/listNavigation.component';
 import { PanelBarActions } from '../panelBarActions';
-import {  Summary } from '../risks/risks.styles';
 import { ViewerPanelButton, ViewerPanelContent, ViewerPanelFooter } from '../viewerPanel/viewerPanel.styles';
+import { Summary } from '../reportedItems/reportedItems.styles';
 import { GroupDetails } from './components/groupDetails';
 import { GroupsContainer, GroupIcon } from './groups.styles';
 
@@ -309,8 +308,13 @@ export class Groups extends PureComponent<IProps, IState> {
 				return true;
 			}
 
-			// disable options that needs at least one group when there are none
-			return !this.props.groups.length && [GROUPS_ACTIONS_ITEMS.DELETE_ALL, GROUPS_ACTIONS_ITEMS.EXPORT].includes(name);
+			const optionsToDisableWhenGroupsIsEmpty = [
+				GROUPS_ACTIONS_ITEMS.DELETE_ALL,
+				GROUPS_ACTIONS_ITEMS.EXPORT,
+				GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL,
+				GROUPS_ACTIONS_ITEMS.DOWNLOAD,
+			]
+			return !this.props.groups.length && optionsToDisableWhenGroupsIsEmpty.includes(name);
 		}
 		return (
 			<MenuList>

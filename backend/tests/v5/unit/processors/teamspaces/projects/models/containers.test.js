@@ -143,14 +143,6 @@ const container2Rev = {
 	timestamp: 1630606846000,
 };
 
-const revWithFileId = ServiceHelper.generateUUIDString();
-const filename = `${revWithFileId}${ServiceHelper.generateUUIDString()}.ifc`;
-const model1Revisions = [
-	{ _id: revWithFileId, author: 'user1', timestamp: new Date(), rFile: [filename] },
-	{ _id: ServiceHelper.generateUUIDString(), author: 'user1', timestamp: new Date() },
-	{ _id: ServiceHelper.generateUUIDString(), author: 'user1', timestamp: new Date(), void: true },
-];
-
 ProjectSettings.getProjectById.mockImplementation(() => project);
 ProjectSettings.addModelToProject.mockResolvedValue();
 ModelSettings.getModelByQuery.mockImplementation((ts, query) => {
@@ -179,8 +171,6 @@ Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 	if (container === 'container2') return container2Rev;
 	throw templates.revisionNotFound;
 });
-
-const getRevisionsMock = Revisions.getRevisions.mockImplementation(() => model1Revisions);
 
 Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
 Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
@@ -354,22 +344,60 @@ const testDeleteContainer = () => {
 
 const testGetRevisions = () => {
 	describe('Get container revisions', () => {
+		const revisions = [
+			{ _id: ServiceHelper.generateUUIDString(),
+				author: ServiceHelper.generateRandomString(),
+				timestamp: new Date(),
+				rFile: [`${ServiceHelper.generateUUIDString()}_${ServiceHelper.generateUUIDString()}_ifc`] },
+			{ _id: ServiceHelper.generateUUIDString(),
+				author: ServiceHelper.generateRandomString(),
+				timestamp: new Date(),
+				rFile: [`${ServiceHelper.generateUUIDString()}_${ServiceHelper.generateUUIDString()}_obj`] },
+			{ _id: ServiceHelper.generateUUIDString(),
+				author: ServiceHelper.generateRandomString(),
+				timestamp: new Date() },
+			{ _id: ServiceHelper.generateUUIDString(),
+				author: ServiceHelper.generateRandomString(),
+				timestamp: new Date(),
+				void: true },
+		];
+
+		const formatRevisions = (revs) => revs.map(({ rFile, ...r }) => {
+			if (rFile) {
+				const format = '.'.concat(rFile[0].split('_').pop());
+				return { ...r, format };
+			}
+			return r;
+		});
+
+		Revisions.getRevisionFormat.mockImplementation((rFile) => (rFile ? '.'.concat(rFile[0].split('_').pop()) : undefined));
+
 		test('should return non-void revisions if the container exists', async () => {
-			const idx = getRevisionsMock.mock.calls.length;
-			const res = await Containers.getRevisions('teamspace', 1, false);
-			expect(getRevisionsMock.mock.calls.length).toBe(idx + 1);
-			expect(getRevisionsMock.mock.calls[idx][1]).toEqual(1);
-			expect(getRevisionsMock.mock.calls[idx][2]).toBe(false);
-			expect(res).toEqual(model1Revisions);
+			const teamspace = ServiceHelper.generateRandomString();
+			const container = ServiceHelper.generateRandomString();
+
+			Revisions.getRevisions.mockImplementationOnce(() => revisions);
+
+			const res = await Containers.getRevisions(teamspace, container, false);
+			expect(Revisions.getRevisions).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisions).toHaveBeenCalledWith(teamspace, container, false,
+				{ _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
+
+			expect(res).toEqual(formatRevisions(revisions));
 		});
 
 		test('should return all revisions if the container exists', async () => {
-			const idx = getRevisionsMock.mock.calls.length;
-			const res = await Containers.getRevisions('teamspace', 1, true);
-			expect(getRevisionsMock.mock.calls.length).toBe(idx + 1);
-			expect(getRevisionsMock.mock.calls[idx][1]).toEqual(1);
-			expect(getRevisionsMock.mock.calls[idx][2]).toBe(true);
-			expect(res).toEqual(model1Revisions);
+			const teamspace = ServiceHelper.generateRandomString();
+			const container = ServiceHelper.generateRandomString();
+
+			Revisions.getRevisions.mockImplementationOnce(() => revisions);
+
+			const res = await Containers.getRevisions(teamspace, container, true);
+			expect(Revisions.getRevisions).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisions).toHaveBeenCalledWith(teamspace, container, true,
+				{ _id: 1, author: 1, timestamp: 1, tag: 1, void: 1, desc: 1, rFile: 1 });
+
+			expect(res).toEqual(formatRevisions(revisions));
 		});
 	});
 };
@@ -428,7 +456,7 @@ const testDownloadRevisionFiles = () => {
 		test('should throw error if revision has no file', async () => {
 			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ rFile: [] });
 
-			await expect(Containers.downloadRevisionFiles('teamspace', 'container', model1Revisions[1]._id))
+			await expect(Containers.downloadRevisionFiles('teamspace', 'container', ServiceHelper.generateUUIDString()))
 				.rejects.toEqual(templates.fileNotFound);
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(0);
@@ -437,7 +465,7 @@ const testDownloadRevisionFiles = () => {
 		test('should download files if revision has file', async () => {
 			const teamspace = ServiceHelper.generateRandomString();
 			const container = ServiceHelper.generateRandomString();
-			const fileName = `${revWithFileId}${ServiceHelper.generateUUIDString()}.ifc`;
+			const fileName = `${ServiceHelper.generateUUIDString()}${ServiceHelper.generateUUIDString()}.ifc`;
 			const revision = ServiceHelper.generateRandomString();
 			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ rFile: [fileName] });
 

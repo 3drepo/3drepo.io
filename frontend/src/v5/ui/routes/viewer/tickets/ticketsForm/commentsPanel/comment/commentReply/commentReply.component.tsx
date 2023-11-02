@@ -38,6 +38,7 @@ export const CommentReply = ({
 	...props
 }: CommentReplyProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const currentUser = CurrentUserHooksSelectors.selectUsername();

@@ -16,6 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
+import { ErrorTextGap } from '../ticketsForm.styles';
 
 export const TopPanelShadow = css`box-shadow: 0 6px 10px rgb(0 0 0 / 4%);`;
 
@@ -35,4 +36,7 @@ export const BaseTicketInfo = styled.div`
 
 export const DescriptionProperty = styled.div`
 	margin: 10px 0;
+	&${ErrorTextGap} {
+		margin: 0;
+	}
 `;

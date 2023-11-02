@@ -16,7 +16,7 @@
  */
 import { PureComponent } from 'react';
 import { ItemLabel } from '../../../components.styles';
-import { NotificationsPanelItem } from '../../notifications.styles';
+import { NotificationsPanelItem } from '../panel/panel.styles';
 import { NotificationsPanelHeaderContainer } from './panelHeader.styles';
 
 interface IProps {

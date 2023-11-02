@@ -17,18 +17,28 @@
 
 import * as faker from 'faker';
 import { ICurrentUser, UpdatePersonalData } from '@/v5/store/currentUser/currentUser.types';
+import { getUrl } from '@/v5/services/api/default';
+import { pick } from 'lodash';
+import { IUser } from '@/v5/store/users/users.redux';
+
+export const generateFakeApiKey = () => faker.datatype.uuid();
 
 export const currentUserMockFactory = (overrides?: Partial<ICurrentUser>): ICurrentUser => ({
 	username:  faker.random.word(),
 	firstName:  faker.random.word(),
 	lastName:  faker.random.word(),
 	email:  faker.random.word(),
-	apiKey:  faker.datatype.uuid(),
+	apiKey:  generateFakeApiKey(),
 	company:  faker.random.word(),
 	countryCode:  faker.random.word(),
 	hasAvatar: faker.datatype.boolean(),
 	...overrides,
 });
+
+export const userFromCurrentUser = (currentUser: Partial<ICurrentUser>) => ({
+	...pick(currentUser, ['company', 'firstName', 'lastName', 'email', 'hasAvatar', 'avatarUrl']),
+	user: currentUser.username,
+}) as IUser;
 
 export const generatePersonalData = (): UpdatePersonalData => ({
 	firstName: faker.name.firstName(),
@@ -40,6 +50,4 @@ export const generatePersonalData = (): UpdatePersonalData => ({
 
 export const generateFakeAvatarFile = (): File => new File([], 'avatar.png');
 
-export const generateFakeAvatarUrl = () => 'blob:https://stackoverflow.com/3044f1cf-d41b-4e6d-ae79-b995342e7000';
-
-export const generateFakeApiKey = () => ({ apiKey: faker.datatype.uuid() });
+export const generateFakeAvatarUrl = () => getUrl(`user/avatar?${Date.now()}`);

@@ -21,13 +21,25 @@ import {
 	FederationBackendSettings,
 	FederationSettings,
 	FederationStats,
+	GroupedContainer,
 	IFederation,
 	NewFederation,
 } from '@/v5/store/federations/federations.types';
-import { times } from 'lodash';
-import { FetchFederationViewsResponse } from '@/v5/services/api/federations';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
+import { times } from 'lodash';
+
+export const prepareMockContainers = (min = 1, max = 10): string[] => (
+	times(faker.datatype.number({ max, min }), () => faker.datatype.uuid()) 
+);
+
+export const groupedContainerMockFactory = (overrides?: GroupedContainer): GroupedContainer => ({
+	_id: faker.datatype.uuid(),
+	group: faker.random.word(),
+	...overrides
+});
+
+export const prepareMockBaseFederation = ({_id, name, role, isFavourite}: IFederation): Partial<IFederation> => ({_id, name, role, isFavourite});
 
 export const federationMockFactory = (overrides?: Partial<IFederation>): IFederation => ({
 	_id: faker.datatype.uuid(),
@@ -38,7 +50,7 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	status: UploadStatuses.OK,
 	code: faker.datatype.uuid(),
 	category: faker.random.words(2),
-	containers: prepareMockContainers(),
+	containers: [groupedContainerMockFactory()],
 	isFavourite: faker.datatype.boolean(),
 	issues: faker.datatype.number(120),
 	risks: faker.datatype.number(120),
@@ -61,36 +73,31 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	...overrides,
 });
 
-export const prepareMockBaseFederation = ({_id, name, role, isFavourite}: IFederation): Partial<IFederation> => ({_id, name, role, isFavourite});
-
-export const prepareMockFederationStatsReply = (federation: IFederation): FederationStats => ({
-	containers: federation.containers,
+export const prepareMockStats = (overrides?: Partial<IFederation>) => ({
+	code: faker.datatype.uuid(),
+	desc: faker.random.words(3),
+	status: UploadStatuses.OK,
+	containers: [groupedContainerMockFactory()],
 	tickets: {
-		issues: federation.issues,
-		risks: federation.risks,
+		issues: faker.datatype.number(),
+		risks: faker.datatype.number(),
 	},
-	lastUpdated: federation.lastUpdated.valueOf(),
-	category: federation.category,
-	status: federation.status,
+	category: faker.random.word(),
+	lastUpdated: faker.datatype.number(),
+	...overrides,
+}) as unknown as FederationStats;
+
+export const prepareMockNewFederation = (federation: IFederation): NewFederation => ({
+	unit: federation.unit,
+	name: federation.name,
 	code: federation.code,
 	desc: federation.desc,
-});
-
-export const prepareMockContainers = (min = 1, max = 10): string[] => (
-	times(faker.datatype.number({ max, min }), () => faker.datatype.uuid()) 
-);
-
-export const prepareMockViewsReply = (federation: IFederation): FetchFederationViewsResponse => ({
-	views: federation.views,
 });
 
 const prepareMockSettingsWithoutSurveyPoint = (federation: IFederation): Omit<FederationSettings, 'surveyPoint'> => ({
 	angleFromNorth: federation.angleFromNorth,
 	defaultView: federation.defaultView,
-	unit: federation.unit,
-	name: federation.name,
-	code: federation.code,
-	desc: federation.desc,
+	...prepareMockNewFederation(federation),
 });
 
 export const prepareMockSettingsReply = (federation: IFederation): FederationSettings => ({
@@ -102,24 +109,3 @@ export const prepareMockRawSettingsReply = (federation: IFederation): Federation
 	...prepareMockSettingsWithoutSurveyPoint(federation),
 	surveyPoints: [federation.surveyPoint],
 });
-
-export const prepareMockNewFederation = (federation: IFederation): NewFederation => ({
-	unit: federation.unit,
-	name: federation.name,
-	code: federation.code,
-	desc: federation.desc,
-});
-
-export const federationMockStats = (overrides?: Partial<FederationStats>) => ({
-	code: faker.datatype.uuid(),
-	desc: faker.random.words(3),
-	status: UploadStatuses.OK,
-	containers: prepareMockContainers(),
-	tickets: {
-		issues: faker.datatype.number(),
-		risks: faker.datatype.number(),
-	},
-	category: faker.random.word(),
-	lastUpdated: faker.datatype.number(),
-	...overrides,
-})

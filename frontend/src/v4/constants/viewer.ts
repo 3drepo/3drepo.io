@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { USE_BETA_VIEWER } from '../modules/viewer/betaViewer.helpers';
+
 export const VIEWER_NAV_MODES = {
 	HELICOPTER: 'HELICOPTER',
 	TURNTABLE: 'TURNTABLE'
@@ -97,12 +99,13 @@ export const VIEWER_ERRORS = {
 };
 
 export const DEFAULT_SETTINGS = {
-	shading: 'standard',
+	[USE_BETA_VIEWER]: true,
+	viewerBackgroundColor: [0.95, 0.96, 0.99],
 	shadows: 'none',
 	xray: true,
 	caching: false,
 	statistics: false,
-	memory: 2032,
+	unityMemory: 0,
 	nearPlane: 10,
 	farPlaneSamplingPoints: 5,
 	farPlaneAlgorithm: 'box',
@@ -111,7 +114,6 @@ export const DEFAULT_SETTINGS = {
 	clipPlaneBorderWidth: 0.8,
 	clipPlaneBorderColor: [0.02, 0.16, 0.32],
 	memoryThreshold: 500,
-	memoryLimit: 2032,
 	meshFactor: 1.3,
 	maxNearPlane: -1,
 	maxFarPlane: -1,
@@ -145,7 +147,7 @@ export const VIEWER_PROJECTION_MODES = {
 };
 
 export const VIEWER_TOOLBAR_ITEMS = {
-	EXTENT: 'Extent',
+	HOME: 'Home',
 	TURNTABLE: 'Turntable',
 	HELICOPTER: 'Helicopter',
 	PERSPECTIVE_VIEW: 'Perspective View',

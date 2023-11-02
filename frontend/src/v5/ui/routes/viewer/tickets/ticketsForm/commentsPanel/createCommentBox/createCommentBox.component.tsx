@@ -30,7 +30,7 @@ import { addReply, createMetadata, imageIsTooBig, IMAGE_MAX_SIZE_MESSAGE, MAX_ME
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { MenuItem } from '@mui/material';
@@ -51,6 +51,7 @@ import {
 } from './createCommentBox.styles';
 import { CommentReply } from '../comment/commentReply/commentReply.component';
 import { ActionMenu } from '../../../ticketsList/ticketsList.styles';
+import { TicketContext } from '../../../ticket.context';
 
 type ImageToUpload = {
 	id: string,
@@ -69,6 +70,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
 	const containerRef = useRef<HTMLElement>();
 	const inputRef = useRef<any>();
+	const { isViewer } = useContext(TicketContext);
 	const { watch, reset, control } = useForm<{ message: string, images: File[] }>({ mode: 'all' });
 	const messageInput = watch('message');
 
@@ -226,7 +228,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 			<Controls>
 				<ActionMenu TriggerButton={<FileIconInput><FileIcon /></FileIconInput>}>
 					<ActionMenuItem>
-						<MenuItem onClick={uploadScreenshot}>
+						<MenuItem onClick={uploadScreenshot} disabled={!isViewer}>
 							<FormattedMessage id="customTicket.comments.action.createScreenshot" defaultMessage="Create screenshot" />
 						</MenuItem>
 						<MenuItem onClick={uploadImages}>

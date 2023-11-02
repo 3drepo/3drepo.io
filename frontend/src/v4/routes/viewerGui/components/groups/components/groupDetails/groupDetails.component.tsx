@@ -48,7 +48,6 @@ interface IProps {
 	totalMeshes: number;
 	canUpdate: boolean;
 	selectedNodes: any;
-	fieldNames: any[];
 	criteriaFieldState: ICriteriaFieldState;
 	createGroup: (teamspace: any, modelId: any, revision: any) => void;
 	updateGroup: (teamspace: any, modelId: any, revision: any, groupId: any) => void;
@@ -57,6 +56,7 @@ interface IProps {
 	resetToSavedSelection: () => void;
 	isPending: boolean;
 	deleteGroup: (id: string | null) => void;
+	isReadOnly: boolean;
 }
 
 interface IState {
@@ -94,7 +94,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 	public state = {
 		isFormValid: false,
 		isFormDirty: false,
-		scrolled: false
+		scrolled: false,
 	};
 
 	public formRef = createRef<HTMLElement>() as any;
@@ -110,8 +110,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			setState={this.props.setCriteriaState}
 			label="Filters"
 			placeholder="Select first filter"
-			disabled={!this.props.canUpdate}
-			fieldNames={this.props.fieldNames}
+			disabled={!this.props.canUpdate || this.props.isReadOnly}
 		/>
 	));
 
@@ -188,7 +187,6 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 			currentUser={this.props.currentUser}
 			totalMeshes={this.props.totalMeshes}
 			canUpdate={this.props.canUpdate}
-			fieldNames={this.props.fieldNames}
 			handleChange={this.handleFieldChange}
 			selectedNodes={this.props.selectedNodes}
 		/>

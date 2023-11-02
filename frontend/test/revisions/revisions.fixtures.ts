@@ -25,6 +25,7 @@ export const revisionsMockFactory = (overrides?: Partial<IRevision>): IRevision 
 	author: faker.name.findName(),
 	desc: faker.random.words(3),
 	void: faker.datatype.boolean(),
+	format: faker.system.commonFileExt(),
 	...overrides,
 });
 
@@ -33,6 +34,7 @@ export const mockCreateRevisionBody = (overrides?: Partial<CreateRevisionBody>):
 	revisionDesc: faker.random.words(3),
 	file: new File(['file'], 'filename.obj'),
 	importAnimations: false,
+	lod: faker.datatype.number({ min: 0, max: 6}).toString(),
 	timezone: 'Europe/London',
 	containerId: faker.datatype.uuid(),
 	containerName: faker.random.words(1),
@@ -43,11 +45,3 @@ export const mockCreateRevisionBody = (overrides?: Partial<CreateRevisionBody>):
 	...overrides,
 });
 
-export const prepareRevisionData = (overrides?: IRevisionUpdate): IRevisionUpdate => ({
-	timestamp: faker.datatype.datetime(),
-	tag: faker.random.word(),
-	author: faker.random.word(),
-	desc: faker.random.word(),
-	void: faker.datatype.boolean(),
-	...overrides,
-});

@@ -16,7 +16,6 @@
  */
 
 import { API } from './default';
-export { getAPIUrl, getResponseCode, setSocketIdHeader } from './default';
 
 export * from './auth';
 export * from './users';

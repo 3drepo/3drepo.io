@@ -17,17 +17,18 @@
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const { addGroupUpdateLog, addTicketLog } = require('../../../models/tickets.logs');
 const { createModelMessage, createProjectMessage } = require('../../chat');
+const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/objects');
+const { getRevisionByIdOrTag, getRevisionFormat } = require('../../../models/revisions');
 const { isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
 const { findProjectByModelId } = require('../../../models/projectSettings');
-const { getRevisionByIdOrTag } = require('../../../models/revisions');
+const { generateFullSchema } = require('../../../schemas/tickets/templates');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
-const { setNestedProperty } = require('../../../utils/helper/objects');
 const { subscribe } = require('../../eventsManager/eventsManager');
 
 const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
@@ -66,12 +67,21 @@ const revisionUpdated = async ({ teamspace, project, model, data, sender }) => {
 
 const revisionAdded = async ({ teamspace, project, model, revision, isFederation }) => {
 	try {
-		const { tag, author, timestamp } = await getRevisionByIdOrTag(teamspace, model, stringToUUID(revision),
-			{ _id: 0, tag: 1, author: 1, timestamp: 1 });
+		const { tag, author, timestamp, desc, rFile } = await getRevisionByIdOrTag(teamspace,
+			model, stringToUUID(revision),
+			{ _id: 0, tag: 1, author: 1, timestamp: 1, desc: 1, rFile: 1 });
+
 		const event = isFederation ? chatEvents.FEDERATION_NEW_REVISION : chatEvents.CONTAINER_NEW_REVISION;
 
-		await createModelMessage(event, { _id: revision, tag, author, timestamp: timestamp.getTime() },
-			teamspace, project, model);
+		const format = getRevisionFormat(rFile);
+
+		await createModelMessage(event, { _id: revision,
+			tag,
+			author,
+			timestamp: timestamp.getTime(),
+			desc,
+			...deleteIfUndefined({ format }),
+		}, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to send a model message to queue: ${err?.message}`);
 	}
@@ -124,10 +134,11 @@ const ticketUpdated = async ({ teamspace, project, model, ticket, author, change
 			getTemplateById(teamspace, ticket.type),
 			addTicketLog(teamspace, project, model, ticket._id, { author, changes, timestamp }),
 		]);
+		const fullTemplate = generateFullSchema(template);
 
 		const updateData = constructUpdatedObject(changes);
 		const event = isFed ? chatEvents.FEDERATION_UPDATE_TICKET : chatEvents.CONTAINER_UPDATE_TICKET;
-		const serialisedTicket = serialiseTicket({ _id: ticket._id, ...updateData }, template);
+		const serialisedTicket = serialiseTicket({ _id: ticket._id, ...updateData }, fullTemplate);
 		await createModelMessage(event, serialisedTicket, teamspace, project, model);
 	} catch (err) {
 		logger.logError(`Failed to process ticket updated event ${err.message}`);

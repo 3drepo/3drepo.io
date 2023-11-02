@@ -17,6 +17,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { Role } from '../currentUser/currentUser.types';
 import { SurveyPoint, View } from '../store.types';
+import { CreateRevisionBody } from '../revisions/revisions.types';
 
 export enum UploadStatuses {
 	OK = 'ok',
@@ -194,21 +195,10 @@ export type DestinationOption = {
 	latestRevision: string;
 };
 
-export type UploadItemFields = {
+export type UploadItemFields = CreateRevisionBody & {
 	uploadId: string;
-	file: File;
 	progress: number;
 	extension: string;
-	containerId: string;
-	containerName: string;
-	containerUnit: string;
-	containerType: string;
-	containerDesc?: string;
-	containerCode?: string;
-	revisionTag: string;
-	revisionDesc?: string;
-	importAnimations?: boolean;
-	timezone?: string;
 };
 
 export type UploadFieldArray = {

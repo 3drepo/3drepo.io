@@ -17,8 +17,7 @@
 
 import { ReactNode, useState } from 'react';
 import { Collapse, Tooltip } from '@mui/material';
-import { ChevronButton } from '@controls/chevronButton';
-import { Container, ButtonContainer, ControlsContainer, CollapsedItemContainer, Title } from './dashboardListCollapse.styles';
+import { Container, ButtonContainer, ControlsContainer, CollapsedItemContainer, Title, ChevronButton } from './dashboardListCollapse.styles';
 
 export type IDashboardListCollapse = {
 	children: ReactNode;
@@ -30,25 +29,32 @@ export type IDashboardListCollapse = {
 	className?: string;
 	sideElement?: ReactNode;
 	isLoading?: boolean;
+	defaultExpanded?: boolean;
 };
 
 export const DashboardListCollapse = ({
-	children, title, tooltipTitles, className, isLoading = false, sideElement,
+	children,
+	title,
+	tooltipTitles,
+	className,
+	isLoading = false,
+	defaultExpanded = true,
+	sideElement,
 }: IDashboardListCollapse): JSX.Element => {
-	const [isCollapsed, setIsCollapsed] = useState(false);
+	const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
 	return (
 		<Container className={className} isLoading={isLoading}>
 			<ControlsContainer>
-				<ButtonContainer onClick={() => setIsCollapsed((state) => !state)}>
-					<Tooltip title={(!isCollapsed ? tooltipTitles?.visible : tooltipTitles?.collapsed) ?? ''}>
-						<ChevronButton isOn={!isCollapsed} isLoading={isLoading} />
+				<ButtonContainer onClick={() => setIsExpanded((state) => !state)}>
+					<Tooltip title={(isExpanded ? tooltipTitles?.visible : tooltipTitles?.collapsed) ?? ''}>
+						<ChevronButton isOn={isExpanded} isLoading={isLoading} />
 					</Tooltip>
 					<Title variant="h3" color="secondary">{title}</Title>
 				</ButtonContainer>
 				{sideElement}
 			</ControlsContainer>
-			<Collapse in={!isCollapsed}>
+			<Collapse in={isExpanded}>
 				<CollapsedItemContainer>
 					{children}
 				</CollapsedItemContainer>

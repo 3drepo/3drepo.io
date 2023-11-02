@@ -19,42 +19,46 @@ import NotFoundIcon from '@assets/icons/filled/404-filled.svg';
 import { Link } from 'react-router-dom';
 import { Button } from '@controls/button';
 import { FormattedMessage } from 'react-intl';
+import { AppBar } from '@components/shared/appBar';
 import { Container, Title, Message, ButtonsContainer } from './notFound.styles';
 
 export const NotFound = (): JSX.Element => (
-	<Container>
-		<NotFoundIcon />
-		<Title>
-			<FormattedMessage id="notFound.title" defaultMessage="Sorry, but the page you were looking for could not be found." />
-		</Title>
-		<Message>
-			<FormattedMessage
-				id="notFound.message"
-				defaultMessage="You can return to our dashboard, or contact our support team if you can't find what you're looking for."
-			/>
-		</Message>
-		<ButtonsContainer>
-			<Button
-				variant="contained"
-				color="primary"
-				component={Link}
-				to="/v5/dashboard"
-			>
+	<>
+		<AppBar />
+		<Container>
+			<NotFoundIcon />
+			<Title>
+				<FormattedMessage id="notFound.title" defaultMessage="Sorry, but the page you were looking for could not be found." />
+			</Title>
+			<Message>
 				<FormattedMessage
-					id="notFound.goToDashboardButton.label"
-					defaultMessage="Go to your Dashboard"
+					id="notFound.message"
+					defaultMessage="You can return to our dashboard, or contact our support team if you can't find what you're looking for."
 				/>
-			</Button>
-			<Button
-				variant="outlined"
-				color="primary"
-				href="https://3drepo.com/contact/"
-			>
-				<FormattedMessage
-					id="notFound.contactSupportButton.label"
-					defaultMessage="Contact support team"
-				/>
-			</Button>
-		</ButtonsContainer>
-	</Container>
+			</Message>
+			<ButtonsContainer>
+				<Button
+					variant="contained"
+					color="primary"
+					component={Link}
+					to="/v5/dashboard"
+				>
+					<FormattedMessage
+						id="notFound.goToDashboardButton.label"
+						defaultMessage="Go to your Dashboard"
+					/>
+				</Button>
+				<Button
+					variant="outlined"
+					color="primary"
+					href="https://3drepo.com/contact/"
+				>
+					<FormattedMessage
+						id="notFound.contactSupportButton.label"
+						defaultMessage="Contact support team"
+					/>
+				</Button>
+			</ButtonsContainer>
+		</Container>
+	</>
 );

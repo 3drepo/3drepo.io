@@ -20,18 +20,22 @@ export const NOT_FOUND_ROUTE_PATH = '/v5/404';
 export const LOGIN_PATH = '/v5/login';
 export const PASSWORD_FORGOT_PATH = '/v5/password-forgot';
 export const SIGN_UP_PATH = '/v5/signup';
+export const SIGN_UP_SSO_PATH = '/v5/signup-sso';
 export const PASSWORD_CHANGE_PATH = '/v5/password-change';
+export const REGISTER_VERIFY_PATH = '/v5/register-verify';
 export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:project/:containerOrFederation/:revision?';
 export const DASHBOARD_ROUTE = '/v5/dashboard';
 export const TEAMSPACE_ROUTE_BASE = `${DASHBOARD_ROUTE}/:teamspace`;
+export const TEAMSPACE_ROUTE_BASE_TAB = `${TEAMSPACE_ROUTE_BASE}/t`;
 export const TEAMSPACE_ROUTE = `${TEAMSPACE_ROUTE_BASE}/t/:tab`;
 export const PROJECT_ROUTE_BASE = `${TEAMSPACE_ROUTE_BASE}/:project`;
 
-const PROJECT_ROUTE_BASE_TAB = `${PROJECT_ROUTE_BASE}/t`;
+export const PROJECT_ROUTE_BASE_TAB = `${PROJECT_ROUTE_BASE}/t`;
 export const PROJECT_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/:tab`;
 export const CONTAINERS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/containers`;
 export const FEDERATIONS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/federations`;
 export const BOARD_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/board/:type?/:containerOrFederation?`;
+export const TICKETS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/tickets/:template/:groupBy/:containerOrFederation?`;
 
 export const PRIVACY_ROUTE = '/v5/privacy';
 export const COOKIES_ROUTE = '/v5/cookies';
@@ -41,6 +45,8 @@ export const RELEASE_NOTES_ROUTE = 'https://help.3drepo.io/en/collections/335823
 
 // eslint-disable-next-line no-restricted-globals
 export const matchesPath = (path) => Boolean(matchPath(location.pathname, { path, exact: true }));
+// eslint-disable-next-line no-restricted-globals
+export const matchesSubPath = (path) => Boolean(matchPath(location.pathname, { path }));
 
 export interface TeamspaceParams {
 	teamspace?: string;
@@ -49,6 +55,11 @@ export interface TeamspaceParams {
 export interface DashboardParams {
 	teamspace?: string;
 	project?: string;
+}
+
+export interface DashboardTicketsParams extends DashboardParams {
+	groupBy?: string;
+	template?: string;
 }
 
 export interface ViewerParams extends DashboardParams {

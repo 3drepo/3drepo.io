@@ -17,13 +17,13 @@
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { FormControlLabel, FormControlLabelProps, Checkbox as MuiCheckbox } from '@mui/material';
 
-export type CheckboxProps = FormInputProps & FormControlLabelProps & {
+export type CheckboxProps = FormInputProps & Omit<FormControlLabelProps, 'control'> & {
 	onClick?: (event) => any,
 };
 
 export const Checkbox = ({ value, onClick, ...props }: CheckboxProps) => (
 	<FormControlLabel
-		control={<MuiCheckbox checked={value} onClick={onClick} />}
+		control={<MuiCheckbox checked={!!value} onClick={onClick} />}
 		{...props}
 	/>
 );

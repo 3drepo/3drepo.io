@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ListItem } from '@mui/material';
 import MaterialList from '@mui/material/List';
 import styled from 'styled-components';
 
@@ -26,3 +27,14 @@ export const List = styled(MaterialList)`
 `;
 
 export const Container = styled.div``;
+
+export const NotificationsPanelItem = styled(ListItem)`
+	&& {
+		padding-left: 5px;
+		padding-right: 5px;
+		padding-bottom: 5px;
+		padding-top: 0;
+		width: 100%;
+		display: block;
+	}
+`;

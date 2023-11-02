@@ -116,7 +116,10 @@ const formatRevisions = (revs, includeVoid = false) => {
 			tag: rev.tag,
 			author: rev.author,
 			void: rev.void,
-			timestamp: rev.timestamp.getTime() } : []));
+			timestamp: rev.timestamp.getTime(),
+			...(!rev.rFile ? {} : { format: '.'.concat(rev.rFile[0].split('_').pop()) }),
+			desc: rev.desc,
+		} : []));
 	return { revisions: formattedRevisions };
 };
 

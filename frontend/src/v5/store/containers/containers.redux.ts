@@ -19,12 +19,10 @@ import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
-import { ContainerSettings } from '@/v5/store/containers/containers.types';
-import { SuccessAndErrorCallbacks, View } from '@/v5/store/store.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
-import { ContainerStats, IContainer, NewContainer, UploadStatuses } from './containers.types';
-import { TeamspaceProjectAndContainerId, ProjectAndContainerId, TeamspaceAndProjectId, ProjectId } from '../store.types';
+import { ContainerStats, IContainer, NewContainer, UploadStatuses, ContainerSettings } from './containers.types';
+import { TeamspaceProjectAndContainerId, ProjectAndContainerId, TeamspaceAndProjectId, ProjectId, SuccessAndErrorCallbacks, View } from '../store.types';
 import { IRevision } from '../revisions/revisions.types';
 import { Role } from '../currentUser/currentUser.types';
 
@@ -40,6 +38,7 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	fetchContainerViewsSuccess: ['projectId', 'containerId', 'views'],
 	fetchContainerSettings: ['teamspace', 'projectId', 'containerId'],
 	fetchContainerSettingsSuccess: ['projectId', 'containerId', 'settings'],
+	updateContainerSuccess: ['projectId', 'containerId', 'container'],
 	updateContainerSettings: ['teamspace', 'projectId', 'containerId', 'settings', 'onSuccess', 'onError'],
 	updateContainerSettingsSuccess: ['projectId', 'containerId', 'settings'],
 	createContainer: ['teamspace', 'projectId', 'newContainer', 'onSuccess', 'onError'],
@@ -97,6 +96,14 @@ export const fetchContainerSettingsSuccess = (state, {
 }) => {
 	const container = getContainerFromState(state, projectId, containerId);
 	Object.assign(container, settings);
+};
+
+export const updateContainerSuccess = (state, {
+	projectId,
+	containerId,
+	container,
+}) => {
+	Object.assign(getContainerFromState(state, projectId, containerId), container);
 };
 
 export const updateContainerSettingsSuccess = (state, {
@@ -161,6 +168,7 @@ export const containersReducer = createReducer<IContainersState>(INITIAL_STATE, 
 	[ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS]: fetchContainerStatsSuccess,
 	[ContainersTypes.FETCH_CONTAINER_VIEWS_SUCCESS]: fetchContainerViewsSuccess,
 	[ContainersTypes.FETCH_CONTAINER_SETTINGS_SUCCESS]: fetchContainerSettingsSuccess,
+	[ContainersTypes.UPDATE_CONTAINER_SUCCESS]: updateContainerSuccess,
 	[ContainersTypes.UPDATE_CONTAINER_SETTINGS_SUCCESS]: updateContainerSettingsSuccess,
 	[ContainersTypes.CREATE_CONTAINER_SUCCESS]: createContainerSuccess,
 	[ContainersTypes.DELETE_CONTAINER_SUCCESS]: deleteContainerSuccess,
@@ -178,7 +186,7 @@ export interface IContainersState {
 
 export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & TeamspaceProjectAndContainerId;
 export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & TeamspaceProjectAndContainerId;
-export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & ProjectAndContainerId & { isFavourite: boolean};
+export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & ProjectAndContainerId & { isFavourite: boolean };
 export type FetchContainersAction = Action<'FETCH_CONTAINERS'> & TeamspaceAndProjectId;
 export type FetchContainersSuccessAction = Action<'FETCH_CONTAINERS_SUCCESS'> & ProjectId & { containers: IContainer[] };
 export type FetchContainerStatsAction = Action<'FETCH_CONTAINER_STATS'> & TeamspaceProjectAndContainerId;
@@ -186,9 +194,10 @@ export type FetchContainerStatsSuccessAction = Action<'FETCH_CONTAINER_STATS_SUC
 export type FetchContainerViewsAction = Action<'FETCH_CONTAINER_VIEWS'> & TeamspaceProjectAndContainerId;
 export type FetchContainerViewsSuccessAction = Action<'FETCH_CONTAINER_VIEWS_SUCCESS'> & ProjectAndContainerId & { views: View[] };
 export type FetchContainerSettingsAction = Action<'FETCH_CONTAINER_SETTINGS'> & TeamspaceProjectAndContainerId;
-export type FetchContainerSettingsSuccessAction = Action<'FETCH_CONTAINER_SETTINGS_SUCCESS'> & ProjectAndContainerId & { settings: ContainerSettings};
+export type FetchContainerSettingsSuccessAction = Action<'FETCH_CONTAINER_SETTINGS_SUCCESS'> & ProjectAndContainerId & { settings: ContainerSettings };
 export type UpdateContainerSettingsAction = Action<'UPDATE_CONTAINER_SETTINGS'> & TeamspaceProjectAndContainerId & SuccessAndErrorCallbacks & { settings: ContainerSettings };
-export type UpdateContainerSettingsSuccessAction = Action<'UPDATE_CONTAINER_SETTINGS_SUCCESS'> & ProjectAndContainerId & { settings: ContainerSettings};
+export type UpdateContainerSuccessAction = Action<'UPDATE_CONTAINER_SUCCESS'> & ProjectAndContainerId & { container: Partial<IContainer> };
+export type UpdateContainerSettingsSuccessAction = Action<'UPDATE_CONTAINER_SETTINGS_SUCCESS'> & ProjectAndContainerId & { settings: ContainerSettings };
 export type CreateContainerAction = Action<'CREATE_CONTAINER'> & TeamspaceAndProjectId & SuccessAndErrorCallbacks & { newContainer: NewContainer };
 export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & ProjectId & { container: IContainer };
 export type DeleteContainerAction = Action<'DELETE'> & TeamspaceProjectAndContainerId & SuccessAndErrorCallbacks;
@@ -248,6 +257,11 @@ export interface IContainersActionCreators {
 		containerId: string,
 		settings: ContainerSettings,
 	) => UpdateContainerSettingsSuccessAction;
+	updateContainerSuccess: (
+		projectId: string,
+		containerId: string,
+		container: Partial<IContainer>,
+	) => UpdateContainerSuccessAction;
 	deleteContainer: (teamspace: string,
 		projectId: string,
 		containerId: string,

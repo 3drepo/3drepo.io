@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { flatten, pick, uniq, values } from 'lodash';
+import { orderBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 
 import { NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
@@ -24,7 +24,6 @@ import { searchByFilters } from '../../helpers/searching';
 import { calculateTotalMeshes } from '../../helpers/tree';
 
 import TreeProcessing from './treeProcessing/treeProcessing';
-import { ITreeProcessingData } from './treeProcessing/treeProcessing.constants';
 
 export const selectTreeDomain = (state) => ({...state.tree});
 
@@ -44,6 +43,12 @@ export const selectComponentState = createSelector(
 	selectTreeDomain, (state) => state.componentState
 );
 
+// This is used by other selectors, although the data seems not to be used.
+// The reason is that "dataRevision" acts as an ID that changes when
+// the visibility of some nodes changes. So doing, it forces the other
+// selectors to recompute the returned data as opposed to what they have
+// "cached" (selectors do a comparison on the data to return to decide whether
+// or not to trigger state refresh).
 export const selectDataRevision = createSelector(
 	selectTreeDomain, (state) => state.dataRevision
 );
@@ -57,6 +62,11 @@ const selectTreeProccessing = () => TreeProcessing.data ;
 export const selectTreeNodesList = createSelector(
 	selectTreeProccessing, selectDataRevision,
 	(treeProcessingData) => treeProcessingData.nodesList || []
+);
+
+export const selectSortedTreeNodesList = createSelector(
+	selectTreeNodesList,
+	(nodesList) => orderBy(nodesList, ({ name }) => name?.toLowerCase()),
 );
 
 export const selectSubModelsRootNodes = createSelector(
@@ -119,11 +129,12 @@ export const selectSelectedFilters = createSelector(
 );
 
 export const selectFilteredNodesList = createSelector(
-	selectTreeNodesList, selectSelectedFilters, (nodes, selectedFilters) => {
+	selectTreeNodesList, selectSortedTreeNodesList, selectSelectedFilters,
+	(nodes, sortedNodes, selectedFilters) => {
 		if (!selectedFilters.length) {
 			return nodes;
 		}
-		return searchByFilters(nodes, selectedFilters, true);
+		return searchByFilters(sortedNodes, selectedFilters, true);
 	}
 );
 
@@ -175,7 +186,7 @@ export const selectVisibleTreeNodesList = createSelector(
 		while (index < treeNodesList.length) {
 			const treeNode = { ...treeNodesList[index] };
 
-			treeNode.isSearchResult = isSearchActive && !treeNode.isFederation && !treeNode.isModel;
+			treeNode.isSearchResult = isSearchActive && treeNode.level > 1;
 			treeNode.isRegularNode = !isSearchActive && (treeNode.level <= 2 || expandedNodesMap[treeNode.parentId]);
 			const isNamelessMesh = treeNode.type === 'mesh' && !treeNode.name;
 			if (!isNamelessMesh && (treeNode.isSearchResult || treeNode.isRegularNode)) {
@@ -186,7 +197,7 @@ export const selectVisibleTreeNodesList = createSelector(
 				} else {
 					treeNode.rootParentIndex = indexesByRootParentIds[treeNode.rootParentId];
 				}
-			} else if (!treeNode.isSearchResult && treeNode.deepChildrenNumber) {
+			} else if (!treeNode.isSearchResult && treeNode.deepChildrenNumber && treeNode.level > 1) {
 				// If we are not showing search result and this node isn't a regular node,
 				// Then we are certain we won't be showing its children, skip them.
 				index += treeNode.deepChildrenNumber;

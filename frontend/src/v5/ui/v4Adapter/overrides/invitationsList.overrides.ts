@@ -15,17 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { EmptyStateInfo } from '@/v4/routes/components/components.styles';
-import { Actions, Footer, Invitation, List } from '@/v4/routes/components/invitationsDialog/invitationsDialog.styles';
+import { Actions, Footer, Invitation, List, Container } from '@/v4/routes/components/invitationsDialog/invitationsDialog.styles';
 import { css } from 'styled-components';
-import { secondaryButtonStyling } from '../resuableOverrides.styles';
+import { secondaryTextButtonStyling } from '../resuableOverrides.styles';
 
 export default css`
-	${EmptyStateInfo} {
-		margin: 30px;
+	${Container} {
+		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	}
 	${List} {
-		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 		padding: 30px;
 		${Invitation} {
 			padding: 0;
@@ -43,7 +41,7 @@ export default css`
 	}
 	${Footer} {
 		.MuiButtonBase-root.MuiButtonBase-root:first-child {
-			${secondaryButtonStyling}
+			${secondaryTextButtonStyling}
 		}
 	}
 `;

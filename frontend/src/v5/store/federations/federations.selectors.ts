@@ -31,6 +31,11 @@ export const selectFederations = createSelector(
 	(state, currentProject) => state?.federationsByProject[currentProject] ?? [],
 );
 
+export const selectFederationsNames = createSelector(
+	selectFederations,
+	(federations) => federations.map(({ name }) => name),
+);
+
 export const selectFavouriteFederations = createSelector(
 	selectFederations,
 	(federations) => federations.filter(({ isFavourite }) => isFavourite),
@@ -56,7 +61,7 @@ export const selectContainersByFederationId = createSelector(
 	selectContainers,
 	selectFederationById,
 	(containers, federation) => compact(federation?.containers?.map(
-		(containerId) => containers.find((container) => container._id === containerId),
+		({ _id }) => containers.find((container) => container._id === _id),
 	)) ?? [],
 );
 

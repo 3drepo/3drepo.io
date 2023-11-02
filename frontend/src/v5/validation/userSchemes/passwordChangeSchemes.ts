@@ -16,7 +16,6 @@
  */
 
 import * as Yup from 'yup';
-import { formatMessage } from '@/v5/services/intl';
 import { password } from './validators';
 
 export const PasswordForgotSchema = Yup.object().shape({
@@ -25,14 +24,4 @@ export const PasswordForgotSchema = Yup.object().shape({
 
 export const PasswordChangeSchema = Yup.object().shape({
 	newPassword: password(),
-	newPasswordConfirm: Yup.string()
-		.required(formatMessage({
-			id: 'passwordChange.error.passwordRequired',
-			defaultMessage: 'Password is required',
-		}))
-		.oneOf([Yup.ref('newPassword')],
-			formatMessage({
-				id: 'passwordChange.error.notMatching',
-				defaultMessage: 'Password confirmation doesn\'t match the password',
-			})),
 });

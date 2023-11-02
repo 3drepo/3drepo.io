@@ -15,11 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Container as GroupDetails,
+import {
+	Container as GroupDetails,
 	Actions as BottomLeftButtons,
 	Description as DetailsDescription,
 	StyledTextField,
 	StyledFormControl,
+	FieldsRow,
 } from '@/v4/routes/viewerGui/components/groups/components/groupDetails/groupDetails.styles';
 import {
 	Container as PreviewListItemContainer,
@@ -52,7 +54,7 @@ import {
 import { primaryButtonStyling } from '@/v5/ui/v4Adapter/resuableOverrides.styles';
 import { ViewerPanelContent } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 import { StyledTextField as AutoSuggestField } from '@/v4/routes/components/autosuggestField/autosuggestField.styles';
-import { MultipleInputsContainer } from '@/v4/routes/components/criteriaField/components/criteriaValueField/criteriaValueField.styles';
+import { PasteButton } from '@/v4/routes/components/criteriaField/criteriaPasteField/criteriaPasteField.styles';
 
 const previewGroupItem = css`
 	${PreviewListItemContainer} {
@@ -128,6 +130,9 @@ const expandedGroupItem = css`
 				.MuiFormControl-root {
 					margin-top: -18px;
 				}
+				${FieldsRow} > :nth-child(2) {
+					width: 420px;
+				}
 				${TextFieldContainer} {
 					border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 					border-radius: 8px;
@@ -146,9 +151,10 @@ const expandedGroupItem = css`
 					
 					.MuiInputBase-root {
 						padding: 0;
+
 						& > textarea {
 							min-height: 2rem;
-							padding: 5px 10px;
+							padding: 5px 20px 5px 10px;
 						}
 						&.Mui-focused fieldset {
 							border: 1px solid ${({ theme }) => theme.palette.primary.main};
@@ -191,17 +197,19 @@ const expandedGroupItem = css`
 				${DetailsDescription} {
 					margin-top: 30px;
 					
-					> div {
-						min-height: 42px !important;
+					& > :first-child {
+						min-height: 32px;
 						margin: 0;
 					}
 					
 					span {
-						display: table;
-						word-break: break-all;
+						display: inline-block;
 						height: 24px;
 						line-height: unset !important;
 						padding-top: 5px;
+						text-overflow: ellipsis;
+						overflow: hidden;
+						max-width: calc(100% - 30px);
 					}
 
 					.MuiFormHelperText-root {
@@ -210,8 +218,16 @@ const expandedGroupItem = css`
 					}
 
 					${ActionsLine} {
-						top: -5px;
+						top: 0;
 						bottom: unset;
+						display: flex;
+						flex-direction: column-reverse;
+
+						button {
+							margin: 2px 5px 2px 0;
+							height: 15px;
+							width: 15px;
+						}
 						
 						svg {
 							font-size: 1rem;
@@ -236,6 +252,7 @@ const expandedGroupItem = css`
 					padding: 0 15px;
 					position: initial;
 				}
+
 				${SelectedCriteria} {
 					padding: 5px 15px 12px;
 					${ButtonContainer} {
@@ -243,7 +260,13 @@ const expandedGroupItem = css`
 						right: 14px;
 					}
 				}
-				// Field / Operation / Value box area
+				
+				${PasteButton} {
+					margin: 2px 0 0 2px;
+					color: ${({ theme }) => theme.palette.secondary.main};
+				}
+
+				// Smart group
 				${FormContainer} {
 					border: none;
 					/* TODO - fix after new palette is released */
@@ -258,10 +281,6 @@ const expandedGroupItem = css`
 						.MuiTextField-root {
 							margin: 0;
 						}
-					}
-
-					${MultipleInputsContainer} {
-						margin: 0;
 					}
 
 					.MuiTextField-root {

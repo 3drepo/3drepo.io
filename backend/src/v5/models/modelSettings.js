@@ -18,8 +18,10 @@
 const Models = {};
 const { SETTINGS_COL, getInfoFromCode } = require('./modelSettings.constants');
 const db = require('../handler/db');
+const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUIDString } = require('../utils/helper/uuids');
+const { isString } = require('../utils/helper/typeCheck');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
@@ -71,6 +73,17 @@ Models.getModelByQuery = async (ts, query, projection) => {
 	const res = await findOneModel(ts, query, projection);
 	if (!res) {
 		throw templates.modelNotFound;
+	}
+
+	// For supporting old schema, to remove next release (5.8.0)
+	if (res.subModels) {
+		res.subModels = res.subModels.map((value) => {
+			if (isString(value)) {
+				return { _id: value };
+			}
+
+			return value;
+		});
 	}
 
 	return res;
@@ -150,7 +163,7 @@ Models.newRevisionProcessed = async (teamspace, project, model, corId, retVal, u
 			 *  containers used to be called models in v4, and models used to be called
 			 *  projects. This data came from 3drepobouncer, which still calls containers projects.
 			 */
-			set.subModels = containers.map(({ project: modelId }) => modelId);
+			set.subModels = containers.map(({ project: _id, group }) => deleteIfUndefined({ _id, group }));
 		}
 	} else {
 		set.status = 'failed';

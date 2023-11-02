@@ -18,7 +18,7 @@
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
 import { useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { findEditedGroup, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
@@ -35,12 +35,17 @@ import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
 import { TicketContext, TicketDetailsView } from '../ticket.context';
+import { useSearchParam } from '../../../useSearchParam';
 
 export const TicketDetailsCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
+	const [, setTicketId] = useSearchParam('ticketId');
+	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
+	const treeNodesList = TreeHooksSelectors.selectTreeNodesList();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const ticket = tickets.find((t) => t._id === ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	const defaultView = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 
@@ -52,7 +57,6 @@ export const TicketDetailsCard = () => {
 		const currentIndex = tickets.findIndex((tckt) => tckt._id === ticket._id);
 		const updatedId = tickets.slice((currentIndex + delta) % tickets.length)[0]._id;
 		TicketsCardActionsDispatchers.setSelectedTicket(updatedId);
-		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
 	};
 
 	const goPrev = () => changeTicketIndex(-1);
@@ -63,10 +67,6 @@ export const TicketDetailsCard = () => {
 		mode: 'onChange',
 		defaultValues: ticket,
 	});
-
-	useEffect(() => {
-		formData.reset(ticket);
-	}, [JSON.stringify(ticket)]);
 
 	const onBlurHandler = () => {
 		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
@@ -90,14 +90,6 @@ export const TicketDetailsCard = () => {
 	};
 
 	useEffect(() => {
-		TicketsActionsDispatchers.fetchTicket(
-			teamspace,
-			project,
-			containerOrFederation,
-			ticket._id,
-			isFederation,
-		);
-
 		if (!templateAlreadyFetched(template)) {
 			TicketsActionsDispatchers.fetchTemplate(
 				teamspace,
@@ -107,11 +99,19 @@ export const TicketDetailsCard = () => {
 				isFederation,
 			);
 		}
+		TicketsActionsDispatchers.fetchTicket(teamspace, project, containerOrFederation, ticket._id, isFederation);
+		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
+		setTicketId(ticket._id);
 	}, [ticket._id]);
 
-	if (!ticket) return (<></>);
+	useEffect(() => {
+		if (isEmpty(defaultView)) return;
+		goToView(defaultView);
+	}, [ticket._id, treeNodesList]);
 
-	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
+	useEffect(() => {
+		formData.reset(ticket);
+	}, [JSON.stringify(ticket)]);
 
 	useEffect(() => {
 		if (view === TicketDetailsView.Groups || isEmpty(defaultView)) return;
@@ -123,6 +123,11 @@ export const TicketDetailsCard = () => {
 		const { state } = defaultView;
 		goToView({ state });
 	}, [JSON.stringify(defaultView?.state)]);
+
+	useEffect(() => () => {
+		setTicketId();
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
+	}, []);
 
 	return (
 		<CardContainer>
@@ -142,19 +147,19 @@ export const TicketDetailsCard = () => {
 						</>
 					)}
 				{view === TicketDetailsView.Form
-				&& (
-					<>
-						<CardHeader>
-							<ArrowBack onClick={goBack} />
-							{template.code}:{ticket.number}
-							<HeaderButtons>
-								<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
-								<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
-							</HeaderButtons>
-						</CardHeader>
-						<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
-					</>
-				)}
+					&& (
+						<>
+							<CardHeader>
+								<ArrowBack onClick={goBack} />
+								{template.code}:{ticket.number}
+								<HeaderButtons>
+									<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
+									<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
+								</HeaderButtons>
+							</CardHeader>
+							<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
+						</>
+					)}
 			</FormProvider>
 		</CardContainer>
 	);

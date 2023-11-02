@@ -25,7 +25,6 @@ const ModelSetting = require("../models/modelSetting");
 const responseCodes = require("../response_codes");
 const C = require("../constants");
 const ModelHelpers = require("../models/helper/model");
-const TextureHelpers = require("../models/helper/texture");
 const UnityAssets = require("../models/unityAssets");
 const Scene = require("../models/scene");
 const SrcAssets = require("../models/srcAssets");
@@ -1617,7 +1616,7 @@ router.get("/:model/revision/:rev/searchtree.json", middlewares.hasReadAccessToM
 router.get("/:model/revision/master/head/subModelRevisions", middlewares.hasReadAccessToModel, getSubModelRevisions);
 
 /**
- * @api {get} /:teamspace/:model/revision/master/head/subModelRevisions Get submodel revisions by rev
+ * @api {get} /:teamspace/:model/revision/:revId/subModelRevisions Get submodel revisions by rev
  * @apiName getSubModelRevisionsByRev
  * @apiGroup Model
  * @apiDescription In a federation it returns the submodels revisions of a particular federation revision.
@@ -1818,35 +1817,6 @@ router.post("/:model/upload",  middlewares.hasUploadAccessToModel, middlewares.f
 router.get("/:model/download/latest", middlewares.hasDownloadAccessToModel, downloadLatest);
 
 router.get("/:model/meshes/:meshId", middlewares.hasReadAccessToModel, getMesh);
-
-/**
- * @api {get} /:teamspace/:model/textures/:textureId  Get texture map
- * @apiName getTexture
- * @apiGroup Texture
- * @apiDescription Returns the texture map with the given UID
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Name of the model containing the texture
- * @apiParam {String} UID of the texture to download
- *
- * @apiExample {get} Example usage:
- * GET /teamSpace1/84b5f0e0-a27d-11eb-ac9d-a531015f5294/textures/c9df3159-295c-4714-8b54-63dc715b1125 HTTP/1.1
- *
- * @apiSuccessExample {png} Success (with headers):
- *
- * HTTP/1.1 200 OK
- * X-Powered-By: Express
- * Vary: Origin
- * Access-Control-Allow-Credentials: true
- * Content-Type: image/png;
- * Date: Wed, 21 Apr 2021 10:59:54 GMT
- * Connection: keep-alive
- * Transfer-Encoding: chunked
- *
- * /***** FILE CONTENTS ******\
- */
-
-router.get("/:model/textures/:textureId", middlewares.hasReadAccessToModel, getTexture);
 
 function updateSettings(req, res, next) {
 	const place = utils.APIInfo(req);
@@ -2320,20 +2290,6 @@ function getMesh(req, res, next) {
 	ModelHelpers.getMeshById(account, model, meshId).then((stream) => {
 		res.writeHead(200, {"Content-Type": "application/json; charset=utf-8" });
 		stream.pipe(res);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-	});
-}
-
-function getTexture(req, res, next) {
-	const {model, account, textureId} = req.params;
-
-	TextureHelpers.getTextureById(account, model, textureId).then((textureInfo) => {
-		const headers = {
-			"Content-Type": "image/" + textureInfo.extension + ";"
-		};
-		res.writeHead(200, headers);
-		textureInfo.stream.pipe(res);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

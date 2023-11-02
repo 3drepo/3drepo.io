@@ -17,6 +17,7 @@
 
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
+import { getAPIUrl } from '@/v4/services/api/default';
 import { LoadingDialog } from '../../routes/components/dialogContainer/components';
 import * as API from '../../services/api';
 import { DialogActions } from '../dialog';
@@ -124,7 +125,7 @@ export function* changeSubscription({ teamspace, subscriptionData }) {
 
 export function* downloadInvoice({ teamspace, invoiceNo }) {
 	try {
-		const url = yield API.getAPIUrl(`${teamspace}/invoices/${invoiceNo}.pdf`);
+		const url = yield getAPIUrl(`${teamspace}/invoices/${invoiceNo}.pdf`);
 		window.open(url, '_blank');
 	} catch (e) {
 		yield put(DialogActions.showEndpointErrorDialog('download', 'invoice', e));
