@@ -7,7 +7,7 @@
 	},
 	"usersProfiles" : {
 		"viewer": {
-			"username":  "username",
+			"username": "username",
 			"password": "password",
 			"email": "username@3drepo.orgs"
 		}

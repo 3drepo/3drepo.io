@@ -13,24 +13,11 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Feature: Login
-	Scenario: Going to default page should redirect to v5 login page
+Feature: Signup
+	Scenario: Sign up link
 		Given Im not logged in
-		When I navigate to '/'
+		And I navigate to '/'
+		When I click on 'Sign up'
 		Then I should be redirected to the 'login' page
+
 	
-	Scenario: Going to page that requires authentication should redirect back to login page
-		Given Im not logged in 
-		When I navigate to the 'dashboard' page
-		Then I should be redirected to the 'login' page
-
-	Scenario: You can log into 3D Repo with a valid username and password
-		Given I navigate to the 'login' page
-		When I sign in as 'viewer'
-		Then I should be redirected to the 'dashboard' page
-
-	Scenario: Upon log in, you should be redirected to the page you wish to go
-		Given Im not logged in 
-		And I navigate to the 'viewer teamspace settings' page
-		When I sign in as 'viewer'
-		Then I should be redirected to the 'viewer teamspace settings' page

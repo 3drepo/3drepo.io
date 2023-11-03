@@ -59,3 +59,10 @@ export const navigateTo = async (driver:WebDriver, page:string) => {
 	await driver.get(getUrl(page));
 	await driver.wait(until.elementLocated(By.css('body')), 100000);
 };
+
+export const clickOn = async (driver: WebDriver, buttonContent:string) => {
+	await waitUntilPageLoaded(driver);
+	const link = await driver.findElement(By.xpath("//*[contains(text(),'" + buttonContent + "')]"));
+	await driver.wait(until.elementIsEnabled(link));
+	link.click();
+};
