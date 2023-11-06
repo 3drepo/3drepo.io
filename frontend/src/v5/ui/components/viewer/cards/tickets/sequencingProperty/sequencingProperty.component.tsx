@@ -27,7 +27,7 @@ import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { formatMessage } from '@/v5/services/intl';
 import { Container, IconContainer, SequenceIconContainer } from './sequencingProperty.styles';
 
-const LABLES = {
+const LABELS = {
 	[SEQUENCING_START_TIME]: formatMessage({ id: 'modules.sequencing.startTime', defaultMessage: 'Start time' }),
 	[SEQUENCING_END_TIME]: formatMessage({ id: 'modules.sequencing.endTime', defaultMessage: 'End time' }),
 };
@@ -70,7 +70,7 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 				minDateTime={minDateTime}
 				maxDateTime={maxDateTime}
 				{...props}
-				label={LABLES[props.name]}
+				label={LABELS[props.name]}
 			/>
 			{value && isViewer && (
 				<SequenceIconContainer onClick={openSequencesCard}>
