@@ -43,7 +43,7 @@ export const waitUntilPageLoaded = async (driver) => driver.wait(until.elementLo
 
 export const fillInputByLabel = async (driver: WebDriver, label, value) => {
 	const input = await driver.findElement(By.xpath('//*[label[contains(text(),"' + label + '")]]/*/input'));
-	await driver.wait(until.elementIsEnabled(input));
+	await driver.wait(until.elementIsVisible(input));
 	await input.sendKeys(value);
 };
 
@@ -54,7 +54,8 @@ export const navigateTo = async (driver:WebDriver, page:string) => {
 
 export const clickOn = async (driver: WebDriver, buttonContent:string) => {
 	await waitUntilPageLoaded(driver);
-	const link = await driver.findElement(By.xpath("//*[self::button or self::a[contains(text(),'" + buttonContent + "')]]"));
+	const withText = "[contains(text(),'" + buttonContent + "')]";
+	const link = await driver.findElement(By.xpath('//*[self::button' + withText + ' or self::a' + withText + ']'));
 	await driver.wait(until.elementIsEnabled(link));
 	link.click();
 };

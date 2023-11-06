@@ -27,4 +27,12 @@ Feature: Signup
 			| Username  | Email             | Password        |
   			| newuser   | newuser@mail.com  | +jk+gnPZM^2LXDV |
 		And I click on "Next step"
+		And I fill in the form with:
+			| First name  | Last name       |
+  			| New		  | User  			|
+		And I click on "Next step"
+		And I click on text "I agree"
+		Then I should be redirected to the 'login' page
+
+
 	
