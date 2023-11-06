@@ -62,3 +62,7 @@ export const getPinColorHex = (name: string) => {
 	if (isObject(pinSchema?.color)) return getColorFromMapping(ticket, pinSchema);
 	return DEFAULT_COLOR;
 };
+
+export const getTicketDefaultPinColor = (ticket, template) => {
+	return isObject(template?.config?.pin) ? getColorFromMapping(ticket, template.config.pin) : DEFAULT_COLOR;
+};

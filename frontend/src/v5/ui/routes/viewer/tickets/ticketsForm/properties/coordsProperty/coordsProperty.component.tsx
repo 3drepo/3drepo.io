@@ -31,11 +31,14 @@ import { getPinColorHex } from './pin.helpers.component';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
 import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { join } from 'lodash';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
-	const pinId = name;
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const pinId = name === 'properties.Pin' ? ticketId : join([ticketId, name], '.');
 	const { isViewer, selectedPin, setSelectedPin } = useContext(TicketContext);
 	const isSelected = selectedPin === pinId;
 	

@@ -19,12 +19,12 @@ import { hexToGLColor } from '@/v4/helpers/colors';
 import { selectCurrentModel } from '@/v4/modules/model';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { theme } from '@/v5/ui/themes/theme';
 import { createSelector } from 'reselect';
 import { isEmpty } from 'lodash';
-import { selectTemplateById, selectTicketById, selectTickets } from '../tickets.selectors';
+import { selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
 import { ITicket } from '../tickets.types';
 import { ITicketsCardState } from './ticketsCard.redux';
+import { getTicketDefaultPinColor } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/pin.helpers.component';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
@@ -33,13 +33,18 @@ export const selectCurrentTickets = createSelector(
 	selectCurrentModel,
 	selectTickets,
 );
+export const selectCurrentTemplates = createSelector(
+	(state) => state,
+	selectCurrentModel,
+	selectTemplates,
+);
 
-const ticketToPin = (ticket:ITicket, selectedId): IPin => ({
+const ticketToPin = (ticket:ITicket, selectedId, color): IPin => ({
 	id: ticket._id,
 	position: ticket.properties.Pin,
 	isSelected: ticket._id === selectedId,
 	type: 'ticket',
-	colour: hexToGLColor(theme.palette.secondary.main),
+	colour: hexToGLColor(color),
 });
 
 export const selectView = createSelector(
@@ -99,13 +104,18 @@ export const selectSelectedTemplate = createSelector(
 
 export const selectTicketPins = createSelector(
 	selectCurrentTickets,
+	selectCurrentTemplates,
 	selectView,
 	selectSelectedTicketId,
-	(tickets, view, selectedTicketId) => {
+	(tickets, templates, view, selectedTicketId) => {
 		if (view !== TicketsCardViews.List) return [];
 
 		return tickets.reduce(
-			(accum, ticket) => (ticket.properties?.Pin ? [...accum, ticketToPin(ticket, selectedTicketId)] : accum),
+			(accum, ticket) => {
+				const template = templates.find(({ _id }) => _id === ticket.type);
+				const color = getTicketDefaultPinColor(ticket, template);
+				return ticket.properties?.Pin ? [...accum, ticketToPin(ticket, selectedTicketId, color)] : accum;
+			},
 			[],
 		);
 	},
