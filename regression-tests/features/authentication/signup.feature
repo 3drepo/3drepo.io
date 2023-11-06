@@ -20,4 +20,11 @@ Feature: Signup
 		When I click on 'Sign up'
 		Then I should be redirected to the 'signup' page
 
+	Scenario: Sign up with valid  properties
+		Given Im not logged in
+		And I navigate to 'signup'
+		And I fill in the form with:
+			| Username  | Email             | Password        |
+  			| newuser   | newuser@mail.com  | +jk+gnPZM^2LXDV |
+		And I click on "Next step"
 	
