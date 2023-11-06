@@ -29,9 +29,11 @@ const getTicketByModelId = (state, modelId, ticketId) => (
 
 export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTickets: ['teamspace', 'projectId', 'modelId', 'isFederation'],
+	fetchTicketsWithProperties: ['teamspace', 'projectId', 'modelId', 'isFederation'],
 	fetchTicket: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation'],
 	fetchTicketsSuccess: ['modelId', 'tickets'],
 	fetchTemplates: ['teamspace', 'projectId', 'modelId', 'isFederation'],
+	fetchTemplatesWithSchemas: ['teamspace', 'projectId', 'modelId', 'isFederation'],
 	fetchTemplate: ['teamspace', 'projectId', 'modelId', 'templateId', 'isFederation'],
 	replaceTemplateSuccess: ['modelId', 'template'],
 	fetchTemplatesSuccess: ['modelId', 'templates'],
@@ -121,6 +123,7 @@ export interface ITicketsState {
 }
 
 export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean };
+export type FetchTicketsWithPropertiesAction = Action<'FETCH_TICKETS_WITH_PROPERTIES'> & TeamspaceProjectAndModel & { isFederation: boolean };
 export type FetchTicketAction = Action<'FETCH_TICKET'> & TeamspaceProjectAndModel & { ticketId: string, isFederation: boolean };
 export type UpdateTicketAction = Action<'UPDATE_TICKET'> & TeamspaceProjectAndModel & { ticketId: string, ticket: Partial<ITicket>, isFederation: boolean };
 export type CreateTicketAction = Action<'CREATE_TICKET'> & TeamspaceProjectAndModel & { ticket: NewTicket, isFederation: boolean, onSuccess: (ticketId) => void };
@@ -129,6 +132,7 @@ export type UpsertTicketSuccessAction = Action<'UPSERT_TICKET_SUCCESS'> & ModelI
 export type UpsertTicketAndFetchGroupsAction = Action<'UPSERT_TICKET_AND_FETCH_GROUPS'> & TeamspaceProjectAndModel & { ticket: Partial<ITicket> };
 export type ReplaceTemplateSuccessAction = Action<'REPLACE_TEMPLATE_SUCCESS'> & ModelId & { template: ITemplate };
 export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceProjectAndModel & { isFederation: boolean };
+export type FetchTemplatesWithSchemasAction = Action<'FETCH_TEMPLATES_WITH_SCHEMAS'> & TeamspaceProjectAndModel & { isFederation: boolean };
 export type FetchTemplateAction = Action<'FETCH_TEMPLATES'> & TeamspaceProjectAndModel & { templateId: string, isFederation: boolean };
 export type FetchTemplatesSuccessAction = Action<'FETCH_TEMPLATES_SUCCESS'> & ModelId & { templates: ITemplate[] };
 export type FetchRiskCategoriesAction = Action<'FETCH_RISK_CATEGORIES'> & TeamspaceId;
@@ -145,6 +149,12 @@ export interface ITicketsActionCreators {
 		modelId: string,
 		isFederation: boolean,
 	) => FetchTicketsAction;
+	fetchTicketsWithProperties: (
+		teamspace: string,
+		projectId: string,
+		modelId: string,
+		isFederation: boolean,
+	) => FetchTicketsWithPropertiesAction;
 	fetchTicket: (
 		teamspace: string,
 		projectId: string,
@@ -178,6 +188,12 @@ export interface ITicketsActionCreators {
 		modelId: string,
 		isFederation: boolean,
 	) => FetchTemplatesAction;
+	fetchTemplatesWithSchemas: (
+		teamspace: string,
+		projectId: string,
+		modelId: string,
+		isFederation: boolean,
+	) => FetchTemplatesWithSchemasAction;
 	fetchTemplatesSuccess: (modelId: string, templates: ITemplate[]) => FetchTemplatesSuccessAction;
 	fetchTemplate: (
 		teamspace: string,
