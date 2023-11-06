@@ -18,6 +18,6 @@ Feature: Signup
 		Given Im not logged in
 		And I navigate to '/'
 		When I click on 'Sign up'
-		Then I should be redirected to the 'login' page
+		Then I should be redirected to the 'signup' page
 
 	

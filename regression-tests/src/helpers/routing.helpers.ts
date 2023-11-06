@@ -16,12 +16,11 @@
  */
 import { domain } from '../../config.json';
 import { getUserForRole } from './users.helpers';
+import * as path from 'node:path';
 
 const absoluteUrl = (url) => new URL(url, domain).toString();
 
 const v5routes = {
-	login: 'login',
-	dashboard: 'dashboard',
 	'teamspace settings': 'dashboard/{username}/t/settings',
 };
 
@@ -42,5 +41,5 @@ export const getUrl = (page: string) => {
 	}
 	const urlAlias = pageChunks.join(' ');
 
-	return absoluteUrl(v5routes[urlAlias] ? replaceParams(`v5/${v5routes[urlAlias]}`, params) : urlAlias);
+	return absoluteUrl(path.join('v5/', (v5routes[urlAlias] ? replaceParams(`${v5routes[urlAlias]}`, params) : urlAlias)));
 };
