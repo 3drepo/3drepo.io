@@ -21,7 +21,6 @@ import { IPin } from '@/v4/services/viewer/viewer';
 import { SequencingProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { theme } from '@/v5/ui/themes/theme';
 import { createSelector } from 'reselect';
-import { isEmpty } from 'lodash';
 import { selectSelectedDate } from '@/v4/modules/sequences';
 import { ITicketsCardState } from './ticketsCard.redux';
 import { selectTemplateById, selectTicketById, selectTickets } from '../tickets.selectors';
@@ -78,10 +77,9 @@ export const selectTicketTransparencies = createSelector(
 	(overridesDicts) => overridesDicts.transparencies,
 );
 
-export const selectTicketHasOverrides = createSelector(
-	selectTicketOverrides,
-	selectTicketTransparencies,
-	(overrides, transparencies) => !isEmpty(overrides) || !isEmpty(transparencies),
+export const selectTicketHasClearedOverrides = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => !ticketCardState.overrides,
 );
 
 export const selectSelectedTicket = createSelector(

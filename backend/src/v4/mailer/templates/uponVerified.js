@@ -851,7 +851,7 @@ const html = data => `
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 150%; text-align: left;">
 
                             If you have any further questions, our support team will be happy to assist you.<br>
-Please, forward your queries to&nbsp;<a href="mailto:support@3drepo.org?subject=Support%20Query" target="_blank">support@3drepo.org</a> or visit our <a href="http://www.3drepo.org/support/" target="_blank">support page</a>.<br>
+Please, forward your queries to&nbsp;<a href="mailto:support@3drepo.com?subject=Support%20Query" target="_blank">support@3drepo.com</a> or visit our <a href="http://www.3drepo.org/support/" target="_blank">support page</a>.<br>
 <br>
 All the best,&nbsp;<br>
 <br>

@@ -33,6 +33,6 @@ export const UnhandledError = ({
 
 	if (!error) return (<></>);
 	if (isNetworkError(error)) return (<NetworkError className={className} />);
-	if (!isExpectedError(error)) return (<UnexpectedError className={className} />);
+	if (!isExpectedError(error)) return (<UnexpectedError error={error} className={className} />);
 	return (<></>);
 };
