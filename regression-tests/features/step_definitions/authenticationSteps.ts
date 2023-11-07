@@ -16,10 +16,17 @@
  */
 
 import { Then } from '@cucumber/cucumber';
-import { getLatestMessageFor } from '../../src/helpers/mailhog.helpers';
-import { expect } from 'chai';
+import { getLatestMailFor } from '../../src/helpers/mailhog.helpers';
+import { WebDriver } from 'selenium-webdriver';
+import { clickOn } from '../../src/helpers/selenium.helpers';
 
 Then('I navigate to verify account from email {string}', async function (email) {
-	await getLatestMessageFor(this.driver, email);
-	expect(true).to.equals(true);
+	const mailContent = await getLatestMailFor(this.driver, email);
+	if (!mailContent) {
+		throw new Error('Mail not received');
+	}
+
+	await (this.driver as WebDriver).executeScript('document.write(`' + mailContent + '`)');
+	await clickOn(this.driver, 'Verify');
+	await (this.driver as WebDriver).executeAsyncScript('var a = 1;');
 });

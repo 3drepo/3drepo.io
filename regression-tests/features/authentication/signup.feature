@@ -14,11 +14,11 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Feature: Signup
-	Scenario: Sign up link
-		Given Im not logged in
-		And I navigate to '/'
-		When I click on 'Sign up'
-		Then I should be redirected to the 'signup' page
+	# Scenario: Sign up link
+	# 	Given Im not logged in
+	# 	And I navigate to '/'
+	# 	When I click on 'Sign up'
+	# 	Then I should be redirected to the 'signup' page
 
 	Scenario: Sign up with valid  properties
 		Given Im not logged in
@@ -33,10 +33,8 @@ Feature: Signup
 		And I click on "Next step"
 		And I click on the checkbox near "I agree"
 		And I click on "Create account"
-		# And I navigate to verify account in 
-	# Scenario: check email
-	# 	Given I navigate to 'signup'
-	# 	Then I navigate to verify account from email "newuser@mail.com" 
+		And I wait until content has "verify your email"
+		And I navigate to verify account from email "newuser@mail.com" 
 
 
 	

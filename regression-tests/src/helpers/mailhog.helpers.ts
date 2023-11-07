@@ -17,6 +17,7 @@
 
 import { WebDriver } from 'selenium-webdriver';
 import { get } from './api.helpers';
+import  * as quotedPrintable from 'quoted-printable';
 
 const apiUrl = 'http://localhost:8025/api/v2'; 
 const getApiUrl = (url: string): string => encodeURI(apiUrl + url);
@@ -55,7 +56,12 @@ export const getMessages = async (driver:WebDriver): Promise<Messages> => {
 } ;
 
 
-export const getLatestMessageFor = async (driver:WebDriver, email:string) => {
+export const getLatestMailFor = async (driver:WebDriver, email:string) => {
 	const messages = await getMessages(driver);
-	console.log(typeof messages);
+	const mailItem = messages.items.find((item) => item.To.Mailbox + '@' + item.To.Domain === email);
+	
+	if (mailItem) {
+		return quotedPrintable.decode(mailItem.Content.Body);
+	}
+	return null;
 };

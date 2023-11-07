@@ -37,8 +37,12 @@ export const get = async (driver:WebDriver, url:string, credentials: boolean = f
 		   });
 		
 		if (res.status === 200) {
-			const json = await res.json();
-			res.json = json;
+			try {
+				const json = await res.json();
+				res.json = json;
+			} catch(e) {
+				console.log(e);
+			}
 		}
 		   
 		return res;
