@@ -397,7 +397,7 @@ export class SignUp extends PureComponent<IProps, IState> {
 									<Field render={({ form }) => (
 										<SubmitButton
 											pending={isPending}
-											disabled={!form.isValid || form.isValidating}
+											disabled={!form.isValid || form.isValidating || !form.dirty}
 										>
 											Sign up
 										</SubmitButton>)}
