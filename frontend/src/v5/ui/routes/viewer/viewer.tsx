@@ -46,6 +46,7 @@ export const Viewer = () => {
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 
 	const handlePinClick = ({ id }) => {
+		TicketsCardActionsDispatchers.setSelectedTicketPin(id);
 		if (!tickets.some((t) => t._id === id)) return;
 
 		TicketsCardActionsDispatchers.openTicket(id);

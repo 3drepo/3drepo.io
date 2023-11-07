@@ -33,13 +33,15 @@ import { formatMessage } from '@/v5/services/intl';
 import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { join } from 'lodash';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
+	const { isViewer } = useContext(TicketContext);
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const pinId = name === 'properties.Pin' ? ticketId : join([ticketId, name], '.');
-	const { isViewer, selectedPin, setSelectedPin } = useContext(TicketContext);
+	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
 	const isSelected = selectedPin === pinId;
 	const hasPin = !!value;
 	
@@ -54,7 +56,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const onClickDelete = () => {
 		onChange?.(null);
 		cancelEdit();
-		if (isSelected) setSelectedPin(null);
+		if (isSelected) TicketsCardActionsDispatchers.setSelectedTicketPin(null);
 	};
 
 	const onClickEditPin = async () => {
@@ -70,7 +72,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 	const onClickSelectPin = () => {
 		if (!hasPin) return;
-		setSelectedPin(isSelected ? null : pinId);
+		TicketsCardActionsDispatchers.setSelectedTicketPin(isSelected ? null : pinId);
 	};
 
 	const getSelectedPinTooltip = () => {

@@ -33,6 +33,7 @@ export const selectCurrentTickets = createSelector(
 	selectCurrentModel,
 	selectTickets,
 );
+
 export const selectCurrentTemplates = createSelector(
 	(state) => state,
 	selectCurrentModel,
@@ -65,6 +66,11 @@ export const selectSelectedTicketId = createSelector(
 export const selectSelectedTemplateId = createSelector(
 	selectTicketsCardDomain,
 	(ticketCardState) => ticketCardState.selectedTemplateId,
+);
+
+export const selectSelectedTicketPinId = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.selectedTicketPinId,
 );
 
 export const selectTicketOverridesDict = createSelector(
