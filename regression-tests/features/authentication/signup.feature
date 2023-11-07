@@ -31,8 +31,12 @@ Feature: Signup
 			| First name  | Last name       |
   			| New		  | User  			|
 		And I click on "Next step"
-		And I click on text "I agree"
-		Then I should be redirected to the 'login' page
+		And I click on the checkbox near "I agree"
+		And I click on "Create account"
+		# And I navigate to verify account in 
+	# Scenario: check email
+	# 	Given I navigate to 'signup'
+	# 	Then I navigate to verify account from email "newuser@mail.com" 
 
 
 	

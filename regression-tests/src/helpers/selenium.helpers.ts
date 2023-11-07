@@ -41,8 +41,16 @@ export const initializeSeleniumDriver = async (browserType) => {
 
 export const waitUntilPageLoaded = async (driver) => driver.wait(until.elementLocated(By.css('body')));
 
+
+const findInputNearText = async (driver: WebDriver, text:string, inputType: string = '') => {
+	const typefilter = inputType ? '[@type="' + inputType  + '"]' : '';
+	const target = By.xpath('//*[contains(text(),"' +  text + '")]//ancestor::*/*/input' + typefilter);
+	await driver.wait(until.elementLocated(target), 100000);
+	return driver.findElement(target);
+};
+
 export const fillInputByLabel = async (driver: WebDriver, label, value) => {
-	const input = await driver.findElement(By.xpath('//*[label[contains(text(),"' + label + '")]]/*/input'));
+	const input = await findInputNearText(driver, label);
 	await driver.wait(until.elementIsVisible(input));
 	await input.sendKeys(value);
 };
@@ -57,10 +65,16 @@ export const clickOn = async (driver: WebDriver, buttonContent:string) => {
 	const withText = "[contains(text(),'" + buttonContent + "')]";
 	const link = await driver.findElement(By.xpath('//*[self::button' + withText + ' or self::a' + withText + ']'));
 	await driver.wait(until.elementIsEnabled(link));
-	link.click();
+	await link.click();
 };
 
 export const fillInForm = async (driver: WebDriver, fields: Record<string, string>) => {
 	await waitUntilPageLoaded(driver);
 	await Promise.all(Object.keys(fields).map((labelName)=> fillInputByLabel(driver, labelName, fields[labelName])));
+};
+
+export const clickOnCheckboxNearText = async (driver: WebDriver, text: string) => {
+	const checkbox = await findInputNearText(driver, text);
+	await driver.wait(until.elementIsEnabled(checkbox));
+	await checkbox.click();
 };
