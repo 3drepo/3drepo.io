@@ -41,6 +41,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const pinId = name === 'properties.Pin' ? ticketId : join([ticketId, name], '.');
 	const { isViewer, selectedPin, setSelectedPin } = useContext(TicketContext);
 	const isSelected = selectedPin === pinId;
+	const hasPin = !!value;
 	
 	const colorHex = getPinColorHex(name);
 
@@ -68,12 +69,12 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	};
 
 	const onClickSelectPin = () => {
-		if (!value) return;
+		if (!hasPin) return;
 		setSelectedPin(isSelected ? null : pinId);
 	};
 
 	const getSelectedPinTooltip = () => {
-		if (!value) return '';
+		if (!hasPin) return '';
 		return isSelected ? formatMessage({ id: 'tickets.pin.deselectPin', defaultMessage: 'Deselect pin' }) : formatMessage({ id: 'tickets.pin.selectPin', defaultMessage: 'Select pin' });
 	};
 
@@ -82,7 +83,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 			ViewerService.removePin(pinId);
 		}
 
-		if (value) {
+		if (hasPin) {
 			ViewerService.showPin({
 				id: pinId, position: value, colour: hexToGLColor(colorHex), type: 'ticket' });
 		}
@@ -114,13 +115,11 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		if (prevValue.current) {
 			ViewerService.removePin(pinId);
 		}
-	}, []);
+	}, [ticketId]);
 
 	useEffect(() => {
 		ViewerService.setSelectionPin({ id: pinId, isSelected });
 	}, [isSelected]);
-
-	const hasPin = !!value;
 
 	return (
 		<ViewerInputContainer required={required} selected={editMode} error={error} disabled={disabled}>
