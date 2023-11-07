@@ -205,7 +205,7 @@
 		"@mui/styled-engine": "npm:@mui/styled-engine-sc@5.12.0",
 		"@types/react": "17.0.39",
 		"@types/react-dom": "17.0.11",
-		"@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0",
+		"@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.0c3f3b7.0",
 		"jackspeak": "2.1.1",
 		"wrap-ansi": "7.0.0"
 	}
