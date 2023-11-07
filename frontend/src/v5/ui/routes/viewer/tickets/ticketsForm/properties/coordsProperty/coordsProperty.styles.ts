@@ -15,37 +15,55 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
+import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
+
+export const PinInputContainer = styled(ViewerInputContainer)`
+	padding: 8px 10px 8px 12px;
+`;
 
 export const PinActions = styled.div`
 	display: flex;
-	gap: 14px;
+	gap: 9px;
 `;
 
-export const PinName = styled(Typography).attrs({
-	variant: 'h5',
-})<{ required: boolean }>`
+export const PinName = styled.div<{ required: boolean }>`
+	${({ theme }) => theme.typography.h5};
+	position: relative;
+	top: -1px;
+	padding-bottom: 1px;
 	user-select: none;
-
+	
 	${({ required }) => required && css`
-		&::after {
-			font-weight: 400;
-			font-size: 0.75rem;
-			color: ${({ theme }) => theme.palette.error.main};
-			margin-left: 2px;
-			content: '*';
-		}
+	&::after {
+		font-weight: 400;
+		font-size: 0.75rem;
+		color: ${({ theme }) => theme.palette.error.main};
+		margin-left: 2px;
+		content: '*';
+	}
 	`}
 `;
 
-export const PinAction = styled.div<{ disabled?: boolean }>`
-	font-size: 10px;
-	font-weight: 500;
+const activeActionStyle = css`
+	background-color: ${({ theme }) => theme.palette.primary.main};
+	color: ${({ theme }) => theme.palette.primary.contrast};
+`;
+const passiveActionStyle = css`
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	color: ${({ theme }) => theme.palette.base.main};
+`;
+
+export const PinAction = styled.div<{ selected?: boolean; disabled?: boolean }>`
+	user-select: none;
+
+	outline: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
+	border-radius: 20px;
+	padding: 5px 5px 4px;
+	height: 15px;
 	display: flex;
 	align-items: center;
-	gap: 3px;
-	user-select: none;
+	
 	${({ theme: { palette }, disabled }) => (disabled ? css`
 		color: ${palette.secondary.lightest};
 		pointer-events: none;
@@ -53,19 +71,20 @@ export const PinAction = styled.div<{ disabled?: boolean }>`
 		color: ${palette.base.main};
 		cursor: pointer;
 	`)};
+
+	${({ selected }) => selected ? activeActionStyle : passiveActionStyle};
+	:hover {
+		${({ selected }) => selected ? passiveActionStyle : activeActionStyle};
+	}
 	svg {
-		height: 12px;
+		height: 14px;
 		width: auto;
 	}
 `;
 
-export const SettingLocationText = styled(PinAction)`
-	font-style: italic;
-	color: inherit;
-	svg {
-		height: 10px;
-		margin: 0 5px;
-	}
+export const PinActionLabel = styled.span`
+	${({ theme }) => theme.typography.caption};
+	padding: 0 4px;
 `;
 
 export const FlexRow = styled.div`

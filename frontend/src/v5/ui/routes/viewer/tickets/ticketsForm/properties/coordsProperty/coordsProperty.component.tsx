@@ -18,22 +18,21 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import CircledPlusIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
-import LocationIcon from '@assets/icons/outlined/pin-outlined.svg';
-import CrossIcon from '@assets/icons/outlined/close-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
+import MoveIcon from '@assets/icons/outlined/arrow_cross-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormHelperText, Tooltip } from '@mui/material';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { FlexRow, PinAction, PinActions, PinName, PinSelectContainer, SettingLocationText } from './coordsProperty.styles';
+import { PinInputContainer, FlexRow, PinAction, PinActionLabel, PinActions, PinName, PinSelectContainer } from './coordsProperty.styles';
 import { getPinColorHex } from './pin.helpers.component';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
-import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { join } from 'lodash';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { PaddedCrossIcon } from '@controls/chip/chip.styles';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const { isViewer } = useContext(TicketContext);
@@ -124,7 +123,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	}, [isSelected]);
 
 	return (
-		<ViewerInputContainer required={required} selected={editMode} error={error} disabled={disabled}>
+		<PinInputContainer required={required} selected={editMode} error={error} disabled={disabled}>
 			<FlexRow>
 				<span>
 					<PinName required={required}>
@@ -132,23 +131,38 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 					</PinName>
 					<PinActions>
 						{editMode && (
-							<SettingLocationText onClick={cancelEdit}>
-								<FormattedMessage id="tickets.pin.selectLocation" defaultMessage="Select new location on model" /> <CrossIcon />
-							</SettingLocationText>
+							<>
+								<PinAction onClick={cancelEdit} selected>
+									<MoveIcon />
+									<PinActionLabel>
+										{hasPin ? (
+											<FormattedMessage id="tickets.pin.selectNewLocation" defaultMessage="Select new location" />
+										) : (
+											<FormattedMessage id="tickets.pin.selectLocation" defaultMessage="Select location" />
+										)}
+									</PinActionLabel>
+								</PinAction>
+								<PinAction onClick={cancelEdit}>
+									<PaddedCrossIcon />
+									<PinActionLabel>
+										<FormattedMessage id="tickets.pin.cancel" defaultMessage="Cancel" />
+									</ PinActionLabel>
+								</PinAction>
+							</>
 						)}
 						{!editMode && (
-							<PinAction onClick={onClickEditPin} disabled={disabled}>
-								{hasPin && (<><LocationIcon /> <FormattedMessage id="tickets.pin.changeLocation" defaultMessage="Change pin location" /></>)}
-								{!hasPin && (<><CircledPlusIcon /> <FormattedMessage id="tickets.pin.addPin" defaultMessage="Add pin" /></>)}
-							</PinAction>
+							<>
+								<PinAction onClick={onClickEditPin} disabled={disabled}>
+									{hasPin ? <MoveIcon /> : <CircledPlusIcon />}
+								</PinAction>
+								{hasPin && (
+									<PinAction onClick={onClickDelete} disabled={disabled}>
+										<DeleteIcon />
+									</PinAction>
+								)}
+							</>
 						)}
 
-						{hasPin && (
-							<PinAction onClick={onClickDelete} disabled={disabled}>
-								<DeleteIcon />
-								<FormattedMessage id="tickets.pin.deletePin" defaultMessage="Delete pin" />
-							</PinAction>
-						)}
 					</PinActions>
 				</span>
 				{isViewer && (
@@ -160,6 +174,6 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 				)}
 			</FlexRow>
 			<FormHelperText>{helperText}</FormHelperText>
-		</ViewerInputContainer>
+		</PinInputContainer>
 	);
 };
