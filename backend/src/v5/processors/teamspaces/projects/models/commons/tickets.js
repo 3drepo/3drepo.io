@@ -16,7 +16,6 @@
  */
 
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addGroups, deleteGroups, getGroupsByIds } = require('../../../../../models/tickets.groups');
 const { addTicket, getAllTickets, getTicketById, updateTicket } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
@@ -26,9 +25,11 @@ const {
 	viewGroups,
 } = require('../../../../../schemas/tickets/templates.constants');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
+const { deleteGroups, getGroupsByIds } = require('../../../../../models/tickets.groups');
 const { getFileWithMetaAsStream, removeFile, storeFile } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
+const { addGroups } = require('./tickets.groups');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { isUUID } = require('../../../../../utils/helper/typeCheck');

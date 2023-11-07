@@ -16,10 +16,10 @@
  */
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
+const { addGroups, getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
 const { getFile } = require('../../../../../services/filesManager');
 const { getLatestRevision } = require('../../../../../models/revisions');
-const { getMetadataByRules } = require('../../../../../models/metadata');
+const { getMetadataByRules, idsToIfcGuids, idsToRevitIds } = require('../../../../../models/metadata');
 const { getNodesBySharedIds } = require('../../../../../models/scenes');
 
 const TicketGroups = {};
@@ -77,6 +77,44 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules) 
 	});
 
 	return { container: model, _ids: Object.values(matchedMeshes) };
+};
+
+const convertObjectIds = async (teamspace, model, group) => {
+	const convertedObjects = await Promise.all(group.objects.map(async (obj) => {
+		const convertedObject = obj;
+
+		if (obj._ids) {
+			let externalIds;
+			let externalIdsName;
+
+			externalIds = await idsToIfcGuids(teamspace, model, obj._ids);
+			if (externalIds?.length) {
+				externalIdsName = 'ifcGuids';
+			} else {
+				externalIds = await idsToRevitIds(teamspace, model, obj._ids);
+				if (externalIds?.length) {
+					externalIdsName = 'revitIds';
+				}
+			}
+
+			if (externalIds.length) {
+				convertedObject[externalIdsName] = externalIds.map((g) => g.metadata[0].value);
+			}
+		}
+
+		return convertedObject;
+	}));
+
+	return convertedObjects;
+};
+
+TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
+	const convertedGroups = await Promise.all(groups.map(async (g) => {
+		const convertedObjects = await convertObjectIds(teamspace, model, g);
+		return { ...g, objects: convertedObjects };
+	}));
+
+	await addGroups(teamspace, project, model, ticket, convertedGroups);
 };
 
 TicketGroups.updateTicketGroup = updateGroup;
