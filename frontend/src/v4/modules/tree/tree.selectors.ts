@@ -186,7 +186,7 @@ export const selectVisibleTreeNodesList = createSelector(
 		while (index < treeNodesList.length) {
 			const treeNode = { ...treeNodesList[index] };
 
-			treeNode.isSearchResult = isSearchActive && !treeNode.isFederation && !treeNode.isModel;
+			treeNode.isSearchResult = isSearchActive && treeNode.level > 1;
 			treeNode.isRegularNode = !isSearchActive && (treeNode.level <= 2 || expandedNodesMap[treeNode.parentId]);
 			const isNamelessMesh = treeNode.type === 'mesh' && !treeNode.name;
 			if (!isNamelessMesh && (treeNode.isSearchResult || treeNode.isRegularNode)) {
@@ -197,7 +197,7 @@ export const selectVisibleTreeNodesList = createSelector(
 				} else {
 					treeNode.rootParentIndex = indexesByRootParentIds[treeNode.rootParentId];
 				}
-			} else if (!treeNode.isSearchResult && treeNode.deepChildrenNumber) {
+			} else if (!treeNode.isSearchResult && treeNode.deepChildrenNumber && treeNode.level > 1) {
 				// If we are not showing search result and this node isn't a regular node,
 				// Then we are certain we won't be showing its children, skip them.
 				index += treeNode.deepChildrenNumber;

@@ -24,15 +24,15 @@ type Transformer<T> = {
 
 export const Transformers = {
 	DEFAULT: {
-		from: (param = '') => param,
-		to: (param = '') => param,
+		from: (param) => param || '',
+		to: (param) => param || '',
 	},
 	BOOLEAN: {
 		from: (param) => JSON.parse(param || 'false'),
 		to: JSON.stringify,
 	},
 	STRING_ARRAY: {
-		from: (arr = '') => arr ? arr.split(',') : [],
+		from: (arr) => arr ? arr.split(',') : [],
 		to: (arr: string[] = []) => arr.length ? arr.join(',') : '',
 	},
 };

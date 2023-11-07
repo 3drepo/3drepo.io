@@ -42,7 +42,7 @@ export const ErrorDialog = (props: IProps) => {
 				<br />
 				{status && (<code>(Status Code: {status})</code>)}
 				<br /><br />
-				If this is unexpected please message support@3drepo.io.
+				If this is unexpected please message support@3drepo.com.
 			</DialogContent>
 
 			<DialogActions>
