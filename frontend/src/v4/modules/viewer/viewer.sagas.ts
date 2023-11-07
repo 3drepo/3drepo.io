@@ -40,7 +40,7 @@ const updateHandlers = {
 	clipPlaneBorderWidth: Viewer.setPlaneBorderWidth,
 	clipPlaneBorderColor: Viewer.setPlaneBorderColor,
 	memoryThreshold: Viewer.setStreamingMemoryThreshold,
-	memoryLimit: Viewer.setStreamingMemoryLimit,
+	unityMemory: Viewer.setUnityMemory,
 	meshFactor: Viewer.setStreamingMeshFactor,
 	phBundleColor: Viewer.setStreamingBundlesColor,
 	maxNearPlane: Viewer.setMaxNearPlane,

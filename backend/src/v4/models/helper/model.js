@@ -746,16 +746,6 @@ async function getModelPermission(username, setting, account) {
 	}
 }
 
-const getMeshDataFromLegacyRef = async (account, model, refObj) => {
-
-	const { fetchFileStream } = require("../fileRef");
-
-	const { readStream: vertices } =  await fetchFileStream(account, `${model}.scene` , refObj.vertices);
-	const { readStream: faces } = await fetchFileStream(account, `${model}.scene`, refObj.faces);
-
-	return { vertices, faces };
-};
-
 const getMeshDataFromRef = async (account, model, refObj) => {
 
 	const { getFileAsStream } = require(`${v5Path}/services/filesManager`);
@@ -783,7 +773,6 @@ async function getMeshById(account, model, meshId) {
 		parents: 1,
 		vertices: 1,
 		faces: 1,
-		_extRef: 1,
 		_blobRef: 1,
 		primitive: 1,
 		rev_id: 1
@@ -800,9 +789,6 @@ async function getMeshById(account, model, meshId) {
 
 	if (mesh._blobRef) {
 		res = await getMeshDataFromRef(account, model, mesh._blobRef);
-
-	} else if(mesh._extRef) {
-		res =  await getMeshDataFromLegacyRef(account, model, mesh._extRef);
 
 	} else {
 		throw new Error(`Could not find mesh data for ${meshId}`);

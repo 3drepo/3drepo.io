@@ -31,17 +31,17 @@ export const createContainerFromRevisionBody = (body: CreateRevisionBody) => ({
 	name: body.containerName,
 	unit: body.containerUnit,
 	type: body.containerType,
-	code: body.containerCode || undefined,
-	desc: body.containerDesc || undefined,
+	code: body.containerCode,
+	desc: body.containerDesc,
 });
 
 export const createFormDataFromRevisionBody = (body: CreateRevisionBody) => {
 	const formData = new FormData();
 	formData.append('file', body.file);
 	formData.append('tag', body.revisionTag);
-	formData.append('desc', body.revisionDesc || undefined);
 	formData.append('importAnimations', body.importAnimations.toString());
 	formData.append('timezone', body.timezone);
+	if (body.revisionDesc) formData.append('desc', body.revisionDesc);
 	formData.append('lod', body.lod);
 	return formData;
 };

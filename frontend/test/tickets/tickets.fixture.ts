@@ -16,7 +16,7 @@
  */
 
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-import { Group, ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
+import { Group, ITemplate, ITicket, PropertyDefinition, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 import * as faker from 'faker';
 import { times } from 'lodash';
 
@@ -52,10 +52,38 @@ export const ticketWithGroupMockFactory = (group: Group) => ticketMockFactory({
 					showHidden: false,
 				}}}})
 
-export const templateMockFactory = (overrides?: ITemplate): ITemplate => ({
+export const templateMockFactory = (overrides?: Partial<ITemplate>): ITemplate => ({
 	_id: faker.datatype.uuid(),
 	name: faker.random.word(),
 	code: faker.random.alpha({ count: 5, upcase: true }),
+	// TODO - replace null with faker values
+	config: null,
+	properties: null,
+	...overrides,
+});
+
+const propertiesMockFactory = (overrides?: PropertyDefinition): PropertyDefinition => ({
+	name: faker.random.word(),
+	type: faker.random.word() as PropertyTypeDefinition,
+	values: faker.random.arrayElement([faker.random.words(1), 'jobsAndUsers', 'riskCategories']) as PropertyDefinition['values'],
+	default: faker.random.word(),
+	readOnly: faker.datatype.boolean(),
+	required: faker.datatype.boolean(),
+	deprecated: faker.datatype.boolean(),
+	...overrides,
+})
+
+export const fullTemplateMockFactory = (overrides?: Partial<ITemplate>): ITemplate => ({
+	_id: faker.datatype.uuid(),
+	name: faker.random.word(),
+	code: faker.random.alpha({ count: 5, upcase: true }),
+	config: {
+		comments: faker.datatype.boolean(),
+		defaultView: faker.datatype.boolean(),
+		issueProperties: faker.datatype.boolean(),
+		pin: faker.datatype.boolean(),
+	},
+	properties: [propertiesMockFactory()],
 	...overrides,
 });
 

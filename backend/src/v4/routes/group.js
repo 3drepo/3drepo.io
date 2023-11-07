@@ -228,12 +228,18 @@ router.get("/revision/:rid/groups", middlewares.issue.canView, listGroups);
  * 	],
  * 	"rules":[
  * 		{
- * 			"field":"Area",
+ * 			"field": {
+ *				"operator": "IS",
+ *				"values": ["Area"]
+ * 			},
  * 			"operator":"GT",
  * 			"values":[5]
  * 		},
  * 		{
- * 			"field":"IFC Type",
+ * 			"field": {
+ *				"operator": "IS",
+ *				"values": ["IFC Type"]
+ * 			},
  * 			"operator":"IS",
  * 			"values":[
  *				"IfcWall",
@@ -365,12 +371,18 @@ router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, updateGrou
  * 	"objects":[],
  * 	"rules":[
  * 		{
- * 			"field":"Area",
+ *			"field": {
+ *				"operator": "IS",
+ *				"values": ["Area"]
+ * 			},
  * 			"operator":"GT",
  * 			"values":[5]
  * 		},
  * 		{
- * 			"field":"IFC Type",
+ *			"field": {
+ *				"operator": "IS",
+ *				"values": ["IFC Type"]
+ * 			},
  * 			"operator":"IS",
  * 			"values":[
  *				"IfcWall",
@@ -429,12 +441,18 @@ router.put("/revision/:rid/groups/:uid", middlewares.issue.canCreate, updateGrou
  * 	],
  * 	"rules":[
  * 		{
- * 			"field":"Area",
+ *			"field": {
+ *				"operator": "IS",
+ *				"values": ["Area"]
+ * 			},
  * 			"operator":"GT",
  * 			"values":[5]
  * 		},
  * 		{
- * 			"field":"IFC Type",
+ *			"field": {
+ *				"operator": "IS",
+ *				"values": ["IFC Type"]
+ * 			},
  * 			"operator":"IS",
  * 			"values":[
  *				"IfcWall",
@@ -479,8 +497,8 @@ router.delete("/groups/", middlewares.issue.canCreate, deleteGroups);
 router.post("/groups/export", middlewares.issue.canView, validateGroupsExportData, exportGroups, serialiseGroupArray);
 
 /**
- * @api {post} /:teamspace/:model/groups/export Import Groups
- * @apiName exportGroups
+ * @api {post} /:teamspace/:model/groups/import Import Groups
+ * @apiName importGroups
  * @apiGroup Groups
  * @apiDescription This is a back-ported endpoint from V5. For details please see V5 documentation /docs/#/Federations/ImportFederationGroups
  */

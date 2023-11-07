@@ -531,7 +531,7 @@ const html = data => `
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
 
 
-                                        <img align="center" alt="" src="https://www.3drepo.io/assets/images/logo.png" width="250" style="max-width: 250px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 0%;" class="mcnImage">
+                                        <img align="center" alt="" src="https://www.3drepo.io/assets/images/logo-dark.png" width="250" style="max-width: 250px; padding-bottom: 0px; vertical-align: bottom; display: inline !important; border-radius: 0%;" class="mcnImage">
 
 
                             </td>
@@ -1012,12 +1012,14 @@ const html = data => `
 
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
 
-                            <span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif"><span style="color:#696969"><em>Copyright © 2020 3D Repo, All rights reserved.</em><br>
+                            <span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif"><span style="color:#696969"><em>Copyright © 2020 Asite 3D Repo, All rights reserved.</em><br>
 <br>
 <strong>Our mailing address is:</strong><br>
-3D Repo Ltd<br>
-307 Euston Road,<br>
-London, NW1 3AD<br>
+Asite 3D Repo<br>
+7th Floor<br>
+Leconfield House<br>
+Curzon Street<br>
+London, W1J 5JA<br>
 United Kingdom</span></span>
                         </td>
                     </tr>

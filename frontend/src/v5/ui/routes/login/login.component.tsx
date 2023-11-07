@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Link } from 'react-router-dom';
 import LoginIcon from '@assets/icons/outlined/login-outlined.svg';
@@ -28,7 +27,7 @@ import { AuthTemplate } from '@components/authTemplate';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SubmitButton } from '@controls/submitButton/submitButton.component';
 import { AuthSubHeader, Divider } from '@components/authTemplate/authTemplate.styles';
-import { useSSOLogin, useSSOParams } from '@/v5/services/sso.hooks';
+import { useSSOLogin } from '@/v5/services/sso.hooks';
 import { Gap } from '@controls/gap';
 import { AuthFormLogin, ForgotPasswordPrompt, MicrosoftButton, OtherOptions, SignUpPrompt, UnhandledErrorInterceptor } from './login.styles';
 import { AuthHeading, ErrorMessage, FormPasswordField, FormUsernameField } from './components/components.styles';
@@ -38,7 +37,6 @@ const APP_VERSION = ClientConfig.VERSION;
 
 export const Login = () => {
 	const [ssoErrorMessage, loginWithSSO] = useSSOLogin();
-	const [, resetSSOParams] = useSSOParams();
 
 	const { control, handleSubmit, formState: { isValid, errors } } = useForm({
 		mode: 'onSubmit',
@@ -62,10 +60,9 @@ export const Login = () => {
 			'INCORRECT_USERNAME_OR_PASSWORD',
 			'ALREADY_LOGGED_IN',
 			'TOO_MANY_LOGIN_ATTEMPTS',
+			'USER_NOT_VERIFIED',
 		].includes(err.response?.data?.code)
 	);
-
-	useEffect(() => resetSSOParams, []);
 
 	return (
 		<AuthTemplate

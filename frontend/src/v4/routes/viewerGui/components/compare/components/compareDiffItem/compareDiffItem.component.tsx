@@ -63,9 +63,9 @@ export class CompareDiffItem extends PureComponent<IProps, any> {
 			</CompareIconWrapper>
 			<RevisionsSelect
 				baseRevision={this.props.baseRevision._id}
-				defaultValue={this.props.baseRevision._id}
+				defaultValue={this.props.targetDiffRevision._id}
 				value={this.props.targetDiffRevision._id}
-				revisions={this.props.revisions}
+				revisions={this.props.revisions.filter(r => r._id !== this.props.baseRevision._id)}
 				disabled={!this.props.selected}
 				onChange={this.props.onRevisionChange}
 			/>

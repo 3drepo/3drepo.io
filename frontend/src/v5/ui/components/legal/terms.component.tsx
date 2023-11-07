@@ -21,7 +21,7 @@ import { Indent, Clause, ClauseNo, PaperTitle, SupportEmail, TermsForm } from '.
 
 export const TermsLegalPaper = () => (
 	<>
-		<PaperTitle>3D Repo Terms Of Use</PaperTitle>
+		<PaperTitle>Asite 3D Repo Ltd Terms Of Use</PaperTitle>
 		<h1>Please read these terms carefully before accessing 3D Repo</h1>
 		<ol>
 			<li>
@@ -172,7 +172,7 @@ export const TermsLegalPaper = () => (
 		</ol>
 		<Clause><ClauseNo id="4.1.">4.1.</ClauseNo>
 			<p><strong>The Service</strong> Associated documentation means: our
-				[ <Link to={PRIVACY_ROUTE}>Privacy Policy</Link>], [ <Link to={COOKIES_ROUTE}>Cookies Policy</Link>]
+				[<Link to={PRIVACY_ROUTE}>Privacy Policy</Link>], [<Link to={COOKIES_ROUTE}>Cookies Policy</Link>]
 				and [<a href="http://3drepo.org/pricing/">Pricing Information</a>].
 				The use of the Service is subject to the Associated Documentation. If you give us personal
 				data about anyone else in order to collaborate with them on a particular project, you must

@@ -96,10 +96,14 @@ export const OPERATIONS_TYPES = {
 } as const;
 
 export type Operator = keyof typeof OPERATIONS_TYPES;
-export type OperatorType = typeof OPERATIONS_TYPES[Operator];
+export type FieldOperator = 'IS' | 'CONTAINS' | 'REGEX' | 'STARTS_WITH' | 'ENDS_WITH';
 
 export interface IGroupRule {
-	field: string,
+	name: string,
+	field: {
+		operator: FieldOperator,
+		values: string[],
+	},
 	operator: Operator,
 	values?: (number | string)[],
 }
@@ -132,6 +136,7 @@ type ColorAndOpacity = {
 export type GroupOverride = ColorAndOpacity & {
 	prefix?: string[],
 	group: string | Group,
+	key?: number;
 };
 
 export type ViewpointState = {
@@ -157,3 +162,5 @@ export type OverridesDicts = {
 	overrides: MeshIdColorDict,
 	transparencies: MeshIdTransparencyDict
 };
+
+export type TicketWithModelIdAndName = ITicket & { modelId: string; modelName: string };

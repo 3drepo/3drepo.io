@@ -851,7 +851,7 @@ const html = data => `
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 150%; text-align: left;">
 
                             If you have any further questions, our support team will be happy to assist you.<br>
-Please, forward your queries to&nbsp;<a href="mailto:support@3drepo.org?subject=Support%20Query" target="_blank">support@3drepo.org</a> or visit our <a href="http://www.3drepo.org/support/" target="_blank">support page</a>.<br>
+Please, forward your queries to&nbsp;<a href="mailto:support@3drepo.com?subject=Support%20Query" target="_blank">support@3drepo.com</a> or visit our <a href="http://www.3drepo.org/support/" target="_blank">support page</a>.<br>
 <br>
 All the best,&nbsp;<br>
 <br>
@@ -1133,13 +1133,14 @@ All the best,&nbsp;<br>
 
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
 
-                            <span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif"><span style="color:#696969"><em>Copyright © 2018 3D Repo, All rights reserved.</em><br>
+                            <span style="font-family:roboto,helvetica neue,helvetica,arial,sans-serif"><span style="color:#696969"><em>Copyright © 2018 Asite 3D Repo, All rights reserved.</em><br>
 <br>
 <strong>Our mailing address is:</strong><br>
-3D Repo<br>
-307 Euston Road<br>
-Bloomsbury<br>
-London, NW1 3AD<br>
+Asite 3D Repo<br>
+7th Floor<br>
+Leconfield House<br>
+Curzon Street<br>
+London, W1J 5JA<br>
 United Kingdom</span></span>
                         </td>
                     </tr>

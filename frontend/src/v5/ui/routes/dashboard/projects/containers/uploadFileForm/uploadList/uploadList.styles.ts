@@ -17,7 +17,11 @@
 
 import styled from 'styled-components';
 
-export const Container = styled.ul`
+export const ListContainer = styled.ul`
 	padding: 0;
 	margin: 0 0 20px;
+	display: flex;
+	flex-direction: column;
+	border-radius: 10px;
+	overflow: hidden;
 `;

@@ -36,7 +36,7 @@ export const NewTermsDialog = (props: IProps) => (
 
 			<p>
 				If you have any questions about these updated versions, please contact us at
-				<Link href="mailto:support@3drepo.org">support@3drepo.org</Link>
+				<Link href="mailto:support@3drepo.com">support@3drepo.com</Link>
 			</p>
 		</DialogContent>
 		<DialogActions>

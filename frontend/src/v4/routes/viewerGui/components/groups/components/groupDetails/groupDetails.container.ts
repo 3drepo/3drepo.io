@@ -19,6 +19,7 @@ import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
 import { connect } from 'react-redux';
+import { selectReadOnly } from '@/v5/store/tickets/card/ticketsCard.selectors';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
 import {
 	selectActiveGroupDetails,
@@ -28,7 +29,7 @@ import {
 	selectFetchingDetailsIsPending,
 } from '../../../../../../modules/groups/groups.selectors';
 import { GroupsActions } from '../../../../../../modules/groups';
-import { selectMetaKeys, selectSettings } from '../../../../../../modules/model';
+import { selectSettings } from '../../../../../../modules/model';
 import { selectSelectedNodes, selectTotalMeshes } from '../../../../../../modules/tree';
 import { GroupDetails } from './groupDetails.component';
 
@@ -40,9 +41,9 @@ const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
 	totalMeshes: selectTotalMeshes,
 	selectedNodes: selectSelectedNodes,
-	fieldNames: selectMetaKeys,
 	criteriaFieldState: selectCriteriaFieldState,
 	isPending: selectFetchingDetailsIsPending,
+	isReadOnly: selectReadOnly,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

@@ -52,8 +52,7 @@ export const DashboardListHeader = ({
 			onSortingChange((prev) => ({ column: [colName, ...slice(prev.column, 1)], direction: [newDirection, ...slice(prev.direction, 1)] }));
 		};
 
-		const sortingDirection = (colName === sort?.column[0] ? sort.direction : undefined);
-
+		const sortingDirection = (colName === sort?.column[0] ? sort.direction[0] : undefined);
 		return { sortingDirection, onClick, sort: true };
 	};
 

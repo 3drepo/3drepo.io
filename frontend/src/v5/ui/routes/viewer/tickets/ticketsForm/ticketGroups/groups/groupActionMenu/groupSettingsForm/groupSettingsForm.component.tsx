@@ -67,6 +67,7 @@ import { NewCollectionForm } from '../newCollectionForm/newCollectionForm.compon
 import { RulesOptionsMenu } from './rulesOptionsMenu/rulesOptionsMenu.component';
 import { RulesField } from './rulesField/ruelsField.component';
 import { Popper } from '../../../ticketGroups.styles';
+import { appendCopySuffixToDuplicateNames } from '../../groupRulesForm/groupRulesForm.helpers';
 
 type GroupSettingsFormProps = {
 	value?: IGroupSettingsForm,
@@ -87,7 +88,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
 	const formRef = useRef(null);
 
-	const isNewGroup = !value;
+	const isNewGroup = !value?.group?._id;
 	const selectedNodes = useSelector(selectSelectedNodes);
 	const sharedIds = selectedNodes.flatMap((node) => node.shared_ids);
 	const objectsCount = useSelector(selectGetNumNodesByMeshSharedIdsArray(sharedIds));
@@ -149,7 +150,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 
 	const handlePasteRules = (pastedRules) => {
 		setIsPastingRules(false);
-		append(pastedRules);
+		append(appendCopySuffixToDuplicateNames(rules, pastedRules));
 	};
 
 	const resetFilterMenu = () => {
@@ -157,15 +158,21 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		setFilterMenuOpen(false);
 	};
 
+	const handleAddFilterClick = () => {
+		setSelectedRule(null);
+		setFilterMenuOpen(true);
+	};
+
 	useEffect(() => {
 		// When no value is passed then the group is a new group
 		resetFilterMenu();
-		if (!value) {
+		if (isNewGroup) {
 			formData.reset({
 				...(isColored ? { color: hexToArray(getRandomSuggestedColor()) } : {}),
 				opacity: 1,
 				prefix: [],
 				group: {},
+				key: value.key,
 			});
 			setIsSmart(true);
 			return;
@@ -349,7 +356,12 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 									...filterMenuCoords,
 								}}
 							>
-								<GroupRulesForm rule={selectedRule?.value} onSave={selectedRule ? (val) => update(selectedRule.index, val) : append} onClose={resetFilterMenu} />
+								<GroupRulesForm
+									rule={selectedRule?.value}
+									onSave={selectedRule ? (val) => update(selectedRule.index, val) : append}
+									onClose={resetFilterMenu}
+									existingRules={rules}
+								/>
 							</Popper>
 							<Subheading>
 								<FormattedMessage
@@ -358,7 +370,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								/>
 								{isAdmin && (
 									<AddFilterTitle>
-										<TriggerButton onClick={() => setFilterMenuOpen(true)}>
+										<TriggerButton onClick={handleAddFilterClick}>
 											<FormattedMessage id="tickets.groups.newGroupForm.addFilter" defaultMessage="Add filter" />
 										</TriggerButton>
 									</AddFilterTitle>
@@ -371,14 +383,14 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								<Rules>
 									{rules.map(({ id, ...ruleValue }, i) => (
 										<ChipRule
-											value={ruleValue}
+											label={ruleValue.name}
 											key={id}
 											isSelected={selectedRule === ruleValue}
 											onDelete={() => {
 												remove(i);
 												resetFilterMenu();
 											}}
-											disabled={!isAdmin}
+											isReadOnly={!isAdmin}
 											onClick={() => {
 												setSelectedRule({ index: i, value: ruleValue });
 												setFilterMenuOpen(true);

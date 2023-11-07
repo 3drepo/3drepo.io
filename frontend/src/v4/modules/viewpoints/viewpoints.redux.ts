@@ -153,10 +153,10 @@ const fetchGroupSuccess = (state = INITIAL_STATE, { group }) => {
 
 const toggleSortOrder = (state = INITIAL_STATE) => {
 	const currentSortOrder = state.componentState.sortOrder;
-	const isASC = currentSortOrder === SORT_ORDER_TYPES.ASCENDING;
-	const sortOrder = isASC ? SORT_ORDER_TYPES.DESCENDING : SORT_ORDER_TYPES.ASCENDING;
+	const isAsc = currentSortOrder === SORT_ORDER_TYPES.ASCENDING;
+	const sortOrder = isAsc ? SORT_ORDER_TYPES.DESCENDING : SORT_ORDER_TYPES.ASCENDING;
 
-	const viewpoints =  orderBy(state.viewpointsMap, ['name'], [sortOrder as ('asc' | 'desc')]);
+	const viewpoints =  orderBy(state.viewpointsMap, ({ name }) => name.trim().toLowerCase(), [sortOrder as ('asc' | 'desc')]);
 
 	state = setComponentState(state, {componentState: { sortOrder }});
 	return fetchViewpointsSuccess(state,  {viewpoints});

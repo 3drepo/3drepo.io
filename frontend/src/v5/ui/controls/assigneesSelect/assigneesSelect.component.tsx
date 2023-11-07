@@ -35,7 +35,7 @@ export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps &
 	maxItems?: number;
 	showAddButton?: boolean;
 	showEmptyText?: boolean;
-	onBlur: () => void;
+	onBlur?: () => void;
 };
 
 export const AssigneesSelect = ({
@@ -67,7 +67,7 @@ export const AssigneesSelect = ({
 		if (disabled) return;
 		e.stopPropagation();
 		setOpen(true);
-	}, []);
+	}, [disabled]);
 
 	const handleClose = () => {
 		setOpen(false);
