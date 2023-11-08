@@ -24,7 +24,7 @@ import { isEmpty } from 'lodash';
 import { selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
 import { ITicket } from '../tickets.types';
 import { ITicketsCardState } from './ticketsCard.redux';
-import { getTicketDefaultPinColor } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/pin.helpers.component';
+import { getTicketDefaultPinColor } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers.component';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 

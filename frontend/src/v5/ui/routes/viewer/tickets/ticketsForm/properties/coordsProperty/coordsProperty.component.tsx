@@ -25,8 +25,8 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormHelperText, Tooltip } from '@mui/material';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { PinInputContainer, FlexRow, PinAction, PinActionLabel, PinActions, PinName, PinSelectContainer } from './coordsProperty.styles';
-import { getPinColorHex, isPinLight } from './pin.helpers.component';
+import { CoordsAction, CoordsActionLabel, CoordsActions, CoordsInputContainer, CoordsName, FlexRow, SelectPinButton } from './coordsProperty.styles';
+import { getPinColorHex, isPinLight } from './coordsProperty.helpers.component';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -58,7 +58,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		if (isSelected) TicketsCardActionsDispatchers.setSelectedTicketPin(null);
 	};
 
-	const onClickEditPin = async () => {
+	const onClickEdit = async () => {
 		setEditMode(true);
 		const pin = await ViewerService.getClickPoint();
 		setEditMode(false);
@@ -74,9 +74,9 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		TicketsCardActionsDispatchers.setSelectedTicketPin(isSelected ? null : pinId);
 	};
 
-	const getSelectedPinTooltip = () => {
+	const getSelectPinTooltip = () => {
 		if (!hasPin) return '';
-		return isSelected ? formatMessage({ id: 'tickets.pin.deselectPin', defaultMessage: 'Deselect pin' }) : formatMessage({ id: 'tickets.pin.selectPin', defaultMessage: 'Select pin' });
+		return isSelected ? formatMessage({ id: 'tickets.coords.deselectPin', defaultMessage: 'Deselect pin' }) : formatMessage({ id: 'tickets.coords.selectPin', defaultMessage: 'Select pin' });
 	};
 
 	const replacePin = () => {
@@ -123,51 +123,51 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	}, [isSelected]);
 
 	return (
-		<PinInputContainer required={required} selected={editMode} error={error} disabled={disabled}>
+		<CoordsInputContainer required={required} selected={editMode} error={error} disabled={disabled}>
 			<FlexRow>
 				<span>
-					<PinName required={required}>
+					<CoordsName required={required}>
 						{label}
-					</PinName>
-					<PinActions>
+					</CoordsName>
+					<CoordsActions>
 						{editMode && (
 							<>
-								<PinAction onClick={cancelEdit} selected>
+								<CoordsAction onClick={cancelEdit} selected>
 									<MoveIcon />
-									<PinActionLabel>
+									<CoordsActionLabel>
 										{hasPin ? (
-											<FormattedMessage id="tickets.pin.selectNewLocation" defaultMessage="Select new location" />
+											<FormattedMessage id="tickets.coords.selectNewLocation" defaultMessage="Select new location" />
 										) : (
-											<FormattedMessage id="tickets.pin.selectLocation" defaultMessage="Select location" />
+											<FormattedMessage id="tickets.coords.selectLocation" defaultMessage="Select location" />
 										)}
-									</PinActionLabel>
-								</PinAction>
-								<PinAction onClick={cancelEdit}>
+									</CoordsActionLabel>
+								</CoordsAction>
+								<CoordsAction onClick={cancelEdit}>
 									<PaddedCrossIcon />
-									<PinActionLabel>
-										<FormattedMessage id="tickets.pin.cancel" defaultMessage="Cancel" />
-									</ PinActionLabel>
-								</PinAction>
+									<CoordsActionLabel>
+										<FormattedMessage id="tickets.coords.cancel" defaultMessage="Cancel" />
+									</ CoordsActionLabel>
+								</CoordsAction>
 							</>
 						)}
 						{!editMode && (
 							<>
-								<PinAction onClick={onClickEditPin} disabled={disabled}>
+								<CoordsAction onClick={onClickEdit} disabled={disabled}>
 									{hasPin ? <MoveIcon /> : <CircledPlusIcon />}
-								</PinAction>
+								</CoordsAction>
 								{hasPin && (
-									<PinAction onClick={onClickDelete} disabled={disabled}>
+									<CoordsAction onClick={onClickDelete} disabled={disabled}>
 										<DeleteIcon />
-									</PinAction>
+									</CoordsAction>
 								)}
 							</>
 						)}
 
-					</PinActions>
+					</CoordsActions>
 				</span>
 				{isViewer && (
-					<Tooltip title={getSelectedPinTooltip()}>
-						<PinSelectContainer
+					<Tooltip title={getSelectPinTooltip()}>
+						<SelectPinButton
 							color={colorHex}
 							$isLight={isPinLight(colorHex)}
 							isSelected={isSelected}
@@ -175,11 +175,11 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 							disabled={!hasPin}
 						>
 							<PinIcon />
-						</PinSelectContainer>
+						</SelectPinButton>
 					</Tooltip>
 				)}
 			</FlexRow>
 			<FormHelperText>{helperText}</FormHelperText>
-		</PinInputContainer>
+		</CoordsInputContainer>
 	);
 };

@@ -18,16 +18,16 @@
 import styled, { css } from 'styled-components';
 import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
 
-export const PinInputContainer = styled(ViewerInputContainer)`
+export const CoordsInputContainer = styled(ViewerInputContainer)`
 	padding: 8px 10px 8px 12px;
 `;
 
-export const PinActions = styled.div`
+export const CoordsActions = styled.div`
 	display: flex;
 	gap: 9px;
 `;
 
-export const PinName = styled.div<{ required: boolean }>`
+export const CoordsName = styled.div<{ required: boolean }>`
 	${({ theme }) => theme.typography.h5};
 	position: relative;
 	top: -1px;
@@ -54,7 +54,7 @@ const passiveActionStyle = css`
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
-export const PinAction = styled.div<{ selected?: boolean; disabled?: boolean }>`
+export const CoordsAction = styled.div<{ selected?: boolean; disabled?: boolean }>`
 	user-select: none;
 
 	outline: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
@@ -82,7 +82,7 @@ export const PinAction = styled.div<{ selected?: boolean; disabled?: boolean }>`
 	}
 `;
 
-export const PinActionLabel = styled.span`
+export const CoordsActionLabel = styled.span`
 	${({ theme }) => theme.typography.caption};
 	padding: 0 4px;
 `;
@@ -92,7 +92,7 @@ export const FlexRow = styled.div`
 	flex-flow: row;
 `;
 
-export const PinSelectContainer = styled.div<{ color: string, isSelected: boolean; $isLight: boolean; disabled: boolean; }>`
+export const SelectPinButton = styled.div<{ color: string, isSelected: boolean; $isLight: boolean; disabled: boolean; }>`
 	outline: 1px solid;
 	outline-color: ${({ color, isSelected, theme }) => isSelected ? color : theme.palette.secondary.lightest};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
