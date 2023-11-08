@@ -75,24 +75,6 @@ export const CRITERIA_REQUIRED_VALUES = {
 	[CRITERIA_OPERATORS_TYPES.NOT_IN_RANGE]: 2
 };
 
-export const CRITERIA_TEMPLATES = {
-	[CRITERIA_OPERATORS_TYPES.IS]: '%field : %values',
-	[CRITERIA_OPERATORS_TYPES.IS_NOT]: '%field : ! %values',
-	[CRITERIA_OPERATORS_TYPES.IS_NOT_EMPTY]: '%field',
-	[CRITERIA_OPERATORS_TYPES.IS_EMPTY]: '! %field',
-	[CRITERIA_OPERATORS_TYPES.CONTAINS]: '%field : * %values',
-	[CRITERIA_OPERATORS_TYPES.NOT_CONTAINS]: '%field : ! * %values',
-	[CRITERIA_OPERATORS_TYPES.EQUALS]: '%field = %values',
-	[CRITERIA_OPERATORS_TYPES.NOT_EQUALS]: '%field = ! %values',
-	[CRITERIA_OPERATORS_TYPES.GT]: '%field > %0',
-	[CRITERIA_OPERATORS_TYPES.GTE]: '%field >= %0',
-	[CRITERIA_OPERATORS_TYPES.LT]: '%field < %0',
-	[CRITERIA_OPERATORS_TYPES.LTE]: '%field <= %0',
-	[CRITERIA_OPERATORS_TYPES.IN_RANGE]: '%field [ %0 : %0 ]',
-	[CRITERIA_OPERATORS_TYPES.NOT_IN_RANGE]: '%field ! [ %0 : %0 ]',
-	[CRITERIA_OPERATORS_TYPES.REGEX]: '%field : / %0 /'
-};
-
 const CRITERIA_FIELD = {
 	name: 'Field',
 	operators: [{

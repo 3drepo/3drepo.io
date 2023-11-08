@@ -17,20 +17,42 @@
 
 import { useHistory } from 'react-router-dom';
 
-export const useSearchParam = (name: string) => {
+type Transformer<T> = {
+	from: (param: string) => T,
+	to: (param: T) => string,
+};
+
+export const Transformers = {
+	DEFAULT: {
+		from: (param) => param || '',
+		to: (param) => param || '',
+	},
+	BOOLEAN: {
+		from: (param) => JSON.parse(param || 'false'),
+		to: JSON.stringify,
+	},
+	STRING_ARRAY: {
+		from: (arr) => arr ? arr.split(',') : [],
+		to: (arr: string[] = []) => arr.length ? arr.join(',') : '',
+	},
+};
+
+// @ts-ignore
+export const useSearchParam = <T = string>(name: string, transformer: Transformer<T> = Transformers.DEFAULT) => {
 	const history = useHistory();
 	const { location } = window;
-	const value = new URLSearchParams(location.search).get(name);
+	const value = transformer.from(new URLSearchParams(location.search).get(name));
 
-	const setParam = (newValue = '') => {
+	const setParam = (newValue: T) => {
 		const searchParams = new URLSearchParams(location.search);
-		if (newValue) {
-			searchParams.set(name, newValue);
+		const transformedNewValue = transformer.to(newValue);
+		if (transformedNewValue) {
+			searchParams.set(name, transformedNewValue);
 		} else {
 			searchParams.delete(name);
 		}
 		history.replace({ search: searchParams.toString() });
 	};
 
-	return [value, setParam] as [string, (val?: string) => void];
+	return [value, setParam] as [T, (val?: T) => void];
 };

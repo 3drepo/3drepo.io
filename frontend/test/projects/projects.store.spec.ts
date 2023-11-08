@@ -16,11 +16,12 @@
  */
 
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
-import { selectCurrentProject, selectCurrentProjectDetails, selectCurrentProjects, selectIsProjectAdmin } from '@/v5/store/projects/projects.selectors';
+import { selectCurrentProject, selectCurrentProjectDetails, selectCurrentProjectTemplates, selectCurrentProjects, selectIsProjectAdmin } from '@/v5/store/projects/projects.selectors';
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { times } from 'lodash';
 import { projectMockFactory } from './projects.fixtures';
 import { createTestStore, listContainsElementWithId } from '../test.helpers';
+import { templateMockFactory } from '../tickets/tickets.fixture';
 
 describe('Projects: store', () => {
 	const teamspace = 'teamspace';
@@ -99,5 +100,16 @@ describe('Projects: store', () => {
 		const nonAdminProject = createAndAddProjectToStore({ isAdmin: false });
 		dispatch(ProjectsActions.setCurrentProject(nonAdminProject._id));
 		expect(selectIsProjectAdmin(getState())).toBeFalsy();
-	})
+	});
+
+	it('should set the templates', () => {
+		const mockProject = projectMockFactory();
+		const mockTemplates = [templateMockFactory()];
+		dispatch(ProjectsActions.fetchSuccess(teamspace, [mockProject]));
+		dispatch(ProjectsActions.setCurrentProject(mockProject._id));
+		dispatch(ProjectsActions.fetchTemplatesSuccess(mockProject._id, mockTemplates));
+
+		const currentTemlates = selectCurrentProjectTemplates(getState());
+		expect(currentTemlates).toEqual(mockTemplates);
+	});
 });

@@ -15,53 +15,73 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useFormContext } from 'react-hook-form';
 import { UploadItemFields } from '@/v5/store/containers/containers.types';
+import { useContext } from 'react';
+import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { UploadListItem } from './uploadListItem/uploadListItem.component';
-import { Container } from './uploadList.styles';
+import { ListContainer } from './uploadList.styles';
+import { UploadFileFormContext } from '../uploadFileFormContext';
+import { UploadListHeaders } from './uploadListHeaders/uploadListHeaders.component';
+import { UploadListItemRowWrapper } from './uploadListItem/uploadListItem.styles';
 
 type IUploadList = {
-	onClickEdit: (index) => void;
-	onClickDelete: (index) => void;
 	values: UploadItemFields[];
-	selectedIndex: number | null;
+	removeUploadById: (id: string) => void;
 	isUploading: boolean;
-	getOriginalIndex: (index: number) => number;
+};
+
+const DEFAULT_SORT_CONFIG = {
+	column: ['file'],
+	direction: [SortingDirection.DESCENDING, SortingDirection.ASCENDING],
 };
 
 export const UploadList = ({
 	values,
-	selectedIndex,
+	removeUploadById,
 	isUploading,
-	onClickEdit,
-	onClickDelete,
-	getOriginalIndex,
 }: IUploadList): JSX.Element => {
-	const { getValues } = useFormContext();
+	const { selectedId, setSelectedId } = useContext(UploadFileFormContext);
+	const { sortedList, setSortConfig } = useOrderedList(values, DEFAULT_SORT_CONFIG);
+
+	const deleteItem = (id, isSelected) => {
+		removeUploadById(id);
+		if (isSelected) setSelectedId();
+	};
+
 	return (
-		<Container>
-			{
-				values.map((item, index) => {
-					const originalIndex = getOriginalIndex(index);
-					const revisionPrefix = `uploads.${originalIndex}`;
-					const defaultInputValues = {
-						containerName: getValues(`${revisionPrefix}.containerName`) || item.containerName,
-						revisionTag: getValues(`${revisionPrefix}.revisionTag`) || item.revisionTag,
-					};
-					return (
-						<UploadListItem
-							revisionPrefix={revisionPrefix}
-							key={item.uploadId}
-							item={item}
-							defaultValues={defaultInputValues}
-							onClickEdit={() => onClickEdit(originalIndex)}
-							onClickDelete={() => onClickDelete(index)}
-							isSelected={index === selectedIndex}
-							isUploading={isUploading}
-						/>
-					);
-				})
-			}
-		</Container>
+		<>
+			<UploadListHeaders
+				setSortConfig={setSortConfig}
+				defaultSortConfig={DEFAULT_SORT_CONFIG}
+				isUploading={isUploading}
+			/>
+			<ListContainer>
+				{
+					values.map(({ uploadId, file, extension }, index) => {
+						const onClickEdit = () => setSelectedId(uploadId);
+						const selected = !isUploading && uploadId === selectedId;
+						const onClickDelete = () => deleteItem(uploadId, selected);
+						return (
+							<UploadListItemRowWrapper
+								key={uploadId}
+								selected={selected}
+								order={sortedList.findIndex((sortedItem) => sortedItem.uploadId === uploadId)}
+							>
+								<UploadListItem
+									index={index}
+									fileData={{ ...file, extension }}
+									uploadId={uploadId}
+									onClickEdit={onClickEdit}
+									onClickDelete={onClickDelete}
+									isSelected={selected}
+									isUploading={isUploading}
+								/>
+							</UploadListItemRowWrapper>
+						);
+					})
+				}
+			</ListContainer>
+		</>
 	);
 };

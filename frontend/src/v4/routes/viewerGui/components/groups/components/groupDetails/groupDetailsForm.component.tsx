@@ -23,7 +23,7 @@ import { Field, Form, Formik } from 'formik';
 import { PureComponent } from 'react';
 import * as Yup from 'yup';
 
-import { GROUPS_TYPES, GROUPS_TYPES_LIST } from '../../../../../../constants/groups';
+import { GROUPS_TYPES_LIST } from '../../../../../../constants/groups';
 import { formatDateTime, formatDateTimeV5 } from '../../../../../../services/formatting/formatDate';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { Description, FieldsRow, LongLabel, StyledFormControl, StyledTextField } from './groupDetails.styles';
@@ -49,7 +49,6 @@ interface IProps {
 	currentUser: any;
 	totalMeshes: number;
 	canUpdate: boolean;
-	fieldNames: any[];
 	selectedNodes: any[];
 	handleChange: (event) => void;
 }

@@ -71,6 +71,7 @@ const selectStyles = css`
 		background-color: transparent;
 		padding: 0;
 		border: none;
+		box-shadow: none;
 	}
 	.MuiOutlinedInput-notchedOutline {
 		border: none;

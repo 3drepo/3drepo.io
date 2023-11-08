@@ -286,7 +286,7 @@ config.version = VERSION;
 config.userNotice = coalesce(config.userNotice, "");
 
 config.contact = config.contact || {};
-config.contact.support = "support@3drepo.org";
+config.contact.support = "support@3drepo.com";
 
 // default vat validation url
 config.vat = coalesce(config.vat, {});

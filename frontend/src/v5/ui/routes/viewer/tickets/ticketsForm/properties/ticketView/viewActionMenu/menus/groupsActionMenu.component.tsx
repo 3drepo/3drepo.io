@@ -37,6 +37,7 @@ export const GroupsActionMenu = ({
 	disabled,
 }: IGroupsActionMenu) => {
 	const hasGroups = value?.colored?.length || value?.hidden?.length;
+
 	return (
 		<ViewActionMenu
 			disabled={!hasGroups}

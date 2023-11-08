@@ -69,6 +69,14 @@ function* login({ username, password }: LoginAction) {
 					),
 				));
 				break;
+			case 'USER_NOT_VERIFIED':
+				yield put(AuthActions.loginFailed(
+					formatMessage({
+						id: 'auth.login.error.userNotVerified',
+						defaultMessage: 'Account not yet verified. Please check your email',
+					}),
+				));
+				break;
 			default:
 				// network or unexpected error
 				yield put(AuthActions.loginFailed(null));

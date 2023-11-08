@@ -19,6 +19,7 @@ import { ChipSelect, ChipSelectProps } from '@controls/chip/chipSelect/chipSelec
 import { DueDateWithIcon, DueDateWithIconProps } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
 import { forwardRef } from 'react';
 import { AssigneesSelect, AssigneesSelectProps } from '@controls/assigneesSelect/assigneesSelect.component';
+import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 import { Checkbox, CheckboxProps } from './checkbox/checkbox.component';
 import { InputController, InputControllerProps } from './inputController.component';
 import { NumberField } from './numberField/numberField.component';
@@ -33,7 +34,7 @@ import { TextField, TextFieldProps } from './textField/textField.component';
 export const FormNumberField = (props: InputControllerProps<TextFieldProps>) => (<InputController Input={NumberField} {...props} />);
 export const FormPasswordField = (props: InputControllerProps<TextFieldProps>) => (<InputController Input={PasswordField} {...props} />);
 export const FormTextField = (props: InputControllerProps<TextFieldProps>) => (<InputController Input={TextField} {...props} />);
-export const FormTextArea = (props: InputControllerProps<TextAreaProps>) => (<InputController Input={TextArea} {...props} />);
+export const FormTextArea = forwardRef((props: InputControllerProps<TextAreaProps>, ref: any) => (<InputController Input={TextArea} {...props} ref={ref} />));
 export const FormTextAreaFixedSize = forwardRef((props: InputControllerProps<TextAreaFixedSizeProps>, ref) => (<InputController Input={TextAreaFixedSize} {...props} ref={ref} />));
 
 // calendar inputs
@@ -44,6 +45,7 @@ export const FormSelectView = (props: InputControllerProps<SelectViewProps>) => 
 export const FormSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={Select} {...props} />);
 export const FormChipSelect = (props: InputControllerProps<ChipSelectProps>) => (<InputController Input={ChipSelect} {...props} />);
 export const FormAssigneesSelect = (props: InputControllerProps<AssigneesSelectProps>) => (<InputController Input={AssigneesSelect} {...props} />);
+export const FormSearchSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={SearchSelect} {...props} />);
 
 // control inputs
 export const FormCheckbox = (props: InputControllerProps<CheckboxProps>) => (<InputController Input={Checkbox} {...props} />);

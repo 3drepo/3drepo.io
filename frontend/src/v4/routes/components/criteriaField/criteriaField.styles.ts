@@ -21,15 +21,12 @@ import {
 	IconButton as IconButtonComponent,
 	InputLabel as InputLabelComponent,
 	List as ListComponent,
-	ListSubheader,
 	MenuItem as MenuItemComponent
 } from '@mui/material';
 import MoreIcon from '@mui/icons-material/MoreVert';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { COLOR } from '../../../styles';
-import { SelectField as SelectFieldComponent } from '../selectField/selectField.component';
 
 export const Container = styled.div`
 	height: 100%;
@@ -139,32 +136,8 @@ export const FormContainer = styled.div`
 	border-top: 1px solid ${COLOR.BLACK_20};
 	padding: 22px;
 	padding-top: 12px;
+	background-color: ${COLOR.WHITE};
 `;
-
-export const CriteriaList = styled(ListComponent)`
-	max-height: 300px;
-	overflow: auto;
-`;
-
-export const Operators = styled.ul`
-	padding: 0;
-`;
-
-export const SelectField = styled(SelectFieldComponent)`
-	width: 100%;
-`;
-
-const emptySelectFieldValueStyleV4 = css`
-	color: ${COLOR.BLACK_87};
-	opacity: 0.42;
-`;
-const emptySelectFieldValueStyleV5 = css`
-	color: ${({ theme }) => theme.palette.base.lighter};
-`;
-
-export const SelectFieldValue = styled.div`
-	${(props: any) => props.placeholder && (isV5() ? emptySelectFieldValueStyleV5 : emptySelectFieldValueStyleV4)};
-` as any;
 
 export const MenuItem = styled(MenuItemComponent)`
 	&& {
@@ -173,30 +146,4 @@ export const MenuItem = styled(MenuItemComponent)`
 		height: 30px;
 		min-width: 180px;
 	}
-`;
-
-export const NewCriterionFooter = styled.div`
-	margin-top: 12px;
-	display: flex;
-	align-items: center;
-	justify-content: ${(props: any) => props.spaced ? 'space-between' : 'flex-end'};
-` as any;
-
-export const OperatorSubheader = styled(ListSubheader)`
-	&:not(:first-of-type) {
-		border-top: 1px solid ${COLOR.BLACK_6};
-	}
-
-	&& {
-		pointer-events: none;
-		outline: none;
-		padding-left: 16px;
-		background-color: ${COLOR.WHITE};
-		color: ${COLOR.BLACK_60}
-	}
-`;
-
-export const CustomError = styled.div `
-	color: ${COLOR.POMEGRANATE};
-	font-size: 12px;
 `;

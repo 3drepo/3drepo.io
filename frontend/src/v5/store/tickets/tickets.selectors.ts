@@ -20,9 +20,37 @@ import { orderBy } from 'lodash';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
 import { createPropertiesWithGroups } from './ticketsGroups.helpers';
-import { Properties } from './tickets.types';
+import { Properties, TicketWithModelIdAndName } from './tickets.types';
+import { selectContainers } from '../containers/containers.selectors';
+import { selectFederations } from '../federations/federations.selectors';
+
+export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
 const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
+
+export const selectTicketsHaveBeenFetched = createSelector(
+	selectTicketsDomain,
+	(state, modelId) => modelId,
+	(state, modelId) => modelId in state.ticketsByModelId,
+);
+
+export const selectTicketsByContainersAndFederations = createSelector(
+	selectTicketsDomain,
+	(state, containersAndFederationsIds: string[]) => containersAndFederationsIds,
+	selectContainers,
+	selectFederations,
+	(state, containersAndFederationsIds, containers, federations) => {
+		const modelIdToName = [...containers, ...federations].reduce((acc, { _id, name }) => {
+			// eslint-disable-next-line no-param-reassign
+			acc[_id] = name;
+			return acc;
+		}, {});
+		const ticketsWithModelId: TicketWithModelIdAndName[] = containersAndFederationsIds.flatMap((modelId) => (
+			(state.ticketsByModelId[modelId] || []).map((ticket) => ({ modelId, modelName: modelIdToName[modelId], ...ticket }))
+		));
+		return sortTicketsByCreationDate(ticketsWithModelId);
+	},
+);
 
 export const selectTemplates = createSelector(
 	selectTicketsDomain,

@@ -37,6 +37,7 @@ import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component
 import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { CardContent } from '../ticketsForm/ticketsForm.styles';
 import { TicketsCardViews } from '../tickets.constants';
+import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 
 export const NewTicketCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
@@ -61,8 +62,10 @@ export const NewTicketCard = () => {
 		TicketsCardActionsDispatchers.openTicket(ticketId);
 	};
 
-	const onSubmit = (vals) => {
+	const onSubmit = async (vals) => {
 		const ticket = { type: template._id, ...vals };
+
+		const { promiseToResolve, resolve } = getWaitablePromise();
 
 		const parsedTicket = filterEmptyTicketValues(ticket) as NewTicket;
 		sanitizeViewVals(ticket, { modules: {} } as ITicket, template);
@@ -72,8 +75,13 @@ export const NewTicketCard = () => {
 			containerOrFederation,
 			parsedTicket,
 			isFederation,
-			goToTicketDetails,
+			(ticketId) => {
+				resolve();
+				goToTicketDetails(ticketId);
+			},
 		);
+
+		await promiseToResolve;
 	};
 
 	useEffect(() => {
@@ -134,19 +142,17 @@ export const NewTicketCard = () => {
 									<CircularProgress />
 								</CardContent>
 							) : (
-								<>
-									<TicketForm
-										template={getEditableProperties(template)}
-										// Im not sure this is still needed here, because we are already depending on react-hook-form to fill the form
-										ticket={defaultTicket}
-										focusOnTitle
-									/>
-								</>
+								<TicketForm
+									template={getEditableProperties(template)}
+									// Im not sure this is still needed here, because we are already depending on react-hook-form to fill the form
+									ticket={defaultTicket}
+									focusOnTitle
+								/>
 							)}
 						</>
 					)}
 					<BottomArea>
-						<SaveButton disabled={!formData.formState.isValid}>
+						<SaveButton disabled={!formData.formState.isValid} isPending={formData.formState.isSubmitting}>
 							<FormattedMessage id="customTicket.button.saveTicket" defaultMessage="Save ticket" />
 						</SaveButton>
 					</BottomArea>
