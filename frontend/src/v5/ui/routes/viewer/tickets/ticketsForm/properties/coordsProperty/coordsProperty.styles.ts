@@ -92,7 +92,7 @@ export const FlexRow = styled.div`
 	flex-flow: row;
 `;
 
-export const PinSelectContainer = styled.div<{ color: string, isSelected: boolean; $isLight: boolean; }>`
+export const PinSelectContainer = styled.div<{ color: string, isSelected: boolean; $isLight: boolean; disabled: boolean; }>`
 	outline: 1px solid;
 	outline-color: ${({ color, isSelected, theme }) => isSelected ? color : theme.palette.secondary.lightest};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
@@ -101,7 +101,7 @@ export const PinSelectContainer = styled.div<{ color: string, isSelected: boolea
 	height: 44px;
 	box-sizing: border-box;
 	padding: 12px;
-	cursor: pointer;
+	cursor: ${({  disabled }) => disabled ? 'default' : 'pointer'};
 
 	${({ $isLight, isSelected, theme }) => $isLight && css`
 		outline-color: ${isSelected ? theme.palette.base.lighter : theme.palette.secondary.lightest};

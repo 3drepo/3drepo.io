@@ -167,7 +167,13 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 				</span>
 				{isViewer && (
 					<Tooltip title={getSelectedPinTooltip()}>
-						<PinSelectContainer color={colorHex} $isLight={isPinLight(colorHex)} isSelected={isSelected} onClick={onClickSelectPin}>
+						<PinSelectContainer
+							color={colorHex}
+							$isLight={isPinLight(colorHex)}
+							isSelected={isSelected}
+							onClick={onClickSelectPin}
+							disabled={!hasPin}
+						>
 							<PinIcon />
 						</PinSelectContainer>
 					</Tooltip>
