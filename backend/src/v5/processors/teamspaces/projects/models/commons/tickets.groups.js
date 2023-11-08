@@ -19,7 +19,7 @@ const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuid
 const { addGroups, getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
 const { getFile } = require('../../../../../services/filesManager');
 const { getLatestRevision } = require('../../../../../models/revisions');
-const { getMetadataByRules, idsToIfcGuids, idsToRevitIds } = require('../../../../../models/metadata');
+const { getMetadataByRules, repoIdsToExternalIds } = require('../../../../../models/metadata');
 const { getNodesBySharedIds } = require('../../../../../models/scenes');
 
 const TicketGroups = {};
@@ -87,17 +87,18 @@ const convertObjectIds = async (teamspace, model, group) => {
 			let externalIds;
 			let externalIdsName;
 
-			externalIds = await idsToIfcGuids(teamspace, model, obj._ids);
+			externalIds = await repoIdsToExternalIds(teamspace, model, obj._ids, 'IFC GUID');
 			if (externalIds?.length) {
 				externalIdsName = 'ifcGuids';
 			} else {
-				externalIds = await idsToRevitIds(teamspace, model, obj._ids);
+				externalIds = await repoIdsToExternalIds(teamspace, model, obj._ids, 'Element ID');
 				if (externalIds?.length) {
 					externalIdsName = 'revitIds';
 				}
 			}
 
 			if (externalIds.length) {
+				delete convertedObject._ids;
 				convertedObject[externalIdsName] = externalIds.map((g) => g.metadata[0].value);
 			}
 		}

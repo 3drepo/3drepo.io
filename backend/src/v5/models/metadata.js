@@ -31,16 +31,9 @@ const constructQueriesFromRules = (revId, rules) => {
 	return { positiveQuery, negativeQuery };
 };
 
-Metadata.idsToIfcGuids = (teamspace, model, ids) => {
-	const query = { type: 'meta', parents: { $in: ids }, 'metadata.key': 'IFC GUID' };
-	const project = { metadata: { $elemMatch: { key: 'IFC GUID' } } };
-
-	return db.find(teamspace, collectionName(model), query, project);
-};
-
-Metadata.idsToRevitIds = (teamspace, model, ids) => {
-	const query = { type: 'meta', parents: { $in: ids }, 'metadata.key': 'Element ID' };
-	const project = { metadata: { $elemMatch: { key: 'Element ID' } } };
+Metadata.repoIdsToExternalIds = (teamspace, model, ids, externalIdName) => {
+	const query = { type: 'meta', parents: { $in: ids }, 'metadata.key': externalIdName };
+	const project = { metadata: { $elemMatch: { key: externalIdName } } };
 
 	return db.find(teamspace, collectionName(model), query, project);
 };
