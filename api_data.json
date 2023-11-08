@@ -48,7 +48,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/auth.js",
+    "filename": "src/v4/routes/auth.js",
     "groupTitle": "3D_Repo"
   },
   {
@@ -122,7 +122,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/accountPermission.js",
+    "filename": "src/v4/routes/accountPermission.js",
     "groupTitle": "Account_Permission"
   },
   {
@@ -169,7 +169,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/accountPermission.js",
+    "filename": "src/v4/routes/accountPermission.js",
     "groupTitle": "Account_Permission"
   },
   {
@@ -227,7 +227,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/accountPermission.js",
+    "filename": "src/v4/routes/accountPermission.js",
     "groupTitle": "Account_Permission"
   },
   {
@@ -294,7 +294,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/accountPermission.js",
+    "filename": "src/v4/routes/accountPermission.js",
     "groupTitle": "Account_Permission"
   },
   {
@@ -346,7 +346,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/auth.js",
+    "filename": "src/v4/routes/auth.js",
     "groupTitle": "Account"
   },
   {
@@ -416,7 +416,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/auth.js",
+    "filename": "src/v4/routes/auth.js",
     "groupTitle": "Account"
   },
   {
@@ -502,7 +502,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/auth.js",
+    "filename": "src/v4/routes/auth.js",
     "groupTitle": "Account"
   },
   {
@@ -599,7 +599,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/auth.js",
+    "filename": "src/v4/routes/auth.js",
     "groupTitle": "Account"
   },
   {
@@ -726,7 +726,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/auth.js",
+    "filename": "src/v4/routes/auth.js",
     "groupTitle": "Account"
   },
   {
@@ -799,7 +799,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/auth.js",
+    "filename": "src/v4/routes/auth.js",
     "groupTitle": "Account"
   },
   {
@@ -859,7 +859,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/auth.js",
+    "filename": "src/v4/routes/auth.js",
     "groupTitle": "Account"
   },
   {
@@ -937,7 +937,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/auth.js",
+    "filename": "src/v4/routes/auth.js",
     "groupTitle": "Account"
   },
   {
@@ -975,7 +975,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/auth.js",
+    "filename": "src/v4/routes/auth.js",
     "groupTitle": "Authentication"
   },
   {
@@ -1033,7 +1033,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/auth.js",
+    "filename": "src/v4/routes/auth.js",
     "groupTitle": "Authentication"
   },
   {
@@ -1071,7 +1071,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/auth.js",
+    "filename": "src/v4/routes/auth.js",
     "groupTitle": "Authentication"
   },
   {
@@ -1172,7 +1172,7 @@
       },
       {
         "title": "Example usage (smart group)",
-        "content": "POST /acme/00000000-0000-0000-0000-000000000000/revision/master/head/groups HTTP/1.1\n{\n\t\"name\":\"Smart 1\",\n\t\"description\":\"This is a smart group of objects with type IfcWall or IfcDoor with area > 5.\",\n\t\"author\":\"alice\",\n\t\"color\":[255,0,0],\n\t\"objects\":[],\n\t\"rules\":[\n\t\t{\n\t\t\t\"field\":\"Area\",\n\t\t\t\"operator\":\"GT\",\n\t\t\t\"values\":[5]\n\t\t},\n\t\t{\n\t\t\t\"field\":\"IFC Type\",\n\t\t\t\"operator\":\"IS\",\n\t\t\t\"values\":[\n\t\t\t\t\"IfcWall\",\n\t\t\t\t\"IfcDoor\"\n\t\t\t]\n\t\t}\n\t]\n}",
+        "content": "POST /acme/00000000-0000-0000-0000-000000000000/revision/master/head/groups HTTP/1.1\n{\n\t\"name\":\"Smart 1\",\n\t\"description\":\"This is a smart group of objects with type IfcWall or IfcDoor with area > 5.\",\n\t\"author\":\"alice\",\n\t\"color\":[255,0,0],\n\t\"objects\":[],\n\t\"rules\":[\n\t\t{\n\t\t\t\"field\": {\n\t\t\t\t\"operator\": \"IS\",\n\t\t\t\t\"values\": [\"Area\"]\n\t\t\t},\n\t\t\t\"operator\":\"GT\",\n\t\t\t\"values\":[5]\n\t\t},\n\t\t{\n\t\t\t\"field\": {\n\t\t\t\t\"operator\": \"IS\",\n\t\t\t\t\"values\": [\"IFC Type\"]\n\t\t\t},\n\t\t\t\"operator\":\"IS\",\n\t\t\t\"values\":[\n\t\t\t\t\"IfcWall\",\n\t\t\t\t\"IfcDoor\"\n\t\t\t]\n\t\t}\n\t]\n}",
         "type": "post"
       }
     ],
@@ -1185,7 +1185,7 @@
         },
         {
           "title": "Success-Response (smart group)",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"_id\":\"00000000-0000-0000-0000-000000000004\",\n\t\"name\":\"Smart 1\",\n\t\"description\":\"This is a smart group of objects with type IfcWall or IfcDoor with area > 5.\",\n\t\"author\":\"alice\",\n\t\"createdAt\":\"2018-03-09T10:45:00.000Z\",\n\t\"color\":[255,0,0],\n\t\"objects\":[\n\t\t{\n\t\t\t\"account\":\"acme\",\n\t\t\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\t\t\"ifc_guids\":[],\n\t\t\t\"shared_ids\":[\n\t\t\t\t\"db18ef69-6d6e-49a0-846e-907346abb39d\",\n\t\t\t\t\"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d\",\n\t\t\t\t\"3f881fa8-2b7b-443e-920f-396c1c85e903\"\n\t\t\t]\n\t\t}\n\t],\n\t\"rules\":[\n\t\t{\n\t\t\t\"field\":\"Area\",\n\t\t\t\"operator\":\"GT\",\n\t\t\t\"values\":[5]\n\t\t},\n\t\t{\n\t\t\t\"field\":\"IFC Type\",\n\t\t\t\"operator\":\"IS\",\n\t\t\t\"values\":[\n\t\t\t\t\"IfcWall\",\n\t\t\t\t\"IfcDoor\"\n\t\t\t]\n\t\t}\n\t]\n}",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"_id\":\"00000000-0000-0000-0000-000000000004\",\n\t\"name\":\"Smart 1\",\n\t\"description\":\"This is a smart group of objects with type IfcWall or IfcDoor with area > 5.\",\n\t\"author\":\"alice\",\n\t\"createdAt\":\"2018-03-09T10:45:00.000Z\",\n\t\"color\":[255,0,0],\n\t\"objects\":[\n\t\t{\n\t\t\t\"account\":\"acme\",\n\t\t\t\"model\":\"00000000-0000-0000-0000-000000000000\",\n\t\t\t\"ifc_guids\":[],\n\t\t\t\"shared_ids\":[\n\t\t\t\t\"db18ef69-6d6e-49a0-846e-907346abb39d\",\n\t\t\t\t\"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d\",\n\t\t\t\t\"3f881fa8-2b7b-443e-920f-396c1c85e903\"\n\t\t\t]\n\t\t}\n\t],\n\t\"rules\":[\n\t\t{\n\t\t\t\"field\": {\n\t\t\t\t\"operator\": \"IS\",\n\t\t\t\t\"values\": [\"Area\"]\n\t\t\t},\n\t\t\t\"operator\":\"GT\",\n\t\t\t\"values\":[5]\n\t\t},\n\t\t{\n\t\t\t\"field\": {\n\t\t\t\t\"operator\": \"IS\",\n\t\t\t\t\"values\": [\"IFC Type\"]\n\t\t\t},\n\t\t\t\"operator\":\"IS\",\n\t\t\t\"values\":[\n\t\t\t\t\"IfcWall\",\n\t\t\t\t\"IfcDoor\"\n\t\t\t]\n\t\t}\n\t]\n}",
           "type": "json"
         }
       ],
@@ -1272,7 +1272,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/group.js",
+    "filename": "src/v4/routes/group.js",
     "groupTitle": "Groups",
     "groupDescription": "<p>A grouping of model elements. Groups can either comprise of a set of manually defined elements or rules (smart group) that define the criteria for its elements.</p>"
   },
@@ -1340,7 +1340,19 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/group.js",
+    "filename": "src/v4/routes/group.js",
+    "groupTitle": "Groups",
+    "groupDescription": "<p>A grouping of model elements. Groups can either comprise of a set of manually defined elements or rules (smart group) that define the criteria for its elements.</p>"
+  },
+  {
+    "type": "post",
+    "url": "/:teamspace/:model/groups/export",
+    "title": "Export Groups",
+    "name": "exportGroups",
+    "group": "Groups",
+    "description": "<p>This is a back-ported endpoint from V5. For details please see V5 documentation /docs/#/Federations/ExportFederationGroups</p>",
+    "version": "0.0.0",
+    "filename": "src/v4/routes/group.js",
     "groupTitle": "Groups",
     "groupDescription": "<p>A grouping of model elements. Groups can either comprise of a set of manually defined elements or rules (smart group) that define the criteria for its elements.</p>"
   },
@@ -1420,7 +1432,7 @@
         },
         {
           "title": "Success-Response (with IFC GUIDs)",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"author\":\"alice\",\n\t\"color\":[255,0,0],\n\t\"createdAt\":1520592300000,\n\t\"description\":\"This is a smart group of objects with type IfcWall or IfcDoor with area > 5.\",\n\t\"name\":\"Smart 1\",\n\t\"objects\":[\n\t\t{\n\t\t\t\"account\": \"acme\",\n\t\t\t\"model\": \"00000000-0000-0000-0000-000000000000\",\n\t\t\t\"ifc_guids\": [\n\t\t\t\t\"2cx1GdQ9fAgRIWgfhfBb84\",\n\t\t\t\t\"13NEEUJ8DEE8fEH0aHgm2z\",\n\t\t\t\t\"3OLNF2_DL6hfPgh8Bw7fI7\"\n\t\t\t],\n\t\t\t\"shared_ids\": [\n\t\t\t\t\"24fdcf2d-b9eb-4fa2-a614-dfe2532493b3\",\n\t\t\t\t\"db18ef69-6d6e-49a0-846e-907346abb39d\",\n\t\t\t\t\"c532ff34-6669-4807-b7f3-6a0ffb17b027\",\n\t\t\t\t\"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d\",\n\t\t\t\t\"3f881fa8-2b7b-443e-920f-396c1c85e903\"\n\t\t\t]\n\t\t}\n\t],\n\t\"rules\":[\n\t\t{\n\t\t\t\"field\":\"Area\",\n\t\t\t\"operator\":\"GT\",\n\t\t\t\"values\":[5]\n\t\t},\n\t\t{\n\t\t\t\"field\":\"IFC Type\",\n\t\t\t\"operator\":\"IS\",\n\t\t\t\"values\":[\n\t\t\t\t\"IfcWall\",\n\t\t\t\t\"IfcDoor\"\n\t\t\t]\n\t\t}\n\t],\n\t\"updatedAt\":1552128300000,\n\t\"updatedBy\":\"alice\",\n\t\"_id\":\"00000000-0000-0000-0000-000000000004\"\n}",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"author\":\"alice\",\n\t\"color\":[255,0,0],\n\t\"createdAt\":1520592300000,\n\t\"description\":\"This is a smart group of objects with type IfcWall or IfcDoor with area > 5.\",\n\t\"name\":\"Smart 1\",\n\t\"objects\":[\n\t\t{\n\t\t\t\"account\": \"acme\",\n\t\t\t\"model\": \"00000000-0000-0000-0000-000000000000\",\n\t\t\t\"ifc_guids\": [\n\t\t\t\t\"2cx1GdQ9fAgRIWgfhfBb84\",\n\t\t\t\t\"13NEEUJ8DEE8fEH0aHgm2z\",\n\t\t\t\t\"3OLNF2_DL6hfPgh8Bw7fI7\"\n\t\t\t],\n\t\t\t\"shared_ids\": [\n\t\t\t\t\"24fdcf2d-b9eb-4fa2-a614-dfe2532493b3\",\n\t\t\t\t\"db18ef69-6d6e-49a0-846e-907346abb39d\",\n\t\t\t\t\"c532ff34-6669-4807-b7f3-6a0ffb17b027\",\n\t\t\t\t\"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d\",\n\t\t\t\t\"3f881fa8-2b7b-443e-920f-396c1c85e903\"\n\t\t\t]\n\t\t}\n\t],\n\t\"rules\":[\n\t\t{\n\t\t\t\"field\": {\n\t\t\t\t\"operator\": \"IS\",\n\t\t\t\t\"values\": [\"Area\"]\n\t\t\t},\n\t\t\t\"operator\":\"GT\",\n\t\t\t\"values\":[5]\n\t\t},\n\t\t{\n\t\t\t\"field\": {\n\t\t\t\t\"operator\": \"IS\",\n\t\t\t\t\"values\": [\"IFC Type\"]\n\t\t\t},\n\t\t\t\"operator\":\"IS\",\n\t\t\t\"values\":[\n\t\t\t\t\"IfcWall\",\n\t\t\t\t\"IfcDoor\"\n\t\t\t]\n\t\t}\n\t],\n\t\"updatedAt\":1552128300000,\n\t\"updatedBy\":\"alice\",\n\t\"_id\":\"00000000-0000-0000-0000-000000000004\"\n}",
           "type": "json"
         }
       ],
@@ -1507,7 +1519,19 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/group.js",
+    "filename": "src/v4/routes/group.js",
+    "groupTitle": "Groups",
+    "groupDescription": "<p>A grouping of model elements. Groups can either comprise of a set of manually defined elements or rules (smart group) that define the criteria for its elements.</p>"
+  },
+  {
+    "type": "post",
+    "url": "/:teamspace/:model/groups/import",
+    "title": "Import Groups",
+    "name": "importGroups",
+    "group": "Groups",
+    "description": "<p>This is a back-ported endpoint from V5. For details please see V5 documentation /docs/#/Federations/ImportFederationGroups</p>",
+    "version": "0.0.0",
+    "filename": "src/v4/routes/group.js",
     "groupTitle": "Groups",
     "groupDescription": "<p>A grouping of model elements. Groups can either comprise of a set of manually defined elements or rules (smart group) that define the criteria for its elements.</p>"
   },
@@ -1625,7 +1649,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/group.js",
+    "filename": "src/v4/routes/group.js",
     "groupTitle": "Groups",
     "groupDescription": "<p>A grouping of model elements. Groups can either comprise of a set of manually defined elements or rules (smart group) that define the criteria for its elements.</p>"
   },
@@ -1824,7 +1848,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/group.js",
+    "filename": "src/v4/routes/group.js",
     "groupTitle": "Groups",
     "groupDescription": "<p>A grouping of model elements. Groups can either comprise of a set of manually defined elements or rules (smart group) that define the criteria for its elements.</p>"
   },
@@ -1883,7 +1907,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/history.js",
+    "filename": "src/v4/routes/history.js",
     "groupTitle": "History"
   },
   {
@@ -1947,7 +1971,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/history.js",
+    "filename": "src/v4/routes/history.js",
     "groupTitle": "History"
   },
   {
@@ -2001,7 +2025,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/history.js",
+    "filename": "src/v4/routes/history.js",
     "groupTitle": "History"
   },
   {
@@ -2134,7 +2158,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/invitations.js",
+    "filename": "src/v4/routes/invitations.js",
     "groupTitle": "Invitations"
   },
   {
@@ -2179,7 +2203,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/invitations.js",
+    "filename": "src/v4/routes/invitations.js",
     "groupTitle": "Invitations"
   },
   {
@@ -2231,7 +2255,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/invitations.js",
+    "filename": "src/v4/routes/invitations.js",
     "groupTitle": "Invitations"
   },
   {
@@ -2294,7 +2318,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/invoice.js",
+    "filename": "src/v4/routes/invoice.js",
     "groupTitle": "Invoice"
   },
   {
@@ -2318,7 +2342,7 @@
     },
     "description": "<p>Render a HTML web page of the requested invoice.</p>",
     "version": "0.0.0",
-    "filename": "routes/invoice.js",
+    "filename": "src/v4/routes/invoice.js",
     "groupTitle": "Invoice"
   },
   {
@@ -2348,7 +2372,7 @@
     },
     "description": "<p>Render out a PDF version of the requested invocie.</p>",
     "version": "0.0.0",
-    "filename": "routes/invoice.js",
+    "filename": "src/v4/routes/invoice.js",
     "groupTitle": "Invoice"
   },
   {
@@ -2427,91 +2451,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/issue.js",
-    "groupTitle": "Issues"
-  },
-  {
-    "type": "delete",
-    "url": "/:teamspace/:model/issues/:issueId/comments",
-    "title": "Deletes an comment from an issue",
-    "name": "commentIssue",
-    "group": "Issues",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "Json",
-            "optional": false,
-            "field": "PAYLOAD",
-            "description": "<p>The data with the comment guid to be deleted.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Model ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "issueId",
-            "description": "<p>Issue ID</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "PAYLOAD",
-          "content": "{\n   guid: \"096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "success": {
-      "examples": [
-        {
-          "title": "Success",
-          "content": " HTTP/1.1 200 OK\n{\n    guid: \"096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "404",
-            "description": "<p>Issue not found</p>"
-          },
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "401",
-            "description": "<p>Not authorized, when the user is not the owner</p>"
-          },
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "400",
-            "description": "<p>Issue comment sealed, when the user is trying to delete a comment that is sealed</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues"
   },
   {
@@ -2809,7 +2749,91 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
+    "groupTitle": "Issues"
+  },
+  {
+    "type": "delete",
+    "url": "/:teamspace/:model/issues/:issueId/comments",
+    "title": "Deletes an comment from an issue",
+    "name": "commentIssue",
+    "group": "Issues",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Json",
+            "optional": false,
+            "field": "PAYLOAD",
+            "description": "<p>The data with the comment guid to be deleted.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "issueId",
+            "description": "<p>Issue ID</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "PAYLOAD",
+          "content": "{\n   guid: \"096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success",
+          "content": " HTTP/1.1 200 OK\n{\n    guid: \"096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "404",
+            "description": "<p>Issue not found</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "401",
+            "description": "<p>Not authorized, when the user is not the owner</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "400",
+            "description": "<p>Issue comment sealed, when the user is trying to delete a comment that is sealed</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues"
   },
   {
@@ -2865,7 +2889,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues"
   },
   {
@@ -2915,7 +2939,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues",
     "parameter": {
       "fields": {
@@ -2953,7 +2977,7 @@
     "group": "Issues",
     "description": "<p>Download issues as a BCF file.</p>",
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues",
     "parameter": {
       "fields": {
@@ -2984,7 +3008,7 @@
     "group": "Issues",
     "description": "<p>Get Issues BCF export based on revision ID.</p>",
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues",
     "parameter": {
       "fields": {
@@ -3022,7 +3046,7 @@
     "group": "Issues",
     "description": "<p>Get an issue viewpoint screenshot.</p>",
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues",
     "parameter": {
       "fields": {
@@ -3079,7 +3103,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues",
     "parameter": {
       "fields": {
@@ -3137,7 +3161,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues",
     "parameter": {
       "fields": {
@@ -3175,7 +3199,7 @@
     "group": "Issues",
     "description": "<p>Upload issues BCF file.</p>",
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues",
     "parameter": {
       "fields": {
@@ -3215,7 +3239,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues",
     "parameter": {
       "fields": {
@@ -3331,7 +3355,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues",
     "parameter": {
       "fields": {
@@ -3739,7 +3763,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues"
   },
   {
@@ -3750,7 +3774,7 @@
     "group": "Issues",
     "description": "<p>Creates a new issue for a particular revision. See <a href=\"#api-Issues-newIssue\">here</a> for more details.</p>",
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues",
     "parameter": {
       "fields": {
@@ -3808,7 +3832,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues",
     "parameter": {
       "fields": {
@@ -3846,7 +3870,7 @@
     "group": "Issues",
     "description": "<p>Render all Issues into a HTML webpage, response is rendered HTML.</p>",
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues",
     "parameter": {
       "fields": {
@@ -3877,7 +3901,7 @@
     "group": "Issues",
     "description": "<p>Render all Issues into a HTML webpage based on current revision ID.</p>",
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues",
     "parameter": {
       "fields": {
@@ -4259,7 +4283,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues"
   },
   {
@@ -4270,7 +4294,7 @@
     "group": "Issues",
     "description": "<p>Updates an issue for a particular revision. See <a href=\"#api-Issues-updateIssue\">here</a> for more details.</p>",
     "version": "0.0.0",
-    "filename": "routes/issue.js",
+    "filename": "src/v4/routes/issue.js",
     "groupTitle": "Issues",
     "parameter": {
       "fields": {
@@ -4357,7 +4381,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/job.js",
+    "filename": "src/v4/routes/job.js",
     "groupTitle": "Jobs"
   },
   {
@@ -4429,7 +4453,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/job.js",
+    "filename": "src/v4/routes/job.js",
     "groupTitle": "Jobs"
   },
   {
@@ -4476,7 +4500,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/job.js",
+    "filename": "src/v4/routes/job.js",
     "groupTitle": "Jobs"
   },
   {
@@ -4503,7 +4527,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/job.js",
+    "filename": "src/v4/routes/job.js",
     "groupTitle": "Jobs",
     "parameter": {
       "fields": {
@@ -4554,7 +4578,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/job.js",
+    "filename": "src/v4/routes/job.js",
     "groupTitle": "Jobs",
     "parameter": {
       "fields": {
@@ -4612,7 +4636,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/job.js",
+    "filename": "src/v4/routes/job.js",
     "groupTitle": "Jobs",
     "parameter": {
       "fields": {
@@ -4686,7 +4710,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/job.js",
+    "filename": "src/v4/routes/job.js",
     "groupTitle": "Jobs"
   },
   {
@@ -4704,7 +4728,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -4835,7 +4859,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -4975,7 +4999,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -5057,7 +5081,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>"
   },
@@ -5076,7 +5100,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -5207,7 +5231,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -5338,7 +5362,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -5469,7 +5493,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -5600,7 +5624,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -5731,7 +5755,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -5862,7 +5886,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -5993,7 +6017,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -6124,7 +6148,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -6255,7 +6279,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -6400,7 +6424,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -6545,7 +6569,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -6676,7 +6700,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -6807,7 +6831,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -6939,7 +6963,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/maps.js",
+    "filename": "src/v4/routes/maps.js",
     "groupTitle": "Maps",
     "groupDescription": "<p>Geographic information system (GIS) resources from Open Street Maps (OSM) and Here are supported. Please note that an app_id and app_code from Here are required to access Here resources.</p>",
     "parameter": {
@@ -6990,7 +7014,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/meta.js",
+    "filename": "src/v4/routes/meta.js",
     "groupTitle": "Meta"
   },
   {
@@ -7027,12 +7051,12 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/meta.js",
+    "filename": "src/v4/routes/meta.js",
     "groupTitle": "Meta"
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/revision/master/head/meta/all.json",
+    "url": "/:teamspace/:model/revision/master/head/meta/all.json?filter=:filter",
     "title": "Get all metadata",
     "name": "getAllMetadata",
     "group": "Meta",
@@ -7053,6 +7077,13 @@
             "optional": false,
             "field": "model",
             "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "filter",
+            "description": "<p>(optional) properties to filter for, comma separated</p>"
           }
         ]
       }
@@ -7074,12 +7105,12 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/meta.js",
+    "filename": "src/v4/routes/meta.js",
     "groupTitle": "Meta"
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/revision/:rev/meta/all.json",
+    "url": "/:teamspace/:model/revision/:rev/meta/all.json?filter=:filter",
     "title": "Get all metadata by revision",
     "name": "getAllMetadataByRev",
     "group": "Meta",
@@ -7107,12 +7138,19 @@
             "optional": false,
             "field": "rev",
             "description": "<p>Revision to get metadata from</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "filter",
+            "description": "<p>(optional) properties to filter for, comma separated</p>"
           }
         ]
       }
     },
     "version": "0.0.0",
-    "filename": "routes/meta.js",
+    "filename": "src/v4/routes/meta.js",
     "groupTitle": "Meta"
   },
   {
@@ -7166,7 +7204,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/meta.js",
+    "filename": "src/v4/routes/meta.js",
     "groupTitle": "Meta"
   },
   {
@@ -7211,7 +7249,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/meta.js",
+    "filename": "src/v4/routes/meta.js",
     "groupTitle": "Meta"
   },
   {
@@ -7264,7 +7302,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/meta.js",
+    "filename": "src/v4/routes/meta.js",
     "groupTitle": "Meta"
   },
   {
@@ -7310,12 +7348,12 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/meta.js",
+    "filename": "src/v4/routes/meta.js",
     "groupTitle": "Meta"
   },
   {
     "type": "post",
-    "url": "/:teamspace/:model/revision(/master/head/|/:revId)/meta/rules",
+    "url": "/:teamspace/:model/revision(/master/head/|/:revId)/meta/rules?filter=:filter",
     "title": "Filter metadata by rules",
     "name": "queryMetadataByRules",
     "group": "Meta",
@@ -7336,6 +7374,13 @@
             "optional": false,
             "field": "model",
             "description": "<p>Model ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "filter",
+            "description": "<p>(optional) properties to filter for, comma separated</p>"
           }
         ],
         "Query": [
@@ -7386,7 +7431,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/meta.js",
+    "filename": "src/v4/routes/meta.js",
     "groupTitle": "Meta"
   },
   {
@@ -7466,7 +7511,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -7549,7 +7594,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -7595,7 +7640,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -7642,7 +7687,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -7681,7 +7726,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -7737,7 +7782,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -7783,7 +7828,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -7837,7 +7882,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -7883,7 +7928,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -7929,7 +7974,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -7976,7 +8021,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8025,7 +8070,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8063,7 +8108,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8101,7 +8146,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8139,7 +8184,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8177,7 +8222,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8231,7 +8276,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8285,7 +8330,61 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/revision/:rev/assetsMeta",
+    "title": "Get revision's metadata about the assets generated",
+    "name": "getRevUnityAssets",
+    "group": "Model",
+    "description": "<p>Get the model's assets metadata of a particular revision</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>The model Id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "rev",
+            "description": "<p>The revision of the model</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/assetsMeta HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "{\n    superMeshes: [\n         {\n              _id: \"<uuid string>\",\n             nVertices: 123,\n             nFaces: 123,\n             nUVChannels: 123,\n             boundingBox: [[1, 2, 3], [3,4, 5]]\n         },\n    ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8323,7 +8422,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8370,7 +8469,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8417,12 +8516,12 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
     "type": "get",
-    "url": "/:teamspace/:model/revision/master/head/subModelRevisions",
+    "url": "/:teamspace/:model/revision/:revId/subModelRevisions",
     "title": "Get submodel revisions by rev",
     "name": "getSubModelRevisionsByRev",
     "group": "Model",
@@ -8455,7 +8554,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8502,7 +8601,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8549,7 +8648,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8587,7 +8686,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8634,7 +8733,66 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "get",
+    "url": "/:teamspace/:model/revision/master/head/unityAssets.json",
+    "title": "Get unity assets",
+    "name": "getUnityAssets",
+    "group": "Model",
+    "description": "<p>Get the lastest model's version unity assets</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>The model Id to get unity assets for.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "rev",
+            "description": "<p>The revision of the model</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/unityAssets.json HTTP/1.1",
+        "type": "get"
+      },
+      {
+        "title": "Example usage:",
+        "content": "GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/assetsMeta HTTP/1.1",
+        "type": "get"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success:",
+          "content": "{\n    superMeshes: [\n         {\n              _id: \"<uuid string>\",\n             nVertices: 123,\n             nFaces: 123,\n             nUVChannels: 123,\n             boundingBox: [[1, 2, 3], [3,4, 5]]\n         },\n    ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8672,7 +8830,84 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "post",
+    "url": "/:teamspace/:model/upload/ms-chunking",
+    "title": "Initialise MS chunking request",
+    "name": "initChunking",
+    "group": "Model",
+    "description": "<p>Initiate model revision data for MS Logic Apps chunked upload.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model id to upload.</p>"
+          }
+        ],
+        "Request body": [
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "filename",
+            "description": "<p>Filename of content to upload</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": false,
+            "field": "tag",
+            "description": "<p>Tag name for new revision</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "String",
+            "optional": true,
+            "field": "desc",
+            "description": "<p>Description for new revision</p>"
+          },
+          {
+            "group": "Request body",
+            "type": "Boolean",
+            "optional": true,
+            "field": "importAnimations",
+            "description": "<p>Whether to import animations within a sequence</p>"
+          }
+        ]
+      }
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking HTTP/1.1\n{\n\t\"filename\": \"structure.ifc\",\n\t\"tag\": \"rev001\",\n\t\"desc\": \"Revision 2\"\n}",
+        "type": "post"
+      }
+    ],
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"corID\": \"00000000-0000-1111-2222-333333333333\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8728,7 +8963,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8775,7 +9010,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8823,7 +9058,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8894,7 +9129,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -8975,7 +9210,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -9058,7 +9293,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -9132,7 +9367,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -9238,7 +9473,199 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "patch",
+    "url": "/:teamspace/:model/upload/ms-chunking/:corID",
+    "title": "Upload model chunk",
+    "name": "uploadChunk",
+    "group": "Model",
+    "description": "<p>Upload model chunk for Microsoft Logic Apps.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID to upload</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "corID",
+            "description": "<p>Upload correlation ID</p>"
+          }
+        ],
+        "Request header": [
+          {
+            "group": "Request header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Range",
+            "description": "<p>Byte range for the current content chunk, including the starting value, ending value, and the total content size, for example: &quot;bytes 0-1023/10100&quot;</p>"
+          },
+          {
+            "group": "Request header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Type",
+            "description": "<p>Type of chunked content</p>"
+          },
+          {
+            "group": "Request header",
+            "type": "String",
+            "optional": false,
+            "field": "Content-Length",
+            "description": "<p>Length of size in bytes of the current chunk</p>"
+          }
+        ],
+        "Request body: Attachment": [
+          {
+            "group": "Request body: Attachment",
+            "type": "binary",
+            "optional": false,
+            "field": "FILE",
+            "description": "<p>the file to be uploaded</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "String",
+            "optional": false,
+            "field": "Range",
+            "description": "<p>Byte range for content that has been received by the endpoint, for example: &quot;bytes=0-1023&quot;</p>"
+          },
+          {
+            "group": "200",
+            "type": "Number",
+            "optional": true,
+            "field": "x-ms-chunk-size",
+            "description": "<p>Suggested chunk size in bytes</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"Range\": \"bytes=0-1023\",\n\t\"x-ms-chunk-size\": 1024\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "PATCH /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333 HTTP/1.1\n\nheader: {\n\t\"Content-Range\": \"bytes 0-1023/10100\",\n\t\"Content-Type\": \"application/octet-stream\",\n\t\"Content-Length\": \"bytes=1024\"\n}\n\nbody: {\n\t\"file\": <FILE CHUNK CONTENTS>\n}",
+        "type": "patch"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "src/v4/routes/model.js",
+    "groupTitle": "Model"
+  },
+  {
+    "type": "post",
+    "url": "/:teamspace/:model/upload/ms-chunking/:corID",
+    "title": "Start MS chunking upload",
+    "name": "uploadChunksStart",
+    "group": "Model",
+    "description": "<p>Start chunked model upload for Microsoft Logic Apps. Max chunk size defined as 52,428,800 bytes (52 MB) based on https://docs.microsoft.com/en-us/azure/logic-apps/logic-apps-limits-and-config?tabs=azure-portal</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "teamspace",
+            "description": "<p>Name of teamspace</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "model",
+            "description": "<p>Model ID to upload</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "corID",
+            "description": "<p>Upload correlation ID</p>"
+          }
+        ],
+        "Request header": [
+          {
+            "group": "Request header",
+            "type": "String",
+            "optional": false,
+            "field": "x-ms-transfer-mode",
+            "description": "<p>Indicates that the content is uploaded in chunks; value=&quot;chunked&quot;</p>"
+          },
+          {
+            "group": "Request header",
+            "type": "Number",
+            "optional": false,
+            "field": "x-ms-content-length",
+            "description": "<p>The entire content size in bytes before chunking</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "200": [
+          {
+            "group": "200",
+            "type": "Number",
+            "optional": true,
+            "field": "x-ms-chunk-size",
+            "description": "<p>Suggested chunk size in bytes</p>"
+          },
+          {
+            "group": "200",
+            "type": "String",
+            "optional": false,
+            "field": "Location",
+            "description": "<p>The URL location where to send the HTTP PATCH messages</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"x-ms-chunk-size\": 1024,\n\t\"Location\": \"/teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333 HTTP/1.1\n\nheader: {\n\t\"x-ms-transfer-mode\": \"chunked\",\n\t\"x-ms-content-length\": 10100\n}",
+        "type": "post"
+      }
+    ],
+    "version": "0.0.0",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -9308,7 +9735,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/model.js",
+    "filename": "src/v4/routes/model.js",
     "groupTitle": "Model"
   },
   {
@@ -9318,7 +9745,7 @@
     "name": "deleteAllNotifications",
     "group": "Notification",
     "version": "0.0.0",
-    "filename": "routes/notification.js",
+    "filename": "src/v4/routes/notification.js",
     "groupTitle": "Notification"
   },
   {
@@ -9340,7 +9767,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/notification.js",
+    "filename": "src/v4/routes/notification.js",
     "groupTitle": "Notification"
   },
   {
@@ -9363,7 +9790,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/notification.js",
+    "filename": "src/v4/routes/notification.js",
     "groupTitle": "Notification"
   },
   {
@@ -9373,17 +9800,7 @@
     "name": "getNotifications",
     "group": "Notification",
     "version": "0.0.0",
-    "filename": "routes/notification.js",
-    "groupTitle": "Notification"
-  },
-  {
-    "type": "patch",
-    "url": "/notifications",
-    "title": "Patch all the user notifications",
-    "name": "patchNotification",
-    "group": "Notification",
-    "version": "0.0.0",
-    "filename": "routes/notification.js",
+    "filename": "src/v4/routes/notification.js",
     "groupTitle": "Notification"
   },
   {
@@ -9406,131 +9823,18 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/notification.js",
+    "filename": "src/v4/routes/notification.js",
     "groupTitle": "Notification"
   },
   {
-    "type": "post",
-    "url": "/:teamspace/permission-templates",
-    "title": "Create a template",
-    "name": "createTemplate",
-    "group": "PermissionTemplate",
-    "description": "<p>Create a permission template.</p>",
-    "parameter": {
-      "fields": {
-        "Request body": [
-          {
-            "group": "Request body",
-            "type": "String",
-            "optional": false,
-            "field": "_id",
-            "description": "<p>Template name</p>"
-          },
-          {
-            "group": "Request body",
-            "type": "String[]",
-            "optional": false,
-            "field": "permissions",
-            "description": "<p>List of model level permissions</p>"
-          }
-        ],
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "String",
-            "optional": false,
-            "field": "_id",
-            "description": "<p>Template name</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "String[]",
-            "optional": false,
-            "field": "permissions",
-            "description": "<p>List of model level permissions</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{\n\t\"_id\":\"Template1\",\n\t\"permissions\":[\n\t\t\"view_model\"\n\t]\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "POST /acme/permission-templates HTTP/1.1\n{\n\t\"_id\":\"Template1\",\n\t\"permissions\":[\n\t\t\"view_model\"\n\t]\n}",
-        "type": "post"
-      }
-    ],
+    "type": "patch",
+    "url": "/notifications",
+    "title": "Patch all the user notifications",
+    "name": "patchNotification",
+    "group": "Notification",
     "version": "0.0.0",
-    "filename": "routes/permissionTemplate.js",
-    "groupTitle": "Permission Template",
-    "groupDescription": "<p>Permission template is a grouping of model level permissions. An ID is assigned to it as well. They are viewer, commenter, and collaborator.</p> <p>Three default permission templates are created by default. They are viewer, commenter, and collaborator.</p>"
-  },
-  {
-    "type": "delete",
-    "url": "/:teamspace/permission-templates/:permissionId",
-    "title": "Delete a template",
-    "name": "deleteTemplate",
-    "group": "PermissionTemplate",
-    "description": "<p>Delete a permission template.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "permissionId",
-            "description": "<p>Permission ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          }
-        ]
-      }
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "DELETE /acme/permission-templates/Template1 HTTP/1.1",
-        "type": "delete"
-      }
-    ],
-    "success": {
-      "examples": [
-        {
-          "title": "Success-Response",
-          "content": "HTTP/1.1 200 OK\n{}",
-          "type": "json"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "routes/permissionTemplate.js",
-    "groupTitle": "Permission Template",
-    "groupDescription": "<p>Permission template is a grouping of model level permissions. An ID is assigned to it as well. They are viewer, commenter, and collaborator.</p> <p>Three default permission templates are created by default. They are viewer, commenter, and collaborator.</p>"
+    "filename": "src/v4/routes/notification.js",
+    "groupTitle": "Notification"
   },
   {
     "type": "get",
@@ -9567,7 +9871,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/permissionTemplate.js",
+    "filename": "src/v4/routes/permissionTemplate.js",
     "groupTitle": "Permission Template",
     "groupDescription": "<p>Permission template is a grouping of model level permissions. An ID is assigned to it as well. They are viewer, commenter, and collaborator.</p> <p>Three default permission templates are created by default. They are viewer, commenter, and collaborator.</p>",
     "success": {
@@ -9595,7 +9899,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/permissionTemplate.js",
+    "filename": "src/v4/routes/permissionTemplate.js",
     "groupTitle": "Permission Template",
     "groupDescription": "<p>Permission template is a grouping of model level permissions. An ID is assigned to it as well. They are viewer, commenter, and collaborator.</p> <p>Three default permission templates are created by default. They are viewer, commenter, and collaborator.</p>",
     "parameter": {
@@ -9628,7 +9932,7 @@
     "name": "listPlans",
     "group": "Plan",
     "version": "0.0.0",
-    "filename": "routes/plan.js",
+    "filename": "src/v4/routes/plan.js",
     "groupTitle": "Plan"
   },
   {
@@ -9674,7 +9978,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/presentation.js",
+    "filename": "src/v4/routes/presentation.js",
     "groupTitle": "Presentation"
   },
   {
@@ -9727,7 +10031,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/presentation.js",
+    "filename": "src/v4/routes/presentation.js",
     "groupTitle": "Presentation"
   },
   {
@@ -9773,7 +10077,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/presentation.js",
+    "filename": "src/v4/routes/presentation.js",
     "groupTitle": "Presentation"
   },
   {
@@ -9827,7 +10131,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/project.js",
+    "filename": "src/v4/routes/project.js",
     "groupTitle": "Project"
   },
   {
@@ -9879,7 +10183,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/project.js",
+    "filename": "src/v4/routes/project.js",
     "groupTitle": "Project"
   },
   {
@@ -9940,7 +10244,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/project.js",
+    "filename": "src/v4/routes/project.js",
     "groupTitle": "Project"
   },
   {
@@ -9992,7 +10296,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/project.js",
+    "filename": "src/v4/routes/project.js",
     "groupTitle": "Project"
   },
   {
@@ -10037,7 +10341,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/project.js",
+    "filename": "src/v4/routes/project.js",
     "groupTitle": "Project"
   },
   {
@@ -10131,7 +10435,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/project.js",
+    "filename": "src/v4/routes/project.js",
     "groupTitle": "Project"
   },
   {
@@ -10228,7 +10532,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/project.js",
+    "filename": "src/v4/routes/project.js",
     "groupTitle": "Project"
   },
   {
@@ -10266,7 +10570,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/resources.js",
+    "filename": "src/v4/routes/resources.js",
     "groupTitle": "Resources"
   },
   {
@@ -10345,7 +10649,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/risk.js",
+    "filename": "src/v4/routes/risk.js",
     "groupTitle": "SafetiBase Risks"
   },
   {
@@ -10468,7 +10772,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/risk.js",
+    "filename": "src/v4/routes/risk.js",
     "groupTitle": "SafetiBase Risks"
   },
   {
@@ -10531,12 +10835,12 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/risk.js",
+    "filename": "src/v4/routes/risk.js",
     "groupTitle": "SafetiBase Risks"
   },
   {
     "type": "delete",
-    "url": "/:teamspace/:model/issues/:issueId/resources",
+    "url": "/:teamspace/:model/risks/:riskId/resources",
     "title": "Detach a resource from a risk",
     "name": "detachResourceRisk",
     "group": "Risks",
@@ -10587,7 +10891,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/risk.js",
+    "filename": "src/v4/routes/risk.js",
     "groupTitle": "SafetiBase Risks"
   },
   {
@@ -10627,7 +10931,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/mitigation.js",
+    "filename": "src/v4/routes/mitigation.js",
     "groupTitle": "SafetiBase Risks"
   },
   {
@@ -10711,7 +11015,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/mitigation.js",
+    "filename": "src/v4/routes/mitigation.js",
     "groupTitle": "SafetiBase Risks"
   },
   {
@@ -10749,7 +11053,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/risk.js",
+    "filename": "src/v4/routes/risk.js",
     "groupTitle": "SafetiBase Risks",
     "parameter": {
       "fields": {
@@ -10814,7 +11118,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/risk.js",
+    "filename": "src/v4/routes/risk.js",
     "groupTitle": "SafetiBase Risks",
     "parameter": {
       "fields": {
@@ -10879,7 +11183,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/risk.js",
+    "filename": "src/v4/routes/risk.js",
     "groupTitle": "SafetiBase Risks",
     "parameter": {
       "fields": {
@@ -10944,7 +11248,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/risk.js",
+    "filename": "src/v4/routes/risk.js",
     "groupTitle": "SafetiBase Risks",
     "parameter": {
       "fields": {
@@ -11120,7 +11424,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/risk.js",
+    "filename": "src/v4/routes/risk.js",
     "groupTitle": "SafetiBase Risks"
   },
   {
@@ -11199,7 +11503,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/risk.js",
+    "filename": "src/v4/routes/risk.js",
     "groupTitle": "SafetiBase Risks"
   },
   {
@@ -11618,7 +11922,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/risk.js",
+    "filename": "src/v4/routes/risk.js",
     "groupTitle": "SafetiBase Risks"
   },
   {
@@ -11833,7 +12137,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/risk.js",
+    "filename": "src/v4/routes/risk.js",
     "groupTitle": "SafetiBase Risks"
   },
   {
@@ -11860,7 +12164,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/sequence.js",
+    "filename": "src/v4/routes/sequence.js",
     "groupTitle": "Sequences",
     "parameter": {
       "fields": {
@@ -12010,7 +12314,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/sequence.js",
+    "filename": "src/v4/routes/sequence.js",
     "groupTitle": "Sequences"
   },
   {
@@ -12037,7 +12341,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/sequence.js",
+    "filename": "src/v4/routes/sequence.js",
     "groupTitle": "Sequences",
     "parameter": {
       "fields": {
@@ -12084,7 +12388,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/sequence.js",
+    "filename": "src/v4/routes/sequence.js",
     "groupTitle": "Sequences",
     "parameter": {
       "fields": {
@@ -12165,7 +12469,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/sequence.js",
+    "filename": "src/v4/routes/sequence.js",
     "groupTitle": "Sequences"
   },
   {
@@ -12286,7 +12590,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/sequence.js",
+    "filename": "src/v4/routes/sequence.js",
     "groupTitle": "Sequences"
   },
   {
@@ -12313,7 +12617,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/sequence.js",
+    "filename": "src/v4/routes/sequence.js",
     "groupTitle": "Sequences",
     "parameter": {
       "fields": {
@@ -12360,7 +12664,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/sequence.js",
+    "filename": "src/v4/routes/sequence.js",
     "groupTitle": "Sequences",
     "parameter": {
       "fields": {
@@ -12434,7 +12738,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/sequence.js",
+    "filename": "src/v4/routes/sequence.js",
     "groupTitle": "Sequences"
   },
   {
@@ -12495,7 +12799,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/sequence.js",
+    "filename": "src/v4/routes/sequence.js",
     "groupTitle": "Sequences"
   },
   {
@@ -12556,7 +12860,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/sequence.js",
+    "filename": "src/v4/routes/sequence.js",
     "groupTitle": "Sequences"
   },
   {
@@ -12617,7 +12921,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/sequence.js",
+    "filename": "src/v4/routes/sequence.js",
     "groupTitle": "Sequences"
   },
   {
@@ -12649,7 +12953,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/sequence.js",
+    "filename": "src/v4/routes/sequence.js",
     "groupTitle": "Sequences",
     "parameter": {
       "fields": {
@@ -12730,7 +13034,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/sequence.js",
+    "filename": "src/v4/routes/sequence.js",
     "groupTitle": "Sequences"
   },
   {
@@ -12794,7 +13098,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/subscriptions.js",
+    "filename": "src/v4/routes/subscriptions.js",
     "groupTitle": "Subscription"
   },
   {
@@ -12862,7 +13166,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/teamspace.js",
+    "filename": "src/v4/routes/teamspace.js",
     "groupTitle": "Teamspace"
   },
   {
@@ -12907,7 +13211,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/teamspace.js",
+    "filename": "src/v4/routes/teamspace.js",
     "groupTitle": "Teamspace"
   },
   {
@@ -12945,7 +13249,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/teamspace.js",
+    "filename": "src/v4/routes/teamspace.js",
     "groupTitle": "Teamspace"
   },
   {
@@ -12990,7 +13294,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/teamspace.js",
+    "filename": "src/v4/routes/teamspace.js",
     "groupTitle": "Teamspace"
   },
   {
@@ -13042,7 +13346,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/teamspace.js",
+    "filename": "src/v4/routes/teamspace.js",
     "groupTitle": "Teamspace"
   },
   {
@@ -13087,7 +13391,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/teamspace.js",
+    "filename": "src/v4/routes/teamspace.js",
     "groupTitle": "Teamspace"
   },
   {
@@ -13114,7 +13418,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/teamspace.js",
+    "filename": "src/v4/routes/teamspace.js",
     "groupTitle": "Teamspace",
     "parameter": {
       "fields": {
@@ -13172,7 +13476,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/teamspace.js",
+    "filename": "src/v4/routes/teamspace.js",
     "groupTitle": "Teamspace"
   },
   {
@@ -13199,7 +13503,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/teamspace.js",
+    "filename": "src/v4/routes/teamspace.js",
     "groupTitle": "Teamspace",
     "parameter": {
       "fields": {
@@ -13264,7 +13568,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/teamspace.js",
+    "filename": "src/v4/routes/teamspace.js",
     "groupTitle": "Teamspace"
   },
   {
@@ -13352,7 +13656,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/teamspace.js",
+    "filename": "src/v4/routes/teamspace.js",
     "groupTitle": "Teamspace"
   },
   {
@@ -13379,7 +13683,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/teamspace.js",
+    "filename": "src/v4/routes/teamspace.js",
     "groupTitle": "Teamspace",
     "parameter": {
       "fields": {
@@ -13394,60 +13698,6 @@
         ]
       }
     }
-  },
-  {
-    "type": "get",
-    "url": "/:teamspace/:model/textures/:textureId",
-    "title": "Get texture map",
-    "name": "getTexture",
-    "group": "Texture",
-    "description": "<p>Returns the texture map with the given UID</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "teamspace",
-            "description": "<p>Name of teamspace</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "model",
-            "description": "<p>Name of the model containing the texture</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "UID",
-            "description": "<p>of the texture to download</p>"
-          }
-        ]
-      }
-    },
-    "examples": [
-      {
-        "title": "Example usage:",
-        "content": "GET /teamSpace1/84b5f0e0-a27d-11eb-ac9d-a531015f5294/textures/c9df3159-295c-4714-8b54-63dc715b1125 HTTP/1.1",
-        "type": "get"
-      }
-    ],
-    "success": {
-      "examples": [
-        {
-          "title": "Success (with headers):",
-          "content": "\nHTTP/1.1 200 OK\nX-Powered-By: Express\nVary: Origin\nAccess-Control-Allow-Credentials: true\nContent-Type: image/png;\nDate: Wed, 21 Apr 2021 10:59:54 GMT\nConnection: keep-alive\nTransfer-Encoding: chunked\n\n/***** FILE CONTENTS ******\\",
-          "type": "png"
-        }
-      ]
-    },
-    "version": "0.0.0",
-    "filename": "routes/model.js",
-    "groupTitle": "Texture"
   },
   {
     "type": "get",
@@ -13466,7 +13716,7 @@
     "name": "GetStarredMetadataTags",
     "group": "User",
     "version": "0.0.0",
-    "filename": "routes/user.js",
+    "filename": "src/v4/routes/user.js",
     "groupTitle": "User"
   },
   {
@@ -13476,7 +13726,7 @@
     "name": "GetStarredModels",
     "group": "User",
     "version": "0.0.0",
-    "filename": "routes/user.js",
+    "filename": "src/v4/routes/user.js",
     "groupTitle": "User"
   },
   {
@@ -13526,7 +13776,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/user.js",
+    "filename": "src/v4/routes/user.js",
     "groupTitle": "User"
   },
   {
@@ -13576,7 +13826,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/user.js",
+    "filename": "src/v4/routes/user.js",
     "groupTitle": "User"
   },
   {
@@ -13627,7 +13877,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/user.js",
+    "filename": "src/v4/routes/user.js",
     "groupTitle": "User"
   },
   {
@@ -13685,7 +13935,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/user.js",
+    "filename": "src/v4/routes/user.js",
     "groupTitle": "User"
   },
   {
@@ -13736,7 +13986,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/user.js",
+    "filename": "src/v4/routes/user.js",
     "groupTitle": "User"
   },
   {
@@ -13794,17 +14044,17 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/user.js",
+    "filename": "src/v4/routes/user.js",
     "groupTitle": "User"
   },
   {
     "type": "delete",
     "url": "/apikey",
     "title": "Deletes the current apikey for the logged user",
-    "name": "deleteApiKey_HTTP_1_1_200_OK___",
+    "name": "deleteApiKey_HTTP/1.1_200_OK_{}",
     "group": "User",
     "version": "0.0.0",
-    "filename": "routes/user.js",
+    "filename": "src/v4/routes/user.js",
     "groupTitle": "User"
   },
   {
@@ -13823,7 +14073,7 @@
     },
     "group": "User",
     "version": "0.0.0",
-    "filename": "routes/user.js",
+    "filename": "src/v4/routes/user.js",
     "groupTitle": "User"
   },
   {
@@ -13842,7 +14092,7 @@
     },
     "group": "User",
     "version": "0.0.0",
-    "filename": "routes/user.js",
+    "filename": "src/v4/routes/user.js",
     "groupTitle": "User"
   },
   {
@@ -13928,7 +14178,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/view.js",
+    "filename": "src/v4/routes/view.js",
     "groupTitle": "Views"
   },
   {
@@ -13982,7 +14232,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/view.js",
+    "filename": "src/v4/routes/view.js",
     "groupTitle": "Views"
   },
   {
@@ -14226,7 +14476,7 @@
       }
     },
     "version": "0.0.0",
-    "filename": "routes/view.js",
+    "filename": "src/v4/routes/view.js",
     "groupTitle": "Views"
   },
   {
@@ -14280,7 +14530,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/view.js",
+    "filename": "src/v4/routes/view.js",
     "groupTitle": "Views"
   },
   {
@@ -14362,7 +14612,7 @@
       }
     ],
     "version": "0.0.0",
-    "filename": "routes/view.js",
+    "filename": "src/v4/routes/view.js",
     "groupTitle": "Views",
     "parameter": {
       "fields": {
@@ -14589,7 +14839,7 @@
       ]
     },
     "version": "0.0.0",
-    "filename": "routes/view.js",
+    "filename": "src/v4/routes/view.js",
     "groupTitle": "Views"
   }
 ]
