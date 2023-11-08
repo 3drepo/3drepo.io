@@ -26,7 +26,7 @@ import { FormHelperText, Tooltip } from '@mui/material';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { PinInputContainer, FlexRow, PinAction, PinActionLabel, PinActions, PinName, PinSelectContainer } from './coordsProperty.styles';
-import { getPinColorHex } from './pin.helpers.component';
+import { getPinColorHex, isPinLight } from './pin.helpers.component';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -167,7 +167,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 				</span>
 				{isViewer && (
 					<Tooltip title={getSelectedPinTooltip()}>
-						<PinSelectContainer color={colorHex} isSelected={isSelected} onClick={onClickSelectPin}>
+						<PinSelectContainer color={colorHex} $isLight={isPinLight(colorHex)} isSelected={isSelected} onClick={onClickSelectPin}>
 							<PinIcon />
 						</PinSelectContainer>
 					</Tooltip>

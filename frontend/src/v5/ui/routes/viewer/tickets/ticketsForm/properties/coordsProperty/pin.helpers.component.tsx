@@ -21,6 +21,7 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { get, isArray, isObject } from 'lodash';
 import { theme } from '@/v5/ui/themes/theme';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
+import { contrastColor } from 'contrast-color';
 
 const DEFAULT_COLOR = theme.palette.primary.main;
 
@@ -66,3 +67,5 @@ export const getPinColorHex = (name: string) => {
 export const getTicketDefaultPinColor = (ticket, template) => {
 	return isObject(template?.config?.pin) ? getColorFromMapping(ticket, template.config.pin) : DEFAULT_COLOR;
 };
+
+export const isPinLight = (hex: string) => contrastColor({ bgColor: hex, threshold: 230 }) !== '#FFFFFF';
