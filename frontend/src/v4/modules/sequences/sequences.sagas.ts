@@ -29,6 +29,7 @@ import { selectHiddenGeometryVisible,  TreeActions } from '../tree';
 import { selectCacheSetting } from '../viewer';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { ViewpointsActions } from '../viewpoints';
+import { GroupsActions } from '../groups';
 import { getSelectedFrame } from './sequences.helper';
 import {
 	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates, selectSelectedDate, selectSelectedFrameViewpoint,
@@ -199,6 +200,7 @@ export function* initializeSequences() {
 }
 
 export function* restoreModelDefaultVisibility() {
+	yield put(GroupsActions.clearColorOverrides());
 	yield put(TreeActions.showAllNodes());
 	yield put(TreeActions.showHiddenGeometry());
 }

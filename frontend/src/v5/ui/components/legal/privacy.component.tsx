@@ -445,8 +445,8 @@ export const PrivacyLegalPaper = () => (
 			<p>
 				You can set your browser to refuse all or some browser cookies, or to alert you when websites set or
 				access cookies. If you disable or refuse cookies, please note that some parts of this website may
-				become inaccessible or not function properly. For more information about the cookies we use, please see
-				<Link to={COOKIES_ROUTE}> Cookies Policy</Link>
+				become inaccessible or not function properly. For more information about the cookies we use, please
+				see <Link to={COOKIES_ROUTE}>Cookies Policy</Link>.
 			</p>
 			<li>
 				<h2>How is your personal data shared?</h2>

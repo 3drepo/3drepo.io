@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { orderBy } from 'lodash';
 import { CreateRevisionAction,
 	FetchAction,
 	RevisionsActions,
@@ -29,12 +30,13 @@ import { CreateRevisionAction,
 import { ContainersActions } from '../containers/containers.redux';
 import { UploadStatuses } from '../containers/containers.types';
 import { createContainerFromRevisionBody, createFormDataFromRevisionBody } from './revisions.helpers';
+import { selectRevisions } from './revisions.selectors';
 
-export function* fetch({ teamspace, projectId, containerId }: FetchAction) {
+export function* fetch({ teamspace, projectId, containerId, onSuccess }: FetchAction) {
 	yield put(RevisionsActions.setIsPending(containerId, true));
 	try {
 		const { data: { revisions } } = yield API.Revisions.fetchRevisions(teamspace, projectId, containerId);
-
+		onSuccess?.();
 		yield put(RevisionsActions.fetchSuccess(containerId, revisions));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -49,6 +51,16 @@ export function* setVoidStatus({ teamspace, projectId, containerId, revisionId, 
 	try {
 		yield API.Revisions.setRevisionVoidStatus(teamspace, projectId, containerId, revisionId, isVoid);
 		yield put(RevisionsActions.setVoidStatusSuccess(containerId, revisionId, isVoid));
+		const revisions = yield select(selectRevisions, containerId);
+		const activeRevisions = revisions.filter((rev) => !rev.void);
+		const revisionsCount = activeRevisions.length;
+		const latestRevision = revisionsCount ? orderBy(activeRevisions, 'timestamp')[0].tag : null;
+		const updates = {
+			revisionsCount,
+			lastUpdated: new Date(),
+			latestRevision,
+		};
+		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, updates));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'revisions.setVoid.error', defaultMessage: 'trying to set revision void status' }),
@@ -73,9 +85,9 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 	}
 	try {
 		if (!containerId) {
-			throw new Error(
-				formatMessage({ id: 'revisions.error.noContainer', defaultMessage: 'Failed to create Container' }),
-			);
+			yield put(RevisionsActions.setUploadComplete(uploadId, true,
+				formatMessage({ id: 'revisions.error.noContainer', defaultMessage: 'Failed to create Container' })));
+			return;
 		}
 		yield put(RevisionsActions.setUploadComplete(uploadId, false));
 		yield API.Revisions.createRevision(
