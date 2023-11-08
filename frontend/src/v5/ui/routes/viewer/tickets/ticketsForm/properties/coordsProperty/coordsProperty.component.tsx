@@ -98,17 +98,17 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 	// Update pin when position changes
 	useEffect(() => {
-		// There seems to be some sort of race condition in react-hook-form
-		// so onBlur cant be called inmmediatly after onchange because the validation wont be there.
-		setTimeout(() => onBlur?.(), 200);
-
 		if (value !== prevValue.current) {
 			replacePin();
 		}
 
 		if (isSelected) ViewerService.setSelectionPin({ id: pinId, isSelected });
-
 		prevValue.current = value;
+
+		// There seems to be some sort of race condition in react-hook-form
+		// so onBlur can't be called immediately after onChange because the validation won't be there.
+		if (required && !value) return;
+		setTimeout(() => onBlur?.(), 200);
 	}, [value]);
 
 	useEffect(() => () => {
