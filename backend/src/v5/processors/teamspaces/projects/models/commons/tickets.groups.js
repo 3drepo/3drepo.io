@@ -106,14 +106,11 @@ const convertObjectIds = async (teamspace, model, group) => {
 		return convertedObject;
 	}));
 
-	return convertedObjects;
+	return { ...group, objects: convertedObjects };
 };
 
 TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
-	const convertedGroups = await Promise.all(groups.map(async (g) => {
-		const convertedObjects = await convertObjectIds(teamspace, model, g);
-		return { ...g, objects: convertedObjects };
-	}));
+	const convertedGroups = await Promise.all(groups.map((g) => convertObjectIds(teamspace, model, g)));
 
 	await addGroups(teamspace, project, model, ticket, convertedGroups);
 };
