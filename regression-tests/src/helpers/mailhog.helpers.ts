@@ -33,7 +33,7 @@ interface MailItemAddress {
 interface MailItem {
 	ID:string;
 	From: MailItemAddress;
-	To: MailItemAddress;
+	To: MailItemAddress[];
 	Content: {
 		Headers: Record<string, string[]>;
 		Body: string;
@@ -58,7 +58,7 @@ export const getMessages = async (driver:WebDriver): Promise<Messages> => {
 
 export const getLatestMailFor = async (driver:WebDriver, email:string) => {
 	const messages = await getMessages(driver);
-	const mailItem = messages.items.find((item) => item.To.Mailbox + '@' + item.To.Domain === email);
+	const mailItem = messages.items.find((item) => item.To.some((t) => t.Mailbox + '@' + t.Domain === email));
 	
 	if (mailItem) {
 		return quotedPrintable.decode(mailItem.Content.Body);

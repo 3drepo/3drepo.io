@@ -65,6 +65,6 @@ export const getV5 = async (driver, url) => get(driver, generateV5ApiUrl(url), t
 export const postV5 = async (driver, url, body = null) => post(driver, generateV5ApiUrl(url), true, body);
 
 
-export const getLogin = (driver) => get(driver, 'login');
+export const getLogin = (driver) => getV5(driver, 'login');
 
-export const logout = (driver) => post(driver, 'logout');
+export const logout = (driver) => postV5(driver, 'logout');

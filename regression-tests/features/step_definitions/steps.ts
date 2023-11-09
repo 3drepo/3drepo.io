@@ -15,14 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { When, Then, Given, Before, After } from '@cucumber/cucumber';
+import { When, Then, Given, Before, After, setDefaultTimeout } from '@cucumber/cucumber';
 import { expect } from 'chai';
 import { until } from 'selenium-webdriver';
-import { clickOn, clickOnCheckboxNearText, fillInForm, initializeSeleniumDriver, navigateTo, waitUntilPageLoaded } from '../../src/helpers/selenium.helpers';
+import { clickOn, clickOnCheckboxNearText, fillInForm, initializeSeleniumDriver, navigateTo, waitForText, waitUntilPageLoaded } from '../../src/helpers/selenium.helpers';
 import { getLogin, logout } from '../../src/helpers/api.helpers';
 import { domain } from '../../config.json';
 import { getUrl } from '../../src/helpers/routing.helpers';
 import { getUserForRole } from '../../src/helpers/users.helpers';
+
+setDefaultTimeout(60 * 1000);
 
 Before(async function () {
 	this.driver = await initializeSeleniumDriver('chrome');
@@ -64,6 +66,10 @@ When('I click on the checkbox near {string}', async function (text: string) {
 
 When('I fill in the form with:', async function (datatable) {
 	await fillInForm(this.driver, datatable.hashes()[0]);
+});
+
+When('I wait until {string} text appears', async function (text) {
+	await waitForText(this.driver, text);
 });
 
 Then('I should be redirected to the {string} page', async function (page) {

@@ -15,24 +15,37 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Then } from '@cucumber/cucumber';
-import { getLatestMailFor } from '../../src/helpers/mailhog.helpers';
-import { WebDriver } from 'selenium-webdriver';
-import { reTry } from '../../src/helpers/functions.helpers';
+export const reTry = async (func, retries, interval) => {
+	const retryData = { intervalId:  null, retries };
+	let error = undefined;
 
-Then('I navigate to verify account from email {string}', async function (email) {
-	const mailContent = await reTry(async () => {
-		const mail = await getLatestMailFor(this.driver, email);
+	const promData =  { resolve: undefined, reject: undefined };
 
-		if (!mail) {
-			throw new Error('Mail not received');
+	const prom = new Promise((resolve, reject) =>  {
+		promData.resolve = resolve;
+		promData.reject = reject;
+	});
+
+	let value = undefined;
+
+	retryData.intervalId = setInterval(async () => {
+		if (!retryData.retries) {
+			clearInterval(retryData.intervalId);
+			if (error) promData.reject(error);
+			else promData.resolve(value);
 		}
 
-		return mail;
-	}, 100, 100);
+		try {
+			value = await func();
+			retryData.retries = 0;
+			error = null;
 
+		} catch (e) {
+			error = e;
+			retryData.retries--;
+		}
 
-	await (this.driver as WebDriver).executeScript('document.write(`' + mailContent + '`)');
-	// await clickOn(this.driver, 'Verify');
-	await (this.driver as WebDriver).executeAsyncScript('var a = 1;');
-});
+	}, interval); 
+
+	return prom;
+};

@@ -17,6 +17,7 @@
 import { Builder, until, By, WebDriver } from 'selenium-webdriver';
 import * as config from '../../config.json';
 import { getUrl } from './routing.helpers';
+import { reTry } from './functions.helpers';
 
 export const delay = (time) => new Promise((resolve) => setTimeout(resolve, time));
 
@@ -41,10 +42,17 @@ export const initializeSeleniumDriver = async (browserType) => {
 
 export const waitUntilPageLoaded = async (driver) => driver.wait(until.elementLocated(By.css('body')));
 
+export const waitForText = async (driver: WebDriver, text:string ) => {
+	const target =  By.xpath('//*[contains(text(),"' +  text + '")]');
+	await driver.wait(until.elementLocated(target), 100000);
+	return driver.findElement(target);
+};
 
 const findInputNearText = async (driver: WebDriver, text:string, inputType: string = '') => {
 	const typefilter = inputType ? '[@type="' + inputType  + '"]' : '';
-	const target = By.xpath('//*[contains(text(),"' +  text + '")]//ancestor::*/*/input' + typefilter);
+	const targetText = '//*[contains(text(),"' +  text + '")]//ancestor::*/*/input' + typefilter;
+	// console.log(targetText);
+	const target = By.xpath(targetText);
 	await driver.wait(until.elementLocated(target), 100000);
 	return driver.findElement(target);
 };
@@ -74,7 +82,10 @@ export const fillInForm = async (driver: WebDriver, fields: Record<string, strin
 };
 
 export const clickOnCheckboxNearText = async (driver: WebDriver, text: string) => {
-	const checkbox = await findInputNearText(driver, text);
-	await driver.wait(until.elementIsEnabled(checkbox));
-	await checkbox.click();
+	const checkbox = await findInputNearText(driver, text, 'checkbox');
+	await driver.wait(until.elementIsEnabled(checkbox), 100000);
+
+	reTry(async () => {
+		await checkbox.click();
+	}, 100, 50);
 };
