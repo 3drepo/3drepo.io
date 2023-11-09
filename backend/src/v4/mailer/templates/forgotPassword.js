@@ -698,8 +698,8 @@ Use the link below to set up a new password for your account.</span>
 
                         <td valign="top" class="mcnTextContent" style="padding: 0px 18px 9px; line-height: 200%; text-align: left;">
 
-                            <span style="font-size:15px">If you did not request a password reset, please ignore this email and contact us at <a href="mailto:support@3drepo.org?subject=Support%20Query" target="_blank"><span
-                                    style="color:#3452ff">support@3drepo.org</span></a> so we can make sure no one else is trying to access your account.<br><br>
+                            <span style="font-size:15px">If you did not request a password reset, please ignore this email and contact us at <a href="mailto:support@3drepo.com?subject=Support%20Query" target="_blank"><span
+                                    style="color:#3452ff">support@3drepo.com</span></a> so we can make sure no one else is trying to access your account.<br><br>
 This password reset is only valid for 24 hours.</span>
                         </td>
                     </tr>

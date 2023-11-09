@@ -24,7 +24,7 @@ import { get } from 'lodash';
 import { ListboxComponent } from './listboxComponent/listboxComponent.component';
 import { Autocomplete } from './fieldValueInput.styles';
 
-export const FieldValueInput = ({ name }) => {
+export const FieldValueInput = ({ name, disabled }) => {
 	const { formState: { errors } } = useFormContext();
 	const fields = useSelector(selectMetaKeys);
 
@@ -43,6 +43,7 @@ export const FieldValueInput = ({ name }) => {
 					onChange={(_, data) => onChange(data)}
 					onInputChange={(_, data) => onChange(data)}
 					noOptionsText={formatMessage({ id: 'tickets.groups.field.noOptions', defaultMessage: 'No options' })}
+					disabled={disabled}
 					renderInput={({ InputProps, ...renderInputParams }) => (
 						<TextField
 							error={!!get(errors, name)}

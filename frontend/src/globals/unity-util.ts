@@ -356,11 +356,11 @@ export class UnityUtil {
 					<br><br> <code>${message}</code>
 					<br><br> This may due to insufficient memory. Please ensure you are using a modern 64bit web browser
 					(such as Chrome or Firefox), reduce your memory usage and try again.
-					If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error.
+					If you are unable to resolve this problem, please contact support@3drepo.com referencing the above error.
 					<br><md-container>`;
 		} else {
 			conf = `Something went wrong :( <br><br> <code>${message}</code><br><br>
-				If you are unable to resolve this problem, please contact support@3drepo.org referencing the above error
+				If you are unable to resolve this problem, please contact support@3drepo.com referencing the above error
 				<br><br> Click OK to refresh this page<md-container>`;
 		}
 

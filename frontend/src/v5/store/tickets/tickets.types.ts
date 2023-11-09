@@ -136,6 +136,7 @@ type ColorAndOpacity = {
 export type GroupOverride = ColorAndOpacity & {
 	prefix?: string[],
 	group: string | Group,
+	key?: number;
 };
 
 export type ViewpointState = {

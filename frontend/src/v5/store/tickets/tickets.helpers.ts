@@ -166,7 +166,7 @@ const overrideHasEditedGroup = (override: GroupOverride, oldOverrides: GroupOver
 	const overrideId = (override.group as Group)._id;
 	if (!overrideId) return false;
 
-	const oldGroup = oldOverrides.find(({ group }) => (group as Group)._id === overrideId).group;
+	const oldGroup = oldOverrides.find(({ group }) => (group as Group)._id === overrideId)?.group;
 	return !isEqual(oldGroup, override.group);
 };
 

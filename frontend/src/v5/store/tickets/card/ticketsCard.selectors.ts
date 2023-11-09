@@ -20,7 +20,6 @@ import { selectCurrentModel } from '@/v4/modules/model';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { createSelector } from 'reselect';
-import { isEmpty } from 'lodash';
 import { selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
 import { ITicket } from '../tickets.types';
 import { ITicketsCardState } from './ticketsCard.redux';
@@ -88,10 +87,9 @@ export const selectTicketTransparencies = createSelector(
 	(overridesDicts) => overridesDicts.transparencies,
 );
 
-export const selectTicketHasOverrides = createSelector(
-	selectTicketOverrides,
-	selectTicketTransparencies,
-	(overrides, transparencies) => !isEmpty(overrides) || !isEmpty(transparencies),
+export const selectTicketHasClearedOverrides = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => !ticketCardState.overrides,
 );
 
 export const selectSelectedTicket = createSelector(

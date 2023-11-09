@@ -20,10 +20,11 @@ import { FormattedMessage } from 'react-intl';
 import { Link } from './unexpectedError.styles';
 
 type UnexpectedErrorProps = {
+	error: any;
 	className?: string;
 };
 
-export const UnexpectedError = ({ className }: UnexpectedErrorProps) => (
+export const UnexpectedError = ({ error, className }: UnexpectedErrorProps) => (
 	<ErrorMessage
 		className={className}
 		title={formatMessage({
@@ -31,19 +32,21 @@ export const UnexpectedError = ({ className }: UnexpectedErrorProps) => (
 			defaultMessage: 'An unexpected error has occurred. Please try again later.',
 		})}
 	>
-		<FormattedMessage
-			id="form.unexpectedError.contactSupport.message"
-			defaultMessage="If the error persists, please {contactSupport}."
-			values={{
-				contactSupport: (
-					<Link to={{ pathname: 'https://3drepo.com/contact/' }}>
-						<FormattedMessage
-							id="form.unexpectedError.contactSupport.link"
-							defaultMessage="contact the support"
-						/>
-					</Link>
-				),
-			}}
-		/>
+		{error.response?.data?.message ?? (
+			<FormattedMessage
+				id="form.unexpectedError.contactSupport.message"
+				defaultMessage="If the error persists, please {contactSupport}."
+				values={{
+					contactSupport: (
+						<Link to={{ pathname: 'https://3drepo.com/contact/' }}>
+							<FormattedMessage
+								id="form.unexpectedError.contactSupport.link"
+								defaultMessage="contact the support"
+							/>
+						</Link>
+					),
+				}}
+			/>
+		)}
 	</ErrorMessage>
 );

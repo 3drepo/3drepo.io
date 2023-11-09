@@ -20,7 +20,7 @@ const { v5Path } = require("../../interop");
 const express = require("express");
 const compress = require("compression");
 const responseCodes = require("../response_codes");
-const { systemLogger } = require("../logger");
+const { systemLogger, logLabels } = require("../logger");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const bodyParserErrorHandler = require("express-body-parser-error-handler");
@@ -188,6 +188,7 @@ APIService.createApp = (config, v5Init = true) => {
 	app.use(function (req, res, next) {
 		// record start time of the request
 		req.startTime = Date.now();
+		systemLogger.logInfo(`[IN] ${req.method} ${req.originalUrl}`, undefined, logLabels.network);
 		// intercept OPTIONS method
 		if ("OPTIONS" === req.method) {
 			res.sendStatus(200);

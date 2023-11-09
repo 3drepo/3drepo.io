@@ -43,18 +43,8 @@ import {
 } from './compare.selectors';
 
 const getNextRevision = (revisions, currentRevision) => {
-	if (!currentRevision) {
-		return revisions[0];
-	}
-
 	const index = revisions.findIndex((r) => r._id === currentRevision._id);
-	const lastRev = index + 1 === revisions.length;
-
-	if (lastRev) {
-		return revisions[index];
-	}
-
-	return revisions[index + 1];
+	return revisions[(index + 1) % revisions.length];
 };
 
 const prepareModelToCompare = (teamspace, modelId, name, isFederation, revisions, currentRevision?) => {
@@ -226,8 +216,8 @@ function* setTargetModel({ modelId, isTarget, isTypeChange = false }) {
 		}
 
 		if (!isTarget) {
-			const { baseRevision } = compareModels.find((comparedModel) => comparedModel._id === modelId);
-			yield put(CompareActions.setTargetRevision(modelId, baseRevision, isDiff));
+			const { baseRevision, targetDiffRevision } = compareModels.find((comparedModel) => comparedModel._id === modelId);
+			yield put(CompareActions.setTargetRevision(modelId, isDiff ? targetDiffRevision : baseRevision, isDiff));
 		}
 
 		if (!isDiff) {

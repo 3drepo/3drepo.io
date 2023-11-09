@@ -29,7 +29,7 @@ export const searchByFilters = (
 		items = [],
 		filters = [],
 		returnDefaultHidden = false,
-		queryFields = ['name', 'desc']
+		queryFields = ['name', 'desc', 'number']
 	) => {
 	const prefilteredItems = !returnDefaultHidden ? items.filter(({defaultHidden}) => !defaultHidden) : items;
 

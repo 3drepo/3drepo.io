@@ -75,7 +75,10 @@ export const setOverrides = (state: ITicketsCardState, { overrides }: SetOverrid
 	state.overrides = overrides;
 };
 
-export const resetState = () => INITIAL_STATE;
+export const resetState = ({ readOnly }: ITicketsCardState) => ({
+	...INITIAL_STATE,
+	readOnly,
+});
 
 export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SET_SELECTED_TICKET]: setSelectedTicket,

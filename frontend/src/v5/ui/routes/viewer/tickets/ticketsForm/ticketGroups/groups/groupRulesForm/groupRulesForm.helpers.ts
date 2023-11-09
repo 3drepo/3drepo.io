@@ -65,3 +65,24 @@ export const groupRuleToFormRule = ({ values, field, ...rule }: IGroupRule): IFo
 	},
 	values: (values || []).map((value) => ({ value })),
 });
+
+export const appendCopySuffixToDuplicateNames = (existingRules: IGroupRule[], newRules: IGroupRule[]) => {
+	const existingNames = new Set((existingRules || []).map(({ name }) => name));
+	const newSelectedCriteria = newRules.map((criterion) => {
+		let { name } = criterion;
+		if (!existingNames.has(name)) {
+			existingNames.add(name);
+			return criterion;
+		}
+
+		let count = 1;
+		do {
+			name = name.replace(/(.*) - Copy \(\d\)/, '$1');
+			name = `${name} - Copy (${count++})`;
+		} while (existingNames.has(name));
+		
+		existingNames.add(name);
+		return { ...criterion, name };
+	});
+	return newSelectedCriteria;
+};

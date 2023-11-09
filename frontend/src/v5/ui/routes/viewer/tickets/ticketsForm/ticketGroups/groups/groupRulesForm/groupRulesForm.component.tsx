@@ -27,6 +27,9 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { useEffect } from 'react';
 import { isEqual } from 'lodash';
+import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { RouteParams } from '@/v4/constants/routes';
+import { useParams } from 'react-router-dom';
 import { Buttons, Form, InputsContainer } from './groupRulesForm.styles';
 import { IFormRule, formRuleToGroupRule, groupRuleToFormRule } from './groupRulesForm.helpers';
 import { RuleFieldValues } from './groupRulesInputs/ruleFieldValues/ruleFieldValues.component';
@@ -53,6 +56,7 @@ type IGroupRules = {
 
 export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [] }: IGroupRules) => {
 	const defaultValues = rule ? groupRuleToFormRule(rule) : DEFAULT_VALUES;
+	const { containerOrFederation } = useParams<RouteParams>();
 
 	const formData = useForm<IFormRule>({
 		defaultValues,
@@ -60,6 +64,10 @@ export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [] }: IG
 		resolver: yupResolver(GroupRuleSchema),
 		context: { alreadyExistingNames: existingRules.map((r) => r.name).filter((name) => name !== rule?.name) },
 	});
+
+	const isCommenterContainer = ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
+	const isCommenterFederation = FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation);
+	const isReadOnly = !(isCommenterContainer || isCommenterFederation); // Cannot use tickets redux state readOnly because groups card also uses this
 
 	const {
 		formState: { isValid, errors },
@@ -95,11 +103,12 @@ export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [] }: IG
 						name="name"
 						label={formatMessage({ id: 'tickets.groups.filterPanel.name', defaultMessage: 'Name' })}
 						formError={errors.name}
+						disabled={isReadOnly}
 					/>
-					<RuleFieldOperator />
-					<RuleFieldValues />
-					<RuleOperator />
-					<RuleValues />
+					<RuleFieldOperator disabled={isReadOnly} />
+					<RuleFieldValues disabled={isReadOnly} />
+					<RuleOperator disabled={isReadOnly} />
+					<RuleValues disabled={isReadOnly} />
 				</InputsContainer>
 				<Buttons>
 					<ActionMenuItem>
@@ -112,7 +121,7 @@ export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [] }: IG
 							variant="contained"
 							color="primary"
 							fullWidth={false}
-							disabled={!isValid || !getIsDirty()}
+							disabled={isReadOnly || !isValid || !getIsDirty()}
 						>
 							{rule ? (
 								<FormattedMessage id="tickets.groups.filterPanel.updateFilter" defaultMessage="Update filter" />
