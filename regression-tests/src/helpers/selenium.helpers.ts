@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Builder, until, By, WebDriver } from 'selenium-webdriver';
+import { Builder, until, By, WebDriver, Locator } from 'selenium-webdriver';
 import * as config from '../../config.json';
 import { getUrl } from './routing.helpers';
 import { reTry } from './functions.helpers';
@@ -34,6 +34,13 @@ export const resizeWindow = async (driver, size) => {
 	await driver.manage().window().setRect(currentResolution);
 };
 
+// getElement is more robust thatn findElement; in the case the page is loading it will wait until the element is available
+// and then try to find the element
+export const getElement = async (driver: WebDriver, locator: Locator) => {
+	await driver.wait(until.elementLocated(locator), 100000);
+	return driver.findElement(locator);
+};
+
 export const initializeSeleniumDriver = async (browserType) => {
 	const driver = await new Builder().forBrowser(browserType).build();
 	await resizeWindow(driver, config.browserSize);
@@ -44,17 +51,14 @@ export const waitUntilPageLoaded = async (driver) => driver.wait(until.elementLo
 
 export const waitForText = async (driver: WebDriver, text:string ) => {
 	const target =  By.xpath('//*[contains(text(),"' +  text + '")]');
-	await driver.wait(until.elementLocated(target), 100000);
-	return driver.findElement(target);
+	return getElement(driver, target);
 };
 
 const findInputNearText = async (driver: WebDriver, text:string, inputType: string = '') => {
 	const typefilter = inputType ? '[@type="' + inputType  + '"]' : '';
 	const targetText = '//*[contains(text(),"' +  text + '")]//ancestor::*/*/input' + typefilter;
-	// console.log(targetText);
 	const target = By.xpath(targetText);
-	await driver.wait(until.elementLocated(target), 100000);
-	return driver.findElement(target);
+	return getElement(driver, target);
 };
 
 export const fillInputByLabel = async (driver: WebDriver, label, value) => {
@@ -71,7 +75,9 @@ export const navigateTo = async (driver:WebDriver, page:string) => {
 export const clickOn = async (driver: WebDriver, buttonContent:string) => {
 	await waitUntilPageLoaded(driver);
 	const withText = "[contains(text(),'" + buttonContent + "')]";
-	const link = await driver.findElement(By.xpath('//*[self::button' + withText + ' or self::a' + withText + ']'));
+	const text = '//body//*' + withText + '';
+	const target = By.xpath(text);
+	const link  = await getElement(driver, target);
 	await driver.wait(until.elementIsEnabled(link));
 	await link.click();
 };
@@ -82,6 +88,7 @@ export const fillInForm = async (driver: WebDriver, fields: Record<string, strin
 };
 
 export const clickOnCheckboxNearText = async (driver: WebDriver, text: string) => {
+	// TODO: make this checkbox a bit more robust. sometimes it picks another checkbox 
 	const checkbox = await findInputNearText(driver, text, 'checkbox');
 	await driver.wait(until.elementIsEnabled(checkbox), 100000);
 
