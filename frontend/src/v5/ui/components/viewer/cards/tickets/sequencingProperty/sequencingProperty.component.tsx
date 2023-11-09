@@ -25,6 +25,7 @@ import { useFormContext } from 'react-hook-form';
 import { SEQUENCING_START_TIME, SEQUENCING_END_TIME } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { formatMessage } from '@/v5/services/intl';
+import { SequencesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Container, IconContainer, SequenceIconContainer } from './sequencingProperty.styles';
 
 const LABELS = {
@@ -35,11 +36,13 @@ const LABELS = {
 export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTimePickerProps) => {
 	const { watch } = useFormContext();
 	const { isViewer } = useContext(TicketContext);
+	const currentSequenceDateTime = SequencesHooksSelectors.selectSelectedDate();
 
 	const startTime = watch(SEQUENCING_START_TIME);
 	const endTime = watch(SEQUENCING_END_TIME);
 	const minDateTime = (props.name === SEQUENCING_START_TIME || !startTime) ? undefined : dayjs(startTime);
 	const maxDateTime = (props.name === SEQUENCING_END_TIME || !endTime) ? undefined : dayjs(endTime);
+	const defaultCalendarDate = !currentSequenceDateTime ? undefined : dayjs(currentSequenceDateTime);
 
 	const openSequencesCard = () => SequencesActionsDispatchers.showSequenceDate(new Date(value));
 
@@ -66,6 +69,7 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 				// onChange is a required prop in DatePicker, however it is not needed as onAccept works better
 				// (onChange triggers at every change: year, minutes, hours, etc., onAccept only when a date is finally chosen)
 				onChange={() => true}
+				defaultCalendarMonth={minDateTime || maxDateTime || defaultCalendarDate}
 				onAccept={handleChange}
 				minDateTime={minDateTime}
 				maxDateTime={maxDateTime}
