@@ -62,7 +62,7 @@ enum OverrideType {
 }
 
 const NO_OVERRIDE_SELECTED = { index: -1, type: OverrideType.COLORED };
-const NO_EDIT_OVERRIDE_SELECTED = { override: null, type: OverrideType.COLORED };
+const NO_EDIT_OVERRIDE_SELECTED = { override: null, type: OverrideType.COLORED, editing: false };
 
 let count = 0;
 
@@ -74,6 +74,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const [selectedColorIndexes, setSelectedColorIndexes] = useState((value.state?.colored || []).map((_, index) => index));
 	const hasClearedOverrides = TicketsCardHooksSelectors.selectTicketHasClearedOverrides();
 	const [isLoading, setIsLoading] = useState(hasClearedOverrides);
+
 
 	const state: Partial<ViewpointState> = value.state || {};
 	const leftPanels = useSelector(selectLeftPanels);
@@ -100,7 +101,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 
 	// If there is no  group it gets a key to get identified within the groups array
 	const onSetEditGroup = (type) => (index) => {
-		setEditingOverride({ override: cloneDeep(state?.[type]?.[index]) || { key: count++ }, type });
+		setEditingOverride({ override: cloneDeep(state?.[type]?.[index]), type, editing:true });
 	};
 
 	const onSelectedHiddenGroupChange = (indexes: number[]) => {
@@ -130,13 +131,18 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				return overrideValue.group._id === group._id;
 			}
 
-			// Is updating or creating a new group
+			// If updating a new group
 			return overrideValue.key === key;
 		});
+
 
 		// It the group is no longer there it will be saved as a new group
 		if ( index === -1 && overrideValue.group._id) {
 			delete overrideValue.group._id; 
+		}
+
+		if (!overrideValue.group._id && !overrideValue.key) {
+			overrideValue.key = count++;
 		}
 
 		// If the group was not found in the groups array is a new group so it goes last
@@ -214,7 +220,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				/>
 			</TicketGroupsContextComponent>
 			<Popper
-				open={!!editingOverride.override}
+				open={editingOverride.editing}
 				style={{ /* style is required to override the default positioning style Popper gets */
 					left: 460,
 					top: isSecondaryCard ? 'unset' : 80,
