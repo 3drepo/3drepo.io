@@ -56,13 +56,16 @@ const passiveActionStyle = css`
 
 export const CoordsAction = styled.div<{ selected?: boolean; disabled?: boolean }>`
 	user-select: none;
-
 	outline: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
 	border-radius: 20px;
-	padding: 5px 5px 4px;
-	height: 15px;
+	padding: 5px;
+	height: 24px;
+	min-width: 24px;
+	width: auto;
+	box-sizing: border-box;
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	
 	${({ theme: { palette }, disabled }) => (disabled ? css`
 		color: ${palette.secondary.lightest};
