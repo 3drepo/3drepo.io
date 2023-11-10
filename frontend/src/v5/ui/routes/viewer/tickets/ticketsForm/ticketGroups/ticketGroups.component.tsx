@@ -79,7 +79,6 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	const leftPanels = useSelector(selectLeftPanels);
 	const isSecondaryCard = leftPanels[0] !== VIEWER_PANELS.TICKETS;
 	const store = useStore();
-	const settingsFormGroups = state[editingOverride.type];
 
 	const clearHighlightedIndex = () => setHighlightedOverride(NO_OVERRIDE_SELECTED);
 
@@ -100,7 +99,9 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	};
 
 	// If there is no  group it gets a key to get identified within the groups array
-	const onSetEditGroup = (type) => (index) => setEditingOverride({ override: cloneDeep(settingsFormGroups?.[index]) || { key: count++ }, type });
+	const onSetEditGroup = (type) => (index) => {
+		setEditingOverride({ override: cloneDeep(state?.[type]?.[index]) || { key: count++ }, type });
+	};
 
 	const onSelectedHiddenGroupChange = (indexes: number[]) => {
 		setSelectedHiddenIndexes(indexes);
@@ -121,8 +122,9 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		if (!newVal.state) {
 			newVal.state = { showHidden: selectHiddenGeometryVisible(store.getState()) };
 		}
+		const groupsOfType = state[editingOverride.type];
 
-		let index = settingsFormGroups?.findIndex(({ group, key }: any) =>  {
+		let index = groupsOfType?.findIndex(({ group, key }: any) =>  {
 			// Is updating an existing group
 			if (overrideValue.group._id) { 
 				return overrideValue.group._id === group._id;
@@ -139,11 +141,11 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 
 		// If the group was not found in the groups array is a new group so it goes last
 		if (index === -1) {
-			index = settingsFormGroups?.length;
+			index = groupsOfType?.length;
 		}
 
 		// If settingsFormGroups is undefined then this is the first group in the list
-		if (!settingsFormGroups) {
+		if (!groupsOfType) {
 			index = 0;
 		}
 
@@ -224,7 +226,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 					value={editingOverride.override}
 					onSubmit={onSubmit}
 					onCancel={cancelEdition}
-					prefixes={getPossiblePrefixes(settingsFormGroups)}
+					prefixes={getPossiblePrefixes(state[editingOverride.type])}
 					isColored={editingOverride.type === OverrideType.COLORED}
 				/>
 			</Popper>
