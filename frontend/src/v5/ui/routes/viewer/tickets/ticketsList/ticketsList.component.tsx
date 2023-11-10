@@ -85,6 +85,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		const wasSelected = ticketIsSelected(ticket);
 
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
+		TicketsCardActionsDispatchers.setSelectedTicketPin(ticket._id);
 
 		if (wasSelected) {
 			TicketsCardActionsDispatchers.openTicket(ticket._id);
