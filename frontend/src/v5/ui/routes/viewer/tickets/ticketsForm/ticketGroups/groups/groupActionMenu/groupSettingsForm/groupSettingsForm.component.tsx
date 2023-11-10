@@ -132,7 +132,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 			newValues.group.objects = meshObjectsToV5GroupNode(data);
 		}
 
-		if (!newValues.color) {
+		if (!isColored) {
 			delete newValues.color;
 		}
 
@@ -183,7 +183,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		setIsSmart(!!value?.group?.rules?.length);
 		setInputObjects(convertToV4GroupNodes(value?.group?.objects));
 		setIsPastingRules(false);
-	}, [value]);
+	}, [value, isColored]);
 
 	useEffect(() => {
 		if (!formRef.current) return;
