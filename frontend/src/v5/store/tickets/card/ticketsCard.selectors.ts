@@ -110,15 +110,15 @@ export const selectTicketPins = createSelector(
 	selectCurrentTickets,
 	selectCurrentTemplates,
 	selectView,
-	selectSelectedTicketId,
-	(tickets, templates, view, selectedTicketId) => {
+	selectSelectedTicketPinId,
+	(tickets, templates, view, selectedTicketPinId) => {
 		if (view !== TicketsCardViews.List) return [];
 
 		return tickets.reduce(
 			(accum, ticket) => {
 				const template = templates.find(({ _id }) => _id === ticket.type);
 				const color = getTicketDefaultPinColor(ticket, template);
-				return ticket.properties?.Pin ? [...accum, ticketToPin(ticket, selectedTicketId, color)] : accum;
+				return ticket.properties?.Pin ? [...accum, ticketToPin(ticket, selectedTicketPinId, color)] : accum;
 			},
 			[],
 		);
