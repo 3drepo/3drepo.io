@@ -132,7 +132,9 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 			}
 
 			// If updating a new group
-			return overrideValue.key === key;
+			if (overrideValue.key) {
+				return overrideValue.key === key;
+			}
 		});
 
 
