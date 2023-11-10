@@ -22,6 +22,7 @@ import { get, isArray, isObject } from 'lodash';
 import { theme } from '@/v5/ui/themes/theme';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { contrastColor } from 'contrast-color';
+import { useFormContext } from 'react-hook-form';
 
 const DEFAULT_COLOR = theme.palette.primary.main;
 
@@ -53,7 +54,8 @@ const getColorFromMapping = (ticket, pinSchema) => {
 export const getPinColorHex = (name: string) => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	if (!containerOrFederation) return DEFAULT_COLOR; // if in tabular view
-	const ticket = TicketsCardHooksSelectors.selectSelectedTicket();
+	const { getValues } = useFormContext();
+	const ticket = getValues();
 	const selectedTemplateId = TicketsCardHooksSelectors.selectSelectedTemplateId() ?? ticket?.type;
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
 	
