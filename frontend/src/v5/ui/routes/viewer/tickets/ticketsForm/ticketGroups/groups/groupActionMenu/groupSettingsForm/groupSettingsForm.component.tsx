@@ -132,7 +132,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 			newValues.group.objects = meshObjectsToV5GroupNode(data);
 		}
 
-		if (!isColored) {
+		if (!newValues.color) {
 			delete newValues.color;
 		}
 
