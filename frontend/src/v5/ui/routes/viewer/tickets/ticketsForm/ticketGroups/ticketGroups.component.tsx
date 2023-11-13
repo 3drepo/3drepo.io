@@ -33,6 +33,8 @@ import { Container, Popper } from './ticketGroups.styles';
 import { GroupsAccordion } from './groupsAccordion/groupsAccordion.component';
 import { TicketGroupsContextComponent } from './ticketGroupsContext.component';
 import { GroupSettingsForm } from './groups/groupActionMenu/groupSettingsForm/groupSettingsForm.component';
+import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 
 const getPossiblePrefixes = (overrides: GroupOverride[] = []): string[][] => {
 	const prefixes = overrides.map(({ prefix }) => (prefix)).filter(Boolean);
@@ -132,7 +134,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 			}
 
 			// If updating a new group
-			if (overrideValue.key) {
+			if (!overrideValue.group._id) {
 				return overrideValue.key === key;
 			}
 		});
@@ -187,6 +189,8 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 
 	useEffect(() => {
 		dispatch(ViewpointsActions.setSelectedViewpoint(null));
+
+		// ViewerService.on(VIEWER_EVENTS.CLEAR_HIGHLIGHT_OBJECTS, )
 	}, []);
 
 	if (isLoading) return (<Loader />);
