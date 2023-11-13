@@ -16,7 +16,7 @@
  */
 
 import { ReactNode, useCallback, useEffect, useState } from 'react';
-import EventListener from 'react-event-listener';
+import { WindowEventListener } from '@/v4/helpers/windowEventListener';
 import { isNil } from 'lodash';
 import { onlyText } from 'react-children-utilities';
 
@@ -54,7 +54,7 @@ export const TextOverflow = ({ children, className, tooltipText }: ITextOverflow
 					{children}
 				</Container>
 			</Tooltip>
-			<EventListener target="window" onResize={() => setIsTruncated(checkIfTruncated())} />
+			<WindowEventListener event="resize" onEventTriggered={() => setIsTruncated(checkIfTruncated())} />
 		</>
 	);
 };
