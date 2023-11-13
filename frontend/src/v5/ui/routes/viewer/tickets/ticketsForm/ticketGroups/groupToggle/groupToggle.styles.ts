@@ -32,7 +32,5 @@ export const EyeCheckbox = styled(Checkbox)`
 `;
 
 export const IndeterminateEye = styled(EyeDisabledIcon)`
-	{
-		color: ${({ theme }) => theme.palette.base.light};
-	}
+	color: ${({ theme }) => theme.palette.base.light};
 `;
