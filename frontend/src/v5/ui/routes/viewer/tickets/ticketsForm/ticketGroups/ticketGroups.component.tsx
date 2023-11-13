@@ -190,7 +190,11 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	useEffect(() => {
 		dispatch(ViewpointsActions.setSelectedViewpoint(null));
 
-		// ViewerService.on(VIEWER_EVENTS.CLEAR_HIGHLIGHT_OBJECTS, )
+		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
+
+		return () => {
+			ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
+		};
 	}, []);
 
 	if (isLoading) return (<Loader />);
