@@ -22,31 +22,34 @@ import { get, isArray, isObject } from 'lodash';
 import { theme } from '@/v5/ui/themes/theme';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { contrastColor } from 'contrast-color';
-import { useFormContext } from 'react-hook-form';
+import { AdditionalProperties } from '../../../tickets.constants';
 
 const DEFAULT_COLOR = theme.palette.primary.main;
 
 const findByName = (array, name) => array.find(({ name: n }) => n === name);
 const rgbArrayToHex = (obj) => rgbaToHex(obj?.toString());
 
+const PROPERTIES = 'properties';
+export const DEFAULT_PIN = `${PROPERTIES}.${AdditionalProperties.PIN}`;
+
 type IGetPinSchema = {
 	name: string;
 	template: ITemplate;
 };
 const getPinSchema = ({ name, template }: IGetPinSchema) => {
-	if (name === 'properties.Pin') return template.config?.pin; // Default Pin
+	if (name === DEFAULT_PIN) return template.config?.pin; // Default Pin
 	const path = name.split('.');
-	if (path[0] === 'properties') return findByName(template.properties, path[1]);
+	if (path[0] === PROPERTIES) return findByName(template.properties, path[1]);
 	const module = findByName(template.modules, path[1]);
 	if (!module) return;
 	return findByName(module.properties, path[2]);
 };
 
 const getColorFromMapping = (ticket, pinSchema) => {
-	const { property: { module = 'properties', name }, mapping } = pinSchema.color;
+	const { property: { module = PROPERTIES, name }, mapping } = pinSchema.color;
 	const defaultColorHex = rgbArrayToHex(mapping.find((option) => option.default)?.default) || DEFAULT_COLOR;
 	if (!ticket) return defaultColorHex;
-	const linkedValue = module === 'properties' ? get(ticket.properties, name) : get(ticket?.modules, [module, name]);
+	const linkedValue = module === PROPERTIES ? get(ticket.properties, name) : get(ticket?.modules, [module, name]);
 	const rgb = mapping.find(({ value }) => value === linkedValue)?.color;
 	return rgb ? rgbArrayToHex(rgb) : defaultColorHex;
 };

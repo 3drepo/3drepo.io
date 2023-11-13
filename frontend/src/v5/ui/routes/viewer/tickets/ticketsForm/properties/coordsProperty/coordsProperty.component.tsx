@@ -39,7 +39,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const pinId = name === 'properties.Pin' ? ticketId : join([ticketId, name], '.');
+	const pinId = name === DEFAULT_PIN ? ticketId : join([ticketId, name], '.');
 	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
 	const isSelected = selectedPin === pinId;
 	const hasPin = !!value;
