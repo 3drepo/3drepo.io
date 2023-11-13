@@ -88,7 +88,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const { teamspace, containerOrFederation, revision } = useParams<ViewerParams>();
 	const formRef = useRef(null);
 
-	const isNewGroup = !value?.group?._id;
+	const isNewGroup = !value;
 	const selectedNodes = useSelector(selectSelectedNodes);
 	const sharedIds = selectedNodes.flatMap((node) => node.shared_ids);
 	const objectsCount = useSelector(selectGetNumNodesByMeshSharedIdsArray(sharedIds));
@@ -172,7 +172,6 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 				opacity: 1,
 				prefix: [],
 				group: {},
-				key: value.key,
 			});
 			setIsSmart(true);
 			return;
@@ -184,7 +183,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		setIsSmart(!!value?.group?.rules?.length);
 		setInputObjects(convertToV4GroupNodes(value?.group?.objects));
 		setIsPastingRules(false);
-	}, [value]);
+	}, [value, isColored]);
 
 	useEffect(() => {
 		if (!formRef.current) return;
