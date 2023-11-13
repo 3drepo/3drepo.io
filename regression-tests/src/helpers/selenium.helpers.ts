@@ -92,7 +92,14 @@ export const clickOnCheckboxNearText = async (driver: WebDriver, text: string) =
 	const checkbox = await findInputNearText(driver, text, 'checkbox');
 	await driver.wait(until.elementIsEnabled(checkbox), 100000);
 
-	reTry(async () => {
+	await reTry(async () => {
 		await checkbox.click();
 	}, 100, 50);
+};
+
+export const closeOriginWindow = async (driver: WebDriver) => {
+	const windows = await (driver as WebDriver).getAllWindowHandles();
+	await driver.switchTo().window(windows[0]);
+	await driver.close();
+	await driver.switchTo().window(windows[1]);
 };

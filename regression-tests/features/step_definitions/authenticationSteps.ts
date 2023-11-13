@@ -19,7 +19,7 @@ import { Then } from '@cucumber/cucumber';
 import { getLatestMailFor } from '../../src/helpers/mailhog.helpers';
 import { WebDriver } from 'selenium-webdriver';
 import { reTry } from '../../src/helpers/functions.helpers';
-import { clickOn } from '../../src/helpers/selenium.helpers';
+import { clickOn, closeOriginWindow } from '../../src/helpers/selenium.helpers';
 
 Then('I navigate to verify account from email {string}', async function (email) {
 	const mailContent = await reTry(async () => {
@@ -35,5 +35,5 @@ Then('I navigate to verify account from email {string}', async function (email) 
 
 	await (this.driver as WebDriver).executeScript('document.write(`' + mailContent + '`)');
 	await clickOn(this.driver, 'Verify');
-	await (this.driver as WebDriver).executeAsyncScript('var a = 1;');
+	await closeOriginWindow(this.driver);
 });

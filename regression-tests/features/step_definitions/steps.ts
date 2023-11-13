@@ -56,6 +56,14 @@ When('I sign in as {string}', async function (role: string) {
 	await clickOn(this.driver, 'Log in');
 });
 
+When('I sign in with:', async function (datatable) {
+	await navigateTo(this.driver, 'login');
+	await waitUntilPageLoaded(this.driver);
+	await fillInForm(this.driver,  datatable.hashes()[0]);
+	await clickOn(this.driver, 'Log in');
+});
+
+
 When('I click on {string}', async function (linkContent: string) {
 	await clickOn(this.driver, linkContent);
 });

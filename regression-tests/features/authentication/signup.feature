@@ -35,6 +35,10 @@ Feature: Signup
 		And I click on "Create account"
 		And I wait until "verify your email" text appears
 		And I navigate to verify account from email "newuser@mail.com" 
-
+		And I wait until "Your account has been verified" text appears
+		When I sign in with:
+			| Username  | Password        |
+  			| newuser   | +jk+gnPZM^2LXDV |
+		Then I should be redirected to the 'dashboard' page
 
 	
