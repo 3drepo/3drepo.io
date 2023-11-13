@@ -77,7 +77,7 @@ export const CoordsAction = styled.div<{ selected?: boolean; disabled?: boolean 
 
 	${({ selected }) => selected ? activeActionStyle : passiveActionStyle};
 	:hover {
-		${({ selected }) => selected ? passiveActionStyle : activeActionStyle};
+		background-color: ${({ selected, theme: { palette } }) => selected ? palette.primary.dark : palette.tertiary.lightest};
 	}
 	svg {
 		height: 14px;
@@ -111,8 +111,6 @@ export const SelectPinButton = styled.div<{ color: string, isSelected: boolean; 
 		> svg path {
 			stroke: ${theme.palette.secondary.main};
 			stroke-width: 1px;
-			stroke-dasharray: 2,2;
-			stroke-linejoin: round;
 		}
 	`};
 
@@ -120,5 +118,6 @@ export const SelectPinButton = styled.div<{ color: string, isSelected: boolean; 
 		color: ${({ color, theme }) => color || theme.palette.primary.main};
 		height: 20px;
 		width: auto;
+		overflow: visible;
 	}
 `;
