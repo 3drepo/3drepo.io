@@ -134,7 +134,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 			}
 
 			// If updating a new group
-			if (!overrideValue.group._id) {
+			if (overrideValue.key !== undefined) {
 				return overrideValue.key === key;
 			}
 		});
@@ -191,10 +191,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		dispatch(ViewpointsActions.setSelectedViewpoint(null));
 
 		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
-
-		return () => {
-			ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
-		};
+		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
 	}, []);
 
 	if (isLoading) return (<Loader />);
