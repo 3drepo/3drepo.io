@@ -28,10 +28,10 @@ import { isV5 } from '@/v4/helpers/isV5';
 
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
-import { isDateOutsideRange, MILLI_PER_HOUR } from '../../../../../../helpers/dateTime';
+import { isDateOutsideRange } from '../../../../../../helpers/dateTime';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { getDateByStep, getSelectedFrameIndex } from '../../../../../../modules/sequences/sequences.helper';
-import { LONG_DATE_TIME_FORMAT_NO_MINUTES, LONG_DATE_TIME_FORMAT_NO_MINUTES_V5 } from '../../../../../../services/formatting/formatDate';
+import { LONG_DATE_TIME_FORMAT, LONG_DATE_TIME_FORMAT_V5 } from '../../../../../../services/formatting/formatDate';
 import {
 	DatePicker,
 	IntervalRow,
@@ -301,8 +301,8 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 									shouldDisableDate={(date: any) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
 									name="date"
 									value={value}
-									inputFormat={isV5() ? LONG_DATE_TIME_FORMAT_NO_MINUTES_V5 : LONG_DATE_TIME_FORMAT_NO_MINUTES}
-									onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / MILLI_PER_HOUR) * MILLI_PER_HOUR))}
+									inputFormat={isV5() ? LONG_DATE_TIME_FORMAT_V5 : LONG_DATE_TIME_FORMAT}
+									onChange={(e) => this.gotoDate(new Date(e.target.value))}
 									placeholder="date"
 									dateTime
 								/>
