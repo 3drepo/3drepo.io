@@ -26,16 +26,21 @@ import { FormHelperText, Tooltip } from '@mui/material';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { CoordsAction, CoordsActionLabel, CoordsActions, CoordsInputContainer, CoordsName, FlexRow, SelectPinButton } from './coordsProperty.styles';
-import { getPinColorHex, isPinLight } from './coordsProperty.helpers.component';
+import { DEFAULT_PIN, getPinColorHex, isPinLight } from './coordsProperty.helpers.component';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { join } from 'lodash';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { PaddedCrossIcon } from '@controls/chip/chip.styles';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { useParams } from 'react-router-dom';
+import { useFormContext } from 'react-hook-form';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
+	const { watch } = useFormContext();
 	const { isViewer } = useContext(TicketContext);
+	const { containerOrFederation } = useParams<ViewerParams>();
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
@@ -43,8 +48,11 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
 	const isSelected = selectedPin === pinId;
 	const hasPin = !!value;
+	const ticket = watch();
+	const selectedTemplateId = TicketsCardHooksSelectors.selectSelectedTemplateId() ?? ticket?.type;
+	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
 	
-	const colorHex = getPinColorHex(name);
+	const colorHex = getPinColorHex(name, template, ticket);
 
 	const cancelEdit = () => {
 		if (!editMode) return;
@@ -88,12 +96,13 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 			ViewerService.showPin({
 				id: pinId, position: value, colour: hexToGLColor(colorHex), type: 'ticket' });
 		}
+
+		if (isSelected) ViewerService.setSelectionPin({ id: pinId, isSelected });
 	};
 
 	// Update pin when colour changes
 	useEffect(() => {
 		replacePin();
-		if (isSelected) ViewerService.setSelectionPin({ id: pinId, isSelected });
 	}, [colorHex]);
 
 	// Update pin when position changes
@@ -102,7 +111,6 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 			replacePin();
 		}
 
-		if (isSelected) ViewerService.setSelectionPin({ id: pinId, isSelected });
 		prevValue.current = value;
 
 		// There seems to be some sort of race condition in react-hook-form

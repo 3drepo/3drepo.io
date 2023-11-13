@@ -14,10 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useParams } from 'react-router-dom';
 import { rgbaToHex } from '@/v4/helpers/colors';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { get, isArray, isObject } from 'lodash';
 import { theme } from '@/v5/ui/themes/theme';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
@@ -54,15 +51,8 @@ const getColorFromMapping = (ticket, pinSchema) => {
 	return rgb ? rgbArrayToHex(rgb) : defaultColorHex;
 };
 
-export const getPinColorHex = (name: string) => {
-	const { containerOrFederation } = useParams<ViewerParams>();
-	if (!containerOrFederation) return DEFAULT_COLOR; // if in tabular view
-	const { watch } = useFormContext();
-	const ticket = watch();
-	const selectedTemplateId = TicketsCardHooksSelectors.selectSelectedTemplateId() ?? ticket?.type;
-	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
-	
-	const pinSchema = getPinSchema({ name, template });
+export const getPinColorHex = (name: string, template, ticket ) => {
+	const pinSchema = getPinSchema({ name, template  });
 
 	if (isArray(pinSchema?.color)) return rgbArrayToHex(pinSchema.color);
 	if (isObject(pinSchema?.color)) return getColorFromMapping(ticket, pinSchema);
