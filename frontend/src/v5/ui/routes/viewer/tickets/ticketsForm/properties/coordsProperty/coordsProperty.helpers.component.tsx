@@ -34,11 +34,11 @@ type IGetPinSchema = {
 	template: ITemplate;
 };
 const getPinSchema = ({ name, template }: IGetPinSchema) => {
-	if (!template) return null;
-	if (name === 'properties.Pin') return template.config.pin; // Default Pin
+	if (name === 'properties.Pin') return template.config?.pin; // Default Pin
 	const path = name.split('.');
 	if (path[0] === 'properties') return findByName(template.properties, path[1]);
 	const module = findByName(template.modules, path[1]);
+	if (!module) return;
 	return findByName(module.properties, path[2]);
 };
 
