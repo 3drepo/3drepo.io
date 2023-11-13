@@ -27,7 +27,7 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { containerMockFactory } from '../containers/containers.fixtures';
 import { federationMockFactory } from '../federations/federations.fixtures';
 import { createTestStore } from '../test.helpers';
-import { mockGroup, mockRiskCategories, templateMockFactory, ticketMockFactory, ticketWithGroupMockFactory } from './tickets.fixture';
+import { fullTemplateMockFactory, getBaseTicket, mockGroup, mockRiskCategories, templateMockFactory, ticketMockFactory, ticketWithGroupMockFactory } from './tickets.fixture';
 import { mockServer } from '../../internals/testing/mockServer';
 
 describe('Tickets: sagas', () => {
@@ -79,6 +79,34 @@ describe('Tickets: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(TicketsActions.fetchTickets(teamspace, projectId, modelId, false));
+			}, [DialogsTypes.OPEN]);
+
+			const ticketsFromState = selectTickets(getState(), modelId);
+			expect(ticketsFromState).toEqual([]);
+		});
+		it('should call fetchContainerTicketsWithProperties endpoint', async () => {
+			const baseTickets = tickets.map(getBaseTicket);
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets`)
+				.reply(200, { tickets: baseTickets });
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticket._id}`)
+				.reply(200, ticket);
+
+			await waitForActions(() => {
+				dispatch(TicketsActions.fetchTicketsWithProperties(teamspace, projectId, modelId, false));
+			}, [
+				TicketsActions.fetchTicketsSuccess(modelId, tickets),
+			]);
+		});
+
+		it('should call fetchContainerTicketsWithProperties endpoint with a 404', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets`)
+				.reply(404);
+
+			await waitForActions(() => {
+				dispatch(TicketsActions.fetchTicketsWithProperties(teamspace, projectId, modelId, false));
 			}, [DialogsTypes.OPEN]);
 
 			const ticketsFromState = selectTickets(getState(), modelId);
@@ -190,6 +218,32 @@ describe('Tickets: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(TicketsActions.fetchTickets(teamspace, projectId, modelId, true));
+			}, [DialogsTypes.OPEN]);
+
+			const ticketsFromState = selectTickets(getState(), modelId);
+			expect(ticketsFromState).toEqual([]);
+		});
+		it('should call fetchFederationTicketsWithProperties endpoint', async () => {
+			const baseTickets = tickets.map(getBaseTicket);
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets`)
+				.reply(200, { tickets: baseTickets });
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticket._id}`)
+				.reply(200, ticket);
+
+			await waitForActions(() => {
+				dispatch(TicketsActions.fetchTicketsWithProperties(teamspace, projectId, modelId, true));
+			}, [TicketsActions.fetchTicketsSuccess(modelId, tickets)]);
+		});
+
+		it('should call fetchFederationTicketsWithProperties endpoint with a 404', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets`)
+				.reply(404);
+
+			await waitForActions(() => {
+				dispatch(TicketsActions.fetchTicketsWithProperties(teamspace, projectId, modelId, true));
 			}, [DialogsTypes.OPEN]);
 
 			const ticketsFromState = selectTickets(getState(), modelId);
@@ -413,7 +467,10 @@ describe('Tickets: sagas', () => {
 	});
 
 	describe('templates', () => {
-		const templates = [templateMockFactory()];
+		const template = templateMockFactory();
+		const templates = [template];
+		const templateWithSchema = fullTemplateMockFactory(template);
+		const templatesWithSchema = [templateWithSchema];
 
 		// Basic Container templates
 		it('should call fetchContainerTemplates endpoint', async () => {
@@ -437,9 +494,32 @@ describe('Tickets: sagas', () => {
 			const templatesFromState = selectTemplates(getState(), modelId);
 			expect(templatesFromState).toEqual([]);
 		});
+		it('should call fetchContainerTemplatesWithSchemas endpoint', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates`)
+				.reply(200, { templates })
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates/${template._id}`)
+				.reply(200, templateWithSchema);
+
+			await waitForActions(() => {
+				dispatch(TicketsActions.fetchTemplatesWithSchemas(teamspace, projectId, modelId, false));
+			}, [TicketsActions.fetchTemplatesSuccess(modelId, templatesWithSchema)]);
+		});
+
+		it('should call fetchContainerTemplatesWithSchemas endpoint with a 404', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates`)
+				.reply(404);
+
+			await waitForActions(() => {
+				dispatch(TicketsActions.fetchTemplatesWithSchemas(teamspace, projectId, modelId, false));
+			}, [DialogsTypes.OPEN]);
+			const templatesFromState = selectTemplates(getState(), modelId);
+			expect(templatesFromState).toEqual([]);
+		});
 
 		it('should call fetchContainerTemplate detail endpoint', async () => {
-			const template = templateMockFactory();
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates/${template._id}`)
 				.reply(200, template);
@@ -450,7 +530,6 @@ describe('Tickets: sagas', () => {
 		});
 
 		it('should call fetchContainerTemplate detail endpoint with a 404', async () => {
-			const template = templateMockFactory();
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates/${template._id}`)
 				.reply(404);
@@ -486,9 +565,33 @@ describe('Tickets: sagas', () => {
 			const templatesFromState = selectTemplates(getState(), modelId);
 			expect(templatesFromState).toEqual([]);
 		});
+		it('should call fetchFederationTemplatesWithSchemas endpoint', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates`)
+				.reply(200, { templates });
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates/${template._id}`)
+				.reply(200, templateWithSchema);
 
-		it('should call fetchContainerTemplate detail endpoint', async () => {
-			const template = templateMockFactory();
+			await waitForActions(() => {
+				dispatch(TicketsActions.fetchTemplatesWithSchemas(teamspace, projectId, modelId, true));
+			}, [TicketsActions.fetchTemplatesSuccess(modelId, templatesWithSchema)]);
+		});
+
+		it('should call fetchFederationTemplatesWithSchemas endpoint with a 404', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates`)
+				.reply(404);
+
+			await waitForActions(() => {
+				dispatch(TicketsActions.fetchTemplatesWithSchemas(teamspace, projectId, modelId, true));
+			}, [DialogsTypes.OPEN]);
+
+			const templatesFromState = selectTemplates(getState(), modelId);
+			expect(templatesFromState).toEqual([]);
+		});
+
+		it('should call fetchFederationTemplate detail endpoint', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates/${template._id}`)
 				.reply(200, template);
@@ -498,8 +601,7 @@ describe('Tickets: sagas', () => {
 			}, [TicketsActions.replaceTemplateSuccess(modelId, template)]);
 		});
 
-		it('should call fetchContainerTemplate detail endpoint with a 404', async () => {
-			const template = templateMockFactory();
+		it('should call fetchFederationTemplate detail endpoint with a 404', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates/${template._id}`)
 				.reply(404);

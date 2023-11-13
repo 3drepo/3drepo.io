@@ -50,9 +50,9 @@ export interface ITemplate {
 	_id: string;
 	name: string;
 	code: string;
-	properties: PropertyDefinition[];
+	properties?: PropertyDefinition[];
 	modules?: TemplateModule[];
-	config: {
+	config?: {
 		comments: boolean;
 		defaultView: boolean;
 		issueProperties: boolean;
