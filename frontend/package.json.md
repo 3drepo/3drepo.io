@@ -1,5 +1,15 @@
 ### Dependencies
 
+##### Trigger a warning
+```json
+{
+	"dependencies": {
+		"react-trello": "2.2.3", // no longer maintained apparently
+		"react-truncate": "2.4.0", // no longer maintained and no viable alternative libraries
+	}
+}
+```
+
 ##### Might no longer be needed
 ```json
 {
