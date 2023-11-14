@@ -90,6 +90,7 @@ export const TicketDetailsCard = () => {
 	};
 
 	useEffect(() => {
+		if (!ticket?._id) return;
 		if (!templateAlreadyFetched(template)) {
 			TicketsActionsDispatchers.fetchTemplate(
 				teamspace,
@@ -102,7 +103,7 @@ export const TicketDetailsCard = () => {
 		TicketsActionsDispatchers.fetchTicket(teamspace, project, containerOrFederation, ticket._id, isFederation);
 		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
 		setTicketId(ticket._id);
-	}, [ticket._id]);
+	}, [ticket?._id]);
 
 	useEffect(() => {
 		if (isEmpty(defaultView)) return;
@@ -128,7 +129,7 @@ export const TicketDetailsCard = () => {
 		setTicketId();
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
 	}, []);
-
+	if (!ticket) return null;
 	return (
 		<CardContainer>
 			<FormProvider {...formData}>
