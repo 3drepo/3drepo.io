@@ -117,6 +117,7 @@
 		"socket.io-client": "4.6.1",
 		"styled-components": "5.3.9",
 		"type-fest": "2.3.2",
+		"ua-parser-js": "1.0.37",
 		"uuidv4": "5.0.1",
 		"worker-loader": "3.0.8",
 		"yup": "0.32.11",
