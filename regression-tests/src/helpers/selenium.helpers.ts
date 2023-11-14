@@ -17,7 +17,6 @@
 import { Builder, until, By, WebDriver, Locator } from 'selenium-webdriver';
 import * as config from '../../config.json';
 import { getUrl } from './routing.helpers';
-import { reTry } from './functions.helpers';
 
 export const delay = (time) => new Promise((resolve) => setTimeout(resolve, time));
 
@@ -40,6 +39,48 @@ export const getElement = async (driver: WebDriver, locator: Locator) => {
 	await driver.wait(until.elementLocated(locator), 100000);
 	return driver.findElement(locator);
 };
+
+export const animationsEnded = async (driver: WebDriver) =>
+	driver.executeScript(`
+	const asFunct = async () => {
+		const reAnimationEvent = /^onanimation/;
+		const reTransitionEvent = /^ontransition/;
+		let lastTime = new Date();
+		let resolve = null;
+		const prom = new Promise((r) => resolve = r);
+		
+		const animationEvents = (target, listener, subscribe = true) => {
+			for (const key in target) {
+				if (reAnimationEvent.test(key) || reTransitionEvent.test(key)) {
+					const eventType = key.substring(2);
+					if (subscribe)
+						target.addEventListener(eventType, listener);
+					else
+						target.removeEventListener(eventType, listener);
+				}
+			}
+		};
+
+		const onAnimationEvent = () => lastTime = new Date();
+
+		let intervalId = undefined;
+		intervalId = setInterval( () => {
+			const now = new Date();
+			if (Number(now) - Number(lastTime) > 200) {
+				animationEvents(document.body, onAnimationEvent, false);
+				clearInterval(intervalId);
+				resolve();
+			}
+		}, 50);
+
+		animationEvents(document.body, onAnimationEvent);
+
+		return prom;
+	};
+
+	return asFunct();
+`);
+
 
 export const initializeSeleniumDriver = async (browserType) => {
 	const driver = await new Builder().forBrowser(browserType).build();
@@ -80,6 +121,7 @@ export const clickOn = async (driver: WebDriver, buttonContent:string) => {
 	const link  = await getElement(driver, target);
 	await driver.wait(until.elementIsEnabled(link));
 	await link.click();
+	await animationsEnded(driver);
 };
 
 export const fillInForm = async (driver: WebDriver, fields: Record<string, string>) => {
@@ -88,13 +130,10 @@ export const fillInForm = async (driver: WebDriver, fields: Record<string, strin
 };
 
 export const clickOnCheckboxNearText = async (driver: WebDriver, text: string) => {
-	// TODO: make this checkbox a bit more robust. sometimes it picks another checkbox 
+	await animationsEnded(driver);
 	const checkbox = await findInputNearText(driver, text, 'checkbox');
 	await driver.wait(until.elementIsEnabled(checkbox), 100000);
-
-	await reTry(async () => {
-		await checkbox.click();
-	}, 100, 50);
+	await checkbox.click();
 };
 
 export const closeOriginWindow = async (driver: WebDriver) => {
