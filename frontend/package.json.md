@@ -4,7 +4,7 @@
 ```json
 {
 	"dependencies": {
-		"react-trello": "2.2.3", // no longer maintained apparently
+		"react-trello": "2.2.3", // dependencies are not being updated
 		"react-truncate": "2.4.0", // no longer maintained and no viable alternative libraries
 	}
 }
