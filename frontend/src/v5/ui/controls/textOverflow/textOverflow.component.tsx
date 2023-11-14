@@ -32,8 +32,9 @@ export const TextOverflow = ({ children, className, tooltipText }: ITextOverflow
 	const [isTruncated, setIsTruncated] = useState(false);
 
 	const checkIfTruncated = useCallback(() => {
-		const { current } = ref
-		if (!current) return false;
+		if (!ref.current) return false;
+
+		const { current } = ref;
 		return current.scrollWidth > current.clientWidth;
 	}, [children]);
 
