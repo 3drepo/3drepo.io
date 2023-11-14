@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useCallback, useEffect, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useState, useRef } from 'react';
 import { WindowEventListener } from '@/v4/helpers/windowEventListener';
-import { isNil } from 'lodash';
 import { onlyText } from 'react-children-utilities';
 
 import { Container, Tooltip } from './textOverflow.styles';
@@ -29,15 +28,14 @@ interface ITextOverflow {
 }
 
 export const TextOverflow = ({ children, className, tooltipText }: ITextOverflow): JSX.Element => {
-	const [labelRef, setLabelRef] = useState<HTMLElement>(null);
+	const ref = useRef(null);
 	const [isTruncated, setIsTruncated] = useState(false);
 
 	const checkIfTruncated = useCallback(() => {
-		if (!isNil(labelRef)) {
-			return labelRef.scrollWidth > labelRef.clientWidth;
-		}
-		return false;
-	}, [labelRef, children]);
+		const { current } = ref
+		if (!current) return false;
+		return current.scrollWidth > current.clientWidth;
+	}, [children]);
 
 	useEffect(() => {
 		setIsTruncated(checkIfTruncated());
@@ -50,7 +48,7 @@ export const TextOverflow = ({ children, className, tooltipText }: ITextOverflow
 				style={{ pointerEvents: isTruncated ? 'all' : 'none' }}
 				placement="bottom"
 			>
-				<Container ref={setLabelRef} className={className}>
+				<Container ref={ref} className={className}>
 					{children}
 				</Container>
 			</Tooltip>
