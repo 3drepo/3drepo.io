@@ -2093,17 +2093,6 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
-"@jest/types@^27.5.1":
-  version "27.5.1"
-  resolved "https://registry.yarnpkg.com/@jest/types/-/types-27.5.1.tgz#3c79ec4a8ba61c170bf937bcf9e98a9df175ec80"
-  integrity sha512-Cx46iJ9QpwQTjIdq5VJu2QTMMs3QlEjI0x1QbBP5W1+nMzyc2XmimiRR/CbX9TO0cPTeUlxWMOu8mslYsJ8DEw==
-  dependencies:
-    "@types/istanbul-lib-coverage" "^2.0.0"
-    "@types/istanbul-reports" "^3.0.0"
-    "@types/node" "*"
-    "@types/yargs" "^16.0.0"
-    chalk "^4.0.0"
-
 "@jest/types@^29.1.0", "@jest/types@^29.6.3":
   version "29.6.3"
   resolved "https://registry.yarnpkg.com/@jest/types/-/types-29.6.3.tgz#1131f8cf634e7e84c5e77bab12f052af585fba59"
@@ -2869,41 +2858,6 @@
     "@storybook/global" "^5.0.0"
     "@storybook/preview-api" "7.4.3"
 
-"@storybook/addon-interactions@7.4.3":
-  version "7.4.3"
-  resolved "https://registry.yarnpkg.com/@storybook/addon-interactions/-/addon-interactions-7.4.3.tgz#cdbc99ce5e718dc888ea098fcefbd4ef762a0f87"
-  integrity sha512-72Uy7FGr3UbEq44D44ML/o/kC8jUuBETDgnNTC/J7n35OzHcBcas9cHzam87IG/M8uxTwKtuUlEzwyoNUjI3MA==
-  dependencies:
-    "@storybook/client-logger" "7.4.3"
-    "@storybook/components" "7.4.3"
-    "@storybook/core-common" "7.4.3"
-    "@storybook/core-events" "7.4.3"
-    "@storybook/global" "^5.0.0"
-    "@storybook/instrumenter" "7.4.3"
-    "@storybook/manager-api" "7.4.3"
-    "@storybook/preview-api" "7.4.3"
-    "@storybook/theming" "7.4.3"
-    "@storybook/types" "7.4.3"
-    jest-mock "^27.0.6"
-    polished "^4.2.2"
-    ts-dedent "^2.2.0"
-
-"@storybook/addon-links@7.4.3":
-  version "7.4.3"
-  resolved "https://registry.yarnpkg.com/@storybook/addon-links/-/addon-links-7.4.3.tgz#2ee71a96c60169f9bd0bd4ed49fd590d8343075f"
-  integrity sha512-flnwlKdePQtwgryFhJlju94DVvZBq477xaD1mG9zcqEe+QeN+1GGggIo6R9e2hEsWcAfpc2yKA4dJP9KS9xIHg==
-  dependencies:
-    "@storybook/client-logger" "7.4.3"
-    "@storybook/core-events" "7.4.3"
-    "@storybook/csf" "^0.1.0"
-    "@storybook/global" "^5.0.0"
-    "@storybook/manager-api" "7.4.3"
-    "@storybook/preview-api" "7.4.3"
-    "@storybook/router" "7.4.3"
-    "@storybook/types" "7.4.3"
-    prop-types "^15.7.2"
-    ts-dedent "^2.0.0"
-
 "@storybook/addon-measure@7.4.3":
   version "7.4.3"
   resolved "https://registry.yarnpkg.com/@storybook/addon-measure/-/addon-measure-7.4.3.tgz#87f4d9e3e4d6c7b94f11cfcb0cc29dd276970b54"
@@ -3339,17 +3293,6 @@
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/@storybook/global/-/global-5.0.0.tgz#b793d34b94f572c1d7d9e0f44fac4e0dbc9572ed"
   integrity sha512-FcOqPAXACP0I3oJ/ws6/rrPT9WGhu915Cg8D02a9YxLo0DE9zI+a9A5gRGvmQ09fiWPukqI8ZAEoQEdWUKMQdQ==
-
-"@storybook/instrumenter@7.4.3":
-  version "7.4.3"
-  resolved "https://registry.yarnpkg.com/@storybook/instrumenter/-/instrumenter-7.4.3.tgz#6cb0786b89b935ce19183fa7a10b0b7b4fb920c0"
-  integrity sha512-XVctoUOFthTCea2+BKFKeUbhWrRY+1I8THgsZx67X3MQDt9bafwQdFR9jTGBeC31oNi1b7nmTuaox0lneNlghA==
-  dependencies:
-    "@storybook/channels" "7.4.3"
-    "@storybook/client-logger" "7.4.3"
-    "@storybook/core-events" "7.4.3"
-    "@storybook/global" "^5.0.0"
-    "@storybook/preview-api" "7.4.3"
 
 "@storybook/manager-api@7.4.3":
   version "7.4.3"
@@ -4128,13 +4071,6 @@
   version "15.0.15"
   resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-15.0.15.tgz#e609a2b1ef9e05d90489c2f5f45bbfb2be092158"
   integrity sha512-IziEYMU9XoVj8hWg7k+UJrXALkGFjWJhn5QFEv9q4p+v40oZhSuC135M38st8XPjICL7Ey4TV64ferBGUoJhBg==
-  dependencies:
-    "@types/yargs-parser" "*"
-
-"@types/yargs@^16.0.0":
-  version "16.0.5"
-  resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-16.0.5.tgz#12cc86393985735a283e387936398c2f9e5f88e3"
-  integrity sha512-AxO/ADJOBFJScHbWhq2xAhlWP24rY4aCEG/NFaMvbT3X2MgRsLjhjQwsn0Zi5zn0LG9jUhCCZMeX9Dkuw6k+vQ==
   dependencies:
     "@types/yargs-parser" "*"
 
@@ -9209,14 +9145,6 @@ jest-message-util@^29.7.0:
     pretty-format "^29.7.0"
     slash "^3.0.0"
     stack-utils "^2.0.3"
-
-jest-mock@^27.0.6:
-  version "27.5.1"
-  resolved "https://registry.yarnpkg.com/jest-mock/-/jest-mock-27.5.1.tgz#19948336d49ef4d9c52021d34ac7b5f36ff967d6"
-  integrity sha512-K4jKbY1d4ENhbrG2zuPWaQBvDly+iZ2yAW+T1fATN78hc0sInwn7wZB8XtlNnvHug5RMwV897Xm4LqmPM4e2Og==
-  dependencies:
-    "@jest/types" "^27.5.1"
-    "@types/node" "*"
 
 jest-mock@^29.7.0:
   version "29.7.0"
