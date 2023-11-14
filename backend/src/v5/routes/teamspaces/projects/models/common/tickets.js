@@ -36,7 +36,7 @@ const {
 	hasReadAccessToFederation,
 } = require('../../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
-const { serialiseFullTicketTemplate, serialiseTicket, serialiseTicketList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
+const { serialiseFullTicketTemplate, serialiseTemplate, serialiseTicket, serialiseTicketList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 const { templateExists, validateNewTicket, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
@@ -60,12 +60,15 @@ const createTicket = (isFed) => async (req, res) => {
 const getAllTemplates = async (req, res) => {
 	const { teamspace, project } = req.params;
 	const showDeprecated = req.query.showDeprecated === 'true';
+	const getDetails = req.query.getDetails === 'true';
 
 	try {
-		const data = await getAllTemplatesInProject(teamspace, project, showDeprecated);
+		const data = await getAllTemplatesInProject(teamspace, project, getDetails, showDeprecated);
+		const formattedData = getDetails
+			? data.map((t) => serialiseTemplate(t, true))
+			: data.map(({ _id, ...rest }) => ({ _id: UUIDToString(_id), ...rest }));
 
-		respond(req, res, templates.ok,
-			{ templates: data.map(({ _id, ...rest }) => ({ _id: UUIDToString(_id), ...rest })) });
+		respond(req, res, templates.ok, { templates: formattedData });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);

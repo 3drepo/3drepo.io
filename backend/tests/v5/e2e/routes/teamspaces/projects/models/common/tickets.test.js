@@ -20,6 +20,7 @@ const SuperTest = require('supertest');
 const FS = require('fs');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
+const { serialiseTemplate } = require('../../../../../../../../src/v5/middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 
 const { basePropertyLabels, propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 const { updateOne, findOne } = require(`${src}/handler/db`);
@@ -96,13 +97,17 @@ const testGetAllTemplates = () => {
 						({ _id, name, code, deprecated }) => ({ _id, name, code, deprecated }),
 					) },
 					true],
+				['the user has sufficient privilege and the parameters are correct (get details)', true, getRoute(),
+					{
+						templates: ticketTemplates.flatMap((t) => (t.deprecated ? [] : serialiseTemplate(t, true))),
+					}, false, true],
 			];
 		};
 
-		const runTest = (desc, success, route, expectedOutput, showDeprecated) => {
+		const runTest = (desc, success, route, expectedOutput, showDeprecated, getDetails) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
-				const res = await agent.get(`${route}${showDeprecated ? '&showDeprecated=true' : ''}`).expect(expectedStatus);
+				const res = await agent.get(`${route}${showDeprecated ? '&showDeprecated=true' : ''}${getDetails ? '&getDetails=true' : ''}`).expect(expectedStatus);
 
 				if (success) {
 					expect(res.body).toEqual(expectedOutput);

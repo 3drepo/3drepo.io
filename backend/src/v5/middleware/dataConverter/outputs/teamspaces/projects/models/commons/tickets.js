@@ -25,13 +25,17 @@ const { templates } = require('../../../../../../../utils/responseCodes');
 
 const Tickets = {};
 
+Tickets.serialiseTemplate = (template, showDeprecated) => {
+	const fullTemplate = generateFullSchema(template);
+	return serialiseTicketTemplate(fullTemplate, !showDeprecated);
+};
+
 Tickets.serialiseFullTicketTemplate = (req, res) => {
 	try {
 		const { templateData, query } = req;
 		const showDeprecated = query?.showDeprecated === 'true';
-		const fullTemplate = generateFullSchema(templateData);
 
-		respond(req, res, templates.ok, serialiseTicketTemplate(fullTemplate, !showDeprecated));
+		respond(req, res, templates.ok, Tickets.serialiseTemplate(templateData, showDeprecated));
 	} catch (err) {
 		respond(req, res, templates.unknown);
 	}
