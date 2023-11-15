@@ -36,7 +36,7 @@ interface IProjectCard {
 }
 
 export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) => {
-	const DEFAULT_IMAGE = 'assets/images/project_placeholder.png';
+	const DEFAULT_IMAGE = 'assets/images/default_background.png';
 	const { teamspace } = useParams<TeamspaceParams>();
 	const to = projectRoute(teamspace, project);
 
