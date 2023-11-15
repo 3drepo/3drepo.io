@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-import LoginBackground from '@assets/images/login_background.png';
+import LoginBackground from '@assets/images/default_background.png';
 import DefaultLogoBase from '@assets/icons/filled/logo_text-filled.svg';
 import { Typography } from '@controls/typography';
 import { clientConfigService } from '@/v4/services/clientConfig';
