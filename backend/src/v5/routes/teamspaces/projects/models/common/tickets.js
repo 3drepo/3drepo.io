@@ -95,7 +95,7 @@ const getTicketsInModel = (isFed) => async (req, res, next) => {
 
 	try {
 		const getTicketList = isFed ? getFedTicketList : getConTicketList;
-		req.tickets = await getTicketList(teamspace, project, model);
+		req.tickets = await getTicketList(teamspace, project, model, req.query.filter);
 		await next();
 	} catch (err) {
 		// istanbul ignore next
