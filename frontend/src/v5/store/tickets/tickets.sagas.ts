@@ -58,30 +58,6 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: F
 		}));
 	}
 }
-export function* fetchTicketsWithProperties({ teamspace, projectId, modelId, isFederation }: FetchTicketsAction) {
-	try {
-		const fetchModelTickets = isFederation
-			? API.Tickets.fetchFederationTickets
-			: API.Tickets.fetchContainerTickets;
-		const tickets = yield fetchModelTickets(teamspace, projectId, modelId);
-
-		const fetchModelTicket = isFederation
-			? API.Tickets.fetchFederationTicket
-			: API.Tickets.fetchContainerTicket;
-		const ticketsWithProperties = yield all(
-			tickets.map((ticket) => fetchModelTicket(teamspace, projectId, modelId, ticket._id)),
-		);
-		yield put(TicketsActions.fetchTicketsSuccess(modelId, ticketsWithProperties));
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage(
-				{ id: 'tickets.fetchTicketsWithProperties.error', defaultMessage: 'trying to fetch {model} tickets with properties' },
-				{ model: getContainerOrFederationFormattedText(isFederation) },
-			),
-			error,
-		}));
-	}
-}
 
 export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFederation }: FetchTicketAction) {
 	try {
@@ -127,25 +103,6 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }:
 			? API.Tickets.fetchFederationTemplates
 			: API.Tickets.fetchContainerTemplates;
 		const templates = yield fetchModelTemplates(teamspace, projectId, modelId);
-		yield put(TicketsActions.fetchTemplatesSuccess(modelId, templates));
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({
-				id: 'tickets.fetchTemplates.error.action',
-				defaultMessage: 'trying to fetch templates',
-			}),
-			error,
-			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
-		}));
-	}
-}
-
-export function* fetchTemplatesWithSchemas({ teamspace, projectId, modelId, isFederation }: FetchTemplatesAction) {
-	try {
-		const fetchModelTemplates = isFederation
-			? API.Tickets.fetchFederationTemplates
-			: API.Tickets.fetchContainerTemplates;
-		const templates = yield fetchModelTemplates(teamspace, projectId, modelId);
 
 		const fetchModelTemplate = isFederation
 			? API.Tickets.fetchFederationTemplate
@@ -159,8 +116,8 @@ export function* fetchTemplatesWithSchemas({ teamspace, projectId, modelId, isFe
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({
-				id: 'tickets.fetchTemplatesWithSchemas.error.action',
-				defaultMessage: 'trying to fetch templates with schemas',
+				id: 'tickets.fetchTemplates.error.action',
+				defaultMessage: 'trying to fetch templates',
 			}),
 			error,
 			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
@@ -297,10 +254,8 @@ export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, tic
 
 export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.FETCH_TICKETS, fetchTickets);
-	yield takeLatest(TicketsTypes.FETCH_TICKETS_WITH_PROPERTIES, fetchTicketsWithProperties);
 	yield takeEvery(TicketsTypes.FETCH_TICKET, fetchTicket);
 	yield takeLatest(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
-	yield takeLatest(TicketsTypes.FETCH_TEMPLATES_WITH_SCHEMAS, fetchTemplatesWithSchemas);
 	yield takeEvery(TicketsTypes.FETCH_TEMPLATE, fetchTemplate);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET, updateTicket);
 	yield takeLatest(TicketsTypes.CREATE_TICKET, createTicket);
