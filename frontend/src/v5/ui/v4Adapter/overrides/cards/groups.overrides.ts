@@ -15,11 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Container as GroupDetails,
+import {
+	Container as GroupDetails,
 	Actions as BottomLeftButtons,
 	Description as DetailsDescription,
 	StyledTextField,
 	StyledFormControl,
+	FieldsRow,
 } from '@/v4/routes/viewerGui/components/groups/components/groupDetails/groupDetails.styles';
 import {
 	Container as PreviewListItemContainer,
@@ -52,6 +54,7 @@ import {
 import { primaryButtonStyling } from '@/v5/ui/v4Adapter/resuableOverrides.styles';
 import { ViewerPanelContent } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 import { StyledTextField as AutoSuggestField } from '@/v4/routes/components/autosuggestField/autosuggestField.styles';
+import { PasteButton } from '@/v4/routes/components/criteriaField/criteriaPasteField/criteriaPasteField.styles';
 
 const previewGroupItem = css`
 	${PreviewListItemContainer} {
@@ -126,6 +129,9 @@ const expandedGroupItem = css`
 				}
 				.MuiFormControl-root {
 					margin-top: -18px;
+				}
+				${FieldsRow} > :nth-child(2) {
+					width: 420px;
 				}
 				${TextFieldContainer} {
 					border: 1px solid ${({ theme }) => theme.palette.base.lightest};
@@ -246,6 +252,7 @@ const expandedGroupItem = css`
 					padding: 0 15px;
 					position: initial;
 				}
+
 				${SelectedCriteria} {
 					padding: 5px 15px 12px;
 					${ButtonContainer} {
@@ -253,7 +260,13 @@ const expandedGroupItem = css`
 						right: 14px;
 					}
 				}
-				// Field / Operation / Value box area
+				
+				${PasteButton} {
+					margin: 2px 0 0 2px;
+					color: ${({ theme }) => theme.palette.secondary.main};
+				}
+
+				// Smart group
 				${FormContainer} {
 					border: none;
 					/* TODO - fix after new palette is released */

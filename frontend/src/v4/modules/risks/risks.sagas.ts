@@ -281,6 +281,14 @@ function* goToRisk({ risk }) {
 	const params = yield select(selectUrlParams);
 	let queryParams =  yield select(selectQueryParams);
 
+	// Im not longer in the viewer or board
+	// this happens when unmounting the card which
+	// makes sense when you close the card in the viewer and want to remove the selected risk
+	// but when navigating back to the dashboard no, so. fixed here
+	if (!params) {
+		return;
+	}
+
 	const riskId = (risk || {})._id;
 
 	const route = params.v5 ? ROUTES.V5_MODEL_VIEWER : ROUTES.MODEL_VIEWER;

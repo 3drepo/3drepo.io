@@ -42,6 +42,7 @@ const mapKeysToSnakeCase = (properties) => _.mapKeys(properties, (val, key) => _
 export const GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE = mapKeysToSnakeCase({
 	[NONE_OPTION]: NONE_OPTION,
 	[BaseProperties.OWNER]: BaseProperties.OWNER,
+	[IssueProperties.ASSIGNEES]: IssueProperties.ASSIGNEES,
 	[IssueProperties.DUE_DATE]: IssueProperties.DUE_DATE,
 	[IssueProperties.PRIORITY]: IssueProperties.PRIORITY,
 	[IssueProperties.STATUS]: IssueProperties.STATUS,
@@ -100,11 +101,41 @@ const groupByList = (tickets: TicketWithModelIdAndName[], groupType: string, gro
 	groups[UNSET] = remainingTickets;
 	return groups;
 };
+const getAssignees = (t) => _.get(t, `properties.${IssueProperties.ASSIGNEES}`);
+const groupByAssignees = (tickets: TicketWithModelIdAndName[]) => {
+	const [ticketsWithAssignees, unsetAssignees] = _.partition(tickets, (ticket) => getAssignees(ticket)?.length > 0);
+
+	const ticketsWithSortedAssignees = ticketsWithAssignees.map((ticket) => {
+		const ticketWithSortedAssignees = _.cloneDeep(ticket);
+		const sortedAssignees = _.orderBy(getAssignees(ticket), (assignee) => assignee.trim().toLowerCase());
+		ticketWithSortedAssignees.properties[IssueProperties.ASSIGNEES] = sortedAssignees;
+		return ticketWithSortedAssignees;
+	});
+
+	const ticketsSortedByAssignees = _.orderBy(
+		ticketsWithSortedAssignees,
+		(ticket) => {
+			const assignees = getAssignees(ticket).map((assignee) => assignee.trim().toLowerCase());
+			return _.orderBy(assignees).join();
+		},
+	);
+
+	const groups = _.groupBy(ticketsSortedByAssignees, (ticket) => {
+		const assignees = getAssignees(ticket);
+		return assignees.join(', ');
+	});
+	if (unsetAssignees.length) {
+		groups[UNSET] = unsetAssignees;
+	}
+	return groups;
+};
 
 export const groupTickets = (groupBy: string, tickets: TicketWithModelIdAndName[]): Record<string, TicketWithModelIdAndName[]> => {
 	switch (groupBy) {
 		case BaseProperties.OWNER:
 			return _.groupBy(tickets, `properties.${BaseProperties.OWNER}`);
+		case IssueProperties.ASSIGNEES:
+			return groupByAssignees(tickets);
 		case IssueProperties.DUE_DATE:
 			return groupByDate(tickets);
 		default:

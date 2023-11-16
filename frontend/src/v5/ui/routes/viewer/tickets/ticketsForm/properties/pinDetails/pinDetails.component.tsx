@@ -28,6 +28,7 @@ import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { PinAction, PinActions, PinName, SettingLocationText } from './pinDetails.styles';
 import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
+import { AdditionalProperties } from '../../../tickets.constants';
 
 export const PinDetails = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const [editMode, setEditMode] = useState(false);
@@ -68,7 +69,14 @@ export const PinDetails = ({ value, label, onChange, onBlur, required, error, he
 
 			if (value) {
 				ViewerService.showPin({
-					id: pinId, position: value, colour: hexToGLColor(theme.palette.primary.main), type: 'issue' });
+					id: pinId,
+					position: value,
+					colour: hexToGLColor(theme.palette.primary.main),
+					type: 'issue', // TODO - check if we can add 'ticket' in IPin.type
+				});
+				if (name === `properties.${AdditionalProperties.PIN}`) {
+					ViewerService.setSelectionPin({ id: pinId, isSelected: true });
+				}
 			}
 		}
 
