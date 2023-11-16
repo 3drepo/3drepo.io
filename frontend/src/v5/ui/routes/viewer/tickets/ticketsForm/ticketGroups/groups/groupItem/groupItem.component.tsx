@@ -24,7 +24,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { rgbaToHex } from '@/v4/helpers/colors';
 import { FormattedMessage } from 'react-intl';
 import { GroupIconComponent } from '@/v5/ui/routes/viewer/groups/groupItem/groupIcon/groupIcon.component';
-import { ErrorTicketButton, PrimaryTicketButton } from '@/v5/ui/routes/viewer/tickets/ticketButton/ticketButton.styles';
+import { TicketButton } from '@/v5/ui/routes/viewer/tickets/ticketButton/ticketButton.styles';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CircularProgress } from '@mui/material';
 import { isString } from 'lodash';
@@ -136,16 +136,16 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 				</NameContainer>
 				<Buttons>
 					{isAdmin && (
-						<ErrorTicketButton onClick={handleDeleteGroup}>
+						<TicketButton variant="error" onClick={handleDeleteGroup}>
 							<DeleteIcon />
-						</ErrorTicketButton>
+						</TicketButton>
 					)}
-					<PrimaryTicketButton onClick={isolateGroup}>
+					<TicketButton variant="primary" onClick={isolateGroup}>
 						<ShowIcon />
-					</PrimaryTicketButton>
-					<PrimaryTicketButton onClick={onEditGroup}>
+					</TicketButton>
+					<TicketButton variant="primary" onClick={onEditGroup}>
 						<EditIcon />
-					</PrimaryTicketButton>
+					</TicketButton>
 				</Buttons>
 			</Headline>
 			<GroupToggle
