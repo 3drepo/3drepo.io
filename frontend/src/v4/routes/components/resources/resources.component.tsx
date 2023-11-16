@@ -119,7 +119,7 @@ export class Resources extends PureComponent<IProps, IState> {
 		const { current: commentForm } = this.props.formRef;
 
 		if (commentForm) {
-			const currentFormCommentValue = commentForm.state.values[COMMENT_FIELD_NAME];
+			const currentFormCommentValue = commentForm.values[COMMENT_FIELD_NAME];
 			const additionalNewLine = (!currentFormCommentValue || currentFormCommentValue.endsWith(`\n`)) ? '' : `\n`;
 
 			commentForm

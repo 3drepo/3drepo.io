@@ -274,7 +274,7 @@ class RiskDetailsFormComponent extends PureComponent<IProps, IState> {
 }
 
 export const RiskDetailsForm = withFormik({
-	mapPropsToValues: ({ risk }) => {
+	mapPropsToValues: ({ risk }: any) => {
 		const setMitigationStatusValue = () => {
 			if (risk.mitigation_status && risk.mitigation_status !== 'mitigation_status') {
 				return risk.mitigation_status;

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, createRef } from 'react';
-import EventListener from 'react-event-listener';
+import { WindowEventListener } from '@/v4/helpers/windowEventListener';
 import { Layer } from 'react-konva';
 
 import { ROUTES } from '../../../constants/routes';
@@ -540,7 +540,7 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 
 		return (
 			<Container height={container.height} width={container.width} ref={this.containerRef}>
-				<EventListener target="window" onResize={this.handleResize} />
+				<WindowEventListener event='resize' onEventTriggered={this.handleResize} />
 				{this.renderTools()}
 				{this.renderLoader(!stage.width || !stage.height)}
 				<StageContainer height={stage.height} width={stage.width}>

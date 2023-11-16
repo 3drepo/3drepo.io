@@ -17,7 +17,6 @@
 
 import { useEffect } from 'react';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
-import { StylesProvider } from '@mui/styles';
 import { ThemeProvider } from 'styled-components';
 
 import { theme } from '@/v5/ui/themes/theme';
@@ -53,15 +52,13 @@ export const Root = () => {
 	return (
 		<ThemeProvider theme={theme}>
 			<MuiThemeProvider theme={theme}>
-				<StylesProvider injectFirst>
-					<V4Adapter>
-						<IntercomProvider appId={intercomLicense}>
-							<MainRoute />
-							<SSOResponseHandler />
-							<ModalsDispatcher />
-						</IntercomProvider>
-					</V4Adapter>
-				</StylesProvider>
+				<V4Adapter>
+					<IntercomProvider appId={intercomLicense}>
+						<MainRoute />
+						<SSOResponseHandler />
+						<ModalsDispatcher />
+					</IntercomProvider>
+				</V4Adapter>
 			</MuiThemeProvider>
 		</ThemeProvider>
 	);
