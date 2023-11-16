@@ -45,15 +45,6 @@ export const CoordsName = styled.div<{ required: boolean }>`
 	`}
 `;
 
-const activeActionStyle = css`
-	background-color: ${({ theme }) => theme.palette.primary.main};
-	color: ${({ theme }) => theme.palette.primary.contrast};
-`;
-const passiveActionStyle = css`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	color: ${({ theme }) => theme.palette.base.main};
-`;
-
 export const CoordsAction = styled.div<{ selected?: boolean; disabled?: boolean }>`
 	user-select: none;
 	outline: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
@@ -75,10 +66,18 @@ export const CoordsAction = styled.div<{ selected?: boolean; disabled?: boolean 
 		cursor: pointer;
 	`)};
 
-	${({ selected }) => selected ? activeActionStyle : passiveActionStyle};
+	${({ selected }) => selected ? css`
+		background-color: ${({ theme }) => theme.palette.primary.main};
+		color: ${({ theme }) => theme.palette.primary.contrast};
+	` : css`
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+		color: ${({ theme }) => theme.palette.base.main};
+	`};
+
 	:hover {
 		background-color: ${({ selected, theme: { palette } }) => selected ? palette.primary.dark : palette.tertiary.lightest};
 	}
+
 	svg {
 		height: 14px;
 		width: auto;

@@ -14,12 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { rgbaToHex } from '@/v4/helpers/colors';
+import { hexToGLColor, rgbaToHex } from '@/v4/helpers/colors';
 import { get, isArray, isObject } from 'lodash';
 import { theme } from '@/v5/ui/themes/theme';
-import { ITemplate } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import { contrastColor } from 'contrast-color';
 import { AdditionalProperties } from '../../../tickets.constants';
+import { IPin } from '@/v4/services/viewer/viewer';
 
 const DEFAULT_COLOR = theme.palette.primary.main;
 
@@ -64,3 +65,11 @@ export const getTicketDefaultPinColor = (ticket, template) => {
 };
 
 export const isPinLight = (hex: string) => contrastColor({ bgColor: hex, threshold: 230 }) !== '#FFFFFF';
+
+export const ticketToPin = (ticket: ITicket, selectedId, color): IPin => ({
+	id: ticket._id,
+	position: ticket.properties.Pin,
+	isSelected: ticket._id === selectedId,
+	type: 'ticket',
+	colour: hexToGLColor(color),
+});

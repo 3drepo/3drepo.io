@@ -15,15 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { hexToGLColor } from '@/v4/helpers/colors';
 import { selectCurrentModel } from '@/v4/modules/model';
-import { IPin } from '@/v4/services/viewer/viewer';
 import { TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { createSelector } from 'reselect';
 import { selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
-import { ITicket } from '../tickets.types';
 import { ITicketsCardState } from './ticketsCard.redux';
-import { getTicketDefaultPinColor } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers.component';
+import { getTicketDefaultPinColor, ticketToPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers.component';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
@@ -38,14 +35,6 @@ export const selectCurrentTemplates = createSelector(
 	selectCurrentModel,
 	selectTemplates,
 );
-
-const ticketToPin = (ticket:ITicket, selectedId, color): IPin => ({
-	id: ticket._id,
-	position: ticket.properties.Pin,
-	isSelected: ticket._id === selectedId,
-	type: 'ticket',
-	colour: hexToGLColor(color),
-});
 
 export const selectView = createSelector(
 	selectTicketsCardDomain,

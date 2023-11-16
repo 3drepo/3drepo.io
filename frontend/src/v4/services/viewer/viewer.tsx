@@ -673,14 +673,19 @@ export class ViewerService {
 	public showPin = async ({id, position, norm, colour, type}: IPin) => {
 		await this.isViewerReady();
 		await this.isModelLoaded();
-		if (type === 'risk') {
-			UnityUtil.dropRiskPin(id, position, norm, colour);
-		} else if (type === 'issue') {
-			UnityUtil.dropIssuePin(id, position, norm, colour);
-		} else if (type === 'ticket') {
-			UnityUtil.dropTicketPin(id, position, norm, colour);
-		} else {
-			UnityUtil.dropBookmarkPin(id, position, norm, colour);
+		switch (type) {
+			case 'risk':
+				UnityUtil.dropRiskPin(id, position, norm, colour);
+				break;
+			case 'issue':
+				UnityUtil.dropIssuePin(id, position, norm, colour);
+				break
+			case 'ticket':
+				UnityUtil.dropTicketPin(id, position, norm, colour);
+				break
+			default:
+				UnityUtil.dropBookmarkPin(id, position, norm, colour);
+				break;
 		}
 	}
 
