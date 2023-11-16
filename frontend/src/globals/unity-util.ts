@@ -841,7 +841,7 @@ export class UnityUtil {
 	// The following methods are concerned with the clip tool. There are three
 	// types of method.
 	// - The start/stop methods turn the tool on and off and change the mode.
-	// - The clipTool.. methods should be hooked up the equivalent buttons on 
+	// - The clipTool.. methods should be hooked up the equivalent buttons on
 	// the toolbar.
 	// - The set/scale/enable methods adjust the visuals and behaviour for fine
 	// tuning; they are not intended to be exposed in the UI, and are not saved.
@@ -944,15 +944,15 @@ export class UnityUtil {
 	 * default. This may need to be called on embedded viewers that don't have
 	 * the full frontend UX.
 	 */
-	public static enableClipToolbar(){
+	public static enableClipToolbar() {
 		UnityUtil.toUnity('EnableClipToolToolbar', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
-	
+
 	/**
 	 * Disables the inbuilt Clip Tool Toolbar, if it was previously enabled via
 	 * enableClipToolbar.
 	 */
-	public static disableClipToolbar(){
+	public static disableClipToolbar() {
 		UnityUtil.toUnity('DisableClipToolToolbar', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
