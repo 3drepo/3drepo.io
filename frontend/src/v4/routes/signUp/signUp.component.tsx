@@ -206,7 +206,7 @@ export class SignUp extends PureComponent<IProps, IState> {
 							initialValues={defaultValues}
 							onSubmit={this.handleSubmit}
 							validationSchema={RegistrationSchema}
-							ref={this.form}
+							innerRef={this.form}
 						>
 							<Form >
 								<Field name="username" render={({ field, form }) => (

@@ -398,7 +398,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 			<Container>
 				{this.renderCreatedScreenshot(Boolean(this.state.newScreenshot))}
 				<Formik
-					ref={formRef}
+					innerRef={formRef}
 					initialValues={{ comment: '', screenshot: this.state.newScreenshot }}
 					validationSchema={CommentSchema}
 					onSubmit={this.handleSave}

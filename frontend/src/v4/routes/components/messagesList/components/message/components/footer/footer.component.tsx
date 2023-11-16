@@ -36,7 +36,7 @@ export const Footer = ({ name, created, formRef, commentRef, comment, ...props }
 	const handleReplayButtonClick = () => {
 		const commentForm = formRef.current;
 		const commentTextarea = commentRef.current.textareaRef;
-		const currentFormCommentValue = commentForm.state.values[COMMENT_FIELD_NAME];
+		const currentFormCommentValue = commentForm.values[COMMENT_FIELD_NAME];
 
 		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}@${name} `);
 		commentTextarea.focus();
@@ -48,7 +48,7 @@ export const Footer = ({ name, created, formRef, commentRef, comment, ...props }
 	const handleQuoteButtonClick = () => {
 		const commentForm = formRef.current;
 		const commentTextarea = commentRef.current.textareaRef;
-		const currentFormCommentValue = commentForm.state.values[COMMENT_FIELD_NAME];
+		const currentFormCommentValue = commentForm.values[COMMENT_FIELD_NAME];
 		const additionalNewLine = (!currentFormCommentValue || currentFormCommentValue.endsWith(`\n`)) ? '' : `  \n`;
 		let quoteComment = '';
 

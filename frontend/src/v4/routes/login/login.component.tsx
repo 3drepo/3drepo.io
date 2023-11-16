@@ -124,7 +124,7 @@ export class Login extends PureComponent<IProps, IState> {
 							initialValues={{ login, password }}
 							onSubmit={this.handleSubmit}
 							validationSchema={LoginSchema}
-							ref={this.formRef}
+							innerRef={this.formRef}
 						>
 							<Form>
 								<Field name="login" render={({ field }) => (
