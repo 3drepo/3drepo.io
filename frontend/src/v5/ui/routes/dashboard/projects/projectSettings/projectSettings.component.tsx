@@ -30,7 +30,6 @@ import { FormattedMessage } from 'react-intl';
 import { dirtyValues } from '@/v5/helpers/form.helper';
 import { InputController } from '@controls/inputs/inputController.component';
 import { getProjectImgSrc } from '@/v5/store/projects/projects.helpers';
-import { testImageExists } from '@controls/fileUploader/imageFile.helper';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { Form, Section, Header, SubmitButton, SuccessMessage, ImageInfo } from './projectSettings.styles';
 import { ProjectImageInput } from './projectImageInput/projectImageInput.component';
@@ -41,12 +40,11 @@ type IFormInput = {
 };
 export const ProjectSettings = () => {
 	const [existingNames, setExistingNames] = useState([]);
-	const [imageWasTested, setImgWasTested] = useState(false);
 
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const currentProject = ProjectsHooksSelectors.selectCurrentProjectDetails();
 
-	const { name = '', _id: projectId } = currentProject;
+	const { name = '', _id: projectId, isAdmin } = currentProject;
 	const imgSrc = getProjectImgSrc(teamspace, projectId);
 	const defaultValues = { name, image: (teamspace && projectId) ? imgSrc : '' };
 
@@ -58,7 +56,6 @@ export const ProjectSettings = () => {
 	});
 
 	const {
-		control,
 		formState: { errors, isValid, dirtyFields, isSubmitting, isSubmitSuccessful },
 		handleSubmit,
 		getValues,
@@ -91,15 +88,7 @@ export const ProjectSettings = () => {
 	}, [currentProject]);
 
 	useEffect(() => {
-		setImgWasTested(false);
-		if (!teamspace || !projectId) return;
-		
 		setExistingNames([]);
-		testImageExists(imgSrc).then((exists) => {
-			setImgWasTested(true);
-			if (!exists) return;
-			reset(defaultValues);
-		});
 	}, [teamspace, projectId]);
 
 	useEffect(() => {
@@ -113,7 +102,6 @@ export const ProjectSettings = () => {
 	return (
 		<FormProvider {...formData}>
 			<Form onSubmit={(event) => handleSubmit(onSubmit)(event).catch(onSubmitError)}>
-				<button type='button' onClick={() => console.log(formData)}>logState</button>
 				<Section>
 					<Header>
 						<FormattedMessage id="project.settings.form.information" defaultMessage="Information" />
@@ -122,9 +110,8 @@ export const ProjectSettings = () => {
 						required
 						name="name"
 						label={formatMessage({ id: 'project.settings.form.name', defaultMessage: 'Name' })}
-						control={control}
 						formError={errors.name}
-						disabled={!currentProject.isAdmin}
+						disabled={!isAdmin}
 					/>
 				</Section>
 				<Section>
@@ -137,19 +124,21 @@ export const ProjectSettings = () => {
 							defaultMessage="An image will help people to recognise the project."
 						/>
 					</ImageInfo>
-					{imageWasTested && (
-						<InputController
-							Input={ProjectImageInput}
-							name='image'
-						/>
-					)}
+					<InputController
+						Input={ProjectImageInput}
+						name='image'
+						disabled={!isAdmin}
+						formError={errors?.image}
+					/>
 				</Section>
-				<SubmitButton
-					disabled={_.isEmpty(dirtyFields) || !isValid || !currentProject.isAdmin}
-					isPending={isSubmitting}
-				>
-					<FormattedMessage id="project.settings.form.saveChanges" defaultMessage="Save changes" />
-				</SubmitButton>
+				{isAdmin && (
+					<SubmitButton
+						disabled={_.isEmpty(dirtyFields) || !isValid}
+						isPending={isSubmitting}
+					>
+						<FormattedMessage id="project.settings.form.saveChanges" defaultMessage="Save changes" />
+					</SubmitButton>
+				)}
 			</Form>
 			{isSubmitSuccessful && (
 				<SuccessMessage>
