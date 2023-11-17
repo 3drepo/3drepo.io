@@ -68,7 +68,9 @@ export const TicketDetailsCard = () => {
 		defaultValues: ticket,
 	});
 
-	const onBlurHandler = () => {
+	// There seems to be some sort of race condition in react-hook-form
+	// so onBlur can't be called immediately after onChange because the validation won't be there.
+	const onBlurHandler = () => setTimeout(() => {
 		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
 		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, formData.formState.errors)));
 
@@ -87,7 +89,7 @@ export const TicketDetailsCard = () => {
 		sanitizeViewVals(validVals, ticket, template);
 		if (isEmpty(validVals)) return;
 		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticket._id, validVals, isFederation);
-	};
+	}, 200);
 
 	useEffect(() => {
 		if (!templateAlreadyFetched(template)) {

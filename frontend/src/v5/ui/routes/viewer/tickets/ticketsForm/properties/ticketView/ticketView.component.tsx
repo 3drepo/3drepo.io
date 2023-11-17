@@ -100,7 +100,7 @@ export const TicketView = ({
 		onChange?.(isEmpty(view) ? null : view);
 	};
 
-	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
+	useEffect(() => onBlur?.(), [value]);
 
 	const onGroupsClick = () => {
 		setDetailViewAndProps(TicketDetailsView.Groups, props);

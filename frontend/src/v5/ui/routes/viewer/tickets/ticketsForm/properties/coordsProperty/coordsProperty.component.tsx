@@ -114,10 +114,8 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 		prevValue.current = value;
 
-		// There seems to be some sort of race condition in react-hook-form
-		// so onBlur can't be called immediately after onChange because the validation won't be there.
 		if (required && !value) return;
-		setTimeout(() => onBlur?.(), 200);
+		onBlur?.();
 	}, [value]);
 
 	useEffect(() => () => {
