@@ -192,14 +192,14 @@ const testGetImage = () => {
 	});
 };
 
-const testUploadImage = () => {
-	describe('Upload image', () => {
-		test('should upload image', async () => {
+const testUpdateImage = () => {
+	describe('Update image', () => {
+		test('should update image', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const stream = generateRandomString();
 
-			await Projects.uploadImage(teamspace, project, stream);
+			await Projects.updateImage(teamspace, project, stream);
 
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
 			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, COL_NAME, project, stream);
@@ -212,7 +212,7 @@ const testUploadImage = () => {
 			const error = new Error(generateRandomString());
 			FilesManager.storeFile.mockRejectedValueOnce(error);
 
-			await expect(Projects.uploadImage(teamspace, project, stream)).rejects.toEqual(error);
+			await expect(Projects.updateImage(teamspace, project, stream)).rejects.toEqual(error);
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
 			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, COL_NAME, project, stream);
 		});
@@ -251,6 +251,6 @@ describe('processors/teamspaces/projects', () => {
 	testGetProjectSettings();
 	testGetAllTemplates();
 	testGetImage();
-	testUploadImage();
+	testUpdateImage();
 	testDeleteImage();
 });

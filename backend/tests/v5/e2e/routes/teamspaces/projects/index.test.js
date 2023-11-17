@@ -19,10 +19,12 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../helper/services');
 const { image, oversizedImage, objModel, src } = require('../../../../helper/path');
-const { stringToUUID } = require('../../../../../../src/v5/utils/helper/uuids');
+
+const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const fs = require('fs');
-const { fileMimeFromBuffer } = require('../../../../../../src/v5/utils/helper/typeCheck');
-const Responder = require('../../../../../../src/v5/utils/responder');
+
+const { fileMimeFromBuffer } = require(`${src}/utils/helper/typeCheck`);
+const Responder = require(`${src}/utils/responder`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
