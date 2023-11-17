@@ -31,6 +31,7 @@ import { dirtyValues } from '@/v5/helpers/form.helper';
 import { InputController } from '@controls/inputs/inputController.component';
 import { getProjectImgSrc } from '@/v5/store/projects/projects.helpers';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
+import { testImageExists } from '@controls/fileUploader/imageFile.helper';
 import { Form, Section, Header, SubmitButton, SuccessMessage, ImageInfo } from './projectSettings.styles';
 import { ProjectImageInput } from './projectImageInput/projectImageInput.component';
 
@@ -40,23 +41,23 @@ type IFormInput = {
 };
 export const ProjectSettings = () => {
 	const [existingNames, setExistingNames] = useState([]);
+	const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const currentProject = ProjectsHooksSelectors.selectCurrentProjectDetails();
 
 	const { name = '', _id: projectId, isAdmin } = currentProject;
-	const imgSrc = getProjectImgSrc(teamspace, projectId);
-	const defaultValues = { name, image: (teamspace && projectId) ? imgSrc : '' };
+	const imgSrcAsUrl = getProjectImgSrc(teamspace, projectId);
 
 	const formData = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(ProjectSchema),
 		context: { existingNames },
-		defaultValues,
+		defaultValues: { name, image: '' },
 	});
 
 	const {
-		formState: { errors, isValid, dirtyFields, isSubmitting, isSubmitSuccessful },
+		formState: { errors, isValid, dirtyFields, isSubmitting, isDirty },
 		handleSubmit,
 		getValues,
 		reset,
@@ -71,25 +72,37 @@ export const ProjectSettings = () => {
 
 	const onSubmit: SubmitHandler<IFormInput> = async (body) => {
 		const { promiseToResolve, resolve, reject } = getWaitablePromise();
+		const updatedProject = dirtyValues(body, dirtyFields);
 
-		const projectUpdate = dirtyValues(body, dirtyFields);
 		ProjectsActionsDispatchers.updateProject(
 			teamspace,
 			projectId,
-			projectUpdate,
+			updatedProject,
 			resolve,
 			reject,
 		);
 		await promiseToResolve;
+		setShowSuccessMessage(true);
+		if ('image' in updatedProject) {
+			const newImgSrc = (updatedProject.image === null) ? '' : imgSrcAsUrl;
+			reset({ name, image: newImgSrc});
+		}
 	};
 
 	useEffect(() => {
-		reset(defaultValues);
-	}, [currentProject]);
+		if (showSuccessMessage && isDirty) {
+			setShowSuccessMessage(false);
+		}
+	}, [isDirty]);
 
 	useEffect(() => {
 		setExistingNames([]);
-	}, [teamspace, projectId]);
+		setShowSuccessMessage(false);
+		testImageExists(imgSrcAsUrl).then((exists) => {
+			const newDefaultImg = exists ? imgSrcAsUrl : '';
+			reset({ name, image: newDefaultImg });
+		});
+	}, [projectId]);
 
 	useEffect(() => {
 		if (existingNames.length) { 
@@ -97,7 +110,7 @@ export const ProjectSettings = () => {
 		}
 	}, [existingNames]);
 
-	if (_.isEmpty(projectId)) return (<></>);
+	if (!projectId) return (<></>);
 
 	return (
 		<FormProvider {...formData}>
@@ -140,7 +153,7 @@ export const ProjectSettings = () => {
 					</SubmitButton>
 				)}
 			</Form>
-			{isSubmitSuccessful && (
+			{showSuccessMessage && (
 				<SuccessMessage>
 					<FormattedMessage id="project.settings.form.successMessage" defaultMessage="The project has been updated successfully." />
 				</SuccessMessage>
