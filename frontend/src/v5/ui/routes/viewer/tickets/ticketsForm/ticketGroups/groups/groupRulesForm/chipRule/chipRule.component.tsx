@@ -22,15 +22,14 @@ type ChipRuleProps = {
 	isSelected: boolean;
 	onClick?: () => void;
 	onDelete: () => void;
-	disabled?: boolean;
+	isReadOnly?: boolean;
 };
-export const ChipRule = ({ label, isSelected, disabled, onDelete, ...props }: ChipRuleProps) => (
+export const ChipRule = ({ label, isSelected, isReadOnly, onDelete, ...props }: ChipRuleProps) => (
 	<Tooltip title={label}>
 		<ChipWrapper>
 			<RuleChip
 				label={label}
-				disabled={disabled}
-				onDelete={disabled ? null : onDelete}
+				onDelete={isReadOnly ? null : onDelete}
 				$selected={isSelected}
 				{...props}
 			/>

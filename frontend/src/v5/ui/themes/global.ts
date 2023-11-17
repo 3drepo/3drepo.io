@@ -15,13 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createGlobalStyle } from 'styled-components';
-import { DefaultTheme } from '@mui/styles';
 import { COLOR } from '@/v4/styles/colors';
-
-export type Theme = DefaultTheme & {
-	typography: any,
-	palette: any,
-};
 
 export const GlobalStyle = createGlobalStyle`
 	html, body {
@@ -33,7 +27,7 @@ export const GlobalStyle = createGlobalStyle`
 	body {
 		margin: 0;
 		padding: 0;
-		${({ theme }: { theme: Theme }) => theme.typography.body1};
+		${({ theme }) => theme.typography.body1};
 	}
 
 	#app {

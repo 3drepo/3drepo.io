@@ -17,7 +17,7 @@
 
 import { useMemo, useState } from 'react';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { get } from 'lodash';
+import { get, isArray } from 'lodash';
 import { ISortConfig } from './useOrderedList.types';
 import { dateToNum } from './useOrderedList.helpers';
 
@@ -42,6 +42,10 @@ export const useOrderedList = <T>(items: T[], defaultConfig: ISortConfig) => {
 
 			if (typeof aValue === 'number') {
 				return aValue - bValue;
+			}
+
+			if (isArray(aValue)) {
+				return aValue.length - bValue.length;
 			}
 
 			if (aValue instanceof Date || bValue instanceof Date) {

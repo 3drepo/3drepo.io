@@ -67,6 +67,7 @@ import { NewCollectionForm } from '../newCollectionForm/newCollectionForm.compon
 import { RulesOptionsMenu } from './rulesOptionsMenu/rulesOptionsMenu.component';
 import { RulesField } from './rulesField/ruelsField.component';
 import { Popper } from '../../../ticketGroups.styles';
+import { appendCopySuffixToDuplicateNames } from '../../groupRulesForm/groupRulesForm.helpers';
 
 type GroupSettingsFormProps = {
 	value?: IGroupSettingsForm,
@@ -149,7 +150,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 
 	const handlePasteRules = (pastedRules) => {
 		setIsPastingRules(false);
-		append(pastedRules);
+		append(appendCopySuffixToDuplicateNames(rules, pastedRules));
 	};
 
 	const resetFilterMenu = () => {
@@ -165,7 +166,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	useEffect(() => {
 		// When no value is passed then the group is a new group
 		resetFilterMenu();
-		if (!value) {
+		if (isNewGroup) {
 			formData.reset({
 				...(isColored ? { color: hexToArray(getRandomSuggestedColor()) } : {}),
 				opacity: 1,
@@ -182,7 +183,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		setIsSmart(!!value?.group?.rules?.length);
 		setInputObjects(convertToV4GroupNodes(value?.group?.objects));
 		setIsPastingRules(false);
-	}, [value]);
+	}, [value, isColored]);
 
 	useEffect(() => {
 		if (!formRef.current) return;
@@ -358,7 +359,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 									rule={selectedRule?.value}
 									onSave={selectedRule ? (val) => update(selectedRule.index, val) : append}
 									onClose={resetFilterMenu}
-									existingRules={value?.group?.rules}
+									existingRules={rules}
 								/>
 							</Popper>
 							<Subheading>
@@ -388,7 +389,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 												remove(i);
 												resetFilterMenu();
 											}}
-											disabled={!isAdmin}
+											isReadOnly={!isAdmin}
 											onClick={() => {
 												setSelectedRule({ index: i, value: ruleValue });
 												setFilterMenuOpen(true);

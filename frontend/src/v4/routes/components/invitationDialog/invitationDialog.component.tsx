@@ -271,7 +271,7 @@ export const InvitationDialog = (props: IProps) => {
 			isInitialValid={getIsInitialValid()}
 			initialValues={{ email: props.email, job: props.job, isAdmin: props.isAdmin, permissions: props.permissions }}
 			render={renderForm}
-			ref={formRef}
+			innerRef={formRef}
 		/>
 	);
 };

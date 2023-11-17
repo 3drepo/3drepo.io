@@ -16,20 +16,15 @@
  */
 
 import ReactMarkdown from 'react-markdown';
-import breaks from 'remark-breaks';
 
-import { renderers } from './markdownMessage.renderers';
+import { components } from './markdownMessage.renderers';
 
 type MarkdownMessageProps = {
 	className?: string;
 	children: any;
 };
-
 export const MarkdownMessage = ({ className, children }: MarkdownMessageProps) => (
-	<ReactMarkdown
-		source={children}
-		renderers={renderers}
-		plugins={[breaks]}
-		className={className}
-	/>
+	<ReactMarkdown components={components} className={className}>
+		{children}
+	</ReactMarkdown>
 );

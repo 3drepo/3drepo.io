@@ -201,7 +201,9 @@ for (let i = 0; i < config.servers.length; i++) {
 			config.apiUrls[server.type] = [];
 		}
 
-		config.apiUrls[server.type].push(server.location_url);
+		if(!server.subdomain) {
+			config.apiUrls[server.type].push(server.location_url);
+		}
 
 	} else if (server.service === "chat") {
 
@@ -286,7 +288,7 @@ config.version = VERSION;
 config.userNotice = coalesce(config.userNotice, "");
 
 config.contact = config.contact || {};
-config.contact.support = "support@3drepo.org";
+config.contact.support = "support@3drepo.com";
 
 // default vat validation url
 config.vat = coalesce(config.vat, {});
