@@ -17,6 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
+import { InputLabel } from '@mui/material';
 
 export const CoordsInputContainer = styled(ViewerInputContainer)`
 	padding: 8px 10px 8px 12px;
@@ -27,22 +28,13 @@ export const CoordsActions = styled.div`
 	gap: 9px;
 `;
 
-export const CoordsName = styled.div<{ required: boolean }>`
+export const Label = styled(InputLabel)`
 	${({ theme }) => theme.typography.h5};
-	position: relative;
-	top: -1px;
 	padding-bottom: 1px;
-	user-select: none;
-	
-	${({ required }) => required && css`
-	&::after {
-		font-weight: 400;
-		font-size: 0.75rem;
-		color: ${({ theme }) => theme.palette.error.main};
-		margin-left: 2px;
-		content: '*';
-	}
-	`}
+	color: inherit;
+	max-width: 100%;
+	word-wrap: break-word;
+	text-overflow: ellipsis;
 `;
 
 export const CoordsAction = styled.div<{ selected?: boolean; disabled?: boolean }>`

@@ -25,7 +25,7 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { FormHelperText, Tooltip } from '@mui/material';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { CoordsAction, CoordsActionLabel, CoordsActions, CoordsInputContainer, CoordsName, FlexRow, SelectPinButton } from './coordsProperty.styles';
+import { CoordsAction, CoordsActionLabel, CoordsActions, CoordsInputContainer, Label, FlexRow, SelectPinButton } from './coordsProperty.styles';
 import { DEFAULT_PIN, getPinColorHex, isPinLight } from './coordsProperty.helpers.component';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
@@ -134,9 +134,9 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		<CoordsInputContainer required={required} selected={editMode} error={error} disabled={disabled}>
 			<FlexRow>
 				<span>
-					<CoordsName required={required}>
+					<Label>
 						{label}
-					</CoordsName>
+					</Label>
 					<CoordsActions>
 						{editMode && (
 							<>
