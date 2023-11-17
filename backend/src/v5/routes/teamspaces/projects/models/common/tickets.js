@@ -191,6 +191,12 @@ const establishRoutes = (isFed) => {
 	 *         required: false
 	 *         schema:
 	 *           type: boolean
+	 *       - name: getDetails
+	 *         description: Indicate if the response should return the templates in full details
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: boolean
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -402,6 +408,12 @@ const establishRoutes = (isFed) => {
 	 *         description: Container/Federation ID
 	 *         in: path
 	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: filter
+	 *         description: Comma separated string that defines extra properties to be included in the response
+	 *         in: query
+	 *         required: false
 	 *         schema:
 	 *           type: string
 	 *     responses:
