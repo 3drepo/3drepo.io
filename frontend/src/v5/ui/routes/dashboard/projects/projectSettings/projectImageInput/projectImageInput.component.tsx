@@ -30,16 +30,13 @@ import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { isString } from 'lodash';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ButtonsContainer, ImageButton, GrayBodyText, ImageContainer, Image } from './projectImageInput.styles';
 
-export const ProjectImageInput = ({ onChange, value, error }: FormInputProps) => {
+export const ProjectImageInput = ({ onChange, value, error, disabled }: FormInputProps) => {
 	const [imgLoaded, setImgLoaded] = useState(false);
 	const [imgSrc, setImgSrc] = useState('');
 	const { project } = useParams<DashboardParams>();
-	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	// TODO - currentProject.isAdmin related things
 
 	const deleteImage = () => {
 		setImgSrc(null);
@@ -69,18 +66,19 @@ export const ProjectImageInput = ({ onChange, value, error }: FormInputProps) =>
 
 	useEffect(() => { setImgLoaded(false); }, [project]);
 
-	if (!imgLoaded && isAdmin) return (<Loader />);
+	if (!imgLoaded && !disabled) return (<Loader />);
 
 	if (imgSrc) return (
 		<>
 			{error && (
 				<ErrorMessage>
+					{/* // TODO - render error // */}
 					Some error {error}
 				</ErrorMessage>
 			)}
 			<ImageContainer>
 				<Image src={imgSrc} />
-				{isAdmin && (
+				{!disabled && (
 					<ButtonsContainer>
 						<FileInputField
 							accept={getSupportedImageExtensions()}
@@ -107,7 +105,7 @@ export const ProjectImageInput = ({ onChange, value, error }: FormInputProps) =>
 		</>
 	);
 
-	if (!imgSrc && isAdmin) return (
+	if (!imgSrc && !disabled) return (
 		<DragAndDrop onDrop={updateImage} accept={getSupportedImageExtensions()}>
 			<Typography variant="h3" color="secondary">
 				<FormattedMessage id="dragAndDrop.drop" defaultMessage="Drop file here" />
