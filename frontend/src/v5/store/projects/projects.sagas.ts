@@ -38,14 +38,19 @@ export function* fetch({ teamspace }) {
 	}
 }
 
-export function* createProject({ teamspace, projectName, onSuccess, onError }) {
+export function* createProject({ teamspace, project, onSuccess, onError }) {
+	const { name, image } = project;
 	try {
-		const projectId = yield API.Projects.createProject(teamspace, projectName);
+		const projectId = yield API.Projects.createProject(teamspace, name);
 		const project = {
 			_id: projectId,
-			name: projectName,
+			name,
 			isAdmin: true,
 		};
+
+		if (image) {
+			yield API.Projects.updateProjectImage(teamspace, projectId, image);
+		}
 		yield put(ProjectsActions.createProjectSuccess(teamspace, project));
 		onSuccess();
 	} catch (error) {
@@ -54,8 +59,20 @@ export function* createProject({ teamspace, projectName, onSuccess, onError }) {
 }
 
 export function* updateProject({ teamspace, projectId, project, onSuccess, onError }) {
+	const { name, image } = project;
 	try {
-		yield API.Projects.updateProject(teamspace, projectId, project);
+		if (name) {
+			yield API.Projects.updateProjectName(teamspace, projectId, name);
+		}
+
+		if (image) {
+			const formData = new FormData();
+			formData.append('file', image)
+			yield API.Projects.updateProjectImage(teamspace, projectId, formData);
+		} else if (image === null) {
+			yield API.Projects.deleteProjectImage(teamspace, projectId);
+		}
+
 		yield put(ProjectsActions.updateProjectSuccess(teamspace, projectId, project));
 		onSuccess();
 	} catch (error) {
@@ -66,6 +83,8 @@ export function* updateProject({ teamspace, projectId, project, onSuccess, onErr
 export function* deleteProject({ teamspace, projectId, onSuccess, onError }) {
 	try {
 		yield API.Projects.deleteProject(teamspace, projectId);
+		// TODO - check if this is required
+		yield API.Projects.deleteProjectImage(teamspace, projectId);
 		yield put(ProjectsActions.deleteProjectSuccess(teamspace, projectId));
 		onSuccess();
 	} catch (error) {
