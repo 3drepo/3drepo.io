@@ -14,23 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useEffect } from 'react';
 
-import { Checkbox as CheckboxBase } from '@mui/material';
-import styled from 'styled-components';
-import EyeDisabledIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
+interface IProps {
+	event: keyof WindowEventMap;
+	onEventTriggered: (e: Event) => any;
+}
 
+export const WindowEventListener = ({ event, onEventTriggered }: IProps) => {
+	useEffect(() => {
+		window.addEventListener(event, onEventTriggered);
+		return () => window.removeEventListener(event, onEventTriggered)
+	}, []);
 
-export const Checkbox = styled(CheckboxBase)`
-	margin-left: auto;
-	margin-right: 0;
-`;
-
-export const EyeCheckbox = styled(Checkbox)`
-	&, &.Mui-checked {
-		color: ${({ theme }) => theme.palette.secondary.main};
-	}
-`;
-
-export const IndeterminateEye = styled(EyeDisabledIcon)`
-	color: ${({ theme }) => theme.palette.base.light};
-`;
+	return (null);
+};

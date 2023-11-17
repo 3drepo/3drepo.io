@@ -40,7 +40,7 @@ export const DialogButtons = ({onClickCancel, validateUploadLimit}) => {
 					color={isV5() ? 'primary' : 'secondary'}
 					variant="contained"
 					type="submit"
-					disabled={!form.isValid || form.isValidating || !validateUploadLimit(form.values.files) }
+					disabled={!form.isValid || form.isValidating || !validateUploadLimit(form.values.files) || !form.dirty}
 				>
 					Save
 				</Button>

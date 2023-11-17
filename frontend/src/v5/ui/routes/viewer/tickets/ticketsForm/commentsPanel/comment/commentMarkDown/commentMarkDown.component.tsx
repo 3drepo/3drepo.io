@@ -15,21 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { desanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import ReactMarkdown from 'react-markdown';
 import { CommentMessage } from '../basicComment/basicComment.styles';
 import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
 import { OverflowContainer } from './commentMarkDown.styles';
 
-const ImageMarkdown = ({ src }) => (<>![image]({src})</>);
-const CodeMarkdown = ({ value }) => (<code>{desanitiseMessage(value)}</code>);
-
-const RENDERERS = {
-	paragraph: CommentMessage,
-	image: ImageMarkdown,
-	code: CodeMarkdown,
+const COMPONENTS = {
+	p: CommentMessage,
+	img: ({ src }) => `![img](${src})`,
 	blockquote: QuotedMessage,
-};
+} as any;
 
 type CommentMarkDownProps = {
 	children?: any,
@@ -37,7 +32,7 @@ type CommentMarkDownProps = {
 };
 export const CommentMarkDown = ({ children, ...props }: CommentMarkDownProps) => (
 	<OverflowContainer>
-		<ReactMarkdown renderers={RENDERERS} escapeHtml={false} {...props}>
+		<ReactMarkdown components={COMPONENTS} {...props}>
 			{children}
 		</ReactMarkdown>
 	</OverflowContainer>
