@@ -106,7 +106,10 @@ export const ProjectImageInput = ({ onChange, value, error, disabled, helperText
 	);
 
 	if (!imgSrc && !disabled) return (
-		<DragAndDrop onDrop={updateImage} accept={getSupportedImageExtensions()}>
+		<DragAndDrop
+			onDrop={([file]) => updateImage(file)}
+			accept={getSupportedImageExtensions()}
+		>
 			<Typography variant="h3" color="secondary">
 				<FormattedMessage id="dragAndDrop.drop" defaultMessage="Drop file here" />
 			</Typography>
