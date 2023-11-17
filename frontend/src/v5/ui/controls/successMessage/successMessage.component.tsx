@@ -29,13 +29,14 @@ export const SuccessMessage = ({ children, className }: SuccessMessageProps) => 
 		<IconContainer>
 			<TickIcon />
 		</IconContainer>
-		<Typography variant="h5">
-			<FormattedMessage
-				id="successfulMessage.title"
-				defaultMessage="Success!"
-			/>
-		</Typography>
-		<span />
-		<Typography variant="body1">{children}</Typography>
+		<div>
+			<Typography variant="h5">
+				<FormattedMessage
+					id="successfulMessage.title"
+					defaultMessage="Success!"
+				/>
+			</Typography>
+			<Typography variant="body1">{children}</Typography>
+		</div>
 	</PostSubmitSuccessfulMessage>
 );
