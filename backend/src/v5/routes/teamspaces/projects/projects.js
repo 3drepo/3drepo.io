@@ -394,7 +394,7 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       200:
-	 *         description: Uploads a new image for the project
+	 *         $ref: "#/components/responses/ok"
 	 */
 	router.put('/:project/image', isAdminToProject, singleImageUpload('file'), uploadImage);
 
@@ -423,7 +423,7 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       200:
-	 *         description: Deletes the image of the project
+	 *         $ref: "#/components/responses/ok"
 	 */
 	router.delete('/:project/image', isAdminToProject, deleteImage);
 
