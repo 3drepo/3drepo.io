@@ -86,11 +86,15 @@ export const ProjectSettings = () => {
 		await promiseToResolve;
 	};
 
-	useEffect(() => { reset(defaultValues); }, [currentProject]);
+	useEffect(() => {
+		reset(defaultValues);
+	}, [currentProject]);
 
 	useEffect(() => {
 		setImgWasTested(false);
 		if (!teamspace || !projectId) return;
+		
+		setExistingNames([]);
 		testImageExists(imgSrc).then((exists) => {
 			setImgWasTested(true);
 			if (!exists) return;
