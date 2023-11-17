@@ -92,7 +92,7 @@ MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = upload
 };
 
 MulterHelper.singleImageUpload = (fileName) => validateMany(
-	[MulterHelper.singleFileUpload(fileName, imageFilter, uploadConfig.avatarSizeLimit, true), ensureFileIsImage],
+	[MulterHelper.singleFileUpload(fileName, imageFilter, uploadConfig.imageSizeLimit, true), ensureFileIsImage],
 );
 
 module.exports = MulterHelper;
