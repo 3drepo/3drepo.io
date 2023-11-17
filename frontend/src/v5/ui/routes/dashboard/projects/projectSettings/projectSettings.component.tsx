@@ -24,41 +24,42 @@ import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledError
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import _ from 'lodash';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm, FormProvider } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { dirtyValues } from '@/v5/helpers/form.helper';
 import { InputController } from '@controls/inputs/inputController.component';
 import { getProjectImgSrc } from '@/v5/store/projects/projects.helpers';
+import { testImageExists } from '@controls/fileUploader/imageFile.helper';
+import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { Form, Section, Header, SubmitButton, SuccessMessage, ImageInfo } from './projectSettings.styles';
 import { ProjectImageInput } from './projectImageInput/projectImageInput.component';
-import { testImageExists } from '@controls/fileUploader/imageFile.helper';
 
 type IFormInput = {
 	name: string,
 	image?: string | File,
 };
 export const ProjectSettings = () => {
-	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
 	const [existingNames, setExistingNames] = useState([]);
 	const [imageWasTested, setImgWasTested] = useState(false);
 
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const currentProject = ProjectsHooksSelectors.selectCurrentProjectDetails();
+
 	const { name = '', _id: projectId } = currentProject;
-	const defaultValues = useRef({ name, image: '' });
+	const imgSrc = getProjectImgSrc(teamspace, projectId);
+	const defaultValues = { name, image: (teamspace && projectId) ? imgSrc : '' };
 
 	const formData = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(ProjectSchema),
 		context: { existingNames },
-		defaultValues: defaultValues.current,
+		defaultValues,
 	});
 
 	const {
 		control,
-		formState: { errors, isValid, dirtyFields },
+		formState: { errors, isValid, dirtyFields, isSubmitting, isSubmitSuccessful },
 		handleSubmit,
 		getValues,
 		reset,
@@ -66,40 +67,34 @@ export const ProjectSettings = () => {
 	} = formData;
 
 	const onSubmitError = (error) => {
-		setSubmitWasSuccessful(false);
 		if (projectAlreadyExists(error)) {
 			setExistingNames(existingNames.concat(getValues('name')));
 		}
 	};
 
-	const onSubmit: SubmitHandler<IFormInput> = (body) => {
-		setIsSubmitting(true);
+	const onSubmit: SubmitHandler<IFormInput> = async (body) => {
+		const { promiseToResolve, resolve, reject } = getWaitablePromise();
 
 		const projectUpdate = dirtyValues(body, dirtyFields);
 		ProjectsActionsDispatchers.updateProject(
 			teamspace,
 			projectId,
 			projectUpdate,
-			() => setSubmitWasSuccessful(true),
-			onSubmitError,
+			resolve,
+			reject,
 		);
-		setIsSubmitting(false);
+		await promiseToResolve;
 	};
 
-	useEffect(() => {
-		setSubmitWasSuccessful(false);
-		reset(defaultValues.current);
-	}, [currentProject]);
+	useEffect(() => { reset(defaultValues); }, [currentProject]);
 
 	useEffect(() => {
 		setImgWasTested(false);
 		if (!teamspace || !projectId) return;
-		const imgSrc = getProjectImgSrc(teamspace, projectId);
 		testImageExists(imgSrc).then((exists) => {
 			setImgWasTested(true);
 			if (!exists) return;
-			defaultValues.current.image = imgSrc;
-			reset(defaultValues.current);
+			reset(defaultValues);
 		});
 	}, [teamspace, projectId]);
 
@@ -113,7 +108,7 @@ export const ProjectSettings = () => {
 
 	return (
 		<FormProvider {...formData}>
-			<Form onSubmit={handleSubmit(onSubmit)}>
+			<Form onSubmit={(event) => handleSubmit(onSubmit)(event).catch(onSubmitError)}>
 				<button type='button' onClick={() => console.log(formData)}>logState</button>
 				<Section>
 					<Header>
@@ -152,7 +147,7 @@ export const ProjectSettings = () => {
 					<FormattedMessage id="project.settings.form.saveChanges" defaultMessage="Save changes" />
 				</SubmitButton>
 			</Form>
-			{submitWasSuccessful && (
+			{isSubmitSuccessful && (
 				<SuccessMessage>
 					<FormattedMessage id="project.settings.form.successMessage" defaultMessage="The project has been updated successfully." />
 				</SuccessMessage>
