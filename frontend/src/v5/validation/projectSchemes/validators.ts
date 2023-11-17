@@ -16,7 +16,7 @@
  */
 
 import * as Yup from 'yup';
-import { trimmedString } from '../shared/validators';
+import { getMaxFileSizeMessage, trimmedString } from '../shared/validators';
 import { formatMessage } from '../../services/intl';
 import { PROJECT_IMAGE_MAX_SIZE_MESSAGE, projectImageFileIsTooBig } from '@/v5/store/projects/projects.helpers';
 import { isString } from 'lodash';
@@ -45,19 +45,18 @@ export const name = trimmedString
 			id: 'projectForm.name.error.alreadyExisting',
 			defaultMessage: 'This name is already taken',
 		}),
-		(name, { options }) => {
+		(value, { options }) => {
 			const existingNames = options.context.existingNames || [];
-			return !existingNames.map((name) => name.trim().toLocaleLowerCase()).includes(name.toLocaleLowerCase());
+			return !existingNames.map(
+				(existingName) => existingName.trim().toLocaleLowerCase()
+			).includes(value.toLocaleLowerCase());
 		},
 	);
 
 export const image = Yup.mixed()
 	.test(
 		'fileSize',
-		formatMessage({
-			id: 'validation.project.error.fileSize',
-			defaultMessage: 'Image cannot exceed {value}.',
-		}, { value: PROJECT_IMAGE_MAX_SIZE_MESSAGE }),
+		getMaxFileSizeMessage(PROJECT_IMAGE_MAX_SIZE_MESSAGE),
 		(file) => {
 			if (!file || isString(file)) return true;
 			return !projectImageFileIsTooBig(file);
