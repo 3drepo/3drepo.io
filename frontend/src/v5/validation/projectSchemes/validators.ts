@@ -47,9 +47,10 @@ export const name = trimmedString
 		}),
 		(value, { options }) => {
 			const existingNames = options.context.existingNames || [];
-			return !existingNames.map(
-				(existingName) => existingName.trim().toLocaleLowerCase()
-			).includes(value.toLocaleLowerCase());
+			const nameExists = existingNames
+				.map((existingName) => existingName.trim().toLocaleLowerCase())
+				.includes(value.toLocaleLowerCase());
+			return !nameExists;
 		},
 	);
 
