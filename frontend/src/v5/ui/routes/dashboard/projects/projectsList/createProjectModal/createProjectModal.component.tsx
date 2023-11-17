@@ -33,7 +33,8 @@ interface CreateProjectModalProps {
 }
 
 interface IFormInput {
-	projectName: string;
+	name: string;
+	image?: File;
 }
 
 export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalProps) => {
@@ -41,9 +42,7 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 	const [existingNames, setExistingNames] = useState([]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const DEFAULT_VALUES = {
-		projectName: '',
-	};
+	const DEFAULT_VALUES = { name: '' };
 
 	const {
 		control,
@@ -61,17 +60,21 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 
 	const onSubmissionError = (error) => {
 		if (projectAlreadyExists(error)) {
-			setExistingNames((currentValue) => [...currentValue, getValues('projectName')]);
+			setExistingNames((currentValue) => [...currentValue, getValues('name')]);
 		}
 	};
 
-	const onSubmit: SubmitHandler<IFormInput> = ({ projectName }) => {
-		ProjectsActionsDispatchers.createProject(currentTeamspace, projectName.trim(), onClickClose, onSubmissionError);
+	const onSubmit: SubmitHandler<IFormInput> = (project) => {
+		const data = {
+			...project,
+			name: project.name.trim(),
+		}
+		ProjectsActionsDispatchers.createProject(currentTeamspace, data, onClickClose, onSubmissionError);
 		setIsSubmitting(false);
 	};
 
 	useEffect(() => {
-		if (existingNames.length) trigger('projectName');
+		if (existingNames.length) trigger('name');
 	}, [errors, JSON.stringify(existingNames)]);
 
 	return (
@@ -92,10 +95,10 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 			/>
 			<FormTextField
 				required
-				name="projectName"
+				name="name"
 				label={formatMessage({ id: 'project.creation.form.name', defaultMessage: 'Project name' })}
 				control={control}
-				formError={errors.projectName}
+				formError={errors.name}
 			/>
 			<UnhandledErrorInterceptor expectedErrorValidators={[projectAlreadyExists]} />
 		</FormModal>

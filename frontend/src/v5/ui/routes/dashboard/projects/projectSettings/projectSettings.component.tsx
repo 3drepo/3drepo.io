@@ -24,23 +24,38 @@ import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledError
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import _ from 'lodash';
-import { useEffect, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { useEffect, useRef, useState } from 'react';
+import { SubmitHandler, useForm, FormProvider } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
-import { Form, SubmitButton, SuccessMessage } from './projectSettings.styles';
+import { dirtyValues } from '@/v5/helpers/form.helper';
+import { InputController } from '@controls/inputs/inputController.component';
+import { getProjectImgSrc } from '@/v5/store/projects/projects.helpers';
+import { Form, Section, Header, SubmitButton, SuccessMessage, ImageInfo } from './projectSettings.styles';
+import { ProjectImageInput } from './projectImageInput/projectImageInput.component';
+import { testImageExists } from '@controls/fileUploader/imageFile.helper';
 
 type IFormInput = {
-	projectName: string,
+	name: string,
+	image?: string | File,
 };
 export const ProjectSettings = () => {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitWasSuccessful, setSubmitWasSuccessful] = useState(false);
 	const [existingNames, setExistingNames] = useState([]);
+	const [imageWasTested, setImgWasTested] = useState(false);
 
-	const currentTeamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const currentProject = ProjectsHooksSelectors.selectCurrentProjectDetails();
+	const { name = '', _id: projectId } = currentProject;
+	const defaultValues = useRef({ name, image: '' });
 
-	const defaultValues = { projectName: currentProject.name || '' };
+	const formData = useForm<IFormInput>({
+		mode: 'onChange',
+		resolver: yupResolver(ProjectSchema),
+		context: { existingNames },
+		defaultValues: defaultValues.current,
+	});
+
 	const {
 		control,
 		formState: { errors, isValid, dirtyFields },
@@ -48,27 +63,22 @@ export const ProjectSettings = () => {
 		getValues,
 		reset,
 		trigger,
-	} = useForm<IFormInput>({
-		mode: 'onChange',
-		resolver: yupResolver(ProjectSchema),
-		context: { existingNames },
-		defaultValues,
-	});
+	} = formData;
 
 	const onSubmitError = (error) => {
 		setSubmitWasSuccessful(false);
 		if (projectAlreadyExists(error)) {
-			const { projectName } = getValues();
-			setExistingNames(existingNames.concat(projectName));
+			setExistingNames(existingNames.concat(getValues('name')));
 		}
 	};
 
-	const onSubmit: SubmitHandler<IFormInput> = ({ projectName }) => {
+	const onSubmit: SubmitHandler<IFormInput> = (body) => {
 		setIsSubmitting(true);
-		const projectUpdate = { name: projectName.trim() };
+
+		const projectUpdate = dirtyValues(body, dirtyFields);
 		ProjectsActionsDispatchers.updateProject(
-			currentTeamspace,
-			currentProject._id,
+			teamspace,
+			projectId,
 			projectUpdate,
 			() => setSubmitWasSuccessful(true),
 			onSubmitError,
@@ -77,32 +87,69 @@ export const ProjectSettings = () => {
 	};
 
 	useEffect(() => {
-		reset(defaultValues);
 		setSubmitWasSuccessful(false);
+		reset(defaultValues.current);
 	}, [currentProject]);
 
 	useEffect(() => {
-		if (existingNames.length) trigger('projectName');
+		setImgWasTested(false);
+		if (!teamspace || !projectId) return;
+		const imgSrc = getProjectImgSrc(teamspace, projectId);
+		testImageExists(imgSrc).then((exists) => {
+			setImgWasTested(true);
+			if (!exists) return;
+			defaultValues.current.image = imgSrc;
+			reset(defaultValues.current);
+		});
+	}, [teamspace, projectId]);
+
+	useEffect(() => {
+		if (existingNames.length) { 
+			trigger('name');
+		}
 	}, [existingNames]);
 
-	if (_.isEmpty(currentProject)) return (<></>);
+	if (_.isEmpty(projectId)) return (<></>);
 
 	return (
-		<>
+		<FormProvider {...formData}>
 			<Form onSubmit={handleSubmit(onSubmit)}>
-				<FormTextField
-					required
-					name="projectName"
-					label={formatMessage({ id: 'project.settings.form.name', defaultMessage: 'Project name' })}
-					control={control}
-					formError={errors.projectName}
-					disabled={!currentProject.isAdmin}
-				/>
+				<button type='button' onClick={() => console.log(formData)}>logState</button>
+				<Section>
+					<Header>
+						<FormattedMessage id="project.settings.form.information" defaultMessage="Information" />
+					</Header>
+					<FormTextField
+						required
+						name="name"
+						label={formatMessage({ id: 'project.settings.form.name', defaultMessage: 'Name' })}
+						control={control}
+						formError={errors.name}
+						disabled={!currentProject.isAdmin}
+					/>
+				</Section>
+				<Section>
+					<Header>
+						<FormattedMessage id="project.settings.form.image" defaultMessage="Project image" />
+					</Header>
+					<ImageInfo>
+						<FormattedMessage
+							id="project.settings.form.image.description"
+							defaultMessage="An image will help people to recognise the project."
+						/>
+					</ImageInfo>
+					{imageWasTested && (
+						<InputController
+							Input={ProjectImageInput}
+							name='image'
+						/>
+					)}
+				</Section>
 				<SubmitButton
 					disabled={_.isEmpty(dirtyFields) || !isValid || !currentProject.isAdmin}
 					isPending={isSubmitting}
 				>
-					<FormattedMessage id="project.settings.form.save" defaultMessage="Save" />
+					<FormattedMessage id="project.settings.form.saveChanges" defaultMessage="Save changes" />
 				</SubmitButton>
 			</Form>
 			{submitWasSuccessful && (
@@ -111,6 +158,6 @@ export const ProjectSettings = () => {
 				</SuccessMessage>
 			)}
 			<UnhandledErrorInterceptor expectedErrorValidators={[projectAlreadyExists]} />
-		</>
+		</FormProvider>
 	);
 };

@@ -17,18 +17,36 @@
 
 import { SubmitButton as SubmitButtonBase } from '@controls/submitButton';
 import { SuccessMessage as SuccessMessageBase } from '@controls/successMessage/successMessage.component';
+import { Typography } from '@mui/material';
 import styled from 'styled-components';
 
 export const SubmitButton = styled(SubmitButtonBase)`
 	width: fit-content;
-	margin: 0 0 0 8px;
+	margin: 0 auto 0 0;
 `;
 
 export const Form = styled.form`
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
 	align-items: flex-end;
 	width: 470px;
+`;
+
+export const Section = styled.div`
+	width: 100%;
+	margin-bottom: 41px;
+`;
+
+export const Header = styled(Typography).attrs({
+	variant: 'h2',
+	color: 'secondary',
+})``;
+
+export const ImageInfo = styled(Typography).attrs({
+	variant: 'body1',
+})`
+	color: ${({ theme }) => theme.palette.base.main};
+	margin: 8px 0 19px;
 `;
 
 export const SuccessMessage = styled(SuccessMessageBase)`
