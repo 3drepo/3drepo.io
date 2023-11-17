@@ -68,7 +68,7 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 		const data = {
 			...project,
 			name: project.name.trim(),
-		}
+		};
 		ProjectsActionsDispatchers.createProject(currentTeamspace, data, onClickClose, onSubmissionError);
 		setIsSubmitting(false);
 	};

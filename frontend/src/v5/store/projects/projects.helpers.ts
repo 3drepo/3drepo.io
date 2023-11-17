@@ -23,7 +23,5 @@ export const getProjectImgSrc = (teamspace: string, project: string) => (
 	generateV5ApiUrl(`teamspaces/${teamspace}/projects/${project}/image`, clientConfigService.GET_API)
 );
 
-const PROJECT_IMAGE_MAX_SIZE = Number(clientConfigService.uploadSizeLimit);
-
-export const projectImageFileIsTooBig = (file): boolean => (file.size > PROJECT_IMAGE_MAX_SIZE);
-export const PROJECT_IMAGE_MAX_SIZE_MESSAGE = formatInfoUnit(PROJECT_IMAGE_MAX_SIZE);
+export const projectImageFileIsTooBig = (file): boolean => (file.size > clientConfigService.projectImageSizeLimit);
+export const PROJECT_IMAGE_MAX_SIZE_MESSAGE = formatInfoUnit(clientConfigService.projectImageSizeLimit);
