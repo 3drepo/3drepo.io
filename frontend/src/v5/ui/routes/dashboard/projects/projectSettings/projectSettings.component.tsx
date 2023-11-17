@@ -53,7 +53,7 @@ export const ProjectSettings = () => {
 		mode: 'onChange',
 		resolver: yupResolver(ProjectSchema),
 		context: { existingNames },
-		defaultValues: { name, image: '' },
+		defaultValues: { name, image: null },
 	});
 
 	const {
@@ -84,8 +84,8 @@ export const ProjectSettings = () => {
 		await promiseToResolve;
 		setShowSuccessMessage(true);
 		if ('image' in updatedProject) {
-			const newImgSrc = (updatedProject.image === null) ? '' : imgSrcAsUrl;
-			reset({ name, image: newImgSrc});
+			const newImgSrc = (updatedProject.image === null) ? null : imgSrcAsUrl;
+			reset({ name, image: newImgSrc });
 		}
 	};
 
@@ -99,7 +99,7 @@ export const ProjectSettings = () => {
 		setExistingNames([]);
 		setShowSuccessMessage(false);
 		testImageExists(imgSrcAsUrl).then((exists) => {
-			const newDefaultImg = exists ? imgSrcAsUrl : '';
+			const newDefaultImg = exists ? imgSrcAsUrl : null;
 			reset({ name, image: newDefaultImg });
 		});
 	}, [projectId]);

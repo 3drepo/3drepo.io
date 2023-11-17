@@ -16,8 +16,6 @@
  */
 
 import { useEffect, useState } from 'react';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { useParams } from 'react-router-dom';
 import { convertFileToImageSrc, getSupportedImageExtensions, testImageExists } from '@controls/fileUploader/imageFile.helper';
 import { FormattedMessage } from 'react-intl';
 import { Typography } from '@mui/material';
@@ -30,43 +28,29 @@ import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { isString } from 'lodash';
 import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
-import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ButtonsContainer, ImageButton, GrayBodyText, ImageContainer, Image } from './projectImageInput.styles';
 
 export const ProjectImageInput = ({ onChange, value, error, disabled, helperText }: FormInputProps) => {
-	const [imgLoaded, setImgLoaded] = useState(false);
-	const [imgSrc, setImgSrc] = useState('');
-	const { project } = useParams<DashboardParams>();
+	const [imgSrc, setImgSrc] = useState(value);
 
-	const deleteImage = () => {
-		setImgSrc(null);
-		onChange(null);
-	};
-
-	const updateImage = (file) => {
-		convertFileToImageSrc(file).then(setImgSrc);
-		onChange(file);
-	};
+	const deleteImage = () => onChange(null);
 
 	useEffect(() => {
-		if (imgLoaded || !value) return;
+		if (!value) {
+			setImgSrc(null);
+			return;
+		}
 
 		if (isString(value)) {
 			testImageExists(value).then((exists) => {
-				setImgSrc(exists ? value : '');
-				setImgLoaded(true);
+				setImgSrc(exists ? value : null);
 			});
-		} else {
-			convertFileToImageSrc(value).then((valueAsString) => {
-				setImgSrc(valueAsString);
-				setImgLoaded(true);
-			}); 
+			return;
 		}
+		
+		// value is a file
+		convertFileToImageSrc(value).then(setImgSrc); 
 	}, [value]);
-
-	useEffect(() => { setImgLoaded(false); }, [project]);
-
-	if (!imgLoaded && !disabled) return (<Loader />);
 
 	if (imgSrc) return (
 		<>
@@ -82,7 +66,7 @@ export const ProjectImageInput = ({ onChange, value, error, disabled, helperText
 					<ButtonsContainer>
 						<FileInputField
 							accept={getSupportedImageExtensions()}
-							onChange={updateImage}
+							onChange={onChange}
 						>
 							<ImageButton variant="primary" as="span">
 								<EditIcon />
@@ -105,9 +89,11 @@ export const ProjectImageInput = ({ onChange, value, error, disabled, helperText
 		</>
 	);
 
-	if (!imgSrc && !disabled) return (
+	if (disabled) return (<></>);
+
+	return (
 		<DragAndDrop
-			onDrop={([file]) => updateImage(file)}
+			onDrop={([file]) => onChange(file)}
 			accept={getSupportedImageExtensions()}
 		>
 			<Typography variant="h3" color="secondary">
@@ -118,7 +104,7 @@ export const ProjectImageInput = ({ onChange, value, error, disabled, helperText
 			</Typography>
 			<FileInputField
 				accept={getSupportedImageExtensions()}
-				onChange={updateImage}
+				onChange={onChange}
 			>
 				<Button component="span" variant="contained" color="primary">
 					<FormattedMessage
@@ -142,6 +128,4 @@ export const ProjectImageInput = ({ onChange, value, error, disabled, helperText
 			</GrayBodyText>
 		</DragAndDrop>
 	);
-
-	return (<></>);
 };
