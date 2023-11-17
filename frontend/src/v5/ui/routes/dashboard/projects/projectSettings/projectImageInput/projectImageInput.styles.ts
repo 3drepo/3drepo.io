@@ -62,5 +62,6 @@ export const ImageButton = styled(FlatButton).attrs({
 	svg {
 		height: 14px;
 		width: 13px;
+		margin-right: 2.5px;
 	}
 `;
