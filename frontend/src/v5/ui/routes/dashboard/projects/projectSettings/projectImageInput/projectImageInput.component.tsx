@@ -33,7 +33,7 @@ import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ButtonsContainer, ImageButton, GrayBodyText, ImageContainer, Image } from './projectImageInput.styles';
 
-export const ProjectImageInput = ({ onChange, value, error, disabled }: FormInputProps) => {
+export const ProjectImageInput = ({ onChange, value, error, disabled, helperText }: FormInputProps) => {
 	const [imgLoaded, setImgLoaded] = useState(false);
 	const [imgSrc, setImgSrc] = useState('');
 	const { project } = useParams<DashboardParams>();
@@ -71,10 +71,10 @@ export const ProjectImageInput = ({ onChange, value, error, disabled }: FormInpu
 	if (imgSrc) return (
 		<>
 			{error && (
-				<ErrorMessage>
-					{/* // TODO - render error // */}
-					Some error {error}
-				</ErrorMessage>
+				<>
+					<ErrorMessage>{helperText}</ErrorMessage>
+					<Gap $height='26px' />
+				</>
 			)}
 			<ImageContainer>
 				<Image src={imgSrc} />
