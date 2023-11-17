@@ -26,6 +26,7 @@ import { IProject } from '@/v5/store/projects/projects.types';
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
+import { getProjectImgSrc } from '@/v5/store/projects/projects.helpers';
 import { EllipsisMenuContainer } from './projectCard.styles';
 import { LinkCard } from '../linkCard.component';
 
@@ -84,7 +85,8 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 			{...props}
 			to={to}
 			heading={<Highlight search={filterQuery}>{project.name}</Highlight>}
-			imgSrc={DEFAULT_IMAGE}
+			imgSrc={getProjectImgSrc(teamspace, project._id)}
+			defaultImgSrc={DEFAULT_IMAGE}
 		>
 			<EllipsisMenuContainer onClick={preventNavigation}>
 				<EllipsisMenu>
