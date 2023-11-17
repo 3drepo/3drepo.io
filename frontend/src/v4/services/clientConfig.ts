@@ -47,6 +47,10 @@ export class ClientConfigService {
 	public tagRegExp;
 	public uploadSizeLimit;
 	public avatarSizeLimit;
+	public projectImageSizeLimit;
+	// this is temporary, should be removed
+	// when when projectImageSizeLimit is sent
+	public imageSizeLimit;
 	public imageExtensions;
 	public apiUrls;
 	private chatHost;
@@ -69,6 +73,8 @@ export class ClientConfigService {
 					this[key] = window.ClientConfig[key];
 				}
 			}
+			this.projectImageSizeLimit = this.imageSizeLimit;
+			this.avatarSizeLimit = this.imageSizeLimit;
 		}
 
 		this.apiAlgorithm = this.createRoundRobinAlgorithm();
