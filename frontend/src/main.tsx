@@ -30,7 +30,7 @@ import { Root as V5Root } from '@/v5/ui/routes';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { getIntlProviderProps, initializeIntl } from '@/v5/services/intl';
+import { formatMessage, getIntlProviderProps, initializeIntl } from '@/v5/services/intl';
 import { initializeActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 import { IntlProvider } from 'react-intl';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -42,6 +42,8 @@ import { LOGIN_PATH as V5_LOGIN_PATH, SIGN_UP_PATH as V5_SIGN_UP_PATH } from './
 import configAxios from './v4/services/api/config-axios';
 import { setSocketIdHeader } from './v5/services/api/default';
 import rootSaga from './v4/modules/sagas';
+import { NotFound } from '@/v5/ui/routes/notFound';
+import { AuthenticatedRoute } from './v5/services/routing/authenticatedRoute.component';
 
 window.UnityUtil = UnityUtil;
 
@@ -75,6 +77,9 @@ const render = () => {
 							<Route path="/v5">
 								<V5Root />
 							</Route>
+							<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })} path="*">
+								<NotFound />
+							</AuthenticatedRoute>
 						</Switch>
 					</LocalizationProvider>
 				</IntlProvider>

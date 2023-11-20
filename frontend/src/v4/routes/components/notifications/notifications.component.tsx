@@ -72,7 +72,7 @@ const NotificationButton = ({ unreadCount, onClick, id }) => (
 			badgeContent={unreadCount}
 			color={unreadCount > 0 ? 'primary' : 'secondary'}
 		>
-			<NotificationsIcon />s
+			<NotificationsIcon />
 		</Badge>
 	</IconButton>
 );
