@@ -103,7 +103,7 @@ export const getViewerLeftPanels = () =>  [
 	VIEWER_PANELS.SEQUENCES,
 	VIEWER_PANELS.MEASUREMENTS,
 ].filter((panel) =>
-(clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES || panel !== VIEWER_PANELS.TICKETS).map(getPanelConfig);
+(clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES || panel !== VIEWER_PANELS.TICKETS).map(getPanelConfig));
 
 export const VIEWER_DRAGGABLE_PANELS = [
 	VIEWER_PANELS.LEGEND,
