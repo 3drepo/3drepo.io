@@ -53,11 +53,12 @@ Projects.deleteProject = async (teamspace, projectId) => {
 
 // passing project in to future proof this - the list will be filtered by project settings configurations
 Projects.getAllTemplates = (teamspace, project, getDetails, showDeprecated) => {
-	let projection = { name: 1, deprecated: 1, code: 1 };
-
-	if (getDetails) {
-		projection = { ...projection, properties: 1, modules: 1, config: 1 };
-	}
+	const projection = {
+		name: 1,
+		deprecated: 1,
+		code: 1,
+		...(getDetails ? { properties: 1, modules: 1, config: 1 } : {}),
+	};
 
 	return getAllTemplates(teamspace, showDeprecated, projection);
 };
