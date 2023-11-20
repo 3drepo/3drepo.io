@@ -38,13 +38,19 @@ export function* fetch({ teamspace }) {
 	}
 }
 
+function * updateImage({ teamspace, projectId, image }) {
+	const formData = new FormData();
+	formData.append('file', image);
+	yield API.Projects.updateProjectImage(teamspace, projectId, formData);
+};
+
 export function* createProject({ teamspace, project, onSuccess, onError }) {
 	const { name, image } = project;
 	try {
 		const projectId = yield API.Projects.createProject(teamspace, name);
 
 		if (image) {
-			yield API.Projects.updateProjectImage(teamspace, projectId, image);
+			yield updateImage({ teamspace, projectId, image });
 		}
 
 		const newProject = {
@@ -67,9 +73,7 @@ export function* updateProject({ teamspace, projectId, project, onSuccess, onErr
 		}
 
 		if (image) {
-			const formData = new FormData();
-			formData.append('file', image);
-			yield API.Projects.updateProjectImage(teamspace, projectId, formData);
+			yield updateImage({ teamspace, projectId, image });
 		} else if (image === null) {
 			yield API.Projects.deleteProjectImage(teamspace, projectId);
 		}
@@ -84,8 +88,6 @@ export function* updateProject({ teamspace, projectId, project, onSuccess, onErr
 export function* deleteProject({ teamspace, projectId, onSuccess, onError }) {
 	try {
 		yield API.Projects.deleteProject(teamspace, projectId);
-		// TODO - check if this is required
-		yield API.Projects.deleteProjectImage(teamspace, projectId);
 		yield put(ProjectsActions.deleteProjectSuccess(teamspace, projectId));
 		onSuccess();
 	} catch (error) {

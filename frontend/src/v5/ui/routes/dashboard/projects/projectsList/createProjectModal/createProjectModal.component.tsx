@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormModal } from '@controls/formModal/formModal.component';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -26,6 +26,10 @@ import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { TextField } from '@controls/inputs/textField/textField.component';
+import { InputController } from '@controls/inputs/inputController.component';
+import { Gap } from '@controls/gap';
+import { getWaitablePromise } from '@/v5/helpers/async.helpers';
+import { ProjectImageInput } from '../../projectSettings/projectImageInput/projectImageInput.component';
 
 interface CreateProjectModalProps {
 	open: boolean;
@@ -40,23 +44,21 @@ interface IFormInput {
 export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalProps) => {
 	const currentTeamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const [existingNames, setExistingNames] = useState([]);
-	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const DEFAULT_VALUES = { name: '' };
-
-	const {
-		control,
-		formState,
-		formState: { errors },
-		handleSubmit,
-		getValues,
-		trigger,
-	} = useForm<IFormInput>({
+	const formData = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(ProjectSchema),
 		context: { existingNames },
-		defaultValues: DEFAULT_VALUES,
+		defaultValues: { name: '', image: null },
 	});
+
+	const {
+		formState,
+		formState: { errors, isSubmitting },
+		handleSubmit,
+		getValues,
+		trigger,
+	} = formData;
 
 	const onSubmissionError = (error) => {
 		if (projectAlreadyExists(error)) {
@@ -64,13 +66,15 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 		}
 	};
 
-	const onSubmit: SubmitHandler<IFormInput> = (project) => {
+	const onSubmit = async (body) => {
+		const { promiseToResolve, resolve, reject } = getWaitablePromise();
 		const data = {
-			...project,
-			name: project.name.trim(),
+			...body,
+			name: body.name.trim(),
 		};
-		ProjectsActionsDispatchers.createProject(currentTeamspace, data, onClickClose, onSubmissionError);
-		setIsSubmitting(false);
+		ProjectsActionsDispatchers.createProject(currentTeamspace, data, resolve, reject);
+		await promiseToResolve;
+		onClickClose();
 	};
 
 	useEffect(() => {
@@ -78,29 +82,36 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 	}, [errors, JSON.stringify(existingNames)]);
 
 	return (
-		<FormModal
-			title={formatMessage({ id: 'project.creation.form.title', defaultMessage: 'Create new Project' })}
-			open={open}
-			onClickClose={onClickClose}
-			onSubmit={handleSubmit(onSubmit)}
-			confirmLabel={formatMessage({ id: 'project.creation.form.createButton', defaultMessage: 'Create Project' })}
-			isValid={formState.isValid}
-			isSubmitting={isSubmitting}
-			maxWidth="sm"
-		>
-			<TextField
-				label={formatMessage({ id: 'project.creation.form.teamspace', defaultMessage: 'Teamspace' })}
-				value={currentTeamspace}
-				disabled
-			/>
-			<FormTextField
-				required
-				name="name"
-				label={formatMessage({ id: 'project.creation.form.name', defaultMessage: 'Project name' })}
-				control={control}
-				formError={errors.name}
-			/>
-			<UnhandledErrorInterceptor expectedErrorValidators={[projectAlreadyExists]} />
-		</FormModal>
+		<FormProvider {...formData}>
+			<FormModal
+				title={formatMessage({ id: 'project.creation.form.title', defaultMessage: 'Create new Project' })}
+				open={open}
+				onClickClose={onClickClose}
+				onSubmit={(event) => handleSubmit(onSubmit)(event).catch(onSubmissionError)}
+				confirmLabel={formatMessage({ id: 'project.creation.form.createButton', defaultMessage: 'Create Project' })}
+				isValid={formState.isValid}
+				isSubmitting={isSubmitting}
+				maxWidth="sm"
+			>
+				<TextField
+					label={formatMessage({ id: 'project.creation.form.teamspace', defaultMessage: 'Teamspace' })}
+					value={currentTeamspace}
+					disabled
+				/>
+				<FormTextField
+					required
+					name="name"
+					label={formatMessage({ id: 'project.creation.form.name', defaultMessage: 'Project name' })}
+					formError={errors.name}
+				/>
+				<Gap $height="28px" />
+				<InputController
+					Input={ProjectImageInput}
+					name="image"
+					formError={errors.image}
+				/>
+				<UnhandledErrorInterceptor expectedErrorValidators={[projectAlreadyExists]} />
+			</FormModal>
+		</FormProvider>
 	);
 };
