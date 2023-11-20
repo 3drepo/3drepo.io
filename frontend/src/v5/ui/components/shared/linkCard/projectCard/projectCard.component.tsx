@@ -30,18 +30,17 @@ import { getProjectImgSrc } from '@/v5/store/projects/projects.helpers';
 import { EllipsisMenuContainer } from './projectCard.styles';
 import { LinkCard } from '../linkCard.component';
 
+const DEFAULT_IMAGE = 'assets/images/default_background.png';
+
 interface IProjectCard {
 	project: IProject;
 	className?: string;
 	filterQuery?: string;
 }
-
 export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) => {
-	const DEFAULT_IMAGE = 'assets/images/default_background.png';
 	const { teamspace } = useParams<TeamspaceParams>();
 	const to = projectRoute(teamspace, project);
 
-	const { isAdmin: isProjectAdmin } = project;
 	const isTeamspaceAdmin = TeamspacesHooksSelectors.selectIsTeamspaceAdmin();
 
 	const preventNavigation = (e) => e.preventDefault();
@@ -111,7 +110,6 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 							defaultMessage: 'Settings',
 						})}
 						to={projectTabRoute(teamspace, project, 'project_settings')}
-						hidden={!isProjectAdmin}
 					/>
 				</EllipsisMenu>
 			</EllipsisMenuContainer>
