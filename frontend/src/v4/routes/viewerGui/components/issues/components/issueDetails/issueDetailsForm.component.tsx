@@ -238,7 +238,7 @@ class IssueDetailsFormComponent extends PureComponent<IProps, IState> {
 }
 
 export const IssueDetailsForm = withFormik({
-	mapPropsToValues: ({ issue }) => {
+	mapPropsToValues: ({ issue }: any) => {
 		return ({
 			status: issue.status,
 			priority: issue.priority,

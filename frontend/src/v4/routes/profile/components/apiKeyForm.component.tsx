@@ -16,7 +16,6 @@
  */
 import { PureComponent, SyntheticEvent } from 'react';
 import { Button } from '@mui/material';
-import { Form } from 'formik';
 
 import {
 	DeleteButton,
@@ -37,7 +36,6 @@ export class APIKeyForm extends PureComponent<IProps> {
 	public render() {
 		const apiKey =  this.props.apiKey || '';
 		return (
-			<Form>
 				<FormContainer container direction="column">
 					<Headline color="primary" variant="subtitle1">Api Key</Headline>
 					<FieldsRow container wrap="nowrap">
@@ -70,7 +68,6 @@ export class APIKeyForm extends PureComponent<IProps> {
 						</DeleteButton>
 					</StyledButtonContainer>
 				</FormContainer>
-			</Form>
 		);
 	}
 

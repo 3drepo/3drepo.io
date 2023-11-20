@@ -20,7 +20,6 @@ import AddCircleBase from '@assets/icons/filled/add_circle-filled.svg';
 
 export const Container = styled.li<{ disabled?: boolean }>`
 	&& {
-
 		color: ${({ theme }) => theme.palette.primary.dark};
 		display: inline-flex;
 		flex-flow: row;
