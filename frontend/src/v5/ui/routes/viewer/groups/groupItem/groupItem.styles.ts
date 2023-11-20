@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 export const GroupsTreeListItem = styled.li<{ $highlighted?: boolean }>`
 	background-color: ${({ $highlighted, theme: { palette } }) => {
@@ -63,7 +63,7 @@ export const GroupItemTextContainer = styled.div`
 	overflow: hidden;
 `;
 
-export const GroupItemObjects = css`
+export const GroupItemObjects = styled.div`
 	${({ theme }) => theme.typography.caption};
 	color: ${({ theme }) => theme.palette.base.main};
 `;
