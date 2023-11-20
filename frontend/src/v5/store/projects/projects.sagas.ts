@@ -42,7 +42,7 @@ function * updateImage({ teamspace, projectId, image }) {
 	const formData = new FormData();
 	formData.append('file', image);
 	yield API.Projects.updateProjectImage(teamspace, projectId, formData);
-};
+}
 
 export function* createProject({ teamspace, project, onSuccess, onError }) {
 	const { name, image } = project;
