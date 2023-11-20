@@ -28,9 +28,9 @@ export const convertFileToImageSrc = (file) => new Promise<string>((resolve) => 
 
 export const getSupportedImageExtensions = () => clientConfigService.imageExtensions.map((x) => `.${x}`).join(',');
 
-export const testImageExists = (src: string) => new Promise<boolean>((resolve) => {
+export const testImageExists = (src: string) => new Promise((resolve, reject) => {
 	const img = new Image();
-	img.onload = () => resolve(true);
-	img.onerror = () => resolve(false);
+	img.onload = resolve;
+	img.onerror = reject;
 	img.src = src;
 });

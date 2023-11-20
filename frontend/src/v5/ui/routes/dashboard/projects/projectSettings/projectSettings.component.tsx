@@ -98,10 +98,9 @@ export const ProjectSettings = () => {
 	useEffect(() => {
 		setExistingNames([]);
 		setShowSuccessMessage(false);
-		testImageExists(imgSrcAsUrl).then((exists) => {
-			const newDefaultImg = exists ? imgSrcAsUrl : null;
-			reset({ name, image: newDefaultImg });
-		});
+		testImageExists(imgSrcAsUrl)
+			.then(() => reset({ name, image: imgSrcAsUrl }))
+			.catch(() => reset({ name, image: null }));
 	}, [projectId]);
 
 	useEffect(() => {
