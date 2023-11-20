@@ -16,7 +16,7 @@
  */
 
 import { ConnectedRouter } from 'connected-react-router';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, Redirect } from 'react-router-dom';
 import 'font-awesome/css/font-awesome.min.css';
 import 'normalize.css/normalize.css';
 import ReactDOM from 'react-dom';
@@ -35,7 +35,6 @@ import { initializeActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.h
 import { IntlProvider } from 'react-intl';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { Version, VersionContext } from './versionContext';
 import { getSocket, initializeSocket, SocketEvents, subscribeToSocketEvent } from './v5/services/realtime/realtime.service';
 import { setSocket } from './v4/modules/chat/chat.sagas';
 import { ROUTES } from './v4/constants/routes';
@@ -65,21 +64,16 @@ const render = () => {
 					<LocalizationProvider dateAdapter={AdapterDayjs}>
 						<Switch>
 							<Route exact path="/">
-								{/* Using this instead of <Redirect /> to force refresh so that isV5() is updated */}
-								{() => window.location.replace('v5/')}
+								<Redirect to={{ pathname:'v5/' }} />
 							</Route>
 							<Route exact path={ROUTES.SIGN_UP}>
-								{/* Using this instead of <Redirect /> to force refresh so that isV5() is updated */}
-								{() => window.location.replace(V5_SIGN_UP_PATH + window.location.search)}
+								<Redirect to={{ pathname: V5_SIGN_UP_PATH + window.location.search }} />
 							</Route>
 							<Route exact path={ROUTES.LOGIN}>
-								{/* Using this instead of <Redirect /> to force refresh so that isV5() is updated */}
-								{() => window.location.replace(V5_LOGIN_PATH)}
+								<Redirect to={{ pathname: V5_LOGIN_PATH }} />
 							</Route>
 							<Route path="/v5">
-								<VersionContext.Provider value={Version.V5}>
-									<V5Root />
-								</VersionContext.Provider>
+								<V5Root />
 							</Route>
 						</Switch>
 					</LocalizationProvider>
