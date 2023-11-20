@@ -49,6 +49,5 @@ export const SortLabel = styled(TableSortLabel) `
 		height: 14px;
 
 		fill: ${({ active, theme }) =>  active ? theme.palette.base.main : 'transparent'}
-		}}
 	}
 `;

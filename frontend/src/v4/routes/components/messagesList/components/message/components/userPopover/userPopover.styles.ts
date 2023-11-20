@@ -31,7 +31,6 @@ export const Container = styled.div`
 
 export const UserData = styled.div`
 	margin-left: 10px;
-	margin-right: 10px;
 	overflow: hidden;
 
 	/* Cannot style in v4Overrides because of react-textarea-autocomplete */
