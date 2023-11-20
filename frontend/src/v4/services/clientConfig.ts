@@ -48,8 +48,9 @@ export class ClientConfigService {
 	public uploadSizeLimit;
 	public avatarSizeLimit;
 	public projectImageSizeLimit;
-	// this is temporary, should be removed
-	// when when projectImageSizeLimit is sent
+	// imageSizeLimit is temporary, should be removed
+	// when both projectImageSizeLimit and
+	// avatarSizeLimit are sent
 	public imageSizeLimit;
 	public imageExtensions;
 	public apiUrls;
