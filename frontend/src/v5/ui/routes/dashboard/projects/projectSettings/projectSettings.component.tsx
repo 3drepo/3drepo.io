@@ -32,8 +32,11 @@ import { InputController } from '@controls/inputs/inputController.component';
 import { getProjectImgSrc } from '@/v5/store/projects/projects.helpers';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { testImageExists } from '@controls/fileUploader/imageFile.helper';
+import { Gap } from '@controls/gap';
 import { Form, Section, Header, SubmitButton, SuccessMessage, ImageInfo } from './projectSettings.styles';
 import { ProjectImageInput } from './projectImageInput/projectImageInput.component';
+
+const DEFAULT_IMAGE = 'assets/images/default_background.png';
 
 type IFormInput = {
 	name: string,
@@ -96,12 +99,13 @@ export const ProjectSettings = () => {
 	}, [isDirty]);
 
 	useEffect(() => {
+		if (projectId === undefined || isAdmin === undefined) return;
 		setExistingNames([]);
 		setShowSuccessMessage(false);
 		testImageExists(imgSrcAsUrl)
 			.then(() => reset({ name, image: imgSrcAsUrl }))
-			.catch(() => reset({ name, image: null }));
-	}, [projectId]);
+			.catch(() => reset({ name, image: isAdmin ? null : DEFAULT_IMAGE }));
+	}, [projectId, isAdmin]);
 
 	useEffect(() => {
 		if (existingNames.length) { 
@@ -130,12 +134,15 @@ export const ProjectSettings = () => {
 					<Header>
 						<FormattedMessage id="project.settings.form.image" defaultMessage="Project image" />
 					</Header>
-					<ImageInfo>
-						<FormattedMessage
-							id="project.settings.form.image.description"
-							defaultMessage="An image will help people to recognise the project."
-						/>
-					</ImageInfo>
+					<Gap $height="8px" />
+					{isAdmin && (
+						<ImageInfo>
+							<FormattedMessage
+								id="project.settings.form.image.description"
+								defaultMessage="An image will help people to recognise the project."
+							/>
+						</ImageInfo>
+					)}
 					<InputController
 						Input={ProjectImageInput}
 						name='image'

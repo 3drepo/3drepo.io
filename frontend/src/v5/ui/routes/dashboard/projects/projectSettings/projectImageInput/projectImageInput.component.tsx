@@ -88,8 +88,6 @@ export const ProjectImageInput = ({ onChange, value, error, disabled, helperText
 		</>
 	);
 
-	if (disabled) return (<></>);
-
 	return (
 		<DragAndDrop
 			onDrop={([file]) => onChange(file)}

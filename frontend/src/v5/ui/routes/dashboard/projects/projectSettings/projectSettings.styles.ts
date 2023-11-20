@@ -46,7 +46,7 @@ export const ImageInfo = styled(Typography).attrs({
 	variant: 'body1',
 })`
 	color: ${({ theme }) => theme.palette.base.main};
-	margin: 8px 0 19px;
+	margin-bottom: 19px;
 `;
 
 export const SuccessMessage = styled(SuccessMessageBase)`
