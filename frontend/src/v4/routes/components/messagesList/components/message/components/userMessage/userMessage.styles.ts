@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { isV5 } from '@/v4/helpers/isV5';
 import styled, { css } from 'styled-components';
 
 import { COLOR } from '../../../../../../../styles';
@@ -26,7 +25,7 @@ export const Container = styled.div<{ self?: boolean }>`
 	justify-content: space-between;
 	align-items: flex-start;
 	position: relative;
-	${({ self }) => self && isV5() && 'flex-direction: row-reverse;'}
+	flex-direction: row-reverse;
 `;
 
 export const Comment = styled(MarkdownMessage)`
@@ -41,8 +40,8 @@ export const Comment = styled(MarkdownMessage)`
 
 // TODO - fix after new palette is released
 const regularCommentStyles = css`
-	background-color: ${isV5() ? '#edf0f8' : COLOR.WHITE};
-	${isV5() && 'margin-right: 0 !important;'}
+	background-color: #edf0f8;
+	margin-right: 0 !important;
 
 	${Comment} {
 		color: ${COLOR.BLACK_60};
@@ -51,8 +50,8 @@ const regularCommentStyles = css`
 
 // TODO - fix after new palette is released
 const selfCommentStyles = css`
-	background-color: ${isV5() ? '#f5f8fa' : COLOR.WHITE};
-	${isV5() && 'margin-left: 0 !important;'}
+	background-color: #f5f8fa;
+	margin-left: 0 !important;
 `;
 
 export const CommentContainer = styled.div<{self?: boolean}>`

@@ -23,8 +23,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import Close from '@mui/icons-material/Close';
 import MoreVert from '@mui/icons-material/MoreVert';
-import V5NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
-import { isV5 } from '@/v4/helpers/isV5';
+import NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
 
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { simpleDate } from '../../../services/formatting/formatDate';
@@ -34,7 +33,7 @@ import { NotificationEmptyItem } from './components/emptyItem/emptyItem.componen
 import { INotification } from './components/notificationItem/notificationItem.component';
 import { NotificationsPanel } from './components/panel/panel.component';
 import { NotificationsPanelHeader } from './components/panelHeader/panelHeader.component';
-import { NotificationsIcon, NotificationsList, NotificationWeekHeader } from './notifications.styles';
+import { NotificationsList, NotificationWeekHeader } from './notifications.styles';
 
 interface IProps {
 	notifications: INotification[];
@@ -73,7 +72,7 @@ const NotificationButton = ({ unreadCount, onClick, id }) => (
 			badgeContent={unreadCount}
 			color={unreadCount > 0 ? 'primary' : 'secondary'}
 		>
-			{isV5() ? <V5NotificationsIcon /> : <NotificationsIcon fontSize="small" />}
+			<NotificationsIcon />s
 		</Badge>
 	</IconButton>
 );

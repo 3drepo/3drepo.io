@@ -26,7 +26,6 @@ import 'simplebar/dist/simplebar.min.css';
 
 import 'simplebar';
 import { dispatch, history, sagaMiddleware, store } from '@/v4/modules/store';
-import V4Root from '@/v4/routes/index';
 import { Root as V5Root } from '@/v5/ui/routes';
 
 import { UnityUtil } from '@/globals/unity-util';
@@ -80,11 +79,6 @@ const render = () => {
 							<Route path="/v5">
 								<VersionContext.Provider value={Version.V5}>
 									<V5Root />
-								</VersionContext.Provider>
-							</Route>
-							<Route>
-								<VersionContext.Provider value={Version.V4}>
-									<V4Root />
 								</VersionContext.Provider>
 							</Route>
 						</Switch>

@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isV5 } from '@/v4/helpers/isV5';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import styled, { css } from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../../../styles';
@@ -49,12 +48,7 @@ export const SortLabel = styled(TableSortLabel) `
 		width: 14px;
 		height: 14px;
 
-		fill: ${({ active, theme }) => {
-			if (isV5()) {
-				return active ? theme.palette.base.main : 'transparent';
-			} else {
-				return active ? COLOR.WHITE : COLOR.BLACK_60;
-			}
+		fill: ${({ active, theme }) =>  active ? theme.palette.base.main : 'transparent'}
 		}}
 	}
 `;

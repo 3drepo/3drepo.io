@@ -18,8 +18,6 @@ import { DialogContent } from '@mui/material';
 import Dropzone from 'react-dropzone';
 import styled, { css } from 'styled-components';
 import { DashedContainer } from '@controls/dashedContainer/dashedContainer.component';
-import { isV5 } from '@/v4/helpers/isV5';
-import { COLOR } from '../../../../styles';
 
 const dropZoneColors = (normalColour, dragColour, errorColour) => (props: any) =>
 	props.error ? errorColour :
@@ -54,9 +52,6 @@ export const ResourcesListContainer = styled.div`
 	& >:last-child {
 		height: 55px;
 	}
-	${!isV5() && css`
-		max-height: 114px;
-	`}
 `;
 
 export const ResourcesListScroller = styled.div`
@@ -85,7 +80,7 @@ export const AddLinkContainer = styled.div`
 	margin-top: 20px;
 `;
 
-const V5DropzoneContent = styled(DashedContainer).attrs<{ error?: boolean, isDragActive?: boolean }>(({
+export const DropzoneContent = styled(DashedContainer).attrs<{ error?: boolean, isDragActive?: boolean }>(({
 	theme: {
 		palette: {
 			primary,
@@ -105,18 +100,7 @@ const V5DropzoneContent = styled(DashedContainer).attrs<{ error?: boolean, isDra
 		background-color: ${dropZoneColors(primary.contrast, primary.lightest, error.lightest)};
 		color: ${dropZoneColors(secondary.main, secondary.main, error.main)};
 	`}
-`;
 
-const V4DropzoneContent = styled.div`
-	border-width: 3px;
-	background-color: ${dropZoneColors('transparent', COLOR.PRIMARY_MAIN_6, COLOR.WARNING_LIGHT)};
-	border-color: ${dropZoneColors(COLOR.BLACK_50, COLOR.PRIMARY_MAIN_80, COLOR.NEGATIVE_87)};
-	color: ${dropZoneColors(COLOR.BLACK_60, COLOR.PRIMARY_MAIN_80, COLOR.NEGATIVE)};
-	border-style: dashed;
-	border-radius: 5px;
-` as any;
-
-export const DropzoneContent = styled(isV5() ? V5DropzoneContent : V4DropzoneContent)`
 	cursor: ${(props: any) => props.error ? 'default' : 'pointer' };
 	position: relative;
 	padding: 10px;

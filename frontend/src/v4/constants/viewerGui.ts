@@ -29,7 +29,6 @@ import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
 import { RisksIcon } from '../routes/viewerGui/components/risks/components/riskIcon/riskIcon.component';
 
 import { clientConfigService } from '../services/clientConfig';
-import { isV5 } from '../helpers/isV5';
 
 export const VIEWER_PANELS = {
 	GIS: 'gis',
@@ -104,9 +103,7 @@ export const getViewerLeftPanels = () =>  [
 	VIEWER_PANELS.SEQUENCES,
 	VIEWER_PANELS.MEASUREMENTS,
 ].filter((panel) =>
-(clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES)
-&& (isV5() || panel !== VIEWER_PANELS.TICKETS) // If is not in v5 dont add the tickets button
-).map(getPanelConfig);
+(clientConfigService.sequencesEnabled || panel !== VIEWER_PANELS.SEQUENCES || panel !== VIEWER_PANELS.TICKETS).map(getPanelConfig);
 
 export const VIEWER_DRAGGABLE_PANELS = [
 	VIEWER_PANELS.LEGEND,

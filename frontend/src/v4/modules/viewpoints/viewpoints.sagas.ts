@@ -19,7 +19,6 @@ import copy from 'copy-to-clipboard';
 import { get } from 'lodash';
 import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import { generatePath } from 'react-router-dom';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { getAPIUrl } from '@/v4/services/api/default';
@@ -318,7 +317,7 @@ export function* shareViewpointLink({ teamspace, modelId, viewpointId, project, 
 		model: modelId,
 		revision,
 	};
-	const basePath = generatePath(isV5() ? ROUTES.V5_MODEL_VIEWER : ROUTES.MODEL_VIEWER, pathParams);
+	const basePath = generatePath(ROUTES.V5_MODEL_VIEWER, pathParams);
 	const url = prefixBaseDomain(`${basePath}?viewId=${viewpointId}`);
 
 	copy(url);

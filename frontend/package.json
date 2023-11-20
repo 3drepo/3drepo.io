@@ -153,7 +153,7 @@
 		"cross-env": "7.0.2",
 		"css-loader": "6.7.3",
 		"cssnano": "5.1.7",
-		"dpdm": "3.9.0",
+		"dpdm": "3.14.0",
 		"esbuild-loader": "2.20.0",
 		"eslint": "8.36.0",
 		"eslint-config-airbnb-typescript": "17.1.0",

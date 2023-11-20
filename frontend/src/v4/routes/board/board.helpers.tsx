@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { formatMessage } from '@/v5/services/intl';
 import { groupBy } from 'lodash';
 
@@ -61,7 +60,7 @@ export const getProjectModels = (teamspaces = [], projectsMap, modelsMap, curren
 
 		if (federations) {
 			const { label, items } = getItemsGroup(
-				isV5() ? formatMessage({ defaultMessage: 'Federations', id: 'board.group.federations'}) : 'Federations',
+				formatMessage({ defaultMessage: 'Federations', id: 'board.group.federations'}),
 				federations,
 			);
 			list.push(label, ...items);
@@ -69,7 +68,7 @@ export const getProjectModels = (teamspaces = [], projectsMap, modelsMap, curren
 
 		if (models) {
 			const { label, items } = getItemsGroup(
-				isV5() ? formatMessage({ defaultMessage: 'Containers', id: 'board.group.containers'}) : 'Models',
+				formatMessage({ defaultMessage: 'Containers', id: 'board.group.containers'}),
 				models,
 			);
 			list.push(label, ...items);

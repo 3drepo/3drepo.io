@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { goBack, push } from 'connected-react-router';
@@ -62,14 +61,10 @@ function* fetchData({ teamspace, model }) {
 		yield put(ModelActions.fetchSettingsSuccess(settings));
 		yield put(ModelActions.setPendingState(false));
 	} catch (error) {
-		if (isV5()) {
-			yield put(DialogsActions.open('alert', {
-				currentActions: formatMessage({ id: 'viewer.error.resource', defaultMessage: 'trying to fetch resource' }),
-				error,
-			}));
-		} else {
-			yield put(DialogActions.showRedirectToTeamspaceDialog(error, teamspace));
-		}
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'viewer.error.resource', defaultMessage: 'trying to fetch resource' }),
+			error,
+		}));
 		return;
 	}
 

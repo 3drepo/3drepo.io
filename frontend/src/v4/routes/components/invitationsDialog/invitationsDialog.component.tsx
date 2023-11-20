@@ -19,8 +19,6 @@ import Button from '@mui/material/Button';
 import Delete from '@mui/icons-material/Delete';
 import Edit from '@mui/icons-material/Edit';
 import { get } from 'lodash';
-import { isV5 } from '@/v4/helpers/isV5';
-
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { EmptyStateInfo } from '../components.styles';
 import { SmallIconButton } from '../smallIconButon/smallIconButton.component';
@@ -94,7 +92,7 @@ export const InvitationsDialog = (props: IProps) => {
 				<CancelButton
 					type="button"
 					color="primary"
-					{...(isV5() && { variant: 'text' })}
+					variant="text"
 					onClick={props.handleClose}
 				>
 					Cancel
