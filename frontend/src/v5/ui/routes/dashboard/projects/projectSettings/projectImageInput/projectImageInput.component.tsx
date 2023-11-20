@@ -27,8 +27,7 @@ import { DragAndDrop } from '@controls/dragAndDrop';
 import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { isString } from 'lodash';
-import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
-import { ButtonsContainer, ImageButton, GrayBodyText, ImageContainer, Image } from './projectImageInput.styles';
+import { ButtonsContainer, ImageButton, GrayBodyText, ImageContainer, Image, ErrorMessage } from './projectImageInput.styles';
 
 export const ProjectImageInput = ({ onChange, value, error, disabled, helperText }: FormInputProps) => {
 	const [imgSrc, setImgSrc] = useState(value);
@@ -57,7 +56,7 @@ export const ProjectImageInput = ({ onChange, value, error, disabled, helperText
 			{error && (
 				<>
 					<ErrorMessage>{helperText}</ErrorMessage>
-					<Gap $height='26px' />
+					<Gap $height='28px' />
 				</>
 			)}
 			<ImageContainer>

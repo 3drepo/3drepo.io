@@ -18,11 +18,16 @@
 import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 import { FlatButton } from '@controls/button/flatButton.component'; 
+import { ErrorMessage as ErrorMessageBase } from '@controls/errorMessage/errorMessage.component';
 
 export const GrayBodyText = styled(Typography).attrs({
 	variant: 'body1',
 })`
 	color: ${({ theme }) => theme.palette.base.main};
+`;
+
+export const ErrorMessage = styled(ErrorMessageBase)`
+	margin-top: 0;
 `;
 
 export const ImageContainer = styled.div`
