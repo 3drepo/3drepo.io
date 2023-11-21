@@ -86,7 +86,7 @@ export const FlexRow = styled.div`
 	flex-flow: row;
 `;
 
-export const SelectPinButton = styled.div<{ color: string, isSelected: boolean; $isLight: boolean; disabled: boolean; }>`
+export const SelectPinButton = styled.div<{ color: string, isSelected: boolean; isLight: boolean; disabled: boolean; }>`
 	outline: 1px solid;
 	outline-color: ${({ color, isSelected, theme }) => isSelected ? color : theme.palette.secondary.lightest};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
@@ -97,7 +97,7 @@ export const SelectPinButton = styled.div<{ color: string, isSelected: boolean; 
 	padding: 12px;
 	cursor: ${({  disabled }) => disabled ? 'default' : 'pointer'};
 
-	${({ $isLight, isSelected, theme }) => $isLight && css`
+	${({ isLight, isSelected, theme }) => isLight && css`
 		outline-color: ${isSelected ? theme.palette.base.lighter : theme.palette.secondary.lightest};
 		> svg path {
 			stroke: ${theme.palette.secondary.main};

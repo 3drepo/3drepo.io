@@ -30,7 +30,6 @@ import { DEFAULT_PIN, getPinColorHex, isPinLight } from './coordsProperty.helper
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { join } from 'lodash';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { PaddedCrossIcon } from '@controls/chip/chip.styles';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
@@ -45,7 +44,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const [editMode, setEditMode] = useState(false);
 	const prevValue = useRef(undefined);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const pinId = name === DEFAULT_PIN ? ticketId : join([ticketId, name], '.');
+	const pinId = name === DEFAULT_PIN ? ticketId : `${ticketId}.${name}`;
 	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
 	const isSelected = selectedPin === pinId;
 	const hasPin = !!value;
@@ -88,7 +87,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		return isSelected ? formatMessage({ id: 'tickets.coords.deselectPin', defaultMessage: 'Deselect pin' }) : formatMessage({ id: 'tickets.coords.selectPin', defaultMessage: 'Select pin' });
 	};
 
-	const replacePin = () => {
+	const refreshPin = () => {
 		if (prevValue.current) {
 			ViewerService.removePin(pinId);
 		}
@@ -103,13 +102,13 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 	// Update pin when colour changes
 	useEffect(() => {
-		replacePin();
+		refreshPin();
 	}, [colorHex]);
 
 	// Update pin when position changes
 	useEffect(() => {
 		if (value !== prevValue.current) {
-			replacePin();
+			refreshPin();
 		}
 
 		prevValue.current = value;
@@ -176,7 +175,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 					<Tooltip title={getSelectPinTooltip()}>
 						<SelectPinButton
 							color={colorHex}
-							$isLight={isPinLight(colorHex)}
+							isLight={isPinLight(colorHex)}
 							isSelected={isSelected}
 							onClick={onClickSelectPin}
 							disabled={!hasPin}
