@@ -34,6 +34,14 @@ export const ProjectImageInput = ({ onChange, value, error, disabled, helperText
 
 	const deleteImage = () => onChange(null);
 
+	const uploadImage = async (file) => {
+		const fileSrc = await convertFileToImageSrc(file);
+		try {
+			await testImageExists(fileSrc);
+			onChange(file);
+		} catch (e) { }
+	};
+
 	useEffect(() => {
 		if (!value) {
 			setImgSrc(null);
@@ -65,7 +73,7 @@ export const ProjectImageInput = ({ onChange, value, error, disabled, helperText
 					<ButtonsContainer>
 						<FileInputField
 							accept={getSupportedImageExtensions()}
-							onChange={onChange}
+							onChange={uploadImage}
 						>
 							<ImageButton variant="primary" as="span">
 								<EditIcon />
@@ -90,7 +98,7 @@ export const ProjectImageInput = ({ onChange, value, error, disabled, helperText
 
 	return (
 		<DragAndDrop
-			onDrop={([file]) => onChange(file)}
+			onDrop={([file]) => uploadImage(file)}
 			accept={getSupportedImageExtensions()}
 		>
 			<Typography variant="h3" color="secondary">
@@ -101,7 +109,7 @@ export const ProjectImageInput = ({ onChange, value, error, disabled, helperText
 			</Typography>
 			<FileInputField
 				accept={getSupportedImageExtensions()}
-				onChange={onChange}
+				onChange={uploadImage}
 			>
 				<Button component="span" variant="contained" color="primary">
 					<FormattedMessage
