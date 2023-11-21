@@ -82,17 +82,11 @@ export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 		GroupsActionsDispatchers.setColorOverrides(descendants, (overridden === false));
 	};
 
-	const onClickIsolate = (event) => {
-		event.stopPropagation();
-		GroupsActionsDispatchers.isolateGroups(descendants);
-	};
-
 	const depth = getGroupNamePath(groupSet.pathName).length;
 
 	return (
 		<GroupsSetTreeListItemComponent
 			onClick={onClickItem}
-			onClickIsolate={onClickIsolate}
 			onClickOverride={onClickOverride}
 			overridden={overridden}
 			highlighted={highlighted}

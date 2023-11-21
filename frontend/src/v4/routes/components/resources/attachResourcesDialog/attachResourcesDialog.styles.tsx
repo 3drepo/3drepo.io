@@ -106,4 +106,4 @@ export const DropzoneContent = styled(DashedContainer).attrs<{ error?: boolean, 
 	padding: 10px;
 	text-align: center;
 	transition: background-color 0.3s ease,color 0.3s ease,border-color 0.3s ease ;
-`;
+` as any;
