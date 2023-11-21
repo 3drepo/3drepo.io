@@ -104,11 +104,11 @@ const getImage = async (req, res) => {
 	}
 };
 
-const uploadImage = async (req, res) => {
+const updateImage = async (req, res) => {
 	const { teamspace, project } = req.params;
 
 	try {
-		await Projects.uploadImage(teamspace, project, req.file.buffer);
+		await Projects.updateImage(teamspace, project, req.file.buffer);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -396,7 +396,7 @@ const establishRoutes = () => {
 	 *       200:
 	 *         $ref: "#/components/responses/ok"
 	 */
-	router.put('/:project/image', isAdminToProject, singleImageUpload('file'), uploadImage);
+	router.put('/:project/image', isAdminToProject, singleImageUpload('file'), updateImage);
 
 	/**
 	 * @openapi

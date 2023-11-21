@@ -19,10 +19,12 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../helper/services');
 const { image, oversizedImage, objModel, src } = require('../../../../helper/path');
-const { stringToUUID } = require('../../../../../../src/v5/utils/helper/uuids');
+
+const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const fs = require('fs');
-const { fileMimeFromBuffer } = require('../../../../../../src/v5/utils/helper/typeCheck');
-const Responder = require('../../../../../../src/v5/utils/responder');
+
+const { fileMimeFromBuffer } = require(`${src}/utils/helper/typeCheck`);
+const Responder = require(`${src}/utils/responder`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -356,6 +358,7 @@ const testGetProjectImage = () => {
 		['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 		['the project has no image', { ...baseRouteParams, projectId: projects.testProject.id }, false, templates.fileNotFound],
 		['the project has image', { ...baseRouteParams }, true, Buffer.from(imageData), undefined],
+		['the project has image (non project admin)', { ...baseRouteParams, key: users.nonAdminUser.apiKey }, true, Buffer.from(imageData), undefined],
 		['the project has image (PNG)', { ...baseRouteParams, projectId: projects.projectWithPngImage.id }, true, fs.readFileSync(image), Responder.mimeTypes.png],
 	];
 
@@ -401,6 +404,7 @@ const testUpdateProjectImage = () => {
 		['the teamspace does not exist', { ...baseRouteParams, teamspace: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
 		['the user is not a member of the teamspace', { ...baseRouteParams, key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
 		['the user does not have access to the project', { ...baseRouteParams, key: users.modelPermUser.apiKey }, false, templates.notAuthorized],
+		['the user is not project admin', { ...baseRouteParams, key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
 		['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 		['an oversized image is provided', { ...baseRouteParams, image: oversizedImage }, false, templates.maxSizeExceeded],
 		['a wrong file type is provided', { ...baseRouteParams, image: objModel }, false, templates.unsupportedFileFormat],
@@ -454,6 +458,7 @@ const testDeleteProjectImage = () => {
 		['the teamspace does not exist', { ...baseRouteParams, teamspace: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
 		['the user is not a member of the teamspace', { ...baseRouteParams, key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
 		['the user does not have access to the project', { ...baseRouteParams, key: users.modelPermUser.apiKey }, false, templates.notAuthorized],
+		['the user is not project admin', { ...baseRouteParams, key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
 		['the project does not exist', { ...baseRouteParams, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 		['the project does not have an image', { ...baseRouteParams, projectId: projects.testProject.id }, true],
 		['the user is teamspace admin', { ...baseRouteParams }, true],
