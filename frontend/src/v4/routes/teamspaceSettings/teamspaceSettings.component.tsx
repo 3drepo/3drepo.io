@@ -314,7 +314,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 									type="submit"
 									variant="contained"
 									color="secondary"
-									disabled={!form.isValid || form.isSubmitting}
+									disabled={!form.isValid || form.isSubmitting || !form.dirty}
 								>
 									Save
 								</Button>}

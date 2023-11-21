@@ -153,7 +153,7 @@ export class ProfileDataForm extends PureComponent<IProps, IState> {
 							<StyledButton
 								color="secondary"
 								variant="contained"
-								disabled={!form.isValid || form.isValidating}
+								disabled={!form.isValid || form.isValidating || !form.dirty}
 								type="submit"
 							>
 								Update profile

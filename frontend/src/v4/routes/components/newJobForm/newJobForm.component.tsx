@@ -120,7 +120,7 @@ export class NewJobForm extends PureComponent<IProps, any> {
 								variant="contained"
 								onClick={isV5() ? this.props.onCancel : undefined}
 								color={isV5() ? 'primary' : 'secondary'}
-								disabled={!form.isValid || form.isValidating}
+								disabled={!form.isValid || form.isValidating || !form.dirty}
 								aria-label="Add new job"
 							>
 								<FormattedMessage

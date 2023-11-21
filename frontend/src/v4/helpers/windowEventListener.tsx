@@ -14,26 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useEffect } from 'react';
 
-import ReactMarkdown from 'react-markdown';
-import { CommentMessage } from '../basicComment/basicComment.styles';
-import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
-import { OverflowContainer } from './commentMarkDown.styles';
+interface IProps {
+	event: keyof WindowEventMap;
+	onEventTriggered: (e: Event) => any;
+}
 
-const COMPONENTS = {
-	p: CommentMessage,
-	img: ({ src }) => `![img](${src})`,
-	blockquote: QuotedMessage,
-} as any;
+export const WindowEventListener = ({ event, onEventTriggered }: IProps) => {
+	useEffect(() => {
+		window.addEventListener(event, onEventTriggered);
+		return () => window.removeEventListener(event, onEventTriggered)
+	}, []);
 
-type CommentMarkDownProps = {
-	children?: any,
-	className?: string,
+	return (null);
 };
-export const CommentMarkDown = ({ children, ...props }: CommentMarkDownProps) => (
-	<OverflowContainer>
-		<ReactMarkdown components={COMPONENTS} {...props}>
-			{children}
-		</ReactMarkdown>
-	</OverflowContainer>
-);

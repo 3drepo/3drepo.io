@@ -1,20 +1,21 @@
 {
-  "processors": [
-    "stylelint-processor-styled-components"
-  ],
-  "extends": [
-    "stylelint-config-recommended",
-    "stylelint-config-styled-components"
-  ],
-  "rules": {
-    "block-no-empty": null,
-    "font-family-no-missing-generic-family-keyword": null,
-    "no-descending-specificity": null,
-    "color-named": "never",
-    "shorthand-property-no-redundant-values": true,
-    "max-empty-lines": 1,
-    "length-zero-no-unit": true,
-    "unit-case": "lower",
-    "indentation": "tab"
-  }
+	"processors": [
+		"stylelint-processor-styled-components"
+	],
+	"extends": [
+		"stylelint-config-recommended",
+		"stylelint-config-styled-components"
+	],
+	"customSyntax": "postcss-scss",
+	"rules": {
+		"block-no-empty": null,
+		"color-named": "never",
+		"font-family-no-missing-generic-family-keyword": null,
+		"indentation": "tab",
+		"length-zero-no-unit": true,
+		"max-empty-lines": 1,
+		"no-descending-specificity": null,
+		"shorthand-property-no-redundant-values": true,
+		"unit-case": "lower"
+	}
 }

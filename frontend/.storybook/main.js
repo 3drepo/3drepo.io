@@ -8,11 +8,7 @@ module.exports = {
   ],
 
   "addons": [
-    "@storybook/addon-links",
     "@storybook/addon-essentials",
-    "@storybook/addon-interactions",
-    "storybook-addon-material-ui5",
-    "storybook-addon-styled-component-theme/dist/preset"
   ],
 
   "framework": {

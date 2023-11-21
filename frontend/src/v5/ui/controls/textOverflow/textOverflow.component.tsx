@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useCallback, useEffect, useState } from 'react';
-import EventListener from 'react-event-listener';
-import { isNil } from 'lodash';
+import { ReactNode, useCallback, useEffect, useState, useRef } from 'react';
+import { WindowEventListener } from '@/v4/helpers/windowEventListener';
 import { onlyText } from 'react-children-utilities';
 
 import { Container, Tooltip } from './textOverflow.styles';
@@ -29,15 +28,15 @@ interface ITextOverflow {
 }
 
 export const TextOverflow = ({ children, className, tooltipText }: ITextOverflow): JSX.Element => {
-	const [labelRef, setLabelRef] = useState<HTMLElement>(null);
+	const ref = useRef(null);
 	const [isTruncated, setIsTruncated] = useState(false);
 
 	const checkIfTruncated = useCallback(() => {
-		if (!isNil(labelRef)) {
-			return labelRef.scrollWidth > labelRef.clientWidth;
-		}
-		return false;
-	}, [labelRef, children]);
+		if (!ref.current) return false;
+
+		const { current } = ref;
+		return current.scrollWidth > current.clientWidth;
+	}, [children]);
 
 	useEffect(() => {
 		setIsTruncated(checkIfTruncated());
@@ -50,11 +49,11 @@ export const TextOverflow = ({ children, className, tooltipText }: ITextOverflow
 				style={{ pointerEvents: isTruncated ? 'all' : 'none' }}
 				placement="bottom"
 			>
-				<Container ref={setLabelRef} className={className}>
+				<Container ref={ref} className={className}>
 					{children}
 				</Container>
 			</Tooltip>
-			<EventListener target="window" onResize={() => setIsTruncated(checkIfTruncated())} />
+			<WindowEventListener event="resize" onEventTriggered={() => setIsTruncated(checkIfTruncated())} />
 		</>
 	);
 };
