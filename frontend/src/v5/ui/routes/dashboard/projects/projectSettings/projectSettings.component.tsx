@@ -18,7 +18,7 @@
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { projectAlreadyExists } from '@/v5/validation/errors.helpers';
+import { isFileFormatUnsupported, projectAlreadyExists } from '@/v5/validation/errors.helpers';
 import { ProjectSchema } from '@/v5/validation/projectSchemes/projectsSchemes';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { FormTextField } from '@controls/inputs/formInputs.component';
@@ -62,6 +62,7 @@ export const ProjectSettings = () => {
 	const {
 		formState: { errors, isValid, dirtyFields, isSubmitting, isDirty },
 		handleSubmit,
+		setError,
 		getValues,
 		reset,
 		trigger,
@@ -70,6 +71,15 @@ export const ProjectSettings = () => {
 	const onSubmitError = (error) => {
 		if (projectAlreadyExists(error)) {
 			setExistingNames(existingNames.concat(getValues('name')));
+		}
+		if (isFileFormatUnsupported(error)) {
+			setError('image', {
+				type: 'custom',
+				message: formatMessage({
+					id: 'project.settings.image.error.format',
+					defaultMessage: 'The file format is not supported',
+				}),
+			});
 		}
 	};
 
@@ -153,19 +163,19 @@ export const ProjectSettings = () => {
 				</Section>
 				{isAdmin && (
 					<SubmitButton
-						disabled={_.isEmpty(dirtyFields) || !isValid}
+						disabled={_.isEmpty(dirtyFields) || !isValid || !_.isEmpty(errors)}
 						isPending={isSubmitting}
 					>
 						<FormattedMessage id="project.settings.form.saveChanges" defaultMessage="Save changes" />
 					</SubmitButton>
 				)}
+				{showSuccessMessage && (
+					<SuccessMessage>
+						<FormattedMessage id="project.settings.form.successMessage" defaultMessage="The project has been updated successfully." />
+					</SuccessMessage>
+				)}
+				<UnhandledErrorInterceptor expectedErrorValidators={[projectAlreadyExists, isFileFormatUnsupported]} />
 			</Form>
-			{showSuccessMessage && (
-				<SuccessMessage>
-					<FormattedMessage id="project.settings.form.successMessage" defaultMessage="The project has been updated successfully." />
-				</SuccessMessage>
-			)}
-			<UnhandledErrorInterceptor expectedErrorValidators={[projectAlreadyExists]} />
 		</FormProvider>
 	);
 };
