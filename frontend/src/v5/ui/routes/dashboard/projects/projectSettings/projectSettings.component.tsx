@@ -86,10 +86,11 @@ export const ProjectSettings = () => {
 		);
 		await promiseToResolve;
 		setShowSuccessMessage(true);
+		const resetBody = { ...body };
 		if ('image' in updatedProject) {
-			const newImgSrc = (updatedProject.image === null) ? null : imgSrcAsUrl;
-			reset({ name, image: newImgSrc });
+			resetBody.image = (updatedProject.image === null) ? null : imgSrcAsUrl;
 		}
+		reset(resetBody);
 	};
 
 	useEffect(() => {
