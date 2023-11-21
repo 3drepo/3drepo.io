@@ -24,6 +24,7 @@ import PlayIcon from '@assets/icons/filled/play-filled.svg';
 
 import {
 	VIEWER_PANELS,
+	VIEWER_PANELS_ICONS,
 	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
@@ -34,6 +35,8 @@ import { Content as ContentComponent } from '../../../components/loader/loader.s
 import { MenuItemContainer } from '../previewListItem/previewListItem.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
+
+export const SequencesIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.SEQUENCES];
 
 export const SequencesContainer = styled(ViewerPanel).attrs({
 	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.SEQUENCES]
