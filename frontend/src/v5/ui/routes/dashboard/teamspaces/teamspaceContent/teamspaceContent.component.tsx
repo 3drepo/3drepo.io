@@ -31,7 +31,7 @@ export const TeamspaceContent = () => {
 	let { path } = useRouteMatch();
 	path = discardSlash(path);
 
-	useEffect(() => { ProjectsActionsDispatchers.setCurrentProject('') }, []);
+	useEffect(() => { ProjectsActionsDispatchers.setCurrentProject(''); }, []);
 
 	return (
 		<Switch>
