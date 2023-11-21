@@ -64,7 +64,7 @@ Projects.updateProject = updateProject;
 
 Projects.getImage = (teamspace, project) => getFile(teamspace, COL_NAME, project);
 
-Projects.uploadImage = (teamspace, project, imageBuffer) => storeFile(teamspace, COL_NAME, project, imageBuffer);
+Projects.updateImage = (teamspace, project, imageBuffer) => storeFile(teamspace, COL_NAME, project, imageBuffer);
 
 Projects.deleteImage = (teamspace, project) => removeFile(teamspace, COL_NAME, project);
 
