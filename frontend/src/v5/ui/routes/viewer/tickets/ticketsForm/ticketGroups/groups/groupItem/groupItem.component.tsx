@@ -49,7 +49,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const dispatch = useDispatch();
 	const {
 		groupType,
-		isHighlightedIndex,
+		highlightedIndex,
 		setHighlightedIndex,
 		clearHighlightedIndex,
 		getGroupIsChecked,
@@ -61,7 +61,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const { group, color, opacity } = override;
 	const checked = getGroupIsChecked(index);
 	const isHidden = groupType === 'hidden';
-	const isHighlighted = isHighlightedIndex(index);
+	const isHighlighted = highlightedIndex === index;
 
 	const sharedIds = toSharedIds(((group as Group).objects || []).flatMap(({ _ids }) => _ids));
 	const objectsCount = useSelector(selectGetNumNodesByMeshSharedIdsArray(sharedIds));
@@ -120,19 +120,19 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		if (isHighlighted) {
 			highlightGroupObjects();
 		}
-	}, [override, isHighlightedIndex]);
+	}, [override, setHighlightedIndex]);
 
 	useEffect(() => {
-		if (!isHighlighted && isHidden && checked) {
+		if (isHighlighted || !isHidden) return;
+
+		if (checked) {
 			const objects = convertToV4GroupNodes((group as Group).objects);
 			dispatch(TreeActions.hideNodesBySharedIds(objects));
 		}
 
-		return () => {
-			if (isHighlighted) {
-				clearHighlightedIndex();
-			}
-		};
+		if (highlightedIndex === -1) {
+			clearHighlightedIndex();
+		}
 	}, [isHighlighted]);
 
 	if (isString(group)) return (<CircularProgress />);

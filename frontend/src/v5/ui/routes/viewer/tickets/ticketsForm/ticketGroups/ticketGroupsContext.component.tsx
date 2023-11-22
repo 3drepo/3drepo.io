@@ -28,8 +28,8 @@ type TicketGroupsContextComponentProps = {
 	children: any,
 	onSelectedGroupsChange?: (indexes: number[]) => void,
 	onDeleteGroups?: (indexes: number[]) => void,
-	onEditGroup?: (index: number) => void
-	isHighlightedIndex: (index: number) => boolean,
+	onEditGroup?: (index: number) => void,
+	highlightedIndex: number,
 	setHighlightedIndex: (index: number) => void,
 	clearHighlightedIndex: () => void,
 };

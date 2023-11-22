@@ -87,9 +87,9 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 
 	const onSetHighlightedIndex = (type) => (index) => setHighlightedOverride({ type, index });
 
-	const onIsHighlightedIndex = (type) => (index) => {
-		if (highlightedOverride.type !== type) return false;
-		return highlightedOverride.index === index;
+	const getHighlightedIndexByType = (type) => {
+		if (highlightedOverride.type !== type) return -1;
+		return highlightedOverride.index;
 	};
 
 	const onDeleteGroups = (type) => (indexes) => {
@@ -206,7 +206,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				onSelectedGroupsChange={setSelectedColorIndexes}
 				overrides={state.colored || []}
 				onEditGroup={onSetEditGroup(OverrideType.COLORED)}
-				isHighlightedIndex={onIsHighlightedIndex(OverrideType.COLORED)}
+				highlightedIndex={getHighlightedIndexByType(OverrideType.COLORED)}
 				clearHighlightedIndex={clearHighlightedIndex}
 				setHighlightedIndex={onSetHighlightedIndex(OverrideType.COLORED)}
 			>
@@ -220,7 +220,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				onSelectedGroupsChange={onSelectedHiddenGroupChange}
 				overrides={state.hidden || []}
 				onEditGroup={onSetEditGroup(OverrideType.HIDDEN)}
-				isHighlightedIndex={onIsHighlightedIndex(OverrideType.HIDDEN)}
+				highlightedIndex={getHighlightedIndexByType(OverrideType.HIDDEN)}
 				setHighlightedIndex={onSetHighlightedIndex(OverrideType.HIDDEN)}
 				clearHighlightedIndex={clearHighlightedIndex}
 			>
