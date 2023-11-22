@@ -47,4 +47,3 @@ Feature: Signup
 			| Username  | Email             | Password        | First name  | Last name       |
   			| newuser2   | newuser@mail.com | +jk+gnPZM^2LXDV | New         | User            |		
 		Then I wait until "This email is already taken" text appears
-	

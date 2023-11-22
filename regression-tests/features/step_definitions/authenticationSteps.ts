@@ -22,7 +22,7 @@ import { reTry } from '../../src/helpers/functions.helpers';
 import { clickOn, clickOnCheckboxNearText, closeOriginWindow, fillInForm, navigateTo, waitForText } from '../../src/helpers/selenium.helpers';
 import { pick } from '../../src/helpers/general.helpers';
 
-Then('I verify the account from email', async function (email) {
+Then('I verify the account from email {string}', async function (email) {
 	const mailContent = await reTry(async () => {
 		const mail = await getLatestMailFor(this.driver, email);
 
