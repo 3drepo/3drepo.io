@@ -20,15 +20,18 @@ import styled from 'styled-components';
 export const IssuePropertiesContainer = styled.div`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	height: 50px;
-	padding: 10px 2px 14px;
+	padding: 10px 2px 0;
 	display: inline-flex;
 	align-items: center;
 	width: 100%;
 	box-sizing: border-box;
+	border-top: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
+	margin-bottom: -3px;
 
-	&:last-child {
-		padding-bottom: 0;
-		margin-bottom: -15px;
+	&:not(:last-child) {
+		border-bottom: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
+		margin-bottom: 13px;
+		padding-bottom: 10px;
 	}
 `;
 
