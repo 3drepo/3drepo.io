@@ -78,7 +78,7 @@ export const TicketGroupsContextComponent = ({
 	};
 
 	useEffect(() => {
-		if (overrides.length > indexedOverrides.length && contextValue.groupType === 'colored') {
+		if (overrides.length > indexedOverrides.length) {
 			// overrides length increased as new overrides were added
 			const newCheckedIndexes = Array.from({ length: overrides.length - indexedOverrides.length }, (el, i) => i + indexedOverrides.length);
 			setCheckedIndexes(_.union(checkedIndexes, newCheckedIndexes));

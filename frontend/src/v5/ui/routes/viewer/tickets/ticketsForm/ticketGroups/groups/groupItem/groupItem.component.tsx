@@ -60,6 +60,8 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const { group, color, opacity } = override;
 	const checked = getGroupIsChecked(index);
+	const isHidden = groupType === 'hidden';
+	const isHighlighted = isHighlightedIndex(index);
 
 	const sharedIds = toSharedIds(((group as Group).objects || []).flatMap(({ _ids }) => _ids));
 	const objectsCount = useSelector(selectGetNumNodesByMeshSharedIdsArray(sharedIds));
@@ -98,7 +100,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const handleToggleClick = (e) => {
 		preventPropagation(e);
 		setGroupIsChecked(index, !checked);
-		if (groupType === 'hidden' && !checked && isHighlightedIndex(index)) {
+		if (isHidden && !checked && isHighlighted) {
 			clearHighlightedIndex();
 		}
 	};
@@ -106,19 +108,23 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const alphaColor = (color || [255, 255, 255]).concat(opacity);
 	const alphaHexColor = rgbaToHex(alphaColor.join());
 
-	useEffect(() => {
-		if (!isHighlightedIndex(index)) return;
+	const highlightGroupObjects = () => {
 		const objects = convertToV4GroupNodes((group as Group).objects);
 		dispatch(TreeActions.clearCurrentlySelected());
 		dispatch(TreeActions.showNodesBySharedIds(objects));
-		const selectionColor = groupType === 'hidden' ? [255, 255, 255] : color;
+		const selectionColor = isHidden ? [255, 255, 255] : color;
 		dispatch(TreeActions.selectNodesBySharedIds(objects, selectionColor?.map((c) => c / 255)));
+	};
+
+	useEffect(() => {
+		if (!isHighlighted) return;
+		highlightGroupObjects();
 	}, [override, isHighlightedIndex]);
 
 	if (isString(group)) return (<CircularProgress />);
 
 	return (
-		<Container onClick={handleClick} $highlighted={isHighlightedIndex(index)}>
+		<Container onClick={handleClick} $highlighted={isHighlighted}>
 			<Headline>
 				<GroupIconComponent rules={group.rules} color={alphaHexColor} />
 				<NameContainer>
