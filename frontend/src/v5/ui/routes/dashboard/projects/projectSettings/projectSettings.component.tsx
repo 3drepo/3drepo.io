@@ -29,14 +29,12 @@ import { SubmitHandler, useForm, FormProvider } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { dirtyValues } from '@/v5/helpers/form.helper';
 import { InputController } from '@controls/inputs/inputController.component';
-import { getProjectImgSrc } from '@/v5/store/projects/projects.helpers';
+import { getProjectImgSrc, DEFAULT_PROJECT_IMAGE } from '@/v5/store/projects/projects.helpers';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { testImageExists } from '@controls/fileUploader/imageFile.helper';
 import { Gap } from '@controls/gap';
 import { Form, Section, Header, SubmitButton, SuccessMessage, ImageInfo } from './projectSettings.styles';
 import { ProjectImageInput } from './projectImageInput/projectImageInput.component';
-
-const DEFAULT_IMAGE = 'assets/images/default_background.png';
 
 type IFormInput = {
 	name: string,
@@ -115,7 +113,7 @@ export const ProjectSettings = () => {
 		setShowSuccessMessage(false);
 		testImageExists(imgSrcAsUrl)
 			.then(() => reset({ name, image: imgSrcAsUrl }))
-			.catch(() => reset({ name, image: isAdmin ? null : DEFAULT_IMAGE }));
+			.catch(() => reset({ name, image: isAdmin ? null : DEFAULT_PROJECT_IMAGE }));
 	}, [projectId, isAdmin]);
 
 	useEffect(() => {
