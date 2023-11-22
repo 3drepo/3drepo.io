@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isV5 } from '@/v4/helpers/isV5';
 import styled, { css } from 'styled-components';
 import Checkers from '@assets/images/checkers.svg';
 import { ComponentToString } from '@/v5/helpers/react.helper';
@@ -29,7 +28,7 @@ export const Container = styled.div`
 	& > * {
 		grid-column-start: 1;
 		grid-row-start: 1;
-		border-radius: ${isV5() ? '5px' : '0'};
+		border-radius: 5px;
 	}
 `;
 
@@ -45,9 +44,9 @@ export const GroupIcon = styled.div<{ $color?: string, $variant?: 'light' | 'dar
 	background-color: ${({ $color }) => $color};
 	
 	${({ $variant, theme }) => ($variant === 'light' ? css`
-		color: ${isV5() ? theme.palette.base.main : '#6B778C'};
-		border: 1px solid ${isV5() ? theme.palette.base.mid : '#E0E5F0'};
+		color: ${theme.palette.base.main};
+		border: 1px solid ${theme.palette.base.mid};
 	` : css`
-		color: ${isV5() ? theme.palette.primary.contrast : '#fff'};
+		color: ${theme.palette.primary.contrast};
 	`)};
 `;

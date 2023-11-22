@@ -32,14 +32,6 @@ import {
 } from './modelsPermissions.styles';
 
 const MODEL_TABLE_CELLS = [{
-	name: 'Model/federation',
-	type: CELL_TYPES.NAME,
-	HeadingComponent: CellUserSearch,
-	CellComponent: ModelItem,
-	searchBy: ['name']
-}];
-
-const MODEL_TABLE_CELLS_V5 = [{
 	name: 'Container/federation',
 	type: CELL_TYPES.NAME,
 	HeadingComponent: CellUserSearch,
@@ -68,7 +60,6 @@ interface IProps {
 	className?: string;
 	onSelectionChange: (selectedModels) => void;
 	onPermissionsChange: (modelsWithPermissions) => void;
-	isV5: boolean;
 	selectedContFedId?: string;
 }
 
@@ -177,11 +168,10 @@ export class ModelsPermissions extends PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { models, permissions, selectedModels, className, isV5, location } = this.props;
+		const { models, permissions, selectedModels, className, location } = this.props;
 		const { permissionsRevision } = this.state;
-		const CELLS = isV5 ? MODEL_TABLE_CELLS_V5 : MODEL_TABLE_CELLS ;
 		// eslint-disable-next-line max-len
-		const textOverlayMessage = `Select a ${ isV5 ? 'container or federation' : 'model'} to view the users' permissions`;
+		const textOverlayMessage = `Select a container or federation to view the users permissions`;
 
 		return (
 			<Container
@@ -192,7 +182,7 @@ export class ModelsPermissions extends PureComponent<IProps, IState> {
 			>
 				<ModelsContainer item>
 					<CustomTable
-						cells={CELLS}
+						cells={MODEL_TABLE_CELLS}
 						rows={getModelsTableRows(models, selectedModels)}
 						onSelectionChange={this.props.onSelectionChange}
 						onSearch={this.handleModelsSearch}

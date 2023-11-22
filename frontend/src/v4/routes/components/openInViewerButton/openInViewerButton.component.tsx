@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { generatePath } from 'react-router-dom';
 import OpenInBrowser from '@mui/icons-material/OpenInBrowser';
@@ -40,17 +39,13 @@ export const OpenInViewerButton = memo((props: IProps) => {
 		event.stopPropagation();
 		const { teamspace, model, query, location } = props;
 		let targetUrl = window.location.origin;
-		if (isV5()) {
-			const project = location.pathname.split("/")[4];
-			const viewerParams = {
-				containerOrFederation: model,
-				teamspace,
-				project,
-			};
-			targetUrl += `${generatePath(VIEWER_ROUTE, viewerParams)}?${query || ''}`;
-		} else {
-			targetUrl += `${ROUTES.VIEWER}/${teamspace}/${model}?${query || ''}`;
-		}
+		const project = location.pathname.split("/")[4];
+		const viewerParams = {
+			containerOrFederation: model,
+			teamspace,
+			project,
+		};
+		targetUrl += `${generatePath(VIEWER_ROUTE, viewerParams)}?${query || ''}`;
 		window.open(targetUrl, '_blank', 'noopener');
 	};
 

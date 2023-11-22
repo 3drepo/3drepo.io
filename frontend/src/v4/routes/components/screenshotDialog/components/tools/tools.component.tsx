@@ -23,7 +23,6 @@ import DotIcon from '@mui/icons-material/FiberManualRecord';
 import RedoIcon from '@mui/icons-material/Redo';
 import TextIcon from '@mui/icons-material/TextFields';
 import UndoIcon from '@mui/icons-material/Undo';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import { lerp } from '../../../../../helpers/lerp';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
@@ -47,9 +46,9 @@ import {
 } from './tools.helpers';
 import { Badge, IconButton, OptionsDivider, ShapeMenuButton, StyledButton, ToolsContainer, MenuItem, Select } from './tools.styles';
 
-const ACTIVE_COLOR = isV5() ? 'primary' : 'secondary';
-const PRIMARY_COLOR = isV5() ? 'secondary' : 'primary';
-const ACTION_COLOR = isV5() ? 'secondary' : 'action';
+const ACTIVE_COLOR = 'primary';
+const PRIMARY_COLOR = 'secondary';
+const ACTION_COLOR = 'secondary';
 
 interface IProps {
 	size: number;
@@ -163,7 +162,7 @@ export class Tools extends PureComponent<IProps, any> {
 	});
 
 	public renderSaveButton = renderWhenTrue(() => (
-			<StyledButton onClick={this.props.onSave} color={isV5() ? 'primary' : 'secondary'} variant="contained">Save</StyledButton>
+			<StyledButton onClick={this.props.onSave} color="primary" variant="contained">Save</StyledButton>
 	));
 
 	public renderSelectableTools = (value, onChange, items) => (
