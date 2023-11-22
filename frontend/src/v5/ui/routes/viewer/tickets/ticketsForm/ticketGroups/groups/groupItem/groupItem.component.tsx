@@ -123,15 +123,9 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	}, [override, setHighlightedIndex]);
 
 	useEffect(() => {
-		if (isHighlighted || !isHidden) return;
-
-		if (checked) {
+		if (!isHighlighted && isHidden && checked) {
 			const objects = convertToV4GroupNodes((group as Group).objects);
 			dispatch(TreeActions.hideNodesBySharedIds(objects));
-		}
-
-		if (highlightedIndex === -1) {
-			clearHighlightedIndex();
 		}
 	}, [isHighlighted]);
 

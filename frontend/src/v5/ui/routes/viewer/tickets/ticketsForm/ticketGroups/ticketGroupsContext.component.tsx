@@ -39,6 +39,8 @@ export const TicketGroupsContextComponent = ({
 	onDeleteGroups,
 	onSelectedGroupsChange,
 	onEditGroup,
+	highlightedIndex,
+	clearHighlightedIndex,
 	...contextValue
 }: TicketGroupsContextComponentProps) => {
 	// overrides should arrive already indexed
@@ -62,7 +64,7 @@ export const TicketGroupsContextComponent = ({
 		state ? _.union(checkedIndexes, indexes) : _.without(checkedIndexes, ...indexes),
 	);
 
-	const handleDeleteGroups = (indexesToDelete) => {
+	const handleDeleteGroups = (indexesToDelete: number[]) => {
 		indexesToDelete = sortBy(indexesToDelete).reverse();
 		let newCheckedIndexes = [...checkedIndexes];
 
@@ -75,6 +77,10 @@ export const TicketGroupsContextComponent = ({
 			newCheckedIndexes = newCheckedIndexes.map((i) => (i < indexToDelete ? i : (i - 1)));
 		});
 		setCheckedIndexes(newCheckedIndexes);
+
+		if (highlightedIndex !== -1 && indexesToDelete.includes(highlightedIndex)) {
+			clearHighlightedIndex();
+		}
 	};
 
 	useEffect(() => {
@@ -91,7 +97,6 @@ export const TicketGroupsContextComponent = ({
 					deletedIndexes.push(index);
 				}
 			});
-
 			handleDeleteGroups(deletedIndexes);
 		}
 		setIndexedOverrides(_.sortBy(addIndex(overrides || []), 'prefix'));
@@ -111,6 +116,8 @@ export const TicketGroupsContextComponent = ({
 				setCollectionIsChecked,
 				getCollectionState,
 				indexedOverrides,
+				highlightedIndex,
+				clearHighlightedIndex,
 			}}
 		>
 			{children}
