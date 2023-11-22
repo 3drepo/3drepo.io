@@ -108,6 +108,9 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 
 	const onSelectedHiddenGroupChange = (indexes: number[]) => {
 		setSelectedHiddenIndexes(indexes);
+		if (highlightedOverride.type === 'hidden' && indexes.includes(highlightedOverride.index)) {
+			setHighlightedOverride(NO_OVERRIDE_SELECTED);
+		}
 		const diffIndexes = xor(indexes, selectedHiddenIndexes);
 		const hideNodes = indexes.length > selectedHiddenIndexes.length;
 		const objects = diffIndexes.flatMap((i) => convertToV4GroupNodes((state.hidden[i]?.group as Group)?.objects));

@@ -85,9 +85,6 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	const handleClick = (e) => {
 		preventPropagation(e);
 		setHighlightedIndex(index);
-		if (groupType === 'hidden') {
-			setGroupIsChecked(index, false);
-		}
 	};
 
 	const isolateGroup = (e) => {
