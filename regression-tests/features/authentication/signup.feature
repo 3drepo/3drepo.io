@@ -20,22 +20,13 @@ Feature: Signup
 		When I click on 'Sign up'
 		Then I should be redirected to the 'signup' page
 
-	Scenario: Sign up with valid  properties
+	Scenario: Sign up with valid properties
 		Given Im not logged in
-		Given I navigate to 'signup'
-		And I fill in the form with:
-			| Username  | Email             | Password        |
-  			| newuser   | newuser@mail.com  | +jk+gnPZM^2LXDV |
-		And I click on "Next step"
-		And I fill in the form with:
-			| First name  | Last name       |
-  			| New		  | User  			|
-		And I click on "Next step"
-		And I click on the checkbox near "I agree"
-		And I click on "Create account"
+		Given I try to signup with:
+			| Username  | Email            | Password        | First name  | Last name       |
+  			| newuser   | newuser@mail.com | +jk+gnPZM^2LXDV | New         | User            |
 		And I wait until "verify your email" text appears
-		And I navigate to verify account from email "newuser@mail.com" 
-		And I wait until "Your account has been verified" text appears
+		And I verify the account from email "newuser@mail.com"
 		When I sign in with:
 			| Username  | Password        |
   			| newuser   | +jk+gnPZM^2LXDV |
@@ -43,31 +34,17 @@ Feature: Signup
 
 	Scenario: Sign up (username taken)
 		Given Im not logged in
-		Given I navigate to 'signup'
-		And I fill in the form with:
-			| Username  | Email             | Password        |
-  			| newuser   | newuser2@mail.com | +jk+gnPZM^2LXDV |
-		And I click on "Next step"
-		And I fill in the form with:
-			| First name  | Last name       |
-  			| New		  | User  			|
-		And I click on "Next step"
-		And I click on the checkbox near "I agree"
-		When I click on "Create account"
+		# I try to signup with same username different email
+		Given I try to signup with:
+			| Username  | Email             | Password        | First name  | Last name       |
+  			| newuser   | newuser2@mail.com | +jk+gnPZM^2LXDV | New         | User            | 
 		Then I wait until "This username is already taken" text appears
 
 	Scenario: Sign up (email taken)
 		Given Im not logged in
-		Given I navigate to 'signup'
-		And I fill in the form with:
-			| Username  | Email             | Password        |
-  			| newuser2   | newuser@mail.com | +jk+gnPZM^2LXDV |
-		And I click on "Next step"
-		And I fill in the form with:
-			| First name  | Last name       |
-  			| New		  | User  			|
-		And I click on "Next step"
-		And I click on the checkbox near "I agree"
-		When I click on "Create account"
+		# I try to signup with same email different username
+		Given I try to signup with:
+			| Username  | Email             | Password        | First name  | Last name       |
+  			| newuser2   | newuser@mail.com | +jk+gnPZM^2LXDV | New         | User            |		
 		Then I wait until "This email is already taken" text appears
 	

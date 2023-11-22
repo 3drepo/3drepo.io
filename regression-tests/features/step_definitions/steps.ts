@@ -18,7 +18,7 @@
 import { When, Then, Given, Before, After, setDefaultTimeout } from '@cucumber/cucumber';
 import { expect } from 'chai';
 import { until } from 'selenium-webdriver';
-import { clickOn, clickOnCheckboxNearText, fillInForm, initializeSeleniumDriver, navigateTo, waitForText, waitUntilPageLoaded } from '../../src/helpers/selenium.helpers';
+import { clickOn, fillInForm, initializeSeleniumDriver, navigateTo, waitForText, waitUntilPageLoaded } from '../../src/helpers/selenium.helpers';
 import { getLogin, logout } from '../../src/helpers/api.helpers';
 import { domain } from '../../config.json';
 import { getUrl } from '../../src/helpers/routing.helpers';
@@ -68,9 +68,6 @@ When('I click on {string}', async function (linkContent: string) {
 	await clickOn(this.driver, linkContent);
 });
 
-When('I click on the checkbox near {string}', async function (text: string) {
-	await clickOnCheckboxNearText(this.driver, text);
-});
 
 When('I fill in the form with:', async function (datatable) {
 	await fillInForm(this.driver, datatable.hashes()[0]);

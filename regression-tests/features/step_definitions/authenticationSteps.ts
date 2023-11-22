@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Then } from '@cucumber/cucumber';
+import { Then, When } from '@cucumber/cucumber';
 import { getLatestMailFor } from '../../src/helpers/mailhog.helpers';
 import { WebDriver } from 'selenium-webdriver';
 import { reTry } from '../../src/helpers/functions.helpers';
-import { clickOn, closeOriginWindow } from '../../src/helpers/selenium.helpers';
+import { clickOn, clickOnCheckboxNearText, closeOriginWindow, fillInForm, navigateTo, waitForText } from '../../src/helpers/selenium.helpers';
+import { pick } from '../../src/helpers/general.helpers';
 
-Then('I navigate to verify account from email {string}', async function (email) {
+Then('I verify the account from email', async function (email) {
 	const mailContent = await reTry(async () => {
 		const mail = await getLatestMailFor(this.driver, email);
 
@@ -36,4 +37,16 @@ Then('I navigate to verify account from email {string}', async function (email) 
 	await (this.driver as WebDriver).executeScript('document.write(`' + mailContent + '`)');
 	await clickOn(this.driver, 'Verify');
 	await closeOriginWindow(this.driver);
+	await waitForText(this.driver, 'Your account has been verified');
+});
+
+When('I try to signup with:', async function (datatable) {
+	const formValues = datatable.hashes()[0];
+	await navigateTo(this.driver, 'signup');
+	await fillInForm(this.driver, pick(formValues, ['Username', 'Email', 'Password']));
+	await clickOn(this.driver, 'Next step');
+	await fillInForm(this.driver, pick(formValues, ['First name', 'Last name']));
+	await clickOn(this.driver, 'Next step');
+	await clickOnCheckboxNearText(this.driver, 'I agree');
+	await clickOn(this.driver, 'Create account');
 });
