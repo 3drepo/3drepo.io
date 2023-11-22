@@ -117,9 +117,16 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 	};
 
 	useEffect(() => {
-		if (!isHighlighted) return;
-		highlightGroupObjects();
+		if (isHighlighted) {
+			highlightGroupObjects();
+		}
 	}, [override, isHighlightedIndex]);
+
+	useEffect(() => () => {
+		if (isHighlighted) {
+			clearHighlightedIndex();
+		}
+	}, [isHighlighted]);
 
 	if (isString(group)) return (<CircularProgress />);
 
