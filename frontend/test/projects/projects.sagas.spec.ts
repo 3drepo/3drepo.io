@@ -128,9 +128,11 @@ describe('Teamspaces: sagas', () => {
 			_id,
 			isAdmin: true,
 		};
+		let onImageError;
 
 		beforeEach(() => {
 			dispatch(ProjectsActions.fetchSuccess(teamspace, []));
+			onImageError = jest.fn();
 		});
 
 		it('should create a project without image', async () => {
@@ -139,10 +141,11 @@ describe('Teamspaces: sagas', () => {
 				.reply(200, { _id });
 
 			await waitForActions(() => {
-				dispatch(ProjectsActions.createProject(teamspace, { name }, onSuccess, onError))
+				dispatch(ProjectsActions.createProject(teamspace, { name }, onSuccess, onImageError, onError))
 			}, [ProjectsActions.createProjectSuccess(teamspace, newProject)]);
 
 			expect(onSuccess).toHaveBeenCalled();
+			expect(onImageError).not.toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
 		});
 
@@ -153,11 +156,21 @@ describe('Teamspaces: sagas', () => {
 				.put(`/teamspaces/${teamspace}/projects/${_id}/image`)
 				.reply(200);
 
-			await waitForActions(() => {
-				dispatch(ProjectsActions.createProject(teamspace, { name, image: mockImageFile }, onSuccess, onError))
-			}, [ProjectsActions.createProjectSuccess(teamspace, newProject)]);
+			await Promise.all([
+				waitForActions(() => {
+					dispatch(ProjectsActions.createProject(
+						teamspace,
+						{ name, image: mockImageFile },
+						() => { onSuccess(); resolve(); },
+						onImageError,
+						onError,
+					))
+				}, [ProjectsActions.createProjectSuccess(teamspace, newProject)]),
+				promiseToResolve,
+			]);
 
 			expect(onSuccess).toHaveBeenCalled();
+			expect(onImageError).not.toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
 		});
 
@@ -169,7 +182,8 @@ describe('Teamspaces: sagas', () => {
 			dispatch(ProjectsActions.createProject(
 				teamspace,
 				{ name },
-				onSuccess, 
+				onSuccess,
+				onImageError,
 				() => { onError(); resolve(); },
 			));
 			await promiseToResolve;
@@ -177,6 +191,7 @@ describe('Teamspaces: sagas', () => {
 			const projectsInStore = selectCurrentProjects(getState());
 			expect(projectsInStore).toEqual([]);
 			expect(onSuccess).not.toHaveBeenCalled();
+			expect(onImageError).not.toHaveBeenCalled();
 			expect(onError).toHaveBeenCalled();
 		});
 
@@ -187,18 +202,24 @@ describe('Teamspaces: sagas', () => {
 				.put(`/teamspaces/${teamspace}/projects/${_id}/image`)
 				.reply(404);
 
-			dispatch(ProjectsActions.createProject(
-				teamspace,
-				{ name, image: mockImageFile },
-				onSuccess,
-				() => { onError(); resolve(); },
-			));
-			await promiseToResolve;
+			await Promise.all([
+				waitForActions(() => {
+					dispatch(ProjectsActions.createProject(
+						teamspace,
+						{ name, image: mockImageFile },
+						onSuccess,
+						() => { onImageError(); resolve(); },
+						onError,
+					));
+				}, [ProjectsActions.createProjectSuccess(teamspace, newProject)]),
+				promiseToResolve,
+			]);
 
 			const projectsInStore = selectCurrentProjects(getState());
-			expect(projectsInStore).toEqual([]);
+			expect(projectsInStore).toEqual([newProject]);
 			expect(onSuccess).not.toHaveBeenCalled();
-			expect(onError).toHaveBeenCalled();
+			expect(onImageError).toHaveBeenCalled();
+			expect(onError).not.toHaveBeenCalled();
 		});
 	});
 

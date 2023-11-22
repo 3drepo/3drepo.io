@@ -33,7 +33,7 @@ export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions
 	replaceTemplateSuccess: ['projectId', 'template'],
 	fetchFailure: [],
 	setCurrentProject: ['projectId'],
-	createProject: ['teamspace', 'project', 'onSuccess', 'onError'],
+	createProject: ['teamspace', 'project', 'onSuccess', 'onImageError', 'onError'],
 	createProjectSuccess: ['teamspace', 'project'],
 	updateProject: ['teamspace', 'projectId', 'project', 'onSuccess', 'onError'],
 	updateProjectSuccess: ['teamspace', 'projectId', 'project'],
@@ -109,6 +109,7 @@ export type SetCurrentProjectAction = Action<'SET_CURRENT_PROJECT_SUCCESS'> & { 
 export type CreateProjectAction = Action<'CREATE_PROJECT'> & OnSuccess & OnError & {
 	teamspace: string,
 	project: { name: string, image?: File },
+	onImageError: (error, id: string) => void,
 };
 export type CreateProjectSuccessAction = Action<'CREATE_PROJECT_SUCCESS'> & { teamspace: string, project: IProject };
 export type UpdateProjectAction = Action<'UPDATE_PROJECT'> & TeamspaceAndProjectId & OnSuccess & OnError & {
@@ -131,6 +132,7 @@ export interface IProjectsActions {
 		teamspace: string,
 		project: { name: string, image?: File },
 		onSuccess: () => void,
+		onImageError: (error, id) => void,
 		onError: (error) => void,
 	) => CreateProjectAction;
 	createProjectSuccess: (teamspace: string, project: IProject) => CreateProjectSuccessAction;
