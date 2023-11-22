@@ -102,10 +102,10 @@ export const ProjectImageInput = ({ onChange, value, error, disabled, helperText
 			accept={getSupportedImageExtensions()}
 		>
 			<Typography variant="h3" color="secondary">
-				<FormattedMessage id="dragAndDrop.drop" defaultMessage="Drop file here" />
+				<FormattedMessage id="project.settings.dragAndDrop.drop" defaultMessage="Drop file here" />
 			</Typography>
 			<Typography variant="h5" color="secondary">
-				<FormattedMessage id="dragAndDrop.or" defaultMessage="or" />
+				<FormattedMessage id="project.settings.dragAndDrop.or" defaultMessage="or" />
 			</Typography>
 			<FileInputField
 				accept={getSupportedImageExtensions()}
