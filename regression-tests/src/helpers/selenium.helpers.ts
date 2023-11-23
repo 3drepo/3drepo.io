@@ -117,9 +117,7 @@ export const navigateTo = async (driver:WebDriver, page:string) => {
 
 export const clickOn = async (driver: WebDriver, buttonContent:string) => {
 	await waitUntilPageLoaded(driver);
-	const withText = "[contains(text(),'" + buttonContent + "')]";
-	const text = '//body//*' + withText + '';
-	
+	const text = `//body//*[text()="${buttonContent}"]`;
 	const target = By.xpath(text);
 	const link  = await getElement(driver, target);
 	await driver.wait(until.elementIsEnabled(link));

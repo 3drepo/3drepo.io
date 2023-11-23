@@ -15,13 +15,11 @@
 
 Feature: Login
 	Scenario: Going to default page should redirect to v5 login page
-		Given Im not logged in
-		When I navigate to '/'
+		Given I navigate to '/'
 		Then I should be redirected to the 'login' page
 	
 	Scenario: Going to page that requires authentication should redirect back to login page
-		Given Im not logged in 
-		When I navigate to the 'dashboard' page
+		Given I navigate to the 'dashboard' page
 		Then I should be redirected to the 'login' page
 
 	Scenario: You can log into 3D Repo with a valid username and password
@@ -30,7 +28,6 @@ Feature: Login
 		Then I should be redirected to the 'dashboard' page
 
 	Scenario: Upon log in, you should be redirected to the page you wish to go
-		Given Im not logged in 
-		And I navigate to the 'viewer teamspace settings' page
+		Given I navigate to the 'viewer teamspace settings' page
 		When I sign in as 'viewer'
 		Then I should be redirected to the 'viewer teamspace settings' page
