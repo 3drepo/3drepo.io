@@ -18,7 +18,6 @@ import { PureComponent, ReactNode, createRef } from 'react';
 import { Field, Formik } from 'formik';
 import { Tooltip } from '@mui/material';
 import * as Yup from 'yup';
-import { isV5 } from '@/v4/helpers/isV5';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
@@ -98,7 +97,7 @@ export class PreviewDetails extends PureComponent<IProps, any> {
 	));
 
 	public renderTitleNumber = renderWhenTrue(() => (
-		<TitleNumber>{this.props.number}{!isV5() && '.'}</TitleNumber>
+		<TitleNumber>{this.props.number}</TitleNumber>
 	));
 
 	public renderNameField = renderWhenTrue(() => (
@@ -118,7 +117,6 @@ export class PreviewDetails extends PureComponent<IProps, any> {
 							placeholder={placeholder}
 							onChange={this.handleNameChange(field)}
 							error={Boolean(form.errors.name) && !this.props.name}
-							helperText={isV5() ? '' : form.errors.name}
 							inputProps={{
 								maxLength: 120,
 								onFocus: () => this.handleFocusName(field, form),

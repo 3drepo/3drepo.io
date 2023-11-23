@@ -16,26 +16,13 @@
  */
 
 import styled from 'styled-components';
-import SmallChevron from '@assets/icons/outlined/small_chevron-outlined.svg';
 import { ChevronStyledIconButton } from '@controls/chevronButton/chevronButton.styles';
-import { isV5 } from '@/v4/helpers/isV5';
 import { GroupsTreeListItemComponent } from './groupItemContainer.component';
 
-const GroupSetNameV5 = styled.h5`
+export const GroupSetName = styled.h5`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin: 0;
 	${({ theme }) => theme.typography.h5};
-`;
-
-const GroupSetNameV4 = styled.div`
-	color: #757575;
-	font-family: Roboto;
-	font-weight: 500;
-	font-size: 13px;
-	line-height: 16px;
-`;
-
-export const GroupSetName = styled(isV5() ? GroupSetNameV5 : GroupSetNameV4)`
 	display: flex;
 	overflow: hidden;
 `;
@@ -50,9 +37,4 @@ export const GroupsSetTreeListItemComponent = styled(GroupsTreeListItemComponent
 	${ChevronStyledIconButton} {
 		margin: 0;
 	}
-`;
-
-export const CollapsibleIconV4 = styled(SmallChevron)<{ $collapsed?: boolean }>`
-	color: #757575;
-	${({ $collapsed }) => (!$collapsed ? 'transform: rotate(90deg);' : '')};
 `;

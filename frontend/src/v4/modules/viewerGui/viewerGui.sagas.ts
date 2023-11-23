@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { goBack, push } from 'connected-react-router';
@@ -62,14 +61,10 @@ function* fetchData({ teamspace, model }) {
 		yield put(ModelActions.fetchSettingsSuccess(settings));
 		yield put(ModelActions.setPendingState(false));
 	} catch (error) {
-		if (isV5()) {
-			yield put(DialogsActions.open('alert', {
-				currentActions: formatMessage({ id: 'viewer.error.resource', defaultMessage: 'trying to fetch resource' }),
-				error,
-			}));
-		} else {
-			yield put(DialogActions.showRedirectToTeamspaceDialog(error, teamspace));
-		}
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'viewer.error.resource', defaultMessage: 'trying to fetch resource' }),
+			error,
+		}));
 		return;
 	}
 
@@ -384,7 +379,7 @@ function* setCamera({ params }) {
 }
 
 function* loadModel() {
-	const { teamspace, model, v5 } = yield select(selectUrlParams);
+	const { teamspace, model } = yield select(selectUrlParams);
 
 	try {
 		yield Viewer.isViewerReady();
@@ -401,24 +396,14 @@ function* loadModel() {
 		}
 
 	} catch (error) {
-		if (v5) {
-			if (matchPath(location.pathname, { path: ROUTES.V5_MODEL_VIEWER })) {
-				const content = formatMessage({
-					id: 'viewerGui.loadModel.error.content',
-					defaultMessage: 'The model was either not found, failed to load correctly ' +
-						'or you are not authorized to view it. ' +
-						' You will now be redirected to the previous page.'
-				})
-				yield put(DialogActions.showDialog({ title: formatMessage({id: 'viewerGui.loadModel.error.title', defaultMessage: 'Model Error'}), content }));
-				yield put(goBack());
-			}
-			return;
-		}
-		const content = 'The model was either not found, failed to load correctly ' +
-			'or you are not authorized to view it. ' +
-			' You will now be redirected to the teamspace page.';
-		yield put(DialogActions.showDialog({ title: 'Model Error', content }));
-		yield put(push(ROUTES.TEAMSPACES));
+		const content = formatMessage({
+				id: 'viewerGui.loadModel.error.content',
+				defaultMessage: 'The model was either not found, failed to load correctly ' +
+					'or you are not authorized to view it. ' +
+					' You will now be redirected to the previous page.'
+			})
+		yield put(DialogActions.showDialog({ title: formatMessage({id: 'viewerGui.loadModel.error.title', defaultMessage: 'Model Error'}), content }));
+		yield put(goBack());
 	}
 }
 

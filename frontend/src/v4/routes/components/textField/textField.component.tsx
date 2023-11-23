@@ -24,7 +24,6 @@ import SaveIcon from '@mui/icons-material/Save';
 import copy from 'copy-to-clipboard';
 import { Field, Formik } from 'formik';
 
-import { isV5 } from '@/v4/helpers/isV5';
 import CopyIcon from '@mui/icons-material/FileCopy';
 import { ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
@@ -334,10 +333,10 @@ export class TextField extends PureComponent<IProps, IState> {
 							{enableMarkdown &&
 							<StyledMarkdownField
 								ref={this.markdownFieldRef}
-								$isPlaceholder={!this.fieldValue && isV5()}
+								$isPlaceholder={!this.fieldValue}
 								{...this.additionalProps()}
 							>
-								{isV5() ? (this.fieldValue || placeholder) : this.fieldValue }
+								{this.fieldValue || placeholder}
 							</StyledMarkdownField>
 							}
 							{!enableMarkdown &&

@@ -18,7 +18,6 @@ import { FunctionComponent } from 'react';
 import InputLabel from '@mui/material/InputLabel';
 import { Field } from 'formik';
 
-import { isV5 } from '@/v4/helpers/isV5';
 import {
 	LEVELS_OF_RISK,
 	RISK_CONSEQUENCES,
@@ -89,12 +88,9 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 						mutable={!isNewRisk}
 						enableMarkdown
 						inputProps={{ maxLength: LONG_TEXT_CHAR_LIM }}
-						{...(isV5() && ({
-							placeholder: 'Type a description',
-							disableShowDefaultUnderline: true,
-							className: 'description',
-							}))
-						}
+						placeholder="Type a description"
+						disableShowDefaultUnderline
+						className="description"
 					/>
 				)} />
 			</Container>

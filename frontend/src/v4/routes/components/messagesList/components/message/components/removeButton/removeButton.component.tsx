@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import CloseIcon from '@mui/icons-material/Close';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import { TooltipButton } from '../../../../../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { Wrapper } from './removeButton.styles';

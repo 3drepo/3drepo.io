@@ -32,11 +32,6 @@ export const GroupItem = ({ group, disabled }) => {
 		GroupsActionsDispatchers.setColorOverrides([group._id], !overridden);
 	};
 
-	const onClickIsolate = (event) => {
-		event.stopPropagation();
-		GroupsActionsDispatchers.isolateGroups([group._id]);
-	};
-
 	const onClickHighlight = (event) => {
 		event.stopPropagation();
 		GroupsActionsDispatchers.setActiveGroup(group);
@@ -55,7 +50,6 @@ export const GroupItem = ({ group, disabled }) => {
 		<GroupsTreeListItemComponent
 			onClick={onClickHighlight}
 			onClickGotoDetails={onClickGotoDetails}
-			onClickIsolate={onClickIsolate}
 			onClickOverride={onClickOverride}
 			overridden={overridden}
 			highlighted={highlighted}

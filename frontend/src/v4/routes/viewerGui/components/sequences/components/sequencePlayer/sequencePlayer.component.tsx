@@ -24,7 +24,6 @@ import PlayArrow from '@mui/icons-material/PlayArrow';
 import Replay from '@mui/icons-material/Replay';
 import Stop from '@mui/icons-material/Stop';
 import { debounce, noop } from 'lodash';
-import { isV5 } from '@/v4/helpers/isV5';
 import { FormattedMessage } from 'react-intl';
 
 import { STEP_SCALE } from '../../../../../../constants/sequences';
@@ -305,7 +304,7 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 										shouldDisableDate={(date: any) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
 										name="date"
 										value={value}
-										inputFormat={isV5() ? LONG_DATE_TIME_FORMAT_NO_MINUTES_V5 : LONG_DATE_TIME_FORMAT_NO_MINUTES}
+										inputFormat={LONG_DATE_TIME_FORMAT_NO_MINUTES_V5}
 										onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / MILLI_PER_HOUR) * MILLI_PER_HOUR))}
 										placeholder="date"
 										dateTime
