@@ -47,3 +47,14 @@ Feature: Signup
 			| Username  | Email             | Password        | First name  | Last name       |
   			| newuser2   | newuser@mail.com | +jk+gnPZM^2LXDV | New         | User            |		
 		Then I wait until "This email is already taken" text appears
+
+	Scenario: Invalid parameters will show errors and invalidate the signup form
+		Given Im not logged in		
+		And I navigate to 'signup'
+		And I fill in the form with:
+			| Username  | Email             | Password |
+  			| space guy | newusermail.com 	| pass     |
+		Then I wait until "Username can only consist of letters" text appears
+		And I wait until "Invalid email address" text appears
+		And I wait until "Password must be at least 8 characters" text appears
+		And button "Next step" should be disabled

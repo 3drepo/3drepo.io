@@ -38,6 +38,7 @@ export const resizeWindow = async (driver, size) => {
 export const getElement = async (driver: WebDriver, locator: Locator) => {
 	await driver.wait(until.elementLocated(locator), 100000);
 	return driver.findElement(locator);
+
 };
 
 export const animationsEnded = async (driver: WebDriver) =>
@@ -95,12 +96,13 @@ export const waitForText = async (driver: WebDriver, text:string ) => {
 	return getElement(driver, target);
 };
 
-const findInputNearText = async (driver: WebDriver, text:string, inputType: string = '') => {
-	const typefilter = inputType ? '[@type="' + inputType  + '"]' : '';
-	const targetText = '//*[contains(text(),"' +  text + '")]//ancestor::*/*/input' + typefilter;
+export const findElementNearText = async (driver: WebDriver, text:string, tag: string) => {
+	const targetText = `//*[contains(text(),"${text}")]//ancestor::*/*/${tag}`;
 	const target = By.xpath(targetText);
 	return getElement(driver, target);
 };
+
+export const findInputNearText = async (driver: WebDriver, text:string) => findElementNearText(driver, text, 'input');
 
 export const fillInputByLabel = async (driver: WebDriver, label, value) => {
 	const input = await findInputNearText(driver, label);
@@ -117,6 +119,7 @@ export const clickOn = async (driver: WebDriver, buttonContent:string) => {
 	await waitUntilPageLoaded(driver);
 	const withText = "[contains(text(),'" + buttonContent + "')]";
 	const text = '//body//*' + withText + '';
+	
 	const target = By.xpath(text);
 	const link  = await getElement(driver, target);
 	await driver.wait(until.elementIsEnabled(link));
@@ -131,7 +134,7 @@ export const fillInForm = async (driver: WebDriver, fields: Record<string, strin
 
 export const clickOnCheckboxNearText = async (driver: WebDriver, text: string) => {
 	await animationsEnded(driver);
-	const checkbox = await findInputNearText(driver, text, 'checkbox');
+	const checkbox = await findInputNearText(driver, text);
 	await driver.wait(until.elementIsEnabled(checkbox), 100000);
 	await checkbox.click();
 };

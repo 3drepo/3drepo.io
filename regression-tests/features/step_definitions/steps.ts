@@ -18,7 +18,7 @@
 import { When, Then, Given, Before, After, setDefaultTimeout } from '@cucumber/cucumber';
 import { expect } from 'chai';
 import { until } from 'selenium-webdriver';
-import { clickOn, fillInForm, initializeSeleniumDriver, navigateTo, waitForText, waitUntilPageLoaded } from '../../src/helpers/selenium.helpers';
+import { clickOn, fillInForm, findElementNearText, initializeSeleniumDriver, navigateTo, waitForText, waitUntilPageLoaded } from '../../src/helpers/selenium.helpers';
 import { getLogin, logout } from '../../src/helpers/api.helpers';
 import { domain } from '../../config.json';
 import { getUrl } from '../../src/helpers/routing.helpers';
@@ -80,6 +80,11 @@ When('I wait until {string} text appears', async function (text) {
 Then('I should be redirected to the {string} page', async function (page) {
 	await this.driver.wait(until.urlIs(getUrl(page)));
 	expect(true).to.equals(true);
+});
+
+When('button {string} should be disabled', async function (buttonText) {
+	const element = await findElementNearText(this.driver, buttonText, 'button');
+	expect(await element.isEnabled()).to.equals(false);
 });
 
 After(async function () {
