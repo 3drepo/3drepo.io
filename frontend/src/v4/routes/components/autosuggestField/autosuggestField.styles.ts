@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isV5 } from '@/v4/helpers/isV5';
 import Popper from '@mui/material/Popper';
 import styled, { css } from 'styled-components';
 import { COLOR } from '../../../styles';
@@ -36,7 +35,6 @@ export const SuggestionsList = styled(Popper)`
 	.react-autosuggest__suggestions-list {
 		max-height: 250px;
 		padding-left: 0;
-		${!isV5() && css`overflow: auto;`}
 	}
 
 	.react-autosuggest__suggestion {
@@ -57,5 +55,5 @@ export const SuggestionsList = styled(Popper)`
 export const OptionsContainer = styled.div`
 	width: 100%;
 	height: 100%;
-	overflow: hidden ${isV5() ? 'overlay' : 'auto'};
+	overflow: hidden overlay;
 `;
