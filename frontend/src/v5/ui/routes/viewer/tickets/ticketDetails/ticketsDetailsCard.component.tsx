@@ -114,12 +114,12 @@ export const TicketDetailsCard = () => {
 	}, [JSON.stringify(ticket)]);
 
 	useEffect(() => {
-		if (view === TicketDetailsView.Groups || isEmpty(defaultView)) return;
+		if (view === TicketDetailsView.Groups) return;
 		goToView(defaultView);
 	}, [JSON.stringify(defaultView?.camera)]);
 
 	useEffect(() => {
-		if (view === TicketDetailsView.Groups || isEmpty(defaultView)) return;
+		if (view === TicketDetailsView.Groups) return;
 		const { state } = defaultView;
 		goToView({ state });
 	}, [JSON.stringify(defaultView?.state)]);
