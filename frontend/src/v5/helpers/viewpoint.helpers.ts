@@ -191,6 +191,10 @@ export const toColorAndTransparencyDicts = (overrides: GroupOverride[]): Overrid
 };
 
 export const goToView = async (view: Viewpoint) => {
+	if (isEmpty(view.state?.colored)  && isEmpty(view.state?.hidden) && isEmpty(view.camera) && isEmpty(view.clippingPlanes)) {
+		return;
+	}
+
 	await ViewerService.setViewpoint(view);
 	const overrides = toColorAndTransparencyDicts(view?.state?.colored || []);
 	TicketsCardActionsDispatchers.setOverrides(overrides);
