@@ -16,25 +16,12 @@
  */
 
 import { Then, When } from '@cucumber/cucumber';
-import { getLatestMailFor } from '../../src/helpers/mailhog.helpers';
-import { WebDriver } from 'selenium-webdriver';
-import { reTry } from '../../src/helpers/functions.helpers';
+import { readLatestMailFor } from '../../src/helpers/mailhog.helpers';
 import { clickOn, clickOnCheckboxNearText, closeOriginWindow, fillInForm, navigateTo, waitForText } from '../../src/helpers/selenium.helpers';
 import { pick } from '../../src/helpers/general.helpers';
 
 Then('I verify the account from email {string}', async function (email) {
-	const mailContent = await reTry(async () => {
-		const mail = await getLatestMailFor(this.driver, email);
-
-		if (!mail) {
-			throw new Error('Mail not received');
-		}
-
-		return mail;
-	}, 100, 100);
-
-
-	await (this.driver as WebDriver).executeScript('document.write(`' + mailContent + '`)');
+	await readLatestMailFor(this.driver, email);
 	await clickOn(this.driver, 'Verify email address');
 	await closeOriginWindow(this.driver);
 	await waitForText(this.driver, 'Your account has been verified');
@@ -49,4 +36,20 @@ When('I try to signup with:', async function (datatable) {
 	await clickOn(this.driver, 'Next step');
 	await clickOnCheckboxNearText(this.driver, 'I agree');
 	await clickOn(this.driver, 'Create account');
+});
+
+When('I request email for forgot password with:', async function (datatable) {
+	const formValues = datatable.hashes()[0];
+	await navigateTo(this.driver, 'password-forgot');
+	await fillInForm(this.driver, formValues);
+	await clickOn(this.driver, 'Send request');
+	await waitForText(this.driver, 'A password change request has been sent');
+});
+
+When('I request email for forgot password with:', async function (datatable) {
+	const formValues = datatable.hashes()[0];
+	await navigateTo(this.driver, 'password-forgot');
+	await fillInForm(this.driver, formValues);
+	await clickOn(this.driver, 'Send request');
+	await waitForText(this.driver, 'A password change request has been sent');
 });

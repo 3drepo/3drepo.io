@@ -16,6 +16,7 @@
  */
 import { WebDriver } from 'selenium-webdriver';
 import { apiDomain } from '../../config.json';
+import { runInBrowser } from './browserRuntime.helpers';
 
 const apiUrl = (url) => new URL(`${apiDomain}/${url}`).toString();
 
@@ -24,42 +25,46 @@ type SeleniumResponse = Response & { json: any };
 
 export const generateV5ApiUrl = (url: string): string => encodeURI(apiUrl(`v5/${url}`));
 
-export const get = async (driver:WebDriver, url:string, credentials: boolean = false) =>  driver.executeScript(`
-	const asFunct = async () => {
-		let res = await fetch("${url}", {
-			"headers": {
-			   "accept": "application/json, text/plain, */*",
-			 },
-			 "body": null,
-			 "method": "GET",
-			 "mode": "cors"
-			 ${credentials ?  ',"credentials": "include"' : '' }
-		   });
-		
-		if (res.status === 200) {
-			try {
-				const json = await res.json();
-				res.json = json;
-			} catch(e) {
-				console.log(e);
-			}
+const browserFetch = async (url:string, credentials: boolean) => {
+	let res = await fetch(url, {
+		'headers': {
+			'accept': 'application/json, text/plain, */*',
+		},
+		'body': null,
+		'method': 'GET',
+		'mode': 'cors',
+		... { ...credentials && { 'credentials': 'include' } },
+	});
+	
+	if (res.status === 200) {
+		try {
+			const json = await res.json();
+			res.json = json;
+		} catch (e) {
+			// eslint-disable-next-line no-console
+			console.log(e);
 		}
-		   
-		return res;
 	}
-	return asFunct();
-`) as Promise<SeleniumResponse>;
+		
+	return res as SeleniumResponse;
+};
 
+const browserPost = async (url: string, credentials: boolean = false, body = null) => 
+	fetch(url, {
+		'headers': {
+		  'accept': 'application/json, text/plain, */*',
+		},
+		'body': JSON.stringify(body),
+		'method': 'POST',
+		'mode': 'cors',
+		... { ...credentials && { 'credentials': 'include' } },
+	});
 
-export const post = async (driver:WebDriver, url, credentials: boolean = false, body = null) => driver.executeScript(`return fetch("${url}", {
-	"headers": {
-	  "accept": "application/json, text/plain, */*",
-	},
-	"body": ${JSON.stringify(body)},
-	"method": "POST",
-	"mode": "cors"
-	${credentials ?  ',"credentials": "include"' : '' }
-})`) as Promise<SeleniumResponse>;
+export const get = async (driver:WebDriver, url:string, credentials: boolean = false) => 
+	runInBrowser(driver, browserFetch)(url, credentials);
+
+export const post = async (driver:WebDriver, url, credentials: boolean = false, body = null) => 
+	runInBrowser(driver, browserPost)(url, credentials, body);
 
 export const getV5 = async (driver, url) => get(driver, generateV5ApiUrl(url), true);
 export const postV5 = async (driver, url, body = null) => post(driver, generateV5ApiUrl(url), true, body);

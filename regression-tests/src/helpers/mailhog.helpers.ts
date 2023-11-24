@@ -18,6 +18,7 @@
 import { WebDriver } from 'selenium-webdriver';
 import { get } from './api.helpers';
 import  * as quotedPrintable from 'quoted-printable';
+import { reTry } from './functions.helpers';
 
 const apiUrl = 'http://localhost:8025/api/v2'; 
 const getApiUrl = (url: string): string => encodeURI(apiUrl + url);
@@ -55,8 +56,7 @@ export const getMessages = async (driver:WebDriver): Promise<Messages> => {
 	return response.json;
 } ;
 
-
-export const getLatestMailFor = async (driver:WebDriver, email:string) => {
+const fetchEmail = async (driver:WebDriver, email:string) => {
 	const messages = await getMessages(driver);
 	const mailItem = messages.items.find((item) => item.To.some((t) => t.Mailbox + '@' + t.Domain === email));
 	
@@ -65,3 +65,22 @@ export const getLatestMailFor = async (driver:WebDriver, email:string) => {
 	}
 	return null;
 };
+
+
+export const readLatestMailFor = async (driver:WebDriver, email:string) => {
+	const mailContent = await reTry(async () => {
+		const mail = await fetchEmail(driver, email);
+
+		if (!mail) {
+			throw new Error('Mail not received');
+		}
+
+		return mail;
+	}, 100, 100);
+
+	await driver.executeScript('document.write(`' + mailContent + '`)');
+};
+
+// export const clearEmails = async (driver: WebDriver) => {
+
+// };
