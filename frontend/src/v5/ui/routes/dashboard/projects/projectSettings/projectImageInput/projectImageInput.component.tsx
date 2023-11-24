@@ -27,10 +27,13 @@ import { DragAndDrop } from '@controls/dragAndDrop';
 import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { isString } from 'lodash';
+import { formatMessage } from '@/v5/services/intl';
+import { useFormContext } from 'react-hook-form';
 import { ButtonsContainer, ImageButton, GrayBodyText, ImageContainer, Image, ErrorMessage } from './projectImageInput.styles';
 
-export const ProjectImageInput = ({ onChange, value, error, disabled, helperText }: FormInputProps) => {
+export const ProjectImageInput = ({ onChange, value, name, error, disabled, helperText }: FormInputProps) => {
 	const [imgSrc, setImgSrc] = useState(value);
+	const { setError } = useFormContext();
 
 	const deleteImage = () => onChange(null);
 
@@ -39,7 +42,15 @@ export const ProjectImageInput = ({ onChange, value, error, disabled, helperText
 		try {
 			await testImageExists(fileSrc);
 			onChange(file);
-		} catch (e) { }
+		} catch (e) {
+			setError(name, {
+				type: 'custom',
+				message: formatMessage({
+					id: 'project.settings.image.error.invalidUpload',
+					defaultMessage: 'The file seems invalid, please try again with a different one',
+				}),
+			});
+		}
 	};
 
 	useEffect(() => {
@@ -97,40 +108,48 @@ export const ProjectImageInput = ({ onChange, value, error, disabled, helperText
 	);
 
 	return (
-		<DragAndDrop
-			onDrop={([file]) => uploadImage(file)}
-			accept={getSupportedImageExtensions()}
-		>
-			<Typography variant="h3" color="secondary">
-				<FormattedMessage id="project.settings.dragAndDrop.drop" defaultMessage="Drop file here" />
-			</Typography>
-			<Typography variant="h5" color="secondary">
-				<FormattedMessage id="project.settings.dragAndDrop.or" defaultMessage="or" />
-			</Typography>
-			<FileInputField
+		<>
+			{error && (
+				<>
+					<ErrorMessage>{helperText}</ErrorMessage>
+					<Gap $height='28px' />
+				</>
+			)}
+			<DragAndDrop
+				onDrop={([file]) => uploadImage(file)}
 				accept={getSupportedImageExtensions()}
-				onChange={uploadImage}
 			>
-				<Button component="span" variant="contained" color="primary">
+				<Typography variant="h3" color="secondary">
+					<FormattedMessage id="project.settings.dragAndDrop.drop" defaultMessage="Drop file here" />
+				</Typography>
+				<Typography variant="h5" color="secondary">
+					<FormattedMessage id="project.settings.dragAndDrop.or" defaultMessage="or" />
+				</Typography>
+				<FileInputField
+					accept={getSupportedImageExtensions()}
+					onChange={uploadImage}
+				>
+					<Button component="span" variant="contained" color="primary">
+						<FormattedMessage
+							id="project.settings.form.image.browse"
+							defaultMessage="Browse"
+						/>
+					</Button>
+				</FileInputField>
+				<Gap $height='19px' />
+				<GrayBodyText>
 					<FormattedMessage
-						id="project.settings.form.image.browse"
-						defaultMessage="Browse"
+						id="project.settings.form.image.supportedFormats"
+						defaultMessage="Supported file formats: JPG, PNG, GIF."
 					/>
-				</Button>
-			</FileInputField>
-			<Gap $height='19px' />
-			<GrayBodyText>
-				<FormattedMessage
-					id="project.settings.form.image.supportedFormats"
-					defaultMessage="Supported file formats: JPG, PNG, GIF."
-				/>
-			</GrayBodyText>
-			<GrayBodyText>
-				<FormattedMessage
-					id="project.settings.form.image.maxFileSize"
-					defaultMessage="Maximum file size: 5MB"
-				/>
-			</GrayBodyText>
-		</DragAndDrop>
+				</GrayBodyText>
+				<GrayBodyText>
+					<FormattedMessage
+						id="project.settings.form.image.maxFileSize"
+						defaultMessage="Maximum file size: 5MB"
+					/>
+				</GrayBodyText>
+			</DragAndDrop>
+		</>
 	);
 };
