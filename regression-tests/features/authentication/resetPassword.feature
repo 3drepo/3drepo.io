@@ -17,3 +17,13 @@ Feature: Reset Password
 		Given I navigate to '/'
 		When I click on 'Forgotten your password?'
 		Then I should be redirected to the 'password-forgot' page
+
+	Scenario: Complete forgot password flow with a valid username (non SSO)
+		Given I request email for forgot password with:
+			| Username or email |
+  			| homerJSimpson     |
+		And I reset the password from email 'homerJSimpson@mailinator.com' with new password 'Uq5a4axS(vc7nnG6'
+		When I sign in with:
+			| Username        | Password         |
+  			| homerJSimpson   | Uq5a4axS(vc7nnG6 |
+		Then I should be redirected to the 'dashboard' page

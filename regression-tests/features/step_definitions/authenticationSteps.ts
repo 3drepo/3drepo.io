@@ -22,8 +22,7 @@ import { pick } from '../../src/helpers/general.helpers';
 
 Then('I verify the account from email {string}', async function (email) {
 	await readLatestMailFor(this.driver, email);
-	await clickOn(this.driver, 'Verify email address');
-	await closeOriginWindow(this.driver);
+	await clickOn(this.driver, 'Verify email address', true);
 	await waitForText(this.driver, 'Your account has been verified');
 });
 
@@ -46,10 +45,10 @@ When('I request email for forgot password with:', async function (datatable) {
 	await waitForText(this.driver, 'A password change request has been sent');
 });
 
-When('I request email for forgot password with:', async function (datatable) {
-	const formValues = datatable.hashes()[0];
-	await navigateTo(this.driver, 'password-forgot');
-	await fillInForm(this.driver, formValues);
-	await clickOn(this.driver, 'Send request');
-	await waitForText(this.driver, 'A password change request has been sent');
+When('I reset the password from email {string} with new password {string}', async function (email, newPass) {
+	await readLatestMailFor(this.driver, email);
+	await clickOn(this.driver, 'Reset your password');
+	await closeOriginWindow(this.driver);
+	await fillInForm(this.driver, { 'New password': newPass });
+	await clickOn(this.driver, 'Save changes');
 });

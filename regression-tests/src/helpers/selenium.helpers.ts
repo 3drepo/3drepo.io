@@ -115,7 +115,14 @@ export const navigateTo = async (driver:WebDriver, page:string) => {
 	await driver.wait(until.elementLocated(By.css('body')), 100000);
 };
 
-export const clickOn = async (driver: WebDriver, buttonContent:string) => {
+export const closeOriginWindow = async (driver: WebDriver) => {
+	const windows = await (driver as WebDriver).getAllWindowHandles();
+	await driver.switchTo().window(windows[0]);
+	await driver.close();
+	await driver.switchTo().window(windows[1]);
+};
+
+export const clickOn = async (driver: WebDriver, buttonContent:string, closeOldWindow: boolean = false) => {
 	await waitUntilPageLoaded(driver);
 	const text = `//body//*[text()="${buttonContent}"]`;
 	const target = By.xpath(text);
@@ -123,6 +130,10 @@ export const clickOn = async (driver: WebDriver, buttonContent:string) => {
 	await driver.wait(until.elementIsEnabled(link));
 	await link.click();
 	await animationsEnded(driver);
+
+	if (closeOldWindow) {
+		await closeOriginWindow(driver);
+	}
 };
 
 export const fillInForm = async (driver: WebDriver, fields: Record<string, string>) => {
@@ -137,9 +148,3 @@ export const clickOnCheckboxNearText = async (driver: WebDriver, text: string) =
 	await checkbox.click();
 };
 
-export const closeOriginWindow = async (driver: WebDriver) => {
-	const windows = await (driver as WebDriver).getAllWindowHandles();
-	await driver.switchTo().window(windows[0]);
-	await driver.close();
-	await driver.switchTo().window(windows[1]);
-};
