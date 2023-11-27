@@ -167,6 +167,10 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 
 		onChange?.(newVal);
 		cancelEdition();
+
+		if (highlightedOverride.index === index && editingOverride.type === highlightedOverride.type) {
+			clearHighlightedIndex();
+		}
 	};
 
 	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
@@ -187,6 +191,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		if (!isLoading || !hasClearedOverrides) return;
 		TicketsCardActionsDispatchers.setOverrides({ overrides: {}, transparencies: {} });
 		setIsLoading(false);
+		clearHighlightedIndex();
 	}, [hasClearedOverrides]);
 
 	useEffect(() => {
