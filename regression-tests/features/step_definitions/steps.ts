@@ -23,6 +23,7 @@ import { getLogin, logout } from '../../src/helpers/api.helpers';
 import { domain } from '../../config.json';
 import { getUrl } from '../../src/helpers/routing.helpers';
 import { getUserForRole } from '../../src/helpers/users.helpers';
+import { getEmailCount } from '../../src/helpers/mailhog.helpers';
 
 setDefaultTimeout(60 * 1000);
 
@@ -89,6 +90,10 @@ When('button {string} should be disabled', async function (buttonText) {
 
 When('I close the original window', async function () {
 	await closeOriginWindow(this.driver);
+});
+
+When('I shouldnt get email', async function () {
+	expect(await getEmailCount(this.driver)).to.equals(0);
 });
 
 After(async function () {

@@ -19,6 +19,7 @@ import { WebDriver } from 'selenium-webdriver';
 import { del, get } from './api.helpers';
 import  * as quotedPrintable from 'quoted-printable';
 import { reTry } from './functions.helpers';
+import { sleep } from './general.helpers';
 
 const apiUrl = 'http://localhost:8025/api/v'; 
 const getApiUrl = (url: string, version: number = 1): string => encodeURI(apiUrl + version + url );
@@ -58,7 +59,9 @@ export const getMessages = async (driver:WebDriver): Promise<Messages> => {
 
 const fetchEmail = async (driver:WebDriver, email:string) => {
 	const messages = await getMessages(driver);
-	const mailItem = messages.items.find((item) => item.To.some((t) => t.Mailbox + '@' + t.Domain === email));
+	const mailItem = messages.items.find((item) => item.To.some((t) =>
+		(t.Mailbox + '@' + t.Domain).toLocaleLowerCase() === email.toLocaleLowerCase(),
+	));
 	
 	if (mailItem) {
 		return {
@@ -88,6 +91,11 @@ export const readLatestMailFor = async (driver:WebDriver, email:string, burnAfte
 	if (burnAfterReading) {
 		await del(driver, getApiUrl(`/messages/${mailId}`));
 	}
+};
+
+export const getEmailCount = async (driver: WebDriver, timeout: number =  1000) => {
+	await sleep(timeout);
+	return (await getMessages(driver)).count;
 };
 
 export const clearEmails = async (driver: WebDriver) => 

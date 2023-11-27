@@ -23,3 +23,5 @@ export const pick = (object: Record<string, string>, fields:string[]) => {
 	});
 	return newObj;
 };
+
+export const sleep = async (timeout) => new Promise((resolve) => setTimeout(resolve, timeout));
