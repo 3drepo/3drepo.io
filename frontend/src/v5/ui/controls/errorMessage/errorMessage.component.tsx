@@ -16,7 +16,6 @@
  */
 import CrossIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
 import { Typography } from '@controls/typography';
-import { Gap } from '@controls/gap';
 import { Container } from './errorMessage.styles';
 import { IconContainer } from '../successMessage/successMessage.styles';
 
@@ -36,11 +35,6 @@ export const ErrorMessage = ({ title, children, className }: ErrorMessageProps) 
 			</Typography>
 		)}
 		{title && children && (<span />)}
-		{children && (
-			<div>
-				<Typography variant="body1">{children}</Typography>
-				<Gap $height="10px" />
-			</div>
-		)}
+		{children && (<Typography variant="body1">{children}</Typography>)}
 	</Container>
 );
