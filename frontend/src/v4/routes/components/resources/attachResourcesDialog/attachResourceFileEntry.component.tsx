@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { TextField } from '@mui/material';
 import { Field } from 'formik';
 import { get } from 'lodash';
@@ -45,7 +44,7 @@ export const FileEntry = ({onClickRemove, index, entry}) => {
 
 			</StyledFormControl>
 			<StyledFormControl>
-				{isV5() && <ResourceIcon type={entry.type} />}
+				<ResourceIcon type={entry.type} />
 				<Field type="hidden" name={fileFieldName} />
 				<ResourceListItem>
 					<span> {entry.file.name} </span>

@@ -18,7 +18,6 @@ import { FunctionComponent } from 'react';
 import { InputLabel } from '@mui/material';
 import { Field } from 'formik';
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { ISSUE_PRIORITIES, ISSUE_STATUSES } from '../../../../../../constants/issues';
 import { LONG_TEXT_CHAR_LIM } from '../../../../../../constants/viewerGui';
 import { canChangeStatus } from '../../../../../../helpers/issues';
@@ -76,12 +75,9 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 						mutable={!isNew}
 						enableMarkdown
 						inputProps={{ maxLength: LONG_TEXT_CHAR_LIM }}
-						{...(isV5() && ({
-							placeholder: 'Type a description',
-							disableShowDefaultUnderline: true,
-							className: 'description',
-						}
-						))}
+						placeholder="Type a description"
+						disableShowDefaultUnderline
+						className="description"
 					/>
 				)} />
 			</Container>

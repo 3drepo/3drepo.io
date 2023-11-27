@@ -17,12 +17,8 @@
 
 import { PureComponent } from 'react';
 
-import SkipNextIcon from '@mui/icons-material/SkipNext';
-import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
-import { isV5 } from '@/v4/helpers/isV5';
-
 import { LockPanelButton } from '../panelBarActions/lockPanelButton';
-import { Container, SkipNextIconV5, SkipPreviousIconV5, StyledIconButton } from './listNavigation.styles';
+import { Container, SkipNextIcon, SkipPreviousIcon, StyledIconButton } from './listNavigation.styles';
 
 interface IProps {
 	panelType?: string;
@@ -70,10 +66,10 @@ export class ListNavigation extends PureComponent<IProps, IState> {
 			<Container>
 				{panelType && <LockPanelButton type={panelType} />}
 				<StyledIconButton onClick={this.handlePrevItem}>
-					{isV5() ? <SkipPreviousIconV5 /> : <SkipPreviousIcon />}
+					<SkipPreviousIcon />
 				</StyledIconButton>
 				<StyledIconButton onClick={this.handleNextItem}>
-					{isV5() ? <SkipNextIconV5 /> : <SkipNextIcon />}
+					<SkipNextIcon />
 				</StyledIconButton>
 			</Container>
 		);

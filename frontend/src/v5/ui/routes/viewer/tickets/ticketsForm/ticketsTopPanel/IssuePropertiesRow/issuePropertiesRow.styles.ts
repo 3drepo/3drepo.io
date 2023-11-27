@@ -16,21 +16,23 @@
  */
 
 import styled from 'styled-components';
-import { TopPanelShadow } from '../ticketsTopPanel.styles';
 
 export const IssuePropertiesContainer = styled.div`
-	border-top: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
-	${TopPanelShadow};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	height: 50px;
-	padding: 10px 15px;
+	padding: 10px 2px 0;
 	display: inline-flex;
 	align-items: center;
 	width: 100%;
-	position: sticky;
-	top: -1px; /* -1 stops border combining with header border making double thick border */
 	box-sizing: border-box;
-	z-index: 4;
+	border-top: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
+	margin-bottom: -3px;
+
+	&:not(:last-child) {
+		border-bottom: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
+		margin-bottom: 13px;
+		padding-bottom: 10px;
+	}
 `;
 
 export const PropertyColumn = styled.span`

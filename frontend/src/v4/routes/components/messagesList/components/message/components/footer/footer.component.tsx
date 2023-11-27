@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { INTERNAL_IMAGE_PATH_PREFIX, VIEWPOINT_ID_REGEX } from '../../../../../../../helpers/comments';
 import { DATE_TIME_FORMAT, SHORT_DATE_FORMAT, SHORT_TIME_FORMAT } from '../../../../../../../services/formatting/formatDate';
 import { COMMENT_FIELD_NAME } from '../../../../../../viewerGui/components/commentForm/commentForm.constants';
@@ -76,16 +75,10 @@ export const Footer = ({ name, created, formRef, commentRef, comment, ...props }
         <Container>
 			<Username>{name}</Username>
 			<Date>
-				{isV5() ? (
-					<>
-						<span>at </span>
-						<DateTime value={created} format={SHORT_TIME_FORMAT} />
-						<span> on </span>
-						<DateTime value={created} format={SHORT_DATE_FORMAT} />
-					</>
-				) : (
-					<DateTime value={created} format={DATE_TIME_FORMAT} />
-				)}
+				<span>at </span>
+				<DateTime value={created} format={SHORT_TIME_FORMAT} />
+				<span> on </span>
+				<DateTime value={created} format={SHORT_DATE_FORMAT} />
 			</Date>
 			<IconButton onClick={handleQuoteButtonClick} size="large">
 				<StyledQuoteIcon />
