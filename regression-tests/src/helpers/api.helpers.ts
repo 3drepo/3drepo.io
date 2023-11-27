@@ -16,7 +16,6 @@
  */
 import { WebDriver } from 'selenium-webdriver';
 import { apiDomain } from '../../config.json';
-import { runInBrowser } from './browserRuntime.helpers';
 
 const apiUrl = (url) => new URL(`${apiDomain}/${url}`).toString();
 
@@ -46,7 +45,7 @@ const browserFetch = async (url:string, credentials: boolean) => {
 		}
 	}
 		
-	return res as SeleniumResponse;
+	return res;
 };
 
 const browserPost = async (url: string, credentials: boolean = false, body = null) => 
@@ -61,10 +60,10 @@ const browserPost = async (url: string, credentials: boolean = false, body = nul
 	});
 
 export const get = async (driver:WebDriver, url:string, credentials: boolean = false) => 
-	runInBrowser(driver, browserFetch)(url, credentials);
+	driver.executeScript<SeleniumResponse>(browserFetch, url, credentials);
 
 export const post = async (driver:WebDriver, url, credentials: boolean = false, body = null) => 
-	runInBrowser(driver, browserPost)(url, credentials, body);
+	driver.executeScript<SeleniumResponse>( browserPost, url, credentials, body);
 
 export const getV5 = async (driver, url) => get(driver, generateV5ApiUrl(url), true);
 export const postV5 = async (driver, url, body = null) => post(driver, generateV5ApiUrl(url), true, body);

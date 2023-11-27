@@ -41,9 +41,9 @@ export const getElement = async (driver: WebDriver, locator: Locator) => {
 
 };
 
+
 export const animationsEnded = async (driver: WebDriver) =>
-	driver.executeScript(`
-	const asFunct = async () => {
+	driver.executeScript(async () => {
 		const reAnimationEvent = /^onanimation/;
 		const reTransitionEvent = /^ontransition/;
 		let lastTime = new Date();
@@ -75,12 +75,9 @@ export const animationsEnded = async (driver: WebDriver) =>
 		}, 50);
 
 		animationEvents(document.body, onAnimationEvent);
-
 		return prom;
-	};
-
-	return asFunct();
-`);
+	})
+;
 
 
 export const initializeSeleniumDriver = async (browserType) => {
