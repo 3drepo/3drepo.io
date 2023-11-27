@@ -27,3 +27,15 @@ Feature: Reset Password
 			| Username        | Password         |
   			| homerJSimpson   | Uq5a4axS(vc7nnG6 |
 		Then I should be redirected to the 'dashboard' page
+
+	Scenario: Complete forgot password flow with a valid email (non SSO)
+		Given I request email for forgot password with:
+			| Username or email |
+  			| homerJSimpson@mailinator.com     |
+		And I reset the password from email 'homerJSimpson@mailinator.com' with new password 'c6UNLHPvBTX86Wa'
+		When I sign in with:
+			| Username        | Password        |
+  			| homerJSimpson   | c6UNLHPvBTX86Wa |
+		Then I should be redirected to the 'dashboard' page
+
+

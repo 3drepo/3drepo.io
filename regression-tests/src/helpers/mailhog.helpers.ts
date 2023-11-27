@@ -16,12 +16,12 @@
  */
 
 import { WebDriver } from 'selenium-webdriver';
-import { get } from './api.helpers';
+import { del, get } from './api.helpers';
 import  * as quotedPrintable from 'quoted-printable';
 import { reTry } from './functions.helpers';
 
-const apiUrl = 'http://localhost:8025/api/v2'; 
-const getApiUrl = (url: string): string => encodeURI(apiUrl + url);
+const apiUrl = 'http://localhost:8025/api/v'; 
+const getApiUrl = (url: string, version: number = 1): string => encodeURI(apiUrl + version + url );
 
 interface MailItemAddress { 
 	Relays: string[];
@@ -52,7 +52,7 @@ interface Messages {
 }
 
 export const getMessages = async (driver:WebDriver): Promise<Messages> => {
-	const response = await get(driver, getApiUrl('/messages'));
+	const response = await get(driver, getApiUrl('/messages', 2));
 	return response.json;
 } ;
 
@@ -61,13 +61,17 @@ const fetchEmail = async (driver:WebDriver, email:string) => {
 	const mailItem = messages.items.find((item) => item.To.some((t) => t.Mailbox + '@' + t.Domain === email));
 	
 	if (mailItem) {
-		return quotedPrintable.decode(mailItem.Content.Body);
+		return {
+			content: quotedPrintable.decode(mailItem.Content.Body),
+			ID: mailItem.ID,
+		};
 	}
 	return null;
 };
 
 
-export const readLatestMailFor = async (driver:WebDriver, email:string) => {
+export const readLatestMailFor = async (driver:WebDriver, email:string, burnAfterReading: boolean = true) => {
+	let mailId;
 	const mailContent = await reTry(async () => {
 		const mail = await fetchEmail(driver, email);
 
@@ -75,12 +79,16 @@ export const readLatestMailFor = async (driver:WebDriver, email:string) => {
 			throw new Error('Mail not received');
 		}
 
-		return mail;
+		mailId = mail.ID;
+		return mail.content;
 	}, 100, 100);
 
 	await driver.executeScript('document.write(`' + mailContent + '`)');
+
+	if (burnAfterReading) {
+		await del(driver, getApiUrl(`/messages/${mailId}`));
+	}
 };
 
-// export const clearEmails = async (driver: WebDriver) => {
-
-// };
+export const clearEmails = async (driver: WebDriver) => 
+	del(driver, getApiUrl('/messages'));
