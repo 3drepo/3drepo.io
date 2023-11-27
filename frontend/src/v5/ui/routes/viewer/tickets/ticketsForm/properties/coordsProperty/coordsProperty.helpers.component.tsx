@@ -41,11 +41,11 @@ const getPinSchema = (name: string, template: ITemplate): IPinSchema | boolean =
 };
 
 const getColorFromMapping = (ticket: ITicket, pinMapping: IPinColorMapping) => {
-	const { property: { module, name }, mapping } = pinMapping;
+	const { property: { module = PROPERTIES, name }, mapping } = pinMapping;
 	// @ts-ignore
 	const defaultColorHex = rgbToHex(mapping.find((option) => option.default)?.default) || DEFAULT_COLOR;
 	if (!ticket) return defaultColorHex;
-	const linkedValue = module === PROPERTIES ? get(ticket.properties, name) : get(ticket?.modules, [module, name]);
+	const linkedValue = module === PROPERTIES ? get(ticket, [PROPERTIES, name]) : get(ticket, ['modules', module, name]);
 	// @ts-ignore
 	const rgb = mapping.find(({ value }) => value === linkedValue)?.color;
 	return rgb ? rgbToHex(rgb) : defaultColorHex;
