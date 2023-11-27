@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import CircledPlusIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
@@ -36,7 +36,7 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { useFormContext } from 'react-hook-form';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { isEqual } from 'lodash';
+import { isEqual, throttle } from 'lodash';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const { watch } = useFormContext();
@@ -78,9 +78,13 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		}
 	};
 
+	const throttledSetSelectedPin = useCallback(throttle( // prevents spam clicking which caused a bug where the pin incorrectly appeared selected
+		(selected) => TicketsCardActionsDispatchers.setSelectedTicketPin(selected ? null : pinId), 1000, { leading: true, trailing: false },
+	), [pinId]);
+
 	const onClickSelectPin = () => {
 		if (!hasPin) return;
-		TicketsCardActionsDispatchers.setSelectedTicketPin(isSelected ? null : pinId);
+		throttledSetSelectedPin(isSelected);
 	};
 
 	const getSelectPinTooltip = () => {
