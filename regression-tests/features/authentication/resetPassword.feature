@@ -13,12 +13,12 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Feature: Reset Password
-	Scenario: From the login page, click on the link to forgot password
+	Scenario: Forgot Password link
 		Given I navigate to '/'
 		When I click on 'Forgotten your password?'
 		Then I should be redirected to the 'password-forgot' page
 
-	Scenario: Complete forgot password flow with a valid username (non SSO)
+	Scenario: Reset password of existing user
 		Given I request email for forgot password with:
 			| Username or email |
   			| homerJSimpson     |
@@ -28,7 +28,7 @@ Feature: Reset Password
   			| homerJSimpson   | Uq5a4axS(vc7nnG6 |
 		Then I should be redirected to the 'dashboard' page
 
-	Scenario: Complete forgot password flow with a valid email (non SSO)
+	Scenario: Reset password of existing user (email)
 		Given I request email for forgot password with:
 			| Username or email |
   			| homerJSimpson@mailinator.com     |
@@ -38,28 +38,28 @@ Feature: Reset Password
   			| homerJSimpson   | c6UNLHPvBTX86Wa |
 		Then I should be redirected to the 'dashboard' page
 
-	Scenario: Fill in the forgot password form with a non existent user
+	Scenario: Reset password of invalid user
 		Given I request email for forgot password with:
 			| Username or email |
   			| nonexistentuser   |
 		Then I wait until "A password change request has been sent" text appears
 		And I shouldnt get email
 
-	Scenario: Fill in the forgot password form with an email that is not registered with 3drepo
+	Scenario: Reset password of invalid user (email)
 		Given I request email for forgot password with:
 			| Username or email        |
   			| nonexistentuser@mail.com |
 		Then I wait until "A password change request has been sent" text appears
 		And I shouldnt get email
 
-	Scenario: Fill in the forgot password form with a valid username (non SSO) with randomised case
+	Scenario: Reset password of existing username (case)
 		Given I request email for forgot password with:
 			| Username or email |
   			| HOMerjsImpsOn     |
 		Then I wait until "A password change request has been sent" text appears
 		And I shouldnt get email
 
-	Scenario: Complete forgot password flow with a valid email but with varied case (non SSO)
+	Scenario: Reset password of existing user (email) (case)
 		Given I request email for forgot password with:
 			| Username or email            |
   			| HOMERjSiMPson@mailinator.com |
