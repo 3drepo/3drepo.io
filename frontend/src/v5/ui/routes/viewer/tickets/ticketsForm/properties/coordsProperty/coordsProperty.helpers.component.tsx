@@ -18,7 +18,7 @@ import { hexToGLColor } from '@/v4/helpers/colors';
 import { get, isArray, isObject } from 'lodash';
 import { IPinColorMapping, IPinSchema, ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import { contrastColor } from 'contrast-color';
-import { AdditionalProperties } from '../../../tickets.constants';
+import { AdditionalProperties, TicketBaseKeys } from '../../../tickets.constants';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { rgbToHex } from '@controls/inputs/colorPicker/colorPicker.helpers';
@@ -27,25 +27,25 @@ const DEFAULT_COLOR = COLOR.PRIMARY_MAIN;
 
 const findByName = (array: any[], name: string) => array.find(({ name: n }) => n === name);
 
-const PROPERTIES = 'properties';
-export const DEFAULT_PIN = `${PROPERTIES}.${AdditionalProperties.PIN}`;
+export const DEFAULT_PIN = `${TicketBaseKeys.PROPERTIES}.${AdditionalProperties.PIN}`;
 
 const getPinSchema = (name: string, template: ITemplate): IPinSchema | boolean => {
 	if (!template) return;
 	if (name === DEFAULT_PIN) return template.config?.pin; // Default Pin
 	const path = name.split('.');
-	if (path[0] === PROPERTIES) return findByName(template.properties, path[1]);
+	if (path[0] === TicketBaseKeys.PROPERTIES) return findByName(template.properties, path[1]);
 	const module = findByName(template.modules, path[1]);
 	if (!module) return;
 	return findByName(module.properties, path[2]);
 };
 
 const getColorFromMapping = (ticket: ITicket, pinMapping: IPinColorMapping) => {
-	const { property: { module = PROPERTIES, name }, mapping } = pinMapping;
+	const { property: { module = TicketBaseKeys.PROPERTIES, name }, mapping } = pinMapping;
 	// @ts-ignore
 	const defaultColorHex = rgbToHex(mapping.find((option) => option.default)?.default) || DEFAULT_COLOR;
 	if (!ticket) return defaultColorHex;
-	const linkedValue = module === PROPERTIES ? get(ticket, [PROPERTIES, name]) : get(ticket, ['modules', module, name]);
+	const linkedValue = module === TicketBaseKeys.PROPERTIES ?
+		get(ticket, [TicketBaseKeys.PROPERTIES, name]) : get(ticket, [TicketBaseKeys.MODULES, module, name]);
 	// @ts-ignore
 	const rgb = mapping.find(({ value }) => value === linkedValue)?.color;
 	return rgb ? rgbToHex(rgb) : defaultColorHex;
