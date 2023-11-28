@@ -20,7 +20,8 @@ import { TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constant
 import { createSelector } from 'reselect';
 import { selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
 import { ITicketsCardState } from './ticketsCard.redux';
-import { getPinColorHex, DEFAULT_PIN,  ticketToPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
+import { getTicketIsCompleted } from '../tickets.helpers';
+import { DEFAULT_PIN, getPinColorHex, ticketToPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
@@ -95,16 +96,23 @@ export const selectSelectedTemplate = createSelector(
 	selectTemplateById,
 );
 
+export const selectFilteredTickets = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.filteredTickets || null,
+);
+
 export const selectTicketPins = createSelector(
 	selectCurrentTickets,
+	selectFilteredTickets,
 	selectCurrentTemplates,
 	selectView,
 	selectSelectedTicketPinId,
-	(tickets, templates, view, selectedTicketPinId) => {
+	(tickets, filteredTickets, templates, view, selectedTicketPinId) => {
 		if (view !== TicketsCardViews.List) return [];
 
-		return tickets.reduce(
+		return (filteredTickets || tickets).reduce(
 			(accum, ticket) => {
+				if (!filteredTickets?.length && getTicketIsCompleted(ticket)) return accum;
 				const template = templates.find(({ _id }) => _id === ticket.type);
 				const color = getPinColorHex(DEFAULT_PIN, template, ticket);
 				return ticket.properties?.Pin ? [...accum, ticketToPin(ticket, selectedTicketPinId, color)] : accum;

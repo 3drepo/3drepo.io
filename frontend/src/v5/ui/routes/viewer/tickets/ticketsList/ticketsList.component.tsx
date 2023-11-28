@@ -120,46 +120,49 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		<SearchContextComponent filteringFunction={filterItems} items={ticketsFilteredByComplete}>
 			<TicketSearchInput />
 			<SearchContext.Consumer>
-				{({ filteredItems }: SearchContextType<ITicket>) => (
-					<>
-						<Filters>
-							<CompletedFilterChip
-								key="completed"
-								selected={showingCompleted}
-								icon={<TickIcon />}
-								onClick={() => setShowingCompleted((prev) => !prev)}
-								label={formatMessage({ id: 'ticketsList.filters.completed', defaultMessage: 'Completed' })}
-							/>
-							{availableTemplates.map(({ name, _id }) => {
-								const count = filteredItems.filter(({ type }) => type === _id).length;
-								return (
-									<FilterChip
-										key={_id}
-										selected={selectedTemplates.has(_id)}
-										onClick={() => toggleTemplate(_id)}
-										label={`${name} (${count})`}
-									/>
-								);
-							})}
-						</Filters>
-						{filterByTemplates(filteredItems).length ? (
-							<List>
-								{filterByTemplates(filteredItems).map((ticket) => (
-									<TicketItem
-										ticket={ticket}
-										key={ticket._id}
-										onClick={(e) => onTicketClick(ticket, e)}
-										selected={ticketIsSelected(ticket)}
-									/>
-								))}
-							</List>
-						) : (
-							<EmptyListMessage>
-								<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
-							</EmptyListMessage>
-						)}
-					</>
-				)}
+				{({ filteredItems }: SearchContextType<ITicket>) => {
+					TicketsCardActionsDispatchers.setFilteredTickets(filterByTemplates(filteredItems));
+					return (
+						<>
+							<Filters>
+								<CompletedFilterChip
+									key="completed"
+									selected={showingCompleted}
+									icon={<TickIcon />}
+									onClick={() => setShowingCompleted((prev) => !prev)}
+									label={formatMessage({ id: 'ticketsList.filters.completed', defaultMessage: 'Completed' })}
+								/>
+								{availableTemplates.map(({ name, _id }) => {
+									const count = filteredItems.filter(({ type }) => type === _id).length;
+									return (
+										<FilterChip
+											key={_id}
+											selected={selectedTemplates.has(_id)}
+											onClick={() => toggleTemplate(_id)}
+											label={`${name} (${count})`}
+										/>
+									);
+								})}
+							</Filters>
+							{filterByTemplates(filteredItems).length ? (
+								<List>
+									{filterByTemplates(filteredItems).map((ticket) => (
+										<TicketItem
+											ticket={ticket}
+											key={ticket._id}
+											onClick={(e) => onTicketClick(ticket, e)}
+											selected={ticketIsSelected(ticket)}
+										/>
+									))}
+								</List>
+							) : (
+								<EmptyListMessage>
+									<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
+								</EmptyListMessage>
+							)}
+						</>
+					);
+				}}
 			</SearchContext.Consumer>
 		</SearchContextComponent>
 	);

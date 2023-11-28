@@ -282,7 +282,7 @@ export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
 	}
 };
 
-export const getTicketIsCompleted = (ticket) => {
+export const getTicketIsCompleted = (ticket: ITicket) => {
 	const issuePropertyStatus = get(ticket, `properties.${IssueProperties.STATUS}`);
 	const treatmentStatus = get(ticket, `modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`);
 

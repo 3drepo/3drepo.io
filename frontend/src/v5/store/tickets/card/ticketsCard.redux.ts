@@ -20,12 +20,13 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
-import { OverridesDicts } from '../tickets.types';
+import { ITicket, OverridesDicts } from '../tickets.types';
 
 export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createActions({
 	setSelectedTicket: ['ticketId'],
 	setSelectedTemplate: ['templateId'],
 	setSelectedTicketPin: ['pinId'],
+	setFilteredTickets: ['tickets'],
 	setCardView: ['view'],
 	openTicket: ['ticketId'],
 	setReadOnly: ['readOnly'],
@@ -37,6 +38,7 @@ export interface ITicketsCardState {
 	selectedTicketId: string | null,
 	selectedTemplateId: string | null,
 	selectedTicketPinId: string | null,
+	filteredTickets: ITicket[],
 	view: TicketsCardViews,
 	readOnly: boolean,
 	overrides: OverridesDicts | null,
@@ -46,6 +48,7 @@ export const INITIAL_STATE: ITicketsCardState = {
 	selectedTicketId: null,
 	selectedTemplateId: null,
 	selectedTicketPinId: null,
+	filteredTickets: null,
 	view: TicketsCardViews.List,
 	overrides: null,
 	readOnly: false,
@@ -61,6 +64,10 @@ export const setSelectedTemplate = (state: ITicketsCardState, { templateId }: Se
 
 export const setSelectedTicketPin = (state: ITicketsCardState, { pinId }: SetSelectedTicketPinAction) => {
 	state.selectedTicketPinId = pinId;
+};
+
+export const setFilteredTickets = (state: ITicketsCardState, { tickets }: SetFilteredTicketsAction) => {
+	state.filteredTickets = tickets;
 };
 
 export const setCardView = (state: ITicketsCardState, { view }: SetCardViewAction) => {
@@ -84,6 +91,7 @@ export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SET_SELECTED_TICKET]: setSelectedTicket,
 	[TicketsCardTypes.SET_SELECTED_TEMPLATE]: setSelectedTemplate,
 	[TicketsCardTypes.SET_SELECTED_TICKET_PIN]: setSelectedTicketPin,
+	[TicketsCardTypes.SET_FILTERED_TICKETS]: setFilteredTickets,
 	[TicketsCardTypes.SET_CARD_VIEW]: setCardView,
 	[TicketsCardTypes.SET_READ_ONLY]: setReadOnly,
 	[TicketsCardTypes.RESET_STATE]: resetState,
@@ -93,6 +101,7 @@ export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 export type SetSelectedTicketAction = Action<'SET_SELECTED_TICKET'> & { ticketId: string };
 export type SetSelectedTemplateAction = Action<'SET_SELECTED_TEMPLATE'> & { templateId: string };
 export type SetSelectedTicketPinAction = Action<'SET_SELECTED_TICKET_PIN'> & { pinId: string };
+export type SetFilteredTicketsAction = Action<'SET_FILTERED_TICKETS'> & { tickets: ITicket[] };
 export type SetCardViewAction = Action<'SET_CARD_VIEW'> & { view: TicketsCardViews };
 export type OpenTicketAction = Action<'OPEN_TICKET'> & { ticketId: string };
 export type SetReadOnlyAction = Action<'SET_READ_ONLY'> & { readOnly: boolean };
@@ -103,6 +112,7 @@ export interface ITicketsCardActionCreators {
 	setSelectedTicket: (ticketId: string) => SetSelectedTicketAction,
 	setSelectedTemplate: (templateId: string) => SetSelectedTemplateAction,
 	setSelectedTicketPin: (pinId: string) => SetSelectedTicketPinAction,
+	setFilteredTickets: (tickets: ITicket[]) => SetFilteredTicketsAction,
 	setCardView: (view: TicketsCardViews) => SetCardViewAction,
 	openTicket: (ticketId: string) => OpenTicketAction,
 	setReadOnly: (readOnly: boolean) => SetReadOnlyAction,
