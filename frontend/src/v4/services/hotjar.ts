@@ -20,9 +20,7 @@ import { clientConfigService } from './clientConfig';
 export const initializeHotjar = () => {
 	const { development, siteId, hotjarVersion } = clientConfigService;
 
-	if (development) return;
-	
-	if (siteId && hotjarVersion) {
+	if (!development && siteId && hotjarVersion) {
 		console.debug('Adding Hotjar');
 		Hotjar.init(siteId, hotjarVersion);
 	}
