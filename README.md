@@ -7,7 +7,7 @@
 ## Latest Release & API
 * Latest release: https://github.com/3drepo/3drepo.io/releases/tag/latest
 * Corresponding Backend API docs: https://3drepo.github.io/3drepo.io/
-* Corresponding UnityUtils API: https://3drepo.github.io/3drepo.io/frontend/classes/unityutil.html
+* Corresponding UnityUtils API: [https://3drepo.github.io/3drepo.io/frontend/classes/unityutil.html](https://3drepo.github.io/3drepo.io/frontend/modules/unity_util.html)
 
 ## Dependencies
 
