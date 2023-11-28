@@ -59,6 +59,7 @@ interface IViewerGuiActionCreators {
 	setClippingMode: (mode: ClipMode) => Action;
 	setCoordView: (visible: boolean) => Action;
 	setPanelVisibility: (visible: boolean) => Action;
+	updateClipState: (clipNumber: number) => Action;
 }
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
