@@ -49,6 +49,8 @@ export class ClientConfigService {
 	public avatarSizeLimit;
 	public imageExtensions;
 	public apiUrls;
+	public hotjarVersion;
+	public siteId;
 	private chatHost;
 	private chatPath;
 	private chatReconnectionAttempts;

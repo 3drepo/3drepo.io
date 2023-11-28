@@ -44,6 +44,7 @@ import { setSocketIdHeader } from './v5/services/api/default';
 import rootSaga from './v4/modules/sagas';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { AuthenticatedRoute } from './v5/services/routing/authenticatedRoute.component';
+import { initializeHotjar } from './v4/services/hotjar';
 
 window.UnityUtil = UnityUtil;
 
@@ -52,6 +53,8 @@ initializeActionsDispatchers(dispatch);
 initializeIntl(navigator.language);
 
 initializeSocket(clientConfigService.chatConfig);
+
+initializeHotjar();
 
 // Injecting the instance of socket from v5 into v4
 setSocket(getSocket());
