@@ -1,13 +1,13 @@
 # 3drepo.io ![](https://travis-ci.org/3drepo/3drepo.io.svg?branch=master)
 
-3drepo.io a web based BIM collaboration platform. It is one of the 4 parts of the 3D Repo ecosystem. 
+3drepo.io a web based BIM collaboration platform. It is one of the 4 parts of the 3D Repo ecosystem.
 
 ![3drepo](https://user-images.githubusercontent.com/11945337/44221768-60634280-a17a-11e8-989e-089a650e3710.png)
 
 ## Latest Release & API
 * Latest release: https://github.com/3drepo/3drepo.io/releases/tag/latest
 * Corresponding Backend API docs: https://3drepo.github.io/3drepo.io/
-* Corresponding UnityUtils API: [https://3drepo.github.io/3drepo.io/frontend/classes/unityutil.html](https://3drepo.github.io/3drepo.io/frontend/modules/unity_util.html)
+* Corresponding UnityUtils API: https://3drepo.github.io/3drepo.io/frontend/classes/unity_util.UnityUtil.html
 
 ## Dependencies
 
@@ -39,7 +39,7 @@ Note: If using windows, please ensure cmd.exe was invoked as administrator (i.e.
 The configuration files are contained in the `config` folder. Each directory in config represents a different configuration. This allows you to quickly switch between, for example, a development environment and a production environment. Each configuration folder is expected to have a config.js file, which details the configuration settings for the particular environment.
 
 In general, to configure a new configuration enviroment called <config_name>:
- 
+
 1. Change to the configuration directory: `cd config`
 2. First create a new directory under config: `mkdir <config_name>`
 3. Copy config/sample_config.js to the new directory as config.js: `cp config_sample.js <config_name>/config.js`
@@ -52,7 +52,7 @@ The repository includes a script `run_app` and `run_app.cmd` specifically for Wi
 `./run/run_app <config> [debug]`
 - `config` This is the directory under config that the configuration resides in
 - `debug` Type debug here for node.js debugging, or leave it out for none.
-  
+
 Typically you will want to run the server using pm2 (install with `npm -g install pm2` under the superuser account):
 
 `./run_app_pm2 <config>`
