@@ -120,7 +120,7 @@ export const TicketDetailsCard = () => {
 
 	useEffect(() => {
 		if (view === TicketDetailsView.Groups) return;
-		const { state } = defaultView;
+		const { state } = defaultView || {};
 		goToView({ state });
 	}, [JSON.stringify(defaultView?.state)]);
 

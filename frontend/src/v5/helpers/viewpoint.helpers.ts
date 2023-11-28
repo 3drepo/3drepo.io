@@ -191,7 +191,7 @@ export const toColorAndTransparencyDicts = (overrides: GroupOverride[]): Overrid
 };
 
 export const goToView = async (view: Viewpoint) => {
-	if (isEmpty(view.state?.colored)  && isEmpty(view.state?.hidden) && isEmpty(view.camera) && isEmpty(view.clippingPlanes)) {
+	if (isEmpty(view?.state?.colored)  && isEmpty(view?.state?.hidden) && isEmpty(view?.camera) && isEmpty(view?.clippingPlanes)) {
 		return;
 	}
 

@@ -95,7 +95,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	useEffect(() => {
 		const view = selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 		goToView(view);
-	}, [selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state]);
+	}, [selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW]]);
 
 	useEffect(() => {
 		const unselectTicket = () => TicketsCardActionsDispatchers.setSelectedTicket(null);
