@@ -23,7 +23,7 @@ import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { BimHooksSelectors, ModelHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Container } from './toolbar.styles';
 import { NavigationIcons } from './icons/multioptionIcons/navigationIcons.component';
-import { ProjectionIcons } from './icons/multioptionIcons/projectIcons.component';
+import { ProjectionIcons } from './icons/multioptionIcons/projectionIcons.component';
 import { BaseIcon } from './icons/baseIcon.component';
 import { ClipIcons } from './icons/multioptionIcons/clipIcons.component';
 
