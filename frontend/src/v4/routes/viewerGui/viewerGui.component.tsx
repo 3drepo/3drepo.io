@@ -37,7 +37,7 @@ import { PanelButton } from './components/panelButton/panelButton.component';
 import RevisionsSwitch from './components/revisionsSwitch/revisionsSwitch.container';
 import { Risks } from './components/risks';
 import Sequences from './components/sequences/sequences.container';
-import Toolbar from './components/toolbar/toolbar.container';
+import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { Tree } from './components/tree';
 import { ViewerLoader } from './components/viewerLoader';
 import { Views } from './components/views';
@@ -219,7 +219,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 				<CloseFocusModeButton isFocusMode={isFocusMode} />
 				<Container id="gui-container" className={this.props.className} hidden={isFocusMode}>
 					<RevisionsSwitch />
-					<Toolbar {...this.urlParams} />
+					<Toolbar />
 					{this.renderLeftPanelsButtons()}
 					{this.renderLeftPanels(leftPanels)}
 					{this.renderRightPanels(rightPanels)}
