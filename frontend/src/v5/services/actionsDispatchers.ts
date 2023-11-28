@@ -24,6 +24,7 @@ import { DialogsActions, IDialogsActionCreators } from '@/v5/store/dialogs/dialo
 import { FederationsActions, IFederationsActionCreators } from '@/v5/store/federations/federations.redux';
 import { GroupsActions } from '@/v4/modules/groups';
 import { JobsActions } from '@/v4/modules/jobs';
+import { ViewerGuiActions } from '@/v4/modules/viewerGui';
 import { IProjectsActions, ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { IRevisionsActionCreators, RevisionsActions } from '@/v5/store/revisions/revisions.redux';
 import { TicketsActions, ITicketsActionCreators } from '@/v5/store/tickets/tickets.redux';
@@ -31,8 +32,9 @@ import { TicketsCardActions, ITicketsCardActionCreators } from '@/v5/store/ticke
 import { ITeamspacesActionCreators, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { IUsersActions, UsersActions } from '@/v5/store/users/users.redux';
 import { ViewerActions, ViewerActionsCreators } from '@/v5/store/viewer/viewer.redux';
-
 import { Action } from 'redux';
+
+import { ClipMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
 
 interface IGroupsActionCreators {
 	setColorOverrides: (groupIds: string[], on: boolean) => Action;
@@ -43,6 +45,20 @@ interface IGroupsActionCreators {
 
 interface IJobsActionCreators {
 	fetchJobs: (teamspace: string) => Action;
+}
+
+interface IViewerGuiActionCreators {
+	goToHomeView: () => Action;
+	setIsFocusMode: (mode: boolean) => Action;
+	setProjectionMode: (mode: ProjectionMode) => Action;
+	setNavigationMode: (mode: NavigationMode) => Action;
+	getHelicopterSpeed: (teamspace: string, containerOrFederation: string) => Action;
+	increaseHelicopterSpeed: (teamspace: string, containerOrFederation: string) => Action;
+	decreaseHelicopterSpeed: (teamspace: string, containerOrFederation: string) => Action;
+	resetHelicopterSpeed: (teamspace: string, containerOrFederation: string) => Action;
+	setClippingMode: (mode: ClipMode) => Action;
+	setCoordView: (visible: boolean) => Action;
+	setPanelVisibility: (visible: boolean) => Action;
 }
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
@@ -60,3 +76,4 @@ export const TicketsCardActionsDispatchers = createActionsDispatchers<ITicketsCa
 export const TicketCommentsActionsDispatchers = createActionsDispatchers<ITicketCommentsActionCreators>(TicketCommentsActions);
 export const UsersActionsDispatchers = createActionsDispatchers<IUsersActions>(UsersActions);
 export const ViewerActionsDispatchers = createActionsDispatchers<ViewerActionsCreators>(ViewerActions);
+export const ViewerGuiActionsDispatchers = createActionsDispatchers<IViewerGuiActionCreators>(ViewerGuiActions);
