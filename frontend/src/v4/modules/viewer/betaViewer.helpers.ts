@@ -17,4 +17,7 @@
 
 export const USE_BETA_VIEWER = 'useBetaViewer';
 export const setUseBetaViewer = (useBetaViewer = true) => localStorage.setItem(USE_BETA_VIEWER, JSON.stringify(useBetaViewer));
-export const getUseBetaViewer = () => JSON.parse(localStorage.getItem(USE_BETA_VIEWER));
+export const getUseBetaViewer = () => {
+	const value = JSON.parse(localStorage.getItem(USE_BETA_VIEWER));
+	return value !== null ? value : true;
+};

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,15 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { useEffect } from 'react';
 
-import { Version, VersionContext } from '@/versionContext';
-import { useContext } from 'react';
+interface IProps {
+	event: keyof WindowEventMap;
+	onEventTriggered: (e: Event) => any;
+}
 
+export const WindowEventListener = ({ event, onEventTriggered }: IProps) => {
+	useEffect(() => {
+		window.addEventListener(event, onEventTriggered);
+		return () => window.removeEventListener(event, onEventTriggered)
+	}, []);
 
-export const withVersion = (WrappedComponent) => (props) => {
-	const version = useContext(VersionContext);
-	return (
-		<WrappedComponent {...props} isV5={version === Version.V5} />
-	);
+	return (null);
 };
-

@@ -21,7 +21,6 @@ import Grid from '@mui/material/Grid';
 import ArrowDropDown from '@mui/icons-material/ArrowDropDown';
 import { identity } from 'lodash';
 import { PureComponent, useEffect, useRef, useState, createRef } from 'react';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import { componentToHex, hexToGLColor, rgbaToHex, GLToHexColor } from '../../../helpers/colors';
 import {
@@ -399,14 +398,14 @@ export class ColorPicker extends PureComponent<IProps, IState> {
 		<Footer>
 			<StyledButton
 				variant="contained"
-				color={isV5() ? 'primary' : 'secondary'}
+				color={'primary'}
 				onClick={this.handleSave}
 			>
 				Save
 			</StyledButton>
 			<StyledButton
-				color={isV5() ? 'secondary' : 'primary'}
-				{...(isV5() && { variant: "outlined" })}
+				color="secondary"
+				variant="outlined"
 				onClick={this.handleClose}
 			>
 				Cancel

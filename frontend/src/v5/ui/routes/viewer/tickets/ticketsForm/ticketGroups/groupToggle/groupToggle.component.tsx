@@ -19,12 +19,12 @@ import EyeIcon from '@assets/icons/outlined/eye-outlined.svg';
 import EyeDisabledIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
 import { CheckboxProps } from '@mui/material';
 import { useContext } from 'react';
-import { Checkbox, EyeCheckbox } from './groupToggle.styles';
+import { Checkbox, EyeCheckbox, IndeterminateEye } from './groupToggle.styles';
 import { TicketGroupsContext } from '../ticketGroupsContext';
 
 export const GroupToggle = (props: CheckboxProps) => {
 	const { groupType } = useContext(TicketGroupsContext);
 
 	if (groupType === 'colored') return (<Checkbox {...props} />);
-	return (<EyeCheckbox icon={<EyeIcon />} checkedIcon={<EyeDisabledIcon />} {...props} />);
+	return (<EyeCheckbox icon={<EyeIcon />} checkedIcon={<EyeDisabledIcon />} indeterminateIcon={<IndeterminateEye />} {...props} />);
 };

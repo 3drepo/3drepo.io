@@ -20,13 +20,11 @@ import { PureComponent } from 'react';
 import Tooltip from '@mui/material/Tooltip';
 import { withFormik, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import {
 	ATTACHMENTS_RISK_TYPE,
 	MAIN_RISK_TYPE,
-	RISK_TABS as V4_RISK_TABS,
-	V5_RISK_TABS,
+	RISK_TABS,
 	SEQUENCING_RISK_TYPE,
 	SHAPES_RISK_TYPE,
 	TREATMENT_RISK_TYPE,
@@ -94,7 +92,6 @@ interface IState {
 	activeTab: string;
 }
 
-const RISK_TABS = isV5() ? V5_RISK_TABS : V4_RISK_TABS;
 class RiskDetailsFormComponent extends PureComponent<IProps, IState> {
 	get isNewRisk() {
 		return !this.props.risk._id;
@@ -274,7 +271,7 @@ class RiskDetailsFormComponent extends PureComponent<IProps, IState> {
 }
 
 export const RiskDetailsForm = withFormik({
-	mapPropsToValues: ({ risk }) => {
+	mapPropsToValues: ({ risk }: any) => {
 		const setMitigationStatusValue = () => {
 			if (risk.mitigation_status && risk.mitigation_status !== 'mitigation_status') {
 				return risk.mitigation_status;

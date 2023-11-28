@@ -15,35 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { StyledIconButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.styles';
-import styled, { css } from 'styled-components';
-import { isV5 } from '@/v4/helpers/isV5';
+import styled from 'styled-components';
 
 export const GroupsTreeListItem = styled.li<{ $highlighted?: boolean }>`
 	background-color: ${({ $highlighted, theme: { palette } }) => {
-		if (isV5()) return $highlighted ? palette.base.lightest : palette.primary.contrast;
-		return $highlighted ? '#F7F7F7' : '#FFFFFF';
+		return $highlighted ? palette.base.lightest : palette.primary.contrast;
 	}};
 	cursor: default;
 	position: relative;
 `;
 
 export const Separator = styled.hr``;
-
-const GroupsTreeListItemContainerV4 = css`
-	max-width: 282px;
-	
-	~ ${Separator} {
-		border: solid 0 #DCDCDC;
-	}
-`;
-
-const GroupsTreeListItemContainerV5 = css`
-	max-width: 311px;
-
-	~ ${Separator} {
-		border: solid 0 ${({ theme: { palette } }) => palette.base.lightest};
-	}
-`;
 
 export const GroupsTreeListItemContainer = styled.div<{ $depth }>`
 	padding-left: ${({ $depth }) => $depth * 10}px;
@@ -52,7 +34,11 @@ export const GroupsTreeListItemContainer = styled.div<{ $depth }>`
 	display: flex;
 	overflow: hidden;
 	box-sizing: border-box;
-	${isV5() ? GroupsTreeListItemContainerV5 : GroupsTreeListItemContainerV4}
+	max-width: 311px;
+
+	~ ${Separator} {
+		border: solid 0 ${({ theme: { palette } }) => palette.base.lightest};
+	}
 
 	~ ${Separator} {
 		margin: 0;
@@ -77,39 +63,16 @@ export const GroupItemTextContainer = styled.div`
 	overflow: hidden;
 `;
 
-const GroupItemNameV4 = css`
-	color: #757575;
-	font-family: Roboto;
-	font-weight: 500;
-	font-size: 12px;
-	line-height: 16px;
-`;
-
-const GroupItemNameV5 = css`
-	${({ theme }) => theme.typography.body1};
-	color: ${({ theme }) => theme.palette.secondary.main};
-`;
-
-const GroupItemObjectsV4 = css`
-	color: #6B778C;
-	font-family: inter;
-	font-weight: 500;
-	font-size: 9px;
-	line-height: 16px;
-`;
-
-const GroupItemObjectsV5 = css`
+export const GroupItemObjects = styled.div`
 	${({ theme }) => theme.typography.caption};
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
 export const GroupItemName = styled.div`
-	${isV5() ? GroupItemNameV5 : GroupItemNameV4}
+	${({ theme }) => theme.typography.body1};
+	color: ${({ theme }) => theme.palette.secondary.main};
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;
 `;
 
-export const GroupItemObjects = styled.div`
-	${isV5() ? GroupItemObjectsV5 : GroupItemObjectsV4}
-`;

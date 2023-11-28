@@ -37,6 +37,9 @@ const isSequencingProperty = (inputName: string) => [SEQUENCING_START_TIME, SEQU
 export const PropertiesList = ({ module, properties, onPropertyBlur }: PropertiesListProps) => {
 	const { formState } = useFormContext();
 	const isReadOnly = TicketsCardHooksSelectors.selectReadOnly();
+
+	if (!properties.length) return null;
+
 	return (
 		<PropertiesListContainer>
 			{properties.map(({
