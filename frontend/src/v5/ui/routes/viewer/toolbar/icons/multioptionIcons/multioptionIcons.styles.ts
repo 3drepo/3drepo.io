@@ -25,15 +25,21 @@ export const MultiOptionIconContainer = styled.div`
 	& > ${Container}::after {
 		content: '';
 		position: absolute;
-		background-image: linear-gradient(to top right, transparent 50%, ${({ theme }) => theme.palette.base.main} 0);
-		height: 6px;
-		width: 6px;
+		height: 0;
+		width: 0;
 		top: 6px;
 		right: 6px;
+		transition: .2s all;
+		border: solid 3px ${({ theme }) => theme.palette.base.main};
 	}
 
 	&:hover > ${Container}::after {
-		background-image: linear-gradient(to top right, transparent 50%, ${({ theme }) => theme.palette.primary.contrast} 0);
+		border-color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+
+	:is(&, &:hover) > ${Container}::after {
+		border-left-color: transparent;
+		border-bottom-color: transparent;
 	}
 `;
 

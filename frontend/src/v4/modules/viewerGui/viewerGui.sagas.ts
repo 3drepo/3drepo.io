@@ -276,12 +276,10 @@ function* setNavigationMode({mode}) {
 	}
 }
 
-function* resetHelicopterSpeed({teamspace, modelId, updateDefaultSpeed}) {
+function* resetHelicopterSpeed({teamspace, modelId }) {
 	try {
 		yield Viewer.helicopterSpeedReset();
-		if (updateDefaultSpeed) {
-			yield API.editHelicopterSpeed(teamspace, modelId, INITIAL_HELICOPTER_SPEED);
-		}
+		yield API.editHelicopterSpeed(teamspace, modelId, INITIAL_HELICOPTER_SPEED);
 		yield put(ViewerGuiActions.setHelicopterSpeed(INITIAL_HELICOPTER_SPEED));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'helicopter speed', error));

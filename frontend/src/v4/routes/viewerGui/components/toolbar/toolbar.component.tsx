@@ -77,7 +77,7 @@ interface IProps {
 	initialiseToolbar: () => void;
 	increaseHelicopterSpeed: (teamspace, modelId) => void;
 	decreaseHelicopterSpeed: (teamspace, modelId) => void;
-	resetHelicopterSpeed: (teamspace, modelId, updateDefaultSpeed) => void;
+	resetHelicopterSpeed: (teamspace, modelId) => void;
 	showAllNodes: () => void;
 	hideSelectedNodes: () => void;
 	isolateSelectedNodes: (nodeId) => void;
@@ -165,7 +165,7 @@ export class Toolbar extends PureComponent<IProps, IState> {
 					{
 						label: `Reset speed to ${INITIAL_HELICOPTER_SPEED}`,
 						Icon: ResetIcon,
-						action: () => this.props.resetHelicopterSpeed(this.props.teamspace, this.props.model, true),
+						action: () => this.props.resetHelicopterSpeed(this.props.teamspace, this.props.model),
 						specificOption: true
 					},
 					{

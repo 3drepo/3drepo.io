@@ -39,7 +39,7 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	setNavigationMode: ['mode'],
 	setNavigationModeSuccess: ['mode'],
 	setHelicopterSpeed: ['speed'],
-	resetHelicopterSpeed: ['teamspace', 'modelId', 'updateDefaultSpeed'],
+	resetHelicopterSpeed: ['teamspace', 'modelId'],
 	getHelicopterSpeed: ['teamspace', 'modelId'],
 	increaseHelicopterSpeed: ['teamspace', 'modelId'],
 	decreaseHelicopterSpeed: ['teamspace', 'modelId'],

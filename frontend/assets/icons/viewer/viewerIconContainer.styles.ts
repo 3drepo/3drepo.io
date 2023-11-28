@@ -47,7 +47,9 @@ export const ViewerIconContainer = styled.div<{ selected?: boolean, disabled?: b
 		${selectedStyles}
 	}
 
-	${({ disabled }) => disabled && disabledStyles}
+	&, &:hover {
+		${({ disabled }) => disabled && disabledStyles}
+	}
 
 	& * {
 		transition: color .1s;
