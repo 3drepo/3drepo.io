@@ -105,18 +105,13 @@ export const TicketDetailsCard = () => {
 	}, [ticket._id]);
 
 	useEffect(() => {
-		if (isEmpty(defaultView)) return;
-		goToView(defaultView);
-	}, [ticket._id, treeNodesList]);
-
-	useEffect(() => {
 		formData.reset(ticket);
 	}, [JSON.stringify(ticket)]);
 
 	useEffect(() => {
 		if (view === TicketDetailsView.Groups) return;
 		goToView(defaultView);
-	}, [JSON.stringify(defaultView?.camera)]);
+	}, [ticket._id, treeNodesList, JSON.stringify(defaultView?.camera)]);
 
 	useEffect(() => {
 		if (view === TicketDetailsView.Groups) return;
