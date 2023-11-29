@@ -20,7 +20,7 @@ type IProps = {
 
 export default ({ className }: IProps) => (
 	<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-		<g className="home-o" clip-path="url(#clip0_1764_3857)">
+		<g className="home-o" clipPath="url(#clip0_1764_3857)">
 			<g className="primary">
 				<path
 					d="M0.302969 6.15713C0.00473802 6.33935 -0.0893098 6.72883 0.0929077 7.02706C0.275125 7.32529 0.664606 7.41934 0.962837 7.23712L8.6335 2.5504C8.85855 2.41289 9.14163 2.41289 9.36668 2.5504L17.0373 7.23712C17.3356 7.41934 17.7251 7.32529 17.9073 7.02706C18.0895 6.72883 17.9954 6.33935 17.6972 6.15713L10.0266 1.4704C9.3964 1.08539 8.60378 1.08539 7.97363 1.4704L0.302969 6.15713Z"
