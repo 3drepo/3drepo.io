@@ -17,12 +17,14 @@
 /* eslint-disable max-len */
 import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 import { AuthActions, IAuthActionCreators } from '@/v5/store/auth/auth.redux';
+import { BimActions } from '@/v4/modules/bim';
 import { ContainersActions, IContainersActionCreators } from '@/v5/store/containers/containers.redux';
 import { CurrentUserActions, ICurrentUserActionCreators } from '@/v5/store/currentUser/currentUser.redux';
 import { DialogsActions, IDialogsActionCreators } from '@/v5/store/dialogs/dialogs.redux';
 import { FederationsActions, IFederationsActionCreators } from '@/v5/store/federations/federations.redux';
 import { GroupsActions } from '@/v4/modules/groups';
 import { JobsActions } from '@/v4/modules/jobs';
+import { MeasurementsActions } from '@/v4/modules/measurements';
 import { IProjectsActionCreators, ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { IRevisionsActionCreators, RevisionsActions } from '@/v5/store/revisions/revisions.redux';
 import { ITeamspacesActionCreators, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
@@ -35,8 +37,11 @@ import { ViewerActions, ViewerActionsCreators } from '@/v5/store/viewer/viewer.r
 import { ViewerGuiActions } from '@/v4/modules/viewerGui';
 import { Action } from 'redux';
 
-import { ClipMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
+import { ClipMode, MeasureMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
 
+interface IBimActionCreators {
+	setIsActive: (active: boolean) => Action;
+}
 interface ITreeActionCreators {
 	showAllNodes: () => Action;
 	hideSelectedNodes: () => Action;
@@ -54,6 +59,10 @@ interface IJobsActionCreators {
 	fetchJobs: (teamspace: string) => Action;
 }
 
+interface IMeasurementsActionCreators {
+	setMeasureMode: (mode: MeasureMode | '') => Action;
+}
+
 interface IViewerGuiActionCreators {
 	goToHomeView: () => Action;
 	setIsFocusMode: (mode: boolean) => Action;
@@ -65,17 +74,19 @@ interface IViewerGuiActionCreators {
 	resetHelicopterSpeed: (teamspace: string, containerOrFederation: string) => Action;
 	setClippingMode: (mode: ClipMode) => Action;
 	setCoordView: (visible: boolean) => Action;
-	setPanelVisibility: (visible: boolean) => Action;
+	setPanelVisibility: (panelName: string, visible: boolean) => Action;
 	updateClipState: (clipNumber: number) => Action;
 }
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
+export const BimActionsDispatchers = createActionsDispatchers<IBimActionCreators>(BimActions);
 export const ContainersActionsDispatchers = createActionsDispatchers<IContainersActionCreators>(ContainersActions);
 export const CurrentUserActionsDispatchers = createActionsDispatchers<ICurrentUserActionCreators>(CurrentUserActions);
 export const DialogsActionsDispatchers = createActionsDispatchers<IDialogsActionCreators>(DialogsActions);
 export const FederationsActionsDispatchers = createActionsDispatchers<IFederationsActionCreators>(FederationsActions);
 export const GroupsActionsDispatchers = createActionsDispatchers<IGroupsActionCreators>(GroupsActions);
 export const JobsActionsDispatchers = createActionsDispatchers<IJobsActionCreators>(JobsActions);
+export const MeasurementsActionsDispatchers = createActionsDispatchers<IMeasurementsActionCreators>(MeasurementsActions);
 export const ProjectsActionsDispatchers = createActionsDispatchers<IProjectsActionCreators>(ProjectsActions);
 export const RevisionsActionsDispatchers = createActionsDispatchers<IRevisionsActionCreators>(RevisionsActions);
 export const TeamspacesActionsDispatchers = createActionsDispatchers<ITeamspacesActionCreators>(TeamspacesActions);

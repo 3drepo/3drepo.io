@@ -174,4 +174,4 @@ export const VIEWER_MEASURING_MODE = {
 	SAM: 'SurfaceArea',
 	CSAM: 'PolygonArea',
 	POINT_TO_POINT: 'Point',
-};
+} as const;

@@ -23,8 +23,9 @@ import EyeHideIcon from '@assets/icons/viewer/eye_hide.svg';
 import EyeShowIcon from '@assets/icons/viewer/eye_show.svg';
 import EyeIsolateIcon from '@assets/icons/viewer/eye_isolate.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { GroupsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { BimActionsDispatchers, GroupsActionsDispatchers, MeasurementsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { BimHooksSelectors, GroupsHooksSelectors, ModelHooksSelectors, TreeHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
+import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { AlwaysOnContainer, ExpansionBlock, ExpansionContainer, MainContainer } from './toolbar.styles';
 import { NavigationIcons } from './icons/multioptionIcons/navigationIcons.component';
 import { ProjectionIcons } from './icons/multioptionIcons/projectionIcons.component';
@@ -38,6 +39,16 @@ export const Toolbar = () => {
 	const hasMetaData = ModelHooksSelectors.selectMetaKeysExist();
 	const showBIMPanel = BimHooksSelectors.selectIsActive();
 	const showCoords = ViewerGuiHooksSelectors.selectIsCoordViewActive();
+
+	const setBIMPanelVisibililty = (visible) => {
+		BimActionsDispatchers.setIsActive(visible);
+		ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.BIM, visible);
+		ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.ACTIVITIES, false);
+
+		if (visible) {
+			MeasurementsActionsDispatchers.setMeasureMode('');
+		}
+	}
 
 	return (
 		<MainContainer>
@@ -64,15 +75,14 @@ export const Toolbar = () => {
 				>
 					<CoordinatesIcon />
 				</BaseIcon>
-				{hasMetaData && (
-					<BaseIcon
-						selected={showBIMPanel}
-						onClick={() => ViewerGuiActionsDispatchers.setPanelVisibility(!showBIMPanel)}
-						title={formatMessage({ id: 'viewer.toolbar.icon.bim', defaultMessage: 'BIM' })}
-					>
-						<InfoIcon />
-					</BaseIcon>
-				)}
+				<BaseIcon
+					hidden={!hasMetaData}
+					selected={showBIMPanel}
+					onClick={() => setBIMPanelVisibililty(!showBIMPanel)}
+					title={formatMessage({ id: 'viewer.toolbar.icon.bim', defaultMessage: 'BIM' })}
+				>
+					<InfoIcon />
+				</BaseIcon>
 			</AlwaysOnContainer>
 			<ExpansionContainer>
 				<ExpansionBlock hidden={!hasOverrides}>
