@@ -18,7 +18,7 @@
 import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
 import { isEmpty } from 'lodash';
 import { PureComponent } from 'react';
-
+import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
@@ -37,13 +37,10 @@ import { PanelButton } from './components/panelButton/panelButton.component';
 import RevisionsSwitch from './components/revisionsSwitch/revisionsSwitch.container';
 import { Risks } from './components/risks';
 import Sequences from './components/sequences/sequences.container';
-import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { Tree } from './components/tree';
 import { ViewerLoader } from './components/viewerLoader';
 import { Views } from './components/views';
-import {
-	Container, DraggablePanels, GuiContainer, LeftPanels, LeftPanelsButtons, RightPanels,
-} from './viewerGui.styles';
+import { Container, DraggablePanels, GuiContainer, LeftPanels, LeftPanelsButtons, RightPanels } from './viewerGui.styles';
 
 interface IProps {
 	viewer: any;
