@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { orderBy, values } from 'lodash';
+import _, { orderBy, values } from 'lodash';
 import { createSelector } from 'reselect';
 
 import { NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
@@ -57,7 +57,7 @@ export const selectActiveNode = createSelector(
 	selectTreeDomain, (state) => state.activeNode
 );
 
-const selectTreeProccessing = () => TreeProcessing.data ;
+const selectTreeProccessing = () => TreeProcessing.data;
 
 export const selectTreeNodesList = createSelector(
 	selectTreeProccessing, selectDataRevision,
@@ -107,6 +107,15 @@ export const selectDefaultVisibilityMap = createSelector(
 export const selectVisibilityMap = createSelector(
 	selectTreeProccessing, selectDataRevision,
 	(treeProcessingData) => treeProcessingData.visibilityMap
+);
+
+export const selectHasHiddenNodes = createSelector(
+	selectTreeNodesList, selectVisibilityMap, selectDataRevision,
+	(nodesList = [], visibilityMap = {}) => {
+		if (!nodesList.length || _.isEmpty(visibilityMap)) return null;
+		const { childrenIds } = nodesList[0];
+		return childrenIds.some((id) => visibilityMap[id] !== VISIBILITY_STATES.VISIBLE);
+	}
 );
 
 export const selectNodesIndexesMap = createSelector(

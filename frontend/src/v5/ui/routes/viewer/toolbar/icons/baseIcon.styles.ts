@@ -18,13 +18,22 @@
 import { ViewerIconContainer } from '@assets/icons/viewer/viewerIconContainer.styles';
 import styled, { css } from 'styled-components';
 
-export const Container = styled(ViewerIconContainer)<{ disabled?: boolean }>`
-	width: 40px;
+export const Container = styled(ViewerIconContainer)<{ disabled?: boolean, hidden?: boolean }>`
 	height: 40px;
 	cursor: pointer;
 	box-sizing: border-box;
 	display: grid;
 	place-content: center;
+	transition: all .2s;
+	overflow: hidden;
+
+	&[hidden] {
+		width: 0;
+	}
+
+	&:not([hidden]) {
+		width: 40px;
+	}
 
 	${({ disabled }) => disabled && css`
 		cursor: default;

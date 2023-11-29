@@ -19,9 +19,12 @@ import CoordinatesIcon from '@assets/icons/viewer/coordinates.svg';
 import FocusIcon from '@assets/icons/viewer/focus.svg';
 import InfoIcon from '@assets/icons/viewer/info.svg';
 import ClearOverridesIcon from '@assets/icons/viewer/clear_overrides.svg';
+import EyeHideIcon from '@assets/icons/viewer/eye_hide.svg';
+import EyeShowIcon from '@assets/icons/viewer/eye_show.svg';
+import EyeIsolateIcon from '@assets/icons/viewer/eye_isolate.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { GroupsActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { BimHooksSelectors, GroupsHooksSelectors, ModelHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
+import { GroupsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { BimHooksSelectors, GroupsHooksSelectors, ModelHooksSelectors, TreeHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { AlwaysOnContainer, ExpansionBlock, ExpansionContainer, MainContainer } from './toolbar.styles';
 import { NavigationIcons } from './icons/multioptionIcons/navigationIcons.component';
 import { ProjectionIcons } from './icons/multioptionIcons/projectionIcons.component';
@@ -30,6 +33,8 @@ import { ClipIcons } from './icons/multioptionIcons/clipIcons.component';
 
 export const Toolbar = () => {
 	const hasOverrides = GroupsHooksSelectors.selectGroupsColourOverrides()?.length > 0;
+	const hasHighlightedObjects = !!TreeHooksSelectors.selectActiveNode();
+	const hasHiddenObjects = TreeHooksSelectors.selectHasHiddenNodes();
 	const hasMetaData = ModelHooksSelectors.selectMetaKeysExist();
 	const showBIMPanel = BimHooksSelectors.selectIsActive();
 	const showCoords = ViewerGuiHooksSelectors.selectIsCoordViewActive();
@@ -77,6 +82,29 @@ export const Toolbar = () => {
 						title={formatMessage({ id: 'viewer.toolbar.icon.clearOverrides', defaultMessage: 'Clear Overrides' })}
 					>
 						<ClearOverridesIcon />
+					</BaseIcon>
+				</ExpansionBlock>
+				<ExpansionBlock hidden={!hasHighlightedObjects && !hasHiddenObjects}>
+					<BaseIcon
+						hidden={!hasHiddenObjects}
+						onClick={TreeActionsDispatchers.showAllNodes}
+						title={formatMessage({ id: 'viewer.toolbar.icon.showAll', defaultMessage: 'Show All' })}
+					>
+						<EyeShowIcon />
+					</BaseIcon>
+					<BaseIcon
+						hidden={!hasHighlightedObjects}
+						onClick={TreeActionsDispatchers.hideSelectedNodes}
+						title={formatMessage({ id: 'viewer.toolbar.icon.hide', defaultMessage: 'Hide' })}
+					>
+						<EyeHideIcon />
+					</BaseIcon>
+					<BaseIcon
+						hidden={!hasHighlightedObjects}
+						onClick={() => TreeActionsDispatchers.isolateSelectedNodes(undefined)}
+						title={formatMessage({ id: 'viewer.toolbar.icon.isolate', defaultMessage: 'Isolate' })}
+					>
+						<EyeIsolateIcon />
 					</BaseIcon>
 				</ExpansionBlock>
 			</ExpansionContainer>

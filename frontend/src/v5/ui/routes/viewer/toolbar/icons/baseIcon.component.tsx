@@ -14,16 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Tooltip, TooltipProps } from '@mui/material';
+import { Tooltip } from '@mui/material';
 import { Container } from './baseIcon.styles';
 
-type BaseIconProps = TooltipProps & {
+type BaseIconProps = {
+	hidden?: boolean;
 	disabled?: boolean;
 	selected?: boolean;
+	onClick: () => void;
+	children: any;
+	title: string;
 }
-export const BaseIcon = ({ children, onClick, disabled, selected, ...props }: BaseIconProps) => (
-	<Tooltip {...props}>
-		<Container onClick={onClick} disabled={disabled} selected={selected}>
+export const BaseIcon = ({ children, title, ...props }: BaseIconProps) => (
+	<Tooltip title={title}>
+		<Container {...props}>
 			{children}
 		</Container>
 	</Tooltip>

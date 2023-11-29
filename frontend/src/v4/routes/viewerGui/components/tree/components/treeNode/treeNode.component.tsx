@@ -151,7 +151,12 @@ export class TreeNode extends PureComponent<IProps, any> {
 		/>
 	));
 
-	private renderActions = renderWhenTrue(() => (
+	private renderActions = renderWhenTrue(() => {
+		if (this.node.parentId) {
+			console.log(this.node)
+			console.log(this.props.visibilityMap[this.node._id])
+		}
+		return (
 		<Actions>
 			{this.renderOpenModelAction(this.isModelRef)}
 			{this.renderGoTopAction(!this.node.isModel && !this.isModelRoot && !this.isModelRef)}
@@ -166,7 +171,7 @@ export class TreeNode extends PureComponent<IProps, any> {
 				onClick={this.toggleShowNode}
 			/>
 		</Actions>
-	));
+	)});
 
 	public getVisibilityIcon = (visibility) => {
 		if (visibility === VISIBILITY_STATES.VISIBLE) {

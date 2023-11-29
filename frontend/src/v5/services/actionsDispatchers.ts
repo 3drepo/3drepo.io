@@ -23,17 +23,25 @@ import { DialogsActions, IDialogsActionCreators } from '@/v5/store/dialogs/dialo
 import { FederationsActions, IFederationsActionCreators } from '@/v5/store/federations/federations.redux';
 import { GroupsActions } from '@/v4/modules/groups';
 import { JobsActions } from '@/v4/modules/jobs';
+import { IProjectsActionCreators, ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { IRevisionsActionCreators, RevisionsActions } from '@/v5/store/revisions/revisions.redux';
 import { ITeamspacesActionCreators, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TicketsActions, ITicketsActionCreators } from '@/v5/store/tickets/tickets.redux';
 import { TicketsCardActions, ITicketsCardActionCreators } from '@/v5/store/tickets/card/ticketsCard.redux';
 import { TicketCommentsActions, ITicketCommentsActionCreators } from '@/v5/store/tickets/comments/ticketComments.redux';
+import { TreeActions } from '@/v4/modules/tree';
 import { IUsersActions, UsersActions } from '@/v5/store/users/users.redux';
 import { ViewerActions, ViewerActionsCreators } from '@/v5/store/viewer/viewer.redux';
+import { ViewerGuiActions } from '@/v4/modules/viewerGui';
 import { Action } from 'redux';
 
 import { ClipMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
 
+interface ITreeActionCreators {
+	showAllNodes: () => Action;
+	hideSelectedNodes: () => Action;
+	isolateSelectedNodes: (containerOrFederation: string) => Action;
+}
 interface IGroupsActionCreators {
 	setColorOverrides: (groupIds: string[], on: boolean) => Action;
 	isolateGroups: (groupIds: string[]) => Action;
@@ -68,11 +76,13 @@ export const DialogsActionsDispatchers = createActionsDispatchers<IDialogsAction
 export const FederationsActionsDispatchers = createActionsDispatchers<IFederationsActionCreators>(FederationsActions);
 export const GroupsActionsDispatchers = createActionsDispatchers<IGroupsActionCreators>(GroupsActions);
 export const JobsActionsDispatchers = createActionsDispatchers<IJobsActionCreators>(JobsActions);
+export const ProjectsActionsDispatchers = createActionsDispatchers<IProjectsActionCreators>(ProjectsActions);
 export const RevisionsActionsDispatchers = createActionsDispatchers<IRevisionsActionCreators>(RevisionsActions);
 export const TeamspacesActionsDispatchers = createActionsDispatchers<ITeamspacesActionCreators>(TeamspacesActions);
 export const TicketsActionsDispatchers = createActionsDispatchers<ITicketsActionCreators>(TicketsActions);
 export const TicketsCardActionsDispatchers = createActionsDispatchers<ITicketsCardActionCreators>(TicketsCardActions);
 export const TicketCommentsActionsDispatchers = createActionsDispatchers<ITicketCommentsActionCreators>(TicketCommentsActions);
+export const TreeActionsDispatchers = createActionsDispatchers<ITreeActionCreators>(TreeActions);
 export const UsersActionsDispatchers = createActionsDispatchers<IUsersActions>(UsersActions);
 export const ViewerActionsDispatchers = createActionsDispatchers<ViewerActionsCreators>(ViewerActions);
 export const ViewerGuiActionsDispatchers = createActionsDispatchers<IViewerGuiActionCreators>(ViewerGuiActions);

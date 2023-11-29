@@ -56,4 +56,12 @@ export const ExpansionContainer = styled.div`
 	width: fit-content;
 	padding-left: 31px;
 	margin-left: -45px;
+
+	&:has(> ${ExpansionBlock}:not([hidden])) {
+		padding-left: 45px;
+	}
+
+	& > ${ExpansionBlock}:not([hidden]) ~ ${ExpansionBlock}:not([hidden]) {
+		border-left: solid 1px ${({ theme }) => theme.palette.base.light};
+	}
 `;

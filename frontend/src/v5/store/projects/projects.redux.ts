@@ -39,7 +39,7 @@ export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions
 	updateProjectSuccess: ['teamspace', 'projectId', 'project'],
 	deleteProject: ['teamspace', 'projectId', 'onSuccess', 'onError'],
 	deleteProjectSuccess: ['teamspace', 'projectId'],
-}, { prefix: 'PROJECTS/' }) as { Types: Constants<IProjectsActions>; Creators: IProjectsActions };
+}, { prefix: 'PROJECTS/' }) as { Types: Constants<IProjectsActionCreators>; Creators: IProjectsActionCreators };
 
 export const INITIAL_STATE: IProjectsState = {
 	projectsByTeamspace: {},
@@ -120,7 +120,7 @@ export type FetchTemplatesSuccessAction = Action<'FETCH_TEMPLATES_SUCCESS'> & Pr
 export type FetchTemplateAction = Action<'FETCH_TEMPLATE'> & TeamspaceAndProjectId & { templateId: string };
 export type ReplaceTemplateSuccessAction = Action<'REPLACE_TEMPLATE_SUCCESS'> & ProjectId & { template: ITemplate };
 
-export interface IProjectsActions {
+export interface IProjectsActionCreators {
 	fetch: (teamspace: string) => FetchProjectsAction;
 	fetchSuccess: (teamspace: string, projects: IProject[]) => FetchProjectsSuccessAction;
 	fetchFailure: () => any;
