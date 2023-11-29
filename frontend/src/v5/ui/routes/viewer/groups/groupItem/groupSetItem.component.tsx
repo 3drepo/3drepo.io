@@ -14,13 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { isV5 } from '@/v4/helpers/isV5';
 import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { GroupsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ChevronButton } from '@controls/chevronButton';
 import { SyntheticEvent } from 'react';
 import { getGroupNamePath } from '../groupsList.helpers';
-import { CollapsibleIconV4, GroupSetName, GroupSetTitle, GroupsSetTreeListItemComponent } from './groupSetItem.styles';
+import { GroupSetName, GroupSetTitle, GroupsSetTreeListItemComponent } from './groupSetItem.styles';
 
 const getGroupSetData = (groupSet, overrides, highlights) => {
 	const data = groupSet.children.reduce((partialData, groupOrGroupSet:any) => {
@@ -63,10 +62,6 @@ const getGroupSetData = (groupSet, overrides, highlights) => {
 	return data;
 };
 
-const CollapsibleIcon = ({ $collapsed }) => (isV5()
-	? <ChevronButton isOn={!$collapsed} size="small" />
-	: <CollapsibleIconV4 $collapsed={$collapsed} />);
-
 export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 	const overrides = GroupsHooksSelectors.selectGroupsColourOverridesSet();
 	const highlights = GroupsHooksSelectors.selectHighlightedGroups();
@@ -87,17 +82,11 @@ export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 		GroupsActionsDispatchers.setColorOverrides(descendants, (overridden === false));
 	};
 
-	const onClickIsolate = (event) => {
-		event.stopPropagation();
-		GroupsActionsDispatchers.isolateGroups(descendants);
-	};
-
 	const depth = getGroupNamePath(groupSet.pathName).length;
 
 	return (
 		<GroupsSetTreeListItemComponent
 			onClick={onClickItem}
-			onClickIsolate={onClickIsolate}
 			onClickOverride={onClickOverride}
 			overridden={overridden}
 			highlighted={highlighted}
@@ -106,7 +95,7 @@ export const GroupSetItem = ({ groupSet, collapse, children, disabled }) => {
 			grandChildren={!hidden ? children : null}
 			$padding={depth === 1}
 		>
-			<CollapsibleIcon $collapsed={hidden} />
+			<ChevronButton isOn={!hidden} size="small" />
 			<GroupSetName>
 				<GroupSetTitle>{groupSet.name}</GroupSetTitle>
 				({descendants.length})

@@ -551,7 +551,7 @@ const Buttons = (props) => {
 						color="secondary"
 						variant="contained"
 						type="submit"
-						disabled={!form.isValid || form.isValidating}
+						disabled={!form.isValid || form.isValidating || !form.dirty}
 					>
 						Save
 					</Button>

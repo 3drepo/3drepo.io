@@ -21,11 +21,8 @@ import Button from '@mui/material/Button';
 import DialogBase from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
-import V4CloseIcon from '@mui/icons-material/Close';
-import V5CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { ConditionalV5Wrapper } from '@/v5/ui/v4Adapter/conditionalV5Container.component';
+import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { V4DialogsAdapter } from '@/v5/ui/v4Adapter/dialogs/v4DialogsAdapter.component';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { IDialogConfig } from '../../../../../modules/dialog/dialog.redux';
@@ -45,8 +42,6 @@ interface IProps {
 export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref: Ref<HTMLDivElement>) => {
 	const [isOpen, setIsOpen] = useState(true);
 	const [closeDisabled, setCloseDisabled] = useState(false);
-
-	const CloseIcon = isV5() ? V5CloseIcon : V4CloseIcon;
 
 	useEffect(() => {
 		if (props.config && props.config.logError) {
@@ -141,13 +136,13 @@ export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref: Ref<HTM
 	};
 
 	return (
-		<ConditionalV5Wrapper v5Wrapper={V4DialogsAdapter}>
+		<V4DialogsAdapter>
 			<DialogBase {...DialogProps} ref={ref} open={isOpen} onClose={handleClose}>
 					<DialogTitle>{title}{renderCloseButton()}</DialogTitle>
 					{renderContent(content && !DialogTemplate)}
 					{renderTemplate(!!DialogTemplate)}
 					{renderActions(content && onCancel && !props.config.onConfirm)}
 			</DialogBase>
-		</ConditionalV5Wrapper>
+		</V4DialogsAdapter>
     );
 });

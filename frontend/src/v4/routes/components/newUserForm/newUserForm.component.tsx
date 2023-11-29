@@ -26,7 +26,6 @@ import Grid from '@mui/material/Grid';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import { JobItem } from '../jobItem/jobItem.component';
 import { UserItem } from '../userItem/userItem.component';
@@ -170,7 +169,7 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 	public handleSubmit = async () => {
 		this.handleSave();
 		await new Promise(r => setTimeout(r, 200));
-		if (isV5() && !this.state.userNotExists) {
+		if (!this.state.userNotExists) {
 			this.props.onCancel();
 		}
 	};

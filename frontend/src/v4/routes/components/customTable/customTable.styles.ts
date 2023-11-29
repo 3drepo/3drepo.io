@@ -14,8 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { isV5 } from '@/v4/helpers/isV5';
 import { memoize } from 'lodash';
 import styled from 'styled-components';
 
@@ -103,12 +101,6 @@ export const Body = styled.div`
 	[data-simplebar='init'] {
 		height: 100%;
 	}
-
-	${!isV5() && isWindows(isFirefox(`
-		.simplebar-content {
-			padding-bottom: 34px !important;
-		}
-	`))}
 `;
 
 export const BodyWrapper = styled.div`

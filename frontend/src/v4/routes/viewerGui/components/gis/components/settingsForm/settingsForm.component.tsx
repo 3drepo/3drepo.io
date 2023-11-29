@@ -112,7 +112,7 @@ export const SettingsForm = (props) => {
 						type="submit"
 						aria-label="Save"
 						color="secondary"
-						disabled={!form.isValid || form.isValidating || readOnly }
+						disabled={!form.isValid || form.isValidating || readOnly || !form.dirty}
 						variant="fab"
 					>
 						<SaveIcon />

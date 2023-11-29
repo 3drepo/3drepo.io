@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cond, get, mapValues, stubTrue } from 'lodash';
+import { cond, mapValues, stubTrue } from 'lodash';
 
 import { getAPIUrl } from '@/v4/services/api/default';
 import {
@@ -32,19 +32,8 @@ import { UserReference } from './userReference/userReference.component';
 
 const withStyledRenderer = (StyledComponent) => (props) => <StyledComponent {...props} />;
 
-const EnhancedParagraph = (props) => {
-	const { children } = props;
-	const hasSingleChild = children && children[0] && children.length === 1;
-	const hasInvalidStructure = hasSingleChild && get(children, ['0', 'props', 'values'], null);
-	if (hasInvalidStructure) {
-		return children;
-	}
-
-	return <Paragraph {...props} />;
-};
-
 const EnhancedLink = ({ children, href, ...props }) => {
-	const value = get(children, ['0', 'props', 'value'], children);
+	const value = children?.[0];
 
 	return cond([
 		[() => value.match(MARKDOWN_RESOURCE_REFERENCE_REGEX), () => {
@@ -67,9 +56,9 @@ const EnhancedImage = ({ children, src, ...props }) => cond([
 	[stubTrue, () => (<Image src={src} enablePreview enablePlaceholder />)]
 ])(src);
 
-export const renderers = mapValues({
-	link: EnhancedLink,
-	paragraph: EnhancedParagraph,
+export const components = mapValues({
+	a: EnhancedLink,
+	p: Paragraph,
 	blockquote: Blockquote,
-	image: EnhancedImage,
+	img: EnhancedImage,
 }, withStyledRenderer);

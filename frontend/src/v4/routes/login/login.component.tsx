@@ -93,7 +93,7 @@ export class Login extends PureComponent<IProps, IState> {
 			<Field render={({ form }) => (
 				<SubmitButton
 					pending={this.props.isPending}
-					disabled={!form.isValid || form.isValidating}
+					disabled={!form.isValid || form.isValidating || !form.dirty}
 				>
 					Log in
 				</SubmitButton>
@@ -124,7 +124,7 @@ export class Login extends PureComponent<IProps, IState> {
 							initialValues={{ login, password }}
 							onSubmit={this.handleSubmit}
 							validationSchema={LoginSchema}
-							ref={this.formRef}
+							innerRef={this.formRef}
 						>
 							<Form>
 								<Field name="login" render={({ field }) => (
