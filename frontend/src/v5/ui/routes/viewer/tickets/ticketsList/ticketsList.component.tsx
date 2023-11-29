@@ -34,6 +34,7 @@ import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters, CompletedFilterChip, TicketSearchInput } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
 import { AdditionalProperties } from '../tickets.constants';
+import { hasDefaultPin } from '../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 
 type TicketsListProps = {
 	tickets: ITicket[];
@@ -85,7 +86,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		const wasSelected = ticketIsSelected(ticket);
 
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
-		TicketsCardActionsDispatchers.setSelectedTicketPin(ticket._id);
+		TicketsCardActionsDispatchers.setSelectedTicketPin(hasDefaultPin(ticket) ? ticket._id : null);
 
 		if (wasSelected) {
 			TicketsCardActionsDispatchers.openTicket(ticket._id);
