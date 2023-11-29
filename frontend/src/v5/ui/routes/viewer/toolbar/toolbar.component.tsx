@@ -34,7 +34,7 @@ import { ClipIcons } from './icons/multioptionIcons/clipIcons.component';
 
 export const Toolbar = () => {
 	const hasOverrides = GroupsHooksSelectors.selectGroupsColourOverrides()?.length > 0;
-	const hasHighlightedObjects = !!TreeHooksSelectors.selectActiveNode();
+	const hasHighlightedObjects = !!TreeHooksSelectors.selectFullySelectedNodesIds().length;
 	const hasHiddenObjects = TreeHooksSelectors.selectHasHiddenNodes();
 	const hasMetaData = ModelHooksSelectors.selectMetaKeysExist();
 	const showBIMPanel = BimHooksSelectors.selectIsActive();
