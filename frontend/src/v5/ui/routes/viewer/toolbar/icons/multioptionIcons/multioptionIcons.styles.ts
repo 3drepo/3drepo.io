@@ -22,7 +22,7 @@ import { BaseIcon } from '../baseIcon.component';
 export const MultiOptionIconContainer = styled.div`
 	position: relative;
 
-	& > ${Container}::after {
+	& > ${/* sc-selector */Container}::after {
 		content: '';
 		position: absolute;
 		height: 0;
@@ -33,11 +33,11 @@ export const MultiOptionIconContainer = styled.div`
 		border: solid 3px ${({ theme }) => theme.palette.base.main};
 	}
 
-	&:hover > ${Container}::after {
+	&:hover > ${/* sc-selector */Container}::after {
 		border-color: ${({ theme }) => theme.palette.primary.contrast};
 	}
 
-	:is(&, &:hover) > ${Container}::after {
+	:is(&, &:hover) > ${/* sc-selector */Container}::after {
 		border-left-color: transparent;
 		border-bottom-color: transparent;
 	}
@@ -52,7 +52,7 @@ export const FloatingIconsContainer = styled.div`
 
 export const FloatingIcon = styled(BaseIcon)`
 	border-radius: 50%;
-	box-shadow: 0px 2px 7px 0px #00000026;
+	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
 	background-color: ${({ theme }) => theme.palette.secondary.main};
 	margin-bottom: 10px;
 `;

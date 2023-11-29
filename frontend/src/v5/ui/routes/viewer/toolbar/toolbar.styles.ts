@@ -57,11 +57,11 @@ export const ExpansionContainer = styled.div`
 	padding-left: 31px;
 	margin-left: -45px;
 
-	&:has(> ${ExpansionBlock}:not([hidden])) {
+	&:has(> ${/* sc-selector */ExpansionBlock}:not([hidden])) {
 		padding-left: 45px;
 	}
 
-	& > ${ExpansionBlock}:not([hidden]) ~ ${ExpansionBlock}:not([hidden]) {
+	& > ${/* sc-selector */ExpansionBlock}:not([hidden]) ~ ${/* sc-selector */ExpansionBlock}:not([hidden]) {
 		border-left: solid 1px ${({ theme }) => theme.palette.base.light};
 	}
 `;
