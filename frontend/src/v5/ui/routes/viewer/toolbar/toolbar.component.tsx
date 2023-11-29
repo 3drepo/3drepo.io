@@ -48,7 +48,7 @@ export const Toolbar = () => {
 		if (visible) {
 			MeasurementsActionsDispatchers.setMeasureMode('');
 		}
-	}
+	};
 
 	return (
 		<MainContainer>
