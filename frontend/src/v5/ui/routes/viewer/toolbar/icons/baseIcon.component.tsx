@@ -21,10 +21,10 @@ type BaseIconProps = {
 	hidden?: boolean;
 	disabled?: boolean;
 	selected?: boolean;
-	onClick: () => void;
+	onClick?: () => void;
 	children: any;
 	title: string;
-}
+};
 export const BaseIcon = ({ children, title, ...props }: BaseIconProps) => (
 	<Tooltip title={title}>
 		<Container {...props}>
