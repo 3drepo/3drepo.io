@@ -17,21 +17,43 @@
 
 import styled from 'styled-components';
 
-export const Container = styled.div`
-	background-color: ${({ theme }) => theme.palette.secondary.main};
-	border: solid 1px ${({ theme }) => theme.palette.secondary.light};
-	height: 48px;
+export const MainContainer = styled.div`
 	border-radius: 24px;
-	padding: 0 10px;
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: space-evenly;
-
 	position: absolute;
 	bottom: 35px;
 	left: 50%;
 	transform: translateX(-50%);
 	pointer-events: all;
 	z-index: 1;
+	display: flex;
+	flex-direction: row;
+
+	& > * {
+		border: solid 1px ${({ theme }) => theme.palette.secondary.light};
+		height: 48px;
+		border-radius: 24px;
+		padding: 0 10px;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-evenly;
+	}
+`;
+
+export const AlwaysOnContainer = styled.div`
+	background-color: ${({ theme }) => theme.palette.secondary.main};
+	z-index: 1;
+`;
+
+export const ExpansionBlock = styled.div`
+	display: inherit;
+	overflow: hidden;
+`;
+
+export const ExpansionContainer = styled.div`
+	background-color: ${({ theme }) => theme.palette.secondary.mid};
+	transition: all .3s;
+	width: fit-content;
+	padding-left: 31px;
+	margin-left: -45px;
 `;

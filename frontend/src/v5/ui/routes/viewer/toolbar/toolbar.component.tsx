@@ -18,53 +18,68 @@ import HomeIcon from '@assets/icons/viewer/home.svg';
 import CoordinatesIcon from '@assets/icons/viewer/coordinates.svg';
 import FocusIcon from '@assets/icons/viewer/focus.svg';
 import InfoIcon from '@assets/icons/viewer/info.svg';
+import ClearOverridesIcon from '@assets/icons/viewer/clear_overrides.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { BimHooksSelectors, ModelHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Container } from './toolbar.styles';
+import { GroupsActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { BimHooksSelectors, GroupsHooksSelectors, ModelHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
+import { AlwaysOnContainer, ExpansionBlock, ExpansionContainer, MainContainer } from './toolbar.styles';
 import { NavigationIcons } from './icons/multioptionIcons/navigationIcons.component';
 import { ProjectionIcons } from './icons/multioptionIcons/projectionIcons.component';
 import { BaseIcon } from './icons/baseIcon.component';
 import { ClipIcons } from './icons/multioptionIcons/clipIcons.component';
 
 export const Toolbar = () => {
+	const hasOverrides = GroupsHooksSelectors.selectGroupsColourOverrides()?.length > 0;
 	const hasMetaData = ModelHooksSelectors.selectMetaKeysExist();
 	const showBIMPanel = BimHooksSelectors.selectIsActive();
 	const showCoords = ViewerGuiHooksSelectors.selectIsCoordViewActive();
 
 	return (
-		<Container>
-			<BaseIcon
-				onClick={() => ViewerGuiActionsDispatchers.goToHomeView()}
-				title={formatMessage({ id: 'viewer.toolbar.icon.home', defaultMessage: 'Home' })}
-			>
-				<HomeIcon />
-			</BaseIcon>
-			<ProjectionIcons />
-			<NavigationIcons />
-			<BaseIcon
-				onClick={() => ViewerGuiActionsDispatchers.setIsFocusMode(true)}
-				title={formatMessage({ id: 'viewer.toolbar.icon.focus', defaultMessage: 'Focus' })}
-			>
-				<FocusIcon />
-			</BaseIcon>
-			<ClipIcons />
-			<BaseIcon
-				selected={showCoords}
-				onClick={() => ViewerGuiActionsDispatchers.setCoordView(!showCoords)}
-				title={formatMessage({ id: 'viewer.toolbar.icon.coordinates', defaultMessage: 'Show Coordinates' })}
-			>
-				<CoordinatesIcon />
-			</BaseIcon>
-			{hasMetaData && (
+		<MainContainer>
+			<AlwaysOnContainer>
 				<BaseIcon
-					selected={showBIMPanel}
-					onClick={() => ViewerGuiActionsDispatchers.setPanelVisibility(!showBIMPanel)}
-					title={formatMessage({ id: 'viewer.toolbar.icon.bim', defaultMessage: 'BIM' })}
+					onClick={ViewerGuiActionsDispatchers.goToHomeView}
+					title={formatMessage({ id: 'viewer.toolbar.icon.home', defaultMessage: 'Home' })}
 				>
-					<InfoIcon />
+					<HomeIcon />
 				</BaseIcon>
-			)}
-		</Container>
+				<ProjectionIcons />
+				<NavigationIcons />
+				<BaseIcon
+					onClick={() => ViewerGuiActionsDispatchers.setIsFocusMode(true)}
+					title={formatMessage({ id: 'viewer.toolbar.icon.focus', defaultMessage: 'Focus' })}
+				>
+					<FocusIcon />
+				</BaseIcon>
+				<ClipIcons />
+				<BaseIcon
+					selected={showCoords}
+					onClick={() => ViewerGuiActionsDispatchers.setCoordView(!showCoords)}
+					title={formatMessage({ id: 'viewer.toolbar.icon.coordinates', defaultMessage: 'Show Coordinates' })}
+				>
+					<CoordinatesIcon />
+				</BaseIcon>
+				{hasMetaData && (
+					<BaseIcon
+						selected={showBIMPanel}
+						onClick={() => ViewerGuiActionsDispatchers.setPanelVisibility(!showBIMPanel)}
+						title={formatMessage({ id: 'viewer.toolbar.icon.bim', defaultMessage: 'BIM' })}
+					>
+						<InfoIcon />
+					</BaseIcon>
+				)}
+			</AlwaysOnContainer>
+			<ExpansionContainer>
+				<ExpansionBlock hidden={!hasOverrides}>
+					<BaseIcon
+						hidden={!hasOverrides}
+						onClick={GroupsActionsDispatchers.clearColorOverrides}
+						title={formatMessage({ id: 'viewer.toolbar.icon.clearOverrides', defaultMessage: 'Clear Overrides' })}
+					>
+						<ClearOverridesIcon />
+					</BaseIcon>
+				</ExpansionBlock>
+			</ExpansionContainer>
+		</MainContainer>
 	);
 };
