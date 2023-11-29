@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, createRef } from 'react';
-import RemoveCircle from '@mui/icons-material/RemoveCircle';
 import BinIcon from '@assets/icons/outlined/delete-outlined.svg';
 import {
 	cond,
@@ -30,7 +29,6 @@ import {
 } from 'lodash';
 import ReactDOM from 'react-dom';
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
@@ -190,7 +188,7 @@ export class Users extends PureComponent<IProps, IState> {
 				},
 				{},
 				{
-					Icon: isV5() ? BinIcon : RemoveCircle,
+					Icon: BinIcon,
 					disabled: user.isCurrentUser || user.isOwner,
 					onClick: this.onRemove.bind(null, user.user)
 				}

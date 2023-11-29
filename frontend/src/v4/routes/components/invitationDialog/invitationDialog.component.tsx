@@ -27,7 +27,6 @@ import { isEmpty } from 'lodash';
 import { useEffect, useRef } from 'react';
 import * as yup from 'yup';
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { MODEL_ROLES_LIST, MODEL_ROLES_TYPES } from '../../../constants/model-permissions';
 import { schema } from '../../../services/validation';
 import { CellSelect } from '../customTable/components/cellSelect/cellSelect.component';
@@ -128,11 +127,6 @@ export const InvitationDialog = (props: IProps) => {
 				{projects.map(({ project, isAdmin }, index) => (
 					<div key={index}>
 						<ProjectConfig>
-							{!isV5() && (
-								<IconButton onClick={() => remove(index)} size="large">
-									<RemoveIcon />
-								</IconButton>
-							)}
 							<Field name={`permissions.${index}.project`} render={({ field }) => (
 								<FormControl>
 									<InputLabel shrink htmlFor={`project-${index}`}>Project</InputLabel>
@@ -146,11 +140,9 @@ export const InvitationDialog = (props: IProps) => {
 									/>
 								</FormControl>
 							)} />
-							{isV5() && (
-								<IconButton onClick={() => remove(index)} size="large">
-									<RemoveIcon />
-								</IconButton>
-							)}
+							<IconButton onClick={() => remove(index)} size="large">
+								<RemoveIcon />
+							</IconButton>
 							{project && (
 								<Field name={`permissions.${index}.isAdmin`} render={({ field, form }) => (
 									<ProjectCheckboxContainer
@@ -237,7 +229,7 @@ export const InvitationDialog = (props: IProps) => {
 					<CancelButton
 						type="button"
 						color="primary"
-						{...(isV5() && { variant: 'text' })}
+						variant="text"
 						onClick={props.handleClose}
 					>
 						Cancel
@@ -271,7 +263,7 @@ export const InvitationDialog = (props: IProps) => {
 			isInitialValid={getIsInitialValid()}
 			initialValues={{ email: props.email, job: props.job, isAdmin: props.isAdmin, permissions: props.permissions }}
 			render={renderForm}
-			ref={formRef}
+			innerRef={formRef}
 		/>
 	);
 };

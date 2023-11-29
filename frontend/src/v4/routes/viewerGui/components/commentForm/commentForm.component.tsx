@@ -27,7 +27,6 @@ import { Field, Formik } from 'formik';
 import { lowerCase, pick, values as _values } from 'lodash';
 import { createRef, forwardRef, PureComponent } from 'react';
 import * as Yup from 'yup';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import { RISK_CONSEQUENCES, RISK_LIKELIHOODS } from '../../../../constants/risks';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -124,7 +123,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 
 	get commentPlaceholder() {
 		if (this.props.canComment) {
-			return isV5() ? 'Leave a comment' : 'Write your comment here';
+			return 'Leave a comment';
 		}
 		return 'You are not able to comment';
 	}
@@ -398,7 +397,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 			<Container>
 				{this.renderCreatedScreenshot(Boolean(this.state.newScreenshot))}
 				<Formik
-					ref={formRef}
+					innerRef={formRef}
 					initialValues={{ comment: '', screenshot: this.state.newScreenshot }}
 					validationSchema={CommentSchema}
 					onSubmit={this.handleSave}
@@ -419,7 +418,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 										color="secondary"
 										type="submit"
 										size="small"
-										disabled={!hideComment && (!canComment || !form.isValid || form.isValidating) || form.isSubmitting}
+										disabled={!hideComment && (!canComment || !form.isValid || form.isValidating || !form.dirty) || form.isSubmitting}
 										aria-label="Add new comment"
 										pending={isPending}
 										id={this.props.parentId + (this.props.hideComment ? '-save-button' : '-add-new-comment')}

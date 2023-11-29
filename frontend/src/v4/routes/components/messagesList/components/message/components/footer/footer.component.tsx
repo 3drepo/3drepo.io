@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { INTERNAL_IMAGE_PATH_PREFIX, VIEWPOINT_ID_REGEX } from '../../../../../../../helpers/comments';
 import { DATE_TIME_FORMAT, SHORT_DATE_FORMAT, SHORT_TIME_FORMAT } from '../../../../../../../services/formatting/formatDate';
 import { COMMENT_FIELD_NAME } from '../../../../../../viewerGui/components/commentForm/commentForm.constants';
@@ -36,7 +35,7 @@ export const Footer = ({ name, created, formRef, commentRef, comment, ...props }
 	const handleReplayButtonClick = () => {
 		const commentForm = formRef.current;
 		const commentTextarea = commentRef.current.textareaRef;
-		const currentFormCommentValue = commentForm.state.values[COMMENT_FIELD_NAME];
+		const currentFormCommentValue = commentForm.values[COMMENT_FIELD_NAME];
 
 		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}@${name} `);
 		commentTextarea.focus();
@@ -48,7 +47,7 @@ export const Footer = ({ name, created, formRef, commentRef, comment, ...props }
 	const handleQuoteButtonClick = () => {
 		const commentForm = formRef.current;
 		const commentTextarea = commentRef.current.textareaRef;
-		const currentFormCommentValue = commentForm.state.values[COMMENT_FIELD_NAME];
+		const currentFormCommentValue = commentForm.values[COMMENT_FIELD_NAME];
 		const additionalNewLine = (!currentFormCommentValue || currentFormCommentValue.endsWith(`\n`)) ? '' : `  \n`;
 		let quoteComment = '';
 
@@ -76,16 +75,10 @@ export const Footer = ({ name, created, formRef, commentRef, comment, ...props }
         <Container>
 			<Username>{name}</Username>
 			<Date>
-				{isV5() ? (
-					<>
-						<span>at </span>
-						<DateTime value={created} format={SHORT_TIME_FORMAT} />
-						<span> on </span>
-						<DateTime value={created} format={SHORT_DATE_FORMAT} />
-					</>
-				) : (
-					<DateTime value={created} format={DATE_TIME_FORMAT} />
-				)}
+				<span>at </span>
+				<DateTime value={created} format={SHORT_TIME_FORMAT} />
+				<span> on </span>
+				<DateTime value={created} format={SHORT_DATE_FORMAT} />
 			</Date>
 			<IconButton onClick={handleQuoteButtonClick} size="large">
 				<StyledQuoteIcon />

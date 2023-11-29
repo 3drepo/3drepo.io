@@ -151,7 +151,7 @@ export class PasswordChange extends PureComponent<IProps, IState> {
 						<Field render={({ form }) => (
 							<SubmitButton
 								pending={this.props.isPending}
-								disabled={!form.isValid || form.isValidating}
+								disabled={!form.isValid || form.isValidating || !form.dirty}
 							>
 								Set password
 							</SubmitButton>
