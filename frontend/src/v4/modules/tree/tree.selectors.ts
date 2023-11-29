@@ -112,7 +112,9 @@ export const selectVisibilityMap = createSelector(
 export const selectHasHiddenNodes = createSelector(
 	selectTreeNodesList, selectVisibilityMap, selectDataRevision,
 	(nodesList = [], visibilityMap = {}) => {
-		if (!nodesList.length || _.isEmpty(visibilityMap)) return null;
+		if (!nodesList.length || _.isEmpty(visibilityMap)) {
+			return null;
+		}
 		const { childrenIds } = nodesList[0];
 		return childrenIds.some((id) => visibilityMap[id] !== VISIBILITY_STATES.VISIBLE);
 	}
