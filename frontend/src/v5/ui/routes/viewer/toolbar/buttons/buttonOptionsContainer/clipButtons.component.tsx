@@ -30,7 +30,7 @@ import { ToolbarButton } from '../toolbarButton.component';
 
 const clipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.clip', defaultMessage: 'Clip' });
 const startBoxClipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.clip.startBox', defaultMessage: 'Start Box Clip' });
-const startSingleClipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.clip.clip', defaultMessage: 'Start Single Clip' });
+const startSingleClipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.clip.startSingle', defaultMessage: 'Start Single Clip' });
 export const ClipButtons = () => {
 	const [expanded, setExpanded] = useState(false);
 	const clipMode: ClipMode = ViewerGuiHooksSelectors.selectClippingMode();
