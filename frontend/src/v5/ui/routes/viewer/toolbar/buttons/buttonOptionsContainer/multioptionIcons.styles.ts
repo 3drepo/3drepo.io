@@ -16,10 +16,10 @@
  */
 
 import styled from 'styled-components';
-import { Container } from '../baseIcon.styles';
-import { BaseIcon } from '../baseIcon.component';
+import { Container } from '../toolbarButton.styles';
+import { ToolbarButton } from '../toolbarButton.component';
 
-export const MultiOptionIconContainer = styled.div`
+export const ButtonOptionsContainer = styled.div`
 	position: relative;
 
 	& > ${/* sc-selector */Container}::after {
@@ -43,14 +43,14 @@ export const MultiOptionIconContainer = styled.div`
 	}
 `;
 
-export const FloatingIconsContainer = styled.div`
+export const FloatingButtonsContainer = styled.div`
 	display: flex;
 	flex-direction: column;
 	position: absolute;
 	bottom: 40px;
 `;
 
-export const FloatingIcon = styled(BaseIcon)`
+export const FloatingButton = styled(ToolbarButton)`
 	border-radius: 50%;
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
 	background-color: ${({ theme }) => theme.palette.secondary.main};

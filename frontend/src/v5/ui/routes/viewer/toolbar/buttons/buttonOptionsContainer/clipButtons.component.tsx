@@ -24,14 +24,14 @@ import { ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
-import { MultiOptionIconContainer, FloatingIconsContainer, FloatingIcon } from './multioptionIcons.styles';
+import { ButtonOptionsContainer, FloatingButtonsContainer, FloatingButton } from './multioptionIcons.styles';
 import { ClipMode } from '../../toolbar.types';
-import { BaseIcon } from '../baseIcon.component';
+import { ToolbarButton } from '../toolbarButton.component';
 
 const clipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.clip', defaultMessage: 'Clip' });
 const startBoxClipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.clip.startBox', defaultMessage: 'Start Box Clip' });
 const startSingleClipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.clip.clip', defaultMessage: 'Start Single Clip' });
-export const ClipIcons = () => {
+export const ClipButtons = () => {
 	const [expanded, setExpanded] = useState(false);
 	const clipMode: ClipMode = ViewerGuiHooksSelectors.selectClippingMode();
 
@@ -48,28 +48,28 @@ export const ClipIcons = () => {
 	if (clipMode === null) {
 		return (
 			<ClickAwayListener onClickAway={() => setExpanded(false)}>
-				<MultiOptionIconContainer>
+				<ButtonOptionsContainer>
 					{expanded && (
-						<FloatingIconsContainer>
-							<FloatingIcon onClick={() => setMode('BOX')} title={startBoxClipTooltipText}>
+						<FloatingButtonsContainer>
+							<FloatingButton onClick={() => setMode('BOX')} title={startBoxClipTooltipText}>
 								<ClipBoxIcon />
-							</FloatingIcon>
-							<FloatingIcon onClick={() => setMode('SINGLE')} title={startSingleClipTooltipText}>
+							</FloatingButton>
+							<FloatingButton onClick={() => setMode('SINGLE')} title={startSingleClipTooltipText}>
 								<ClipPlaneIcon />
-							</FloatingIcon>
-						</FloatingIconsContainer>
+							</FloatingButton>
+						</FloatingButtonsContainer>
 					)}
-					<BaseIcon onClick={() => setExpanded(!expanded)} title={clipTooltipText}>
+					<ToolbarButton onClick={() => setExpanded(!expanded)} title={clipTooltipText}>
 						<ClipPlaneIcon />
-					</BaseIcon>
-				</MultiOptionIconContainer>
+					</ToolbarButton>
+				</ButtonOptionsContainer>
 			</ClickAwayListener>
 		);
 	}
 
 	return (
-		<BaseIcon title={clipTooltipText} selected>
+		<ToolbarButton title={clipTooltipText} selected>
 			{clipMode === 'SINGLE' ? <ClipPlaneIcon /> : <ClipBoxIcon />}
-		</BaseIcon>
+		</ToolbarButton>
 	);
 };

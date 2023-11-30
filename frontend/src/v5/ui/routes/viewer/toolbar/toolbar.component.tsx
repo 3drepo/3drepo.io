@@ -27,10 +27,10 @@ import { BimActionsDispatchers, GroupsActionsDispatchers, MeasurementsActionsDis
 import { BimHooksSelectors, GroupsHooksSelectors, ModelHooksSelectors, TreeHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { AlwaysOnContainer, ExpansionBlock, ExpansionContainer, MainContainer } from './toolbar.styles';
-import { NavigationIcons } from './icons/multioptionIcons/navigationIcons.component';
-import { ProjectionIcons } from './icons/multioptionIcons/projectionIcons.component';
-import { BaseIcon } from './icons/baseIcon.component';
-import { ClipIcons } from './icons/multioptionIcons/clipIcons.component';
+import { NavigationButtons } from './buttons/buttonOptionsContainer/navigationButtons.component';
+import { ProjectionButtons } from './buttons/buttonOptionsContainer/projectionButtons.component';
+import { ToolbarButton } from './buttons/toolbarButton.component';
+import { ClipButtons } from './buttons/buttonOptionsContainer/clipButtons.component';
 
 export const Toolbar = () => {
 	const hasOverrides = GroupsHooksSelectors.selectGroupsColourOverrides()?.length > 0;
@@ -53,69 +53,69 @@ export const Toolbar = () => {
 	return (
 		<MainContainer>
 			<AlwaysOnContainer>
-				<BaseIcon
+				<ToolbarButton
 					onClick={ViewerGuiActionsDispatchers.goToHomeView}
 					title={formatMessage({ id: 'viewer.toolbar.icon.home', defaultMessage: 'Home' })}
 				>
 					<HomeIcon />
-				</BaseIcon>
-				<ProjectionIcons />
-				<NavigationIcons />
-				<BaseIcon
+				</ToolbarButton>
+				<ProjectionButtons />
+				<NavigationButtons />
+				<ToolbarButton
 					onClick={() => ViewerGuiActionsDispatchers.setIsFocusMode(true)}
 					title={formatMessage({ id: 'viewer.toolbar.icon.focus', defaultMessage: 'Focus' })}
 				>
 					<FocusIcon />
-				</BaseIcon>
-				<ClipIcons />
-				<BaseIcon
+				</ToolbarButton>
+				<ClipButtons />
+				<ToolbarButton
 					selected={showCoords}
 					onClick={() => ViewerGuiActionsDispatchers.setCoordView(!showCoords)}
 					title={formatMessage({ id: 'viewer.toolbar.icon.coordinates', defaultMessage: 'Show Coordinates' })}
 				>
 					<CoordinatesIcon />
-				</BaseIcon>
-				<BaseIcon
+				</ToolbarButton>
+				<ToolbarButton
 					hidden={!hasMetaData}
 					selected={showBIMPanel}
 					onClick={() => setBIMPanelVisibililty(!showBIMPanel)}
 					title={formatMessage({ id: 'viewer.toolbar.icon.bim', defaultMessage: 'BIM' })}
 				>
 					<InfoIcon />
-				</BaseIcon>
+				</ToolbarButton>
 			</AlwaysOnContainer>
 			<ExpansionContainer>
 				<ExpansionBlock hidden={!hasOverrides}>
-					<BaseIcon
+					<ToolbarButton
 						hidden={!hasOverrides}
 						onClick={GroupsActionsDispatchers.clearColorOverrides}
 						title={formatMessage({ id: 'viewer.toolbar.icon.clearOverrides', defaultMessage: 'Clear Overrides' })}
 					>
 						<ClearOverridesIcon />
-					</BaseIcon>
+					</ToolbarButton>
 				</ExpansionBlock>
 				<ExpansionBlock hidden={!hasHighlightedObjects && !hasHiddenObjects}>
-					<BaseIcon
+					<ToolbarButton
 						hidden={!hasHiddenObjects}
 						onClick={TreeActionsDispatchers.showAllNodes}
 						title={formatMessage({ id: 'viewer.toolbar.icon.showAll', defaultMessage: 'Show All' })}
 					>
 						<EyeShowIcon />
-					</BaseIcon>
-					<BaseIcon
+					</ToolbarButton>
+					<ToolbarButton
 						hidden={!hasHighlightedObjects}
 						onClick={TreeActionsDispatchers.hideSelectedNodes}
 						title={formatMessage({ id: 'viewer.toolbar.icon.hide', defaultMessage: 'Hide' })}
 					>
 						<EyeHideIcon />
-					</BaseIcon>
-					<BaseIcon
+					</ToolbarButton>
+					<ToolbarButton
 						hidden={!hasHighlightedObjects}
 						onClick={() => TreeActionsDispatchers.isolateSelectedNodes(undefined)}
 						title={formatMessage({ id: 'viewer.toolbar.icon.isolate', defaultMessage: 'Isolate' })}
 					>
 						<EyeIsolateIcon />
-					</BaseIcon>
+					</ToolbarButton>
 				</ExpansionBlock>
 			</ExpansionContainer>
 		</MainContainer>

@@ -28,13 +28,13 @@ import { useParams } from 'react-router-dom';
 import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { INITIAL_HELICOPTER_SPEED, MAX_HELICOPTER_SPEED, MIN_HELICOPTER_SPEED } from '@/v4/constants/viewer';
-import { MultiOptionIconContainer, FloatingIconsContainer, FloatingIcon } from './multioptionIcons.styles';
+import { ButtonOptionsContainer, FloatingButtonsContainer, FloatingButton } from './multioptionIcons.styles';
 import { NavigationMode } from '../../toolbar.types';
-import { BaseIcon } from '../baseIcon.component';
+import { ToolbarButton } from '../toolbarButton.component';
 
 const turntableTooltipText = formatMessage({ id: 'viewer.toolbar.icon.navigation.turntable', defaultMessage: 'Turntable' });
 const helicopterTooltipText = formatMessage({ id: 'viewer.toolbar.icon.navigation.helicopter', defaultMessage: 'Helicopter View' });
-export const NavigationIcons = () => {
+export const NavigationButtons = () => {
 	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
 	const [expanded, setExpanded] = useState(false);
 	const navigationMode: NavigationMode = ViewerGuiHooksSelectors.selectNavigationMode();
@@ -48,35 +48,35 @@ export const NavigationIcons = () => {
 	if (navigationMode === 'TURNTABLE') {
 		return (
 			<ClickAwayListener onClickAway={() => setExpanded(false)}>
-				<MultiOptionIconContainer>
+				<ButtonOptionsContainer>
 					{expanded && (
-						<FloatingIconsContainer>
-							<FloatingIcon onClick={() => setMode('HELICOPTER')} title={helicopterTooltipText}>
+						<FloatingButtonsContainer>
+							<FloatingButton onClick={() => setMode('HELICOPTER')} title={helicopterTooltipText}>
 								<HelicopterIcon />
-							</FloatingIcon>
-						</FloatingIconsContainer>
+							</FloatingButton>
+						</FloatingButtonsContainer>
 					)}
-					<BaseIcon onClick={() => setExpanded(!expanded)} title={turntableTooltipText}>
+					<ToolbarButton onClick={() => setExpanded(!expanded)} title={turntableTooltipText}>
 						<RotateIcon />
-					</BaseIcon>
-				</MultiOptionIconContainer>
+					</ToolbarButton>
+				</ButtonOptionsContainer>
 			</ClickAwayListener>
 		);
 	}
 
 	return (
 		<ClickAwayListener onClickAway={() => setExpanded(false)}>
-			<MultiOptionIconContainer>
+			<ButtonOptionsContainer>
 				{expanded && (
-					<FloatingIconsContainer>
-						<FloatingIcon
+					<FloatingButtonsContainer>
+						<FloatingButton
 							onClick={() => ViewerGuiActionsDispatchers.resetHelicopterSpeed(teamspace, containerOrFederation)}
 							title={formatMessage({ id: 'viewer.toolbar.icon.navigation.helicopter.resetSpeed', defaultMessage: 'Reset speed' })}
 							disabled={helicopterSpeed === INITIAL_HELICOPTER_SPEED}
 						>
 							<ResetIcon />
-						</FloatingIcon>
-						<FloatingIcon
+						</FloatingButton>
+						<FloatingButton
 							onClick={() => ViewerGuiActionsDispatchers.increaseHelicopterSpeed(teamspace, containerOrFederation)}
 							title={
 								formatMessage({
@@ -87,8 +87,8 @@ export const NavigationIcons = () => {
 							disabled={helicopterSpeed === MAX_HELICOPTER_SPEED}
 						>
 							<PlusIcon />
-						</FloatingIcon>
-						<FloatingIcon
+						</FloatingButton>
+						<FloatingButton
 							onClick={() => ViewerGuiActionsDispatchers.decreaseHelicopterSpeed(teamspace, containerOrFederation)}
 							title={
 								formatMessage({
@@ -99,16 +99,16 @@ export const NavigationIcons = () => {
 							disabled={helicopterSpeed === MIN_HELICOPTER_SPEED}
 						>
 							<MinusIcon />
-						</FloatingIcon>
-						<FloatingIcon onClick={() => setMode('TURNTABLE')} title={turntableTooltipText}>
+						</FloatingButton>
+						<FloatingButton onClick={() => setMode('TURNTABLE')} title={turntableTooltipText}>
 							<RotateIcon />
-						</FloatingIcon>
-					</FloatingIconsContainer>
+						</FloatingButton>
+					</FloatingButtonsContainer>
 				)}
-				<BaseIcon onClick={() => setExpanded(!expanded)} title={helicopterTooltipText}>
+				<ToolbarButton onClick={() => setExpanded(!expanded)} title={helicopterTooltipText}>
 					<HelicopterIcon />
-				</BaseIcon>
-			</MultiOptionIconContainer>
+				</ToolbarButton>
+			</ButtonOptionsContainer>
 		</ClickAwayListener>
 	);
 };

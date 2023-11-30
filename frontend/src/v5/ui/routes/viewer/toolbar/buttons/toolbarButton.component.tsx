@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Tooltip } from '@mui/material';
-import { Container } from './baseIcon.styles';
+import { Container } from './toolbarButton.styles';
 
-type BaseIconProps = {
+type ToolbarButtonProps = {
 	hidden?: boolean;
 	disabled?: boolean;
 	selected?: boolean;
@@ -25,7 +25,7 @@ type BaseIconProps = {
 	children: any;
 	title: string;
 };
-export const BaseIcon = ({ children, title, ...props }: BaseIconProps) => (
+export const ToolbarButton = ({ children, title, ...props }: ToolbarButtonProps) => (
 	<Tooltip title={title}>
 		<Container {...props}>
 			{children}

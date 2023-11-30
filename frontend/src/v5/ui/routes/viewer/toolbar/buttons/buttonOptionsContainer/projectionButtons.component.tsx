@@ -22,13 +22,13 @@ import { formatMessage } from '@/v5/services/intl';
 import { useState } from 'react';
 import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
-import { MultiOptionIconContainer, FloatingIconsContainer, FloatingIcon } from './multioptionIcons.styles';
+import { ButtonOptionsContainer, FloatingButtonsContainer, FloatingButton } from './multioptionIcons.styles';
 import { ProjectionMode } from '../../toolbar.types';
-import { BaseIcon } from '../baseIcon.component';
+import { ToolbarButton } from '../toolbarButton.component';
 
 const orthographicTooltipText = formatMessage({ id: 'viewer.toolbar.icon.projection.orthographic', defaultMessage: 'Orthographic View' });
 const perspectiveTooltipText = formatMessage({ id: 'viewer.toolbar.icon.projection.perspective', defaultMessage: 'Perspective View' });
-export const ProjectionIcons = () => {
+export const ProjectionButtons = () => {
 	const projectionMode = ViewerGuiHooksSelectors.selectProjectionMode();
 	const [expanded, setExpanded] = useState(false);
 
@@ -40,36 +40,36 @@ export const ProjectionIcons = () => {
 	if (projectionMode === 'orthographic') {
 		return (
 			<ClickAwayListener onClickAway={() => setExpanded(false)}>
-				<MultiOptionIconContainer>
+				<ButtonOptionsContainer>
 					{expanded && (
-						<FloatingIconsContainer>
-							<FloatingIcon onClick={() => setMode('perspective')} title={perspectiveTooltipText}>
+						<FloatingButtonsContainer>
+							<FloatingButton onClick={() => setMode('perspective')} title={perspectiveTooltipText}>
 								<PerspectiveIcon />
-							</FloatingIcon>
-						</FloatingIconsContainer>
+							</FloatingButton>
+						</FloatingButtonsContainer>
 					)}
-					<BaseIcon onClick={() => setExpanded(!expanded)} title={orthographicTooltipText}>
+					<ToolbarButton onClick={() => setExpanded(!expanded)} title={orthographicTooltipText}>
 						<OrthogonalIcon />
-					</BaseIcon>
-				</MultiOptionIconContainer>
+					</ToolbarButton>
+				</ButtonOptionsContainer>
 			</ClickAwayListener>
 		);
 	}
 
 	return (
 		<ClickAwayListener onClickAway={() => setExpanded(false)}>
-			<MultiOptionIconContainer>
+			<ButtonOptionsContainer>
 				{expanded && (
-					<FloatingIconsContainer hidden={!expanded}>
-						<FloatingIcon onClick={() => setMode('orthographic')} title={orthographicTooltipText}>
+					<FloatingButtonsContainer hidden={!expanded}>
+						<FloatingButton onClick={() => setMode('orthographic')} title={orthographicTooltipText}>
 							<OrthogonalIcon />
-						</FloatingIcon>
-					</FloatingIconsContainer>
+						</FloatingButton>
+					</FloatingButtonsContainer>
 				)}
-				<BaseIcon onClick={() => setExpanded(!expanded)} title={perspectiveTooltipText}>
+				<ToolbarButton onClick={() => setExpanded(!expanded)} title={perspectiveTooltipText}>
 					<PerspectiveIcon />
-				</BaseIcon>
-			</MultiOptionIconContainer>
+				</ToolbarButton>
+			</ButtonOptionsContainer>
 		</ClickAwayListener>
 	);
 };
