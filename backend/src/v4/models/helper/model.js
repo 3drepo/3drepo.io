@@ -653,11 +653,7 @@ function importModel(account, model, username, modelSetting, source, data) {
 }
 
 async function isSubModel(account, model) {
-
-	// Old schema support, to remove in 5.8
-
 	const query = {$or: [
-		{ subModels: model },
 		{ "subModels._id": model }
 	]};
 

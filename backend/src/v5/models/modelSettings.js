@@ -75,17 +75,6 @@ Models.getModelByQuery = async (ts, query, projection) => {
 		throw templates.modelNotFound;
 	}
 
-	// For supporting old schema, to remove next release (5.8.0)
-	if (res.subModels) {
-		res.subModels = res.subModels.map((value) => {
-			if (isString(value)) {
-				return { _id: value };
-			}
-
-			return value;
-		});
-	}
-
 	return res;
 };
 
