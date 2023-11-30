@@ -56,7 +56,7 @@ export const NavigationButtons = () => {
 							</FloatingButton>
 						</FloatingButtonsContainer>
 					)}
-					<ToolbarButton onClick={() => setExpanded(!expanded)} title={turntableTooltipText}>
+					<ToolbarButton onClick={() => setExpanded(!expanded)} title={!expanded ? turntableTooltipText : ''}>
 						<RotateIcon />
 					</ToolbarButton>
 				</ButtonOptionsContainer>
@@ -105,7 +105,7 @@ export const NavigationButtons = () => {
 						</FloatingButton>
 					</FloatingButtonsContainer>
 				)}
-				<ToolbarButton onClick={() => setExpanded(!expanded)} title={helicopterTooltipText}>
+				<ToolbarButton onClick={() => setExpanded(!expanded)} title={!expanded ? helicopterTooltipText : ''}>
 					<HelicopterIcon />
 				</ToolbarButton>
 			</ButtonOptionsContainer>

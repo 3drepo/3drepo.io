@@ -59,7 +59,7 @@ export const ClipButtons = () => {
 							</FloatingButton>
 						</FloatingButtonsContainer>
 					)}
-					<ToolbarButton onClick={() => setExpanded(!expanded)} title={clipTooltipText}>
+					<ToolbarButton onClick={() => setExpanded(!expanded)} title={!expanded ? clipTooltipText : ''}>
 						<ClipPlaneIcon />
 					</ToolbarButton>
 				</ButtonOptionsContainer>
