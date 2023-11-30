@@ -54,6 +54,7 @@ interface IGroupsActionCreators {
 	setActiveGroup: (group: any) => Action;
 	showDetails: (group: any) => Action;
 	clearColorOverrides: () => Action;
+	clearSelectionHighlights: (shouldClearTree?: boolean) => Action;
 }
 
 interface ISequencesActionCreators {

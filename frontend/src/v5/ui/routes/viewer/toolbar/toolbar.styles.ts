@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import PlusIcon from '@assets/icons/viewer/plus.svg';
 
 export const Container = styled.div`
 	border-radius: 24px;
@@ -37,6 +38,10 @@ export const Container = styled.div`
 		flex-direction: row;
 		align-items: center;
 		justify-content: space-evenly;
+	}
+
+	* {
+		transition: all .3s;
 	}
 `;
 
