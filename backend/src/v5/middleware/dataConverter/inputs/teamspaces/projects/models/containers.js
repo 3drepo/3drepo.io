@@ -30,9 +30,9 @@ Containers.canDeleteContainer = async (req, res, next) => {
 	try {
 		const { teamspace, container } = req.params;
 
-		const query = { $or: [
-			{ 'subModels._id': container },
-		] };
+		const query = {
+			'subModels._id': container,
+		};
 
 		const fed = await getModelByQuery(teamspace, query, { _id: 1, name: 1 }).catch(() => {});
 		if (fed) {

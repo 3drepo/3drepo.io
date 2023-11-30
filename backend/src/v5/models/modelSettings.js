@@ -21,7 +21,6 @@ const db = require('../handler/db');
 const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateUUIDString } = require('../utils/helper/uuids');
-const { isString } = require('../utils/helper/typeCheck');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
