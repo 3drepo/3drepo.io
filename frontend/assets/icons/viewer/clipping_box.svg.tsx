@@ -21,8 +21,7 @@ type IProps = {
 export default ({ className }: IProps) => (
 	<svg width="18" height="19" viewBox="0 0 18 19" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
 		<g id="slice-box-o">
-			<g
-				className="higlight">
+			<g className="highlight">
 				<path
 					d="M2.43952 12.1139V12.5215H3.70515V12.1139H2.43952Z"
 					fill="currentColor"
