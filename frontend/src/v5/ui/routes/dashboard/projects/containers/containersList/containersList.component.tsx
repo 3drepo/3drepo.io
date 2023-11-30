@@ -41,7 +41,8 @@ import { SearchContext, SearchContextType } from '@controls/search/searchContext
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 import { UploadFileForm } from '../uploadFileForm/uploadFileForm.component';
-import { SkeletonListItem } from './skeletonListItem';
+import { ContainerListItemLoading } from './containerListItem/containerListItemLoading.component';
+// import { SkeletonListItem } from './skeletonListItem';
 
 interface IContainersList {
 	emptyMessage: ReactNode;
@@ -128,7 +129,7 @@ export const ContainersList = ({
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
 						sortedList.map((container, index) => (container.hasStatsPending ? (
-							<SkeletonListItem delay={index / 10} key={container._id} />
+							<ContainerListItemLoading  delay={index / 10} container={container} key={container._id} />
 						) : (
 							<ContainerListItem
 								key={container._id}

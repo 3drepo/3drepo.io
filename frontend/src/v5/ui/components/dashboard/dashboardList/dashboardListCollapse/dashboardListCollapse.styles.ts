@@ -15,15 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { Typography } from '@controls/typography';
 import { ChevronButton as ChevronButtonBase } from '@controls/chevronButton';
-
-export const Container = styled.div<{ isLoading?: boolean }>`
-	${({ isLoading }) => isLoading && css`
-		pointer-events: none;
-	`}
-`;
 
 export const ButtonContainer = styled.div`
 	display: flex;

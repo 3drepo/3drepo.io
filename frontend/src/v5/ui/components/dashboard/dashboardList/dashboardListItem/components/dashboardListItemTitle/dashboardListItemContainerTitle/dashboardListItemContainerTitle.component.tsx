@@ -44,14 +44,14 @@ export const DashboardListItemContainerTitle = ({
 
 	const hasRevisions = container.revisionsCount > 0;
 	const linkProps = {
-		to: hasRevisions ? viewerRoute(teamspace, project, container) : '#',
+		to: hasRevisions || container.hasStatsPending ? viewerRoute(teamspace, project, container) : '#',
 		target: openInNewTab ? '_blank' : '_self',
 		rel: 'noopener noreferrer',
 	};
 
 	return (
 		<DashboardListItemTitle
-			subtitle={(
+			subtitle={!container.hasStatsPending && (
 				<LatestRevision
 					name={(
 						<Highlight search={query}>
@@ -71,7 +71,7 @@ export const DashboardListItemContainerTitle = ({
 					<FormattedMessage id="containers.list.item.title.tooltip.empty" defaultMessage="No revisions" />
 				)
 			}
-			disabled={!hasRevisions}
+			disabled={false}
 		>
 			<Link {...linkProps}>
 				<Highlight search={query}>

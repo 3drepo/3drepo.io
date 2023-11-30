@@ -29,9 +29,9 @@ import { ContainerSettingsModal } from '../../../containerSettingsModal/containe
 import { uploadToContainer } from '../../../uploadFileForm/uploadToContainer.component';
 
 type ContainerEllipsisMenuProps = {
-	selected: boolean,
+	selected?: boolean,
 	container: IContainer,
-	onSelectOrToggleItem: (id: string) => void,
+	onSelectOrToggleItem?: (id: string) => void,
 };
 
 export const ContainerEllipsisMenu = ({
@@ -121,12 +121,14 @@ export const ContainerEllipsisMenu = ({
 					container._id,
 				) }}
 			/>
-			<EllipsisMenuItem
-				title={formatMessage(selected
-					? { id: 'containers.ellipsisMenu.hideRevisions', defaultMessage: 'Hide Revisions' }
-					: { id: 'containers.ellipsisMenu.viewRevisions', defaultMessage: 'View Revisions' })}
-				onClick={() => onSelectOrToggleItem(container._id)}
-			/>
+			{onSelectOrToggleItem && (
+				<EllipsisMenuItem
+					title={formatMessage(selected
+						? { id: 'containers.ellipsisMenu.hideRevisions', defaultMessage: 'Hide Revisions' }
+						: { id: 'containers.ellipsisMenu.viewRevisions', defaultMessage: 'View Revisions' })}
+					onClick={() => onSelectOrToggleItem(container._id)}
+				/>
+			)}
 			<EllipsisMenuItem
 				title={formatMessage({
 					id: 'containers.ellipsisMenu.editPermissions',

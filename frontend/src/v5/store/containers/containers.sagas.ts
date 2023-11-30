@@ -65,31 +65,6 @@ export function* removeFavourites({ containerId, teamspace, projectId }: RemoveF
 	}
 }
 
-export function* fetchContainers({ teamspace, projectId }: FetchContainersAction) {
-	try {
-		const { containers }: FetchContainersResponse = yield API.Containers.fetchContainers(teamspace, projectId);
-		const containersWithoutStats = prepareContainersData(containers);
-		const storedContainers = yield select(selectContainers);
-		const isPending = yield select(selectIsListPending);
-
-		// Only update if theres is new data
-		if (isPending || !isEqualWith(storedContainers, containersWithoutStats, compByColum(['_id', 'name', 'role', 'isFavourite']))) {
-			yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
-		}
-
-		yield all(
-			containers.map(
-				(container) => put(ContainersActions.fetchContainerStats(teamspace, projectId, container._id)),
-			),
-		);
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'containers.fetchAll.error', defaultMessage: 'trying to fetch containers' }),
-			error,
-		}));
-	}
-}
-
 export function* fetchContainerStats({ teamspace, projectId, containerId }: FetchContainerStatsAction) {
 	try {
 		const stats = yield API.Containers.fetchContainerStats(teamspace, projectId, containerId);
@@ -108,6 +83,31 @@ export function* fetchContainerStats({ teamspace, projectId, containerId }: Fetc
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.fetchStats.error', defaultMessage: 'trying to fetch containers details' }),
+			error,
+		}));
+	}
+}
+
+export function* fetchContainers({ teamspace, projectId }: FetchContainersAction) {
+	try {
+		const { containers }: FetchContainersResponse = yield API.Containers.fetchContainers(teamspace, projectId);
+		const containersWithoutStats = prepareContainersData(containers);
+		const storedContainers = yield select(selectContainers);
+		const isPending = yield select(selectIsListPending);
+
+		// Only update if theres is new datad
+		if (isPending || !isEqualWith(storedContainers, containersWithoutStats, compByColum(['_id', 'name', 'role', 'isFavourite']))) {
+			yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
+		}
+
+		// yield all(
+		// 	containers.map(
+		// 		(container) => put(ContainersActions.fetchContainerStats(teamspace, projectId, container._id)),
+		// 	),d
+		// ); 
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'containers.fetchAll.error', defaultMessage: 'trying to fetch containers' }),
 			error,
 		}));
 	}
