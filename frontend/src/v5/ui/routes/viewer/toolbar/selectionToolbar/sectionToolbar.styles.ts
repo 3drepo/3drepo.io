@@ -17,30 +17,23 @@
 
 import styled from 'styled-components';
 
-export const Container = styled.div`
-	border-radius: 24px;
-	position: absolute;
-	bottom: 35px;
-	left: 50%;
-	transform: translateX(-50%);
-	pointer-events: all;
-	z-index: 1;
-	display: flex;
-	flex-direction: row;
-
-	& > * {
-		border: solid 1px ${({ theme }) => theme.palette.secondary.light};
-		height: 48px;
-		border-radius: 24px;
-		padding: 0 10px;
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: space-evenly;
-	}
+export const Section = styled.div`
+	display: inherit;
+	overflow: hidden;
 `;
 
-export const MainToolbar = styled.div`
-	background-color: ${({ theme }) => theme.palette.secondary.main};
-	z-index: 1;
+export const Container = styled.div`
+	background-color: ${({ theme }) => theme.palette.secondary.mid};
+	transition: all .3s;
+	width: fit-content;
+	padding-left: 31px;
+	margin-left: -45px;
+
+	&:has(> ${/* sc-selector */Section}:not([hidden])) {
+		padding-left: 45px;
+	}
+
+	& > ${/* sc-selector */Section}:not([hidden]) ~ ${/* sc-selector */Section}:not([hidden]) {
+		border-left: solid 1px ${({ theme }) => theme.palette.base.light};
+	}
 `;

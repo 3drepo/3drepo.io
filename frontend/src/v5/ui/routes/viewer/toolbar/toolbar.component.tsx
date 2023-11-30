@@ -18,24 +18,18 @@ import HomeIcon from '@assets/icons/viewer/home.svg';
 import CoordinatesIcon from '@assets/icons/viewer/coordinates.svg';
 import FocusIcon from '@assets/icons/viewer/focus.svg';
 import InfoIcon from '@assets/icons/viewer/info.svg';
-import ClearOverridesIcon from '@assets/icons/viewer/clear_overrides.svg';
-import EyeHideIcon from '@assets/icons/viewer/eye_hide.svg';
-import EyeShowIcon from '@assets/icons/viewer/eye_show.svg';
-import EyeIsolateIcon from '@assets/icons/viewer/eye_isolate.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { BimActionsDispatchers, GroupsActionsDispatchers, MeasurementsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { BimHooksSelectors, GroupsHooksSelectors, ModelHooksSelectors, TreeHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
+import { BimActionsDispatchers, MeasurementsActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { BimHooksSelectors, ModelHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
-import { AlwaysOnContainer, ExpansionBlock, ExpansionContainer, MainContainer } from './toolbar.styles';
+import { MainToolbar, Container } from './toolbar.styles';
 import { NavigationButtons } from './buttons/buttonOptionsContainer/navigationButtons.component';
 import { ProjectionButtons } from './buttons/buttonOptionsContainer/projectionButtons.component';
 import { ToolbarButton } from './buttons/toolbarButton.component';
 import { ClipButtons } from './buttons/buttonOptionsContainer/clipButtons.component';
+import { SectionToolbar } from './selectionToolbar/selectionToolbar.component';
 
 export const Toolbar = () => {
-	const hasOverrides = GroupsHooksSelectors.selectGroupsColourOverrides()?.length > 0;
-	const hasHighlightedObjects = !!TreeHooksSelectors.selectFullySelectedNodesIds().length;
-	const hasHiddenObjects = TreeHooksSelectors.selectHasHiddenNodes();
 	const hasMetaData = ModelHooksSelectors.selectMetaKeysExist();
 	const showBIMPanel = BimHooksSelectors.selectIsActive();
 	const showCoords = ViewerGuiHooksSelectors.selectIsCoordViewActive();
@@ -51,8 +45,8 @@ export const Toolbar = () => {
 	};
 
 	return (
-		<MainContainer>
-			<AlwaysOnContainer>
+		<Container>
+			<MainToolbar>
 				<ToolbarButton
 					onClick={ViewerGuiActionsDispatchers.goToHomeView}
 					title={formatMessage({ id: 'viewer.toolbar.icon.home', defaultMessage: 'Home' })}
@@ -83,41 +77,8 @@ export const Toolbar = () => {
 				>
 					<InfoIcon />
 				</ToolbarButton>
-			</AlwaysOnContainer>
-			<ExpansionContainer>
-				<ExpansionBlock hidden={!hasOverrides}>
-					<ToolbarButton
-						hidden={!hasOverrides}
-						onClick={GroupsActionsDispatchers.clearColorOverrides}
-						title={formatMessage({ id: 'viewer.toolbar.icon.clearOverrides', defaultMessage: 'Clear Overrides' })}
-					>
-						<ClearOverridesIcon />
-					</ToolbarButton>
-				</ExpansionBlock>
-				<ExpansionBlock hidden={!hasHighlightedObjects && !hasHiddenObjects}>
-					<ToolbarButton
-						hidden={!hasHiddenObjects}
-						onClick={TreeActionsDispatchers.showAllNodes}
-						title={formatMessage({ id: 'viewer.toolbar.icon.showAll', defaultMessage: 'Show All' })}
-					>
-						<EyeShowIcon />
-					</ToolbarButton>
-					<ToolbarButton
-						hidden={!hasHighlightedObjects}
-						onClick={TreeActionsDispatchers.hideSelectedNodes}
-						title={formatMessage({ id: 'viewer.toolbar.icon.hide', defaultMessage: 'Hide' })}
-					>
-						<EyeHideIcon />
-					</ToolbarButton>
-					<ToolbarButton
-						hidden={!hasHighlightedObjects}
-						onClick={() => TreeActionsDispatchers.isolateSelectedNodes(undefined)}
-						title={formatMessage({ id: 'viewer.toolbar.icon.isolate', defaultMessage: 'Isolate' })}
-					>
-						<EyeIsolateIcon />
-					</ToolbarButton>
-				</ExpansionBlock>
-			</ExpansionContainer>
-		</MainContainer>
+			</MainToolbar>
+			<SectionToolbar />
+		</Container>
 	);
 };
