@@ -91,6 +91,10 @@ export const ContainerListItemLoading = ({
 		}
 	};
 
+	useEffect( () => {
+		ContainersActionsDispatchers.fetchContainerStats(teamspace, project, container._id);
+	}, []);
+
 	return (
 		<DashboardListItem>
 			<DashboardListItemRow>

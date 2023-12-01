@@ -65,7 +65,7 @@ export const DashboardListItemContainerTitle = ({
 			)}
 			selected={isSelected}
 			tooltipTitle={
-				hasRevisions ? (
+				container.hasStatsPending || hasRevisions ? (
 					<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
 				) : (
 					<FormattedMessage id="containers.list.item.title.tooltip.empty" defaultMessage="No revisions" />
