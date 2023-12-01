@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import _, { orderBy, values } from 'lodash';
+import { isEmpty, orderBy, values } from 'lodash';
 import { createSelector } from 'reselect';
+import { selectUsername } from '@/v5/store/currentUser/currentUser.selectors';
 
 import { NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
 import { mergeArrays } from '../../helpers/arrays';
 import { searchByFilters } from '../../helpers/searching';
 import { calculateTotalMeshes } from '../../helpers/tree';
-
 import TreeProcessing from './treeProcessing/treeProcessing';
 
 export const selectTreeDomain = (state) => ({...state.tree});
@@ -107,17 +107,6 @@ export const selectDefaultVisibilityMap = createSelector(
 export const selectVisibilityMap = createSelector(
 	selectTreeProccessing, selectDataRevision,
 	(treeProcessingData) => treeProcessingData.visibilityMap
-);
-
-export const selectHasHiddenNodes = createSelector(
-	selectTreeNodesList, selectVisibilityMap, selectDataRevision,
-	(nodesList = [], visibilityMap = {}) => {
-		if (!nodesList.length || _.isEmpty(visibilityMap)) {
-			return null;
-		}
-		const { childrenIds } = nodesList[0];
-		return childrenIds.some((id) => visibilityMap[id] !== VISIBILITY_STATES.VISIBLE);
-	}
 );
 
 export const selectNodesIndexesMap = createSelector(
@@ -337,4 +326,23 @@ export const selectVisibleTreeNodesIds = createSelector(
 
 export const selectIsTreeProcessed = createSelector(
 	selectTreeDomain, (state) => state.isTreeProcessed
+);
+
+
+export const selectModelHasHiddenNodes = createSelector(
+	(_, model) => model,
+	selectUsername,
+	selectTreeNodesList,
+	selectVisibilityMap,
+	selectDefaultVisibilityMap,
+	selectMeshesByNodeId,
+	selectHiddenGeometryVisible,
+	selectDataRevision,
+	(model, username, nodesList = [], visibilityMap = {}, defaultVisibilityMap = {}, meshesByNodeId, isHiddenGeometryVisible) => {
+		if (!model || !username || !nodesList.length || isEmpty(visibilityMap)) {
+			return null;
+		}
+		const meshes = meshesByNodeId[`${username}@${model}`][nodesList[0]._id];
+		return meshes.some((id) => (visibilityMap[id] !== VISIBILITY_STATES.VISIBLE && (isHiddenGeometryVisible || defaultVisibilityMap[id] !== VISIBILITY_STATES.INVISIBLE)));
+	}
 );

@@ -21,13 +21,15 @@ import EyeIsolateIcon from '@assets/icons/viewer/eye_isolate.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { GroupsActionsDispatchers, TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { GroupsHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useParams } from 'react-router-dom';
 import { Section, Container } from './sectionToolbar.styles';
 import { ToolbarButton } from '../buttons/toolbarButton.component';
 
 export const SectionToolbar = () => {
+	const { containerOrFederation } = useParams();
 	const hasOverrides = GroupsHooksSelectors.selectGroupsColourOverrides()?.length > 0;
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectFullySelectedNodesIds().length;
-	const hasHiddenObjects = TreeHooksSelectors.selectHasHiddenNodes();
+	const hasHiddenObjects = TreeHooksSelectors.selectModelHasHiddenNodes(containerOrFederation);
 
 	return (
 		<Container>
