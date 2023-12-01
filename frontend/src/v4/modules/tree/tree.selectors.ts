@@ -328,9 +328,8 @@ export const selectIsTreeProcessed = createSelector(
 	selectTreeDomain, (state) => state.isTreeProcessed
 );
 
-
 export const selectModelHasHiddenNodes = createSelector(
-	(_, model) => model,
+	selectSubModelsRootNodes,
 	selectUsername,
 	selectTreeNodesList,
 	selectVisibilityMap,
@@ -338,11 +337,23 @@ export const selectModelHasHiddenNodes = createSelector(
 	selectMeshesByNodeId,
 	selectHiddenGeometryVisible,
 	selectDataRevision,
-	(model, username, nodesList = [], visibilityMap = {}, defaultVisibilityMap = {}, meshesByNodeId, isHiddenGeometryVisible) => {
-		if (!model || !username || !nodesList.length || isEmpty(visibilityMap)) {
+	(subModelsRootNodes, username, nodesList = [], visibilityMap = {}, defaultVisibilityMap = {}, meshesByNodeId, isHiddenGeometryVisible) => {
+		if (!username || !nodesList.length || isEmpty(visibilityMap)) {
 			return null;
 		}
-		const meshes = meshesByNodeId[`${username}@${model}`][nodesList[0]._id];
+
+		let meshes;
+		const [root] = nodesList;
+		if (isEmpty(subModelsRootNodes)) {
+			meshes = meshesByNodeId[root.namespacedId][root._id];
+		} else {
+			const subModelsMeshesById: Array<Record<string, string[]>> = Object.entries(subModelsRootNodes).flatMap(([modelId, node]: any) => (
+				node.children.length ? meshesByNodeId[`${root.teamspace}@${modelId}`] : []
+			));
+			meshes = root.subTreeRoots.flatMap((modelId) => (
+				subModelsMeshesById.flatMap((subModelMeshes) => subModelMeshes[modelId] || [])
+			));
+		}
 		return meshes.some((id) => (visibilityMap[id] !== VISIBILITY_STATES.VISIBLE && (isHiddenGeometryVisible || defaultVisibilityMap[id] !== VISIBILITY_STATES.INVISIBLE)));
 	}
 );
