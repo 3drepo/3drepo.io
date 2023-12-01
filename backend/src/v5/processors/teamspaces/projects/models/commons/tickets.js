@@ -189,7 +189,7 @@ const filterToProjection = (filter) => {
 					const moduleName = name.split('.')[0];
 					const moduleProp = name.split('.')[1];
 					if (moduleName && moduleProp) {
-						updatedObj[`modules.${moduleName}.${moduleProp}`] = 1;
+						updatedObj[`modules.${name}`] = 1;
 					}
 				} else {
 					updatedObj[`properties.${name}`] = 1;

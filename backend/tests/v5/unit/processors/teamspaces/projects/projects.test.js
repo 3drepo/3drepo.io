@@ -170,8 +170,7 @@ const testGetAllTemplates = () => {
 				.resolves.toEqual(expectedOutput);
 
 			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledTimes(1);
-			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, showDeprecated,
-				{ name: 1, code: 1, deprecated: 1, properties: 1, modules: 1, config: 1 });
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, showDeprecated, undefined);
 		});
 	});
 };
