@@ -390,7 +390,8 @@
 		"bin": "text/plain",
 		"json": "application/json",
 		"png": "image/png",
-		"jpg": "image/jpg"
+		"jpg": "image/jpg",
+		"unity3d": "application/octet-stream"
 	};
 
 	const genResponseLogging = ({status, code}, {contentLength}, {session, startTime, method, originalUrl} = {}) => {
@@ -463,6 +464,10 @@
 				} else {
 					// Force compression on everything else
 					res.setHeader("Content-Type", "application/json");
+				}
+
+				if(req.params.format === "unity3d") {
+					res.setHeader("Content-Encoding", "gzip");
 				}
 
 				// res.setHeader("Content-Length", extraInfo.length);
