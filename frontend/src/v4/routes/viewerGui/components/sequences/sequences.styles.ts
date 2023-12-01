@@ -21,7 +21,6 @@ import { Grid, IconButton, Input } from '@mui/material';
 import Slider from '@mui/material/Slider';
 import DotIcon from '@mui/icons-material/FiberManualRecord';
 import PlayIcon from '@assets/icons/filled/play-filled.svg';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import {
 	VIEWER_PANELS,
@@ -45,7 +44,7 @@ export const SequencesContainer = styled(ViewerPanel).attrs({
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.SEQUENCES]}px;
 `;
 
-export const SequenceItemIcon =  styled(isV5() ? PlayIcon : SequencesIcon)`
+export const SequenceItemIcon =  styled(PlayIcon)`
 	&& {
 		font-size: 67px;
 		margin-right: 13px;

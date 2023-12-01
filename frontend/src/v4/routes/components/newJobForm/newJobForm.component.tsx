@@ -21,7 +21,6 @@ import Grid from '@mui/material/Grid';
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import { Field, Form, Formik } from 'formik';
 import { ColorPicker } from '../colorPicker/colorPicker.component';
@@ -118,8 +117,8 @@ export class NewJobForm extends PureComponent<IProps, any> {
 							<SaveButton
 								type="submit"
 								variant="contained"
-								onClick={isV5() ? this.props.onCancel : undefined}
-								color={isV5() ? 'primary' : 'secondary'}
+								onClick={this.props.onCancel}
+								color="primary"
 								disabled={!form.isValid || form.isValidating || !form.dirty}
 								aria-label="Add new job"
 							>

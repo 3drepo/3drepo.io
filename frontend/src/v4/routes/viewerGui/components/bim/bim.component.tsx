@@ -24,7 +24,6 @@ import { isEmpty } from 'lodash';
 import { BIM_ACTIONS_ITEMS, BIM_ACTIONS_MENU } from '@/v4/constants/bim';
 import { getFilters, sortMetadata, transformMetadataToNestedList } from '@/v4/helpers/bim';
 import { renderWhenTrue } from '@/v4/helpers/rendering';
-import { isV5 } from '@/v4/helpers/isV5';
 import { IMetaRecord } from '@/v4/modules/bim/bim.redux';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import {
@@ -174,7 +173,7 @@ export class Bim extends PureComponent<IProps, any> {
 					value={Number(showStarred)}
 					onChange={this.handleTabChange}
 				>
-					<Tab label={isV5() ? 'All data' : 'All'} />
+					<Tab label="All data" />
 					<Tab label="Starred" />
 				</Tabs>
 				<ViewerPanelContent>

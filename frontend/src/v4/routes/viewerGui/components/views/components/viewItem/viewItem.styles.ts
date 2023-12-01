@@ -19,12 +19,10 @@ import { IconButton, MenuItem, TextField, Button } from '@mui/material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import SaveIcon from '@mui/icons-material/Save';
 import ShareIcon from '@mui/icons-material/Share';
 
 import { Form } from 'formik';
 import styled, { css } from 'styled-components';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import { FONT_WEIGHT } from '../../../../../../styles';
 import { COLOR } from '../../../../../../styles';
@@ -44,7 +42,7 @@ export const ViewpointItem = styled(MenuItem)<{ active?: boolean }>`
 		border-bottom: 1px solid ${COLOR.BLACK_20};
 		box-sizing: border-box;
 
-		${({ active }) => isV5() && `
+		${({ active }) => `
 			padding: ${active ? '12px 15px' : '12px 40px 12px 15px'};
 		`}
 	}
@@ -102,22 +100,6 @@ export const StyledCancelIcon = styled(CancelIcon)`
 	&& {
 		${IconStyles};
 		margin-right: 14px;
-	}
-`;
-
-export const StyledSaveIcon = styled(SaveIcon)`
-	&& {
-		${IconStyles};
-	}
-`;
-
-export const SaveIconButton = styled(IconButton)`
-	&& {
-		padding: 0;
-
-		&:hover {
-			background-color: transparent;
-		}
 	}
 `;
 

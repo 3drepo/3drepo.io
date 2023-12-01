@@ -19,13 +19,14 @@ import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
 import { useEffect } from 'react';
 import axios from 'axios';
 import { useHistory, useLocation } from 'react-router-dom';
-import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { AuthActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isNotLoggedIn } from '@/v5/validation/errors.helpers';
 import { addParams, pathName } from '@/v5/helpers/url.helper';
 import { Route, RouteProps } from './route.component';
 import { useSSOParams } from '../sso.hooks';
 import { postActions } from '../api/sso';
+import { enableKickedOutEvent } from '../realtime/auth.events';
 
 const cleanSSOParams = (location) => {
 	const searchParams = new URLSearchParams(location.search);
@@ -49,6 +50,20 @@ const WrapAuthenticationRedirect = ({ children }) => {
 			history.replace(url);
 		}
 	}, [isAuthenticated, authenticationFetched]);
+
+	useEffect(() => {
+		if (!authenticationFetched) {
+			AuthActionsDispatchers.authenticate();
+		}
+	}, [authenticationFetched]);
+
+	useEffect(() => {
+		if (isAuthenticated) {
+			TeamspacesActionsDispatchers.fetch();
+		}
+	}, [isAuthenticated]);
+
+	useEffect(enableKickedOutEvent);
 
 	if (!isAuthenticated) {
 		return (<></>);
