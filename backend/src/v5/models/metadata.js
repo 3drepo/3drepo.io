@@ -31,8 +31,8 @@ const constructQueriesFromRules = (revId, rules) => {
 	return { positiveQuery, negativeQuery };
 };
 
-Metadata.repoIdsToExternalIds = (teamspace, model, ids, externalIdName) => {
-	const query = { type: 'meta', parents: { $in: ids }, 'metadata.key': externalIdName };
+Metadata.sharedIdsToExternalIds = (teamspace, model, sharedIds, externalIdName) => {
+	const query = { type: 'meta', parents: { $in: sharedIds }, 'metadata.key': externalIdName };
 	const project = { metadata: { $elemMatch: { key: externalIdName } } };
 
 	return db.find(teamspace, collectionName(model), query, project);
@@ -79,6 +79,12 @@ Metadata.getMetadataByRules = async (teamspace, project, model, revId, rules, pr
 	]);
 
 	return { matched, unwanted };
+};
+
+Metadata.getMetadataByValues = (teamspace, model, revId, key, values, projection) => {
+	const query = { type: 'meta', 'metadata.key': key, 'metadata.value': { $in: values }, rev_id: revId };
+
+	return db.find(teamspace, collectionName(model), query, projection);
 };
 
 module.exports = Metadata;

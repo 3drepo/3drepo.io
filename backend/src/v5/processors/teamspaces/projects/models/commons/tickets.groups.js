@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /**
  *  Copyright (C) 2023 3D Repo Ltd
  *
@@ -17,10 +18,10 @@
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
+const { getMetadataByRules, getMetadataByValues, sharedIdsToExternalIds } = require('../../../../../models/metadata');
+const { getNodesByByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { getFile } = require('../../../../../services/filesManager');
 const { getLatestRevision } = require('../../../../../models/revisions');
-const { getMetadataByRules, repoIdsToExternalIds } = require('../../../../../models/metadata');
-const { getNodesBySharedIds } = require('../../../../../models/scenes');
 
 const TicketGroups = {};
 
@@ -79,25 +80,29 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules) 
 	return { container: model, _ids: Object.values(matchedMeshes) };
 };
 
-const convertObjectIds = async (teamspace, model, group) => {
-	const convertedObjects = await Promise.all(group.objects.map(async (obj) => {
-		const convertedObject = obj;
+const convert3dRepoGuidsToExternalIds = async (teamspace, project, model, objects) => {
+	const convertedObjects = await Promise.all(objects.map(async (obj) => {
+		const convertedObject = { ...obj };
 
 		if (obj._ids) {
 			let externalIds;
 			let externalIdsName;
 
-			externalIds = await repoIdsToExternalIds(teamspace, model, obj._ids, 'IFC GUID');
+			let shared_ids = await getNodesByByIds(teamspace, project, model, obj._ids,
+				{ _id: 0, shared_id: 1 });
+			shared_ids = shared_ids.map((s) => s.shared_id);
+
+			externalIds = await sharedIdsToExternalIds(teamspace, model, shared_ids, 'IFC GUID');
 			if (externalIds?.length) {
-				externalIdsName = 'ifcGuids';
+				externalIdsName = 'ifc_guids';
 			} else {
-				externalIds = await repoIdsToExternalIds(teamspace, model, obj._ids, 'Element ID');
+				externalIds = await sharedIdsToExternalIds(teamspace, model, shared_ids, 'Element ID');
 				if (externalIds?.length) {
 					externalIdsName = 'revitIds';
 				}
 			}
 
-			if (externalIds.length) {
+			if (externalIds?.length) {
 				delete convertedObject._ids;
 				convertedObject[externalIdsName] = externalIds.map((g) => g.metadata[0].value);
 			}
@@ -106,18 +111,69 @@ const convertObjectIds = async (teamspace, model, group) => {
 		return convertedObject;
 	}));
 
-	return { ...group, objects: convertedObjects };
+	return convertedObjects;
+};
+
+const convertExternalIdsTo3dRepoGuids = async (teamspace, project, model, revId, objects) => {
+	const convertedObjects = await Promise.all(objects.map(async (obj) => {
+		if (obj._ids) {
+			return obj;
+		}
+
+		const convertedObject = { ...obj };
+
+		let revision = revId;
+		if (!revision) {
+			try {
+				const rev = await getLatestRevision(teamspace, model, { _id: 1 });
+				revision = rev._id;
+			} catch (err) {
+				return convertedObject;
+			}
+		}
+
+		let metadata;
+		if (obj.revitIds) {
+			metadata = await getMetadataByValues(teamspace, model, revision, 'Element ID', obj.revitIds, { parents: 1 });
+			delete convertedObject.revitIds;
+		} else if (obj.ifc_guids) {
+			metadata = await getMetadataByValues(teamspace, model, revision, 'IFC GUID', obj.ifc_guids, { parents: 1 });
+			delete convertedObject.ifc_guids;
+		}
+
+		const nodes = await getNodesBySharedIds(teamspace, project, model, revision,
+			metadata.flatMap(({ parents }) => parents), { _id: 1 });
+
+		convertedObject._ids = nodes.map(({ _id }) => _id);
+
+		return convertedObject;
+	}));
+
+	return convertedObjects;
 };
 
 TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
-	const convertedGroups = await Promise.all(groups.map((g) => convertObjectIds(teamspace, model, g)));
+	const convertedGroups = await Promise.all(groups.map(
+		async (group) => {
+			const objects = await convert3dRepoGuidsToExternalIds(teamspace, project, model, group.objects);
+			return { ...group, objects };
+		}));
 
 	await addGroups(teamspace, project, model, ticket, convertedGroups);
 };
 
-TicketGroups.updateTicketGroup = updateGroup;
+TicketGroups.updateTicketGroup = async (teamspace, project, model, ticket, groupId, data, author) => {
+	const convertedData = { ...data };
 
-TicketGroups.getTicketGroupById = async (teamspace, project, model, revId, ticket, groupId, containers) => {
+	if (data.objects) {
+		convertedData.objects = await convert3dRepoGuidsToExternalIds(teamspace, project, model, data.objects);
+	}
+
+	await updateGroup(teamspace, project, model, ticket, groupId, convertedData, author);
+};
+
+TicketGroups.getTicketGroupById = async (teamspace, project, model, revId, ticket, groupId, containers,
+	convertTo3DRepoGuids) => {
 	const group = await getGroupById(teamspace, project, model, ticket, groupId);
 
 	if (group.rules) {
@@ -131,6 +187,10 @@ TicketGroups.getTicketGroupById = async (teamspace, project, model, revId, ticke
 				return objs._ids.length ? objs : [];
 			}),
 		)).flat();
+	}
+
+	if (convertTo3DRepoGuids) {
+		group.objects = await convertExternalIdsTo3dRepoGuids(teamspace, project, model, revId, group.objects);
 	}
 
 	return group;
