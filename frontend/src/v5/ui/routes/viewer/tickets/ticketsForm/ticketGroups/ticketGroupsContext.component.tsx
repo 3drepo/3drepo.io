@@ -28,8 +28,8 @@ type TicketGroupsContextComponentProps = {
 	children: any,
 	onSelectedGroupsChange?: (indexes: number[]) => void,
 	onDeleteGroups?: (indexes: number[]) => void,
-	onEditGroup?: (index: number) => void
-	isHighlightedIndex: (index: number) => boolean,
+	onEditGroup?: (index: number) => void,
+	highlightedIndex: number,
 	setHighlightedIndex: (index: number) => void,
 	clearHighlightedIndex: () => void,
 };
@@ -39,6 +39,8 @@ export const TicketGroupsContextComponent = ({
 	onDeleteGroups,
 	onSelectedGroupsChange,
 	onEditGroup,
+	highlightedIndex,
+	clearHighlightedIndex,
 	...contextValue
 }: TicketGroupsContextComponentProps) => {
 	// overrides should arrive already indexed
@@ -62,7 +64,7 @@ export const TicketGroupsContextComponent = ({
 		state ? _.union(checkedIndexes, indexes) : _.without(checkedIndexes, ...indexes),
 	);
 
-	const handleDeleteGroups = (indexesToDelete) => {
+	const handleDeleteGroups = (indexesToDelete: number[]) => {
 		indexesToDelete = sortBy(indexesToDelete).reverse();
 		let newCheckedIndexes = [...checkedIndexes];
 
@@ -75,10 +77,14 @@ export const TicketGroupsContextComponent = ({
 			newCheckedIndexes = newCheckedIndexes.map((i) => (i < indexToDelete ? i : (i - 1)));
 		});
 		setCheckedIndexes(newCheckedIndexes);
+
+		if (highlightedIndex !== -1 && indexesToDelete.includes(highlightedIndex)) {
+			clearHighlightedIndex();
+		}
 	};
 
 	useEffect(() => {
-		if (overrides.length > indexedOverrides.length && contextValue.groupType === 'colored') {
+		if (overrides.length > indexedOverrides.length) {
 			// overrides length increased as new overrides were added
 			const newCheckedIndexes = Array.from({ length: overrides.length - indexedOverrides.length }, (el, i) => i + indexedOverrides.length);
 			setCheckedIndexes(_.union(checkedIndexes, newCheckedIndexes));
@@ -91,7 +97,6 @@ export const TicketGroupsContextComponent = ({
 					deletedIndexes.push(index);
 				}
 			});
-
 			handleDeleteGroups(deletedIndexes);
 		}
 		setIndexedOverrides(_.sortBy(addIndex(overrides || []), 'prefix'));
@@ -113,6 +118,8 @@ export const TicketGroupsContextComponent = ({
 				setCollectionIsChecked,
 				getCollectionState,
 				indexedOverrides,
+				highlightedIndex,
+				clearHighlightedIndex,
 			}}
 		>
 			{children}
