@@ -20,7 +20,7 @@ const SuperTest = require('supertest');
 const FS = require('fs');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
-const { serialiseTemplate } = require('../../../../../../../../src/v5/middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
+const { serialiseTicketTemplate } = require('../../../../../../../../src/v5/middleware/dataConverter/outputs/common/tickets.templates');
 
 const { basePropertyLabels, propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 const { updateOne, findOne } = require(`${src}/handler/db`);
@@ -72,6 +72,11 @@ const testGetAllTemplates = () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);
 			await ServiceHelper.db.createTemplates(teamspace, ticketTemplates);
 		});
+
+		const serialiseTemplate = (template, showDeprecated) => {
+			const fullTemplate = generateFullSchema(template);
+			return serialiseTicketTemplate(fullTemplate, !showDeprecated);
+		};
 
 		const generateTestData = (isFed) => {
 			const modelWithTemplates = isFed ? fed : con;
@@ -505,7 +510,7 @@ const testGetTicketList = () => {
 			await setupBasicData(users, teamspace, project, [con, fed, conNoTickets, fedNoTickets]);
 			await ServiceHelper.db.createTemplates(teamspace, templatesToUse);
 
-			[fed, con].forEach((model) => {
+			await Promise.all([fed, con].map((model) => {
 				const modelType = fed === model ? 'federation' : 'container';
 				const addTicketRoute = (modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${users.tsAdmin.apiKey}`;
 
@@ -518,7 +523,9 @@ const testGetTicketList = () => {
 					// eslint-disable-next-line no-param-reassign
 					ticket._id = res.body._id;
 				});
-			});
+
+				return model;
+			}));
 		});
 
 		const generateTestData = (isFed) => {

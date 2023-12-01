@@ -180,25 +180,21 @@ Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource
 Tickets.getTicketById = getTicketById;
 
 const filterToProjection = (filter) => {
-	const projectionObject = filter
-		? filter.split(',').reduce((obj, name) => {
-			const updatedObj = { ...obj };
+	const projectionObject = {};
 
-			if (name) {
-				if (name.includes('.')) {
-					const moduleName = name.split('.')[0];
-					const moduleProp = name.split('.')[1];
-					if (moduleName && moduleProp) {
-						updatedObj[`modules.${name}`] = 1;
-					}
-				} else {
-					updatedObj[`properties.${name}`] = 1;
+	filter?.split(',').forEach((name) => {
+		if (name) {
+			if (name.includes('.')) {
+				const moduleName = name.split('.')[0];
+				const moduleProp = name.split('.')[1];
+				if (moduleName && moduleProp) {
+					projectionObject[`modules.${name}`] = 1;
 				}
+			} else {
+				projectionObject[`properties.${name}`] = 1;
 			}
-
-			return updatedObj;
-		}, {})
-		: {};
+		}
+	});
 
 	return projectionObject;
 };
