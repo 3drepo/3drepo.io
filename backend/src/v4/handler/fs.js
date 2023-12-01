@@ -111,7 +111,15 @@ class FSHandler {
 
 	getFile(key) {
 		try {
-			return Promise.resolve(fs.readFileSync(this.getFullPath(key)));
+			return new Promise((resolve, reject) => {
+				fs.readFile(this.getFullPath(key), (err, data) => {
+					if (err === null) {
+						resolve(data);
+					} else {
+						reject(err);
+					}
+				});
+			});
 		} catch (err) {
 			systemLogger.logError("Failed to get file: ", err);
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
