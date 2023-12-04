@@ -102,6 +102,8 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	}, [selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state]);
 
 	useEffect(() => {
+		TicketsCardActionsDispatchers.setSelectedTicketPin(selectedTicket?._id);
+
 		const unselectTicket = () => TicketsCardActionsDispatchers.setSelectedTicket(null);
 		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, unselectTicket);
 		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, unselectTicket);
