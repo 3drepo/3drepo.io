@@ -127,6 +127,10 @@ export const TicketDetailsCard = () => {
 		goToView({ state });
 	}, [JSON.stringify(defaultView?.state)]);
 
+	useEffect(() => () => {
+		setTicketId();
+	}, []);
+
 	return (
 		<CardContainer>
 			<FormProvider {...formData}>
