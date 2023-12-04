@@ -17,12 +17,28 @@
 
 import styled from 'styled-components';
 
-export const ClearDateAction = styled.div`
-	${({ theme }) => theme.typography.body1}
-	font-weight: 500;
-	color: ${({ theme }) => theme.palette.error.main};
-	margin-right: 22px;
+export const Container = styled.div`
+	position: relative;
+`;
+
+export const IconContainer = styled.div`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	margin-top: -7px;
 	cursor: pointer;
-	height: 32px;
-	text-align: right;
+
+	svg {
+		width: 10px;
+		height: 10px;
+	}
+`;
+
+export const SequenceIconContainer = styled(IconContainer)`
+	position: absolute;
+	right: 28px;
+	bottom: 1.5px;
+
+	svg {
+		width: 12.5px;
+		height: 12.5px;
+	}
 `;
