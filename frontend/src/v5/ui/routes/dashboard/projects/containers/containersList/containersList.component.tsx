@@ -97,29 +97,29 @@ const VirtualList = ({ items, itemHeight, itemContent }:Props) => {
 	const itemsSlice = items.slice(firstItemindex, Math.min(contentCount + firstItemindex, items.length));
 	const listHeight = items.reduce((partialSum, _, index) => (itemsHeight.current[index] || itemHeight) + partialSum, 0);
 
-
-	
 	let onScroll;
 	onScroll = () => {
-		const rect = elem.current.getBoundingClientRect(); 
+		const rect = elem.current.getBoundingClientRect();
+		let shouldUpdate = rect.y !== prevRect.current?.y;
 
-		if (rect.y !== prevRect.current?.y) {
-			const { firstItemindex: first } =  getFirstItemIndex(Math.max(0, -prevRect.current?.y));
-			let i = 0;
+		const { firstItemindex: first } =  getFirstItemIndex(Math.max(0, -prevRect.current?.y));
+		let i = 0;
 
-			for (let child of itemsContainer.current.children as any as Iterable<Element>) {
-				console.log(child);
-				itemsHeight.current[i + first] = child.getBoundingClientRect().height;
-				i++;
+		for (let child of itemsContainer.current.children as any as Iterable<Element>) {
+			const height = child.getBoundingClientRect().height;
+		
+			if (!!height && itemsHeight.current[i + first] !== height) {
+				itemsHeight.current[i + first] = height;
+				shouldUpdate = true;
 			}
-				
-			console.log(JSON.stringify({ itemsHeight: itemsHeight.current }, null, '\t'));
-			
+		
+			i++;
+		}
 
+		if (shouldUpdate) {
 			prevRect.current = rect; 
 			setElemRect(rect);
 		}
-		// itemsContainer.current.chil
 
 		window.requestAnimationFrame(onScroll);
 	};
