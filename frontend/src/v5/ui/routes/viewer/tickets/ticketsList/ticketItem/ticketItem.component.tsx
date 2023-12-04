@@ -63,6 +63,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 
 	useEffect(() => {
 		if (selected && ref.current) {
+			// @ts-ignore
 			ref.current.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'start' });
 		}
 	}, []);

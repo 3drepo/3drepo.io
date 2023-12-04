@@ -73,6 +73,7 @@ const PreviewListSingleItem = ({ active, index, ...props }) => {
 
 	useEffect(() => {
 		if (active && ref.current) {
+			// @ts-ignore
 			ref.current.firstElementChild.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'start' });
 		}
 	}, [active]);
