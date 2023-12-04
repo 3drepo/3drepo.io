@@ -199,7 +199,7 @@ const filterToProjection = (filter) => {
 	return projectionObject;
 };
 
-Tickets.getTicketList = (teamspace, project, model) => {
+Tickets.getTicketList = (teamspace, project, model, filter) => {
 	const { SAFETIBASE, SEQUENCING } = presetModules;
 	const {
 		[SAFETIBASE]: safetibaseProps,
