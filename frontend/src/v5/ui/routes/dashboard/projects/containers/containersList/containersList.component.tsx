@@ -69,16 +69,15 @@ const VirtualList = ({ items, itemHeight, itemContent }:Props) => {
 	const [elemRect, setElemRect] = useState<DOMRect>({ x:0, y:0, width:0, height:0 } as DOMRect);
 	// const [itemsHeight, setItemsHeight] = useState<Record<number, number>>({});
 
-	const { innerHeight } = window;
+	let { innerHeight } = window;
 
-
-	const contentCount = Math.ceil(innerHeight / itemHeight);
+	const contentCount = Math.ceil((1.5 * innerHeight) / itemHeight);
 	// const contentCountPadding = Math.floor(contentCount / 2);
 	const getFirstItemIndex = (y) => {
 		let spacerHeight = 0;
 		let firstItemindex = 0; 
 		for (let i = 0; i < items.length; i++) {
-			const currentItemHeight = itemsHeight.current[firstItemindex] || itemHeight;
+			const currentItemHeight = i ? itemsHeight.current[firstItemindex] || itemHeight : 0 ;
 			if (spacerHeight + currentItemHeight < y) {
 				spacerHeight += currentItemHeight;
 				firstItemindex = i;
