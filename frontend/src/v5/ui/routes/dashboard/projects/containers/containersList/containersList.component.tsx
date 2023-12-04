@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactElement, ReactNode, forwardRef, useCallback, useContext, useEffect, useRef, useRef, useState } from 'react';
+import { ReactNode, useCallback, useContext, useState } from 'react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import {
@@ -42,6 +42,7 @@ import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 import { UploadFileForm } from '../uploadFileForm/uploadFileForm.component';
 import { ContainerListItemLoading } from './containerListItem/containerListItemLoading.component';
+import { VirtualList } from '@controls/virtualList/virtualList.component';
 
 interface IContainersList {
 	emptyMessage: ReactNode;
@@ -52,89 +53,6 @@ interface IContainersList {
 	},
 	onClickCreate: () => void;
 }
-
-interface Props {
-	items: any[];
-	itemHeight: number;
-	itemContent:  (value: any, index: number, array: any[]) => JSX.Element;
-}
-
-const VirtualList = ({ items, itemHeight, itemContent }:Props) => { 
-	const elem = useRef<Element>();
-	const itemsContainer = useRef<Element>();
-	const prevRect = useRef<DOMRect>();
-	const itemsHeight = useRef<Record<number, number>>({});
-
-
-	const [elemRect, setElemRect] = useState<DOMRect>({ x:0, y:0, width:0, height:0 } as DOMRect);
-	// const [itemsHeight, setItemsHeight] = useState<Record<number, number>>({});
-
-	let { innerHeight } = window;
-
-	const contentCount = Math.ceil((1.5 * innerHeight) / itemHeight);
-	// const contentCountPadding = Math.floor(contentCount / 2);
-	const getFirstItemIndex = (y) => {
-		let spacerHeight = 0;
-		let firstItemindex = 0; 
-		for (let i = 0; i < items.length; i++) {
-			const currentItemHeight = i ? itemsHeight.current[firstItemindex] || itemHeight : 0 ;
-			if (spacerHeight + currentItemHeight < y) {
-				spacerHeight += currentItemHeight;
-				firstItemindex = i;
-			}
-		}
-
-		return { firstItemindex, spacerHeight };
-	};
-
-	// const contentOffset = Math.max(0, Math.floor( -elemRect.y / itemHeight));
-	// console.log(JSON.stringify({contentOffset, calculatedContentOffset:  getFirstItemIndex(Math.max(0, -elemRect.y)) }, null, '\t'));
-	// const spacerHeight = contentOffset * itemHeight;
-
-	const { firstItemindex, spacerHeight } =  getFirstItemIndex(Math.max(0, -elemRect.y));
-
-	const itemsSlice = items.slice(firstItemindex, Math.min(contentCount + firstItemindex, items.length));
-	const listHeight = items.reduce((partialSum, _, index) => (itemsHeight.current[index] || itemHeight) + partialSum, 0);
-
-	let onScroll;
-	onScroll = () => {
-		const rect = elem.current.getBoundingClientRect();
-		let shouldUpdate = rect.y !== prevRect.current?.y;
-
-		const { firstItemindex: first } =  getFirstItemIndex(Math.max(0, -prevRect.current?.y));
-		let i = 0;
-
-		for (let child of itemsContainer.current.children as any as Iterable<Element>) {
-			const height = child.getBoundingClientRect().height;
-		
-			if (!!height && itemsHeight.current[i + first] !== height) {
-				itemsHeight.current[i + first] = height;
-				shouldUpdate = true;
-			}
-		
-			i++;
-		}
-
-		if (shouldUpdate) {
-			prevRect.current = rect; 
-			setElemRect(rect);
-		}
-
-		window.requestAnimationFrame(onScroll);
-	};
-	
-	useEffect(() => {
-		window.requestAnimationFrame(onScroll);
-	}, []);
-	
-
-	return (<div style={{ display:'block', height: listHeight }} ref={elem as any} >
-		<div style={{ display:'block', height: spacerHeight } }/>
-		<ul ref={itemsContainer as any}>
-			{itemsSlice.map(itemContent)}
-		</ul>
-	</div>);
-};
 
 
 export const ContainersList = ({
