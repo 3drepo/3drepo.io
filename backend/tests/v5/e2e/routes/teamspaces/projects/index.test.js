@@ -80,21 +80,28 @@ const testGetProjectList = () => {
 			await setupBasicData(basicData);
 		});
 
-		const route = `/v5/teamspaces/${teamspace}/projects`;
+		const route = (ts = teamspace, key = users.tsAdmin.apiKey) => `/v5/teamspaces/${ts}/projects?key=${key}`;
+
 		test('should fail without a valid session', async () => {
-			const res = await agent.get(route).expect(templates.notLoggedIn.status);
+			const res = await agent.get(route(teamspace, ServiceHelper.generateRandomString()))
+				.expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
+
 		test('should fail without a valid teamspace', async () => {
-			const res = await agent.get(`/v5/teamspaces/badTSName/projects?key=${users.tsAdmin.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.get(route(ServiceHelper.generateRandomString()))
+				.expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
+
 		test('should fail without a valid teamspace licence', async () => {
-			const res = await agent.get(`${route}?key=${users.unlicencedUser.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.get(route(teamspace, users.unlicencedUser.apiKey))
+				.expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
+
 		test('should return a project list if the user has a valid session and is admin of teamspace', async () => {
-			const res = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			const res = await agent.get(route()).expect(templates.ok.status);
 			expect(res.body).toEqual({
 				projects: Object.keys(projects).map((p) => (
 					{ _id: projects[p].id, name: projects[p].name, isAdmin: true })),
@@ -102,7 +109,7 @@ const testGetProjectList = () => {
 		});
 
 		test('should return a project list if the user has a valid session and has access to a model within one of the project', async () => {
-			const res = await agent.get(`${route}?key=${users.modelPermUser.apiKey}`).expect(templates.ok.status);
+			const res = await agent.get(route(teamspace, users.modelPermUser.apiKey)).expect(templates.ok.status);
 			expect(res.body).toEqual({
 				projects:
 					[{ _id: projects.testProject.id, name: projects.testProject.name, isAdmin: false }],
@@ -120,43 +127,46 @@ const testCreateProject = () => {
 			await setupBasicData(basicData);
 		});
 
-		const route = `/v5/teamspaces/${teamspace}/projects`;
+		const route = (ts = teamspace, key = users.tsAdmin.apiKey) => `/v5/teamspaces/${ts}/projects?key=${key}`;
 
 		test('should fail without a valid session', async () => {
-			const res = await agent.post(route).expect(templates.notLoggedIn.status);
+			const res = await agent.post(route(teamspace, ServiceHelper.generateRandomString()))
+				.expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
 		test('should fail without a valid teamspace', async () => {
-			const res = await agent.post(`/v5/teamspaces/badTSName/projects?key=${users.tsAdmin.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.post(route(ServiceHelper.generateRandomString()))
+				.expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
 		test('should fail if the user is not teamspace admin', async () => {
-			const res = await agent.post(`${route}?key=${users.nonAdminUser.apiKey}`).expect(templates.notAuthorized.status);
+			const res = await agent.post(route(teamspace, users.nonAdminUser.apiKey))
+				.expect(templates.notAuthorized.status);
 			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 
 		test('should fail if the new project data are not valid', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`)
+			const res = await agent.post(route())
 				.send({ name: 123 }).expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if the new project name is taken by another project', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`)
+			const res = await agent.post(route())
 				.send({ name: projects.testProject.name }).expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should fail if the new project name is taken by another project (case insensitive)', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`)
+			const res = await agent.post(route())
 				.send({ name: projects.testProject.name.toUpperCase() }).expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
 
 		test('should create new project if new project data are valid', async () => {
-			const res = await agent.post(`${route}?key=${users.tsAdmin.apiKey}`)
+			const res = await agent.post(route())
 				.send({ name: 'Valid Name' }).expect(templates.ok.status);
 
 			const projectsRes = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
@@ -178,30 +188,35 @@ const testUpdateProject = () => {
 			await setupBasicData(basicData);
 		});
 
-		const route = `/v5/teamspaces/${teamspace}/projects/${projects.testProject.id}`;
+		const route = (ts = teamspace, project = projects.testProject.id,
+			key = users.tsAdmin.apiKey) => `/v5/teamspaces/${ts}/projects/${project}?key=${key}`;
 
 		test('should fail without a valid session', async () => {
-			const res = await agent.patch(route).expect(templates.notLoggedIn.status);
+			const res = await agent.patch(route(teamspace, projects.testProject.id,
+				ServiceHelper.generateRandomString())).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
 		test('should fail without a valid teamspace', async () => {
-			const res = await agent.patch(`/v5/teamspaces/badTSName/projects/${projects.testProject.id}?key=${users.tsAdmin.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.patch(route(ServiceHelper.generateRandomString(), projects.testProject.id))
+				.expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
 		test('should fail if the user is not project admin', async () => {
-			const res = await agent.patch(`${route}?key=${users.nonAdminUser.apiKey}`).expect(templates.notAuthorized.status);
+			const res = await agent.patch(route(teamspace, projects.testProject.id,
+				users.nonAdminUser.apiKey)).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 
 		test('should fail without a valid project', async () => {
-			const res = await agent.patch(`/v5/teamspaces/${teamspace}/projects/12345?key=${users.tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
+			const res = await agent.patch(route(teamspace, ServiceHelper.generateRandomString(),
+				users.tsAdmin.apiKey)).expect(templates.projectNotFound.status);
 			expect(res.body.code).toEqual(templates.projectNotFound.code);
 		});
 
 		test('should fail if the project data are not valid', async () => {
-			const res = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+			const res = await agent.patch(route())
 				.send({ name: 123 }).expect(templates.invalidArguments.status);
 			expect(res.body.code).toEqual(templates.invalidArguments.code);
 		});
@@ -212,7 +227,7 @@ const testUpdateProject = () => {
 			const res = await agent.post(`/v5/teamspaces/${teamspace}/projects/?key=${users.tsAdmin.apiKey}`)
 				.send({ name }).expect(templates.ok.status);
 
-			const projectsRes = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+			const projectsRes = await agent.patch(route())
 				.send({ name }).expect(templates.invalidArguments.status);
 			expect(projectsRes.body.code).toEqual(templates.invalidArguments.code);
 
@@ -227,7 +242,7 @@ const testUpdateProject = () => {
 			const res = await agent.post(`/v5/teamspaces/${teamspace}/projects/?key=${users.tsAdmin.apiKey}`)
 				.send({ name }).expect(templates.ok.status);
 
-			const projectsRes = await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+			const projectsRes = await agent.patch(route())
 				.send({ name: name.toUpperCase() }).expect(templates.invalidArguments.status);
 			expect(projectsRes.body.code).toEqual(templates.invalidArguments.code);
 
@@ -237,7 +252,7 @@ const testUpdateProject = () => {
 		});
 
 		test('should edit project if project name is the same', async () => {
-			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+			await agent.patch(route())
 				.send({ name: projects.testProject.name }).expect(templates.ok.status);
 
 			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
@@ -245,7 +260,7 @@ const testUpdateProject = () => {
 		});
 
 		test('should edit project if project data are valid', async () => {
-			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+			await agent.patch(route())
 				.send({ name: 'New Name' }).expect(templates.ok.status);
 
 			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
@@ -253,7 +268,7 @@ const testUpdateProject = () => {
 			expect(res.body.projects.find((p) => p.name === 'New Name')).not.toBe(undefined);
 
 			// edit the project again to keep it the same for the next tests
-			await agent.patch(`${route}?key=${users.tsAdmin.apiKey}`)
+			await agent.patch(route())
 				.send({ name: projects.testProject.name }).expect(templates.ok.status);
 		});
 	});
@@ -268,25 +283,29 @@ const testDeleteProject = () => {
 			await setupBasicData(basicData);
 		});
 
-		const route = (projectId) => `/v5/teamspaces/${teamspace}/projects/${projectId}`;
+		const route = (ts = teamspace, project = projects.testProject.id, key = users.tsAdmin.apiKey) => `/v5/teamspaces/${ts}/projects/${project}?key=${key}`;
 
 		test('should fail without a valid session', async () => {
-			const res = await agent.delete(route(projects.testProject.id)).expect(templates.notLoggedIn.status);
+			const res = await agent.delete(route(teamspace, projects.testProject.id,
+				ServiceHelper.generateRandomString())).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
 		test('should fail without a valid teamspace', async () => {
-			const res = await agent.delete(`/v5/teamspaces/badTSName/projects/${projects.testProject.id}?key=${users.tsAdmin.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.delete(route(ServiceHelper.generateRandomString()))
+				.expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
 		test('should fail if the user is not teamspace admin', async () => {
-			const res = await agent.delete(`${route(projects.testProject.id)}?key=${users.nonAdminUser.apiKey}`).expect(templates.notAuthorized.status);
+			const res = await agent.delete(route(teamspace, projects.testProject.id, users.nonAdminUser.apiKey))
+				.expect(templates.notAuthorized.status);
 			expect(res.body.code).toEqual(templates.notAuthorized.code);
 		});
 
 		test('should fail without a valid project', async () => {
-			const res = await agent.delete(`/v5/teamspaces/${teamspace}/projects/12345?key=${users.tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
+			const res = await agent.delete(route(teamspace, ServiceHelper.generateRandomString()))
+				.expect(templates.projectNotFound.status);
 			expect(res.body.code).toEqual(templates.projectNotFound.code);
 		});
 
@@ -295,7 +314,7 @@ const testDeleteProject = () => {
 			const res = await agent.post(`/v5/teamspaces/${teamspace}/projects/?key=${users.tsAdmin.apiKey}`)
 				.send({ name: 'New Project' }).expect(templates.ok.status);
 
-			await agent.delete(`${route(res.body._id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			await agent.delete(route(teamspace, res.body._id)).expect(templates.ok.status);
 
 			const projectsRes = await agent.get(`/v5/teamspaces/${teamspace}/projects?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
 			expect(projectsRes.body.projects.find((p) => p.name === 'New Project')).toBe(undefined);
@@ -312,30 +331,34 @@ const testGetProject = () => {
 			await setupBasicData(basicData);
 		});
 
-		const route = (projectId) => `/v5/teamspaces/${teamspace}/projects/${projectId}`;
+		const route = (ts = teamspace, project = projects.testProject.id, key = users.tsAdmin.apiKey) => `/v5/teamspaces/${ts}/projects/${project}?key=${key}`;
 
 		test('should fail without a valid session', async () => {
-			const res = await agent.get(route(projects.testProject.id)).expect(templates.notLoggedIn.status);
+			const res = await agent.get(route(teamspace, projects.testProject.id, ServiceHelper.generateRandomString()))
+				.expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
 		test('should fail without a valid teamspace', async () => {
-			const res = await agent.get(`/v5/teamspaces/badTSName/projects/${projects.testProject.id}?key=${users.tsAdmin.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.get(route(ServiceHelper.generateRandomString()))
+				.expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
 		test('should fail if the user is not teamspace member', async () => {
-			const res = await agent.get(`${route(projects.testProject.id)}?key=${users.unlicencedUser.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.get(route(teamspace, projects.testProject.id, users.unlicencedUser.apiKey))
+				.expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
 		test('should fail without a valid project', async () => {
-			const res = await agent.get(`/v5/teamspaces/${teamspace}/projects/12345?key=${users.tsAdmin.apiKey}`).expect(templates.projectNotFound.status);
+			const res = await agent.get(route(teamspace, ServiceHelper.generateRandomString()))
+				.expect(templates.projectNotFound.status);
 			expect(res.body.code).toEqual(templates.projectNotFound.code);
 		});
 
 		test('should get project', async () => {
-			const res = await agent.get(`${route(projects.testProject.id)}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			const res = await agent.get(route()).expect(templates.ok.status);
 			expect(res.body).toEqual({ name: projects.testProject.name });
 		});
 	});
