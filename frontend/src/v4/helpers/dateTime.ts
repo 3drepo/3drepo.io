@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const MILLI_PER_HOUR = 1000 * 60 * 60;
 export const MILLI_PER_DAY = 1000 * 60 * 60 * 24;
 
 export const getDays = (min, max) => {

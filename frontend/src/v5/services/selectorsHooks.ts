@@ -25,6 +25,7 @@ import * as FederationsSelectors from '@/v5/store/federations/federations.select
 import * as GroupsSelectors from '@/v4/modules/groups/groups.selectors';
 import * as ModelSelectors from '@/v4/modules/model/model.selectors';
 import * as RevisionsSelectors from '@/v5/store/revisions/revisions.selectors';
+import * as SequencesSelctors from '@/v4/modules/sequences/sequences.selectors';
 import * as TreeSelectors from '@/v4/modules/tree/tree.selectors';
 import * as TicketsSelectors from '@/v5/store/tickets/tickets.selectors';
 import * as TicketsCardSelectors from '@/v5/store/tickets/card/ticketsCard.selectors';
@@ -43,6 +44,7 @@ export const GroupsHooksSelectors = createHooksSelectors(GroupsSelectors);
 export const ModelHooksSelectors = createHooksSelectors(ModelSelectors);
 export const ProjectsHooksSelectors = createHooksSelectors(ProjectsSelectors);
 export const RevisionsHooksSelectors = createHooksSelectors(RevisionsSelectors);
+export const SequencesHooksSelectors = createHooksSelectors(SequencesSelctors);
 export const TicketsHooksSelectors = createHooksSelectors(TicketsSelectors);
 export const TicketsCardHooksSelectors = createHooksSelectors(TicketsCardSelectors);
 export const TicketCommentsHooksSelectors = createHooksSelectors(TicketCommentsSelectors);

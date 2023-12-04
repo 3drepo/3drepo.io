@@ -28,6 +28,7 @@ import { MeasurementsActions } from '@/v4/modules/measurements';
 import { IProjectsActionCreators, ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { IRevisionsActionCreators, RevisionsActions } from '@/v5/store/revisions/revisions.redux';
 import { ITeamspacesActionCreators, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
+import { SequencesActions } from '@/v4/modules/sequences';
 import { TicketsActions, ITicketsActionCreators } from '@/v5/store/tickets/tickets.redux';
 import { TicketsCardActions, ITicketsCardActionCreators } from '@/v5/store/tickets/card/ticketsCard.redux';
 import { TicketCommentsActions, ITicketCommentsActionCreators } from '@/v5/store/tickets/comments/ticketComments.redux';
@@ -53,6 +54,10 @@ interface IGroupsActionCreators {
 	setActiveGroup: (group: any) => Action;
 	showDetails: (group: any) => Action;
 	clearColorOverrides: () => Action;
+}
+
+interface ISequencesActionCreators {
+	showSequenceDate: (date: Date) => Action;
 }
 
 interface IJobsActionCreators {
@@ -89,6 +94,7 @@ export const JobsActionsDispatchers = createActionsDispatchers<IJobsActionCreato
 export const MeasurementsActionsDispatchers = createActionsDispatchers<IMeasurementsActionCreators>(MeasurementsActions);
 export const ProjectsActionsDispatchers = createActionsDispatchers<IProjectsActionCreators>(ProjectsActions);
 export const RevisionsActionsDispatchers = createActionsDispatchers<IRevisionsActionCreators>(RevisionsActions);
+export const SequencesActionsDispatchers = createActionsDispatchers<ISequencesActionCreators>(SequencesActions);
 export const TeamspacesActionsDispatchers = createActionsDispatchers<ITeamspacesActionCreators>(TeamspacesActions);
 export const TicketsActionsDispatchers = createActionsDispatchers<ITicketsActionCreators>(TicketsActions);
 export const TicketsCardActionsDispatchers = createActionsDispatchers<ITicketsCardActionCreators>(TicketsCardActions);

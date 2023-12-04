@@ -26,9 +26,11 @@ export const TextField = styled(TextFieldBase)`
 
 	.MuiInputBase-root {
 		padding: 0;
-		&, & * {
+
+		&, & input {
 			cursor: pointer;
 		}
+
 		&.Mui-disabled {
 			&, & * {
 				cursor: context-menu;
