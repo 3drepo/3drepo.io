@@ -34,6 +34,7 @@ import { IssueDetailsForm } from './issueDetailsForm.component';
 interface IProps {
 	viewer: any;
 	jobs: any[];
+	filteredIssues: any[];
 	issues: any[];
 	topicTypes: any[];
 	issue: any;
@@ -88,6 +89,7 @@ interface IProps {
 interface IState {
 	logsLoaded: boolean;
 	scrolled: boolean;
+	listIndex: number;
 }
 
 const UNASSIGNED_JOB = {
@@ -99,6 +101,7 @@ export class IssueDetails extends PureComponent<IProps, IState> {
 	public state = {
 		logsLoaded: false,
 		scrolled: false,
+		listIndex: (this.props.filteredIssues || []).findIndex(({ _id }) => _id === this.props.issue._id),
 	};
 
 	public formRef = createRef<any>();
@@ -229,12 +232,23 @@ export class IssueDetails extends PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount() {
-		const { teamspace, model, issue, unsubscribeOnIssueCommentsChanges } = this.props;
+		const { teamspace, model, issue, filteredIssues, revision, unsubscribeOnIssueCommentsChanges, setActiveIssue } = this.props;
 		unsubscribeOnIssueCommentsChanges(teamspace, model, issue._id);
 
-		if (this.props.issue.defaultHidden) {
-			this.props.setActiveIssue({}, null, true);
+		if (filteredIssues.find(({ _id }) => _id === issue._id)) {
+			// item is part of the filtered items list, no action required
+			return;
 		}
+
+		if (filteredIssues.length) {
+			const { listIndex } = this.state;
+			// set next item in the list as active
+			setActiveIssue(filteredIssues[listIndex % filteredIssues.length], revision, false);
+			return;
+		}
+
+		// the item was not in the filtered list
+		setActiveIssue({}, null, true);
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -246,6 +260,11 @@ export class IssueDetails extends PureComponent<IProps, IState> {
 			unsubscribeOnIssueCommentsChanges(prevProps.teamspace, prevProps.model, prevProps.issue._id);
 			fetchIssue(teamspace, model, issue._id);
 			subscribeOnIssueCommentsChanges(teamspace, model, issue._id);
+		}
+
+		const newListIndex = (this.props.filteredIssues || []).findIndex(({ _id }) => _id === this.props.issue._id);
+		if (newListIndex !== -1) {
+			this.setState({ ...this.state, listIndex: newListIndex });
 		}
 	}
 
@@ -332,10 +351,10 @@ export class IssueDetails extends PureComponent<IProps, IState> {
 
 	public handlePanelScroll = (e) => {
 		if (e.target.scrollTop > 0 && !this.state.scrolled) {
-			this.setState({ scrolled: true });
+			this.setState({ scrolled: true, listIndex: this.state.listIndex });
 		}
 		if (e.target.scrollTop === 0 && this.state.scrolled) {
-			this.setState({ scrolled: false });
+			this.setState({ scrolled: false, listIndex: this.state.listIndex });
 		}
 	}
 
