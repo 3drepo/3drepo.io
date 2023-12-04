@@ -36,7 +36,7 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { useFormContext } from 'react-hook-form';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { isEqual, throttle } from 'lodash';
+import { isArray, isEqual, throttle } from 'lodash';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const { watch } = useFormContext();
@@ -107,12 +107,13 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 	// Update pin when colour changes
 	useEffect(() => {
+		if (!prevValue.current) return;
 		refreshPin();
 	}, [colorHex]);
 
 	// Update pin when position changes
 	useEffect(() => {
-		if (!isEqual(value, prevValue.current)) {
+		if (!isEqual(value, prevValue.current) && isArray(prevValue.current)) {
 			refreshPin();
 		}
 
@@ -124,9 +125,6 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 	useEffect(() => () => {
 		ViewerService.clearMeasureMode();
-		if (prevValue.current) {
-			ViewerService.removePin(pinId);
-		}
 	}, [ticketId]);
 
 	useEffect(() => {

@@ -16,12 +16,13 @@
  */
 
 import { selectCurrentModel } from '@/v4/modules/model';
-import { TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { TicketBaseKeys, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { createSelector } from 'reselect';
 import { selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
 import { ITicketsCardState } from './ticketsCard.redux';
 import { getTicketIsCompleted } from '../tickets.helpers';
 import { DEFAULT_PIN, getPinColorHex, ticketToPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
+import { get } from 'lodash';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
@@ -143,14 +144,38 @@ export const selectTicketPins = createSelector(
 	selectCurrentTemplates,
 	selectView,
 	selectSelectedTicketPinId,
-	(tickets, templates, view, selectedTicketPinId) => {
-		if (view !== TicketsCardViews.List) return [];
+	selectSelectedTicket,
+	(tickets, templates, view, selectedTicketPinId, selectedTicket) => {
+		if (view === TicketsCardViews.New) return [];
+		const pinArray = [];
+		if (view === TicketsCardViews.Details) {
+			const selectedTemplate = templates.find(({ _id }) => _id === selectedTicket.type);
+			selectedTemplate.properties.forEach(({ name, type }) => {
+				if (type !== 'coords' || !selectedTicket.properties[name]) return;
+				const pinPath = `${TicketBaseKeys.PROPERTIES}.${name}`;
+				const pinId = pinPath === DEFAULT_PIN ? selectedTicket._id : `${selectedTicket._id}.${pinPath}`;
+				const color = getPinColorHex(pinPath, selectedTemplate, selectedTicket);
+				return pinArray.push(ticketToPin(pinId, get(selectedTicket, pinPath), selectedTicketPinId, color));
+			});
+			selectedTemplate.modules.forEach((module) => {
+				const moduleName = module.name || module.type;
+				if (!selectedTicket.modules[moduleName]) return;
+				module.properties.forEach(({ name, type }) => {
+					const pinPath = `${TicketBaseKeys.MODULES}.${moduleName}.${name}`;
+					if (type !== 'coords' || !get(selectedTicket, pinPath)) return;
+					const pinId = `${selectedTicket._id}.${pinPath}`;
+					const color = getPinColorHex(pinPath, selectedTemplate, selectedTicket);
+					return pinArray.push(ticketToPin(pinId, get(selectedTicket, pinPath), selectedTicketPinId, color));
+				});
+			});
+			return pinArray;
+		}
 
 		return (tickets).reduce(
 			(accum, ticket) => {
 				const template = templates.find(({ _id }) => _id === ticket.type);
 				const color = getPinColorHex(DEFAULT_PIN, template, ticket);
-				return ticket.properties?.Pin ? [...accum, ticketToPin(ticket, selectedTicketPinId, color)] : accum;
+				return ticket.properties?.Pin ? [...accum, ticketToPin(ticket._id, ticket.properties.Pin, selectedTicketPinId, color)] : accum;
 			},
 			[],
 		);

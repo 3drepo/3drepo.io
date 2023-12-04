@@ -63,10 +63,10 @@ export const getPinColorHex = (name: string, template: ITemplate, ticket: ITicke
 
 export const isPinLight = (hex: string) => contrastColor({ bgColor: hex, threshold: 230 }) !== '#FFFFFF';
 
-export const ticketToPin = (ticket: ITicket, selectedId: string, color: string): IPin => ({
-	id: ticket._id,
-	position: ticket.properties.Pin,
-	isSelected: ticket._id === selectedId,
+export const ticketToPin = (pinId, position, selectedId: string, color: string): IPin => ({
+	id: pinId,
+	position,
+	isSelected: pinId === selectedId,
 	type: 'ticket',
 	colour: hexToGLColor(color),
 });
