@@ -128,7 +128,7 @@ export const selectAllFilteredIssuesGetter = createSelector(
 );
 
 export const selectFilteredIssues = createSelector(
-	selectAllFilteredIssuesGetter, (allFilteredIssuesGetter) => allFilteredIssuesGetter()
+	selectAllFilteredIssuesGetter, (allFilteredIssuesGetter) => allFilteredIssuesGetter(true)
 );
 
 export const selectShowPins = createSelector(

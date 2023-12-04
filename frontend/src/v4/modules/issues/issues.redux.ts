@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { DEFAULT_ISSUES_FILTERS } from '@/v4/constants/issues';
 import { cloneDeep, isEmpty, keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
@@ -89,7 +90,7 @@ export const INITIAL_STATE = {
 		expandDetails: true,
 		newIssue: {},
 		newComment: {},
-		selectedFilters: [],
+		selectedFilters: DEFAULT_ISSUES_FILTERS,
 		filteredRisks: [],
 		showPins: true,
 		fetchingDetailsIsPending: false,

@@ -136,7 +136,7 @@ export const selectAllFilteredRisksGetter = createSelector(
 
 export const selectFilteredRisks = createSelector(
 	selectAllFilteredRisksGetter,
-		(allFilteredRisksGetter) => allFilteredRisksGetter()
+		(allFilteredRisksGetter) => allFilteredRisksGetter(true)
 );
 
 export const selectShowPins = createSelector(

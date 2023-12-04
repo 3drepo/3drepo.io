@@ -44,7 +44,6 @@ interface IProps {
 	filters: any[];
 	headerMenuItems: IHeaderMenuItem[];
 	activeItemId?: string;
-	showDefaultHiddenItems: boolean;
 	isModelLoaded: boolean;
 	title?: string;
 	isPending?: boolean;
