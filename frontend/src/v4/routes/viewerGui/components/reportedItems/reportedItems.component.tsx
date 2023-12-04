@@ -70,7 +70,7 @@ interface IProps {
 
 const PreviewListSingleItem = ({ active, index, ...props }) => {
 	const ref = useRef<HTMLDivElement>();
-	
+
 	useEffect(() => {
 		if (active && ref.current) {
 			ref.current.firstElementChild.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'start' });
@@ -122,6 +122,7 @@ export class ReportedItems extends PureComponent<IProps> {
 				{this.props.items.map((item, index) => (
 					<PreviewListSingleItem
 						{...item}
+						key={index}
 						index={index}
 						onItemClick={this.handleItemFocus(item)}
 						onArrowClick={this.handleShowItemDetails(item)}
