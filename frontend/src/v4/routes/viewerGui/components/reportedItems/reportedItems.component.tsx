@@ -153,6 +153,7 @@ export class ReportedItems extends PureComponent<IProps, IState> {
 			onChange={this.props.onChangeFilters}
 			filters={this.props.filters as any}
 			selectedFilters={this.props.selectedFilters}
+			defaultFiltersCollapsed
 		/>
 	));
 

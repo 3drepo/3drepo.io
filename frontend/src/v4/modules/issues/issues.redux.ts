@@ -101,7 +101,8 @@ export const INITIAL_STATE = {
 		sortBy: 'created',
 		failedToLoad: false,
 		savedPin: null,
-		measureMode: ''
+		measureMode: '',
+		searchEnabled: true,
 	},
 };
 

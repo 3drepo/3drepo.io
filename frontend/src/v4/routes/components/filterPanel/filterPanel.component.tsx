@@ -73,6 +73,7 @@ interface IProps {
 	className?: string;
 	autoFocus?: boolean;
 	left?: boolean;
+	defaultFiltersCollapsed?: boolean;
 	onChange: (selectedFilters) => void;
 	onDataTypeChange?: (selectedDataTypes) => void;
 }
@@ -157,7 +158,7 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 		selectedDataTypes: [],
 		value: '',
 		suggestions: [],
-		filtersOpen: false,
+		filtersOpen: this.props.defaultFiltersCollapsed ?? false,
 		removableFilterIndex: null
 	};
 

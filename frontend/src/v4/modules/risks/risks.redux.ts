@@ -95,6 +95,7 @@ export interface IRisksComponentState {
 	measureMode: string;
 	sortOrder: string;
 	sortBy: string;
+	searchEnabled?: boolean;
 }
 
 export interface IRisksState {
@@ -122,7 +123,8 @@ export const INITIAL_STATE: IRisksState = {
 		sortOrder: 'desc',
 		failedToLoad: false,
 		sortBy: 'created',
-		measureMode: ''
+		measureMode: '',
+		searchEnabled: true,
 	},
 	mitigationCriteria: {},
 };
