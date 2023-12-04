@@ -16,11 +16,10 @@
  */
 
 const { src } = require('../../helper/path');
-const { times, cloneDeep } = require('lodash');
+const { times } = require('lodash');
 const { generateRandomString, generateRandomObject, generateGroup } = require('../../helper/services');
 
 const Groups = require(`${src}/models/tickets.groups`);
-const { fieldOperators } = require(`${src}/models/metadata.rules.constants`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
