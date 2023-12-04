@@ -159,7 +159,7 @@ export const VIEWER_TOOLBAR_ITEMS = {
 	FOCUS: 'Focus',
 	CLIP: 'Clip',
 	COORDVIEW: 'Show Coordinates',
-	BIM: 'BIM'
+	BIM: 'Attribute Data'
 };
 
 export const INITIAL_HELICOPTER_SPEED = 1;
