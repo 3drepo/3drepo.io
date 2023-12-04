@@ -50,7 +50,6 @@ interface IProps {
 	showNewUpdateDialog: (config) => void;
 	authenticate: () => void;
 	logout: () => void;
-	startup: () => void;
 	hideDialog: () => void;
 	onLoggedOut: () => void;
 	subscribeToDm: (event, handler) => void;
@@ -86,7 +85,6 @@ export class App extends PureComponent<IProps, IState> {
 
 	constructor(props) {
 		super(props);
-		props.startup();
 	}
 
 	public componentDidMount() {

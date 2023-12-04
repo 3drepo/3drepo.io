@@ -199,9 +199,13 @@ const filterToProjection = (filter) => {
 	return projectionObject;
 };
 
-Tickets.getTicketList = (teamspace, project, model, filter) => {
-	const { SAFETIBASE } = presetModules;
-	const { [SAFETIBASE]: safetibaseProps } = modulePropertyLabels;
+Tickets.getTicketList = (teamspace, project, model) => {
+	const { SAFETIBASE, SEQUENCING } = presetModules;
+	const {
+		[SAFETIBASE]: safetibaseProps,
+		[SEQUENCING]: seqProps,
+	} = modulePropertyLabels;
+
 	const projection = {
 		_id: 1,
 		title: 1,
@@ -219,6 +223,8 @@ Tickets.getTicketList = (teamspace, project, model, filter) => {
 		[`modules.${SAFETIBASE}.${safetibaseProps.LEVEL_OF_RISK}`]: 1,
 		[`modules.${SAFETIBASE}.${safetibaseProps.TREATED_LEVEL_OF_RISK}`]: 1,
 		[`modules.${SAFETIBASE}.${safetibaseProps.TREATMENT_STATUS}`]: 1,
+		[`modules.${SEQUENCING}.${seqProps.START_TIME}`]: 1,
+		[`modules.${SEQUENCING}.${seqProps.END_TIME}`]: 1,
 
 	};
 
