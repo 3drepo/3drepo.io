@@ -18,10 +18,6 @@
 import { GroupRulesForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketGroups/groups/groupRulesForm/groupRulesForm.component';
 import { useEffect, useState } from 'react';
 import _, { uniqueId } from 'lodash';
-import { ThemeProvider } from 'styled-components';
-import { palette } from '@/v5/ui/themes/theme';
-import { MuiTheme as v4Theme } from '@/v4/styles';
-import { isV5 } from '@/v4/helpers/isV5';
 import { Container } from './newCriterionForm.styles';
 
 interface IProps {
@@ -35,8 +31,6 @@ export const NewCriterionForm = ({ criterion, onSubmit, alreadySelectedFilters =
 	// used to clear the form after saving
 	const [key, setKey] = useState(uniqueId());
 
-	const theme = isV5() ? {} : _.merge(_.cloneDeep(v4Theme), { palette });
-
 	const handleSubmit = (data) => {
 		setKey(uniqueId());
 		onSubmit(data);
@@ -48,15 +42,13 @@ export const NewCriterionForm = ({ criterion, onSubmit, alreadySelectedFilters =
 
 	return (
 		<Container>
-			<ThemeProvider theme={theme as any}>
-				<GroupRulesForm
-					key={key}
-					rule={criterion}
-					existingRules={alreadySelectedFilters}
-					onSave={handleSubmit}
-					onClose={() => {}}
-				/>
-			</ThemeProvider>
+			<GroupRulesForm
+				key={key}
+				rule={criterion}
+				existingRules={alreadySelectedFilters}
+				onSave={handleSubmit}
+				onClose={() => {}}
+			/>
 		</Container>
 	);
 };

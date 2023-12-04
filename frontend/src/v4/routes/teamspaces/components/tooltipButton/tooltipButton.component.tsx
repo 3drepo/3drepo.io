@@ -17,7 +17,6 @@
 import { ComponentType } from 'react';
 import Tooltip from '@mui/material/Tooltip';
 import { TooltipProps } from '@mui/material/Tooltip';
-import { isV5 } from '@/v4/helpers/isV5';
 import { StyledIconButton } from './tooltipButton.styles';
 interface IProps {
 	label: string;
@@ -65,7 +64,7 @@ export const TooltipButton = (props: IProps) => {
 		</StyledIconButton>
 	);
 
-	const v5PopperProps = isV5() && notOverlap && {
+	const PopperProps = notOverlap && {
 		PopperProps: {
 			sx: {
 				top: '14px !important',
@@ -85,7 +84,7 @@ export const TooltipButton = (props: IProps) => {
 						disableHoverListener={disabled}
 						placement={placement}
 						disableFocusListener={disableFocusListener}
-						{...v5PopperProps}
+						{...PopperProps}
 					>
 						<span>
 							{renderButton()}

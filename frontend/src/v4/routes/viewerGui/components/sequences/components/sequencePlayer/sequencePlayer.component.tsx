@@ -24,7 +24,7 @@ import PlayArrow from '@mui/icons-material/PlayArrow';
 import Replay from '@mui/icons-material/Replay';
 import Stop from '@mui/icons-material/Stop';
 import { debounce, noop } from 'lodash';
-import { isV5 } from '@/v4/helpers/isV5';
+import { FormattedMessage } from 'react-intl';
 
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
@@ -34,12 +34,14 @@ import { getDateByStep, getSelectedFrameIndex } from '../../../../../../modules/
 import { LONG_DATE_TIME_FORMAT_NO_MINUTES, LONG_DATE_TIME_FORMAT_NO_MINUTES_V5 } from '../../../../../../services/formatting/formatDate';
 import {
 	DatePicker,
+	FlexCol,
 	IntervalRow,
 	SequencePlayerAllInputs,
 	SequencePlayerColumn,
 	SequencePlayerContainer,
 	SequenceRow,
 	SequenceSlider,
+	SetToCurrentDateButton,
 	SliderRow,
 	StepInput,
 	StepLabel,
@@ -297,15 +299,20 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 								</IconButton>
 							</Grid>
 							<Grid item>
-								<DatePicker
-									shouldDisableDate={(date: any) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
-									name="date"
-									value={value}
-									inputFormat={isV5() ? LONG_DATE_TIME_FORMAT_NO_MINUTES_V5 : LONG_DATE_TIME_FORMAT_NO_MINUTES}
-									onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / MILLI_PER_HOUR) * MILLI_PER_HOUR))}
-									placeholder="date"
-									dateTime
-								/>
+								<FlexCol>
+									<DatePicker
+										shouldDisableDate={(date: any) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
+										name="date"
+										value={value}
+										inputFormat={LONG_DATE_TIME_FORMAT_NO_MINUTES_V5}
+										onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / MILLI_PER_HOUR) * MILLI_PER_HOUR))}
+										placeholder="date"
+										dateTime
+									/>
+									<SetToCurrentDateButton onClick={() => this.gotoDate(new Date())}>
+										<FormattedMessage id="viewer.sequences.setToCurrentDate" defaultMessage="Set to current date" />
+									</SetToCurrentDateButton>
+								</FlexCol>
 							</Grid>
 							<Grid item>
 								<IconButton disabled={this.isLastDay} onClick={this.forward} size="small">

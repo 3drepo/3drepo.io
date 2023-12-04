@@ -20,7 +20,6 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import ArrowIcon from '@mui/icons-material/ArrowForward';
 import styled, { css } from 'styled-components';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import { COLOR } from '../../../../styles/colors';
 import OpenInViewerButtonComponent from '../../../components/openInViewerButton/openInViewerButton.container';
@@ -79,7 +78,7 @@ export const MenuItemContainer = styled(MenuItem)<{ expired?: boolean }>`
 		}
 	}
 
-	${({ theme, expired }) => isV5() && css`
+	${({ theme, expired }) => css`
 		&&:hover {
 			// TODO - fix after new palette is released
 			${!expired && 'background-color: #F7F8FA'}; // TODO - fix after new palette is released

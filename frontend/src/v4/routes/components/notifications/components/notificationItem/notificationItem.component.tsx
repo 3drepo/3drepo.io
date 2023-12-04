@@ -24,7 +24,6 @@ import Clear from '@mui/icons-material/Clear';
 import Lens from '@mui/icons-material/Lens';
 import PanoramaFishEye from '@mui/icons-material/PanoramaFishEye';
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { viewerRoute } from '@/v5/services/routing/routing';
 
@@ -163,9 +162,7 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 		}
 
 		const {teamSpace, project, modelId, history, issuesId} = this.props;
-		let pathname = isV5()
-			? viewerRoute(teamSpace, project, modelId)
-			: `/viewer/${teamSpace}/${modelId}`;
+		let pathname = viewerRoute(teamSpace, project, modelId)
 		let search = '';
 
 		if (this.props.type === TYPES.ISSUE_CLOSED) {
@@ -185,11 +182,7 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 		}
 
 		if (this.props.type === TYPES.MODEL_UPDATED && this.props.revision) {
-			if (isV5()) {
-				pathname = viewerRoute(teamSpace, project, modelId, this.props.revision);
-			} else {
-				pathname += `/${this.props.revision}`;
-			}
+			pathname = viewerRoute(teamSpace, project, modelId, this.props.revision);
 		}
 
 		history.push({pathname, search});
@@ -229,32 +222,22 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 			onClick: this.onClick
 		};
 
-		const v5Color = read ? COLOR.BASE_LIGHT : COLOR.SECONDARY_MAIN;
-
-		const v5StylingOverride = isV5() ? {
-			primaryColor: v5Color,
-			fontWeight: undefined,
-			sx: {
-				'& p > span': {
-					color: v5Color,
-				},
-			},
-		} : {};
+		const color = read ? COLOR.BASE_LIGHT : COLOR.SECONDARY_MAIN;
 
 		return (
 			<Container {...containerProps}>
 				<Item>
-					<Avatar sx={isV5() && { color: v5Color }}>
+					<Avatar sx={{ color }}>
 						{icon}
 					</Avatar>
 
 					<NotificationItemText
-						primaryColor={read ? 'rgba(0, 0, 0, 0.54)' : 'rgba(0, 0, 0, 0.87)'}
+						primaryColor={color}
 						secondaryColor={read ? 'rgba(0, 0, 0, 0.24)' : 'rgba(0, 0, 0, 0.54)'}
-						fontWeight={read ? FONT_WEIGHT.NORMAL : FONT_WEIGHT.BOLD}
 						primary={details}
 						secondary={summary}
-						{...v5StylingOverride}
+						fontWeight={undefined}
+						sx={{'& p > span': { color}}}
 					/>
 
 					<ItemSecondaryAction>

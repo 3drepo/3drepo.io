@@ -206,7 +206,7 @@ export class SignUp extends PureComponent<IProps, IState> {
 							initialValues={defaultValues}
 							onSubmit={this.handleSubmit}
 							validationSchema={RegistrationSchema}
-							ref={this.form}
+							innerRef={this.form}
 						>
 							<Form >
 								<Field name="username" render={({ field, form }) => (
@@ -397,7 +397,7 @@ export class SignUp extends PureComponent<IProps, IState> {
 									<Field render={({ form }) => (
 										<SubmitButton
 											pending={isPending}
-											disabled={!form.isValid || form.isValidating}
+											disabled={!form.isValid || form.isValidating || !form.dirty}
 										>
 											Sign up
 										</SubmitButton>)}

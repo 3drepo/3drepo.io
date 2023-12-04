@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, createRef } from 'react';
-import EventListener from 'react-event-listener';
+import { WindowEventListener } from '@/v4/helpers/windowEventListener';
 
 import { StyledIndicator } from './indicator.styles';
 
@@ -43,9 +43,9 @@ export class Indicator extends PureComponent <IProps, any> {
 	public render() {
 		return (
 			<>
-				<EventListener
-					target="window"
-					onMouseMove={this.handleMouseMove}
+				<WindowEventListener
+					event='mousemove'
+					onEventTriggered={this.handleMouseMove}
 				/>
 				<StyledIndicator {...this.props} ref={this.indicatorRef} />
 			</>

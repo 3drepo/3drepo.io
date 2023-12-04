@@ -31,9 +31,11 @@ const findByName = (array: any[], name: string) => array.find(({ name: n }) => n
 
 export const DEFAULT_PIN = `${TicketBaseKeys.PROPERTIES}.${AdditionalProperties.PIN}`;
 
+export const hasDefaultPin = (ticket: ITicket) => !!get(ticket, [TicketBaseKeys.PROPERTIES, AdditionalProperties.PIN]);
+
 const getPinSchema = (name: string, template: ITemplate): IPinSchema | boolean => {
 	if (!template) return;
-	if (name === DEFAULT_PIN) return template.config?.pin; // Default Pin
+	if (name === DEFAULT_PIN) return template.config?.pin;
 	const path = name.split('.');
 	if (path[0] === TicketBaseKeys.PROPERTIES) return findByName(template.properties, path[1]);
 	const module = findByName(template.modules, path[1]);

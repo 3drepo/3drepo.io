@@ -337,7 +337,7 @@ export class UploadModelFileDialog extends PureComponent<IProps, IState> {
 									type="submit"
 									variant="contained"
 									color="secondary"
-									disabled={(!form.isValid || form.isValidating)}
+									disabled={!form.isValid || form.isValidating || !form.dirty}
 								>
 									Upload
 								</Button>

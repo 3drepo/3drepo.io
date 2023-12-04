@@ -16,7 +16,6 @@
  */
 
 import { isEmpty } from 'lodash';
-import { isV5 } from '@/v4/helpers/isV5';
 import { useEffect } from 'react';
 import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { EmptyStateInfo } from '../../../../../components/components.styles';
@@ -63,7 +62,7 @@ export const ShapesFormTab = ({
 		<Content active={active}>
 			{addButtonsEnabled &&
 				<MeasuringTypeContainer>
-					Create {isV5() ? 'markup' : 'Markup:'} &nbsp; &nbsp;
+					Create markup&nbsp; &nbsp;
 					<MeasuringType basicTypes setMeasureMode={setMeasureMode} measureMode={measureMode} />
 				</MeasuringTypeContainer>
 			}

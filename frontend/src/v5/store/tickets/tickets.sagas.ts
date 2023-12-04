@@ -108,7 +108,7 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }:
 			? API.Tickets.fetchFederationTemplate
 			: API.Tickets.fetchContainerTemplate;
 
-		const templatesWithSchemas = yield all(
+		const templatesWithSchemas = yield all( // TODO remove and rework once #4579 is merged in
 			templates.map((template) => fetchModelTemplate(teamspace, projectId, modelId, template._id)),
 		);
 

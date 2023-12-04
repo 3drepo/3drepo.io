@@ -43,16 +43,17 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const { isViewer } = useContext(TicketContext);
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const [editMode, setEditMode] = useState(false);
-	const prevValue = useRef(undefined);
-	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const pinId = name === DEFAULT_PIN ? ticketId : `${ticketId}.${name}`;
-	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
-	const isSelected = selectedPin === pinId;
-	const hasPin = !!value;
 	const ticket = watch() as ITicket;
+	const prevValue = useRef(undefined);
+
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId() ?? '';
+	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
 	const selectedTemplateId = TicketsCardHooksSelectors.selectSelectedTemplateId() ?? ticket?.type;
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
-	
+
+	const pinId = name === DEFAULT_PIN ? ticketId : `${ticketId}.${name}`;
+	const isSelected = selectedPin === pinId;
+	const hasPin = !!value;
 	const colorHex = getPinColorHex(name, template, ticket);
 
 	const cancelEdit = () => {

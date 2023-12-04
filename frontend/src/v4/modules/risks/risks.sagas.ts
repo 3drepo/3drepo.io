@@ -291,7 +291,7 @@ function* goToRisk({ risk }) {
 
 	const riskId = (risk || {})._id;
 
-	const route = params.v5 ? ROUTES.V5_MODEL_VIEWER : ROUTES.MODEL_VIEWER;
+	const route = ROUTES.V5_MODEL_VIEWER;
 	const path = generatePath(route, params);
 
 	queryParams = riskId ?  {... queryParams, riskId} : omit(queryParams, 'riskId');

@@ -21,7 +21,7 @@ import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { isEmpty } from 'lodash';
+import { cloneDeep, isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 import { FormHelperText } from '@mui/material';
@@ -96,8 +96,10 @@ export const TicketView = ({
 
 	// State
 	const onDeleteGroups = () => {
-		const { state, ...view } = value || {};
-		onChange?.(isEmpty(view) ? null : view);
+		const { state, ...view } = cloneDeep(value || {});
+		state.colored = [];
+		state.hidden = [];
+		onChange?.({ state, ...view });
 	};
 
 	useEffect(() => onBlur?.(), [value]);

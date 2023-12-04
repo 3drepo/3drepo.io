@@ -34,6 +34,9 @@ interface PropertiesListProps {
 export const PropertiesList = ({ module, properties, onPropertyBlur }: PropertiesListProps) => {
 	const { formState } = useFormContext();
 	const isReadOnly = TicketsCardHooksSelectors.selectReadOnly();
+
+	if (!properties.length) return null;
+
 	return (
 		<PropertiesListContainer>
 			{properties.map(({
