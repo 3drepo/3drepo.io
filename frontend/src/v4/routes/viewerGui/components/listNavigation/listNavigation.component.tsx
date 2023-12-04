@@ -30,16 +30,18 @@ interface IProps {
 
 interface IState {
 	currentIndex: number;
+	initialItemsCount: number;
 }
 
 export class ListNavigation extends PureComponent<IProps, IState> {
 	public state = {
-		currentIndex: 0
+		currentIndex: 0,
+		initialItemsCount: 0,
 	};
 
 	public componentDidMount() {
 		if (this.props.initialIndex) {
-			this.setState({ currentIndex: this.props.initialIndex });
+			this.setState({ currentIndex: this.props.initialIndex, initialItemsCount: this.props.itemsCount });
 		}
 	}
 
@@ -49,7 +51,7 @@ export class ListNavigation extends PureComponent<IProps, IState> {
 
 	public handleNavigation = ( skip ) => {
 		const index =  (this.props.itemsCount +  this.state.currentIndex + skip) % this.props.itemsCount ;
-		this.setState({ currentIndex: index }, this.handleChange);
+		this.setState({ currentIndex: index, initialItemsCount: this.props.itemsCount }, this.handleChange);
 	}
 
 	public handlePrevItem = () => {
@@ -57,7 +59,11 @@ export class ListNavigation extends PureComponent<IProps, IState> {
 	}
 
 	public handleNextItem = () => {
-		this.handleNavigation(1);
+		if (this.state.initialItemsCount === this.props.itemsCount) {
+			this.handleNavigation(1);
+		} else {
+			this.handleNavigation(0);
+		}
 	}
 
 	public render() {
