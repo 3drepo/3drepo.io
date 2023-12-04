@@ -23,7 +23,6 @@ import { selectActiveSession, selectIsAuthenticated, selectIsPending, AuthAction
 import { ChatActions } from '../../modules/chat';
 import { selectCurrentUser } from '../../modules/currentUser';
 import { selectDialogs, DialogActions } from '../../modules/dialog';
-import { StartupActions } from '../../modules/startup/startup.redux';
 import { App } from './app.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -38,7 +37,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	authenticate: AuthActions.authenticate,
 	logout: AuthActions.logout,
 	onLoggedOut: AuthActions.onLoggedOut,
-	startup: StartupActions.startup,
 	showNewUpdateDialog: DialogActions.showNewUpdateDialog,
 	showDialog: DialogActions.showDialog,
 	hideDialog: DialogActions.hideDialog,
