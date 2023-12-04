@@ -25,7 +25,6 @@ const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 
 const { systemLogger } = require("../logger.js");
-const { convertLegacyRules } = require("../../v5/schemas/rules");
 
 const fieldTypes = {
 	"description": "[object String]",
@@ -323,10 +322,6 @@ Group.findByUID = async function (account, model, branch, revId, uid, showIfcGui
 		throw responseCodes.GROUP_NOT_FOUND;
 	}
 
-	if(foundGroup.rules) {
-		foundGroup.rules = convertLegacyRules(foundGroup.rules);
-	}
-
 	if (convertToIfcGuids) {
 		foundGroup.objects = await getObjectsArrayAsIfcGuids(foundGroup, false);
 	} else {
@@ -385,9 +380,6 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 	const sharedIdConversionPromises = [];
 
 	results.forEach(result => {
-		if(result.rules) {
-			result.rules = convertLegacyRules(result.rules);
-		}
 		const getObjIdProm = getObjectIds(account, model, branch, revId, result, true, showIfcGuids)
 			.then((sharedIdObjects) => {
 				result.objects = sharedIdObjects;

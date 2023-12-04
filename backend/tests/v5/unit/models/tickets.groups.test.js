@@ -128,42 +128,6 @@ const testGetGroupsByIds = () => {
 				{ teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
 		});
 
-		test('Should get all the groups, with legacy schema rules be converted to new schema', async () => {
-			const teamspace = generateRandomString();
-			const project = generateRandomString();
-			const model = generateRandomString();
-			const ticket = generateRandomString();
-			const groupIds = times(6, generateRandomString());
-			const projection = { [generateRandomString()]: 1 };
-
-			const group = generateGroup(true);
-			group.rules = group.rules.map(({ name, field, ...rest }) => ({ ...rest, field: generateRandomString() }));
-
-			const groupConverted = cloneDeep(group);
-			groupConverted.rules = groupConverted.rules.map(({ field, ...rest }) => ({ ...rest,
-				field: {
-					values: [field],
-					operator: fieldOperators.IS.name,
-				} }));
-
-			db.find.mockResolvedValueOnce([group]);
-
-			const result = await Groups.getGroupsByIds(teamspace, project, model, ticket, groupIds, projection);
-
-			expect(result.length).toBe(1);
-
-			for (let i = 0; i < result[0].rules.length; ++i) {
-				const resRule = result[0].rules[i];
-				const expectedRule = groupConverted.rules[i];
-
-				expect(resRule).toEqual(expect.objectContaining(expectedRule));
-			}
-
-			expect(db.find).toHaveBeenCalledTimes(1);
-			expect(db.find).toHaveBeenCalledWith(teamspace, groupCol,
-				{ teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
-		});
-
 		test('Should relay the error if find failed', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
@@ -250,29 +214,6 @@ const testGetGroupById = () => {
 
 		test('Should return whatever the query returns', async () => {
 			const expectedData = generateGroup(true);
-
-			const projection = generateRandomObject();
-
-			db.findOne.mockResolvedValueOnce(expectedData);
-
-			await expect(Groups.getGroupById(teamspace, project, model, ticket, groupId, projection))
-				.resolves.toEqual(expectedData);
-
-			expect(db.findOne).toHaveBeenCalledTimes(1);
-			expect(db.findOne).toHaveBeenCalledWith(teamspace, groupCol,
-				{ teamspace, project, model, ticket, _id: groupId }, projection);
-		});
-
-		test('Should convert legacy schema rules', async () => {
-			const group = generateGroup(true);
-			group.rules = group.rules.map(({ name, field, ...rest }) => ({ ...rest, field: generateRandomString() }));
-
-			const expectedData = cloneDeep(group);
-			expectedData.rules = expectedData.rules.map(({ field, ...rest }) => ({ ...rest,
-				field: {
-					values: [field],
-					operator: fieldOperators.IS.name,
-				} }));
 
 			const projection = generateRandomObject();
 
