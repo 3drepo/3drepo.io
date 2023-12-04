@@ -21,7 +21,6 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import TicketsIcon from '@assets/icons/filled/tickets-filled.svg';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { ViewerParams } from '../../../routes.constants';
@@ -38,7 +37,7 @@ export const TicketsListCard = () => {
 				<FormattedMessage id="viewer.cards.tickets.title" defaultMessage="Tickets" />
 				{!readOnly && (<NewTicketMenu />)}
 			</CardHeader>
-			<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
+			<CardContent>
 				{tickets.length ? (
 					<TicketsList tickets={tickets} />
 				) : (

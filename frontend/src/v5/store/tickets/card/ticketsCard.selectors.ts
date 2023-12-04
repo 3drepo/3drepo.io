@@ -96,23 +96,58 @@ export const selectSelectedTemplate = createSelector(
 	selectTemplateById,
 );
 
-export const selectFilteredTickets = createSelector(
+export const selectTicketsFilters = createSelector(
 	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.filteredTickets || null,
+	(ticketCardState) => ticketCardState.ticketsFilters,
 );
 
-export const selectTicketPins = createSelector(
+export const selectFilteringCompleted = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.ticketsFilters.complete,
+);
+
+export const selectFilteringTemplates = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.ticketsFilters.templates,
+);
+
+export const selectFilteringQueries = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.ticketsFilters.queries,
+);
+
+export const selectTicketsFilteredByCompleted = createSelector(
 	selectCurrentTickets,
-	selectFilteredTickets,
+	selectFilteringCompleted,
+	(tickets, isComplete) => tickets.filter((ticket) => getTicketIsCompleted(ticket) === isComplete),
+);
+
+export const selectTicketsWithAllFiltersApplied = createSelector(
+	selectTicketsFilteredByCompleted,
+	selectFilteringTemplates,
+	selectFilteringQueries,
+	selectCurrentTemplates,
+	(tickets, filteredTemplates, queries, templates) => {
+		const filteredByTemplates = filteredTemplates.length ? tickets.filter(({ type }) => filteredTemplates.includes(type)) : tickets;
+		return queries.length ? filteredByTemplates.filter((ticket) => {
+			const templateCode = templates.find((template) => template._id === ticket.type).code;
+			const ticketCode = `${templateCode}:${ticket.number}`;
+			return queries.some((q) => [ticketCode, ticket.title].some((str) => str.toLowerCase().includes(q.toLowerCase())));
+		}) : filteredByTemplates;
+	},
+);
+
+
+export const selectTicketPins = createSelector(
+	selectTicketsWithAllFiltersApplied,
 	selectCurrentTemplates,
 	selectView,
 	selectSelectedTicketPinId,
-	(tickets, filteredTickets, templates, view, selectedTicketPinId) => {
+	(tickets, templates, view, selectedTicketPinId) => {
 		if (view !== TicketsCardViews.List) return [];
 
-		return (filteredTickets || tickets).reduce(
+		return (tickets).reduce(
 			(accum, ticket) => {
-				if (!filteredTickets?.length && getTicketIsCompleted(ticket)) return accum;
 				const template = templates.find(({ _id }) => _id === ticket.type);
 				const color = getPinColorHex(DEFAULT_PIN, template, ticket);
 				return ticket.properties?.Pin ? [...accum, ticketToPin(ticket, selectedTicketPinId, color)] : accum;

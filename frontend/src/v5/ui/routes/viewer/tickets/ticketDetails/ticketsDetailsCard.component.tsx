@@ -126,11 +126,6 @@ export const TicketDetailsCard = () => {
 		goToView({ state });
 	}, [JSON.stringify(defaultView?.state)]);
 
-	useEffect(() => () => {
-		setTicketId();
-		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
-	}, []);
-
 	return (
 		<CardContainer>
 			<FormProvider {...formData}>
