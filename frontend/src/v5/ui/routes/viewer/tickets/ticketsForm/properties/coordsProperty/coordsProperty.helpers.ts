@@ -25,8 +25,6 @@ import { rgbToHex } from '@controls/inputs/colorPicker/colorPicker.helpers';
 
 const DEFAULT_COLOR = COLOR.PRIMARY_MAIN;
 
-export const hasDefaultPin = (ticket) => !!get(ticket, [TicketBaseKeys.PROPERTIES, AdditionalProperties.PIN]);
-
 const findByName = (array: any[], name: string) => array.find(({ name: n }) => n === name);
 
 export const DEFAULT_PIN = `${TicketBaseKeys.PROPERTIES}.${AdditionalProperties.PIN}`;
