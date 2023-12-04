@@ -167,7 +167,6 @@ const SequencePlayerStyles = css`
 
 				svg {
 					width: 24px;
-					margin-top: -11px;
 				}
 			}
 
@@ -216,7 +215,7 @@ const SequencePlayerStyles = css`
 				}
 
 				${DatePicker} {
-					margin: 0 3px 12px;
+					margin: 0 3px 0;
 					width: 146px;
 
 					input {
@@ -227,6 +226,7 @@ const SequencePlayerStyles = css`
 
 				button {
 					color: ${({ theme }) => theme.palette.secondary.main};
+					height: 24px;
 
 					&.Mui-disabled {
 						color: ${({ theme }) => theme.palette.base.lightest};
@@ -236,6 +236,8 @@ const SequencePlayerStyles = css`
 
 			${IntervalRow} {
 				margin-left: 10px;
+				height: fit-content;
+				margin-top: 0;
 
 				.MuiSelect-select {
 					width: 89px;
