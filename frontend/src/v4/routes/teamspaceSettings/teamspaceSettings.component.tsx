@@ -141,9 +141,11 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 
 		this.props.updateTeamspaceSettings(teamspace, settings);
 		resetForm({
-			topicTypes,
-			riskCategories,
-			createMitigationSuggestions
+			values: {
+				topicTypes,
+				riskCategories,
+				createMitigationSuggestions
+			}
 		});
 		this.setState({
 			fileName: '',

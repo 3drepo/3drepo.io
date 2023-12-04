@@ -68,6 +68,18 @@ export const SequenceTasksListContainer = styled(ViewerPanelContent)`
 	color: ${COLOR.BLACK_60};
 `;
 
+export const SetToCurrentDateButton = styled.span`
+	&&, &&:hover {
+		cursor: pointer;
+		text-decoration: underline;
+		height: fit-content;
+		font-size: 10px;
+		font-weight: 600;
+		margin-left: 3px;
+		color: ${({ theme }) => theme.palette.secondary.main};
+	}
+`;
+
 export const TaskListLabel = styled.div`
 	font-weight: 500;
 	padding: 15px;
@@ -136,7 +148,7 @@ export const SequenceRow = styled(Grid).attrs({
 	container: true,
 	direction: 'row',
 	justify: 'flex-start',
-	alignItems: 'center',
+	alignItems: 'flex-start',
 	item: true
 })`
 	&& {
@@ -144,9 +156,16 @@ export const SequenceRow = styled(Grid).attrs({
 	}
 `;
 
+export const FlexCol = styled.div`
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+`;
+
 export const SliderRow = styled(SequenceRow)`
 	&& {
 		margin-left: -24px;
+		align-items: center;
 	}
 `;
 
