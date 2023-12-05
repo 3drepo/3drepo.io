@@ -53,7 +53,7 @@ export const FloatingButtonsContainer = styled.div`
 export const FloatingButton = styled(ToolbarButton).attrs({
 	TooltipProps: {
 		placement: 'right',
-	}
+	},
 })`
 	border-radius: 50%;
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
