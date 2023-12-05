@@ -51,14 +51,10 @@ export const NavigationButtons = () => {
 				<ButtonOptionsContainer>
 					{expanded && (
 						<FloatingButtonsContainer>
-							<FloatingButton onClick={() => setMode('HELICOPTER')} title={helicopterTooltipText}>
-								<HelicopterIcon />
-							</FloatingButton>
+							<FloatingButton Icon={HelicopterIcon} onClick={() => setMode('HELICOPTER')} title={helicopterTooltipText} />
 						</FloatingButtonsContainer>
 					)}
-					<ToolbarButton onClick={() => setExpanded(!expanded)} title={!expanded ? turntableTooltipText : ''}>
-						<RotateIcon />
-					</ToolbarButton>
+					<ToolbarButton Icon={RotateIcon} onClick={() => setExpanded(!expanded)} title={!expanded ? turntableTooltipText : ''} />
 				</ButtonOptionsContainer>
 			</ClickAwayListener>
 		);
@@ -70,13 +66,13 @@ export const NavigationButtons = () => {
 				{expanded && (
 					<FloatingButtonsContainer>
 						<FloatingButton
+							Icon={ResetIcon}
 							onClick={() => ViewerGuiActionsDispatchers.resetHelicopterSpeed(teamspace, containerOrFederation)}
 							title={formatMessage({ id: 'viewer.toolbar.icon.navigation.helicopter.resetSpeed', defaultMessage: 'Reset speed' })}
 							disabled={helicopterSpeed === INITIAL_HELICOPTER_SPEED}
-						>
-							<ResetIcon />
-						</FloatingButton>
+						/>
 						<FloatingButton
+							Icon={PlusIcon}
 							onClick={() => ViewerGuiActionsDispatchers.increaseHelicopterSpeed(teamspace, containerOrFederation)}
 							title={
 								formatMessage({
@@ -85,10 +81,9 @@ export const NavigationButtons = () => {
 								}, { speed: helicopterSpeed + 1 })
 							}
 							disabled={helicopterSpeed === MAX_HELICOPTER_SPEED}
-						>
-							<PlusIcon />
-						</FloatingButton>
+						/>
 						<FloatingButton
+							Icon={MinusIcon}
 							onClick={() => ViewerGuiActionsDispatchers.decreaseHelicopterSpeed(teamspace, containerOrFederation)}
 							title={
 								formatMessage({
@@ -97,17 +92,11 @@ export const NavigationButtons = () => {
 								}, { speed: helicopterSpeed - 1 })
 							}
 							disabled={helicopterSpeed === MIN_HELICOPTER_SPEED}
-						>
-							<MinusIcon />
-						</FloatingButton>
-						<FloatingButton onClick={() => setMode('TURNTABLE')} title={turntableTooltipText}>
-							<RotateIcon />
-						</FloatingButton>
+						/>
+						<FloatingButton Icon={RotateIcon} onClick={() => setMode('TURNTABLE')} title={turntableTooltipText}/>
 					</FloatingButtonsContainer>
 				)}
-				<ToolbarButton onClick={() => setExpanded(!expanded)} title={!expanded ? helicopterTooltipText : ''}>
-					<HelicopterIcon />
-				</ToolbarButton>
+				<ToolbarButton Icon={HelicopterIcon} onClick={() => setExpanded(!expanded)} title={!expanded ? helicopterTooltipText : ''} />
 			</ButtonOptionsContainer>
 		</ClickAwayListener>
 	);

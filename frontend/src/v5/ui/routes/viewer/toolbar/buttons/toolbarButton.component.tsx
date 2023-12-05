@@ -22,13 +22,13 @@ type ToolbarButtonProps = {
 	disabled?: boolean;
 	selected?: boolean;
 	onClick?: () => void;
-	children: any;
+	Icon: any;
 	title: string;
 };
-export const ToolbarButton = ({ children, title, ...props }: ToolbarButtonProps) => (
+export const ToolbarButton = ({ Icon, title, ...props }: ToolbarButtonProps) => (
 	<Tooltip title={title}>
 		<Container {...props}>
-			{children}
+			<Icon />
 		</Container>
 	</Tooltip>
 );

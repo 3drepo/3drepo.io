@@ -52,25 +52,22 @@ export const ClipButtons = () => {
 				<ButtonOptionsContainer>
 					{expanded && (
 						<FloatingButtonsContainer>
-							<FloatingButton onClick={() => setMode('BOX')} title={startBoxClipTooltipText}>
-								<ClipBoxIcon />
-							</FloatingButton>
-							<FloatingButton onClick={() => setMode('SINGLE')} title={startSingleClipTooltipText}>
-								<ClipPlaneIcon />
-							</FloatingButton>
+							<FloatingButton Icon={ClipBoxIcon} onClick={() => setMode('BOX')} title={startBoxClipTooltipText} />
+							<FloatingButton Icon={ClipPlaneIcon} onClick={() => setMode('SINGLE')} title={startSingleClipTooltipText} />
 						</FloatingButtonsContainer>
 					)}
-					<ToolbarButton onClick={() => setExpanded(!expanded)} title={!expanded ? clipTooltipText : ''}>
-						<ClipPlaneIcon />
-					</ToolbarButton>
+					<ToolbarButton Icon={ClipPlaneIcon} onClick={() => setExpanded(!expanded)} title={!expanded ? clipTooltipText : ''} />
 				</ButtonOptionsContainer>
 			</ClickAwayListener>
 		);
 	}
 
 	return (
-		<ToolbarButton title={clipTooltipText} selected={isClipEdit} onClick={() => ViewerGuiActionsDispatchers.setClipEdit(!isClipEdit)}>
-			{clipMode === 'SINGLE' ? <ClipPlaneIcon /> : <ClipBoxIcon />}
-		</ToolbarButton>
+		<ToolbarButton
+			Icon={clipMode === 'SINGLE' ? ClipPlaneIcon : ClipBoxIcon}
+			title={clipTooltipText}
+			selected={isClipEdit}
+			onClick={() => ViewerGuiActionsDispatchers.setClipEdit(!isClipEdit)}
+		/>
 	);
 };

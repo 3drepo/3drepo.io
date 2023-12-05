@@ -43,14 +43,10 @@ export const ProjectionButtons = () => {
 				<ButtonOptionsContainer>
 					{expanded && (
 						<FloatingButtonsContainer>
-							<FloatingButton onClick={() => setMode('perspective')} title={perspectiveTooltipText}>
-								<PerspectiveIcon />
-							</FloatingButton>
+							<FloatingButton Icon={PerspectiveIcon} onClick={() => setMode('perspective')} title={perspectiveTooltipText} />
 						</FloatingButtonsContainer>
 					)}
-					<ToolbarButton onClick={() => setExpanded(!expanded)} title={!expanded ? orthographicTooltipText : ''}>
-						<OrthogonalIcon />
-					</ToolbarButton>
+					<ToolbarButton Icon={OrthogonalIcon} onClick={() => setExpanded(!expanded)} title={!expanded ? orthographicTooltipText : ''} />
 				</ButtonOptionsContainer>
 			</ClickAwayListener>
 		);
@@ -61,14 +57,10 @@ export const ProjectionButtons = () => {
 			<ButtonOptionsContainer>
 				{expanded && (
 					<FloatingButtonsContainer hidden={!expanded}>
-						<FloatingButton onClick={() => setMode('orthographic')} title={orthographicTooltipText}>
-							<OrthogonalIcon />
-						</FloatingButton>
+						<FloatingButton Icon={OrthogonalIcon} onClick={() => setMode('orthographic')} title={orthographicTooltipText} />
 					</FloatingButtonsContainer>
 				)}
-				<ToolbarButton onClick={() => setExpanded(!expanded)} title={!expanded ? perspectiveTooltipText : ''}>
-					<PerspectiveIcon />
-				</ToolbarButton>
+				<ToolbarButton Icon={PerspectiveIcon} onClick={() => setExpanded(!expanded)} title={!expanded ? perspectiveTooltipText : ''} />
 			</ButtonOptionsContainer>
 		</ClickAwayListener>
 	);

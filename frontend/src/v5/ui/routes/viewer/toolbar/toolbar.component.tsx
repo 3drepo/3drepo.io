@@ -48,35 +48,31 @@ export const Toolbar = () => {
 		<Container>
 			<MainToolbar>
 				<ToolbarButton
+					Icon={HomeIcon}
 					onClick={ViewerGuiActionsDispatchers.goToHomeView}
 					title={formatMessage({ id: 'viewer.toolbar.icon.home', defaultMessage: 'Home' })}
-				>
-					<HomeIcon />
-				</ToolbarButton>
+				/>
 				<ProjectionButtons />
 				<NavigationButtons />
 				<ToolbarButton
+					Icon={FocusIcon}
 					onClick={() => ViewerGuiActionsDispatchers.setIsFocusMode(true)}
 					title={formatMessage({ id: 'viewer.toolbar.icon.focus', defaultMessage: 'Focus' })}
-				>
-					<FocusIcon />
-				</ToolbarButton>
+				/>
 				<ClipButtons />
 				<ToolbarButton
+					Icon={CoordinatesIcon}
 					selected={showCoords}
 					onClick={() => ViewerGuiActionsDispatchers.setCoordView(!showCoords)}
 					title={formatMessage({ id: 'viewer.toolbar.icon.coordinates', defaultMessage: 'Show Coordinates' })}
-				>
-					<CoordinatesIcon />
-				</ToolbarButton>
+				/>
 				<ToolbarButton
+					Icon={InfoIcon}
 					hidden={!hasMetaData}
 					selected={showBIMPanel}
 					onClick={() => setBIMPanelVisibililty(!showBIMPanel)}
 					title={formatMessage({ id: 'viewer.toolbar.icon.attributeData', defaultMessage: 'Attribute Data' })}
-				>
-					<InfoIcon />
-				</ToolbarButton>
+				/>
 			</MainToolbar>
 			<SectionToolbar />
 		</Container>

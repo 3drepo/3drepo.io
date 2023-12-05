@@ -36,35 +36,31 @@ export const SectionToolbar = () => {
 		<Container>
 			<Section hidden={!hasOverrides}>
 				<ToolbarButton
+					Icon={ClearOverridesIcon}
 					hidden={!hasOverrides}
 					onClick={GroupsActionsDispatchers.clearColorOverrides}
 					title={formatMessage({ id: 'viewer.toolbar.icon.clearOverrides', defaultMessage: 'Clear Overrides' })}
-				>
-					<ClearOverridesIcon />
-				</ToolbarButton>
+				/>
 			</Section>
 			<Section hidden={!hasHighlightedObjects && !hasHiddenObjects}>
 				<ToolbarButton
+					Icon={EyeShowIcon}
 					hidden={!hasHiddenObjects}
 					onClick={TreeActionsDispatchers.showAllNodes}
 					title={formatMessage({ id: 'viewer.toolbar.icon.showAll', defaultMessage: 'Show All' })}
-				>
-					<EyeShowIcon />
-				</ToolbarButton>
+				/>
 				<ToolbarButton
+					Icon={EyeHideIcon}
 					hidden={!hasHighlightedObjects}
 					onClick={TreeActionsDispatchers.hideSelectedNodes}
 					title={formatMessage({ id: 'viewer.toolbar.icon.hide', defaultMessage: 'Hide' })}
-				>
-					<EyeHideIcon />
-				</ToolbarButton>
+				/>
 				<ToolbarButton
+					Icon={EyeIsolateIcon}
 					hidden={!hasHighlightedObjects}
 					onClick={() => TreeActionsDispatchers.isolateSelectedNodes(undefined)}
 					title={formatMessage({ id: 'viewer.toolbar.icon.isolate', defaultMessage: 'Isolate' })}
-				>
-					<EyeIsolateIcon />
-				</ToolbarButton>
+				/>
 			</Section>
 		</Container>
 	);
