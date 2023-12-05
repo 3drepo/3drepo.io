@@ -25,20 +25,21 @@ const { templates } = require('../../../../../../../utils/responseCodes');
 
 const Tickets = {};
 
-const serialiseTemplate = (template, showDeprecated, getDetails) => {
-	if (getDetails) {
-		const fullTemplate = generateFullSchema(template);
-		return serialiseTicketTemplate(fullTemplate, !showDeprecated);
-	}
-	return { ...template, _id: UUIDToString(template._id) };
+const serialiseTemplate = (template, showDeprecated) => {
+	const fullTemplate = generateFullSchema(template);
+	return serialiseTicketTemplate(fullTemplate, !showDeprecated);
 };
 
 Tickets.serialiseTemplatesList = (req, res) => {
 	try {
 		const { templates: templateData, query } = req;
 		const getDetails = query?.getDetails === 'true';
+		const showDeprecated = query?.showDeprecated === 'true';
 
-		const formattedData = templateData.map((t) => serialiseTemplate(t, true, getDetails));
+		const formattedData = getDetails
+			? templateData.map((t) => serialiseTemplate(t, showDeprecated))
+			: templateData.map((t) => ({ ...t, _id: UUIDToString(t._id) }));
+
 		respond(req, res, templates.ok, { templates: formattedData });
 	} catch (err) {
 		respond(req, res, templates.unknown);

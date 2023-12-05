@@ -739,16 +739,14 @@ const testGetTicketList = () => {
 	const moduleName = generateRandomString();
 
 	describe.each([
-		['the default projection (undefined filter)', undefined, {}],
-		['the default projection (empty filter)', '', {}],
-		['the default projection (filter with empty property)', ',', {}],
-		['the default projection (filter with empty module)', ',.', {}],
-		['custom projection (filter with one valid and one empty property)', `${propertyName},`, { [`properties.${propertyName}`]: 1 }],
-		['custom projection (filter with one valid and one empty module)', `${moduleName}.${propertyName},`, { [`modules.${moduleName}.${propertyName}`]: 1 }],
-		['custom projection (filter with property)', `${propertyName}`, { [`properties.${propertyName}`]: 1 }],
-		['custom projection (filter with module)', `${moduleName}.${propertyName}`, { [`modules.${moduleName}.${propertyName}`]: 1 }],
-		['custom projection (filter with module and property)', `${moduleName}.${propertyName},${propertyName}`, { [`properties.${propertyName}`]: 1, [`modules.${moduleName}.${propertyName}`]: 1 }],
-	])('Get ticket list', (desc, filter, customProjection) => {
+		['the default projection (undefined filter)', undefined],
+		['the default projection (empty filter)', {}],
+		['custom projection (filter with one valid and one empty property)', { [`properties.${propertyName}`]: 1 }],
+		['custom projection (filter with one valid and one empty module)', { [`modules.${moduleName}.${propertyName}`]: 1 }],
+		['custom projection (filter with property)', { [`properties.${propertyName}`]: 1 }],
+		['custom projection (filter with module)', { [`modules.${moduleName}.${propertyName}`]: 1 }],
+		['custom projection (filter with module and property)', { [`properties.${propertyName}`]: 1, [`modules.${moduleName}.${propertyName}`]: 1 }],
+	])('Get ticket list', (desc, filter) => {
 		test(`Should call getAllTickets in model with ${desc}`, async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
@@ -769,7 +767,7 @@ const testGetTicketList = () => {
 				title: 1,
 				number: 1,
 				type: 1,
-				...customProjection,
+				...filter,
 				[`properties.${basePropertyLabels.OWNER}`]: 1,
 				[`properties.${basePropertyLabels.CREATED_AT}`]: 1,
 				[`properties.${basePropertyLabels.DEFAULT_VIEW}`]: 1,

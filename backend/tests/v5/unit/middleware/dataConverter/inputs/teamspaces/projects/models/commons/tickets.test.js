@@ -278,7 +278,35 @@ const testValidateUpdateTicket = () => {
 	});
 };
 
+const testConvertFilterToProjection = () => {
+	describe('Convert filter to projection', () => {
+		const propName1 = generateRandomString();
+		const propName2 = generateRandomString();
+		const modName1 = generateRandomString();
+		const modName2 = generateRandomString();
+
+		describe.each([
+			['with no filter', { }, {}],
+			['with invalid filter (empty property name)', { filter: ',' }, {}],
+			['with invalid filter (empty module name)', { filter: ',.' }, {}],
+			['with empty filter', { filter: '' }, {}],
+			['with filter that has properties', { filter: `${propName1},${propName2}` }, { [`properties.${propName1}`]: 1, [`properties.${propName2}`]: 1 }],
+			['with filter that has modules', { filter: `${modName1}.${propName1},${modName2}.${propName2}` }, { [`modules.${modName1}.${propName1}`]: 1, [`modules.${modName2}.${propName2}`]: 1 }],
+			['with filter that has both modules and properties', { filter: `${propName1},${modName2}.${propName2}` }, { [`properties.${propName1}`]: 1, [`modules.${modName2}.${propName2}`]: 1 }],
+		])('Check if req arguments for new comment are valid', (desc, query, expectedProjection) => {
+			test(`should convert the query filter to projection ${desc}`, async () => {
+				const mockCB = jest.fn();
+				const req = { query };
+				await Tickets.convertFilterToProjection(req, {}, mockCB);
+				expect(req.filter).toEqual(expectedProjection);
+				expect(mockCB).toHaveBeenCalledTimes(1);
+			});
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets', () => {
 	testValidateNewTicket();
 	testValidateUpdateTicket();
+	testConvertFilterToProjection();
 });

@@ -66,6 +66,26 @@ const templateIDToParams = async (req, res, next) => {
 	}
 };
 
+TicketsMiddleware.convertFilterToProjection = async (req, res, next) => {
+	const projectionObject = {};
+
+	req.query.filter?.split(',').forEach((name) => {
+		if (name) {
+			if (name.includes('.')) {
+				const [moduleName, moduleProp] = name.split('.');
+				if (moduleName && moduleProp) {
+					projectionObject[`modules.${name}`] = 1;
+				}
+			} else {
+				projectionObject[`properties.${name}`] = 1;
+			}
+		}
+	});
+
+	req.filter = projectionObject;
+	await next();
+};
+
 TicketsMiddleware.checkTicketExists = async (req, res, next) => {
 	const { teamspace, project, model, ticket } = req.params;
 
