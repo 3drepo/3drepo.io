@@ -34,6 +34,7 @@ const startSingleClipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.clip
 export const ClipButtons = () => {
 	const [expanded, setExpanded] = useState(false);
 	const clipMode: ClipMode = ViewerGuiHooksSelectors.selectClippingMode();
+	const isClipEdit = ViewerGuiHooksSelectors.selectIsClipEdit();
 
 	const setMode = (mode: ClipMode) => {
 		setExpanded(false);
@@ -68,7 +69,7 @@ export const ClipButtons = () => {
 	}
 
 	return (
-		<ToolbarButton title={clipTooltipText} selected>
+		<ToolbarButton title={clipTooltipText} selected={isClipEdit} onClick={() => ViewerGuiActionsDispatchers.setClipEdit(!isClipEdit)}>
 			{clipMode === 'SINGLE' ? <ClipPlaneIcon /> : <ClipBoxIcon />}
 		</ToolbarButton>
 	);

@@ -81,6 +81,7 @@ interface IViewerGuiActionCreators {
 	setCoordView: (visible: boolean) => Action;
 	setPanelVisibility: (panelName: string, visible: boolean) => Action;
 	updateClipState: (clipNumber: number) => Action;
+	setClipEdit: (isClipEdit: boolean) => Action;
 }
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
