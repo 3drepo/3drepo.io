@@ -28,8 +28,7 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	setSelectedTicketPin: ['pinId'],
 	addTicketsTemplateFilter: ['templateId'],
 	removeTicketsTemplateFilter: ['templateId'],
-	addTicketsQueryFilter: ['query'],
-	removeTicketsQueryFilter: ['query'],
+	setTicketsQueriesFilter: ['searchQueries'],
 	toggleTicketsCompleteFilter: [],
 	setCardView: ['view'],
 	openTicket: ['ticketId'],
@@ -82,12 +81,8 @@ export const removeTicketsTemplateFilter = (state: ITicketsCardState, { template
 	state.ticketsFilters.templates.splice(state.ticketsFilters.templates.findIndex((id) => id === templateId), 1);
 };
 
-export const addTicketsQueryFilter = (state: ITicketsCardState, { searchQuery }: AddTicketsQueryFilterAction) => {
-	state.ticketsFilters.queries.push(searchQuery);
-};
-
-export const removeTicketsQueryFilter = (state: ITicketsCardState, { searchQuery }: RemoveTicketsQueryFilterAction) => {
-	state.ticketsFilters.queries.splice(state.ticketsFilters.queries.findIndex((id) => id === searchQuery), 1);
+export const setTicketsQueriesFilter = (state: ITicketsCardState, { searchQueries }: SetTicketsQueriesFilterAction) => {
+	state.ticketsFilters.queries = searchQueries;
 };
 
 export const toggleTicketsCompleteFilter = (state: ITicketsCardState) => {
@@ -117,8 +112,7 @@ export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SET_SELECTED_TICKET_PIN]: setSelectedTicketPin,
 	[TicketsCardTypes.ADD_TICKETS_TEMPLATE_FILTER]: addTicketsTemplateFilter,
 	[TicketsCardTypes.REMOVE_TICKETS_TEMPLATE_FILTER]: removeTicketsTemplateFilter,
-	[TicketsCardTypes.ADD_TICKETS_QUERY_FILTER]: addTicketsQueryFilter,
-	[TicketsCardTypes.REMOVE_TICKETS_QUERY_FILTER]: removeTicketsQueryFilter,
+	[TicketsCardTypes.SET_TICKETS_QUERIES_FILTER]: setTicketsQueriesFilter,
 	[TicketsCardTypes.TOGGLE_TICKETS_COMPLETE_FILTER]: toggleTicketsCompleteFilter,
 	[TicketsCardTypes.SET_CARD_VIEW]: setCardView,
 	[TicketsCardTypes.SET_READ_ONLY]: setReadOnly,
@@ -131,8 +125,7 @@ export type SetSelectedTemplateAction = Action<'SET_SELECTED_TEMPLATE'> & { temp
 export type SetSelectedTicketPinAction = Action<'SET_SELECTED_TICKET_PIN'> & { pinId: string };
 export type AddTicketsTemplateFilterAction = Action<'ADD_TICKETS_TEMPLATE_FILTER'> & { templateId: string };
 export type RemoveTicketsTemplateFilterAction = Action<'REMOVE_TICKETS_TEMPLATE_FILTER'> & { templateId: string };
-export type AddTicketsQueryFilterAction = Action<'ADD_TICKETS_QUERY_FILTER'> & { searchQuery: string };
-export type RemoveTicketsQueryFilterAction = Action<'REMOVE_TICKETS_QUERY_FILTER'> & { searchQuery: string };
+export type SetTicketsQueriesFilterAction = Action<'ADD_TICKETS_QUERY_FILTER'> & { searchQueries: string[] };
 export type ToggleTicketsCompleteFilterAction = Action<'TOGGLE_TICKETS_COMPLETE_FILTER'>;
 export type SetCardViewAction = Action<'SET_CARD_VIEW'> & { view: TicketsCardViews };
 export type OpenTicketAction = Action<'OPEN_TICKET'> & { ticketId: string };
@@ -146,8 +139,7 @@ export interface ITicketsCardActionCreators {
 	setSelectedTicketPin: (pinId: string) => SetSelectedTicketPinAction,
 	addTicketsTemplateFilter: (templateId: string) => AddTicketsTemplateFilterAction,
 	removeTicketsTemplateFilter: (templateId: string) => RemoveTicketsTemplateFilterAction,
-	addTicketsQueryFilter: (searchQuery: string) => AddTicketsQueryFilterAction,
-	removeTicketsQueryFilter: (searchQuery: string) => RemoveTicketsQueryFilterAction,
+	setTicketsQueriesFilter: (searchQueries: string[]) => SetTicketsQueriesFilterAction,
 	toggleTicketsCompleteFilter: () => ToggleTicketsCompleteFilterAction,
 	setCardView: (view: TicketsCardViews) => SetCardViewAction,
 	openTicket: (ticketId: string) => OpenTicketAction,
