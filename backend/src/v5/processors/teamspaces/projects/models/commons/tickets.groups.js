@@ -80,7 +80,7 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules) 
 	return { container: model, _ids: Object.values(matchedMeshes) };
 };
 
-const convert3dRepoGuidsToExternalIds = async (teamspace, project, model, objects) => {
+const convert3dRepoGuidsToExternalIds = async (teamspace, project, objects) => {
 	const convertedObjects = await Promise.all(objects.map(async (obj) => {
 		const convertedObject = { ...obj };
 
@@ -88,15 +88,15 @@ const convert3dRepoGuidsToExternalIds = async (teamspace, project, model, object
 			let externalIds;
 			let externalIdsName;
 
-			let shared_ids = await getNodesByByIds(teamspace, project, model, obj._ids,
+			let shared_ids = await getNodesByByIds(teamspace, project, obj.container, obj._ids,
 				{ _id: 0, shared_id: 1 });
 			shared_ids = shared_ids.map((s) => s.shared_id);
 
-			externalIds = await sharedIdsToExternalIds(teamspace, model, shared_ids, 'IFC GUID');
+			externalIds = await sharedIdsToExternalIds(teamspace, obj.container, shared_ids, 'IFC GUID');
 			if (externalIds?.length) {
 				externalIdsName = 'ifc_guids';
 			} else {
-				externalIds = await sharedIdsToExternalIds(teamspace, model, shared_ids, 'Element ID');
+				externalIds = await sharedIdsToExternalIds(teamspace, obj.container, shared_ids, 'Element ID');
 				if (externalIds?.length) {
 					externalIdsName = 'revitIds';
 				}
@@ -114,7 +114,7 @@ const convert3dRepoGuidsToExternalIds = async (teamspace, project, model, object
 	return convertedObjects;
 };
 
-const convertExternalIdsTo3dRepoGuids = async (teamspace, project, model, revId, objects) => {
+const convertExternalIdsTo3dRepoGuids = async (teamspace, project, revId, objects) => {
 	const convertedObjects = await Promise.all(objects.map(async (obj) => {
 		if (obj._ids) {
 			return obj;
@@ -125,7 +125,7 @@ const convertExternalIdsTo3dRepoGuids = async (teamspace, project, model, revId,
 		let revision = revId;
 		if (!revision) {
 			try {
-				const rev = await getLatestRevision(teamspace, model, { _id: 1 });
+				const rev = await getLatestRevision(teamspace, obj.container, { _id: 1 });
 				revision = rev._id;
 			} catch (err) {
 				return convertedObject;
@@ -134,14 +134,14 @@ const convertExternalIdsTo3dRepoGuids = async (teamspace, project, model, revId,
 
 		let metadata;
 		if (obj.revitIds) {
-			metadata = await getMetadataByValues(teamspace, model, revision, 'Element ID', obj.revitIds, { parents: 1 });
+			metadata = await getMetadataByValues(teamspace, obj.container, revision, 'Element ID', obj.revitIds, { parents: 1 });
 			delete convertedObject.revitIds;
 		} else if (obj.ifc_guids) {
-			metadata = await getMetadataByValues(teamspace, model, revision, 'IFC GUID', obj.ifc_guids, { parents: 1 });
+			metadata = await getMetadataByValues(teamspace, obj.container, revision, 'IFC GUID', obj.ifc_guids, { parents: 1 });
 			delete convertedObject.ifc_guids;
 		}
 
-		const nodes = await getNodesBySharedIds(teamspace, project, model, revision,
+		const nodes = await getNodesBySharedIds(teamspace, project, obj.container, revision,
 			metadata.flatMap(({ parents }) => parents), { _id: 1 });
 
 		convertedObject._ids = nodes.map(({ _id }) => _id);
@@ -155,7 +155,7 @@ const convertExternalIdsTo3dRepoGuids = async (teamspace, project, model, revId,
 TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
 	const convertedGroups = await Promise.all(groups.map(
 		async (group) => {
-			const objects = await convert3dRepoGuidsToExternalIds(teamspace, project, model, group.objects);
+			const objects = await convert3dRepoGuidsToExternalIds(teamspace, project, group.objects);
 			return { ...group, objects };
 		}));
 
@@ -166,7 +166,7 @@ TicketGroups.updateTicketGroup = async (teamspace, project, model, ticket, group
 	const convertedData = { ...data };
 
 	if (data.objects) {
-		convertedData.objects = await convert3dRepoGuidsToExternalIds(teamspace, project, model, data.objects);
+		convertedData.objects = await convert3dRepoGuidsToExternalIds(teamspace, project, data.objects);
 	}
 
 	await updateGroup(teamspace, project, model, ticket, groupId, convertedData, author);
@@ -190,7 +190,7 @@ TicketGroups.getTicketGroupById = async (teamspace, project, model, revId, ticke
 	}
 
 	if (convertTo3DRepoGuids) {
-		group.objects = await convertExternalIdsTo3dRepoGuids(teamspace, project, model, revId, group.objects);
+		group.objects = await convertExternalIdsTo3dRepoGuids(teamspace, project, revId, group.objects);
 	}
 
 	return group;
