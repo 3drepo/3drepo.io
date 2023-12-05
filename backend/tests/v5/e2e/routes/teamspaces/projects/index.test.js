@@ -169,7 +169,7 @@ const testCreateProject = () => {
 			const res = await agent.post(route())
 				.send({ name: 'Valid Name' }).expect(templates.ok.status);
 
-			const projectsRes = await agent.get(`${route}?key=${users.tsAdmin.apiKey}`).expect(templates.ok.status);
+			const projectsRes = await agent.get(route(teamspace, users.tsAdmin.apiKey)).expect(templates.ok.status);
 			expect(projectsRes.body.projects.find((p) => p.name === 'Valid Name')).not.toBe(undefined);
 
 			// Delete project afterwards
