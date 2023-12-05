@@ -110,7 +110,7 @@ export class Bim extends PureComponent<IProps, any> {
 		const { isPending, searchEnabled } = this.props;
 		return (
 			<ViewerPanel
-				title="BIM"
+				title="Attribute Data"
 				Icon={this.getTitleIcon()}
 				renderActions={this.renderActions}
 				pending={isPending}
