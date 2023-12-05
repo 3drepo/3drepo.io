@@ -51,7 +51,7 @@ export const FloatingButtonsContainer = styled.div`
 `;
 
 export const FloatingButton = styled(ToolbarButton).attrs({
-	TooltipProps: {
+	tooltipProps: {
 		placement: 'right',
 	},
 })`
