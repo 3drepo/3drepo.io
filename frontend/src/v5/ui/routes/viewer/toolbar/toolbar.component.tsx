@@ -73,7 +73,7 @@ export const Toolbar = () => {
 					hidden={!hasMetaData}
 					selected={showBIMPanel}
 					onClick={() => setBIMPanelVisibililty(!showBIMPanel)}
-					title={formatMessage({ id: 'viewer.toolbar.icon.bim', defaultMessage: 'BIM' })}
+					title={formatMessage({ id: 'viewer.toolbar.icon.attributeData', defaultMessage: 'Attribute Data' })}
 				>
 					<InfoIcon />
 				</ToolbarButton>
