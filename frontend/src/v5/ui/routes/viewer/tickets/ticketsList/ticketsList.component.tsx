@@ -48,7 +48,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const availableTemplates = templates.filter(({ _id }) => availableTemplatesIds.includes(_id));
 
 	const ticketIsSelected = (ticket: ITicket) => selectedTicket?._id === ticket._id;
-	const filteredByCompleted = TicketsCardHooksSelectors.selectTicketsFilteredByCompleted();
+	const filteredByQueriesAndCompleted = TicketsCardHooksSelectors.selectTicketsFilteredByQueriesAndCompleted();
 	const filteredItems = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied();
 
 	const toggleTemplate = (templateId: string) => {
@@ -98,7 +98,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 					label={formatMessage({ id: 'ticketsList.filters.completed', defaultMessage: 'Completed' })}
 				/>
 				{availableTemplates.map(({ name, _id }) => {
-					const count = filteredByCompleted.filter(({ type }) => type === _id).length;
+					const count = filteredByQueriesAndCompleted.filter(({ type }) => type === _id).length;
 					return (
 						<FilterChip
 							key={_id}
