@@ -20,12 +20,15 @@ import EyeShowIcon from '@assets/icons/viewer/eye_show.svg';
 import EyeIsolateIcon from '@assets/icons/viewer/eye_isolate.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { GroupsActionsDispatchers, TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { GroupsHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
+import { GroupsHooksSelectors, TicketsCardHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
+import { isEmpty } from 'lodash';
 import { Section, Container } from './sectionToolbar.styles';
 import { ToolbarButton } from '../buttons/toolbarButton.component';
 
 export const SectionToolbar = () => {
-	const hasOverrides = GroupsHooksSelectors.selectGroupsColourOverrides()?.length > 0;
+	const hasGroupOverrides = GroupsHooksSelectors.selectGroupsColourOverrides()?.length > 0;
+	const hasTicketOverrides = !isEmpty(TicketsCardHooksSelectors.selectTicketOverrides());
+	const hasOverrides = hasGroupOverrides || hasTicketOverrides;
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectFullySelectedNodesIds().length;
 	const hasHiddenObjects = TreeHooksSelectors.selectModelHasHiddenNodes();
 
