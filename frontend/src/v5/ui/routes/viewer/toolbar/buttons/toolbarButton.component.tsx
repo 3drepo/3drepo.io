@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Tooltip } from '@mui/material';
+import { Tooltip, TooltipProps } from '@mui/material';
 import { Container } from './toolbarButton.styles';
 
 type ToolbarButtonProps = {
@@ -24,9 +24,10 @@ type ToolbarButtonProps = {
 	onClick?: () => void;
 	Icon: any;
 	title: string;
+	TooltipProps?: Omit<TooltipProps, 'title' | 'children'>;
 };
-export const ToolbarButton = ({ Icon, title, ...props }: ToolbarButtonProps) => (
-	<Tooltip title={title}>
+export const ToolbarButton = ({ Icon, title, TooltipProps, ...props }: ToolbarButtonProps) => (
+	<Tooltip {...TooltipProps} title={title}>
 		<Container {...props}>
 			<Icon />
 		</Container>
