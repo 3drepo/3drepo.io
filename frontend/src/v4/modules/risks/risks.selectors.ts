@@ -126,13 +126,17 @@ export const selectSelectedFilters = createSelector(
 
 export const selectAllFilteredRisksGetter = createSelector(
 	selectRisks, selectSelectedFilters, selectSortOrder, selectSortByField,
-		(risks, selectedFilters, sortOrder, sortByField) => (forceReturnHiddenRisk = false) => {
-			const returnHiddenRisk = selectedFilters.length && selectedFilters
-				.some(({ value: { value } }) => RISK_DEFAULT_HIDDEN_LEVELS.includes(value));
+	(risks, selectedFilters, sortOrder, sortByField) => (forceReturnHiddenRisk = false, ignoreFilters = false) => {
+		const returnHiddenRisk = selectedFilters.length && selectedFilters
+			.some(({ value: { value } }) => RISK_DEFAULT_HIDDEN_LEVELS.includes(value));
 
-			return sortByDate(searchByFilters(risks, selectedFilters, returnHiddenRisk || forceReturnHiddenRisk),
-				{ order: sortOrder }, sortByField );
-});
+		return sortByDate(
+			searchByFilters(risks, ignoreFilters ? [] : selectedFilters, returnHiddenRisk || forceReturnHiddenRisk),
+			{ order: sortOrder },
+			sortByField,
+		);
+	}
+);
 
 export const selectFilteredRisks = createSelector(
 	selectAllFilteredRisksGetter,
