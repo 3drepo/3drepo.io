@@ -1,0 +1,80 @@
+/**
+ *  Copyright (C) 2023 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+type QueueItem<T> = { promise: Promise<T>, resolve, args, resolved: boolean };
+export class LifoQueue<T> {
+	private queue: QueueItem<T>[] = [] ;
+
+	private dict = {};
+
+	private batchSize;
+
+	private running = false;
+
+	private func: (...args) => Promise<T>;
+
+	private getPromise(args):QueueItem<T>  {
+		let prom = this.dict[JSON.stringify(args)];
+		if (!prom) {
+			prom = {};
+			prom.promise = new Promise((resolve) => prom.resolve = resolve);
+			prom.args = args;
+			prom.resolved = false;
+		}
+		
+		return prom;
+	}
+
+	private async runqueue() {
+		this.running = true;
+		while (this.queue.length) {
+			const batch =  this.queue.splice(Math.max(this.queue.length - this.batchSize, 0));
+			await Promise.all(batch.reverse().map(async (p) => {
+				if (p.resolved) {
+					return p.promise;
+				}
+				
+				p.resolve(await this.func(...p.args));
+				// eslint-disable-next-line no-param-reassign
+				p.resolved = true;
+			}));
+		}
+		this.clearQueue();
+		this.running = false;
+	}
+
+	public enqueue(...args): Promise<T> {
+		const prom = this.getPromise(args);
+		this.queue.push(prom);
+
+		if (this.queue.length && !this.running) {
+			this.runqueue();
+		}
+
+		return prom.promise;
+	}
+
+	public clearQueue() {
+		this.queue = [];
+		this.dict = {};
+	}
+
+	public constructor(func: (...args) => Promise<T>, batchSize) {
+		this.func = func;
+		this.batchSize = batchSize;
+	}
+}
