@@ -20,7 +20,7 @@ const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
 
-const { src, modelFolder } = require('../../../helper/path');
+const { src, modelFolder, imagesFolder } = require('../../../helper/path');
 const config = require('../../../../../src/v5/utils/config');
 
 const MulterHelper = require(`${src}/middleware/dataConverter/multer`);
@@ -31,10 +31,13 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
-const createRequestWithFile = (filename = 'file', file = 'dummy.obj') => {
+const createRequestWithFile = (filename = 'file', file = 'dummy.obj', folder = modelFolder) => {
 	const form = new FormData();
-	form.append(filename,
-		fs.createReadStream(path.join(modelFolder, file)));
+
+	if (filename) {
+		form.append(filename,
+			fs.createReadStream(path.join(folder, file)));
+	}
 
 	const req = new MockExpressRequest({
 		method: 'POST',
@@ -48,8 +51,33 @@ const createRequestWithFile = (filename = 'file', file = 'dummy.obj') => {
 	return req;
 };
 
+const testSingleImageUpload = () => {
+	describe.each([
+		['request provides a valid image file', createRequestWithFile('file', 'valid.png', imagesFolder), undefined, true],
+		['request provides non image file', createRequestWithFile('file'), undefined, false, templates.unsupportedFileFormat.code],
+		['request provides corrupted image', createRequestWithFile('file', 'corrupted.png', imagesFolder), undefined, false, templates.unsupportedFileFormat.code],
+		['request provides too large image', createRequestWithFile('file', 'tooBig.png', imagesFolder), undefined, false, templates.maxSizeExceeded.code],
+	])('Single image upload', (desc, req, fileName, success, code = templates.invalidArguments.code) => {
+		test(`${success ? 'next() should be called' : `should fail with ${code}`} if ${desc}`, async () => {
+			const mockCB = jest.fn(() => { });
+			const resCallLength = Responder.respond.mock.calls.length;
+			await MulterHelper.singleImageUpload(fileName)(req, {}, mockCB);
+
+			if (success) {
+				expect(mockCB).toHaveBeenCalledTimes(1);
+				expect(req.file).toBeTruthy();
+			} else {
+				expect(mockCB).not.toHaveBeenCalled();
+				expect(Responder.respond).toHaveBeenCalledTimes(resCallLength + 1);
+				expect(Responder.respond.mock.calls[0][2].code).toEqual(code);
+			}
+		});
+	});
+};
+
 const testSingleFileUpload = () => {
 	describe.each([
+		['request does not have a file', createRequestWithFile(null), undefined, (a, b, cb) => { cb(null, true); }, config.uploadSizeLimit, false, false, templates.invalidArguments.code],
 		['request provides the correct parameters and no filter', createRequestWithFile(), undefined, (a, b, cb) => { cb(null, true); }, config.uploadSizeLimit, false, true],
 		['request provides the correct parameters and no filter (2)', createRequestWithFile('a'), 'a', (a, b, cb) => { cb(null, true); }, config.uploadSizeLimit, false, true],
 		['request provides the correct parameters and no filter and store file in memory', createRequestWithFile(), undefined, (a, b, cb) => { cb(null, true); }, config.uploadSizeLimit, true, true],
@@ -75,5 +103,6 @@ const testSingleFileUpload = () => {
 };
 
 describe('middleware/dataConverter/multer', () => {
+	testSingleImageUpload();
 	testSingleFileUpload();
 });

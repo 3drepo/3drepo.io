@@ -26,6 +26,7 @@ const ProjectsModel = require(`${src}/models/projectSettings`);
 const Projects = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
+const { generateRandomString } = require('../../../../../../helper/services');
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
@@ -59,6 +60,38 @@ const testValidateProjectData = () => {
 	});
 };
 
+const testProjectExists = () => {
+	describe('Check if project exists', () => {
+		test('should respond with error if project does not exist', async () => {
+			const mockCB = jest.fn(() => {});
+			const req = { params: { teamspace: generateRandomString(), project: generateRandomString() } };
+			ProjectsModel.getProjectById.mockRejectedValueOnce(templates.projectNotFound);
+
+			await Projects.projectExists(req, {}, mockCB);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(ProjectsModel.getProjectById).toHaveBeenCalledTimes(1);
+			expect(ProjectsModel.getProjectById).toHaveBeenCalledWith(req.params.teamspace, req.params.project,
+				{ _id: 1 });
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.projectNotFound);
+		});
+
+		test('next() should be called if the project exists', async () => {
+			const mockCB = jest.fn(() => {});
+			const req = { params: { teamspace: generateRandomString(), project: generateRandomString() } };
+			ProjectsModel.getProjectById.mockResolvedValueOnce({});
+
+			await Projects.projectExists(req, {}, mockCB);
+			expect(mockCB).toHaveBeenCalled();
+			expect(ProjectsModel.getProjectById).toHaveBeenCalledTimes(1);
+			expect(ProjectsModel.getProjectById).toHaveBeenCalledWith(req.params.teamspace, req.params.project,
+				{ _id: 1 });
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/teamspaces/projects', () => {
 	testValidateProjectData();
+	testProjectExists();
 });

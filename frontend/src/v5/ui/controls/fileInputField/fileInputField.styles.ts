@@ -18,11 +18,11 @@
 import styled from 'styled-components';
 
 export const HiddenFileInput = styled.input`
-	visibility: hidden;
+	display: none;
 	height: 0;
 	width: 0;
 `;
 
 export const FileLabel = styled.label`
-	margin: 0 10px;
+	margin: 0;
 `;

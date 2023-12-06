@@ -15,14 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import { generateV5ApiUrl } from '@/v5/services/api/default';
+import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 
-export const ClearDateAction = styled.div`
-	${({ theme }) => theme.typography.body1}
-	font-weight: 500;
-	color: ${({ theme }) => theme.palette.error.main};
-	margin-right: 22px;
-	cursor: pointer;
-	height: 32px;
-	text-align: right;
-`;
+export const DEFAULT_PROJECT_IMAGE = 'assets/images/default_background.png';
+
+export const getProjectImgSrc = (teamspace: string, project: string) => (
+	generateV5ApiUrl(`teamspaces/${teamspace}/projects/${project}/image`, clientConfigService.GET_API)
+);
+
+export const projectImageFileIsTooBig = (file): boolean => (file.size > clientConfigService.projectImageSizeLimit);
+export const PROJECT_IMAGE_MAX_SIZE_MESSAGE = formatInfoUnit(clientConfigService.projectImageSizeLimit);

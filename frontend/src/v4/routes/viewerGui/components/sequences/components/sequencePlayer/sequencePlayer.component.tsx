@@ -28,10 +28,10 @@ import { FormattedMessage } from 'react-intl';
 
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
-import { isDateOutsideRange, MILLI_PER_HOUR } from '../../../../../../helpers/dateTime';
+import { isDateOutsideRange } from '../../../../../../helpers/dateTime';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { getDateByStep, getSelectedFrameIndex } from '../../../../../../modules/sequences/sequences.helper';
-import { LONG_DATE_TIME_FORMAT_NO_MINUTES, LONG_DATE_TIME_FORMAT_NO_MINUTES_V5 } from '../../../../../../services/formatting/formatDate';
+import { LONG_DATE_TIME_FORMAT_V5 } from '../../../../../../services/formatting/formatDate';
 import {
 	DatePicker,
 	FlexCol,
@@ -304,8 +304,8 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 										shouldDisableDate={(date: any) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
 										name="date"
 										value={value}
-										inputFormat={LONG_DATE_TIME_FORMAT_NO_MINUTES_V5}
-										onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / MILLI_PER_HOUR) * MILLI_PER_HOUR))}
+										inputFormat={LONG_DATE_TIME_FORMAT_V5}
+										onChange={(e) => this.gotoDate(new Date(e.target.value))}
 										placeholder="date"
 										dateTime
 									/>

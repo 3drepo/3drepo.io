@@ -97,7 +97,7 @@ export const NewTicketCard = () => {
 
 	useEffect(() => {
 		formData.reset(defaultTicket);
-	}, [JSON.stringify(defaultTicket)]);
+	}, [isLoading]);
 
 	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
 

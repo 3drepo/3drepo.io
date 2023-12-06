@@ -16,11 +16,13 @@
  */
 
 import { selectCurrentModel } from '@/v4/modules/model';
-import { TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { createSelector } from 'reselect';
 import { selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
 import { ITicketsCardState } from './ticketsCard.redux';
 import { getPinColorHex, DEFAULT_PIN,  ticketToPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
+import { IPin } from '@/v4/services/viewer/viewer';
+import { SequencingProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { selectSelectedDate } from '@/v4/modules/sequences';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
@@ -100,14 +102,29 @@ export const selectTicketPins = createSelector(
 	selectCurrentTemplates,
 	selectView,
 	selectSelectedTicketPinId,
-	(tickets, templates, view, selectedTicketPinId) => {
+	selectSelectedDate,
+	(tickets, templates, view, selectedTicketPinId, selectedSequenceDate): IPin[] => {
 		if (view !== TicketsCardViews.List) return [];
 
 		return tickets.reduce(
 			(accum, ticket) => {
+				if (!ticket.properties?.Pin) return accum;
 				const template = templates.find(({ _id }) => _id === ticket.type);
 				const color = getPinColorHex(DEFAULT_PIN, template, ticket);
-				return ticket.properties?.Pin ? [...accum, ticketToPin(ticket, selectedTicketPinId, color)] : accum;
+
+				const pin = ticket.properties?.Pin;
+				if (!pin) return accum;
+				const { sequencing } = ticket.modules;
+				
+				if (sequencing && selectedSequenceDate) {
+					const startDate = sequencing[SequencingProperties.START_TIME];
+					const endDate = sequencing[SequencingProperties.END_TIME];
+					if (
+						startDate && new Date(startDate) > new Date(selectedSequenceDate) ||
+						endDate && new Date(endDate) < new Date(selectedSequenceDate)
+					) return accum;
+				}
+				return [...accum, ticketToPin(ticket, selectedTicketPinId, color)];
 			},
 			[],
 		);
