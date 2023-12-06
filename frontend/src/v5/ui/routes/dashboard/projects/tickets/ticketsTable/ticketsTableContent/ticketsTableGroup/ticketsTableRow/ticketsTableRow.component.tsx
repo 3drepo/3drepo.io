@@ -27,7 +27,7 @@ import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, STATUS_MAP, TREATMENT_LEVELS_MAP 
 import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { Tooltip } from '@mui/material';
-import { formatDate, formatTime } from '@/v5/services/intl';
+import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { Row, Cell, CellChipText, CellOwner, OverflowContainer, SmallFont, CellDate } from './ticketsTableRow.styles';
 
 type TicketsTableRowProps = {
@@ -94,7 +94,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 			</Cell>
 			<Cell width={109}>
 				<SmallFont>
-					{formatDate(createdAt)} {formatTime(createdAt)}
+					{formatShortDateTime(createdAt)}
 				</SmallFont>
 			</Cell>
 			<Cell width={96} hidden={!hasProperties}>
