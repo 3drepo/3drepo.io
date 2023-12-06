@@ -126,11 +126,12 @@ export const selectTicketsFilteredByQueriesAndCompleted = createSelector(
 	selectCurrentTemplates,
 	(tickets, isComplete, queries, templates) => {
 		const filteredByCompleted = tickets.filter((ticket) => getTicketIsCompleted(ticket) === isComplete);
-		return queries.length ? filteredByCompleted.filter((ticket) => {
+		if (!queries.length) return filteredByCompleted;
+		return filteredByCompleted.filter((ticket) => {
 			const templateCode = templates.find((template) => template._id === ticket.type).code;
 			const ticketCode = `${templateCode}:${ticket.number}`;
 			return queries.some((q) => [ticketCode, ticket.title].some((str) => str.toLowerCase().includes(q.toLowerCase())));
-		}) : filteredByCompleted;
+		});
 	},
 );
 
@@ -140,7 +141,8 @@ export const selectTicketsWithAllFiltersApplied = createSelector(
 	selectFilteringQueries,
 	selectCurrentTemplates,
 	(tickets, filteredTemplates) => {
-		return filteredTemplates.length ? tickets.filter(({ type }) => filteredTemplates.includes(type)) : tickets;
+		if (!filteredTemplates.length) return tickets;
+		return tickets.filter(({ type }) => filteredTemplates.includes(type));
 	},
 );
 
@@ -155,11 +157,12 @@ export const selectTicketPins = createSelector(
 	(tickets, templates, view, selectedTicketPinId, selectedTicket, selectedSequenceDate): IPin[] => {
 		if (view === TicketsCardViews.New) return [];
 		const pinArray = [];
+		if (!templates.length || !tickets.length) return;
 		if (view === TicketsCardViews.Details) {
 			const selectedTemplate = templates.find(({ _id }) => _id === selectedTicket.type);
 			selectedTemplate.properties.forEach(({ name, type }) => {
-				if (type !== 'coords' || !selectedTicket.properties[name]) return;
 				const pinPath = `${TicketBaseKeys.PROPERTIES}.${name}`;
+				if (type !== 'coords' || !get(selectedTicket, pinPath)) return;
 				const pinId = pinPath === DEFAULT_PIN ? selectedTicket._id : `${selectedTicket._id}.${pinPath}`;
 				const color = getPinColorHex(pinPath, selectedTemplate, selectedTicket);
 				return pinArray.push(ticketToPin(pinId, get(selectedTicket, pinPath), selectedTicketPinId, color));
@@ -177,7 +180,7 @@ export const selectTicketPins = createSelector(
 			});
 			return pinArray;
 		}
-		return (tickets).reduce(
+		return tickets.reduce(
 			(accum, ticket) => {
 				if (!ticket.properties?.Pin) return accum;
 				const template = templates.find(({ _id }) => _id === ticket.type);
