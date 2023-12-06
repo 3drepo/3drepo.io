@@ -70,7 +70,7 @@ function* fetchData({ teamspace, containerOrFederation, project }: FetchDataActi
 		}
 
 		yield put(TicketsActions.fetchTickets(teamspace, project, containerOrFederation, isFederation));
-		yield put(TicketsActions.fetchTemplates(teamspace, project, containerOrFederation, isFederation));
+		yield put(TicketsActions.fetchTemplates(teamspace, project, containerOrFederation, isFederation, true));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'viewer.fetch.error', defaultMessage: 'trying to fetch viewer data' }),

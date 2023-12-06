@@ -97,22 +97,14 @@ export function* fetchTemplate({ teamspace, projectId, modelId, templateId, isFe
 	}
 }
 
-export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }: FetchTemplatesAction) {
+export function* fetchTemplates({ teamspace, projectId, modelId, isFederation, getDetails = false }: FetchTemplatesAction) {
 	try {
 		const fetchModelTemplates = isFederation
 			? API.Tickets.fetchFederationTemplates
 			: API.Tickets.fetchContainerTemplates;
-		const templates = yield fetchModelTemplates(teamspace, projectId, modelId);
+		const templates = yield fetchModelTemplates(teamspace, projectId, modelId, getDetails);
 
-		const fetchModelTemplate = isFederation
-			? API.Tickets.fetchFederationTemplate
-			: API.Tickets.fetchContainerTemplate;
-
-		const templatesWithSchemas = yield all( // TODO remove and rework once #4579 is merged in
-			templates.map((template) => fetchModelTemplate(teamspace, projectId, modelId, template._id)),
-		);
-
-		yield put(TicketsActions.fetchTemplatesSuccess(modelId, templatesWithSchemas));
+		yield put(TicketsActions.fetchTemplatesSuccess(modelId, templates));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({

@@ -27,7 +27,7 @@ import { mergeWithArray } from '../store.helpers';
 export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions({
 	fetch: ['teamspace'],
 	fetchSuccess: ['teamspace', 'projects'],
-	fetchTemplates: ['teamspace', 'projectId'],
+	fetchTemplates: ['teamspace', 'projectId', 'getDetails'],
 	fetchTemplatesSuccess: ['projectId', 'templates'],
 	fetchTemplate: ['teamspace', 'projectId', 'templateId'],
 	replaceTemplateSuccess: ['projectId', 'template'],
@@ -118,7 +118,7 @@ export type UpdateProjectAction = Action<'UPDATE_PROJECT'> & TeamspaceAndProject
 export type UpdateProjectSuccessAction = Action<'UPDATE_PROJECT_SUCCESS'> & TeamspaceAndProjectId & { project: Partial<IProject> };
 export type DeleteProjectAction = Action<'DELETE_PROJECT'> & TeamspaceAndProjectId & OnSuccess & OnError;
 export type DeleteProjectSuccessAction = Action<'DELETE_PROJECT_SUCCESS'> & TeamspaceAndProjectId;
-export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId;
+export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId & { getDetails?: boolean };
 export type FetchTemplatesSuccessAction = Action<'FETCH_TEMPLATES_SUCCESS'> & ProjectId & { templates: ITemplate[] };
 export type FetchTemplateAction = Action<'FETCH_TEMPLATE'> & TeamspaceAndProjectId & { templateId: string };
 export type ReplaceTemplateSuccessAction = Action<'REPLACE_TEMPLATE_SUCCESS'> & ProjectId & { template: ITemplate };
@@ -155,7 +155,7 @@ export interface IProjectsActions {
 		onError: (error) => void,
 	) => DeleteProjectAction;
 	deleteProjectSuccess: (teamspace: string, projectId: string) => DeleteProjectSuccessAction;
-	fetchTemplates: (teamspace: string, projectId: string) => FetchTemplatesAction;
+	fetchTemplates: (teamspace: string, projectId: string, getDetails?: boolean) => FetchTemplatesAction;
 	fetchTemplatesSuccess: (projectId: string, templates: ITemplate[]) => FetchTemplatesSuccessAction;
 	fetchTemplate: (teamspace: string, projectId: string, templateId: string) => FetchTemplateAction;
 	replaceTemplateSuccess: (projectId: string, template: ITemplate) => ReplaceTemplateSuccessAction;
