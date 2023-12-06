@@ -51,7 +51,7 @@ Tickets.serialiseFullTicketTemplate = (req, res) => {
 		const { templateData, query } = req;
 		const showDeprecated = query?.showDeprecated === 'true';
 
-		respond(req, res, templates.ok, serialiseTemplate(templateData, showDeprecated, true));
+		respond(req, res, templates.ok, serialiseTemplate(templateData, showDeprecated));
 	} catch (err) {
 		respond(req, res, templates.unknown);
 	}
