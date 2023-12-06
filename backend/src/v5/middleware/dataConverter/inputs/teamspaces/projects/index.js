@@ -16,9 +16,9 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
+const { getProjectById, getProjectByName } = require('../../../../../models/projectSettings');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const Yup = require('yup');
-const { getProjectByName } = require('../../../../../models/projectSettings');
 const { respond } = require('../../../../../utils/responder');
 const { types } = require('../../../../../utils/helper/yup');
 
@@ -41,6 +41,17 @@ Projects.validateProjectData = async (req, res, next) => {
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Projects.projectExists = async (req, res, next) => {
+	try {
+		const { teamspace, project } = req.params;
+		await getProjectById(teamspace, project, { _id: 1 });
+
+		await next();
+	} catch (err) {
+		respond(req, res, err);
 	}
 };
 

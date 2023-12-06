@@ -16,11 +16,13 @@
  */
 
 const { createProject, deleteProject, getProjectById, getProjectList, updateProject } = require('../../../models/projectSettings');
+const { getFile, removeFile, storeFile } = require('../../../services/filesManager');
 const {
 	hasProjectAdminPermissions,
 	hasReadAccessToModel,
 	isTeamspaceAdmin,
 } = require('../../../utils/permissions/permissions');
+const { COL_NAME } = require('../../../models/projectSettings.constants');
 const { getAllTemplates } = require('../../../models/tickets.templates');
 const { removeModelData } = require('../../../utils/helper/models');
 
@@ -65,5 +67,11 @@ Projects.getAllTemplates = (teamspace, project, getDetails, showDeprecated) => {
 Projects.getProjectSettings = (teamspace, projectId) => getProjectById(teamspace, projectId, { name: 1, _id: 0 });
 
 Projects.updateProject = updateProject;
+
+Projects.getImage = (teamspace, project) => getFile(teamspace, COL_NAME, project);
+
+Projects.updateImage = (teamspace, project, imageBuffer) => storeFile(teamspace, COL_NAME, project, imageBuffer);
+
+Projects.deleteImage = (teamspace, project) => removeFile(teamspace, COL_NAME, project);
 
 module.exports = Projects;

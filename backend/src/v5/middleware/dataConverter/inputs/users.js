@@ -23,9 +23,7 @@ const { formatPronouns } = require('../../../utils/helper/strings');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { post } = require('../../../utils/webRequests');
 const { respond } = require('../../../utils/responder');
-const { singleImageUpload } = require('../multer');
 const { types } = require('../../../utils/helper/yup');
-const { validateMany } = require('../../common');
 
 const Users = {};
 
@@ -145,16 +143,6 @@ Users.validateUpdateData = async (req, res, next) => {
 			return;
 		}
 
-		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
-	}
-};
-
-const validateAvatarData = async (req, res, next) => {
-	try {
-		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
-
-		await next();
-	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
@@ -315,7 +303,5 @@ Users.validateVerifyData = async (req, res, next) => {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
-
-Users.validateAvatarFile = validateMany([singleImageUpload('file'), validateAvatarData]);
 
 module.exports = Users;

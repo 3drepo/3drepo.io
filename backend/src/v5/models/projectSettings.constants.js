@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,14 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+const ProjectConstants = {};
 
-export const HiddenFileInput = styled.input`
-	display: none;
-	height: 0;
-	width: 0;
-`;
+ProjectConstants.COL_NAME = 'projects';
 
-export const FileLabel = styled.label`
-	margin: 0;
-`;
+module.exports = ProjectConstants;

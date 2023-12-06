@@ -15,17 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FlatButton } from '@controls/button/flatButton.component';
-import styled from 'styled-components';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import { generateV5ApiUrl } from '@/v5/services/api/default';
+import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 
-export const TicketButton = styled(FlatButton)`
-	height: 24px;
-	width: 24px;
-	margin: 2px;
-	border-radius: 100%;
+export const DEFAULT_PROJECT_IMAGE = 'assets/images/default_background.png';
 
-	& > svg {
-		max-width: 14px;
-		max-height: 17px;
-	}
-`;
+export const getProjectImgSrc = (teamspace: string, project: string) => (
+	generateV5ApiUrl(`teamspaces/${teamspace}/projects/${project}/image`, clientConfigService.GET_API)
+);
+
+export const projectImageFileIsTooBig = (file): boolean => (file.size > clientConfigService.projectImageSizeLimit);
+export const PROJECT_IMAGE_MAX_SIZE_MESSAGE = formatInfoUnit(clientConfigService.projectImageSizeLimit);

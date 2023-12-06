@@ -18,7 +18,7 @@
 import { TeamspacesHooksSelectors, TicketsCardHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import ReplyIcon from '@assets/icons/outlined/reply_arrow-outlined.svg';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
-import { PrimaryTicketButton } from '../../../../ticketButton/ticketButton.styles';
+import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
 import { Comment, AuthorAvatar } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons, CommentWithButtonsContainer } from '../basicComment/basicComment.styles';
@@ -55,9 +55,9 @@ export const OtherUserComment = ({
 			/>
 			{!readOnly && (
 				<CommentButtons>
-					<PrimaryTicketButton onClick={() => onReply(_id)}>
+					<TicketButton variant="primary" onClick={() => onReply(_id)}>
 						<ReplyIcon />
-					</PrimaryTicketButton>
+					</TicketButton>
 				</CommentButtons>
 			)}
 		</CommentWithButtonsContainer>
