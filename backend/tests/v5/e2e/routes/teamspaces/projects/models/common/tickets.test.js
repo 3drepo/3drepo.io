@@ -104,8 +104,12 @@ const testGetAllTemplates = () => {
 					true],
 				['the user has sufficient privilege and the parameters are correct (get details)', true, getRoute(),
 					{
-						templates: ticketTemplates.flatMap((t) => (t.deprecated ? [] : serialiseTemplate(t, true))),
+						templates: ticketTemplates.flatMap((t) => (t.deprecated ? [] : serialiseTemplate(t, false))),
 					}, false, true],
+				['the user has sufficient privilege and the parameters are correct (get details & show deprecated)', true, getRoute(),
+					{
+						templates: ticketTemplates.flatMap((t) => serialiseTemplate(t, true)),
+					}, true, true],
 			];
 		};
 
