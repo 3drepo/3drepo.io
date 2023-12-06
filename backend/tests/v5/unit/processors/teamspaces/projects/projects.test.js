@@ -151,15 +151,33 @@ const testGetAllTemplates = () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const showDeprecated = false;
+			const getDetails = false;
 
 			const expectedOutput = [generateRandomString(), generateRandomString(), generateRandomString()];
 			TemplatesModel.getAllTemplates.mockResolvedValueOnce(expectedOutput);
 
-			await expect(Projects.getAllTemplates(teamspace, project, showDeprecated)).resolves.toEqual(expectedOutput);
+			await expect(Projects.getAllTemplates(teamspace, project, getDetails, showDeprecated))
+				.resolves.toEqual(expectedOutput);
 
 			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledTimes(1);
 			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, showDeprecated,
 				{ name: 1, code: 1, deprecated: 1 });
+		});
+
+		test('should return all templates available for the project (get details)', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const showDeprecated = false;
+			const getDetails = true;
+
+			const expectedOutput = [generateRandomString(), generateRandomString(), generateRandomString()];
+			TemplatesModel.getAllTemplates.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Projects.getAllTemplates(teamspace, project, getDetails, showDeprecated))
+				.resolves.toEqual(expectedOutput);
+
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, showDeprecated, undefined);
 		});
 	});
 };

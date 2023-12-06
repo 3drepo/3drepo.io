@@ -735,8 +735,21 @@ const testGetTicketById = () => {
 };
 
 const testGetTicketList = () => {
-	describe('Get ticket list', () => {
-		test('should call getAllTickets in model with the expected projection', async () => {
+	const propertyName = generateRandomString();
+	const moduleName = generateRandomString();
+
+	describe.each([
+		['the default projection (undefined filter)', undefined, {}],
+		['the default projection (empty filter)', [], {}],
+		['the default projection (filter with empty property)', [''], {}],
+		['the default projection (filter with empty module)', ['.'], {}],
+		['custom projection (filter with one valid and one empty property)', [propertyName, ''], { [`properties.${propertyName}`]: 1 }],
+		['custom projection (filter with one valid and one empty module)', [`${moduleName}.${propertyName}`, '.'], { [`modules.${moduleName}.${propertyName}`]: 1 }],
+		['custom projection (filter with property)', [propertyName], { [`properties.${propertyName}`]: 1 }],
+		['custom projection (filter with module)', [`${moduleName}.${propertyName}`], { [`modules.${moduleName}.${propertyName}`]: 1 }],
+		['custom projection (filter with module and property)', [`${moduleName}.${propertyName}`, propertyName], { [`properties.${propertyName}`]: 1, [`modules.${moduleName}.${propertyName}`]: 1 }],
+	])('Get ticket list', (desc, filter, customProjection) => {
+		test(`Should call getAllTickets in model with ${desc}`, async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
@@ -745,7 +758,7 @@ const testGetTicketList = () => {
 
 			TicketsModel.getAllTickets.mockResolvedValueOnce(expectedOutput);
 
-			await expect(Tickets.getTicketList(teamspace, project, model))
+			await expect(Tickets.getTicketList(teamspace, project, model, filter))
 				.resolves.toEqual(expectedOutput);
 
 			const { SAFETIBASE, SEQUENCING } = presetModules;
@@ -756,6 +769,7 @@ const testGetTicketList = () => {
 				title: 1,
 				number: 1,
 				type: 1,
+				...customProjection,
 				[`properties.${basePropertyLabels.OWNER}`]: 1,
 				[`properties.${basePropertyLabels.CREATED_AT}`]: 1,
 				[`properties.${basePropertyLabels.DEFAULT_VIEW}`]: 1,
