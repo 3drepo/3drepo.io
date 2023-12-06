@@ -18,6 +18,7 @@
 import styled, { css } from 'styled-components';
 import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
 import { InputLabel } from '@mui/material';
+import { isPinLight } from './coordsProperty.helpers';
 
 export const CoordsInputContainer = styled(ViewerInputContainer)`
 	padding: 8px 10px 8px 12px;
@@ -86,7 +87,7 @@ export const FlexRow = styled.div`
 	flex-flow: row;
 `;
 
-export const SelectPinButton = styled.div<{ color: string, isSelected: boolean; isLight: boolean; disabled: boolean; }>`
+export const SelectPinButton = styled.div<{ color: string, isSelected: boolean; disabled: boolean; }>`
 	outline: 1px solid;
 	outline-color: ${({ color, isSelected, theme }) => isSelected ? color : theme.palette.secondary.lightest};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
@@ -97,7 +98,7 @@ export const SelectPinButton = styled.div<{ color: string, isSelected: boolean; 
 	padding: 12px;
 	cursor: ${({  disabled }) => disabled ? 'default' : 'pointer'};
 
-	${({ isLight, isSelected, theme }) => isLight && css`
+	${({ color, isSelected, theme }) => isPinLight(color) && css`
 		outline-color: ${isSelected ? theme.palette.base.lighter : theme.palette.secondary.lightest};
 		> svg path {
 			stroke: ${theme.palette.secondary.main};

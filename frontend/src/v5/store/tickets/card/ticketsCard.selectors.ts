@@ -16,13 +16,15 @@
  */
 
 import { selectCurrentModel } from '@/v4/modules/model';
-import { TicketBaseKeys, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { SequencingProperties, TicketBaseKeys, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { createSelector } from 'reselect';
 import { selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
 import { ITicketsCardState } from './ticketsCard.redux';
 import { getTicketIsCompleted } from '../tickets.helpers';
 import { DEFAULT_PIN, getPinColorHex, ticketToPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { get } from 'lodash';
+import { IPin } from '@/v4/services/viewer/viewer';
+import { selectSelectedDate } from '@/v4/modules/sequences';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
@@ -149,7 +151,8 @@ export const selectTicketPins = createSelector(
 	selectView,
 	selectSelectedTicketPinId,
 	selectSelectedTicket,
-	(tickets, templates, view, selectedTicketPinId, selectedTicket) => {
+	selectSelectedDate,
+	(tickets, templates, view, selectedTicketPinId, selectedTicket, selectedSequenceDate): IPin[] => {
 		if (view === TicketsCardViews.New) return [];
 		const pinArray = [];
 		if (view === TicketsCardViews.Details) {
@@ -174,14 +177,27 @@ export const selectTicketPins = createSelector(
 			});
 			return pinArray;
 		}
-
 		return (tickets).reduce(
 			(accum, ticket) => {
+				if (!ticket.properties?.Pin) return accum;
 				const template = templates.find(({ _id }) => _id === ticket.type);
 				const color = getPinColorHex(DEFAULT_PIN, template, ticket);
-				return ticket.properties?.Pin ? [...accum, ticketToPin(ticket._id, ticket.properties.Pin, selectedTicketPinId, color)] : accum;
+
+				const pin = ticket.properties?.Pin;
+				if (!pin) return accum;
+				const { sequencing } = ticket.modules;
+				
+				if (sequencing && selectedSequenceDate) {
+					const startDate = sequencing[SequencingProperties.START_TIME];
+					const endDate = sequencing[SequencingProperties.END_TIME];
+					if (
+						startDate && new Date(startDate) > new Date(selectedSequenceDate) ||
+						endDate && new Date(endDate) < new Date(selectedSequenceDate)
+					) return accum;
+				}
+				return [...accum, ticketToPin(ticket._id, ticket.properties.Pin, selectedTicketPinId, color)];
 			},
-			[],
+			pinArray,
 		);
 	},
 );

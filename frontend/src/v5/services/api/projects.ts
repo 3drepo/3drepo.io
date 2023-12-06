@@ -15,25 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IProject } from '@/v5/store/projects/projects.types';
 import { AxiosResponse } from 'axios';
 import api from './default';
 
 export const fetchProjects = (teamspace: string): Promise<any> => api.get(`teamspaces/${teamspace}/projects`);
 
-export const createProject = async (teamspace: string, projectName: string): Promise<any> => {
-	const { data } = await api.post(`teamspaces/${teamspace}/projects`, { name: projectName });
+export const createProject = async (teamspace: string, name: string): Promise<any> => {
+	const { data } = await api.post(`teamspaces/${teamspace}/projects`, { name });
 	return data._id;
 };
 
-export const updateProject = (
+export const updateProjectName = (
 	teamspace: string,
 	projectId: string,
-	project: Partial<IProject>,
+	name: string,
 ): Promise<AxiosResponse<void>> => (
-	api.patch(`teamspaces/${teamspace}/projects/${projectId}`, project)
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}`, { name })
 );
 
 export const deleteProject = (teamspace: string, projectId: string): Promise<AxiosResponse<void>> => (
 	api.delete(`teamspaces/${teamspace}/projects/${projectId}`)
+);
+
+export const updateProjectImage = (
+	teamspace: string,
+	projectId: string,
+	image: FormData,
+): Promise<AxiosResponse<void>> => (
+	api.put(`teamspaces/${teamspace}/projects/${projectId}/image`, image)
+);
+
+export const deleteProjectImage = (teamspace: string, projectId: string): Promise<AxiosResponse<void>> => (
+	api.delete(`teamspaces/${teamspace}/projects/${projectId}/image`)
 );

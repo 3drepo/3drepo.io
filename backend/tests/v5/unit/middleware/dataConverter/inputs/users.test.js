@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src, modelFolder, imagesFolder } = require('../../../../helper/path');
+const { src } = require('../../../../helper/path');
 
 jest.mock('../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -30,10 +30,6 @@ const UsersModel = require(`${src}/models/users`);
 
 const { formatPronouns } = require(`${src}/utils/helper/strings`);
 const Users = require(`${src}/middleware/dataConverter/inputs/users`);
-const MockExpressRequest = require('mock-express-request');
-const FormData = require('form-data');
-const fs = require('fs');
-const path = require('path');
 const { generateRandomString } = require('../../../../helper/services');
 
 const config = require(`${src}/utils/config`);
@@ -170,55 +166,6 @@ const testValidateUpdateData = () => {
 
 			expect(UsersModel.isSsoUser).toHaveBeenCalledTimes(1);
 			expect(UsersModel.isSsoUser).toHaveBeenCalledWith(existingUsername);
-		});
-	});
-};
-
-const createRequestWithFile = (filename = 'valid.png', extraProp = false) => {
-	const form = new FormData();
-	if (filename) {
-		let fileFolder = imagesFolder;
-
-		if (!filename.endsWith('.png')) {
-			fileFolder = modelFolder;
-		}
-
-		form.append('file', fs.createReadStream(path.join(fileFolder, filename)));
-	}
-
-	if (extraProp) form.append('extraProp', 'extra');
-
-	const req = new MockExpressRequest({
-		method: 'PUT',
-		host: 'localhost',
-		url: '/user/avatar',
-		headers: form.getHeaders(),
-	});
-
-	form.pipe(req);
-	return req;
-};
-
-const testValidateAvatarData = () => {
-	describe.each([
-		['with valid file', true],
-		['with unsupported file', false, 'dummy.obj', false, templates.unsupportedFileFormat],
-		['with corrupt file', false, 'corrupted.png', false, templates.unsupportedFileFormat],
-		['with no file', false, null, false, templates.invalidArguments],
-		['with too large file', false, 'tooBig.png', false, templates.maxSizeExceeded],
-		['with extra property', true, 'valid.png', true],
-	])('Check if req arguments for new avatar upload are valid', (desc, shouldPass, filename, extraProp, expectedError) => {
-		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedError.code}`}`, async () => {
-			const mockCB = jest.fn();
-			const req = createRequestWithFile(filename, extraProp);
-			await Users.validateAvatarFile(req, {}, mockCB);
-			if (shouldPass) {
-				expect(mockCB.mock.calls.length).toBe(1);
-			} else {
-				expect(mockCB.mock.calls.length).toBe(0);
-				expect(Responder.respond.mock.calls.length).toBe(1);
-				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
-			}
 		});
 	});
 };
@@ -439,7 +386,6 @@ const testVerifyData = () => {
 describe('middleware/dataConverter/inputs/users', () => {
 	testValidateLoginData();
 	testValidateUpdateData();
-	testValidateAvatarData();
 	testForgotPasswordData();
 	testResetingPasswordData();
 	testValidateSignUpData();

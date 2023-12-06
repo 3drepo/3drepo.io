@@ -278,7 +278,7 @@ config.resourceUploadSizeLimit =  config.resourceUploadSizeLimit || 104857600;
 config.fileUploads = {
 	modelSizeLimit: config.uploadSizeLimit,
 	resourceSizeLimit:config.resourceUploadSizeLimit,
-	avatarSizeLimit: 1048576,
+	imageSizeLimit: 1048576,
 	imageExtensions: ["png", "jpg", "gif"],
 	uploadDir: config.cn_queue.upload_dir
 
@@ -306,7 +306,7 @@ config.getBaseURL = function (internalAccess) {
 };
 
 // avatar size limit
-config.avatarSizeLimit = coalesce(config.avatarSizeLimit, 1048576);
+config.imageSizeLimit = coalesce(config.imageSizeLimit, 1048576);
 
 config.liveChatLicense = config.liveChatLicense || 0;
 

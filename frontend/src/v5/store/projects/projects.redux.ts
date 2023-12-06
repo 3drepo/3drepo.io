@@ -27,13 +27,13 @@ import { mergeWithArray } from '../store.helpers';
 export const { Types: ProjectsTypes, Creators: ProjectsActions } = createActions({
 	fetch: ['teamspace'],
 	fetchSuccess: ['teamspace', 'projects'],
-	fetchTemplates: ['teamspace', 'projectId'],
+	fetchTemplates: ['teamspace', 'projectId', 'getDetails'],
 	fetchTemplatesSuccess: ['projectId', 'templates'],
 	fetchTemplate: ['teamspace', 'projectId', 'templateId'],
 	replaceTemplateSuccess: ['projectId', 'template'],
 	fetchFailure: [],
 	setCurrentProject: ['projectId'],
-	createProject: ['teamspace', 'projectName', 'onSuccess', 'onError'],
+	createProject: ['teamspace', 'project', 'onSuccess', 'onImageError', 'onError'],
 	createProjectSuccess: ['teamspace', 'project'],
 	updateProject: ['teamspace', 'projectId', 'project', 'onSuccess', 'onError'],
 	updateProjectSuccess: ['teamspace', 'projectId', 'project'],
@@ -108,14 +108,17 @@ export type FetchProjectsSuccessAction = Action<'FETCH_PROJECTS_SUCCESS'> & { te
 export type SetCurrentProjectAction = Action<'SET_CURRENT_PROJECT_SUCCESS'> & { projectId: string };
 export type CreateProjectAction = Action<'CREATE_PROJECT'> & OnSuccess & OnError & {
 	teamspace: string,
-	projectName: string,
+	project: { name: string, image?: File },
+	onImageError: (error, id: string) => void,
 };
 export type CreateProjectSuccessAction = Action<'CREATE_PROJECT_SUCCESS'> & { teamspace: string, project: IProject };
-export type UpdateProjectAction = Action<'UPDATE_PROJECT'> & TeamspaceAndProjectId & OnSuccess & OnError & { project: Partial<IProject> };
+export type UpdateProjectAction = Action<'UPDATE_PROJECT'> & TeamspaceAndProjectId & OnSuccess & OnError & {
+	project: { name?: string, image?: File },
+};
 export type UpdateProjectSuccessAction = Action<'UPDATE_PROJECT_SUCCESS'> & TeamspaceAndProjectId & { project: Partial<IProject> };
 export type DeleteProjectAction = Action<'DELETE_PROJECT'> & TeamspaceAndProjectId & OnSuccess & OnError;
 export type DeleteProjectSuccessAction = Action<'DELETE_PROJECT_SUCCESS'> & TeamspaceAndProjectId;
-export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId;
+export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceAndProjectId & { getDetails?: boolean };
 export type FetchTemplatesSuccessAction = Action<'FETCH_TEMPLATES_SUCCESS'> & ProjectId & { templates: ITemplate[] };
 export type FetchTemplateAction = Action<'FETCH_TEMPLATE'> & TeamspaceAndProjectId & { templateId: string };
 export type ReplaceTemplateSuccessAction = Action<'REPLACE_TEMPLATE_SUCCESS'> & ProjectId & { template: ITemplate };
@@ -127,15 +130,16 @@ export interface IProjectsActions {
 	setCurrentProject: (projectId: string) => SetCurrentProjectAction;
 	createProject: (
 		teamspace: string,
-		projectName: string,
+		project: { name: string, image?: File },
 		onSuccess: () => void,
+		onImageError: (error, id) => void,
 		onError: (error) => void,
 	) => CreateProjectAction;
 	createProjectSuccess: (teamspace: string, project: IProject) => CreateProjectSuccessAction;
 	updateProject: (
 		teamspace: string,
 		projectId: string,
-		project: Partial<IProject>,
+		project: { name?: string, image?: File },
 		onSuccess: () => void,
 		onError: (error) => void,
 	) => UpdateProjectAction;
@@ -151,7 +155,7 @@ export interface IProjectsActions {
 		onError: (error) => void,
 	) => DeleteProjectAction;
 	deleteProjectSuccess: (teamspace: string, projectId: string) => DeleteProjectSuccessAction;
-	fetchTemplates: (teamspace: string, projectId: string) => FetchTemplatesAction;
+	fetchTemplates: (teamspace: string, projectId: string, getDetails?: boolean) => FetchTemplatesAction;
 	fetchTemplatesSuccess: (projectId: string, templates: ITemplate[]) => FetchTemplatesSuccessAction;
 	fetchTemplate: (teamspace: string, projectId: string, templateId: string) => FetchTemplateAction;
 	replaceTemplateSuccess: (projectId: string, template: ITemplate) => ReplaceTemplateSuccessAction;

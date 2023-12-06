@@ -32,7 +32,7 @@ import { getViewerState, goToView } from '@/v5/helpers/viewpoint.helpers';
 import { TicketContext, TicketDetailsView } from '../../../ticket.context';
 import { TicketImageContent } from '../ticketImageContent/ticketImageContent.component';
 import { TicketImageActionMenu } from '../ticketImageContent/ticketImageActionMenu.component';
-import { PrimaryTicketButton } from '../../../ticketButton/ticketButton.styles';
+import { TicketButton } from '../../../ticketButton/ticketButton.styles';
 import { Header, HeaderSection, Label, Tooltip } from './ticketView.styles';
 import { CameraActionMenu } from './viewActionMenu/menus/cameraActionMenu.component';
 import { GroupsActionMenu } from './viewActionMenu/menus/groupsActionMenu.component';
@@ -120,17 +120,17 @@ export const TicketView = ({
 					{!hasViewpoint ? (
 						<Tooltip title={(formatMessage({ id: 'viewer.card.button.saveCurrentView', defaultMessage: 'Save current view' }))}>
 							<div hidden={disabled}>
-								<PrimaryTicketButton onClick={updateViewpoint}>
+								<TicketButton variant="primary" onClick={updateViewpoint}>
 									<TickIcon />
-								</PrimaryTicketButton>
+								</TicketButton>
 							</div>
 						</Tooltip>
 					) : (
 						<Tooltip title={(formatMessage({ id: 'viewer.card.button.gotToView', defaultMessage: 'Go to view' }))}>
 							<div>
-								<PrimaryTicketButton onClick={goToViewpoint}>
+								<TicketButton variant="primary" onClick={goToViewpoint}>
 									<ViewpointIcon />
-								</PrimaryTicketButton>
+								</TicketButton>
 							</div>
 						</Tooltip>
 					)}

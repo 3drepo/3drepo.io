@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import CircledPlusIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
@@ -26,7 +26,7 @@ import { FormHelperText, Tooltip } from '@mui/material';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { CoordsAction, CoordsActionLabel, CoordsActions, CoordsInputContainer, Label, FlexRow, SelectPinButton } from './coordsProperty.styles';
-import { DEFAULT_PIN, getPinColorHex, isPinLight } from './coordsProperty.helpers';
+import { DEFAULT_PIN, getPinColorHex } from './coordsProperty.helpers';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -36,7 +36,7 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { useFormContext } from 'react-hook-form';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { isArray, isEqual, throttle } from 'lodash';
+import { isArray, isEqual } from 'lodash';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const { watch } = useFormContext();
@@ -46,7 +46,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const ticket = watch() as ITicket;
 	const prevValue = useRef(undefined);
 
-	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId() ?? '';
+	const ticketId = ticket._id ?? 'newTicket';
 	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
 	const selectedTemplateId = TicketsCardHooksSelectors.selectSelectedTemplateId() ?? ticket?.type;
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
@@ -79,13 +79,9 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		}
 	};
 
-	const throttledSetSelectedPin = useCallback(throttle( // prevents spam clicking which caused a bug where the pin incorrectly appeared selected
-		(selected) => TicketsCardActionsDispatchers.setSelectedTicketPin(selected ? null : pinId), 1000, { leading: true, trailing: false },
-	), [pinId]);
-
 	const onClickSelectPin = () => {
 		if (!hasPin) return;
-		throttledSetSelectedPin(isSelected);
+		TicketsCardActionsDispatchers.setSelectedTicketPin(isSelected ? null : pinId);
 	};
 
 	const getSelectPinTooltip = () => {
@@ -179,7 +175,6 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 					<Tooltip title={getSelectPinTooltip()}>
 						<SelectPinButton
 							color={colorHex}
-							isLight={isPinLight(colorHex)}
 							isSelected={isSelected}
 							onClick={onClickSelectPin}
 							disabled={!hasPin}

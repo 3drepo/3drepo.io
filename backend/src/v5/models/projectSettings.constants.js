@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createActions } from 'reduxsauce';
+const ProjectConstants = {};
 
-export const { Types: StartupTypes, Creators: StartupActions } = createActions({
-	startup: null
-}, { prefix: 'STARTUP/' });
+ProjectConstants.COL_NAME = 'projects';
+
+module.exports = ProjectConstants;
