@@ -34,9 +34,10 @@ import { isEmpty } from 'lodash';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CollapseSideElementGroup } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.styles';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
-import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem/skeletonListItem.component';
 import { EditFederationContainersListItem, IconButtonProps } from './editFederationContainersListItem/editFederationContainersListItem.component';
 import { Container, ContainerListMainTitle, ContainerCount } from './editFederationContainersList.styles';
+import { VirtualList } from '@controls/virtualList/virtualList.component';
+import { EditFederationContainersListItemLoading } from './editFederationContainersListItem/editFederationContainersListItemLoading.component';
 
 export type ActionButtonProps = {
 	children: ReactNode;
@@ -128,22 +129,27 @@ export const EditFederationContainers = ({
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
 				<DashboardList>
+
 					{!isEmpty(sortedList) ? (
-						sortedList.map((container, index) => (container.hasStatsPending ? (
-							<SkeletonListItem delay={index / 10} key={container._id} />
-						) : (
-							<EditFederationContainersListItem
-								icon={IconButton}
-								key={container._id}
-								isSelected={container._id === selectedItemId}
-								container={container}
-								filterQuery={query}
-								onItemClick={selectOrToggleItem}
-							/>
-						)))
+						<VirtualList items={sortedList} itemHeight={81} itemContent={
+							(container, index) => (
+								container.hasStatsPending ? (
+									<EditFederationContainersListItemLoading  index={index} container={container} key={container._id} />
+								) : (
+									<EditFederationContainersListItem
+										icon={IconButton}
+										key={container._id}
+										isSelected={container._id === selectedItemId}
+										container={container}
+										filterQuery={query}
+										onItemClick={selectOrToggleItem}
+									/>
+								)
+							)
+						}/>
 					) : (
 						<DashboardListEmptyContainer>
-							{ hasContainers ? (
+							{hasContainers ? (
 								<DashboardListEmptySearchResults />
 							) : emptyListMessage}
 						</DashboardListEmptyContainer>
