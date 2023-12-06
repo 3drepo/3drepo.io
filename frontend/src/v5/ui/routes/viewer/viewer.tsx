@@ -71,6 +71,7 @@ export const Viewer = () => {
 	}, [project]);
 
 	useEffect(() => {
+		TicketsCardActionsDispatchers.resetState();
 		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
 	}, [teamspace, project, containerOrFederation]);
 
