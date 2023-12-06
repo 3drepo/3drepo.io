@@ -16,7 +16,7 @@
  */
 
 import { formatDayOfWeek } from '@controls/inputs/datePicker/dateFormatHelper';
-import { DatePicker } from '@mui/x-date-pickers';
+import { DateTimePicker } from '@mui/x-date-pickers';
 import { ReactElement, useState } from 'react';
 import dayjs from 'dayjs';
 import { StopBackgroundInteraction } from './dueDate.styles';
@@ -32,33 +32,42 @@ type IBaseDueDate = {
 export const BaseDueDate = ({ value, disabled, onBlur, onChange, ...props }: IBaseDueDate) => {
 	const [open, setOpen] = useState(false);
 
-	const preventPropagation = (e) => { if (e.key !== 'Escape') e.stopPropagation(); };
-	const handleClose = () => setOpen(false);
+	const preventPropagation = (e) => {
+		if (e.key !== 'Escape') {
+			e.stopPropagation();
+		}
+	};
+	const closePicker = () => setOpen(false);
+
 	const handleClick = (e) => {
+		if (disabled) return;
 		preventPropagation(e);
-		if (!open) setOpen(!disabled);
+		if (!open) {
+			setOpen(true);
+		}
 	};
 	const onDateChange = (newValue) => {
 		const timestamp = newValue?.toDate()?.getTime() || null;
-		setOpen(false);
+		closePicker();
 		onChange?.(timestamp);
 		onBlur?.(timestamp);
 	};
 
 	return (
 		<div onClick={handleClick} aria-hidden="true">
-			<StopBackgroundInteraction open={open} onClick={handleClose} />
-			<DatePicker
+			<StopBackgroundInteraction open={open} onClick={closePicker} />
+			<DateTimePicker
 				// If value is 0 display it as null to prevent it showing as 1/1/1970
 				value={value ? dayjs(value) : null}
 				open={open}
-				// onChange is a required prop in DatePicker, however it is not needed as onAccept works better
+				// onChange is a required prop in DateTimePicker, however it is not needed as onAccept works better
 				// (onChange triggers when changing year, onAccept only when a date is finally chosen)
 				onChange={() => true}
 				onAccept={onDateChange}
-				onClose={handleClose}
+				onClose={closePicker}
 				dayOfWeekFormatter={formatDayOfWeek}
 				disableHighlightToday
+				PaperProps={{ onClick: preventPropagation }}
 				{...props}
 			/>
 		</div>

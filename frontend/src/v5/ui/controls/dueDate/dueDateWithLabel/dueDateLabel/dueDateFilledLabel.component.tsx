@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatDate } from '@/v5/services/intl';
+import { formatDate, formatTime } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { IDueDateEmptyLabel } from './dueDateEmptyLabel.component';
 import { DateContainer } from './dueDateLabel.styles';
+import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 
 type IDueDateFilledLabel = IDueDateEmptyLabel & {
 	value: number;
@@ -26,7 +27,7 @@ type IDueDateFilledLabel = IDueDateEmptyLabel & {
 
 export const DueDateFilledLabel = ({ value, ...props }: IDueDateFilledLabel): JSX.Element => {
 	const isOverdue = value < Date.now();
-	const formattedDate = formatDate(value);
+	const formattedDate = formatShortDateTime(value);
 	return (
 		<DateContainer isOverdue={isOverdue} {...props}>
 			{isOverdue ? (

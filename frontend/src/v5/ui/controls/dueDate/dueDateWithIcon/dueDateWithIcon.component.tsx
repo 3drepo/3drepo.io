@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatShortDate } from '@/v5/helpers/intl.helper';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { formatTime } from '@/v5/services/intl';
+import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { BaseDueDate } from '../baseDueDate.component';
 import { CalendarIcon, DueDateWithIconContainer } from '../dueDate.styles';
 import { DateContainer, EmptyDateContainer } from '../dueDateWithLabel/dueDateLabel/dueDateLabel.styles';
@@ -42,7 +41,7 @@ export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: DueDateW
 							{value ? (
 								<DateContainer {...args} ref={inputRef} isOverdue={isOverdue} disabled={disabled}>
 									<CalendarIcon />
-									{formatShortDate(value)} {formatTime(value)}
+									{formatShortDateTime(value)}
 								</DateContainer>
 							) : (
 								<EmptyDateContainer {...args} ref={inputRef} disabled={disabled}><CalendarIcon />
