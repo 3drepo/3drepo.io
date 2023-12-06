@@ -47,6 +47,7 @@ const FilesManager = require('../../../src/v5/services/filesManager');
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
 const { USERS_DB_NAME, USERS_COL, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
+const { COL_NAME } = require(`${src}/models/projectSettings.constants`);
 const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
 const db = {};
@@ -247,12 +248,18 @@ db.createLegends = (teamspace, modelId, legends) => {
 db.createMetadata = (teamspace, modelId, metadataId, metadata) => DbHandler.insertOne(teamspace, `${modelId}.scene`,
 	{ _id: stringToUUID(metadataId), type: 'meta', metadata });
 
-db.createAvatar = async (username, type, avatarData) => {
+const createImage = async (dbName, colName, type, imageId, imageData) => {
 	const { defaultStorage } = config;
 	config.defaultStorage = type;
-	await FilesManager.storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarData);
+	await FilesManager.storeFile(dbName, colName, imageId, imageData);
 	config.defaultStorage = defaultStorage;
 };
+
+db.createAvatar = (username, type, avatarData) => createImage(USERS_DB_NAME, AVATARS_COL_NAME,
+	type, username, avatarData);
+
+db.createProjectImage = (teamspace, project, type, imageData) => createImage(teamspace, COL_NAME,
+	type, project, imageData);
 
 db.addLoginRecords = async (records) => {
 	await DbHandler.insertMany(INTERNAL_DB, 'loginRecords', records);

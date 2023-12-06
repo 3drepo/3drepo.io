@@ -32,7 +32,7 @@ import { selectApiKey, selectCurrentUser } from '@/v5/store/currentUser/currentU
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 import { ViewerActions } from '@/v4/modules/viewer';
 import MockDate from 'mockdate';
-import { omit, pick } from 'lodash';
+import { pick } from 'lodash';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { UsersActions } from '@/v5/store/users/users.redux';
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
