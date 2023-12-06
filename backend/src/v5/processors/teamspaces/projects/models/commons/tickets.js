@@ -179,7 +179,26 @@ Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource
 
 Tickets.getTicketById = getTicketById;
 
-Tickets.getTicketList = (teamspace, project, model, filter = {}) => {
+const filtersToProjection = (filters) => {
+	const projectionObject = {};
+
+	filters.forEach((name) => {
+		if (name) {
+			if (name.includes('.')) {
+				const [moduleName, moduleProp] = name.split('.');
+				if (moduleName && moduleProp) {
+					projectionObject[`modules.${name}`] = 1;
+				}
+			} else {
+				projectionObject[`properties.${name}`] = 1;
+			}
+		}
+	});
+
+	return projectionObject;
+};
+
+Tickets.getTicketList = (teamspace, project, model, filters = []) => {
 	const { SAFETIBASE, SEQUENCING } = presetModules;
 	const {
 		[SAFETIBASE]: safetibaseProps,
@@ -191,7 +210,7 @@ Tickets.getTicketList = (teamspace, project, model, filter = {}) => {
 		title: 1,
 		number: 1,
 		type: 1,
-		...filter,
+		...filtersToProjection(filters),
 		[`properties.${basePropertyLabels.OWNER}`]: 1,
 		[`properties.${basePropertyLabels.CREATED_AT}`]: 1,
 		[`properties.${basePropertyLabels.DEFAULT_VIEW}`]: 1,

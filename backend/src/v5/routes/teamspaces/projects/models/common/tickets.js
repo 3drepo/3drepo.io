@@ -29,7 +29,6 @@ const {
 	getTicketResourceAsStream: getFedTicketResourceAsStream,
 	updateTicket: updateFedTicket,
 } = require('../../../../../processors/teamspaces/projects/models/federations');
-const { convertFilterToProjection, templateExists, validateNewTicket, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const {
 	hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation,
@@ -38,6 +37,7 @@ const {
 } = require('../../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const { serialiseFullTicketTemplate, serialiseTemplatesList, serialiseTicket, serialiseTicketList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
+const { templateExists, validateNewTicket, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../processors/teamspaces/projects');
@@ -92,7 +92,7 @@ const getTicketsInModel = (isFed) => async (req, res, next) => {
 
 	try {
 		const getTicketList = isFed ? getFedTicketList : getConTicketList;
-		req.tickets = await getTicketList(teamspace, project, model, req.filter);
+		req.tickets = await getTicketList(teamspace, project, model, req.query.filter?.split(','));
 		await next();
 	} catch (err) {
 		// istanbul ignore next
@@ -457,7 +457,7 @@ const establishRoutes = (isFed) => {
 	 *                         description: ticket modules and their properties
 	 *
 	 */
-	router.get('/', hasReadAccess, convertFilterToProjection, getTicketsInModel(isFed), serialiseTicketList);
+	router.get('/', hasReadAccess, getTicketsInModel(isFed), serialiseTicketList);
 
 	/**
 	 * @openapi
