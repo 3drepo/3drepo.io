@@ -39,7 +39,7 @@ import {
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Display } from '@/v5/ui/themes/media';
-import { formatDate } from '@/v5/services/intl';
+import { formatDate, formatTime } from '@/v5/services/intl';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { RevisionDetails } from '@components/shared/revisionDetails/revisionDetails.component';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
@@ -120,11 +120,11 @@ export const ContainerListItem = memo(({
 					{container.type}
 				</DashboardListItemText>
 				<DashboardListItemText
-					width={78}
+					width={113}
 					selected={isSelected}
 					dontHighlight
 				>
-					{container.lastUpdated ? formatDate(container.lastUpdated) : ''}
+					{container.lastUpdated && `${formatDate(container.lastUpdated)} ${formatTime(container.lastUpdated)}`}
 				</DashboardListItemText>
 				<DashboardListItemIcon>
 					<FavouriteCheckbox
