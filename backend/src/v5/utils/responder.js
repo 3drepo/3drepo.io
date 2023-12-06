@@ -22,6 +22,7 @@ const logger = require('./logger').logWithLabel(networkLabel);
 const { v4Path } = require('../../interop');
 // eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
 const { cachePolicy } = require(`${v4Path}/config`);
+const zlib = require('zlib');
 
 const Responder = {};
 
@@ -94,11 +95,14 @@ Responder.respond = (req, res, resCode, body, { cache, customHeaders, mimeType =
 	}
 };
 
-Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSize, { mimeType } = {}) => {
+Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSize, { encoding, mimeType } = {}) => {
 	const headers = {
 		'Content-Length': fileSize,
-		'Content-Disposition': `attachment;filename=${fileName}`,
 	};
+
+	if (fileName) {
+		headers['Content-Disposition'] = `attachment;filename=${fileName}`;
+	}
 
 	const contentType = Responder.mimeTypes[req.params.format] || mimeType;
 	if (contentType) {
@@ -106,25 +110,41 @@ Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSiz
 	}
 	let response = createResponseCode(resCode);
 
-	readStream.on('error', (error) => {
+	let responseStream = readStream;
+
+	if (encoding) {
+		if (req.acceptsEncoding(encoding)) {
+			headers['Content-Encoding'] = encoding;
+		} else {
+			// If the agent cannot accept our statically-compressed files, then
+			// decompress it and let Node re-compress to the agents' preference
+			switch (encoding) {
+			case 'gzip':
+				responseStream = readStream.pipe(zlib.createGunzip());
+				break;
+			default:
+				res.status(createResponseCode());
+				res.end();
+				genResponseLogging.logError(genResponseLogging(response.code, fileSize, req));
+				return;
+			}
+			delete headers['Content-Length']; // We will not know the size of an uncompressed stream
+		}
+	}
+
+	responseStream.on('error', (error) => {
 		response = createResponseCode(error);
 		logger.logInfo(genResponseLogging(response.code, fileSize, req));
 		res.status(response.status);
 		res.end();
 	});
 
-	readStream.once('data', () => {
-		res.writeHead(response.status, headers);
-	});
-
-	readStream.on('data', (data) => {
-		res.write(data);
-	});
-
-	readStream.on('end', () => {
-		res.end();
+	responseStream.on('end', () => {
 		logger.logInfo(genResponseLogging(response.code, fileSize, req));
 	});
+
+	res.writeHead(response.status, headers);
+	responseStream.pipe(res);
 };
 
 module.exports = Responder;
