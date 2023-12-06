@@ -32,7 +32,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
 	DashboardListItemIcon,
@@ -40,21 +40,12 @@ import {
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { DashboardListItemContainerTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
-import {
-	enableRealtimeContainerRemoved,
-	enableRealtimeContainerUpdateSettings,
-} from '@/v5/services/realtime/container.events';
+
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import {
-	enableRealtimeContainerRevisionUpdate,
-	enableRealtimeNewRevisionUpdate,
-} from '@/v5/services/realtime/revision.events';
-import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
-import { IsMainList } from '../../mainList.context';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.component';
 import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
 import { Display } from '@/v5/ui/themes/media';
@@ -69,19 +60,6 @@ export const ContainerListItemLoading = ({
 	delay,
 }: IContainerListItem): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
-	const isMainList = useContext(IsMainList);
-
-	useEffect(() => {
-		if (isMainList) {
-			return combineSubscriptions(
-				enableRealtimeContainerRemoved(teamspace, project, container._id),
-				enableRealtimeContainerUpdateSettings(teamspace, project, container._id),
-				enableRealtimeContainerRevisionUpdate(teamspace, project, container._id),
-				enableRealtimeNewRevisionUpdate(teamspace, project, container._id),
-			);
-		}
-		return null;
-	}, [container._id]);
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
 		if (checked) {

@@ -34,10 +34,72 @@ import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { FetchContainersResponse } from '@/v5/services/api/containers';
 import { isEqualWith } from 'lodash';
-import { FetchContainerViewsResponseView } from './containers.types';
+import { ContainerStats, FetchContainerViewsResponseView, IContainer } from './containers.types';
 import { prepareContainerSettingsForBackend, prepareContainerSettingsForFrontend, prepareContainersData } from './containers.helpers';
 import { selectContainerById, selectContainers, selectIsListPending } from './containers.selectors';
 import { compByColum } from '../store.helpers';
+import { getSortingFunction } from '@components/dashboard/dashboardList/useOrderedList/useOrderedList.helpers';
+import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+
+type QueueItem<T> = { promise: Promise<T>, resolve, args };
+class Queue<T> {
+	private queue: QueueItem<T>[] = [] ;
+
+	private dict = {};
+
+	private batchSize;
+
+	private running = false;
+
+	private func: (...args) => Promise<T>;
+
+	private getPromise(args):QueueItem<T>  {
+		let prom = this.dict[JSON.stringify(args)];
+		if (!prom) {
+			prom = {};
+			prom.promise = new Promise((resolve) => prom.resolve = resolve);
+			prom.args = args;
+		}
+		
+		return prom;
+	}
+
+	private async runqueue() {
+		this.running = true;
+		while (this.queue.length) {
+			const batch =  this.queue.splice(Math.max(this.queue.length - this.batchSize, 0));
+			await Promise.all(batch.reverse().map(async (p) => {
+				console.log('fetching ' + p.args[p.args.length - 1]);
+				p.resolve(await this.func(...p.args));
+			}));
+		}
+		this.clearQueue();
+		this.running = false;
+	}
+
+	public enqueue(...args): Promise<T> {
+		const prom = this.getPromise(args);
+		this.queue.push(prom);
+
+		if (this.queue.length && !this.running) {
+			this.runqueue();
+		}
+
+		return prom.promise;
+	}
+
+	public clearQueue() {
+		this.queue = [];
+		this.dict = {};
+	}
+
+	public constructor(func: (...args) => Promise<T>, batchSize) {
+		this.func = func;
+		this.batchSize = batchSize;
+	}
+}
+
+const statsQueue = new Queue<ContainerStats>(API.Containers.fetchContainerStats, 30);
 
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
@@ -67,10 +129,9 @@ export function* removeFavourites({ containerId, teamspace, projectId }: RemoveF
 
 export function* fetchContainerStats({ teamspace, projectId, containerId }: FetchContainerStatsAction) {
 	try {
-		const stats = yield API.Containers.fetchContainerStats(teamspace, projectId, containerId);
-
-		const container = yield select(selectContainerById, containerId);
-
+		const container: IContainer = yield select(selectContainerById, containerId);
+		const stats = yield statsQueue.enqueue(teamspace, projectId, containerId, container.name);
+		
 		const basicDataEqual = compByColum(['unit', 'type'])(container, stats);
 		// eslint-disable-next-line max-len
 		const revisionsEqual = (container?.latestRevision === stats?.revisions?.latestRevision && container?.status === stats?.status) // if it has revisions
@@ -100,11 +161,11 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 			yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
 		}
 
-		// yield all(
-		// 	containers.map(
-		// 		(container) => put(ContainersActions.fetchContainerStats(teamspace, projectId, container._id)),
-		// 	),d
-		// ); 
+		yield all(
+			containers.sort(getSortingFunction({ column: ['name'], direction:[SortingDirection.DESCENDING] })).map(
+				(container) => put(ContainersActions.fetchContainerStats(teamspace, projectId, container._id)),
+			),
+		); 
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.fetchAll.error', defaultMessage: 'trying to fetch containers' }),
