@@ -73,6 +73,10 @@ export const getIntlProviderProps = () => ({
 	defaultLocal: getIntl().defaultLocale,
 	locale: getIntl().locale,
 	onError: (error) => {
+		if (error.code === 'MISSING_TRANSLATION' && getIntl().locale === DEFAULT_LOCALE) {
+			return;
+		}
+
+		console.error(error);
 	},
-	fallbackOnEmptyString: false,
 });

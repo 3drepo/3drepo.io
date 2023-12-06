@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-type QueueItem<T> = { promise: Promise<T>, resolve, args, resolved: boolean };
+type QueueItem<T> = { promise: Promise<T>, resolve, reject, args, resolved: boolean };
 export class LifoQueue<T> {
 	private queue: QueueItem<T>[] = [] ;
 
@@ -31,7 +31,10 @@ export class LifoQueue<T> {
 		let prom = this.dict[JSON.stringify(args)];
 		if (!prom) {
 			prom = {};
-			prom.promise = new Promise((resolve) => prom.resolve = resolve);
+			prom.promise = new Promise((resolve, reject) => {
+				prom.resolve = resolve;
+				prom.reject = reject;
+			});
 			prom.args = args;
 			prom.resolved = false;
 		}
@@ -48,7 +51,11 @@ export class LifoQueue<T> {
 					return p.promise;
 				}
 				
-				p.resolve(await this.func(...p.args));
+				try {
+					p.resolve(await this.func(...p.args));
+				} catch (e) {
+					p.reject(e);
+				}
 				// eslint-disable-next-line no-param-reassign
 				p.resolved = true;
 			}));

@@ -16,7 +16,6 @@
  */
 
 import { useRef, useState, useEffect } from 'react';
-import { ItemsListContainer } from './virtualList.styles';
 
 interface Props {
 	items: any[];
