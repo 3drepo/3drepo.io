@@ -73,7 +73,7 @@ export function* removeFavourites({ containerId, teamspace, projectId }: RemoveF
 export function* fetchContainerStats({ teamspace, projectId, containerId }: FetchContainerStatsAction) {
 	try {
 		const container: IContainer = yield select(selectContainerById, containerId);
-		const stats = yield statsQueue.enqueue(teamspace, projectId, containerId, container.name);
+		const stats = yield statsQueue.enqueue(teamspace, projectId, containerId);
 		
 		const basicDataEqual = compByColum(['unit', 'type'])(container, stats);
 		// eslint-disable-next-line max-len
