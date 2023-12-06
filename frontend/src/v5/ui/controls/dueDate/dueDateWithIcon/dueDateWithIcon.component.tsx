@@ -19,6 +19,7 @@ import { formatShortDate } from '@/v5/helpers/intl.helper';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
+import { formatTime } from '@/v5/services/intl';
 import { BaseDueDate } from '../baseDueDate.component';
 import { CalendarIcon, DueDateWithIconContainer } from '../dueDate.styles';
 import { DateContainer, EmptyDateContainer } from '../dueDateWithLabel/dueDateLabel/dueDateLabel.styles';
@@ -39,7 +40,10 @@ export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: DueDateW
 					({ inputRef, ...args }) => (
 						<Tooltip title={disabled ? '' : tooltip} arrow>
 							{value ? (
-								<DateContainer {...args} ref={inputRef} isOverdue={isOverdue} disabled={disabled}><CalendarIcon /> {formatShortDate(value)}</DateContainer>
+								<DateContainer {...args} ref={inputRef} isOverdue={isOverdue} disabled={disabled}>
+									<CalendarIcon />
+									{formatShortDate(value)} {formatTime(value)}
+								</DateContainer>
 							) : (
 								<EmptyDateContainer {...args} ref={inputRef} disabled={disabled}><CalendarIcon />
 									{ disabled ? (
