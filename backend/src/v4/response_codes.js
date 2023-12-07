@@ -390,8 +390,7 @@
 		"bin": "text/plain",
 		"json": "application/json",
 		"png": "image/png",
-		"jpg": "image/jpg",
-		"unity3d": "application/octet-stream"
+		"jpg": "image/jpg"
 	};
 
 	const genResponseLogging = ({status, code}, {contentLength}, {session, startTime, method, originalUrl} = {}) => {
