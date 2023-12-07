@@ -19,11 +19,11 @@ import styled, { css } from 'styled-components';
 
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
+import TextField from '@mui/material/TextField';
 import { DateTimePicker } from '@mui/lab';
 
 import { COLOR } from '../../../../../styles';
 import { FileUploadInvoker } from '../../../../viewerGui/components/commentForm/commentForm.styles';
-import TextField from '@mui/material/TextField';
 import { Wrapper } from '../childMenu/childMenu.styles';
 
 export const StyledList = styled(List)<{ $hasDateTimeInputs?: boolean }>`
