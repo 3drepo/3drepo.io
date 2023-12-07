@@ -19,9 +19,10 @@ import { AutocompleteProps, TextFieldProps } from '@mui/material';
 import SearchIcon from '@assets/icons/outlined/search-outlined.svg';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { TextField, StartAdornment, SearchChip, Autocomplete } from '../../../../../controls/search/searchInput/searchInput.styles';
+import { TextField, StartAdornment, SearchChip } from '../../../../../controls/search/searchInput/searchInput.styles';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { Autocomplete } from './ticketSearchInput.styles';
 
 type ITicketSearchInput = {
 	variant?: 'filled' | 'outlined',
