@@ -36,7 +36,7 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { useFormContext } from 'react-hook-form';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { isArray, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const { watch } = useFormContext();
@@ -110,9 +110,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 	// Update pin when position changes
 	useEffect(() => {
-		if (!isEqual(value, prevValue.current) && isArray(prevValue.current)) {
-			refreshPin();
-		}
+		if (!isEqual(value, prevValue.current)) refreshPin();
 
 		prevValue.current = value;
 
