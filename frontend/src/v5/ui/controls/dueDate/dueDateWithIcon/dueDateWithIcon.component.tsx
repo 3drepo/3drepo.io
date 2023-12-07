@@ -19,24 +19,24 @@ import { FormInputProps } from '@controls/inputs/inputController.component';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
-import { BaseDueDate } from '../baseDueDate.component';
+import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import { CalendarIcon, DueDateWithIconContainer } from '../dueDate.styles';
 import { DateContainer, EmptyDateContainer } from '../dueDateWithLabel/dueDateLabel/dueDateLabel.styles';
 
 export type DueDateWithIconProps = Omit<FormInputProps, 'onBlur'> & {
 	tooltip?: string;
-	onBlur?: (newValue) => void;
+	onBlur?: () => void;
 };
 
 export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: DueDateWithIconProps) => {
 	const isOverdue = value < Date.now();
 	return (
 		<DueDateWithIconContainer>
-			<BaseDueDate
+			<DateTimePicker
 				value={value}
 				disabled={disabled}
 				renderInput={
-					({ inputRef, ...args }) => (
+					({ inputRef, ...args }: any) => (
 						<Tooltip title={disabled ? '' : tooltip} arrow>
 							{value ? (
 								<DateContainer {...args} ref={inputRef} isOverdue={isOverdue} disabled={disabled}>

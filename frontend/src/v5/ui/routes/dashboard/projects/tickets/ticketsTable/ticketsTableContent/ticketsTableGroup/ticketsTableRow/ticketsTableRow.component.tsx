@@ -103,7 +103,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 			<CellOwner width={62}>
 				<UserPopoverCircle user={ownerAsUser} />
 			</CellOwner>
-			<CellDate width={119} hidden={!hasProperties}>
+			<CellDate width={126} hidden={!hasProperties}>
 				{!!dueDate && (<DueDateWithIcon value={dueDate} disabled />)}
 			</CellDate>
 			<CellChipText width={90} hidden={!hasProperties}>

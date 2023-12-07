@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatDate, formatTime } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { IDueDateEmptyLabel } from './dueDateEmptyLabel.component';
 import { DateContainer } from './dueDateLabel.styles';

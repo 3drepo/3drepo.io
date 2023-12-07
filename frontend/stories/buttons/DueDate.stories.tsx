@@ -33,7 +33,7 @@ export default {
 		},
 	},
 	decorators: [LocalizationProviderDecorator],
-	parameters: { controls: ['onBlur'] },
+	parameters: { controls: ['onChange'] },
 } as Meta<typeof DueDateWithLabel>;
 
 type Story = StoryObj<typeof DueDateWithLabel>;
