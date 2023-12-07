@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { ViewerIconContainer } from '@assets/icons/viewer/viewerIconContainer.styles';
+import styled, { css } from 'styled-components';
 
-export const Container = styled.div`
-	position: absolute;
-	top: 80px;
-	right: 20px;
-	z-index: 2;
-	visibility: ${(props: any) => props.visible ? 'visible' : 'hidden'};
-	pointer-events: ${(props: any) => props.visible ? 'inherit' : 'none'};
-` as any;
+export const Container = styled(ViewerIconContainer)<{ disabled?: boolean, hidden?: boolean }>`
+	height: 40px;
+	cursor: pointer;
+	box-sizing: border-box;
+	display: grid;
+	place-content: center;
+	transition: all .2s;
+	overflow: hidden;
+
+	&[hidden] {
+		width: 0;
+	}
+
+	&:not([hidden]) {
+		width: 40px;
+	}
+
+	${({ disabled }) => disabled && css`
+		cursor: default;
+		pointer-events: none;
+	`}
+`;
+

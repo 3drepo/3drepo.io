@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -18,10 +18,29 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
+	border-radius: 24px;
 	position: absolute;
-	top: 80px;
-	right: 20px;
-	z-index: 2;
-	visibility: ${(props: any) => props.visible ? 'visible' : 'hidden'};
-	pointer-events: ${(props: any) => props.visible ? 'inherit' : 'none'};
-` as any;
+	bottom: 35px;
+	left: 50%;
+	transform: translateX(-50%);
+	pointer-events: all;
+	z-index: 1;
+	display: flex;
+	flex-direction: row;
+
+	& > * {
+		border: solid 1px ${({ theme }) => theme.palette.secondary.light};
+		height: 48px;
+		border-radius: 24px;
+		padding: 0 10px;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-evenly;
+	}
+`;
+
+export const MainToolbar = styled.div`
+	background-color: ${({ theme }) => theme.palette.secondary.main};
+	z-index: 1;
+`;
