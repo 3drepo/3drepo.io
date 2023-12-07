@@ -161,6 +161,27 @@ export const ISSUE_FILTERS = [
 	}
 ] as any;
 
+export const DEFAULT_ISSUES_FILTERS = [
+	{
+		label: 'Status',
+		relatedField: ISSUE_FILTER_RELATED_FIELDS.STATUS,
+		type: FILTER_TYPES.UNDEFINED,
+		value: { value: STATUSES.OPEN, label: 'Open' },
+	},
+	{
+		label: 'Status',
+		relatedField: ISSUE_FILTER_RELATED_FIELDS.STATUS,
+		type: FILTER_TYPES.UNDEFINED,
+		value: { value: STATUSES.IN_PROGRESS, label: 'In progress' },
+	},
+	{
+		label: 'Status',
+		relatedField: ISSUE_FILTER_RELATED_FIELDS.STATUS,
+		type: FILTER_TYPES.UNDEFINED,
+		value: { value: STATUSES.FOR_APPROVAL, label: 'For approval' },
+	},
+]
+
 export const ACTIONS_TYPES = {
 	SORT: 'SORT'
 };
