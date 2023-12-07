@@ -15,22 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const SsoConstants = {};
+const Yup = require('yup');
+const config = require('../../../utils/config');
+const { generateTemplateFn } = require('./common');
 
-SsoConstants.providers = {
-	AAD: 'aad',
-};
+const dataSchema = Yup.object({
+	username: Yup.string().required(),
+	ssoType: Yup.string().required(),
+	domain: Yup.string().default(() => config.getBaseURL()),
+	supportEmail: Yup.string().default(() => config.contact.support),
+}).required(true);
 
-SsoConstants.providerLabels = {
-	AAD: 'Microsoft',
-};
+const TEMPLATE_PATH = `${__dirname}/html/forgotPasswordSSO.html`;
 
-SsoConstants.errorCodes = {
-	EMAIL_EXISTS: 1,
-	EMAIL_EXISTS_WITH_SSO: 2,
-	NON_SSO_USER: 3,
-	USER_NOT_FOUND: 4,
-	UNKNOWN: 5,
-};
+const ForgotPasswordTemplate = {};
 
-module.exports = SsoConstants;
+ForgotPasswordTemplate.subject = () => 'Your reset password request';
+
+ForgotPasswordTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
+
+module.exports = ForgotPasswordTemplate;

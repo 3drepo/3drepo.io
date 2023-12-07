@@ -21,8 +21,11 @@ const Yup = require('yup');
 const config = require('../../../utils/config');
 const { formatPronouns } = require('../../../utils/helper/strings');
 const { getUserFromSession } = require('../../../utils/sessions');
+const { templates: mailTemplates } = require('../../../services/mailer/mailer.constants');
 const { post } = require('../../../utils/webRequests');
+const { providerLabels } = require('../../../services/sso/sso.constants');
 const { respond } = require('../../../utils/responder');
+const { sendEmail } = require('../../../services/mailer');
 const { types } = require('../../../utils/helper/yup');
 
 const Users = {};
@@ -158,15 +161,28 @@ Users.validateForgotPasswordData = async (req, res, next) => {
 
 		try {
 			const usernameOrEmail = req.body.user;
-			const { user, customData: { sso } } = await getUserByUsernameOrEmail(usernameOrEmail, { user: 1, _id: 0, 'customData.sso': 1 });
+			const { user, customData: { sso, email, firstName } } = await getUserByUsernameOrEmail(usernameOrEmail, {
+				user: 1,
+				_id: 0,
+				'customData.sso': 1,
+				'customData.firstName': 1,
+				'customData.email': 1,
+			});
 
 			if (sso) {
+				await sendEmail(mailTemplates.FORGOT_PASSWORD_SSO.name, email,
+					{
+						email,
+						username: user,
+						firstName,
+						ssoType: providerLabels[sso.type.toUpperCase()],
+					});
 				throw templates.unknown;
 			}
 
 			req.body.user = user;
 			next();
-		} catch {
+		} catch (err) {
 			respond(req, res, templates.ok);
 		}
 	} catch (err) {
