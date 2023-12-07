@@ -157,7 +157,7 @@ export const selectTicketPins = createSelector(
 	(tickets, templates, view, selectedTicketPinId, selectedTicket, selectedSequenceDate): IPin[] => {
 		if (view === TicketsCardViews.New) return [];
 		const pinArray = [];
-		if (!templates.length || !tickets.length) return;
+		if (!templates.length || !tickets.length) return [];
 		if (view === TicketsCardViews.Details) {
 			const selectedTemplate = templates.find(({ _id }) => _id === selectedTicket.type);
 			selectedTemplate.properties.forEach(({ name, type }) => {
@@ -182,12 +182,11 @@ export const selectTicketPins = createSelector(
 		}
 		return tickets.reduce(
 			(accum, ticket) => {
-				if (!ticket.properties?.Pin) return accum;
+				const pin = ticket.properties?.Pin;
+				if (!pin) return accum;
 				const template = templates.find(({ _id }) => _id === ticket.type);
 				const color = getPinColorHex(DEFAULT_PIN, template, ticket);
 
-				const pin = ticket.properties?.Pin;
-				if (!pin) return accum;
 				const { sequencing } = ticket.modules;
 				
 				if (sequencing && selectedSequenceDate) {
