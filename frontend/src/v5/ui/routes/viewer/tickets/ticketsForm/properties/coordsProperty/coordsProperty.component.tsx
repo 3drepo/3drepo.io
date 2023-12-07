@@ -38,6 +38,8 @@ import { useFormContext } from 'react-hook-form';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { isEqual } from 'lodash';
 
+const NEW_TICKET_ID = 'temporaryIdForNewTickets';
+
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
 	const { watch } = useFormContext();
 	const { isViewer } = useContext(TicketContext);
@@ -46,7 +48,8 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const ticket = watch() as ITicket;
 	const prevValue = useRef(undefined);
 
-	const ticketId = ticket._id ?? 'newTicket';
+	const isNewTicket = !ticket._id;
+	const ticketId = !isNewTicket ? ticket._id : NEW_TICKET_ID;
 	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
 	const selectedTemplateId = TicketsCardHooksSelectors.selectSelectedTemplateId() ?? ticket?.type;
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
@@ -125,6 +128,10 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	useEffect(() => {
 		ViewerService.setSelectionPin({ id: pinId, isSelected });
 	}, [isSelected]);
+
+	useEffect(() => () => {
+		if (isNewTicket) ViewerService.removePin(pinId);
+	}, []);
 
 	return (
 		<CoordsInputContainer required={required} selected={editMode} error={error} disabled={disabled}>
