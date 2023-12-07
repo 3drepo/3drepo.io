@@ -16,7 +16,6 @@
  */
 
 import styled from 'styled-components';
-import PlusIcon from '@assets/icons/viewer/plus.svg';
 
 export const Container = styled.div`
 	border-radius: 24px;
