@@ -16,7 +16,7 @@
  */
 import { PureComponent, ReactNode } from 'react';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { NAMED_MONTH_DATE_FORMAT, SHORT_DATE_FORMAT } from '../../../../services/formatting/formatDate';
+import { LONG_DATE_TIME_FORMAT } from '../../../../services/formatting/formatDate';
 import { DateTime } from '../../../components/dateTime/dateTime.component';
 import { UserMarker } from '../../../components/messagesList/components/message/components/userMarker';
 import { Author, Container, Date, Details, ExtraInfo, Icon, Status, OpenInViewerButton, UserAndModelDetails } from './previewItemInfo.styles';
@@ -52,7 +52,7 @@ export class PreviewItemInfo extends PureComponent<IProps, any> {
 
 	public renderDateTime = renderWhenTrue(() => (
 		<Date>
-			<DateTime value={this.props.createdAt} format={SHORT_DATE_FORMAT} />
+			<DateTime value={this.props.createdAt} format={LONG_DATE_TIME_FORMAT} />
 		</Date>
 	));
 

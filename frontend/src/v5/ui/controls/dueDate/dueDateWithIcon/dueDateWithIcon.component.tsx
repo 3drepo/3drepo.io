@@ -15,31 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatShortDate } from '@/v5/helpers/intl.helper';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { BaseDueDate } from '../baseDueDate.component';
+import { formatShortDateTime } from '@/v5/helpers/intl.helper';
+import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import { CalendarIcon, DueDateWithIconContainer } from '../dueDate.styles';
 import { DateContainer, EmptyDateContainer } from '../dueDateWithLabel/dueDateLabel/dueDateLabel.styles';
 
 export type DueDateWithIconProps = Omit<FormInputProps, 'onBlur'> & {
 	tooltip?: string;
-	onBlur?: (newValue) => void;
+	onBlur?: () => void;
 };
 
 export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: DueDateWithIconProps) => {
 	const isOverdue = value < Date.now();
 	return (
 		<DueDateWithIconContainer>
-			<BaseDueDate
+			<DateTimePicker
 				value={value}
 				disabled={disabled}
 				renderInput={
-					({ inputRef, ...args }) => (
+					({ inputRef, ...args }: any) => (
 						<Tooltip title={disabled ? '' : tooltip} arrow>
 							{value ? (
-								<DateContainer {...args} ref={inputRef} isOverdue={isOverdue} disabled={disabled}><CalendarIcon /> {formatShortDate(value)}</DateContainer>
+								<DateContainer {...args} ref={inputRef} isOverdue={isOverdue} disabled={disabled}>
+									<CalendarIcon />
+									{formatShortDateTime(value)}
+								</DateContainer>
 							) : (
 								<EmptyDateContainer {...args} ref={inputRef} disabled={disabled}><CalendarIcon />
 									{ disabled ? (
