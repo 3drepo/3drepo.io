@@ -22,7 +22,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { GroupsActionsDispatchers, TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { GroupsHooksSelectors, TicketsCardHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
-import { Section, Container } from './sectionToolbar.styles';
+import { FormattedMessage } from 'react-intl';
+import { Section, Container, ClearButton, ClearIcon } from './sectionToolbar.styles';
 import { ToolbarButton } from '../buttons/toolbarButton.component';
 
 export const SectionToolbar = () => {
@@ -61,6 +62,13 @@ export const SectionToolbar = () => {
 					onClick={() => TreeActionsDispatchers.isolateSelectedNodes(undefined)}
 					title={formatMessage({ id: 'viewer.toolbar.icon.isolate', defaultMessage: 'Isolate' })}
 				/>
+				<ClearButton
+					hidden={!hasHighlightedObjects}
+					onClick={() => GroupsActionsDispatchers.clearSelectionHighlights()}
+				>
+					<ClearIcon />
+					<FormattedMessage id="viewer.toolbar.icon.clearSelection" defaultMessage="Clear Selection" />
+				</ClearButton>
 			</Section>
 		</Container>
 	);
