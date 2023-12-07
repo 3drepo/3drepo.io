@@ -104,6 +104,8 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 			yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
 		}
 
+		statsQueue.resetQueue();
+
 		yield all(
 			containers.sort(getSortingFunction({ column: ['name'], direction:[SortingDirection.DESCENDING] })).map(
 				(container) => put(ContainersActions.fetchContainerStats(teamspace, projectId, container._id)),

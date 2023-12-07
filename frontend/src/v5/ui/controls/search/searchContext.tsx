@@ -29,14 +29,14 @@ const defaultValue: SearchContextType<any> = { items: [], filteredItems: [], que
 export const SearchContext = createContext(defaultValue);
 SearchContext.displayName = 'SearchContext';
 
-export interface Props {
-	items: any[];
+export interface SearchContextProps<T> {
+	items: T[];
 	children: any;
 	fieldsToFilter?: string[];
-	filteringFunction?: <T>(items: T[], query: string) => T[];
+	filteringFunction?: (items: T[], query: string) => T[];
 }
 
-export const SearchContextComponent = ({ items, children, fieldsToFilter, filteringFunction }: Props) => {
+export const SearchContextComponent = ({ items, children, fieldsToFilter, filteringFunction }: SearchContextProps<any>) => {
 	const [query, setQuery] = useState('');
 	const [contextValue, setContextValue] = useState({ items, filteredItems: items, query, setQuery });
 

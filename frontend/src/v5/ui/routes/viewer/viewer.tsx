@@ -26,6 +26,8 @@ import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/che
 import { ViewerParams } from '../routes.constants';
 import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
 import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
+import { SpinnerLoader } from '@controls/spinnerLoader';
+import { CentredContainer } from '@controls/centredContainer';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -62,7 +64,7 @@ export const Viewer = () => {
 
 	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
 
-	if (isLoading) return null;
+	if (isLoading) return (<CentredContainer horizontal vertical><SpinnerLoader /></CentredContainer>);
 
 	if (selectedContainer?.revisionsCount === 0) {
 		return <InvalidContainerOverlay status={selectedContainer.status} />;

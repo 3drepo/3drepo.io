@@ -60,8 +60,8 @@ export class LifoQueue<T> {
 				p.resolved = true;
 			}));
 		}
-		this.clearQueue();
-		this.running = false;
+		this.resetQueue();
+
 	}
 
 	public enqueue(...args): Promise<T> {
@@ -75,9 +75,10 @@ export class LifoQueue<T> {
 		return prom.promise;
 	}
 
-	public clearQueue() {
+	public resetQueue() {
 		this.queue = [];
 		this.dict = {};
+		this.running = false;
 	}
 
 	public constructor(func: (...args) => Promise<T>, batchSize) {
