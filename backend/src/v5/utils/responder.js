@@ -128,7 +128,7 @@ Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSiz
 				genResponseLogging.logError(genResponseLogging(response.code, fileSize, req));
 				return;
 			}
-			delete headers['Content-Length']; // We will not know the size of an uncompressed stream
+			delete headers['Content-Length']; // We will not know the size of a decompressed stream
 		}
 	}
 
