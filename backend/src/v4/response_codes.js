@@ -466,10 +466,6 @@
 					res.setHeader("Content-Type", "application/json");
 				}
 
-				if(req.params.format === "unity3d") {
-					res.setHeader("Content-Encoding", "gzip");
-				}
-
 				// res.setHeader("Content-Length", extraInfo.length);
 				meta.contentLength = extraInfo.length;
 
