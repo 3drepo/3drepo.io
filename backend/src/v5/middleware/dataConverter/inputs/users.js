@@ -20,10 +20,10 @@ const { createResponseCode, templates } = require('../../../utils/responseCodes'
 const Yup = require('yup');
 const config = require('../../../utils/config');
 const { formatPronouns } = require('../../../utils/helper/strings');
+const { getProviderLabel } = require('../../../services/sso/sso.constants');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { templates: mailTemplates } = require('../../../services/mailer/mailer.constants');
 const { post } = require('../../../utils/webRequests');
-const { providerLabels } = require('../../../services/sso/sso.constants');
 const { respond } = require('../../../utils/responder');
 const { sendEmail } = require('../../../services/mailer');
 const { types } = require('../../../utils/helper/yup');
@@ -175,7 +175,7 @@ Users.validateForgotPasswordData = async (req, res, next) => {
 						email,
 						username: user,
 						firstName,
-						ssoType: providerLabels[sso.type.toUpperCase()],
+						ssoType: getProviderLabel(sso.type),
 					});
 				throw templates.unknown;
 			}

@@ -21,8 +21,13 @@ SsoConstants.providers = {
 	AAD: 'aad',
 };
 
-SsoConstants.providerLabels = {
-	AAD: 'Microsoft',
+SsoConstants.getProviderLabel = (provider) => {
+	switch (provider) {
+	case SsoConstants.providers.AAD:
+		return 'Microsoft';
+	default:
+		return undefined;
+	}
 };
 
 SsoConstants.errorCodes = {

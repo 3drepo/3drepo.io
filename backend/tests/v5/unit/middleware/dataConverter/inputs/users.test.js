@@ -25,6 +25,12 @@ jest.mock('../../../../../../src/v5/utils/permissions/permissions');
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
+jest.mock('../../../../../../src/v5/services/mailer');
+const Mailer = require(`${src}/services/mailer`);
+const { templates: mailTemplates } = require(`${src}/services/mailer/mailer.constants`);
+
+const { providers, getProviderLabel } = require(`${src}/services/sso/sso.constants`);
+
 jest.mock('../../../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
 
@@ -116,6 +122,8 @@ const testValidateLoginData = () => {
 				expect(Responder.respond.mock.calls.length).toBe(1);
 				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedError.code);
 			}
+			// some test cases do not call the function, reset to ensure it doesn't trickle down to the next test.
+			UsersModel.getUserByUsernameOrEmail.mockReset();
 		});
 	});
 };
@@ -171,24 +179,27 @@ const testValidateUpdateData = () => {
 };
 
 const testForgotPasswordData = () => {
+	const genUserData = (sso) => ({
+		user: existingUsername,
+		customData: {
+			firstName: generateRandomString(),
+			email: generateRandomString(),
+			...(sso ? { sso: { id: generateRandomString(), type: providers.AAD } } : {}),
+		},
+	});
 	describe.each([
-		[{ body: { user: existingUsername } }, true, 'with valid username'],
-		[{ body: { user: availableUsername } }, false, 'with invalid username', templates.ok],
-		[{ body: { user: ssoUsername } }, false, 'with sso user username', templates.ok],
-		[{ body: { user: existingEmail } }, true, 'with valid email'],
-		[{ body: { user: existingEmail, extra: 'extra' } }, false, 'with extra properties', templates.invalidArguments],
-		[{ body: {} }, false, 'with empty body', templates.invalidArguments],
-		[{ body: undefined }, false, 'with undefined body', templates.invalidArguments],
-	])('Check if req arguments for requesting a reset password email are valid', (req, shouldPass, desc, expectedResponse) => {
+		[{ body: { user: existingUsername } }, genUserData(), true, 'with valid username'],
+		[{ body: { user: availableUsername } }, undefined, false, 'with invalid username', templates.ok],
+		[{ body: { user: ssoUsername } }, genUserData(true), false, 'with sso user username', templates.ok, true],
+		[{ body: { user: existingEmail } }, genUserData(), true, 'with valid email'],
+		[{ body: { user: existingEmail, extra: 'extra' } }, genUserData(), false, 'with extra properties', templates.invalidArguments],
+		[{ body: {} }, undefined, false, 'with empty body', templates.invalidArguments],
+		[{ body: undefined }, undefined, false, 'with undefined body', templates.invalidArguments],
+	])('Forgot password data validation', (req, userData, shouldPass, desc, expectedResponse, sendMail) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedResponse.code}`}`, async () => {
-			UsersModel.getUserByUsernameOrEmail.mockImplementationOnce((usernameOrEmail) => {
-				if (usernameOrEmail === existingUsername || usernameOrEmail === existingEmail) {
-					return { user: existingUsername, customData: {} };
-				} if (usernameOrEmail === ssoUsername) {
-					return { user: existingUsername, customData: { sso: { id: generateRandomString() } } };
-				}
-
-				throw templates.userNotFound;
+			UsersModel.getUserByUsernameOrEmail.mockImplementationOnce(() => {
+				if (!userData) return Promise.reject(templates.userNotFound);
+				return Promise.resolve(userData);
 			});
 
 			const mockCB = jest.fn();
@@ -200,6 +211,22 @@ const testForgotPasswordData = () => {
 				expect(mockCB.mock.calls.length).toBe(0);
 				expect(Responder.respond.mock.calls.length).toBe(1);
 				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedResponse.code);
+			}
+
+			if (sendMail) {
+				expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
+				expect(Mailer.sendEmail).toHaveBeenCalledWith(
+					mailTemplates.FORGOT_PASSWORD_SSO.name,
+					userData.customData.email,
+					{
+						email: userData.customData.email,
+						username: userData.user,
+						firstName: userData.customData.firstName,
+						ssoType: getProviderLabel(userData.customData.sso.type),
+					},
+				);
+			} else {
+				expect(Mailer.sendEmail).not.toHaveBeenCalledTimes(1);
 			}
 		});
 	});
