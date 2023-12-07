@@ -56,6 +56,7 @@ export const TicketDetailsCard = () => {
 		const index = currentIndex === -1 ? initialIndex.current : currentIndex;
 		const updatedId = filteredTickets.slice((index + delta) % filteredTickets.length)[0]._id;
 		TicketsCardActionsDispatchers.setSelectedTicket(updatedId);
+		TicketsCardActionsDispatchers.setSelectedTicketPin(updatedId);
 	};
 
 	const cycleToPrevTicket = () => changeTicketIndex(-1);
