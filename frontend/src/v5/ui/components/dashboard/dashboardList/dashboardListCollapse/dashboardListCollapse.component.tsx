@@ -17,7 +17,7 @@
 
 import { ReactNode, useState } from 'react';
 import { Collapse, Tooltip } from '@mui/material';
-import { ButtonContainer, ControlsContainer, CollapsedItemContainer, Title, ChevronButton } from './dashboardListCollapse.styles';
+import { ButtonContainer, ControlsContainer, CollapsedItemContainer, Title, ChevronButton, Container } from './dashboardListCollapse.styles';
 
 export type IDashboardListCollapse = {
 	children: ReactNode;
@@ -44,7 +44,7 @@ export const DashboardListCollapse = ({
 	const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
 	return (
-		<div className={className} >
+		<Container className={className} >
 			<ControlsContainer>
 				<ButtonContainer onClick={() => setIsExpanded((state) => !state)}>
 					<Tooltip title={(isExpanded ? tooltipTitles?.visible : tooltipTitles?.collapsed) ?? ''}>
@@ -59,6 +59,6 @@ export const DashboardListCollapse = ({
 					{children}
 				</CollapsedItemContainer>
 			</Collapse>
-		</div>
+		</Container>
 	);
 };
