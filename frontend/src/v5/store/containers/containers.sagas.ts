@@ -195,6 +195,10 @@ export function* deleteContainer({ teamspace, projectId, containerId, onSuccess,
 	}
 }
 
+export function* resetContainerStatsQueue() {
+	statsQueue.resetQueue();
+}
+
 export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(ContainersTypes.REMOVE_FAVOURITE, removeFavourites);
@@ -205,4 +209,5 @@ export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.UPDATE_CONTAINER_SETTINGS, updateContainerSettings);
 	yield takeEvery(ContainersTypes.CREATE_CONTAINER, createContainer);
 	yield takeLatest(ContainersTypes.DELETE_CONTAINER, deleteContainer);
+	yield takeEvery(ContainersTypes.RESET_CONTAINER_STATS_QUEUE, resetContainerStatsQueue);
 }
