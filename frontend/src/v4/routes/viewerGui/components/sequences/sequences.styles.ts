@@ -263,3 +263,17 @@ export const StyledLoader = styled(Loader)`
 		font-size: 13px;
 	}
 `;
+
+export const ToggleContainer = styled.div`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	font-weight: 600;
+	height: 48px;
+	position: absolute;
+	bottom: 0;
+	border-top: solid 1px ${({ theme }) => theme.palette.base.lightest};
+	box-sizing: border-box;
+`;
