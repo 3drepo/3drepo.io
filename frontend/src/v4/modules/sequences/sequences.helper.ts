@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { isEqual } from 'lodash';
+import { formatMessage } from '@/v5/services/intl';
 import { STEP_SCALE } from '../../constants/sequences';
 import { Viewer } from '../../services/viewer/viewer';
 import { getState } from '../store';
@@ -63,6 +64,17 @@ export const getDateWithinBoundaries = (date: Date, minDate: Date, maxDate: Date
 
 	return date;
 }
+
+export const MODAL_TODAY_NOT_AVAILABLE_BODY = () => ({
+	title: formatMessage({
+		id: 'sequences.unavailableDate.title',
+		defaultMessage: 'Unavailable date',
+	}),
+	message: formatMessage({
+		id: 'sequences.unavailableDate.message',
+		defaultMessage: 'Today\'s date falls outside of the range of the sequence. The nearest date is selected',
+	}),
+});
 
 export const getDateByStep = (date, stepScale, step) => {
 	const newDate = new Date(date);

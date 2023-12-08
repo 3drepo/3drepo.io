@@ -18,10 +18,9 @@ import { PureComponent, useEffect, useState } from 'react';
 import { IconButton } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { formatMessage } from '@/v5/services/intl';
 import { STEP_SCALE } from '../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
-import { getDateWithinBoundaries, getSelectedFrame } from '../../../../modules/sequences/sequences.helper';
+import { MODAL_TODAY_NOT_AVAILABLE_BODY, getDateWithinBoundaries, getSelectedFrame } from '../../../../modules/sequences/sequences.helper';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import { Loader } from '../../../components/loader/loader.component';
 import { PanelBarActions } from '../panelBarActions';
@@ -85,16 +84,7 @@ const SequenceDetails = ({
 		setDateToUse(newDateToUse);
 
 		if (newDateToUse.getTime() !== now.getTime()) {
-			DialogsActionsDispatchers.open('info', {
-				title: formatMessage({
-					id: 'sequences.unavailableDate.title',
-					defaultMessage: 'Unavailable date',
-				}),
-				message: formatMessage({
-					id: 'sequences.unavailableDate.message',
-					defaultMessage: 'Today\'s date is not available in this sequence, {br}the closest frame will be selected instead.',
-				}, { br: <br /> }),
-			});
+			DialogsActionsDispatchers.open('info', MODAL_TODAY_NOT_AVAILABLE_BODY);
 		}
 	}, []);
 

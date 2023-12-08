@@ -25,12 +25,13 @@ import Replay from '@mui/icons-material/Replay';
 import Stop from '@mui/icons-material/Stop';
 import { debounce, noop } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
 import { isDateOutsideRange } from '../../../../../../helpers/dateTime';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { getDateByStep, getSelectedFrameIndex } from '../../../../../../modules/sequences/sequences.helper';
+import { MODAL_TODAY_NOT_AVAILABLE_BODY, getDateByStep, getDateWithinBoundaries, getSelectedFrameIndex } from '../../../../../../modules/sequences/sequences.helper';
 import { LONG_DATE_TIME_FORMAT_V5 } from '../../../../../../services/formatting/formatDate';
 import {
 	DatePicker,
@@ -287,6 +288,17 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 
 	public render() {
 		const { value, stepScale , stepInterval } = this.state;
+		const { min, max } = this.props;
+
+		const goToToday = () => {
+			const now = new Date();
+			const newDateToUse = getDateWithinBoundaries(now, new Date(min), new Date(max));
+			this.gotoDate(newDateToUse);
+
+			if (newDateToUse.getTime() !== now.getTime()) {
+				DialogsActionsDispatchers.open('info', MODAL_TODAY_NOT_AVAILABLE_BODY);
+			}
+		}
 
 		return (
             <SequencePlayerContainer>
@@ -309,7 +321,7 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 										placeholder="date"
 										dateTime
 									/>
-									<SetToCurrentDateButton onClick={() => this.gotoDate(new Date())}>
+									<SetToCurrentDateButton onClick={goToToday}>
 										<FormattedMessage id="viewer.sequences.setToCurrentDate" defaultMessage="Set to current date" />
 									</SetToCurrentDateButton>
 								</FlexCol>
