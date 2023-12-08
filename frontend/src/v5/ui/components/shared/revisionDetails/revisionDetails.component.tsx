@@ -92,7 +92,7 @@ export const RevisionDetails = ({ containerId, revisionsCount, status }: IRevisi
 	return (
 		<Container>
 			<RevisionsListHeaderContainer>
-				<RevisionsListHeaderLabel width={130} tabletWidth={94}><FormattedMessage id="revisionDetails.addedOn" defaultMessage="Added on" /></RevisionsListHeaderLabel>
+				<RevisionsListHeaderLabel width={140} tabletWidth={94}><FormattedMessage id="revisionDetails.addedOn" defaultMessage="Added on" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel width={170} tabletWidth={155}><FormattedMessage id="revisionDetails.addedBy" defaultMessage="Added by" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel width={150} tabletWidth={300}><FormattedMessage id="revisionDetails.revisionCode" defaultMessage="Revision name" /></RevisionsListHeaderLabel>
 				<RevisionsListHeaderLabel hideWhenSmallerThan={1140}><FormattedMessage id="revisionDetails.description" defaultMessage="Description" /></RevisionsListHeaderLabel>

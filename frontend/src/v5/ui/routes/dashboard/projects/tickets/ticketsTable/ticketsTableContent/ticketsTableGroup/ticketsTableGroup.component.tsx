@@ -83,7 +83,7 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 								<SortingTableHeader name="modelName" width={187} hidden={!showModelName}>
 									<FormattedMessage id="ticketTable.column.header.federationContainer" defaultMessage="federation / container" />
 								</SortingTableHeader>
-								<SortingTableHeader name={`properties.${BaseProperties.CREATED_AT}`} width={80}>
+								<SortingTableHeader name={`properties.${BaseProperties.CREATED_AT}`} width={109}>
 									<FormattedMessage id="ticketTable.column.header.createdAt" defaultMessage="created at" />
 								</SortingTableHeader>
 								<SortingTableHeader name={`properties.${IssueProperties.ASSIGNEES}`} width={96} hidden={!hasProperties}> 
@@ -92,7 +92,7 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 								<SortingTableHeader name={`properties.${BaseProperties.OWNER}`} width={62}>
 									<FormattedMessage id="ticketTable.column.header.owner" defaultMessage="owner" />
 								</SortingTableHeader>
-								<SortingTableHeader name={`properties.${IssueProperties.DUE_DATE}`} width={90} hidden={!hasProperties}>
+								<SortingTableHeader name={`properties.${IssueProperties.DUE_DATE}`} width={119} hidden={!hasProperties}>
 									<FormattedMessage id="ticketTable.column.header.dueDate" defaultMessage="due date" />
 								</SortingTableHeader>
 								<SortingTableHeader name={`properties.${IssueProperties.PRIORITY}`} width={90} hidden={!hasProperties}>

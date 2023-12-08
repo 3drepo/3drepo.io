@@ -17,3 +17,40 @@
 
 // Positive infinity ensures null values are shown at the top
 export const dateToNum = (date) => (date ? (date).getTime() : Number.POSITIVE_INFINITY);
+
+import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+import { get, isArray } from 'lodash';
+
+export const getSortingFunction = <T>(sortConfig) => {
+	const { column, direction } = sortConfig;
+
+	const sortingFunction = (a: T, b: T, index = 0): number => {
+		const aValue = get(a, column[index]);
+		const bValue = get(b, column[index]);
+
+		if (aValue === bValue && (index + 1 < column.length)) {
+			return direction[index] === SortingDirection.ASCENDING
+				? sortingFunction(a, b, index + 1) : sortingFunction(b, a, index + 1);
+		}
+
+		if (typeof aValue === 'string') {
+			return aValue.localeCompare(bValue);
+		}
+
+		if (typeof aValue === 'number') {
+			return aValue - bValue;
+		}
+
+		if (isArray(aValue)) {
+			return aValue.length - bValue.length;
+		}
+
+		if (aValue instanceof Date || bValue instanceof Date) {
+			return dateToNum(aValue) - dateToNum(bValue);
+		}
+
+		return 0;
+	};
+
+	return  direction[0] === SortingDirection.ASCENDING ? sortingFunction : (a: T, b: T) => sortingFunction(b, a);
+};

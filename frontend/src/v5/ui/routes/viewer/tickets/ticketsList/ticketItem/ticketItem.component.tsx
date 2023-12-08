@@ -51,7 +51,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const onBlurAssignees = (newVals) => {
 		if (!isEqual(newVals, assignees)) updateTicketProperty({ [IssueProperties.ASSIGNEES]: newVals });
 	};
-	const onBlurDueDate = (newVal) => {
+	const onChangeDueDate = (newVal) => {
 		if (newVal !== dueDate) updateTicketProperty({ [IssueProperties.DUE_DATE]: newVal });
 	};
 
@@ -82,7 +82,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			</ChipList>
 			{priority && (
 				<IssuePropertiesRow>
-					<DueDateWithLabel value={dueDate} onBlur={onBlurDueDate} disabled={readOnly} />
+					<DueDateWithLabel value={dueDate} onChange={onChangeDueDate} disabled={readOnly} />
 					<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" label="" />
 					<Assignees value={assignees} onBlur={onBlurAssignees} disabled={readOnly} />
 				</IssuePropertiesRow>

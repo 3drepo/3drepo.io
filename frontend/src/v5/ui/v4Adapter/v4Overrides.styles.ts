@@ -19,7 +19,6 @@ import styled from 'styled-components';
 import { Mark as HighlighterMark } from '@/v4/routes/components/highlight/highlight.styles';
 import { ViewerPanelContent } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
 import { Container as RevisionsSwitchContainer } from '@/v4/routes/viewerGui/components/revisionsSwitch/revisionsSwitch.styles';
-import bottomToolbar from './overrides/bottomToolbar.overrides';
 import panelsMenu from './overrides/panelsMenu.overrides';
 import leftPanel from './overrides/leftPanel.overrides';
 import visualSettings from './overrides/visualSettings.overrides';
@@ -70,7 +69,6 @@ export const V4OverridesContainer = styled.div`
 
 	${leftPanel}
 	${panelsMenu}
-	${bottomToolbar}
 
 	${previewItem}
 	${previewDetails}

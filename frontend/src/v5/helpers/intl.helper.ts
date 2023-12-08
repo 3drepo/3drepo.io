@@ -88,6 +88,15 @@ export const formatShortDate = (date) => formatDate(date, { // DD/MM/YY
 	year: '2-digit',
 });
 
+export const formatShortDateTime = (date) => formatDate(date, { // DD MM YYYY hh:mm
+	hour: 'numeric',
+	minute: 'numeric',
+	day: 'numeric',
+	month: 'numeric',
+	year: 'numeric',
+}).replaceAll(',', '');
+
+
 export const formatLongDateTime = (date) => formatDate(date, { // DD Month YYYY at hh:mm
 	hour: 'numeric',
 	minute: 'numeric',

@@ -34,10 +34,15 @@ import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { FetchContainersResponse } from '@/v5/services/api/containers';
 import { isEqualWith } from 'lodash';
-import { FetchContainerViewsResponseView } from './containers.types';
+import { ContainerStats, FetchContainerViewsResponseView, IContainer } from './containers.types';
 import { prepareContainerSettingsForBackend, prepareContainerSettingsForFrontend, prepareContainersData } from './containers.helpers';
 import { selectContainerById, selectContainers, selectIsListPending } from './containers.selectors';
 import { compByColum } from '../store.helpers';
+import { getSortingFunction } from '@components/dashboard/dashboardList/useOrderedList/useOrderedList.helpers';
+import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+import { LifoQueue } from '@/v5/helpers/functions.helpers';
+
+const statsQueue = new LifoQueue<ContainerStats>(API.Containers.fetchContainerStats, 30);
 
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
@@ -65,37 +70,11 @@ export function* removeFavourites({ containerId, teamspace, projectId }: RemoveF
 	}
 }
 
-export function* fetchContainers({ teamspace, projectId }: FetchContainersAction) {
-	try {
-		const { containers }: FetchContainersResponse = yield API.Containers.fetchContainers(teamspace, projectId);
-		const containersWithoutStats = prepareContainersData(containers);
-		const storedContainers = yield select(selectContainers);
-		const isPending = yield select(selectIsListPending);
-
-		// Only update if theres is new data
-		if (isPending || !isEqualWith(storedContainers, containersWithoutStats, compByColum(['_id', 'name', 'role', 'isFavourite']))) {
-			yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
-		}
-
-		yield all(
-			containers.map(
-				(container) => put(ContainersActions.fetchContainerStats(teamspace, projectId, container._id)),
-			),
-		);
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'containers.fetchAll.error', defaultMessage: 'trying to fetch containers' }),
-			error,
-		}));
-	}
-}
-
 export function* fetchContainerStats({ teamspace, projectId, containerId }: FetchContainerStatsAction) {
 	try {
-		const stats = yield API.Containers.fetchContainerStats(teamspace, projectId, containerId);
-
-		const container = yield select(selectContainerById, containerId);
-
+		const container: IContainer = yield select(selectContainerById, containerId);
+		const stats = yield statsQueue.enqueue(teamspace, projectId, containerId);
+		
 		const basicDataEqual = compByColum(['unit', 'type'])(container, stats);
 		// eslint-disable-next-line max-len
 		const revisionsEqual = (container?.latestRevision === stats?.revisions?.latestRevision && container?.status === stats?.status) // if it has revisions
@@ -108,6 +87,33 @@ export function* fetchContainerStats({ teamspace, projectId, containerId }: Fetc
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.fetchStats.error', defaultMessage: 'trying to fetch containers details' }),
+			error,
+		}));
+	}
+}
+
+export function* fetchContainers({ teamspace, projectId }: FetchContainersAction) {
+	try {
+		const { containers }: FetchContainersResponse = yield API.Containers.fetchContainers(teamspace, projectId);
+		const containersWithoutStats = prepareContainersData(containers);
+		const storedContainers = yield select(selectContainers);
+		const isPending = yield select(selectIsListPending);
+
+		// Only update if theres is new data
+		if (isPending || !isEqualWith(storedContainers, containersWithoutStats, compByColum(['_id', 'name', 'role', 'isFavourite']))) {
+			yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
+		}
+
+		statsQueue.resetQueue();
+
+		yield all(
+			containers.sort(getSortingFunction({ column: ['name'], direction:[SortingDirection.DESCENDING] })).map(
+				(container) => put(ContainersActions.fetchContainerStats(teamspace, projectId, container._id)),
+			),
+		); 
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'containers.fetchAll.error', defaultMessage: 'trying to fetch containers' }),
 			error,
 		}));
 	}
@@ -189,6 +195,10 @@ export function* deleteContainer({ teamspace, projectId, containerId, onSuccess,
 	}
 }
 
+export function* resetContainerStatsQueue() {
+	statsQueue.resetQueue();
+}
+
 export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.ADD_FAVOURITE, addFavourites);
 	yield takeLatest(ContainersTypes.REMOVE_FAVOURITE, removeFavourites);
@@ -199,4 +209,5 @@ export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.UPDATE_CONTAINER_SETTINGS, updateContainerSettings);
 	yield takeEvery(ContainersTypes.CREATE_CONTAINER, createContainer);
 	yield takeLatest(ContainersTypes.DELETE_CONTAINER, deleteContainer);
+	yield takeEvery(ContainersTypes.RESET_CONTAINER_STATS_QUEUE, resetContainerStatsQueue);
 }

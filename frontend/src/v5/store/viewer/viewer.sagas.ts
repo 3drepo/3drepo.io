@@ -59,9 +59,10 @@ function* fetchData({ teamspace, containerOrFederation, project }: FetchDataActi
 				project,
 				containerId,
 			));
+
 			const result = yield race({
 				fail: take(DialogsTypes.OPEN),
-				success: take(ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS),
+				success: take((action)=> action.type === ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS && action.containerId === containerId),
 			});
 
 			if (result.fail) {

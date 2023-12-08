@@ -17,7 +17,7 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import { isEmpty, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
@@ -77,9 +77,8 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 
 	useEffect(() => {
 		const view = selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
-		if (isEmpty(view)) return;
 		goToView(view);
-	}, [selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state]);
+	}, [selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW]]);
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setSelectedTicketPin(selectedTicket?._id);

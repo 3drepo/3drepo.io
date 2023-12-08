@@ -415,26 +415,21 @@ describe('Tickets: sagas', () => {
 	describe('templates', () => {
 		const template = templateMockFactory();
 		const templates = [template];
-		const templateWithSchema = fullTemplateMockFactory(template);
-		const templatesWithSchema = [templateWithSchema];
 
 		// Basic Container templates
 		it('should call fetchContainerTemplates endpoint', async () => {
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates`)
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates?getDetails=false`)
 				.reply(200, { templates })
-			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates/${template._id}`)
-				.reply(200, templateWithSchema);
 
 			await waitForActions(() => {
 				dispatch(TicketsActions.fetchTemplates(teamspace, projectId, modelId, false));
-			}, [TicketsActions.fetchTemplatesSuccess(modelId, templatesWithSchema)]);
+			}, [TicketsActions.fetchTemplatesSuccess(modelId, templates)]);
 		});
 
 		it('should call fetchContainerTemplates endpoint with a 404', async () => {
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates`)
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates?getDetails=false`)
 				.reply(404);
 
 			await waitForActions(() => {
@@ -470,20 +465,17 @@ describe('Tickets: sagas', () => {
 		// Basic Federation templates
 		it('should call fetchFederationTemplates endpoint', async () => {
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates`)
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates?getDetails=false`)
 				.reply(200, { templates });
-			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates/${template._id}`)
-				.reply(200, templateWithSchema);
 
 			await waitForActions(() => {
 				dispatch(TicketsActions.fetchTemplates(teamspace, projectId, modelId, true));
-			}, [TicketsActions.fetchTemplatesSuccess(modelId, templatesWithSchema)]);
+			}, [TicketsActions.fetchTemplatesSuccess(modelId, templates)]);
 		});
 
 		it('should call fetchFederationTemplates endpoint with a 404', async () => {
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates`)
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates?getDetails=false`)
 				.reply(404);
 
 			await waitForActions(() => {
