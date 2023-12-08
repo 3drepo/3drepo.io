@@ -19,8 +19,8 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { SequencesList } from './sequencesList.component';
 import { SequencesActions, selectOpenOnToday } from '@/v4/modules/sequences';
+import { SequencesList } from './sequencesList.component';
 
 const mapStateToProps = createStructuredSelector({
 	openOnToday: selectOpenOnToday,
