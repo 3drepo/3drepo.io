@@ -49,6 +49,8 @@ export const DashboardListItemContainerTitle = ({
 		rel: 'noopener noreferrer',
 	};
 
+	const canLaunchContainer = container.hasStatsPending || hasRevisions;
+
 	return (
 		<DashboardListItemTitle
 			subtitle={!container.hasStatsPending && (
@@ -64,14 +66,13 @@ export const DashboardListItemContainerTitle = ({
 				/>
 			)}
 			selected={isSelected}
-			tooltipTitle={
-				container.hasStatsPending || hasRevisions ? (
-					<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
-				) : (
-					<FormattedMessage id="containers.list.item.title.tooltip.empty" defaultMessage="No revisions" />
-				)
+			tooltipTitle={canLaunchContainer ? (
+				<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
+			) : (
+				<FormattedMessage id="containers.list.item.title.tooltip.empty" defaultMessage="No revisions" />
+			)
 			}
-			disabled={false}
+			disabled={!canLaunchContainer}
 		>
 			<Link {...linkProps}>
 				<Highlight search={query}>
