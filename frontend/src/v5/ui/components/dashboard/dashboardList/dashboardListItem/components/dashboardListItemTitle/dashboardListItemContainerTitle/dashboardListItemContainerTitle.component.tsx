@@ -37,6 +37,7 @@ export const DashboardListItemContainerTitle = ({
 	container,
 	isSelected = false,
 	openInNewTab = false,
+	...props
 }: IContainerTitle): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
@@ -53,6 +54,7 @@ export const DashboardListItemContainerTitle = ({
 
 	return (
 		<DashboardListItemTitle
+			{...props}
 			subtitle={!container.hasStatsPending && (
 				<LatestRevision
 					name={(

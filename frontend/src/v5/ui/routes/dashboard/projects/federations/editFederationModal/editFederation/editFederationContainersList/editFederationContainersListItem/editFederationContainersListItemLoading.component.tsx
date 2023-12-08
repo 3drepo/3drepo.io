@@ -17,8 +17,13 @@
 
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TeamspacesHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem/skeletonListItem.component';
+import { Display } from '@/v5/ui/themes/media';
+import { DashboardListItem } from '@components/dashboard/dashboardList';
+import { DashboardListItemContainerTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
+import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
+import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
 import { useEffect } from 'react';
+import { DashboardListItemRow } from './editFederationContainersListItem.styles';
 
 export const EditFederationContainersListItemLoading = ({ index, container }) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -28,6 +33,33 @@ export const EditFederationContainersListItemLoading = ({ index, container }) =>
 		ContainersActionsDispatchers.fetchContainerStats(teamspace, project, container._id);
 	}, []);
 
+	const delay = index / 10;
+	return (
 
-	return (<SkeletonListItem delay={index / 10} key={container._id} />);
+		<DashboardListItem >
+			<DashboardListItemRow>
+				<DashboardListItemContainerTitle
+					minWidth={116}
+					maxWidth={209}
+					container={container}
+					openInNewTab
+				/>
+				<FixedOrGrowContainer width={186} hideWhenSmallerThan={Display.Desktop} >
+					<SkeletonBlock delay={delay} width="80%" />
+				</FixedOrGrowContainer>
+				<FixedOrGrowContainer width={160} >
+					<SkeletonBlock delay={delay} width="80%" />
+				</FixedOrGrowContainer>
+				<FixedOrGrowContainer width={160} >
+					<SkeletonBlock delay={delay} width="90%" />
+				</FixedOrGrowContainer>
+				<FixedOrGrowContainer width={160} hideWhenSmallerThan={Display.Tablet}>
+					<SkeletonBlock delay={delay} width="90%" />
+				</FixedOrGrowContainer>
+				<FixedOrGrowContainer width={100}>
+					<SkeletonBlock delay={delay} width="90%" />
+				</FixedOrGrowContainer>
+			</DashboardListItemRow>
+		</DashboardListItem>
+	);
 };
