@@ -15,12 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { ListContainer } from './dashboardList.styles';
 
 type IDashboardList = {
 	children?: ReactNode;
 	className?: string;
+	style?: React.CSSProperties;
 };
 
 export const DashboardList = ({ children, ...props }: IDashboardList): JSX.Element => (
