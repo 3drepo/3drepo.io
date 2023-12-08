@@ -99,7 +99,7 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 		const storedContainers = yield select(selectContainers);
 		const isPending = yield select(selectIsListPending);
 
-		// Only update if theres is new datad
+		// Only update if theres is new data
 		if (isPending || !isEqualWith(storedContainers, containersWithoutStats, compByColum(['_id', 'name', 'role', 'isFavourite']))) {
 			yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
 		}
