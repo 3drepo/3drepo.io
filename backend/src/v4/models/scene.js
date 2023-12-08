@@ -21,6 +21,8 @@ const db = require("../handler/db");
 const ExternalServices = require("../handler/externalServices");
 const matrix = require("./helper/matrix");
 const History = require("./history");
+const {v5Path} = require("../../interop");
+const Models = require(`${v5Path}/models/modelSettings`);
 
 function clean(nodeToClean) {
 	if (nodeToClean) {
@@ -119,10 +121,9 @@ Scene.getNodeById = async function (account, model, id, projection = {}) {
 };
 
 Scene.getMeshInfo = async (account, model, branch, rev, user) => {
-	const refNodes = await Scene.findNodesByType(account, model, branch, rev, "ref", undefined, {project: 1});
-
-	if(refNodes.length) {
-		// it is a federation
+	const isFed = await Models.isFederation(account, model);
+	if(isFed) {
+		const refNodes = await Scene.findNodesByType(account, model, branch, rev, "ref", undefined, {project: 1});
 		const { hasReadAccessToModelHelper } = require("../middlewares/middlewares");
 		const C = require("../constants");
 		const subModelMeshes = await Promise.all(refNodes.map(async ({project}) => {
