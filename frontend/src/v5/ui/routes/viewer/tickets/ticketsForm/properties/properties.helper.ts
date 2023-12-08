@@ -16,9 +16,10 @@
  */
 import { TextField } from '@controls/inputs/textField/textField.component';
 import { TextAreaFixedSize } from '@controls/inputs/textArea/textAreaFixedSize.component';
-import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
+import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import { Toggle } from '@controls/inputs/toggle/toggle.component';
 import { NumberField } from '@controls/inputs/numberField/numberField.component';
+import { SequencingProperty } from '@components/viewer/cards/tickets/sequencingProperty/sequencingProperty.component';
 import { PinDetails } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/pinDetails/pinDetails.component';
 import { ManyOfProperty } from './manyOfProperty.component';
 import { OneOfProperty } from './oneOfProperty.component';
@@ -28,7 +29,8 @@ import { TicketView } from './ticketView/ticketView.component';
 export const TicketProperty = {
 	text: TextField,
 	longText: TextAreaFixedSize,
-	date: DatePicker,
+	date: DateTimePicker,
+	sequencing: SequencingProperty,
 	oneOf: OneOfProperty,
 	manyOf: ManyOfProperty,
 	boolean: Toggle,

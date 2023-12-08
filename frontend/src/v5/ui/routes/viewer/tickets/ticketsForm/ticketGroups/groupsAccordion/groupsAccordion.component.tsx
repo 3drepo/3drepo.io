@@ -35,6 +35,8 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 		indexedOverrides,
 		editGroup,
 		groupType,
+		highlightedIndex,
+		clearHighlightedIndex,
 	} = useContext(TicketGroupsContext);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const hasClearedOverrides = TicketsCardHooksSelectors.selectTicketHasClearedOverrides();
@@ -54,8 +56,10 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 	};
 
 	useEffect(() => {
-		if (hasClearedOverrides && isColored) {
-			setCollectionIsChecked(indexes, false);
+		if (!isColored || !hasClearedOverrides) return;
+		setCollectionIsChecked(indexes, false);
+		if (highlightedIndex >= 0) {
+			clearHighlightedIndex();
 		}
 	}, [hasClearedOverrides]);
 

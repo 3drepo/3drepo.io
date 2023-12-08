@@ -18,7 +18,6 @@
 import { PureComponent } from 'react';
 
 import {
-	ISSUE_DEFAULT_HIDDEN_STATUSES,
 	ISSUE_FILTERS,
 	ISSUES_ACTIONS_MENU,
 } from '../../../../constants/issues';
@@ -108,14 +107,6 @@ export class Issues extends PureComponent<IProps, any> {
 			[...this.commonHeaderMenuItems, this.toggleSubmodelsMenuItem];*/
 	}
 
-	get showDefaultHiddenItems() {
-		if (this.props.selectedFilters.length) {
-			return this.props.selectedFilters
-				.some(({ value: { value } }) => ISSUE_DEFAULT_HIDDEN_STATUSES.includes(value));
-		}
-		return false;
-	}
-
 	public renderDetailsView = renderWhenTrue(() => (
 		<IssueDetails
 			teamspace={this.props.teamspace}
@@ -191,7 +182,6 @@ export class Issues extends PureComponent<IProps, any> {
 				isPending={this.props.isPending}
 				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
 				items={this.props.issues}
-				showDefaultHiddenItems={this.showDefaultHiddenItems}
 				activeItemId={this.props.activeIssueId}
 				showDetails={this.props.showDetails}
 				permissions={this.props.modelSettings.permissions}

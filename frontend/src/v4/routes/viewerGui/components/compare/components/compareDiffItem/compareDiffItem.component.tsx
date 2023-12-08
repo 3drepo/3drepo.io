@@ -18,7 +18,7 @@
 import { PureComponent } from 'react';
 
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { formatShortDate } from '../../../../../../services/formatting/formatDate';
+import { formatShortDateTime } from '../../../../../../services/formatting/formatDate';
 import { ArrowsAltH } from '../../../../../components/fontAwesomeIcon';
 import { RevisionsSelect } from '../revisionsSelect/revisionsSelect.component';
 import {
@@ -51,7 +51,7 @@ export class CompareDiffItem extends PureComponent<IProps, any> {
 
 	public get currentRevisionName() {
 		if (this.props.baseRevision._id) {
-			return this.props.baseRevision.tag || formatShortDate(this.props.baseRevision.timestamp);
+			return this.props.baseRevision.tag || formatShortDateTime(this.props.baseRevision.timestamp);
 		}
 		return 'No revision found';
 	}

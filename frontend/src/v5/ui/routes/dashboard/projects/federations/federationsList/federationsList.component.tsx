@@ -105,10 +105,10 @@ export const FederationsList = ({
 					<DashboardListHeaderLabel name="containers" width={165} hideWhenSmallerThan={Display.Tablet}>
 						<FormattedMessage id="federations.list.header.containers" defaultMessage="Containers" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="code" width={188} minWidth={43}>
+					<DashboardListHeaderLabel name="code" width={172} minWidth={43}>
 						<FormattedMessage id="federations.list.header.code" defaultMessage="Code" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="lastUpdated" width={180} minWidth={150}>
+					<DashboardListHeaderLabel name="lastUpdated" width={210} minWidth={166}>
 						<FormattedMessage id="federations.list.header.lastUpdated" defaultMessage="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>

@@ -47,6 +47,11 @@ export class ClientConfigService {
 	public tagRegExp;
 	public uploadSizeLimit;
 	public avatarSizeLimit;
+	public projectImageSizeLimit;
+	// imageSizeLimit is temporary, should be removed
+	// when both projectImageSizeLimit and
+	// avatarSizeLimit are sent
+	public imageSizeLimit;
 	public imageExtensions;
 	public apiUrls;
 	public hotjarVersion;
@@ -71,6 +76,8 @@ export class ClientConfigService {
 					this[key] = window.ClientConfig[key];
 				}
 			}
+			this.projectImageSizeLimit = this.imageSizeLimit;
+			this.avatarSizeLimit = this.imageSizeLimit;
 		}
 
 		this.apiAlgorithm = this.createRoundRobinAlgorithm();

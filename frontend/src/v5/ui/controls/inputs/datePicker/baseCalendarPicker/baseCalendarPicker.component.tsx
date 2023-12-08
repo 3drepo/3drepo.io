@@ -20,6 +20,7 @@ import { FormInputProps } from '@controls/inputs/inputController.component';
 import { formatMessage } from '@/v5/services/intl';
 import { TextField } from './baseCalendarPicker.styles';
 import { formatDayOfWeek } from '../dateFormatHelper';
+import { StopBackgroundInteraction } from '@controls/dueDate/dueDate.styles';
 
 export type BaseCalendarPickerProps = FormInputProps & {
 	defaultValue?: Date;
@@ -35,55 +36,81 @@ export const BaseCalendarPicker = ({
 	required,
 	value,
 	onChange,
+	onBlur,
 	...props
 }: BaseCalendarPickerProps) => {
 	const [open, setOpen] = useState(false);
 
+	const closePicker = () => setOpen(false);
+
+	const preventPropagation = (e) => {
+		if (e.key !== 'Escape') {
+			e.preventDefault();
+			e.stopPropagation();
+		}
+	};
+
 	const handleClick = (e) => {
-		e.preventDefault();
-		if (!disabled) setOpen(true);
+		if (disabled) return;
+		preventPropagation(e);
+		if (!open) {
+			setOpen(true);
+		}
+	};
+
+	const onDateChange = (newValue) => {
+		const timestamp = newValue?.toDate()?.getTime() || null;
+		closePicker();
+		onChange?.(timestamp);
+		onBlur?.();
 	};
 
 	return (
-		<PickerComponent
-			renderInput={({ ref, inputRef, ...textFieldProps }) => (
-				<TextField
-					{...textFieldProps}
-					ref={inputRef}
-					inputRef={inputRef}
-					onClick={handleClick}
-					onKeyDown={(e) => e.preventDefault()}
-					error={error}
-					helperText={helperText}
-					required={required}
-					inputProps={{
-						...textFieldProps.inputProps,
-						placeholder: formatMessage({
-							id: 'calendarPicker.placeholder',
-							defaultMessage: 'Choose a date',
-						}),
-					}}
-				/>
-			)}
-			{...props}
-			// If value is 0 display it as null to prevent it showing as 1/1/1970
-			value={value ? dayjs(value) : null}
-			onOpen={() => setOpen(true)}
-			onClose={() => {
-				// This is to signal that the date has changed (we are using onblur to save changes)
-				props.onBlur?.();
-				setOpen(false);
-			}}
-			disabled={disabled}
-			open={open}
-			dayOfWeekFormatter={formatDayOfWeek}
-			disableHighlightToday
-			componentsProps={{
-				actionBar: {
-					hidden: required,
-				},
-			}}
-			onChange={(dayJs) => onChange?.(dayJs?.toDate().getTime() || null)}
-		/>
+		<div onClick={handleClick} aria-hidden="true">
+			<StopBackgroundInteraction open={open} onClick={closePicker} />
+			<PickerComponent
+				renderInput={({ ref, inputRef, ...textFieldProps }) => (
+					<TextField
+						{...textFieldProps}
+						ref={inputRef}
+						inputRef={inputRef}
+						onClick={handleClick}
+						onKeyDown={(e) => e.preventDefault()}
+						error={error}
+						helperText={helperText}
+						required={required}
+						inputProps={{
+							...textFieldProps.inputProps,
+							placeholder: formatMessage({
+								id: 'calendarPicker.placeholder',
+								defaultMessage: 'Choose a date',
+							}),
+						}}
+					/>
+				)}
+				disableHighlightToday
+				dayOfWeekFormatter={formatDayOfWeek}
+				disabled={disabled}
+				// onChange is a required prop in Date[Time]Picker, however it is not needed as onAccept works better
+				// (onChange triggers even when changing year, onAccept only when a date is finally chosen)
+				onChange={() => true}
+				onAccept={onDateChange}
+				value={value ? dayjs(value) : null}
+				componentsProps={{
+					actionBar: {
+						hidden: required,
+					},
+				}}
+				{...props}
+				PaperProps={{ onClick: preventPropagation }}
+				open={open}
+				onOpen={() => setOpen(true)}
+				onClose={() => {
+					// This is to signal that the date has changed (we are using onblur to save changes)
+					onBlur?.();
+					setOpen(false);
+				}}
+			/>
+		</div>
 	);
 };

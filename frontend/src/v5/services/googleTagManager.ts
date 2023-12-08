@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,22 +16,13 @@
  */
 
 import TagManager from 'react-gtm-module';
+import { clientConfigService } from '../../v4/services/clientConfig';
 
-import { clientConfigService } from './clientConfig';
+export const initializeGoogleTagManager = () => {
+	const { development, gtm } = clientConfigService;
 
-class AnalyticsService {
-	public init() {
-		const { development, gtm } = clientConfigService;
-
-		if (development) {
-			console.debug('Development - Not loading Google Analytics or remarketing');
-		} else {
-			if (gtm && gtm.gtmId) {
-				console.debug('Adding Google Tag Manager');
-				TagManager.initialize(gtm);
-			}
-		}
+	if (!development && gtm && gtm.gtmId) {
+		console.debug('Adding Google Tag Manager');
+		TagManager.initialize(gtm);
 	}
-}
-
-export const analyticsService = new AnalyticsService();
+};

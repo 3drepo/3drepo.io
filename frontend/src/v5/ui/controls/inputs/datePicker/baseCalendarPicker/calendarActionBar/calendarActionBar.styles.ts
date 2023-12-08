@@ -15,16 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Typography } from '@controls/typography';
 import styled from 'styled-components';
 
-export const ClearDateAction = styled(Typography).attrs({
-	variant: 'body1',
-})`
-	color: ${({ theme }) => theme.palette.error.main};
-	position: absolute;
-	right: 22px;
-	bottom: 18px;
+export const ClearDateAction = styled.div`
+	${({ theme }) => theme.typography.body1}
 	font-weight: 500;
+	color: ${({ theme }) => theme.palette.error.main};
+	margin-right: 22px;
 	cursor: pointer;
+	height: 32px;
+	text-align: right;
 `;

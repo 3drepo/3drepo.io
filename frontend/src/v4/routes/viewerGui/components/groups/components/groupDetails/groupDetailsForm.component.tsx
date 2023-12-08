@@ -22,7 +22,7 @@ import { PureComponent } from 'react';
 import * as Yup from 'yup';
 
 import { GROUPS_TYPES_LIST } from '../../../../../../constants/groups';
-import { formatDateTime, formatDateTimeV5 } from '../../../../../../services/formatting/formatDate';
+import { formatShortDateTime } from '../../../../../../services/formatting/formatDate';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { Description, FieldsRow, LongLabel, StyledFormControl, StyledTextField } from './groupDetails.styles';
 
@@ -91,7 +91,7 @@ export class GroupDetailsForm extends PureComponent<IProps, any> {
 						/>
 						<StyledTextField
 							label="Last updated"
-							value={formatDateTimeV5(updatedAt)}
+							value={formatShortDateTime(updatedAt)}
 							disabled
 						/>
 						<StyledFormControl>

@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatLongDateTime, getRelativeTime } from '@/v5/helpers/intl.helper';
-import { formatDate } from '@/v5/services/intl';
+import { formatLongDateTime, formatShortDateTime, getRelativeTime } from '@/v5/helpers/intl.helper';
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { FormattedMessage } from 'react-intl';
@@ -55,7 +54,7 @@ export const CreationInfo = ({
 				<FormattedMessage
 					id="creationInfo.creation"
 					defaultMessage="Created by {username} on {creationDate}."
-					values={{ username: <Username />, creationDate: formatDate(createdAt) }}
+					values={{ username: <Username />, creationDate: formatShortDateTime(createdAt) }}
 				/>
 			</span>
 			{updatedAt && updatedAt !== createdAt && (

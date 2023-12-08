@@ -16,11 +16,13 @@
  */
 
 const { createProject, deleteProject, getProjectById, getProjectList, updateProject } = require('../../../models/projectSettings');
+const { getFile, removeFile, storeFile } = require('../../../services/filesManager');
 const {
 	hasProjectAdminPermissions,
 	hasReadAccessToModel,
 	isTeamspaceAdmin,
 } = require('../../../utils/permissions/permissions');
+const { COL_NAME } = require('../../../models/projectSettings.constants');
 const { getAllTemplates } = require('../../../models/tickets.templates');
 const { removeModelData } = require('../../../utils/helper/models');
 
@@ -52,12 +54,24 @@ Projects.deleteProject = async (teamspace, projectId) => {
 };
 
 // passing project in to future proof this - the list will be filtered by project settings configurations
-Projects.getAllTemplates = (teamspace, project, showDeprecated) => getAllTemplates(
-	teamspace, showDeprecated, { name: 1, deprecated: 1, code: 1 },
-);
+Projects.getAllTemplates = (teamspace, project, getDetails, showDeprecated) => {
+	const projection = getDetails ? undefined : {
+		name: 1,
+		deprecated: 1,
+		code: 1,
+	};
+
+	return getAllTemplates(teamspace, showDeprecated, projection);
+};
 
 Projects.getProjectSettings = (teamspace, projectId) => getProjectById(teamspace, projectId, { name: 1, _id: 0 });
 
 Projects.updateProject = updateProject;
+
+Projects.getImage = (teamspace, project) => getFile(teamspace, COL_NAME, project);
+
+Projects.updateImage = (teamspace, project, imageBuffer) => storeFile(teamspace, COL_NAME, project, imageBuffer);
+
+Projects.deleteImage = (teamspace, project) => removeFile(teamspace, COL_NAME, project);
 
 module.exports = Projects;

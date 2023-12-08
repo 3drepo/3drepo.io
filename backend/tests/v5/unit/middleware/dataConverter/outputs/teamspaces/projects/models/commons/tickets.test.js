@@ -37,6 +37,52 @@ const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 const TicketOutputMiddleware = require(`${src}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets`);
 
+const testSerialiseTemplatesList = () => {
+	describe('Serialise templates list', () => {
+		test('should not show all fields if getDetails is not set to true', () => {
+			const req = { templates: times(10, () => generateTemplate()), query: { } };
+
+			TicketOutputMiddleware.serialiseTemplatesList(req, {});
+
+			expect(TicketTemplateSchema.generateFullSchema).not.toHaveBeenCalled();
+			expect(TicketTemplateHelper.serialiseTicketTemplate).not.toHaveBeenCalled();
+
+			const formattedTemplates = req.templates.map((t) => ({ ...t, _id: UUIDToString(t._id) }));
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, { templates: formattedTemplates });
+		});
+
+		test('should show all fields if getDetails is set to true', () => {
+			const req = { templates: times(10, () => generateTemplate()),
+				query: { getDetails: 'true' } };
+
+			const serialisedTemplateData = generateTemplate();
+
+			times(10, () => {
+				TicketTemplateSchema.generateFullSchema.mockReturnValueOnce(generateTemplate());
+				TicketTemplateHelper.serialiseTicketTemplate.mockReturnValueOnce(serialisedTemplateData);
+			});
+
+			TicketOutputMiddleware.serialiseTemplatesList(req, {});
+
+			expect(TicketTemplateSchema.generateFullSchema).toHaveBeenCalledTimes(req.templates.length);
+			expect(TicketTemplateHelper.serialiseTicketTemplate).toHaveBeenCalledTimes(req.templates.length);
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok,
+				{ templates: times(10, () => serialisedTemplateData) });
+		});
+
+		test('should catch the error and respond gracefully on error', () => {
+			TicketOutputMiddleware.serialiseTemplatesList(undefined, {});
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(undefined, {}, templates.unknown);
+		});
+	});
+};
+
 const testSerialiseTicketTemplate = () => {
 	describe('Serialise full ticket template', () => {
 		test('should not show all fields if show deprecated is set to false', () => {
@@ -388,4 +434,5 @@ describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/ti
 	testSerialiseTicketTemplate();
 	testSerialiseTicket();
 	testSerialiseTicketList();
+	testSerialiseTemplatesList();
 });
