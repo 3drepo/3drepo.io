@@ -18,11 +18,10 @@ import Hotjar from '@hotjar/browser';
 import { clientConfigService } from './clientConfig';
 
 export const initializeHotjar = () => {
-	const { development, hotjar = {} } = clientConfigService;
-	const { siteId, hotjarVersion } = hotjar;
+	const { development, hotjar } = clientConfigService;
 
-	if (!development && siteId && hotjarVersion) {
-		console.debug('Adding Hotjar');
-		Hotjar.init(siteId, hotjarVersion);
+	if (!development && hotjar) {
+		const { siteId, version } = hotjar;
+		Hotjar.init(siteId, version);
 	}
 };
