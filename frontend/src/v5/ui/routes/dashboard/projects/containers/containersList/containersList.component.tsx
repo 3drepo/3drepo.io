@@ -82,6 +82,7 @@ export const ContainersList = ({
 				title={<>{title} {!isListPending && <CircledNumber>{containers.length}</CircledNumber>}</>}
 				tooltipTitles={titleTooltips}
 				isLoading={areStatsPending}
+				interactableWhileLoading
 				sideElement={(
 					<CollapseSideElementGroup>
 						<SearchInput

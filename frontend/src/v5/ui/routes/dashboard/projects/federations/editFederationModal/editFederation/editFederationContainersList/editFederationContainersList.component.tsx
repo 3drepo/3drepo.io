@@ -93,6 +93,7 @@ export const EditFederationContainers = ({
 						{!isListPending && <ContainerCount>({sortedList.length})</ContainerCount>}
 					</>
 				)}
+				interactableWhileLoading
 				isLoading={areStatsPending}
 				tooltipTitles={collapsableTooltips}
 				sideElement={(
