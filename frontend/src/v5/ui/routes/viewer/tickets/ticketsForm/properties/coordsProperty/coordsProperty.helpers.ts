@@ -41,6 +41,15 @@ const getPinSchema = (name: string, template: ITemplate): IPinSchema | boolean =
 	return findByName(module.properties, path[2]);
 };
 
+export const getLinkedValuePath = (name, template): string => {
+	const pinSchema = getPinSchema(name, template);
+	const property = get(pinSchema, 'color.property');
+	if (!property) return '';
+	const module = property.module ? `${TicketBaseKeys.MODULES}.${property.module}` : TicketBaseKeys.PROPERTIES;
+	const linkedValueName = property.name;
+	return `${module}.${linkedValueName}`;
+};
+
 const getColorFromMapping = (ticket: ITicket, pinMapping: IPinColorMapping) => {
 	const { property: { module = TicketBaseKeys.PROPERTIES, name }, mapping } = pinMapping;
 	// @ts-ignore
