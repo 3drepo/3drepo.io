@@ -50,6 +50,20 @@ export const getSelectedFrameIndex = (frames, endingDate) => {
 	return leftMargin;
 };
 
+export const getDateWithinBoundaries = (date: Date, minDate: Date, maxDate: Date) => {
+	const dateAsNumber = date.getTime();
+
+	if (dateAsNumber < minDate.getTime()) {
+		return minDate;
+	}
+
+	if (dateAsNumber > maxDate.getTime()) {
+		return maxDate;
+	}
+
+	return date;
+}
+
 export const getDateByStep = (date, stepScale, step) => {
 	const newDate = new Date(date);
 

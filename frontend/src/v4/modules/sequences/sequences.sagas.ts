@@ -30,7 +30,7 @@ import { selectCacheSetting } from '../viewer';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { ViewpointsActions } from '../viewpoints';
 import { GroupsActions } from '../groups';
-import { getSelectedFrame } from './sequences.helper';
+import { getDateWithinBoundaries, getSelectedFrame } from './sequences.helper';
 import {
 	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates, selectSelectedDate, selectSelectedFrameViewpoint,
 	selectSelectedSequence, selectSequences, selectSequenceModel,
@@ -254,18 +254,7 @@ export function* showSequenceDate({ date }) {
 	// 4 - bond date by sequence start/end date
 	const { startDate, endDate } = yield select(selectSelectedSequence);
 
-	const dateAsNumber = new Date(date).getTime();
-
-	let dateToSelect = date;
-
-	if (dateAsNumber < startDate) {
-		dateToSelect = new Date(startDate);
-	}
-
-	if (dateAsNumber > endDate) {
-		dateToSelect = new Date(endDate);
-	}
-
+	const dateToSelect = getDateWithinBoundaries(date, new Date(startDate), new Date(endDate));
 	yield put(SequencesActions.setSelectedDate(dateToSelect));
 }
 
