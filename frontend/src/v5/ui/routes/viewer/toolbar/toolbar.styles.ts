@@ -38,6 +38,10 @@ export const Container = styled.div`
 		align-items: center;
 		justify-content: space-evenly;
 	}
+
+	* {
+		transition: all .3s;
+	}
 `;
 
 export const MainToolbar = styled.div`

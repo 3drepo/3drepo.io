@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import PlusIcon from '@assets/icons/viewer/plus.svg';
 
 export const Section = styled.div`
 	display: inherit;
@@ -35,5 +36,35 @@ export const Container = styled.div`
 
 	& > ${/* sc-selector */Section}:not([hidden]) ~ ${/* sc-selector */Section}:not([hidden]) {
 		border-left: solid 1px ${({ theme }) => theme.palette.base.light};
+	}
+`;
+
+export const ClearIcon = styled(PlusIcon)`
+	transform: rotate(45deg);
+`;
+
+export const ClearButton = styled.div`
+	cursor: pointer;
+	height: 30px;
+	border-radius: 19px;
+	color: ${({ theme }) => theme.palette.primary.lightest};
+	background-color: ${({ theme }) => theme.palette.secondary.light};
+	align-self: center;
+	overflow: hidden;
+	display: flex;
+	flex-direction: row;
+	place-items: center;
+	gap: 6px;
+	padding: 11px;
+	box-sizing: border-box;
+	white-space: nowrap;
+
+	&[hidden] {
+		width: 0;
+		padding: 0;
+	}
+
+	&:not([hidden]) {
+		width: fit-content;
 	}
 `;

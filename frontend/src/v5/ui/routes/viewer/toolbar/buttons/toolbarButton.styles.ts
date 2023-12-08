@@ -24,7 +24,6 @@ export const Container = styled(ViewerIconContainer)<{ disabled?: boolean, hidde
 	box-sizing: border-box;
 	display: grid;
 	place-content: center;
-	transition: all .2s;
 	overflow: hidden;
 
 	&[hidden] {
