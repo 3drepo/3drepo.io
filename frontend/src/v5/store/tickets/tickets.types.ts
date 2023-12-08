@@ -155,6 +155,10 @@ export enum ViewpointGroupOverrideType {
 type ColorAndOpacity = {
 	color?: [number, number, number],
 	opacity?: number,
+	transformation?: [number, number, number, number,
+		number, number, number, number,
+		number, number, number, number,
+		number, number, number, number]
 };
 
 export type GroupOverride = ColorAndOpacity & {

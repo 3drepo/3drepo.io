@@ -73,6 +73,12 @@ const convertToV5GroupOverride = (group: any, type: ViewpointGroupOverrideType):
 		override.opacity = opacity;
 	}
 
+	if (group.transformation) {
+		const { transformation } = group;
+		override.transformation = transformation;
+	}
+
+
 	return override;
 };
 
