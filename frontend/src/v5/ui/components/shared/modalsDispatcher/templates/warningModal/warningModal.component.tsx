@@ -22,11 +22,13 @@ import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 interface IWarningModal {
 	message: string,
 	title: string,
-	onClickClose: () =>void,
+	onClickClose: () => void,
 	open: boolean,
+	secondaryButtonLabel?: string,
+	onClickSecondary?: () => void,
 }
 
-export const WarningModal = ({ title, message, onClickClose, open }: IWarningModal) => (
+export const WarningModal = ({ title, message, onClickClose, open, secondaryButtonLabel, onClickSecondary }: IWarningModal) => (
 	<Modal open={open} onClose={onClickClose}>
 		<ModalContent>
 			<WarningIcon />
@@ -48,6 +50,11 @@ export const WarningModal = ({ title, message, onClickClose, open }: IWarningMod
 						defaultMessage="Ok, close window"
 					/>
 				</Button>
+				{secondaryButtonLabel && (
+					<Button autoFocus variant="outlined" color="secondary" onClick={() => { onClickClose(); onClickSecondary(); }}>
+						{secondaryButtonLabel}
+					</Button>
+				)}
 			</Actions>
 		</ModalContent>
 	</Modal>

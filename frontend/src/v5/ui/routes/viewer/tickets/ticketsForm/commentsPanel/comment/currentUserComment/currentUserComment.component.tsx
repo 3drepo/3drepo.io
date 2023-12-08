@@ -21,7 +21,7 @@ import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ErrorTicketButton, PrimaryTicketButton } from '../../../../ticketButton/ticketButton.styles';
+import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
 import { Comment, CommentWithButtonsContainer } from './currentUserComment.styles';
 import { EditComment } from './editComment/editComment.component';
 import { DeletedComment } from './deletedComment/deletedComment.component';
@@ -70,15 +70,15 @@ export const CurrentUserComment = ({
 		<CommentWithButtonsContainer>
 			{!readOnly && (
 				<CommentButtons>
-					<ErrorTicketButton onClick={() => onDelete(_id)}>
+					<TicketButton variant="error" onClick={() => onDelete(_id)}>
 						<DeleteIcon />
-					</ErrorTicketButton>
-					<PrimaryTicketButton onClick={() => onReply(_id)}>
+					</TicketButton>
+					<TicketButton variant="primary" onClick={() => onReply(_id)}>
 						<ReplyIcon />
-					</PrimaryTicketButton>
-					<PrimaryTicketButton onClick={() => setIsEditMode(true)}>
+					</TicketButton>
+					<TicketButton variant="primary" onClick={() => setIsEditMode(true)}>
 						<EditIcon />
-					</PrimaryTicketButton>
+					</TicketButton>
 				</CommentButtons>
 			)}
 			<Comment

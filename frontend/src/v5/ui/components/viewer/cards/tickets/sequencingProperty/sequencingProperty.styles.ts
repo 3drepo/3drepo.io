@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2023 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,23 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import TagManager from 'react-gtm-module';
+import styled from 'styled-components';
 
-import { clientConfigService } from './clientConfig';
+export const Container = styled.div`
+	position: relative;
+`;
 
-class AnalyticsService {
-	public init() {
-		const { development, gtm } = clientConfigService;
+export const IconContainer = styled.div`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	margin-top: -7px;
+	cursor: pointer;
 
-		if (development) {
-			console.debug('Development - Not loading Google Analytics or remarketing');
-		} else {
-			if (gtm && gtm.gtmId) {
-				console.debug('Adding Google Tag Manager');
-				TagManager.initialize(gtm);
-			}
-		}
+	svg {
+		width: 10px;
+		height: 10px;
 	}
-}
+`;
 
-export const analyticsService = new AnalyticsService();
+export const SequenceIconContainer = styled(IconContainer)`
+	position: absolute;
+	right: 28px;
+	bottom: 1.5px;
+
+	svg {
+		width: 12.5px;
+		height: 12.5px;
+	}
+`;

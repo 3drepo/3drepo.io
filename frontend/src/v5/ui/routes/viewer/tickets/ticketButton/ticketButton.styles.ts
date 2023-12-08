@@ -15,59 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import { FlatButton } from '@controls/button/flatButton.component';
+import styled from 'styled-components';
 
-const TicketButtonStyling = styled.button.attrs({
-	type: 'button',
-})<{ disabled?: boolean }>`
+export const TicketButton = styled(FlatButton)`
 	height: 24px;
 	width: 24px;
 	margin: 2px;
 	border-radius: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	cursor: pointer;
-	border: none;
 
 	& > svg {
 		max-width: 14px;
 		max-height: 17px;
-	}
-
-	${({ theme, disabled }) => disabled && css`
-		&&, &&:hover {
-			color: ${theme.palette.primary.contrast};
-			background-color: ${theme.palette.base.lightest};
-			cursor: initial;
-		}
-	`}
-`;
-
-export const PrimaryTicketButton = styled(TicketButtonStyling)`
-	color: ${({ theme }) => theme.palette.primary.main};
-	background-color: ${({ theme }) => theme.palette.primary.lightest};
-
-	&:hover {
-		color: ${({ theme }) => theme.palette.primary.contrast};
-		background-color: ${({ theme }) => theme.palette.primary.main};
-	}
-
-	&:active {
-		background-color: ${({ theme }) => theme.palette.primary.dark};
-	}
-`;
-
-export const ErrorTicketButton = styled(TicketButtonStyling)`
-	color: ${({ theme }) => theme.palette.error.main};
-	background-color: ${({ theme }) => theme.palette.error.lightest};
-
-	&:hover {
-		color: ${({ theme }) => theme.palette.primary.contrast};
-		background-color: ${({ theme }) => theme.palette.error.main};
-	}
-
-	&:active {
-		background-color: ${({ theme }) => theme.palette.error.dark};
 	}
 `;

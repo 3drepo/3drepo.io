@@ -223,6 +223,7 @@ export const UploadFileForm = ({
 									<FileInputField
 										accept={getSupportedFileExtensions()}
 										onChange={(files) => addFilesToList(files)}
+										multiple
 									>
 										<Button component="span" variant="contained" color="primary">
 											<FormattedMessage

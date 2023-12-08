@@ -28,5 +28,6 @@ PathHelper.modelFolder = `${__dirname}/../resources/models`;
 PathHelper.imagesFolder = `${__dirname}/../resources/images`;
 PathHelper.objModel = Path.join(PathHelper.modelFolder, 'dummy.obj');
 PathHelper.image = Path.join(PathHelper.imagesFolder, 'valid.png');
+PathHelper.oversizedImage = Path.join(PathHelper.imagesFolder, 'tooBig.png');
 PathHelper.objModelUppercaseExt = Path.join(PathHelper.modelFolder, 'dummyUppercaseExt.OBJ');
 module.exports = PathHelper;

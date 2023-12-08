@@ -16,13 +16,15 @@
  */
 
 const { hasAccessToTeamspace, isAdminToProject, isTeamspaceAdmin } = require('../../../middleware/permissions/permissions');
+const { projectExists, validateProjectData } = require('../../../middleware/dataConverter/inputs/teamspaces/projects');
 const Projects = require('../../../processors/teamspaces/projects');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../utils/helper/uuids');
+const { fileExtensionFromBuffer } = require('../../../utils/helper/typeCheck');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
+const { singleImageUpload } = require('../../../middleware/dataConverter/multer');
 const { templates } = require('../../../utils/responseCodes');
-const { validateProjectData } = require('../../../middleware/dataConverter/inputs/teamspaces/projects');
 
 const serialiseProject = (project) => ({ ...project, _id: UUIDToString(project._id) });
 
@@ -82,6 +84,44 @@ const getProject = async (req, res) => {
 	try {
 		const projectSettings = await Projects.getProjectSettings(teamspace, project);
 		respond(req, res, templates.ok, projectSettings);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getImage = async (req, res) => {
+	const { teamspace, project } = req.params;
+
+	try {
+		const buffer = await Projects.getImage(teamspace, project);
+		const fileExt = await fileExtensionFromBuffer(buffer);
+		req.params.format = fileExt || 'png';
+		respond(req, res, templates.ok, buffer);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const updateImage = async (req, res) => {
+	const { teamspace, project } = req.params;
+
+	try {
+		await Projects.updateImage(teamspace, project, req.file.buffer);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const deleteImage = async (req, res) => {
+	const { teamspace, project } = req.params;
+
+	try {
+		await Projects.deleteImage(teamspace, project);
+		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -285,6 +325,107 @@ const establishRoutes = () => {
 	 *                   example: project1
 	 */
 	router.get('/:project', hasAccessToTeamspace, getProject);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/image:
+	 *   get:
+	 *     description: Gets a project image
+	 *     tags: [Projects]
+	 *     operationId: getProjectImage
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Id of the project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: returns a project image
+	 *         content:
+	 *           image/png:
+	 *             schema:
+	 *               type: string
+	 *               format: binary
+	 */
+	router.get('/:project/image', hasAccessToTeamspace, projectExists, getImage);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/image:
+	 *   put:
+	 *     description: Upload a project image
+	 *     tags: [Projects]
+	 *     operationId: uploadProjectImage
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Id of the project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     requestBody:
+	 *       content:
+	 *         multipart/form-data:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               file:
+	 *                 type: string
+	 *                 format: binary
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         $ref: "#/components/responses/ok"
+	 */
+	router.put('/:project/image', isAdminToProject, singleImageUpload('file'), updateImage);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/image:
+	 *   delete:
+	 *     description: Deletes a project image
+	 *     tags: [Projects]
+	 *     operationId: deleteProjectImage
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Id of the project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         $ref: "#/components/responses/ok"
+	 */
+	router.delete('/:project/image', isAdminToProject, deleteImage);
 
 	return router;
 };

@@ -20,10 +20,17 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 export const stripBase64Prefix = (base64name) => base64name.replace('data:', '').replace(/^.+,/, '');
 export const addBase64Prefix = (value, imageType = 'png') => `data:image/${imageType};base64,${value}`;
 
-export const convertFileToImageSrc = (file) => new Promise((resolve) => {
+export const convertFileToImageSrc = (file) => new Promise<string>((resolve) => {
 	const reader = new FileReader();
-	reader.onloadend = () => resolve(reader.result);
+	reader.onloadend = () => resolve(reader.result as string);
 	reader.readAsDataURL(file);
 });
 
 export const getSupportedImageExtensions = () => clientConfigService.imageExtensions.map((x) => `.${x}`).join(',');
+
+export const testImageExists = (src: string) => new Promise((resolve, reject) => {
+	const img = new Image();
+	img.onload = resolve;
+	img.onerror = reject;
+	img.src = src;
+});
