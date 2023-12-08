@@ -70,7 +70,7 @@ const da =  new Date();
 const SequenceDetails = ({
 	startDate, endDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
 	setStepScale, currentTasks, loadingFrameState, loadingViewpoint, rightPanels, toggleActivitiesPanel, openOnToday,
-	fetchActivityDetails, onPlayStarted, frames, isActivitiesPending, toggleLegend, draggablePanels, selectedSequence
+	fetchActivityDetails, onPlayStarted, frames, isActivitiesPending, toggleLegend, draggablePanels
 }) => {
 	const [dateToUse, setDateToUse] = useState(null);
 
@@ -81,7 +81,6 @@ const SequenceDetails = ({
 		}
 
 		const now = new Date();
-		const { startDate, endDate } = selectedSequence;
 		const newDateToUse = getDateWithinBoundaries(now, new Date(startDate), new Date(endDate));
 		setDateToUse(newDateToUse);
 
@@ -192,7 +191,7 @@ export class Sequences extends PureComponent<IProps, {}> {
 				{!sequences && <SequencesLoader />}
 
 				{selectedSequence && sequences.length > 0 &&
-					<SequenceDetails {...this.props} onPlayStarted={this.onPlayStarted} selectedSequence={selectedSequence} />
+					<SequenceDetails {...this.props} onPlayStarted={this.onPlayStarted} />
 				}
 
 				{sequences && !selectedSequence && sequences.length > 0 &&
