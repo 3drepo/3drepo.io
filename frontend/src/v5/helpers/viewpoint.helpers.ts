@@ -24,6 +24,7 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { TreeActions } from '@/v4/modules/tree';
 import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors';
 import { TicketsCardActionsDispatchers } from '../services/actionsDispatchers';
+import { GroupsActions } from '@/v4/modules/groups';
 
 export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	container: object.model as string,
@@ -191,11 +192,17 @@ export const toColorAndTransparencyDicts = (overrides: GroupOverride[]): Overrid
 };
 
 export const goToView = async (view: Viewpoint) => {
+	if (isEmpty(view?.state?.colored)  && isEmpty(view?.state?.hidden) && isEmpty(view?.camera) && isEmpty(view?.clippingPlanes)) {
+		return;
+	}
+	
+	dispatch(GroupsActions.clearColorOverrides());
 	await ViewerService.setViewpoint(view);
 	const overrides = toColorAndTransparencyDicts(view?.state?.colored || []);
 	TicketsCardActionsDispatchers.setOverrides(overrides);
 
 	await ViewerService.clearHighlights();
+
 
 	if (view?.state) {
 		dispatch(TreeActions.setHiddenGeometryVisible(!!view.state.showHidden));

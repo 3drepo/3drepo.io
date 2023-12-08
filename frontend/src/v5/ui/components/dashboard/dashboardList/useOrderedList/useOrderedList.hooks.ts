@@ -16,49 +16,14 @@
  */
 
 import { useMemo, useState } from 'react';
-import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { get, isArray } from 'lodash';
 import { ISortConfig } from './useOrderedList.types';
-import { dateToNum } from './useOrderedList.helpers';
+import { getSortingFunction } from './useOrderedList.helpers';
 
 export const useOrderedList = <T>(items: T[], defaultConfig: ISortConfig) => {
 	const [sortConfig, setSortConfig] = useState<ISortConfig>(defaultConfig);
 
 	const sortedList = useMemo(() => {
-		const { column, direction } = sortConfig;
-
-		const sortingFunction = (a: T, b: T, index = 0): number => {
-			const aValue = get(a, column[index]);
-			const bValue = get(b, column[index]);
-
-			if (aValue === bValue && (index + 1 < column.length)) {
-				return direction[index] === SortingDirection.ASCENDING
-					? sortingFunction(a, b, index + 1) : sortingFunction(b, a, index + 1);
-			}
-
-			if (typeof aValue === 'string') {
-				return aValue.localeCompare(bValue);
-			}
-
-			if (typeof aValue === 'number') {
-				return aValue - bValue;
-			}
-
-			if (isArray(aValue)) {
-				return aValue.length - bValue.length;
-			}
-
-			if (aValue instanceof Date || bValue instanceof Date) {
-				return dateToNum(aValue) - dateToNum(bValue);
-			}
-
-			return 0;
-		};
-
-		const sortingFunctionWithDirection = direction[0] === SortingDirection.ASCENDING
-			? sortingFunction : (a: T, b: T) => sortingFunction(b, a);
-
-		return [...items].sort(sortingFunctionWithDirection);
+		return [...items].sort(getSortingFunction(sortConfig));
 	}, [sortConfig, items]);
 
 	return { sortedList, setSortConfig };
