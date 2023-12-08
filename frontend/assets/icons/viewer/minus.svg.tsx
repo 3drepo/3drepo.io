@@ -14,35 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 type IProps = {
 	className?: any;
 };
 
 export default ({ className }: IProps) => (
-	<svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="26 93 78 78">
+	<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
 		<path
-			fill="none"
-			stroke="currentColor"
-			d="M 30,167 V 117 H 80 30 L 55,97 h 45 l -20,20 20,-20 v 45 l -20,25 v -50 50 z"
-			strokeWidth="8"
-			strokeLinecap="butt"
-			strokeLinejoin="round"
-			strokeOpacity="1"
-			strokeMiterlimit="4"
-			strokeDasharray="none"
-		/>
-		<path
-			fill="none"
-			stroke="currentColor"
-			d="m 30,167 25,-25 45,0 -45,0 V 96.999998"
-			strokeWidth="4"
-			strokeLinecap="butt"
-			strokeLinejoin="round"
-			strokeOpacity="1"
-			strokeMiterlimit="4"
-			strokeDasharray="12.00000033, 12.00000033000000066"
-			strokeDashoffset="0"
+			className="primary"
+			fillRule="evenodd"
+			clipRule="evenodd"
+			d="M17.5156 9.00879C17.5156 9.35828 17.2323 9.6416 16.8828 9.6416H1.11523C0.765741 9.6416 0.482422 9.35828 0.482422 9.00879C0.482422 8.6593 0.765741 8.37598 1.11523 8.37598H16.8828C17.2323 8.37598 17.5156 8.6593 17.5156 9.00879Z"
+			fill="currentColor"
 		/>
 	</svg>
 );

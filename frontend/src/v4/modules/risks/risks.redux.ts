@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { DEFAULT_RISKS_FILTERS } from '@/v4/constants/risks';
 import { cloneDeep, isEmpty, keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
@@ -94,6 +95,7 @@ export interface IRisksComponentState {
 	measureMode: string;
 	sortOrder: string;
 	sortBy: string;
+	searchEnabled?: boolean;
 }
 
 export interface IRisksState {
@@ -112,7 +114,7 @@ export const INITIAL_STATE: IRisksState = {
 		expandDetails: true,
 		newRisk: {},
 		newComment: {},
-		selectedFilters: [],
+		selectedFilters: DEFAULT_RISKS_FILTERS,
 		filteredRisks: [],
 		showPins: true,
 		fetchingDetailsIsPending: false,
@@ -121,7 +123,8 @@ export const INITIAL_STATE: IRisksState = {
 		sortOrder: 'desc',
 		failedToLoad: false,
 		sortBy: 'created',
-		measureMode: ''
+		measureMode: '',
+		searchEnabled: true,
 	},
 	mitigationCriteria: {},
 };

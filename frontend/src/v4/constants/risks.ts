@@ -153,6 +153,33 @@ export const RISK_FILTER_RELATED_FIELDS = {
 	START_DATETIME: 'sequence_start'
 };
 
+export const DEFAULT_RISKS_FILTERS = [
+	{
+		label: 'Treatment Status',
+		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS,
+		type: FILTER_TYPES.UNDEFINED,
+		value: { value: RISK_LEVELS.UNMITIGATED, label: 'Unmitigated' },
+	},
+	{
+		label: 'Treatment Status',
+		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS,
+		type: FILTER_TYPES.UNDEFINED,
+		value: { value: RISK_LEVELS.PROPOSED, label: 'Proposed' },
+	},
+	{
+		label: 'Treatment Status',
+		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS,
+		type: FILTER_TYPES.UNDEFINED,
+		value: { value: RISK_LEVELS.AGREED_PARTIAL, label: 'Agreed (Partial)' },
+	},
+	{
+		label: 'Treatment Status',
+		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS,
+		type: FILTER_TYPES.UNDEFINED,
+		value: { value: RISK_LEVELS.REJECTED, label: 'Rejected' },
+	},
+];
+
 export const RISK_FILTERS = [
 	{
 		label: 'Category',

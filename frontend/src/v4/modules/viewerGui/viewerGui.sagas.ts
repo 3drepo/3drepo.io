@@ -198,34 +198,6 @@ function* stopListenOnClickPin() {
 	}
 }
 
-const updateClipStateCallback = (clipNumber) => {
-	dispatch(ViewerGuiActions.updateClipState(clipNumber));
-};
-
-function* initialiseToolbar() {
-	try {
-		yield put(ViewerGuiActions.startListenOnNumClip());
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('initialise', 'toolbar', error));
-	}
-}
-
-function* startListenOnNumClip() {
-	try {
-		Viewer.on(VIEWER_EVENTS.UPDATE_NUM_CLIP, updateClipStateCallback);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('start listen on', 'num clip', error));
-	}
-}
-
-function* stopListenOnNumClip() {
-	try {
-		Viewer.off(VIEWER_EVENTS.UPDATE_NUM_CLIP, updateClipStateCallback);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('stop listen on', 'num clip', error));
-	}
-}
-
 function* updateClipState({clipNumber}) {
 	try {
 		const isClipEdit = yield select(selectIsClipEdit);
@@ -276,12 +248,10 @@ function* setNavigationMode({mode}) {
 	}
 }
 
-function* resetHelicopterSpeed({teamspace, modelId, updateDefaultSpeed}) {
+function* resetHelicopterSpeed({teamspace, modelId }) {
 	try {
 		yield Viewer.helicopterSpeedReset();
-		if (updateDefaultSpeed) {
-			yield API.editHelicopterSpeed(teamspace, modelId, INITIAL_HELICOPTER_SPEED);
-		}
+		yield API.editHelicopterSpeed(teamspace, modelId, INITIAL_HELICOPTER_SPEED);
 		yield put(ViewerGuiActions.setHelicopterSpeed(INITIAL_HELICOPTER_SPEED));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'helicopter speed', error));
@@ -428,7 +398,6 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.START_LISTEN_ON_CLICK_PIN, startListenOnClickPin);
 	yield takeLatest(ViewerGuiTypes.STOP_LISTEN_ON_CLICK_PIN, stopListenOnClickPin);
 	yield takeLatest(ViewerGuiTypes.HANDLE_PIN_CLICK, handlePinClick);
-	yield takeLatest(ViewerGuiTypes.INITIALISE_TOOLBAR, initialiseToolbar);
 	yield takeLatest(ViewerGuiTypes.SET_NAVIGATION_MODE, setNavigationMode);
 	yield takeLatest(ViewerGuiTypes.RESET_HELICOPTER_SPEED, resetHelicopterSpeed);
 	yield takeLatest(ViewerGuiTypes.GET_HELICOPTER_SPEED, getHelicopterSpeed);
@@ -438,8 +407,6 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.SET_CLIPPING_MODE, setClippingMode);
 	yield takeLatest(ViewerGuiTypes.UPDATE_CLIP_STATE, updateClipState);
 	yield takeLatest(ViewerGuiTypes.SET_CLIP_EDIT, setClipEdit);
-	yield takeLatest(ViewerGuiTypes.START_LISTEN_ON_NUM_CLIP, startListenOnNumClip);
-	yield takeLatest(ViewerGuiTypes.STOP_LISTEN_ON_NUM_CLIP, stopListenOnNumClip);
 	yield takeLatest(ViewerGuiTypes.CLEAR_HIGHLIGHTS, clearHighlights);
 	yield takeLatest(ViewerGuiTypes.SET_CAMERA, setCamera);
 	yield takeLatest(ViewerGuiTypes.SET_PROJECTION_MODE, setProjectionMode);
