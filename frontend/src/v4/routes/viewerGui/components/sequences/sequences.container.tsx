@@ -24,6 +24,7 @@ import { ActivitiesActions } from '../../../../modules/activities';
 import { LegendActions } from '../../../../modules/legend';
 import {
 	selectActivitiesPending, selectCurrentActivities, selectEndDate, selectFrames, selectIsLoadingFrameState,
+	selectOpenOnToday,
 	selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedSequence, selectSelectedStartingDate,
 	selectSequences, selectStartDate, selectStepInterval, selectStepScale, SequencesActions,
 } from '../../../../modules/sequences';
@@ -48,6 +49,7 @@ const mapStateToProps = createStructuredSelector({
 	rightPanels: selectRightPanels,
 	draggablePanels: selectDraggablePanels,
 	isActivitiesPending: selectActivitiesPending,
+	openOnToday: selectOpenOnToday,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

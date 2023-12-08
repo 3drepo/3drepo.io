@@ -14,18 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent } from 'react';
+import { PureComponent, useEffect, useState } from 'react';
 import { IconButton } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { formatMessage } from '@/v5/services/intl';
 import { STEP_SCALE } from '../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
-import { getSelectedFrame } from '../../../../modules/sequences/sequences.helper';
+import { getDateWithinBoundaries, getSelectedFrame } from '../../../../modules/sequences/sequences.helper';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import { Loader } from '../../../components/loader/loader.component';
 import { PanelBarActions } from '../panelBarActions';
 import { SequenceForm } from './components/sequenceForm/';
 import { SequencePlayer } from './components/sequencePlayer/sequencePlayer.component';
-import { SequencesList } from './components/sequencesList/sequencesList.component';
+import SequencesList from './components/sequencesList/sequencesList.container';
 import { TasksList } from './components/tasksList/sequenceTasksList.component';
 import {
 	LoaderContainer, SequencesContainer, SequencesIcon
@@ -60,21 +62,54 @@ interface IProps {
 	draggablePanels: string[];
 	toggleLegend: () => void;
 	resetLegendPanel: () => void;
+	openOnToday: boolean;
 }
 
 const da =  new Date();
 
 const SequenceDetails = ({
 	startDate, endDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
-	setStepScale, currentTasks, loadingFrameState, loadingViewpoint, rightPanels, toggleActivitiesPanel,
-	fetchActivityDetails, onPlayStarted, frames, isActivitiesPending, toggleLegend, draggablePanels
-}) => (
+	setStepScale, currentTasks, loadingFrameState, loadingViewpoint, rightPanels, toggleActivitiesPanel, openOnToday,
+	fetchActivityDetails, onPlayStarted, frames, isActivitiesPending, toggleLegend, draggablePanels, selectedSequence
+}) => {
+	const [dateToUse, setDateToUse] = useState(null);
+
+	useEffect(() => {
+		if (!openOnToday) {
+			setDateToUse(selectedDate);
+			return;
+		}
+
+		const now = new Date();
+		const { startDate, endDate } = selectedSequence;
+		const newDateToUse = getDateWithinBoundaries(now, new Date(startDate), new Date(endDate));
+		setDateToUse(newDateToUse);
+
+		if (newDateToUse.getTime() !== now.getTime()) {
+			DialogsActionsDispatchers.open('info', {
+				title: formatMessage({
+					id: 'sequences.unavailableDate.title',
+					defaultMessage: 'Unavailable date',
+				}),
+				message: formatMessage({
+					id: 'sequences.unavailableDate.message',
+					defaultMessage: 'Today\'s date is not available in this sequence, {br}the closest frame will be selected instead.',
+				}, { br: <br /> }),
+			});
+		}
+	}, []);
+
+	if (!dateToUse) {
+		return null;
+	}
+
+	return (
 		<>
 			<SequenceForm />
 			<SequencePlayer
 				min={startDate}
 				max={endDate}
-				value={selectedDate}
+				value={dateToUse}
 				endingDate={selectedEndingDate}
 				stepInterval={stepInterval}
 				stepScale={stepScale}
@@ -98,6 +133,7 @@ const SequenceDetails = ({
 			/>
 		</>
 	);
+};
 
 const SequencesLoader = () => (<LoaderContainer><Loader /></LoaderContainer>);
 
@@ -128,10 +164,8 @@ export class Sequences extends PureComponent<IProps, {}> {
 
 	public onPlayStarted = () => {
 		const {
-			selectedSequence,
 			selectedDate,
 			frames,
-			showViewpoint,
 			deselectViewsAndLeaveClipping
 		} = this.props;
 		const { viewpoint } = getSelectedFrame(frames, selectedDate);
@@ -158,7 +192,7 @@ export class Sequences extends PureComponent<IProps, {}> {
 				{!sequences && <SequencesLoader />}
 
 				{selectedSequence && sequences.length > 0 &&
-					<SequenceDetails {...this.props} onPlayStarted={this.onPlayStarted} />
+					<SequenceDetails {...this.props} onPlayStarted={this.onPlayStarted} selectedSequence={selectedSequence} />
 				}
 
 				{sequences && !selectedSequence && sequences.length > 0 &&
