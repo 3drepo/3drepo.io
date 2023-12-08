@@ -37,6 +37,8 @@ export class LifoQueue<T> {
 			});
 			prom.args = args;
 			prom.resolved = false;
+
+			this.dict[JSON.stringify(args)] = prom;
 		}
 		
 		return prom;
@@ -51,13 +53,13 @@ export class LifoQueue<T> {
 					return p.promise;
 				}
 				
+				// eslint-disable-next-line no-param-reassign
+				p.resolved = true;
 				try {
 					p.resolve(await this.func(...p.args));
 				} catch (e) {
 					p.reject(e);
 				}
-				// eslint-disable-next-line no-param-reassign
-				p.resolved = true;
 			}));
 		}
 		this.resetQueue();
