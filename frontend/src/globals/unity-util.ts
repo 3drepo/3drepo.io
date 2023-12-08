@@ -1165,6 +1165,24 @@ export class UnityUtil {
 		UnityUtil.toUnity('DropBookmarkPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
+	/**
+	 * Add a ticket pin
+	 * @category Pins
+	 * @param id - Identifier for the pin
+	 * @param position - point in space where the pin should generate
+	 * @param normal - normal vector for the pin (note: this is no longer used)
+	 * @param colour - RGB value for the colour of the pin
+	 */
+	public static dropTicketPin(id: string, position: number[], normal: number[], colour: number[]) {
+		const params = {
+			id,
+			position,
+			normal,
+			color: colour,
+		};
+		UnityUtil.toUnity('DropTicketPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+	}
+
 	public static selectPin(id: string) {
 		UnityUtil.toUnity('SelectPin', UnityUtil.LoadingState.MODEL_LOADING, id);
 	}

@@ -21,6 +21,12 @@ export enum TicketsCardViews {
 	New = 'new',
 }
 
+export enum TicketBaseKeys {
+	PROPERTIES = 'properties',
+	MODULES = 'modules',
+	CONFIG = 'config',
+}
+
 export enum BaseProperties {
 	TITLE = 'title',
 	DESCRIPTION = 'Description',
