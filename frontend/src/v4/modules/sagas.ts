@@ -89,7 +89,7 @@ export default function* rootSaga() {
 		fork(viewerSaga),
 		fork(viewerGuiSaga),
 		fork(viewpointsSaga),
-		
+
 		fork(auth2Saga),
 		fork(containersSaga),
 		fork(currentUser2Saga),
