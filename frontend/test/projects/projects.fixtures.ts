@@ -24,3 +24,5 @@ export const projectMockFactory = (overrides?: Partial<IProject>): IProject => (
 	isAdmin: faker.datatype.boolean(),
 	...overrides,
 });
+
+export const generateFakeProjectImageFile = (): File => new File([], 'projectImage.png');

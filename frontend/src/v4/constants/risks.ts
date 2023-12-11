@@ -24,7 +24,6 @@ import NewReleases from '@mui/icons-material/NewReleases';
 import Pins from '@mui/icons-material/PinDrop';
 import Print from '@mui/icons-material/Print';
 import SyncProblem from '@mui/icons-material/SyncProblem';
-import { isV5 } from '../helpers/isV5';
 
 import { FILTER_TYPES } from '../routes/components/filterPanel/filterPanel';
 import { SortAmountDown, SortAmountUp } from '../routes/components/fontAwesomeIcon';
@@ -42,7 +41,7 @@ export const LEVELS = {
 };
 
 export const LEVELS_LIST = [
-	{ value: LEVELS.UNSET, name: isV5() ? 'Unset' : 'UNSET' },
+	{ value: LEVELS.UNSET, name: 'Unset'},
 	{ value: LEVELS.VERY_LOW, name: 'Very Low' },
 	{ value: LEVELS.LOW, name: 'Low' },
 	{ value: LEVELS.MODERATE, name: 'Moderate' },
@@ -65,13 +64,8 @@ export const ATTACHMENTS_RISK_TYPE = 'attachments';
 export const RISK_TABS = {
 	RISK: 'Risk',
 	TREATMENT: 'Treatment',
-	SEQUENCING: 'Sequencing',
 	SHAPES: 'Shapes',
 	ATTACHMENTS: 'Attachments',
-};
-
-export const V5_RISK_TABS = {
-	...RISK_TABS,
 	SEQUENCING: '4D',
 };
 
@@ -158,6 +152,33 @@ export const RISK_FILTER_RELATED_FIELDS = {
 	OVERALL_LEVEL_OF_RISK: 'overall_level_of_risk',
 	START_DATETIME: 'sequence_start'
 };
+
+export const DEFAULT_RISKS_FILTERS = [
+	{
+		label: 'Treatment Status',
+		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS,
+		type: FILTER_TYPES.UNDEFINED,
+		value: { value: RISK_LEVELS.UNMITIGATED, label: 'Unmitigated' },
+	},
+	{
+		label: 'Treatment Status',
+		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS,
+		type: FILTER_TYPES.UNDEFINED,
+		value: { value: RISK_LEVELS.PROPOSED, label: 'Proposed' },
+	},
+	{
+		label: 'Treatment Status',
+		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS,
+		type: FILTER_TYPES.UNDEFINED,
+		value: { value: RISK_LEVELS.AGREED_PARTIAL, label: 'Agreed (Partial)' },
+	},
+	{
+		label: 'Treatment Status',
+		relatedField: RISK_FILTER_RELATED_FIELDS.MITIGATION_STATUS,
+		type: FILTER_TYPES.UNDEFINED,
+		value: { value: RISK_LEVELS.REJECTED, label: 'Rejected' },
+	},
+];
 
 export const RISK_FILTERS = [
 	{

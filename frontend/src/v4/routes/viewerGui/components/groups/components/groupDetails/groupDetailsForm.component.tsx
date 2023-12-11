@@ -14,8 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { isV5 } from '@/v4/helpers/isV5';
 import { Select } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -24,7 +22,7 @@ import { PureComponent } from 'react';
 import * as Yup from 'yup';
 
 import { GROUPS_TYPES_LIST } from '../../../../../../constants/groups';
-import { formatDateTime, formatDateTimeV5 } from '../../../../../../services/formatting/formatDate';
+import { formatShortDateTime } from '../../../../../../services/formatting/formatDate';
 import { VALIDATIONS_MESSAGES } from '../../../../../../services/validation';
 import { Description, FieldsRow, LongLabel, StyledFormControl, StyledTextField } from './groupDetails.styles';
 
@@ -93,7 +91,7 @@ export class GroupDetailsForm extends PureComponent<IProps, any> {
 						/>
 						<StyledTextField
 							label="Last updated"
-							value={isV5() ? formatDateTimeV5(updatedAt) : formatDateTime(updatedAt)}
+							value={formatShortDateTime(updatedAt)}
 							disabled
 						/>
 						<StyledFormControl>

@@ -1,6 +1,6 @@
 {
 	"name": "3drepo.io-frontend",
-	"version": "5.6.2",
+	"version": "5.6.3",
 	"description": "The frontend for 3drepo.io",
 	"engines": {
 		"node": "18.x.x"
@@ -25,7 +25,7 @@
 		"lint:css": "stylelint ./**/*.styles.ts",
 		"lint": "yarn circular:test && yarn lint:ts && yarn lint:css",
 		"lint:fix": "yarn lint:ts --fix",
-		"docs": "typedoc --out ./docs ./src/globals --options ./internals/typedoc.js --logger none",
+		"docs": "typedoc --out ./docs --entryPointStrategy expand ./src/globals --options ./internals/typedoc.js",
 		"extract": "node ./internals/intl/extract.js",
 		"compile": "node ./internals/intl/compile.js",
 		"storybook": "storybook dev -p 6006",
@@ -153,7 +153,7 @@
 		"cross-env": "7.0.2",
 		"css-loader": "6.7.3",
 		"cssnano": "5.1.7",
-		"dpdm": "3.9.0",
+		"dpdm": "3.14.0",
 		"esbuild-loader": "2.20.0",
 		"eslint": "8.36.0",
 		"eslint-config-airbnb-typescript": "17.1.0",
@@ -183,7 +183,7 @@
 		"stylelint-processor-styled-components": "1.10.0",
 		"ts-jest": "29.1.0",
 		"tslint": "5.18.0",
-		"typedoc": "0.17.7",
+		"typedoc": "0.25.3",
 		"typescript": "5.0.2",
 		"url-loader": "4.1.1",
 		"webpack": "5.76.2",

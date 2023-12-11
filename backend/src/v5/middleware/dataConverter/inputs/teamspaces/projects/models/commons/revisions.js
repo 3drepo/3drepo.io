@@ -92,7 +92,6 @@ const validateContainerRevisionUpload = async (req, res, next) => {
 
 	try {
 		req.body = await schema.validate(req.body);
-		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
 		if (!req.file.size) throw createResponseCode(templates.invalidArguments, 'File cannot be empty');
 		const { teamspace } = req.params;
 		await sufficientQuota(teamspace, req.file.size);

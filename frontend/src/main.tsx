@@ -16,7 +16,7 @@
  */
 
 import { ConnectedRouter } from 'connected-react-router';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, Redirect } from 'react-router-dom';
 import 'font-awesome/css/font-awesome.min.css';
 import 'normalize.css/normalize.css';
 import ReactDOM from 'react-dom';
@@ -26,17 +26,15 @@ import 'simplebar/dist/simplebar.min.css';
 
 import 'simplebar';
 import { dispatch, history, sagaMiddleware, store } from '@/v4/modules/store';
-import V4Root from '@/v4/routes/index';
 import { Root as V5Root } from '@/v5/ui/routes';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { getIntlProviderProps, initializeIntl } from '@/v5/services/intl';
+import { formatMessage, getIntlProviderProps, initializeIntl } from '@/v5/services/intl';
 import { initializeActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 import { IntlProvider } from 'react-intl';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { Version, VersionContext } from './versionContext';
 import { getSocket, initializeSocket, SocketEvents, subscribeToSocketEvent } from './v5/services/realtime/realtime.service';
 import { setSocket } from './v4/modules/chat/chat.sagas';
 import { ROUTES } from './v4/constants/routes';
@@ -44,6 +42,9 @@ import { LOGIN_PATH as V5_LOGIN_PATH, SIGN_UP_PATH as V5_SIGN_UP_PATH } from './
 import configAxios from './v4/services/api/config-axios';
 import { setSocketIdHeader } from './v5/services/api/default';
 import rootSaga from './v4/modules/sagas';
+import { NotFound } from '@/v5/ui/routes/notFound';
+import { AuthenticatedRoute } from './v5/services/routing/authenticatedRoute.component';
+import { initializeGoogleTagManager } from './v5/services/googleTagManager';
 
 window.UnityUtil = UnityUtil;
 
@@ -52,6 +53,8 @@ initializeActionsDispatchers(dispatch);
 initializeIntl(navigator.language);
 
 initializeSocket(clientConfigService.chatConfig);
+
+initializeGoogleTagManager();
 
 // Injecting the instance of socket from v5 into v4
 setSocket(getSocket());
@@ -66,27 +69,20 @@ const render = () => {
 					<LocalizationProvider dateAdapter={AdapterDayjs}>
 						<Switch>
 							<Route exact path="/">
-								{/* Using this instead of <Redirect /> to force refresh so that isV5() is updated */}
-								{() => window.location.replace('v5/')}
+								<Redirect to={{ pathname:'v5/' }} />
 							</Route>
 							<Route exact path={ROUTES.SIGN_UP}>
-								{/* Using this instead of <Redirect /> to force refresh so that isV5() is updated */}
-								{() => window.location.replace(V5_SIGN_UP_PATH + window.location.search)}
+								<Redirect to={{ pathname: V5_SIGN_UP_PATH + window.location.search }} />
 							</Route>
 							<Route exact path={ROUTES.LOGIN}>
-								{/* Using this instead of <Redirect /> to force refresh so that isV5() is updated */}
-								{() => window.location.replace(V5_LOGIN_PATH)}
+								<Redirect to={{ pathname: V5_LOGIN_PATH }} />
 							</Route>
 							<Route path="/v5">
-								<VersionContext.Provider value={Version.V5}>
-									<V5Root />
-								</VersionContext.Provider>
+								<V5Root />
 							</Route>
-							<Route>
-								<VersionContext.Provider value={Version.V4}>
-									<V4Root />
-								</VersionContext.Provider>
-							</Route>
+							<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })} path="*">
+								<NotFound />
+							</AuthenticatedRoute>
 						</Switch>
 					</LocalizationProvider>
 				</IntlProvider>

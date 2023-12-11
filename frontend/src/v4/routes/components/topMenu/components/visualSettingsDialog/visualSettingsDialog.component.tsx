@@ -55,18 +55,6 @@ const BasicSettings = (props) => {
 	return (
 		<List>
 			<FormListItem>
-				4GB viewer
-				<Field name="useBetaViewer" render={ ({ field }) => (
-					<Switch checked={field.value} onClick={props.onUseBetaViewerChange} {...field} value="true" color="secondary" />
-				)} />
-				{props.showBetaViewerWarning && (
-					<SubHeading>
-						Changing this setting will require you to refresh your browser before taking effect.
-					</SubHeading>
-				)}
-			</FormListItem>
-			<V5Divider />
-			<FormListItem>
 				Viewer Background Color
 				<Field name="viewerBackgroundColor" render={ ({ field }) => (
 					<ColorPicker {...field} onChange={(val) => {
@@ -573,7 +561,6 @@ interface IState {
 	visualSettings: any;
 	flag: boolean;
 	showCacheWarning: boolean;
-	showBetaViewerWarning: boolean;
 }
 
 export class VisualSettingsDialog extends PureComponent<IProps, IState> {
@@ -582,7 +569,6 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 		visualSettings: null,
 		flag: false,
 		showCacheWarning: false,
-		showBetaViewerWarning: false,
 	};
 
 	public handleTabChange = (event, selectedTab) => {
@@ -591,10 +577,6 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 
 	public onCacheChange = (event) => {
 		this.setState({showCacheWarning : event.target.checked});
-	}
-
-	public onUseBetaViewerChange = (event) => {
-		this.setState({ showBetaViewerWarning : event.target.checked !== this.props.visualSettings.useBetaViewer });
 	}
 
 	public onSubmit = (values) => {
@@ -640,8 +622,6 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 						{selectedTab === 0 && (
 							<BasicSettings
 								onCacheChange={this.onCacheChange}
-								onUseBetaViewerChange={this.onUseBetaViewerChange}
-								showBetaViewerWarning={this.state.showBetaViewerWarning}
 							/>
 						)}
 						{selectedTab === 1 && <AdvancedSettings />}

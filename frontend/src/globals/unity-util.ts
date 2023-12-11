@@ -125,8 +125,6 @@ export class UnityUtil {
 
 	public static verbose = false;
 
-	public static usingBetaViewer = false;
-
 	/**
 	 * Contains a list of calls to make during the Unity Update method. One
 	 * call is made per Unity frame.
@@ -141,12 +139,11 @@ export class UnityUtil {
 	* @param progressCallback
 	* @param modelLoaderProgressCallback
 	*/
-	public static init(errorCallback: any, progressCallback: any, modelLoaderProgressCallback: any, useBetaViewer = false) {
+	public static init(errorCallback: any, progressCallback: any, modelLoaderProgressCallback: any) {
 		UnityUtil.errorCallback = errorCallback;
 		UnityUtil.progressCallback = progressCallback;
 		UnityUtil.modelLoaderProgressCallback = modelLoaderProgressCallback;
-		UnityUtil.usingBetaViewer = useBetaViewer;
-		UnityUtil.unityBuildSubdirectory = useBetaViewer ? '/unity/beta/Build' : '/unity/Build'; // These directories are determined by webpack.common.config.js
+		UnityUtil.unityBuildSubdirectory = '/unity/Build'; // These directories are determined by webpack.common.config.js
 		UnityUtil.setUnityMemory(0); // This forces the browser to update the viewer with the autodetected memory. If the user has set it explicitly in viewer settings, it will be overridden later when they are processed.
 	}
 
@@ -644,12 +641,6 @@ export class UnityUtil {
 	 * can handle, determined by hueristics in this method.
 	 */
 	public static setUnityMemory(maxMemoryInMb: number) {
-		// This method is only supported on the 4GB viewer. The previous viewer
-		// will always use 2GB.
-		if (!this.usingBetaViewer) {
-			return;
-		}
-
 		let memory = Number(maxMemoryInMb);
 		if (memory === 0) {
 			// If the user has not set the memory explicitly, then attempt to
@@ -1275,6 +1266,24 @@ export class UnityUtil {
 			color: colour,
 		};
 		UnityUtil.toUnity('DropBookmarkPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+	}
+
+	/**
+	 * Add a ticket pin
+	 * @category Pins
+	 * @param id - Identifier for the pin
+	 * @param position - point in space where the pin should generate
+	 * @param normal - normal vector for the pin (note: this is no longer used)
+	 * @param colour - RGB value for the colour of the pin
+	 */
+	public static dropTicketPin(id: string, position: number[], normal: number[], colour: number[]) {
+		const params = {
+			id,
+			position,
+			normal,
+			color: colour,
+		};
+		UnityUtil.toUnity('DropTicketPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
 	public static selectPin(id: string) {

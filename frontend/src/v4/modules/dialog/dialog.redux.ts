@@ -21,7 +21,6 @@ import { generatePath } from 'react-router';
 import { get, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
-import { isV5 } from '@/v4/helpers/isV5';
 import { ROUTES } from '../../constants/routes';
 import * as Dialogs from '../../routes/components/dialogContainer/components';
 
@@ -172,7 +171,7 @@ const showRedirectToTeamspaceDialog = (state = INITIAL_STATE, action) => {
 	const { method, dataType, error, teamspace } = action;
 	const status = get(error.response, 'status', 'Implementation error');
 	const message = get(error.response, 'data.message', error.message);
-	const teamspaceRoute = isV5() ? generatePath(ROUTES.V5_TEAMSPACE, { teamspace }) : ROUTES.TEAMSPACES;
+	const teamspaceRoute = generatePath(ROUTES.V5_TEAMSPACE, { teamspace });
 	const config = {
 		title: 'Error',
 		content: 'We cannot load the model due to the following:',

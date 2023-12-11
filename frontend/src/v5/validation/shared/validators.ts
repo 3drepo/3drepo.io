@@ -23,6 +23,7 @@ export const trimmedString = Yup.string().transform((value) => value.trim());
 export const nullableNumber = Yup.number().transform(
 	(_, val) => ((val || val === 0) ? Number(val) : null),
 ).nullable(true);
+
 export const requiredNumber = (requiredError?) => nullableNumber.test(
 	'requiredNumber',
 	requiredError || formatMessage({
@@ -31,3 +32,8 @@ export const requiredNumber = (requiredError?) => nullableNumber.test(
 	}),
 	(number) => isNumber(number),
 );
+
+export const getMaxFileSizeMessage = (value) => formatMessage({
+	id: 'validation.file.error.fileSize',
+	defaultMessage: 'The file you tried to upload was too big. File uploads should be no larger than {value}.',
+}, { value });

@@ -764,7 +764,7 @@ function uploadAvatar(req, res, next) {
 			return cb({ resCode: responseCodes.FILE_FORMAT_NOT_SUPPORTED });
 		}
 
-		if (size > config.avatarSizeLimit) {
+		if (size > config.imageSizeLimit) {
 			return cb({ resCode: responseCodes.AVATAR_SIZE_LIMIT });
 		}
 

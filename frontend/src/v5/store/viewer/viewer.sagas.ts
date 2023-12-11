@@ -59,9 +59,10 @@ function* fetchData({ teamspace, containerOrFederation, project }: FetchDataActi
 				project,
 				containerId,
 			));
+
 			const result = yield race({
 				fail: take(DialogsTypes.OPEN),
-				success: take(ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS),
+				success: take((action)=> action.type === ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS && action.containerId === containerId),
 			});
 
 			if (result.fail) {
@@ -70,7 +71,7 @@ function* fetchData({ teamspace, containerOrFederation, project }: FetchDataActi
 		}
 
 		yield put(TicketsActions.fetchTickets(teamspace, project, containerOrFederation, isFederation));
-		yield put(TicketsActions.fetchTemplates(teamspace, project, containerOrFederation, isFederation));
+		yield put(TicketsActions.fetchTemplates(teamspace, project, containerOrFederation, isFederation, true));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'viewer.fetch.error', defaultMessage: 'trying to fetch viewer data' }),

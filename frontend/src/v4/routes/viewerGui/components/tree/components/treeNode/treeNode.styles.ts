@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { cond, constant, isEqual, matches, stubTrue } from 'lodash';
 import styled, { css } from 'styled-components';
 import {
@@ -78,10 +77,10 @@ const getButtonBackgroundColor = (props) => {
 };
 
 const containerIndentation = cond([
-	[matches({ nodeType: TREE_ITEM_FEDERATION_TYPE }), constant(isV5() ? 15 : 38)],
-	[matches({ nodeType: TREE_ITEM_MODEL_TYPE }), constant(isV5() ? 15 : 20)],
+	[matches({ nodeType: TREE_ITEM_FEDERATION_TYPE }), constant(15)],
+	[matches({ nodeType: TREE_ITEM_MODEL_TYPE }), constant(15)],
 	[stubTrue, ({ level, hasFederationRoot }) => {
-		const INDENTATION_STEP = isV5() ? 8 : 10;
+		const INDENTATION_STEP = 8;
 		const indentation = level * INDENTATION_STEP;
 		return !hasFederationRoot ? indentation + INDENTATION_STEP : indentation;
 	}]
@@ -113,7 +112,7 @@ export const StyledExpandableButton = styled.button<IExpandableButton>`
 		font-size: 16px;
 	}
 
-	${({ theme, hasChildren, expanded }) => isV5() && hasChildren && `
+	${({ theme, hasChildren, expanded }) => hasChildren && `
 		background-color: ${expanded ? theme.palette.secondary.main : theme.palette.base.main};
 	`}
 `;
@@ -179,7 +178,7 @@ export const Container = styled.li<IContainer & { $isContainer: boolean }>`
 		}
 	` : ''};
 
-	${({ theme: { palette }, nodeType, active, expandable }) => isV5() && css`
+	${({ theme: { palette }, nodeType, active, expandable }) => css`
 		/* TODO - fix after new palette is released */
 		background-color: ${active ? '#F7F8FA' : palette.primary.contrast};
 		border: none;

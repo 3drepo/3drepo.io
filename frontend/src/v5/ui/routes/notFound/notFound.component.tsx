@@ -21,44 +21,59 @@ import { Button } from '@controls/button';
 import { FormattedMessage } from 'react-intl';
 import { AppBar } from '@components/shared/appBar';
 import { Container, Title, Message, ButtonsContainer } from './notFound.styles';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { ThemeProvider } from 'styled-components';
+import { theme } from '@/v5/ui/themes/theme';
+import { IntercomProvider } from 'react-use-intercom';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import { GlobalStyle } from '@/v5/ui/themes/global';
 
-export const NotFound = (): JSX.Element => (
-	<>
-		<AppBar />
-		<Container>
-			<NotFoundIcon />
-			<Title>
-				<FormattedMessage id="notFound.title" defaultMessage="Sorry, but the page you were looking for could not be found." />
-			</Title>
-			<Message>
-				<FormattedMessage
-					id="notFound.message"
-					defaultMessage="You can return to our dashboard, or contact our support team if you can't find what you're looking for."
-				/>
-			</Message>
-			<ButtonsContainer>
-				<Button
-					variant="contained"
-					color="primary"
-					component={Link}
-					to="/v5/dashboard"
-				>
-					<FormattedMessage
-						id="notFound.goToDashboardButton.label"
-						defaultMessage="Go to your Dashboard"
-					/>
-				</Button>
-				<Button
-					variant="outlined"
-					color="primary"
-					href="https://3drepo.com/contact/"
-				>
-					<FormattedMessage
-						id="notFound.contactSupportButton.label"
-						defaultMessage="Contact support team"
-					/>
-				</Button>
-			</ButtonsContainer>
-		</Container>
-	</>
-);
+
+export const NotFound = (): JSX.Element => {
+	const { intercomLicense } = clientConfigService;
+	return (
+		<ThemeProvider theme={theme}>
+			<MuiThemeProvider theme={theme}>
+				<IntercomProvider appId={intercomLicense}>
+					<GlobalStyle />
+					<AppBar />
+					<Container>
+						<NotFoundIcon />
+						<Title>
+							<FormattedMessage id="notFound.title" defaultMessage="Sorry, but the page you were looking for could not be found." />
+						</Title>
+						<Message>
+							<FormattedMessage
+								id="notFound.message"
+								defaultMessage="You can return to our dashboard, or contact our support team if you can't find what you're looking for."
+							/>
+						</Message>
+						<ButtonsContainer>
+							<Button
+								variant="contained"
+								color="primary"
+								component={Link}
+								to="/v5/dashboard"
+							>
+								<FormattedMessage
+									id="notFound.goToDashboardButton.label"
+									defaultMessage="Go to your Dashboard"
+								/>
+							</Button>
+							<Button
+								variant="outlined"
+								color="primary"
+								href="https://3drepo.com/contact/"
+							>
+								<FormattedMessage
+									id="notFound.contactSupportButton.label"
+									defaultMessage="Contact support team"
+								/>
+							</Button>
+						</ButtonsContainer>
+					</Container>
+				</IntercomProvider>
+			</MuiThemeProvider>
+		</ThemeProvider>
+	);
+};

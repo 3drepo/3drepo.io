@@ -102,6 +102,9 @@ jobs:
       - name: Run Frontend yarn test
         run: cd frontend ; yarn test
 
+      - name: Run Frontend yarn docs
+        run: cd frontend ; yarn docs
+
 
   run-frontend-lint:
     name: Run Frontend lint
