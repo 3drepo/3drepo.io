@@ -22,16 +22,19 @@ import { StyledIconButton } from './timeIcon.styles';
 
 interface IProps {
 	name: string;
-	handleOnClick: () => void;
+	value: number;
+	handleOnClick: (value: number) => void;
 }
 
-export const TimeIcon = ({ name, handleOnClick }: IProps) => {
+export const TimeIcon = ({ name, value, handleOnClick }: IProps) => {
 	if (name && !DATE_FIELDS.includes(name)) {
 		return null;
 	}
 
+	const handleOnIconClick = () => handleOnClick(value);
+
 	return (
-		<StyledIconButton onClick={handleOnClick}>
+		<StyledIconButton onClick={handleOnIconClick}>
 			<PlayIcon />
 		</StyledIconButton>
 	);

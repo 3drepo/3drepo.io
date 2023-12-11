@@ -49,10 +49,7 @@ const renderValue = (key, value, setSelectedDate) => {
 	}
 
 	return (
-		<Grid item xs={6}>
-			{processedValue}
-			<TimeIcon name={dateToSelect ? undefined : key} handleOnClick={() => setSelectedDate(dateToSelect || value)} />
-		</Grid>
+		<Grid item xs={6}>{processedValue} <TimeIcon name={dateToSelect ? undefined : key} value={dateToSelect || value} handleOnClick={setSelectedDate} /></Grid>
 	);
 }
 
