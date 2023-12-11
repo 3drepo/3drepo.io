@@ -25,6 +25,7 @@ import { LegendActions } from '../../../../modules/legend';
 import {
 	selectActivitiesPending, selectCurrentActivities, selectEndDate, selectFrames, selectIsLoadingFrameState,
 	selectOpenOnToday,
+	selectSelectedDate,
 	selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedSequence, selectSelectedStartingDate,
 	selectSequences, selectStartDate, selectStepInterval, selectStepScale, SequencesActions,
 } from '../../../../modules/sequences';
@@ -37,7 +38,8 @@ const mapStateToProps = createStructuredSelector({
 	startDate: selectStartDate,
 	endDate: selectEndDate,
 	frames: selectFrames,
-	selectedDate: selectSelectedStartingDate,
+	selectedDate: selectSelectedDate,
+	selectedStartDate: selectSelectedStartingDate,
 	selectedEndingDate: selectSelectedEndingDate,
 	colorOverrides: selectSelectedFrameColors,
 	stepInterval: selectStepInterval,

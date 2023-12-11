@@ -42,6 +42,7 @@ interface IProps {
 	startDate: Date;
 	frames: any[];
 	selectedDate: Date;
+	selectedStartDate: Date;
 	selectedEndingDate: Date;
 	colorOverrides: any;
 	stepInterval: number;
@@ -67,14 +68,14 @@ interface IProps {
 const da =  new Date();
 
 const SequenceDetails = ({
-	startDate, endDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
+	startDate, endDate, selectedDate, selectedStartDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
 	setStepScale, currentTasks, loadingFrameState, loadingViewpoint, rightPanels, toggleActivitiesPanel, openOnToday,
 	fetchActivityDetails, onPlayStarted, frames, isActivitiesPending, toggleLegend, draggablePanels
 }) => {
 	const [dateToUse, setDateToUse] = useState(null);
 
 	useEffect(() => {
-		if (!openOnToday) {
+		if (!openOnToday || selectedDate) {
 			setDateToUse(selectedDate);
 			return;
 		}
@@ -116,7 +117,7 @@ const SequenceDetails = ({
 			/>
 			<TasksList
 				tasks={currentTasks}
-				startDate={selectedDate}
+				startDate={selectedStartDate}
 				endDate={selectedEndingDate}
 				fetchActivityDetails={fetchActivityDetails}
 			/>
@@ -153,11 +154,11 @@ export class Sequences extends PureComponent<IProps, {}> {
 
 	public onPlayStarted = () => {
 		const {
-			selectedDate,
+			selectedStartDate,
 			frames,
 			deselectViewsAndLeaveClipping
 		} = this.props;
-		const { viewpoint } = getSelectedFrame(frames, selectedDate);
+		const { viewpoint } = getSelectedFrame(frames, selectedStartDate);
 
 		if (!viewpoint) {
 			deselectViewsAndLeaveClipping();
