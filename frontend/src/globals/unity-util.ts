@@ -125,8 +125,6 @@ export class UnityUtil {
 
 	public static verbose = false;
 
-	public static usingBetaViewer = false;
-
 	/**
 	 * Contains a list of calls to make during the Unity Update method. One
 	 * call is made per Unity frame.
@@ -643,12 +641,6 @@ export class UnityUtil {
 	 * can handle, determined by hueristics in this method.
 	 */
 	public static setUnityMemory(maxMemoryInMb: number) {
-		// This method is only supported on the 4GB viewer. The previous viewer
-		// will always use 2GB.
-		if (!this.usingBetaViewer) {
-			return;
-		}
-
 		let memory = Number(maxMemoryInMb);
 		if (memory === 0) {
 			// If the user has not set the memory explicitly, then attempt to
