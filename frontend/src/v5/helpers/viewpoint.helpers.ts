@@ -14,12 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Viewpoint, Group, ViewpointGroupOverrideType, GroupOverride, ViewpointState, V4GroupObjects, OverridesDicts } from '@/v5/store/tickets/tickets.types';
+import { Viewpoint, Group, ViewpointGroupOverrideType, GroupOverride, ViewpointState, V4GroupObjects, OverridesDicts, TransformMatrix } from '@/v5/store/tickets/tickets.types';
 import { getGroupHexColor, rgbaToHex } from '@/v4/helpers/colors';
 import { generateViewpoint as generateViewpointV4, getNodesIdsFromSharedIds, toSharedIds } from '@/v4/helpers/viewpoints';
 import { formatMessage } from '@/v5/services/intl';
 import { dispatch, getState } from '@/v4/modules/store';
-import { isEmpty, isString } from 'lodash';
+import { isEmpty } from 'lodash';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { TreeActions } from '@/v4/modules/tree';
 import { ViewerGuiActions } from '@/v4/modules/viewerGui';
@@ -106,109 +106,69 @@ export const getViewerState = async () => {
 	return state;
 };
 
-const mergeGroups = (groups: any[]) => ({ objects: groups.flatMap((group) => group.objects) });
-
-const convertToV4Group = (groupOverride: GroupOverride) => {
-	const { color, opacity, group: v5Group } = groupOverride;
-
-	if (isString(v5Group)) {
-		return { color: [0, 0, 0, 0], objects: [] }; // theres no info yet so I say us an empty group
-	}
-
-	const group:any = {
-		objects: convertToV4GroupNodes(v5Group?.objects || []),
-	};
-
-	if (color) {
-		group.color = getGroupHexColor([...color, Math.round((opacity ?? 1) * 255)]);
-	}
-
-	if (opacity) {
-		group.opacity = opacity;
-	}
-
-	return group;
-};
-
-export const viewpointV5ToV4 = (viewpoint: Viewpoint) => {
-	let v4Viewpoint:any = {};
-	if (viewpoint.camera) {
-		// eslint-disable-next-line @typescript-eslint/naming-convention
-		const { position, up, forward: view_dir, type, size: orthographicSize } = viewpoint.camera;
-		v4Viewpoint = { position, up, view_dir, type, orthographicSize, look_at: null, account: null, model: null };
-	}
-
-	if (!isEmpty(viewpoint.state)) {
-		v4Viewpoint.hideIfc = !viewpoint.state.hidden;
-	}
-
-	if (!isEmpty(viewpoint.clippingPlanes)) {
-		v4Viewpoint.clippingPlanes = viewpoint.clippingPlanes;
-	}
-
-	if (!isEmpty(viewpoint.state?.colored)) {
-		v4Viewpoint.override_groups = viewpoint.state.colored.map(convertToV4Group);
-	}
-
-	if (!isEmpty(viewpoint.state?.transformed)) {
-		v4Viewpoint.transformation_groups = viewpoint.state.transformed.map(convertToV4Group);
-	}
-
-	if (!isEmpty(viewpoint.state?.hidden)) {
-		v4Viewpoint.hidden_group = mergeGroups(viewpoint.state.hidden.map(convertToV4Group));
-	}
-
-	return { viewpoint: v4Viewpoint };
-};
-
 export const meshObjectsToV5GroupNode = (objects) => objects.map((obj) => ({
 	container: obj.model,
 	_ids: obj.mesh_ids,
 }));
 
-export const toColorAndTransparencyDicts = (overrides: GroupOverride[]): OverridesDicts => {
-	const toMeshDictionary = (objects: V4GroupObjects, color: string, opacity: number): OverridesDicts => objects.shared_ids.reduce((dict, id) => {
-		if (color !== undefined) {
+export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDicts => {
+	const toMeshDictionary = (objects: V4GroupObjects, color: string, opacity: number, transformation: TransformMatrix): OverridesDicts => 
+		objects.shared_ids.reduce((dict, id) => {
+			if (color !== undefined) {
 			// eslint-disable-next-line no-param-reassign
-			dict.overrides[id] = color;
-		}
+				dict.overrides[id] = color;
+			}
 
-		if (opacity !== undefined) {
+			if (opacity !== undefined) {
 			// eslint-disable-next-line no-param-reassign
-			dict.transparencies[id] = opacity;
-		}
-		return dict;
-	}, { overrides: {}, transparencies: {} } as OverridesDicts);
+				dict.transparencies[id] = opacity;
+			}
+
+			if (transformation !== undefined) {
+				// eslint-disable-next-line no-param-reassign
+				dict.transformations[id] = transformation;
+			}
+
+			return dict;
+		}, { overrides: {}, transparencies: {}, transformations: {} } as OverridesDicts);
 
 	return overrides.reduce((acum, current) => {
 		const color = current.color ? getGroupHexColor(current.color) : undefined;
-		const { opacity } = current;
+		const { opacity, transformation } = current;
 		const v4Objects = convertToV4GroupNodes((current.group as Group)?.objects || []);
 
 		return v4Objects.reduce((dict, objects) => {
-			const overrideDict = toMeshDictionary(objects, color, opacity);
+			const overrideDict = toMeshDictionary(objects, color, opacity, transformation);
 
 			// eslint-disable-next-line no-param-reassign
 			dict.overrides = { ...dict.overrides, ...overrideDict.overrides };
 			// eslint-disable-next-line no-param-reassign
 			dict.transparencies = { ...dict.transparencies, ...overrideDict.transparencies };
+
+			// eslint-disable-next-line no-param-reassign
+			dict.transformations = { ...dict.transformations, ...overrideDict.transformations };
+	
 			return dict;
 		}, acum);
-	}, { overrides: {}, transparencies: {} } as OverridesDicts);
+	}, { overrides: {}, transparencies: {}, transformations: {} } as OverridesDicts);
 };
 
 export const goToView = async (view: Viewpoint) => {
-	if (isEmpty(view?.state?.colored)  && isEmpty(view?.state?.hidden) && isEmpty(view?.camera) && isEmpty(view?.clippingPlanes)) {
+	if (
+		isEmpty(view?.state?.colored) && 
+		isEmpty(view?.state?.hidden) && 
+		isEmpty(view?.state?.transformed) && 
+		isEmpty(view?.camera) && 
+		isEmpty(view?.clippingPlanes)) {
 		return;
 	}
 	
 	dispatch(ViewerGuiActions.clearColorOverrides());
 	await ViewerService.setViewpoint(view);
-	const overrides = toColorAndTransparencyDicts(view?.state?.colored || []);
+	const overrides = toGroupPropertiesDicts((view?.state?.colored || []).concat(view?.state?.transformed || []));
 	TicketsCardActionsDispatchers.setOverrides(overrides);
-
+	
 	await ViewerService.clearHighlights();
-
 
 	if (view?.state) {
 		dispatch(TreeActions.setHiddenGeometryVisible(!!view.state.showHidden));

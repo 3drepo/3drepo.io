@@ -152,16 +152,18 @@ export enum ViewpointGroupOverrideType {
 	TRANSFORMED,
 }
 
-type ColorAndOpacity = {
+export type TransformMatrix = [number, number, number, number,
+	number, number, number, number,
+	number, number, number, number,
+	number, number, number, number];
+
+type GroupProperties = {
 	color?: [number, number, number],
 	opacity?: number,
-	transformation?: [number, number, number, number,
-		number, number, number, number,
-		number, number, number, number,
-		number, number, number, number]
+	transformation?: TransformMatrix
 };
 
-export type GroupOverride = ColorAndOpacity & {
+export type GroupOverride = GroupProperties & {
 	prefix?: string[],
 	group: string | Group,
 	key?: number;
@@ -185,10 +187,12 @@ export type IGroupSettingsForm = GroupOverride & { group: Group };
 
 type MeshIdColorDict = Record<string, string>;
 type MeshIdTransparencyDict = Record<string, number>;
+type MeshIdTransformDict = Record<string, TransformMatrix>;
 
 export type OverridesDicts = {
 	overrides: MeshIdColorDict,
-	transparencies: MeshIdTransparencyDict
+	transparencies: MeshIdTransparencyDict,
+	transformations: MeshIdTransformDict
 };
 
 export type TicketWithModelIdAndName = ITicket & { modelId: string; modelName: string };
