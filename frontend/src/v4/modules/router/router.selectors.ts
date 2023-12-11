@@ -58,11 +58,7 @@ const selectV5UrlParams = createSelector(
 		const viewerParams = matchPath<RouteParams>(location.pathname, { path: viewerPath });
 		const boardParams = matchPath<RouteParams>(location.pathname, { path: boardPath });
 
-		const params: RouteParams & {v5?: boolean} = (viewerParams || boardParams || {}).params;
-
-		if (params) {
-			params.v5 = true;
-		}
+		const params: RouteParams = (viewerParams || boardParams || {}).params;
 
 		return params;
 	}

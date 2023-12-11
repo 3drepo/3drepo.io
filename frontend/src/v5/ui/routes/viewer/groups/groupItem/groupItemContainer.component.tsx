@@ -15,16 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Visibility from '@mui/icons-material/VisibilityOutlined';
 import { ArrowButton, StyledArrowIcon } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
-import { TooltipButton } from '@/v4/routes/teamspaces/components/tooltipButton/tooltipButton.component';
 import { Checkbox } from '@mui/material';
-import { isV5 } from '@/v4/helpers/isV5';
 import { GroupsTreeListItem, GroupsTreeListItemContainer, ButtonsContainer, Separator } from './groupItem.styles';
 
 interface Props {
 	onClick: (event: any) => void;
-	onClickIsolate: (event: any) => void;
 	onClickGotoDetails?: (event: any) => void;
 	onClickOverride: (event: any) => void;
 	disabled: boolean;
@@ -40,7 +36,6 @@ interface Props {
 export const GroupsTreeListItemComponent = (
 	{
 		onClick,
-		onClickIsolate,
 		onClickGotoDetails,
 		onClickOverride,
 		disabled,
@@ -57,7 +52,6 @@ export const GroupsTreeListItemComponent = (
 		<GroupsTreeListItemContainer $depth={depth}>
 			{children}
 			<ButtonsContainer>
-				{!isV5() && <TooltipButton action={onClickIsolate} label="Isolate" Icon={Visibility} disabled={disabled} />}
 				<Checkbox onClick={onClickOverride} checked={overridden} indeterminate={overridden === undefined} />
 			</ButtonsContainer>
 			{active

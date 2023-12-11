@@ -18,7 +18,7 @@
 import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
 import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useEffect, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
@@ -26,6 +26,8 @@ import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/che
 import { ViewerParams } from '../routes.constants';
 import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
 import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
+import { SpinnerLoader } from '@controls/spinnerLoader';
+import { CentredContainer } from '@controls/centredContainer';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -46,6 +48,7 @@ export const Viewer = () => {
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 
 	const handlePinClick = ({ id }) => {
+		TicketsCardActionsDispatchers.setSelectedTicketPin(id);
 		if (!tickets.some((t) => t._id === id)) return;
 
 		TicketsCardActionsDispatchers.openTicket(id);
@@ -57,12 +60,25 @@ export const Viewer = () => {
 	}, [tickets]);
 
 	useEffect(() => {
+		if (teamspace) {
+			TeamspacesActionsDispatchers.setCurrentTeamspace(teamspace);
+			ProjectsActionsDispatchers.fetch(teamspace);
+		}
+	}, [teamspace]);
+
+	useEffect(() => {
+		if (project) {
+			ProjectsActionsDispatchers.setCurrentProject(project);
+		}
+	}, [project]);
+
+	useEffect(() => {
 		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
 	}, [teamspace, project, containerOrFederation]);
 
 	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
 
-	if (isLoading) return null;
+	if (isLoading) return (<CentredContainer horizontal vertical><SpinnerLoader /></CentredContainer>);
 
 	if (selectedContainer?.revisionsCount === 0) {
 		return <InvalidContainerOverlay status={selectedContainer.status} />;

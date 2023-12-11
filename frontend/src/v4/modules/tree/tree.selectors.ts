@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { orderBy, values } from 'lodash';
+import { isEmpty, orderBy, values } from 'lodash';
 import { createSelector } from 'reselect';
+import { selectUsername } from '@/v5/store/currentUser/currentUser.selectors';
 
 import { NODE_TYPES, VISIBILITY_STATES } from '../../constants/tree';
 import { mergeArrays } from '../../helpers/arrays';
 import { searchByFilters } from '../../helpers/searching';
 import { calculateTotalMeshes } from '../../helpers/tree';
-
 import TreeProcessing from './treeProcessing/treeProcessing';
 
 export const selectTreeDomain = (state) => ({...state.tree});
@@ -57,7 +57,7 @@ export const selectActiveNode = createSelector(
 	selectTreeDomain, (state) => state.activeNode
 );
 
-const selectTreeProccessing = () => TreeProcessing.data ;
+const selectTreeProccessing = () => TreeProcessing.data;
 
 export const selectTreeNodesList = createSelector(
 	selectTreeProccessing, selectDataRevision,
@@ -186,7 +186,7 @@ export const selectVisibleTreeNodesList = createSelector(
 		while (index < treeNodesList.length) {
 			const treeNode = { ...treeNodesList[index] };
 
-			treeNode.isSearchResult = isSearchActive && !treeNode.isFederation && !treeNode.isModel;
+			treeNode.isSearchResult = isSearchActive && treeNode.level > 1;
 			treeNode.isRegularNode = !isSearchActive && (treeNode.level <= 2 || expandedNodesMap[treeNode.parentId]);
 			const isNamelessMesh = treeNode.type === 'mesh' && !treeNode.name;
 			if (!isNamelessMesh && (treeNode.isSearchResult || treeNode.isRegularNode)) {
@@ -197,7 +197,7 @@ export const selectVisibleTreeNodesList = createSelector(
 				} else {
 					treeNode.rootParentIndex = indexesByRootParentIds[treeNode.rootParentId];
 				}
-			} else if (!treeNode.isSearchResult && treeNode.deepChildrenNumber) {
+			} else if (!treeNode.isSearchResult && treeNode.deepChildrenNumber && treeNode.level > 1) {
 				// If we are not showing search result and this node isn't a regular node,
 				// Then we are certain we won't be showing its children, skip them.
 				index += treeNode.deepChildrenNumber;
@@ -326,4 +326,34 @@ export const selectVisibleTreeNodesIds = createSelector(
 
 export const selectIsTreeProcessed = createSelector(
 	selectTreeDomain, (state) => state.isTreeProcessed
+);
+
+export const selectModelHasHiddenNodes = createSelector(
+	selectSubModelsRootNodes,
+	selectUsername,
+	selectTreeNodesList,
+	selectVisibilityMap,
+	selectDefaultVisibilityMap,
+	selectMeshesByNodeId,
+	selectHiddenGeometryVisible,
+	selectDataRevision,
+	(subModelsRootNodes, username, nodesList = [], visibilityMap = {}, defaultVisibilityMap = {}, meshesByNodeId, isHiddenGeometryVisible) => {
+		if (!username || !nodesList.length || isEmpty(visibilityMap)) {
+			return null;
+		}
+
+		let meshes;
+		const [root] = nodesList;
+		if (isEmpty(subModelsRootNodes)) {
+			meshes = meshesByNodeId[root.namespacedId][root._id];
+		} else {
+			const subModelsMeshesById: Array<Record<string, string[]>> = Object.entries(subModelsRootNodes).flatMap(([modelId, node]: any) => (
+				node.children.length ? meshesByNodeId[`${root.teamspace}@${modelId}`] : []
+			));
+			meshes = root.subTreeRoots.flatMap((modelId) => (
+				subModelsMeshesById.flatMap((subModelMeshes) => subModelMeshes[modelId] || [])
+			));
+		}
+		return meshes.some((id) => (visibilityMap[id] !== VISIBILITY_STATES.VISIBLE && (isHiddenGeometryVisible || defaultVisibilityMap[id] !== VISIBILITY_STATES.INVISIBLE)));
+	}
 );

@@ -201,7 +201,9 @@ for (let i = 0; i < config.servers.length; i++) {
 			config.apiUrls[server.type] = [];
 		}
 
-		config.apiUrls[server.type].push(server.location_url);
+		if(!server.subdomain) {
+			config.apiUrls[server.type].push(server.location_url);
+		}
 
 	} else if (server.service === "chat") {
 
@@ -276,7 +278,7 @@ config.resourceUploadSizeLimit =  config.resourceUploadSizeLimit || 104857600;
 config.fileUploads = {
 	modelSizeLimit: config.uploadSizeLimit,
 	resourceSizeLimit:config.resourceUploadSizeLimit,
-	avatarSizeLimit: 1048576,
+	imageSizeLimit: 1048576,
 	imageExtensions: ["png", "jpg", "gif"],
 	uploadDir: config.cn_queue.upload_dir
 
@@ -286,7 +288,7 @@ config.version = VERSION;
 config.userNotice = coalesce(config.userNotice, "");
 
 config.contact = config.contact || {};
-config.contact.support = "support@3drepo.org";
+config.contact.support = "support@3drepo.com";
 
 // default vat validation url
 config.vat = coalesce(config.vat, {});
@@ -304,7 +306,7 @@ config.getBaseURL = function (internalAccess) {
 };
 
 // avatar size limit
-config.avatarSizeLimit = coalesce(config.avatarSizeLimit, 1048576);
+config.imageSizeLimit = coalesce(config.imageSizeLimit, 1048576);
 
 config.liveChatLicense = config.liveChatLicense || 0;
 

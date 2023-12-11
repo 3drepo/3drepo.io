@@ -18,7 +18,6 @@ import { FunctionComponent } from 'react';
 import InputLabel from '@mui/material/InputLabel';
 import { Field } from 'formik';
 
-import { isV5 } from '@/v4/helpers/isV5';
 import {
 	LEVELS_OF_RISK,
 	RISK_CONSEQUENCES,
@@ -30,7 +29,7 @@ import { TextField } from '../../../../../components/textField/textField.compone
 import { UpdateButtons } from '../../../updateButtons/updateButtons.component';
 import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component';
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
-import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
+import { NAMED_MONTH_DATETIME_FORMAT } from '../../../../../../services/formatting/formatDate';
 import { DateField } from '../../../../../components/dateField/dateField.component';
 
 import {
@@ -89,12 +88,9 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 						mutable={!isNewRisk}
 						enableMarkdown
 						inputProps={{ maxLength: LONG_TEXT_CHAR_LIM }}
-						{...(isV5() && ({
-							placeholder: 'Type a description',
-							disableShowDefaultUnderline: true,
-							className: 'description',
-							}))
-						}
+						placeholder="Type a description"
+						disableShowDefaultUnderline
+						className="description"
 					/>
 				)} />
 			</Container>
@@ -259,7 +255,8 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 							<DateFieldContainer>
 								<DateField
 									{...field}
-									inputFormat={NAMED_MONTH_DATE_FORMAT}
+									dateTime
+									inputFormat={NAMED_MONTH_DATETIME_FORMAT}
 									disabled={!canEditBasicProperty}
 									placeholder="Choose a due date"
 								/>

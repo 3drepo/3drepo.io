@@ -45,6 +45,7 @@ interface IProps {
 	renderActions?: () => JSX.Element | JSX.Element[];
 	id?: string;
 	style?: any;
+	children: any;
 }
 
 export class ViewerPanel extends PureComponent<IProps, any> {

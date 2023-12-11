@@ -28,7 +28,11 @@ export interface TicketContextType {
 	setDetailViewAndProps: (view: TicketDetailsView, props?: any) => void;
 }
 
-const defaultValue: TicketContextType = { isViewer: false, view: TicketDetailsView.Form, setDetailViewAndProps: () => {} };
+const defaultValue: TicketContextType = {
+	isViewer: false,
+	view: TicketDetailsView.Form,
+	setDetailViewAndProps: () => {},
+};
 export const TicketContext = createContext(defaultValue);
 TicketContext.displayName = 'TicketContext';
 

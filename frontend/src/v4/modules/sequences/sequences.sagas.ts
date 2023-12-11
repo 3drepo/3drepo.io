@@ -29,6 +29,7 @@ import { selectHiddenGeometryVisible,  TreeActions } from '../tree';
 import { selectCacheSetting } from '../viewer';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { ViewpointsActions } from '../viewpoints';
+import { GroupsActions } from '../groups';
 import { getSelectedFrame } from './sequences.helper';
 import {
 	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates, selectSelectedDate, selectSelectedFrameViewpoint,
@@ -199,6 +200,7 @@ export function* initializeSequences() {
 }
 
 export function* restoreModelDefaultVisibility() {
+	yield put(GroupsActions.clearColorOverrides());
 	yield put(TreeActions.showAllNodes());
 	yield put(TreeActions.showHiddenGeometry());
 }
@@ -249,8 +251,22 @@ export function* showSequenceDate({ date }) {
 		yield take(SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS);
 	}
 
-	// 2 - Select the date
-	yield put(SequencesActions.setSelectedDate(date));
+	// 4 - bond date by sequence start/end date
+	const { startDate, endDate } = yield select(selectSelectedSequence);
+
+	const dateAsNumber = new Date(date).getTime();
+
+	let dateToSelect = date;
+
+	if (dateAsNumber < startDate) {
+		dateToSelect = new Date(startDate);
+	}
+
+	if (dateAsNumber > endDate) {
+		dateToSelect = new Date(endDate);
+	}
+
+	yield put(SequencesActions.setSelectedDate(dateToSelect));
 }
 
 function* handleTransparenciesVisibility({ transparencies }) {

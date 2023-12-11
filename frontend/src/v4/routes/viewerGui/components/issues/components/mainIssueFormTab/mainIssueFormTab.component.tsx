@@ -18,11 +18,10 @@ import { FunctionComponent } from 'react';
 import { InputLabel } from '@mui/material';
 import { Field } from 'formik';
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { ISSUE_PRIORITIES, ISSUE_STATUSES } from '../../../../../../constants/issues';
 import { LONG_TEXT_CHAR_LIM } from '../../../../../../constants/viewerGui';
 import { canChangeStatus } from '../../../../../../helpers/issues';
-import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
+import { NAMED_MONTH_DATETIME_FORMAT } from '../../../../../../services/formatting/formatDate';
 import { CellSelect } from '../../../../../components/customTable/components/cellSelect/cellSelect.component';
 import { DateField } from '../../../../../components/dateField/dateField.component';
 import { TextField } from '../../../../../components/textField/textField.component';
@@ -76,12 +75,9 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 						mutable={!isNew}
 						enableMarkdown
 						inputProps={{ maxLength: LONG_TEXT_CHAR_LIM }}
-						{...(isV5() && ({
-							placeholder: 'Type a description',
-							disableShowDefaultUnderline: true,
-							className: 'description',
-						}
-						))}
+						placeholder="Type a description"
+						disableShowDefaultUnderline
+						className="description"
 					/>
 				)} />
 			</Container>
@@ -164,7 +160,8 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 						<DateFieldContainer>
 							<DateField
 								{...field}
-								inputFormat={NAMED_MONTH_DATE_FORMAT}
+								dateTime
+								inputFormat={NAMED_MONTH_DATETIME_FORMAT}
 								disabled={!canEditBasicProperty}
 								placeholder="Choose a due date"
 							/>

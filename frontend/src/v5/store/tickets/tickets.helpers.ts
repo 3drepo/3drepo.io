@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FederationsHooksSelectors, SequencesHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { camelCase, isEmpty, isEqual, isObject, mapKeys, get } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
@@ -25,7 +25,7 @@ import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
-import { IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { IssueProperties, TicketBaseKeys, SafetibaseProperties, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
@@ -62,7 +62,13 @@ export const getDefaultTicket = (template: ITemplate): EditableTicket => {
 			[name || type]: templatePropertiesToTicketProperties(moduleProperties),
 		}),
 		{},
-	);
+	) as any;
+
+	const currentSequenceDateTime = SequencesHooksSelectors.selectSelectedDate();
+	if (modules.sequencing && currentSequenceDateTime) {
+		modules.sequencing[SequencingProperties.START_TIME] = new Date(currentSequenceDateTime).getTime();
+	}
+
 	return ({
 		title: '',
 		type: template._id,
@@ -101,10 +107,10 @@ export const filterEmptyTicketValues = (ticket) => {
 	const parsedTicket = {};
 	Object.entries(ticket).forEach(([key, value]) => {
 		switch (key) {
-			case 'properties':
+			case TicketBaseKeys.PROPERTIES:
 				parsedTicket[key] = filterEmptyModuleValues(value);
 				break;
-			case 'modules':
+			case TicketBaseKeys.MODULES:
 				parsedTicket[key] = {};
 				Object.entries(value).forEach(([module, moduleValue]) => {
 					const parsedModule = filterEmptyModuleValues(moduleValue);
@@ -166,7 +172,7 @@ const overrideHasEditedGroup = (override: GroupOverride, oldOverrides: GroupOver
 	const overrideId = (override.group as Group)._id;
 	if (!overrideId) return false;
 
-	const oldGroup = oldOverrides.find(({ group }) => (group as Group)._id === overrideId).group;
+	const oldGroup = oldOverrides.find(({ group }) => (group as Group)._id === overrideId)?.group;
 	return !isEqual(oldGroup, override.group);
 };
 
@@ -254,7 +260,7 @@ export const sanitizeViewVals = (values:Partial<ITicket>, ticket:ITicket, templa
 };
 
 export const templateAlreadyFetched = (template: ITemplate) => {
-	const fetchedProperties = ['modules', 'properties', 'config'];
+	const fetchedProperties: string[] = Object.values(TicketBaseKeys);
 	return fetchedProperties.some((prop) => Object.keys(template).includes(prop));
 };
 

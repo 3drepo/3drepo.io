@@ -15,9 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import RemoveCircle from '@mui/icons-material/RemoveCircle';
 import ReactDOM from 'react-dom';
-import { isV5 } from '@/v4/helpers/isV5';
 import { formatMessage } from '@/v5/services/intl';
 import BinIcon from '@assets/icons/outlined/delete-outlined.svg'
 import { FormattedMessage } from 'react-intl';
@@ -40,7 +38,7 @@ const JOBS_TABLE_CELLS = [{
 	searchBy: ['name'],
 	HeadingComponent: CellUserSearch
 }, {
-	name: isV5() ? formatMessage({ id: 'job.assignedColours', defaultMessage: 'Assigned Colours' }) : 'Colour',
+	name: formatMessage({ id: 'job.assignedColours', defaultMessage: 'Assigned Colours' }),
 	type: CELL_TYPES.COLOR,
 	HeadingProps: {
 		component: {
@@ -113,7 +111,7 @@ export class Jobs extends PureComponent<IProps, IState> {
 				},
 				{},
 				{
-					Icon: isV5() ? BinIcon : RemoveCircle,
+					Icon: BinIcon,
 					onClick: this.onRemove.bind(null, job._id)
 				}
 			];
@@ -147,14 +145,12 @@ export class Jobs extends PureComponent<IProps, IState> {
 			container={container}
 			key={this.state.panelKey}
 			render={this.renderNewJobFormPanel}
-			{...(isV5() ? {
-				Icon: () => (
-					<>
-						<AddCircleIcon />
-						<FormattedMessage id="newJob.panelButton" defaultMessage="New job" />
-					</>
-				)
-			} : {})}
+			Icon={() => (
+				<>
+					<AddCircleIcon />
+					<FormattedMessage id="newJob.panelButton" defaultMessage="New job" />
+				</>
+			)}
 		/>
 	)
 
@@ -190,23 +186,21 @@ export class Jobs extends PureComponent<IProps, IState> {
 					/>
 				</UserManagementTab>
 				{containerElement && this.renderNewJobForm(containerElement)}
-				{isV5() && (
-					<Panel
-						open={Boolean(panelBottomAnchorEl)}
-						anchorEl={panelBottomAnchorEl}
-						onClose={closeNewJobForm}
-						anchorOrigin={{
-							vertical: 'top',
-							horizontal: 'center',
-						}}
-						transformOrigin={{
-							vertical: 'center',
-							horizontal: 'center',
-						}}
-					>
-						{this.renderNewJobFormPanel({ closePanel: () => {} })}
-					</Panel>
-				)}
+				<Panel
+					open={Boolean(panelBottomAnchorEl)}
+					anchorEl={panelBottomAnchorEl}
+					onClose={closeNewJobForm}
+					anchorOrigin={{
+						vertical: 'top',
+						horizontal: 'center',
+					}}
+					transformOrigin={{
+						vertical: 'center',
+						horizontal: 'center',
+					}}
+				>
+					{this.renderNewJobFormPanel({ closePanel: () => {} })}
+				</Panel>
 			</Container>
 		);
 	}

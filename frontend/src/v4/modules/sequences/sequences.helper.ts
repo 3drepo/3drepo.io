@@ -22,7 +22,7 @@ import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds } from '../tree';
 
 export const getSelectedFrame = (frames, endingDate) => {
 	const index = getSelectedFrameIndex(frames, endingDate);
-	return index === null ? null : frames[index];
+	return frames[index];
 };
 
 export const getSelectedFrameIndex = (frames, endingDate) => {
@@ -47,11 +47,7 @@ export const getSelectedFrameIndex = (frames, endingDate) => {
 		return rightMargin;
 	}
 
-	if ( frames[leftMargin].dateTime <= endingDate) {
-		return leftMargin;
-	}
-
-	return null;
+	return leftMargin;
 };
 
 export const getDateByStep = (date, stepScale, step) => {
@@ -63,6 +59,9 @@ export const getDateByStep = (date, stepScale, step) => {
 			break;
 		case STEP_SCALE.DAY:
 			newDate.setDate(newDate.getDate() + step);
+			break;
+		case STEP_SCALE.WEEK:
+			newDate.setDate(newDate.getDate() + step * 7);
 			break;
 		case STEP_SCALE.MONTH:
 			newDate.setMonth(newDate.getMonth() + step);

@@ -19,8 +19,6 @@ import { useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { ProjectsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { isEmpty } from 'lodash';
 import AddCircleIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import ColoredGroupsIcon from '@assets/icons/outlined/boxes-outlined.svg';
 import HiddenGroupsIcon from '@assets/icons/outlined/boxes_disabled-outlined.svg';
@@ -37,9 +35,11 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 		indexedOverrides,
 		editGroup,
 		groupType,
+		highlightedIndex,
+		clearHighlightedIndex,
 	} = useContext(TicketGroupsContext);
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const overrides = TicketsCardHooksSelectors.selectTicketOverrides();
+	const hasClearedOverrides = TicketsCardHooksSelectors.selectTicketHasClearedOverrides();
 	const indexes = indexedOverrides.map(({ index }) => index);
 	const overridesCount = indexedOverrides.length;
 	const state = getCollectionState(indexes);
@@ -56,10 +56,12 @@ export const GroupsAccordion = ({ title }: GroupsAccordionProps) => {
 	};
 
 	useEffect(() => {
-		if (isEmpty(overrides) && isColored) {
-			TicketsCardActionsDispatchers.setOverrides(null);
+		if (!isColored || !hasClearedOverrides) return;
+		setCollectionIsChecked(indexes, false);
+		if (highlightedIndex >= 0) {
+			clearHighlightedIndex();
 		}
-	}, [overrides]);
+	}, [hasClearedOverrides]);
 
 	return (
 		<Accordion

@@ -17,6 +17,8 @@
 
 import { Checkbox as CheckboxBase } from '@mui/material';
 import styled from 'styled-components';
+import EyeDisabledIcon from '@assets/icons/outlined/eye_disabled-outlined.svg';
+
 
 export const Checkbox = styled(CheckboxBase)`
 	margin-left: auto;
@@ -27,4 +29,8 @@ export const EyeCheckbox = styled(Checkbox)`
 	&, &.Mui-checked {
 		color: ${({ theme }) => theme.palette.secondary.main};
 	}
+`;
+
+export const IndeterminateEye = styled(EyeDisabledIcon)`
+	color: ${({ theme }) => theme.palette.base.light};
 `;

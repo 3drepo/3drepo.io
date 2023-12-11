@@ -24,11 +24,10 @@ import { isEqual, isNil, keyBy, omit, uniqBy } from 'lodash';
 import Autosuggest from 'react-autosuggest';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import * as yup from 'yup';
-import { isV5 } from '@/v4/helpers/isV5';
 import { BACKSPACE, ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { compareStrings } from '../../../helpers/searching';
-import { formatShortDate } from '../../../services/formatting/formatDate';
+import { formatShortDateTime } from '../../../services/formatting/formatDate';
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { Filter } from '../fontAwesomeIcon';
 import { Highlight } from '../highlight/highlight.component';
@@ -74,6 +73,7 @@ interface IProps {
 	className?: string;
 	autoFocus?: boolean;
 	left?: boolean;
+	defaultFiltersCollapsed?: boolean;
 	onChange: (selectedFilters) => void;
 	onDataTypeChange?: (selectedDataTypes) => void;
 }
@@ -158,7 +158,7 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 		selectedDataTypes: [],
 		value: '',
 		suggestions: [],
-		filtersOpen: false,
+		filtersOpen: this.props.defaultFiltersCollapsed ?? false,
 		removableFilterIndex: null
 	};
 
@@ -175,37 +175,28 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 	));
 
 	public renderFiltersMenuButton = renderWhenTrue(() => {
-		const v5Props = {
-			PopoverProps: {
-				anchorOrigin: {
-					vertical: 'bottom',
-					horizontal: 'center',
-				},
-				transformOrigin: {
-					vertical: 'top',
-					horizontal: 'right',
-				},
-				sx: {
-					marginLeft: '-25px',
-					marginTop: '-15px',
-				}
+		const popoverProps = {
+			anchorOrigin: {
+				vertical: 'bottom',
+				horizontal: 'center',
+			},
+			transformOrigin: {
+				vertical: 'top',
+				horizontal: 'right',
+			},
+			sx: {
+				marginLeft: '-25px',
+				marginTop: '-15px',
 			}
 		};
-		const v4Props = {
-			PopoverProps: {
-				anchorOrigin: {
-					vertical: 'center',
-					horizontal: 'left',
-				},
-			},
-		};
+
 		return (
 			<ButtonContainer>
 				<ButtonMenu
 					renderButton={FilterButton}
 					renderContent={this.renderFiltersMenu}
 					PaperProps={{ style: { overflow: 'initial', boxShadow: 'none' } }}
-					{...(isV5() ? v5Props : v4Props)}
+					PopoverProps={popoverProps}
 					ButtonProps={{ disabled: false }}
 				/>
 			</ButtonContainer>
@@ -216,7 +207,7 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 		<Placeholder onClick={this.handlePlaceholderClick}>
 			<SearchIcon />
 			<PlaceholderText>
-				{isV5() ? 'Search...' : 'Search'}
+				Search...
 			</PlaceholderText>
 		</Placeholder>
 	));
@@ -265,14 +256,14 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 
 	public onSelectDateFilter = (dateFilter, child) => {
 		dateFilter.label = child.label;
-		dateFilter.value.label = formatShortDate(child.date);
+		dateFilter.value.label = formatShortDateTime(child.date);
 		const selectedFilterIndex = this.state.selectedFilters.findIndex((filter) => filter.value.value === child.value);
 
 		if (selectedFilterIndex > -1) {
 			this.setState((prevState) => {
 				const newFilters = [...prevState.selectedFilters];
 				newFilters[selectedFilterIndex].label = child.label;
-				newFilters[selectedFilterIndex].value.label = formatShortDate(child.date);
+				newFilters[selectedFilterIndex].value.label = formatShortDateTime(child.date);
 				newFilters[selectedFilterIndex].value.date = child.date;
 				return newFilters as any;
 			}, this.handleFiltersChange);

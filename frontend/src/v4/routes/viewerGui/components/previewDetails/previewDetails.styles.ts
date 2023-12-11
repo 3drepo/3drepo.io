@@ -28,7 +28,6 @@ import {
 
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { isV5 } from '@/v4/helpers/isV5';
 import {GROUP_PANEL_NAME} from '../../../../constants/groups';
 import { TextField as TextFieldBase } from '../../../components/textField/textField.component';
 
@@ -201,18 +200,7 @@ const expandedStyles = css`
 const unexpandedStyles  = css`
 	height: calc(100% - ${SUMMARY_HEIGHT}px);
 
-	${isV5()
-		? expandedStyles
-		: `
-			${NotCollapsableContent} {
-				height: calc(100% - 40px);
-			}
-
-			${MessageListContainer} {
-				height: calc(100% - 40px);
-			}
-		`
-	}
+	${expandedStyles}
 `;
 
 export const ScrollableContainer = styled.div`
@@ -226,7 +214,7 @@ export const ScrollableContainer = styled.div`
 export const TextField = styled(TextFieldBase)<{ mutable: boolean }>`
 	${({ mutable }) => mutable && css`
 		input {
-			max-width: calc(100% - ${isV5() ? 66 : 58}px);
+			max-width: calc(100% - 66px);
 		}
 	`}
 `;

@@ -49,7 +49,6 @@ import presentationSaga from './presentation/presentation.sagas';
 import risksSaga from './risks/risks.sagas';
 import sequencesSaga from './sequences/sequences.sagas';
 import starredSaga from './starred/starred.sagas';
-import startupSaga from './startup/startup.sagas';
 import teamspaceSaga from './teamspace/teamspace.sagas';
 import teamspacesSaga from './teamspaces/teamspaces.sagas';
 import treeSaga from './tree/tree.sagas';
@@ -57,13 +56,11 @@ import userManagementSaga from './userManagement/userManagement.sagas';
 import viewerSaga from './viewer/viewer.sagas';
 import viewerGuiSaga from './viewerGui/viewerGui.sagas';
 import viewpointsSaga from './viewpoints/viewpoints.sagas';
-import { sagaMiddleware } from './store';
 
 // <-- IMPORT MODULE SAGA -->
 
 export default function* rootSaga() {
 	yield all([
-		fork(startupSaga),
 		fork(currentUserSaga),
 		fork(userManagementSaga),
 		fork(jobsSaga),

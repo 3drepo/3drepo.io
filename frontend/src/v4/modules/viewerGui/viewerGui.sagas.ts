@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { goBack, push } from 'connected-react-router';
@@ -62,14 +61,10 @@ function* fetchData({ teamspace, model }) {
 		yield put(ModelActions.fetchSettingsSuccess(settings));
 		yield put(ModelActions.setPendingState(false));
 	} catch (error) {
-		if (isV5()) {
-			yield put(DialogsActions.open('alert', {
-				currentActions: formatMessage({ id: 'viewer.error.resource', defaultMessage: 'trying to fetch resource' }),
-				error,
-			}));
-		} else {
-			yield put(DialogActions.showRedirectToTeamspaceDialog(error, teamspace));
-		}
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'viewer.error.resource', defaultMessage: 'trying to fetch resource' }),
+			error,
+		}));
 		return;
 	}
 
@@ -203,34 +198,6 @@ function* stopListenOnClickPin() {
 	}
 }
 
-const updateClipStateCallback = (clipNumber) => {
-	dispatch(ViewerGuiActions.updateClipState(clipNumber));
-};
-
-function* initialiseToolbar() {
-	try {
-		yield put(ViewerGuiActions.startListenOnNumClip());
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('initialise', 'toolbar', error));
-	}
-}
-
-function* startListenOnNumClip() {
-	try {
-		Viewer.on(VIEWER_EVENTS.UPDATE_NUM_CLIP, updateClipStateCallback);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('start listen on', 'num clip', error));
-	}
-}
-
-function* stopListenOnNumClip() {
-	try {
-		Viewer.off(VIEWER_EVENTS.UPDATE_NUM_CLIP, updateClipStateCallback);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('stop listen on', 'num clip', error));
-	}
-}
-
 function* updateClipState({clipNumber}) {
 	try {
 		const isClipEdit = yield select(selectIsClipEdit);
@@ -281,12 +248,10 @@ function* setNavigationMode({mode}) {
 	}
 }
 
-function* resetHelicopterSpeed({teamspace, modelId, updateDefaultSpeed}) {
+function* resetHelicopterSpeed({teamspace, modelId }) {
 	try {
 		yield Viewer.helicopterSpeedReset();
-		if (updateDefaultSpeed) {
-			yield API.editHelicopterSpeed(teamspace, modelId, INITIAL_HELICOPTER_SPEED);
-		}
+		yield API.editHelicopterSpeed(teamspace, modelId, INITIAL_HELICOPTER_SPEED);
 		yield put(ViewerGuiActions.setHelicopterSpeed(INITIAL_HELICOPTER_SPEED));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'helicopter speed', error));
@@ -384,7 +349,7 @@ function* setCamera({ params }) {
 }
 
 function* loadModel() {
-	const { teamspace, model, v5 } = yield select(selectUrlParams);
+	const { teamspace, model } = yield select(selectUrlParams);
 
 	try {
 		yield Viewer.isViewerReady();
@@ -401,18 +366,14 @@ function* loadModel() {
 		}
 
 	} catch (error) {
-		const content = 'The model was either not found, failed to load correctly ' +
-			'or you are not authorized to view it. ' +
-			' You will now be redirected to the teamspace page.';
-		yield put(DialogActions.showDialog({ title: 'Model Error', content }));
-
-		if (v5) {
-			if (matchPath(location.pathname, { path: ROUTES.V5_MODEL_VIEWER })) {
-				yield put(goBack());
-			}
-			return;
-		}
-		yield put(push(ROUTES.TEAMSPACES));
+		const content = formatMessage({
+				id: 'viewerGui.loadModel.error.content',
+				defaultMessage: 'The model was either not found, failed to load correctly ' +
+					'or you are not authorized to view it. ' +
+					' You will now be redirected to the previous page.'
+			})
+		yield put(DialogActions.showDialog({ title: formatMessage({id: 'viewerGui.loadModel.error.title', defaultMessage: 'Model Error'}), content }));
+		yield put(goBack());
 	}
 }
 
@@ -437,7 +398,6 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.START_LISTEN_ON_CLICK_PIN, startListenOnClickPin);
 	yield takeLatest(ViewerGuiTypes.STOP_LISTEN_ON_CLICK_PIN, stopListenOnClickPin);
 	yield takeLatest(ViewerGuiTypes.HANDLE_PIN_CLICK, handlePinClick);
-	yield takeLatest(ViewerGuiTypes.INITIALISE_TOOLBAR, initialiseToolbar);
 	yield takeLatest(ViewerGuiTypes.SET_NAVIGATION_MODE, setNavigationMode);
 	yield takeLatest(ViewerGuiTypes.RESET_HELICOPTER_SPEED, resetHelicopterSpeed);
 	yield takeLatest(ViewerGuiTypes.GET_HELICOPTER_SPEED, getHelicopterSpeed);
@@ -447,8 +407,6 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.SET_CLIPPING_MODE, setClippingMode);
 	yield takeLatest(ViewerGuiTypes.UPDATE_CLIP_STATE, updateClipState);
 	yield takeLatest(ViewerGuiTypes.SET_CLIP_EDIT, setClipEdit);
-	yield takeLatest(ViewerGuiTypes.START_LISTEN_ON_NUM_CLIP, startListenOnNumClip);
-	yield takeLatest(ViewerGuiTypes.STOP_LISTEN_ON_NUM_CLIP, stopListenOnNumClip);
 	yield takeLatest(ViewerGuiTypes.CLEAR_HIGHLIGHTS, clearHighlights);
 	yield takeLatest(ViewerGuiTypes.SET_CAMERA, setCamera);
 	yield takeLatest(ViewerGuiTypes.SET_PROJECTION_MODE, setProjectionMode);

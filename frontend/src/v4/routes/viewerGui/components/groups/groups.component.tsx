@@ -308,8 +308,13 @@ export class Groups extends PureComponent<IProps, IState> {
 				return true;
 			}
 
-			// disable options that needs at least one group when there are none
-			return !this.props.groups.length && [GROUPS_ACTIONS_ITEMS.DELETE_ALL, GROUPS_ACTIONS_ITEMS.EXPORT].includes(name);
+			const optionsToDisableWhenGroupsIsEmpty = [
+				GROUPS_ACTIONS_ITEMS.DELETE_ALL,
+				GROUPS_ACTIONS_ITEMS.EXPORT,
+				GROUPS_ACTIONS_ITEMS.OVERRIDE_ALL,
+				GROUPS_ACTIONS_ITEMS.DOWNLOAD,
+			]
+			return !this.props.groups.length && optionsToDisableWhenGroupsIsEmpty.includes(name);
 		}
 		return (
 			<MenuList>

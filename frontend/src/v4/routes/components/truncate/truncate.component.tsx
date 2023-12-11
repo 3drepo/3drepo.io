@@ -25,23 +25,19 @@ import { Container } from './truncate.styles';
 interface IProps {
 	className?: string;
 	children: string | ReactNode;
-	lines: number | boolean;
+	lines: number;
 	ellipsis?: string | ReactNode;
 	trimWhitespace?: boolean;
 	width?: number;
 	onTruncate?: () => void;
 }
 
-export const Truncate = memo((props: IProps) => {
-	const { children, ...truncateProps } = props;
-
-	return (
-		<Container className={props.className}>
-			<Tooltip title={children}>
-				<Box>
-					<TruncateBase {...truncateProps}>{children}</TruncateBase>
-				</Box>
-			</Tooltip>
-		</Container>
-	);
-});
+export const Truncate = memo(({ children, className, ...props }: IProps) => (
+	<Container className={className}>
+		<Tooltip title={children}>
+			<Box>
+				<TruncateBase {...props}>{children}</TruncateBase>
+			</Box>
+		</Tooltip>
+	</Container>
+));

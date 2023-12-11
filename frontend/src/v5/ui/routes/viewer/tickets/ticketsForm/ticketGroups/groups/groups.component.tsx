@@ -25,7 +25,7 @@ import { TreeActions } from '@/v4/modules/tree';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import ShowIcon from '@assets/icons/outlined/eye-outlined.svg';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ErrorTicketButton, PrimaryTicketButton } from '@/v5/ui/routes/viewer/tickets/ticketButton/ticketButton.styles';
+import { TicketButton } from '@/v5/ui/routes/viewer/tickets/ticketButton/ticketButton.styles';
 import { useContext } from 'react';
 import {
 	CollectionHeadline,
@@ -83,13 +83,13 @@ const GroupCollection = ({ overrides, prefix, level }) => {
 					</CollectionHeadline>
 					<Buttons>
 						{isAdmin && (
-							<ErrorTicketButton onClick={handleDeleteCollection}>
+							<TicketButton variant="error" onClick={handleDeleteCollection}>
 								<DeleteIcon />
-							</ErrorTicketButton>
+							</TicketButton>
 						)}
-						<PrimaryTicketButton onClick={isolateCollection}>
+						<TicketButton variant="primary" onClick={isolateCollection}>
 							<ShowIcon />
-						</PrimaryTicketButton>
+						</TicketButton>
 					</Buttons>
 					<GroupToggle
 						onClick={handleCheckboxClick}

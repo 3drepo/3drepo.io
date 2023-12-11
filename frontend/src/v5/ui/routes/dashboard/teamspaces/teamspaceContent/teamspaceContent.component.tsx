@@ -20,6 +20,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { Route } from '@/v5/services/routing/route.component';
 import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { discardSlash } from '@/v5/helpers/url.helper';
+import { useEffect } from 'react';
+import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ProjectsList } from '../projects/projectsList.component';
 import { TeamspaceSettings } from '../settings/teamspaceSettings.component';
 import { UsersList } from '../users/usersList.component';
@@ -28,6 +30,8 @@ import { Jobs } from '../jobs/jobs.component';
 export const TeamspaceContent = () => {
 	let { path } = useRouteMatch();
 	path = discardSlash(path);
+
+	useEffect(() => { ProjectsActionsDispatchers.setCurrentProject(''); }, []);
 
 	return (
 		<Switch>

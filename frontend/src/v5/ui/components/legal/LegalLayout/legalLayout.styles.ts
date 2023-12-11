@@ -132,9 +132,9 @@ export const PaperTitle = styled.div`
 `;
 
 export const SupportEmail = styled.a.attrs({
-	href: 'mailto:support@3drepo.org',
+	href: 'mailto:support@3drepo.com',
 })`
 	::after {
-		content: 'support@3drepo.org';
+		content: 'support@3drepo.com';
 	}
 `;

@@ -27,35 +27,26 @@ export const Headers = styled.div`
 	width: min(90vw, 1289px);
 `;
 
-export const IconContainer = styled.div<{ $flip?: boolean, $hidden: boolean }>`
+export const IconContainer = styled.div<{ $flip?: boolean }>`
 	animation: all .2s;
-
-	svg {
-		margin-bottom: -1px;
-	}
+	display: inline-flex;
+	margin-right: 5px;
 
 	${({ $flip }) => $flip && css`
 		transform: rotate(180deg);
 	`}
-
-	${({ $hidden }) => $hidden && css`
-		display: none;
-	`}
 `;
 
-export const Header = styled(FixedOrGrowContainer)<{ hidden?: boolean, $selected: boolean, $selectable: boolean }>`
+export const Header = styled(FixedOrGrowContainer)<{ $selectable: boolean }>`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
-	display: flex;
-	flex-direction: row;
 	padding-left: 10px;
 	text-align: start;
 	box-sizing: border-box;
 	user-select: none;
-
-	${({ $selected }) => $selected && css`
-		gap: 5px;
-	`}
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 
 	${({ $selectable }) => $selectable && css`
 		cursor: pointer;
@@ -66,10 +57,6 @@ export const Header = styled(FixedOrGrowContainer)<{ hidden?: boolean, $selected
 	` : css`
 		flex: 1;
 		min-width: 300px;
-	`}
-
-	${({ hidden }) => hidden && css`
-		display: none;
 	`}
 `;
 

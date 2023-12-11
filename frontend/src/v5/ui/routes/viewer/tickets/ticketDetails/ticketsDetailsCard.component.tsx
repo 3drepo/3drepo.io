@@ -18,7 +18,7 @@
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
 import { useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { findEditedGroup, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
@@ -41,7 +41,7 @@ export const TicketDetailsCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
 	const [, setTicketId] = useSearchParam('ticketId');
 	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
-
+	const treeNodesList = TreeHooksSelectors.selectTreeNodesList();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
@@ -68,7 +68,9 @@ export const TicketDetailsCard = () => {
 		defaultValues: ticket,
 	});
 
-	const onBlurHandler = () => {
+	// There seems to be some sort of race condition in react-hook-form
+	// so onBlur can't be called immediately after onChange because the validation won't be there.
+	const onBlurHandler = () => setTimeout(() => {
 		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
 		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, formData.formState.errors)));
 
@@ -87,9 +89,10 @@ export const TicketDetailsCard = () => {
 		sanitizeViewVals(validVals, ticket, template);
 		if (isEmpty(validVals)) return;
 		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticket._id, validVals, isFederation);
-	};
+	}, 200);
 
 	useEffect(() => {
+		if (!ticket?._id) return;
 		if (!templateAlreadyFetched(template)) {
 			TicketsActionsDispatchers.fetchTemplate(
 				teamspace,
@@ -102,20 +105,20 @@ export const TicketDetailsCard = () => {
 		TicketsActionsDispatchers.fetchTicket(teamspace, project, containerOrFederation, ticket._id, isFederation);
 		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
 		setTicketId(ticket._id);
-	}, [ticket._id]);
+	}, [ticket?._id]);
 
 	useEffect(() => {
 		formData.reset(ticket);
 	}, [JSON.stringify(ticket)]);
 
 	useEffect(() => {
-		if (view === TicketDetailsView.Groups || isEmpty(defaultView)) return;
+		if (view === TicketDetailsView.Groups) return;
 		goToView(defaultView);
-	}, [JSON.stringify(defaultView?.camera)]);
+	}, [ticket._id, treeNodesList, JSON.stringify(defaultView?.camera)]);
 
 	useEffect(() => {
-		if (view === TicketDetailsView.Groups || isEmpty(defaultView)) return;
-		const { state } = defaultView;
+		if (view === TicketDetailsView.Groups) return;
+		const { state } = defaultView || {};
 		goToView({ state });
 	}, [JSON.stringify(defaultView?.state)]);
 
@@ -123,7 +126,7 @@ export const TicketDetailsCard = () => {
 		setTicketId();
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
 	}, []);
-
+	if (!ticket) return null;
 	return (
 		<CardContainer>
 			<FormProvider {...formData}>

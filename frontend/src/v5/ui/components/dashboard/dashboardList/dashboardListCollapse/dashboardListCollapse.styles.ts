@@ -29,7 +29,7 @@ export const ButtonContainer = styled.div`
 	display: flex;
 	align-items: center;
 	cursor: pointer;
-	width: max-content;
+	width: 100%;
 	user-select: none;
 `;
 
@@ -40,6 +40,9 @@ export const ChevronButton = styled(ChevronButtonBase)`
 export const Title = styled(Typography)`
 	white-space: nowrap;
 	margin-right: 10px;
+	display: inline-flex;
+	align-items: center;
+	width: calc(100% - 38px);
 `;
 
 export const CollapsedItemContainer = styled.div`
@@ -49,4 +52,7 @@ export const CollapsedItemContainer = styled.div`
 export const ControlsContainer = styled.div`
 	display: flex;
 	justify-content: space-between;
+	overflow: hidden;
+	width: 100%;
 `;
+

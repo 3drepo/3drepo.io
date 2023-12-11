@@ -64,6 +64,7 @@ export const Autocomplete = styled(BaseAutocomplete)`
 			}
 			.MuiAutocomplete-endAdornment {
 				margin: 0 0 0 auto;
+				line-height: initial;
 				svg {
 					color: ${({ theme }) => theme.palette.base.main};
 					height: 10px;

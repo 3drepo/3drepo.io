@@ -15,15 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { COL_NAME } = require('../../../../../../src/v5/models/projectSettings.constants');
 const { src } = require('../../../../helper/path');
 const { generateRandomString } = require('../../../../helper/services');
 
 jest.mock('../../../../../../src/v5/models/projectSettings');
 const ProjectsModel = require(`${src}/models/projectSettings`);
+
+jest.mock('../../../../../../src/v5/services/filesManager');
+const FilesManager = require(`${src}/services/filesManager`);
+
 jest.mock('../../../../../../src/v5/models/tickets.templates');
 const TemplatesModel = require(`${src}/models/tickets.templates`);
+
 jest.mock('../../../../../../src/v5/utils/helper/models');
 const ModelHelper = require(`${src}/utils/helper/models`);
+
 const Projects = require(`${src}/processors/teamspaces/projects`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 
@@ -144,15 +151,113 @@ const testGetAllTemplates = () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const showDeprecated = false;
+			const getDetails = false;
 
 			const expectedOutput = [generateRandomString(), generateRandomString(), generateRandomString()];
 			TemplatesModel.getAllTemplates.mockResolvedValueOnce(expectedOutput);
 
-			await expect(Projects.getAllTemplates(teamspace, project, showDeprecated)).resolves.toEqual(expectedOutput);
+			await expect(Projects.getAllTemplates(teamspace, project, getDetails, showDeprecated))
+				.resolves.toEqual(expectedOutput);
 
 			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledTimes(1);
 			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, showDeprecated,
 				{ name: 1, code: 1, deprecated: 1 });
+		});
+
+		test('should return all templates available for the project (get details)', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const showDeprecated = false;
+			const getDetails = true;
+
+			const expectedOutput = [generateRandomString(), generateRandomString(), generateRandomString()];
+			TemplatesModel.getAllTemplates.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Projects.getAllTemplates(teamspace, project, getDetails, showDeprecated))
+				.resolves.toEqual(expectedOutput);
+
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, showDeprecated, undefined);
+		});
+	});
+};
+
+const testGetImage = () => {
+	describe('Get image', () => {
+		test('Should get image', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const stream = generateRandomString();
+			FilesManager.getFile.mockResolvedValueOnce(stream);
+
+			const result = await Projects.getImage(teamspace, project);
+
+			expect(result).toEqual(stream);
+			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFile).toHaveBeenCalledWith(teamspace, COL_NAME, project);
+		});
+
+		test('should return whatever error is thrown from FilesManager', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const error = new Error(generateRandomString());
+			FilesManager.getFile.mockRejectedValueOnce(error);
+
+			await expect(Projects.getImage(teamspace, project)).rejects.toEqual(error);
+			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFile).toHaveBeenCalledWith(teamspace, COL_NAME, project);
+		});
+	});
+};
+
+const testUpdateImage = () => {
+	describe('Update image', () => {
+		test('should update image', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const stream = generateRandomString();
+
+			await Projects.updateImage(teamspace, project, stream);
+
+			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, COL_NAME, project, stream);
+		});
+
+		test('should return whatever error is thrown from FilesManager', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const stream = generateRandomString();
+			const error = new Error(generateRandomString());
+			FilesManager.storeFile.mockRejectedValueOnce(error);
+
+			await expect(Projects.updateImage(teamspace, project, stream)).rejects.toEqual(error);
+			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, COL_NAME, project, stream);
+		});
+	});
+};
+
+const testDeleteImage = () => {
+	describe('Delete image', () => {
+		test('should delete image', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+
+			await Projects.deleteImage(teamspace, project);
+
+			expect(FilesManager.removeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFile).toHaveBeenCalledWith(teamspace, COL_NAME, project);
+		});
+
+		test('should return whatever error is thrown from FilesManager', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const error = new Error(generateRandomString());
+			FilesManager.removeFile.mockRejectedValueOnce(error);
+
+			await expect(Projects.deleteImage(teamspace, project)).rejects.toEqual(error);
+			expect(FilesManager.removeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFile).toHaveBeenCalledWith(teamspace, COL_NAME, project);
 		});
 	});
 };
@@ -163,4 +268,7 @@ describe('processors/teamspaces/projects', () => {
 	testCreateProject();
 	testGetProjectSettings();
 	testGetAllTemplates();
+	testGetImage();
+	testUpdateImage();
+	testDeleteImage();
 });

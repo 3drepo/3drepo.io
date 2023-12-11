@@ -21,7 +21,6 @@ import { Grid, IconButton, Input } from '@mui/material';
 import Slider from '@mui/material/Slider';
 import DotIcon from '@mui/icons-material/FiberManualRecord';
 import PlayIcon from '@assets/icons/filled/play-filled.svg';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import {
 	VIEWER_PANELS,
@@ -45,7 +44,7 @@ export const SequencesContainer = styled(ViewerPanel).attrs({
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.SEQUENCES]}px;
 `;
 
-export const SequenceItemIcon =  styled(isV5() ? PlayIcon : SequencesIcon)`
+export const SequenceItemIcon =  styled(PlayIcon)`
 	&& {
 		font-size: 67px;
 		margin-right: 13px;
@@ -67,6 +66,18 @@ export const SequenceTasksListContainer = styled(ViewerPanelContent)`
 	background-color: ${COLOR.BLACK_6};
 	font-size: 13px;
 	color: ${COLOR.BLACK_60};
+`;
+
+export const SetToCurrentDateButton = styled.span`
+	&&, &&:hover {
+		cursor: pointer;
+		text-decoration: underline;
+		height: fit-content;
+		font-size: 10px;
+		font-weight: 600;
+		margin-left: 3px;
+		color: ${({ theme }) => theme.palette.secondary.main};
+	}
 `;
 
 export const TaskListLabel = styled.div`
@@ -137,7 +148,7 @@ export const SequenceRow = styled(Grid).attrs({
 	container: true,
 	direction: 'row',
 	justify: 'flex-start',
-	alignItems: 'center',
+	alignItems: 'flex-start',
 	item: true
 })`
 	&& {
@@ -145,9 +156,16 @@ export const SequenceRow = styled(Grid).attrs({
 	}
 `;
 
+export const FlexCol = styled.div`
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+`;
+
 export const SliderRow = styled(SequenceRow)`
 	&& {
 		margin-left: -24px;
+		align-items: center;
 	}
 `;
 

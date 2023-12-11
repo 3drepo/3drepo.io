@@ -21,7 +21,6 @@ import Popper from '@mui/material/Popper';
 import TextField from '@mui/material/TextField';
 import Copy from '@mui/icons-material/FileCopy';
 import styled, { css } from 'styled-components';
-import { isV5 } from '@/v4/helpers/isV5';
 import { COLOR } from './../../../styles/colors';
 
 interface IContainer {
@@ -50,7 +49,7 @@ export const Container = styled.div<IContainer>`
 	height: ${(props) => props.filtersOpen ? '45px' : 'auto'};
 	flex: none;
 	
-	${(props) => isV5() && props.filtersOpen && 'height: 57px;'}
+	${(props) => props.filtersOpen && 'height: 57px;'}
 `;
 
 export const Chips = styled.div<IChips>`
@@ -65,8 +64,8 @@ export const Chips = styled.div<IChips>`
 
 export const FiltersContainer = styled.div<{ empty: boolean }>`
 	max-height: 240px;
-	min-height: ${({ empty }) => empty ? 0 : 45}px;
-	overflow: hidden ${isV5() ? 'overlay' : 'auto'};
+	min-height: ${({ empty }) => empty ? 0 : 57}px;
+	overflow: hidden overlay;
 `;
 
 export const SelectedFilters = styled.div<ISelectedFilters>`
@@ -80,19 +79,12 @@ export const SelectedFilters = styled.div<ISelectedFilters>`
 		padding: ${(props) => props.empty ? '0 40px 0 8px' : '4px 40px 0 8px'};
 	}
 
-	${({ theme, empty, filtersOpen}) => isV5() && css`
-		${!empty && css`
-			border-bottom: solid 1px ${theme.palette.base.lightest};
-			${Chips} {
-				padding: 9px 40px 9px 15px;
-			}
-		`}
+	${({ theme, empty}) =>  !empty && css`
+		border-bottom: solid 1px ${theme.palette.base.lightest};
 
-		${!empty && filtersOpen && css`
-			& .MuiChip-root {
-				margin-bottom: 11px !important;
-			}
-		`}
+		${Chips} {
+			padding: 9px 40px 9px 15px;
+		}
 	`}
 `;
 
@@ -152,7 +144,7 @@ export const SuggestionsList = styled(Popper)`
 
 export const SuggestionsScrollArea = styled.div`
 	max-height: 250px;
-	overflow: ${isV5() ? 'overlay' : 'auto'};
+	overflow: 'overlay';
 
 	.react-autosuggest__suggestions-list {
 		max-height: unset;

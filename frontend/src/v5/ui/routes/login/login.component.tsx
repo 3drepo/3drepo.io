@@ -60,6 +60,7 @@ export const Login = () => {
 			'INCORRECT_USERNAME_OR_PASSWORD',
 			'ALREADY_LOGGED_IN',
 			'TOO_MANY_LOGIN_ATTEMPTS',
+			'USER_NOT_VERIFIED',
 		].includes(err.response?.data?.code)
 	);
 

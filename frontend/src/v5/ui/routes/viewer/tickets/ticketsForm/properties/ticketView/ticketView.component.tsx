@@ -21,7 +21,7 @@ import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { isEmpty } from 'lodash';
+import { cloneDeep, isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 import { FormHelperText } from '@mui/material';
@@ -32,7 +32,7 @@ import { getViewerState, goToView } from '@/v5/helpers/viewpoint.helpers';
 import { TicketContext, TicketDetailsView } from '../../../ticket.context';
 import { TicketImageContent } from '../ticketImageContent/ticketImageContent.component';
 import { TicketImageActionMenu } from '../ticketImageContent/ticketImageActionMenu.component';
-import { PrimaryTicketButton } from '../../../ticketButton/ticketButton.styles';
+import { TicketButton } from '../../../ticketButton/ticketButton.styles';
 import { Header, HeaderSection, Label, Tooltip } from './ticketView.styles';
 import { CameraActionMenu } from './viewActionMenu/menus/cameraActionMenu.component';
 import { GroupsActionMenu } from './viewActionMenu/menus/groupsActionMenu.component';
@@ -96,11 +96,13 @@ export const TicketView = ({
 
 	// State
 	const onDeleteGroups = () => {
-		const { state, ...view } = value || {};
-		onChange?.(isEmpty(view) ? null : view);
+		const { state, ...view } = cloneDeep(value || {});
+		state.colored = [];
+		state.hidden = [];
+		onChange?.({ state, ...view });
 	};
 
-	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
+	useEffect(() => onBlur?.(), [value]);
 
 	const onGroupsClick = () => {
 		setDetailViewAndProps(TicketDetailsView.Groups, props);
@@ -118,17 +120,17 @@ export const TicketView = ({
 					{!hasViewpoint ? (
 						<Tooltip title={(formatMessage({ id: 'viewer.card.button.saveCurrentView', defaultMessage: 'Save current view' }))}>
 							<div hidden={disabled}>
-								<PrimaryTicketButton onClick={updateViewpoint}>
+								<TicketButton variant="primary" onClick={updateViewpoint}>
 									<TickIcon />
-								</PrimaryTicketButton>
+								</TicketButton>
 							</div>
 						</Tooltip>
 					) : (
 						<Tooltip title={(formatMessage({ id: 'viewer.card.button.gotToView', defaultMessage: 'Go to view' }))}>
 							<div>
-								<PrimaryTicketButton onClick={goToViewpoint}>
+								<TicketButton variant="primary" onClick={goToViewpoint}>
 									<ViewpointIcon />
-								</PrimaryTicketButton>
+								</TicketButton>
 							</div>
 						</Tooltip>
 					)}
