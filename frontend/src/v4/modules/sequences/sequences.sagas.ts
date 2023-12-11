@@ -251,7 +251,7 @@ export function* showSequenceDate({ date }) {
 		yield take(SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS);
 	}
 
-	// 4 - bond date by sequence start/end date
+	// 4 - bound date by sequence start/end date
 	const { startDate, endDate } = yield select(selectSelectedSequence);
 
 	const dateToSelect = getDateWithinBoundaries(date, new Date(startDate), new Date(endDate));
