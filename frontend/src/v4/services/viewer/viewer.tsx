@@ -19,7 +19,6 @@ import EventEmitter from 'eventemitter3';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { isEmpty, isString } from 'lodash';
-import { getUseBetaViewer } from '@/v4/modules/viewer/betaViewer.helpers';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -97,7 +96,7 @@ export class ViewerService {
 	public setupInstance = async (container, onError) => {
 		this.element = container;
 
-		UnityUtil.init(onError, this.onUnityProgress, this.onModelProgress, getUseBetaViewer());
+		UnityUtil.init(onError, this.onUnityProgress, this.onModelProgress);
 		UnityUtil.hideProgressBar();
 
 		const unityHolder = document.createElement('canvas');
