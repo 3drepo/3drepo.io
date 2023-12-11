@@ -47,10 +47,10 @@ const testGetTicketGroupById = () => {
 		const group = generateRandomString();
 
 		test('[Normal group] should return the group found', async () => {
-			const expectedData = generateRandomObject();
+			const expectedData = { ...generateRandomObject(), objects: [{ _ids: [generateRandomString()] }] };
 			GroupsModel.getGroupById.mockResolvedValueOnce(expectedData);
 
-			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group))
+			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group, undefined, true))
 				.resolves.toEqual(expectedData);
 
 			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
@@ -79,7 +79,7 @@ const testGetTicketGroupById = () => {
 				_ids: nodeRes.map(({ _id }) => _id),
 			}];
 
-			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group))
+			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group, undefined, true))
 				.resolves.toEqual(expectedData);
 
 			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
@@ -123,7 +123,7 @@ const testGetTicketGroupById = () => {
 				_ids: nodeRes.map(({ _id }) => _id),
 			}];
 
-			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group, [container]))
+			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group, [container], true))
 				.resolves.toEqual(expectedData);
 
 			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
@@ -152,7 +152,7 @@ const testGetTicketGroupById = () => {
 			const expectedData = cloneDeep(groupData);
 			expectedData.objects = [];
 
-			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group, [container]))
+			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group, [container], true))
 				.resolves.toEqual(expectedData);
 
 			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
@@ -189,7 +189,7 @@ const testGetTicketGroupById = () => {
 				_ids: nodeRes.slice(0, 5).map(({ _id }) => _id),
 			}];
 
-			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group))
+			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group, undefined, true))
 				.resolves.toEqual(expectedData);
 
 			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
@@ -230,7 +230,7 @@ const testGetTicketGroupById = () => {
 				_ids: nodeRes.slice(1, 5).map(({ _id }) => _id),
 			}];
 
-			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group))
+			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group, undefined, true))
 				.resolves.toEqual(expectedData);
 
 			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
@@ -258,7 +258,7 @@ const testGetTicketGroupById = () => {
 			const expectedData = cloneDeep(groupData);
 			expectedData.objects = [];
 
-			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group))
+			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group, undefined, true))
 				.resolves.toEqual(expectedData);
 
 			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);

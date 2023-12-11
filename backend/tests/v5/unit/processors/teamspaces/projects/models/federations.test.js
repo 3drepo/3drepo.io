@@ -340,7 +340,7 @@ const testGetTicketGroupById = () => {
 			const expectedData = generateRandomObject();
 			const fn = jest.spyOn(TicketGroup, 'getTicketGroupById').mockResolvedValueOnce(expectedData);
 
-			await expect(Federations.getTicketGroupById(teamspace, projectId, federation, revId, ticket, groupId))
+			await expect(Federations.getTicketGroupById(teamspace, projectId, federation, revId, ticket, groupId, true))
 				.resolves.toEqual(expectedData);
 
 			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
@@ -348,7 +348,7 @@ const testGetTicketGroupById = () => {
 				{ subModels: 1 });
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, containers);
+			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, containers, true);
 		});
 
 		test('Should retrieve containers then call the general getTicketGroupById even if there\'s no containers', async () => {
@@ -357,15 +357,15 @@ const testGetTicketGroupById = () => {
 			const expectedData = generateRandomObject();
 			const fn = jest.spyOn(TicketGroup, 'getTicketGroupById').mockResolvedValueOnce(expectedData);
 
-			await expect(Federations.getTicketGroupById(teamspace, projectId, federation, revId, ticket, groupId))
-				.resolves.toEqual(expectedData);
+			await expect(Federations.getTicketGroupById(teamspace, projectId, federation, revId, ticket,
+				groupId, false)).resolves.toEqual(expectedData);
 
 			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federation,
 				{ subModels: 1 });
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, undefined);
+			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, undefined, false);
 		});
 	});
 };

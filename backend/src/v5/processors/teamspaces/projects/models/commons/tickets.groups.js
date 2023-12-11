@@ -18,19 +18,24 @@
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
-const { getMetadataByRules, getMetadataByValues, sharedIdsToExternalIds } = require('../../../../../models/metadata');
+const { getMetadataByQuery, getMetadataByRules } = require('../../../../../models/metadata');
 const { getNodesByByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { getFile } = require('../../../../../services/filesManager');
 const { getLatestRevision } = require('../../../../../models/revisions');
 
 const TicketGroups = {};
 
+const externalIdNamesToKeys = {
+	ifc_guids: ['IFC GUID', 'Ifc::IfcGUID', 'Element::IfcGUID'],
+	revit_ids: ['Element ID', 'Element ID::Value'],
+};
+
 const getIdToMeshesMapping = async (teamspace, model, revId) => {
 	const fileData = await getFile(teamspace, `${model}.stash.json_mpc`, `${UUIDToString(revId)}/idToMeshes.json`);
 	return JSON.parse(fileData);
 };
 
-const getObjectArrayFromRules = async (teamspace, project, model, revId, rules) => {
+const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, convertTo3DRepoGuids) => {
 	let revision = revId;
 	if (!revision) {
 		try {
@@ -41,14 +46,35 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules) 
 		}
 	}
 
-	const [
-		{ matched, unwanted },
-		idToMeshes,
-	] = await Promise.all([
-		getMetadataByRules(teamspace, project, model, revision, rules, { parents: 1 }),
-		getIdToMeshesMapping(teamspace, model, revision),
-	]);
+	const projection = { parents: 1,
+		...(convertTo3DRepoGuids ? {} : { metadata: {
+			$elemMatch: { $or: Object.values(externalIdNamesToKeys).flat().map((n) => ({ key: n })) } } }) };
 
+	const { matched, unwanted } = await getMetadataByRules(teamspace, project, model, revision, rules, projection);
+
+	if (!convertTo3DRepoGuids && matched.some((m) => m.metadata)) {
+		const wantedIds = [...new Set(matched.map(({ metadata }) => metadata[0].value))];
+		const unwantedIds = [...new Set(unwanted.map(({ metadata }) => metadata[0].value))];
+
+		const metaKeys = matched.map(({ metadata }) => metadata).flat().map(({ key }) => key);
+		let externalIdName;
+
+		Object.keys(externalIdNamesToKeys).forEach((name) => {
+			if (metaKeys.some((m) => externalIdNamesToKeys[name].includes(m))) {
+				externalIdName = name;
+			}
+		});
+
+		unwantedIds.forEach((id) => {
+			if (wantedIds[id]) {
+				delete wantedIds[id];
+			}
+		});
+
+		return { container: model, [externalIdName]: wantedIds };
+	}
+
+	const idToMeshes = await getIdToMeshesMapping(teamspace, model, revision);
 	const [
 		matchedNodes,
 		unwantedNodes,
@@ -82,30 +108,31 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules) 
 
 const convert3dRepoGuidsToExternalIds = async (teamspace, project, objects) => {
 	const convertedObjects = await Promise.all(objects.map(async (obj) => {
+		if (!obj._ids) {
+			return obj;
+		}
+
 		const convertedObject = { ...obj };
 
-		if (obj._ids) {
-			let externalIds;
-			let externalIdsName;
+		const shared_ids = await getNodesByByIds(teamspace, project, obj.container, obj._ids,
+			{ _id: 0, shared_id: 1 });
 
-			let shared_ids = await getNodesByByIds(teamspace, project, obj.container, obj._ids,
-				{ _id: 0, shared_id: 1 });
-			shared_ids = shared_ids.map((s) => s.shared_id);
+		const convertIds = async (externalIdName) => {
+			const externalIdKeys = externalIdNamesToKeys[externalIdName];
+			const query = { parents: { $in: shared_ids.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
+			const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
 
-			externalIds = await sharedIdsToExternalIds(teamspace, obj.container, shared_ids, 'IFC GUID');
-			if (externalIds?.length) {
-				externalIdsName = 'ifc_guids';
-			} else {
-				externalIds = await sharedIdsToExternalIds(teamspace, obj.container, shared_ids, 'Element ID');
-				if (externalIds?.length) {
-					externalIdsName = 'revitIds';
-				}
-			}
-
-			if (externalIds?.length) {
+			const metadata = await getMetadataByQuery(teamspace, obj.container, query, projection);
+			if (metadata?.length) {
 				delete convertedObject._ids;
-				convertedObject[externalIdsName] = externalIds.map((g) => g.metadata[0].value);
+				convertedObject[externalIdName] = [...new Set(metadata.map((m) => m.metadata[0].value))];
 			}
+		};
+
+		await convertIds('ifc_guids');
+
+		if (!convertedObject.ifc_guids) {
+			await convertIds('revit_ids');
 		}
 
 		return convertedObject;
@@ -121,30 +148,41 @@ const convertExternalIdsTo3dRepoGuids = async (teamspace, project, revId, object
 		}
 
 		const convertedObject = { ...obj };
+		const { container } = obj;
 
 		let revision = revId;
 		if (!revision) {
 			try {
-				const rev = await getLatestRevision(teamspace, obj.container, { _id: 1 });
+				const rev = await getLatestRevision(teamspace, container, { _id: 1 });
 				revision = rev._id;
 			} catch (err) {
 				return convertedObject;
 			}
 		}
 
-		let metadata;
-		if (obj.revitIds) {
-			metadata = await getMetadataByValues(teamspace, obj.container, revision, 'Element ID', obj.revitIds, { parents: 1 });
-			delete convertedObject.revitIds;
-		} else if (obj.ifc_guids) {
-			metadata = await getMetadataByValues(teamspace, obj.container, revision, 'IFC GUID', obj.ifc_guids, { parents: 1 });
-			delete convertedObject.ifc_guids;
-		}
+		const externalIdName = obj.revit_ids ? 'revit_ids' : 'ifc_guids';
+		const query = {
+			rev_id: revision,
+			metadata: { $elemMatch: { key: { $in: externalIdNamesToKeys[externalIdName] },
+				value: { $in: obj[externalIdName] } } },
+		};
 
-		const nodes = await getNodesBySharedIds(teamspace, project, obj.container, revision,
+		const metadata = await getMetadataByQuery(teamspace, container, query, { parents: 1 });
+		const nodes = await getNodesBySharedIds(teamspace, project, container, revision,
 			metadata.flatMap(({ parents }) => parents), { _id: 1 });
 
-		convertedObject._ids = nodes.map(({ _id }) => _id);
+		delete convertedObject[externalIdName];
+		convertedObject._ids = [];
+
+		const idToMeshes = await getIdToMeshesMapping(teamspace, container, revision);
+		nodes.forEach(({ _id }) => {
+			const idStr = UUIDToString(_id);
+			if (idToMeshes[idStr]) {
+				idToMeshes[idStr].forEach((id) => {
+					convertedObject._ids.push(stringToUUID(id));
+				});
+			}
+		});
 
 		return convertedObject;
 	}));
@@ -155,8 +193,12 @@ const convertExternalIdsTo3dRepoGuids = async (teamspace, project, revId, object
 TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
 	const convertedGroups = await Promise.all(groups.map(
 		async (group) => {
-			const objects = await convert3dRepoGuidsToExternalIds(teamspace, project, group.objects);
-			return { ...group, objects };
+			if (group.objects) {
+				const objects = await convert3dRepoGuidsToExternalIds(teamspace, project, group.objects);
+				return { ...group, objects };
+			}
+
+			return group;
 		}));
 
 	await addGroups(teamspace, project, model, ticket, convertedGroups);
@@ -175,22 +217,21 @@ TicketGroups.updateTicketGroup = async (teamspace, project, model, ticket, group
 TicketGroups.getTicketGroupById = async (teamspace, project, model, revId, ticket, groupId, containers,
 	convertTo3DRepoGuids) => {
 	const group = await getGroupById(teamspace, project, model, ticket, groupId);
+	const rev = containers ? undefined : revId;
 
 	if (group.rules) {
 		const modelsToQuery = containers || [model];
-		const rev = containers ? undefined : revId;
 
 		group.objects = (await Promise.all(
 			modelsToQuery.map(async (con) => {
-				const objs = await getObjectArrayFromRules(teamspace, project, con, rev, group.rules);
+				const objs = await getObjectArrayFromRules(teamspace, project, con, rev,
+					group.rules, convertTo3DRepoGuids);
 				// eslint-disable-next-line no-underscore-dangle
-				return objs._ids.length ? objs : [];
+				return objs._ids?.length || objs.revit_ids?.length || objs.ifc_guids?.length ? objs : [];
 			}),
 		)).flat();
-	}
-
-	if (convertTo3DRepoGuids) {
-		group.objects = await convertExternalIdsTo3dRepoGuids(teamspace, project, revId, group.objects);
+	} else if (convertTo3DRepoGuids) {
+		group.objects = await convertExternalIdsTo3dRepoGuids(teamspace, project, rev, group.objects);
 	}
 
 	return group;
