@@ -81,8 +81,8 @@ export const selectTicketTransparencies = createSelector(
 );
 
 export const selectTicketTransformations = createSelector(
-	selectTicketOverridesDict,
-	(overridesDicts) => overridesDicts.transformations,
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.transformations || {},
 );
 
 

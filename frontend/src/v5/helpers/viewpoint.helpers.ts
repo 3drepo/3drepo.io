@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Viewpoint, Group, ViewpointGroupOverrideType, GroupOverride, ViewpointState, V4GroupObjects, OverridesDicts, TransformMatrix } from '@/v5/store/tickets/tickets.types';
+import { Viewpoint, Group, ViewpointGroupOverrideType, GroupOverride, ViewpointState, V4GroupObjects, OverridesDicts, TransformMatrix, MeshIdTransformDict } from '@/v5/store/tickets/tickets.types';
 import { getGroupHexColor, rgbaToHex } from '@/v4/helpers/colors';
 import { generateViewpoint as generateViewpointV4, getNodesIdsFromSharedIds, toSharedIds } from '@/v4/helpers/viewpoints';
 import { formatMessage } from '@/v5/services/intl';
@@ -124,11 +124,6 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 				dict.transparencies[id] = opacity;
 			}
 
-			if (transformation !== undefined) {
-				// eslint-disable-next-line no-param-reassign
-				dict.transformations[id] = transformation;
-			}
-
 			return dict;
 		}, { overrides: {}, transparencies: {}, transformations: {} } as OverridesDicts);
 
@@ -145,12 +140,23 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 			// eslint-disable-next-line no-param-reassign
 			dict.transparencies = { ...dict.transparencies, ...overrideDict.transparencies };
 
-			// eslint-disable-next-line no-param-reassign
-			dict.transformations = { ...dict.transformations, ...overrideDict.transformations };
-	
 			return dict;
 		}, acum);
 	}, { overrides: {}, transparencies: {}, transformations: {} } as OverridesDicts);
+};
+
+const toTranformationsDict = (overrides: GroupOverride[]): MeshIdTransformDict => {
+	const dict: MeshIdTransformDict = {};
+
+	overrides.forEach((current) => {
+		const v4Objects = convertToV4GroupNodes((current.group as Group)?.objects || []);
+		v4Objects.forEach((obj) => 
+			obj.shared_ids.forEach((id) => 
+				dict[id] = current.transformation,
+			));
+	});
+
+	return dict;
 };
 
 export const goToView = async (view: Viewpoint) => {
@@ -165,9 +171,12 @@ export const goToView = async (view: Viewpoint) => {
 	
 	dispatch(ViewerGuiActions.clearColorOverrides());
 	await ViewerService.setViewpoint(view);
-	const overrides = toGroupPropertiesDicts((view?.state?.colored || []).concat(view?.state?.transformed || []));
+	const overrides = toGroupPropertiesDicts(view?.state?.colored || []);
 	TicketsCardActionsDispatchers.setOverrides(overrides);
-	
+
+	const transformations = toTranformationsDict(view?.state?.transformed || []);
+	TicketsCardActionsDispatchers.setTransformations(transformations);
+
 	await ViewerService.clearHighlights();
 
 	if (view?.state) {

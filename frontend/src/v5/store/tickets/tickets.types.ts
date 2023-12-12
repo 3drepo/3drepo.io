@@ -187,12 +187,11 @@ export type IGroupSettingsForm = GroupOverride & { group: Group };
 
 type MeshIdColorDict = Record<string, string>;
 type MeshIdTransparencyDict = Record<string, number>;
-type MeshIdTransformDict = Record<string, TransformMatrix>;
+export type MeshIdTransformDict = Record<string, TransformMatrix>;
 
 export type OverridesDicts = {
 	overrides: MeshIdColorDict,
 	transparencies: MeshIdTransparencyDict,
-	transformations: MeshIdTransformDict
 };
 
 export type TicketWithModelIdAndName = ITicket & { modelId: string; modelName: string };
