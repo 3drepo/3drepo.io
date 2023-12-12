@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Viewpoint, Group, ViewpointGroupOverrideType, GroupOverride, ViewpointState, V4GroupObjects, OverridesDicts, TransformMatrix, MeshIdTransformDict } from '@/v5/store/tickets/tickets.types';
+import { Viewpoint, Group, ViewpointGroupOverrideType, GroupOverride, ViewpointState, V4GroupObjects, OverridesDicts, MeshIdTransformDict } from '@/v5/store/tickets/tickets.types';
 import { getGroupHexColor, rgbaToHex } from '@/v4/helpers/colors';
 import { generateViewpoint as generateViewpointV4, getNodesIdsFromSharedIds, toSharedIds } from '@/v4/helpers/viewpoints';
 import { formatMessage } from '@/v5/services/intl';
@@ -112,7 +112,7 @@ export const meshObjectsToV5GroupNode = (objects) => objects.map((obj) => ({
 }));
 
 export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDicts => {
-	const toMeshDictionary = (objects: V4GroupObjects, color: string, opacity: number, transformation: TransformMatrix): OverridesDicts => 
+	const toMeshDictionary = (objects: V4GroupObjects, color: string, opacity: number): OverridesDicts => 
 		objects.shared_ids.reduce((dict, id) => {
 			if (color !== undefined) {
 			// eslint-disable-next-line no-param-reassign
@@ -125,15 +125,15 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 			}
 
 			return dict;
-		}, { overrides: {}, transparencies: {}, transformations: {} } as OverridesDicts);
+		}, { overrides: {}, transparencies: {} } as OverridesDicts);
 
 	return overrides.reduce((acum, current) => {
 		const color = current.color ? getGroupHexColor(current.color) : undefined;
-		const { opacity, transformation } = current;
+		const { opacity } = current;
 		const v4Objects = convertToV4GroupNodes((current.group as Group)?.objects || []);
 
 		return v4Objects.reduce((dict, objects) => {
-			const overrideDict = toMeshDictionary(objects, color, opacity, transformation);
+			const overrideDict = toMeshDictionary(objects, color, opacity);
 
 			// eslint-disable-next-line no-param-reassign
 			dict.overrides = { ...dict.overrides, ...overrideDict.overrides };
@@ -142,7 +142,7 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 
 			return dict;
 		}, acum);
-	}, { overrides: {}, transparencies: {}, transformations: {} } as OverridesDicts);
+	}, { overrides: {}, transparencies: {} } as OverridesDicts);
 };
 
 const toTranformationsDict = (overrides: GroupOverride[]): MeshIdTransformDict => {
