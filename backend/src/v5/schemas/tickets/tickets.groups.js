@@ -29,13 +29,13 @@ const objectEntryValidator = Yup.object().shape({
 	container: Yup.string().test('Container id', 'Container ID must be an UUID string', isUUIDString).required(),
 	_ids: Yup.array().of(types.id).min(1),
 	ifc_guids: Yup.array().of(Yup.string().length(22)).min(1),
-	revitIds: Yup.array().of(Yup.number()).min(1),
+	revit_ids: Yup.array().of(Yup.number()).min(1),
 }).test(
 	'Object item check',
-	'Can only contain either _ids or ifc_guids or revitIds',
-	(value) => (value._ids && !(value.ifc_guids || value.revitIds))
-	|| (value.ifc_guids && !(value._ids || value.revitIds))
-	|| (value.revitIds && !(value._ids || value.ifc_guids)));
+	'Can only contain either _ids or ifc_guids or revit_ids',
+	(value) => (value._ids && !(value.ifc_guids || value.revit_ids))
+	|| (value.ifc_guids && !(value._ids || value.revit_ids))
+	|| (value.revit_ids && !(value._ids || value.ifc_guids)));
 
 Groups.schema = (allowIds, fieldsOptional) => {
 	let group = Yup.object({

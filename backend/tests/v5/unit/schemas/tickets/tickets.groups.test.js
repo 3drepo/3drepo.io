@@ -23,6 +23,7 @@ const {
 	generateRandomString,
 	generateUUID,
 	generateUUIDString,
+	generateRandomNumber,
 } = require('../../../helper/services');
 
 const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
@@ -70,10 +71,26 @@ const testSchema = () => {
 		['data is a UUID and allowIds is set to false', false, false, generateUUID(), false],
 		['data only has some of the values and fieldsOptional is set to true', false, true, { name: generateRandomString() }, true],
 		['data only has some of the values and fieldsOptional is set to false', false, false, { name: generateRandomString() }, false],
-		['data only has both rules and objects and fieldsOptional is set to true', false, true, {
+		['data has both rules and objects and fieldsOptional is set to true', false, true, {
 			name: generateRandomString(),
 			rules: [{ field: generateRandomString(), operation: 'EXISTS' }],
 			objects: [{ _ids: [generateUUID()], container: generateUUIDString() }],
+		}, false],
+		['data has objects with revit_ids', false, false, {
+			name: generateRandomString(),
+			objects: [{ revit_ids: [generateRandomNumber()], container: generateUUIDString() }],
+		}, true],
+		['data has objects with ifc_guids', false, false, {
+			name: generateRandomString(),
+			objects: [{ ifc_guids: [generateRandomString(22)], container: generateUUIDString() }],
+		}, true],
+		['data has objects with both ifc_guids and revit_ids', false, false, {
+			name: generateRandomString(),
+			objects: [{ ifc_guids: [generateRandomString(22)], revit_ids: [], container: generateUUIDString() }],
+		}, false],
+		['data has objects with both _ids and revit_ids', false, false, {
+			name: generateRandomString(),
+			objects: [{ _ids: [generateUUID()], revit_ids: [], container: generateUUIDString() }],
 		}, false],
 	])('Schema validation', (desc, allowIds, fieldsOptional, data, shouldPass) => {
 		test(`Should ${shouldPass ? 'pass' : 'fail'} if ${desc}`, async () => {
