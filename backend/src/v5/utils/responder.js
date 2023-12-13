@@ -125,7 +125,8 @@ Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSiz
 			default:
 				res.status(createResponseCode());
 				res.end();
-				genResponseLogging.logError(genResponseLogging(response.code, fileSize, req));
+				logger.logError(`Unexpected encoding type: ${encoding}`);
+				logger.logError(genResponseLogging(response.code, fileSize, req));
 				return;
 			}
 			delete headers['Content-Length']; // We will not know the size of a decompressed stream
