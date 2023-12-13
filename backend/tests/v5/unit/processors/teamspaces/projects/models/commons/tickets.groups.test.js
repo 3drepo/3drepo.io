@@ -38,6 +38,77 @@ jest.mock('../../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 
 const testGetTicketGroupById = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const container = generateRandomString();
+	const ticket = generateRandomString();
+	const groupId = generateRandomString();
+
+	const defaultOptions = {
+		negativeQuery: false,
+		matchedMeta: times(10, () => ({ parents: times(2, () => generateRandomString()) })),
+		unwantedMeta: [],
+		latestRevision: { _id: generateRandomString() },
+		revision: generateRandomString(),
+	};
+
+	describe.each([
+		['when its a normal group', { objects: [{ _ids: [generateRandomString()] }] }, defaultOptions],
+		['when its a smart group (container)', { rules: [generateRandomObject()] }, defaultOptions],
+		['when its a smart group (federation)', { rules: [generateRandomObject()] }, { ...defaultOptions, containers: [container] }],
+	])('Get ticket group by Id', (desc, group, options) => {
+		test(`should return the group found ${desc}`, async () => {
+			let expectedData = group;
+			let { revision } = options;
+
+			GroupsModel.getGroupById.mockResolvedValueOnce(group);
+
+			if (options.containers && (group.rules || options.convertTo3DRepoGuids)) {
+				revision = generateRandomString();
+				
+				options.failedRevision ? 
+				RevsModel.getLatestRevision.mockResolvedValueOnce({ _id: revision });
+			}
+
+			if (group.rules) {
+				MetaModel.getMetadataByRules.mockResolvedValueOnce({
+					matched: options.matchedMeta, unwanted: options.unwantedMeta,
+				});
+
+				const nodeRes = times(10, () => ({ _id: generateRandomString() }));
+				ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes);
+
+				const idMapMock = {};
+
+				nodeRes.forEach(({ _id }) => { idMapMock[_id] = [_id]; });
+				FilesManager.getFile.mockResolvedValueOnce(JSON.stringify(idMapMock));
+
+				expectedData = { ...group, objects: [{ container, _ids: nodeRes.map(({ _id }) => _id) }] };
+			}
+
+			await expect(Groups.getTicketGroupById(teamspace, project, container, options.revision, ticket,
+				groupId, options.containers, true)).resolves.toEqual(expectedData);
+
+			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.getGroupById).toHaveBeenCalledWith(teamspace, project, container, ticket, groupId);
+
+			if (options.containers && (group.rules || options.convertTo3DRepoGuids)) {
+				expect(RevsModel.getLatestRevision).toHaveBeenCalledTimes(1);
+				expect(RevsModel.getLatestRevision).toHaveBeenCalledWith(teamspace, container, { _id: 1 });
+			}
+
+			if (group.rules) {
+				expect(MetaModel.getMetadataByRules).toHaveBeenCalledTimes(1);
+				expect(MetaModel.getMetadataByRules).toHaveBeenCalledWith(teamspace, project, container,
+					revision, group.rules, { parents: 1 });
+
+				expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledTimes(1);
+				expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledWith(teamspace, project, container,
+					revision, options.matchedMeta.flatMap(({ parents }) => parents), { _id: 1 });
+			}
+		});
+	});
+
 	describe('Get ticket group by Id', () => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
