@@ -44,11 +44,137 @@ const testValidate = () => {
 				issueProperties: true,
 				defaultView: true,
 				defaultImage: false,
+				pin: true,
 			},
 			deprecated: true,
 			properties: undefined,
 			modules: undefined,
 		}, true],
+		['pin with a colour defined', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: { color: [50, 50, 50] },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, true],
+		['pin with a colour logic defined', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: { color: {
+					property: {
+						name: generateRandomString(),
+					},
+					mapping: [
+						{
+							default: [255, 255, 255],
+						},
+						{
+							value: generateRandomString(),
+							color: [50, 50, 50],
+						},
+						{
+							value: generateRandomString(),
+							color: [0, 0, 50],
+						},
+					],
+				} },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, true],
+		['pin with a colour logic defined but no default specified', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: { color: {
+					property: {
+						name: generateRandomString(),
+					},
+					mapping: [
+						{
+							value: generateRandomString(),
+							color: [50, 50, 50],
+						},
+						{
+							value: generateRandomString(),
+							color: [0, 0, 50],
+						},
+					],
+				} },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['pin with a colour logic defined but more than 1 default specified', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: { color: {
+					property: {
+						name: generateRandomString(),
+					},
+					mapping: [
+						{
+							default: [50, 50, 50],
+						},
+						{
+							default: [0, 0, 50],
+						},
+					],
+				} },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['pin with a colour logic defined (module property)', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: { color: {
+					property: {
+						name: generateRandomString(),
+						module: generateRandomString(),
+					},
+					mapping: [
+						{
+							default: [255, 255, 255],
+						},
+						{
+							value: generateRandomString(),
+							color: [50, 50, 50],
+						},
+						{
+							value: generateRandomString(),
+							color: [0, 0, 50],
+						},
+					],
+				} },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, true],
+
+		['pin with an invalid colour', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: { color: 'hi' },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['pin defined with empty object', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				pin: { },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
 		['properties is an empty array', { name: generateRandomString(), code: generateRandomString(3), properties: [] }, true],
 		['properties is of the wrong type', { name: generateRandomString(), code: generateRandomString(3), properties: 'a' }, false],
 		['property name is used by a default property', { name: generateRandomString(), code: generateRandomString(3), properties: [defaultProperties[0]] }, false],
@@ -217,6 +343,220 @@ const testValidate = () => {
 				type: propTypes.NUMBER,
 				default: generateRandomString(),
 			}] }, false],
+		['Coord property with no colour', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.COORDS,
+			}] }, true],
+		['Coord property with color defined', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.COORDS,
+				color: [50, 50, 50],
+			}] }, true],
+		['Coord property with an invalid color defined', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.COORDS,
+				color: ['a', 'b', 'c'],
+			}] }, false],
+		['Coord property with color mapping defined', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [
+				{
+					name: 'refMap',
+					type: propTypes.TEXT,
+				},
+				{
+					name: generateRandomString(),
+					type: propTypes.COORDS,
+					color: {
+						property: {
+							name: 'refMap',
+						},
+						mapping: [
+							{
+								default: [100, 100, 100],
+							},
+							{
+								value: generateRandomString(),
+								color: [50, 50, 50],
+							},
+							{
+								value: generateRandomString(),
+								color: [0, 0, 50],
+							},
+						],
+					},
+				}] }, true],
+		['Coord property with color mapping defined but referencing a deprecated field', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [
+				{
+					name: 'refMap',
+					type: propTypes.TEXT,
+					deprecated: true,
+				},
+				{
+					name: generateRandomString(),
+					type: propTypes.COORDS,
+					color: {
+						property: {
+							name: 'refMap',
+						},
+						mapping: [
+							{
+								default: [100, 100, 100],
+							},
+							{
+								value: generateRandomString(),
+								color: [50, 50, 50],
+							},
+							{
+								value: generateRandomString(),
+								color: [0, 0, 50],
+							},
+						],
+					},
+				}] }, false],
+		['Coord property with color mapping defined but referencing a non existent field', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [
+				{
+					name: generateRandomString(),
+					type: propTypes.TEXT,
+					deprecated: true,
+				},
+				{
+					name: generateRandomString(),
+					type: propTypes.COORDS,
+					color: {
+						property: {
+							name: generateRandomString(),
+						},
+						mapping: [
+							{
+								default: [100, 100, 100],
+							},
+							{
+								value: generateRandomString(),
+								color: [50, 50, 50],
+							},
+							{
+								value: generateRandomString(),
+								color: [0, 0, 50],
+							},
+						],
+					},
+				}] }, false],
+		['Coord property with color mapping defined (module property)', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.COORDS,
+				color: {
+					property: {
+						name: 'refMap',
+						module: 'mod',
+					},
+					mapping: [
+						{
+							default: [100, 100, 100],
+						},
+						{
+							value: generateRandomString(),
+							color: [50, 50, 50],
+						},
+						{
+							value: generateRandomString(),
+							color: [0, 0, 50],
+						},
+					],
+				},
+			}],
+			modules: [{
+				name: 'mod',
+				properties: [{
+					name: 'refMap',
+					type: propTypes.TEXT,
+				}],
+			}],
+		}, true],
+		['Coord property with color mapping defined (no default)', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.COORDS,
+				color: {
+					property: {
+						name: generateRandomString(),
+					},
+					mapping: [
+						{
+							value: generateRandomString(),
+							color: [50, 50, 50],
+						},
+						{
+							value: generateRandomString(),
+							color: [0, 0, 50],
+						},
+					],
+				},
+			}] }, false],
+		['Coord property with color mapping defined (more than one default)', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.COORDS,
+				color: {
+					property: {
+						name: generateRandomString(),
+					},
+					mapping: [
+						{
+							default: [1, 1, 1],
+						},
+						{
+							default: [2, 2, 2],
+						},
+						{
+							value: generateRandomString(),
+							color: [50, 50, 50],
+						},
+						{
+							value: generateRandomString(),
+							color: [0, 0, 50],
+						},
+					],
+				},
+			}] }, false],
+		['Coord property with no mapping', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.COORDS,
+				color: {
+					property: {
+						name: generateRandomString(),
+					},
+					mapping: [
+					],
+				},
+			}] }, false],
+
 	];
 
 	const createSkeleton = (modules) => ({ name: generateRandomString(), code: generateRandomString(3), modules });

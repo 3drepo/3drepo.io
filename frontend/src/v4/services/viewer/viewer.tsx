@@ -19,7 +19,6 @@ import EventEmitter from 'eventemitter3';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { isEmpty, isString } from 'lodash';
-import { getUseBetaViewer } from '@/v4/modules/viewer/betaViewer.helpers';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -39,7 +38,7 @@ interface IViewerConstructor {
 
 export interface IPin {
 	id: string;
-	type?: 'issue' | 'risk' | 'bookmark' | null;
+	type?: 'issue' | 'risk' | 'bookmark' | 'ticket' | null;
 	position: number[];
 	norm?: number[];
 	colour: number[];
@@ -97,7 +96,7 @@ export class ViewerService {
 	public setupInstance = async (container, onError) => {
 		this.element = container;
 
-		UnityUtil.init(onError, this.onUnityProgress, this.onModelProgress, getUseBetaViewer());
+		UnityUtil.init(onError, this.onUnityProgress, this.onModelProgress);
 		UnityUtil.hideProgressBar();
 
 		const unityHolder = document.createElement('canvas');
@@ -673,12 +672,19 @@ export class ViewerService {
 	public showPin = async ({id, position, norm, colour, type}: IPin) => {
 		await this.isViewerReady();
 		await this.isModelLoaded();
-		if (type === 'risk') {
-			UnityUtil.dropRiskPin(id, position, norm, colour);
-		} else if (type === 'issue') {
-			UnityUtil.dropIssuePin(id, position, norm, colour);
-		} else {
-			UnityUtil.dropBookmarkPin(id, position, norm, colour);
+		switch (type) {
+			case 'risk':
+				UnityUtil.dropRiskPin(id, position, norm, colour);
+				break;
+			case 'issue':
+				UnityUtil.dropIssuePin(id, position, norm, colour);
+				break
+			case 'ticket':
+				UnityUtil.dropTicketPin(id, position, norm, colour);
+				break
+			default:
+				UnityUtil.dropBookmarkPin(id, position, norm, colour);
+				break;
 		}
 	}
 

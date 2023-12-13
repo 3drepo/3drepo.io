@@ -37,6 +37,7 @@ export const DashboardListItemContainerTitle = ({
 	container,
 	isSelected = false,
 	openInNewTab = false,
+	...props
 }: IContainerTitle): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
@@ -44,14 +45,17 @@ export const DashboardListItemContainerTitle = ({
 
 	const hasRevisions = container.revisionsCount > 0;
 	const linkProps = {
-		to: hasRevisions ? viewerRoute(teamspace, project, container) : '#',
+		to: hasRevisions || container.hasStatsPending ? viewerRoute(teamspace, project, container) : '#',
 		target: openInNewTab ? '_blank' : '_self',
 		rel: 'noopener noreferrer',
 	};
 
+	const canLaunchContainer = container.hasStatsPending || hasRevisions;
+
 	return (
 		<DashboardListItemTitle
-			subtitle={(
+			{...props}
+			subtitle={!container.hasStatsPending && (
 				<LatestRevision
 					name={(
 						<Highlight search={query}>
@@ -64,14 +68,13 @@ export const DashboardListItemContainerTitle = ({
 				/>
 			)}
 			selected={isSelected}
-			tooltipTitle={
-				hasRevisions ? (
-					<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
-				) : (
-					<FormattedMessage id="containers.list.item.title.tooltip.empty" defaultMessage="No revisions" />
-				)
+			tooltipTitle={canLaunchContainer ? (
+				<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
+			) : (
+				<FormattedMessage id="containers.list.item.title.tooltip.empty" defaultMessage="No revisions" />
+			)
 			}
-			disabled={!hasRevisions}
+			disabled={!canLaunchContainer}
 		>
 			<Link {...linkProps}>
 				<Highlight search={query}>

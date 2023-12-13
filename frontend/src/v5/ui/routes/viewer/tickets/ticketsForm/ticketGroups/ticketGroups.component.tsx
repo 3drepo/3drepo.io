@@ -173,7 +173,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		}
 	};
 
-	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
+	useEffect(() => onBlur?.(), [value]);
 
 	useEffect(() => {
 		if (highlightedOverride.index === NO_OVERRIDE_SELECTED.index) {

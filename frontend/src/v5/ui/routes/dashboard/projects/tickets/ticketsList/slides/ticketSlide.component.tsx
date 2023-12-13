@@ -59,6 +59,7 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 	}, [ticket]);
 
 	useEffect(() => {
+		if (!containerOrFederation) return;
 		TicketsActionsDispatchers.fetchTicket(
 			teamspace,
 			project,

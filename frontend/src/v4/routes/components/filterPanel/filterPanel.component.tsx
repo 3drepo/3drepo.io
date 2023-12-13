@@ -27,7 +27,7 @@ import * as yup from 'yup';
 import { BACKSPACE, ENTER_KEY } from '../../../constants/keys';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { compareStrings } from '../../../helpers/searching';
-import { formatShortDate } from '../../../services/formatting/formatDate';
+import { formatShortDateTime } from '../../../services/formatting/formatDate';
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
 import { Filter } from '../fontAwesomeIcon';
 import { Highlight } from '../highlight/highlight.component';
@@ -73,6 +73,7 @@ interface IProps {
 	className?: string;
 	autoFocus?: boolean;
 	left?: boolean;
+	defaultFiltersCollapsed?: boolean;
 	onChange: (selectedFilters) => void;
 	onDataTypeChange?: (selectedDataTypes) => void;
 }
@@ -157,7 +158,7 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 		selectedDataTypes: [],
 		value: '',
 		suggestions: [],
-		filtersOpen: false,
+		filtersOpen: this.props.defaultFiltersCollapsed ?? false,
 		removableFilterIndex: null
 	};
 
@@ -255,14 +256,14 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 
 	public onSelectDateFilter = (dateFilter, child) => {
 		dateFilter.label = child.label;
-		dateFilter.value.label = formatShortDate(child.date);
+		dateFilter.value.label = formatShortDateTime(child.date);
 		const selectedFilterIndex = this.state.selectedFilters.findIndex((filter) => filter.value.value === child.value);
 
 		if (selectedFilterIndex > -1) {
 			this.setState((prevState) => {
 				const newFilters = [...prevState.selectedFilters];
 				newFilters[selectedFilterIndex].label = child.label;
-				newFilters[selectedFilterIndex].value.label = formatShortDate(child.date);
+				newFilters[selectedFilterIndex].value.label = formatShortDateTime(child.date);
 				newFilters[selectedFilterIndex].value.date = child.date;
 				return newFilters as any;
 			}, this.handleFiltersChange);

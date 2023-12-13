@@ -131,6 +131,7 @@ export default css`
 			font-size: 9px;
 			font-weight: 500;
 			color: ${({ theme }) => theme.palette.base.main};
+			min-width: fit-content;
 		}
 
 		${Description} {

@@ -18,6 +18,7 @@
 export enum STEP_SCALE {
 	HOUR,
 	DAY,
+	WEEK,
 	MONTH,
 	YEAR,
 	FRAME,
