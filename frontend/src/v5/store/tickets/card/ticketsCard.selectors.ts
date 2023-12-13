@@ -20,7 +20,7 @@ import { SequencingProperties, TicketBaseKeys, TicketsCardViews } from '@/v5/ui/
 import { createSelector } from 'reselect';
 import { selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
 import { ITicketsCardState } from './ticketsCard.redux';
-import { getTicketIsCompleted } from '../tickets.helpers';
+import { getTicketIsCompleted } from './ticketsCard.helpers';
 import { DEFAULT_PIN, getPinColorHex, ticketToPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { get } from 'lodash';
 import { IPin } from '@/v4/services/viewer/viewer';

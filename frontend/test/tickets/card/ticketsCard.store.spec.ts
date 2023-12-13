@@ -51,21 +51,25 @@ describe('Tickets: store', () => {
 		describe('filters', () => {
 			it('should toggle the completed filter', () => {
 				dispatch(TicketsCardActions.toggleTicketsCompleteFilter());
-				const completedFilterFromState = selectFilteringCompleted(getState());
+				const completedFilterFromState1 = selectFilteringCompleted(getState());
 				
-				expect(completedFilterFromState).toEqual(true);
+				expect(completedFilterFromState1).toEqual(true);
 				
 				dispatch(TicketsCardActions.toggleTicketsCompleteFilter());
-				expect(completedFilterFromState).toEqual(false);
+				const completedFilterFromState2 = selectFilteringCompleted(getState());
+
+				expect(completedFilterFromState2).toEqual(false);
 			});
 			it('should add and remove template filters', () => {
 				dispatch(TicketsCardActions.addTicketsTemplateFilter(templateId));
-				const templateFiltersFromState = selectFilteringTemplates(getState());
+				const templateFiltersFromState1 = selectFilteringTemplates(getState());
 				
-				expect(templateFiltersFromState).toEqual([templateId]);
+				expect(templateFiltersFromState1).toEqual([templateId]);
 				
 				dispatch(TicketsCardActions.removeTicketsTemplateFilter(templateId));
-				expect(templateFiltersFromState).toEqual([]);
+				const templateFiltersFromState2 = selectFilteringTemplates(getState());
+
+				expect(templateFiltersFromState2).toEqual([]);
 			});
 
 			it('should add and remove template filters', () => {
