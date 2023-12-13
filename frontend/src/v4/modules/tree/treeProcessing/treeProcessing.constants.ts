@@ -40,6 +40,7 @@ export interface INode {
 	rootParentId?: string;
 	type: string;
 	subTreeRoots: string[];
+	teamspace?: string;
 }
 
 export interface ITreeProcessingData {

@@ -15,15 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createSelector } from 'reselect';
-import { USE_BETA_VIEWER, getUseBetaViewer } from './betaViewer.helpers';
 
 export const selectViewerDomain = (state) => ({...state.viewer});
 
 export const selectSettings = createSelector(
-	selectViewerDomain, (state) => ({
-		...state.settings,
-		[USE_BETA_VIEWER]: getUseBetaViewer(),
-	}),
+	selectViewerDomain, (state) => state.settings
 );
 
 export const selectShadowSetting = createSelector(

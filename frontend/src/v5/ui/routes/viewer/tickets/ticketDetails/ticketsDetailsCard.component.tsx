@@ -68,7 +68,9 @@ export const TicketDetailsCard = () => {
 		defaultValues: ticket,
 	});
 
-	const onBlurHandler = () => {
+	// There seems to be some sort of race condition in react-hook-form
+	// so onBlur can't be called immediately after onChange because the validation won't be there.
+	const onBlurHandler = () => setTimeout(() => {
 		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
 		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, formData.formState.errors)));
 
@@ -87,7 +89,7 @@ export const TicketDetailsCard = () => {
 		sanitizeViewVals(validVals, ticket, template);
 		if (isEmpty(validVals)) return;
 		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticket._id, validVals, isFederation);
-	};
+	}, 200);
 
 	useEffect(() => {
 		if (!ticket?._id) return;
@@ -106,22 +108,17 @@ export const TicketDetailsCard = () => {
 	}, [ticket?._id]);
 
 	useEffect(() => {
-		if (isEmpty(defaultView)) return;
-		goToView(defaultView);
-	}, [ticket._id, treeNodesList]);
-
-	useEffect(() => {
 		formData.reset(ticket);
 	}, [JSON.stringify(ticket)]);
 
 	useEffect(() => {
-		if (view === TicketDetailsView.Groups || isEmpty(defaultView)) return;
+		if (view === TicketDetailsView.Groups) return;
 		goToView(defaultView);
-	}, [JSON.stringify(defaultView?.camera)]);
+	}, [ticket._id, treeNodesList, JSON.stringify(defaultView?.camera)]);
 
 	useEffect(() => {
-		if (view === TicketDetailsView.Groups || isEmpty(defaultView)) return;
-		const { state } = defaultView;
+		if (view === TicketDetailsView.Groups) return;
+		const { state } = defaultView || {};
 		goToView({ state });
 	}, [JSON.stringify(defaultView?.state)]);
 

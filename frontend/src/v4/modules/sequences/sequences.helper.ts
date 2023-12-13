@@ -60,6 +60,9 @@ export const getDateByStep = (date, stepScale, step) => {
 		case STEP_SCALE.DAY:
 			newDate.setDate(newDate.getDate() + step);
 			break;
+		case STEP_SCALE.WEEK:
+			newDate.setDate(newDate.getDate() + step * 7);
+			break;
 		case STEP_SCALE.MONTH:
 			newDate.setMonth(newDate.getMonth() + step);
 			break;

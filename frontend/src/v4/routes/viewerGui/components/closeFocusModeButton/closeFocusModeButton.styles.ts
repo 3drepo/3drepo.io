@@ -19,7 +19,7 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
 	position: absolute;
-	top: 20px;
+	top: 80px;
 	right: 20px;
 	z-index: 2;
 	visibility: ${(props: any) => props.visible ? 'visible' : 'hidden'};

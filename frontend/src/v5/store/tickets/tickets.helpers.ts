@@ -25,7 +25,7 @@ import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
-import { IssueProperties, SafetibaseProperties, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { IssueProperties, TicketBaseKeys, SafetibaseProperties, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
@@ -107,10 +107,10 @@ export const filterEmptyTicketValues = (ticket) => {
 	const parsedTicket = {};
 	Object.entries(ticket).forEach(([key, value]) => {
 		switch (key) {
-			case 'properties':
+			case TicketBaseKeys.PROPERTIES:
 				parsedTicket[key] = filterEmptyModuleValues(value);
 				break;
-			case 'modules':
+			case TicketBaseKeys.MODULES:
 				parsedTicket[key] = {};
 				Object.entries(value).forEach(([module, moduleValue]) => {
 					const parsedModule = filterEmptyModuleValues(moduleValue);
@@ -260,7 +260,7 @@ export const sanitizeViewVals = (values:Partial<ITicket>, ticket:ITicket, templa
 };
 
 export const templateAlreadyFetched = (template: ITemplate) => {
-	const fetchedProperties = ['modules', 'properties', 'config'];
+	const fetchedProperties: string[] = Object.values(TicketBaseKeys);
 	return fetchedProperties.some((prop) => Object.keys(template).includes(prop));
 };
 

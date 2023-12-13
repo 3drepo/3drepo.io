@@ -20,13 +20,9 @@ export const FontAwesomeIcon = FontAwesomeIconComponent;
 
 // Before add new icon's component, add required fa icon to library in "services/fontAwesome"
 export const Eraser = (props) => <FontAwesomeIconComponent {...props} icon="eraser" />;
-export const Eye = (props) => <FontAwesomeIconComponent {...props} icon="eye" />;
 export const Filter = (props) => <FontAwesomeIconComponent {...props} icon="filter" />;
-export const Tint = (props) => <FontAwesomeIconComponent {...props} icon="tint" />;
-export const HandPaper = (props) => <FontAwesomeIconComponent {...props} icon="hand-paper" />;
 export const SortAmountUp = (props) => <FontAwesomeIconComponent {...props} icon="sort-amount-up" />;
 export const SortAmountDown = (props) => <FontAwesomeIconComponent {...props} icon="sort-amount-down" />;
-export const Helicopter = (props) => <FontAwesomeIconComponent {...props} icon="helicopter" />;
 export const ArrowsAltH = (props) => <FontAwesomeIconComponent {...props} icon="arrows-alt-h" />;
 export const DrawPolygon = (props) => <FontAwesomeIconComponent {...props} icon="draw-polygon" />;
 export const Copy = (props) => <FontAwesomeIconComponent {...props} icon="copy" />;

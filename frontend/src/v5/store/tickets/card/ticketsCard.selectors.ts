@@ -15,16 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { hexToGLColor } from '@/v4/helpers/colors';
 import { selectCurrentModel } from '@/v4/modules/model';
+import { createSelector } from 'reselect';
+import { selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
+import { ITicketsCardState } from './ticketsCard.redux';
+import { getPinColorHex, DEFAULT_PIN,  ticketToPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { SequencingProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { theme } from '@/v5/ui/themes/theme';
-import { createSelector } from 'reselect';
 import { selectSelectedDate } from '@/v4/modules/sequences';
-import { ITicketsCardState } from './ticketsCard.redux';
-import { selectTemplateById, selectTicketById, selectTickets } from '../tickets.selectors';
-import { ITicket } from '../tickets.types';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
@@ -34,13 +32,11 @@ export const selectCurrentTickets = createSelector(
 	selectTickets,
 );
 
-const ticketToPin = (ticket: ITicket, selectedId): IPin => ({
-	id: ticket._id,
-	position: ticket.properties.Pin,
-	isSelected: ticket._id === selectedId,
-	type: 'issue',
-	colour: hexToGLColor(theme.palette.secondary.main),
-});
+export const selectCurrentTemplates = createSelector(
+	(state) => state,
+	selectCurrentModel,
+	selectTemplates,
+);
 
 export const selectView = createSelector(
 	selectTicketsCardDomain,
@@ -60,6 +56,11 @@ export const selectSelectedTicketId = createSelector(
 export const selectSelectedTemplateId = createSelector(
 	selectTicketsCardDomain,
 	(ticketCardState) => ticketCardState.selectedTemplateId,
+);
+
+export const selectSelectedTicketPinId = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.selectedTicketPinId,
 );
 
 export const selectTicketOverridesDict = createSelector(
@@ -98,14 +99,19 @@ export const selectSelectedTemplate = createSelector(
 
 export const selectTicketPins = createSelector(
 	selectCurrentTickets,
+	selectCurrentTemplates,
 	selectView,
-	selectSelectedTicket,
+	selectSelectedTicketPinId,
 	selectSelectedDate,
-	(tickets, view, selectedTicket, selectedSequenceDate): IPin[] => {
+	(tickets, templates, view, selectedTicketPinId, selectedSequenceDate): IPin[] => {
 		if (view !== TicketsCardViews.List) return [];
 
 		return tickets.reduce(
 			(accum, ticket) => {
+				if (!ticket.properties?.Pin) return accum;
+				const template = templates.find(({ _id }) => _id === ticket.type);
+				const color = getPinColorHex(DEFAULT_PIN, template, ticket);
+
 				const pin = ticket.properties?.Pin;
 				if (!pin) return accum;
 				const { sequencing } = ticket.modules;
@@ -118,7 +124,7 @@ export const selectTicketPins = createSelector(
 						endDate && new Date(endDate) < new Date(selectedSequenceDate)
 					) return accum;
 				}
-				return [...accum, ticketToPin(ticket, selectedTicket?._id)];
+				return [...accum, ticketToPin(ticket, selectedTicketPinId, color)];
 			},
 			[],
 		);

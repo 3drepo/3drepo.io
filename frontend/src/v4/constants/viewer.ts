@@ -15,17 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { USE_BETA_VIEWER } from '../modules/viewer/betaViewer.helpers';
-
 export const VIEWER_NAV_MODES = {
 	HELICOPTER: 'HELICOPTER',
 	TURNTABLE: 'TURNTABLE'
-};
+} as const;
 
 export const VIEWER_CLIP_MODES = {
 	SINGLE: 'SINGLE',
 	BOX: 'BOX'
-};
+} as const;
 
 export const VIEWER_MAP_SOURCES = {
 	OSM: 'OSM',
@@ -99,7 +97,6 @@ export const VIEWER_ERRORS = {
 };
 
 export const DEFAULT_SETTINGS = {
-	[USE_BETA_VIEWER]: true,
 	viewerBackgroundColor: [0.95, 0.96, 0.99],
 	shadows: 'none',
 	xray: true,
@@ -144,7 +141,7 @@ export const VIEWER_PANELS = {
 export const VIEWER_PROJECTION_MODES = {
 	ORTHOGRAPHIC: 'orthographic',
 	PERSPECTIVE: 'perspective'
-};
+} as const;
 
 export const VIEWER_TOOLBAR_ITEMS = {
 	HOME: 'Home',
@@ -174,4 +171,4 @@ export const VIEWER_MEASURING_MODE = {
 	SAM: 'SurfaceArea',
 	CSAM: 'PolygonArea',
 	POINT_TO_POINT: 'Point',
-};
+} as const;
