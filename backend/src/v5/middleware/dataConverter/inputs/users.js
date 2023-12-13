@@ -172,7 +172,6 @@ Users.validateForgotPasswordData = async (req, res, next) => {
 			if (sso) {
 				await sendEmail(mailTemplates.FORGOT_PASSWORD_SSO.name, email,
 					{
-						email,
 						username: user,
 						firstName,
 						ssoType: getProviderLabel(sso.type),

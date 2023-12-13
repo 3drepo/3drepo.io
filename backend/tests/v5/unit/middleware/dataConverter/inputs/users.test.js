@@ -190,12 +190,12 @@ const testForgotPasswordData = () => {
 	describe.each([
 		[{ body: { user: existingUsername } }, genUserData(), true, 'with valid username'],
 		[{ body: { user: availableUsername } }, undefined, false, 'with invalid username', templates.ok],
-		[{ body: { user: ssoUsername } }, genUserData(true), false, 'with sso user username', templates.ok, true],
+		[{ body: { user: ssoUsername } }, genUserData(true), false, 'with sso user username', templates.ok],
 		[{ body: { user: existingEmail } }, genUserData(), true, 'with valid email'],
 		[{ body: { user: existingEmail, extra: 'extra' } }, genUserData(), false, 'with extra properties', templates.invalidArguments],
 		[{ body: {} }, undefined, false, 'with empty body', templates.invalidArguments],
 		[{ body: undefined }, undefined, false, 'with undefined body', templates.invalidArguments],
-	])('Forgot password data validation', (req, userData, shouldPass, desc, expectedResponse, sendMail) => {
+	])('Forgot password data validation', (req, userData, shouldPass, desc, expectedResponse) => {
 		test(`${desc} ${shouldPass ? ' should call next()' : `should respond with ${expectedResponse.code}`}`, async () => {
 			UsersModel.getUserByUsernameOrEmail.mockImplementationOnce(() => {
 				if (!userData) return Promise.reject(templates.userNotFound);
@@ -213,7 +213,7 @@ const testForgotPasswordData = () => {
 				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedResponse.code);
 			}
 
-			if (sendMail) {
+			if (userData.customData.sso) {
 				expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
 				expect(Mailer.sendEmail).toHaveBeenCalledWith(
 					mailTemplates.FORGOT_PASSWORD_SSO.name,
@@ -226,7 +226,7 @@ const testForgotPasswordData = () => {
 					},
 				);
 			} else {
-				expect(Mailer.sendEmail).not.toHaveBeenCalledTimes(1);
+				expect(Mailer.sendEmail).not.toHaveBeenCalled();
 			}
 		});
 	});
