@@ -653,9 +653,7 @@ function importModel(account, model, username, modelSetting, source, data) {
 }
 
 async function isSubModel(account, model) {
-	const query = {$or: [
-		{ "subModels._id": model }
-	]};
+	const query = { "subModels._id": model };
 
 	return (await findModelSettings(account, query)).length > 0;
 }
