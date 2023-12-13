@@ -23,13 +23,35 @@ const {
 	presetModulesProperties,
 	propTypes } = require('./templates.constants');
 
+const { isArray, isString } = require('../../utils/helper/typeCheck');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
 const Yup = require('yup');
 const { cloneDeep } = require('../../utils/helper/objects');
-const { isString } = require('../../utils/helper/typeCheck');
 const { propTypesToValidator } = require('./validators');
 
+const TemplateSchema = {};
+
 const defaultFalse = stripWhen(Yup.boolean().default(false), (v) => !v);
+const nameSchema = types.strings.title.min(1);
+
+const pinColSchema = Yup.lazy((val) => {
+	if (val === undefined) return Yup.mixed().strip();
+	if (isArray(val)) return types.color3Arr;
+
+	return Yup.object({
+		property: Yup.object({
+			name: nameSchema.required(),
+			module: nameSchema,
+		}),
+
+		mapping: Yup.array().of(Yup.object({
+			default: types.color3Arr,
+			value: Yup.mixed().when('default', (def, schema) => (def ? schema.strip() : schema.required())),
+			color: types.color3Arr.when('default', (def, schema) => (def ? schema.strip() : schema.required())),
+		})).test('Color mapping', 'Must contain one default entry', (arr) => arr.filter((obj) => !!obj.default).length === 1),
+
+	});
+});
 
 const blackListedChrsRegex = /^[^.,[\]]*$/;
 
@@ -60,6 +82,7 @@ const propSchema = Yup.object().shape({
 		}
 		return schema.strip();
 	}),
+	color: Yup.mixed().when('type', (val, schema) => (val === propTypes.COORDS ? pinColSchema : schema.strip())),
 
 	default: Yup.mixed().when(['type', 'values'], (type, values) => {
 		const res = propTypesToValidator(type);
@@ -129,12 +152,50 @@ const configSchema = Yup.object().shape({
 	attachments: defaultFalse,
 	defaultView: defaultFalse,
 	defaultImage: Yup.boolean().when('defaultView', (defaultView, schema) => (defaultView ? schema.strip() : defaultFalse)),
-	pin: defaultFalse,
+	pin: Yup.lazy((val) => (val?.color ? Yup.object({ color: pinColSchema }) : defaultFalse)),
 }).default({});
 
 const defaultPropertyNames = defaultProperties.map(({ name }) => name);
+
+const pinMappingTest = (val, context) => {
+	const template = TemplateSchema.generateFullSchema(val);
+	const activeProperties = new Set();
+	const activeCondPins = [];
+
+	const prependPrefix = (prefix, name) => `${prefix ? `${prefix}.` : ''}${name}`;
+
+	const collectProperties = (props, prefix = '') => {
+		props.forEach((entry) => {
+			if (!entry.deprecated) {
+				if (entry.type === propTypes.COORDS && entry?.color?.property) {
+					activeCondPins.push({ name: prependPrefix(prefix, entry.name), property: entry.color.property });
+				}
+
+				activeProperties.add(prependPrefix(prefix, entry.name));
+			}
+		});
+	};
+
+	collectProperties(template.properties);
+	template.modules.forEach(({ name, type, deprecated, properties }) => {
+		if (!deprecated) {
+			collectProperties(properties, name ?? type);
+		}
+	});
+
+	const badPins = activeCondPins.flatMap(({ name, property }) => {
+		const prop = prependPrefix(property.module, property.name);
+
+		return (activeProperties.has(prop)) ? [] : name;
+	});
+
+	if (badPins.length) return context.createError({ message: `The following COORDS properties have conditional mapping referencing a deprecated/invalid property: ${badPins.join(',')}` });
+
+	return true;
+};
+
 const schema = Yup.object().shape({
-	name: types.strings.title.required(),
+	name: nameSchema.required(),
 	code: Yup.string().length(3).required(),
 	config: configSchema,
 	deprecated: defaultFalse,
@@ -153,9 +214,7 @@ const schema = Yup.object().shape({
 		return true;
 	}),
 
-}).noUnknown();
-
-const TemplateSchema = {};
+}).test(pinMappingTest).noUnknown();
 
 TemplateSchema.validate = (template) => schema.validateSync(template, { stripUnknown: true });
 

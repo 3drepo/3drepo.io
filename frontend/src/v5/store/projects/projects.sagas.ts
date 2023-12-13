@@ -99,7 +99,7 @@ export function* deleteProject({ teamspace, projectId, onSuccess, onError }) {
 	}
 }
 
-export function* fetchTemplates({ teamspace, projectId }) {
+export function* fetchTemplates({ teamspace, projectId, getDetails = false }) {
 	try {
 		const models = [...(yield select(selectContainers)), ...(yield select(selectFederations))];
 		if (!models.length) {
@@ -109,7 +109,7 @@ export function* fetchTemplates({ teamspace, projectId }) {
 		const modelId = models[0]._id;
 		const isFed = !!(yield select(selectFederationById, modelId));
 		const fetchModelTemplates = isFed ? API.Tickets.fetchFederationTemplates : API.Tickets.fetchContainerTemplates;
-		const templates = yield fetchModelTemplates(teamspace, projectId, modelId);
+		const templates = yield fetchModelTemplates(teamspace, projectId, modelId, getDetails);
 		yield put(ProjectsActions.fetchTemplatesSuccess(projectId, templates));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {

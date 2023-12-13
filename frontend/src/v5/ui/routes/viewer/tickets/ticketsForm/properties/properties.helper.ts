@@ -19,8 +19,8 @@ import { TextAreaFixedSize } from '@controls/inputs/textArea/textAreaFixedSize.c
 import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import { Toggle } from '@controls/inputs/toggle/toggle.component';
 import { NumberField } from '@controls/inputs/numberField/numberField.component';
+import { CoordsProperty } from './coordsProperty/coordsProperty.component';
 import { SequencingProperty } from '@components/viewer/cards/tickets/sequencingProperty/sequencingProperty.component';
-import { PinDetails } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/pinDetails/pinDetails.component';
 import { ManyOfProperty } from './manyOfProperty.component';
 import { OneOfProperty } from './oneOfProperty.component';
 import { TicketImage } from './ticketImageContent/ticketImage/ticketImage.component';
@@ -34,7 +34,7 @@ export const TicketProperty = {
 	oneOf: OneOfProperty,
 	manyOf: ManyOfProperty,
 	boolean: Toggle,
-	coords: PinDetails,
+	coords: CoordsProperty,
 	number: NumberField,
 	image: TicketImage,
 	view: TicketView,
