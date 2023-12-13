@@ -43,7 +43,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
-	const { templates: selectedTemplates } = TicketsCardHooksSelectors.selectTicketsFilters();
+	const selectedTemplates = TicketsCardHooksSelectors.selectFilteringTemplates();
 	const showingCompleted = TicketsCardHooksSelectors.selectFilteringCompleted();
 	const availableTemplatesIds = uniq(tickets.map(({ type }) => type));
 	const availableTemplates = templates.filter(({ _id }) => availableTemplatesIds.includes(_id));

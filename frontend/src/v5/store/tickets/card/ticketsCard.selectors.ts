@@ -99,11 +99,6 @@ export const selectSelectedTemplate = createSelector(
 	selectTemplateById,
 );
 
-export const selectTicketsFilters = createSelector(
-	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.ticketsFilters,
-);
-
 export const selectFilteringCompleted = createSelector(
 	selectTicketsCardDomain,
 	(ticketCardState) => ticketCardState.ticketsFilters.complete,
