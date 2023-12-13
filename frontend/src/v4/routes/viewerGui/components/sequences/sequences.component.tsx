@@ -75,7 +75,12 @@ const SequenceDetails = ({
 	const [dateToUse, setDateToUse] = useState(null);
 
 	useEffect(() => {
-		if (!openOnToday || selectedDate) {
+		if (!openOnToday) {
+			setDateToUse(selectedDate || selectedEndingDate);
+			return;
+		}
+
+		if (selectedDate) {
 			setDateToUse(selectedDate);
 			return;
 		}
