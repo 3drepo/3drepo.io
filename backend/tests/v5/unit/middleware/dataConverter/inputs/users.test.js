@@ -213,13 +213,12 @@ const testForgotPasswordData = () => {
 				expect(Responder.respond.mock.results[0].value.code).toEqual(expectedResponse.code);
 			}
 
-			if (userData.customData.sso) {
+			if (userData?.customData?.sso) {
 				expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
 				expect(Mailer.sendEmail).toHaveBeenCalledWith(
 					mailTemplates.FORGOT_PASSWORD_SSO.name,
 					userData.customData.email,
 					{
-						email: userData.customData.email,
 						username: userData.user,
 						firstName: userData.customData.firstName,
 						ssoType: getProviderLabel(userData.customData.sso.type),
