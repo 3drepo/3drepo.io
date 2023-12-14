@@ -73,7 +73,7 @@ export const Viewer = () => {
 	}, [project]);
 
 	useEffect(() => {
-		TicketsCardActionsDispatchers.resetState();
+		TicketsCardActionsDispatchers.resetFilters();
 		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
 	}, [teamspace, project, containerOrFederation]);
 

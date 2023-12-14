@@ -24,6 +24,7 @@ import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emp
 import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { ViewerParams } from '../../../routes.constants';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 export const TicketsListCard = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -37,7 +38,7 @@ export const TicketsListCard = () => {
 				<FormattedMessage id="viewer.cards.tickets.title" defaultMessage="Tickets" />
 				{!readOnly && (<NewTicketMenu />)}
 			</CardHeader>
-			<CardContent>
+			<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
 				{tickets.length ? (
 					<TicketsList tickets={tickets} />
 				) : (
