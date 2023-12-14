@@ -133,8 +133,6 @@ export const selectTicketsFilteredByQueriesAndCompleted = createSelector(
 export const selectTicketsWithAllFiltersApplied = createSelector(
 	selectTicketsFilteredByQueriesAndCompleted,
 	selectFilteringTemplates,
-	selectFilteringQueries,
-	selectCurrentTemplates,
 	(tickets, filteredTemplates) => {
 		if (!filteredTemplates.length) return tickets;
 		return tickets.filter(({ type }) => filteredTemplates.includes(type));
