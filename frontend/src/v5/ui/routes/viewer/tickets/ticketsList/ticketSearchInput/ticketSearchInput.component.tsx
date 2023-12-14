@@ -33,10 +33,10 @@ export const TicketSearchInput = ({ variant = 'filled', placeholder, ...props }:
 	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
 
 	const onChange = (_, newQueries, reason) => {
-		TicketsCardActionsDispatchers.setTicketsQueriesFilter((reason === 'clear') ? [] : newQueries);
+		TicketsCardActionsDispatchers.setQueryFilters((reason === 'clear') ? [] : newQueries);
 	};
 
-	const removeQuery = (deletedQuery) => TicketsCardActionsDispatchers.setTicketsQueriesFilter(queries.filter((query) => query !== deletedQuery ));
+	const removeQuery = (deletedQuery) => TicketsCardActionsDispatchers.setQueryFilters(queries.filter((query) => query !== deletedQuery ));
 
 	return (
 		<Autocomplete

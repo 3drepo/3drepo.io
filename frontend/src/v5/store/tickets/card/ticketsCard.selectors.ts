@@ -101,17 +101,17 @@ export const selectSelectedTemplate = createSelector(
 
 export const selectFilteringCompleted = createSelector(
 	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.ticketsFilters.complete,
+	(ticketCardState) => ticketCardState.filters.complete,
 );
 
 export const selectFilteringTemplates = createSelector(
 	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.ticketsFilters.templates,
+	(ticketCardState) => ticketCardState.filters.templates,
 );
 
 export const selectFilteringQueries = createSelector(
 	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.ticketsFilters.queries,
+	(ticketCardState) => ticketCardState.filters.queries,
 );
 
 export const selectTicketsFilteredByQueriesAndCompleted = createSelector(

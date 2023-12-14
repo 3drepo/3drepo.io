@@ -54,9 +54,9 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 
 	const toggleTemplate = (templateId: string) => {
 		if (selectedTemplates.includes(templateId)) {
-			TicketsCardActionsDispatchers.removeTicketsTemplateFilter(templateId);
+			TicketsCardActionsDispatchers.removeTemplateFilter(templateId);
 		} else {
-			TicketsCardActionsDispatchers.addTicketsTemplateFilter(templateId);
+			TicketsCardActionsDispatchers.addTemplateFilter(templateId);
 		}
 	};
 
@@ -96,7 +96,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 					key="completed"
 					selected={showingCompleted}
 					icon={<TickIcon />}
-					onClick={() => TicketsCardActionsDispatchers.toggleTicketsCompleteFilter()}
+					onClick={() => TicketsCardActionsDispatchers.toggleCompleteFilter()}
 					label={formatMessage({ id: 'ticketsList.filters.completed', defaultMessage: 'Completed' })}
 				/>
 				{availableTemplates.map(({ name, _id }) => {
