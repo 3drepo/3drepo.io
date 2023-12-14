@@ -1534,7 +1534,7 @@ export const theme = createTheme({
 								},
 							},
 							'&.Mui-disabled': {
-								color: COLOR.BASE_MAIN,
+								color: COLOR.BASE_LIGHT,
 							},
 						},
 					},
@@ -1581,12 +1581,16 @@ export const theme = createTheme({
 									'&.Mui-selected': {
 										color: COLOR.PRIMARY_MAIN_CONTRAST,
 									},
+									'&.Mui-disabled': {
+										color: COLOR.BASE_LIGHT,
+									},
 								},
 							},
 						},
 						// bottom buttons (AM - PM)
 						'.MuiClock-pmButton, .MuiClock-amButton': {
-							bottom: 0,
+							bottom: 'unset',
+							top: 190,
 						},
 					},
 				},

@@ -16,37 +16,9 @@
  */
 
 import * as Yup from 'yup';
-import { trimmedString } from '../shared/validators';
-import { formatMessage } from '../../services/intl';
+import { name, image } from './validators';
 
 export const ProjectSchema = Yup.object().shape({
-	projectName: trimmedString
-		.max(120, formatMessage({
-			id: 'projectForm.name.error.max',
-			defaultMessage: 'Project name is limited to 120 characters',
-		}))
-		.required(
-			formatMessage({
-				id: 'projectForm.name.error.required',
-				defaultMessage: 'Project name is required',
-			}),
-		)
-		.matches(
-			/^[^/?=#+]{0,119}[^/?=#+ ]{1}$/,
-			formatMessage({
-				id: 'projectForm.name.error.illegalCharacters',
-				defaultMessage: 'Project name cannot contain the following characters: / ? = # +',
-			}),
-		)
-		.test(
-			'alreadyExistingProject',
-			formatMessage({
-				id: 'projectForm.name.error.alreadyExisting',
-				defaultMessage: 'This name is already taken',
-			}),
-			(projectName, { options }) => {
-				const existingNames = options.context.existingNames || [];
-				return !existingNames.map((name) => name.trim().toLocaleLowerCase()).includes(projectName.toLocaleLowerCase());
-			},
-		),
+	name,
+	image,
 });

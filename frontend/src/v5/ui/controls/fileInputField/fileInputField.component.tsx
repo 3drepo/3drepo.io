@@ -24,16 +24,23 @@ type IFileInputField = ButtonProps & {
 	accept?: string;
 	onChange: (files) => void;
 	children: any;
+	multiple?: boolean;
 };
 
-export const FileInputField = ({ accept, onChange, children }: IFileInputField) => {
+export const FileInputField = ({ accept, onChange, children, multiple = false }: IFileInputField) => {
 	const [id] = useState(uuid());
 
 	const handleClick = (event: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
 		const element = event.target as HTMLInputElement;
 		element.value = '';
 	};
-	const handleChange = (event) => onChange(event.target.files);
+	const handleChange = (event) => {
+		let newValue = event.target.files;
+		if (!multiple) {
+			newValue = newValue[0];
+		}
+		onChange(newValue);
+	};
 
 	return (
 		<FileLabel htmlFor={`hidden-file-input-${id}`}>
@@ -43,7 +50,7 @@ export const FileInputField = ({ accept, onChange, children }: IFileInputField) 
 				type="file"
 				onChange={handleChange}
 				onClick={handleClick}
-				multiple
+				multiple={multiple}
 			/>
 			{children}
 		</FileLabel>

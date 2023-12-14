@@ -15,20 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled from 'styled-components';
+import { Container as ErrorMessage } from '../errorMessage/errorMessage.styles';
 
-export const PostSubmitSuccessfulMessage = styled.div`
+export const PostSubmitSuccessfulMessage = styled(ErrorMessage)`
 	color: ${({ theme }) => theme.palette.primary.main};
 	background-color: ${({ theme }) => theme.palette.primary.lightest};
-	min-height: 45px;
-	box-sizing: border-box;
-	border: solid 1px currentColor;
-	padding: 10px 15px;
-	margin-top: 19px;
-	border-radius: 8px;
-	display: grid;
-	align-items: center;
-	grid-template-columns: 33px 1fr;
-	grid-template-rows: minmax(25px, 1fr) auto;
 
 	h5 {
 		font-size: 16px;
@@ -37,7 +28,6 @@ export const PostSubmitSuccessfulMessage = styled.div`
 
 export const IconContainer = styled.div`
 	display: flex;
-	align-self: start;
 
 	svg {
 		border: solid 1px;

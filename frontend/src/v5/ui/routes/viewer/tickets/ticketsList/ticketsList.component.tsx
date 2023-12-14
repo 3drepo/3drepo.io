@@ -17,7 +17,6 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { isEmpty } from 'lodash';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
@@ -34,6 +33,7 @@ import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters, CompletedFilterChip, TicketSearchInput } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
 import { AdditionalProperties } from '../tickets.constants';
+import { hasDefaultPin } from '../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 
 type TicketsListProps = {
 	tickets: ITicket[];
@@ -85,6 +85,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 		const wasSelected = ticketIsSelected(ticket);
 
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
+		TicketsCardActionsDispatchers.setSelectedTicketPin(hasDefaultPin(ticket) ? ticket._id : null);
 
 		if (wasSelected) {
 			TicketsCardActionsDispatchers.openTicket(ticket._id);
@@ -95,11 +96,12 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 
 	useEffect(() => {
 		const view = selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
-		if (isEmpty(view)) return;
 		goToView(view);
-	}, [selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW]?.state]);
+	}, [selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW]]);
 
 	useEffect(() => {
+		TicketsCardActionsDispatchers.setSelectedTicketPin(selectedTicket?._id);
+
 		const unselectTicket = () => TicketsCardActionsDispatchers.setSelectedTicket(null);
 		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, unselectTicket);
 		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, unselectTicket);

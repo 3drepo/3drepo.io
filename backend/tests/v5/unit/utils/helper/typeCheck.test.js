@@ -132,6 +132,7 @@ const testFileExtensionFromBuffer = () => {
 			['Empty string', '', undefined],
 			['Number', 3, undefined],
 			['Null value', null, undefined],
+			['Undefined value', undefined, undefined],
 		],
 	)('Get file extension', (description, data, extension) => {
 		test(`${description} should return ${extension}`, async () => {

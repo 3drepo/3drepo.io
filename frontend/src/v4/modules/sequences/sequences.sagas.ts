@@ -251,8 +251,22 @@ export function* showSequenceDate({ date }) {
 		yield take(SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS);
 	}
 
-	// 2 - Select the date
-	yield put(SequencesActions.setSelectedDate(date));
+	// 4 - bond date by sequence start/end date
+	const { startDate, endDate } = yield select(selectSelectedSequence);
+
+	const dateAsNumber = new Date(date).getTime();
+
+	let dateToSelect = date;
+
+	if (dateAsNumber < startDate) {
+		dateToSelect = new Date(startDate);
+	}
+
+	if (dateAsNumber > endDate) {
+		dateToSelect = new Date(endDate);
+	}
+
+	yield put(SequencesActions.setSelectedDate(dateToSelect));
 }
 
 function* handleTransparenciesVisibility({ transparencies }) {

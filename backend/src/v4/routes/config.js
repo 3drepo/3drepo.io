@@ -118,7 +118,7 @@ function createClientConfig(serverConfig, req) {
 	}
 
 	clientConfig.uploadSizeLimit = config.uploadSizeLimit;
-	clientConfig.avatarSizeLimit = config.fileUploads.avatarSizeLimit;
+	clientConfig.imageSizeLimit = config.fileUploads.imageSizeLimit;
 	clientConfig.imageExtensions = config.fileUploads.imageExtensions;
 	clientConfig.countries = addressMeta.countries;
 	clientConfig.euCountriesCode = addressMeta.euCountriesCode;

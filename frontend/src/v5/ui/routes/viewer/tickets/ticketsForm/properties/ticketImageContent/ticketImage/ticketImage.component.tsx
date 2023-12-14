@@ -28,7 +28,7 @@ export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperTe
 	const onImageChange = (newValue) => onChange(newValue ? stripBase64Prefix(newValue) : null);
 	const imgSrc = getImgSrc(value);
 
-	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
+	useEffect(() => onBlur?.(), [value]);
 
 	return (
 		<InputContainer disabled={disabled} {...props}>

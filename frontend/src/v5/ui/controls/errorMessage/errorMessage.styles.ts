@@ -16,9 +16,18 @@
  */
 
 import styled from 'styled-components';
-import { PostSubmitSuccessfulMessage } from '@controls/successMessage/successMessage.styles';
 
-export const Container = styled(PostSubmitSuccessfulMessage)`
+export const Container = styled.div`
 	color: ${({ theme }) => theme.palette.error.main};
 	background-color: ${({ theme }) => theme.palette.error.lightest};
+	min-height: 45px;
+	box-sizing: border-box;
+	border: solid 1px currentColor;
+	padding: 10px 15px;
+	margin-top: 19px;
+	border-radius: 8px;
+	display: grid;
+	align-items: center;
+	grid-template-columns: 33px 1fr;
+	grid-template-rows: minmax(25px, 1fr) auto;
 `;

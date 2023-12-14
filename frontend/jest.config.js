@@ -6,7 +6,8 @@ module.exports = {
 	moduleNameMapper: {
 		'@assets/(.*)': '<rootDir>/assets/$1',
 		'@controls/(.*)': '<rootDir>/src/v5/ui/controls/$1',
-		'^@/(.*)$': '<rootDir>/src/$1'
+		'^@/(.*)$': '<rootDir>/src/$1',
+    	'@components/(.*)': '<rootDir>/src/v5/ui/components/$1'
 	},
 	transform: {
 		'^.+\\.svg$': '<rootDir>/internals/testing/svgTransform.ts',
@@ -15,3 +16,4 @@ module.exports = {
 		"node_modules/(?!byte-size/.*)"
 	],
 };
+

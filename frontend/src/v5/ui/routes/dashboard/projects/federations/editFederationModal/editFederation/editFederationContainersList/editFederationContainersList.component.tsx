@@ -34,9 +34,10 @@ import { isEmpty } from 'lodash';
 import { ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CollapseSideElementGroup } from '@/v5/ui/routes/dashboard/projects/containers/containersList/containersList.styles';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
-import { SkeletonListItem } from '@components/shared/revisionDetails/components/skeletonListItem/skeletonListItem.component';
 import { EditFederationContainersListItem, IconButtonProps } from './editFederationContainersListItem/editFederationContainersListItem.component';
 import { Container, ContainerListMainTitle, ContainerCount } from './editFederationContainersList.styles';
+import { VirtualList } from '@controls/virtualList/virtualList.component';
+import { EditFederationContainersListItemLoading } from './editFederationContainersListItem/editFederationContainersListItemLoading.component';
 
 export type ActionButtonProps = {
 	children: ReactNode;
@@ -92,6 +93,7 @@ export const EditFederationContainers = ({
 						{!isListPending && <ContainerCount>({sortedList.length})</ContainerCount>}
 					</>
 				)}
+				interactableWhileLoading
 				isLoading={areStatsPending}
 				tooltipTitles={collapsableTooltips}
 				sideElement={(
@@ -111,7 +113,7 @@ export const EditFederationContainers = ({
 					<DashboardListHeaderLabel name="name" minWidth={116}>
 						<FormattedMessage id="modal.editFederation.list.header.container" defaultMessage="Container" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="revisionsCount" width={186} hideWhenSmallerThan={Display.Desktop}>
+					<DashboardListHeaderLabel name="revisionsCount" width={170} hideWhenSmallerThan={Display.Desktop}>
 						<FormattedMessage id="modal.editFederation.list.header.revisions" defaultMessage="Revisions" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="code" width={160}>
@@ -123,27 +125,32 @@ export const EditFederationContainers = ({
 					<DashboardListHeaderLabel name="type" width={160} hideWhenSmallerThan={Display.Tablet}>
 						<FormattedMessage id="modal.editFederation.list.header.category" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="lastUpdated" width={100}>
+					<DashboardListHeaderLabel name="lastUpdated" width={140}>
 						<FormattedMessage id="modal.editFederation.list.header.lastUpdated" defaultMessage="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
 				<DashboardList>
+
 					{!isEmpty(sortedList) ? (
-						sortedList.map((container, index) => (container.hasStatsPending ? (
-							<SkeletonListItem delay={index / 10} key={container._id} />
-						) : (
-							<EditFederationContainersListItem
-								icon={IconButton}
-								key={container._id}
-								isSelected={container._id === selectedItemId}
-								container={container}
-								filterQuery={query}
-								onItemClick={selectOrToggleItem}
-							/>
-						)))
+						<VirtualList items={sortedList} itemHeight={81} itemContent={
+							(container, index) => (
+								container.hasStatsPending ? (
+									<EditFederationContainersListItemLoading  index={index} container={container} key={container._id} />
+								) : (
+									<EditFederationContainersListItem
+										icon={IconButton}
+										key={container._id}
+										isSelected={container._id === selectedItemId}
+										container={container}
+										filterQuery={query}
+										onItemClick={selectOrToggleItem}
+									/>
+								)
+							)
+						}/>
 					) : (
 						<DashboardListEmptyContainer>
-							{ hasContainers ? (
+							{hasContainers ? (
 								<DashboardListEmptySearchResults />
 							) : emptyListMessage}
 						</DashboardListEmptyContainer>
