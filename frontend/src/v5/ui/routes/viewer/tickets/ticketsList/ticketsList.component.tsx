@@ -17,7 +17,7 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import { uniq } from 'lodash';
+import { uniq, xor } from 'lodash';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
@@ -52,13 +52,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 	const filteredByQueriesAndCompleted = TicketsCardHooksSelectors.selectTicketsFilteredByQueriesAndCompleted();
 	const filteredItems = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied();
 
-	const toggleTemplate = (templateId: string) => {
-		if (selectedTemplates.includes(templateId)) {
-			TicketsCardActionsDispatchers.removeTemplateFilter(templateId);
-		} else {
-			TicketsCardActionsDispatchers.addTemplateFilter(templateId);
-		}
-	};
+	const toggleTemplate = (templateId: string) => TicketsCardActionsDispatchers.setTemplateFilters(xor(selectedTemplates, [templateId]));
 
 	const onTicketClick = (ticket: ITicket, event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		event.stopPropagation();
