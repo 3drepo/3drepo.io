@@ -535,7 +535,7 @@ const testDeleteModel = () => {
 		const conIsSubModel = ServiceHelper.generateRandomModel();
 		const fedOfSubModelCon = ServiceHelper.generateRandomModel({ isFederation: true });
 
-		fedOfSubModelCon.properties.subModels = [conIsSubModel._id];
+		fedOfSubModelCon.properties.subModels = [{ _id: conIsSubModel._id }];
 
 		beforeAll(async () => {
 			const models = [con, fed, conIsSubModel, fedOfSubModelCon];
@@ -600,7 +600,7 @@ const testUpdateModelSettings = () => {
 		const conIsSubModel = ServiceHelper.generateRandomModel();
 		const fedOfSubModelCon = ServiceHelper.generateRandomModel({ isFederation: true });
 
-		fedOfSubModelCon.properties.subModels = [conIsSubModel._id];
+		fedOfSubModelCon.properties.subModels = [{ _id: conIsSubModel._id }];
 
 		fed.legend = { _id: ServiceHelper.generateUUID() };
 		con.legend = { _id: ServiceHelper.generateUUID() };

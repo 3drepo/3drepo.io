@@ -18,7 +18,6 @@
 const GROUPS_COL = 'tickets.groups';
 
 const { deleteMany, find, findOne, insertMany, updateOne } = require('../handler/db');
-const { convertLegacyRules } = require('../schemas/rules');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
@@ -34,19 +33,8 @@ Groups.deleteGroups = async (teamspace, project, model, ticket, groupIds) => {
 	await deleteMany(teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: { $in: groupIds } });
 };
 
-Groups.getGroupsByIds = async (teamspace, project, model, ticket, groupIds, projection) => {
-	const groups = await find(teamspace, GROUPS_COL,
-		{ teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
-
-	return groups.map(({ rules, ...group }) => {
-		if (rules) {
-			// eslint-disable-next-line no-param-reassign
-			group.rules = convertLegacyRules(rules);
-		}
-
-		return group;
-	});
-};
+Groups.getGroupsByIds = (teamspace, project, model, ticket, groupIds, projection) => find(teamspace, GROUPS_COL,
+	{ teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
 
 Groups.updateGroup = async (teamspace, project, model, ticket, groupId, data, author) => {
 	const updates = { $set: data };
@@ -71,9 +59,6 @@ Groups.getGroupById = async (teamspace, project, model, ticket, groupId,
 		throw templates.groupNotFound;
 	}
 
-	if (group.rules) {
-		group.rules = convertLegacyRules(group.rules);
-	}
 	return group;
 };
 
