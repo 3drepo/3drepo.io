@@ -191,6 +191,6 @@ export type TicketWithModelIdAndName = ITicket & { modelId: string; modelName: s
 
 export type ITicketsFilters = {
 	complete: boolean,
-	templates: string[] | null,
-	queries: string[] | null,
+	templates: string[],
+	queries: string[],
 };
