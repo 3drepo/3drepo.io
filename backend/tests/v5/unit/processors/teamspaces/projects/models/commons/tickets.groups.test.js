@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /**
  *  Copyright (C) 2022 3D Repo Ltd
  *
@@ -261,27 +262,28 @@ const testAddGroups = () => {
 				expect(ScenesModel.getNodesByIds).toHaveBeenCalledTimes(groups.length);
 				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(groups.length);
 
-				groups.forEach((g) => {
-					g.objects.forEach((o) => {
-						expect(ScenesModel.getNodesByIds).toHaveBeenCalledWith(teamspace, project, o.container, o._ids,
-							{ _id: 0, shared_id: 1 });
+				const convertedGroups = groups.map((group) => {
+					const convertedObjects = group.objects.map((obj) => {
+						expect(ScenesModel.getNodesByIds).toHaveBeenCalledWith(teamspace, project,
+							obj.container, obj._ids, { _id: 0, shared_id: 1 });
 
 						const externalIdKeys = Object.values(externalIdNamesToKeys).flat().map((n) => ({ key: n }));
 						const query = { parents: { $in: sharedIds.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
 						const projection = { metadata: { $elemMatch: { $or: externalIdKeys } } };
 
-						expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, o.container,
+						expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, obj.container,
 							query, projection);
 
-						if (metadata.length) {
-							delete o._ids;
-							o[externalIdName] = metadata.map((m) => m.metadata[0].value);
-						}
+						return metadata.length
+							? { ...obj, _ids: undefined, [externalIdName]: metadata.map((m) => m.metadata[0].value) }
+							: obj;
 					});
+					return { ...group, objects: convertedObjects };
 				});
 
 				expect(GroupsModel.addGroups).toHaveBeenCalledTimes(1);
-				expect(GroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, container, ticket, groups);
+				expect(GroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, container,
+					ticket, convertedGroups);
 			});
 		});
 	});
@@ -334,21 +336,20 @@ const testUpdateGroup = () => {
 				expect(ScenesModel.getNodesByIds).toHaveBeenCalledTimes(data.objects.length);
 				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(data.objects.length);
 
-				data.objects.forEach((o) => {
-					expect(ScenesModel.getNodesByIds).toHaveBeenCalledWith(teamspace, project, o.container, o._ids,
+				data.objects = data.objects.map((obj) => {
+					expect(ScenesModel.getNodesByIds).toHaveBeenCalledWith(teamspace, project, obj.container, obj._ids,
 						{ _id: 0, shared_id: 1 });
 
 					const externalIdKeys = Object.values(externalIdNamesToKeys).flat().map((n) => ({ key: n }));
 					const query = { parents: { $in: sharedIds.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
 					const projection = { metadata: { $elemMatch: { $or: externalIdKeys } } };
 
-					expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, o.container,
+					expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, obj.container,
 						query, projection);
 
-					if (metadata.length) {
-						delete o._ids;
-						o[externalIdName] = metadata.map((m) => m.metadata[0].value);
-					}
+					return metadata.length
+						? { ...obj, _ids: undefined, [externalIdName]: metadata.map((m) => m.metadata[0].value) }
+						: obj;
 				});
 
 				expect(GroupsModel.updateGroup).toHaveBeenCalledTimes(1);
