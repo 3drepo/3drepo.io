@@ -162,12 +162,12 @@ const testGetTicketGroupById = () => {
 	});
 
 	describe.each([
-		['when its a federation group', { ...defaultOptions, containers: [container], group: cloneDeep(ifcGuidGroup), externalIdName: 'ifc_guids' }],
-		['when convertTo3dRepoIds set to false', { ...defaultOptions, group: cloneDeep(ifcGuidGroup), convertTo3dRepoIds: false }],
-		['when group already stores 3d repo Ids', { ...defaultOptions, group: cloneDeep(normalGroup) }],
-		['when getLatestRevision fails', { ...defaultOptions, group: cloneDeep(ifcGuidGroup), externalIdName: 'ifc_guids', containers: [container], latestRevisionFail: true }],
-		['when converting from ifc guids', { ...defaultOptions, group: cloneDeep(ifcGuidGroup), externalIdName: 'ifc_guids' }],
-		['when converting from revit Ids', { ...defaultOptions, group: cloneDeep(revitIdGroup), externalIdName: 'revit_ids' }],
+		['when its a federation group', { ...defaultOptions, containers: [container], group: ifcGuidGroup, externalIdName: 'ifc_guids' }],
+		['when convertTo3dRepoIds set to false', { ...defaultOptions, group: ifcGuidGroup, convertTo3dRepoIds: false }],
+		['when group already stores 3d repo Ids', { ...defaultOptions, group: normalGroup }],
+		['when getLatestRevision fails', { ...defaultOptions, group: ifcGuidGroup, externalIdName: 'ifc_guids', containers: [container], latestRevisionFail: true }],
+		['when converting from ifc guids', { ...defaultOptions, group: ifcGuidGroup, externalIdName: 'ifc_guids' }],
+		['when converting from revit Ids', { ...defaultOptions, group: revitIdGroup, externalIdName: 'revit_ids' }],
 	])('Get ticket group by Id (normal group)', (desc, options) => {
 		test(`should return the group found ${desc}`, async () => {
 			const expectedData = cloneDeep(options.group);
@@ -207,6 +207,17 @@ const testGetTicketGroupById = () => {
 					expect(RevsModel.getLatestRevision).toHaveBeenCalledTimes(1);
 					expect(RevsModel.getLatestRevision).toHaveBeenCalledWith(teamspace,
 						options.group.objects[0].container, { _id: 1 });
+				}
+
+				if (!options.latestRevisionFail && options.group !== normalGroup) {
+					const query = {
+						rev_id: revision,
+						metadata: { $elemMatch: { key: { $in: externalIdNamesToKeys[options.externalIdName] },
+							value: { $in: options.group.objects.map((o) => o[options.externalIdName]).flat() } } },
+					};
+					expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
+					expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace,
+						options.group.objects[0].container, query, { parents: 1 });
 				}
 			}
 
