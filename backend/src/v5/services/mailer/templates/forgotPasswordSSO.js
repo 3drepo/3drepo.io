@@ -15,25 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const errorNotification = require('./templates/errorNotification');
-const forgotPassword = require('./templates/forgotPassword');
-const forgotPasswordSso = require('./templates/forgotPasswordSSO');
-const { toConstantCase } = require('../../utils/helper/strings');
-const verifyUser = require('./templates/verifyUser');
+const Yup = require('yup');
+const config = require('../../../utils/config');
+const { generateTemplateFn } = require('./common');
 
-const MailerConstants = {};
+const dataSchema = Yup.object({
+	username: Yup.string().required(),
+	ssoType: Yup.string().required(),
+	domain: Yup.string().default(() => config.getBaseURL()),
+	supportEmail: Yup.string().default(() => config.contact.support),
+}).required(true);
 
-const templates = {
-	verifyUser,
-	forgotPassword,
-	forgotPasswordSso,
-	errorNotification,
-};
+const TEMPLATE_PATH = `${__dirname}/html/forgotPasswordSSO.html`;
 
-MailerConstants.templates = {};
-Object.keys(templates).forEach((templateName) => {
-	const name = toConstantCase(templateName);
-	MailerConstants.templates[name] = { ...templates[templateName], name };
-});
+const ForgotPasswordTemplate = {};
 
-module.exports = MailerConstants;
+ForgotPasswordTemplate.subject = () => 'Your reset password request';
+
+ForgotPasswordTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
+
+module.exports = ForgotPasswordTemplate;
