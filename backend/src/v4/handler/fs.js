@@ -111,7 +111,7 @@ class FSHandler {
 
 	getFile(key) {
 		try {
-			return readFile(this.getPullPath(key));
+			return readFile(this.getFullPath(key));
 		} catch (err) {
 			systemLogger.logError("Failed to get file: ", err);
 			return Promise.reject(ResponseCodes.NO_FILE_FOUND);
