@@ -18,7 +18,8 @@
 const { cloneDeep, times } = require('lodash');
 
 const { src } = require('../../../../../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomObject, generateUUIDString } = require('../../../../../../helper/services');
+const { stringToUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
 
 const Groups = require(`${src}/processors/teamspaces/projects/models/commons/tickets.groups`);
 
@@ -37,315 +38,329 @@ const ScenesModel = require(`${src}/models/scenes`);
 jest.mock('../../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 
+const externalIdNamesToKeys = {
+	ifc_guids: ['IFC GUID', 'Ifc::IfcGUID', 'Element::IfcGUID'],
+	revit_ids: ['Element ID', 'Element ID::Value'],
+};
+
 const testGetTicketGroupById = () => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const container = generateRandomString();
 	const ticket = generateRandomString();
 	const groupId = generateRandomString();
+	const smartGroup = { rules: [generateRandomObject()] };
+	const normalGroup = { objects: [{ _ids: [times(10, () => generateRandomString())],
+		container: generateRandomString() }] };
+	const ifcGuidGroup = { objects: [{ ifc_guids: [times(10, () => generateRandomString())],
+		container: generateRandomString() }] };
+	const revitIdGroup = { objects: [{ revit_ids: [times(10, () => generateRandomString())],
+		container: generateRandomString() }] };
+
+	const getMeta = (externalIdName) => times(10, () => ({ parents: times(2, () => generateRandomString()),
+		metadata: [{ key: externalIdName, value: generateRandomString() }] }));
 
 	const defaultOptions = {
-		negativeQuery: false,
-		matchedMeta: times(10, () => ({ parents: times(2, () => generateRandomString()) })),
+		group: smartGroup,
+		matchedMeta: getMeta('IFC GUID'),
 		unwantedMeta: [],
-		latestRevision: { _id: generateRandomString() },
 		revision: generateRandomString(),
+		convertTo3dRepoIds: true,
+		latestRevisionFail: false,
 	};
 
 	describe.each([
-		['when its a normal group', { objects: [{ _ids: [generateRandomString()] }] }, defaultOptions],
-		['when its a smart group (container)', { rules: [generateRandomObject()] }, defaultOptions],
-		['when its a smart group (federation)', { rules: [generateRandomObject()] }, { ...defaultOptions, containers: [container] }],
-	])('Get ticket group by Id', (desc, group, options) => {
+		['when its a container group', defaultOptions],
+		['when its a federation group', { ...defaultOptions, containers: [container] }],
+		['when getLatestRevision fails', { ...defaultOptions, containers: [container], latestRevisionFail: true }],
+		['when there is a negative query', { ...defaultOptions, unwantedMeta: defaultOptions.matchedMeta.slice(5) }],
+		['when there are no matches', { ...defaultOptions, matchedMeta: [] }],
+		['with ifc guids', { ...defaultOptions, convertTo3dRepoIds: false, externalIdName: 'ifc_guids' }],
+		['with revit ids', { ...defaultOptions, convertTo3dRepoIds: false, externalIdName: 'revit_ids', matchedMeta: getMeta('Element ID') }],
+		['with ifc guids (with negative query)', { ...defaultOptions, convertTo3dRepoIds: false, externalIdName: 'ifc_guids', unwantedMeta: defaultOptions.matchedMeta.slice(0, 5) }],
+	])('Get ticket group by Id (smart group)', (desc, options) => {
 		test(`should return the group found ${desc}`, async () => {
-			let expectedData = group;
+			let expectedData;
 			let { revision } = options;
 
-			GroupsModel.getGroupById.mockResolvedValueOnce(group);
+			GroupsModel.getGroupById.mockResolvedValueOnce(cloneDeep(options.group));
 
-			if (options.containers && (group.rules || options.convertTo3DRepoGuids)) {
-				revision = generateRandomString();
-				
-				options.failedRevision ? 
-				RevsModel.getLatestRevision.mockResolvedValueOnce({ _id: revision });
-			}
+			if (options.latestRevisionFail) {
+				RevsModel.getLatestRevision.mockRejectedValueOnce(generateRandomString);
+				expectedData = { ...options.group, objects: [] };
+			} else {
+				if (options.containers) {
+					revision = generateRandomString();
+					RevsModel.getLatestRevision.mockResolvedValueOnce({ _id: revision });
+				}
 
-			if (group.rules) {
 				MetaModel.getMetadataByRules.mockResolvedValueOnce({
 					matched: options.matchedMeta, unwanted: options.unwantedMeta,
 				});
 
-				const nodeRes = times(10, () => ({ _id: generateRandomString() }));
-				ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes);
+				if (options.convertTo3dRepoIds) {
+					const nodeRes = options.matchedMeta.length
+						? times(10, () => ({ _id: generateRandomString() }))
+						: [];
 
-				const idMapMock = {};
+					if (options.matchedMeta.length) {
+						ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes);
+					}
 
-				nodeRes.forEach(({ _id }) => { idMapMock[_id] = [_id]; });
-				FilesManager.getFile.mockResolvedValueOnce(JSON.stringify(idMapMock));
+					if (options.unwantedMeta.length && nodeRes.length) {
+						ScenesModel.getNodesBySharedIds
+							.mockResolvedValueOnce([...nodeRes.slice(options.unwantedMeta.length),
+								{ _id: generateRandomString() }]);
+					}
 
-				expectedData = { ...group, objects: [{ container, _ids: nodeRes.map(({ _id }) => _id) }] };
+					const idMapMock = {};
+					nodeRes.slice(1).forEach(({ _id }) => { idMapMock[_id] = [_id]; });
+					FilesManager.getFile.mockResolvedValueOnce(JSON.stringify(idMapMock));
+
+					const ids = nodeRes.slice(1, nodeRes.length - options.unwantedMeta.length).map(({ _id }) => _id);
+
+					expectedData = { ...options.group, objects: ids.length ? [{ container, _ids: ids }] : [] };
+				} else {
+					expectedData = { ...options.group,
+						objects: [{ container,
+							[options.externalIdName]: options.matchedMeta.map((m) => m.metadata[0].value) }] };
+				}
 			}
 
 			await expect(Groups.getTicketGroupById(teamspace, project, container, options.revision, ticket,
-				groupId, options.containers, true)).resolves.toEqual(expectedData);
+				groupId, options.containers, options.convertTo3dRepoIds)).resolves.toEqual(expectedData);
 
 			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
 			expect(GroupsModel.getGroupById).toHaveBeenCalledWith(teamspace, project, container, ticket, groupId);
 
-			if (options.containers && (group.rules || options.convertTo3DRepoGuids)) {
+			if (options.containers) {
 				expect(RevsModel.getLatestRevision).toHaveBeenCalledTimes(1);
 				expect(RevsModel.getLatestRevision).toHaveBeenCalledWith(teamspace, container, { _id: 1 });
 			}
 
-			if (group.rules) {
+			if (!options.latestRevisionFail) {
 				expect(MetaModel.getMetadataByRules).toHaveBeenCalledTimes(1);
 				expect(MetaModel.getMetadataByRules).toHaveBeenCalledWith(teamspace, project, container,
-					revision, group.rules, { parents: 1 });
+					revision, options.group.rules, {
+						parents: 1,
+						...(options.convertTo3dRepoIds ? {} : { metadata: { $elemMatch:
+							{ $or: Object.values(externalIdNamesToKeys).flat().map((n) => ({ key: n })) } } }),
+					});
 
-				expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledTimes(1);
-				expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledWith(teamspace, project, container,
-					revision, options.matchedMeta.flatMap(({ parents }) => parents), { _id: 1 });
+				if (options.matchedMeta.length && options.convertTo3dRepoIds) {
+					expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledWith(teamspace, project, container,
+						revision, options.matchedMeta.flatMap(({ parents }) => parents), { _id: 1 });
+				}
+
+				if (options.unwantedMeta.length && options.convertTo3dRepoIds) {
+					expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledWith(teamspace, project, container,
+						revision, options.unwantedMeta.flatMap(({ parents }) => parents), { _id: 1 });
+				}
 			}
 		});
 	});
 
-	describe('Get ticket group by Id', () => {
-		const teamspace = generateRandomString();
-		const project = generateRandomString();
-		const model = generateRandomString();
-		const revId = generateRandomString();
-		const ticket = generateRandomString();
-		const group = generateRandomString();
+	describe.each([
+		['when its a federation group', { ...defaultOptions, containers: [container], group: cloneDeep(ifcGuidGroup), externalIdName: 'ifc_guids' }],
+		['when convertTo3dRepoIds set to false', { ...defaultOptions, group: cloneDeep(ifcGuidGroup), convertTo3dRepoIds: false }],
+		['when group already stores 3d repo Ids', { ...defaultOptions, group: cloneDeep(normalGroup) }],
+		['when getLatestRevision fails', { ...defaultOptions, group: cloneDeep(ifcGuidGroup), externalIdName: 'ifc_guids', containers: [container], latestRevisionFail: true }],
+		['when converting from ifc guids', { ...defaultOptions, group: cloneDeep(ifcGuidGroup), externalIdName: 'ifc_guids' }],
+		['when converting from revit Ids', { ...defaultOptions, group: cloneDeep(revitIdGroup), externalIdName: 'revit_ids' }],
+	])('Get ticket group by Id (normal group)', (desc, options) => {
+		test(`should return the group found ${desc}`, async () => {
+			const expectedData = cloneDeep(options.group);
+			let { revision } = options;
 
-		test('[Normal group] should return the group found', async () => {
-			const expectedData = { ...generateRandomObject(), objects: [{ _ids: [generateRandomString()] }] };
-			GroupsModel.getGroupById.mockResolvedValueOnce(expectedData);
+			GroupsModel.getGroupById.mockResolvedValueOnce(cloneDeep(options.group));
 
-			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group, undefined, true))
-				.resolves.toEqual(expectedData);
+			if (options.convertTo3dRepoIds && options.externalIdName) {
+				if (options.latestRevisionFail) {
+					RevsModel.getLatestRevision.mockRejectedValueOnce(generateRandomString());
+					expectedData.objects = [];
+				} else {
+					if (options.containers) {
+						revision = generateRandomString();
+						RevsModel.getLatestRevision.mockResolvedValueOnce({ _id: revision });
+					}
+
+					const nodeRes = times(10, () => ({ _id: generateUUIDString() }));
+					MetaModel.getMetadataByQuery.mockResolvedValueOnce(options.matchedMeta);
+					ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes);
+
+					const idMapMock = { };
+					nodeRes.slice(1).forEach(({ _id }) => { idMapMock[_id] = [_id]; });
+					FilesManager.getFile.mockResolvedValueOnce(JSON.stringify(idMapMock));
+
+					const ids = nodeRes.slice(1).map(({ _id }) => stringToUUID(_id));
+					expectedData.objects = expectedData.objects
+						.map((o) => ({ ...o, [options.externalIdName]: undefined, _ids: ids }));
+				}
+			}
+
+			await expect(Groups.getTicketGroupById(teamspace, project, container, revision, ticket,
+				groupId, options.containers, options.convertTo3dRepoIds)).resolves.toEqual(expectedData);
+
+			if (options.convertTo3dRepoIds) {
+				if (options.containers) {
+					expect(RevsModel.getLatestRevision).toHaveBeenCalledTimes(1);
+					expect(RevsModel.getLatestRevision).toHaveBeenCalledWith(teamspace,
+						options.group.objects[0].container, { _id: 1 });
+				}
+			}
 
 			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
-			expect(GroupsModel.getGroupById).toHaveBeenCalledWith(teamspace, project, model, ticket, group);
+			expect(GroupsModel.getGroupById).toHaveBeenCalledWith(teamspace, project, container, ticket, groupId);
+		});
+	});
+};
+
+const testAddGroups = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const container = generateRandomString();
+	const ticket = generateRandomString();
+
+	describe('Add groups', () => {
+		test('should add smart groups', async () => {
+			const smartGroups = times(10, () => ({ rules: generateRandomString() }));
+			await Groups.addGroups(teamspace, project, container, ticket, smartGroups);
+
+			expect(GroupsModel.addGroups).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, container, ticket, smartGroups);
 		});
 
-		test('[Smart group] should return the group found with the query results (container)', async () => {
-			const groupData = { ...generateRandomObject(), rules: [generateRandomObject()] };
-			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
+		test('should add groups without conversion if they already have external Id', async () => {
+			const groups = times(10, () => ({
+				objects: [{ ifc_guids: [generateRandomString()], container: generateRandomString() }],
+			}));
+			await Groups.addGroups(teamspace, project, container, ticket, groups);
 
-			const metaRes = times(10, () => ({ parents: times(2, () => generateRandomString()) }));
-			MetaModel.getMetadataByRules.mockResolvedValueOnce({ matched: metaRes, unwanted: [] });
-
-			const nodeRes = times(10, () => ({ _id: generateRandomString() }));
-			ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes);
-
-			const idMapMock = {};
-
-			nodeRes.forEach(({ _id }) => { idMapMock[_id] = [_id]; });
-
-			FilesManager.getFile.mockResolvedValueOnce(JSON.stringify(idMapMock));
-
-			const expectedData = cloneDeep(groupData);
-			expectedData.objects = [{
-				container: model,
-				_ids: nodeRes.map(({ _id }) => _id),
-			}];
-
-			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group, undefined, true))
-				.resolves.toEqual(expectedData);
-
-			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
-			expect(GroupsModel.getGroupById).toHaveBeenCalledWith(teamspace, project, model, ticket, group);
-
-			expect(RevsModel.getLatestRevision).not.toHaveBeenCalled();
-
-			expect(MetaModel.getMetadataByRules).toHaveBeenCalledTimes(1);
-			expect(MetaModel.getMetadataByRules).toHaveBeenCalledWith(teamspace, project, model, revId,
-				groupData.rules, { parents: 1 });
-
-			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledTimes(1);
-			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledWith(teamspace, project, model,
-				revId, metaRes.flatMap(({ parents }) => parents), { _id: 1 });
+			expect(GroupsModel.addGroups).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, container, ticket, groups);
 		});
 
-		test('[Smart group] should return the group found with the query results (federations)', async () => {
-			const container = generateRandomString();
+		describe.each([
+			['preserve oject as it is (no metadata found)', undefined, []],
+			['convert object ids to ifc_guids', 'ifc_guids', times(10, () => ({ metadata: [{ key: 'IFC GUID', value: generateRandomString() }] }))],
+			['convert object ids to revit_ids', 'revit_ids', times(10, () => ({ metadata: [{ key: 'Element ID', value: generateRandomString() }] }))],
+		])('Convert Ids and add groups', (desc, externalIdName, metadata) => {
+			test(`should ${desc} and add groups`, async () => {
+				const groups = times(10, () => ({
+					objects: [{ _ids: [generateRandomString()], container: generateRandomString() }],
+				}));
+				const sharedIds = times(10, () => ({ shared_id: generateRandomString() }));
 
-			const conRev = generateRandomString();
-			RevsModel.getLatestRevision.mockResolvedValueOnce({ _id: conRev });
+				times(groups.length, () => {
+					ScenesModel.getNodesByIds.mockResolvedValueOnce(sharedIds);
+					MetaModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
+				});
 
-			const groupData = { ...generateRandomObject(), rules: [generateRandomObject()] };
-			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
+				await Groups.addGroups(teamspace, project, container, ticket, groups);
 
-			const metaRes = times(10, () => ({ parents: times(2, () => generateRandomString()) }));
-			MetaModel.getMetadataByRules.mockResolvedValueOnce({ matched: metaRes, unwanted: [] });
+				expect(ScenesModel.getNodesByIds).toHaveBeenCalledTimes(groups.length);
+				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(groups.length);
 
-			const nodeRes = times(10, () => ({ _id: generateRandomString() }));
-			ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes);
+				groups.forEach((g) => {
+					g.objects.forEach((o) => {
+						expect(ScenesModel.getNodesByIds).toHaveBeenCalledWith(teamspace, project, o.container, o._ids,
+							{ _id: 0, shared_id: 1 });
 
-			const idMapMock = {};
+						const externalIdKeys = Object.values(externalIdNamesToKeys).flat().map((n) => ({ key: n }));
+						const query = { parents: { $in: sharedIds.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
+						const projection = { metadata: { $elemMatch: { $or: externalIdKeys } } };
 
-			nodeRes.forEach(({ _id }) => { idMapMock[_id] = [_id]; });
+						expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, o.container,
+							query, projection);
 
-			FilesManager.getFile.mockResolvedValueOnce(JSON.stringify(idMapMock));
+						if (metadata.length) {
+							delete o._ids;
+							o[externalIdName] = metadata.map((m) => m.metadata[0].value);
+						}
+					});
+				});
 
-			const expectedData = cloneDeep(groupData);
-			expectedData.objects = [{
-				container,
-				_ids: nodeRes.map(({ _id }) => _id),
-			}];
+				expect(GroupsModel.addGroups).toHaveBeenCalledTimes(1);
+				expect(GroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, container, ticket, groups);
+			});
+		});
+	});
+};
 
-			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group, [container], true))
-				.resolves.toEqual(expectedData);
+const testUpdateGroup = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const container = generateRandomString();
+	const ticket = generateRandomString();
+	const groupId = generateRandomString();
+	const author = generateRandomString();
 
-			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
-			expect(GroupsModel.getGroupById).toHaveBeenCalledWith(teamspace, project, model, ticket, group);
+	describe('Update groups', () => {
+		test('should update a group', async () => {
+			const data = generateRandomObject();
+			await Groups.updateTicketGroup(teamspace, project, container, ticket, groupId, data, author);
 
-			expect(RevsModel.getLatestRevision).toHaveBeenCalledTimes(1);
-			expect(RevsModel.getLatestRevision).toHaveBeenCalledWith(teamspace, container, { _id: 1 });
-
-			expect(MetaModel.getMetadataByRules).toHaveBeenCalledTimes(1);
-			expect(MetaModel.getMetadataByRules).toHaveBeenCalledWith(teamspace, project, container, conRev,
-				groupData.rules, { parents: 1 });
-
-			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledTimes(1);
-			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledWith(teamspace, project, container,
-				conRev, metaRes.flatMap(({ parents }) => parents), { _id: 1 });
+			expect(GroupsModel.updateGroup).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.updateGroup).toHaveBeenCalledWith(teamspace, project, container, ticket, groupId,
+				data, author);
 		});
 
-		test('[Smart group] should not fail if we failed to find a revision for the container (federations)', async () => {
-			const container = generateRandomString();
+		test('should update a group without conversion if it already has external Id', async () => {
+			const data = { objects: [{ ifc_guids: [generateRandomString()], container: generateRandomString() }] };
+			await Groups.updateTicketGroup(teamspace, project, container, ticket, groupId, data, author);
 
-			RevsModel.getLatestRevision.mockRejectedValueOnce(generateRandomString());
-
-			const groupData = { ...generateRandomObject(), rules: [generateRandomObject()] };
-			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
-
-			const expectedData = cloneDeep(groupData);
-			expectedData.objects = [];
-
-			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group, [container], true))
-				.resolves.toEqual(expectedData);
-
-			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
-			expect(GroupsModel.getGroupById).toHaveBeenCalledWith(teamspace, project, model, ticket, group);
-
-			expect(RevsModel.getLatestRevision).toHaveBeenCalledTimes(1);
-			expect(RevsModel.getLatestRevision).toHaveBeenCalledWith(teamspace, container, { _id: 1 });
-
-			expect(MetaModel.getMetadataByRules).not.toHaveBeenCalled();
-			expect(ScenesModel.getNodesBySharedIds).not.toHaveBeenCalled();
+			expect(GroupsModel.updateGroup).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.updateGroup).toHaveBeenCalledWith(teamspace, project, container, ticket, groupId,
+				data, author);
 		});
 
-		test('[Smart group] should return the group found with the query results (negative query)', async () => {
-			const groupData = { ...generateRandomObject(), rules: [generateRandomObject()] };
-			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
+		describe.each([
+			['preserve oject as it is (no metadata found)', undefined, []],
+			['convert object ids to ifc_guids', 'ifc_guids', times(10, () => ({ metadata: [{ key: 'IFC GUID', value: generateRandomString() }] }))],
+			['convert object ids to revit_ids', 'revit_ids', times(10, () => ({ metadata: [{ key: 'Element ID', value: generateRandomString() }] }))],
+		])('Convert Ids and update groups', (desc, externalIdName, metadata) => {
+			test(`should ${desc} and update groups`, async () => {
+				const data = { objects: times(10, () => ({
+					_ids: [generateRandomString()], container: generateRandomString() })) };
+				const sharedIds = times(10, () => ({ shared_id: generateRandomString() }));
 
-			const metaRes = times(10, () => ({ parents: times(2, () => generateRandomString()) }));
-			const rejected = times(10, () => ({ parents: times(2, () => generateRandomString()) }));
-			MetaModel.getMetadataByRules.mockResolvedValueOnce({ matched: metaRes, unwanted: rejected });
+				times(data.objects.length, () => {
+					ScenesModel.getNodesByIds.mockResolvedValueOnce(sharedIds);
+					MetaModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
+				});
 
-			const nodeRes = times(10, () => ({ _id: generateRandomString() }));
-			ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes);
-			ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes.slice(5));
+				await Groups.updateTicketGroup(teamspace, project, container, ticket, groupId, data, author);
 
-			const idMapMock = {};
+				expect(ScenesModel.getNodesByIds).toHaveBeenCalledTimes(data.objects.length);
+				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(data.objects.length);
 
-			nodeRes.forEach(({ _id }) => { idMapMock[_id] = [_id]; });
+				data.objects.forEach((o) => {
+					expect(ScenesModel.getNodesByIds).toHaveBeenCalledWith(teamspace, project, o.container, o._ids,
+						{ _id: 0, shared_id: 1 });
 
-			FilesManager.getFile.mockResolvedValueOnce(JSON.stringify(idMapMock));
+					const externalIdKeys = Object.values(externalIdNamesToKeys).flat().map((n) => ({ key: n }));
+					const query = { parents: { $in: sharedIds.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
+					const projection = { metadata: { $elemMatch: { $or: externalIdKeys } } };
 
-			const expectedData = cloneDeep(groupData);
-			expectedData.objects = [{
-				container: model,
-				_ids: nodeRes.slice(0, 5).map(({ _id }) => _id),
-			}];
+					expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, o.container,
+						query, projection);
 
-			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group, undefined, true))
-				.resolves.toEqual(expectedData);
+					if (metadata.length) {
+						delete o._ids;
+						o[externalIdName] = metadata.map((m) => m.metadata[0].value);
+					}
+				});
 
-			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
-			expect(GroupsModel.getGroupById).toHaveBeenCalledWith(teamspace, project, model, ticket, group);
-
-			expect(RevsModel.getLatestRevision).not.toHaveBeenCalled();
-
-			expect(MetaModel.getMetadataByRules).toHaveBeenCalledTimes(1);
-			expect(MetaModel.getMetadataByRules).toHaveBeenCalledWith(teamspace, project, model, revId,
-				groupData.rules, { parents: 1 });
-
-			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledTimes(2);
-			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledWith(teamspace, project, model,
-				revId, metaRes.flatMap(({ parents }) => parents), { _id: 1 });
-		});
-
-		test('[Smart group] should return the group found with the query results (idmap not found)', async () => {
-			const groupData = { ...generateRandomObject(), rules: [generateRandomObject()] };
-			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
-
-			const metaRes = times(10, () => ({ parents: times(2, () => generateRandomString()) }));
-			const rejected = times(10, () => ({ parents: times(2, () => generateRandomString()) }));
-			MetaModel.getMetadataByRules.mockResolvedValueOnce({ matched: metaRes, unwanted: rejected });
-
-			const nodeRes = times(10, () => ({ _id: generateRandomString() }));
-			ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes);
-			ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes.slice(5));
-
-			const idMapMock = {};
-
-			nodeRes.slice(1, nodeRes.length - 1).forEach(({ _id }) => { idMapMock[_id] = [_id]; });
-
-			FilesManager.getFile.mockResolvedValueOnce(JSON.stringify(idMapMock));
-
-			const expectedData = cloneDeep(groupData);
-			expectedData.objects = [{
-				container: model,
-				_ids: nodeRes.slice(1, 5).map(({ _id }) => _id),
-			}];
-
-			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group, undefined, true))
-				.resolves.toEqual(expectedData);
-
-			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
-			expect(GroupsModel.getGroupById).toHaveBeenCalledWith(teamspace, project, model, ticket, group);
-
-			expect(RevsModel.getLatestRevision).not.toHaveBeenCalled();
-
-			expect(MetaModel.getMetadataByRules).toHaveBeenCalledTimes(1);
-			expect(MetaModel.getMetadataByRules).toHaveBeenCalledWith(teamspace, project, model, revId,
-				groupData.rules, { parents: 1 });
-
-			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledTimes(2);
-			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledWith(teamspace, project, model,
-				revId, metaRes.flatMap(({ parents }) => parents), { _id: 1 });
-		});
-
-		test('[Smart group] should return the group found with the query results (no match)', async () => {
-			const groupData = { ...generateRandomObject(), rules: [generateRandomObject()] };
-			GroupsModel.getGroupById.mockResolvedValueOnce(groupData);
-
-			MetaModel.getMetadataByRules.mockResolvedValueOnce({ matched: [], unwanted: [] });
-
-			FilesManager.getFile.mockResolvedValueOnce(JSON.stringify({}));
-
-			const expectedData = cloneDeep(groupData);
-			expectedData.objects = [];
-
-			await expect(Groups.getTicketGroupById(teamspace, project, model, revId, ticket, group, undefined, true))
-				.resolves.toEqual(expectedData);
-
-			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
-			expect(GroupsModel.getGroupById).toHaveBeenCalledWith(teamspace, project, model, ticket, group);
-
-			expect(RevsModel.getLatestRevision).not.toHaveBeenCalled();
-
-			expect(MetaModel.getMetadataByRules).toHaveBeenCalledTimes(1);
-			expect(MetaModel.getMetadataByRules).toHaveBeenCalledWith(teamspace, project, model, revId,
-				groupData.rules, { parents: 1 });
-
-			expect(ScenesModel.getNodesBySharedIds).not.toHaveBeenCalled();
+				expect(GroupsModel.updateGroup).toHaveBeenCalledTimes(1);
+				expect(GroupsModel.updateGroup).toHaveBeenCalledWith(teamspace, project, container, ticket, groupId,
+					data, author);
+			});
 		});
 	});
 };
 
 describe(determineTestGroup(__filename), () => {
 	testGetTicketGroupById();
+	testAddGroups();
+	testUpdateGroup();
 });
