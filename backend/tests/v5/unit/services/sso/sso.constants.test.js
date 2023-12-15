@@ -15,25 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const errorNotification = require('./templates/errorNotification');
-const forgotPassword = require('./templates/forgotPassword');
-const forgotPasswordSso = require('./templates/forgotPasswordSSO');
-const { toConstantCase } = require('../../utils/helper/strings');
-const verifyUser = require('./templates/verifyUser');
+const { src } = require('../../../helper/path');
+const { generateRandomString, determineTestGroup } = require('../../../helper/services');
 
-const MailerConstants = {};
+const SSOConstants = require(`${src}/services/sso/sso.constants`);
 
-const templates = {
-	verifyUser,
-	forgotPassword,
-	forgotPasswordSso,
-	errorNotification,
+const testGetProviderLabel = () => {
+	describe('Get Provider label', () => {
+		test('All known providers should return a label', () => {
+			Object.values(SSOConstants.providers).forEach((provider) => {
+				expect(SSOConstants.getProviderLabel(provider)).not.toBeUndefined();
+			});
+		});
+
+		test('Unknown provider should return undefined', () => {
+			expect(SSOConstants.getProviderLabel(generateRandomString())).toBeUndefined();
+		});
+	});
 };
 
-MailerConstants.templates = {};
-Object.keys(templates).forEach((templateName) => {
-	const name = toConstantCase(templateName);
-	MailerConstants.templates[name] = { ...templates[templateName], name };
+describe(determineTestGroup(__filename), () => {
+	testGetProviderLabel();
 });
-
-module.exports = MailerConstants;

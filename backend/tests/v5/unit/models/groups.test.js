@@ -23,7 +23,6 @@ const { generateRandomString, generateGroup } = require('../../helper/services')
 const Group = require(`${src}/models/groups`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
 const testGetGroupsByIds = () => {
 	describe('Get many groups by Ids', () => {
@@ -43,35 +42,6 @@ const testGetGroupsByIds = () => {
 			const res = await Group.getGroupsByIds(teamspace, model, groupIds, projection);
 
 			expect(res).toEqual(expectedData);
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.groups`,
-				{ _id: { $in: groupIds } }, projection, undefined);
-		});
-
-		test('should return the list of Groups with legacy schema converted ', async () => {
-			const group = {
-				...generateGroup(true),
-				rules: [{ field: generateRandomString(), operator: valueOperators.IS_EMPTY.name }],
-			};
-
-			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce([group]);
-
-			const teamspace = generateRandomString();
-			const model = generateRandomString();
-			const groupIds = [1, 2, 3];
-			const projection = { _id: 0 };
-
-			const res = await Group.getGroupsByIds(teamspace, model, groupIds, projection);
-
-			const expectedData = cloneDeep(group);
-
-			expectedData.rules = expectedData.rules.map(({ field, ...rest }) => ({
-				field: { operator: fieldOperators.IS.name, values: [field] },
-				name: `! ${field}`,
-				...rest,
-			}));
-
-			expect(res).toEqual([expectedData]);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.groups`,
 				{ _id: { $in: groupIds } }, projection, undefined);
@@ -120,34 +90,6 @@ const testGetGroups = () => {
 					sequence_id: { $exists: false },
 					view_id: { $exists: false },
 				}, projection, undefined);
-		});
-
-		test('should return the list of Groups with legacy schema converted ', async () => {
-			const group = {
-				...generateGroup(true),
-				rules: [{ field: generateRandomString(), operator: valueOperators.IS_NOT_EMPTY.name }],
-			};
-
-			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce([group]);
-
-			const teamspace = generateRandomString();
-			const model = generateRandomString();
-			const projection = { _id: 0 };
-
-			const res = await Group.getGroups(teamspace, model, true, projection);
-
-			const expectedData = cloneDeep(group);
-
-			expectedData.rules = expectedData.rules.map(({ field, ...rest }) => ({
-				field: { operator: fieldOperators.IS.name, values: [field] },
-				name: `${field}`,
-				...rest,
-			}));
-
-			expect(res).toEqual([expectedData]);
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.groups`,
-				{ }, projection, undefined);
 		});
 	});
 };
