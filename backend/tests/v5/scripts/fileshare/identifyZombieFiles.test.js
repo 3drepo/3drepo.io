@@ -107,5 +107,8 @@ describe(determineTestGroup(__filename), () => {
 		await setupData(data);
 	});
 	runTest(data);
-	afterAll(disconnect);
+	afterAll(async () => {
+		await disconnect();
+		unlinkSync('./unreferenced_files.csv');
+	});
 });

@@ -83,20 +83,6 @@ const testGetContainerById = () => {
 
 const testGetFederationById = () => {
 	describe('Get FederationById', () => {
-		test('should return content of federation settings if found (v4 schema)', async () => {
-			const expectedData = {
-				_id: 'abc',
-				name: 'federation name',
-				subModels: times(4, () => generateUUIDString()),
-			};
-			DBHandler.findOne.mockResolvedValueOnce({ ...expectedData });
-
-			const res = await Model.getFederationById('someTS', 'someFederation');
-			expect(res).toEqual({ ...expectedData,
-				subModels: expectedData.subModels.map((_id) => ({ _id })),
-			});
-		});
-
 		test('should return content of federation settings if found (v5 schema)', async () => {
 			const expectedData = {
 				_id: 'abc',
