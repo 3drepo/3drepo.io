@@ -36,6 +36,8 @@ const { validateNewRevisionData : validateNewModelRevisionData } = require(`${v5
 const { validateNewRevisionData : validateNewFedRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/federations`);
 const ContainersV5 = require(`${v5Path}/processors/teamspaces/projects/models/containers`);
 const FederationsV5 = require(`${v5Path}/processors/teamspaces/projects/models/federations`);
+const ResponderV5 = require(`${v5Path}/utils/responder`);
+const ResponseCodes = require(`${v5Path}/utils/responseCodes`);
 
 function convertProjectToParam(req, res, next) {
 	if (req.body.project) {
@@ -2264,9 +2266,8 @@ function getSubModelRevisions(req, res, next) {
 function getUnityBundle(req, res, next) {
 	const {account, model, uid} = req.params;
 
-	UnityAssets.getUnityBundle(account, model, uid).then(file => {
-		req.params.format = "unity3d";
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
+	UnityAssets.getUnityBundle(account, model, uid).then(({ readStream, size, mimeType, encoding }) => {
+		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, undefined, size, { mimeType, encoding });
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
