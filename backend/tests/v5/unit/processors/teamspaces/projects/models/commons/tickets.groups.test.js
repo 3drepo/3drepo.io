@@ -278,10 +278,10 @@ const testAddGroups = () => {
 							/* eslint-disable-next-line no-underscore-dangle */
 							obj.container, obj._ids, { _id: 0, shared_id: 1 });
 
-						const externalIdKeys = Object.values(externalIdNamesToKeys).flat().map((n) => ({ key: n }));
+						const externalIdKeys = Object.values(externalIdNamesToKeys).flat();
 						const query = { parents: { $in: sharedIds.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
-						const projection = { metadata: { $elemMatch: { $or: externalIdKeys } } };
-
+						const projection = { metadata: { $elemMatch:
+							{ $or: externalIdKeys.map((n) => ({ key: n })) } } };
 						expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, obj.container,
 							query, projection);
 
@@ -352,9 +352,9 @@ const testUpdateGroup = () => {
 					expect(ScenesModel.getNodesByIds).toHaveBeenCalledWith(teamspace, project, obj.container, obj._ids,
 						{ _id: 0, shared_id: 1 });
 
-					const externalIdKeys = Object.values(externalIdNamesToKeys).flat().map((n) => ({ key: n }));
+					const externalIdKeys = Object.values(externalIdNamesToKeys).flat();
 					const query = { parents: { $in: sharedIds.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
-					const projection = { metadata: { $elemMatch: { $or: externalIdKeys } } };
+					const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
 
 					expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, obj.container,
 						query, projection);
