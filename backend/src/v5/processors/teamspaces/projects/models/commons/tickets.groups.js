@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 /**
  *  Copyright (C) 2023 3D Repo Ltd
  *
@@ -15,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/* eslint-disable no-underscore-dangle */
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, getGroupById, updateGroup } = require('../../../../../models/tickets.groups');

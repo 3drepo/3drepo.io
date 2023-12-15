@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 /**
  *  Copyright (C) 2022 3D Repo Ltd
  *
@@ -276,6 +275,7 @@ const testAddGroups = () => {
 				const convertedGroups = groups.map((group) => {
 					const convertedObjects = group.objects.map((obj) => {
 						expect(ScenesModel.getNodesByIds).toHaveBeenCalledWith(teamspace, project,
+							/* eslint-disable-next-line no-underscore-dangle */
 							obj.container, obj._ids, { _id: 0, shared_id: 1 });
 
 						const externalIdKeys = Object.values(externalIdNamesToKeys).flat().map((n) => ({ key: n }));
@@ -348,6 +348,7 @@ const testUpdateGroup = () => {
 				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(data.objects.length);
 
 				data.objects = data.objects.map((obj) => {
+					/* eslint-disable-next-line no-underscore-dangle */
 					expect(ScenesModel.getNodesByIds).toHaveBeenCalledWith(teamspace, project, obj.container, obj._ids,
 						{ _id: 0, shared_id: 1 });
 

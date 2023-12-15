@@ -33,9 +33,11 @@ const objectEntryValidator = Yup.object().shape({
 }).test(
 	'Object item check',
 	'Can only contain either _ids or ifc_guids or revit_ids',
+	/* eslint-disable no-underscore-dangle */
 	(value) => (value._ids && !(value.ifc_guids || value.revit_ids))
 	|| (value.ifc_guids && !(value._ids || value.revit_ids))
 	|| (value.revit_ids && !(value._ids || value.ifc_guids)));
+	/* eslint-enable no-underscore-dangle */
 
 Groups.schema = (allowIds, fieldsOptional) => {
 	let group = Yup.object({
