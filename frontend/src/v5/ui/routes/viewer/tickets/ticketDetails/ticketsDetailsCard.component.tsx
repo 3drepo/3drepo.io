@@ -56,6 +56,7 @@ export const TicketDetailsCard = () => {
 	const defaultView = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 	const currentIndex = filteredTickets.findIndex((tckt) => tckt._id === ticket._id);
 	const initialIndex = useRef(currentIndex);
+	const disableCycleButtons = currentIndex > -1 ? filteredTickets.length < 2 : filteredTickets.length < 1;
 
 	const getUpdatedIndex = (delta: number) => {
 		let index = currentIndex === -1 ? initialIndex.current : currentIndex;
@@ -166,8 +167,8 @@ export const TicketDetailsCard = () => {
 								<ArrowBack onClick={goBack} />
 								{template.code}:{ticket.number}
 								<HeaderButtons>
-									<CircleButton variant="viewer" onClick={cycleToPrevTicket}><ChevronLeft /></CircleButton>
-									<CircleButton variant="viewer" onClick={cycleToNextTicket}><ChevronRight /></CircleButton>
+									<CircleButton variant="viewer" onClick={cycleToPrevTicket} disabled={disableCycleButtons}><ChevronLeft /></CircleButton>
+									<CircleButton variant="viewer" onClick={cycleToNextTicket} disabled={disableCycleButtons}><ChevronRight /></CircleButton>
 								</HeaderButtons>
 							</CardHeader>
 							<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
