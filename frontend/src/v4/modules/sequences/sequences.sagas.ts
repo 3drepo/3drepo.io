@@ -18,6 +18,7 @@
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
+import { TicketsCardActions } from '@/v5/store/tickets/card/ticketsCard.redux';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 
 import * as API from '../../services/api';
@@ -238,6 +239,8 @@ export function* restoreModelDefaultVisibility() {
 }
 
 export function* setSelectedSequence({ sequenceId }) {
+	yield put(TicketsCardActions.setTransformations({}));
+
 	if (sequenceId) {
 		yield put(SequencesActions.initializeSequences());
 		yield put(SequencesActions.fetchSequence(sequenceId));
