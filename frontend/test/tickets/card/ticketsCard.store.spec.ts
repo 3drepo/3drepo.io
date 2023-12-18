@@ -50,30 +50,25 @@ describe('Tickets: store', () => {
 
 		describe('filters', () => {
 			it('should toggle the completed filter', () => {
-				dispatch(TicketsCardActions.toggleTicketsCompleteFilter());
+				dispatch(TicketsCardActions.toggleCompleteFilter());
 				const completedFilterFromState1 = selectFilteringCompleted(getState());
 				
 				expect(completedFilterFromState1).toEqual(true);
 				
-				dispatch(TicketsCardActions.toggleTicketsCompleteFilter());
+				dispatch(TicketsCardActions.toggleCompleteFilter());
 				const completedFilterFromState2 = selectFilteringCompleted(getState());
 
 				expect(completedFilterFromState2).toEqual(false);
 			});
-			it('should add and remove template filters', () => {
-				dispatch(TicketsCardActions.addTicketsTemplateFilter(templateId));
-				const templateFiltersFromState1 = selectFilteringTemplates(getState());
+			it('should set template filters', () => {
+				dispatch(TicketsCardActions.setTemplateFilters([templateId]));
+				const templateFiltersFromState = selectFilteringTemplates(getState());
 				
-				expect(templateFiltersFromState1).toEqual([templateId]);
-				
-				dispatch(TicketsCardActions.removeTicketsTemplateFilter(templateId));
-				const templateFiltersFromState2 = selectFilteringTemplates(getState());
-
-				expect(templateFiltersFromState2).toEqual([]);
+				expect(templateFiltersFromState).toEqual([templateId]);
 			});
 
-			it('should add and remove template filters', () => {
-				dispatch(TicketsCardActions.setTicketsQueriesFilter([query]));
+			it('should set query filters', () => {
+				dispatch(TicketsCardActions.setQueryFilters([query]));
 				const queryFiltersFromState = selectFilteringQueries(getState());
 				
 				expect(queryFiltersFromState).toEqual([query]);
@@ -84,9 +79,9 @@ describe('Tickets: store', () => {
 			dispatch(TicketsCardActions.setSelectedTicket(ticketId));
 			dispatch(TicketsCardActions.setSelectedTemplate(templateId));
 			dispatch(TicketsCardActions.setSelectedTicketPin(pinId));
-			dispatch(TicketsCardActions.toggleTicketsCompleteFilter());
-			dispatch(TicketsCardActions.addTicketsTemplateFilter(templateId));
-			dispatch(TicketsCardActions.setTicketsQueriesFilter([query]));
+			dispatch(TicketsCardActions.toggleCompleteFilter());
+			dispatch(TicketsCardActions.setTemplateFilters([templateId]));
+			dispatch(TicketsCardActions.setQueryFilters([query]));
 			dispatch(TicketsCardActions.resetState());
 
 			const selectedTicketIdFromState = selectSelectedTicketId(getState());
@@ -99,9 +94,9 @@ describe('Tickets: store', () => {
 			expect(selectedTicketIdFromState).toEqual(null);
 			expect(selectedTemplateIdFromState).toEqual(null);
 			expect(selectedTicketPinIdFromState).toEqual(null);
-			expect(completeFilterFromState).toEqual(false);
-			expect(templateFiltersFromState).toEqual([]);
-			expect(queryFiltersFromState).toEqual([]);
+			expect(completeFilterFromState).toEqual(true);
+			expect(templateFiltersFromState).toEqual([templateId]);
+			expect(queryFiltersFromState).toEqual([query]);
 		});
 	});
 });
