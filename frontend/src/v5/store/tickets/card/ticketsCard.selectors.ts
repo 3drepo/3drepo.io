@@ -148,28 +148,23 @@ export const selectTicketPins = createSelector(
 	selectSelectedTicket,
 	selectSelectedDate,
 	(tickets, templates, view, selectedTicketPinId, selectedTicket, selectedSequenceDate): IPin[] => {
-		if (view === TicketsCardViews.New) return [];
+		if (view === TicketsCardViews.New || !tickets.length) return [];
 		const pinArray = [];
-		if (!templates.length || !tickets.length) return [];
 		if (view === TicketsCardViews.Details) {
 			const selectedTemplate = templates.find(({ _id }) => _id === selectedTicket.type);
-			selectedTemplate.properties.forEach(({ name, type }) => {
-				const pinPath = `${TicketBaseKeys.PROPERTIES}.${name}`;
+			
+			const moduleToPins = (modulePath) => ({ name, type }) => {
+				const pinPath = `${modulePath}.${name}`;
 				if (type !== 'coords' || !get(selectedTicket, pinPath)) return;
 				const pinId = pinPath === DEFAULT_PIN ? selectedTicket._id : `${selectedTicket._id}.${pinPath}`;
 				const color = getPinColorHex(pinPath, selectedTemplate, selectedTicket);
-				return pinArray.push(ticketToPin(pinId, get(selectedTicket, pinPath), selectedTicketPinId, color));
-			});
+				return ticketToPin(pinId, get(selectedTicket, pinPath), selectedTicketPinId, color);
+			};
+			pinArray.push(...selectedTemplate.properties.map(moduleToPins(TicketBaseKeys.PROPERTIES)));
 			selectedTemplate.modules.forEach((module) => {
 				const moduleName = module.name || module.type;
 				if (!selectedTicket.modules[moduleName]) return;
-				module.properties.forEach(({ name, type }) => {
-					const pinPath = `${TicketBaseKeys.MODULES}.${moduleName}.${name}`;
-					if (type !== 'coords' || !get(selectedTicket, pinPath)) return;
-					const pinId = `${selectedTicket._id}.${pinPath}`;
-					const color = getPinColorHex(pinPath, selectedTemplate, selectedTicket);
-					return pinArray.push(ticketToPin(pinId, get(selectedTicket, pinPath), selectedTicketPinId, color));
-				});
+				pinArray.push(...module.properties.map(moduleToPins(`${TicketBaseKeys.MODULES}.${moduleName}`)));
 			});
 			return pinArray;
 		}
@@ -190,7 +185,7 @@ export const selectTicketPins = createSelector(
 						endDate && new Date(endDate) < new Date(selectedSequenceDate)
 					) return accum;
 				}
-				return [...accum, ticketToPin(ticket._id, ticket.properties.Pin, selectedTicketPinId, color)];
+				return [...accum, ticketToPin(ticket._id, pin, selectedTicketPinId, color)];
 			},
 			pinArray,
 		);
