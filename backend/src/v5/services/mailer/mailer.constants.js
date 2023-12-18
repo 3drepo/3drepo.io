@@ -17,6 +17,7 @@
 
 const errorNotification = require('./templates/errorNotification');
 const forgotPassword = require('./templates/forgotPassword');
+const forgotPasswordSso = require('./templates/forgotPasswordSSO');
 const { toConstantCase } = require('../../utils/helper/strings');
 const verifyUser = require('./templates/verifyUser');
 
@@ -25,6 +26,7 @@ const MailerConstants = {};
 const templates = {
 	verifyUser,
 	forgotPassword,
+	forgotPasswordSso,
 	errorNotification,
 };
 
