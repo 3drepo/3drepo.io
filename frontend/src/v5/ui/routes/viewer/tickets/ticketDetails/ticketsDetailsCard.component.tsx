@@ -37,6 +37,11 @@ import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component
 import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { useSearchParam } from '../../../useSearchParam';
 
+enum IndexChange {
+	UP = 1,
+	DOWN = -1,
+}
+
 export const TicketDetailsCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
 	const [, setTicketId] = useSearchParam('ticketId');
@@ -52,15 +57,20 @@ export const TicketDetailsCard = () => {
 	const currentIndex = filteredTickets.findIndex((tckt) => tckt._id === ticket._id);
 	const initialIndex = useRef(currentIndex);
 
-	const changeTicketIndex = (delta: number) => {
-		const index = currentIndex === -1 ? initialIndex.current : currentIndex;
-		const updatedId = filteredTickets.slice((index + delta) % filteredTickets.length)[0]._id;
+	const getUpdatedIndex = (delta: number) => {
+		let index = currentIndex === -1 ? initialIndex.current : currentIndex;
+		if (currentIndex === -1 && delta === IndexChange.UP) index -= 1;
+		return (index + delta) % filteredTickets.length;
+	};
+
+	const changeTicketIndex = (delta: IndexChange) => {
+		const updatedId = filteredTickets.slice(getUpdatedIndex(delta))[0]._id;
 		TicketsCardActionsDispatchers.setSelectedTicket(updatedId);
 		TicketsCardActionsDispatchers.setSelectedTicketPin(updatedId);
 	};
 
-	const cycleToPrevTicket = () => changeTicketIndex(-1);
-	const cycleToNextTicket = () => changeTicketIndex(1);
+	const cycleToPrevTicket = () => changeTicketIndex(IndexChange.DOWN);
+	const cycleToNextTicket = () => changeTicketIndex(IndexChange.UP);
 
 	const goBack = () => {
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
