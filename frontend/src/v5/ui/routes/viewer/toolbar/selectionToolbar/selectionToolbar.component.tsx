@@ -14,17 +14,27 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import GizmoRotateIcon from '@assets/icons/viewer/gizmo_rotate.svg';
+import GizmoScaleIcon from '@assets/icons/viewer/gizmo_scale.svg';
+import GizmoTranslateIcon from '@assets/icons/viewer/gizmo_translate.svg';
+import FlipPlaneIcon from '@assets/icons/viewer/flip_plane.svg';
+import AlignIcon from '@assets/icons/viewer/align.svg';
+import ClipSelectionIcon from '@assets/icons/viewer/clip_selection.svg';
+import ResetIcon from '@assets/icons/viewer/reset.svg';
+import CancelIcon from '@assets/icons/viewer/delete.svg';
 import ClearOverridesIcon from '@assets/icons/viewer/clear_overrides.svg';
 import EyeHideIcon from '@assets/icons/viewer/eye_hide.svg';
 import EyeShowIcon from '@assets/icons/viewer/eye_show.svg';
 import EyeIsolateIcon from '@assets/icons/viewer/eye_isolate.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { GroupsActionsDispatchers, TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { GroupsHooksSelectors, TicketsCardHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
+import { GroupsHooksSelectors, TicketsCardHooksSelectors, TreeHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Section, Container, ClearButton, ClearIcon } from './sectionToolbar.styles';
 import { ToolbarButton } from '../buttons/toolbarButton.component';
+import { VIEWER_CLIP_MODES } from '@/v4/constants/viewer';
+import { UnityUtil } from '@/globals/unity-util';
 
 export const SectionToolbar = () => {
 	const hasGroupOverrides = GroupsHooksSelectors.selectGroupsColourOverrides()?.length > 0;
@@ -33,8 +43,60 @@ export const SectionToolbar = () => {
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectFullySelectedNodesIds().length;
 	const hasHiddenObjects = TreeHooksSelectors.selectModelHasHiddenNodes();
 
+	const isBoxClippingMode = ViewerGuiHooksSelectors.selectClippingMode() === VIEWER_CLIP_MODES.BOX;
+	const isClipEdit = ViewerGuiHooksSelectors.selectIsClipEdit();
 	return (
 		<Container>
+			<Section hidden={!isClipEdit}>
+				<ToolbarButton
+					Icon={GizmoRotateIcon}
+					hidden={!isClipEdit}
+					onClick={UnityUtil.clipToolRotate}
+					title={formatMessage({ id: 'viewer.toolbar.icon.rotateMode', defaultMessage: 'Rotate Mode' })}
+				/>
+				<ToolbarButton
+					Icon={GizmoScaleIcon}
+					hidden={!isClipEdit || !isBoxClippingMode}
+					onClick={UnityUtil.clipToolScale}
+					title={formatMessage({ id: 'viewer.toolbar.icon.scaleMode', defaultMessage: 'Scale Mode' })}
+				/>
+				<ToolbarButton
+					Icon={GizmoTranslateIcon}
+					hidden={!isClipEdit}
+					onClick={UnityUtil.clipToolTranslate}
+					title={formatMessage({ id: 'viewer.toolbar.icon.translateMode', defaultMessage: 'Translate Mode' })}
+				/>
+				<ToolbarButton
+					Icon={FlipPlaneIcon}
+					hidden={!isClipEdit || isBoxClippingMode}
+					onClick={UnityUtil.clipToolFlip}
+					title={formatMessage({ id: 'viewer.toolbar.icon.flipPlane', defaultMessage: 'Flip Plane' })}
+				/>
+				<ToolbarButton
+					Icon={AlignIcon}
+					hidden={!isClipEdit}
+					onClick={UnityUtil.clipToolRealign}
+					title={formatMessage({ id: 'viewer.toolbar.icon.align', defaultMessage: 'Align' })}
+				/>
+				<ToolbarButton
+					Icon={ClipSelectionIcon}
+					hidden={!isClipEdit || !hasHighlightedObjects}
+					onClick={UnityUtil.clipToolClipToSelection}
+					title={formatMessage({ id: 'viewer.toolbar.icon.clipSelection', defaultMessage: 'Clip Selection' })}
+				/>
+				<ToolbarButton
+					Icon={ResetIcon}
+					hidden={!isClipEdit}
+					onClick={UnityUtil.stopClipEdit}
+					title={formatMessage({ id: 'viewer.toolbar.icon.reset', defaultMessage: 'Reset' })}
+				/>
+				<ToolbarButton
+					Icon={CancelIcon}
+					hidden={!isClipEdit}
+					onClick={UnityUtil.clipToolDelete}
+					title={formatMessage({ id: 'viewer.toolbar.icon.cancel', defaultMessage: 'Cancel' })}
+				/>
+			</Section>
 			<Section hidden={!hasOverrides}>
 				<ToolbarButton
 					Icon={ClearOverridesIcon}
