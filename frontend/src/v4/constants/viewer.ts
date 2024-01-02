@@ -25,6 +25,12 @@ export const VIEWER_CLIP_MODES = {
 	BOX: 'BOX'
 } as const;
 
+export const VIEWER_GIZMO_MODES = {
+	TRANSLATE: 'TRANSLATE',
+	ROTATE: 'ROTATE',
+	SCALE: 'SCALE'
+} as const;
+
 export const VIEWER_MAP_SOURCES = {
 	OSM: 'OSM',
 	HERE: 'HERE',
