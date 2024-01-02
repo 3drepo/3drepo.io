@@ -41,39 +41,39 @@ export const SectionToolbar = () => {
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectFullySelectedNodesIds().length;
 	const hasHiddenObjects = TreeHooksSelectors.selectModelHasHiddenNodes();
 
+	const clippingModeActive = !!ViewerGuiHooksSelectors.selectClippingMode();
 	const isBoxClippingMode = ViewerGuiHooksSelectors.selectClippingMode() === VIEWER_CLIP_MODES.BOX;
-	const isClipEdit = ViewerGuiHooksSelectors.selectIsClipEdit();
 	return (
 		<Container>
-			<Section hidden={!isClipEdit}>
-				<GizmoModeButtons />
+			<Section hidden={!clippingModeActive}>
+				<GizmoModeButtons hidden={!clippingModeActive} />
 				<ToolbarButton
 					Icon={FlipPlaneIcon}
-					hidden={!isClipEdit || isBoxClippingMode}
+					hidden={!clippingModeActive || isBoxClippingMode}
 					onClick={UnityUtil.clipToolFlip}
 					title={formatMessage({ id: 'viewer.toolbar.icon.flipPlane', defaultMessage: 'Flip Plane' })}
 				/>
 				<ToolbarButton
 					Icon={AlignIcon}
-					hidden={!isClipEdit}
+					hidden={!clippingModeActive}
 					onClick={UnityUtil.clipToolRealign}
 					title={formatMessage({ id: 'viewer.toolbar.icon.align', defaultMessage: 'Align' })}
 				/>
 				<ToolbarButton
 					Icon={ClipSelectionIcon}
-					hidden={!isClipEdit || !hasHighlightedObjects}
+					hidden={!clippingModeActive && !hasHighlightedObjects}
 					onClick={UnityUtil.clipToolClipToSelection}
-					title={formatMessage({ id: 'viewer.toolbar.icon.clipSelection', defaultMessage: 'Clip Selection' })}
+					title={formatMessage({ id: 'viewer.toolbar.icon.clipSelection', defaultMessage: 'Clip To Selection' })}
 				/>
 				<ToolbarButton
 					Icon={ResetIcon}
-					hidden={!isClipEdit}
+					hidden={!clippingModeActive}
 					onClick={UnityUtil.stopClipEdit}
 					title={formatMessage({ id: 'viewer.toolbar.icon.reset', defaultMessage: 'Reset' })}
 				/>
 				<ToolbarButton
 					Icon={CancelIcon}
-					hidden={!isClipEdit}
+					hidden={!clippingModeActive}
 					onClick={UnityUtil.clipToolDelete}
 					title={formatMessage({ id: 'viewer.toolbar.icon.cancel', defaultMessage: 'Cancel' })}
 				/>
