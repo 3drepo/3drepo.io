@@ -71,12 +71,23 @@ export const getDateWithinBoundaries = (inputDate: Date | number, inputMinDate: 
 
 export const MODAL_TODAY_NOT_AVAILABLE_BODY = {
 	title: formatMessage({
-		id: 'sequences.unavailableDate.title',
+		id: 'sequences.unavailableDate.today.title',
 		defaultMessage: 'Unavailable date',
 	}),
 	message: formatMessage({
-		id: 'sequences.unavailableDate.message',
+		id: 'sequences.unavailableDate.today.message',
 		defaultMessage: 'Today\'s date falls outside of the range of the sequence. The nearest date is selected',
+	}),
+};
+
+export const MODAL_DATE_NOT_AVAILABLE_BODY = {
+	title: formatMessage({
+		id: 'sequences.unavailableDate.date.title',
+		defaultMessage: 'Unavailable date',
+	}),
+	message: formatMessage({
+		id: 'sequences.unavailableDate.date.message',
+		defaultMessage: 'The selected date falls outside of the range of the sequence. The nearest date is selected',
 	}),
 };
 
