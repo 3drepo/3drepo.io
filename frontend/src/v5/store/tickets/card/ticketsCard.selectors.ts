@@ -119,15 +119,12 @@ export const selectTicketsFilteredByQueriesAndCompleted = createSelector(
 	selectFilteringCompleted,
 	selectFilteringQueries,
 	selectCurrentTemplates,
-	(tickets, isComplete, queries, templates) => {
-		const filteredByCompleted = tickets.filter((ticket) => getTicketIsCompleted(ticket) === isComplete);
-		if (!queries.length) return filteredByCompleted;
-		return filteredByCompleted.filter((ticket) => {
-			const templateCode = templates.find((template) => template._id === ticket.type).code;
-			const ticketCode = `${templateCode}:${ticket.number}`;
-			return queries.some((q) => [ticketCode, ticket.title].some((str) => str.toLowerCase().includes(q.toLowerCase())));
-		});
-	},
+	(tickets, isComplete, queries, templates) => tickets.filter((ticket) => {
+		const templateCode = templates.find((template) => template._id === ticket.type).code;
+		const ticketCode = `${templateCode}:${ticket.number}`;
+		return getTicketIsCompleted(ticket) === isComplete &&
+			(!queries.length || queries.some((q) => [ticketCode, ticket.title].some((str) => str.toLowerCase().includes(q.toLowerCase()))));
+	}),
 );
 
 export const selectTicketsWithAllFiltersApplied = createSelector(
