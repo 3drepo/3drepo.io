@@ -25,37 +25,33 @@ import { VIEWER_CLIP_MODES, VIEWER_GIZMO_MODES } from '@/v4/constants/viewer';
 import { ButtonOptionsContainer, FloatingButtonsContainer, FloatingButton } from './multioptionIcons.styles';
 import { GizmoMode } from '../../toolbar.types';
 import { ToolbarButton } from '../toolbarButton.component';
-import { UnityUtil } from '@/globals/unity-util';
 import { ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 const OPTIONS = [
 	{
 		option: VIEWER_GIZMO_MODES.TRANSLATE,
 		title: formatMessage({ id: 'viewer.toolbar.icon.gizmoModes.translate', defaultMessage: 'Translate' }),
 		icon: GizmoTranslateIcon,
-		onClick: () => UnityUtil.clipToolTranslate(),
 	},
 	{
 		option: VIEWER_GIZMO_MODES.SCALE,
 		title: formatMessage({ id: 'viewer.toolbar.icon.gizmoModes.scale', defaultMessage: 'Scale' }),
 		icon: GizmoScaleIcon,
-		onClick: () => UnityUtil.clipToolScale(),
 	},
 	{
 		option: VIEWER_GIZMO_MODES.ROTATE,
 		title: formatMessage({ id: 'viewer.toolbar.icon.gizmoModes.rotate', defaultMessage: 'Rotate' }),
 		icon: GizmoRotateIcon,
-		onClick: () => UnityUtil.clipToolRotate(),
 	},
 ];
 
-export const GizmoModeButtons = () => {
+export const GizmoModeButtons = (props) => {
 	const [expanded, setExpanded] = useState(false);
 	
 	const isBoxClippingMode = ViewerGuiHooksSelectors.selectClippingMode() === VIEWER_CLIP_MODES.BOX;
-	const isClipEdit = ViewerGuiHooksSelectors.selectIsClipEdit();
 	
-	const [gizmoMode, setGizmoMode] = useState<GizmoMode>(VIEWER_GIZMO_MODES.TRANSLATE); // todo reduxify
+	const gizmoMode = ViewerGuiHooksSelectors.selectGizmoMode();
 
 	const currentMode = OPTIONS.find(({ option }) => option === gizmoMode);
 	const otherModes = OPTIONS.filter(({ option }) => {
@@ -65,9 +61,7 @@ export const GizmoModeButtons = () => {
 
 	const setMode = (mode: GizmoMode) => {
 		setExpanded(false);
-		OPTIONS.find(({ option }) => option === mode).onClick();
-		// ViewerGuiActionsDispatchers.setGizmoMode(mode);
-		setGizmoMode(mode); // todo reduxify
+		ViewerGuiActionsDispatchers.setGizmoMode(mode);
 	};
 
 	// useEffect(() => {
@@ -83,7 +77,7 @@ export const GizmoModeButtons = () => {
 						{otherModes.map(({ option, title, icon: Icon }) => <FloatingButton key={option} Icon={Icon} onClick={() => setMode(option)} title={title} />)}
 					</FloatingButtonsContainer>
 				)}
-				<ToolbarButton Icon={currentMode.icon} onClick={() => setExpanded(!expanded)} title={!expanded ? currentMode.title : ''} hidden={!isClipEdit} />
+				<ToolbarButton Icon={currentMode.icon} onClick={() => setExpanded(!expanded)} title={!expanded ? currentMode.title : ''} {...props} />
 			</ButtonOptionsContainer>
 		</ClickAwayListener>
 	);

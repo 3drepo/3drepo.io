@@ -38,7 +38,7 @@ import { ViewerActions, ViewerActionsCreators } from '@/v5/store/viewer/viewer.r
 import { ViewerGuiActions } from '@/v4/modules/viewerGui';
 import { Action } from 'redux';
 
-import { ClipMode, MeasureMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
+import { ClipMode, GizmoMode, MeasureMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
 
 interface IBimActionCreators {
 	setIsActive: (active: boolean) => Action;
@@ -79,6 +79,7 @@ interface IViewerGuiActionCreators {
 	decreaseHelicopterSpeed: (teamspace: string, containerOrFederation: string) => Action;
 	resetHelicopterSpeed: (teamspace: string, containerOrFederation: string) => Action;
 	setClippingMode: (mode: ClipMode) => Action;
+	setGizmoMode: (mode: GizmoMode) => Action;
 	setCoordView: (visible: boolean) => Action;
 	setPanelVisibility: (panelName: string, visible: boolean) => Action;
 	updateClipState: (clipNumber: number) => Action;

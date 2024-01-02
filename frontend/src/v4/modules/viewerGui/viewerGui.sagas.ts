@@ -21,8 +21,9 @@ import { goBack, push } from 'connected-react-router';
 import { matchPath } from 'react-router';
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
+import { UnityUtil } from '@/globals/unity-util';
 import { ROUTES } from '../../constants/routes';
-import { INITIAL_HELICOPTER_SPEED, VIEWER_CLIP_MODES, VIEWER_EVENTS } from '../../constants/viewer';
+import { INITIAL_HELICOPTER_SPEED, VIEWER_CLIP_MODES, VIEWER_EVENTS, VIEWER_GIZMO_MODES } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Viewer } from '../../services/viewer/viewer';
@@ -311,10 +312,30 @@ function* setClippingMode({mode}) {
 		if (mode) {
 			const isSingle = mode === VIEWER_CLIP_MODES.SINGLE;
 			yield Viewer.startClip(isSingle);
+			yield put(ViewerGuiActions.setGizmoMode(VIEWER_GIZMO_MODES.TRANSLATE));
 		}
 		yield put(ViewerGuiActions.setClippingModeSuccess(mode));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'clipping mode', error));
+	}
+}
+
+function* setGizmoMode({ mode }) {
+	try {
+		switch (mode) {
+			case VIEWER_GIZMO_MODES.ROTATE:
+				UnityUtil.clipToolRotate()
+				break;
+			case VIEWER_GIZMO_MODES.SCALE:
+				UnityUtil.clipToolScale()
+				break
+			default:
+				UnityUtil.clipToolTranslate();
+				break;
+		}
+		yield put(ViewerGuiActions.setGizmoModeSuccess(mode));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'gizmo mode', error));
 	}
 }
 
@@ -405,6 +426,7 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.DECREASE_HELICOPTER_SPEED, decreaseHelicopterSpeed);
 	yield takeLatest(ViewerGuiTypes.GO_TO_HOME_VIEW, goToHomeView);
 	yield takeLatest(ViewerGuiTypes.SET_CLIPPING_MODE, setClippingMode);
+	yield takeLatest(ViewerGuiTypes.SET_GIZMO_MODE, setGizmoMode);
 	yield takeLatest(ViewerGuiTypes.UPDATE_CLIP_STATE, updateClipState);
 	yield takeLatest(ViewerGuiTypes.SET_CLIP_EDIT, setClipEdit);
 	yield takeLatest(ViewerGuiTypes.CLEAR_HIGHLIGHTS, clearHighlights);

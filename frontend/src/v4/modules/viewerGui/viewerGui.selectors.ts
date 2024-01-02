@@ -81,6 +81,10 @@ export const selectClippingMode = createSelector(
 	selectViewerGuiDomain, (state) => state.clippingMode
 );
 
+export const selectGizmoMode = createSelector(
+	selectViewerGuiDomain, (state) => state.gizmoMode
+);
+
 export const selectIsClipEdit = createSelector(
 	selectViewerGuiDomain, (state) => state.isClipEdit
 );

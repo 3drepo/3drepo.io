@@ -17,7 +17,8 @@
 
 import { cloneDeep } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
-import { INITIAL_HELICOPTER_SPEED, VIEWER_NAV_MODES } from '../../constants/viewer';
+import { GizmoMode } from '@/v5/ui/routes/viewer/toolbar/toolbar.types';
+import { INITIAL_HELICOPTER_SPEED, VIEWER_GIZMO_MODES, VIEWER_NAV_MODES } from '../../constants/viewer';
 import { getViewerLeftPanels, VIEWER_DRAGGABLE_PANELS, VIEWER_RIGHT_PANELS } from '../../constants/viewerGui';
 
 export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActions({
@@ -48,6 +49,8 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	setClipEdit: ['isClipEdit'],
 	setClipEditSuccess: ['isClipEdit'],
 	setClipNumber: ['clipNumber'],
+	setGizmoMode: ['mode'],
+	setGizmoModeSuccess: ['mode'],
 	updateClipState: ['clipNumber'],
 	setIsPinDropMode: ['mode'],
 	setIsPinDropModeSuccess: ['isPinDropMode'],
@@ -70,6 +73,7 @@ export interface IViewerGuiState {
 	isModelLoaded: boolean;
 	navigationMode: string;
 	clippingMode: string;
+	gizmoMode: GizmoMode;
 	helicopterSpeed: number;
 	isFocusMode: boolean;
 	isClipEdit: boolean;
@@ -87,6 +91,7 @@ export const INITIAL_STATE: IViewerGuiState = {
 	coordViewActive: false,
 	navigationMode: VIEWER_NAV_MODES.TURNTABLE,
 	clippingMode: null,
+	gizmoMode: VIEWER_GIZMO_MODES.TRANSLATE,
 	helicopterSpeed: INITIAL_HELICOPTER_SPEED,
 	isFocusMode: false,
 	isClipEdit: false,
@@ -151,6 +156,10 @@ const setClippingModeSuccess = (state = INITIAL_STATE, { mode }) => {
 	return { ...state, clippingMode: mode, isClipEdit: true };
 };
 
+const setGizmoModeSuccess = (state = INITIAL_STATE, { mode }) => {
+	return { ...state, gizmoMode: mode };
+};
+
 const setHelicopterSpeed = (state = INITIAL_STATE, { speed }) => {
 	return { ...state, helicopterSpeed: speed };
 };
@@ -196,6 +205,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerGuiTypes.SET_NAVIGATION_MODE_SUCCESS] : setNavigationModeSuccess,
 	[ViewerGuiTypes.SET_PROJECTION_MODE_SUCCESS] : setProjectionModeSuccess,
 	[ViewerGuiTypes.SET_CLIPPING_MODE_SUCCESS] : setClippingModeSuccess,
+	[ViewerGuiTypes.SET_GIZMO_MODE_SUCCESS] : setGizmoModeSuccess,
 	[ViewerGuiTypes.SET_HELICOPTER_SPEED] : setHelicopterSpeed,
 	[ViewerGuiTypes.SET_IS_FOCUS_MODE] : setIsFocusMode,
 	[ViewerGuiTypes.SET_CLIP_EDIT_SUCCESS] : setClipEditSuccess,
