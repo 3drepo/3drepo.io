@@ -888,7 +888,7 @@ export class UnityUtil {
 	/**
 	 * Puts the clip tool in Realign mode. In this mode the plane (or front of
 	 * the box in six plane mode) will snap to the position and orientation of
-	 * the first surface to be licked. If the background is clicked, the planes
+	 * the first surface to be clicked. If the background is clicked, the planes
 	 * or plane will reset to the scene bounding box.
 	 */
 	public static clipToolRealign() {

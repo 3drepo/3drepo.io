@@ -21,7 +21,7 @@ type IProps = {
 
 export default ({ className }: IProps) => (<svg width="19" height="18" viewBox="0 0 19 18" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
 	<g id="flip-plane-o">
-		<path className="highlight" fill-rule="evenodd" clip-rule="evenodd" d="M1.31641 3.07617C1.31641 2.02769 2.16637 1.17773 3.21484 1.17773H8.41797V16.7344H3.21484C2.16637 16.7344 1.31641 15.8844 1.31641 14.8359V3.07617Z" fill="currentColor"/>
+		<path className="highlight" fillRule="evenodd" clipRule="evenodd" d="M1.31641 3.07617C1.31641 2.02769 2.16637 1.17773 3.21484 1.17773H8.41797V16.7344H3.21484C2.16637 16.7344 1.31641 15.8844 1.31641 14.8359V3.07617Z" fill="currentColor"/>
 		<g className="primary" id="Union">
 			<path d="M9.68359 0.632812C9.68359 0.28332 9.40027 0 9.05078 0C8.70129 0 8.41797 0.28332 8.41797 0.632812V17.3672C8.41797 17.7167 8.70129 18 9.05078 18C9.40027 18 9.68359 17.7167 9.68359 17.3672V0.632812Z" fill="currentColor"/>
 			<path d="M10.5977 2.53125H12.0273V1.26562H10.5977V2.53125Z" fill="currentColor"/>
