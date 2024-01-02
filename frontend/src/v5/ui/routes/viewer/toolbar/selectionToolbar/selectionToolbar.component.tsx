@@ -17,7 +17,6 @@
 import FlipPlaneIcon from '@assets/icons/viewer/flip_plane.svg';
 import AlignIcon from '@assets/icons/viewer/align.svg';
 import ClipSelectionIcon from '@assets/icons/viewer/clip_selection.svg';
-import ResetIcon from '@assets/icons/viewer/reset.svg';
 import CancelIcon from '@assets/icons/viewer/delete.svg';
 import ClearOverridesIcon from '@assets/icons/viewer/clear_overrides.svg';
 import EyeHideIcon from '@assets/icons/viewer/eye_hide.svg';
@@ -64,12 +63,6 @@ export const SectionToolbar = () => {
 					hidden={!clippingModeActive && !hasHighlightedObjects}
 					onClick={UnityUtil.clipToolClipToSelection}
 					title={formatMessage({ id: 'viewer.toolbar.icon.clipSelection', defaultMessage: 'Clip To Selection' })}
-				/>
-				<ToolbarButton
-					Icon={ResetIcon}
-					hidden={!clippingModeActive}
-					onClick={UnityUtil.stopClipEdit}
-					title={formatMessage({ id: 'viewer.toolbar.icon.reset', defaultMessage: 'Reset' })}
 				/>
 				<ToolbarButton
 					Icon={CancelIcon}
