@@ -51,7 +51,11 @@ export const getSelectedFrameIndex = (frames, endingDate) => {
 	return leftMargin;
 };
 
-export const getDateWithinBoundaries = (date: Date, minDate: Date, maxDate: Date) => {
+export const getDateWithinBoundaries = (inputDate: Date | number, inputMinDate: Date | number, inputMaxDate: Date | number) => {
+	const date = new Date(inputDate);
+	const minDate = new Date(inputMinDate);
+	const maxDate = new Date(inputMaxDate);
+
 	const dateAsNumber = date.getTime();
 
 	if (dateAsNumber < minDate.getTime()) {
