@@ -45,7 +45,7 @@ import rootSaga from './v4/modules/sagas';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { AuthenticatedRoute } from './v5/services/routing/authenticatedRoute.component';
 import { initializeGoogleTagManager } from './v5/services/googleTagManager';
-import { initializeHotjar } from './v4/services/hotjar';
+import { initializeHotjar } from './v5/services/hotjar';
 
 window.UnityUtil = UnityUtil;
 

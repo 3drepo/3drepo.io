@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import Hotjar from '@hotjar/browser';
-import { clientConfigService } from './clientConfig';
+import { clientConfigService } from '../../v4/services/clientConfig';
 
 export const initializeHotjar = () => {
 	const { development, hotjar } = clientConfigService;
