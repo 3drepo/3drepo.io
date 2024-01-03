@@ -39,7 +39,7 @@ export const SectionToolbar = () => {
 	const hasOverrides = hasGroupOverrides || hasTicketOverrides;
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectFullySelectedNodesIds().length;
 	const hasHiddenObjects = TreeHooksSelectors.selectModelHasHiddenNodes();
-	const clippingModeActive = !!ViewerGuiHooksSelectors.selectClippingMode();
+	const clippingModeActive = ViewerGuiHooksSelectors.selectIsClipEdit();
 	const isBoxClippingMode = ViewerGuiHooksSelectors.selectClippingMode() === VIEWER_CLIP_MODES.BOX;
 	return (
 		<Container>
