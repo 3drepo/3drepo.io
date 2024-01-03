@@ -59,9 +59,10 @@ export const SectionToolbar = () => {
 				/>
 				<ToolbarButton
 					Icon={ClipSelectionIcon}
-					hidden={!clippingModeActive && !hasHighlightedObjects}
+					hidden={!clippingModeActive}
 					onClick={Viewer.clipToolClipToSelection}
 					title={formatMessage({ id: 'viewer.toolbar.icon.clipToSelection', defaultMessage: 'Clip To Selection' })}
+					disabled={!hasHighlightedObjects}
 				/>
 				<ToolbarButton
 					Icon={CancelIcon}
