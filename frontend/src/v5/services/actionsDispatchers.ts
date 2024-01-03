@@ -57,7 +57,8 @@ interface IGroupsActionCreators {
 }
 
 interface ISequencesActionCreators {
-	showSequenceDate: (date: Date) => Action;
+	showSequenceDate: (date: Date | null) => Action;
+	setSelectedDate: (date: Date | null) => Action;
 }
 
 interface IJobsActionCreators {
