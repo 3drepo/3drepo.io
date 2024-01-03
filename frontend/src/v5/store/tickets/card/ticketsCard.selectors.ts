@@ -22,7 +22,7 @@ import { selectTemplateById, selectTemplates, selectTicketById, selectTickets } 
 import { ITicketsCardState } from './ticketsCard.redux';
 import { getTicketIsCompleted } from './ticketsCard.helpers';
 import { DEFAULT_PIN, getPinColorHex, ticketToPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
-import { get } from 'lodash';
+import { compact, get } from 'lodash';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
 
@@ -163,7 +163,7 @@ export const selectTicketPins = createSelector(
 				if (!selectedTicket.modules[moduleName]) return;
 				pinArray.push(...module.properties.map(moduleToPins(`${TicketBaseKeys.MODULES}.${moduleName}`)));
 			});
-			return pinArray;
+			return compact(pinArray);
 		}
 		return tickets.reduce(
 			(accum, ticket) => {
