@@ -35,6 +35,7 @@ interface IProps {
 	setSelectedSequence: (id: string) => void;
 	openOnToday: boolean;
 	setOpenOnToday: (newValue: boolean) => void;
+	showSequenceDate: (newValue: Date | null) => void;
 }
 
 const SequenceItem = ({name, modelName, startDate, endDate, onClick}) => (
@@ -55,18 +56,25 @@ const SequenceItem = ({name, modelName, startDate, endDate, onClick}) => (
 	</SequenceItemContainer>
 );
 
-export const SequencesList = ({ setSelectedSequence, sequences, openOnToday, setOpenOnToday }: IProps) => (
-	<ViewerPanelContent>
-		{sequences.map((sequence) => (
-			<SequenceItem key={sequence._id} {...sequence} onClick={() => setSelectedSequence(sequence._id)} />
-		))}
-		<Gap $height='48px' />
-		<ToggleContainer>
-			<Toggle onChange={() => setOpenOnToday(!openOnToday)} checked={openOnToday} />
-			<FormattedMessage
-				id="sequeneces.toggle.goToToday"
-				defaultMessage="Go to today's date when entering a sequence"
-			/>
-		</ToggleContainer>
-	</ViewerPanelContent>
-);
+export const SequencesList = ({ setSelectedSequence, sequences, openOnToday, setOpenOnToday, showSequenceDate }: IProps) => {
+	const onSequenceClick = ({ _id }) => {
+		setSelectedSequence(_id);
+		showSequenceDate(null);
+	};
+
+	return (
+		<ViewerPanelContent>
+			{sequences.map((sequence) => (
+				<SequenceItem key={sequence._id} {...sequence} onClick={() => onSequenceClick(sequence)} />
+			))}
+			<Gap $height='48px' />
+			<ToggleContainer>
+				<Toggle onChange={() => setOpenOnToday(!openOnToday)} checked={openOnToday} />
+				<FormattedMessage
+					id="sequeneces.toggle.goToToday"
+					defaultMessage="Go to today's date when entering a sequence"
+				/>
+			</ToggleContainer>
+		</ViewerPanelContent>
+	);
+};

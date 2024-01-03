@@ -28,6 +28,7 @@ const mapStateToProps = createStructuredSelector({
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setOpenOnToday: SequencesActions.setOpenOnTodaySuccess,
+	showSequenceDate: SequencesActions.showSequenceDate,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(SequencesList));
