@@ -17,10 +17,9 @@
 import { PureComponent, useEffect, useState } from 'react';
 import { IconButton } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { STEP_SCALE } from '../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
-import { MODAL_TODAY_NOT_AVAILABLE_BODY, getDateWithinBoundaries, getSelectedFrame } from '../../../../modules/sequences/sequences.helper';
+import { getDateWithinBoundaries, getSelectedFrame } from '../../../../modules/sequences/sequences.helper';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import { Loader } from '../../../components/loader/loader.component';
 import { PanelBarActions } from '../panelBarActions';
@@ -62,73 +61,44 @@ interface IProps {
 	draggablePanels: string[];
 	toggleLegend: () => void;
 	resetLegendPanel: () => void;
-	openOnToday: boolean;
 }
 
 const da =  new Date();
 
 const SequenceDetails = ({
 	startDate, endDate, selectedDate, selectedStartDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
-	setStepScale, currentTasks, loadingFrameState, loadingViewpoint, rightPanels, toggleActivitiesPanel, openOnToday,
-	fetchActivityDetails, onPlayStarted, frames, isActivitiesPending, toggleLegend, draggablePanels
-}) => {
-	const [dateToUse, setDateToUse] = useState(null);
-
-	useEffect(() => {
-		if (!openOnToday) {
-			setDateToUse(selectedDate || selectedEndingDate);
-			return;
-		}
-
-		if (selectedDate) {
-			setDateToUse(selectedDate);
-			return;
-		}
-
-		const now = new Date();
-		const newDateToUse = getDateWithinBoundaries(now, new Date(startDate), new Date(endDate));
-		setDateToUse(newDateToUse);
-
-		if (newDateToUse.getTime() !== now.getTime()) {
-			DialogsActionsDispatchers.open('info', MODAL_TODAY_NOT_AVAILABLE_BODY);
-		}
-	}, []);
-
-	if (!dateToUse) {
-		return null;
-	}
-
-	return (
-		<>
-			<SequenceForm />
-			<SequencePlayer
-				min={startDate}
-				max={endDate}
-				value={dateToUse}
-				endingDate={selectedEndingDate}
-				stepInterval={stepInterval}
-				stepScale={stepScale}
-				onChange={setSelectedDate}
-				onChangeStepScale={setStepScale}
-				onChangeStepInterval={setStepInterval}
-				loadingFrame={loadingFrameState || loadingViewpoint}
-				rightPanels={rightPanels}
-				toggleActivitiesPanel={toggleActivitiesPanel}
-				onPlayStarted={onPlayStarted}
-				frames={frames}
-				isActivitiesPending={isActivitiesPending}
-				toggleLegend={toggleLegend}
-				draggablePanels={draggablePanels}
-			/>
-			<TasksList
-				tasks={currentTasks}
-				startDate={selectedStartDate}
-				endDate={selectedEndingDate}
-				fetchActivityDetails={fetchActivityDetails}
-			/>
-		</>
-	);
-};
+	setStepScale, currentTasks, loadingFrameState, loadingViewpoint, rightPanels, toggleActivitiesPanel,
+	fetchActivityDetails, onPlayStarted, frames, isActivitiesPending, toggleLegend, draggablePanels,
+}) => (
+	<>
+		<SequenceForm />
+		<SequencePlayer
+			min={startDate}
+			max={endDate}
+			value={selectedDate}
+			endingDate={selectedEndingDate}
+			stepInterval={stepInterval}
+			stepScale={stepScale}
+			onChange={setSelectedDate}
+			onChangeStepScale={setStepScale}
+			onChangeStepInterval={setStepInterval}
+			loadingFrame={loadingFrameState || loadingViewpoint}
+			rightPanels={rightPanels}
+			toggleActivitiesPanel={toggleActivitiesPanel}
+			onPlayStarted={onPlayStarted}
+			frames={frames}
+			isActivitiesPending={isActivitiesPending}
+			toggleLegend={toggleLegend}
+			draggablePanels={draggablePanels}
+		/>
+		<TasksList
+			tasks={currentTasks}
+			startDate={selectedStartDate}
+			endDate={selectedEndingDate}
+			fetchActivityDetails={fetchActivityDetails}
+		/>
+	</>
+);
 
 const SequencesLoader = () => (<LoaderContainer><Loader /></LoaderContainer>);
 
