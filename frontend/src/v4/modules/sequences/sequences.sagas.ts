@@ -187,7 +187,7 @@ export function* setSelectedDate({ date }) {
 			// bound date by sequence start/end date
 			const { startDate, endDate } = yield select(selectSelectedSequence);
 			let dateToSelect;
-			
+
 			if (date) {
 				dateToSelect = getDateWithinBoundaries(date, startDate, endDate);
 
@@ -198,7 +198,7 @@ export function* setSelectedDate({ date }) {
 				// if no date is passed, use today or the sequence start date (depening on openOnToday)
 				const defaultDate = openOnToday ? new Date() : new Date(startDate);
 				dateToSelect = getDateWithinBoundaries(defaultDate, startDate, endDate);
-				
+
 				if (dateToSelect.getTime() !== defaultDate.getTime()) {
 					DialogsActionsDispatchers.open('info', MODAL_TODAY_NOT_AVAILABLE_BODY);
 				}
@@ -246,8 +246,7 @@ export function* setSelectedSequence({ sequenceId }) {
 }
 
 export function* showSequenceDate({ date }) {
-	let sequences = yield select(selectSequences);
-
+	const sequences = yield select(selectSequences);
 	if (!sequences.length) {
 		return;
 	}
@@ -260,7 +259,7 @@ export function* showSequenceDate({ date }) {
 	}
 
 	yield put(SequencesActions.setSelectedDate(date));
-	
+
 	const sequencePanelVisible = (yield select(selectLeftPanels)).includes[VIEWER_PANELS.SEQUENCES];
 	if (!sequencePanelVisible) {
 		// if sequence panel is closed, open it
