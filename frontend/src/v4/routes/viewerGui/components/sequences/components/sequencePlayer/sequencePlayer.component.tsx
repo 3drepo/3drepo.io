@@ -292,7 +292,7 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 
 		const goToToday = () => {
 			const now = new Date();
-			const newDateToUse = getDateWithinBoundaries(now, new Date(min), new Date(max));
+			const newDateToUse = getDateWithinBoundaries(now, min, max);
 			this.gotoDate(newDateToUse);
 
 			if (newDateToUse.getTime() !== now.getTime()) {
