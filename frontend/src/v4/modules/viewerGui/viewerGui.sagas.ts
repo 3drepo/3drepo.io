@@ -17,12 +17,9 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
-import { goBack, push } from 'connected-react-router';
-import { matchPath } from 'react-router';
+import { goBack } from 'connected-react-router';
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
-import { UnityUtil } from '@/globals/unity-util';
-import { ROUTES } from '../../constants/routes';
 import { INITIAL_HELICOPTER_SPEED, VIEWER_CLIP_MODES, VIEWER_EVENTS, VIEWER_GIZMO_MODES } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
@@ -51,7 +48,6 @@ import {
 	selectClipNumber,
 	selectHelicopterSpeed,
 	selectIsClipEdit,
-	selectIsMetadataVisible
 } from './viewerGui.selectors';
 
 function* fetchData({ teamspace, model }) {
@@ -324,13 +320,13 @@ function* setGizmoMode({ mode }) {
 	try {
 		switch (mode) {
 			case VIEWER_GIZMO_MODES.ROTATE:
-				UnityUtil.clipToolRotate()
+				Viewer.clipToolRotate()
 				break;
 			case VIEWER_GIZMO_MODES.SCALE:
-				UnityUtil.clipToolScale()
+				Viewer.clipToolScale()
 				break
 			default:
-				UnityUtil.clipToolTranslate();
+				Viewer.clipToolTranslate();
 				break;
 		}
 		yield put(ViewerGuiActions.setGizmoModeSuccess(mode));

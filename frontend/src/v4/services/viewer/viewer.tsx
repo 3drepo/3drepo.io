@@ -1256,6 +1256,34 @@ export class ViewerService {
 		UnityUtil.stopClipEdit();
 	}
 
+	public clipToolFlip() {
+		UnityUtil.clipToolFlip();
+	}
+
+	public clipToolRealign() {
+		UnityUtil.clipToolRealign();
+	}
+
+	public clipToolClipToSelection() {
+		UnityUtil.clipToolClipToSelection();
+	}
+
+	public clipToolDelete() {
+		UnityUtil.clipToolDelete();
+	}
+
+	public clipToolRotate() {
+		UnityUtil.clipToolRotate();
+	}
+
+	public clipToolScale() {
+		UnityUtil.clipToolScale();
+	}
+
+	public clipToolTranslate() {
+		UnityUtil.clipToolTranslate();
+	}
+
 	public setNavigationOn() {
 		UnityUtil.setNavigationOn();
 	}

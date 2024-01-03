@@ -30,8 +30,8 @@ import { FormattedMessage } from 'react-intl';
 import { Section, Container, ClearButton, ClearIcon } from './sectionToolbar.styles';
 import { ToolbarButton } from '../buttons/toolbarButton.component';
 import { VIEWER_CLIP_MODES } from '@/v4/constants/viewer';
-import { UnityUtil } from '@/globals/unity-util';
 import { GizmoModeButtons } from '../buttons/buttonOptionsContainer/gizmoModeButtons.component';
+import { Viewer } from '@/v4/services/viewer/viewer';
 
 export const SectionToolbar = () => {
 	const hasGroupOverrides = GroupsHooksSelectors.selectGroupsColourOverrides()?.length > 0;
@@ -39,7 +39,6 @@ export const SectionToolbar = () => {
 	const hasOverrides = hasGroupOverrides || hasTicketOverrides;
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectFullySelectedNodesIds().length;
 	const hasHiddenObjects = TreeHooksSelectors.selectModelHasHiddenNodes();
-
 	const clippingModeActive = !!ViewerGuiHooksSelectors.selectClippingMode();
 	const isBoxClippingMode = ViewerGuiHooksSelectors.selectClippingMode() === VIEWER_CLIP_MODES.BOX;
 	return (
@@ -49,25 +48,25 @@ export const SectionToolbar = () => {
 				<ToolbarButton
 					Icon={FlipPlaneIcon}
 					hidden={!clippingModeActive || isBoxClippingMode}
-					onClick={UnityUtil.clipToolFlip}
+					onClick={Viewer.clipToolFlip}
 					title={formatMessage({ id: 'viewer.toolbar.icon.flipPlane', defaultMessage: 'Flip Plane' })}
 				/>
 				<ToolbarButton
 					Icon={AlignIcon}
 					hidden={!clippingModeActive}
-					onClick={UnityUtil.clipToolRealign}
+					onClick={Viewer.clipToolRealign}
 					title={formatMessage({ id: 'viewer.toolbar.icon.align', defaultMessage: 'Align' })}
 				/>
 				<ToolbarButton
 					Icon={ClipSelectionIcon}
 					hidden={!clippingModeActive && !hasHighlightedObjects}
-					onClick={UnityUtil.clipToolClipToSelection}
-					title={formatMessage({ id: 'viewer.toolbar.icon.clipSelection', defaultMessage: 'Clip To Selection' })}
+					onClick={Viewer.clipToolClipToSelection}
+					title={formatMessage({ id: 'viewer.toolbar.icon.clipToSelection', defaultMessage: 'Clip To Selection' })}
 				/>
 				<ToolbarButton
 					Icon={CancelIcon}
 					hidden={!clippingModeActive}
-					onClick={UnityUtil.clipToolDelete}
+					onClick={Viewer.clipToolDelete}
 					title={formatMessage({ id: 'viewer.toolbar.icon.cancel', defaultMessage: 'Cancel' })}
 				/>
 			</Section>
