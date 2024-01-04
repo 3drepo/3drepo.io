@@ -122,8 +122,13 @@ export const selectTicketsFilteredByQueriesAndCompleted = createSelector(
 	(tickets, isComplete, queries, templates) => tickets.filter((ticket) => {
 		const templateCode = templates.find((template) => template._id === ticket.type).code;
 		const ticketCode = `${templateCode}:${ticket.number}`;
-		return getTicketIsCompleted(ticket) === isComplete &&
-			(!queries.length || queries.some((q) => [ticketCode, ticket.title].some((str) => str.toLowerCase().includes(q.toLowerCase()))));
+		const ticketsMatchesIsCompleted = getTicketIsCompleted(ticket) === isComplete;
+		if (!ticketsMatchesIsCompleted) return false;
+
+		if (!queries.length) return true;
+
+		const ticketMatchesQuery = (query) => [ticketCode, ticket.title].some((str) => str.toLowerCase().includes(query.toLowerCase()));
+		return queries.some(ticketMatchesQuery);
 	}),
 );
 
