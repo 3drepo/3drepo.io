@@ -38,8 +38,8 @@ import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { useSearchParam } from '../../../useSearchParam';
 
 enum IndexChange {
-	UP = 1,
-	DOWN = -1,
+	PREV = -1,
+	NEXT = 1,
 }
 
 export const TicketDetailsCard = () => {
@@ -60,7 +60,7 @@ export const TicketDetailsCard = () => {
 
 	const getUpdatedIndex = (delta: number) => {
 		let index = currentIndex === -1 ? initialIndex.current : currentIndex;
-		if (currentIndex === -1 && delta === IndexChange.UP) index -= 1;
+		if (currentIndex === -1 && delta === IndexChange.NEXT) index -= 1;
 		return (index + delta) % filteredTickets.length;
 	};
 
@@ -70,8 +70,8 @@ export const TicketDetailsCard = () => {
 		TicketsCardActionsDispatchers.setSelectedTicketPin(updatedId);
 	};
 
-	const cycleToPrevTicket = () => changeTicketIndex(IndexChange.DOWN);
-	const cycleToNextTicket = () => changeTicketIndex(IndexChange.UP);
+	const cycleToPrevTicket = () => changeTicketIndex(IndexChange.PREV);
+	const cycleToNextTicket = () => changeTicketIndex(IndexChange.NEXT);
 
 	const goBack = () => {
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
