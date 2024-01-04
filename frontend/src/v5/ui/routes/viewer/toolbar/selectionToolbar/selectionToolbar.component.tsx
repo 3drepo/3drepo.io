@@ -39,34 +39,35 @@ export const SectionToolbar = () => {
 	const hasOverrides = hasGroupOverrides || hasTicketOverrides;
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectFullySelectedNodesIds().length;
 	const hasHiddenObjects = TreeHooksSelectors.selectModelHasHiddenNodes();
-	const clippingModeActive = ViewerGuiHooksSelectors.selectIsClipEdit();
-	const isBoxClippingMode = ViewerGuiHooksSelectors.selectClippingMode() === VIEWER_CLIP_MODES.BOX;
+	const clippingMode = ViewerGuiHooksSelectors.selectClippingMode();
+	const clippingSectionOpen = ViewerGuiHooksSelectors.selectIsClipEdit() && !!clippingMode;
+	const isBoxClippingMode = clippingMode === VIEWER_CLIP_MODES.BOX;
 	return (
 		<Container>
-			<Section hidden={!clippingModeActive}>
-				<GizmoModeButtons hidden={!clippingModeActive} />
+			<Section hidden={!clippingSectionOpen}>
+				<GizmoModeButtons hidden={!clippingSectionOpen} />
 				<ToolbarButton
 					Icon={FlipPlaneIcon}
-					hidden={!clippingModeActive || isBoxClippingMode}
+					hidden={!clippingSectionOpen || isBoxClippingMode}
 					onClick={Viewer.clipToolFlip}
 					title={formatMessage({ id: 'viewer.toolbar.icon.flipPlane', defaultMessage: 'Flip Plane' })}
 				/>
 				<ToolbarButton
 					Icon={AlignIcon}
-					hidden={!clippingModeActive}
+					hidden={!clippingSectionOpen}
 					onClick={Viewer.clipToolRealign}
 					title={formatMessage({ id: 'viewer.toolbar.icon.alignToSurface', defaultMessage: 'Align To Surface' })}
 				/>
 				<ToolbarButton
 					Icon={ClipSelectionIcon}
-					hidden={!clippingModeActive}
+					hidden={!clippingSectionOpen}
 					onClick={Viewer.clipToolClipToSelection}
 					title={formatMessage({ id: 'viewer.toolbar.icon.clipToSelection', defaultMessage: 'Clip To Selection' })}
 					disabled={!hasHighlightedObjects}
 				/>
 				<ToolbarButton
 					Icon={CancelIcon}
-					hidden={!clippingModeActive}
+					hidden={!clippingSectionOpen}
 					onClick={Viewer.clipToolDelete}
 					title={formatMessage({ id: 'viewer.toolbar.icon.deleteClip', defaultMessage: 'Delete' })}
 				/>
