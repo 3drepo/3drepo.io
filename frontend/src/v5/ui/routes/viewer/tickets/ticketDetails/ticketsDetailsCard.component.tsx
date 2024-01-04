@@ -25,7 +25,7 @@ import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { isEmpty } from 'lodash';
+import { isEmpty, set } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
@@ -57,6 +57,7 @@ export const TicketDetailsCard = () => {
 	const currentIndex = filteredTickets.findIndex((tckt) => tckt._id === ticket._id);
 	const initialIndex = useRef(currentIndex);
 	const disableCycleButtons = currentIndex > -1 ? filteredTickets.length < 2 : filteredTickets.length < 1;
+	const templateValidationSchema = getValidators(template);
 
 	const getUpdatedIndex = (delta: IndexChange) => {
 		let index = currentIndex === -1 ? initialIndex.current : currentIndex;
@@ -79,16 +80,27 @@ export const TicketDetailsCard = () => {
 	};
 
 	const formData = useForm({
-		resolver: yupResolver(getValidators(template)),
+		resolver: yupResolver(templateValidationSchema),
 		mode: 'onChange',
 		defaultValues: ticket,
 	});
 
-	// There seems to be some sort of race condition in react-hook-form
-	// so onBlur can't be called immediately after onChange because the validation won't be there.
-	const onBlurHandler = () => setTimeout(() => {
-		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
-		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, formData.formState.errors)));
+	const onBlurHandler = async () => {
+		const dirtyFields = formData.formState.dirtyFields;
+		if (isEmpty(dirtyFields)) return;
+
+		const formValues = formData.getValues();
+		let errors = {};
+		try {
+			// cannot use formState.errors because the validation for complex objects is completed after
+			// onBlur gets called, so formState.errors for those objects is updated to the previous
+			// onBlur call instead and might claim there are no errors when it's not the case
+			await templateValidationSchema.validateSync(formValues, { abortEarly: false });
+		} catch (yupError) {
+			(yupError?.inner || []).forEach(({ path, message }) => set(errors, path, { message }));
+		}
+		const values = dirtyValues(formValues, dirtyFields);
+		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, errors)));
 
 		const editedGroup = findEditedGroup(validVals, ticket, template);
 		if (editedGroup) {
@@ -105,7 +117,7 @@ export const TicketDetailsCard = () => {
 		sanitizeViewVals(validVals, ticket, template);
 		if (isEmpty(validVals)) return;
 		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticket._id, validVals, isFederation);
-	}, 200);
+	};
 
 	useEffect(() => {
 		if (!ticket?._id) return;
@@ -140,6 +152,7 @@ export const TicketDetailsCard = () => {
 	}, [JSON.stringify(defaultView?.state)]);
 
 	useEffect(() => () => {
+		onBlurHandler();
 		setTicketId();
 	}, []);
 
