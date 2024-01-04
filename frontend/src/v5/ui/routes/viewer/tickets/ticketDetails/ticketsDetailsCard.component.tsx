@@ -67,7 +67,6 @@ export const TicketDetailsCard = () => {
 	const changeTicketIndex = (delta: IndexChange) => {
 		const updatedId = filteredTickets.at(getUpdatedIndex(delta))._id;
 		TicketsCardActionsDispatchers.setSelectedTicket(updatedId);
-		TicketsCardActionsDispatchers.setSelectedTicketPin(updatedId);
 	};
 
 	const cycleToPrevTicket = () => changeTicketIndex(IndexChange.PREV);
