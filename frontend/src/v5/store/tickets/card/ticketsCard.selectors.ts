@@ -151,8 +151,8 @@ export const selectTicketPins = createSelector(
 	selectSelectedDate,
 	(tickets, templates, view, selectedTicketPinId, selectedTicket, selectedSequenceDate): IPin[] => {
 		if (view === TicketsCardViews.New || !tickets.length) return [];
-		const pinArray = [];
 		if (view === TicketsCardViews.Details) {
+			const pinArray = [];
 			const selectedTemplate = templates.find(({ _id }) => _id === selectedTicket.type);
 			
 			const moduleToPins = (modulePath) => ({ name, type }) => {
@@ -189,7 +189,7 @@ export const selectTicketPins = createSelector(
 				}
 				return [...accum, ticketToPin(ticket._id, pin, selectedTicketPinId, color)];
 			},
-			pinArray,
+			[],
 		);
 	},
 );
