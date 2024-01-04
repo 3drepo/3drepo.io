@@ -31,12 +31,12 @@ import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 const OPTIONS = [
 	{
 		option: VIEWER_GIZMO_MODES.TRANSLATE,
-		title: formatMessage({ id: 'viewer.toolbar.icon.gizmoModes.translate', defaultMessage: 'Translate' }),
+		title: formatMessage({ id: 'viewer.toolbar.icon.gizmoModes.move', defaultMessage: 'Move' }),
 		icon: GizmoTranslateIcon,
 	},
 	{
 		option: VIEWER_GIZMO_MODES.SCALE,
-		title: formatMessage({ id: 'viewer.toolbar.icon.gizmoModes.scale', defaultMessage: 'Scale' }),
+		title: formatMessage({ id: 'viewer.toolbar.icon.gizmoModes.resize', defaultMessage: 'Resize' }),
 		icon: GizmoScaleIcon,
 	},
 	{

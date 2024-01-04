@@ -55,7 +55,7 @@ export const SectionToolbar = () => {
 					Icon={AlignIcon}
 					hidden={!clippingModeActive}
 					onClick={Viewer.clipToolRealign}
-					title={formatMessage({ id: 'viewer.toolbar.icon.align', defaultMessage: 'Align' })}
+					title={formatMessage({ id: 'viewer.toolbar.icon.alignToSurface', defaultMessage: 'Align To Surface' })}
 				/>
 				<ToolbarButton
 					Icon={ClipSelectionIcon}
@@ -68,7 +68,7 @@ export const SectionToolbar = () => {
 					Icon={CancelIcon}
 					hidden={!clippingModeActive}
 					onClick={Viewer.clipToolDelete}
-					title={formatMessage({ id: 'viewer.toolbar.icon.cancel', defaultMessage: 'Cancel' })}
+					title={formatMessage({ id: 'viewer.toolbar.icon.deleteClip', defaultMessage: 'Delete' })}
 				/>
 			</Section>
 			<Section hidden={!hasOverrides}>
