@@ -48,9 +48,7 @@ const OPTIONS = [
 
 export const GizmoModeButtons = (props) => {
 	const [expanded, setExpanded] = useState(false);
-	
 	const isBoxClippingMode = ViewerGuiHooksSelectors.selectClippingMode() === VIEWER_CLIP_MODES.BOX;
-	
 	const gizmoMode = ViewerGuiHooksSelectors.selectGizmoMode();
 
 	const currentMode = OPTIONS.find(({ option }) => option === gizmoMode);
@@ -63,11 +61,6 @@ export const GizmoModeButtons = (props) => {
 		setExpanded(false);
 		ViewerGuiActionsDispatchers.setGizmoMode(mode);
 	};
-
-	// useEffect(() => {
-	// Viewer.on(VIEWER_EVENTS.UPDATE_NUM_CLIP, ViewerGuiActionsDispatchers.updateClipState);
-	// return () => Viewer.off(VIEWER_EVENTS.UPDATE_NUM_CLIP, ViewerGuiActionsDispatchers.updateClipState);
-	// }, []);
 
 	return (
 		<ClickAwayListener onClickAway={() => setExpanded(false)}>
