@@ -110,6 +110,7 @@ export const TicketDetailsCard = () => {
 
 	useEffect(() => {
 		if (!ticket?._id) return;
+		initialIndex.current = currentIndex;
 		if (!templateAlreadyFetched(template)) {
 			TicketsActionsDispatchers.fetchTemplate(
 				teamspace,
@@ -142,6 +143,7 @@ export const TicketDetailsCard = () => {
 	useEffect(() => () => {
 		setTicketId();
 	}, []);
+
 	if (!ticket) return null;
 	return (
 		<CardContainer>
