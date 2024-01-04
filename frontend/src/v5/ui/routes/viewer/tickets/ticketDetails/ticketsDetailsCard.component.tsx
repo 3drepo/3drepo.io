@@ -49,7 +49,7 @@ export const TicketDetailsCard = () => {
 	const treeNodesList = TreeHooksSelectors.selectTreeNodesList();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
-	const filteredTickets = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied();
+	const filteredTickets = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied() as any;
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const ticket = tickets.find((t) => t._id === ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
@@ -58,14 +58,14 @@ export const TicketDetailsCard = () => {
 	const initialIndex = useRef(currentIndex);
 	const disableCycleButtons = currentIndex > -1 ? filteredTickets.length < 2 : filteredTickets.length < 1;
 
-	const getUpdatedIndex = (delta: number) => {
+	const getUpdatedIndex = (delta: IndexChange) => {
 		let index = currentIndex === -1 ? initialIndex.current : currentIndex;
 		if (currentIndex === -1 && delta === IndexChange.NEXT) index -= 1;
 		return (index + delta) % filteredTickets.length;
 	};
 
 	const changeTicketIndex = (delta: IndexChange) => {
-		const updatedId = filteredTickets.slice(getUpdatedIndex(delta))[0]._id;
+		const updatedId = filteredTickets.at(getUpdatedIndex(delta))._id;
 		TicketsCardActionsDispatchers.setSelectedTicket(updatedId);
 		TicketsCardActionsDispatchers.setSelectedTicketPin(updatedId);
 	};
