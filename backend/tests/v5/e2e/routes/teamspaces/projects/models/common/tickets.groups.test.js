@@ -106,18 +106,24 @@ const setupExtIDTicket = (container) => {
 	const ticket = ServiceHelper.generateTicket(template);
 
 	const groupWithIfcGuids = ServiceHelper.generateGroup(false, { serialised: true, hasId: false, container });
+	const groupWithRvtIds = ServiceHelper.generateGroup(false, { serialised: true, hasId: false, container });
 
 	// FIXME: need constant reference
 	/* eslint-disable no-underscore-dangle */
 	groupWithIfcGuids.objects[0].ifc_guids = groupWithIfcGuids.objects[0]._ids.map(
 		() => ServiceHelper.generateRandomString(22));
 	delete groupWithIfcGuids.objects[0]._ids;
+
+	groupWithRvtIds.objects[0].revit_ids = groupWithRvtIds.objects[0]._ids.map(
+		() => Math.floor(Math.random() * 10000));
+	delete groupWithRvtIds.objects[0]._ids;
 	/* eslint-enable no-underscore-dangle */
 
 	ticket.properties[viewName] = {
 		state: {
 			hidden: [
 				{ group: groupWithIfcGuids },
+				{ group: groupWithRvtIds },
 			],
 		},
 	};
@@ -144,10 +150,15 @@ const testGetGroup = () => {
 				const { body: ticketRes } = await agent.post(addTicketRoute(model._id)).send(extIdTestCase.ticket);
 				/* eslint-disable no-param-reassign */
 				const { body: getRes } = await agent.get(getTicketRoute(model._id, ticketRes._id));
-				const groupId = getRes.properties[extIdTestCase.viewName].state.hidden[0].group;
-				model.extIdGroup = {
+				const hiddenGroups = getRes.properties[extIdTestCase.viewName].state.hidden;
+				model.groupWithIfcGuids = {
 					...extIdTestCase.groupWithIfcGuids,
-					_id: groupId,
+					_id: hiddenGroups[0].group,
+				};
+
+				model.groupWithRvtIds = {
+					...extIdTestCase.groupWithRvtIds,
+					_id: hiddenGroups[1].group,
 				};
 				model.extIdTicket = { ...cloneDeep(extIdTestCase.ticket), _id: ticketRes._id };
 				/* eslint-enable no-param-reassign */
@@ -171,7 +182,8 @@ const testGetGroup = () => {
 				['the ticket does not exist', { ...baseRouteParams, ticket: { _id: ServiceHelper.generateRandomString() } }, false, templates.ticketNotFound],
 				['the group does not exist', { ...baseRouteParams, group: { _id: ServiceHelper.generateRandomString() } }, false, templates.groupNotFound],
 				['the group id is valid', baseRouteParams, true],
-				['the group id is valid (returning IFC GUIDs)', { ...baseRouteParams, group: model.extIdGroup, ticket: model.extIdTicket, convertIds: false }, true],
+				['the group id is valid (returning IFC GUIDs)', { ...baseRouteParams, group: model.groupWithIfcGuids, ticket: model.extIdTicket, convertIds: false }, true],
+				['the group id is valid (returning RVT IDs)', { ...baseRouteParams, group: model.groupWithRvtIds, ticket: model.extIdTicket, convertIds: false }, true],
 			];
 		};
 
