@@ -21,7 +21,7 @@ import { createSelector } from 'reselect';
 import { selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
 import { ITicketsCardState } from './ticketsCard.redux';
 import { getTicketIsCompleted } from './ticketsCard.helpers';
-import { DEFAULT_PIN, getPinColorHex, pinFormatter } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
+import { DEFAULT_PIN, getPinColorHex, formatPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { compact, get } from 'lodash';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
@@ -161,7 +161,7 @@ export const selectTicketPins = createSelector(
 				const pinId = pinPath === DEFAULT_PIN ? selectedTicket._id : `${selectedTicket._id}.${pinPath}`;
 				const color = getPinColorHex(pinPath, selectedTemplate, selectedTicket);
 				const isSelected = pinId === selectedTicketPinId;
-				return pinFormatter(pinId, get(selectedTicket, pinPath), isSelected, color);
+				return formatPin(pinId, get(selectedTicket, pinPath), isSelected, color);
 			};
 			pinArray.push(...selectedTemplate.properties.map(moduleToPins(TicketBaseKeys.PROPERTIES)));
 			selectedTemplate.modules.forEach((module) => {
@@ -189,7 +189,7 @@ export const selectTicketPins = createSelector(
 					) return accum;
 				}
 				const isSelected = selectedTicketPinId === ticket._id;
-				return [...accum, pinFormatter(ticket._id, pin, isSelected, color)];
+				return [...accum, formatPin(ticket._id, pin, isSelected, color)];
 			},
 			[],
 		);

@@ -72,7 +72,7 @@ export const getPinColorHex = (name: string, template: ITemplate, ticket: ITicke
 
 export const isPinLight = (hex: string) => contrastColor({ bgColor: hex, threshold: 230 }) !== '#FFFFFF';
 
-export const pinFormatter = (pinId, position, isSelected: boolean, color: string): IPin => ({
+export const formatPin = (pinId, position, isSelected: boolean, color: string): IPin => ({
 	id: pinId,
 	position,
 	isSelected,
