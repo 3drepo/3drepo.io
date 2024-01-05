@@ -18,27 +18,25 @@
 import { AutocompleteProps, TextFieldProps } from '@mui/material';
 import SearchIcon from '@assets/icons/outlined/search-outlined.svg';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { useContext } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { TextField, StartAdornment, SearchChip, Autocomplete } from './searchInput.styles';
-import { SearchContext } from '../searchContext';
+import { TextField, StartAdornment, SearchChip } from '../../../../../controls/search/searchInput/searchInput.styles';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { Autocomplete } from './ticketSearchInput.styles';
 
-type ISearchInputWithChips = {
+type ITicketSearchInput = {
 	variant?: 'filled' | 'outlined',
-	onRemoveChip?: (index: number) => void,
 	placeholder?: string,
 } & Partial<AutocompleteProps<TextFieldProps, boolean, undefined, undefined, typeof SearchChip>>;
 
-export const SearchInputWithChips = ({ variant = 'filled', placeholder, onRemoveChip, ...props }: ISearchInputWithChips): JSX.Element => {
-	const { query, setQuery } = useContext(SearchContext);
-	const queries: string[] = query ? JSON.parse(query) : [];
+export const TicketSearchInput = ({ variant = 'filled', placeholder, ...props }: ITicketSearchInput): JSX.Element => {
+	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
 
-	const onChange = (e, newValue) => setQuery(JSON.stringify(newValue));
-
-	const removeQuery = (index) => {
-		onRemoveChip?.(index);
-		setQuery(JSON.stringify(queries.filter((el, i) => index !== i)));
+	const onChange = (_, newQueries, reason) => {
+		TicketsCardActionsDispatchers.setQueryFilters((reason === 'clear') ? [] : newQueries);
 	};
+
+	const removeQuery = (deletedQuery) => TicketsCardActionsDispatchers.setQueryFilters(queries.filter((query) => query !== deletedQuery ));
 
 	return (
 		<Autocomplete
@@ -50,12 +48,12 @@ export const SearchInputWithChips = ({ variant = 'filled', placeholder, onRemove
 			clearIcon={<CloseIcon />}
 			getOptionLabel={(labelObject) => labelObject[0] ?? ''} // This silences a console error
 			renderTags={(
-				values: any[],
-			) => values.map((value: any, index: number) => (
+				values: string[],
+			) => values.map((value: string) => (
 				<SearchChip
 					key={value}
 					label={value}
-					onDelete={() => removeQuery(index)}
+					onDelete={() => removeQuery(value)}
 				/>
 			))}
 			onChange={onChange}
