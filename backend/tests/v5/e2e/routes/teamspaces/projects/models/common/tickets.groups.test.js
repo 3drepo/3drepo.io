@@ -20,6 +20,8 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
+const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
+
 const { valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -89,13 +91,67 @@ const setupBasicData = async ({ users, teamspace, project, fed, con, template, t
 	}));
 };
 
+const setupExtIDTicket = (container) => {
+	const viewName = ServiceHelper.generateRandomString();
+	const template = {
+		...ServiceHelper.generateTemplate(),
+		properties: [
+			{
+				name: viewName,
+				type: propTypes.VIEW,
+			},
+		],
+		modules: [],
+	};
+	const ticket = ServiceHelper.generateTicket(template);
+
+	const groupWithIfcGuids = ServiceHelper.generateGroup(false, { serialised: true, hasId: false, container });
+
+	// FIXME: need constant reference
+	/* eslint-disable no-underscore-dangle */
+	groupWithIfcGuids.objects[0].ifc_guids = groupWithIfcGuids.objects[0]._ids.map(
+		() => ServiceHelper.generateRandomString(22));
+	delete groupWithIfcGuids.objects[0]._ids;
+	/* eslint-enable no-underscore-dangle */
+
+	ticket.properties[viewName] = {
+		state: {
+			hidden: [
+				{ group: groupWithIfcGuids },
+			],
+		},
+	};
+
+	return { ticket, template, groupWithIfcGuids, viewName };
+};
+
 const testGetGroup = () => {
 	describe('Get group', () => {
 		const basicData = generateBasicData();
 		const { users, teamspace, project, con, fed } = basicData;
 
+		const extIdTestCase = setupExtIDTicket();
+
 		beforeAll(async () => {
 			await setupBasicData(basicData);
+			await ServiceHelper.db.createTemplates(teamspace, [extIdTestCase.template]);
+
+			await Promise.all([fed, con].map(async (model) => {
+				const modelType = fed === model ? 'federation' : 'container';
+				const addTicketRoute = (modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${users.tsAdmin.apiKey}`;
+				const getTicketRoute = (modelId, ticketId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets/${ticketId}?key=${users.tsAdmin.apiKey}`;
+
+				const { body: ticketRes } = await agent.post(addTicketRoute(model._id)).send(extIdTestCase.ticket);
+				/* eslint-disable no-param-reassign */
+				const { body: getRes } = await agent.get(getTicketRoute(model._id, ticketRes._id));
+				const groupId = getRes.properties[extIdTestCase.viewName].state.hidden[0].group;
+				model.extIdGroup = {
+					...extIdTestCase.groupWithIfcGuids,
+					_id: groupId,
+				};
+				model.extIdTicket = { ...cloneDeep(extIdTestCase.ticket), _id: ticketRes._id };
+				/* eslint-enable no-param-reassign */
+			}));
 		});
 
 		const generateTestData = (isFed) => {
@@ -112,19 +168,19 @@ const testGetGroup = () => {
 				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel() }, false, modelNotFound],
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
-				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound],
-				['the group does not exist', { ...baseRouteParams, groupId: ServiceHelper.generateRandomString() }, false, templates.groupNotFound],
+				['the ticket does not exist', { ...baseRouteParams, ticket: { _id: ServiceHelper.generateRandomString() } }, false, templates.ticketNotFound],
+				['the group does not exist', { ...baseRouteParams, group: { _id: ServiceHelper.generateRandomString() } }, false, templates.groupNotFound],
 				['the group id is valid', baseRouteParams, true],
+				['the group id is valid (returning IFC GUIDs)', { ...baseRouteParams, group: model.extIdGroup, ticket: model.extIdTicket, convertIds: false }, true],
 			];
 		};
 
-		const runTest = (desc, { model, ...routeParams }, success, expectedOutput) => {
-			const getRoute = ({ key, projectId, modelId, ticketId, groupId, modelType }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/groups/${groupId}${key ? `?key=${key}` : ''}`;
-
+		const getRoute = ({ key, projectId, modelId, ticketId, groupId, modelType, convertIds }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/groups/${groupId}${key ? `?key=${key}` : ''}${convertIds ? '&convertIds=true' : ''}`;
+		const runTest = (desc, { model, ticket, group, ...routeParams }, success, expectedOutput) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
 				const endpoint = getRoute({ modelId: model._id,
-					ticketId: model.ticket?._id,
-					groupId: model.group?._id,
+					ticketId: (ticket || model.ticket)?._id,
+					groupId: (group || model.group)?._id,
 					...routeParams });
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 
