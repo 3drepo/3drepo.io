@@ -86,9 +86,6 @@ export const TicketDetailsCard = () => {
 	});
 
 	const onBlurHandler = async () => {
-		const dirtyFields = formData.formState.dirtyFields;
-		if (isEmpty(dirtyFields)) return;
-
 		const formValues = formData.getValues();
 		let errors = {};
 		try {
@@ -99,7 +96,7 @@ export const TicketDetailsCard = () => {
 		} catch (yupError) {
 			(yupError?.inner || []).forEach(({ path, message }) => set(errors, path, { message }));
 		}
-		const values = dirtyValues(formValues, dirtyFields);
+		const values = dirtyValues(formValues, formData.formState.dirtyFields);
 		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, errors)));
 
 		const editedGroup = findEditedGroup(validVals, ticket, template);

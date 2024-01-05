@@ -48,9 +48,6 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 	});
 
 	const onBlurHandler = async () => {
-		const dirtyFields = formData.formState.dirtyFields;
-		if (isEmpty(dirtyFields)) return;
-
 		const formValues = formData.getValues();
 		let errors = {};
 		try {
@@ -61,7 +58,7 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 		} catch (yupError) {
 			(yupError?.inner || []).forEach(({ path, message }) => set(errors, path, { message }));
 		}
-		const values = dirtyValues(formValues, dirtyFields);
+		const values = dirtyValues(formValues, formData.formState.dirtyFields);
 		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, errors)));
 		sanitizeViewVals(validVals, ticket, template);
 		if (isEmpty(validVals)) return;
