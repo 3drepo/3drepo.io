@@ -148,36 +148,31 @@ const setupExtIDTicket = (container) => {
 	};
 
 	/* eslint-disable no-underscore-dangle */
+
 	// FIXME: need constant reference
-	const groupWithIfcGuids = createGroupWithExtIds({ ifc_guids: [rootMeta.metadata[0].value] });
-	const groupWithIfcGuidsNotFound = createGroupWithExtIds({ ifc_guids: [ServiceHelper.generateRandomString(22)] });
-	const groupWithRvtIds = createGroupWithExtIds({ revit_ids: [rootMeta.metadata[1].value] });
-	const groupWithRvtIdsNotFound = createGroupWithExtIds({ revit_ids: [Math.floor(Math.random() * 10000)] });
+	const groups = {
+		groupWithIfcGuids: { data: createGroupWithExtIds({ ifc_guids: [rootMeta.metadata[0].value] }),
+			convertedObjs: [meshIdStr1, meshIdStr2] },
+		groupWithRvtIds: { data: createGroupWithExtIds({ revit_ids: [rootMeta.metadata[1].value] }),
+			convertedObjs: [meshIdStr1, meshIdStr2] },
+		groupWithIfcGuidsNotFound: { data: createGroupWithExtIds({
+			ifc_guids: [ServiceHelper.generateRandomString(22)] }),
+		convertedObjs: [] },
+		groupWithRvtIdsNotFound: { data: createGroupWithExtIds({ revit_ids: [Math.floor(Math.random() * 10000)] }),
+			convertedObjs: [] },
+	};
 
 	/* eslint-enable no-underscore-dangle */
 
 	ticket.properties[viewName] = {
 		state: {
-			hidden: [
-				{ group: cloneDeep(groupWithIfcGuids) },
-				{ group: cloneDeep(groupWithRvtIds) },
-				{ group: cloneDeep(groupWithIfcGuidsNotFound) },
-				{ group: cloneDeep(groupWithRvtIdsNotFound) },
-			],
+			hidden: Object.values(groups).map(({ data }) => ({ group: cloneDeep(data) })),
 		},
 	};
 
-	groupWithRvtIds.convertedObjects = [meshIdStr1, meshIdStr2];
-	groupWithIfcGuids.convertedObjects = [meshIdStr1, meshIdStr2];
-	groupWithRvtIdsNotFound.convertedObjects = [];
-	groupWithIfcGuidsNotFound.convertedObjects = [];
-
 	return { ticket,
 		template,
-		groupWithIfcGuids,
-		groupWithRvtIds,
-		groupWithIfcGuidsNotFound,
-		groupWithRvtIdsNotFound,
+		groups,
 		viewName,
 		scene: { nodes, rev, meshMap } };
 };
@@ -207,12 +202,13 @@ const testGetGroup = () => {
 
 				const hiddenGroups = getRes.properties[extIdTestCase.viewName].state.hidden;
 
-				const groupsToUpdate = ['groupWithIfcGuids', 'groupWithRvtIds', 'groupWithIfcGuidsNotFound', 'groupWithRvtIdsNotFound'];
+				const groupsToUpdate = Object.keys(extIdTestCase.groups);
 
 				groupsToUpdate.forEach((name, ind) => {
 					model[name] = {
-						...extIdTestCase[name],
+						...extIdTestCase.groups[name].data,
 						_id: hiddenGroups[ind].group,
+						convertedObjects: extIdTestCase.groups[name].convertedObjs,
 					};
 				});
 
