@@ -109,9 +109,6 @@ const setupExtIDTicket = (container) => {
 	};
 	const ticket = ServiceHelper.generateTicket(template);
 
-	const groupWithIfcGuids = ServiceHelper.generateGroup(false, { serialised: true, hasId: false, container });
-	const groupWithRvtIds = ServiceHelper.generateGroup(false, { serialised: true, hasId: false, container });
-
 	const rev = ServiceHelper.generateRevisionEntry();
 	const revId = rev._id;
 
@@ -142,13 +139,21 @@ const setupExtIDTicket = (container) => {
 		[meshIdStr2]: meshIdStr2,
 	};
 
-	// FIXME: need constant reference
-	/* eslint-disable no-underscore-dangle */
-	groupWithIfcGuids.objects[0].ifc_guids = [rootMeta.metadata[0].value];
-	delete groupWithIfcGuids.objects[0]._ids;
+	const createGroupWithExtIds = (idsObj) => {
+		const group = ServiceHelper.generateGroup(false, { serialised: true, hasId: false, container });
+		/* eslint-disable-next-line no-underscore-dangle */
+		delete group.objects[0]._ids;
+		group.objects[0] = { ...group.objects[0], ...idsObj };
+		return group;
+	};
 
-	groupWithRvtIds.objects[0].revit_ids = [rootMeta.metadata[1].value];
-	delete groupWithRvtIds.objects[0]._ids;
+	/* eslint-disable no-underscore-dangle */
+	// FIXME: need constant reference
+	const groupWithIfcGuids = createGroupWithExtIds({ ifc_guids: [rootMeta.metadata[0].value] });
+	const groupWithIfcGuidsNotFound = createGroupWithExtIds({ ifc_guids: [ServiceHelper.generateRandomString(22)] });
+	const groupWithRvtIds = createGroupWithExtIds({ revit_ids: [rootMeta.metadata[1].value] });
+	const groupWithRvtIdsNotFound = createGroupWithExtIds({ revit_ids: [Math.floor(Math.random() * 10000)] });
+
 	/* eslint-enable no-underscore-dangle */
 
 	ticket.properties[viewName] = {
@@ -156,14 +161,25 @@ const setupExtIDTicket = (container) => {
 			hidden: [
 				{ group: cloneDeep(groupWithIfcGuids) },
 				{ group: cloneDeep(groupWithRvtIds) },
+				{ group: cloneDeep(groupWithIfcGuidsNotFound) },
+				{ group: cloneDeep(groupWithRvtIdsNotFound) },
 			],
 		},
 	};
 
 	groupWithRvtIds.convertedObjects = [meshIdStr1, meshIdStr2];
 	groupWithIfcGuids.convertedObjects = [meshIdStr1, meshIdStr2];
+	groupWithRvtIdsNotFound.convertedObjects = [];
+	groupWithIfcGuidsNotFound.convertedObjects = [];
 
-	return { ticket, template, groupWithIfcGuids, groupWithRvtIds, viewName, scene: { nodes, rev, meshMap } };
+	return { ticket,
+		template,
+		groupWithIfcGuids,
+		groupWithRvtIds,
+		groupWithIfcGuidsNotFound,
+		groupWithRvtIdsNotFound,
+		viewName,
+		scene: { nodes, rev, meshMap } };
 };
 
 const testGetGroup = () => {
@@ -190,25 +206,20 @@ const testGetGroup = () => {
 				const { body: getRes } = await agent.get(getTicketRoute(model._id, ticketRes._id));
 
 				const hiddenGroups = getRes.properties[extIdTestCase.viewName].state.hidden;
-				model.groupWithIfcGuids = {
-					...extIdTestCase.groupWithIfcGuids,
-					_id: hiddenGroups[0].group,
-				};
 
-				model.groupWithRvtIds = {
-					...extIdTestCase.groupWithRvtIds,
-					_id: hiddenGroups[1].group,
-				};
+				const groupsToUpdate = ['groupWithIfcGuids', 'groupWithRvtIds', 'groupWithIfcGuidsNotFound', 'groupWithRvtIdsNotFound'];
+
+				groupsToUpdate.forEach((name, ind) => {
+					model[name] = {
+						...extIdTestCase[name],
+						_id: hiddenGroups[ind].group,
+					};
+				});
+
 				model.extIdTicket = { ...cloneDeep(extIdTestCase.ticket), _id: ticketRes._id };
 				/* eslint-enable no-param-reassign */
 			}));
 		});
-
-		// TODO:
-		// converted IFC to shared IDs
-		// converted REVIT to shared IDs
-		// converted but nothing to show
-		// Reference container in federation
 
 		const generateTestData = (isFed) => {
 			const modelType = isFed ? 'federation' : 'container';
@@ -233,8 +244,10 @@ const testGetGroup = () => {
 				['the group id is valid', baseRouteParams, true],
 				['the group id is valid (returning IFC GUIDs)', { ...baseRouteParams, groupName: 'groupWithIfcGuids', ticketName: 'extIdTicket', convertIds: false }, true],
 				['the group id is valid and IFC guids are converted', { ...baseRouteParams, groupName: 'groupWithIfcGuids', ticketName: 'extIdTicket' }, true],
+				['the group id is valid with unfound IFC GUIDs should return empty array', { ...baseRouteParams, groupName: 'groupWithIfcGuidsNotFound', ticketName: 'extIdTicket', convertIds: true }, true],
 				['the group id is valid (returning RVT IDs)', { ...baseRouteParams, groupName: 'groupWithRvtIds', ticketName: 'extIdTicket', convertIds: false }, true],
 				['the group id is valid and RVT IDs are converted', { ...baseRouteParams, groupName: 'groupWithRvtIds', ticketName: 'extIdTicket' }, true],
+				['the group id is valid with unfound RVT IDs should return empty array', { ...baseRouteParams, groupName: 'groupWithRvtIdsNotFound', ticketName: 'extIdTicket', convertIds: true }, true],
 			];
 		};
 
@@ -251,10 +264,11 @@ const testGetGroup = () => {
 				const res = await agent.get(endpoint).expect(expectedStatus);
 
 				if (success) {
-					const { convertedObjects, ...expectedData } = group;
+					const { convertedObjects, ...expectedData } = cloneDeep(group);
 					if (convertedObjects && routeParams.convertIds !== false) {
 						// eslint-disable-next-line no-underscore-dangle
 						expectedData.objects[0]._ids = convertedObjects;
+
 						// FIXME: should not be hard coded
 						delete expectedData.objects[0].ifc_guids;
 						delete expectedData.objects[0].revit_ids;
@@ -267,7 +281,7 @@ const testGetGroup = () => {
 		};
 
 		describe.each(generateTestData(true))('Federations', runTest);
-		//		describe.each(generateTestData())('Containers', runTest);
+		describe.each(generateTestData())('Containers', runTest);
 	});
 };
 
