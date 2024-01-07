@@ -265,16 +265,12 @@ db.addLoginRecords = async (records) => {
 	await DbHandler.insertMany(INTERNAL_DB, 'loginRecords', records);
 };
 
-db.createScene = async (teamspace, modelId, rev, nodes, meshMap) => {
-	const rId = stringToUUID(rev._id);
-	const nodesToCommit = nodes.map((n) => ({ ...n, rId }));
-	await Promise.all([
-		db.createRevision(teamspace, modelId, rev),
-		DbHandler.insertMany(teamspace, `${modelId}.scene`, nodesToCommit),
-		FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
+db.createScene = (teamspace, modelId, rev, nodes, meshMap) => Promise.all([
+	db.createRevision(teamspace, modelId, rev),
+	DbHandler.insertMany(teamspace, `${modelId}.scene`, nodes),
+	FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
 
-	]);
-};
+]);
 
 ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 ServiceHelper.fileExists = (filePath) => {
@@ -745,7 +741,7 @@ ServiceHelper.resetSharedDir = () => {
 ServiceHelper.generateBasicNode = (type, rev_id, parents, additionalData = {}) => deleteIfUndefined({
 	_id: generateUUID(),
 	shared_id: generateUUID(),
-	rev_id,
+	rev_id: stringToUUID(rev_id),
 	type,
 	parents,
 	...additionalData,
