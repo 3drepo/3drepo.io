@@ -609,6 +609,11 @@ ServiceHelper.generateGroup = (isSmart = false, {
 	return group;
 };
 
+ServiceHelper.createGroupWithRule = (rule) => {
+	const group = ServiceHelper.generateGroup(true, { serialised: true, hasId: false });
+	return { ...group, rules: [rule] };
+};
+
 // This generates groups with v4 schema. use generateGroup for v5 (tickets) schema
 ServiceHelper.generateLegacyGroup = (account, model, isSmart = false, isIfcGuids = false, serialised = true) => {
 	const genId = () => (serialised ? ServiceHelper.generateUUIDString() : generateUUID());

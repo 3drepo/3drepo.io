@@ -22,7 +22,7 @@ const { src } = require('../../../../../../helper/path');
 
 const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
-const { valueOperators } = require(`${src}/models/metadata.rules.constants`);
+const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
@@ -147,6 +147,16 @@ const setupExtIDTicket = (container) => {
 		return group;
 	};
 
+	const createSmartGroupWithMatchingMeta = ({ key, value }) => {
+		const rule = {
+			name: ServiceHelper.generateRandomString(),
+			field: { operator: fieldOperators.IS.name, values: [key] },
+			operator: valueOperators.IS.name,
+			values: [value],
+		};
+		return ServiceHelper.createGroupWithRule(rule);
+	};
+
 	/* eslint-disable no-underscore-dangle */
 
 	// FIXME: need constant reference
@@ -160,6 +170,22 @@ const setupExtIDTicket = (container) => {
 		convertedObjs: [] },
 		groupWithRvtIdsNotFound: { data: createGroupWithExtIds({ revit_ids: [Math.floor(Math.random() * 10000)] }),
 			convertedObjs: [] },
+		smartGroupWithIfcGuids: {
+			data: createSmartGroupWithMatchingMeta(rootMeta.metadata[0]),
+			convertedObjs: [meshIdStr1, meshIdStr2],
+			original: { ifc_guids: [rootMeta.metadata[0].value] },
+		},
+		smartGroupWithRvtIds: {
+			data: createSmartGroupWithMatchingMeta(rootMeta.metadata[1]),
+			convertedObjs: [meshIdStr1, meshIdStr2],
+			original: { ifc_guids: [rootMeta.metadata[0].value] },
+		},
+		smartGroupWithIfcGuidsNotFound: {
+			data: createSmartGroupWithMatchingMeta({ ...rootMeta.metadata[0],
+				value: ServiceHelper.generateRandomString(22) }),
+			convertedObjs: [],
+			original: { ifc_guids: [] },
+		},
 	};
 
 	/* eslint-enable no-underscore-dangle */
@@ -209,6 +235,7 @@ const testGetGroup = () => {
 						...extIdTestCase.groups[name].data,
 						_id: hiddenGroups[ind].group,
 						convertedObjects: extIdTestCase.groups[name].convertedObjs,
+						original: extIdTestCase.groups[name].original,
 					};
 				});
 
@@ -244,6 +271,8 @@ const testGetGroup = () => {
 				['the group id is valid (returning RVT IDs)', { ...baseRouteParams, groupName: 'groupWithRvtIds', ticketName: 'extIdTicket', convertIds: false }, true],
 				['the group id is valid and RVT IDs are converted', { ...baseRouteParams, groupName: 'groupWithRvtIds', ticketName: 'extIdTicket' }, true],
 				['the group id is valid with unfound RVT IDs should return empty array', { ...baseRouteParams, groupName: 'groupWithRvtIdsNotFound', ticketName: 'extIdTicket', convertIds: true }, true],
+				['the smart group id is valid', { ...baseRouteParams, ticketName: 'extIdTicket', groupName: 'smartGroupWithIfcGuids' }, true],
+				['the smart group id is valid (returning IFC Guids)', { ...baseRouteParams, ticketName: 'extIdTicket', groupName: 'smartGroupWithIfcGuids', convertIds: false }, true],
 			];
 		};
 
@@ -260,15 +289,22 @@ const testGetGroup = () => {
 				const res = await agent.get(endpoint).expect(expectedStatus);
 
 				if (success) {
-					const { convertedObjects, ...expectedData } = cloneDeep(group);
-					if (convertedObjects && routeParams.convertIds !== false) {
-						// eslint-disable-next-line no-underscore-dangle
-						expectedData.objects[0]._ids = convertedObjects;
+					const { convertedObjects, original, ...expectedData } = cloneDeep(group);
+					if (routeParams.convertIds !== false) {
+						if (convertedObjects) {
+						// have to construct this for smart groups
+							expectedData.objects = expectedData.objects || [{ container: con._id }];
+							// eslint-disable-next-line no-underscore-dangle
+							expectedData.objects[0]._ids = convertedObjects;
 
-						// FIXME: should not be hard coded
-						delete expectedData.objects[0].ifc_guids;
-						delete expectedData.objects[0].revit_ids;
+							// FIXME: should not be hard coded
+							delete expectedData.objects[0].ifc_guids;
+							delete expectedData.objects[0].revit_ids;
+						}
+					} else if (original) {
+						expectedData.objects = [{ container: con._id, ...original }];
 					}
+
 					expect(res.body).toEqual(expectedData);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
