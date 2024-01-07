@@ -25,12 +25,14 @@ const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
 const { valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 let server;
 let agent;
 
 const generateBasicData = () => {
 	const template = ServiceHelper.generateTemplate(false, true);
+	const con = ServiceHelper.generateRandomModel();
 
 	return ({
 		users: {
@@ -42,8 +44,8 @@ const generateBasicData = () => {
 		},
 		teamspace: ServiceHelper.generateRandomString(),
 		project: ServiceHelper.generateRandomProject(),
-		con: ServiceHelper.generateRandomModel(),
-		fed: ServiceHelper.generateRandomModel({ isFederation: true }),
+		con,
+		fed: ServiceHelper.generateRandomModel({ isFederation: true, properties: { subModels: [{ _id: con._id }] } }),
 		template,
 		ticket: ServiceHelper.generateTicket(template),
 	});
@@ -87,6 +89,8 @@ const setupBasicData = async ({ users, teamspace, project, fed, con, template, t
 		}
 
 		model.ticket = { ...cloneDeep(ticket), _id: ticketRes._id };
+
+		model.notFound = { _id: ServiceHelper.generateUUIDString() };
 		/* eslint-enable no-param-reassign */
 	}));
 };
@@ -108,14 +112,42 @@ const setupExtIDTicket = (container) => {
 	const groupWithIfcGuids = ServiceHelper.generateGroup(false, { serialised: true, hasId: false, container });
 	const groupWithRvtIds = ServiceHelper.generateGroup(false, { serialised: true, hasId: false, container });
 
+	const rev = ServiceHelper.generateRevisionEntry();
+	const revId = rev._id;
+
+	const rootNode = ServiceHelper.generateBasicNode('transformation', revId);
+
+	// FIXME: constant reference
+	const rootMeta = ServiceHelper.generateBasicNode('metadata', revId, [rootNode.shared_id], { metadata: [{
+		key: 'IFC GUID',
+		value: ServiceHelper.generateRandomString(22),
+	},
+	{
+		key: 'Element ID',
+		value: Math.floor(Math.random() * 10000),
+	},
+
+	] });
+
+	const mesh1 = ServiceHelper.generateBasicNode('mesh', revId, [rootNode.shared_id]);
+	const mesh2 = ServiceHelper.generateBasicNode('mesh', revId, [rootNode.shared_id]);
+
+	const nodes = [rootNode, rootMeta, mesh1, mesh2];
+	const meshIdStr1 = UUIDToString(mesh1._id);
+	const meshIdStr2 = UUIDToString(mesh2._id);
+
+	const meshMap = {
+		[`${UUIDToString(rootNode._id)}`]: [meshIdStr1, meshIdStr2],
+		[meshIdStr1]: meshIdStr1,
+		[meshIdStr2]: meshIdStr2,
+	};
+
 	// FIXME: need constant reference
 	/* eslint-disable no-underscore-dangle */
-	groupWithIfcGuids.objects[0].ifc_guids = groupWithIfcGuids.objects[0]._ids.map(
-		() => ServiceHelper.generateRandomString(22));
+	groupWithIfcGuids.objects[0].ifc_guids = [rootMeta.metadata[0].value];
 	delete groupWithIfcGuids.objects[0]._ids;
 
-	groupWithRvtIds.objects[0].revit_ids = groupWithRvtIds.objects[0]._ids.map(
-		() => Math.floor(Math.random() * 10000));
+	groupWithRvtIds.objects[0].revit_ids = [rootMeta.metadata[1].value];
 	delete groupWithRvtIds.objects[0]._ids;
 	/* eslint-enable no-underscore-dangle */
 
@@ -128,7 +160,7 @@ const setupExtIDTicket = (container) => {
 		},
 	};
 
-	return { ticket, template, groupWithIfcGuids, viewName };
+	return { ticket, template, groupWithIfcGuids, groupWithRvtIds, viewName, scene: { nodes, rev, meshMap } };
 };
 
 const testGetGroup = () => {
@@ -142,8 +174,11 @@ const testGetGroup = () => {
 			await setupBasicData(basicData);
 			await ServiceHelper.db.createTemplates(teamspace, [extIdTestCase.template]);
 
+			await ServiceHelper.db.createScene(teamspace, con._id, extIdTestCase.scene.rev,
+				extIdTestCase.scene.nodes, extIdTestCase.scene.meshMap);
 			await Promise.all([fed, con].map(async (model) => {
 				const modelType = fed === model ? 'federation' : 'container';
+
 				const addTicketRoute = (modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${users.tsAdmin.apiKey}`;
 				const getTicketRoute = (modelId, ticketId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets/${ticketId}?key=${users.tsAdmin.apiKey}`;
 
@@ -165,12 +200,22 @@ const testGetGroup = () => {
 			}));
 		});
 
+		// TODO:
+		// converted IFC to shared IDs
+		// converted REVIT to shared IDs
+		// converted but nothing to show
+		// Reference container in federation
+
 		const generateTestData = (isFed) => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
-			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType };
+			const baseRouteParams = { key: users.tsAdmin.apiKey,
+				projectId: project.id,
+				model,
+				modelType,
+				convertIds: true };
 
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
@@ -179,27 +224,28 @@ const testGetGroup = () => {
 				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel() }, false, modelNotFound],
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
-				['the ticket does not exist', { ...baseRouteParams, ticket: { _id: ServiceHelper.generateRandomString() } }, false, templates.ticketNotFound],
-				['the group does not exist', { ...baseRouteParams, group: { _id: ServiceHelper.generateRandomString() } }, false, templates.groupNotFound],
+				['the ticket does not exist', { ...baseRouteParams, ticketName: 'notFound' }, false, templates.ticketNotFound],
+				['the group does not exist', { ...baseRouteParams, groupName: 'notFound' }, false, templates.groupNotFound],
 				['the group id is valid', baseRouteParams, true],
-				['the group id is valid (returning IFC GUIDs)', { ...baseRouteParams, group: model.groupWithIfcGuids, ticket: model.extIdTicket, convertIds: false }, true],
-				['the group id is valid (returning RVT IDs)', { ...baseRouteParams, group: model.groupWithRvtIds, ticket: model.extIdTicket, convertIds: false }, true],
+				['the group id is valid (returning IFC GUIDs)', { ...baseRouteParams, groupName: 'groupWithIfcGuids', ticketName: 'extIdTicket', convertIds: false }, true],
+				['the group id is valid (returning RVT IDs)', { ...baseRouteParams, groupName: 'groupWithRvtIds', ticketName: 'extIdTicket', convertIds: false }, true],
 			];
 		};
 
-		const getRoute = ({ key, projectId, modelId, ticketId, groupId, modelType, convertIds }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/groups/${groupId}${key ? `?key=${key}` : ''}${convertIds ? '&convertIds=true' : ''}`;
-		const runTest = (desc, { model, ticket, group, ...routeParams }, success, expectedOutput) => {
+		const getRoute = ({ key, projectId, modelId, ticketId, groupId, modelType, convertIds }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/groups/${groupId}${key ? `?key=${key}` : ''}${!convertIds ? '&convertIds=false' : ''}`;
+		const runTest = (desc, { model, groupName = 'group', ticketName = 'ticket', ...routeParams }, success, expectedOutput) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const ticket = model[ticketName];
+				const group = model[groupName];
 				const endpoint = getRoute({ modelId: model._id,
-					ticketId: (ticket || model.ticket)?._id,
-					groupId: (group || model.group)?._id,
+					ticketId: ticket?._id,
+					groupId: group?._id,
 					...routeParams });
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
-
 				const res = await agent.get(endpoint).expect(expectedStatus);
 
 				if (success) {
-					expect(res.body).toEqual(model.group);
+					expect(res.body).toEqual(group);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
@@ -219,6 +265,13 @@ const testUpdateGroup = () => {
 		beforeAll(async () => {
 			await setupBasicData(basicData);
 		});
+
+		// TODO:
+		// - create with IFC guids
+		// - create with rvt
+		// - create with shared ids and see converted (IFC)
+		// - create with shared ids and see converted (RVT)
+		// - create with shared ids and see not converted if not everything is covered
 
 		const generateTestData = (isFed) => {
 			const modelType = isFed ? 'federation' : 'container';

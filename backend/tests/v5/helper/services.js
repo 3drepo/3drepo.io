@@ -265,6 +265,17 @@ db.addLoginRecords = async (records) => {
 	await DbHandler.insertMany(INTERNAL_DB, 'loginRecords', records);
 };
 
+db.createScene = async (teamspace, modelId, rev, nodes, meshMap) => {
+	const rId = stringToUUID(rev._id);
+	const nodesToCommit = nodes.map((n) => ({ ...n, rId }));
+	await Promise.all([
+		db.createRevision(teamspace, modelId, rev),
+		DbHandler.insertMany(teamspace, `${modelId}.scene`, nodesToCommit),
+		FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
+
+	]);
+};
+
 ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 ServiceHelper.fileExists = (filePath) => {
 	let flag = true;
@@ -730,5 +741,14 @@ ServiceHelper.resetSharedDir = () => {
 	fs.rmSync(fsDir, { recursive: true });
 	fs.mkdirSync(fsDir);
 };
+
+ServiceHelper.generateBasicNode = (type, rev_id, parents, additionalData = {}) => deleteIfUndefined({
+	_id: generateUUID(),
+	shared_id: generateUUID(),
+	rev_id,
+	type,
+	parents,
+	...additionalData,
+});
 
 module.exports = ServiceHelper;
