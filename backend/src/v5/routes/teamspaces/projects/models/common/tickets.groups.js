@@ -47,7 +47,7 @@ const getGroup = (isFed) => async (req, res, next) => {
 		const convertTo3DRepoGuids = query.convertIds !== 'false';
 		const getGroupById = isFed ? getFedGroup : getConGroup;
 		req.groupData = await getGroupById(teamspace, project, model, stringToUUID(query.revId), ticket, group,
-			undefined, convertTo3DRepoGuids);
+			convertTo3DRepoGuids);
 		await next();
 	} catch (err) {
 		// istanbul ignore next

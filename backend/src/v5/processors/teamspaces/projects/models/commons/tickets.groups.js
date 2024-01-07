@@ -206,8 +206,8 @@ TicketGroups.updateTicketGroup = async (teamspace, project, model, ticket, group
 	await updateGroup(teamspace, project, model, ticket, groupId, convertedData, author);
 };
 
-TicketGroups.getTicketGroupById = async (teamspace, project, model, revId, ticket, groupId, containers,
-	convertTo3dRepoIds) => {
+TicketGroups.getTicketGroupById = async (teamspace, project, model, revId, ticket, groupId, convertTo3dRepoIds,
+	containers) => {
 	const group = await getGroupById(teamspace, project, model, ticket, groupId);
 
 	const rev = containers ? undefined : revId;
