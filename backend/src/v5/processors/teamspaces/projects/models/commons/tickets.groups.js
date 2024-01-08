@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/* eslint-disable no-underscore-dangle */
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
@@ -38,7 +37,7 @@ const getExteralIdNameFromMetadata = (metadata) => {
 	return externalIdName;
 };
 
-const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, convertTo3dRepoIds) => {
+const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, returnMeshIds) => {
 	let revision = revId;
 	if (!revision) {
 		try {
@@ -50,12 +49,12 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 	}
 
 	const projection = { parents: 1,
-		...(convertTo3dRepoIds ? {} : { metadata: {
+		...(returnMeshIds ? {} : { metadata: {
 			$elemMatch: { $or: Object.values(idTypesToKeys).flat().map((n) => ({ key: n })) } } }) };
 
 	const { matched, unwanted } = await getMetadataByRules(teamspace, project, model, revision, rules, projection);
 
-	if (!convertTo3dRepoIds && matched.some((m) => m.metadata)) {
+	if (!returnMeshIds && matched.some((m) => m.metadata)) {
 		const wantedIds = [...new Set(matched.map(({ metadata }) => metadata[0].value))];
 		const unwantedIds = [...new Set(unwanted.map(({ metadata }) => metadata[0].value))];
 
@@ -97,14 +96,16 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 	return { container: model, _ids: Object.values(matchedMeshes) };
 };
 
-const convert3dRepoIdsToExternalIds = async (teamspace, project, objects) => {
+const convertToExternalIds = async (teamspace, project, objects) => {
 	const convertedObjects = await Promise.all(objects.map(async (obj) => {
+		// eslint-disable-next-line no-underscore-dangle
 		if (!obj._ids) {
 			return obj;
 		}
 
 		const convertedObject = { ...obj };
 
+		// eslint-disable-next-line no-underscore-dangle
 		const shared_ids = await getNodesByIds(teamspace, project, obj.container, obj._ids,
 			{ _id: 0, shared_id: 1 });
 
@@ -114,6 +115,7 @@ const convert3dRepoIdsToExternalIds = async (teamspace, project, objects) => {
 		const metadata = await getMetadataByQuery(teamspace, obj.container, query, projection);
 
 		if (metadata?.length) {
+			// eslint-disable-next-line no-underscore-dangle
 			delete convertedObject._ids;
 			const externalIdName = getExteralIdNameFromMetadata(metadata);
 			convertedObject[externalIdName] = [...new Set(metadata.map((m) => m.metadata[0].value))];
@@ -125,8 +127,9 @@ const convert3dRepoIdsToExternalIds = async (teamspace, project, objects) => {
 	return convertedObjects;
 };
 
-const convertToInternalIds = async (teamspace, project, revId, containerEntries) => {
+const convertToMeshIds = async (teamspace, project, revId, containerEntries) => {
 	const convertedEntries = await Promise.all(containerEntries.map(async (entry) => {
+		// eslint-disable-next-line no-underscore-dangle
 		if (entry._ids) {
 			return entry;
 		}
@@ -165,7 +168,7 @@ TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
 	const convertedGroups = await Promise.all(groups.map(
 		async (group) => {
 			if (group.objects) {
-				const objects = await convert3dRepoIdsToExternalIds(teamspace, project, group.objects);
+				const objects = await convertToExternalIds(teamspace, project, group.objects);
 				return { ...group, objects };
 			}
 
@@ -179,13 +182,13 @@ TicketGroups.updateTicketGroup = async (teamspace, project, model, ticket, group
 	const convertedData = { ...data };
 
 	if (data.objects) {
-		convertedData.objects = await convert3dRepoIdsToExternalIds(teamspace, project, data.objects);
+		convertedData.objects = await convertToExternalIds(teamspace, project, data.objects);
 	}
 
 	await updateGroup(teamspace, project, model, ticket, groupId, convertedData, author);
 };
 
-TicketGroups.getTicketGroupById = async (teamspace, project, model, revId, ticket, groupId, convertTo3dRepoIds,
+TicketGroups.getTicketGroupById = async (teamspace, project, model, revId, ticket, groupId, returnMeshIds,
 	containers) => {
 	const group = await getGroupById(teamspace, project, model, ticket, groupId);
 
@@ -196,14 +199,13 @@ TicketGroups.getTicketGroupById = async (teamspace, project, model, revId, ticke
 
 		group.objects = (await Promise.all(
 			modelsToQuery.map(async (con) => {
-				const objs = await getObjectArrayFromRules(teamspace, project, con, rev,
-					group.rules, convertTo3dRepoIds);
+				const objs = await getObjectArrayFromRules(teamspace, project, con, rev, group.rules, returnMeshIds);
 				// eslint-disable-next-line no-underscore-dangle
 				return objs._ids?.length || objs.revit_ids?.length || objs.ifc_guids?.length ? objs : [];
 			}),
 		)).flat();
-	} else if (convertTo3dRepoIds) {
-		group.objects = await convertToInternalIds(teamspace, project, rev, group.objects);
+	} else if (returnMeshIds) {
+		group.objects = await convertToMeshIds(teamspace, project, rev, group.objects);
 	}
 
 	return group;
