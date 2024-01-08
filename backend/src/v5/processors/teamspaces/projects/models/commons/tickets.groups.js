@@ -20,8 +20,10 @@ const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuid
 const { addGroups, getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
 const { getMetadataByQuery, getMetadataByRules } = require('../../../../../models/metadata');
 const { getNodesByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
+const { getCommonElements } = require('../../../../../utils/helper/arrays');
 const { getFile } = require('../../../../../services/filesManager');
 const { getLatestRevision } = require('../../../../../models/revisions');
+const { getMeshesWithParentIds } = require('./scene');
 const { idTypesToKeys } = require('../../../../../models/tickets.groups.constants');
 
 const TicketGroups = {};
@@ -31,7 +33,7 @@ const getIdToMeshesMapping = async (teamspace, model, revId) => {
 	return JSON.parse(fileData);
 };
 
-const getExteralidNameFromMetadata = (metadata) => {
+const getExteralIdNameFromMetadata = (metadata) => {
 	let externalIdName;
 	Object.keys(idTypesToKeys).forEach((name) => {
 		if (idTypesToKeys[name].some((m) => m === metadata[0].metadata[0].key)) {
@@ -65,7 +67,7 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 
 		unwantedIds.filter((id) => (wantedIds.includes(id))).forEach((id) => delete wantedIds[id]);
 
-		const externalIdName = getExteralidNameFromMetadata(matched);
+		const externalIdName = getExteralIdNameFromMetadata(matched);
 		return { container: model, [externalIdName]: wantedIds };
 	}
 
@@ -119,7 +121,7 @@ const convert3dRepoIdsToExternalIds = async (teamspace, project, objects) => {
 
 		if (metadata?.length) {
 			delete convertedObject._ids;
-			const externalIdName = getExteralidNameFromMetadata(metadata);
+			const externalIdName = getExteralIdNameFromMetadata(metadata);
 			convertedObject[externalIdName] = [...new Set(metadata.map((m) => m.metadata[0].value))];
 		}
 
@@ -129,13 +131,12 @@ const convert3dRepoIdsToExternalIds = async (teamspace, project, objects) => {
 	return convertedObjects;
 };
 
-const convertExternalIdsTo3dRepoIds = async (teamspace, project, revId, objects) => {
+const convertToInternalIds = async (teamspace, project, revId, objects) => {
 	const convertedObjects = await Promise.all(objects.map(async (obj) => {
 		if (obj._ids) {
 			return obj;
 		}
 
-		const convertedObject = { ...obj };
 		const { container } = obj;
 
 		let revision = revId;
@@ -148,31 +149,30 @@ const convertExternalIdsTo3dRepoIds = async (teamspace, project, revId, objects)
 			}
 		}
 
-		const externalIdName = obj.revit_ids ? 'revit_ids' : 'ifc_guids';
+		const idType = getCommonElements(Object.keys(obj), Object.keys(idTypesToKeys))[0];
+
 		const query = {
 			rev_id: revision,
-			metadata: { $elemMatch: { key: { $in: idTypesToKeys[externalIdName] },
-				value: { $in: obj[externalIdName] } } },
+			metadata: { $elemMatch: { key: { $in: idTypesToKeys[idType] },
+				value: { $in: obj[idType] } } },
 		};
 
 		const metadata = await getMetadataByQuery(teamspace, container, query, { parents: 1 });
-		const nodes = await getNodesBySharedIds(teamspace, project, container, revision,
-			metadata.flatMap(({ parents }) => parents), { _id: 1 });
+		const meshes = await getMeshesWithParentIds(teamspace, project, container, revision,
+			metadata.flatMap(({ parents }) => parents));
 
-		delete convertedObject[externalIdName];
-		convertedObject._ids = [];
-
+		const _ids = [];
 		const idToMeshes = await getIdToMeshesMapping(teamspace, container, revision);
-		nodes.forEach(({ _id }) => {
+		meshes.forEach(({ _id }) => {
 			const idStr = UUIDToString(_id);
 			if (idToMeshes[idStr]) {
 				idToMeshes[idStr].forEach((id) => {
-					convertedObject._ids.push(stringToUUID(id));
+					_ids.push(stringToUUID(id));
 				});
 			}
 		});
 
-		return convertedObject;
+		return { ...obj, [idType]: undefined, _ids };
 	}));
 
 	return convertedObjects.flat();
@@ -220,7 +220,7 @@ TicketGroups.getTicketGroupById = async (teamspace, project, model, revId, ticke
 			}),
 		)).flat();
 	} else if (convertTo3dRepoIds) {
-		group.objects = await convertExternalIdsTo3dRepoIds(teamspace, project, rev, group.objects);
+		group.objects = await convertToInternalIds(teamspace, project, rev, group.objects);
 	}
 
 	return group;
