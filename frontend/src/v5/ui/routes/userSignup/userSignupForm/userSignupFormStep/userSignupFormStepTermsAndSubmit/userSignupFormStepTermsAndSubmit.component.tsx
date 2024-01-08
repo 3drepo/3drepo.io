@@ -61,7 +61,7 @@ export const UserSignupFormStepTermsAndSubmit = () => {
 									`}
 									values={{
 										termsLink: (label) => <Link to={TERMS_ROUTE} target="_blank">{label}</Link>,
-										privacyLink: (label) => <Link to={PRIVACY_ROUTE} target="_blank">{label}</Link>,
+										privacyLink: (label) => <a href={PRIVACY_ROUTE} target="_blank">{label}</a>,
 										cookiesLink: (label) => <Link to={COOKIES_ROUTE} target="_blank">{label}</Link>,
 									}}
 								/>

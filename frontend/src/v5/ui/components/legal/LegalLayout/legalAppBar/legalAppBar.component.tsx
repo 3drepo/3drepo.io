@@ -20,9 +20,9 @@ import LogoIcon from '@assets/icons/filled/logo-filled.svg';
 import PrintIcon from '@assets/icons/outlined/print-outlined.svg';
 import { FormattedMessage } from 'react-intl';
 import { AppBarContainer } from '@components/shared/appBar/appBar.styles';
-import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { DASHBOARD_ROUTE, PRIVACY_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
-import { NavLink, NavLinks, Items } from './legalAppBar.styles';
+import { NavLink, NavLinks, Items, PrivacyLink } from './legalAppBar.styles';
 
 type ILegalAppBar = {
 	activePage: string;
@@ -35,9 +35,9 @@ export const LegalAppBar = ({ activePage }: ILegalAppBar): JSX.Element => (
 				<LogoIcon />
 			</Link>
 			<NavLinks>
-				<NavLink to="/v5/privacy" selected={activePage === 'privacy'}>
+				<PrivacyLink href={PRIVACY_ROUTE} target="_blank">
 					<FormattedMessage id="legalAppBar.privacy" defaultMessage="Privacy Policy" />
-				</NavLink>
+				</PrivacyLink>
 				<NavLink to="/v5/terms" selected={activePage === 'terms'}>
 					<FormattedMessage id="legalAppBar.terms" defaultMessage="Terms and Conditions" />
 				</NavLink>
