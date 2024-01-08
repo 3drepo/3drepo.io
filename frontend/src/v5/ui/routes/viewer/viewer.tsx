@@ -28,6 +28,7 @@ import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidView
 import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
 import { SpinnerLoader } from '@controls/spinnerLoader';
 import { CentredContainer } from '@controls/centredContainer';
+import { TicketsCardViews } from './tickets/tickets.constants';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -73,6 +74,8 @@ export const Viewer = () => {
 	}, [project]);
 
 	useEffect(() => {
+		TicketsCardActionsDispatchers.resetFilters();
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
 		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
 	}, [teamspace, project, containerOrFederation]);
 

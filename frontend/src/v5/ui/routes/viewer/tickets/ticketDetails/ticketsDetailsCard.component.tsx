@@ -16,7 +16,7 @@
  */
 
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -37,6 +37,11 @@ import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component
 import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { useSearchParam } from '../../../useSearchParam';
 
+enum IndexChange {
+	PREV = -1,
+	NEXT = 1,
+}
+
 export const TicketDetailsCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams();
 	const [, setTicketId] = useSearchParam('ticketId');
@@ -44,23 +49,34 @@ export const TicketDetailsCard = () => {
 	const treeNodesList = TreeHooksSelectors.selectTreeNodesList();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
+	const filteredTickets = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied() as any;
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const ticket = tickets.find((t) => t._id === ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	const defaultView = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
+	const currentIndex = filteredTickets.findIndex((tckt) => tckt._id === ticket._id);
+	const initialIndex = useRef(currentIndex);
+	const disableCycleButtons = currentIndex > -1 ? filteredTickets.length < 2 : filteredTickets.length < 1;
 
-	const goBack = () => {
-		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
+	const getUpdatedIndex = (delta: IndexChange) => {
+		let index = currentIndex === -1 ? initialIndex.current : currentIndex;
+		if (currentIndex === -1 && delta === IndexChange.NEXT) index -= 1;
+		return (index + delta) % filteredTickets.length;
 	};
 
-	const changeTicketIndex = (delta: number) => {
-		const currentIndex = tickets.findIndex((tckt) => tckt._id === ticket._id);
-		const updatedId = tickets.slice((currentIndex + delta) % tickets.length)[0]._id;
+	const changeTicketIndex = (delta: IndexChange) => {
+		const updatedId = filteredTickets.at(getUpdatedIndex(delta))._id;
 		TicketsCardActionsDispatchers.setSelectedTicket(updatedId);
 	};
 
-	const goPrev = () => changeTicketIndex(-1);
-	const goNext = () => changeTicketIndex(1);
+	const cycleToPrevTicket = () => changeTicketIndex(IndexChange.PREV);
+	const cycleToNextTicket = () => changeTicketIndex(IndexChange.NEXT);
+
+	const goBack = () => {
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
+		if (currentIndex !== -1) return;
+		cycleToPrevTicket();
+	};
 
 	const formData = useForm({
 		resolver: yupResolver(getValidators(template)),
@@ -93,6 +109,7 @@ export const TicketDetailsCard = () => {
 
 	useEffect(() => {
 		if (!ticket?._id) return;
+		initialIndex.current = currentIndex;
 		if (!templateAlreadyFetched(template)) {
 			TicketsActionsDispatchers.fetchTemplate(
 				teamspace,
@@ -124,8 +141,8 @@ export const TicketDetailsCard = () => {
 
 	useEffect(() => () => {
 		setTicketId();
-		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
 	}, []);
+
 	if (!ticket) return null;
 	return (
 		<CardContainer>
@@ -151,8 +168,8 @@ export const TicketDetailsCard = () => {
 								<ArrowBack onClick={goBack} />
 								{template.code}:{ticket.number}
 								<HeaderButtons>
-									<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
-									<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
+									<CircleButton variant="viewer" onClick={cycleToPrevTicket} disabled={disableCycleButtons}><ChevronLeft /></CircleButton>
+									<CircleButton variant="viewer" onClick={cycleToNextTicket} disabled={disableCycleButtons}><ChevronRight /></CircleButton>
 								</HeaderButtons>
 							</CardHeader>
 							<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />

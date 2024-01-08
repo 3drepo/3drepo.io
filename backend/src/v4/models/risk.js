@@ -24,6 +24,7 @@ const ChatEvent = require("./chatEvent");
 const Ticket = require("./ticket");
 const Mitigation = require("./mitigation");
 const utils = require("../utils");
+const { findProjectByModelId } = require("../../v5/models/projectSettings.js");
 
 const fieldTypes = {
 	"_id": "[object Object]",
@@ -175,7 +176,8 @@ class Risk extends Ticket {
 	}
 
 	async getRisksReport(account, model, rid, filters, res) {
-		const reportGen = require("../models/report").newRisksReport(account, model, rid);
+		const { _id: projectId } = await findProjectByModelId(account, model, { _id: 1 });
+		const reportGen = require("../models/report").newRisksReport(account, utils.uuidToString(projectId), model, rid);
 		return this.getReport(account, model, rid, filters, res, reportGen);
 	}
 
