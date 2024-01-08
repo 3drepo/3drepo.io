@@ -17,9 +17,14 @@
 
 const GroupConstants = {};
 
+GroupConstants.idTypes = {
+	IFC: 'ifc_guids',
+	REVIT: 'revit_ids',
+};
+
 GroupConstants.idTypesToKeys = {
-	ifc_guids: ['IFC GUID', 'Ifc::IfcGUID', 'Element::IfcGUID'],
-	revit_ids: ['Element ID', 'Element ID::Value'],
+	[GroupConstants.idTypes.IFC]: ['IFC GUID', 'Ifc::IfcGUID', 'Element::IfcGUID'],
+	[GroupConstants.idTypes.REVIT]: ['Element ID', 'Element ID::Value'],
 };
 
 module.exports = GroupConstants;
