@@ -23,8 +23,7 @@ const { getMetadataByQuery, getMetadataByRules } = require('../../../../../model
 const { getNodesByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { getCommonElements } = require('../../../../../utils/helper/arrays');
 const { getLatestRevision } = require('../../../../../models/revisions');
-const { getMeshesWithParentIds } = require('./scene');
-const { idTypesToKeys } = require('../../../../../models/tickets.groups.constants');
+const { idTypesToKeys } = require('../../../../../models/metadata.constants');
 
 const TicketGroups = {};
 
