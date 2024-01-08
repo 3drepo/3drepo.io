@@ -210,6 +210,10 @@ export const selectSelectedState = createSelector(
 	}
 );
 
+const selectShowColorOverrides = createSelector(
+	selectSequencesDomain, (state) => state.showColorOverrides
+);
+
 const convertToDictionary = (stateChanges) => {
 	return stateChanges.reduce((dict, actual) => {
 		actual.shared_ids.forEach((id) => {
@@ -221,14 +225,15 @@ const convertToDictionary = (stateChanges) => {
 };
 
 export const selectSelectedFrameColors = createSelector(
-	selectSelectedState, (state) => {
-		if (!state) {
+	selectSelectedState, selectShowColorOverrides,
+	(state, showColorOverrides) => {
+		if (!state || !showColorOverrides) {
 			return null;
 		}
 
 		try {
-			const colors = state.color.map((c) => ({...c, value: GLToHexColor(c.value)}));
-			return  convertToDictionary(colors);
+			const colors = (state?.color || []).map((c) => ({...c, value: GLToHexColor(c.value)}));
+			return convertToDictionary(colors);
 		} catch (e) {
 			return {};
 		}

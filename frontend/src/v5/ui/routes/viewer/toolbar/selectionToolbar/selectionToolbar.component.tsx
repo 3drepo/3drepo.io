@@ -20,16 +20,14 @@ import EyeShowIcon from '@assets/icons/viewer/eye_show.svg';
 import EyeIsolateIcon from '@assets/icons/viewer/eye_isolate.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { GroupsActionsDispatchers, TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { GroupsHooksSelectors, TicketsCardHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TreeHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { Section, Container, ClearButton, ClearIcon } from './sectionToolbar.styles';
+import { Section, Container, ClearButton, ClearIcon } from './selectionToolbar.styles';
 import { ToolbarButton } from '../buttons/toolbarButton.component';
 
 export const SectionToolbar = () => {
-	const hasGroupOverrides = GroupsHooksSelectors.selectGroupsColourOverrides()?.length > 0;
-	const hasTicketOverrides = !isEmpty(TicketsCardHooksSelectors.selectTicketOverrides());
-	const hasOverrides = hasGroupOverrides || hasTicketOverrides;
+	const hasOverrides = !isEmpty(ViewerGuiHooksSelectors.selectColorOverrides());
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectFullySelectedNodesIds().length;
 	const hasHiddenObjects = TreeHooksSelectors.selectModelHasHiddenNodes();
 

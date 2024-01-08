@@ -183,6 +183,7 @@ export function* setSelectedDate({ date }) {
 
 		if (selectedSequence) {
 			yield put(SequencesActions.setSelectedDateSuccess(date));
+			yield put(SequencesActions.setShowColorOverrides(true));
 			yield put(SequencesActions.prefetchFrames());
 			yield showFrameViewpoint();
 		}
@@ -216,6 +217,7 @@ export function* setSelectedSequence({ sequenceId }) {
 		if (selectedSequence) {
 			yield put(SequencesActions.setStateDefinition(undefined, {}));
 			yield put(SequencesActions.setSelectedDateSuccess(null));
+			yield put(SequencesActions.setShowColorOverrides(true));
 			yield put(SequencesActions.setLastSelectedDateSuccess(null));
 			yield put(SequencesActions.restoreModelDefaultVisibility());
 		}
@@ -277,6 +279,10 @@ function* handleTransparenciesVisibility({ transparencies }) {
 	}
 }
 
+export function* clearColorOverrides() {
+	yield put(SequencesActions.setShowColorOverrides(false));
+};
+
 export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCE, fetchSequence);
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCE_LIST, fetchSequenceList);
@@ -290,4 +296,5 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.PREFETCH_FRAMES, prefetchFrames);
 	yield takeLatest(SequencesTypes.SHOW_SEQUENCE_DATE, showSequenceDate);
 	yield takeLatest(SequencesTypes.HANDLE_TRANSPARENCIES_VISIBILITY, handleTransparenciesVisibility);
+	yield takeLatest(SequencesTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
 }

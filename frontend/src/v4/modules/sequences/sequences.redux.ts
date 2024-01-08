@@ -44,6 +44,8 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	showSequenceDate: ['date'],
 	handleTransparenciesVisibility: ['transparencies'],
 	restoreModelDefaultVisibility: [],
+	clearColorOverrides: [],
+	setShowColorOverrides: ['showColorOverrides'],
 	reset: []
 }, { prefix: 'SEQUENCES/' });
 
@@ -69,6 +71,7 @@ export interface ISequencesState {
 	hiddenGeometryVisible: boolean;
 	activities: any;
 	activitiesPending: any;
+	showColorOverrides: boolean;
 }
 
 export const INITIAL_STATE: ISequencesState = {
@@ -84,6 +87,7 @@ export const INITIAL_STATE: ISequencesState = {
 	hiddenGeometryVisible: true,
 	activities: {},
 	activitiesPending: true,
+	showColorOverrides: true,
 };
 
 export const fetchSequenceSuccess = (state = INITIAL_STATE, { sequence }) => {
@@ -161,6 +165,10 @@ export const setStepScale = (state = INITIAL_STATE, { stepScale }) => {
 	return {...state, stepScale};
 };
 
+export const setShowColorOverrides = (state = INITIAL_STATE, { showColorOverrides }) => {
+	return { ...state, showColorOverrides };
+};
+
 export const reset = () => {
 	return {...INITIAL_STATE};
 };
@@ -177,5 +185,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS]: setSelectedSequenceSuccess,
 	[SequencesTypes.SET_STEP_INTERVAL]: setStepInterval,
 	[SequencesTypes.SET_STEP_SCALE]: setStepScale,
+	[SequencesTypes.SET_SHOW_COLOR_OVERRIDES]: setShowColorOverrides,
 	[SequencesTypes.RESET]: reset
 });
