@@ -17,9 +17,29 @@
 
 const Scene = {};
 
+const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
+const { getFile } = require('../../../../../services/filesManager');
 const { getNodesBySharedIds } = require('../../../../../models/scenes');
 
-Scene.getMeshesWithParentIds = (teamspace, project, container, revision, parentIds) => getNodesBySharedIds(teamspace,
-	project, container, revision, parentIds, { _id: 1 });
+Scene.getIdToMeshesMapping = async (teamspace, model, revId) => {
+	const fileData = await getFile(teamspace, `${model}.stash.json_mpc`, `${UUIDToString(revId)}/idToMeshes.json`);
+	return JSON.parse(fileData);
+};
+
+Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, parentIds) => {
+	const nodes = await getNodesBySharedIds(teamspace, project, container, revision, parentIds, { _id: 1 });
+	const idToMeshes = await Scene.getIdToMeshesMapping(teamspace, container, revision);
+	const meshes = [];
+	nodes.forEach(({ _id }) => {
+		const idStr = UUIDToString(_id);
+		if (idToMeshes[idStr]) {
+			idToMeshes[idStr].forEach((id) => {
+				meshes.push(stringToUUID(id));
+			});
+		}
+	});
+
+	return meshes;
+};
 
 module.exports = Scene;

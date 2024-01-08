@@ -18,20 +18,14 @@
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
+const { getIdToMeshesMapping, getMeshesWithParentIds } = require('./scene');
 const { getMetadataByQuery, getMetadataByRules } = require('../../../../../models/metadata');
 const { getNodesByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { getCommonElements } = require('../../../../../utils/helper/arrays');
-const { getFile } = require('../../../../../services/filesManager');
 const { getLatestRevision } = require('../../../../../models/revisions');
-const { getMeshesWithParentIds } = require('./scene');
 const { idTypesToKeys } = require('../../../../../models/tickets.groups.constants');
 
 const TicketGroups = {};
-
-const getIdToMeshesMapping = async (teamspace, model, revId) => {
-	const fileData = await getFile(teamspace, `${model}.stash.json_mpc`, `${UUIDToString(revId)}/idToMeshes.json`);
-	return JSON.parse(fileData);
-};
 
 const getExteralIdNameFromMetadata = (metadata) => {
 	let externalIdName;
@@ -131,13 +125,13 @@ const convert3dRepoIdsToExternalIds = async (teamspace, project, objects) => {
 	return convertedObjects;
 };
 
-const convertToInternalIds = async (teamspace, project, revId, objects) => {
-	const convertedObjects = await Promise.all(objects.map(async (obj) => {
-		if (obj._ids) {
-			return obj;
+const convertToInternalIds = async (teamspace, project, revId, containerEntries) => {
+	const convertedEntries = await Promise.all(containerEntries.map(async (entry) => {
+		if (entry._ids) {
+			return entry;
 		}
 
-		const { container } = obj;
+		const { container } = entry;
 
 		let revision = revId;
 		if (!revision) {
@@ -149,33 +143,22 @@ const convertToInternalIds = async (teamspace, project, revId, objects) => {
 			}
 		}
 
-		const idType = getCommonElements(Object.keys(obj), Object.keys(idTypesToKeys))[0];
+		const idType = getCommonElements(Object.keys(entry), Object.keys(idTypesToKeys))[0];
 
 		const query = {
 			rev_id: revision,
 			metadata: { $elemMatch: { key: { $in: idTypesToKeys[idType] },
-				value: { $in: obj[idType] } } },
+				value: { $in: entry[idType] } } },
 		};
 
 		const metadata = await getMetadataByQuery(teamspace, container, query, { parents: 1 });
-		const meshes = await getMeshesWithParentIds(teamspace, project, container, revision,
+		const meshIds = await getMeshesWithParentIds(teamspace, project, container, revision,
 			metadata.flatMap(({ parents }) => parents));
 
-		const _ids = [];
-		const idToMeshes = await getIdToMeshesMapping(teamspace, container, revision);
-		meshes.forEach(({ _id }) => {
-			const idStr = UUIDToString(_id);
-			if (idToMeshes[idStr]) {
-				idToMeshes[idStr].forEach((id) => {
-					_ids.push(stringToUUID(id));
-				});
-			}
-		});
-
-		return { ...obj, [idType]: undefined, _ids };
+		return { ...entry, [idType]: undefined, _ids: meshIds };
 	}));
 
-	return convertedObjects.flat();
+	return convertedEntries.flat();
 };
 
 TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
