@@ -20,7 +20,7 @@ const { cloneDeep, times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomObject, generateUUIDString } = require('../../../../../../helper/services');
 const { stringToUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
-const { idTypesToKeys } = require('../../../../../../../../src/v5/models/tickets.groups.constants');
+const { idTypesToKeys } = require('../../../../../../../../src/v5/models/metadata.constants');
 
 const Groups = require(`${src}/processors/teamspaces/projects/models/commons/tickets.groups`);
 

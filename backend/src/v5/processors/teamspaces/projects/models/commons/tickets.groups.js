@@ -24,7 +24,7 @@ const { getCommonElements } = require('../../../../../utils/helper/arrays');
 const { getFile } = require('../../../../../services/filesManager');
 const { getLatestRevision } = require('../../../../../models/revisions');
 const { getMeshesWithParentIds } = require('./scene');
-const { idTypesToKeys } = require('../../../../../models/tickets.groups.constants');
+const { idTypesToKeys } = require('../../../../../models/metadata.constants');
 
 const TicketGroups = {};
 

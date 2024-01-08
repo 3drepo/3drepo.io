@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const GroupConstants = {};
+const MetaConstants = {};
 
-GroupConstants.idTypes = {
+MetaConstants.idTypes = {
 	IFC: 'ifc_guids',
 	REVIT: 'revit_ids',
 };
 
-GroupConstants.idTypesToKeys = {
-	[GroupConstants.idTypes.IFC]: ['IFC GUID', 'Ifc::IfcGUID', 'Element::IfcGUID'],
-	[GroupConstants.idTypes.REVIT]: ['Element ID', 'Element ID::Value'],
+MetaConstants.idTypesToKeys = {
+	[MetaConstants.idTypes.IFC]: ['IFC GUID', 'Ifc::IfcGUID', 'Element::IfcGUID'],
+	[MetaConstants.idTypes.REVIT]: ['Element ID', 'Element ID::Value'],
 };
 
-module.exports = GroupConstants;
+module.exports = MetaConstants;
