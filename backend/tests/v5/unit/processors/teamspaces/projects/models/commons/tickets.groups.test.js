@@ -20,6 +20,7 @@ const { cloneDeep, times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomObject, generateUUIDString } = require('../../../../../../helper/services');
 const { stringToUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
+const { idTypesToKeys } = require('../../../../../../../../src/v5/models/tickets.groups.constants');
 
 const Groups = require(`${src}/processors/teamspaces/projects/models/commons/tickets.groups`);
 
@@ -37,11 +38,6 @@ const ScenesModel = require(`${src}/models/scenes`);
 
 jest.mock('../../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
-
-const externalIdNamesToKeys = {
-	ifc_guids: ['IFC GUID', 'Ifc::IfcGUID', 'Element::IfcGUID'],
-	revit_ids: ['Element ID', 'Element ID::Value'],
-};
 
 const testGetTicketGroupById = () => {
 	const teamspace = generateRandomString();
@@ -144,7 +140,7 @@ const testGetTicketGroupById = () => {
 					revision, options.group.rules, {
 						parents: 1,
 						...(options.convertTo3dRepoIds ? {} : { metadata: { $elemMatch:
-							{ $or: Object.values(externalIdNamesToKeys).flat().map((n) => ({ key: n })) } } }),
+							{ $or: Object.values(idTypesToKeys).flat().map((n) => ({ key: n })) } } }),
 					});
 
 				if (options.matchedMeta.length && options.convertTo3dRepoIds) {
@@ -211,7 +207,7 @@ const testGetTicketGroupById = () => {
 				if (!options.latestRevisionFail && options.group !== normalGroup) {
 					const query = {
 						rev_id: revision,
-						metadata: { $elemMatch: { key: { $in: externalIdNamesToKeys[options.externalIdName] },
+						metadata: { $elemMatch: { key: { $in: idTypesToKeys[options.externalIdName] },
 							value: { $in: options.group.objects.map((o) => o[options.externalIdName]).flat() } } },
 					};
 					expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
@@ -278,7 +274,7 @@ const testAddGroups = () => {
 							/* eslint-disable-next-line no-underscore-dangle */
 							obj.container, obj._ids, { _id: 0, shared_id: 1 });
 
-						const externalIdKeys = Object.values(externalIdNamesToKeys).flat();
+						const externalIdKeys = Object.values(idTypesToKeys).flat();
 						const query = { parents: { $in: sharedIds.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
 						const projection = { metadata: { $elemMatch:
 							{ $or: externalIdKeys.map((n) => ({ key: n })) } } };
@@ -352,7 +348,7 @@ const testUpdateGroup = () => {
 					expect(ScenesModel.getNodesByIds).toHaveBeenCalledWith(teamspace, project, obj.container, obj._ids,
 						{ _id: 0, shared_id: 1 });
 
-					const externalIdKeys = Object.values(externalIdNamesToKeys).flat();
+					const externalIdKeys = Object.values(idTypesToKeys).flat();
 					const query = { parents: { $in: sharedIds.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
 					const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
 
