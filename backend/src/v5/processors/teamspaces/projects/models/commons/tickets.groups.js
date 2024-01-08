@@ -18,7 +18,7 @@
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
 const { getIdToMeshesMapping, getMeshesWithParentIds } = require('./scene');
-const { getMetadataByQuery, getMetadataByRules } = require('../../../../../models/metadata');
+const { getMetadataByQuery, getMetadataByRules, getMetadataWithMatchingData } = require('../../../../../models/metadata');
 const { getNodesByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { getCommonElements } = require('../../../../../utils/helper/arrays');
 const { getLatestRevision } = require('../../../../../models/revisions');
@@ -142,26 +142,20 @@ const convertToMeshIds = async (teamspace, project, revId, containerEntries) => 
 				const rev = await getLatestRevision(teamspace, container, { _id: 1 });
 				revision = rev._id;
 			} catch (err) {
-				return [];
+				return undefined;
 			}
 		}
 
 		const idType = getCommonElements(Object.keys(entry), Object.keys(idTypesToKeys))[0];
-
-		const query = {
-			rev_id: revision,
-			metadata: { $elemMatch: { key: { $in: idTypesToKeys[idType] },
-				value: { $in: entry[idType] } } },
-		};
-
-		const metadata = await getMetadataByQuery(teamspace, container, query, { parents: 1 });
+		const metadata = await getMetadataWithMatchingData(teamspace, container, revision,
+			idTypesToKeys[idType], entry[idType], { parents: 1 });
 		const meshIds = await getMeshesWithParentIds(teamspace, project, container, revision,
 			metadata.flatMap(({ parents }) => parents));
 
 		return { ...entry, [idType]: undefined, _ids: meshIds };
 	}));
 
-	return convertedEntries.flat();
+	return convertedEntries.filter((e) => e);
 };
 
 TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
