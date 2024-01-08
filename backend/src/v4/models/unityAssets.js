@@ -23,7 +23,8 @@ const utils = require("../utils");
 const { getRefNodes } = require("./ref");
 const C = require("../constants");
 const db = require("../handler/db");
-const FileRef = require("./fileRef");
+const {v5Path} = require("../../interop");
+const FilesManager = require(`${v5Path}/services/filesManager`);
 
 const UnityAssets = {};
 
@@ -71,7 +72,8 @@ UnityAssets.getAssetList = function(account, model, branch, rev, username) {
 
 UnityAssets.getUnityBundle = function(account, model, id) {
 	const bundleFileName = `${id}.unity3d`;
-	return FileRef.getUnityBundle(account, model, bundleFileName);
+	const collection = `${model}.stash.unity3d.ref`;
+	return FilesManager.getFileAsStream(account, collection, bundleFileName);
 };
 
 module.exports = UnityAssets;

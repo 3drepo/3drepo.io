@@ -43,7 +43,7 @@ Responder.respond.mockImplementation((req, res, errCode) => errCode);
 const subModelContainer = 'ImSub';
 const queuedStatusContainer = generateRandomString();
 
-ModelSettings.getModelByQuery.mockImplementation((teamspace, query) => (query.$or[0].subModels !== subModelContainer
+ModelSettings.getModelByQuery.mockImplementation((teamspace, query) => (query['subModels._id'] !== subModelContainer
 	? Promise.reject(templates.modelNotFound)
 	: Promise.resolve({ _id: 1, name: 'abc' })));
 

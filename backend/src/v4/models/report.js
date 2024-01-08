@@ -90,13 +90,14 @@ function formatDate(date, printTime = true) {
 }
 
 class ReportGenerator {
-	constructor(type, teamspace, model, rev) {
+	constructor(type, teamspace, project, model, rev) {
 		this.userFullName = [];
 		this.promises = [];
 		this.type = type;
 		this.typeSingular = singularLabel[type];
 		this.teamspace = teamspace;
 		this.modelID = model;
+		this.projectID = project;
 		this.rev = rev || this.getRevisionID(teamspace, model);
 		this.reportDate = formatDate(new Date(), false);
 
@@ -150,7 +151,7 @@ class ReportGenerator {
 			newEntry.createdTS = entry.created;
 			newEntry.number = entry.number || "";
 			newEntry.screenshot = entry.viewpoint.screenshot;
-			newEntry.screenshotURL = `${config.getBaseURL()}/viewer/${this.teamspace}/${this.modelID}?${urlQS[this.type]}=${entry._id}`;
+			newEntry.screenshotURL = `${config.getBaseURL()}/v5/viewer/${this.teamspace}/${this.projectID}/${this.modelID}?${urlQS[this.type]}=${entry._id}`;
 			newEntry.name = entry.name;
 
 			newEntry.desc = entry.desc;
@@ -248,6 +249,6 @@ class ReportGenerator {
 }
 
 module.exports = {
-	newIssuesReport :  (teamspace, model, rev) =>  new ReportGenerator(ReportType.ISSUES, teamspace, model, rev),
-	newRisksReport :  (teamspace, model, rev) =>  new ReportGenerator(ReportType.RISKS, teamspace, model, rev)
+	newIssuesReport :  (teamspace, project, model, rev) =>  new ReportGenerator(ReportType.ISSUES, teamspace, project, model, rev),
+	newRisksReport :  (teamspace, project, model, rev) =>  new ReportGenerator(ReportType.RISKS, teamspace, project, model, rev)
 };

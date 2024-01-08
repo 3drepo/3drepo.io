@@ -30,7 +30,7 @@ import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { CircleButton } from '@controls/circleButton';
-import { getTicketIsCompleted, modelIsFederation, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
+import { modelIsFederation, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
 import _ from 'lodash';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
@@ -51,6 +51,7 @@ import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
 import { useSelectedModels } from './newTicketMenu/useSelectedModels';
+import { getTicketIsCompleted } from '@/v5/store/tickets/card/ticketsCard.helpers';
 
 type FormType = {
 	containersAndFederations: string[],
