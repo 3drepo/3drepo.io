@@ -289,6 +289,8 @@ ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
 	+ Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
+ServiceHelper.generateRandomIfcGuid = () => ServiceHelper.generateRandomString(22);
+ServiceHelper.generateRandomRvtId = () => Math.floor(Math.random() * 10000);
 
 ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
 

@@ -117,11 +117,11 @@ const setupExtIDTicket = (container) => {
 	// FIXME: constant reference
 	const rootMeta = ServiceHelper.generateBasicNode('meta', revId, [rootNode.shared_id], { metadata: [{
 		key: 'IFC GUID',
-		value: ServiceHelper.generateRandomString(22),
+		value: ServiceHelper.generateRandomIfcGuid(),
 	},
 	{
 		key: 'Element ID',
-		value: Math.floor(Math.random() * 10000),
+		value: ServiceHelper.generateRandomRvtId(),
 	},
 
 	] });
@@ -166,9 +166,9 @@ const setupExtIDTicket = (container) => {
 		groupWithRvtIds: { data: createGroupWithExtIds({ revit_ids: [rootMeta.metadata[1].value] }),
 			convertedObjs: [meshIdStr1, meshIdStr2] },
 		groupWithIfcGuidsNotFound: { data: createGroupWithExtIds({
-			ifc_guids: [ServiceHelper.generateRandomString(22)] }),
+			ifc_guids: [ServiceHelper.generateRandomIfcGuid()] }),
 		convertedObjs: [] },
-		groupWithRvtIdsNotFound: { data: createGroupWithExtIds({ revit_ids: [Math.floor(Math.random() * 10000)] }),
+		groupWithRvtIdsNotFound: { data: createGroupWithExtIds({ revit_ids: [ServiceHelper.generateRandomRvtId()] }),
 			convertedObjs: [] },
 		smartGroupWithIfcGuids: {
 			data: createSmartGroupWithMatchingMeta(rootMeta.metadata[0]),
@@ -182,7 +182,7 @@ const setupExtIDTicket = (container) => {
 		},
 		smartGroupWithIfcGuidsNotFound: {
 			data: createSmartGroupWithMatchingMeta({ ...rootMeta.metadata[0],
-				value: ServiceHelper.generateRandomString(22) }),
+				value: ServiceHelper.generateRandomIfcGuid() }),
 			convertedObjs: [],
 			original: { ifc_guids: [] },
 		},
@@ -326,13 +326,6 @@ const testUpdateGroup = () => {
 			await setupBasicData(basicData);
 		});
 
-		// TODO:
-		// - create with IFC guids
-		// - create with rvt
-		// - create with shared ids and see converted (IFC)
-		// - create with shared ids and see converted (RVT)
-		// - create with shared ids and see not converted if not everything is covered
-
 		const generateTestData = (isFed) => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
@@ -352,6 +345,23 @@ const testUpdateGroup = () => {
 				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, payload, false, templates.ticketNotFound],
 				['the group does not exist', { ...baseRouteParams, groupId: ServiceHelper.generateRandomString() }, payload, false, templates.groupNotFound],
 				['the group id is valid', baseRouteParams, payload, true],
+				['the payload has ifc guids', { ...baseRouteParams, checkOutput: false }, { objects: [
+					// FIXME: replace hard coded name with constants
+					{ container: con._id, ifc_guids: [ServiceHelper.generateRandomIfcGuid()] },
+				] }, true],
+				['the payload has rvt ids', { ...baseRouteParams, checkOutput: false }, { objects: [
+					// FIXME: replace hard coded name with constants
+					{ container: con._id, revit_ids: [ServiceHelper.generateRandomRvtId()] },
+				] }, true],
+				['the payload has no ids', { ...baseRouteParams, checkOutput: false }, { objects: [
+					{ container: con._id },
+				] }, false, templates.invalidArguments],
+				['the payload has more than one type of ids', { ...baseRouteParams, checkOutput: false }, { objects: [
+					// FIXME: replace hard coded name with constants
+					{ container: con._id,
+						revit_ids: [ServiceHelper.generateRandomRvtId()],
+						ifc_guids: [ServiceHelper.generateRandomIfcGuid()] },
+				] }, false, templates.invalidArguments],
 				['the payload contains both rules and objects', baseRouteParams, { rules: [{
 					field: 'IFC Type',
 					operator: valueOperators.IS.name,
@@ -366,7 +376,8 @@ const testUpdateGroup = () => {
 			];
 		};
 
-		const runTest = (desc, { model, ...routeParams }, payload, success, expectedOutput = templates.ok) => {
+		const runTest = (desc, { model, checkOutput = true, ...routeParams },
+			payload, success, expectedOutput = templates.ok) => {
 			const updateRoute = ({ key, projectId, modelId, ticketId, groupId, modelType }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/groups/${groupId}${key ? `?key=${key}` : ''}`;
 			const getRoute = ({ key, projectId, modelId, ticketId, groupId, modelType }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/groups/${groupId}${key ? `?key=${key}` : ''}`;
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
@@ -385,7 +396,10 @@ const testUpdateGroup = () => {
 
 				if (success) {
 					const getRes = await agent.get(getEndpoint).expect(200);
-					expect(getRes.body).toEqual({ ...model.group, ...payload });
+					if (checkOutput) {
+						// some tests we don't care about the output (this is checked by the GET function)
+						expect(getRes.body).toEqual({ ...model.group, ...payload });
+					}
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
