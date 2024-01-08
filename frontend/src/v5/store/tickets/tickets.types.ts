@@ -188,3 +188,9 @@ export type OverridesDicts = {
 };
 
 export type TicketWithModelIdAndName = ITicket & { modelId: string; modelName: string };
+
+export type ITicketsFilters = {
+	complete: boolean,
+	templates: string[],
+	queries: string[],
+};
