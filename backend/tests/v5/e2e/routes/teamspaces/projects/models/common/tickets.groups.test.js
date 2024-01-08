@@ -20,15 +20,19 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
-const { valueOperators } = require(`${src}/models/metadata.rules.constants`);
+const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
+
+const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 let server;
 let agent;
 
 const generateBasicData = () => {
 	const template = ServiceHelper.generateTemplate(false, true);
+	const con = ServiceHelper.generateRandomModel();
 
 	return ({
 		users: {
@@ -40,8 +44,8 @@ const generateBasicData = () => {
 		},
 		teamspace: ServiceHelper.generateRandomString(),
 		project: ServiceHelper.generateRandomProject(),
-		con: ServiceHelper.generateRandomModel(),
-		fed: ServiceHelper.generateRandomModel({ isFederation: true }),
+		con,
+		fed: ServiceHelper.generateRandomModel({ isFederation: true, properties: { subModels: [{ _id: con._id }] } }),
 		template,
 		ticket: ServiceHelper.generateTicket(template),
 	});
@@ -85,8 +89,118 @@ const setupBasicData = async ({ users, teamspace, project, fed, con, template, t
 		}
 
 		model.ticket = { ...cloneDeep(ticket), _id: ticketRes._id };
+
+		model.notFound = { _id: ServiceHelper.generateUUIDString() };
 		/* eslint-enable no-param-reassign */
 	}));
+};
+
+const setupExtIDTicket = (container) => {
+	const viewName = ServiceHelper.generateRandomString();
+	const template = {
+		...ServiceHelper.generateTemplate(),
+		properties: [
+			{
+				name: viewName,
+				type: propTypes.VIEW,
+			},
+		],
+		modules: [],
+	};
+	const ticket = ServiceHelper.generateTicket(template);
+
+	const rev = ServiceHelper.generateRevisionEntry();
+	const revId = rev._id;
+
+	const rootNode = ServiceHelper.generateBasicNode('transformation', revId);
+
+	// FIXME: constant reference
+	const rootMeta = ServiceHelper.generateBasicNode('meta', revId, [rootNode.shared_id], { metadata: [{
+		key: 'IFC GUID',
+		value: ServiceHelper.generateRandomString(22),
+	},
+	{
+		key: 'Element ID',
+		value: Math.floor(Math.random() * 10000),
+	},
+
+	] });
+
+	const mesh1 = ServiceHelper.generateBasicNode('mesh', revId, [rootNode.shared_id]);
+	const mesh2 = ServiceHelper.generateBasicNode('mesh', revId, [rootNode.shared_id]);
+
+	const nodes = [rootNode, rootMeta, mesh1, mesh2];
+	const meshIdStr1 = UUIDToString(mesh1._id);
+	const meshIdStr2 = UUIDToString(mesh2._id);
+
+	const meshMap = {
+		[`${UUIDToString(rootNode._id)}`]: [meshIdStr1, meshIdStr2],
+		[meshIdStr1]: meshIdStr1,
+		[meshIdStr2]: meshIdStr2,
+	};
+
+	const createGroupWithExtIds = (idsObj) => {
+		const group = ServiceHelper.generateGroup(false, { serialised: true, hasId: false, container });
+		/* eslint-disable-next-line no-underscore-dangle */
+		delete group.objects[0]._ids;
+		group.objects[0] = { ...group.objects[0], ...idsObj };
+		return group;
+	};
+
+	const createSmartGroupWithMatchingMeta = ({ key, value }) => {
+		const rule = {
+			name: ServiceHelper.generateRandomString(),
+			field: { operator: fieldOperators.IS.name, values: [key] },
+			operator: valueOperators.IS.name,
+			values: [value],
+		};
+		return ServiceHelper.createGroupWithRule(rule);
+	};
+
+	/* eslint-disable no-underscore-dangle */
+
+	// FIXME: need constant reference
+	const groups = {
+		groupWithIfcGuids: { data: createGroupWithExtIds({ ifc_guids: [rootMeta.metadata[0].value] }),
+			convertedObjs: [meshIdStr1, meshIdStr2] },
+		groupWithRvtIds: { data: createGroupWithExtIds({ revit_ids: [rootMeta.metadata[1].value] }),
+			convertedObjs: [meshIdStr1, meshIdStr2] },
+		groupWithIfcGuidsNotFound: { data: createGroupWithExtIds({
+			ifc_guids: [ServiceHelper.generateRandomString(22)] }),
+		convertedObjs: [] },
+		groupWithRvtIdsNotFound: { data: createGroupWithExtIds({ revit_ids: [Math.floor(Math.random() * 10000)] }),
+			convertedObjs: [] },
+		smartGroupWithIfcGuids: {
+			data: createSmartGroupWithMatchingMeta(rootMeta.metadata[0]),
+			convertedObjs: [meshIdStr1, meshIdStr2],
+			original: { ifc_guids: [rootMeta.metadata[0].value] },
+		},
+		smartGroupWithRvtIds: {
+			data: createSmartGroupWithMatchingMeta(rootMeta.metadata[1]),
+			convertedObjs: [meshIdStr1, meshIdStr2],
+			original: { ifc_guids: [rootMeta.metadata[0].value] },
+		},
+		smartGroupWithIfcGuidsNotFound: {
+			data: createSmartGroupWithMatchingMeta({ ...rootMeta.metadata[0],
+				value: ServiceHelper.generateRandomString(22) }),
+			convertedObjs: [],
+			original: { ifc_guids: [] },
+		},
+	};
+
+	/* eslint-enable no-underscore-dangle */
+
+	ticket.properties[viewName] = {
+		state: {
+			hidden: Object.values(groups).map(({ data }) => ({ group: cloneDeep(data) })),
+		},
+	};
+
+	return { ticket,
+		template,
+		groups,
+		viewName,
+		scene: { nodes, rev, meshMap } };
 };
 
 const testGetGroup = () => {
@@ -94,8 +208,40 @@ const testGetGroup = () => {
 		const basicData = generateBasicData();
 		const { users, teamspace, project, con, fed } = basicData;
 
+		const extIdTestCase = setupExtIDTicket(con._id);
+
 		beforeAll(async () => {
 			await setupBasicData(basicData);
+			await ServiceHelper.db.createTemplates(teamspace, [extIdTestCase.template]);
+
+			await ServiceHelper.db.createScene(teamspace, con._id, extIdTestCase.scene.rev,
+				extIdTestCase.scene.nodes, extIdTestCase.scene.meshMap);
+			await Promise.all([fed, con].map(async (model) => {
+				const modelType = fed === model ? 'federation' : 'container';
+
+				const addTicketRoute = (modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${users.tsAdmin.apiKey}`;
+				const getTicketRoute = (modelId, ticketId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets/${ticketId}?key=${users.tsAdmin.apiKey}`;
+
+				const { body: ticketRes } = await agent.post(addTicketRoute(model._id)).send(extIdTestCase.ticket);
+				/* eslint-disable no-param-reassign */
+				const { body: getRes } = await agent.get(getTicketRoute(model._id, ticketRes._id));
+
+				const hiddenGroups = getRes.properties[extIdTestCase.viewName].state.hidden;
+
+				const groupsToUpdate = Object.keys(extIdTestCase.groups);
+
+				groupsToUpdate.forEach((name, ind) => {
+					model[name] = {
+						...extIdTestCase.groups[name].data,
+						_id: hiddenGroups[ind].group,
+						convertedObjects: extIdTestCase.groups[name].convertedObjs,
+						original: extIdTestCase.groups[name].original,
+					};
+				});
+
+				model.extIdTicket = { ...cloneDeep(extIdTestCase.ticket), _id: ticketRes._id };
+				/* eslint-enable no-param-reassign */
+			}));
 		});
 
 		const generateTestData = (isFed) => {
@@ -103,7 +249,11 @@ const testGetGroup = () => {
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
-			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType };
+			const baseRouteParams = { key: users.tsAdmin.apiKey,
+				projectId: project.id,
+				model,
+				modelType,
+				convertIds: true };
 
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
@@ -112,26 +262,50 @@ const testGetGroup = () => {
 				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel() }, false, modelNotFound],
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
-				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound],
-				['the group does not exist', { ...baseRouteParams, groupId: ServiceHelper.generateRandomString() }, false, templates.groupNotFound],
+				['the ticket does not exist', { ...baseRouteParams, ticketName: 'notFound' }, false, templates.ticketNotFound],
+				['the group does not exist', { ...baseRouteParams, groupName: 'notFound' }, false, templates.groupNotFound],
 				['the group id is valid', baseRouteParams, true],
+				['the group id is valid (returning IFC GUIDs)', { ...baseRouteParams, groupName: 'groupWithIfcGuids', ticketName: 'extIdTicket', convertIds: false }, true],
+				['the group id is valid and IFC guids are converted', { ...baseRouteParams, groupName: 'groupWithIfcGuids', ticketName: 'extIdTicket' }, true],
+				['the group id is valid with unfound IFC GUIDs should return empty array', { ...baseRouteParams, groupName: 'groupWithIfcGuidsNotFound', ticketName: 'extIdTicket', convertIds: true }, true],
+				['the group id is valid (returning RVT IDs)', { ...baseRouteParams, groupName: 'groupWithRvtIds', ticketName: 'extIdTicket', convertIds: false }, true],
+				['the group id is valid and RVT IDs are converted', { ...baseRouteParams, groupName: 'groupWithRvtIds', ticketName: 'extIdTicket' }, true],
+				['the group id is valid with unfound RVT IDs should return empty array', { ...baseRouteParams, groupName: 'groupWithRvtIdsNotFound', ticketName: 'extIdTicket', convertIds: true }, true],
+				['the smart group id is valid', { ...baseRouteParams, ticketName: 'extIdTicket', groupName: 'smartGroupWithIfcGuids' }, true],
+				['the smart group id is valid (returning IFC Guids)', { ...baseRouteParams, ticketName: 'extIdTicket', groupName: 'smartGroupWithIfcGuids', convertIds: false }, true],
 			];
 		};
 
-		const runTest = (desc, { model, ...routeParams }, success, expectedOutput) => {
-			const getRoute = ({ key, projectId, modelId, ticketId, groupId, modelType }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/groups/${groupId}${key ? `?key=${key}` : ''}`;
-
+		const getRoute = ({ key, projectId, modelId, ticketId, groupId, modelType, convertIds }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/groups/${groupId}${key ? `?key=${key}` : ''}${!convertIds ? '&convertIds=false' : ''}`;
+		const runTest = (desc, { model, groupName = 'group', ticketName = 'ticket', ...routeParams }, success, expectedOutput) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const ticket = model[ticketName];
+				const group = model[groupName];
 				const endpoint = getRoute({ modelId: model._id,
-					ticketId: model.ticket?._id,
-					groupId: model.group?._id,
+					ticketId: ticket?._id,
+					groupId: group?._id,
 					...routeParams });
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
-
 				const res = await agent.get(endpoint).expect(expectedStatus);
 
 				if (success) {
-					expect(res.body).toEqual(model.group);
+					const { convertedObjects, original, ...expectedData } = cloneDeep(group);
+					if (routeParams.convertIds !== false) {
+						if (convertedObjects) {
+						// have to construct this for smart groups
+							expectedData.objects = expectedData.objects || [{ container: con._id }];
+							// eslint-disable-next-line no-underscore-dangle
+							expectedData.objects[0]._ids = convertedObjects;
+
+							// FIXME: should not be hard coded
+							delete expectedData.objects[0].ifc_guids;
+							delete expectedData.objects[0].revit_ids;
+						}
+					} else if (original) {
+						expectedData.objects = [{ container: con._id, ...original }];
+					}
+
+					expect(res.body).toEqual(expectedData);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
@@ -151,6 +325,13 @@ const testUpdateGroup = () => {
 		beforeAll(async () => {
 			await setupBasicData(basicData);
 		});
+
+		// TODO:
+		// - create with IFC guids
+		// - create with rvt
+		// - create with shared ids and see converted (IFC)
+		// - create with shared ids and see converted (RVT)
+		// - create with shared ids and see not converted if not everything is covered
 
 		const generateTestData = (isFed) => {
 			const modelType = isFed ? 'federation' : 'container';

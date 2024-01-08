@@ -36,7 +36,7 @@ Federations.getTicketGroupById = async (teamspace, project, federation, revId, t
 	convertTo3DRepoGuids) => {
 	const { subModels: containers } = await getFederationById(teamspace, federation, { subModels: 1 });
 	return TicketGroups.getTicketGroupById(teamspace, project, federation, revId,
-		ticket, groupId, containers ? containers.map(({ _id }) => _id) : undefined, convertTo3DRepoGuids);
+		ticket, groupId, convertTo3DRepoGuids, containers ? containers.map(({ _id }) => _id) : undefined);
 };
 
 Federations.addFederation = (teamspace, project, federation) => addModel(teamspace, project,
