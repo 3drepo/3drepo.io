@@ -22,13 +22,9 @@ const { getMetadataByQuery, getMetadataByRules } = require('../../../../../model
 const { getNodesByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { getFile } = require('../../../../../services/filesManager');
 const { getLatestRevision } = require('../../../../../models/revisions');
+const { idTypesToKeys } = require('../../../../../models/tickets.groups.constants');
 
 const TicketGroups = {};
-
-const externalIdNamesToKeys = {
-	ifc_guids: ['IFC GUID', 'Ifc::IfcGUID', 'Element::IfcGUID'],
-	revit_ids: ['Element ID', 'Element ID::Value'],
-};
 
 const getIdToMeshesMapping = async (teamspace, model, revId) => {
 	const fileData = await getFile(teamspace, `${model}.stash.json_mpc`, `${UUIDToString(revId)}/idToMeshes.json`);
@@ -37,8 +33,8 @@ const getIdToMeshesMapping = async (teamspace, model, revId) => {
 
 const getExteralidNameFromMetadata = (metadata) => {
 	let externalIdName;
-	Object.keys(externalIdNamesToKeys).forEach((name) => {
-		if (externalIdNamesToKeys[name].some((m) => m === metadata[0].metadata[0].key)) {
+	Object.keys(idTypesToKeys).forEach((name) => {
+		if (idTypesToKeys[name].some((m) => m === metadata[0].metadata[0].key)) {
 			externalIdName = name;
 		}
 	});
@@ -59,7 +55,7 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 
 	const projection = { parents: 1,
 		...(convertTo3dRepoIds ? {} : { metadata: {
-			$elemMatch: { $or: Object.values(externalIdNamesToKeys).flat().map((n) => ({ key: n })) } } }) };
+			$elemMatch: { $or: Object.values(idTypesToKeys).flat().map((n) => ({ key: n })) } } }) };
 
 	const { matched, unwanted } = await getMetadataByRules(teamspace, project, model, revision, rules, projection);
 
@@ -116,7 +112,7 @@ const convert3dRepoIdsToExternalIds = async (teamspace, project, objects) => {
 		const shared_ids = await getNodesByIds(teamspace, project, obj.container, obj._ids,
 			{ _id: 0, shared_id: 1 });
 
-		const externalIdKeys = Object.values(externalIdNamesToKeys).flat();
+		const externalIdKeys = Object.values(idTypesToKeys).flat();
 		const query = { parents: { $in: shared_ids.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
 		const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
 		const metadata = await getMetadataByQuery(teamspace, obj.container, query, projection);
@@ -155,7 +151,7 @@ const convertExternalIdsTo3dRepoIds = async (teamspace, project, revId, objects)
 		const externalIdName = obj.revit_ids ? 'revit_ids' : 'ifc_guids';
 		const query = {
 			rev_id: revision,
-			metadata: { $elemMatch: { key: { $in: externalIdNamesToKeys[externalIdName] },
+			metadata: { $elemMatch: { key: { $in: idTypesToKeys[externalIdName] },
 				value: { $in: obj[externalIdName] } } },
 		};
 
