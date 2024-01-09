@@ -18,12 +18,12 @@
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
+const { getMeshesWithParentIds, sharedIdsToExternalIds } = require('./scene');
 const { getMetadataByQuery, getMetadataByRules } = require('../../../../../models/metadata');
 const { getNodesByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { getCommonElements } = require('../../../../../utils/helper/arrays');
 const { getFile } = require('../../../../../services/filesManager');
 const { getLatestRevision } = require('../../../../../models/revisions');
-const { getMeshesWithParentIds } = require('./scene');
 const { idTypesToKeys } = require('../../../../../models/metadata.constants');
 
 const TicketGroups = {};
@@ -33,18 +33,7 @@ const getIdToMeshesMapping = async (teamspace, model, revId) => {
 	return JSON.parse(fileData);
 };
 
-const getExteralIdNameFromMetadata = (metadata) => {
-	let externalIdName;
-	Object.keys(idTypesToKeys).forEach((name) => {
-		if (idTypesToKeys[name].some((m) => m === metadata[0].metadata[0].key)) {
-			externalIdName = name;
-		}
-	});
-
-	return externalIdName;
-};
-
-const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, convertTo3dRepoIds) => {
+const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, returnMeshIds) => {
 	let revision = revId;
 	if (!revision) {
 		try {
@@ -56,12 +45,12 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 	}
 
 	const projection = { parents: 1,
-		...(convertTo3dRepoIds ? {} : { metadata: {
+		...(returnMeshIds ? {} : { metadata: {
 			$elemMatch: { $or: Object.values(idTypesToKeys).flat().map((n) => ({ key: n })) } } }) };
 
 	const { matched, unwanted } = await getMetadataByRules(teamspace, project, model, revision, rules, projection);
 
-	if (!convertTo3dRepoIds && matched.some((m) => m.metadata)) {
+	if (!returnMeshIds && matched.some((m) => m.metadata)) {
 		const wantedIds = [...new Set(matched.map(({ metadata }) => metadata[0].value))];
 		const unwantedIds = [...new Set(unwanted.map(({ metadata }) => metadata[0].value))];
 
@@ -111,18 +100,16 @@ const convert3dRepoIdsToExternalIds = async (teamspace, project, objects) => {
 
 		const convertedObject = { ...obj };
 
-		const shared_ids = await getNodesByIds(teamspace, project, obj.container, obj._ids,
+		// eslint-disable-next-line no-underscore-dangle
+		const nodes = await getNodesByIds(teamspace, project, obj.container, obj._ids,
 			{ _id: 0, shared_id: 1 });
 
-		const externalIdKeys = Object.values(idTypesToKeys).flat();
-		const query = { parents: { $in: shared_ids.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
-		const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
-		const metadata = await getMetadataByQuery(teamspace, obj.container, query, projection);
+		const res = await sharedIdsToExternalIds(teamspace, obj.container, nodes.map(({ shared_ids }) => shared_ids));
 
-		if (metadata?.length) {
+		if (res) {
+			// eslint-disable-next-line no-underscore-dangle
 			delete convertedObject._ids;
-			const externalIdName = getExteralIdNameFromMetadata(metadata);
-			convertedObject[externalIdName] = [...new Set(metadata.map((m) => m.metadata[0].value))];
+			convertedObject[res.type] = res.values;
 		}
 
 		return convertedObject;
