@@ -17,25 +17,14 @@
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
-const { getIdToMeshesMapping, getMeshesWithParentIds } = require('./scene');
-const { getMetadataByQuery, getMetadataByRules, getMetadataWithMatchingData } = require('../../../../../models/metadata');
+const { getIdToMeshesMapping, getMeshesWithParentIds, sharedIdsToExternalIds } = require('./scene');
+const { getMetadataByRules, getMetadataWithMatchingData } = require('../../../../../models/metadata');
 const { getNodesByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { getCommonElements } = require('../../../../../utils/helper/arrays');
 const { getLatestRevision } = require('../../../../../models/revisions');
 const { idTypesToKeys } = require('../../../../../models/metadata.constants');
 
 const TicketGroups = {};
-
-const getExteralIdNameFromMetadata = (metadata) => {
-	let externalIdName;
-	Object.keys(idTypesToKeys).forEach((name) => {
-		if (idTypesToKeys[name].some((m) => m === metadata[0].metadata[0].key)) {
-			externalIdName = name;
-		}
-	});
-
-	return externalIdName;
-};
 
 const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, returnMeshIds) => {
 	let revision = revId;
@@ -106,19 +95,14 @@ const convertToExternalIds = async (teamspace, project, objects) => {
 		const nodes = await getNodesByIds(teamspace, project, obj.container, obj._ids,
 			{ _id: 0, shared_id: 1 });
 
-		const externalIdKeys = Object.values(idTypesToKeys).flat();
-		const query = { parents: { $in: nodes.map((n) => n.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
-		const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
-		const metadata = await getMetadataByQuery(teamspace, obj.container, query, projection);
+		const res = await sharedIdsToExternalIds(teamspace, obj.container, nodes.map(({ shared_ids }) => shared_ids));
 
 		const convertedObject = { ...obj };
-		if (metadata?.length) {
+		if (res) {
 			// eslint-disable-next-line no-underscore-dangle
 			delete convertedObject._ids;
-			const externalIdName = getExteralIdNameFromMetadata(metadata);
-			convertedObject[externalIdName] = [...new Set(metadata.map((m) => m.metadata[0].value))];
+			convertedObject[res.type] = res.values;
 		}
-
 		return convertedObject;
 	}));
 
