@@ -48,9 +48,8 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 		}
 	}
 
-	const projection = { parents: 1,
-		...(returnMeshIds ? {} : { metadata: {
-			$elemMatch: { $or: Object.values(idTypesToKeys).flat().map((n) => ({ key: n })) } } }) };
+	const externalKeys = Object.values(idTypesToKeys).flat().map((n) => ({ key: n }));
+	const projection = { parents: 1, ...(returnMeshIds ? {} : { metadata: { $elemMatch: { $or: externalKeys } } }) };
 
 	const { matched, unwanted } = await getMetadataByRules(teamspace, project, model, revision, rules, projection);
 
