@@ -392,7 +392,7 @@ function* setIsPinDropMode({ mode }: { mode: boolean }) {
 
 function * clearColorOverrides() {
 	yield put(GroupsActions.clearColorOverridesSuccess());
-	yield put(ViewpointsActions.setSelectedViewpoint(null));
+	yield put(ViewpointsActions.clearColorOverrides());
 	yield put(TicketsCardActions.setOverrides(null));
 	yield put(SequencesActions.clearColorOverrides());
 }

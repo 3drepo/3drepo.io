@@ -284,6 +284,17 @@ export function* cacheGroupsFromViewpoint({ viewpoint,  groupsData }) {
 	yield all(groups.map((group) => put(ViewpointsActions.fetchGroupSuccess(group))));
 }
 
+export function* clearColorOverrides() {
+	const viewpoint = yield select(selectSelectedViewpoint);
+	if (!viewpoint?.override_groups?.length) {
+		return;
+	}
+	yield put(ViewpointsActions.setSelectedViewpoint({
+		...viewpoint,
+		override_groups: [],
+	}));
+}
+
 export function* setActiveViewpoint({ teamspace, modelId, view }) {
 	try {
 		if (view) {
@@ -349,4 +360,5 @@ export default function* ViewpointsSaga() {
 	yield takeEvery(ViewpointsTypes.CACHE_GROUPS_FROM_VIEWPOINT, cacheGroupsFromViewpoint);
 	yield takeEvery(ViewpointsTypes.SHOW_PRESET, showPreset);
 	yield takeEvery(ViewpointsTypes.FETCH_VIEWPOINT_GROUPS, fetchViewpointGroups);
+	yield takeEvery(ViewpointsTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
 }

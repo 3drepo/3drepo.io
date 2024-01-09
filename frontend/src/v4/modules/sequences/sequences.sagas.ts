@@ -32,7 +32,7 @@ import { ViewpointsActions } from '../viewpoints';
 import { getSelectedFrame } from './sequences.helper';
 import {
 	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates, selectSelectedDate, selectSelectedFrameViewpoint,
-	selectSelectedSequence, selectSequences, selectSequenceModel,
+	selectSelectedSequence, selectSequences, selectSequenceModel, selectSelectedFrame, selectSelectedStateDefinition,
 } from './sequences.selectors';
 import { selectSelectedSequenceId, selectStateDefinitions,
 	SequencesActions, SequencesTypes } from '.';
@@ -176,16 +176,22 @@ function * prefetchFrames() {
 	yield all(keyframes.map((d) => put(SequencesActions.fetchFrame(d))));
 }
 
+function* setSelectedStateDefinition() {
+	const selectedFrame = yield select(selectSelectedFrame);
+	const stateDefinitions = yield select(selectStateDefinitions);
+	yield put(SequencesActions.setSelectedStateDefinition(stateDefinitions[selectedFrame?.state]));
+}
+
 export function* setSelectedDate({ date }) {
 	try {
 		const selectedSequence = yield select(selectSelectedSequence);
 
 		if (selectedSequence) {
 			yield put(SequencesActions.setSelectedDateSuccess(date));
-			yield put(SequencesActions.setShowColorOverrides(true));
 			yield put(SequencesActions.prefetchFrames());
 			yield showFrameViewpoint();
 		}
+		yield setSelectedStateDefinition();
 
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('select frame', 'sequences', error));
@@ -216,13 +222,13 @@ export function* setSelectedSequence({ sequenceId }) {
 		if (selectedSequence) {
 			yield put(SequencesActions.setStateDefinition(undefined, {}));
 			yield put(SequencesActions.setSelectedDateSuccess(null));
-			yield put(SequencesActions.setShowColorOverrides(true));
 			yield put(SequencesActions.setLastSelectedDateSuccess(null));
 			yield put(SequencesActions.restoreModelDefaultVisibility());
 		}
 		yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
 		yield put(SequencesActions.fetchActivitiesDefinitions(sequenceId));
 	}
+	yield setSelectedStateDefinition();
 }
 
 export function* showSequenceDate({ date }) {
@@ -279,8 +285,9 @@ function* handleTransparenciesVisibility({ transparencies }) {
 }
 
 export function* clearColorOverrides() {
-	yield put(SequencesActions.setShowColorOverrides(false));
-};
+	const { color, ...selectedStateDefinition } = yield select(selectSelectedStateDefinition);
+	yield put(SequencesActions.setSelectedStateDefinition(selectedStateDefinition));
+}
 
 export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCE, fetchSequence);

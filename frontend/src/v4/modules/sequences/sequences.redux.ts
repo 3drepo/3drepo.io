@@ -36,6 +36,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	fetchFrame: ['date'],
 	prefetchFrames: [],
 	setStateDefinition: ['stateId', 'stateDefinition'],
+	setSelectedStateDefinition: ['stateDefinition'],
 	setStepInterval: ['stepInterval'],
 	setStepScale: ['stepScale'],
 	fetchActivitiesDefinitions: ['sequenceId'],
@@ -44,7 +45,6 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	showSequenceDate: ['date'],
 	handleTransparenciesVisibility: ['transparencies'],
 	restoreModelDefaultVisibility: [],
-	setShowColorOverrides: ['showColorOverrides'],
 	clearColorOverrides: [],
 	reset: []
 }, { prefix: 'SEQUENCES/' });
@@ -58,13 +58,25 @@ export interface ISequance {
 	model: string;
 }
 
+type IDefinition = {
+	value: number[],
+	shared_id: string[],
+};
+
+export type IStateDefinition = Record<string, {
+	tranformation: IDefinition[],
+	color: IDefinition[],
+	transparency: IDefinition[],
+}>;
+
 export interface ISequencesState {
 	sequences: null | ISequance[];
 	selectedSequence: null | string;
 	lastSelectedSequence: null | string;
 	selectedDate: null | Date;
 	lastSelectedDate: null | Date;
-	stateDefinitions: any;
+	stateDefinitions: IStateDefinition;
+	selectedStateDefinition: IStateDefinition;
 	statesPending: boolean;
 	stepInterval: number;
 	stepScale: STEP_SCALE;
@@ -81,6 +93,7 @@ export const INITIAL_STATE: ISequencesState = {
 	selectedDate: null,
 	lastSelectedDate: null,
 	stateDefinitions: {},
+	selectedStateDefinition: {},
 	statesPending: false,
 	stepInterval: 1,
 	stepScale: STEP_SCALE.DAY,
@@ -157,16 +170,16 @@ export const setStateDefinition = (state = INITIAL_STATE, { stateId, stateDefini
 	return {...state, stateDefinitions: {...state.stateDefinitions, [stateId]: stateDefinition}};
 };
 
+export const setSelectedStateDefinition = (state = INITIAL_STATE, { stateDefinition }) => {
+	return { ...state, selectedStateDefinition: stateDefinition };
+};
+
 export const setStepInterval = (state = INITIAL_STATE, { stepInterval }) => {
 	return {...state, stepInterval};
 };
 
 export const setStepScale = (state = INITIAL_STATE, { stepScale }) => {
 	return {...state, stepScale};
-};
-
-export const setShowColorOverrides = (state = INITIAL_STATE, { showColorOverrides }) => {
-	return { ...state, showColorOverrides };
 };
 
 export const reset = () => {
@@ -182,9 +195,9 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.SET_SELECTED_DATE_SUCCESS]: setSelectedDateSuccess,
 	[SequencesTypes.SET_LAST_SELECTED_DATE_SUCCESS]: setLastSelectedDateSuccess,
 	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,
+	[SequencesTypes.SET_SELECTED_STATE_DEFINITION]: setSelectedStateDefinition,
 	[SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS]: setSelectedSequenceSuccess,
 	[SequencesTypes.SET_STEP_INTERVAL]: setStepInterval,
 	[SequencesTypes.SET_STEP_SCALE]: setStepScale,
-	[SequencesTypes.SET_SHOW_COLOR_OVERRIDES]: setShowColorOverrides,
 	[SequencesTypes.RESET]: reset
 });
