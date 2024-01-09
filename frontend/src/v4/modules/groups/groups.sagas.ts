@@ -373,7 +373,7 @@ function * clearColorOverrides() {
 	yield put(GroupsActions.clearColorOverridesSuccess());
 	yield put(ViewpointsActions.setSelectedViewpoint(null));
 	yield put(TicketsCardActions.setOverrides(null));
-	yield put(SequencesActions.setShowColorOverrides(false));
+	yield put(SequencesActions.clearColorOverrides());
 }
 
 function * setOverrideAll({overrideAll}) {

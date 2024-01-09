@@ -279,6 +279,10 @@ function* handleTransparenciesVisibility({ transparencies }) {
 	}
 }
 
+export function* clearColorOverrides() {
+	yield put(SequencesActions.setShowColorOverrides(false));
+};
+
 export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCE, fetchSequence);
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCE_LIST, fetchSequenceList);
@@ -292,4 +296,5 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.PREFETCH_FRAMES, prefetchFrames);
 	yield takeLatest(SequencesTypes.SHOW_SEQUENCE_DATE, showSequenceDate);
 	yield takeLatest(SequencesTypes.HANDLE_TRANSPARENCIES_VISIBILITY, handleTransparenciesVisibility);
+	yield takeLatest(SequencesTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
 }
