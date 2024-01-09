@@ -66,8 +66,8 @@ const testGetTicketGroupById = () => {
 	};
 
 	describe.each([
-		['when its a container group', defaultOptions],
-		['when its a federation group', { ...defaultOptions, containers: [container] }],
+		['when it is a container group', defaultOptions],
+		['when it is a federation group', { ...defaultOptions, containers: [container] }],
 		['when getLatestRevision fails', { ...defaultOptions, containers: [container], latestRevisionFail: true }],
 		['when there is a negative query', { ...defaultOptions, unwantedMeta: defaultOptions.matchedMeta.slice(5) }],
 		['when there are no matches', { ...defaultOptions, matchedMeta: [] }],
@@ -157,7 +157,7 @@ const testGetTicketGroupById = () => {
 	});
 
 	describe.each([
-		['when its a federation group', { ...defaultOptions, containers: [container], group: ifcGuidGroup, externalIdName: 'ifc_guids' }],
+		['when it is a federation group', { ...defaultOptions, containers: [container], group: ifcGuidGroup, externalIdName: 'ifc_guids' }],
 		['when convertTo3dRepoIds set to false', { ...defaultOptions, group: ifcGuidGroup, convertTo3dRepoIds: false }],
 		['when group already stores 3d repo Ids', { ...defaultOptions, group: normalGroup }],
 		['when getLatestRevision fails', { ...defaultOptions, group: ifcGuidGroup, externalIdName: 'ifc_guids', containers: [container], latestRevisionFail: true }],
@@ -248,7 +248,7 @@ const testAddGroups = () => {
 		});
 
 		describe.each([
-			['preserve oject as it is (no metadata found)', undefined, []],
+			['preserve object as it is (no metadata found)', undefined, []],
 			['convert object ids to ifc_guids', 'ifc_guids', times(10, () => ({ metadata: [{ key: 'IFC GUID', value: generateRandomString() }] }))],
 			['convert object ids to revit_ids', 'revit_ids', times(10, () => ({ metadata: [{ key: 'Element ID', value: generateRandomString() }] }))],
 		])('Convert Ids and add groups', (desc, externalIdName, metadata) => {
@@ -324,7 +324,7 @@ const testUpdateGroup = () => {
 		});
 
 		describe.each([
-			['preserve oject as it is (no metadata found)', undefined, []],
+			['preserve object as it is (no metadata found)', undefined, []],
 			['convert object ids to ifc_guids', 'ifc_guids', times(10, () => ({ metadata: [{ key: 'IFC GUID', value: generateRandomString() }] }))],
 			['convert object ids to revit_ids', 'revit_ids', times(10, () => ({ metadata: [{ key: 'Element ID', value: generateRandomString() }] }))],
 		])('Convert Ids and update groups', (desc, externalIdName, metadata) => {
