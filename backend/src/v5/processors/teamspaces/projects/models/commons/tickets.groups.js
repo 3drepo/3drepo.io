@@ -14,23 +14,27 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/* eslint-disable no-underscore-dangle */
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
-const { getMeshesWithParentIds, sharedIdsToExternalIds } = require('./scene');
-const { getMetadataByQuery, getMetadataByRules } = require('../../../../../models/metadata');
+const { getIdToMeshesMapping, getMeshesWithParentIds } = require('./scene');
+const { getMetadataByQuery, getMetadataByRules, getMetadataWithMatchingData } = require('../../../../../models/metadata');
 const { getNodesByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { getCommonElements } = require('../../../../../utils/helper/arrays');
-const { getFile } = require('../../../../../services/filesManager');
 const { getLatestRevision } = require('../../../../../models/revisions');
 const { idTypesToKeys } = require('../../../../../models/metadata.constants');
 
 const TicketGroups = {};
 
-const getIdToMeshesMapping = async (teamspace, model, revId) => {
-	const fileData = await getFile(teamspace, `${model}.stash.json_mpc`, `${UUIDToString(revId)}/idToMeshes.json`);
-	return JSON.parse(fileData);
+const getExteralIdNameFromMetadata = (metadata) => {
+	let externalIdName;
+	Object.keys(idTypesToKeys).forEach((name) => {
+		if (idTypesToKeys[name].some((m) => m === metadata[0].metadata[0].key)) {
+			externalIdName = name;
+		}
+	});
+
+	return externalIdName;
 };
 
 const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, returnMeshIds) => {
@@ -44,9 +48,8 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 		}
 	}
 
-	const projection = { parents: 1,
-		...(returnMeshIds ? {} : { metadata: {
-			$elemMatch: { $or: Object.values(idTypesToKeys).flat().map((n) => ({ key: n })) } } }) };
+	const externalKeys = Object.values(idTypesToKeys).flat().map((n) => ({ key: n }));
+	const projection = { parents: 1, ...(returnMeshIds ? {} : { metadata: { $elemMatch: { $or: externalKeys } } }) };
 
 	const { matched, unwanted } = await getMetadataByRules(teamspace, project, model, revision, rules, projection);
 
@@ -92,24 +95,28 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 	return { container: model, _ids: Object.values(matchedMeshes) };
 };
 
-const convert3dRepoIdsToExternalIds = async (teamspace, project, objects) => {
+const convertToExternalIds = async (teamspace, project, objects) => {
 	const convertedObjects = await Promise.all(objects.map(async (obj) => {
+		// eslint-disable-next-line no-underscore-dangle
 		if (!obj._ids) {
 			return obj;
 		}
-
-		const convertedObject = { ...obj };
 
 		// eslint-disable-next-line no-underscore-dangle
 		const nodes = await getNodesByIds(teamspace, project, obj.container, obj._ids,
 			{ _id: 0, shared_id: 1 });
 
-		const res = await sharedIdsToExternalIds(teamspace, obj.container, nodes.map(({ shared_ids }) => shared_ids));
+		const externalIdKeys = Object.values(idTypesToKeys).flat();
+		const query = { parents: { $in: nodes.map((n) => n.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
+		const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
+		const metadata = await getMetadataByQuery(teamspace, obj.container, query, projection);
 
-		if (res) {
+		const convertedObject = { ...obj };
+		if (metadata?.length) {
 			// eslint-disable-next-line no-underscore-dangle
 			delete convertedObject._ids;
-			convertedObject[res.type] = res.values;
+			const externalIdName = getExteralIdNameFromMetadata(metadata);
+			convertedObject[externalIdName] = [...new Set(metadata.map((m) => m.metadata[0].value))];
 		}
 
 		return convertedObject;
@@ -118,58 +125,41 @@ const convert3dRepoIdsToExternalIds = async (teamspace, project, objects) => {
 	return convertedObjects;
 };
 
-const convertToInternalIds = async (teamspace, project, revId, objects) => {
-	const convertedObjects = await Promise.all(objects.map(async (obj) => {
-		if (obj._ids) {
-			return obj;
+const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
+	// eslint-disable-next-line no-underscore-dangle
+	if (containerEntry._ids) {
+		return containerEntry;
+	}
+
+	const { container } = containerEntry;
+
+	let revision = revId;
+	if (!revision) {
+		try {
+			const rev = await getLatestRevision(teamspace, container, { _id: 1 });
+			revision = rev._id;
+		} catch (err) {
+			return undefined;
 		}
+	}
 
-		const { container } = obj;
+	const formattedEntry = { ...containerEntry };
 
-		let revision = revId;
-		if (!revision) {
-			try {
-				const rev = await getLatestRevision(teamspace, container, { _id: 1 });
-				revision = rev._id;
-			} catch (err) {
-				return [];
-			}
-		}
+	const idType = getCommonElements(Object.keys(formattedEntry), Object.keys(idTypesToKeys))[0];
+	const metadata = await getMetadataWithMatchingData(teamspace, container, revision,
+		idTypesToKeys[idType], formattedEntry[idType], { parents: 1 });
+	const meshIds = await getMeshesWithParentIds(teamspace, project, container, revision,
+		metadata.flatMap(({ parents }) => parents));
 
-		const idType = getCommonElements(Object.keys(obj), Object.keys(idTypesToKeys))[0];
-
-		const query = {
-			rev_id: revision,
-			metadata: { $elemMatch: { key: { $in: idTypesToKeys[idType] },
-				value: { $in: obj[idType] } } },
-		};
-
-		const metadata = await getMetadataByQuery(teamspace, container, query, { parents: 1 });
-		const meshes = await getMeshesWithParentIds(teamspace, project, container, revision,
-			metadata.flatMap(({ parents }) => parents));
-
-		const _ids = [];
-		const idToMeshes = await getIdToMeshesMapping(teamspace, container, revision);
-		meshes.forEach(({ _id }) => {
-			const idStr = UUIDToString(_id);
-			if (idToMeshes[idStr]) {
-				idToMeshes[idStr].forEach((id) => {
-					_ids.push(stringToUUID(id));
-				});
-			}
-		});
-
-		return { ...obj, [idType]: undefined, _ids };
-	}));
-
-	return convertedObjects.flat();
+	delete formattedEntry[idType];
+	return { ...formattedEntry, _ids: meshIds };
 };
 
 TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
 	const convertedGroups = await Promise.all(groups.map(
 		async (group) => {
 			if (group.objects) {
-				const objects = await convert3dRepoIdsToExternalIds(teamspace, project, group.objects);
+				const objects = await convertToExternalIds(teamspace, project, group.objects);
 				return { ...group, objects };
 			}
 
@@ -183,31 +173,33 @@ TicketGroups.updateTicketGroup = async (teamspace, project, model, ticket, group
 	const convertedData = { ...data };
 
 	if (data.objects) {
-		convertedData.objects = await convert3dRepoIdsToExternalIds(teamspace, project, data.objects);
+		convertedData.objects = await convertToExternalIds(teamspace, project, data.objects);
 	}
 
 	await updateGroup(teamspace, project, model, ticket, groupId, convertedData, author);
 };
 
-TicketGroups.getTicketGroupById = async (teamspace, project, model, revId, ticket, groupId, convertTo3dRepoIds,
+TicketGroups.getTicketGroupById = async (teamspace, project, model, revId, ticket, groupId, returnMeshIds,
 	containers) => {
 	const group = await getGroupById(teamspace, project, model, ticket, groupId);
 
 	const rev = containers ? undefined : revId;
+	const modelsToQuery = containers || [model];
 
 	if (group.rules) {
-		const modelsToQuery = containers || [model];
-
 		group.objects = (await Promise.all(
 			modelsToQuery.map(async (con) => {
-				const objs = await getObjectArrayFromRules(teamspace, project, con, rev,
-					group.rules, convertTo3dRepoIds);
+				const objs = await getObjectArrayFromRules(teamspace, project, con, rev, group.rules, returnMeshIds);
 				// eslint-disable-next-line no-underscore-dangle
 				return objs._ids?.length || objs.revit_ids?.length || objs.ifc_guids?.length ? objs : [];
 			}),
 		)).flat();
-	} else if (convertTo3dRepoIds) {
-		group.objects = await convertToInternalIds(teamspace, project, rev, group.objects);
+	} else if (returnMeshIds) {
+		group.objects = (await Promise.all(
+			group.objects.map((obj) => (modelsToQuery.includes(obj.container)
+				? convertToMeshIds(teamspace, project, rev, obj)
+				: undefined))))
+			.filter((ids) => ids);
 	}
 
 	return group;

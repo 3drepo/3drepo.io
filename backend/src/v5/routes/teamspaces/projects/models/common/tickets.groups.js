@@ -44,10 +44,10 @@ const getGroup = (isFed) => async (req, res, next) => {
 	const { teamspace, project, model, ticket, group } = params;
 
 	try {
-		const convertTo3DRepoGuids = query.convertIds !== 'false';
+		const convertToMeshIds = query.convertIds !== 'false';
 		const getGroupById = isFed ? getFedGroup : getConGroup;
 		req.groupData = await getGroupById(teamspace, project, model, stringToUUID(query.revId), ticket, group,
-			convertTo3DRepoGuids);
+			convertToMeshIds);
 		await next();
 	} catch (err) {
 		// istanbul ignore next
