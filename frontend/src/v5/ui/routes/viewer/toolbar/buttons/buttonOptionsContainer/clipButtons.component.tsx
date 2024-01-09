@@ -23,7 +23,7 @@ import { useEffect, useState } from 'react';
 import { ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Viewer } from '@/v4/services/viewer/viewer';
-import { VIEWER_EVENTS } from '@/v4/constants/viewer';
+import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { ButtonOptionsContainer, FloatingButtonsContainer, FloatingButton } from './multioptionIcons.styles';
 import { ClipMode } from '../../toolbar.types';
 import { ToolbarButton } from '../toolbarButton.component';
@@ -52,8 +52,8 @@ export const ClipButtons = () => {
 				<ButtonOptionsContainer>
 					{expanded && (
 						<FloatingButtonsContainer>
-							<FloatingButton Icon={ClipBoxIcon} onClick={() => setMode('BOX')} title={startBoxClipTooltipText} />
-							<FloatingButton Icon={ClipPlaneIcon} onClick={() => setMode('SINGLE')} title={startSingleClipTooltipText} />
+							<FloatingButton Icon={ClipBoxIcon} onClick={() => setMode(VIEWER_CLIP_MODES.BOX)} title={startBoxClipTooltipText} />
+							<FloatingButton Icon={ClipPlaneIcon} onClick={() => setMode(VIEWER_CLIP_MODES.SINGLE)} title={startSingleClipTooltipText} />
 						</FloatingButtonsContainer>
 					)}
 					<ToolbarButton Icon={ClipPlaneIcon} onClick={() => setExpanded(!expanded)} title={!expanded ? clipTooltipText : ''} />
