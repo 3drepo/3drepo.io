@@ -228,7 +228,6 @@ export function* setSelectedSequence({ sequenceId }) {
 		yield put(SequencesActions.setSelectedSequenceSuccess(sequenceId));
 		yield put(SequencesActions.fetchActivitiesDefinitions(sequenceId));
 	}
-	yield setSelectedStateDefinition();
 }
 
 export function* showSequenceDate({ date }) {
