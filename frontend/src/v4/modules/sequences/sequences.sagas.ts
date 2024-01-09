@@ -285,8 +285,13 @@ function* handleTransparenciesVisibility({ transparencies }) {
 }
 
 export function* clearColorOverrides() {
-	const { color, ...selectedStateDefinition } = yield select(selectSelectedStateDefinition);
-	yield put(SequencesActions.setSelectedStateDefinition(selectedStateDefinition));
+	const selectedStateDefinition = yield select(selectSelectedStateDefinition);
+	if (selectedStateDefinition?.color?.length) {
+		yield put(SequencesActions.setSelectedStateDefinition({
+			...selectedStateDefinition,
+			color: [],
+		}));
+	}
 }
 
 export default function* SequencesSaga() {

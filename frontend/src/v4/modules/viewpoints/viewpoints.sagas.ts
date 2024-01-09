@@ -286,13 +286,12 @@ export function* cacheGroupsFromViewpoint({ viewpoint,  groupsData }) {
 
 export function* clearColorOverrides() {
 	const viewpoint = yield select(selectSelectedViewpoint);
-	if (!viewpoint?.override_groups?.length) {
-		return;
+	if (viewpoint?.override_groups?.length) {
+		yield put(ViewpointsActions.setSelectedViewpoint({
+			...viewpoint,
+			override_groups: [],
+		}));
 	}
-	yield put(ViewpointsActions.setSelectedViewpoint({
-		...viewpoint,
-		override_groups: [],
-	}));
 }
 
 export function* setActiveViewpoint({ teamspace, modelId, view }) {
