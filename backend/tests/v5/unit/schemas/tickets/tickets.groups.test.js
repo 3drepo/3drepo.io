@@ -92,6 +92,10 @@ const testSchema = () => {
 			name: generateRandomString(),
 			objects: [{ _ids: [generateUUID()], revit_ids: [], container: generateUUIDString() }],
 		}, false],
+		['data has objects with only container and no ids', false, false, {
+			name: generateRandomString(),
+			objects: [{ container: generateUUIDString() }],
+		}, false],
 	])('Schema validation', (desc, allowIds, fieldsOptional, data, shouldPass) => {
 		test(`Should ${shouldPass ? 'pass' : 'fail'} if ${desc}`, async () => {
 			const schemaToTest = GroupsSchema.schema(allowIds, fieldsOptional);

@@ -16,13 +16,13 @@
  */
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addGroups, getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
+const { addGroups, deleteGroups, getGroupById, getGroupsByIds, updateGroup } = require('../../../../../models/tickets.groups');
 const { getIdToMeshesMapping, getMeshesWithParentIds } = require('./scene');
 const { getMetadataByQuery, getMetadataByRules, getMetadataWithMatchingData } = require('../../../../../models/metadata');
 const { getNodesByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
+const { idTypes, idTypesToKeys } = require('../../../../../models/metadata.constants');
 const { getCommonElements } = require('../../../../../utils/helper/arrays');
 const { getLatestRevision } = require('../../../../../models/revisions');
-const { idTypes, idTypesToKeys } = require('../../../../../models/metadata.constants');
 
 const TicketGroups = {};
 
@@ -172,6 +172,10 @@ TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
 
 	await addGroups(teamspace, project, model, ticket, convertedGroups);
 };
+
+TicketGroups.deleteGroups = deleteGroups;
+
+TicketGroups.getGroupsByIds = getGroupsByIds;
 
 TicketGroups.updateTicketGroup = async (teamspace, project, model, ticket, groupId, data, author) => {
 	const convertedData = { ...data };
