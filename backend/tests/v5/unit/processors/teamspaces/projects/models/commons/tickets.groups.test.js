@@ -20,7 +20,7 @@ const { cloneDeep, times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomObject, generateUUIDString } = require('../../../../../../helper/services');
 const { stringToUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
-const { idTypesToKeys } = require('../../../../../../../../src/v5/models/metadata.constants');
+const { idTypesToKeys, idTypes } = require('../../../../../../../../src/v5/models/metadata.constants');
 
 const Groups = require(`${src}/processors/teamspaces/projects/models/commons/tickets.groups`);
 
@@ -48,9 +48,9 @@ const testGetTicketGroupById = () => {
 	const smartGroup = { rules: [generateRandomObject()] };
 	const normalGroup = { objects: [{ _ids: [times(10, () => generateRandomString())],
 		container: generateRandomString() }] };
-	const ifcGuidGroup = { objects: [{ ifc_guids: [times(10, () => generateRandomString())],
+	const ifcGuidGroup = { objects: [{ [idTypes.IFC]: [times(10, () => generateRandomString())],
 		container: generateRandomString() }] };
-	const revitIdGroup = { objects: [{ revit_ids: [times(10, () => generateRandomString())],
+	const revitIdGroup = { objects: [{ [idTypes.REVIT]: [times(10, () => generateRandomString())],
 		container: generateRandomString() }] };
 
 	const getMeta = (externalIdName) => times(10, () => ({ parents: times(2, () => generateRandomString()),
@@ -58,10 +58,10 @@ const testGetTicketGroupById = () => {
 
 	const defaultOptions = {
 		group: smartGroup,
-		matchedMeta: getMeta('IFC GUID'),
+		matchedMeta: getMeta(idTypesToKeys[idTypes.IFC][0]),
 		unwantedMeta: [],
 		revision: generateRandomString(),
-		convertTo3dRepoIds: true,
+		convertToMeshIds: true,
 		latestRevisionFail: false,
 	};
 
@@ -71,9 +71,9 @@ const testGetTicketGroupById = () => {
 		['when getLatestRevision fails', { ...defaultOptions, containers: [container], latestRevisionFail: true }],
 		['when there is a negative query', { ...defaultOptions, unwantedMeta: defaultOptions.matchedMeta.slice(5) }],
 		['when there are no matches', { ...defaultOptions, matchedMeta: [] }],
-		['with ifc guids', { ...defaultOptions, convertTo3dRepoIds: false, externalIdName: 'ifc_guids' }],
-		['with revit ids', { ...defaultOptions, convertTo3dRepoIds: false, externalIdName: 'revit_ids', matchedMeta: getMeta('Element ID') }],
-		['with ifc guids (with negative query)', { ...defaultOptions, convertTo3dRepoIds: false, externalIdName: 'ifc_guids', unwantedMeta: defaultOptions.matchedMeta.slice(0, 5) }],
+		['with ifc guids', { ...defaultOptions, convertToMeshIds: false, externalIdName: [idTypes.IFC] }],
+		['with revit ids', { ...defaultOptions, convertToMeshIds: false, externalIdName: [idTypes.REVIT], matchedMeta: getMeta(idTypesToKeys[idTypes.REVIT][0]) }],
+		['with ifc guids (with negative query)', { ...defaultOptions, convertToMeshIds: false, externalIdName: [idTypes.IFC], unwantedMeta: defaultOptions.matchedMeta.slice(0, 5) }],
 	])('Get ticket group by Id (smart group)', (desc, options) => {
 		test(`should return the group found ${desc}`, async () => {
 			let expectedData;
@@ -94,7 +94,7 @@ const testGetTicketGroupById = () => {
 					matched: options.matchedMeta, unwanted: options.unwantedMeta,
 				});
 
-				if (options.convertTo3dRepoIds) {
+				if (options.convertToMeshIds) {
 					const nodeRes = options.matchedMeta.length
 						? times(10, () => ({ _id: generateRandomString() }))
 						: [];
@@ -124,7 +124,7 @@ const testGetTicketGroupById = () => {
 			}
 
 			await expect(Groups.getTicketGroupById(teamspace, project, container, options.revision, ticket,
-				groupId, options.containers, options.convertTo3dRepoIds)).resolves.toEqual(expectedData);
+				groupId, options.containers, options.convertToMeshIds)).resolves.toEqual(expectedData);
 
 			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
 			expect(GroupsModel.getGroupById).toHaveBeenCalledWith(teamspace, project, container, ticket, groupId);
@@ -139,16 +139,16 @@ const testGetTicketGroupById = () => {
 				expect(MetaModel.getMetadataByRules).toHaveBeenCalledWith(teamspace, project, container,
 					revision, options.group.rules, {
 						parents: 1,
-						...(options.convertTo3dRepoIds ? {} : { metadata: { $elemMatch:
+						...(options.convertToMeshIds ? {} : { metadata: { $elemMatch:
 							{ $or: Object.values(idTypesToKeys).flat().map((n) => ({ key: n })) } } }),
 					});
 
-				if (options.matchedMeta.length && options.convertTo3dRepoIds) {
+				if (options.matchedMeta.length && options.convertToMeshIds) {
 					expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledWith(teamspace, project, container,
 						revision, options.matchedMeta.flatMap(({ parents }) => parents), { _id: 1 });
 				}
 
-				if (options.unwantedMeta.length && options.convertTo3dRepoIds) {
+				if (options.unwantedMeta.length && options.convertToMeshIds) {
 					expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledWith(teamspace, project, container,
 						revision, options.unwantedMeta.flatMap(({ parents }) => parents), { _id: 1 });
 				}
@@ -157,12 +157,12 @@ const testGetTicketGroupById = () => {
 	});
 
 	describe.each([
-		['when it is a federation group', { ...defaultOptions, containers: [container], group: ifcGuidGroup, externalIdName: 'ifc_guids' }],
-		['when convertTo3dRepoIds set to false', { ...defaultOptions, group: ifcGuidGroup, convertTo3dRepoIds: false }],
+		['when it is a federation group', { ...defaultOptions, containers: [container], group: ifcGuidGroup, externalIdName: [idTypes.IFC] }],
+		['when convertToMeshIds set to false', { ...defaultOptions, group: ifcGuidGroup, convertToMeshIds: false }],
 		['when group already stores 3d repo Ids', { ...defaultOptions, group: normalGroup }],
-		['when getLatestRevision fails', { ...defaultOptions, group: ifcGuidGroup, externalIdName: 'ifc_guids', containers: [container], latestRevisionFail: true }],
-		['when converting from ifc guids', { ...defaultOptions, group: ifcGuidGroup, externalIdName: 'ifc_guids' }],
-		['when converting from revit Ids', { ...defaultOptions, group: revitIdGroup, externalIdName: 'revit_ids' }],
+		['when getLatestRevision fails', { ...defaultOptions, group: ifcGuidGroup, externalIdName: [idTypes.IFC], containers: [container], latestRevisionFail: true }],
+		['when converting from ifc guids', { ...defaultOptions, group: ifcGuidGroup, externalIdName: [idTypes.IFC] }],
+		['when converting from revit Ids', { ...defaultOptions, group: revitIdGroup, externalIdName: [idTypes.REVIT] }],
 	])('Get ticket group by Id (normal group)', (desc, options) => {
 		test(`should return the group found ${desc}`, async () => {
 			const expectedData = cloneDeep(options.group);
@@ -170,7 +170,7 @@ const testGetTicketGroupById = () => {
 
 			GroupsModel.getGroupById.mockResolvedValueOnce(cloneDeep(options.group));
 
-			if (options.convertTo3dRepoIds && options.externalIdName) {
+			if (options.convertToMeshIds && options.externalIdName) {
 				if (options.latestRevisionFail) {
 					RevsModel.getLatestRevision.mockRejectedValueOnce(generateRandomString());
 					expectedData.objects = [];
@@ -195,9 +195,9 @@ const testGetTicketGroupById = () => {
 			}
 
 			await expect(Groups.getTicketGroupById(teamspace, project, container, revision, ticket,
-				groupId, options.containers, options.convertTo3dRepoIds)).resolves.toEqual(expectedData);
+				groupId, options.containers, options.convertToMeshIds)).resolves.toEqual(expectedData);
 
-			if (options.convertTo3dRepoIds) {
+			if (options.convertToMeshIds) {
 				if (options.containers) {
 					expect(RevsModel.getLatestRevision).toHaveBeenCalledTimes(1);
 					expect(RevsModel.getLatestRevision).toHaveBeenCalledWith(teamspace,
@@ -239,7 +239,7 @@ const testAddGroups = () => {
 
 		test('should add groups without conversion if they already have external Id', async () => {
 			const groups = times(10, () => ({
-				objects: [{ ifc_guids: [generateRandomString()], container: generateRandomString() }],
+				objects: [{ [idTypes.IFC]: [generateRandomString()], container: generateRandomString() }],
 			}));
 			await Groups.addGroups(teamspace, project, container, ticket, groups);
 
@@ -249,8 +249,8 @@ const testAddGroups = () => {
 
 		describe.each([
 			['preserve object as it is (no metadata found)', undefined, []],
-			['convert object ids to ifc_guids', 'ifc_guids', times(10, () => ({ metadata: [{ key: 'IFC GUID', value: generateRandomString() }] }))],
-			['convert object ids to revit_ids', 'revit_ids', times(10, () => ({ metadata: [{ key: 'Element ID', value: generateRandomString() }] }))],
+			[`convert object ids to ${[idTypes.IFC]}`, [idTypes.IFC], times(10, () => ({ metadata: [{ key: idTypesToKeys[idTypes.IFC][0], value: generateRandomString() }] }))],
+			[`convert object ids to ${[idTypes.REVIT]}`, [idTypes.REVIT], times(10, () => ({ metadata: [{ key: idTypesToKeys[idTypes.REVIT][0], value: generateRandomString() }] }))],
 		])('Convert Ids and add groups', (desc, externalIdName, metadata) => {
 			test(`should ${desc} and add groups`, async () => {
 				const groups = times(10, () => ({
@@ -315,7 +315,7 @@ const testUpdateGroup = () => {
 		});
 
 		test('should update a group without conversion if it already has external Id', async () => {
-			const data = { objects: [{ ifc_guids: [generateRandomString()], container: generateRandomString() }] };
+			const data = { objects: [{ [idTypes.IFC]: [generateRandomString()], container: generateRandomString() }] };
 			await Groups.updateTicketGroup(teamspace, project, container, ticket, groupId, data, author);
 
 			expect(GroupsModel.updateGroup).toHaveBeenCalledTimes(1);
@@ -325,8 +325,8 @@ const testUpdateGroup = () => {
 
 		describe.each([
 			['preserve object as it is (no metadata found)', undefined, []],
-			['convert object ids to ifc_guids', 'ifc_guids', times(10, () => ({ metadata: [{ key: 'IFC GUID', value: generateRandomString() }] }))],
-			['convert object ids to revit_ids', 'revit_ids', times(10, () => ({ metadata: [{ key: 'Element ID', value: generateRandomString() }] }))],
+			[`convert object ids to ${[idTypes.IFC]}`, [idTypes.IFC], times(10, () => ({ metadata: [{ key: idTypesToKeys[idTypes.IFC][0], value: generateRandomString() }] }))],
+			[`convert object ids to ${[idTypes.REVIT]}`, [idTypes.REVIT], times(10, () => ({ metadata: [{ key: idTypesToKeys[idTypes.REVIT][0], value: generateRandomString() }] }))],
 		])('Convert Ids and update groups', (desc, externalIdName, metadata) => {
 			test(`should ${desc} and update groups`, async () => {
 				const data = { objects: times(10, () => ({

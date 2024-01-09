@@ -25,6 +25,7 @@ const {
 	generateUUIDString,
 	generateRandomNumber,
 } = require('../../../helper/services');
+const { idTypes } = require('../../../../../src/v5/models/metadata.constants');
 
 const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 
@@ -76,21 +77,24 @@ const testSchema = () => {
 			rules: [{ field: generateRandomString(), operation: 'EXISTS' }],
 			objects: [{ _ids: [generateUUID()], container: generateUUIDString() }],
 		}, false],
-		['data has objects with revit_ids', false, false, {
+		[`data has objects with ${[idTypes.REVIT]}`, false, false, {
 			name: generateRandomString(),
-			objects: [{ revit_ids: [generateRandomNumber()], container: generateUUIDString() }],
+			objects: [{ [idTypes.REVIT]: [generateRandomNumber()], container: generateUUIDString() }],
 		}, true],
-		['data has objects with ifc_guids', false, false, {
+		[`data has objects with ${[idTypes.IFC]}`, false, false, {
 			name: generateRandomString(),
-			objects: [{ ifc_guids: [generateRandomString(22)], container: generateUUIDString() }],
+			objects: [{ [idTypes.IFC]: [generateRandomString(22)], container: generateUUIDString() }],
 		}, true],
-		['data has objects with both ifc_guids and revit_ids', false, false, {
+		[`data has objects with both ${[idTypes.IFC]} and ${[idTypes.REVIT]}`, false, false, {
 			name: generateRandomString(),
-			objects: [{ ifc_guids: [generateRandomString(22)], revit_ids: [], container: generateUUIDString() }],
+			objects: [{
+				[idTypes.IFC]: [generateRandomString(22)],
+				[idTypes.REVIT]: [],
+				container: generateUUIDString() }],
 		}, false],
-		['data has objects with both _ids and revit_ids', false, false, {
+		[`data has objects with both _ids and ${[idTypes.REVIT]}`, false, false, {
 			name: generateRandomString(),
-			objects: [{ _ids: [generateUUID()], revit_ids: [], container: generateUUIDString() }],
+			objects: [{ _ids: [generateUUID()], [idTypes.REVIT]: [], container: generateUUIDString() }],
 		}, false],
 		['data has objects with only container and no ids', false, false, {
 			name: generateRandomString(),
