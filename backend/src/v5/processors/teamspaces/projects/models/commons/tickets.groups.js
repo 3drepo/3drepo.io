@@ -22,7 +22,7 @@ const { getMetadataByQuery, getMetadataByRules, getMetadataWithMatchingData } = 
 const { getNodesByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { getCommonElements } = require('../../../../../utils/helper/arrays');
 const { getLatestRevision } = require('../../../../../models/revisions');
-const { idTypesToKeys } = require('../../../../../models/metadata.constants');
+const { idTypes, idTypesToKeys } = require('../../../../../models/metadata.constants');
 
 const TicketGroups = {};
 
@@ -53,46 +53,50 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 
 	const { matched, unwanted } = await getMetadataByRules(teamspace, project, model, revision, rules, projection);
 
-	if (!returnMeshIds && matched.some((m) => m.metadata)) {
-		const wantedIds = [...new Set(matched.map(({ metadata }) => metadata[0].value))];
-		const unwantedIds = [...new Set(unwanted.map(({ metadata }) => metadata[0].value))];
+	if (returnMeshIds) {
+		const idToMeshes = await getIdToMeshesMapping(teamspace, model, revision);
+		const [
+			matchedNodes,
+			unwantedNodes,
+		] = await Promise.all([
+			matched.length ? getNodesBySharedIds(teamspace, project, model, revision,
+				matched.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
+			unwanted.length ? getNodesBySharedIds(teamspace, project, model, revision,
+				unwanted.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
+		]);
 
-		unwantedIds.filter((id) => (wantedIds.includes(id))).forEach((id) => delete wantedIds[id]);
+		const matchedMeshes = {};
 
-		const externalIdName = getExteralIdNameFromMetadata(matched);
-		return { container: model, [externalIdName]: wantedIds };
+		matchedNodes.forEach(({ _id }) => {
+			const idStr = UUIDToString(_id);
+			if (idToMeshes[idStr]) {
+				idToMeshes[idStr].forEach((id) => {
+					matchedMeshes[id] = stringToUUID(id);
+				});
+			}
+		});
+
+		unwantedNodes.forEach(({ _id }) => {
+			const idStr = UUIDToString(_id);
+			if (idToMeshes[idStr]) {
+				idToMeshes[idStr].forEach((id) => delete matchedMeshes[id]);
+			}
+		});
+
+		return { container: model, _ids: Object.values(matchedMeshes) };
 	}
 
-	const idToMeshes = await getIdToMeshesMapping(teamspace, model, revision);
-	const [
-		matchedNodes,
-		unwantedNodes,
-	] = await Promise.all([
-		matched.length ? getNodesBySharedIds(teamspace, project, model, revision,
-			matched.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
-		unwanted.length ? getNodesBySharedIds(teamspace, project, model, revision,
-			unwanted.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
-	]);
+	if (!matched.some((m) => m.metadata)) {
+		return { container: model, [idTypes.IFC]: [] };
+	}
 
-	const matchedMeshes = {};
+	const wantedIds = [...new Set(matched.map(({ metadata }) => metadata[0].value))];
+	const unwantedIds = [...new Set(unwanted.map(({ metadata }) => metadata[0].value))];
 
-	matchedNodes.forEach(({ _id }) => {
-		const idStr = UUIDToString(_id);
-		if (idToMeshes[idStr]) {
-			idToMeshes[idStr].forEach((id) => {
-				matchedMeshes[id] = stringToUUID(id);
-			});
-		}
-	});
+	unwantedIds.filter((id) => (wantedIds.includes(id))).forEach((id) => delete wantedIds[id]);
 
-	unwantedNodes.forEach(({ _id }) => {
-		const idStr = UUIDToString(_id);
-		if (idToMeshes[idStr]) {
-			idToMeshes[idStr].forEach((id) => delete matchedMeshes[id]);
-		}
-	});
-
-	return { container: model, _ids: Object.values(matchedMeshes) };
+	const externalIdName = getExteralIdNameFromMetadata(matched);
+	return { container: model, [externalIdName]: wantedIds };
 };
 
 const convertToExternalIds = async (teamspace, project, objects) => {
@@ -107,7 +111,7 @@ const convertToExternalIds = async (teamspace, project, objects) => {
 			{ _id: 0, shared_id: 1 });
 
 		const externalIdKeys = Object.values(idTypesToKeys).flat();
-		const query = { parents: { $in: nodes.map((n) => n.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
+		const query = { parents: { $in: nodes.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
 		const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
 		const metadata = await getMetadataByQuery(teamspace, obj.container, query, projection);
 
