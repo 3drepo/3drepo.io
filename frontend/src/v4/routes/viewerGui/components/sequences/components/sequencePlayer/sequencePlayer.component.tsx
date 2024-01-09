@@ -66,7 +66,6 @@ interface IProps {
 	loadingFrame: boolean;
 	rightPanels: string[];
 	toggleActivitiesPanel: () => void;
-	onPlayStarted?: () => void;
 	frames: IFrame[];
 	isActivitiesPending: boolean;
 	draggablePanels: string[];
@@ -221,7 +220,6 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 	public prevStep = this.moveStep.bind(this, -1);
 
 	public play = () => {
-		(this.props.onPlayStarted || noop)();
 		this.stop();
 
 		const intervalId = (setInterval(() => {

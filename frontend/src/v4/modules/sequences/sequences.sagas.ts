@@ -190,6 +190,12 @@ export function* setSelectedDate({ date }) {
 			yield put(SequencesActions.setSelectedDateSuccess(date));
 			yield put(SequencesActions.prefetchFrames());
 			yield showFrameViewpoint();
+
+			const { viewpoint } = getSelectedFrame(frames, date);
+
+			if (!viewpoint) {
+				yield put(ViewpointsActions.setActiveViewpoint(null));
+			}
 		}
 		yield setSelectedStateDefinition();
 

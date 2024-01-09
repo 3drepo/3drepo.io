@@ -19,7 +19,6 @@ import { IconButton } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import { STEP_SCALE } from '../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
-import { getSelectedFrame } from '../../../../modules/sequences/sequences.helper';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import { Loader } from '../../../components/loader/loader.component';
 import { PanelBarActions } from '../panelBarActions';
@@ -53,8 +52,6 @@ interface IProps {
 	setPanelVisibility: (panelName, visibility) => void;
 	toggleActivitiesPanel: () => void;
 	fetchActivityDetails: (id: string) => void;
-	deselectViewsAndLeaveClipping: () => void;
-	showViewpoint: (teamspace: string, model: string, viewpoint: any) => void;
 	id?: string;
 	isActivitiesPending: boolean;
 	draggablePanels: string[];
@@ -67,7 +64,7 @@ const da =  new Date();
 const SequenceDetails = ({
 	startDate, endDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
 	setStepScale, currentTasks, loadingFrameState, loadingViewpoint, rightPanels, toggleActivitiesPanel,
-	fetchActivityDetails, onPlayStarted, frames, isActivitiesPending, toggleLegend, draggablePanels
+	fetchActivityDetails, frames, isActivitiesPending, toggleLegend, draggablePanels
 }) => (
 		<>
 			<SequenceForm />
@@ -84,7 +81,6 @@ const SequenceDetails = ({
 				loadingFrame={loadingFrameState || loadingViewpoint}
 				rightPanels={rightPanels}
 				toggleActivitiesPanel={toggleActivitiesPanel}
-				onPlayStarted={onPlayStarted}
 				frames={frames}
 				isActivitiesPending={isActivitiesPending}
 				toggleLegend={toggleLegend}
@@ -126,21 +122,6 @@ export class Sequences extends PureComponent<IProps, {}> {
 		return <SequencesIcon />;
 	}
 
-	public onPlayStarted = () => {
-		const {
-			selectedSequence,
-			selectedDate,
-			frames,
-			showViewpoint,
-			deselectViewsAndLeaveClipping
-		} = this.props;
-		const { viewpoint } = getSelectedFrame(frames, selectedDate);
-
-		if (!viewpoint) {
-			deselectViewsAndLeaveClipping();
-		}
-	}
-
 	public render = () => {
 		const { selectedSequence, setSelectedSequence, sequences } = this.props;
 
@@ -158,7 +139,7 @@ export class Sequences extends PureComponent<IProps, {}> {
 				{!sequences && <SequencesLoader />}
 
 				{selectedSequence && sequences.length > 0 &&
-					<SequenceDetails {...this.props} onPlayStarted={this.onPlayStarted} />
+					<SequenceDetails {...this.props} />
 				}
 
 				{sequences && !selectedSequence && sequences.length > 0 &&
