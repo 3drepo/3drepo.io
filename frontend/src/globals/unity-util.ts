@@ -19,6 +19,7 @@
 /* eslint-enable no-var */
 
 import { IndexedDbCache } from './unity-indexedbcache';
+import { WebRequestHandler2 } from './unity-webrequesthandler2';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
@@ -2114,5 +2115,9 @@ export class UnityUtil {
 	 */
 	public static createIndexedDbCache(gameObjectName: string) {
 		this.unityInstance.repoDbCache = new IndexedDbCache(this.unityInstance, gameObjectName, this.unityDomain); // IndexedDbCache expects to find the worker at in [unityDomain]/unity/indexeddbworker.js
+	}
+
+	public static createWebRequestManager(gameObjectName: string) {
+		this.unityInstance.webRequestHandler2 = new WebRequestHandler2(this.unityInstance, gameObjectName);
 	}
 }
