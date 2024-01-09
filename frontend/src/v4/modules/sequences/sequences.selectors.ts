@@ -213,10 +213,6 @@ export const selectSelectedState = createSelector(
 	}
 );
 
-const selectShowColorOverrides = createSelector(
-	selectSequencesDomain, (state) => state.showColorOverrides
-);
-
 const convertToDictionary = (stateChanges) => {
 	return stateChanges.reduce((dict, actual) => {
 		actual.shared_ids.forEach((id) => {
@@ -228,9 +224,8 @@ const convertToDictionary = (stateChanges) => {
 };
 
 export const selectSelectedFrameColors = createSelector(
-	selectSelectedState, selectShowColorOverrides,
-	(state, showColorOverrides) => {
-		if (!state || !showColorOverrides) {
+	selectSelectedState, (state) => {
+		if (!state) {
 			return null;
 		}
 

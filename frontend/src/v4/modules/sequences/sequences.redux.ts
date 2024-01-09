@@ -83,7 +83,6 @@ export interface ISequencesState {
 	hiddenGeometryVisible: boolean;
 	activities: any;
 	activitiesPending: any;
-	showColorOverrides: boolean;
 }
 
 export const INITIAL_STATE: ISequencesState = {
@@ -100,7 +99,6 @@ export const INITIAL_STATE: ISequencesState = {
 	hiddenGeometryVisible: true,
 	activities: {},
 	activitiesPending: true,
-	showColorOverrides: true,
 };
 
 export const fetchSequenceSuccess = (state = INITIAL_STATE, { sequence }) => {
