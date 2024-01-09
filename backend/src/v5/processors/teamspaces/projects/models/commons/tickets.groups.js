@@ -102,17 +102,16 @@ const convertToExternalIds = async (teamspace, project, objects) => {
 			return obj;
 		}
 
-		const convertedObject = { ...obj };
-
 		// eslint-disable-next-line no-underscore-dangle
-		const shared_ids = await getNodesByIds(teamspace, project, obj.container, obj._ids,
+		const nodes = await getNodesByIds(teamspace, project, obj.container, obj._ids,
 			{ _id: 0, shared_id: 1 });
 
 		const externalIdKeys = Object.values(idTypesToKeys).flat();
-		const query = { parents: { $in: shared_ids.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
+		const query = { parents: { $in: nodes.map((n) => n.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
 		const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
 		const metadata = await getMetadataByQuery(teamspace, obj.container, query, projection);
 
+		const convertedObject = { ...obj };
 		if (metadata?.length) {
 			// eslint-disable-next-line no-underscore-dangle
 			delete convertedObject._ids;
