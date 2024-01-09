@@ -30,7 +30,6 @@ import { createGroupsFromViewpoint, generateViewpoint,
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
-import { GroupsActions } from '../groups';
 import { IssuesActions } from '../issues';
 import { ModelActions } from '../model';
 import { selectCurrentRevisionId } from '../model';
@@ -195,7 +194,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 		}
 
 		if (viewpoint.override_groups) {
-			yield put(GroupsActions.clearColorOverrides());
+			yield put(ViewerGuiActions.clearColorOverrides());
 		}
 
 		yield put(TreeActions.clearCurrentlySelected());

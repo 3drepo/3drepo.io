@@ -19,7 +19,7 @@ import EyeHideIcon from '@assets/icons/viewer/eye_hide.svg';
 import EyeShowIcon from '@assets/icons/viewer/eye_show.svg';
 import EyeIsolateIcon from '@assets/icons/viewer/eye_isolate.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { GroupsActionsDispatchers, TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { GroupsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TreeHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
@@ -37,7 +37,7 @@ export const SectionToolbar = () => {
 				<ToolbarButton
 					Icon={ClearOverridesIcon}
 					hidden={!hasOverrides}
-					onClick={GroupsActionsDispatchers.clearColorOverrides}
+					onClick={ViewerGuiActionsDispatchers.clearColorOverrides}
 					title={formatMessage({ id: 'viewer.toolbar.icon.clearOverrides', defaultMessage: 'Clear Overrides' })}
 				/>
 			</Section>

@@ -202,11 +202,14 @@ export const selectIsLoadingFrameState = createSelector(
 	}
 );
 
-export const selectSelectedState = createSelector(
-	selectSelectedStateId, selectLastSelectedStateId, selectStateDefinitions,
-	(stateId, prevStateId, stateDefinitions) => {
+export const selectSelectedStateDefinition = createSelector(
+	selectSequencesDomain, (state) => state.selectedStateDefinition || {}
+);
 
-		return stateDefinitions[stateId] || stateDefinitions[prevStateId];
+export const selectSelectedState = createSelector(
+	selectSelectedStateDefinition, selectLastSelectedStateId, selectStateDefinitions,
+	(selectedStateDefinition, prevStateId, stateDefinitions) => {
+		return selectedStateDefinition || stateDefinitions[prevStateId];
 	}
 );
 
