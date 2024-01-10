@@ -45,6 +45,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	showSequenceDate: ['date'],
 	handleTransparenciesVisibility: ['transparencies'],
 	restoreModelDefaultVisibility: [],
+	updateSelectedStateDefinition: [],
 	clearColorOverrides: [],
 	clearTransformations: [],
 	reset: []

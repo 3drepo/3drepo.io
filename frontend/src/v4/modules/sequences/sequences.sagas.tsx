@@ -115,6 +115,8 @@ export function* fetchFrame({ date }) {
 		const sequenceId =  yield select(selectSelectedSequenceId);
 		const loadedStates = yield select(selectStateDefinitions);
 		const frames = yield select(selectFrames);
+		const selectedDate = yield select(selectSelectedDate);
+		const dateIsSelectedDate = selectedDate.valueOf() === date.valueOf()
 		const { state: stateId, viewpoint } = getSelectedFrame(frames, date);
 
 		if (stateId) {
@@ -130,12 +132,11 @@ export function* fetchFrame({ date }) {
 					const fetchPromise = cachedData ? Promise.resolve({data: cachedData})
 						: API.getSequenceState(teamspace, model, sequenceId, stateId);
 					fetchPromise.then((response) => {
-						const selectedDate = selectSelectedDate(getState());
-						if (selectedDate.valueOf() === date.valueOf()) {
-							dispatch(SequencesActions.setLastSelectedDateSuccess(date));
-						}
-
 						dispatch(SequencesActions.setStateDefinition(stateId, response.data));
+						if (dateIsSelectedDate) {
+							dispatch(SequencesActions.setLastSelectedDateSuccess(date));
+							dispatch(SequencesActions.updateSelectedStateDefinition());
+						}
 						if (cacheEnabled && !cachedData) {
 							DataCache.putValue(STORE_NAME.FRAMES, iDBKey, response.data);
 						}
@@ -144,17 +145,14 @@ export function* fetchFrame({ date }) {
 					dispatch(SequencesActions.setStateDefinition(stateId, {}));
 				});
 			} else {
-				const selectedDate =  yield select(selectSelectedDate);
-				if (selectedDate.valueOf() === date.valueOf()) {
+				if (dateIsSelectedDate) {
 					yield put(SequencesActions.setLastSelectedDateSuccess(date));
 				}
 			}
 		} else {
-			const selectedDate = yield select(selectSelectedDate);
-
 			// This is to avoid fetching the groups twice.
 			// When showpoint is called in showFrameViewpoint it fetches the groups
-			if (selectedDate.valueOf() !== date.valueOf()) {
+			if (dateIsSelectedDate) {
 				yield put(ViewpointsActions.fetchViewpointGroups(teamspace, model, { viewpoint }));
 			}
 		}
@@ -198,7 +196,7 @@ export function* setSelectedDate({ date }) {
 				yield put(ViewpointsActions.setActiveViewpoint(null));
 			}
 		}
-		yield updateSelectedStateDefinition();
+		yield put(SequencesActions.updateSelectedStateDefinition());
 
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('select frame', 'sequences', error));
@@ -321,6 +319,7 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.PREFETCH_FRAMES, prefetchFrames);
 	yield takeLatest(SequencesTypes.SHOW_SEQUENCE_DATE, showSequenceDate);
 	yield takeLatest(SequencesTypes.HANDLE_TRANSPARENCIES_VISIBILITY, handleTransparenciesVisibility);
+	yield takeLatest(SequencesTypes.UPDATE_SELECTED_STATE_DEFINITION, updateSelectedStateDefinition);
 	yield takeLatest(SequencesTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
 	yield takeLatest(SequencesTypes.CLEAR_TRANSFORMATIONS, clearTransformations);
 }
