@@ -57,10 +57,6 @@ export const Panel = styled(PanelComponent)<IPanel>`
 	${({ isPending }) => isPending ? css`
 		min-height: 120px !important;
 	` : ''};
-
-	&:last-child {
-		margin-bottom: 0;
-	}
 `;
 
 export const TitleContainer = styled.div`
@@ -133,6 +129,7 @@ export const ViewerPanelFooter = styled(Grid).attrs({
 	flex: none;
 	min-height: 65px;
 	font-size: 14px;
+	z-index: 1;
 `;
 
 export const ViewerPanelButton = styled(SubmitButton)<IViewerPanelButton>`
