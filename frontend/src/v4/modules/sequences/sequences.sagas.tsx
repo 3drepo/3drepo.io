@@ -99,8 +99,8 @@ export function* fetchActivitiesDefinitions({ sequenceId }) {
 			// API CALL TO GET TASKS
 			const {data} = yield API.getSequenceActivities(teamspace, model, sequenceId);
 			yield put(SequencesActions.fetchActivitiesDefinitionsSuccess(sequenceId, data.activities));
-			yield put(SequencesActions.setActivitiesPending(false));
 		}
+		yield put(SequencesActions.setActivitiesPending(false));
 
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'sequences', error));
