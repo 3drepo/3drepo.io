@@ -81,10 +81,18 @@ const testSchema = () => {
 			name: generateRandomString(),
 			objects: [{ [idTypes.REVIT]: [generateRandomNumber()], container: generateUUIDString() }],
 		}, true],
+		[`data has objects with wrong type of ${[idTypes.REVIT]}`, false, false, {
+			name: generateRandomString(),
+			objects: [{ [idTypes.REVIT]: [generateRandomString()], container: generateUUIDString() }],
+		}, false],
 		[`data has objects with ${[idTypes.IFC]}`, false, false, {
 			name: generateRandomString(),
 			objects: [{ [idTypes.IFC]: [generateRandomString(22)], container: generateUUIDString() }],
 		}, true],
+		[`data has objects with wrong type of ${[idTypes.IFC]}`, false, false, {
+			name: generateRandomString(),
+			objects: [{ [idTypes.IFC]: [generateRandomNumber()], container: generateUUIDString() }],
+		}, false],
 		[`data has objects with both ${[idTypes.IFC]} and ${[idTypes.REVIT]}`, false, false, {
 			name: generateRandomString(),
 			objects: [{

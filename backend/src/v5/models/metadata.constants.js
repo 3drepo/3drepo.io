@@ -23,8 +23,8 @@ MetaConstants.idTypes = {
 };
 
 MetaConstants.idTypesToKeys = {
-	[MetaConstants.idTypes.IFC]: ['IFC GUID', 'Ifc::IfcGUID', 'Element::IfcGUID'],
-	[MetaConstants.idTypes.REVIT]: ['Element ID', 'Element ID::Value'],
+	[MetaConstants.idTypes.IFC]: ['IFC GUID', 'Ifc::IfcGUID', 'Element::IfcGUID', 'IFC Parameters::IfcGUID'],
+	[MetaConstants.idTypes.REVIT]: ['Element ID', 'Element ID::Value', 'Tag', 'Element::IfcTag'],
 };
 
 module.exports = MetaConstants;
