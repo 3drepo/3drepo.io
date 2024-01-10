@@ -17,12 +17,17 @@
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
-const { getIdToMeshesMapping, getMeshesWithParentIds, sharedIdsToExternalIds } = require('./scene');
+const { getArrayDifference, getCommonElements } = require('../../../../../utils/helper/arrays');
+const {
+	getExternalIdsFromMetadata,
+	getIdToMeshesMapping,
+	getMeshesWithParentIds,
+	sharedIdsToExternalIds,
+} = require('./scene');
 const { getMetadataByRules, getMetadataWithMatchingData } = require('../../../../../models/metadata');
 const { getNodesByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
-const { getCommonElements } = require('../../../../../utils/helper/arrays');
+const { idTypes, idTypesToKeys } = require('../../../../../models/metadata.constants');
 const { getLatestRevision } = require('../../../../../models/revisions');
-const { idTypesToKeys } = require('../../../../../models/metadata.constants');
 
 const TicketGroups = {};
 
@@ -42,14 +47,24 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 
 	const { matched, unwanted } = await getMetadataByRules(teamspace, project, model, revision, rules, projection);
 
-	if (!returnMeshIds && matched.some((m) => m.metadata)) {
-		const wantedIds = [...new Set(matched.map(({ metadata }) => metadata[0].value))];
-		const unwantedIds = [...new Set(unwanted.map(({ metadata }) => metadata[0].value))];
+	if (!returnMeshIds) {
+		const defaultType = Object.keys(idTypes)[0];
+		let res = { container: model, [defaultType]: [] };
 
-		unwantedIds.filter((id) => (wantedIds.includes(id))).forEach((id) => delete wantedIds[id]);
+		if (!matched.length) return res;
 
-		const externalIdName = getExteralIdNameFromMetadata(matched);
-		return { container: model, [externalIdName]: wantedIds };
+		const wantedIds = getExternalIdsFromMetadata(matched);
+		if (wantedIds) {
+			if (unwanted.length) {
+				const unwantedIds = getExternalIdsFromMetadata(unwanted, wantedIds.key);
+				if (unwantedIds) {
+					wantedIds.value = getArrayDifference(unwantedIds.value, wantedIds.value);
+				}
+			}
+			res = { container: model, [wantedIds.type]: wantedIds.value };
+		}
+
+		return res;
 	}
 
 	const idToMeshes = await getIdToMeshesMapping(teamspace, model, revision);

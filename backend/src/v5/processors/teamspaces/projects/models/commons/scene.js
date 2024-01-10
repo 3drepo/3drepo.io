@@ -18,10 +18,10 @@
 const Scene = {};
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
+const { idTypesToKeys, metaKeyToIdType } = require('../../../../../models/metadata.constants');
 const { getFile } = require('../../../../../services/filesManager');
 const { getMetadataByQuery } = require('../../../../../models/metadata');
 const { getNodesBySharedIds } = require('../../../../../models/scenes');
-const { idTypesToKeys } = require('../../../../../models/metadata.constants');
 
 Scene.getIdToMeshesMapping = async (teamspace, model, revId) => {
 	const fileData = await getFile(teamspace, `${model}.stash.json_mpc`, `${UUIDToString(revId)}/idToMeshes.json`);
@@ -44,15 +44,43 @@ Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, p
 	return meshes;
 };
 
-const getExteralIdNameFromMetadata = (metadata) => {
-	let externalIdName;
-	Object.keys(idTypesToKeys).forEach((name) => {
-		if (idTypesToKeys[name].some((m) => m === metadata[0].metadata[0].key)) {
-			externalIdName = name;
-		}
+Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
+	const res = {};
+	metadata.forEach((entry) => {
+		// It may be possible that we are storing the same id in multiple metadata entries.
+		// So we are keeping track of what we've already found
+		const idCounted = new Set();
+
+		(entry.metadata || []).forEach(({ key, value }) => {
+			const idType = metaKeyToIdType[key];
+
+			if (!idType || idCounted.has(idType)) return;
+
+			idCounted.add(idType);
+
+			if (res[idType]) {
+				res[idType] = [value];
+			} else {
+				res[idType].push(value);
+			}
+		});
 	});
 
-	return externalIdName;
+	// If there is a specific type the user wanted, return them
+	// This is currently explicity used for differencing therefore we don't care if
+	// we can't represent them all - we may need to add a partial flag in the future
+	if (wantedType) return res[wantedType];
+
+	// If we are determining the type, make sure we have a record for each metadata
+	const targetCount = metadata.length;
+
+	for (const idType of Object.keys(res)) {
+		if (res[idType].length === targetCount) {
+			return { key: idType, values: res[idType] };
+		}
+	}
+
+	return undefined;
 };
 
 Scene.sharedIdsToExternalIds = async (teamspace, container, sharedIds) => {
@@ -61,13 +89,7 @@ Scene.sharedIdsToExternalIds = async (teamspace, container, sharedIds) => {
 	const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
 	const metadata = await getMetadataByQuery(teamspace, container, query, projection);
 
-	if (metadata?.length) {
-		// eslint-disable-next-line no-underscore-dangle
-		const externalIdName = getExteralIdNameFromMetadata(metadata);
-		return { type: externalIdName, values: [...new Set(metadata.map((m) => m.metadata[0].value))] };
-	}
-
-	return undefined;
+	return Scene.determineExternalIdsFromMetadata(metadata);
 };
 
 module.exports = Scene;
