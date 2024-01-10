@@ -348,7 +348,7 @@ const testGetTicketGroupById = () => {
 				{ subModels: 1 });
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, containers, true);
+			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, true, containers);
 		});
 
 		test('Should retrieve containers then call the general getTicketGroupById even if there\'s no containers', async () => {
@@ -365,7 +365,7 @@ const testGetTicketGroupById = () => {
 				{ subModels: 1 });
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, undefined, false);
+			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, false, undefined);
 		});
 	});
 };

@@ -19,6 +19,7 @@ const { cloneDeep } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
+const { idTypesToKeys, idTypes } = require('../../../../../../../../src/v5/models/metadata.constants');
 
 const { propTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
@@ -114,13 +115,12 @@ const setupExtIDTicket = (container) => {
 
 	const rootNode = ServiceHelper.generateBasicNode('transformation', revId);
 
-	// FIXME: constant reference
 	const rootMeta = ServiceHelper.generateBasicNode('meta', revId, [rootNode.shared_id], { metadata: [{
-		key: 'IFC GUID',
+		key: idTypesToKeys[idTypes.IFC][0],
 		value: ServiceHelper.generateRandomIfcGuid(),
 	},
 	{
-		key: 'Element ID',
+		key: idTypesToKeys[idTypes.REVIT][0],
 		value: ServiceHelper.generateRandomRvtId(),
 	},
 
@@ -158,33 +158,32 @@ const setupExtIDTicket = (container) => {
 	};
 
 	/* eslint-disable no-underscore-dangle */
-
-	// FIXME: need constant reference
 	const groups = {
-		groupWithIfcGuids: { data: createGroupWithExtIds({ ifc_guids: [rootMeta.metadata[0].value] }),
+		groupWithIfcGuids: { data: createGroupWithExtIds({ [idTypes.IFC]: [rootMeta.metadata[0].value] }),
 			convertedObjs: [meshIdStr1, meshIdStr2] },
-		groupWithRvtIds: { data: createGroupWithExtIds({ revit_ids: [rootMeta.metadata[1].value] }),
+		groupWithRvtIds: { data: createGroupWithExtIds({ [idTypes.REVIT]: [rootMeta.metadata[1].value] }),
 			convertedObjs: [meshIdStr1, meshIdStr2] },
 		groupWithIfcGuidsNotFound: { data: createGroupWithExtIds({
-			ifc_guids: [ServiceHelper.generateRandomIfcGuid()] }),
+			[idTypes.IFC]: [ServiceHelper.generateRandomIfcGuid()] }),
 		convertedObjs: [] },
-		groupWithRvtIdsNotFound: { data: createGroupWithExtIds({ revit_ids: [ServiceHelper.generateRandomRvtId()] }),
-			convertedObjs: [] },
+		groupWithRvtIdsNotFound: { data: createGroupWithExtIds({
+			[idTypes.REVIT]: [ServiceHelper.generateRandomRvtId()] }),
+		convertedObjs: [] },
 		smartGroupWithIfcGuids: {
 			data: createSmartGroupWithMatchingMeta(rootMeta.metadata[0]),
 			convertedObjs: [meshIdStr1, meshIdStr2],
-			original: { ifc_guids: [rootMeta.metadata[0].value] },
+			original: { [idTypes.IFC]: [rootMeta.metadata[0].value] },
 		},
 		smartGroupWithRvtIds: {
 			data: createSmartGroupWithMatchingMeta(rootMeta.metadata[1]),
 			convertedObjs: [meshIdStr1, meshIdStr2],
-			original: { ifc_guids: [rootMeta.metadata[0].value] },
+			original: { [idTypes.IFC]: [rootMeta.metadata[0].value] },
 		},
 		smartGroupWithIfcGuidsNotFound: {
 			data: createSmartGroupWithMatchingMeta({ ...rootMeta.metadata[0],
 				value: ServiceHelper.generateRandomIfcGuid() }),
 			convertedObjs: [],
-			original: { ifc_guids: [] },
+			original: { [idTypes.IFC]: [] },
 		},
 	};
 
@@ -297,9 +296,8 @@ const testGetGroup = () => {
 							// eslint-disable-next-line no-underscore-dangle
 							expectedData.objects[0]._ids = convertedObjects;
 
-							// FIXME: should not be hard coded
-							delete expectedData.objects[0].ifc_guids;
-							delete expectedData.objects[0].revit_ids;
+							delete expectedData.objects[0][idTypes.IFC];
+							delete expectedData.objects[0][idTypes.REVIT];
 						}
 					} else if (original) {
 						expectedData.objects = [{ container: con._id, ...original }];
@@ -346,21 +344,18 @@ const testUpdateGroup = () => {
 				['the group does not exist', { ...baseRouteParams, groupId: ServiceHelper.generateRandomString() }, payload, false, templates.groupNotFound],
 				['the group id is valid', baseRouteParams, payload, true],
 				['the payload has ifc guids', { ...baseRouteParams, checkOutput: false }, { objects: [
-					// FIXME: replace hard coded name with constants
-					{ container: con._id, ifc_guids: [ServiceHelper.generateRandomIfcGuid()] },
+					{ container: con._id, [idTypes.IFC]: [ServiceHelper.generateRandomIfcGuid()] },
 				] }, true],
 				['the payload has rvt ids', { ...baseRouteParams, checkOutput: false }, { objects: [
-					// FIXME: replace hard coded name with constants
-					{ container: con._id, revit_ids: [ServiceHelper.generateRandomRvtId()] },
+					{ container: con._id, [idTypes.REVIT]: [ServiceHelper.generateRandomRvtId()] },
 				] }, true],
 				['the payload has no ids', { ...baseRouteParams, checkOutput: false }, { objects: [
 					{ container: con._id },
 				] }, false, templates.invalidArguments],
 				['the payload has more than one type of ids', { ...baseRouteParams, checkOutput: false }, { objects: [
-					// FIXME: replace hard coded name with constants
 					{ container: con._id,
-						revit_ids: [ServiceHelper.generateRandomRvtId()],
-						ifc_guids: [ServiceHelper.generateRandomIfcGuid()] },
+						[idTypes.REVIT]: [ServiceHelper.generateRandomRvtId()],
+						[idTypes.IFC]: [ServiceHelper.generateRandomIfcGuid()] },
 				] }, false, templates.invalidArguments],
 				['the payload contains both rules and objects', baseRouteParams, { rules: [{
 					field: 'IFC Type',

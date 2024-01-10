@@ -153,9 +153,9 @@ const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
 
 	const formattedEntry = { ...containerEntry };
 
-	const idType = getCommonElements(Object.keys(formattedEntry), Object.keys(idTypesToKeys))[0];
+	const idType = getCommonElements(Object.keys(containerEntry), Object.keys(idTypesToKeys))[0];
 	const metadata = await getMetadataWithMatchingData(teamspace, container, revision,
-		idTypesToKeys[idType], formattedEntry[idType], { parents: 1 });
+		idTypesToKeys[idType], containerEntry[idType], { parents: 1 });
 	const meshIds = await getMeshesWithParentIds(teamspace, project, container, revision,
 		metadata.flatMap(({ parents }) => parents));
 

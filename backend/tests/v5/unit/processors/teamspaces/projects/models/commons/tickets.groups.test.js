@@ -46,12 +46,9 @@ const testGetTicketGroupById = () => {
 	const ticket = generateRandomString();
 	const groupId = generateRandomString();
 	const smartGroup = { rules: [generateRandomObject()] };
-	const normalGroup = { objects: [{ _ids: [times(10, () => generateRandomString())],
-		container: generateRandomString() }] };
-	const ifcGuidGroup = { objects: [{ [idTypes.IFC]: [times(10, () => generateRandomString())],
-		container: generateRandomString() }] };
-	const revitIdGroup = { objects: [{ [idTypes.REVIT]: [times(10, () => generateRandomString())],
-		container: generateRandomString() }] };
+	const normalGroup = { objects: [{ _ids: [times(10, () => generateRandomString())], container }] };
+	const ifcGuidGroup = { objects: [{ [idTypes.IFC]: [times(10, () => generateRandomString())], container }] };
+	const revitIdGroup = { objects: [{ [idTypes.REVIT]: [times(10, () => generateRandomString())], container }] };
 
 	const getMeta = (externalIdName) => times(10, () => ({ parents: times(2, () => generateRandomString()),
 		metadata: [{ key: externalIdName, value: generateRandomString() }] }));
@@ -124,7 +121,7 @@ const testGetTicketGroupById = () => {
 			}
 
 			await expect(Groups.getTicketGroupById(teamspace, project, container, options.revision, ticket,
-				groupId, options.containers, options.convertToMeshIds)).resolves.toEqual(expectedData);
+				groupId, options.convertToMeshIds, options.containers)).resolves.toEqual(expectedData);
 
 			expect(GroupsModel.getGroupById).toHaveBeenCalledTimes(1);
 			expect(GroupsModel.getGroupById).toHaveBeenCalledWith(teamspace, project, container, ticket, groupId);
@@ -167,21 +164,22 @@ const testGetTicketGroupById = () => {
 		test(`should return the group found ${desc}`, async () => {
 			const expectedData = cloneDeep(options.group);
 			let { revision } = options;
+			const { externalIdName, convertToMeshIds, latestRevisionFail, containers, group } = options;
 
-			GroupsModel.getGroupById.mockResolvedValueOnce(cloneDeep(options.group));
+			GroupsModel.getGroupById.mockResolvedValueOnce(cloneDeep(group));
 
-			if (options.convertToMeshIds && options.externalIdName) {
-				if (options.latestRevisionFail) {
+			if (convertToMeshIds && externalIdName) {
+				if (latestRevisionFail) {
 					RevsModel.getLatestRevision.mockRejectedValueOnce(generateRandomString());
 					expectedData.objects = [];
 				} else {
-					if (options.containers) {
+					if (containers) {
 						revision = generateRandomString();
 						RevsModel.getLatestRevision.mockResolvedValueOnce({ _id: revision });
 					}
 
 					const nodeRes = times(10, () => ({ _id: generateUUIDString() }));
-					MetaModel.getMetadataByQuery.mockResolvedValueOnce(options.matchedMeta);
+					MetaModel.getMetadataWithMatchingData.mockResolvedValueOnce(options.matchedMeta);
 					ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes);
 
 					const idMapMock = { };
@@ -190,29 +188,25 @@ const testGetTicketGroupById = () => {
 
 					const ids = nodeRes.slice(1).map(({ _id }) => stringToUUID(_id));
 					expectedData.objects = expectedData.objects
-						.map((o) => ({ ...o, [options.externalIdName]: undefined, _ids: ids }));
+						.map((o) => ({ ...o, [externalIdName]: undefined, _ids: ids }));
 				}
 			}
 
 			await expect(Groups.getTicketGroupById(teamspace, project, container, revision, ticket,
-				groupId, options.containers, options.convertToMeshIds)).resolves.toEqual(expectedData);
+				groupId, convertToMeshIds, containers)).resolves.toEqual(expectedData);
 
-			if (options.convertToMeshIds) {
-				if (options.containers) {
+			if (convertToMeshIds) {
+				if (containers) {
 					expect(RevsModel.getLatestRevision).toHaveBeenCalledTimes(1);
 					expect(RevsModel.getLatestRevision).toHaveBeenCalledWith(teamspace,
-						options.group.objects[0].container, { _id: 1 });
+						group.objects[0].container, { _id: 1 });
 				}
 
-				if (!options.latestRevisionFail && options.group !== normalGroup) {
-					const query = {
-						rev_id: revision,
-						metadata: { $elemMatch: { key: { $in: idTypesToKeys[options.externalIdName] },
-							value: { $in: options.group.objects.map((o) => o[options.externalIdName]).flat() } } },
-					};
-					expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
-					expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace,
-						options.group.objects[0].container, query, { parents: 1 });
+				if (!latestRevisionFail && group !== normalGroup) {
+					expect(MetaModel.getMetadataWithMatchingData).toHaveBeenCalledTimes(1);
+					expect(MetaModel.getMetadataWithMatchingData).toHaveBeenCalledWith(teamspace,
+						container, revision, idTypesToKeys[externalIdName],
+						group.objects[0][externalIdName], { parents: 1 });
 				}
 			}
 
@@ -226,6 +220,7 @@ const testAddGroups = () => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const container = generateRandomString();
+	const revision = generateRandomString();
 	const ticket = generateRandomString();
 
 	describe('Add groups', () => {
@@ -256,7 +251,7 @@ const testAddGroups = () => {
 				const groups = times(10, () => ({
 					objects: [{ _ids: [generateRandomString()], container: generateRandomString() }],
 				}));
-				const sharedIds = times(10, () => ({ shared_id: generateRandomString() }));
+				const sharedIds = times(10, () => ({ rev_id: revision, shared_id: generateRandomString() }));
 
 				times(groups.length, () => {
 					ScenesModel.getNodesByIds.mockResolvedValueOnce(sharedIds);
@@ -272,10 +267,10 @@ const testAddGroups = () => {
 					const convertedObjects = group.objects.map((obj) => {
 						expect(ScenesModel.getNodesByIds).toHaveBeenCalledWith(teamspace, project,
 							/* eslint-disable-next-line no-underscore-dangle */
-							obj.container, obj._ids, { _id: 0, shared_id: 1 });
+							obj.container, obj._ids, { _id: 0, shared_id: 1, rev_id: 1 });
 
 						const externalIdKeys = Object.values(idTypesToKeys).flat();
-						const query = { parents: { $in: sharedIds.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
+						const query = { rev_id: revision, parents: { $in: sharedIds.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
 						const projection = { metadata: { $elemMatch:
 							{ $or: externalIdKeys.map((n) => ({ key: n })) } } };
 						expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, obj.container,
@@ -300,6 +295,7 @@ const testUpdateGroup = () => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const container = generateRandomString();
+	const revision = generateRandomString();
 	const ticket = generateRandomString();
 	const groupId = generateRandomString();
 	const author = generateRandomString();
@@ -331,7 +327,7 @@ const testUpdateGroup = () => {
 			test(`should ${desc} and update groups`, async () => {
 				const data = { objects: times(10, () => ({
 					_ids: [generateRandomString()], container: generateRandomString() })) };
-				const sharedIds = times(10, () => ({ shared_id: generateRandomString() }));
+				const sharedIds = times(10, () => ({ shared_id: generateRandomString(), rev_id: revision }));
 
 				times(data.objects.length, () => {
 					ScenesModel.getNodesByIds.mockResolvedValueOnce(sharedIds);
@@ -346,10 +342,10 @@ const testUpdateGroup = () => {
 				data.objects = data.objects.map((obj) => {
 					/* eslint-disable-next-line no-underscore-dangle */
 					expect(ScenesModel.getNodesByIds).toHaveBeenCalledWith(teamspace, project, obj.container, obj._ids,
-						{ _id: 0, shared_id: 1 });
+						{ _id: 0, shared_id: 1, rev_id: 1 });
 
 					const externalIdKeys = Object.values(idTypesToKeys).flat();
-					const query = { parents: { $in: sharedIds.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
+					const query = { rev_id: revision, parents: { $in: sharedIds.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
 					const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
 
 					expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, obj.container,
