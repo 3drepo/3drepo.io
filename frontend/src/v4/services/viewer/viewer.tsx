@@ -1242,18 +1242,22 @@ export class ViewerService {
 
 	public startBoxClip() {
 		UnityUtil.startBoxClip();
+		this.emit(VIEWER_EVENTS.UPDATE_CLIP_MODE, 'BOX');
 	}
 
 	public startSingleClip() {
 		UnityUtil.startSingleClip();
+		this.emit(VIEWER_EVENTS.UPDATE_CLIP_MODE, 'SINGLE');
 	}
 
 	public startClipEdit() {
 		UnityUtil.startClipEdit();
+		this.emit(VIEWER_EVENTS.UPDATE_CLIP_EDIT, true);
 	}
 
 	public stopClipEdit() {
 		UnityUtil.stopClipEdit();
+		this.emit(VIEWER_EVENTS.UPDATE_CLIP_EDIT, false);
 	}
 
 	public clipToolFlip() {
@@ -1270,6 +1274,7 @@ export class ViewerService {
 
 	public clipToolDelete() {
 		UnityUtil.clipToolDelete();
+		this.emit(VIEWER_EVENTS.UPDATE_CLIP_MODE, null);
 	}
 
 	public clipToolRotate() {

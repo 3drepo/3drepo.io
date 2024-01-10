@@ -23,7 +23,7 @@ import EyeHideIcon from '@assets/icons/viewer/eye_hide.svg';
 import EyeShowIcon from '@assets/icons/viewer/eye_show.svg';
 import EyeIsolateIcon from '@assets/icons/viewer/eye_isolate.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { GroupsActionsDispatchers, TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { GroupsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { GroupsHooksSelectors, TicketsCardHooksSelectors, TreeHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
@@ -40,7 +40,7 @@ export const SectionToolbar = () => {
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectFullySelectedNodesIds().length;
 	const hasHiddenObjects = TreeHooksSelectors.selectModelHasHiddenNodes();
 	const clippingMode = ViewerGuiHooksSelectors.selectClippingMode();
-	const clippingSectionOpen = ViewerGuiHooksSelectors.selectIsClipEdit() && !!clippingMode;
+	const clippingSectionOpen = ViewerGuiHooksSelectors.selectIsClipEdit();
 	const isBoxClippingMode = clippingMode === VIEWER_CLIP_MODES.BOX;
 	return (
 		<Container>
@@ -68,7 +68,7 @@ export const SectionToolbar = () => {
 				<ToolbarButton
 					Icon={CancelIcon}
 					hidden={!clippingSectionOpen}
-					onClick={Viewer.clipToolDelete}
+					onClick={() => ViewerGuiActionsDispatchers.setClippingMode(null)}
 					title={formatMessage({ id: 'viewer.toolbar.icon.deleteClip', defaultMessage: 'Delete' })}
 				/>
 			</Section>

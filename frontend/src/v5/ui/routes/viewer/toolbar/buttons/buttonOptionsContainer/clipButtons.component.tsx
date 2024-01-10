@@ -42,8 +42,12 @@ export const ClipButtons = () => {
 	};
 
 	useEffect(() => {
-		Viewer.on(VIEWER_EVENTS.UPDATE_NUM_CLIP, ViewerGuiActionsDispatchers.updateClipState);
-		return () => Viewer.off(VIEWER_EVENTS.UPDATE_NUM_CLIP, ViewerGuiActionsDispatchers.updateClipState);
+		Viewer.on(VIEWER_EVENTS.UPDATE_CLIP_EDIT, ViewerGuiActionsDispatchers.updateClipEdit);
+		Viewer.on(VIEWER_EVENTS.UPDATE_CLIP_MODE, (mode: ClipMode) => ViewerGuiActionsDispatchers.updateClipMode(mode));
+		return () => {
+			Viewer.off(VIEWER_EVENTS.UPDATE_CLIP_EDIT, ViewerGuiActionsDispatchers.setClipEdit);
+			Viewer.off(VIEWER_EVENTS.UPDATE_CLIP_MODE, () => ViewerGuiActionsDispatchers.updateClipMode(null));
+		};
 	}, []);
 
 	if (clipMode === null) {

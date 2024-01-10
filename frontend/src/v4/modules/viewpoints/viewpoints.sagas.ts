@@ -23,6 +23,7 @@ import { generatePath } from 'react-router-dom';
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { getAPIUrl } from '@/v4/services/api/default';
 import { CHAT_CHANNELS } from '@/v4/constants/chat';
+import { VIEWER_CLIP_MODES } from '@/v4/constants/viewer';
 import { ROUTES } from '../../constants/routes';
 import { prepareGroup } from '../../helpers/groups';
 import { createGroupsFromViewpoint, generateViewpoint,
@@ -290,6 +291,15 @@ export function* setActiveViewpoint({ teamspace, modelId, view }) {
 		if (view) {
 			yield put(SequencesActions.setSelectedSequence(null));
 			yield put(ViewpointsActions.showViewpoint(teamspace, modelId, view));
+			if (!view.clippingPlanes) {
+				yield put(ViewerGuiActions.setClippingMode(null));
+			}
+			if (view.clippingPlanes?.length === 1) {
+				yield put(ViewerGuiActions.setClippingMode(VIEWER_CLIP_MODES.SINGLE));
+			}
+			if (view.clippingPlanes?.length === 6) {
+				yield put(ViewerGuiActions.setClippingMode(VIEWER_CLIP_MODES.BOX));
+			}
 		} else {
 			yield put(ViewpointsActions.setSelectedViewpoint(null));
 		}

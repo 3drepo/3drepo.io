@@ -17,7 +17,7 @@
 
 import { cloneDeep } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
-import { GizmoMode } from '@/v5/ui/routes/viewer/toolbar/toolbar.types';
+import { ClipMode, GizmoMode } from '@/v5/ui/routes/viewer/toolbar/toolbar.types';
 import { INITIAL_HELICOPTER_SPEED, VIEWER_GIZMO_MODES, VIEWER_NAV_MODES } from '../../constants/viewer';
 import { getViewerLeftPanels, VIEWER_DRAGGABLE_PANELS, VIEWER_RIGHT_PANELS } from '../../constants/viewerGui';
 
@@ -45,13 +45,14 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	decreaseHelicopterSpeed: ['teamspace', 'modelId'],
 	setIsFocusMode: ['isFocusMode'],
 	setClippingMode: ['mode'],
-	setClippingModeSuccess: ['mode'],
+	updateClipModeSuccess: ['mode'],
 	setClipEdit: ['isClipEdit'],
-	setClipEditSuccess: ['isClipEdit'],
+	updateClipEditSuccess: ['isClipEdit'],
 	setClipNumber: ['clipNumber'],
 	setGizmoMode: ['mode'],
 	setGizmoModeSuccess: ['mode'],
-	updateClipState: ['clipNumber'],
+	updateClipMode: ['clipMode'],
+	updateClipEdit: ['clipEdit'],
 	setIsPinDropMode: ['mode'],
 	setIsPinDropModeSuccess: ['isPinDropMode'],
 	setPinData: ['pinData'],
@@ -72,7 +73,7 @@ export interface IViewerGuiState {
 	coordViewActive: boolean;
 	isModelLoaded: boolean;
 	navigationMode: string;
-	clippingMode: string;
+	clippingMode: ClipMode;
 	gizmoMode: GizmoMode;
 	helicopterSpeed: number;
 	isFocusMode: boolean;
@@ -152,8 +153,8 @@ const setNavigationModeSuccess = (state = INITIAL_STATE, { mode }) => {
 	return { ...state, navigationMode: mode };
 };
 
-const setClippingModeSuccess = (state = INITIAL_STATE, { mode }) => {
-	return { ...state, clippingMode: mode, isClipEdit: true };
+const updateClipModeSuccess = (state = INITIAL_STATE, { mode }) => {
+	return { ...state, clippingMode: mode, isClipEdit: !!mode };
 };
 
 const setGizmoModeSuccess = (state = INITIAL_STATE, { mode }) => {
@@ -172,7 +173,7 @@ const setIsModelLoaded = (state = INITIAL_STATE, { isModelLoaded }) => {
 	return { ...state, isModelLoaded };
 };
 
-const setClipEditSuccess = (state = INITIAL_STATE, { isClipEdit }) => {
+const updateClipEditSuccess = (state = INITIAL_STATE, { isClipEdit }) => {
 	return { ...state, isClipEdit };
 };
 
@@ -204,11 +205,11 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerGuiTypes.SET_IS_MODEL_LOADED] : setIsModelLoaded,
 	[ViewerGuiTypes.SET_NAVIGATION_MODE_SUCCESS] : setNavigationModeSuccess,
 	[ViewerGuiTypes.SET_PROJECTION_MODE_SUCCESS] : setProjectionModeSuccess,
-	[ViewerGuiTypes.SET_CLIPPING_MODE_SUCCESS] : setClippingModeSuccess,
+	[ViewerGuiTypes.UPDATE_CLIP_MODE_SUCCESS] : updateClipModeSuccess,
 	[ViewerGuiTypes.SET_GIZMO_MODE_SUCCESS] : setGizmoModeSuccess,
 	[ViewerGuiTypes.SET_HELICOPTER_SPEED] : setHelicopterSpeed,
 	[ViewerGuiTypes.SET_IS_FOCUS_MODE] : setIsFocusMode,
-	[ViewerGuiTypes.SET_CLIP_EDIT_SUCCESS] : setClipEditSuccess,
+	[ViewerGuiTypes.UPDATE_CLIP_EDIT_SUCCESS] : updateClipEditSuccess,
 	[ViewerGuiTypes.SET_CLIP_NUMBER] : setClipNumber,
 	[ViewerGuiTypes.SET_COORD_VIEW_SUCCESS] : setCoordViewSuccess,
 	[ViewerGuiTypes.SET_IS_PIN_DROP_MODE_SUCCESS]: setIsPinDropModeSuccess,
