@@ -30,6 +30,7 @@ const BCF = require("./bcf");
 const Ticket = require("./ticket");
 
 const C = require("../constants");
+const { findProjectByModelId } = require("../../v5/models/projectSettings.js");
 
 const fieldTypes = {
 	"_id": "[object Object]",
@@ -252,7 +253,8 @@ class Issue extends Ticket {
 	}
 
 	async getIssuesReport(account, model, rid, filters, res) {
-		const reportGen = require("../models/report").newIssuesReport(account, model, rid);
+		const { _id: projectId } = await findProjectByModelId(account, model, { _id: 1 });
+		const reportGen = require("../models/report").newIssuesReport(account, utils.uuidToString(projectId), model, rid);
 		return super.getReport(account, model, rid, filters, res, reportGen);
 	}
 

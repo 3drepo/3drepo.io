@@ -19,24 +19,13 @@
 // see tickets.groups.js
 
 const EventsManager = require('../services/eventsManager/eventsManager');
-const { convertLegacyRules } = require('../schemas/rules');
 const db = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { templates } = require('../utils/responseCodes');
 
 const Groups = {};
 
-const findGroups = async (teamspace, model, query, projection, sort) => {
-	const groups = await db.find(teamspace, `${model}.groups`, query, projection, sort);
-	return groups.map(({ rules, ...group }) => {
-		if (rules) {
-			// eslint-disable-next-line no-param-reassign
-			group.rules = convertLegacyRules(rules);
-		}
-
-		return group;
-	});
-};
+const findGroups = (teamspace, model, query, projection, sort) => db.find(teamspace, `${model}.groups`, query, projection, sort);
 
 Groups.getGroupsByIds = (teamspace, model, ids, projection) => {
 	const query = { _id: { $in: ids } };

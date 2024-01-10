@@ -90,9 +90,11 @@ const toggleMeshesVisibility = (meshes, visibility) => {
 };
 
 function* handleMetadata(node: any) {
-	const isMetadataActive = yield select(selectIsActive);
-	if (node && node.meta && isMetadataActive) {
+	if (node?.meta) {
 		yield put(BimActions.fetchMetadata(node.teamspace, node.model, node.meta[0]));
+	}
+	const metadataIsActive = yield select(selectIsActive);
+	if (metadataIsActive) {
 		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, true));
 	}
 }

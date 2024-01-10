@@ -26,7 +26,7 @@ import { FormHelperText, Tooltip } from '@mui/material';
 import { hexToGLColor } from '@/v4/helpers/colors';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { CoordsAction, CoordsActionLabel, CoordsActions, CoordsInputContainer, Label, FlexRow, SelectPinButton } from './coordsProperty.styles';
-import { DEFAULT_PIN, getPinColorHex } from './coordsProperty.helpers';
+import { DEFAULT_PIN, getLinkedValuePath, getPinColorHex } from './coordsProperty.helpers';
 import { TicketContext } from '../../../ticket.context';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -34,23 +34,28 @@ import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers'
 import { PaddedCrossIcon } from '@controls/chip/chip.styles';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
-import { useFormContext } from 'react-hook-form';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { isEqual } from 'lodash';
+import { useFormContext } from 'react-hook-form';
+
+const NEW_TICKET_ID = 'temporaryIdForNewTickets';
 
 export const CoordsProperty = ({ value, label, onChange, onBlur, required, error, helperText, disabled, name }: FormInputProps) => {
-	const { watch } = useFormContext();
 	const { isViewer } = useContext(TicketContext);
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const [editMode, setEditMode] = useState(false);
-	const ticket = watch() as ITicket;
 	const prevValue = useRef(undefined);
-
-	const ticketId = ticket._id ?? 'newTicket';
-	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
+	const { getValues, watch } = useFormContext();
+	const ticket = getValues() as ITicket;
 	const selectedTemplateId = TicketsCardHooksSelectors.selectSelectedTemplateId() ?? ticket?.type;
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
+	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
 
+	const linkedPath = getLinkedValuePath(name, template);
+	watch(linkedPath); // this ensures the component updates when the linkev value changes
+	
+	const isNewTicket = !ticket?._id;
+	const ticketId = !isNewTicket ? ticket._id : NEW_TICKET_ID;
 	const pinId = name === DEFAULT_PIN ? ticketId : `${ticketId}.${name}`;
 	const isSelected = selectedPin === pinId;
 	const hasPin = !!value;
@@ -104,14 +109,13 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 	// Update pin when colour changes
 	useEffect(() => {
+		if (!prevValue.current) return;
 		refreshPin();
 	}, [colorHex]);
 
 	// Update pin when position changes
 	useEffect(() => {
-		if (!isEqual(value, prevValue.current)) {
-			refreshPin();
-		}
+		if (!isEqual(value, prevValue.current)) refreshPin();
 
 		prevValue.current = value;
 
@@ -121,14 +125,15 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 	useEffect(() => () => {
 		ViewerService.clearMeasureMode();
-		if (prevValue.current) {
-			ViewerService.removePin(pinId);
-		}
 	}, [ticketId]);
 
 	useEffect(() => {
 		ViewerService.setSelectionPin({ id: pinId, isSelected });
 	}, [isSelected]);
+
+	useEffect(() => () => {
+		if (isNewTicket) ViewerService.removePin(pinId);
+	}, []);
 
 	return (
 		<CoordsInputContainer required={required} selected={editMode} error={error} disabled={disabled}>

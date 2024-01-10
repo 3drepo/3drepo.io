@@ -41,6 +41,15 @@ const getPinSchema = (name: string, template: ITemplate): IPinSchema | boolean =
 	return findByName(module.properties, path[2]);
 };
 
+export const getLinkedValuePath = (name, template): string => {
+	const pinSchema = getPinSchema(name, template);
+	const property = get(pinSchema, 'color.property');
+	if (!property) return '';
+	const module = property.module ? `${TicketBaseKeys.MODULES}.${property.module}` : TicketBaseKeys.PROPERTIES;
+	const linkedValueName = property.name;
+	return `${module}.${linkedValueName}`;
+};
+
 const getColorFromMapping = (ticket: ITicket, pinMapping: IPinColorMapping) => {
 	const { property: { module = TicketBaseKeys.PROPERTIES, name }, mapping } = pinMapping;
 	// @ts-ignore
@@ -63,10 +72,10 @@ export const getPinColorHex = (name: string, template: ITemplate, ticket: ITicke
 
 export const isPinLight = (hex: string) => contrastColor({ bgColor: hex, threshold: 230 }) !== '#FFFFFF';
 
-export const ticketToPin = (ticket: ITicket, selectedId: string, color: string): IPin => ({
-	id: ticket._id,
-	position: ticket.properties.Pin,
-	isSelected: ticket._id === selectedId,
+export const formatPin = (pinId, position, isSelected: boolean, color: string): IPin => ({
+	id: pinId,
+	position,
+	isSelected,
 	type: 'ticket',
 	colour: hexToGLColor(color),
 });
