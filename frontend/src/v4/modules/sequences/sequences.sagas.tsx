@@ -34,6 +34,7 @@ import {
 	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates, selectSelectedDate, selectSelectedFrameViewpoint,
 	selectSelectedSequence, selectSequences, selectSequenceModel, selectSelectedFrame, selectSelectedStateDefinition,
 } from './sequences.selectors';
+import { IStateDefinitions } from './sequences.redux';
 import { selectSelectedSequenceId, selectStateDefinitions,
 	SequencesActions, SequencesTypes } from '.';
 
@@ -176,7 +177,7 @@ function * prefetchFrames() {
 	yield all(keyframes.map((d) => put(SequencesActions.fetchFrame(d))));
 }
 
-function* setSelectedStateDefinition() {
+function* updateSelectedStateDefinition() {
 	const selectedFrame = yield select(selectSelectedFrame);
 	const stateDefinitions = yield select(selectStateDefinitions);
 	yield put(SequencesActions.setSelectedStateDefinition(stateDefinitions[selectedFrame?.state]));
@@ -197,7 +198,7 @@ export function* setSelectedDate({ date }) {
 				yield put(ViewpointsActions.setActiveViewpoint(null));
 			}
 		}
-		yield setSelectedStateDefinition();
+		yield updateSelectedStateDefinition();
 
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('select frame', 'sequences', error));
@@ -289,14 +290,22 @@ function* handleTransparenciesVisibility({ transparencies }) {
 	}
 }
 
-export function* clearColorOverrides() {
+function* clearStateDefinitionProperty(property: keyof IStateDefinitions) {
 	const selectedStateDefinition = yield select(selectSelectedStateDefinition);
-	if (selectedStateDefinition?.color?.length) {
+	if (selectedStateDefinition?.[property]?.length) {
 		yield put(SequencesActions.setSelectedStateDefinition({
 			...selectedStateDefinition,
-			color: [],
+			[property]: [],
 		}));
 	}
+}
+
+export function* clearColorOverrides() {
+	yield clearStateDefinitionProperty('color');
+}
+
+export function* clearTransformations() {
+	yield clearStateDefinitionProperty('transformation');
 }
 
 export default function* SequencesSaga() {
@@ -313,4 +322,5 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.SHOW_SEQUENCE_DATE, showSequenceDate);
 	yield takeLatest(SequencesTypes.HANDLE_TRANSPARENCIES_VISIBILITY, handleTransparenciesVisibility);
 	yield takeLatest(SequencesTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
+	yield takeLatest(SequencesTypes.CLEAR_TRANSFORMATIONS, clearTransformations);
 }

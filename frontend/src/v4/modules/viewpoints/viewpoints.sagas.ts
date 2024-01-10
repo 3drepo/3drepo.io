@@ -294,6 +294,17 @@ export function* clearColorOverrides() {
 	}
 }
 
+export function* clearTransformations() {
+	const viewpoint = yield select(selectSelectedViewpoint);
+	if (!viewpoint?.transformation_groups?.length) {
+		return;
+	}
+	yield put(ViewpointsActions.setSelectedViewpoint({
+		...viewpoint,
+		transformation_groups: [],
+	}));
+}
+
 export function* setActiveViewpoint({ teamspace, modelId, view }) {
 	try {
 		if (view) {
@@ -360,4 +371,5 @@ export default function* ViewpointsSaga() {
 	yield takeEvery(ViewpointsTypes.SHOW_PRESET, showPreset);
 	yield takeEvery(ViewpointsTypes.FETCH_VIEWPOINT_GROUPS, fetchViewpointGroups);
 	yield takeEvery(ViewpointsTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
+	yield takeEvery(ViewpointsTypes.CLEAR_TRANSFORMATIONS, clearTransformations);
 }
