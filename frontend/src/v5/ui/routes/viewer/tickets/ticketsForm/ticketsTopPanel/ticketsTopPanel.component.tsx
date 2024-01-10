@@ -28,7 +28,7 @@ import _ from 'lodash';
 import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
 import { PropertiesList } from '../propertiesList.component';
-import { IssuePropertiesRow } from './IssuePropertiesRow/issuePropertiesRow.component';
+import { IssuePropertiesInputs } from './IssuePropertiesInputs/issuePropertiesInputs.component';
 import { BaseTicketInfo, DescriptionProperty, TopPanel } from './ticketsTopPanel.styles';
 import { ErrorTextGap } from '../ticketsForm.styles';
 
@@ -94,7 +94,7 @@ export const TicketsTopPanel = ({
 					/>
 					{_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`) && <ErrorTextGap />}
 				</DescriptionProperty>
-				{hasIssueProperties && <IssueProperties onBlur={onPropertyBlur} readOnly={readOnly} />}
+				{hasIssueProperties && <IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnly} />}
 				<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
 			</BaseTicketInfo>
 		</TopPanel>

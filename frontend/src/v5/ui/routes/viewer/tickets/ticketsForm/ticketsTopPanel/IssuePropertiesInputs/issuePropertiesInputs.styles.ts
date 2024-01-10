@@ -16,31 +16,40 @@
  */
 
 import styled from 'styled-components';
+import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
 
-export const IssuePropertiesContainer = styled.div`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	height: 50px;
-	padding: 10px 2px 0;
-	display: inline-flex;
-	align-items: center;
-	width: 100%;
-	box-sizing: border-box;
-	border-top: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
-	margin-bottom: -3px;
+export const Container = styled.div``;
 
-	&:not(:last-child) {
-		border-bottom: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
-		margin-bottom: 13px;
-		padding-bottom: 10px;
+export const FlexContainer = styled(InputContainer)`
+	display: flex;
+	flex-direction: row;
+
+	& > *:not(:last-child) {
+		border-right: solid 1px ${({ theme }) => theme.palette.base.lightest};
+		padding-right: 10px;
+	}
+
+	& > *:not(:first-child) {
+		padding-left: 10px;
 	}
 `;
 
-export const PropertyColumn = styled.span`
-	width: fit-content;
-	min-width: 57px;
+export const Property = styled.div`
 	.MuiChip-root {
 		padding: 0;
 	}
+`;
+
+export const PriorityInput = styled(Property)`
+	flex: 65;
+`;
+
+export const DueDateInput = styled(Property)`
+	flex: 125;
+`;
+
+export const StatusInput = styled(Property)`
+	flex: 110;
 `;
 
 export const PropertyTitle = styled.div`
@@ -48,13 +57,13 @@ export const PropertyTitle = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
-export const ColumnSeparator = styled.div`
-	height: 100%;
-	border-left: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
-	margin: 0 10px;
-`;
-
-export const AssigneesWrapper = styled.span`
-	margin-left: auto;
+export const AssigneesContainer = styled(InputContainer)`
 	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	
+	&:not(:last-child) {
+		margin-bottom: 10px;
+	}
 `;
