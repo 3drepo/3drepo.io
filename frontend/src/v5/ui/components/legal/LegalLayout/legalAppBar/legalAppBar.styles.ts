@@ -15,28 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { Items as ItemsBase } from '@components/shared/appBar/appBar.styles';
 
 export const NavLinks = styled.div`
 	margin: 0 13px;
+	color: ${({ theme }) => theme.palette.base.light};
 `;
 
-const NavLinkStyles = css`
+export const NavLink = styled(Link)<{ selected: boolean }>`
 	margin: 0 12px;
 	${({ theme }) => theme.typography.h5}
 	cursor: pointer;
 	display: inline-block;
 	white-space: nowrap;
-`;
-
-export const PrivacyLink = styled.a`
-	${NavLinkStyles}
-`;
-
-export const NavLink = styled(Link)<{ selected: boolean }>`
-	${NavLinkStyles}
 	color: ${({ theme: { palette }, selected }) => (selected ? palette.primary.main : palette.base.light)};
 `;
 

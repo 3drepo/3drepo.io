@@ -59,7 +59,7 @@ export const MicrosoftText = ({ title, className }: MicrosoftTextProps) => (
 				`}
 				values={{
 					TermsLink: (label) => <Link to={TERMS_ROUTE} target="_blank">{label}</Link>,
-					PrivacyLink: (label) => <a href={PRIVACY_ROUTE} target="_blank">{label}</a>,
+					PrivacyLink: (label) => <Link as="a" href={PRIVACY_ROUTE} target="_blank" rel="noopener noreferrer">{label}</Link>,
 				}}
 
 			/>

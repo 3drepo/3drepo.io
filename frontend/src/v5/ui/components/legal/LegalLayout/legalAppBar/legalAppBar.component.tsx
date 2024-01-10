@@ -22,7 +22,7 @@ import { FormattedMessage } from 'react-intl';
 import { AppBarContainer } from '@components/shared/appBar/appBar.styles';
 import { DASHBOARD_ROUTE, PRIVACY_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
-import { NavLink, NavLinks, Items, PrivacyLink } from './legalAppBar.styles';
+import { NavLink, NavLinks, Items } from './legalAppBar.styles';
 
 type ILegalAppBar = {
 	activePage: string;
@@ -35,9 +35,9 @@ export const LegalAppBar = ({ activePage }: ILegalAppBar): JSX.Element => (
 				<LogoIcon />
 			</Link>
 			<NavLinks>
-				<PrivacyLink href={PRIVACY_ROUTE} target="_blank">
+				<NavLink as="a" href={PRIVACY_ROUTE} target="_blank" rel="noopener noreferrer">
 					<FormattedMessage id="legalAppBar.privacy" defaultMessage="Privacy Policy" />
-				</PrivacyLink>
+				</NavLink>
 				<NavLink to="/v5/terms" selected={activePage === 'terms'}>
 					<FormattedMessage id="legalAppBar.terms" defaultMessage="Terms and Conditions" />
 				</NavLink>

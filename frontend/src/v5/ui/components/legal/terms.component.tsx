@@ -172,7 +172,7 @@ export const TermsLegalPaper = () => (
 		</ol>
 		<Clause><ClauseNo id="4.1.">4.1.</ClauseNo>
 			<p><strong>The Service</strong> Associated documentation means: our
-				[<a href={PRIVACY_ROUTE} target="_blank">Privacy Policy</a>], [<Link to={COOKIES_ROUTE}>Cookies Policy</Link>]
+				[<Link as="a" href={PRIVACY_ROUTE} target="_blank" rel="noopener noreferrer">Privacy Policy</Link>], [<Link to={COOKIES_ROUTE}>Cookies Policy</Link>]
 				and [<a href="http://3drepo.org/pricing/">Pricing Information</a>].
 				The use of the Service is subject to the Associated Documentation. If you give us personal
 				data about anyone else in order to collaborate with them on a particular project, you must
