@@ -108,22 +108,26 @@ const convertToExternalIds = async (teamspace, project, objects) => {
 
 		// eslint-disable-next-line no-underscore-dangle
 		const nodes = await getNodesByIds(teamspace, project, obj.container, obj._ids,
-			{ _id: 0, shared_id: 1 });
+			{ _id: 0, shared_id: 1, rev_id: 1 });
 
-		const externalIdKeys = Object.values(idTypesToKeys).flat();
-		const query = { parents: { $in: nodes.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
-		const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
-		const metadata = await getMetadataByQuery(teamspace, obj.container, query, projection);
+		if (nodes.length) {
+			const externalIdKeys = Object.values(idTypesToKeys).flat();
+			const query = { rev_id: nodes[0].rev_id, parents: { $in: nodes.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
+			const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
+			const metadata = await getMetadataByQuery(teamspace, obj.container, query, projection);
 
-		const convertedObject = { ...obj };
-		if (metadata?.length) {
-			// eslint-disable-next-line no-underscore-dangle
-			delete convertedObject._ids;
-			const externalIdName = getExteralIdNameFromMetadata(metadata);
-			convertedObject[externalIdName] = [...new Set(metadata.map((m) => m.metadata[0].value))];
+			const convertedObject = { ...obj };
+			if (metadata?.length) {
+				// eslint-disable-next-line no-underscore-dangle
+				delete convertedObject._ids;
+				const externalIdName = getExteralIdNameFromMetadata(metadata);
+				convertedObject[externalIdName] = [...new Set(metadata.map((m) => m.metadata[0].value))];
+			}
+
+			return convertedObject;
 		}
 
-		return convertedObject;
+		return obj;
 	}));
 
 	return convertedObjects;
