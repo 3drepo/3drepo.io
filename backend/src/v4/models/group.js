@@ -17,9 +17,19 @@
 
 "use strict";
 
+const { v5Path } = require("../../interop");
+
+const { getCommonElements } = require(`${v5Path}/utils/helper/arrays`);
+const { idTypes, idTypesToKeys } = require(`${v5Path}/models/metadata.constants`);
+const { getMetadataWithMatchingData } = require(`${v5Path}/models/metadata`);
+const { sharedIdsToExternalIds, getMeshesWithParentIds } = require(`${v5Path}/processors/teamspaces/projects/models/commons/scene`);
+const { findProjectByModelId } = require(`${v5Path}/models/projectSettings.js`);
+
 const utils = require("../utils");
 const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
+const { findNodes } = require("./scene");
+const { getHistory } = require("./history");
 const { validateRules } = require("./helper/rule");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
@@ -44,7 +54,7 @@ const fieldTypes = {
 };
 
 const embeddedObjectFields = {
-	"objects" : ["account", "model", "shared_ids", "ifc_guids"],
+	"objects" : ["account", "model", "shared_ids", ...Object.values(idTypes)],
 	"rules" : ["name", "field", "operator", "values"]
 };
 
@@ -91,7 +101,7 @@ function clean(groupData) {
 	cleanArray(groupData, "transformation");
 
 	for (let i = 0; groupData.objects && i < groupData.objects.length; i++) {
-		cleanArray(groupData.objects[i], "ifc_guids");
+		cleanArray(groupData.objects[i], idTypes.IFC);
 		if (groupData.objects[i].shared_ids) {
 			cleanArray(groupData.objects[i], "shared_ids");
 			groupData.objects[i].shared_ids = groupData.objects[i].shared_ids.map(x => utils.uuidToString(x));
@@ -119,130 +129,91 @@ function getObjectIds(account, model, branch, revId, groupData, convertSharedIDs
 	}
 }
 
-/**
- * Converts all IFC Guids to shared IDs if applicable and return the objects array.
- */
 function getObjectsArray(model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids = false) {
-	const objectIdPromises = [];
 
-	for (let i = 0; i < groupData.objects.length; i++) {
-		const objectId = {};
-		objectId.account = groupData.objects[i].account;
-		objectId.model = groupData.objects[i].model;
-
-		const _branch = (model === objectId.model) ? branch : "master";
-		const _revId = (model === objectId.model) ? revId : null;
-
-		const ifcGuids = groupData.objects[i].ifc_guids || [];
-
-		const objectIdsSet = groupData.objects[i].shared_ids ? new Set(groupData.objects[i].shared_ids.map(utils.uuidToString)) : new Set();
+	return Promise.all(groupData.objects.map(async({account, model:container, shared_ids, ...extIds}) => {
 
 		if (showIfcGuids) {
-			objectId.ifc_guids = ifcGuids;
-			objectIdPromises.push(objectId);
-		} else {
-			objectIdPromises.push(Meta.ifcGuidsToUUIDs(
-				objectId.account,
-				objectId.model,
-				_branch,
-				_revId,
-				ifcGuids
-			).then(sharedIdResults => {
-				for (let j = 0; j < sharedIdResults.length; j++) {
-					objectIdsSet.add(utils.uuidToString(sharedIdResults[j].shared_id));
-				}
-
-				if (objectIdsSet.size > 0) {
-					objectId.shared_ids = [];
-					objectIdsSet.forEach(id => {
-						if (!convertSharedIDsToString) {
-							id = utils.stringToUUID(id);
-						}
-						objectId.shared_ids.push(id);
-					});
-				}
-
-				return objectId;
-			}));
+			if (extIds[idTypes.IFC]) {
+				return {account, model: container, [idTypes.IFC]: extIds[idTypes.IFC]};
+			}
+			return {account, model: container, [idTypes.IFC]: []};
+		} else if(shared_ids) {
+			return {account, model: container, shared_ids: convertSharedIDsToString ? shared_ids.map(utils.uuidToString) : shared_ids.map(utils.stringToUUID)};
 		}
-	}
 
-	return Promise.all(objectIdPromises);
+		// At this point, we're either trying to convert shared Ids to ifcGuids, or external ids to shared ids
+
+		const {_id: conRevId} = await getHistory(
+			account, container,
+			model === container ? branch : "master",
+			model === container && !branch ? revId : undefined,
+			{_id: 1}
+		);
+
+		if(shared_ids) {
+
+			const res = await sharedIdsToExternalIds(account, container, shared_ids.map(utils.stringToUUID));
+
+			if(res) {
+				return {account, model: container, [res.key]: res.value};
+			}
+
+			return {account, model: container, [idTypes.IFC]: extIds[idTypes.IFC]};
+		}
+
+		const idType = getCommonElements(Object.keys(extIds), Object.keys(idTypesToKeys))[0];
+		const metadata = await getMetadataWithMatchingData(account, container, conRevId,
+			idTypesToKeys[idType], extIds[idType], { parents: 1 });
+		if(metadata.length) {
+			const {_id: project}  = await findProjectByModelId(account, container, {_id: 1});
+			const meshIds = await getMeshesWithParentIds(account, project, container, conRevId,
+				metadata.flatMap(({ parents }) => parents));
+
+			const meshNodes = await findNodes(account, model, undefined, conRevId, {_id: {$in: meshIds}}, {shared_id: 1});
+
+			return { account, model:container, shared_ids: meshNodes.map(({shared_id}) => convertSharedIDsToString ? utils.uuidToString(shared_id) : shared_id)};
+		}
+
+	}));
 }
 
 /**
- * Converts all shared IDs to IFC Guids if applicable and return the objects array.
+ * Converts all shared IDs to external ids if applicable and return the objects array.
  */
-function getObjectsArrayAsIfcGuids(data) {
-	const ifcGuidPromises = [];
-
-	for (let i = 0; data && data.objects && i < data.objects.length; i++) {
-		const account = data.objects[i].account;
-		const model = data.objects[i].model;
-
-		if (!(account && model) || (!data.objects[i].ifc_guids && !data.objects[i].shared_ids)) {
+function getObjectsArrayAsExternalIds(data) {
+	return Promise.all(data.objects.map(async (containerEntry) => {
+		const {account, model} = containerEntry;
+		if (!(account && model)) {
 			return Promise.reject(responseCodes.INVALID_GROUP);
 		}
 
-		const sharedIdsSet = new Set();
-		const ifcGuidsSet = new Set();
-
-		const objectList = data.objects[i].shared_ids ? data.objects[i].shared_ids : [];
-		const sharedIds = [];
-
-		for (let j = 0; j < objectList.length; j++) {
-			if (utils.isString(objectList[j])) {
-				sharedIds.push(utils.stringToUUID(objectList[j]));
-			}
-
-			sharedIdsSet.add(utils.uuidToString(sharedIds[j]));
+		// have to have shared_ids, IFC or RVT ids, but not more than one
+		if (
+			(!containerEntry[idTypes.IFC] && !containerEntry[idTypes.RVT] && !containerEntry.shared_ids) &&
+			!(containerEntry[idTypes.IFC] && !containerEntry[idTypes.RVT] && !containerEntry.shared_ids) &&
+			!(!containerEntry[idTypes.IFC] && containerEntry[idTypes.RVT] && !containerEntry.shared_ids) &&
+			!(!containerEntry[idTypes.IFC] && !containerEntry[idTypes.RVT] && containerEntry.shared_ids)
+		) {
+			return Promise.reject(responseCodes.INVALID_GROUP);
 		}
 
-		if (data.objects[i].ifc_guids) {
-			data.objects[i].ifc_guids.forEach(ifcGuid => {
-				ifcGuidsSet.add(ifcGuid);
-			});
+		if(!containerEntry.shared_ids) {
+			return data;
 		}
 
-		ifcGuidPromises.push(
-			Meta.uuidsToIfcGuids(account, model, sharedIds).then(ifcGuids => {
-				if (ifcGuids && ifcGuids.length > 0) {
-					for (let j = 0; j < ifcGuids.length; j++) {
-						ifcGuidsSet.add(ifcGuids[j].metadata[0].value);
+		const sharedIds = containerEntry.shared_ids.map(utils.stringToUUID);
 
-						for (let k = 0; k < ifcGuids[j].parents.length; k++) {
-							sharedIdsSet.delete(utils.uuidToString(ifcGuids[j].parents[k]));
-						}
-					}
-				}
+		const externalIds = await sharedIdsToExternalIds(account, model, sharedIds);
 
-				const convertedObjectsResponse = {
-					account,
-					model
-				};
+		if(externalIds) {
+			return {account, model, [externalIds.key] : externalIds.value};
+		}
 
-				if (sharedIdsSet.size > 0) {
-					convertedObjectsResponse.shared_ids = [];
-					sharedIdsSet.forEach(id => {
-						convertedObjectsResponse.shared_ids.push(utils.stringToUUID(id));
-					});
-				}
+		return containerEntry;
 
-				if (ifcGuidsSet.size > 0) {
-					convertedObjectsResponse.ifc_guids = [];
-					ifcGuidsSet.forEach(id => {
-						convertedObjectsResponse.ifc_guids.push(id);
-					});
-				}
+	}));
 
-				return convertedObjectsResponse;
-			})
-		);
-	}
-
-	return Promise.all(ifcGuidPromises).then(ifcObjects => {
-		return ifcObjects;
-	});
 }
 
 const Group = {};
@@ -250,7 +221,7 @@ const Group = {};
 Group.create = async function (account, model, branch = "master", rid = null, sessionId, creator = "", data) {
 	const newGroup = {};
 
-	const convertedObjects = await getObjectsArrayAsIfcGuids(data, false);
+	const convertedObjects = await getObjectsArrayAsExternalIds(data, false);
 
 	let typeCorrect = (!data.objects !== !data.rules);
 
@@ -323,7 +294,7 @@ Group.findByUID = async function (account, model, branch, revId, uid, showIfcGui
 	}
 
 	if (convertToIfcGuids) {
-		foundGroup.objects = await getObjectsArrayAsIfcGuids(foundGroup, false);
+		foundGroup.objects = await getObjectsArrayAsExternalIds(foundGroup);
 	} else {
 		try {
 			foundGroup.objects = await getObjectIds(account, model, branch, revId, foundGroup, showIfcGuids);
@@ -394,7 +365,7 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 Group.update = async function (account, model, branch = "master", revId = null, sessionId, user = "", groupId, data) {
 	const group = await Group.findByUID(account, model, branch, revId, groupId);
 
-	const convertedObjects = await getObjectsArrayAsIfcGuids(data, false);
+	const convertedObjects = await getObjectsArrayAsExternalIds(data, false);
 	const toUpdate = {};
 	const toUnset = {};
 
