@@ -28,49 +28,44 @@ import { ToolbarButton } from '../toolbarButton.component';
 import { ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
-const OPTIONS = [
-	{
-		option: VIEWER_GIZMO_MODES.TRANSLATE,
+const GIZMO_OPTIONS = {
+	[VIEWER_GIZMO_MODES.TRANSLATE]: {
 		title: formatMessage({ id: 'viewer.toolbar.icon.gizmoModes.move', defaultMessage: 'Move' }),
-		icon: GizmoTranslateIcon,
+		Icon: GizmoTranslateIcon,
 	},
-	{
-		option: VIEWER_GIZMO_MODES.SCALE,
+	[VIEWER_GIZMO_MODES.SCALE]: {
 		title: formatMessage({ id: 'viewer.toolbar.icon.gizmoModes.resize', defaultMessage: 'Resize' }),
-		icon: GizmoScaleIcon,
+		Icon: GizmoScaleIcon,
 	},
-	{
-		option: VIEWER_GIZMO_MODES.ROTATE,
+	[VIEWER_GIZMO_MODES.ROTATE]: {
 		title: formatMessage({ id: 'viewer.toolbar.icon.gizmoModes.rotate', defaultMessage: 'Rotate' }),
-		icon: GizmoRotateIcon,
+		Icon: GizmoRotateIcon,
 	},
-];
+};
 
 export const GizmoModeButtons = (props) => {
 	const [expanded, setExpanded] = useState(false);
 	const isBoxClippingMode = ViewerGuiHooksSelectors.selectClippingMode() === VIEWER_CLIP_MODES.BOX;
 	const gizmoMode = ViewerGuiHooksSelectors.selectGizmoMode();
 
-	const currentMode = OPTIONS.find(({ option }) => option === gizmoMode);
-	const otherModes = OPTIONS.filter(({ option }) => {
-		if (!isBoxClippingMode && option === VIEWER_GIZMO_MODES.SCALE) return;
-		return option !== gizmoMode;
-	});
-
 	const setMode = (mode: GizmoMode) => {
 		setExpanded(false);
 		ViewerGuiActionsDispatchers.setGizmoMode(mode);
 	};
+
+	const FloatingGizmoButton = ({ mode }) => <FloatingButton {...GIZMO_OPTIONS[mode]} onClick={() => setMode(mode)} />;
 
 	return (
 		<ClickAwayListener onClickAway={() => setExpanded(false)}>
 			<ButtonOptionsContainer>
 				{expanded && (
 					<FloatingButtonsContainer>
-						{otherModes.map(({ option, title, icon: Icon }) => <FloatingButton key={option} Icon={Icon} onClick={() => setMode(option)} title={title} />)}
+						{gizmoMode !== VIEWER_GIZMO_MODES.TRANSLATE && <FloatingGizmoButton mode={VIEWER_GIZMO_MODES.TRANSLATE} />}
+						{gizmoMode !== VIEWER_GIZMO_MODES.SCALE && isBoxClippingMode && <FloatingGizmoButton mode={VIEWER_GIZMO_MODES.SCALE} />}
+						{gizmoMode !== VIEWER_GIZMO_MODES.ROTATE && <FloatingGizmoButton mode={VIEWER_GIZMO_MODES.ROTATE} />}
 					</FloatingButtonsContainer>
 				)}
-				<ToolbarButton Icon={currentMode.icon} onClick={() => setExpanded(!expanded)} title={!expanded ? currentMode.title : ''} {...props} />
+				<ToolbarButton Icon={GIZMO_OPTIONS[gizmoMode].Icon} onClick={() => setExpanded(!expanded)} title={!expanded ? GIZMO_OPTIONS[gizmoMode].title : ''} {...props} />
 			</ButtonOptionsContainer>
 		</ClickAwayListener>
 	);
