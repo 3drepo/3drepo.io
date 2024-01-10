@@ -94,7 +94,7 @@ export const TicketsTopPanel = ({
 					/>
 					{_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`) && <ErrorTextGap />}
 				</DescriptionProperty>
-				{hasIssueProperties && <IssuePropertiesRow onBlur={onPropertyBlur} readOnly={readOnly} />}
+				{hasIssueProperties && <IssueProperties onBlur={onPropertyBlur} readOnly={readOnly} />}
 				<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
 			</BaseTicketInfo>
 		</TopPanel>

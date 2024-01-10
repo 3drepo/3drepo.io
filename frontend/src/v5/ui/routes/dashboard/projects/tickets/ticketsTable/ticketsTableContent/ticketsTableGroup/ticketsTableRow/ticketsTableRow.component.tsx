@@ -83,7 +83,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 					</OverflowContainer>
 				</Tooltip>
 			</Cell>
-			<Cell width={187} hidden={!showModelName}>
+			<Cell width={145} hidden={!showModelName}>
 				<Tooltip title={modelName}>
 					<OverflowContainer>
 						<Highlight search={query}>
@@ -92,7 +92,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 					</OverflowContainer>
 				</Tooltip>
 			</Cell>
-			<Cell width={109}>
+			<Cell width={127}>
 				<SmallFont>
 					{formatShortDateTime(createdAt)}
 				</SmallFont>
@@ -103,7 +103,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 			<CellOwner width={62}>
 				<UserPopoverCircle user={ownerAsUser} />
 			</CellOwner>
-			<CellDate width={126} hidden={!hasProperties}>
+			<CellDate width={147} hidden={!hasProperties}>
 				{!!dueDate && (<DueDateWithIcon value={dueDate} disabled />)}
 			</CellDate>
 			<CellChipText width={90} hidden={!hasProperties}>
