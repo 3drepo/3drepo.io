@@ -154,7 +154,7 @@ function getObjectsArray(model, branch, revId, groupData, convertSharedIDsToStri
 
 		if(shared_ids) {
 
-			const res = await sharedIdsToExternalIds(account, container, shared_ids.map(utils.stringToUUID));
+			const res = await sharedIdsToExternalIds(account, container, conRevId, shared_ids.map(utils.stringToUUID));
 
 			if(res) {
 				return {account, model: container, [res.key]: res.value};
@@ -184,10 +184,9 @@ function getObjectsArray(model, branch, revId, groupData, convertSharedIDsToStri
 /**
  * Converts all shared IDs to external ids if applicable and return the objects array.
  */
-function getObjectsArrayAsExternalIds(data) {
+function getObjectsArrayAsExternalIds(account, model, branch, rId, data) {
 	return Promise.all(data.objects.map(async (containerEntry) => {
-		const {account, model} = containerEntry;
-		if (!(account && model)) {
+		if (!(containerEntry.account && containerEntry.model)) {
 			return Promise.reject(responseCodes.INVALID_GROUP);
 		}
 
@@ -205,9 +204,16 @@ function getObjectsArrayAsExternalIds(data) {
 			return data;
 		}
 
+		const {_id: conRevId} = await getHistory(
+			account, containerEntry.model,
+			model === containerEntry.model ? branch : "master",
+			model === containerEntry.model && !branch ? rId : undefined,
+			{_id: 1}
+		);
+
 		const sharedIds = containerEntry.shared_ids.map(utils.stringToUUID);
 
-		const externalIds = await sharedIdsToExternalIds(account, model, sharedIds);
+		const externalIds = await sharedIdsToExternalIds(containerEntry.account, containerEntry.model, conRevId, sharedIds);
 
 		if(externalIds) {
 			return {account, model, [externalIds.key] : externalIds.values};
@@ -224,7 +230,7 @@ const Group = {};
 Group.create = async function (account, model, branch = "master", rid = null, sessionId, creator = "", data) {
 	const newGroup = {};
 
-	const convertedObjects = await getObjectsArrayAsExternalIds(data, false);
+	const convertedObjects = await getObjectsArrayAsExternalIds(account, model, branch, rid, data, false);
 
 	let typeCorrect = (!data.objects !== !data.rules);
 
@@ -296,7 +302,7 @@ Group.findByUID = async function (account, model, branch, revId, uid, showIfcGui
 	}
 
 	if (convertToIfcGuids) {
-		foundGroup.objects = await getObjectsArrayAsExternalIds(foundGroup);
+		foundGroup.objects = await getObjectsArrayAsExternalIds(account, mode, branch, revId, foundGroup);
 	} else {
 		try {
 			foundGroup.objects = await getObjectIds(account, model, branch, revId, foundGroup, showIfcGuids);
@@ -367,7 +373,7 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 Group.update = async function (account, model, branch = "master", revId = null, sessionId, user = "", groupId, data) {
 	const group = await Group.findByUID(account, model, branch, revId, groupId);
 
-	const convertedObjects = await getObjectsArrayAsExternalIds(data, false);
+	const convertedObjects = await getObjectsArrayAsExternalIds(account, model, branch, revId, data, false);
 	const toUpdate = {};
 	const toUnset = {};
 

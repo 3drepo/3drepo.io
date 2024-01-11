@@ -83,9 +83,9 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 	return undefined;
 };
 
-Scene.sharedIdsToExternalIds = async (teamspace, container, sharedIds) => {
+Scene.sharedIdsToExternalIds = async (teamspace, container, revId, sharedIds) => {
 	const externalIdKeys = Object.values(idTypesToKeys).flat();
-	const query = { parents: { $in: sharedIds }, 'metadata.key': { $in: externalIdKeys } };
+	const query = { parents: { $in: sharedIds }, 'metadata.key': { $in: externalIdKeys }, rev_id: revId };
 	const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
 	const metadata = await getMetadataByQuery(teamspace, container, query, projection);
 
