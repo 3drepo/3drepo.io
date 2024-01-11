@@ -17,6 +17,7 @@
 
 const { UUIDToString, stringToUUID } = require('../../utils/helper/uuids');
 const Yup = require('yup');
+const { idTypes } = require('../../models/metadata.constants');
 const { isUUIDString } = require('../../utils/helper/typeCheck');
 const { schema: rulesSchema } = require('../rules');
 const { types } = require('../../utils/helper/yup');
@@ -28,15 +29,15 @@ const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal))
 const objectEntryValidator = Yup.object().shape({
 	container: Yup.string().test('Container id', 'Container ID must be an UUID string', isUUIDString).required(),
 	_ids: Yup.array().of(types.id).min(1),
-	ifc_guids: Yup.array().of(Yup.string().length(22)).min(1),
-	revit_ids: Yup.array().of(Yup.number()).min(1),
+	[idTypes.IFC]: Yup.array().of(Yup.string().length(22)).min(1),
+	[idTypes.REVIT]: Yup.array().of(Yup.number()).min(1),
 }).test(
 	'Object item check',
-	'Can only contain either _ids or ifc_guids or revit_ids',
+	`Can only contain either _ids or ${[idTypes.IFC]} or ${[idTypes.REVIT]}`,
 	/* eslint-disable no-underscore-dangle */
-	(value) => (value._ids && !(value.ifc_guids || value.revit_ids))
-	|| (value.ifc_guids && !(value._ids || value.revit_ids))
-	|| (value.revit_ids && !(value._ids || value.ifc_guids)));
+	(value) => (value._ids && !(value[idTypes.IFC] || value[idTypes.REVIT]))
+	|| (value[idTypes.IFC] && !(value._ids || value[idTypes.REVIT]))
+	|| (value[idTypes.REVIT] && !(value._ids || value[idTypes.IFC])));
 	/* eslint-enable no-underscore-dangle */
 
 Groups.schema = (allowIds, fieldsOptional) => {

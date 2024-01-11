@@ -16,7 +16,7 @@
  */
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addGroups, getGroupById, updateGroup } = require('../../../../../models/tickets.groups');
+const { addGroups, deleteGroups, getGroupById, getGroupsByIds, updateGroup } = require('../../../../../models/tickets.groups');
 const { getArrayDifference, getCommonElements } = require('../../../../../utils/helper/arrays');
 const {
 	getExternalIdsFromMetadata,
@@ -47,72 +47,74 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 
 	const { matched, unwanted } = await getMetadataByRules(teamspace, project, model, revision, rules, projection);
 
-	if (!returnMeshIds) {
-		const defaultType = Object.keys(idTypes)[0];
-		let res = { container: model, [defaultType]: [] };
+	if (returnMeshIds) {
+		const idToMeshes = await getIdToMeshesMapping(teamspace, model, revision);
+		const [
+			matchedNodes,
+			unwantedNodes,
+		] = await Promise.all([
+			matched.length ? getNodesBySharedIds(teamspace, project, model, revision,
+				matched.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
+			unwanted.length ? getNodesBySharedIds(teamspace, project, model, revision,
+				unwanted.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
+		]);
 
-		if (!matched.length) return res;
-
-		const wantedIds = getExternalIdsFromMetadata(matched);
-		if (wantedIds) {
-			if (unwanted.length) {
-				const unwantedIds = getExternalIdsFromMetadata(unwanted, wantedIds.key);
-				if (unwantedIds) {
-					wantedIds.value = getArrayDifference(unwantedIds.value, wantedIds.value);
-				}
+		const matchedMeshes = {};
+		matchedNodes.forEach(({ _id }) => {
+			const idStr = UUIDToString(_id);
+			if (idToMeshes[idStr]) {
+				idToMeshes[idStr].forEach((id) => {
+					matchedMeshes[id] = stringToUUID(id);
+				});
 			}
-			res = { container: model, [wantedIds.type]: wantedIds.value };
-		}
-
-		return res;
+		});
+		unwantedNodes.forEach(({ _id }) => {
+			const idStr = UUIDToString(_id);
+			if (idToMeshes[idStr]) {
+				idToMeshes[idStr].forEach((id) => delete matchedMeshes[id]);
+			}
+		});
+		return { container: model, _ids: Object.values(matchedMeshes) };
 	}
 
-	const idToMeshes = await getIdToMeshesMapping(teamspace, model, revision);
-	const [
-		matchedNodes,
-		unwantedNodes,
-	] = await Promise.all([
-		matched.length ? getNodesBySharedIds(teamspace, project, model, revision,
-			matched.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
-		unwanted.length ? getNodesBySharedIds(teamspace, project, model, revision,
-			unwanted.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
-	]);
+	const defaultType = Object.keys(idTypes)[0];
+	let res = { container: model, [defaultType]: [] };
 
-	const matchedMeshes = {};
+	if (!matched.length) return res;
 
-	matchedNodes.forEach(({ _id }) => {
-		const idStr = UUIDToString(_id);
-		if (idToMeshes[idStr]) {
-			idToMeshes[idStr].forEach((id) => {
-				matchedMeshes[id] = stringToUUID(id);
-			});
+	const wantedIds = getExternalIdsFromMetadata(matched);
+	if (wantedIds) {
+		if (unwanted.length) {
+			const unwantedIds = getExternalIdsFromMetadata(unwanted, wantedIds.key);
+			if (unwantedIds) {
+				wantedIds.value = getArrayDifference(unwantedIds.value, wantedIds.value);
+			}
 		}
-	});
+		res = { container: model, [wantedIds.type]: wantedIds.value };
+	}
 
-	unwantedNodes.forEach(({ _id }) => {
-		const idStr = UUIDToString(_id);
-		if (idToMeshes[idStr]) {
-			idToMeshes[idStr].forEach((id) => delete matchedMeshes[id]);
-		}
-	});
-
-	return { container: model, _ids: Object.values(matchedMeshes) };
+	return res;
 };
 
-const convertToExternalIds = async (teamspace, project, objects) => {
-	const convertedObjects = await Promise.all(objects.map(async (obj) => {
+const convertToExternalIds = async (teamspace, project, containerEntries) => {
+	const convertedEntries = await Promise.all(containerEntries.map(async (entry) => {
 		// eslint-disable-next-line no-underscore-dangle
-		if (!obj._ids) {
-			return obj;
+		if (!entry._ids) {
+			return entry;
 		}
 
 		// eslint-disable-next-line no-underscore-dangle
-		const nodes = await getNodesByIds(teamspace, project, obj.container, obj._ids,
-			{ _id: 0, shared_id: 1 });
+		const nodes = await getNodesByIds(teamspace, project, entry.container, entry._ids,
+			{ _id: 0, shared_id: 1, rev_id: 1 });
 
-		const res = await sharedIdsToExternalIds(teamspace, obj.container, nodes.map(({ shared_ids }) => shared_ids));
+		if (!nodes.length) {
+			const defaultType = Object.keys(idTypes)[0];
+			return { container: entry.container, [defaultType]: [] };
+		}
+		const res = await sharedIdsToExternalIds(teamspace, entry.container, nodes[0].rev_id,
+			nodes.map(({ shared_ids }) => shared_ids));
 
-		const convertedObject = { ...obj };
+		const convertedObject = { ...entry };
 		if (res) {
 			// eslint-disable-next-line no-underscore-dangle
 			delete convertedObject._ids;
@@ -121,7 +123,7 @@ const convertToExternalIds = async (teamspace, project, objects) => {
 		return convertedObject;
 	}));
 
-	return convertedObjects;
+	return convertedEntries;
 };
 
 const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
@@ -144,9 +146,9 @@ const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
 
 	const formattedEntry = { ...containerEntry };
 
-	const idType = getCommonElements(Object.keys(formattedEntry), Object.keys(idTypesToKeys))[0];
+	const idType = getCommonElements(Object.keys(containerEntry), Object.keys(idTypesToKeys))[0];
 	const metadata = await getMetadataWithMatchingData(teamspace, container, revision,
-		idTypesToKeys[idType], formattedEntry[idType], { parents: 1 });
+		idTypesToKeys[idType], containerEntry[idType], { parents: 1 });
 	const meshIds = await getMeshesWithParentIds(teamspace, project, container, revision,
 		metadata.flatMap(({ parents }) => parents));
 
@@ -167,6 +169,10 @@ TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
 
 	await addGroups(teamspace, project, model, ticket, convertedGroups);
 };
+
+TicketGroups.deleteGroups = deleteGroups;
+
+TicketGroups.getGroupsByIds = getGroupsByIds;
 
 TicketGroups.updateTicketGroup = async (teamspace, project, model, ticket, groupId, data, author) => {
 	const convertedData = { ...data };

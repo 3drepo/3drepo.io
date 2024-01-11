@@ -126,6 +126,11 @@ const establishRoutes = (isFed) => {
 	 *         in: query
 	 *         schema:
 	 *           type: string
+	 *       - name: convertIds
+	 *         description: Flag to define whether object Ids should be converted to mesh Ids or returned as external Ids
+	 *         in: query
+	 *         schema:
+	 *           type: boolean
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
