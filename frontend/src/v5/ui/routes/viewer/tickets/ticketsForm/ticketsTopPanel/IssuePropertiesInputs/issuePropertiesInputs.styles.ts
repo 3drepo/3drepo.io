@@ -18,8 +18,6 @@
 import styled from 'styled-components';
 import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
 
-export const Container = styled.div``;
-
 export const FlexContainer = styled(InputContainer)`
 	display: flex;
 	flex-direction: row;
@@ -57,12 +55,7 @@ export const PropertyTitle = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
-export const AssigneesContainer = styled(InputContainer)`
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	align-items: center;
-	
+export const AssigneesContainer = styled.div`
 	&:not(:last-child) {
 		margin-bottom: 10px;
 	}

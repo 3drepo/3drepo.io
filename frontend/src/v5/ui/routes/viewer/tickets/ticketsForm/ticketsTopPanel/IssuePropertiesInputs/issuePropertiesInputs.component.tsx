@@ -17,13 +17,14 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { PRIORITY_LEVELS_MAP, STATUS_MAP } from '@controls/chip/chip.types';
-import { FormAssigneesSelect, FormChipSelect, FormDueDateWithIcon } from '@controls/inputs/formInputs.component';
+import { FormChipSelect, FormDueDateWithIcon } from '@controls/inputs/formInputs.component';
+import { Gap } from '@controls/gap';
+import { InputController } from '@controls/inputs/inputController.component';
 
 import { FormattedMessage } from 'react-intl';
 import { IssueProperties } from '../../../tickets.constants';
 import { AssigneesContainer, DueDateInput, FlexContainer, PriorityInput, PropertyTitle, StatusInput } from './issuePropertiesInputs.styles';
-import { Gap } from '@controls/gap';
-import { Typography } from '@controls/typography';
+import { JobsAndUsersProperty } from '../../properties/jobsAndUsersProperty.component';
 
 type IIssuePropertiesInputs = {
 	onBlur: () => void;
@@ -94,20 +95,19 @@ export const IssuePropertiesInputs = ({ onBlur, readOnly }: IIssuePropertiesInpu
 		</FlexContainer>
 		<Gap $height="10px" />
 		<AssigneesContainer>
-			<Typography variant="h5">
-				<FormattedMessage
-					id="customTicket.topPanel.assignees.label"
-					defaultMessage="Assignees"
-				/>
-			</Typography>
-			<FormAssigneesSelect
+			<InputController
+				Input={JobsAndUsersProperty}
 				name={`properties[${IssueProperties.ASSIGNEES}]`}
 				onBlur={onBlur}
 				key={IssueProperties.ASSIGNEES}
 				disabled={readOnly}
 				showAddButton
 				multiple
-				maxItems={5}
+				maxItems={17}
+				label={formatMessage({
+					id: 'customTicket.topPanel.assignees.label',
+					defaultMessage: 'Assignees',
+				})}
 			/>
 		</AssigneesContainer>
 	</>
