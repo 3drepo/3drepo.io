@@ -32,7 +32,7 @@ import { ToolbarButton } from '../buttons/toolbarButton.component';
 import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { GizmoModeButtons } from '../buttons/buttonOptionsContainer/gizmoModeButtons.component';
 import { Viewer } from '@/v4/services/viewer/viewer';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export const SectionToolbar = () => {
 	const [alignActive, setAlignActive] = useState(false);
@@ -49,8 +49,19 @@ export const SectionToolbar = () => {
 	const onClickAlign = () => {
 		Viewer.clipToolRealign();
 		setAlignActive(true);
-		Viewer.on(VIEWER_EVENTS.UPDATE_NUM_CLIP, () => Viewer.off(VIEWER_EVENTS.UPDATE_NUM_CLIP, () => setAlignActive(false)));
 	};
+
+	useEffect(() => {
+		if (alignActive) {
+			Viewer.on(VIEWER_EVENTS.UPDATE_CLIP, () => setAlignActive(false));
+			Viewer.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => setAlignActive(false));
+		}
+		return () => {
+			Viewer.off(VIEWER_EVENTS.UPDATE_CLIP, () => setAlignActive(false));
+			Viewer.off(VIEWER_EVENTS.BACKGROUND_SELECTED, () => setAlignActive(false));
+		};
+	}, [alignActive]);
+	
 
 	return (
 		<Container>

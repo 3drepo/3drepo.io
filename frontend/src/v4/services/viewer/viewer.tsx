@@ -1223,9 +1223,8 @@ export class ViewerService {
 		this.emit(VIEWER_EVENTS.CLIPPING_PLANE_BROADCAST, clip);
 	}
 
-	public numClipPlanesUpdated(nPlanes) {
-		this.numClips = nPlanes;
-		this.emit(VIEWER_EVENTS.UPDATE_NUM_CLIP, nPlanes);
+	public clipUpdated() {
+		this.emit(VIEWER_EVENTS.UPDATE_CLIP);
 	}
 
 	public updateClippingPlanes( clipPlanes, account, model ) {

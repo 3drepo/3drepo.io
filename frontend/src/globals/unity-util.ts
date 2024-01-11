@@ -483,9 +483,9 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
-	public static clipUpdated(nPlanes) {
-		if (UnityUtil.viewer && UnityUtil.viewer.numClipPlanesUpdated) {
-			UnityUtil.viewer.numClipPlanesUpdated(nPlanes);
+	public static clipUpdated() {
+		if (UnityUtil.viewer && UnityUtil.viewer.clipUpdated) {
+			UnityUtil.viewer.clipUpdated();
 		}
 	}
 
