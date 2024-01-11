@@ -22,9 +22,9 @@ import { dispatch, getState } from '@/v4/modules/store';
 import { isEmpty, isString } from 'lodash';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { TreeActions } from '@/v4/modules/tree';
+import { ViewerGuiActions } from '@/v4/modules/viewerGui';
 import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors';
 import { TicketsCardActionsDispatchers } from '../services/actionsDispatchers';
-import { GroupsActions } from '@/v4/modules/groups';
 
 export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	container: object.model as string,
@@ -196,7 +196,7 @@ export const goToView = async (view: Viewpoint) => {
 		return;
 	}
 	
-	dispatch(GroupsActions.clearColorOverrides());
+	dispatch(ViewerGuiActions.clearColorOverrides());
 	await ViewerService.setViewpoint(view);
 	const overrides = toColorAndTransparencyDicts(view?.state?.colored || []);
 	TicketsCardActionsDispatchers.setOverrides(overrides);
