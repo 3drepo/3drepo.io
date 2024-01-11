@@ -230,7 +230,7 @@ const Group = {};
 Group.create = async function (account, model, branch = "master", rid = null, sessionId, creator = "", data) {
 	const newGroup = {};
 
-	const convertedObjects = await getObjectsArrayAsExternalIds(account, model, branch, rid, data, false);
+	const convertedObjects = data.objects ? await getObjectsArrayAsExternalIds(account, model, branch, rid, data, false) : undefined;
 
 	let typeCorrect = (!data.objects !== !data.rules);
 
@@ -302,7 +302,7 @@ Group.findByUID = async function (account, model, branch, revId, uid, showIfcGui
 	}
 
 	if (convertToIfcGuids) {
-		foundGroup.objects = await getObjectsArrayAsExternalIds(account, mode, branch, revId, foundGroup);
+		foundGroup.objects = await getObjectsArrayAsExternalIds(account, model, branch, revId, foundGroup);
 	} else {
 		try {
 			foundGroup.objects = await getObjectIds(account, model, branch, revId, foundGroup, showIfcGuids);
@@ -373,7 +373,7 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 Group.update = async function (account, model, branch = "master", revId = null, sessionId, user = "", groupId, data) {
 	const group = await Group.findByUID(account, model, branch, revId, groupId);
 
-	const convertedObjects = await getObjectsArrayAsExternalIds(account, model, branch, revId, data, false);
+	const convertedObjects = data.objects ? await getObjectsArrayAsExternalIds(account, model, branch, revId, data, false) : undefined;
 	const toUpdate = {};
 	const toUnset = {};
 
