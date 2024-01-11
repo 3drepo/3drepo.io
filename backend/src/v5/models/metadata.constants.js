@@ -33,7 +33,7 @@ MetaConstants.metaKeyToIdType = {};
 Object.keys(MetaConstants.idTypesToKeys).forEach((idType) => {
 	const keys = MetaConstants.idTypesToKeys[idType];
 	keys.forEach((label) => {
-		MetaConstants.metadataKeyToIdType[label] = idType;
+		MetaConstants.metaKeyToIdType[label] = idType;
 	});
 });
 
