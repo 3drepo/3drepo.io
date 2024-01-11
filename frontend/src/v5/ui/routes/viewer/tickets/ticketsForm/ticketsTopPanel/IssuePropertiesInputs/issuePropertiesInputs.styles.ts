@@ -55,7 +55,7 @@ export const PropertyTitle = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
-export const AssigneesContainer = styled.div`
+export const AssigneesContainer = styled(InputContainer)`
 	&:not(:last-child) {
 		margin-bottom: 10px;
 	}

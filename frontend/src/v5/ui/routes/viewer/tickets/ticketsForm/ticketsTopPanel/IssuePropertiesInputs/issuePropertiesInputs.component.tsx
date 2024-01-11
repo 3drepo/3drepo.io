@@ -20,6 +20,7 @@ import { PRIORITY_LEVELS_MAP, STATUS_MAP } from '@controls/chip/chip.types';
 import { FormChipSelect, FormDueDateWithIcon } from '@controls/inputs/formInputs.component';
 import { Gap } from '@controls/gap';
 import { InputController } from '@controls/inputs/inputController.component';
+import { Typography } from '@controls/typography';
 
 import { FormattedMessage } from 'react-intl';
 import { IssueProperties } from '../../../tickets.constants';
@@ -95,6 +96,12 @@ export const IssuePropertiesInputs = ({ onBlur, readOnly }: IIssuePropertiesInpu
 		</FlexContainer>
 		<Gap $height="10px" />
 		<AssigneesContainer>
+			<Typography variant="h5">
+				<FormattedMessage
+					id="customTicket.topPanel.assignees.label"
+					defaultMessage="Assignees"
+				/>
+			</Typography>
 			<InputController
 				Input={JobsAndUsersProperty}
 				name={`properties[${IssueProperties.ASSIGNEES}]`}
@@ -104,10 +111,6 @@ export const IssuePropertiesInputs = ({ onBlur, readOnly }: IIssuePropertiesInpu
 				showAddButton
 				multiple
 				maxItems={17}
-				label={formatMessage({
-					id: 'customTicket.topPanel.assignees.label',
-					defaultMessage: 'Assignees',
-				})}
 			/>
 		</AssigneesContainer>
 	</>
