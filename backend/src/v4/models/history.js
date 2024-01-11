@@ -33,10 +33,12 @@ const History = {};
 History.getHistory = async function(account, model, branch, revId, projection) {
 	let history;
 
-	if (revId && utils.isUUID(revId)) {
-		history = await History.findByUID(account, model, revId, projection);
-	} else if (revId && !utils.isUUID(revId)) {
-		history = await History.findByTag(account, model, revId, projection);
+	if (revId) {
+		if(utils.isUUIDObject(revId)) {
+			history = await History.findByUID(account, model, revId, projection);
+		} else {
+			history = await History.findByTag(account, model, revId, projection);
+		}
 	} else if (branch) {
 		history = await History.findByBranch(account, model, branch, projection);
 	}

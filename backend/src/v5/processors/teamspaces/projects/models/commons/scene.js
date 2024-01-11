@@ -58,7 +58,7 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 
 			idCounted.add(idType);
 
-			if (res[idType]) {
+			if (!res[idType]) {
 				res[idType] = [value];
 			} else {
 				res[idType].push(value);
@@ -89,7 +89,7 @@ Scene.sharedIdsToExternalIds = async (teamspace, container, sharedIds) => {
 	const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
 	const metadata = await getMetadataByQuery(teamspace, container, query, projection);
 
-	return Scene.determineExternalIdsFromMetadata(metadata);
+	return Scene.getExternalIdsFromMetadata(metadata);
 };
 
 module.exports = Scene;

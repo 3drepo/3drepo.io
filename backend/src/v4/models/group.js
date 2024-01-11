@@ -101,7 +101,9 @@ function clean(groupData) {
 	cleanArray(groupData, "transformation");
 
 	for (let i = 0; groupData.objects && i < groupData.objects.length; i++) {
-		cleanArray(groupData.objects[i], idTypes.IFC);
+		if (groupData.objects[i][idTypes.IFC]) {
+			cleanArray(groupData.objects[i], idTypes.IFC);
+		}
 		if (groupData.objects[i].shared_ids) {
 			cleanArray(groupData.objects[i], "shared_ids");
 			groupData.objects[i].shared_ids = groupData.objects[i].shared_ids.map(x => utils.uuidToString(x));
@@ -143,7 +145,6 @@ function getObjectsArray(model, branch, revId, groupData, convertSharedIDsToStri
 		}
 
 		// At this point, we're either trying to convert shared Ids to ifcGuids, or external ids to shared ids
-
 		const {_id: conRevId} = await getHistory(
 			account, container,
 			model === container ? branch : "master",
@@ -165,14 +166,16 @@ function getObjectsArray(model, branch, revId, groupData, convertSharedIDsToStri
 		const idType = getCommonElements(Object.keys(extIds), Object.keys(idTypesToKeys))[0];
 		const metadata = await getMetadataWithMatchingData(account, container, conRevId,
 			idTypesToKeys[idType], extIds[idType], { parents: 1 });
+
 		if(metadata.length) {
 			const {_id: project}  = await findProjectByModelId(account, container, {_id: 1});
 			const meshIds = await getMeshesWithParentIds(account, project, container, conRevId,
 				metadata.flatMap(({ parents }) => parents));
 
-			const meshNodes = await findNodes(account, model, undefined, conRevId, {_id: {$in: meshIds}}, {shared_id: 1});
-
+			const meshNodes = await findNodes(account, container, undefined, conRevId, {_id: {$in: meshIds}}, {shared_id: 1});
 			return { account, model:container, shared_ids: meshNodes.map(({shared_id}) => convertSharedIDsToString ? utils.uuidToString(shared_id) : shared_id)};
+		} else {
+			return { account, model:container, shared_ids: []};
 		}
 
 	}));
@@ -207,7 +210,7 @@ function getObjectsArrayAsExternalIds(data) {
 		const externalIds = await sharedIdsToExternalIds(account, model, sharedIds);
 
 		if(externalIds) {
-			return {account, model, [externalIds.key] : externalIds.value};
+			return {account, model, [externalIds.key] : externalIds.values};
 		}
 
 		return containerEntry;
@@ -264,7 +267,6 @@ Group.create = async function (account, model, branch = "master", rid = null, se
 
 		newGroup._id = utils.uuidToString(newGroup._id);
 		newGroup.objects = await getObjectIds(account, model, branch, rid, newGroup, true, false);
-
 		if (sessionId) {
 			ChatEvent.newGroups(sessionId, account, model, newGroup);
 		}
