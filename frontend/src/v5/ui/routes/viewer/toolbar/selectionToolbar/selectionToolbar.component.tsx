@@ -29,11 +29,14 @@ import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Section, Container, ClearButton, ClearIcon } from './sectionToolbar.styles';
 import { ToolbarButton } from '../buttons/toolbarButton.component';
-import { VIEWER_CLIP_MODES } from '@/v4/constants/viewer';
+import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { GizmoModeButtons } from '../buttons/buttonOptionsContainer/gizmoModeButtons.component';
 import { Viewer } from '@/v4/services/viewer/viewer';
+import { useState } from 'react';
 
 export const SectionToolbar = () => {
+	const [alignActive, setAlignActive] = useState(false);
+
 	const hasGroupOverrides = GroupsHooksSelectors.selectGroupsColourOverrides()?.length > 0;
 	const hasTicketOverrides = !isEmpty(TicketsCardHooksSelectors.selectTicketOverrides());
 	const hasOverrides = hasGroupOverrides || hasTicketOverrides;
@@ -42,6 +45,13 @@ export const SectionToolbar = () => {
 	const clippingMode = ViewerGuiHooksSelectors.selectClippingMode();
 	const clippingSectionOpen = ViewerGuiHooksSelectors.selectIsClipEdit();
 	const isBoxClippingMode = clippingMode === VIEWER_CLIP_MODES.BOX;
+
+	const onClickAlign = () => {
+		Viewer.clipToolRealign();
+		setAlignActive(true);
+		Viewer.on(VIEWER_EVENTS.UPDATE_NUM_CLIP, () => Viewer.off(VIEWER_EVENTS.UPDATE_NUM_CLIP, () => setAlignActive(false)));
+	};
+
 	return (
 		<Container>
 			<Section hidden={!clippingSectionOpen}>
@@ -55,7 +65,8 @@ export const SectionToolbar = () => {
 				<ToolbarButton
 					Icon={AlignIcon}
 					hidden={!clippingSectionOpen}
-					onClick={Viewer.clipToolRealign}
+					onClick={onClickAlign}
+					selected={alignActive}
 					title={formatMessage({ id: 'viewer.toolbar.icon.alignToSurface', defaultMessage: 'Align To Surface' })}
 				/>
 				<ToolbarButton
