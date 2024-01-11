@@ -66,7 +66,7 @@ const propertyValidator = ({ required, name, type }: PropertyDefinition) => {
 			validator = Yup.object().nullable();
 	}
 
-	if (required) {
+	if (required && type !== 'boolean') {
 		validator = validator.required(
 			formatMessage({
 				id: 'validation.ticket.requiredField',

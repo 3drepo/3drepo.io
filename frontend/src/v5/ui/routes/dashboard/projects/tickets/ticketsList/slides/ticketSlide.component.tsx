@@ -26,7 +26,7 @@ import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { TicketForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketForm.component';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { isEmpty } from 'lodash';
+import { isEmpty, set } from 'lodash';
 import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
@@ -39,16 +39,27 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<DashboardTicketsParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsHooksSelectors.selectTicketByIdRaw(containerOrFederation, ticketId);
+	const templateValidationSchema = getValidators(template);
 
 	const formData = useForm({
-		resolver: yupResolver(getValidators(template)),
+		resolver: yupResolver(templateValidationSchema),
 		mode: 'onChange',
 		defaultValues: ticket,
 	});
 
-	const onBlurHandler = () => {
-		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
-		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, formData.formState.errors)));
+	const onBlurHandler = async () => {
+		const formValues = formData.getValues();
+		let errors = {};
+		try {
+			// cannot use formState.errors because the validation for complex objects is completed after
+			// onBlur gets called, so formState.errors for those objects is updated to the previous
+			// onBlur call instead and might claim there are no errors when it's not the case
+			await templateValidationSchema.validateSync(formValues, { abortEarly: false });
+		} catch (yupError) {
+			(yupError?.inner || []).forEach(({ path, message }) => set(errors, path, { message }));
+		}
+		const values = dirtyValues(formValues, formData.formState.dirtyFields);
+		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, errors)));
 		sanitizeViewVals(validVals, ticket, template);
 		if (isEmpty(validVals)) return;
 		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticketId, validVals, isFederation);
@@ -75,6 +86,10 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 			? enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation)
 			: enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation);
 	}, [containerOrFederation]);
+
+	useEffect(() => () => {
+		onBlurHandler();
+	}, []);
 
 	if (!templateAlreadyFetched(template) || !ticket || !containerOrFederation) return (<Loader />);
 
