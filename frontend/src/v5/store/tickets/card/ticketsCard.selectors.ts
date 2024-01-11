@@ -141,7 +141,6 @@ export const selectTicketsWithAllFiltersApplied = createSelector(
 	},
 );
 
-
 export const selectTicketPins = createSelector(
 	selectTicketsWithAllFiltersApplied,
 	selectCurrentTemplates,
@@ -194,4 +193,8 @@ export const selectTicketPins = createSelector(
 			[],
 		);
 	},
+);
+
+export const selectUnsavedTicket = createSelector(
+	selectTicketsCardDomain, (state) => state.unsavedTicket || null,
 );

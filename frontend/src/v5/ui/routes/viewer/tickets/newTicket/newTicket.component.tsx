@@ -41,12 +41,21 @@ import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 
 export const NewTicketCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const unsavedTicket = TicketsCardHooksSelectors.selectUnsavedTicket();
+	const cardView = TicketsCardHooksSelectors.selectView();
 
 	const isFederation = modelIsFederation(containerOrFederation);
 	const template = TicketsCardHooksSelectors.selectSelectedTemplate();
 	const isLoading = !('config' in template);
+	const templateId = template._id;
 
-	const defaultTicket = getDefaultTicket(template);
+	let defaultTicket = getDefaultTicket(template);
+	if (
+		unsavedTicket?.containerOrFederation === containerOrFederation
+		&& unsavedTicket?.templateId === templateId
+	) {
+		defaultTicket = unsavedTicket.data;
+	}
 
 	const formData = useForm({
 		resolver: yupResolver(isLoading ? null : getTicketValidator(template)),
@@ -63,7 +72,7 @@ export const NewTicketCard = () => {
 	};
 
 	const onSubmit = async (vals) => {
-		const ticket = { type: template._id, ...vals };
+		const ticket = { type: templateId, ...vals };
 
 		const { promiseToResolve, resolve } = getWaitablePromise();
 
@@ -85,14 +94,22 @@ export const NewTicketCard = () => {
 	};
 
 	useEffect(() => {
-		if (templateAlreadyFetched(template)) return;
-		TicketsActionsDispatchers.fetchTemplate(
-			teamspace,
-			project,
-			containerOrFederation,
-			template._id,
-			isFederation,
-		);
+		if (!templateAlreadyFetched(template)) {
+			TicketsActionsDispatchers.fetchTemplate(
+				teamspace,
+				project,
+				containerOrFederation,
+				templateId,
+				isFederation,
+			);
+		}
+
+		return () => {
+			const newUnsavedTicket = (cardView === TicketsCardViews.New)
+				? { containerOrFederation, templateId, data: formData.getValues() }
+				: null;
+			TicketsCardActionsDispatchers.setUnsavedTicket(newUnsavedTicket);
+		};
 	}, []);
 
 	useEffect(() => {
