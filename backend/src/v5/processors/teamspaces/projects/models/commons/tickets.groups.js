@@ -65,25 +65,22 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 				unwanted.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
 		]);
 
-		const matchedMeshes = [];
-		const unwantedMeshes = [];
-
+		const matchedMeshes = {};
 		matchedNodes.forEach(({ _id }) => {
 			const idStr = UUIDToString(_id);
 			if (idToMeshes[idStr]) {
-				matchedMeshes.push(...idToMeshes[idStr]);
+				idToMeshes[idStr].forEach((id) => {
+					matchedMeshes[id] = stringToUUID(id);
+				});
 			}
 		});
-
 		unwantedNodes.forEach(({ _id }) => {
 			const idStr = UUIDToString(_id);
 			if (idToMeshes[idStr]) {
-				unwantedMeshes.push(...idToMeshes[idStr]);
+				idToMeshes[idStr].forEach((id) => delete matchedMeshes[id]);
 			}
 		});
-
-		const filteredMeshes = getArrayDifference(unwantedMeshes, matchedMeshes);
-		return { container: model, _ids: [...new Set(filteredMeshes)].map(stringToUUID) };
+		return { container: model, _ids: Object.values(matchedMeshes) };
 	}
 
 	if (!matched.some((m) => m.metadata)) {
