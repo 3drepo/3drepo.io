@@ -216,152 +216,140 @@ const testGetTicketGroupById = () => {
 	});
 };
 
+const getCommonTestCases = (isUpdate) => {
+	const nodes = times(10, () => ({ rev_id: generateRandomString(), shared_id: generateRandomString() }));
+	const action = isUpdate ? 'update' : 'add';
+	const metadataValue = generateRandomString();
+	const container = generateRandomString();
+
+	return [
+		{
+			desc: `should ${action} a smart group`,
+			container,
+			group: { rules: generateRandomString() },
+			containsMeshIds: false,
+		},
+		{
+			desc: `should ${action} a group without conversion if it already has external Id`,
+			container,
+			group: { objects: [{ [idTypes.IFC]: [generateRandomString()], container }] },
+			containsMeshIds: false,
+		},
+		{
+			desc: `should ${action} a group without conversion if nodes are not found`,
+			container,
+			group: { objects: [{ _ids: [generateRandomString()], container }] },
+			nodes: [],
+		},
+		{
+			desc: `should ${action} a group without conversion if metadata are not found`,
+			container,
+			group: { objects: [{ _ids: [generateRandomString()], container }] },
+			nodes,
+		},
+		{
+			desc: `should ${action} a group and convert group ids to ${[idTypes.IFC]}`,
+			container,
+			group: { objects: [{ _ids: [generateRandomString()], container }] },
+			nodes,
+			metadata: times(10,
+				() => ({ metadata: [{ key: idTypesToKeys[idTypes.IFC][0], value: metadataValue }] })),
+			convertedGroup: { objects: [{ [idTypes.IFC]: [metadataValue], container }] },
+		},
+		{
+			desc: `should ${action} a group and convert group ids to ${[idTypes.REVIT]}`,
+			container,
+			group: { objects: [{ _ids: [generateRandomString()], container }] },
+			nodes,
+			metadata: times(10,
+				() => ({ metadata: [{ key: idTypesToKeys[idTypes.REVIT][0], value: metadataValue }] })),
+			convertedGroup: { objects: [{ [idTypes.REVIT]: [metadataValue], container }] },
+		},
+	];
+};
+
 const testAddGroups = () => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
-	const container = generateRandomString();
-	const revision = generateRandomString();
 	const ticket = generateRandomString();
+	const externalIdKeys = Object.values(idTypesToKeys).flat();
 
-	describe('Add groups', () => {
-		test('should add smart groups', async () => {
-			const smartGroups = times(10, () => ({ rules: generateRandomString() }));
-			await Groups.addGroups(teamspace, project, container, ticket, smartGroups);
+	const runTest = ({ desc, container, group, nodes, metadata, convertedGroup, containsMeshIds = true }) => {
+		test(desc, async () => {
+			if (containsMeshIds) {
+				ScenesModel.getNodesByIds.mockResolvedValueOnce(nodes);
+			}
 
-			expect(GroupsModel.addGroups).toHaveBeenCalledTimes(1);
-			expect(GroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, container, ticket, smartGroups);
-		});
+			if (nodes?.length) {
+				MetaModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
+			}
 
-		test('should add groups without conversion if they already have external Id', async () => {
-			const groups = times(10, () => ({
-				objects: [{ [idTypes.IFC]: [generateRandomString()], container: generateRandomString() }],
-			}));
-			await Groups.addGroups(teamspace, project, container, ticket, groups);
+			await Groups.addGroups(teamspace, project, container, ticket, [group]);
 
 			expect(GroupsModel.addGroups).toHaveBeenCalledTimes(1);
-			expect(GroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, container, ticket, groups);
+			expect(GroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, container,
+				ticket, [convertedGroup ?? group]);
+
+			if (containsMeshIds) {
+				expect(ScenesModel.getNodesByIds).toHaveBeenCalledTimes(1);
+				expect(ScenesModel.getNodesByIds).toHaveBeenCalledWith(teamspace, project, container,
+					// eslint-disable-next-line no-underscore-dangle
+					group.objects[0]._ids, { _id: 0, shared_id: 1, rev_id: 1 });
+			}
+
+			if (nodes?.length) {
+				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
+				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container,
+					{ rev_id: nodes[0].rev_id, parents: { $in: nodes.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } },
+					{ metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } });
+			}
 		});
+	};
 
-		describe.each([
-			['preserve object as it is (no metadata found)', undefined, []],
-			[`convert object ids to ${[idTypes.IFC]}`, [idTypes.IFC], times(10, () => ({ metadata: [{ key: idTypesToKeys[idTypes.IFC][0], value: generateRandomString() }] }))],
-			[`convert object ids to ${[idTypes.REVIT]}`, [idTypes.REVIT], times(10, () => ({ metadata: [{ key: idTypesToKeys[idTypes.REVIT][0], value: generateRandomString() }] }))],
-		])('Convert Ids and add groups', (desc, externalIdName, metadata) => {
-			test(`should ${desc} and add groups`, async () => {
-				const groups = times(10, () => ({
-					objects: [{ _ids: [generateRandomString()], container: generateRandomString() }],
-				}));
-				const sharedIds = times(10, () => ({ rev_id: revision, shared_id: generateRandomString() }));
-
-				times(groups.length, () => {
-					ScenesModel.getNodesByIds.mockResolvedValueOnce(sharedIds);
-					MetaModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
-				});
-
-				await Groups.addGroups(teamspace, project, container, ticket, groups);
-
-				expect(ScenesModel.getNodesByIds).toHaveBeenCalledTimes(groups.length);
-				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(groups.length);
-
-				const convertedGroups = groups.map((group) => {
-					const convertedObjects = group.objects.map((obj) => {
-						expect(ScenesModel.getNodesByIds).toHaveBeenCalledWith(teamspace, project,
-							/* eslint-disable-next-line no-underscore-dangle */
-							obj.container, obj._ids, { _id: 0, shared_id: 1, rev_id: 1 });
-
-						const externalIdKeys = Object.values(idTypesToKeys).flat();
-						const query = { rev_id: revision, parents: { $in: sharedIds.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
-						const projection = { metadata: { $elemMatch:
-							{ $or: externalIdKeys.map((n) => ({ key: n })) } } };
-						expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, obj.container,
-							query, projection);
-
-						return metadata.length
-							? { ...obj, _ids: undefined, [externalIdName]: metadata.map((m) => m.metadata[0].value) }
-							: obj;
-					});
-					return { ...group, objects: convertedObjects };
-				});
-
-				expect(GroupsModel.addGroups).toHaveBeenCalledTimes(1);
-				expect(GroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, container,
-					ticket, convertedGroups);
-			});
-		});
-	});
+	describe.each(getCommonTestCases())('Add groups', runTest);
 };
 
 const testUpdateGroup = () => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
-	const container = generateRandomString();
-	const revision = generateRandomString();
 	const ticket = generateRandomString();
 	const groupId = generateRandomString();
 	const author = generateRandomString();
+	const externalIdKeys = Object.values(idTypesToKeys).flat();
 
-	describe('Update groups', () => {
-		test('should update a group', async () => {
-			const data = generateRandomObject();
-			await Groups.updateTicketGroup(teamspace, project, container, ticket, groupId, data, author);
+	const runTest = ({ desc, container, group, nodes, metadata, convertedGroup, containsMeshIds = true }) => {
+		test(desc, async () => {
+			if (containsMeshIds) {
+				ScenesModel.getNodesByIds.mockResolvedValueOnce(nodes);
+			}
+
+			if (nodes?.length) {
+				MetaModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
+			}
+
+			await Groups.updateTicketGroup(teamspace, project, container, ticket, groupId, group, author);
 
 			expect(GroupsModel.updateGroup).toHaveBeenCalledTimes(1);
-			expect(GroupsModel.updateGroup).toHaveBeenCalledWith(teamspace, project, container, ticket, groupId,
-				data, author);
+			expect(GroupsModel.updateGroup).toHaveBeenCalledWith(teamspace, project, container,
+				ticket, groupId, convertedGroup ?? group, author);
+
+			if (containsMeshIds) {
+				expect(ScenesModel.getNodesByIds).toHaveBeenCalledTimes(1);
+				expect(ScenesModel.getNodesByIds).toHaveBeenCalledWith(teamspace, project, container,
+					// eslint-disable-next-line no-underscore-dangle
+					group.objects[0]._ids, { _id: 0, shared_id: 1, rev_id: 1 });
+			}
+
+			if (nodes?.length) {
+				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
+				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container,
+					{ rev_id: nodes[0].rev_id, parents: { $in: nodes.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } },
+					{ metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } });
+			}
 		});
+	};
 
-		test('should update a group without conversion if it already has external Id', async () => {
-			const data = { objects: [{ [idTypes.IFC]: [generateRandomString()], container: generateRandomString() }] };
-			await Groups.updateTicketGroup(teamspace, project, container, ticket, groupId, data, author);
-
-			expect(GroupsModel.updateGroup).toHaveBeenCalledTimes(1);
-			expect(GroupsModel.updateGroup).toHaveBeenCalledWith(teamspace, project, container, ticket, groupId,
-				data, author);
-		});
-
-		describe.each([
-			['preserve object as it is (no metadata found)', undefined, []],
-			[`convert object ids to ${[idTypes.IFC]}`, [idTypes.IFC], times(10, () => ({ metadata: [{ key: idTypesToKeys[idTypes.IFC][0], value: generateRandomString() }] }))],
-			[`convert object ids to ${[idTypes.REVIT]}`, [idTypes.REVIT], times(10, () => ({ metadata: [{ key: idTypesToKeys[idTypes.REVIT][0], value: generateRandomString() }] }))],
-		])('Convert Ids and update groups', (desc, externalIdName, metadata) => {
-			test(`should ${desc} and update groups`, async () => {
-				const data = { objects: times(10, () => ({
-					_ids: [generateRandomString()], container: generateRandomString() })) };
-				const sharedIds = times(10, () => ({ shared_id: generateRandomString(), rev_id: revision }));
-
-				times(data.objects.length, () => {
-					ScenesModel.getNodesByIds.mockResolvedValueOnce(sharedIds);
-					MetaModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
-				});
-
-				await Groups.updateTicketGroup(teamspace, project, container, ticket, groupId, data, author);
-
-				expect(ScenesModel.getNodesByIds).toHaveBeenCalledTimes(data.objects.length);
-				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(data.objects.length);
-
-				data.objects = data.objects.map((obj) => {
-					/* eslint-disable-next-line no-underscore-dangle */
-					expect(ScenesModel.getNodesByIds).toHaveBeenCalledWith(teamspace, project, obj.container, obj._ids,
-						{ _id: 0, shared_id: 1, rev_id: 1 });
-
-					const externalIdKeys = Object.values(idTypesToKeys).flat();
-					const query = { rev_id: revision, parents: { $in: sharedIds.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
-					const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
-
-					expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, obj.container,
-						query, projection);
-
-					return metadata.length
-						? { ...obj, _ids: undefined, [externalIdName]: metadata.map((m) => m.metadata[0].value) }
-						: obj;
-				});
-
-				expect(GroupsModel.updateGroup).toHaveBeenCalledTimes(1);
-				expect(GroupsModel.updateGroup).toHaveBeenCalledWith(teamspace, project, container, ticket, groupId,
-					data, author);
-			});
-		});
-	});
+	describe.each(getCommonTestCases(true))('Update group', runTest);
 };
 
 describe(determineTestGroup(__filename), () => {
