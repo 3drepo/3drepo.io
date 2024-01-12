@@ -43,12 +43,13 @@ const GIZMO_OPTIONS = {
 	},
 };
 
-export const GizmoModeButtons = (props) => {
+export const GizmoModeButtons = ({ disabled, ...props }) => {
 	const [expanded, setExpanded] = useState(false);
 	const isBoxClippingMode = ViewerGuiHooksSelectors.selectClippingMode() === VIEWER_CLIP_MODES.BOX;
 	const gizmoMode = ViewerGuiHooksSelectors.selectGizmoMode();
 
 	const setMode = (mode: GizmoMode) => {
+		if (disabled) return;
 		setExpanded(false);
 		ViewerGuiActionsDispatchers.setGizmoMode(mode);
 	};
@@ -57,7 +58,7 @@ export const GizmoModeButtons = (props) => {
 
 	return (
 		<ClickAwayListener onClickAway={() => setExpanded(false)}>
-			<ButtonOptionsContainer>
+			<ButtonOptionsContainer disabled={disabled}>
 				{expanded && (
 					<FloatingButtonsContainer>
 						{gizmoMode !== VIEWER_GIZMO_MODES.TRANSLATE && <FloatingGizmoButton mode={VIEWER_GIZMO_MODES.TRANSLATE} />}
@@ -65,7 +66,7 @@ export const GizmoModeButtons = (props) => {
 						{gizmoMode !== VIEWER_GIZMO_MODES.ROTATE && <FloatingGizmoButton mode={VIEWER_GIZMO_MODES.ROTATE} />}
 					</FloatingButtonsContainer>
 				)}
-				<ToolbarButton Icon={GIZMO_OPTIONS[gizmoMode].Icon} onClick={() => setExpanded(!expanded)} title={!expanded ? GIZMO_OPTIONS[gizmoMode].title : ''} {...props} />
+				<ToolbarButton Icon={GIZMO_OPTIONS[gizmoMode].Icon} onClick={() => setExpanded(!expanded)} title={!expanded ? GIZMO_OPTIONS[gizmoMode].title : ''} disabled={disabled} {...props} />
 			</ButtonOptionsContainer>
 		</ClickAwayListener>
 	);

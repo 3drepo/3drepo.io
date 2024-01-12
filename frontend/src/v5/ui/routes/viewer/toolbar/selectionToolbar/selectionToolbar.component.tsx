@@ -66,7 +66,7 @@ export const SectionToolbar = () => {
 	return (
 		<Container>
 			<Section hidden={!clippingSectionOpen}>
-				<GizmoModeButtons hidden={!clippingSectionOpen} />
+				<GizmoModeButtons hidden={!clippingSectionOpen} disabled={alignActive} />
 				<ToolbarButton
 					Icon={FlipPlaneIcon}
 					hidden={!clippingSectionOpen || isBoxClippingMode}
