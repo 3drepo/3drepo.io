@@ -34,18 +34,6 @@ let agent;
 const generateBasicData = () => {
 	const template = ServiceHelper.generateTemplate(false, true);
 	const con = ServiceHelper.generateRandomModel();
-	const ticket = ServiceHelper.generateTicket(template);
-
-	Object.keys(ticket.properties).forEach((prop) => {
-		const property = ticket.properties[prop];
-		if (property.state) {
-			property.state.hidden.forEach((hidden) => {
-				// eslint-disable-next-line no-param-reassign
-				hidden.group.objects = hidden.group.objects
-					? hidden.group.objects.map((obj) => ({ ...obj, container: con._id })) : undefined;
-			});
-		}
-	});
 
 	return ({
 		users: {
@@ -60,7 +48,7 @@ const generateBasicData = () => {
 		con,
 		fed: ServiceHelper.generateRandomModel({ isFederation: true, properties: { subModels: [{ _id: con._id }] } }),
 		template,
-		ticket,
+		ticket: ServiceHelper.generateTicket(template, false, con._id),
 	});
 };
 

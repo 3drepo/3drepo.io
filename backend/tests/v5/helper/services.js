@@ -504,7 +504,7 @@ ServiceHelper.generateTemplate = (deprecated, hasView = false) => ({
 	...deleteIfUndefined({ deprecated }),
 });
 
-const generateProperties = (propTemplate, internalType) => {
+const generateProperties = (propTemplate, internalType, container) => {
 	const properties = {};
 
 	propTemplate.forEach(({ name, deprecated, type }) => {
@@ -520,7 +520,7 @@ const generateProperties = (propTemplate, internalType) => {
 				state: {
 					hidden: [
 						{ group: ServiceHelper.generateGroup(true, { serialised: true, hasId: false }) },
-						{ group: ServiceHelper.generateGroup(false, { serialised: true, hasId: false }) },
+						{ group: ServiceHelper.generateGroup(false, { serialised: true, hasId: false, container }) },
 					],
 				},
 			};
@@ -537,19 +537,19 @@ ServiceHelper.generateRandomObject = () => ({
 	[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
 });
 
-ServiceHelper.generateTicket = (template, internalType = false) => {
+ServiceHelper.generateTicket = (template, internalType = false, container) => {
 	const modules = {};
 	template.modules.forEach(({ name, type, deprecated, properties }) => {
 		if (deprecated) return;
 		const id = name ?? type;
-		modules[id] = generateProperties(properties, internalType);
+		modules[id] = generateProperties(properties, internalType, container);
 	});
 
 	const ticket = {
 		_id: ServiceHelper.generateUUIDString(),
 		type: template._id,
 		title: ServiceHelper.generateRandomString(),
-		properties: generateProperties(template.properties, internalType),
+		properties: generateProperties(template.properties, internalType, container),
 		modules,
 	};
 
