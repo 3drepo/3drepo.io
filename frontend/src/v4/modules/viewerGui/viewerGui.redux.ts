@@ -48,7 +48,6 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	updateClipModeSuccess: ['mode'],
 	setClipEdit: ['isClipEdit'],
 	updateClipEditSuccess: ['isClipEdit'],
-	setClipNumber: ['clipNumber'],
 	setGizmoMode: ['mode'],
 	setGizmoModeSuccess: ['mode'],
 	updateClipMode: ['clipMode'],
@@ -78,7 +77,6 @@ export interface IViewerGuiState {
 	helicopterSpeed: number;
 	isFocusMode: boolean;
 	isClipEdit: boolean;
-	clipNumber: number;
 	isPinDropMode: boolean;
 	pinData: any;
 }
@@ -96,7 +94,6 @@ export const INITIAL_STATE: IViewerGuiState = {
 	helicopterSpeed: INITIAL_HELICOPTER_SPEED,
 	isFocusMode: false,
 	isClipEdit: false,
-	clipNumber: 0,
 	isPinDropMode: false,
 	pinData: null,
 };
@@ -177,10 +174,6 @@ const updateClipEditSuccess = (state = INITIAL_STATE, { isClipEdit }) => {
 	return { ...state, isClipEdit };
 };
 
-const setClipNumber = (state = INITIAL_STATE, { clipNumber }) => {
-	return { ...state, clipNumber };
-};
-
 const setIsPinDropModeSuccess = (state = INITIAL_STATE, { isPinDropMode }) => {
 	return { ...state, isPinDropMode };
 };
@@ -210,7 +203,6 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerGuiTypes.SET_HELICOPTER_SPEED] : setHelicopterSpeed,
 	[ViewerGuiTypes.SET_IS_FOCUS_MODE] : setIsFocusMode,
 	[ViewerGuiTypes.UPDATE_CLIP_EDIT_SUCCESS] : updateClipEditSuccess,
-	[ViewerGuiTypes.SET_CLIP_NUMBER] : setClipNumber,
 	[ViewerGuiTypes.SET_COORD_VIEW_SUCCESS] : setCoordViewSuccess,
 	[ViewerGuiTypes.SET_IS_PIN_DROP_MODE_SUCCESS]: setIsPinDropModeSuccess,
 	[ViewerGuiTypes.SET_PIN_DATA]: setPinData,

@@ -46,9 +46,7 @@ import { TreeActions } from '../tree';
 import { selectInitialView, selectViewpointsDomain, selectViewpointsList, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
 import { ViewerGuiActions, ViewerGuiTypes } from './viewerGui.redux';
 import {
-	selectClipNumber,
 	selectClippingMode,
-	selectGizmoMode,
 	selectHelicopterSpeed,
 	selectIsClipEdit,
 } from './viewerGui.selectors';

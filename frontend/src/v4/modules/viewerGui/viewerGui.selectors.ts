@@ -89,10 +89,6 @@ export const selectIsClipEdit = createSelector(
 	selectViewerGuiDomain, (state) => state.isClipEdit
 );
 
-export const selectClipNumber = createSelector(
-	selectViewerGuiDomain, (state) => state.clipNumber
-);
-
 export const selectColorOverrides = createSelector(
 	selectViewsOverrides, selectGroupsOverrides, selectTicketOverrides, selectSelectedFrameColors,
 		(viewsOverrides, groupsOverrides, ticketsOverrides, sequenceFrameOverrides ) =>
