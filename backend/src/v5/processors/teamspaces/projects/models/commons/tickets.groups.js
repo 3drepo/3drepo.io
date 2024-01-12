@@ -15,19 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, deleteGroups, getGroupById, getGroupsByIds, updateGroup } = require('../../../../../models/tickets.groups');
 const { getArrayDifference, getCommonElements } = require('../../../../../utils/helper/arrays');
 const {
 	getExternalIdsFromMetadata,
-	getIdToMeshesMapping,
 	getMeshesWithParentIds,
 	sharedIdsToExternalIds,
-} = require('./scene');
+} = require('./scenes');
 const { getMetadataByRules, getMetadataWithMatchingData } = require('../../../../../models/metadata');
-const { getNodesByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { idTypes, idTypesToKeys } = require('../../../../../models/metadata.constants');
 const { getLatestRevision } = require('../../../../../models/revisions');
+const { getNodesByIds } = require('../../../../../models/scenes');
+const { stringToUUID } = require('../../../../../utils/helper/uuids');
 
 const TicketGroups = {};
 
@@ -48,33 +47,17 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 	const { matched, unwanted } = await getMetadataByRules(teamspace, project, model, revision, rules, projection);
 
 	if (returnMeshIds) {
-		const idToMeshes = await getIdToMeshesMapping(teamspace, model, revision);
 		const [
-			matchedNodes,
-			unwantedNodes,
+			matchedMeshIds,
+			unwantedMeshIds,
 		] = await Promise.all([
-			matched.length ? getNodesBySharedIds(teamspace, project, model, revision,
-				matched.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
-			unwanted.length ? getNodesBySharedIds(teamspace, project, model, revision,
-				unwanted.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
+			matched.length ? getMeshesWithParentIds(teamspace, project, model, revision,
+				matched.flatMap(({ parents }) => parents), true) : Promise.resolve([]),
+			unwanted.length ? getMeshesWithParentIds(teamspace, project, model, revision,
+				unwanted.flatMap(({ parents }) => parents), true) : Promise.resolve([]),
 		]);
 
-		const matchedMeshes = {};
-		matchedNodes.forEach(({ _id }) => {
-			const idStr = UUIDToString(_id);
-			if (idToMeshes[idStr]) {
-				idToMeshes[idStr].forEach((id) => {
-					matchedMeshes[id] = stringToUUID(id);
-				});
-			}
-		});
-		unwantedNodes.forEach(({ _id }) => {
-			const idStr = UUIDToString(_id);
-			if (idToMeshes[idStr]) {
-				idToMeshes[idStr].forEach((id) => delete matchedMeshes[id]);
-			}
-		});
-		return { container: model, _ids: Object.values(matchedMeshes) };
+		return { container: model, _ids: getArrayDifference(unwantedMeshIds, matchedMeshIds).map(stringToUUID) };
 	}
 
 	const defaultType = Object.keys(idTypes)[0];
@@ -82,15 +65,15 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 
 	if (!matched.length) return res;
 
-	const wantedIds = getExternalIdsFromMetadata(matched);
+	const wantedIds = await getExternalIdsFromMetadata(matched);
 	if (wantedIds) {
 		if (unwanted.length) {
 			const unwantedIds = getExternalIdsFromMetadata(unwanted, wantedIds.key);
 			if (unwantedIds) {
-				wantedIds.value = getArrayDifference(unwantedIds.value, wantedIds.value);
+				wantedIds.values = getArrayDifference(unwantedIds.values, wantedIds.values);
 			}
 		}
-		res = { container: model, [wantedIds.type]: wantedIds.value };
+		res = { container: model, [wantedIds.type]: wantedIds.values };
 	}
 
 	return res;

@@ -23,20 +23,20 @@ const { getFile } = require('../../../../../services/filesManager');
 const { getMetadataByQuery } = require('../../../../../models/metadata');
 const { getNodesBySharedIds } = require('../../../../../models/scenes');
 
-Scene.getIdToMeshesMapping = async (teamspace, model, revId) => {
+const getIdToMeshesMapping = async (teamspace, model, revId) => {
 	const fileData = await getFile(teamspace, `${model}.stash.json_mpc`, `${UUIDToString(revId)}/idToMeshes.json`);
 	return JSON.parse(fileData);
 };
 
-Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, parentIds) => {
+Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, parentIds, returnString = false) => {
 	const nodes = await getNodesBySharedIds(teamspace, project, container, revision, parentIds, { _id: 1 });
-	const idToMeshes = await Scene.getIdToMeshesMapping(teamspace, container, revision);
+	const idToMeshes = await getIdToMeshesMapping(teamspace, container, revision);
 	const meshes = [];
 	nodes.forEach(({ _id }) => {
 		const idStr = UUIDToString(_id);
 		if (idToMeshes[idStr]) {
 			idToMeshes[idStr].forEach((id) => {
-				meshes.push(stringToUUID(id));
+				meshes.push(returnString ? id : stringToUUID(id));
 			});
 		}
 	});

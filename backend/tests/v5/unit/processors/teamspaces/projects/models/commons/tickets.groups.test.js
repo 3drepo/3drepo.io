@@ -36,6 +36,9 @@ const MetaModel = require(`${src}/models/metadata`);
 jest.mock('../../../../../../../../src/v5/models/scenes');
 const ScenesModel = require(`${src}/models/scenes`);
 
+jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/scenes');
+const SceneProcessor = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
+
 jest.mock('../../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 
@@ -60,14 +63,14 @@ const getSmartTicketGroupById = () => {
 	};
 
 	describe.each([
-		['when it is a container group', defaultOptions],
+		['xxxwhen it is a container group', defaultOptions],
 		['when it is a federation group', { ...defaultOptions, containers: [container] }],
 		['when getLatestRevision fails', { ...defaultOptions, containers: [container], latestRevisionFail: true }],
 		['when there is a negative query', { ...defaultOptions, unwantedMeta: defaultOptions.matchedMeta.slice(5) }],
 		['when there are no matches', { ...defaultOptions, matchedMeta: [] }],
-		['with ifc guids', { ...defaultOptions, convertToMeshIds: false, externalIdName: [idTypes.IFC] }],
-		['with revit ids', { ...defaultOptions, convertToMeshIds: false, externalIdName: [idTypes.REVIT], matchedMeta: getMetadata(idTypesToKeys[idTypes.REVIT][0]) }],
-		['when returnMeshIds is true but no metadata are found', { ...defaultOptions, convertToMeshIds: false, noMetaFound: true, matchedMeta: [{ parents: times(2, () => generateRandomString()) }] }],
+		['with ifc guids', { ...defaultOptions, convertToMeshIds: false, externalIdName: idTypes.IFC }],
+		['with revit ids', { ...defaultOptions, convertToMeshIds: false, externalIdName: idTypes.REVIT, matchedMeta: getMetadata(idTypesToKeys[idTypes.REVIT][0]) }],
+		['when returnMeshIds is false but no metadata are found', { ...defaultOptions, convertToMeshIds: false, noMetaFound: true, matchedMeta: [{ parents: times(2, () => generateRandomString()) }] }],
 		['with ifc guids (with negative query)', { ...defaultOptions, convertToMeshIds: false, externalIdName: [idTypes.IFC], unwantedMeta: defaultOptions.matchedMeta.slice(0, 5) }],
 	])('Get ticket group by Id (smart group)', (desc, options) => {
 		test(`should return the group found ${desc}`, async () => {
@@ -111,10 +114,21 @@ const getSmartTicketGroupById = () => {
 					const ids = nodeRes.slice(1, nodeRes.length - options.unwantedMeta.length).map(({ _id }) => _id);
 
 					expectedData = { ...options.group, objects: ids.length ? [{ container, _ids: ids }] : [] };
+				} else if (options.noMetaFound) {
+					expectedData = { ...options.group, objects: [] };
 				} else {
+					const expectedValues = options.matchedMeta.map(({ metadata }) => metadata[0].value);
+					SceneProcessor.getExternalIdsFromMetadata.mockResolvedValueOnce(
+						{ type: options.externalIdName, values: expectedValues });
+
+					if (options.unwantedMeta) {
+						SceneProcessor.getExternalIdsFromMetadata.mockResolvedValueOnce(
+							{ type: options.externalIdName,
+								values: options.unwantedMeta.map(({ metadata }) => metadata[0].value) });
+					}
+
 					expectedData = { ...options.group,
-						objects: options.noMetaFound ? [] : [{ container,
-							[options.externalIdName]: options.matchedMeta.map((m) => m.metadata[0].value) }] };
+						objects: [{ container, [options.externalIdName]: expectedValues }] };
 				}
 			}
 
