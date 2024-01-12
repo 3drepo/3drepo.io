@@ -30,6 +30,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useContext, useEffect } from 'react';
 import { InputController } from '@controls/inputs/inputController.component';
+import { getWaitablePromise } from '@/v5/helpers/async.helpers';
+import { merge } from 'lodash';
 import { BottomArea, CloseButton, Form, SaveButton } from './newTicket.styles';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ViewerParams } from '../../../routes.constants';
@@ -37,7 +39,6 @@ import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component
 import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { CardContent } from '../ticketsForm/ticketsForm.styles';
 import { TicketsCardViews } from '../tickets.constants';
-import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 
 export const NewTicketCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
@@ -54,7 +55,7 @@ export const NewTicketCard = () => {
 		unsavedTicket?.containerOrFederation === containerOrFederation
 		&& unsavedTicket?.templateId === templateId
 	) {
-		defaultTicket = unsavedTicket.data;
+		defaultTicket = merge(defaultTicket, unsavedTicket.data);
 	}
 
 	const formData = useForm({
@@ -91,6 +92,7 @@ export const NewTicketCard = () => {
 		);
 
 		await promiseToResolve;
+		TicketsCardActionsDispatchers.setUnsavedTicket(null);
 	};
 
 	useEffect(() => {
