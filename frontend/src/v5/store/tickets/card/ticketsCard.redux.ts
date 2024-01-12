@@ -35,7 +35,7 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	setReadOnly: ['readOnly'],
 	resetState: [],
 	setOverrides: ['overrides'],
-	setUnsavedTicket: ['containerOrFederation', 'template', 'data'],
+	setUnsavedTicket: ['unsavedTicket'],
 }, { prefix: 'TICKETS_CARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
 export interface ITicketsCardState {
