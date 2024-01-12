@@ -196,11 +196,9 @@ export const goToView = async (view: Viewpoint) => {
 		return;
 	}
 
-	const { clippingPlanes: currentClippingPlanes } = await ViewerService.getCurrentViewpoint();
-	const newView = !isEmpty(view.clippingPlanes) ? view : { ...view, clippingPlanes: currentClippingPlanes };
 	
 	dispatch(GroupsActions.clearColorOverrides());
-	await ViewerService.setViewpoint(newView);
+	await ViewerService.setViewpoint(view);
 	const overrides = toColorAndTransparencyDicts(view?.state?.colored || []);
 	TicketsCardActionsDispatchers.setOverrides(overrides);
 
