@@ -212,7 +212,9 @@ function* updateClipMode({ clipMode }) {
 
 		if (currentClipMode !== clipMode) {
 			yield put(ViewerGuiActions.updateClipModeSuccess(clipMode));
-			yield put(ViewerGuiActions.setClipEdit(!!clipMode));
+		}
+		if (!clipMode) {
+			yield put(ViewerGuiActions.updateClipEdit(null));
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('update', 'clip mode', error));

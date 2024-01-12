@@ -2109,11 +2109,21 @@ export class UnityUtil {
 	 * @param account - name of teamspace
 	 * @param model - name of model
 	 */
-	public static updateClippingPlanes(clipPlane: object, requireBroadcast: boolean, account?: string, model?: string) {
+	public static updateClippingPlanes(clipPlane: any, requireBroadcast: boolean, account?: string, model?: string) {
 		const param: any = {};
 		param.clip = clipPlane;
 		if (account && model) {
 			param.nameSpace = `${account}.${model}`;
+		}
+		if (!clipPlane?.length) {
+			UnityUtil.viewer.stopClipEdit();
+			UnityUtil.viewer.setClipMode(null);
+		}
+		if (clipPlane?.length === 1) {
+			UnityUtil.viewer.setClipMode('SINGLE');
+		}
+		if (clipPlane?.length === 6) {
+			UnityUtil.viewer.setClipMode('BOX');
 		}
 		param.requiresBroadcast = requireBroadcast;
 		UnityUtil.toUnity('UpdateClip', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
@@ -2126,6 +2136,7 @@ export class UnityUtil {
 	 */
 	public static disableClippingPlanes() {
 		UnityUtil.toUnity('DisableClip', undefined, undefined);
+		UnityUtil.viewer.stopClipEdit();
 	}
 
 	/**

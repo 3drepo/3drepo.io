@@ -151,7 +151,7 @@ const setNavigationModeSuccess = (state = INITIAL_STATE, { mode }) => {
 };
 
 const updateClipModeSuccess = (state = INITIAL_STATE, { mode }) => {
-	return { ...state, clippingMode: mode, isClipEdit: !!mode };
+	return { ...state, clippingMode: mode };
 };
 
 const setGizmoModeSuccess = (state = INITIAL_STATE, { mode }) => {

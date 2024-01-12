@@ -1237,16 +1237,21 @@ export class ViewerService {
 		} else {
 			this.startBoxClip();
 		}
+		this.emit(VIEWER_EVENTS.UPDATE_CLIP_EDIT, true);
+	}
+
+	public setClipMode(mode) {
+		this.emit(VIEWER_EVENTS.UPDATE_CLIP_MODE, mode);
 	}
 
 	public startBoxClip() {
 		UnityUtil.startBoxClip();
-		this.emit(VIEWER_EVENTS.UPDATE_CLIP_MODE, 'BOX');
+		this.setClipMode('BOX')
 	}
 
 	public startSingleClip() {
 		UnityUtil.startSingleClip();
-		this.emit(VIEWER_EVENTS.UPDATE_CLIP_MODE, 'SINGLE');
+		this.setClipMode('SINGLE')
 	}
 
 	public startClipEdit() {
