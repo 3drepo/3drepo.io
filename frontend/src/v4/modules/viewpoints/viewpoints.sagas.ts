@@ -30,7 +30,6 @@ import { createGroupsFromViewpoint, generateViewpoint,
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
-import { GroupsActions } from '../groups';
 import { IssuesActions } from '../issues';
 import { ModelActions } from '../model';
 import { selectCurrentRevisionId } from '../model';
@@ -195,7 +194,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 		}
 
 		if (viewpoint.override_groups) {
-			yield put(GroupsActions.clearColorOverrides());
+			yield put(ViewerGuiActions.clearColorOverrides());
 		}
 
 		yield put(TreeActions.clearCurrentlySelected());
@@ -285,6 +284,16 @@ export function* cacheGroupsFromViewpoint({ viewpoint,  groupsData }) {
 	yield all(groups.map((group) => put(ViewpointsActions.fetchGroupSuccess(group))));
 }
 
+export function* clearColorOverrides() {
+	const viewpoint = yield select(selectSelectedViewpoint);
+	if (viewpoint?.override_groups?.length) {
+		yield put(ViewpointsActions.setSelectedViewpoint({
+			...viewpoint,
+			override_groups: [],
+		}));
+	}
+}
+
 export function* setActiveViewpoint({ teamspace, modelId, view }) {
 	try {
 		if (view) {
@@ -350,4 +359,5 @@ export default function* ViewpointsSaga() {
 	yield takeEvery(ViewpointsTypes.CACHE_GROUPS_FROM_VIEWPOINT, cacheGroupsFromViewpoint);
 	yield takeEvery(ViewpointsTypes.SHOW_PRESET, showPreset);
 	yield takeEvery(ViewpointsTypes.FETCH_VIEWPOINT_GROUPS, fetchViewpointGroups);
+	yield takeEvery(ViewpointsTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
 }

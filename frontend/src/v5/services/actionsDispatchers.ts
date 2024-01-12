@@ -53,7 +53,6 @@ interface IGroupsActionCreators {
 	isolateGroups: (groupIds: string[]) => Action;
 	setActiveGroup: (group: any) => Action;
 	showDetails: (group: any) => Action;
-	clearColorOverrides: () => Action;
 	clearSelectionHighlights: (shouldClearTree?: boolean) => Action;
 }
 
@@ -83,6 +82,7 @@ interface IViewerGuiActionCreators {
 	setPanelVisibility: (panelName: string, visible: boolean) => Action;
 	updateClipState: (clipNumber: number) => Action;
 	setClipEdit: (isClipEdit: boolean) => Action;
+	clearColorOverrides: () => Action;
 }
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
