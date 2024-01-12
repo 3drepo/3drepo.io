@@ -24,10 +24,10 @@ import EyeShowIcon from '@assets/icons/viewer/eye_show.svg';
 import EyeIsolateIcon from '@assets/icons/viewer/eye_isolate.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { GroupsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { GroupsHooksSelectors, TicketsCardHooksSelectors, TreeHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TreeHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { Section, Container, ClearButton, ClearIcon } from './sectionToolbar.styles';
+import { Section, Container, ClearButton, ClearIcon } from './selectionToolbar.styles';
 import { ToolbarButton } from '../buttons/toolbarButton.component';
 import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { GizmoModeButtons } from '../buttons/buttonOptionsContainer/gizmoModeButtons.component';
@@ -37,9 +37,7 @@ import { useEffect, useState } from 'react';
 export const SectionToolbar = () => {
 	const [alignActive, setAlignActive] = useState(false);
 
-	const hasGroupOverrides = GroupsHooksSelectors.selectGroupsColourOverrides()?.length > 0;
-	const hasTicketOverrides = !isEmpty(TicketsCardHooksSelectors.selectTicketOverrides());
-	const hasOverrides = hasGroupOverrides || hasTicketOverrides;
+	const hasOverrides = !isEmpty(ViewerGuiHooksSelectors.selectColorOverrides());
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectFullySelectedNodesIds().length;
 	const hasHiddenObjects = TreeHooksSelectors.selectModelHasHiddenNodes();
 	const clippingMode = ViewerGuiHooksSelectors.selectClippingMode();
@@ -98,7 +96,7 @@ export const SectionToolbar = () => {
 				<ToolbarButton
 					Icon={ClearOverridesIcon}
 					hidden={!hasOverrides}
-					onClick={GroupsActionsDispatchers.clearColorOverrides}
+					onClick={ViewerGuiActionsDispatchers.clearColorOverrides}
 					title={formatMessage({ id: 'viewer.toolbar.icon.clearOverrides', defaultMessage: 'Clear Overrides' })}
 				/>
 			</Section>

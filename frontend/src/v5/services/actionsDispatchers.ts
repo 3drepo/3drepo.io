@@ -53,12 +53,12 @@ interface IGroupsActionCreators {
 	isolateGroups: (groupIds: string[]) => Action;
 	setActiveGroup: (group: any) => Action;
 	showDetails: (group: any) => Action;
-	clearColorOverrides: () => Action;
 	clearSelectionHighlights: (shouldClearTree?: boolean) => Action;
 }
 
 interface ISequencesActionCreators {
-	showSequenceDate: (date: Date) => Action;
+	showSequenceDate: (date: Date | null) => Action;
+	setSelectedDate: (date: Date | null) => Action;
 }
 
 interface IJobsActionCreators {
@@ -83,6 +83,7 @@ interface IViewerGuiActionCreators {
 	setCoordView: (visible: boolean) => Action;
 	setPanelVisibility: (panelName: string, visible: boolean) => Action;
 	setClipEdit: (isClipEdit: boolean) => Action;
+	clearColorOverrides: () => Action;
 }
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);

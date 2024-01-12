@@ -20,8 +20,9 @@ import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { goBack } from 'connected-react-router';
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
-import { isUndefined } from 'lodash';
-import { INITIAL_HELICOPTER_SPEED, VIEWER_CLIP_MODES, VIEWER_EVENTS, VIEWER_GIZMO_MODES } from '../../constants/viewer';
+import { TicketsCardActions } from '@/v5/store/tickets/card/ticketsCard.redux';
+import { ROUTES } from '../../constants/routes';
+import { INITIAL_HELICOPTER_SPEED, VIEWER_GIZMO_MODES, VIEWER_EVENTS } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Viewer } from '../../services/viewer/viewer';
@@ -395,6 +396,13 @@ function* setIsPinDropMode({ mode }: { mode: boolean }) {
 	}
 }
 
+function * clearColorOverrides() {
+	yield put(GroupsActions.clearColorOverridesSuccess());
+	yield put(ViewpointsActions.clearColorOverrides());
+	yield put(TicketsCardActions.setOverrides(null));
+	yield put(SequencesActions.clearColorOverrides());
+}
+
 export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.FETCH_DATA, fetchData);
 	yield takeLatest(ViewerGuiTypes.RESET_PANELS_STATES, resetPanelsStates);
@@ -418,4 +426,5 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.SET_PROJECTION_MODE, setProjectionMode);
 	yield takeLatest(ViewerGuiTypes.LOAD_MODEL, loadModel);
 	yield takeLatest(ViewerGuiTypes.SET_IS_PIN_DROP_MODE, setIsPinDropMode);
+	yield takeLatest(ViewerGuiTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
 }
