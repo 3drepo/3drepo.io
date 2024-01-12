@@ -17,11 +17,11 @@
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, deleteGroups, getGroupById, getGroupsByIds, updateGroup } = require('../../../../../models/tickets.groups');
-const { getArrayDifference, getCommonElements } = require('../../../../../utils/helper/arrays');
 const { getIdToMeshesMapping, getMeshesWithParentIds } = require('./scene');
 const { getMetadataByQuery, getMetadataByRules, getMetadataWithMatchingData } = require('../../../../../models/metadata');
 const { getNodesByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { idTypes, idTypesToKeys } = require('../../../../../models/metadata.constants');
+const { getCommonElements } = require('../../../../../utils/helper/arrays');
 const { getLatestRevision } = require('../../../../../models/revisions');
 
 const TicketGroups = {};
