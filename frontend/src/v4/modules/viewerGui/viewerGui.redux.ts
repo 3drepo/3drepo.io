@@ -45,13 +45,11 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	decreaseHelicopterSpeed: ['teamspace', 'modelId'],
 	setIsFocusMode: ['isFocusMode'],
 	setClippingMode: ['mode'],
-	updateClipModeSuccess: ['mode'],
+	setClipModeSuccess: ['mode'],
 	setClipEdit: ['isClipEdit'],
-	updateClipEditSuccess: ['isClipEdit'],
+	setClipEditSuccess: ['isClipEdit'],
 	setGizmoMode: ['mode'],
 	setGizmoModeSuccess: ['mode'],
-	updateClipMode: ['clipMode'],
-	updateClipEdit: ['clipEdit'],
 	setIsPinDropMode: ['mode'],
 	setIsPinDropModeSuccess: ['isPinDropMode'],
 	setPinData: ['pinData'],
@@ -150,7 +148,7 @@ const setNavigationModeSuccess = (state = INITIAL_STATE, { mode }) => {
 	return { ...state, navigationMode: mode };
 };
 
-const updateClipModeSuccess = (state = INITIAL_STATE, { mode }) => {
+const setClipModeSuccess = (state = INITIAL_STATE, { mode }) => {
 	return { ...state, clippingMode: mode };
 };
 
@@ -170,7 +168,7 @@ const setIsModelLoaded = (state = INITIAL_STATE, { isModelLoaded }) => {
 	return { ...state, isModelLoaded };
 };
 
-const updateClipEditSuccess = (state = INITIAL_STATE, { isClipEdit }) => {
+const setClipEditSuccess = (state = INITIAL_STATE, { isClipEdit }) => {
 	return { ...state, isClipEdit };
 };
 
@@ -198,11 +196,11 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerGuiTypes.SET_IS_MODEL_LOADED] : setIsModelLoaded,
 	[ViewerGuiTypes.SET_NAVIGATION_MODE_SUCCESS] : setNavigationModeSuccess,
 	[ViewerGuiTypes.SET_PROJECTION_MODE_SUCCESS] : setProjectionModeSuccess,
-	[ViewerGuiTypes.UPDATE_CLIP_MODE_SUCCESS] : updateClipModeSuccess,
+	[ViewerGuiTypes.SET_CLIP_MODE_SUCCESS] : setClipModeSuccess,
 	[ViewerGuiTypes.SET_GIZMO_MODE_SUCCESS] : setGizmoModeSuccess,
 	[ViewerGuiTypes.SET_HELICOPTER_SPEED] : setHelicopterSpeed,
 	[ViewerGuiTypes.SET_IS_FOCUS_MODE] : setIsFocusMode,
-	[ViewerGuiTypes.UPDATE_CLIP_EDIT_SUCCESS] : updateClipEditSuccess,
+	[ViewerGuiTypes.SET_CLIP_EDIT_SUCCESS] : setClipEditSuccess,
 	[ViewerGuiTypes.SET_COORD_VIEW_SUCCESS] : setCoordViewSuccess,
 	[ViewerGuiTypes.SET_IS_PIN_DROP_MODE_SUCCESS]: setIsPinDropModeSuccess,
 	[ViewerGuiTypes.SET_PIN_DATA]: setPinData,

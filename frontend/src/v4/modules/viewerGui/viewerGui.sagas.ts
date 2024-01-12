@@ -196,31 +196,6 @@ function* stopListenOnClickPin() {
 	}
 }
 
-function* updateClipEdit({ clipEdit }) {
-	try {
-		const currentClipEdit = yield select(selectIsClipEdit);
-		if (currentClipEdit !== clipEdit) {
-			yield put(ViewerGuiActions.updateClipEditSuccess(clipEdit));
-		}
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'clip edit', error));
-	}
-}
-function* updateClipMode({ clipMode }) {
-	try {
-		const currentClipMode = yield select(selectClippingMode);
-
-		if (currentClipMode !== clipMode) {
-			yield put(ViewerGuiActions.updateClipModeSuccess(clipMode));
-		}
-		if (!clipMode) {
-			yield put(ViewerGuiActions.updateClipEdit(null));
-		}
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'clip mode', error));
-	}
-}
-
 function* goToHomeView() {
 	try {
 		const defaultView = yield select(selectDefaultView);
@@ -311,17 +286,21 @@ function* decreaseHelicopterSpeed({ teamspace, modelId }) {
 	}
 }
 
-function* setClippingMode({mode}) {
+function* setClippingMode({ mode }) {
 	try {
-		if (mode) {
-			const isSingle = mode === VIEWER_CLIP_MODES.SINGLE;
-			yield Viewer.startClip(isSingle);
-			yield put(ViewerGuiActions.setGizmoMode(VIEWER_GIZMO_MODES.TRANSLATE));
-		} else {
-			Viewer.clipToolDelete();
+		const currentClipMode = yield select(selectClippingMode);
+		if (currentClipMode !== mode) {
+			yield all([
+				put(ViewerGuiActions.setClipModeSuccess(mode)),
+				Viewer.setClipMode(mode),
+				put(ViewerGuiActions.setGizmoMode(VIEWER_GIZMO_MODES.TRANSLATE)),
+			])
+		}
+		if (!mode) {
+			yield put(ViewerGuiActions.setClipEdit(false));
 		}
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('set', 'clipping mode', error));
+		yield put(DialogActions.showErrorDialog('set', 'clip mode', error));
 	}
 }
 
@@ -344,11 +323,17 @@ function* setGizmoMode({ mode }) {
 	}
 }
 
-function* setClipEdit({isClipEdit}) {
+function* setClipEdit({ isClipEdit }) {
 	try {
-		yield isClipEdit ? Viewer.startClipEdit() : Viewer.stopClipEdit();
+		const currentClipEdit = yield select(selectIsClipEdit);
+		if (currentClipEdit !== isClipEdit) {
+			yield all([
+				isClipEdit ? Viewer.startClipEdit() : Viewer.stopClipEdit(),
+				put(ViewerGuiActions.setClipEditSuccess(isClipEdit)),
+			])
+		}
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('toggle', 'clip edit', error));
+		yield put(DialogActions.showErrorDialog('set', 'clip edit', error));
 	}
 }
 
@@ -426,10 +411,8 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.DECREASE_HELICOPTER_SPEED, decreaseHelicopterSpeed);
 	yield takeLatest(ViewerGuiTypes.GO_TO_HOME_VIEW, goToHomeView);
 	yield takeLatest(ViewerGuiTypes.SET_CLIPPING_MODE, setClippingMode);
-	yield takeLatest(ViewerGuiTypes.UPDATE_CLIP_MODE, updateClipMode);
 	yield takeLatest(ViewerGuiTypes.SET_GIZMO_MODE, setGizmoMode);
 	yield takeLatest(ViewerGuiTypes.SET_CLIP_EDIT, setClipEdit);
-	yield takeLatest(ViewerGuiTypes.UPDATE_CLIP_EDIT, updateClipEdit);
 	yield takeLatest(ViewerGuiTypes.CLEAR_HIGHLIGHTS, clearHighlights);
 	yield takeLatest(ViewerGuiTypes.SET_CAMERA, setCamera);
 	yield takeLatest(ViewerGuiTypes.SET_PROJECTION_MODE, setProjectionMode);

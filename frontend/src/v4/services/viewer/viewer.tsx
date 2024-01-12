@@ -1241,17 +1241,21 @@ export class ViewerService {
 	}
 
 	public setClipMode(mode) {
+		if (mode) {
+			const isSingle = mode === 'SINGLE';
+			this.startClip(isSingle);
+		} else {
+			this.clipToolDelete()
+		}
 		this.emit(VIEWER_EVENTS.UPDATE_CLIP_MODE, mode);
 	}
 
 	public startBoxClip() {
 		UnityUtil.startBoxClip();
-		this.setClipMode('BOX')
 	}
 
 	public startSingleClip() {
 		UnityUtil.startSingleClip();
-		this.setClipMode('SINGLE')
 	}
 
 	public startClipEdit() {

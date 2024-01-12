@@ -82,8 +82,6 @@ interface IViewerGuiActionCreators {
 	setGizmoMode: (mode: GizmoMode) => Action;
 	setCoordView: (visible: boolean) => Action;
 	setPanelVisibility: (panelName: string, visible: boolean) => Action;
-	updateClipMode: (clipMode: ClipMode) => Action;
-	updateClipEdit: (clipEdit: boolean) => Action;
 	setClipEdit: (isClipEdit: boolean) => Action;
 }
 
