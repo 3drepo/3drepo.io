@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PureComponent } from 'react';
-
 import { Grid, Tooltip } from '@mui/material';
+import { Gap } from '@controls/gap';
+import { Toggle } from '@controls/inputs/toggle/toggle.component';
+import { FormattedMessage } from 'react-intl';
 
 import { formatShortDateTime } from '../../../../../../services/formatting/formatDate';
 import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
@@ -26,11 +27,15 @@ import {
 	SequenceItemContainer,
 	SequenceItemIcon,
 	SequenceName,
+	ToggleContainer,
 } from '../../sequences.styles';
 
 interface IProps {
 	sequences: any;
 	setSelectedSequence: (id: string) => void;
+	openOnToday: boolean;
+	setOpenOnToday: (newValue: boolean) => void;
+	showSequenceDate: (newValue: Date | null) => void;
 }
 
 const SequenceItem = ({name, modelName, startDate, endDate, onClick}) => (
@@ -51,16 +56,25 @@ const SequenceItem = ({name, modelName, startDate, endDate, onClick}) => (
 	</SequenceItemContainer>
 );
 
-export class SequencesList extends PureComponent<IProps, {}> {
-	public render = () => {
-		const { setSelectedSequence, sequences } = this.props;
+export const SequencesList = ({ setSelectedSequence, sequences, openOnToday, setOpenOnToday, showSequenceDate }: IProps) => {
+	const onSequenceClick = ({ _id }) => {
+		setSelectedSequence(_id);
+		showSequenceDate(null);
+	};
 
-		return (
-			<ViewerPanelContent>
-				{sequences.map((sequence) => (
-					<SequenceItem key={sequence._id} {...sequence} onClick={() => setSelectedSequence(sequence._id)} />
-				))}
-			</ViewerPanelContent>
-		);
-	}
-}
+	return (
+		<ViewerPanelContent>
+			{sequences.map((sequence) => (
+				<SequenceItem key={sequence._id} {...sequence} onClick={() => onSequenceClick(sequence)} />
+			))}
+			<Gap $height='48px' />
+			<ToggleContainer>
+				<Toggle onChange={() => setOpenOnToday(!openOnToday)} checked={openOnToday} />
+				<FormattedMessage
+					id="sequeneces.toggle.goToToday"
+					defaultMessage="Go to today's date when entering a sequence"
+				/>
+			</ToggleContainer>
+		</ViewerPanelContent>
+	);
+};
