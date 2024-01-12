@@ -199,7 +199,7 @@ function* stopListenOnClickPin() {
 function* updateClipEdit({ clipEdit }) {
 	try {
 		const currentClipEdit = yield select(selectIsClipEdit);
-		if (!isUndefined(clipEdit) && currentClipEdit !== clipEdit) {
+		if (currentClipEdit !== clipEdit) {
 			yield put(ViewerGuiActions.updateClipEditSuccess(clipEdit));
 		}
 	} catch (error) {
@@ -210,7 +210,7 @@ function* updateClipMode({ clipMode }) {
 	try {
 		const currentClipMode = yield select(selectClippingMode);
 
-		if (!isUndefined(clipMode) && currentClipMode !== clipMode) {
+		if (currentClipMode !== clipMode) {
 			yield put(ViewerGuiActions.updateClipModeSuccess(clipMode));
 			yield put(ViewerGuiActions.setClipEdit(!!clipMode));
 		}
