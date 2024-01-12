@@ -37,7 +37,7 @@ export const FEDERATIONS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/federations`;
 export const BOARD_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/board/:type?/:containerOrFederation?`;
 export const TICKETS_ROUTE = `${PROJECT_ROUTE_BASE_TAB}/tickets/:template/:groupBy/:containerOrFederation?`;
 
-export const PRIVACY_ROUTE = '/v5/privacy';
+export const PRIVACY_ROUTE = 'https://www.asite.com/privacy-policy';
 export const COOKIES_ROUTE = '/v5/cookies';
 export const TERMS_ROUTE = '/v5/terms';
 

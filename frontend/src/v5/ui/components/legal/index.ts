@@ -15,6 +15,5 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { PrivacyLegalPaper } from './privacy.component';
 export { CookiesLegalPaper } from './cookies.component';
 export { TermsLegalPaper } from './terms.component';
