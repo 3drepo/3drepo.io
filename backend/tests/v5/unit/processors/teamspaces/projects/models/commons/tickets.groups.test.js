@@ -39,23 +39,20 @@ const ScenesModel = require(`${src}/models/scenes`);
 jest.mock('../../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 
-const testGetTicketGroupById = () => {
+const getMetadata = (externalIdName) => times(10, () => ({ parents: times(2, () => generateRandomString()),
+	metadata: [{ key: externalIdName, value: generateRandomString() }] }));
+
+const getSmartTicketGroupById = () => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const container = generateRandomString();
 	const ticket = generateRandomString();
 	const groupId = generateRandomString();
 	const smartGroup = { rules: [generateRandomObject()] };
-	const normalGroup = { objects: [{ _ids: [times(10, () => generateRandomString())], container }] };
-	const ifcGuidGroup = { objects: [{ [idTypes.IFC]: [times(10, () => generateRandomString())], container }] };
-	const revitIdGroup = { objects: [{ [idTypes.REVIT]: [times(10, () => generateRandomString())], container }] };
-
-	const getMeta = (externalIdName) => times(10, () => ({ parents: times(2, () => generateRandomString()),
-		metadata: [{ key: externalIdName, value: generateRandomString() }] }));
 
 	const defaultOptions = {
 		group: smartGroup,
-		matchedMeta: getMeta(idTypesToKeys[idTypes.IFC][0]),
+		matchedMeta: getMetadata(idTypesToKeys[idTypes.IFC][0]),
 		unwantedMeta: [],
 		revision: generateRandomString(),
 		convertToMeshIds: true,
@@ -69,7 +66,8 @@ const testGetTicketGroupById = () => {
 		['when there is a negative query', { ...defaultOptions, unwantedMeta: defaultOptions.matchedMeta.slice(5) }],
 		['when there are no matches', { ...defaultOptions, matchedMeta: [] }],
 		['with ifc guids', { ...defaultOptions, convertToMeshIds: false, externalIdName: [idTypes.IFC] }],
-		['with revit ids', { ...defaultOptions, convertToMeshIds: false, externalIdName: [idTypes.REVIT], matchedMeta: getMeta(idTypesToKeys[idTypes.REVIT][0]) }],
+		['with revit ids', { ...defaultOptions, convertToMeshIds: false, externalIdName: [idTypes.REVIT], matchedMeta: getMetadata(idTypesToKeys[idTypes.REVIT][0]) }],
+		['when returnMeshIds is true but no metadata are found', { ...defaultOptions, convertToMeshIds: false, noMetaFound: true, matchedMeta: [{ parents: times(2, () => generateRandomString()) }] }],
 		['with ifc guids (with negative query)', { ...defaultOptions, convertToMeshIds: false, externalIdName: [idTypes.IFC], unwantedMeta: defaultOptions.matchedMeta.slice(0, 5) }],
 	])('Get ticket group by Id (smart group)', (desc, options) => {
 		test(`should return the group found ${desc}`, async () => {
@@ -115,7 +113,7 @@ const testGetTicketGroupById = () => {
 					expectedData = { ...options.group, objects: ids.length ? [{ container, _ids: ids }] : [] };
 				} else {
 					expectedData = { ...options.group,
-						objects: [{ container,
+						objects: options.noMetaFound ? [] : [{ container,
 							[options.externalIdName]: options.matchedMeta.map((m) => m.metadata[0].value) }] };
 				}
 			}
@@ -152,24 +150,48 @@ const testGetTicketGroupById = () => {
 			}
 		});
 	});
+};
+
+const getNormalTicketGroupById = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const container = generateRandomString();
+	const ticket = generateRandomString();
+	const groupId = generateRandomString();
+	const normalGroup = { objects: [{ _ids: [times(10, () => generateRandomString())], container }] };
+	const ifcGuidGroup = { objects: [{ [idTypes.IFC]: [times(10, () => generateRandomString())], container }] };
+	const revitIdGroup = { objects: [{ [idTypes.REVIT]: [times(10, () => generateRandomString())], container }] };
+
+	const defaultOptions = {
+		group: ifcGuidGroup,
+		matchedMeta: getMetadata(idTypesToKeys[idTypes.IFC][0]),
+		unwantedMeta: [],
+		revision: generateRandomString(),
+		convertToMeshIds: true,
+		latestRevisionFail: false,
+	};
 
 	describe.each([
-		['when it is a federation group', { ...defaultOptions, containers: [container], group: ifcGuidGroup, externalIdName: [idTypes.IFC] }],
-		['when convertToMeshIds set to false', { ...defaultOptions, group: ifcGuidGroup, convertToMeshIds: false }],
+		['when it is a federation group', { ...defaultOptions, containers: [container], externalIdName: [idTypes.IFC] }],
+		['when it is a federation  but the container of the group object is not part of the federation', { ...defaultOptions, externalIdName: [idTypes.IFC], invalidContainer: true, containers: [container], group: { ...ifcGuidGroup, objects: [{ container: generateRandomString() }] } }],
+		['when convertToMeshIds set to false', { ...defaultOptions, convertToMeshIds: false }],
 		['when group already stores 3d repo Ids', { ...defaultOptions, group: normalGroup }],
-		['when getLatestRevision fails', { ...defaultOptions, group: ifcGuidGroup, externalIdName: [idTypes.IFC], containers: [container], latestRevisionFail: true }],
-		['when converting from ifc guids', { ...defaultOptions, group: ifcGuidGroup, externalIdName: [idTypes.IFC] }],
+		['when getLatestRevision fails', { ...defaultOptions, externalIdName: [idTypes.IFC], containers: [container], latestRevisionFail: true }],
+		['when converting from ifc guids', { ...defaultOptions, externalIdName: [idTypes.IFC] }],
 		['when converting from revit Ids', { ...defaultOptions, group: revitIdGroup, externalIdName: [idTypes.REVIT] }],
 	])('Get ticket group by Id (normal group)', (desc, options) => {
 		test(`should return the group found ${desc}`, async () => {
 			const expectedData = cloneDeep(options.group);
 			let { revision } = options;
-			const { externalIdName, convertToMeshIds, latestRevisionFail, containers, group } = options;
+			const { externalIdName, convertToMeshIds, latestRevisionFail, containers,
+				invalidContainer, group } = options;
 
 			GroupsModel.getGroupById.mockResolvedValueOnce(cloneDeep(group));
 
 			if (convertToMeshIds && externalIdName) {
-				if (latestRevisionFail) {
+				if (invalidContainer) {
+					expectedData.objects = [];
+				} else if (latestRevisionFail) {
 					RevsModel.getLatestRevision.mockRejectedValueOnce(generateRandomString());
 					expectedData.objects = [];
 				} else {
@@ -195,7 +217,7 @@ const testGetTicketGroupById = () => {
 			await expect(Groups.getTicketGroupById(teamspace, project, container, revision, ticket,
 				groupId, convertToMeshIds, containers)).resolves.toEqual(expectedData);
 
-			if (convertToMeshIds) {
+			if (convertToMeshIds && !invalidContainer) {
 				if (containers) {
 					expect(RevsModel.getLatestRevision).toHaveBeenCalledTimes(1);
 					expect(RevsModel.getLatestRevision).toHaveBeenCalledWith(teamspace,
@@ -353,7 +375,8 @@ const testUpdateGroup = () => {
 };
 
 describe(determineTestGroup(__filename), () => {
-	testGetTicketGroupById();
+	getNormalTicketGroupById();
+	getSmartTicketGroupById();
 	testAddGroups();
 	testUpdateGroup();
 });
