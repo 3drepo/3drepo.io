@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const Container = styled.div`
 	position: relative;
@@ -32,13 +32,20 @@ export const IconContainer = styled.div`
 	}
 `;
 
-export const SequenceIconContainer = styled(IconContainer)`
+export const SequenceIconContainer = styled(IconContainer)<{ disabled?: boolean }>`
 	position: absolute;
 	right: 28px;
-	bottom: 1.5px;
+	bottom: 2px;
+	padding: 5px;
+	display: flex;
 
 	svg {
 		width: 12.5px;
 		height: 12.5px;
 	}
+
+	${({ disabled, theme }) => disabled && css`
+		cursor: unset;
+		color: ${theme.palette.base.light};
+	`}
 `;

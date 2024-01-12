@@ -22,6 +22,7 @@ import { dispatch, getState } from '@/v4/modules/store';
 import { isEmpty, isString } from 'lodash';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { TreeActions } from '@/v4/modules/tree';
+import { ViewerGuiActions } from '@/v4/modules/viewerGui';
 import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors';
 import { TicketsCardActionsDispatchers } from '../services/actionsDispatchers';
 
@@ -191,11 +192,17 @@ export const toColorAndTransparencyDicts = (overrides: GroupOverride[]): Overrid
 };
 
 export const goToView = async (view: Viewpoint) => {
+	if (isEmpty(view?.state?.colored)  && isEmpty(view?.state?.hidden) && isEmpty(view?.camera) && isEmpty(view?.clippingPlanes)) {
+		return;
+	}
+	
+	dispatch(ViewerGuiActions.clearColorOverrides());
 	await ViewerService.setViewpoint(view);
 	const overrides = toColorAndTransparencyDicts(view?.state?.colored || []);
 	TicketsCardActionsDispatchers.setOverrides(overrides);
 
 	await ViewerService.clearHighlights();
+
 
 	if (view?.state) {
 		dispatch(TreeActions.setHiddenGeometryVisible(!!view.state.showHidden));

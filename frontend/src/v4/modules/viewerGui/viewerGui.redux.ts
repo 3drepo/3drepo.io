@@ -59,6 +59,7 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	setProjectionModeSuccess: ['mode'],
 	resetPanels: [],
 	reset: [],
+	clearColorOverrides: [],
 }, { prefix: 'VIEWER_GUI/' });
 
 export interface IViewerGuiState {

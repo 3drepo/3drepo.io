@@ -20,11 +20,16 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
-import { OverridesDicts } from '../tickets.types';
+import { ITicketsFilters, OverridesDicts } from '../tickets.types';
 
 export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createActions({
 	setSelectedTicket: ['ticketId'],
 	setSelectedTemplate: ['templateId'],
+	setSelectedTicketPin: ['pinId'],
+	setTemplateFilters: ['templateIds'],
+	setQueryFilters: ['searchQueries'],
+	toggleCompleteFilter: [],
+	resetFilters: [],
 	setCardView: ['view'],
 	openTicket: ['ticketId'],
 	setReadOnly: ['readOnly'],
@@ -35,6 +40,8 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 export interface ITicketsCardState {
 	selectedTicketId: string | null,
 	selectedTemplateId: string | null,
+	selectedTicketPinId: string | null,
+	filters: ITicketsFilters,
 	view: TicketsCardViews,
 	readOnly: boolean,
 	overrides: OverridesDicts | null,
@@ -43,6 +50,12 @@ export interface ITicketsCardState {
 export const INITIAL_STATE: ITicketsCardState = {
 	selectedTicketId: null,
 	selectedTemplateId: null,
+	selectedTicketPinId: null,
+	filters: {
+		complete: false,
+		templates: [],
+		queries: [],
+	},
 	view: TicketsCardViews.List,
 	overrides: null,
 	readOnly: false,
@@ -54,6 +67,26 @@ export const setSelectedTicket = (state: ITicketsCardState, { ticketId }: SetSel
 
 export const setSelectedTemplate = (state: ITicketsCardState, { templateId }: SetSelectedTemplateAction) => {
 	state.selectedTemplateId = templateId;
+};
+
+export const setSelectedTicketPin = (state: ITicketsCardState, { pinId }: SetSelectedTicketPinAction) => {
+	state.selectedTicketPinId = pinId;
+};
+
+export const setTemplateFilters = (state: ITicketsCardState, { templateIds }: SetTemplateFiltersAction) => {
+	state.filters.templates = templateIds;
+};
+
+export const setQueryFilters = (state: ITicketsCardState, { searchQueries }: SetQueryFiltersAction) => {
+	state.filters.queries = searchQueries;
+};
+
+export const toggleCompleteFilter = (state: ITicketsCardState) => {
+	state.filters.complete = !state.filters.complete;
+};
+
+export const resetFilters = (state: ITicketsCardState) => {
+	state.filters = INITIAL_STATE.filters;
 };
 
 export const setCardView = (state: ITicketsCardState, { view }: SetCardViewAction) => {
@@ -68,14 +101,20 @@ export const setOverrides = (state: ITicketsCardState, { overrides }: SetOverrid
 	state.overrides = overrides;
 };
 
-export const resetState = ({ readOnly }: ITicketsCardState) => ({
+export const resetState = ({ filters, readOnly }: ITicketsCardState) => ({
 	...INITIAL_STATE,
+	filters,
 	readOnly,
 });
 
 export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SET_SELECTED_TICKET]: setSelectedTicket,
 	[TicketsCardTypes.SET_SELECTED_TEMPLATE]: setSelectedTemplate,
+	[TicketsCardTypes.SET_SELECTED_TICKET_PIN]: setSelectedTicketPin,
+	[TicketsCardTypes.SET_TEMPLATE_FILTERS]: setTemplateFilters,
+	[TicketsCardTypes.SET_QUERY_FILTERS]: setQueryFilters,
+	[TicketsCardTypes.TOGGLE_COMPLETE_FILTER]: toggleCompleteFilter,
+	[TicketsCardTypes.RESET_FILTERS]: resetFilters,
 	[TicketsCardTypes.SET_CARD_VIEW]: setCardView,
 	[TicketsCardTypes.SET_READ_ONLY]: setReadOnly,
 	[TicketsCardTypes.RESET_STATE]: resetState,
@@ -84,6 +123,11 @@ export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 
 export type SetSelectedTicketAction = Action<'SET_SELECTED_TICKET'> & { ticketId: string };
 export type SetSelectedTemplateAction = Action<'SET_SELECTED_TEMPLATE'> & { templateId: string };
+export type SetSelectedTicketPinAction = Action<'SET_SELECTED_TICKET_PIN'> & { pinId: string };
+export type SetTemplateFiltersAction = Action<'SET_TEMPLATE_FILTERS'> & { templateIds: string[] };
+export type SetQueryFiltersAction = Action<'SET_QUERY_FILTERS'> & { searchQueries: string[] };
+export type ToggleCompleteFilterAction = Action<'TOGGLE_COMPLETE_FILTER'>;
+export type ResetFiltersAction = Action<'RESET_FILTERS'>;
 export type SetCardViewAction = Action<'SET_CARD_VIEW'> & { view: TicketsCardViews };
 export type OpenTicketAction = Action<'OPEN_TICKET'> & { ticketId: string };
 export type SetReadOnlyAction = Action<'SET_READ_ONLY'> & { readOnly: boolean };
@@ -93,6 +137,11 @@ export type SetOverridesAction = Action<'SET_OVERRIDES'> & { overrides: Override
 export interface ITicketsCardActionCreators {
 	setSelectedTicket: (ticketId: string) => SetSelectedTicketAction,
 	setSelectedTemplate: (templateId: string) => SetSelectedTemplateAction,
+	setSelectedTicketPin: (pinId: string) => SetSelectedTicketPinAction,
+	setTemplateFilters: (templateIds: string[]) => SetTemplateFiltersAction,
+	setQueryFilters: (searchQueries: string[]) => SetQueryFiltersAction,
+	toggleCompleteFilter: () => ToggleCompleteFilterAction,
+	resetFilters: () => ResetFiltersAction,
 	setCardView: (view: TicketsCardViews) => SetCardViewAction,
 	openTicket: (ticketId: string) => OpenTicketAction,
 	setReadOnly: (readOnly: boolean) => SetReadOnlyAction,

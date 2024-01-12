@@ -47,6 +47,7 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	deleteContainerSuccess: ['projectId', 'containerId'],
 	setContainerStatus: ['projectId', 'containerId', 'status'],
 	containerProcessingSuccess: ['projectId', 'containerId', 'revision'],
+	resetContainerStatsQueue: [],
 }, { prefix: 'CONTAINERS/' }) as { Types: Constants<IContainersActionCreators>; Creators: IContainersActionCreators };
 
 export const INITIAL_STATE: IContainersState = {
@@ -275,4 +276,5 @@ export interface IContainersActionCreators {
 		containerId: string,
 		revision: IRevision
 	) => ContainerProcessingSuccessAction;
+	resetContainerStatsQueue:() => Action<'RESET_CONTAINER_STATS_QUEUE'>;
 }

@@ -97,12 +97,13 @@ export function* fetchTemplate({ teamspace, projectId, modelId, templateId, isFe
 	}
 }
 
-export function* fetchTemplates({ teamspace, projectId, modelId, isFederation }: FetchTemplatesAction) {
+export function* fetchTemplates({ teamspace, projectId, modelId, isFederation, getDetails = false }: FetchTemplatesAction) {
 	try {
 		const fetchModelTemplates = isFederation
 			? API.Tickets.fetchFederationTemplates
 			: API.Tickets.fetchContainerTemplates;
-		const templates = yield fetchModelTemplates(teamspace, projectId, modelId);
+		const templates = yield fetchModelTemplates(teamspace, projectId, modelId, getDetails);
+
 		yield put(TicketsActions.fetchTemplatesSuccess(modelId, templates));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -245,7 +246,7 @@ export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, tic
 
 export default function* ticketsSaga() {
 	yield takeEvery(TicketsTypes.FETCH_TICKETS, fetchTickets);
-	yield takeLatest(TicketsTypes.FETCH_TICKET, fetchTicket);
+	yield takeEvery(TicketsTypes.FETCH_TICKET, fetchTicket);
 	yield takeLatest(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
 	yield takeEvery(TicketsTypes.FETCH_TEMPLATE, fetchTemplate);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET, updateTicket);
