@@ -204,19 +204,24 @@ function getObjectsArrayAsExternalIds(account, model, branch, rId, data) {
 			return data;
 		}
 
-		const {_id: conRevId} = await getHistory(
-			account, containerEntry.model,
-			model === containerEntry.model ? branch : "master",
-			model === containerEntry.model && !branch ? rId : undefined,
-			{_id: 1}
-		);
+		try {
+			const {_id: conRevId} = await getHistory(
+				account, containerEntry.model,
+				model === containerEntry.model ? branch : "master",
+				model === containerEntry.model && !branch ? rId : undefined,
+				{_id: 1}
+			);
 
-		const sharedIds = containerEntry.shared_ids.map(utils.stringToUUID);
+			const sharedIds = containerEntry.shared_ids.map(utils.stringToUUID);
 
-		const externalIds = await sharedIdsToExternalIds(containerEntry.account, containerEntry.model, conRevId, sharedIds);
+			const externalIds = await sharedIdsToExternalIds(containerEntry.account, containerEntry.model, conRevId, sharedIds);
 
-		if(externalIds) {
-			return {account, model, [externalIds.key] : externalIds.values};
+			if(externalIds) {
+				return {account, model, [externalIds.key] : externalIds.values};
+			}
+		} catch {
+			// do nothing, just return the original container entry
+			// This can happen if there is no valid revision
 		}
 
 		return containerEntry;
