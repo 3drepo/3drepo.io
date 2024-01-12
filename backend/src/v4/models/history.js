@@ -34,8 +34,8 @@ History.getHistory = async function(account, model, branch, revId, projection) {
 	let history;
 
 	if (revId) {
-		if(utils.isUUIDObject(revId)) {
-			history = await History.findByUID(account, model, revId, projection);
+		if(utils.isUUIDObject(revId) || utils.isUUID(revId)) {
+			history = await History.findByUID(account, model, utils.stringToUUID(revId), projection);
 		} else {
 			history = await History.findByTag(account, model, revId, projection);
 		}
