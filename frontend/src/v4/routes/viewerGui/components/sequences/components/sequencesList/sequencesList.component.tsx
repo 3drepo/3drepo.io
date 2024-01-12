@@ -20,7 +20,7 @@ import { Gap } from '@controls/gap';
 import { Toggle } from '@controls/inputs/toggle/toggle.component';
 import { FormattedMessage } from 'react-intl';
 
-import { formatShortDate } from '../../../../../../services/formatting/formatDate';
+import { formatShortDateTime } from '../../../../../../services/formatting/formatDate';
 import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
 import {
 	SequenceDatesContainer,
@@ -48,8 +48,8 @@ const SequenceItem = ({name, modelName, startDate, endDate, onClick}) => (
 				</Tooltip>
 				<Grid item>{modelName}</Grid>
 				<SequenceDatesContainer>
-					<Grid item>Start: {formatShortDate(new Date(startDate))} </Grid>
-					<Grid item>End: {formatShortDate(new Date(endDate))} </Grid>
+					<Grid item>Start: {formatShortDateTime(new Date(startDate))} </Grid>
+					<Grid item>End: {formatShortDateTime(new Date(endDate))} </Grid>
 				</SequenceDatesContainer>
 			</Grid>
 		</Grid>

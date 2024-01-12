@@ -34,6 +34,7 @@ import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { TreeActions, TreeTypes, selectTreeNodesList } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
+import { SequencesActions } from '../sequences';
 import { GroupsActions, GroupsTypes, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
 import {
 	selectActiveGroupDetails,
@@ -368,12 +369,6 @@ function* setNewGroup() {
 	}
 }
 
-function * clearColorOverrides() {
-	yield put(GroupsActions.clearColorOverridesSuccess());
-	yield put(ViewpointsActions.setSelectedViewpoint(null));
-	yield put(TicketsCardActions.setOverrides(null));
-}
-
 function * setOverrideAll({overrideAll}) {
 	if (!overrideAll) {
 		yield put(GroupsActions.clearColorOverridesSuccess());
@@ -478,7 +473,6 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.SUBSCRIBE_ON_CHANGES, subscribeOnChanges);
 	yield takeLatest(GroupsTypes.UNSUBSCRIBE_FROM_CHANGES, unsubscribeFromChanges);
 	yield takeLatest(GroupsTypes.RESET_TO_SAVED_SELECTION, resetToSavedSelection);
-	yield takeLatest(GroupsTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
 	yield takeLatest(GroupsTypes.SET_OVERRIDE_ALL, setOverrideAll);
 	yield takeLatest(GroupsTypes.SET_SHOW_SMART_GROUPS, setShowSmartGroups);
 	yield takeLatest(GroupsTypes.SET_SHOW_STANDARD_GROUPS, setShowStandardGroups);

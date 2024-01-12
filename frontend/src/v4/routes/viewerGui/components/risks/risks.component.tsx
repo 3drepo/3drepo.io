@@ -87,14 +87,6 @@ export class Risks extends PureComponent<IProps, any> {
 		return getHeaderMenuItems(this.props);
 	}
 
-	get showDefaultHiddenItems() {
-		if (this.props.selectedFilters.length) {
-			return this.props.selectedFilters
-				.some(({ value: { value } }) => RISK_DEFAULT_HIDDEN_LEVELS.includes(value));
-		}
-		return false;
-	}
-
 	public renderDetailsView = renderWhenTrue(() => (
 		<RiskDetails
 			teamspace={this.props.teamspace}
@@ -160,7 +152,6 @@ export class Risks extends PureComponent<IProps, any> {
 			<RisksContainer
 				isPending={this.props.isPending}
 				items={this.props.risks}
-				showDefaultHiddenItems={this.showDefaultHiddenItems}
 				activeItemId={this.props.activeRiskId}
 				showDetails={this.props.showDetails}
 				permissions={this.props.modelSettings.permissions}

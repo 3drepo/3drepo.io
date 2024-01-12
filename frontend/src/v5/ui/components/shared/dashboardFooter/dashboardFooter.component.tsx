@@ -17,6 +17,7 @@
 
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
+import { PRIVACY_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { FooterContainer, FooterItem, FooterItems, FooterLogo } from './dashboardFooter.styles';
 
 type IDashboardFooter = {
@@ -28,7 +29,7 @@ export const DashboardFooter = ({ variant = 'light' }: IDashboardFooter): JSX.El
 		<FooterLogo />
 		<FooterItems>
 			<FooterItem>
-				<Link to="/v5/privacy">
+				<Link to={{ pathname: PRIVACY_ROUTE }} target="_blank" rel="noopener noreferrer">
 					<FormattedMessage id="dashboardFooter.privacy" defaultMessage="Privacy" />
 				</Link>
 			</FooterItem>

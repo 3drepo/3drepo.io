@@ -19,16 +19,15 @@ import EyeHideIcon from '@assets/icons/viewer/eye_hide.svg';
 import EyeShowIcon from '@assets/icons/viewer/eye_show.svg';
 import EyeIsolateIcon from '@assets/icons/viewer/eye_isolate.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { GroupsActionsDispatchers, TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { GroupsHooksSelectors, TicketsCardHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
+import { GroupsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TreeHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
-import { Section, Container } from './sectionToolbar.styles';
+import { FormattedMessage } from 'react-intl';
+import { Section, Container, ClearButton, ClearIcon } from './selectionToolbar.styles';
 import { ToolbarButton } from '../buttons/toolbarButton.component';
 
 export const SectionToolbar = () => {
-	const hasGroupOverrides = GroupsHooksSelectors.selectGroupsColourOverrides()?.length > 0;
-	const hasTicketOverrides = !isEmpty(TicketsCardHooksSelectors.selectTicketOverrides());
-	const hasOverrides = hasGroupOverrides || hasTicketOverrides;
+	const hasOverrides = !isEmpty(ViewerGuiHooksSelectors.selectColorOverrides());
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectFullySelectedNodesIds().length;
 	const hasHiddenObjects = TreeHooksSelectors.selectModelHasHiddenNodes();
 
@@ -38,7 +37,7 @@ export const SectionToolbar = () => {
 				<ToolbarButton
 					Icon={ClearOverridesIcon}
 					hidden={!hasOverrides}
-					onClick={GroupsActionsDispatchers.clearColorOverrides}
+					onClick={ViewerGuiActionsDispatchers.clearColorOverrides}
 					title={formatMessage({ id: 'viewer.toolbar.icon.clearOverrides', defaultMessage: 'Clear Overrides' })}
 				/>
 			</Section>
@@ -61,6 +60,13 @@ export const SectionToolbar = () => {
 					onClick={() => TreeActionsDispatchers.isolateSelectedNodes(undefined)}
 					title={formatMessage({ id: 'viewer.toolbar.icon.isolate', defaultMessage: 'Isolate' })}
 				/>
+				<ClearButton
+					hidden={!hasHighlightedObjects}
+					onClick={() => GroupsActionsDispatchers.clearSelectionHighlights()}
+				>
+					<ClearIcon />
+					<FormattedMessage id="viewer.toolbar.icon.clearSelection" defaultMessage="Clear Selection" />
+				</ClearButton>
 			</Section>
 		</Container>
 	);

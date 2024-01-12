@@ -29,7 +29,7 @@ import { TextField } from '../../../../../components/textField/textField.compone
 import { UpdateButtons } from '../../../updateButtons/updateButtons.component';
 import { AutoSuggestField } from '../autoSuggestField/autosuggestField.component';
 import { LevelOfRisk } from '../levelOfRisk/levelOfRisk.component';
-import { NAMED_MONTH_DATE_FORMAT } from '../../../../../../services/formatting/formatDate';
+import { NAMED_MONTH_DATETIME_FORMAT } from '../../../../../../services/formatting/formatDate';
 import { DateField } from '../../../../../components/dateField/dateField.component';
 
 import {
@@ -255,7 +255,8 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 							<DateFieldContainer>
 								<DateField
 									{...field}
-									inputFormat={NAMED_MONTH_DATE_FORMAT}
+									dateTime
+									inputFormat={NAMED_MONTH_DATETIME_FORMAT}
 									disabled={!canEditBasicProperty}
 									placeholder="Choose a due date"
 								/>

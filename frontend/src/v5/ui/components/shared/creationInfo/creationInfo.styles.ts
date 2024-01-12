@@ -21,14 +21,14 @@ export const CreationInfoContainer = styled.div`
 	display: flex;
 	${({ theme }) => theme.typography.caption};
 	color: ${({ theme }) => theme.palette.base.main};
-	padding: 0 10px;
+	padding-left: 10px;
 	gap: 2px;
 `;
 
 export const TruncateName = styled.div`
 	display: inline-block;
 	text-decoration: underline;
-	max-width: 90px;
+	max-width: 65px;
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;

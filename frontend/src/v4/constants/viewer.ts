@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { USE_BETA_VIEWER } from '../modules/viewer/betaViewer.helpers';
-
 export const VIEWER_NAV_MODES = {
 	HELICOPTER: 'HELICOPTER',
 	TURNTABLE: 'TURNTABLE'
@@ -99,7 +97,6 @@ export const VIEWER_ERRORS = {
 };
 
 export const DEFAULT_SETTINGS = {
-	[USE_BETA_VIEWER]: true,
 	viewerBackgroundColor: [0.95, 0.96, 0.99],
 	shadows: 'none',
 	xray: true,

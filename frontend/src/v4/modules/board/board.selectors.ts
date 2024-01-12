@@ -96,10 +96,10 @@ const selectJobsValues = createSelector(
 });
 
 const selectIssues = createSelector(
-	selectBoardDomain,  selectShowClosedIssues, selectAllFilteredIssuesGetter,
+	selectBoardDomain, selectShowClosedIssues, selectAllFilteredIssuesGetter,
 	({ filterProp }, showClosedIssues, selectAllFilteredIssuessGetter) => {
 		const forceShowHidden = filterProp === ISSUE_FILTER_PROPS.status.value || showClosedIssues;
-		return  selectAllFilteredIssuessGetter(forceShowHidden);
+		return selectAllFilteredIssuessGetter(forceShowHidden, true);
 	}
 );
 
@@ -107,7 +107,7 @@ const selectRisks = createSelector(
 	selectBoardDomain, selectAllFilteredRisksGetter,
 	({ filterProp }, risksGetter) => {
 		const forceShowHidden = filterProp === RISK_FILTER_PROPS.mitigation_status.value;
-		return risksGetter(forceShowHidden);
+		return risksGetter(forceShowHidden, true);
 	}
 );
 

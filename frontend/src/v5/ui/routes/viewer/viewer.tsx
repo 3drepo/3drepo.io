@@ -26,6 +26,9 @@ import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/che
 import { ViewerParams } from '../routes.constants';
 import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
 import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
+import { SpinnerLoader } from '@controls/spinnerLoader';
+import { CentredContainer } from '@controls/centredContainer';
+import { TicketsCardViews } from './tickets/tickets.constants';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -46,6 +49,7 @@ export const Viewer = () => {
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 
 	const handlePinClick = ({ id }) => {
+		TicketsCardActionsDispatchers.setSelectedTicketPin(id);
 		if (!tickets.some((t) => t._id === id)) return;
 
 		TicketsCardActionsDispatchers.openTicket(id);
@@ -70,12 +74,14 @@ export const Viewer = () => {
 	}, [project]);
 
 	useEffect(() => {
+		TicketsCardActionsDispatchers.resetFilters();
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
 		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
 	}, [teamspace, project, containerOrFederation]);
 
 	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
 
-	if (isLoading) return null;
+	if (isLoading) return (<CentredContainer horizontal vertical><SpinnerLoader /></CentredContainer>);
 
 	if (selectedContainer?.revisionsCount === 0) {
 		return <InvalidContainerOverlay status={selectedContainer.status} />;

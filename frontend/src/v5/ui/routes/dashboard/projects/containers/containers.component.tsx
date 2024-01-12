@@ -28,7 +28,7 @@ import { enableRealtimeNewContainer } from '@/v5/services/realtime/container.eve
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { CONTAINERS_SEARCH_FIELDS } from '@/v5/store/containers/containers.helpers';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ContainersActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
@@ -47,6 +47,7 @@ export const Containers = (): JSX.Element => {
 	const onClickCreate = () => DialogsActionsDispatchers.open(CreateContainerForm);
 
 	useEffect(() => enableRealtimeNewContainer(teamspace, project), [project]);
+	useEffect(() => () => {ContainersActionsDispatchers.resetContainerStatsQueue();}, [] );
 
 	if (isListPending) {
 		return (<DashboardSkeletonList itemComponent={<SkeletonListItem />} />);

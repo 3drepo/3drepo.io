@@ -26,8 +26,6 @@ import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWith
 import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { Highlight } from '@controls/highlight';
-import { useContext } from 'react';
-import { SearchContext } from '@controls/search/searchContext';
 import { Ticket, Id, Title, ChipList, Assignees, IssuePropertiesRow } from './ticketItem.styles';
 import { IssueProperties, SafetibaseProperties } from '../../tickets.constants';
 
@@ -39,8 +37,7 @@ type TicketItemProps = {
 
 export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const { query } = useContext(SearchContext);
-	const queries = query ? JSON.parse(query) : [];
+	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
 
 	const isFederation = modelIsFederation(containerOrFederation);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
@@ -54,7 +51,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const onBlurAssignees = (newVals) => {
 		if (!isEqual(newVals, assignees)) updateTicketProperty({ [IssueProperties.ASSIGNEES]: newVals });
 	};
-	const onBlurDueDate = (newVal) => {
+	const onChangeDueDate = (newVal) => {
 		if (newVal !== dueDate) updateTicketProperty({ [IssueProperties.DUE_DATE]: newVal });
 	};
 
@@ -85,7 +82,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			</ChipList>
 			{priority && (
 				<IssuePropertiesRow>
-					<DueDateWithLabel value={dueDate} onBlur={onBlurDueDate} disabled={readOnly} />
+					<DueDateWithLabel value={dueDate} onChange={onChangeDueDate} disabled={readOnly} />
 					<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" label="" />
 					<Assignees value={assignees} onBlur={onBlurAssignees} disabled={readOnly} />
 				</IssuePropertiesRow>

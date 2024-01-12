@@ -30,11 +30,10 @@ import { selectHiddenGeometryVisible,  TreeActions } from '../tree';
 import { selectCacheSetting } from '../viewer';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { ViewpointsActions } from '../viewpoints';
-import { GroupsActions } from '../groups';
 import { getDateWithinBoundaries, getSelectedFrame, MODAL_DATE_NOT_AVAILABLE_BODY, MODAL_TODAY_NOT_AVAILABLE_BODY } from './sequences.helper';
 import {
 	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates, selectSelectedDate, selectSelectedFrameViewpoint,
-	selectSelectedSequence, selectSequences, selectSequenceModel, selectOpenOnToday,
+	selectSelectedSequence, selectSequences, selectSequenceModel, selectOpenOnToday, selectSelectedFrame, selectSelectedStateDefinition,
 } from './sequences.selectors';
 import { selectSelectedSequenceId, selectStateDefinitions,
 	SequencesActions, SequencesTypes } from '.';
@@ -178,6 +177,12 @@ function * prefetchFrames() {
 	yield all(keyframes.map((d) => put(SequencesActions.fetchFrame(d))));
 }
 
+function* setSelectedStateDefinition() {
+	const selectedFrame = yield select(selectSelectedFrame);
+	const stateDefinitions = yield select(selectStateDefinitions);
+	yield put(SequencesActions.setSelectedStateDefinition(stateDefinitions[selectedFrame?.state]));
+}
+
 export function* setSelectedDate({ date }) {
 	try {
 		const selectedSequence = yield select(selectSelectedSequence);
@@ -207,6 +212,7 @@ export function* setSelectedDate({ date }) {
 			yield put(SequencesActions.prefetchFrames());
 			yield showFrameViewpoint();
 		}
+		yield setSelectedStateDefinition();
 
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('select frame', 'sequences', error));
@@ -221,7 +227,7 @@ export function* initializeSequences() {
 }
 
 export function* restoreModelDefaultVisibility() {
-	yield put(GroupsActions.clearColorOverrides());
+	yield put(ViewerGuiActions.clearColorOverrides());
 	yield put(TreeActions.showAllNodes());
 	yield put(TreeActions.showHiddenGeometry());
 }
@@ -275,6 +281,16 @@ function* handleTransparenciesVisibility({ transparencies }) {
 	}
 }
 
+export function* clearColorOverrides() {
+	const selectedStateDefinition = yield select(selectSelectedStateDefinition);
+	if (selectedStateDefinition?.color?.length) {
+		yield put(SequencesActions.setSelectedStateDefinition({
+			...selectedStateDefinition,
+			color: [],
+		}));
+	}
+}
+
 export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCE, fetchSequence);
 	yield takeLatest(SequencesTypes.FETCH_SEQUENCE_LIST, fetchSequenceList);
@@ -288,4 +304,5 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.PREFETCH_FRAMES, prefetchFrames);
 	yield takeLatest(SequencesTypes.SHOW_SEQUENCE_DATE, showSequenceDate);
 	yield takeLatest(SequencesTypes.HANDLE_TRANSPARENCIES_VISIBILITY, handleTransparenciesVisibility);
+	yield takeLatest(SequencesTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
 }

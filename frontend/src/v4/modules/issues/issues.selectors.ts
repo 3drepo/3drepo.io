@@ -118,17 +118,20 @@ export const selectSelectedFilters = createSelector(
 
 export const selectAllFilteredIssuesGetter = createSelector(
 	selectIssues, selectSelectedFilters, selectSortOrder, selectSortByField,
-		(issues, selectedFilters, sortOrder, sortByField) => (forceReturnHiddenIssue = false) =>  {
-			const returnHiddenIssue = selectedFilters.length && selectedFilters
-				.some(({ value: { value } }) => ISSUE_DEFAULT_HIDDEN_STATUSES.includes(value));
+	(issues, selectedFilters, sortOrder, sortByField) => (forceReturnHiddenIssue = false, ignoreFilters = false) =>  {
+		const returnHiddenIssue = selectedFilters.length && selectedFilters
+			.some(({ value: { value } }) => ISSUE_DEFAULT_HIDDEN_STATUSES.includes(value));
 
-			return sortByDate(searchByFilters(issues, selectedFilters, returnHiddenIssue || forceReturnHiddenIssue),
-				{ order: sortOrder }, sortByField );
-		}
+		return sortByDate(
+			searchByFilters(issues, ignoreFilters ? [] : selectedFilters, returnHiddenIssue || forceReturnHiddenIssue),
+			{ order: sortOrder },
+			sortByField,
+		);
+	}
 );
 
 export const selectFilteredIssues = createSelector(
-	selectAllFilteredIssuesGetter, (allFilteredIssuesGetter) => allFilteredIssuesGetter()
+	selectAllFilteredIssuesGetter, (allFilteredIssuesGetter) => allFilteredIssuesGetter(true)
 );
 
 export const selectShowPins = createSelector(

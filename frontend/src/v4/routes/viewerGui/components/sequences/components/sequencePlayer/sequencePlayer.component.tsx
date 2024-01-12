@@ -339,6 +339,7 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 							<Select value={stepScale} onChange={this.onChangeStepScale} >
 								<MenuItem value={STEP_SCALE.HOUR}>hour(s)</MenuItem>
 								<MenuItem value={STEP_SCALE.DAY}>day(s)</MenuItem>
+								<MenuItem value={STEP_SCALE.WEEK}>week(s)</MenuItem>
 								<MenuItem value={STEP_SCALE.MONTH}>month(s)</MenuItem>
 								<MenuItem value={STEP_SCALE.YEAR}>year(s)</MenuItem>
 								<MenuItem value={STEP_SCALE.FRAME}>frame(s)</MenuItem>
