@@ -18,7 +18,7 @@
 const Scene = {};
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { idTypesToKeys, metaKeyToIdType } = require('../../../../../models/metadata.constants');
+const { idTypes, idTypesToKeys, metaKeyToIdType } = require('../../../../../models/metadata.constants');
 const { getFile } = require('../../../../../services/filesManager');
 const { getMetadataByQuery } = require('../../../../../models/metadata');
 const { getNodesBySharedIds } = require('../../../../../models/scenes');
@@ -45,6 +45,9 @@ Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, p
 
 Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 	const res = {};
+
+	Object.values(idTypes).forEach((v) => { res[v] = []; });
+
 	metadata.forEach((entry) => {
 		// It may be possible that we are storing the same id in multiple metadata entries.
 		// So we are keeping track of what we've already found
@@ -56,26 +59,24 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 			if (!idType || idCounted.has(idType)) return;
 
 			idCounted.add(idType);
-
-			if (!res[idType]) {
-				res[idType] = [value];
-			} else {
-				res[idType].push(value);
-			}
+			res[idType].push(value);
 		});
 	});
 
 	// If there is a specific type the user wanted, return them
 	// This is currently explicity used for differencing therefore we don't care if
 	// we can't represent them all - we may need to add a partial flag in the future
-	if (wantedType) return res[wantedType];
+	if (wantedType) return { key: wantedType, values: res[wantedType] };
 
 	// If we are determining the type, make sure we have a record for each metadata
 	const targetCount = metadata.length;
 
-	for (const idType of Object.keys(res)) {
-		if (res[idType].length === targetCount) {
-			return { key: idType, values: res[idType] };
+	if (targetCount) {
+		for (const idType of Object.keys(res)) {
+			if (res[idType].length === targetCount) {
+				// convert to set to purge duplicates
+				return { key: idType, values: Array.from(new Set(res[idType])) };
+			}
 		}
 	}
 

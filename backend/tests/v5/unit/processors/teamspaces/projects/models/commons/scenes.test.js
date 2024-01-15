@@ -18,9 +18,16 @@
 const { times } = require('lodash');
 
 const { src } = require('../../../../../../helper/path');
-const { determineTestGroup, generateRandomString, generateUUID, generateUUIDString } = require('../../../../../../helper/services');
+const {
+	determineTestGroup,
+	generateRandomString,
+	generateUUID,
+	generateUUIDString,
+	generateRandomIfcGuid,
+	generateRandomRvtId,
+} = require('../../../../../../helper/services');
 const { UUIDToString, stringToUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
-// const { idTypesToKeys, idTypes } = require('../../../../../../../../src/v5/models/metadata.constants');
+const { idTypesToKeys, idTypes, metaKeyToIdType } = require('../../../../../../../../src/v5/models/metadata.constants');
 
 const Scenes = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
 
@@ -88,6 +95,54 @@ const testGetMeshesWithParentIds = () => {
 	});
 };
 
+const testGetExternalIdsFromMetadata = () => {
+	const generateMeta = (ifc, revit) => {
+		const metadata = [{ key: generateRandomString(), value: generateRandomString() }];
+
+		if (revit) {
+			metadata.push(...Object.values(idTypesToKeys[idTypes.REVIT]).map((key) => ({
+				key, value: revit,
+			})));
+		}
+
+		if (ifc) {
+			metadata.push(...Object.values(idTypesToKeys[idTypes.IFC]).map((key) => ({
+				key, value: ifc,
+			})));
+		}
+
+		return { metadata };
+	};
+
+	const ifcOnlyMeta = times(4, () => generateMeta(generateRandomIfcGuid()));
+	const rvtOnlyMeta = times(4, () => generateMeta(undefined, generateRandomRvtId()));
+	const bothMeta = times(4, () => generateMeta(generateRandomIfcGuid(), generateRandomRvtId()));
+
+	const getIDsFromMeta = (meta, targetType) => meta.flatMap(({ metadata }) => {
+		for (const { key, value } of metadata) {
+			if (metaKeyToIdType[key] === targetType) return value;
+		}
+		return [];
+	});
+
+	describe.each([
+		['undefined if metadata is empty', []],
+		['ifc guids if matched', ifcOnlyMeta, undefined, { key: idTypes.IFC, values: getIDsFromMeta(ifcOnlyMeta, idTypes.IFC) }],
+		['rvt ids if matched', rvtOnlyMeta, undefined, { key: idTypes.REVIT, values: getIDsFromMeta(rvtOnlyMeta, idTypes.REVIT) }],
+		['ifc guids if both rvt and ifc matched', bothMeta, undefined, { key: idTypes.IFC, values: getIDsFromMeta(bothMeta, idTypes.IFC) }],
+		['revit ids if requested', bothMeta, idTypes.REVIT, { key: idTypes.REVIT, values: getIDsFromMeta(bothMeta, idTypes.REVIT) }],
+		['partial match of a specific id if requested', [...ifcOnlyMeta, ...rvtOnlyMeta], idTypes.REVIT, { key: idTypes.REVIT, values: getIDsFromMeta(rvtOnlyMeta, idTypes.REVIT) }],
+		['undefined if partial match and no specific type is requested', [...ifcOnlyMeta, ...rvtOnlyMeta]],
+		['all unique values', [...ifcOnlyMeta, ...ifcOnlyMeta], undefined, { key: idTypes.IFC, values: getIDsFromMeta(ifcOnlyMeta, idTypes.IFC) }],
+
+	])('Get external ids from metadata', (desc, metadata, wantedType, expectedResults) => {
+		test(`Should return ${desc}`, () => {
+			expect(Scenes.getExternalIdsFromMetadata(metadata, wantedType)).toEqual(expectedResults);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetMeshesWithParentIds();
+	testGetExternalIdsFromMetadata();
 });
