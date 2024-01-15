@@ -101,9 +101,12 @@ function clean(groupData) {
 	cleanArray(groupData, "transformation");
 
 	for (let i = 0; groupData.objects && i < groupData.objects.length; i++) {
-		if (groupData.objects[i][idTypes.IFC]) {
-			cleanArray(groupData.objects[i], idTypes.IFC);
-		}
+		Object.values(idTypes).forEach((idType) => {
+			if (groupData.objects[i][idType]) {
+				cleanArray(groupData.objects[i], idType);
+			}
+		});
+
 		if (groupData.objects[i].shared_ids) {
 			cleanArray(groupData.objects[i], "shared_ids");
 			groupData.objects[i].shared_ids = groupData.objects[i].shared_ids.map(x => utils.uuidToString(x));
@@ -111,7 +114,9 @@ function clean(groupData) {
 	}
 
 	if(groupData.objects) {
-		groupData.objects = groupData.objects.filter(obj => obj.ifc_guids || obj.shared_ids);
+		groupData.objects = groupData.objects.filter(({shared_ids, ...extIds}) => {
+			return shared_ids || Object.keys(extIds).some((v) => Object.values(idTypes).includes(v));
+		});
 	}
 
 	delete groupData.__v;
@@ -123,15 +128,16 @@ function getGroupCollectionName(model) {
 	return model + ".groups";
 }
 
-function getObjectIds(account, model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids = false) {
+async function getObjectIds(account, model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids = false) {
 	if (groupData.rules && groupData.rules.length > 0) {
 		return Meta.findObjectIdsByRules(account, model, groupData.rules, branch, revId, convertSharedIDsToString, showIfcGuids);
 	} else {
-		return getObjectsArray(model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids);
+		const res = await getObjectsArray(model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids);
+		return res;
 	}
 }
 
-function getObjectsArray(model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids = false) {
+async function getObjectsArray(model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids = false) {
 
 	return Promise.all(groupData.objects.map(async({account, model:container, shared_ids, ...extIds}) => {
 
@@ -179,6 +185,7 @@ function getObjectsArray(model, branch, revId, groupData, convertSharedIDsToStri
 		}
 
 	}));
+
 }
 
 /**
@@ -205,6 +212,7 @@ function getObjectsArrayAsExternalIds(account, model, branch, rId, data) {
 		}
 
 		try {
+
 			const {_id: conRevId} = await getHistory(
 				account, containerEntry.model,
 				model === containerEntry.model ? branch : "master",
@@ -426,7 +434,6 @@ Group.update = async function (account, model, branch = "master", revId = null, 
 			if (Object.keys(toUnset).length > 0) {
 				updateBson.$unset = toUnset;
 			}
-
 			await db.updateOne(account, getGroupCollectionName(model), { _id: group._id }, updateBson);
 		}
 
