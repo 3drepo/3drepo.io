@@ -252,7 +252,7 @@ const getCommonTestCases = (isUpdate) => {
 			nodes: [],
 		},
 		{
-			desc: `should ${action} a group without conversion if metadata are not found`,
+			desc: `should ${action} a group without conversion if external ids are not found`,
 			container,
 			group: { objects: [{ _ids: [generateRandomString()], container }] },
 			nodes,
@@ -262,8 +262,7 @@ const getCommonTestCases = (isUpdate) => {
 			container,
 			group: { objects: [{ _ids: [generateRandomString()], container }] },
 			nodes,
-			metadata: times(10,
-				() => ({ metadata: [{ key: idTypesToKeys[idTypes.IFC][0], value: metadataValue }] })),
+			convertedResults: { type: idTypes.IFC, values: [metadataValue] },
 			convertedGroup: { objects: [{ [idTypes.IFC]: [metadataValue], container }] },
 		},
 		{
@@ -271,8 +270,7 @@ const getCommonTestCases = (isUpdate) => {
 			container,
 			group: { objects: [{ _ids: [generateRandomString()], container }] },
 			nodes,
-			metadata: times(10,
-				() => ({ metadata: [{ key: idTypesToKeys[idTypes.REVIT][0], value: metadataValue }] })),
+			convertedResults: { type: idTypes.REVIT, values: [metadataValue] },
 			convertedGroup: { objects: [{ [idTypes.REVIT]: [metadataValue], container }] },
 		},
 	];
@@ -282,16 +280,15 @@ const testAddGroups = () => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const ticket = generateRandomString();
-	const externalIdKeys = Object.values(idTypesToKeys).flat();
 
-	const runTest = ({ desc, container, group, nodes, metadata, convertedGroup, containsMeshIds = true }) => {
+	const runTest = ({ desc, container, group, nodes, convertedResults, convertedGroup, containsMeshIds = true }) => {
 		test(desc, async () => {
 			if (containsMeshIds) {
 				ScenesModel.getNodesByIds.mockResolvedValueOnce(nodes);
 			}
 
 			if (nodes?.length) {
-				MetaModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
+				SceneProcessor.sharedIdsToExternalIds.mockResolvedValueOnce(convertedResults);
 			}
 
 			await Groups.addGroups(teamspace, project, container, ticket, [group]);
@@ -308,10 +305,9 @@ const testAddGroups = () => {
 			}
 
 			if (nodes?.length) {
-				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
-				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container,
-					{ rev_id: nodes[0].rev_id, parents: { $in: nodes.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } },
-					{ metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } });
+				expect(SceneProcessor.sharedIdsToExternalIds).toHaveBeenCalledTimes(1);
+				expect(SceneProcessor.sharedIdsToExternalIds).toHaveBeenCalledWith(teamspace, container,
+					nodes[0].rev_id, nodes.map(({ shared_id }) => shared_id));
 			}
 		});
 	};
@@ -325,16 +321,15 @@ const testUpdateGroup = () => {
 	const ticket = generateRandomString();
 	const groupId = generateRandomString();
 	const author = generateRandomString();
-	const externalIdKeys = Object.values(idTypesToKeys).flat();
 
-	const runTest = ({ desc, container, group, nodes, metadata, convertedGroup, containsMeshIds = true }) => {
+	const runTest = ({ desc, container, group, nodes, convertedResults, convertedGroup, containsMeshIds = true }) => {
 		test(desc, async () => {
 			if (containsMeshIds) {
 				ScenesModel.getNodesByIds.mockResolvedValueOnce(nodes);
 			}
 
 			if (nodes?.length) {
-				MetaModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
+				SceneProcessor.sharedIdsToExternalIds.mockResolvedValueOnce(convertedResults);
 			}
 
 			await Groups.updateTicketGroup(teamspace, project, container, ticket, groupId, group, author);
@@ -351,10 +346,9 @@ const testUpdateGroup = () => {
 			}
 
 			if (nodes?.length) {
-				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
-				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container,
-					{ rev_id: nodes[0].rev_id, parents: { $in: nodes.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } },
-					{ metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } });
+				expect(SceneProcessor.sharedIdsToExternalIds).toHaveBeenCalledTimes(1);
+				expect(SceneProcessor.sharedIdsToExternalIds).toHaveBeenCalledWith(teamspace, container,
+					nodes[0].rev_id, nodes.map(({ shared_id }) => shared_id));
 			}
 		});
 	};

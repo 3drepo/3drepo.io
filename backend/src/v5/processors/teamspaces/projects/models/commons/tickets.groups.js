@@ -79,7 +79,8 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 	return res;
 };
 
-const convertToExternalIds = async (teamspace, project, containerEntries) => {
+const convertToExternalIds = async (teamspace, project, containerEntries, returnOriginalIfNotFound = false) => {
+	const defaultType = Object.keys(idTypes)[0];
 	const convertedEntries = await Promise.all(containerEntries.map(async (entry) => {
 		// eslint-disable-next-line no-underscore-dangle
 		if (!entry._ids) {
@@ -91,17 +92,18 @@ const convertToExternalIds = async (teamspace, project, containerEntries) => {
 			{ _id: 0, shared_id: 1, rev_id: 1 });
 
 		if (!nodes.length) {
-			const defaultType = Object.keys(idTypes)[0];
-			return { container: entry.container, [defaultType]: [] };
+			return returnOriginalIfNotFound ? entry : { container: entry.container, [defaultType]: [] };
 		}
 		const res = await sharedIdsToExternalIds(teamspace, entry.container, nodes[0].rev_id,
-			nodes.map(({ shared_ids }) => shared_ids));
+			nodes.map(({ shared_id }) => shared_id));
 
 		const convertedObject = { ...entry };
 		if (res) {
 			// eslint-disable-next-line no-underscore-dangle
 			delete convertedObject._ids;
 			convertedObject[res.type] = res.values;
+		} else if (!returnOriginalIfNotFound) {
+			return { container: entry.container, [defaultType]: [] };
 		}
 		return convertedObject;
 	}));
@@ -143,7 +145,7 @@ TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
 	const convertedGroups = await Promise.all(groups.map(
 		async (group) => {
 			if (group.objects) {
-				const objects = await convertToExternalIds(teamspace, project, group.objects);
+				const objects = await convertToExternalIds(teamspace, project, group.objects, true);
 				return { ...group, objects };
 			}
 
@@ -161,7 +163,7 @@ TicketGroups.updateTicketGroup = async (teamspace, project, model, ticket, group
 	const convertedData = { ...data };
 
 	if (data.objects) {
-		convertedData.objects = await convertToExternalIds(teamspace, project, data.objects);
+		convertedData.objects = await convertToExternalIds(teamspace, project, data.objects, true);
 	}
 
 	await updateGroup(teamspace, project, model, ticket, groupId, convertedData, author);
