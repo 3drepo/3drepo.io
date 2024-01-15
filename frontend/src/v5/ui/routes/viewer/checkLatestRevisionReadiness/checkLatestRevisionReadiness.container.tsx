@@ -30,9 +30,7 @@ export const CheckLatestRevisionReadiness = (): JSX.Element => {
 	const isFederation = FederationsHooksSelectors.selectContainersByFederationId(containerOrFederation);
 
 	const checkContainerReadiness = (container) => {
-		if ((!canUploadToBackend(container.status))
-			&& container.revisionsCount
-		) {
+		if (!canUploadToBackend(container.status) && container.revisionsCount) {
 			DialogsActionsDispatchers.open('info', {
 				title: formatMessage(
 					{ id: 'viewer.latestRevisionNotReady.title', defaultMessage: 'The latest revision is still processing' },
@@ -44,6 +42,10 @@ export const CheckLatestRevisionReadiness = (): JSX.Element => {
 				primaryButtonLabel: formatMessage({
 					id: 'viewer.latestRevisionNotReady.primaryLabel',
 					defaultMessage: 'Go to viewer',
+				}), 
+				secondaryButtonLabel: formatMessage({
+					id: 'infoModal.action.secondaryDefault',
+					defaultMessage: 'Go back to Teamspace',
 				}),
 				onClickSecondary: () => {
 					history.push(generatePath(TEAMSPACE_ROUTE_BASE, { teamspace }));

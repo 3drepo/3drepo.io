@@ -14,18 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent } from 'react';
+import { PureComponent, useEffect, useState } from 'react';
 import { IconButton } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import { STEP_SCALE } from '../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
-import { getSelectedFrame } from '../../../../modules/sequences/sequences.helper';
+import { getDateWithinBoundaries, getSelectedFrame } from '../../../../modules/sequences/sequences.helper';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import { Loader } from '../../../components/loader/loader.component';
 import { PanelBarActions } from '../panelBarActions';
 import { SequenceForm } from './components/sequenceForm/';
 import { SequencePlayer } from './components/sequencePlayer/sequencePlayer.component';
-import { SequencesList } from './components/sequencesList/sequencesList.component';
+import SequencesList from './components/sequencesList/sequencesList.container';
 import { TasksList } from './components/tasksList/sequenceTasksList.component';
 import {
 	LoaderContainer, SequencesContainer, SequencesIcon
@@ -41,6 +41,7 @@ interface IProps {
 	startDate: Date;
 	frames: any[];
 	selectedDate: Date;
+	selectedStartDate: Date;
 	selectedEndingDate: Date;
 	colorOverrides: any;
 	stepInterval: number;
@@ -65,39 +66,39 @@ interface IProps {
 const da =  new Date();
 
 const SequenceDetails = ({
-	startDate, endDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
+	startDate, endDate, selectedDate, selectedStartDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
 	setStepScale, currentTasks, loadingFrameState, loadingViewpoint, rightPanels, toggleActivitiesPanel,
-	fetchActivityDetails, onPlayStarted, frames, isActivitiesPending, toggleLegend, draggablePanels
+	fetchActivityDetails, onPlayStarted, frames, isActivitiesPending, toggleLegend, draggablePanels,
 }) => (
-		<>
-			<SequenceForm />
-			<SequencePlayer
-				min={startDate}
-				max={endDate}
-				value={selectedDate}
-				endingDate={selectedEndingDate}
-				stepInterval={stepInterval}
-				stepScale={stepScale}
-				onChange={setSelectedDate}
-				onChangeStepScale={setStepScale}
-				onChangeStepInterval={setStepInterval}
-				loadingFrame={loadingFrameState || loadingViewpoint}
-				rightPanels={rightPanels}
-				toggleActivitiesPanel={toggleActivitiesPanel}
-				onPlayStarted={onPlayStarted}
-				frames={frames}
-				isActivitiesPending={isActivitiesPending}
-				toggleLegend={toggleLegend}
-				draggablePanels={draggablePanels}
-			/>
-			<TasksList
-				tasks={currentTasks}
-				startDate={selectedDate}
-				endDate={selectedEndingDate}
-				fetchActivityDetails={fetchActivityDetails}
-			/>
-		</>
-	);
+	<>
+		<SequenceForm />
+		<SequencePlayer
+			min={startDate}
+			max={endDate}
+			value={selectedDate}
+			endingDate={selectedEndingDate}
+			stepInterval={stepInterval}
+			stepScale={stepScale}
+			onChange={setSelectedDate}
+			onChangeStepScale={setStepScale}
+			onChangeStepInterval={setStepInterval}
+			loadingFrame={loadingFrameState || loadingViewpoint}
+			rightPanels={rightPanels}
+			toggleActivitiesPanel={toggleActivitiesPanel}
+			onPlayStarted={onPlayStarted}
+			frames={frames}
+			isActivitiesPending={isActivitiesPending}
+			toggleLegend={toggleLegend}
+			draggablePanels={draggablePanels}
+		/>
+		<TasksList
+			tasks={currentTasks}
+			startDate={selectedStartDate}
+			endDate={selectedEndingDate}
+			fetchActivityDetails={fetchActivityDetails}
+		/>
+	</>
+);
 
 const SequencesLoader = () => (<LoaderContainer><Loader /></LoaderContainer>);
 
@@ -128,13 +129,11 @@ export class Sequences extends PureComponent<IProps, {}> {
 
 	public onPlayStarted = () => {
 		const {
-			selectedSequence,
-			selectedDate,
+			selectedStartDate,
 			frames,
-			showViewpoint,
 			deselectViewsAndLeaveClipping
 		} = this.props;
-		const { viewpoint } = getSelectedFrame(frames, selectedDate);
+		const { viewpoint } = getSelectedFrame(frames, selectedStartDate);
 
 		if (!viewpoint) {
 			deselectViewsAndLeaveClipping();

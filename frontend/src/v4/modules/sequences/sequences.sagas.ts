@@ -16,6 +16,7 @@
  */
 
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 
@@ -29,10 +30,10 @@ import { selectHiddenGeometryVisible,  TreeActions } from '../tree';
 import { selectCacheSetting } from '../viewer';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { ViewpointsActions } from '../viewpoints';
-import { getSelectedFrame } from './sequences.helper';
+import { getDateWithinBoundaries, getSelectedFrame, MODAL_DATE_NOT_AVAILABLE_BODY, MODAL_TODAY_NOT_AVAILABLE_BODY } from './sequences.helper';
 import {
 	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates, selectSelectedDate, selectSelectedFrameViewpoint,
-	selectSelectedSequence, selectSequences, selectSequenceModel, selectSelectedFrame, selectSelectedStateDefinition,
+	selectSelectedSequence, selectSequences, selectSequenceModel, selectOpenOnToday, selectSelectedFrame, selectSelectedStateDefinition,
 } from './sequences.selectors';
 import { selectSelectedSequenceId, selectStateDefinitions,
 	SequencesActions, SequencesTypes } from '.';
@@ -185,9 +186,29 @@ function* setSelectedStateDefinition() {
 export function* setSelectedDate({ date }) {
 	try {
 		const selectedSequence = yield select(selectSelectedSequence);
+		const openOnToday = yield select(selectOpenOnToday);
 
 		if (selectedSequence) {
-			yield put(SequencesActions.setSelectedDateSuccess(date));
+			// bound date by sequence start/end date
+			const { startDate, endDate } = yield select(selectSelectedSequence);
+			let dateToSelect;
+
+			if (date) {
+				dateToSelect = getDateWithinBoundaries(date, startDate, endDate);
+
+				if (dateToSelect.getTime() !== new Date(date).getTime()) {
+					DialogsActionsDispatchers.open('info', MODAL_DATE_NOT_AVAILABLE_BODY);
+				}
+			} else {
+				// if no date is passed, use today or the sequence start date (depening on openOnToday)
+				const defaultDate = openOnToday ? new Date() : new Date(startDate);
+				dateToSelect = getDateWithinBoundaries(defaultDate, startDate, endDate);
+
+				if (dateToSelect.getTime() !== defaultDate.getTime()) {
+					DialogsActionsDispatchers.open('info', MODAL_TODAY_NOT_AVAILABLE_BODY);
+				}
+			}
+			yield put(SequencesActions.setSelectedDateSuccess(dateToSelect));
 			yield put(SequencesActions.prefetchFrames());
 			yield showFrameViewpoint();
 		}
@@ -231,48 +252,25 @@ export function* setSelectedSequence({ sequenceId }) {
 }
 
 export function* showSequenceDate({ date }) {
-	// 1 - if sequence panel is closed, open it
-	const sequencePanelVisible = (yield select(selectLeftPanels)).includes[VIEWER_PANELS.SEQUENCES];
-
-	if (!sequencePanelVisible) {
-		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.SEQUENCES, true));
+	const sequences = yield select(selectSequences);
+	if (!sequences.length) {
+		return;
 	}
 
-	// 2 - if there is no sequences loaded, load them
-	let sequences = yield select(selectSequences);
-
-	// If there are is already a selected sequence with a date and frames, this will cause it to crash
-	// because it wipes out the frames definition.
-	if (!sequences) {
-		yield put(SequencesActions.fetchSequenceList());
-		yield take(SequencesTypes.FETCH_SEQUENCE_LIST_SUCCESS);
-		sequences = yield select(selectSequences);
-	}
-
-	// 3 - if there is no selected sequence, select the first one
 	const selectedSequenceId = yield select(selectSelectedSequenceId);
-
-	if (!selectedSequenceId && sequences.length > 0) {
+	if (!selectedSequenceId) {
+		// if there is no selected sequence, select the first one
 		yield put(SequencesActions.setSelectedSequence(sequences[0]._id));
 		yield take(SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS);
 	}
 
-	// 4 - bond date by sequence start/end date
-	const { startDate, endDate } = yield select(selectSelectedSequence);
+	yield put(SequencesActions.setSelectedDate(date));
 
-	const dateAsNumber = new Date(date).getTime();
-
-	let dateToSelect = date;
-
-	if (dateAsNumber < startDate) {
-		dateToSelect = new Date(startDate);
+	const sequencePanelVisible = (yield select(selectLeftPanels)).includes[VIEWER_PANELS.SEQUENCES];
+	if (!sequencePanelVisible) {
+		// if sequence panel is closed, open it
+		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.SEQUENCES, true));
 	}
-
-	if (dateAsNumber > endDate) {
-		dateToSelect = new Date(endDate);
-	}
-
-	yield put(SequencesActions.setSelectedDate(dateToSelect));
 }
 
 function* handleTransparenciesVisibility({ transparencies }) {

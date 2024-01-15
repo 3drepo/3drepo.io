@@ -55,6 +55,10 @@ export const selectStateDefinitions = createSelector(
 	selectSequencesDomain, (state) => state.stateDefinitions
 );
 
+export const selectOpenOnToday = createSelector(
+	selectSequencesDomain, (state) => state.openOnToday
+);
+
 export const selectSelectedSequenceId = createSelector(
 	selectSequencesDomain, (state) => state.selectedSequence
 );

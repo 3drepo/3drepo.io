@@ -16,7 +16,7 @@
  */
 
 import { IconButton } from '@mui/material';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const SmallIconButtonStyled = styled(IconButton).attrs({
 	component: 'span'
@@ -26,6 +26,12 @@ export const SmallIconButtonStyled = styled(IconButton).attrs({
 		height: 10px;
 		z-index: 1;
 		box-sizing: content-box;
+
+		${({ disabled, theme }) => disabled && css`
+			&&& {
+				color: ${theme.palette.base.light};
+			}
+		`}
 	}
 
 	svg .stroke {
