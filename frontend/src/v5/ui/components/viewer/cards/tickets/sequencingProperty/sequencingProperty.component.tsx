@@ -37,6 +37,7 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 	const { watch } = useFormContext();
 	const { isViewer } = useContext(TicketContext);
 	const currentSequenceDateTime = SequencesHooksSelectors.selectSelectedDate();
+	const hasSequences = SequencesHooksSelectors.selectHasSequences();
 
 	const startTime = watch(SEQUENCING_START_TIME);
 	const endTime = watch(SEQUENCING_END_TIME);
@@ -44,7 +45,10 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 	const maxDateTime = (props.name === SEQUENCING_END_TIME || !endTime) ? undefined : dayjs(endTime);
 	const defaultCalendarDate = !currentSequenceDateTime ? undefined : dayjs(currentSequenceDateTime);
 
-	const openSequencesCard = () => SequencesActionsDispatchers.showSequenceDate(new Date(value));
+	const openSequencesCard = () => {
+		if (!hasSequences) return;
+		SequencesActionsDispatchers.showSequenceDate(new Date(value));
+	};
 
 	const handleChange = (newValue) => onChange(newValue ? newValue?.toDate()?.getTime() : newValue);
 
@@ -77,7 +81,7 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 				label={LABELS[props.name]}
 			/>
 			{value && isViewer && (
-				<SequenceIconContainer onClick={openSequencesCard}>
+				<SequenceIconContainer onClick={openSequencesCard} disabled={!hasSequences}>
 					<SequencingIcon />
 				</SequenceIconContainer>
 			)}
