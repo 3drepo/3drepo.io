@@ -85,6 +85,8 @@ const getSmartTicketGroupById = () => {
 				if (options.containers) {
 					revision = generateRandomString();
 					RevsModel.getLatestRevision.mockResolvedValueOnce({ _id: revision });
+				} else if (revision) {
+					RevsModel.getRevisionByIdOrTag.mockResolvedValueOnce({ _id: revision });
 				}
 
 				MetaModel.getMetadataByRules.mockResolvedValueOnce({
@@ -204,6 +206,8 @@ const getNormalTicketGroupById = () => {
 					if (containers) {
 						revision = generateRandomString();
 						RevsModel.getLatestRevision.mockResolvedValueOnce({ _id: revision });
+					} else if (revision) {
+						RevsModel.getRevisionByIdOrTag.mockResolvedValueOnce({ _id: revision });
 					}
 
 					const ids = times(10, generateUUIDString());
@@ -215,8 +219,9 @@ const getNormalTicketGroupById = () => {
 				}
 			}
 
-			await expect(Groups.getTicketGroupById(teamspace, project, container, revision, ticket,
-				groupId, convertToMeshIds, containers)).resolves.toEqual(expectedData);
+			const results = await Groups.getTicketGroupById(teamspace, project, container, revision, ticket,
+				groupId, convertToMeshIds, containers);
+			expect(results).toEqual(expectedData);
 
 			if (convertToMeshIds && !invalidContainer) {
 				if (containers) {
@@ -275,7 +280,7 @@ const getCommonTestCases = (isUpdate) => {
 			container,
 			group: { objects: [{ _ids: [generateRandomString()], container }] },
 			nodes,
-			convertedResults: { type: idTypes.IFC, values: [metadataValue] },
+			convertedResults: { key: idTypes.IFC, values: [metadataValue] },
 			convertedGroup: { objects: [{ [idTypes.IFC]: [metadataValue], container }] },
 		},
 		{
@@ -283,7 +288,7 @@ const getCommonTestCases = (isUpdate) => {
 			container,
 			group: { objects: [{ _ids: [generateRandomString()], container }] },
 			nodes,
-			convertedResults: { type: idTypes.REVIT, values: [metadataValue] },
+			convertedResults: { key: idTypes.REVIT, values: [metadataValue] },
 			convertedGroup: { objects: [{ [idTypes.REVIT]: [metadataValue], container }] },
 		},
 	];
