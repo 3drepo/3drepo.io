@@ -33,11 +33,11 @@ export const ButtonOptionsContainer = styled.div<{ disabled?: boolean }>`
 		border: solid 3px ${({ theme }) => theme.palette.base.main};
 	}
 
-	${({ disabled, theme }) => !disabled && css`
-		&:hover > ${/* sc-selector */Container}::after {
+	&:hover > ${/* sc-selector */Container}::after {
+		${({ disabled, theme }) => !disabled && css`
 			border-color: ${theme.palette.primary.contrast};
-		}
-	`}
+		`}
+	}
 
 	:is(&, &:hover) > ${/* sc-selector */Container}::after {
 		border-left-color: transparent;
