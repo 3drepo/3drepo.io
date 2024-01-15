@@ -17,9 +17,10 @@
 
 import { Switch } from 'react-router-dom';
 import { Route } from '@/v5/services/routing/route.component';
-import { CookiesLegalPaper, PrivacyLegalPaper, TermsLegalPaper } from '@components/legal';
+import { CookiesLegalPaper, TermsLegalPaper } from '@components/legal';
 import { LegalLayout } from '@components/legal/LegalLayout/legalLayout.component';
 import { formatMessage } from '@/v5/services/intl';
+import { PRIVACY_ROUTE } from '../routes.constants';
 
 type ILegalRoutes = {
 	path: string;
@@ -35,7 +36,7 @@ export const LegalRoutes = ({ path }: ILegalRoutes) => (
 				<CookiesLegalPaper />
 			</Route>
 			<Route title={formatMessage({ id: 'pageTitle.privacy', defaultMessage: 'Privacy Policy' })} exact path={`${path}/privacy`}>
-				<PrivacyLegalPaper />
+				{() => window.location.href = PRIVACY_ROUTE}
 			</Route>
 		</Switch>
 	</LegalLayout>

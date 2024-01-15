@@ -15,37 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
+import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { SequencesActions, selectOpenOnToday } from '@/v4/modules/sequences';
+import { SequencesList } from './sequencesList.component';
 
-export const Container = styled.div`
-	position: relative;
-`;
+const mapStateToProps = createStructuredSelector({
+	openOnToday: selectOpenOnToday,
+});
 
-export const IconContainer = styled.div`
-	color: ${({ theme }) => theme.palette.secondary.main};
-	margin-top: -7px;
-	cursor: pointer;
+export const mapDispatchToProps = (dispatch) => bindActionCreators({
+	setOpenOnToday: SequencesActions.setOpenOnTodaySuccess,
+	showSequenceDate: SequencesActions.showSequenceDate,
+}, dispatch);
 
-	svg {
-		width: 10px;
-		height: 10px;
-	}
-`;
-
-export const SequenceIconContainer = styled(IconContainer)<{ disabled?: boolean }>`
-	position: absolute;
-	right: 28px;
-	bottom: 2px;
-	padding: 5px;
-	display: flex;
-
-	svg {
-		width: 12.5px;
-		height: 12.5px;
-	}
-
-	${({ disabled, theme }) => disabled && css`
-		cursor: unset;
-		color: ${theme.palette.base.light};
-	`}
-`;
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(SequencesList));

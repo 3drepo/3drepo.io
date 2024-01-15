@@ -37,7 +37,6 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	clearSelectionHighlights: ['shouldClearTree'],
 	addColorOverride: ['groupId'],
 	removeColorOverride: ['groupId'],
-	clearColorOverrides: [],
 	clearColorOverridesSuccess: [],
 	replaceColorOverrides: ['groupIds'],
 	setColorOverrides: ['groupIds', 'on'],

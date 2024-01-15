@@ -21,15 +21,16 @@ import { Items as ItemsBase } from '@components/shared/appBar/appBar.styles';
 
 export const NavLinks = styled.div`
 	margin: 0 13px;
+	color: ${({ theme }) => theme.palette.base.light};
 `;
 
 export const NavLink = styled(Link)<{ selected: boolean }>`
 	margin: 0 12px;
 	${({ theme }) => theme.typography.h5}
-	color: ${({ theme: { palette }, selected }) => (selected ? palette.primary.main : palette.base.light)};
 	cursor: pointer;
 	display: inline-block;
 	white-space: nowrap;
+	color: ${({ theme: { palette }, selected }) => (selected ? palette.primary.main : palette.base.light)};
 `;
 
 export const Items = styled(ItemsBase)`
