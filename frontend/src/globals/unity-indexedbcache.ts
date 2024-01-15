@@ -63,8 +63,8 @@ export class IndexedDbCache {
 		const result = await fetch(new URL('unity/indexeddbworker.js', this.host).toString());
 		const source = await result.text();
 		const blob = new Blob([source], { type: 'application/javascript' });
-		// this.worker = new Worker(URL.createObjectURL(blob));
-		this.worker = new Worker(new URL('unity/indexeddbworker.js', this.host).toString()); // This when debugging...
+		this.worker = new Worker(URL.createObjectURL(blob));
+		// this.worker = new Worker(new URL('unity/indexeddbworker.js', this.host).toString()); // This when debugging...
 		this.worker.onmessage = (ev) => {
 			// The state of the IndexedDb has changed, so we may need to pause
 			// requests.
