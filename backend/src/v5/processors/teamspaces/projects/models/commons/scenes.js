@@ -31,17 +31,16 @@ const getIdToMeshesMapping = async (teamspace, model, revId) => {
 Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, parentIds, returnString = false) => {
 	const nodes = await getNodesBySharedIds(teamspace, project, container, revision, parentIds, { _id: 1 });
 	const idToMeshes = await getIdToMeshesMapping(teamspace, container, revision);
-	const meshes = [];
+	const meshes = new Set();
 	nodes.forEach(({ _id }) => {
 		const idStr = UUIDToString(_id);
 		if (idToMeshes[idStr]) {
-			idToMeshes[idStr].forEach((id) => {
-				meshes.push(returnString ? id : stringToUUID(id));
-			});
+			idToMeshes[idStr].forEach((val) => meshes.add(val));
 		}
 	});
 
-	return meshes;
+	const meshesArr = Array.from(meshes);
+	return returnString ? meshesArr : meshesArr.map(stringToUUID);
 };
 
 Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
