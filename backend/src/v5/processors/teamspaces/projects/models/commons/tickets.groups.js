@@ -66,6 +66,7 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 	if (!matched.length) return res;
 
 	const wantedIds = await getExternalIdsFromMetadata(matched);
+
 	if (wantedIds) {
 		if (unwanted.length) {
 			const unwantedIds = await getExternalIdsFromMetadata(unwanted, wantedIds.key);
@@ -73,7 +74,7 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 				wantedIds.values = getArrayDifference(unwantedIds.values, wantedIds.values);
 			}
 		}
-		res = { container: model, [wantedIds.type]: wantedIds.values };
+		res = { container: model, [wantedIds.key]: wantedIds.values };
 	}
 
 	return res;
