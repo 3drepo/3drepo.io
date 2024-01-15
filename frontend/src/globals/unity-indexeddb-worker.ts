@@ -135,14 +135,13 @@ export class IndexedDbCacheWorker {
 		if (record !== undefined) {
 			this.sendGetTransactionComplete({
 				id,
-				size: record.size,
-				result: record,
+				data: record.data,
 			});
 		} else if (!(key in this.index)) {
 			// We know the database doesnt have the key, so return immediately again
 			this.sendGetTransactionComplete({
 				id,
-				size: -1,
+				data: undefined,
 			});
 		} else {
 			// We believe the key is in the database, so go ahead and request it
@@ -155,13 +154,12 @@ export class IndexedDbCacheWorker {
 					if (request.result === undefined) {
 						this.sendGetTransactionComplete({ // Where a key is not found, we want to handle this outside the error chain
 							id,
-							size: -1, // -1 indicates that no key was found or the transaction was aborted
+							data: undefined, // indicates that no key was found or the transaction was aborted
 						});
 					} else {
 						this.sendGetTransactionComplete({
 							id,
-							size: request.result.size,
-							result: request.result,
+							data: request.result.data,
 						});
 					}
 					// At the end of this function the transaction will exit the active state, after which no more changes can be made to it
@@ -177,7 +175,7 @@ export class IndexedDbCacheWorker {
 					console.error(`IndexedDb Cache Error: ${ev.currentTarget.error}`);
 					this.sendGetTransactionComplete({
 						id,
-						size: -1,
+						data: undefined,
 					});
 					ev.stopPropagation(); // Don't bubble the error up
 				};
@@ -212,7 +210,6 @@ export class IndexedDbCacheWorker {
 
 				this.sendGetTransactionComplete({
 					id,
-					size: -1,
 				});
 
 				console.error('Unexpected IndexedDb read exception', e);
@@ -231,7 +228,8 @@ export class IndexedDbCacheWorker {
 		self.postMessage({
 			type: 'OnGetTransactionComplete',
 			parms,
-		});
+		},
+		parms.data !== undefined ? [parms.data] : []);
 	}
 
 	sendIndexedDbUpdated(parms: any) {
