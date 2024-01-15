@@ -22,9 +22,9 @@ const {
 	getMeshesWithParentIds,
 	sharedIdsToExternalIds,
 } = require('./scenes');
+const { getLatestRevision, getRevisionByIdOrTag } = require('../../../../../models/revisions');
 const { getMetadataByRules, getMetadataWithMatchingData } = require('../../../../../models/metadata');
 const { idTypes, idTypesToKeys } = require('../../../../../models/metadata.constants');
-const { getLatestRevision } = require('../../../../../models/revisions');
 const { getNodesByIds } = require('../../../../../models/scenes');
 const { stringToUUID } = require('../../../../../utils/helper/uuids');
 
@@ -32,7 +32,11 @@ const TicketGroups = {};
 
 const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, returnMeshIds) => {
 	let revision = revId;
-	if (!revision) {
+
+	if (revision) {
+		const rev = await getRevisionByIdOrTag(teamspace, model, revision, { _id: 1 });
+		revision = rev._id;
+	} else {
 		try {
 			const rev = await getLatestRevision(teamspace, model, { _id: 1 });
 			revision = rev._id;
@@ -101,7 +105,7 @@ const convertToExternalIds = async (teamspace, project, containerEntries) => {
 		if (res) {
 			// eslint-disable-next-line no-underscore-dangle
 			delete convertedObject._ids;
-			convertedObject[res.type] = res.values;
+			convertedObject[res.key] = res.values;
 		}
 		return convertedObject;
 	}));
@@ -118,7 +122,10 @@ const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
 	const { container } = containerEntry;
 
 	let revision = revId;
-	if (!revision) {
+	if (revision) {
+		const rev = await getRevisionByIdOrTag(teamspace, container, revision, { _id: 1 });
+		revision = rev._id;
+	} else {
 		try {
 			const rev = await getLatestRevision(teamspace, container, { _id: 1 });
 			revision = rev._id;
@@ -132,6 +139,7 @@ const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
 	const idType = getCommonElements(Object.keys(containerEntry), Object.keys(idTypesToKeys))[0];
 	const metadata = await getMetadataWithMatchingData(teamspace, container, revision,
 		idTypesToKeys[idType], containerEntry[idType], { parents: 1 });
+
 	const meshIds = await getMeshesWithParentIds(teamspace, project, container, revision,
 		metadata.flatMap(({ parents }) => parents));
 
