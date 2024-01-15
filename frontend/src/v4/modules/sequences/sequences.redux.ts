@@ -33,6 +33,7 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setSelectedDate: ['date'],
 	setSelectedDateSuccess: ['date'],
 	setLastSelectedDateSuccess: ['date'],
+	setOpenOnTodaySuccess: ['openOnToday'],
 	fetchFrame: ['date'],
 	prefetchFrames: [],
 	setStateDefinition: ['stateId', 'stateDefinition'],
@@ -85,6 +86,7 @@ export interface ISequencesState {
 	hiddenGeometryVisible: boolean;
 	activities: any;
 	activitiesPending: any;
+	openOnToday: boolean;
 }
 
 export const INITIAL_STATE: ISequencesState = {
@@ -101,6 +103,7 @@ export const INITIAL_STATE: ISequencesState = {
 	hiddenGeometryVisible: true,
 	activities: {},
 	activitiesPending: true,
+	openOnToday: true,
 };
 
 export const fetchSequenceSuccess = (state = INITIAL_STATE, { sequence }) => {
@@ -158,6 +161,10 @@ export const setSelectedSequenceSuccess = (state = INITIAL_STATE, { sequenceId }
 	return {...state, selectedSequence: sequenceId, lastSelectedSequence };
 };
 
+export const setOpenOnTodaySuccess =  (state = INITIAL_STATE, { openOnToday }) => {
+	return {...state, openOnToday };
+};
+
 export const setSelectedDateSuccess =  (state = INITIAL_STATE, { date }) => {
 	return {...state, selectedDate: date };
 };
@@ -192,6 +199,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.UPDATE_SEQUENCE_SUCCESS]: updateSequenceSuccess,
 	[SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS_SUCCESS]: fetchActivitiesDefinitionsSuccess,
 	[SequencesTypes.SET_ACTIVITIES_PENDING]: setActivitiesPending,
+	[SequencesTypes.SET_OPEN_ON_TODAY_SUCCESS]: setOpenOnTodaySuccess,
 	[SequencesTypes.SET_SELECTED_DATE_SUCCESS]: setSelectedDateSuccess,
 	[SequencesTypes.SET_LAST_SELECTED_DATE_SUCCESS]: setLastSelectedDateSuccess,
 	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,

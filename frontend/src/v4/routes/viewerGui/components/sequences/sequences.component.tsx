@@ -24,7 +24,7 @@ import { Loader } from '../../../components/loader/loader.component';
 import { PanelBarActions } from '../panelBarActions';
 import { SequenceForm } from './components/sequenceForm/';
 import { SequencePlayer } from './components/sequencePlayer/sequencePlayer.component';
-import { SequencesList } from './components/sequencesList/sequencesList.component';
+import SequencesList from './components/sequencesList/sequencesList.container';
 import { TasksList } from './components/tasksList/sequenceTasksList.component';
 import {
 	LoaderContainer, SequencesContainer, SequencesIcon
@@ -40,6 +40,7 @@ interface IProps {
 	startDate: Date;
 	frames: any[];
 	selectedDate: Date;
+	selectedStartDate: Date;
 	selectedEndingDate: Date;
 	colorOverrides: any;
 	stepInterval: number;
@@ -62,38 +63,38 @@ interface IProps {
 const da =  new Date();
 
 const SequenceDetails = ({
-	startDate, endDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
+	startDate, endDate, selectedDate, selectedStartDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
 	setStepScale, currentTasks, loadingFrameState, loadingViewpoint, rightPanels, toggleActivitiesPanel,
-	fetchActivityDetails, frames, isActivitiesPending, toggleLegend, draggablePanels
+	fetchActivityDetails, frames, isActivitiesPending, toggleLegend, draggablePanels,
 }) => (
-		<>
-			<SequenceForm />
-			<SequencePlayer
-				min={startDate}
-				max={endDate}
-				value={selectedDate}
-				endingDate={selectedEndingDate}
-				stepInterval={stepInterval}
-				stepScale={stepScale}
-				onChange={setSelectedDate}
-				onChangeStepScale={setStepScale}
-				onChangeStepInterval={setStepInterval}
-				loadingFrame={loadingFrameState || loadingViewpoint}
-				rightPanels={rightPanels}
-				toggleActivitiesPanel={toggleActivitiesPanel}
-				frames={frames}
-				isActivitiesPending={isActivitiesPending}
-				toggleLegend={toggleLegend}
-				draggablePanels={draggablePanels}
-			/>
-			<TasksList
-				tasks={currentTasks}
-				startDate={selectedDate}
-				endDate={selectedEndingDate}
-				fetchActivityDetails={fetchActivityDetails}
-			/>
-		</>
-	);
+	<>
+		<SequenceForm />
+		<SequencePlayer
+			min={startDate}
+			max={endDate}
+			value={selectedDate}
+			endingDate={selectedEndingDate}
+			stepInterval={stepInterval}
+			stepScale={stepScale}
+			onChange={setSelectedDate}
+			onChangeStepScale={setStepScale}
+			onChangeStepInterval={setStepInterval}
+			loadingFrame={loadingFrameState || loadingViewpoint}
+			rightPanels={rightPanels}
+			toggleActivitiesPanel={toggleActivitiesPanel}
+			frames={frames}
+			isActivitiesPending={isActivitiesPending}
+			toggleLegend={toggleLegend}
+			draggablePanels={draggablePanels}
+		/>
+		<TasksList
+			tasks={currentTasks}
+			startDate={selectedStartDate}
+			endDate={selectedEndingDate}
+			fetchActivityDetails={fetchActivityDetails}
+		/>
+	</>
+);
 
 const SequencesLoader = () => (<LoaderContainer><Loader /></LoaderContainer>);
 
@@ -134,6 +135,7 @@ export class Sequences extends PureComponent<IProps, {}> {
 					hideMenu
 				/>}
 				id={this.props.id}
+				title=""
 			>
 
 				{!sequences && <SequencesLoader />}
