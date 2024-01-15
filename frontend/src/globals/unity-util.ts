@@ -1688,9 +1688,9 @@ export class UnityUtil {
 	 */
 	public static setAPIHost(hostNames: [string]) {
 		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({
-			hostNames
+			hostNames,
 		}));
-		UnityUtil.webRequestHandler.setAPIHost(hostNames);	
+		UnityUtil.webRequestHandler.setAPIHost(hostNames);
 	}
 
 	/**
