@@ -863,13 +863,6 @@ export class ViewerService {
 		UnityUtil.setMaxShadowDistance(value);
 	}
 
-	public setNumCacheThreads(value: number) {
-		if (value === undefined) {
- 			return;
-		}
-		UnityUtil.setNumCacheThreads(value);
-	}
-
 	public setNearPlane = (nearplane: number) => {
 		if (nearplane === undefined) {
  			return;
