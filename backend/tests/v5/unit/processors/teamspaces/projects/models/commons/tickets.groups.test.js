@@ -67,8 +67,10 @@ const getSmartTicketGroupById = () => {
 		['when there are no matches', { ...defaultOptions, matchedMeta: [] }],
 		['with ifc guids', { ...defaultOptions, convertToMeshIds: false, externalIdName: idTypes.IFC }],
 		['with revit ids', { ...defaultOptions, convertToMeshIds: false, externalIdName: idTypes.REVIT, matchedMeta: getMetadata(idTypesToKeys[idTypes.REVIT][0]) }],
-		['when returnMeshIds is false but no metadata are found', { ...defaultOptions, convertToMeshIds: false, noMetaFound: true, matchedMeta: [{ parents: times(2, () => generateRandomString()) }] }],
+		['when returnMeshIds is false but no metadata are found', { ...defaultOptions, convertToMeshIds: false, noMetaFound: true, matchedMeta: [] }],
+		['when returnMeshIds is false but no external Id are found', { ...defaultOptions, convertToMeshIds: false, noExternId: true, matchedMeta: [{ parents: times(2, () => generateRandomString()) }] }],
 		['with ifc guids (with negative query)', { ...defaultOptions, convertToMeshIds: false, externalIdName: [idTypes.IFC], unwantedMeta: defaultOptions.matchedMeta.slice(0, 5) }],
+		['with ifc guids (with negative query) but no unwanted external ID are found', { ...defaultOptions, convertToMeshIds: false, externalIdName: [idTypes.IFC], noUnwantedExternId: true, unwantedMeta: defaultOptions.matchedMeta.slice(0, 5) }],
 	])('Get ticket group by Id (smart group)', (desc, options) => {
 		test(`should return the group found ${desc}`, async () => {
 			let expectedData;
@@ -105,19 +107,30 @@ const getSmartTicketGroupById = () => {
 					}
 				} else if (options.noMetaFound) {
 					expectedData = { ...options.group, objects: [] };
+				} else if (options.noExternId) {
+					SceneProcessor.getExternalIdsFromMetadata.mockResolvedValueOnce(undefined);
+					expectedData = { ...options.group, objects: [] };
 				} else {
 					const expectedValues = options.matchedMeta.map(({ metadata }) => metadata[0].value);
 					SceneProcessor.getExternalIdsFromMetadata.mockResolvedValueOnce(
 						{ type: options.externalIdName, values: expectedValues });
 
-					if (options.unwantedMeta.length) {
-						SceneProcessor.getExternalIdsFromMetadata.mockResolvedValueOnce(
-							{ type: options.externalIdName,
-								values: options.unwantedMeta.map(({ metadata }) => metadata[0].value) });
-					}
-
 					expectedData = { ...options.group,
 						objects: [{ container, [options.externalIdName]: expectedValues }] };
+					if (options.unwantedMeta.length) {
+						if (options.noUnwantedExternId) {
+							SceneProcessor.getExternalIdsFromMetadata.mockResolvedValueOnce(undefined);
+						} else {
+							const unwantedIds = options.unwantedMeta.map(({ metadata }) => metadata[0].value);
+							SceneProcessor.getExternalIdsFromMetadata.mockResolvedValueOnce(
+								{ type: options.externalIdName,
+									values: unwantedIds });
+							expectedData = { ...options.group,
+								objects: [{ container,
+									[options.externalIdName]: expectedValues.filter(
+										(v) => !unwantedIds.includes(v)) }] };
+						}
+					}
 				}
 			}
 

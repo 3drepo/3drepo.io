@@ -68,7 +68,7 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 	const wantedIds = await getExternalIdsFromMetadata(matched);
 	if (wantedIds) {
 		if (unwanted.length) {
-			const unwantedIds = getExternalIdsFromMetadata(unwanted, wantedIds.key);
+			const unwantedIds = await getExternalIdsFromMetadata(unwanted, wantedIds.key);
 			if (unwantedIds) {
 				wantedIds.values = getArrayDifference(unwantedIds.values, wantedIds.values);
 			}
@@ -79,8 +79,7 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 	return res;
 };
 
-const convertToExternalIds = async (teamspace, project, containerEntries, returnOriginalIfNotFound = false) => {
-	const defaultType = Object.keys(idTypes)[0];
+const convertToExternalIds = async (teamspace, project, containerEntries) => {
 	const convertedEntries = await Promise.all(containerEntries.map(async (entry) => {
 		// eslint-disable-next-line no-underscore-dangle
 		if (!entry._ids) {
@@ -92,7 +91,7 @@ const convertToExternalIds = async (teamspace, project, containerEntries, return
 			{ _id: 0, shared_id: 1, rev_id: 1 });
 
 		if (!nodes.length) {
-			return returnOriginalIfNotFound ? entry : { container: entry.container, [defaultType]: [] };
+			return entry;
 		}
 		const res = await sharedIdsToExternalIds(teamspace, entry.container, nodes[0].rev_id,
 			nodes.map(({ shared_id }) => shared_id));
@@ -102,8 +101,6 @@ const convertToExternalIds = async (teamspace, project, containerEntries, return
 			// eslint-disable-next-line no-underscore-dangle
 			delete convertedObject._ids;
 			convertedObject[res.type] = res.values;
-		} else if (!returnOriginalIfNotFound) {
-			return { container: entry.container, [defaultType]: [] };
 		}
 		return convertedObject;
 	}));
