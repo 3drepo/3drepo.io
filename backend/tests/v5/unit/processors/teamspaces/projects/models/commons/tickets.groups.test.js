@@ -113,7 +113,7 @@ const getSmartTicketGroupById = () => {
 				} else {
 					const expectedValues = options.matchedMeta.map(({ metadata }) => metadata[0].value);
 					SceneProcessor.getExternalIdsFromMetadata.mockResolvedValueOnce(
-						{ type: options.externalIdName, values: expectedValues });
+						{ key: options.externalIdName, values: expectedValues });
 
 					expectedData = { ...options.group,
 						objects: [{ container, [options.externalIdName]: expectedValues }] };
@@ -123,7 +123,7 @@ const getSmartTicketGroupById = () => {
 						} else {
 							const unwantedIds = options.unwantedMeta.map(({ metadata }) => metadata[0].value);
 							SceneProcessor.getExternalIdsFromMetadata.mockResolvedValueOnce(
-								{ type: options.externalIdName,
+								{ key: options.externalIdName,
 									values: unwantedIds });
 							expectedData = { ...options.group,
 								objects: [{ container,
