@@ -22,7 +22,7 @@ const { v5Path } = require("../../interop");
 const { getCommonElements } = require(`${v5Path}/utils/helper/arrays`);
 const { idTypes, idTypesToKeys } = require(`${v5Path}/models/metadata.constants`);
 const { getMetadataWithMatchingData } = require(`${v5Path}/models/metadata`);
-const { sharedIdsToExternalIds, getMeshesWithParentIds } = require(`${v5Path}/processors/teamspaces/projects/models/commons/scene`);
+const { sharedIdsToExternalIds, getMeshesWithParentIds } = require(`${v5Path}/processors/teamspaces/projects/models/commons/scenes`);
 const { findProjectByModelId } = require(`${v5Path}/models/projectSettings.js`);
 
 const utils = require("../utils");
