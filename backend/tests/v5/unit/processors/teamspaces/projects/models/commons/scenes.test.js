@@ -31,8 +31,8 @@ const { idTypesToKeys, idTypes, metaKeyToIdType } = require('../../../../../../.
 
 const Scenes = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
 
-// jest.mock('../../../../../../../../src/v5/models/metadata');
-// const MetaModel = require(`${src}/models/metadata`);
+jest.mock('../../../../../../../../src/v5/models/metadata');
+const MetaModel = require(`${src}/models/metadata`);
 
 jest.mock('../../../../../../../../src/v5/models/scenes');
 const ScenesModel = require(`${src}/models/scenes`);
@@ -142,7 +142,38 @@ const testGetExternalIdsFromMetadata = () => {
 	});
 };
 
+const testSharedIdsToExternalIds = () => {
+	describe('Get shared ids from external ids', () => {
+		test('should fetch the metadata query and call getExternalIdsFromMetadata', async () => {
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+			const revId = generateUUID();
+			const sharedIds = times(10, generateUUID);
+
+			const metaRes = generateRandomString();
+			const finalRes = generateRandomString();
+
+			MetaModel.getMetadataByQuery.mockResolvedValueOnce(metaRes);
+
+			const fn = jest.spyOn(Scenes, 'getExternalIdsFromMetadata');
+			fn.mockReturnValueOnce(finalRes);
+
+			const res = await Scenes.sharedIdsToExternalIds(teamspace, container, revId, sharedIds);
+
+			expect(res).toEqual(finalRes);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(metaRes);
+
+			expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
+			expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(
+				teamspace, container, expect.anything(), expect.anything());
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetMeshesWithParentIds();
 	testGetExternalIdsFromMetadata();
+	testSharedIdsToExternalIds();
 });
