@@ -19,6 +19,7 @@ import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { selectSelectedTicket } from '@/v5/store/tickets/card/ticketsCard.selectors';
 import { CompareActions } from '../../modules/compare';
 
 import { selectCurrentTeamspace, selectCurrentUser } from '../../modules/currentUser';
@@ -49,6 +50,7 @@ const mapStateToProps = createStructuredSelector({
 	isFocusMode: selectIsFocusMode,
 	disabledPanelButtons: selectDisabledPanelButtons,
 	isPresentationActive: selectIsPresentationActive,
+	selectedTicket: selectSelectedTicket,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

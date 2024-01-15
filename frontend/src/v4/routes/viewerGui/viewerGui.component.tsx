@@ -16,9 +16,12 @@
  */
 
 import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
-import { isEmpty } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { PureComponent } from 'react';
 import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { goToView } from '@/v5/helpers/viewpoint.helpers';
+import { AdditionalProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
@@ -67,6 +70,7 @@ interface IProps {
 	rightPanels: string[];
 	draggablePanels: string[];
 	disabledPanelButtons: Set<string>;
+	selectedTicket: ITicket | null | undefined;
 	stopListenOnSelections: () => void;
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
@@ -180,6 +184,14 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 		if (presentationActivityChanged && this.props.isPresentationActive) {
 			this.props.setPanelVisibility(VIEWER_PANELS.COMPARE, false);
 			this.props.resetCompareComponent();
+		}
+
+		const prevView = prevProps.selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
+		const currView = this.props.selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
+
+		if (!isEqual(prevView, currView)) {
+			// This is for not refreshing the view when exiting a selected ticket
+			goToView(currView);
 		}
 	}
 
