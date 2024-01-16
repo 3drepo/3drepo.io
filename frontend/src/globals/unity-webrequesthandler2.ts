@@ -180,6 +180,15 @@ export class WebRequestHandler2 {
 		}
 	}
 
+	/** Converts the data returned from a get request into a string and returns
+	 * it. The plugin will allocate an unmanaged buffer for the string and copy
+	 * it into it.
+	 */
+	getResponseString(id: number): string {
+		const body = new TextDecoder().decode(this.requests[id].data);
+		return body;
+	}
+
 	/**
 	 * Releases any resources associated with an existing request.
 	 * Not all oprations will have resources. If an invalid id is passed in,
