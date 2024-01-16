@@ -20,7 +20,7 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
-import { IUnsavedTicket, ITicketsFilters, OverridesDicts } from '../tickets.types';
+import { EditableTicket, ITicketsFilters, OverridesDicts } from '../tickets.types';
 
 export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createActions({
 	setSelectedTicket: ['ticketId'],
@@ -35,7 +35,7 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	setReadOnly: ['readOnly'],
 	resetState: [],
 	setOverrides: ['overrides'],
-	setUnsavedTicket: ['unsavedTicket'],
+	setUnsavedTicket: ['ticket'],
 }, { prefix: 'TICKETS_CARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
 export interface ITicketsCardState {
@@ -46,7 +46,7 @@ export interface ITicketsCardState {
 	view: TicketsCardViews,
 	readOnly: boolean,
 	overrides: OverridesDicts | null,
-	unsavedTicket: IUnsavedTicket | null,
+	unsavedTicket: EditableTicket | null,
 }
 
 export const INITIAL_STATE: ITicketsCardState = {
@@ -104,8 +104,8 @@ export const setOverrides = (state: ITicketsCardState, { overrides }: SetOverrid
 	state.overrides = overrides;
 };
 
-export const setUnsavedTicket = (state: ITicketsCardState, { unsavedTicket }: SetUnsavedTicketAction) => {
-	state.unsavedTicket = unsavedTicket;
+export const setUnsavedTicket = (state: ITicketsCardState, { ticket }: SetUnsavedTicketAction) => {
+	state.unsavedTicket = ticket;
 };
 
 export const resetState = ({ filters, readOnly }: ITicketsCardState) => ({
@@ -141,7 +141,7 @@ export type OpenTicketAction = Action<'OPEN_TICKET'> & { ticketId: string };
 export type SetReadOnlyAction = Action<'SET_READ_ONLY'> & { readOnly: boolean };
 export type ResetStateAction = Action<'RESET_STATE'>;
 export type SetOverridesAction = Action<'SET_OVERRIDES'> & { overrides: OverridesDicts | null };
-export type SetUnsavedTicketAction = Action<'SET_UNSAVED_TICKET'> & { unsavedTicket: IUnsavedTicket };
+export type SetUnsavedTicketAction = Action<'SET_UNSAVED_TICKET'> & { ticket: EditableTicket };
 
 export interface ITicketsCardActionCreators {
 	setSelectedTicket: (ticketId: string) => SetSelectedTicketAction,
@@ -156,5 +156,5 @@ export interface ITicketsCardActionCreators {
 	setReadOnly: (readOnly: boolean) => SetReadOnlyAction,
 	resetState: () => ResetStateAction,
 	setOverrides: (overrides: OverridesDicts) => SetOverridesAction,
-	setUnsavedTicket: (unsavedTicket: IUnsavedTicket) => SetUnsavedTicketAction,
+	setUnsavedTicket: (ticket: EditableTicket) => SetUnsavedTicketAction,
 }

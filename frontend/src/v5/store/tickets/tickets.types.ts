@@ -86,11 +86,6 @@ export interface ITemplate {
 
 export type NewTicket = Omit<ITicket, '_id'>;
 export type EditableTicket = Omit<NewTicket, 'number'>;
-export type IUnsavedTicket = {
-	containerOrFederation: string,
-	templateId: string,
-	data: EditableTicket,
-};
 
 export type Camera = {
 	type: 'perspective' | 'orthographic';

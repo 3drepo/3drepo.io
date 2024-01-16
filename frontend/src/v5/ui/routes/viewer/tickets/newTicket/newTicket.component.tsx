@@ -43,7 +43,6 @@ import { TicketsCardViews } from '../tickets.constants';
 export const NewTicketCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const unsavedTicket = TicketsCardHooksSelectors.selectUnsavedTicket();
-	const cardView = TicketsCardHooksSelectors.selectView();
 
 	const isFederation = modelIsFederation(containerOrFederation);
 	const template = TicketsCardHooksSelectors.selectSelectedTemplate();
@@ -51,11 +50,8 @@ export const NewTicketCard = () => {
 	const templateId = template._id;
 
 	let defaultTicket = getDefaultTicket(template);
-	if (
-		unsavedTicket?.containerOrFederation === containerOrFederation
-		&& unsavedTicket?.templateId === templateId
-	) {
-		defaultTicket = merge(defaultTicket, unsavedTicket.data);
+	if (unsavedTicket) {
+		defaultTicket = merge(defaultTicket, unsavedTicket);
 	}
 
 	const formData = useForm({
@@ -92,7 +88,6 @@ export const NewTicketCard = () => {
 		);
 
 		await promiseToResolve;
-		TicketsCardActionsDispatchers.setUnsavedTicket(null);
 	};
 
 	useEffect(() => {
@@ -107,10 +102,7 @@ export const NewTicketCard = () => {
 		}
 
 		return () => {
-			const newUnsavedTicket = (cardView === TicketsCardViews.New)
-				? { containerOrFederation, templateId, data: formData.getValues() }
-				: null;
-			TicketsCardActionsDispatchers.setUnsavedTicket(newUnsavedTicket);
+			TicketsCardActionsDispatchers.setUnsavedTicket(formData.getValues());
 		};
 	}, []);
 
