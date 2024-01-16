@@ -149,17 +149,9 @@ export const viewpointV5ToV4 = (viewpoint: Viewpoint) => {
 		v4Viewpoint.clippingPlanes = viewpoint.clippingPlanes;
 	}
 
-	// if (!isEmpty(viewpoint.state?.colored)) {
-	// 	v4Viewpoint.override_groups = viewpoint.state.colored.map(convertToV4Group);
-	// }
-
 	if (!isEmpty(viewpoint.state?.transformed)) {
 		v4Viewpoint.transformation_groups = viewpoint.state.transformed.map(convertToV4Group);
 	}
-
-	// if (!isEmpty(viewpoint.state?.hidden)) {
-	// 	v4Viewpoint.hidden_group = mergeGroups(viewpoint.state.hidden.map(convertToV4Group));
-	// }
 
 	return { viewpoint: v4Viewpoint };
 };
