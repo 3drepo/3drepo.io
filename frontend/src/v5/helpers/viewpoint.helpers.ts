@@ -14,17 +14,18 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Viewpoint, Group, ViewpointGroupOverrideType, GroupOverride, ViewpointState, V4GroupObjects, OverridesDicts, MeshIdTransformDict } from '@/v5/store/tickets/tickets.types';
+import { Viewpoint, Group, ViewpointGroupOverrideType, GroupOverride, ViewpointState, V4GroupObjects, OverridesDicts } from '@/v5/store/tickets/tickets.types';
 import { getGroupHexColor, rgbaToHex } from '@/v4/helpers/colors';
 import { generateViewpoint as generateViewpointV4, getNodesIdsFromSharedIds, toSharedIds } from '@/v4/helpers/viewpoints';
 import { formatMessage } from '@/v5/services/intl';
 import { dispatch, getState } from '@/v4/modules/store';
-import { isEmpty } from 'lodash';
-import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
+import { isEmpty, isString } from 'lodash';
 import { TreeActions } from '@/v4/modules/tree';
-import { ViewerGuiActions } from '@/v4/modules/viewerGui';
 import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors';
 import { TicketsCardActionsDispatchers } from '../services/actionsDispatchers';
+import { ViewpointsActions } from '@/v4/modules/viewpoints';
+import { GroupsActions } from '@/v4/modules/groups';
+import { SequencesActions } from '@/v4/modules/sequences';
 
 export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	container: object.model as string,
@@ -106,6 +107,63 @@ export const getViewerState = async () => {
 	return state;
 };
 
+const convertToV4Group = (groupOverride: GroupOverride) => {
+	const { color, opacity, transformation, group: v5Group } = groupOverride;
+
+	if (isString(v5Group)) {
+		return { color: [0, 0, 0, 0], objects: [] }; // theres no info yet so I say us an empty group
+	}
+
+	const group:any = {
+		objects: convertToV4GroupNodes(v5Group?.objects || []),
+	};
+
+	if (color) {
+		group.color = getGroupHexColor([...color, Math.round((opacity ?? 1) * 255)]);
+	}
+
+	if (opacity) {
+		group.opacity = opacity;
+	}
+
+	if (transformation) {
+		group.transformation = transformation;
+	}
+
+	return group;
+};
+
+export const viewpointV5ToV4 = (viewpoint: Viewpoint) => {
+	let v4Viewpoint:any = {};
+	if (viewpoint.camera) {
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		const { position, up, forward: view_dir, type, size: orthographicSize } = viewpoint.camera;
+		v4Viewpoint = { position, up, view_dir, type, orthographicSize, look_at: null, account: null, model: null };
+	}
+
+	if (!isEmpty(viewpoint.state)) {
+		v4Viewpoint.hideIfc = !viewpoint.state.hidden;
+	}
+
+	if (!isEmpty(viewpoint.clippingPlanes)) {
+		v4Viewpoint.clippingPlanes = viewpoint.clippingPlanes;
+	}
+
+	// if (!isEmpty(viewpoint.state?.colored)) {
+	// 	v4Viewpoint.override_groups = viewpoint.state.colored.map(convertToV4Group);
+	// }
+
+	if (!isEmpty(viewpoint.state?.transformed)) {
+		v4Viewpoint.transformation_groups = viewpoint.state.transformed.map(convertToV4Group);
+	}
+
+	// if (!isEmpty(viewpoint.state?.hidden)) {
+	// 	v4Viewpoint.hidden_group = mergeGroups(viewpoint.state.hidden.map(convertToV4Group));
+	// }
+
+	return { viewpoint: v4Viewpoint };
+};
+
 export const meshObjectsToV5GroupNode = (objects) => objects.map((obj) => ({
 	container: obj.model,
 	_ids: obj.mesh_ids,
@@ -117,6 +175,8 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 			if (color !== undefined) {
 			// eslint-disable-next-line no-param-reassign
 				dict.overrides[id] = color;
+			} else {
+				dict.transparencies[id] = 0;
 			}
 
 			if (opacity !== undefined) {
@@ -145,20 +205,6 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 	}, { overrides: {}, transparencies: {} } as OverridesDicts);
 };
 
-const toTranformationsDict = (overrides: GroupOverride[]): MeshIdTransformDict => {
-	const dict: MeshIdTransformDict = {};
-
-	overrides.forEach((current) => {
-		const v4Objects = convertToV4GroupNodes((current.group as Group)?.objects || []);
-		v4Objects.forEach((obj) => 
-			obj.shared_ids.forEach((id) => 
-				dict[id] = current.transformation,
-			));
-	});
-
-	return dict;
-};
-
 export const goToView = async (view: Viewpoint) => {
 	if (
 		isEmpty(view?.state?.colored) && 
@@ -169,24 +215,19 @@ export const goToView = async (view: Viewpoint) => {
 		return;
 	}
 	
-	dispatch(ViewerGuiActions.clearColorOverrides());
-	await ViewerService.setViewpoint(view);
+	// This is not very clean but will be fixed with the overrides refactor
+	dispatch(GroupsActions.clearColorOverridesSuccess());
+	dispatch(ViewpointsActions.clearColorOverrides());
+	dispatch(SequencesActions.clearColorOverrides());
+	
 	const overrides = toGroupPropertiesDicts(view?.state?.colored || []);
 	TicketsCardActionsDispatchers.setOverrides(overrides);
-
-	const transformations = toTranformationsDict(view?.state?.transformed || []);
-	TicketsCardActionsDispatchers.setTransformations(transformations);
-
-	await ViewerService.clearHighlights();
-
-	if (view?.state) {
-		dispatch(TreeActions.setHiddenGeometryVisible(!!view.state.showHidden));
-	}
-
 	const v4HiddenObjects = convertToV4GroupNodes(view.state?.hidden?.flatMap((hiddenOverride) => (hiddenOverride.group as Group)?.objects || []));
 	if (v4HiddenObjects.length) {
 		dispatch(TreeActions.hideNodesBySharedIds(v4HiddenObjects, true));
 	} else {
 		dispatch(TreeActions.showAllNodes());
 	}
+	
+	dispatch(ViewpointsActions.showViewpoint(null, null, viewpointV5ToV4(view)));
 };

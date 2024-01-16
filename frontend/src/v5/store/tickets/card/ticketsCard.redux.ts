@@ -20,7 +20,7 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
-import { EditableTicket, ITicketsFilters, MeshIdTransformDict, OverridesDicts } from '../tickets.types';
+import { EditableTicket, ITicketsFilters, OverridesDicts } from '../tickets.types';
 
 export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createActions({
 	setSelectedTicket: ['ticketId'],
@@ -111,11 +111,6 @@ export const setUnsavedTicket = (state: ITicketsCardState, { ticket }: SetUnsave
 	state.unsavedTicket = ticket;
 }
 
-export const setTransformations = (state: ITicketsCardState, { transformations }: SetTransformationsAction) => {
-	state.transformations = transformations;
-};
-
-
 export const resetState = ({ filters, readOnly }: ITicketsCardState) => ({
 	...INITIAL_STATE,
 	filters,
@@ -135,7 +130,6 @@ export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.RESET_STATE]: resetState,
 	[TicketsCardTypes.SET_OVERRIDES]: setOverrides,
 	[TicketsCardTypes.SET_UNSAVED_TICKET]: setUnsavedTicket,
-	[TicketsCardTypes.SET_TRANSFORMATIONS]: setTransformations,
 }));
 
 export type SetSelectedTicketAction = Action<'SET_SELECTED_TICKET'> & { ticketId: string };
@@ -151,7 +145,6 @@ export type SetReadOnlyAction = Action<'SET_READ_ONLY'> & { readOnly: boolean };
 export type ResetStateAction = Action<'RESET_STATE'>;
 export type SetOverridesAction = Action<'SET_OVERRIDES'> & { overrides: OverridesDicts | null };
 export type SetUnsavedTicketAction = Action<'SET_UNSAVED_TICKET'> & { ticket: EditableTicket };
-export type SetTransformationsAction = Action<'SET_TRANSFORMATIONS'> & { transformations: OverridesDicts | null };
 
 export interface ITicketsCardActionCreators {
 	setSelectedTicket: (ticketId: string) => SetSelectedTicketAction,
@@ -166,6 +159,5 @@ export interface ITicketsCardActionCreators {
 	setReadOnly: (readOnly: boolean) => SetReadOnlyAction,
 	resetState: () => ResetStateAction,
 	setOverrides: (overrides: OverridesDicts) => SetOverridesAction,
-	setUnsavedTicket: (ticket: EditableTicket) => SetUnsavedTicketAction,
-	setTransformations: (transformations: MeshIdTransformDict) => SetTransformationsAction
+	setUnsavedTicket: (ticket: EditableTicket) => SetUnsavedTicketAction
 }

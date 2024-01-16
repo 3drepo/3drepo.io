@@ -80,12 +80,6 @@ export const selectTicketTransparencies = createSelector(
 	(overridesDicts) => overridesDicts.transparencies,
 );
 
-export const selectTicketTransformations = createSelector(
-	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.transformations || {},
-);
-
-
 export const selectTicketHasClearedOverrides = createSelector(
 	selectTicketsCardDomain,
 	(ticketCardState) => !ticketCardState.overrides,
