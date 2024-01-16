@@ -157,7 +157,7 @@ export class IndexedDbCacheWorker {
 							data: undefined, // indicates that no key was found or the transaction was aborted
 						});
 					} else {
-						this.sendGetTransactionComplete({
+						this.sendGetTransactionCompleteTransfer({
 							id,
 							data: request.result.data,
 						});
@@ -228,8 +228,20 @@ export class IndexedDbCacheWorker {
 		self.postMessage({
 			type: 'OnGetTransactionComplete',
 			parms,
+		});
+	}
+
+	// A version of sendGetTransactionComplete that uses the transferable objects
+	// override to transfer the data ArrayBuffer, rather then perform a deep copy.
+	// Only use this when no more references to the ArrayBuffer will exist in the
+	// worker scope; for example, when handling indexeddb get callbacks, but not
+	// when using the memory cache.
+	sendGetTransactionCompleteTransfer(parms: any) {
+		self.postMessage({
+			type: 'OnGetTransactionComplete',
+			parms,
 		},
-		parms.data !== undefined ? [parms.data] : []);
+		[parms.data]);
 	}
 
 	sendIndexedDbUpdated(parms: any) {
