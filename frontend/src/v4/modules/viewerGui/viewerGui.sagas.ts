@@ -21,8 +21,7 @@ import { goBack } from 'connected-react-router';
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { TicketsCardActions } from '@/v5/store/tickets/card/ticketsCard.redux';
-import { ROUTES } from '../../constants/routes';
-import { INITIAL_HELICOPTER_SPEED, VIEWER_GIZMO_MODES, VIEWER_EVENTS } from '../../constants/viewer';
+import { INITIAL_HELICOPTER_SPEED, VIEWER_GIZMO_MODES, VIEWER_EVENTS, VIEWER_CLIP_MODES } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Viewer } from '../../services/viewer/viewer';
@@ -44,7 +43,7 @@ import { SequencesActions } from '../sequences';
 import { StarredActions } from '../starred';
 import { dispatch } from '../store';
 import { TreeActions } from '../tree';
-import { selectInitialView, selectViewpointsDomain, selectViewpointsList, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
+import { selectInitialView, selectViewpointsDomain, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
 import { ViewerGuiActions, ViewerGuiTypes } from './viewerGui.redux';
 import {
 	selectClippingMode,
@@ -291,14 +290,11 @@ function* setClippingMode({ mode }) {
 	try {
 		const currentClipMode = yield select(selectClippingMode);
 		if (currentClipMode !== mode) {
-			yield all([
-				put(ViewerGuiActions.setClipModeSuccess(mode)),
-				Viewer.setClipMode(mode),
-				put(ViewerGuiActions.setGizmoMode(VIEWER_GIZMO_MODES.TRANSLATE)),
-			])
-		}
-		if (!mode) {
-			yield put(ViewerGuiActions.setClipEdit(false));
+			yield put(ViewerGuiActions.setClipModeSuccess(mode));
+			if (!mode) {
+				yield Viewer.clipToolDelete();
+				yield put(ViewerGuiActions.setClipEdit(false));
+			}
 		}
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('set', 'clip mode', error));
@@ -328,8 +324,9 @@ function* setClipEdit({ isClipEdit }) {
 	try {
 		const currentClipEdit = yield select(selectIsClipEdit);
 		if (currentClipEdit !== isClipEdit) {
+			const clippingMode = yield select(selectClippingMode);
 			yield all([
-				isClipEdit ? Viewer.startClipEdit() : Viewer.stopClipEdit(),
+				isClipEdit ? Viewer.startClip(clippingMode === VIEWER_CLIP_MODES.SINGLE) : Viewer.stopClipEdit(),
 				put(ViewerGuiActions.setClipEditSuccess(isClipEdit)),
 			])
 		}
