@@ -34,7 +34,7 @@ import { Loader } from '../../../components/loader/loader.component';
 import { Content as ContentComponent } from '../../../components/loader/loader.styles';
 import { MenuItemContainer } from '../previewListItem/previewListItem.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
+import { ViewerPanelContent as ViewerPanelContentBase } from '../viewerPanel/viewerPanel.styles';
 
 export const SequencesIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.SEQUENCES];
 
@@ -62,7 +62,7 @@ export const SequencePlayerContainer = styled.div`
 	height: 165px;
 `;
 
-export const SequenceTasksListContainer = styled(ViewerPanelContent)`
+export const SequenceTasksListContainer = styled(ViewerPanelContentBase)`
 	background-color: ${COLOR.BLACK_6};
 	font-size: 13px;
 	color: ${COLOR.BLACK_60};
@@ -219,6 +219,8 @@ export const StepInput = styled(Input).attrs({
 `;
 
 export const SequenceItemContainer = styled(MenuItemContainer)`
+	min-height: 94px;
+	max-height: 94px;
 	&& {
 		padding-left: 15px;
 	}
@@ -264,6 +266,16 @@ export const StyledLoader = styled(Loader)`
 	}
 `;
 
+export const ViewerPanelContent = styled(ViewerPanelContentBase)`
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+`;
+
+export const SequenceItems = styled.div`
+	display: contents;
+`;
+
 export const ToggleContainer = styled.div`
 	width: 100%;
 	display: flex;
@@ -271,9 +283,13 @@ export const ToggleContainer = styled.div`
 	justify-content: center;
 	gap: 7px;
 	font-weight: 600;
-	height: 48px;
-	position: absolute;
+	min-height: 48px;
+	max-height: 48px;
+	position: sticky;
 	bottom: 0;
+	margin-top: auto;
+	z-index: 3;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	border-top: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	box-sizing: border-box;
 `;
