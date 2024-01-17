@@ -100,22 +100,24 @@ function clean(groupData) {
 	cleanArray(groupData, "rules");
 	cleanArray(groupData, "transformation");
 
-	for (let i = 0; groupData.objects && i < groupData.objects.length; i++) {
-		Object.values(idTypes).forEach((idType) => {
-			if (groupData.objects[i][idType]) {
-				cleanArray(groupData.objects[i], idType);
-			}
-		});
-
-		if (groupData.objects[i].shared_ids) {
-			cleanArray(groupData.objects[i], "shared_ids");
-			groupData.objects[i].shared_ids = groupData.objects[i].shared_ids.map(x => utils.uuidToString(x));
-		}
-	}
-
 	if(groupData.objects) {
-		groupData.objects = groupData.objects.filter(({shared_ids, ...extIds}) => {
-			return shared_ids || Object.keys(extIds).some((v) => Object.values(idTypes).includes(v));
+		groupData.objects = groupData.objects.filter(({shared_ids, ...extIds}, i) => {
+			const shouldKeep =  shared_ids || getCommonElements(Object.keys(extIds), Object.values(idTypes)).length;
+
+			if(shouldKeep) {
+				Object.values(idTypes).forEach((idType) => {
+					if (groupData.objects[i][idType]) {
+						cleanArray(groupData.objects[i], idType);
+					}
+				});
+
+				if (groupData.objects[i].shared_ids) {
+					cleanArray(groupData.objects[i], "shared_ids");
+					groupData.objects[i].shared_ids = groupData.objects[i].shared_ids.map(x => utils.uuidToString(x));
+				}
+			}
+
+			return shouldKeep;
 		});
 	}
 
@@ -132,8 +134,7 @@ async function getObjectIds(account, model, branch, revId, groupData, convertSha
 	if (groupData.rules && groupData.rules.length > 0) {
 		return Meta.findObjectIdsByRules(account, model, groupData.rules, branch, revId, convertSharedIDsToString, showIfcGuids);
 	} else {
-		const res = await getObjectsArray(model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids);
-		return res;
+		return getObjectsArray(model, branch, revId, groupData, convertSharedIDsToString, showIfcGuids);
 	}
 }
 
@@ -142,10 +143,10 @@ async function getObjectsArray(model, branch, revId, groupData, convertSharedIDs
 	return Promise.all(groupData.objects.map(async({account, model:container, shared_ids, ...extIds}) => {
 
 		if (showIfcGuids) {
-			if (extIds[idTypes.IFC]) {
-				return {account, model: container, [idTypes.IFC]: extIds[idTypes.IFC]};
+			if (!shared_ids) {
+				// if we're storing other external Ids, just return empty array (not converting).
+				return {account, model: container, [idTypes.IFC]: extIds[idTypes.IFC] ?? []};
 			}
-			return {account, model: container, [idTypes.IFC]: []};
 		} else if(shared_ids) {
 			return {account, model: container, shared_ids: convertSharedIDsToString ? shared_ids.map(utils.uuidToString) : shared_ids.map(utils.stringToUUID)};
 		}
@@ -199,16 +200,16 @@ function getObjectsArrayAsExternalIds(account, model, branch, rId, data) {
 
 		// have to have shared_ids, IFC or RVT ids, but not more than one
 		if (
-			(!containerEntry[idTypes.IFC] && !containerEntry[idTypes.RVT] && !containerEntry.shared_ids) &&
-			!(containerEntry[idTypes.IFC] && !containerEntry[idTypes.RVT] && !containerEntry.shared_ids) &&
-			!(!containerEntry[idTypes.IFC] && containerEntry[idTypes.RVT] && !containerEntry.shared_ids) &&
+			(!containerEntry[idTypes.IFC] && !containerEntry[idTypes.RVT] && !containerEntry.shared_ids) ||
+			!(containerEntry[idTypes.IFC] && !containerEntry[idTypes.RVT] && !containerEntry.shared_ids) ||
+			!(!containerEntry[idTypes.IFC] && containerEntry[idTypes.RVT] && !containerEntry.shared_ids) ||
 			!(!containerEntry[idTypes.IFC] && !containerEntry[idTypes.RVT] && containerEntry.shared_ids)
 		) {
 			return Promise.reject(responseCodes.INVALID_GROUP);
 		}
 
 		if(!containerEntry.shared_ids) {
-			return data;
+			return containerEntry;
 		}
 
 		try {

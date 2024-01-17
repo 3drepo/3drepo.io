@@ -166,9 +166,13 @@ const testSharedIdsToExternalIds = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(metaRes);
 
+			const externalIdKeys = Object.values(idTypesToKeys).flat();
+			const query = { parents: { $in: sharedIds }, 'metadata.key': { $in: externalIdKeys }, rev_id: revId };
+			const projection = { metadata: 1 };
+
 			expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
 			expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(
-				teamspace, container, expect.anything(), expect.anything());
+				teamspace, container, query, projection);
 		});
 	});
 };

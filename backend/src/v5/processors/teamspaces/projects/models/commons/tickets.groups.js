@@ -69,11 +69,11 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 
 	if (!matched.length) return res;
 
-	const wantedIds = await getExternalIdsFromMetadata(matched);
+	const wantedIds = getExternalIdsFromMetadata(matched);
 
 	if (wantedIds) {
 		if (unwanted.length) {
-			const unwantedIds = await getExternalIdsFromMetadata(unwanted, wantedIds.key);
+			const unwantedIds = getExternalIdsFromMetadata(unwanted, wantedIds.key);
 			if (unwantedIds) {
 				wantedIds.values = getArrayDifference(unwantedIds.values, wantedIds.values);
 			}
@@ -151,7 +151,7 @@ TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
 	const convertedGroups = await Promise.all(groups.map(
 		async (group) => {
 			if (group.objects) {
-				const objects = await convertToExternalIds(teamspace, project, group.objects, true);
+				const objects = await convertToExternalIds(teamspace, project, group.objects);
 				return { ...group, objects };
 			}
 
@@ -169,7 +169,7 @@ TicketGroups.updateTicketGroup = async (teamspace, project, model, ticket, group
 	const convertedData = { ...data };
 
 	if (data.objects) {
-		convertedData.objects = await convertToExternalIds(teamspace, project, data.objects, true);
+		convertedData.objects = await convertToExternalIds(teamspace, project, data.objects);
 	}
 
 	await updateGroup(teamspace, project, model, ticket, groupId, convertedData, author);
