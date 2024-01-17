@@ -189,7 +189,7 @@ export function* setSelectedDate({ date }) {
 
 		if (selectedSequence) {
 			// bound date by sequence start/end date
-			const { startDate, endDate } = yield select(selectSelectedSequence);
+			const { startDate, endDate, frames } = yield select(selectSelectedSequence);
 			let dateToSelect;
 
 			if (date) {
