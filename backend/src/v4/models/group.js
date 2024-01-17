@@ -20,6 +20,7 @@
 const { v5Path } = require("../../interop");
 
 const { getCommonElements } = require(`${v5Path}/utils/helper/arrays`);
+const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects`);
 const { idTypes, idTypesToKeys } = require(`${v5Path}/models/metadata.constants`);
 const { getMetadataWithMatchingData } = require(`${v5Path}/models/metadata`);
 const { sharedIdsToExternalIds, getMeshesWithParentIds } = require(`${v5Path}/processors/teamspaces/projects/models/commons/scenes`);
@@ -200,10 +201,7 @@ function getObjectsArrayAsExternalIds(account, model, branch, rId, data) {
 
 		// have to have shared_ids, IFC or RVT ids, but not more than one
 		if (
-			(!containerEntry[idTypes.IFC] && !containerEntry[idTypes.RVT] && !containerEntry.shared_ids) ||
-			!(containerEntry[idTypes.IFC] && !containerEntry[idTypes.RVT] && !containerEntry.shared_ids) ||
-			!(!containerEntry[idTypes.IFC] && containerEntry[idTypes.RVT] && !containerEntry.shared_ids) ||
-			!(!containerEntry[idTypes.IFC] && !containerEntry[idTypes.RVT] && containerEntry.shared_ids)
+			getCommonElements([...Object.values(idTypes), "shared_ids"], Object.keys(deleteIfUndefined(containerEntry))).length !== 1
 		) {
 			return Promise.reject(responseCodes.INVALID_GROUP);
 		}
