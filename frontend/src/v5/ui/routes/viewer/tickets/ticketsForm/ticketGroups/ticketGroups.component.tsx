@@ -194,7 +194,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	}, [hasClearedOverrides]);
 
 	useEffect(() => {
-		dispatch(ViewpointsActions.setSelectedViewpoint(null));
+		dispatch(ViewpointsActions.clearColorOverrides());
 
 		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
 		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
