@@ -20,12 +20,8 @@ import { generateViewpoint as generateViewpointV4, getNodesIdsFromSharedIds, toS
 import { formatMessage } from '@/v5/services/intl';
 import { dispatch, getState } from '@/v4/modules/store';
 import { isEmpty, isString } from 'lodash';
-import { TreeActions } from '@/v4/modules/tree';
 import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors';
-import { TicketsCardActionsDispatchers } from '../services/actionsDispatchers';
 import { ViewpointsActions } from '@/v4/modules/viewpoints';
-import { GroupsActions } from '@/v4/modules/groups';
-import { SequencesActions } from '@/v4/modules/sequences';
 
 export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	container: object.model as string,
@@ -133,6 +129,8 @@ const convertToV4Group = (groupOverride: GroupOverride) => {
 	return group;
 };
 
+const mergeGroups = (groups: any[]) => ({ objects: groups.flatMap((group) => group.objects) });
+
 export const viewpointV5ToV4 = (viewpoint: Viewpoint) => {
 	let v4Viewpoint:any = {};
 	if (viewpoint.camera) {
@@ -151,6 +149,15 @@ export const viewpointV5ToV4 = (viewpoint: Viewpoint) => {
 
 	if (!isEmpty(viewpoint.state?.transformed)) {
 		v4Viewpoint.transformation_groups = viewpoint.state.transformed.map(convertToV4Group);
+	}
+
+
+	if (!isEmpty(viewpoint.state?.colored)) {
+		v4Viewpoint.override_groups = viewpoint.state.colored.map(convertToV4Group);
+	}
+	
+	if (!isEmpty(viewpoint.state?.hidden)) {
+		v4Viewpoint.hidden_group = mergeGroups(viewpoint.state.hidden.map(convertToV4Group));
 	}
 
 	return { viewpoint: v4Viewpoint };
@@ -205,20 +212,6 @@ export const goToView = async (view: Viewpoint) => {
 		isEmpty(view?.camera) && 
 		isEmpty(view?.clippingPlanes)) {
 		return;
-	}
-	
-	// This is not very clean but will be fixed with the overrides refactor
-	dispatch(GroupsActions.clearColorOverridesSuccess());
-	dispatch(ViewpointsActions.clearColorOverrides());
-	dispatch(SequencesActions.clearColorOverrides());
-	
-	const overrides = toGroupPropertiesDicts(view?.state?.colored || []);
-	TicketsCardActionsDispatchers.setOverrides(overrides);
-	const v4HiddenObjects = convertToV4GroupNodes(view.state?.hidden?.flatMap((hiddenOverride) => (hiddenOverride.group as Group)?.objects || []));
-	if (v4HiddenObjects.length) {
-		dispatch(TreeActions.hideNodesBySharedIds(v4HiddenObjects, true));
-	} else {
-		dispatch(TreeActions.showAllNodes());
 	}
 	
 	dispatch(ViewpointsActions.showViewpoint(null, null, viewpointV5ToV4(view)));
