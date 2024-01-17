@@ -112,9 +112,9 @@ function clean(groupData) {
 					}
 				});
 
+				cleanArray(groupData.objects[i], "shared_ids");
 				if (groupData.objects[i].shared_ids) {
-					cleanArray(groupData.objects[i], "shared_ids");
-					groupData.objects[i].shared_ids = groupData.objects[i].shared_ids.map(x => utils.uuidToString(x));
+					groupData.objects[i].shared_ids = groupData.objects[i].shared_ids.map(utils.uuidToString);
 				}
 			}
 
@@ -242,7 +242,7 @@ const Group = {};
 Group.create = async function (account, model, branch = "master", rid = null, sessionId, creator = "", data) {
 	const newGroup = {};
 
-	const convertedObjects = Array.isArray(data.objects) ? await getObjectsArrayAsExternalIds(account, model, branch, rid, data, false) : undefined;
+	const convertedObjects = Array.isArray(data.objects) ? await getObjectsArrayAsExternalIds(account, model, branch, rid, data) : undefined;
 
 	let typeCorrect = (!data.objects !== !data.rules);
 
@@ -317,7 +317,7 @@ Group.findByUID = async function (account, model, branch, revId, uid, showIfcGui
 		foundGroup.objects = await getObjectsArrayAsExternalIds(account, model, branch, revId, foundGroup);
 	} else {
 		try {
-			foundGroup.objects = await getObjectIds(account, model, branch, revId, foundGroup, showIfcGuids);
+			foundGroup.objects = await getObjectIds(account, model, branch, revId, foundGroup, !noClean, showIfcGuids);
 		} catch (err) {
 			// This can happen if there's no revisions
 		}
