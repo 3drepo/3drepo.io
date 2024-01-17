@@ -54,6 +54,7 @@ export class ClientConfigService {
 	public imageSizeLimit;
 	public imageExtensions;
 	public apiUrls;
+	public hotjar;
 	private chatHost;
 	private chatPath;
 	private chatReconnectionAttempts;
