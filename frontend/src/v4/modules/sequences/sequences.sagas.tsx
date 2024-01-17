@@ -214,7 +214,7 @@ export function* setSelectedDate({ date }) {
 			const { viewpoint } = getSelectedFrame(frames, date);
 
 			if (!viewpoint) {
-				yield put(ViewpointsActions.setActiveViewpoint(null));
+				yield put(ViewpointsActions.deselectViewsAndLeaveClipping());
 			}
 		}
 		yield put(SequencesActions.updateSelectedStateDefinition());
