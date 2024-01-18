@@ -36,8 +36,8 @@ const MetaModel = require(`${src}/models/metadata`);
 jest.mock('../../../../../../../../src/v5/models/scenes');
 const ScenesModel = require(`${src}/models/scenes`);
 
-jest.mock('../../../../../../../../src/v5/services/filesManager');
-const FilesManager = require(`${src}/services/filesManager`);
+jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/scenes');
+const SceneProcessor = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
 
 const getMetadata = (externalIdName) => times(10, () => ({ parents: times(2, () => generateRandomString()),
 	metadata: [{ key: externalIdName, value: generateRandomString() }] }));
@@ -65,10 +65,12 @@ const getSmartTicketGroupById = () => {
 		['when getLatestRevision fails', { ...defaultOptions, containers: [container], latestRevisionFail: true }],
 		['when there is a negative query', { ...defaultOptions, unwantedMeta: defaultOptions.matchedMeta.slice(5) }],
 		['when there are no matches', { ...defaultOptions, matchedMeta: [] }],
-		['with ifc guids', { ...defaultOptions, convertToMeshIds: false, externalIdName: [idTypes.IFC] }],
-		['with revit ids', { ...defaultOptions, convertToMeshIds: false, externalIdName: [idTypes.REVIT], matchedMeta: getMetadata(idTypesToKeys[idTypes.REVIT][0]) }],
-		['when returnMeshIds is true but no metadata are found', { ...defaultOptions, convertToMeshIds: false, noMetaFound: true, matchedMeta: [{ parents: times(2, () => generateRandomString()) }] }],
+		['with ifc guids', { ...defaultOptions, convertToMeshIds: false, externalIdName: idTypes.IFC }],
+		['with revit ids', { ...defaultOptions, convertToMeshIds: false, externalIdName: idTypes.REVIT, matchedMeta: getMetadata(idTypesToKeys[idTypes.REVIT][0]) }],
+		['when returnMeshIds is false but no metadata are found', { ...defaultOptions, convertToMeshIds: false, noMetaFound: true, matchedMeta: [] }],
+		['when returnMeshIds is false but no external Id are found', { ...defaultOptions, convertToMeshIds: false, noExternId: true, matchedMeta: [{ parents: times(2, () => generateRandomString()) }] }],
 		['with ifc guids (with negative query)', { ...defaultOptions, convertToMeshIds: false, externalIdName: [idTypes.IFC], unwantedMeta: defaultOptions.matchedMeta.slice(0, 5) }],
+		['with ifc guids (with negative query) but no unwanted external ID are found', { ...defaultOptions, convertToMeshIds: false, externalIdName: [idTypes.IFC], noUnwantedExternId: true, unwantedMeta: defaultOptions.matchedMeta.slice(0, 5) }],
 	])('Get ticket group by Id (smart group)', (desc, options) => {
 		test(`should return the group found ${desc}`, async () => {
 			let expectedData;
@@ -83,6 +85,8 @@ const getSmartTicketGroupById = () => {
 				if (options.containers) {
 					revision = generateRandomString();
 					RevsModel.getLatestRevision.mockResolvedValueOnce({ _id: revision });
+				} else if (revision) {
+					RevsModel.getRevisionByIdOrTag.mockResolvedValueOnce({ _id: revision });
 				}
 
 				MetaModel.getMetadataByRules.mockResolvedValueOnce({
@@ -90,31 +94,45 @@ const getSmartTicketGroupById = () => {
 				});
 
 				if (options.convertToMeshIds) {
-					const nodeRes = options.matchedMeta.length
-						? times(10, () => ({ _id: generateRandomString() }))
-						: [];
-
 					if (options.matchedMeta.length) {
-						ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes);
+						const ids = times(options.matchedMeta.length, generateUUIDString);
+						SceneProcessor.getMeshesWithParentIds.mockResolvedValueOnce(ids);
+						expectedData = { ...options.group,
+							objects: [{ container, _ids: ids.map(stringToUUID) }] };
+					} else {
+						expectedData = { ...options.group, objects: [] };
 					}
 
-					if (options.unwantedMeta.length && nodeRes.length) {
-						ScenesModel.getNodesBySharedIds
-							.mockResolvedValueOnce([...nodeRes.slice(options.unwantedMeta.length),
-								{ _id: generateRandomString() }]);
+					if (options.unwantedMeta.length) {
+						const ids = times(options.unwantedMeta.length, generateUUIDString);
+						SceneProcessor.getMeshesWithParentIds.mockResolvedValueOnce(ids);
 					}
-
-					const idMapMock = {};
-					nodeRes.slice(1).forEach(({ _id }) => { idMapMock[_id] = [_id]; });
-					FilesManager.getFile.mockResolvedValueOnce(JSON.stringify(idMapMock));
-
-					const ids = nodeRes.slice(1, nodeRes.length - options.unwantedMeta.length).map(({ _id }) => _id);
-
-					expectedData = { ...options.group, objects: ids.length ? [{ container, _ids: ids }] : [] };
+				} else if (options.noMetaFound) {
+					expectedData = { ...options.group, objects: [] };
+				} else if (options.noExternId) {
+					SceneProcessor.getExternalIdsFromMetadata.mockReturnValueOnce(undefined);
+					expectedData = { ...options.group, objects: [] };
 				} else {
+					const expectedValues = options.matchedMeta.map(({ metadata }) => metadata[0].value);
+					SceneProcessor.getExternalIdsFromMetadata.mockReturnValueOnce(
+						{ key: options.externalIdName, values: expectedValues });
+
 					expectedData = { ...options.group,
-						objects: options.noMetaFound ? [] : [{ container,
-							[options.externalIdName]: options.matchedMeta.map((m) => m.metadata[0].value) }] };
+						objects: [{ container, [options.externalIdName]: expectedValues }] };
+					if (options.unwantedMeta.length) {
+						if (options.noUnwantedExternId) {
+							SceneProcessor.getExternalIdsFromMetadata.mockReturnValueOnce(undefined);
+						} else {
+							const unwantedIds = options.unwantedMeta.map(({ metadata }) => metadata[0].value);
+							SceneProcessor.getExternalIdsFromMetadata.mockReturnValueOnce(
+								{ key: options.externalIdName,
+									values: unwantedIds });
+							expectedData = { ...options.group,
+								objects: [{ container,
+									[options.externalIdName]: expectedValues.filter(
+										(v) => !unwantedIds.includes(v)) }] };
+						}
+					}
 				}
 			}
 
@@ -137,16 +155,6 @@ const getSmartTicketGroupById = () => {
 						...(options.convertToMeshIds ? {} : { metadata: { $elemMatch:
 							{ $or: Object.values(idTypesToKeys).flat().map((n) => ({ key: n })) } } }),
 					});
-
-				if (options.matchedMeta.length && options.convertToMeshIds) {
-					expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledWith(teamspace, project, container,
-						revision, options.matchedMeta.flatMap(({ parents }) => parents), { _id: 1 });
-				}
-
-				if (options.unwantedMeta.length && options.convertToMeshIds) {
-					expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledWith(teamspace, project, container,
-						revision, options.unwantedMeta.flatMap(({ parents }) => parents), { _id: 1 });
-				}
 			}
 		});
 	});
@@ -198,24 +206,22 @@ const getNormalTicketGroupById = () => {
 					if (containers) {
 						revision = generateRandomString();
 						RevsModel.getLatestRevision.mockResolvedValueOnce({ _id: revision });
+					} else if (revision) {
+						RevsModel.getRevisionByIdOrTag.mockResolvedValueOnce({ _id: revision });
 					}
 
-					const nodeRes = times(10, () => ({ _id: generateUUIDString() }));
+					const ids = times(10, generateUUIDString());
 					MetaModel.getMetadataWithMatchingData.mockResolvedValueOnce(options.matchedMeta);
-					ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodeRes);
-
-					const idMapMock = { };
-					nodeRes.slice(1).forEach(({ _id }) => { idMapMock[_id] = [_id]; });
-					FilesManager.getFile.mockResolvedValueOnce(JSON.stringify(idMapMock));
-
-					const ids = nodeRes.slice(1).map(({ _id }) => stringToUUID(_id));
+					SceneProcessor.getMeshesWithParentIds.mockResolvedValueOnce(ids);
 					expectedData.objects = expectedData.objects
-						.map((o) => ({ ...o, [externalIdName]: undefined, _ids: ids }));
+						.map(({ container: resContainer }) => ({
+							container: resContainer, _ids: ids.map(stringToUUID) }));
 				}
 			}
 
-			await expect(Groups.getTicketGroupById(teamspace, project, container, revision, ticket,
-				groupId, convertToMeshIds, containers)).resolves.toEqual(expectedData);
+			const results = await Groups.getTicketGroupById(teamspace, project, container, revision, ticket,
+				groupId, convertToMeshIds, containers);
+			expect(results).toEqual(expectedData);
 
 			if (convertToMeshIds && !invalidContainer) {
 				if (containers) {
@@ -264,7 +270,7 @@ const getCommonTestCases = (isUpdate) => {
 			nodes: [],
 		},
 		{
-			desc: `should ${action} a group without conversion if metadata are not found`,
+			desc: `should ${action} a group without conversion if external ids are not found`,
 			container,
 			group: { objects: [{ _ids: [generateRandomString()], container }] },
 			nodes,
@@ -274,8 +280,7 @@ const getCommonTestCases = (isUpdate) => {
 			container,
 			group: { objects: [{ _ids: [generateRandomString()], container }] },
 			nodes,
-			metadata: times(10,
-				() => ({ metadata: [{ key: idTypesToKeys[idTypes.IFC][0], value: metadataValue }] })),
+			convertedResults: { key: idTypes.IFC, values: [metadataValue] },
 			convertedGroup: { objects: [{ [idTypes.IFC]: [metadataValue], container }] },
 		},
 		{
@@ -283,8 +288,7 @@ const getCommonTestCases = (isUpdate) => {
 			container,
 			group: { objects: [{ _ids: [generateRandomString()], container }] },
 			nodes,
-			metadata: times(10,
-				() => ({ metadata: [{ key: idTypesToKeys[idTypes.REVIT][0], value: metadataValue }] })),
+			convertedResults: { key: idTypes.REVIT, values: [metadataValue] },
 			convertedGroup: { objects: [{ [idTypes.REVIT]: [metadataValue], container }] },
 		},
 	];
@@ -294,16 +298,15 @@ const testAddGroups = () => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const ticket = generateRandomString();
-	const externalIdKeys = Object.values(idTypesToKeys).flat();
 
-	const runTest = ({ desc, container, group, nodes, metadata, convertedGroup, containsMeshIds = true }) => {
+	const runTest = ({ desc, container, group, nodes, convertedResults, convertedGroup, containsMeshIds = true }) => {
 		test(desc, async () => {
 			if (containsMeshIds) {
 				ScenesModel.getNodesByIds.mockResolvedValueOnce(nodes);
 			}
 
 			if (nodes?.length) {
-				MetaModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
+				SceneProcessor.sharedIdsToExternalIds.mockResolvedValueOnce(convertedResults);
 			}
 
 			await Groups.addGroups(teamspace, project, container, ticket, [group]);
@@ -320,10 +323,9 @@ const testAddGroups = () => {
 			}
 
 			if (nodes?.length) {
-				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
-				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container,
-					{ rev_id: nodes[0].rev_id, parents: { $in: nodes.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } },
-					{ metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } });
+				expect(SceneProcessor.sharedIdsToExternalIds).toHaveBeenCalledTimes(1);
+				expect(SceneProcessor.sharedIdsToExternalIds).toHaveBeenCalledWith(teamspace, container,
+					nodes[0].rev_id, nodes.map(({ shared_id }) => shared_id));
 			}
 		});
 	};
@@ -337,16 +339,15 @@ const testUpdateGroup = () => {
 	const ticket = generateRandomString();
 	const groupId = generateRandomString();
 	const author = generateRandomString();
-	const externalIdKeys = Object.values(idTypesToKeys).flat();
 
-	const runTest = ({ desc, container, group, nodes, metadata, convertedGroup, containsMeshIds = true }) => {
+	const runTest = ({ desc, container, group, nodes, convertedResults, convertedGroup, containsMeshIds = true }) => {
 		test(desc, async () => {
 			if (containsMeshIds) {
 				ScenesModel.getNodesByIds.mockResolvedValueOnce(nodes);
 			}
 
 			if (nodes?.length) {
-				MetaModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
+				SceneProcessor.sharedIdsToExternalIds.mockResolvedValueOnce(convertedResults);
 			}
 
 			await Groups.updateTicketGroup(teamspace, project, container, ticket, groupId, group, author);
@@ -363,10 +364,9 @@ const testUpdateGroup = () => {
 			}
 
 			if (nodes?.length) {
-				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
-				expect(MetaModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container,
-					{ rev_id: nodes[0].rev_id, parents: { $in: nodes.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } },
-					{ metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } });
+				expect(SceneProcessor.sharedIdsToExternalIds).toHaveBeenCalledTimes(1);
+				expect(SceneProcessor.sharedIdsToExternalIds).toHaveBeenCalledWith(teamspace, container,
+					nodes[0].rev_id, nodes.map(({ shared_id }) => shared_id));
 			}
 		});
 	};

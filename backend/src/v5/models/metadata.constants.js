@@ -17,6 +17,7 @@
 
 const MetaConstants = {};
 
+// The order on this object determines the priority.
 MetaConstants.idTypes = {
 	IFC: 'ifc_guids',
 	REVIT: 'revit_ids',
@@ -26,5 +27,14 @@ MetaConstants.idTypesToKeys = {
 	[MetaConstants.idTypes.IFC]: ['IFC GUID', 'Ifc::IfcGUID', 'Element::IfcGUID', 'IFC Parameters::IfcGUID'],
 	[MetaConstants.idTypes.REVIT]: ['Element ID', 'Element ID::Value', 'Tag', 'Element::IfcTag'],
 };
+
+MetaConstants.metaKeyToIdType = {};
+
+Object.keys(MetaConstants.idTypesToKeys).forEach((idType) => {
+	const keys = MetaConstants.idTypesToKeys[idType];
+	keys.forEach((label) => {
+		MetaConstants.metaKeyToIdType[label] = idType;
+	});
+});
 
 module.exports = MetaConstants;

@@ -15,31 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, deleteGroups, getGroupById, getGroupsByIds, updateGroup } = require('../../../../../models/tickets.groups');
-const { getIdToMeshesMapping, getMeshesWithParentIds } = require('./scene');
-const { getMetadataByQuery, getMetadataByRules, getMetadataWithMatchingData } = require('../../../../../models/metadata');
-const { getNodesByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
+const { getArrayDifference, getCommonElements } = require('../../../../../utils/helper/arrays');
+const {
+	getExternalIdsFromMetadata,
+	getMeshesWithParentIds,
+	sharedIdsToExternalIds,
+} = require('./scenes');
+const { getLatestRevision, getRevisionByIdOrTag } = require('../../../../../models/revisions');
+const { getMetadataByRules, getMetadataWithMatchingData } = require('../../../../../models/metadata');
 const { idTypes, idTypesToKeys } = require('../../../../../models/metadata.constants');
-const { getCommonElements } = require('../../../../../utils/helper/arrays');
-const { getLatestRevision } = require('../../../../../models/revisions');
+const { getNodesByIds } = require('../../../../../models/scenes');
+const { stringToUUID } = require('../../../../../utils/helper/uuids');
 
 const TicketGroups = {};
 
-const getExteralIdNameFromMetadata = (metadata) => {
-	let externalIdName;
-	Object.keys(idTypesToKeys).forEach((name) => {
-		if (idTypesToKeys[name].some((m) => m === metadata[0].metadata[0].key)) {
-			externalIdName = name;
-		}
-	});
-
-	return externalIdName;
-};
-
 const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, returnMeshIds) => {
 	let revision = revId;
-	if (!revision) {
+
+	if (revision) {
+		const rev = await getRevisionByIdOrTag(teamspace, model, revision, { _id: 1 });
+		revision = rev._id;
+	} else {
 		try {
 			const rev = await getLatestRevision(teamspace, model, { _id: 1 });
 			revision = rev._id;
@@ -54,46 +51,37 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 	const { matched, unwanted } = await getMetadataByRules(teamspace, project, model, revision, rules, projection);
 
 	if (returnMeshIds) {
-		const idToMeshes = await getIdToMeshesMapping(teamspace, model, revision);
 		const [
-			matchedNodes,
-			unwantedNodes,
+			matchedMeshIds,
+			unwantedMeshIds,
 		] = await Promise.all([
-			matched.length ? getNodesBySharedIds(teamspace, project, model, revision,
-				matched.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
-			unwanted.length ? getNodesBySharedIds(teamspace, project, model, revision,
-				unwanted.flatMap(({ parents }) => parents), { _id: 1 }) : Promise.resolve([]),
+			matched.length ? getMeshesWithParentIds(teamspace, project, model, revision,
+				matched.flatMap(({ parents }) => parents), true) : Promise.resolve([]),
+			unwanted.length ? getMeshesWithParentIds(teamspace, project, model, revision,
+				unwanted.flatMap(({ parents }) => parents), true) : Promise.resolve([]),
 		]);
 
-		const matchedMeshes = {};
-		matchedNodes.forEach(({ _id }) => {
-			const idStr = UUIDToString(_id);
-			if (idToMeshes[idStr]) {
-				idToMeshes[idStr].forEach((id) => {
-					matchedMeshes[id] = stringToUUID(id);
-				});
-			}
-		});
-		unwantedNodes.forEach(({ _id }) => {
-			const idStr = UUIDToString(_id);
-			if (idToMeshes[idStr]) {
-				idToMeshes[idStr].forEach((id) => delete matchedMeshes[id]);
-			}
-		});
-		return { container: model, _ids: Object.values(matchedMeshes) };
+		return { container: model, _ids: getArrayDifference(unwantedMeshIds, matchedMeshIds).map(stringToUUID) };
 	}
 
-	if (!matched.some((m) => m.metadata)) {
-		return { container: model, [idTypes.IFC]: [] };
+	const defaultType = Object.keys(idTypes)[0];
+	let res = { container: model, [defaultType]: [] };
+
+	if (!matched.length) return res;
+
+	const wantedIds = getExternalIdsFromMetadata(matched);
+
+	if (wantedIds) {
+		if (unwanted.length) {
+			const unwantedIds = getExternalIdsFromMetadata(unwanted, wantedIds.key);
+			if (unwantedIds) {
+				wantedIds.values = getArrayDifference(unwantedIds.values, wantedIds.values);
+			}
+		}
+		res = { container: model, [wantedIds.key]: wantedIds.values };
 	}
 
-	const wantedIds = [...new Set(matched.map(({ metadata }) => metadata[0].value))];
-	const unwantedIds = [...new Set(unwanted.map(({ metadata }) => metadata[0].value))];
-
-	unwantedIds.filter((id) => (wantedIds.includes(id))).forEach((id) => delete wantedIds[id]);
-
-	const externalIdName = getExteralIdNameFromMetadata(matched);
-	return { container: model, [externalIdName]: wantedIds };
+	return res;
 };
 
 const convertToExternalIds = async (teamspace, project, containerEntries) => {
@@ -107,24 +95,19 @@ const convertToExternalIds = async (teamspace, project, containerEntries) => {
 		const nodes = await getNodesByIds(teamspace, project, entry.container, entry._ids,
 			{ _id: 0, shared_id: 1, rev_id: 1 });
 
-		if (nodes.length) {
-			const externalIdKeys = Object.values(idTypesToKeys).flat();
-			const query = { rev_id: nodes[0].rev_id, parents: { $in: nodes.map((s) => s.shared_id) }, 'metadata.key': { $in: externalIdKeys } };
-			const projection = { metadata: { $elemMatch: { $or: externalIdKeys.map((n) => ({ key: n })) } } };
-			const metadata = await getMetadataByQuery(teamspace, entry.container, query, projection);
-
-			const convertedEntry = { ...entry };
-			if (metadata?.length) {
-				// eslint-disable-next-line no-underscore-dangle
-				delete convertedEntry._ids;
-				const externalIdName = getExteralIdNameFromMetadata(metadata);
-				convertedEntry[externalIdName] = [...new Set(metadata.map((m) => m.metadata[0].value))];
-			}
-
-			return convertedEntry;
+		if (!nodes.length) {
+			return entry;
 		}
+		const res = await sharedIdsToExternalIds(teamspace, entry.container, nodes[0].rev_id,
+			nodes.map(({ shared_id }) => shared_id));
 
-		return entry;
+		const convertedObject = { ...entry };
+		if (res) {
+			// eslint-disable-next-line no-underscore-dangle
+			delete convertedObject._ids;
+			convertedObject[res.key] = res.values;
+		}
+		return convertedObject;
 	}));
 
 	return convertedEntries;
@@ -139,7 +122,10 @@ const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
 	const { container } = containerEntry;
 
 	let revision = revId;
-	if (!revision) {
+	if (revision) {
+		const rev = await getRevisionByIdOrTag(teamspace, container, revision, { _id: 1 });
+		revision = rev._id;
+	} else {
 		try {
 			const rev = await getLatestRevision(teamspace, container, { _id: 1 });
 			revision = rev._id;
@@ -153,6 +139,7 @@ const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
 	const idType = getCommonElements(Object.keys(containerEntry), Object.keys(idTypesToKeys))[0];
 	const metadata = await getMetadataWithMatchingData(teamspace, container, revision,
 		idTypesToKeys[idType], containerEntry[idType], { parents: 1 });
+
 	const meshIds = await getMeshesWithParentIds(teamspace, project, container, revision,
 		metadata.flatMap(({ parents }) => parents));
 

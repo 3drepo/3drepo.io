@@ -68,6 +68,7 @@ async function findStashNodes(account, model, branch, revision, query = {}, proj
 
 const Scene = {};
 
+Scene.findNodes = findNodes;
 Scene.findNodesByField = async function (account, model, branch, revision, fieldName, projection = {}) {
 	const query = { "metadata.key": fieldName };
 	const proj = { parents: 1, metadata: { $elemMatch: { key: fieldName } }, ...projection };
