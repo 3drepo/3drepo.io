@@ -102,23 +102,20 @@ function clean(groupData) {
 	cleanArray(groupData, "transformation");
 
 	if(groupData.objects) {
-		groupData.objects = groupData.objects.filter(({shared_ids, ...extIds}, i) => {
-			const shouldKeep =  shared_ids || getCommonElements(Object.keys(extIds), Object.values(idTypes)).length;
+		groupData.objects = groupData.objects.filter((entry) => {
 
-			if(shouldKeep) {
-				Object.values(idTypes).forEach((idType) => {
-					if (groupData.objects[i][idType]) {
-						cleanArray(groupData.objects[i], idType);
-					}
-				});
-
-				cleanArray(groupData.objects[i], "shared_ids");
-				if (groupData.objects[i].shared_ids) {
-					groupData.objects[i].shared_ids = groupData.objects[i].shared_ids.map(utils.uuidToString);
+			Object.values([...Object.values(idTypes), "shared_ids"]).forEach((idType) => {
+				if (entry[idType]) {
+					cleanArray(entry, idType);
 				}
+			});
+
+			if (entry.shared_ids) {
+				entry.shared_ids = entry.shared_ids.map(utils.uuidToString);
+				return true;
 			}
 
-			return shouldKeep;
+			return  getCommonElements(Object.keys(entry), Object.values(idTypes)).length;
 		});
 	}
 
