@@ -36,6 +36,8 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	resetState: [],
 	setOverrides: ['overrides'],
 	setUnsavedTicket: ['ticket'],
+	setTransformations: ['transformation'],
+
 }, { prefix: 'TICKETS_CARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
 export interface ITicketsCardState {
@@ -47,6 +49,7 @@ export interface ITicketsCardState {
 	readOnly: boolean,
 	overrides: OverridesDicts | null,
 	unsavedTicket: EditableTicket | null,
+	transformations: any,
 }
 
 export const INITIAL_STATE: ITicketsCardState = {
@@ -60,6 +63,7 @@ export const INITIAL_STATE: ITicketsCardState = {
 	},
 	view: TicketsCardViews.List,
 	overrides: null,
+	transformations: null,
 	readOnly: false,
 	unsavedTicket: null,
 };
@@ -106,6 +110,10 @@ export const setOverrides = (state: ITicketsCardState, { overrides }: SetOverrid
 
 export const setUnsavedTicket = (state: ITicketsCardState, { ticket }: SetUnsavedTicketAction) => {
 	state.unsavedTicket = ticket;
+}
+W
+export const setTransformations = (state: ITicketsCardState, { transformations }: SetTransformationsAction) => {
+	state.transformations = transformations;
 };
 
 export const resetState = ({ filters, readOnly }: ITicketsCardState) => ({
@@ -127,6 +135,7 @@ export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.RESET_STATE]: resetState,
 	[TicketsCardTypes.SET_OVERRIDES]: setOverrides,
 	[TicketsCardTypes.SET_UNSAVED_TICKET]: setUnsavedTicket,
+	[TicketsCardTypes.SET_TRANSFORMATIONS]: setTransformations,
 }));
 
 export type SetSelectedTicketAction = Action<'SET_SELECTED_TICKET'> & { ticketId: string };
@@ -142,6 +151,7 @@ export type SetReadOnlyAction = Action<'SET_READ_ONLY'> & { readOnly: boolean };
 export type ResetStateAction = Action<'RESET_STATE'>;
 export type SetOverridesAction = Action<'SET_OVERRIDES'> & { overrides: OverridesDicts | null };
 export type SetUnsavedTicketAction = Action<'SET_UNSAVED_TICKET'> & { ticket: EditableTicket };
+export type SetTransformationsAction = Action<'SET_TRANSFORMATIONS'> & { transformations : any | null };
 
 export interface ITicketsCardActionCreators {
 	setSelectedTicket: (ticketId: string) => SetSelectedTicketAction,
@@ -157,4 +167,5 @@ export interface ITicketsCardActionCreators {
 	resetState: () => ResetStateAction,
 	setOverrides: (overrides: OverridesDicts) => SetOverridesAction,
 	setUnsavedTicket: (ticket: EditableTicket) => SetUnsavedTicketAction,
+	setTransformations: (transformations: any) => SetTransformationsAction 
 }
