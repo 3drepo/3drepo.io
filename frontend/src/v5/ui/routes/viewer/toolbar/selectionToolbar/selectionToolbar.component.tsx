@@ -18,6 +18,7 @@ import ClearOverridesIcon from '@assets/icons/viewer/clear_overrides.svg';
 import EyeHideIcon from '@assets/icons/viewer/eye_hide.svg';
 import EyeShowIcon from '@assets/icons/viewer/eye_show.svg';
 import EyeIsolateIcon from '@assets/icons/viewer/eye_isolate.svg';
+import ResetTransformationsIcons from '@assets/icons/viewer/reset_transformations.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { GroupsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TreeHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -30,6 +31,7 @@ export const SectionToolbar = () => {
 	const hasOverrides = !isEmpty(ViewerGuiHooksSelectors.selectColorOverrides());
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectFullySelectedNodesIds().length;
 	const hasHiddenObjects = TreeHooksSelectors.selectModelHasHiddenNodes();
+	const hasTransformations = !isEmpty(ViewerGuiHooksSelectors.selectTransformations());
 
 	return (
 		<Container>
@@ -39,6 +41,14 @@ export const SectionToolbar = () => {
 					hidden={!hasOverrides}
 					onClick={ViewerGuiActionsDispatchers.clearColorOverrides}
 					title={formatMessage({ id: 'viewer.toolbar.icon.clearOverrides', defaultMessage: 'Clear Overrides' })}
+				/>
+			</Section>
+			<Section hidden={!hasTransformations}>
+				<ToolbarButton
+					Icon={ResetTransformationsIcons}
+					hidden={!hasTransformations}
+					onClick={() => ViewerGuiActionsDispatchers.clearTransformations()}
+					title={formatMessage({ id: 'viewer.toolbar.icon.resetTransformation', defaultMessage: 'Reset Transformation' })}
 				/>
 			</Section>
 			<Section hidden={!hasHighlightedObjects && !hasHiddenObjects}>

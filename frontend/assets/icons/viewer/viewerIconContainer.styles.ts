@@ -34,6 +34,11 @@ const disabledStyles = css`
 `;
 
 export const ViewerIconContainer = styled.div<{ selected?: boolean, disabled?: boolean }>`
+	svg {
+		height: 18px;
+		width: 18px;
+	}
+	
 	.primary {
 		color: ${({ theme }) => theme.palette.secondary.lightest};
 	}

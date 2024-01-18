@@ -16,18 +16,18 @@
  */
 
 import { Grid, Tooltip } from '@mui/material';
-import { Gap } from '@controls/gap';
 import { Toggle } from '@controls/inputs/toggle/toggle.component';
 import { FormattedMessage } from 'react-intl';
 
 import { formatShortDateTime } from '../../../../../../services/formatting/formatDate';
-import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
 import {
 	SequenceDatesContainer,
 	SequenceItemContainer,
 	SequenceItemIcon,
 	SequenceName,
+	SequenceItems,
 	ToggleContainer,
+	ViewerPanelContent
 } from '../../sequences.styles';
 
 interface IProps {
@@ -58,16 +58,17 @@ const SequenceItem = ({name, modelName, startDate, endDate, onClick}) => (
 
 export const SequencesList = ({ setSelectedSequence, sequences, openOnToday, setOpenOnToday, showSequenceDate }: IProps) => {
 	const onSequenceClick = ({ _id }) => {
-		setSelectedSequence(_id);
 		showSequenceDate(null);
+		setSelectedSequence(_id);
 	};
 
 	return (
 		<ViewerPanelContent>
-			{sequences.map((sequence) => (
-				<SequenceItem key={sequence._id} {...sequence} onClick={() => onSequenceClick(sequence)} />
-			))}
-			<Gap $height='48px' />
+			<SequenceItems>
+				{sequences.map((sequence) => (
+					<SequenceItem key={sequence._id} {...sequence} onClick={() => onSequenceClick(sequence)} />
+				))}
+			</SequenceItems>
 			<ToggleContainer>
 				<Toggle onChange={() => setOpenOnToday(!openOnToday)} checked={openOnToday} />
 				<FormattedMessage
