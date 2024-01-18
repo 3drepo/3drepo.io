@@ -234,8 +234,37 @@ const testGetMetadataByRules = () => {
 	});
 };
 
+const testGetMetadataWithMatchingData = () => {
+	describe('Get metadata matching data', () => {
+		test('should return the metadata based on the matching data', async () => {
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+			const revision = generateRandomString();
+			const matchingKeys = generateRandomString();
+			const matchingValues = generateRandomString();
+			const projection = generateRandomString();
+
+			const expectedData = generateRandomObject();
+			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
+
+			await expect(Metadata.getMetadataWithMatchingData(teamspace, container, revision, matchingKeys,
+				matchingValues, projection)).resolves.toEqual(expectedData);
+
+			const query = {
+				type: 'meta',
+				rev_id: revision,
+				metadata: { $elemMatch: { key: { $in: matchingKeys }, value: { $in: matchingValues } } },
+			};
+
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, `${container}.scene`, query, projection);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetMetadataById();
 	testUpdateCustomMetadata();
 	testGetMetadataByRules();
+	testGetMetadataWithMatchingData();
 });

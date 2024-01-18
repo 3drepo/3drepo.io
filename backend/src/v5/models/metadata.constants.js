@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,15 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Scene = {};
-const db = require('../handler/db');
+const MetaConstants = {};
 
-const getCollection = (model) => `${model}.scene`;
+// The order on this object determines the priority.
+MetaConstants.idTypes = {
+	IFC: 'ifc_guids',
+	REVIT: 'revit_ids',
+};
 
-Scene.getNodesBySharedIds = (teamspace, project, model, revId, sharedIds, projection) => db.find(
-	teamspace, getCollection(model), { rev_id: revId, shared_id: { $in: sharedIds } }, projection);
+MetaConstants.idTypesToKeys = {
+	[MetaConstants.idTypes.IFC]: ['IFC GUID', 'Ifc::IfcGUID', 'Element::IfcGUID', 'IFC Parameters::IfcGUID'],
+	[MetaConstants.idTypes.REVIT]: ['Element ID', 'Element ID::Value', 'Tag', 'Element::IfcTag'],
+};
 
-Scene.getNodesByIds = (teamspace, project, model, ids, projection) => db.find(
-	teamspace, getCollection(model), { _id: { $in: ids } }, projection);
+MetaConstants.metaKeyToIdType = {};
 
-module.exports = Scene;
+Object.keys(MetaConstants.idTypesToKeys).forEach((idType) => {
+	const keys = MetaConstants.idTypesToKeys[idType];
+	keys.forEach((label) => {
+		MetaConstants.metaKeyToIdType[label] = idType;
+	});
+});
+
+module.exports = MetaConstants;
