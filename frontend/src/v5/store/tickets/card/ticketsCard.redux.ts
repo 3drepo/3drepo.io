@@ -109,7 +109,7 @@ export const setOverrides = (state: ITicketsCardState, { overrides }: SetOverrid
 
 export const setUnsavedTicket = (state: ITicketsCardState, { ticket }: SetUnsavedTicketAction) => {
 	state.unsavedTicket = ticket;
-}
+};
 
 export const resetState = ({ filters, readOnly }: ITicketsCardState) => ({
 	...INITIAL_STATE,
