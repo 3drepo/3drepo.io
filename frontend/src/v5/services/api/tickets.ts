@@ -151,8 +151,13 @@ export const fetchTicketGroup = async (
 	ticketId: string,
 	groupId: string,
 	isFed: boolean,
+	revision?: string,
 ) => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/${modelType(isFed)}/${modelId}/tickets/${ticketId}/groups/${groupId}`);
+	let url = `teamspaces/${teamspace}/projects/${projectId}/${modelType(isFed)}/${modelId}/tickets/${ticketId}/groups/${groupId}`;
+	if (revision) {
+		url += `?revId=${revision}`;
+	}
+	const { data } = await api.get(url);
 	return data;
 };
 

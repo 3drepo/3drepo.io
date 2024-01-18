@@ -24,22 +24,22 @@ import { subscribeToRoomEvent } from './realtime.service';
 import { TicketsActionsDispatchers } from '../actionsDispatchers';
 
 // Container ticket
-export const enableRealtimeContainerUpdateTicket = (teamspace: string, project: string, containerId: string) => (
+export const enableRealtimeContainerUpdateTicket = (teamspace: string, project: string, containerId: string, revision?: string) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
 		'containerUpdateTicket',
 		(ticket: Partial<EditableTicket>) => {
 			fillOverridesIfEmpty(ticket);
-			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket);
+			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket, revision);
 		},
 	)
 );
 
-export const enableRealtimeContainerNewTicket = (teamspace: string, project: string, containerId: string) => (
+export const enableRealtimeContainerNewTicket = (teamspace: string, project: string, containerId: string, revision?: string) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
 		'containerNewTicket',
-		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket),
+		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket, revision),
 	)
 );
 
@@ -59,32 +59,32 @@ export const enableRealtimeContainerUpdateTicketGroup = (teamspace: string, proj
 );
 
 // Federation ticket
-export const enableRealtimeFederationUpdateTicket = (teamspace: string, project: string, federationId: string) => (
+export const enableRealtimeFederationUpdateTicket = (teamspace: string, project: string, federationId: string, revision?: string) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: federationId },
 		'federationUpdateTicket',
 		(ticket: Partial<EditableTicket>) => {
 			fillOverridesIfEmpty(ticket);
-			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, federationId, ticket);
+			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, federationId, ticket, revision);
 		},
 	)
 );
 
-export const enableRealtimeFederationNewTicket = (teamspace: string, project: string, federationId: string) => (
+export const enableRealtimeFederationNewTicket = (teamspace: string, project: string, federationId: string, revision?: string) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: federationId },
 		'federationNewTicket',
-		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, federationId, ticket),
+		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, federationId, ticket, revision),
 	)
 );
 
-export const enableRealtimeFederationUpdateTicketGroup = (teamspace: string, project: string, federationId: string, revision: string) => (
+export const enableRealtimeFederationUpdateTicketGroup = (teamspace: string, project: string, federationId: string) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: federationId },
 		'federationUpdateTicketGroup',
 		async (group: Group) => {
 			if (group.rules) {
-				const { data } = await getMeshIDsByQuery(teamspace, federationId, group.rules, revision);
+				const { data } = await getMeshIDsByQuery(teamspace, federationId, group.rules);
 				// eslint-disable-next-line no-param-reassign
 				group.objects = meshObjectsToV5GroupNode(data);
 			}

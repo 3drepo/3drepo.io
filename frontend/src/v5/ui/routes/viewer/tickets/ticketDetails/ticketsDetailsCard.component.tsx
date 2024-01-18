@@ -43,7 +43,7 @@ enum IndexChange {
 }
 
 export const TicketDetailsCard = () => {
-	const { teamspace, project, containerOrFederation } = useParams();
+	const { teamspace, project, containerOrFederation, revision } = useParams();
 	const [, setTicketId] = useSearchParam('ticketId');
 	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
 	const treeNodesList = TreeHooksSelectors.selectTreeNodesList();
@@ -128,8 +128,7 @@ export const TicketDetailsCard = () => {
 				isFederation,
 			);
 		}
-		TicketsActionsDispatchers.fetchTicket(teamspace, project, containerOrFederation, ticket._id, isFederation);
-		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
+		TicketsActionsDispatchers.fetchTicket(teamspace, project, containerOrFederation, ticket._id, isFederation, revision);
 		setTicketId(ticket._id);
 	}, [ticket?._id]);
 
