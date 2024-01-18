@@ -55,11 +55,12 @@ export function* createProject({ teamspace, project, onSuccess, onImageError, on
 			name,
 			isAdmin: true,
 		};
-		yield put(ProjectsActions.createProjectSuccess(teamspace, newProject));
-
+		
 		if (image) {
 			yield updateImage({ teamspace, projectId, image });
 		}
+
+		yield put(ProjectsActions.createProjectSuccess(teamspace, newProject));
 		onSuccess();
 	} catch (error) {
 		if (projectId) {
