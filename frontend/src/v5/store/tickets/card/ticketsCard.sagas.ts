@@ -15,12 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { put, takeLatest } from 'redux-saga/effects';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ViewerGuiActions } from '@/v4/modules/viewerGui/viewerGui.redux';
 import { OpenTicketAction, TicketsCardActions, TicketsCardTypes } from './ticketsCard.redux';
-import { ViewpointsActions } from '@/v4/modules/viewpoints';
 
 export function* openTicket({ ticketId }: OpenTicketAction) {
 	yield put(TicketsCardActions.setSelectedTicket(ticketId));
@@ -28,11 +27,6 @@ export function* openTicket({ ticketId }: OpenTicketAction) {
 	yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.TICKETS, true));
 }
 
-function * resetState() {
-	yield put(ViewpointsActions.setActiveViewpoint(null));
-}
-
 export default function* ticketsCardSaga() {
 	yield takeLatest(TicketsCardTypes.OPEN_TICKET, openTicket);
-	yield takeEvery(TicketsCardTypes.RESET_STATE, resetState);
 }
