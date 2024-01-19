@@ -174,9 +174,7 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 			if (color !== undefined) {
 			// eslint-disable-next-line no-param-reassign
 				dict.overrides[id] = color;
-			} else {
-				dict.transparencies[id] = 0;
-			}
+			} 
 
 			if (opacity !== undefined) {
 			// eslint-disable-next-line no-param-reassign
