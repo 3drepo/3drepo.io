@@ -99,6 +99,7 @@ export const TicketView = ({
 		const { state, ...view } = cloneDeep(value || {});
 		state.colored = [];
 		state.hidden = [];
+		state.transformed = [];
 		onChange?.({ state, ...view });
 	};
 
