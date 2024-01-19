@@ -35,7 +35,8 @@ Quota.getQuotaInfo = async (teamspace) => {
 		// paypal subs have a different schema - and no oen should have an active paypal sub. Skip.
 		if (key !== 'paypal') {
 			userHasHadPaidPlan = true;
-			const { expiryDate, data, collaborators: subCollaborators } = subs[key];
+			const { expiryDate, data } = subs[key];
+			const subCollaborators = subs[key].collaborators ?? 0;
 
 			if (!expiryDate || expiryDate > Date.now()) {
 				freeTier = false;
