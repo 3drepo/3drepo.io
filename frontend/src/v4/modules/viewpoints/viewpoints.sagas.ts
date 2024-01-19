@@ -218,21 +218,14 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 }
 
 export function * deselectViewsAndLeaveClipping() {
-	const selectedViewpoint  = yield select(selectSelectedViewpoint);
-	yield put(IssuesActions.goToIssue(null));
-	yield take('@@router/LOCATION_CHANGE');
-	yield put(RisksActions.goToRisk(null));
-	yield take('@@router/LOCATION_CHANGE');
-
-	yield all([
-			put(IssuesActions.setActiveIssue({}, null, true)),
-			put(RisksActions.setActiveRisk({}, null, true)),
-			put(ViewpointsActions.setActiveViewpoint(null))]);
+	const selectedViewpoint = yield select(selectSelectedViewpoint);
+	yield put(ViewpointsActions.setActiveViewpoint(null));
 
 	if (selectedViewpoint) {
+		const { clippingPlanes } = selectedViewpoint;
 		yield take(ViewpointsTypes.SHOW_VIEWPOINT);
-		if (selectedViewpoint.clippingPlanes) {
-			const viewpoint = {viewpoint: {clippingPlanes: selectedViewpoint.clippingPlanes }};
+		if (clippingPlanes) {
+			const viewpoint = { viewpoint: { clippingPlanes } };
 			yield put(ViewpointsActions.showViewpoint(null, null, viewpoint));
 		}
 	}
@@ -293,6 +286,17 @@ export function* clearColorOverrides() {
 			override_groups: [],
 		}));
 	}
+}
+
+export function* clearTransformations() {
+	const viewpoint = yield select(selectSelectedViewpoint);
+	if (!viewpoint?.transformation_groups?.length) {
+		return;
+	}
+	yield put(ViewpointsActions.setSelectedViewpoint({
+		...viewpoint,
+		transformation_groups: [],
+	}));
 }
 
 export function* setActiveViewpoint({ teamspace, modelId, view }) {
@@ -361,4 +365,5 @@ export default function* ViewpointsSaga() {
 	yield takeEvery(ViewpointsTypes.SHOW_PRESET, showPreset);
 	yield takeEvery(ViewpointsTypes.FETCH_VIEWPOINT_GROUPS, fetchViewpointGroups);
 	yield takeEvery(ViewpointsTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
+	yield takeEvery(ViewpointsTypes.CLEAR_TRANSFORMATIONS, clearTransformations);
 }

@@ -14,16 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import Hotjar from '@hotjar/browser';
+import { clientConfigService } from '../../v4/services/clientConfig';
 
-const Scene = {};
-const db = require('../handler/db');
+export const initializeHotjar = () => {
+	const { development, hotjar } = clientConfigService;
 
-const getCollection = (model) => `${model}.scene`;
-
-Scene.getNodesBySharedIds = (teamspace, project, model, revId, sharedIds, projection) => db.find(
-	teamspace, getCollection(model), { rev_id: revId, shared_id: { $in: sharedIds } }, projection);
-
-Scene.getNodesByIds = (teamspace, project, model, ids, projection) => db.find(
-	teamspace, getCollection(model), { _id: { $in: ids } }, projection);
-
-module.exports = Scene;
+	if (!development && hotjar) {
+		const { siteId, version } = hotjar;
+		Hotjar.init(siteId, version);
+	}
+};

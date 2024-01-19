@@ -51,6 +51,7 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	fetchViewpointGroups: ['teamspace', 'modelId', 'view'],
 	addViewpointGroupsBeingLoaded: ['ids'],
 	clearColorOverrides: [],
+	clearTransformations: [],
 	reset: [],
 }, { prefix: 'VIEWPOINTS/' });
 

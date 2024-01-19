@@ -23,7 +23,9 @@ const {
 	generateRandomString,
 	generateUUID,
 	generateUUIDString,
+	generateRandomNumber,
 } = require('../../../helper/services');
+const { idTypes } = require('../../../../../src/v5/models/metadata.constants');
 
 const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 
@@ -70,10 +72,41 @@ const testSchema = () => {
 		['data is a UUID and allowIds is set to false', false, false, generateUUID(), false],
 		['data only has some of the values and fieldsOptional is set to true', false, true, { name: generateRandomString() }, true],
 		['data only has some of the values and fieldsOptional is set to false', false, false, { name: generateRandomString() }, false],
-		['data only has both rules and objects and fieldsOptional is set to true', false, true, {
+		['data has both rules and objects and fieldsOptional is set to true', false, true, {
 			name: generateRandomString(),
 			rules: [{ field: generateRandomString(), operation: 'EXISTS' }],
 			objects: [{ _ids: [generateUUID()], container: generateUUIDString() }],
+		}, false],
+		[`data has objects with ${[idTypes.REVIT]}`, false, false, {
+			name: generateRandomString(),
+			objects: [{ [idTypes.REVIT]: [generateRandomNumber()], container: generateUUIDString() }],
+		}, true],
+		[`data has objects with wrong type of ${[idTypes.REVIT]}`, false, false, {
+			name: generateRandomString(),
+			objects: [{ [idTypes.REVIT]: [generateRandomString()], container: generateUUIDString() }],
+		}, false],
+		[`data has objects with ${[idTypes.IFC]}`, false, false, {
+			name: generateRandomString(),
+			objects: [{ [idTypes.IFC]: [generateRandomString(22)], container: generateUUIDString() }],
+		}, true],
+		[`data has objects with wrong type of ${[idTypes.IFC]}`, false, false, {
+			name: generateRandomString(),
+			objects: [{ [idTypes.IFC]: [generateRandomNumber()], container: generateUUIDString() }],
+		}, false],
+		[`data has objects with both ${[idTypes.IFC]} and ${[idTypes.REVIT]}`, false, false, {
+			name: generateRandomString(),
+			objects: [{
+				[idTypes.IFC]: [generateRandomString(22)],
+				[idTypes.REVIT]: [],
+				container: generateUUIDString() }],
+		}, false],
+		[`data has objects with both _ids and ${[idTypes.REVIT]}`, false, false, {
+			name: generateRandomString(),
+			objects: [{ _ids: [generateUUID()], [idTypes.REVIT]: [], container: generateUUIDString() }],
+		}, false],
+		['data has objects with only container and no ids', false, false, {
+			name: generateRandomString(),
+			objects: [{ container: generateUUIDString() }],
 		}, false],
 	])('Schema validation', (desc, allowIds, fieldsOptional, data, shouldPass) => {
 		test(`Should ${shouldPass ? 'pass' : 'fail'} if ${desc}`, async () => {

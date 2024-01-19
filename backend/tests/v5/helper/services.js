@@ -265,6 +265,13 @@ db.addLoginRecords = async (records) => {
 	await DbHandler.insertMany(INTERNAL_DB, 'loginRecords', records);
 };
 
+db.createScene = (teamspace, modelId, rev, nodes, meshMap) => Promise.all([
+	db.createRevision(teamspace, modelId, rev),
+	DbHandler.insertMany(teamspace, `${modelId}.scene`, nodes),
+	FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
+
+]);
+
 ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 ServiceHelper.fileExists = (filePath) => {
 	let flag = true;
@@ -282,6 +289,8 @@ ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
 	+ Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
+ServiceHelper.generateRandomIfcGuid = () => ServiceHelper.generateRandomString(22);
+ServiceHelper.generateRandomRvtId = () => Math.floor(Math.random() * 10000);
 
 ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
 
@@ -495,7 +504,7 @@ ServiceHelper.generateTemplate = (deprecated, hasView = false) => ({
 	...deleteIfUndefined({ deprecated }),
 });
 
-const generateProperties = (propTemplate, internalType) => {
+const generateProperties = (propTemplate, internalType, container) => {
 	const properties = {};
 
 	propTemplate.forEach(({ name, deprecated, type }) => {
@@ -511,7 +520,7 @@ const generateProperties = (propTemplate, internalType) => {
 				state: {
 					hidden: [
 						{ group: ServiceHelper.generateGroup(true, { serialised: true, hasId: false }) },
-						{ group: ServiceHelper.generateGroup(false, { serialised: true, hasId: false }) },
+						{ group: ServiceHelper.generateGroup(false, { serialised: true, hasId: false, container }) },
 					],
 				},
 			};
@@ -528,19 +537,19 @@ ServiceHelper.generateRandomObject = () => ({
 	[ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString(),
 });
 
-ServiceHelper.generateTicket = (template, internalType = false) => {
+ServiceHelper.generateTicket = (template, internalType = false, container) => {
 	const modules = {};
 	template.modules.forEach(({ name, type, deprecated, properties }) => {
 		if (deprecated) return;
 		const id = name ?? type;
-		modules[id] = generateProperties(properties, internalType);
+		modules[id] = generateProperties(properties, internalType, container);
 	});
 
 	const ticket = {
 		_id: ServiceHelper.generateUUIDString(),
 		type: template._id,
 		title: ServiceHelper.generateRandomString(),
-		properties: generateProperties(template.properties, internalType),
+		properties: generateProperties(template.properties, internalType, container),
 		modules,
 	};
 
@@ -600,6 +609,11 @@ ServiceHelper.generateGroup = (isSmart = false, {
 	}
 
 	return group;
+};
+
+ServiceHelper.createGroupWithRule = (rule) => {
+	const group = ServiceHelper.generateGroup(true, { serialised: true, hasId: false });
+	return { ...group, rules: [rule] };
 };
 
 // This generates groups with v4 schema. use generateGroup for v5 (tickets) schema
@@ -730,5 +744,14 @@ ServiceHelper.resetSharedDir = () => {
 	fs.rmSync(fsDir, { recursive: true });
 	fs.mkdirSync(fsDir);
 };
+
+ServiceHelper.generateBasicNode = (type, rev_id, parents, additionalData = {}) => deleteIfUndefined({
+	_id: generateUUID(),
+	shared_id: generateUUID(),
+	rev_id: stringToUUID(rev_id),
+	type,
+	parents,
+	...additionalData,
+});
 
 module.exports = ServiceHelper;

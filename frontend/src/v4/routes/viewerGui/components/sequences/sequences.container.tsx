@@ -29,7 +29,7 @@ import {
 	selectSequences, selectStartDate, selectStepInterval, selectStepScale, SequencesActions,
 } from '../../../../modules/sequences';
 import { selectDraggablePanels, selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
-import { selectIsLoadingSequenceViewpoint, ViewpointsActions } from '../../../../modules/viewpoints';
+import { selectIsLoadingSequenceViewpoint } from '../../../../modules/viewpoints';
 import { Sequences } from './sequences.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -62,8 +62,6 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetLegendPanel: LegendActions.resetPanel,
 	fetchActivityDetails: ActivitiesActions.fetchDetails,
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
-	deselectViewsAndLeaveClipping: ViewpointsActions.deselectViewsAndLeaveClipping,
-	setActiveViewpoint: ViewpointsActions.setActiveViewpoint,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Sequences));

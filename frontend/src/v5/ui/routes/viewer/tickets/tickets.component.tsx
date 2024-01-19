@@ -66,6 +66,16 @@ export const Tickets = () => {
 		);
 	}, [containerOrFederation]);
 
+	useEffect(() => () => {
+		if (view === TicketsCardViews.New) {
+			TicketsCardActionsDispatchers.setUnsavedTicket(null);
+		}
+	}, [view]);
+
+	useEffect(() => {
+		TicketsCardActionsDispatchers.setUnsavedTicket(null);
+	}, [containerOrFederation]);
+
 	return (
 		<>
 			{view === TicketsCardViews.List && <TicketsListCard />}

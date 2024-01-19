@@ -16,7 +16,7 @@
  */
 
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addGroups, deleteGroups, getGroupsByIds } = require('../../../../../models/tickets.groups');
+const { addGroups, deleteGroups, getGroupsByIds } = require('./tickets.groups');
 const { addTicket, getAllTickets, getTicketById, updateTicket } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,

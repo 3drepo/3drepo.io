@@ -84,6 +84,7 @@ interface IViewerGuiActionCreators {
 	setPanelVisibility: (panelName: string, visible: boolean) => Action;
 	setClipEdit: (isClipEdit: boolean) => Action;
 	clearColorOverrides: () => Action;
+	clearTransformations: () => Action;
 }
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);

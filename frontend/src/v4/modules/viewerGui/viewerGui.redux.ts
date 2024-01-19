@@ -61,6 +61,7 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	resetPanels: [],
 	reset: [],
 	clearColorOverrides: [],
+	clearTransformations: [],
 }, { prefix: 'VIEWER_GUI/' });
 
 export interface IViewerGuiState {
