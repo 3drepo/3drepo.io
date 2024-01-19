@@ -1,7 +1,7 @@
 import { theme as V5Theme } from '@/v5/ui/themes/theme';
 import { theme as V5ViewerTheme } from '@/v5/ui/routes/viewer/theme';
 import { IntlProvider } from 'react-intl';
-import { getIntlProviderProps } from '@/v5/services/intl';
+import { getIntl } from '@/v5/services/intl';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
@@ -73,7 +73,7 @@ const withThemeProvider = (Story, context)=>{
 export const decorators = [
 	withThemeProvider,
 	(Story) => (
-		<IntlProvider {...getIntlProviderProps()}>
+		<IntlProvider {...getIntl()}>
 			<Story />
 		</IntlProvider>
 	),
