@@ -14,6 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import FlipPlaneIcon from '@assets/icons/viewer/flip_plane.svg';
+import AlignIcon from '@assets/icons/viewer/align.svg';
+import ClipSelectionIcon from '@assets/icons/viewer/clip_selection.svg';
+import CancelIcon from '@assets/icons/viewer/delete.svg';
 import ClearOverridesIcon from '@assets/icons/viewer/clear_overrides.svg';
 import EyeHideIcon from '@assets/icons/viewer/eye_hide.svg';
 import EyeShowIcon from '@assets/icons/viewer/eye_show.svg';
@@ -26,15 +30,70 @@ import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Section, Container, ClearButton, ClearIcon } from './selectionToolbar.styles';
 import { ToolbarButton } from '../buttons/toolbarButton.component';
+import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '@/v4/constants/viewer';
+import { GizmoModeButtons } from '../buttons/buttonOptionsContainer/gizmoModeButtons.component';
+import { Viewer } from '@/v4/services/viewer/viewer';
+import { useEffect, useState } from 'react';
 
 export const SectionToolbar = () => {
+	const [alignActive, setAlignActive] = useState(false);
+
 	const hasOverrides = !isEmpty(ViewerGuiHooksSelectors.selectColorOverrides());
 	const hasHighlightedObjects = !!TreeHooksSelectors.selectFullySelectedNodesIds().length;
 	const hasHiddenObjects = TreeHooksSelectors.selectModelHasHiddenNodes();
+	const clippingMode = ViewerGuiHooksSelectors.selectClippingMode();
+	const clippingSectionOpen = ViewerGuiHooksSelectors.selectIsClipEdit();
+	const isBoxClippingMode = clippingMode === VIEWER_CLIP_MODES.BOX;
 	const hasTransformations = !isEmpty(ViewerGuiHooksSelectors.selectTransformations());
+
+	const onClickAlign = () => {
+		Viewer.clipToolRealign();
+		setAlignActive(true);
+	};
+
+	useEffect(() => {
+		if (alignActive) {
+			Viewer.on(VIEWER_EVENTS.UPDATE_CLIP, () => setAlignActive(false));
+			Viewer.on(VIEWER_EVENTS.BACKGROUND_SELECTED, () => setAlignActive(false));
+		}
+		return () => {
+			Viewer.off(VIEWER_EVENTS.UPDATE_CLIP, () => setAlignActive(false));
+			Viewer.off(VIEWER_EVENTS.BACKGROUND_SELECTED, () => setAlignActive(false));
+		};
+	}, [alignActive]);
+	
 
 	return (
 		<Container>
+			<Section hidden={!clippingSectionOpen}>
+				<GizmoModeButtons hidden={!clippingSectionOpen} disabled={alignActive} />
+				<ToolbarButton
+					Icon={FlipPlaneIcon}
+					hidden={!clippingSectionOpen || isBoxClippingMode}
+					onClick={Viewer.clipToolFlip}
+					title={formatMessage({ id: 'viewer.toolbar.icon.flipPlane', defaultMessage: 'Flip Plane' })}
+				/>
+				<ToolbarButton
+					Icon={AlignIcon}
+					hidden={!clippingSectionOpen}
+					onClick={onClickAlign}
+					selected={alignActive}
+					title={formatMessage({ id: 'viewer.toolbar.icon.alignToSurface', defaultMessage: 'Align To Surface' })}
+				/>
+				<ToolbarButton
+					Icon={ClipSelectionIcon}
+					hidden={!clippingSectionOpen}
+					onClick={Viewer.clipToolClipToSelection}
+					title={formatMessage({ id: 'viewer.toolbar.icon.clipToSelection', defaultMessage: 'Clip To Selection' })}
+					disabled={!hasHighlightedObjects}
+				/>
+				<ToolbarButton
+					Icon={CancelIcon}
+					hidden={!clippingSectionOpen}
+					onClick={() => ViewerGuiActionsDispatchers.setClippingMode(null)}
+					title={formatMessage({ id: 'viewer.toolbar.icon.deleteClip', defaultMessage: 'Delete' })}
+				/>
+			</Section>
 			<Section hidden={!hasOverrides}>
 				<ToolbarButton
 					Icon={ClearOverridesIcon}

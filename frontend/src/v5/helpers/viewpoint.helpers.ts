@@ -195,6 +195,7 @@ export const goToView = async (view: Viewpoint) => {
 	if (isEmpty(view?.state?.colored)  && isEmpty(view?.state?.hidden) && isEmpty(view?.camera) && isEmpty(view?.clippingPlanes)) {
 		return;
 	}
+
 	
 	dispatch(ViewerGuiActions.clearColorOverrides());
 	await ViewerService.setViewpoint(view);
@@ -202,7 +203,6 @@ export const goToView = async (view: Viewpoint) => {
 	TicketsCardActionsDispatchers.setOverrides(overrides);
 
 	await ViewerService.clearHighlights();
-
 
 	if (view?.state) {
 		dispatch(TreeActions.setHiddenGeometryVisible(!!view.state.showHidden));

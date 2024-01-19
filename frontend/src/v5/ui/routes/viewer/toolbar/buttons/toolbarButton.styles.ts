@@ -36,7 +36,6 @@ export const Container = styled(ViewerIconContainer)<{ disabled?: boolean, hidde
 
 	${({ disabled }) => disabled && css`
 		cursor: default;
-		pointer-events: none;
 	`}
 `;
 

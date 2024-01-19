@@ -29,7 +29,7 @@ const selectedStyles = css`
 
 const disabledStyles = css`
 	.primary, .highlight {
-		color: ${({ theme }) => theme.palette.base.lightest};
+		color: ${({ theme }) => theme.palette.base.main};
 	}
 `;
 
