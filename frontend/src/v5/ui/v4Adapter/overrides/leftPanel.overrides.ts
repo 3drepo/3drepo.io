@@ -182,6 +182,7 @@ export default css`
 			color: ${({ theme }) => theme.palette.base.light} !important;
 			box-sizing: border-box;
 			border-color: ${({ theme }) => theme.palette.base.lightest};
+			z-index: 0;
 
 			${StyledIconButton} {
 				height: 26px;

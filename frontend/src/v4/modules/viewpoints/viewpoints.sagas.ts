@@ -182,6 +182,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 		yield put(TreeActions.setHiddenGeometryVisible(viewpoint.hideIfc === false));
 
 		yield Viewer.updateClippingPlanes(clippingPlanes, teamspace, modelId);
+		yield put(ViewerGuiActions.setClipEdit(false));
 
 		yield waitForTreeToBeReady();
 		yield put(ViewpointsActions.fetchViewpointGroups(teamspace, modelId, view));

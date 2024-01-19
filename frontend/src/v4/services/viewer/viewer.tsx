@@ -1223,9 +1223,8 @@ export class ViewerService {
 		this.emit(VIEWER_EVENTS.CLIPPING_PLANE_BROADCAST, clip);
 	}
 
-	public numClipPlanesUpdated(nPlanes) {
-		this.numClips = nPlanes;
-		this.emit(VIEWER_EVENTS.UPDATE_NUM_CLIP, nPlanes);
+	public clipUpdated() {
+		this.emit(VIEWER_EVENTS.UPDATE_CLIP);
 	}
 
 	public updateClippingPlanes( clipPlanes, account, model ) {
@@ -1238,6 +1237,14 @@ export class ViewerService {
 		} else {
 			this.startBoxClip();
 		}
+		this.emit(VIEWER_EVENTS.UPDATE_CLIP_EDIT, true);
+	}
+
+	public setClipMode(mode) {
+		if (!mode) {
+			this.clipToolDelete()
+		}
+		this.emit(VIEWER_EVENTS.UPDATE_CLIP_MODE, mode);
 	}
 
 	public startBoxClip() {
@@ -1250,10 +1257,41 @@ export class ViewerService {
 
 	public startClipEdit() {
 		UnityUtil.startClipEdit();
+		this.emit(VIEWER_EVENTS.UPDATE_CLIP_EDIT, true);
 	}
 
 	public stopClipEdit() {
 		UnityUtil.stopClipEdit();
+		this.emit(VIEWER_EVENTS.UPDATE_CLIP_EDIT, false);
+	}
+
+	public clipToolFlip() {
+		UnityUtil.clipToolFlip();
+	}
+
+	public clipToolRealign() {
+		UnityUtil.clipToolRealign();
+	}
+
+	public clipToolClipToSelection() {
+		UnityUtil.clipToolClipToSelection();
+	}
+
+	public clipToolDelete() {
+		UnityUtil.clipToolDelete();
+		this.emit(VIEWER_EVENTS.UPDATE_CLIP_MODE, null);
+	}
+
+	public clipToolRotate() {
+		UnityUtil.clipToolRotate();
+	}
+
+	public clipToolScale() {
+		UnityUtil.clipToolScale();
+	}
+
+	public clipToolTranslate() {
+		UnityUtil.clipToolTranslate();
 	}
 
 	public setNavigationOn() {

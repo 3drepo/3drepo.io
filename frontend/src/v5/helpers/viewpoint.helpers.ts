@@ -213,6 +213,7 @@ export const goToView = async (view: Viewpoint) => {
 		isEmpty(view?.clippingPlanes)) {
 		return;
 	}
+
 	
 	dispatch(ViewpointsActions.showViewpoint(null, null, viewpointV5ToV4(view)));
 };

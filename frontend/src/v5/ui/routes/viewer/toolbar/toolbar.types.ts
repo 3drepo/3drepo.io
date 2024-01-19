@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { VIEWER_CLIP_MODES, VIEWER_MEASURING_MODE, VIEWER_NAV_MODES, VIEWER_PROJECTION_MODES } from '@/v4/constants/viewer';
+import { VIEWER_CLIP_MODES, VIEWER_GIZMO_MODES, VIEWER_MEASURING_MODE, VIEWER_NAV_MODES, VIEWER_PROJECTION_MODES } from '@/v4/constants/viewer';
 
 type ValuesOf<T> = T[keyof T];
 
 export type ProjectionMode = ValuesOf<typeof VIEWER_PROJECTION_MODES>;
 export type NavigationMode = ValuesOf<typeof VIEWER_NAV_MODES>;
-export type ClipMode = ValuesOf<typeof VIEWER_CLIP_MODES>;
+export type ClipMode = ValuesOf<typeof VIEWER_CLIP_MODES> | null;
+export type GizmoMode = ValuesOf<typeof VIEWER_GIZMO_MODES>;
 export type MeasureMode = ValuesOf<typeof VIEWER_MEASURING_MODE>;
