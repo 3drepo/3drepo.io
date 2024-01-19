@@ -86,7 +86,7 @@ describe('Tickets: sagas', () => {
 			expect(ticketsFromState).toEqual([]);
 		});
 
-		fit('should call fetchContainerTicket endpoint', async () => {
+		it('should call fetchContainerTicket endpoint', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticket._id}`)
 				.reply(200, ticket);
@@ -197,7 +197,7 @@ describe('Tickets: sagas', () => {
 			expect(ticketsFromState).toEqual([]);
 		});
 
-		fit('should call fetchFederationTicket endpoint', async () => {
+		it('should call fetchFederationTicket endpoint', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticket._id}`)
 				.reply(200, ticket);
@@ -283,7 +283,7 @@ describe('Tickets: sagas', () => {
 		});
 		describe('groups', () => {
 			beforeEach(populateTicketsStore);
-			fit('should call upsertTicketAndFetchGroups', async () => {
+			it('should call upsertTicketAndFetchGroups', async () => {
 				populateGroupsStore();
 
 				const updateProp = { _id: ticket._id, title: 'updatedTicketName' };
