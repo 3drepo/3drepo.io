@@ -14,12 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentType, useEffect } from 'react';
-import { DatePickerProps } from '@mui/lab/DatePicker';
-import { DateTimePickerProps } from '@mui/lab/DateTimePicker';
+import { useEffect } from 'react';
 import { TextField } from '@mui/material';
 import { useState } from 'react';
-import { StyledDatePicker, StyledDateTimePicker } from './dateField.styles';
+import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
+import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
 
 interface IProps {
 	value?: any;
@@ -48,7 +47,7 @@ export const DateField = ({
 	...dateFieldProps
 }: IProps) => {
 	const [value, setValue] = useState(propValue || null);
-	const Picker: ComponentType<DatePickerProps | DateTimePickerProps> = dateTime ? StyledDateTimePicker : StyledDatePicker;
+	const Picker = dateTime ? DateTimePicker : DatePicker;
 
 	const handleAccept = (newValue) => {
 		if (newValue) {
@@ -78,11 +77,13 @@ export const DateField = ({
 					defaultValue={defaultValue}
 					name={name}
 					onBlur={onBlur}
-					className={className}
 					{...props}
+					InputProps={{ endAdornment: null }}
 				/>
 			)}
+			className={className}
 			{...dateFieldProps}
+			components={{ ActionBar: null }}
 		/>
 	);
 };
