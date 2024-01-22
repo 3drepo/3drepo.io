@@ -33,6 +33,7 @@ const testGetQuotaInfo = () => {
 	const tsWithMultipleLicense2 = 'multiLicense2';
 	const tsWithSomeUsage = 'withUsage';
 	const tsWithFreeQuota = 'freeQuota';
+	const tsWithNoCollabs = 'tsWithNoCollabs';
 
 	const validExpiryDate = Date.now() + 100000;
 	const subsByTeamspace = {
@@ -86,6 +87,13 @@ const testGetQuotaInfo = () => {
 		},
 
 		[tsWithFreeQuota]: {},
+
+		[tsWithNoCollabs]: {
+			enterprise: {
+				data: 1,
+				expiryDate: validExpiryDate,
+			},
+		},
 	};
 
 	DBHandler.findOne.mockImplementation((ts, col, { _id }) => {
@@ -100,6 +108,7 @@ const testGetQuotaInfo = () => {
 		['Teamspace with sufficient quota (multiple license)', tsWithMultipleLicense, 1024 * 1024 * 5, 9, validExpiryDate - 10, false],
 		['Teamspace with sufficient quota (multiple license v2)', tsWithMultipleLicense2, 1024 * 1024 * 3, 'unlimited', validExpiryDate, false],
 		['Teamspace with sufficient quota (with existing usage)', tsWithSomeUsage, 1024 * 1024 * 2, 3, validExpiryDate, false],
+		['Teamspace with no collaborators (with existing usage)', tsWithNoCollabs, 1024 * 1024 * 2, config.subscriptions.basic.collaborators, validExpiryDate, false],
 	])('Return quota info', (desc, teamspace, size, collaborators, expiryDate, freeTier, error) => {
 		test(`${desc} should ${error ? `fail with ${error.code}` : 'should return quota info'}`, async () => {
 			const quotaInfoProm = Quota.getQuotaInfo(teamspace);
