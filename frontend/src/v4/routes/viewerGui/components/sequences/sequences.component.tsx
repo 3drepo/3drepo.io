@@ -58,6 +58,7 @@ interface IProps {
 	draggablePanels: string[];
 	toggleLegend: () => void;
 	resetLegendPanel: () => void;
+	clearTransformations: () => void;
 }
 
 const da =  new Date();
@@ -112,10 +113,15 @@ export class Sequences extends PureComponent<IProps, {}> {
 		}
 	}
 
+	public onSequenceClose = () => {
+		this.props.setSelectedSequence(null);
+		this.props.clearTransformations();
+	}
+
 	public renderTitleIcon = () => {
 		if (this.props.selectedSequence) {
 			return (
-                <IconButton onClick={() => this.props.setSelectedSequence(null)} size="large">
+                <IconButton onClick={this.onSequenceClose} size="large">
 					<ArrowBack />
 				</IconButton>
             );
