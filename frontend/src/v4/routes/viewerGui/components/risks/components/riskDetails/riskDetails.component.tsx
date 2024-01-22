@@ -244,8 +244,8 @@ export class RiskDetails extends PureComponent<IProps, IState> {
 			return;
 		}
 
-		if (filteredRisks.length) {
-			const { listIndex } = this.state;
+		const { listIndex } = this.state;
+		if (filteredRisks.length && listIndex < filteredRisks.length) {
 			// set next item in the list as active
 			setActiveRisk(filteredRisks[listIndex % filteredRisks.length], revision, false);
 			return;

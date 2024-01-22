@@ -239,9 +239,9 @@ export class IssueDetails extends PureComponent<IProps, IState> {
 			// item is part of the filtered items list, no action required
 			return;
 		}
+		const { listIndex } = this.state;
 
-		if (filteredIssues.length) {
-			const { listIndex } = this.state;
+		if (filteredIssues.length && listIndex < filteredIssues.length) {
 			// set next item in the list as active
 			setActiveIssue(filteredIssues[listIndex % filteredIssues.length], revision, false);
 			return;
