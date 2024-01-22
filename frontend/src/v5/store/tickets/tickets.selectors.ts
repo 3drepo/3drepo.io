@@ -19,7 +19,7 @@ import { createSelector } from 'reselect';
 import { orderBy } from 'lodash';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
-import { createPropertiesWithGroups } from './ticketsGroups.helpers';
+import { createPropertiesWithGroups, ticketWithGroups } from './ticketsGroups.helpers';
 import { ITicket, Properties, TicketWithModelIdAndName } from './tickets.types';
 import { selectContainers } from '../containers/containers.selectors';
 import { selectFederations } from '../federations/federations.selectors';
@@ -77,12 +77,7 @@ export const selectTickets = createSelector(
 	(state, modelId, groups): ITicket[] => {
 		const tickets = [];
 		(state.ticketsByModelId[modelId] || []).forEach((ticket) => {
-			let { properties } = ticket;
-			properties = createPropertiesWithGroups(properties, groups);
-			tickets.push({
-				...ticket,
-				properties,
-			});
+			tickets.push(ticketWithGroups(ticket, groups));
 		});
 
 		return orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
