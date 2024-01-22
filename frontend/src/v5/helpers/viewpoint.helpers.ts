@@ -209,7 +209,6 @@ export const goToView = async (view: Viewpoint) => {
 		isEmpty(view?.state?.transformed) && 
 		isEmpty(view?.camera) && 
 		isEmpty(view?.clippingPlanes)) {
-		dispatch(ViewpointsActions.showViewpoint(null, null, { viewpoint: {} }));
 		return;
 	}
 	
