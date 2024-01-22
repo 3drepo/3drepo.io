@@ -14,9 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect } from 'react';
 import { TextField } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
 
@@ -43,7 +42,6 @@ export const DateField = ({
 	placeholder,
 	dateTime,
 	defaultValue,
-	className,
 	...dateFieldProps
 }: IProps) => {
 	const [value, setValue] = useState(propValue || null);
@@ -76,12 +74,12 @@ export const DateField = ({
 					placeholder={placeholder}
 					defaultValue={defaultValue}
 					name={name}
-					onBlur={onBlur}
 					{...props}
 					InputProps={{ endAdornment: null }}
 				/>
 			)}
-			className={className}
+			// @ts-ignore
+			inputProps={{ readOnly: true }}
 			{...dateFieldProps}
 			components={{ ActionBar: null }}
 		/>
