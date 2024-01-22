@@ -61,7 +61,9 @@ export const TicketDetailsCard = () => {
 
 	const getUpdatedIndex = (delta: IndexChange) => {
 		let index = currentIndex === -1 ? initialIndex.current : currentIndex;
-		if (currentIndex === -1 && delta === IndexChange.NEXT) index -= 1;
+		if (currentIndex === -1 && delta === IndexChange.NEXT) {
+			index--;
+		}
 		return (index + delta) % filteredTickets.length;
 	};
 
@@ -75,8 +77,9 @@ export const TicketDetailsCard = () => {
 
 	const goBack = () => {
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
-		if (currentIndex !== -1) return;
-		cycleToPrevTicket();
+		if (currentIndex === -1) {
+			TicketsCardActionsDispatchers.setSelectedTicket(null);
+		}
 	};
 
 	const formData = useForm({

@@ -35,6 +35,7 @@ import { RiskDetailsForm } from './riskDetailsForm.component';
 interface IProps {
 	viewer: any;
 	jobs: any[];
+	filteredRisks: any[];
 	risks: any[];
 	risk: any;
 	comments: any[];
@@ -80,6 +81,7 @@ interface IProps {
 	removeMeasurement: (uuid) => void;
 	setMeasurementColor: (uuid, color) => void;
 	setMeasurementName: (uuid, type, name) => void;
+	setActiveRisk: (risk, revision, ignoreViewer) => void;
 	minSequenceDate: Date;
 	maxSequenceDate: Date;
 	selectedDate: Date;
@@ -91,6 +93,7 @@ interface IProps {
 interface IState {
 	logsLoaded: boolean;
 	scrolled: boolean;
+	listIndex: number;
 }
 
 const UNASSIGNED_JOB = {
@@ -101,7 +104,8 @@ const UNASSIGNED_JOB = {
 export class RiskDetails extends PureComponent<IProps, IState> {
 	public state = {
 		logsLoaded: false,
-		scrolled: false
+		scrolled: false,
+		listIndex: (this.props.filteredRisks || []).findIndex(({ _id }) => _id === this.props.risk._id),
 	};
 
 	public formRef = createRef<any>();
@@ -232,8 +236,23 @@ export class RiskDetails extends PureComponent<IProps, IState> {
 	}
 
 	public componentWillUnmount() {
-		const { teamspace, model, risk, unsubscribeOnRiskCommentsChanges } = this.props;
+		const { teamspace, model, risk, filteredRisks, revision, setActiveRisk, unsubscribeOnRiskCommentsChanges } = this.props;
 		unsubscribeOnRiskCommentsChanges(teamspace, model, risk._id);
+
+		if (filteredRisks.find(({ _id }) => _id === risk._id)) {
+			// item is part of the filtered items list, no action required
+			return;
+		}
+
+		const { listIndex } = this.state;
+		if (filteredRisks.length && listIndex < filteredRisks.length) {
+			// set next item in the list as active
+			setActiveRisk(filteredRisks[listIndex % filteredRisks.length], revision, false);
+			return;
+		}
+
+		// the item was not in the filtered list
+		setActiveRisk({}, null, true);
 	}
 
 	public componentDidUpdate(prevProps) {
@@ -245,6 +264,11 @@ export class RiskDetails extends PureComponent<IProps, IState> {
 			unsubscribeOnRiskCommentsChanges(prevProps.teamspace, prevProps.model, prevProps.risk._id);
 			fetchRisk(teamspace, model, risk._id);
 			subscribeOnRiskCommentsChanges(teamspace, model, risk._id);
+		}
+
+		const newListIndex = (this.props.filteredRisks || []).findIndex(({ _id }) => _id === this.props.risk._id);
+		if (newListIndex !== -1) {
+			this.setState({ ...this.state, listIndex: newListIndex });
 		}
 	}
 
@@ -330,10 +354,10 @@ export class RiskDetails extends PureComponent<IProps, IState> {
 
 	public handlePanelScroll = (e) => {
 		if (e.target.scrollTop > 0 && !this.state.scrolled) {
-			this.setState({ scrolled: true });
+			this.setState({ scrolled: true, listIndex: this.state.listIndex });
 		}
 		if (e.target.scrollTop === 0 && this.state.scrolled) {
-			this.setState({ scrolled: false });
+			this.setState({ scrolled: false, listIndex: this.state.listIndex });
 		}
 	}
 

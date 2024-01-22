@@ -26,6 +26,7 @@ import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWith
 import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { Highlight } from '@controls/highlight';
+import { useEffect, useRef } from 'react';
 import { Ticket, Id, Title, ChipList, Assignees, IssuePropertiesRow } from './ticketItem.styles';
 import { IssueProperties, SafetibaseProperties } from '../../tickets.constants';
 
@@ -36,6 +37,7 @@ type TicketItemProps = {
 };
 
 export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
+	const ref = useRef<HTMLDivElement>();
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
 
@@ -59,11 +61,19 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 		TicketsCardActionsDispatchers.openTicket(ticket._id);
 	};
 
+	useEffect(() => {
+		if (selected && ref.current) {
+			// @ts-ignore
+			ref.current.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'start' });
+		}
+	}, []);
+
 	return (
 		<Ticket
 			onClick={onClick}
 			key={ticket._id}
 			$selected={selected}
+			ref={ref}
 		>
 			<Id>
 				<Highlight search={queries}>
