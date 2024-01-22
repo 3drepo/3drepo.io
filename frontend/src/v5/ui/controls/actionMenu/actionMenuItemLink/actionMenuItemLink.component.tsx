@@ -14,8 +14,8 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Link, ItemIcon, ItemText } from './actionMenuItemLink.styles';
-import { ActionMenuItem } from '../actionMenuItem/actionMenuItem.component';
+import { ItemIcon, ItemText, LinkWrapper } from './actionMenuItemLink.styles';
+import { Link } from 'react-router-dom';
 
 type ActionMenuItemLinkProps = {
 	className?: string;
@@ -25,16 +25,19 @@ type ActionMenuItemLinkProps = {
 	onClick?: () => void;
 };
 
-export const ActionMenuItemLink = ({ Icon, to = '#', children, ...otherProps }: ActionMenuItemLinkProps) => (
-	<ActionMenuItem {...otherProps}>
-		<Link to={to}>
-			{Icon && (
-				<ItemIcon>
-					<Icon />
-				</ItemIcon>
-			)}
-			<ItemText>{children}</ItemText>
-		</Link>
-	</ActionMenuItem>
-);
+export const ActionMenuItemLink = ({ Icon, to, children, ...otherProps }: ActionMenuItemLinkProps) => {
+	const ConditionalLink = (props) => to ? <Link  to={to} {...props}/> : <a {...props} />;
+	return (
+		<LinkWrapper {...otherProps}>
+			<ConditionalLink>
+				{Icon && (
+					<ItemIcon>
+						<Icon />
+					</ItemIcon>
+				)}
+				<ItemText>{children}</ItemText>
+			</ConditionalLink>
+		</LinkWrapper>
+	);
+};
 ActionMenuItemLink.isActionMenuClosingElement = true;

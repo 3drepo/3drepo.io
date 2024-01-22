@@ -16,9 +16,9 @@
  */
 import styled from 'styled-components';
 import ListItemIcon from '@mui/material/ListItemIcon';
-import { Link as LinkBase } from 'react-router-dom';
+import { ActionMenuItem } from '../actionMenuItem/actionMenuItem.component';
 
-export const Link = styled(LinkBase)`
+export const LinkWrapper = styled(ActionMenuItem)`
 	text-decoration: none;
 	width: 100%;
 	box-sizing: border-box;
@@ -26,11 +26,16 @@ export const Link = styled(LinkBase)`
 	transition: all 0s;
 	border-radius: 8px;
 	height: 39px;
-	padding: 0 11px;
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	text-align: left;
+	
+	> a { 
+		padding: 0 11px;
+		display: flex;
+		text-decoration: none;
+	}
 
 	&:hover {
 		background-color: ${({ theme }) => theme.palette.tertiary.lightest};
