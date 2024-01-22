@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
@@ -27,14 +27,30 @@ import {
 	enableRealtimeFederationUpdateTicket,
 	enableRealtimeFederationUpdateTicketGroup,
 } from '@/v5/services/realtime/ticket.events';
-import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsCardHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TicketsCardViews } from './tickets.constants';
+import { AdditionalProperties, TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component';
 import { NewTicketCard } from './newTicket/newTicket.component';
 import { ViewerParams } from '../../routes.constants';
-import { TicketContextComponent } from './ticket.context';
+import { TicketContext, TicketContextComponent, TicketDetailsView } from './ticket.context';
+import { goToView } from '@/v5/helpers/viewpoint.helpers';
+
+
+const ShowViewpoint = () => {
+	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
+	const { view: detailsView } = useContext(TicketContext);
+	const currView = selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
+	const treeNodesList = TreeHooksSelectors.selectTreeNodesList();
+
+	useEffect(() => {
+		if (detailsView === TicketDetailsView.Groups) return;
+		goToView(currView);
+	}, [JSON.stringify(currView), treeNodesList]);
+
+	return null;
+};
 
 export const Tickets = () => {
 	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
@@ -77,10 +93,11 @@ export const Tickets = () => {
 	}, [containerOrFederation]);
 
 	return (
-		<>
+		<TicketContextComponent isViewer>
 			{view === TicketsCardViews.List && <TicketsListCard />}
-			{view === TicketsCardViews.Details && <TicketContextComponent isViewer><TicketDetailsCard /></TicketContextComponent>}
-			{view === TicketsCardViews.New && <TicketContextComponent isViewer><NewTicketCard /></TicketContextComponent>}
-		</>
+			{view === TicketsCardViews.Details && <TicketDetailsCard />}
+			{view === TicketsCardViews.New && <NewTicketCard />}
+			<ShowViewpoint />
+		</TicketContextComponent>
 	);
 };

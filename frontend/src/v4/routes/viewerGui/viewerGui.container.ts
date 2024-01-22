@@ -50,7 +50,6 @@ const mapStateToProps = createStructuredSelector({
 	isFocusMode: selectIsFocusMode,
 	disabledPanelButtons: selectDisabledPanelButtons,
 	isPresentationActive: selectIsPresentationActive,
-	selectedTicket: selectSelectedTicket,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
