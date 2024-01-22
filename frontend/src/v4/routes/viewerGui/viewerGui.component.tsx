@@ -186,10 +186,8 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 			this.props.resetCompareComponent();
 		}
 
-		const prevView = prevProps.selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 		const currView = this.props.selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
-
-		if (!isEqual(prevView, currView)) {
+		if (prevProps.selectedTicket?._id !== this.props.selectedTicket?._id && currView) {
 			// This is for not refreshing the view when exiting a selected ticket
 			goToView(currView);
 		}
