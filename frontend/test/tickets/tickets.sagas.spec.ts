@@ -41,6 +41,7 @@ describe('Tickets: sagas', () => {
 	const teamspace = 'teamspace';
 	const projectId = 'project';
 	const modelId = 'modelId';
+	const revision = 'revision';
 
 	const populateTicketsStore = () => dispatch(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	const populateGroupsStore = () => dispatch(TicketsActions.fetchTicketGroupsSuccess(groups));
@@ -91,10 +92,10 @@ describe('Tickets: sagas', () => {
 				.reply(200, ticket);
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.fetchTicket(teamspace, projectId, modelId, ticket._id, false));
+				dispatch(TicketsActions.fetchTicket(teamspace, projectId, modelId, ticket._id, false, revision));
 			}, [
 				TicketsActions.upsertTicketSuccess(modelId, ticket),
-				TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id),
+				TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id, revision),
 			]);
 		});
 		it('should call fetchContainerTicket endpoint with a 404', async () => {
@@ -202,10 +203,10 @@ describe('Tickets: sagas', () => {
 				.reply(200, ticket);
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.fetchTicket(teamspace, projectId, modelId, ticket._id, true));
+				dispatch(TicketsActions.fetchTicket(teamspace, projectId, modelId, ticket._id, true, revision));
 			}, [
 				TicketsActions.upsertTicketSuccess(modelId, ticket),
-				TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id),
+				TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id, revision),
 			]);
 		});
 		it('should call fetchFederationTicket endpoint with a 404', async () => {
@@ -288,10 +289,10 @@ describe('Tickets: sagas', () => {
 				const updateProp = { _id: ticket._id, title: 'updatedTicketName' };
 
 				await waitForActions(() => {
-					dispatch(TicketsActions.upsertTicketAndFetchGroups(teamspace, projectId, modelId, updateProp));
+					dispatch(TicketsActions.upsertTicketAndFetchGroups(teamspace, projectId, modelId, updateProp, revision));
 				}, [
 					TicketsActions.upsertTicketSuccess(modelId, updateProp),
-					TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id),
+					TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id, revision),
 				]);
 			});
 			describe('containers', () => {

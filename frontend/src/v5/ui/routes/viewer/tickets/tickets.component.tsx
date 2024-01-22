@@ -70,17 +70,21 @@ export const Tickets = () => {
 	useEffect(() => {
 		if (isFederation) {
 			return combineSubscriptions(
-				enableRealtimeFederationNewTicket(teamspace, project, containerOrFederation),
-				enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation),
-				enableRealtimeFederationUpdateTicketGroup(teamspace, project, containerOrFederation, revision),
+				enableRealtimeFederationNewTicket(teamspace, project, containerOrFederation, revision),
+				enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation, revision),
+				enableRealtimeFederationUpdateTicketGroup(teamspace, project, containerOrFederation),
 			);
 		}
 		return combineSubscriptions(
-			enableRealtimeContainerNewTicket(teamspace, project, containerOrFederation),
-			enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation),
+			enableRealtimeContainerNewTicket(teamspace, project, containerOrFederation, revision),
+			enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation, revision),
 			enableRealtimeContainerUpdateTicketGroup(teamspace, project, containerOrFederation, revision),
 		);
-	}, [containerOrFederation]);
+	}, [containerOrFederation, revision]);
+
+	useEffect(() => {
+		TicketsActionsDispatchers.clearGroups();
+	}, [revision]);
 
 	useEffect(() => () => {
 		if (view === TicketsCardViews.New) {

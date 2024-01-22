@@ -44,7 +44,7 @@ enum IndexChange {
 }
 
 export const TicketDetailsCard = () => {
-	const { teamspace, project, containerOrFederation } = useParams();
+	const { teamspace, project, containerOrFederation, revision } = useParams();
 	const [, setTicketId] = useSearchParam('ticketId');
 	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -60,7 +60,9 @@ export const TicketDetailsCard = () => {
 
 	const getUpdatedIndex = (delta: IndexChange) => {
 		let index = currentIndex === -1 ? initialIndex.current : currentIndex;
-		if (currentIndex === -1 && delta === IndexChange.NEXT) index -= 1;
+		if (currentIndex === -1 && delta === IndexChange.NEXT) {
+			index--;
+		}
 		return (index + delta) % filteredTickets.length;
 	};
 
@@ -74,8 +76,9 @@ export const TicketDetailsCard = () => {
 
 	const goBack = () => {
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
-		if (currentIndex !== -1) return;
-		cycleToPrevTicket();
+		if (currentIndex === -1) {
+			TicketsCardActionsDispatchers.setSelectedTicket(null);
+		}
 	};
 
 	const formData = useForm({
@@ -127,8 +130,7 @@ export const TicketDetailsCard = () => {
 				isFederation,
 			);
 		}
-		TicketsActionsDispatchers.fetchTicket(teamspace, project, containerOrFederation, ticket._id, isFederation);
-		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
+		TicketsActionsDispatchers.fetchTicket(teamspace, project, containerOrFederation, ticket._id, isFederation, revision);
 		setTicketId(ticket._id);
 	}, [ticket?._id]);
 

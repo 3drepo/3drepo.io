@@ -31,6 +31,7 @@ import {
 	selectNewComment,
 	selectPostCommentIsPending,
 	IssuesActions,
+	selectFilteredIssues,
 } from '../../../../../../modules/issues';
 import { selectJobsList, selectMyJob } from '../../../../../../modules/jobs';
 import { selectPermissions, selectUnit } from '../../../../../../modules/model';
@@ -60,6 +61,7 @@ const mapStateToProps = createStructuredSelector({
 	failedToLoad: selectFailedToLoad,
 	postCommentIsPending: selectPostCommentIsPending,
 	issues: selectIssues,
+	filteredIssues: selectFilteredIssues,
 	minSequenceDate: selectStartDate,
 	maxSequenceDate: selectEndDate,
 	selectedDate: selectSelectedStartingDate,

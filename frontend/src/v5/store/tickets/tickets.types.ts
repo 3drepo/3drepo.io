@@ -135,6 +135,7 @@ export interface IGroupRule {
 export type Group = {
 	_id?: string,
 	name: string,
+	ticket?: string,
 	description?: string,
 	objects?: { container: string, _ids: string[] }[],
 	rules?: IGroupRule[],
