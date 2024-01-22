@@ -69,19 +69,18 @@ export const DateField = ({
 			onAccept={handleAccept}
 			onChange={() => {}}
 			disableHighlightToday
+			// @ts-ignore
+			inputProps={{ readOnly: true, placeholder }}
+			components={{ ActionBar: null }}
 			renderInput={(props) => (
 				<TextField
-					placeholder={placeholder}
 					defaultValue={defaultValue}
 					name={name}
 					{...props}
 					InputProps={{ endAdornment: null }}
 				/>
 			)}
-			// @ts-ignore
-			inputProps={{ readOnly: true }}
 			{...dateFieldProps}
-			components={{ ActionBar: null }}
 		/>
 	);
 };
