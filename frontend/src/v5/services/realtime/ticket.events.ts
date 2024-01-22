@@ -22,6 +22,7 @@ import { getMeshIDsByQuery } from '@/v4/services/api';
 import { meshObjectsToV5GroupNode } from '@/v5/helpers/viewpoint.helpers';
 import { subscribeToRoomEvent } from './realtime.service';
 import { TicketsActionsDispatchers } from '../actionsDispatchers';
+import { fetchTicketGroup } from '../api/tickets';
 
 // Container ticket
 export const enableRealtimeContainerUpdateTicket = (teamspace: string, project: string, containerId: string) => (
@@ -52,6 +53,10 @@ export const enableRealtimeContainerUpdateTicketGroup = (teamspace: string, proj
 				const { data } = await getMeshIDsByQuery(teamspace, containerId, group.rules, revision);
 				// eslint-disable-next-line no-param-reassign
 				group.objects = meshObjectsToV5GroupNode(data);
+			// eslint-disable-next-line no-underscore-dangle
+			} else if (group.objects.some((o) => !o._ids)) {
+				const { objects } = await fetchTicketGroup(teamspace, project, containerId, group.ticket, group._id, false);
+				group.objects = objects;
 			}
 			TicketsActionsDispatchers.updateTicketGroupSuccess(group);
 		},
@@ -87,6 +92,10 @@ export const enableRealtimeFederationUpdateTicketGroup = (teamspace: string, pro
 				const { data } = await getMeshIDsByQuery(teamspace, federationId, group.rules, revision);
 				// eslint-disable-next-line no-param-reassign
 				group.objects = meshObjectsToV5GroupNode(data);
+			// eslint-disable-next-line no-underscore-dangle
+			} else if (group.objects.some((o) => !o._ids)) {
+				const { objects } = await fetchTicketGroup(teamspace, project, federationId, group.ticket, group._id, true);
+				group.objects = objects;
 			}
 			TicketsActionsDispatchers.updateTicketGroupSuccess(group);
 		},
