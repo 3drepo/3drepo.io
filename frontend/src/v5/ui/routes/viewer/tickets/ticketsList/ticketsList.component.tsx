@@ -40,7 +40,7 @@ type TicketsListProps = {
 };
 
 export const TicketsList = ({ tickets }: TicketsListProps) => {
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
 	const selectedTemplates = TicketsCardHooksSelectors.selectFilteringTemplates();
@@ -66,7 +66,7 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 			TicketsCardActionsDispatchers.openTicket(ticket._id);
 		}
 
-		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
+		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id, revision);
 	};
 
 	useEffect(() => {
