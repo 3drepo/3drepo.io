@@ -35,14 +35,11 @@ export default css`
 		}
 		${SequenceDateContainer} {
 			width: 190px;
-			${SequenceDateField} { // HERE
-				outline: 1px solid peru;
+			${SequenceDateField} {
 				.MuiInputBase-root {
-					outline: 1px solid hotpink;
 					margin: 0px;
-					
+
 					input {
-						outline: 1px solid lightgoldenrodyellow;
 						color: ${({ theme }) => theme.palette.secondary.main};
 						box-sizing: border-box;
 						width: 184px;
