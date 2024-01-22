@@ -62,6 +62,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetLegendPanel: LegendActions.resetPanel,
 	fetchActivityDetails: ActivitiesActions.fetchDetails,
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
+	clearTransformations: ViewerGuiActions.clearTransformations,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Sequences));
