@@ -48,10 +48,9 @@ export const TicketDetailsCard = () => {
 	const [, setTicketId] = useSearchParam('ticketId');
 	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
 	const isFederation = modelIsFederation(containerOrFederation);
-	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 	const filteredTickets = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied() as any;
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const ticket = tickets.find((t) => t._id === ticketId);
+	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	const currentIndex = filteredTickets.findIndex((tckt) => tckt._id === ticket._id);
 	const initialIndex = useRef(currentIndex);
