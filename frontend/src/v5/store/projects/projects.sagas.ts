@@ -47,23 +47,27 @@ function * updateImage({ teamspace, projectId, image }) {
 export function* createProject({ teamspace, project, onSuccess, onImageError, onError }) {
 	const { name, image } = project;
 	let projectId;
+	let newProject;
 	try {
 		projectId = yield API.Projects.createProject(teamspace, name);
 
-		const newProject = {
+		newProject = {
 			_id: projectId,
 			name,
 			isAdmin: true,
 		};
-		yield put(ProjectsActions.createProjectSuccess(teamspace, newProject));
-
+		
 		if (image) {
 			yield updateImage({ teamspace, projectId, image });
 		}
+		
+		yield put(ProjectsActions.createProjectSuccess(teamspace, newProject));
+		
 		onSuccess();
 	} catch (error) {
 		if (projectId) {
 			onImageError(error, projectId);
+			yield put(ProjectsActions.createProjectSuccess(teamspace, newProject));
 		} else {
 			onError(error);
 		}
