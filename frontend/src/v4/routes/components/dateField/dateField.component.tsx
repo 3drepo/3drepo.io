@@ -14,12 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ComponentType, useEffect } from 'react';
-import { DatePickerProps } from '@mui/lab/DatePicker';
-import { DateTimePickerProps } from '@mui/lab/DateTimePicker';
 import { TextField } from '@mui/material';
-import { useState } from 'react';
-import { StyledDatePicker, StyledDateTimePicker } from './dateField.styles';
+import { useEffect, useState } from 'react';
+import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
+import { DatePicker } from '@controls/inputs/datePicker/datePicker.component';
 
 interface IProps {
 	value?: any;
@@ -44,11 +42,10 @@ export const DateField = ({
 	placeholder,
 	dateTime,
 	defaultValue,
-	className,
 	...dateFieldProps
 }: IProps) => {
 	const [value, setValue] = useState(propValue || null);
-	const Picker: ComponentType<DatePickerProps | DateTimePickerProps> = dateTime ? StyledDateTimePicker : StyledDatePicker;
+	const Picker = dateTime ? DateTimePicker : DatePicker;
 
 	const handleAccept = (newValue) => {
 		if (newValue) {
@@ -72,14 +69,15 @@ export const DateField = ({
 			onAccept={handleAccept}
 			onChange={() => {}}
 			disableHighlightToday
+			// @ts-ignore
+			inputProps={{ readOnly: true, placeholder }}
+			components={{ ActionBar: null }}
 			renderInput={(props) => (
 				<TextField
-					placeholder={placeholder}
 					defaultValue={defaultValue}
 					name={name}
-					onBlur={onBlur}
-					className={className}
 					{...props}
+					InputProps={{ endAdornment: null }}
 				/>
 			)}
 			{...dateFieldProps}

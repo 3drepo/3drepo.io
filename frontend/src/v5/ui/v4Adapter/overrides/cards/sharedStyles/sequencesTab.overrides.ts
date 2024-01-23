@@ -52,7 +52,7 @@ export default css`
 			
 			${SequenceDateActions} {
 				bottom: -3px;
-				left: -9px;
+				left: -41px;
 				top: unset;
 				right: unset;
 				.MuiIconButton-root {
