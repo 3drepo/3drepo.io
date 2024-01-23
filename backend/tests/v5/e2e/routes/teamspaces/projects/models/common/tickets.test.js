@@ -719,6 +719,7 @@ const testUpdateTicket = () => {
 					expect(updatedTicket).toHaveProperty('number');
 					expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.UPDATED_AT);
 					expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.CREATED_AT);
+					expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.STATUS);
 					expect(updatedTicket.properties).toHaveProperty(basePropertyLabels.OWNER);
 					expect(updatedTicket.properties[basePropertyLabels.UPDATED_AT])
 						.not.toEqual(ticket.properties[basePropertyLabels.UPDATED_AT]);
@@ -729,6 +730,7 @@ const testUpdateTicket = () => {
 						...ticket.properties,
 						[basePropertyLabels.UPDATED_AT]: updatedTicket.properties[basePropertyLabels.UPDATED_AT],
 						[basePropertyLabels.CREATED_AT]: updatedTicket.properties[basePropertyLabels.CREATED_AT],
+						[basePropertyLabels.STATUS]: updatedTicket.properties[basePropertyLabels.STATUS],
 						[basePropertyLabels.OWNER]: updatedTicket.properties[basePropertyLabels.OWNER],
 						...(payloadChanges?.properties ?? {}),
 						[imagePropName]: updatedTicket.properties[imagePropName],
