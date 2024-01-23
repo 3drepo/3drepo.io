@@ -25,7 +25,7 @@ type ICalendarActionBar = {
 export const CalendarActionBar = ({ onClear, hidden }: ICalendarActionBar) => {
 	if (hidden) return null;
 	return (
-		<ClearDateAction onClick={onClear} hidden={hidden}>
+		<ClearDateAction onClick={onClear}>
 			<FormattedMessage id="datePicker.actionBar.clear" defaultMessage="Clear date" />
 		</ClearDateAction>
 	);
