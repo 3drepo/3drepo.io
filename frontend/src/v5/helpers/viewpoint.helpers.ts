@@ -37,7 +37,7 @@ export const convertToV4GroupNodes = (objects = []) => objects.map(({ container:
 	shared_ids: toSharedIds(_ids),
 }));
 
-const convertToV5GroupOverride = (group: any, type: ViewpointGroupOverrideType): GroupOverride => {
+const convertToV5GroupOverride = (group: any, type: ViewpointGroupOverrideType, key: number): GroupOverride => {
 	let description = '';
 	let name = '';
 	switch (type) {
@@ -73,7 +73,7 @@ const convertToV5GroupOverride = (group: any, type: ViewpointGroupOverrideType):
 		override.opacity = opacity;
 	}
 
-	return override;
+	return { ...override, key };
 };
 
 export const getViewerState = async () => {
@@ -82,22 +82,24 @@ export const getViewerState = async () => {
 	const state: ViewpointState = { showHidden: !viewpointV4.hideIfc };
 
 	if (viewpointV4.override_groups?.length) {
-		state.colored = viewpointV4.override_groups.map((group) => convertToV5GroupOverride(group, ViewpointGroupOverrideType.COLORED));
+		state.colored = viewpointV4.override_groups.map((group, index) => convertToV5GroupOverride(group, ViewpointGroupOverrideType.COLORED, index));
 	}
 
 	if (viewpointV4.highlighted_group) {
 		state.colored = (state.colored || [])
-			.concat(convertToV5GroupOverride(viewpointV4.highlighted_group, ViewpointGroupOverrideType.COLORED))
+			.concat(convertToV5GroupOverride(viewpointV4.highlighted_group, ViewpointGroupOverrideType.COLORED, (state.colored || []).length))
 			// eslint-disable-next-line no-underscore-dangle
 			.filter(({ group }) => !!(group as Group).objects.filter((obj) => obj._ids.length).length);
 	}
 
 	if (viewpointV4.hidden_group) {
-		state.hidden = [convertToV5GroupOverride(viewpointV4.hidden_group, ViewpointGroupOverrideType.HIDDEN)];
+		state.hidden = [convertToV5GroupOverride(viewpointV4.hidden_group, ViewpointGroupOverrideType.HIDDEN, 0)];
 	}
 
 	if (viewpointV4.transformation_groups) {
-		state.transformed = viewpointV4.transformation_groups.map((group) => convertToV5GroupOverride(group, ViewpointGroupOverrideType.TRANSFORMED));
+		state.transformed = viewpointV4.transformation_groups.map(
+			(group, index) => convertToV5GroupOverride(group, ViewpointGroupOverrideType.TRANSFORMED, index),
+		);
 	}
 
 	return state;
