@@ -100,6 +100,7 @@ export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [] }: IG
 				<InputsContainer>
 					<FormTextField
 						required
+						autoFocus
 						name="name"
 						label={formatMessage({ id: 'tickets.groups.filterPanel.name', defaultMessage: 'Name' })}
 						formError={errors.name}

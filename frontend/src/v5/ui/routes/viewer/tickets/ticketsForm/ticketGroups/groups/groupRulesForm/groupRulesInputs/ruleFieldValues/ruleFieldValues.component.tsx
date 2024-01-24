@@ -16,7 +16,7 @@
  */
 
 import { useFormContext, useFieldArray } from 'react-hook-form';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import AddValueIcon from '@assets/icons/outlined/add_circle-outlined.svg';
 import RemoveValueIcon from '@assets/icons/outlined/remove_circle-outlined.svg';
 import { range } from 'lodash';
@@ -26,12 +26,16 @@ import { FieldValueInput } from './fieldValueInput/fieldValueInput.component';
 
 export const RuleFieldValues = ({ disabled }) => {
 	const name = 'field.values';
+	const [autoFocus, setAutoFocus] = useState(false);
 	const { control, watch, setValue } = useFormContext<IFormRule>();
 	const { fields, append, remove } = useFieldArray({ control, name });
 
 	const operator = watch('field.operator');
 
-	const appendEmptyValue = () => append({ value: '' });
+	const appendEmptyValue = () => {
+		append({ value: '' });
+		setAutoFocus(!!fields.length);
+	};
 
 	useEffect(() => {
 		if (fields.length) return;
@@ -53,7 +57,7 @@ export const RuleFieldValues = ({ disabled }) => {
 			<>
 				{fields.map((field, i) => (
 					<ValuesContainer key={field.id}>
-						<FieldValueInput name={`field.values.${i}.value`} disabled={disabled} />
+						<FieldValueInput name={`field.values.${i}.value`} autoFocus={autoFocus} disabled={disabled} />
 						<ValueIconContainer onClick={() => remove(i)} disabled={disabled || fields.length === 1}>
 							<RemoveValueIcon />
 						</ValueIconContainer>
