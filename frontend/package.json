@@ -190,6 +190,7 @@
 		"webpack-livereload-plugin": "3.0.2"
 	},
 	"resolutions": {
-		"@mui/styled-engine": "npm:@mui/styled-engine-sc@5.12.0"
+		"@mui/styled-engine": "npm:@mui/styled-engine-sc@5.12.0",
+		"@babel/traverse": "7.23.7"
 	}
 }
