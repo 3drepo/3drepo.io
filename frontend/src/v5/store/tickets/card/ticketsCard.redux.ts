@@ -36,6 +36,7 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	resetState: [],
 	setOverrides: ['overrides'],
 	setUnsavedTicket: ['ticket'],
+	setTransformations: ['transformations'],
 }, { prefix: 'TICKETS_CARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
 export interface ITicketsCardState {
@@ -47,6 +48,7 @@ export interface ITicketsCardState {
 	readOnly: boolean,
 	overrides: OverridesDicts | null,
 	unsavedTicket: EditableTicket | null,
+	transformations: any,
 }
 
 export const INITIAL_STATE: ITicketsCardState = {
@@ -60,6 +62,7 @@ export const INITIAL_STATE: ITicketsCardState = {
 	},
 	view: TicketsCardViews.List,
 	overrides: null,
+	transformations: null,
 	readOnly: false,
 	unsavedTicket: null,
 };
@@ -156,5 +159,5 @@ export interface ITicketsCardActionCreators {
 	setReadOnly: (readOnly: boolean) => SetReadOnlyAction,
 	resetState: () => ResetStateAction,
 	setOverrides: (overrides: OverridesDicts) => SetOverridesAction,
-	setUnsavedTicket: (ticket: EditableTicket) => SetUnsavedTicketAction,
+	setUnsavedTicket: (ticket: EditableTicket) => SetUnsavedTicketAction
 }

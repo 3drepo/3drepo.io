@@ -16,7 +16,7 @@
  */
 
 import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
-import { isEmpty } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { PureComponent } from 'react';
 import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { VIEWER_EVENTS } from '../../constants/viewer';
@@ -181,6 +181,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 			this.props.setPanelVisibility(VIEWER_PANELS.COMPARE, false);
 			this.props.resetCompareComponent();
 		}
+
 	}
 
 	public componentWillUnmount() {

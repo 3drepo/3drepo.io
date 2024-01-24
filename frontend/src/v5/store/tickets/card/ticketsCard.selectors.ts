@@ -67,7 +67,7 @@ export const selectSelectedTicketPinId = createSelector(
 
 export const selectTicketOverridesDict = createSelector(
 	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.overrides || { overrides: {}, transparencies: {} },
+	(ticketCardState) => ticketCardState.overrides || { overrides: {}, transparencies: {}, transformations: {} },
 );
 
 export const selectTicketOverrides = createSelector(

@@ -30,7 +30,7 @@ import { Root as V5Root } from '@/v5/ui/routes';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { formatMessage, getIntlProviderProps, initializeIntl } from '@/v5/services/intl';
+import { formatMessage, getIntl, initializeIntl } from '@/v5/services/intl';
 import { initializeActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 import { IntlProvider } from 'react-intl';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -68,7 +68,7 @@ const render = () => {
 	ReactDOM.render(
 		<Provider store={store as any}>
 			<ConnectedRouter history={history as History}>
-				<IntlProvider {...getIntlProviderProps()}>
+				<IntlProvider {...getIntl()}>
 					<LocalizationProvider dateAdapter={AdapterDayjs}>
 						<Switch>
 							<Route exact path="/">
