@@ -273,6 +273,7 @@ const fillEmptyOverrides = (values: Partial<ITicket>) => {
 			viewValue.state ||= {} as any;
 			viewValue.state.colored ||= [];
 			viewValue.state.hidden ||= [];
+			viewValue.state.transformed ||= [];
 		}
 	});
 };

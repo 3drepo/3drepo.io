@@ -20,11 +20,8 @@ import { generateViewpoint as generateViewpointV4, getNodesIdsFromSharedIds, toS
 import { formatMessage } from '@/v5/services/intl';
 import { dispatch, getState } from '@/v4/modules/store';
 import { isEmpty, isString } from 'lodash';
-import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
-import { TreeActions } from '@/v4/modules/tree';
-import { ViewerGuiActions } from '@/v4/modules/viewerGui';
 import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors';
-import { TicketsCardActionsDispatchers } from '../services/actionsDispatchers';
+import { ViewpointsActions } from '@/v4/modules/viewpoints';
 
 export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	container: object.model as string,
@@ -73,6 +70,12 @@ const convertToV5GroupOverride = (group: any, type: ViewpointGroupOverrideType):
 		override.opacity = opacity;
 	}
 
+	if (group.transformation) {
+		const { transformation } = group;
+		override.transformation = transformation;
+	}
+
+
 	return override;
 };
 
@@ -100,10 +103,8 @@ export const getViewerState = async () => {
 	return state;
 };
 
-const mergeGroups = (groups: any[]) => ({ objects: groups.flatMap((group) => group.objects) });
-
 const convertToV4Group = (groupOverride: GroupOverride) => {
-	const { color, opacity, group: v5Group } = groupOverride;
+	const { color, opacity, transformation, group: v5Group } = groupOverride;
 
 	if (isString(v5Group)) {
 		return { color: [0, 0, 0, 0], objects: [] }; // theres no info yet so I say us an empty group
@@ -121,8 +122,14 @@ const convertToV4Group = (groupOverride: GroupOverride) => {
 		group.opacity = opacity;
 	}
 
+	if (transformation) {
+		group.transformation = transformation;
+	}
+
 	return group;
 };
+
+const mergeGroups = (groups: any[]) => ({ objects: groups.flatMap((group) => group.objects) });
 
 export const viewpointV5ToV4 = (viewpoint: Viewpoint) => {
 	let v4Viewpoint:any = {};
@@ -140,14 +147,15 @@ export const viewpointV5ToV4 = (viewpoint: Viewpoint) => {
 		v4Viewpoint.clippingPlanes = viewpoint.clippingPlanes;
 	}
 
-	if (!isEmpty(viewpoint.state?.colored)) {
-		v4Viewpoint.override_groups = viewpoint.state.colored.map(convertToV4Group);
-	}
-
 	if (!isEmpty(viewpoint.state?.transformed)) {
 		v4Viewpoint.transformation_groups = viewpoint.state.transformed.map(convertToV4Group);
 	}
 
+
+	if (!isEmpty(viewpoint.state?.colored)) {
+		v4Viewpoint.override_groups = viewpoint.state.colored.map(convertToV4Group);
+	}
+	
 	if (!isEmpty(viewpoint.state?.hidden)) {
 		v4Viewpoint.hidden_group = mergeGroups(viewpoint.state.hidden.map(convertToV4Group));
 	}
@@ -160,19 +168,21 @@ export const meshObjectsToV5GroupNode = (objects) => objects.map((obj) => ({
 	_ids: obj.mesh_ids,
 }));
 
-export const toColorAndTransparencyDicts = (overrides: GroupOverride[]): OverridesDicts => {
-	const toMeshDictionary = (objects: V4GroupObjects, color: string, opacity: number): OverridesDicts => objects.shared_ids.reduce((dict, id) => {
-		if (color !== undefined) {
+export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDicts => {
+	const toMeshDictionary = (objects: V4GroupObjects, color: string, opacity: number): OverridesDicts => 
+		objects.shared_ids.reduce((dict, id) => {
+			if (color !== undefined) {
 			// eslint-disable-next-line no-param-reassign
-			dict.overrides[id] = color;
-		}
+				dict.overrides[id] = color;
+			} 
 
-		if (opacity !== undefined) {
+			if (opacity !== undefined) {
 			// eslint-disable-next-line no-param-reassign
-			dict.transparencies[id] = opacity;
-		}
-		return dict;
-	}, { overrides: {}, transparencies: {} } as OverridesDicts);
+				dict.transparencies[id] = opacity;
+			}
+
+			return dict;
+		}, { overrides: {}, transparencies: {} } as OverridesDicts);
 
 	return overrides.reduce((acum, current) => {
 		const color = current.color ? getGroupHexColor(current.color) : undefined;
@@ -186,32 +196,21 @@ export const toColorAndTransparencyDicts = (overrides: GroupOverride[]): Overrid
 			dict.overrides = { ...dict.overrides, ...overrideDict.overrides };
 			// eslint-disable-next-line no-param-reassign
 			dict.transparencies = { ...dict.transparencies, ...overrideDict.transparencies };
+
 			return dict;
 		}, acum);
 	}, { overrides: {}, transparencies: {} } as OverridesDicts);
 };
 
 export const goToView = async (view: Viewpoint) => {
-	if (isEmpty(view?.state?.colored)  && isEmpty(view?.state?.hidden) && isEmpty(view?.camera) && isEmpty(view?.clippingPlanes)) {
+	if (
+		isEmpty(view?.state?.colored) && 
+		isEmpty(view?.state?.hidden) && 
+		isEmpty(view?.state?.transformed) && 
+		isEmpty(view?.camera) && 
+		isEmpty(view?.clippingPlanes)) {
 		return;
 	}
-
 	
-	dispatch(ViewerGuiActions.clearColorOverrides());
-	await ViewerService.setViewpoint(view);
-	const overrides = toColorAndTransparencyDicts(view?.state?.colored || []);
-	TicketsCardActionsDispatchers.setOverrides(overrides);
-
-	await ViewerService.clearHighlights();
-
-	if (view?.state) {
-		dispatch(TreeActions.setHiddenGeometryVisible(!!view.state.showHidden));
-	}
-
-	const v4HiddenObjects = convertToV4GroupNodes(view.state?.hidden?.flatMap((hiddenOverride) => (hiddenOverride.group as Group)?.objects || []));
-	if (v4HiddenObjects.length) {
-		dispatch(TreeActions.hideNodesBySharedIds(v4HiddenObjects, true));
-	} else {
-		dispatch(TreeActions.showAllNodes());
-	}
+	dispatch(ViewpointsActions.showViewpoint(null, null, viewpointV5ToV4(view)));
 };
