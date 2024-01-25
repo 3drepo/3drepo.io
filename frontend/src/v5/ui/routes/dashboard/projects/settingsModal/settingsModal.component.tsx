@@ -355,7 +355,6 @@ export const SettingsModal = ({
 					control={control}
 					label={`x (${currentUnit})`}
 					formError={errors.x}
-					required
 					disabled={!isProjectAdmin}
 				/>
 				<FormNumberField
@@ -363,7 +362,6 @@ export const SettingsModal = ({
 					control={control}
 					label={`y (${currentUnit})`}
 					formError={errors.y}
-					required
 					disabled={!isProjectAdmin}
 				/>
 				<FormNumberField
@@ -371,7 +369,6 @@ export const SettingsModal = ({
 					control={control}
 					label={`z (${currentUnit})`}
 					formError={errors.z}
-					required
 					disabled={!isProjectAdmin}
 				/>
 			</FlexContainer>
