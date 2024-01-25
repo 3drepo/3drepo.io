@@ -17,6 +17,7 @@
 
 import { PureComponent } from 'react';
 
+import { isNumber } from 'lodash';
 import { LockPanelButton } from '../panelBarActions/lockPanelButton';
 import { Container, SkipNextIcon, SkipPreviousIcon, StyledIconButton } from './listNavigation.styles';
 
@@ -40,7 +41,7 @@ export class ListNavigation extends PureComponent<IProps, IState> {
 	};
 
 	public componentDidMount() {
-		if (this.props.initialIndex) {
+		if (isNumber(this.props.initialIndex)) {
 			this.setState({ currentIndex: this.props.initialIndex, initialItemsCount: this.props.itemsCount });
 		}
 	}
