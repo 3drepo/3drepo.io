@@ -53,7 +53,7 @@ export const fetchFederationTemplate = async (
 	teamspace: string,
 	projectId: string,
 	federationId: string,
-	templateId:string,
+	templateId: string,
 ): Promise<ITemplate> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates/${templateId}`);
 	return data;
@@ -63,8 +63,9 @@ export const fetchContainerTickets = async (
 	teamspace: string,
 	projectId: string,
 	containerId: string,
+	filter?: string[],
 ): Promise<FetchTicketsResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets`);
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets?filter=${filter.join()}`);
 	return data.tickets;
 };
 
@@ -72,8 +73,9 @@ export const fetchFederationTickets = async (
 	teamspace: string,
 	projectId: string,
 	federationId: string,
+	filter?: string[],
 ): Promise<FetchTicketsResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets`);
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets?filter=${filter.join()}`);
 	return data.tickets;
 };
 
