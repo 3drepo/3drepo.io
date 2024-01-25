@@ -98,6 +98,7 @@ export const TicketsTable = () => {
 	const setSidePanelData = (modelId: string, ticket?: Partial<ITicket>) => {
 		const newParams = {
 			...params,
+			template,
 			containerOrFederation: modelId,
 		};
 		const path = generatePath(TICKETS_ROUTE, newParams);
