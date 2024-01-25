@@ -56,10 +56,8 @@ const getBackgroundColor = (props) => {
 	switch (props.nodeType) {
 		case TREE_ITEM_FEDERATION_TYPE:
 			return  COLOR.GRAY_50;
-			break;
 		case TREE_ITEM_MODEL_TYPE:
 			return COLOR.GRAY;
-			break;
 		default:
 			return COLOR.WHITE;
 	}
@@ -157,6 +155,7 @@ export const Container = styled.li<IContainer & { $isContainer: boolean }>`
 	height: ${TREE_ITEM_SIZE}px;
 	box-sizing: border-box;
 	cursor: inherit;
+	user-select: none;
 
 	${({ $isContainer }) => $isContainer && css`
 		${Name} {
