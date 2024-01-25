@@ -54,15 +54,17 @@ export const TicketDetailsCard = () => {
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	const currentIndex = filteredTickets.findIndex((tckt) => tckt._id === ticket._id);
 	const initialIndex = useRef(currentIndex);
-	const disableCycleButtons = currentIndex > -1 ? filteredTickets.length < 2 : filteredTickets.length < 1;
+	const listLength = filteredTickets.length;
+	const ticketWasRemoved = currentIndex === -1;
+	const disableCycleButtons = ticketWasRemoved ? listLength < 1 : listLength < 2;
 	const templateValidationSchema = getValidators(template);
 
 	const getUpdatedIndex = (delta: IndexChange) => {
-		let index = currentIndex === -1 ? initialIndex.current : currentIndex;
-		if (currentIndex === -1 && delta === IndexChange.NEXT) {
+		let index = ticketWasRemoved ? initialIndex.current : currentIndex;
+		if (ticketWasRemoved && delta === IndexChange.NEXT) {
 			index--;
 		}
-		return (index + delta) % filteredTickets.length;
+		return (index + delta) % listLength;
 	};
 
 	const changeTicketIndex = (delta: IndexChange) => {
@@ -75,7 +77,10 @@ export const TicketDetailsCard = () => {
 
 	const goBack = () => {
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
-		if (currentIndex === -1) {
+		if (!ticketWasRemoved) return;
+		if (initialIndex.current < listLength) {
+			cycleToNextTicket();
+		} else {
 			TicketsCardActionsDispatchers.setSelectedTicket(null);
 		}
 	};
