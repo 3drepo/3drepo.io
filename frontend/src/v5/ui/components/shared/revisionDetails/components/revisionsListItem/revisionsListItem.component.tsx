@@ -38,6 +38,7 @@ export const RevisionsListItem = ({ revision, containerId }: IRevisionsListItem)
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const { timestamp, desc, author, tag, void: voidStatus, format } = revision;
+	const disabled = voidStatus;
 
 	const toggleVoidStatus = (e: SyntheticEvent) => {
 		e.preventDefault();
@@ -52,7 +53,7 @@ export const RevisionsListItem = ({ revision, containerId }: IRevisionsListItem)
 	const hasCollaboratorAccess = ContainersHooksSelectors.selectHasCollaboratorAccess(containerId);
 
 	return (
-		<Container to={viewerRoute(teamspace, project, containerId, revision)}>
+		<Container to={disabled ? null : viewerRoute(teamspace, project, containerId, revision)} disabled={disabled}>
 			<RevisionsListItemText width={140} tabletWidth={94}> {formatShortDateTime(timestamp)} </RevisionsListItemText>
 			<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={author} />
 			<RevisionsListItemTag width={150} tabletWidth={300}> {tag} </RevisionsListItemTag>
