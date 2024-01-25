@@ -36,21 +36,6 @@ import { NewTicketCard } from './newTicket/newTicket.component';
 import { ViewerParams } from '../../routes.constants';
 import { TicketContextComponent } from './ticket.context';
 
-
-const ShowViewpoint = () => {
-	// const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
-	// const { view: detailsView } = useContext(TicketContext);
-	// const currView = selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
-	// const treeNodesList = TreeHooksSelectors.selectTreeNodesList();
-
-	// useEffect(() => {
-	// if (detailsView === TicketDetailsView.Groups) return;
-	// goToView(currView);
-	// }, [JSON.stringify(currView), treeNodesList]);
-
-	return null;
-};
-
 export const Tickets = () => {
 	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -81,10 +66,6 @@ export const Tickets = () => {
 		);
 	}, [containerOrFederation, revision]);
 
-	useEffect(() => {
-		TicketsActionsDispatchers.clearGroups();
-	}, [revision]);
-
 	useEffect(() => () => {
 		if (view === TicketsCardViews.New) {
 			TicketsCardActionsDispatchers.setUnsavedTicket(null);
@@ -100,7 +81,6 @@ export const Tickets = () => {
 			{view === TicketsCardViews.List && <TicketsListCard />}
 			{view.startsWith(TicketsCardViews.Details)  && <TicketDetailsCard />}
 			{view === TicketsCardViews.New && <NewTicketCard />}
-			<ShowViewpoint />
 		</TicketContextComponent>
 	);
 };
