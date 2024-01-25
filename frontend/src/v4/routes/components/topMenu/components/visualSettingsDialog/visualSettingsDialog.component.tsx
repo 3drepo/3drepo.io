@@ -584,13 +584,15 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 
 	public onSubmit = (values) => {
 		const { updateSettings, currentUser} = this.props;
+		const parsedValues = {
+			...values,
+			nearPlane: Number(values.nearPlane),
+			unityMemory: Number(values.unityMemory),
+			farPlaneSamplingPoints: Number(values.farPlaneSamplingPoints),
+			maxShadowDistance: Number(values.maxShadowDistance),
+		};
 
-		values.nearPlane = Number(values.nearPlane);
-		values.unityMemory = Number(values.unityMemory);
-		values.farPlaneSamplingPoints = Number(values.farPlaneSamplingPoints);
-		values.maxShadowDistance = Number(values.maxShadowDistance);
-
-		updateSettings(currentUser, values);
+		updateSettings(currentUser, parsedValues);
 
 		this.props.handleClose();
 	}
