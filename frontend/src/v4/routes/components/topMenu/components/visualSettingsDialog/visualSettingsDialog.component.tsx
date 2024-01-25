@@ -520,7 +520,10 @@ const Buttons = (props) => {
 				variant="contained"
 				disabled={isEqual(form.values, DEFAULT_SETTINGS)}
 				type="button"
-				onClick={() => form.setValues(DEFAULT_SETTINGS)}
+				onClick={() => {
+					form.setValues(DEFAULT_SETTINGS);
+					props.hideWarning();
+				}}
 			>
 					Reset
 				</NegativeActionButton>
@@ -592,6 +595,10 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 		this.props.handleClose();
 	}
 
+	public hideWarning = () => {
+		this.setState({ showCacheWarning: false });
+	}
+
 	public componentDidMount() {
 		this.setState({visualSettings: this.props.visualSettings});
 	}
@@ -627,7 +634,7 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 						{selectedTab === 1 && <AdvancedSettings />}
 						{selectedTab === 2 && <StreamingSettings />}
 						{selectedTab === 0 && showCacheWarning && <CacheWarning />}
-						<Buttons onClickCancel={handleClose} />
+						<Buttons onClickCancel={handleClose} hideWarning={this.hideWarning} />
 					</Form>
 				</Formik>
 			</VisualSettingsDialogContent>
