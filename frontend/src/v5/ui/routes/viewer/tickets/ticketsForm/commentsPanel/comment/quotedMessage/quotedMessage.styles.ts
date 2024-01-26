@@ -16,7 +16,8 @@
  */
 
 import styled, { css } from 'styled-components';
-import { CommentImagesContainer, CommentMessage } from '../basicComment/basicComment.styles';
+import { CommentMessage } from '../basicComment/basicComment.styles';
+import { CommentImagesContainer } from '../commentNonMessageContent/commentNonMessageContent.styles';
 
 export const secondaryQuotedMessageStyles = css`
 	background-color: ${({ theme }) => theme.palette.secondary.mid};

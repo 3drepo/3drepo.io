@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,26 +16,33 @@
  */
 
 import styled from 'styled-components';
+import { ImageWithSkeleton } from '@controls/imageWithSkeleton/imageWithSkeleton.component';
 
-import IconButton from '@mui/material/IconButton';
-import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg'
+export const CommentAuthor = styled.div`
+	font-weight: 600;
+	font-size: 11px;
+	line-height: 18px;
+	margin-bottom: 5px;
+`;
 
-export const Container = styled.div``;
+export const SingleImage = styled(ImageWithSkeleton).attrs({
+	variant: 'secondary',
+})`
+	width: 241px;
+	margin: -10px 0 10px -12px;
+	border-radius: inherit;
+	border-bottom-right-radius: 0;
+	border-bottom-left-radius: 0;
+	cursor: pointer;
 
-export const StyledIconButton = styled(IconButton)<{ disabled?: boolean }>`
-	&& {
-		padding: 6px;
+	&:is(span) {
+		padding-top: 100%;
 	}
 `;
 
-export const SkipPreviousIcon = styled(ChevronIcon)`
-	transform: rotate(90deg);
-	width: 14px;
-	height: 14px;
-`;
-
-export const SkipNextIcon = styled(ChevronIcon)`
-	transform: rotate(-90deg);
-	width: 14px;
-	height: 14px;
+export const CommentImagesContainer = styled.div`
+	width: 231px;
+	margin-top: -5px;
+	margin-left: -7px;
+	margin-bottom: 3px;
 `;

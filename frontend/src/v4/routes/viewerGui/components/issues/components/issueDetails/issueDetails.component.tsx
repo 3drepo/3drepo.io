@@ -204,6 +204,7 @@ export class IssueDetails extends PureComponent<IProps, IState> {
 				onTakeScreenshot={this.handleNewScreenshot}
 				onSave={this.handleSave}
 				canComment={this.userCanComment()}
+				hasNoPermission={!this.canEditBasicProperty}
 				hideComment={this.isNewIssue}
 				hideScreenshot={this.props.disableViewer || this.isNewIssue}
 				hideUploadButton={this.isNewIssue}

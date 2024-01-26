@@ -168,7 +168,7 @@ export type ContainerBackendSettings = {
 	status?: UploadStatuses;
 	timestamp?: number;
 	type?: string;
-	angleFromNorth: number;
+	angleFromNorth?: number;
 	code?: string;
 	unit?: string;
 	defaultView?: string;
@@ -180,7 +180,7 @@ export type ContainerBackendSettings = {
 };
 
 export type ContainerSettings = Omit<ContainerBackendSettings, 'surveyPoints'> & {
-	surveyPoint: SurveyPoint;
+	surveyPoint?: SurveyPoint;
 };
 
 export type FetchContainerViewsResponseView = { views: View[] };
