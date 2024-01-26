@@ -69,13 +69,14 @@ export class ListNavigation extends PureComponent<IProps, IState> {
 
 	public render() {
 		const { panelType } = this.props;
+		const disableArrows = this.state.initialItemsCount <= 1;
 		return (
 			<Container>
 				{panelType && <LockPanelButton type={panelType} />}
-				<StyledIconButton onClick={this.handlePrevItem}>
+				<StyledIconButton onClick={this.handlePrevItem} disabled={disableArrows}>
 					<SkipPreviousIcon />
 				</StyledIconButton>
-				<StyledIconButton onClick={this.handleNextItem}>
+				<StyledIconButton onClick={this.handleNextItem} disabled={disableArrows}>
 					<SkipNextIcon />
 				</StyledIconButton>
 			</Container>
