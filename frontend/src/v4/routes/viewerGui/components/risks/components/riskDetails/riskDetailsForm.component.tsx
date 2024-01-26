@@ -207,6 +207,7 @@ class RiskDetailsFormComponent extends PureComponent<IProps, IState> {
 			startTimeValue={this.props.values.sequence_start}
 			endTimeValue={this.props.values.sequence_end}
 			sequences={this.props.sequences}
+			canComment={this.canEditResources}
 		/>
 	)
 
