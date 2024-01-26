@@ -62,7 +62,7 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 			<Input
 				{...field}
 				{...props}
-				value={field.value || ''}
+				value={field.value ?? ''}
 				onChange={(event) => {
 					field.onChange(event);
 					onChange?.(event);

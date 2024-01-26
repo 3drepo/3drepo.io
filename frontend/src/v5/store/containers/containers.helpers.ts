@@ -24,6 +24,7 @@ import {
 	ContainerSettings,
 } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
+import { isNumber } from 'lodash';
 
 export const CONTAINERS_SEARCH_FIELDS = ['code', 'type', 'name', 'desc', 'latestRevision'];
 
@@ -74,7 +75,10 @@ export const prepareContainerSettingsForFrontend = ({
 export const prepareContainerSettingsForBackend = ({
 	surveyPoint,
 	...otherProps
-}: ContainerSettings) => ({
-	surveyPoints: [surveyPoint],
-	...otherProps,
-});
+}: ContainerSettings) => {
+	if (!isNumber(surveyPoint)) return otherProps;
+	return {
+		surveyPoints: [surveyPoint],
+		...otherProps,
+	};
+};
