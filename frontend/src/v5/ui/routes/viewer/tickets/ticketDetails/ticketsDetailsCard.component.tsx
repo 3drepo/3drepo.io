@@ -16,7 +16,7 @@
  */
 
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
-import { useContext, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -25,18 +25,15 @@ import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { get, isEmpty, set } from 'lodash';
+import { isEmpty, set } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
-import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
-import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { useSearchParam } from '../../../useSearchParam';
-import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 
 enum IndexChange {
 	PREV = -1,
@@ -46,7 +43,10 @@ enum IndexChange {
 export const TicketDetailsCard = () => {
 	const { teamspace, project, containerOrFederation, revision } = useParams();
 	const [, setTicketId] = useSearchParam('ticketId');
-	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
+
+	const view = TicketsCardHooksSelectors.selectView();
+	const viewProps = TicketsCardHooksSelectors.selectViewProps();
+
 	const isFederation = modelIsFederation(containerOrFederation);
 	const filteredTickets = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied() as any;
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
@@ -147,23 +147,15 @@ export const TicketDetailsCard = () => {
 		setTicketId();
 	}, []);
 
-	const onClickBackFromGroups = () => {
-		setDetailViewAndProps(TicketDetailsView.Form);
-		const viewpoint = get(ticket, viewProps.name) as Viewpoint;
-		const { state } = viewpoint || {};
-		goToView({ state });
-		TicketsCardActionsDispatchers.setOverrides(null);
-	};
-
 	if (!ticket) return null;
 	return (
 		<CardContainer>
 			<FormProvider {...formData}>
-				{view === TicketDetailsView.Groups
+				{view === TicketsCardViews.DetailsGroups
 					&& (
 						<>
 							<CardHeader>
-								<ArrowBack onClick={onClickBackFromGroups} />
+								<ArrowBack onClick={() => TicketsCardActionsDispatchers.goBackFromTicketGroups(ticket)} />
 								{ticket.title}:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" />
 							</CardHeader>
 							<InputController
@@ -173,7 +165,7 @@ export const TicketDetailsCard = () => {
 							/>
 						</>
 					)}
-				{view === TicketDetailsView.Form
+				{view !== TicketsCardViews.DetailsGroups
 					&& (
 						<>
 							<CardHeader>

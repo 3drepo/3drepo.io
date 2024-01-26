@@ -30,13 +30,14 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	setQueryFilters: ['searchQueries'],
 	toggleCompleteFilter: [],
 	resetFilters: [],
-	setCardView: ['view'],
+	setCardView: ['view', 'props'],
 	openTicket: ['ticketId'],
 	setReadOnly: ['readOnly'],
 	resetState: [],
 	setOverrides: ['overrides'],
 	setUnsavedTicket: ['ticket'],
 	setTransformations: ['transformations'],
+	goBackFromTicketGroups: ['ticket'],
 }, { prefix: 'TICKETS_CARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
 export interface ITicketsCardState {
@@ -45,6 +46,7 @@ export interface ITicketsCardState {
 	selectedTicketPinId: string | null,
 	filters: ITicketsFilters,
 	view: TicketsCardViews,
+	viewProps: any,
 	readOnly: boolean,
 	overrides: OverridesDicts | null,
 	unsavedTicket: EditableTicket | null,
@@ -61,6 +63,7 @@ export const INITIAL_STATE: ITicketsCardState = {
 		queries: [],
 	},
 	view: TicketsCardViews.List,
+	viewProps: null,
 	overrides: null,
 	transformations: null,
 	readOnly: false,
@@ -95,8 +98,9 @@ export const resetFilters = (state: ITicketsCardState) => {
 	state.filters = INITIAL_STATE.filters;
 };
 
-export const setCardView = (state: ITicketsCardState, { view }: SetCardViewAction) => {
+export const setCardView = (state: ITicketsCardState, { view, props }: SetCardViewAction) => {
 	state.view = view;
+	state.viewProps = props;
 };
 
 export const setReadOnly = (state: ITicketsCardState, { readOnly }: SetReadOnlyAction) => {
@@ -139,12 +143,13 @@ export type SetTemplateFiltersAction = Action<'SET_TEMPLATE_FILTERS'> & { templa
 export type SetQueryFiltersAction = Action<'SET_QUERY_FILTERS'> & { searchQueries: string[] };
 export type ToggleCompleteFilterAction = Action<'TOGGLE_COMPLETE_FILTER'>;
 export type ResetFiltersAction = Action<'RESET_FILTERS'>;
-export type SetCardViewAction = Action<'SET_CARD_VIEW'> & { view: TicketsCardViews };
+export type SetCardViewAction = Action<'SET_CARD_VIEW'> & { view: TicketsCardViews, props?:any };
 export type OpenTicketAction = Action<'OPEN_TICKET'> & { ticketId: string };
 export type SetReadOnlyAction = Action<'SET_READ_ONLY'> & { readOnly: boolean };
 export type ResetStateAction = Action<'RESET_STATE'>;
 export type SetOverridesAction = Action<'SET_OVERRIDES'> & { overrides: OverridesDicts | null };
 export type SetUnsavedTicketAction = Action<'SET_UNSAVED_TICKET'> & { ticket: EditableTicket };
+export type GoBackFromTicketGroupsAction = Action<'GO_BACK_FROM_TICKET_GROUPS'> & { ticket: EditableTicket } ;
 
 export interface ITicketsCardActionCreators {
 	setSelectedTicket: (ticketId: string) => SetSelectedTicketAction,
@@ -154,10 +159,11 @@ export interface ITicketsCardActionCreators {
 	setQueryFilters: (searchQueries: string[]) => SetQueryFiltersAction,
 	toggleCompleteFilter: () => ToggleCompleteFilterAction,
 	resetFilters: () => ResetFiltersAction,
-	setCardView: (view: TicketsCardViews) => SetCardViewAction,
+	setCardView: (view: TicketsCardViews, props?: any) => SetCardViewAction,
 	openTicket: (ticketId: string) => OpenTicketAction,
 	setReadOnly: (readOnly: boolean) => SetReadOnlyAction,
 	resetState: () => ResetStateAction,
 	setOverrides: (overrides: OverridesDicts) => SetOverridesAction,
-	setUnsavedTicket: (ticket: EditableTicket) => SetUnsavedTicketAction
+	setUnsavedTicket: (ticket: EditableTicket) => SetUnsavedTicketAction,
+	goBackFromTicketGroups: (ticket: EditableTicket) => GoBackFromTicketGroupsAction
 }
