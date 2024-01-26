@@ -102,6 +102,11 @@ class RiskDetailsFormComponent extends PureComponent<IProps, IState> {
 		return this.isNewRisk || canComment(risk, myJob, permissions, currentUser);
 	}
 
+	get canEditResources() {
+		const { risk, myJob, permissions, currentUser } = this.props;
+		return canComment(risk, myJob, permissions, currentUser);
+	}
+
 	public state = {
 		isSaving: false,
 		activeTab: MAIN_RISK_TYPE,
@@ -220,7 +225,12 @@ class RiskDetailsFormComponent extends PureComponent<IProps, IState> {
 	)
 
 	public showAttachmentsContent = (active) => (
-		<AttachmentsFormTab active={active} resources={this.props.risk.resources} {...this.props} />
+		<AttachmentsFormTab
+			active={active}
+			resources={this.props.risk.resources}
+			canEdit={this.canEditResources}
+			{...this.props}
+		/>
 	)
 
 	get attachmentsProps() {

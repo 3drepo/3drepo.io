@@ -98,6 +98,11 @@ class IssueDetailsFormComponent extends PureComponent<IProps, IState> {
 		return this.isNewIssue || canComment(issue, myJob, permissions, currentUser);
 	}
 
+	get canEditResources() {
+		const { issue, myJob, permissions, currentUser } = this.props;
+		return canComment(issue, myJob, permissions, currentUser);
+	}
+
 	get canChangeAssigned() {
 		const { issue, myJob, permissions, currentUser } = this.props;
 		return canChangeAssigned(issue, myJob, permissions, currentUser);
@@ -184,7 +189,12 @@ class IssueDetailsFormComponent extends PureComponent<IProps, IState> {
 	)
 
 	public showAttachmentsContent = (active) => (
-		<AttachmentsFormTab active={active} resources={this.props.issue.resources} {...this.props} />
+		<AttachmentsFormTab
+			active={active}
+			resources={this.props.issue.resources}
+			canEdit={this.canEditResources}
+			{...this.props}
+		/>
 	)
 
 	get attachmentsProps() {
