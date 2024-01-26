@@ -18,7 +18,6 @@ import { PureComponent, Ref, forwardRef, FC } from 'react';
 import Tooltip from '@mui/material/Tooltip';
 
 import { VIEWER_EVENTS, VIEWER_MEASURING_MODE } from '../../../../constants/viewer';
-import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { ContainedButton } from '../containedButton/containedButton.component';
 import { Container, PinIcon } from './pinButton.styles';
 
@@ -26,6 +25,7 @@ interface IProps {
 	viewer: any;
 	hasPin: boolean;
 	disabled?: boolean;
+	hasNoPermission?: boolean;
 	pinId?: string;
 	pinData: any;
 	onChange: (pin) => void;
@@ -108,29 +108,27 @@ export class PinButton extends PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { disabled } = this.props;
+		const { disabled, hasNoPermission } = this.props;
 		const wasPinDropped = this.state.wasPinDropped || this.props.hasPin;
 		const editMsg = !wasPinDropped ? 'Add pin' : 'Edit pin';
 		const pinLabel =  this.state.active ? 'Save pin' :  editMsg;
+		let title = '';
+		if (disabled) {
+			title = 'Sorry, this cannot be edited on a closed item.';
+		}
+
+		if (hasNoPermission) {
+			title = 'Sorry, You do not have enough permissions to do this.';
+		}
 
 		return (
-			<>
-				{renderWhenTrueOtherwise(() => (
-					<Tooltip title={`Sorry, You do not have enough permissions to do this.`}>
-						<UpdatePinButton
-							disabled={disabled}
-							onClickButton={this.onClickButton}
-							pinLabel={pinLabel}
-						/>
-					</Tooltip>
-				), () => (
-					<UpdatePinButton
-						disabled={disabled}
-						onClickButton={this.onClickButton}
-						pinLabel={pinLabel}
-					/>
-				))(disabled)}
-			</>
+			<Tooltip title={title}>
+				<UpdatePinButton
+					disabled={disabled}
+					onClickButton={this.onClickButton}
+					pinLabel={pinLabel}
+				/>
+			</Tooltip>
 		);
 	}
 }
