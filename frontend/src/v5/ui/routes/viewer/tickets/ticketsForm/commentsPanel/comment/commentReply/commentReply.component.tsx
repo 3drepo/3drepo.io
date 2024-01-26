@@ -22,7 +22,7 @@ import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
 import { CommentMarkDown, ExpandableImage, OriginalMessage, CameraIcon } from './commentReply.styles';
-import { CommentAuthor } from '../basicComment/basicComment.styles';
+import { CommentAuthor } from '../commentNonMessageContent/commentNonMessageContent.styles';
 import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
 
 type CommentReplyProps = TicketCommentReplyMetadata & {
