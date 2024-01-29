@@ -18,6 +18,7 @@
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const Yup = require('yup');
 const { checkLegendExists } = require('../../../../../../../models/legends');
+const { escapeRegexChrs } = require('../../../../../../../utils/helper/strings');
 const { getModelByQuery } = require('../../../../../../../models/modelSettings');
 const { getProjectById } = require('../../../../../../../models/projectSettings');
 const { getViewById } = require('../../../../../../../models/views');
@@ -63,7 +64,7 @@ const modelNameType = (teamspace, project, model) => types.strings.title.test('n
 		}
 
 		// eslint-disable-next-line security/detect-non-literal-regexp
-		const query = { _id: { $in: models }, name: new RegExp(`^${value}$`, 'i') };
+		const query = { _id: { $in: models }, name: new RegExp(`^${escapeRegexChrs(value)}$`, 'i') };
 		await getModelByQuery(teamspace, query, { _id: 1 });
 		return false;
 	} catch (err) {
