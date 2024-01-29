@@ -22,78 +22,85 @@ export const compareStrings = (string1, string2) => {
 	return (string1 || '').toLowerCase().includes((string2 || '').toLowerCase());
 };
 
-const dateFloor = (date) => new Date(date).setHours(0, 0, 0, 0);
-const dateCeiling = (date) => new Date(date).setHours(23, 59, 59, 999);
+interface Filter {
+	label: string;
+	type: FILTER_TYPES;
+	relatedField: string;
+	value: { "label": string, "value": string | number, "date"?: number }
+}
+
+const getFilter = (filters: Filter[], queryFields) => {
+	const filterType = get(filters[0], 'type', FILTER_TYPES.UNDEFINED);
+	return (item) => {
+
+		if (filterType === FILTER_TYPES.UNDEFINED) {
+			return filters.some((filter) => {
+				const filterValue =
+					isArray(item[filter.relatedField]) && !item[filter.relatedField].length ? [''] : item[filter.relatedField];
+				const itemValue = isArray(filterValue) ? filterValue || [''] : [filterValue];
+
+				return itemValue.every((value) => {
+					if (typeof value === 'string') {
+						return !filter.value.value ? filter.value.value === value : compareStrings(value, filter.value.value);
+					}
+					if (typeof value === 'number') {
+						return value === filter.value.value;
+					}
+					return false;
+				});
+			});
+		}
+
+		if (filterType === FILTER_TYPES.QUERY) {
+				return filters.some((filter) => {
+					const logFound = item.comments && item.comments.length ? item.comments.some(({ comment }) => {
+						if (comment) {
+							return compareStrings(comment, filter.value.value);
+						}
+						return false;
+					}) : false;
+
+					return logFound || queryFields.some((field) => {
+						return compareStrings(`${item[field]}`, filter.value.value);
+					});
+				})
+		}
+
+		if (filterType === FILTER_TYPES.DATE) {
+			return filters.every((filter) => {
+				const itemValue = item[filter.relatedField];
+				if (!itemValue) {
+					return false;
+				}
+
+				const boundryType = filter.value.value as string;
+				const boundryValue = filter.value.date;
+
+				if (boundryType.includes('from')) {
+					return itemValue >= boundryValue;
+				}
+
+				return itemValue <= boundryValue;
+			});
+		}
+	}
+}
+
+const getFiltersByRelatedField = (filters: Filter[], queryFields: string[]) => {
+	// In general the filtering criteria is (field1 === 'aValue' OR field1 === 'anotherValue') AND (field2 === 'filterValueForfield2' OR field2 === 'anotherfilterValueForfield2')
+	// when comparing fields of date type is like  fieldDate  >= startDate AND fieldDate  <= endDate so it doesnt follow the general rule
+	const groupedFilters = groupBy(filters, 'relatedField');
+	return Object.keys(groupedFilters).map((key) => getFilter(groupedFilters[key], queryFields));
+}
 
 export const searchByFilters = (
-		items = [],
-		filters = [],
-		returnDefaultHidden = false,
-		queryFields = ['name', 'desc', 'number']
-	) => {
-	const prefilteredItems = !returnDefaultHidden ? items.filter(({defaultHidden}) => !defaultHidden) : items;
-
-	if (!filters.length) {
-		return prefilteredItems;
-	}
-
-	const groupedFilters = groupBy(filters, 'relatedField');
-	return prefilteredItems.filter((item) => {
-		const filteringResults: any = map(groupedFilters, (selectedFilters: any) => {
-			const filterType = get(selectedFilters[0], 'type', FILTER_TYPES.UNDEFINED);
-
-			switch (filterType) {
-				case FILTER_TYPES.UNDEFINED:
-					return selectedFilters.some((filter) => {
-						const filterValue =
-							isArray(item[filter.relatedField]) && !item[filter.relatedField].length ? [''] : item[filter.relatedField];
-						const itemValue = isArray(filterValue) ? filterValue || [''] : [filterValue];
-
-						return itemValue.every((value) => {
-							if (typeof value === 'string') {
-								return !filter.value.value ? filter.value.value === value : compareStrings(value, filter.value.value);
-							}
-							if (typeof value === 'number') {
-								return value === filter.value.value;
-							}
-							return false;
-						});
-					});
-					break;
-				case FILTER_TYPES.QUERY:
-					return selectedFilters.some((filter) => {
-						const logFound = item.comments && item.comments.length ? item.comments.some(({ comment }) => {
-							if (comment) {
-								return compareStrings(comment, filter.value.value);
-							}
-							return false;
-						}) : false;
-
-						return logFound || queryFields.some((field) => {
-							return compareStrings(`${item[field]}`, filter.value.value);
-						});
-					});
-					break;
-				case FILTER_TYPES.DATE:
-					return selectedFilters.every((filter) => {
-						const itemValue = item[filter.relatedField];
-						if (!itemValue) {
-							return false;
-						}
-
-						const boundryType = filter.value.value;
-						const boundryValue = filter.value.date;
-
-						if (boundryType.includes('from')) {
-							return itemValue >= dateFloor(boundryValue);
-						}
-
-						return itemValue <= dateCeiling(boundryValue);
-					});
-					break;
-			}
-		});
-
-		return filteringResults.every((result) => result);
-	});
+	items = [],
+	filters: Filter[] = [],
+	returnDefaultHidden = false,
+	queryFields = ['name', 'desc', 'number']
+) => {
+	return items.filter((value) =>
+		(returnDefaultHidden || !value.defaultHidden) &&
+		getFiltersByRelatedField(filters, queryFields).every(filter => filter(value))
+	);
 };
