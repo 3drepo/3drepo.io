@@ -22,14 +22,14 @@ export const compareStrings = (string1, string2) => {
 	return (string1 || '').toLowerCase().includes((string2 || '').toLowerCase());
 };
 
-interface Filter {
+interface FilterDefinition {
 	label: string;
 	type: FILTER_TYPES;
 	relatedField: string;
 	value: { "label": string, "value": string | number, "date"?: number }
 }
 
-const getFilter = (filters: Filter[], queryFields) => {
+const getFilter = (filters: FilterDefinition[], queryFields) => {
 	const filterType = get(filters[0], 'type', FILTER_TYPES.UNDEFINED);
 	return (item) => {
 
@@ -86,7 +86,7 @@ const getFilter = (filters: Filter[], queryFields) => {
 	}
 }
 
-const getFiltersByRelatedField = (filters: Filter[], queryFields: string[]) => {
+const getFiltersFunctionsByRelatedField = (filters: FilterDefinition[], queryFields: string[]) => {
 	// In general the filtering criteria is (field1 === 'aValue' OR field1 === 'anotherValue') AND (field2 === 'filterValueForfield2' OR field2 === 'anotherfilterValueForfield2')
 	// when comparing fields of date type is like  fieldDate  >= startDate AND fieldDate  <= endDate so it doesnt follow the general rule
 	const groupedFilters = groupBy(filters, 'relatedField');
@@ -95,12 +95,12 @@ const getFiltersByRelatedField = (filters: Filter[], queryFields: string[]) => {
 
 export const searchByFilters = (
 	items = [],
-	filters: Filter[] = [],
+	filtersDefinitions: FilterDefinition[] = [],
 	returnDefaultHidden = false,
 	queryFields = ['name', 'desc', 'number']
 ) => {
 	return items.filter((value) =>
 		(returnDefaultHidden || !value.defaultHidden) &&
-		getFiltersByRelatedField(filters, queryFields).every(filter => filter(value))
+		getFiltersFunctionsByRelatedField(filtersDefinitions, queryFields).every(filter => filter(value))
 	);
 };
