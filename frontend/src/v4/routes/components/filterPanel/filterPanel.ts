@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const FILTER_TYPES = {
-	UNDEFINED: 1,
-	DATE: 2,
-	QUERY: 3
+export enum FILTER_TYPES {
+	UNDEFINED = 1,
+	DATE = 2,
+	QUERY = 3
 };
 
 export const DATA_TYPES = {
