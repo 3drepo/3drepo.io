@@ -114,12 +114,13 @@ export class Tree extends PureComponent<IProps, IState> {
 	));
 
 	public renderNodesList = renderWhenTrue(() => {
-		const { nodesList, dataRevision } = this.props;
+		const { nodesList, dataRevision, visibleNodesIds, activeNode } = this.props;
 		const size = nodesList.length;
 		const maxHeight = 842;
 
 		const treeHeight = TREE_ITEM_SIZE * size;
 		const treeNodesHeight = Math.min(maxHeight, treeHeight) + 1;
+		const activeNodeIsVisible = visibleNodesIds.includes(activeNode);
 
 		return (
 			<div style={{ height: treeNodesHeight, flex: 1 }}>
@@ -137,7 +138,7 @@ export class Tree extends PureComponent<IProps, IState> {
 							className="tree-list"
 							outerRef={this.scrollbarRef}
 						>
-							{this.renderTreeNode}
+							{(nodeProps) => this.renderTreeNode({ ...nodeProps, activeNodeIsVisible })}
 						</List>
 					)}
 				</AutoSizer>
@@ -224,13 +225,14 @@ export class Tree extends PureComponent<IProps, IState> {
 	}
 
 	private renderTreeNode = (props) => {
-		const { index, style, data } = props;
+		const { index, style, data, activeNodeIsVisible } = props;
 		const { expandedNodesMap, activeNode } = this.props;
 		const treeNode = data[index];
 
 		const treeNodeProps = {
 			index,
 			style,
+			activeNodeIsVisible,
 			key: treeNode._id,
 			data: treeNode,
 			hasFederationRoot: this.isFederation,

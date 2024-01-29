@@ -145,7 +145,19 @@ export const ParentOfVisible = styled.span`
 	display: flex;
 `;
 
-export const Container = styled.li<IContainer & { $isContainer: boolean }>`
+const nodeColor = css<IContainer & { activeNodeIsVisible }>`
+	${({ theme, active, selected, highlighted, activeNodeIsVisible }) => {
+		if (active) {
+			return theme.palette.primary.main;
+		}
+		if ((selected || highlighted) && !activeNodeIsVisible) {
+			return theme.palette.tertiary.mid;
+		}
+		return theme.palette.secondary.main;
+	}}
+`;
+
+export const Container = styled.li<IContainer & { $isContainer: boolean, activeNodeIsVisible: boolean }>`
 	${containerBorder};
 	background-color: ${getBackgroundColor};
 	padding: 2px 12px 2px ${containerIndentation}px;
@@ -181,16 +193,16 @@ export const Container = styled.li<IContainer & { $isContainer: boolean }>`
 		/* TODO - fix after new palette is released */
 		background-color: ${active ? '#F7F8FA' : palette.primary.contrast};
 		border: none;
-		color: ${active ? palette.primary.main : palette.base.main};
+		color: ${nodeColor};
 		${(nodeType === TREE_ITEM_MODEL_TYPE) && `
 			border-top: 1px solid ${palette.base.lightest};
 		`};
 
 		${StyledExpandableButton} {
 			${expandable ? css`
-				background-color: ${active ? palette.primary.main : palette.secondary.main};
+				background-color: ${nodeColor};
 			}` : css`
-				color: inherit;
+				color: ${nodeColor};
 				background-color: transparent;
 			`
 		}
