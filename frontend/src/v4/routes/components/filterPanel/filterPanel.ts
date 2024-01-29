@@ -20,6 +20,11 @@ export enum FILTER_TYPES {
 	DATE = 2,
 	QUERY = 3
 };
+export const FILTER_TYPES_OLD = {
+	UNDEFINED: 1,
+	DATE: 2,
+	QUERY: 3
+};
 
 export const DATA_TYPES = {
 	MODELS: 1,
@@ -30,7 +35,7 @@ export const DATA_TYPES = {
 export interface IFilter {
 	values: any;
 	label?: string;
-	type?: number;
+	type?: FILTER_TYPES;
 }
 
 export interface ISelectedFilter {
