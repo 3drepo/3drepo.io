@@ -26,7 +26,6 @@ import {
 import { UploadStatuses } from '@/v5/store/containers/containers.types';
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
 import { Role } from '../currentUser/currentUser.types';
-import { isNumber } from 'lodash';
 
 export const FEDERATION_SEARCH_FIELDS = ['code', 'name', 'desc', 'category'];
 
