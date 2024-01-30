@@ -16,6 +16,7 @@
  */
 import { all, call, put, select, take, takeLatest, delay } from 'redux-saga/effects';
 
+import { selectHasCommenterAccess } from '@/v5/store/containers/containers.selectors';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
@@ -170,6 +171,14 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 		modelsWithMeshes.mainTree.account = teamspace;
 		modelsWithMeshes.mainTree.model = modelId;
 
+		const modelsLackingPermissions = [];
+		for (const { model } of modelSettings.subModels) {
+			const hasPermissions = yield select((s) => selectHasCommenterAccess(s, model))
+			if (!hasPermissions) {
+				modelsLackingPermissions.push(model)
+			}
+		}
+
 		const meshMap = modelsWithMeshes.subModels.length ? modelsWithMeshes.subModels :
 			[modelsWithMeshes.mainTree];
 
@@ -182,8 +191,10 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 		};
 
 		dataToProcessed.mainTree.name = modelSettings.name;
+		dataToProcessed.mainTree.children = dataToProcessed.mainTree.children.filter(({ name }) => !modelsLackingPermissions.includes(name.split(':')[1]));
 		dataToProcessed.mainTree.isFederation = modelSettings.federate;
-		dataToProcessed.subModels = modelSettings.subModels;
+		dataToProcessed.subTrees = subTrees.filter(({ nodes: { project } }) => !modelsLackingPermissions.includes(project))
+		dataToProcessed.subModels = modelSettings.subModels.filter(({ model }) => !modelsLackingPermissions.includes(model))
 		dataToProcessed.treePath = treePath;
 
 		yield TreeProcessing.transformData(dataToProcessed, setIsTreeProcessed);
