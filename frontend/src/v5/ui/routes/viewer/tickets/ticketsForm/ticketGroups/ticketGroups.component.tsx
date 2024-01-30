@@ -20,7 +20,7 @@ import { Group, GroupOverride, Viewpoint, ViewpointState } from '@/v5/store/tick
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
-import { convertToV4GroupNodes, toColorAndTransparencyDicts } from '@/v5/helpers/viewpoint.helpers';
+import { convertToV4GroupNodes, toGroupPropertiesDicts } from '@/v5/helpers/viewpoint.helpers';
 import { cloneDeep, isString, isUndefined, uniqBy, xor } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
@@ -186,7 +186,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	useEffect(() => {
 		const colored = selectedColorIndexes.map((i) => state.colored[i]).filter(Boolean);
 		if (colored.some(({ group }) => isString(group))) return;
-		TicketsCardActionsDispatchers.setOverrides(toColorAndTransparencyDicts(colored));
+		TicketsCardActionsDispatchers.setOverrides(toGroupPropertiesDicts(colored));
 	}, [selectedColorIndexes, value]);
 
 	useEffect(() => {
@@ -196,7 +196,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	}, [hasClearedOverrides]);
 
 	useEffect(() => {
-		dispatch(ViewpointsActions.setSelectedViewpoint(null));
+		dispatch(ViewpointsActions.clearColorOverrides());
 
 		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
 		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
