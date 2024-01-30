@@ -30,13 +30,13 @@ import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } fr
 import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
+import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
-import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
+import { BreakableText, ChevronLeft, ChevronRight, GroupsCardHeader } from './ticketDetailsCard.styles';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
 import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { useSearchParam } from '../../../useSearchParam';
-import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 
 enum IndexChange {
 	PREV = -1,
@@ -157,10 +157,11 @@ export const TicketDetailsCard = () => {
 				{view === TicketDetailsView.Groups
 					&& (
 						<>
-							<CardHeader>
+							<GroupsCardHeader>
 								<ArrowBack onClick={onClickBackFromGroups} />
-								{ticket.title}:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" />
-							</CardHeader>
+								<BreakableText>{ticket.title}</BreakableText>
+								<span>:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" /></span>
+							</GroupsCardHeader>
 							<InputController
 								Input={TicketGroups}
 								name={viewProps.name}
