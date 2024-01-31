@@ -62,13 +62,13 @@ Feature: Login
   			| hammeerJSimpson@mailinator.com   | homerJSimpson |
 		Then I wait until "Incorrect username or password" text appears
 	
-	# Scenario: Logging in elsewhere
-	# 	Given I sign in with:
-	# 		| Username        | Password      |
-  	# 		| homerJSimpson   | homerJSimpson |
-	# 	And I in another browser
-	# 	Given I sign in with:
-	# 		| Username        | Password      |
-  	# 		| homerJSimpson   | homerJSimpson |
-	# 	When I switch back
-		# Then I wait until "Incorrect username or password" text appears
+	Scenario: Logging in elsewhere
+		Given I sign in with:
+			| Username        | Password      |
+  			| homerJSimpson   | homerJSimpson |
+		And I in another browser
+		Given I sign in with:
+			| Username        | Password      |
+  			| homerJSimpson   | homerJSimpson |
+		When I switch back
+		Then I wait until "You've been logged out" text appears

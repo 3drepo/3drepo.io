@@ -100,6 +100,17 @@ When('I shouldnt get email', async function () {
 	expect(await getEmailCount(this.driver)).to.equals(0);
 });
 
+When('I in another browser', async function () {
+	this.oldDriver = this.driver;
+	this.driver = await initializeSeleniumDriver('chrome');
+});
+
+When('I switch back', async function () {
+	await this.driver.quit();
+	this.driver = this.oldDriver;
+	this.oldDriver = null;
+});
+
 After(async function () {
 	await this.driver.quit();
 });
