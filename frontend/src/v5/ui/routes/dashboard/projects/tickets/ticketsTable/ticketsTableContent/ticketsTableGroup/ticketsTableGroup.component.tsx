@@ -89,7 +89,7 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 								<SortingTableHeader name={`properties.${IssueProperties.ASSIGNEES}`} width={96} hidden={!hasProperties}> 
 									<FormattedMessage id="ticketTable.column.header.assignees" defaultMessage="assignees" />
 								</SortingTableHeader>
-								<SortingTableHeader name={`properties.${BaseProperties.OWNER}`} width={62}>
+								<SortingTableHeader name={`properties.${BaseProperties.OWNER}`} width={52}>
 									<FormattedMessage id="ticketTable.column.header.owner" defaultMessage="owner" />
 								</SortingTableHeader>
 								<SortingTableHeader name={`properties.${IssueProperties.DUE_DATE}`} width={147} hidden={!hasProperties}>
@@ -98,7 +98,7 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 								<SortingTableHeader name={`properties.${IssueProperties.PRIORITY}`} width={90} hidden={!hasProperties}>
 									<FormattedMessage id="ticketTable.column.header.priority" defaultMessage="priority" />
 								</SortingTableHeader>
-								<SortingTableHeader name={`properties.${IssueProperties.STATUS}`} width={100} hidden={!hasProperties}>
+								<SortingTableHeader name={`properties.${BaseProperties.STATUS}`} width={110}>
 									<FormattedMessage id="ticketTable.column.header.status" defaultMessage="status" />
 								</SortingTableHeader>
 								<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`} width={137} hidden={!hasSafetibase}>

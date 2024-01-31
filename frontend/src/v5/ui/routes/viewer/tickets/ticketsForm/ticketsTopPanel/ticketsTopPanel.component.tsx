@@ -54,7 +54,6 @@ export const TicketsTopPanel = ({
 	const createdAt = getValues(`properties.${BaseProperties.CREATED_AT}`);
 	const updatedAt = getValues(`properties.${BaseProperties.UPDATED_AT}`);
 
-	const hasIssueProperties = properties.some((property) => property.name === IssueProperties.PRIORITY);
 	const topPanelProperties: string[] = Object.values({ ...BaseProperties, ...IssueProperties });
 	const extraProperties = properties.filter(({ name }) => !topPanelProperties.includes(name));
 
@@ -94,7 +93,7 @@ export const TicketsTopPanel = ({
 					/>
 					{_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`) && <ErrorTextGap />}
 				</DescriptionProperty>
-				{hasIssueProperties && <IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnly} />}
+				<IssuePropertiesInputs properties={properties} onBlur={onPropertyBlur} readOnly={readOnly} />
 				<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
 			</BaseTicketInfo>
 		</TopPanel>

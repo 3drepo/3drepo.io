@@ -100,7 +100,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 			<Cell width={96} hidden={!hasProperties}>
 				{!!assignees?.length && (<AssigneesSelect value={assignees} multiple disabled />)}
 			</Cell>
-			<CellOwner width={62}>
+			<CellOwner width={52}>
 				<UserPopoverCircle user={ownerAsUser} />
 			</CellOwner>
 			<CellDate width={147} hidden={!hasProperties}>
@@ -109,7 +109,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 			<CellChipText width={90} hidden={!hasProperties}>
 				<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
 			</CellChipText>
-			<CellChipText width={100} hidden={!hasProperties}>
+			<CellChipText width={110}>
 				<Chip {...STATUS_MAP[status]} variant="text" />
 			</CellChipText>
 			<Cell width={137} hidden={!hasSafetibase}>

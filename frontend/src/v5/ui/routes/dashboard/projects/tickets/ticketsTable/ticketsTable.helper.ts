@@ -45,14 +45,14 @@ export const GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE = mapKeysToSnakeCase({
 	[IssueProperties.ASSIGNEES]: IssueProperties.ASSIGNEES,
 	[IssueProperties.DUE_DATE]: IssueProperties.DUE_DATE,
 	[IssueProperties.PRIORITY]: IssueProperties.PRIORITY,
-	[IssueProperties.STATUS]: IssueProperties.STATUS,
+	[BaseProperties.STATUS]: BaseProperties.STATUS,
 	[SafetibaseProperties.LEVEL_OF_RISK]: SafetibaseProperties.LEVEL_OF_RISK,
 	[SafetibaseProperties.TREATMENT_STATUS]: SafetibaseProperties.TREATMENT_STATUS,
 });
 
 export const ISSUE_PROPERTIES_GROUPS = {
 	[IssueProperties.PRIORITY]: PriorityLevels,
-	[IssueProperties.STATUS]: TicketStatuses,
+	[BaseProperties.STATUS]: TicketStatuses,
 };
 
 export const SAFETIBASE_PROPERTIES_GROUPS = {
