@@ -43,7 +43,7 @@ const objectEntryValidator = Yup.object().shape({
 Groups.schema = (allowIds, fieldsOptional) => {
 	let group = Yup.object({
 		name: types.strings.title,
-		description: types.strings.longDescription,
+		description: types.strings.longDescription.nullable(),
 		rules: Yup.lazy((val) => (val ? rulesSchema : Yup.mixed())),
 		objects: Yup.array().of(objectEntryValidator).min(1),
 	}).test(
