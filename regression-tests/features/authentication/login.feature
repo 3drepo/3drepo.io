@@ -31,3 +31,44 @@ Feature: Login
 		Given I navigate to the 'viewer teamspace settings' page
 		When I sign in as 'viewer'
 		Then I should be redirected to the 'viewer teamspace settings' page
+
+	Scenario: Logging in with email address
+		Given I sign in with:
+			| Username                       | Password      |
+  			| homerJSimpson@mailinator.com   | homerJSimpson |
+		Then I should be redirected to the 'dashboard' page
+	
+	Scenario: Loggin in with email address (case insensitive)
+		Given I sign in with:
+			| Username                      | Password      |
+  			| HOMERJSimpson@mailinATor.com  | homerJSimpson |
+		Then I should be redirected to the 'dashboard' page
+	
+	Scenario: Logging in with the wrong password
+		Given I sign in with:
+			| Username        | Password  |
+  			| homerJSimpson   | hahawrong |
+		Then I wait until "Incorrect username or password" text appears
+	
+	Scenario: Logging in with the wrong username
+		Given I sign in with:
+			| Username        	| Password      |
+  			| hammeerJSimpson   | homerJSimpson |
+		Then I wait until "Incorrect username or password" text appears 	
+
+	Scenario: Logging in with the wrong email
+		Given I sign in with:
+			| Username        	               | Password      |
+  			| hammeerJSimpson@mailinator.com   | homerJSimpson |
+		Then I wait until "Incorrect username or password" text appears
+	
+	# Scenario: Logging in elsewhere
+	# 	Given I sign in with:
+	# 		| Username        | Password      |
+  	# 		| homerJSimpson   | homerJSimpson |
+	# 	And I in another browser
+	# 	Given I sign in with:
+	# 		| Username        | Password      |
+  	# 		| homerJSimpson   | homerJSimpson |
+	# 	When I switch back
+		# Then I wait until "Incorrect username or password" text appears

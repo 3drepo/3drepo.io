@@ -36,7 +36,7 @@ export const resizeWindow = async (driver, size) => {
 // getElement is more robust thatn findElement; in the case the page is loading it will wait until the element is available
 // and then try to find the element
 export const getElement = async (driver: WebDriver, locator: Locator) => {
-	await driver.wait(until.elementLocated(locator), 100000);
+	await driver.wait(until.elementLocated(locator), 3000);
 	return driver.findElement(locator);
 
 };

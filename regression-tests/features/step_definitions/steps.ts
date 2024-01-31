@@ -75,7 +75,11 @@ When('I fill in the form with:', async function (datatable) {
 });
 
 When('I wait until {string} text appears', async function (text) {
-	await waitForText(this.driver, text);
+	try {
+		await waitForText(this.driver, text);
+	} catch (e) {
+		throw new Error(`The text "${text}" never appeared :(`);
+	}
 });
 
 Then('I should be redirected to the {string} page', async function (page) {
