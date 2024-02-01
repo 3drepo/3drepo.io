@@ -76,4 +76,10 @@ UnityAssets.getUnityBundle = function(account, model, id) {
 	return FilesManager.getFileAsStream(account, collection, bundleFileName);
 };
 
+UnityAssets.getRepoBundle = function(account, model, id) {
+	const bundleFileName = `${id}.repobundle`;
+	const collection = `${model}.stash.repobundles.ref`;
+	return FilesManager.getFileAsStream(account, collection, bundleFileName);
+};
+
 module.exports = UnityAssets;
