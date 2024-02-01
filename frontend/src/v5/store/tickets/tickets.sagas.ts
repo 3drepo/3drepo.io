@@ -37,17 +37,23 @@ import {
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 import { ITicket, ViewpointState } from './tickets.types';
-import { selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
+import { selectTemplateById, selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
+import { getTicketWithStatus } from './tickets.helpers';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsAction) {
 	try {
 		const fetchModelTickets = isFederation
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
-		const tickets = yield fetchModelTickets(teamspace, projectId, modelId);
-		yield put(TicketsActions.fetchTicketsSuccess(modelId, tickets));
+		const tickets: ITicket[] = yield fetchModelTickets(teamspace, projectId, modelId);
+		const fullTickets = [];
+		for (const ticket of tickets) {
+			const template = yield select(selectTemplateById, modelId, ticket.type);
+			fullTickets.push(getTicketWithStatus(ticket, template));
+		}
+		yield put(TicketsActions.fetchTicketsSuccess(modelId, fullTickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
