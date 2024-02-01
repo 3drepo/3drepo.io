@@ -16,7 +16,12 @@
  */
 
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
+import { CardHeader } from '@components/viewer/cards/card.styles';
 import styled from 'styled-components';
+
+export const GroupsCardHeader = styled(CardHeader)`
+	gap: 0;
+`;
 
 const CommonChevronStyle = styled(ChevronIcon)`
 	&& {
@@ -32,4 +37,12 @@ export const ChevronLeft = styled(CommonChevronStyle)`
 export const ChevronRight = styled(CommonChevronStyle)`
 	transform: rotate(-90deg);
 	margin-left: 2px;
+`;
+
+export const BreakableText = styled.div`
+	margin-left: 5px;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 `;
