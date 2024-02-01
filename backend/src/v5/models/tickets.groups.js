@@ -19,6 +19,7 @@ const GROUPS_COL = 'tickets.groups';
 
 const { deleteMany, find, findOne, insertMany, updateOne } = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
+const { isEqual } = require('../utils/helper/objects');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
@@ -37,15 +38,29 @@ Groups.getGroupsByIds = (teamspace, project, model, ticket, groupIds, projection
 	{ teamspace, project, model, ticket, _id: { $in: groupIds } }, projection);
 
 Groups.updateGroup = async (teamspace, project, model, ticket, groupId, data, author) => {
-	const updates = { $set: data };
+	const toUpdate = { };
+	const toUnset = { };
 
-	if (data.rules) {
-		updates.$unset = { objects: 1 };
-	} else if (data.objects) {
-		updates.$unset = { rules: 1 };
+	Object.keys(data).forEach((key) => {
+		if (data[key]) {
+			toUpdate[key] = data[key];
+		} else {
+			toUnset[key] = 1;
+		}
+	});
+
+	if (toUpdate.rules) {
+		toUnset.objects = 1;
+	} else if (toUpdate.objects) {
+		toUnset.rules = 1;
 	}
+
+	const actions = {};
+	if (!isEqual(toUpdate, {})) actions.$set = toUpdate;
+	if (!isEqual(toUnset, {})) actions.$unset = toUnset;
+
 	await updateOne(
-		teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: groupId }, updates);
+		teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: groupId }, actions);
 
 	publish(events.UPDATE_TICKET_GROUP, { _id: groupId, teamspace, project, model, ticket, changes: data, author });
 };
