@@ -22,7 +22,8 @@ import { pick } from '../../src/helpers/general.helpers';
 
 Then('I verify the account from email {string}', async function (email) {
 	await readLatestMailFor(this.driver, email);
-	await clickOn(this.driver, 'Verify email address', true);
+	await clickOn(this.driver, 'Verify email address');
+	await closeOriginWindow(this.driver);
 	await waitForText(this.driver, 'Your account has been verified');
 });
 

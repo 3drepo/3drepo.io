@@ -38,9 +38,12 @@ export const resizeWindow = async (driver, size) => {
 export const getElement = async (driver: WebDriver, locator: Locator) => {
 	await driver.wait(until.elementLocated(locator), 3000);
 	return driver.findElement(locator);
-
 };
 
+export const getElements = async (driver: WebDriver, locator: Locator) => {
+	await driver.wait(until.elementLocated(locator), 3000);
+	return driver.findElements(locator);
+};
 
 export const animationsEnded = async (driver: WebDriver) =>
 	driver.executeScript(async () => {
@@ -119,18 +122,31 @@ export const closeOriginWindow = async (driver: WebDriver) => {
 	await driver.switchTo().window(windows[1]);
 };
 
-export const clickOn = async (driver: WebDriver, buttonContent:string, closeOldWindow: boolean = false) => {
+export const clickOn = async (driver: WebDriver, buttonContent:string, elementNumber?:number) => {
 	await waitUntilPageLoaded(driver);
 	const text = `//body//*[text()="${buttonContent}"]`;
 	const target = By.xpath(text);
-	const link  = await getElement(driver, target);
+	const elements = await getElements(driver, target);
+
+	let link;
+
+	if (elementNumber) {
+		link = elements[elementNumber - 1]; // element number starts from 1
+	} else {
+
+		const tagOrder = ['a', 'button', 'div'];
+		const getTagPriority = (tag):number => tagOrder.includes(tag) ? tagOrder.indexOf(tag) : tagOrder.length;
+
+		await Promise.all(elements.map(async (element) => {
+			(element as any).tag = await element.getTagName();
+		}));
+		
+		link = elements.sort((a:any, b:any) => getTagPriority(a.tag) - getTagPriority(b.tag)) [0];
+	}
+
 	await driver.wait(until.elementIsEnabled(link));
 	await link.click();
 	await animationsEnded(driver);
-
-	if (closeOldWindow) {
-		await closeOriginWindow(driver);
-	}
 };
 
 export const fillInForm = async (driver: WebDriver, fields: Record<string, string>) => {

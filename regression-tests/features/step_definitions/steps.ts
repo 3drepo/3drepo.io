@@ -18,7 +18,7 @@
 import { When, Then, Given, Before, After, setDefaultTimeout } from '@cucumber/cucumber';
 import { expect } from 'chai';
 import { until } from 'selenium-webdriver';
-import { clickOn, closeOriginWindow, fillInForm, findElementNearText, initializeSeleniumDriver, navigateTo, waitForText, waitUntilPageLoaded } from '../../src/helpers/selenium.helpers';
+import { clickOn, closeOriginWindow, delay, fillInForm, findElementNearText, initializeSeleniumDriver, navigateTo, waitForText, waitUntilPageLoaded } from '../../src/helpers/selenium.helpers';
 import { getLogin, logout } from '../../src/helpers/api.helpers';
 import { domain } from '../../config.json';
 import { getUrl } from '../../src/helpers/routing.helpers';
@@ -100,7 +100,7 @@ When('I shouldnt get email', async function () {
 	expect(await getEmailCount(this.driver)).to.equals(0);
 });
 
-When('I in another browser', async function () {
+When('in another browser', async function () {
 	this.oldDriver = this.driver;
 	this.driver = await initializeSeleniumDriver('chrome');
 });
@@ -109,6 +109,11 @@ When('I switch back', async function () {
 	await this.driver.quit();
 	this.driver = this.oldDriver;
 	this.oldDriver = null;
+});
+
+// For debuggin test purposes
+When('I wait for {int} seconds', async function (seconds) {
+	await delay(seconds * 1000);
 });
 
 After(async function () {

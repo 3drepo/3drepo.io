@@ -66,7 +66,7 @@ Feature: Login
 		Given I sign in with:
 			| Username        | Password      |
   			| homerJSimpson   | homerJSimpson |
-		And I in another browser
+		And in another browser
 		Given I sign in with:
 			| Username        | Password      |
   			| homerJSimpson   | homerJSimpson |
