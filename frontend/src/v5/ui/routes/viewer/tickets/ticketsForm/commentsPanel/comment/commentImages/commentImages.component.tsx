@@ -19,13 +19,15 @@ import { FlexContainer, ClickListener, ExpandableImage } from './commentImages.s
 
 type CommentImagesProps = {
 	images: string[];
+	onDownload?: (index) => void;
+	onDelete?: (index) => void;
 };
-export const CommentImages = ({ images }: CommentImagesProps) => {
+export const CommentImages = ({ images, ...props }: CommentImagesProps) => {
 	if (images.length <= 3) {
 		return (
 			<FlexContainer>
 				{images.map((image, index) => (
-					<ExpandableImage images={images} displayImageIndex={index} key={image} />
+					<ExpandableImage images={images} displayImageIndex={index} key={image} {...props} />
 				))}
 			</FlexContainer>
 		);
@@ -35,12 +37,12 @@ export const CommentImages = ({ images }: CommentImagesProps) => {
 			<>
 				<FlexContainer>
 					{(images.slice(0, 2)).map((image, index) => (
-						<ExpandableImage images={images} displayImageIndex={index} key={image} />
+						<ExpandableImage images={images} displayImageIndex={index} key={image} {...props} />
 					))}
 				</FlexContainer>
 				<FlexContainer>
 					{(images.slice(2, 5)).map((image, index) => (
-						<ExpandableImage images={images} displayImageIndex={index + 2} key={image} />
+						<ExpandableImage images={images} displayImageIndex={index + 2} key={image} {...props} />
 					))}
 				</FlexContainer>
 			</>
@@ -54,12 +56,12 @@ export const CommentImages = ({ images }: CommentImagesProps) => {
 		<ClickListener onClick={preloadImages}>
 			<FlexContainer>
 				{(images.slice(0, 2)).map((image, index) => (
-					<ExpandableImage images={images} displayImageIndex={index} key={image} />
+					<ExpandableImage images={images} displayImageIndex={index} key={image} {...props} />
 				))}
 			</FlexContainer>
 			<FlexContainer>
-				<ExpandableImage images={images} displayImageIndex={2} />
-				<ExpandableImage images={images} displayImageIndex={3} showExtraImagesValue />
+				<ExpandableImage images={images} displayImageIndex={2} {...props} />
+				<ExpandableImage images={images} displayImageIndex={3} showExtraImagesValue {...props} />
 			</FlexContainer>
 		</ClickListener>
 	);
