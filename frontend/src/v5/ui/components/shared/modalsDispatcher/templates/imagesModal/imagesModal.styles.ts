@@ -57,6 +57,39 @@ export const Counter = styled.div`
 	font-weight: 700;
 `;
 
+export const Buttons = styled(FlexRow)`
+	gap: 9px;
+`;
+
+export const TopBarButton = styled(FlexRow)`
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	border: solid 1px ${({ theme }) => theme.palette.primary.contrast};
+	background-color: transparent;
+	border-radius: 8px;
+	height: 32px;
+	min-width: 36px;
+	cursor: pointer;
+
+	&:hover {
+		color: ${({ theme }) => theme.palette.secondary.main};
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+
+	svg {
+		width: 14px;
+	}
+`;
+
+export const TextTopBarButton = styled(TopBarButton)`
+	padding: 0 16px;
+	font-weight: 600;
+	gap: 8px;
+
+	svg {
+		height: 18px;
+	}
+`;
+
 export const CloseButton = styled(CloseButtonBase)`
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	position: unset;

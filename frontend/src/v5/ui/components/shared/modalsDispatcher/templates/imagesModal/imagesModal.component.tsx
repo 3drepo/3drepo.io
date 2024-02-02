@@ -18,12 +18,15 @@
 import { useEffect, useRef, useState } from 'react';
 import ChevronIcon from '@assets/icons/outlined/small_chevron-outlined.svg';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
+import { FormattedMessage } from 'react-intl';
+import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
+import DownloadIcon from '@assets/icons/outlined/download_arrow-outlined.svg';
+import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import {
 	Modal, Container, Image, NextButton, PreviousButton, CloseButton, Counter,
-	TopBar, FlexRow, ImageThumbnail,
+	TopBar, Buttons, TopBarButton, FlexRow, TextTopBarButton, ImageThumbnail,
 	ImagesContainer, ImageWithArrows,
 } from './imagesModal.styles';
-import { FormattedMessage } from 'react-intl';
 
 type ImagesModalProps = {
 	images: string[];
@@ -31,8 +34,10 @@ type ImagesModalProps = {
 	displayImageIndex?: number;
 	onClickClose: () => void;
 	open: boolean;
+	onDelete?: (index) => void;
+	onDownload?: (index) => void;
 };
-export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open }: ImagesModalProps) => {
+export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open, onDelete, onDownload }: ImagesModalProps) => {
 	const [imageIndex, setImageIndex] = useState(displayImageIndex);
 	const imagesLength = images.length;
 	const imageRef = useRef<HTMLImageElement>(null);
@@ -88,6 +93,25 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open 
 							/>
 						</Counter>
 					)}
+					<Buttons>
+						<TextTopBarButton>
+							<EditIcon />
+							<FormattedMessage
+								id="images.button.addMarkup"
+								defaultMessage="Add markup"
+							/>
+						</TextTopBarButton>
+						{onDelete && (
+							<TopBarButton onClick={() => onDelete(imageIndex)}>
+								<DeleteIcon />
+							</TopBarButton>
+						)}
+						{onDownload && (
+							<TopBarButton onClick={() => onDownload(imageIndex)}>
+								<DownloadIcon />
+							</TopBarButton>
+						)}
+					</Buttons>
 				</FlexRow>
 				<CloseButton onClick={onClickClose}>
 					<CloseIcon />
