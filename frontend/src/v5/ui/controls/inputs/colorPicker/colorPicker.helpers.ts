@@ -25,7 +25,7 @@ export type RgbArray = [number, number, number];
 export type RgbGroupColor = GroupColor & { color?: RgbArray };
 export type HexGroupColor = GroupColor & { color?: string };
 
-const rgbToHex = (color: RgbArray) => color && muiRgbToHex(`rgb(${color.join()})`);
+export const rgbToHex = (color: RgbArray) => color && muiRgbToHex(`rgb(${color.join()})`);
 export const rgbGroupColorToHex = ({ opacity, color }: RgbGroupColor): HexGroupColor => ({
 	opacity,
 	color: rgbToHex(color),

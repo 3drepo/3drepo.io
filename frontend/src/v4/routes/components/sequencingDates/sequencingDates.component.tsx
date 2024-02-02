@@ -19,8 +19,11 @@ import InputLabel from '@mui/material/InputLabel';
 import CloseIcon from '@mui/icons-material/Close';
 import SequencesIcon from '@mui/icons-material/Movie';
 import { Field } from 'formik';
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
+import { createStructuredSelector } from 'reselect';
+import { selectHasSequences } from '@/v4/modules/sequences';
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { isDateOutsideRange } from '../../../helpers/dateTime';
 import { LONG_DATE_TIME_FORMAT_V5, NAMED_MONTH_DATETIME_FORMAT } from '../../../services/formatting/formatDate';
 import {
@@ -39,13 +42,14 @@ interface IProps {
 	endTimeValue?: Date;
 	startTimeValue?: Date;
 	startDate?: Date;
+	hasSequences: boolean;
 }
 
 interface IState {
 	valued: any;
 }
 
-const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocusedDate, ...props }) => {
+const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocusedDate, hasSequences, canEdit, ...props }) => {
 	const [value, setValue] = useState(props.value);
 	const deleteValue = () => {
 		onChange({target: { value: null, name }})
@@ -61,18 +65,19 @@ const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocus
 		<SequenceDateContainer>
 			<SequenceDateField
 				shouldDisableDate={(date: any) => isDateOutsideRange(min, max, date.$d)}
-				inputFormat={isV5() ? LONG_DATE_TIME_FORMAT_V5 : NAMED_MONTH_DATETIME_FORMAT}
+				inputFormat={LONG_DATE_TIME_FORMAT_V5}
 				dateTime
 				name={name}
 				value={value}
 				onChange={handleChange}
 				defaultValue={min}
 				initialFocusedDate={initialFocusedDate}
-				placeholder={isV5() ? 'Set time and date' : ''}
+				placeholder="Set time and date"
+				disabled={!canEdit}
 			/>
 			{ value &&
 				<SequenceDateActions>
-					<SmallIconButton onClick={(e) => showSequenceDate(value)} Icon={SequencesIcon} />
+					<SmallIconButton onClick={(e) => showSequenceDate(value)} Icon={SequencesIcon} disabled={!hasSequences} />
 					<SmallIconButton onClick={deleteValue} Icon={CloseIcon} />
 				</SequenceDateActions>
 			}
@@ -80,7 +85,7 @@ const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocus
 	);
 };
 
-export class SequencingDates extends PureComponent<IProps, IState> {
+export class BaseSequencingDates extends PureComponent<IProps, IState> {
 	get additionalProps() {
 		const { endTimeValue, startTimeValue, selectedDate, startDate } = this.props;
 		const newTime = selectedDate ? selectedDate : endTimeValue;
@@ -125,3 +130,8 @@ export class SequencingDates extends PureComponent<IProps, IState> {
 		);
 	}
 }
+
+const mapStateToProps = createStructuredSelector({
+	hasSequences: selectHasSequences,
+});
+export const SequencingDates = withRouter(connect(mapStateToProps)(BaseSequencingDates));

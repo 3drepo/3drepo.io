@@ -19,9 +19,10 @@ import styled from 'styled-components';
 
 import Button from '@mui/material/Button';
 
+import { css } from 'styled-components';
 import { COLOR } from '../../../../styles';
 
-export const StyledButton = styled(Button)<{ squeezed?: number }>`
+export const StyledButton = styled(Button)<{ squeezed?: number, disabled?: boolean }>`
 	background-color: ${COLOR.SOFT_BLUE};
 	padding: ${({ squeezed }) => squeezed ? '4px 5px' : '6px 20px'};
 	min-width: 56px;
@@ -35,4 +36,11 @@ export const StyledButton = styled(Button)<{ squeezed?: number }>`
 		margin-right: 2px;
 		margin-bottom: 1px;
 	}
+
+	${({ disabled }) => disabled && css`
+		&&&& {
+			color: ${({ theme }) => theme.palette.base.lightest};
+			border-color: ${({ theme }) => theme.palette.base.lightest};
+		}
+	`}
 `;

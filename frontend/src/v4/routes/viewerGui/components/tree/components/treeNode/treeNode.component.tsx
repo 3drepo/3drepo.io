@@ -16,7 +16,6 @@
  */
 import { PureComponent } from 'react';
 import { Tooltip } from '@mui/material';
-import { isV5 } from '@/v4/helpers/isV5';
 import AddIcon from '@mui/icons-material/Add';
 import UpIcon from '@mui/icons-material/KeyboardArrowUp';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -51,6 +50,7 @@ interface IProps {
 	expanded?: boolean;
 	selected?: boolean;
 	active?: boolean;
+	activeNodeIsVisible?: boolean;
 	hasFederationRoot?: boolean;
 	collapseNodes?: (nodesIds: string[]) => void;
 	expandNodes?: (id) => void;
@@ -73,7 +73,7 @@ const CollapseButton = ({ Icon, onClick, expanded, hasChildren, nodeType }) => (
 );
 
 const ParentOfVisibleIcon = () => <ParentOfVisible><VisibilityIcon color="inherit" /></ParentOfVisible>;
-const VisibleIcon = () => <VisibilityIcon color={isV5() ? 'secondary' : 'primary'} />;
+const VisibleIcon = () => <VisibilityIcon color="secondary" />;
 const InvisibleIcon = () => <VisibilityOffIcon color="action" />;
 
 export class TreeNode extends PureComponent<IProps, any> {
@@ -139,7 +139,7 @@ export class TreeNode extends PureComponent<IProps, any> {
 	private renderOpenModelAction = renderWhenTrue(() => (
 		<SmallIconButton
 			Icon={OpenInNewIcon}
-			tooltip={`Open ${isV5() ? 'Container' : 'model' } in new tab`}
+			tooltip={`Open Container in new tab`}
 			onClick={this.handleOpenModelClick}
 		/>
 	));
@@ -179,7 +179,7 @@ export class TreeNode extends PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { expanded, isSearchResult, style, key, active, hasFederationRoot } = this.props;
+		const { expanded, isSearchResult, style, key, active, hasFederationRoot, activeNodeIsVisible } = this.props;
 
 		return (
 			<Tooltip title={this.node.name.trim()} placement="bottom">
@@ -190,6 +190,7 @@ export class TreeNode extends PureComponent<IProps, any> {
 					expandable={this.node.expandable && !this.isModelRoot}
 					selected={this.isSelected}
 					active={active}
+					activeNodeIsVisible={activeNodeIsVisible}
 					highlighted={this.isHighlighted}
 					expanded={isSearchResult && expanded}
 					level={this.level}
@@ -246,8 +247,7 @@ export class TreeNode extends PureComponent<IProps, any> {
 		const { teamspace, project } = this.props.match.params;
 		const { model } = this.props.settings.subModels.find((subModel) => subModel.name === this.node.name);
 
-		const url = isV5() ? `${window.location.origin}/v5/viewer/${teamspace}/${project}/${model}`
-			: `${window.location.origin}/viewer/${teamspace}/${model}`;
+		const url = `${window.location.origin}/v5/viewer/${teamspace}/${project}/${model}`;
 		const newWindow = window.open() as any;
 		newWindow.opener = null;
 		newWindow.location = url;

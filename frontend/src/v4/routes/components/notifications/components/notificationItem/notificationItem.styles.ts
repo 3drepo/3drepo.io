@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { ListItemButton } from '@mui/material';
 import ListItemText from '@mui/material/ListItemText';
 import Paper from '@mui/material/Paper';
@@ -30,7 +29,7 @@ export const Item = styled(ListItemButton)`
 export const Container = styled(Paper)`
 	background-color: transparent;
 	margin: 3px;
-	${({ read }: any) => isV5() && !read && css`
+	${({ read }: any) => !read && css`
 		.MuiButtonBase-root:hover .MuiListItemText-root > span {
 			text-decoration: underline;
 		}

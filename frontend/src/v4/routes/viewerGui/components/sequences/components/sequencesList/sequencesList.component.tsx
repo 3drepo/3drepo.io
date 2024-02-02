@@ -15,22 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PureComponent } from 'react';
-
 import { Grid, Tooltip } from '@mui/material';
+import { Toggle } from '@controls/inputs/toggle/toggle.component';
+import { FormattedMessage } from 'react-intl';
 
-import { formatShortDate } from '../../../../../../services/formatting/formatDate';
-import { ViewerPanelContent } from '../../../viewerPanel/viewerPanel.styles';
+import { formatShortDateTime } from '../../../../../../services/formatting/formatDate';
 import {
 	SequenceDatesContainer,
 	SequenceItemContainer,
 	SequenceItemIcon,
 	SequenceName,
+	SequenceItems,
+	ToggleContainer,
+	ViewerPanelContent
 } from '../../sequences.styles';
 
 interface IProps {
 	sequences: any;
 	setSelectedSequence: (id: string) => void;
+	openOnToday: boolean;
+	setOpenOnToday: (newValue: boolean) => void;
+	showSequenceDate: (newValue: Date | null) => void;
 }
 
 const SequenceItem = ({name, modelName, startDate, endDate, onClick}) => (
@@ -43,24 +48,34 @@ const SequenceItem = ({name, modelName, startDate, endDate, onClick}) => (
 				</Tooltip>
 				<Grid item>{modelName}</Grid>
 				<SequenceDatesContainer>
-					<Grid item>Start: {formatShortDate(new Date(startDate))} </Grid>
-					<Grid item>End: {formatShortDate(new Date(endDate))} </Grid>
+					<Grid item>Start: {formatShortDateTime(new Date(startDate))} </Grid>
+					<Grid item>End: {formatShortDateTime(new Date(endDate))} </Grid>
 				</SequenceDatesContainer>
 			</Grid>
 		</Grid>
 	</SequenceItemContainer>
 );
 
-export class SequencesList extends PureComponent<IProps, {}> {
-	public render = () => {
-		const { setSelectedSequence, sequences } = this.props;
+export const SequencesList = ({ setSelectedSequence, sequences, openOnToday, setOpenOnToday, showSequenceDate }: IProps) => {
+	const onSequenceClick = ({ _id }) => {
+		showSequenceDate(null);
+		setSelectedSequence(_id);
+	};
 
-		return (
-			<ViewerPanelContent>
+	return (
+		<ViewerPanelContent>
+			<SequenceItems>
 				{sequences.map((sequence) => (
-					<SequenceItem key={sequence._id} {...sequence} onClick={() => setSelectedSequence(sequence._id)} />
+					<SequenceItem key={sequence._id} {...sequence} onClick={() => onSequenceClick(sequence)} />
 				))}
-			</ViewerPanelContent>
-		);
-	}
-}
+			</SequenceItems>
+			<ToggleContainer>
+				<Toggle onChange={() => setOpenOnToday(!openOnToday)} checked={openOnToday} />
+				<FormattedMessage
+					id="sequeneces.toggle.goToToday"
+					defaultMessage="Go to today's date when entering a sequence"
+				/>
+			</ToggleContainer>
+		</ViewerPanelContent>
+	);
+};

@@ -15,11 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { put, select, takeLatest } from 'redux-saga/effects';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ViewerGuiActions } from '@/v4/modules/viewerGui/viewerGui.redux';
-import { OpenTicketAction, TicketsCardActions, TicketsCardTypes } from './ticketsCard.redux';
+import { GoBackFromTicketGroupsAction, OpenTicketAction, TicketsCardActions, TicketsCardTypes } from './ticketsCard.redux';
+import { goToView } from '@/v5/helpers/viewpoint.helpers';
+import { get } from 'lodash';
+import { Viewpoint } from '../tickets.types';
+import { selectViewProps } from './ticketsCard.selectors';
 
 export function* openTicket({ ticketId }: OpenTicketAction) {
 	yield put(TicketsCardActions.setSelectedTicket(ticketId));
@@ -27,6 +31,16 @@ export function* openTicket({ ticketId }: OpenTicketAction) {
 	yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.TICKETS, true));
 }
 
+export function* goBackFromTicketGroups({ ticket }: GoBackFromTicketGroupsAction ) {
+	const viewProps = yield select(selectViewProps);
+	const viewpoint = get(ticket, viewProps.name) as Viewpoint;
+	const { state } = viewpoint || {};
+	goToView({ state });
+	yield put(TicketsCardActions.setOverrides(null));
+	yield put(TicketsCardActions.setCardView(TicketsCardViews.Details));
+}
+
 export default function* ticketsCardSaga() {
 	yield takeLatest(TicketsCardTypes.OPEN_TICKET, openTicket);
+	yield takeLatest(TicketsCardTypes.GO_BACK_FROM_TICKET_GROUPS, goBackFromTicketGroups);
 }

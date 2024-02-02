@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { isV5 } from '@/v4/helpers/isV5';
 import { Button } from '@mui/material';
 import { Field } from 'formik';
 import {
@@ -37,10 +36,10 @@ export const DialogButtons = ({onClickCancel, validateUploadLimit}) => {
 
 			<Field render={ ({ form }) => (
 				<Button
-					color={isV5() ? 'primary' : 'secondary'}
+					color="primary"
 					variant="contained"
 					type="submit"
-					disabled={!form.isValid || form.isValidating || !validateUploadLimit(form.values.files) }
+					disabled={!form.isValid || form.isValidating || !validateUploadLimit(form.values.files) || !form.dirty}
 				>
 					Save
 				</Button>

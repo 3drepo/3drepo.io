@@ -26,24 +26,25 @@ import { useContext } from 'react';
 import { SortedTableComponent, SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import ArrowIcon from '@assets/icons/outlined/arrow-outlined.svg';
-import { TextOverflow } from '@controls/textOverflow';
 import { Header, Headers, Group, NewTicketRow, NewTicketText, IconContainer } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 
-const SortingTableHeader = ({ name = null, children, ...props }) => {
+const SortingTableHeader = ({ name = null, children, hidden = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
 	const isSelected = name === sortingColumn;
 
+	if (hidden) return (null);
+
 	return (
-		<Header {...props} onClick={() => onColumnClick(name)} $selected={isSelected} $selectable={!!name}>
-			<IconContainer $flip={isDescendingOrder} $hidden={!name || !isSelected}>
-				<ArrowIcon />
-			</IconContainer>
-			<TextOverflow>
-				{children}
-			</TextOverflow>
+		<Header {...props} onClick={() => onColumnClick(name)} $selectable={!!name}>
+			{name && isSelected && (
+				<IconContainer $flip={isDescendingOrder}>
+					<ArrowIcon />
+				</IconContainer>
+			)}
+			{children}
 		</Header>
 	);
 };
@@ -79,10 +80,10 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 								<SortingTableHeader name={BaseProperties.TITLE}>
 									<FormattedMessage id="ticketTable.column.header.title" defaultMessage="title" />
 								</SortingTableHeader>
-								<SortingTableHeader name="modelName" width={187} hidden={!showModelName}>
+								<SortingTableHeader name="modelName" width={145} hidden={!showModelName}>
 									<FormattedMessage id="ticketTable.column.header.federationContainer" defaultMessage="federation / container" />
 								</SortingTableHeader>
-								<SortingTableHeader name={`properties.${BaseProperties.CREATED_AT}`} width={80}>
+								<SortingTableHeader name={`properties.${BaseProperties.CREATED_AT}`} width={127}>
 									<FormattedMessage id="ticketTable.column.header.createdAt" defaultMessage="created at" />
 								</SortingTableHeader>
 								<SortingTableHeader name={`properties.${IssueProperties.ASSIGNEES}`} width={96} hidden={!hasProperties}> 
@@ -91,7 +92,7 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 								<SortingTableHeader name={`properties.${BaseProperties.OWNER}`} width={62}>
 									<FormattedMessage id="ticketTable.column.header.owner" defaultMessage="owner" />
 								</SortingTableHeader>
-								<SortingTableHeader name={`properties.${IssueProperties.DUE_DATE}`} width={90} hidden={!hasProperties}>
+								<SortingTableHeader name={`properties.${IssueProperties.DUE_DATE}`} width={147} hidden={!hasProperties}>
 									<FormattedMessage id="ticketTable.column.header.dueDate" defaultMessage="due date" />
 								</SortingTableHeader>
 								<SortingTableHeader name={`properties.${IssueProperties.PRIORITY}`} width={90} hidden={!hasProperties}>

@@ -16,61 +16,94 @@
  */
 
 import { ArrowBack, CardContainer, CardHeader, HeaderButtons } from '@components/viewer/cards/card.styles';
-import { useContext, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { findEditedGroup, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { isEmpty } from 'lodash';
+import { isEmpty, set } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
-import { goToView } from '@/v5/helpers/viewpoint.helpers';
-import { AdditionalProperties, TicketsCardViews } from '../tickets.constants';
+import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
-import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { useSearchParam } from '../../../useSearchParam';
 
-export const TicketDetailsCard = () => {
-	const { teamspace, project, containerOrFederation } = useParams();
-	const [, setTicketId] = useSearchParam('ticketId');
-	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
-	const treeNodesList = TreeHooksSelectors.selectTreeNodesList();
-	const isFederation = modelIsFederation(containerOrFederation);
-	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
-	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const ticket = tickets.find((t) => t._id === ticketId);
-	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
-	const defaultView = ticket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
+enum IndexChange {
+	PREV = -1,
+	NEXT = 1,
+}
 
-	const goBack = () => {
-		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
+export const TicketDetailsCard = () => {
+	const { teamspace, project, containerOrFederation, revision } = useParams();
+	const [, setTicketId] = useSearchParam('ticketId');
+
+	const view = TicketsCardHooksSelectors.selectView();
+	const viewProps = TicketsCardHooksSelectors.selectViewProps();
+
+	const isFederation = modelIsFederation(containerOrFederation);
+	const filteredTickets = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied() as any;
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
+	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
+	const currentIndex = filteredTickets.findIndex((tckt) => tckt._id === ticket._id);
+	const initialIndex = useRef(currentIndex);
+	const listLength = filteredTickets.length;
+	const ticketWasRemoved = currentIndex === -1;
+	const disableCycleButtons = ticketWasRemoved ? listLength < 1 : listLength < 2;
+	const templateValidationSchema = getValidators(template);
+
+	const getUpdatedIndex = (delta: IndexChange) => {
+		let index = ticketWasRemoved ? initialIndex.current : currentIndex;
+		if (ticketWasRemoved && delta === IndexChange.NEXT) {
+			index--;
+		}
+		return (index + delta) % listLength;
 	};
 
-	const changeTicketIndex = (delta: number) => {
-		const currentIndex = tickets.findIndex((tckt) => tckt._id === ticket._id);
-		const updatedId = tickets.slice((currentIndex + delta) % tickets.length)[0]._id;
+	const changeTicketIndex = (delta: IndexChange) => {
+		const updatedId = filteredTickets.at(getUpdatedIndex(delta))._id;
 		TicketsCardActionsDispatchers.setSelectedTicket(updatedId);
 	};
 
-	const goPrev = () => changeTicketIndex(-1);
-	const goNext = () => changeTicketIndex(1);
+	const cycleToPrevTicket = () => changeTicketIndex(IndexChange.PREV);
+	const cycleToNextTicket = () => changeTicketIndex(IndexChange.NEXT);
+
+	const goBack = () => {
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
+		if (!ticketWasRemoved) return;
+		if (initialIndex.current < listLength) {
+			cycleToNextTicket();
+		} else {
+			TicketsCardActionsDispatchers.setSelectedTicket(null);
+		}
+	};
 
 	const formData = useForm({
-		resolver: yupResolver(getValidators(template)),
+		resolver: yupResolver(templateValidationSchema),
 		mode: 'onChange',
 		defaultValues: ticket,
 	});
 
-	const onBlurHandler = () => {
-		const values = dirtyValues(formData.getValues(), formData.formState.dirtyFields);
-		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, formData.formState.errors)));
+	const onBlurHandler = async () => {
+		const formValues = formData.getValues();
+		let errors = {};
+		try {
+			// cannot use formState.errors because the validation for complex objects is completed after
+			// onBlur gets called, so formState.errors for those objects is updated to the previous
+			// onBlur call instead and might claim there are no errors when it's not the case
+			await templateValidationSchema.validateSync(formValues, { abortEarly: false });
+		} catch (yupError) {
+			(yupError?.inner || []).forEach(({ path, message }) => set(errors, path, { message }));
+		}
+		const values = dirtyValues(formValues, formData.formState.dirtyFields);
+		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, errors)));
 
 		const editedGroup = findEditedGroup(validVals, ticket, template);
 		if (editedGroup) {
@@ -90,6 +123,8 @@ export const TicketDetailsCard = () => {
 	};
 
 	useEffect(() => {
+		if (!ticket?._id) return;
+		initialIndex.current = currentIndex;
 		if (!templateAlreadyFetched(template)) {
 			TicketsActionsDispatchers.fetchTemplate(
 				teamspace,
@@ -99,39 +134,28 @@ export const TicketDetailsCard = () => {
 				isFederation,
 			);
 		}
-		TicketsActionsDispatchers.fetchTicket(teamspace, project, containerOrFederation, ticket._id, isFederation);
-		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
+		TicketsActionsDispatchers.fetchTicket(teamspace, project, containerOrFederation, ticket._id, isFederation, revision);
 		setTicketId(ticket._id);
-	}, [ticket._id]);
+	}, [ticket?._id]);
 
 	useEffect(() => {
 		formData.reset(ticket);
 	}, [JSON.stringify(ticket)]);
 
-	useEffect(() => {
-		if (view === TicketDetailsView.Groups) return;
-		goToView(defaultView);
-	}, [ticket._id, treeNodesList, JSON.stringify(defaultView?.camera)]);
-
-	useEffect(() => {
-		if (view === TicketDetailsView.Groups) return;
-		const { state } = defaultView || {};
-		goToView({ state });
-	}, [JSON.stringify(defaultView?.state)]);
-
 	useEffect(() => () => {
+		onBlurHandler();
 		setTicketId();
-		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
 	}, []);
 
+	if (!ticket) return null;
 	return (
 		<CardContainer>
 			<FormProvider {...formData}>
-				{view === TicketDetailsView.Groups
+				{view === TicketsCardViews.DetailsGroups
 					&& (
 						<>
 							<CardHeader>
-								<ArrowBack onClick={() => setDetailViewAndProps(TicketDetailsView.Form)} />
+								<ArrowBack onClick={() => TicketsCardActionsDispatchers.goBackFromTicketGroups(ticket)} />
 								{ticket.title}:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" />
 							</CardHeader>
 							<InputController
@@ -141,15 +165,15 @@ export const TicketDetailsCard = () => {
 							/>
 						</>
 					)}
-				{view === TicketDetailsView.Form
+				{view !== TicketsCardViews.DetailsGroups
 					&& (
 						<>
 							<CardHeader>
 								<ArrowBack onClick={goBack} />
 								{template.code}:{ticket.number}
 								<HeaderButtons>
-									<CircleButton variant="viewer" onClick={goPrev}><ChevronLeft /></CircleButton>
-									<CircleButton variant="viewer" onClick={goNext}><ChevronRight /></CircleButton>
+									<CircleButton variant="viewer" onClick={cycleToPrevTicket} disabled={disableCycleButtons}><ChevronLeft /></CircleButton>
+									<CircleButton variant="viewer" onClick={cycleToNextTicket} disabled={disableCycleButtons}><ChevronRight /></CircleButton>
 								</HeaderButtons>
 							</CardHeader>
 							<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />

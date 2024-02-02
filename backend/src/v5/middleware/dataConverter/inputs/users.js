@@ -20,12 +20,13 @@ const { createResponseCode, templates } = require('../../../utils/responseCodes'
 const Yup = require('yup');
 const config = require('../../../utils/config');
 const { formatPronouns } = require('../../../utils/helper/strings');
+const { getProviderLabel } = require('../../../services/sso/sso.constants');
 const { getUserFromSession } = require('../../../utils/sessions');
+const { templates: mailTemplates } = require('../../../services/mailer/mailer.constants');
 const { post } = require('../../../utils/webRequests');
 const { respond } = require('../../../utils/responder');
-const { singleImageUpload } = require('../multer');
+const { sendEmail } = require('../../../services/mailer');
 const { types } = require('../../../utils/helper/yup');
-const { validateMany } = require('../../common');
 
 const Users = {};
 
@@ -149,16 +150,6 @@ Users.validateUpdateData = async (req, res, next) => {
 	}
 };
 
-const validateAvatarData = async (req, res, next) => {
-	try {
-		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
-
-		await next();
-	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
-	}
-};
-
 Users.validateForgotPasswordData = async (req, res, next) => {
 	const schema = Yup.object().shape({
 		user: Yup.string().required(),
@@ -170,15 +161,27 @@ Users.validateForgotPasswordData = async (req, res, next) => {
 
 		try {
 			const usernameOrEmail = req.body.user;
-			const { user, customData: { sso } } = await getUserByUsernameOrEmail(usernameOrEmail, { user: 1, _id: 0, 'customData.sso': 1 });
+			const { user, customData: { sso, email, firstName } } = await getUserByUsernameOrEmail(usernameOrEmail, {
+				user: 1,
+				_id: 0,
+				'customData.sso': 1,
+				'customData.firstName': 1,
+				'customData.email': 1,
+			});
 
 			if (sso) {
+				await sendEmail(mailTemplates.FORGOT_PASSWORD_SSO.name, email,
+					{
+						username: user,
+						firstName,
+						ssoType: getProviderLabel(sso.type),
+					});
 				throw templates.unknown;
 			}
 
 			req.body.user = user;
 			next();
-		} catch {
+		} catch (err) {
 			respond(req, res, templates.ok);
 		}
 	} catch (err) {
@@ -315,7 +318,5 @@ Users.validateVerifyData = async (req, res, next) => {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
-
-Users.validateAvatarFile = validateMany([singleImageUpload('file'), validateAvatarData]);
 
 module.exports = Users;

@@ -33,9 +33,11 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	setSelectedDate: ['date'],
 	setSelectedDateSuccess: ['date'],
 	setLastSelectedDateSuccess: ['date'],
+	setOpenOnTodaySuccess: ['openOnToday'],
 	fetchFrame: ['date'],
 	prefetchFrames: [],
 	setStateDefinition: ['stateId', 'stateDefinition'],
+	setSelectedStateDefinition: ['stateDefinition'],
 	setStepInterval: ['stepInterval'],
 	setStepScale: ['stepScale'],
 	fetchActivitiesDefinitions: ['sequenceId'],
@@ -44,6 +46,9 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	showSequenceDate: ['date'],
 	handleTransparenciesVisibility: ['transparencies'],
 	restoreModelDefaultVisibility: [],
+	updateSelectedStateDefinition: [],
+	clearColorOverrides: [],
+	clearTransformations: [],
 	reset: []
 }, { prefix: 'SEQUENCES/' });
 
@@ -56,19 +61,32 @@ export interface ISequance {
 	model: string;
 }
 
+type IDefinition = {
+	value: number[],
+	shared_id: string[],
+};
+
+export type IStateDefinitions = {
+	transformation: IDefinition[],
+	color: IDefinition[],
+	transparency: IDefinition[],
+};
+
 export interface ISequencesState {
 	sequences: null | ISequance[];
 	selectedSequence: null | string;
 	lastSelectedSequence: null | string;
 	selectedDate: null | Date;
 	lastSelectedDate: null | Date;
-	stateDefinitions: any;
+	stateDefinitions: Record<string, IStateDefinitions>;
+	selectedStateDefinition: Record<string, IStateDefinitions>;
 	statesPending: boolean;
 	stepInterval: number;
 	stepScale: STEP_SCALE;
 	hiddenGeometryVisible: boolean;
 	activities: any;
 	activitiesPending: any;
+	openOnToday: boolean;
 }
 
 export const INITIAL_STATE: ISequencesState = {
@@ -78,12 +96,14 @@ export const INITIAL_STATE: ISequencesState = {
 	selectedDate: null,
 	lastSelectedDate: null,
 	stateDefinitions: {},
+	selectedStateDefinition: {},
 	statesPending: false,
 	stepInterval: 1,
 	stepScale: STEP_SCALE.DAY,
 	hiddenGeometryVisible: true,
 	activities: {},
 	activitiesPending: true,
+	openOnToday: true,
 };
 
 export const fetchSequenceSuccess = (state = INITIAL_STATE, { sequence }) => {
@@ -141,6 +161,10 @@ export const setSelectedSequenceSuccess = (state = INITIAL_STATE, { sequenceId }
 	return {...state, selectedSequence: sequenceId, lastSelectedSequence };
 };
 
+export const setOpenOnTodaySuccess =  (state = INITIAL_STATE, { openOnToday }) => {
+	return {...state, openOnToday };
+};
+
 export const setSelectedDateSuccess =  (state = INITIAL_STATE, { date }) => {
 	return {...state, selectedDate: date };
 };
@@ -151,6 +175,10 @@ export const setLastSelectedDateSuccess =  (state = INITIAL_STATE, { date }) => 
 
 export const setStateDefinition = (state = INITIAL_STATE, { stateId, stateDefinition}) => {
 	return {...state, stateDefinitions: {...state.stateDefinitions, [stateId]: stateDefinition}};
+};
+
+export const setSelectedStateDefinition = (state = INITIAL_STATE, { stateDefinition }) => {
+	return { ...state, selectedStateDefinition: stateDefinition };
 };
 
 export const setStepInterval = (state = INITIAL_STATE, { stepInterval }) => {
@@ -171,9 +199,11 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[SequencesTypes.UPDATE_SEQUENCE_SUCCESS]: updateSequenceSuccess,
 	[SequencesTypes.FETCH_ACTIVITIES_DEFINITIONS_SUCCESS]: fetchActivitiesDefinitionsSuccess,
 	[SequencesTypes.SET_ACTIVITIES_PENDING]: setActivitiesPending,
+	[SequencesTypes.SET_OPEN_ON_TODAY_SUCCESS]: setOpenOnTodaySuccess,
 	[SequencesTypes.SET_SELECTED_DATE_SUCCESS]: setSelectedDateSuccess,
 	[SequencesTypes.SET_LAST_SELECTED_DATE_SUCCESS]: setLastSelectedDateSuccess,
 	[SequencesTypes.SET_STATE_DEFINITION]: setStateDefinition,
+	[SequencesTypes.SET_SELECTED_STATE_DEFINITION]: setSelectedStateDefinition,
 	[SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS]: setSelectedSequenceSuccess,
 	[SequencesTypes.SET_STEP_INTERVAL]: setStepInterval,
 	[SequencesTypes.SET_STEP_SCALE]: setStepScale,

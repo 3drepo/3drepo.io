@@ -19,7 +19,6 @@ import copy from 'copy-to-clipboard';
 import { get } from 'lodash';
 import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import { generatePath } from 'react-router-dom';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { getAPIUrl } from '@/v4/services/api/default';
@@ -31,7 +30,6 @@ import { createGroupsFromViewpoint, generateViewpoint,
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
-import { GroupsActions } from '../groups';
 import { IssuesActions } from '../issues';
 import { ModelActions } from '../model';
 import { selectCurrentRevisionId } from '../model';
@@ -184,6 +182,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 		yield put(TreeActions.setHiddenGeometryVisible(viewpoint.hideIfc === false));
 
 		yield Viewer.updateClippingPlanes(clippingPlanes, teamspace, modelId);
+		yield put(ViewerGuiActions.setClipEdit(false));
 
 		yield waitForTreeToBeReady();
 		yield put(ViewpointsActions.fetchViewpointGroups(teamspace, modelId, view));
@@ -196,7 +195,7 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 		}
 
 		if (viewpoint.override_groups) {
-			yield put(GroupsActions.clearColorOverrides());
+			yield put(ViewerGuiActions.clearColorOverrides());
 		}
 
 		yield put(TreeActions.clearCurrentlySelected());
@@ -219,21 +218,14 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 }
 
 export function * deselectViewsAndLeaveClipping() {
-	const selectedViewpoint  = yield select(selectSelectedViewpoint);
-	yield put(IssuesActions.goToIssue(null));
-	yield take('@@router/LOCATION_CHANGE');
-	yield put(RisksActions.goToRisk(null));
-	yield take('@@router/LOCATION_CHANGE');
-
-	yield all([
-			put(IssuesActions.setActiveIssue({}, null, true)),
-			put(RisksActions.setActiveRisk({}, null, true)),
-			put(ViewpointsActions.setActiveViewpoint(null))]);
+	const selectedViewpoint = yield select(selectSelectedViewpoint);
+	yield put(ViewpointsActions.setActiveViewpoint(null));
 
 	if (selectedViewpoint) {
+		const { clippingPlanes } = selectedViewpoint;
 		yield take(ViewpointsTypes.SHOW_VIEWPOINT);
-		if (selectedViewpoint.clippingPlanes) {
-			const viewpoint = {viewpoint: {clippingPlanes: selectedViewpoint.clippingPlanes }};
+		if (clippingPlanes) {
+			const viewpoint = { viewpoint: { clippingPlanes } };
 			yield put(ViewpointsActions.showViewpoint(null, null, viewpoint));
 		}
 	}
@@ -286,6 +278,27 @@ export function* cacheGroupsFromViewpoint({ viewpoint,  groupsData }) {
 	yield all(groups.map((group) => put(ViewpointsActions.fetchGroupSuccess(group))));
 }
 
+export function* clearColorOverrides() {
+	const viewpoint = yield select(selectSelectedViewpoint);
+	if (viewpoint?.override_groups?.length) {
+		yield put(ViewpointsActions.setSelectedViewpoint({
+			...viewpoint,
+			override_groups: [],
+		}));
+	}
+}
+
+export function* clearTransformations() {
+	const viewpoint = yield select(selectSelectedViewpoint);
+	if (!viewpoint?.transformation_groups?.length) {
+		return;
+	}
+	yield put(ViewpointsActions.setSelectedViewpoint({
+		...viewpoint,
+		transformation_groups: [],
+	}));
+}
+
 export function* setActiveViewpoint({ teamspace, modelId, view }) {
 	try {
 		if (view) {
@@ -318,7 +331,7 @@ export function* shareViewpointLink({ teamspace, modelId, viewpointId, project, 
 		model: modelId,
 		revision,
 	};
-	const basePath = generatePath(isV5() ? ROUTES.V5_MODEL_VIEWER : ROUTES.MODEL_VIEWER, pathParams);
+	const basePath = generatePath(ROUTES.V5_MODEL_VIEWER, pathParams);
 	const url = prefixBaseDomain(`${basePath}?viewId=${viewpointId}`);
 
 	copy(url);
@@ -335,6 +348,16 @@ export function* setDefaultViewpoint({ teamspace, modelId, view }) {
 	}
 }
 
+export function* clearDefaultViewpoint({ teamspace, modelId }) {
+	try {
+		yield API.editModelSettings(teamspace, modelId, { defaultView: null });
+		yield put(ModelActions.updateSettingsSuccess({ defaultView: null }));
+		yield put(SnackbarActions.show('View unset as home view'));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('unset the home viewpoint', ''));
+	}
+}
+
 export default function* ViewpointsSaga() {
 	yield takeEvery(ViewpointsTypes.FETCH_VIEWPOINTS, fetchViewpoints);
 	yield takeEvery(ViewpointsTypes.CREATE_VIEWPOINT, createViewpoint);
@@ -347,8 +370,11 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.SHOW_VIEWPOINT, showViewpoint);
 	yield takeEvery(ViewpointsTypes.SHARE_VIEWPOINT_LINK, shareViewpointLink);
 	yield takeEvery(ViewpointsTypes.SET_DEFAULT_VIEWPOINT, setDefaultViewpoint);
+	yield takeEvery(ViewpointsTypes.CLEAR_DEFAULT_VIEWPOINT, clearDefaultViewpoint);
 	yield takeEvery(ViewpointsTypes.DESELECT_VIEWS_AND_LEAVE_CLIPPING, deselectViewsAndLeaveClipping);
 	yield takeEvery(ViewpointsTypes.CACHE_GROUPS_FROM_VIEWPOINT, cacheGroupsFromViewpoint);
 	yield takeEvery(ViewpointsTypes.SHOW_PRESET, showPreset);
 	yield takeEvery(ViewpointsTypes.FETCH_VIEWPOINT_GROUPS, fetchViewpointGroups);
+	yield takeEvery(ViewpointsTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
+	yield takeEvery(ViewpointsTypes.CLEAR_TRANSFORMATIONS, clearTransformations);
 }

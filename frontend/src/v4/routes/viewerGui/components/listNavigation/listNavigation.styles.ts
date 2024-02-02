@@ -22,19 +22,19 @@ import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg'
 
 export const Container = styled.div``;
 
-export const StyledIconButton = styled(IconButton)`
+export const StyledIconButton = styled(IconButton)<{ disabled?: boolean }>`
 	&& {
 		padding: 6px;
 	}
 `;
 
-export const SkipPreviousIconV5 = styled(ChevronIcon)`
+export const SkipPreviousIcon = styled(ChevronIcon)`
 	transform: rotate(90deg);
 	width: 14px;
 	height: 14px;
 `;
 
-export const SkipNextIconV5 = styled(ChevronIcon)`
+export const SkipNextIcon = styled(ChevronIcon)`
 	transform: rotate(-90deg);
 	width: 14px;
 	height: 14px;

@@ -18,7 +18,6 @@ import { SyntheticEvent } from 'react';
 
 import { IRevision } from '@/v5/store/revisions/revisions.types';
 import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { formatDate } from '@/v5/services/intl';
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@mui/material';
@@ -28,6 +27,7 @@ import { Container, DownloadButton, DownloadIcon, RevisionsListItemTag } from '.
 import { RevisionsListItemAuthor } from './revisionsListItemAuthor/revisionsListItemAuthor.component';
 import { RevisionsListItemText } from './revisionsListItemText/revisionsListItemText.component';
 import { RevisionsListItemButton } from './revisionsListItemButton/revisionsListItemButton.component';
+import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 
 type IRevisionsListItem = {
 	revision: IRevision;
@@ -38,6 +38,7 @@ export const RevisionsListItem = ({ revision, containerId }: IRevisionsListItem)
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const { timestamp, desc, author, tag, void: voidStatus, format } = revision;
+	const disabled = voidStatus;
 
 	const toggleVoidStatus = (e: SyntheticEvent) => {
 		e.preventDefault();
@@ -52,8 +53,8 @@ export const RevisionsListItem = ({ revision, containerId }: IRevisionsListItem)
 	const hasCollaboratorAccess = ContainersHooksSelectors.selectHasCollaboratorAccess(containerId);
 
 	return (
-		<Container to={viewerRoute(teamspace, project, containerId, revision)}>
-			<RevisionsListItemText width={130} tabletWidth={94}> {formatDate(timestamp)} </RevisionsListItemText>
+		<Container to={disabled ? null : viewerRoute(teamspace, project, containerId, revision)} disabled={disabled}>
+			<RevisionsListItemText width={140} tabletWidth={94}> {formatShortDateTime(timestamp)} </RevisionsListItemText>
 			<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={author} />
 			<RevisionsListItemTag width={150} tabletWidth={300}> {tag} </RevisionsListItemTag>
 			<RevisionsListItemText hideWhenSmallerThan={1140}> {desc} </RevisionsListItemText>

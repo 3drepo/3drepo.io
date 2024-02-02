@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { RgbArray } from '@controls/inputs/colorPicker/colorPicker.helpers';
+
 export type PropertyTypeDefinition = 'text' | 'longText' | 'boolean' | 'number' | 'date' | 'view' | 'manyOf' | 'oneOf' | 'image' | 'coords' | 'measurements';
 
 export interface PropertyDefinition {
@@ -46,17 +48,39 @@ export interface TemplateModule {
 	properties: PropertyDefinition[];
 }
 
+export type IPinColorMapping = {
+	property: {
+		name: string,
+		module?: string,
+	}
+	mapping: [
+		{
+			default: RgbArray;
+		},
+		{
+			value: any;
+			color: RgbArray;
+		}[],
+	]
+};
+
+export type IPinSchema = {
+	name: string;
+	type: 'coords';
+	color: RgbArray | IPinColorMapping;
+};
+
 export interface ITemplate {
 	_id: string;
 	name: string;
 	code: string;
-	properties: PropertyDefinition[];
+	properties?: PropertyDefinition[];
 	modules?: TemplateModule[];
-	config: {
+	config?: {
 		comments: boolean;
 		defaultView: boolean;
 		issueProperties: boolean;
-		pin: boolean;
+		pin: boolean | IPinSchema;
 	};
 }
 
@@ -111,6 +135,7 @@ export interface IGroupRule {
 export type Group = {
 	_id?: string,
 	name: string,
+	ticket?: string,
 	description?: string,
 	objects?: { container: string, _ids: string[] }[],
 	rules?: IGroupRule[],
@@ -128,12 +153,18 @@ export enum ViewpointGroupOverrideType {
 	TRANSFORMED,
 }
 
-type ColorAndOpacity = {
+export type TransformMatrix = [number, number, number, number,
+	number, number, number, number,
+	number, number, number, number,
+	number, number, number, number];
+
+type GroupProperties = {
 	color?: [number, number, number],
 	opacity?: number,
+	transformation?: TransformMatrix
 };
 
-export type GroupOverride = ColorAndOpacity & {
+export type GroupOverride = GroupProperties & {
 	prefix?: string[],
 	group: string | Group,
 	key?: number;
@@ -157,10 +188,17 @@ export type IGroupSettingsForm = GroupOverride & { group: Group };
 
 type MeshIdColorDict = Record<string, string>;
 type MeshIdTransparencyDict = Record<string, number>;
+export type MeshIdTransformDict = Record<string, TransformMatrix>;
 
 export type OverridesDicts = {
 	overrides: MeshIdColorDict,
-	transparencies: MeshIdTransparencyDict
+	transparencies: MeshIdTransparencyDict,
 };
 
 export type TicketWithModelIdAndName = ITicket & { modelId: string; modelName: string };
+
+export type ITicketsFilters = {
+	complete: boolean,
+	templates: string[],
+	queries: string[],
+};

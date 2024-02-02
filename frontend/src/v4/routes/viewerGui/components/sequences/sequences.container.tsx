@@ -24,11 +24,12 @@ import { ActivitiesActions } from '../../../../modules/activities';
 import { LegendActions } from '../../../../modules/legend';
 import {
 	selectActivitiesPending, selectCurrentActivities, selectEndDate, selectFrames, selectIsLoadingFrameState,
+	selectSelectedDate,
 	selectSelectedEndingDate, selectSelectedFrameColors, selectSelectedSequence, selectSelectedStartingDate,
 	selectSequences, selectStartDate, selectStepInterval, selectStepScale, SequencesActions,
 } from '../../../../modules/sequences';
 import { selectDraggablePanels, selectRightPanels, ViewerGuiActions } from '../../../../modules/viewerGui';
-import { selectIsLoadingSequenceViewpoint, ViewpointsActions } from '../../../../modules/viewpoints';
+import { selectIsLoadingSequenceViewpoint } from '../../../../modules/viewpoints';
 import { Sequences } from './sequences.component';
 
 const mapStateToProps = createStructuredSelector({
@@ -36,7 +37,8 @@ const mapStateToProps = createStructuredSelector({
 	startDate: selectStartDate,
 	endDate: selectEndDate,
 	frames: selectFrames,
-	selectedDate: selectSelectedStartingDate,
+	selectedDate: selectSelectedDate,
+	selectedStartDate: selectSelectedStartingDate,
 	selectedEndingDate: selectSelectedEndingDate,
 	colorOverrides: selectSelectedFrameColors,
 	stepInterval: selectStepInterval,
@@ -60,8 +62,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetLegendPanel: LegendActions.resetPanel,
 	fetchActivityDetails: ActivitiesActions.fetchDetails,
 	setPanelVisibility: ViewerGuiActions.setPanelVisibility,
-	deselectViewsAndLeaveClipping: ViewpointsActions.deselectViewsAndLeaveClipping,
-	setActiveViewpoint: ViewpointsActions.setActiveViewpoint,
+	clearTransformations: ViewerGuiActions.clearTransformations,
 }, dispatch);
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Sequences));

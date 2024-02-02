@@ -21,8 +21,8 @@ import { useForm } from 'react-hook-form';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { desanitiseMessage, sanitiseMessage, addReply } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { EditCommentButtons, EditCommentContainer, EditCommentInput } from './editComment.styles';
-import { ErrorTicketButton, PrimaryTicketButton } from '../../../../../ticketButton/ticketButton.styles';
-import { CommentReply } from '../../commentReply/commentReply.component';
+import { TicketButton } from '../../../../../ticketButton/ticketButton.styles';
+import { CommentNonMessageContent } from '../../commentNonMessageContent/commentNonMessageContent.component';
 
 type EditCommentProps = Pick<ITicketComment, '_id' | 'author' | 'message' | 'images'> & {
 	onClose: () => void;
@@ -50,7 +50,11 @@ export const EditComment = ({ _id, message, images, author, metadata, onEdit, on
 	return (
 		<>
 			<EditCommentContainer data-author={author}>
-				<CommentReply {...metadata} />
+				<CommentNonMessageContent
+					images={images}
+					metadata={metadata}
+					isCurrentUserComment={false}
+				/>
 				<EditCommentInput
 					name="editedMessage"
 					control={control}
@@ -58,12 +62,12 @@ export const EditComment = ({ _id, message, images, author, metadata, onEdit, on
 				/>
 			</EditCommentContainer>
 			<EditCommentButtons>
-				<ErrorTicketButton onClick={onClose}>
+				<TicketButton variant="error" onClick={onClose}>
 					<CancelIcon />
-				</ErrorTicketButton>
-				<PrimaryTicketButton onClick={updateMessage} disabled={!canUpdate}>
+				</TicketButton>
+				<TicketButton variant="primary" onClick={updateMessage} disabled={!canUpdate}>
 					<TickIcon />
-				</PrimaryTicketButton>
+				</TicketButton>
 			</EditCommentButtons>
 		</>
 	);

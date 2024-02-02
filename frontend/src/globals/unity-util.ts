@@ -125,8 +125,6 @@ export class UnityUtil {
 
 	public static verbose = false;
 
-	public static usingBetaViewer = false;
-
 	/**
 	 * Contains a list of calls to make during the Unity Update method. One
 	 * call is made per Unity frame.
@@ -141,12 +139,11 @@ export class UnityUtil {
 	* @param progressCallback
 	* @param modelLoaderProgressCallback
 	*/
-	public static init(errorCallback: any, progressCallback: any, modelLoaderProgressCallback: any, useBetaViewer = false) {
+	public static init(errorCallback: any, progressCallback: any, modelLoaderProgressCallback: any) {
 		UnityUtil.errorCallback = errorCallback;
 		UnityUtil.progressCallback = progressCallback;
 		UnityUtil.modelLoaderProgressCallback = modelLoaderProgressCallback;
-		UnityUtil.usingBetaViewer = useBetaViewer;
-		UnityUtil.unityBuildSubdirectory = useBetaViewer ? '/unity/beta/Build' : '/unity/Build'; // These directories are determined by webpack.common.config.js
+		UnityUtil.unityBuildSubdirectory = '/unity/Build'; // These directories are determined by webpack.common.config.js
 		UnityUtil.setUnityMemory(0); // This forces the browser to update the viewer with the autodetected memory. If the user has set it explicitly in viewer settings, it will be overridden later when they are processed.
 	}
 
@@ -486,9 +483,9 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
-	public static clipUpdated(nPlanes) {
-		if (UnityUtil.viewer && UnityUtil.viewer.numClipPlanesUpdated) {
-			UnityUtil.viewer.numClipPlanesUpdated(nPlanes);
+	public static clipUpdated() {
+		if (UnityUtil.viewer && UnityUtil.viewer.clipUpdated) {
+			UnityUtil.viewer.clipUpdated();
 		}
 	}
 
@@ -642,14 +639,9 @@ export class UnityUtil {
 	 * Tells the viewer the maximum amount of memory it can expect to be able
 	 * to allocate for its heap. 0 means the maximum amount that the browser
 	 * can handle, determined by hueristics in this method.
+	 * @category Streaming
 	 */
 	public static setUnityMemory(maxMemoryInMb: number) {
-		// This method is only supported on the 4GB viewer. The previous viewer
-		// will always use 2GB.
-		if (!this.usingBetaViewer) {
-			return;
-		}
-
 		let memory = Number(maxMemoryInMb);
 		if (memory === 0) {
 			// If the user has not set the memory explicitly, then attempt to
@@ -673,7 +665,7 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Move the pivot point to eh centre of the objects provided
+	 * Move the pivot point to the centre of the objects provided
 	 * @category Navigations
 	 * @param meshIDs - array of json objects each recording { model: <account.modelID>, meshID: [array of mesh IDs] }
 	 */
@@ -838,6 +830,19 @@ export class UnityUtil {
 		UnityUtil.toUnity('DiffToolRenderTransAsDefault', undefined, undefined);
 	}
 
+	// The following methods are concerned with the clip tool. There are three
+	// types of method.
+	// - The start/stop methods turn the tool on and off and change the mode.
+	// - The clipTool.. methods should be hooked up the equivalent buttons on
+	// the toolbar.
+	// - The set/scale/enable methods adjust the visuals and behaviour for fine
+	// tuning; they are not intended to be exposed in the UI, and are not saved.
+
+	// Some of the toolbar buttons will be stateful, such as clipToolRealign.
+	// Use the `clipUpdated` callback to detect when the planes have been placed
+	// in this mode (do not use clipBroadcast - that is only called after
+	// setting the planes from the frontend).
+
 	/**
 	* Start clip editing in single plane mode
 	* @category Clipping Plane
@@ -868,6 +873,117 @@ export class UnityUtil {
 	*/
 	public static stopClipEdit() {
 		UnityUtil.toUnity('StopClipEdit', undefined, undefined);
+	}
+
+	/**
+	* Move the clipping planes to the current selection (highlighted objects).
+	* In single plane mode this moves along the normal so that the selected
+	* object(s) are fully visible.
+	* In six plane mode, the planes move to encompass the selection exactly,
+	* retaining their orientation.
+	* @category Clipping Plane
+	*/
+	public static clipToolClipToSelection() {
+		UnityUtil.toUnity('ClipToolClipToSelection', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Puts the clip tool in Realign mode. In this mode the plane (or front of
+	 * the box in six plane mode) will snap to the position and orientation of
+	 * the first surface to be clicked. If the background is clicked, the planes
+	 * or plane will reset to the scene bounding box.
+	 * @category Clipping Plane
+	 */
+	public static clipToolRealign() {
+		UnityUtil.toUnity('ClipToolRealign', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Flip the clip plane or box
+	 * @category Clipping Plane
+	 */
+	public static clipToolFlip() {
+		UnityUtil.toUnity('ClipToolFlip', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Hide all the clip planes, and reset them to the scene bounding box
+	 * @category Clipping Plane
+	 */
+	public static clipToolDelete() {
+		UnityUtil.toUnity('ClipToolDelete', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Puts the Clip Planes Gizmo into Translate mode.
+	 * @category Clipping Plane
+	 */
+	public static clipToolTranslate() {
+		UnityUtil.toUnity('ClipToolTranslate', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Puts the Clip Planes Gizmo in Rotate mode.
+	 * @category Clipping Plane
+	 */
+	public static clipToolRotate() {
+		UnityUtil.toUnity('ClipToolRotate', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Puts the Clip Planes Gizmo in Scale mode.
+	 * @category Clipping Plane
+	 */
+	public static clipToolScale() {
+		UnityUtil.toUnity('ClipToolScale', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Enables the inbuilt Clip Tool Toolbar. The toolbar is always disabled by
+	 * default. This may need to be called on embedded viewers that don't have
+	 * the full frontend UX.
+	 * @category Clipping Plane
+	 */
+	public static enableClipToolbar() {
+		UnityUtil.toUnity('EnableClipToolToolbar', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Disables the inbuilt Clip Tool Toolbar, if it was previously enabled via
+	 * enableClipToolbar.
+	 * @category Clipping Plane
+	 */
+	public static disableClipToolbar() {
+		UnityUtil.toUnity('DisableClipToolToolbar', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Increase or decrease the Gizmo Size on screen by the amount provided (in percent)
+	 * @category Clipping Plane
+	 */
+	public static scaleClipGizmo(percent: number) {
+		UnityUtil.toUnity('ScaleClipGizmo', UnityUtil.LoadingState.VIEWER_READY, percent);
+	}
+
+	/**
+	* Set the coefficient linking the change in Clip Box Size to proportion
+	* of the screen covered by the cursor when scaling in all three axes.
+	* @category Clipping Plane
+	*/
+	public static setClipScaleSpeed(speed: number) {
+		UnityUtil.toUnity('SetClipScaleSpeed', UnityUtil.LoadingState.VIEWER_READY, speed);
+	}
+
+	/**
+	 * Sets the coefficient that defines how much the clip box should be
+	 * oversized when using the clip to selection function. The box is
+	 * oversized to prevent the clip border being immediately visible.
+	 * Setting this to 1 sets it to the default. Above 1 makes it larger
+	 * and below 1 makes it smaller. 0 disables the feature.
+	 * @category Clipping Plane
+	 */
+	public static setClipSelectionBoxScalar(scalar: number) {
+		UnityUtil.toUnity('SetClipSelectionBoxScalar', UnityUtil.LoadingState.VIEWER_READY, scalar);
 	}
 
 	/**
@@ -940,6 +1056,7 @@ export class UnityUtil {
 	/**
 	 * Remove a particular measurement.
 	 * @param uuid - The measurement id of the measurement to be removed
+	 * @category Measuring tool
 	 */
 	public static clearMeasureToolMeasurement(uuid) {
 		UnityUtil.toUnity('ClearMeasureToolMeasurement', undefined, uuid);
@@ -948,6 +1065,7 @@ export class UnityUtil {
 	/**
 	 * Set color of a particular measurement.
 	 * @param uuid - The measurement id of the measurement that will change color
+	 * @category Measuring tool
 	 */
 	public static setMeasureToolMeasurementColor(uuid, color) {
 		UnityUtil.toUnity('SetMeasureToolMeasurementColor', undefined, JSON.stringify({ uuid, color }));
@@ -956,6 +1074,7 @@ export class UnityUtil {
 	/**
 	 * Set color of a particular measurement.
 	 * @param uuid - The measurement id of the measurement that will change name
+	 * @category Measuring tool
 	 */
 	public static setMeasureToolMeasurementName(uuid, name) {
 		UnityUtil.toUnity('SetMeasureToolMeasurementName', undefined, JSON.stringify({ uuid, name }));
@@ -970,41 +1089,75 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Disnable measure display mode to xyz.
+	 * Disable measure display mode to xyz.
 	 * @category Measuring tool
 	 */
 	public static disableMeasureToolXYZDisplay() {
 		UnityUtil.toUnity('DisableMeasureToolXYZDisplay');
 	}
 
+	/**
+	 * Add a specific measurment to the scene.
+	 * @category Measuring tool
+	 */
 	public static addMeasurement(measurement) {
 		UnityUtil.toUnity('AddMeasurement', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(measurement));
 	}
 
+	/**
+	 * Newly created measurements do not have labels.
+	 * @category Measuring tool
+	 */
 	public static hideNewMeasurementsLabels() {
 		UnityUtil.toUnity('HideNewMeasurementsLabels');
 	}
 
+	/**
+	 * Newly created measurements have labels visible
+	 * @category Measuring tool
+	 */
 	public static showNewMeasurementsLabels() {
 		UnityUtil.toUnity('ShowNewMeasurementsLabels');
 	}
 
+	/**
+	 * Select a measurement
+	 * @category Measuring tool
+	 */
 	public static selectMeasurement(id: string) {
 		UnityUtil.toUnity('SelectMeasurement', UnityUtil.LoadingState.MODEL_LOADING, id);
 	}
 
+	/**
+	 * Deselect a measurement
+	 * @category Measuring tool
+	 */
 	public static deselectMeasurement(id: string) {
 		UnityUtil.toUnity('DeselectMeasurement', UnityUtil.LoadingState.MODEL_LOADING, id);
 	}
 
+	/**
+	 * Sets the priority of a model namespace (making it higher or lower than
+	 * the others). This can be used for example to ensure a model always loads
+	 * fully, at the expense of others.
+	 * @category Streaming
+	 */
 	public static setStreamingModelPriority(modelNamespace: string, priority: number) {
 		UnityUtil.toUnity('SetStreamingModelPriority', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({ modelNamespace, priority }));
 	}
 
+	/**
+	 * Adjusts the correction factor applied to mesh size estimates to account for Unity overheads.
+	 * @category Streaming
+	 */
 	public static setStreamingMeshFactor(factor: number) {
 		UnityUtil.toUnity('SetStreamingMeshFactor', UnityUtil.LoadingState.VIEWER_READY, Number(factor));
 	}
 
+	/**
+	 * Adjusts how the visibilty of a Supermesh affects its priority when deciding whether or not to load it.
+	 * @category Streaming
+	 */
 	public static setStreamingFovWeight(weight: number) {
 		UnityUtil.toUnity('SetStreamingFovWeight', UnityUtil.LoadingState.VIEWER_READY, Number(weight));
 	}
@@ -1165,10 +1318,36 @@ export class UnityUtil {
 		UnityUtil.toUnity('DropBookmarkPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
 	}
 
+	/**
+	 * Add a ticket pin
+	 * @category Pins
+	 * @param id - Identifier for the pin
+	 * @param position - point in space where the pin should generate
+	 * @param normal - normal vector for the pin (note: this is no longer used)
+	 * @param colour - RGB value for the colour of the pin
+	 */
+	public static dropTicketPin(id: string, position: number[], normal: number[], colour: number[]) {
+		const params = {
+			id,
+			position,
+			normal,
+			color: colour,
+		};
+		UnityUtil.toUnity('DropTicketPin', UnityUtil.LoadingState.MODEL_LOADING, JSON.stringify(params));
+	}
+
+	/**
+	 * Select a Pin by Id
+	 * @category Pins
+	 */
 	public static selectPin(id: string) {
 		UnityUtil.toUnity('SelectPin', UnityUtil.LoadingState.MODEL_LOADING, id);
 	}
 
+	/**
+	 * Deselect a selected Pin by Id
+	 * @category Pins
+	 */
 	public static deselectPin(id: string) {
 		UnityUtil.toUnity('DeselectPin', UnityUtil.LoadingState.MODEL_LOADING, id);
 	}
@@ -1354,10 +1533,18 @@ export class UnityUtil {
 		});
 	}
 
+	/**
+	 * Enables the Pause Rendering feature of the viewer - when the camera is not moving, the main scene will not be redrawn.
+	 * @category Configurations
+	 */
 	public static pauseRendering() {
 		UnityUtil.toUnity('PauseRendering', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
+	/**
+	 * Disables the Pause Rendering feature of the viewer - the entire scene will render every frame regardless of camera behaviour.
+	 * @category Configurations
+	 */
 	public static resumeRendering() {
 		UnityUtil.toUnity('ResumeRendering', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
@@ -1750,6 +1937,7 @@ export class UnityUtil {
 
 	/**
 	 * Use orthographic view
+	 * @category Configurations
 	 */
 	public static useOrthographicProjection() {
 		UnityUtil.toUnity('UseOrthographicProjection', UnityUtil.LoadingState.MODEL_LOADING, undefined);
@@ -1757,6 +1945,7 @@ export class UnityUtil {
 
 	/**
 	 * Use perspective view
+	 * @category Configurations
 	 */
 	public static usePerspectiveProjection() {
 		UnityUtil.toUnity('UsePerspectiveProjection', UnityUtil.LoadingState.MODEL_LOADING, undefined);
@@ -1813,6 +2002,7 @@ export class UnityUtil {
 
 	/**
 	 * Show progress bar while model is loading
+	 * @category Configurations
 	 */
 	public static showProgressBar() {
 		UnityUtil.toUnity('ShowProgressBar', UnityUtil.LoadingState.VIEWER_READY, undefined);
@@ -1820,6 +2010,7 @@ export class UnityUtil {
 
 	/**
 	 * Hide progress bar while model is loading
+	 * @category Configurations
 	 */
 	public static hideProgressBar() {
 		UnityUtil.toUnity('HideProgressBar', UnityUtil.LoadingState.VIEWER_READY, undefined);
@@ -1918,11 +2109,21 @@ export class UnityUtil {
 	 * @param account - name of teamspace
 	 * @param model - name of model
 	 */
-	public static updateClippingPlanes(clipPlane: object, requireBroadcast: boolean, account?: string, model?: string) {
+	public static updateClippingPlanes(clipPlane: any, requireBroadcast: boolean, account?: string, model?: string) {
 		const param: any = {};
 		param.clip = clipPlane;
 		if (account && model) {
 			param.nameSpace = `${account}.${model}`;
+		}
+		if (!clipPlane?.length) {
+			UnityUtil.viewer.stopClipEdit();
+			UnityUtil.viewer.setClipMode(null);
+		}
+		if (clipPlane?.length === 1) {
+			UnityUtil.viewer.setClipMode('SINGLE');
+		}
+		if (clipPlane?.length === 6) {
+			UnityUtil.viewer.setClipMode('BOX');
 		}
 		param.requiresBroadcast = requireBroadcast;
 		UnityUtil.toUnity('UpdateClip', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
@@ -1935,6 +2136,7 @@ export class UnityUtil {
 	 */
 	public static disableClippingPlanes() {
 		UnityUtil.toUnity('DisableClip', undefined, undefined);
+		UnityUtil.viewer.stopClipEdit();
 	}
 
 	/**
@@ -1945,6 +2147,10 @@ export class UnityUtil {
 		UnityUtil.toUnity('ZoomToHighlightedMeshes', UnityUtil.LoadingState.MODEL_LOADING, undefined);
 	}
 
+	/**
+	 * Zoom to a set of objects specified by their Ids
+	 * @category Configurations
+	 */
 	public static zoomToObjects(meshEntries: object[]) {
 		UnityUtil.toUnity('ZoomToObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(meshEntries));
 	}
@@ -2050,13 +2256,17 @@ export class UnityUtil {
 	}
 
 	/** How many non-trivial jobs the viewer can complete per frame when the
-	 * camera isnt moving */
+	 * camera isnt moving
+	 * @category Configurations
+	 * */
 	public static setJobsPerFrameStatic(numJobs: number) {
 		UnityUtil.toUnity('SetNumStaticJobs', UnityUtil.LoadingState.VIEWER_READY, numJobs);
 	}
 
 	/** How many non-trivial jobs the viewer can complete per frame when the
-	 * camera is moving */
+	 * camera is moving
+	 * @category Configurations
+	 * */
 	public static setJobsPerFrameDynamic(numJobs: number) {
 		UnityUtil.toUnity('SetNumDynamicJobs', UnityUtil.LoadingState.VIEWER_READY, numJobs);
 	}
@@ -2102,6 +2312,7 @@ export class UnityUtil {
 	/**
 	 * Creates an IndexedDbCache object which provides access to cached web requests using IndexedDb.
 	 * @param unityInstance
+	 * @category Configurations
 	 */
 	public static createIndexedDbCache(gameObjectName: string) {
 		this.unityInstance.repoDbCache = new IndexedDbCache(this.unityInstance, gameObjectName, this.unityDomain); // IndexedDbCache expects to find the worker at in [unityDomain]/unity/indexeddbworker.js

@@ -113,7 +113,7 @@ export const EditFederationContainers = ({
 					<DashboardListHeaderLabel name="name" minWidth={116}>
 						<FormattedMessage id="modal.editFederation.list.header.container" defaultMessage="Container" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="revisionsCount" width={186} hideWhenSmallerThan={Display.Desktop}>
+					<DashboardListHeaderLabel name="revisionsCount" width={170} hideWhenSmallerThan={Display.Desktop}>
 						<FormattedMessage id="modal.editFederation.list.header.revisions" defaultMessage="Revisions" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="code" width={160}>
@@ -125,7 +125,7 @@ export const EditFederationContainers = ({
 					<DashboardListHeaderLabel name="type" width={160} hideWhenSmallerThan={Display.Tablet}>
 						<FormattedMessage id="modal.editFederation.list.header.category" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="lastUpdated" width={100}>
+					<DashboardListHeaderLabel name="lastUpdated" width={140}>
 						<FormattedMessage id="modal.editFederation.list.header.lastUpdated" defaultMessage="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>

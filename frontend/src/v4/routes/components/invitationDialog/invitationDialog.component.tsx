@@ -27,7 +27,8 @@ import { isEmpty } from 'lodash';
 import { useEffect, useRef } from 'react';
 import * as yup from 'yup';
 
-import { isV5 } from '@/v4/helpers/isV5';
+import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { MODEL_ROLES_LIST, MODEL_ROLES_TYPES } from '../../../constants/model-permissions';
 import { schema } from '../../../services/validation';
 import { CellSelect } from '../customTable/components/cellSelect/cellSelect.component';
@@ -53,6 +54,7 @@ const invitationSchema = yup.object().shape({
 });
 
 interface IProps {
+	teamspace: string;
 	className?: string;
 	email?: string;
 	job?: string;
@@ -67,6 +69,8 @@ interface IProps {
 
 export const InvitationDialog = (props: IProps) => {
 	const formRef = useRef(null);
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const { used } = TeamspacesHooksSelectors.selectCurrentQuotaSeats();
 
 	useEffect(() => {
 		const { isValid, validateForm } = formRef.current;
@@ -80,6 +84,8 @@ export const InvitationDialog = (props: IProps) => {
 		const onFinish = () => {
 			actions.setSubmitting(false);
 			props.handleClose();
+
+			TeamspacesActionsDispatchers.setUsedQuotaSeats(teamspace, used + 1);
 		};
 
 		const onError = () => {
@@ -128,11 +134,6 @@ export const InvitationDialog = (props: IProps) => {
 				{projects.map(({ project, isAdmin }, index) => (
 					<div key={index}>
 						<ProjectConfig>
-							{!isV5() && (
-								<IconButton onClick={() => remove(index)} size="large">
-									<RemoveIcon />
-								</IconButton>
-							)}
 							<Field name={`permissions.${index}.project`} render={({ field }) => (
 								<FormControl>
 									<InputLabel shrink htmlFor={`project-${index}`}>Project</InputLabel>
@@ -146,11 +147,9 @@ export const InvitationDialog = (props: IProps) => {
 									/>
 								</FormControl>
 							)} />
-							{isV5() && (
-								<IconButton onClick={() => remove(index)} size="large">
-									<RemoveIcon />
-								</IconButton>
-							)}
+							<IconButton onClick={() => remove(index)} size="large">
+								<RemoveIcon />
+							</IconButton>
 							{project && (
 								<Field name={`permissions.${index}.isAdmin`} render={({ field, form }) => (
 									<ProjectCheckboxContainer
@@ -237,7 +236,7 @@ export const InvitationDialog = (props: IProps) => {
 					<CancelButton
 						type="button"
 						color="primary"
-						{...(isV5() && { variant: 'text' })}
+						variant="text"
 						onClick={props.handleClose}
 					>
 						Cancel
@@ -271,7 +270,7 @@ export const InvitationDialog = (props: IProps) => {
 			isInitialValid={getIsInitialValid()}
 			initialValues={{ email: props.email, job: props.job, isAdmin: props.isAdmin, permissions: props.permissions }}
 			render={renderForm}
-			ref={formRef}
+			innerRef={formRef}
 		/>
 	);
 };

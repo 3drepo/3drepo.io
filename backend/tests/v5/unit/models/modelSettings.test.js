@@ -83,20 +83,6 @@ const testGetContainerById = () => {
 
 const testGetFederationById = () => {
 	describe('Get FederationById', () => {
-		test('should return content of federation settings if found (v4 schema)', async () => {
-			const expectedData = {
-				_id: 'abc',
-				name: 'federation name',
-				subModels: times(4, () => generateUUIDString()),
-			};
-			DBHandler.findOne.mockResolvedValueOnce({ ...expectedData });
-
-			const res = await Model.getFederationById('someTS', 'someFederation');
-			expect(res).toEqual({ ...expectedData,
-				subModels: expectedData.subModels.map((_id) => ({ _id })),
-			});
-		});
-
 		test('should return content of federation settings if found (v5 schema)', async () => {
 			const expectedData = {
 				_id: 'abc',
@@ -694,6 +680,32 @@ const testUpdateModelSettings = () => {
 					},
 					name: data.name,
 					defaultView: data.defaultView,
+				},
+			};
+
+			DBHandler.findOneAndUpdate.mockResolvedValueOnce({});
+			await Model.updateModelSettings(teamspace, project, model, data);
+			checkResults(DBHandler.findOneAndUpdate, model, updateObject);
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
+				{
+					teamspace,
+					project,
+					model,
+					data,
+					isFederation: false,
+				});
+		});
+
+		test('Should update the settings of a model value of 0', async () => {
+			const data = {
+				angleFromNorth: 0,
+			};
+
+			const updateObject = {
+				$set: {
+					angleFromNorth: 0,
 				},
 			};
 

@@ -17,14 +17,15 @@
 
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { mockServer } from '../../internals/testing/mockServer';
-import { createTestStore } from '../test.helpers';
+import { createTestStore, spyOnAxiosApiCallWithFile } from '../test.helpers';
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
-import { projectMockFactory } from './projects.fixtures';
+import { generateFakeProjectImageFile, projectMockFactory } from './projects.fixtures';
 import { selectCurrentProjects } from '@/v5/store/projects/projects.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { templateMockFactory } from '../tickets/tickets.fixture';
 import { selectCurrentProjectTemplates } from '@/v5/store/projects/projects.selectors';
+import api from '@/v5/services/api/default';
 import { FederationsActions } from '@/v5/store/federations/federations.redux';
 import { federationMockFactory } from '../federations/federations.fixtures';
 
@@ -32,6 +33,7 @@ describe('Teamspaces: sagas', () => {
 	const teamspace = 'teamspace';
 	const projectId = 'project';
 	const mockProject = projectMockFactory({ _id: projectId });
+	const mockImageFile = generateFakeProjectImageFile();
 	const federationId = 'federationId';
 	const mockFederation = federationMockFactory({ _id: federationId });
 	const templateId = 'template';
@@ -39,6 +41,7 @@ describe('Teamspaces: sagas', () => {
 	let onSuccess, onError;
 	let dispatch, getState, waitForActions;
 	let resolve, promiseToResolve;
+	let spy;
 
 	beforeEach(() => {
 		onSuccess = jest.fn();
@@ -47,6 +50,12 @@ describe('Teamspaces: sagas', () => {
 		({ resolve, promiseToResolve } = getWaitablePromise());
 		dispatch(TeamspacesActions.setCurrentTeamspace(teamspace));
 	});
+
+	beforeAll(() => {
+		spy = spyOnAxiosApiCallWithFile(api, 'put');
+	});
+
+	afterAll(() => { spy.mockClear(); });
 
 	describe('fetch', () => {
 		it('should fetch projects data and dispatch FETCH_SUCCESS', async () => {
@@ -112,40 +121,69 @@ describe('Teamspaces: sagas', () => {
 	});
 
 	describe('createProject', () => {
-		const name = 'newProject';
-		const _id = '123';
+		const name = `new${mockProject.name}`;
+		const _id = `new${projectId}`;
 		const newProject = {
 			name,
 			_id,
 			isAdmin: true,
 		};
+		let onImageError;
 
 		beforeEach(() => {
 			dispatch(ProjectsActions.fetchSuccess(teamspace, []));
+			onImageError = jest.fn();
 		});
 
-		it('should create a project', async () => {
+		it('should create a project without image', async () => {
 			mockServer
 				.post(`/teamspaces/${teamspace}/projects`, { name })
 				.reply(200, { _id });
 
 			await waitForActions(() => {
-					dispatch(ProjectsActions.createProject(teamspace, name, onSuccess, onError))
+				dispatch(ProjectsActions.createProject(teamspace, { name }, onSuccess, onImageError, onError))
 			}, [ProjectsActions.createProjectSuccess(teamspace, newProject)]);
 
 			expect(onSuccess).toHaveBeenCalled();
+			expect(onImageError).not.toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
 		});
 
-		it('should call error callback when API call errors', async () => {
+		it('should create a project with image', async () => {
+			mockServer
+				.post(`/teamspaces/${teamspace}/projects`, { name })
+				.reply(200, { _id })
+				.put(`/teamspaces/${teamspace}/projects/${_id}/image`)
+				.reply(200);
+
+			await Promise.all([
+				waitForActions(() => {
+					dispatch(ProjectsActions.createProject(
+						teamspace,
+						{ name, image: mockImageFile },
+						() => { onSuccess(); resolve(); },
+						onImageError,
+						onError,
+					))
+				}, [ProjectsActions.createProjectSuccess(teamspace, newProject)]),
+				promiseToResolve,
+			]);
+
+			expect(onSuccess).toHaveBeenCalled();
+			expect(onImageError).not.toHaveBeenCalled();
+			expect(onError).not.toHaveBeenCalled();
+		});
+
+		it('should call error callback when API call errors for name', async () => {
 			mockServer
 				.post(`/teamspaces/${teamspace}/projects`, { name })
 				.reply(404)
 
 			dispatch(ProjectsActions.createProject(
 				teamspace,
-				name,
-				onSuccess, 
+				{ name },
+				onSuccess,
+				onImageError,
 				() => { onError(); resolve(); },
 			));
 			await promiseToResolve;
@@ -153,46 +191,139 @@ describe('Teamspaces: sagas', () => {
 			const projectsInStore = selectCurrentProjects(getState());
 			expect(projectsInStore).toEqual([]);
 			expect(onSuccess).not.toHaveBeenCalled();
+			expect(onImageError).not.toHaveBeenCalled();
 			expect(onError).toHaveBeenCalled();
+		});
+
+		it('should call error callback when API call errors for image', async () => {
+			mockServer
+				.post(`/teamspaces/${teamspace}/projects`, { name })
+				.reply(200, { _id })
+				.put(`/teamspaces/${teamspace}/projects/${_id}/image`)
+				.reply(404);
+
+			await Promise.all([
+				waitForActions(() => {
+					dispatch(ProjectsActions.createProject(
+						teamspace,
+						{ name, image: mockImageFile },
+						onSuccess,
+						() => { onImageError(); resolve(); },
+						onError,
+					));
+				}, [ProjectsActions.createProjectSuccess(teamspace, newProject)]),
+				promiseToResolve,
+			]);
+
+			const projectsInStore = selectCurrentProjects(getState());
+			expect(projectsInStore).toEqual([newProject]);
+			expect(onSuccess).not.toHaveBeenCalled();
+			expect(onImageError).toHaveBeenCalled();
+			expect(onError).not.toHaveBeenCalled();
 		});
 	});
 
 	describe('updateProject', () => {
-		const updatedProject = { ...mockProject, name: mockProject + "new" };
+		const newName = `new${mockProject.name}`;
+
 		beforeEach(() => {
 			dispatch(ProjectsActions.fetchSuccess(teamspace, [mockProject]));
 		});
 
-		it('should call updateProject endpoint', async () => {
-			mockServer
-				.patch(`/teamspaces/${teamspace}/projects/${projectId}`)
-				.reply(200)
-
-			await waitForActions(() => {
-				dispatch(ProjectsActions.updateProject(teamspace, projectId, updatedProject, onSuccess, onError));
-			}, [ProjectsActions.updateProjectSuccess(teamspace, projectId, updatedProject)])
-
-			expect(onSuccess).toHaveBeenCalled();
-			expect(onError).not.toHaveBeenCalled();
+		describe('without image', () => {
+			it('should call updateProject endpoint', async () => {
+				mockServer
+					.patch(`/teamspaces/${teamspace}/projects/${projectId}`)
+					.reply(200)
+	
+				await waitForActions(() => {
+					dispatch(ProjectsActions.updateProject(teamspace, projectId, { name: newName }, onSuccess, onError));
+				}, [ProjectsActions.updateProjectSuccess(teamspace, projectId, { name: newName })])
+	
+				expect(onSuccess).toHaveBeenCalled();
+				expect(onError).not.toHaveBeenCalled();
+			});
+		
+			it('should call updateProject endpoint with 404 and open alert modal', async () => {
+				mockServer
+					.patch(`/teamspaces/${teamspace}/projects/${projectId}`)
+					.reply(404)
+	
+				dispatch(ProjectsActions.updateProject(
+					teamspace,
+					projectId,
+					{ name: newName },
+					onSuccess, 
+					() => { onError(); resolve(); },
+				));
+				await promiseToResolve;
+	
+				const projectsInStore = selectCurrentProjects(getState());
+				expect(projectsInStore).toEqual([mockProject]);
+				expect(onSuccess).not.toHaveBeenCalled();
+				expect(onError).toHaveBeenCalled();
+			});
 		});
-		it('should call updateProject endpoint with 404 and open alert modal', async () => {
-			mockServer
-				.patch(`/teamspaces/${teamspace}/projects/${projectId}`)
-				.reply(404)
 
-			dispatch(ProjectsActions.updateProject(
-				teamspace,
-				projectId,
-				updatedProject,
-				onSuccess, 
-				() => { onError(); resolve(); },
-			));
-			await promiseToResolve;
+		describe('with image', () => {
+			it('should update image', async () => {
+				mockServer
+					.put(`/teamspaces/${teamspace}/projects/${projectId}/image`)
+					.reply(200)
+	
+				dispatch(ProjectsActions.updateProject(
+					teamspace,
+					projectId,
+					{ image: mockImageFile },
+					() => { onSuccess(); resolve(); },
+					onError,
+				));
 
-			const projectsInStore = selectCurrentProjects(getState());
-			expect(projectsInStore).toEqual([mockProject]);
-			expect(onSuccess).not.toHaveBeenCalled();
-			expect(onError).toHaveBeenCalled();
+				await promiseToResolve;
+	
+				expect(onSuccess).toHaveBeenCalled();
+				expect(onError).not.toHaveBeenCalled();
+				spy.mockClear();
+			});
+	
+			it('should delete image', async () => {
+				mockServer
+					.delete(`/teamspaces/${teamspace}/projects/${projectId}/image`)
+					.reply(200)
+
+				dispatch(ProjectsActions.updateProject(
+					teamspace,
+					projectId,
+					{ image: null },
+					() => { onSuccess(); resolve(); },
+					onError,
+				));
+
+				await promiseToResolve;
+	
+				expect(onSuccess).toHaveBeenCalled();
+				expect(onError).not.toHaveBeenCalled();
+			});
+	
+			it('should call updateProject endpoint with 404', async () => {
+				mockServer
+					.put(`/teamspaces/${teamspace}/projects/${projectId}/image`)
+					.reply(404)
+	
+				dispatch(ProjectsActions.updateProject(
+					teamspace,
+					projectId,
+					{ image: mockImageFile },
+					onSuccess,
+					() => { onError(); resolve(); },
+				));
+				await promiseToResolve;
+	
+				const projectsInStore = selectCurrentProjects(getState());
+				expect(projectsInStore).toEqual([mockProject]);
+				expect(onSuccess).not.toHaveBeenCalled();
+				expect(onError).toHaveBeenCalled();
+			});
 		});
 	});
 
@@ -207,7 +338,7 @@ describe('Teamspaces: sagas', () => {
 		describe('fetchTemplates', () => {
 			it('should call fetchTemplates endpoint', async () => {
 				mockServer
-					.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates`)
+					.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates?getDetails=false`)
 					.reply(200, { templates: [mockTemplate] });
 	
 				await waitForActions(() => {
@@ -220,7 +351,7 @@ describe('Teamspaces: sagas', () => {
 	
 			it('should call fetchTemplates endpoint with 404', async () => {
 				mockServer
-					.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates`)
+					.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates?getDetails=false`)
 					.reply(404);
 	
 				await waitForActions(() => {

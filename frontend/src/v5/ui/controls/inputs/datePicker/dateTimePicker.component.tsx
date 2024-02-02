@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { DateTimePicker as MuiDateTimePicker, DateTimePickerProps as MuiDateTimePickerProps } from '@mui/x-date-pickers';
-
 import { BaseCalendarPicker, BaseCalendarPickerProps } from './baseCalendarPicker/baseCalendarPicker.component';
 import { formatTime, getDateTimeMask } from './dateFormatHelper';
 
-type DateTimePickerProps = BaseCalendarPickerProps & Partial<MuiDateTimePickerProps<any, any>>;
+export type DateTimePickerProps = Omit<BaseCalendarPickerProps, 'PickerComponent'> & Partial<MuiDateTimePickerProps<any, any>>;
 export const DateTimePicker = (props: DateTimePickerProps) => (
 	<BaseCalendarPicker
 		PickerComponent={MuiDateTimePicker}

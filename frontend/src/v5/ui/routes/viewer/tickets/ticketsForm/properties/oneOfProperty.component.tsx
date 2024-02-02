@@ -17,31 +17,18 @@
 
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
-import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { Select } from '@controls/inputs/select/select.component';
-import { FormControl, FormHelperText, InputLabel, MenuItem } from '@mui/material';
+import { MenuItem } from '@mui/material';
+import { JobsAndUsersProperty } from './jobsAndUsersProperty.component';
 
 type OneOfPropertyProps = FormInputProps & { values: PropertyDefinition['values']; onBlur: () => void };
 export const OneOfProperty = ({ values, value, ...props }: OneOfPropertyProps) => {
-	let items = [];
 	if (values === 'jobsAndUsers') {
-		return (
-			<FormControl required={props.required} disabled={props.disabled} error={props.error} className={props.className}>
-				<InputLabel id={`${props.name}-label`}>{props.label}</InputLabel>
-				<AssigneesSelect
-					value={value}
-					showAddButton
-					{...props}
-				/>
-				<FormHelperText>{props.helperText}</FormHelperText>
-			</FormControl>
-		);
-	} if (values === 'riskCategories') {
-		items = TicketsHooksSelectors.selectRiskCategories() || [];
-	} else {
-		items = (values as string[]);
+		return (<JobsAndUsersProperty value={value} {...props} />);
 	}
+	
+	const items = (values === 'riskCategories') ? TicketsHooksSelectors.selectRiskCategories() : values;
 	return (
 		<Select {...props} value={value ?? ''}>
 			{(items as string[]).map((propValue) => (

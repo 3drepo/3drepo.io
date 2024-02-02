@@ -17,16 +17,9 @@
 import styled from 'styled-components';
 import { Tooltip as TooltipComponent } from '@mui/material';
 
-import withStyles from '@mui/styles/withStyles';
-
-export const Tooltip = withStyles(() => ({
-	tooltip: {
-		maxWidth: 600,
-	},
-	tooltipPlacementBottom: {
-		transform: 'translateX(25%) !important',
-	},
-}))(TooltipComponent);
+export const Tooltip = styled(TooltipComponent)`
+	max-width: 600px;
+`;
 
 export const Container = styled.div`
 	position: relative;
@@ -38,9 +31,7 @@ export const Container = styled.div`
 	height: 100%;
 	text-overflow: ellipsis;
 
-	&:hover {
-		& > * {
-			text-decoration: underline;
-		}
+	&:hover > * {
+		text-decoration: underline;
 	}
 `;

@@ -16,6 +16,7 @@
  */
 
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 
@@ -29,12 +30,12 @@ import { selectHiddenGeometryVisible,  TreeActions } from '../tree';
 import { selectCacheSetting } from '../viewer';
 import { selectLeftPanels, ViewerGuiActions } from '../viewerGui';
 import { ViewpointsActions } from '../viewpoints';
-import { GroupsActions } from '../groups';
-import { getSelectedFrame } from './sequences.helper';
+import { getDateWithinBoundaries, getSelectedFrame, MODAL_DATE_NOT_AVAILABLE_BODY, MODAL_TODAY_NOT_AVAILABLE_BODY } from './sequences.helper';
 import {
 	selectActivitiesDefinitions, selectFrames, selectNextKeyFramesDates, selectSelectedDate, selectSelectedFrameViewpoint,
-	selectSelectedSequence, selectSequences, selectSequenceModel,
+	selectSelectedSequence, selectSequences, selectSequenceModel, selectOpenOnToday, selectSelectedFrame, selectSelectedStateDefinition,
 } from './sequences.selectors';
+import { IStateDefinitions } from './sequences.redux';
 import { selectSelectedSequenceId, selectStateDefinitions,
 	SequencesActions, SequencesTypes } from '.';
 
@@ -99,8 +100,8 @@ export function* fetchActivitiesDefinitions({ sequenceId }) {
 			// API CALL TO GET TASKS
 			const {data} = yield API.getSequenceActivities(teamspace, model, sequenceId);
 			yield put(SequencesActions.fetchActivitiesDefinitionsSuccess(sequenceId, data.activities));
-			yield put(SequencesActions.setActivitiesPending(false));
 		}
+		yield put(SequencesActions.setActivitiesPending(false));
 
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'sequences', error));
@@ -115,6 +116,8 @@ export function* fetchFrame({ date }) {
 		const sequenceId =  yield select(selectSelectedSequenceId);
 		const loadedStates = yield select(selectStateDefinitions);
 		const frames = yield select(selectFrames);
+		const selectedDate = yield select(selectSelectedDate);
+		const dateIsSelectedDate = selectedDate.valueOf() === date.valueOf()
 		const { state: stateId, viewpoint } = getSelectedFrame(frames, date);
 
 		if (stateId) {
@@ -130,12 +133,11 @@ export function* fetchFrame({ date }) {
 					const fetchPromise = cachedData ? Promise.resolve({data: cachedData})
 						: API.getSequenceState(teamspace, model, sequenceId, stateId);
 					fetchPromise.then((response) => {
-						const selectedDate = selectSelectedDate(getState());
-						if (selectedDate.valueOf() === date.valueOf()) {
-							dispatch(SequencesActions.setLastSelectedDateSuccess(date));
-						}
-
 						dispatch(SequencesActions.setStateDefinition(stateId, response.data));
+						if (dateIsSelectedDate) {
+							dispatch(SequencesActions.setLastSelectedDateSuccess(date));
+							dispatch(SequencesActions.updateSelectedStateDefinition());
+						}
 						if (cacheEnabled && !cachedData) {
 							DataCache.putValue(STORE_NAME.FRAMES, iDBKey, response.data);
 						}
@@ -144,17 +146,14 @@ export function* fetchFrame({ date }) {
 					dispatch(SequencesActions.setStateDefinition(stateId, {}));
 				});
 			} else {
-				const selectedDate =  yield select(selectSelectedDate);
-				if (selectedDate.valueOf() === date.valueOf()) {
+				if (dateIsSelectedDate) {
 					yield put(SequencesActions.setLastSelectedDateSuccess(date));
 				}
 			}
 		} else {
-			const selectedDate = yield select(selectSelectedDate);
-
 			// This is to avoid fetching the groups twice.
 			// When showpoint is called in showFrameViewpoint it fetches the groups
-			if (selectedDate.valueOf() !== date.valueOf()) {
+			if (dateIsSelectedDate) {
 				yield put(ViewpointsActions.fetchViewpointGroups(teamspace, model, { viewpoint }));
 			}
 		}
@@ -177,15 +176,48 @@ function * prefetchFrames() {
 	yield all(keyframes.map((d) => put(SequencesActions.fetchFrame(d))));
 }
 
+function* updateSelectedStateDefinition() {
+	const selectedFrame = yield select(selectSelectedFrame);
+	const stateDefinitions = yield select(selectStateDefinitions);
+	yield put(SequencesActions.setSelectedStateDefinition(stateDefinitions[selectedFrame?.state]));
+}
+
 export function* setSelectedDate({ date }) {
 	try {
 		const selectedSequence = yield select(selectSelectedSequence);
+		const openOnToday = yield select(selectOpenOnToday);
 
 		if (selectedSequence) {
-			yield put(SequencesActions.setSelectedDateSuccess(date));
+			// bound date by sequence start/end date
+			const { startDate, endDate, frames } = yield select(selectSelectedSequence);
+			let dateToSelect;
+
+			if (date) {
+				dateToSelect = getDateWithinBoundaries(date, startDate, endDate);
+
+				if (dateToSelect.getTime() !== new Date(date).getTime()) {
+					DialogsActionsDispatchers.open('info', MODAL_DATE_NOT_AVAILABLE_BODY);
+				}
+			} else {
+				// if no date is passed, use today or the sequence start date (depening on openOnToday)
+				const defaultDate = openOnToday ? new Date() : new Date(startDate);
+				dateToSelect = getDateWithinBoundaries(defaultDate, startDate, endDate);
+
+				if (dateToSelect.getTime() !== defaultDate.getTime()) {
+					DialogsActionsDispatchers.open('info', MODAL_TODAY_NOT_AVAILABLE_BODY);
+				}
+			}
+			yield put(SequencesActions.setSelectedDateSuccess(dateToSelect));
 			yield put(SequencesActions.prefetchFrames());
 			yield showFrameViewpoint();
+
+			const { viewpoint } = getSelectedFrame(frames, date);
+
+			if (!viewpoint) {
+				yield put(ViewpointsActions.deselectViewsAndLeaveClipping());
+			}
 		}
+		yield put(SequencesActions.updateSelectedStateDefinition());
 
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('select frame', 'sequences', error));
@@ -200,7 +232,7 @@ export function* initializeSequences() {
 }
 
 export function* restoreModelDefaultVisibility() {
-	yield put(GroupsActions.clearColorOverrides());
+	yield put(ViewerGuiActions.clearColorOverrides());
 	yield put(TreeActions.showAllNodes());
 	yield put(TreeActions.showHiddenGeometry());
 }
@@ -225,34 +257,25 @@ export function* setSelectedSequence({ sequenceId }) {
 }
 
 export function* showSequenceDate({ date }) {
-	// 1 - if sequence panel is closed, open it
-	const sequencePanelVisible = (yield select(selectLeftPanels)).includes[VIEWER_PANELS.SEQUENCES];
-
-	if (!sequencePanelVisible) {
-		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.SEQUENCES, true));
+	const sequences = yield select(selectSequences);
+	if (!sequences.length) {
+		return;
 	}
 
-	// 2 - if there is no sequences loaded, load them
-	let sequences = yield select(selectSequences);
-
-	// If there are is already a selected sequence with a date and frames, this will cause it to crash
-	// because it wipes out the frames definition.
-	if (!sequences) {
-		yield put(SequencesActions.fetchSequenceList());
-		yield take(SequencesTypes.FETCH_SEQUENCE_LIST_SUCCESS);
-		sequences = yield select(selectSequences);
-	}
-
-	// 3 - if there is no selected sequence, select the first one
 	const selectedSequenceId = yield select(selectSelectedSequenceId);
-
-	if (!selectedSequenceId && sequences.length > 0) {
+	if (!selectedSequenceId) {
+		// if there is no selected sequence, select the first one
 		yield put(SequencesActions.setSelectedSequence(sequences[0]._id));
 		yield take(SequencesTypes.SET_SELECTED_SEQUENCE_SUCCESS);
 	}
 
-	// 2 - Select the date
 	yield put(SequencesActions.setSelectedDate(date));
+
+	const sequencePanelVisible = (yield select(selectLeftPanels)).includes[VIEWER_PANELS.SEQUENCES];
+	if (!sequencePanelVisible) {
+		// if sequence panel is closed, open it
+		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.SEQUENCES, true));
+	}
 }
 
 function* handleTransparenciesVisibility({ transparencies }) {
@@ -261,6 +284,24 @@ function* handleTransparenciesVisibility({ transparencies }) {
 	if (selectedSequence) {
 		yield put(TreeActions.handleTransparenciesVisibility(transparencies));
 	}
+}
+
+function* clearStateDefinitionProperty(property: keyof IStateDefinitions) {
+	const selectedStateDefinition = yield select(selectSelectedStateDefinition);
+	if (selectedStateDefinition?.[property]?.length) {
+		yield put(SequencesActions.setSelectedStateDefinition({
+			...selectedStateDefinition,
+			[property]: [],
+		}));
+	}
+}
+
+export function* clearColorOverrides() {
+	yield clearStateDefinitionProperty('color');
+}
+
+export function* clearTransformations() {
+	yield clearStateDefinitionProperty('transformation');
 }
 
 export default function* SequencesSaga() {
@@ -276,4 +317,7 @@ export default function* SequencesSaga() {
 	yield takeLatest(SequencesTypes.PREFETCH_FRAMES, prefetchFrames);
 	yield takeLatest(SequencesTypes.SHOW_SEQUENCE_DATE, showSequenceDate);
 	yield takeLatest(SequencesTypes.HANDLE_TRANSPARENCIES_VISIBILITY, handleTransparenciesVisibility);
+	yield takeLatest(SequencesTypes.UPDATE_SELECTED_STATE_DEFINITION, updateSelectedStateDefinition);
+	yield takeLatest(SequencesTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
+	yield takeLatest(SequencesTypes.CLEAR_TRANSFORMATIONS, clearTransformations);
 }

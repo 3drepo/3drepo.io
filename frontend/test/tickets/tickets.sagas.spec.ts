@@ -27,7 +27,7 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { containerMockFactory } from '../containers/containers.fixtures';
 import { federationMockFactory } from '../federations/federations.fixtures';
 import { createTestStore } from '../test.helpers';
-import { mockGroup, mockRiskCategories, templateMockFactory, ticketMockFactory, ticketWithGroupMockFactory } from './tickets.fixture';
+import { fullTemplateMockFactory, getBaseTicket, mockGroup, mockRiskCategories, templateMockFactory, ticketMockFactory, ticketWithGroupMockFactory } from './tickets.fixture';
 import { mockServer } from '../../internals/testing/mockServer';
 
 describe('Tickets: sagas', () => {
@@ -41,6 +41,7 @@ describe('Tickets: sagas', () => {
 	const teamspace = 'teamspace';
 	const projectId = 'project';
 	const modelId = 'modelId';
+	const revision = 'revision';
 
 	const populateTicketsStore = () => dispatch(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	const populateGroupsStore = () => dispatch(TicketsActions.fetchTicketGroupsSuccess(groups));
@@ -91,10 +92,10 @@ describe('Tickets: sagas', () => {
 				.reply(200, ticket);
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.fetchTicket(teamspace, projectId, modelId, ticket._id, false));
+				dispatch(TicketsActions.fetchTicket(teamspace, projectId, modelId, ticket._id, false, revision));
 			}, [
 				TicketsActions.upsertTicketSuccess(modelId, ticket),
-				TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id),
+				TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id, revision),
 			]);
 		});
 		it('should call fetchContainerTicket endpoint with a 404', async () => {
@@ -202,10 +203,10 @@ describe('Tickets: sagas', () => {
 				.reply(200, ticket);
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.fetchTicket(teamspace, projectId, modelId, ticket._id, true));
+				dispatch(TicketsActions.fetchTicket(teamspace, projectId, modelId, ticket._id, true, revision));
 			}, [
 				TicketsActions.upsertTicketSuccess(modelId, ticket),
-				TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id),
+				TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id, revision),
 			]);
 		});
 		it('should call fetchFederationTicket endpoint with a 404', async () => {
@@ -288,10 +289,10 @@ describe('Tickets: sagas', () => {
 				const updateProp = { _id: ticket._id, title: 'updatedTicketName' };
 
 				await waitForActions(() => {
-					dispatch(TicketsActions.upsertTicketAndFetchGroups(teamspace, projectId, modelId, updateProp));
+					dispatch(TicketsActions.upsertTicketAndFetchGroups(teamspace, projectId, modelId, updateProp, revision));
 				}, [
 					TicketsActions.upsertTicketSuccess(modelId, updateProp),
-					TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id),
+					TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id, revision),
 				]);
 			});
 			describe('containers', () => {
@@ -413,13 +414,14 @@ describe('Tickets: sagas', () => {
 	});
 
 	describe('templates', () => {
-		const templates = [templateMockFactory()];
+		const template = templateMockFactory();
+		const templates = [template];
 
 		// Basic Container templates
 		it('should call fetchContainerTemplates endpoint', async () => {
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates`)
-				.reply(200, { templates });
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates?getDetails=false`)
+				.reply(200, { templates })
 
 			await waitForActions(() => {
 				dispatch(TicketsActions.fetchTemplates(teamspace, projectId, modelId, false));
@@ -428,7 +430,7 @@ describe('Tickets: sagas', () => {
 
 		it('should call fetchContainerTemplates endpoint with a 404', async () => {
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates`)
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates?getDetails=false`)
 				.reply(404);
 
 			await waitForActions(() => {
@@ -439,7 +441,6 @@ describe('Tickets: sagas', () => {
 		});
 
 		it('should call fetchContainerTemplate detail endpoint', async () => {
-			const template = templateMockFactory();
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates/${template._id}`)
 				.reply(200, template);
@@ -450,7 +451,6 @@ describe('Tickets: sagas', () => {
 		});
 
 		it('should call fetchContainerTemplate detail endpoint with a 404', async () => {
-			const template = templateMockFactory();
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates/${template._id}`)
 				.reply(404);
@@ -466,7 +466,7 @@ describe('Tickets: sagas', () => {
 		// Basic Federation templates
 		it('should call fetchFederationTemplates endpoint', async () => {
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates`)
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates?getDetails=false`)
 				.reply(200, { templates });
 
 			await waitForActions(() => {
@@ -476,7 +476,7 @@ describe('Tickets: sagas', () => {
 
 		it('should call fetchFederationTemplates endpoint with a 404', async () => {
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates`)
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates?getDetails=false`)
 				.reply(404);
 
 			await waitForActions(() => {
@@ -487,8 +487,7 @@ describe('Tickets: sagas', () => {
 			expect(templatesFromState).toEqual([]);
 		});
 
-		it('should call fetchContainerTemplate detail endpoint', async () => {
-			const template = templateMockFactory();
+		it('should call fetchFederationTemplate detail endpoint', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates/${template._id}`)
 				.reply(200, template);
@@ -498,8 +497,7 @@ describe('Tickets: sagas', () => {
 			}, [TicketsActions.replaceTemplateSuccess(modelId, template)]);
 		});
 
-		it('should call fetchContainerTemplate detail endpoint with a 404', async () => {
-			const template = templateMockFactory();
+		it('should call fetchFederationTemplate detail endpoint with a 404', async () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates/${template._id}`)
 				.reply(404);

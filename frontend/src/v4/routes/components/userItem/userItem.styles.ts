@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isV5 } from '@/v4/helpers/isV5';
 import Grid from '@mui/material/Grid';
 import styled, { css } from 'styled-components';
 import { COLOR } from '../../../styles';
@@ -29,19 +28,14 @@ const BaseStyles = styled(Grid)`
 `;
 
 export const Name = styled(BaseStyles)`
-	${isV5() ? css`
-		color: ${({ theme }) => theme.palette.secondary.main};
-		font-size: 15px;
-		font-weight: 500;
-	` : css`
-		color: COLOR.BLACK_60;
-		font-size: 14px;
-	`}
+	color: ${({ theme }) => theme.palette.secondary.main};
+	font-size: 15px;
+	font-weight: 500;
 	line-height: 20px;
 `;
 
 export const Detail = styled(BaseStyles)`
-	font-size: ${isV5() ? '12px' : '10px'};
-	color: ${isV5() ? ({ theme }) => theme.palette.base.main : COLOR.BLACK_40};
+	font-size: 12px;
+	color: ${({ theme }) => theme.palette.base.main};
 	line-height: 13px;
 `;

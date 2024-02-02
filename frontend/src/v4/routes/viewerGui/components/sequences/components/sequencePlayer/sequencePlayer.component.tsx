@@ -24,22 +24,25 @@ import PlayArrow from '@mui/icons-material/PlayArrow';
 import Replay from '@mui/icons-material/Replay';
 import Stop from '@mui/icons-material/Stop';
 import { debounce, noop } from 'lodash';
-import { isV5 } from '@/v4/helpers/isV5';
+import { FormattedMessage } from 'react-intl';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
-import { isDateOutsideRange, MILLI_PER_HOUR } from '../../../../../../helpers/dateTime';
+import { isDateOutsideRange } from '../../../../../../helpers/dateTime';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
-import { getDateByStep, getSelectedFrameIndex } from '../../../../../../modules/sequences/sequences.helper';
-import { LONG_DATE_TIME_FORMAT_NO_MINUTES, LONG_DATE_TIME_FORMAT_NO_MINUTES_V5 } from '../../../../../../services/formatting/formatDate';
+import { MODAL_TODAY_NOT_AVAILABLE_BODY, getDateByStep, getDateWithinBoundaries, getSelectedFrameIndex } from '../../../../../../modules/sequences/sequences.helper';
+import { LONG_DATE_TIME_FORMAT_V5 } from '../../../../../../services/formatting/formatDate';
 import {
 	DatePicker,
+	FlexCol,
 	IntervalRow,
 	SequencePlayerAllInputs,
 	SequencePlayerColumn,
 	SequencePlayerContainer,
 	SequenceRow,
 	SequenceSlider,
+	SetToCurrentDateButton,
 	SliderRow,
 	StepInput,
 	StepLabel,
@@ -64,7 +67,6 @@ interface IProps {
 	loadingFrame: boolean;
 	rightPanels: string[];
 	toggleActivitiesPanel: () => void;
-	onPlayStarted?: () => void;
 	frames: IFrame[];
 	isActivitiesPending: boolean;
 	draggablePanels: string[];
@@ -219,7 +221,6 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 	public prevStep = this.moveStep.bind(this, -1);
 
 	public play = () => {
-		(this.props.onPlayStarted || noop)();
 		this.stop();
 
 		const intervalId = (setInterval(() => {
@@ -285,6 +286,17 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 
 	public render() {
 		const { value, stepScale , stepInterval } = this.state;
+		const { min, max } = this.props;
+
+		const goToToday = () => {
+			const now = new Date();
+			const newDateToUse = getDateWithinBoundaries(now, min, max);
+			this.gotoDate(newDateToUse);
+
+			if (newDateToUse.getTime() !== now.getTime()) {
+				DialogsActionsDispatchers.open('info', MODAL_TODAY_NOT_AVAILABLE_BODY);
+			}
+		}
 
 		return (
             <SequencePlayerContainer>
@@ -297,15 +309,20 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 								</IconButton>
 							</Grid>
 							<Grid item>
-								<DatePicker
-									shouldDisableDate={(date: any) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
-									name="date"
-									value={value}
-									inputFormat={isV5() ? LONG_DATE_TIME_FORMAT_NO_MINUTES_V5 : LONG_DATE_TIME_FORMAT_NO_MINUTES}
-									onChange={(e) => this.gotoDate(new Date(Math.floor(e.target.value / MILLI_PER_HOUR) * MILLI_PER_HOUR))}
-									placeholder="date"
-									dateTime
-								/>
+								<FlexCol>
+									<DatePicker
+										shouldDisableDate={(date: any) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
+										name="date"
+										value={value}
+										inputFormat={LONG_DATE_TIME_FORMAT_V5}
+										onChange={(e) => this.gotoDate(new Date(e.target.value))}
+										placeholder="date"
+										dateTime
+									/>
+									<SetToCurrentDateButton onClick={goToToday}>
+										<FormattedMessage id="viewer.sequences.setToCurrentDate" defaultMessage="Set to current date" />
+									</SetToCurrentDateButton>
+								</FlexCol>
 							</Grid>
 							<Grid item>
 								<IconButton disabled={this.isLastDay} onClick={this.forward} size="small">

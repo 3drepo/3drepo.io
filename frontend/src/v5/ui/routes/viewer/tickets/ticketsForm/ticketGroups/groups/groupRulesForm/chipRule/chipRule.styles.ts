@@ -43,7 +43,6 @@ export const RuleChip = styled(Chip).attrs(({
 	color: $selected ? palette.tertiary.main : palette.secondary.main,
 	variant: 'filled',
 }))<{ $selected: boolean, disabled?: boolean }>`
-
 	.MuiChip-label {
 		text-transform: initial;
 		font-weight: initial;

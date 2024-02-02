@@ -19,6 +19,7 @@ import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { selectSelectedTicket, selectView } from '@/v5/store/tickets/card/ticketsCard.selectors';
 import { CompareActions } from '../../modules/compare';
 
 import { selectCurrentTeamspace, selectCurrentUser } from '../../modules/currentUser';
@@ -28,7 +29,7 @@ import { selectIsPending, selectSettings, ModelActions } from '../../modules/mod
 import { selectIsPresentationActive, PresentationActions } from '../../modules/presentation';
 import { RisksActions } from '../../modules/risks';
 import { selectQueryParams } from '../../modules/router/router.selectors';
-import { TreeActions } from '../../modules/tree';
+import { TreeActions, selectTreeNodesList } from '../../modules/tree';
 import {
 	selectDisabledPanelButtons, selectDraggablePanels, selectIsFocusMode, selectLeftPanels, selectRightPanels,
 	ViewerGuiActions,
@@ -49,6 +50,9 @@ const mapStateToProps = createStructuredSelector({
 	isFocusMode: selectIsFocusMode,
 	disabledPanelButtons: selectDisabledPanelButtons,
 	isPresentationActive: selectIsPresentationActive,
+	selectedTicket: selectSelectedTicket,
+	treeNodesList: selectTreeNodesList,
+	ticketsCardView: selectView
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

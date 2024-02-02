@@ -55,18 +55,6 @@ const BasicSettings = (props) => {
 	return (
 		<List>
 			<FormListItem>
-				4GB viewer
-				<Field name="useBetaViewer" render={ ({ field }) => (
-					<Switch checked={field.value} onClick={props.onUseBetaViewerChange} {...field} value="true" color="secondary" />
-				)} />
-				{props.showBetaViewerWarning && (
-					<SubHeading>
-						Changing this setting will require you to refresh your browser before taking effect.
-					</SubHeading>
-				)}
-			</FormListItem>
-			<V5Divider />
-			<FormListItem>
 				Viewer Background Color
 				<Field name="viewerBackgroundColor" render={ ({ field }) => (
 					<ColorPicker {...field} onChange={(val) => {
@@ -532,7 +520,10 @@ const Buttons = (props) => {
 				variant="contained"
 				disabled={isEqual(form.values, DEFAULT_SETTINGS)}
 				type="button"
-				onClick={() => form.setValues(DEFAULT_SETTINGS)}
+				onClick={() => {
+					form.setValues(DEFAULT_SETTINGS);
+					props.hideWarning();
+				}}
 			>
 					Reset
 				</NegativeActionButton>
@@ -551,7 +542,7 @@ const Buttons = (props) => {
 						color="secondary"
 						variant="contained"
 						type="submit"
-						disabled={!form.isValid || form.isValidating}
+						disabled={!form.isValid || form.isValidating || !form.dirty}
 					>
 						Save
 					</Button>
@@ -573,7 +564,6 @@ interface IState {
 	visualSettings: any;
 	flag: boolean;
 	showCacheWarning: boolean;
-	showBetaViewerWarning: boolean;
 }
 
 export class VisualSettingsDialog extends PureComponent<IProps, IState> {
@@ -582,7 +572,6 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 		visualSettings: null,
 		flag: false,
 		showCacheWarning: false,
-		showBetaViewerWarning: false,
 	};
 
 	public handleTabChange = (event, selectedTab) => {
@@ -593,21 +582,23 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 		this.setState({showCacheWarning : event.target.checked});
 	}
 
-	public onUseBetaViewerChange = (event) => {
-		this.setState({ showBetaViewerWarning : event.target.checked !== this.props.visualSettings.useBetaViewer });
-	}
-
 	public onSubmit = (values) => {
 		const { updateSettings, currentUser} = this.props;
+		const parsedValues = {
+			...values,
+			nearPlane: Number(values.nearPlane),
+			unityMemory: Number(values.unityMemory),
+			farPlaneSamplingPoints: Number(values.farPlaneSamplingPoints),
+			maxShadowDistance: Number(values.maxShadowDistance),
+		};
 
-		values.nearPlane = Number(values.nearPlane);
-		values.unityMemory = Number(values.unityMemory);
-		values.farPlaneSamplingPoints = Number(values.farPlaneSamplingPoints);
-		values.maxShadowDistance = Number(values.maxShadowDistance);
-
-		updateSettings(currentUser, values);
+		updateSettings(currentUser, parsedValues);
 
 		this.props.handleClose();
+	}
+
+	public hideWarning = () => {
+		this.setState({ showCacheWarning: false });
 	}
 
 	public componentDidMount() {
@@ -640,14 +631,12 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 						{selectedTab === 0 && (
 							<BasicSettings
 								onCacheChange={this.onCacheChange}
-								onUseBetaViewerChange={this.onUseBetaViewerChange}
-								showBetaViewerWarning={this.state.showBetaViewerWarning}
 							/>
 						)}
 						{selectedTab === 1 && <AdvancedSettings />}
 						{selectedTab === 2 && <StreamingSettings />}
 						{selectedTab === 0 && showCacheWarning && <CacheWarning />}
-						<Buttons onClickCancel={handleClose} />
+						<Buttons onClickCancel={handleClose} hideWarning={this.hideWarning} />
 					</Form>
 				</Formik>
 			</VisualSettingsDialogContent>

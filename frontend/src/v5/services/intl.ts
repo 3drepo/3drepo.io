@@ -43,12 +43,19 @@ export const initializeIntl = (locale: string) => {
 			// Locale of the fallback defaultMessage
 			defaultLocale: DEFAULT_LOCALE,
 			messages,
+			onError: (error) => {
+				if (error.code === 'MISSING_TRANSLATION') {
+					return;
+				}
+		
+				console.error(error);
+			},
 		},
 		cache,
 	);
 };
 
-const getIntl = () => {
+export const getIntl = () => {
 	if (!intlInternal) {
 		initializeIntl(DEFAULT_LOCALE);
 	}
@@ -63,20 +70,10 @@ export const formatMessage: typeof intlInternal.formatMessage = (descriptor, val
 export const formatDate: typeof intlInternal.formatDate = (value, opts?): string => getIntl().formatDate(value, opts);
 
 // eslint-disable-next-line max-len
+export const formatTime: typeof intlInternal.formatTime = (value, opts?): string => getIntl().formatTime(value, opts);
+
+// eslint-disable-next-line max-len
 export const formatRelativeTime: typeof intlInternal.formatRelativeTime = (value, unit?, opts?): string => getIntl().formatRelativeTime(value, unit, opts);
 
 // eslint-disable-next-line max-len
 export const formatPlural: typeof intlInternal.formatPlural = (value, opts?): Intl.LDMLPluralRule => getIntl().formatPlural(value, opts);
-
-export const getIntlProviderProps = () => ({
-	messages: getIntl().messages,
-	defaultLocal: getIntl().defaultLocale,
-	locale: getIntl().locale,
-	onError: (error) => {
-		if (error.code === 'MISSING_TRANSLATION' && getIntl().locale === DEFAULT_LOCALE) {
-			return;
-		}
-
-		console.error(error);
-	},
-});

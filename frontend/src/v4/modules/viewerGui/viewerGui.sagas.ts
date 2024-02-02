@@ -15,15 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isV5 } from '@/v4/helpers/isV5';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
-import { goBack, push } from 'connected-react-router';
-import { matchPath } from 'react-router';
+import { goBack } from 'connected-react-router';
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
-import { ROUTES } from '../../constants/routes';
-import { INITIAL_HELICOPTER_SPEED, VIEWER_CLIP_MODES, VIEWER_EVENTS } from '../../constants/viewer';
+import { TicketsCardActions } from '@/v5/store/tickets/card/ticketsCard.redux';
+import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
+import { INITIAL_HELICOPTER_SPEED, VIEWER_GIZMO_MODES, VIEWER_EVENTS, VIEWER_CLIP_MODES } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
 import { Viewer } from '../../services/viewer/viewer';
@@ -45,13 +44,12 @@ import { SequencesActions } from '../sequences';
 import { StarredActions } from '../starred';
 import { dispatch } from '../store';
 import { TreeActions } from '../tree';
-import { selectInitialView, selectViewpointsDomain, selectViewpointsList, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
+import { selectInitialView, selectViewpointsDomain, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
 import { ViewerGuiActions, ViewerGuiTypes } from './viewerGui.redux';
 import {
-	selectClipNumber,
+	selectClippingMode,
 	selectHelicopterSpeed,
 	selectIsClipEdit,
-	selectIsMetadataVisible
 } from './viewerGui.selectors';
 
 function* fetchData({ teamspace, model }) {
@@ -62,14 +60,10 @@ function* fetchData({ teamspace, model }) {
 		yield put(ModelActions.fetchSettingsSuccess(settings));
 		yield put(ModelActions.setPendingState(false));
 	} catch (error) {
-		if (isV5()) {
-			yield put(DialogsActions.open('alert', {
-				currentActions: formatMessage({ id: 'viewer.error.resource', defaultMessage: 'trying to fetch resource' }),
-				error,
-			}));
-		} else {
-			yield put(DialogActions.showRedirectToTeamspaceDialog(error, teamspace));
-		}
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'viewer.error.resource', defaultMessage: 'trying to fetch resource' }),
+			error,
+		}));
 		return;
 	}
 
@@ -79,6 +73,7 @@ function* fetchData({ teamspace, model }) {
 		yield put(ViewpointsActions.reset());
 
 		yield all([
+			put(TicketsActions.clearGroups()),
 			put(ModelActions.fetchRevisions(teamspace, model, false)),
 			put(CurrentUserActions.fetchUser(username)),
 			put(JobsActions.fetchJobs(teamspace)),
@@ -203,52 +198,6 @@ function* stopListenOnClickPin() {
 	}
 }
 
-const updateClipStateCallback = (clipNumber) => {
-	dispatch(ViewerGuiActions.updateClipState(clipNumber));
-};
-
-function* initialiseToolbar() {
-	try {
-		yield put(ViewerGuiActions.startListenOnNumClip());
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('initialise', 'toolbar', error));
-	}
-}
-
-function* startListenOnNumClip() {
-	try {
-		Viewer.on(VIEWER_EVENTS.UPDATE_NUM_CLIP, updateClipStateCallback);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('start listen on', 'num clip', error));
-	}
-}
-
-function* stopListenOnNumClip() {
-	try {
-		Viewer.off(VIEWER_EVENTS.UPDATE_NUM_CLIP, updateClipStateCallback);
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('stop listen on', 'num clip', error));
-	}
-}
-
-function* updateClipState({clipNumber}) {
-	try {
-		const isClipEdit = yield select(selectIsClipEdit);
-		const currentClipNumber = yield select(selectClipNumber);
-
-		if (currentClipNumber !== clipNumber) {
-			yield put(ViewerGuiActions.setClipNumber(clipNumber));
-
-			if (clipNumber === 0 && isClipEdit) {
-				yield put(ViewerGuiActions.setClipEdit(false));
-				yield put(ViewerGuiActions.setClippingMode(null));
-			}
-		}
-	} catch (error) {
-		yield put(DialogActions.showErrorDialog('update', 'clip state', error));
-	}
-}
-
 function* goToHomeView() {
 	try {
 		const defaultView = yield select(selectDefaultView);
@@ -281,12 +230,10 @@ function* setNavigationMode({mode}) {
 	}
 }
 
-function* resetHelicopterSpeed({teamspace, modelId, updateDefaultSpeed}) {
+function* resetHelicopterSpeed({teamspace, modelId }) {
 	try {
 		yield Viewer.helicopterSpeedReset();
-		if (updateDefaultSpeed) {
-			yield API.editHelicopterSpeed(teamspace, modelId, INITIAL_HELICOPTER_SPEED);
-		}
+		yield API.editHelicopterSpeed(teamspace, modelId, INITIAL_HELICOPTER_SPEED);
 		yield put(ViewerGuiActions.setHelicopterSpeed(INITIAL_HELICOPTER_SPEED));
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'helicopter speed', error));
@@ -341,28 +288,52 @@ function* decreaseHelicopterSpeed({ teamspace, modelId }) {
 	}
 }
 
-function* setClippingMode({mode}) {
+function* setClippingMode({ mode }) {
 	try {
-		if (mode) {
-			const isSingle = mode === VIEWER_CLIP_MODES.SINGLE;
-			yield Viewer.startClip(isSingle);
+		const currentClipMode = yield select(selectClippingMode);
+		if (currentClipMode !== mode) {
+			yield put(ViewerGuiActions.setClipModeSuccess(mode));
+			if (!mode) {
+				yield Viewer.clipToolDelete();
+				yield put(ViewerGuiActions.setClipEdit(false));
+			}
 		}
-		yield put(ViewerGuiActions.setClippingModeSuccess(mode));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('set', 'clipping mode', error));
+		yield put(DialogActions.showErrorDialog('set', 'clip mode', error));
 	}
 }
 
-function* setClipEdit({isClipEdit}) {
+function* setGizmoMode({ mode }) {
 	try {
-		if (isClipEdit) {
-			yield Viewer.startClipEdit();
-		} else {
-			yield Viewer.stopClipEdit();
+		switch (mode) {
+			case VIEWER_GIZMO_MODES.ROTATE:
+				Viewer.clipToolRotate()
+				break;
+			case VIEWER_GIZMO_MODES.SCALE:
+				Viewer.clipToolScale()
+				break
+			default:
+				Viewer.clipToolTranslate();
+				break;
 		}
-		yield put(ViewerGuiActions.setClipEditSuccess(isClipEdit));
+		yield put(ViewerGuiActions.setGizmoModeSuccess(mode));
 	} catch (error) {
-		yield put(DialogActions.showErrorDialog('toggle', 'clip edit', error));
+		yield put(DialogActions.showErrorDialog('set', 'gizmo mode', error));
+	}
+}
+
+function* setClipEdit({ isClipEdit }) {
+	try {
+		const currentClipEdit = yield select(selectIsClipEdit);
+		if (currentClipEdit !== isClipEdit) {
+			const clippingMode = yield select(selectClippingMode);
+			yield all([
+				isClipEdit ? Viewer.startClip(clippingMode === VIEWER_CLIP_MODES.SINGLE) : Viewer.stopClipEdit(),
+				put(ViewerGuiActions.setClipEditSuccess(isClipEdit)),
+			])
+		}
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('set', 'clip edit', error));
 	}
 }
 
@@ -384,7 +355,7 @@ function* setCamera({ params }) {
 }
 
 function* loadModel() {
-	const { teamspace, model, v5 } = yield select(selectUrlParams);
+	const { teamspace, model } = yield select(selectUrlParams);
 
 	try {
 		yield Viewer.isViewerReady();
@@ -401,18 +372,14 @@ function* loadModel() {
 		}
 
 	} catch (error) {
-		const content = 'The model was either not found, failed to load correctly ' +
-			'or you are not authorized to view it. ' +
-			' You will now be redirected to the teamspace page.';
-		yield put(DialogActions.showDialog({ title: 'Model Error', content }));
-
-		if (v5) {
-			if (matchPath(location.pathname, { path: ROUTES.V5_MODEL_VIEWER })) {
-				yield put(goBack());
-			}
-			return;
-		}
-		yield put(push(ROUTES.TEAMSPACES));
+		const content = formatMessage({
+				id: 'viewerGui.loadModel.error.content',
+				defaultMessage: 'The model was either not found, failed to load correctly ' +
+					'or you are not authorized to view it. ' +
+					' You will now be redirected to the previous page.'
+			})
+		yield put(DialogActions.showDialog({ title: formatMessage({id: 'viewerGui.loadModel.error.title', defaultMessage: 'Model Error'}), content }));
+		yield put(goBack());
 	}
 }
 
@@ -428,6 +395,18 @@ function* setIsPinDropMode({ mode }: { mode: boolean }) {
 	}
 }
 
+export function * clearColorOverrides() {
+	yield put(GroupsActions.clearColorOverridesSuccess());
+	yield put(ViewpointsActions.clearColorOverrides());
+	yield put(TicketsCardActions.setOverrides(null));
+	yield put(SequencesActions.clearColorOverrides());
+}
+
+export function* clearTransformations() {
+	yield put(SequencesActions.clearTransformations());
+	yield put(ViewpointsActions.clearTransformations());
+}
+
 export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.FETCH_DATA, fetchData);
 	yield takeLatest(ViewerGuiTypes.RESET_PANELS_STATES, resetPanelsStates);
@@ -437,7 +416,6 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.START_LISTEN_ON_CLICK_PIN, startListenOnClickPin);
 	yield takeLatest(ViewerGuiTypes.STOP_LISTEN_ON_CLICK_PIN, stopListenOnClickPin);
 	yield takeLatest(ViewerGuiTypes.HANDLE_PIN_CLICK, handlePinClick);
-	yield takeLatest(ViewerGuiTypes.INITIALISE_TOOLBAR, initialiseToolbar);
 	yield takeLatest(ViewerGuiTypes.SET_NAVIGATION_MODE, setNavigationMode);
 	yield takeLatest(ViewerGuiTypes.RESET_HELICOPTER_SPEED, resetHelicopterSpeed);
 	yield takeLatest(ViewerGuiTypes.GET_HELICOPTER_SPEED, getHelicopterSpeed);
@@ -445,13 +423,13 @@ export default function* ViewerGuiSaga() {
 	yield takeLatest(ViewerGuiTypes.DECREASE_HELICOPTER_SPEED, decreaseHelicopterSpeed);
 	yield takeLatest(ViewerGuiTypes.GO_TO_HOME_VIEW, goToHomeView);
 	yield takeLatest(ViewerGuiTypes.SET_CLIPPING_MODE, setClippingMode);
-	yield takeLatest(ViewerGuiTypes.UPDATE_CLIP_STATE, updateClipState);
+	yield takeLatest(ViewerGuiTypes.SET_GIZMO_MODE, setGizmoMode);
 	yield takeLatest(ViewerGuiTypes.SET_CLIP_EDIT, setClipEdit);
-	yield takeLatest(ViewerGuiTypes.START_LISTEN_ON_NUM_CLIP, startListenOnNumClip);
-	yield takeLatest(ViewerGuiTypes.STOP_LISTEN_ON_NUM_CLIP, stopListenOnNumClip);
 	yield takeLatest(ViewerGuiTypes.CLEAR_HIGHLIGHTS, clearHighlights);
 	yield takeLatest(ViewerGuiTypes.SET_CAMERA, setCamera);
 	yield takeLatest(ViewerGuiTypes.SET_PROJECTION_MODE, setProjectionMode);
 	yield takeLatest(ViewerGuiTypes.LOAD_MODEL, loadModel);
 	yield takeLatest(ViewerGuiTypes.SET_IS_PIN_DROP_MODE, setIsPinDropMode);
+	yield takeLatest(ViewerGuiTypes.CLEAR_COLOR_OVERRIDES, clearColorOverrides);
+	yield takeLatest(ViewerGuiTypes.CLEAR_TRANSFORMATIONS, clearTransformations);
 }

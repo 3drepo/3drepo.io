@@ -16,27 +16,26 @@
  */
 
 const { createProject, deleteProject, getProjectById, getProjectList, updateProject } = require('../../../models/projectSettings');
+const { getFile, removeFile, storeFile } = require('../../../services/filesManager');
 const {
 	hasProjectAdminPermissions,
-	hasReadAccessToModel,
+	hasReadAccessToSomeModels,
 	isTeamspaceAdmin,
 } = require('../../../utils/permissions/permissions');
+const { COL_NAME } = require('../../../models/projectSettings.constants');
 const { getAllTemplates } = require('../../../models/tickets.templates');
 const { removeModelData } = require('../../../utils/helper/models');
 
 const Projects = {};
 
-const hasSomeModelAccess = async (teamspace, project, models, user) => {
-	const modelAccess = await Promise.all(models.map((model) => hasReadAccessToModel(teamspace, project, model, user)));
-	return modelAccess.some((bool) => bool);
-};
-
 Projects.getProjectList = async (teamspace, user) => {
-	const projects = await getProjectList(teamspace, { _id: 1, name: 1, permissions: 1, models: 1 });
-	const tsAdmin = await isTeamspaceAdmin(teamspace, user);
+	const [projects, tsAdmin] = await Promise.all([
+		getProjectList(teamspace, { _id: 1, name: 1, permissions: 1, models: 1 }),
+		isTeamspaceAdmin(teamspace, user),
+	]);
 	return (await Promise.all(projects.map(async ({ _id, name, permissions, models }) => {
 		const isAdmin = tsAdmin || hasProjectAdminPermissions(permissions, user);
-		const hasAccess = isAdmin || await hasSomeModelAccess(teamspace, _id, models, user);
+		const hasAccess = isAdmin || await hasReadAccessToSomeModels(teamspace, _id, models, user);
 		return hasAccess ? { _id, name, isAdmin } : [];
 	}))).flat();
 };
@@ -52,12 +51,24 @@ Projects.deleteProject = async (teamspace, projectId) => {
 };
 
 // passing project in to future proof this - the list will be filtered by project settings configurations
-Projects.getAllTemplates = (teamspace, project, showDeprecated) => getAllTemplates(
-	teamspace, showDeprecated, { name: 1, deprecated: 1, code: 1 },
-);
+Projects.getAllTemplates = (teamspace, project, getDetails, showDeprecated) => {
+	const projection = getDetails ? undefined : {
+		name: 1,
+		deprecated: 1,
+		code: 1,
+	};
+
+	return getAllTemplates(teamspace, showDeprecated, projection);
+};
 
 Projects.getProjectSettings = (teamspace, projectId) => getProjectById(teamspace, projectId, { name: 1, _id: 0 });
 
 Projects.updateProject = updateProject;
+
+Projects.getImage = (teamspace, project) => getFile(teamspace, COL_NAME, project);
+
+Projects.updateImage = (teamspace, project, imageBuffer) => storeFile(teamspace, COL_NAME, project, imageBuffer);
+
+Projects.deleteImage = (teamspace, project) => removeFile(teamspace, COL_NAME, project);
 
 module.exports = Projects;

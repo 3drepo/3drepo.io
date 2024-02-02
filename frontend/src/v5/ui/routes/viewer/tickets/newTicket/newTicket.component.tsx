@@ -28,25 +28,33 @@ import { getTicketValidator } from '@/v5/store/tickets/tickets.validators';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import { InputController } from '@controls/inputs/inputController.component';
+import { getWaitablePromise } from '@/v5/helpers/async.helpers';
+import { merge } from 'lodash';
 import { BottomArea, CloseButton, Form, SaveButton } from './newTicket.styles';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
 import { ViewerParams } from '../../../routes.constants';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
-import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { CardContent } from '../ticketsForm/ticketsForm.styles';
 import { TicketsCardViews } from '../tickets.constants';
-import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 
 export const NewTicketCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const unsavedTicket = TicketsCardHooksSelectors.selectUnsavedTicket();
 
 	const isFederation = modelIsFederation(containerOrFederation);
 	const template = TicketsCardHooksSelectors.selectSelectedTemplate();
 	const isLoading = !('config' in template);
+	const templateId = template._id;
 
-	const defaultTicket = getDefaultTicket(template);
+	const view = TicketsCardHooksSelectors.selectView();
+	const viewProps = TicketsCardHooksSelectors.selectViewProps();
+
+	let defaultTicket = getDefaultTicket(template);
+	if (unsavedTicket) {
+		defaultTicket = merge(defaultTicket, unsavedTicket);
+	}
 
 	const formData = useForm({
 		resolver: yupResolver(isLoading ? null : getTicketValidator(template)),
@@ -63,7 +71,7 @@ export const NewTicketCard = () => {
 	};
 
 	const onSubmit = async (vals) => {
-		const ticket = { type: template._id, ...vals };
+		const ticket = { type: templateId, ...vals };
 
 		const { promiseToResolve, resolve } = getWaitablePromise();
 
@@ -85,30 +93,33 @@ export const NewTicketCard = () => {
 	};
 
 	useEffect(() => {
-		if (templateAlreadyFetched(template)) return;
-		TicketsActionsDispatchers.fetchTemplate(
-			teamspace,
-			project,
-			containerOrFederation,
-			template._id,
-			isFederation,
-		);
+		if (!templateAlreadyFetched(template)) {
+			TicketsActionsDispatchers.fetchTemplate(
+				teamspace,
+				project,
+				containerOrFederation,
+				templateId,
+				isFederation,
+			);
+		}
+
+		return () => {
+			TicketsCardActionsDispatchers.setUnsavedTicket(formData.getValues());
+		};
 	}, []);
 
 	useEffect(() => {
 		formData.reset(defaultTicket);
-	}, [JSON.stringify(defaultTicket)]);
-
-	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
+	}, [isLoading]);
 
 	return (
 		<CardContainer>
 			<FormProvider {...formData}>
 				<Form onSubmit={formData.handleSubmit(onSubmit)}>
-					{view === TicketDetailsView.Groups && (
+					{view === TicketsCardViews.DetailsGroups && (
 						<>
 							<CardHeader>
-								<ArrowBack onClick={() => setDetailViewAndProps(TicketDetailsView.Form)} />
+								<ArrowBack onClick={() => TicketsCardActionsDispatchers.goBackFromTicketGroups(unsavedTicket || formData.getValues() ) } />
 								<FormattedMessage
 									id="viewer.cards.newTicketTitleGroups"
 									defaultMessage="New {template} ticket:Groups"
@@ -124,7 +135,7 @@ export const NewTicketCard = () => {
 						</>
 					)}
 
-					{view === TicketDetailsView.Form && (
+					{view !== TicketsCardViews.DetailsGroups && (
 						<>
 							<CardHeader>
 								<TicketsIcon />

@@ -16,8 +16,8 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { camelCase, isEmpty, isEqual, isObject, mapKeys, get } from 'lodash';
+import { FederationsHooksSelectors, SequencesHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { camelCase, isEmpty, isEqual, isObject, mapKeys } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
@@ -25,8 +25,7 @@ import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
-import { IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
+import { TicketBaseKeys, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 
@@ -62,7 +61,13 @@ export const getDefaultTicket = (template: ITemplate): EditableTicket => {
 			[name || type]: templatePropertiesToTicketProperties(moduleProperties),
 		}),
 		{},
-	);
+	) as any;
+
+	const currentSequenceDateTime = SequencesHooksSelectors.selectSelectedDate();
+	if (modules.sequencing && currentSequenceDateTime) {
+		modules.sequencing[SequencingProperties.START_TIME] = new Date(currentSequenceDateTime).getTime();
+	}
+
 	return ({
 		title: '',
 		type: template._id,
@@ -101,10 +106,10 @@ export const filterEmptyTicketValues = (ticket) => {
 	const parsedTicket = {};
 	Object.entries(ticket).forEach(([key, value]) => {
 		switch (key) {
-			case 'properties':
+			case TicketBaseKeys.PROPERTIES:
 				parsedTicket[key] = filterEmptyModuleValues(value);
 				break;
-			case 'modules':
+			case TicketBaseKeys.MODULES:
 				parsedTicket[key] = {};
 				Object.entries(value).forEach(([module, moduleValue]) => {
 					const parsedModule = filterEmptyModuleValues(moduleValue);
@@ -254,7 +259,7 @@ export const sanitizeViewVals = (values:Partial<ITicket>, ticket:ITicket, templa
 };
 
 export const templateAlreadyFetched = (template: ITemplate) => {
-	const fetchedProperties = ['modules', 'properties', 'config'];
+	const fetchedProperties: string[] = Object.values(TicketBaseKeys);
 	return fetchedProperties.some((prop) => Object.keys(template).includes(prop));
 };
 
@@ -268,6 +273,7 @@ const fillEmptyOverrides = (values: Partial<ITicket>) => {
 			viewValue.state ||= {} as any;
 			viewValue.state.colored ||= [];
 			viewValue.state.hidden ||= [];
+			viewValue.state.transformed ||= [];
 		}
 	});
 };
@@ -280,14 +286,4 @@ export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
 	if (values.modules) {
 		Object.values(values.modules).forEach(fillEmptyOverrides);
 	}
-};
-
-export const getTicketIsCompleted = (ticket) => {
-	const issuePropertyStatus = get(ticket, `properties.${IssueProperties.STATUS}`);
-	const treatmentStatus = get(ticket, `modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`);
-
-	const isCompletedIssueProperty = [TicketStatuses.CLOSED, TicketStatuses.VOID].includes(issuePropertyStatus);
-	const isCompletedTreatmentStatus = [TreatmentStatuses.AGREED_FULLY, TreatmentStatuses.VOID].includes(treatmentStatus);
-
-	return (isCompletedIssueProperty || isCompletedTreatmentStatus);
 };

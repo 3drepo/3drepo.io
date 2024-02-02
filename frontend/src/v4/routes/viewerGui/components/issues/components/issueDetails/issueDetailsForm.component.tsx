@@ -20,16 +20,13 @@ import { PureComponent } from 'react';
 import Tooltip from '@mui/material/Tooltip';
 import { withFormik, Form } from 'formik';
 import { debounce, get, isEmpty, isEqual } from 'lodash';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import {
 	ATTACHMENTS_ISSUE_TAB,
 	ISSUE_PROPERTIES_TAB,
 	ISSUE_SEQUENCING_TAB,
-	V5_ISSUE_SEQUENCING_TAB,
 	ISSUE_SHAPES_TAB,
-	ISSUE_TABS as V4_ISSUE_TABS,
-	V5_ISSUE_TABS,
+	ISSUE_TABS
 } from '../../../../../../constants/issues';
 import { VIEWER_PANELS_TITLES } from '../../../../../../constants/viewerGui';
 import { canChangeAssigned, canComment } from '../../../../../../helpers/issues';
@@ -90,7 +87,6 @@ interface IState {
 	activeTab: string;
 }
 
-const ISSUE_TABS = isV5() ? V5_ISSUE_TABS : V4_ISSUE_TABS;
 class IssueDetailsFormComponent extends PureComponent<IProps, IState> {
 
 	get isNewIssue() {
@@ -100,6 +96,11 @@ class IssueDetailsFormComponent extends PureComponent<IProps, IState> {
 	get canEditViewpoint() {
 		const { issue, myJob, permissions, currentUser } = this.props;
 		return this.isNewIssue || canComment(issue, myJob, permissions, currentUser);
+	}
+
+	get canEditResources() {
+		const { issue, myJob, permissions, currentUser } = this.props;
+		return canComment(issue, myJob, permissions, currentUser);
 	}
 
 	get canChangeAssigned() {
@@ -170,6 +171,7 @@ class IssueDetailsFormComponent extends PureComponent<IProps, IState> {
 			startTimeValue={this.props.values.sequence_start}
 			endTimeValue={this.props.values.sequence_end}
 			sequences={this.props.sequences}
+			canComment={this.canEditResources}
 		/>
 	)
 
@@ -188,7 +190,12 @@ class IssueDetailsFormComponent extends PureComponent<IProps, IState> {
 	)
 
 	public showAttachmentsContent = (active) => (
-		<AttachmentsFormTab active={active} resources={this.props.issue.resources} {...this.props} />
+		<AttachmentsFormTab
+			active={active}
+			resources={this.props.issue.resources}
+			canEdit={this.canEditResources}
+			{...this.props}
+		/>
 	)
 
 	get attachmentsProps() {
@@ -222,13 +229,13 @@ class IssueDetailsFormComponent extends PureComponent<IProps, IState> {
 					scrollButtons="auto"
 				>
 					<StyledTab label={ISSUE_TABS.ISSUE} value={ISSUE_PROPERTIES_TAB} />
-					<StyledTab label={ISSUE_TABS.SEQUENCING} value={isV5() ? V5_ISSUE_SEQUENCING_TAB : ISSUE_SEQUENCING_TAB} />
+					<StyledTab label={ISSUE_TABS.SEQUENCING} value={ISSUE_SEQUENCING_TAB} />
 					<StyledTab label={ISSUE_TABS.SHAPES} value={ISSUE_SHAPES_TAB} />
 					<StyledTab {...this.attachmentsProps} value={ATTACHMENTS_ISSUE_TAB} />
 				</StyledTabs>
 				<TabContent>
 					{this.showIssueContent(activeTab === ISSUE_PROPERTIES_TAB)}
-					{this.showSequencingContent(activeTab === (isV5() ? V5_ISSUE_SEQUENCING_TAB : ISSUE_SEQUENCING_TAB))}
+					{this.showSequencingContent(activeTab === ISSUE_SEQUENCING_TAB)}
 					{this.showShapesContent(activeTab === ISSUE_SHAPES_TAB)}
 					{this.showAttachmentsContent(activeTab === ATTACHMENTS_ISSUE_TAB)}
 				</TabContent>
@@ -238,7 +245,7 @@ class IssueDetailsFormComponent extends PureComponent<IProps, IState> {
 }
 
 export const IssueDetailsForm = withFormik({
-	mapPropsToValues: ({ issue }) => {
+	mapPropsToValues: ({ issue }: any) => {
 		return ({
 			status: issue.status,
 			priority: issue.priority,

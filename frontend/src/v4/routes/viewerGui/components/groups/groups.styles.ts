@@ -16,9 +16,6 @@
  */
 
 import styled, { css } from 'styled-components';
-import { isV5 } from '@/v4/helpers/isV5';
-import { Actions } from '@/v4/routes/viewerGui/components/previewListItem/previewListItem.styles';
-import { COLOR } from '../../../../styles';
 
 import {
 	VIEWER_PANELS,
@@ -26,8 +23,6 @@ import {
 	VIEWER_PANELS_MIN_HEIGHTS,
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
-import { PreviewListItem } from '../previewListItem/previewListItem.component';
-import { Description } from '../previewListItem/previewListItem.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
 import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
 

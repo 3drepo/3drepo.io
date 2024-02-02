@@ -16,7 +16,7 @@
  */
 
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addGroups, deleteGroups, getGroupsByIds } = require('../../../../../models/tickets.groups');
+const { addGroups, deleteGroups, getGroupsByIds } = require('./tickets.groups');
 const { addTicket, getAllTickets, getTicketById, updateTicket } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
@@ -179,14 +179,38 @@ Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource
 
 Tickets.getTicketById = getTicketById;
 
-Tickets.getTicketList = (teamspace, project, model) => {
-	const { SAFETIBASE } = presetModules;
-	const { [SAFETIBASE]: safetibaseProps } = modulePropertyLabels;
+const filtersToProjection = (filters) => {
+	const projectionObject = {};
+
+	filters.forEach((name) => {
+		if (name) {
+			if (name.includes('.')) {
+				const [moduleName, moduleProp] = name.split('.');
+				if (moduleName && moduleProp) {
+					projectionObject[`modules.${name}`] = 1;
+				}
+			} else {
+				projectionObject[`properties.${name}`] = 1;
+			}
+		}
+	});
+
+	return projectionObject;
+};
+
+Tickets.getTicketList = (teamspace, project, model, filters = []) => {
+	const { SAFETIBASE, SEQUENCING } = presetModules;
+	const {
+		[SAFETIBASE]: safetibaseProps,
+		[SEQUENCING]: seqProps,
+	} = modulePropertyLabels;
+
 	const projection = {
 		_id: 1,
 		title: 1,
 		number: 1,
 		type: 1,
+		...filtersToProjection(filters),
 		[`properties.${basePropertyLabels.OWNER}`]: 1,
 		[`properties.${basePropertyLabels.CREATED_AT}`]: 1,
 		[`properties.${basePropertyLabels.DEFAULT_VIEW}`]: 1,
@@ -198,6 +222,8 @@ Tickets.getTicketList = (teamspace, project, model) => {
 		[`modules.${SAFETIBASE}.${safetibaseProps.LEVEL_OF_RISK}`]: 1,
 		[`modules.${SAFETIBASE}.${safetibaseProps.TREATED_LEVEL_OF_RISK}`]: 1,
 		[`modules.${SAFETIBASE}.${safetibaseProps.TREATMENT_STATUS}`]: 1,
+		[`modules.${SEQUENCING}.${seqProps.START_TIME}`]: 1,
+		[`modules.${SEQUENCING}.${seqProps.END_TIME}`]: 1,
 
 	};
 

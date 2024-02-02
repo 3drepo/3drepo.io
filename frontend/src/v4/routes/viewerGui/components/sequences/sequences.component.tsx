@@ -19,13 +19,12 @@ import { IconButton } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import { STEP_SCALE } from '../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
-import { getSelectedFrame } from '../../../../modules/sequences/sequences.helper';
 import { EmptyStateInfo } from '../../../components/components.styles';
 import { Loader } from '../../../components/loader/loader.component';
 import { PanelBarActions } from '../panelBarActions';
 import { SequenceForm } from './components/sequenceForm/';
 import { SequencePlayer } from './components/sequencePlayer/sequencePlayer.component';
-import { SequencesList } from './components/sequencesList/sequencesList.component';
+import SequencesList from './components/sequencesList/sequencesList.container';
 import { TasksList } from './components/tasksList/sequenceTasksList.component';
 import {
 	LoaderContainer, SequencesContainer, SequencesIcon
@@ -41,6 +40,7 @@ interface IProps {
 	startDate: Date;
 	frames: any[];
 	selectedDate: Date;
+	selectedStartDate: Date;
 	selectedEndingDate: Date;
 	colorOverrides: any;
 	stepInterval: number;
@@ -53,51 +53,49 @@ interface IProps {
 	setPanelVisibility: (panelName, visibility) => void;
 	toggleActivitiesPanel: () => void;
 	fetchActivityDetails: (id: string) => void;
-	deselectViewsAndLeaveClipping: () => void;
-	showViewpoint: (teamspace: string, model: string, viewpoint: any) => void;
 	id?: string;
 	isActivitiesPending: boolean;
 	draggablePanels: string[];
 	toggleLegend: () => void;
 	resetLegendPanel: () => void;
+	clearTransformations: () => void;
 }
 
 const da =  new Date();
 
 const SequenceDetails = ({
-	startDate, endDate, selectedDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
+	startDate, endDate, selectedDate, selectedStartDate, selectedEndingDate, setSelectedDate, stepInterval, stepScale, setStepInterval,
 	setStepScale, currentTasks, loadingFrameState, loadingViewpoint, rightPanels, toggleActivitiesPanel,
-	fetchActivityDetails, onPlayStarted, frames, isActivitiesPending, toggleLegend, draggablePanels
+	fetchActivityDetails, frames, isActivitiesPending, toggleLegend, draggablePanels,
 }) => (
-		<>
-			<SequenceForm />
-			<SequencePlayer
-				min={startDate}
-				max={endDate}
-				value={selectedDate}
-				endingDate={selectedEndingDate}
-				stepInterval={stepInterval}
-				stepScale={stepScale}
-				onChange={setSelectedDate}
-				onChangeStepScale={setStepScale}
-				onChangeStepInterval={setStepInterval}
-				loadingFrame={loadingFrameState || loadingViewpoint}
-				rightPanels={rightPanels}
-				toggleActivitiesPanel={toggleActivitiesPanel}
-				onPlayStarted={onPlayStarted}
-				frames={frames}
-				isActivitiesPending={isActivitiesPending}
-				toggleLegend={toggleLegend}
-				draggablePanels={draggablePanels}
-			/>
-			<TasksList
-				tasks={currentTasks}
-				startDate={selectedDate}
-				endDate={selectedEndingDate}
-				fetchActivityDetails={fetchActivityDetails}
-			/>
-		</>
-	);
+	<>
+		<SequenceForm />
+		<SequencePlayer
+			min={startDate}
+			max={endDate}
+			value={selectedDate}
+			endingDate={selectedEndingDate}
+			stepInterval={stepInterval}
+			stepScale={stepScale}
+			onChange={setSelectedDate}
+			onChangeStepScale={setStepScale}
+			onChangeStepInterval={setStepInterval}
+			loadingFrame={loadingFrameState || loadingViewpoint}
+			rightPanels={rightPanels}
+			toggleActivitiesPanel={toggleActivitiesPanel}
+			frames={frames}
+			isActivitiesPending={isActivitiesPending}
+			toggleLegend={toggleLegend}
+			draggablePanels={draggablePanels}
+		/>
+		<TasksList
+			tasks={currentTasks}
+			startDate={selectedStartDate}
+			endDate={selectedEndingDate}
+			fetchActivityDetails={fetchActivityDetails}
+		/>
+	</>
+);
 
 const SequencesLoader = () => (<LoaderContainer><Loader /></LoaderContainer>);
 
@@ -115,30 +113,20 @@ export class Sequences extends PureComponent<IProps, {}> {
 		}
 	}
 
+	public onSequenceClose = () => {
+		this.props.setSelectedSequence(null);
+		this.props.clearTransformations();
+	}
+
 	public renderTitleIcon = () => {
 		if (this.props.selectedSequence) {
 			return (
-                <IconButton onClick={() => this.props.setSelectedSequence(null)} size="large">
+                <IconButton onClick={this.onSequenceClose} size="large">
 					<ArrowBack />
 				</IconButton>
             );
 		}
 		return <SequencesIcon />;
-	}
-
-	public onPlayStarted = () => {
-		const {
-			selectedSequence,
-			selectedDate,
-			frames,
-			showViewpoint,
-			deselectViewsAndLeaveClipping
-		} = this.props;
-		const { viewpoint } = getSelectedFrame(frames, selectedDate);
-
-		if (!viewpoint) {
-			deselectViewsAndLeaveClipping();
-		}
 	}
 
 	public render = () => {
@@ -153,12 +141,13 @@ export class Sequences extends PureComponent<IProps, {}> {
 					hideMenu
 				/>}
 				id={this.props.id}
+				title=""
 			>
 
 				{!sequences && <SequencesLoader />}
 
 				{selectedSequence && sequences.length > 0 &&
-					<SequenceDetails {...this.props} onPlayStarted={this.onPlayStarted} />
+					<SequenceDetails {...this.props} />
 				}
 
 				{sequences && !selectedSequence && sequences.length > 0 &&

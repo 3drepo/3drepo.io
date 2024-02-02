@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, createRef } from 'react';
-import List from '@mui/material/List';
 import ArrowRight from '@mui/icons-material/ArrowRight';
 import Check from '@mui/icons-material/Check';
 import Copy from '@mui/icons-material/FileCopy';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import TextField from '@mui/material/TextField';
+import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
+import { LONG_DATE_TIME_FORMAT } from '@/v4/services/formatting/formatDate';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { FILTER_TYPES } from '../../filterPanel';
@@ -33,9 +33,10 @@ import {
 	MenuFooter,
 	MenuList,
 	NestedWrapper,
-	StyledDatePicker,
+	StyledList,
 	StyledItemText,
-	StyledListItem
+	StyledListItem,
+	DateTimePickerWrapper
 } from './filtersMenu.styles';
 
 interface IProps {
@@ -103,7 +104,7 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 
 	public onDateChange = (item, subItem) => (value) => {
 		this.setState({ [subItem.value]: value } as any, () => {
-			subItem.date = value.valueOf();
+			subItem.date = value?.valueOf();
 			this.props.onToggleFilter(item, subItem);
 		});
 	}
@@ -118,13 +119,13 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 				<StyledItemText>
 					{name}
 					{item.type === FILTER_TYPES.DATE &&
-						<StyledDatePicker
-							value={this.getSelectedDate(item, subItem.value)}
-							onChange={this.onDateChange(item, subItem.value)}
-							renderInput={(params) => (
-								<TextField {...params} placeholder="Select date" />
-							)}
-						/>
+						<DateTimePickerWrapper>
+							<DateTimePicker
+								value={this.getSelectedDate(item, subItem.value)}
+								onChange={this.onDateChange(item, subItem.value)}
+								inputFormat={LONG_DATE_TIME_FORMAT}
+							/>
+						</DateTimePickerWrapper>
 					}
 					{this.isSelectedItem(item.label, subItem.value) && <Check fontSize={'small'} />}
 				</StyledItemText>
@@ -137,8 +138,9 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 	))(index === this.state.activeItem && item.values)
 
 	public renderMenuItems = (items) => {
+		const hasDateTimeInputs = items.some(({ type }) => type === FILTER_TYPES.DATE);
 		return (
-			<List>
+			<StyledList $hasDateTimeInputs={hasDateTimeInputs}>
 				{
 					items.map((item, index) => (
 						<NestedWrapper key={`${item.label}-${index}`} onMouseLeave={this.hideSubMenu}>
@@ -147,14 +149,14 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 						</NestedWrapper>
 					))
 				}
-			</List>
+			</StyledList>
 		);
 	}
 
 	public renderMenuDataTypes = renderWhenTrue(() => {
 		return (
 			<DataTypesWrapper>
-				<List>
+				<StyledList>
 					{
 						this.props.dataTypes.map((item, index) => {
 							const isSelected = this.props.selectedDataTypes.includes(item.type);
@@ -169,7 +171,7 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 							);
 						})
 					}
-				</List>
+				</StyledList>
 			</DataTypesWrapper>
 		);
 	});

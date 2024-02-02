@@ -16,6 +16,7 @@
  */
 import { all, call, put, select, take, takeLatest, delay } from 'redux-saga/effects';
 
+import { selectHasViewerAccess } from '@/v5/store/containers/containers.selectors';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { Viewer } from '../../services/viewer/viewer';
@@ -49,7 +50,6 @@ import {
 	selectSelectionMap,
 	selectSubModelsRootNodes,
 	selectTreeNodesList,
-	selectVisibilityMap
 } from './tree.selectors';
 import { TreeActions, TreeTypes } from './tree.redux';
 
@@ -90,9 +90,11 @@ const toggleMeshesVisibility = (meshes, visibility) => {
 };
 
 function* handleMetadata(node: any) {
-	const isMetadataActive = yield select(selectIsActive);
-	if (node && node.meta && isMetadataActive) {
+	if (node?.meta) {
 		yield put(BimActions.fetchMetadata(node.teamspace, node.model, node.meta[0]));
+	}
+	const metadataIsActive = yield select(selectIsActive);
+	if (metadataIsActive) {
 		yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.BIM, true));
 	}
 }
@@ -168,6 +170,14 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 		modelsWithMeshes.mainTree.account = teamspace;
 		modelsWithMeshes.mainTree.model = modelId;
 
+		const modelsLackingPermissions = [];
+		for (const { model } of modelSettings.subModels) {
+			const hasPermissions = yield select((state) => selectHasViewerAccess(state, model))
+			if (!hasPermissions) {
+				modelsLackingPermissions.push(model)
+			}
+		}
+
 		const meshMap = modelsWithMeshes.subModels.length ? modelsWithMeshes.subModels :
 			[modelsWithMeshes.mainTree];
 
@@ -178,10 +188,11 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 			meshMap,
 			treePath: {}
 		};
-
 		dataToProcessed.mainTree.name = modelSettings.name;
+		dataToProcessed.mainTree.children = dataToProcessed.mainTree.children.filter(({ name }) => !modelsLackingPermissions.includes(name.split(':').at(-1)));
 		dataToProcessed.mainTree.isFederation = modelSettings.federate;
-		dataToProcessed.subModels = modelSettings.subModels;
+		dataToProcessed.subTrees = subTrees.filter(({ nodes: { project } }) => !modelsLackingPermissions.includes(project))
+		dataToProcessed.subModels = modelSettings.subModels.filter(({ model }) => !modelsLackingPermissions.includes(model))
 		dataToProcessed.treePath = treePath;
 
 		yield TreeProcessing.transformData(dataToProcessed, setIsTreeProcessed);

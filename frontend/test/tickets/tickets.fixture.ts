@@ -18,7 +18,7 @@
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { Group, ITemplate, ITicket, PropertyDefinition, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 import * as faker from 'faker';
-import { times } from 'lodash';
+import { pick, times } from 'lodash';
 
 export const ticketMockFactory = (overrides?: Partial<ITicket>): ITicket => ({
 	_id: faker.datatype.uuid(),
@@ -29,8 +29,8 @@ export const ticketMockFactory = (overrides?: Partial<ITicket>): ITicket => ({
 		owner: faker.random.word(),
 		defaultView: EMPTY_VIEW,
 		pin: [],
-		status: faker.random.arrayElement(['None', 'Low', 'Medium', 'High']),
-		priority : faker.random.arrayElement(['Open', 'In progress', 'For approval', 'Closed', 'Void']),
+		priority: faker.random.arrayElement(['None', 'Low', 'Medium', 'High']),
+		status : faker.random.arrayElement(['Open', 'In progress', 'For approval', 'Closed', 'Void']),
 		assignees: [],
 		...overrides?.properties,
 	},
@@ -56,9 +56,6 @@ export const templateMockFactory = (overrides?: Partial<ITemplate>): ITemplate =
 	_id: faker.datatype.uuid(),
 	name: faker.random.word(),
 	code: faker.random.alpha({ count: 5, upcase: true }),
-	// TODO - replace null with faker values
-	config: null,
-	properties: null,
 	...overrides,
 });
 
@@ -99,3 +96,5 @@ export const mockGroup = (overrides?: Partial<Group>): Group => ({
 	}],
 	...overrides,
 })
+
+export const getBaseTicket = (ticket: ITicket) => pick(ticket, ['_id', 'title', 'number', 'type'])

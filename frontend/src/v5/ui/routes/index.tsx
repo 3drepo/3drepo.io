@@ -15,15 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
-import { StylesProvider } from '@mui/styles';
 import { ThemeProvider } from 'styled-components';
 
 import { theme } from '@/v5/ui/themes/theme';
-import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
-import { AuthActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { enableKickedOutEvent } from '@/v5/services/realtime/auth.events';
 import { ModalsDispatcher } from '@components/shared/modalsDispatcher/modalsDispatcher.component';
 import { SSOResponseHandler } from '@components/shared/sso/ssoLinkingResponseHandler/ssoLinkingResponseHandler.component';
 import { IntercomProvider } from 'react-use-intercom';
@@ -32,36 +27,18 @@ import { MainRoute } from './dashboard';
 import { V4Adapter } from '../v4Adapter/v4Adapter';
 
 export const Root = () => {
-	const isAuthenticated: boolean = AuthHooksSelectors.selectIsAuthenticated();
-	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
 	const { intercomLicense } = clientConfigService;
-
-	useEffect(() => {
-		if (!authenticationFetched) {
-			AuthActionsDispatchers.authenticate();
-		}
-	}, [authenticationFetched]);
-
-	useEffect(() => {
-		if (isAuthenticated) {
-			TeamspacesActionsDispatchers.fetch();
-		}
-	}, [isAuthenticated]);
-
-	useEffect(enableKickedOutEvent);
 
 	return (
 		<ThemeProvider theme={theme}>
 			<MuiThemeProvider theme={theme}>
-				<StylesProvider injectFirst>
-					<V4Adapter>
-						<IntercomProvider appId={intercomLicense}>
-							<MainRoute />
-							<SSOResponseHandler />
-							<ModalsDispatcher />
-						</IntercomProvider>
-					</V4Adapter>
-				</StylesProvider>
+				<V4Adapter>
+					<IntercomProvider appId={intercomLicense}>
+						<MainRoute />
+						<SSOResponseHandler />
+						<ModalsDispatcher />
+					</IntercomProvider>
+				</V4Adapter>
 			</MuiThemeProvider>
 		</ThemeProvider>
 	);

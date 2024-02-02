@@ -26,6 +26,7 @@ import { IProject } from '@/v5/store/projects/projects.types';
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
+import { getProjectImgSrc, DEFAULT_PROJECT_IMAGE } from '@/v5/store/projects/projects.helpers';
 import { EllipsisMenuContainer } from './projectCard.styles';
 import { LinkCard } from '../linkCard.component';
 
@@ -34,13 +35,10 @@ interface IProjectCard {
 	className?: string;
 	filterQuery?: string;
 }
-
 export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) => {
-	const DEFAULT_IMAGE = 'assets/images/project_placeholder.png';
 	const { teamspace } = useParams<TeamspaceParams>();
 	const to = projectRoute(teamspace, project);
 
-	const { isAdmin: isProjectAdmin } = project;
 	const isTeamspaceAdmin = TeamspacesHooksSelectors.selectIsTeamspaceAdmin();
 
 	const preventNavigation = (e) => e.preventDefault();
@@ -84,7 +82,8 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 			{...props}
 			to={to}
 			heading={<Highlight search={filterQuery}>{project.name}</Highlight>}
-			imgSrc={DEFAULT_IMAGE}
+			imgSrc={getProjectImgSrc(teamspace, project._id)}
+			defaultImgSrc={DEFAULT_PROJECT_IMAGE}
 		>
 			<EllipsisMenuContainer onClick={preventNavigation}>
 				<EllipsisMenu>
@@ -109,7 +108,6 @@ export const ProjectCard = ({ project, filterQuery, ...props }: IProjectCard) =>
 							defaultMessage: 'Settings',
 						})}
 						to={projectTabRoute(teamspace, project, 'project_settings')}
-						hidden={!isProjectAdmin}
 					/>
 				</EllipsisMenu>
 			</EllipsisMenuContainer>

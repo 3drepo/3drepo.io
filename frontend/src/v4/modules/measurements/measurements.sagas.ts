@@ -33,6 +33,7 @@
 	 selectPointMeasurements,
 	 MeasurementsActions,
 	 MeasurementsTypes,
+	 selectXyzDisplay,
  } from './';
 
 const onMeasurementCreated = (measure) => {
@@ -209,8 +210,8 @@ export function* clearMeasurements() {
 export function* resetMeasurementTool() {
 	try {
 		yield put(MeasurementsActions.resetMeasurementToolSuccess());
-		const units = yield select(selectMeasureUnits);
-		yield put(MeasurementsActions.setMeasureUnits(units));
+		yield put(MeasurementsActions.setMeasureXyzDisplay(yield select(selectXyzDisplay)));
+		yield put(MeasurementsActions.setMeasureUnits(yield select(selectMeasureUnits)));
 	} catch (error) {
 		DialogActions.showErrorDialog('reset', 'measurements tool', error);
 	}

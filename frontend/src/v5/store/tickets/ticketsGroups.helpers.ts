@@ -16,7 +16,7 @@
  */
 
 import { isString } from 'lodash';
-import { Group, GroupOverride, ViewpointState, Properties } from './tickets.types';
+import { Group, GroupOverride, ViewpointState, Properties, ITicket } from './tickets.types';
 
 const overrideWithGroups = (groups: Record<string, Group>) => (override: GroupOverride) => {
 	const overrideToReturn = { ...override };
@@ -57,6 +57,18 @@ export const createPropertiesWithGroups = (properties, groups) => Object.keys(pr
 
 	return partialProps;
 }, {} as Properties);
+
+export const ticketWithGroups = (ticket: ITicket, groups: Record<string, Group>)  => {
+	const properties = createPropertiesWithGroups(ticket.properties, groups);
+
+
+	const modules:Record<string, Properties> = {};
+	Object.keys(ticket.modules || {}).forEach((moduleName) => 
+		modules[moduleName] = createPropertiesWithGroups(ticket.modules[moduleName], groups),
+	); 
+	return { ...ticket, properties, modules };
+};
+
 /* eslint-enable no-param-reassign */
 
 export const getSanitizedSmartGroup = (group) => {

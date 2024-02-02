@@ -231,7 +231,7 @@
 		MODEL_IS_A_SUBMODEL: { message: "Model cannot be deleted as it is currently a sub model of another federation", status: 400 },
 		SUBMODEL_IS_MISSING: { message: "subModels field is missing in request body", status: 400 },
 
-		AVATAR_SIZE_LIMIT: { status: 400, message: `Avatar image cannot be larger than ${config.avatarSizeLimit / 1024 / 1024 } MB` },
+		AVATAR_SIZE_LIMIT: { status: 400, message: `Avatar image cannot be larger than ${config.imageSizeLimit / 1024 / 1024 } MB` },
 		INVALID_USERNAME: { message: "Invalid username", status: 400 },
 		FILE_NO_EXT: { message: "Filename must have extension", status: 400 },
 

@@ -15,21 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseDueDate } from '../baseDueDate.component';
+import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import { DueDateEmptyLabel } from './dueDateLabel/dueDateEmptyLabel.component';
 import { DueDateFilledLabel } from './dueDateLabel/dueDateFilledLabel.component';
 
 type IDueDateWithLabel = {
 	value: number;
 	disabled?: boolean;
-	onBlur?: (newValue) => void;
+	onChange?: (newValue) => void;
 };
 
-export const DueDateWithLabel = ({ value, disabled, onBlur }: IDueDateWithLabel) => (
-	<BaseDueDate
+export const DueDateWithLabel = ({ value, disabled, onChange }: IDueDateWithLabel) => (
+	<DateTimePicker
 		value={value}
 		disabled={disabled}
-		onBlur={onBlur}
+		onChange={onChange}
 		renderInput={({ inputRef }) => (
 			<div ref={inputRef}>
 				{value ? (

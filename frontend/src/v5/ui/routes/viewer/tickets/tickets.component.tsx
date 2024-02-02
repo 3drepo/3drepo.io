@@ -35,13 +35,11 @@ import { TicketDetailsCard } from './ticketDetails/ticketsDetailsCard.component'
 import { NewTicketCard } from './newTicket/newTicket.component';
 import { ViewerParams } from '../../routes.constants';
 import { TicketContextComponent } from './ticket.context';
-import { useSearchParam } from '../../useSearchParam';
 
 export const Tickets = () => {
 	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const view = TicketsCardHooksSelectors.selectView();
-	const [, setTicketId] = useSearchParam('ticketId');
 
 	const readOnly = isFederation
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
@@ -51,33 +49,38 @@ export const Tickets = () => {
 	useEffect(() => {
 		UsersActionsDispatchers.fetchUsers(teamspace);
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
-
-		return () => {
-			TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
-			setTicketId('');
-		};
 	}, []);
 
 	useEffect(() => {
 		if (isFederation) {
 			return combineSubscriptions(
-				enableRealtimeFederationNewTicket(teamspace, project, containerOrFederation),
-				enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation),
-				enableRealtimeFederationUpdateTicketGroup(teamspace, project, containerOrFederation, revision),
+				enableRealtimeFederationNewTicket(teamspace, project, containerOrFederation, revision),
+				enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation, revision),
+				enableRealtimeFederationUpdateTicketGroup(teamspace, project, containerOrFederation),
 			);
 		}
 		return combineSubscriptions(
-			enableRealtimeContainerNewTicket(teamspace, project, containerOrFederation),
-			enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation),
+			enableRealtimeContainerNewTicket(teamspace, project, containerOrFederation, revision),
+			enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation, revision),
 			enableRealtimeContainerUpdateTicketGroup(teamspace, project, containerOrFederation, revision),
 		);
+	}, [containerOrFederation, revision]);
+
+	useEffect(() => () => {
+		if (view === TicketsCardViews.New) {
+			TicketsCardActionsDispatchers.setUnsavedTicket(null);
+		}
+	}, [view]);
+
+	useEffect(() => {
+		TicketsCardActionsDispatchers.setUnsavedTicket(null);
 	}, [containerOrFederation]);
 
 	return (
-		<>
+		<TicketContextComponent isViewer>
 			{view === TicketsCardViews.List && <TicketsListCard />}
-			{view === TicketsCardViews.Details && <TicketContextComponent isViewer><TicketDetailsCard /></TicketContextComponent>}
-			{view === TicketsCardViews.New && <TicketContextComponent isViewer><NewTicketCard /></TicketContextComponent>}
-		</>
+			{view.startsWith(TicketsCardViews.Details)  && <TicketDetailsCard />}
+			{view === TicketsCardViews.New && <NewTicketCard />}
+		</TicketContextComponent>
 	);
 };

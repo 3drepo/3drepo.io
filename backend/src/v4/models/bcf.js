@@ -187,6 +187,15 @@ async function getIssueBCF(issue, account, model, unit) {
 			return;
 		}
 
+		const getViewpointId = (viewId = utils.generateUUID()) => {
+			try {
+				utils.uuidToString(viewId);
+
+			} catch (err) {
+				return utils.uuidToString(utils.generateUUID());
+			}
+		};
+
 		const commentXmlObj = {
 			"@":{
 				Guid: utils.uuidToString(comment.guid ? comment.guid : utils.generateUUID())
@@ -195,7 +204,7 @@ async function getIssueBCF(issue, account, model, unit) {
 			"Author": comment.owner,
 			"Comment": comment.comment,
 			"Viewpoint": {
-				"@": {Guid: utils.uuidToString(comment.viewpoint ? comment.viewpoint :	utils.generateUUID())}
+				"@": {Guid: getViewpointId(comment.viewpoint)}
 			},
 			// bcf 1.0 for back comp
 			"Status": issue.topic_type ? utils.ucFirst(issue.topic_type.replace(/_/g, " ")) : "",

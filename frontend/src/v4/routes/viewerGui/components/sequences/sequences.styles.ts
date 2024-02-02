@@ -21,7 +21,6 @@ import { Grid, IconButton, Input } from '@mui/material';
 import Slider from '@mui/material/Slider';
 import DotIcon from '@mui/icons-material/FiberManualRecord';
 import PlayIcon from '@assets/icons/filled/play-filled.svg';
-import { isV5 } from '@/v4/helpers/isV5';
 
 import {
 	VIEWER_PANELS,
@@ -35,7 +34,7 @@ import { Loader } from '../../../components/loader/loader.component';
 import { Content as ContentComponent } from '../../../components/loader/loader.styles';
 import { MenuItemContainer } from '../previewListItem/previewListItem.styles';
 import { ViewerPanel } from '../viewerPanel/viewerPanel.component';
-import { ViewerPanelContent } from '../viewerPanel/viewerPanel.styles';
+import { ViewerPanelContent as ViewerPanelContentBase } from '../viewerPanel/viewerPanel.styles';
 
 export const SequencesIcon = VIEWER_PANELS_ICONS[VIEWER_PANELS.SEQUENCES];
 
@@ -45,7 +44,7 @@ export const SequencesContainer = styled(ViewerPanel).attrs({
 	min-height: ${VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.SEQUENCES]}px;
 `;
 
-export const SequenceItemIcon =  styled(isV5() ? PlayIcon : SequencesIcon)`
+export const SequenceItemIcon =  styled(PlayIcon)`
 	&& {
 		font-size: 67px;
 		margin-right: 13px;
@@ -63,10 +62,22 @@ export const SequencePlayerContainer = styled.div`
 	height: 165px;
 `;
 
-export const SequenceTasksListContainer = styled(ViewerPanelContent)`
+export const SequenceTasksListContainer = styled(ViewerPanelContentBase)`
 	background-color: ${COLOR.BLACK_6};
 	font-size: 13px;
 	color: ${COLOR.BLACK_60};
+`;
+
+export const SetToCurrentDateButton = styled.span`
+	&&, &&:hover {
+		cursor: pointer;
+		text-decoration: underline;
+		height: fit-content;
+		font-size: 10px;
+		font-weight: 600;
+		margin-left: 3px;
+		color: ${({ theme }) => theme.palette.secondary.main};
+	}
 `;
 
 export const TaskListLabel = styled.div`
@@ -137,7 +148,7 @@ export const SequenceRow = styled(Grid).attrs({
 	container: true,
 	direction: 'row',
 	justify: 'flex-start',
-	alignItems: 'center',
+	alignItems: 'flex-start',
 	item: true
 })`
 	&& {
@@ -145,9 +156,16 @@ export const SequenceRow = styled(Grid).attrs({
 	}
 `;
 
+export const FlexCol = styled.div`
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+`;
+
 export const SliderRow = styled(SequenceRow)`
 	&& {
 		margin-left: -24px;
+		align-items: center;
 	}
 `;
 
@@ -201,6 +219,8 @@ export const StepInput = styled(Input).attrs({
 `;
 
 export const SequenceItemContainer = styled(MenuItemContainer)`
+	min-height: 94px;
+	max-height: 94px;
 	&& {
 		padding-left: 15px;
 	}
@@ -244,4 +264,32 @@ export const StyledLoader = styled(Loader)`
 		margin-right: 0;
 		font-size: 13px;
 	}
+`;
+
+export const ViewerPanelContent = styled(ViewerPanelContentBase)`
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+`;
+
+export const SequenceItems = styled.div`
+	display: contents;
+`;
+
+export const ToggleContainer = styled.div`
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	font-weight: 600;
+	min-height: 48px;
+	max-height: 48px;
+	position: sticky;
+	bottom: 0;
+	margin-top: auto;
+	z-index: 3;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	border-top: solid 1px ${({ theme }) => theme.palette.base.lightest};
+	box-sizing: border-box;
 `;

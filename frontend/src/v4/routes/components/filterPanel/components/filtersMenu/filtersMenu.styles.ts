@@ -15,14 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
-import { DatePicker } from '@mui/lab';
+import TextField from '@mui/material/TextField';
+import { TextField as CalendarTextField } from '@controls/inputs/datePicker/baseCalendarPicker/baseCalendarPicker.styles';
 
 import { COLOR } from '../../../../../styles';
 import { FileUploadInvoker } from '../../../../viewerGui/components/commentForm/commentForm.styles';
+import { Wrapper } from '../childMenu/childMenu.styles';
+
+export const StyledList = styled(List)<{ $hasDateTimeInputs?: boolean }>`
+	${({ $hasDateTimeInputs }) => $hasDateTimeInputs && css`
+		${Wrapper} {
+			min-width: 210px;
+		}
+	`}
+`;
 
 export const MenuList = styled(List)`
 	background-color: ${COLOR.WHITE};
@@ -49,17 +59,23 @@ export const StyledItemText = styled.div`
 	align-items: center;
 `;
 
+export const DateTimePickerWrapper = styled.div`
+	&& ${CalendarTextField} {
+		width: 144px;
+	}
+`;
+
 export const IconWrapper = styled.div`
 	color: ${COLOR.BLACK_60};
 	font-size: 12px;
 	margin-right: 10px;
 `;
 
-export const StyledListItem = styled(ListItemButton)`
-	&& {
+export const StyledListItem = styled(ListItemButton)<{ $isDateTime?: boolean }>`
+	&&& {
 		padding: 4px 10px;
 		height: 30px;
-		min-width: 180px;
+		min-width: ${({ $isDateTime }) => $isDateTime ? 212 : 180}px;
 
 		${FileUploadInvoker} {
 			display: none;
@@ -67,14 +83,9 @@ export const StyledListItem = styled(ListItemButton)`
 	}
 `;
 
-export const StyledDatePicker = styled(DatePicker)`
-	&& {
-		margin-left: 10px;
-	}
-
-	input {
-		font-size: 12px;
-	}
+export const DateTimeTextField = styled(TextField)`
+	width: 160px;
+	min-width: 158px;
 `;
 
 export const CopyItem = styled.div`

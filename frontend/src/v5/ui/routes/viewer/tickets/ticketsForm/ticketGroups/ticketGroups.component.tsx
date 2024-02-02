@@ -20,7 +20,7 @@ import { Group, GroupOverride, Viewpoint, ViewpointState } from '@/v5/store/tick
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
-import { convertToV4GroupNodes, toColorAndTransparencyDicts } from '@/v5/helpers/viewpoint.helpers';
+import { convertToV4GroupNodes, toGroupPropertiesDicts } from '@/v5/helpers/viewpoint.helpers';
 import { cloneDeep, isString, uniqBy, xor } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
@@ -87,9 +87,9 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 
 	const onSetHighlightedIndex = (type) => (index) => setHighlightedOverride({ type, index });
 
-	const onIsHighlightedIndex = (type) => (index) => {
-		if (highlightedOverride.type !== type) return false;
-		return highlightedOverride.index === index;
+	const getHighlightedIndexByType = (type) => {
+		if (highlightedOverride.type !== type) return -1;
+		return highlightedOverride.index;
 	};
 
 	const onDeleteGroups = (type) => (indexes) => {
@@ -108,6 +108,9 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 
 	const onSelectedHiddenGroupChange = (indexes: number[]) => {
 		setSelectedHiddenIndexes(indexes);
+		if (highlightedOverride.type === OverrideType.HIDDEN && indexes.includes(highlightedOverride.index)) {
+			setHighlightedOverride(NO_OVERRIDE_SELECTED);
+		}
 		const diffIndexes = xor(indexes, selectedHiddenIndexes);
 		const hideNodes = indexes.length > selectedHiddenIndexes.length;
 		const objects = diffIndexes.flatMap((i) => convertToV4GroupNodes((state.hidden[i]?.group as Group)?.objects));
@@ -164,10 +167,13 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 
 		onChange?.(newVal);
 		cancelEdition();
-		setHighlightedOverride({ index, type: editingOverride.type });
+
+		if (highlightedOverride.index === index && editingOverride.type === highlightedOverride.type) {
+			clearHighlightedIndex();
+		}
 	};
 
-	useEffect(() => { setTimeout(() => { onBlur?.(); }, 200); }, [value]);
+	useEffect(() => onBlur?.(), [value]);
 
 	useEffect(() => {
 		if (highlightedOverride.index === NO_OVERRIDE_SELECTED.index) {
@@ -178,7 +184,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	useEffect(() => {
 		const colored = selectedColorIndexes.map((i) => state.colored[i]).filter(Boolean);
 		if (colored.some(({ group }) => isString(group))) return;
-		TicketsCardActionsDispatchers.setOverrides(toColorAndTransparencyDicts(colored));
+		TicketsCardActionsDispatchers.setOverrides(toGroupPropertiesDicts(colored));
 	}, [selectedColorIndexes, value]);
 
 	useEffect(() => {
@@ -188,7 +194,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	}, [hasClearedOverrides]);
 
 	useEffect(() => {
-		dispatch(ViewpointsActions.setSelectedViewpoint(null));
+		dispatch(ViewpointsActions.clearColorOverrides());
 
 		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
 		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
@@ -199,12 +205,12 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 	return (
 		<Container onClick={clearHighlightedIndex}>
 			<TicketGroupsContextComponent
-				groupType="colored"
+				groupType={OverrideType.COLORED}
 				onDeleteGroups={onDeleteGroups(OverrideType.COLORED)}
 				onSelectedGroupsChange={setSelectedColorIndexes}
 				overrides={state.colored || []}
 				onEditGroup={onSetEditGroup(OverrideType.COLORED)}
-				isHighlightedIndex={onIsHighlightedIndex(OverrideType.COLORED)}
+				highlightedIndex={getHighlightedIndexByType(OverrideType.COLORED)}
 				clearHighlightedIndex={clearHighlightedIndex}
 				setHighlightedIndex={onSetHighlightedIndex(OverrideType.COLORED)}
 			>
@@ -213,14 +219,14 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 				/>
 			</TicketGroupsContextComponent>
 			<TicketGroupsContextComponent
-				groupType="hidden"
+				groupType={OverrideType.HIDDEN}
 				onDeleteGroups={onDeleteGroups(OverrideType.HIDDEN)}
+				onSelectedGroupsChange={onSelectedHiddenGroupChange}
 				overrides={state.hidden || []}
 				onEditGroup={onSetEditGroup(OverrideType.HIDDEN)}
-				isHighlightedIndex={onIsHighlightedIndex(OverrideType.HIDDEN)}
+				highlightedIndex={getHighlightedIndexByType(OverrideType.HIDDEN)}
 				setHighlightedIndex={onSetHighlightedIndex(OverrideType.HIDDEN)}
 				clearHighlightedIndex={clearHighlightedIndex}
-				onSelectedGroupsChange={onSelectedHiddenGroupChange}
 			>
 				<GroupsAccordion
 					title={formatMessage({ id: 'ticketCard.groups.hidden', defaultMessage: 'Hidden Groups' })}

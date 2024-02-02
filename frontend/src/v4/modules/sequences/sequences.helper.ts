@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { isEqual } from 'lodash';
+import { formatMessage } from '@/v5/services/intl';
 import { STEP_SCALE } from '../../constants/sequences';
 import { Viewer } from '../../services/viewer/viewer';
 import { getState } from '../store';
@@ -22,7 +23,7 @@ import { selectGetMeshesByIds, selectGetNodesIdsFromSharedIds } from '../tree';
 
 export const getSelectedFrame = (frames, endingDate) => {
 	const index = getSelectedFrameIndex(frames, endingDate);
-	return index === null ? null : frames[index];
+	return frames[index];
 };
 
 export const getSelectedFrameIndex = (frames, endingDate) => {
@@ -47,11 +48,47 @@ export const getSelectedFrameIndex = (frames, endingDate) => {
 		return rightMargin;
 	}
 
-	if ( frames[leftMargin].dateTime <= endingDate) {
-		return leftMargin;
+	return leftMargin;
+};
+
+export const getDateWithinBoundaries = (inputDate: Date | number, inputMinDate: Date | number, inputMaxDate: Date | number) => {
+	const date = new Date(inputDate);
+	const minDate = new Date(inputMinDate);
+	const maxDate = new Date(inputMaxDate);
+
+	const dateAsNumber = date.getTime();
+
+	if (dateAsNumber < minDate.getTime()) {
+		return minDate;
 	}
 
-	return null;
+	if (dateAsNumber > maxDate.getTime()) {
+		return maxDate;
+	}
+
+	return date;
+}
+
+export const MODAL_TODAY_NOT_AVAILABLE_BODY = {
+	title: formatMessage({
+		id: 'sequences.unavailableDate.today.title',
+		defaultMessage: 'Unavailable date',
+	}),
+	message: formatMessage({
+		id: 'sequences.unavailableDate.today.message',
+		defaultMessage: 'Today\'s date falls outside of the range of the sequence. The nearest date is selected',
+	}),
+};
+
+export const MODAL_DATE_NOT_AVAILABLE_BODY = {
+	title: formatMessage({
+		id: 'sequences.unavailableDate.date.title',
+		defaultMessage: 'Unavailable date',
+	}),
+	message: formatMessage({
+		id: 'sequences.unavailableDate.date.message',
+		defaultMessage: 'The selected date falls outside of the range of the sequence. The nearest date is selected',
+	}),
 };
 
 export const getDateByStep = (date, stepScale, step) => {

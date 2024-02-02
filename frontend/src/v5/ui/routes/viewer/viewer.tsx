@@ -18,7 +18,7 @@
 import { ViewerGui } from '@/v4/routes/viewerGui';
 import { useParams } from 'react-router-dom';
 import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useEffect, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
@@ -28,6 +28,7 @@ import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidView
 import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
 import { SpinnerLoader } from '@controls/spinnerLoader';
 import { CentredContainer } from '@controls/centredContainer';
+import { TicketsCardViews } from './tickets/tickets.constants';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
@@ -48,6 +49,7 @@ export const Viewer = () => {
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 
 	const handlePinClick = ({ id }) => {
+		TicketsCardActionsDispatchers.setSelectedTicketPin(id);
 		if (!tickets.some((t) => t._id === id)) return;
 
 		TicketsCardActionsDispatchers.openTicket(id);
@@ -59,6 +61,21 @@ export const Viewer = () => {
 	}, [tickets]);
 
 	useEffect(() => {
+		if (teamspace) {
+			TeamspacesActionsDispatchers.setCurrentTeamspace(teamspace);
+			ProjectsActionsDispatchers.fetch(teamspace);
+		}
+	}, [teamspace]);
+
+	useEffect(() => {
+		if (project) {
+			ProjectsActionsDispatchers.setCurrentProject(project);
+		}
+	}, [project]);
+
+	useEffect(() => {
+		TicketsCardActionsDispatchers.resetFilters();
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
 		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
 	}, [teamspace, project, containerOrFederation]);
 

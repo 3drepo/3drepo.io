@@ -121,10 +121,10 @@ export const ContainersList = ({
 					<DashboardListHeaderLabel name="code" width={160}>
 						<FormattedMessage id="containers.list.header.containerCode" defaultMessage="Container code" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="type" width={160} hideWhenSmallerThan={Display.Tablet}>
+					<DashboardListHeaderLabel name="type" width={173} hideWhenSmallerThan={Display.Tablet}>
 						<FormattedMessage id="containers.list.header.category" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="lastUpdated" width={188}>
+					<DashboardListHeaderLabel name="lastUpdated" width={210}>
 						<FormattedMessage id="containers.list.header.lastUpdated" defaultMessage="Last updated" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>

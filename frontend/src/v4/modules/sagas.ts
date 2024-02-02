@@ -49,7 +49,6 @@ import presentationSaga from './presentation/presentation.sagas';
 import risksSaga from './risks/risks.sagas';
 import sequencesSaga from './sequences/sequences.sagas';
 import starredSaga from './starred/starred.sagas';
-import startupSaga from './startup/startup.sagas';
 import teamspaceSaga from './teamspace/teamspace.sagas';
 import teamspacesSaga from './teamspaces/teamspaces.sagas';
 import treeSaga from './tree/tree.sagas';
@@ -57,51 +56,50 @@ import userManagementSaga from './userManagement/userManagement.sagas';
 import viewerSaga from './viewer/viewer.sagas';
 import viewerGuiSaga from './viewerGui/viewerGui.sagas';
 import viewpointsSaga from './viewpoints/viewpoints.sagas';
-import { sagaMiddleware } from './store';
 
 // <-- IMPORT MODULE SAGA -->
 
 export default function* rootSaga() {
 	yield all([
-		fork(startupSaga),
-		fork(currentUserSaga),
-		fork(userManagementSaga),
-		fork(jobsSaga),
-		fork(billingSaga),
-		fork(teamspacesSaga),
-		fork(modelSaga),
-		fork(authSaga),
-		fork(currentUser2Saga),
-		fork(notificationsSaga),
-		fork(commentsSaga),
-		fork(viewerSaga),
-		fork(risksSaga),
-		fork(viewpointsSaga),
-		fork(groupsSaga),
-		fork(treeSaga),
-		fork(bimSaga),
-		fork(starredSaga),
-		fork(measurementsSaga),
-		fork(issuesSaga),
-		fork(compareSaga),
-		fork(chatSaga),
-		fork(viewerGuiSaga),
-		fork(dialogSaga),
-		fork(teamspaceSaga),
-		fork(boardSaga),
-		fork(sequencesSaga),
 		fork(activitiesSaga),
-		fork(presentationSaga),
+		fork(authSaga),
+		fork(billingSaga),
+		fork(bimSaga),
+		fork(boardSaga),
+		fork(chatSaga),
+		fork(commentsSaga),
+		fork(compareSaga),
+		fork(currentUserSaga),
+		fork(dialogSaga),
+		fork(groupsSaga),
+		fork(issuesSaga),
+		fork(jobsSaga),
 		fork(legendSaga),
-		fork(teamspaces2Saga),
+		fork(measurementsSaga),
+		fork(modelSaga),
+		fork(notificationsSaga),
+		fork(presentationSaga),
+		fork(risksSaga),
+		fork(sequencesSaga),
+		fork(starredSaga),
+		fork(teamspaceSaga),
+		fork(teamspacesSaga),
+		fork(treeSaga),
+		fork(userManagementSaga),
+		fork(viewerSaga),
+		fork(viewerGuiSaga),
+		fork(viewpointsSaga),
+
 		fork(auth2Saga),
-		fork(projectsSaga),
 		fork(containersSaga),
+		fork(currentUser2Saga),
 		fork(federationsSaga),
+		fork(projectsSaga),
 		fork(revisionsSaga),
 		fork(ticketsSaga),
 		fork(ticketsCardSaga),
 		fork(ticketCommentsSaga),
+		fork(teamspaces2Saga),
 		fork(usersSaga),
 		fork(viewer2Saga),
 		// <-- INJECT MODULE SAGA -->

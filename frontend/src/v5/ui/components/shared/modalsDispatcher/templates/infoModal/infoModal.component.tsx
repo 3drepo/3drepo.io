@@ -27,7 +27,7 @@ interface IInfoModal {
 	secondaryButtonLabel?: string;
 	open: boolean,
 	onClickClose?: () => void;
-	onClickSecondary: () => void;
+	onClickSecondary?: () => void;
 }
 
 export const InfoModal = ({
@@ -37,10 +37,7 @@ export const InfoModal = ({
 		id: 'infoModal.action.primaryDefault',
 		defaultMessage: 'Ok, close window',
 	}),
-	secondaryButtonLabel = formatMessage({
-		id: 'infoModal.action.secondaryDefault',
-		defaultMessage: 'Go back to Teamspace',
-	}),
+	secondaryButtonLabel,
 	onClickClose,
 	onClickSecondary,
 	open,
@@ -62,13 +59,15 @@ export const InfoModal = ({
 				<Button autoFocus variant="contained" color="primary" onClick={onClickClose}>
 					{primaryButtonLabel}
 				</Button>
-				<Button
-					variant="outlined"
-					color="secondary"
-					onClick={() => { onClickClose(); onClickSecondary(); }}
-				>
-					{secondaryButtonLabel}
-				</Button>
+				{secondaryButtonLabel && onClickSecondary && (
+					<Button
+						variant="outlined"
+						color="secondary"
+						onClick={() => { onClickClose(); onClickSecondary?.(); }}
+					>
+						{secondaryButtonLabel}
+					</Button>
+				)}
 			</Actions>
 		</ModalContent>
 	</Modal>

@@ -17,7 +17,8 @@
 
 import { cloneDeep } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
-import { INITIAL_HELICOPTER_SPEED, VIEWER_NAV_MODES } from '../../constants/viewer';
+import { ClipMode, GizmoMode } from '@/v5/ui/routes/viewer/toolbar/toolbar.types';
+import { INITIAL_HELICOPTER_SPEED, VIEWER_GIZMO_MODES, VIEWER_NAV_MODES } from '../../constants/viewer';
 import { getViewerLeftPanels, VIEWER_DRAGGABLE_PANELS, VIEWER_RIGHT_PANELS } from '../../constants/viewerGui';
 
 export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActions({
@@ -34,24 +35,21 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	handlePinClick: ['id'],
 	setIsModelLoaded: ['isModelLoaded'],
 	loadModel: [],
-	initialiseToolbar: [],
 	goToHomeView: [],
 	setNavigationMode: ['mode'],
 	setNavigationModeSuccess: ['mode'],
 	setHelicopterSpeed: ['speed'],
-	resetHelicopterSpeed: ['teamspace', 'modelId', 'updateDefaultSpeed'],
+	resetHelicopterSpeed: ['teamspace', 'modelId'],
 	getHelicopterSpeed: ['teamspace', 'modelId'],
 	increaseHelicopterSpeed: ['teamspace', 'modelId'],
 	decreaseHelicopterSpeed: ['teamspace', 'modelId'],
 	setIsFocusMode: ['isFocusMode'],
 	setClippingMode: ['mode'],
-	setClippingModeSuccess: ['mode'],
+	setClipModeSuccess: ['mode'],
 	setClipEdit: ['isClipEdit'],
 	setClipEditSuccess: ['isClipEdit'],
-	setClipNumber: ['clipNumber'],
-	updateClipState: ['clipNumber'],
-	startListenOnNumClip: [],
-	stopListenOnNumClip: [],
+	setGizmoMode: ['mode'],
+	setGizmoModeSuccess: ['mode'],
 	setIsPinDropMode: ['mode'],
 	setIsPinDropModeSuccess: ['isPinDropMode'],
 	setPinData: ['pinData'],
@@ -62,6 +60,8 @@ export const { Types: ViewerGuiTypes, Creators: ViewerGuiActions } = createActio
 	setProjectionModeSuccess: ['mode'],
 	resetPanels: [],
 	reset: [],
+	clearColorOverrides: [],
+	clearTransformations: [],
 }, { prefix: 'VIEWER_GUI/' });
 
 export interface IViewerGuiState {
@@ -72,11 +72,11 @@ export interface IViewerGuiState {
 	coordViewActive: boolean;
 	isModelLoaded: boolean;
 	navigationMode: string;
-	clippingMode: string;
+	clippingMode: ClipMode;
+	gizmoMode: GizmoMode;
 	helicopterSpeed: number;
 	isFocusMode: boolean;
 	isClipEdit: boolean;
-	clipNumber: number;
 	isPinDropMode: boolean;
 	pinData: any;
 }
@@ -90,10 +90,10 @@ export const INITIAL_STATE: IViewerGuiState = {
 	coordViewActive: false,
 	navigationMode: VIEWER_NAV_MODES.TURNTABLE,
 	clippingMode: null,
+	gizmoMode: VIEWER_GIZMO_MODES.TRANSLATE,
 	helicopterSpeed: INITIAL_HELICOPTER_SPEED,
 	isFocusMode: false,
 	isClipEdit: false,
-	clipNumber: 0,
 	isPinDropMode: false,
 	pinData: null,
 };
@@ -150,8 +150,12 @@ const setNavigationModeSuccess = (state = INITIAL_STATE, { mode }) => {
 	return { ...state, navigationMode: mode };
 };
 
-const setClippingModeSuccess = (state = INITIAL_STATE, { mode }) => {
-	return { ...state, clippingMode: mode, isClipEdit: true };
+const setClipModeSuccess = (state = INITIAL_STATE, { mode }) => {
+	return { ...state, clippingMode: mode };
+};
+
+const setGizmoModeSuccess = (state = INITIAL_STATE, { mode }) => {
+	return { ...state, gizmoMode: mode };
 };
 
 const setHelicopterSpeed = (state = INITIAL_STATE, { speed }) => {
@@ -168,10 +172,6 @@ const setIsModelLoaded = (state = INITIAL_STATE, { isModelLoaded }) => {
 
 const setClipEditSuccess = (state = INITIAL_STATE, { isClipEdit }) => {
 	return { ...state, isClipEdit };
-};
-
-const setClipNumber = (state = INITIAL_STATE, { clipNumber }) => {
-	return { ...state, clipNumber };
 };
 
 const setIsPinDropModeSuccess = (state = INITIAL_STATE, { isPinDropMode }) => {
@@ -198,11 +198,11 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[ViewerGuiTypes.SET_IS_MODEL_LOADED] : setIsModelLoaded,
 	[ViewerGuiTypes.SET_NAVIGATION_MODE_SUCCESS] : setNavigationModeSuccess,
 	[ViewerGuiTypes.SET_PROJECTION_MODE_SUCCESS] : setProjectionModeSuccess,
-	[ViewerGuiTypes.SET_CLIPPING_MODE_SUCCESS] : setClippingModeSuccess,
+	[ViewerGuiTypes.SET_CLIP_MODE_SUCCESS] : setClipModeSuccess,
+	[ViewerGuiTypes.SET_GIZMO_MODE_SUCCESS] : setGizmoModeSuccess,
 	[ViewerGuiTypes.SET_HELICOPTER_SPEED] : setHelicopterSpeed,
 	[ViewerGuiTypes.SET_IS_FOCUS_MODE] : setIsFocusMode,
 	[ViewerGuiTypes.SET_CLIP_EDIT_SUCCESS] : setClipEditSuccess,
-	[ViewerGuiTypes.SET_CLIP_NUMBER] : setClipNumber,
 	[ViewerGuiTypes.SET_COORD_VIEW_SUCCESS] : setCoordViewSuccess,
 	[ViewerGuiTypes.SET_IS_PIN_DROP_MODE_SUCCESS]: setIsPinDropModeSuccess,
 	[ViewerGuiTypes.SET_PIN_DATA]: setPinData,

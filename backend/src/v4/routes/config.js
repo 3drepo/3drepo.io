@@ -90,6 +90,8 @@ function createClientConfig(serverConfig, req) {
 
 	clientConfig.apiUrls = config.apiUrls;
 
+	clientConfig.hotjar = config.hotjar;
+
 	clientConfig.C = {
 		GET_API : C.GET_API,
 		POST_API : C.POST_API,
@@ -118,7 +120,7 @@ function createClientConfig(serverConfig, req) {
 	}
 
 	clientConfig.uploadSizeLimit = config.uploadSizeLimit;
-	clientConfig.avatarSizeLimit = config.fileUploads.avatarSizeLimit;
+	clientConfig.imageSizeLimit = config.fileUploads.imageSizeLimit;
 	clientConfig.imageExtensions = config.fileUploads.imageExtensions;
 	clientConfig.countries = addressMeta.countries;
 	clientConfig.euCountriesCode = addressMeta.euCountriesCode;

@@ -20,6 +20,7 @@ const SuperTest = require('supertest');
 const FS = require('fs');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
+const { serialiseTicketTemplate } = require('../../../../../../../../src/v5/middleware/dataConverter/outputs/common/tickets.templates');
 
 const { basePropertyLabels, propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 const { updateOne, findOne } = require(`${src}/handler/db`);
@@ -72,6 +73,11 @@ const testGetAllTemplates = () => {
 			await ServiceHelper.db.createTemplates(teamspace, ticketTemplates);
 		});
 
+		const serialiseTemplate = (template, showDeprecated) => {
+			const fullTemplate = generateFullSchema(template);
+			return serialiseTicketTemplate(fullTemplate, !showDeprecated);
+		};
+
 		const generateTestData = (isFed) => {
 			const modelWithTemplates = isFed ? fed : con;
 			const modelType = isFed ? 'federation' : 'container';
@@ -96,13 +102,21 @@ const testGetAllTemplates = () => {
 						({ _id, name, code, deprecated }) => ({ _id, name, code, deprecated }),
 					) },
 					true],
+				['the user has sufficient privilege and the parameters are correct (get details)', true, getRoute(),
+					{
+						templates: ticketTemplates.flatMap((t) => (t.deprecated ? [] : serialiseTemplate(t, false))),
+					}, false, true],
+				['the user has sufficient privilege and the parameters are correct (get details & show deprecated)', true, getRoute(),
+					{
+						templates: ticketTemplates.flatMap((t) => serialiseTemplate(t, true)),
+					}, true, true],
 			];
 		};
 
-		const runTest = (desc, success, route, expectedOutput, showDeprecated) => {
+		const runTest = (desc, success, route, expectedOutput, showDeprecated, getDetails) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
-				const res = await agent.get(`${route}${showDeprecated ? '&showDeprecated=true' : ''}`).expect(expectedStatus);
+				const res = await agent.get(`${route}${showDeprecated ? '&showDeprecated=true' : ''}${getDetails ? '&getDetails=true' : ''}`).expect(expectedStatus);
 
 				if (success) {
 					expect(res.body).toEqual(expectedOutput);
@@ -493,26 +507,28 @@ const testGetTicketList = () => {
 		const fedNoTickets = ServiceHelper.generateRandomModel({ isFederation: true });
 		const templatesToUse = times(3, () => ServiceHelper.generateTemplate());
 
+		con.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
+		fed.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
+
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed, conNoTickets, fedNoTickets]);
 			await ServiceHelper.db.createTemplates(teamspace, templatesToUse);
 
-			await Promise.all([fed, con].map(async (model) => {
+			await Promise.all([fed, con].map((model) => {
 				const modelType = fed === model ? 'federation' : 'container';
 				const addTicketRoute = (modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${users.tsAdmin.apiKey}`;
 
-				const ticketProms = times(10, async (n) => {
-					const ticket = ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]);
+				model.tickets.forEach(async (ticket) => {
 					const res = await agent.post(addTicketRoute(model._id)).send(ticket);
 					if (!res.body._id) {
 						throw new Error(`Could not add a new ticket: ${res.body.message}`);
 					}
+
+					// eslint-disable-next-line no-param-reassign
 					ticket._id = res.body._id;
-					return ticket;
 				});
 
-				// eslint-disable-next-line no-param-reassign
-				model.tickets = await Promise.all(ticketProms);
+				return model;
 			}));
 		});
 
@@ -522,7 +538,8 @@ const testGetTicketList = () => {
 			const model = isFed ? fed : con;
 			const modelNoTickets = isFed ? fedNoTickets : conNoTickets;
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
-
+			const moduleName = Object.keys(model.tickets[0].modules)[0];
+			const filter = `${Object.keys(model.tickets[0].properties)[0]},${moduleName}.${Object.keys(model.tickets[0].modules[moduleName])[0]}`;
 			const baseRouteParams = { key: users.tsAdmin.apiKey, modelType, projectId: project.id, model };
 
 			return [
@@ -534,10 +551,9 @@ const testGetTicketList = () => {
 				['the user does not have access to the federation', { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the model has no tickets', { ...baseRouteParams, model: modelNoTickets }, true],
 				['the model has tickets', baseRouteParams, true],
+				['the model has tickets (filter)', { ...baseRouteParams, filter }, true],
 			];
 		};
-
-		const getRoute = ({ key, projectId, modelType, modelId }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets${key ? `?key=${key}` : ''}`;
 
 		const sortById = (a, b) => {
 			if (a._id > b._id) return 1;
@@ -545,8 +561,9 @@ const testGetTicketList = () => {
 			return 0;
 		};
 
-		const runTest = (desc, { model, ...routeParams }, success, expectedOutput) => {
+		const runTest = (desc, { model, filter, ...routeParams }, success, expectedOutput) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const getRoute = ({ key, projectId, modelType, modelId }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets${key ? `?key=${key}` : ''}${filter ? `&filter=${filter}` : ''}`;
 				const endpoint = getRoute({ ...routeParams, modelId: model._id });
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 				const res = await agent.get(endpoint).expect(expectedStatus);
@@ -559,6 +576,18 @@ const testGetTicketList = () => {
 							const { _id, title, type } = tickets[ind];
 							expect(tickOut).toEqual(expect.objectContaining({ _id, title, type }));
 						});
+
+						if (filter) {
+							const filterParts = filter.split(',');
+							const propName = filterParts[0];
+							const moduleName = filterParts[1].split('.')[0];
+							const moduleProp = filterParts[1].split('.')[1];
+
+							const ticketContainingProps = res.body.tickets
+								.filter((t) => t.properties[propName] && t.modules[moduleName][moduleProp]);
+
+							expect(ticketContainingProps).toBeDefined();
+						}
 					} else {
 						expect(res.body).toEqual({ tickets });
 					}
