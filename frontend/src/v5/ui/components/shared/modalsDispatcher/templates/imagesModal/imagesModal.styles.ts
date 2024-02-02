@@ -19,25 +19,54 @@ import { formatMessage } from '@/v5/services/intl';
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
 import { Modal as ModalBase, CloseButton as CloseButtonBase } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import styled, { css } from 'styled-components';
+import { hexToOpacity } from '@/v5/ui/themes/theme';
 
 export const Modal = styled(ModalBase).attrs({
 	maxWidth: 'lg',
 })`
 	.MuiPaper-root {
 		border-radius: 0;
+		max-height: unset;
 	}
 `;
 
-export const CloseButton = styled(CloseButtonBase)`
-	top: 35px;
-	right: 50px;
-	position: fixed;
-	color: ${({ theme }) => theme.palette.primary.contrast};
+export const FlexRow = styled.div`
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
 `;
 
-const modalContentStyles = css`
+export const TopBar = styled(FlexRow)`
+	left: 0;
+	top: 0;
+	position: fixed;
+	width: 100%;
+	padding: 16px 27px;
+	box-sizing: border-box;
+	justify-content: space-between;
+	align-items: center;
+`;
+
+export const Counter = styled.div`
+	background-color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 15)};
+	padding: 5px 10px;
+	border-radius: 10px;
+	margin-right: 22px;
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	font-weight: 700;
+`;
+
+export const CloseButton = styled(CloseButtonBase)`
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	position: unset;
+`;
+
+export const Container = styled.div`
+	display: flex;
+	flex-direction: column;
 	height: 100%;
-	max-height: calc(100vh - 64px);
+	max-height: calc(100vh - 10px);
 	width: 100%;
 	max-width: calc(100vw - 64px);
 `;
@@ -45,19 +74,19 @@ const modalContentStyles = css`
 export const Image = styled.img.attrs({
 	alt: formatMessage({ id: 'modal.image', defaultMessage: 'Enlarged image' }),
 })`
-	${modalContentStyles}
-	object-fit: cover;
+	object-fit: contain;
+	height: calc(100vh - 210px);
 	max-width: min(1200px, calc(100vw - 250px));
 `;
 
-export const Container = styled.div`
-	${modalContentStyles}
-	display: flex;
+export const ImageWithArrows = styled(FlexRow)`
+	position: relative;
+	margin-top: 27px;
 `;
 
 export const NextButton = styled(NavbarButton)`
 	position: fixed;
-	top: calc(50% - 10px);
+	top: calc(50% - 50px);
 	cursor: pointer;
 	right: 63px;
 	border-width: 2px;
@@ -77,4 +106,25 @@ export const PreviousButton = styled(NextButton)`
 	transform: rotate(180deg);
 	right: unset;
 	left: 63px;
+`;
+
+export const ImagesContainer = styled.div`
+	display: flex;
+	gap: 12px;
+	margin-top: 12px;
+	overflow-x: scroll;
+`;
+
+export const ImageThumbnail = styled.img<{ selected?: boolean }>`
+	border-radius: 8px;
+	min-width: 120px;
+	max-width: 120px;
+	height: 68px;
+	object-fit: cover;
+	box-sizing: border-box;
+	cursor: pointer;
+
+	${({ selected }) => selected && css`
+		border: solid 2px ${({ theme }) => theme.palette.primary.main};
+	`}
 `;

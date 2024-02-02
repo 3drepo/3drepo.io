@@ -15,10 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ChevronIcon from '@assets/icons/outlined/small_chevron-outlined.svg';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { Modal, Container, Image, NextButton, PreviousButton, CloseButton } from './imagesModal.styles';
+import {
+	Modal, Container, Image, NextButton, PreviousButton, CloseButton, Counter,
+	TopBar, FlexRow, ImageThumbnail,
+	ImagesContainer, ImageWithArrows,
+} from './imagesModal.styles';
+import { FormattedMessage } from 'react-intl';
 
 type ImagesModalProps = {
 	images: string[];
@@ -30,6 +35,7 @@ type ImagesModalProps = {
 export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open }: ImagesModalProps) => {
 	const [imageIndex, setImageIndex] = useState(displayImageIndex);
 	const imagesLength = images.length;
+	const imageRef = useRef<HTMLImageElement>(null);
 
 	const changeImageIndex = (delta) => setImageIndex((imageIndex + delta + imagesLength) % imagesLength);
 
@@ -49,34 +55,70 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open 
 				changeImageIndex(1);
 				break;
 			default:
-				// do nothing
+			// do nothing
 		}
 	};
+
+	useEffect(() => {
+		if (!imageRef.current) return;
+		imageRef.current.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+	}, [imageIndex]);
 
 	useEffect(() => {
 		document.addEventListener('keydown', handleKeyDown);
 		return () => document.removeEventListener('keydown', handleKeyDown);
 	});
 
+	useEffect(() => {
+		if (!imagesLength) {
+			onClickClose();
+		}
+	}, [imagesLength]);
+
 	return (
 		<Modal open={open} onClose={onClickClose}>
+			<TopBar>
+				<FlexRow>
+					{imagesLength > 1 && (
+						<Counter>
+							<FormattedMessage
+								id="images.count"
+								defaultMessage="{imageIndex} of {imagesLength}"
+								values={{ imageIndex: imageIndex + 1, imagesLength }}
+							/>
+						</Counter>
+					)}
+				</FlexRow>
+				<CloseButton onClick={onClickClose}>
+					<CloseIcon />
+				</CloseButton>
+			</TopBar>
 			<Container>
 				{imagesLength === 1 ? (
 					<Image src={images[imageIndex]} />
 				) : (
 					<>
-						<PreviousButton onClick={() => changeImageIndex(-1)}>
-							<ChevronIcon />
-						</PreviousButton>
-						<Image src={images[imageIndex]} key={images[imageIndex]} />
-						<NextButton onClick={() => changeImageIndex(1)}>
-							<ChevronIcon />
-						</NextButton>
+						<ImageWithArrows>
+							<PreviousButton onClick={() => changeImageIndex(-1)}>
+								<ChevronIcon />
+							</PreviousButton>
+							<Image src={images[imageIndex]} key={images[imageIndex]} />
+							<NextButton onClick={() => changeImageIndex(1)}>
+								<ChevronIcon />
+							</NextButton>
+						</ImageWithArrows>
+						<ImagesContainer>
+							{images.map((img, index) => (
+								<ImageThumbnail
+									src={img}
+									onClick={() => setImageIndex(index)}
+									selected={index === imageIndex}
+									ref={index === imageIndex ? imageRef : null}
+								/>
+							))}
+						</ImagesContainer>
 					</>
 				)}
-				<CloseButton onClick={onClickClose}>
-					<CloseIcon />
-				</CloseButton>
 			</Container>
 		</Modal>
 	);
