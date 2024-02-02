@@ -202,7 +202,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		return () => {
 			ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
 			TicketsCardActionsDispatchers.setEditingGroups(false);
-		}
+		};
 	}, []);
 
 	if (isLoading) return (<Loader />);
