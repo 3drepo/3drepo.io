@@ -146,5 +146,5 @@ export const groupTickets = (groupBy: string, tickets: TicketWithModelIdAndName[
 export const hasRequiredViewerProperties = (template) => {
 	const modules = template.modules?.flatMap((module) => module.properties) || [];
 	const properties = modules.concat(template.properties || []);
-	return properties.some(({ required, type }) => required && ['view', 'coords', 'image'].includes(type));
+	return properties.some(({ required, type }) => required && ['view', 'coords'].includes(type));
 };

@@ -202,7 +202,7 @@ Models.updateModelSettings = async (teamspace, project, model, data) => {
 
 	Object.keys(data).forEach((key) => {
 		const value = data[key];
-		if (value) {
+		if (value !== undefined && value !== null) {
 			if (key === 'unit' || key === 'code') {
 				if (!toUpdate.properties) {
 					toUpdate.properties = {};

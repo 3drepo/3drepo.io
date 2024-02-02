@@ -16,7 +16,7 @@
  */
 import { TextField } from '@mui/material';
 import { Field } from 'formik';
-import { get } from 'lodash';
+import { useState } from 'react';
 import {
 	FieldsRow,
 	StyledFormControl
@@ -24,35 +24,45 @@ import {
 import { RemoveButton } from '../removeButton.component';
 import { ResourceListLinkItem } from './attachResourcesDialog.styles';
 
-export const LinkEntry = ({onClickRemove, index }) => {
+export const LinkEntry = ({ onClickRemove, index }) => {
+	const [nameIsDirty, setNameIsDirty] = useState(false);
+	const [linkIsDirty, setLinkIsDirty] = useState(false);
 	const nameFieldName = `links.${index}.name`;
 	const linkFieldName = `links.${index}.link`;
 
 	return (
-	<FieldsRow container justifyContent="space-between" flex={0.5}>
-		<StyledFormControl>
-			<Field name={nameFieldName} render={({ field, form }) => (
-				<TextField {...field}
-					placeholder="3D Repo"
-					fullWidth
-					error={Boolean(get(form.errors, nameFieldName))}
-					helperText={get(form.errors, nameFieldName)}
-				/>
-			)} />
-		</StyledFormControl>
-		<StyledFormControl>
-			<ResourceListLinkItem>
-				<Field name={linkFieldName} render={({ field, form }) => (
+		<FieldsRow container justifyContent="space-between" flex={0.5}>
+			<StyledFormControl>
+				<Field name={nameFieldName} render={({ field, meta: { error, touched } }) => (
 					<TextField {...field}
-						placeholder="https://3drepo.com/"
+						placeholder="3D Repo"
 						fullWidth
-						error={Boolean(get(form.errors, linkFieldName))}
-						helperText={get(form.errors, linkFieldName)}
+						error={!!((nameIsDirty || touched) && error)}
+						helperText={((nameIsDirty || touched) && error)}
+						onBlur={(...data) => {
+							setNameIsDirty(true);
+							field.onBlur(...data);
+						}}
 					/>
 				)} />
-				<RemoveButton onClick={onClickRemove} />
-			</ResourceListLinkItem>
-		</StyledFormControl>
-	</FieldsRow>
+			</StyledFormControl>
+			<StyledFormControl>
+				<ResourceListLinkItem>
+					<Field name={linkFieldName} render={({ field, meta: { error, touched } }) => (
+						<TextField {...field}
+							placeholder="https://3drepo.com/"
+							fullWidth
+							error={!!((linkIsDirty || touched) && error)}
+							helperText={((linkIsDirty || touched) && error)}
+							onBlur={(...data) => {
+								setLinkIsDirty(true);
+								field.onBlur(...data);
+							}}
+						/>
+					)} />
+					<RemoveButton onClick={onClickRemove} />
+				</ResourceListLinkItem>
+			</StyledFormControl>
+		</FieldsRow>
 	);
 };

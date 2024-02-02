@@ -59,6 +59,7 @@ export const getContainerOrFederationFormattedText = (isFederation) => (
 
 export const isCollaboratorRole = (role: Role): boolean => [Role.ADMIN, Role.COLLABORATOR].includes(role);
 export const isCommenterRole = (role: Role): boolean => [Role.ADMIN, Role.COLLABORATOR, Role.COMMENTER].includes(role);
+export const isViewerRole = (role: Role): boolean => [Role.ADMIN, Role.COLLABORATOR, Role.COMMENTER, Role.VIEWER].includes(role);
 
 export const mergeWithArray = (objValue, srcValue) => mergeWith(objValue, srcValue, (target, src) => {
 	if (isArray(target)) return src; // If its an array that is merging just use the newest

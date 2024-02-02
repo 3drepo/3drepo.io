@@ -30,7 +30,7 @@ export const MARKDOWN_INTERNAL_IMAGE_PATH_REGEX = new RegExp(`${INTERNAL_IMAGE_P
 export const VIEWPOINT_ID_REGEX = new RegExp('/viewpoints/[\\w-]+', 'gi');
 
 export interface IComment {
-	action?: {property: string, from: string, to: string, propertyText: string, text: string};
+	action?: { property: string, from: string, to: string, propertyText: string, text: string };
 	comment: string | undefined | null;
 	_id: string;
 	guid: number;
@@ -44,24 +44,24 @@ export interface IDetails {
 	model: string;
 }
 
-export const createAttachResourceComments = (owner: string,  resources = []) =>
+export const createAttachResourceComments = (owner: string, resources = []) =>
 	resources.map((r) =>
 	({
 		_id: +(new Date()),
 		guid: +(new Date()),
 		owner,
-		action: {property: 'resource', to: r.name},
+		action: { property: 'resource', to: r.name },
 		sealed: true
 	}));
 
-export const createRemoveResourceComment = (owner: string, {name, ...rest} ) =>
-	({
-		_id: +(new Date()),
-		guid: +(new Date()),
-		owner,
-		action: {property: 'resource', from: name},
-		sealed: true
-	});
+export const createRemoveResourceComment = (owner: string, { name, ...rest }) =>
+({
+	_id: +(new Date()),
+	guid: +(new Date()),
+	owner,
+	action: { property: 'resource', from: name },
+	sealed: true
+});
 
 export const prepareComments = (comments = []) => {
 	comments = comments.filter((c) => !c.action || c.action.property !== 'extras');
@@ -71,7 +71,7 @@ export const prepareComments = (comments = []) => {
 	}
 
 	const preparedComments = comments.map((comment) => prepareComment(comment));
-	return sortByDate(preparedComments, {order: 'desc'});
+	return sortByDate(preparedComments, { order: 'desc' });
 };
 
 export const prepareComment = (comment) => {
@@ -92,7 +92,7 @@ const convertActionCommentToText = (comment: IComment) => {
 
 	if (comment) {
 		switch (comment.action.property) {
-			case 'resource' :
+			case 'resource':
 				if (comment.action.to) {
 					text = `Resource ${comment.action.to} attached by ${comment.owner}`;
 				} else {
@@ -218,7 +218,7 @@ const convertActionCommentToText = (comment: IComment) => {
 				comment.action.propertyText = 'BCF import';
 				text = comment.action.propertyText + ' by ' + comment.owner;
 				break;
-			case 'position' :
+			case 'position':
 				// In this case is not needed to be specific of the value that changed
 				comment.action.to = comment.action.from = null;
 				comment.action.propertyText = 'Pin';
@@ -236,11 +236,19 @@ const convertActionCommentToText = (comment: IComment) => {
 
 			case 'issue_referenced':
 				comment.action.propertyText = 'Referenced';
-				text = 'Issue referenced in #' + comment.action.to  + ' by ' + comment.owner;
+				text = 'Issue referenced in #' + comment.action.to + ' by ' + comment.owner;
 				break;
 
 			case 'name':
 				comment.action.propertyText = 'Title';
+				text = comment.action.propertyText + ' updated by ' + comment.owner;
+				break;
+			case 'sequence_start':
+				comment.action.propertyText = 'Sequence start';
+				text = comment.action.propertyText + ' updated by ' + comment.owner;
+				break;
+			case 'sequence_end':
+				comment.action.propertyText = 'Sequence end';
 				text = comment.action.propertyText + ' updated by ' + comment.owner;
 				break;
 		}
@@ -285,11 +293,11 @@ const convertActionValueToText = (value = '') => {
 	return actionText;
 };
 
-export const transformCustomsLinksToMarkdown = ( details: IDetails, comment: IComment, tickets, type ) => {
+export const transformCustomsLinksToMarkdown = (details: IDetails, comment: IComment, tickets, type) => {
 	let text = comment.comment;
 
 	if (!text || (Boolean(comment.action)
-	&&  !['issue_referenced', 'risk_referenced'].includes(comment.action?.property))) {
+		&& !['issue_referenced', 'risk_referenced'].includes(comment.action?.property))) {
 		return text;
 	}
 
@@ -308,8 +316,8 @@ export const transformCustomsLinksToMarkdown = ( details: IDetails, comment: ICo
 			const referenceRegExp = RegExp(viewpointReference);
 			text = text
 				.replace(referenceRegExp,
-				// eslint-disable-next-line max-len
-				`![](${INTERNAL_IMAGE_PATH_PREFIX}${teamspace}/${projectId}/${referenceType}/${ticketId}/viewpoints/${viewpointId}/screenshot.png)`);
+					// eslint-disable-next-line max-len
+					`![](${INTERNAL_IMAGE_PATH_PREFIX}${teamspace}/${projectId}/${referenceType}/${ticketId}/viewpoints/${viewpointId}/screenshot.png)`);
 		});
 	}
 

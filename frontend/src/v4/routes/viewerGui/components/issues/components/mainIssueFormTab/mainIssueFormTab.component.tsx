@@ -94,6 +94,7 @@ export const MainIssueFormTab: FunctionComponent<IProps> = ({
 					isNew={isNew}
 					disableViewer={disableViewer}
 					canEditViewpoint={canEditViewpoint}
+					hasNoPermission={!canEditBasicProperty}
 					onChangePin={props.onChangePin}
 					onSavePin={props.onSavePin}
 					onUpdateViewpoint={props.onUpdateViewpoint}

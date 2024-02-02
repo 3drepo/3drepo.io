@@ -63,7 +63,7 @@ export const ticketWithGroups = (ticket: ITicket, groups: Record<string, Group>)
 
 
 	const modules:Record<string, Properties> = {};
-	Object.keys(ticket.modules).forEach((moduleName) => 
+	Object.keys(ticket.modules || {}).forEach((moduleName) => 
 		modules[moduleName] = createPropertiesWithGroups(ticket.modules[moduleName], groups),
 	); 
 	return { ...ticket, properties, modules };

@@ -53,7 +53,7 @@ export const TeamspaceQuota = () => {
 				<SeatsQuota seats={quota.seats} />
 			</TeamspaceQuotaLayout>
 			{showContactLink && (
-				<ContactLink href="https://3drepo.com/about/contact/">
+				<ContactLink href="https://3drepo.com/about/contact/" target="_blank">
 					<FormattedMessage id="teamspace.quota.contactSales" defaultMessage="Contact Sales" />
 				</ContactLink>
 			)}
