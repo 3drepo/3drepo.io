@@ -31,7 +31,7 @@ import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
-import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
+import { BreakableText, ChevronLeft, ChevronRight, GroupsCardHeader } from './ticketDetailsCard.styles';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
 import { useSearchParam } from '../../../useSearchParam';
 
@@ -154,10 +154,11 @@ export const TicketDetailsCard = () => {
 				{view === TicketsCardViews.DetailsGroups
 					&& (
 						<>
-							<CardHeader>
+							<GroupsCardHeader>
 								<ArrowBack onClick={() => TicketsCardActionsDispatchers.goBackFromTicketGroups(ticket)} />
-								{ticket.title}:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" />
-							</CardHeader>
+								<BreakableText>{ticket.title}</BreakableText>
+								<span>:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" /></span>
+							</GroupsCardHeader>
 							<InputController
 								Input={TicketGroups}
 								name={viewProps.name}

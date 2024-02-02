@@ -24,7 +24,7 @@ import { get } from 'lodash';
 import { ListboxComponent } from './listboxComponent/listboxComponent.component';
 import { Autocomplete } from './fieldValueInput.styles';
 
-export const FieldValueInput = ({ name, disabled }) => {
+export const FieldValueInput = ({ name, autoFocus = false, disabled }) => {
 	const { formState: { errors } } = useFormContext();
 	const fields = useSelector(selectMetaKeys);
 
@@ -49,7 +49,7 @@ export const FieldValueInput = ({ name, disabled }) => {
 							error={!!get(errors, name)}
 							InputProps={{
 								...InputProps,
-								autoFocus: true,
+								autoFocus,
 							}}
 							{...renderInputParams}
 						/>

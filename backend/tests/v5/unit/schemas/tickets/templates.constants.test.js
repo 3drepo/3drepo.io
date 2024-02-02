@@ -24,10 +24,10 @@ const testGetApplicableDefaultProperties = () => {
 		const basicProp = [{ name: 'Description', type: TemplateConstants.propTypes.LONG_TEXT },
 			{ name: 'Owner', type: TemplateConstants.propTypes.TEXT, readOnly: true },
 			{ name: 'Created at', type: TemplateConstants.propTypes.DATE, readOnly: true },
-			{ name: 'Updated at', type: TemplateConstants.propTypes.DATE, readOnly: true }];
+			{ name: 'Updated at', type: TemplateConstants.propTypes.DATE, readOnly: true },
+			{ name: 'Status', type: TemplateConstants.propTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open' }];
 
 		const issueProp = [{ name: 'Priority', type: TemplateConstants.propTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None' },
-			{ name: 'Status', type: TemplateConstants.propTypes.ONE_OF, values: ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], default: 'Open' },
 			{ name: 'Assignees', type: TemplateConstants.propTypes.MANY_OF, values: TemplateConstants.presetEnumValues.JOBS_AND_USERS },
 			{ name: 'Due Date', type: TemplateConstants.propTypes.DATE }];
 		test('Should only return the basic properties if none of the optional flags are configured', () => {
