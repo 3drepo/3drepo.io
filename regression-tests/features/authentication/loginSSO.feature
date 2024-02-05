@@ -18,6 +18,6 @@ Feature: Login (SSO)
 		Given I navigate to '/'
 		Then I click on 'Sign in with Microsoft'
 		When I sign in at Microsoft with:
-			| Sign in                   | password      |
-  			| homerJSimpson@outlook.com | homerJSimpson |
-		Then I wait for 90 seconds
+			| Sign in                 | password      |
+  			| homerJSimpson@asite.com | homerJSimpson |
+		Then I should be redirected to the 'dashboard' page

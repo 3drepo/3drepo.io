@@ -118,11 +118,7 @@ When('I sign in at Microsoft with:', async function (datatable) {
 	await clickOn(this.driver, 'Next');
 	await fillInForm(this.driver, { [labels[1]]: hashes[labels[1]] });
 	await clickOn(this.driver, 'Sign in');
-
-
-	// await this.driver.quit();
-	// this.driver = this.oldDriver;
-	// this.oldDriver = null;
+	await clickOn(this.driver, 'Yes');
 });
 
 
