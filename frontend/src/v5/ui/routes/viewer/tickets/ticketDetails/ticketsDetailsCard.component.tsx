@@ -148,12 +148,12 @@ export const TicketDetailsCard = () => {
 	if (!ticket) return null;
 
 
-	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
+	const { detailsView, setDetailViewAndProps, detailsViewProps: viewProps } = useContext(TicketContext);
 
 	return (
 		<CardContainer>
 			<FormProvider {...formData}>
-				{view === TicketDetailsView.Groups && (
+				{detailsView === TicketDetailsView.Groups && (
 				
 					<>
 						<CardHeader>
@@ -167,7 +167,7 @@ export const TicketDetailsCard = () => {
 						/>
 					</>
 				)}
-				{view === TicketDetailsView.Form && (
+				{detailsView === TicketDetailsView.Form && (
 
 					<>
 						<CardHeader>

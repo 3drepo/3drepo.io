@@ -110,13 +110,13 @@ export const NewTicketCard = () => {
 		formData.reset(defaultTicket);
 	}, [isLoading]);
 
-	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
+	const { detailsView, setDetailViewAndProps, detailsViewProps: viewProps } = useContext(TicketContext);
 
 	return (
 		<CardContainer>
 			<FormProvider {...formData}>
 				<Form onSubmit={formData.handleSubmit(onSubmit)}>
-					{view === TicketDetailsView.Groups && (
+					{detailsView === TicketDetailsView.Groups && (
 						<>
 							<CardHeader>
 								<ArrowBack onClick={() => setDetailViewAndProps(TicketDetailsView.Form)} />
@@ -135,7 +135,7 @@ export const NewTicketCard = () => {
 						</>
 					)}
 
-					{view === TicketDetailsView.Form && (
+					{detailsView === TicketDetailsView.Form && (
 						<>
 							<CardHeader>
 								<TicketsIcon />
