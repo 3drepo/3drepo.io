@@ -15,14 +15,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { ControlledAssigneesSelect } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
 import styled from 'styled-components';
 
+export const Ticket = styled.div<{ $selected?: boolean }>`
+	position: relative;
+	cursor: pointer;
+	padding: 5px 10px;
+	background-color: ${({ theme, $selected }) => ($selected ? theme.palette.primary.lightest : theme.palette.primary.contrast)};
+`;
+
+export const FlexRow = styled.div`
+	display: inline-flex;
+	gap: 7px;
+	margin: 5px 0;
+	width: 100%;
+`;
+
+export const IssuePropertiesRow = styled(FlexRow)`
+	align-items: center;
+`;
+
 export const Id = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
-	font-weight: 500;
-	font-size: 10px;
-	line-height: 14px;
+	${({ theme }) => theme.typography.caption}
 `;
 
 export const Title = styled.div`
@@ -42,18 +59,19 @@ export const Title = styled.div`
 	}
 `;
 
-// TODO - fix after new palette is released
-export const Ticket = styled.div<{ $selected?: boolean }>`
-	position: relative;
-	cursor: pointer;
-	padding: 12px 14px 16px;
-	background-color: ${({ theme, $selected }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
+export const Description = styled(Truncate).attrs({
+	lines: 2,
+})`
+	${({ theme }) => theme.typography.label};
+	color: '#20232A';
 `;
 
-export const ChipList = styled.div`
-	display: inline-flex;
-	gap: 7px;
-	margin: 8px 0 0;
+export const Thumbnail = styled.img`
+	height: 75px;
+	width: 75px;
+	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	border-radius: 5px;
+	object-fit: cover;
 `;
 
 export const Assignees = styled(ControlledAssigneesSelect).attrs({
@@ -63,11 +81,4 @@ export const Assignees = styled(ControlledAssigneesSelect).attrs({
 })`
 	margin-left: auto;
 	height: 28px;
-`;
-
-export const IssuePropertiesRow = styled.div`
-	margin: 7px 0 0;
-	display: inline-flex;
-	width: 100%;
-	align-items: center;
 `;
