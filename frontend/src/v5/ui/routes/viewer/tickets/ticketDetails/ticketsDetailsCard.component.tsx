@@ -42,6 +42,7 @@ enum IndexChange {
 }
 
 export const TicketDetailsCard = () => {
+	const { detailsView, setDetailViewAndProps, detailsViewProps: viewProps } = useContext(TicketContext);
 	const { teamspace, project, containerOrFederation, revision } = useParams();
 	const [, setTicketId] = useSearchParam('ticketId');
 
@@ -132,6 +133,8 @@ export const TicketDetailsCard = () => {
 				isFederation,
 			);
 		}
+
+		setDetailViewAndProps(TicketDetailsView.Form);
 		TicketsActionsDispatchers.fetchTicket(teamspace, project, containerOrFederation, ticket._id, isFederation, revision);
 		setTicketId(ticket._id);
 	}, [ticket?._id]);
@@ -148,7 +151,6 @@ export const TicketDetailsCard = () => {
 	if (!ticket) return null;
 
 
-	const { detailsView, setDetailViewAndProps, detailsViewProps: viewProps } = useContext(TicketContext);
 
 	return (
 		<CardContainer>
