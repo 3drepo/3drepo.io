@@ -7,7 +7,7 @@
 		{
 			"type": "node",
 			"request": "launch",
-			"name": "Launch Program",
+			"name": "Test logginSSO feature",
 			"skipFiles": [
 				"<node_internals>/**"
 			],

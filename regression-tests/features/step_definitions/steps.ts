@@ -25,7 +25,7 @@ import { getUrl } from '../../src/helpers/routing.helpers';
 import { getUserForRole } from '../../src/helpers/users.helpers';
 import { getEmailCount } from '../../src/helpers/mailhog.helpers';
 
-setDefaultTimeout(60 * 1000);
+setDefaultTimeout(120 * 1000);
 
 Before(async function () {
 	this.driver = await initializeSeleniumDriver('chrome');
@@ -111,7 +111,23 @@ When('I switch back', async function () {
 	this.oldDriver = null;
 });
 
-// For debuggin test purposes
+When('I sign in at Microsoft with:', async function (datatable) {
+	const hashes = datatable.hashes()[0] ;
+	const labels = Object.keys(hashes);
+	await fillInForm(this.driver, { [labels[0]]: hashes[labels[0]] });
+	await clickOn(this.driver, 'Next');
+	await fillInForm(this.driver, { [labels[1]]: hashes[labels[1]] });
+	await clickOn(this.driver, 'Sign in');
+
+
+	// await this.driver.quit();
+	// this.driver = this.oldDriver;
+	// this.oldDriver = null;
+});
+
+
+
+// For debugging test purposes
 When('I wait for {int} seconds', async function (seconds) {
 	await delay(seconds * 1000);
 });

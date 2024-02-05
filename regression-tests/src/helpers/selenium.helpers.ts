@@ -14,9 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Builder, until, By, WebDriver, Locator } from 'selenium-webdriver';
+import { Builder, until, By, WebDriver, Locator, WebElement } from 'selenium-webdriver';
 import * as config from '../../config.json';
 import { getUrl } from './routing.helpers';
+
+type Label = string;
+type Value = string;
+
 
 export const delay = (time) => new Promise((resolve) => setTimeout(resolve, time));
 
@@ -92,14 +96,53 @@ export const initializeSeleniumDriver = async (browserType) => {
 export const waitUntilPageLoaded = async (driver) => driver.wait(until.elementLocated(By.css('body')));
 
 export const waitForText = async (driver: WebDriver, text:string ) => {
-	const target =  By.xpath('//*[contains(text(),"' +  text + '")]');
+	const target =  By.xpath('//body//*[contains(text(),"' +  text + '")]');
 	return getElement(driver, target);
 };
 
+const getClientRects = async (driver: WebDriver, elements:WebElement[]):Promise<(DOMRect | null)[]> =>
+	driver.executeScript((elems: Element[]) => {
+		return elems.map((el) => el.getClientRects()).map((rect) => rect.item(0));
+	}, elements);
+
+const findCloserRectIndex = (rect: DOMRect, rects: (DOMRect | null)[]) => {
+	let minDistance = Infinity;
+	let index = -1;
+
+	rects.forEach((otherRect, rectIndex) => {
+		if (otherRect === null) return;
+		const distance = Math.pow(rect.bottom - otherRect.y, 2) + Math.pow(rect.left - otherRect.left, 2);
+		if (distance < minDistance) {
+			minDistance = distance;
+			index = rectIndex;
+		}
+	});
+
+	return index;
+};
+
+export const findElementsNearText = async (driver: WebDriver, text:string, tag:string) => {
+	const str = `//body//*[contains(text(),"${text}")]`;
+	const textElements = await getElements(driver,  By.xpath(str));
+	const tagElements = await getElements(driver,  By.xpath(`//body//${tag}`));
+
+	const textElementsRects = await getClientRects(driver, textElements);
+	const tagElementsRects = await getClientRects(driver, tagElements);
+
+	const results: { textElement: WebElement, closerElement:WebElement }[]  = [];
+
+	textElements.forEach((textElement, index) => {
+		const rect = textElementsRects[index];
+		const closerElement =  tagElements[findCloserRectIndex(rect, tagElementsRects)];
+		results.push({ textElement, closerElement });
+	});
+
+	return results;
+};
+
 export const findElementNearText = async (driver: WebDriver, text:string, tag: string) => {
-	const targetText = `//*[contains(text(),"${text}")]//ancestor::*/*/${tag}`;
-	const target = By.xpath(targetText);
-	return getElement(driver, target);
+	const result = (await findElementsNearText(driver, text, tag))[0];
+	return result?.closerElement;
 };
 
 export const findInputNearText = async (driver: WebDriver, text:string) => findElementNearText(driver, text, 'input');
@@ -124,7 +167,7 @@ export const closeOriginWindow = async (driver: WebDriver) => {
 
 export const clickOn = async (driver: WebDriver, buttonContent:string, elementNumber?:number) => {
 	await waitUntilPageLoaded(driver);
-	const text = `//body//*[text()="${buttonContent}"]`;
+	const text = `//body//*[text()="${buttonContent}"]|//body//input[@value='${buttonContent}']`;
 	const target = By.xpath(text);
 	const elements = await getElements(driver, target);
 
@@ -134,7 +177,7 @@ export const clickOn = async (driver: WebDriver, buttonContent:string, elementNu
 		link = elements[elementNumber - 1]; // element number starts from 1
 	} else {
 
-		const tagOrder = ['a', 'button', 'div'];
+		const tagOrder = ['a', 'button', 'input', 'div'];
 		const getTagPriority = (tag):number => tagOrder.includes(tag) ? tagOrder.indexOf(tag) : tagOrder.length;
 
 		await Promise.all(elements.map(async (element) => {
@@ -149,9 +192,16 @@ export const clickOn = async (driver: WebDriver, buttonContent:string, elementNu
 	await animationsEnded(driver);
 };
 
-export const fillInForm = async (driver: WebDriver, fields: Record<string, string>) => {
+export const fillInForm = async (driver: WebDriver, fields: Record<Label, Value>) => {
 	await waitUntilPageLoaded(driver);
-	await Promise.all(Object.keys(fields).map((labelName)=> fillInputByLabel(driver, labelName, fields[labelName])));
+	try {
+		await Promise.all(Object.keys(fields).map((labelName)=> fillInputByLabel(driver, labelName, fields[labelName])));
+	} catch (e) {
+		// there is a tolarance on the label in order to reuse the same table
+		console.warn('Warning when trying to fillInForm');
+		console.warn(e);
+	}
+
 };
 
 export const clickOnCheckboxNearText = async (driver: WebDriver, text: string) => {

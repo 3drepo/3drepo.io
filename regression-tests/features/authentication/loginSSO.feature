@@ -17,4 +17,7 @@ Feature: Login (SSO)
 	Scenario: Signing in with Microsoft
 		Given I navigate to '/'
 		Then I click on 'Sign in with Microsoft'
-		Then I wait for 10 seconds
+		When I sign in at Microsoft with:
+			| Sign in                   | password      |
+  			| homerJSimpson@outlook.com | homerJSimpson |
+		Then I wait for 90 seconds
