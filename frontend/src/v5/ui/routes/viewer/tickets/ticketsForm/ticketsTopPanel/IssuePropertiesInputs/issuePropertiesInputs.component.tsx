@@ -104,24 +104,26 @@ export const IssuePropertiesInputs = ({ onBlur, readOnly, properties }: IIssuePr
 				)}
 			</FlexContainer>
 			<Gap $height="10px" />
-			<AssigneesContainer>
-				<Typography variant="h5">
-					<FormattedMessage
-						id="customTicket.topPanel.assignees.label"
-						defaultMessage="Assignees"
+			{hasIssueProperties && (
+				<AssigneesContainer>
+					<Typography variant="h5">
+						<FormattedMessage
+							id="customTicket.topPanel.assignees.label"
+							defaultMessage="Assignees"
+						/>
+					</Typography>
+					<InputController
+						Input={JobsAndUsersProperty}
+						name={`properties[${IssueProperties.ASSIGNEES}]`}
+						onBlur={onBlur}
+						key={IssueProperties.ASSIGNEES}
+						disabled={readOnly}
+						showAddButton
+						multiple
+						maxItems={17}
 					/>
-				</Typography>
-				<InputController
-					Input={JobsAndUsersProperty}
-					name={`properties[${IssueProperties.ASSIGNEES}]`}
-					onBlur={onBlur}
-					key={IssueProperties.ASSIGNEES}
-					disabled={readOnly}
-					showAddButton
-					multiple
-					maxItems={17}
-				/>
-			</AssigneesContainer>
+				</AssigneesContainer>
+			)}
 		</>
 	);
 };
