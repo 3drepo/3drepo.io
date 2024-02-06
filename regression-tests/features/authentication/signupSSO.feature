@@ -28,5 +28,11 @@ Feature: SignupSSO
 	Scenario: Sign up (email taken - normal user)
 		Given I try to signup with Microsoft SSO with:
 			| Username   	   | Company  | Microsoft Email    | Microsoft Password |
-  			| anotherSSOUser   | Asite    | anSSOUser@outlook.com | mspassword    ||
+  			| anotherSSOUser   | Asite    | anSSOUser@outlook.com | mspassword      |
 		Then I wait until "you already have an account with us" text appears
+
+	Scenario: Sign up (email taken - SSO user)
+		Given I try to signup with Microsoft SSO with:
+			| Username   	   | Company  | Microsoft Email    | Microsoft Password |
+  			| anotherSSOUser   | Asite    | anSSOUser@outlook.com | mspassword      |
+		Then I should be redirected to the 'dashboard' page

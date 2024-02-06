@@ -17,7 +17,7 @@
 
 import { When, Then, Given, Before, After, setDefaultTimeout } from '@cucumber/cucumber';
 import { expect } from 'chai';
-import { until } from 'selenium-webdriver';
+import { WebDriver, until } from 'selenium-webdriver';
 import { clickOn, clickOnMenu, closeOriginWindow, delay, fillInForm, findElementNearText, initializeSeleniumDriver, navigateTo, waitForText, waitUntilPageLoaded } from '../../src/helpers/selenium.helpers';
 import { getLogin, logout } from '../../src/helpers/api.helpers';
 import { domain } from '../../config.json';
@@ -84,7 +84,7 @@ When('I wait until {string} text appears', async function (text) {
 });
 
 Then('I should be redirected to the {string} page', async function (page) {
-	await this.driver.wait(until.urlContains(getUrl(page)));
+	await (this.driver as WebDriver).wait(until.urlContains(getUrl(page)), 20000);
 	expect(true).to.equals(true);
 });
 
