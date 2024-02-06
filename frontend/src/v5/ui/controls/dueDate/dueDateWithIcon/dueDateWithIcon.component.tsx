@@ -41,7 +41,7 @@ export const DueDateWithIcon = ({ value, disabled, tooltip, ...props }: DueDateW
 							{value ? (
 								<DateContainer {...args} ref={inputRef} isOverdue={isOverdue} disabled={disabled}>
 									<CalendarIcon />
-									{formatShortDateTime(value)}
+									{formatShortDateTime(value, { hour12: false })}
 								</DateContainer>
 							) : (
 								<EmptyDateContainer {...args} ref={inputRef} disabled={disabled}><CalendarIcon />

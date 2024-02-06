@@ -26,7 +26,7 @@ type IDueDateFilledLabel = IDueDateEmptyLabel & {
 
 export const DueDateFilledLabel = ({ value, ...props }: IDueDateFilledLabel): JSX.Element => {
 	const isOverdue = value < Date.now();
-	const formattedDate = formatShortDateTime(value);
+	const formattedDate = formatShortDateTime(value, { hour12: false });
 	return (
 		<DateContainer isOverdue={isOverdue} {...props}>
 			{isOverdue ? (
