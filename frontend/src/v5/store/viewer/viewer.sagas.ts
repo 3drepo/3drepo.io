@@ -25,7 +25,7 @@ import { DialogsActions, DialogsTypes } from '../dialogs/dialogs.redux';
 import { prepareFederationsData } from '../federations/federations.helpers';
 import { FederationsActions, FederationsTypes } from '../federations/federations.redux';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
-import { TicketsActions, TicketsTypes } from '../tickets/tickets.redux';
+import { TicketsActions } from '../tickets/tickets.redux';
 import { FetchDataAction, ViewerActions, ViewerTypes } from './viewer.redux';
 
 function* fetchData({ teamspace, containerOrFederation, project }: FetchDataAction) {
@@ -71,7 +71,6 @@ function* fetchData({ teamspace, containerOrFederation, project }: FetchDataActi
 		}
 
 		yield put(TicketsActions.fetchTemplates(teamspace, project, containerOrFederation, isFederation, true));
-		yield take([DialogsTypes.OPEN, TicketsTypes.FETCH_TEMPLATES_SUCCESS]);
 		yield put(TicketsActions.fetchTickets(teamspace, project, containerOrFederation, isFederation));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
