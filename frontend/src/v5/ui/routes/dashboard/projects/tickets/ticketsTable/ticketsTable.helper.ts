@@ -19,7 +19,7 @@ import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/r
 import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
 import { PriorityLevels, RiskLevels, TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
-import { TicketWithModelIdAndName } from '@/v5/store/tickets/tickets.types';
+import { TicketWithModelId } from '@/v5/store/tickets/tickets.types';
 
 export const NONE_OPTION = 'None';
 
@@ -65,7 +65,7 @@ const GROUP_NAMES_BY_TYPE = {
 	...SAFETIBASE_PROPERTIES_GROUPS,
 };
 
-const groupByDate = (tickets: TicketWithModelIdAndName[]) => {
+const groupByDate = (tickets: TicketWithModelId[]) => {
 	const groups = {};
 	// eslint-disable-next-line prefer-const
 	let [ticketsWithUnsetDueDate, remainingTickets] = _.partition(tickets, ({ properties }) => !properties[IssueProperties.DUE_DATE]);
@@ -74,7 +74,7 @@ const groupByDate = (tickets: TicketWithModelIdAndName[]) => {
 	const dueDateOptions = getOptionsForGroupsWithDueDate();
 	const endOfCurrentWeek = new Date();
 
-	const ticketDueDateIsPassed = (ticket: TicketWithModelIdAndName) => ticket.properties[IssueProperties.DUE_DATE] < endOfCurrentWeek.getTime();
+	const ticketDueDateIsPassed = (ticket: TicketWithModelId) => ticket.properties[IssueProperties.DUE_DATE] < endOfCurrentWeek.getTime();
 
 	let currentWeekTickets;
 	while (dueDateOptions.length) {
@@ -86,7 +86,7 @@ const groupByDate = (tickets: TicketWithModelIdAndName[]) => {
 	return groups;
 };
 
-const groupByList = (tickets: TicketWithModelIdAndName[], groupType: string, groupValues: string[]) => {
+const groupByList = (tickets: TicketWithModelId[], groupType: string, groupValues: string[]) => {
 	const groups = {};
 	let remainingTickets = tickets;
 	let currentTickets = [];
@@ -102,7 +102,7 @@ const groupByList = (tickets: TicketWithModelIdAndName[], groupType: string, gro
 	return groups;
 };
 const getAssignees = (t) => _.get(t, `properties.${IssueProperties.ASSIGNEES}`);
-const groupByAssignees = (tickets: TicketWithModelIdAndName[]) => {
+const groupByAssignees = (tickets: TicketWithModelId[]) => {
 	const [ticketsWithAssignees, unsetAssignees] = _.partition(tickets, (ticket) => getAssignees(ticket)?.length > 0);
 
 	const ticketsWithSortedAssignees = ticketsWithAssignees.map((ticket) => {
@@ -130,7 +130,7 @@ const groupByAssignees = (tickets: TicketWithModelIdAndName[]) => {
 	return groups;
 };
 
-export const groupTickets = (groupBy: string, tickets: TicketWithModelIdAndName[]): Record<string, TicketWithModelIdAndName[]> => {
+export const groupTickets = (groupBy: string, tickets: TicketWithModelId[]): Record<string, TicketWithModelId[]> => {
 	switch (groupBy) {
 		case BaseProperties.OWNER:
 			return _.groupBy(tickets, `properties.${BaseProperties.OWNER}`);

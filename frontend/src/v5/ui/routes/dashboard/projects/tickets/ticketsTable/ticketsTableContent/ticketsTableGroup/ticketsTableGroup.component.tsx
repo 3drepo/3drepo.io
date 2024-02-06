@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITicket, TicketWithModelIdAndName } from '@/v5/store/tickets/tickets.types';
+import { ITicket, TicketWithModelId } from '@/v5/store/tickets/tickets.types';
 import { FormattedMessage } from 'react-intl';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
@@ -51,7 +51,7 @@ const SortingTableHeader = ({ name = null, children, hidden = false, ...props })
 
 type TicketsTableGroupProps = {
 	selectedTicketId?: string;
-	ticketsWithModelId: TicketWithModelIdAndName[];
+	ticketsWithModelId: TicketWithModelId[];
 	onEditTicket: (modelId: string, ticket: Partial<ITicket>) => void;
 	onNewTicket: (modelId: string) => void;
 };
@@ -70,7 +70,7 @@ export const TicketsTableGroup = ({ ticketsWithModelId, onEditTicket, onNewTicke
 	return (
 		<SortedTableComponent items={ticketsWithModelId} sortingColumn={BaseProperties.CREATED_AT}>
 			<SortedTableContext.Consumer>
-				{({ sortedItems }: SortedTableType<TicketWithModelIdAndName>) => (
+				{({ sortedItems }: SortedTableType<TicketWithModelId>) => (
 					<>
 						{!!ticketsWithModelId.length && (
 							<Headers>
