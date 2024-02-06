@@ -20,7 +20,7 @@ export const getDateMask = () => {
 	const isoString = '2018-10-25'; // example date!
 
 	const intlString = formatDate(isoString); // generate a formatted date
-	const dateParts = isoString.split('-'); // prepare to replace with pattern parts
+	const dateParts = isoString.split('/'); // prepare to replace with pattern parts
 
 	return intlString
 		.replace(dateParts[2], 'DD')
@@ -28,7 +28,7 @@ export const getDateMask = () => {
 		.replace(dateParts[0], 'YYYY');
 };
 
-export const getDateTimeMask = () => `${getDateMask()} @ hh:mma`;
+export const getDateTimeMask = () => `${getDateMask()} @ HH:mm`;
 
 export const formatTime = (time) => time.replace('@', formatMessage({
 	id: 'form.dateTime.at',
