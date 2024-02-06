@@ -79,7 +79,7 @@ export const Tickets = () => {
 	return (
 		<TicketContextComponent isViewer>
 			{view === TicketsCardViews.List && <TicketsListCard />}
-			{view.startsWith(TicketsCardViews.Details)  && <TicketDetailsCard />}
+			{view === TicketsCardViews.Details && <TicketDetailsCard />}
 			{view === TicketsCardViews.New && <NewTicketCard />}
 		</TicketContextComponent>
 	);
