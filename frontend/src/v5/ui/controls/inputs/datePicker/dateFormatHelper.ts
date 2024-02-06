@@ -17,15 +17,15 @@
 import { formatDate, formatMessage } from '@/v5/services/intl';
 
 export const getDateMask = () => {
-	const isoString = '2018-10-25'; // example date!
+	const isoString = '2018/10/25'; // example date!
+	const [year, month, day] = isoString.split('/');
 
 	const intlString = formatDate(isoString); // generate a formatted date
-	const dateParts = isoString.split('/'); // prepare to replace with pattern parts
 
 	return intlString
-		.replace(dateParts[2], 'DD')
-		.replace(dateParts[1], 'MM')
-		.replace(dateParts[0], 'YYYY');
+		.replace(day, 'DD')
+		.replace(month, 'MM')
+		.replace(year, 'YYYY');
 };
 
 export const getDateTimeMask = () => `${getDateMask()} @ HH:mm`;
