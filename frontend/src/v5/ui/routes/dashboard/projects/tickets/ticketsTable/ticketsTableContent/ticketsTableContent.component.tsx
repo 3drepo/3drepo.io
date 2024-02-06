@@ -85,7 +85,7 @@ export const TicketsTableContent = ({ setSidePanelData, selectedTicketId }: Tick
 	if (groupBy === NONE_OPTION) {
 		return (
 			<TicketsTableGroup
-				ticketsWithModelIdAndName={filteredItems}
+				ticketsWithModelId={filteredItems}
 				onNewTicket={onGroupNewTicket('')}
 				onEditTicket={setSidePanelData}
 				selectedTicketId={selectedTicketId}
@@ -97,19 +97,19 @@ export const TicketsTableContent = ({ setSidePanelData, selectedTicketId }: Tick
 
 	return (
 		<Container>
-			{_.entries(groups).map(([groupName, ticketsWithModelIdAndName]) => (
+			{_.entries(groups).map(([groupName, ticketsWithModelId]) => (
 				<DashboardListCollapse
 					title={(
 						<>
 							<Title>{groupName}</Title>
-							<CircledNumber disabled={!ticketsWithModelIdAndName.length}>{ticketsWithModelIdAndName.length}</CircledNumber>
+							<CircledNumber disabled={!ticketsWithModelId.length}>{ticketsWithModelId.length}</CircledNumber>
 						</>
 					)}
-					defaultExpanded={!!ticketsWithModelIdAndName.length}
-					key={groupBy + groupName + template + ticketsWithModelIdAndName}
+					defaultExpanded={!!ticketsWithModelId.length}
+					key={groupBy + groupName + template + ticketsWithModelId}
 				>
 					<TicketsTableGroup
-						ticketsWithModelIdAndName={ticketsWithModelIdAndName}
+						ticketsWithModelId={ticketsWithModelId}
 						onNewTicket={onGroupNewTicket(groupName)}
 						onEditTicket={setSidePanelData}
 						selectedTicketId={selectedTicketId}

@@ -19,6 +19,7 @@ import { createSelector } from 'reselect';
 import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
 import { IProjectsState } from './projects.redux';
 import { IProject } from './projects.types';
+import { selectTicketsRaw, sortTicketsByCreationDate, getTicketWithStatus } from '../tickets/tickets.selectors';
 
 const selectProjectsDomain = (state): IProjectsState => state?.projects;
 
@@ -65,4 +66,15 @@ export const selectCurrentProjectTemplateById = createSelector(
 	selectCurrentProjectTemplates,
 	(state, templateId) => templateId,
 	(templates, templateId) => templates.find(({ _id }) => _id === templateId),
+);
+
+export const selectTicketsByContainersAndFederations = createSelector(
+	(state) => state,
+	(state, modelsIds: string[]) => modelsIds,
+	(reduxStore, modelsIds) => {
+		const tickets = modelsIds
+			.flatMap((modelId) => selectTicketsRaw(reduxStore, modelId).map((ticket) => ({ ...ticket, modelId })))
+			.map((ticket) => getTicketWithStatus(ticket, selectCurrentProjectTemplateById(reduxStore, ticket.type)));
+		return sortTicketsByCreationDate(tickets);
+	},
 );

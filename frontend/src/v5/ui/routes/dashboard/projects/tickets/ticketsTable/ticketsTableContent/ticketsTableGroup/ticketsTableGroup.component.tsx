@@ -51,11 +51,11 @@ const SortingTableHeader = ({ name = null, children, hidden = false, ...props })
 
 type TicketsTableGroupProps = {
 	selectedTicketId?: string;
-	ticketsWithModelIdAndName: TicketWithModelIdAndName[];
+	ticketsWithModelId: TicketWithModelIdAndName[];
 	onEditTicket: (modelId: string, ticket: Partial<ITicket>) => void;
 	onNewTicket: (modelId: string) => void;
 };
-export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
+export const TicketsTableGroup = ({ ticketsWithModelId, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
 	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
 	const { getValues } = useFormContext();
 
@@ -68,11 +68,11 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 	const hasSafetibase = template?.modules?.some((module) => module.type === 'safetibase');
 
 	return (
-		<SortedTableComponent items={ticketsWithModelIdAndName} sortingColumn={BaseProperties.CREATED_AT}>
+		<SortedTableComponent items={ticketsWithModelId} sortingColumn={BaseProperties.CREATED_AT}>
 			<SortedTableContext.Consumer>
 				{({ sortedItems }: SortedTableType<TicketWithModelIdAndName>) => (
 					<>
-						{!!ticketsWithModelIdAndName.length && (
+						{!!ticketsWithModelId.length && (
 							<Headers>
 								<SortingTableHeader width={80}>
 									<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
@@ -110,12 +110,12 @@ export const TicketsTableGroup = ({ ticketsWithModelIdAndName, onEditTicket, onN
 							</Headers>
 						)}
 						<Group>
-							{sortedItems.map(({ modelId, modelName, ...ticket }) => (
+							{sortedItems.map(({ modelId, ...ticket }) => (
 								<TicketsTableRow
 									key={ticket._id}
 									ticket={ticket}
+									modelId={modelId}
 									showModelName={showModelName}
-									modelName={modelName}
 									onClick={() => onEditTicket(modelId, ticket)}
 									selected={selectedTicketId === ticket._id}
 								/>

@@ -16,7 +16,7 @@
  */
 
 import { JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from 'react-redux';
 import { selectFederationById } from '@/v5/store/federations/federations.selectors';
@@ -30,7 +30,7 @@ import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { CircleButton } from '@controls/circleButton';
-import { getTicketWithStatus, modelIsFederation, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
+import { modelIsFederation, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { FormProvider, useForm } from 'react-hook-form';
 import _ from 'lodash';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
@@ -52,7 +52,6 @@ import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
 import { useSelectedModels } from './newTicketMenu/useSelectedModels';
 import { getTicketIsCompleted } from '@/v5/store/tickets/card/ticketsCard.helpers';
-import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 
 type FormType = {
 	containersAndFederations: string[],
@@ -76,7 +75,7 @@ export const TicketsTable = () => {
 	});
 	const { containersAndFederations, groupBy, template } = formData.watch();
 
-	const ticketsWithModelIdAndName = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
+	const ticketsWithModelId = ProjectsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const [sidePanelTicket, setSidePanelTicket] = useState<Partial<ITicket>>(null);
@@ -91,9 +90,9 @@ export const TicketsTable = () => {
 	const isCreatingNewTicket = containerOrFederation && !selectedTicketId && !hasRequiredViewerProperties(selectedTemplate);
 
 	const ticketsFilteredByTemplate = useMemo(() => {
-		const ticketsToShow = ticketsWithModelIdAndName.filter((t) => getTicketIsCompleted(t) === showCompleted);
+		const ticketsToShow = ticketsWithModelId.filter((t) => getTicketIsCompleted(t) === showCompleted);
 		return ticketsToShow.filter(({ type }) => type === template);
-	}, [template, ticketsWithModelIdAndName, showCompleted]);
+	}, [template, ticketsWithModelId, showCompleted]);
 	const newTicketButtonIsDisabled = !containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0;
 
 	const setSidePanelData = (modelId: string, ticket?: Partial<ITicket>) => {
@@ -197,21 +196,6 @@ export const TicketsTable = () => {
 		TicketsCardActionsDispatchers.setReadOnly(readOnly);
 	}, [readOnly]);
 
-	useEffect(() => {
-		ticketsFilteredByTemplate.forEach(({ modelId, modelName, ...ticket }) => {
-			if (!ticket.properties[BaseProperties.STATUS]) {
-				TicketsActionsDispatchers.updateTicket(
-					teamspace, 
-					project,
-					modelId,
-					ticket._id,
-					getTicketWithStatus(ticket, selectedTemplate),
-					isFed(modelId),
-				);
-			}
-		});
-	}, [ticketsFilteredByTemplate]);
-
 	return (
 		<SearchContextComponent items={ticketsFilteredByTemplate} filteringFunction={filterTickets}>
 			<FormProvider {...formData}>
@@ -272,7 +256,7 @@ export const TicketsTable = () => {
 				{containerOrFederation && (
 					<MuiThemeProvider theme={theme}>
 						<TicketContextComponent isViewer={false}>
-							{selectedTicketId && (<TicketSlide ticketId={selectedTicketId} template={selectedTemplate} />)}
+							{selectedTicketId && (<TicketSlide ticket={sidePanelTicket as ITicket} template={selectedTemplate} />)}
 							{!selectedTicketId && (
 								<NewTicketSlide
 									defaultValue={sidePanelTicket}
