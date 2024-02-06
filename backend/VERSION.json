@@ -21,7 +21,7 @@
   },
   "vba" : {
 	"current" : "3.1.1",
-	"supported": ["4.6.0"]
+	"supported": []
   },
   "unreal" : {
     "current" : "1.2.2",
