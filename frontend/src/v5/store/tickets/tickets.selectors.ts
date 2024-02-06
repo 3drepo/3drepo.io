@@ -95,7 +95,7 @@ export const selectTicketByIdRaw = createSelector(
 export const selectTicketById = createSelector(
 	selectTickets,
 	(_, modelId, ticketId) => ticketId,
-	(tickets, ticketId) => tickets.find(({ _id }) => _id === ticketId),
+	(tickets, ticketId) => tickets.find(({ _id }) => _id === ticketId) || null,
 );
 
 export const selectRiskCategories = createSelector(
