@@ -19,7 +19,7 @@ import { createSelector } from 'reselect';
 import { orderBy } from 'lodash';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
-import { createPropertiesWithGroups, ticketWithGroups } from './ticketsGroups.helpers';
+import { ticketWithGroups } from './ticketsGroups.helpers';
 import { ITicket, TicketWithModelIdAndName } from './tickets.types';
 import { selectContainers } from '../containers/containers.selectors';
 import { selectFederations } from '../federations/federations.selectors';
@@ -82,7 +82,7 @@ export const selectTickets = createSelector(
 	(ticketsList, groups): ITicket[] => {
 		const tickets = [];
 		ticketsList.forEach((ticket) => {
-			tickets.push({ ...ticket, properties: createPropertiesWithGroups(ticket.properties, groups) });
+			tickets.push(ticketWithGroups(ticket, groups));
 		});
 
 		return orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
@@ -96,14 +96,9 @@ export const selectTicketByIdRaw = createSelector(
 );
 
 export const selectTicketById = createSelector(
-	selectTicketByIdRaw,
-	selectTicketsGroups,
-	(ticket, groups) => {
-		if (!ticket) {
-			return ticket;
-		}
-		return ticketWithGroups(ticket, groups);
-	},
+	selectTickets,
+	(_, modelId, ticketId) => ticketId,
+	(tickets, ticketId) => tickets.find(({ _id }) => _id === ticketId),
 );
 
 export const selectRiskCategories = createSelector(
