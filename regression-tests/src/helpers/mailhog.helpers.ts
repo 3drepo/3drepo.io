@@ -84,7 +84,7 @@ export const readLatestMailFor = async (driver:WebDriver, email:string, burnAfte
 
 		mailId = mail.ID;
 		return mail.content;
-	}, 100, 100);
+	}, 100, 500);
 
 	await driver.executeScript('document.write(`' + mailContent + '`)');
 

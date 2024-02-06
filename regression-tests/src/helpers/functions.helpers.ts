@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const reTry = async (func, retries, interval) => {
+export const reTry = async (func, retries:number, interval:number) => {
 	const retryData = { intervalId:  null, retries };
 	let error = undefined;
 

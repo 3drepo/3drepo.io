@@ -56,6 +56,11 @@ When('I reset the password from email {string} with new password {string}', asyn
 	await clickOn(this.driver, 'Save changes');
 });
 
+When('I get an email for {string} with {string} text', async function (email, text) {
+	await readLatestMailFor(this.driver, email);
+	await waitForText(this.driver, text);
+});
+
 When('I try to signup with Microsoft SSO with:', async function (datatable) {
 	const formValues = datatable.hashes()[0] as { 'Username': string, 'Company' : string,  'Microsoft Email':string,  'Microsoft Password': string };
 	await navigateTo(this.driver, 'signup-sso');

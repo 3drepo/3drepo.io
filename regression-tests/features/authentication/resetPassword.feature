@@ -38,6 +38,13 @@ Feature: Reset Password
   			| homerJSimpson   | c6UNLHPvBTX86Wa |
 		Then I should be redirected to the 'dashboard' page
 
+	Scenario: Reset password of existing user (SSO)
+		Given I request email for forgot password with:
+			| Username or email |
+  			| teamSpace1    	|
+	 	Then I wait until "A password change request has been sent" text appears
+	 	Then I get an email for "smontero@asite.com" with "Your account is associated with a Microsoft account" text
+
 	Scenario: Reset password of invalid user
 		Given I request email for forgot password with:
 			| Username or email |
