@@ -108,6 +108,7 @@ const getClientRects = async (driver: WebDriver, elements:WebElement[]):Promise<
 const findCloserRectIndex = (rect: DOMRect, rects: (DOMRect | null)[]) => {
 	let minDistance = Infinity;
 	let index = -1;
+	if (!rect) return index;
 
 	rects.forEach((otherRect, rectIndex) => {
 		if (otherRect === null) return;
@@ -209,5 +210,37 @@ export const clickOnCheckboxNearText = async (driver: WebDriver, text: string) =
 	const checkbox = await findInputNearText(driver, text);
 	await driver.wait(until.elementIsEnabled(checkbox), 100000);
 	await checkbox.click();
+};
+
+
+const buttonsPaths = {
+	'avatar': '(//button)[4]',
+};
+
+
+
+const menuPathToXPaths = (menuPath) => {
+	const chunks = menuPath.split('>');
+
+	return chunks.map((chunk) => {
+		return  By.xpath(buttonsPaths[chunk] || `//body//*[text()="${chunk}"]`);
+	});
+};
+
+
+export const clickOnMenu = async (driver: WebDriver, menuPath: string) => {
+	const xpaths = menuPathToXPaths(menuPath);
+
+	for (let i = 0; i < xpaths.length; i++) {
+		const path = xpaths[i];
+		try {
+			await animationsEnded(driver);
+			const element = await getElement(driver, path);
+			await driver.wait(until.elementIsEnabled(element));
+			await element.click();
+		} catch (e) {
+			console.error(e);
+		}
+	}
 };
 

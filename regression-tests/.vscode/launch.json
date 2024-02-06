@@ -7,13 +7,13 @@
 		{
 			"type": "node",
 			"request": "launch",
-			"name": "Test logginSSO feature",
+			"name": "Test current feature",
 			"skipFiles": [
 				"<node_internals>/**"
 			],
 			"runtimeExecutable": "yarn",
 			"runtimeArgs": ["test"],
-			"program": "./features/authentication/loginSSO.feature",
+			"program": "${file}",
 			"outFiles": [
 				"${workspaceFolder}/**/*.js"
 			]

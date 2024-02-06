@@ -18,7 +18,7 @@
 import { When, Then, Given, Before, After, setDefaultTimeout } from '@cucumber/cucumber';
 import { expect } from 'chai';
 import { until } from 'selenium-webdriver';
-import { clickOn, closeOriginWindow, delay, fillInForm, findElementNearText, initializeSeleniumDriver, navigateTo, waitForText, waitUntilPageLoaded } from '../../src/helpers/selenium.helpers';
+import { clickOn, clickOnMenu, closeOriginWindow, delay, fillInForm, findElementNearText, initializeSeleniumDriver, navigateTo, waitForText, waitUntilPageLoaded } from '../../src/helpers/selenium.helpers';
 import { getLogin, logout } from '../../src/helpers/api.helpers';
 import { domain } from '../../config.json';
 import { getUrl } from '../../src/helpers/routing.helpers';
@@ -121,6 +121,10 @@ When('I sign in at Microsoft with:', async function (datatable) {
 	await clickOn(this.driver, 'Yes');
 });
 
+
+When('I click on menu {string}', async function (menuPath) {
+	await clickOnMenu(this.driver, menuPath);
+});
 
 
 // For debugging test purposes
