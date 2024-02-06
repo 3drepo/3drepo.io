@@ -13,8 +13,14 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Feature: SignupSSO
-	Scenario: Sign up with an microsoft account via SSO
+	Scenario: Sign up with valid properties
 		Given I try to signup with Microsoft SSO with:
 			| Username    | Company | Microsoft Email       | Microsoft Password |
   			| anSSOUser   | Asite   | anSSOUser@outlook.com | mspassword    |
 		Then I should be redirected to the 'dashboard' page
+
+	Scenario: Sign up (username taken)
+		Given I try to signup with Microsoft SSO with:
+			| Username   	  | Company |
+  			| homerJSimpson   | Asite   |
+		Then I wait until "selected username is already taken" text appears

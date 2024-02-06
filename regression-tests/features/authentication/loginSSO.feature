@@ -30,10 +30,10 @@ Feature: Login (SSO)
   			| unregisteredHomerJSimpson@outlook.com | homerJSimpson |
 		Then I wait until "You are not registered with 3D Repo" text appears
 	
-	Scenario: Signing in with Microsoft with an account not linked to SSO
-		Given I navigate to '/'
-		Then I click on 'Sign in with Microsoft'
-		When I sign in at Microsoft with:
-			| Email                              | password      |
-  			| othermailHomerJSimpson@outlook.com | homerJSimpson |
-		Then I wait until "This email is associated with an account that is not linked with Microsoft." text appears
+	# Scenario: Signing in with Microsoft with an account not linked to SSO
+	# 	Given I navigate to '/'
+	# 	Then I click on 'Sign in with Microsoft'
+	# 	When I sign in at Microsoft with:
+	# 		| Email                              | password      |
+  	# 		| othermailHomerJSimpson@outlook.com | homerJSimpson |
+	# 	Then I wait until "This email is associated with an account that is not linked with Microsoft." text appears

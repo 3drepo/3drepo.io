@@ -155,9 +155,14 @@ export const fillInputByLabel = async (driver: WebDriver, label, value) => {
 	await input.sendKeys(value);
 };
 
+export const waitForPageToBeLoaded = async (driver: WebDriver) => {
+	await driver.wait(until.elementLocated(By.css('body')), 100000);
+	await animationsEnded(driver);
+};
+
 export const navigateTo = async (driver:WebDriver, page:string) => {
 	await driver.get(getUrl(page));
-	await driver.wait(until.elementLocated(By.css('body')), 100000);
+	await waitForPageToBeLoaded(driver);
 };
 
 export const closeOriginWindow = async (driver: WebDriver) => {

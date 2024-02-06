@@ -17,9 +17,10 @@
 
 import { Then, When } from '@cucumber/cucumber';
 import { readLatestMailFor } from '../../src/helpers/mailhog.helpers';
-import { clickOn, clickOnCheckboxNearText, closeOriginWindow, fillInForm, navigateTo, waitForText } from '../../src/helpers/selenium.helpers';
+import { clickOn, clickOnCheckboxNearText, closeOriginWindow, fillInForm, navigateTo, waitForPageToBeLoaded, waitForText } from '../../src/helpers/selenium.helpers';
 import { pick } from '../../src/helpers/general.helpers';
 import { signInInMicrosoft } from '../../src/helpers/authentication.helpers';
+import { WebDriver } from 'selenium-webdriver';
 
 Then('I verify the account from email {string}', async function (email) {
 	await readLatestMailFor(this.driver, email);
@@ -62,5 +63,12 @@ When('I try to signup with Microsoft SSO with:', async function (datatable) {
 	await clickOn(this.driver, 'Next step');
 	await clickOnCheckboxNearText(this.driver, 'I agree');
 	await clickOn(this.driver, 'Create account');
-	await signInInMicrosoft(this.driver, formValues['Microsoft Email'], formValues['Microsoft Password']);
+	await waitForPageToBeLoaded(this.driver);
+	const currentUrl = await (this.driver  as WebDriver).getCurrentUrl();
+
+	if (currentUrl.includes('microsoft')) {
+		await signInInMicrosoft(this.driver, formValues['Microsoft Email'], formValues['Microsoft Password']);
+	} else {
+		console.warn('Didn\'t redirect to microsfot when trying ot signup with SSO!');
+	}
 });

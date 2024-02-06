@@ -21,5 +21,6 @@ export const center = (rect: DOMRect) =>
 export const distanceBetweenRects = (rectA: DOMRect, rectB: DOMRect) => {
 	const centerA = center(rectA);
 	const centerB = center(rectB);
+
 	return Math.pow(centerA.y - centerB.y, 2) + Math.pow(centerA.x - centerB.x, 2);
 };
