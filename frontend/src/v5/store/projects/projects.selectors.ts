@@ -71,10 +71,10 @@ export const selectCurrentProjectTemplateById = createSelector(
 export const selectTicketsByContainersAndFederations = createSelector(
 	(state) => state,
 	(state, modelsIds: string[]) => modelsIds,
-	(reduxStore, modelsIds) => {
+	(storeState, modelsIds) => {
 		const tickets = modelsIds
-			.flatMap((modelId) => selectTicketsRaw(reduxStore, modelId).map((ticket) => ({ ...ticket, modelId })))
-			.map((ticket) => getTicketWithStatus(ticket, selectCurrentProjectTemplateById(reduxStore, ticket.type)));
+			.flatMap((modelId) => selectTicketsRaw(storeState, modelId).map((ticket) => ({ ...ticket, modelId })))
+			.map((ticket) => getTicketWithStatus(ticket, selectCurrentProjectTemplateById(storeState, ticket.type)));
 		return sortTicketsByCreationDate(tickets);
 	},
 );

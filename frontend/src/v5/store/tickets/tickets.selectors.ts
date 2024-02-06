@@ -73,11 +73,11 @@ export const selectTickets = createSelector(
 	selectTicketsGroups,
 	(state, modelId) => modelId,
 	(state) => state,
-	(ticketsList, groups, modelId, reduxStore): ITicket[] => {
+	(ticketsList, groups, modelId, storeState): ITicket[] => {
 		const tickets = [];
 		ticketsList.forEach((ticket) => {
 			tickets.push(ticketWithGroups(
-				getTicketWithStatus(ticket, selectTemplateById(reduxStore, modelId, ticket.type)),
+				getTicketWithStatus(ticket, selectTemplateById(storeState, modelId, ticket.type)),
 				groups,
 			));
 		});
