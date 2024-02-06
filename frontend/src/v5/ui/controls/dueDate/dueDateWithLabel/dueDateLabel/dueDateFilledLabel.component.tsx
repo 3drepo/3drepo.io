@@ -17,8 +17,8 @@
 
 import { FormattedMessage } from 'react-intl';
 import { IDueDateEmptyLabel } from './dueDateEmptyLabel.component';
-import { DateContainer } from './dueDateLabel.styles';
-import { formatShortDateTime } from '@/v5/helpers/intl.helper';
+import { DateContainer, DueStateContainer } from './dueDateLabel.styles';
+import { formatShortDateTimeWithDash } from '@/v5/helpers/intl.helper';
 
 type IDueDateFilledLabel = IDueDateEmptyLabel & {
 	value: number;
@@ -26,14 +26,19 @@ type IDueDateFilledLabel = IDueDateEmptyLabel & {
 
 export const DueDateFilledLabel = ({ value, ...props }: IDueDateFilledLabel): JSX.Element => {
 	const isOverdue = value < Date.now();
-	const formattedDate = formatShortDateTime(value);
+	const formattedDate = formatShortDateTimeWithDash(value);
 	return (
-		<DateContainer isOverdue={isOverdue} {...props}>
-			{isOverdue ? (
-				<FormattedMessage id="dueDate.overdue" defaultMessage="Overdue {date}" values={{ date: formattedDate }} />
-			) : (
-				<FormattedMessage id="dueDate.due" defaultMessage="Due {date}" values={{ date: formattedDate }} />
-			)}
-		</DateContainer>
+		<>
+			<DateContainer isOverdue={isOverdue} {...props}>
+				<DueStateContainer>
+					{isOverdue ? (
+						<FormattedMessage id="dueDate.overdue" defaultMessage="Overdue:" values={{ date: formattedDate }} />
+					) : (
+						<FormattedMessage id="dueDate.due" defaultMessage="Due:" values={{ date: formattedDate }} />
+					)}
+				</DueStateContainer>
+				{formattedDate}
+			</DateContainer>
+		</>
 	);
 };
