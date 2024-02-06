@@ -17,6 +17,7 @@
 import { Builder, until, By, WebDriver, Locator, WebElement } from 'selenium-webdriver';
 import * as config from '../../config.json';
 import { getUrl } from './routing.helpers';
+import { distanceBetweenRects } from './rect.helpers';
 
 type Label = string;
 type Value = string;
@@ -112,7 +113,7 @@ const findCloserRectIndex = (rect: DOMRect, rects: (DOMRect | null)[]) => {
 
 	rects.forEach((otherRect, rectIndex) => {
 		if (otherRect === null) return;
-		const distance = Math.pow(rect.bottom - otherRect.y, 2) + Math.pow(rect.left - otherRect.left, 2);
+		const distance = distanceBetweenRects(rect, otherRect);
 		if (distance < minDistance) {
 			minDistance = distance;
 			index = rectIndex;
@@ -216,8 +217,6 @@ export const clickOnCheckboxNearText = async (driver: WebDriver, text: string) =
 const buttonsPaths = {
 	'avatar': '(//button)[4]',
 };
-
-
 
 const menuPathToXPaths = (menuPath) => {
 	const chunks = menuPath.split('>');

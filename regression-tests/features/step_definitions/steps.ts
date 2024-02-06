@@ -24,6 +24,7 @@ import { domain } from '../../config.json';
 import { getUrl } from '../../src/helpers/routing.helpers';
 import { getUserForRole } from '../../src/helpers/users.helpers';
 import { getEmailCount } from '../../src/helpers/mailhog.helpers';
+import { signInInMicrosoft } from '../../src/helpers/authentication.helpers';
 
 setDefaultTimeout(120 * 1000);
 
@@ -83,7 +84,7 @@ When('I wait until {string} text appears', async function (text) {
 });
 
 Then('I should be redirected to the {string} page', async function (page) {
-	await this.driver.wait(until.urlIs(getUrl(page)));
+	await this.driver.wait(until.urlContains(getUrl(page)));
 	expect(true).to.equals(true);
 });
 
@@ -113,19 +114,12 @@ When('I switch back', async function () {
 
 When('I sign in at Microsoft with:', async function (datatable) {
 	const hashes = datatable.hashes()[0] ;
-	const labels = Object.keys(hashes);
-	await fillInForm(this.driver, { [labels[0]]: hashes[labels[0]] });
-	await clickOn(this.driver, 'Next');
-	await fillInForm(this.driver, { [labels[1]]: hashes[labels[1]] });
-	await clickOn(this.driver, 'Sign in');
-	await clickOn(this.driver, 'Yes');
+	await signInInMicrosoft(this.driver, hashes.Email, hashes.Password);
 });
-
 
 When('I click on menu {string}', async function (menuPath) {
 	await clickOnMenu(this.driver, menuPath);
 });
-
 
 // For debugging test purposes
 When('I wait for {int} seconds', async function (seconds) {

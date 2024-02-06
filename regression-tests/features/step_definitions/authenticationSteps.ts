@@ -19,6 +19,7 @@ import { Then, When } from '@cucumber/cucumber';
 import { readLatestMailFor } from '../../src/helpers/mailhog.helpers';
 import { clickOn, clickOnCheckboxNearText, closeOriginWindow, fillInForm, navigateTo, waitForText } from '../../src/helpers/selenium.helpers';
 import { pick } from '../../src/helpers/general.helpers';
+import { signInInMicrosoft } from '../../src/helpers/authentication.helpers';
 
 Then('I verify the account from email {string}', async function (email) {
 	await readLatestMailFor(this.driver, email);
@@ -52,4 +53,14 @@ When('I reset the password from email {string} with new password {string}', asyn
 	await closeOriginWindow(this.driver);
 	await fillInForm(this.driver, { 'New password': newPass });
 	await clickOn(this.driver, 'Save changes');
+});
+
+When('I try to signup with Microsoft SSO with:', async function (datatable) {
+	const formValues = datatable.hashes()[0] as { 'Username': string, 'Company' : string,  'Microsoft Email':string,  'Microsoft Password': string };
+	await navigateTo(this.driver, 'signup-sso');
+	await fillInForm(this.driver, pick(formValues, ['Username', 'Company']));
+	await clickOn(this.driver, 'Next step');
+	await clickOnCheckboxNearText(this.driver, 'I agree');
+	await clickOn(this.driver, 'Create account');
+	await signInInMicrosoft(this.driver, formValues['Microsoft Email'], formValues['Microsoft Password']);
 });
