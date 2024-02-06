@@ -24,3 +24,9 @@ Feature: SignupSSO
 			| Username   	  | Company |
   			| homerJSimpson   | Asite   |
 		Then I wait until "selected username is already taken" text appears
+
+	Scenario: Sign up (email taken - normal user)
+		Given I try to signup with Microsoft SSO with:
+			| Username   	   | Company  | Microsoft Email    | Microsoft Password |
+  			| anotherSSOUser   | Asite    | anSSOUser@outlook.com | mspassword    ||
+		Then I wait until "you already have an account with us" text appears
