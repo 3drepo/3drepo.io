@@ -73,6 +73,7 @@ interface IProps {
 	selectedTicket: ITicket | undefined;
 	treeNodesList: any;
 	ticketsCardView: TicketsCardViews;
+	isEditingGroups: boolean;
 	stopListenOnSelections: () => void;
 	stopListenOnModelLoaded: () => void;
 	stopListenOnClickPin: () => void;
@@ -188,7 +189,7 @@ export class ViewerGui extends PureComponent<IProps, IState> {
 			this.props.resetCompareComponent();
 		}
 
-		if (this.props.ticketsCardView === TicketsCardViews.DetailsGroups) {
+		if (this.props.isEditingGroups) {
 			return;
 		}
 
