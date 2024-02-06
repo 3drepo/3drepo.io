@@ -37,6 +37,7 @@ interface IProps {
 	takeScreenshot?: (disableViewpointSuggestion: boolean) => void;
 	uploadScreenshot?: (image, disableViewpointSuggestion: boolean) => void;
 	uploadImage?: () => void;
+	hasNoPermission?: boolean;
 	disabled?: boolean;
 	disableScreenshot?: boolean;
 	close?: (e) => void;
@@ -166,16 +167,18 @@ export const UpdateImageButton = forwardRef(({ hasImage, disabled, ...props }: I
 	);
 });
 
-export const ImageButton = ({ ...props }: IProps) => {
+export const ImageButton = ({ hasNoPermission, ...props }: IProps) => {
+	let title = '';
+	if (props.disabled) {
+		title = 'Sorry, this cannot be edited on a closed item.';
+	}
+
+	if (hasNoPermission) {
+		title = 'Sorry, You do not have enough permissions to do this.';
+	}
 	return (
-		<>
-			{renderWhenTrueOtherwise(() => (
-				<Tooltip title={`Sorry, You do not have enough permissions to do this.`}>
-					<UpdateImageButton {...props} />
-				</Tooltip>
-			), () => (
-				<UpdateImageButton {...props} />
-			))(props.disabled)}
-		</>
+		<Tooltip title={title}>
+			<UpdateImageButton {...props} />
+		</Tooltip>
 	);
 };

@@ -21,6 +21,7 @@ import { goBack } from 'connected-react-router';
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { TicketsCardActions } from '@/v5/store/tickets/card/ticketsCard.redux';
+import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
 import { INITIAL_HELICOPTER_SPEED, VIEWER_GIZMO_MODES, VIEWER_EVENTS, VIEWER_CLIP_MODES } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
@@ -72,6 +73,7 @@ function* fetchData({ teamspace, model }) {
 		yield put(ViewpointsActions.reset());
 
 		yield all([
+			put(TicketsActions.clearGroups()),
 			put(ModelActions.fetchRevisions(teamspace, model, false)),
 			put(CurrentUserActions.fetchUser(username)),
 			put(JobsActions.fetchJobs(teamspace)),

@@ -17,12 +17,9 @@
 
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { editedCommentMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
-import { CommentImages } from '../commentImages/commentImages.component';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown.component';
-import { CommentContainer, CommentAge, CommentAuthor, EditedCommentLabel, SingleImage, CommentImagesContainer } from './basicComment.styles';
-import { CommentReply } from '../commentReply/commentReply.component';
+import { CommentContainer, CommentAge, EditedCommentLabel } from './basicComment.styles';
+import { CommentNonMessageContent } from '../commentNonMessageContent/commentNonMessageContent.component';
 
 export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
 	children?: any;
@@ -33,38 +30,25 @@ export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>>
 };
 export const BasicComment = ({
 	author,
-	images = [],
+	images,
 	children,
 	message,
 	commentAge,
 	metadata,
-	isCurrentUserComment = true,
+	isCurrentUserComment,
 	createdAt,
 	updatedAt,
 	...props
 }: BasicCommentProps) => {
-	const imagesSrc = images.map(getImgSrc);
 	const isEdited = updatedAt && (createdAt !== updatedAt);
 	return (
 		<CommentContainer {...props}>
-			{images.length === 1 && (
-				<SingleImage
-					src={imagesSrc[0]}
-					onClick={() => DialogsActionsDispatchers.open('images', { images: imagesSrc })}
-				/>
-			)}
-			{author && (<CommentAuthor>{author}</CommentAuthor>)}
-			{metadata && (
-				<CommentReply
-					variant={isCurrentUserComment ? 'secondary' : 'primary'}
-					{...metadata}
-				/>
-			)}
-			{images.length > 1 && (
-				<CommentImagesContainer>
-					<CommentImages images={imagesSrc} />
-				</CommentImagesContainer>
-			)}
+			<CommentNonMessageContent
+				images={images}
+				author={author}
+				metadata={metadata}
+				isCurrentUserComment={isCurrentUserComment}
+			/>
 			{isEdited && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			{message && (<CommentMarkDown>{message}</CommentMarkDown>)}
 			<CommentAge>{commentAge}</CommentAge>

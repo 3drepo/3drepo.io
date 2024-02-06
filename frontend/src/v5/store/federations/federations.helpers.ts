@@ -87,7 +87,10 @@ export const prepareFederationSettingsForFrontend = ({
 export const prepareFederationSettingsForBackend = ({
 	surveyPoint,
 	...otherProps
-}: FederationSettings) => ({
-	surveyPoints: [surveyPoint],
-	...otherProps,
-});
+}: FederationSettings) => {
+	if (!surveyPoint) return otherProps;
+	return {
+		surveyPoints: [surveyPoint],
+		...otherProps,
+	};
+};

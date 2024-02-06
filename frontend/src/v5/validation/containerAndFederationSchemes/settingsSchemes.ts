@@ -18,7 +18,8 @@
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
-import { numberField, name, unit, desc, code, nullableNumberField } from './validators';
+import { name, unit, desc, code, nullableNumberField } from './validators';
+import { isNumber } from 'lodash';
 
 export const SettingsSchema = Yup.object().shape({
 	name,
@@ -43,9 +44,18 @@ export const SettingsSchemaWithGeoPosition = SettingsSchema.shape({
 			formatMessage({
 				id: 'settings.angle.error.max',
 				defaultMessage: 'Angle cannot be greater than 360',
-			}))
-		.transform((value) => value ?? 0),
-	x: numberField.required(),
-	y: numberField.required(),
-	z: numberField.required(),
-});
+			})),
+	x: nullableNumberField,
+	y: nullableNumberField,
+	z: nullableNumberField,
+}).test(
+	'allOrNoneGISValues',
+	formatMessage({
+		id: 'validation.settings.GIS.error.allOrNone',
+		defaultMessage: 'GIS Values must either all be provided or all empty',
+	}),
+	(value) => {
+		const surveyPointFields = [value.latitude, value.longitude, value.angleFromNorth, value.x, value.y, value.z];
+		return surveyPointFields.every((val) => isNumber(val)) || surveyPointFields.every((val) => !isNumber(val));
+	},
+);

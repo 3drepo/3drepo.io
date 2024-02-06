@@ -206,6 +206,7 @@ export class RiskDetails extends PureComponent<IProps, IState> {
 				onTakeScreenshot={this.handleNewScreenshot}
 				onSave={this.handleSave}
 				canComment={this.userCanComment()}
+				hasNoPermission={!this.canEditBasicProperty}
 				hideComment={this.isNewRisk}
 				hideScreenshot={this.props.disableViewer || this.isNewRisk}
 				hideUploadButton={this.isNewRisk}

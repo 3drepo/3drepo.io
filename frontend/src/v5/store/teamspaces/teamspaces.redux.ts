@@ -25,6 +25,7 @@ export const { Types: TeamspacesTypes, Creators: TeamspacesActions } = createAct
 	fetchSuccess: ['teamspaces'],
 	fetchQuota: ['teamspace'],
 	fetchQuotaSuccess: ['teamspace', 'quota'],
+	setUsedQuotaSeats: ['teamspace', 'seats'],
 	setCurrentTeamspace: ['currentTeamspace'],
 	setTeamspacesArePending: ['teamspacesArePending'],
 }, { prefix: 'TEAMSPACES2/' }) as { Types: Constants<ITeamspacesActionCreators>; Creators: ITeamspacesActionCreators };
@@ -52,11 +53,16 @@ export const fetchQuotaSuccess = (state, { teamspace, quota }: FetchQuotaSuccess
 	state.quota[teamspace] = quota;
 };
 
+export const setUsedQuotaSeats = (state, { teamspace, seats }: SetUsedQuotaSeatsAction) => {
+	state.quota[teamspace].seats.used = seats;
+};
+
 export const teamspacesReducer = createReducer(INITIAL_STATE, produceAll({
 	[TeamspacesTypes.FETCH_SUCCESS]: fetchSuccess,
 	[TeamspacesTypes.FETCH_QUOTA_SUCCESS]: fetchQuotaSuccess,
 	[TeamspacesTypes.SET_CURRENT_TEAMSPACE]: setCurrentTeamspace,
 	[TeamspacesTypes.SET_TEAMSPACES_ARE_PENDING]: setTeamspacesArePending,
+	[TeamspacesTypes.SET_USED_QUOTA_SEATS]: setUsedQuotaSeats,
 }));
 
 /**
@@ -92,7 +98,7 @@ export type FetchQuotaAction = Action<'FETCH_QUOTA'> & { teamspace: string };
 export type FetchQuotaSuccessAction = Action<'FETCH_QUOTA_SUCCESS'> & { teamspace: string, quota: Quota };
 export type SetCurrentTeamspaceAction = Action<'SET_CURRENT_TEAMSPACE'> & { currentTeamspace: string };
 export type SetTeamspacesArePendingAction = Action<'SET_TEAMSPACES_ARE_PENDING'> & { teamspacesArePending: boolean };
-
+export type SetUsedQuotaSeatsAction = Action<'SET_USED_QUOTA_SEATS'> & { teamspace: string, seats: number };
 export interface ITeamspacesActionCreators {
 	fetch: () => FetchAction;
 	fetchSuccess: (teamspaces: ITeamspace[]) => FetchSuccessAction;
@@ -100,4 +106,5 @@ export interface ITeamspacesActionCreators {
 	setTeamspacesArePending: (teamspacesArePending: boolean) => SetTeamspacesArePendingAction;
 	fetchQuota: (teamspace: string) => FetchQuotaAction;
 	fetchQuotaSuccess: (teamspace: string, quota: Quota) => FetchQuotaSuccessAction;
+	setUsedQuotaSeats: (teamspace: string, seats: number) => SetUsedQuotaSeatsAction;
 }

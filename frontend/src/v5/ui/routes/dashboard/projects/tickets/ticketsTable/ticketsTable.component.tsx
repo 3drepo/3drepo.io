@@ -79,7 +79,6 @@ export const TicketsTable = () => {
 	const ticketsWithModelIdAndName = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
-	const [sidePanelModelId, setSidePanelModelId] = useState<string>(null);
 	const [sidePanelTicket, setSidePanelTicket] = useState<Partial<ITicket>>(null);
 	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
 
@@ -89,7 +88,7 @@ export const TicketsTable = () => {
 		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
 	const selectedTicketId = sidePanelTicket?._id;
 	const templateIsFetched = templateAlreadyFetched(selectedTemplate || {} as any);
-	const isCreatingNewTicket = sidePanelModelId && !selectedTicketId && !hasRequiredViewerProperties(selectedTemplate);
+	const isCreatingNewTicket = containerOrFederation && !selectedTicketId && !hasRequiredViewerProperties(selectedTemplate);
 
 	const ticketsFilteredByTemplate = useMemo(() => {
 		const ticketsToShow = ticketsWithModelIdAndName.filter((t) => getTicketIsCompleted(t) === showCompleted);
@@ -98,7 +97,13 @@ export const TicketsTable = () => {
 	const newTicketButtonIsDisabled = !containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0;
 
 	const setSidePanelData = (modelId: string, ticket?: Partial<ITicket>) => {
-		setSidePanelModelId(modelId);
+		const newParams = {
+			...params,
+			template,
+			containerOrFederation: modelId,
+		};
+		const path = generatePath(TICKETS_ROUTE, newParams);
+		history.replace(path + window.location.search);
 		setSidePanelTicket(ticket);
 	};
 
@@ -118,12 +123,12 @@ export const TicketsTable = () => {
 	});
 
 	const getOpenInViewerLink = () => {
-		if (!sidePanelModelId) return '';
+		if (!containerOrFederation) return '';
 
 		const pathname = generatePath(VIEWER_ROUTE, {
 			teamspace,
 			project,
-			containerOrFederation: sidePanelModelId || '',
+			containerOrFederation: containerOrFederation || '',
 		});
 		return pathname + (selectedTicketId ? `?ticketId=${selectedTicketId}` : '');
 	};
@@ -176,15 +181,6 @@ export const TicketsTable = () => {
 		setModelsIds();
 		formData.setValue('containersAndFederations', []);
 	}, [project]);
-
-	useEffect(() => {
-		const newParams = {
-			...params,
-			containerOrFederation: sidePanelModelId,
-		};
-		const path = generatePath(TICKETS_ROUTE, newParams);
-		history.replace(path + window.location.search);
-	}, [sidePanelModelId]);
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setSelectedTicket(selectedTicketId);
@@ -259,7 +255,7 @@ export const TicketsTable = () => {
 				</FiltersContainer>
 				<TicketsTableContent setSidePanelData={setSidePanelData} selectedTicketId={selectedTicketId} />
 			</FormProvider>
-			<SidePanel open={!!sidePanelModelId}>
+			<SidePanel open={!!containerOrFederation}>
 				<SlidePanelHeader>
 					<Link to={getOpenInViewerLink()} target="_blank" disabled={isCreatingNewTicket}>
 						<OpenInViewerButton disabled={isCreatingNewTicket}>
@@ -273,7 +269,7 @@ export const TicketsTable = () => {
 						<ExpandIcon />
 					</CircleButton>
 				</SlidePanelHeader>
-				{sidePanelModelId && (
+				{containerOrFederation && (
 					<MuiThemeProvider theme={theme}>
 						<TicketContextComponent isViewer={false}>
 							{selectedTicketId && (<TicketSlide ticketId={selectedTicketId} template={selectedTemplate} />)}
