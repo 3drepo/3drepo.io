@@ -27,9 +27,8 @@ import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { Highlight } from '@controls/highlight';
 import { useEffect, useRef } from 'react';
-import { Ticket, Id, Title, Assignees, IssuePropertiesRow, Thumbnail, Description, FlexRow } from './ticketItem.styles';
+import { Ticket, Id, Title, Assignees, IssuePropertiesRow, Thumbnail, Description, FlexRow, CreationInfo } from './ticketItem.styles';
 import { IssueProperties, SafetibaseProperties } from '../../tickets.constants';
-import { CreationInfo } from '@components/shared/creationInfo/creationInfo.component';
 
 type TicketItemProps = {
 	ticket: ITicket;

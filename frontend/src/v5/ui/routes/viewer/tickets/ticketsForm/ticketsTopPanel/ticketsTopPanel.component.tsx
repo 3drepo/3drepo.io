@@ -19,7 +19,6 @@ import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
-import { CreationInfo } from '@components/shared/creationInfo/creationInfo.component';
 import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
 import { useFormContext } from 'react-hook-form';
 import { useEffect, useRef } from 'react';
@@ -29,7 +28,7 @@ import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
 import { PropertiesList } from '../propertiesList.component';
 import { IssuePropertiesInputs } from './IssuePropertiesInputs/issuePropertiesInputs.component';
-import { BaseTicketInfo, DescriptionProperty, TopPanel } from './ticketsTopPanel.styles';
+import { DescriptionProperty, TopPanel, CreationInfo } from './ticketsTopPanel.styles';
 import { ErrorTextGap } from '../ticketsForm.styles';
 
 type ITicketsTopPanel = {
@@ -65,38 +64,36 @@ export const TicketsTopPanel = ({
 
 	return (
 		<TopPanel>
-			<BaseTicketInfo>
-				<TitleProperty
-					name={BaseProperties.TITLE}
-					defaultValue={title}
-					formError={formState.errors[BaseProperties.TITLE]}
-					onBlur={onPropertyBlur}
-					disabled={readOnly}
-					ref={ref}
+			<TitleProperty
+				name={BaseProperties.TITLE}
+				defaultValue={title}
+				formError={formState.errors[BaseProperties.TITLE]}
+				onBlur={onPropertyBlur}
+				disabled={readOnly}
+				ref={ref}
+			/>
+			{createdAt && (
+				<CreationInfo
+					owner={owner}
+					createdAt={createdAt}
+					updatedAt={updatedAt}
 				/>
-				{createdAt && (
-					<CreationInfo
-						owner={owner}
-						createdAt={createdAt}
-						updatedAt={updatedAt}
-					/>
-				)}
-				<DescriptionProperty>
-					<FormTextAreaFixedSize
-						name={`properties.${BaseProperties.DESCRIPTION}`}
-						onBlur={onPropertyBlur}
-						placeholder={formatMessage({
-							id: 'customTicket.topPanel.description',
-							defaultMessage: 'Description',
-						})}
-						formError={_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`)}
-						disabled={readOnly}
-					/>
-					{_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`) && <ErrorTextGap />}
-				</DescriptionProperty>
-				{hasIssueProperties && <IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnly} />}
-				<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
-			</BaseTicketInfo>
+			)}
+			<DescriptionProperty>
+				<FormTextAreaFixedSize
+					name={`properties.${BaseProperties.DESCRIPTION}`}
+					onBlur={onPropertyBlur}
+					placeholder={formatMessage({
+						id: 'customTicket.topPanel.description',
+						defaultMessage: 'Description',
+					})}
+					formError={_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`)}
+					disabled={readOnly}
+				/>
+				{_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`) && <ErrorTextGap />}
+			</DescriptionProperty>
+			{hasIssueProperties && <IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnly} />}
+			<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
 		</TopPanel>
 	);
 };

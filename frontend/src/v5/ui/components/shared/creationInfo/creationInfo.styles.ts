@@ -21,11 +21,12 @@ export const CreationInfoContainer = styled.div`
 	display: flex;
 	${({ theme }) => theme.typography.caption};
 	color: ${({ theme }) => theme.palette.base.main};
-	padding-left: 10px;
 	gap: 2px;
 `;
 
-export const TruncateName = styled.div`
+export const CreationInfoValue = styled.span``;
+
+export const TruncateName = styled(CreationInfoValue)`
 	display: inline-block;
 	text-decoration: underline;
 	max-width: 65px;

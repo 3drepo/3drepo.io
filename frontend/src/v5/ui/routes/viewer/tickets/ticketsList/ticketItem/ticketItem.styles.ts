@@ -16,6 +16,8 @@
  */
 
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
+import { CreationInfo as BaseCreationInfo } from '@components/shared/creationInfo/creationInfo.component';
+import { CreationInfoValue } from '@components/shared/creationInfo/creationInfo.styles';
 import { ControlledAssigneesSelect } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
 import styled from 'styled-components';
 
@@ -81,4 +83,12 @@ export const Assignees = styled(ControlledAssigneesSelect).attrs({
 })`
 	margin-left: auto;
 	height: 28px;
+`;
+
+export const CreationInfo = styled(BaseCreationInfo)`
+	color: ${({ theme }) => theme.palette.base.main};
+	${CreationInfoValue} {
+		color: ${({ theme }) => theme.palette.secondary.main};
+		text-decoration: none;
+	}
 `;
