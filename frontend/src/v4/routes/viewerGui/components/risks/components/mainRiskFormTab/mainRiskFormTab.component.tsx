@@ -107,6 +107,7 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 					isNew={isNewRisk}
 					disableViewer={disableViewer}
 					canEditViewpoint={canEditViewpoint}
+					hasNoPermission={!canEditBasicProperty}
 					onChangePin={props.onChangePin}
 					onSavePin={props.onSavePin}
 					onUpdateViewpoint={props.onUpdateViewpoint}

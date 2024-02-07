@@ -22,7 +22,7 @@ import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg'
 
 export const Container = styled.div``;
 
-export const StyledIconButton = styled(IconButton)`
+export const StyledIconButton = styled(IconButton)<{ disabled?: boolean }>`
 	&& {
 		padding: 6px;
 	}

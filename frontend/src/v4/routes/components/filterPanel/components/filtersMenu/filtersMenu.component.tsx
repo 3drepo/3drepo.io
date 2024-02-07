@@ -19,6 +19,8 @@ import ArrowRight from '@mui/icons-material/ArrowRight';
 import Check from '@mui/icons-material/Check';
 import Copy from '@mui/icons-material/FileCopy';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
+import { LONG_DATE_TIME_FORMAT } from '@/v4/services/formatting/formatDate';
 
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { FILTER_TYPES } from '../../filterPanel';
@@ -28,14 +30,13 @@ import {
 	CopyItem,
 	CopyText,
 	DataTypesWrapper,
-	DateTimeTextField,
 	MenuFooter,
 	MenuList,
 	NestedWrapper,
 	StyledList,
-	StyledDateTimePicker,
 	StyledItemText,
-	StyledListItem
+	StyledListItem,
+	DateTimePickerWrapper
 } from './filtersMenu.styles';
 
 interface IProps {
@@ -103,7 +104,7 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 
 	public onDateChange = (item, subItem) => (value) => {
 		this.setState({ [subItem.value]: value } as any, () => {
-			subItem.date = value.valueOf();
+			subItem.date = value?.valueOf();
 			this.props.onToggleFilter(item, subItem);
 		});
 	}
@@ -118,13 +119,13 @@ export class FiltersMenu extends PureComponent<IProps, IState> {
 				<StyledItemText>
 					{name}
 					{item.type === FILTER_TYPES.DATE &&
-						<StyledDateTimePicker
-							value={this.getSelectedDate(item, subItem.value)}
-							onChange={this.onDateChange(item, subItem.value)}
-							renderInput={(params) => (
-								<DateTimeTextField {...params} placeholder="Select date" />
-							)}
-						/>
+						<DateTimePickerWrapper>
+							<DateTimePicker
+								value={this.getSelectedDate(item, subItem.value)}
+								onChange={this.onDateChange(item, subItem.value)}
+								inputFormat={LONG_DATE_TIME_FORMAT}
+							/>
+						</DateTimePickerWrapper>
 					}
 					{this.isSelectedItem(item.label, subItem.value) && <Check fontSize={'small'} />}
 				</StyledItemText>

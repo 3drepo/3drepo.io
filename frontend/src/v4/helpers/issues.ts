@@ -45,7 +45,7 @@ export const prepareIssue = (issue, jobs = []) => {
 	const preparedIssue = {...issue};
 
 	if (issue.thumbnail) {
-		preparedIssue.thumbnail = issue.thumbnail.length ? getAPIUrl(issue.thumbnail) : '';
+		preparedIssue.thumbnail = `${getAPIUrl(issue.thumbnail)}?${new Date().getTime()}`;
 	}
 
 	const descriptionThumbnail = issue.viewpoint && issue.viewpoint.screenshot

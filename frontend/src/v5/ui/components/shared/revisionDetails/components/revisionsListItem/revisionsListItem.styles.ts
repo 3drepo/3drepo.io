@@ -14,20 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import DownloadIconBase from '@assets/icons/outlined/download_arrow-outlined.svg';
 import { IconButton } from '@mui/material';
 import { Container as fixedOrGrowContainer } from '@/v5/ui/controls/fixedOrGrowContainer/fixedOrGrowContainer.styles';
+import { hexToOpacity } from '@/v5/ui/themes/theme';
 import { Link } from 'react-router-dom';
 import { RevisionsListItemText } from './revisionsListItemText/revisionsListItemText.component';
 
-export const Container = styled(Link)`
+export const Container = styled(Link) <{ diabled: boolean }>`
 	display: flex;
 	align-items: center;
 	height: 100%;
 	padding-left: 20px;
 	padding-right: 153px;
 	color: ${({ theme }) => theme.palette.primary.contrast};
+	background-color: ${({ theme }) => theme.palette.secondary.mid};
 
 	&:link { text-decoration: none; }
 	&:visited { text-decoration: none; }
@@ -39,6 +41,14 @@ export const Container = styled(Link)`
 		overflow: hidden;
 		padding-right: 10px;
 	}
+
+	${({ disabled }) => disabled ? css`
+		cursor: default;
+	` : css`
+		&:hover {
+			background-color: ${({ theme }) => hexToOpacity(theme.palette.secondary.main, 50)};
+		}
+	`}
 `;
 
 export const DownloadIcon = styled(DownloadIconBase)`

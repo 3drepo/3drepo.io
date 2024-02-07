@@ -57,8 +57,9 @@ const removeModelDataMock = ModelHelper.removeModelData.mockImplementation(() =>
 jest.mock('../../../../../../src/v5/utils/permissions/permissions', () => ({
 	...jest.requireActual('../../../../../../src/v5/utils/permissions/permissions'),
 	isTeamspaceAdmin: jest.fn().mockImplementation((teamspace, user) => user === 'tsAdmin'),
-	hasReadAccessToModel: jest.fn()
-		.mockImplementation((teamspace, project, model, user) => (modelReadPermissions[model] || []).includes(user)),
+	hasReadAccessToSomeModels: jest.fn()
+		.mockImplementation((teamspace, project, models, user) => models.some(
+			(model) => (modelReadPermissions[model] || []).includes(user))),
 }));
 
 const determineProjectListResult = (username) => projectList.flatMap(({ permissions, _id, name, models }) => {

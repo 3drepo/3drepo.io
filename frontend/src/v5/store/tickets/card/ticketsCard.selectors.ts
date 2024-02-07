@@ -45,6 +45,11 @@ export const selectView = createSelector(
 	(ticketCardState) => ticketCardState.view,
 );
 
+export const selectViewProps = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.viewProps,
+);
+
 export const selectReadOnly = createSelector(
 	selectTicketsCardDomain,
 	(ticketCardState) => ticketCardState.readOnly,

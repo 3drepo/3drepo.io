@@ -3,7 +3,7 @@ import * as nock from 'nock'
 import axios from 'axios';
 import clientConfigMock from './clientConfig.mock';
 
-axios.defaults.adapter = require('axios/lib/adapters/http');
+axios.defaults.adapter = 'http';
 
 nock.disableNetConnect();
 

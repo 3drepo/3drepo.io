@@ -57,6 +57,7 @@ interface IProps {
 	onDelete?: (teamspace, model, id) => void;
 	onShare?: (teamspace, model, id, project?, revision?) => void;
 	onSetDefault?: (teamspace, model, id) => void;
+	onClearDefault?: (teamspace, model) => void;
 	onOpenEditMode?: () => void;
 	onClick?: (viewpoint) => void;
 	onChangeName?: (viewpointName) => void;
@@ -97,7 +98,7 @@ const HamburgerMenu = ({onSetAsDefault, onDelete, isAdmin, defaultView}) => {
 				onClose={toggleMenu}
 			>
 				<MenuItem onClick={closeMenuAnd(onSetAsDefault)} disabled={!isAdmin} >
-					Set as Home View
+					{defaultView ? 'Unset as Home View' : 'Set as Home View'}
 				</MenuItem>
 				{renderDeleteMenuItem(!defaultView)}
 			</Menu>
@@ -236,8 +237,12 @@ export class ViewItem extends PureComponent<IProps, any> {
 	}
 
 	public handleSetDefault = () => {
-		const { teamspace, modelId, viewpoint } = this.props;
-		this.props.onSetDefault(teamspace, modelId, viewpoint);
+		const { teamspace, modelId, viewpoint, defaultView } = this.props;
+		if (!defaultView) {
+			this.props.onSetDefault(teamspace, modelId, viewpoint);
+		} else {
+			this.props.onClearDefault(teamspace, modelId);
+		}
 	}
 
 	public handleNameChange = (field) => (event) => {

@@ -20,6 +20,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { isEmpty } from 'lodash';
 import { all, put, select, takeLatest } from 'redux-saga/effects';
 
+import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
+import { selectCurrentQuotaSeats } from '@/v5/store/teamspaces/teamspaces.selectors';
 import {
 	FederationReminderDialog
 } from '../../routes/modelsPermissions/components/federationReminderDialog/federationReminderDialog.component';
@@ -107,6 +109,9 @@ export function* addUser({ user }) {
 
 		yield put(UserManagementActions.addUserSuccess(data, currentUser.username));
 		yield put(SnackbarActions.show('User added'));
+
+		const { used } = yield select(selectCurrentQuotaSeats);
+		yield put(TeamspacesActions.setUsedQuotaSeats(teamspace, used + 1));
 	} catch (error) {
 		if (error.response.status === 404) {
 			yield put(UserManagementActions.setUserNotExists(true));
@@ -144,6 +149,9 @@ export function* sendInvitation({ email, job, isAdmin, permissions, onFinish, on
 		const isInvitationNotOnPendingList = isEmpty(pendingInvitations.filter((item) => (item.email === invitation.email)));
 		const actionMessage = isInvitationNotOnPendingList ? 'Invitation sent' : 'Invitation updated';
 		const { data: savedInvitation } = yield API.sendInvitation(teamspace, invitation);
+
+		const { used } = yield select(selectCurrentQuotaSeats);
+		yield put(TeamspacesActions.setUsedQuotaSeats(teamspace, used + 1));
 		onFinish();
 		yield put(UserManagementActions.sendInvitationSuccess(savedInvitation));
 		yield put(SnackbarActions.show(actionMessage));
@@ -159,6 +167,9 @@ export function* removeInvitation({ email }) {
 		yield API.removeInvitation(teamspace, email);
 		yield put(UserManagementActions.removeInvitationSuccess(email));
 		yield put(SnackbarActions.show('Invitation removed'));
+
+		const { used } = yield select(selectCurrentQuotaSeats);
+		yield put(TeamspacesActions.setUsedQuotaSeats(teamspace, used - 1));
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('remove', 'invitation', error));
 	}
@@ -166,12 +177,15 @@ export function* removeInvitation({ email }) {
 
 export function* removeUser({ username }) {
 	try {
+		const teamspace = yield select(selectCurrentTeamspace);
+		const { used } = yield select(selectCurrentQuotaSeats);
 			DialogsActionsDispatchers.open('delete', {
 				name: username,
 				onClickConfirm: () => new Promise<void>(
 					(accept, reject) => {
 						try {
-							dispatch(UserManagementActions.removeUserCascade(username))
+							dispatch(UserManagementActions.removeUserCascade(username));
+							dispatch(TeamspacesActions.setUsedQuotaSeats(teamspace, used - 1));
 							accept();
 						} catch {
 							reject();

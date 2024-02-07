@@ -103,10 +103,23 @@ const testFormatPronouns = () => {
 	});
 };
 
+const testEscapeRegexChrs = () => {
+	describe.each([
+		['', ''],
+		['oneTwoThree', 'oneTwoThree'],
+		['.*', '\\.\\*'],
+	])('Escape regex characters', (source, target) => {
+		test(`with ${source} should result in ${target}`, () => {
+			expect(StringHelper.escapeRegexChrs(source)).toEqual(target);
+		});
+	});
+};
+
 describe('utils/helper/strings', () => {
 	testGetURLDomain();
 	testToCamelCase();
 	testToConstantCase();
 	testGenerateHashString();
 	testFormatPronouns();
+	testEscapeRegexChrs();
 });

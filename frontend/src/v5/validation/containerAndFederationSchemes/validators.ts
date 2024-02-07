@@ -36,7 +36,7 @@ export const numberField = Yup.number()
 	}));
 
 export const nullableNumberField = Yup.number()
-	.transform((value) => (Number.isNaN(value) ? 0 : value))
+	.transform((value) => (Number.isNaN(value) ? null : value))
 	.nullable();
 
 export const name = trimmedString
