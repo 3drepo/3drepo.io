@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { CreationInfo as BaseCreationInfo } from '@components/shared/creationInfo/creationInfo.component';
 import { CreationInfoValue } from '@components/shared/creationInfo/creationInfo.styles';
 import { ControlledAssigneesSelect } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
@@ -62,16 +61,29 @@ export const Title = styled.div`
 	}
 `;
 
-export const Description = styled(Truncate).attrs({
-	lines: 2,
-})`
+// TODO - fix after new palette is released
+export const Description = styled.div`
 	${({ theme }) => theme.typography.label};
-	color: '#20232A';
+	color: #20232A;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	@supports (-webkit-line-clamp: 2) {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: initial;
+		/* stylelint-disable-next-line */
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+	}
 `;
 
 export const Thumbnail = styled.img`
 	height: 75px;
 	width: 75px;
+	min-width: 75px;
 	box-sizing: border-box;
 	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 5px;

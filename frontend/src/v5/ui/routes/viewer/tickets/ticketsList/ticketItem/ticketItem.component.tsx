@@ -56,7 +56,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			ref={ref}
 		>
 			<FlexRow>
-				{thumbnailSrc && <Thumbnail src={thumbnailSrc} />}
+				{thumbnailSrc && (<Thumbnail src={thumbnailSrc} loading="lazy" />)}
 				<BaseInfo {...ticket} />
 			</FlexRow>
 			<Chips {...ticket} />
