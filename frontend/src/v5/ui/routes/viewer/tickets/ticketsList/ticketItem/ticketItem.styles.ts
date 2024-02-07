@@ -42,14 +42,15 @@ export const IssuePropertiesRow = styled(FlexRow)`
 export const Id = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
 	${({ theme }) => theme.typography.caption}
+	line-height: 10px;
 `;
 
 export const Title = styled.div`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	font-weight: 500;
 	font-size: 12px;
-	line-height: 16px;
-	padding-top: 5px;
+	line-height: 12px;
+	padding: 8px 0;
 	width: fit-content;
 	max-width: 100%;
 	overflow: hidden;
@@ -64,6 +65,7 @@ export const Title = styled.div`
 // TODO - fix after new palette is released
 export const Description = styled.div`
 	${({ theme }) => theme.typography.label};
+	line-height: 11px;
 	color: #20232A;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -100,6 +102,8 @@ export const Assignees = styled(ControlledAssigneesSelect).attrs({
 `;
 
 export const CreationInfo = styled(BaseCreationInfo)`
+	line-height: 10px;
+	padding-bottom: 5px;
 	color: ${({ theme }) => theme.palette.base.main};
 	${CreationInfoValue} {
 		color: ${({ theme }) => theme.palette.secondary.main};
