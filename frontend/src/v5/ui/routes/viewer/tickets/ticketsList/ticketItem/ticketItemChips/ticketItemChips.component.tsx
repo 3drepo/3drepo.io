@@ -15,22 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { RISK_LEVELS_MAP, RiskLevels, STATUS_MAP, TREATMENT_LEVELS_MAP, TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
+import { RISK_LEVELS_MAP, STATUS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
 import { FlexRow } from '../ticketItem.styles';
 import { Chip } from '@controls/chip/chip.component';
+import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
 
-type ITicketItemChips = {
-	status: TicketStatuses,
-	riskLevel: RiskLevels,
-	treatmentStatus: TreatmentStatuses,
-};
-
-
-export const TicketItemChips = ({ status, riskLevel, treatmentStatus }: ITicketItemChips) => {
+export const TicketItemChips = ({ properties, modules: { safetibase = {} } }: ITicket) => {
+	const { status } = getPropertiesInCamelCase(properties);
+	const { treatmentStatus = null, levelOfRisk = null } = getPropertiesInCamelCase(safetibase);
 	return (
 		<FlexRow>
 			{status && <Chip {...STATUS_MAP[status]} variant="outlined" />}
-			{riskLevel && <Chip {...RISK_LEVELS_MAP[riskLevel]} variant="filled" />}
+			{levelOfRisk && <Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />}
 			{treatmentStatus && <Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />}
 		</FlexRow>
 	);
