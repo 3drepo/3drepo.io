@@ -20,7 +20,7 @@ import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
-import { Ticket, Thumbnail, FlexRow } from './ticketItem.styles';
+import { Thumbnail, FlexRow, TicketItemContainer } from './ticketItem.styles';
 import { TicketItemBaseInfo as BaseInfo } from './ticketItemBaseInfo/ticketItemBaseInfo.component';
 import { TicketItemChips as Chips } from './ticketItemChips/ticketItemChips.component';
 import { TicketItemBottomRow as BottomRow } from './ticketItemBottomRow/ticketItemBottomRow.component';
@@ -49,7 +49,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	}, []);
 
 	return (
-		<Ticket
+		<TicketItemContainer
 			onClick={onClick}
 			key={ticket._id}
 			$selected={selected}
@@ -61,6 +61,6 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 			</FlexRow>
 			<Chips {...ticket} />
 			<BottomRow {...ticket} />
-		</Ticket>
+		</TicketItemContainer>
 	);
 };

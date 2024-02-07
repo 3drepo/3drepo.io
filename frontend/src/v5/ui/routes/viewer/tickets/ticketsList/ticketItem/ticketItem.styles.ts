@@ -21,17 +21,18 @@ import { CreationInfoValue } from '@components/shared/creationInfo/creationInfo.
 import { ControlledAssigneesSelect } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
 import styled from 'styled-components';
 
-export const Ticket = styled.div<{ $selected?: boolean }>`
-	position: relative;
+export const TicketItemContainer = styled.div<{ $selected?: boolean }>`
+	display: flex;
+	flex-flow: column;
 	cursor: pointer;
-	padding: 5px 10px;
+	padding: 10px;
+	gap: 10px;
 	background-color: ${({ theme, $selected }) => ($selected ? theme.palette.primary.lightest : theme.palette.primary.contrast)};
 `;
 
 export const FlexRow = styled.div`
 	display: inline-flex;
 	gap: 7px;
-	margin: 5px 0;
 	width: 100%;
 `;
 
@@ -71,6 +72,7 @@ export const Description = styled(Truncate).attrs({
 export const Thumbnail = styled.img`
 	height: 75px;
 	width: 75px;
+	box-sizing: border-box;
 	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 5px;
 	object-fit: cover;
