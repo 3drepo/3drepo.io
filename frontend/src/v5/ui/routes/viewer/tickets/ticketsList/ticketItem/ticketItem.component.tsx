@@ -15,21 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase, getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { Chip } from '@controls/chip/chip.component';
-import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
-import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
-import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { Highlight } from '@controls/highlight';
 import { useEffect, useRef } from 'react';
-import { Ticket, Id, Title, Assignees, IssuePropertiesRow, Thumbnail, Description, FlexRow, CreationInfo } from './ticketItem.styles';
-import { IssueProperties, SafetibaseProperties } from '../../tickets.constants';
+import { Ticket, Id, Title, Thumbnail, Description, FlexRow, CreationInfo } from './ticketItem.styles';
+import { SafetibaseProperties } from '../../tickets.constants';
 import { TicketItemChips } from './ticketItemChips/ticketItemChips.component';
+import { TicketItemBottomRow } from './ticketItemBottomRow/ticketItemBottomRow.component';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -43,24 +40,14 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
 
 	const isFederation = modelIsFederation(containerOrFederation);
-	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
-	const { status, priority, assignees = [], dueDate = null, defaultView = {}, description = '' } = getPropertiesInCamelCase(ticket.properties);
+	const { status, defaultView = {}, description = '' } = getPropertiesInCamelCase(ticket.properties);
 
 	const thumbnailSrc = defaultView?.screenshot ?
 		getTicketResourceUrl(teamspace, project, containerOrFederation, ticket._id, defaultView.screenshot, isFederation) : null;
 
 	const riskLevel = ticket.modules?.safetibase?.[SafetibaseProperties.LEVEL_OF_RISK];
 	const treatmentStatus = ticket.modules?.safetibase?.[SafetibaseProperties.TREATMENT_STATUS];
-
-	const updateTicketProperty = (value) => TicketsActionsDispatchers
-		.updateTicket(teamspace, project, containerOrFederation, ticket._id, { properties: value }, isFederation);
-	const onBlurAssignees = (newVals) => {
-		if (!isEqual(newVals, assignees)) updateTicketProperty({ [IssueProperties.ASSIGNEES]: newVals });
-	};
-	const onChangeDueDate = (newVal) => {
-		if (newVal !== dueDate) updateTicketProperty({ [IssueProperties.DUE_DATE]: newVal });
-	};
 
 	const expandTicket = () => TicketsCardActionsDispatchers.openTicket(ticket._id);
 
@@ -101,13 +88,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 				</div>
 			</FlexRow>
 			<TicketItemChips status={status} riskLevel={riskLevel} treatmentStatus={treatmentStatus} />
-			{priority && (
-				<IssuePropertiesRow>
-					<DueDateWithLabel value={dueDate} onChange={onChangeDueDate} disabled={readOnly} />
-					<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" label="" />
-					<Assignees value={assignees} onBlur={onBlurAssignees} disabled={readOnly} />
-				</IssuePropertiesRow>
-			)}
+			<TicketItemBottomRow {...ticket} />
 		</Ticket>
 	);
 };

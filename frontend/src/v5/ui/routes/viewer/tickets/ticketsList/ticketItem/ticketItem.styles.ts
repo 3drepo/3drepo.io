@@ -77,7 +77,7 @@ export const Thumbnail = styled.img`
 `;
 
 export const Assignees = styled(ControlledAssigneesSelect).attrs({
-	maxItems: 7,
+	maxItems: 5,
 	showEmptyText: true,
 	multiple: true,
 })`
