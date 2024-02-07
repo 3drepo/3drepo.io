@@ -61,7 +61,7 @@
     "mongodb": "3.7.3",
     "multer": "1.4.4",
     "nanoid": "3.3.1",
-    "nodemailer": "6.6.3",
+    "nodemailer": "6.9.9",
     "openapi-schema-validator": "12.0.0",
     "paypal-rest-sdk": "1.8.1",
     "pug": "3.0.2",
