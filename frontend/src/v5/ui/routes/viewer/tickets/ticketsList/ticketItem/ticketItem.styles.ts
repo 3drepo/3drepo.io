@@ -18,32 +18,7 @@
 import { CreationInfo as BaseCreationInfo } from '@components/shared/creationInfo/creationInfo.component';
 import { CreationInfoValue } from '@components/shared/creationInfo/creationInfo.styles';
 import { ControlledAssigneesSelect } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
-import styled from 'styled-components';
-
-export const TicketItemContainer = styled.div<{ $selected?: boolean }>`
-	display: flex;
-	flex-flow: column;
-	cursor: pointer;
-	padding: 10px;
-	gap: 10px;
-	background-color: ${({ theme, $selected }) => ($selected ? theme.palette.primary.lightest : theme.palette.primary.contrast)};
-`;
-
-export const FlexRow = styled.div`
-	display: inline-flex;
-	gap: 7px;
-	width: 100%;
-`;
-
-export const IssuePropertiesRow = styled(FlexRow)`
-	align-items: center;
-`;
-
-export const Id = styled.div`
-	color: ${({ theme }) => theme.palette.base.main};
-	${({ theme }) => theme.typography.caption}
-	line-height: 10px;
-`;
+import styled, { css } from 'styled-components';
 
 export const Title = styled.div`
 	color: ${({ theme }) => theme.palette.secondary.main};
@@ -60,6 +35,38 @@ export const Title = styled.div`
 	&:hover {
 		text-decoration: underline;
 	}
+`;
+
+export const TicketItemContainer = styled.div<{ $selected?: boolean }>`
+	display: flex;
+	flex-flow: column;
+	cursor: pointer;
+	padding: 10px;
+	gap: 10px;
+	background-color: ${({ theme, $selected }) => ($selected ? theme.palette.primary.lightest : theme.palette.primary.contrast)};
+	${({ theme, $selected }) => $selected && css`
+		background-color: ${theme.palette.primary.lightest};
+		${Title} {
+			color: ${theme.palette.primary.dark}
+		}
+	`}
+`;
+
+export const FlexRow = styled.div`
+	display: inline-flex;
+	gap: 7px;
+	width: 100%;
+`;
+
+export const IssuePropertiesRow = styled(FlexRow)`
+	align-items: center;
+	gap: 0;
+`;
+
+export const Id = styled.div`
+	color: ${({ theme }) => theme.palette.base.main};
+	${({ theme }) => theme.typography.caption}
+	line-height: 10px;
 `;
 
 // TODO - fix after new palette is released
