@@ -19,7 +19,6 @@ const GROUPS_COL = 'tickets.groups';
 
 const { deleteMany, find, findOne, insertMany, updateOne } = require('../handler/db');
 const { events } = require('../services/eventsManager/eventsManager.constants');
-const { isEqual } = require('../utils/helper/objects');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { templates } = require('../utils/responseCodes');
 
