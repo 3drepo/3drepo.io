@@ -21,7 +21,7 @@ import { getPropertiesInCamelCase, getTicketResourceUrl, modelIsFederation } fro
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { Chip } from '@controls/chip/chip.component';
-import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, STATUS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
+import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
 import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
 import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
@@ -29,6 +29,7 @@ import { Highlight } from '@controls/highlight';
 import { useEffect, useRef } from 'react';
 import { Ticket, Id, Title, Assignees, IssuePropertiesRow, Thumbnail, Description, FlexRow, CreationInfo } from './ticketItem.styles';
 import { IssueProperties, SafetibaseProperties } from '../../tickets.constants';
+import { TicketItemChips } from './ticketItemChips/ticketItemChips.component';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -61,9 +62,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 		if (newVal !== dueDate) updateTicketProperty({ [IssueProperties.DUE_DATE]: newVal });
 	};
 
-	const expandTicket = () => {
-		TicketsCardActionsDispatchers.openTicket(ticket._id);
-	};
+	const expandTicket = () => TicketsCardActionsDispatchers.openTicket(ticket._id);
 
 	useEffect(() => {
 		if (selected && ref.current) {
@@ -101,11 +100,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 					</Description>
 				</div>
 			</FlexRow>
-			<FlexRow>
-				{status && <Chip {...STATUS_MAP[status]} variant="outlined" />}
-				{riskLevel && <Chip {...RISK_LEVELS_MAP[riskLevel]} variant="filled" />}
-				{treatmentStatus && <Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />}
-			</FlexRow>
+			<TicketItemChips status={status} riskLevel={riskLevel} treatmentStatus={treatmentStatus} />
 			{priority && (
 				<IssuePropertiesRow>
 					<DueDateWithLabel value={dueDate} onChange={onChangeDueDate} disabled={readOnly} />
