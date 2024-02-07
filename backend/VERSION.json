@@ -20,8 +20,8 @@
 	"supported" : []
   },
   "vba" : {
-	"current" : "4.6.0",
-	"supported": []
+	"current" : "3.1.1",
+	"supported": ["4.6.0"]
   },
   "unreal" : {
     "current" : "1.2.2",
