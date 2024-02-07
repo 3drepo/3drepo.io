@@ -21,7 +21,8 @@ const {
 	presetEnumValues,
 	presetModules,
 	presetModulesProperties,
-	propTypes } = require('./templates.constants');
+	propTypes,
+	statusTypes } = require('./templates.constants');
 
 const { isArray, isString } = require('../../utils/helper/typeCheck');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
@@ -145,6 +146,11 @@ const moduleSchema = Yup.object().shape({
 }).test('Name and type', 'Only provide a name or a type for a module, not both',
 	({ name, type }) => (name && !type) || (!name && type));
 
+const customStatus = Yup.object({
+	name: Yup.string().min(1).required(),
+	type: Yup.string().oneOf(statusTypes).required(),
+});
+
 const configSchema = Yup.object().shape({
 	// If new configs are added, please ensure we add it to the e2e test case
 	comments: defaultFalse,
@@ -153,6 +159,10 @@ const configSchema = Yup.object().shape({
 	defaultView: defaultFalse,
 	defaultImage: Yup.boolean().when('defaultView', (defaultView, schema) => (defaultView ? schema.strip() : defaultFalse)),
 	pin: Yup.lazy((val) => (val?.color ? Yup.object({ color: pinColSchema }) : defaultFalse)),
+	status: Yup.lazy((val) => (val ? Yup.object({
+		values: Yup.array().of(customStatus).min(1).required(),
+		default: Yup.mixed().when('values', (values) => Yup.string().oneOf(values.map((v) => v.name)).required()),
+	}) : defaultFalse)),
 }).default({});
 
 const defaultPropertyNames = defaultProperties.map(({ name }) => name);

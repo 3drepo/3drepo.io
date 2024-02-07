@@ -68,6 +68,8 @@ const TemplateConstants = { propTypes, presetEnumValues, presetModules, riskLeve
 
 TemplateConstants.riskLevelsToNum = (value) => riskLevelsArr.indexOf(value);
 
+TemplateConstants.statusTypes = ['open', 'active', 'review', 'done', 'void'];
+
 TemplateConstants.presetModulesProperties = {
 	[presetModules.SEQUENCING]: [
 		createPropertyEntry('Start Time', propTypes.DATE),
