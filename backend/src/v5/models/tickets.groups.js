@@ -42,7 +42,7 @@ Groups.updateGroup = async (teamspace, project, model, ticket, groupId, data, au
 	const toUnset = { };
 
 	Object.keys(data).forEach((key) => {
-		if (data[key]) {
+		if (data[key] !== null) {
 			toUpdate[key] = data[key];
 		} else {
 			toUnset[key] = 1;
@@ -56,8 +56,8 @@ Groups.updateGroup = async (teamspace, project, model, ticket, groupId, data, au
 	}
 
 	const actions = {};
-	if (!isEqual(toUpdate, {})) actions.$set = toUpdate;
-	if (!isEqual(toUnset, {})) actions.$unset = toUnset;
+	if (Object.keys(toUpdate).length) actions.$set = toUpdate;
+	if (Object.keys(toUnset).length) actions.$unset = toUnset;
 
 	await updateOne(
 		teamspace, GROUPS_COL, { teamspace, project, model, ticket, _id: groupId }, actions);
