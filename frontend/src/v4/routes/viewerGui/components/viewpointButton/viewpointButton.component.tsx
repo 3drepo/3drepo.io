@@ -17,7 +17,6 @@
 import { Ref, forwardRef, FC } from 'react';
 import Tooltip from '@mui/material/Tooltip';
 
-import { renderWhenTrueOtherwise } from '../../../../helpers/rendering';
 import { StreetView } from '../../../components/fontAwesomeIcon';
 import { ContainedButton } from '../containedButton/containedButton.component';
 import { Container as ButtonContainer } from '../pinButton/pinButton.styles';
@@ -25,6 +24,7 @@ import { Container as ButtonContainer } from '../pinButton/pinButton.styles';
 interface IProps {
 	onUpdate?: () => void;
 	disabled?: boolean;
+	hasNoPermission?: boolean;
 }
 
 const UpdateViewpointButton: FC<IProps> = forwardRef(
@@ -41,16 +41,18 @@ const UpdateViewpointButton: FC<IProps> = forwardRef(
 	)
 );
 
-export const ViewpointButton = ({ ...props }: IProps) => {
+export const ViewpointButton = ({ hasNoPermission, ...props }: IProps) => {
+	let title = '';
+	if (props.disabled) {
+		title = 'Sorry, this cannot be edited on a closed item.';
+	}
+
+	if (hasNoPermission) {
+		title = 'Sorry, You do not have enough permissions to do this.';
+	}
 	return (
-		<>
-			{renderWhenTrueOtherwise(() => (
-				<Tooltip title={`Sorry, You do not have enough permissions to do this.`}>
-					<UpdateViewpointButton {...props} />
-				</Tooltip>
-			), () => (
-				<UpdateViewpointButton {...props} />
-			))(props.disabled)}
-		</>
+		<Tooltip title={title}>
+			<UpdateViewpointButton {...props} />
+		</Tooltip>
 	);
 };

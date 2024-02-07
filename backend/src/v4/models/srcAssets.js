@@ -23,7 +23,8 @@ const utils = require("../utils");
 const { getRefNodes } = require("./ref");
 const db = require("../handler/db");
 const responseCodes = require("../response_codes");
-const FileRef = require("./fileRef");
+const {v5Path} = require("../../interop");
+const FilesManager = require(`${v5Path}/services/filesManager`);
 
 const SrcAssets = {};
 
@@ -72,7 +73,9 @@ SrcAssets.getAssetList = async (account, model, branch, rev, username) => {
 };
 
 SrcAssets.getSRC = (account, model, id) => {
-	return FileRef.getSRCFile(account, model, `${id}.src.mpc`);
+	const bundleFileName = `${id}.src.mpc`;
+	const collection = `${model}.stash.src.ref`;
+	return FilesManager.getFileAsStream(account, collection, bundleFileName);
 };
 
 module.exports = SrcAssets;

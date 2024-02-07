@@ -49,7 +49,7 @@ interface IState {
 	valued: any;
 }
 
-const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocusedDate, hasSequences, ...props }) => {
+const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocusedDate, hasSequences, canEdit, ...props }) => {
 	const [value, setValue] = useState(props.value);
 	const deleteValue = () => {
 		onChange({target: { value: null, name }})
@@ -73,6 +73,7 @@ const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocus
 				defaultValue={min}
 				initialFocusedDate={initialFocusedDate}
 				placeholder="Set time and date"
+				disabled={!canEdit}
 			/>
 			{ value &&
 				<SequenceDateActions>

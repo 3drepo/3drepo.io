@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../../helper/path');
+const { generateRandomString } = require('../../../helper/services');
 
 const Permissions = require(`${src}/utils/permissions/permissions`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
@@ -84,6 +86,35 @@ const testHasProjectAdminPermissions = () => {
 	])('Has project admin permissions', (permissions, user, result) => {
 		test(`with ${JSON.stringify(permissions)} user ${result ? 'have' : 'does not have'} admin rights`, () => {
 			expect(Permissions.hasProjectAdminPermissions(permissions, user)).toBe(result);
+		});
+	});
+};
+
+const testHasReadAccessToSomeModels = () => {
+	const noAccessUser = generateRandomString();
+	const someAccessUser = generateRandomString();
+	const fullAccessUser = generateRandomString();
+
+	const findModelsResults = [
+		{
+			permissions: [{ user: someAccessUser, permission: 'viewer' }, { user: fullAccessUser, permission: 'viewer' }],
+		},
+		{
+			permissions: [{ user: fullAccessUser, permission: 'viewer' }],
+		},
+
+	];
+
+	describe.each([
+		['the user has no permissions on any models', noAccessUser, false],
+		['the user has permissions on 1 model', someAccessUser, true],
+		['the user has permissions on all models', fullAccessUser, true],
+	])('Has read access to some models', (desc, user, hasAccess) => {
+		test(`Should return ${hasAccess ? 'true' : 'false'} if ${desc}`, async () => {
+			ModelSettings.findModels.mockResolvedValueOnce(findModelsResults);
+			await expect(
+				Permissions.hasReadAccessToSomeModels(generateRandomString(), generateRandomString(),
+					times(2, () => generateRandomString()), user)).resolves.toBe(hasAccess);
 		});
 	});
 };
@@ -381,6 +412,7 @@ describe('utils/permissions', () => {
 	testIsTeamspaceAdmin();
 	testIsProjectAdmin();
 	testHasProjectAdminPermissions();
+	testHasReadAccessToSomeModels();
 	testHasReadAccessToModel();
 	testHasWriteAccessToModel();
 	testHasCommenterAccessToModel();

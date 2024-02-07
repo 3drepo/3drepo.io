@@ -74,8 +74,8 @@ const render = () => {
 							<Route exact path="/">
 								<Redirect to={{ pathname:'v5/' }} />
 							</Route>
-							<Route exact path={ROUTES.SIGN_UP}>
-								<Redirect to={{ pathname: V5_SIGN_UP_PATH + window.location.search }} />
+							<Route path={ROUTES.SIGN_UP}>
+								<Redirect to={{ pathname: V5_SIGN_UP_PATH, search: window.location.search }} />
 							</Route>
 							<Route exact path={ROUTES.LOGIN}>
 								<Redirect to={{ pathname: V5_LOGIN_PATH }} />

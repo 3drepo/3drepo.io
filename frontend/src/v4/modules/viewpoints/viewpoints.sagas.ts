@@ -348,6 +348,16 @@ export function* setDefaultViewpoint({ teamspace, modelId, view }) {
 	}
 }
 
+export function* clearDefaultViewpoint({ teamspace, modelId }) {
+	try {
+		yield API.editModelSettings(teamspace, modelId, { defaultView: null });
+		yield put(ModelActions.updateSettingsSuccess({ defaultView: null }));
+		yield put(SnackbarActions.show('View unset as home view'));
+	} catch (error) {
+		yield put(DialogActions.showErrorDialog('unset the home viewpoint', ''));
+	}
+}
+
 export default function* ViewpointsSaga() {
 	yield takeEvery(ViewpointsTypes.FETCH_VIEWPOINTS, fetchViewpoints);
 	yield takeEvery(ViewpointsTypes.CREATE_VIEWPOINT, createViewpoint);
@@ -360,6 +370,7 @@ export default function* ViewpointsSaga() {
 	yield takeLatest(ViewpointsTypes.SHOW_VIEWPOINT, showViewpoint);
 	yield takeEvery(ViewpointsTypes.SHARE_VIEWPOINT_LINK, shareViewpointLink);
 	yield takeEvery(ViewpointsTypes.SET_DEFAULT_VIEWPOINT, setDefaultViewpoint);
+	yield takeEvery(ViewpointsTypes.CLEAR_DEFAULT_VIEWPOINT, clearDefaultViewpoint);
 	yield takeEvery(ViewpointsTypes.DESELECT_VIEWS_AND_LEAVE_CLIPPING, deselectViewsAndLeaveClipping);
 	yield takeEvery(ViewpointsTypes.CACHE_GROUPS_FROM_VIEWPOINT, cacheGroupsFromViewpoint);
 	yield takeEvery(ViewpointsTypes.SHOW_PRESET, showPreset);

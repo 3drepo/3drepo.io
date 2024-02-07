@@ -27,7 +27,7 @@ export type FederationBackendSettings = {
 	status?: UploadStatuses;
 	timestamp?: number;
 	type?: string;
-	angleFromNorth: number;
+	angleFromNorth?: number;
 	code?: string;
 	unit?: string;
 	author?: string;
@@ -80,7 +80,7 @@ export type NewFederationRealtime = NewFederation & {
 };
 
 export type FederationSettings = Omit<FederationBackendSettings, 'surveyPoints'> & {
-	surveyPoint: SurveyPoint;
+	surveyPoint?: SurveyPoint;
 };
 
 export type MinimumFederation = Pick<IFederation, '_id' | 'name' | 'role' | 'isFavourite'>;

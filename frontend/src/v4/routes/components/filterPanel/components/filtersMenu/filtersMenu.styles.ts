@@ -20,7 +20,7 @@ import styled, { css } from 'styled-components';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import TextField from '@mui/material/TextField';
-import { DateTimePicker } from '@mui/lab';
+import { TextField as CalendarTextField } from '@controls/inputs/datePicker/baseCalendarPicker/baseCalendarPicker.styles';
 
 import { COLOR } from '../../../../../styles';
 import { FileUploadInvoker } from '../../../../viewerGui/components/commentForm/commentForm.styles';
@@ -59,6 +59,12 @@ export const StyledItemText = styled.div`
 	align-items: center;
 `;
 
+export const DateTimePickerWrapper = styled.div`
+	&& ${CalendarTextField} {
+		width: 144px;
+	}
+`;
+
 export const IconWrapper = styled.div`
 	color: ${COLOR.BLACK_60};
 	font-size: 12px;
@@ -74,16 +80,6 @@ export const StyledListItem = styled(ListItemButton)<{ $isDateTime?: boolean }>`
 		${FileUploadInvoker} {
 			display: none;
 		}
-	}
-`;
-
-export const StyledDateTimePicker = styled(DateTimePicker)`
-	&& {
-		margin-left: 10px;
-	}
-
-	input {
-		font-size: 12px;
 	}
 `;
 

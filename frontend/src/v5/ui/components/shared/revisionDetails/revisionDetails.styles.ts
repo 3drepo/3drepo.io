@@ -18,7 +18,6 @@
 import styled, { css } from 'styled-components';
 import { DashboardListEmptyContainer } from '@components/dashboard/dashboardList';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
-import { hexToOpacity } from '@/v5/ui/themes/theme';
 import * as RevisionsListHeaderLabelStyles from './components/revisionsListHeaderLabel/revisionsListHeaderLabel.styles';
 
 const BORDER_RADIUS = '8px';
@@ -115,9 +114,7 @@ export const RevisionsListItemWrapper = styled.li<{ selected?: boolean, isBefore
 	list-style: none;
 	position: relative;
 	margin-left: 66px;
-	cursor: pointer;
 
-	background-color: ${({ theme }) => theme.palette.secondary.mid};
 	border: solid 1px ${({ theme }) => theme.palette.secondary.light};
 	border-width: 1px 1px 0 8px;
 
@@ -130,10 +127,6 @@ export const RevisionsListItemWrapper = styled.li<{ selected?: boolean, isBefore
 	}
 	&:only-child {
 		border-radius: ${BORDER_RADIUS};
-	}
-
-	&:hover {
-		background-color: ${({ theme }) => hexToOpacity(theme.palette.secondary.main, 50)};
 	}
 
 	${({ theme, selected }) => selected && css`
