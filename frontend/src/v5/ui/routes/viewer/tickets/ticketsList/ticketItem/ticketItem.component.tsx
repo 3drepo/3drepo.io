@@ -15,18 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase, getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
-import { Highlight } from '@controls/highlight';
 import { useEffect, useRef } from 'react';
-import { Ticket, Id, Title, Thumbnail, Description, FlexRow, CreationInfo } from './ticketItem.styles';
-import { SafetibaseProperties } from '../../tickets.constants';
-import { TicketItemChips } from './ticketItemChips/ticketItemChips.component';
-import { TicketItemBottomRow } from './ticketItemBottomRow/ticketItemBottomRow.component';
+import { Ticket, Thumbnail, FlexRow } from './ticketItem.styles';
+import { TicketItemBaseInfo as BaseInfo } from './ticketItemBaseInfo/ticketItemBaseInfo.component';
+import { TicketItemChips as Chips } from './ticketItemChips/ticketItemChips.component';
+import { TicketItemBottomRow as BottomRow } from './ticketItemBottomRow/ticketItemBottomRow.component';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -35,21 +32,14 @@ type TicketItemProps = {
 };
 
 export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
-	const ref = useRef<HTMLDivElement>();
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
+	const ref = useRef<HTMLDivElement>();
 
 	const isFederation = modelIsFederation(containerOrFederation);
-	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
-	const { status, defaultView = {}, description = '' } = getPropertiesInCamelCase(ticket.properties);
+	const { defaultView = {} } = getPropertiesInCamelCase(ticket.properties);
 
 	const thumbnailSrc = defaultView?.screenshot ?
 		getTicketResourceUrl(teamspace, project, containerOrFederation, ticket._id, defaultView.screenshot, isFederation) : null;
-
-	const riskLevel = ticket.modules?.safetibase?.[SafetibaseProperties.LEVEL_OF_RISK];
-	const treatmentStatus = ticket.modules?.safetibase?.[SafetibaseProperties.TREATMENT_STATUS];
-
-	const expandTicket = () => TicketsCardActionsDispatchers.openTicket(ticket._id);
 
 	useEffect(() => {
 		if (selected && ref.current) {
@@ -67,28 +57,10 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 		>
 			<FlexRow>
 				{thumbnailSrc && <Thumbnail src={thumbnailSrc} />}
-				<div>
-					<Id>
-						<Highlight search={queries}>
-							{`${template?.code}:${ticket.number}`}
-						</Highlight>
-					</Id>
-					<Title onClick={expandTicket}>
-						<Highlight search={queries}>
-							{ticket.title}
-						</Highlight>
-					</Title>
-					<CreationInfo
-						owner={ticket.properties.Owner}
-						createdAt={ticket.properties['Created at']}
-					/>
-					<Description>
-						{description}
-					</Description>
-				</div>
+				<BaseInfo {...ticket} />
 			</FlexRow>
-			<TicketItemChips status={status} riskLevel={riskLevel} treatmentStatus={treatmentStatus} />
-			<TicketItemBottomRow {...ticket} />
+			<Chips {...ticket} />
+			<BottomRow {...ticket} />
 		</Ticket>
 	);
 };
