@@ -159,7 +159,7 @@ export const TicketDetailsCard = () => {
 				
 					<>
 						<GroupsCardHeader>
-							<ArrowBack onClick={() => TicketsCardActionsDispatchers.goBackFromTicketGroups(ticket)} />
+							<ArrowBack onClick={() => setDetailViewAndProps(TicketDetailsView.Form)} />
 							<BreakableText>{ticket.title}</BreakableText>
 							<span>:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" /></span>
 						</GroupsCardHeader>
