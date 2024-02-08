@@ -37,7 +37,6 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	setOverrides: ['overrides'],
 	setUnsavedTicket: ['ticket'],
 	setTransformations: ['transformations'],
-	goBackFromTicketGroups: ['ticket'],
 	setEditingGroups: ['isEditing'],
 }, { prefix: 'TICKETS_CARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
@@ -157,7 +156,6 @@ export type SetReadOnlyAction = Action<'SET_READ_ONLY'> & { readOnly: boolean };
 export type ResetStateAction = Action<'RESET_STATE'>;
 export type SetOverridesAction = Action<'SET_OVERRIDES'> & { overrides: OverridesDicts | null };
 export type SetUnsavedTicketAction = Action<'SET_UNSAVED_TICKET'> & { ticket: EditableTicket };
-export type GoBackFromTicketGroupsAction = Action<'GO_BACK_FROM_TICKET_GROUPS'> & { ticket: EditableTicket } ;
 export type SetEditingGroupsAction = Action<'SET_EDITING_GROUPS'> & { isEditing: boolean } ;
 
 
@@ -175,6 +173,5 @@ export interface ITicketsCardActionCreators {
 	resetState: () => ResetStateAction,
 	setOverrides: (overrides: OverridesDicts) => SetOverridesAction,
 	setUnsavedTicket: (ticket: EditableTicket) => SetUnsavedTicketAction,
-	goBackFromTicketGroups: (ticket: EditableTicket) => GoBackFromTicketGroupsAction
 	setEditingGroups: (isEditing:boolean) => SetEditingGroupsAction,
 }
