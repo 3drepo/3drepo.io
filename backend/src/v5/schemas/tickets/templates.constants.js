@@ -129,8 +129,17 @@ Object.keys(TemplateConstants.presetModulesProperties).forEach((module) => {
 	);
 });
 
-TemplateConstants.getApplicableDefaultProperties = (config) => TemplateConstants.defaultProperties.flatMap(
-	({ availableIf, ...prop }) => (!availableIf || availableIf(config) ? prop : []),
-);
+TemplateConstants.getApplicableDefaultProperties = (config) => {
+	const properties = TemplateConstants.defaultProperties.flatMap(
+		({ availableIf, ...prop }) => (!availableIf || availableIf(config) ? prop : []));
+
+	if (config.status) {
+		const statusProp = properties.find((p) => p.name === 'Status');
+		statusProp.values = config.status.values.map((v) => v.name);
+		statusProp.default = config.status.default;
+	}
+
+	return properties;
+};
 
 module.exports = TemplateConstants;
