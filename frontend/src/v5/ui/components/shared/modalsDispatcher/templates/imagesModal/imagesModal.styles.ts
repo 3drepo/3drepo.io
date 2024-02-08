@@ -141,13 +141,6 @@ export const PreviousButton = styled(NextButton)`
 	left: 63px;
 `;
 
-export const ImagesContainer = styled.div`
-	display: flex;
-	gap: 12px;
-	margin-top: 12px;
-	overflow-x: scroll;
-`;
-
 export const ImageThumbnail = styled.img<{ selected?: boolean }>`
 	border-radius: 8px;
 	min-width: 120px;
@@ -160,4 +153,21 @@ export const ImageThumbnail = styled.img<{ selected?: boolean }>`
 	${({ selected }) => selected && css`
 		border: solid 2px ${({ theme }) => theme.palette.primary.main};
 	`}
+`;
+
+export const ImagesContainer = styled.div`
+	display: flex;
+	gap: 12px;
+	margin-top: 12px;
+	overflow-x: scroll;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+
+	& > *:first-child {
+		margin-left: auto;
+	}
+
+	& > *:last-child {
+		margin-right: auto;
+	}
 `;
