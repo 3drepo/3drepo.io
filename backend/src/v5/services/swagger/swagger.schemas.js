@@ -49,16 +49,23 @@ Schemas.schemas.errorCodes = {
 	description: 'Error codes: <br/><br/>* `1` - A non SSO account with the same email already exists<br/><br/>* `2` - An SSO account witht he same email already exists<br/><br/>* `3` - The user is non SSO<br/><br/>* `4` - The user was not found<br/><br/>* `5` - Unknown',
 };
 
-const ticketTemplateStatusesSchema = {
-	description: 'Custom status list',
-	type: 'array',
-	items: {
-		type: 'object',
-		required: ['name', 'type'],
-		properties: {
-			name: helpers.stringDef('Name of the custom status', 'Awaiting triage'),
-			type: helpers.stringDef('Status type', statusTypes[0], Object.values(statusTypes)),
+const ticketTemplateStatusConfig = {
+	description: 'Custom status configuration',
+	type: 'object',
+	required: ['values', 'default'],
+	properties: {
+		values: {
+			type: 'array',
+			items: {
+				type: 'object',
+				required: ['name', 'type'],
+				properties: {
+					name: helpers.stringDef('Name of the custom status', 'Awaiting triage'),
+					type: helpers.stringDef('Status type', statusTypes[0], Object.values(statusTypes)[0]),
+				},
+			},
 		},
+		default: helpers.stringDef('Default value', 'Awaiting triage'),
 	},
 };
 
@@ -100,7 +107,7 @@ const ticketTemplateConfigSchema = {
 		defaultView: helpers.boolDef('Include a default view with image (default: false)'),
 		defaultImage: helpers.boolDef('Include a default image - this will be ignored if defaultView is set to true (default: false)'),
 		pin: helpers.boolDef('Include a pin (default: false)'),
-		status: ticketTemplateStatusesSchema,
+		status: ticketTemplateStatusConfig,
 	},
 };
 
