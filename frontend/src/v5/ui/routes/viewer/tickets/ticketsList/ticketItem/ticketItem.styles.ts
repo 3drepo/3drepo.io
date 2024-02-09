@@ -19,6 +19,7 @@ import { CreationInfo as BaseCreationInfo } from '@components/shared/creationInf
 import { CreationInfoValue } from '@components/shared/creationInfo/creationInfo.styles';
 import { ControlledAssigneesSelect } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
 import styled, { css } from 'styled-components';
+import ViewpointIconBase from '@assets/icons/outlined/cube_in_square-outlined.svg';
 
 export const Title = styled.div`
 	color: ${({ theme }) => theme.palette.secondary.main};
@@ -31,10 +32,6 @@ export const Title = styled.div`
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-
-	&:hover {
-		text-decoration: underline;
-	}
 `;
 
 export const TicketItemContainer = styled.div<{ $selected?: boolean }>`
@@ -89,14 +86,43 @@ export const Description = styled.div`
 	}
 `;
 
-export const Thumbnail = styled.img`
+export const ThumbnailContainer = styled.div`
+	position: relative;
 	height: 75px;
 	width: 75px;
 	min-width: 75px;
 	box-sizing: border-box;
 	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 5px;
+	overflow: hidden;
+`;
+
+export const HoverState = styled.div`
+	background-color: ${({ theme }) => theme.palette.secondary.main};
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	z-index: 101;
+	opacity: 0;
+	&:hover {
+		opacity: 0.75;
+	}
+`;
+
+export const ViewpointIcon = styled(ViewpointIconBase)`
+	position: absolute;
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	height: 18px;
+	width: 18px;
+	top: 8px;
+	left: 8px;
+`;
+
+export const Thumbnail = styled.img`
+	height: 100%;
+	width: 100%;
 	object-fit: cover;
+	user-select: none;
 `;
 
 export const Assignees = styled(ControlledAssigneesSelect).attrs({

@@ -15,31 +15,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { getPropertiesInCamelCase, getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { useParams } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
-import { Thumbnail, FlexRow, TicketItemContainer } from './ticketItem.styles';
+import { FlexRow, TicketItemContainer } from './ticketItem.styles';
 import { TicketItemBaseInfo as BaseInfo } from './ticketItemBaseInfo/ticketItemBaseInfo.component';
 import { TicketItemChips as Chips } from './ticketItemChips/ticketItemChips.component';
 import { TicketItemBottomRow as BottomRow } from './ticketItemBottomRow/ticketItemBottomRow.component';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketItemThumbnail } from './ticketItemThumbnail/ticketItemThumbnail.component';
+import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { hasDefaultPin } from '../../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 
 type TicketItemProps = {
 	ticket: ITicket;
-	onClick: React.MouseEventHandler<HTMLDivElement>;
 	selected?: boolean;
 };
 
-export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+export const TicketItem = ({ ticket, selected }: TicketItemProps) => {
 	const ref = useRef<HTMLDivElement>();
+	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const isSelected = selectedTicketId === ticket._id;
 
-	const isFederation = modelIsFederation(containerOrFederation);
-	const { defaultView = {} } = getPropertiesInCamelCase(ticket.properties);
-
-	const thumbnailSrc = defaultView?.screenshot ?
-		getTicketResourceUrl(teamspace, project, containerOrFederation, ticket._id, defaultView.screenshot, isFederation) : null;
+	const onClickTicket = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+		event.stopPropagation();
+		TicketsCardActionsDispatchers.openTicket(ticket._id);
+		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
+		TicketsCardActionsDispatchers.setSelectedTicketPin(hasDefaultPin(ticket) ? ticket._id : null);
+	};
 
 	useEffect(() => {
 		if (selected && ref.current) {
@@ -50,13 +52,13 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 
 	return (
 		<TicketItemContainer
-			onClick={onClick}
+			onClick={onClickTicket}
 			key={ticket._id}
-			$selected={selected}
+			$selected={isSelected}
 			ref={ref}
 		>
 			<FlexRow>
-				{thumbnailSrc && (<Thumbnail src={thumbnailSrc} loading="lazy" />)}
+				<TicketItemThumbnail ticket={ticket} />
 				<BaseInfo {...ticket} />
 			</FlexRow>
 			<Chips {...ticket} />
