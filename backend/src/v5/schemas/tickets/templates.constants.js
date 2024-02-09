@@ -130,11 +130,8 @@ Object.keys(TemplateConstants.presetModulesProperties).forEach((module) => {
 	);
 });
 
-TemplateConstants.getApplicableDefaultProperties = (config) => {
-	const properties = TemplateConstants.defaultProperties(config).flatMap(
-		({ availableIf, ...prop }) => (!availableIf || availableIf(config) ? prop : []));
-
-	return properties;
-};
+TemplateConstants.getApplicableDefaultProperties = (config) => TemplateConstants.defaultProperties.flatMap(
+	({ availableIf, ...prop }) => (!availableIf || availableIf(config) ? prop : []),
+);
 
 module.exports = TemplateConstants;
