@@ -19,28 +19,33 @@ import { useEffect, useRef, useState } from 'react';
 import ChevronIcon from '@assets/icons/outlined/small_chevron-outlined.svg';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
+import UploadImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
-import DownloadIcon from '@assets/icons/outlined/download_arrow-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import {
-	Modal, Container, Image, NextButton, PreviousButton, CloseButton, Counter,
-	TopBar, Buttons, TopBarButton, FlexRow, TextTopBarButton, ImageThumbnail,
-	ImagesContainer, ImageWithArrows,
+	Modal, CenterBar, Image, NextButton, PreviousButton, FloatingButton, Counter,
+	TopBar, Buttons, TopBarButton, TextTopBarButton, ImageThumbnail,
+	BottomBar, ImageWithArrows, ImageThumbnailContainer, ImageContainer,
 } from './imagesModal.styles';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { formatMessage } from '@/v5/services/intl';
+import { uploadFile } from '@controls/fileUploader/uploadFile';
+import { getSupportedImageExtensions } from '@controls/fileUploader/imageFile.helper';
 
-type ImagesModalProps = {
+export type ImagesModalProps = {
+	onClickClose: () => void;
+	open: boolean;
 	images: string[];
 	// to use if the image to display is not the first one
 	displayImageIndex?: number;
-	onClickClose: () => void;
-	open: boolean;
+	onUpload?: () => void;
 	onDelete?: (index) => void;
-	onDownload?: (index) => void;
 };
-export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open, onDelete, onDownload }: ImagesModalProps) => {
+export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open, onUpload, onDelete }: ImagesModalProps) => {
 	const [imageIndex, setImageIndex] = useState(displayImageIndex);
 	const imagesLength = images.length;
 	const imageRef = useRef<HTMLImageElement>(null);
+	const hasManyImages = imagesLength > 1;
 
 	const changeImageIndex = (delta) => setImageIndex((imageIndex + delta + imagesLength) % imagesLength);
 
@@ -64,6 +69,20 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 		}
 	};
 
+	const handleDelete = (index: number) => {
+		DialogsActionsDispatchers.open('delete', {
+			onClickConfirm: onDelete(index),
+			titleLabel: formatMessage({
+				id: 'imagesModal.deleteModal.title',
+				defaultMessage: 'Delete image',
+			}),
+			message: formatMessage({
+				id: 'imagesModal.deleteModal.message',
+				defaultMessage: 'Are you sure you want to delete the selected image?',
+			}),
+		});
+	};
+
 	useEffect(() => {
 		if (!imageRef.current) return;
 		imageRef.current.scrollIntoView({ behavior: 'smooth', inline: 'center' });
@@ -83,8 +102,8 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 	return (
 		<Modal open={open} onClose={onClickClose}>
 			<TopBar>
-				<FlexRow>
-					{imagesLength > 1 && (
+				<Buttons>
+					{hasManyImages && (
 						<Counter>
 							<FormattedMessage
 								id="images.count"
@@ -93,57 +112,61 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 							/>
 						</Counter>
 					)}
-					<Buttons>
-						<TextTopBarButton>
-							<EditIcon />
-							<FormattedMessage
-								id="images.button.addMarkup"
-								defaultMessage="Add markup"
-							/>
-						</TextTopBarButton>
-						{onDelete && (
-							<TopBarButton onClick={() => onDelete(imageIndex)}>
-								<DeleteIcon />
-							</TopBarButton>
-						)}
-						{onDownload && (
-							<TopBarButton onClick={() => onDownload(imageIndex)}>
-								<DownloadIcon />
-							</TopBarButton>
-						)}
-					</Buttons>
-				</FlexRow>
-				<CloseButton onClick={onClickClose}>
+					<TextTopBarButton>
+						<EditIcon />
+						<FormattedMessage
+							id="images.button.addMarkup"
+							defaultMessage="Add markup"
+						/>
+					</TextTopBarButton>
+					{onUpload && (
+						<TopBarButton onClick={onUpload}>
+							<UploadImageIcon />
+						</TopBarButton>
+					)}
+					{onDelete && (
+						<TopBarButton onClick={() => handleDelete(imageIndex)}>
+							<DeleteIcon />
+						</TopBarButton>
+					)}
+				</Buttons>
+				<FloatingButton onClick={onClickClose}>
 					<CloseIcon />
-				</CloseButton>
+				</FloatingButton>
 			</TopBar>
-			<Container>
-				{imagesLength === 1 ? (
-					<Image src={images[imageIndex]} />
-				) : (
-					<>
-						<ImageWithArrows>
-							<PreviousButton onClick={() => changeImageIndex(-1)}>
-								<ChevronIcon />
-							</PreviousButton>
-							<Image src={images[imageIndex]} key={images[imageIndex]} />
-							<NextButton onClick={() => changeImageIndex(1)}>
-								<ChevronIcon />
-							</NextButton>
-						</ImageWithArrows>
-						<ImagesContainer>
-							{images.map((img, index) => (
-								<ImageThumbnail
-									src={img}
-									onClick={() => setImageIndex(index)}
-									selected={index === imageIndex}
-									ref={index === imageIndex ? imageRef : null}
-								/>
-							))}
-						</ImagesContainer>
-					</>
+			<CenterBar>
+				{!hasManyImages && (
+					<ImageContainer>
+						<Image src={images[imageIndex]} />
+					</ImageContainer>
 				)}
-			</Container>
+				{hasManyImages && (
+					<ImageWithArrows>
+						<PreviousButton onClick={() => changeImageIndex(-1)}>
+							<ChevronIcon />
+						</PreviousButton>
+						<ImageContainer $fullscreen>
+							<Image src={images[imageIndex]} key={images[imageIndex]} />
+						</ImageContainer>
+						<NextButton onClick={() => changeImageIndex(1)}>
+							<ChevronIcon />
+						</NextButton>
+					</ImageWithArrows>
+				)}
+			</CenterBar>
+			{hasManyImages && (
+				<BottomBar>
+					{images.map((img, index) => (
+						<ImageThumbnailContainer
+							onClick={() => setImageIndex(index)}
+							selected={index === imageIndex}
+							ref={index === imageIndex ? imageRef : null}
+						>
+							<ImageThumbnail src={img} />
+						</ImageThumbnailContainer>
+					))}
+				</BottomBar>
+			)}
 		</Modal>
 	);
 };

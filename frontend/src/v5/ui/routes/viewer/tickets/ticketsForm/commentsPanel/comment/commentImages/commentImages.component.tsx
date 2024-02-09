@@ -19,7 +19,7 @@ import { FlexContainer, ClickListener, ExpandableImage } from './commentImages.s
 
 type CommentImagesProps = {
 	images: string[];
-	onDownload?: (index) => void;
+	onUpload?: (images: string[]) => void;
 	onDelete?: (index) => void;
 };
 export const CommentImages = ({ images, ...props }: CommentImagesProps) => {
