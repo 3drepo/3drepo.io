@@ -21,6 +21,8 @@ import * as path from 'node:path';
 const absoluteUrl = (url) => new URL(url, domain).toString();
 
 const v5routes = {
+	// in the test the first part of the string will become the username to be replaced
+	// so 'viewer teamspace settings' will be 'dashboard/viewerUsername/t/settings' (whith viewerUsername be the username defined for a viewer)
 	'teamspace settings': 'dashboard/{username}/t/settings',
 };
 
