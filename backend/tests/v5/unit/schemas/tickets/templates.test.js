@@ -15,14 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { cloneDeep } = require('lodash');
+const { cloneDeep, times } = require('lodash');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
+const { statusTypes } = require('../../../../../src/v5/schemas/tickets/templates.constants');
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 const { propTypes, getApplicableDefaultProperties, presetModules, presetEnumValues, presetModulesProperties, defaultProperties } = require(`${src}/schemas/tickets/templates.constants`);
 
 const testValidate = () => {
+	const statusValues = times(5, () => ({ name: generateRandomString(), type: statusTypes[0] }));
+
 	const nameTests = [
 		['the name is too long', { name: generateRandomString(121), code: generateRandomString(3) }, false],
 		['the name is an empty string', { name: '', code: generateRandomString(3) }, false],
@@ -175,6 +178,81 @@ const testValidate = () => {
 			properties: undefined,
 			modules: undefined,
 		}, false],
+		['status with no values', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: { default: generateRandomString() },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status with empty values array', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: { values: [], default: generateRandomString() },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status with no default', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: { values: statusValues },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status that has a value with no name', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: [...statusValues, { type: statusTypes[0] }],
+					default: statusValues[0].name,
+				},
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status that has a value with no type', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: [...statusValues, { name: generateRandomString() }],
+					default: statusValues[0].name,
+				},
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status that has a default which doesnt exist in values', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: statusValues,
+					default: generateRandomString(),
+				},
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status that is valid', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: statusValues,
+					default: statusValues[0].name,
+				},
+			},
+			properties: undefined,
+			modules: undefined,
+		}, true],
 		['properties is an empty array', { name: generateRandomString(), code: generateRandomString(3), properties: [] }, true],
 		['properties is of the wrong type', { name: generateRandomString(), code: generateRandomString(3), properties: 'a' }, false],
 		['property name is used by a default property', { name: generateRandomString(), code: generateRandomString(3), properties: [defaultProperties[0]] }, false],

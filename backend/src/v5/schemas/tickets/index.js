@@ -315,7 +315,7 @@ Tickets.deserialiseUUIDsInTicket = (ticket, template) => {
 Tickets.serialiseTicket = (ticket, fullTemplate, stripDeprecated) => {
 	const caster = generateCastObject({
 		...fullTemplate,
-		properties: fullTemplate.properties.concat(defaultProperties),
+		properties: fullTemplate.properties.concat(defaultProperties(fullTemplate.config)),
 	}, stripDeprecated);
 	return caster.cast(ticket);
 };

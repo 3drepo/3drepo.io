@@ -15,12 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times, cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
+const { generateRandomString } = require('../../../helper/services');
+const { statusTypes } = require('../../../../../src/v5/schemas/tickets/templates.constants');
 
 const TemplateConstants = require(`${src}/schemas/tickets/templates.constants`);
 
 const testGetApplicableDefaultProperties = () => {
 	describe('Get applicable default properties', () => {
+		const customStatusValues = times(5, () => ({ name: generateRandomString(), type: statusTypes[0] }));
+		const customStatus = { values: customStatusValues, default: customStatusValues[0].name };
+
 		const basicProp = [{ name: 'Description', type: TemplateConstants.propTypes.LONG_TEXT },
 			{ name: 'Owner', type: TemplateConstants.propTypes.TEXT, readOnly: true },
 			{ name: 'Created at', type: TemplateConstants.propTypes.DATE, readOnly: true },
@@ -30,8 +36,19 @@ const testGetApplicableDefaultProperties = () => {
 		const issueProp = [{ name: 'Priority', type: TemplateConstants.propTypes.ONE_OF, values: ['None', 'Low', 'Medium', 'High'], default: 'None' },
 			{ name: 'Assignees', type: TemplateConstants.propTypes.MANY_OF, values: TemplateConstants.presetEnumValues.JOBS_AND_USERS },
 			{ name: 'Due Date', type: TemplateConstants.propTypes.DATE }];
+
 		test('Should only return the basic properties if none of the optional flags are configured', () => {
 			expect(TemplateConstants.getApplicableDefaultProperties({})).toEqual(basicProp);
+		});
+
+		test('Should return the basic properties with custom status if config has a status defined', () => {
+			const customStatusProps = cloneDeep(basicProp);
+			const statusProp = customStatusProps.find((p) => p.name === 'Status');
+			statusProp.values = customStatusValues.map((v) => v.name);
+			statusProp.default = customStatus.default;
+
+			expect(TemplateConstants.getApplicableDefaultProperties({ status: customStatus }))
+				.toEqual([...customStatusProps]);
 		});
 
 		test('Should return the basic and issue properties if issueProperties is set to true', () => {

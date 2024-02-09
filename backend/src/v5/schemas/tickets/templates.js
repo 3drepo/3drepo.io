@@ -165,7 +165,7 @@ const configSchema = Yup.object().shape({
 	}) : defaultFalse)),
 }).default({});
 
-const defaultPropertyNames = defaultProperties.map(({ name }) => name);
+const defaultPropertyNames = defaultProperties().map(({ name }) => name);
 
 const pinMappingTest = (val, context) => {
 	const template = TemplateSchema.generateFullSchema(val);

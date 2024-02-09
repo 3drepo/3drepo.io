@@ -101,22 +101,23 @@ TemplateConstants.presetModulesProperties = {
 
 };
 
-TemplateConstants.defaultProperties = [
+TemplateConstants.defaultProperties = (config) => [
 	createPropertyEntry('Description', propTypes.LONG_TEXT),
 	createPropertyEntry('Owner', propTypes.TEXT, undefined, undefined, true),
 	createPropertyEntry('Created at', propTypes.DATE, undefined, undefined, true),
 	createPropertyEntry('Updated at', propTypes.DATE, undefined, undefined, true),
-	createPropertyEntry('Status', propTypes.ONE_OF, ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], 'Open'),
+	createPropertyEntry('Status', propTypes.ONE_OF,
+		config?.status ? config?.status.values.map((v) => v.name) : ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'],
+		config?.status ? config?.status.default : 'Open'),
 	createPropertyEntry('Default Image', propTypes.IMAGE, undefined, undefined, undefined, ({ defaultImage }) => defaultImage),
 	createPropertyEntry('Default View', propTypes.VIEW, undefined, undefined, undefined, ({ defaultView }) => defaultView),
 	createPropertyEntry('Priority', propTypes.ONE_OF, ['None', 'Low', 'Medium', 'High'], 'None', undefined, ({ issueProperties }) => issueProperties),
 	createPropertyEntry('Assignees', propTypes.MANY_OF, presetEnumValues.JOBS_AND_USERS, undefined, undefined, ({ issueProperties }) => issueProperties),
 	createPropertyEntry('Due Date', propTypes.DATE, undefined, undefined, undefined, ({ issueProperties }) => issueProperties),
 	createPropertyEntry('Pin', propTypes.COORDS, undefined, undefined, undefined, ({ pin }) => pin),
-
 ];
 
-TemplateConstants.basePropertyLabels = createConstantMapping(TemplateConstants.defaultProperties.map(
+TemplateConstants.basePropertyLabels = createConstantMapping(TemplateConstants.defaultProperties().map(
 	({ name }) => name,
 ));
 
@@ -130,14 +131,8 @@ Object.keys(TemplateConstants.presetModulesProperties).forEach((module) => {
 });
 
 TemplateConstants.getApplicableDefaultProperties = (config) => {
-	const properties = TemplateConstants.defaultProperties.flatMap(
+	const properties = TemplateConstants.defaultProperties(config).flatMap(
 		({ availableIf, ...prop }) => (!availableIf || availableIf(config) ? prop : []));
-
-	if (config.status) {
-		const statusProp = properties.find((p) => p.name === 'Status');
-		statusProp.values = config.status.values.map((v) => v.name);
-		statusProp.default = config.status.default;
-	}
 
 	return properties;
 };

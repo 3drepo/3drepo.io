@@ -61,7 +61,7 @@ const ticketTemplateStatusConfig = {
 				required: ['name', 'type'],
 				properties: {
 					name: helpers.stringDef('Name of the custom status', 'Awaiting triage'),
-					type: helpers.stringDef('Status type', statusTypes[0], Object.values(statusTypes)[0]),
+					type: helpers.stringDef('Status type', statusTypes[0], statusTypes),
 				},
 			},
 		},
@@ -92,7 +92,7 @@ const ticketTemplateModSchema = {
 		type: 'object',
 		properties: {
 			name: helpers.stringDef('Name of the module', 'BCF Reference'),
-			type: helpers.stringDef('Preset module name', undefined, undefined, Object.values(presetModules)),
+			type: helpers.stringDef('Preset module name', undefined, Object.values(presetModules)),
 			deprecated: helpers.boolDef('Denotes if this module is no longer in use', false),
 			properties: ticketTemplatePropSchema,
 		},
