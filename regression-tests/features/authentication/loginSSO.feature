@@ -18,7 +18,7 @@ Feature: Login (SSO)
 		Given I navigate to '/'
 		Then I click on 'Sign in with Microsoft'
 		When I sign in at Microsoft with:
-			| Email                     | password      |
+			| Email                     | Password      |
   			| homerJSimpson@outlook.com | homerJSimpson |
 		Then I should be redirected to the 'dashboard' page
 	
@@ -26,7 +26,7 @@ Feature: Login (SSO)
 		Given I navigate to '/'
 		Then I click on 'Sign in with Microsoft'
 		When I sign in at Microsoft with:
-			| Email                                 | password      |
+			| Email                                 | Password      |
   			| unregisteredHomerJSimpson@outlook.com | homerJSimpson |
 		Then I wait until "You are not registered with 3D Repo" text appears
 	
@@ -34,6 +34,6 @@ Feature: Login (SSO)
 		Given I navigate to '/'
 		Then I click on 'Sign in with Microsoft'
 		When I sign in at Microsoft with:
-			| Email                              | password      |
+			| Email                              | Password      |
   			| othermailHomerJSimpson@outlook.com | homerJSimpson |
 		Then I wait until "This email is associated with an account that is not linked with Microsoft." text appears
