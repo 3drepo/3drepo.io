@@ -18,13 +18,14 @@
 import { When, Then, Given, Before, After, setDefaultTimeout } from '@cucumber/cucumber';
 import { expect } from 'chai';
 import { WebDriver, until } from 'selenium-webdriver';
-import { clickOn, clickOnMenu, closeOriginWindow, delay, fillInForm, findElementNearText, initializeSeleniumDriver, navigateTo, waitForText, waitUntilPageLoaded } from '../../src/helpers/selenium.helpers';
+import { clickOn, clickOnMenu, closeOriginWindow, fillInForm, findElementNearText, initializeSeleniumDriver, navigateTo, waitForPageToBeLoaded, waitForText } from '../../src/helpers/selenium.helpers';
 import { getLogin, logout } from '../../src/helpers/api.helpers';
 import { domain } from '../../config.json';
 import { getUrl } from '../../src/helpers/routing.helpers';
 import { getUserForRole } from '../../src/helpers/users.helpers';
 import { getEmailCount } from '../../src/helpers/mailhog.helpers';
 import { signInInMicrosoft } from '../../src/helpers/authentication.helpers';
+import { sleep } from '../../src/helpers/general.helpers';
 
 setDefaultTimeout(120 * 1000);
 
@@ -34,7 +35,7 @@ Before(async function () {
 
 Given('Im not logged in', async function () {
 	await this.driver.get(domain);
-	await waitUntilPageLoaded(this.driver);
+	await waitForPageToBeLoaded(this.driver);
 
 	const res = await getLogin(this.driver);
 
@@ -53,14 +54,12 @@ When('I navigate to the {string} page', async function (page) {
 
 When('I sign in as {string}', async function (role: string) {
 	const { username, password } = getUserForRole(role);
-	await waitUntilPageLoaded(this.driver);
 	await fillInForm(this.driver, { Username: username, Password: password });
 	await clickOn(this.driver, 'Log in');
 });
 
 When('I sign in with:', async function (datatable) {
 	await navigateTo(this.driver, 'login');
-	await waitUntilPageLoaded(this.driver);
 	await fillInForm(this.driver,  datatable.hashes()[0]);
 	await clickOn(this.driver, 'Log in');
 });
@@ -123,7 +122,7 @@ When('I click on menu {string}', async function (menuPath) {
 
 // For debugging test purposes
 When('I wait for {int} seconds', async function (seconds) {
-	await delay(seconds * 1000);
+	await sleep(seconds * 1000);
 });
 
 After(async function () {

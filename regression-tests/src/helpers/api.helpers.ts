@@ -25,17 +25,18 @@ type SeleniumResponse = Response & { json: any };
 export const generateV5ApiUrl = (url: string): string => encodeURI(apiUrl(`v5/${url}`));
 
 
-const browserDelete = async (url:string, credentials: boolean) => 
+const browserDelete = async (url:string, credentials: boolean, body = null) => 
 	fetch(url, {
 		'headers': {
 			'accept': 'application/json, text/plain, */*',
 		},
+		... { ...body && { body } },
 		'method': 'DELETE',
 		'mode': 'cors',
 		... { ...credentials && { 'credentials': 'include' } },
 	});
 
-const browserFetch = async (url:string, credentials: boolean) => {
+const browserGet = async (url:string, credentials: boolean) => {
 	let res = await fetch(url, {
 		'headers': {
 			'accept': 'application/json, text/plain, */*',
@@ -71,7 +72,7 @@ const browserPost = async (url: string, credentials: boolean = false, body = nul
 	});
 
 export const get = async (driver:WebDriver, url:string, credentials: boolean = false) => 
-	driver.executeScript<SeleniumResponse>(browserFetch, url, credentials);
+	driver.executeScript<SeleniumResponse>(browserGet, url, credentials);
 
 export const post = async (driver:WebDriver, url, credentials: boolean = false, body = null) => 
 	driver.executeScript<SeleniumResponse>( browserPost, url, credentials, body);

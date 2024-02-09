@@ -22,9 +22,6 @@ import { distanceBetweenRects } from './rect.helpers';
 type Label = string;
 type Value = string;
 
-
-export const delay = (time) => new Promise((resolve) => setTimeout(resolve, time));
-
 // This is for ensure that the size of the innerwidt/innerheight of the browser is exactly what
 // regardless of the bars of the browser that is running the test
 export const resizeWindow = async (driver, size) => {
@@ -87,14 +84,11 @@ export const animationsEnded = async (driver: WebDriver) =>
 	})
 ;
 
-
 export const initializeSeleniumDriver = async (browserType) => {
 	const driver = await new Builder().forBrowser(browserType).build();
 	await resizeWindow(driver, config.browserSize);
 	return driver;
 };
-
-export const waitUntilPageLoaded = async (driver) => driver.wait(until.elementLocated(By.css('body')));
 
 export const waitForText = async (driver: WebDriver, text:string ) => {
 	const target =  By.xpath('//body//*[contains(text(),"' +  text + '")]');
@@ -173,7 +167,7 @@ export const closeOriginWindow = async (driver: WebDriver) => {
 };
 
 export const clickOn = async (driver: WebDriver, buttonContent:string, elementNumber?:number) => {
-	await waitUntilPageLoaded(driver);
+	await waitForPageToBeLoaded(driver);
 	const text = `//body//*[text()="${buttonContent}"]|//body//input[@value='${buttonContent}']`;
 	const target = By.xpath(text);
 	const elements = await getElements(driver, target);
@@ -196,11 +190,10 @@ export const clickOn = async (driver: WebDriver, buttonContent:string, elementNu
 
 	await driver.wait(until.elementIsEnabled(link));
 	await link.click();
-	await animationsEnded(driver);
 };
 
 export const fillInForm = async (driver: WebDriver, fields: Record<Label, Value>) => {
-	await waitUntilPageLoaded(driver);
+	await waitForPageToBeLoaded(driver);
 	try {
 		await Promise.all(Object.keys(fields).map((labelName)=> fillInputByLabel(driver, labelName, fields[labelName])));
 	} catch (e) {
