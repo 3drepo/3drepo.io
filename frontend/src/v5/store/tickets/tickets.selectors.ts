@@ -20,19 +20,9 @@ import { orderBy } from 'lodash';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
 import { ticketWithGroups } from './ticketsGroups.helpers';
-import { ITemplate, ITicket } from './tickets.types';
-
-export const getTicketWithStatus = (ticket: ITicket, template: ITemplate) => {
-	if (ticket.properties[BaseProperties.STATUS] || !template) return ticket;
-	const statusProperty = template.properties?.find(({ name }) => name === BaseProperties.STATUS);
-	return {
-		...ticket,
-		properties: {
-			...ticket.properties,
-			[BaseProperties.STATUS]: statusProperty?.default,
-		},
-	};
-};
+import { ITicket } from './tickets.types';
+import { getTicketWithStatus } from './tickets.helpers';
+import { selectCurrentProjectTemplateById } from '../projects/projects.selectors';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -68,18 +58,22 @@ export const selectTicketsRaw = createSelector(
 	(state, modelId) => state.ticketsByModelId[modelId] || [],
 );
 
-export const selectTickets = createSelector(
+export const selectTicketsWithModelId = createSelector(
 	selectTicketsRaw,
+	(state, modelId) => modelId,
+	(tickets, modelId) => tickets.map((ticket) => ({ ...ticket, modelId })),
+);
+
+export const selectTickets = createSelector(
+	selectTicketsWithModelId,
 	selectTicketsGroups,
 	(state, modelId) => modelId,
 	(state) => state,
 	(ticketsList, groups, modelId, storeState): ITicket[] => {
 		const tickets = [];
 		ticketsList.forEach((ticket) => {
-			tickets.push(ticketWithGroups(
-				getTicketWithStatus(ticket, selectTemplateById(storeState, modelId, ticket.type)),
-				groups,
-			));
+			const ticketWithStatus = getTicketWithStatus(ticket, selectTemplateById(storeState, modelId, ticket.type));
+			tickets.push(ticketWithGroups(ticketWithStatus, groups));
 		});
 
 		return orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
@@ -101,4 +95,15 @@ export const selectTicketById = createSelector(
 export const selectRiskCategories = createSelector(
 	selectTicketsDomain,
 	(state) => state.riskCategories,
+);
+
+export const selectTicketsByContainersAndFederations = createSelector(
+	(state) => state,
+	(state, modelsIds: string[]) => modelsIds,
+	(storeState, modelsIds) => {
+		const tickets = modelsIds
+			.flatMap((modelId) => selectTicketsWithModelId(storeState, modelId))
+			.map((ticket) => getTicketWithStatus(ticket, selectCurrentProjectTemplateById(storeState, ticket.type)));
+		return sortTicketsByCreationDate(tickets);
+	},
 );

@@ -25,8 +25,6 @@ import { useFormContext } from 'react-hook-form';
 import { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import _ from 'lodash';
-import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
-import { Gap } from '@controls/gap';
 import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
 import { PropertiesList } from '../propertiesList.component';

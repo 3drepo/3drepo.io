@@ -16,7 +16,7 @@
  */
 
 import { JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from 'react-redux';
 import { selectFederationById } from '@/v5/store/federations/federations.selectors';
@@ -75,7 +75,7 @@ export const TicketsTable = () => {
 	});
 	const { containersAndFederations, groupBy, template } = formData.watch();
 
-	const ticketsWithModelId = ProjectsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
+	const ticketsWithModelId = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const [sidePanelTicket, setSidePanelTicket] = useState<Partial<ITicket>>(null);
