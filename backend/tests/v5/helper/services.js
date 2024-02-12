@@ -44,6 +44,8 @@ const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constant
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const FilesManager = require('../../../src/v5/services/filesManager');
 
+const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
+
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
 const { USERS_DB_NAME, USERS_COL, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
@@ -293,6 +295,11 @@ ServiceHelper.generateRandomIfcGuid = () => ServiceHelper.generateRandomString(2
 ServiceHelper.generateRandomRvtId = () => Math.floor(Math.random() * 10000);
 
 ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
+
+ServiceHelper.generateCusomStatusValues = () => times(statusTypes.length, (i) => ({
+	name: ServiceHelper.generateRandomString(),
+	type: statusTypes[i],
+}));
 
 ServiceHelper.generateSequenceEntry = (rid) => {
 	const startDate = ServiceHelper.generateRandomDate();

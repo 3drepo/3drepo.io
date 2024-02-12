@@ -15,16 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { cloneDeep, times } = require('lodash');
+const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
-const { generateRandomString } = require('../../../helper/services');
-const { statusTypes } = require('../../../../../src/v5/schemas/tickets/templates.constants');
+const { generateRandomString, generateCusomStatusValues } = require('../../../helper/services');
+
+const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 const { propTypes, getApplicableDefaultProperties, presetModules, presetEnumValues, presetModulesProperties, defaultProperties } = require(`${src}/schemas/tickets/templates.constants`);
 
 const testValidate = () => {
-	const statusValues = times(5, () => ({ name: generateRandomString(), type: statusTypes[0] }));
+	const statusValues = generateCusomStatusValues();
 
 	const nameTests = [
 		['the name is too long', { name: generateRandomString(121), code: generateRandomString(3) }, false],

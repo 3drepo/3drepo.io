@@ -21,7 +21,6 @@ const FS = require('fs');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
 const { serialiseTicketTemplate } = require('../../../../../../../../src/v5/middleware/dataConverter/outputs/common/tickets.templates');
-const { statusTypes } = require('../../../../../../../../src/v5/schemas/tickets/templates.constants');
 
 const { basePropertyLabels, propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 const { updateOne, findOne } = require(`${src}/handler/db`);
@@ -205,7 +204,8 @@ const testAddTicket = () => {
 	describe('Add ticket', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const template = ServiceHelper.generateTemplate();
-		const statusValues = times(5, () => ({ name: ServiceHelper.generateRandomString(), type: statusTypes[0] }));
+		const statusValues = ServiceHelper.generateCusomStatusValues();
+
 		const templateWithAllModulesAndPresetEnums = {
 			...ServiceHelper.generateTemplate(),
 			config: {

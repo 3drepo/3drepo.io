@@ -147,7 +147,7 @@ const moduleSchema = Yup.object().shape({
 	({ name, type }) => (name && !type) || (!name && type));
 
 const customStatus = Yup.object({
-	name: Yup.string().min(1).required(),
+	name: types.strings.title.required(),
 	type: Yup.string().oneOf(statusTypes).required(),
 });
 
@@ -161,7 +161,7 @@ const configSchema = Yup.object().shape({
 	pin: Yup.lazy((val) => (val?.color ? Yup.object({ color: pinColSchema }) : defaultFalse)),
 	status: Yup.lazy((val) => (val ? Yup.object({
 		values: Yup.array().of(customStatus).min(1).required(),
-		default: Yup.mixed().when('values', (values) => Yup.string().oneOf(values.map((v) => v.name)).required()),
+		default: Yup.mixed().when('values', (values) => Yup.string().oneOf(values.map(({ name }) => name)).required()),
 	}) : defaultFalse)),
 }).default({});
 

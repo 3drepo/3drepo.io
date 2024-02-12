@@ -15,17 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { times, cloneDeep } = require('lodash');
+const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
-const { generateRandomString } = require('../../../helper/services');
-const { statusTypes } = require('../../../../../src/v5/schemas/tickets/templates.constants');
+const { generateCusomStatusValues } = require('../../../helper/services');
 
 const TemplateConstants = require(`${src}/schemas/tickets/templates.constants`);
 
 const testGetApplicableDefaultProperties = () => {
 	describe('Get applicable default properties', () => {
-		const customStatusValues = times(5, () => ({ name: generateRandomString(), type: statusTypes[0] }));
-		const customStatus = { values: customStatusValues, default: customStatusValues[0].name };
+		const statusValues = generateCusomStatusValues();
+		const customStatus = { values: statusValues, default: statusValues[0].name };
 
 		const basicProp = [{ name: 'Description', type: TemplateConstants.propTypes.LONG_TEXT },
 			{ name: 'Owner', type: TemplateConstants.propTypes.TEXT, readOnly: true },
@@ -44,7 +43,7 @@ const testGetApplicableDefaultProperties = () => {
 		test('Should return the basic properties with custom status if config has a status defined', () => {
 			const customStatusProps = cloneDeep(basicProp);
 			const statusProp = customStatusProps.find((p) => p.name === 'Status');
-			statusProp.values = customStatusValues.map((v) => v.name);
+			statusProp.values = statusValues.map((v) => v.name);
 			statusProp.default = customStatus.default;
 
 			expect(TemplateConstants.getApplicableDefaultProperties({ status: customStatus }))
