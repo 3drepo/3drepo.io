@@ -42,7 +42,7 @@ export const PanelsContainer = styled.div`
 `;
 
 export const PropertiesListContainer = styled.div`
-	> :not(:first-child) {
+	& > * {
 		margin: 10px 0 0;
 		&${ErrorTextGap} {
 			margin: 0;

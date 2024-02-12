@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,13 +17,13 @@
 
 import styled from 'styled-components';
 
-export const Property = styled.div`
+export const Container = styled.div`
 	.MuiChip-root {
 		padding: 0;
 	}
 `;
 
-export const PropertyTitle = styled.div`
+export const Title = styled.div`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
 `;

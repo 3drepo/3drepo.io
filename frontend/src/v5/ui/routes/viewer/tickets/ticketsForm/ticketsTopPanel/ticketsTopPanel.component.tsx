@@ -25,12 +25,16 @@ import { useFormContext } from 'react-hook-form';
 import { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import _ from 'lodash';
+import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
+import { Gap } from '@controls/gap';
 import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
 import { PropertiesList } from '../propertiesList.component';
-import { IssuePropertiesInputs } from './IssuePropertiesInputs/issuePropertiesInputs.component';
-import { BaseTicketInfo, DescriptionProperty, TopPanel } from './ticketsTopPanel.styles';
+import { IssuePropertiesInputs } from './issuePropertiesInputs/issuePropertiesInputs.component';
+import { BaseTicketInfo, DescriptionProperty, TopPanel, FlexContainer } from './ticketsTopPanel.styles';
 import { ErrorTextGap } from '../ticketsForm.styles';
+import { StatusProperty } from './statusProperty/statusProperty.component';
+import { AssigneesProperty } from './assignessProperty/assigneesProperty.component';
 
 type ITicketsTopPanel = {
 	title: string;
@@ -56,6 +60,7 @@ export const TicketsTopPanel = ({
 
 	const topPanelProperties: string[] = Object.values({ ...BaseProperties, ...IssueProperties });
 	const extraProperties = properties.filter(({ name }) => !topPanelProperties.includes(name));
+	const hasIssueProperties = properties.some((property) => property.name === IssueProperties.PRIORITY);
 
 	useEffect(() => {
 		if (!focusOnTitle || !ref.current || !_.isEmpty(formState.touchedFields)) return;
@@ -93,7 +98,14 @@ export const TicketsTopPanel = ({
 					/>
 					{_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`) && <ErrorTextGap />}
 				</DescriptionProperty>
-				<IssuePropertiesInputs properties={properties} onBlur={onPropertyBlur} readOnly={readOnly} />
+				<FlexContainer>
+					{hasIssueProperties ? (
+						<IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnly} />
+					) : (
+						<StatusProperty onBlur={onPropertyBlur} readOnly={readOnly} />
+					)}
+				</FlexContainer>
+				{hasIssueProperties && (<AssigneesProperty onBlur={onPropertyBlur} readOnly={readOnly} />)}
 				<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
 			</BaseTicketInfo>
 		</TopPanel>
