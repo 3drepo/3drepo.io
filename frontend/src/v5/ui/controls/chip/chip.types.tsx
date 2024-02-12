@@ -102,7 +102,7 @@ export const PRIORITY_LEVELS_MAP = {
 export const RISK_LEVELS_MAP = {
 	[RiskLevels.VERY_LOW]: {
 		label: formatMessage({ id: 'chip.riskLevel.veryLow', defaultMessage: 'Very Low Risk' }),
-		color: COLOR.FAVOURITE_MAIN,
+		color: COLOR.FAVOURITE_MID,
 	},
 	[RiskLevels.LOW]: {
 		label: formatMessage({ id: 'chip.riskLevel.low', defaultMessage: 'Low Risk' }),
@@ -110,7 +110,7 @@ export const RISK_LEVELS_MAP = {
 	},
 	[RiskLevels.MODERATE]: {
 		label: formatMessage({ id: 'chip.riskLevel.moderate', defaultMessage: 'Moderate Risk' }),
-		color: '#ED6C02',
+		color: COLOR.WARNING_MAIN,
 	},
 	[RiskLevels.HIGH]: {
 		label: formatMessage({ id: 'chip.riskLevel.high', defaultMessage: 'High Risk' }),
@@ -118,7 +118,7 @@ export const RISK_LEVELS_MAP = {
 	},
 	[RiskLevels.VERY_HIGH]: {
 		label: formatMessage({ id: 'chip.riskLevel.veryHigh', defaultMessage: 'Very High Risk' }),
-		color: '#000000',
+		color: COLOR.ERROR_DARK,
 	},
 };
 
@@ -130,7 +130,7 @@ export const STATUS_MAP = {
 	},
 	[TicketStatuses.IN_PROGRESS]: {
 		label: formatMessage({ id: 'chip.ticketStatus.inProgress', defaultMessage: 'In Progress' }),
-		color: '#7156FF',
+		color: '#7356F6',
 		icon: <ClockIcon />,
 	},
 	[TicketStatuses.FOR_APPROVAL]: {
@@ -153,7 +153,7 @@ export const STATUS_MAP = {
 export const TREATMENT_LEVELS_MAP = {
 	[TreatmentStatuses.UNTREATED]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.untreated', defaultMessage: 'Untreated' }),
-		color: COLOR.BASE_LIGHT,
+		color: COLOR.BASE_MID,
 	},
 	[TreatmentStatuses.PROPOSED]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.proposed', defaultMessage: 'Proposed' }),
@@ -161,7 +161,7 @@ export const TREATMENT_LEVELS_MAP = {
 	},
 	[TreatmentStatuses.AGREED_PARTIAL]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.agreedPartial', defaultMessage: 'Agreed (Partial)' }),
-		color: '#4CAF50',
+		color: '#57975A',
 	},
 	[TreatmentStatuses.AGREED_FULLY]: {
 		label: formatMessage({ id: 'chip.treatmentLevel.agreedFully', defaultMessage: 'Agreed (Fully)' }),
