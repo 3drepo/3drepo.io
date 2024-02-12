@@ -159,10 +159,10 @@ const configSchema = Yup.object().shape({
 	defaultView: defaultFalse,
 	defaultImage: Yup.boolean().when('defaultView', (defaultView, schema) => (defaultView ? schema.strip() : defaultFalse)),
 	pin: Yup.lazy((val) => (val?.color ? Yup.object({ color: pinColSchema }) : defaultFalse)),
-	status: Yup.lazy((val) => (val ? Yup.object({
+	status: Yup.object({
 		values: Yup.array().of(customStatus).min(1).required(),
-		default: Yup.mixed().when('values', (values) => Yup.string().oneOf(values.map(({ name }) => name)).required()),
-	}) : defaultFalse)),
+		default: Yup.mixed().when('values', (values) => (values ? Yup.string().oneOf(values.map(({ name }) => name)).required() : Yup.mixed())),
+	}),
 }).default({});
 
 const defaultPropertyNames = defaultProperties().map(({ name }) => name);
