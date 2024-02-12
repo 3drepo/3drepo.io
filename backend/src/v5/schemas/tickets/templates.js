@@ -162,7 +162,7 @@ const configSchema = Yup.object().shape({
 	status: Yup.object({
 		values: Yup.array().of(customStatus).min(1).required(),
 		default: Yup.mixed().when('values', (values) => (values ? Yup.string().oneOf(values.map(({ name }) => name)).required() : Yup.mixed())),
-	}),
+	}).default(undefined),
 }).default({});
 
 const defaultPropertyNames = defaultProperties().map(({ name }) => name);

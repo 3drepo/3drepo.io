@@ -107,7 +107,7 @@ TemplateConstants.defaultProperties = (config) => [
 	createPropertyEntry('Created at', propTypes.DATE, undefined, undefined, true),
 	createPropertyEntry('Updated at', propTypes.DATE, undefined, undefined, true),
 	createPropertyEntry('Status', propTypes.ONE_OF,
-		config?.status ? config?.status.values.map((v) => v.name) : ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'],
+		config?.status?.values ? config.status.values.map((v) => v.name) : ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'],
 		config?.status?.default || 'Open'),
 	createPropertyEntry('Default Image', propTypes.IMAGE, undefined, undefined, undefined, ({ defaultImage }) => defaultImage),
 	createPropertyEntry('Default View', propTypes.VIEW, undefined, undefined, undefined, ({ defaultView }) => defaultView),

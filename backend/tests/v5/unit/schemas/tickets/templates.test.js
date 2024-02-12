@@ -242,7 +242,7 @@ const testValidate = () => {
 			properties: undefined,
 			modules: undefined,
 		}, false],
-		['status that has a default which doesnt exist in values', {
+		['status that has a default which does not exist in values', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
 			config: {
