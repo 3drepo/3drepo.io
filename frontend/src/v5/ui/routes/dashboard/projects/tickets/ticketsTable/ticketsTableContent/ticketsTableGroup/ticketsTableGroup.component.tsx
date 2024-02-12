@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITicket, TicketWithModelId } from '@/v5/store/tickets/tickets.types';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { FormattedMessage } from 'react-intl';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
@@ -51,11 +51,11 @@ const SortingTableHeader = ({ name = null, children, hidden = false, ...props })
 
 type TicketsTableGroupProps = {
 	selectedTicketId?: string;
-	ticketsWithModelId: TicketWithModelId[];
+	tickets: ITicket[];
 	onEditTicket: (modelId: string, ticket: Partial<ITicket>) => void;
 	onNewTicket: (modelId: string) => void;
 };
-export const TicketsTableGroup = ({ ticketsWithModelId, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
+export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
 	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
 	const { getValues } = useFormContext();
 
@@ -68,11 +68,11 @@ export const TicketsTableGroup = ({ ticketsWithModelId, onEditTicket, onNewTicke
 	const hasSafetibase = template?.modules?.some((module) => module.type === 'safetibase');
 
 	return (
-		<SortedTableComponent items={ticketsWithModelId} sortingColumn={BaseProperties.CREATED_AT}>
+		<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT}>
 			<SortedTableContext.Consumer>
-				{({ sortedItems }: SortedTableType<TicketWithModelId>) => (
+				{({ sortedItems }: SortedTableType<ITicket>) => (
 					<>
-						{!!ticketsWithModelId.length && (
+						{!!tickets.length && (
 							<Headers>
 								<SortingTableHeader width={80}>
 									<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
