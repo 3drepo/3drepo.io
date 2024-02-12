@@ -230,6 +230,18 @@ const testValidate = () => {
 			properties: undefined,
 			modules: undefined,
 		}, false],
+		['status that has a value with invalid type', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: [...statusValues, { name: generateRandomString(), type: generateRandomString() }],
+					default: statusValues[0].name,
+				},
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
 		['status that has a default which doesnt exist in values', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
