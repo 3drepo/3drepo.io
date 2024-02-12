@@ -14,32 +14,78 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { WebDriver } from 'selenium-webdriver';
 import { apiDomain } from '../../config.json';
 
 const apiUrl = (url) => new URL(`${apiDomain}/${url}`).toString();
 
+type SeleniumResponse = Response & { json: any };
+
+
 export const generateV5ApiUrl = (url: string): string => encodeURI(apiUrl(`v5/${url}`));
 
-export const get = async (driver, url) => driver.executeScript(`return fetch("${generateV5ApiUrl(url)}", {
- "headers": {
-    "accept": "application/json, text/plain, */*",
-  },
-  "body": null,
-  "method": "GET",
-  "mode": "cors",
-  "credentials": "include"
-})`);
 
-export const post = async (driver, url, body = null) => driver.executeScript(`return fetch("${generateV5ApiUrl(url)}", {
-	"headers": {
-	  "accept": "application/json, text/plain, */*",
-	},
-	"body": ${JSON.stringify(body)},
-	"method": "POST",
-	"mode": "cors",
-	"credentials": "include"
-})`);
+const browserDelete = async (url:string, credentials: boolean, body = null) => 
+	fetch(url, {
+		'headers': {
+			'accept': 'application/json, text/plain, */*',
+		},
+		... { ...body && { body } },
+		'method': 'DELETE',
+		'mode': 'cors',
+		... { ...credentials && { 'credentials': 'include' } },
+	});
 
-export const getLogin = (driver) => get(driver, 'login');
+const browserGet = async (url:string, credentials: boolean) => {
+	let res = await fetch(url, {
+		'headers': {
+			'accept': 'application/json, text/plain, */*',
+		},
+		'body': null,
+		'method': 'GET',
+		'mode': 'cors',
+		... { ...credentials && { 'credentials': 'include' } },
+	});
+	
+	if (res.status === 200) {
+		try {
+			const json = await res.json();
+			res.json = json;
+		} catch (e) {
+			// eslint-disable-next-line no-console
+			console.log(e);
+		}
+	}
+		
+	return res;
+};
 
-export const logout = (driver) => post(driver, 'logout');
+const browserPost = async (url: string, credentials: boolean = false, body = null) => 
+	fetch(url, {
+		'headers': {
+		  'accept': 'application/json, text/plain, */*',
+		},
+		'body': JSON.stringify(body),
+		'method': 'POST',
+		'mode': 'cors',
+		... { ...credentials && { 'credentials': 'include' } },
+	});
+
+export const get = async (driver:WebDriver, url:string, credentials: boolean = false) => 
+	driver.executeScript<SeleniumResponse>(browserGet, url, credentials);
+
+export const post = async (driver:WebDriver, url, credentials: boolean = false, body = null) => 
+	driver.executeScript<SeleniumResponse>( browserPost, url, credentials, body);
+
+export const del = async (driver:WebDriver, url, credentials: boolean = false, body = null) => 
+	driver.executeScript<SeleniumResponse>( browserDelete, url, credentials, body);
+
+
+
+export const getV5 = async (driver, url) => get(driver, generateV5ApiUrl(url), true);
+export const postV5 = async (driver, url, body = null) => post(driver, generateV5ApiUrl(url), true, body);
+
+
+export const getLogin = (driver) => getV5(driver, 'login');
+
+export const logout = (driver) => postV5(driver, 'logout');
