@@ -82,4 +82,10 @@ UnityAssets.getRepoBundle = function(account, model, id) {
 	return FilesManager.getFileAsStream(account, collection, bundleFileName);
 };
 
+UnityAssets.getTexture = function(account, model, id) {
+	const textureFilename = `${id}`;
+	const collection = `${model}.scene`;
+	return FilesManager.getFileAsStream(account, collection, textureFilename);
+};
+
 module.exports = UnityAssets;

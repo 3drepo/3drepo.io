@@ -483,6 +483,18 @@ router.get("/:model/:uid.src.mpc", middlewares.hasReadAccessToModel, getSRC);
 router.get("/:model/:uid.repobundle", middlewares.hasReadAccessToModel, getRepoBundle);
 
 /**
+ * @api {get} /:teamspace/:model/:uid.texture Get a Texture by Id
+ * @apiName getTexture
+ * @apiGroup Model
+ * @apiDescription Gets a texture by id. The id may be provided from a number of sources but most likely will be given in a mappings material properties. The metadata of the texture is provided in the response headers.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model id of the model
+ * @apiParam {String} uid id of the texture file.
+ */
+router.get("/:model/:uid.texture", middlewares.hasReadAccessToModel, getTexture);
+
+/**
  * @api {get} /:teamspace/:model/revision/:rev/srcAssets.json Get revision's src assets
  * @apiName getRevSrcAssets
  * @apiGroup Model
@@ -2290,6 +2302,16 @@ function getRepoBundle(req, res, next) {
 	const {account, model, uid} = req.params;
 
 	UnityAssets.getRepoBundle(account, model, uid).then(({ readStream, size, mimeType, encoding }) => {
+		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, undefined, size, { mimeType, encoding });
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
+	});
+}
+
+function getTexture(req, res, next) {
+	const {account, model, uid} = req.params;
+
+	UnityAssets.getTexture(account, model, uid).then(({ readStream, size, mimeType, encoding }) => {
 		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, undefined, size, { mimeType, encoding });
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
