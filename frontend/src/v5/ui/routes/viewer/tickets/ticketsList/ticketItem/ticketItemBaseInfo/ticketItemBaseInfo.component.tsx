@@ -16,29 +16,26 @@
  */
 
 import { Highlight } from '@controls/highlight/highlight.component';
-import { CreationInfo, Description, Id, Title } from '../ticketItem.styles';
+import { BaseInfoContainer, CreationInfo, Description, Id, Title } from '../ticketItem.styles';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 
-export const TicketItemBaseInfo = ({ _id: ticketId, number, type, title, properties }) => {
+export const TicketItemBaseInfo = ({ number, type, title, properties }) => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, type);
 	const { description = '', createdAt, owner } = getPropertiesInCamelCase(properties);
 
-	const expandTicket = () => TicketsCardActionsDispatchers.openTicket(ticketId);
-
 	return (
-		<div>
+		<BaseInfoContainer>
 			<Id>
 				<Highlight search={queries}>
 					{`${template?.code}:${number}`}
 				</Highlight>
 			</Id>
-			<Title onClick={expandTicket}>
+			<Title>
 				<Highlight search={queries}>
 					{title}
 				</Highlight>
@@ -50,6 +47,6 @@ export const TicketItemBaseInfo = ({ _id: ticketId, number, type, title, propert
 			<Description>
 				{description}
 			</Description>
-		</div>
+		</BaseInfoContainer>
 	);
 };

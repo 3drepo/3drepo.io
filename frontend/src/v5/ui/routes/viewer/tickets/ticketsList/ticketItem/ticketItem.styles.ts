@@ -20,12 +20,14 @@ import { CreationInfoValue } from '@components/shared/creationInfo/creationInfo.
 import { ControlledAssigneesSelect } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
 import styled, { css } from 'styled-components';
 import ViewpointIconBase from '@assets/icons/outlined/cube_in_square-outlined.svg';
+import { TextOverflow } from '@controls/textOverflow';
 
-export const Title = styled.div`
+export const Title = styled(TextOverflow)`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	font-weight: 500;
 	font-size: 12px;
 	line-height: 12px;
+	height: 12px;
 	padding: 8px 0;
 	width: fit-content;
 	max-width: 100%;
@@ -55,6 +57,10 @@ export const FlexRow = styled.div`
 	width: 100%;
 `;
 
+export const BaseInfoContainer = styled.div`
+	min-width: 0;
+`;
+
 export const IssuePropertiesRow = styled(FlexRow)`
 	align-items: center;
 	gap: 0;
@@ -67,23 +73,12 @@ export const Id = styled.div`
 `;
 
 // TODO - fix after new palette is released
-export const Description = styled.div`
+export const Description = styled(TextOverflow).attrs({
+	lines: 2,
+})`
 	${({ theme }) => theme.typography.label};
 	line-height: 11px;
 	color: #20232A;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-
-	@supports (-webkit-line-clamp: 2) {
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: initial;
-		/* stylelint-disable-next-line */
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		-webkit-box-orient: vertical;
-	}
 `;
 
 export const ThumbnailContainer = styled.div`
