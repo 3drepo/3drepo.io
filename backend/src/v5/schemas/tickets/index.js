@@ -90,6 +90,9 @@ const generatePropertiesValidator = async (teamspace, properties, oldProperties,
 				}
 
 				const oldValue = oldProperties?.[prop.name];
+
+				validator = validator.test('Immutable property', 'Immutable property cannot be edited', (value) => !(prop.immutable && oldValue && value));
+
 				validator = stripWhen(validator, (p) => {
 					let valueToEval = p;
 					if (isObject(p) && !isDate(p)) {

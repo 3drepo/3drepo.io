@@ -606,6 +606,7 @@ const testUpdateTicket = () => {
 	describe('Update ticket', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const requiredPropName = ServiceHelper.generateRandomString();
+		const immutableProperty = ServiceHelper.generateRandomString();
 		const imagePropName = ServiceHelper.generateRandomString();
 		const requiredImagePropName = ServiceHelper.generateRandomString();
 		const templateWithRequiredProp = {
@@ -624,6 +625,11 @@ const testUpdateTicket = () => {
 					name: requiredImagePropName,
 					type: propTypes.IMAGE,
 					required: true,
+				},
+				{
+					name: immutableProperty,
+					type: propTypes.TEXT,
+					immutable: true,
 				},
 			],
 		};
@@ -690,6 +696,7 @@ const testUpdateTicket = () => {
 				['the ticketId provided does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound, { title: ServiceHelper.generateRandomString() }],
 				['the update data does not conforms to the template (trying to unset required prop)', baseRouteParams, false, templates.invalidArguments, { properties: { [requiredPropName]: null } }],
 				['the update data does not conforms to the template (trying to unset required img prop)', baseRouteParams, false, templates.invalidArguments, { properties: { [requiredImagePropName]: null } }],
+				['the update data does not conforms to the template (trying to update immutable prop with value)', baseRouteParams, false, templates.invalidArguments, { properties: { [immutableProperty]: ServiceHelper.generateRandomString() } }],
 				['the update data is an empty object', baseRouteParams, false, templates.invalidArguments, { }],
 				['the update data are the same as the existing', baseRouteParams, false, templates.invalidArguments, { properties: { [requiredPropName]: model.ticket.properties[requiredPropName] } }],
 				['the update data conforms to the template', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString() }],

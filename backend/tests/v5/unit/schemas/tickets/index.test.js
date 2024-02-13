@@ -106,13 +106,14 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 		});
 };
 
+const fieldName = generateRandomString();
+
 const testPropertyConditions = (testData, moduleProperty, isNewTicket) => {
 	describe.each(
 		testData,
 	)(`${moduleProperty ? '[Modules] ' : ''}Property Conditions`, (desc, schema, succeed, input, output) => {
 		test(desc, async () => {
 			const teamspace = generateRandomString();
-			const fieldName = generateRandomString();
 			const modName = generateRandomString();
 			const propArr = [
 				{
@@ -135,8 +136,14 @@ const testPropertyConditions = (testData, moduleProperty, isNewTicket) => {
 			const oldTicket = isNewTicket ? undefined : {
 				title: generateRandomString(),
 				type: generateRandomString(),
-				properties: {},
-				modules: {},
+				properties: {
+					[fieldName]: generateRandomString(),
+				},
+				modules: moduleProperty ? {
+					[modName]: {
+						[fieldName]: generateRandomString(),
+					},
+				} : {},
 			};
 
 			const fullData = ({
@@ -464,11 +471,13 @@ const testValidateTicket = () => {
 		const addTicketPropertyConditionTests = commonPropertyConditionTests.concat([
 			['Should fill in default value if not present', { type: propTypes.TEXT, default: randomData }, true, undefined, randomData],
 			['Should fail if required field is not present', { type: propTypes.TEXT, required: true }, false],
+			['Should pass if property is immutable', { type: propTypes.TEXT, immutable: true }, true, randomData, randomData],
 		]);
 
 		const updateTicketPropertyConditionTests = commonPropertyConditionTests.concat([
 			['Should pass if required field is not present (ticket update)', { type: propTypes.TEXT, required: true }, true],
 			['Should fail if required field is set to null (ticket update)', { type: propTypes.TEXT, required: true }, false, null],
+			['Should fail if property is immutable (ticket update)', { type: propTypes.TEXT, immutable: true }, false, randomData],
 		]);
 
 		testPropertyConditions(addTicketPropertyConditionTests, false, true);
