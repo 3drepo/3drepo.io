@@ -18,23 +18,27 @@
 import { HoverState, Thumbnail, ThumbnailContainer, ViewpointIcon } from '../ticketItem.styles';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { hasDefaultPin } from '../../../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
-import { has } from 'lodash';
+import { get, has } from 'lodash';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
-import { getPropertiesInCamelCase, getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 
 export const TicketItemThumbnail = ({ ticket }) => {
-
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const isFederation = modelIsFederation(containerOrFederation);
-	const { defaultView = {} } = getPropertiesInCamelCase(ticket.properties);
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
+	const isFederation = modelIsFederation(containerOrFederation);
 
-	const thumbnailSrc = defaultView?.screenshot ?
-		getTicketResourceUrl(teamspace, project, containerOrFederation, ticket._id, defaultView.screenshot, isFederation) : null;
+	const defaultView = get(ticket.properties, 'Default View');
+	const defaultImage = get(ticket.properties, 'Default Image');
 	const hasViewpoint = has(defaultView, 'camera');
+	const hasThumbnail = has(template, ['config', 'defaultView']) || has(template, ['config', 'defaultImage']);
+	
+	const resourceId =  defaultView?.screenshot ||  defaultImage?.screenshot;
+	const thumbnailSrc = resourceId ?
+		getTicketResourceUrl(teamspace, project, containerOrFederation, ticket._id, resourceId, isFederation) : null;
 
 	const goToViewpoint = (event) => {
 		event.stopPropagation();
@@ -48,8 +52,7 @@ export const TicketItemThumbnail = ({ ticket }) => {
 		goToView(defaultView); 
 	};
 
-	if (!thumbnailSrc) return null;
-
+	if (!hasThumbnail) return null;
 	return (
 		<ThumbnailContainer>
 			{hasViewpoint && (
