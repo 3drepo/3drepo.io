@@ -34,7 +34,7 @@ export const Container = styled.div<{ lines: number }>`
 	${({ lines }) => lines > 1 && css`
 		height: ${lines}em;
 		@supports (-webkit-line-clamp: ${lines}) {
-			white-space: pre-line;
+			white-space: normal;
 			display: -webkit-box;
 			-webkit-line-clamp: ${lines};
 			-webkit-box-orient: vertical;
