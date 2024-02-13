@@ -22,15 +22,13 @@ import { FormattedMessage } from 'react-intl';
 import UploadImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { formatMessage } from '@/v5/services/intl';
 import {
 	Modal, CenterBar, Image, NextButton, PreviousButton, FloatingButton, Counter,
 	TopBar, Buttons, TopBarButton, TextTopBarButton, ImageThumbnail,
 	BottomBar, ImageWithArrows, ImageThumbnailContainer, ImageContainer,
 } from './imagesModal.styles';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { formatMessage } from '@/v5/services/intl';
-import { uploadFile } from '@controls/fileUploader/uploadFile';
-import { getSupportedImageExtensions } from '@controls/fileUploader/imageFile.helper';
 
 export type ImagesModalProps = {
 	onClickClose: () => void;
@@ -83,21 +81,23 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 		});
 	};
 
-	useEffect(() => {
+	const centerSelectedThumbnail = () => {
 		if (!imageRef.current) return;
 		imageRef.current.scrollIntoView({ behavior: 'smooth', inline: 'center' });
-	}, [imageIndex]);
+	};
 
 	useEffect(() => {
 		document.addEventListener('keydown', handleKeyDown);
 		return () => document.removeEventListener('keydown', handleKeyDown);
-	});
+	}, []);
 
 	useEffect(() => {
 		if (!imagesLength) {
 			onClickClose();
 		}
 	}, [imagesLength]);
+
+	useEffect(() => { centerSelectedThumbnail(); }, [imagesLength, imageIndex]);
 
 	return (
 		<Modal open={open} onClose={onClickClose}>
@@ -155,12 +155,13 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 				)}
 			</CenterBar>
 			{hasManyImages && (
-				<BottomBar>
+				<BottomBar onLoad={centerSelectedThumbnail}>
 					{images.map((img, index) => (
 						<ImageThumbnailContainer
 							onClick={() => setImageIndex(index)}
 							selected={index === imageIndex}
 							ref={index === imageIndex ? imageRef : null}
+							key={img + index}
 						>
 							<ImageThumbnail src={img} />
 						</ImageThumbnailContainer>
