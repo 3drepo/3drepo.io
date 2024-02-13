@@ -50,6 +50,13 @@ export const FloatingButton = styled(NavbarButton)`
 	box-sizing: border-box;
 	cursor: pointer;
 	margin: 0;
+
+	&&.Mui-disabled {
+		pointer-events: none;
+		opacity: .25;
+		color: ${({ theme }) => theme.palette.primary.contrast};
+		border-color: ${({ theme }) => theme.palette.primary.contrast};
+	}
 `;
 
 export const TopBar = styled(FlexRow)`
@@ -122,14 +129,6 @@ export const BottomBar = styled.div`
 	overflow-x: scroll;
 	flex-wrap: nowrap;
 	white-space: nowrap;
-
-	& > *:first-child {
-		margin-left: auto;
-	}
-
-	& > *:last-child {
-		margin-right: auto;
-	}
 `;
 
 export const ImageWithArrows = styled(FlexRow)`
@@ -159,6 +158,14 @@ export const ImageThumbnailContainer = styled(FlexRow)<{ selected?: boolean }>`
 	min-width: 75px;
 	height: 75px;
 	overflow: hidden;
+
+	&:first-of-type {
+		margin-left: calc(50% - 37px);
+	}
+
+	&:last-of-type {
+		margin-right: calc(50% - 37px);
+	}
 
 	${({ selected, theme }) => selected ? css`
 		border: solid 2px ${theme.palette.primary.main};
