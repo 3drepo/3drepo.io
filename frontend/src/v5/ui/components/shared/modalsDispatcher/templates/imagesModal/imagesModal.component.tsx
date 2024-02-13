@@ -142,13 +142,13 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 				)}
 				{hasManyImages && (
 					<ImageWithArrows>
-						<PreviousButton onClick={() => changeImageIndex(-1)}>
+						<PreviousButton onClick={() => changeImageIndex(-1)} disabled={imageIndex === 0}>
 							<ChevronIcon />
 						</PreviousButton>
 						<ImageContainer $fullscreen>
 							<Image src={images[imageIndex]} key={images[imageIndex]} />
 						</ImageContainer>
-						<NextButton onClick={() => changeImageIndex(1)}>
+						<NextButton onClick={() => changeImageIndex(1)} disabled={imageIndex === (imagesLength - 1)}>
 							<ChevronIcon />
 						</NextButton>
 					</ImageWithArrows>
