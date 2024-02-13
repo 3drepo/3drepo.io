@@ -21,7 +21,7 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { CurrentUserHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { DialogsActionsDispatchers, TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { uuid } from '@/v4/helpers/uuid';
 import { convertFileToImageSrc, getSupportedImageExtensions } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
@@ -34,6 +34,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { MenuItem } from '@mui/material';
+import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
 import {
 	Controls,
 	CharsCounter,
@@ -65,6 +66,7 @@ type CreateCommentBoxProps = {
 	deleteCommentReply: () => void;
 };
 export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCommentBoxProps) => {
+	const [displayImageIndex, setDisplayImageIndex] = useState(-1);
 	const [imagesToUpload, setImagesToUpload] = useState<ImageToUpload[]>([]);
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
@@ -79,6 +81,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 
+	const modalIsOpen = displayImageIndex !== -1;
 	const replyMetadata = createMetadata(commentReply);
 	const commentReplyLength = commentReply ? addReply(replyMetadata, '').length : 0;
 	const charsCount = (messageInput?.length || 0) + commentReplyLength;
@@ -142,15 +145,8 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 		setImagesToUpload(imagesToUpload.concat(imageToUpload));
 	};
 
-	const deleteImage = (idToDelete) => {
-		setImagesToUpload(imagesToUpload.filter(({ id }) => id !== idToDelete));
-	};
-
-	const openImagesModal = (imageIndex) => {
-		DialogsActionsDispatchers.open('images', {
-			images: imagesToUpload.map(({ src }) => src),
-			displayImageIndex: imageIndex,
-		});
+	const deleteImage = (index) => {
+		setImagesToUpload(imagesToUpload.toSpliced(index, 1));
 	};
 
 	const handleDragLeave = ({ relatedTarget }) => {
@@ -203,8 +199,8 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 				<Images>
 					{imagesToUpload.map(({ src, id, error }, index) => (
 						<ImageContainer key={id}>
-							<Image src={src} $error={error} onClick={() => openImagesModal(index)} draggable={false} />
-							<DeleteButton onClick={() => deleteImage(id)} error={error}>
+							<Image src={src} $error={error} onClick={() => setDisplayImageIndex(index)} draggable={false} />
+							<DeleteButton onClick={() => deleteImage(index)} error={error}>
 								<DeleteIcon />
 							</DeleteButton>
 						</ImageContainer>
@@ -245,6 +241,16 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 					<SendIcon />
 				</SendButton>
 			</Controls>
+			{modalIsOpen && (
+				<ImagesModal
+					images={imagesToUpload.map(({ src }) => src)}
+					displayImageIndex={displayImageIndex}
+					onUpload={uploadImages}
+					onDelete={deleteImage}
+					onClickClose={() => setDisplayImageIndex(-1)}
+					open
+				/>
+			)}
 		</Container>
 	);
 };
