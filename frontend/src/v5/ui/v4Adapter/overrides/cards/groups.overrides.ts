@@ -130,9 +130,6 @@ const expandedGroupItem = css`
 				.MuiFormControl-root {
 					margin-top: -18px;
 				}
-				${FieldsRow} > :nth-child(2) {
-					width: 420px;
-				}
 				${TextFieldContainer} {
 					border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 					border-radius: 8px;
@@ -177,6 +174,12 @@ const expandedGroupItem = css`
 							line-height: 24px;
 							font-size: 12px;
 						}
+					}
+				}
+				${FieldsRow} > :nth-child(2) {
+					width: 420px;
+					${FieldWrapper} ${StyledLinkableField} {
+						margin-right: 8px;
 					}
 				}
 				${StyledFormControl} {

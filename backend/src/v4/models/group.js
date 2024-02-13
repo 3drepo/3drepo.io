@@ -221,7 +221,7 @@ function getObjectsArrayAsExternalIds(account, model, branch, rId, data) {
 			const externalIds = await sharedIdsToExternalIds(containerEntry.account, containerEntry.model, conRevId, sharedIds);
 
 			if(externalIds) {
-				return {account, model, [externalIds.key] : externalIds.values};
+				return {account, model: containerEntry.model, [externalIds.key] : externalIds.values};
 			}
 		} catch {
 			// do nothing, just return the original container entry

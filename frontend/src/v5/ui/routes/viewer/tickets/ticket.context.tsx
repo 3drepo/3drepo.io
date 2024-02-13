@@ -23,24 +23,24 @@ export enum TicketDetailsView {
 
 export interface TicketContextType {
 	isViewer?: boolean;
-	view: TicketDetailsView;
-	viewProps?: any;
+	detailsView: TicketDetailsView;
+	detailsViewProps?: any;
 	setDetailViewAndProps: (view: TicketDetailsView, props?: any) => void;
 }
 
 const defaultValue: TicketContextType = {
 	isViewer: false,
-	view: TicketDetailsView.Form,
+	detailsView: TicketDetailsView.Form,
 	setDetailViewAndProps: () => {},
 };
 export const TicketContext = createContext(defaultValue);
 TicketContext.displayName = 'TicketContext';
 
 export const TicketContextComponent = ({ children, isViewer }) => {
-	const [view, setView] = useState(TicketDetailsView.Form);
-	const [viewProps, setViewProps] = useState();
+	const [detailsView, setView] = useState(TicketDetailsView.Form);
+	const [detailsViewProps, setViewProps] = useState();
 
-	const setDetailViewAndProps = (viewParam, props) => {
+	const setDetailViewAndProps = (viewParam: TicketDetailsView, props) => {
 		if (props) {
 			setViewProps(props);
 		}
@@ -48,7 +48,7 @@ export const TicketContextComponent = ({ children, isViewer }) => {
 	};
 
 	return (
-		<TicketContext.Provider value={{ isViewer, view, viewProps, setDetailViewAndProps }}>
+		<TicketContext.Provider value={{ isViewer, detailsView, detailsViewProps, setDetailViewAndProps }}>
 			{children}
 		</TicketContext.Provider>
 	);

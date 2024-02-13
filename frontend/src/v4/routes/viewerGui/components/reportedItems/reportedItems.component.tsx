@@ -243,9 +243,7 @@ export class ReportedItems extends PureComponent<IProps> {
 
 	public renderActions = () => {
 		if (this.props.showDetails && this.props.activeItemId) {
-			const canBeNavigated = this.props.items.length > 1;
-			return canBeNavigated ?
-					this.renderHeaderNavigation() : <PanelBarActions type={this.props.type} hideSearch hideMenu />;
+			return this.renderHeaderNavigation();
 		}
 
 		return (

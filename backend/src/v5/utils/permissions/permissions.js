@@ -21,7 +21,7 @@ const {
 	MODEL_WRITE_ROLES,
 	PROJECT_ADMIN,
 } = require('./permissions.constants');
-const { getContainerById, getFederationById, getModelById } = require('../../models/modelSettings');
+const { findModels, getContainerById, getFederationById, getModelById } = require('../../models/modelSettings');
 const { getProjectAdmins, modelsExistInProject } = require('../../models/projectSettings');
 const { getTeamspaceAdmins, hasAccessToTeamspace } = require('../../models/teamspaceSettings');
 
@@ -83,6 +83,14 @@ const modelPermCheck = (permCheck, mode) => async (teamspace, project, modelID, 
 
 	const { permissions } = model;
 	return permissions && permissions.some((perm) => perm.user === username && permCheck(perm));
+};
+
+// has read access to at least 1 model within the list
+Permissions.hasReadAccessToSomeModels = async (teamspace, project, models, username) => {
+	const permCheck = (perm) => MODEL_READ_ROLES.includes(perm.permission);
+	const modelPerms = await findModels(teamspace, { _id: { $in: models } }, { permissions: 1 });
+	return modelPerms.some(({ permissions }) => permissions
+		&& permissions.some((perm) => perm.user === username && permCheck(perm)));
 };
 
 Permissions.hasWriteAccessToModel = modelPermCheck(

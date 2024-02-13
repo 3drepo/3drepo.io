@@ -249,7 +249,7 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 	public onDeselectFilter = (selectedFilter) => {
 		this.setState({
 			selectedFilters: this.state.selectedFilters.filter(
-				(filter) => filter.value.value !== selectedFilter.value.value
+				(filter) => !(filter.value.value === selectedFilter.value.value && filter.relatedField === selectedFilter.relatedField)
 			)
 		}, this.handleFiltersChange);
 	}
@@ -257,7 +257,9 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 	public onSelectDateFilter = (dateFilter, child) => {
 		dateFilter.label = child.label;
 		dateFilter.value.label = formatShortDateTime(child.date);
-		const selectedFilterIndex = this.state.selectedFilters.findIndex((filter) => filter.value.value === child.value);
+		const selectedFilterIndex = this.state.selectedFilters.findIndex(
+			(filter) => filter.value.value === child.value && filter.relatedField === dateFilter.relatedField
+		);
 
 		if (selectedFilterIndex > -1) {
 			this.setState((prevState) => {
@@ -285,12 +287,21 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 			}
 		};
 
-		if (parent.type === FILTER_TYPES.DATE && child.date) {
-			newSelectedFilter.value.date = child.date;
-			this.onSelectDateFilter(newSelectedFilter, child);
-		}
-
-		if (!found && parent.type !== FILTER_TYPES.DATE) {
+		if (parent.type === FILTER_TYPES.DATE) {
+			if (child.date) {
+				newSelectedFilter.value.date = child.date;
+				this.onSelectDateFilter(newSelectedFilter, child);
+			} else if (found) {
+				this.state.selectedFilters.filter((filter) =>
+					filter.relatedField === parent.relatedField && filter.value.value === child.value
+				);
+				this.setState((prevState) => ({
+					selectedFilters: prevState.selectedFilters.filter((filter) =>
+						filter.relatedField === parent.relatedField && filter.value.value === child.value
+					),
+				}), this.handleFiltersChange);
+			}
+		} else if (!found) {
 			this.setState((prevState) => ({
 				selectedFilters: [...prevState.selectedFilters, newSelectedFilter]
 			}), this.handleFiltersChange);
@@ -299,7 +310,7 @@ export class FilterPanel extends PureComponent<IProps, IState> {
 
 	public onToggleFilter = (parent, child) => {
 		const foundFilter = this.state.selectedFilters.find((filter) =>
-			filter.label === parent.label && filter.value.value === child.value
+			filter.relatedField === parent.relatedField && filter.value.value === child.value
 		);
 
 		if (foundFilter && parent.type !== FILTER_TYPES.DATE) {

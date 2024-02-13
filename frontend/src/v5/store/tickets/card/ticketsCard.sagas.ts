@@ -27,6 +27,7 @@ export function* openTicket({ ticketId }: OpenTicketAction) {
 	yield put(ViewerGuiActions.setPanelVisibility(VIEWER_PANELS.TICKETS, true));
 }
 
+
 export default function* ticketsCardSaga() {
 	yield takeLatest(TicketsCardTypes.OPEN_TICKET, openTicket);
 }

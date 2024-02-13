@@ -25,12 +25,12 @@ interface IProps {
 	attachFileResources: () => void;
 	attachLinkResources: () => void;
 	showDialog: (config: any) => void;
-	canComment: boolean;
+	canEdit: boolean;
 	formRef: any;
 }
 
 export const AttachmentsFormTab: FunctionComponent<IProps> = ({
-	active, resources, showDialog, attachFileResources, attachLinkResources, onRemoveResource, canComment, formRef,
+	active, resources, showDialog, attachFileResources, attachLinkResources, onRemoveResource, canEdit, formRef,
 }) => {
 	return (
 		<Content active={active}>
@@ -40,7 +40,7 @@ export const AttachmentsFormTab: FunctionComponent<IProps> = ({
 				onSaveFiles={attachFileResources}
 				onSaveLinks={attachLinkResources}
 				onRemoveResource={onRemoveResource}
-				canEdit={canComment}
+				canEdit={canEdit}
 				formRef={formRef}
 			/>
 		</Content>

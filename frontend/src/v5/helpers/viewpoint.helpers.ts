@@ -89,7 +89,10 @@ export const getViewerState = async () => {
 	}
 
 	if (viewpointV4.highlighted_group) {
-		state.colored = (state.colored || []).concat(convertToV5GroupOverride(viewpointV4.highlighted_group, ViewpointGroupOverrideType.COLORED));
+		state.colored = (state.colored || [])
+			.concat(convertToV5GroupOverride(viewpointV4.highlighted_group, ViewpointGroupOverrideType.COLORED))
+			// eslint-disable-next-line no-underscore-dangle
+			.filter(({ group }) => !!(group as Group).objects.filter((obj) => obj._ids.length).length);
 	}
 
 	if (viewpointV4.hidden_group) {

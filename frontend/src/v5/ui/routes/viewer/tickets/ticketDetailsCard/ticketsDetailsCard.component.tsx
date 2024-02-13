@@ -25,18 +25,16 @@ import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { get, isEmpty, set } from 'lodash';
+import { isEmpty, set } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
-import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketForm } from '../ticketsForm/ticketForm.component';
-import { ChevronLeft, ChevronRight } from './ticketDetails.styles';
+import { BreakableText, ChevronLeft, ChevronRight, GroupsCardHeader } from './ticketDetailsCard.styles';
 import { TicketGroups } from '../ticketsForm/ticketGroups/ticketGroups.component';
-import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { useSearchParam } from '../../../useSearchParam';
-import { Viewpoint } from '@/v5/store/tickets/tickets.types';
+import { TicketContext, TicketDetailsView } from '../ticket.context';
 
 enum IndexChange {
 	PREV = -1,
@@ -44,9 +42,10 @@ enum IndexChange {
 }
 
 export const TicketDetailsCard = () => {
+	const { detailsView, setDetailViewAndProps, detailsViewProps: viewProps } = useContext(TicketContext);
 	const { teamspace, project, containerOrFederation, revision } = useParams();
 	const [, setTicketId] = useSearchParam('ticketId');
-	const { view, setDetailViewAndProps, viewProps } = useContext(TicketContext);
+
 	const isFederation = modelIsFederation(containerOrFederation);
 	const filteredTickets = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied() as any;
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
@@ -54,15 +53,17 @@ export const TicketDetailsCard = () => {
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	const currentIndex = filteredTickets.findIndex((tckt) => tckt._id === ticket._id);
 	const initialIndex = useRef(currentIndex);
-	const disableCycleButtons = currentIndex > -1 ? filteredTickets.length < 2 : filteredTickets.length < 1;
+	const listLength = filteredTickets.length;
+	const ticketWasRemoved = currentIndex === -1;
+	const disableCycleButtons = ticketWasRemoved ? listLength < 1 : listLength < 2;
 	const templateValidationSchema = getValidators(template);
 
 	const getUpdatedIndex = (delta: IndexChange) => {
-		let index = currentIndex === -1 ? initialIndex.current : currentIndex;
-		if (currentIndex === -1 && delta === IndexChange.NEXT) {
+		let index = ticketWasRemoved ? initialIndex.current : currentIndex;
+		if (ticketWasRemoved && delta === IndexChange.NEXT) {
 			index--;
 		}
-		return (index + delta) % filteredTickets.length;
+		return (index + delta) % listLength;
 	};
 
 	const changeTicketIndex = (delta: IndexChange) => {
@@ -75,7 +76,10 @@ export const TicketDetailsCard = () => {
 
 	const goBack = () => {
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
-		if (currentIndex === -1) {
+		if (!ticketWasRemoved) return;
+		if (initialIndex.current < listLength) {
+			cycleToNextTicket();
+		} else {
 			TicketsCardActionsDispatchers.setSelectedTicket(null);
 		}
 	};
@@ -129,6 +133,8 @@ export const TicketDetailsCard = () => {
 				isFederation,
 			);
 		}
+
+		setDetailViewAndProps(TicketDetailsView.Form);
 		TicketsActionsDispatchers.fetchTicket(teamspace, project, containerOrFederation, ticket._id, isFederation, revision);
 		setTicketId(ticket._id);
 	}, [ticket?._id]);
@@ -142,46 +148,42 @@ export const TicketDetailsCard = () => {
 		setTicketId();
 	}, []);
 
-	const onClickBackFromGroups = () => {
-		setDetailViewAndProps(TicketDetailsView.Form);
-		const viewpoint = get(ticket, viewProps.name) as Viewpoint;
-		const { state } = viewpoint || {};
-		goToView({ state });
-		TicketsCardActionsDispatchers.setOverrides(null);
-	};
-
 	if (!ticket) return null;
+
+
+
 	return (
 		<CardContainer>
 			<FormProvider {...formData}>
-				{view === TicketDetailsView.Groups
-					&& (
-						<>
-							<CardHeader>
-								<ArrowBack onClick={onClickBackFromGroups} />
-								{ticket.title}:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" />
-							</CardHeader>
-							<InputController
-								Input={TicketGroups}
-								name={viewProps.name}
-								onBlur={onBlurHandler}
-							/>
-						</>
-					)}
-				{view === TicketDetailsView.Form
-					&& (
-						<>
-							<CardHeader>
-								<ArrowBack onClick={goBack} />
-								{template.code}:{ticket.number}
-								<HeaderButtons>
-									<CircleButton variant="viewer" onClick={cycleToPrevTicket} disabled={disableCycleButtons}><ChevronLeft /></CircleButton>
-									<CircleButton variant="viewer" onClick={cycleToNextTicket} disabled={disableCycleButtons}><ChevronRight /></CircleButton>
-								</HeaderButtons>
-							</CardHeader>
-							<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
-						</>
-					)}
+				{detailsView === TicketDetailsView.Groups && (
+				
+					<>
+						<GroupsCardHeader>
+							<ArrowBack onClick={() => setDetailViewAndProps(TicketDetailsView.Form)} />
+							<BreakableText>{ticket.title}</BreakableText>
+							<span>:<FormattedMessage id="ticket.groups.header" defaultMessage="Groups" /></span>
+						</GroupsCardHeader>
+						<InputController
+							Input={TicketGroups}
+							name={viewProps.name}
+							onBlur={onBlurHandler}
+						/>
+					</>
+				)}
+				{detailsView === TicketDetailsView.Form && (
+
+					<>
+						<CardHeader>
+							<ArrowBack onClick={goBack} />
+							{template.code}:{ticket.number}
+							<HeaderButtons>
+								<CircleButton variant="viewer" onClick={cycleToPrevTicket} disabled={disableCycleButtons}><ChevronLeft /></CircleButton>
+								<CircleButton variant="viewer" onClick={cycleToNextTicket} disabled={disableCycleButtons}><ChevronRight /></CircleButton>
+							</HeaderButtons>
+						</CardHeader>
+						<TicketForm template={template} ticket={ticket} onPropertyBlur={onBlurHandler} />
+					</>
+				)}
 			</FormProvider>
 		</CardContainer>
 	);

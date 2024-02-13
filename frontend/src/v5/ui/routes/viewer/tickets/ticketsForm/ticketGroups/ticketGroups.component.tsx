@@ -21,7 +21,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
 import { convertToV4GroupNodes, toGroupPropertiesDicts } from '@/v5/helpers/viewpoint.helpers';
-import { cloneDeep, isString, uniqBy, xor } from 'lodash';
+import { cloneDeep, isString, isUndefined, uniqBy, xor } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
 import { selectHiddenGeometryVisible } from '@/v4/modules/tree/tree.selectors';
@@ -101,7 +101,6 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		}
 	};
 
-	// If there is no  group it gets a key to get identified within the groups array
 	const onSetEditGroup = (type) => (index) => {
 		setEditingOverride({ override: cloneDeep(state?.[type]?.[index]), type, editing:true });
 	};
@@ -123,6 +122,9 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 
 	const cancelEdition = () => setEditingOverride(NO_EDIT_OVERRIDE_SELECTED);
 
+	const groupHasId = ({ group }: GroupOverride) => !!(group as Group)._id;
+	const groupHasKey = ({ key }: GroupOverride) => !isUndefined(key);
+
 	const onSubmit = (overrideValue) => {
 		const newVal = cloneDeep(value || {});
 		if (!newVal.state) {
@@ -132,23 +134,23 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 
 		let index = groupsOfType?.findIndex(({ group, key }: any) =>  {
 			// Is updating an existing group
-			if (overrideValue.group._id) { 
+			if (groupHasId(overrideValue)) { 
 				return overrideValue.group._id === group._id;
 			}
 
 			// If updating a new group
-			if (overrideValue.key !== undefined) {
+			if (groupHasKey(overrideValue)) {
 				return overrideValue.key === key;
 			}
 		});
 
 
 		// It the group is no longer there it will be saved as a new group
-		if ( index === -1 && overrideValue.group._id) {
+		if (index === -1 && groupHasId(overrideValue)) {
 			delete overrideValue.group._id; 
 		}
 
-		if (!overrideValue.group._id && !overrideValue.key) {
+		if (!groupHasId(overrideValue) && !groupHasKey(overrideValue)) {
 			overrideValue.key = count++;
 		}
 
@@ -197,7 +199,20 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		dispatch(ViewpointsActions.clearColorOverrides());
 
 		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
-		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
+
+		TicketsCardActionsDispatchers.setEditingGroups(true);
+		return () => {
+			ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
+			TicketsCardActionsDispatchers.setEditingGroups(false);
+		};
+	}, []);
+
+	useEffect(() => {
+		const groups = (state.colored || []).concat(state.hidden || []);
+		const [group] = groups;
+		if (!group || groupHasId(group) || groupHasKey(group)) return;
+		groups.forEach((groupOverride) => groupOverride.key = count++);
+		onChange({ ...value, state });
 	}, []);
 
 	if (isLoading) return (<Loader />);

@@ -16,7 +16,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { defaults, pick, omitBy, difference, isMatch, mapValues } from 'lodash';
+import { defaults, pick, omitBy, difference, isMatch, mapValues, isNumber } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { MenuItem } from '@mui/material';
@@ -91,15 +91,15 @@ const getDefaultValues = (containerOrFederation: IContainer | IFederation, isCon
 	const DEFAULT_UNIT = UNITS[0];
 	const {
 		unit = DEFAULT_UNIT.abbreviation,
-		angleFromNorth = 0,
+		angleFromNorth,
 		code,
 		name,
 		desc = '',
 	} = containerOrFederation;
 	const defaultView = containerOrFederation.defaultView || EMPTY_VIEW._id;
 	const { latLong, position } = containerOrFederation.surveyPoint || {};
-	const [x, y, z] = position || [0, 0, 0];
-	const [latitude, longitude] = latLong || [0, 0];
+	const [x, y, z] = position ?? [undefined, undefined, undefined];
+	const [latitude, longitude] = latLong ?? [undefined, undefined];
 	return {
 		name,
 		desc,
@@ -169,7 +169,7 @@ export const SettingsModal = ({
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 
 	const containerOrFederationName = isContainer ? 'Container' : 'Federation';
-	const EMPTY_GIS_VALUES = { latitude: 0, longitude: 0, angleFromNorth: 0 };
+	const EMPTY_GIS_VALUES = { latitude: undefined, longitude: undefined, angleFromNorth: undefined };
 
 	const getGisValues = (obj) => defaults(pick(
 		omitBy(obj, (val) => val === ''),
@@ -197,22 +197,23 @@ export const SettingsModal = ({
 	};
 
 	const onSubmit: SubmitHandler<IFormInput> = ({
-		latitude = 0, longitude = 0,
+		latitude, longitude, angleFromNorth,
 		x, y, z,
-		...otherSettings
+		...nonGISSettings
 	}) => {
-		const settings = {
+		const settings = isNumber(latitude) ? {
 			surveyPoint: {
 				latLong: [latitude, longitude],
 				position: [x, y, z],
 			},
-			...otherSettings,
-		} as ContainerSettings | FederationSettings;
+			angleFromNorth,
+			...nonGISSettings,
+		} : nonGISSettings;
 		updateSettings(
 			teamspace,
 			project,
 			containerOrFederation._id,
-			settings,
+			settings as ContainerSettings | FederationSettings,
 			onClickClose,
 			onSubmitError,
 		);
@@ -355,7 +356,6 @@ export const SettingsModal = ({
 					control={control}
 					label={`x (${currentUnit})`}
 					formError={errors.x}
-					required
 					disabled={!isProjectAdmin}
 				/>
 				<FormNumberField
@@ -363,7 +363,6 @@ export const SettingsModal = ({
 					control={control}
 					label={`y (${currentUnit})`}
 					formError={errors.y}
-					required
 					disabled={!isProjectAdmin}
 				/>
 				<FormNumberField
@@ -371,7 +370,6 @@ export const SettingsModal = ({
 					control={control}
 					label={`z (${currentUnit})`}
 					formError={errors.z}
-					required
 					disabled={!isProjectAdmin}
 				/>
 			</FlexContainer>
