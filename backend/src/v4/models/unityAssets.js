@@ -82,10 +82,21 @@ UnityAssets.getRepoBundle = function(account, model, id) {
 	return FilesManager.getFileAsStream(account, collection, bundleFileName);
 };
 
-UnityAssets.getTexture = function(account, model, id) {
+UnityAssets.getTexture = async function(account, model, id) {
 	const textureFilename = `${id}`;
 	const collection = `${model}.scene`;
-	return FilesManager.getFileAsStream(account, collection, textureFilename);
+
+	const node = await db.findOne(account, collection, { _id: utils.stringToUUID(textureFilename) }, {
+		_id: 1,
+		_blobRef: 1
+	});
+
+	const {data, buffer} = node._blobRef;
+
+	const response = await FilesManager.getFileAsStream(account, collection, buffer.name, data);
+	response.mimeType = "image/png";
+
+	return response;
 };
 
 module.exports = UnityAssets;
