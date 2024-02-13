@@ -36,7 +36,7 @@ export const TicketItemThumbnail = ({ ticket }) => {
 	const hasViewpoint = has(defaultView, 'camera');
 	const hasThumbnail = has(template, ['config', 'defaultView']) || has(template, ['config', 'defaultImage']);
 	
-	const resourceId =  defaultView?.screenshot ||  defaultImage?.screenshot;
+	const resourceId =  defaultView?.screenshot ||  defaultImage;
 	const thumbnailSrc = resourceId ?
 		getTicketResourceUrl(teamspace, project, containerOrFederation, ticket._id, resourceId, isFederation) : null;
 
