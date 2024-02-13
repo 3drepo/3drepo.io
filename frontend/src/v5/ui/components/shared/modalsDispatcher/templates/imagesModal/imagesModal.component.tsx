@@ -36,6 +36,7 @@ export type ImagesModalProps = {
 	images: string[];
 	// to use if the image to display is not the first one
 	displayImageIndex?: number;
+	// these will not work as expected when the modal is rendered using ActionDispatcher
 	onUpload?: () => void;
 	onDelete?: (index) => void;
 };
@@ -67,9 +68,16 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 		}
 	};
 
-	const handleDelete = (index: number) => {
+	const handleDelete = () => {
+		onDelete(imageIndex);
+		if (imageIndex === (imagesLength - 1)) {
+			setImageIndex(imageIndex - 1);
+		}
+	};
+
+	const triggerDeleteModal = () => {
 		DialogsActionsDispatchers.open('delete', {
-			onClickConfirm: onDelete(index),
+			onClickConfirm: handleDelete,
 			titleLabel: formatMessage({
 				id: 'imagesModal.deleteModal.title',
 				defaultMessage: 'Delete image',
@@ -125,7 +133,7 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 						</TopBarButton>
 					)}
 					{onDelete && (
-						<TopBarButton onClick={() => handleDelete(imageIndex)}>
+						<TopBarButton onClick={triggerDeleteModal}>
 							<DeleteIcon />
 						</TopBarButton>
 					)}
