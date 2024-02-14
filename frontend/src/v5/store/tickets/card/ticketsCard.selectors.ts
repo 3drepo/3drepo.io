@@ -55,6 +55,12 @@ export const selectReadOnly = createSelector(
 	(ticketCardState) => ticketCardState.readOnly,
 );
 
+export const selectIsEditingGroups = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.isEditingGroups,
+);
+
+
 export const selectSelectedTicketId = createSelector(
 	selectTicketsCardDomain,
 	(ticketCardState) => ticketCardState.selectedTicketId,

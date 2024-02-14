@@ -14,21 +14,41 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { createContext } from 'react';
+import { createContext, useState } from 'react';
+
+export enum TicketDetailsView {
+	Form,
+	Groups,
+}
 
 export interface TicketContextType {
 	isViewer?: boolean;
+	detailsView: TicketDetailsView;
+	detailsViewProps?: any;
+	setDetailViewAndProps: (view: TicketDetailsView, props?: any) => void;
 }
 
 const defaultValue: TicketContextType = {
 	isViewer: false,
+	detailsView: TicketDetailsView.Form,
+	setDetailViewAndProps: () => {},
 };
 export const TicketContext = createContext(defaultValue);
 TicketContext.displayName = 'TicketContext';
 
 export const TicketContextComponent = ({ children, isViewer }) => {
+	const [detailsView, setView] = useState(TicketDetailsView.Form);
+	const [detailsViewProps, setViewProps] = useState();
+
+	const setDetailViewAndProps = (viewParam: TicketDetailsView, props) => {
+		if (props) {
+			setViewProps(props);
+		}
+		setView(viewParam);
+	};
+
 	return (
-		<TicketContext.Provider value={{ isViewer }}>
+		<TicketContext.Provider value={{ isViewer, detailsView, detailsViewProps, setDetailViewAndProps }}>
 			{children}
 		</TicketContext.Provider>
 	);

@@ -1,10 +1,13 @@
 {
 	"compilerOptions": {
+		"target": "ES2017",
 		"esModuleInterop": true,
 		"resolveJsonModule": true,
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
 		"types": [
 			"node",
 			"@types/selenium-webdriver"
-		]
+		],
 	}
 }

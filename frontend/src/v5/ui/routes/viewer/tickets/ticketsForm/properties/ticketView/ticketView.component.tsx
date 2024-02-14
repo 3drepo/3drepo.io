@@ -19,7 +19,7 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import ViewpointIcon from '@assets/icons/outlined/aim-outlined.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { cloneDeep, isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
@@ -29,6 +29,7 @@ import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { formatMessage } from '@/v5/services/intl';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { getViewerState, goToView } from '@/v5/helpers/viewpoint.helpers';
+import { TicketContext, TicketDetailsView } from '../../../ticket.context';
 import { TicketImageContent } from '../ticketImageContent/ticketImageContent.component';
 import { TicketImageActionMenu } from '../ticketImageContent/ticketImageActionMenu.component';
 import { TicketButton } from '../../../ticketButton/ticketButton.styles';
@@ -36,8 +37,6 @@ import { Header, HeaderSection, Label, Tooltip } from './ticketView.styles';
 import { CameraActionMenu } from './viewActionMenu/menus/cameraActionMenu.component';
 import { GroupsActionMenu } from './viewActionMenu/menus/groupsActionMenu.component';
 import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TicketsCardViews } from '../../../tickets.constants';
 
 type ITicketView = {
 	value: Viewpoint | undefined;
@@ -60,6 +59,7 @@ export const TicketView = ({
 	required,
 	...props
 }: ITicketView) => {
+	const { setDetailViewAndProps } = useContext(TicketContext);
 	const hasViewpoint = value?.camera;
 
 	// Viewpoint
@@ -106,7 +106,7 @@ export const TicketView = ({
 	useEffect(() => onBlur?.(), [value]);
 
 	const onGroupsClick = () => {
-		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.DetailsGroups, props);
+		setDetailViewAndProps(TicketDetailsView.Groups, props);
 	};
 
 	const imgSrc = getImgSrc(value?.screenshot);

@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,25 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { formatDate, formatMessage } from '@/v5/services/intl';
 
-export const getDateMask = () => {
-	const isoString = '2018/10/25'; // example date!
-	const [year, month, day] = isoString.split('/');
+export const center = (rect: DOMRect) => 
+	( { x: (rect.left + rect.right) / 2, y: (rect.top + rect.bottom) / 2 });
 
-	const intlString = formatDate(isoString); // generate a formatted date
+export const distanceBetweenRects = (rectA: DOMRect, rectB: DOMRect) => {
+	const centerA = center(rectA);
+	const centerB = center(rectB);
 
-	return intlString
-		.replace(day, 'DD')
-		.replace(month, 'MM')
-		.replace(year, 'YYYY');
+	return Math.pow(centerA.y - centerB.y, 2) + Math.pow(centerA.x - centerB.x, 2);
 };
-
-export const getDateTimeMask = () => `${getDateMask()} @ HH:mm`;
-
-export const formatTime = (time) => time.replace('@', formatMessage({
-	id: 'form.dateTime.at',
-	defaultMessage: 'at',
-}));
-
-export const formatDayOfWeek = (day) => day[0].toUpperCase() + day[1];

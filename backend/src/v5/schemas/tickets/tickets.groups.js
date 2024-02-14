@@ -40,10 +40,10 @@ const objectEntryValidator = Yup.object().shape({
 	|| (value[idTypes.REVIT] && !(value._ids || value[idTypes.IFC])));
 	/* eslint-enable no-underscore-dangle */
 
-Groups.schema = (allowIds, fieldsOptional) => {
+Groups.schema = (allowIds, isUpdate) => {
 	let group = Yup.object({
 		name: types.strings.title,
-		description: types.strings.longDescription,
+		description: types.strings.longDescription.nullable(isUpdate),
 		rules: Yup.lazy((val) => (val ? rulesSchema : Yup.mixed())),
 		objects: Yup.array().of(objectEntryValidator).min(1),
 	}).test(
@@ -61,7 +61,7 @@ Groups.schema = (allowIds, fieldsOptional) => {
 		},
 	);
 
-	if (!fieldsOptional) {
+	if (!isUpdate) {
 		group = group.test(
 			'Rules and objects', 'Groups must contain either rules or objects',
 			({ rules, objects }) => (rules || objects));

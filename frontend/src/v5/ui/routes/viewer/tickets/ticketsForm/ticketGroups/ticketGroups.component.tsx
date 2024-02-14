@@ -199,7 +199,12 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		dispatch(ViewpointsActions.clearColorOverrides());
 
 		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
-		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
+
+		TicketsCardActionsDispatchers.setEditingGroups(true);
+		return () => {
+			ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, clearHighlightedIndex);
+			TicketsCardActionsDispatchers.setEditingGroups(false);
+		};
 	}, []);
 
 	useEffect(() => {

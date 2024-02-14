@@ -59,9 +59,6 @@ branch       = "master" if production else "staging"
 updateFrontend(version);
 updateBackend(version);
 
-execExitOnFail("git clean -f -d", "Failed to clean directory")
-
-
 execExitOnFail("git commit -m \"Version " + version + "\"", "Failed to commit")
 
 execExitOnFail("git push origin :refs/tags/" + version, "Failed to push tag")
