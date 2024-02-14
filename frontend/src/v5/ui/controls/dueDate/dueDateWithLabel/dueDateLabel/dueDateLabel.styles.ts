@@ -35,10 +35,7 @@ export const DateContainer = styled.span<{ isOverdue?: boolean; disabled?: boole
 		}
 		color: ${theme.palette.secondary.main};
 	` : css`
-		${DueStateContainer} {
-			color: ${theme.palette.error.main};
-		}
-		color: ${theme.palette.error.dark};
+		color: ${theme.palette.error.main};
 	`};
 
 	${({ disabled }) => !disabled && css`
