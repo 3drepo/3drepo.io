@@ -20,10 +20,22 @@ import { orderBy } from 'lodash';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
 import { ticketWithGroups } from './ticketsGroups.helpers';
-import { ITicket } from './tickets.types';
-import { getTicketWithStatus } from './tickets.helpers';
+import { ITemplate, ITicket } from './tickets.types';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
+
+export const getTemplateDefaultStatus = (template: ITemplate) => template.properties?.find(({ name }) => name === BaseProperties.STATUS)?.default;
+
+export const getTicketWithStatus = (ticket: ITicket, template: ITemplate) => {
+	if (ticket.properties[BaseProperties.STATUS] || !template) return ticket;
+	return {
+		...ticket,
+		properties: {
+			...ticket.properties,
+			[BaseProperties.STATUS]: getTemplateDefaultStatus(template),
+		},
+	};
+};
 
 const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
 

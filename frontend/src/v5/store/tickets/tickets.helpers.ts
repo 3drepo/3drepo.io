@@ -25,7 +25,7 @@ import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
-import { TicketBaseKeys, SequencingProperties, BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { TicketBaseKeys, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 
@@ -286,17 +286,4 @@ export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
 	if (values.modules) {
 		Object.values(values.modules).forEach(fillEmptyOverrides);
 	}
-};
-
-export const getTemplateDefaultStatus = (template: ITemplate) => template.properties?.find(({ name }) => name === BaseProperties.STATUS)?.default;
-
-export const getTicketWithStatus = (ticket: ITicket, template: ITemplate) => {
-	if (ticket.properties[BaseProperties.STATUS] || !template) return ticket;
-	return {
-		...ticket,
-		properties: {
-			...ticket.properties,
-			[BaseProperties.STATUS]: getTemplateDefaultStatus(template),
-		},
-	};
 };
