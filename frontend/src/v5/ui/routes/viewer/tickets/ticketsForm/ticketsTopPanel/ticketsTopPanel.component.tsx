@@ -28,11 +28,11 @@ import _ from 'lodash';
 import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
 import { PropertiesList } from '../propertiesList.component';
-import { IssuePropertiesInputs } from './issuePropertiesInputs/issuePropertiesInputs.component';
 import { BaseTicketInfo, DescriptionProperty, TopPanel, FlexContainer } from './ticketsTopPanel.styles';
 import { ErrorTextGap } from '../ticketsForm.styles';
 import { StatusProperty } from './statusProperty/statusProperty.component';
 import { AssigneesProperty } from './assignessProperty/assigneesProperty.component';
+import { IssuePropertiesInputs } from './issuePropertiesInputs/issuePropertiesInputs.component';
 
 type ITicketsTopPanel = {
 	title: string;
