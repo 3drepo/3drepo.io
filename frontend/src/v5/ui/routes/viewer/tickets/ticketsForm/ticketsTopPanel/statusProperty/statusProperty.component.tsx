@@ -30,14 +30,14 @@ export const StatusProperty = ({ onBlur, readOnly }: StatusPropertyProps) => (
 	<Container>
 		<Title>
 			<FormattedMessage
-				id="ticketTopPanel.status.label"
+				id="ticket.topPanel.status.label"
 				defaultMessage="Status"
 			/>
 		</Title>
 		<FormChipSelect
 			variant="text"
 			tooltip={formatMessage({
-				id: 'customTicket.topPanel.status.tooltip',
+				id: 'ticket.topPanel.status.tooltip',
 				defaultMessage: 'Set status',
 			})}
 			name={`properties.${BaseProperties.STATUS}`}
