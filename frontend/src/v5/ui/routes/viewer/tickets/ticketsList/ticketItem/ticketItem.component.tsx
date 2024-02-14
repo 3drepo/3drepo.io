@@ -23,7 +23,7 @@ import { TicketItemChips as Chips } from './ticketItemChips/ticketItemChips.comp
 import { TicketItemBottomRow as BottomRow } from './ticketItemBottomRow/ticketItemBottomRow.component';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketItemThumbnail } from './ticketItemThumbnail/ticketItemThumbnail.component';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { hasDefaultPin } from '../../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { has } from 'lodash';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
@@ -35,7 +35,7 @@ type TicketItemProps = {
 };
 
 export const TicketItem = ({ ticket, selected }: TicketItemProps) => {
-	const { containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const ref = useRef<HTMLDivElement>();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isSelected = selectedTicketId === ticket._id;
@@ -48,6 +48,7 @@ export const TicketItem = ({ ticket, selected }: TicketItemProps) => {
 		TicketsCardActionsDispatchers.openTicket(ticket._id);
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
 		TicketsCardActionsDispatchers.setSelectedTicketPin(hasDefaultPin(ticket) ? ticket._id : null);
+		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id, revision);
 	};
 
 	useEffect(() => {
