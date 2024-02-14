@@ -16,11 +16,11 @@
  */
 
 import { Highlight } from '@controls/highlight/highlight.component';
-import { BaseInfoContainer, CreationInfo, Description, Id, Title } from '../ticketItem.styles';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
+import { BaseInfoContainer, CreationInfo, Description, Id, Title } from './ticketItemBaseInfo.styles';
 
 export const TicketItemBaseInfo = ({ number, type, title, properties }) => {
 	const { containerOrFederation } = useParams<ViewerParams>();

@@ -15,26 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CreationInfo as BaseCreationInfo } from '@components/shared/creationInfo/creationInfo.component';
-import { CreationInfoValue } from '@components/shared/creationInfo/creationInfo.styles';
 import { ControlledAssigneesSelect } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
 import styled, { css } from 'styled-components';
 import ViewpointIconBase from '@assets/icons/outlined/cube_in_square-outlined.svg';
-import { TextOverflow } from '@controls/textOverflow';
-
-export const Title = styled(TextOverflow)`
-	color: ${({ theme }) => theme.palette.secondary.main};
-	font-weight: 500;
-	font-size: 12px;
-	line-height: 12px;
-	height: 12px;
-	padding: 8px 0;
-	width: fit-content;
-	max-width: 100%;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-`;
+import { Title } from './ticketItemBaseInfo/ticketItemBaseInfo.styles';
 
 export const TicketItemContainer = styled.div<{ $selected?: boolean }>`
 	display: flex;
@@ -57,28 +41,9 @@ export const FlexRow = styled.div`
 	width: 100%;
 `;
 
-export const BaseInfoContainer = styled.div`
-	min-width: 0;
-`;
-
 export const IssuePropertiesRow = styled(FlexRow)`
 	align-items: center;
 	gap: 0;
-`;
-
-export const Id = styled.div`
-	color: ${({ theme }) => theme.palette.base.main};
-	${({ theme }) => theme.typography.caption}
-	line-height: 10px;
-`;
-
-// TODO - fix after new palette is released
-export const Description = styled(TextOverflow).attrs({
-	lines: 2,
-})`
-	${({ theme }) => theme.typography.label};
-	line-height: 11px;
-	color: #20232A;
 `;
 
 export const ThumbnailContainer = styled.div`
@@ -141,14 +106,4 @@ export const Assignees = styled(ControlledAssigneesSelect).attrs({
 })`
 	margin-left: auto;
 	height: 28px;
-`;
-
-export const CreationInfo = styled(BaseCreationInfo)`
-	line-height: 10px;
-	padding-bottom: 5px;
-	color: ${({ theme }) => theme.palette.base.main};
-	${CreationInfoValue} {
-		color: ${({ theme }) => theme.palette.secondary.main};
-		text-decoration: none;
-	}
 `;
