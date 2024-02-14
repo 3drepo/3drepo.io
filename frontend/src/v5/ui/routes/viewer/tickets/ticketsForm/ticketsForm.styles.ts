@@ -42,7 +42,7 @@ export const PanelsContainer = styled.div`
 `;
 
 export const PropertiesListContainer = styled.div`
-	& > * {
+	&& > * {
 		margin: 10px 0 0;
 		&${ErrorTextGap} {
 			margin: 0;
