@@ -288,14 +288,15 @@ export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
 	}
 };
 
+export const getTemplateDefaultStatus = (template: ITemplate) => template.properties?.find(({ name }) => name === BaseProperties.STATUS)?.default;
+
 export const getTicketWithStatus = (ticket: ITicket, template: ITemplate) => {
 	if (ticket.properties[BaseProperties.STATUS] || !template) return ticket;
-	const statusProperty = template.properties?.find(({ name }) => name === BaseProperties.STATUS);
 	return {
 		...ticket,
 		properties: {
 			...ticket.properties,
-			[BaseProperties.STATUS]: statusProperty?.default,
+			[BaseProperties.STATUS]: getTemplateDefaultStatus(template),
 		},
 	};
 };
