@@ -45,6 +45,7 @@ export enum IssueProperties {
 
 export enum AdditionalProperties {
 	DEFAULT_VIEW = 'Default View',
+	DEFAULT_IMAGE = 'Default Image',
 	PIN = 'Pin',
 }
 

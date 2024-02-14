@@ -28,7 +28,7 @@ import { selectContainersByFederationId } from '../federations/federations.selec
 import { TicketsActions, TicketsTypes } from '../tickets/tickets.redux';
 import { FetchDataAction, ViewerActions, ViewerTypes } from './viewer.redux';
 import { selectTemplates } from '../tickets/tickets.selectors';
-import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { AdditionalProperties, BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 
 function* fetchData({ teamspace, containerOrFederation, project }: FetchDataAction) {
 	yield put(ViewerActions.setFetching(true));
@@ -78,10 +78,10 @@ function* fetchData({ teamspace, containerOrFederation, project }: FetchDataActi
 		const filter = templates.reduce((acc, template) => {
 			const configColor = template.config?.pin?.color;
 			if (!configColor?.property) return acc;
-			const { module, property: { name } } = configColor;
+			const { property: { module, name } } = configColor;
 			const path = module ? `${module}.${name}` : name;
 			return [...acc, path];
-		}, [BaseProperties.DESCRIPTION]);
+		}, [BaseProperties.DESCRIPTION, AdditionalProperties.DEFAULT_IMAGE]);
 		yield put(TicketsActions.fetchTickets(teamspace, project, containerOrFederation, isFederation, filter));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
