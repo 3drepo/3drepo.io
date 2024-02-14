@@ -20,7 +20,7 @@ import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
 import { FormChipSelect, FormDueDateWithIcon } from '@controls/inputs/formInputs.component';
 import { FormattedMessage } from 'react-intl';
 import { IssueProperties } from '../../../tickets.constants';
-import { Property, PropertyTitle } from './issuePropertiesInputs.styles';
+import { Property, PropertyTitle } from '../statusProperty/statusProperty.styles';
 import { StatusProperty } from '../statusProperty/statusProperty.component';
 
 type IIssuePropertiesInputs = {

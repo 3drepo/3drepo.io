@@ -20,20 +20,20 @@ import { FormattedMessage } from 'react-intl';
 import { FormChipSelect } from '@controls/inputs/formInputs.component';
 import { formatMessage } from '@/v5/services/intl';
 import { BaseProperties } from '../../../tickets.constants';
-import { Title, Container } from './statusProperty.styles';
+import { PropertyTitle, Property } from './statusProperty.styles';
 
 type StatusPropertyProps = {
 	onBlur: () => void;
 	readOnly: boolean;
 };
 export const StatusProperty = ({ onBlur, readOnly }: StatusPropertyProps) => (
-	<Container>
-		<Title>
+	<Property>
+		<PropertyTitle>
 			<FormattedMessage
 				id="ticket.topPanel.status.label"
 				defaultMessage="Status"
 			/>
-		</Title>
+		</PropertyTitle>
 		<FormChipSelect
 			variant="text"
 			tooltip={formatMessage({
@@ -46,5 +46,5 @@ export const StatusProperty = ({ onBlur, readOnly }: StatusPropertyProps) => (
 			values={STATUS_MAP}
 			disabled={readOnly}
 		/>
-	</Container>
+	</Property>
 );

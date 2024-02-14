@@ -17,13 +17,13 @@
 
 import styled from 'styled-components';
 
-export const Container = styled.div`
+export const Property = styled.div`
 	.MuiChip-root {
 		padding: 0;
 	}
 `;
 
-export const Title = styled.div`
+export const PropertyTitle = styled.div`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
 `;
