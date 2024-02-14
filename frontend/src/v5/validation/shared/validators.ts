@@ -20,6 +20,8 @@ import * as Yup from 'yup';
 
 export const trimmedString = Yup.string().transform((value) => value && value.trim());
 
+export const nullableString = Yup.string().transform((value) => value || null).nullable();
+
 export const nullableNumber = Yup.number().transform(
 	(_, val) => ((val || val === 0) ? Number(val) : null),
 ).nullable(true);

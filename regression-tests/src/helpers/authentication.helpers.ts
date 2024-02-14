@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,25 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { formatDate, formatMessage } from '@/v5/services/intl';
 
-export const getDateMask = () => {
-	const isoString = '2018/10/25'; // example date!
-	const [year, month, day] = isoString.split('/');
+import { fillInForm, clickOn } from './selenium.helpers';
 
-	const intlString = formatDate(isoString); // generate a formatted date
-
-	return intlString
-		.replace(day, 'DD')
-		.replace(month, 'MM')
-		.replace(year, 'YYYY');
+export const signInInMicrosoft = async (driver, email, password) => {
+	await fillInForm(driver, { 'Sign in': email });
+	await clickOn(driver, 'Next');
+	await fillInForm(driver, { 'Enter password': password });
+	await clickOn(driver, 'Sign in');
+	await clickOn(driver, 'Yes');
 };
 
-export const getDateTimeMask = () => `${getDateMask()} @ HH:mm`;
-
-export const formatTime = (time) => time.replace('@', formatMessage({
-	id: 'form.dateTime.at',
-	defaultMessage: 'at',
-}));
-
-export const formatDayOfWeek = (day) => day[0].toUpperCase() + day[1];
