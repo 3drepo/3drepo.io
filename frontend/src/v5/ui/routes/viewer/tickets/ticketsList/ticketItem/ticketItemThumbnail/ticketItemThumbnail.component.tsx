@@ -15,26 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { HoverState, Thumbnail, ThumbnailContainer, ViewpointIcon } from '../ticketItem.styles';
+import { HoverState, ImagePlaceholder, Thumbnail, ThumbnailContainer, ViewpointIcon } from '../ticketItem.styles';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { hasDefaultPin } from '../../../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { get, has } from 'lodash';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
+import ImageIcon from '@assets/icons/outlined/image_thin-outlined.svg';
+import { FormattedMessage } from 'react-intl';
 
 export const TicketItemThumbnail = ({ ticket }) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
 	const isFederation = modelIsFederation(containerOrFederation);
 
 	const defaultView = get(ticket.properties, 'Default View');
 	const defaultImage = get(ticket.properties, 'Default Image');
 	const hasViewpoint = has(defaultView, 'camera');
-	const hasThumbnail = has(template, ['config', 'defaultView']) || has(template, ['config', 'defaultImage']);
 	
 	const resourceId =  defaultView?.screenshot ||  defaultImage;
 	const thumbnailSrc = resourceId ?
@@ -46,13 +44,10 @@ export const TicketItemThumbnail = ({ ticket }) => {
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
 		TicketsCardActionsDispatchers.setSelectedTicketPin(hasDefaultPin(ticket) ? ticket._id : null);
 		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
-		
-		// If this ticket is already selected we still want the viewpoint to change on click
-		if (selectedTicketId !== ticket._id) return;
+
 		goToView(defaultView); 
 	};
 
-	if (!hasThumbnail) return null;
 	return (
 		<ThumbnailContainer>
 			{hasViewpoint && (
@@ -60,7 +55,12 @@ export const TicketItemThumbnail = ({ ticket }) => {
 					<ViewpointIcon />
 				</HoverState>
 			)}
-			<Thumbnail src={thumbnailSrc} loading="lazy" />
+			{thumbnailSrc ? ( <Thumbnail src={thumbnailSrc} loading="lazy" /> ) : (
+				<ImagePlaceholder>
+					<ImageIcon />
+					<FormattedMessage id="ticketItem.thumbnail.placeholderImageText" defaultMessage="Image Unavailable" />
+				</ImagePlaceholder>
+			)}
 		</ThumbnailContainer>
 	);
 };

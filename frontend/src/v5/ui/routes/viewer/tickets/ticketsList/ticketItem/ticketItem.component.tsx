@@ -21,10 +21,13 @@ import { FlexRow, TicketItemContainer } from './ticketItem.styles';
 import { TicketItemBaseInfo as BaseInfo } from './ticketItemBaseInfo/ticketItemBaseInfo.component';
 import { TicketItemChips as Chips } from './ticketItemChips/ticketItemChips.component';
 import { TicketItemBottomRow as BottomRow } from './ticketItemBottomRow/ticketItemBottomRow.component';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketItemThumbnail } from './ticketItemThumbnail/ticketItemThumbnail.component';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { hasDefaultPin } from '../../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
+import { has } from 'lodash';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { useParams } from 'react-router-dom';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -32,9 +35,13 @@ type TicketItemProps = {
 };
 
 export const TicketItem = ({ ticket, selected }: TicketItemProps) => {
+	const { containerOrFederation } = useParams<ViewerParams>();
 	const ref = useRef<HTMLDivElement>();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isSelected = selectedTicketId === ticket._id;
+	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
+
+	const templateHasThumbnail = has(template, ['config', 'defaultView']) || has(template, ['config', 'defaultImage']);
 
 	const onClickTicket = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		event.stopPropagation();
@@ -58,7 +65,7 @@ export const TicketItem = ({ ticket, selected }: TicketItemProps) => {
 			ref={ref}
 		>
 			<FlexRow>
-				<TicketItemThumbnail ticket={ticket} />
+				{templateHasThumbnail && <TicketItemThumbnail ticket={ticket} />}
 				<BaseInfo {...ticket} />
 			</FlexRow>
 			<Chips {...ticket} />

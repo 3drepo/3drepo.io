@@ -120,6 +120,20 @@ export const Thumbnail = styled.img`
 	user-select: none;
 `;
 
+export const ImagePlaceholder = styled.div`
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	${({ theme }) => theme.typography.label};
+	color: ${({ theme }) => theme.palette.base.main};
+	display: flex;
+    flex-flow: column;
+    align-items: center;
+    text-align: center;
+	height: 100%;
+    justify-content: center;
+	gap: 4px;
+	line-height: 12px;
+`;
+
 export const Assignees = styled(ControlledAssigneesSelect).attrs({
 	maxItems: 5,
 	showEmptyText: true,
