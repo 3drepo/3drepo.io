@@ -75,10 +75,9 @@ export const selectTickets = createSelector(
 	(state, modelId) => modelId,
 	(state) => state,
 	(ticketsList, groups, modelId, storeState): ITicket[] => {
-		const ticketsWithId = ticketsList.map((ticket) => ({ ...ticket, modelId }));
-		const tickets = ticketsWithId.map((ticket) => {
+		const tickets = ticketsList.map((ticket) => {
 			const ticketWithStatus = getTicketWithStatus(ticket, selectTemplateById(storeState, modelId, ticket.type));
-			return ticketWithGroups(ticketWithStatus, groups);
+			return ticketWithGroups(({ ...ticketWithStatus, modelId }), groups);
 		});
 
 		return orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
