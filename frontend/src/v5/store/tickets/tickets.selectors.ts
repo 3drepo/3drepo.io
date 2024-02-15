@@ -19,12 +19,23 @@ import { createSelector } from 'reselect';
 import { orderBy } from 'lodash';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
-import { createPropertiesWithGroups, ticketWithGroups } from './ticketsGroups.helpers';
-import { ITicket, TicketWithModelIdAndName } from './tickets.types';
-import { selectContainers } from '../containers/containers.selectors';
-import { selectFederations } from '../federations/federations.selectors';
+import { ticketWithGroups } from './ticketsGroups.helpers';
+import { ITemplate, ITicket } from './tickets.types';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
+
+export const getTemplateDefaultStatus = (template: ITemplate) => template.properties?.find(({ name }) => name === BaseProperties.STATUS)?.default;
+
+export const getTicketWithStatus = (ticket: ITicket, template: ITemplate) => {
+	if (ticket.properties[BaseProperties.STATUS] || !template) return ticket;
+	return {
+		...ticket,
+		properties: {
+			...ticket.properties,
+			[BaseProperties.STATUS]: getTemplateDefaultStatus(template),
+		},
+	};
+};
 
 const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
 
@@ -32,24 +43,6 @@ export const selectTicketsHaveBeenFetched = createSelector(
 	selectTicketsDomain,
 	(state, modelId) => modelId,
 	(state, modelId) => modelId in state.ticketsByModelId,
-);
-
-export const selectTicketsByContainersAndFederations = createSelector(
-	selectTicketsDomain,
-	(state, containersAndFederationsIds: string[]) => containersAndFederationsIds,
-	selectContainers,
-	selectFederations,
-	(state, containersAndFederationsIds, containers, federations) => {
-		const modelIdToName = [...containers, ...federations].reduce((acc, { _id, name }) => {
-			// eslint-disable-next-line no-param-reassign
-			acc[_id] = name;
-			return acc;
-		}, {});
-		const ticketsWithModelId: TicketWithModelIdAndName[] = containersAndFederationsIds.flatMap((modelId) => (
-			(state.ticketsByModelId[modelId] || []).map((ticket) => ({ modelId, modelName: modelIdToName[modelId], ...ticket }))
-		));
-		return sortTicketsByCreationDate(ticketsWithModelId);
-	},
 );
 
 export const selectTemplates = createSelector(
@@ -70,7 +63,7 @@ export const selectTicketsGroups = createSelector(
 	(state) => state.groupsByGroupId,
 );
 
-const selectTicketsRaw = createSelector(
+export const selectTicketsRaw = createSelector(
 	selectTicketsDomain,
 	(state, modelId) => modelId,
 	(state, modelId) => state.ticketsByModelId[modelId] || [],
@@ -79,10 +72,12 @@ const selectTicketsRaw = createSelector(
 export const selectTickets = createSelector(
 	selectTicketsRaw,
 	selectTicketsGroups,
-	(ticketsList, groups): ITicket[] => {
-		const tickets = [];
-		ticketsList.forEach((ticket) => {
-			tickets.push({ ...ticket, properties: createPropertiesWithGroups(ticket.properties, groups) });
+	(state, modelId) => modelId,
+	(state) => state,
+	(ticketsList, groups, modelId, storeState): ITicket[] => {
+		const tickets = ticketsList.map((ticket) => {
+			const ticketWithStatus = getTicketWithStatus(ticket, selectTemplateById(storeState, modelId, ticket.type));
+			return ticketWithGroups(({ ...ticketWithStatus, modelId }), groups);
 		});
 
 		return orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
@@ -96,17 +91,21 @@ export const selectTicketByIdRaw = createSelector(
 );
 
 export const selectTicketById = createSelector(
-	selectTicketByIdRaw,
-	selectTicketsGroups,
-	(ticket, groups) => {
-		if (!ticket) {
-			return ticket;
-		}
-		return ticketWithGroups(ticket, groups);
-	},
+	selectTickets,
+	(_, modelId, ticketId) => ticketId,
+	(tickets, ticketId) => tickets.find(({ _id }) => _id === ticketId) || null,
 );
 
 export const selectRiskCategories = createSelector(
 	selectTicketsDomain,
 	(state) => state.riskCategories,
+);
+
+export const selectTicketsByContainersAndFederations = createSelector(
+	(state) => state,
+	(state, modelsIds: string[]) => modelsIds,
+	(storeState, modelsIds) => {
+		const tickets = modelsIds.flatMap((modelId) => selectTickets(storeState, modelId));
+		return sortTicketsByCreationDate(tickets);
+	},
 );
