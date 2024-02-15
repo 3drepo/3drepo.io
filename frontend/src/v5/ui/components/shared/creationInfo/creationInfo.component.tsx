@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { formatLongDateTime, formatShortDateTimeWithDash, getRelativeTime } from '@/v5/helpers/intl.helper';
+import { formatLongDateTime, formatShortDateTime, getRelativeTime } from '@/v5/helpers/intl.helper';
 import { TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { FormattedMessage } from 'react-intl';
@@ -40,12 +40,12 @@ export const CreationInfo = ({
 	const ownerDetails = UsersHooksSelectors.selectUser(teamspace, owner);
 
 	const Username = () => (
-		<HoverPopover anchor={(props) => <TruncateName {...props}>{owner}</TruncateName>}>
+		<HoverPopover anchor={(props) => <TruncateName {...props}>{`${ownerDetails.firstName} ${ownerDetails.lastName}`}</TruncateName>}>
 			<UserPopover user={ownerDetails} />
 		</HoverPopover>
 	);
 	const CreationDate = () => (
-		<HoverPopover anchor={(props) => <CreationInfoValue {...props}>{formatShortDateTimeWithDash(createdAt)}</CreationInfoValue>}>
+		<HoverPopover anchor={(props) => <CreationInfoValue {...props}>{formatShortDateTime(createdAt)}</CreationInfoValue>}>
 			<PopoverContainer>
 				{formatLongDateTime(createdAt)}
 			</PopoverContainer>
@@ -68,7 +68,7 @@ export const CreationInfo = ({
 			{updatedAt && updatedAt !== createdAt && (
 				<FormattedMessage
 					id="creationInfo.lastUpdated"
-					defaultMessage="Updated {lastUpdated}"
+					defaultMessage=". Updated {lastUpdated}"
 					values={{ lastUpdated: <LastUpdated /> }}
 				/>
 			)}

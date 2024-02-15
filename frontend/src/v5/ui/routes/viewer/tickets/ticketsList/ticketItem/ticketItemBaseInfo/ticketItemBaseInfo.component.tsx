@@ -20,7 +20,8 @@ import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
-import { BaseInfoContainer, CreationInfo, Description, Id, Title } from './ticketItemBaseInfo.styles';
+import { BaseInfoContainer, Description, Id, Title } from './ticketItemBaseInfo.styles';
+import { CreationInfo } from '@components/shared/creationInfo/creationInfo.component';
 
 export const TicketItemBaseInfo = ({ number, type, title, properties }) => {
 	const { containerOrFederation } = useParams<ViewerParams>();

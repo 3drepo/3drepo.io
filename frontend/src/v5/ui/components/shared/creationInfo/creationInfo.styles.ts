@@ -18,13 +18,16 @@
 import styled from 'styled-components';
 
 export const CreationInfoContainer = styled.div`
-	display: flex;
+	display: inline-block;
 	${({ theme }) => theme.typography.caption};
 	color: ${({ theme }) => theme.palette.base.main};
-	gap: 2px;
+	line-height: 10px;
 `;
 
-export const CreationInfoValue = styled.span``;
+export const CreationInfoValue = styled.span`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	text-decoration: none;
+`;
 
 export const TruncateName = styled(CreationInfoValue)`
 	display: inline-block;

@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CreationInfo as BaseCreationInfo } from '@components/shared/creationInfo/creationInfo.component';
-import { CreationInfoValue } from '@components/shared/creationInfo/creationInfo.styles';
 import { TextOverflow } from '@controls/textOverflow';
 import styled from 'styled-components';
 
@@ -44,15 +42,6 @@ export const Title = styled(TextOverflow)`
 	white-space: nowrap;
 `;
 
-export const CreationInfo = styled(BaseCreationInfo)`
-	line-height: 10px;
-	padding-bottom: 5px;
-	color: ${({ theme }) => theme.palette.base.main};
-	${CreationInfoValue} {
-		color: ${({ theme }) => theme.palette.secondary.main};
-		text-decoration: none;
-	}
-`;
 
 // TODO - fix after new palette is released
 export const Description = styled(TextOverflow).attrs({
