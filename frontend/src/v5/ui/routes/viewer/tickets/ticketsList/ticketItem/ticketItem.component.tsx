@@ -31,10 +31,9 @@ import { useParams } from 'react-router-dom';
 
 type TicketItemProps = {
 	ticket: ITicket;
-	selected?: boolean;
 };
 
-export const TicketItem = ({ ticket, selected }: TicketItemProps) => {
+export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const ref = useRef<HTMLDivElement>();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
@@ -52,7 +51,7 @@ export const TicketItem = ({ ticket, selected }: TicketItemProps) => {
 	};
 
 	useEffect(() => {
-		if (selected && ref.current) {
+		if (isSelected && ref.current) {
 			// @ts-ignore
 			ref.current.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'start' });
 		}
