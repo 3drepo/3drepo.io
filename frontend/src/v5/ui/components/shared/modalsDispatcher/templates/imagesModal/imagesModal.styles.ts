@@ -68,12 +68,18 @@ export const Buttons = styled(FlexRow)`
 	gap: 9px;
 `;
 
-export const Counter = styled.div`
+export const Counter = styled.div<{ $counterChars: number }>`
 	background-color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 15)};
-	padding: 9px 14px;
 	border-radius: 10px;
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	font-weight: 600;
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	place-items: center;
+	width: ${({ $counterChars }) => 42 + ($counterChars * 8)}px;
+	height: 36px;
+	padding: 0 10px;
+	gap: 2px;
 `;
 
 export const TopBarButton = styled(FloatingButton)`
@@ -156,19 +162,20 @@ export const ImageThumbnailContainer = styled(FlexRow)<{ selected?: boolean }>`
 	cursor: pointer;
 	border-radius: 8px;
 	min-width: 75px;
+	max-width: 75px;
 	height: 75px;
 	overflow: hidden;
 
 	&:first-of-type {
-		margin-left: calc(50% - 37px);
+		margin-left: auto;
 	}
 
 	&:last-of-type {
-		margin-right: calc(50% - 37px);
+		margin-right: auto;
 	}
 
 	${({ selected, theme }) => selected ? css`
-		border: solid 2px ${theme.palette.primary.main};
+		border: solid 4px ${theme.palette.primary.main};
 	` : css`
 		border: solid 1px ${theme.palette.secondary.light};
 

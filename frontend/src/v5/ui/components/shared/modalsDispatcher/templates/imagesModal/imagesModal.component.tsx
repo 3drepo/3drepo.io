@@ -91,7 +91,7 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 
 	const centerSelectedThumbnail = () => {
 		if (!imageRef.current) return;
-		imageRef.current.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+		imageRef.current.scrollIntoView({ behavior: 'instant', inline: 'center' });
 	};
 
 	useEffect(() => {
@@ -112,12 +112,10 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 			<TopBar>
 				<Buttons>
 					{hasManyImages && (
-						<Counter>
-							<FormattedMessage
-								id="images.count"
-								defaultMessage="{imageIndex} of {imagesLength}"
-								values={{ imageIndex: imageIndex + 1, imagesLength }}
-							/>
+						<Counter $counterChars={imagesLength.toString().length}>
+							<span>{imageIndex + 1}</span>
+							<span><FormattedMessage id="images.count.of" defaultMessage="of" /></span>
+							<span>{imagesLength}</span>
 						</Counter>
 					)}
 					<TextTopBarButton>
