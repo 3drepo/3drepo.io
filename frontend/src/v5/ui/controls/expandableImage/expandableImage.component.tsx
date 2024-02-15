@@ -20,21 +20,21 @@ import { Image, ExtraImages, OverlappingContainer } from './expandableImage.styl
 
 type ExpandableImageProps = {
 	// to use if the image to display is not the first one
-	displayImageIndex?: number,
+	index?: number,
 	images: string[],
 	className?: string,
 	showExtraImagesValue?: boolean,
 };
 export const ExpandableImage = ({
-	displayImageIndex = 0,
+	index = 0,
 	images,
 	showExtraImagesValue,
 	className,
 	...imgProps
 }: ExpandableImageProps) => {
-	const displayImage = images[displayImageIndex];
+	const displayImage = images[index];
 
-	const openImagesModal = () => DialogsActionsDispatchers.open('images', { images, displayImageIndex });
+	const openImagesModal = () => DialogsActionsDispatchers.open('images', { images, index });
 
 	if (!showExtraImagesValue || images.length === 1) {
 		return (<Image src={displayImage} onClick={openImagesModal} className={className} {...imgProps} />);
@@ -43,7 +43,7 @@ export const ExpandableImage = ({
 	return (
 		<OverlappingContainer onClick={openImagesModal} className={className}>
 			<Image src={displayImage} {...imgProps} />
-			<ExtraImages>+{images.length - (displayImageIndex + 1)}</ExtraImages>
+			<ExtraImages>+{images.length - (index + 1)}</ExtraImages>
 		</OverlappingContainer>
 	);
 };

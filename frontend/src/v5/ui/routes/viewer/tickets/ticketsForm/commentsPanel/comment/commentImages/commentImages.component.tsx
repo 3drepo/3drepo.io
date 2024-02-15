@@ -27,7 +27,7 @@ export const CommentImages = ({ images, ...props }: CommentImagesProps) => {
 		return (
 			<FlexContainer>
 				{images.map((image, index) => (
-					<ExpandableImage images={images} displayImageIndex={index} key={image} {...props} />
+					<ExpandableImage images={images} index={index} key={image} {...props} />
 				))}
 			</FlexContainer>
 		);
@@ -37,12 +37,12 @@ export const CommentImages = ({ images, ...props }: CommentImagesProps) => {
 			<>
 				<FlexContainer>
 					{(images.slice(0, 2)).map((image, index) => (
-						<ExpandableImage images={images} displayImageIndex={index} key={image} {...props} />
+						<ExpandableImage images={images} index={index} key={image} {...props} />
 					))}
 				</FlexContainer>
 				<FlexContainer>
 					{(images.slice(2, 5)).map((image, index) => (
-						<ExpandableImage images={images} displayImageIndex={index + 2} key={image} {...props} />
+						<ExpandableImage images={images} index={index + 2} key={image} {...props} />
 					))}
 				</FlexContainer>
 			</>
@@ -56,12 +56,12 @@ export const CommentImages = ({ images, ...props }: CommentImagesProps) => {
 		<ClickListener onClick={preloadImages}>
 			<FlexContainer>
 				{(images.slice(0, 2)).map((image, index) => (
-					<ExpandableImage images={images} displayImageIndex={index} key={image} {...props} />
+					<ExpandableImage images={images} index={index} key={image} {...props} />
 				))}
 			</FlexContainer>
 			<FlexContainer>
-				<ExpandableImage images={images} displayImageIndex={2} {...props} />
-				<ExpandableImage images={images} displayImageIndex={3} showExtraImagesValue {...props} />
+				<ExpandableImage images={images} index={2} {...props} />
+				<ExpandableImage images={images} index={3} showExtraImagesValue {...props} />
 			</FlexContainer>
 		</ClickListener>
 	);
