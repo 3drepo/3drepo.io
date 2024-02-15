@@ -15,19 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FlexContainer, ClickListener, ExpandableImage } from './commentImages.styles';
+import { FlexContainer, ClickListener, CommentImage } from './commentImages.styles';
 
 type CommentImagesProps = {
 	images: string[];
 	onUpload?: (images: string[]) => void;
 	onDelete?: (index) => void;
+	onImageClick: (index) => void;
 };
-export const CommentImages = ({ images, ...props }: CommentImagesProps) => {
+export const CommentImages = ({ images, onImageClick, ...props }: CommentImagesProps) => {
 	if (images.length <= 3) {
 		return (
 			<FlexContainer>
 				{images.map((image, index) => (
-					<ExpandableImage images={images} index={index} key={image} {...props} />
+					<CommentImage onClick={() => onImageClick(index)} src={image} key={image} {...props} />
 				))}
 			</FlexContainer>
 		);
@@ -37,12 +38,12 @@ export const CommentImages = ({ images, ...props }: CommentImagesProps) => {
 			<>
 				<FlexContainer>
 					{(images.slice(0, 2)).map((image, index) => (
-						<ExpandableImage images={images} index={index} key={image} {...props} />
+						<CommentImage onClick={() => onImageClick(index)} src={image} key={image} {...props} />
 					))}
 				</FlexContainer>
 				<FlexContainer>
 					{(images.slice(2, 5)).map((image, index) => (
-						<ExpandableImage images={images} index={index + 2} key={image} {...props} />
+						<CommentImage onClick={() => onImageClick(index)} src={image} key={image} {...props} />
 					))}
 				</FlexContainer>
 			</>
@@ -56,12 +57,12 @@ export const CommentImages = ({ images, ...props }: CommentImagesProps) => {
 		<ClickListener onClick={preloadImages}>
 			<FlexContainer>
 				{(images.slice(0, 2)).map((image, index) => (
-					<ExpandableImage images={images} index={index} key={image} {...props} />
+					<CommentImage onClick={() => onImageClick(index)} src={image} key={image} {...props} />
 				))}
 			</FlexContainer>
 			<FlexContainer>
-				<ExpandableImage images={images} index={2} {...props} />
-				<ExpandableImage images={images} index={3} showExtraImagesValue {...props} />
+				<CommentImage onClick={() => onImageClick(2)} src={images[2]} {...props} />
+				<CommentImage onClick={() => onImageClick(3)} src={images[3]} extraCount={images.length - 3} {...props} />
 			</FlexContainer>
 		</ClickListener>
 	);

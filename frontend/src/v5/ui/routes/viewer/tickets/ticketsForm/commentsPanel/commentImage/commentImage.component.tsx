@@ -15,28 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { CommentImage as CommentImageBase } from '@/v5/ui/routes/viewer/tickets/ticketsForm/commentsPanel/commentImage/commentImage.component';
+import { Image, ExtraImages, OverlappingContainer } from './commentImage.styles';
 
-export const ClickListener = styled.div`
-	display: contents;
-`;
-
-export const FlexContainer = styled.div`
-	display: flex;
-	flex-direction: row;
-	width: 100%;
-	gap: 5px;
-
-	& > * {
-		flex: 1;
+type CommentImageProps = {
+	src: string,
+	className?: string,
+	extraCount?: number,
+	onClick?: () => void,
+};
+export const CommentImage = ({
+	src,
+	extraCount,
+	className,
+	onClick,
+	...imgProps
+}: CommentImageProps) => {
+	if (!extraCount) {
+		return (<Image src={src} onClick={onClick} className={className} {...imgProps} />);
 	}
 
-	& ~ & {
-		margin-top: 5px;
-	}
-`;
-
-export const CommentImage = styled(CommentImageBase).attrs({
-	variant: 'secondary',
-})``;
+	return (
+		<OverlappingContainer onClick={onClick} className={className}>
+			<Image src={src} {...imgProps} />
+			<ExtraImages>+{extraCount}</ExtraImages>
+		</OverlappingContainer>
+	);
+};

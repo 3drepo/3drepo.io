@@ -21,7 +21,7 @@ import { TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketCo
 import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
-import { CommentMarkDown, ExpandableImage, OriginalMessage, CameraIcon } from './commentReply.styles';
+import { CommentMarkDown, CommentImage, OriginalMessage, CameraIcon } from './commentReply.styles';
 import { CommentAuthor } from '../commentNonMessageContent/commentNonMessageContent.styles';
 import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
 
@@ -69,7 +69,7 @@ export const CommentReply = ({
 					</CommentMarkDown>
 				</OriginalMessage>
 			</div>
-			{images.length > 0 && (<ExpandableImage images={imagesSrcs} showExtraImagesValue />)}
+			{images.length > 0 && (<CommentImage src={imagesSrcs[0]} extraCount={images.length - 1} />)}
 		</QuotedMessage>
 	);
 };
