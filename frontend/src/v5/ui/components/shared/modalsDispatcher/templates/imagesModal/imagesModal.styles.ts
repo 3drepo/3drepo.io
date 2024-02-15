@@ -141,10 +141,14 @@ export const ImageWithArrows = styled(FlexRow)`
 	gap: 22px;
 `;
 
-export const NextButton = styled(FloatingButton)`
+export const NextButton = styled(FloatingButton)<{ disabled?: boolean }>`
 	& svg {
 		margin-left: 1px;
 	}
+
+	${({ disabled }) => disabled && css`
+		pointer-events: none;
+	`}
 `;
 
 export const PreviousButton = styled(NextButton)`
