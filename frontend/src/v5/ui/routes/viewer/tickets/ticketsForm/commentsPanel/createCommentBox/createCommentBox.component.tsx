@@ -73,7 +73,10 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 	const containerRef = useRef<HTMLElement>();
 	const inputRef = useRef<any>();
 	const { isViewer } = useContext(TicketContext);
-	const { watch, reset, control } = useForm<{ message: string, images: File[] }>({ mode: 'all' });
+	const { watch, reset, control } = useForm<{ message: string, images: File[] }>({
+		mode: 'all',
+		defaultValues: { message: '' },
+	});
 	const messageInput = watch('message');
 
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
