@@ -43,7 +43,7 @@ export const ExpandableImage = ({
 	return (
 		<OverlappingContainer onClick={openImagesModal} className={className}>
 			<Image src={displayImage} {...imgProps} />
-			<ExtraImages>+{images.length - (index + 1)}</ExtraImages>
+			<ExtraImages>+{images.length - index}</ExtraImages>
 		</OverlappingContainer>
 	);
 };
