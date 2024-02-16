@@ -33,7 +33,7 @@ describe('Tickets: store', () => {
 
 	describe('tickets', () => {
 		it('should fetch and set model tickets', () => {
-			const ticket = ticketMockFactory();
+			const ticket = ticketMockFactory({ modelId });
 			dispatch(TicketsActions.fetchTicketsSuccess(modelId, [ticket]));
 			const modelTicketsFromState = selectTickets(getState(), modelId);
 	
@@ -41,7 +41,7 @@ describe('Tickets: store', () => {
 		});
 	
 		it('should update the model tickets', () => {
-			const ticket = ticketMockFactory();
+			const ticket = ticketMockFactory({ modelId });
 			dispatch(TicketsActions.fetchTicketsSuccess(modelId, [ticket]));
 	
 			const oldTicket = cloneDeep(ticket)
@@ -56,7 +56,7 @@ describe('Tickets: store', () => {
 		});
 	
 		it('should insert a ticket', () => {
-			const ticket = ticketMockFactory();
+			const ticket = ticketMockFactory({ modelId });
 			dispatch(TicketsActions.upsertTicketSuccess(modelId, ticket));
 			const ticketFromStore = selectTicketById(getState(), modelId, ticket._id);
 			expect(ticketFromStore).toEqual(ticket);

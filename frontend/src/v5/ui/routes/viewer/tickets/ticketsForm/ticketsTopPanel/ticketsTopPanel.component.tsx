@@ -28,8 +28,10 @@ import { BaseProperties, IssueProperties } from '../../tickets.constants';
 import { TitleProperty } from '../properties/titleProperty.component';
 import { PropertiesList } from '../propertiesList.component';
 import { IssuePropertiesInputs } from './IssuePropertiesInputs/issuePropertiesInputs.component';
-import { DescriptionProperty, TopPanel, CreationInfo } from './ticketsTopPanel.styles';
+import { DescriptionProperty, TopPanel, CreationInfo, FlexContainer } from './ticketsTopPanel.styles';
 import { ErrorTextGap } from '../ticketsForm.styles';
+import { StatusProperty } from './statusProperty/statusProperty.component';
+import { AssigneesProperty } from './assignessProperty/assigneesProperty.component';
 
 type ITicketsTopPanel = {
 	title: string;
@@ -53,9 +55,9 @@ export const TicketsTopPanel = ({
 	const createdAt = getValues(`properties.${BaseProperties.CREATED_AT}`);
 	const updatedAt = getValues(`properties.${BaseProperties.UPDATED_AT}`);
 
-	const hasIssueProperties = properties.some((property) => property.name === IssueProperties.PRIORITY);
 	const topPanelProperties: string[] = Object.values({ ...BaseProperties, ...IssueProperties });
 	const extraProperties = properties.filter(({ name }) => !topPanelProperties.includes(name));
+	const hasIssueProperties = properties.some((property) => property.name === IssueProperties.PRIORITY);
 
 	useEffect(() => {
 		if (!focusOnTitle || !ref.current || !_.isEmpty(formState.touchedFields)) return;
@@ -92,7 +94,14 @@ export const TicketsTopPanel = ({
 				/>
 				{_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`) && <ErrorTextGap />}
 			</DescriptionProperty>
-			{hasIssueProperties && <IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnly} />}
+			<FlexContainer>
+				{hasIssueProperties ? (
+					<IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnly} />
+				) : (
+					<StatusProperty onBlur={onPropertyBlur} readOnly={readOnly} />
+				)}
+			</FlexContainer>
+			{hasIssueProperties && (<AssigneesProperty onBlur={onPropertyBlur} readOnly={readOnly} />)}
 			<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
 		</TopPanel>
 	);

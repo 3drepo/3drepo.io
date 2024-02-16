@@ -26,7 +26,7 @@ export const TicketItemChips = ({ properties, modules: { safetibase = {} } }: IT
 	const { treatmentStatus = null, levelOfRisk = null } = getPropertiesInCamelCase(safetibase);
 	return (
 		<FlexRow>
-			{status && <Chip {...STATUS_MAP[status]} variant="outlined" />}
+			<Chip {...STATUS_MAP[status]} variant="outlined" />
 			{levelOfRisk && <Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />}
 			{treatmentStatus && <Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />}
 		</FlexRow>
