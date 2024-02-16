@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useState } from 'react';
+import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
+import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { CommentImages } from '../commentImages/commentImages.component';
 import { CommentAuthor } from './commentNonMessageContent.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
-import { useState } from 'react';
-import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
-import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 
 export type CommentNonMessageContentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
 	metadata?: TicketCommentReplyMetadata;
