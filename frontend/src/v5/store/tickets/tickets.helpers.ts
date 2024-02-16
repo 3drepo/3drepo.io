@@ -26,8 +26,11 @@ import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
 import { TicketBaseKeys, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { getState } from '@/v4/modules/store';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
+import { selectFederationById } from '../federations/federations.selectors';
+import { selectSelectedTicketId } from './card/ticketsCard.selectors';
 
 export const modelIsFederation = (modelId: string) => !!FederationsHooksSelectors.selectFederationById(modelId);
 
@@ -157,8 +160,9 @@ export const isResourceId = (str) => {
 
 export const getImgSrc = (imgData) => {
 	const { teamspace, project, containerOrFederation } = useParams();
-	const isFederation = modelIsFederation(containerOrFederation);
-	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const state = getState();
+	const isFederation = !!selectFederationById(state, containerOrFederation);
+	const ticketId = selectSelectedTicketId(state);
 
 	if (!imgData) return '';
 	if (isResourceId(imgData)) {
