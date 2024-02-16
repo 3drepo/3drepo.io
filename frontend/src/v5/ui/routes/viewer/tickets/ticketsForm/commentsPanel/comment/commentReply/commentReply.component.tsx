@@ -21,6 +21,7 @@ import { TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketCo
 import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CommentMarkDown, CommentImage, OriginalMessage, CameraIcon } from './commentReply.styles';
 import { CommentAuthor } from '../commentNonMessageContent/commentNonMessageContent.styles';
 import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
@@ -56,6 +57,8 @@ export const CommentReply = ({
 		isFederation,
 	));
 
+	const openImagesModal = () => DialogsActionsDispatchers.open('images', { images: imagesSrcs });
+
 	if (!message && images.length === 0) return (<></>);
 
 	return (
@@ -69,7 +72,7 @@ export const CommentReply = ({
 					</CommentMarkDown>
 				</OriginalMessage>
 			</div>
-			{images.length > 0 && (<CommentImage src={imagesSrcs[0]} extraCount={images.length - 1} />)}
+			{images.length > 0 && (<CommentImage src={imagesSrcs[0]} extraCount={images.length - 1} onClick={openImagesModal} />)}
 		</QuotedMessage>
 	);
 };
