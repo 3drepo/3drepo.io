@@ -27,28 +27,22 @@ export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>>
 	commentAge: string;
 	metadata?: TicketCommentReplyMetadata;
 	isCurrentUserComment?: boolean;
+	onDeleteImage?: (index) => void;
+	onUploadImages?: () => void;
 };
 export const BasicComment = ({
 	author,
-	images,
-	children,
 	message,
 	commentAge,
-	metadata,
-	isCurrentUserComment,
 	createdAt,
 	updatedAt,
+	className,
 	...props
 }: BasicCommentProps) => {
 	const isEdited = updatedAt && (createdAt !== updatedAt);
 	return (
-		<CommentContainer {...props}>
-			<CommentNonMessageContent
-				images={images}
-				author={author}
-				metadata={metadata}
-				isCurrentUserComment={isCurrentUserComment}
-			/>
+		<CommentContainer className={className}>
+			<CommentNonMessageContent {...props} />
 			{isEdited && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			{message && (<CommentMarkDown>{message}</CommentMarkDown>)}
 			<CommentAge>{commentAge}</CommentAge>

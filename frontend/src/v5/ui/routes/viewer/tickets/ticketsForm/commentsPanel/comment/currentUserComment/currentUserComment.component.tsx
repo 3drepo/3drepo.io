@@ -21,6 +21,12 @@ import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { uploadFile } from '@controls/fileUploader/uploadFile';
+import { convertFileToImageSrc, getSupportedImageExtensions } from '@controls/fileUploader/imageFile.helper';
+import { imageIsTooBig } from '@/v5/store/tickets/comments/ticketComments.helpers';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { formatMessage } from '@/v5/services/intl';
+import { clientConfigService } from '@/v4/services/clientConfig';
 import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
 import { Comment, CommentWithButtonsContainer } from './currentUserComment.styles';
 import { EditComment } from './editComment/editComment.component';
@@ -50,17 +56,46 @@ export const CurrentUserComment = ({
 	const [isEditMode, setIsEditMode] = useState(false);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 
+	const onDeleteImage = (index) => onEdit(_id, message, images.toSpliced(index, 1));
+
+	const onUploadImages = async () => {
+		const files = await uploadFile(getSupportedImageExtensions(), true) as File[];
+		const imagesToUpload = [];
+		for (const file of files) {
+			if (!imageIsTooBig(file)) {
+				imagesToUpload.push(await convertFileToImageSrc(file) as string);
+			}
+		}
+		onEdit(_id, message, images.concat(imagesToUpload));
+		const imagesTooBigCount = files.length - imagesToUpload.length;
+		if (imagesTooBigCount) {
+			DialogsActionsDispatchers.open('warning', {
+				title: formatMessage({
+					defaultMessage: 'Max file size exceeded',
+					id: 'comment.uploadImages.error.tooBig.title',
+				}, { imagesTooBigCount }),
+				message: formatMessage({
+					defaultMessage: `
+						{imagesTooBigCount} {imagesTooBigCount, plural, one {file was} other {files were}} too big and could not be uploaded.
+						The max file size is {maxFileSize}`,
+					id: 'comment.uploadImages.error.tooBig.message',
+				}, { imagesTooBigCount, maxFileSize: clientConfigService.resourceUploadSizeLimit }),
+			});
+		}
+	};
+	const imagesEditingFunctions = { onDeleteImage, onUploadImages };
+
 	if (deleted) return (<DeletedComment author={author} />);
 
 	if (isEditMode) {
 		return (
 			<EditComment
-				_id={_id}
 				message={message}
 				images={images}
 				author={author}
 				metadata={metadata}
-				onEdit={onEdit}
+				onEditMessage={(newMessage) => onEdit(_id, newMessage, images)}
+				{...imagesEditingFunctions}
 				onClose={() => setIsEditMode(false)}
 			/>
 		);
@@ -85,6 +120,7 @@ export const CurrentUserComment = ({
 				message={message}
 				images={images}
 				metadata={metadata}
+				{...(!readOnly ? imagesEditingFunctions : {})}
 				{...props}
 			/>
 		</CommentWithButtonsContainer>
