@@ -59,6 +59,7 @@ const ticketTemplatePropSchema = {
 			name: helpers.stringDef('Name of the prop', 'Floor'),
 			type: helpers.stringDef('Property type', propTypes.ONE_OF, Object.values(propTypes)),
 			deprecated: helpers.boolDef('Denotes if this prop is no longer in use', false),
+			immutable: helpers.boolDef('Denotes if this prop is immutable', false),
 			required: helpers.boolDef('If this prop is required (default: false)', true),
 			values: helpers.arrayDef(`list of possible values (only applicable if type is ${propTypes.ONE_OF} or ${propTypes.MANY_OF}`, helpers.stringDef(), ['Level 1', 'Level 2', 'Basement']),
 		},
