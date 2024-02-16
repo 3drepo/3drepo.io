@@ -20,6 +20,9 @@ import styled from 'styled-components';
 
 export const BaseInfoContainer = styled.div`
 	min-width: 0;
+	gap: 5px;
+    display: flex;
+    flex-flow: column;
 `;
 
 export const Id = styled.div`
@@ -34,12 +37,14 @@ export const Title = styled(TextOverflow)`
 	font-size: 12px;
 	line-height: 12px;
 	height: 12px;
-	padding: 8px 0;
+	min-height: 12px;
+	padding: 3px 0;
 	width: fit-content;
 	max-width: 100%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	flex-grow: 0;
 `;
 
 

@@ -32,7 +32,7 @@ export const Container = styled.div<{ lines: number }>`
 	text-overflow: ellipsis;
 	
 	${({ lines }) => lines > 1 && css`
-		height: ${lines}em;
+		max-height: ${1.1 * lines}em;
 		@supports (-webkit-line-clamp: ${lines}) {
 			white-space: normal;
 			display: -webkit-box;

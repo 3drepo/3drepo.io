@@ -41,13 +41,8 @@ export const TicketItemBaseInfo = ({ number, type, title, properties }) => {
 					{title}
 				</Highlight>
 			</Title>
-			<CreationInfo
-				owner={owner}
-				createdAt={createdAt}
-			/>
-			<Description>
-				{description}
-			</Description>
+			<CreationInfo owner={owner} createdAt={createdAt} />
+			{ description && <Description>{description}</Description>}
 		</BaseInfoContainer>
 	);
 };
