@@ -90,6 +90,7 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 
 	const centerSelectedThumbnail = () => {
 		if (!imageRef.current) return;
+		// @ts-ignore
 		imageRef.current.scrollIntoView({ behavior: 'instant', inline: 'center' });
 	};
 

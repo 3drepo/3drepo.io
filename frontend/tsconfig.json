@@ -4,7 +4,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "module": "commonjs",
-    "target": "esnext",
+    "target": "es6",
     "types": [
       "react",
       "react-dom",
@@ -16,7 +16,6 @@
     "lib": [
       "es2015",
       "es2019",
-	  "es2023",
       "dom",
       "es2020.string",
       "es2021.string",

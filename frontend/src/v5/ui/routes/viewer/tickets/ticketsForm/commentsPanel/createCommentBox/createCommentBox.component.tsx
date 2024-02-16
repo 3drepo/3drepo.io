@@ -149,6 +149,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 	};
 
 	const deleteImage = (index) => {
+		// @ts-ignore
 		setImagesToUpload(imagesToUpload.toSpliced(index, 1));
 	};
 

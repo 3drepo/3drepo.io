@@ -56,6 +56,7 @@ export const CurrentUserComment = ({
 	const [isEditMode, setIsEditMode] = useState(false);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 
+	// @ts-ignore
 	const onDeleteImage = (index) => onEdit(_id, message, images.toSpliced(index, 1));
 
 	const onUploadImages = async () => {
