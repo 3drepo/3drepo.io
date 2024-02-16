@@ -36,7 +36,6 @@ export type ImagesModalProps = {
 	images: string[];
 	// to use if the image to display is not the first one
 	displayImageIndex?: number;
-	// these will not work as expected when the modal is rendered using ActionDispatcher
 	onUpload?: () => void;
 	onDelete?: (index) => void;
 };
