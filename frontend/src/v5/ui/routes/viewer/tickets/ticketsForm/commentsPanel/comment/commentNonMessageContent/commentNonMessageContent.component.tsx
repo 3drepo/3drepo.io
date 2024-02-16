@@ -16,30 +16,34 @@
  */
 
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 import { CommentImages } from '../commentImages/commentImages.component';
-import { CommentAuthor, SingleImage, CommentImagesContainer } from './commentNonMessageContent.styles';
+import { CommentAuthor } from './commentNonMessageContent.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
+import { useState } from 'react';
+import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
+import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
 
 export type CommentNonMessageContentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
 	metadata?: TicketCommentReplyMetadata;
 	isCurrentUserComment?: boolean;
+	onUploadImages?: () => void;
+	onDeleteImage?: (index) => void;
 };
 export const CommentNonMessageContent = ({
 	author,
 	images = [],
 	metadata,
 	isCurrentUserComment = true,
+	onUploadImages,
+	onDeleteImage,
 }: CommentNonMessageContentProps) => {
-	const imagesSrc = images.map(getImgSrc);
+	const [displayImageIndex, setDisplayImageIndex] = useState(-1);
+	const modalIsOpen = displayImageIndex !== -1;
+
 	return (
 		<>
 			{images.length === 1 && (
-				<SingleImage
-					src={imagesSrc[0]}
-					onClick={() => DialogsActionsDispatchers.open('images', { images: imagesSrc })}
-				/>
+				<CommentImages images={images} onImageClick={setDisplayImageIndex} />
 			)}
 			{author && (<CommentAuthor>{author}</CommentAuthor>)}
 			{metadata && (
@@ -49,9 +53,17 @@ export const CommentNonMessageContent = ({
 				/>
 			)}
 			{images.length > 1 && (
-				<CommentImagesContainer>
-					<CommentImages images={imagesSrc} />
-				</CommentImagesContainer>
+				<CommentImages images={images} onImageClick={setDisplayImageIndex} />
+			)}
+			{modalIsOpen && (
+				<ImagesModal
+					open
+					images={images.map(getImgSrc)}
+					onClickClose={() => setDisplayImageIndex(-1)}
+					displayImageIndex={displayImageIndex}
+					onUpload={onUploadImages}
+					onDelete={onDeleteImage}
+				/>
 			)}
 		</>
 	);

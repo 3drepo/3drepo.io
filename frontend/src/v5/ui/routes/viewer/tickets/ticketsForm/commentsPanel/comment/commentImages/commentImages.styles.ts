@@ -18,10 +18,6 @@
 import styled from 'styled-components';
 import { CommentImage as CommentImageBase } from '@/v5/ui/routes/viewer/tickets/ticketsForm/commentsPanel/commentImage/commentImage.component';
 
-export const ClickListener = styled.div`
-	display: contents;
-`;
-
 export const FlexContainer = styled.div`
 	display: flex;
 	flex-direction: row;
@@ -40,3 +36,24 @@ export const FlexContainer = styled.div`
 export const CommentImage = styled(CommentImageBase).attrs({
 	variant: 'secondary',
 })``;
+
+
+export const SingleImage = styled(CommentImage)`
+	width: 241px;
+	margin: -10px 0 10px -12px;
+	border-radius: inherit;
+	border-bottom-right-radius: 0;
+	border-bottom-left-radius: 0;
+	cursor: pointer;
+
+	&:is(span) {
+		padding-top: 100%;
+	}
+`;
+
+export const MultiImagesContainer = styled.div`
+	width: 231px;
+	margin-top: -5px;
+	margin-left: -7px;
+	margin-bottom: 3px;
+`;
