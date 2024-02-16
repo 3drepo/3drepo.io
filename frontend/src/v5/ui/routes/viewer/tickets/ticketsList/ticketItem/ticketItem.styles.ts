@@ -85,10 +85,10 @@ export const ImagePlaceholder = styled.div`
 	${({ theme }) => theme.typography.label};
 	color: ${({ theme }) => theme.palette.base.main};
 	display: flex;
-    flex-flow: column;
-    align-items: center;
-    text-align: center;
-    justify-content: center;
+	flex-flow: column;
+	align-items: center;
+	text-align: center;
+	justify-content: center;
 	gap: 4px;
 	line-height: 12px;
 `;

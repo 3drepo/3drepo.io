@@ -21,8 +21,8 @@ import styled from 'styled-components';
 export const BaseInfoContainer = styled.div`
 	min-width: 0;
 	gap: 5px;
-    display: flex;
-    flex-flow: column;
+	display: flex;
+	flex-flow: column;
 `;
 
 export const Id = styled.div`
