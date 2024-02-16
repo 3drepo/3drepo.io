@@ -198,7 +198,7 @@ const filtersToProjection = (filters) => {
 	return projectionObject;
 };
 
-Tickets.getTicketList = (teamspace, project, model, filters = []) => {
+Tickets.getTicketList = (teamspace, project, model, filters = [], updatedSince) => {
 	const { SAFETIBASE, SEQUENCING } = presetModules;
 	const {
 		[SAFETIBASE]: safetibaseProps,
@@ -227,9 +227,7 @@ Tickets.getTicketList = (teamspace, project, model, filters = []) => {
 
 	};
 
-	const sort = { [`properties.${basePropertyLabels.Created_AT}`]: -1 };
-
-	return getAllTickets(teamspace, project, model, projection, sort);
+	return getAllTickets(teamspace, project, model, { projection, updatedSince });
 };
 
 module.exports = Tickets;

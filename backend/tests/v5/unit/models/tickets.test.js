@@ -156,7 +156,7 @@ const testGetAllTickets = () => {
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
 
-			await expect(Ticket.getAllTickets(teamspace, project, model, projection, sort))
+			await expect(Ticket.getAllTickets(teamspace, project, model, { projection, sort }))
 				.resolves.toEqual(expectedOutput);
 
 			expect(fn).toHaveBeenCalledTimes(1);
@@ -164,7 +164,7 @@ const testGetAllTickets = () => {
 				{ teamspace, project, model }, projection, sort);
 		});
 
-		test('Should impose default projection if not provided', async () => {
+		test('Should impose default projection abd sort if not provided', async () => {
 			const expectedOutput = { [generateRandomString()]: generateRandomString() };
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
@@ -174,7 +174,22 @@ const testGetAllTickets = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
-				{ teamspace, project, model }, { teamspace: 0, project: 0, model: 0 }, undefined);
+				{ teamspace, project, model }, { teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 });
+		});
+
+		test('Should impose query for updated since a certain date if it is provided', async () => {
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			const date = new Date();
+			await expect(Ticket.getAllTickets(teamspace, project, model, { updatedSince: date }))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, project, model, [`properties.${basePropertyLabels.UPDATED_AT}`]: { $gt: date } },
+				{ teamspace: 0, project: 0, model: 0 }, { [`properties.${basePropertyLabels.Created_AT}`]: -1 });
 		});
 	});
 };

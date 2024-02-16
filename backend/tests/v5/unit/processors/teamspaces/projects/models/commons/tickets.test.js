@@ -748,7 +748,8 @@ const testGetTicketList = () => {
 		['custom projection (filter with property)', [propertyName], { [`properties.${propertyName}`]: 1 }],
 		['custom projection (filter with module)', [`${moduleName}.${propertyName}`], { [`modules.${moduleName}.${propertyName}`]: 1 }],
 		['custom projection (filter with module and property)', [`${moduleName}.${propertyName}`, propertyName], { [`properties.${propertyName}`]: 1, [`modules.${moduleName}.${propertyName}`]: 1 }],
-	])('Get ticket list', (desc, filter, customProjection) => {
+		['updatedSince provided', [], {}, new Date()],
+	])('Get ticket list', (desc, filter, customProjection, updatedSince) => {
 		test(`Should call getAllTickets in model with ${desc}`, async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
@@ -758,7 +759,7 @@ const testGetTicketList = () => {
 
 			TicketsModel.getAllTickets.mockResolvedValueOnce(expectedOutput);
 
-			await expect(Tickets.getTicketList(teamspace, project, model, filter))
+			await expect(Tickets.getTicketList(teamspace, project, model, filter, updatedSince))
 				.resolves.toEqual(expectedOutput);
 
 			const { SAFETIBASE, SEQUENCING } = presetModules;
@@ -787,7 +788,8 @@ const testGetTicketList = () => {
 			};
 
 			expect(TicketsModel.getAllTickets).toHaveBeenCalledTimes(1);
-			expect(TicketsModel.getAllTickets).toHaveBeenCalledWith(teamspace, project, model, projection, { [`properties.${basePropertyLabels.Created_AT}`]: -1 });
+			expect(TicketsModel.getAllTickets).toHaveBeenCalledWith(teamspace, project, model,
+				{ projection, updatedSince });
 		});
 	});
 };

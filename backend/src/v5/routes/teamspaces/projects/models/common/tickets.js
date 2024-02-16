@@ -89,10 +89,18 @@ const getTicket = (isFed) => async (req, res, next) => {
 
 const getTicketsInModel = (isFed) => async (req, res, next) => {
 	const { teamspace, project, model } = req.params;
+	const { filter, updatedSince: updatedSinceStr } = req.query;
 
 	try {
 		const getTicketList = isFed ? getFedTicketList : getConTicketList;
-		req.tickets = await getTicketList(teamspace, project, model, req.query.filter?.split(','));
+
+		const additionalProps = filter?.split(',');
+
+		const updatedSinceNum = Number(updatedSinceStr);
+
+		const updatedSince = Number.isInteger(updatedSinceNum) ? new Date(updatedSinceNum) : undefined;
+
+		req.tickets = await getTicketList(teamspace, project, model, additionalProps, updatedSince);
 		await next();
 	} catch (err) {
 		// istanbul ignore next
@@ -407,6 +415,12 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *       - name: updatedSince
+	 *         description: only return tickets that have been updated since a certain time (in epoch timestamp)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: number
 	 *       - name: filter
 	 *         description: Comma separated string that defines extra properties to be included in the response
 	 *         in: query
