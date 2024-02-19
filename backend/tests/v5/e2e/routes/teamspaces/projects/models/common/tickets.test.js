@@ -549,16 +549,20 @@ const testGetTicketList = () => {
 				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel() }, false, modelNotFound],
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				['the user does not have access to the federation', { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
-				['the model has no tickets', { ...baseRouteParams, model: modelNoTickets }, true],
-				['the model has tickets', baseRouteParams, true],
-				['the model has tickets (filter)', { ...baseRouteParams, filter }, true],
+				['the model has no tickets', { ...baseRouteParams, model: modelNoTickets }, true, []],
+				['the model has tickets', baseRouteParams, true, model.tickets],
+				['the model has tickets with filter imposed', { ...baseRouteParams, filter }, true, model.tickets],
 			];
 		};
 
-		const sortById = (a, b) => {
-			if (a._id > b._id) return 1;
-			if (b._id > a._id) return -1;
-			return 0;
+		const ticketsById = (tickets) => {
+			const res = {};
+
+			tickets.forEach((ticket) => {
+				res[ticket._id] = ticket;
+			});
+
+			return res;
 		};
 
 		const runTest = (desc, { model, filter, ...routeParams }, success, expectedOutput) => {
@@ -568,29 +572,24 @@ const testGetTicketList = () => {
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 				const res = await agent.get(endpoint).expect(expectedStatus);
 				if (success) {
-					const tickets = model.tickets ?? [];
+					expect(res.body.tickets.length).toBe(expectedOutput.length);
+
 					if (res.body?.tickets?.length) {
-						expect(res.body.tickets.length).toBe(tickets.length);
-						tickets.sort(sortById);
-						res.body.tickets.sort(sortById);
-						res.body.tickets.forEach((tickOut, ind) => {
-							const { _id, title, type } = tickets[ind];
+						const ticketByIdMap = ticketsById(expectedOutput);
+						res.body.tickets.forEach((tickOut) => {
+							const { _id, title, type } = ticketByIdMap[tickOut._id];
 							expect(tickOut).toEqual(expect.objectContaining({ _id, title, type }));
 						});
 
 						if (filter) {
-							const filterParts = filter.split(',');
-							const propName = filterParts[0];
-							const moduleName = filterParts[1].split('.')[0];
-							const moduleProp = filterParts[1].split('.')[1];
+							const [propName, moduleFilter] = filter.split(',');
+							const [moduleName, moduleProp] = moduleFilter.split('.');
 
 							const ticketContainingProps = res.body.tickets
 								.filter((t) => t.properties[propName] && t.modules[moduleName][moduleProp]);
 
 							expect(ticketContainingProps).toBeDefined();
 						}
-					} else {
-						expect(res.body).toEqual({ tickets });
 					}
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
