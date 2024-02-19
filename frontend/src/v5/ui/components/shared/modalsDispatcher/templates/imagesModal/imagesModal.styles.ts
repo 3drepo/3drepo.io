@@ -123,8 +123,8 @@ export const Image = styled.img.attrs({
 	border-radius: 10px;
 `;
 
-export const ImageContainer = styled(FlexRow)<{ $fullscreen?: boolean }>`
-	height: calc(100vh - ${({ $fullscreen }) => $fullscreen ? 210 : 106}px);
+export const ImageContainer = styled(FlexRow)<{ $isCarousel?: boolean }>`
+	height: calc(100vh - ${({ $isCarousel }) => $isCarousel ? 210 : 106}px);
 	width: 100%;
 `;
 

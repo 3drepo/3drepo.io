@@ -151,7 +151,7 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 						<PreviousButton onClick={() => changeImageIndex(-1)} disabled={imageIndex === 0}>
 							<ChevronIcon />
 						</PreviousButton>
-						<ImageContainer $fullscreen>
+						<ImageContainer $isCarousel>
 							<Image src={images[imageIndex]} key={images[imageIndex]} />
 						</ImageContainer>
 						<NextButton onClick={() => changeImageIndex(1)} disabled={imageIndex === (imagesLength - 1)}>
