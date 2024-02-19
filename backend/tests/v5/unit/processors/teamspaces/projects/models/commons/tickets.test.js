@@ -793,7 +793,7 @@ const testGetTicketList = () => {
 			let sort;
 			if (sortBy) {
 				const sortOrder = sortDesc || sortDesc === undefined ? -1 : 1;
-				sort = { [sortBy]: sortOrder };
+				sort = { [`properties.${sortBy}`]: sortOrder };
 			}
 
 			expect(TicketsModel.getAllTickets).toHaveBeenCalledTimes(1);

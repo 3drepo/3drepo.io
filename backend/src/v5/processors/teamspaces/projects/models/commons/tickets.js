@@ -186,6 +186,7 @@ const propertyToFilterName = (property) => {
 		if (moduleName && moduleProp) {
 			return `modules.${property}`;
 		}
+		return undefined;
 	}
 	return `properties.${property}`;
 };
@@ -195,7 +196,8 @@ const filtersToProjection = (filters) => {
 
 	filters.forEach((name) => {
 		if (name) {
-			projectionObject[propertyToFilterName(name)] = 1;
+			const nameSanitised = propertyToFilterName(name);
+			if (nameSanitised) projectionObject[nameSanitised] = 1;
 		}
 	});
 
@@ -233,7 +235,7 @@ Tickets.getTicketList = (teamspace, project, model,
 	};
 	let sort;
 
-	if (sortBy) {
+	if (sortBy && propertyToFilterName(sortBy)) {
 		sort = { [propertyToFilterName(sortBy)]: sortDesc ? -1 : 1 };
 	}
 
