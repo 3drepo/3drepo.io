@@ -41,9 +41,6 @@ export const Title = styled(TextOverflow)`
 	padding: 3px 0;
 	width: fit-content;
 	max-width: 100%;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
 	flex-grow: 0;
 `;
 

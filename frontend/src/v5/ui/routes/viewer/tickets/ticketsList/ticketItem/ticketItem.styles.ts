@@ -59,7 +59,6 @@ export const ThumbnailContainer = styled(OverlappingContainer)`
 
 export const HoverState = styled.div`
 	background-color: ${({ theme }) => theme.palette.secondary.main};
-	z-index: 1;
 	opacity: 0;
 	&:hover {
 		opacity: 0.75;

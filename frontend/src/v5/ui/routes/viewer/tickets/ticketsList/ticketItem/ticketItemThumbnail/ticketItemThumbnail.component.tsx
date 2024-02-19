@@ -50,16 +50,16 @@ export const TicketItemThumbnail = ({ ticket }) => {
 
 	return (
 		<ThumbnailContainer>
-			{hasViewpoint && (
-				<HoverState onClick={goToViewpoint}>
-					<ViewpointIcon />
-				</HoverState>
-			)}
 			{thumbnailSrc ? ( <Thumbnail src={thumbnailSrc} loading="lazy" /> ) : (
 				<ImagePlaceholder>
 					<ImageIcon />
 					<FormattedMessage id="ticketItem.thumbnail.placeholderImageText" defaultMessage="Image Unavailable" />
 				</ImagePlaceholder>
+			)}
+			{hasViewpoint && (
+				<HoverState onClick={goToViewpoint}>
+					<ViewpointIcon />
+				</HoverState>
 			)}
 		</ThumbnailContainer>
 	);
