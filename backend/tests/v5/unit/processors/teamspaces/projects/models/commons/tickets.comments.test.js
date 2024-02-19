@@ -144,17 +144,17 @@ const testGetCommentsByTicket = () => {
 			const ticket = generateRandomString();
 
 			const expectedOutput = generateRandomString();
-			const projection = { [generateRandomString()]: generateRandomString() };
-			const sort = { [generateRandomString()]: generateRandomString() };
+			const sortBy = generateRandomString();
+			const sort = { [sortBy]: 1 };
 
 			CommentsModel.getCommentsByTicket.mockResolvedValueOnce(expectedOutput);
 
-			await expect(Comments.getCommentsByTicket(teamspace, project, model, ticket, projection, sort))
+			await expect(Comments.getCommentsByTicket(teamspace, project, model, ticket, { sortBy, sortDesc: false }))
 				.resolves.toEqual(expectedOutput);
 
 			expect(CommentsModel.getCommentsByTicket).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.getCommentsByTicket).toHaveBeenCalledWith(teamspace, project, model,
-				ticket, projection, sort);
+				ticket, { sort });
 		});
 	});
 };

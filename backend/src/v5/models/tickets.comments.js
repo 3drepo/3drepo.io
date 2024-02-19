@@ -48,7 +48,7 @@ TicketComments.getCommentById = async (teamspace, project, model, ticket, _id,
 
 TicketComments.getCommentsByTicket = (teamspace, project, model, ticket,
 	{
-		projection = { teamspace: 0, project: 0, model: 0, ticket: 0, history: 0 },
+		projection = { teamspace: 0, project: 0, model: 0, ticket: 0 },
 		updatedSince,
 		sort = { createdAt: -1 },
 	} = {}) => {
