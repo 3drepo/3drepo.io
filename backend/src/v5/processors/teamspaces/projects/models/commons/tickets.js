@@ -180,19 +180,22 @@ Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource
 
 Tickets.getTicketById = getTicketById;
 
+const propertyToFilterName = (property) => {
+	if (property.includes('.')) {
+		const [moduleName, moduleProp] = property.split('.');
+		if (moduleName && moduleProp) {
+			return `modules.${property}`;
+		}
+	}
+	return `properties.${property}`;
+};
+
 const filtersToProjection = (filters) => {
 	const projectionObject = {};
 
 	filters.forEach((name) => {
 		if (name) {
-			if (name.includes('.')) {
-				const [moduleName, moduleProp] = name.split('.');
-				if (moduleName && moduleProp) {
-					projectionObject[`modules.${name}`] = 1;
-				}
-			} else {
-				projectionObject[`properties.${name}`] = 1;
-			}
+			projectionObject[propertyToFilterName(name)] = 1;
 		}
 	});
 
@@ -231,7 +234,7 @@ Tickets.getTicketList = (teamspace, project, model,
 	let sort;
 
 	if (sortBy) {
-		sort = { [sortBy]: sortDesc ? -1 : 1 };
+		sort = { [propertyToFilterName(sortBy)]: sortDesc ? -1 : 1 };
 	}
 
 	return getAllTickets(teamspace, project, model, deleteIfUndefined({ projection, updatedSince, sort }));

@@ -89,7 +89,7 @@ const getTicket = (isFed) => async (req, res, next) => {
 
 const getTicketsInModel = (isFed) => async (req, res, next) => {
 	const { teamspace, project, model } = req.params;
-	const { filter, updatedSince: updatedSinceStr, sortBy, sortDesc = true } = req.query;
+	const { filter, updatedSince: updatedSinceStr, sortBy, sortDesc = 'true' } = req.query;
 
 	try {
 		const getTicketList = isFed ? getFedTicketList : getConTicketList;
@@ -101,7 +101,7 @@ const getTicketsInModel = (isFed) => async (req, res, next) => {
 		const updatedSince = Number.isInteger(updatedSinceNum) ? new Date(updatedSinceNum) : undefined;
 
 		req.tickets = await getTicketList(teamspace, project, model,
-			{ filters, updatedSince, sortBy, sortDesc });
+			{ filters, updatedSince, sortBy, sortDesc: sortDesc === 'true' });
 		await next();
 	} catch (err) {
 		// istanbul ignore next

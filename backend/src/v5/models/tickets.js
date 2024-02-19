@@ -125,7 +125,7 @@ Tickets.getTicketById = async (
 	return ticket;
 };
 
-Tickets.getAllTickets = (
+Tickets.getAllTickets = async (
 	teamspace,
 	project,
 	model,
@@ -141,7 +141,11 @@ Tickets.getAllTickets = (
 	if (updatedSince) {
 		query[`properties.${basePropertyLabels.UPDATED_AT}`] = { $gt: updatedSince };
 	}
-	return DbHandler.find(teamspace, TICKETS_COL, query, projection, sort);
+
+	const res = await DbHandler.find(teamspace, TICKETS_COL, query, projection, sort);
+	console.log(sort);
+	console.log(res.map(({ properties }) => properties['Created at'].toString()));
+	return res;
 };
 
 module.exports = Tickets;
