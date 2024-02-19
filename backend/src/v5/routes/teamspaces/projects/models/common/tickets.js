@@ -42,6 +42,7 @@ const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../processors/teamspaces/projects');
 const { getUserFromSession } = require('../../../../../utils/sessions');
+const { isString } = require('../../../../../utils/helper/typeCheck');
 const { templates } = require('../../../../../utils/responseCodes');
 
 const createTicket = (isFed) => async (req, res) => {
@@ -101,7 +102,7 @@ const getTicketsInModel = (isFed) => async (req, res, next) => {
 		const updatedSince = Number.isInteger(updatedSinceNum) ? new Date(updatedSinceNum) : undefined;
 
 		req.tickets = await getTicketList(teamspace, project, model,
-			{ filters, updatedSince, sortBy, sortDesc: sortDesc === 'true' });
+			{ filters, updatedSince, sortBy: isString(sortBy) ? sortBy : undefined, sortDesc: sortDesc === 'true' });
 		await next();
 	} catch (err) {
 		// istanbul ignore next
