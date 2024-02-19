@@ -53,7 +53,7 @@ export const CommentImages = ({ images, onImageClick, ...props }: CommentImagesP
 				</FlexContainer>
 				<FlexContainer>
 					{(imagesSrcs.slice(2, 5)).map((image, index) => (
-						<CommentImage onClick={() => onImageClick(index)} src={image} key={image} {...props} />
+						<CommentImage onClick={() => onImageClick(index + 2)} src={image} key={image} {...props} />
 					))}
 				</FlexContainer>
 			</MultiImagesContainer>
