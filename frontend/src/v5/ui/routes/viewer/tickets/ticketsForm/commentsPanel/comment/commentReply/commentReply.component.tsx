@@ -72,7 +72,7 @@ export const CommentReply = ({
 					</CommentMarkDown>
 				</OriginalMessage>
 			</div>
-			{images.length > 0 && (<CommentImage src={imagesSrcs[0]} extraCount={images.length - 1} onClick={openImagesModal} />)}
+			{images.length > 0 && (<CommentImage src={imagesSrcs[0]} extraCount={images.length} onClick={openImagesModal} />)}
 		</QuotedMessage>
 	);
 };
