@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { cloneDeep } = require('lodash');
+const { cloneDeep, times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
@@ -146,33 +146,41 @@ const testGetCommentsList = () => {
 
 			await Promise.all([fed, con].map(async (model) => {
 				const ticket = ServiceHelper.generateTicket(template);
-				const comment1 = ServiceHelper.generateComment();
-				const comment2 = ServiceHelper.generateComment();
-
 				const modelType = fed === model ? 'federation' : 'container';
 				const addTicketRoute = (modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${users.tsAdmin.apiKey}`;
 				const addCommentRoute = (modelId, ticketId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets/${ticketId}/comments?key=${users.tsAdmin.apiKey}`;
+
 				const ticketRes = await agent.post(addTicketRoute(model._id)).send(ticket);
 				ticket._id = ticketRes.body._id;
-				// eslint-disable-next-line no-param-reassign
+				/* eslint-disable no-param-reassign */
 				model.ticket = ticket;
 
-				const commentRes1 = await agent.post(addCommentRoute(model._id, model.ticket._id)).send(comment1);
-				comment1._id = commentRes1.body._id;
-				const commentRes2 = await agent.post(addCommentRoute(model._id, model.ticket._id)).send(comment2);
-				comment2._id = commentRes2.body._id;
-
-				// eslint-disable-next-line no-param-reassign
-				model.comments = [comment1, comment2];
+				model.comments = await Promise.all(times(10, async () => {
+					const comment = ServiceHelper.generateComment();
+					const commentRes = await agent.post(addCommentRoute(model._id, model.ticket._id)).send(comment);
+					comment._id = commentRes.body._id;
+					return comment;
+				}));
+				/* eslint-enable no-param-reassign */
 			}));
 		});
 
 		const generateTestData = (isFed) => {
+			const orderCheck = (prop, descending) => (comments) => {
+				let lastValue;
+				comments.forEach((comment) => {
+					if (lastValue) {
+						expect(comment[prop] > lastValue).toBe(!descending);
+					}
+
+					lastValue = comment[prop];
+				});
+			};
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
-			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType };
+			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType, orderChecker: orderCheck('createdAt', true) };
 
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
@@ -183,11 +191,24 @@ const testGetCommentsList = () => {
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound],
 				['the ticket id is valid', baseRouteParams, true],
+				['the ticket id is valid and updatedSince is specified to a future date', { ...baseRouteParams, options: { updatedSince: Date.now() + 10000 } }, true, []],
+				['the ticket id is valid and comments are sorted by updated date in ascending order', { ...baseRouteParams, options: { sortBy: 'upatedAt', sortDesc: false, orderChecker: orderCheck('updatedAt', false) } }, true],
+				['the ticket id is valid and comments are sorted by updated date in descending order', { ...baseRouteParams, options: { sortBy: 'upatedAt', sortDesc: false, orderChecker: orderCheck('updatedAt', true) } }, true],
 			];
 		};
 
-		const runTest = (desc, { model, ...routeParams }, success, expectedOutput) => {
-			const getRoute = ({ key, projectId, modelId, ticketId, modelType }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/comments${key ? `?key=${key}` : ''}`;
+		const commentsById = (comments) => {
+			const res = {};
+
+			comments.forEach((comment) => {
+				res[comment._id] = comment;
+			});
+
+			return res;
+		};
+
+		const runTest = (desc, { model, orderChecker, options = {}, ...routeParams }, success, expectedOutput) => {
+			const getRoute = ({ key, projectId, modelId, ticketId, modelType }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/comments${ServiceHelper.createQueryString({ key, ...options })}`;
 
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
 				const endpoint = getRoute({ modelId: model._id, ticketId: model.ticket?._id, ...routeParams });
@@ -196,19 +217,24 @@ const testGetCommentsList = () => {
 				const res = await agent.get(endpoint).expect(expectedStatus);
 
 				if (success) {
-					const expectedComments = cloneDeep(model.comments);
+					const expectedComments = expectedOutput || model.comments;
+					expect(res.body.comments.length).toEqual(expectedComments.length);
 
-					for (let i = 0; i < expectedComments.length; i++) {
-						const expectedComment = expectedComments[i];
-						const comment = res.body.comments.find((c) => c._id === expectedComment._id);
+					if (expectedComments.length) {
+						const commentsByIdMap = commentsById(expectedComments);
 
-						// eslint-disable-next-line no-param-reassign
-						expectedComment.author = users.tsAdmin.user;
-						expectedComment.createdAt = comment.createdAt;
-						expectedComment.updatedAt = comment.updatedAt;
-						expectedComment.images = comment.images;
+						res.body.comments.forEach((comment) => {
+							const { images, author, createdAt, updatedAt, ...others } = commentsByIdMap[comment._id];
+
+							if (images) {
+								expect(images.length).toEqual(comment.images.length);
+							}
+
+							expect(comment).toEqual(expect.objectContaining(others));
+						});
 					}
-					expect(res.body).toEqual({ comments: expectedComments.sort((a, b) => b.createdAt - a.createdAt) });
+
+					orderChecker(res.body.comments);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}

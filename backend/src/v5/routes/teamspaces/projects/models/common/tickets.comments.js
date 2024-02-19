@@ -51,6 +51,7 @@ const getComment = (isFed) => async (req, res, next) => {
 
 	try {
 		const getCommentById = isFed ? getFedComment : getConComment;
+
 		req.commentData = await getCommentById(teamspace, project, model, ticket, comment);
 		await next();
 	} catch (err) {
@@ -60,12 +61,18 @@ const getComment = (isFed) => async (req, res, next) => {
 };
 
 const getAllComments = (isFed) => async (req, res, next) => {
-	const { params } = req;
+	const { params, query } = req;
 	const { teamspace, project, model, ticket } = params;
+	const { updatedSince: updatedSinceStr, sortBy, sortDesc = 'true' } = query;
 
 	try {
 		const getCommentsByTicket = isFed ? getFedComments : getConComments;
-		const comments = await getCommentsByTicket(teamspace, project, model, ticket);
+
+		const updatedSinceNum = Number(updatedSinceStr);
+		const updatedSince = Number.isInteger(updatedSinceNum) ? new Date(updatedSinceNum) : undefined;
+
+		const comments = await getCommentsByTicket(teamspace, project, model, ticket,
+			{ updatedSince, sortBy, sortDesc: sortDesc === 'true' });
 		req.comments = comments;
 		await next();
 	} catch (err) {
@@ -275,6 +282,24 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *       - name: updatedSince
+	 *         description: only return comments that have been updated since a certain time (in epoch timestamp)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: number
+	 *       - name: sortBy
+	 *         description: specify what property the comments should be sorted by (default is created at)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: string
+	 *       - name: sortDesc
+	 *         description: specify whether the comments should be sorted in descending order (default is true)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: boolean
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"

@@ -271,7 +271,16 @@ db.createScene = (teamspace, modelId, rev, nodes, meshMap) => Promise.all([
 	FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
 
 ]);
+ServiceHelper.createQueryString = (options) => {
+	const keys = Object.keys(deleteIfUndefined(options, true));
 
+	if (keys.length) {
+		const optionsArr = keys.map((key) => `${key}=${options[key]}`);
+		return `?${optionsArr.join('&')}`;
+	}
+
+	return '';
+};
 ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 ServiceHelper.fileExists = (filePath) => {
 	let flag = true;

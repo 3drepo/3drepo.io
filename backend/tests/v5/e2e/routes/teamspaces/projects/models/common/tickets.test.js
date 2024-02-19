@@ -25,7 +25,6 @@ const { serialiseTicketTemplate } = require('../../../../../../../../src/v5/midd
 const { basePropertyLabels, propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 const { updateOne, findOne } = require(`${src}/handler/db`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
-const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
@@ -543,17 +542,6 @@ const testGetTicketList = () => {
 			return res;
 		};
 
-		const createQueryString = (options) => {
-			const keys = Object.keys(deleteIfUndefined(options, true));
-
-			if (keys.length) {
-				const optionsArr = keys.map((key) => `${key}=${options[key]}`);
-				return `?${optionsArr.join('&')}`;
-			}
-
-			return '';
-		};
-
 		const generateTestData = (isFed) => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
@@ -566,11 +554,11 @@ const testGetTicketList = () => {
 
 			const checkTicketList = (ascending = true) => (tickets) => {
 				// check the list is sorted by created at, ascending order
-				let lastTicketTime = ascending ? 0 : Number.MAX_VALUE;
+				let lastTicketTime;
 
 				for (const entry of tickets) {
 					const createdAt = entry.properties[basePropertyLabels.CREATED_AT];
-					expect(ascending ? lastTicketTime < createdAt : lastTicketTime > createdAt).toBeTruthy();
+					if (lastTicketTime) expect(lastTicketTime < createdAt).toBe(ascending);
 					lastTicketTime = createdAt;
 				}
 			};
@@ -593,7 +581,7 @@ const testGetTicketList = () => {
 
 		const runTest = (desc, { model, options = {}, checkTicketList, ...routeParams }, success, expectedOutput) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
-				const getRoute = ({ key, projectId, modelType, modelId }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets${createQueryString({ key, ...options })}`;
+				const getRoute = ({ key, projectId, modelType, modelId }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets${ServiceHelper.createQueryString({ key, ...options })}`;
 				const endpoint = getRoute({ ...routeParams, modelId: model._id });
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 				const res = await agent.get(endpoint).expect(expectedStatus);
