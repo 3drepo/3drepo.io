@@ -74,7 +74,7 @@ export const CurrentUserComment = ({
 				title: formatMessage({
 					defaultMessage: 'Max file size exceeded',
 					id: 'comment.uploadImages.error.tooBig.title',
-				}, { imagesTooBigCount }),
+				}),
 				message: formatMessage({
 					defaultMessage: `
 						{imagesTooBigCount} {imagesTooBigCount, plural, one {file was} other {files were}} too big and could not be uploaded.
