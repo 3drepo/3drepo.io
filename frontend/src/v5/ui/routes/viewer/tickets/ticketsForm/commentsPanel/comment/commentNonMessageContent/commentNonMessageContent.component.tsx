@@ -17,7 +17,9 @@
 
 import { useState } from 'react';
 import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
-import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
+import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { useParams } from 'react-router-dom';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { CommentImages } from '../commentImages/commentImages.component';
 import { CommentAuthor } from './commentNonMessageContent.styles';
@@ -37,13 +39,21 @@ export const CommentNonMessageContent = ({
 	onUploadImages,
 	onDeleteImage,
 }: CommentNonMessageContentProps) => {
+	const { teamspace, project, containerOrFederation } = useParams();
 	const [displayImageIndex, setDisplayImageIndex] = useState(-1);
 	const modalIsOpen = displayImageIndex !== -1;
+	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const isFederation = modelIsFederation(containerOrFederation);
+
+	const imgsSrcs = images.map((img) => {
+		if (!isResourceId(img)) return img;
+		return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, img, isFederation);
+	});
 
 	return (
 		<>
 			{images.length === 1 && (
-				<CommentImages images={images} onImageClick={setDisplayImageIndex} />
+				<CommentImages images={imgsSrcs} onImageClick={setDisplayImageIndex} />
 			)}
 			{author && (<CommentAuthor>{author}</CommentAuthor>)}
 			{metadata && (
@@ -53,12 +63,12 @@ export const CommentNonMessageContent = ({
 				/>
 			)}
 			{images.length > 1 && (
-				<CommentImages images={images} onImageClick={setDisplayImageIndex} />
+				<CommentImages images={imgsSrcs} onImageClick={setDisplayImageIndex} />
 			)}
 			{modalIsOpen && (
 				<ImagesModal
 					open
-					images={images.map(getImgSrc)}
+					images={imgsSrcs}
 					onClickClose={() => setDisplayImageIndex(-1)}
 					displayImageIndex={displayImageIndex}
 					onUpload={onUploadImages}
