@@ -570,6 +570,7 @@ const testGetTicketList = () => {
 				if (success) {
 					const tickets = model.tickets ?? [];
 					if (res.body?.tickets?.length) {
+						expect(res.body.tickets.length).toBe(tickets.length);
 						tickets.sort(sortById);
 						res.body.tickets.sort(sortById);
 						res.body.tickets.forEach((tickOut, ind) => {

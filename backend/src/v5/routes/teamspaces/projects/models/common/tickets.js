@@ -89,18 +89,19 @@ const getTicket = (isFed) => async (req, res, next) => {
 
 const getTicketsInModel = (isFed) => async (req, res, next) => {
 	const { teamspace, project, model } = req.params;
-	const { filter, updatedSince: updatedSinceStr } = req.query;
+	const { filter, updatedSince: updatedSinceStr, sortBy, sortDesc = true } = req.query;
 
 	try {
 		const getTicketList = isFed ? getFedTicketList : getConTicketList;
 
-		const additionalProps = filter?.split(',');
+		const filters = filter?.split(',');
 
 		const updatedSinceNum = Number(updatedSinceStr);
 
 		const updatedSince = Number.isInteger(updatedSinceNum) ? new Date(updatedSinceNum) : undefined;
 
-		req.tickets = await getTicketList(teamspace, project, model, additionalProps, updatedSince);
+		req.tickets = await getTicketList(teamspace, project, model,
+			{ filters, updatedSince, sortBy, sortDesc });
 		await next();
 	} catch (err) {
 		// istanbul ignore next
@@ -421,6 +422,18 @@ const establishRoutes = (isFed) => {
 	 *         required: false
 	 *         schema:
 	 *           type: number
+	 *       - name: sortBy
+	 *         description: specify what property the tickets should be sorted by (default is created at)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: string
+	 *       - name: sortDesc
+	 *         description: specify whether the tickets should be sorted in descending order (default is true)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: boolean
 	 *       - name: filter
 	 *         description: Comma separated string that defines extra properties to be included in the response
 	 *         in: query

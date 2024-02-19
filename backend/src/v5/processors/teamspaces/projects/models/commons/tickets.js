@@ -29,6 +29,7 @@ const { createResponseCode, templates } = require('../../../../../utils/response
 const { getFileWithMetaAsStream, removeFile, storeFile } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
+const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { isUUID } = require('../../../../../utils/helper/typeCheck');
@@ -198,7 +199,8 @@ const filtersToProjection = (filters) => {
 	return projectionObject;
 };
 
-Tickets.getTicketList = (teamspace, project, model, filters = [], updatedSince) => {
+Tickets.getTicketList = (teamspace, project, model,
+	{ filters = [], updatedSince, sortBy, sortDesc = true }) => {
 	const { SAFETIBASE, SEQUENCING } = presetModules;
 	const {
 		[SAFETIBASE]: safetibaseProps,
@@ -226,8 +228,13 @@ Tickets.getTicketList = (teamspace, project, model, filters = [], updatedSince) 
 		[`modules.${SEQUENCING}.${seqProps.END_TIME}`]: 1,
 
 	};
+	let sort;
 
-	return getAllTickets(teamspace, project, model, { projection, updatedSince });
+	if (sortBy) {
+		sort = { [sortBy]: sortDesc ? -1 : 1 };
+	}
+
+	return getAllTickets(teamspace, project, model, deleteIfUndefined({ projection, updatedSince, sort }));
 };
 
 module.exports = Tickets;
