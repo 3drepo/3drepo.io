@@ -242,7 +242,7 @@ const testGetCommentsList = () => {
 			});
 		};
 
-		// describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData(true))('Federations', runTest);
 		describe.each(generateTestData())('Containers', runTest);
 	});
 };
