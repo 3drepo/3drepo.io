@@ -25,16 +25,16 @@ import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tick
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import ImageIcon from '@assets/icons/outlined/image_thin-outlined.svg';
 import { FormattedMessage } from 'react-intl';
+import { AdditionalProperties } from '../../../tickets.constants';
 
 export const TicketItemThumbnail = ({ ticket }) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 
-	const defaultView = get(ticket.properties, 'Default View');
-	const defaultImage = get(ticket.properties, 'Default Image');
+	const defaultView = get(ticket.properties, AdditionalProperties.DEFAULT_VIEW);
 	const hasViewpoint = has(defaultView, 'camera');
 	
-	const resourceId =  defaultView?.screenshot ||  defaultImage;
+	const resourceId =  defaultView?.screenshot ||  get(ticket.properties, AdditionalProperties.DEFAULT_IMAGE);
 	const thumbnailSrc = resourceId ?
 		getTicketResourceUrl(teamspace, project, containerOrFederation, ticket._id, resourceId, isFederation) : null;
 
