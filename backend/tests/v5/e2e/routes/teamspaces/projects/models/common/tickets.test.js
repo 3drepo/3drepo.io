@@ -204,7 +204,7 @@ const testAddTicket = () => {
 	describe('Add ticket', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const template = ServiceHelper.generateTemplate();
-		const statusValues = ServiceHelper.generateCusomStatusValues();
+		const statusValues = ServiceHelper.generateCustomStatusValues();
 
 		const templateWithAllModulesAndPresetEnums = {
 			...ServiceHelper.generateTemplate(),
