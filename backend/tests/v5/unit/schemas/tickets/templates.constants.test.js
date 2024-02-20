@@ -17,13 +17,13 @@
 
 const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
-const { generateCusomStatusValues } = require('../../../helper/services');
+const { generateCustomStatusValues, outOfOrderArrayEqual } = require('../../../helper/services');
 
 const TemplateConstants = require(`${src}/schemas/tickets/templates.constants`);
 
 const testGetApplicableDefaultProperties = () => {
 	describe('Get applicable default properties', () => {
-		const statusValues = generateCusomStatusValues();
+		const statusValues = generateCustomStatusValues();
 		const customStatus = { values: statusValues, default: statusValues[0].name };
 
 		const basicProp = [{ name: 'Description', type: TemplateConstants.propTypes.LONG_TEXT },
@@ -37,7 +37,8 @@ const testGetApplicableDefaultProperties = () => {
 			{ name: 'Due Date', type: TemplateConstants.propTypes.DATE }];
 
 		test('Should only return the basic properties if none of the optional flags are configured', () => {
-			expect(TemplateConstants.getApplicableDefaultProperties({})).toEqual(basicProp);
+			const results = TemplateConstants.getApplicableDefaultProperties({});
+			outOfOrderArrayEqual(results, basicProp);
 		});
 
 		test('Should return the basic properties with custom status if config has a status defined', () => {
@@ -46,18 +47,18 @@ const testGetApplicableDefaultProperties = () => {
 			statusProp.values = statusValues.map((v) => v.name);
 			statusProp.default = customStatus.default;
 
-			expect(TemplateConstants.getApplicableDefaultProperties({ status: customStatus }))
-				.toEqual([...customStatusProps]);
+			outOfOrderArrayEqual(TemplateConstants.getApplicableDefaultProperties({ status: customStatus }),
+				customStatusProps);
 		});
 
 		test('Should return the basic and issue properties if issueProperties is set to true', () => {
-			expect(TemplateConstants.getApplicableDefaultProperties({ issueProperties: true }))
-				.toEqual([...basicProp, ...issueProp]);
+			outOfOrderArrayEqual(TemplateConstants.getApplicableDefaultProperties({ issueProperties: true }),
+				[...basicProp, ...issueProp]);
 		});
 
 		test('Should return the basic, issue and pin properties if issueProperties  and pin is set to true', () => {
-			expect(TemplateConstants.getApplicableDefaultProperties({ issueProperties: true, pin: true }))
-				.toEqual([...basicProp, ...issueProp, { name: 'Pin', type: TemplateConstants.propTypes.COORDS }]);
+			outOfOrderArrayEqual(TemplateConstants.getApplicableDefaultProperties({ issueProperties: true, pin: true }),
+				[...basicProp, ...issueProp, { name: 'Pin', type: TemplateConstants.propTypes.COORDS }]);
 		});
 	});
 };

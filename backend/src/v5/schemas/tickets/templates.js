@@ -16,7 +16,7 @@
  */
 
 const {
-	defaultProperties,
+	basePropertyLabels,
 	getApplicableDefaultProperties,
 	presetEnumValues,
 	presetModules,
@@ -166,8 +166,6 @@ const configSchema = Yup.object().shape({
 	}).default(undefined),
 }).default({});
 
-const defaultPropertyNames = defaultProperties().map(({ name }) => name);
-
 const pinMappingTest = (val, context) => {
 	const template = TemplateSchema.generateFullSchema(val);
 	const activeProperties = new Set();
@@ -211,7 +209,7 @@ const schema = Yup.object().shape({
 	config: configSchema,
 	deprecated: defaultFalse,
 	properties: propertyArray.test('No name clash', 'Cannot have the same name as a default property',
-		(val) => val.every(({ name }) => !defaultPropertyNames.includes(name))),
+		(val) => val.every(({ name }) => !Object.values(basePropertyLabels).includes(name))),
 	modules: Yup.array().default([]).of(moduleSchema).test((arr, context) => {
 		const modNames = new Set();
 		for (const { name, type } of arr) {

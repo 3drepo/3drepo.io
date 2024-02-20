@@ -284,6 +284,12 @@ ServiceHelper.fileExists = (filePath) => {
 	}
 	return flag;
 };
+
+ServiceHelper.outOfOrderArrayEqual = (arr1, arr2) => {
+	expect(arr1.length).toEqual(arr2.length);
+	expect(arr1).toEqual(expect.arrayContaining(arr2));
+};
+
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
@@ -296,7 +302,7 @@ ServiceHelper.generateRandomRvtId = () => Math.floor(Math.random() * 10000);
 
 ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
 
-ServiceHelper.generateCusomStatusValues = () => times(statusTypes.length, (i) => ({
+ServiceHelper.generateCustomStatusValues = () => times(statusTypes.length, (i) => ({
 	name: ServiceHelper.generateRandomString(),
 	type: statusTypes[i],
 }));

@@ -17,15 +17,15 @@
 
 const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateCusomStatusValues } = require('../../../helper/services');
+const { generateRandomString, generateCustomStatusValues } = require('../../../helper/services');
 
 const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
-const { propTypes, getApplicableDefaultProperties, presetModules, presetEnumValues, presetModulesProperties, defaultProperties } = require(`${src}/schemas/tickets/templates.constants`);
+const { propTypes, getApplicableDefaultProperties, presetModules, presetEnumValues, presetModulesProperties, basePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
 
 const testValidate = () => {
-	const statusValues = generateCusomStatusValues();
+	const statusValues = generateCustomStatusValues();
 
 	const nameTests = [
 		['the name is too long', { name: generateRandomString(121), code: generateRandomString(3) }, false],
@@ -69,7 +69,7 @@ const testValidate = () => {
 			config: {
 				pin: { color: {
 					property: {
-						name: generateRandomString(),
+						name: 'fixedName',
 					},
 					mapping: [
 						{
@@ -86,7 +86,10 @@ const testValidate = () => {
 					],
 				} },
 			},
-			properties: undefined,
+			properties: [{
+				name: 'fixedName',
+				type: propTypes.TEXT,
+			}],
 			modules: undefined,
 		}, true],
 		['pin with a colour logic defined but no default specified', {
@@ -139,8 +142,8 @@ const testValidate = () => {
 			config: {
 				pin: { color: {
 					property: {
-						name: generateRandomString(),
-						module: generateRandomString(),
+						name: 'name',
+						module: 'mod',
 					},
 					mapping: [
 						{
@@ -158,7 +161,17 @@ const testValidate = () => {
 				} },
 			},
 			properties: undefined,
-			modules: undefined,
+			modules: [
+				{
+					name: 'mod',
+					properties: [
+						{
+							name: 'name',
+							type: propTypes.TEXT,
+						},
+					],
+				},
+			],
 		}, true],
 
 		['pin with an invalid colour', {
@@ -268,7 +281,12 @@ const testValidate = () => {
 		}, true],
 		['properties is an empty array', { name: generateRandomString(), code: generateRandomString(3), properties: [] }, true],
 		['properties is of the wrong type', { name: generateRandomString(), code: generateRandomString(3), properties: 'a' }, false],
-		['property name is used by a default property', { name: generateRandomString(), code: generateRandomString(3), properties: [defaultProperties[0]] }, false],
+		['property name is used by a default property', { name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: basePropertyLabels.STATUS,
+				type: propTypes.TEXT,
+			}] }, false],
 		['modules is an empty array', { name: generateRandomString(), code: generateRandomString(3), modules: [] }, true],
 		['modules is of the wrong type', { name: generateRandomString(), code: generateRandomString(3), modules: 'a' }, false],
 	];
