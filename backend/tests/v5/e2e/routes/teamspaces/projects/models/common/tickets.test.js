@@ -204,6 +204,8 @@ const testAddTicket = () => {
 	describe('Add ticket', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const template = ServiceHelper.generateTemplate();
+		const statusValues = ServiceHelper.generateCustomStatusValues();
+
 		const templateWithAllModulesAndPresetEnums = {
 			...ServiceHelper.generateTemplate(),
 			config: {
@@ -213,6 +215,7 @@ const testAddTicket = () => {
 				defaultView: true,
 				defaultImage: true,
 				pin: true,
+				status: { values: statusValues, default: statusValues[0].name },
 			},
 			properties: Object.values(presetEnumValues).map((values) => ({
 				name: ServiceHelper.generateRandomString(),

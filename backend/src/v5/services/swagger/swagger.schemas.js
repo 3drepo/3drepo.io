@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { fieldOperators, valueOperators } = require('../../models/metadata.rules.constants');
-const { presetModules, propTypes } = require('../../schemas/tickets/templates.constants');
+const { presetModules, propTypes, statusTypes } = require('../../schemas/tickets/templates.constants');
 const { deleteIfUndefined } = require('../../utils/helper/objects');
 const { getSwaggerComponents } = require('../../utils/responseCodes');
 
@@ -49,6 +49,26 @@ Schemas.schemas.errorCodes = {
 	description: 'Error codes: <br/><br/>* `1` - A non SSO account with the same email already exists<br/><br/>* `2` - An SSO account witht he same email already exists<br/><br/>* `3` - The user is non SSO<br/><br/>* `4` - The user was not found<br/><br/>* `5` - Unknown',
 };
 
+const ticketTemplateStatusConfig = {
+	description: 'Custom status configuration',
+	type: 'object',
+	required: ['values', 'default'],
+	properties: {
+		values: {
+			type: 'array',
+			items: {
+				type: 'object',
+				required: ['name', 'type'],
+				properties: {
+					name: helpers.stringDef('Name of the custom status', 'Awaiting triage'),
+					type: helpers.stringDef('Status type', statusTypes[0], statusTypes),
+				},
+			},
+		},
+		default: helpers.stringDef('Default value', 'Awaiting triage'),
+	},
+};
+
 const ticketTemplatePropSchema = {
 	description: 'Properties within a ticket or module',
 	type: 'array',
@@ -73,7 +93,7 @@ const ticketTemplateModSchema = {
 		type: 'object',
 		properties: {
 			name: helpers.stringDef('Name of the module', 'BCF Reference'),
-			type: helpers.stringDef('Preset module name', undefined, undefined, Object.values(presetModules)),
+			type: helpers.stringDef('Preset module name', undefined, Object.values(presetModules)),
 			deprecated: helpers.boolDef('Denotes if this module is no longer in use', false),
 			properties: ticketTemplatePropSchema,
 		},
@@ -88,6 +108,7 @@ const ticketTemplateConfigSchema = {
 		defaultView: helpers.boolDef('Include a default view with image (default: false)'),
 		defaultImage: helpers.boolDef('Include a default image - this will be ignored if defaultView is set to true (default: false)'),
 		pin: helpers.boolDef('Include a pin (default: false)'),
+		status: ticketTemplateStatusConfig,
 	},
 };
 

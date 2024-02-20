@@ -17,12 +17,16 @@
 
 const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString, generateCustomStatusValues } = require('../../../helper/services');
+
+const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
-const { propTypes, getApplicableDefaultProperties, presetModules, presetEnumValues, presetModulesProperties, defaultProperties } = require(`${src}/schemas/tickets/templates.constants`);
+const { propTypes, getApplicableDefaultProperties, presetModules, presetEnumValues, presetModulesProperties, basePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
 
 const testValidate = () => {
+	const statusValues = generateCustomStatusValues();
+
 	const nameTests = [
 		['the name is too long', { name: generateRandomString(121), code: generateRandomString(3) }, false],
 		['the name is an empty string', { name: '', code: generateRandomString(3) }, false],
@@ -65,7 +69,7 @@ const testValidate = () => {
 			config: {
 				pin: { color: {
 					property: {
-						name: generateRandomString(),
+						name: 'fixedName',
 					},
 					mapping: [
 						{
@@ -82,7 +86,10 @@ const testValidate = () => {
 					],
 				} },
 			},
-			properties: undefined,
+			properties: [{
+				name: 'fixedName',
+				type: propTypes.TEXT,
+			}],
 			modules: undefined,
 		}, true],
 		['pin with a colour logic defined but no default specified', {
@@ -135,8 +142,8 @@ const testValidate = () => {
 			config: {
 				pin: { color: {
 					property: {
-						name: generateRandomString(),
-						module: generateRandomString(),
+						name: 'name',
+						module: 'mod',
 					},
 					mapping: [
 						{
@@ -154,7 +161,17 @@ const testValidate = () => {
 				} },
 			},
 			properties: undefined,
-			modules: undefined,
+			modules: [
+				{
+					name: 'mod',
+					properties: [
+						{
+							name: 'name',
+							type: propTypes.TEXT,
+						},
+					],
+				},
+			],
 		}, true],
 
 		['pin with an invalid colour', {
@@ -175,9 +192,101 @@ const testValidate = () => {
 			properties: undefined,
 			modules: undefined,
 		}, false],
+		['status with no values', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: { default: generateRandomString() },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status with empty values array', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: { values: [], default: generateRandomString() },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status with no default', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: { values: statusValues },
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status that has a value with no name', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: [...statusValues, { type: statusTypes[0] }],
+					default: statusValues[0].name,
+				},
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status that has a value with no type', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: [...statusValues, { name: generateRandomString() }],
+					default: statusValues[0].name,
+				},
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status that has a value with invalid type', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: [...statusValues, { name: generateRandomString(), type: generateRandomString() }],
+					default: statusValues[0].name,
+				},
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status that has a default which does not exist in values', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: statusValues,
+					default: generateRandomString(),
+				},
+			},
+			properties: undefined,
+			modules: undefined,
+		}, false],
+		['status that is valid', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				status: {
+					values: statusValues,
+					default: statusValues[0].name,
+				},
+			},
+			properties: undefined,
+			modules: undefined,
+		}, true],
 		['properties is an empty array', { name: generateRandomString(), code: generateRandomString(3), properties: [] }, true],
 		['properties is of the wrong type', { name: generateRandomString(), code: generateRandomString(3), properties: 'a' }, false],
-		['property name is used by a default property', { name: generateRandomString(), code: generateRandomString(3), properties: [defaultProperties[0]] }, false],
+		['property name is used by a default property', { name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: basePropertyLabels.STATUS,
+				type: propTypes.TEXT,
+			}] }, false],
 		['modules is an empty array', { name: generateRandomString(), code: generateRandomString(3), modules: [] }, true],
 		['modules is of the wrong type', { name: generateRandomString(), code: generateRandomString(3), modules: 'a' }, false],
 	];

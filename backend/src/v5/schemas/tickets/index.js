@@ -18,7 +18,6 @@
 const { UUIDToString, stringToUUID } = require('../../utils/helper/uuids');
 const {
 	basePropertyLabels,
-	defaultProperties,
 	modulePropertyLabels,
 	presetEnumValues,
 	presetModules,
@@ -317,10 +316,10 @@ Tickets.deserialiseUUIDsInTicket = (ticket, template) => {
 	return caster.cast(ticket);
 };
 
+// NOTE: this function assumes the full template is being passed in - i.e. generateFullSchema has been called.
 Tickets.serialiseTicket = (ticket, fullTemplate, stripDeprecated) => {
 	const caster = generateCastObject({
 		...fullTemplate,
-		properties: fullTemplate.properties.concat(defaultProperties),
 	}, stripDeprecated);
 	return caster.cast(ticket);
 };

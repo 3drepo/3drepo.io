@@ -102,8 +102,11 @@ const ticketAdded = async ({ teamspace, project, model, ticket }) => {
 		isFederationCheck(teamspace, model),
 		getTemplateById(teamspace, ticket.type),
 	]);
+
+	const fullTemplate = generateFullSchema(template);
+
 	const event = isFed ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
-	const serialisedTicket = serialiseTicket(ticket, template);
+	const serialisedTicket = serialiseTicket(ticket, fullTemplate);
 	await createModelMessage(event, serialisedTicket, teamspace, project, model);
 };
 
