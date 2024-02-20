@@ -164,7 +164,7 @@ const testGetAllTickets = () => {
 				{ teamspace, project, model }, projection, sort);
 		});
 
-		test('Should impose default projection abd sort if not provided', async () => {
+		test('Should impose default projection and sort if not provided', async () => {
 			const expectedOutput = { [generateRandomString()]: generateRandomString() };
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);

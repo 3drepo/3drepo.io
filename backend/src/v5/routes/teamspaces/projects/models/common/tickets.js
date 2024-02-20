@@ -42,8 +42,8 @@ const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../processors/teamspaces/projects');
 const { getUserFromSession } = require('../../../../../utils/sessions');
-const { isString } = require('../../../../../utils/helper/typeCheck');
 const { templates } = require('../../../../../utils/responseCodes');
+const { validateListSortAndFilter } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/utils');
 
 const createTicket = (isFed) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
@@ -90,19 +90,11 @@ const getTicket = (isFed) => async (req, res, next) => {
 
 const getTicketsInModel = (isFed) => async (req, res, next) => {
 	const { teamspace, project, model } = req.params;
-	const { filter, updatedSince: updatedSinceStr, sortBy, sortDesc = 'true' } = req.query;
 
 	try {
 		const getTicketList = isFed ? getFedTicketList : getConTicketList;
 
-		const filters = filter?.split(',');
-
-		const updatedSinceNum = Number(updatedSinceStr);
-
-		const updatedSince = Number.isInteger(updatedSinceNum) ? new Date(updatedSinceNum) : undefined;
-
-		req.tickets = await getTicketList(teamspace, project, model,
-			{ filters, updatedSince, sortBy: isString(sortBy) ? sortBy : undefined, sortDesc: sortDesc === 'true' });
+		req.tickets = await getTicketList(teamspace, project, model, req.listOptions);
 		await next();
 	} catch (err) {
 		// istanbul ignore next
@@ -485,7 +477,7 @@ const establishRoutes = (isFed) => {
 	 *                         description: ticket modules and their properties
 	 *
 	 */
-	router.get('/', hasReadAccess, getTicketsInModel(isFed), serialiseTicketList);
+	router.get('/', hasReadAccess, validateListSortAndFilter, getTicketsInModel(isFed), serialiseTicketList);
 
 	/**
 	 * @openapi

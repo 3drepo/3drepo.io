@@ -44,6 +44,7 @@ const { checkTicketExists } = require('../../../../../middleware/dataConverter/i
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
+const { validateListSortAndFilter } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/utils');
 
 const getComment = (isFed) => async (req, res, next) => {
 	const { params } = req;
@@ -61,18 +62,13 @@ const getComment = (isFed) => async (req, res, next) => {
 };
 
 const getAllComments = (isFed) => async (req, res, next) => {
-	const { params, query } = req;
+	const { params, listOptions } = req;
 	const { teamspace, project, model, ticket } = params;
-	const { updatedSince: updatedSinceStr, sortBy, sortDesc = 'true' } = query;
 
 	try {
 		const getCommentsByTicket = isFed ? getFedComments : getConComments;
 
-		const updatedSinceNum = Number(updatedSinceStr);
-		const updatedSince = Number.isInteger(updatedSinceNum) ? new Date(updatedSinceNum) : undefined;
-
-		const comments = await getCommentsByTicket(teamspace, project, model, ticket,
-			{ updatedSince, sortBy, sortDesc: sortDesc === 'true' });
+		const comments = await getCommentsByTicket(teamspace, project, model, ticket, listOptions);
 		req.comments = comments;
 		await next();
 	} catch (err) {
@@ -348,7 +344,7 @@ const establishRoutes = (isFed) => {
 	 *                     example: 1632821119000
 	 *                     description: Timestamp of when the comment was last updated
 	 */
-	router.get('', hasReadAccess, checkTicketExists, getAllComments(isFed), serialiseCommentList);
+	router.get('', hasReadAccess, checkTicketExists, validateListSortAndFilter, getAllComments(isFed), serialiseCommentList);
 
 	/**
 	 * @openapi

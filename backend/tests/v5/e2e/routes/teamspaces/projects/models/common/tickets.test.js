@@ -574,8 +574,8 @@ const testGetTicketList = () => {
 				['the model has tickets', baseRouteParams, true, model.tickets],
 				['the model has tickets with filter imposed', { ...baseRouteParams, options: { filter } }, true, model.tickets],
 				['the model returning only tickets updated since now', { ...baseRouteParams, options: { updatedSince: Date.now() + 1000000 } }, true, []],
-				['the model returning tickets sorted by created at in ascending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.CREATED_AT, sortDesc: false }, checkTicketList: checkTicketList() }, true, model.tickets],
-				['the model returning tickets sorted by created at in descending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.CREATED_AT, sortDesc: true }, checkTicketList: checkTicketList(false) }, true, model.tickets],
+				['the model returning tickets sorted by updated at in ascending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: false }, checkTicketList: checkTicketList() }, true, model.tickets],
+				['the model returning tickets sorted by updated at in descending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: true }, checkTicketList: checkTicketList(false) }, true, model.tickets],
 			];
 		};
 

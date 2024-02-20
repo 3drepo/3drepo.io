@@ -116,7 +116,7 @@ const testGetCommentsByTicket = () => {
 				{ createdAt: -1 });
 		});
 
-		test('should return impose a filter on updatedAt if updatedSince is specified', async () => {
+		test('should impose a filter on updatedAt if updatedSince is specified', async () => {
 			const expectedOutput = [
 				{ [generateRandomString()]: generateRandomString() },
 				{ [generateRandomString()]: generateRandomString() },
