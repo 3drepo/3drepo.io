@@ -21,7 +21,7 @@ import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { FormattedMessage } from 'react-intl';
 import { UserPopover } from '../popoverCircles/userPopoverCircle/userPopover/userPopover.component';
 import { PopoverContainer } from '../popoverCircles/userPopoverCircle/userPopover/userPopover.styles';
-import { CreationInfoContainer, CreationInfoValue, TruncateName } from './creationInfo.styles';
+import { CreationInfoContainer, NoShrinkLabel, ShrinkValue, NoShrinkValue } from './creationInfo.styles';
 
 type ICreationInfo = {
 	owner: string;
@@ -38,39 +38,45 @@ export const CreationInfo = ({
 }: ICreationInfo) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const ownerDetails = UsersHooksSelectors.selectUser(teamspace, owner);
+	const hasUpdateInfo = updatedAt && updatedAt !== createdAt;
 
 	const Username = () => (
-		<HoverPopover anchor={(props) => <TruncateName {...props}>{`${ownerDetails.firstName} ${ownerDetails.lastName}`}</TruncateName>}>
-			<UserPopover user={ownerDetails} />
-		</HoverPopover>
+		<ShrinkValue>
+			<HoverPopover anchor={(props) => <span {...props}>{`${ownerDetails.firstName} ${ownerDetails.lastName}`}</span>}>
+				<UserPopover user={ownerDetails} />
+			</HoverPopover>
+		</ShrinkValue>
 	);
 	const CreationDate = () => (
-		<HoverPopover anchor={(props) => <CreationInfoValue {...props}>{formatShortDateTime(createdAt)}</CreationInfoValue>}>
-			<PopoverContainer>
-				{formatLongDateTime(createdAt)}
-			</PopoverContainer>
-		</HoverPopover>
+		<NoShrinkValue>
+			<HoverPopover anchor={(props) => <span {...props}>{formatShortDateTime(createdAt)}</span>}>
+				<PopoverContainer>
+					{formatLongDateTime(createdAt)}
+				</PopoverContainer>
+			</HoverPopover>
+			{hasUpdateInfo && <FormattedMessage id="creationInfo.fullStop" defaultMessage="." />}
+		</NoShrinkValue>
 	);
 	const LastUpdated = () => (
-		<HoverPopover anchor={(props) => <CreationInfoValue {...props}>{getRelativeTime(updatedAt)}</CreationInfoValue>}>
-			<PopoverContainer>
-				{formatLongDateTime(updatedAt)}
-			</PopoverContainer>
-		</HoverPopover>
+		<NoShrinkValue>
+			<HoverPopover anchor={(props) => <span {...props}>{getRelativeTime(updatedAt)}</span>}>
+				<PopoverContainer>
+					{formatLongDateTime(updatedAt)}
+				</PopoverContainer>
+			</HoverPopover>
+		</NoShrinkValue>
 	);
 	return (
 		<CreationInfoContainer className={className}>
-			<FormattedMessage
-				id="creationInfo.creation"
-				defaultMessage="Created by {username} on {creationDate}"
-				values={{ username: <Username />, creationDate: <CreationDate /> }}
-			/>
-			{updatedAt && updatedAt !== createdAt && (
-				<FormattedMessage
-					id="creationInfo.lastUpdated"
-					defaultMessage=". Updated {lastUpdated}"
-					values={{ lastUpdated: <LastUpdated /> }}
-				/>
+			<NoShrinkLabel><FormattedMessage id="creationInfo.createdBy" defaultMessage="Created by" /></NoShrinkLabel>
+			<Username />
+			<NoShrinkLabel><FormattedMessage id="creationInfo.on" defaultMessage="on" /></NoShrinkLabel>
+			<CreationDate />
+			{hasUpdateInfo && (
+				<>
+					<NoShrinkLabel><FormattedMessage id="creationInfo.updatedAt" defaultMessage="Updated" /></NoShrinkLabel>
+					<LastUpdated />
+				</>
 			)}
 		</CreationInfoContainer>
 	);

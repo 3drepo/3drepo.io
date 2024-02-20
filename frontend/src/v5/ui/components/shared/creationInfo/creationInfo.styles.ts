@@ -17,24 +17,30 @@
 
 import styled from 'styled-components';
 
-export const CreationInfoContainer = styled.div`
-	display: inline-block;
-	${({ theme }) => theme.typography.caption};
-	color: ${({ theme }) => theme.palette.base.main};
-	line-height: 10px;
+export const NoShrinkLabel = styled.span`
+	flex-grow: 1;
+	flex-shrink: 0;
 `;
 
-export const CreationInfoValue = styled.span`
+export const NoShrinkValue = styled(NoShrinkLabel)`
 	color: ${({ theme }) => theme.palette.secondary.main};
-	text-decoration: none;
 `;
 
-export const TruncateName = styled(CreationInfoValue)`
-	display: inline-block;
-	text-decoration: underline;
-	max-width: 65px;
+export const ShrinkValue = styled(NoShrinkValue)`
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;
 	vertical-align: bottom;
+	flex-grow: 0;
+	flex-shrink: 1;
+`;
+
+export const CreationInfoContainer = styled.div`
+	width: fit-content;
+	display: flex;
+	flex-direction: rows;
+	${({ theme }) => theme.typography.caption};
+	color: ${({ theme }) => theme.palette.base.main};
+	line-height: 10px;
+	gap: 3px;
 `;

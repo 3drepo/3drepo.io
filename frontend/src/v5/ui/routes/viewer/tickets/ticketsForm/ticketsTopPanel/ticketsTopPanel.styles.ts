@@ -30,7 +30,7 @@ export const TopPanel = styled.div`
 `;
 
 export const CreationInfo = styled(BaseCreationInfo)`
-	margin-left: 10px;
+	margin: 0 10px;
 `;
 
 export const DescriptionProperty = styled.div`
