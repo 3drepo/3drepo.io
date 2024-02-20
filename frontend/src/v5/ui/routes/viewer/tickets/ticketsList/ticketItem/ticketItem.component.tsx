@@ -86,7 +86,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 				</Highlight>
 			</Title>
 			<ChipList>
-				{status && <Chip {...STATUS_MAP[status]} variant="outlined" />}
+				<Chip {...STATUS_MAP[status]} variant="outlined" />
 				{riskLevel && <Chip {...RISK_LEVELS_MAP[riskLevel]} variant="filled" />}
 				{treatmentStatus && <Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />}
 			</ChipList>

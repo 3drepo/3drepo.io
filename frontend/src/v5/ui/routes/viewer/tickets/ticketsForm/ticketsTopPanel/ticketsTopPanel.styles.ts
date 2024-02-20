@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
 import { ErrorTextGap } from '../ticketsForm.styles';
 
 export const TopPanel = styled.div`
@@ -36,5 +37,20 @@ export const DescriptionProperty = styled.div`
 	margin: 10px 0;
 	&${ErrorTextGap} {
 		margin: 0;
+	}
+`;
+
+export const FlexContainer = styled(InputContainer)`
+	display: grid;
+	grid-template-columns: 98fr 65fr 125fr;
+	margin-top: 10px;
+
+	& > *:not(:last-child) {
+		border-right: solid 1px ${({ theme }) => theme.palette.base.lightest};
+		padding-right: 10px;
+	}
+
+	& > *:not(:first-child) {
+		padding-left: 10px;
 	}
 `;

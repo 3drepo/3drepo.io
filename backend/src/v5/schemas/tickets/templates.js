@@ -61,6 +61,7 @@ const propSchema = Yup.object().shape({
 	type: Yup.string().oneOf(Object.values(propTypes)).required(),
 	deprecated: defaultFalse,
 	required: defaultFalse,
+	immutable: defaultFalse,
 	values: Yup.mixed().when('type', (val, schema) => {
 		if (val === propTypes.MANY_OF || val === propTypes.ONE_OF) {
 			return schema.test('Values check', 'Property values must of be an array of values or the name of a preset', (value) => {

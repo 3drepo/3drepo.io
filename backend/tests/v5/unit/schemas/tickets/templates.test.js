@@ -289,6 +289,13 @@ const testValidate = () => {
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 			}] }, true],
+		['property is immutable', { name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				immutable: true,
+			}] }, true],
 		['property name contains fullstop', { name: generateRandomString(),
 			code: generateRandomString(3),
 			properties: [{

@@ -33,7 +33,7 @@ const GROUP_OPTIONS = {
 	[IssueProperties.ASSIGNEES]: formatMessage({ id: 'groupBy.assignees', defaultMessage: 'Assignees' }),
 	[IssueProperties.DUE_DATE]: formatMessage({ id: 'groupBy.dueDate', defaultMessage: 'Due date' }),
 	[IssueProperties.PRIORITY]: formatMessage({ id: 'groupBy.priority', defaultMessage: 'Priority' }),
-	[IssueProperties.STATUS]: formatMessage({ id: 'groupBy.status', defaultMessage: 'Status' }),
+	[BaseProperties.STATUS]: formatMessage({ id: 'groupBy.status', defaultMessage: 'Status' }),
 	[SafetibaseProperties.LEVEL_OF_RISK]: formatMessage({ id: 'groupBy.levelOfRisk', defaultMessage: 'Level of risk' }),
 	[SafetibaseProperties.TREATMENT_STATUS]: formatMessage({ id: 'groupBy.treatmentStatus', defaultMessage: 'Treatment status' }),
 };
@@ -53,7 +53,6 @@ export const GroupByFormSelect = (props) => {
 				IssueProperties.ASSIGNEES,
 				IssueProperties.DUE_DATE,
 				IssueProperties.PRIORITY,
-				IssueProperties.STATUS,
 			].includes(groupBy)
 		) return false;
 		if (!hasSafetibase && [SafetibaseProperties.LEVEL_OF_RISK, SafetibaseProperties.TREATMENT_STATUS].includes(groupBy)) return false;
@@ -91,8 +90,8 @@ export const GroupByFormSelect = (props) => {
 			<MenuItem value={IssueProperties.PRIORITY} key={IssueProperties.PRIORITY} hidden={!hasProperties}>
 				{GROUP_OPTIONS[IssueProperties.PRIORITY]}
 			</MenuItem>
-			<MenuItem value={IssueProperties.STATUS} key={IssueProperties.STATUS} hidden={!hasProperties}>
-				{GROUP_OPTIONS[IssueProperties.STATUS]}
+			<MenuItem value={BaseProperties.STATUS} key={BaseProperties.STATUS}>
+				{GROUP_OPTIONS[BaseProperties.STATUS]}
 			</MenuItem>
 			<MenuItem value={SafetibaseProperties.LEVEL_OF_RISK} key={SafetibaseProperties.LEVEL_OF_RISK} hidden={!hasSafetibase}>
 				{GROUP_OPTIONS[SafetibaseProperties.LEVEL_OF_RISK]}

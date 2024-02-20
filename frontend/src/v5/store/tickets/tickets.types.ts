@@ -38,6 +38,7 @@ export interface ITicket {
 	type: string,
 	properties: Properties,
 	modules?: Record<string, Properties>,
+	modelId?: string,
 }
 
 export interface TemplateModule {
@@ -194,8 +195,6 @@ export type OverridesDicts = {
 	overrides: MeshIdColorDict,
 	transparencies: MeshIdTransparencyDict,
 };
-
-export type TicketWithModelIdAndName = ITicket & { modelId: string; modelName: string };
 
 export type ITicketsFilters = {
 	complete: boolean,
