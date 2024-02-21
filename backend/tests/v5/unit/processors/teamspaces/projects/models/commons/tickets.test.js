@@ -751,7 +751,7 @@ const testGetTicketList = () => {
 		['updatedSince provided', [], {}, new Date()],
 		['sortBy is provided', [], {}, undefined, { sortBy: generateRandomString() }],
 		['sortDesc is provided', [], {}, undefined, { sortDesc: false }],
-		['sortBy and sortDesc is provided', [], {}, undefined, { sortBy: generateRandomString(), sortDesc: false }],
+		['sortBy and sortDesc is provided', [], {}, undefined, { sortBy: generateRandomString(), sortDesc: true }],
 	])('Get ticket list', (desc, filters, customProjection, updatedSince, { sortBy, sortDesc } = {}) => {
 		test(`Should call getAllTickets in model with ${desc}`, async () => {
 			const teamspace = generateRandomString();
