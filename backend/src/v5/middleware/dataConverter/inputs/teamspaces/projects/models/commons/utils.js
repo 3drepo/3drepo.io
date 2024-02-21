@@ -26,10 +26,14 @@ Utils.validateListSortAndFilter = async (req, res, next) => {
 	req.listOptions = {};
 	if (req.query) {
 		const schema = Yup.object({
-			filter: Yup.array().of(Yup.string().min(1)).min(1).transform((v, val) => (val?.length ? val.split(',') : v))
+			filters: Yup.array().of(Yup.string().min(1)).min(1).transform((v, val) => (val?.length ? val.split(',') : v))
 				.default(undefined),
 			sortBy: Yup.string().min(1),
-			sortDesc: Yup.boolean(),
+			sortDesc: Yup.boolean().when('sortBy', {
+				is: (val) => val === undefined,
+				then: (s) => s.strip(),
+				otherwise: (s) => s,
+			}),
 			updatedSince: types.date,
 		});
 		try {

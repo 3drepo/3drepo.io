@@ -29,9 +29,9 @@ const UtilsMiddleware = require(`${src}/middleware/dataConverter/inputs/teamspac
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const testValidateListSortAndFilter = () => {
-	const validQuery = { filter: generateRandomString(), sortBy: generateRandomString(), sortDesc: 'true', updatedSince: Date.now().toString() };
+	const validQuery = { filters: generateRandomString(), sortBy: generateRandomString(), sortDesc: 'true', updatedSince: Date.now().toString() };
 	const validQueryCasted = {
-		filter: [validQuery.filter],
+		filters: [validQuery.filters],
 		sortBy: validQuery.sortBy,
 		sortDesc: validQuery.sortDesc !== 'false',
 		updatedSince: new Date(Number(validQuery.updatedSince)),
@@ -41,9 +41,10 @@ const testValidateListSortAndFilter = () => {
 		['No query object', undefined, true, {}],
 		['query object has unrelated fields', { [generateRandomString()]: generateRandomString() }, true, {}],
 		['query object has valid fields', { [generateRandomString()]: generateRandomString(), ...validQuery }, true, validQueryCasted],
-		['filter is empty', { filter: '' }, false],
-		['filter is full of commas', { filter: ',,,' }, false],
+		['filters is empty', { filters: '' }, false],
+		['filters is full of commas', { filters: ',,,' }, false],
 		['sortBy is empty', { sortBy: '' }, false],
+		['sortBy is empty but sortDesc is provided', { sortDesc: true }, true, {}],
 		['updatedSince is not a valid timestamp', { updatedSince: generateRandomString() }, false],
 	])('Validate list sort and filter options', (desc, query, success, expectedOutput) => {
 		test(`Should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
