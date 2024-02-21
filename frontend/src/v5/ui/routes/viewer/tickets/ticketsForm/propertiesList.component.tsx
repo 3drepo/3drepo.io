@@ -24,7 +24,7 @@ import { useFormContext } from 'react-hook-form';
 import { TicketProperty } from './properties/properties.helper';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { ErrorTextGap, PropertiesListContainer } from './ticketsForm.styles';
-import { SEQUENCING_END_TIME, SEQUENCING_START_TIME } from '../tickets.constants';
+import { SEQUENCING_END_TIME, SEQUENCING_START_TIME, TicketsCardViews } from '../tickets.constants';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
@@ -39,6 +39,8 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 	const isReadOnly = TicketsCardHooksSelectors.selectReadOnly();
 
 	if (!properties.length) return null;
+	const storeTicketValues = TicketsCardHooksSelectors.selectSelectedTicket();
+	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
 
 	return (
 		<PropertiesListContainer>
@@ -48,17 +50,19 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 				readOnly: disabled,
 				required,
 				values,
+				immutable,
 			}) => {
 				const inputName = `${module}.${name}`;
 				const type = isSequencingProperty(inputName) ? 'sequencing' : basicType;
 				const PropertyComponent = TicketProperty[type] || UnsupportedProperty;
 				const formError = get(formState.errors, inputName);
+				const immutableDisabled = immutable && !isNewTicket && !!get(storeTicketValues, inputName);
 				return (
 					<Fragment key={name}>
 						<InputController
 							Input={PropertyComponent}
 							label={name}
-							disabled={disabled || isReadOnly}
+							disabled={disabled || isReadOnly || immutableDisabled}
 							required={required}
 							name={inputName}
 							formError={formError}
