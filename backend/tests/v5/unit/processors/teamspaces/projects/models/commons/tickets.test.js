@@ -748,7 +748,11 @@ const testGetTicketList = () => {
 		['custom projection (filter with property)', [propertyName], { [`properties.${propertyName}`]: 1 }],
 		['custom projection (filter with module)', [`${moduleName}.${propertyName}`], { [`modules.${moduleName}.${propertyName}`]: 1 }],
 		['custom projection (filter with module and property)', [`${moduleName}.${propertyName}`, propertyName], { [`properties.${propertyName}`]: 1, [`modules.${moduleName}.${propertyName}`]: 1 }],
-	])('Get ticket list', (desc, filter, customProjection) => {
+		['updatedSince provided', [], {}, new Date()],
+		['sortBy is provided', [], {}, undefined, { sortBy: generateRandomString() }],
+		['sortDesc is provided', [], {}, undefined, { sortDesc: false }],
+		['sortBy and sortDesc is provided', [], {}, undefined, { sortBy: generateRandomString(), sortDesc: true }],
+	])('Get ticket list', (desc, filters, customProjection, updatedSince, { sortBy, sortDesc } = {}) => {
 		test(`Should call getAllTickets in model with ${desc}`, async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
@@ -758,7 +762,7 @@ const testGetTicketList = () => {
 
 			TicketsModel.getAllTickets.mockResolvedValueOnce(expectedOutput);
 
-			await expect(Tickets.getTicketList(teamspace, project, model, filter))
+			await expect(Tickets.getTicketList(teamspace, project, model, { filters, updatedSince, sortBy, sortDesc }))
 				.resolves.toEqual(expectedOutput);
 
 			const { SAFETIBASE, SEQUENCING } = presetModules;
@@ -786,8 +790,15 @@ const testGetTicketList = () => {
 
 			};
 
+			let sort;
+			if (sortBy) {
+				const sortOrder = sortDesc ? -1 : 1;
+				sort = { [`properties.${sortBy}`]: sortOrder };
+			}
+
 			expect(TicketsModel.getAllTickets).toHaveBeenCalledTimes(1);
-			expect(TicketsModel.getAllTickets).toHaveBeenCalledWith(teamspace, project, model, projection, { [`properties.${basePropertyLabels.Created_AT}`]: -1 });
+			expect(TicketsModel.getAllTickets).toHaveBeenCalledWith(teamspace, project, model,
+				{ projection, updatedSince, sort });
 		});
 	});
 };

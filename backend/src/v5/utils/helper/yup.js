@@ -102,7 +102,11 @@ YupHelper.types.strings.email = Yup.string().email();
 
 YupHelper.types.strings.name = Yup.string().min(1).max(35);
 
-YupHelper.types.date = Yup.date().transform((n, orgVal) => new Date(orgVal));
+YupHelper.types.date = Yup.date().transform((n, orgVal) => {
+	const valAsNum = Number(orgVal);
+	return new Date(
+		Number.isNaN(valAsNum) ? orgVal : valAsNum);
+});
 
 const imageValidityTests = (yupType, isNullable) => yupType.test('image-validity-test', 'Image is not valid', async (value, { createError, originalValue }) => {
 	if (isUUIDString(originalValue)) {

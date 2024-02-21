@@ -90,7 +90,7 @@ const testGetCommentsByTicket = () => {
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
 
-			await expect(Comments.getCommentsByTicket(teamspace, project, model, ticket, projection, sort))
+			await expect(Comments.getCommentsByTicket(teamspace, project, model, ticket, { projection, sort }))
 				.resolves.toEqual(expectedOutput);
 
 			expect(fn).toHaveBeenCalledTimes(1);
@@ -98,7 +98,7 @@ const testGetCommentsByTicket = () => {
 				{ teamspace, project, model, ticket }, projection, sort);
 		});
 
-		test('should return whatever the database query returns usign default projection and sort', async () => {
+		test('should return whatever the database query returns using default projection and sort', async () => {
 			const expectedOutput = [
 				{ [generateRandomString()]: generateRandomString() },
 				{ [generateRandomString()]: generateRandomString() },
@@ -112,6 +112,25 @@ const testGetCommentsByTicket = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, commentCol,
 				{ teamspace, project, model, ticket },
+				{ teamspace: 0, project: 0, model: 0, ticket: 0 },
+				{ createdAt: -1 });
+		});
+
+		test('should impose a filter on updatedAt if updatedSince is specified', async () => {
+			const expectedOutput = [
+				{ [generateRandomString()]: generateRandomString() },
+				{ [generateRandomString()]: generateRandomString() },
+			];
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			const date = new Date();
+			await expect(Comments.getCommentsByTicket(teamspace, project, model, ticket, { updatedSince: date }))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, commentCol,
+				{ teamspace, project, model, ticket, updatedAt: { $gt: date } },
 				{ teamspace: 0, project: 0, model: 0, ticket: 0 },
 				{ createdAt: -1 });
 		});
