@@ -792,7 +792,7 @@ const testGetTicketList = () => {
 
 			let sort;
 			if (sortBy) {
-				const sortOrder = sortDesc || sortDesc === undefined ? -1 : 1;
+				const sortOrder = sortDesc ? -1 : 1;
 				sort = { [`properties.${sortBy}`]: sortOrder };
 			}
 
