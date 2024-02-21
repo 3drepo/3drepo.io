@@ -205,7 +205,7 @@ const filtersToProjection = (filters) => {
 };
 
 Tickets.getTicketList = (teamspace, project, model,
-	{ filters = [], updatedSince, sortBy, sortDesc = true }) => {
+	{ filters = [], updatedSince, sortBy, sortDesc }) => {
 	const { SAFETIBASE, SEQUENCING } = presetModules;
 	const {
 		[SAFETIBASE]: safetibaseProps,

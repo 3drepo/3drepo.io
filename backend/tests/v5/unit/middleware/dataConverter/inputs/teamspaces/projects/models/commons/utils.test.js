@@ -45,6 +45,7 @@ const testValidateListSortAndFilter = () => {
 		['filters is full of commas', { filters: ',,,' }, false],
 		['sortBy is empty', { sortBy: '' }, false],
 		['sortBy is empty but sortDesc is provided', { sortDesc: true }, true, {}],
+		['sortBy is provided but sortDesc is empty', { sortBy: validQuery.sortBy }, true, { sortBy: validQueryCasted.sortBy, sortDesc: true }],
 		['updatedSince is not a valid timestamp', { updatedSince: generateRandomString() }, false],
 	])('Validate list sort and filter options', (desc, query, success, expectedOutput) => {
 		test(`Should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {

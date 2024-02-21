@@ -32,7 +32,7 @@ Utils.validateListSortAndFilter = async (req, res, next) => {
 			sortDesc: Yup.boolean().when('sortBy', {
 				is: (val) => val === undefined,
 				then: (s) => s.strip(),
-				otherwise: (s) => s,
+				otherwise: (s) => s.default(true),
 			}),
 			updatedSince: types.date,
 		});
