@@ -43,6 +43,7 @@ const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../processors/teamspaces/projects');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { templates } = require('../../../../../utils/responseCodes');
+const { validateListSortAndFilter } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/utils');
 
 const createTicket = (isFed) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
@@ -92,7 +93,8 @@ const getTicketsInModel = (isFed) => async (req, res, next) => {
 
 	try {
 		const getTicketList = isFed ? getFedTicketList : getConTicketList;
-		req.tickets = await getTicketList(teamspace, project, model, req.query.filter?.split(','));
+
+		req.tickets = await getTicketList(teamspace, project, model, req.listOptions);
 		await next();
 	} catch (err) {
 		// istanbul ignore next
@@ -407,6 +409,24 @@ const establishRoutes = (isFed) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
+	 *       - name: updatedSince
+	 *         description: only return tickets that have been updated since a certain time (in epoch timestamp)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: number
+	 *       - name: sortBy
+	 *         description: specify what property the tickets should be sorted by (default is created at)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: string
+	 *       - name: sortDesc
+	 *         description: specify whether the tickets should be sorted in descending order (default is true)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: boolean
 	 *       - name: filter
 	 *         description: Comma separated string that defines extra properties to be included in the response
 	 *         in: query
@@ -457,7 +477,7 @@ const establishRoutes = (isFed) => {
 	 *                         description: ticket modules and their properties
 	 *
 	 */
-	router.get('/', hasReadAccess, getTicketsInModel(isFed), serialiseTicketList);
+	router.get('/', hasReadAccess, validateListSortAndFilter, getTicketsInModel(isFed), serialiseTicketList);
 
 	/**
 	 * @openapi

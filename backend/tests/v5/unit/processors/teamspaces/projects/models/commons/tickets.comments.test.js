@@ -137,24 +137,61 @@ const testDeleteComment = () => {
 
 const testGetCommentsByTicket = () => {
 	describe('Get comments by ticket', () => {
-		test('should call getCommentsByTicket in model with the expected projection and sort', async () => {
+		test('should call getCommentsByTicket in model', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
 			const ticket = generateRandomString();
 
 			const expectedOutput = generateRandomString();
-			const projection = { [generateRandomString()]: generateRandomString() };
-			const sort = { [generateRandomString()]: generateRandomString() };
 
 			CommentsModel.getCommentsByTicket.mockResolvedValueOnce(expectedOutput);
 
-			await expect(Comments.getCommentsByTicket(teamspace, project, model, ticket, projection, sort))
+			await expect(Comments.getCommentsByTicket(teamspace, project, model, ticket))
 				.resolves.toEqual(expectedOutput);
 
 			expect(CommentsModel.getCommentsByTicket).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.getCommentsByTicket).toHaveBeenCalledWith(teamspace, project, model,
-				ticket, projection, sort);
+				ticket, { });
+		});
+		test('should call getCommentsByTicket in model with the expected projection and sort (ascending)', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const ticket = generateRandomString();
+
+			const expectedOutput = generateRandomString();
+			const sortBy = generateRandomString();
+			const sort = { [sortBy]: 1 };
+
+			CommentsModel.getCommentsByTicket.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Comments.getCommentsByTicket(teamspace, project, model, ticket, { sortBy, sortDesc: false }))
+				.resolves.toEqual(expectedOutput);
+
+			expect(CommentsModel.getCommentsByTicket).toHaveBeenCalledTimes(1);
+			expect(CommentsModel.getCommentsByTicket).toHaveBeenCalledWith(teamspace, project, model,
+				ticket, { sort });
+		});
+
+		test('should call getCommentsByTicket in model with the expected projection and sort (descending)', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const ticket = generateRandomString();
+
+			const expectedOutput = generateRandomString();
+			const sortBy = generateRandomString();
+			const sort = { [sortBy]: -1 };
+
+			CommentsModel.getCommentsByTicket.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Comments.getCommentsByTicket(teamspace, project, model, ticket, { sortBy, sortDesc: true }))
+				.resolves.toEqual(expectedOutput);
+
+			expect(CommentsModel.getCommentsByTicket).toHaveBeenCalledTimes(1);
+			expect(CommentsModel.getCommentsByTicket).toHaveBeenCalledWith(teamspace, project, model,
+				ticket, { sort });
 		});
 	});
 };
