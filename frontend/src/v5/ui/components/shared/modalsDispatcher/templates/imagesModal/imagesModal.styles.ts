@@ -83,7 +83,27 @@ export const Counter = styled.div<{ $counterChars: number }>`
 	place-items: center;
 `;
 
-export const TopBarButton = styled(FloatingButton)`
+const Button = styled(NavbarButton)`
+	height: 36px;
+	min-width: 36px;
+	width: 36px;
+	box-sizing: border-box;
+	cursor: pointer;
+	margin: 0;
+
+	&&.Mui-disabled {
+		pointer-events: none;
+		opacity: .25;
+		color: ${({ theme }) => theme.palette.primary.contrast};
+		border-color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+`;
+
+export const CloseButton = styled(Button)`
+	align-self: flex-end;
+`;
+
+export const TopBarButton = styled(Button)`
 	border-radius: 8px;
 
 	svg {
@@ -129,6 +149,10 @@ export const ImageContainer = styled(FlexRow)<{ $isCarousel?: boolean }>`
 	width: 100%;
 `;
 
+export const MarkupToolbarContainer = styled.div`
+	margin: 35px auto 0;
+`;
+
 export const BottomBar = styled.div`
 	display: flex;
 	gap: 12px;
@@ -146,7 +170,6 @@ export const NextButton = styled(FloatingButton)<{ disabled?: boolean }>`
 	height: 38px;
 	min-width: 38px;
 	width: 38px;
-
 	& svg {
 		margin-left: 1px;
 		height: 25px;
