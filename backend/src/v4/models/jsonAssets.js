@@ -166,8 +166,7 @@ function getHelperJSONFile(account, model, branch, rev, username, filename, pref
 }
 
 JSONAssets.getSuperMeshMapping = function(account, model, id) {
-	const postfix = id.includes("_unity") ? ".json.mpc" : "";
-	const name = `${id}${postfix}`;
+	const name = `${id}.json.mpc`;
 	return FileRef.getJSONFile(account, model, name);
 };
 
