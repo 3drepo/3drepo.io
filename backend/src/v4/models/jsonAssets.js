@@ -238,8 +238,9 @@ const generateSuperMeshMappings = async (account, model, jsonFiles, outStream) =
 
 };
 
-const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, outStream) => {
-	const cacheFileName = `${utils.uuidToString(revId)}/supermeshes.json`;
+const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, legacy, outStream) => {
+	const cachePostfix = legacy ? "_unity" : "";
+	const cacheFileName = `${utils.uuidToString(revId)}/supermeshes${cachePostfix}.json`;
 	const fileRef = await FileRef.jsonFileExists(account, model, cacheFileName);
 	if(fileRef?.size) {
 		const { readStream } = await FileRef.getJSONFileStream(account, model, cacheFileName);
@@ -277,6 +278,9 @@ const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, ou
 			cacheStream.emit("error", err);
 		});
 
+		// For all new uploads, bouncer will generate the caches for both RepoBundles and
+		// AssetBundles, so we don't need to do anything with the legacy flag here.
+
 		await generateSuperMeshMappings(account, model, jsonFiles, passThruStr);
 		await cacheWriteProm;
 
@@ -284,7 +288,7 @@ const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, ou
 
 };
 
-const getSuperMeshMappingForModels = async (modelsToProcess, outStream) => {
+const getSuperMeshMappingForModels = async (modelsToProcess, legacy, outStream) => {
 
 	for(let i = 0; i < modelsToProcess.length; ++i) {
 		const entry = modelsToProcess[i];
@@ -292,7 +296,7 @@ const getSuperMeshMappingForModels = async (modelsToProcess, outStream) => {
 			const assetList = await DB.findOne(
 				entry.account, `${entry.model}.stash.unity3d`, {_id: entry.rev}, {jsonFiles: 1});
 			if(assetList) {
-				await addSuperMeshMappingsToStream(entry.account, entry.model, entry.rev, assetList.jsonFiles, outStream);
+				await addSuperMeshMappingsToStream(entry.account, entry.model, entry.rev, assetList.jsonFiles, legacy, outStream);
 			}
 
 			if(i !== modelsToProcess.length - 1) {
@@ -302,7 +306,7 @@ const getSuperMeshMappingForModels = async (modelsToProcess, outStream) => {
 	}
 };
 
-JSONAssets.getAllSuperMeshMapping = async (account, model, branch, rev) => {
+JSONAssets.getAllSuperMeshMapping = async (account, model, branch, rev, legacy) => {
 	let modelsToProcess;
 
 	const subModelRefs = await getRefNodes(account, model, branch, rev);
@@ -327,7 +331,7 @@ JSONAssets.getAllSuperMeshMapping = async (account, model, branch, rev) => {
 	if(isFed) {
 		outStream.write("{\"submodels\":[");
 	}
-	getSuperMeshMappingForModels(modelsToProcess, outStream).then(() => {
+	getSuperMeshMappingForModels(modelsToProcess, legacy, outStream).then(() => {
 		// NOTE: this is using a .then because we do not want to wait on this promise - we want to
 		// return the stream handler to the client before we start streaming data.
 		if(isFed) {

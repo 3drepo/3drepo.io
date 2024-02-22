@@ -88,13 +88,26 @@ UnityAssets.getTexture = async function(account, model, id) {
 
 	const node = await db.findOne(account, collection, { _id: utils.stringToUUID(textureFilename) }, {
 		_id: 1,
-		_blobRef: 1
+		_blobRef: 1,
+		extension: 1
 	});
 
-	const {data, buffer} = node._blobRef;
+	const {elements, buffer} = node._blobRef;
 
-	const response = await FilesManager.getFileAsStream(account, collection, buffer.name, data);
-	response.mimeType = "image/png";
+	// chunkInfo is passed to createReadStream, which expects `start` and `end` properties
+	const chunkInfo = {
+		start: buffer.start + elements.data.start,
+		end: buffer.start + elements.data.start + elements.data.size
+	};
+
+	const response = await FilesManager.getFileAsStream(account, collection, buffer.name, chunkInfo);
+
+	if(node.extension === "jpg") {
+		node.extension = "jpeg"; // jpg is not a valid mime type, only jpeg, even though the extensions are equivalent
+	}
+
+	response.mimeType = `image/${node.extension}`;
+	response.size = chunkInfo.end - chunkInfo.start;
 
 	return response;
 };
