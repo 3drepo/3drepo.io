@@ -45,7 +45,10 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 	const imageRef = useRef<HTMLImageElement>(null);
 	const hasManyImages = imagesLength > 1;
 
-	const changeImageIndex = (delta) => setImageIndex((imageIndex + delta + imagesLength) % imagesLength);
+	const changeImageIndex = (delta) => {
+		const newIndex = Math.max(0, Math.min(imagesLength - 1, imageIndex + delta));
+		setImageIndex(newIndex);
+	};
 
 	const handleKeyDown = ({ keyCode }) => {
 		const ESCAPE_KEY = 27;
@@ -97,7 +100,7 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 	useEffect(() => {
 		document.addEventListener('keydown', handleKeyDown);
 		return () => document.removeEventListener('keydown', handleKeyDown);
-	}, []);
+	}, [changeImageIndex]);
 
 	useEffect(() => {
 		if (!imagesLength) {
