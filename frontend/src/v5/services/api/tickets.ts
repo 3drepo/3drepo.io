@@ -66,7 +66,7 @@ export const fetchContainerTickets = async (
 	filters?: string[],
 ): Promise<FetchTicketsResponse> => {
 	let path = `teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets`;
-	if (filters?.length) path += `?filter=${filter.join()}`;
+	if (filters?.length) path += `?filters=${filters.join()}`;
 	const { data } = await api.get(path);
 	return data.tickets;
 };
