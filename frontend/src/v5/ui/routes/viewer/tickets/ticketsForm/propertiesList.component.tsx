@@ -18,7 +18,7 @@
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { InputController } from '@controls/inputs/inputController.component';
-import { get } from 'lodash';
+import { get, isUndefined } from 'lodash';
 import { Fragment } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { TicketProperty } from './properties/properties.helper';
@@ -56,7 +56,7 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 				const type = isSequencingProperty(inputName) ? 'sequencing' : basicType;
 				const PropertyComponent = TicketProperty[type] || UnsupportedProperty;
 				const formError = get(formState.errors, inputName);
-				const immutableDisabled = immutable && !isNewTicket && !!get(storeTicketValues, inputName);
+				const immutableDisabled = immutable && !isNewTicket && !isUndefined(get(storeTicketValues, inputName));
 				return (
 					<Fragment key={name}>
 						<InputController
