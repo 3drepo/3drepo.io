@@ -1962,6 +1962,24 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Tells the viewer to enable Textures if they have previously been disabled.
+	 * Any Geometry already loaded must be reloaded for Textures to show.
+	 * @category Configurations
+	 */
+	public static enableTextures() {
+		UnityUtil.toUnity('EnableTextures', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
+	 * Tells the viewer to disable textures. This means at runtime Textures will
+	 * not be loaded with Geometry even where available.
+	 * @category Configurations
+	 */
+	public static disableTextures() {
+		UnityUtil.toUnity('DisableTextures', UnityUtil.LoadingState.VIEWER_READY);
+	}
+
+	/**
 	 * Change the camera configuration
 	 * teamspace and model is only needed if the viewpoint is relative to a model
 	 * @category Navigations
