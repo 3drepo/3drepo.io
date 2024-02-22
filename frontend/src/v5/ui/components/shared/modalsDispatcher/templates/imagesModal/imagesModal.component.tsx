@@ -118,9 +118,14 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 				<Buttons>
 					{hasManyImages && (
 						<Counter $counterChars={imagesLength.toString().length}>
-							<span>{imageIndex + 1}</span>
-							<span><FormattedMessage id="images.count.of" defaultMessage="of" /></span>
-							<span>{imagesLength}</span>
+							<FormattedMessage
+								id="images.count.of"
+								defaultMessage="{current} of {total}"
+								values={{
+									current: imageIndex + 1,
+									total: imagesLength,
+								}}
+							/>
 						</Counter>
 					)}
 					<TextTopBarButton>

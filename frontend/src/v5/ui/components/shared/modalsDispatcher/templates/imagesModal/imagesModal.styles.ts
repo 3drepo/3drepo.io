@@ -73,13 +73,12 @@ export const Counter = styled.div<{ $counterChars: number }>`
 	border-radius: 10px;
 	color: ${({ theme }) => theme.palette.primary.contrast};
 	font-weight: 600;
-	display: grid;
-	grid-template-columns: 1fr auto 1fr;
-	place-items: center;
-	width: ${({ $counterChars }) => 42 + ($counterChars * 8)}px;
+	width: fit-content;
 	height: 36px;
-	padding: 0 10px;
-	gap: 2px;
+	padding: 0 16px;
+	font-variant-numeric: tabular-nums;
+	display: grid;
+	place-items: center;
 `;
 
 export const TopBarButton = styled(FloatingButton)`
