@@ -427,7 +427,7 @@ const establishRoutes = (isFed) => {
 	 *         required: false
 	 *         schema:
 	 *           type: boolean
-	 *       - name: filter
+	 *       - name: filters
 	 *         description: Comma separated string that defines extra properties to be included in the response
 	 *         in: query
 	 *         required: false
