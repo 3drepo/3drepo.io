@@ -44,6 +44,8 @@ const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constant
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const FilesManager = require('../../../src/v5/services/filesManager');
 
+const { statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
+
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
 const { USERS_DB_NAME, USERS_COL, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
@@ -271,7 +273,16 @@ db.createScene = (teamspace, modelId, rev, nodes, meshMap) => Promise.all([
 	FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
 
 ]);
+ServiceHelper.createQueryString = (options) => {
+	const keys = Object.keys(deleteIfUndefined(options, true));
 
+	if (keys.length) {
+		const optionsArr = keys.map((key) => `${key}=${options[key]}`);
+		return `?${optionsArr.join('&')}`;
+	}
+
+	return '';
+};
 ServiceHelper.sleepMS = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 ServiceHelper.fileExists = (filePath) => {
 	let flag = true;
@@ -282,6 +293,12 @@ ServiceHelper.fileExists = (filePath) => {
 	}
 	return flag;
 };
+
+ServiceHelper.outOfOrderArrayEqual = (arr1, arr2) => {
+	expect(arr1.length).toEqual(arr2.length);
+	expect(arr1).toEqual(expect.arrayContaining(arr2));
+};
+
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
@@ -293,6 +310,11 @@ ServiceHelper.generateRandomIfcGuid = () => ServiceHelper.generateRandomString(2
 ServiceHelper.generateRandomRvtId = () => Math.floor(Math.random() * 10000);
 
 ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
+
+ServiceHelper.generateCustomStatusValues = () => times(statusTypes.length, (i) => ({
+	name: ServiceHelper.generateRandomString(),
+	type: statusTypes[i],
+}));
 
 ServiceHelper.generateSequenceEntry = (rid) => {
 	const startDate = ServiceHelper.generateRandomDate();

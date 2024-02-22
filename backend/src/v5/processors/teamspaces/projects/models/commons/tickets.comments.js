@@ -61,7 +61,11 @@ Comments.updateComment = async (teamspace, project, model, ticket, oldComment, u
 
 Comments.deleteComment = deleteComment;
 
-Comments.getCommentsByTicket = getCommentsByTicket;
+Comments.getCommentsByTicket = (teamspace, project, model, ticket, { updatedSince, sortBy, sortDesc } = {}) => {
+	const sort = sortBy ? { [sortBy]: sortDesc ? -1 : 1 } : undefined;
+
+	return getCommentsByTicket(teamspace, project, model, ticket, { updatedSince, sort });
+};
 
 Comments.getCommentById = getCommentById;
 

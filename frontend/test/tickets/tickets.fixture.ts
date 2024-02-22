@@ -38,19 +38,23 @@ export const ticketMockFactory = (overrides?: Partial<ITicket>): ITicket => ({
 	...overrides,
 });
 
-export const ticketWithGroupMockFactory = (group: Group) => ticketMockFactory({
-		properties: {
-			defaultView: {
-				state: {
-					colored: [
-						{
-							group: group._id,
-							opacity: faker.datatype.float({ min: 0, max: 1 }),
-							color: times(3, () => faker.datatype.number(255)),
-						}
-					],
-					showHidden: false,
-				}}}})
+export const ticketWithGroupMockFactory = (group: Group, overrides?: Partial<ITicket>) => ticketMockFactory({
+	properties: {
+		defaultView: {
+			state: {
+				colored: [
+					{
+						group: group._id,
+						opacity: faker.datatype.float({ min: 0, max: 1 }),
+						color: times(3, () => faker.datatype.number(255)),
+					}
+				],
+				showHidden: false,
+			}
+		}
+	},
+	...overrides,
+});
 
 export const templateMockFactory = (overrides?: Partial<ITemplate>): ITemplate => ({
 	_id: faker.datatype.uuid(),

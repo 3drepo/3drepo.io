@@ -45,7 +45,7 @@ const createStateWithGroup = (state: ViewpointState, groups: Record<string, Grou
 };
 
 /* eslint-disable no-param-reassign */
-export const createPropertiesWithGroups = (properties, groups) => Object.keys(properties).reduce((partialProps, key) => {
+const createPropertiesWithGroups = (properties, groups) => Object.keys(properties).reduce((partialProps, key) => {
 	if (properties[key]?.state) {
 		partialProps[key] = {
 			...properties[key],

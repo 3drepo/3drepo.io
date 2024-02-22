@@ -27,21 +27,21 @@ import { IFederation } from '@/v5/store/federations/federations.types';
 import { containerMockFactory } from '../containers/containers.fixtures';
 import { federationMockFactory } from '../federations/federations.fixtures';
 import { createTestStore } from '../test.helpers';
-import { fullTemplateMockFactory, getBaseTicket, mockGroup, mockRiskCategories, templateMockFactory, ticketMockFactory, ticketWithGroupMockFactory } from './tickets.fixture';
+import { mockGroup, mockRiskCategories, templateMockFactory, ticketMockFactory, ticketWithGroupMockFactory } from './tickets.fixture';
 import { mockServer } from '../../internals/testing/mockServer';
 
 describe('Tickets: sagas', () => {
 	let onSuccess;
 	let dispatch; let getState; let
 		waitForActions;
-	const group = mockGroup();
-	const groups = [group];
-	const ticket = ticketWithGroupMockFactory(group);
-	const tickets = [ticket];
 	const teamspace = 'teamspace';
 	const projectId = 'project';
 	const modelId = 'modelId';
 	const revision = 'revision';
+	const group = mockGroup();
+	const groups = [group];
+	const ticket = ticketWithGroupMockFactory(group, { modelId });
+	const tickets = [ticket];
 
 	const populateTicketsStore = () => dispatch(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	const populateGroupsStore = () => dispatch(TicketsActions.fetchTicketGroupsSuccess(groups));
