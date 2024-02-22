@@ -58,6 +58,7 @@ export const EditComment = ({ message, images, author, metadata, onClose, onEdit
 					isCurrentUserComment={false}
 					onUploadImages={onUploadImages}
 					onDeleteImage={onDeleteImage}
+					hasMessage={!!message}
 				/>
 				<EditCommentInput
 					name="editedMessage"

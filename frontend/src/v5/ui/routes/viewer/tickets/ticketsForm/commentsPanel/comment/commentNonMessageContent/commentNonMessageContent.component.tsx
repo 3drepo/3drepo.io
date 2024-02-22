@@ -21,6 +21,7 @@ import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/stor
 import { useParams } from 'react-router-dom';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
+import { formatMessage } from '@/v5/services/intl';
 import { CommentImages } from '../commentImages/commentImages.component';
 import { CommentAuthor } from './commentNonMessageContent.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
@@ -30,6 +31,7 @@ export type CommentNonMessageContentProps = Partial<Omit<ITicketComment, 'histor
 	isCurrentUserComment?: boolean;
 	onUploadImages?: () => void;
 	onDeleteImage?: (index) => void;
+	hasMessage: boolean;
 };
 export const CommentNonMessageContent = ({
 	author,
@@ -38,12 +40,18 @@ export const CommentNonMessageContent = ({
 	isCurrentUserComment = true,
 	onUploadImages,
 	onDeleteImage,
+	hasMessage,
 }: CommentNonMessageContentProps) => {
 	const { teamspace, project, containerOrFederation } = useParams();
 	const [displayImageIndex, setDisplayImageIndex] = useState(-1);
 	const modalIsOpen = displayImageIndex !== -1;
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isFederation = modelIsFederation(containerOrFederation);
+
+	const disabledDeleteMessage = (hasMessage || images.length > 1) ? null : formatMessage({
+		id: 'comment.deleteImage.disabled.emptyMessage',
+		defaultMessage: 'Cannot delete last image of a comment with no message',
+	});
 
 	const imgsSrcs = images.map((img) => {
 		if (!isResourceId(img)) return img;
@@ -73,6 +81,7 @@ export const CommentNonMessageContent = ({
 					displayImageIndex={displayImageIndex}
 					onUpload={onUploadImages}
 					onDelete={onDeleteImage}
+					disabledDeleteMessage={disabledDeleteMessage}
 				/>
 			)}
 		</>

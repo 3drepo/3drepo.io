@@ -23,6 +23,7 @@ import UploadImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg'
 import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { Tooltip } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
 import {
 	Modal, CenterBar, Image, NextButton, PreviousButton, FloatingButton, Counter,
@@ -38,8 +39,9 @@ export type ImagesModalProps = {
 	displayImageIndex?: number;
 	onUpload?: () => void;
 	onDelete?: (index) => void;
+	disabledDeleteMessage?: string;
 };
-export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open, onUpload, onDelete }: ImagesModalProps) => {
+export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open, onUpload, onDelete, disabledDeleteMessage }: ImagesModalProps) => {
 	const [imageIndex, setImageIndex] = useState(displayImageIndex);
 	const imagesLength = images.length;
 	const imageRef = useRef<HTMLImageElement>(null);
@@ -134,9 +136,13 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 						</TopBarButton>
 					)}
 					{onDelete && (
-						<TopBarButton onClick={triggerDeleteModal}>
-							<DeleteIcon />
-						</TopBarButton>
+						<Tooltip title={disabledDeleteMessage}>
+							<span>
+								<TopBarButton onClick={triggerDeleteModal} disabled={!!disabledDeleteMessage}>
+									<DeleteIcon />
+								</TopBarButton>
+							</span>
+						</Tooltip>
 					)}
 				</Buttons>
 				<FloatingButton onClick={onClickClose}>
