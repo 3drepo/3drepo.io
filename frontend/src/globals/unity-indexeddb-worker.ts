@@ -77,7 +77,7 @@ export class IndexedDbCacheWorker {
 	index: any;
 
 	createIndexedDbCache() {
-		const request = indexedDB.open('3DRepoCacheDb', 1);
+		const request = indexedDB.open('3DRepoCacheDb', 2);
 
 		request.onerror = () => {
 			console.error('Unable to open IndexedDb - Model Caching will be Disabled.');
@@ -89,6 +89,9 @@ export class IndexedDbCacheWorker {
 		// When onupgradeneeded completes successfully, onsuccess will be called
 		request.onupgradeneeded = (event: any) => {
 			const db = event.target.result;
+			if (event.oldVersion == 1) {
+				db.deleteObjectStore(this.objectStoreName); // Existing keys from version 1 are the wrong types (UInt8Array, whereas we now expect them to be ArrayBuffers)
+			}
 			db.createObjectStore(this.objectStoreName, {}); // The database uses a simple key-pair assocation, where the key is passed explicitly
 		};
 

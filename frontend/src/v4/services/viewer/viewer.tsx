@@ -1168,9 +1168,9 @@ export class ViewerService {
 
 	public setModelCache = (cache: boolean) => {
 		if (cache) {
-			UnityUtil.enableCaching();
+			UnityUtil.enableExternalWebRequestHandler();
 		} else {
-			UnityUtil.disableCaching();
+			UnityUtil.disableExternalWebRequestHandler();
 		}
 	}
 

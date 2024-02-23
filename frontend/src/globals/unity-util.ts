@@ -1409,16 +1409,16 @@ export class UnityUtil {
 	 * Enable model caching
  	 * @category Configurations
 	 */
-	public static enableCaching() {
-		UnityUtil.toUnity('EnableCaching', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	public static enableExternalWebRequestHandler() {
+		UnityUtil.toUnity('EnableExternalWebRequestHandler', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
 	 * Disable model caching
  	 * @category Configurations
 	 */
-	public static disableCaching() {
-		UnityUtil.toUnity('DisableCaching', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	public static disableExternalWebRequestHandler() {
+		UnityUtil.toUnity('DisableExternalWebRequestHandler', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
