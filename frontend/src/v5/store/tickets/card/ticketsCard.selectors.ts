@@ -45,10 +45,21 @@ export const selectView = createSelector(
 	(ticketCardState) => ticketCardState.view,
 );
 
+export const selectViewProps = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.viewProps,
+);
+
 export const selectReadOnly = createSelector(
 	selectTicketsCardDomain,
 	(ticketCardState) => ticketCardState.readOnly,
 );
+
+export const selectIsEditingGroups = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.isEditingGroups,
+);
+
 
 export const selectSelectedTicketId = createSelector(
 	selectTicketsCardDomain,
@@ -67,7 +78,7 @@ export const selectSelectedTicketPinId = createSelector(
 
 export const selectTicketOverridesDict = createSelector(
 	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.overrides || { overrides: {}, transparencies: {} },
+	(ticketCardState) => ticketCardState.overrides || { overrides: {}, transparencies: {}, transformations: {} },
 );
 
 export const selectTicketOverrides = createSelector(
@@ -141,7 +152,6 @@ export const selectTicketsWithAllFiltersApplied = createSelector(
 	},
 );
 
-
 export const selectTicketPins = createSelector(
 	selectTicketsWithAllFiltersApplied,
 	selectCurrentTemplates,
@@ -194,4 +204,8 @@ export const selectTicketPins = createSelector(
 			[],
 		);
 	},
+);
+
+export const selectUnsavedTicket = createSelector(
+	selectTicketsCardDomain, (state) => state.unsavedTicket || null,
 );

@@ -46,7 +46,9 @@ export const { Types: SequencesTypes, Creators: SequencesActions } = createActio
 	showSequenceDate: ['date'],
 	handleTransparenciesVisibility: ['transparencies'],
 	restoreModelDefaultVisibility: [],
+	updateSelectedStateDefinition: [],
 	clearColorOverrides: [],
+	clearTransformations: [],
 	reset: []
 }, { prefix: 'SEQUENCES/' });
 
@@ -64,11 +66,11 @@ type IDefinition = {
 	shared_id: string[],
 };
 
-export type IStateDefinition = Record<string, {
-	tranformation: IDefinition[],
+export type IStateDefinitions = {
+	transformation: IDefinition[],
 	color: IDefinition[],
 	transparency: IDefinition[],
-}>;
+};
 
 export interface ISequencesState {
 	sequences: null | ISequance[];
@@ -76,8 +78,8 @@ export interface ISequencesState {
 	lastSelectedSequence: null | string;
 	selectedDate: null | Date;
 	lastSelectedDate: null | Date;
-	stateDefinitions: IStateDefinition;
-	selectedStateDefinition: IStateDefinition;
+	stateDefinitions: Record<string, IStateDefinitions>;
+	selectedStateDefinition: Record<string, IStateDefinitions>;
 	statesPending: boolean;
 	stepInterval: number;
 	stepScale: STEP_SCALE;

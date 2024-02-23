@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { BaseProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicket } from '../tickets.types';
 import { TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
 import { get } from 'lodash';
 
 export const getTicketIsCompleted = (ticket: ITicket): boolean => {
-	const issuePropertyStatus = get(ticket, `properties.${IssueProperties.STATUS}`);
+	const basePropertyStatus = get(ticket, `properties.${BaseProperties.STATUS}`);
 	const treatmentStatus = get(ticket, `modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`);
 
-	const isCompletedIssueProperty = [TicketStatuses.CLOSED, TicketStatuses.VOID].includes(issuePropertyStatus);
+	const isCompletedIssueProperty = [TicketStatuses.CLOSED, TicketStatuses.VOID].includes(basePropertyStatus);
 	const isCompletedTreatmentStatus = [TreatmentStatuses.AGREED_FULLY, TreatmentStatuses.VOID].includes(treatmentStatus);
 
 	return (isCompletedIssueProperty || isCompletedTreatmentStatus);

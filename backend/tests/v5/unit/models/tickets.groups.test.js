@@ -158,7 +158,7 @@ const testUpdateGroup = () => {
 		const groupId = generateRandomString();
 		const author = generateRandomString();
 
-		test('Should update the group as expected', async () => {
+		test('Should update the group as expected (set)', async () => {
 			const data = generateRandomObject();
 			await expect(Groups.updateGroup(teamspace, project, model, ticket, groupId, data,
 				author)).resolves.toBeUndefined();
@@ -166,6 +166,23 @@ const testUpdateGroup = () => {
 			expect(db.updateOne).toHaveBeenCalledTimes(1);
 			expect(db.updateOne).toHaveBeenCalledWith(teamspace, groupCol,
 				{ teamspace, project, model, ticket, _id: groupId }, { $set: data });
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET_GROUP,
+				{ _id: groupId, teamspace, project, model, ticket, changes: data, author });
+		});
+
+		test('Should update the group as expected (unset)', async () => {
+			const unsetProp = generateRandomString();
+			const data = { [unsetProp]: null };
+
+			await expect(Groups.updateGroup(teamspace, project, model, ticket, groupId, data,
+				author)).resolves.toBeUndefined();
+
+			expect(db.updateOne).toHaveBeenCalledTimes(1);
+			expect(db.updateOne).toHaveBeenCalledWith(teamspace, groupCol,
+				{ teamspace, project, model, ticket, _id: groupId },
+				{ $unset: { [unsetProp]: 1 } });
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			expect(EventsManager.publish).toHaveBeenCalledWith(events.UPDATE_TICKET_GROUP,

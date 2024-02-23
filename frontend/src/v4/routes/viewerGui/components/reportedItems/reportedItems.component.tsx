@@ -14,12 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, ReactChildren, createRef } from 'react';
+import { PureComponent, ReactChildren, createRef, useEffect, useRef } from 'react';
 import IconButton from '@mui/material/IconButton';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 
 import { formatMessage } from '@/v5/services/intl';
+import { InvisibleContainer } from '@controls/invisibleContainer/invisibleContainer.styles';
 import { CREATE_ISSUE, VIEW_ISSUE } from '../../../../constants/issue-permissions';
 import { hasPermissions } from '../../../../helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -67,11 +68,25 @@ interface IProps {
 	id?: string;
 }
 
-interface IState {
-	prevScroll: number;
-}
+const PreviewListSingleItem = ({ active, index, ...props }) => {
+	const ref = useRef<HTMLDivElement>();
 
-export class ReportedItems extends PureComponent<IProps, IState> {
+	useEffect(() => {
+		if (active && ref.current) {
+			// @ts-ignore
+			ref.current.firstElementChild.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'start' });
+		}
+	}, [active]);
+
+	return (
+		<InvisibleContainer ref={ref}>
+			{/* @ts-ignore */}
+			<PreviewListItem {...props} active={active} key={index} />
+		</InvisibleContainer>
+	);
+};
+
+export class ReportedItems extends PureComponent<IProps> {
 
 	get activeItemIndex() {
 		return this.props.items.findIndex((item) => item._id === this.props.activeItemId);
@@ -91,12 +106,6 @@ export class ReportedItems extends PureComponent<IProps, IState> {
 		}
 		return 'Model is loading';
 	}
-	public state = {
-		prevScroll: 0
-	};
-
-	public listViewRef = createRef<HTMLDivElement>();
-	public listContainerRef = createRef<any>();
 
 	public handleClickOutside = () => {
 		const { onDeactivateItem } = this.props;
@@ -106,26 +115,32 @@ export class ReportedItems extends PureComponent<IProps, IState> {
 		}
 	}
 
-	public renderItemsList = renderWhenTrue(() => (
-		<ListContainer ref={this.listContainerRef}>
-			{this.props.items.map((item, index) => (
-				<PreviewListItem
-					{...item}
-					key={index}
-					onItemClick={this.handleItemFocus(item)}
-					onArrowClick={this.handleShowItemDetails(item)}
-					active={this.props.activeItemId === item._id}
-					hasViewPermission={this.hasPermission(VIEW_ISSUE)}
-					modelLoaded={this.props.isModelLoaded}
-					panelName={this.props.type}
-				/>
-			))}
-		</ListContainer>
-	));
+	public renderItemsList = renderWhenTrue(() => {
+		const activeItemRef = createRef<any>();
+
+		return (
+			<ListContainer>
+				{this.props.items.map((item, index) => (
+					<PreviewListSingleItem
+						{...item}
+						key={index}
+						index={index}
+						onItemClick={this.handleItemFocus(item)}
+						onArrowClick={this.handleShowItemDetails(item)}
+						active={this.props.activeItemId === item._id}
+						ref={this.props.activeItemId === item._id ? activeItemRef : undefined}
+						hasViewPermission={this.hasPermission(VIEW_ISSUE)}
+						modelLoaded={this.props.isModelLoaded}
+						panelName={this.props.type}
+					/>
+				))}
+			</ListContainer>
+		);
+	});
 
 	public renderListView = renderWhenTrue(() => (
 		<>
-			<ViewerPanelContent onClick={this.handleClickOutside} ref={this.listViewRef}>
+			<ViewerPanelContent onClick={this.handleClickOutside}>
 				<div onClick={(event: React.MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
 					{this.renderEmptyState(!this.props.searchEnabled && !this.props.items.length)}
 					{this.renderNotFound(this.props.searchEnabled && !this.props.items.length)}
@@ -176,21 +191,6 @@ export class ReportedItems extends PureComponent<IProps, IState> {
 	public renderNotFound = renderWhenTrue(() => (
 		<EmptyStateInfo>No entry matched</EmptyStateInfo>
 	));
-
-	public componentDidUpdate(prevProps) {
-		const { showDetails } = this.props;
-		const detailsWasClosed = prevProps.showDetails !== showDetails && !showDetails;
-
-		const changes = {} as IState;
-
-		if (detailsWasClosed) {
-			this.listViewRef.current.scrollTo(0, this.state.prevScroll);
-		}
-
-		if (this.listViewRef.current) {
-			this.setState({prevScroll: this.listViewRef.current.scrollTop});
-		}
-	}
 
 	public hasPermission = (permission) => {
 		const { permissions: modelPermissions } = this.props;
@@ -243,9 +243,7 @@ export class ReportedItems extends PureComponent<IProps, IState> {
 
 	public renderActions = () => {
 		if (this.props.showDetails && this.props.activeItemId) {
-			const canBeNavigated = this.props.items.length > 1;
-			return canBeNavigated ?
-					this.renderHeaderNavigation() : <PanelBarActions type={this.props.type} hideSearch hideMenu />;
+			return this.renderHeaderNavigation();
 		}
 
 		return (

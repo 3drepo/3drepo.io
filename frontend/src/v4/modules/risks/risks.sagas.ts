@@ -48,7 +48,7 @@ import { DialogActions } from '../dialog';
 import { selectMyJob } from '../jobs';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
-import { selectSelectedStartingDate, SequencesActions } from '../sequences';
+import { selectSelectedSequence, selectSelectedStartingDate, SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { TreeActions } from '../tree';
@@ -264,10 +264,12 @@ function* printRisks({ teamspace, modelId }) {
 function* setActiveRisk({ risk, revision, ignoreViewer = false }) {
 	try {
 		if (risk) {
-			yield all([
-				!ignoreViewer ? put(ViewpointsActions.showViewpoint(risk?.account, risk?.model, risk)) : null,
-				put(RisksActions.setComponentState({ activeRisk: risk._id, expandDetails: true }))
-			]);
+			const sequenceCardIsActive = !!(yield select(selectSelectedSequence));
+			const willSetSequenceDate = sequenceCardIsActive && risk?.sequence_start;
+			if (!ignoreViewer && !willSetSequenceDate) {
+				yield put(ViewpointsActions.showViewpoint(risk?.account, risk?.model, risk));
+			}
+			yield put(RisksActions.setComponentState({ activeRisk: risk._id, expandDetails: true }));
 		} else {
 			yield put(RisksActions.setComponentState({ activeRisk: null }));
 			yield put(TreeActions.clearCurrentlySelected());

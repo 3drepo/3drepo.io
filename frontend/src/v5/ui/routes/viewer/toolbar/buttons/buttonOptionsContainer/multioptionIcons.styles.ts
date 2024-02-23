@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Container } from '../toolbarButton.styles';
 import { ToolbarButton } from '../toolbarButton.component';
 
-export const ButtonOptionsContainer = styled.div`
+export const ButtonOptionsContainer = styled.div<{ disabled?: boolean }>`
 	position: relative;
 
 	& > ${/* sc-selector */Container}::after {
@@ -34,7 +34,9 @@ export const ButtonOptionsContainer = styled.div`
 	}
 
 	&:hover > ${/* sc-selector */Container}::after {
-		border-color: ${({ theme }) => theme.palette.primary.contrast};
+		${({ disabled, theme }) => !disabled && css`
+			border-color: ${theme.palette.primary.contrast};
+		`}
 	}
 
 	:is(&, &:hover) > ${/* sc-selector */Container}::after {

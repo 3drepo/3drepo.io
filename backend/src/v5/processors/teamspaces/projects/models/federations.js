@@ -32,10 +32,10 @@ const { queueFederationUpdate } = require('../../../../services/modelProcessing'
 const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups };
 
 // Override
-Federations.getTicketGroupById = async (teamspace, project, federation, revId, ticket, groupId) => {
+Federations.getTicketGroupById = async (teamspace, project, federation, revId, ticket, groupId, convertToMeshIds) => {
 	const { subModels: containers } = await getFederationById(teamspace, federation, { subModels: 1 });
 	return TicketGroups.getTicketGroupById(teamspace, project, federation, revId,
-		ticket, groupId, containers ? containers.map(({ _id }) => _id) : undefined);
+		ticket, groupId, convertToMeshIds, containers ? containers.map(({ _id }) => _id) : undefined);
 };
 
 Federations.addFederation = (teamspace, project, federation) => addModel(teamspace, project,

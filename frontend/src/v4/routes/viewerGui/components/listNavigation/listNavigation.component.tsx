@@ -17,6 +17,7 @@
 
 import { PureComponent } from 'react';
 
+import { isNumber } from 'lodash';
 import { LockPanelButton } from '../panelBarActions/lockPanelButton';
 import { Container, SkipNextIcon, SkipPreviousIcon, StyledIconButton } from './listNavigation.styles';
 
@@ -30,16 +31,18 @@ interface IProps {
 
 interface IState {
 	currentIndex: number;
+	initialItemsCount: number;
 }
 
 export class ListNavigation extends PureComponent<IProps, IState> {
 	public state = {
-		currentIndex: 0
+		currentIndex: 0,
+		initialItemsCount: 0,
 	};
 
 	public componentDidMount() {
-		if (this.props.initialIndex) {
-			this.setState({ currentIndex: this.props.initialIndex });
+		if (isNumber(this.props.initialIndex)) {
+			this.setState({ currentIndex: this.props.initialIndex, initialItemsCount: this.props.itemsCount });
 		}
 	}
 
@@ -49,7 +52,7 @@ export class ListNavigation extends PureComponent<IProps, IState> {
 
 	public handleNavigation = ( skip ) => {
 		const index =  (this.props.itemsCount +  this.state.currentIndex + skip) % this.props.itemsCount ;
-		this.setState({ currentIndex: index }, this.handleChange);
+		this.setState({ currentIndex: index, initialItemsCount: this.props.itemsCount }, this.handleChange);
 	}
 
 	public handlePrevItem = () => {
@@ -57,18 +60,23 @@ export class ListNavigation extends PureComponent<IProps, IState> {
 	}
 
 	public handleNextItem = () => {
-		this.handleNavigation(1);
+		if (this.state.initialItemsCount === this.props.itemsCount) {
+			this.handleNavigation(1);
+		} else {
+			this.handleNavigation(0);
+		}
 	}
 
 	public render() {
 		const { panelType } = this.props;
+		const disableArrows = this.state.initialItemsCount <= 1;
 		return (
 			<Container>
 				{panelType && <LockPanelButton type={panelType} />}
-				<StyledIconButton onClick={this.handlePrevItem}>
+				<StyledIconButton onClick={this.handlePrevItem} disabled={disableArrows}>
 					<SkipPreviousIcon />
 				</StyledIconButton>
-				<StyledIconButton onClick={this.handleNextItem}>
+				<StyledIconButton onClick={this.handleNextItem} disabled={disableArrows}>
 					<SkipNextIcon />
 				</StyledIconButton>
 			</Container>

@@ -20,7 +20,6 @@ import PlusIcon from '@assets/icons/viewer/plus.svg';
 
 export const Section = styled.div`
 	display: inherit;
-	overflow: hidden;
 `;
 
 export const Container = styled.div`

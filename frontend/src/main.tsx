@@ -30,7 +30,7 @@ import { Root as V5Root } from '@/v5/ui/routes';
 
 import { UnityUtil } from '@/globals/unity-util';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { formatMessage, getIntlProviderProps, initializeIntl } from '@/v5/services/intl';
+import { formatMessage, getIntl, initializeIntl } from '@/v5/services/intl';
 import { initializeActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 import { IntlProvider } from 'react-intl';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -45,6 +45,7 @@ import rootSaga from './v4/modules/sagas';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { AuthenticatedRoute } from './v5/services/routing/authenticatedRoute.component';
 import { initializeGoogleTagManager } from './v5/services/googleTagManager';
+import { initializeHotjar } from './v5/services/hotjar';
 
 window.UnityUtil = UnityUtil;
 
@@ -53,6 +54,8 @@ initializeActionsDispatchers(dispatch);
 initializeIntl(navigator.language);
 
 initializeSocket(clientConfigService.chatConfig);
+
+initializeHotjar();
 
 initializeGoogleTagManager();
 
@@ -65,14 +68,14 @@ const render = () => {
 	ReactDOM.render(
 		<Provider store={store as any}>
 			<ConnectedRouter history={history as History}>
-				<IntlProvider {...getIntlProviderProps()}>
+				<IntlProvider {...getIntl()}>
 					<LocalizationProvider dateAdapter={AdapterDayjs}>
 						<Switch>
 							<Route exact path="/">
 								<Redirect to={{ pathname:'v5/' }} />
 							</Route>
-							<Route exact path={ROUTES.SIGN_UP}>
-								<Redirect to={{ pathname: V5_SIGN_UP_PATH + window.location.search }} />
+							<Route path={ROUTES.SIGN_UP}>
+								<Redirect to={{ pathname: V5_SIGN_UP_PATH, search: window.location.search }} />
 							</Route>
 							<Route exact path={ROUTES.LOGIN}>
 								<Redirect to={{ pathname: V5_LOGIN_PATH }} />

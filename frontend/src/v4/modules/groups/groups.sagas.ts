@@ -34,7 +34,6 @@ import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { TreeActions, TreeTypes, selectTreeNodesList } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
-import { SequencesActions } from '../sequences';
 import { GroupsActions, GroupsTypes, INITIAL_CRITERIA_FIELD_STATE } from './groups.redux';
 import {
 	selectActiveGroupDetails,

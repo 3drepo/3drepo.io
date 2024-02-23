@@ -44,8 +44,10 @@ const getGroup = (isFed) => async (req, res, next) => {
 	const { teamspace, project, model, ticket, group } = params;
 
 	try {
+		const convertToMeshIds = query.convertIds !== 'false';
 		const getGroupById = isFed ? getFedGroup : getConGroup;
-		req.groupData = await getGroupById(teamspace, project, model, stringToUUID(query.revId), ticket, group);
+		req.groupData = await getGroupById(teamspace, project, model, stringToUUID(query.revId), ticket, group,
+			convertToMeshIds);
 		await next();
 	} catch (err) {
 		// istanbul ignore next
@@ -124,6 +126,11 @@ const establishRoutes = (isFed) => {
 	 *         in: query
 	 *         schema:
 	 *           type: string
+	 *       - name: convertIds
+	 *         description: Flag to define whether object Ids should be converted to mesh Ids or returned as external Ids
+	 *         in: query
+	 *         schema:
+	 *           type: boolean
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"

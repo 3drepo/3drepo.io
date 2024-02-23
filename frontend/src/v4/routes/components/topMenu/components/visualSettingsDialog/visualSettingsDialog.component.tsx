@@ -520,7 +520,10 @@ const Buttons = (props) => {
 				variant="contained"
 				disabled={isEqual(form.values, DEFAULT_SETTINGS)}
 				type="button"
-				onClick={() => form.setValues(DEFAULT_SETTINGS)}
+				onClick={() => {
+					form.setValues(DEFAULT_SETTINGS);
+					props.hideWarning();
+				}}
 			>
 					Reset
 				</NegativeActionButton>
@@ -581,15 +584,21 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 
 	public onSubmit = (values) => {
 		const { updateSettings, currentUser} = this.props;
+		const parsedValues = {
+			...values,
+			nearPlane: Number(values.nearPlane),
+			unityMemory: Number(values.unityMemory),
+			farPlaneSamplingPoints: Number(values.farPlaneSamplingPoints),
+			maxShadowDistance: Number(values.maxShadowDistance),
+		};
 
-		values.nearPlane = Number(values.nearPlane);
-		values.unityMemory = Number(values.unityMemory);
-		values.farPlaneSamplingPoints = Number(values.farPlaneSamplingPoints);
-		values.maxShadowDistance = Number(values.maxShadowDistance);
-
-		updateSettings(currentUser, values);
+		updateSettings(currentUser, parsedValues);
 
 		this.props.handleClose();
+	}
+
+	public hideWarning = () => {
+		this.setState({ showCacheWarning: false });
 	}
 
 	public componentDidMount() {
@@ -627,7 +636,7 @@ export class VisualSettingsDialog extends PureComponent<IProps, IState> {
 						{selectedTab === 1 && <AdvancedSettings />}
 						{selectedTab === 2 && <StreamingSettings />}
 						{selectedTab === 0 && showCacheWarning && <CacheWarning />}
-						<Buttons onClickCancel={handleClose} />
+						<Buttons onClickCancel={handleClose} hideWarning={this.hideWarning} />
 					</Form>
 				</Formik>
 			</VisualSettingsDialogContent>

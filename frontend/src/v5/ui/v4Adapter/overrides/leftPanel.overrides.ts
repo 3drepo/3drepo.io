@@ -66,6 +66,11 @@ export default css`
 				height: 32px;
 				width: 32px;
 				margin: 0 0 0 5px;
+
+				&.Mui-disabled {
+					color: ${({ theme }) => theme.palette.base.lightest};
+				}
+
 				svg {
 					font-size: 1.2rem;
 				}
@@ -120,6 +125,10 @@ export default css`
 					height: 32px;
 					width: 32px;
 					margin: 0 0 0 5px;
+
+					&.Mui-disabled {
+						color: ${({ theme }) => theme.palette.base.lightest};
+					}
 
 					svg {
 						font-size: 1.2rem;
@@ -182,6 +191,7 @@ export default css`
 			color: ${({ theme }) => theme.palette.base.light} !important;
 			box-sizing: border-box;
 			border-color: ${({ theme }) => theme.palette.base.lightest};
+			z-index: 0;
 
 			${StyledIconButton} {
 				height: 26px;

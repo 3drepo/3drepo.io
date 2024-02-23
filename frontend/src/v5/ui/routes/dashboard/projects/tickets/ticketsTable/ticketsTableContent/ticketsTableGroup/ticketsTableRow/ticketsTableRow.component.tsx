@@ -16,7 +16,7 @@
  */
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { ProjectsHooksSelectors, TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { useContext } from 'react';
 import { SearchContext } from '@controls/search/searchContext';
@@ -33,14 +33,15 @@ import { Row, Cell, CellChipText, CellOwner, OverflowContainer, SmallFont, CellD
 type TicketsTableRowProps = {
 	ticket: ITicket,
 	showModelName: boolean,
-	modelName: string,
+	modelId: string,
 	selected: boolean,
 	onClick: () => void,
 };
-export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, selected }: TicketsTableRowProps) => {
+export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selected }: TicketsTableRowProps) => {
 	const { query } = useContext(SearchContext);
 	const { _id: id, title, properties, number, type, modules } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
+	const { name: modelName } = ContainersHooksSelectors.selectContainerById(modelId) || FederationsHooksSelectors.selectFederationById(modelId);
 
 	if (!properties || !template?.code) return null;
 
@@ -83,7 +84,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 					</OverflowContainer>
 				</Tooltip>
 			</Cell>
-			<Cell width={187} hidden={!showModelName}>
+			<Cell width={145} hidden={!showModelName}>
 				<Tooltip title={modelName}>
 					<OverflowContainer>
 						<Highlight search={query}>
@@ -92,7 +93,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 					</OverflowContainer>
 				</Tooltip>
 			</Cell>
-			<Cell width={109}>
+			<Cell width={127}>
 				<SmallFont>
 					{formatShortDateTime(createdAt)}
 				</SmallFont>
@@ -100,16 +101,16 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelName, sel
 			<Cell width={96} hidden={!hasProperties}>
 				{!!assignees?.length && (<AssigneesSelect value={assignees} multiple disabled />)}
 			</Cell>
-			<CellOwner width={62}>
+			<CellOwner width={52}>
 				<UserPopoverCircle user={ownerAsUser} />
 			</CellOwner>
-			<CellDate width={126} hidden={!hasProperties}>
+			<CellDate width={147} hidden={!hasProperties}>
 				{!!dueDate && (<DueDateWithIcon value={dueDate} disabled />)}
 			</CellDate>
 			<CellChipText width={90} hidden={!hasProperties}>
 				<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
 			</CellChipText>
-			<CellChipText width={100} hidden={!hasProperties}>
+			<CellChipText width={110}>
 				<Chip {...STATUS_MAP[status]} variant="text" />
 			</CellChipText>
 			<Cell width={137} hidden={!hasSafetibase}>

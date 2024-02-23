@@ -68,6 +68,8 @@ const TemplateConstants = { propTypes, presetEnumValues, presetModules, riskLeve
 
 TemplateConstants.riskLevelsToNum = (value) => riskLevelsArr.indexOf(value);
 
+TemplateConstants.statusTypes = ['open', 'active', 'review', 'done', 'void'];
+
 TemplateConstants.presetModulesProperties = {
 	[presetModules.SEQUENCING]: [
 		createPropertyEntry('Start Time', propTypes.DATE),
@@ -99,7 +101,7 @@ TemplateConstants.presetModulesProperties = {
 
 };
 
-TemplateConstants.defaultProperties = [
+const defaultProperties = [
 	createPropertyEntry('Description', propTypes.LONG_TEXT),
 	createPropertyEntry('Owner', propTypes.TEXT, undefined, undefined, true),
 	createPropertyEntry('Created at', propTypes.DATE, undefined, undefined, true),
@@ -107,16 +109,34 @@ TemplateConstants.defaultProperties = [
 	createPropertyEntry('Default Image', propTypes.IMAGE, undefined, undefined, undefined, ({ defaultImage }) => defaultImage),
 	createPropertyEntry('Default View', propTypes.VIEW, undefined, undefined, undefined, ({ defaultView }) => defaultView),
 	createPropertyEntry('Priority', propTypes.ONE_OF, ['None', 'Low', 'Medium', 'High'], 'None', undefined, ({ issueProperties }) => issueProperties),
-	createPropertyEntry('Status', propTypes.ONE_OF, ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], 'Open', undefined, ({ issueProperties }) => issueProperties),
 	createPropertyEntry('Assignees', propTypes.MANY_OF, presetEnumValues.JOBS_AND_USERS, undefined, undefined, ({ issueProperties }) => issueProperties),
 	createPropertyEntry('Due Date', propTypes.DATE, undefined, undefined, undefined, ({ issueProperties }) => issueProperties),
-	createPropertyEntry('Pin', propTypes.COORDS, undefined, undefined, undefined, ({ pin }) => pin),
-
 ];
 
-TemplateConstants.basePropertyLabels = createConstantMapping(TemplateConstants.defaultProperties.map(
-	({ name }) => name,
-));
+const createCustomPropertyFn = (propertyObj, customiseFn) => (config) => customiseFn(propertyObj, config);
+
+const statusCustomiseFn = (prop, config) => {
+	if (config?.status) {
+		const { values: valuesMap, default: defaultVal } = config.status;
+
+		const values = valuesMap.map(({ name }) => name);
+
+		return { ...prop, values, default: defaultVal };
+	}
+	return prop;
+};
+
+const pinCustomiseFn = (prop, config) => (config?.pin?.color ? { ...prop, color: config.pin.color } : prop);
+
+const customisableProperties = [
+	createCustomPropertyFn(createPropertyEntry('Status', propTypes.ONE_OF, ['Open', 'In Progress', 'For Approval', 'Closed', 'Void'], 'Open'), statusCustomiseFn),
+	createCustomPropertyFn(createPropertyEntry('Pin', propTypes.COORDS, undefined, undefined, undefined, ({ pin }) => pin), pinCustomiseFn),
+];
+
+TemplateConstants.basePropertyLabels = createConstantMapping([
+	...defaultProperties.map(({ name }) => name),
+	...customisableProperties.map((fn) => { const { name } = fn({}); return name; }),
+]);
 
 TemplateConstants.modulePropertyLabels = {};
 
@@ -127,8 +147,14 @@ Object.keys(TemplateConstants.presetModulesProperties).forEach((module) => {
 	);
 });
 
-TemplateConstants.getApplicableDefaultProperties = (config) => TemplateConstants.defaultProperties.flatMap(
-	({ availableIf, ...prop }) => (!availableIf || availableIf(config) ? prop : []),
-);
+TemplateConstants.getApplicableDefaultProperties = (config) => [
+	...defaultProperties.flatMap(
+		({ availableIf, ...prop }) => (!availableIf || availableIf(config) ? prop : []),
+	),
+	...customisableProperties.flatMap((createFn) => {
+		const { availableIf, ...prop } = createFn(config);
+		return !availableIf || availableIf(config) ? prop : [];
+	}),
+];
 
 module.exports = TemplateConstants;

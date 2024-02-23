@@ -53,7 +53,7 @@ const utils = require("../utils");
  *     "permissions": {
  *       "projects": [
  *         {
- *           "project": "Bim Logo",
+ *           "project": '5bf7df65-f3a8-4337-8016-a63f00000000',
  *           "project_admin": true
  *         }
  *       ]
@@ -65,7 +65,7 @@ const utils = require("../utils");
  *     "permissions": {
  *       "projects": [
  *         {
- *           "project": "Bim Logo",
+ *           "project": '5bf7df65-f3a8-4337-8016-a63f00000000',
  *           "models": [
  *             {
  *               "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f",

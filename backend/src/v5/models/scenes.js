@@ -23,4 +23,7 @@ const getCollection = (model) => `${model}.scene`;
 Scene.getNodesBySharedIds = (teamspace, project, model, revId, sharedIds, projection) => db.find(
 	teamspace, getCollection(model), { rev_id: revId, shared_id: { $in: sharedIds } }, projection);
 
+Scene.getNodesByIds = (teamspace, project, model, ids, projection) => db.find(
+	teamspace, getCollection(model), { _id: { $in: ids } }, projection);
+
 module.exports = Scene;

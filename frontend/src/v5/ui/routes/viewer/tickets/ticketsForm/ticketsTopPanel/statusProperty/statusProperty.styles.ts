@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,27 +17,7 @@
 
 import styled from 'styled-components';
 
-export const IssuePropertiesContainer = styled.div`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	height: 50px;
-	padding: 10px 2px 0;
-	display: inline-flex;
-	align-items: center;
-	width: 100%;
-	box-sizing: border-box;
-	border-top: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
-	margin-bottom: -3px;
-
-	&:not(:last-child) {
-		border-bottom: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
-		margin-bottom: 13px;
-		padding-bottom: 10px;
-	}
-`;
-
-export const PropertyColumn = styled.span`
-	width: fit-content;
-	min-width: 57px;
+export const Property = styled.div`
 	.MuiChip-root {
 		padding: 0;
 	}
@@ -46,15 +26,4 @@ export const PropertyColumn = styled.span`
 export const PropertyTitle = styled.div`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
-`;
-
-export const ColumnSeparator = styled.div`
-	height: 100%;
-	border-left: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
-	margin: 0 10px;
-`;
-
-export const AssigneesWrapper = styled.span`
-	margin-left: auto;
-	display: flex;
 `;

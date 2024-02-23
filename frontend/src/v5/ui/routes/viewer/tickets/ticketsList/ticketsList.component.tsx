@@ -21,7 +21,6 @@ import { uniq, xor } from 'lodash';
 import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
-import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { formatMessage } from '@/v5/services/intl';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
@@ -31,7 +30,6 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, Filters, CompletedFilterChip } from './ticketsList.styles';
 import { ViewerParams } from '../../../routes.constants';
-import { AdditionalProperties } from '../tickets.constants';
 import { hasDefaultPin } from '../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { TicketSearchInput } from './ticketSearchInput/ticketSearchInput.component';
 
@@ -40,7 +38,7 @@ type TicketsListProps = {
 };
 
 export const TicketsList = ({ tickets }: TicketsListProps) => {
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
 	const selectedTemplates = TicketsCardHooksSelectors.selectFilteringTemplates();
@@ -66,13 +64,8 @@ export const TicketsList = ({ tickets }: TicketsListProps) => {
 			TicketsCardActionsDispatchers.openTicket(ticket._id);
 		}
 
-		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id);
+		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id, revision);
 	};
-
-	useEffect(() => {
-		const view = selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
-		goToView(view);
-	}, [selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW]]);
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setSelectedTicketPin(selectedTicket?._id);

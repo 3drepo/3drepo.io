@@ -81,19 +81,13 @@ export const getRelativeTime = (from: Date | number) => {
 	return formatRelativeTime(-Math.floor(daysDifference / 365), TIME_UNIT.year);
 };
 
-// The default fomatDate format is DD/MM/YYYY
-export const formatShortDate = (date) => formatDate(date, { // DD/MM/YY
-	day: 'numeric',
-	month: 'numeric',
-	year: '2-digit',
-});
-
 export const formatShortDateTime = (date) => formatDate(date, { // DD MM YYYY hh:mm
 	hour: 'numeric',
 	minute: 'numeric',
 	day: 'numeric',
 	month: 'numeric',
 	year: 'numeric',
+	hour12: false,
 }).replaceAll(',', '');
 
 
@@ -103,4 +97,5 @@ export const formatLongDateTime = (date) => formatDate(date, { // DD Month YYYY 
 	day: 'numeric',
 	month: 'long',
 	year: 'numeric',
+	hour12: false,
 });

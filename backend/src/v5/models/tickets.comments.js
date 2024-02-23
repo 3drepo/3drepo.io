@@ -47,8 +47,17 @@ TicketComments.getCommentById = async (teamspace, project, model, ticket, _id,
 };
 
 TicketComments.getCommentsByTicket = (teamspace, project, model, ticket,
-	projection = { teamspace: 0, project: 0, model: 0, ticket: 0 },
-	sort = { createdAt: -1 }) => findMany(teamspace, { teamspace, project, model, ticket }, projection, sort);
+	{
+		projection = { teamspace: 0, project: 0, model: 0, ticket: 0 },
+		updatedSince,
+		sort = { createdAt: -1 },
+	} = {}) => {
+	const query = { teamspace, project, model, ticket };
+	if (updatedSince) {
+		query.updatedAt = { $gt: updatedSince };
+	}
+	return findMany(teamspace, query, projection, sort);
+};
 
 TicketComments.addComment = async (teamspace, project, model, ticket, commentData, author) => {
 	const _id = generateUUID();

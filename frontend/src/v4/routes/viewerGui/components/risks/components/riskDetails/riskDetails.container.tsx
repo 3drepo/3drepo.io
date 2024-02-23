@@ -35,6 +35,7 @@ import {
 	selectPostCommentIsPending,
 	selectRisks,
 	RisksActions,
+	selectFilteredRisks,
 } from '../../../../../../modules/risks';
 import {
 	selectEndDate,
@@ -53,6 +54,7 @@ const mapStateToProps = createStructuredSelector({
 	comments: selectActiveRiskComments,
 	jobs: selectJobsList,
 	risks: selectRisks,
+	filteredRisks: selectFilteredRisks,
 	expandDetails: selectExpandDetails,
 	fetchingDetailsIsPending: selectFetchingDetailsIsPending,
 	newComment: selectNewComment,
@@ -75,6 +77,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchRisk: RisksActions.fetchRisk,
 	saveRisk: RisksActions.saveRisk,
 	updateRisk: RisksActions.updateRisk,
+	setActiveRisk: RisksActions.setActiveRisk,
 	updateViewpoint: RisksActions.updateActiveRiskViewpoint,
 	cloneRisk: RisksActions.cloneRisk,
 	postComment: RisksActions.postComment,

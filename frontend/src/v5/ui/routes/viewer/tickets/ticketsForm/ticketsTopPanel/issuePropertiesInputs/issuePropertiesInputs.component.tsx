@@ -16,21 +16,21 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { PRIORITY_LEVELS_MAP, STATUS_MAP } from '@controls/chip/chip.types';
-import { FormAssigneesSelect, FormChipSelect, FormDueDateWithIcon } from '@controls/inputs/formInputs.component';
-
+import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
+import { FormChipSelect, FormDueDateWithIcon } from '@controls/inputs/formInputs.component';
 import { FormattedMessage } from 'react-intl';
 import { IssueProperties } from '../../../tickets.constants';
-import { ColumnSeparator, AssigneesWrapper, IssuePropertiesContainer, PropertyColumn, PropertyTitle } from './issuePropertiesRow.styles';
+import { Property, PropertyTitle } from '../statusProperty/statusProperty.styles';
+import { StatusProperty } from '../statusProperty/statusProperty.component';
 
-type IIssuePropertiesRow = {
+type IIssuePropertiesInputs = {
 	onBlur: () => void;
 	readOnly: boolean;
 };
-
-export const IssuePropertiesRow = ({ onBlur, readOnly }: IIssuePropertiesRow) => (
-	<IssuePropertiesContainer>
-		<PropertyColumn>
+export const IssuePropertiesInputs = ({ onBlur, readOnly }: IIssuePropertiesInputs) => (
+	<>
+		<StatusProperty onBlur={onBlur} readOnly={readOnly} />
+		<Property>
 			<PropertyTitle>
 				<FormattedMessage
 					id="ticketTopPanel.priority.label"
@@ -49,9 +49,8 @@ export const IssuePropertiesRow = ({ onBlur, readOnly }: IIssuePropertiesRow) =>
 				values={PRIORITY_LEVELS_MAP}
 				disabled={readOnly}
 			/>
-		</PropertyColumn>
-		<ColumnSeparator />
-		<PropertyColumn>
+		</Property>
+		<Property>
 			<PropertyTitle>
 				<FormattedMessage
 					id="ticketTopPanel.dueDate.label"
@@ -68,37 +67,6 @@ export const IssuePropertiesRow = ({ onBlur, readOnly }: IIssuePropertiesRow) =>
 				key={IssueProperties.DUE_DATE}
 				disabled={readOnly}
 			/>
-		</PropertyColumn>
-		<ColumnSeparator />
-		<PropertyColumn>
-			<PropertyTitle>
-				<FormattedMessage
-					id="ticketTopPanel.status.label"
-					defaultMessage="Status"
-				/>
-			</PropertyTitle>
-			<FormChipSelect
-				variant="text"
-				tooltip={formatMessage({
-					id: 'customTicket.topPanel.status.tooltip',
-					defaultMessage: 'Set status',
-				})}
-				name={`properties[${IssueProperties.STATUS}]`}
-				onBlur={onBlur}
-				key={IssueProperties.STATUS}
-				values={STATUS_MAP}
-				disabled={readOnly}
-			/>
-		</PropertyColumn>
-		<AssigneesWrapper>
-			<FormAssigneesSelect
-				name={`properties[${IssueProperties.ASSIGNEES}]`}
-				onBlur={onBlur}
-				key={IssueProperties.ASSIGNEES}
-				disabled={readOnly}
-				showAddButton
-				multiple
-			/>
-		</AssigneesWrapper>
-	</IssuePropertiesContainer>
+		</Property>
+	</>
 );

@@ -2277,9 +2277,9 @@ function getSRC(req, res, next) {
 	const {account, model, uid} = req.params;
 
 	// FIXME: We should probably generalise this and have a model assets object.
-	SrcAssets.getSRC(account, model, uid).then(file => {
+	SrcAssets.getSRC(account, model, uid).then(({ readStream, size, mimeType, encoding }) => {
 		req.params.format = "src";
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file.file, undefined, config.cachePolicy);
+		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, undefined, size, { mimeType, encoding });
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

@@ -47,7 +47,7 @@ import { DialogActions } from '../dialog';
 import { selectJobsList, selectMyJob } from '../jobs';
 import { selectCurrentModel, selectCurrentModelTeamspace } from '../model';
 import { selectQueryParams, selectUrlParams } from '../router/router.selectors';
-import { selectSelectedStartingDate, SequencesActions } from '../sequences';
+import { selectSelectedSequence, selectSelectedStartingDate, SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
 import { dispatch, getState } from '../store';
 import { selectTopicTypes } from '../teamspace';
@@ -294,10 +294,12 @@ function* setActiveIssue({ issue, revision, ignoreViewer = false }) {
 			const { account, model, _id } = issue;
 			yield put(IssuesActions.subscribeOnIssueCommentsChanges(account, model, _id));
 
-			yield all([
-				!ignoreViewer ? put(ViewpointsActions.showViewpoint(issue?.account, issue?.model, issue)) : null,
-				put(IssuesActions.setComponentState({ activeIssue: issue._id, expandDetails: true }))
-			]);
+			const sequenceCardIsActive = !!(yield select(selectSelectedSequence));
+			const willSetSequenceDate = sequenceCardIsActive && issue?.sequence_start;
+			if (!ignoreViewer && !willSetSequenceDate) {
+				yield put(ViewpointsActions.showViewpoint(issue?.account, issue?.model, issue));
+			}
+			yield put(IssuesActions.setComponentState({ activeIssue: issue._id, expandDetails: true }));
 		} else {
 			yield put(IssuesActions.setComponentState({ activeIssue: null }));
 			yield put(TreeActions.clearCurrentlySelected());

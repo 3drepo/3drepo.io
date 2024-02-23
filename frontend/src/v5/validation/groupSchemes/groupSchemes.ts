@@ -19,6 +19,7 @@ import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { isEqual } from 'lodash';
 import { OPERATIONS_TYPES } from '@/v5/store/tickets/tickets.types';
+import { nullableString } from '../shared/validators';
 
 const requiredTrimmedString = Yup.string().trim().required(
 	formatMessage({
@@ -53,7 +54,7 @@ export const GroupRuleSchema = Yup.object().shape({
 
 const GroupSchema = Yup.object().shape({
 	name: requiredTrimmedString,
-	description: Yup.string().max(1200, formatMessage({
+	description: nullableString.max(1200, formatMessage({
 		id: 'validation.group.description.error.max',
 		defaultMessage: 'Description is limited to 1200 characters',
 	})),

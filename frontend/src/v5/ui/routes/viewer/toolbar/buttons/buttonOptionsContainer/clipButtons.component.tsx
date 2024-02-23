@@ -23,14 +23,15 @@ import { useEffect, useState } from 'react';
 import { ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Viewer } from '@/v4/services/viewer/viewer';
-import { VIEWER_EVENTS } from '@/v4/constants/viewer';
+import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { ButtonOptionsContainer, FloatingButtonsContainer, FloatingButton } from './multioptionIcons.styles';
 import { ClipMode } from '../../toolbar.types';
 import { ToolbarButton } from '../toolbarButton.component';
 
-const clipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.clip', defaultMessage: 'Clip' });
-const startBoxClipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.clip.startBox', defaultMessage: 'Start Box Clip' });
-const startSingleClipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.clip.startSingle', defaultMessage: 'Start Single Clip' });
+const clipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.sectioning', defaultMessage: 'Sectioning' });
+const startBoxClipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.sectioning.boxSection', defaultMessage: 'Section By Box' });
+const startSingleClipTooltipText = formatMessage({ id: 'viewer.toolbar.icon.sectioning.planeSection', defaultMessage: 'Section By Plane' });
+
 export const ClipButtons = () => {
 	const [expanded, setExpanded] = useState(false);
 	const clipMode: ClipMode = ViewerGuiHooksSelectors.selectClippingMode();
@@ -39,11 +40,16 @@ export const ClipButtons = () => {
 	const setMode = (mode: ClipMode) => {
 		setExpanded(false);
 		ViewerGuiActionsDispatchers.setClippingMode(mode);
+		ViewerGuiActionsDispatchers.setClipEdit(true);
 	};
 
 	useEffect(() => {
-		Viewer.on(VIEWER_EVENTS.UPDATE_NUM_CLIP, ViewerGuiActionsDispatchers.updateClipState);
-		return () => Viewer.off(VIEWER_EVENTS.UPDATE_NUM_CLIP, ViewerGuiActionsDispatchers.updateClipState);
+		Viewer.on(VIEWER_EVENTS.UPDATE_CLIP_EDIT, ViewerGuiActionsDispatchers.setClipEdit);
+		Viewer.on(VIEWER_EVENTS.UPDATE_CLIP_MODE, (mode: ClipMode) => ViewerGuiActionsDispatchers.setClippingMode(mode));
+		return () => {
+			Viewer.off(VIEWER_EVENTS.UPDATE_CLIP_EDIT, ViewerGuiActionsDispatchers.setClipEdit);
+			Viewer.off(VIEWER_EVENTS.UPDATE_CLIP_MODE, () => ViewerGuiActionsDispatchers.setClippingMode(null));
+		};
 	}, []);
 
 	if (clipMode === null) {
@@ -52,8 +58,8 @@ export const ClipButtons = () => {
 				<ButtonOptionsContainer>
 					{expanded && (
 						<FloatingButtonsContainer>
-							<FloatingButton Icon={ClipBoxIcon} onClick={() => setMode('BOX')} title={startBoxClipTooltipText} />
-							<FloatingButton Icon={ClipPlaneIcon} onClick={() => setMode('SINGLE')} title={startSingleClipTooltipText} />
+							<FloatingButton Icon={ClipBoxIcon} onClick={() => setMode(VIEWER_CLIP_MODES.BOX)} title={startBoxClipTooltipText} />
+							<FloatingButton Icon={ClipPlaneIcon} onClick={() => setMode(VIEWER_CLIP_MODES.SINGLE)} title={startSingleClipTooltipText} />
 						</FloatingButtonsContainer>
 					)}
 					<ToolbarButton Icon={ClipPlaneIcon} onClick={() => setExpanded(!expanded)} title={!expanded ? clipTooltipText : ''} />

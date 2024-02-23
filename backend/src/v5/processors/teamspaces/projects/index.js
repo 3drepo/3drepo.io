@@ -19,7 +19,7 @@ const { createProject, deleteProject, getProjectById, getProjectList, updateProj
 const { getFile, removeFile, storeFile } = require('../../../services/filesManager');
 const {
 	hasProjectAdminPermissions,
-	hasReadAccessToModel,
+	hasReadAccessToSomeModels,
 	isTeamspaceAdmin,
 } = require('../../../utils/permissions/permissions');
 const { COL_NAME } = require('../../../models/projectSettings.constants');
@@ -28,17 +28,14 @@ const { removeModelData } = require('../../../utils/helper/models');
 
 const Projects = {};
 
-const hasSomeModelAccess = async (teamspace, project, models, user) => {
-	const modelAccess = await Promise.all(models.map((model) => hasReadAccessToModel(teamspace, project, model, user)));
-	return modelAccess.some((bool) => bool);
-};
-
 Projects.getProjectList = async (teamspace, user) => {
-	const projects = await getProjectList(teamspace, { _id: 1, name: 1, permissions: 1, models: 1 });
-	const tsAdmin = await isTeamspaceAdmin(teamspace, user);
+	const [projects, tsAdmin] = await Promise.all([
+		getProjectList(teamspace, { _id: 1, name: 1, permissions: 1, models: 1 }),
+		isTeamspaceAdmin(teamspace, user),
+	]);
 	return (await Promise.all(projects.map(async ({ _id, name, permissions, models }) => {
 		const isAdmin = tsAdmin || hasProjectAdminPermissions(permissions, user);
-		const hasAccess = isAdmin || await hasSomeModelAccess(teamspace, _id, models, user);
+		const hasAccess = isAdmin || await hasReadAccessToSomeModels(teamspace, _id, models, user);
 		return hasAccess ? { _id, name, isAdmin } : [];
 	}))).flat();
 };

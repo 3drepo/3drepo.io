@@ -41,12 +41,12 @@ import { selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 
-export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsAction) {
+export function* fetchTickets({ teamspace, projectId, modelId, isFederation, filter }: FetchTicketsAction) {
 	try {
 		const fetchModelTickets = isFederation
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
-		const tickets = yield fetchModelTickets(teamspace, projectId, modelId);
+		const tickets = yield fetchModelTickets(teamspace, projectId, modelId, filter);
 		yield put(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -59,14 +59,14 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation }: F
 	}
 }
 
-export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFederation }: FetchTicketAction) {
+export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFederation, revision }: FetchTicketAction) {
 	try {
 		const fetchModelTicket = isFederation
 			? API.Tickets.fetchFederationTicket
 			: API.Tickets.fetchContainerTicket;
 		const ticket = yield fetchModelTicket(teamspace, projectId, modelId, ticketId);
 		yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
-		yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticketId));
+		yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticketId, revision));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
@@ -202,7 +202,7 @@ const appendPropertiesGroupsToArray = (groupsIds: any[], properties: object) => 
 	});
 };
 
-const getTicketsGroupsIds = (ticket:ITicket) => {
+const getTicketsGroupsIds = (ticket: ITicket) => {
 	const groupsIds = [];
 
 	appendPropertiesGroupsToArray(groupsIds, ticket.properties);
@@ -215,7 +215,7 @@ const getTicketsGroupsIds = (ticket:ITicket) => {
 	return groupsIds;
 };
 
-export function* fetchTicketGroups({ teamspace, projectId, modelId, ticketId }: FetchTicketGroupsAction) {
+export function* fetchTicketGroups({ teamspace, projectId, modelId, ticketId, revision }: FetchTicketGroupsAction) {
 	try {
 		const ticket: ITicket = yield select(selectTicketByIdRaw, modelId, ticketId);
 		const fetchedGroups = yield select(selectTicketsGroups);
@@ -225,7 +225,7 @@ export function* fetchTicketGroups({ teamspace, projectId, modelId, ticketId }: 
 		const groupsIds = getTicketsGroupsIds(ticket).filter((id) => isString(id) && !fetchedGroups[id]);
 
 		const groups = yield all(
-			groupsIds.map((groupId) => API.Tickets.fetchTicketGroup(teamspace, projectId, modelId, ticketId, groupId, isFed)),
+			groupsIds.map((groupId) => API.Tickets.fetchTicketGroup(teamspace, projectId, modelId, ticketId, groupId, isFed, revision)),
 		);
 
 		yield put(TicketsActions.fetchTicketGroupsSuccess(groups));
@@ -239,9 +239,9 @@ export function* fetchTicketGroups({ teamspace, projectId, modelId, ticketId }: 
 	}
 }
 
-export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, ticket }: UpsertTicketAndFetchGroupsAction) {
+export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, ticket, revision }: UpsertTicketAndFetchGroupsAction) {
 	yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
-	yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id));
+	yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id, revision));
 }
 
 export default function* ticketsSaga() {

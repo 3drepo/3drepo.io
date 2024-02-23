@@ -50,6 +50,7 @@ interface IProps {
 	expanded?: boolean;
 	selected?: boolean;
 	active?: boolean;
+	activeNodeIsVisible?: boolean;
 	hasFederationRoot?: boolean;
 	collapseNodes?: (nodesIds: string[]) => void;
 	expandNodes?: (id) => void;
@@ -178,7 +179,7 @@ export class TreeNode extends PureComponent<IProps, any> {
 	}
 
 	public render() {
-		const { expanded, isSearchResult, style, key, active, hasFederationRoot } = this.props;
+		const { expanded, isSearchResult, style, key, active, hasFederationRoot, activeNodeIsVisible } = this.props;
 
 		return (
 			<Tooltip title={this.node.name.trim()} placement="bottom">
@@ -189,6 +190,7 @@ export class TreeNode extends PureComponent<IProps, any> {
 					expandable={this.node.expandable && !this.isModelRoot}
 					selected={this.isSelected}
 					active={active}
+					activeNodeIsVisible={activeNodeIsVisible}
 					highlighted={this.isHighlighted}
 					expanded={isSearchResult && expanded}
 					level={this.level}

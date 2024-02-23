@@ -29,11 +29,16 @@ const selectedStyles = css`
 
 const disabledStyles = css`
 	.primary, .highlight {
-		color: ${({ theme }) => theme.palette.base.lightest};
+		color: ${({ theme }) => theme.palette.base.main};
 	}
 `;
 
 export const ViewerIconContainer = styled.div<{ selected?: boolean, disabled?: boolean }>`
+	svg {
+		height: 18px;
+		width: 18px;
+	}
+	
 	.primary {
 		color: ${({ theme }) => theme.palette.secondary.lightest};
 	}

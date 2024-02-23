@@ -74,7 +74,10 @@ export const prepareContainerSettingsForFrontend = ({
 export const prepareContainerSettingsForBackend = ({
 	surveyPoint,
 	...otherProps
-}: ContainerSettings) => ({
-	surveyPoints: [surveyPoint],
-	...otherProps,
-});
+}: ContainerSettings) => {
+	if (!surveyPoint) return otherProps;
+	return {
+		surveyPoints: [surveyPoint],
+		...otherProps,
+	};
+};

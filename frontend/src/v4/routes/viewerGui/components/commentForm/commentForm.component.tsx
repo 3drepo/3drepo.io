@@ -64,6 +64,7 @@ interface IProps {
 	horizontal: boolean;
 	tickets: any[];
 	canComment: boolean;
+	hasNoPermission: boolean;
 	comment?: string;
 	screenshot?: string;
 	viewpoint?: any;
@@ -125,7 +126,10 @@ export class CommentForm extends PureComponent<IProps, IState> {
 		if (this.props.canComment) {
 			return 'Leave a comment';
 		}
-		return 'You are not able to comment';
+		if (this.props.hasNoPermission) {
+			return 'You do not have enough permission to comment'
+		}
+		return 'You cannot leave a comment on a closed item';
 	}
 
 	private filteredUsersList = (token) => this.props.teamspaceUsers.filter((user) =>
@@ -217,7 +221,6 @@ export class CommentForm extends PureComponent<IProps, IState> {
 			},
 		});
 
-		return usersTrigger;
 	}
 
 	public renderCommentField = renderWhenTrue(() => (

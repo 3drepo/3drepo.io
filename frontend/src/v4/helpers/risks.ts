@@ -40,7 +40,7 @@ export const prepareRisk = (risk, jobs = []) => {
 	const preparedRisk = {...risk};
 
 	if (risk.thumbnail) {
-		preparedRisk.thumbnail = risk.thumbnail.length ? getAPIUrl(risk.thumbnail) : '';
+		preparedRisk.thumbnail = `${getAPIUrl(risk.thumbnail)}?${new Date().getTime()}`;
 	}
 
 	const descriptionThumbnail = risk.viewpoint && risk.viewpoint.screenshot

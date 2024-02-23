@@ -99,6 +99,7 @@ const ticketAddedTest = () => {
                             new Date(getRes.body.properties[basePropertyLabels.UPDATED_AT]).getTime(),
 						[basePropertyLabels.CREATED_AT]:
                             new Date(getRes.body.properties[basePropertyLabels.CREATED_AT]).getTime(),
+						[basePropertyLabels.STATUS]: getRes.body.properties[basePropertyLabels.STATUS],
 					},
 					number: 1,
 				},
@@ -138,6 +139,7 @@ const ticketAddedTest = () => {
                             new Date(getRes.body.properties[basePropertyLabels.UPDATED_AT]).getTime(),
 						[basePropertyLabels.CREATED_AT]:
                             new Date(getRes.body.properties[basePropertyLabels.CREATED_AT]).getTime(),
+						[basePropertyLabels.STATUS]: getRes.body.properties[basePropertyLabels.STATUS],
 					},
 					number: 1,
 				},

@@ -60,9 +60,6 @@ export default css`
 	${RightPanels} {
 		margin-top: 8px;
 		box-sizing: border-box;
-		@media (min-width: 1520px) {
-			height: calc(100% - 38px);
-		}
 
 		${InputContainer} .react-autosuggest__container input {
 			height: 50px;

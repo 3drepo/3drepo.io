@@ -68,6 +68,7 @@ interface IProps {
 	showViewpoint: (teamspace, modelId, view) => void;
 	shareViewpointLink: (teamspace, modelId, viewId, project?, revision?) => void;
 	setDefaultViewpoint: (teamspace, modelId, viewId) => void;
+	clearDefaultViewpoint: (teamspace, modelId) => void;
 	setActiveViewpoint: (teamspace, modelId, view) => void;
 	subscribeOnViewpointChanges: (teamspace, modelId) => void;
 	unsubscribeOnViewpointChanges: (teamspace, modelId) => void;
@@ -157,6 +158,7 @@ export class Views extends PureComponent<IProps, any> {
 					onSaveEdit={this.handleUpdate(viewpoint._id)}
 					onChangeName={this.handleActiveViewpointChange}
 					onSetDefault={this.props.setDefaultViewpoint}
+					onClearDefault={this.props.clearDefaultViewpoint}
 					isAdmin={this.props.isAdmin}
 					defaultView={isDefaultView}
 				/>
