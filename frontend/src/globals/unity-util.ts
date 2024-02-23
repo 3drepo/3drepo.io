@@ -19,7 +19,7 @@
 /* eslint-enable no-var */
 
 import { IndexedDbCache } from './unity-indexedbcache';
-import { WebRequestHandler2 } from './unity-webrequesthandler2';
+import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
@@ -264,7 +264,7 @@ export class UnityUtil {
 		}
 
 		UnityUtil.unityDomain = new URL(domainURL || window.location.origin);
-		this.externalWebRequestHandler = new WebRequestHandler2(new IndexedDbCache(this.unityDomain)); // IndexedDbCache expects to find the worker at in [unityDomain]/unity/indexeddbworker.js
+		this.externalWebRequestHandler = new ExternalWebRequestHandler(new IndexedDbCache(this.unityDomain)); // IndexedDbCache expects to find the worker at in [unityDomain]/unity/indexeddbworker.js
 
 		const buildUrl = new URL(UnityUtil.unityBuildSubdirectory, UnityUtil.unityDomain);
 
