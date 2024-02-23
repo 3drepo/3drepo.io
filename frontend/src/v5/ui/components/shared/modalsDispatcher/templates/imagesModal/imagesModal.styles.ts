@@ -170,6 +170,7 @@ export const NextButton = styled(FloatingButton)<{ disabled?: boolean }>`
 	height: 38px;
 	min-width: 38px;
 	width: 38px;
+
 	& svg {
 		margin-left: 1px;
 		height: 25px;
