@@ -54,8 +54,7 @@ export class ExternalWebRequestHandler {
 	}
 
 	setAPIHost(hostNames: [string]) { // An array for backwards compatability reasons
-		// eslint-disable-next-line prefer-destructuring
-		this.apiHost = hostNames[0];
+		[this.apiHost] = hostNames;
 	}
 
 	/** Should direct to the cache object's read function. If the cache is
@@ -99,16 +98,26 @@ export class ExternalWebRequestHandler {
 
 		// Attempt to get the key from the cache. If this is successful it can be
 		// given directly to the viewer, otherwise retrieve it.
-		this.readCache(url, cache).then((result) => {
+		this.readCache(url, cache).then(async (result) => {
 			if (result !== undefined) {
 				resolve(result);
 				return Promise.resolve();
 			}
 
-			return fetch(this.getUrl(url)).then((response) => response.arrayBuffer()).then((data) => { // This promise is returned so that any exceptions it produces are caught below
-				this.writeCache(url, data);
-				resolve(data);
-			});
+			const response = await fetch(this.getUrl(url));
+
+			// Where the request gets a response outside the OK range, fetch will
+			// not raise an error, but will print to the console. In this case we
+			// terminate the task gracefully and don't need to print the error
+			// again.
+			if (!response.ok) {
+				throw new Error('Aborted');
+			}
+
+			const data = await response.arrayBuffer();
+			this.writeCache(url, data);
+			resolve(data);
+
 		}).catch((err) => {
 			if (err.message !== 'Aborted') { // This we don't need to print because in this case the control flow is expected
 				console.error(err);
@@ -167,8 +176,7 @@ export class ExternalWebRequestHandler {
 	 * it into it.
 	 */
 	getResponseString(id: number): string {
-		const body = new TextDecoder().decode(this.requests[id].data);
-		return body;
+		return new TextDecoder().decode(this.requests[id].data);
 	}
 
 	/**
