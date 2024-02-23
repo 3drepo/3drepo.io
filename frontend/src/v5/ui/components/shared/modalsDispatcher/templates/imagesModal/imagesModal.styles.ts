@@ -50,6 +50,8 @@ export const FloatingButton = styled(NavbarButton)`
 	box-sizing: border-box;
 	cursor: pointer;
 	margin: 0;
+	border: none;
+	background-color: ${({ theme }) => hexToOpacity(theme.palette.primary.contrast, 3.9)};
 
 	&&.Mui-disabled {
 		pointer-events: none;
@@ -85,7 +87,7 @@ export const TopBarButton = styled(FloatingButton)`
 	border-radius: 8px;
 
 	svg {
-		width: 14px;
+		width: 17px;
 	}
 `;
 
@@ -141,8 +143,13 @@ export const ImageWithArrows = styled(FlexRow)`
 `;
 
 export const NextButton = styled(FloatingButton)<{ disabled?: boolean }>`
+	height: 38px;
+	min-width: 38px;
+	width: 38px;
+
 	& svg {
 		margin-left: 1px;
+		height: 25px;
 	}
 
 	${({ disabled }) => disabled && css`
