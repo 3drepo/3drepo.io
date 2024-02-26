@@ -16,33 +16,10 @@
  */
 
 import styled from 'styled-components';
-import { ImageWithSkeleton } from '@controls/imageWithSkeleton/imageWithSkeleton.component';
 
 export const CommentAuthor = styled.div`
 	font-weight: 600;
 	font-size: 11px;
 	line-height: 18px;
 	margin-bottom: 5px;
-`;
-
-export const SingleImage = styled(ImageWithSkeleton).attrs({
-	variant: 'secondary',
-})`
-	width: 241px;
-	margin: -10px 0 10px -12px;
-	border-radius: inherit;
-	border-bottom-right-radius: 0;
-	border-bottom-left-radius: 0;
-	cursor: pointer;
-
-	&:is(span) {
-		padding-top: 100%;
-	}
-`;
-
-export const CommentImagesContainer = styled.div`
-	width: 231px;
-	margin-top: -5px;
-	margin-left: -7px;
-	margin-bottom: 3px;
 `;
