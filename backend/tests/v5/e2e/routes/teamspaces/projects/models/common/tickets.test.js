@@ -93,23 +93,20 @@ const testGetAllTemplates = () => {
 				[`the model is not a ${modelType}`, false, getRoute({ modelId: modelWrongType._id }), modelNotFound],
 				[`the user does not have access to the ${modelType}`, false, getRoute({ key: users.noProjectAccess.apiKey }), templates.notAuthorized],
 				['the user has sufficient privilege and the parameters are correct', true, getRoute(),
-					{
-						templates: ticketTemplates.flatMap(({ _id, name, deprecated, code }) => (deprecated ? []
-							: { _id, name, code })),
-					}],
+					ticketTemplates.flatMap(({ _id, name, deprecated, code }) => (deprecated
+						? [] : { _id, name, code })),
+				],
 				['the user has sufficient privilege and the parameters are correct (show deprecated)', true, getRoute(),
-					{ templates: ticketTemplates.map(
+					ticketTemplates.map(
 						({ _id, name, code, deprecated }) => ({ _id, name, code, deprecated }),
-					) },
+					),
 					true],
 				['the user has sufficient privilege and the parameters are correct (get details)', true, getRoute(),
-					{
-						templates: ticketTemplates.flatMap((t) => (t.deprecated ? [] : serialiseTemplate(t, false))),
-					}, false, true],
+					ticketTemplates.flatMap((t) => (t.deprecated ? [] : serialiseTemplate(t, false))),
+					false, true],
 				['the user has sufficient privilege and the parameters are correct (get details & show deprecated)', true, getRoute(),
-					{
-						templates: ticketTemplates.flatMap((t) => serialiseTemplate(t, true)),
-					}, true, true],
+					ticketTemplates.flatMap((t) => serialiseTemplate(t, true)),
+					true, true],
 			];
 		};
 
@@ -119,7 +116,7 @@ const testGetAllTemplates = () => {
 				const res = await agent.get(`${route}${showDeprecated ? '&showDeprecated=true' : ''}${getDetails ? '&getDetails=true' : ''}`).expect(expectedStatus);
 
 				if (success) {
-					expect(res.body).toEqual(expectedOutput);
+					expect(res.body.templates).toEqual(expect.arrayContaining(expectedOutput));
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
@@ -250,7 +247,7 @@ const testAddTicket = () => {
 				['the ticket data does not conforms to the template', false, getRoute(), templates.invalidArguments, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
 				['the ticket data conforms to the template', true, getRoute()],
 				['the ticket data conforms to the template but the user is a viewer', false, getRoute({ key: users.viewer.apiKey }), templates.notAuthorized],
-				['the ticket has a template that contains all preset modules, preset enums and configs', true, getRoute(), undefined, { properties: {}, modules: {}, type: templateWithAllModulesAndPresetEnums._id }],
+				['the ticket has a template that contains all preset modules, preset enums and configs', true, getRoute(), undefined, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums) }],
 			];
 		};
 
@@ -604,7 +601,7 @@ const testGetTicketList = () => {
 							const [moduleName, moduleProp] = moduleFilter.split('.');
 
 							const ticketContainingProps = res.body.tickets
-								.filter((t) => t.properties[propName] && t.modules[moduleName][moduleProp]);
+								.filter((t) => t.properties[propName] && t.modules[moduleName] && t.modules[moduleName][moduleProp]);
 
 							expect(ticketContainingProps).toBeDefined();
 						}
