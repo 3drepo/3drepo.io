@@ -2,7 +2,7 @@ matrix:
   include:
     # tests (v4)
     - language: node_js
-      dist: focal
+      dist: jammy
       name: Backend tests (V4)
       git:
       submodules: false
