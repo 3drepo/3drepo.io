@@ -573,9 +573,9 @@ ServiceHelper.generateRandomObject = () => ({
 });
 
 ServiceHelper.generateTicket = (template, internalType = false, container) => {
-	const fullTemplate = generateFullSchema(template);
+	const fullTemplate = generateFullSchema(template) ? generateFullSchema(template) : template;
 	const modules = {};
-	fullTemplate.modules.forEach(({ name, type, deprecated, properties }) => {
+	(fullTemplate?.modules || []).forEach(({ name, type, deprecated, properties }) => {
 		if (deprecated) return;
 		const id = name ?? type;
 		modules[id] = generateProperties(properties, internalType, container);

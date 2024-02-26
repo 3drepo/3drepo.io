@@ -601,7 +601,8 @@ const testGetTicketList = () => {
 							const [moduleName, moduleProp] = moduleFilter.split('.');
 
 							const ticketContainingProps = res.body.tickets
-								.filter((t) => t.properties[propName] && t.modules[moduleName] && t.modules[moduleName][moduleProp]);
+								.filter((t) => t.properties[propName] && t.modules[moduleName]
+								&& t.modules[moduleName][moduleProp]);
 
 							expect(ticketContainingProps).toBeDefined();
 						}
