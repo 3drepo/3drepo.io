@@ -48,6 +48,6 @@ const defaultTemplates = [
 	},
 ];
 
-TemplateConsts.defaultTemplates = defaultTemplates.map(validate);
+TemplateConsts.defaultTemplates = defaultTemplates.map(({ _id, ...template }) => ({ ...validate(template), _id }));
 
 module.exports = TemplateConsts;
