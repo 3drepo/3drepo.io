@@ -125,6 +125,9 @@ Tickets.getTicketById = async (
 	return ticket;
 };
 
+Tickets.getTicketsByQuery = (teamspace, project, model, query, projection) => DbHandler.find(teamspace,
+	TICKETS_COL, { teamspace, project, model, ...query }, projection);
+
 Tickets.getAllTickets = (
 	teamspace,
 	project,
