@@ -59,6 +59,8 @@ const generateTemplate = () => ({
 		{
 			name: generateRandomString(),
 			type: propTypes.TEXT,
+			unique: true,
+			readOnlyOnUI: true,
 		},
 	],
 	modules: [],
@@ -74,7 +76,8 @@ const testAddTemplate = () => {
 		['teamspace does not exist', tsAdmin.apiKey, generateRandomString(), templateToUse, false, templates.teamspaceNotFound],
 		['user is not a member of the teamspace', normalUser.apiKey, noTemplatesTS.name, templateToUse, false, templates.teamspaceNotFound],
 		['user is a ts admin and there is a valid template', tsAdmin.apiKey, undefined, templateToUse, true],
-		['template is invalid', tsAdmin.apiKey, undefined, {}, false, templates.invalidArguments],
+		['template is empty object', tsAdmin.apiKey, undefined, {}, false, templates.invalidArguments],
+		['template is invalid (invalid unique property)', tsAdmin.apiKey, undefined, { ...templateToUse, properties: [{ name: generateRandomString(), type: propTypes.LONG_TEXT, unique: true }] }, false, templates.invalidArguments],
 	])('Add template', (desc, key, ts, data, success, expectedRes) => {
 		test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
 			const expectedStatus = success ? templates.ok.status : expectedRes.status;
@@ -115,6 +118,7 @@ const testUpdateTemplate = () => {
 			['template is invalid', tsAdmin.apiKey, undefined, undefined, {}, false, templates.invalidArguments],
 			['template name is already used by another template', tsAdmin.apiKey, undefined, undefined, { ...templateToUse, name: templateThatClashes.name }, false, templates.invalidArguments],
 			['template code is already used by another template', tsAdmin.apiKey, undefined, undefined, { ...templateToUse, code: templateThatClashes.code }, false, templates.invalidArguments],
+			['template is invalid (invalid unique property)', tsAdmin.apiKey, undefined, undefined, { ...templateToUse, properties: [{ name: generateRandomString(), type: propTypes.LONG_TEXT, unique: true }] }, false, templates.invalidArguments],
 			['template id is invalid', tsAdmin.apiKey, undefined, generateRandomString(), templateToUse, false, templates.templateNotFound],
 		])('', (desc, key, ts, id, data, success, expectedRes) => {
 			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {

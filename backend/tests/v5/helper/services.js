@@ -476,6 +476,7 @@ ServiceHelper.generateTemplate = (deprecated, hasView = false) => ({
 			name: ServiceHelper.generateRandomString(),
 			type: propTypes.NUMBER,
 			default: ServiceHelper.generateRandomNumber(),
+			unique: true,
 		},
 		...(hasView ? [{
 			name: ServiceHelper.generateRandomString(),

@@ -307,6 +307,27 @@ const testValidate = () => {
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 			}] }, true],
+		['property is unique', { name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				unique: true,
+			}] }, true],
+		['property is unique for non-supported type', { name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.BOOLEAN,
+				unique: true,
+			}] }, false],
+		['property is readOnlyOnUI', { name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				readOnlyOnUI: true,
+			}] }, true],
 		['property is immutable', { name: generateRandomString(),
 			code: generateRandomString(3),
 			properties: [{
