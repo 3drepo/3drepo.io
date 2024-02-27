@@ -23,10 +23,11 @@ matrix:
 
       before_install:
         - sudo apt remove mongodb && sudo apt purge mongodb && sudo apt autoremove && sudo rm -rf /var/lib/mongodb
-        - wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
-        - echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+        - sudo apt-get -y install gnupg curl
+        - curl -fsSL https://www.mongodb.org/static/pgp/server-6.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor
+        - echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
         - sudo apt-get update
-        - sudo apt-get install -y gnupg mongodb-org=6.0.4 mongodb-org-database=6.0.4 mongodb-org-server=6.0.4 mongodb-org-shell=6.0.4 mongodb-org-tools=6.0.4
+        - sudo apt-get install -y mongodb-org=6.0.14 mongodb-org-database=6.0.14 mongodb-org-server=6.0.14 mongodb-org-mongos=6.0.14 mongodb-org-tools=6.0.14
         - sudo systemctl daemon-reload && sudo systemctl start mongod && echo $(mongod --version)
         - mkdir -p submodules
         - test_ver=`cat backend/testDBVersion`
