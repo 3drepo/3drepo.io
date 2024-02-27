@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import { CommentMessage } from '../basicComment/basicComment.styles';
-import { CommentImagesContainer } from '../commentNonMessageContent/commentNonMessageContent.styles';
+import { MultiImagesContainer } from '../commentImages/commentImages.styles';
 
 export const secondaryQuotedMessageStyles = css`
 	background-color: ${({ theme }) => theme.palette.secondary.mid};
@@ -59,7 +59,7 @@ export const QuotedMessage = styled.div<{ variant?: 'primary' | 'secondary', sho
 		}
 	`}
 
-	& ~ ${CommentImagesContainer} {
+	& ~ ${MultiImagesContainer} {
 		margin-top: 6px;
 	}
 `;
