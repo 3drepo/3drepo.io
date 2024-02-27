@@ -80,7 +80,7 @@ const BasicSettings = (props) => {
 				)} />
 			</FormListItem>
 			<FormListItem>
-				Model Caching (Beta)
+				Model Caching
 				<Field name="caching" render={ ({ field }) => (
 					<Switch onClick={props.onCacheChange} checked={field.value} {...field} value="true" color="secondary" />
 				)} />
