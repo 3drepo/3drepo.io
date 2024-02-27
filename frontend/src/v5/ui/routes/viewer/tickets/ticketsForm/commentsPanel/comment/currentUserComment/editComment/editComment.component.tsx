@@ -24,12 +24,14 @@ import { EditCommentButtons, EditCommentContainer, EditCommentInput } from './ed
 import { TicketButton } from '../../../../../ticketButton/ticketButton.styles';
 import { CommentNonMessageContent } from '../../commentNonMessageContent/commentNonMessageContent.component';
 
-type EditCommentProps = Pick<ITicketComment, '_id' | 'author' | 'message' | 'images'> & {
+type EditCommentProps = Pick<ITicketComment, 'author' | 'message' | 'images'> & {
 	onClose: () => void;
-	onEdit: (id, newMessage, newImages) => void;
 	metadata?: TicketCommentReplyMetadata;
+	onEditMessage: (newMessage) => void;
+	onDeleteImage: (index) => void;
+	onUploadImages: () => void;
 };
-export const EditComment = ({ _id, message, images, author, metadata, onEdit, onClose }: EditCommentProps) => {
+export const EditComment = ({ message, images, author, metadata, onClose, onEditMessage, onDeleteImage, onUploadImages }: EditCommentProps) => {
 	const { control, watch } = useForm<{ editedMessage }>({
 		defaultValues: { editedMessage: desanitiseMessage(message) },
 	});
@@ -43,7 +45,7 @@ export const EditComment = ({ _id, message, images, author, metadata, onEdit, on
 		if (metadata._id) {
 			newMessage = addReply(metadata, newMessage);
 		}
-		onEdit(_id, newMessage, images);
+		onEditMessage(newMessage);
 		onClose();
 	};
 
@@ -54,6 +56,9 @@ export const EditComment = ({ _id, message, images, author, metadata, onEdit, on
 					images={images}
 					metadata={metadata}
 					isCurrentUserComment={false}
+					onUploadImages={onUploadImages}
+					onDeleteImage={onDeleteImage}
+					hasMessage={!!message}
 				/>
 				<EditCommentInput
 					name="editedMessage"

@@ -15,25 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { CommentImage as CommentImageBase } from '@/v5/ui/routes/viewer/tickets/ticketsForm/commentsPanel/commentImage/commentImage.component';
-import CameraIconBase from '@assets/icons/outlined/camera-outlined.svg';
-import { CommentMarkDown as CommentMarkDownBase } from '../commentMarkDown/commentMarkDown.component';
+import { Image, ExtraImages, OverlappingContainer } from './commentImage.styles';
 
-export const CommentMarkDown = styled(CommentMarkDownBase)`
-	display: inline;
-`;
+type CommentImageProps = {
+	src: string,
+	className?: string,
+	extraCount?: number,
+	onClick?: () => void,
+};
+export const CommentImage = ({
+	src,
+	extraCount,
+	className,
+	onClick,
+	...imgProps
+}: CommentImageProps) => {
+	if (!extraCount) {
+		return (<Image src={src} onClick={onClick} className={className} {...imgProps} />);
+	}
 
-export const CameraIcon = styled(CameraIconBase)`
-	margin-right: 5px;
-	margin-bottom: -1px;
-`;
-
-export const OriginalMessage = styled.div`
-	display: inline-block;
-`;
-
-export const CommentImage = styled(CommentImageBase)`
-	min-width: 67px;
-	height: 67px;
-`;
+	return (
+		<OverlappingContainer onClick={onClick} className={className}>
+			<Image src={src} {...imgProps} />
+			<ExtraImages>+{extraCount}</ExtraImages>
+		</OverlappingContainer>
+	);
+};
