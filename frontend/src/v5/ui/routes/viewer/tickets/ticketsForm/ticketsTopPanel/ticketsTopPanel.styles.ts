@@ -48,6 +48,7 @@ export const FlexContainer = styled(InputContainer)`
 	& > *:not(:last-child) {
 		border-right: solid 1px ${({ theme }) => theme.palette.base.lightest};
 		padding-right: 10px;
+		max-width: 93px;
 	}
 
 	& > *:not(:first-child) {
