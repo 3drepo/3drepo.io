@@ -1,4 +1,22 @@
 /**
+ *  Copyright (C) 2024 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* eslint-disable max-classes-per-file */
+/**
  *  Copyright (C) 2017 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -97,53 +115,6 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 		return this.containerRef.current;
 	}
 
-	public get layer() {
-		return this.layerRef.current;
-	}
-
-	public get imageLayer() {
-		return this.imageLayerRef.current;
-	}
-
-	public get drawingLayer() {
-		return this.drawingLayerRef.current;
-	}
-
-	public get stage() {
-		return this.stageRef.current;
-	}
-
-	public get isDrawingMode() {
-		return this.state.mode === MODES.BRUSH || this.state.mode === MODES.ERASER;
-	}
-
-	public get isErasing() {
-		return this.state.mode === MODES.ERASER;
-	}
-
-	public get selectedElementType() {
-		const [elementType] = this.state.selectedObjectName.split('-');
-		return elementType;
-	}
-
-	public renderIndicator = renderWhenTrue(() => (
-		<Indicator color={this.state.color} size={this.state.strokeWidth} />
-	));
-
-	public renderErasing = renderWhenTrue(() => {
-		return (
-			<Erasing
-				height={this.state.stage.height}
-				width={this.state.stage.width}
-				size={this.state.strokeWidth}
-				color={this.state.color}
-				mode={this.state.mode}
-				layer={this.layerRef}
-				stage={this.stage}
-			/>
-		);
-	});
-
 	public async componentDidMount() {
 		const sourceImage = await this.props.sourceImage;
 
@@ -154,9 +125,9 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 			});
 			this.scaleStage(image);
 
-			this.imageLayer.add(image);
-			this.imageLayer.batchDraw();
-			this.lastImageCanvasWidth = this.imageLayer.canvas.width;
+			this.imageLayerRef.current.add(image);
+			this.imageLayerRef.current.batchDraw();
+			this.lastImageCanvasWidth = this.imageLayerRef.current.canvas.width;
 		};
 		imageObj.src = sourceImage;
 
@@ -167,7 +138,7 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 			this.props.viewer.pauseRendering();
 		}
 
-		if (this.layer) {
+		if (this.layerRef.current) {
 			this.clearCanvas();
 		}
 	}
@@ -184,30 +155,9 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 			this.props.viewer.resumeRendering();
 		}
 
-		if (this.layer) {
+		if (this.layerRef.current) {
 			this.clearCanvas();
 		}
-	}
-
-	public handleRefreshDrawingLayer = () => this.drawingLayer.getLayer().batchDraw();
-
-	public get localPosition() {
-		if (this.stage && this.layer) {
-			const position = this.stage.getPointerPosition();
-			return {
-				x: position.x - this.layer.x(),
-				y: position.y - this.layer.y()
-			};
-		}
-		return {
-			x: 0,
-			y: 0
-		};
-	}
-
-	public handleResize = () => {
-		const backgroundImage = this.imageLayer.children[0];
-		this.scaleStage(backgroundImage);
 	}
 
 	private updateDialogSizes = ({ height, width }) => {
@@ -241,49 +191,23 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 		}
 
 		if (this.lastImageCanvasWidth) {
-			const x = (this.imageLayer.canvas.width - this.lastImageCanvasWidth) / 2;
+			const x = (this.imageLayerRef.current.canvas.width - this.lastImageCanvasWidth) / 2;
 
-			this.layer.setAttrs({ x });
-			this.drawingLayer.setAttrs({ x });
+			this.layerRef.current.setAttrs({ x });
+			this.drawingLayerRef.current.setAttrs({ x });
 		} else {
-			this.lastImageCanvasWidth = this.imageLayer.canvas.width;
+			this.lastImageCanvasWidth = this.imageLayerRef.current.canvas.width;
 		}
-	}
-
-	public handleChangeObject = (attrs) => {
-		this.props.updateElement(attrs.name, attrs);
-	}
-
-	private updateProperty = (property: string, value: number) => {
-		if (this.state.selectedObjectName) {
-			this.props.updateElement(this.state.selectedObjectName, { [property]: value });
-		}
-
-		this.setState({
-			[property]: value,
-		});
-	}
-
-	public handleBrushSizeChange = ({ target: { value } }) => {
-		this.updateProperty('strokeWidth', value);
-	}
-
-	public handleTextSizeChange = ({ target: { value } }) => {
-		this.updateProperty('fontSize', value);
-	}
-
-	public handleColorChange = (color) => {
-		this.updateProperty('color', color);
 	}
 
 	public clearCanvas = () => {
-		this.layer.clear();
-		this.drawingLayer.clear();
-		this.stage.clearCache();
-		this.layer.clearCache();
-		this.drawingLayer.clearCache();
-		this.layer.destroyChildren();
-		this.drawingLayer.destroyChildren();
+		this.layerRef.current.clear();
+		this.drawingLayerRef.current.clear();
+		this.stageRef.current.clearCache();
+		this.layerRef.current.clearCache();
+		this.drawingLayerRef.current.clearCache();
+		this.layerRef.current.destroyChildren();
+		this.drawingLayerRef.current.destroyChildren();
 
 		// init before clear - it's on puporse because of library's bug;
 		// the library doesn't clear current state, only past and future
@@ -293,9 +217,22 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 		this.props.initHistory();
 	}
 
+	public handleKeyDown = (e) => {
+		if (this.state.selectedObjectName) {
+			if (e.keyCode === 8) {
+				this.props.removeElement(this.state.selectedObjectName);
+				this.setState({
+					selectedObjectName: ''
+				}, () => {
+					document.body.style.cursor = 'default';
+				});
+			}
+		}
+	}
+
 	public handleSave = () => {
 		this.setState({ selectedObjectName: '' }, async () => {
-			const screenshot = await this.stage.toDataURL();
+			const screenshot = await this.stageRef.current.toDataURL();
 			this.props.handleResolve(screenshot);
 		});
 	}
@@ -355,129 +292,26 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 		}
 	}
 
-	public addNewText = (position, text?: string, updateState: boolean = true) => {
-		if (!this.state.selectedObjectName) {
-			position.y = position.y + 1;
-			const newText = getNewText(this.state.color, this.state.fontSize, position, text);
-			this.props.addElement(newText);
-
-			if (updateState) {
-				this.setState({
-					selectedObjectName: newText.name,
-					mode: MODES.TEXT,
-				});
-			}
-
-			document.body.style.cursor = 'crosshair';
-		}
-	}
-
-	public addNewDrawnLine = (line, type, updateState: boolean = true) => {
-		if (!this.state.selectedObjectName) {
-			const newLine = getNewDrawnLine(line.attrs, this.state.color, type);
-			const selectedObjectName = this.isErasing ? '' : newLine.name;
-			this.props.addElement(newLine);
-
-			if (updateState) {
-				if (type !== MODES.POLYGON) {
-					this.setState(({mode}) => ({selectedObjectName, mode: this.isErasing ? mode : MODES.BRUSH}));
-				} else {
-					this.setState({selectedObjectName, mode: MODES.POLYGON});
-				}
-			}
-		}
-	}
-
-	public addNewShape = (figure, { attrs }, updateState: boolean = true) => {
-		if (!this.state.selectedObjectName) {
-			const correctCircle = figure === SHAPE_TYPES.CIRCLE && attrs.radius > 1;
-			const correctTriangle = figure === SHAPE_TYPES.TRIANGLE && attrs.radius > 1;
-			const correctRectangle =
-				figure === SHAPE_TYPES.RECTANGLE && (Math.abs(attrs.height) > 1 || Math.abs(attrs.width) > 1);
-			const correctLineShape = [SHAPE_TYPES.LINE, SHAPE_TYPES.ARROW]
-					.includes(figure) && attrs.points && attrs.points.length;
-			const correctCustomShape = [SHAPE_TYPES.CLOUD]
-					.includes(figure) && (Math.abs(attrs.scaleX) > 0 || Math.abs(attrs.scaleY) > 0);
-
-			if (correctCircle || correctTriangle || correctRectangle || correctLineShape || correctCustomShape) {
-				const { scaleX, scaleY, ...attributes } = attrs;
-				const newShape = getNewShape(figure, this.state.color, {
-					...attributes,
-					initScaleX: scaleX,
-					initScaleY: scaleY,
-				});
-				const selectedObjectName = newShape.name;
-				this.props.addElement(newShape);
-				if (updateState) {
-					this.setState({ selectedObjectName });
-				}
-			}
-
-			document.body.style.cursor = 'crosshair';
-		}
-	}
-
-	public handleKeyDown = (e) => {
+	private updateProperty = (property: string, value: number) => {
 		if (this.state.selectedObjectName) {
-			if (e.keyCode === 8) {
-				this.props.removeElement(this.state.selectedObjectName);
-				this.setState({
-					selectedObjectName: ''
-				}, () => {
-					document.body.style.cursor = 'default';
-				});
-			}
+			this.props.updateElement(this.state.selectedObjectName, { [property]: value });
 		}
+
+		this.setState({
+			[property]: value,
+		});
 	}
 
-	public renderObjects = () => this.props.canvasElements.map((element, index) => {
-		const isSelected = this.state.selectedObjectName === element.name;
-		const commonProps = {
-			element,
-			isSelected,
-			handleChange: (newAttrs) => this.handleChangeObject(newAttrs),
-		};
+	public handleBrushSizeChange = ({ target: { value } }) => {
+		this.updateProperty('strokeWidth', value);
+	}
 
-		if (element.type === ELEMENT_TYPES.TEXT) {
-			return (<TextNode key={index} {...commonProps} />);
-		} else if (element.type === ELEMENT_TYPES.DRAWING) {
-			return (<DrawnLine key={index} {...commonProps} />);
-		}
-		return (<Shape key={index} {...commonProps} />);
-	})
+	public handleTextSizeChange = ({ target: { value } }) => {
+		this.updateProperty('fontSize', value);
+	}
 
-	public renderDrawingHandler = () => (
-			<DrawingHandler
-					height={this.state.stage.height}
-					width={this.state.stage.width}
-					size={this.state.strokeWidth}
-					textSize={this.state.fontSize}
-					color={this.state.color}
-					mode={this.state.mode}
-					layer={this.drawingLayerRef}
-					stage={this.stage}
-					handleNewDrawnLine={this.addNewDrawnLine}
-					handleNewDrawnShape={this.addNewShape}
-					handleNewText={this.addNewText}
-					selected={this.state.selectedObjectName}
-					activeShape={this.state.activeShape}
-					disabled={this.props.disabled}
-			/>
-	)
-
-	public renderLayers = () => {
-		if (this.state.stage.width && this.state.stage.height) {
-			return (
-				<>
-					<Layer ref={this.imageLayerRef} />
-					<Layer ref={this.layerRef}>
-						{this.renderObjects()}
-						{this.renderErasing(this.isErasing)}
-					</Layer>
-					<Layer ref={this.drawingLayerRef} />
-				</>
-			);
-		}
+	public handleColorChange = (color) => {
+		this.updateProperty('color', color);
 	}
 
 	public renderTools = () => (
@@ -505,34 +339,10 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 		/>
 	)
 
-	public handleStageMouseDown = ({ target }) => {
-		const isAnchor = target && target.attrs.name && target.attrs.name.includes('anchor');
-		const isSelectedObject = target.parent && (target.parent.attrs.name !== this.state.selectedObjectName);
-		const isDrawnLine = target.attrs.type !== 'drawing' && target.attrs.name !== this.state.selectedObjectName;
-
-		if (!target.parent || (isSelectedObject && isDrawnLine && !isAnchor)) {
-			this.setState({ selectedObjectName: '' });
-			return;
-		}
-	}
-
-	public renderTypingHandler = () => (
-		<TypingHandler
-			mode={this.state.mode}
-			stage={this.stage}
-			layer={this.layer}
-			color={this.state.color}
-			fontSize={this.state.fontSize}
-			onRefreshDrawingLayer={this.handleRefreshDrawingLayer}
-			onAddNewText={this.addNewText}
-			selected={this.state.selectedObjectName}
-		/>
-	)
-
 	public renderLoader = renderWhenTrue(() => (
-			<LoaderContainer>
-				<Loader size={20} />
-			</LoaderContainer>
+		<LoaderContainer>
+			<Loader size={20} />
+		</LoaderContainer>
 	));
 
 	public render() {
@@ -540,25 +350,245 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 
 		return (
 			<Container height={container.height} width={container.width} ref={this.containerRef}>
-				<WindowEventListener event='resize' onEventTriggered={this.handleResize} />
 				{this.renderTools()}
 				{this.renderLoader(!stage.width || !stage.height)}
-				<StageContainer height={stage.height} width={stage.width}>
-					{this.renderIndicator(!this.props.disabled && this.isDrawingMode && !this.state.selectedObjectName)}
-					<Stage
-						id="stage"
-						ref={this.stageRef}
-						height={stage.height}
-						width={stage.width}
-						onMouseDown={this.handleStageMouseDown}
-						onTouchStart={this.handleStageMouseDown}
-					>
-						{this.renderLayers()}
-					</Stage>
-					{this.renderDrawingHandler()}
-					{this.renderTypingHandler()}
-				</StageContainer>
+				<MarkupStage
+					disabled={this.props.disabled}
+					updateElement={this.props.updateElement}
+					canvasElements={this.props.canvasElements}
+					addElement={this.props.addElement}
+
+					stageRef={this.stageRef}
+					layerRef={this.layerRef}
+					imageLayerRef={this.imageLayerRef}
+					drawingLayerRef={this.drawingLayerRef}
+					scaleStage={this.scaleStage}
+
+					activeShape={this.state.activeShape}
+					color={this.state.color}
+					selectedObjectName={this.state.selectedObjectName}
+					strokeWidth={this.state.strokeWidth}
+					mode={this.state.mode}
+					stage={this.state.stage}
+					fontSize={this.state.fontSize}
+					onSetSelectedObjectName={(selectedObjectName) => this.setState({ selectedObjectName })}
+					onModeChange={(mode) => this.setState({ mode })}
+				/>
 			</Container>
 		);
 	}
 }
+
+class MarkupStage extends PureComponent<{
+	stageRef,
+	color,
+	strokeWidth,
+	disabled,
+	selectedObjectName,
+	updateElement,
+	imageLayerRef,
+	layerRef,
+	drawingLayerRef,
+	canvasElements,
+	mode,
+	stage,
+	fontSize,
+	addElement,
+	activeShape,
+	onSetSelectedObjectName,
+	onModeChange,
+	scaleStage,
+}, any> {
+	public get isErasing() {
+		return this.props.mode === MODES.ERASER;
+	}
+
+	public get isDrawingMode() {
+		return this.props.mode === MODES.BRUSH || this.isErasing;
+	}
+
+	public handleStageMouseDown = ({ target }) => {
+		const isAnchor = target && target.attrs.name && target.attrs.name.includes('anchor');
+		const isSelectedObject = target.parent && (target.parent.attrs.name !== this.props.selectedObjectName);
+		const isDrawnLine = target.attrs.type !== 'drawing' && target.attrs.name !== this.props.selectedObjectName;
+
+		if (!target.parent || (isSelectedObject && isDrawnLine && !isAnchor)) {
+			this.props.onSetSelectedObjectName('');
+			return;
+		}
+	}
+
+	public addNewText = (position, text?: string, updateState: boolean = true) => {
+		if (!this.props.selectedObjectName) {
+			position.y = position.y + 1;
+			const newText = getNewText(this.props.color, this.props.fontSize, position, text);
+			this.props.addElement(newText);
+
+			if (updateState) {
+				this.props.onSetSelectedObjectName(newText.name);
+				this.props.onModeChange(MODES.TEXT);
+				// this.setState({
+				// 	selectedObjectName: newText.name,
+				// 	mode: MODES.TEXT,
+				// });
+			}
+
+			document.body.style.cursor = 'crosshair';
+		}
+	}
+
+	public addNewShape = (figure, { attrs }, updateState: boolean = true) => {
+		if (!this.props.selectedObjectName) {
+			const correctCircle = figure === SHAPE_TYPES.CIRCLE && attrs.radius > 1;
+			const correctTriangle = figure === SHAPE_TYPES.TRIANGLE && attrs.radius > 1;
+			const correctRectangle =
+				figure === SHAPE_TYPES.RECTANGLE && (Math.abs(attrs.height) > 1 || Math.abs(attrs.width) > 1);
+			const correctLineShape = [SHAPE_TYPES.LINE, SHAPE_TYPES.ARROW]
+					.includes(figure) && attrs.points && attrs.points.length;
+			const correctCustomShape = [SHAPE_TYPES.CLOUD]
+					.includes(figure) && (Math.abs(attrs.scaleX) > 0 || Math.abs(attrs.scaleY) > 0);
+
+			if (correctCircle || correctTriangle || correctRectangle || correctLineShape || correctCustomShape) {
+				const { scaleX, scaleY, ...attributes } = attrs;
+				const newShape = getNewShape(figure, this.props.color, {
+					...attributes,
+					initScaleX: scaleX,
+					initScaleY: scaleY,
+				});
+				const selectedObjectName = newShape.name;
+				this.props.addElement(newShape);
+				if (updateState) {
+					this.props.onSetSelectedObjectName(selectedObjectName);
+				}
+			}
+
+			document.body.style.cursor = 'crosshair';
+		}
+	}
+
+	public addNewDrawnLine = (line, type, updateState: boolean = true) => {
+		if (!this.props.selectedObjectName) {
+			const newLine = getNewDrawnLine(line.attrs, this.props.color, type);
+			const selectedObjectName = this.isErasing ? '' : newLine.name;
+			this.props.addElement(newLine);
+
+			if (updateState) {
+				this.props.onSetSelectedObjectName(selectedObjectName);
+				if (type !== MODES.POLYGON) {
+					this.props.onModeChange(this.isErasing ? this.props.mode : MODES.BRUSH);
+				} else {
+					this.props.onModeChange(MODES.POLYGON);
+				}
+			}
+		}
+	}
+
+	public handleResize = () => {
+		const backgroundImage = this.props.imageLayerRef.current.children[0];
+		this.props.scaleStage(backgroundImage);
+	}
+
+	public renderIndicator = renderWhenTrue(() => (
+		<Indicator color={this.props.color} size={this.props.strokeWidth} />
+	));
+
+	public renderObjects = () => this.props.canvasElements.map((element, index) => {
+		const isSelected = this.props.selectedObjectName === element.name;
+		const commonProps = {
+			element,
+			isSelected,
+			handleChange: (newAttrs) => this.props.updateElement(newAttrs.name, newAttrs),
+		};
+
+		if (element.type === ELEMENT_TYPES.TEXT) {
+			return (<TextNode key={index} {...commonProps} />);
+		} else if (element.type === ELEMENT_TYPES.DRAWING) {
+			return (<DrawnLine key={index} {...commonProps} />);
+		}
+		return (<Shape key={index} {...commonProps} />);
+	})
+
+	public renderErasing = renderWhenTrue(() => {
+		return (
+			<Erasing
+				height={this.props.stage.height}
+				width={this.props.stage.width}
+				size={this.props.strokeWidth}
+				color={this.props.color}
+				mode={this.props.mode}
+				layer={this.props.layerRef}
+				stage={this.props.stageRef.current}
+			/>
+		);
+	});
+
+	public renderLayers = () => {
+		if (this.props.stage.width && this.props.stage.height) {
+			return (
+				<>
+					<Layer ref={this.props.imageLayerRef} />
+					<Layer ref={this.props.layerRef}>
+						{this.renderObjects()}
+						{this.renderErasing(this.isErasing)}
+					</Layer>
+					<Layer ref={this.props.drawingLayerRef} />
+				</>
+			);
+		}
+	}
+
+	public renderDrawingHandler = () => (
+		<DrawingHandler
+			height={this.props.stage.height}
+			width={this.props.stage.width}
+			size={this.props.strokeWidth}
+			textSize={this.props.fontSize}
+			color={this.props.color}
+			mode={this.props.mode}
+			layer={this.props.drawingLayerRef}
+			stage={this.props.stageRef.current}
+			handleNewDrawnLine={this.addNewDrawnLine}
+			handleNewDrawnShape={this.addNewShape}
+			handleNewText={this.addNewText}
+			selected={this.props.selectedObjectName}
+			activeShape={this.props.activeShape}
+			disabled={this.props.disabled}
+		/>
+	)
+
+	public handleRefreshDrawingLayer = () => this.props.drawingLayerRef.current.getLayer().batchDraw();
+
+	public renderTypingHandler = () => (
+		<TypingHandler
+			mode={this.props.mode}
+			stage={this.props.stageRef.current}
+			layer={this.props.layerRef.current}
+			color={this.props.color}
+			fontSize={this.props.fontSize}
+			onRefreshDrawingLayer={this.handleRefreshDrawingLayer}
+			onAddNewText={this.addNewText}
+			selected={this.props.selectedObjectName}
+		/>
+	)
+
+	render() {
+		return (
+			<StageContainer height={this.props.stage.height} width={this.props.stage.width}>
+				<WindowEventListener event='resize' onEventTriggered={this.handleResize} />
+				{this.renderIndicator(!this.props.disabled && this.isDrawingMode && !this.props.selectedObjectName)}
+				<Stage
+					id="stage"
+					ref={this.props.stageRef}
+					height={this.props.stage.height}
+					width={this.props.stage.width}
+					onMouseDown={this.handleStageMouseDown}
+					onTouchStart={this.handleStageMouseDown}
+				>
+					{this.renderLayers()}
+				</Stage>
+				{this.renderDrawingHandler()}
+				{this.renderTypingHandler()}
+			</StageContainer>
+		);
+	}
+};
