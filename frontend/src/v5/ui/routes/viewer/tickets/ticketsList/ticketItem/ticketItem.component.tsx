@@ -21,7 +21,7 @@ import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { Chip } from '@controls/chip/chip.component';
-import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, STATUS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
+import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
 import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
 import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
@@ -29,6 +29,7 @@ import { Highlight } from '@controls/highlight';
 import { useEffect, useRef } from 'react';
 import { Ticket, Id, Title, ChipList, Assignees, IssuePropertiesRow } from './ticketItem.styles';
 import { IssueProperties, SafetibaseProperties } from '../../tickets.constants';
+import { StatusChip } from '@controls/chip/statusChip/statusChip.component';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -86,7 +87,7 @@ export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
 				</Highlight>
 			</Title>
 			<ChipList>
-				<Chip {...STATUS_MAP[status]} variant="outlined" />
+				<StatusChip value={status} templateId={ticket.type} variant="outlined" />
 				{riskLevel && <Chip {...RISK_LEVELS_MAP[riskLevel]} variant="filled" />}
 				{treatmentStatus && <Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />}
 			</ChipList>
