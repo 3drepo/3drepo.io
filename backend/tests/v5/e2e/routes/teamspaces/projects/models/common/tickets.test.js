@@ -257,7 +257,7 @@ const testAddTicket = () => {
 				['the ticket data includes duplicate value for unique property', false, getRoute(), templates.invalidArguments, { properties: { [uniquePropertyName]: uniquePropValue } }],
 				['the ticket data conforms to the template', true, getRoute()],
 				['the ticket data conforms to the template but the user is a viewer', false, getRoute({ key: users.viewer.apiKey }), templates.notAuthorized],
-				['the ticket has a template that contains all preset modules, preset enums and configs', true, getRoute(), undefined, { properties: {}, modules: {}, type: templateWithAllModulesAndPresetEnums._id }],				
+				['the ticket has a template that contains all preset modules, preset enums and configs', true, getRoute(), undefined, { properties: {}, modules: {}, type: templateWithAllModulesAndPresetEnums._id }],
 			];
 		};
 

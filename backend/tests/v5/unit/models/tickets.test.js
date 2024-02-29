@@ -179,6 +179,28 @@ const testGetAllTickets = () => {
 	});
 };
 
+const testGetTicketsByQuery = () => {
+	describe('Get tickets by query', () => {
+		test('Should return whatever the query returns', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const query = { [generateRandomString()]: generateRandomString() };
+			const projection = { [generateRandomString()]: generateRandomString() };
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getTicketsByQuery(teamspace, project, model, query, projection))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, project, model, ...query }, projection);
+		});
+	});
+};
+
 const testUpdateTicket = () => {
 	describe('Update ticket', () => {
 		const teamspace = generateRandomString();
@@ -554,4 +576,5 @@ describe('models/tickets', () => {
 	testGetTicketById();
 	testUpdateTicket();
 	testGetAllTickets();
+	testGetTicketsByQuery();
 });
