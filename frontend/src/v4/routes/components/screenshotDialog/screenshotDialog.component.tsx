@@ -35,6 +35,8 @@
 import { PureComponent, createRef } from 'react';
 
 import { IFontSize, IStrokeWidth } from '@components/shared/modalsDispatcher/templates/imagesModal/imageMarkup/imageMarkup.types';
+import { viewportSize } from '@/v4/helpers/viewportSize';
+import { aspectRatio } from '@/v4/helpers/aspectRatio';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { LoaderContainer } from '../../board/board.styles';
 import { Loader } from '../loader/loader.component';
@@ -44,6 +46,10 @@ import { INITIAL_VALUES } from './screenshotDialog.helpers';
 import { MODES } from './markupStage/markupStage.helpers';
 import { Container } from './screenshotDialog.styles';
 import { MarkupRefObject, MarkupStage } from './markupStage/markupStage.component';
+
+const INIT_DIALOG_PADDING = 48;
+const HORIZONTAL_DIALOG_PADDING = 2 * INIT_DIALOG_PADDING;
+const VERTICAL_DIALOG_PADDING = 40 - 2 * INIT_DIALOG_PADDING;
 
 const MIN_DIALOG_WIDTH = 860;
 const MIN_DIALOG_HEIGHT = 300;
@@ -71,6 +77,10 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 			height: INIT_DIALOG_HEIGHT,
 			width: MIN_DIALOG_WIDTH,
 		},
+		stage: {
+			height: 0,
+			width: 0,
+		},
 		selectedObjectName: '',
 		sourceImage: '',
 	};
@@ -82,11 +92,25 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 
 	public markupRef = createRef<MarkupRefObject>();
 
-	private onScaleStage = ({ height, width }) => {
+	private onScaleStage = (image) => {
+		const { naturalWidth, naturalHeight } = image.attrs.image;
+		const { width: viewportWidth, height: viewportHeight } = viewportSize();
+		const maxHeight = viewportHeight - VERTICAL_DIALOG_PADDING;
+		const maxWidth = viewportWidth - HORIZONTAL_DIALOG_PADDING;
+
+		let newStageSizes;
+		if (naturalWidth < maxWidth && naturalHeight < maxHeight) {
+			newStageSizes = { height: naturalHeight, width: naturalWidth };
+		} else {
+			const { scaledWidth, scaledHeight } = aspectRatio(naturalWidth, naturalHeight, maxWidth, maxHeight);
+			newStageSizes = { height: scaledHeight, width: scaledWidth };
+			image.setAttrs(newStageSizes);
+		}
 		this.setState({
+			stage: newStageSizes,
 			container: {
-				height: height >= MIN_DIALOG_HEIGHT ? height : MIN_DIALOG_HEIGHT,
-				width: width >= MIN_DIALOG_WIDTH ? width : MIN_DIALOG_WIDTH,
+				height: newStageSizes.height >= MIN_DIALOG_HEIGHT ? newStageSizes.height : MIN_DIALOG_HEIGHT,
+				width: newStageSizes.width >= MIN_DIALOG_WIDTH ? newStageSizes.width : MIN_DIALOG_WIDTH,
 			},
 		});
 	}
@@ -223,6 +247,7 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 						onSelectedObjectNameChange={(selectedObjectName) => this.setState({ selectedObjectName })}
 						onModeChange={(mode) => this.setState({ mode })}
 						onCursorChange={this.setCursor}
+						sizes={this.state.stage}
 					/>
 				)}
 			</Container>

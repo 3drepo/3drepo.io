@@ -43,9 +43,7 @@ import { selectPathname } from '@/v4/modules/router/router.selectors';
 import { withViewer } from '@/v4/services/viewer/viewer';
 import { bindActionCreators } from 'redux';
 import { ROUTES } from '../../../../constants/routes';
-import { aspectRatio } from '../../../../helpers/aspectRatio';
 import { renderWhenTrue } from '../../../../helpers/rendering';
-import { viewportSize } from '../../../../helpers/viewportSize';
 import { DrawingHandler } from '../components/drawingHandler/drawingHandler.component';
 import { DrawnLine } from '../components/drawnLine/drawnLine.component';
 import { Erasing } from '../components/erasing/erasing.component';
@@ -57,10 +55,6 @@ import { TypingHandler } from '../components/typingHandler/typingHandler.compone
 import { getNewDrawnLine, getNewShape, getNewText, ELEMENT_TYPES, MODES } from './markupStage.helpers';
 import { Stage, StageContainer } from './markupStage.styles';
 
-const INIT_DIALOG_PADDING = 48;
-const HORIZONTAL_DIALOG_PADDING = 2 * INIT_DIALOG_PADDING;
-const VERTICAL_DIALOG_PADDING = 40 - 2 * INIT_DIALOG_PADDING;
-
 declare const Konva;
 
 export type MarkupRefObject = {
@@ -70,7 +64,8 @@ export type MarkupRefObject = {
 type MarkupStageProps = {
 	sourceImage: string;
 	disabled?: boolean;
-	onScaleStage: ({ height, width }) => void
+	sizes: { height: number, width: number };
+	onScaleStage?: (image) => void
 	markupRef: React.MutableRefObject<MarkupRefObject>,
 	activeShape: IShapeType,
 	color: string,
@@ -94,11 +89,6 @@ interface IProps extends MarkupStageProps {
 	initHistory: () => void;
 }
 class BaseMarkupStage extends PureComponent<IProps, any> {
-	public state = {
-		height: 0,
-		width: 0,
-	};
-
 	public imageLayerRef = createRef<any>();
 	public layerRef = createRef<any>();
 	public drawingLayerRef = createRef<any>();
@@ -188,22 +178,7 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 	}
 
 	public scaleStage = (image) => {
-		const { naturalWidth, naturalHeight } = image.attrs.image;
-		const { width: viewportWidth, height: viewportHeight } = viewportSize();
-		const maxHeight = viewportHeight - VERTICAL_DIALOG_PADDING;
-		const maxWidth = viewportWidth - HORIZONTAL_DIALOG_PADDING;
-
-		let newSizes;
-		if (naturalWidth < maxWidth && naturalHeight < maxHeight) {
-			newSizes = { height: naturalHeight, width: naturalWidth };
-		} else {
-			const { scaledWidth, scaledHeight } = aspectRatio(naturalWidth, naturalHeight, maxWidth, maxHeight);
-			newSizes = { height: scaledHeight, width: scaledWidth };
-			image.setAttrs(newSizes);
-		}
-		this.props.onScaleStage(newSizes);
-		this.setState(newSizes);
-
+		this.props.onScaleStage?.(image)
 		if (this.lastImageCanvasWidthRef.current) {
 			const x = (this.imageLayerRef.current.canvas.width - this.lastImageCanvasWidthRef.current) / 2;
 
@@ -314,8 +289,8 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 	public renderErasing = renderWhenTrue(() => {
 		return (
 			<Erasing
-				height={this.state.height}
-				width={this.state.width}
+				height={this.props.sizes.height}
+				width={this.props.sizes.width}
 				size={this.props.strokeWidth}
 				color={this.props.color}
 				mode={this.props.mode}
@@ -326,24 +301,22 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 	});
 
 	public renderLayers = () => {
-		if (this.state.width && this.state.height) {
-			return (
-				<>
-					<Layer ref={this.imageLayerRef} />
-					<Layer ref={this.layerRef}>
-						{this.renderObjects()}
-						{this.renderErasing(this.isErasing)}
-					</Layer>
-					<Layer ref={this.drawingLayerRef} />
-				</>
-			);
-		}
+		return (
+			<>
+				<Layer ref={this.imageLayerRef} />
+				<Layer ref={this.layerRef}>
+					{this.renderObjects()}
+					{this.renderErasing(this.isErasing)}
+				</Layer>
+				<Layer ref={this.drawingLayerRef} />
+			</>
+		);
 	}
 
 	public renderDrawingHandler = renderWhenTrue(() => (
 		<DrawingHandler
-			height={this.state.height}
-			width={this.state.width}
+			height={this.props.sizes.height}
+			width={this.props.sizes.width}
 			size={this.props.strokeWidth}
 			textSize={this.props.fontSize}
 			color={this.props.color}
@@ -376,14 +349,14 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 
 	render() {
 		return (
-			<StageContainer height={this.state.height} width={this.state.width}>
+			<StageContainer height={this.props.sizes.height} width={this.props.sizes.width}>
 				<WindowEventListener event='resize' onEventTriggered={this.handleResize} />
 				{this.renderIndicator(!this.props.disabled && this.isDrawingMode && !this.props.selectedObjectName)}
 				<Stage
 					id="stage"
 					ref={this.stageRef}
-					height={this.state.height}
-					width={this.state.width}
+					height={this.props.sizes.height}
+					width={this.props.sizes.width}
 					onMouseDown={this.handleStageMouseDown}
 					onTouchStart={this.handleStageMouseDown}
 				>
