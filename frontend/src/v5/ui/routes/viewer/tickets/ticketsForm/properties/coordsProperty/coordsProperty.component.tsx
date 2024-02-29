@@ -143,7 +143,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 						{label}
 					</Label>
 					<CoordsActions>
-						{editMode && (
+						{editMode && !disabled && (
 							<>
 								<CoordsAction onClick={cancelEdit} selected>
 									<MoveIcon />
@@ -163,7 +163,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 								</CoordsAction>
 							</>
 						)}
-						{!editMode && (
+						{!editMode && !disabled && (
 							<>
 								<CoordsAction onClick={onClickEdit} disabled={disabled}>
 									{hasPin ? <MoveIcon /> : <CircledPlusIcon />}
