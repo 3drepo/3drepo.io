@@ -23,12 +23,13 @@ import { SearchContext } from '@controls/search/searchContext';
 import { Highlight } from '@controls/highlight';
 import { DueDateWithIcon } from '@controls/dueDate/dueDateWithIcon/dueDateWithIcon.component';
 import { Chip } from '@controls/chip/chip.component';
-import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, STATUS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
+import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
 import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { Tooltip } from '@mui/material';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { Row, Cell, CellChipText, CellOwner, OverflowContainer, SmallFont, CellDate } from './ticketsTableRow.styles';
+import { StatusChip } from '@controls/chip/statusChip/statusChip.component';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
@@ -111,7 +112,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 				<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
 			</CellChipText>
 			<CellChipText width={110}>
-				<Chip {...STATUS_MAP[status]} variant="text" />
+				<StatusChip value={status} templateId={template._id} modelId={modelId} variant="outlined" />
 			</CellChipText>
 			<Cell width={137} hidden={!hasSafetibase}>
 				<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />

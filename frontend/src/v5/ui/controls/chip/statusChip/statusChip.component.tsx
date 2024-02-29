@@ -16,6 +16,16 @@
  */
 
 import { Chip } from '../chip.component';
+import { IChip } from '../chip.types';
 import { getStatusChipProps } from '../chip.helpers';
 
-export const StatusChip = ({ value, templateId, ...props }) => <Chip {...getStatusChipProps(templateId, value)} {...props} />;
+export type StatusChipProps = {
+	value: string,
+	templateId: string,
+	modelId?: string,
+};
+export const StatusChip = ({ value, templateId, modelId, ...props }: StatusChipProps & IChip) => {
+	const chipProps = getStatusChipProps({ templateId, value, modelId });
+	if (!value) return null;
+	return <Chip {...chipProps} {...props} />;
+};

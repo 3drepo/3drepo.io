@@ -18,9 +18,8 @@
 import { selectCurrentModel } from '@/v4/modules/model';
 import { SequencingProperties, TicketBaseKeys, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { createSelector } from 'reselect';
-import { selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
+import { selectTemplateById, selectTemplates, selectTicketById, selectTicketIsCompleted, selectTickets } from '../tickets.selectors';
 import { ITicketsCardState } from './ticketsCard.redux';
-import { getTicketIsCompleted } from './ticketsCard.helpers';
 import { DEFAULT_PIN, getPinColorHex, formatPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { compact, get } from 'lodash';
 import { IPin } from '@/v4/services/viewer/viewer';
@@ -126,15 +125,17 @@ export const selectFilteringQueries = createSelector(
 );
 
 export const selectTicketsFilteredByQueriesAndCompleted = createSelector(
+	(state) => state,
 	selectCurrentTickets,
 	selectFilteringCompleted,
 	selectFilteringQueries,
 	selectCurrentTemplates,
-	(tickets, isComplete, queries, templates) => tickets.filter((ticket) => {
+	selectCurrentModel,
+	(state, tickets, isComplete, queries, templates, containerOrFederation) => tickets.filter((ticket) => {
 		const templateCode = templates.find((template) => template._id === ticket.type).code;
 		const ticketCode = `${templateCode}:${ticket.number}`;
-		const ticketsMatchesIsCompleted = getTicketIsCompleted(ticket) === isComplete;
-		if (!ticketsMatchesIsCompleted) return false;
+		const ticketMatchesIsCompleted = selectTicketIsCompleted(state, containerOrFederation,  ticket._id) === isComplete;
+		if (!ticketMatchesIsCompleted) return false;
 
 		if (!queries.length) return true;
 

@@ -51,7 +51,6 @@ import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
 import { useSelectedModels } from './newTicketMenu/useSelectedModels';
-import { getTicketIsCompleted } from '@/v5/store/tickets/card/ticketsCard.helpers';
 
 type FormType = {
 	containersAndFederations: string[],
@@ -92,7 +91,7 @@ export const TicketsTable = () => {
 	const isCreatingNewTicket = containerOrFederation && !selectedTicketId && !hasRequiredViewerProperties(selectedTemplate);
 
 	const ticketsFilteredByTemplate = useMemo(() => {
-		const ticketsToShow = tickets.filter((t) => getTicketIsCompleted(t) === showCompleted);
+		const ticketsToShow = tickets.filter((t) => TicketsHooksSelectors.selectTicketIsCompleted(t.modelId, t._id) === showCompleted);
 		return ticketsToShow.filter(({ type }) => type === template);
 	}, [template, tickets, showCompleted]);
 	const newTicketButtonIsDisabled = !containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0;

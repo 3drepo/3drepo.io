@@ -18,8 +18,9 @@
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
-import { PriorityLevels, RiskLevels, TicketStatuses, TreatmentStatuses } from '@controls/chip/chip.types';
+import { PriorityLevels, RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { getStatusLabels } from '@controls/chip/chip.helpers';
 
 export const NONE_OPTION = 'None';
 
@@ -52,7 +53,6 @@ export const GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE = mapKeysToSnakeCase({
 
 export const ISSUE_PROPERTIES_GROUPS = {
 	[IssueProperties.PRIORITY]: PriorityLevels,
-	[BaseProperties.STATUS]: TicketStatuses,
 };
 
 export const SAFETIBASE_PROPERTIES_GROUPS = {
@@ -138,6 +138,8 @@ export const groupTickets = (groupBy: string, tickets: ITicket[]): Record<string
 			return groupByAssignees(tickets);
 		case IssueProperties.DUE_DATE:
 			return groupByDate(tickets);
+		case BaseProperties.STATUS:
+			return groupByList(tickets, groupBy, getStatusLabels(tickets[0]?.modelId, tickets[0]?.type));
 		default:
 			return groupByList(tickets, groupBy, _.values(GROUP_NAMES_BY_TYPE[groupBy]));
 	}
