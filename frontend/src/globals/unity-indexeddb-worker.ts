@@ -77,7 +77,7 @@ export class IndexedDbCacheWorker {
 	index: any;
 
 	createIndexedDbCache() {
-		const request = indexedDB.open('3DRepoCacheDb', 1);
+		const request = indexedDB.open('3DRepoCacheDb', 2);
 
 		request.onerror = () => {
 			console.error('Unable to open IndexedDb - Model Caching will be Disabled.');
@@ -89,6 +89,9 @@ export class IndexedDbCacheWorker {
 		// When onupgradeneeded completes successfully, onsuccess will be called
 		request.onupgradeneeded = (event: any) => {
 			const db = event.target.result;
+			if (event.oldVersion == 1) {
+				db.deleteObjectStore(this.objectStoreName); // Existing keys from version 1 are the wrong types (UInt8Array, whereas we now expect them to be ArrayBuffers)
+			}
 			db.createObjectStore(this.objectStoreName, {}); // The database uses a simple key-pair assocation, where the key is passed explicitly
 		};
 
@@ -135,14 +138,13 @@ export class IndexedDbCacheWorker {
 		if (record !== undefined) {
 			this.sendGetTransactionComplete({
 				id,
-				size: record.size,
-				result: record,
+				data: record.data,
 			});
 		} else if (!(key in this.index)) {
 			// We know the database doesnt have the key, so return immediately again
 			this.sendGetTransactionComplete({
 				id,
-				size: -1,
+				data: undefined,
 			});
 		} else {
 			// We believe the key is in the database, so go ahead and request it
@@ -155,13 +157,12 @@ export class IndexedDbCacheWorker {
 					if (request.result === undefined) {
 						this.sendGetTransactionComplete({ // Where a key is not found, we want to handle this outside the error chain
 							id,
-							size: -1, // -1 indicates that no key was found or the transaction was aborted
+							data: undefined, // indicates that no key was found or the transaction was aborted
 						});
 					} else {
-						this.sendGetTransactionComplete({
+						this.sendGetTransactionCompleteTransfer({
 							id,
-							size: request.result.size,
-							result: request.result,
+							data: request.result.data,
 						});
 					}
 					// At the end of this function the transaction will exit the active state, after which no more changes can be made to it
@@ -177,7 +178,7 @@ export class IndexedDbCacheWorker {
 					console.error(`IndexedDb Cache Error: ${ev.currentTarget.error}`);
 					this.sendGetTransactionComplete({
 						id,
-						size: -1,
+						data: undefined,
 					});
 					ev.stopPropagation(); // Don't bubble the error up
 				};
@@ -212,7 +213,6 @@ export class IndexedDbCacheWorker {
 
 				this.sendGetTransactionComplete({
 					id,
-					size: -1,
 				});
 
 				console.error('Unexpected IndexedDb read exception', e);
@@ -232,6 +232,19 @@ export class IndexedDbCacheWorker {
 			type: 'OnGetTransactionComplete',
 			parms,
 		});
+	}
+
+	// A version of sendGetTransactionComplete that uses the transferable objects
+	// override to transfer the data ArrayBuffer, rather then perform a deep copy.
+	// Only use this when no more references to the ArrayBuffer will exist in the
+	// worker scope; for example, when handling indexeddb get callbacks, but not
+	// when using the memory cache.
+	sendGetTransactionCompleteTransfer(parms: any) {
+		self.postMessage({
+			type: 'OnGetTransactionComplete',
+			parms,
+		},
+		[parms.data]);
 	}
 
 	sendIndexedDbUpdated(parms: any) {
