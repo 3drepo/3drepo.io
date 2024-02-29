@@ -222,7 +222,7 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 						fontSize={this.state.fontSize as IFontSize}
 						onSelectedObjectNameChange={(selectedObjectName) => this.setState({ selectedObjectName })}
 						onModeChange={(mode) => this.setState({ mode })}
-						onChangeCursor={this.setCursor}
+						onCursorChange={this.setCursor}
 					/>
 				)}
 			</Container>

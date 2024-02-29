@@ -67,8 +67,7 @@ export type MarkupRefObject = {
 	getScreenshot: () => Promise<string>,
 	clearCanvas: () => void,
 }
-
-interface IProps {
+type MarkupStageProps = {
 	sourceImage: string;
 	disabled?: boolean;
 	onScaleStage: ({ height, width }) => void
@@ -81,8 +80,9 @@ interface IProps {
 	fontSize: IFontSize,
 	onSelectedObjectNameChange: (name: string) => void,
 	onModeChange: (mode: IMode) => void,
-	onChangeCursor: (cursor: 'crosshair' | 'default') => void,
-
+	onCursorChange: (cursor: 'crosshair' | 'default') => void,
+}
+interface IProps extends MarkupStageProps {
 	// props passed by 'container'
 	canvasElements: any[];
 	pathname: string;
@@ -144,7 +144,7 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 
 	public componentDidUpdate(prevProps, prevState) {
 		if (this.props.mode === MODES.SHAPE && prevState.mode !== MODES.SHAPE) {
-			this.props.onChangeCursor('crosshair');
+			this.props.onCursorChange('crosshair');
 		}
 	}
 
@@ -236,7 +236,7 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 				this.props.onModeChange(MODES.TEXT);
 			}
 
-			this.props.onChangeCursor('crosshair');
+			this.props.onCursorChange('crosshair');
 		}
 	}
 
@@ -265,7 +265,7 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 				}
 			}
 
-			this.props.onChangeCursor('crosshair');
+			this.props.onCursorChange('crosshair');
 		}
 	}
 
@@ -412,4 +412,4 @@ const mapDispatchToProps = (dispatch) => bindActionCreators({
 	initHistory: CanvasHistoryActions.initHistory
 }, dispatch);
 
-export const MarkupStage = withViewer(connect(mapStateToProps, mapDispatchToProps)(BaseMarkupStage));
+export const MarkupStage = withViewer(connect(mapStateToProps, mapDispatchToProps)(BaseMarkupStage)) as (props: MarkupStageProps) => any;
