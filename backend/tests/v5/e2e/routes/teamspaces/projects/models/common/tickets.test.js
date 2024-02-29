@@ -201,10 +201,13 @@ const testGetTemplateDetails = () => {
 const testAddTicket = () => {
 	describe('Add ticket', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
+		const uniquePropertyName = ServiceHelper.generateRandomString();
 		const template = ServiceHelper.generateTemplate();
+		template.properties.push({ name: uniquePropertyName, type: propTypes.TEXT, unique: true });
+
 		const conTicket = ServiceHelper.generateTicket(template);
 		const fedTicket = ServiceHelper.generateTicket(template);
-		const uniquePropertyName = template.properties.find((p) => p.unique).name;
+
 		const statusValues = ServiceHelper.generateCustomStatusValues();
 
 		const templateWithAllModulesAndPresetEnums = {
