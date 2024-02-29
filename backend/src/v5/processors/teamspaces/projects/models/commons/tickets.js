@@ -29,6 +29,7 @@ const { createResponseCode, templates } = require('../../../../../utils/response
 const { getFileWithMetaAsStream, removeFile, storeFile } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
+const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { isUUID } = require('../../../../../utils/helper/typeCheck');
@@ -179,26 +180,32 @@ Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource
 
 Tickets.getTicketById = getTicketById;
 
+const propertyToFilterName = (property) => {
+	if (property.includes('.')) {
+		const [moduleName, moduleProp] = property.split('.');
+		if (moduleName && moduleProp) {
+			return `modules.${property}`;
+		}
+		return undefined;
+	}
+	return `properties.${property}`;
+};
+
 const filtersToProjection = (filters) => {
 	const projectionObject = {};
 
 	filters.forEach((name) => {
 		if (name) {
-			if (name.includes('.')) {
-				const [moduleName, moduleProp] = name.split('.');
-				if (moduleName && moduleProp) {
-					projectionObject[`modules.${name}`] = 1;
-				}
-			} else {
-				projectionObject[`properties.${name}`] = 1;
-			}
+			const nameSanitised = propertyToFilterName(name);
+			if (nameSanitised) projectionObject[nameSanitised] = 1;
 		}
 	});
 
 	return projectionObject;
 };
 
-Tickets.getTicketList = (teamspace, project, model, filters = []) => {
+Tickets.getTicketList = (teamspace, project, model,
+	{ filters = [], updatedSince, sortBy, sortDesc }) => {
 	const { SAFETIBASE, SEQUENCING } = presetModules;
 	const {
 		[SAFETIBASE]: safetibaseProps,
@@ -226,10 +233,13 @@ Tickets.getTicketList = (teamspace, project, model, filters = []) => {
 		[`modules.${SEQUENCING}.${seqProps.END_TIME}`]: 1,
 
 	};
+	let sort;
 
-	const sort = { [`properties.${basePropertyLabels.Created_AT}`]: -1 };
+	if (sortBy && propertyToFilterName(sortBy)) {
+		sort = { [propertyToFilterName(sortBy)]: sortDesc ? -1 : 1 };
+	}
 
-	return getAllTickets(teamspace, project, model, projection, sort);
+	return getAllTickets(teamspace, project, model, deleteIfUndefined({ projection, updatedSince, sort }));
 };
 
 module.exports = Tickets;

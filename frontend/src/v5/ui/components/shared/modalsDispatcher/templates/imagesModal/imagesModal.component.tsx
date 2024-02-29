@@ -15,23 +15,42 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ChevronIcon from '@assets/icons/outlined/small_chevron-outlined.svg';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
-import { Modal, Container, Image, NextButton, PreviousButton, CloseButton } from './imagesModal.styles';
+import { FormattedMessage } from 'react-intl';
+import UploadImageIcon from '@assets/icons/outlined/add_image-outlined.svg';
+import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
+import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { Tooltip } from '@mui/material';
+import { formatMessage } from '@/v5/services/intl';
+import {
+	Modal, CenterBar, Image, NextButton, PreviousButton, FloatingButton, Counter,
+	TopBar, Buttons, TopBarButton, TextTopBarButton, ImageThumbnail,
+	BottomBar, ImageWithArrows, ImageThumbnailContainer, ImageContainer,
+} from './imagesModal.styles';
 
-type ImagesModalProps = {
+export type ImagesModalProps = {
+	onClickClose: () => void;
+	open: boolean;
 	images: string[];
 	// to use if the image to display is not the first one
 	displayImageIndex?: number;
-	onClickClose: () => void;
-	open: boolean;
+	onUpload?: () => void;
+	onDelete?: (index) => void;
+	disabledDeleteMessage?: string;
 };
-export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open }: ImagesModalProps) => {
+export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open, onUpload, onDelete, disabledDeleteMessage }: ImagesModalProps) => {
 	const [imageIndex, setImageIndex] = useState(displayImageIndex);
 	const imagesLength = images.length;
+	const imageRef = useRef<HTMLImageElement>(null);
+	const hasManyImages = imagesLength > 1;
 
-	const changeImageIndex = (delta) => setImageIndex((imageIndex + delta + imagesLength) % imagesLength);
+	const changeImageIndex = (delta) => {
+		const newIndex = Math.max(0, Math.min(imagesLength - 1, imageIndex + delta));
+		setImageIndex(newIndex);
+	};
 
 	const handleKeyDown = ({ keyCode }) => {
 		const ESCAPE_KEY = 27;
@@ -49,35 +68,126 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open 
 				changeImageIndex(1);
 				break;
 			default:
-				// do nothing
+			// do nothing
 		}
+	};
+
+	const handleDelete = () => {
+		onDelete(imageIndex);
+		if (imageIndex === (imagesLength - 1)) {
+			setImageIndex(imageIndex - 1);
+		}
+	};
+
+	const triggerDeleteModal = () => {
+		DialogsActionsDispatchers.open('delete', {
+			onClickConfirm: handleDelete,
+			titleLabel: formatMessage({
+				id: 'imagesModal.deleteModal.title',
+				defaultMessage: 'Delete image',
+			}),
+			message: formatMessage({
+				id: 'imagesModal.deleteModal.message',
+				defaultMessage: 'Are you sure you want to delete the selected image?',
+			}),
+		});
+	};
+
+	const centerSelectedThumbnail = () => {
+		if (!imageRef.current) return;
+		// @ts-ignore
+		imageRef.current.scrollIntoView({ behavior: 'instant', inline: 'center' });
 	};
 
 	useEffect(() => {
 		document.addEventListener('keydown', handleKeyDown);
 		return () => document.removeEventListener('keydown', handleKeyDown);
-	});
+	}, [changeImageIndex]);
+
+	useEffect(() => {
+		if (!imagesLength) {
+			onClickClose();
+		}
+	}, [imagesLength]);
+
+	useEffect(() => { centerSelectedThumbnail(); }, [imagesLength, imageIndex]);
 
 	return (
 		<Modal open={open} onClose={onClickClose}>
-			<Container>
-				{imagesLength === 1 ? (
-					<Image src={images[imageIndex]} />
-				) : (
-					<>
-						<PreviousButton onClick={() => changeImageIndex(-1)}>
+			<TopBar>
+				<Buttons>
+					{hasManyImages && (
+						<Counter $counterChars={imagesLength.toString().length}>
+							<FormattedMessage
+								id="images.count.of"
+								defaultMessage="{current} of {total}"
+								values={{
+									current: imageIndex + 1,
+									total: imagesLength,
+								}}
+							/>
+						</Counter>
+					)}
+					<TextTopBarButton>
+						<EditIcon />
+						<FormattedMessage
+							id="images.button.addMarkup"
+							defaultMessage="Add markup"
+						/>
+					</TextTopBarButton>
+					{onUpload && (
+						<TopBarButton onClick={onUpload}>
+							<UploadImageIcon />
+						</TopBarButton>
+					)}
+					{onDelete && (
+						<Tooltip title={disabledDeleteMessage}>
+							<span>
+								<TopBarButton onClick={triggerDeleteModal} disabled={!!disabledDeleteMessage}>
+									<DeleteIcon />
+								</TopBarButton>
+							</span>
+						</Tooltip>
+					)}
+				</Buttons>
+				<FloatingButton onClick={onClickClose}>
+					<CloseIcon />
+				</FloatingButton>
+			</TopBar>
+			<CenterBar>
+				{!hasManyImages && (
+					<ImageContainer>
+						<Image src={images[imageIndex]} />
+					</ImageContainer>
+				)}
+				{hasManyImages && (
+					<ImageWithArrows>
+						<PreviousButton onClick={() => changeImageIndex(-1)} disabled={imageIndex === 0}>
 							<ChevronIcon />
 						</PreviousButton>
-						<Image src={images[imageIndex]} key={images[imageIndex]} />
-						<NextButton onClick={() => changeImageIndex(1)}>
+						<ImageContainer $isCarousel>
+							<Image src={images[imageIndex]} key={images[imageIndex]} />
+						</ImageContainer>
+						<NextButton onClick={() => changeImageIndex(1)} disabled={imageIndex === (imagesLength - 1)}>
 							<ChevronIcon />
 						</NextButton>
-					</>
+					</ImageWithArrows>
 				)}
-				<CloseButton onClick={onClickClose}>
-					<CloseIcon />
-				</CloseButton>
-			</Container>
+			</CenterBar>
+			{hasManyImages && (
+				<BottomBar onLoad={centerSelectedThumbnail}>
+					{images.map((img, index) => (
+						<ImageThumbnailContainer
+							onClick={() => setImageIndex(index)}
+							selected={index === imageIndex}
+							ref={index === imageIndex ? imageRef : null}
+							key={img + index}
+						>
+							<ImageThumbnail src={img} />
+						</ImageThumbnailContainer>
+					))}
+				</BottomBar>
+			)}
 		</Modal>
 	);
 };
