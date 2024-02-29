@@ -117,20 +117,3 @@ export const selectStatusConfigByTemplateId = createSelector(
 	(state, modelId, templateId) => templateId,
 	(storeState, modelId, templateId) => selectTemplateById(storeState, modelId, templateId)?.config?.status || DEFAULT_STATUS_CONFIG,
 );
-
-export const selectTicketIsCompleted = createSelector(
-	(state) => state,
-	(state, modelId) => modelId,
-	(state, modelId, ticketId) => ticketId,
-	(state, modelId, ticketId) => {
-		const ticket = selectTicketById(state, modelId, ticketId);
-		const config = selectStatusConfigByTemplateId(state, modelId, ticket.type);
-		const statusType = config.values.find(({ name }) => name === ticket.properties[BaseProperties.STATUS]).type;
-		const treatmentStatus = get(ticket, `modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`);
-
-		const isCompletedIssueProperty = [TicketStatusTypes.DONE, TicketStatusTypes.VOID].includes(statusType);
-		const isCompletedTreatmentStatus = [TreatmentStatuses.AGREED_FULLY, TreatmentStatuses.VOID].includes(treatmentStatus);
-
-		return (isCompletedIssueProperty || isCompletedTreatmentStatus);
-	},
-);

@@ -16,10 +16,13 @@
  */
 
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { STATUS_TYPE_MAP } from './chip.types';
+import { DEFAULT_STATUS_CONFIG, STATUS_TYPE_MAP, TicketStatusTypes, TreatmentStatuses } from './chip.types';
 import { useParams } from 'react-router-dom';
 import { StatusChipProps } from './statusChip/statusChip.component';
 import { DashboardTicketsParams } from '../../routes/routes.constants';
+import { BaseProperties, SafetibaseProperties } from '../../routes/viewer/tickets/tickets.constants';
+import { get } from 'lodash';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
 
 export const getStatusChipProps = ({ templateId, value, modelId }: StatusChipProps ) => {
 	const { containerOrFederation = modelId } = useParams();
@@ -42,4 +45,16 @@ export const getStatusPropertyValues = (templateId) => {
 export const getStatusLabels = (containerOrFederation, templateId) => {
 	const values = TicketsHooksSelectors.selectStatusConfigByTemplateId(containerOrFederation, templateId)?.values;
 	return values.map(({ name, label }) => label || name);
+};
+
+export const ticketIsCompleted = (ticket: ITicket, template) => {
+	const statusValue = get(ticket, `properties.${BaseProperties.STATUS}`);
+	const allStatusValues = (template.config?.status || DEFAULT_STATUS_CONFIG).values;
+	const statusType = allStatusValues.find(({ name }) => name === statusValue)?.type;
+	const treatmentStatus = get(ticket, `modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`);
+
+	const isCompletedIssueProperty = [TicketStatusTypes.DONE, TicketStatusTypes.VOID].includes(statusType);
+	const isCompletedTreatmentStatus = [TreatmentStatuses.AGREED_FULLY, TreatmentStatuses.VOID].includes(treatmentStatus);
+
+	return (isCompletedIssueProperty || isCompletedTreatmentStatus);
 };
