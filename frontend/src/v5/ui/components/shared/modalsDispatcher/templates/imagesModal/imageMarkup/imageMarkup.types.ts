@@ -16,7 +16,8 @@
  */
 
 import { SHAPE_TYPES } from '@/v4/routes/components/screenshotDialog/components/shape/shape.constants';
-import { ELEMENT_TYPES, MODES, MODE_OPERATION } from '@/v4/routes/components/screenshotDialog/screenshotDialog.helpers';
+import { ELEMENT_TYPES, MODES } from '@/v4/routes/components/screenshotDialog/markupStage/markupStage.helpers';
+import { MODE_OPERATION } from '@/v4/routes/components/screenshotDialog/screenshotDialog.helpers';
 
 export type ValuesOf<T> = T[keyof T];
 

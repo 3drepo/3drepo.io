@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Stage as KonvaStage } from 'react-konva';
 import styled from 'styled-components';
 
 export const Container = styled.div<{ height: number, width: number }>`
@@ -24,38 +23,6 @@ export const Container = styled.div<{ height: number, width: number }>`
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	height: ${(props: any) => `${props.height}px` || 'auto'};
-	width: ${(props: any) => `${props.width}px` || 'auto'};
-`;
-
-export const HiddenCanvas = styled.canvas`
-	position: absolute;
-	z-index: -1;
-`;
-
-export const Canvas = styled.canvas`
-	position: absolute;
-	z-index: 2;
-`;
-
-export const BackgroundImage = styled.img`
-	width: 100%;
-	text-align: center;
-	margin: auto;
-	padding: 0;
-	position: absolute;
-	bottom: 0;
-	top: 0;
-	user-select: none;
-`;
-
-export const Stage = styled(KonvaStage)`
-	position: absolute;
-`;
-
-export const StageContainer = styled.div<{ height: number, width: number }>`
-	position: relative;
-	overflow: hidden;
 	height: ${(props: any) => `${props.height}px` || 'auto'};
 	width: ${(props: any) => `${props.width}px` || 'auto'};
 `;

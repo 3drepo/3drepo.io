@@ -33,55 +33,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, createRef } from 'react';
-import { WindowEventListener } from '@/v4/helpers/windowEventListener';
-import { Layer } from 'react-konva';
 
-import { ROUTES } from '../../../constants/routes';
-import { aspectRatio } from '../../../helpers/aspectRatio';
+import { IFontSize, IStrokeWidth } from '@components/shared/modalsDispatcher/templates/imagesModal/imageMarkup/imageMarkup.types';
 import { renderWhenTrue } from '../../../helpers/rendering';
-import { viewportSize } from '../../../helpers/viewportSize';
 import { LoaderContainer } from '../../board/board.styles';
 import { Loader } from '../loader/loader.component';
-import { DrawingHandler } from './components/drawingHandler/drawingHandler.component';
-import { DrawnLine } from './components/drawnLine/drawnLine.component';
-import { Erasing } from './components/erasing/erasing.component';
-import { Indicator } from './components/indicator/indicator.component';
-import { Shape } from './components/shape/shape.component';
 import { SHAPE_TYPES } from './components/shape/shape.constants';
-import { TextNode } from './components/textNode/textNode.component';
 import { Tools } from './components/tools/tools.component';
-import { TypingHandler } from './components/typingHandler/typingHandler.component';
-import {
-	getNewDrawnLine, getNewShape, getNewText, ELEMENT_TYPES, INITIAL_VALUES, MODES
-} from './screenshotDialog.helpers';
-import { Container, Stage, StageContainer } from './screenshotDialog.styles';
+import { INITIAL_VALUES } from './screenshotDialog.helpers';
+import { MODES } from './markupStage/markupStage.helpers';
+import { Container } from './screenshotDialog.styles';
+import { MarkupRefObject, MarkupStage } from './markupStage/markupStage.component';
 
 const MIN_DIALOG_WIDTH = 860;
 const MIN_DIALOG_HEIGHT = 300;
 const INIT_DIALOG_HEIGHT = 600;
-const INIT_DIALOG_PADDING = 48;
-const HORIZONTAL_DIALOG_PADDING = 2 * INIT_DIALOG_PADDING;
-const VERTICAL_DIALOG_PADDING = 40 - 2 * INIT_DIALOG_PADDING;
-
-declare const Konva;
 
 interface IProps {
 	sourceImage: string | Promise<string>;
 	disabled?: boolean;
-	canvasElements: any[];
 	arePastElements: boolean;
 	areFutureElements: boolean;
-	pathname: string;
-	viewer: any;
 	handleResolve: (screenshot) => void;
-	handleClose: () => void;
-	addElement: (element) => void;
 	updateElement: (elementName, property) => void;
-	removeElement: (elementName) => void;
 	undo: () => void;
 	redo: () => void;
-	clearHistory: () => void;
-	initHistory: () => void;
 }
 
 export class ScreenshotDialog extends PureComponent<IProps, any> {
@@ -89,150 +65,35 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 		color: INITIAL_VALUES.color,
 		strokeWidth: INITIAL_VALUES.brushSize,
 		fontSize: INITIAL_VALUES.textSize,
-		mode: null,
+		mode: INITIAL_VALUES.mode,
 		activeShape: null,
-		sourceImage: '',
-		stage: {
-			height: 0,
-			width: 0,
-		},
 		container: {
 			height: INIT_DIALOG_HEIGHT,
 			width: MIN_DIALOG_WIDTH,
 		},
 		selectedObjectName: '',
+		sourceImage: '',
 	};
-
-	public containerRef = createRef<any>();
-	public layerRef = createRef<any>();
-	public imageLayerRef = createRef<any>();
-	public drawingLayerRef = createRef<any>();
-	public stageRef = createRef<any>();
-
-	public lastImageCanvasWidth = null;
-
-	public get containerElement() {
-		return this.containerRef.current;
-	}
 
 	public async componentDidMount() {
 		const sourceImage = await this.props.sourceImage;
-
-		const imageObj = new Image();
-		imageObj.onload = () => {
-			const image = new Konva.Image({
-				image: imageObj,
-			});
-			this.scaleStage(image);
-
-			this.imageLayerRef.current.add(image);
-			this.imageLayerRef.current.batchDraw();
-			this.lastImageCanvasWidth = this.imageLayerRef.current.canvas.width;
-		};
-		imageObj.src = sourceImage;
-
-		this.setState({ sourceImage, mode: INITIAL_VALUES.mode });
-
-		document.addEventListener('keydown', this.handleKeyDown);
-		if (this.props.pathname.includes(ROUTES.VIEWER)) {
-			this.props.viewer.pauseRendering();
-		}
-
-		if (this.layerRef.current) {
-			this.clearCanvas();
-		}
+		this.setState({ sourceImage });
 	}
 
-	public componentDidUpdate(prevProps, prevState) {
-		if (this.state.mode === MODES.SHAPE && prevState.mode !== MODES.SHAPE) {
-			document.body.style.cursor = 'crosshair';
-		}
-	}
+	public markupRef = createRef<MarkupRefObject>();
 
-	public componentWillUnmount() {
-		document.removeEventListener('keydown', this.handleKeyDown);
-		if (this.props.pathname.includes(ROUTES.VIEWER)) {
-			this.props.viewer.resumeRendering();
-		}
-
-		if (this.layerRef.current) {
-			this.clearCanvas();
-		}
-	}
-
-	private updateDialogSizes = ({ height, width }) => {
+	private onScaleStage = ({ height, width }) => {
 		this.setState({
 			container: {
 				height: height >= MIN_DIALOG_HEIGHT ? height : MIN_DIALOG_HEIGHT,
 				width: width >= MIN_DIALOG_WIDTH ? width : MIN_DIALOG_WIDTH,
 			},
-			stage: {
-				height,
-				width,
-			}
 		});
-	}
-
-	public scaleStage = (image) => {
-		const { naturalWidth, naturalHeight } = image.attrs.image;
-		const { width: viewportWidth, height: viewportHeight } = viewportSize();
-		const maxHeight = viewportHeight - VERTICAL_DIALOG_PADDING;
-		const maxWidth = viewportWidth - HORIZONTAL_DIALOG_PADDING;
-
-		if (naturalWidth < maxWidth && naturalHeight < maxHeight) {
-			this.updateDialogSizes({ height: naturalHeight, width: naturalWidth });
-		} else {
-			const { scaledWidth, scaledHeight } = aspectRatio(naturalWidth, naturalHeight, maxWidth, maxHeight);
-			image.setAttrs({
-				width: scaledWidth,
-				height: scaledHeight,
-			});
-			this.updateDialogSizes({ height: scaledHeight, width: scaledWidth });
-		}
-
-		if (this.lastImageCanvasWidth) {
-			const x = (this.imageLayerRef.current.canvas.width - this.lastImageCanvasWidth) / 2;
-
-			this.layerRef.current.setAttrs({ x });
-			this.drawingLayerRef.current.setAttrs({ x });
-		} else {
-			this.lastImageCanvasWidth = this.imageLayerRef.current.canvas.width;
-		}
-	}
-
-	public clearCanvas = () => {
-		this.layerRef.current.clear();
-		this.drawingLayerRef.current.clear();
-		this.stageRef.current.clearCache();
-		this.layerRef.current.clearCache();
-		this.drawingLayerRef.current.clearCache();
-		this.layerRef.current.destroyChildren();
-		this.drawingLayerRef.current.destroyChildren();
-
-		// init before clear - it's on puporse because of library's bug;
-		// the library doesn't clear current state, only past and future
-		// and then call again init to allow to undo
-		this.props.initHistory();
-		this.props.clearHistory();
-		this.props.initHistory();
-	}
-
-	public handleKeyDown = (e) => {
-		if (this.state.selectedObjectName) {
-			if (e.keyCode === 8) {
-				this.props.removeElement(this.state.selectedObjectName);
-				this.setState({
-					selectedObjectName: ''
-				}, () => {
-					document.body.style.cursor = 'default';
-				});
-			}
-		}
 	}
 
 	public handleSave = () => {
 		this.setState({ selectedObjectName: '' }, async () => {
-			const screenshot = await this.stageRef.current.toDataURL();
+			const screenshot = await this.markupRef.current.getScreenshot();
 			this.props.handleResolve(screenshot);
 		});
 	}
@@ -269,9 +130,7 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 			return;
 		}
 
-		const newState = {
-			activeShape: shape
-		} as any;
+		const newState = { activeShape: shape } as any;
 
 		if (this.state.mode !== MODES.SHAPE) {
 			newState.mode = MODES.SHAPE;
@@ -280,15 +139,13 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 		this.setState(newState);
 	}
 
+	public setCursor = (cursor: 'crosshair' | 'default') => document.body.style.cursor = cursor;
+
 	public handleToolTextClick = () => {
 		if (this.state.mode !==  MODES.TEXT) {
-			this.setState({ mode: MODES.TEXT }, () => {
-				document.body.style.cursor = 'crosshair';
-			});
+			this.setState({ mode: MODES.TEXT }, () => this.setCursor('crosshair'));
 		} else {
-			this.setState({ mode: '' }, () => {
-				document.body.style.cursor = 'default';
-			});
+			this.setState({ mode: '' }, () => this.setCursor('default'));
 		}
 	}
 
@@ -297,9 +154,7 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 			this.props.updateElement(this.state.selectedObjectName, { [property]: value });
 		}
 
-		this.setState({
-			[property]: value,
-		});
+		this.setState({ [property]: value });
 	}
 
 	public handleBrushSizeChange = ({ target: { value } }) => {
@@ -310,11 +165,9 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 		this.updateProperty('fontSize', value);
 	}
 
-	public handleColorChange = (color) => {
-		this.updateProperty('color', color);
-	}
+	public handleColorChange = (color) => this.updateProperty('color', color);
 
-	public renderTools = () => (
+	public renderTools = renderWhenTrue(() => (
 		<Tools
 			size={this.state.strokeWidth}
 			textSize={this.state.fontSize}
@@ -323,7 +176,7 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 			onEraseClick={this.setEraserMode}
 			onTextClick={this.handleToolTextClick}
 			onShapeClick={this.setShapeMode}
-			onClearClick={this.clearCanvas}
+			onClearClick={this.markupRef.current.clearCanvas}
 			onBrushSizeChange={this.handleBrushSizeChange}
 			onTextSizeChange={this.handleTextSizeChange}
 			onColorChange={this.handleColorChange}
@@ -337,7 +190,7 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 			arePastElements={this.props.arePastElements}
 			areFutureElements={this.props.areFutureElements}
 		/>
-	)
+	));
 
 	public renderLoader = renderWhenTrue(() => (
 		<LoaderContainer>
@@ -346,249 +199,33 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 	));
 
 	public render() {
-		const { stage, container } = this.state;
+		const { container } = this.state;
+		const imgIsLoading = !this.state.sourceImage;
 
 		return (
-			<Container height={container.height} width={container.width} ref={this.containerRef}>
-				{this.renderTools()}
-				{this.renderLoader(!stage.width || !stage.height)}
-				<MarkupStage
-					disabled={this.props.disabled}
-					updateElement={this.props.updateElement}
-					canvasElements={this.props.canvasElements}
-					addElement={this.props.addElement}
+			<Container height={container.height} width={container.width}>
+				{this.renderTools(this.markupRef.current)}
+				{this.renderLoader(!this.markupRef.current || imgIsLoading)}
+				{!imgIsLoading && (
+					<MarkupStage
+						sourceImage={this.state.sourceImage}
+						disabled={this.props.disabled}
 
-					stageRef={this.stageRef}
-					layerRef={this.layerRef}
-					imageLayerRef={this.imageLayerRef}
-					drawingLayerRef={this.drawingLayerRef}
-					scaleStage={this.scaleStage}
+						onScaleStage={this.onScaleStage}
+						markupRef={this.markupRef}
 
-					activeShape={this.state.activeShape}
-					color={this.state.color}
-					selectedObjectName={this.state.selectedObjectName}
-					strokeWidth={this.state.strokeWidth}
-					mode={this.state.mode}
-					stage={this.state.stage}
-					fontSize={this.state.fontSize}
-					onSetSelectedObjectName={(selectedObjectName) => this.setState({ selectedObjectName })}
-					onModeChange={(mode) => this.setState({ mode })}
-				/>
+						activeShape={this.state.activeShape}
+						color={this.state.color}
+						selectedObjectName={this.state.selectedObjectName}
+						strokeWidth={this.state.strokeWidth as IStrokeWidth}
+						mode={this.state.mode}
+						fontSize={this.state.fontSize as IFontSize}
+						onSelectedObjectNameChange={(selectedObjectName) => this.setState({ selectedObjectName })}
+						onModeChange={(mode) => this.setState({ mode })}
+						onChangeCursor={this.setCursor}
+					/>
+				)}
 			</Container>
 		);
 	}
 }
-
-class MarkupStage extends PureComponent<{
-	stageRef,
-	color,
-	strokeWidth,
-	disabled,
-	selectedObjectName,
-	updateElement,
-	imageLayerRef,
-	layerRef,
-	drawingLayerRef,
-	canvasElements,
-	mode,
-	stage,
-	fontSize,
-	addElement,
-	activeShape,
-	onSetSelectedObjectName,
-	onModeChange,
-	scaleStage,
-}, any> {
-	public get isErasing() {
-		return this.props.mode === MODES.ERASER;
-	}
-
-	public get isDrawingMode() {
-		return this.props.mode === MODES.BRUSH || this.isErasing;
-	}
-
-	public handleStageMouseDown = ({ target }) => {
-		const isAnchor = target && target.attrs.name && target.attrs.name.includes('anchor');
-		const isSelectedObject = target.parent && (target.parent.attrs.name !== this.props.selectedObjectName);
-		const isDrawnLine = target.attrs.type !== 'drawing' && target.attrs.name !== this.props.selectedObjectName;
-
-		if (!target.parent || (isSelectedObject && isDrawnLine && !isAnchor)) {
-			this.props.onSetSelectedObjectName('');
-			return;
-		}
-	}
-
-	public addNewText = (position, text?: string, updateState: boolean = true) => {
-		if (!this.props.selectedObjectName) {
-			position.y = position.y + 1;
-			const newText = getNewText(this.props.color, this.props.fontSize, position, text);
-			this.props.addElement(newText);
-
-			if (updateState) {
-				this.props.onSetSelectedObjectName(newText.name);
-				this.props.onModeChange(MODES.TEXT);
-				// this.setState({
-				// 	selectedObjectName: newText.name,
-				// 	mode: MODES.TEXT,
-				// });
-			}
-
-			document.body.style.cursor = 'crosshair';
-		}
-	}
-
-	public addNewShape = (figure, { attrs }, updateState: boolean = true) => {
-		if (!this.props.selectedObjectName) {
-			const correctCircle = figure === SHAPE_TYPES.CIRCLE && attrs.radius > 1;
-			const correctTriangle = figure === SHAPE_TYPES.TRIANGLE && attrs.radius > 1;
-			const correctRectangle =
-				figure === SHAPE_TYPES.RECTANGLE && (Math.abs(attrs.height) > 1 || Math.abs(attrs.width) > 1);
-			const correctLineShape = [SHAPE_TYPES.LINE, SHAPE_TYPES.ARROW]
-					.includes(figure) && attrs.points && attrs.points.length;
-			const correctCustomShape = [SHAPE_TYPES.CLOUD]
-					.includes(figure) && (Math.abs(attrs.scaleX) > 0 || Math.abs(attrs.scaleY) > 0);
-
-			if (correctCircle || correctTriangle || correctRectangle || correctLineShape || correctCustomShape) {
-				const { scaleX, scaleY, ...attributes } = attrs;
-				const newShape = getNewShape(figure, this.props.color, {
-					...attributes,
-					initScaleX: scaleX,
-					initScaleY: scaleY,
-				});
-				const selectedObjectName = newShape.name;
-				this.props.addElement(newShape);
-				if (updateState) {
-					this.props.onSetSelectedObjectName(selectedObjectName);
-				}
-			}
-
-			document.body.style.cursor = 'crosshair';
-		}
-	}
-
-	public addNewDrawnLine = (line, type, updateState: boolean = true) => {
-		if (!this.props.selectedObjectName) {
-			const newLine = getNewDrawnLine(line.attrs, this.props.color, type);
-			const selectedObjectName = this.isErasing ? '' : newLine.name;
-			this.props.addElement(newLine);
-
-			if (updateState) {
-				this.props.onSetSelectedObjectName(selectedObjectName);
-				if (type !== MODES.POLYGON) {
-					this.props.onModeChange(this.isErasing ? this.props.mode : MODES.BRUSH);
-				} else {
-					this.props.onModeChange(MODES.POLYGON);
-				}
-			}
-		}
-	}
-
-	public handleResize = () => {
-		const backgroundImage = this.props.imageLayerRef.current.children[0];
-		this.props.scaleStage(backgroundImage);
-	}
-
-	public renderIndicator = renderWhenTrue(() => (
-		<Indicator color={this.props.color} size={this.props.strokeWidth} />
-	));
-
-	public renderObjects = () => this.props.canvasElements.map((element, index) => {
-		const isSelected = this.props.selectedObjectName === element.name;
-		const commonProps = {
-			element,
-			isSelected,
-			handleChange: (newAttrs) => this.props.updateElement(newAttrs.name, newAttrs),
-		};
-
-		if (element.type === ELEMENT_TYPES.TEXT) {
-			return (<TextNode key={index} {...commonProps} />);
-		} else if (element.type === ELEMENT_TYPES.DRAWING) {
-			return (<DrawnLine key={index} {...commonProps} />);
-		}
-		return (<Shape key={index} {...commonProps} />);
-	})
-
-	public renderErasing = renderWhenTrue(() => {
-		return (
-			<Erasing
-				height={this.props.stage.height}
-				width={this.props.stage.width}
-				size={this.props.strokeWidth}
-				color={this.props.color}
-				mode={this.props.mode}
-				layer={this.props.layerRef}
-				stage={this.props.stageRef.current}
-			/>
-		);
-	});
-
-	public renderLayers = () => {
-		if (this.props.stage.width && this.props.stage.height) {
-			return (
-				<>
-					<Layer ref={this.props.imageLayerRef} />
-					<Layer ref={this.props.layerRef}>
-						{this.renderObjects()}
-						{this.renderErasing(this.isErasing)}
-					</Layer>
-					<Layer ref={this.props.drawingLayerRef} />
-				</>
-			);
-		}
-	}
-
-	public renderDrawingHandler = () => (
-		<DrawingHandler
-			height={this.props.stage.height}
-			width={this.props.stage.width}
-			size={this.props.strokeWidth}
-			textSize={this.props.fontSize}
-			color={this.props.color}
-			mode={this.props.mode}
-			layer={this.props.drawingLayerRef}
-			stage={this.props.stageRef.current}
-			handleNewDrawnLine={this.addNewDrawnLine}
-			handleNewDrawnShape={this.addNewShape}
-			handleNewText={this.addNewText}
-			selected={this.props.selectedObjectName}
-			activeShape={this.props.activeShape}
-			disabled={this.props.disabled}
-		/>
-	)
-
-	public handleRefreshDrawingLayer = () => this.props.drawingLayerRef.current.getLayer().batchDraw();
-
-	public renderTypingHandler = () => (
-		<TypingHandler
-			mode={this.props.mode}
-			stage={this.props.stageRef.current}
-			layer={this.props.layerRef.current}
-			color={this.props.color}
-			fontSize={this.props.fontSize}
-			onRefreshDrawingLayer={this.handleRefreshDrawingLayer}
-			onAddNewText={this.addNewText}
-			selected={this.props.selectedObjectName}
-		/>
-	)
-
-	render() {
-		return (
-			<StageContainer height={this.props.stage.height} width={this.props.stage.width}>
-				<WindowEventListener event='resize' onEventTriggered={this.handleResize} />
-				{this.renderIndicator(!this.props.disabled && this.isDrawingMode && !this.props.selectedObjectName)}
-				<Stage
-					id="stage"
-					ref={this.props.stageRef}
-					height={this.props.stage.height}
-					width={this.props.stage.width}
-					onMouseDown={this.handleStageMouseDown}
-					onTouchStart={this.handleStageMouseDown}
-				>
-					{this.renderLayers()}
-				</Stage>
-				{this.renderDrawingHandler()}
-				{this.renderTypingHandler()}
-			</StageContainer>
-		);
-	}
-};

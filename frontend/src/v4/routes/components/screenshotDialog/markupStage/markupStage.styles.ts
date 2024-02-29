@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,22 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { COLOR } from '../../../styles';
-import { initialBrushSize, initialTextSize} from './components/tools/tools.helpers';
-import { MODES } from './markupStage/markupStage.helpers';
+import { Stage as KonvaStage } from 'react-konva';
+import styled from 'styled-components';
 
-export const INITIAL_VALUES = {
-	color: COLOR.RED,
-	brushColor: COLOR.PRIMARY_DARK,
-	brushSize: initialBrushSize(),
-	textSize: initialTextSize(),
-	mode: MODES.BRUSH
-};
+export const Stage = styled(KonvaStage)`
+	position: absolute;
+`;
 
-export const MODE_OPERATION = {
-	brush: 'source-over',
-	eraser: 'destination-out'
-};
-
-export const EDITABLE_TEXTAREA_NAME = 'editable-textarea';
-export const EDITABLE_TEXTAREA_PLACEHOLDER = 'Type to change text...';
+export const StageContainer = styled.div<{ height: number, width: number }>`
+	position: relative;
+	overflow: hidden;
+	height: ${(props: any) => `${props.height}px` || 'auto'};
+	width: ${(props: any) => `${props.width}px` || 'auto'};
+`;
