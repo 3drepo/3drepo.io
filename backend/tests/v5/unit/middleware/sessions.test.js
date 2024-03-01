@@ -24,8 +24,6 @@ const Responder = require(`${src}/utils/responder`);
 jest.mock('../../../../src/v5/utils/permissions/permissions');
 const { templates } = require(`${src}/utils/responseCodes`);
 const config = require(`${src}/utils/config`);
-jest.mock('../../../../src/v5/utils/helper/strings');
-const StringsHelper = require(`${src}/utils/helper/strings`);
 jest.mock('../../../../src/v5/utils/helper/userAgent');
 const UserAgentHelper = require(`${src}/utils/helper/userAgent`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
@@ -42,6 +40,12 @@ jest.mock('../../../../src/v5/handler/db', () => ({
 }));
 
 jest.mock('../../../../src/v5/services/sessions');
+
+jest.mock('../../../../src/v5/utils/helper/strings', () => ({
+	...jest.requireActual('../../../../src/v5/utils/helper/strings'),
+	getURLDomain: () => 'abc.com',
+}));
+
 const SessionService = require(`${src}/services/sessions`);
 
 const sessionMiddleware = jest.fn().mockImplementation((req, res, next) => next());
@@ -55,10 +59,8 @@ Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const pluginAgent = generateRandomString();
 const webBrowserUserAgent = generateRandomString();
-const urlDomain = generateRandomString();
 
 UserAgentHelper.isFromWebBrowser.mockImplementation((userAgent) => userAgent === webBrowserUserAgent);
-StringsHelper.getURLDomain.mockImplementation(() => urlDomain);
 
 const testCreateSession = () => {
 	const checkResults = (request) => {

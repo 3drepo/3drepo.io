@@ -224,7 +224,7 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			config: {
 				status: {
-					values: [...statusValues, { type: statusTypes[0] }],
+					values: [...statusValues, { type: statusTypes.OPEN }],
 					default: statusValues[0].name,
 				},
 			},
@@ -306,6 +306,27 @@ const testValidate = () => {
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
+			}] }, true],
+		['property is unique', { name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				unique: true,
+			}] }, true],
+		['property is unique for unsupported type', { name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.BOOLEAN,
+				unique: true,
+			}] }, false],
+		['property is readOnlyOnUI', { name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				readOnlyOnUI: true,
 			}] }, true],
 		['property is immutable', { name: generateRandomString(),
 			code: generateRandomString(3),

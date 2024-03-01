@@ -26,6 +26,7 @@ export interface PropertyDefinition {
 	values?: string[] | 'jobsAndUsers' | 'riskCategories';
 	default?: string;
 	readOnly?: boolean;
+	immutable?: boolean;
 	required?: boolean;
 	deprecated?: boolean;
 }

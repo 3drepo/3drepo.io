@@ -56,12 +56,25 @@ const pinColSchema = Yup.lazy((val) => {
 
 const blackListedChrsRegex = /^[^.,[\]]*$/;
 
+const uniqueTypeBlackList = [
+	propTypes.LONG_TEXT,
+	propTypes.BOOLEAN,
+	propTypes.IMAGE,
+	propTypes.VIEW,
+	propTypes.MEASUREMENTS,
+	propTypes.COORDS,
+];
+
 const propSchema = Yup.object().shape({
 	name: types.strings.title.required().min(1).matches(blackListedChrsRegex),
 	type: Yup.string().oneOf(Object.values(propTypes)).required(),
 	deprecated: defaultFalse,
 	required: defaultFalse,
 	immutable: defaultFalse,
+	readOnlyOnUI: defaultFalse,
+	unique: Yup.lazy((value) => Yup.boolean().strip(!value)
+		.when('type', (typeVal, schema) => schema.test('Unique check', `Unique attribute cannot be applied to properties of type: ${uniqueTypeBlackList.join(', ')}`,
+			(uniqueVal) => !(uniqueVal && uniqueTypeBlackList.includes(typeVal))))),
 	values: Yup.mixed().when('type', (val, schema) => {
 		if (val === propTypes.MANY_OF || val === propTypes.ONE_OF) {
 			return schema.test('Values check', 'Property values must of be an array of values or the name of a preset', (value) => {
@@ -149,7 +162,7 @@ const moduleSchema = Yup.object().shape({
 
 const customStatus = Yup.object({
 	name: types.strings.title.required(),
-	type: Yup.string().oneOf(statusTypes).required(),
+	type: Yup.string().oneOf(Object.values(statusTypes)).required(),
 });
 
 const configSchema = Yup.object().shape({
