@@ -17,30 +17,21 @@
 
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DEFAULT_STATUS_CONFIG, STATUS_TYPE_MAP, TicketStatusTypes, TreatmentStatuses } from './chip.types';
-import { useParams } from 'react-router-dom';
-import { StatusChipProps } from './statusChip/statusChip.component';
-import { DashboardTicketsParams } from '../../routes/routes.constants';
 import { BaseProperties, SafetibaseProperties } from '../../routes/viewer/tickets/tickets.constants';
 import { get } from 'lodash';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 
-export const getStatusChipProps = ({ templateId, value, modelId }: StatusChipProps ) => {
-	const { containerOrFederation = modelId } = useParams();
-	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(containerOrFederation, templateId);
+export const getChipPropsFromConfig = (statusConfig, value) => {
 	const valueProps = statusConfig.values.find(({ name }) => name === value);
 	if (!valueProps) return {};
 	const { type, label = value } = valueProps;
 	return { label, value, ...STATUS_TYPE_MAP[type] };
 };
 
-export const getStatusPropertyValues = (templateId) => {
-	const { containerOrFederation, template = templateId } = useParams<DashboardTicketsParams>();
-	const values = TicketsHooksSelectors.selectStatusConfigByTemplateId(containerOrFederation, template)?.values;
-	return values.reduce((acc, { name }) => {
-		acc[name] = getStatusChipProps({ templateId: template, value: name });
-		return acc;
-	}, {});
-};
+export const getStatusPropertyValues = (statusConfig) => statusConfig.values.reduce((acc, { name }) => {
+	acc[name] = getChipPropsFromConfig(statusConfig, name);
+	return acc;
+}, {});
 
 export const getStatusLabels = (containerOrFederation, templateId) => {
 	const values = TicketsHooksSelectors.selectStatusConfigByTemplateId(containerOrFederation, templateId)?.values;

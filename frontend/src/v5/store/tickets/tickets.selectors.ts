@@ -16,12 +16,12 @@
  */
 
 import { createSelector } from 'reselect';
-import { get, orderBy } from 'lodash';
-import { BaseProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { orderBy } from 'lodash';
+import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
 import { ticketWithGroups } from './ticketsGroups.helpers';
 import { ITemplate, ITicket } from './tickets.types';
-import { DEFAULT_STATUS_CONFIG, TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types';
+import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 

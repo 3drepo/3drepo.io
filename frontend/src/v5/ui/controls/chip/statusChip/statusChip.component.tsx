@@ -15,17 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Chip } from '../chip.component';
 import { IChip } from '../chip.types';
-import { getStatusChipProps } from '../chip.helpers';
+import { getChipPropsFromConfig } from '../chip.helpers';
+import { Chip } from './statusChip.styles';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 
-export type StatusChipProps = {
+export type StatusChipProps = IChip & {
 	value: string,
 	templateId: string,
-	modelId?: string,
+	modelId: string,
 };
-export const StatusChip = ({ value, templateId, modelId, ...props }: StatusChipProps & IChip) => {
-	const chipProps = getStatusChipProps({ templateId, value, modelId });
+export const StatusChip = ({ value, templateId, modelId, ...props }: StatusChipProps) => {
+	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(modelId, templateId);
+	const chipProps = getChipPropsFromConfig(statusConfig, value);
 	if (!value) return null;
 	return <Chip {...chipProps} {...props} />;
 };

@@ -15,13 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useParams } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { FormChipSelect } from '@controls/inputs/formInputs.component';
 import { formatMessage } from '@/v5/services/intl';
 import { BaseProperties } from '../../../tickets.constants';
 import { PropertyTitle, Property } from './statusProperty.styles';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getStatusPropertyValues } from '@controls/chip/chip.helpers';
+import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { useMemo } from 'react';
 
 type StatusPropertyProps = {
 	onBlur: () => void;
@@ -29,8 +32,10 @@ type StatusPropertyProps = {
 };
 
 export const StatusProperty = ({ onBlur, readOnly }: StatusPropertyProps) => {
-	const templateId = TicketsCardHooksSelectors.selectSelectedTicket()?.type;
-	const values = getStatusPropertyValues(templateId);
+	const { containerOrFederation, template: templateIdTabularView } = useParams<DashboardTicketsParams>();
+	const templateId = TicketsCardHooksSelectors.selectSelectedTicket()?.type || templateIdTabularView;
+	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(containerOrFederation, templateId);
+	const values = useMemo(() => getStatusPropertyValues(statusConfig), [templateId]);
 	return (
 		<Property>
 			<PropertyTitle>
