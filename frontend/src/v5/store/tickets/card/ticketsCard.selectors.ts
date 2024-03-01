@@ -24,7 +24,7 @@ import { DEFAULT_PIN, getPinColorHex, formatPin } from '@/v5/ui/routes/viewer/ti
 import { compact, get } from 'lodash';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
-import { ticketIsCompleted } from '@controls/chip/chip.helpers';
+import { ticketIsCompleted } from '@controls/chip/statusChip.helpers';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 

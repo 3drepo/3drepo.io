@@ -16,8 +16,8 @@
  */
 
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { DEFAULT_STATUS_CONFIG, STATUS_TYPE_MAP, TicketStatusTypes, TreatmentStatuses } from './chip.types';
-import { BaseProperties, SafetibaseProperties } from '../../routes/viewer/tickets/tickets.constants';
+import { DEFAULT_STATUS_CONFIG, STATUS_TYPE_MAP, TicketStatusTypes, TreatmentStatuses } from '../chip.types';
+import { BaseProperties, SafetibaseProperties } from '../../../routes/viewer/tickets/tickets.constants';
 import { get } from 'lodash';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 

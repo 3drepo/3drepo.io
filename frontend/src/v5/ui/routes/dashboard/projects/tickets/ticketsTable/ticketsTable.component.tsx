@@ -51,7 +51,7 @@ import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
 import { useSelectedModels } from './newTicketMenu/useSelectedModels';
-import { ticketIsCompleted } from '@controls/chip/chip.helpers';
+import { ticketIsCompleted } from '@controls/chip/statusChip.helpers';
 
 type FormType = {
 	containersAndFederations: string[],
