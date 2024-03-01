@@ -17,9 +17,6 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import TextIcon from '@assets/icons/outlined/text-outlined.svg';
-import UnderlinedTextIcon from '@assets/icons/outlined/underlined_text-outlined.svg';
-import ItalicTextIcon from '@assets/icons/outlined/italic_text-outlined.svg';
-import BoldTextIcon from '@assets/icons/outlined/bold_text-outlined.svg';
 import BinIcon from '@assets/icons/outlined/delete-outlined.svg';
 import RedoIcon from '@assets/icons/outlined/redo_arrow-outlined.svg';
 import UndoIcon from '@assets/icons/outlined/undo_arrow-outlined.svg';
@@ -85,23 +82,6 @@ export const MarkupToolbar = ({
 			<ToolbarButton
 				Icon={() => <>{fontSize}</>}
 				title={formatMessage({ id: 'imageMarkup.icon.title.fontSize', defaultMessage: 'Font size' })}
-			/>
-			<Divider />
-			<ToolbarButton
-				Icon={TextIcon}
-				title={formatMessage({ id: 'imageMarkup.icon.title.normalText', defaultMessage: 'Normal text' })}
-			/>
-			<ToolbarButton
-				Icon={BoldTextIcon}
-				title={formatMessage({ id: 'imageMarkup.icon.title.bold', defaultMessage: 'bold' })}
-			/>
-			<ToolbarButton
-				Icon={ItalicTextIcon}
-				title={formatMessage({ id: 'imageMarkup.icon.title.italic', defaultMessage: 'italic' })}
-			/>
-			<ToolbarButton
-				Icon={UnderlinedTextIcon}
-				title={formatMessage({ id: 'imageMarkup.icon.title.underlined', defaultMessage: 'underlined' })}
 			/>
 			<Divider />
 			<ModeButtons
