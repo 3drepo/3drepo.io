@@ -90,6 +90,10 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 		this.setState({ sourceImage });
 	}
 
+	public componentWillUnmount() {
+		this.setCursor('default');
+	}
+
 	public markupRef = createRef<MarkupRefObject>();
 
 	private onScaleStage = (image) => {
