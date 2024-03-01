@@ -313,9 +313,9 @@ ServiceHelper.generateRandomRvtId = () => Math.floor(Math.random() * 10000);
 
 ServiceHelper.generateRandomURL = () => `http://${ServiceHelper.generateRandomString()}.com/`;
 
-ServiceHelper.generateCustomStatusValues = () => times(statusTypes.length, (i) => ({
+ServiceHelper.generateCustomStatusValues = () => Object.values(statusTypes).map((type) => ({
 	name: ServiceHelper.generateRandomString(),
-	type: statusTypes[i],
+	type,
 }));
 
 ServiceHelper.generateSequenceEntry = (rid) => {
@@ -573,7 +573,7 @@ ServiceHelper.generateRandomObject = () => ({
 });
 
 ServiceHelper.generateTicket = (template, internalType = false, container) => {
-	const fullTemplate = generateFullSchema(template) ? generateFullSchema(template) : template;
+	const fullTemplate = generateFullSchema(template) ?? template;
 	const modules = {};
 	(fullTemplate?.modules || []).forEach(({ name, type, deprecated, properties }) => {
 		if (deprecated) return;

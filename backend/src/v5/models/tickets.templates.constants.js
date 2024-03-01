@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { presetModules } = require('../schemas/tickets/templates.constants');
+const { presetModules, statusTypes } = require('../schemas/tickets/templates.constants');
 const { stringToUUID } = require('../utils/helper/uuids');
 const { validate } = require('../schemas/tickets/templates');
 
@@ -33,10 +33,10 @@ const defaultTemplates = [
 			pin: true,
 			status: {
 				values: [
-					{ name: 'Active', type: 'open' },
-					{ name: 'Reviewed', type: 'review' },
-					{ name: 'Approved', type: 'review' },
-					{ name: 'Resolved', type: 'done' },
+					{ name: 'Active', type: statusTypes.OPEN },
+					{ name: 'Reviewed', type: statusTypes.REVIEW },
+					{ name: 'Approved', type: statusTypes.REVIEW },
+					{ name: 'Resolved', type: statusTypes.DONE },
 				],
 				default: 'Active',
 

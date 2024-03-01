@@ -61,7 +61,7 @@ const ticketTemplateStatusConfig = {
 				required: ['name', 'type'],
 				properties: {
 					name: helpers.stringDef('Name of the custom status', 'Awaiting triage'),
-					type: helpers.stringDef('Status type', statusTypes[0], statusTypes),
+					type: helpers.stringDef('Status type', statusTypes.OPEN, Object.values(statusTypes)),
 				},
 			},
 		},

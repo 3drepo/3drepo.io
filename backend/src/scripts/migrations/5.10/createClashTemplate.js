@@ -35,7 +35,7 @@ const processTeamspace = async (teamspace) => {
 			// make sure the code isn't currently used
 			const codeUsed = await getTemplateByCode(teamspace, clashTemplate.code).catch(() => false);
 			if (codeUsed) {
-				throw new Error(`[${teamspace}] Template code ${clashTemplate.code} is already in used.`);
+				throw new Error(`[${teamspace}] Template code ${clashTemplate.code} is already in use.`);
 			}
 			await addDefaultTemplates(teamspace);
 		} else {

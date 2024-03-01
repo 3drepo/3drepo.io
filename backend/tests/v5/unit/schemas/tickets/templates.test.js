@@ -224,7 +224,7 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			config: {
 				status: {
-					values: [...statusValues, { type: statusTypes[0] }],
+					values: [...statusValues, { type: statusTypes.OPEN }],
 					default: statusValues[0].name,
 				},
 			},

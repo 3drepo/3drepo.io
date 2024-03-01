@@ -88,12 +88,12 @@ const createPropertyEntry = (name, type, config = {}) => {
 
 const TemplateConstants = { propTypes, presetEnumValues, presetModules, riskLevels, viewGroups };
 
+TemplateConstants.statusTypes = createConstantMapping(['open', 'active', 'review', 'done', 'void']);
+
 TemplateConstants.riskLevelsToNum = (value) => riskLevelsArr.indexOf(value);
 
-TemplateConstants.statusTypes = ['open', 'active', 'review', 'done', 'void'];
-
 const riskLevelConfig = { [propOptions.VALUES]: riskLevelsArr, [propOptions.DEFAULT]: riskLevels.VERY_LOW };
-const clashElementTypes = ['Revit, IFC, DWG, DGN, Unknown'];
+const clashElementTypes = ['Revit', 'IFC', 'DWG', 'DGN', 'Unknown'];
 
 TemplateConstants.presetModulesProperties = {
 	[presetModules.SEQUENCING]: [
@@ -106,7 +106,7 @@ TemplateConstants.presetModulesProperties = {
 	[presetModules.SAFETIBASE]: [
 		createPropertyEntry('Risk Likelihood', propTypes.ONE_OF, riskLevelConfig),
 		createPropertyEntry('Risk Consequence', propTypes.ONE_OF, riskLevelConfig),
-		createPropertyEntry('Level of Risk', propTypes.TEXT, { readOnly: true }),
+		createPropertyEntry('Level of Risk', propTypes.TEXT, { [propOptions.READ_ONLY]: true }),
 		createPropertyEntry('Category', propTypes.ONE_OF, { [propOptions.VALUES]: presetEnumValues.RISK_CATEGORIES }),
 		createPropertyEntry('Associated Activity', propTypes.TEXT),
 		createPropertyEntry('Element Type', propTypes.TEXT),
@@ -120,7 +120,7 @@ TemplateConstants.presetModulesProperties = {
 		createPropertyEntry('Treatment Status', propTypes.ONE_OF, { [propOptions.VALUES]: ['Untreated', 'Proposed', 'Agreed (Partial)', 'Agreed (Fully)', 'Rejected', 'Void'], [propOptions.DEFAULT]: 'Untreated' }),
 		createPropertyEntry('Treated Risk Likelihood', propTypes.ONE_OF, riskLevelConfig),
 		createPropertyEntry('Treated Risk Consequence', propTypes.ONE_OF, riskLevelConfig),
-		createPropertyEntry('Treated Level of Risk', propTypes.TEXT, { readOnly: true }),
+		createPropertyEntry('Treated Level of Risk', propTypes.TEXT, { [propOptions.READ_ONLY]: true }),
 		createPropertyEntry('Residual Risk', propTypes.TEXT),
 	],
 	[presetModules.CLASH]: [
@@ -129,11 +129,11 @@ TemplateConstants.presetModulesProperties = {
 		createPropertyEntry('Clash Point', propTypes.COORDS, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Distance (m)', propTypes.NUMBER, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Clash View', propTypes.VIEW, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
-		createPropertyEntry('Item 1 ID Type', propTypes.ONE_OF, { values: clashElementTypes, [propOptions.IMMUTABLE]: true, [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Item 1 ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: clashElementTypes, [propOptions.IMMUTABLE]: true, [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Item 1 ID', propTypes.TEXT, { [propOptions.IMMUTABLE]: true, [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
-		createPropertyEntry('Item 2 ID Type', propTypes.ONE_OF, { values: clashElementTypes, [propOptions.IMMUTABLE]: true, [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Item 2 ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: clashElementTypes, [propOptions.IMMUTABLE]: true, [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Item 2 ID', propTypes.TEXT, { [propOptions.IMMUTABLE]: true, [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
-		createPropertyEntry('Status', propTypes.ONE_OF, { values: ['Active', 'Reviewed', 'Approved', 'Resolved'], default: 'Active', [propOptions.REQUIRED]: true }),
+		createPropertyEntry('Status', propTypes.ONE_OF, { [propOptions.VALUES]: ['Active', 'Reviewed', 'Approved', 'Resolved'], default: 'Active', [propOptions.REQUIRED]: true }),
 		createPropertyEntry('Assigned to', propTypes.TEXT),
 		createPropertyEntry('Approved by', propTypes.TEXT),
 		createPropertyEntry('Approved at', propTypes.TEXT),
@@ -143,9 +143,9 @@ TemplateConstants.presetModulesProperties = {
 
 const defaultProperties = [
 	createPropertyEntry('Description', propTypes.LONG_TEXT),
-	createPropertyEntry('Owner', propTypes.TEXT, { readOnly: true }),
-	createPropertyEntry('Created at', propTypes.DATE, { readOnly: true }),
-	createPropertyEntry('Updated at', propTypes.DATE, { readOnly: true }),
+	createPropertyEntry('Owner', propTypes.TEXT, { [propOptions.READ_ONLY]: true }),
+	createPropertyEntry('Created at', propTypes.DATE, { [propOptions.READ_ONLY]: true }),
+	createPropertyEntry('Updated at', propTypes.DATE, { [propOptions.READ_ONLY]: true }),
 	createPropertyEntry('Default Image', propTypes.IMAGE, { [propOptions.AVAILABLE_IF]: ({ defaultImage }) => defaultImage }),
 	createPropertyEntry('Default View', propTypes.VIEW, { [propOptions.AVAILABLE_IF]: ({ defaultView }) => defaultView }),
 	createPropertyEntry('Priority', propTypes.ONE_OF, { [propOptions.VALUES]: ['None', 'Low', 'Medium', 'High'], [propOptions.DEFAULT]: 'None', [propOptions.AVAILABLE_IF]: ({ issueProperties }) => issueProperties }),

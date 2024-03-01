@@ -163,7 +163,7 @@ const testAddTemplate = () => {
 
 const testAddDefaultTemplate = () => {
 	describe('Add default templates', () => {
-		test('Should return the id if the template is added successfully', async () => {
+		test('Should not error if the template is added successfully', async () => {
 			const fn = jest.spyOn(db, 'insertMany').mockResolvedValueOnce();
 			const teamspace = generateRandomString();
 
@@ -173,7 +173,7 @@ const testAddDefaultTemplate = () => {
 			expect(fn).toHaveBeenCalledWith(teamspace, templatesColName, defaultTemplates);
 		});
 
-		test('Should throw with whatever error insertOne errored with', async () => {
+		test('Should throw with whatever error insertMany errored with', async () => {
 			const errMsg = new Error(generateRandomString());
 			jest.spyOn(db, 'insertMany').mockRejectedValueOnce(errMsg);
 			const teamspace = generateRandomString();
