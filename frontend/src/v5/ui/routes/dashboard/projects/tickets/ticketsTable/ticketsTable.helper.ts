@@ -20,7 +20,7 @@ import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
 import { PriorityLevels, RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { getStatusLabels } from '@controls/chip/statusChip.helpers';
+import { getStatusLabels } from '@controls/chip/statusChip/statusChip.helpers';
 
 export const NONE_OPTION = 'None';
 

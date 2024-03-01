@@ -22,9 +22,9 @@ import { formatMessage } from '@/v5/services/intl';
 import { BaseProperties } from '../../../tickets.constants';
 import { PropertyTitle, Property } from './statusProperty.styles';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { getStatusPropertyValues } from '@controls/chip/statusChip.helpers';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useMemo } from 'react';
+import { getStatusPropertyValues } from '@controls/chip/statusChip/statusChip.helpers';
 
 type StatusPropertyProps = {
 	onBlur: () => void;

@@ -16,7 +16,7 @@
  */
 
 import { IChip } from '../chip.types';
-import { getChipPropsFromConfig } from '../statusChip.helpers';
+import { getChipPropsFromConfig } from '../statusChip/statusChip.helpers';
 import { Chip } from './statusChip.styles';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 

@@ -41,7 +41,7 @@ const textStyles = (color: string) => css`
 `;
 
 export const ChipWrapper = styled.div<{ variant: string; color: string; disabled: boolean }>`
-    display: inline-flex;
+	display: inline-flex;
 	.MuiChip-root {
 		${({ theme }) => theme.typography.body2};
 		font-size: 0.5rem;
