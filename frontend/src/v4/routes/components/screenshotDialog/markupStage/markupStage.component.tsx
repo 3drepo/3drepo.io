@@ -35,7 +35,7 @@ import { PureComponent, createRef } from 'react';
 import { WindowEventListener } from '@/v4/helpers/windowEventListener';
 import { Layer } from 'react-konva';
 
-import { IFontSize, IShapeType, IMode, IStrokeWidth } from '@components/shared/modalsDispatcher/templates/imagesModal/imageMarkup/imageMarkup.types';
+import { IFontSize, IShapeType, IMode, IStrokeWidth, ICalloutType } from '@components/shared/modalsDispatcher/templates/imagesModal/imageMarkup/imageMarkup.types';
 import { createStructuredSelector } from 'reselect';
 import { connect } from 'react-redux';
 import { CanvasHistoryActions, selectAreFutureElements, selectArePastElements, selectCanvasElements } from '@/v4/modules/canvasHistory';
@@ -67,7 +67,7 @@ type MarkupStageProps = {
 	sizes: { height: number, width: number };
 	onScaleStage?: (image) => void
 	markupRef: React.MutableRefObject<MarkupRefObject>,
-	activeShape: IShapeType,
+	activeShape: IShapeType | ICalloutType,
 	color: string,
 	selectedObjectName: string,
 	strokeWidth: IStrokeWidth,
@@ -75,7 +75,7 @@ type MarkupStageProps = {
 	fontSize: IFontSize,
 	onSelectedObjectNameChange: (name: string) => void,
 	onModeChange: (mode: IMode) => void,
-	onCursorChange: (cursor: 'crosshair' | 'default') => void,
+	onCursorChange?: (cursor: 'crosshair' | 'default') => void,
 }
 interface IProps extends MarkupStageProps {
 	// props passed by 'container'
@@ -132,9 +132,9 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 		};
 	}
 
-	public componentDidUpdate(prevProps, prevState) {
-		if (this.props.mode === MODES.SHAPE && prevState.mode !== MODES.SHAPE) {
-			this.props.onCursorChange('crosshair');
+	public componentDidUpdate(prevProps) {
+		if (this.props.mode === MODES.SHAPE && prevProps.mode !== MODES.SHAPE) {
+			this.props.onCursorChange?.('crosshair');
 		}
 	}
 
@@ -211,7 +211,7 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 				this.props.onModeChange(MODES.TEXT);
 			}
 
-			this.props.onCursorChange('crosshair');
+			this.props.onCursorChange?.('crosshair');
 		}
 	}
 
@@ -240,7 +240,7 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 				}
 			}
 
-			this.props.onCursorChange('crosshair');
+			this.props.onCursorChange?.('crosshair');
 		}
 	}
 
