@@ -36,7 +36,7 @@ const isSequencingProperty = (inputName: string) => [SEQUENCING_START_TIME, SEQU
 
 export const PropertiesList = ({ module, properties, onPropertyBlur }: PropertiesListProps) => {
 	const { formState } = useFormContext();
-	const isReadOnly = TicketsCardHooksSelectors.selectReadOnly();
+	const ticketIsReadOnly = TicketsCardHooksSelectors.selectReadOnly();
 
 	if (!properties.length) return null;
 	const storeTicketValues = TicketsCardHooksSelectors.selectSelectedTicket();
@@ -48,6 +48,7 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 				name,
 				type: basicType,
 				readOnly: disabled,
+				readOnlyOnUI,
 				required,
 				values,
 				immutable,
@@ -62,7 +63,7 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 						<InputController
 							Input={PropertyComponent}
 							label={name}
-							disabled={disabled || isReadOnly || immutableDisabled}
+							disabled={disabled || ticketIsReadOnly || readOnlyOnUI || immutableDisabled}
 							required={required}
 							name={inputName}
 							formError={formError}
