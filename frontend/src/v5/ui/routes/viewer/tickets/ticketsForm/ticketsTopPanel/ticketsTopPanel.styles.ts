@@ -45,10 +45,12 @@ export const FlexContainer = styled(InputContainer)`
 	grid-template-columns: 98fr 65fr 125fr;
 	margin-top: 10px;
 
+	.MuiChip-root {
+		max-width: 110px
+	}
 	& > *:not(:last-child) {
 		border-right: solid 1px ${({ theme }) => theme.palette.base.lightest};
 		padding-right: 10px;
-		max-width: 93px;
 	}
 
 	& > *:not(:first-child) {

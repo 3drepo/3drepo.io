@@ -111,7 +111,7 @@ export const TicketsTableRow = ({ ticket, onClick, showModelName, modelId, selec
 			<CellChipText width={90} hidden={!hasProperties}>
 				<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
 			</CellChipText>
-			<CellChipText width={110}>
+			<CellChipText width={150}>
 				<StatusChip value={status} templateId={template._id} modelId={modelId} variant="outlined" />
 			</CellChipText>
 			<Cell width={137} hidden={!hasSafetibase}>
