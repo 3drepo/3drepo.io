@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -23,29 +23,67 @@ import BoldTextIcon from '@assets/icons/outlined/bold_text-outlined.svg';
 import BinIcon from '@assets/icons/outlined/delete-outlined.svg';
 import RedoIcon from '@assets/icons/outlined/redo_arrow-outlined.svg';
 import UndoIcon from '@assets/icons/outlined/undo_arrow-outlined.svg';
-import SquareCalloutIcon from '@assets/icons/outlined/callout_square-outlined.svg';
-import CircleIcon from '@assets/icons/outlined/circle-outlined.svg';
-import DrawIcon from '@assets/icons/outlined/draw-outlined.svg';
-import EraserIcon from '@assets/icons/outlined/eraser-outlined.svg';
 import ResetIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
-import { ToolbarButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButton.component';
 import { Button } from '@controls/button';
-import { Toolbar, Divider } from './markupToolbar.styles';
+import { CanvasHistoryActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CanvasHistoryHooksSelectors } from '@/v5/services/selectorsHooks';
+import { Divider, Toolbar } from './markupToolbar.styles';
+import { ToolbarButton } from './toolbarButton/toolbarButton.component';
+import { ICalloutType, IFontSize, IMode, IShapeType, IStrokeWidth } from '../imageMarkup.types';
+import { ModeButtons } from './modeButtons/modeButtons.component';
 
-type MarkupToolbarProps = { onSave: () => void, onClose: () => void };
-export const MarkupToolbar = ({ onSave, onClose }: MarkupToolbarProps) => {
+type MarkupToolbarProps = {
+	onSave: () => void,
+	onClose: () => void,
+	shape: IShapeType,
+	color: string,
+	selectedObjectName: string,
+	strokeWidth: IStrokeWidth,
+	mode: IMode,
+	fontSize: IFontSize,
+	callout: ICalloutType,
+	// onSelectedObjectNameChange: (name: string) => void,
+	// onModeChange: (mode: IMode) => void,
+	// onCursorChange: (cursor: 'crosshair' | 'default') => void,
+	// onSelectMode,
+	onClearClick,
+	onBrushSizeChange,
+	onTextSizeChange,
+	onColorChange,
+
+	onShapeChange,
+	onModeChange,
+	onCalloutChange,
+};
+export const MarkupToolbar = ({
+	onSave,
+	onClose,
+	color,
+	strokeWidth,
+	shape,
+	mode,
+	fontSize,
+	onClearClick,
+	onShapeChange,
+	onModeChange,
+	callout,
+	onCalloutChange,
+}: MarkupToolbarProps) => {
+	const hasFutureHistory = !!CanvasHistoryHooksSelectors.selectAreFutureElements();
+	const hasPastHistory = !!CanvasHistoryHooksSelectors.selectArePastElements();
+
 	return (
 		<Toolbar>
 			<ToolbarButton
-				Icon={() => (<>0</>)}
+				Icon={() => (<>{color} {mode}</>)}
 				title={formatMessage({ id: 'imageMarkup.icon.title.color', defaultMessage: 'color' })}
 			/>
 			<ToolbarButton
-				Icon={() => <>icon</>}
+				Icon={() => <>{strokeWidth}</>}
 				title={formatMessage({ id: 'imageMarkup.icon.title.strokeWidth', defaultMessage: 'stroke width' })}
 			/>
 			<ToolbarButton
-				Icon={() => <>icon</>}
+				Icon={() => <>{fontSize}</>}
 				title={formatMessage({ id: 'imageMarkup.icon.title.fontSize', defaultMessage: 'Font size' })}
 			/>
 			<Divider />
@@ -66,34 +104,32 @@ export const MarkupToolbar = ({ onSave, onClose }: MarkupToolbarProps) => {
 				title={formatMessage({ id: 'imageMarkup.icon.title.underlined', defaultMessage: 'underlined' })}
 			/>
 			<Divider />
-			<ToolbarButton
-				Icon={DrawIcon}
-				title={formatMessage({ id: 'imageMarkup.icon.title.draw', defaultMessage: 'Draw' })}
-			/>
-			<ToolbarButton
-				Icon={EraserIcon}
-				title={formatMessage({ id: 'imageMarkup.icon.title.erase', defaultMessage: 'Erase' })}
-			/>
-			<ToolbarButton
-				Icon={CircleIcon}
-				title={formatMessage({ id: 'imageMarkup.icon.title.shape', defaultMessage: 'Shape' })}
-			/>
-			<ToolbarButton
-				Icon={SquareCalloutIcon}
-				title={formatMessage({ id: 'imageMarkup.icon.title.callout', defaultMessage: 'Callout' })}
+			<ModeButtons
+				mode={mode}
+				onModeChange={onModeChange}
+				shape={shape}
+				onShapeChange={onShapeChange}
+				callout={callout}
+				onCalloutChange={onCalloutChange}
 			/>
 			<Divider />
 			<ToolbarButton
 				Icon={UndoIcon}
 				title={formatMessage({ id: 'imageMarkup.icon.title.undo', defaultMessage: 'Undo' })}
+				disabled={!hasPastHistory}
+				onClick={CanvasHistoryActionsDispatchers.undo}
 			/>
 			<ToolbarButton
 				Icon={RedoIcon}
 				title={formatMessage({ id: 'imageMarkup.icon.title.redo', defaultMessage: 'Redo' })}
+				onClick={CanvasHistoryActionsDispatchers.redo}
+				disabled={!hasFutureHistory}
 			/>
 			<ToolbarButton
 				Icon={ResetIcon}
 				title={formatMessage({ id: 'imageMarkup.icon.title.reset', defaultMessage: 'Reset' })}
+				onClick={onClearClick}
+				disabled={!hasFutureHistory && !hasPastHistory}
 			/>
 			<Divider />
 			<ToolbarButton
@@ -101,7 +137,7 @@ export const MarkupToolbar = ({ onSave, onClose }: MarkupToolbarProps) => {
 				onClick={onClose}
 				title={formatMessage({ id: 'imageMarkup.icon.title.cancel', defaultMessage: 'Cancel' })}
 			/>
-			<Button onClick={onSave}>
+			<Button onClick={onSave} disabled={!hasPastHistory}>
 				Save
 			</Button>
 		</Toolbar>

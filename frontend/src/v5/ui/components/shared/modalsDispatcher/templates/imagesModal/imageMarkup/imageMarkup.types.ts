@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SHAPE_TYPES } from '@/v4/routes/components/screenshotDialog/components/shape/shape.constants';
 import { ELEMENT_TYPES, MODES } from '@/v4/routes/components/screenshotDialog/markupStage/markupStage.helpers';
 import { MODE_OPERATION } from '@/v4/routes/components/screenshotDialog/screenshotDialog.helpers';
 
@@ -23,7 +22,6 @@ export type ValuesOf<T> = T[keyof T];
 
 export type ISize = 'XS' | 'S' | 'M' | 'L' | 'XL';
 export type IMode = ValuesOf<typeof MODES>;
-export type IShapeType = ValuesOf<typeof SHAPE_TYPES>;
 export type IDimension = { width: number, height: number };
 export type IModeOperation = ValuesOf<typeof MODE_OPERATION>;
 export type IElementType = ValuesOf<typeof ELEMENT_TYPES>;
@@ -46,14 +44,20 @@ export const FONT_SIZE = {
 } as const;
 export type IFontSize = ValuesOf<typeof FONT_SIZE>;
 
-export type IMarkupForm = {
-	color: string,
-	strokeWidth: IStrokeWidth,
-	fontSize: IFontSize,
-	mode: IMode,
-	activeShape: IShapeType,
-	sourceImage: string,
-	stage: IDimension,
-	container: IDimension,
-	selectedObjectName: string,
-};
+export const SHAPES = {
+	RECTANGLE: 1,
+	TRIANGLE: 2,
+	CIRCLE: 3,
+	LINE: 4,
+	CLOUD: 5,
+	ARROW: 6,
+	POLYGON: 7,
+} as const;
+export type IShapeType = ValuesOf<typeof SHAPES>;
+
+export const CALLOUTS = {
+	DOT: 8,
+	CIRCLE: 9,
+	RECTANGLE: 10,
+} as const;
+export type ICalloutType = ValuesOf<typeof CALLOUTS>;

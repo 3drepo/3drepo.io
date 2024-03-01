@@ -37,12 +37,27 @@ import { IUsersActions, UsersActions } from '@/v5/store/users/users.redux';
 import { ViewerActions, ViewerActionsCreators } from '@/v5/store/viewer/viewer.redux';
 import { ViewerGuiActions } from '@/v4/modules/viewerGui';
 import { Action } from 'redux';
+import { CanvasHistoryActions } from '@/v4/modules/canvasHistory';
 
 import { ClipMode, GizmoMode, MeasureMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
+import { IElementType } from '@components/shared/modalsDispatcher/templates/imagesModal/imageMarkup/imageMarkup.types';
 
 interface IBimActionCreators {
 	setIsActive: (active: boolean) => Action;
 }
+
+interface ICanvasHistoryActionCreators {
+	setActiveSuccess: (isActive: boolean) => Action;
+	setDisabledSuccess: (isDisabled: boolean) => Action;
+	add: (element: Partial<IElementType>) => Action;
+	remove: (elementName: string) => Action;
+	update: (elementName: string, properties: Record<string, number>) => Action;
+	undo: () => Action;
+	redo: () => Action;
+	clearHistory: () => Action;
+	initHistory: () => Action;
+}
+
 interface ITreeActionCreators {
 	showAllNodes: () => Action;
 	hideSelectedNodes: () => Action;
@@ -89,6 +104,7 @@ interface IViewerGuiActionCreators {
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);
 export const BimActionsDispatchers = createActionsDispatchers<IBimActionCreators>(BimActions);
+export const CanvasHistoryActionsDispatchers = createActionsDispatchers<ICanvasHistoryActionCreators>(CanvasHistoryActions);
 export const ContainersActionsDispatchers = createActionsDispatchers<IContainersActionCreators>(ContainersActions);
 export const CurrentUserActionsDispatchers = createActionsDispatchers<ICurrentUserActionCreators>(CurrentUserActions);
 export const DialogsActionsDispatchers = createActionsDispatchers<IDialogsActionCreators>(DialogsActions);

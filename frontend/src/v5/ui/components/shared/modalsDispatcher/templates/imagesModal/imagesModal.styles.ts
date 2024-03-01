@@ -149,10 +149,6 @@ export const ImageContainer = styled(FlexRow)<{ $isCarousel?: boolean }>`
 	width: 100%;
 `;
 
-export const MarkupToolbarContainer = styled.div`
-	margin: 35px auto 0;
-`;
-
 export const BottomBar = styled.div`
 	display: flex;
 	gap: 12px;

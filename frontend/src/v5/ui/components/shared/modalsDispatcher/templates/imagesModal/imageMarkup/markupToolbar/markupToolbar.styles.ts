@@ -40,10 +40,6 @@ export const Toolbar = styled.div`
 		align-items: center;
 		justify-content: space-evenly;
 	}
-
-	* {
-		transition: all .3s;
-	}
 `;
 
 export const Divider = styled.div`

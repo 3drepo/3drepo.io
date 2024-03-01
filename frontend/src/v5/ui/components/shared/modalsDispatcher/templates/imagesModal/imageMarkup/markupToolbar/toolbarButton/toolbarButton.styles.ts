@@ -15,40 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const ImageSizesRefContainer = styled.img`
-	max-height: calc(100vh - 210px);
-	max-width: calc(100vw - 164px);
-	z-index: -1;
-	opacity: 0;
-	border: solid 2px red;
-	position: absolute;
-	object-fit: contain;
+export const Container = styled.div<{ disabled?: boolean, selected?: boolean }>`
+	height: 40px;
+	width: 40px;
+	padding: 0 10px;
+	box-sizing: border-box;
+	cursor: pointer;
+	display: grid;
+	place-content: center;
+	overflow: hidden;
+	color: ${({ theme }) => theme.palette.secondary.main};
 
-	img {
-		height: 100%;
+	${({ selected, theme }) => selected && css`
+		color: ${theme.palette.primary.main};
+	`}
+
+	${({ disabled, theme }) => disabled ? css`
+		cursor: default;
+		color: ${theme.palette.base.light};
+	` : css`
+		&:hover {
+			color: ${theme.palette.primary.main};
+		}
+	`}
+
+	svg {
 		width: 100%;
 	}
 `;
 
-export const Container = styled.div<{ $cursor }>`
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	position: relative;
-	cursor: ${({ $cursor }) => $cursor};
-	height: 100%;
-`;
-
-export const MarkupStageContainer = styled.div`
-	border: solid 1px ${({ theme }) => theme.palette.primary.main};
-	border-radius: 10px;
-	overflow: hidden;
-	margin: auto;
-`;
-
-export const MarkupToolbarContainer = styled.div`
-	margin: 47px auto 20px;
-`;
