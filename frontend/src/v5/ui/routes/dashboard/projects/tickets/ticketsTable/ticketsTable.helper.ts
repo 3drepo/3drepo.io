@@ -20,7 +20,7 @@ import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
 import { PriorityLevels, RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { getStatusLabels } from '@controls/chip/statusChip/statusChip.helpers';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export const NONE_OPTION = 'None';
 
@@ -139,7 +139,10 @@ export const groupTickets = (groupBy: string, tickets: ITicket[]): Record<string
 		case IssueProperties.DUE_DATE:
 			return groupByDate(tickets);
 		case BaseProperties.STATUS:
-			return groupByList(tickets, groupBy, getStatusLabels(tickets[0]?.modelId, tickets[0]?.type));
+			const { modelId, type } = tickets[0];
+			const values = TicketsHooksSelectors.selectStatusConfigByTemplateId(modelId, type)?.values;
+			const labels = values.map(({ name, label }) => label || name);
+			return groupByList(tickets, groupBy, labels);
 		default:
 			return groupByList(tickets, groupBy, _.values(GROUP_NAMES_BY_TYPE[groupBy]));
 	}

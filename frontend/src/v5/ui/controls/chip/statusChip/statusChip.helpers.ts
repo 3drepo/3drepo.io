@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DEFAULT_STATUS_CONFIG, STATUS_TYPE_MAP, TicketStatusTypes, TreatmentStatuses } from '../chip.types';
 import { BaseProperties, SafetibaseProperties } from '../../../routes/viewer/tickets/tickets.constants';
 import { get } from 'lodash';
@@ -32,11 +31,6 @@ export const getStatusPropertyValues = (statusConfig) => statusConfig.values.red
 	acc[name] = getChipPropsFromConfig(statusConfig, name);
 	return acc;
 }, {});
-
-export const getStatusLabels = (containerOrFederation, templateId) => {
-	const values = TicketsHooksSelectors.selectStatusConfigByTemplateId(containerOrFederation, templateId)?.values;
-	return values.map(({ name, label }) => label || name);
-};
 
 export const ticketIsCompleted = (ticket: ITicket, template) => {
 	const statusValue = get(ticket, `properties.${BaseProperties.STATUS}`);
