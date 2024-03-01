@@ -45,7 +45,7 @@ const generateBasicData = () => ({
 	fed: ServiceHelper.generateRandomModel({ isFederation: true }),
 });
 
-const setupBasicData = async (users, teamspace, project, models) => {
+const setupBasicData = async (users, teamspace, project, models, templatesToAdd) => {
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 
 	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
@@ -59,6 +59,7 @@ const setupBasicData = async (users, teamspace, project, models) => {
 		...userProms,
 		...modelProms,
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
+		ServiceHelper.db.createTemplates(teamspace, templatesToAdd),
 	]);
 };
 
@@ -69,8 +70,7 @@ const testGetAllTemplates = () => {
 		const ticketTemplates = times(10, (n) => ServiceHelper.generateTemplate(n % 2 === 0 ? true : undefined));
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed]);
-			await ServiceHelper.db.createTemplates(teamspace, ticketTemplates);
+			await setupBasicData(users, teamspace, project, [con, fed], ticketTemplates);
 		});
 
 		const serialiseTemplate = (template, showDeprecated) => {
@@ -93,23 +93,20 @@ const testGetAllTemplates = () => {
 				[`the model is not a ${modelType}`, false, getRoute({ modelId: modelWrongType._id }), modelNotFound],
 				[`the user does not have access to the ${modelType}`, false, getRoute({ key: users.noProjectAccess.apiKey }), templates.notAuthorized],
 				['the user has sufficient privilege and the parameters are correct', true, getRoute(),
-					{
-						templates: ticketTemplates.flatMap(({ _id, name, deprecated, code }) => (deprecated ? []
-							: { _id, name, code })),
-					}],
+					ticketTemplates.flatMap(({ _id, name, deprecated, code }) => (deprecated
+						? [] : { _id, name, code })),
+				],
 				['the user has sufficient privilege and the parameters are correct (show deprecated)', true, getRoute(),
-					{ templates: ticketTemplates.map(
+					ticketTemplates.map(
 						({ _id, name, code, deprecated }) => ({ _id, name, code, deprecated }),
-					) },
+					),
 					true],
 				['the user has sufficient privilege and the parameters are correct (get details)', true, getRoute(),
-					{
-						templates: ticketTemplates.flatMap((t) => (t.deprecated ? [] : serialiseTemplate(t, false))),
-					}, false, true],
+					ticketTemplates.flatMap((t) => (t.deprecated ? [] : serialiseTemplate(t, false))),
+					false, true],
 				['the user has sufficient privilege and the parameters are correct (get details & show deprecated)', true, getRoute(),
-					{
-						templates: ticketTemplates.flatMap((t) => serialiseTemplate(t, true)),
-					}, true, true],
+					ticketTemplates.flatMap((t) => serialiseTemplate(t, true)),
+					true, true],
 			];
 		};
 
@@ -119,7 +116,7 @@ const testGetAllTemplates = () => {
 				const res = await agent.get(`${route}${showDeprecated ? '&showDeprecated=true' : ''}${getDetails ? '&getDetails=true' : ''}`).expect(expectedStatus);
 
 				if (success) {
-					expect(res.body).toEqual(expectedOutput);
+					expect(res.body.templates).toEqual(expect.arrayContaining(expectedOutput));
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
@@ -136,9 +133,7 @@ const testGetTemplateDetails = () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const template = ServiceHelper.generateTemplate();
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed]);
-
-			await ServiceHelper.db.createTemplates(teamspace, [template]);
+			await setupBasicData(users, teamspace, project, [con, fed], [template]);
 		});
 
 		const generateTestData = (isFed) => {
@@ -203,7 +198,15 @@ const testGetTemplateDetails = () => {
 const testAddTicket = () => {
 	describe('Add ticket', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
+		const uniquePropertyName = ServiceHelper.generateRandomString();
 		const template = ServiceHelper.generateTemplate();
+		template.properties.push({ name: uniquePropertyName, type: propTypes.TEXT, unique: true });
+
+		const conTicket = ServiceHelper.generateTicket(template);
+		const fedTicket = ServiceHelper.generateTicket(template);
+
+		const statusValues = ServiceHelper.generateCustomStatusValues();
+
 		const templateWithAllModulesAndPresetEnums = {
 			...ServiceHelper.generateTemplate(),
 			config: {
@@ -213,6 +216,7 @@ const testAddTicket = () => {
 				defaultView: true,
 				defaultImage: true,
 				pin: true,
+				status: { values: statusValues, default: statusValues[0].name },
 			},
 			properties: Object.values(presetEnumValues).map((values) => ({
 				name: ServiceHelper.generateRandomString(),
@@ -223,8 +227,10 @@ const testAddTicket = () => {
 		};
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed]);
-			await ServiceHelper.db.createTemplates(teamspace, [template, templateWithAllModulesAndPresetEnums]);
+			await setupBasicData(users, teamspace, project, [con, fed],
+				[template, templateWithAllModulesAndPresetEnums]);
+			await ServiceHelper.db.createTicket(teamspace, project, con, conTicket);
+			await ServiceHelper.db.createTicket(teamspace, project, con, fedTicket);
 		});
 
 		const generateTestData = (isFed) => {
@@ -232,6 +238,9 @@ const testAddTicket = () => {
 			const wrongTypeModel = isFed ? con : fed;
 			const modelWithTemplates = isFed ? fed : con;
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const uniquePropValue = isFed
+				? fedTicket.properties[uniquePropertyName]
+				: conTicket.properties[uniquePropertyName];
 
 			const getRoute = ({ key = users.tsAdmin.apiKey, projectId = project.id, modelId = modelWithTemplates._id } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets${key ? `?key=${key}` : ''}`;
 
@@ -245,9 +254,10 @@ const testAddTicket = () => {
 				['the templateId provided does not exist', false, getRoute(), templates.templateNotFound, { type: ServiceHelper.generateRandomString() }],
 				['the templateId is not provided', false, getRoute(), templates.invalidArguments, { type: undefined }],
 				['the ticket data does not conforms to the template', false, getRoute(), templates.invalidArguments, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
+				['the ticket data includes duplicate value for unique property', false, getRoute(), templates.invalidArguments, { properties: { [uniquePropertyName]: uniquePropValue } }],
 				['the ticket data conforms to the template', true, getRoute()],
 				['the ticket data conforms to the template but the user is a viewer', false, getRoute({ key: users.viewer.apiKey }), templates.notAuthorized],
-				['the ticket has a template that contains all preset modules, preset enums and configs', true, getRoute(), undefined, { properties: {}, modules: {}, type: templateWithAllModulesAndPresetEnums._id }],
+				['the ticket has a template that contains all preset modules, preset enums and configs', true, getRoute(), undefined, { ...ServiceHelper.generateTicket(templateWithAllModulesAndPresetEnums) }],
 			];
 		};
 
@@ -299,8 +309,7 @@ const testGetTicketResource = () => {
 				},
 			};
 
-			await setupBasicData(users, teamspace, project, [con, fed]);
-			await ServiceHelper.db.createTemplates(teamspace, [template]);
+			await setupBasicData(users, teamspace, project, [con, fed], [template]);
 
 			await Promise.all([fed, con].map(async (model) => {
 				const modelType = fed === model ? 'federation' : 'container';
@@ -421,8 +430,7 @@ const testGetTicket = () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed]);
-			await ServiceHelper.db.createTemplates(teamspace, [templateToUse]);
+			await setupBasicData(users, teamspace, project, [con, fed], [templateToUse]);
 
 			await Promise.all([fed, con].map(async (model) => {
 				const ticket = ServiceHelper.generateTicket(templateToUse);
@@ -511,14 +519,14 @@ const testGetTicketList = () => {
 		fed.tickets = times(10, (n) => ServiceHelper.generateTicket(templatesToUse[n % templatesToUse.length]));
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed, conNoTickets, fedNoTickets]);
-			await ServiceHelper.db.createTemplates(teamspace, templatesToUse);
+			await setupBasicData(users, teamspace, project, [con, fed, conNoTickets, fedNoTickets],
+				templatesToUse);
 
-			await Promise.all([fed, con].map((model) => {
+			await Promise.all([fed, con].map(async (model) => {
 				const modelType = fed === model ? 'federation' : 'container';
 				const addTicketRoute = (modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${users.tsAdmin.apiKey}`;
 
-				model.tickets.forEach(async (ticket) => {
+				await Promise.all(model.tickets.map(async (ticket) => {
 					const res = await agent.post(addTicketRoute(model._id)).send(ticket);
 					if (!res.body._id) {
 						throw new Error(`Could not add a new ticket: ${res.body.message}`);
@@ -526,11 +534,21 @@ const testGetTicketList = () => {
 
 					// eslint-disable-next-line no-param-reassign
 					ticket._id = res.body._id;
-				});
+				}));
 
 				return model;
 			}));
 		});
+
+		const ticketsById = (tickets) => {
+			const res = {};
+
+			tickets.forEach((ticket) => {
+				res[ticket._id] = ticket;
+			});
+
+			return res;
+		};
 
 		const generateTestData = (isFed) => {
 			const modelType = isFed ? 'federation' : 'container';
@@ -542,6 +560,17 @@ const testGetTicketList = () => {
 			const filter = `${Object.keys(model.tickets[0].properties)[0]},${moduleName}.${Object.keys(model.tickets[0].modules[moduleName])[0]}`;
 			const baseRouteParams = { key: users.tsAdmin.apiKey, modelType, projectId: project.id, model };
 
+			const checkTicketList = (ascending = true) => (tickets) => {
+				// check the list is sorted by created at, ascending order
+				let lastTicketTime;
+
+				for (const entry of tickets) {
+					const createdAt = entry.properties[basePropertyLabels.CREATED_AT];
+					if (lastTicketTime) expect(lastTicketTime < createdAt).toBe(ascending);
+					lastTicketTime = createdAt;
+				}
+			};
+
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', { ...baseRouteParams, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
@@ -549,47 +578,42 @@ const testGetTicketList = () => {
 				[`the ${modelType} does not exist`, { ...baseRouteParams, model: ServiceHelper.generateRandomModel() }, false, modelNotFound],
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				['the user does not have access to the federation', { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
-				['the model has no tickets', { ...baseRouteParams, model: modelNoTickets }, true],
-				['the model has tickets', baseRouteParams, true],
-				['the model has tickets (filter)', { ...baseRouteParams, filter }, true],
+				['the model has no tickets', { ...baseRouteParams, model: modelNoTickets }, true, []],
+				['the model has tickets', baseRouteParams, true, model.tickets],
+				['the model has tickets with filter imposed', { ...baseRouteParams, options: { filter } }, true, model.tickets],
+				['the model returning only tickets updated since now', { ...baseRouteParams, options: { updatedSince: Date.now() + 1000000 } }, true, []],
+				['the model returning tickets sorted by updated at in ascending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: false }, checkTicketList: checkTicketList() }, true, model.tickets],
+				['the model returning tickets sorted by updated at in descending order', { ...baseRouteParams, options: { sortBy: basePropertyLabels.UPDATED_AT, sortDesc: true }, checkTicketList: checkTicketList(false) }, true, model.tickets],
 			];
 		};
 
-		const sortById = (a, b) => {
-			if (a._id > b._id) return 1;
-			if (b._id > a._id) return -1;
-			return 0;
-		};
-
-		const runTest = (desc, { model, filter, ...routeParams }, success, expectedOutput) => {
+		const runTest = (desc, { model, options = {}, checkTicketList, ...routeParams }, success, expectedOutput) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
-				const getRoute = ({ key, projectId, modelType, modelId }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets${key ? `?key=${key}` : ''}${filter ? `&filter=${filter}` : ''}`;
+				const getRoute = ({ key, projectId, modelType, modelId }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets${ServiceHelper.createQueryString({ key, ...options })}`;
 				const endpoint = getRoute({ ...routeParams, modelId: model._id });
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 				const res = await agent.get(endpoint).expect(expectedStatus);
 				if (success) {
-					const tickets = model.tickets ?? [];
+					expect(res.body.tickets.length).toBe(expectedOutput.length);
+					if (checkTicketList) checkTicketList(res.body.tickets);
+
 					if (res.body?.tickets?.length) {
-						tickets.sort(sortById);
-						res.body.tickets.sort(sortById);
-						res.body.tickets.forEach((tickOut, ind) => {
-							const { _id, title, type } = tickets[ind];
+						const ticketByIdMap = ticketsById(expectedOutput);
+						res.body.tickets.forEach((tickOut) => {
+							const { _id, title, type } = ticketByIdMap[tickOut._id];
 							expect(tickOut).toEqual(expect.objectContaining({ _id, title, type }));
 						});
 
-						if (filter) {
-							const filterParts = filter.split(',');
-							const propName = filterParts[0];
-							const moduleName = filterParts[1].split('.')[0];
-							const moduleProp = filterParts[1].split('.')[1];
+						if (options.filter) {
+							const [propName, moduleFilter] = options.filter.split(',');
+							const [moduleName, moduleProp] = moduleFilter.split('.');
 
 							const ticketContainingProps = res.body.tickets
-								.filter((t) => t.properties[propName] && t.modules[moduleName][moduleProp]);
+								.filter((t) => t.properties[propName] && t.modules[moduleName]
+								&& t.modules[moduleName][moduleProp]);
 
 							expect(ticketContainingProps).toBeDefined();
 						}
-					} else {
-						expect(res.body).toEqual({ tickets });
 					}
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
@@ -610,7 +634,8 @@ const testUpdateTicket = () => {
 		const immutablePropWithDefaultValue = ServiceHelper.generateRandomString();
 		const imagePropName = ServiceHelper.generateRandomString();
 		const requiredImagePropName = ServiceHelper.generateRandomString();
-		const templateWithRequiredProp = {
+		const uniquePropName = ServiceHelper.generateRandomString();
+		const template = {
 			...ServiceHelper.generateTemplate(),
 			properties: [
 				{
@@ -638,23 +663,29 @@ const testUpdateTicket = () => {
 					immutable: true,
 					default: ServiceHelper.generateRandomString(),
 				},
+				{
+					name: uniquePropName,
+					type: propTypes.TEXT,
+					unique: true,
+				},
 			],
 		};
 
 		const deprecatedTemplate = ServiceHelper.generateTemplate();
-		con.ticket = ServiceHelper.generateTicket(templateWithRequiredProp);
+		con.ticket = ServiceHelper.generateTicket(template);
 		con.ticket.properties[requiredImagePropName] = FS.readFileSync(image, { encoding: 'base64' });
 		delete con.ticket.properties[immutablePropWithDefaultValue];
 		con.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
+		const conUniqueProp = con.ticket.properties[uniquePropName];
 
-		fed.ticket = ServiceHelper.generateTicket(templateWithRequiredProp);
+		fed.ticket = ServiceHelper.generateTicket(template);
 		fed.ticket.properties[requiredImagePropName] = FS.readFileSync(image, { encoding: 'base64' });
 		delete fed.ticket.properties[immutablePropWithDefaultValue];
 		fed.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
+		const fedUniqueProp = fed.ticket.properties[uniquePropName];
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed]);
-			await ServiceHelper.db.createTemplates(teamspace, [templateWithRequiredProp, deprecatedTemplate]);
+			await setupBasicData(users, teamspace, project, [con, fed], [template, deprecatedTemplate]);
 
 			await Promise.all([fed, con].map(async (model) => {
 				const modelType = fed === model ? 'federation' : 'container';
@@ -673,7 +704,7 @@ const testUpdateTicket = () => {
 
 				await updateOne(teamspace, 'templates', { _id: stringToUUID(deprecatedTemplate._id) }, { $set: { deprecated: true } });
 
-				model.ticket.properties[immutablePropWithDefaultValue] = templateWithRequiredProp
+				model.ticket.properties[immutablePropWithDefaultValue] = template
 					.properties.find((p) => p.name === immutablePropWithDefaultValue).default;
 			}));
 		});
@@ -688,6 +719,7 @@ const testUpdateTicket = () => {
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const uniquePropValue = isFed ? fedUniqueProp : conUniqueProp;
 
 			const baseRouteParams = {
 				key: users.tsAdmin.apiKey,
@@ -712,6 +744,7 @@ const testUpdateTicket = () => {
 				['the update data does not conform to the template (trying to update immutable prop with default value)', baseRouteParams, false, templates.invalidArguments, { properties: { [immutablePropWithDefaultValue]: ServiceHelper.generateRandomString() } }],
 				['the update data is an empty object', baseRouteParams, false, templates.invalidArguments, { }],
 				['the update data are the same as the existing', baseRouteParams, false, templates.invalidArguments, { properties: { [requiredPropName]: model.ticket.properties[requiredPropName] } }],
+				['the update data includes duplicate unique value', baseRouteParams, false, templates.invalidArguments, { properties: { [uniquePropName]: uniquePropValue } }],
 				['the update data conforms to the template', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString() }],
 				['the update data conforms to the template but the user is a viewer', { ...baseRouteParams, key: users.viewer.apiKey }, false, templates.notAuthorized, { title: ServiceHelper.generateRandomString() }],
 				['the update data conforms to the template even if the template is deprecated', { ...baseRouteParams, ticket: model.depTemTicket }, true, undefined, { title: ServiceHelper.generateRandomString() }],

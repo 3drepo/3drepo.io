@@ -19,6 +19,7 @@ const { src } = require('../../helper/path');
 const { generateRandomString, generateUUID } = require('../../helper/services');
 
 const TicketTemplates = require(`${src}/models/tickets.templates`);
+const { defaultTemplates } = require(`${src}/models/tickets.templates.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const db = require(`${src}/handler/db`);
 
@@ -160,6 +161,28 @@ const testAddTemplate = () => {
 	});
 };
 
+const testAddDefaultTemplate = () => {
+	describe('Add default templates', () => {
+		test('Should not error if the template is added successfully', async () => {
+			const fn = jest.spyOn(db, 'insertMany').mockResolvedValueOnce();
+			const teamspace = generateRandomString();
+
+			await TicketTemplates.addDefaultTemplates(teamspace);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, templatesColName, defaultTemplates);
+		});
+
+		test('Should throw with whatever error insertMany errored with', async () => {
+			const errMsg = new Error(generateRandomString());
+			jest.spyOn(db, 'insertMany').mockRejectedValueOnce(errMsg);
+			const teamspace = generateRandomString();
+
+			await expect(TicketTemplates.addDefaultTemplates(teamspace)).rejects.toEqual(errMsg);
+		});
+	});
+};
+
 const testUpdateTemplate = () => {
 	describe('Update template', () => {
 		test('Should update successfully', async () => {
@@ -191,5 +214,6 @@ describe('models/tickets.templates', () => {
 	testGetTemplateByCode();
 	testGetAllTemplates();
 	testAddTemplate();
+	testAddDefaultTemplate();
 	testUpdateTemplate();
 });

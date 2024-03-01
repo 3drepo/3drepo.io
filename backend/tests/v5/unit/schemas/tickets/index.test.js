@@ -34,6 +34,9 @@ const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 jest.mock('../../../../../src/v5/models/jobs');
 const JobsModel = require(`${src}/models/jobs`);
 
+jest.mock('../../../../../src/v5/models/tickets');
+const TicketsModel = require(`${src}/models/tickets`);
+
 const { isEqual, deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { isString } = require(`${src}/utils/helper/typeCheck`);
@@ -58,6 +61,9 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 		(desc, schema, goodTest, badTest) => {
 			test(desc, async () => {
 				const teamspace = generateRandomString();
+				const project = generateRandomString();
+				const model = generateRandomString();
+
 				const fieldName = generateRandomString();
 				const propArr = [
 					{
@@ -66,6 +72,7 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 					},
 				];
 				const template = {
+					_id: generateUUID(),
 					properties: moduleProperty ? [] : propArr,
 					modules: moduleProperty ? [
 						{
@@ -96,7 +103,7 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 						} : {},
 					});
 
-					await TicketSchema.validateTicket(teamspace, template, fullData, oldTicket);
+					await TicketSchema.validateTicket(teamspace, project, model, template, fullData, oldTicket);
 				};
 
 				if (goodTest !== undefined) await expect(runTest(goodTest)).resolves.toBeUndefined();
@@ -106,14 +113,15 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 		});
 };
 
-const fieldName = generateRandomString();
-
 const testPropertyConditions = (testData, moduleProperty, isNewTicket) => {
 	describe.each(
 		testData,
 	)(`${moduleProperty ? '[Modules] ' : ''}Property Conditions`, (desc, schema, succeed, input, output) => {
 		test(desc, async () => {
+			const fieldName = generateRandomString();
 			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
 			const modName = generateRandomString();
 			const propArr = [
 				{
@@ -122,6 +130,7 @@ const testPropertyConditions = (testData, moduleProperty, isNewTicket) => {
 				},
 			];
 			const template = {
+				_id: generateUUID(),
 				properties: moduleProperty ? [] : propArr,
 				modules: moduleProperty ? [
 					{
@@ -162,10 +171,10 @@ const testPropertyConditions = (testData, moduleProperty, isNewTicket) => {
 						? deleteIfUndefined({ [modName]: isEqual(propObjOut, {}) ? undefined : propObjOut }) : {},
 				});
 
-				await expect(TicketSchema.validateTicket(teamspace, template, fullData, oldTicket))
+				await expect(TicketSchema.validateTicket(teamspace, project, model, template, fullData, oldTicket))
 					.resolves.toEqual(outData);
 			} else {
-				await expect(TicketSchema.validateTicket(teamspace, template, fullData, oldTicket)
+				await expect(TicketSchema.validateTicket(teamspace, project, model, template, fullData, oldTicket)
 					.catch(() => Promise.reject())).rejects.toBeUndefined();
 			}
 		});
@@ -175,6 +184,8 @@ const testPropertyConditions = (testData, moduleProperty, isNewTicket) => {
 const testPresetValues = () => {
 	describe('Preset values', () => {
 		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
 		const module = generateRandomString();
 		const prop = generateRandomString();
 		const prop2 = generateRandomString();
@@ -214,7 +225,7 @@ const testPresetValues = () => {
 		const runTestCases = (template, testCases) => {
 			const runTest = async (data) => {
 				try {
-					await TicketSchema.validateTicket(teamspace, template, data);
+					await TicketSchema.validateTicket(teamspace, project, model, template, data);
 				} catch (err) {
 					throw undefined;
 				}
@@ -275,22 +286,30 @@ const testGroups = () => {
 			convertToTestParams('Have all groups', true, {
 				state: {
 					[viewGroups.HIDDEN]: [{ group: generateGroup(false, { hasId: false }) }],
-					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
+					[viewGroups.COLORED]: [{
+						group: generateGroup(false, { hasId: false }),
 						color: times(3, () => 0),
-						opacity: 1 }],
-					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
-						transformation: times(16, () => 0) }],
+						opacity: 1,
+					}],
+					[viewGroups.TRANSFORMED]: [{
+						group: generateGroup(false, { hasId: false }),
+						transformation: times(16, () => 0),
+					}],
 				},
 			}),
 
 			convertToTestParams('Smart groups', true, {
 				state: {
 					[viewGroups.HIDDEN]: [{ group: generateGroup(true, { hasId: false }) }],
-					[viewGroups.COLORED]: [{ group: generateGroup(true, { hasId: false }),
+					[viewGroups.COLORED]: [{
+						group: generateGroup(true, { hasId: false }),
 						color: times(3, () => 0),
-						opacity: 1 }],
-					[viewGroups.TRANSFORMED]: [{ group: generateGroup(true, { hasId: false }),
-						transformation: times(16, () => 0) }],
+						opacity: 1,
+					}],
+					[viewGroups.TRANSFORMED]: [{
+						group: generateGroup(true, { hasId: false }),
+						transformation: times(16, () => 0),
+					}],
 				},
 			}),
 			convertToTestParams('Empty group', false, {
@@ -300,28 +319,38 @@ const testGroups = () => {
 			}),
 			convertToTestParams('Have prefix', true, {
 				state: {
-					[viewGroups.HIDDEN]: [{ group: generateGroup(false, { hasId: false }),
-						prefix: times(2, () => generateRandomString) }],
-					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
+					[viewGroups.HIDDEN]: [{
+						group: generateGroup(false, { hasId: false }),
+						prefix: times(2, () => generateRandomString),
+					}],
+					[viewGroups.COLORED]: [{
+						group: generateGroup(false, { hasId: false }),
 						color: times(3, () => 0),
 						opacity: 1,
-						prefix: times(2, () => generateRandomString) }],
-					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
+						prefix: times(2, () => generateRandomString),
+					}],
+					[viewGroups.TRANSFORMED]: [{
+						group: generateGroup(false, { hasId: false }),
 						transformation: times(16, () => 0),
-						prefix: times(2, () => generateRandomString) }],
+						prefix: times(2, () => generateRandomString),
+					}],
 				},
 			}),
 			convertToTestParams('Invalid prefix type', false, {
 				state: {
-					[viewGroups.HIDDEN]: [{ group: generateGroup(false, { hasId: false }),
-						prefix: generateRandomString() }],
+					[viewGroups.HIDDEN]: [{
+						group: generateGroup(false, { hasId: false }),
+						prefix: generateRandomString(),
+					}],
 				},
 			}),
 			convertToTestParams('Colored groups', true, {
 				state: {
-					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
+					[viewGroups.COLORED]: [{
+						group: generateGroup(false, { hasId: false }),
 						color: times(3, () => 0),
-						opacity: 1 }],
+						opacity: 1,
+					}],
 				},
 			}),
 			convertToTestParams('Colored groups no color or opacity', false, {
@@ -331,20 +360,26 @@ const testGroups = () => {
 			}),
 			convertToTestParams('Colored groups - just colours', true, {
 				state: {
-					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
-						color: times(3, () => 0) }],
+					[viewGroups.COLORED]: [{
+						group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 0),
+					}],
 				},
 			}),
 			convertToTestParams('Colored groups - not enough elements in the color array', false, {
 				state: {
-					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
-						color: times(2, () => 0) }],
+					[viewGroups.COLORED]: [{
+						group: generateGroup(false, { hasId: false }),
+						color: times(2, () => 0),
+					}],
 				},
 			}),
 			convertToTestParams('Colored groups - value too big', false, {
 				state: {
-					[viewGroups.COLORED]: [{ group: generateGroup(false, { hasId: false }),
-						color: times(3, () => 1000) }],
+					[viewGroups.COLORED]: [{
+						group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 1000),
+					}],
 				},
 			}),
 			convertToTestParams('Colored groups - just opacity', true, {
@@ -360,8 +395,10 @@ const testGroups = () => {
 			}),
 			convertToTestParams('Transformed groups', true, {
 				state: {
-					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
-						transformation: times(16, () => 1) }],
+					[viewGroups.TRANSFORMED]: [{
+						group: generateGroup(false, { hasId: false }),
+						transformation: times(16, () => 1),
+					}],
 				},
 			}),
 			convertToTestParams('Transformed groups - no matrix', false, {
@@ -372,14 +409,18 @@ const testGroups = () => {
 			}),
 			convertToTestParams('Transformed groups - wrong type', false, {
 				state: {
-					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
-						transformation: false }],
+					[viewGroups.TRANSFORMED]: [{
+						group: generateGroup(false, { hasId: false }),
+						transformation: false,
+					}],
 				},
 			}),
 			convertToTestParams('Transformed groups - wrong array size', false, {
 				state: {
-					[viewGroups.TRANSFORMED]: [{ group: generateGroup(false, { hasId: false }),
-						transformation: times(15, () => 1) }],
+					[viewGroups.TRANSFORMED]: [{
+						group: generateGroup(false, { hasId: false }),
+						transformation: times(15, () => 1),
+					}],
 				},
 			}),
 
@@ -388,8 +429,10 @@ const testGroups = () => {
 		const updateOnlyTestCase = (isUpdate) => [
 			convertToTestParams('Use group id instead of data', isUpdate, {
 				state: {
-					[viewGroups.TRANSFORMED]: [{ group: generateUUIDString(),
-						transformation: times(16, () => 1) }],
+					[viewGroups.TRANSFORMED]: [{
+						group: generateUUIDString(),
+						transformation: times(16, () => 1),
+					}],
 				},
 			}),
 		];
@@ -401,8 +444,78 @@ const testGroups = () => {
 	});
 };
 
+const testUniqueProperties = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+	const moduleName = generateRandomString();
+	const uniquePropName = generateRandomString();
+
+	const template = {
+		_id: generateUUID(),
+		properties: [{
+			name: uniquePropName,
+			type: propTypes.TEXT,
+			unique: true,
+		}],
+		modules: [{
+			name: moduleName,
+			properties: [{
+				name: uniquePropName,
+				type: propTypes.TEXT,
+				unique: true,
+			}],
+		}],
+	};
+
+	describe.each([
+		['the value is unique', true, false],
+		['the value is unique (Module prop)', true, true],
+		['the value is null', true, false, null, {}],
+		['the value is null (Module prop)', true, true, null, {}],
+		['the value is duplicate', false, false],
+		['the value is duplicate (Module prop)', false, true],
+	])('Unique Properties', (desc, shouldPass, moduleProperty, propValue = generateRandomString(), oldTicket) => {
+		test(`Should ${shouldPass ? 'pass' : 'fail'} if ${desc}`, async () => {
+			if (propValue) {
+				times(shouldPass ? 2 : 1, () => TicketsModel.getTicketsByQuery.mockResolvedValueOnce(
+					shouldPass ? [] : [{ _id: generateUUID() }]));
+			}
+
+			const data = { [uniquePropName]: propValue };
+
+			const ticket = ({
+				title: generateRandomString(),
+				type: generateUUID(),
+				properties: moduleProperty ? {} : data,
+				modules: moduleProperty ? {
+					[moduleName]: data,
+				} : {},
+			});
+
+			if (shouldPass) {
+				await expect(TicketSchema.validateTicket(teamspace, project, model, template, ticket, oldTicket))
+					.resolves.not.toBeUndefined();
+			} else {
+				await expect(TicketSchema.validateTicket(teamspace, project, model, template, ticket, oldTicket))
+					.rejects.not.toBeUndefined();
+			}
+
+			if (propValue) {
+				const query = { type: template._id, [`${moduleProperty ? `modules.${moduleName}` : 'properties'}.${uniquePropName}`]: data[uniquePropName] };
+				expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(teamspace, project,
+					model, query, { _id: 1 });
+			}
+		});
+	});
+};
+
 const testValidateTicket = () => {
 	describe('Validate ticket', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+
 		const propertyTypeSetData = [
 			['Text', { type: propTypes.TEXT }, generateRandomString(), generateRandomString(121)],
 			['Long text', { type: propTypes.LONG_TEXT }, generateRandomString(), generateRandomString(1201)],
@@ -486,8 +599,8 @@ const testValidateTicket = () => {
 		testPropertyConditions(updateTicketPropertyConditionTests);
 
 		test('Should ignore deprecated modules', async () => {
-			const teamspace = generateRandomString();
 			const template = {
+				_id: generateUUID(),
 				properties: [],
 				modules: [{
 					name: generateRandomString(),
@@ -506,12 +619,13 @@ const testValidateTicket = () => {
 				properties: {},
 				modules: {},
 			};
-			await expect(TicketSchema.validateTicket(teamspace, template, input)).resolves.toEqual(input);
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+				.resolves.toEqual(input);
 		});
 
 		test('Should created default properties/modules object if it is not present', async () => {
-			const teamspace = generateRandomString();
 			const template = {
+				_id: generateUUID(),
 				properties: [{
 					name: generateRandomString(),
 					type: propTypes.TEXT,
@@ -523,15 +637,15 @@ const testValidateTicket = () => {
 				title: generateRandomString(),
 				type: generateUUID(),
 			};
-			await expect(TicketSchema.validateTicket(teamspace, template, input))
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
 				.resolves.toEqual({ ...input, properties: {}, modules: {} });
 		});
 
 		describe('Composite Types', () => {
 			test('Should remove the composite property if it is empty', async () => {
-				const teamspace = generateRandomString();
 				const propName = generateRandomString();
 				const template = {
+					_id: generateUUID(),
 					properties: [{
 						name: propName,
 						type: propTypes.VIEW,
@@ -559,14 +673,14 @@ const testValidateTicket = () => {
 						},
 					},
 				};
-				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
+				await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
 					.resolves.toEqual({ ...input, properties: {}, modules: {} });
 			});
 
 			test('Should remove composite property we are trying to set it to null when it\'s already empty', async () => {
-				const teamspace = generateRandomString();
 				const propName = generateRandomString();
 				const template = {
+					_id: generateUUID(),
 					properties: [{
 						name: propName,
 						type: propTypes.VIEW,
@@ -587,14 +701,14 @@ const testValidateTicket = () => {
 
 					},
 				};
-				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
+				await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
 					.resolves.toEqual({ ...input, properties: {}, modules: {} });
 			});
 
 			test('Should remove the property if it will be the same after default values', async () => {
-				const teamspace = generateRandomString();
 				const propName = generateRandomString();
 				const template = {
+					_id: generateUUID(),
 					properties: [{
 						name: propName,
 						type: propTypes.VIEW,
@@ -629,14 +743,14 @@ const testValidateTicket = () => {
 						},
 					},
 				};
-				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
+				await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
 					.resolves.toEqual({ ...input, properties: {}, modules: {} });
 			});
 
 			test('Should remove the composite property if it is the same as before', async () => {
-				const teamspace = generateRandomString();
 				const propName = generateRandomString();
 				const template = {
+					_id: generateUUID(),
 					properties: [{
 						name: propName,
 						type: propTypes.VIEW,
@@ -670,14 +784,14 @@ const testValidateTicket = () => {
 						},
 					},
 				};
-				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
+				await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
 					.resolves.toEqual({ ...input, properties: {}, modules: {} });
 			});
 
 			test('Should succeed if a required view only have a camera', async () => {
-				const teamspace = generateRandomString();
 				const propName = generateRandomString();
 				const template = {
+					_id: generateUUID(),
 					properties: [{
 						name: propName,
 						type: propTypes.VIEW,
@@ -701,15 +815,15 @@ const testValidateTicket = () => {
 					},
 				};
 
-				await TicketSchema.validateTicket(teamspace, template, input);
-				await expect(TicketSchema.validateTicket(teamspace, template, input))
+				await TicketSchema.validateTicket(teamspace, project, model, template, input);
+				await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
 					.resolves.toEqual({ ...input, modules: {} });
 			});
 
 			test('Should fail if a required view property has no camera on creation', async () => {
-				const teamspace = generateRandomString();
 				const propName = generateRandomString();
 				const template = {
+					_id: generateUUID(),
 					properties: [{
 						name: propName,
 						type: propTypes.VIEW,
@@ -727,14 +841,14 @@ const testValidateTicket = () => {
 						},
 					},
 				};
-				await expect(TicketSchema.validateTicket(teamspace, template, input))
+				await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
 					.rejects.not.toBeUndefined();
 			});
 
 			test('Should fail if we are trying to remove the camera from a required view', async () => {
-				const teamspace = generateRandomString();
 				const propName = generateRandomString();
 				const template = {
+					_id: generateUUID(),
 					properties: [{
 						name: propName,
 						type: propTypes.VIEW,
@@ -766,14 +880,14 @@ const testValidateTicket = () => {
 						},
 					},
 				};
-				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
+				await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
 					.rejects.not.toBeUndefined();
 			});
 
 			test('Should succeed if we are trying to remove the state/clip from a required view', async () => {
-				const teamspace = generateRandomString();
 				const propName = generateRandomString();
 				const template = {
+					_id: generateUUID(),
 					properties: [{
 						name: propName,
 						type: propTypes.VIEW,
@@ -807,12 +921,13 @@ const testValidateTicket = () => {
 						},
 					},
 				};
-				await expect(TicketSchema.validateTicket(teamspace, template, input, oldTicket))
+				await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
 					.resolves.toEqual({ ...input, modules: {} });
 			});
 		});
 
 		testPresetValues();
+		testUniqueProperties();
 	});
 };
 
@@ -1011,6 +1126,7 @@ const testDeserialiseUUIDsInTicket = () => {
 			const numberProp = generateRandomString();
 			const viewModProp = generateRandomString();
 			const template = {
+				_id: generateUUID(),
 				properties: [{
 					type: propTypes.VIEW,
 					name: viewProp,
@@ -1055,9 +1171,9 @@ const testDeserialiseUUIDsInTicket = () => {
 				title: generateRandomString(),
 				properties: {
 					[viewProp]:
-				{
-					state: generateStateObject(),
-				},
+					{
+						state: generateStateObject(),
+					},
 					[numberProp]: 1,
 				},
 				modules: {

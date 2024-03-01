@@ -34,13 +34,13 @@ const validateTicket = (isNewTicket) => async (req, res, next) => {
 		const newTicket = req.body;
 		const template = req.templateData;
 		const user = getUserFromSession(req.session);
-		const { teamspace } = req.params;
+		const { teamspace, project, model } = req.params;
 
 		if (isNewTicket && template.deprecated) {
 			throw createResponseCode(templates.invalidArguments, 'Template has been deprecated');
 		}
 
-		req.body = await validateTicketSchema(teamspace, template, newTicket, oldTicket);
+		req.body = await validateTicketSchema(teamspace, project, model, template, newTicket, oldTicket);
 
 		if (!isNewTicket && isEqual(req.body, { modules: {}, properties: {} })) {
 			throw createResponseCode(templates.invalidArguments, 'No valid properties to update.');
