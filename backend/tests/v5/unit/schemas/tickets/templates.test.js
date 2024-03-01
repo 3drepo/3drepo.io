@@ -314,7 +314,7 @@ const testValidate = () => {
 				type: propTypes.TEXT,
 				unique: true,
 			}] }, true],
-		['property is unique for non-supported type', { name: generateRandomString(),
+		['property is unique for unsupported type', { name: generateRandomString(),
 			code: generateRandomString(3),
 			properties: [{
 				name: generateRandomString(),
