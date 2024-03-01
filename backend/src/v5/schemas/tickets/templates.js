@@ -149,7 +149,7 @@ const moduleSchema = Yup.object().shape({
 
 const customStatus = Yup.object({
 	name: types.strings.title.required(),
-	type: Yup.string().oneOf(statusTypes).required(),
+	type: Yup.string().oneOf(Object.values(statusTypes)).required(),
 });
 
 const configSchema = Yup.object().shape({

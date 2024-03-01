@@ -617,12 +617,12 @@ const updateTicketGroupTests = () => {
 
 const testAddTicket = () => {
 	describe('Add ticket', () => {
+		const template = generateTemplate();
+		const ticket = generateTicket(template);
 		test('should call addTicket in model and return whatever it returns', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
-			const template = generateTemplate();
-			const ticket = generateTicket(template);
 
 			const expectedOutput = generateRandomString();
 
@@ -650,12 +650,12 @@ const testAddTicket = () => {
 
 const testUpdateTicket = () => {
 	describe('Update ticket', () => {
+		const template = generateTemplate();
+		const ticket = generateTicket(template);
 		test('should call updateTicket in model', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
-			const template = generateTemplate();
-			const ticket = generateTicket(template);
 			const updateData = {
 				title: generateRandomString(),
 				properties: {},

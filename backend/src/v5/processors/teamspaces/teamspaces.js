@@ -22,6 +22,7 @@ const { createTeamspaceSettings, getMembersInfo, grantAdminToUser, removeUserFro
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
+const { addDefaultTemplates } = require('../../models/tickets.templates');
 const { deleteFavourites } = require('../../models/users');
 const { dropDatabase } = require('../../handler/db');
 const { getAccessibleTeamspaces } = require('../../models/users');
@@ -56,6 +57,7 @@ Teamspaces.initTeamspace = async (username) => {
 			grantTeamspaceRoleToUser(username, username),
 			createTeamspaceSettings(username),
 			assignUserToJob(username, DEFAULT_OWNER_JOB, username),
+			addDefaultTemplates(username),
 		]);
 		await grantAdminToUser(username, username);
 	} catch (err) {

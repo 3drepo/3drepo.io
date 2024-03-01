@@ -33,6 +33,9 @@ const JobsModel = require(`${src}/models/jobs`);
 jest.mock('../../../../../src/v5/models/teamspaceSettings');
 const TeamspacesModel = require(`${src}/models/teamspaceSettings`);
 
+jest.mock('../../../../../src/v5/models/tickets.templates');
+const TemplatesModel = require(`${src}/models/tickets.templates`);
+
 jest.mock('../../../../../src/v5/models/roles');
 const RolesModel = require(`${src}/models/roles`);
 
@@ -135,6 +138,8 @@ const testInitTeamspace = () => {
 			expect(JobsModel.addDefaultJobs).toHaveBeenCalledWith(username);
 			expect(TeamspacesModel.createTeamspaceSettings).toHaveBeenCalledTimes(1);
 			expect(TeamspacesModel.createTeamspaceSettings).toHaveBeenCalledWith(username);
+			expect(TemplatesModel.addDefaultTemplates).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.addDefaultTemplates).toHaveBeenCalledWith(username);
 		});
 
 		test('should initialize a teamspace even if an error is thrown ', async () => {
