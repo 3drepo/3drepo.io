@@ -31,7 +31,6 @@ const floatingElementStyles = css`
 	margin-bottom: 5px;
 	box-sizing: border-box;
 	border: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
-	cursor: initial;
 `;
 
 export const FloatingBar = styled.div`
@@ -41,6 +40,7 @@ export const FloatingBar = styled.div`
 	display: flex;
 	flex-direction: column;
 	padding: 10px 0;
+	cursor: inherit;
 `;
 
 export const FloatingBarItem = styled.div<{ selected?: boolean }>`
@@ -64,4 +64,5 @@ export const FloatingButton = styled(ToolbarButton).attrs({
 })`
 	${floatingElementStyles}
 	border-radius: 50%;
+	cursor: pointer;
 `;
