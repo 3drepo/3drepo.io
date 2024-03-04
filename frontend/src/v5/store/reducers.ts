@@ -17,6 +17,7 @@
 
 import { federationsReducer } from '@/v5/store/federations/federations.redux';
 import { containersReducer } from '@/v5/store/containers/containers.redux';
+import { drawingsReducer } from '@/v5/store/drawings/drawings.redux';
 import { dialogsReducer } from '@/v5/store/dialogs/dialogs.redux';
 import { projectsReducer } from '@/v5/store/projects/projects.redux';
 import { teamspacesReducer } from '@/v5/store/teamspaces/teamspaces.redux';
@@ -36,6 +37,7 @@ export default {
 	containers: containersReducer,
 	currentUser2: currentUserReducer,
 	dialogsV5: dialogsReducer,
+	drawings: drawingsReducer,
 	federations: federationsReducer,
 	projects: projectsReducer,
 	revisions: revisionsReducer,
