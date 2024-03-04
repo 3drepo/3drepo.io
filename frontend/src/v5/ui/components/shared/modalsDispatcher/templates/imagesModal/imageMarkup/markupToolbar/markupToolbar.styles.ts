@@ -31,7 +31,7 @@ export const Toolbar = styled.div`
 	align-items: center;
 	border-radius: 24px;
 	pointer-events: all;
-	box-shadow: 0px 2px 7px 0px #00000026;
+	box-shadow: 0 2px 7px 0 #00000026;
 
 	& > ${ViewerIconContainer} {
 		border-radius: 24px;
