@@ -15,10 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// TODO: Unfinished interface
 export interface Drawing {
 	_id: string;
+	name: string;
 }
 
+// TODO: Unfinished interface
 export interface DrawingStats {
 	_id: string;
 	revisions : { total: number, lastUpdated?: number, latestRevision?: string }

@@ -19,7 +19,7 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProjectAndDrawingId } from '../store.types';
-import { Drawing, DrawingStats } from './drawing.types';
+import { Drawing, DrawingStats } from './drawings.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 
 export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions({
