@@ -26,26 +26,29 @@ export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions
 	fetchDrawings: ['teamspace', 'projectId'],
 	fetchDrawingsSuccess: ['projectId', 'drawings'],
 	fetchDrawingStats: ['teamspace', 'projectId', 'drawingId'],
-	fetchDrawingStatsSuccess: [ 'drawingId', 'stats'],
+	fetchDrawingStatsSuccess: ['projectId', 'drawingId', 'stats'],
 }, { prefix: 'DRAWINGS/' }) as { Types: Constants<DrawingsActionCreators>; Creators: DrawingsActionCreators };
 
+
+const getDrawingFromState = (state: DrawingsState, projectId, drawingId) => (
+	state.drawingsByProject[projectId].find((drawing) => drawing._id === drawingId)
+);
 
 export const fetchDrawingsSuccess = (state: DrawingsState, { projectId, drawings } : FetchDrawingsSuccessAction) => {
 	state.drawingsByProject[projectId] = drawings;
 };
 
-export const fetchDrawingStatsSuccess = (state: DrawingsState, { drawingId, stats }:FetchDrawingStatsSuccessAction ) => {
-	state.statsByDrawing[drawingId] = (state.statsByDrawing[drawingId] || []).concat(stats);
+export const fetchDrawingStatsSuccess = (state: DrawingsState, { drawingId, projectId, stats }:FetchDrawingStatsSuccessAction ) => {
+	const drawing = getDrawingFromState(state, projectId, drawingId);
+	Object.assign(drawing,  { ... stats.revisions });
 };
 
 const INITIAL_STATE: DrawingsState = {
 	drawingsByProject: {},
-	statsByDrawing : {},
 };
 
 export interface DrawingsState {
 	drawingsByProject: Record<string, Drawing[]>;
-	statsByDrawing : Record<string, DrawingStats[]>;
 }
 
 export const drawingsReducer = createReducer<DrawingsState>(INITIAL_STATE, produceAll({

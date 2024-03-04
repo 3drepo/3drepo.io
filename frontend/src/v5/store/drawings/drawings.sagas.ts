@@ -19,8 +19,6 @@ import { all, put, takeEvery } from 'redux-saga/effects';
 import { DrawingsActions, DrawingsTypes, FetchDrawingStatsAction, FetchDrawingsAction } from './drawings.redux';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
-import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { getSortingFunction } from '@components/dashboard/dashboardList/useOrderedList/useOrderedList.helpers';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { LifoQueue } from '@/v5/helpers/functions.helpers';
 import { DrawingStats } from './drawings.types';
@@ -29,12 +27,13 @@ const statsQueue = new LifoQueue<DrawingStats>(API.Drawings.fetchDrawingsStats, 
 
 export function* fetchDrawings({ teamspace, projectId }: FetchDrawingsAction) {
 	try {
-		const drawings = yield API.Drawings.fetchDrawings(teamspace, projectId);
-
 		statsQueue.resetQueue();
 
+		const drawings = yield API.Drawings.fetchDrawings(teamspace, projectId);
+		yield put(DrawingsActions.fetchDrawingsSuccess(projectId, drawings));
+
 		yield all(
-			drawings.sort(getSortingFunction({ column: ['name'], direction:[SortingDirection.DESCENDING] })).map(
+			drawings.map(
 				(drawing) => put(DrawingsActions.fetchDrawingStats(teamspace, projectId, drawing._id)),
 			),
 		); 

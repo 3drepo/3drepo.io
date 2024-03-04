@@ -15,4 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const Drawings = () => (<h1>Drawings list</h1>);
+import { DrawingActionDispatchers } from '@/v5/services/actionsDispatchers';
+import { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { DrawingHooksSelectors } from '@/v5/services/selectorsHooks';
+
+
+export const Drawings = () => {
+	const { teamspace, project } = useParams<DashboardParams>();
+
+	const isPending = DrawingHooksSelectors.selectIsListPending();
+	const drawings = DrawingHooksSelectors.selectDrawings();
+
+	useEffect(() => {
+		if (!isPending) return;
+		DrawingActionDispatchers.fetchDrawings(teamspace, project);
+	}, [isPending]);
+
+	return (<div>
+		<h1>Drawings list</h1>
+		{isPending ? 
+			(<b>Loading...</b>) : 
+			(
+				<ul>
+					{drawings.map((drawing) => (<li>{drawing.name}</li>))
+					} 
+				</ul>
+			)
+		}
+	</div>);
+};

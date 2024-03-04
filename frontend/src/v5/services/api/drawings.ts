@@ -25,11 +25,11 @@ export const fetchDrawings = (teamspace, projectId): Promise<Drawing[]> => {
 	return delay<Drawing[]>(Math.random() *  300, [ // TODO: The schema is unfinished
 		{
 			_id: 'asdasdmom',
-			name: 'My cool drawing`',
+			name: 'My cool drawing',
 		},
 		{
 			_id: 'liuhiuhlk',
-			name: 'Another drawing`',
+			name: 'Another drawing',
 		}]) ;
 };
 
