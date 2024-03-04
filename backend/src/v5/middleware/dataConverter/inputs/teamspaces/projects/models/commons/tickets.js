@@ -80,8 +80,12 @@ const validateTicketImportData = (isNew) => async (req, res, next) => {
 			throw createResponseCode(templates.invalidArguments, 'Template has been deprecated');
 		}
 
-		req.body.tickets = await Promise.all(req.body.tickets.map((ticket, i) => processTicket(teamspace,
-			project, model, template, user, ticket, isNew ? undefined : req.ticketData[i], true)));
+		req.body.tickets = await Promise.all(req.body.tickets.map((ticket, i) => {
+			const validatedTicket = processTicket(teamspace,
+				project, model, template, user, ticket, isNew ? undefined : req.ticketData[i], true);
+			validatedTicket.type = template._id;
+			return validatedTicket;
+		}));
 
 		await next();
 	} catch (err) {

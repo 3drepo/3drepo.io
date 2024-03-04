@@ -227,8 +227,9 @@ const testValidateImportTickets = () => {
 			if (success) {
 				expect(fn).toHaveBeenCalledTimes(1);
 				expect(Responder.respond).not.toHaveBeenCalled();
-				req.body.tickets.forEach(({ processed }) => {
+				req.body.tickets.forEach(({ processed, type }) => {
 					expect(processed).toBeTruthy();
+					expect(type).toEqual(stringToUUID(knownTemplateID));
 				});
 
 				expect(SettingsMW.checkTicketTemplateExists).toHaveBeenCalledTimes(1);
