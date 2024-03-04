@@ -16,33 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Container } from './toolbarButton.styles';
 import { ToolbarButton } from './toolbarButton.component';
-
-export const ButtonOptionsContainer = styled.div<{ disabled?: boolean }>`
-	position: relative;
-
-	& > ${/* sc-selector */Container}::after {
-		content: '';
-		position: absolute;
-		height: 0;
-		width: 0;
-		top: 6px;
-		right: 6px;
-		border: solid 3px ${({ theme }) => theme.palette.base.main};
-	}
-
-	&:hover > ${/* sc-selector */Container}::after {
-		${({ disabled, theme }) => !disabled && css`
-			border-color: ${theme.palette.primary.contrast};
-		`}
-	}
-
-	:is(&, &:hover) > ${/* sc-selector */Container}::after {
-		border-left-color: transparent;
-		border-bottom-color: transparent;
-	}
-`;
 
 export const FloatingButtonsContainer = styled.div`
 	display: flex;
@@ -51,13 +25,44 @@ export const FloatingButtonsContainer = styled.div`
 	bottom: 44px;
 `;
 
+const floatingElementStyles = css`
+	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	margin-bottom: 5px;
+	box-sizing: border-box;
+	border: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
+	position: relative;
+	z-index: 2;
+`;
+
+export const FloatingBar = styled.div`
+	${floatingElementStyles}
+	border-radius: 20px;
+	width: 40px;
+	display: flex;
+	flex-direction: column;
+	padding: 10px 0;
+`;
+
+export const FloatingBarItem = styled.div<{ selected?: boolean }>`
+	cursor: pointer;
+	width: 100%;
+	height: 19px;
+	font-weight: 500;
+	color: ${({ theme, selected }) => selected ? theme.palette.primary.main : theme.palette.secondary.main};
+	display: grid;
+	place-content: center;
+
+	&:hover {
+		color: ${({ theme }) => theme.palette.primary.main};
+	}
+`;
+
 export const FloatingButton = styled(ToolbarButton).attrs({
 	tooltipProps: {
 		placement: 'right',
 	},
 })`
+	${floatingElementStyles}
 	border-radius: 50%;
-	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	margin-bottom: 5px;
 `;
