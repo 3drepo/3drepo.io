@@ -23,6 +23,7 @@ import { MarkupRefObject, MarkupStage } from '@/v4/routes/components/screenshotD
 import { CanvasHistoryActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { aspectRatio } from '@/v4/helpers/aspectRatio';
+import { flushSync } from 'react-dom';
 
 type ImageMarkupProps = {
 	image: string,
@@ -63,6 +64,7 @@ export const ImageMarkup = ({ image, onSave, onClose }: ImageMarkupProps) => {
 	};
 
 	const handleSave = async () => {
+		flushSync(() => setSelectedObjectName(''));
 		const screenshot = await markupRef.current.getScreenshot();
 		onSave(screenshot);
 		onClose();
