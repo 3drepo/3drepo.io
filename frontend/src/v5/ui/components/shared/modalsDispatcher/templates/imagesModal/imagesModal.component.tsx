@@ -50,7 +50,7 @@ export const ImagesModal = ({
 	open,
 	onUpload,
 	onDelete,
-	onAddMarkup = () => {},
+	onAddMarkup,
 	disabledDeleteMessage,
 }: ImagesModalProps) => {
 	const [imageIndex, setImageIndex] = useState(displayImageIndex);
@@ -132,7 +132,7 @@ export const ImagesModal = ({
 					<CloseIcon />
 				</CloseButton>
 			</TopBar>
-			<ImageMarkup image={currentImage} onSave={() => {}} onClose={() => setMarkupMode(false)} />
+			<ImageMarkup image={currentImage} onSave={onAddMarkup} onClose={() => setMarkupMode(false)} />
 		</Modal>
 	);
 
