@@ -21,9 +21,9 @@ import { ClickAwayListener } from '@mui/material';
 import { useState } from 'react';
 import { ButtonOptionsContainer, IconWithFooterContainer } from '../buttons.styles';
 import { STROKE_WIDTH } from '../../../imageMarkup.types';
-import { StrokeOption } from './strokeWidthButton.styles';
+import { FloatingBarItem, StrokeOption } from './strokeWidthButton.styles';
 import { invert } from 'lodash';
-import { FloatingBar, FloatingBarItem, FloatingButtonsContainer } from '../../toolbarButton/multioptionIcons.styles';
+import { FloatingBar, FloatingButtonsContainer } from '../../toolbarButton/multioptionIcons.styles';
 import { ToolbarButton } from '../../toolbarButton/toolbarButton.component';
 
 const VALUE_TO_WIDTH = invert(STROKE_WIDTH);
@@ -54,10 +54,7 @@ export const StrokeWidthButton = ({ value, onChange }: StrokeWidthButtonProps) =
 						<FloatingBar>
 							{Object.values(STROKE_WIDTH).map((width, index) => (
 								<FloatingBarItem onClick={() => handleChange(width)}>
-									<StrokeOption
-										selected={width === value}
-										$width={(index + 1) * 2}
-									/>
+									<StrokeOption selected={width === value} $width={(index + 1) * 2} />
 								</FloatingBarItem>
 							))}
 						</FloatingBar>

@@ -31,8 +31,7 @@ const floatingElementStyles = css`
 	margin-bottom: 5px;
 	box-sizing: border-box;
 	border: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
-	position: relative;
-	z-index: 2;
+	cursor: initial;
 `;
 
 export const FloatingBar = styled.div`

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { hexToOpacity } from '@/v5/ui/themes/theme';
 import styled, { css } from 'styled-components';
 
 export const Container = styled.div<{ disabled?: boolean, selected?: boolean }>`
@@ -25,11 +26,12 @@ export const Container = styled.div<{ disabled?: boolean, selected?: boolean }>`
 	cursor: pointer;
 	display: grid;
 	place-content: center;
-	overflow: hidden;
 	color: ${({ theme }) => theme.palette.secondary.main};
+	border-radius: 50%;
 
 	${({ selected, theme }) => selected && css`
 		color: ${theme.palette.primary.main};
+		background-color: ${hexToOpacity(theme.palette.primary.light, 25)};
 	`}
 
 	${({ disabled, theme }) => disabled ? css`

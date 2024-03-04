@@ -16,7 +16,7 @@
  */
 
 import { FloatingButtonsContainer } from '@/v5/ui/routes/viewer/toolbar/buttons/buttonOptionsContainer/multioptionIcons.styles';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { Container } from '../toolbarButton/toolbarButton.styles';
 
 export const IconWithFooterContainer = styled.div<{ $footer }>`

@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import { FloatingBarItem as FloatingBarItemBase } from '../../toolbarButton/multioptionIcons.styles';
 
 export const StrokeOption = styled.div<{ selected, $width }>`
 	background-color: ${({ theme: { palette }, selected }) => selected ? palette.primary.main : palette.secondary.main};
@@ -24,8 +25,10 @@ export const StrokeOption = styled.div<{ selected, $width }>`
 	outline: none;
 	width: ${({ $width }) => $width}px;
 	height: ${({ $width }) => $width}px;
+`;
 
-	&:hover {
+export const FloatingBarItem = styled(FloatingBarItemBase)`
+	&:hover ${StrokeOption} {
 		background-color: ${({ theme }) => theme.palette.primary.main};
 	}
 `;
