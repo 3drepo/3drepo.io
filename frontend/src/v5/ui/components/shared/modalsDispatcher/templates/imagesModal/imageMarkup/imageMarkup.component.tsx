@@ -31,7 +31,7 @@ type ImageMarkupProps = {
 };
 export const ImageMarkup = ({ image, onSave, onClose }: ImageMarkupProps) => {
 	const [selectedObjectName, setSelectedObjectName] = useState('');
-	const [color, setColor] = useState('#d32c1f');
+	const [color, setColor] = useState('#d32c1fff');
 	const [strokeWidth, setStrokeWidth] = useState(STROKE_WIDTH.M);
 	const [fontSize, setFontSize] = useState(FONT_SIZE.M);
 	const [mode, setMode] = useState(MODES.BRUSH);
@@ -74,12 +74,12 @@ export const ImageMarkup = ({ image, onSave, onClose }: ImageMarkupProps) => {
 		}
 	};
 
-	const handleBrushSizeChange = ({ target: { value } }) => {
+	const handletrokeWidthChange = (value) => {
 		setStrokeWidth(value);
 		updateElement({ strokeWidth: value });
 	};
 
-	const handleTextSizeChange = ({ target: { value } }) => {
+	const handleFontSizeChange = (value) => {
 		setFontSize(value);
 		updateElement({ fontSize: value });
 	};
@@ -143,8 +143,8 @@ export const ImageMarkup = ({ image, onSave, onClose }: ImageMarkupProps) => {
 						fontSize={fontSize}
 						color={color}
 						onClearClick={markupRef.current.clearCanvas}
-						onBrushSizeChange={handleBrushSizeChange}
-						onTextSizeChange={handleTextSizeChange}
+						onStrokeWidthChange={handletrokeWidthChange}
+						onFontSizeChange={handleFontSizeChange}
 						onColorChange={handleColorChange}
 						mode={mode}
 						onModeChange={handleModeChange}
