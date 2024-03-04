@@ -22,11 +22,11 @@ import TextIcon from '@assets/icons/outlined/text-outlined.svg';
 import BinIcon from '@assets/icons/outlined/delete-outlined.svg';
 import RedoIcon from '@assets/icons/outlined/redo_arrow-outlined.svg';
 import UndoIcon from '@assets/icons/outlined/undo_arrow-outlined.svg';
-import ResetIcon from '@assets/icons/outlined/cross_sharp_edges-outlined.svg';
-import { Button } from '@controls/button';
+import ResetIcon from '@assets/icons/outlined/cross-outlined.svg';
+import SaveIcon from '@assets/icons/outlined/save-outlined.svg';
 import { CanvasHistoryActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CanvasHistoryHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Divider, Toolbar } from './markupToolbar.styles';
+import { Divider, SaveButton, Toolbar } from './markupToolbar.styles';
 import { ToolbarButton } from './toolbarButton/toolbarButton.component';
 import { ICalloutType, IFontSize, IMode, IShapeType, IStrokeWidth } from '../imageMarkup.types';
 import { MODES } from '@/v4/routes/components/screenshotDialog/markupStage/markupStage.helpers';
@@ -126,9 +126,9 @@ export const MarkupToolbar = ({
 				onClick={onClose}
 				title={formatMessage({ id: 'imageMarkup.icon.title.cancel', defaultMessage: 'Cancel' })}
 			/>
-			<Button onClick={onSave} disabled={!hasPastHistory}>
-				Save
-			</Button>
+			<SaveButton onClick={onSave} disabled={!hasPastHistory}>
+				<SaveIcon />
+			</SaveButton>
 		</Toolbar>
 	);
 };

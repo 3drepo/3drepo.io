@@ -16,6 +16,7 @@
  */
 
 import { ViewerIconContainer } from '@assets/icons/viewer/viewerIconContainer.styles';
+import { Button } from '@controls/button';
 import styled from 'styled-components';
 
 export const Toolbar = styled.div`
@@ -47,4 +48,16 @@ export const Divider = styled.div`
 	height: 30px;
 	margin: 0 5px;
 	background-color: ${({ theme }) => theme.palette.base.main};
+`;
+
+export const SaveButton = styled(Button).attrs({
+	variant: 'contained',
+	color: 'primary',
+})`
+	height: 40px;
+	width: 40px;
+	border-radius: 50%;
+	min-width: unset;
+	padding: 0;
+	margin: unset;
 `;
