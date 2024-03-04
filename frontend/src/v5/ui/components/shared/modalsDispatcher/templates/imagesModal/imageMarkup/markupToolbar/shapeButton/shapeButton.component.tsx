@@ -26,7 +26,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { useState } from 'react';
 import { IMode, IShapeType, SHAPES } from '../../imageMarkup.types';
 import { ToolbarButton } from '../toolbarButton/toolbarButton.component';
-import { FloatingButton, ButtonOptionsContainer, FloatingButtonsContainer } from '../toolbarButton/multioptionIcons.styles';
+import { FloatingButton, FloatingButtonsContainer } from '../toolbarButton/multioptionIcons.styles';
+import { ButtonOptionsContainer } from '../buttons/buttons.styles';
 import { MODES } from '@/v4/routes/components/screenshotDialog/markupStage/markupStage.helpers';
 
 const SHAPES_DATA: Record<IShapeType, any> = {

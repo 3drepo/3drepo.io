@@ -21,9 +21,10 @@ import CalloutRectangleIcon from '@assets/icons/outlined/callout_square-outlined
 import { ClickAwayListener } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
 import { useState } from 'react';
-import { ToolbarButton } from '../toolbarButton/toolbarButton.component';
-import { CALLOUTS, ICalloutType, IMode } from '../../imageMarkup.types';
-import { ButtonOptionsContainer, FloatingButton, FloatingButtonsContainer } from '../toolbarButton/multioptionIcons.styles';
+import { ToolbarButton } from '../../toolbarButton/toolbarButton.component';
+import { CALLOUTS, ICalloutType, IMode } from '../../../imageMarkup.types';
+import { FloatingButton, FloatingButtonsContainer } from '../../toolbarButton/multioptionIcons.styles';
+import { ButtonOptionsContainer } from '../buttons.styles';
 import { MODES } from '@/v4/routes/components/screenshotDialog/markupStage/markupStage.helpers';
 
 const CALLOUT_DATA = {

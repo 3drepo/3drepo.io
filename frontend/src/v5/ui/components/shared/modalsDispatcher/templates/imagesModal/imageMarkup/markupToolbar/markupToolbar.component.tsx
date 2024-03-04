@@ -16,6 +16,8 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
+import DrawIcon from '@assets/icons/outlined/draw-outlined.svg';
+import EraserIcon from '@assets/icons/outlined/eraser-outlined.svg';
 import TextIcon from '@assets/icons/outlined/text-outlined.svg';
 import BinIcon from '@assets/icons/outlined/delete-outlined.svg';
 import RedoIcon from '@assets/icons/outlined/redo_arrow-outlined.svg';
@@ -27,7 +29,12 @@ import { CanvasHistoryHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Divider, Toolbar } from './markupToolbar.styles';
 import { ToolbarButton } from './toolbarButton/toolbarButton.component';
 import { ICalloutType, IFontSize, IMode, IShapeType, IStrokeWidth } from '../imageMarkup.types';
-import { ModeButtons } from './modeButtons/modeButtons.component';
+import { MODES } from '@/v4/routes/components/screenshotDialog/markupStage/markupStage.helpers';
+import { ShapeButton } from './shapeButton/shapeButton.component';
+import { CalloutButton } from './buttons/calloutButton/calloutButton.component';
+import { ColorButton } from './buttons/colorButton/colorButton.component';
+import { FontSizeButton } from './buttons/fontSizeButton/fontSizeButton.component';
+import { StrokeWidthButton } from './buttons/strokeWidthButton/strokeWidthButton.component';
 
 type MarkupToolbarProps = {
 	onSave: () => void,
@@ -39,13 +46,9 @@ type MarkupToolbarProps = {
 	mode: IMode,
 	fontSize: IFontSize,
 	callout: ICalloutType,
-	// onSelectedObjectNameChange: (name: string) => void,
-	// onModeChange: (mode: IMode) => void,
-	// onCursorChange: (cursor: 'crosshair' | 'default') => void,
-	// onSelectMode,
 	onClearClick,
-	onBrushSizeChange,
-	onTextSizeChange,
+	onStrokeWidthChange,
+	onFontSizeChange,
 	onColorChange,
 
 	onShapeChange,
@@ -56,42 +59,48 @@ export const MarkupToolbar = ({
 	onSave,
 	onClose,
 	color,
+	onColorChange,
 	strokeWidth,
-	shape,
-	mode,
+	onStrokeWidthChange,
 	fontSize,
-	onClearClick,
+	onFontSizeChange,
+	shape,
 	onShapeChange,
+	mode,
 	onModeChange,
 	callout,
 	onCalloutChange,
+	onClearClick,
 }: MarkupToolbarProps) => {
 	const hasFutureHistory = !!CanvasHistoryHooksSelectors.selectAreFutureElements();
 	const hasPastHistory = !!CanvasHistoryHooksSelectors.selectArePastElements();
 
 	return (
 		<Toolbar>
-			<ToolbarButton
-				Icon={() => (<>{color} {mode}</>)}
-				title={formatMessage({ id: 'imageMarkup.icon.title.color', defaultMessage: 'color' })}
-			/>
-			<ToolbarButton
-				Icon={() => <>{strokeWidth}</>}
-				title={formatMessage({ id: 'imageMarkup.icon.title.strokeWidth', defaultMessage: 'stroke width' })}
-			/>
-			<ToolbarButton
-				Icon={() => <>{fontSize}</>}
-				title={formatMessage({ id: 'imageMarkup.icon.title.fontSize', defaultMessage: 'Font size' })}
-			/>
+			<ColorButton value={color} onChange={onColorChange} />
+			<StrokeWidthButton value={strokeWidth} onChange={onStrokeWidthChange} />
+			<FontSizeButton value={fontSize} onChange={onFontSizeChange} />
 			<Divider />
-			<ModeButtons
-				mode={mode}
-				onModeChange={onModeChange}
-				shape={shape}
-				onShapeChange={onShapeChange}
-				callout={callout}
-				onCalloutChange={onCalloutChange}
+			<ToolbarButton
+				Icon={DrawIcon}
+				title={formatMessage({ id: 'imageMarkup.icon.title.draw', defaultMessage: 'Draw' })}
+				selected={mode === MODES.BRUSH}
+				onClick={() => onModeChange(MODES.BRUSH)}
 			/>
+			<ToolbarButton
+				Icon={EraserIcon}
+				title={formatMessage({ id: 'imageMarkup.icon.title.erase', defaultMessage: 'Erase' })}
+				selected={mode === MODES.ERASER}
+				onClick={() => onModeChange(MODES.ERASER)}
+			/>
+			<ToolbarButton
+				Icon={TextIcon}
+				title={formatMessage({ id: 'imageMarkup.icon.title.erase', defaultMessage: 'Text' })}
+				selected={mode === MODES.TEXT}
+				onClick={() => onModeChange(MODES.TEXT)}
+			/>
+			<ShapeButton shape={shape} onShapeChange={onShapeChange} mode={mode} />
+			<CalloutButton callout={callout} onCalloutChange={onCalloutChange} mode={mode} />
 			<Divider />
 			<ToolbarButton
 				Icon={UndoIcon}
