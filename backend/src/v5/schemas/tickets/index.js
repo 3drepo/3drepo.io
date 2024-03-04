@@ -153,9 +153,9 @@ const generateModuleValidator = async (teamspace, project, model, templateId, mo
 	return moduleToSchema;
 };
 
-Tickets.validateTicket = async (teamspace, project, model, template, newTicket, oldTicket) => {
-	const fullTem = generateFullSchema(template);
+Tickets.validateTicket = async (teamspace, project, model, template, newTicket, oldTicket, isImport) => {
 	const isNewTicket = !oldTicket;
+	const fullTem = generateFullSchema(template, isNewTicket && isImport);
 
 	const validatorObj = {
 		title: isNewTicket ? types.strings.title.required()

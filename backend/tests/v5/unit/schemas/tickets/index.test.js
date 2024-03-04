@@ -24,6 +24,8 @@ const {
 	generateUUID,
 	generateUUIDString,
 	generateRandomDate,
+	generateTemplate,
+	generateTicket,
 } = require('../../../helper/services');
 
 const FS = require('fs');
@@ -190,7 +192,7 @@ const testPresetValues = () => {
 		const prop = generateRandomString();
 		const prop2 = generateRandomString();
 
-		const generateTemplate = (values) => ({
+		const generateTemplateWithValues = (values) => ({
 			properties: [{
 				name: prop,
 				type: propTypes.ONE_OF,
@@ -243,7 +245,7 @@ const testPresetValues = () => {
 		};
 
 		describe(presetEnumValues.JOBS_AND_USERS, () => {
-			const template = generateTemplate(presetEnumValues.JOBS_AND_USERS);
+			const template = generateTemplateWithValues(presetEnumValues.JOBS_AND_USERS);
 
 			const jobs = times(5, () => generateRandomString());
 			const users = times(5, () => generateRandomString());
@@ -260,7 +262,7 @@ const testPresetValues = () => {
 		});
 
 		describe(presetEnumValues.RISK_CATEGORIES, () => {
-			const template = generateTemplate(presetEnumValues.RISK_CATEGORIES);
+			const template = generateTemplateWithValues(presetEnumValues.RISK_CATEGORIES);
 
 			const categories = times(5, () => generateRandomString());
 			TeamspaceModel.getRiskCategories.mockResolvedValue(categories);
@@ -639,6 +641,27 @@ const testValidateTicket = () => {
 			};
 			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
 				.resolves.toEqual({ ...input, properties: {}, modules: {} });
+		});
+
+		const importTestTem = {
+			_id: generateUUID(),
+			...generateTemplate(),
+		};
+
+		const importTestInput = generateTicket(importTestTem);
+
+		test('Should invoke generateFullSchema with isImport set to true if it is a new ticket and is in import mode', async () => {
+			await TicketSchema.validateTicket(teamspace, project, model, importTestTem,
+				importTestInput, undefined, true);
+			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
+			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, true);
+		});
+
+		test('Should invoke generateFullSchema with isImport set to false if it is not a new ticket and is in import mode', async () => {
+			await TicketSchema.validateTicket(teamspace, project, model, importTestTem,
+				importTestInput, importTestInput, true);
+			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
+			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, false);
 		});
 
 		describe('Composite Types', () => {
