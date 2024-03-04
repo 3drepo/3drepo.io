@@ -27,20 +27,20 @@ export type IModeOperation = ValuesOf<typeof MODE_OPERATION>;
 export type IElementType = ValuesOf<typeof ELEMENT_TYPES>;
 
 export const STROKE_WIDTH = {
-	XL: 26,
-	L: 14,
-	M: 6,
-	S: 3,
 	XS: 1,
+	S: 3,
+	M: 6,
+	L: 14,
+	XL: 26,
 } as const;
 export type IStrokeWidth = ValuesOf<typeof STROKE_WIDTH>;
 
 export const FONT_SIZE = {
-	XL: 46,
-	L: 36,
-	M: 24,
-	S: 18,
 	XS: 14,
+	S: 18,
+	M: 24,
+	L: 36,
+	XL: 46,
 } as const;
 export type IFontSize = ValuesOf<typeof FONT_SIZE>;
 
