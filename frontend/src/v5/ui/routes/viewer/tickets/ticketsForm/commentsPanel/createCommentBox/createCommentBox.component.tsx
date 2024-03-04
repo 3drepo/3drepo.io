@@ -148,6 +148,11 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 		setImagesToUpload(imagesToUpload.concat(imageToUpload));
 	};
 
+	const editImage = (image, index) => {
+		imagesToUpload[index] = image;
+		setImagesToUpload(imagesToUpload);
+	};
+
 	const deleteImage = (index) => {
 		// @ts-ignore
 		setImagesToUpload(imagesToUpload.toSpliced(index, 1));
@@ -251,6 +256,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 					displayImageIndex={displayImageIndex}
 					onUpload={uploadImages}
 					onDelete={deleteImage}
+					onAddMarkup={editImage}
 					onClickClose={() => setDisplayImageIndex(-1)}
 					open
 				/>

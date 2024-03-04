@@ -38,7 +38,7 @@ export type ImagesModalProps = {
 	images: string[];
 	// to use if the image to display is not the first one
 	displayImageIndex?: number;
-	onAddMarkup?: (img) => void;
+	onAddMarkup?: (img, index) => void;
 	onUpload?: () => void;
 	onDelete?: (index) => void;
 	disabledDeleteMessage?: string;
@@ -132,7 +132,7 @@ export const ImagesModal = ({
 					<CloseIcon />
 				</CloseButton>
 			</TopBar>
-			<ImageMarkup image={currentImage} onSave={onAddMarkup} onClose={() => setMarkupMode(false)} />
+			<ImageMarkup image={currentImage} onSave={(img) => onAddMarkup(img, imageIndex)} onClose={() => setMarkupMode(false)} />
 		</Modal>
 	);
 

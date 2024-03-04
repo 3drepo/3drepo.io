@@ -31,6 +31,7 @@ export type CommentNonMessageContentProps = Partial<Omit<ITicketComment, 'histor
 	isCurrentUserComment?: boolean;
 	onUploadImages?: () => void;
 	onDeleteImage?: (index) => void;
+	onEditImage?: (img, index) => void;
 	hasMessage: boolean;
 };
 export const CommentNonMessageContent = ({
@@ -40,6 +41,7 @@ export const CommentNonMessageContent = ({
 	isCurrentUserComment = true,
 	onUploadImages,
 	onDeleteImage,
+	onEditImage,
 	hasMessage,
 }: CommentNonMessageContentProps) => {
 	const { teamspace, project, containerOrFederation } = useParams();
@@ -81,6 +83,7 @@ export const CommentNonMessageContent = ({
 					displayImageIndex={displayImageIndex}
 					onUpload={onUploadImages}
 					onDelete={onDeleteImage}
+					onAddMarkup={onEditImage}
 					disabledDeleteMessage={disabledDeleteMessage}
 				/>
 			)}

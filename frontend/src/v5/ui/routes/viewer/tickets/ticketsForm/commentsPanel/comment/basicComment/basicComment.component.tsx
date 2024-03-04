@@ -29,6 +29,7 @@ export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>>
 	isCurrentUserComment?: boolean;
 	onDeleteImage?: (index) => void;
 	onUploadImages?: () => void;
+	onEditImage?: (img) => void;
 };
 export const BasicComment = ({
 	author,

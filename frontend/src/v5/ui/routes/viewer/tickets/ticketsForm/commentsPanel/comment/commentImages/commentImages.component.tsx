@@ -21,6 +21,7 @@ type CommentImagesProps = {
 	images: string[];
 	onUpload?: (images: string[]) => void;
 	onDelete?: (index) => void;
+	onEditImage?: (img) => void;
 	onImageClick: (index) => void;
 };
 export const CommentImages = ({ images, onImageClick, ...props }: CommentImagesProps) => {
