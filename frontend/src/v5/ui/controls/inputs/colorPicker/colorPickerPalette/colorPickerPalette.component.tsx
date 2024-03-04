@@ -28,8 +28,9 @@ import { HexGroupColor, getColorIsValid, DEFAULT_SUGGESTED_HEX_COLORS, UNSET_HEX
 type ColorPickerPaletteProps = {
 	value: HexGroupColor,
 	onChange: (value: HexGroupColor) => void,
+	onClose?: () => void,
 };
-export const ColorPickerPalette = ({ value, onChange }: ColorPickerPaletteProps) => {
+export const ColorPickerPalette = ({ value, onChange, onClose }: ColorPickerPaletteProps) => {
 	const [color, setColor] = useState<string>(value.color);
 	const [opacity, setOpacity] = useState<number>(value.opacity);
 	const ref = useRef();
@@ -47,16 +48,17 @@ export const ColorPickerPalette = ({ value, onChange }: ColorPickerPaletteProps)
 		if (e.key === '.') e.preventDefault();
 	};
 
-	const resetValues = () => {
+	const handleClickClose = () => {
 		setColor(value.color);
 		setOpacity(value.opacity);
+		onClose?.();
 	};
 
 	return (
 		<span ref={ref}>
 			<ColorPickerMenu
 				title={formatMessage({ id: 'colorPicker.palette.title', defaultMessage: 'Select colour' })}
-				onClickClose={resetValues}
+				onClickClose={handleClickClose}
 			>
 				<ColorGrid>
 					<ColorOption onClick={() => setColor(null)} />
