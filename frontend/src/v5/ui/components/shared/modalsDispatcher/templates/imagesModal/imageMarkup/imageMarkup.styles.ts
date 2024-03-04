@@ -22,7 +22,6 @@ export const ImageSizesRefContainer = styled.img`
 	max-width: calc(100vw - 164px);
 	z-index: -1;
 	opacity: 0;
-	border: solid 2px red;
 	position: absolute;
 	object-fit: contain;
 
