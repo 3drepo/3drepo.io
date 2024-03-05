@@ -38,7 +38,7 @@ export const hexGroupColorToRgb = ({ opacity, color }: HexGroupColor): RgbGroupC
 });
 
 export const hexToDecimal = (hex) => parseInt(hex, 16);
-export const decimalToHex = (decimal) => decimal.toString(16);
+export const decimalToHex = (decimal) => decimal.toString(16).padStart(2, '0');
 
 export const getColorIsValid = (color: string) => !color || /[0-9a-f]{6}/.test(color?.toLocaleLowerCase());
 
