@@ -93,7 +93,7 @@ export const MarkupToolbar = ({
 			/>
 			<ToolbarButton
 				Icon={TextIcon}
-				title={formatMessage({ id: 'imageMarkup.icon.title.erase', defaultMessage: 'Text' })}
+				title={formatMessage({ id: 'imageMarkup.icon.title.text', defaultMessage: 'Text' })}
 				selected={mode === MODES.TEXT}
 				onClick={() => onModeChange(MODES.TEXT)}
 			/>

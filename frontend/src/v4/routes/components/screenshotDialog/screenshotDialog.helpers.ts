@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { formatMessage } from '@/v5/services/intl';
 import { COLOR } from '../../../styles';
 import { initialBrushSize, initialTextSize} from './components/tools/tools.helpers';
 import { MODES } from './markupStage/markupStage.helpers';
@@ -32,5 +33,5 @@ export const MODE_OPERATION = {
 	eraser: 'destination-out'
 };
 
-export const EDITABLE_TEXTAREA_NAME = 'editable-textarea';
-export const EDITABLE_TEXTAREA_PLACEHOLDER = 'Type to change text...';
+export const EDITABLE_TEXTAREA_NAME = formatMessage({ id: 'imageMarkup.textarea.editable', defaultMessage: 'editable-textarea' });
+export const EDITABLE_TEXTAREA_PLACEHOLDER = formatMessage({ id: 'imageMarkup.textarea.placeholder', defaultMessage: 'Type to change text...' });

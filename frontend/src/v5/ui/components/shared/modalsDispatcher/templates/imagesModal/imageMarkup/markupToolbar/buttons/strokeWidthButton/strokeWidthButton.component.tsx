@@ -63,7 +63,7 @@ export const StrokeWidthButton = ({ value, onChange }: StrokeWidthButtonProps) =
 				<ToolbarButton
 					Icon={Icon}
 					onClick={() => setExpanded(!expanded)}
-					title={formatMessage({ id: 'imageMarkup.icon.title.strokeWidth', defaultMessage: 'stroke width' })}
+					title={formatMessage({ id: 'imageMarkup.icon.title.strokeWidth', defaultMessage: 'Stroke width' })}
 				/>
 			</ButtonOptionsContainer>
 		</ClickAwayListener>

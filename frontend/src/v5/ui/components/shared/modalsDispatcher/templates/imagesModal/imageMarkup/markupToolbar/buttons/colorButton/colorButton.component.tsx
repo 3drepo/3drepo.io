@@ -67,7 +67,7 @@ export const ColorButton = ({ value, onChange }: ColorButtonProps) => {
 					)}
 				</FloatingButtonsContainer>
 				<ToolbarButton
-					title={formatMessage({ id: 'imageMarkup.icon.title.color', defaultMessage: 'color' })}
+					title={formatMessage({ id: 'imageMarkup.icon.title.color', defaultMessage: 'Colour' })}
 					Icon={() => (<ColorIcon color={value} />)}
 					onClick={() => setExpanded(!expanded)}
 				/>
