@@ -42,6 +42,7 @@ import { CanvasHistoryActions, selectAreFutureElements, selectArePastElements, s
 import { selectPathname } from '@/v4/modules/router/router.selectors';
 import { withViewer } from '@/v4/services/viewer/viewer';
 import { bindActionCreators } from 'redux';
+import { COLOR } from '@/v4/styles';
 import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { DrawingHandler } from '../components/drawingHandler/drawingHandler.component';
@@ -246,7 +247,7 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 
 	public addNewDrawnLine = (line, type, updateState: boolean = true) => {
 		if (!this.props.selectedObjectName) {
-			const newLine = getNewDrawnLine(line.attrs, this.props.color, type);
+			const newLine = getNewDrawnLine(line.attrs, this.isErasing ? COLOR.WHITE : this.props.color, type);
 			const selectedObjectName = this.isErasing ? '' : newLine.name;
 			this.props.addElement(newLine);
 
@@ -267,7 +268,7 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 	}
 
 	public renderIndicator = renderWhenTrue(() => (
-		<Indicator color={this.props.color} size={this.props.strokeWidth} />
+		<Indicator color={this.props.color} size={this.props.strokeWidth} isEraser={this.isErasing} />
 	));
 
 	public renderObjects = () => this.props.canvasElements.map((element, index) => {
@@ -292,7 +293,6 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 				height={this.props.sizes.height}
 				width={this.props.sizes.width}
 				size={this.props.strokeWidth}
-				color={this.props.color}
 				mode={this.props.mode}
 				layer={this.layerRef}
 				stage={this.stageRef.current}
