@@ -23,6 +23,7 @@ export const FloatingButtonsContainer = styled.div`
 	flex-direction: column;
 	position: absolute;
 	bottom: 44px;
+	z-index: 10;
 `;
 
 const floatingElementStyles = css`

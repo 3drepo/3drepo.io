@@ -29,4 +29,6 @@ export const ColorIcon = styled.div<{ color: string }>`
 export const PickerContainer = styled.div`
 	margin-bottom: 5px;
 	cursor: initial;
+	position: relative;
+	z-index: 10;
 `;
