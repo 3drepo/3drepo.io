@@ -19,7 +19,6 @@ import { formatMessage } from '@/v5/services/intl';
 import DrawIcon from '@assets/icons/outlined/draw-outlined.svg';
 import EraserIcon from '@assets/icons/outlined/eraser-outlined.svg';
 import TextIcon from '@assets/icons/outlined/text-outlined.svg';
-import BinIcon from '@assets/icons/outlined/delete-outlined.svg';
 import RedoIcon from '@assets/icons/outlined/redo_arrow-outlined.svg';
 import UndoIcon from '@assets/icons/outlined/undo_arrow-outlined.svg';
 import ResetIcon from '@assets/icons/outlined/cross-outlined.svg';
@@ -57,7 +56,6 @@ type MarkupToolbarProps = {
 };
 export const MarkupToolbar = ({
 	onSave,
-	onClose,
 	color,
 	onColorChange,
 	strokeWidth,
@@ -121,11 +119,6 @@ export const MarkupToolbar = ({
 				disabled={!hasFutureHistory && !hasPastHistory}
 			/>
 			<Divider />
-			<ToolbarButton
-				Icon={BinIcon}
-				onClick={onClose}
-				title={formatMessage({ id: 'imageMarkup.icon.title.cancel', defaultMessage: 'Cancel' })}
-			/>
 			<SaveButton onClick={onSave} disabled={!hasPastHistory}>
 				<SaveIcon />
 			</SaveButton>
