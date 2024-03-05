@@ -84,6 +84,7 @@ const Button = styled(NavbarButton)`
 
 export const CloseButton = styled(Button)`
 	align-self: flex-end;
+	margin-left: auto;
 `;
 
 export const TopBarButton = styled(Button)`
