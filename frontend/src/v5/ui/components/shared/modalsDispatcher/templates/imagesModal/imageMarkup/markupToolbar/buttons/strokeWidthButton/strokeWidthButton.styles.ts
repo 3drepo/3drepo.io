@@ -18,13 +18,13 @@
 import styled from 'styled-components';
 import { FloatingBarItem as FloatingBarItemBase } from '../../toolbarButton/multioptionIcons.styles';
 
-export const StrokeOption = styled.div<{ selected, $width }>`
+export const StrokeOption = styled.div<{ selected, $height }>`
 	background-color: ${({ theme: { palette }, selected }) => selected ? palette.primary.main : palette.secondary.main};
-	border-radius: 50%;
+	border-radius: ${({ $height }) => $height}px;
 	border: none;
 	outline: none;
-	width: ${({ $width }) => $width}px;
-	height: ${({ $width }) => $width}px;
+	width: 30px;
+	height: ${({ $height }) => $height}px;
 `;
 
 export const FloatingBarItem = styled(FloatingBarItemBase)`
