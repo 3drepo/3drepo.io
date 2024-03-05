@@ -132,6 +132,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 			id: uuid(),
 		})));
 		setImagesToUpload(imagesToUpload.concat(images));
+		setDisplayImageIndex(imagesToUpload.length);
 	};
 
 	const uploadImages = async () => {
@@ -146,6 +147,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 			id: uuid(),
 		};
 		setImagesToUpload(imagesToUpload.concat(imageToUpload));
+		setDisplayImageIndex(imagesToUpload.length);
 	};
 
 	const editImage = async (image, index) => {
