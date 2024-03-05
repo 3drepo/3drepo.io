@@ -126,9 +126,9 @@ export const ImagesModal = ({
 	useEffect(() => { centerSelectedThumbnail(); }, [imagesLength, imageIndex]);
 
 	if (markupMode) return (
-		<Modal open={open} onClose={onClickClose}>
+		<Modal open={open}>
 			<TopBar>
-				<CloseButton onClick={onClickClose}>
+				<CloseButton onClick={() => setMarkupMode(false)}>
 					<CloseIcon />
 				</CloseButton>
 			</TopBar>
