@@ -64,7 +64,7 @@ export const TicketView = ({
 	const { setDetailViewAndProps } = useContext(TicketContext);
 	const hasViewpoint = value?.camera;
 
-	const handleImageClick = () => setModalIsOpen(true);
+	const openImageModal = () => setModalIsOpen(true);
 
 	// Viewpoint
 	const updateViewpoint = async () => {
@@ -72,11 +72,15 @@ export const TicketView = ({
 		const screenshot = stripBase64Prefix(await ViewerService.getScreenshot());
 		const state = await getViewerState();
 		onChange?.({ screenshot, ...currentCameraAndClipping, state });
+		openImageModal();
 	};
 
 	// Image
 	const onImageChange = (newImg) => {
 		onChange({ ...value, screenshot: newImg ? stripBase64Prefix(newImg) : '' });
+		if (newImg) {
+			openImageModal();
+		}
 	};
 
 	// Camera
@@ -159,9 +163,9 @@ export const TicketView = ({
 					value={imgSrc}
 					onChange={onImageChange}
 					disabled={disabled}
-					onImageClick={handleImageClick}
+					onImageClick={openImageModal}
 				>
-					<TicketImageActionMenu onClick={handleImageClick} value={imgSrc} onChange={onImageChange} disabled={disabled} />
+					<TicketImageActionMenu onClick={openImageModal} value={imgSrc} onChange={onImageChange} disabled={disabled} />
 					<CameraActionMenu
 						value={value?.camera}
 						disabled={disabled}

@@ -28,10 +28,16 @@ import { ImagesModal } from '@components/shared/modalsDispatcher/templates/image
 type TicketImageProps = FormInputProps & { onImageClick: () => void; };
 export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperText, onImageClick, ...props }: TicketImageProps) => {
 	const [modalIsOpen, setModalIsOpen] = useState(false);
-	const onImageChange = (newValue) => onChange(newValue ? stripBase64Prefix(newValue) : null);
 	const imgSrc = getImgSrc(value);
 
-	const handleImageClick = () => setModalIsOpen(true);
+	const openImageModal = () => setModalIsOpen(true);
+
+	const onImageChange = (newValue) => {
+		onChange(newValue ? stripBase64Prefix(newValue) : null);
+		if (newValue) {
+			openImageModal();
+		}
+	};
 
 	useEffect(() => onBlur?.(), [value]);
 
@@ -43,9 +49,9 @@ export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperTe
 					value={imgSrc}
 					onChange={onImageChange}
 					disabled={disabled}
-					onImageClick={handleImageClick}
+					onImageClick={openImageModal}
 				>
-					<TicketImageActionMenu value={imgSrc} onChange={onImageChange} disabled={disabled} onClick={handleImageClick} />
+					<TicketImageActionMenu value={imgSrc} onChange={onImageChange} disabled={disabled} onClick={openImageModal} />
 				</TicketImageContent>
 				<FormHelperText>{helperText}</FormHelperText>
 			</InputContainer>
