@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
@@ -23,24 +23,40 @@ import { FormHelperText } from '@mui/material';
 import { TicketImageContent } from '../ticketImageContent.component';
 import { TicketImageActionMenu } from '../ticketImageActionMenu.component';
 import { InputContainer, Label } from './ticketImage.styles';
+import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
 
-export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperText, ...props }: FormInputProps) => {
+type TicketImageProps = FormInputProps & { onImageClick: () => void; };
+export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperText, onImageClick, ...props }: TicketImageProps) => {
+	const [modalIsOpen, setModalIsOpen] = useState(false);
 	const onImageChange = (newValue) => onChange(newValue ? stripBase64Prefix(newValue) : null);
 	const imgSrc = getImgSrc(value);
+
+	const handleImageClick = () => setModalIsOpen(true);
 
 	useEffect(() => onBlur?.(), [value]);
 
 	return (
-		<InputContainer disabled={disabled} {...props}>
-			<Label>{label}</Label>
-			<TicketImageContent
-				value={imgSrc}
-				onChange={onImageChange}
-				disabled={disabled}
-			>
-				<TicketImageActionMenu value={imgSrc} onChange={onImageChange} disabled={disabled} />
-			</TicketImageContent>
-			<FormHelperText>{helperText}</FormHelperText>
-		</InputContainer>
+		<>
+			<InputContainer disabled={disabled} {...props}>
+				<Label>{label}</Label>
+				<TicketImageContent
+					value={imgSrc}
+					onChange={onImageChange}
+					disabled={disabled}
+					onImageClick={handleImageClick}
+				>
+					<TicketImageActionMenu value={imgSrc} onChange={onImageChange} disabled={disabled} onClick={handleImageClick} />
+				</TicketImageContent>
+				<FormHelperText>{helperText}</FormHelperText>
+			</InputContainer>
+			{modalIsOpen && (
+				<ImagesModal
+					open
+					images={[imgSrc]}
+					onAddMarkup={disabled ? null : onImageChange}
+					onClickClose={() => setModalIsOpen(false)}
+				/>
+			)}
+		</>
 	);
 };
