@@ -60,6 +60,7 @@ export const ColorButton = ({ value, onChange }: ColorButtonProps) => {
 									value={getColorAndOpacity()}
 									onChange={handleChange}
 									onClose={() => setExpanded(false)}
+									disableTransparent
 								/>
 							</ThemeProvider>
 						</PickerContainer>

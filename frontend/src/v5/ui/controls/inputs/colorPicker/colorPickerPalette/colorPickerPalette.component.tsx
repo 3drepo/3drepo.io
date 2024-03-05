@@ -23,14 +23,15 @@ import { ActionMenuItem } from '@controls/actionMenu';
 import { ColorGrid, BottomBar, HexTextField, PercentageTextField, SquaredColorOption, GradientButton, ColorOption, ColorActionMenu, UpdateButton } from './colorPickerPalette.styles';
 import { ColorPickerMenu } from '../colorPickerMenu/colorPickerMenu.component';
 import { ColorPickerGradient } from '../colorPickerGradient/colorPickerGradient.component';
-import { HexGroupColor, getColorIsValid, DEFAULT_SUGGESTED_HEX_COLORS, UNSET_HEX_COLOR } from '../colorPicker.helpers';
+import { HexGroupColor, getColorIsValid, DEFAULT_SUGGESTED_HEX_COLORS, UNSET_HEX_COLOR, NON_TRANSPARENT_OPTION } from '../colorPicker.helpers';
 
 type ColorPickerPaletteProps = {
 	value: HexGroupColor,
 	onChange: (value: HexGroupColor) => void,
 	onClose?: () => void,
+	disableTransparent?: boolean,
 };
-export const ColorPickerPalette = ({ value, onChange, onClose }: ColorPickerPaletteProps) => {
+export const ColorPickerPalette = ({ disableTransparent = false, value, onChange, onClose }: ColorPickerPaletteProps) => {
 	const [color, setColor] = useState<string>(value.color);
 	const [opacity, setOpacity] = useState<number>(value.opacity);
 	const ref = useRef();
@@ -40,7 +41,7 @@ export const ColorPickerPalette = ({ value, onChange, onClose }: ColorPickerPale
 
 	const handleColorChange = (newColor) => setColor(`#${newColor}`);
 	const handleOpacityChange = (e) => {
-		const valueInRange = clamp(e.currentTarget.value, 0, 100) / 100;
+		const valueInRange = clamp(e.currentTarget.value, disableTransparent ? 1 : 0, 100) / 100;
 		setOpacity(valueInRange);
 	};
 
@@ -61,8 +62,7 @@ export const ColorPickerPalette = ({ value, onChange, onClose }: ColorPickerPale
 				onClickClose={handleClickClose}
 			>
 				<ColorGrid>
-					<ColorOption onClick={() => setColor(null)} />
-					{DEFAULT_SUGGESTED_HEX_COLORS.map((suggestedColor) => (
+					{[disableTransparent ? NON_TRANSPARENT_OPTION : null, ...DEFAULT_SUGGESTED_HEX_COLORS].map((suggestedColor) => (
 						<ColorOption $color={suggestedColor} onClick={() => setColor(suggestedColor)} key={suggestedColor} />
 					))}
 				</ColorGrid>
