@@ -53,7 +53,7 @@ export const StrokeWidthButton = ({ value, onChange }: StrokeWidthButtonProps) =
 					{expanded && (
 						<FloatingBar>
 							{Object.values(STROKE_WIDTH).map((width, index) => (
-								<FloatingBarItem onClick={() => handleChange(width)}>
+								<FloatingBarItem onClick={() => handleChange(width)} key={width}>
 									<StrokeOption selected={width === value} $height={(index + 1) * 2} />
 								</FloatingBarItem>
 							))}

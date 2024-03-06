@@ -52,7 +52,7 @@ export const FontSizeButton = ({ value, onChange }: FontSizeButtonProps) => {
 					{expanded && (
 						<FloatingBar>
 							{Object.entries(FONT_SIZE).map(([key, val]) => (
-								<FloatingBarItem onClick={() => handleChange(val)} selected={val === value}>
+								<FloatingBarItem onClick={() => handleChange(val)} selected={val === value} key={key}>
 									{key}
 								</FloatingBarItem>
 							))}
