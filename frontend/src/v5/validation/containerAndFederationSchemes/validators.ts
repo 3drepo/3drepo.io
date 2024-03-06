@@ -58,12 +58,16 @@ export const name = trimmedString
 			defaultMessage: 'This name is already used within this project',
 		}),
 		(nameValue, testContext) => {
-			return !testContext.options.context.alreadyExistingNames.map((n) => n.trim().toLocaleLowerCase()).includes(nameValue?.toLocaleLowerCase());
+			if (!testContext.options?.context) return true;
+			return !testContext.options.context.alreadyExistingNames?.map((n) => n.trim().toLocaleLowerCase()).includes(nameValue?.toLocaleLowerCase());
 		},
 	);
 
 export const unit = Yup.string().required().oneOf(['mm', 'cm', 'dm', 'm', 'ft']).default('mm');
 export const type = Yup.string().required().default('Uncategorised');
+
+export const alphaNumericHyphens = /^[\w|_|-]*$/;
+
 
 export const code = Yup.lazy((value) => (
 	stripIfBlankString(value)
@@ -72,7 +76,7 @@ export const code = Yup.lazy((value) => (
 				id: 'validation.model.code.error.max',
 				defaultMessage: 'Code is limited to 50 characters',
 			}))
-		.matches(/^[\w|_|-]*$/,
+		.matches(alphaNumericHyphens,
 			formatMessage({
 				id: 'validation.model.code.error.characters',
 				defaultMessage: 'Code can only consist of letters, numbers, hyphens or underscores',
@@ -94,7 +98,7 @@ export const revisionTag = Yup.string()
 			id: 'validation.revisions.tag.error.error.max',
 			defaultMessage: 'Revision Name is limited to 50 characters',
 		}))
-	.matches(/^[\w|_|-]*$/,
+	.matches(alphaNumericHyphens,
 		formatMessage({
 			id: 'validation.revisions.tag.error.characters',
 			defaultMessage: 'Revision Name can only consist of letters, numbers, hyphens or underscores',
