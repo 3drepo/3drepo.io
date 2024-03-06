@@ -90,7 +90,6 @@ export const formatShortDateTime = (date) => formatDate(date, { // DD MM YYYY hh
 	hour12: false,
 }).replaceAll(',', '');
 
-
 export const formatLongDateTime = (date) => formatDate(date, { // DD Month YYYY at hh:mm
 	hour: 'numeric',
 	minute: 'numeric',

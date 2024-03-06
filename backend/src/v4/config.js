@@ -279,7 +279,7 @@ config.fileUploads = {
 	modelSizeLimit: config.uploadSizeLimit,
 	resourceSizeLimit:config.resourceUploadSizeLimit,
 	imageSizeLimit: 1048576,
-	imageExtensions: ["png", "jpg", "gif"],
+	imageExtensions: ["png", "jpg", "jpeg", "gif"],
 	uploadDir: config.cn_queue.upload_dir
 
 };

@@ -58,10 +58,6 @@ describe('Viewer: sagas', () => {
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerOrFederationId}/stats`)
 				.reply(200, containerStat);
 
-			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerOrFederationId}/tickets/templates?getDetails=true`)
-				.reply(200);
-
 			await waitForActions(() => {
 				dispatch(ViewerActions.fetchData(teamspace, projectId, containerOrFederationId));
 			}, [ViewerActions.setFetching(false)]);
@@ -101,10 +97,6 @@ describe('Viewer: sagas', () => {
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${baseContainers[2]._id}/stats`)
 				.reply(200, containersStats[2]);
-
-			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${containerOrFederationId}/tickets/templates?getDetails=true`)
-				.reply(200);
 
 			await waitForActions(() => {
 				dispatch(ViewerActions.fetchData(teamspace, projectId, containerOrFederationId));

@@ -16,58 +16,87 @@
  */
 
 import { ControlledAssigneesSelect } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import ViewpointIconBase from '@assets/icons/outlined/cube_in_square-outlined.svg';
+import { Title } from './ticketItemBaseInfo/ticketItemBaseInfo.styles';
+import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
 
-export const Id = styled.div`
-	color: ${({ theme }) => theme.palette.base.main};
-	font-weight: 500;
-	font-size: 10px;
-	line-height: 14px;
+export const TicketItemContainer = styled.div<{ $selected?: boolean }>`
+	display: flex;
+	flex-flow: column;
+	cursor: pointer;
+	padding: 10px;
+	gap: 10px;
+	background-color: ${({ theme, $selected }) => ($selected ? theme.palette.primary.lightest : theme.palette.primary.contrast)};
+	${({ theme, $selected }) => $selected && css`
+		background-color: ${theme.palette.primary.lightest};
+		${Title} {
+			color: ${theme.palette.primary.dark}
+		}
+	`}
 `;
 
-export const Title = styled.div`
-	color: ${({ theme }) => theme.palette.secondary.main};
-	font-weight: 500;
-	font-size: 12px;
-	line-height: 16px;
-	padding-top: 5px;
-	width: fit-content;
-	max-width: 100%;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+export const FlexRow = styled.div`
+	display: inline-flex;
+	gap: 7px;
+	width: 100%;
+`;
 
+export const IssuePropertiesRow = styled(FlexRow)`
+	align-items: center;
+	gap: 0;
+`;
+
+export const ThumbnailContainer = styled(OverlappingContainer)`
+	height: 75px;
+	width: 75px;
+	min-width: 75px;
+	box-sizing: border-box;
+	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	border-radius: 5px;
+	overflow: hidden;
+`;
+
+export const HoverState = styled.div`
+	background-color: ${({ theme }) => theme.palette.secondary.main};
+	opacity: 0;
 	&:hover {
-		text-decoration: underline;
+		opacity: 0.75;
 	}
 `;
 
-// TODO - fix after new palette is released
-export const Ticket = styled.div<{ $selected?: boolean }>`
-	position: relative;
-	cursor: pointer;
-	padding: 12px 14px 16px;
-	background-color: ${({ theme, $selected }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
+export const ViewpointIcon = styled(ViewpointIconBase)`
+	position: absolute;
+	color: ${({ theme }) => theme.palette.primary.contrast};
+	height: 18px;
+	width: 18px;
+	top: 8px;
+	left: 8px;
 `;
 
-export const ChipList = styled.div`
-	display: inline-flex;
-	gap: 7px;
-	margin: 8px 0 0;
+export const Thumbnail = styled.img`
+	object-fit: cover;
+	user-select: none;
+`;
+
+export const ImagePlaceholder = styled.div`
+	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
+	${({ theme }) => theme.typography.label};
+	color: ${({ theme }) => theme.palette.base.main};
+	display: flex;
+	flex-flow: column;
+	align-items: center;
+	text-align: center;
+	justify-content: center;
+	gap: 4px;
+	line-height: 12px;
 `;
 
 export const Assignees = styled(ControlledAssigneesSelect).attrs({
-	maxItems: 7,
+	maxItems: 5,
 	showEmptyText: true,
 	multiple: true,
 })`
 	margin-left: auto;
 	height: 28px;
-`;
-
-export const IssuePropertiesRow = styled.div`
-	margin: 7px 0 0;
-	display: inline-flex;
-	width: 100%;
-	align-items: center;
 `;

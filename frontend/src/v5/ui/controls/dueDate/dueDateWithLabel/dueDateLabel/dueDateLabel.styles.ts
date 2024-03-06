@@ -17,19 +17,33 @@
 
 import styled, { css } from 'styled-components';
 
+export const DueStateContainer = styled.span`
+	padding-right: 3px;
+`;
+
 export const DateContainer = styled.span<{ isOverdue?: boolean; disabled?: boolean }>`
 	font-size: 10px;
 	user-select: none;
-	color: ${({ theme, isOverdue = false }) => (isOverdue ? theme.palette.error.main : theme.palette.secondary.main)};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	display: inline-flex;
+	gap: 3px;
+	align-items: center;
+
+	${({ isOverdue, theme }) => !isOverdue ? css`
+		${DueStateContainer} {
+			color: ${theme.palette.base.main};
+		}
+		color: ${theme.palette.secondary.main};
+	` : css`
+		color: ${theme.palette.error.main};
+	`};
+
 	${({ disabled }) => !disabled && css`
 		cursor: pointer;
 		&:hover {
 			text-decoration: underline;
 		}
 	`}
-	display: inline-flex;
-	gap: 3px;
-	align-items: center;
 `;
 
 export const EmptyDateContainer = styled(DateContainer)`

@@ -15,88 +15,61 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { Chip } from '@controls/chip/chip.component';
-import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, STATUS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
-import { DueDateWithLabel } from '@controls/dueDate/dueDateWithLabel/dueDateWithLabel.component';
-import { isEqual } from 'lodash';
-import { useParams } from 'react-router-dom';
-import { Highlight } from '@controls/highlight';
 import { useEffect, useRef } from 'react';
-import { Ticket, Id, Title, ChipList, Assignees, IssuePropertiesRow } from './ticketItem.styles';
-import { IssueProperties, SafetibaseProperties } from '../../tickets.constants';
+import { FlexRow, TicketItemContainer } from './ticketItem.styles';
+import { TicketItemBaseInfo as BaseInfo } from './ticketItemBaseInfo/ticketItemBaseInfo.component';
+import { TicketItemChips as Chips } from './ticketItemChips/ticketItemChips.component';
+import { TicketItemBottomRow as BottomRow } from './ticketItemBottomRow/ticketItemBottomRow.component';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketItemThumbnail } from './ticketItemThumbnail/ticketItemThumbnail.component';
+import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { hasDefaultPin } from '../../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
+import { has } from 'lodash';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { useParams } from 'react-router-dom';
 
 type TicketItemProps = {
 	ticket: ITicket;
-	onClick: React.MouseEventHandler<HTMLDivElement>;
-	selected?: boolean;
 };
 
-export const TicketItem = ({ ticket, onClick, selected }: TicketItemProps) => {
+export const TicketItem = ({ ticket }: TicketItemProps) => {
+	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const ref = useRef<HTMLDivElement>();
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
-
-	const isFederation = modelIsFederation(containerOrFederation);
-	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
+	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const isSelected = selectedTicketId === ticket._id;
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
-	const { status, priority, assignees = [], dueDate = null } = getPropertiesInCamelCase(ticket.properties);
-	const riskLevel = ticket.modules?.safetibase?.[SafetibaseProperties.LEVEL_OF_RISK];
-	const treatmentStatus = ticket.modules?.safetibase?.[SafetibaseProperties.TREATMENT_STATUS];
 
-	const updateTicketProperty = (value) => TicketsActionsDispatchers
-		.updateTicket(teamspace, project, containerOrFederation, ticket._id, { properties: value }, isFederation);
-	const onBlurAssignees = (newVals) => {
-		if (!isEqual(newVals, assignees)) updateTicketProperty({ [IssueProperties.ASSIGNEES]: newVals });
-	};
-	const onChangeDueDate = (newVal) => {
-		if (newVal !== dueDate) updateTicketProperty({ [IssueProperties.DUE_DATE]: newVal });
-	};
+	const templateHasThumbnail = has(template, ['config', 'defaultView']) || has(template, ['config', 'defaultImage']);
 
-	const expandTicket = () => {
+	const onClickTicket = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+		event.stopPropagation();
 		TicketsCardActionsDispatchers.openTicket(ticket._id);
+		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
+		TicketsCardActionsDispatchers.setSelectedTicketPin(hasDefaultPin(ticket) ? ticket._id : null);
+		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id, revision);
 	};
 
 	useEffect(() => {
-		if (selected && ref.current) {
+		if (isSelected && ref.current) {
 			// @ts-ignore
 			ref.current.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'start' });
 		}
 	}, []);
 
 	return (
-		<Ticket
-			onClick={onClick}
+		<TicketItemContainer
+			onClick={onClickTicket}
 			key={ticket._id}
-			$selected={selected}
+			$selected={isSelected}
 			ref={ref}
 		>
-			<Id>
-				<Highlight search={queries}>
-					{`${template?.code}:${ticket.number}`}
-				</Highlight>
-			</Id>
-			<Title onClick={expandTicket}>
-				<Highlight search={queries}>
-					{ticket.title}
-				</Highlight>
-			</Title>
-			<ChipList>
-				<Chip {...STATUS_MAP[status]} variant="outlined" />
-				{riskLevel && <Chip {...RISK_LEVELS_MAP[riskLevel]} variant="filled" />}
-				{treatmentStatus && <Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />}
-			</ChipList>
-			{priority && (
-				<IssuePropertiesRow>
-					<DueDateWithLabel value={dueDate} onChange={onChangeDueDate} disabled={readOnly} />
-					<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" label="" />
-					<Assignees value={assignees} onBlur={onBlurAssignees} disabled={readOnly} />
-				</IssuePropertiesRow>
-			)}
-		</Ticket>
+			<FlexRow>
+				{templateHasThumbnail && <TicketItemThumbnail ticket={ticket} />}
+				<BaseInfo {...ticket} />
+			</FlexRow>
+			<Chips {...ticket} />
+			<BottomRow {...ticket} />
+		</TicketItemContainer>
 	);
 };
