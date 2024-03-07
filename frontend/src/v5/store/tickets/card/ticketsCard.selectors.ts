@@ -126,12 +126,11 @@ export const selectFilteringQueries = createSelector(
 );
 
 export const selectTicketsFilteredByQueriesAndCompleted = createSelector(
-	(state) => state,
 	selectCurrentTickets,
 	selectFilteringCompleted,
 	selectFilteringQueries,
 	selectCurrentTemplates,
-	(state, tickets, isComplete, queries, templates) => tickets.filter((ticket) => {
+	(tickets, isComplete, queries, templates) => tickets.filter((ticket) => {
 		const template = templates.find((t) => t._id === ticket.type);
 		const ticketCode = `${template.code}:${ticket.number}`;
 		const ticketMatchesIsCompleted = ticketIsCompleted(ticket, template) === isComplete;

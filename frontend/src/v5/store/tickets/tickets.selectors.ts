@@ -112,8 +112,6 @@ export const selectTicketsByContainersAndFederations = createSelector(
 );
 
 export const selectStatusConfigByTemplateId = createSelector(
-	(state) => state,
-	(state, modelId) => modelId,
-	(state, modelId, templateId) => templateId,
-	(storeState, modelId, templateId) => selectTemplateById(storeState, modelId, templateId)?.config?.status || DEFAULT_STATUS_CONFIG,
+	selectTemplateById,
+	(template) => template?.config?.status || DEFAULT_STATUS_CONFIG,
 );
