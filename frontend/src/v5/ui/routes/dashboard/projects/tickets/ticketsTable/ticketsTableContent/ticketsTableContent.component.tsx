@@ -26,9 +26,10 @@ import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketsTableGroup } from './ticketsTableGroup/ticketsTableGroup.component';
-import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, groupTickets, ISSUE_PROPERTIES_GROUPS, NONE_OPTION, SAFETIBASE_PROPERTIES_GROUPS, UNSET } from '../ticketsTable.helper';
+import { GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE, groupTickets, NONE_OPTION, SAFETIBASE_PROPERTIES_GROUPS, UNSET } from '../ticketsTable.helper';
 import { EmptyTicketsView } from '../../emptyTicketsView/emptyTicketsView.styles';
 import { Container, Title } from './ticketsTableContent.styles';
+import { PriorityLevels } from '@controls/chip/chip.types';
 
 type TicketsTableContentProps = {
 	setSidePanelData: (modelId: string, ticket?: Partial<ITicket>) => void;
@@ -58,7 +59,7 @@ export const TicketsTableContent = ({ setSidePanelData, selectedTicketId }: Tick
 
 		if (groupBy === IssueProperties.PRIORITY) {
 			defaultValue.properties = {
-				[groupBy]: ISSUE_PROPERTIES_GROUPS[groupBy][formattedGroupByValue],
+				[groupBy]: PriorityLevels[formattedGroupByValue],
 			};
 		}
 

@@ -51,17 +51,13 @@ export const GROUP_BY_URL_PARAM_TO_TEMPLATE_CASE = mapKeysToSnakeCase({
 	[SafetibaseProperties.TREATMENT_STATUS]: SafetibaseProperties.TREATMENT_STATUS,
 });
 
-export const ISSUE_PROPERTIES_GROUPS = {
-	[IssueProperties.PRIORITY]: PriorityLevels,
-};
-
 export const SAFETIBASE_PROPERTIES_GROUPS = {
 	[SafetibaseProperties.LEVEL_OF_RISK]: RiskLevels,
 	[SafetibaseProperties.TREATMENT_STATUS]: TreatmentStatuses,
 };
 
 const GROUP_NAMES_BY_TYPE = {
-	...ISSUE_PROPERTIES_GROUPS,
+	[IssueProperties.PRIORITY]: PriorityLevels,
 	...SAFETIBASE_PROPERTIES_GROUPS,
 };
 

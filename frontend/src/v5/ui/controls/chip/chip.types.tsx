@@ -208,5 +208,4 @@ export const DEFAULT_STATUS_CONFIG = {
 			label: formatMessage({ id: 'chip.ticketStatus.void', defaultMessage: 'Void' }),
 		},
 	],
-	default: TicketStatusDefaultValues.OPEN,
 };
