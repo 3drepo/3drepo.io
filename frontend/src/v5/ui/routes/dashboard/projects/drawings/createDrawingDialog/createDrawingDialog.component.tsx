@@ -23,6 +23,9 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { FormModal } from '@controls/formModal/formModal.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { CreateDrawingSchema } from '@/v5/validation/drawingsSchemes/drawingSchemes';
+import { DrawingHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useEffect } from 'react';
+import { DrawingActionDispatchers } from '@/v5/services/actionsDispatchers';
 
 interface IFormInput {
 	name: string;
@@ -34,20 +37,23 @@ interface IFormInput {
 
 export const CreateDrawingDialog = ({ open, onClickClose }) => {
 	// const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
+	const categories = DrawingHooksSelectors.selectCategories();
+	const isCategoriesPending = DrawingHooksSelectors.selectIsCategoriesPending();
+
 	const {
 		handleSubmit,
 		// getValues,
 		// trigger,
+		setValue,
 		control,
 		formState,
 		formState: { errors },
 	} = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(CreateDrawingSchema),
-		defaultValues: { name:'' },
 	});
-	// const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	// const project = ProjectsHooksSelectors.selectCurrentProject();
 
 	// const onSubmitError = (err) => {
 	// if (nameAlreadyExists(err)) {
@@ -55,7 +61,16 @@ export const CreateDrawingDialog = ({ open, onClickClose }) => {
 	// trigger('name');
 	// }
 	// };
-	const categories = ['cat 1', 'cat 2'];
+
+	useEffect(() => {
+		if (isCategoriesPending) return;
+		setValue('category', categories[0]);
+	}, [isCategoriesPending]);
+
+	useEffect(() => {
+		if (!isCategoriesPending) return;
+		DrawingActionDispatchers.fetchCategories(teamspace, project);
+	}, []);
 
 	const onSubmit: SubmitHandler<IFormInput> = (body) => {
 		console.log(body);
@@ -89,8 +104,8 @@ export const CreateDrawingDialog = ({ open, onClickClose }) => {
 			<FormSelect
 				required
 				control={control}
-				label={formatMessage({ id: 'containers.creation.form.category', defaultMessage: 'Category' })}
-				name="type"
+				label={formatMessage({ id: 'drawings.creation.form.category', defaultMessage: 'Category' })}
+				name="category"
 			>
 				{categories.map((category) => (
 					<MenuItem key={category} value={category}> {category}</MenuItem>

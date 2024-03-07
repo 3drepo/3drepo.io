@@ -27,6 +27,8 @@ export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions
 	fetchDrawingsSuccess: ['projectId', 'drawings'],
 	fetchDrawingStats: ['teamspace', 'projectId', 'drawingId'],
 	fetchDrawingStatsSuccess: ['projectId', 'drawingId', 'stats'],
+	fetchCategories: ['teamspace', 'projectId'],
+	fetchCategoriesSuccess: ['projectId', 'categories'],
 }, { prefix: 'DRAWINGS/' }) as { Types: Constants<DrawingsActionCreators>; Creators: DrawingsActionCreators };
 
 
@@ -43,17 +45,24 @@ export const fetchDrawingStatsSuccess = (state: DrawingsState, { drawingId, proj
 	Object.assign(drawing,  { ... stats.revisions });
 };
 
+export const fetchCategoriesSuccess = (state: DrawingsState, { projectId, categories }:FetchCategoriesSuccessAction ) => {
+	state.categoriesByProject[projectId] = categories;
+};
+
 const INITIAL_STATE: DrawingsState = {
 	drawingsByProject: {},
+	categoriesByProject: {},
 };
 
 export interface DrawingsState {
 	drawingsByProject: Record<string, Drawing[]>;
+	categoriesByProject: Record<string, string[]>;
 }
 
 export const drawingsReducer = createReducer<DrawingsState>(INITIAL_STATE, produceAll({
 	[DrawingsTypes.FETCH_DRAWINGS_SUCCESS]: fetchDrawingsSuccess,
 	[DrawingsTypes.FETCH_DRAWING_STATS_SUCCESS]: fetchDrawingStatsSuccess,
+	[DrawingsTypes.FETCH_CATEGORIES_SUCCESS]: fetchCategoriesSuccess,
 })) as (state: DrawingsState, action: any) => DrawingsState;
 
 
@@ -61,10 +70,15 @@ export type FetchDrawingsAction = Action<'FETCH_DRAWINGS'> & TeamspaceAndProject
 export type FetchDrawingsSuccessAction = Action<'FETCH_DRAWINGS_SUCCESS'> & ProjectId & { drawings: Drawing[] };
 export type FetchDrawingStatsAction = Action<'FETCH_DRAWING_STATS'> & TeamspaceProjectAndDrawingId;
 export type FetchDrawingStatsSuccessAction = Action<'FETCH_DRAWING_STATS_SUCCESS'> & ProjectAndDrawingId & { stats: DrawingStats };
+export type FetchCategoriesAction = Action<'FETCH_DRAWINGS_CATEGORIES'> & TeamspaceAndProjectId;
+export type FetchCategoriesSuccessAction = Action<'FETCH_DRAWINGS_CATEGORIES_SUCCESS'> & ProjectId & { categories: string[] };
+
 
 export interface DrawingsActionCreators {
 	fetchDrawings: (teamspace: string, projectId: string) => FetchDrawingsAction;
 	fetchDrawingsSuccess: (projectId: string, drawings: Drawing[]) => FetchDrawingsSuccessAction;
 	fetchDrawingStats: (teamspace: string, projectId: string, drawingId: string) => FetchDrawingStatsAction;
 	fetchDrawingStatsSuccess: ( projectId: string, drawingId: string, stats: DrawingStats ) => FetchDrawingStatsSuccessAction;
+	fetchCategories: (teamspace: string, projectId: string) => FetchCategoriesAction;
+	fetchCategoriesSuccess: (projectId: string, categories: string[]) => FetchCategoriesSuccessAction;
 }

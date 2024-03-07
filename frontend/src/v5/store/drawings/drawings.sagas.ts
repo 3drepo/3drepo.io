@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, takeEvery } from 'redux-saga/effects';
-import { DrawingsActions, DrawingsTypes, FetchDrawingStatsAction, FetchDrawingsAction } from './drawings.redux';
+import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { DrawingsActions, DrawingsTypes, FetchCategoriesAction, FetchDrawingStatsAction, FetchDrawingsAction } from './drawings.redux';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '../dialogs/dialogs.redux';
@@ -59,7 +59,21 @@ export function* fetchDrawingStats({ teamspace, projectId, drawingId }: FetchDra
 	}
 }
 
+export function* fetchCategories({ teamspace, projectId }: FetchCategoriesAction) {
+	try {
+		const categories = yield API.Drawings.fetchCategories(teamspace, projectId);
+		yield put(DrawingsActions.fetchCategoriesSuccess(projectId, categories));
+
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'drawings.fetchCategories.error', defaultMessage: 'trying to fetch categories' }),
+			error,
+		}));
+	}
+}
+
 export default function* DrawingsSaga() {
 	yield takeEvery(DrawingsTypes.FETCH_DRAWINGS, fetchDrawings);
 	yield takeEvery(DrawingsTypes.FETCH_DRAWING_STATS, fetchDrawingStats);
+	yield takeLatest(DrawingsTypes.FETCH_CATEGORIES, fetchCategories);
 }

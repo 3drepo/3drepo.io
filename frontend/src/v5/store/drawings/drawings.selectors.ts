@@ -28,6 +28,17 @@ export const selectDrawings = createSelector(
 
 export const selectIsListPending = createSelector(
 	selectContainersDomain, selectCurrentProject,
-	// Checks if the containers for the project have been fetched
+	// Checks if the drawings for the project have been fetched
 	(state, currentProject) => !state.drawingsByProject[currentProject],
+);
+
+export const selectCategories = createSelector(
+	selectContainersDomain, selectCurrentProject,
+	(state, currentProject) => (state.categoriesByProject[currentProject] ?? []),
+);
+
+export const selectIsCategoriesPending = createSelector(
+	selectContainersDomain, selectCurrentProject,
+	// Checks if the categories for the project have been fetched
+	(state, currentProject) => !state.categoriesByProject[currentProject],
 );

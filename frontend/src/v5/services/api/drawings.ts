@@ -48,3 +48,9 @@ export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promi
 
 	return delay<DrawingStats>(Math.random() * 250, stats[drawingId]) ;
 };
+
+
+export const fetchCategories = (teamspace, projectId): Promise<string[]> => {
+	const categories =  ['A drawing category', 'Another drawing category', 'Yet another one'];
+	return delay<string[]>(1000, categories) ;
+};
