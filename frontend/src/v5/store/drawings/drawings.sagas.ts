@@ -72,15 +72,18 @@ export function* fetchCategories({ teamspace, projectId }: FetchCategoriesAction
 	}
 }
 
-export function* createDrawing({ teamspace, projectId, drawing }: CreateDrawingAction) {
+export function* createDrawing({ teamspace, projectId, drawing, onSuccess, onError }: CreateDrawingAction) {
 	try {
-		const drawingId = yield API.Drawings.createDrawing(teamspace, projectId, drawing);
-		// yield put(DrawingsActions.fetchCategoriesSuccess(projectId, categories));
+		const id = yield API.Drawings.createDrawing(teamspace, projectId, drawing);
+		const newDrawing = { _id: id, ...drawing };
+		yield put(DrawingsActions.createDrawingSuccess(
+			projectId,
+			newDrawing,
+		));
+
+		onSuccess();
 	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'drawings.fetchCategories.error', defaultMessage: 'trying to fetch categories' }),
-			error,
-		}));
+		onError(error);
 	}
 }
 

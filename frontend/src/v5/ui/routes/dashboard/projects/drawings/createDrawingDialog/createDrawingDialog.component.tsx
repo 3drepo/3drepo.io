@@ -26,6 +26,7 @@ import { DrawingHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors
 import { useEffect, useState } from 'react';
 import { DrawingActionDispatchers } from '@/v5/services/actionsDispatchers';
 import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
+import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 interface IFormInput {
 	name: string;
 	drawingNumber: string;
@@ -74,8 +75,15 @@ export const CreateDrawingDialog = ({ open, onClickClose }) => {
 		DrawingActionDispatchers.fetchCategories(teamspace, project);
 	}, []);
 
-	const onSubmit: SubmitHandler<IFormInput> = (body) => {
-		console.log(body);
+	const onSubmit: SubmitHandler<IFormInput> = async (body) => {
+		await new Promise<void>((accept, reject ) => DrawingActionDispatchers.createDrawing(teamspace, project, body as any, ()=>{
+			accept();
+			onClickClose();
+		},
+		() => {
+			onSubmitError(errors);
+			reject();
+		}));
 	};
 
 	return (
@@ -86,6 +94,7 @@ export const CreateDrawingDialog = ({ open, onClickClose }) => {
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'drawings.creation.ok', defaultMessage: 'Create Drawing' })}
 			isValid={formState.isValid}
+			isSubmitting={formState.isSubmitting}
 			maxWidth="sm"
 		>
 			<FormTextField

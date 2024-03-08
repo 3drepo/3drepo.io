@@ -17,7 +17,7 @@
 
 import { delay } from '@/v4/helpers/async';
 import { Drawing, DrawingStats } from '@/v5/store/drawings/drawings.types';
-
+import uuid from 'uuidv4';
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -55,6 +55,6 @@ export const fetchCategories = (teamspace, projectId): Promise<string[]> => {
 	return delay<string[]>(1000, categories) ;
 };
 
-export const createDrawing = (teamspace, projectId, drawing): Promise<string[]> => {
-	return delay<string[]>(1000, ) ;
+export const createDrawing = (teamspace, projectId, drawing): Promise<string> => {
+	return delay<string>(1000, uuid()) ;
 };
