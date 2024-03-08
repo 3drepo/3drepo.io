@@ -19,7 +19,7 @@ import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/r
 import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
 import { PriorityLevels, RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { IStatusConfig, ITicket } from '@/v5/store/tickets/tickets.types';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export const NONE_OPTION = 'None';
@@ -136,8 +136,8 @@ export const groupTickets = (groupBy: string, tickets: ITicket[]): Record<string
 			return groupByDate(tickets);
 		case BaseProperties.STATUS:
 			const { modelId, type } = tickets[0];
-			const values = TicketsHooksSelectors.selectStatusConfigByTemplateId(modelId, type)?.values;
-			const labels = values.map(({ name, label }) => label || name);
+			const config: IStatusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(modelId, type);
+			const labels = config.values.map(({ name, label }) => label || name);
 			return groupByList(tickets, groupBy, labels);
 		default:
 			return groupByList(tickets, groupBy, _.values(GROUP_NAMES_BY_TYPE[groupBy]));

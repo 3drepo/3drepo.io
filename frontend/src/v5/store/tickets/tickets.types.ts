@@ -81,7 +81,7 @@ export type StatusValue = {
 
 export type IStatusConfig = {
 	values: StatusValue[],
-	default: string;
+	default?: string;
 };
 
 export interface ITemplate {
