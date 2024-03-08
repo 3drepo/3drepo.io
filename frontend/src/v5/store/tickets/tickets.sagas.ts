@@ -166,7 +166,7 @@ export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket,
 	}
 }
 
-export function* createTicket({ teamspace, projectId, modelId, ticket, isFederation, onSuccess }: CreateTicketAction) {
+export function* createTicket({ teamspace, projectId, modelId, ticket, isFederation, onSuccess, onError }: CreateTicketAction) {
 	try {
 		const updateModelTicket = isFederation
 			? API.Tickets.createFederationTicket
@@ -182,6 +182,7 @@ export function* createTicket({ teamspace, projectId, modelId, ticket, isFederat
 			),
 			error,
 		}));
+		onError();
 	}
 }
 
