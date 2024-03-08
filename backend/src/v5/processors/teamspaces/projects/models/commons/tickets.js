@@ -157,25 +157,24 @@ const processExternalData = async (teamspace, project, model, ticketIds, data) =
 	await Promise.all(ticketIds.map(async (ticketId, i) => {
 		const { binaries, groups } = data[i];
 
-		if (groups.stillUsed.length) {
+		if (groups.stillUsed.size) {
+			const stillUsed = Array.from(groups.stillUsed);
 			const existingGroups = await getGroupsByIds(teamspace, project, model, ticketId,
-				groups.stillUsed, { _id: 1 });
+				stillUsed, { _id: 1 });
 
-			if (existingGroups.length !== groups.stillUsed.length) {
+			if (existingGroups.length !== stillUsed.length) {
 				const notFoundGroups = getArrayDifference(existingGroups.map(({ _id }) => UUIDToString(_id)),
-					groups.stillUsed);
+					stillUsed);
 				throw createResponseCode(templates.invalidArguments, `The following groups are not found: ${notFoundGroups.join(',')}`);
 			}
 		}
 
-		console.log(groups.toAdd);
-		await addGroups(teamspace, project, model, ticketId, groups.toAdd);
 		await Promise.all([
-			//	...binaries.toRemove.map((ref) => removeFile(teamspace, TICKETS_RESOURCES_COL, ref)),
-			//			storeFiles(teamspace, project, model, ticketId, binaries.toAdd),
-			// groups.toAdd.length ? addGroups(teamspace, project, model, ticketId, groups.toAdd) : Promise.resolve(),
-			//			groups.toRemove.length ? deleteGroups(teamspace, project, model, ticketId,
-			//				groups.toRemove) : Promise.resolve(),
+			...binaries.toRemove.map((ref) => removeFile(teamspace, TICKETS_RESOURCES_COL, ref)),
+			storeFiles(teamspace, project, model, ticketId, binaries.toAdd),
+			groups.toAdd.length ? addGroups(teamspace, project, model, ticketId, groups.toAdd) : Promise.resolve(),
+			groups.toRemove.length ? deleteGroups(teamspace, project, model, ticketId,
+				groups.toRemove) : Promise.resolve(),
 		]);
 	}));
 };
@@ -196,7 +195,7 @@ const processNewTickets = async (teamspace, project, model, template, tickets) =
 		ids.push(ticket._id);
 	});
 
-	await processExternalData(teamspace, project, model, res, externalDataDelta);
+	await processExternalData(teamspace, project, model, ids, externalDataDelta);
 
 	return ids;
 };
@@ -211,7 +210,7 @@ Tickets.addTicket = async (teamspace, project, model, template, ticket) => {
 Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData, author) => {
 	const externalDataDelta = processSpecialProperties(template, [oldTicket], [updateData]);
 	await updateTicket(teamspace, project, model, oldTicket, updateData, author);
-	await processExternalData(teamspace, project, model, oldTicket._id, externalDataDelta);
+	await processExternalData(teamspace, project, model, [oldTicket._id], externalDataDelta);
 };
 
 Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(

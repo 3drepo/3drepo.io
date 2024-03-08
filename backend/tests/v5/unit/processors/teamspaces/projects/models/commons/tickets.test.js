@@ -140,7 +140,7 @@ const addTicketImageTest = async (isView) => {
 	expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
 	expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(imageTestData.template);
 
-	const meta = { teamspace, project, model, ticket: expectedOutput };
+	const meta = { teamspace, project, model, ticket: expectedOutput._id };
 	expect(FilesManager.storeFile).toHaveBeenCalledTimes(2);
 	expect(FilesManager.storeFile).toHaveBeenCalledWith(
 		teamspace, TICKETS_RESOURCES_COL, propRef, imageTestData.propBuffer, meta,
@@ -269,7 +269,7 @@ const generateGroupsTestData = (useGroupsUUID = false) => {
 };
 
 const addTicketGroupTests = () => {
-	describe('!!!Groups', () => {
+	describe('Groups', () => {
 		test('should be extracted and replaced with a group UUID', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
@@ -279,13 +279,12 @@ const addTicketGroupTests = () => {
 			const expectedOutput = { _id: generateRandomString() };
 
 			TicketsModel.addTicketsWithTemplate.mockResolvedValueOnce([expectedOutput]);
-			TicketGroupsModel.addGroups.mockResolvedValue(true);
 			TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
 
 			await expect(Tickets.addTicket(teamspace, project, model, testData.template,
 				testData.ticket)).resolves.toEqual(expectedOutput._id);
 
-			/*			expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledTimes(1);
 			expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project, model,
 				testData.template._id, expect.any(Array));
 
@@ -309,13 +308,13 @@ const addTicketGroupTests = () => {
 
 			expect(TicketGroupsModel.addGroups).toHaveBeenCalledTimes(1);
 			expect(TicketGroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project,
-				model, expectedOutput, expect.any(Array));
+				model, expectedOutput._id, expect.any(Array));
 
 			const groupIDsToSave = TicketGroupsModel.addGroups.mock.calls[0][4].map(({ _id }) => _id);
 
 			expect(groupIDsToSave.length).toBe(newGroups.length);
 			expect(groupIDsToSave).toEqual(expect.arrayContaining(newGroups));
-			expect(TicketGroupsModel.deleteGroups).not.toHaveBeenCalled(); */
+			expect(TicketGroupsModel.deleteGroups).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -434,7 +433,7 @@ const updateTicketGroupTests = () => {
 				testData.ticket._id, groupsToRemove);
 		});
 
-		test('Old groups are removed if they are no longer referenced and new groups should be added', async () => {
+		test('!!!Old groups are removed if they are no longer referenced and new groups should be added', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
