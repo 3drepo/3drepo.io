@@ -33,7 +33,10 @@ type StatusPropertyProps = {
 
 export const StatusProperty = ({ onBlur, readOnly }: StatusPropertyProps) => {
 	const { containerOrFederation, template: templateIdTabularView } = useParams<DashboardTicketsParams>();
-	const templateId = TicketsCardHooksSelectors.selectSelectedTicket()?.type || templateIdTabularView;
+	const templateIdExistingTicket = TicketsCardHooksSelectors.selectSelectedTicket()?.type;
+	const templateIdNewTicket = TicketsCardHooksSelectors.selectSelectedTemplateId() || templateIdTabularView;
+	const templateId = templateIdTabularView || templateIdExistingTicket || templateIdNewTicket;
+
 	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(containerOrFederation, templateId);
 	const values = useMemo(() => getStatusPropertyValues(statusConfig), [templateId]);
 	return (
