@@ -16,7 +16,7 @@
  */
 
 import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
-import { DrawingsActions, DrawingsTypes, FetchCategoriesAction, FetchDrawingStatsAction, FetchDrawingsAction } from './drawings.redux';
+import { CreateDrawingAction, DrawingsActions, DrawingsTypes, FetchCategoriesAction, FetchDrawingStatsAction, FetchDrawingsAction } from './drawings.redux';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '../dialogs/dialogs.redux';
@@ -72,8 +72,21 @@ export function* fetchCategories({ teamspace, projectId }: FetchCategoriesAction
 	}
 }
 
+export function* createDrawing({ teamspace, projectId, drawing }: CreateDrawingAction) {
+	try {
+		const drawingId = yield API.Drawings.createDrawing(teamspace, projectId, drawing);
+		// yield put(DrawingsActions.fetchCategoriesSuccess(projectId, categories));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'drawings.fetchCategories.error', defaultMessage: 'trying to fetch categories' }),
+			error,
+		}));
+	}
+}
+
 export default function* DrawingsSaga() {
 	yield takeEvery(DrawingsTypes.FETCH_DRAWINGS, fetchDrawings);
 	yield takeEvery(DrawingsTypes.FETCH_DRAWING_STATS, fetchDrawingStats);
 	yield takeLatest(DrawingsTypes.FETCH_CATEGORIES, fetchCategories);
+	yield takeEvery(DrawingsTypes.CREATE_DRAWING, createDrawing);
 }

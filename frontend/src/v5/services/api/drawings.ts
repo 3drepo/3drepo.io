@@ -54,3 +54,7 @@ export const fetchCategories = (teamspace, projectId): Promise<string[]> => {
 	const categories =  ['A drawing category', 'Another drawing category', 'Yet another one'];
 	return delay<string[]>(1000, categories) ;
 };
+
+export const createDrawing = (teamspace, projectId, drawing): Promise<string[]> => {
+	return delay<string[]>(1000, ) ;
+};

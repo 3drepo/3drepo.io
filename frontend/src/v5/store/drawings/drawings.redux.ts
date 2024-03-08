@@ -29,6 +29,7 @@ export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions
 	fetchDrawingStatsSuccess: ['projectId', 'drawingId', 'stats'],
 	fetchCategories: ['teamspace', 'projectId'],
 	fetchCategoriesSuccess: ['projectId', 'categories'],
+	createDrawing: ['teamspace', 'projectId', 'drawing'],
 }, { prefix: 'DRAWINGS/' }) as { Types: Constants<DrawingsActionCreators>; Creators: DrawingsActionCreators };
 
 
@@ -72,6 +73,7 @@ export type FetchDrawingStatsAction = Action<'FETCH_DRAWING_STATS'> & TeamspaceP
 export type FetchDrawingStatsSuccessAction = Action<'FETCH_DRAWING_STATS_SUCCESS'> & ProjectAndDrawingId & { stats: DrawingStats };
 export type FetchCategoriesAction = Action<'FETCH_DRAWINGS_CATEGORIES'> & TeamspaceAndProjectId;
 export type FetchCategoriesSuccessAction = Action<'FETCH_DRAWINGS_CATEGORIES_SUCCESS'> & ProjectId & { categories: string[] };
+export type CreateDrawingAction = Action<'CREATE_DRAWING'> & TeamspaceAndProjectId & { drawing: Drawing };
 
 
 export interface DrawingsActionCreators {
@@ -81,4 +83,5 @@ export interface DrawingsActionCreators {
 	fetchDrawingStatsSuccess: ( projectId: string, drawingId: string, stats: DrawingStats ) => FetchDrawingStatsSuccessAction;
 	fetchCategories: (teamspace: string, projectId: string) => FetchCategoriesAction;
 	fetchCategoriesSuccess: (projectId: string, categories: string[]) => FetchCategoriesSuccessAction;
+	createDrawing: (teamspace: string, projectId: string, drawing: Drawing) => CreateDrawingAction;
 }
