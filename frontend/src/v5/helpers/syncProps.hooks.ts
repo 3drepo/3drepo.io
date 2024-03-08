@@ -61,13 +61,10 @@ export const useSyncProps = (props) => {
  * @returns the synched props
  */
 export const useSyncPropsEffect = (syncProps) => {
-	const [synchedProps, setSynchedProps] = useState(syncProps);
+	const [synchedProps, setSynchedProps] = useState(syncProps?.current?.props || syncProps);
 	useEffect(() => {
 		if (syncProps.current?.emit) {
 			syncProps.current.on(UPDATE_EVENT, setSynchedProps);
-	
-			setSynchedProps(syncProps.current.props);
-	
 			return () => {
 				syncProps.current.removeListener(UPDATE_EVENT, setSynchedProps);
 			};
