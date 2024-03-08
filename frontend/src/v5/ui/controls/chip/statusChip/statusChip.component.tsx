@@ -17,7 +17,7 @@
 
 import { IChip } from '../chip.types';
 import { getChipPropsFromConfig } from '../statusChip/statusChip.helpers';
-import { Chip } from './statusChip.styles';
+import { Chip } from '../chip.component';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export type StatusChipProps = IChip & {

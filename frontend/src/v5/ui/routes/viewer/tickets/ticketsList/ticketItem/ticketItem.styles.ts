@@ -54,6 +54,19 @@ export const ChipList = styled.div`
 	display: inline-flex;
 	gap: 7px;
 	margin: 8px 0 0;
+	width: 100%;
+	>* {
+		flex-shrink: 0;
+		flex-grow: 0;
+		min-width: 0;
+
+		&:first-child {
+			flex-shrink: 1;
+		}
+		&:last-child {
+			flex-grow: 1;
+		}
+	}
 `;
 
 export const Assignees = styled(ControlledAssigneesSelect).attrs({
