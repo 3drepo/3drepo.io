@@ -26,3 +26,9 @@ export const Container = styled.div<{ height: number, width: number }>`
 	height: ${(props: any) => `${props.height}px` || 'auto'};
 	width: ${(props: any) => `${props.width}px` || 'auto'};
 `;
+
+export const MarkupToolbarContainer = styled.div`
+	position: absolute;
+    z-index: 1;
+    bottom: 19px;
+`;

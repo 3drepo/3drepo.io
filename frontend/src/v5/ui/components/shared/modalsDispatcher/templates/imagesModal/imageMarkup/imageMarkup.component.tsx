@@ -140,7 +140,6 @@ export const ImageMarkup = ({ image, onSave, onClose }: ImageMarkupProps) => {
 				<MarkupToolbarContainer>
 					<MarkupToolbar
 						onSave={handleSave}
-						onClose={onClose}
 						strokeWidth={strokeWidth}
 						fontSize={fontSize}
 						color={color}

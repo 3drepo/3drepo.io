@@ -37,7 +37,6 @@ import { StrokeWidthButton } from './buttons/strokeWidthButton/strokeWidthButton
 
 type MarkupToolbarProps = {
 	onSave: () => void,
-	onClose: () => void,
 	shape: IShapeType,
 	color: string,
 	selectedObjectName: string,

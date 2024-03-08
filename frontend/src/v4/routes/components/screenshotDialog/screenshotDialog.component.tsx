@@ -18,17 +18,16 @@
 
 import { PureComponent, createRef } from 'react';
 
-import { IFontSize, IStrokeWidth } from '@components/shared/modalsDispatcher/templates/imagesModal/imageMarkup/imageMarkup.types';
+import { CALLOUTS, IFontSize, IStrokeWidth, SHAPES } from '@components/shared/modalsDispatcher/templates/imagesModal/imageMarkup/imageMarkup.types';
 import { viewportSize } from '@/v4/helpers/viewportSize';
 import { aspectRatio } from '@/v4/helpers/aspectRatio';
+import { MarkupToolbar } from '@components/shared/modalsDispatcher/templates/imagesModal/imageMarkup/markupToolbar/markupToolbar.component';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { LoaderContainer } from '../../board/board.styles';
 import { Loader } from '../loader/loader.component';
-import { SHAPE_TYPES } from './components/shape/shape.constants';
-import { Tools } from './components/tools/tools.component';
 import { INITIAL_VALUES } from './screenshotDialog.helpers';
 import { MODES } from './markupStage/markupStage.helpers';
-import { Container } from './screenshotDialog.styles';
+import { Container, MarkupToolbarContainer } from './screenshotDialog.styles';
 import { MarkupRefObject, MarkupStage } from './markupStage/markupStage.component';
 
 const INIT_DIALOG_PADDING = 48;
@@ -56,7 +55,8 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 		strokeWidth: INITIAL_VALUES.brushSize,
 		fontSize: INITIAL_VALUES.textSize,
 		mode: INITIAL_VALUES.mode,
-		activeShape: null,
+		activeShape: SHAPES.RECTANGLE,
+		callout: CALLOUTS.RECTANGLE,
 		container: {
 			height: INIT_DIALOG_HEIGHT,
 			width: MIN_DIALOG_WIDTH,
@@ -121,45 +121,7 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 		this.setState(() => newState);
 	}
 
-	public setBrushMode = () => this.setMode(MODES.BRUSH);
-
-	public setEraserMode = () => this.setMode(MODES.ERASER);
-
-	public setShapeMode = (shape) => {
-		if ([SHAPE_TYPES.CALLOUT_DOT, SHAPE_TYPES.CALLOUT_CIRCLE, SHAPE_TYPES.CALLOUT_RECTANGLE].includes(shape)) {
-			this.setState({
-				activeShape: shape,
-				mode: MODES.CALLOUT,
-			});
-			return;
-		}
-
-		if (shape === SHAPE_TYPES.POLYGON) {
-			this.setState({
-				activeShape: shape,
-				mode: MODES.POLYGON,
-			});
-			return;
-		}
-
-		const newState = { activeShape: shape } as any;
-
-		if (this.state.mode !== MODES.SHAPE) {
-			newState.mode = MODES.SHAPE;
-		}
-
-		this.setState(newState);
-	}
-
 	public setCursor = (cursor: 'crosshair' | 'default') => document.body.style.cursor = cursor;
-
-	public handleToolTextClick = () => {
-		if (this.state.mode !==  MODES.TEXT) {
-			this.setState({ mode: MODES.TEXT }, () => this.setCursor('crosshair'));
-		} else {
-			this.setState({ mode: '' }, () => this.setCursor('default'));
-		}
-	}
 
 	private updateProperty = (property: string, value: number) => {
 		if (this.state.selectedObjectName) {
@@ -169,39 +131,61 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 		this.setState({ [property]: value });
 	}
 
-	public handleBrushSizeChange = ({ target: { value } }) => {
-		this.updateProperty('strokeWidth', value);
-	}
+	public handleBrushSizeChange = (value) => this.updateProperty('strokeWidth', value);
+	public handleTextSizeChange = (value) => this.updateProperty('fontSize', value);
+	public handleColorChange = (value) => this.updateProperty('color', value);
 
-	public handleTextSizeChange = ({ target: { value } }) => {
-		this.updateProperty('fontSize', value);
-	}
+	public handleModeChange = (newMode) => {
+		const newState = {} as any;
+		if (this.state.selectedObjectName) {
+			newState.selectedObjectName = '';
+		}
 
-	public handleColorChange = (color) => this.updateProperty('color', color);
+		newState.mode = newMode;
+		this.setState(newState);
+	};
+
+	public handleCalloutChange = (newCallout) => {
+		this.setState({
+			callout: newCallout,
+			mode: MODES.CALLOUT,
+		})
+	};
+
+	public handleShapeChange = (newShape) => {
+		if (newShape === SHAPES.POLYGON) {
+			this.setState({ activeShape: newShape, mode: MODES.POLYGON});
+			return;
+		}
+
+		if (this.state.mode !== MODES.SHAPE) {
+			this.setState({ activeShape: newShape, mode: MODES.SHAPE});
+			return;
+		}
+
+		this.setState({ activeShape: newShape });
+	};
 
 	public renderTools = renderWhenTrue(() => (
-		<Tools
-			size={this.state.strokeWidth}
-			textSize={this.state.fontSize}
-			color={this.state.color}
-			onDrawClick={this.setBrushMode}
-			onEraseClick={this.setEraserMode}
-			onTextClick={this.handleToolTextClick}
-			onShapeClick={this.setShapeMode}
-			onClearClick={this.markupRef.current.clearCanvas}
-			onBrushSizeChange={this.handleBrushSizeChange}
-			onTextSizeChange={this.handleTextSizeChange}
-			onColorChange={this.handleColorChange}
-			onUndo={this.props.undo}
-			onRedo={this.props.redo}
-			onSave={this.handleSave}
-			disabled={this.props.disabled}
-			mode={this.state.mode}
-			activeShape={this.state.activeShape}
-			selectedObjectName={this.state.selectedObjectName}
-			arePastElements={this.props.arePastElements}
-			areFutureElements={this.props.areFutureElements}
-		/>
+		<MarkupToolbarContainer>
+			<MarkupToolbar
+				onSave={this.handleSave}
+				shape={this.state.activeShape}
+				color={this.state.color}
+				selectedObjectName={this.state.selectedObjectName}
+				strokeWidth={this.state.strokeWidth as IStrokeWidth}
+				mode={this.state.mode}
+				fontSize={this.state.fontSize as IFontSize}
+				callout={this.state.callout}
+				onClearClick={this.markupRef.current.clearCanvas}
+				onStrokeWidthChange={this.handleBrushSizeChange}
+				onFontSizeChange={this.handleTextSizeChange}
+				onColorChange={this.handleColorChange}
+				onShapeChange={this.handleShapeChange}
+				onModeChange={this.handleModeChange}
+				onCalloutChange={this.handleCalloutChange}
+			/>
+		</MarkupToolbarContainer>
 	));
 
 	public renderLoader = renderWhenTrue(() => (
@@ -226,7 +210,7 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 						onScaleStage={this.onScaleStage}
 						markupRef={this.markupRef}
 
-						activeShape={this.state.activeShape}
+						activeShape={this.state.mode === MODES.SHAPE ? this.state.activeShape : this.state.callout}
 						color={this.state.color}
 						selectedObjectName={this.state.selectedObjectName}
 						strokeWidth={this.state.strokeWidth as IStrokeWidth}
