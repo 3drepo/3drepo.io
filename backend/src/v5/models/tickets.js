@@ -34,17 +34,23 @@ const determineTicketNumber = async (teamspace, project, model, type) => {
 	return (lastTicket?.number ?? 0) + 1;
 };
 
-Tickets.addTicket = async (teamspace, project, model, ticketData) => {
-	const _id = generateUUID();
-	const number = await determineTicketNumber(teamspace, project, model, ticketData.type);
-	const ticket = { ...ticketData, teamspace, project, model, _id, number };
-	await DbHandler.insertOne(teamspace, TICKETS_COL, ticket);
-	publish(events.NEW_TICKET,
-		{ teamspace,
-			project,
-			model,
-			ticket: { ...ticketData, _id, number } });
-	return _id;
+// We expect all tickets to have the same template (i.e. type field should be the same in all tickets provided)
+Tickets.addTicketsWithTemplate = async (teamspace, project, model, templateId, tickets) => {
+	if (!tickets?.length) return undefined;
+
+	const response = [];
+	const startCounter = await determineTicketNumber(teamspace, project, model, templateId);
+
+	const processedTickets = tickets.map((ticketData, i) => {
+		const fullData = { ...ticketData, _id: generateUUID(), number: startCounter + i };
+		response.push(fullData);
+
+		return { ...fullData, teamspace, project, model };
+	});
+
+	await DbHandler.insertMany(teamspace, TICKETS_COL, processedTickets);
+
+	return response;
 };
 
 Tickets.updateTicket = async (teamspace, project, model, oldTicket, updateData, author) => {

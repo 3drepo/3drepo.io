@@ -20,6 +20,7 @@ const {
 	getTicketById: getConTicketById,
 	getTicketList: getConTicketList,
 	getTicketResourceAsStream: getConTicketResourceAsStream,
+	importTickets: importConTickets,
 	updateTicket: updateConTicket,
 } = require('../../../../../processors/teamspaces/projects/models/containers');
 const {
@@ -27,6 +28,7 @@ const {
 	getTicketById: getFedTicketById,
 	getTicketList: getFedTicketList,
 	getTicketResourceAsStream: getFedTicketResourceAsStream,
+	importTickets: importFedTickets,
 	updateTicket: updateFedTicket,
 } = require('../../../../../processors/teamspaces/projects/models/federations');
 const {
@@ -37,7 +39,7 @@ const {
 } = require('../../../../../middleware/permissions/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const { serialiseFullTicketTemplate, serialiseTemplatesList, serialiseTicket, serialiseTicketList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
-const { templateExists, validateNewTicket, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { templateExists, validateImportTickets, validateNewTicket, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../processors/teamspaces/projects');
@@ -52,6 +54,19 @@ const createTicket = (isFed) => async (req, res) => {
 		const _id = await addTicket(teamspace, project, model, req.templateData, req.body);
 
 		respond(req, res, templates.ok, { _id: UUIDToString(_id) });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const importTickets = (isFed) => async (req, res) => {
+	const { teamspace, project, model } = req.params;
+	try {
+		const importTicketsToModel = isFed ? importFedTickets : importConTickets;
+		const ids = await importTicketsToModel(teamspace, project, model, req.templateData, req.body);
+
+		respond(req, res, templates.ok, { tickets: ids.map(UUIDToString) });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -283,6 +298,116 @@ const establishRoutes = (isFed) => {
 	 *               $ref: "#/components/schemas/ticketTemplate"
 	 */
 	router.get('/templates/:template', hasReadAccess, templateExists, serialiseFullTicketTemplate);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets:
+	 *   post:
+	 *     description: Import multiple existing tickets into the model
+	 *     tags: [Tickets]
+	 *     operationId: importTickets
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: type
+	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/ Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: template
+	 *         description: Template ID
+	 *         in: query
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *                 tickets:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       title:
+	 *                       type: string
+	 *                       description: Title of the ticket
+	 *                       example: Doorway too narrow
+	 *                       properties:
+	 *                         type: object
+	 *                         description: properties within the ticket
+	 *                         properties:
+	 *                           Created at
+	 *                             type: number
+	 *                             description: Timestamp of when this ticket was created
+	 *                           Description:
+	 *                             type: string
+	 *                             description: A detailed description of the ticket
+	 *                             example: The door way is too narrow for disable access
+	 *                           CustomProperty1:
+	 *                             type: string
+	 *                             description: Any custom properties in the ticket should be filled in this way
+	 *                             example: Data1
+	 *                       modules:
+	 *                         type: object
+	 *                         description: modules within the ticket
+	 *                         properties:
+	 *                           Module1:
+	 *                             type: object
+	 *                             description: properties within Module1
+	 *                             properties:
+	 *                               Property1:
+	 *                                 type: string
+	 *                                 description: Any properties in the module should be filled in this way
+	 *                                 example: Data1
+	 *                       modules:
+	 *                         type: array
+	 *                         description: array of comments to import as part of the ticket
+	 *
+	 *
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: ticket has been successfully added, returns the ids of the newly created tickets
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 tickets:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       _id:
+	 *                         type: string
+	 *                         format: uuid
+	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 */
+	router.post('/import', hasCommenterAccess, validateImportTickets, importTickets(isFed));
 
 	/**
 	 * @openapi

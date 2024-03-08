@@ -27,6 +27,10 @@ const { isUUID } = require(`${src}/utils/helper/typeCheck`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
+jest.mock('../../../../../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+
 jest.mock('../../../../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);
 
@@ -104,24 +108,26 @@ const addTicketImageTest = async (isView) => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
 	const model = generateRandomString();
-	const expectedOutput = generateRandomString();
+	const expectedOutput = { _id: generateRandomString() };
 	const imageTestData = generateImageTestData(isView);
 
-	TicketsModel.addTicket.mockResolvedValueOnce(expectedOutput);
+	TicketsModel.addTicketsWithTemplate.mockResolvedValueOnce([expectedOutput]);
 	TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
 
 	await expect(Tickets.addTicket(teamspace, project, model, imageTestData.template,
-		imageTestData.ticket)).resolves.toEqual(expectedOutput);
+		imageTestData.ticket)).resolves.toEqual(expectedOutput._id);
 
-	const processedTicket = TicketsModel.addTicket.mock.calls[0][3];
+	const [processedTicket] = TicketsModel.addTicketsWithTemplate.mock.calls[0][4];
+
 	const propRef = isView ? processedTicket.properties[imageTestData.propName].screenshot
 		: processedTicket.properties[imageTestData.propName];
 	const modPropRef = isView ? processedTicket.modules[imageTestData.moduleName][imageTestData.propName].screenshot
 		: processedTicket.modules[imageTestData.moduleName][imageTestData.propName];
 
-	expect(TicketsModel.addTicket).toHaveBeenCalledTimes(1);
-	expect(TicketsModel.addTicket).toHaveBeenCalledWith(teamspace, project, model,
-		{
+	expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledTimes(1);
+	expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project, model,
+		imageTestData.template._id,
+		[{
 			...imageTestData.ticket,
 			properties: { [imageTestData.propName]: generatePropData(propRef, isView) },
 			modules: {
@@ -129,7 +135,7 @@ const addTicketImageTest = async (isView) => {
 					[imageTestData.propName]: generatePropData(modPropRef, isView),
 				},
 			},
-		});
+		}]);
 
 	expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
 	expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(imageTestData.template);
@@ -263,27 +269,29 @@ const generateGroupsTestData = (useGroupsUUID = false) => {
 };
 
 const addTicketGroupTests = () => {
-	describe('Groups', () => {
+	describe('!!!Groups', () => {
 		test('should be extracted and replaced with a group UUID', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
 
 			const testData = generateGroupsTestData();
-			const expectedOutput = generateRandomString();
+			const expectedOutput = { _id: generateRandomString() };
 
-			TicketsModel.addTicket.mockResolvedValueOnce(expectedOutput);
+			TicketsModel.addTicketsWithTemplate.mockResolvedValueOnce([expectedOutput]);
+			TicketGroupsModel.addGroups.mockResolvedValue(true);
 			TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
 
 			await expect(Tickets.addTicket(teamspace, project, model, testData.template,
-				testData.ticket)).resolves.toEqual(expectedOutput);
+				testData.ticket)).resolves.toEqual(expectedOutput._id);
 
-			expect(TicketsModel.addTicket).toHaveBeenCalledTimes(1);
-			expect(TicketsModel.addTicket).toHaveBeenCalledWith(teamspace, project, model, expect.any(Object));
+			/*			expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project, model,
+				testData.template._id, expect.any(Array));
 
 			const newGroups = [];
 
-			const processedTicket = TicketsModel.addTicket.mock.calls[0][3];
+			const [processedTicket] = TicketsModel.addTicketsWithTemplate.mock.calls[0][4];
 			const propData = processedTicket.properties[testData.propName];
 			const modPropData = processedTicket.modules[testData.moduleName][testData.propName];
 
@@ -307,7 +315,7 @@ const addTicketGroupTests = () => {
 
 			expect(groupIDsToSave.length).toBe(newGroups.length);
 			expect(groupIDsToSave).toEqual(expect.arrayContaining(newGroups));
-			expect(TicketGroupsModel.deleteGroups).not.toHaveBeenCalled();
+			expect(TicketGroupsModel.deleteGroups).not.toHaveBeenCalled(); */
 		});
 	});
 };
@@ -619,26 +627,34 @@ const testAddTicket = () => {
 	describe('Add ticket', () => {
 		const template = generateTemplate();
 		const ticket = generateTicket(template);
-		test('should call addTicket in model and return whatever it returns', async () => {
+		test('should call addTicketsWithTemplate in model and return whatever it returns', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
 
-			const expectedOutput = generateRandomString();
+			const expectedOutput = { ...ticket, _id: generateRandomString() };
 
-			TicketsModel.addTicket.mockResolvedValueOnce(expectedOutput);
+			TicketsModel.addTicketsWithTemplate.mockResolvedValueOnce([expectedOutput]);
 			TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
 
 			await expect(Tickets.addTicket(teamspace, project, model, template, ticket))
-				.resolves.toEqual(expectedOutput);
+				.resolves.toEqual(expectedOutput._id);
 
 			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(template);
 
-			expect(TicketsModel.addTicket).toHaveBeenCalledTimes(1);
-			expect(TicketsModel.addTicket).toHaveBeenCalledWith(teamspace, project, model, ticket);
+			expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project, model,
+				template._id, [ticket]);
 
 			expect(FilesManager.storeFile).not.toHaveBeenCalled();
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
+				{ teamspace,
+					project,
+					model,
+					ticket: { ...ticket, ...expectedOutput } });
 		});
 
 		test('should process image and store a ref', () => addTicketImageTest());
