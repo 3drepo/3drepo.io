@@ -23,16 +23,27 @@ import { Drawing, DrawingStats } from './drawings.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 
 export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions({
+	addFavourite: ['teamspace', 'projectId', 'drawingId'],
+	removeFavourite: ['teamspace', 'projectId', 'drawingId'],
+	setFavouriteSuccess: ['projectId', 'drawingId', 'isFavourite'],
 	fetchDrawings: ['teamspace', 'projectId'],
 	fetchDrawingsSuccess: ['projectId', 'drawings'],
 	fetchDrawingStats: ['teamspace', 'projectId', 'drawingId'],
 	fetchDrawingStatsSuccess: ['projectId', 'drawingId', 'stats'],
-}, { prefix: 'DRAWINGS/' }) as { Types: Constants<DrawingsActionCreators>; Creators: DrawingsActionCreators };
+}, { prefix: 'DRAWINGS/' }) as { Types: Constants<IDrawingsActionCreators>; Creators: IDrawingsActionCreators };
 
 
 const getDrawingFromState = (state: DrawingsState, projectId, drawingId) => (
 	state.drawingsByProject[projectId].find((drawing) => drawing._id === drawingId)
 );
+
+export const setFavouriteSuccess = (state, {
+	projectId,
+	drawingId,
+	isFavourite,
+}) => {
+	getDrawingFromState(state, projectId, drawingId).isFavourite = isFavourite;
+};
 
 export const fetchDrawingsSuccess = (state: DrawingsState, { projectId, drawings } : FetchDrawingsSuccessAction) => {
 	state.drawingsByProject[projectId] = drawings;
@@ -52,17 +63,24 @@ export interface DrawingsState {
 }
 
 export const drawingsReducer = createReducer<DrawingsState>(INITIAL_STATE, produceAll({
+	[DrawingsTypes.SET_FAVOURITE_SUCCESS]: setFavouriteSuccess,
 	[DrawingsTypes.FETCH_DRAWINGS_SUCCESS]: fetchDrawingsSuccess,
 	[DrawingsTypes.FETCH_DRAWING_STATS_SUCCESS]: fetchDrawingStatsSuccess,
 })) as (state: DrawingsState, action: any) => DrawingsState;
 
 
+export type AddFavouriteAction = Action<'ADD_FAVOURITE'> & TeamspaceProjectAndDrawingId;
+export type RemoveFavouriteAction = Action<'REMOVE_FAVOURITE'> & TeamspaceProjectAndDrawingId;
+export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & ProjectAndDrawingId & { isFavourite: boolean };
 export type FetchDrawingsAction = Action<'FETCH_DRAWINGS'> & TeamspaceAndProjectId;
 export type FetchDrawingsSuccessAction = Action<'FETCH_DRAWINGS_SUCCESS'> & ProjectId & { drawings: Drawing[] };
 export type FetchDrawingStatsAction = Action<'FETCH_DRAWING_STATS'> & TeamspaceProjectAndDrawingId;
 export type FetchDrawingStatsSuccessAction = Action<'FETCH_DRAWING_STATS_SUCCESS'> & ProjectAndDrawingId & { stats: DrawingStats };
 
-export interface DrawingsActionCreators {
+export interface IDrawingsActionCreators {
+	addFavourite: (teamspace: string, projectId: string, drawingId: string) => AddFavouriteAction;
+	removeFavourite: (teamspace: string, projectId: string, drawingId: string) => RemoveFavouriteAction;
+	setFavouriteSuccess: (projectId: string, drawingId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
 	fetchDrawings: (teamspace: string, projectId: string) => FetchDrawingsAction;
 	fetchDrawingsSuccess: (projectId: string, drawings: Drawing[]) => FetchDrawingsSuccessAction;
 	fetchDrawingStats: (teamspace: string, projectId: string, drawingId: string) => FetchDrawingStatsAction;

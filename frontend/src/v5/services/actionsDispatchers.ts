@@ -21,7 +21,7 @@ import { BimActions } from '@/v4/modules/bim';
 import { ContainersActions, IContainersActionCreators } from '@/v5/store/containers/containers.redux';
 import { CurrentUserActions, ICurrentUserActionCreators } from '@/v5/store/currentUser/currentUser.redux';
 import { DialogsActions, IDialogsActionCreators } from '@/v5/store/dialogs/dialogs.redux';
-import { DrawingsActionCreators, DrawingsActions } from '@/v5/store/drawings/drawings.redux';
+import { IDrawingsActionCreators, DrawingsActions } from '@/v5/store/drawings/drawings.redux';
 import { FederationsActions, IFederationsActionCreators } from '@/v5/store/federations/federations.redux';
 import { GroupsActions } from '@/v4/modules/groups';
 import { JobsActions } from '@/v4/modules/jobs';
@@ -93,7 +93,7 @@ export const BimActionsDispatchers = createActionsDispatchers<IBimActionCreators
 export const ContainersActionsDispatchers = createActionsDispatchers<IContainersActionCreators>(ContainersActions);
 export const CurrentUserActionsDispatchers = createActionsDispatchers<ICurrentUserActionCreators>(CurrentUserActions);
 export const DialogsActionsDispatchers = createActionsDispatchers<IDialogsActionCreators>(DialogsActions);
-export const DrawingActionDispatchers =  createActionsDispatchers<DrawingsActionCreators>(DrawingsActions);
+export const DrawingsActionsDispatchers =  createActionsDispatchers<IDrawingsActionCreators>(DrawingsActions);
 export const FederationsActionsDispatchers = createActionsDispatchers<IFederationsActionCreators>(FederationsActions);
 export const GroupsActionsDispatchers = createActionsDispatchers<IGroupsActionCreators>(GroupsActions);
 export const JobsActionsDispatchers = createActionsDispatchers<IJobsActionCreators>(JobsActions);

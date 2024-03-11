@@ -19,6 +19,7 @@
 export interface Drawing {
 	_id: string;
 	name: string;
+	isFavourite: boolean;
 }
 
 // TODO: Unfinished interface

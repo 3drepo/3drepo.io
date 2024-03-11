@@ -16,6 +16,7 @@
  */
 
 import { memo, useContext, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import {
 	DashboardListItemButton,
@@ -32,6 +33,8 @@ import { DrawingsCalibrationButton } from './drawingsCalibrationButton/drawingsC
 import { IsMainList } from '../../../containers/mainList.context';
 import { DrawingsEllipsisMenu } from './drawingsEllipsisMenu/drawingsEllipsisMenu.component';
 import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 interface IDrawingsListItem {
 	isSelected: boolean;
@@ -43,7 +46,8 @@ export const DrawingListItem = memo(({
 	isSelected,
 	drawing,
 	onSelectOrToggleItem,
-}: IDrawingsListItem): JSX.Element => {
+}: IDrawingsListItem) => {
+	const { teamspace, project } = useParams<DashboardParams>();
 	const isMainList = useContext(IsMainList);
 
 	useEffect(() => {
@@ -53,8 +57,12 @@ export const DrawingListItem = memo(({
 		return null;
 	}, [drawing._id]);
 
-	const onChangeFavourite = () => {
-		// TODO add set favourite call
+	const onChangeFavourite = ({ currentTarget: { checked } }) => {
+		if (checked) {
+			DrawingsActionsDispatchers.addFavourite(teamspace, project, drawing._id);
+		} else {
+			DrawingsActionsDispatchers.removeFavourite(teamspace, project, drawing._id);
+		}
 	};
 
 	return (

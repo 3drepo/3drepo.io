@@ -16,7 +16,7 @@
  */
 
 import { all, put, takeEvery } from 'redux-saga/effects';
-import { DrawingsActions, DrawingsTypes, FetchDrawingStatsAction, FetchDrawingsAction } from './drawings.redux';
+import { AddFavouriteAction, DrawingsActions, DrawingsTypes, FetchDrawingStatsAction, FetchDrawingsAction, RemoveFavouriteAction } from './drawings.redux';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '../dialogs/dialogs.redux';
@@ -24,6 +24,32 @@ import { LifoQueue } from '@/v5/helpers/functions.helpers';
 import { DrawingStats } from './drawings.types';
 
 const statsQueue = new LifoQueue<DrawingStats>(API.Drawings.fetchDrawingsStats, 30);
+
+export function* addFavourites({ teamspace, projectId, drawingId }: AddFavouriteAction) {
+	try {
+		yield put(DrawingsActions.setFavouriteSuccess(projectId, drawingId, true));
+		yield API.Drawings.addFavourite(teamspace, projectId, drawingId);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'drawings.addFavourite.error', defaultMessage: 'trying to add container to favourites' }),
+			error,
+		}));
+		yield put(DrawingsActions.setFavouriteSuccess(projectId, drawingId, false));
+	}
+}
+
+export function* removeFavourites({ teamspace, projectId, drawingId }: RemoveFavouriteAction) {
+	try {
+		yield put(DrawingsActions.setFavouriteSuccess(projectId, drawingId, false));
+		yield API.Drawings.removeFavourite(teamspace, projectId, drawingId);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'drawings.removeFavourite.error', defaultMessage: 'trying to remove container from favourites' }),
+			error,
+		}));
+		yield put(DrawingsActions.setFavouriteSuccess(projectId, drawingId, true));
+	}
+}
 
 export function* fetchDrawings({ teamspace, projectId }: FetchDrawingsAction) {
 	try {

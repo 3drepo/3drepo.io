@@ -16,9 +16,19 @@
  */
 
 import { delay } from '@/v4/helpers/async';
+import api from '@/v4/services/api';
 import { Drawing, DrawingStats } from '@/v5/store/drawings/drawings.types';
+import { AxiosResponse } from 'axios';
 
+export const addFavourite = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/drawings/favourites`, {
+		drawings: [drawingId],
+	})
+);
 
+export const removeFavourite = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => (
+	api.delete(`teamspaces/${teamspace}/projects/${projectId}/drawings/favourites?ids=${drawingId}`)
+);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const fetchDrawings = (teamspace, projectId): Promise<Drawing[]> => {
@@ -26,18 +36,22 @@ export const fetchDrawings = (teamspace, projectId): Promise<Drawing[]> => {
 		{
 			_id: 'asdasdmom',
 			name: 'My cool drawing',
+			isFavourite: true,
 		},
 		{
 			_id: 'stilllife',
 			name: 'Still life',
+			isFavourite: true,
 		},
 		{
 			_id: 'boring',
 			name: 'Boring Drawing',
+			isFavourite: false,
 		},
 		{
 			_id: 'liuhiuhlk',
 			name: 'Another drawing',
+			isFavourite: false,
 		}]) ;
 };
 

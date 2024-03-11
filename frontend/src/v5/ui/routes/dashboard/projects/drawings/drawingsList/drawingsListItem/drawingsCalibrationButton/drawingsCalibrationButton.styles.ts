@@ -55,6 +55,5 @@ export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{
 			default:
 				return emptyStyles;
 		}
-	}}
-}
+	}}}
 `;
