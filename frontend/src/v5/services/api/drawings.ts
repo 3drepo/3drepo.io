@@ -67,5 +67,8 @@ export const createDrawing = (teamspace, projectId, drawing): Promise<string> =>
 };
 
 export const updateDrawing = (teamspace, projectId, drawingId, drawing): Promise<string> => {
+	// delay(200, null);
+	// throw new Error('name already exists');
+	// throw new Error('Drawing number already exists');
 	return delay(500, null);
 };
