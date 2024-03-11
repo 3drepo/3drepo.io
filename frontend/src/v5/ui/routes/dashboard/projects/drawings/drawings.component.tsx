@@ -19,30 +19,93 @@ import { DrawingActionDispatchers } from '@/v5/services/actionsDispatchers';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { DrawingHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { SearchContextComponent } from '@controls/search/searchContext';
+import { FormattedMessage } from 'react-intl';
+import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
+import { IsMainList } from '../containers/mainList.context';
+import { Button } from '@controls/button';
+import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
+import { DrawingsList } from './drawingsList/drawingsList.component';
 
 
 export const Drawings = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	const isPending = DrawingHooksSelectors.selectIsListPending();
 	const drawings = DrawingHooksSelectors.selectDrawings();
+
+	const favouriteDrawings = []; // TODO use selector for favs
+	const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'type', 'code']; // TODO use helper file
+
+	const onClickCreate = () => { }; // TODO add func
 
 	useEffect(() => {
 		if (!isPending) return;
 		DrawingActionDispatchers.fetchDrawings(teamspace, project);
 	}, [isPending]);
 
-	return (<div>
-		<h1>Drawings list</h1>
-		{isPending ? 
-			(<b>Loading...</b>) : 
-			(
-				<ul>
-					{drawings.map((drawing) => (<li>{drawing.name}</li>))
-					} 
-				</ul>
-			)
-		}
-	</div>);
+	return (
+		<>
+			<SearchContextComponent items={favouriteDrawings} fieldsToFilter={DRAWINGS_SEARCH_FIELDS}>
+				<DrawingsList
+					title={(
+						<FormattedMessage
+							id="drawings.favourites.collapseTitle"
+							defaultMessage="Favourites"
+						/>
+					)}
+					titleTooltips={{
+						collapsed: <FormattedMessage id="drawings.favourites.collapse.tooltip.show" defaultMessage="Show favourites" />,
+						visible: <FormattedMessage id="drawings.favourites.collapse.tooltip.hide" defaultMessage="Hide favourites" />,
+					}}
+					onClickCreate={onClickCreate}
+					emptyMessage={(
+						<DashboardListEmptyText>
+							<FormattedMessage
+								id="drawings.favourites.emptyMessage"
+								defaultMessage="Click on the star to mark a drawing as favourite"
+							/>
+						</DashboardListEmptyText>
+					)}
+				/>
+			</SearchContextComponent>
+			<Divider />
+			<IsMainList.Provider value>
+				<SearchContextComponent items={drawings} fieldsToFilter={DRAWINGS_SEARCH_FIELDS}>
+					<DrawingsList
+						title={(
+							<FormattedMessage
+								id="drawings.all.collapseTitle"
+								defaultMessage="All Drawings"
+							/>
+						)}
+						titleTooltips={{
+							collapsed: <FormattedMessage id="drawings.all.collapse.tooltip.show" defaultMessage="Show all" />,
+							visible: <FormattedMessage id="drawings.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
+						}}
+						onClickCreate={onClickCreate}
+						emptyMessage={(
+							<>
+								<DashboardListEmptyText>
+									<FormattedMessage id="drawings.all.emptyMessage" defaultMessage="You haven’t created any drawings." />
+								</DashboardListEmptyText>
+								{ isProjectAdmin && (
+									<Button
+										startIcon={<AddCircleIcon />}
+										variant="contained"
+										color="primary"
+										onClick={onClickCreate}
+									>
+										<FormattedMessage id="drawings.all.newDrawing" defaultMessage="New Drawing" />
+									</Button>
+								)}
+							</>
+						)}
+					/>
+				</SearchContextComponent>
+			</IsMainList.Provider>
+		</>
+	);
 };

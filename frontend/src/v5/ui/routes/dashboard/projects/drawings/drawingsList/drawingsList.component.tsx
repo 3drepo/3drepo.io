@@ -1,0 +1,157 @@
+/**
+ *  Copyright (C) 2024 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { formatMessage } from '@/v5/services/intl';
+import { ContainersHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { Display } from '@/v5/ui/themes/media';
+import { DashboardListCollapse, DashboardListHeader, DashboardListHeaderLabel, DashboardList, DashboardListEmptyContainer, DashboardListEmptySearchResults } from '@components/dashboard/dashboardList';
+import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
+import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
+import { VirtualList } from '@controls/virtualList/virtualList.component';
+import { isEmpty } from 'lodash';
+import { FormattedMessage } from 'react-intl';
+import { ContainerListItemLoading } from '../../containers/containersList/containerListItem/containerListItemLoading.component';
+import { CollapseSideElementGroup, Container } from '../../containers/containersList/containersList.styles';
+import { UploadFileForm } from '../../containers/uploadFileForm/uploadFileForm.component';
+import { AddCircleIcon } from '../../federations/editFederationModal/editFederation/editFederationContainersList/editFederationContainersListItem/groupOption/groupOption.styles';
+import { SearchInput } from '../../tickets/tickets.styles';
+import { useCallback, useContext, useState } from 'react';
+import { SearchContext, SearchContextType } from '@controls/search/searchContext';
+import { Button } from '@controls/button';
+import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
+import { DrawingListItem } from './drawingsListItem/drawingsListItem.component';
+
+export const DRAWING_LIST_COLUMN_WIDTHS = { // TODO - move to helper?
+	name: 200,
+	total: 180,
+	calibration: 180,
+	code: 180,
+	type: 100,
+	lastUpdated: 100,
+	actions: 80,
+};
+
+export const DrawingsList = ({
+	emptyMessage,
+	title,
+	titleTooltips,
+	onClickCreate,
+}) => {
+	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+
+	const { items: drawings, filteredItems: filteredDrawings } = useContext<SearchContextType<any>>(SearchContext); // TODO add search context type IDrawing
+	const hasDrawings = drawings.length > 0;
+
+	const selectOrToggleItem = useCallback((id: string) => {
+		setSelectedItemId((state) => (state === id ? null : id));
+	}, []);
+
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+	const isListPending = false; // TODO add selector
+	const areStatsPending = false; // TODO add selector
+	const canUpload = ContainersHooksSelectors.selectCanUploadToProject(); // TODO Does this need to change?
+	const { sortedList, setSortConfig } = useOrderedList(filteredDrawings, DEFAULT_SORT_CONFIG);
+
+	return (
+		<Container>
+			<DashboardListCollapse
+				title={<>{title} {!isListPending && <CircledNumber>{drawings.length}</CircledNumber>}</>}
+				tooltipTitles={titleTooltips}
+				isLoading={areStatsPending}
+				interactableWhileLoading
+				sideElement={(
+					<CollapseSideElementGroup>
+						<SearchInput
+							placeholder={formatMessage({ id: 'drawings.search.placeholder', defaultMessage: 'Search drawings...' })}
+						/>
+						{ isProjectAdmin && (
+							<Button
+								startIcon={<AddCircleIcon />}
+								variant="outlined"
+								color="secondary"
+								onClick={onClickCreate}
+							>
+								<FormattedMessage id="drawings.mainHeader.newDrawing" defaultMessage="New drawing" />
+							</Button>
+						)}
+						{ canUpload && (
+							<Button
+								startIcon={<ArrowUpCircleIcon />}
+								variant="contained"
+								color="primary"
+								onClick={() => DialogsActionsDispatchers.open(UploadFileForm)}
+							>
+								<FormattedMessage id="drawings.mainHeader.uploadFiles" defaultMessage="Upload files" />
+							</Button>
+						)}
+					</CollapseSideElementGroup>
+				)}
+			>
+				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
+					{/* TODO Check names match object keys */}
+					<DashboardListHeaderLabel name="name" minWidth={DRAWING_LIST_COLUMN_WIDTHS.name}>
+						<FormattedMessage id="drawings.list.header.drawing" defaultMessage="Drawing" />
+					</DashboardListHeaderLabel>
+					<DashboardListHeaderLabel name="revisionsCount" width={DRAWING_LIST_COLUMN_WIDTHS.total} hideWhenSmallerThan={Display.Desktop}>
+						<FormattedMessage id="drawings.list.header.revisions" defaultMessage="Revisions" />
+					</DashboardListHeaderLabel>
+					<DashboardListHeaderLabel name="calibration" width={DRAWING_LIST_COLUMN_WIDTHS.calibration}>
+						<FormattedMessage id="drawings.list.header.calibration" defaultMessage="2D/3D Calibration" />
+					</DashboardListHeaderLabel>
+					<DashboardListHeaderLabel name="code" width={DRAWING_LIST_COLUMN_WIDTHS.code} hideWhenSmallerThan={Display.Tablet}>
+						<FormattedMessage id="drawings.list.header.drawingNo" defaultMessage="Drawing Number" />
+					</DashboardListHeaderLabel>
+					<DashboardListHeaderLabel name="category" width={DRAWING_LIST_COLUMN_WIDTHS.type}>
+						<FormattedMessage id="drawings.list.header.category" defaultMessage="Category" />
+					</DashboardListHeaderLabel>
+					<DashboardListHeaderLabel name="lastUpdated" width={DRAWING_LIST_COLUMN_WIDTHS.lastUpdated}>
+						<FormattedMessage id="drawings.list.header.lastUpdated" defaultMessage="Last Updated" />
+					</DashboardListHeaderLabel>
+					<DashboardListHeaderLabel name="Actions" width={DRAWING_LIST_COLUMN_WIDTHS.actions}>
+						<FormattedMessage id="drawings.list.header.actions" defaultMessage="Actions" />
+					</DashboardListHeaderLabel>
+				</DashboardListHeader>
+				<DashboardList>
+					{!isEmpty(sortedList) ? (
+						<VirtualList items={sortedList} itemHeight={81} itemContent={
+							(drawing, index) => (
+								drawing.hasStatsPending ? (
+									// TODO - Drawing list item loading?
+									<ContainerListItemLoading  delay={index / 10} container={drawing} key={drawing._id} />
+								) : (
+									<DrawingListItem
+										key={drawing._id}
+										isSelected={drawing._id === selectedItemId}
+										drawing={drawing}
+										onSelectOrToggleItem={selectOrToggleItem}
+									/>
+								)
+							)
+						}/>
+					) : (
+						<DashboardListEmptyContainer>
+							{hasDrawings ? (
+								<DashboardListEmptySearchResults />
+							) : emptyMessage}
+						</DashboardListEmptyContainer>
+					)}
+				</DashboardList>
+			</DashboardListCollapse>
+		</Container>
+	);
+};
