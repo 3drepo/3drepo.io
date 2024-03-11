@@ -32,6 +32,21 @@ const ticketCol = 'tickets';
 
 const testAddTicketsWithTemplate = () => {
 	describe('Add tickets with template', () => {
+		test('Should do nothing if empty array is provided', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const templateType = generateRandomString();
+
+			const fn = jest.spyOn(db, 'insertMany');
+			const findFn = jest.spyOn(db, 'findOne');
+
+			const res = await Ticket.addTicketsWithTemplate(teamspace, project, model, templateType, []);
+
+			expect(res).toEqual([]);
+			expect(fn).not.toHaveBeenCalled();
+			expect(findFn).not.toHaveBeenCalled();
+		});
 		test('Should add the tickets', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();

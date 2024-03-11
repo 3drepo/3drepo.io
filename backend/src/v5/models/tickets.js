@@ -36,7 +36,7 @@ const determineTicketNumber = async (teamspace, project, model, type) => {
 
 // We expect all tickets to have the same template (i.e. type field should be the same in all tickets provided)
 Tickets.addTicketsWithTemplate = async (teamspace, project, model, templateId, tickets) => {
-	if (!tickets?.length) return undefined;
+	if (!tickets?.length) return [];
 
 	const response = [];
 	const startCounter = await determineTicketNumber(teamspace, project, model, templateId);
