@@ -177,6 +177,13 @@ const insertTicketsImageTest = async (isImport, isView) => {
 			teamspace, TICKETS_RESOURCES_COL, ref, buffer, meta,
 		);
 	});
+
+	expect(EventsManager.publish).toHaveBeenCalledTimes(expectedOutput.length);
+	expectedOutput.forEach((ticket) => expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
+		{ teamspace,
+			project,
+			model,
+			ticket }));
 };
 
 const updateTicketImageTest = async (isView) => {
@@ -360,6 +367,12 @@ const insertTicketsGroupTests = (isImport) => {
 			expect(groupIDsToSave.length).toBe(expectedGroupIds.length);
 			expect(groupIDsToSave).toEqual(expect.arrayContaining(expectedGroupIds));
 			expect(TicketGroupsModel.deleteGroups).not.toHaveBeenCalled();
+			expect(EventsManager.publish).toHaveBeenCalledTimes(expectedOutput.length);
+			expectedOutput.forEach((ticket) => expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
+				{ teamspace,
+					project,
+					model,
+					ticket }));
 		});
 	});
 };
