@@ -39,6 +39,7 @@ export const Drawings = () => {
 	}, [isPending]);
 
 	const onClickCreate = () => DialogsActionsDispatchers.open(CreateDrawingDialog);
+	const onClickEdit = (_id) => DialogsActionsDispatchers.open(CreateDrawingDialog, { _id });
 
 	return (<div>
 		<h1>Drawings list</h1>
@@ -55,7 +56,7 @@ export const Drawings = () => {
 						<FormattedMessage id="drawings.newDrawing" defaultMessage="New drawing" />
 					</Button>
 					<ul>
-						{drawings.map((drawing) => (<li>{drawing.name}</li>))} 
+						{drawings.map((drawing) => (<li>{drawing.name} <button onClick={() => onClickEdit(drawing._id)}>Edit</button></li>))} 
 					</ul>
 				</>
 

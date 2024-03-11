@@ -25,7 +25,7 @@ import { CreateDrawingSchema } from '@/v5/validation/drawingsSchemes/drawingSche
 import { DrawingHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useEffect, useState } from 'react';
 import { DrawingActionDispatchers } from '@/v5/services/actionsDispatchers';
-import { nameAlreadyExists } from '@/v5/validation/errors.helpers';
+import { nameAlreadyExists, numberAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 interface IFormInput {
 	name: string;
@@ -40,8 +40,16 @@ export const CreateDrawingDialog = ({ open, onClickClose }) => {
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const categories = DrawingHooksSelectors.selectCategories();
 	const isCategoriesPending = DrawingHooksSelectors.selectIsCategoriesPending();
-	const drawingsNames = DrawingHooksSelectors.selectDrawings().map((d) => d.name);
+	const drawingsNames = [];
+	const drawingNumbers = [];
+
+	DrawingHooksSelectors.selectDrawings().forEach((d) => {
+		drawingsNames.push(d.name);
+		drawingNumbers.push(d.drawingNumber);
+	});
+
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState(drawingsNames);
+	const [alreadyExistingNumbers, setAlreadyExistingNumbers] = useState(drawingsNames);
 	
 
 	const {
@@ -55,13 +63,18 @@ export const CreateDrawingDialog = ({ open, onClickClose }) => {
 	} = useForm<IFormInput>({
 		mode: 'onChange',
 		resolver: yupResolver(CreateDrawingSchema),
-		context: { alreadyExistingNames },
+		context: { alreadyExistingNames, alreadyExistingNumbers },
 	});
 
 	const onSubmitError = (err) => {
 		if (nameAlreadyExists(err)) {
 			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
 			trigger('name');
+		}
+
+		if (numberAlreadyExists(err)) {
+			setAlreadyExistingNumbers([getValues('drawingNumber'), ...alreadyExistingNumbers]);
+			trigger('drawingNumber');
 		}
 	};
 
@@ -91,9 +104,8 @@ export const CreateDrawingDialog = ({ open, onClickClose }) => {
 			onClickClose={!formState.isSubmitting ? onClickClose : null}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'drawings.creation.ok', defaultMessage: 'Create Drawing' })}
-			isValid={formState.isValid}
-			isSubmitting={formState.isSubmitting}
 			maxWidth="sm"
+			{...formState}
 		>
 			<FormTextField
 				control={control}

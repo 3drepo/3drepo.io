@@ -28,9 +28,20 @@ export const CreateDrawingSchema =  Yup.object().shape({
 		}))
 		.required(
 			formatMessage({
-				id: 'validation.revisions.tag.error.required',
+				id: 'validation.drawingNumber.error.required',
 				defaultMessage: 'Drawing Number is a required field',
 			}),
-		),
+		).test(
+			'alreadyExistingNumbers',
+			formatMessage({
+				id: 'validation.drawingNumber.alreadyExisting',
+				defaultMessage: 'Your Drawing Number is already in use, please use a unique Drawing Number',
+			}),
+			(value, testContext) => {
+				if (!testContext.options?.context) return true;
+				return !testContext.options.context.alreadyExistingNumbers?.map((n) => n.trim().toLocaleLowerCase()).includes(value?.toLocaleLowerCase());
+			},
+		)
+	,
 	desc,
 });

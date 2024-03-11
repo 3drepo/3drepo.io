@@ -58,5 +58,6 @@ export const fetchCategories = (teamspace, projectId): Promise<string[]> => {
 export const createDrawing = (teamspace, projectId, drawing): Promise<string> => {
 	delay(200, null);
 	// throw new Error('name already exists');
-	return delay<string>(1000, uuid()) ;
+	// throw new Error('Drawing number already exists');
+	return delay<string>(500, uuid()) ;
 };
