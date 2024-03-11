@@ -167,28 +167,30 @@ const testValidateImportTickets = () => {
 	const goodTickets = times(5, () => generateTicket(template));
 
 	const badTicket = generateTicket(template);
-	const badReadOnlyTicket = { ...generateTicket(template), failRO: true };
 
 	const templateCheck = async (req, res, next) => {
 		const { template: tem } = req.params;
 
 		const temIdStr = UUIDToString(tem);
 		if (temIdStr === knownTemplateID) {
-			req.templateData = template;
+			req.templateData = { ...template, _id: stringToUUID(knownTemplateID) };
 			await next();
 			return;
 		}
 
 		if (temIdStr === deprecatedTemplateID) {
-			req.templateData = { ...template, deprecated: true };
+			req.templateData = { ...template, deprecated: true, _id: stringToUUID(deprecatedTemplateID) };
 			await next();
 		}
 	};
 
 	const validation = (t, p, m, tem, ticket) => (ticket === badTicket
 		? Promise.reject(templates.invalidArguments) : Promise.resolve(ticket));
-	const processReadOnly = (e, ticket) => (ticket?.failRO
-		? Promise.reject(new Error('Failed at readOnly')) : Promise.resolve({ ...ticket, processed: true }));
+	const processReadOnly = (e, ticket) => {
+		// eslint-disable-next-line no-param-reassign
+		ticket.processed = true;
+		return Promise.resolve();
+	};
 
 	describe.each([
 		['template is not provided', { query: {} }, false, createResponseCode(templates.invalidArguments, 'Template must be provided')],
@@ -201,7 +203,6 @@ const testValidateImportTickets = () => {
 		['tickets is not an array', { body: { tickets: 1 } }, false, createResponseCode(templates.invalidArguments, 'Expected body to contain an array of tickets')],
 		['ticket array is empty', { body: { tickets: [] } }, false, createResponseCode(templates.invalidArguments, 'Must contain at least 1 ticket')],
 		['ticket array contains a bad ticket', { body: { tickets: [...goodTickets, badTicket] } }, false, templates.invalidArguments],
-		['ticket array contains a ticket where we failed to process read only values', { body: { tickets: [...goodTickets, badReadOnlyTicket] } }, false, createResponseCode(templates.invalidArguments, 'Failed at readOnly')],
 		['all tickets are valid', {}, true],
 	])('Validate import tickets', (desc, additionalReq, success, expectedRes) => {
 		afterEach(() => {
