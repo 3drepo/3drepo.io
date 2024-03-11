@@ -28,6 +28,7 @@ import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { Display } from '@/v5/ui/themes/media';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { DrawingTitle } from './drawingTitle/drawingTitle.component';
+import { DrawingsCalibrationButton } from './drawingsCalibrationButton/drawingsCalibrationButton.styles';
 import { IsMainList } from '../../../containers/mainList.context';
 import { DrawingsEllipsisMenu } from './drawingsEllipsisMenu/drawingsEllipsisMenu.component';
 import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers';
@@ -80,21 +81,18 @@ export const DrawingListItem = memo(({
 					<FormattedMessage
 						id="drawings.list.item.revisions"
 						defaultMessage="{count, plural, =0 {No revisions} one {# revision} other {# revisions}}"
-						values={{ count: drawing.total }}
+						values={{ count: drawing.revisionCount }}
 					/>
 				</DashboardListItemButton>
-				{/* Todo add actual calibration button component */}
-				<DashboardListItemButton
-					onClick={() => onSelectOrToggleItem(drawing._id)}
+				<DrawingsCalibrationButton
+					calibration={drawing.calibration}
+					onClick={() => { }} // TODO - add calibrate functionality
 					width={DRAWING_LIST_COLUMN_WIDTHS.calibration}
 					hideWhenSmallerThan={Display.Desktop}
 					tooltipTitle={
 						<FormattedMessage id="drawings.list.item.calibration.tooltip" defaultMessage="Calibration state" /> // TODO What should this be??
 					}
-				>
-					{/* Todo add value */}
-					Calibrated 
-				</DashboardListItemButton>
+				/>
 				<DashboardListItemText
 					selected={isSelected}
 					width={DRAWING_LIST_COLUMN_WIDTHS.code}

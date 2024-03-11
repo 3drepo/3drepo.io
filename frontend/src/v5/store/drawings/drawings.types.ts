@@ -23,7 +23,14 @@ export interface Drawing {
 
 // TODO: Unfinished interface
 export interface DrawingStats {
-	_id: string;
-	revisions : { total: number, lastUpdated?: number, latestRevision?: string }
+	_id: string,
+	revisions: {
+		revisionCount: number,
+		lastUpdated?: number,
+		latestRevision?: string,
+		calibration?: string,
+		type?: string,
+		code?: string,
+		isFavourite: boolean,
+	}
 }
-

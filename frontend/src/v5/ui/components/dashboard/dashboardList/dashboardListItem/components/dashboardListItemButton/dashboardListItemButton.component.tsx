@@ -20,9 +20,10 @@ import { FixedOrGrowContainer, FixedOrGrowContainerProps } from '@controls/fixed
 import { Tooltip } from '@mui/material';
 import { Button } from './dashboardListItemButton.styles';
 
-interface IDashboardListItemButton extends FixedOrGrowContainerProps {
+export interface IDashboardListItemButton extends FixedOrGrowContainerProps {
 	onClick: Dispatch<SyntheticEvent>;
 	tooltipTitle?: ReactNode;
+	startIcon?: ReactNode;
 	disabled?: boolean
 }
 
@@ -31,6 +32,7 @@ export const DashboardListItemButton = ({
 	tooltipTitle = '',
 	disabled = false,
 	children,
+	startIcon,
 	...containerProps
 }: IDashboardListItemButton): JSX.Element => (
 	<FixedOrGrowContainer {...containerProps}>
@@ -42,6 +44,7 @@ export const DashboardListItemButton = ({
 						event.stopPropagation();
 						onClick(event);
 					}}
+					startIcon={startIcon}
 				>
 					{children}
 				</Button>

@@ -98,7 +98,7 @@ export const DrawingsList = ({
 					<DashboardListHeaderLabel name="name" minWidth={DRAWING_LIST_COLUMN_WIDTHS.name}>
 						<FormattedMessage id="drawings.list.header.drawing" defaultMessage="Drawing" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="revisionsCount" width={DRAWING_LIST_COLUMN_WIDTHS.total} hideWhenSmallerThan={Display.Desktop}>
+					<DashboardListHeaderLabel name="revisionsCount" width={DRAWING_LIST_COLUMN_WIDTHS.revisionCount} hideWhenSmallerThan={Display.Desktop}>
 						<FormattedMessage id="drawings.list.header.revisions" defaultMessage="Revisions" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="calibration" width={DRAWING_LIST_COLUMN_WIDTHS.calibration}>
