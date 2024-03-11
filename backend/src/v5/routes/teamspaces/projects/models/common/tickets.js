@@ -64,7 +64,7 @@ const importTickets = (isFed) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
 	try {
 		const importTicketsToModel = isFed ? importFedTickets : importConTickets;
-		const ids = await importTicketsToModel(teamspace, project, model, req.templateData, req.body);
+		const ids = await importTicketsToModel(teamspace, project, model, req.templateData, req.body.tickets);
 
 		respond(req, res, templates.ok, { tickets: ids.map(UUIDToString) });
 	} catch (err) {

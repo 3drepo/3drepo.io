@@ -38,7 +38,8 @@ const processTicket = async (teamspace, project, model, template, author, newTic
 	}
 
 	const deserialised = deserialiseUUIDsInTicket(validatedTicket, template);
-	return processReadOnlyValues(existingData, deserialised, author);
+	processReadOnlyValues(existingData, deserialised, author);
+	return deserialised;
 };
 
 const validateTicket = (isNewTicket) => async (req, res, next) => {
@@ -80,8 +81,8 @@ const validateTicketImportData = (isNew) => async (req, res, next) => {
 			throw createResponseCode(templates.invalidArguments, 'Template has been deprecated');
 		}
 
-		req.body.tickets = await Promise.all(req.body.tickets.map((ticket, i) => {
-			const validatedTicket = processTicket(teamspace,
+		req.body.tickets = await Promise.all(req.body.tickets.map(async (ticket, i) => {
+			const validatedTicket = await processTicket(teamspace,
 				project, model, template, user, ticket, isNew ? undefined : req.ticketData[i], true);
 			validatedTicket.type = template._id;
 			return validatedTicket;

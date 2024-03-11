@@ -284,6 +284,73 @@ const testAddTicket = () => {
 		describe.each(generateTestData())('Containers', runTest);
 	});
 };
+
+const testImportTickets = () => {
+	describe('Import tickets', () => {
+		const { users, teamspace, project, con, fed } = generateBasicData();
+		const uniquePropertyName = ServiceHelper.generateRandomString();
+		const template = ServiceHelper.generateTemplate();
+		const template2 = ServiceHelper.generateTemplate();
+		template.properties.push({ name: uniquePropertyName, type: propTypes.TEXT, unique: true });
+
+		beforeAll(async () => {
+			await setupBasicData(users, teamspace, project, [con, fed],
+				[template, template2]);
+		});
+
+		const generateTestData = (isFed) => {
+			const modelType = isFed ? 'federation' : 'container';
+			const wrongTypeModel = isFed ? con : fed;
+			const modelWithTemplates = isFed ? fed : con;
+			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+
+			const getRoute = ({ key = users.tsAdmin.apiKey, projectId = project.id, modelId = modelWithTemplates._id, templateId = template._id } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/import${ServiceHelper.createQueryString({ key, template: templateId })}`;
+
+			return [
+				['the user does not have a valid session', false, getRoute({ key: null }), templates.notLoggedIn],
+				['the user is not a member of the teamspace', false, getRoute({ key: users.nobody.apiKey }), templates.teamspaceNotFound],
+				['the project does not exist', false, getRoute({ projectId: ServiceHelper.generateRandomString() }), templates.projectNotFound],
+				[`the ${modelType} does not exist`, false, getRoute({ modelId: ServiceHelper.generateRandomString() }), modelNotFound],
+				[`the model provided is a ${modelType}`, false, getRoute({ modelId: wrongTypeModel._id }), modelNotFound],
+				['the user does not have access to the federation', false, getRoute({ key: users.noProjectAccess.apiKey }), templates.notAuthorized],
+				['the templateId provided does not exist', false, getRoute({ templateId: ServiceHelper.generateUUIDString() }), templates.templateNotFound],
+				['the templateId provided is not a UUID string', false, getRoute({ templateId: ServiceHelper.generateRandomString() }), templates.templateNotFound],
+				['the templateId is not provided', false, getRoute({ templateId: null }), templates.invalidArguments],
+				['the ticket data does not conforms to the template', false, getRoute(), templates.invalidArguments, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
+				['the ticket data conforms to the template', true, getRoute()],
+				['the ticket data conforms to the template but the user is a viewer', false, getRoute({ key: users.viewer.apiKey }), templates.notAuthorized],
+			];
+		};
+
+		const runTest = (desc, success, route, expectedOutput, payloadChanges = {}) => {
+			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+				const payload = {
+					tickets: times(10, () => ({ ...ServiceHelper.generateTicket(template), ...payloadChanges })),
+				};
+
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+
+				const res = await agent.post(route).send(payload).expect(expectedStatus);
+
+				if (success) {
+					const { tickets } = res.body;
+					expect(tickets).not.toBeUndefined();
+
+					await Promise.all(tickets.map(async (id) => {
+						const getEndpoint = route.replace('/tickets/import', `/tickets/${id}`);
+						await agent.get(getEndpoint).expect(templates.ok.status);
+					}));
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
+	});
+};
+
 const testGetTicketResource = () => {
 	describe('Get ticket resource', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
@@ -812,6 +879,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testGetAllTemplates();
 	testGetTemplateDetails();
 	testAddTicket();
+	testImportTickets();
 	testGetTicketResource();
 	testGetTicket();
 	testGetTicketList();
