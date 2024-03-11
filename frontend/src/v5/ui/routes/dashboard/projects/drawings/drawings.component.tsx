@@ -27,6 +27,7 @@ import { IsMainList } from '../containers/mainList.context';
 import { Button } from '@controls/button';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { DrawingsList } from './drawingsList/drawingsList.component';
+import { DRAWINGS_SEARCH_FIELDS } from '@/v5/store/drawings/drawings.helpers';
 
 
 export const Drawings = () => {
@@ -37,7 +38,6 @@ export const Drawings = () => {
 	const drawings = DrawingHooksSelectors.selectDrawings();
 
 	const favouriteDrawings = []; // TODO use selector for favs
-	const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'type', 'code']; // TODO use helper file
 
 	const onClickCreate = () => { }; // TODO add func
 

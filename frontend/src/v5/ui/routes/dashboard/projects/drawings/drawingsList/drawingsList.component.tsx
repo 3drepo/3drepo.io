@@ -35,16 +35,7 @@ import { SearchContext, SearchContextType } from '@controls/search/searchContext
 import { Button } from '@controls/button';
 import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
 import { DrawingListItem } from './drawingsListItem/drawingsListItem.component';
-
-export const DRAWING_LIST_COLUMN_WIDTHS = { // TODO - move to helper?
-	name: 200,
-	total: 180,
-	calibration: 180,
-	code: 180,
-	type: 100,
-	lastUpdated: 100,
-	actions: 80,
-};
+import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers';
 
 export const DrawingsList = ({
 	emptyMessage,

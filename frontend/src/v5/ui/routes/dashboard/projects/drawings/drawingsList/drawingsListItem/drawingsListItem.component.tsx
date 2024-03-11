@@ -28,9 +28,9 @@ import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { Display } from '@/v5/ui/themes/media';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { DrawingTitle } from './drawingTitle/drawingTitle.component';
-import { DRAWING_LIST_COLUMN_WIDTHS } from '../drawingsList.component';
 import { IsMainList } from '../../../containers/mainList.context';
 import { DrawingsEllipsisMenu } from './drawingsEllipsisMenu/drawingsEllipsisMenu.component';
+import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers';
 
 interface IDrawingsListItem {
 	isSelected: boolean;
