@@ -76,14 +76,12 @@ export const CreateDrawingDialog = ({ open, onClickClose }) => {
 	}, []);
 
 	const onSubmit: SubmitHandler<IFormInput> = async (body) => {
-		await new Promise<void>((accept, reject ) => DrawingActionDispatchers.createDrawing(teamspace, project, body as any, ()=>{
-			accept();
+		try {
+			await new Promise<void>((accept, reject ) => DrawingActionDispatchers.createDrawing(teamspace, project, body as any, accept, reject));
 			onClickClose();
-		},
-		() => {
-			onSubmitError(errors);
-			reject();
-		}));
+		} catch (err) {
+			onSubmitError(err);
+		}
 	};
 
 	return (
