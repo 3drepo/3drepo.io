@@ -55,7 +55,7 @@ export const DrawingsEllipsisMenu = ({
 					defaultMessage: 'Calibrate',
 				})}
 				onClick={() => { }} // TODO - add calibration functionality
-				disabled={!drawing.revisionCount}
+				disabled={!drawing.revisionsCount}
 				hidden={!hasCollaboratorAccess}
 			/>
 			<EllipsisMenuItem

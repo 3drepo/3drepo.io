@@ -25,7 +25,7 @@ export interface Drawing {
 export interface DrawingStats {
 	_id: string,
 	revisions: {
-		revisionCount: number,
+		revisionsCount: number,
 		lastUpdated?: number,
 		latestRevision?: string,
 		calibration?: string,

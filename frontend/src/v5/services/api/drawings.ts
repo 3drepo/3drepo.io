@@ -45,19 +45,19 @@ export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promi
 	const stats =  { // TODO: The schema is unfinished
 		asdasdmom: {
 			_id: 'asdasdmom',
-			revisions : { revisionCount: 0, calibration: 'empty', isFavourite: false, type: 'Architectural', code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0001' },
+			revisions : { revisionsCount: 0, calibration: 'empty', isFavourite: false, type: 'Architectural', code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0001' },
 		},
 		liuhiuhlk: {
 			_id: 'liuhiuhlk',
-			revisions : { revisionCount: 1, lastUpdated: 1709569331628,  latestRevision:'I dunno', calibration: 'calibrated', isFavourite: false, type: 'Existing', code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0002' },
+			revisions : { revisionsCount: 1, lastUpdated: 1709569331628,  latestRevision:'I dunno', calibration: 'calibrated', isFavourite: false, type: 'Existing', code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0002' },
 		},
 		stilllife: {
 			_id: 'stilllife',
-			revisions : { revisionCount: 2,  lastUpdated: 1009569331628,  latestRevision:'Apple', calibration: 'outOfSync', isFavourite: true, type: 'Existing', code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0003' },
+			revisions : { revisionsCount: 2,  lastUpdated: 1009569331628,  latestRevision:'Apple', calibration: 'outOfSync', isFavourite: true, type: 'Existing', code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0003' },
 		},
 		boring: {
 			_id: 'boring',
-			revisions : { revisionCount: 10, lastUpdated: 1609569331628,  latestRevision:'Shading and other such things to improve the drawing', calibration: 'uncalibrated', isFavourite: false, type: 'MEP', code: 'SC2-SFT-V1-01-M4-ST-30_11_30-0001' },
+			revisions : { revisionsCount: 10, lastUpdated: 1609569331628,  latestRevision:'Shading and other such things to improve the drawing', calibration: 'uncalibrated', isFavourite: false, type: 'MEP', code: 'SC2-SFT-V1-01-M4-ST-30_11_30-0001' },
 		},
 
 	};

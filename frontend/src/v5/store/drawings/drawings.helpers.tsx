@@ -21,13 +21,13 @@ import CalibratedIcon from '@assets/icons/filled/calibration-filled.svg';
 import NotCalibrated from '@assets/icons/filled/no_calibration-filled.svg';
 
 export const DRAWING_LIST_COLUMN_WIDTHS = {
-	name: 200,
-	revisionCount: 180,
-	calibration: 180,
-	code: 180,
-	type: 100,
-	lastUpdated: 100,
-	actions: 80,
+	name: 90,
+	revisionsCount: 165,
+	calibration: 165,
+	code: 190,
+	type: 120,
+	lastUpdated: 135,
+	actions: 72,
 };
 
 export const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'type', 'code'];

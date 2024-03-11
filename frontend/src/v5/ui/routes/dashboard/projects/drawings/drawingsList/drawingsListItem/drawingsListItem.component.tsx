@@ -67,12 +67,13 @@ export const DrawingListItem = memo(({
 				onClick={() => onSelectOrToggleItem(drawing._id)}
 			>
 				<DrawingTitle
+					minWidth={DRAWING_LIST_COLUMN_WIDTHS.name}
 					drawing={drawing}
 					isSelected={isSelected}
 				/>
 				<DashboardListItemButton
 					onClick={() => onSelectOrToggleItem(drawing._id)}
-					width={DRAWING_LIST_COLUMN_WIDTHS.name}
+					width={DRAWING_LIST_COLUMN_WIDTHS.revisionsCount}
 					hideWhenSmallerThan={Display.Desktop}
 					tooltipTitle={
 						<FormattedMessage id="drawings.list.item.revisions.tooltip" defaultMessage="View revisions" />
@@ -81,7 +82,7 @@ export const DrawingListItem = memo(({
 					<FormattedMessage
 						id="drawings.list.item.revisions"
 						defaultMessage="{count, plural, =0 {No revisions} one {# revision} other {# revisions}}"
-						values={{ count: drawing.revisionCount }}
+						values={{ count: drawing.revisionsCount }}
 					/>
 				</DashboardListItemButton>
 				<DrawingsCalibrationButton
@@ -97,16 +98,14 @@ export const DrawingListItem = memo(({
 					selected={isSelected}
 					width={DRAWING_LIST_COLUMN_WIDTHS.code}
 				>
-					{drawing.code || 'PH' + Math.random() ** 2}
-					{/* TODO - remove placeholder */}
+					{drawing.code}
 				</DashboardListItemText>
 				<DashboardListItemText
 					width={DRAWING_LIST_COLUMN_WIDTHS.type}
 					hideWhenSmallerThan={Display.Tablet}
 					selected={isSelected}
 				>
-					{drawing.type || 'Lorem'}
-					{/* TODO - remove placeholder */}
+					{drawing.type}
 				</DashboardListItemText>
 				<DashboardListItemText
 					width={DRAWING_LIST_COLUMN_WIDTHS.lastUpdated}
