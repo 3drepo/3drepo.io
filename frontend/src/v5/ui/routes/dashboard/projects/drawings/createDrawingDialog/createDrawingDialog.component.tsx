@@ -88,7 +88,7 @@ export const CreateDrawingDialog = ({ open, onClickClose }) => {
 		<FormModal
 			open={open}
 			title={formatMessage({ id: 'drawings.creation.title', defaultMessage: 'Create new Drawing' })}
-			onClickClose={onClickClose}
+			onClickClose={!formState.isSubmitting ? onClickClose : null}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'drawings.creation.ok', defaultMessage: 'Create Drawing' })}
 			isValid={formState.isValid}
