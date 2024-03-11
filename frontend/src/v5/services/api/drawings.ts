@@ -14,44 +14,48 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { delay } from '@/v4/helpers/async';
 import { Drawing, DrawingStats } from '@/v5/store/drawings/drawings.types';
 import uuid from 'uuidv4';
 
+const categories =  ['A drawing category', 'Another drawing category', 'Yet another one'];
+
+const drawings = [ // TODO: The schema is unfinished
+	{
+		_id: uuid(),
+		name: 'My cool drawing',
+		drawingNumber: uuid(),
+		category: categories[0],
+	},
+	{
+		_id: uuid(),
+		name: 'Another drawing',
+		drawingNumber: uuid(),
+		category: categories[1],
+	}];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const fetchDrawings = (teamspace, projectId): Promise<Drawing[]> => {
-	return delay<Drawing[]>(Math.random() *  300, [ // TODO: The schema is unfinished
-		{
-			_id: 'asdasdmom',
-			name: 'My cool drawing',
-		},
-		{
-			_id: 'liuhiuhlk',
-			name: 'Another drawing',
-		}]) ;
+	return delay<Drawing[]>(Math.random() *  300, drawings) ;
 };
 
 export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promise<DrawingStats> => {
-	const stats =  { // TODO: The schema is unfinished
-		asdasdmom: {
-			_id: 'asdasdmom',
-			revisions : { total: 0 },
-		},
-		liuhiuhlk: {
-			_id: 'liuhiuhlk',
-			revisions : { total: 1, lastUpdated: 1709569331628,  latestRevision:'I dunno' },
-		},
+	const stats =   [{
+		_id: drawings[0]._id,
+		revisions : { total: 0 },
+	},
+	{
+		_id: drawings[1]._id,
+		revisions : { total: 1, lastUpdated: 1709569331628,  latestRevision:'I dunno' },
+	}];
 
-	};
-
-	return delay<DrawingStats>(Math.random() * 250, stats[drawingId]) ;
+	return delay<DrawingStats>(Math.random() * 250, stats.find(((s)=> s._id === drawingId))) ;
 };
 
 
 export const fetchCategories = (teamspace, projectId): Promise<string[]> => {
-	const categories =  ['A drawing category', 'Another drawing category', 'Yet another one'];
 	return delay<string[]>(1000, categories) ;
 };
 
@@ -60,4 +64,8 @@ export const createDrawing = (teamspace, projectId, drawing): Promise<string> =>
 	// throw new Error('name already exists');
 	// throw new Error('Drawing number already exists');
 	return delay<string>(500, uuid()) ;
+};
+
+export const updateDrawing = (teamspace, projectId, drawingId, drawing): Promise<string> => {
+	return delay(500, null);
 };

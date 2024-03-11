@@ -26,6 +26,9 @@ import { nameAlreadyExists, numberAlreadyExists } from '@/v5/validation/errors.h
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { IFormInput, useDrawingForm } from './drawingsDialogs.hooks';
 import { Drawing } from '@/v5/store/drawings/drawings.types';
+import { ShareTextField } from '@controls/shareTextField';
+import { FormattedMessage } from 'react-intl';
+import { SectionTitle } from '../../settingsModal/settingsModal.styles';
 
 interface Props { 
 	open: boolean; 
@@ -47,10 +50,9 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 		formState: { errors },
 	} = formData;
 
-
 	const onSubmit: SubmitHandler<IFormInput> = async (body) => {
 		try {
-			await new Promise<void>((accept, reject ) => DrawingActionDispatchers.createDrawing(teamspace, project, body as any, accept, reject));
+			await new Promise<void>((accept, reject ) => DrawingActionDispatchers.updateDrawing(teamspace, project, drawing._id, body as any, accept, reject));
 			onClickClose();
 		} catch (err) {
 			onSubmitError(err);
@@ -60,13 +62,23 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 	return (
 		<FormModal
 			open={open}
-			title={formatMessage({ id: 'drawings.creation.title', defaultMessage: 'Create new Drawing' })}
+			title={formatMessage({ id: 'drawings.edit.title', defaultMessage: 'Drawing Settings' })}
 			onClickClose={!formState.isSubmitting ? onClickClose : null}
 			onSubmit={handleSubmit(onSubmit)}
-			confirmLabel={formatMessage({ id: 'drawings.creation.ok', defaultMessage: 'Create Drawing' })}
+			confirmLabel={formatMessage({ id: 'drawings.edit.ok', defaultMessage: 'Save Drawing' })}
 			maxWidth="sm"
 			{...formState}
 		>
+			<SectionTitle>
+				<FormattedMessage
+					id="drawing.edit.informationTitle"
+					defaultMessage={'Drawing information'}
+				/>
+			</SectionTitle>
+			<ShareTextField
+				label="ID"
+				value={drawing._id}
+			/>
 			<FormTextField
 				control={control}
 				name="name"

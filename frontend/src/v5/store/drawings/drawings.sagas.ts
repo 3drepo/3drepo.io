@@ -16,7 +16,7 @@
  */
 
 import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
-import { CreateDrawingAction, DrawingsActions, DrawingsTypes, FetchCategoriesAction, FetchDrawingStatsAction, FetchDrawingsAction } from './drawings.redux';
+import { CreateDrawingAction, DrawingsActions, DrawingsTypes, FetchCategoriesAction, FetchDrawingStatsAction, FetchDrawingsAction, UpdateDrawingAction } from './drawings.redux';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '../dialogs/dialogs.redux';
@@ -44,7 +44,6 @@ export function* fetchDrawings({ teamspace, projectId }: FetchDrawingsAction) {
 		}));
 	}
 }
-
 
 export function* fetchDrawingStats({ teamspace, projectId, drawingId }: FetchDrawingStatsAction) {
 	try {
@@ -76,11 +75,19 @@ export function* createDrawing({ teamspace, projectId, drawing, onSuccess, onErr
 	try {
 		const id = yield API.Drawings.createDrawing(teamspace, projectId, drawing);
 		const newDrawing = { _id: id, ...drawing };
-		yield put(DrawingsActions.createDrawingSuccess(
-			projectId,
-			newDrawing,
-		));
+		yield put(DrawingsActions.createDrawingSuccess(projectId, newDrawing));
 
+		onSuccess();
+	} catch (error) {
+		onError(error);
+	}
+}
+
+export function* updateDrawing({ teamspace, projectId, drawingId, drawing, onSuccess, onError }: UpdateDrawingAction) {
+	try {
+		yield API.Drawings.updateDrawing(teamspace, projectId, drawingId, drawing);
+		const updatedDrawing = { _id: drawingId, ...drawing };
+		yield put(DrawingsActions.updateDrawingSuccess(projectId, updatedDrawing));
 		onSuccess();
 	} catch (error) {
 		onError(error);
@@ -92,4 +99,5 @@ export default function* DrawingsSaga() {
 	yield takeEvery(DrawingsTypes.FETCH_DRAWING_STATS, fetchDrawingStats);
 	yield takeLatest(DrawingsTypes.FETCH_CATEGORIES, fetchCategories);
 	yield takeEvery(DrawingsTypes.CREATE_DRAWING, createDrawing);
+	yield takeEvery(DrawingsTypes.UPDATE_DRAWING, updateDrawing);
 }
