@@ -32,6 +32,7 @@ import { mockServer } from '../../internals/testing/mockServer';
 
 describe('Tickets: sagas', () => {
 	let onSuccess;
+	let onError;
 	let dispatch; let getState; let
 		waitForActions;
 	const teamspace = 'teamspace';
@@ -54,6 +55,7 @@ describe('Tickets: sagas', () => {
 	};
 	beforeEach(() => {
 		onSuccess = jest.fn();
+		onError = jest.fn();
 		({ dispatch, getState, waitForActions } = createTestStore());
 		dispatch(TeamspacesActions.setCurrentTeamspace(teamspace));
 		dispatch(ProjectsActions.setCurrentProject(projectId));
@@ -149,10 +151,11 @@ describe('Tickets: sagas', () => {
 				.reply(200, { _id });
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newTicket, false, onSuccess));
+				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newTicket, false, onSuccess, onError));
 			}, [TicketsActions.upsertTicketSuccess(modelId, { _id, ...newTicket })]);
 
 			expect(onSuccess).toHaveBeenCalledWith(_id);
+			expect(onError).not.toHaveBeenCalled();
 		});
 
 		it('should call createContainerTicket endpoint with a 404', async () => {
@@ -165,12 +168,13 @@ describe('Tickets: sagas', () => {
 				.reply(404, { _id });
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newTicket, false, onSuccess));
+				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newTicket, false, onSuccess, onError));
 			}, [DialogsTypes.OPEN]);
 
 			const ticketsFromState = selectTickets(getState(), modelId);
 			expect(ticketsFromState).toEqual([]);
 			expect(onSuccess).not.toHaveBeenCalled();
+			expect(onError).toHaveBeenCalled();
 		});
 
 		// Federations
@@ -260,9 +264,10 @@ describe('Tickets: sagas', () => {
 				.reply(200, { _id });
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newticket, true, onSuccess));
+				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newticket, true, onSuccess, onError));
 			}, [TicketsActions.upsertTicketSuccess(modelId, { _id, ...newticket })]);
 			expect(onSuccess).toHaveBeenCalledWith(_id);
+			expect(onError).not.toHaveBeenCalled();
 		});
 
 		it('should call createFederationTicket endpoint with a 404', async () => {
@@ -274,12 +279,13 @@ describe('Tickets: sagas', () => {
 				.reply(404);
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newticket, true, onSuccess));
+				dispatch(TicketsActions.createTicket(teamspace, projectId, modelId, newticket, true, onSuccess, onError));
 			}, [DialogsTypes.OPEN]);
 
 			const ticketsFromState = selectTickets(getState(), modelId);
 			expect(ticketsFromState).toEqual([]);
 			expect(onSuccess).not.toHaveBeenCalled();
+			expect(onError).toHaveBeenCalled();
 		});
 		describe('groups', () => {
 			beforeEach(populateTicketsStore);
