@@ -26,6 +26,13 @@ export const selectDrawings = createSelector(
 	(state, currentProject) => (state.drawingsByProject[currentProject] ?? []),
 );
 
+export const selectDrawingById = createSelector(
+	selectDrawings,
+	(_, _id) => _id,
+	(drawings, _id) => drawings.find((d) => d._id === _id),
+);
+
+
 export const selectIsListPending = createSelector(
 	selectContainersDomain, selectCurrentProject,
 	// Checks if the drawings for the project have been fetched

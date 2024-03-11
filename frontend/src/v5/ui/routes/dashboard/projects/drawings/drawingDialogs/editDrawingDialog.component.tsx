@@ -18,75 +18,35 @@
 import { formatMessage } from '@/v5/services/intl';
 import { FormTextField, FormSelect } from '@controls/inputs/formInputs.component';
 import { MenuItem } from '@mui/material';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { SubmitHandler } from 'react-hook-form';
 import { FormModal } from '@controls/formModal/formModal.component';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { CreateDrawingSchema } from '@/v5/validation/drawingsSchemes/drawingSchemes';
 import { DrawingHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useEffect, useState } from 'react';
 import { DrawingActionDispatchers } from '@/v5/services/actionsDispatchers';
 import { nameAlreadyExists, numberAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
-interface IFormInput {
-	name: string;
-	drawingNumber: string;
-	category: string;
-	desc: string
+import { IFormInput, useDrawingForm } from './drawingsDialogs.hooks';
+import { Drawing } from '@/v5/store/drawings/drawings.types';
+
+interface Props { 
+	open: boolean; 
+	onClickClose: () => void;
+	drawing: Drawing
 }
 
-
-export const CreateDrawingDialog = ({ open, onClickClose }) => {
+export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const categories = DrawingHooksSelectors.selectCategories();
-	const isCategoriesPending = DrawingHooksSelectors.selectIsCategoriesPending();
-	const drawingsNames = [];
-	const drawingNumbers = [];
 
-	DrawingHooksSelectors.selectDrawings().forEach((d) => {
-		drawingsNames.push(d.name);
-		drawingNumbers.push(d.drawingNumber);
-	});
-
-	const [alreadyExistingNames, setAlreadyExistingNames] = useState(drawingsNames);
-	const [alreadyExistingNumbers, setAlreadyExistingNumbers] = useState(drawingsNames);
-	
+	const { onSubmitError, formData } = useDrawingForm(drawing);
 
 	const {
 		handleSubmit,
-		getValues,
-		trigger,
-		setValue,
 		control,
 		formState,
 		formState: { errors },
-	} = useForm<IFormInput>({
-		mode: 'onChange',
-		resolver: yupResolver(CreateDrawingSchema),
-		context: { alreadyExistingNames, alreadyExistingNumbers },
-	});
+	} = formData;
 
-	const onSubmitError = (err) => {
-		if (nameAlreadyExists(err)) {
-			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
-			trigger('name');
-		}
-
-		if (numberAlreadyExists(err)) {
-			setAlreadyExistingNumbers([getValues('drawingNumber'), ...alreadyExistingNumbers]);
-			trigger('drawingNumber');
-		}
-	};
-
-	useEffect(() => {
-		if (isCategoriesPending) return;
-		setValue('category', categories[0]);
-	}, [isCategoriesPending]);
-
-	useEffect(() => {
-		if (!isCategoriesPending) return;
-		DrawingActionDispatchers.fetchCategories(teamspace, project);
-	}, []);
 
 	const onSubmit: SubmitHandler<IFormInput> = async (body) => {
 		try {
@@ -138,8 +98,7 @@ export const CreateDrawingDialog = ({ open, onClickClose }) => {
 				label={formatMessage({ id: 'drawings.creation.form.code', defaultMessage: 'Description' })}
 				formError={errors.desc}
 			/>
-			<UnhandledErrorInterceptor expectedErrorValidators={[nameAlreadyExists]} />
+			<UnhandledErrorInterceptor expectedErrorValidators={[nameAlreadyExists, numberAlreadyExists]} />
 		</FormModal>
 	);
-
 };

@@ -23,7 +23,8 @@ import { DrawingHooksSelectors } from '@/v5/services/selectorsHooks';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { Button } from '@controls/button';
 import { FormattedMessage } from 'react-intl';
-import { CreateDrawingDialog } from './createDrawingDialog/createDrawingDialog.component';
+import { CreateDrawingDialog } from './drawingDialogs/createDrawingDialog.component';
+import { EditDrawingDialog } from './drawingDialogs/editDrawingDialog.component';
 
 
 
@@ -39,7 +40,7 @@ export const Drawings = () => {
 	}, [isPending]);
 
 	const onClickCreate = () => DialogsActionsDispatchers.open(CreateDrawingDialog);
-	const onClickEdit = (_id) => DialogsActionsDispatchers.open(CreateDrawingDialog, { _id });
+	const onClickEdit = (drawing) => DialogsActionsDispatchers.open(EditDrawingDialog, { drawing });
 
 	return (<div>
 		<h1>Drawings list</h1>
@@ -56,7 +57,7 @@ export const Drawings = () => {
 						<FormattedMessage id="drawings.newDrawing" defaultMessage="New drawing" />
 					</Button>
 					<ul>
-						{drawings.map((drawing) => (<li>{drawing.name} <button onClick={() => onClickEdit(drawing._id)}>Edit</button></li>))} 
+						{drawings.map((drawing) => (<li>{drawing.name} <button onClick={() => onClickEdit(drawing)}>Edit</button></li>))} 
 					</ul>
 				</>
 

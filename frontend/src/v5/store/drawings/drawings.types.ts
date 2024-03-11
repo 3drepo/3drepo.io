@@ -20,6 +20,7 @@ export interface Drawing {
 	_id: string;
 	name: string;
 	drawingNumber: string;
+	category: string;
 }
 
 // TODO: Unfinished interface
