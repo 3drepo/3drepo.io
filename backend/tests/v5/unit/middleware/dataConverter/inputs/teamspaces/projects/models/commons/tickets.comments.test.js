@@ -98,7 +98,7 @@ const testValidateUpdateComment = () => {
 			[{ ...req, body: { images: [UUIDToString(existingRef2)], message: generateRandomString() } }, true, 'with both an image ref and a new message'],
 			[{ ...req, body: { images: [UUIDToString(existingRef)], message: existingComment.message } }, false, 'with no actual changes', { ...existingComment, history: undefined }],
 			[{ ...req, body: {} }, false, 'with empty body'],
-		])('Check if req arguments for new comment are valid', (request, shouldPass, desc, comment = existingComment, error = templates.invalidArguments) => {
+		])('Check if req arguments for updating a comment are valid', (request, shouldPass, desc, comment = existingComment, error = templates.invalidArguments) => {
 			test(`${desc} ${shouldPass ? ' should call next()' : 'should respond with invalidArguments'}`, async () => {
 				const mockCB = jest.fn();
 

@@ -17,45 +17,21 @@
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
-const Yup = require('yup');
 const { getCommentById } = require('../../../../../../../models/tickets.comments');
 const { getTicketById } = require('../../../../../../../models/tickets');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isEqual } = require('../../../../../../../utils/helper/objects');
-const { isUUIDString } = require('../../../../../../../utils/helper/typeCheck');
 const { respond } = require('../../../../../../../utils/responder');
-const { types } = require('../../../../../../../utils/helper/yup');
+const { validateComment: validateCommentSchema } = require('../../../../../../../schemas/tickets/tickets.comments');
 const { validateMany } = require('../../../../../../common');
 
 const CommentsMiddleware = {};
 
-const validateComment = (isNewComment) => async (req, res, next) => {
+const validateComment = async (req, res, next) => {
 	try {
-		const history = req.commentData?.history ?? [];
-		const historyImages = history.flatMap(({ images }) => images ?? []);
-		const currentImages = req.commentData?.images ?? [];
-		const acceptableRefs = [...new Set([...currentImages, ...historyImages])].map(UUIDToString);
+		req.body = await validateCommentSchema(req.body, req.commentData);
 
-		const schema = Yup.object().shape({
-			message: types.strings.longDescription,
-			images: Yup.array().min(1).of(
-				isNewComment
-					? types.embeddedImage()
-					: types.embeddedImageOrRef()
-						.test('Image ref test', 'One or more image refs do not correspond to a current comment image ref',
-							(value, { originalValue }) => !isUUIDString(originalValue)
-								|| acceptableRefs.includes(originalValue)),
-			),
-		}).test(
-			'at-least-one-property',
-			'You must provide at least a message or a set of images',
-			(value) => Object.keys(value).length,
-		).required()
-			.noUnknown();
-
-		req.body = await schema.validate(req.body);
-
-		if (!isNewComment) {
+		if (req.commentData) {
 			const { message, images } = req.body;
 			const existingImgRefs = req.commentData.images?.map(UUIDToString).sort();
 			const newImgRefs = images?.map(UUIDToString).sort();
@@ -96,7 +72,7 @@ CommentsMiddleware.canUpdateComment = async (req, res, next) => {
 	}
 };
 
-CommentsMiddleware.validateNewComment = validateComment(true);
-CommentsMiddleware.validateUpdateComment = validateMany([CommentsMiddleware.canUpdateComment, validateComment()]);
+CommentsMiddleware.validateNewComment = validateComment;
+CommentsMiddleware.validateUpdateComment = validateMany([CommentsMiddleware.canUpdateComment, validateComment]);
 
 module.exports = CommentsMiddleware;

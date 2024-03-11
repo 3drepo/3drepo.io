@@ -17,11 +17,38 @@
 
 const { UUIDToString } = require('../../utils/helper/uuids');
 const Yup = require('yup');
+const { isUUIDString } = require('../../utils/helper/typeCheck');
 const { types } = require('../../utils/helper/yup');
 
 const Comments = {};
 
 const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal));
+
+Comments.validateComment = (newData, existingComment) => {
+	const isNewComment = !existingComment;
+	const history = existingComment?.history ?? [];
+	const historyImages = history.flatMap(({ images }) => images ?? []);
+	const currentImages = existingComment?.images ?? [];
+	const acceptableRefs = [...new Set([...currentImages, ...historyImages])].map(UUIDToString);
+	const schema = Yup.object().shape({
+		message: types.strings.longDescription,
+		images: Yup.array().min(1).of(
+			isNewComment
+				? types.embeddedImage()
+				: types.embeddedImageOrRef()
+					.test('Image ref test', 'One or more image refs do not correspond to a current comment image ref',
+						(value, { originalValue }) => !isUUIDString(originalValue)
+								|| acceptableRefs.includes(originalValue)),
+		),
+	}).test(
+		'at-least-one-property',
+		'You must provide at least a message or a set of images',
+		(value) => Object.keys(value).length,
+	).required()
+		.noUnknown();
+
+	return schema.validate(newData);
+};
 
 Comments.serialiseComment = (comment) => {
 	const caster = Yup.object({
