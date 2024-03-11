@@ -30,6 +30,7 @@ import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { DrawingTitle } from './drawingTitle/drawingTitle.component';
 import { DRAWING_LIST_COLUMN_WIDTHS } from '../drawingsList.component';
 import { IsMainList } from '../../../containers/mainList.context';
+import { DrawingsEllipsisMenu } from './drawingsEllipsisMenu/drawingsEllipsisMenu.component';
 
 interface IDrawingsListItem {
 	isSelected: boolean;
@@ -124,12 +125,11 @@ export const DrawingListItem = memo(({
 					/>
 				</DashboardListItemIcon>
 				<DashboardListItemIcon selected={isSelected}>
-					{/* TODO add ellipsis button */}
-					{/* <DrawingEllipsisMenu
+					<DrawingsEllipsisMenu
 						selected={isSelected}
 						drawing={drawing}
 						onSelectOrToggleItem={onSelectOrToggleItem}
-					/> */}
+					/>
 				</DashboardListItemIcon>
 			</DashboardListItemRow>
 			{isSelected && (
