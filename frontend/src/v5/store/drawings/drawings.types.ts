@@ -23,6 +23,25 @@ export interface Drawing {
 	name: string;
 	isFavourite: boolean;
 	role: Role;
+	revisionsCount: number;
+	lastUpdated?: number;
+	latestRevision?: string;
+	calibration?: string;
+	type?: string;
+	code?: string;
+	hasStatsPending?: boolean;
+	status?: any; // TODO - add drawing statuses
+	errorReason?: {
+		message: string;
+		timestamp: Date | null;
+	};
+}
+
+export interface MinimumDrawing {
+	_id: string;
+	name: string;
+	role: Role;
+	isFavourite: boolean;
 }
 
 // TODO: Unfinished interface
@@ -32,9 +51,5 @@ export interface DrawingStats {
 		revisionsCount: number,
 		lastUpdated?: number,
 		latestRevision?: string,
-		calibration?: string,
-		type?: string,
-		code?: string,
-		isFavourite: boolean,
 	}
 }

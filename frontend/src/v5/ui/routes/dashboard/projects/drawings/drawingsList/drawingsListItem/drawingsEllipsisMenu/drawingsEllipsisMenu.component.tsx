@@ -22,10 +22,11 @@ import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { DrawingsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { Drawing } from '@/v5/store/drawings/drawings.types';
 
 type DrawingsEllipsisMenuProps = {
 	selected?: boolean,
-	drawing: any, // TODO - add drawing type
+	drawing: Drawing,
 	onSelectOrToggleItem?: (id: string) => void,
 };
 

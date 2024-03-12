@@ -17,9 +17,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { delay } from '@/v4/helpers/async';
-import api from '@/v4/services/api';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
-import { Drawing, DrawingStats } from '@/v5/store/drawings/drawings.types';
+import { Drawing, DrawingStats, MinimumDrawing } from '@/v5/store/drawings/drawings.types';
 import { AxiosResponse } from 'axios';
 
 export const addFavourite = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => {
@@ -31,8 +30,8 @@ export const removeFavourite = (teamspace, projectId, drawingId): Promise<AxiosR
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const fetchDrawings = (teamspace, projectId): Promise<Drawing[]> => {
-	return delay<Drawing[]>(Math.random() *  300, [ // TODO: The schema is unfinished
+export const fetchDrawings = (teamspace, projectId): Promise<MinimumDrawing[]> => {
+	return delay<MinimumDrawing[]>(Math.random() *  300, [ // TODO: The schema is unfinished
 		{
 			_id: 'asdasdmom',
 			name: 'My cool drawing',

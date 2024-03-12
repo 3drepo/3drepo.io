@@ -17,41 +17,28 @@
 
 // TODO - This is almost identical to containerTitle. Can adapt original component and reuse?
 
-import { viewerRoute } from '@/v5/services/routing/routing';
-import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardListItemTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
 import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Highlight } from '@controls/highlight';
 import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { Link } from 'react-router-dom';
 import { LatestRevision } from '../../../../containers/containersList/latestRevision/latestRevision.component';
+import { Drawing } from '@/v5/store/drawings/drawings.types';
 
 interface IDrawingTitle extends FixedOrGrowContainerProps {
-	drawing: any; // TODO add drawing type
+	drawing: Drawing;
 	isSelected?: boolean;
-	openInNewTab?: boolean;
 }
 
 export const DrawingTitle = ({
 	drawing,
 	isSelected = false,
-	openInNewTab = false,
 	...props
 }: IDrawingTitle): JSX.Element => {
-	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const { query } = useContext(SearchContext);
-
 	const hasRevisions = drawing.revisionsCount > 0;
-	const linkProps = {
-		to: hasRevisions || drawing.hasStatsPending ? viewerRoute(teamspace, project, drawing) : '#',
-		target: openInNewTab ? '_blank' : '_self',
-		rel: 'noopener noreferrer',
-	};
-
-	const canLaunchDrawing = drawing.hasStatsPending || hasRevisions; // TODO make sure this uses drawing props
+	const canLaunchDrawing = drawing.hasStatsPending || hasRevisions;
 
 	return (
 		<DashboardListItemTitle
@@ -77,11 +64,10 @@ export const DrawingTitle = ({
 			}
 			disabled={!canLaunchDrawing}
 		>
-			<Link {...linkProps}>
-				<Highlight search={query}>
-					{drawing.name}
-				</Highlight>
-			</Link>
+			{/* TODO - add open drawing functionality */}
+			<Highlight search={query}>
+				{drawing.name}
+			</Highlight>
 		</DashboardListItemTitle>
 	);
 };

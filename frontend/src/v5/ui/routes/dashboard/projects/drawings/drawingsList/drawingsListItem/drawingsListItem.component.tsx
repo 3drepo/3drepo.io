@@ -35,10 +35,11 @@ import { DrawingsEllipsisMenu } from './drawingsEllipsisMenu/drawingsEllipsisMen
 import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { Drawing } from '@/v5/store/drawings/drawings.types';
 
 interface IDrawingsListItem {
 	isSelected: boolean;
-	drawing: any; // TODO add drawing type
+	drawing: Drawing;
 	onSelectOrToggleItem: (id: string) => void;
 }
 
@@ -52,7 +53,7 @@ export const DrawingListItem = memo(({
 
 	useEffect(() => {
 		if (isMainList) {
-			// TODO add realtime events
+			// TODO - add realtime events
 		}
 		return null;
 	}, [drawing._id]);
@@ -99,7 +100,7 @@ export const DrawingListItem = memo(({
 					width={DRAWING_LIST_COLUMN_WIDTHS.calibration}
 					hideWhenSmallerThan={Display.Desktop}
 					tooltipTitle={
-						<FormattedMessage id="drawings.list.item.calibration.tooltip" defaultMessage="Calibration state" /> // TODO What should this be??
+						<FormattedMessage id="drawings.list.item.calibration.tooltip" defaultMessage="Calibrate" />
 					}
 				/>
 				<DashboardListItemText
