@@ -98,7 +98,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 								<SortingTableHeader name={`properties.${IssueProperties.PRIORITY}`} width={90} hidden={!hasProperties}>
 									<FormattedMessage id="ticketTable.column.header.priority" defaultMessage="priority" />
 								</SortingTableHeader>
-								<SortingTableHeader name={`properties.${BaseProperties.STATUS}`} width={110}>
+								<SortingTableHeader name={`properties.${BaseProperties.STATUS}`} width={150}>
 									<FormattedMessage id="ticketTable.column.header.status" defaultMessage="status" />
 								</SortingTableHeader>
 								<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`} width={137} hidden={!hasSafetibase}>

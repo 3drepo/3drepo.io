@@ -19,6 +19,7 @@
 /* eslint-enable no-var */
 
 import { IndexedDbCache } from './unity-indexedbcache';
+import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
@@ -66,6 +67,9 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static unityInstance;
+
+	/** @hidden */
+	public static externalWebRequestHandler;
 
 	/** A URL pointing to the domain hosting a Unity distribution. E.g. www.3drepo.io/.
 	 * This is where the Unity Build folder and the IndexedDb worker can be found. */
@@ -261,6 +265,7 @@ export class UnityUtil {
 		}
 
 		UnityUtil.unityDomain = new URL(domainURL || window.location.origin);
+		this.externalWebRequestHandler = new ExternalWebRequestHandler(new IndexedDbCache(this.unityDomain)); // IndexedDbCache expects to find the worker at in [unityDomain]/unity/indexeddbworker.js
 
 		const buildUrl = new URL(UnityUtil.unityBuildSubdirectory, UnityUtil.unityDomain);
 
@@ -1414,24 +1419,16 @@ export class UnityUtil {
 	 * Enable model caching
  	 * @category Configurations
 	 */
-	public static enableCaching() {
-		UnityUtil.toUnity('EnableCaching', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	public static enableExternalWebRequestHandler() {
+		UnityUtil.toUnity('EnableExternalWebRequestHandler', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
 	 * Disable model caching
  	 * @category Configurations
 	 */
-	public static disableCaching() {
-		UnityUtil.toUnity('DisableCaching', UnityUtil.LoadingState.VIEWER_READY, undefined);
-	}
-
-	/**
-	 * Set the number of simultaneously threads for cache access
- 	 * @category Configurations
-	 */
-	public static setNumCacheThreads(thread) {
-		UnityUtil.toUnity('SetSimultaneousCacheAccess', UnityUtil.LoadingState.VIEWER_READY, thread);
+	public static disableExternalWebRequestHandler() {
+		UnityUtil.toUnity('DisableExternalWebRequestHandler', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
 	/**
@@ -1875,10 +1872,13 @@ export class UnityUtil {
 	/**
 	 * Set API host urls. This is needs to be called before loading model.
 	 * @category Configurations
-	 * @param hostname - list of API names to use. (e.g ["https://api1.www.3drepo.io/api/"])
+	 * @param hostNames - list of API names to use. (e.g ["https://api1.www.3drepo.io/api/"])
 	 */
-	public static setAPIHost(hostname: [string]) {
-		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(hostname));
+	public static setAPIHost(hostNames: [string]) {
+		UnityUtil.toUnity('SetAPIHost', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify({
+			hostNames,
+		}));
+		UnityUtil.externalWebRequestHandler.setAPIHost(hostNames);
 	}
 
 	/**
@@ -2338,11 +2338,20 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Creates an IndexedDbCache object which provides access to cached web requests using IndexedDb.
-	 * @param unityInstance
+	 * Sets the maximum number of responses WebRequestManager2 should attempt to
+	 * handle at any one time. The higher this is the faster models will load but
+	 * the more working memory is required. The default value is 5.
 	 * @category Configurations
 	 */
-	public static createIndexedDbCache(gameObjectName: string) {
-		this.unityInstance.repoDbCache = new IndexedDbCache(this.unityInstance, gameObjectName, this.unityDomain); // IndexedDbCache expects to find the worker at in [unityDomain]/unity/indexeddbworker.js
+	public static setMaxConcurrentResponses(max: number) {
+		UnityUtil.toUnity('SetMaxNumResponses', UnityUtil.LoadingState.VIEWER_READY, max);
+	}
+
+	/**
+	 * Creates the WebRequestHandler backend for the WebRequestHandler2 Component in Unity
+	 * @hidden
+	 */
+	public static createWebRequestHandler(gameObjectName: string) {
+		this.externalWebRequestHandler.setUnityInstance(this.unityInstance, gameObjectName);
 	}
 }
