@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DrawingActionDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
@@ -43,7 +43,7 @@ export const Drawings = () => {
 
 	useEffect(() => {
 		if (!isPending) return;
-		DrawingActionDispatchers.fetchDrawings(teamspace, project);
+		DrawingsActionsDispatchers.fetchDrawings(teamspace, project);
 	}, [isPending]);
 
 	return (

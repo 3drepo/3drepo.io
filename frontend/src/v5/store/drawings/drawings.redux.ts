@@ -18,7 +18,7 @@
 import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
-import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProjectAndDrawingId } from '../store.types';
+import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProjectAndDrawingId, SuccessAndErrorCallbacks } from '../store.types';
 import { Drawing, DrawingStats } from './drawings.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 
@@ -30,6 +30,8 @@ export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions
 	fetchDrawingsSuccess: ['projectId', 'drawings'],
 	fetchDrawingStats: ['teamspace', 'projectId', 'drawingId'],
 	fetchDrawingStatsSuccess: ['projectId', 'drawingId', 'stats'],
+	deleteDrawing: ['teamspace', 'projectId', 'drawingId', 'onSuccess', 'onError'],
+	deleteDrawingSuccess: ['projectId', 'drawingId'],
 }, { prefix: 'DRAWINGS/' }) as { Types: Constants<IDrawingsActionCreators>; Creators: IDrawingsActionCreators };
 
 
@@ -54,6 +56,15 @@ export const fetchDrawingStatsSuccess = (state: DrawingsState, { drawingId, proj
 	Object.assign(drawing,  { ... stats.revisions });
 };
 
+export const deleteDrawingSuccess = (state, {
+	projectId,
+	drawingId,
+}) => {
+	state.drawingsByProject[projectId] = state.drawingsByProject[projectId].filter(
+		(drawing) => drawingId !== drawing._id,
+	);
+};
+
 const INITIAL_STATE: DrawingsState = {
 	drawingsByProject: {},
 };
@@ -66,6 +77,7 @@ export const drawingsReducer = createReducer<DrawingsState>(INITIAL_STATE, produ
 	[DrawingsTypes.SET_FAVOURITE_SUCCESS]: setFavouriteSuccess,
 	[DrawingsTypes.FETCH_DRAWINGS_SUCCESS]: fetchDrawingsSuccess,
 	[DrawingsTypes.FETCH_DRAWING_STATS_SUCCESS]: fetchDrawingStatsSuccess,
+	[DrawingsTypes.DELETE_DRAWING_SUCCESS]: deleteDrawingSuccess,
 })) as (state: DrawingsState, action: any) => DrawingsState;
 
 
@@ -76,6 +88,8 @@ export type FetchDrawingsAction = Action<'FETCH_DRAWINGS'> & TeamspaceAndProject
 export type FetchDrawingsSuccessAction = Action<'FETCH_DRAWINGS_SUCCESS'> & ProjectId & { drawings: Drawing[] };
 export type FetchDrawingStatsAction = Action<'FETCH_DRAWING_STATS'> & TeamspaceProjectAndDrawingId;
 export type FetchDrawingStatsSuccessAction = Action<'FETCH_DRAWING_STATS_SUCCESS'> & ProjectAndDrawingId & { stats: DrawingStats };
+export type DeleteDrawingAction = Action<'DELETE'> & TeamspaceProjectAndDrawingId & SuccessAndErrorCallbacks;
+export type DeleteDrawingSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndDrawingId;
 
 export interface IDrawingsActionCreators {
 	addFavourite: (teamspace: string, projectId: string, drawingId: string) => AddFavouriteAction;
@@ -85,4 +99,11 @@ export interface IDrawingsActionCreators {
 	fetchDrawingsSuccess: (projectId: string, drawings: Drawing[]) => FetchDrawingsSuccessAction;
 	fetchDrawingStats: (teamspace: string, projectId: string, drawingId: string) => FetchDrawingStatsAction;
 	fetchDrawingStatsSuccess: ( projectId: string, drawingId: string, stats: DrawingStats ) => FetchDrawingStatsSuccessAction;
+	deleteDrawing: (teamspace: string,
+		projectId: string,
+		drawingId: string,
+		onSuccess: () => void,
+		onError: (error) => void,
+	) => DeleteDrawingAction;
+	deleteDrawingSuccess: (projectId: string, drawingId: string) => DeleteDrawingSuccessAction;
 }

@@ -14,11 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { useParams } from 'react-router';
 import { formatMessage } from '@/v5/services/intl';
-import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DialogsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { DrawingsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 
 type DrawingsEllipsisMenuProps = {
 	selected?: boolean,
@@ -31,6 +34,7 @@ export const DrawingsEllipsisMenu = ({
 	drawing,
 	onSelectOrToggleItem,
 }: DrawingsEllipsisMenuProps) => {
+	const { teamspace, project } = useParams<DashboardParams>();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const hasCollaboratorAccess = DrawingsHooksSelectors.selectHasCollaboratorAccess(drawing._id);
 
@@ -39,7 +43,13 @@ export const DrawingsEllipsisMenu = ({
 	const onClickDelete = () => DialogsActionsDispatchers.open('delete', {
 		name: drawing.name,
 		onClickConfirm: () => new Promise<void>(
-			() => { }, // TODO - add actual delete drawing call
+			(accept, reject) => DrawingsActionsDispatchers.deleteDrawing(
+				teamspace,
+				project,
+				drawing._id,
+				accept,
+				reject,
+			),
 		),
 		message: formatMessage({
 			id: 'deleteModal.drawing.message',

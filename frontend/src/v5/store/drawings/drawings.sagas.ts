@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, takeEvery } from 'redux-saga/effects';
-import { AddFavouriteAction, DrawingsActions, DrawingsTypes, FetchDrawingStatsAction, FetchDrawingsAction, RemoveFavouriteAction } from './drawings.redux';
+import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { AddFavouriteAction, DeleteDrawingAction, DrawingsActions, DrawingsTypes, FetchDrawingStatsAction, FetchDrawingsAction, RemoveFavouriteAction } from './drawings.redux';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '../dialogs/dialogs.redux';
@@ -31,7 +31,7 @@ export function* addFavourites({ teamspace, projectId, drawingId }: AddFavourite
 		yield API.Drawings.addFavourite(teamspace, projectId, drawingId);
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'drawings.addFavourite.error', defaultMessage: 'trying to add container to favourites' }),
+			currentActions: formatMessage({ id: 'drawings.addFavourite.error', defaultMessage: 'trying to add drawing to favourites' }),
 			error,
 		}));
 		yield put(DrawingsActions.setFavouriteSuccess(projectId, drawingId, false));
@@ -44,7 +44,7 @@ export function* removeFavourites({ teamspace, projectId, drawingId }: RemoveFav
 		yield API.Drawings.removeFavourite(teamspace, projectId, drawingId);
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'drawings.removeFavourite.error', defaultMessage: 'trying to remove container from favourites' }),
+			currentActions: formatMessage({ id: 'drawings.removeFavourite.error', defaultMessage: 'trying to remove drawing from favourites' }),
 			error,
 		}));
 		yield put(DrawingsActions.setFavouriteSuccess(projectId, drawingId, true));
@@ -85,7 +85,18 @@ export function* fetchDrawingStats({ teamspace, projectId, drawingId }: FetchDra
 	}
 }
 
+export function* deleteDrawing({ teamspace, projectId, drawingId, onSuccess, onError }: DeleteDrawingAction) {
+	try {
+		yield API.Drawings.deleteDrawing(teamspace, projectId, drawingId);
+		yield put(DrawingsActions.deleteDrawingSuccess(projectId, drawingId));
+		onSuccess();
+	} catch (error) {
+		onError(error);
+	}
+}
+
 export default function* DrawingsSaga() {
 	yield takeEvery(DrawingsTypes.FETCH_DRAWINGS, fetchDrawings);
 	yield takeEvery(DrawingsTypes.FETCH_DRAWING_STATS, fetchDrawingStats);
+	yield takeLatest(DrawingsTypes.DELETE_DRAWING, deleteDrawing);
 }

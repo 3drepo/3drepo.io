@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { delay } from '@/v4/helpers/async';
 import api from '@/v4/services/api';
@@ -21,15 +22,13 @@ import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { Drawing, DrawingStats } from '@/v5/store/drawings/drawings.types';
 import { AxiosResponse } from 'axios';
 
-export const addFavourite = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => (
-	api.patch(`teamspaces/${teamspace}/projects/${projectId}/drawings/favourites`, {
-		drawings: [drawingId],
-	})
-);
+export const addFavourite = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => {
+	return delay(Math.random() * 15 ** 2, null) ;
+};
 
-export const removeFavourite = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => (
-	api.delete(`teamspaces/${teamspace}/projects/${projectId}/drawings/favourites?ids=${drawingId}`)
-);
+export const removeFavourite = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => {
+	return delay(Math.random() * 15 ** 2, null) ;
+};
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const fetchDrawings = (teamspace, projectId): Promise<Drawing[]> => {
@@ -82,4 +81,8 @@ export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promi
 	};
 
 	return delay<DrawingStats>(Math.random() * 250, stats[drawingId]) ;
+};
+
+export const deleteDrawing = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => {
+	return delay(Math.random() * 15 ** 2, null) ;
 };
