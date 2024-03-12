@@ -33,6 +33,7 @@ import { IssuePropertiesInputs } from './issuePropertiesInputs/issuePropertiesIn
 import { ErrorTextGap } from '../ticketsForm.styles';
 import { StatusProperty } from './statusProperty/statusProperty.component';
 import { AssigneesProperty } from './assignessProperty/assigneesProperty.component';
+import { InputContainer } from '@controls/inputs/inputContainer/inputContainer.styles';
 
 type ITicketsTopPanel = {
 	title: string;
@@ -96,13 +97,15 @@ export const TicketsTopPanel = ({
 					/>
 					{_.get(formState.errors, `properties.${BaseProperties.DESCRIPTION}`) && <ErrorTextGap />}
 				</DescriptionProperty>
-				<FlexContainer>
-					{hasIssueProperties ? (
+				{hasIssueProperties ? (
+					<FlexContainer>
 						<IssuePropertiesInputs onBlur={onPropertyBlur} readOnly={readOnly} />
-					) : (
+					</FlexContainer>
+				) : (
+					<InputContainer>
 						<StatusProperty onBlur={onPropertyBlur} readOnly={readOnly} />
-					)}
-				</FlexContainer>
+					</InputContainer>
+				)}
 				{hasIssueProperties && (<AssigneesProperty onBlur={onPropertyBlur} readOnly={readOnly} />)}
 				<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
 			</BaseTicketInfo>
