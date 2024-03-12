@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// TODO - This is almost identical to containerTitle. Can adapt original component and reuse?
-
 import { DashboardListItemTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
 import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Highlight } from '@controls/highlight';
@@ -26,16 +24,16 @@ import { FormattedMessage } from 'react-intl';
 import { LatestRevision } from '../../../../containers/containersList/latestRevision/latestRevision.component';
 import { Drawing } from '@/v5/store/drawings/drawings.types';
 
-interface IDrawingTitle extends FixedOrGrowContainerProps {
+interface IDrawingsListItemTitle extends FixedOrGrowContainerProps {
 	drawing: Drawing;
 	isSelected?: boolean;
 }
 
-export const DrawingTitle = ({
+export const DrawingsListItemTitle = ({
 	drawing,
 	isSelected = false,
 	...props
-}: IDrawingTitle): JSX.Element => {
+}: IDrawingsListItemTitle): JSX.Element => {
 	const { query } = useContext(SearchContext);
 	const hasRevisions = drawing.revisionsCount > 0;
 	const canLaunchDrawing = drawing.hasStatsPending || hasRevisions;

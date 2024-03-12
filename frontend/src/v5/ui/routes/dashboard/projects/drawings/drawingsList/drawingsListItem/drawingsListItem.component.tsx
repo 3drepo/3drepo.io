@@ -28,7 +28,7 @@ import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { Display } from '@/v5/ui/themes/media';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
-import { DrawingTitle } from './drawingTitle/drawingTitle.component';
+import { DrawingsListItemTitle } from './drawingsListItemTitle/drawingsListItemTitle.component';
 import { DrawingsCalibrationButton } from './drawingsCalibrationButton/drawingsCalibrationButton.styles';
 import { IsMainList } from '../../../containers/mainList.context';
 import { DrawingsEllipsisMenu } from './drawingsEllipsisMenu/drawingsEllipsisMenu.component';
@@ -75,7 +75,7 @@ export const DrawingListItem = memo(({
 				selected={isSelected}
 				onClick={() => onSelectOrToggleItem(drawing._id)}
 			>
-				<DrawingTitle
+				<DrawingsListItemTitle
 					minWidth={DRAWING_LIST_COLUMN_WIDTHS.name}
 					drawing={drawing}
 					isSelected={isSelected}
