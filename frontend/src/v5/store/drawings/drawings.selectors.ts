@@ -21,11 +21,16 @@ import { DrawingsState } from './drawings.redux';
 import { Role } from '../currentUser/currentUser.types';
 import { isCollaboratorRole } from '../store.helpers';
 
-const selectContainersDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
+const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
 export const selectDrawings = createSelector(
-	selectContainersDomain, selectCurrentProject,
+	selectDrawingsDomain, selectCurrentProject,
 	(state, currentProject) => (state.drawingsByProject[currentProject] ?? []),
+);
+
+export const selectFavouriteDrawings = createSelector(
+	selectDrawings,
+	(drawings) => drawings.filter(({ isFavourite }) => isFavourite),
 );
 
 export const selectDrawingById = createSelector(
@@ -35,17 +40,17 @@ export const selectDrawingById = createSelector(
 );
 
 export const selectIsListPending = createSelector(
-	selectContainersDomain, selectCurrentProject,
-	// Checks if the containers for the project have been fetched
+	selectDrawingsDomain, selectCurrentProject,
+	// Checks if the drawings for the project have been fetched
 	(state, currentProject) => !state.drawingsByProject[currentProject],
 );
 
-export const selectContainerRole = createSelector(
+export const selectDrawingRole = createSelector(
 	selectDrawingById,
 	(drawing): Role | null => drawing?.role || null,
 );
 
 export const selectHasCollaboratorAccess = createSelector(
-	selectContainerRole,
+	selectDrawingRole,
 	(role): boolean => isCollaboratorRole(role),
 );

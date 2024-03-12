@@ -96,6 +96,8 @@ export function* deleteDrawing({ teamspace, projectId, drawingId, onSuccess, onE
 }
 
 export default function* DrawingsSaga() {
+	yield takeLatest(DrawingsTypes.ADD_FAVOURITE, addFavourites);
+	yield takeLatest(DrawingsTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeEvery(DrawingsTypes.FETCH_DRAWINGS, fetchDrawings);
 	yield takeEvery(DrawingsTypes.FETCH_DRAWING_STATS, fetchDrawingStats);
 	yield takeLatest(DrawingsTypes.DELETE_DRAWING, deleteDrawing);

@@ -36,8 +36,7 @@ export const Drawings = () => {
 
 	const isPending = DrawingsHooksSelectors.selectIsListPending();
 	const drawings = DrawingsHooksSelectors.selectDrawings();
-
-	const favouriteDrawings = []; // TODO use selector for favs
+	const favouriteDrawings = DrawingsHooksSelectors.selectFavouriteDrawings();
 
 	const onClickCreate = () => { }; // TODO add func #4782
 
