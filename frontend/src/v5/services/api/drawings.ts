@@ -17,6 +17,7 @@
 
 import { delay } from '@/v4/helpers/async';
 import api from '@/v4/services/api';
+import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { Drawing, DrawingStats } from '@/v5/store/drawings/drawings.types';
 import { AxiosResponse } from 'axios';
 
@@ -37,21 +38,25 @@ export const fetchDrawings = (teamspace, projectId): Promise<Drawing[]> => {
 			_id: 'asdasdmom',
 			name: 'My cool drawing',
 			isFavourite: true,
+			role: Role.ADMIN,
 		},
 		{
 			_id: 'stilllife',
 			name: 'Still life',
 			isFavourite: true,
+			role: Role.COLLABORATOR,
 		},
 		{
 			_id: 'boring',
 			name: 'Boring Drawing',
 			isFavourite: false,
+			role: Role.COMMENTER,
 		},
 		{
 			_id: 'liuhiuhlk',
 			name: 'Another drawing',
 			isFavourite: false,
+			role: Role.VIEWER,
 		}]) ;
 };
 

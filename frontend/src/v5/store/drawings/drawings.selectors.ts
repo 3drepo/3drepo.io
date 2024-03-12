@@ -18,6 +18,8 @@
 import { createSelector } from 'reselect';
 import { selectCurrentProject } from '../projects/projects.selectors';
 import { DrawingsState } from './drawings.redux';
+import { Role } from '../currentUser/currentUser.types';
+import { isCollaboratorRole } from '../store.helpers';
 
 const selectContainersDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
@@ -26,8 +28,24 @@ export const selectDrawings = createSelector(
 	(state, currentProject) => (state.drawingsByProject[currentProject] ?? []),
 );
 
+export const selectDrawingById = createSelector(
+	selectDrawings,
+	(_, _id) => _id,
+	(drawings, _id) => drawings.find((d) => d._id === _id),
+);
+
 export const selectIsListPending = createSelector(
 	selectContainersDomain, selectCurrentProject,
 	// Checks if the containers for the project have been fetched
 	(state, currentProject) => !state.drawingsByProject[currentProject],
+);
+
+export const selectContainerRole = createSelector(
+	selectDrawingById,
+	(drawing): Role | null => drawing?.role || null,
+);
+
+export const selectHasCollaboratorAccess = createSelector(
+	selectContainerRole,
+	(role): boolean => isCollaboratorRole(role),
 );

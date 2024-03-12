@@ -19,7 +19,7 @@ import { DrawingActionDispatchers } from '@/v5/services/actionsDispatchers';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { DrawingHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { FormattedMessage } from 'react-intl';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
@@ -34,12 +34,12 @@ export const Drawings = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
-	const isPending = DrawingHooksSelectors.selectIsListPending();
-	const drawings = DrawingHooksSelectors.selectDrawings();
+	const isPending = DrawingsHooksSelectors.selectIsListPending();
+	const drawings = DrawingsHooksSelectors.selectDrawings();
 
 	const favouriteDrawings = []; // TODO use selector for favs
 
-	const onClickCreate = () => { }; // TODO add func
+	const onClickCreate = () => { }; // TODO add func #4782
 
 	useEffect(() => {
 		if (!isPending) return;

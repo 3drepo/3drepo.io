@@ -18,7 +18,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 type DrawingsEllipsisMenuProps = {
 	selected?: boolean,
@@ -32,9 +32,9 @@ export const DrawingsEllipsisMenu = ({
 	onSelectOrToggleItem,
 }: DrawingsEllipsisMenuProps) => {
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const hasCollaboratorAccess = true; // TODO Add permision selector
+	const hasCollaboratorAccess = DrawingsHooksSelectors.selectHasCollaboratorAccess(drawing._id);
 
-	const onClickSettings = () => { }; // TODO - add drawing settings modal
+	const onClickSettings = () => { }; // TODO - add drawing settings modal #4782
 
 	const onClickDelete = () => DialogsActionsDispatchers.open('delete', {
 		name: drawing.name,

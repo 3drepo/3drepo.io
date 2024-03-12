@@ -15,11 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Role } from '../currentUser/currentUser.types';
+
 // TODO: Unfinished interface
 export interface Drawing {
 	_id: string;
 	name: string;
 	isFavourite: boolean;
+	role: Role;
 }
 
 // TODO: Unfinished interface
