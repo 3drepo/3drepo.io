@@ -19,7 +19,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors, SequencesHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { camelCase, isEmpty, isEqual, isObject, mapKeys } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
-import ClashIcon from '@mui/icons-material/Compare';
+import ClashIcon from '@assets/icons/outlined/clash-outlined.svg';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
 import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
