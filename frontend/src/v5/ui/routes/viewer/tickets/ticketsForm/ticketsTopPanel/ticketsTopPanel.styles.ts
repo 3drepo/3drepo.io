@@ -42,8 +42,13 @@ export const DescriptionProperty = styled.div`
 
 export const FlexContainer = styled(InputContainer)`
 	display: grid;
-	grid-template-columns: 98fr 65fr 125fr;
+	grid-template-columns: 98fr 65fr 100fr;
 	margin-top: 10px;
+
+	& > * {
+		overflow: hidden;
+		box-sizing: border-box;
+	}
 
 	& > *:not(:last-child) {
 		border-right: solid 1px ${({ theme }) => theme.palette.base.lightest};

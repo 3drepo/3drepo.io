@@ -42,6 +42,7 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 	const storeTicketValues = TicketsCardHooksSelectors.selectSelectedTicket();
 	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
 
+	if (!properties.length) return null;
 	return (
 		<PropertiesListContainer>
 			{properties.map(({

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TicketStatusTypes } from '@controls/chip/chip.types';
 import { RgbArray } from '@controls/inputs/colorPicker/colorPicker.helpers';
 
 export type PropertyTypeDefinition = 'text' | 'longText' | 'boolean' | 'number' | 'date' | 'view' | 'manyOf' | 'oneOf' | 'image' | 'coords' | 'measurements';
@@ -74,6 +75,17 @@ export type IPinSchema = {
 	color: RgbArray | IPinColorMapping;
 };
 
+export type StatusValue = {
+	name: string;
+	type: TicketStatusTypes;
+	label?: string;
+};
+
+export type IStatusConfig = {
+	values: StatusValue[],
+	default?: string;
+};
+
 export interface ITemplate {
 	_id: string;
 	name: string;
@@ -81,10 +93,11 @@ export interface ITemplate {
 	properties?: PropertyDefinition[];
 	modules?: TemplateModule[];
 	config?: {
-		comments: boolean;
-		defaultView: boolean;
-		issueProperties: boolean;
-		pin: boolean | IPinSchema;
+		comments?: boolean;
+		defaultView?: boolean;
+		issueProperties?: boolean;
+		pin?: boolean | IPinSchema;
+		status?: IStatusConfig;
 	};
 }
 
