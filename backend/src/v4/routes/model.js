@@ -331,6 +331,83 @@ router.get("/:model/revision/master/head/unityAssets.json", middlewares.hasReadA
 
 router.get("/:model/revision/:rev/unityAssets.json", middlewares.hasReadAccessToModel, getUnityAssets);
 
+// RepoBundles information
+
+/**
+ * @api {get} /:teamspace/:model/revision/master/head/repoAssets.json Get unity assets
+ * @apiName getRepoAssets
+ * @apiGroup Model
+ * @apiDescription Get the lastest model's version assets. If RepoBundles are available, they are returned, otherwise AssetBundles are returned.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model The model Id to get unity assets for.
+ *
+ * @apiExample {get} Example usage:
+ * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/repoAssets.json HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *    models: [
+ *       {
+ *          _id: "Mw+Qm5J5QaqofBxG9TqOkw==",
+ *          assets: [
+ *             "92fc213b-1bab-49a4-b10e-f4368a52d500"
+ *          ],
+ *          database: "teamSpace1",
+ *          model: "3549ddf6-885d-4977-87f1-eeac43a0e818",
+ *          offset: [
+ *             -688.095458984375,
+ *             6410.9140625,
+ *             683.460205078125
+ *          ],
+ *          jsonFiles: [
+ *             "92fc213b-1bab-49a4-b10e-f4368a52d500"
+ *          ]
+ *       }
+ *    ]
+ * }
+ */
+
+router.get("/:model/revision/master/head/repoAssets.json", middlewares.hasReadAccessToModel, getRepoAssets);
+
+/**
+ * @api {get} /:teamspace/:model/revision/:rev/unityAssets.json Get revision's unity assets
+ * @apiName getRevUnityAssets
+ * @apiGroup Model
+ * @apiDescription Get the model's assets but of a particular revision. If RepoBundles are available, they are returned, otherwise AssetBundles are returned.
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model The model Id to get unity assets for.
+ * @apiParam {String} rev The revision of the model to get unity assets for
+ *
+ * @apiExample {get} Example usage:
+ * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/unityAssets.json HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success:
+ * {
+ *    models: [
+ *       {
+ *          _id: "Mw+Qm5J5QaqofBxG9TqOkw==",
+ *          assets: [
+ *             "92fc213b-1bab-49a4-b10e-f4368a52d500"
+ *          ],
+ *          database: "teamSpace1",
+ *          model: "3549ddf6-885d-4977-87f1-eeac43a0e818",
+ *          offset: [
+ *             -688.095458984375,
+ *             6410.9140625,
+ *             683.460205078125
+ *          ],
+ *          jsonFiles: [
+ *             "92fc213b-1bab-49a4-b10e-f4368a52d500"
+ *          ]
+ *       }
+ *    ]
+ * }
+ */
+
+router.get("/:model/revision/:rev/repoAssets.json", middlewares.hasReadAccessToModel, getRepoAssets);
+
 /**
  * @api {get} /:teamspace/:model/revision/master/head/unityAssets.json Get unity assets
  * @apiName getUnityAssets
@@ -2237,7 +2314,19 @@ function getUnityAssets(req, res, next) {
 	const username = req.session.user.username;
 	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
 
-	UnityAssets.getAssetList(account, model, branch, rev, username).then(obj => {
+	UnityAssets.getAssetList(account, model, branch, rev, username, true).then(obj => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
+	}).catch(err => {
+		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
+	});
+}
+
+function getRepoAssets(req, res, next) {
+	const {account, model, rev} = req.params;
+	const username = req.session.user.username;
+	const branch = rev ? undefined : C.MASTER_BRANCH_NAME;
+
+	UnityAssets.getAssetList(account, model, branch, rev, username, false).then(obj => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, obj);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
