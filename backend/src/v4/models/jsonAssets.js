@@ -293,8 +293,15 @@ const getSuperMeshMappingForModels = async (modelsToProcess, legacy, outStream) 
 	for(let i = 0; i < modelsToProcess.length; ++i) {
 		const entry = modelsToProcess[i];
 		if(entry) {
-			const assetList = await DB.findOne(
-				entry.account, `${entry.model}.stash.unity3d`, {_id: entry.rev}, {jsonFiles: 1});
+
+			let assetList = await DB.findOne(
+				entry.account, `${entry.model}.stash.repobundles`, {_id: entry.rev}, {jsonFiles: 1});
+
+			if(!assetList | legacy) {
+				assetList = await DB.findOne(
+					entry.account, `${entry.model}.stash.unity3d`, {_id: entry.rev}, {jsonFiles: 1});
+			}
+
 			if(assetList) {
 				await addSuperMeshMappingsToStream(entry.account, entry.model, entry.rev, assetList.jsonFiles, legacy, outStream);
 			}
