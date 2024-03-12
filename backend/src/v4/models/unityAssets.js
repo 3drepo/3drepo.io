@@ -50,7 +50,7 @@ async function getAssetListFromRef(ref, username, legacy) {
 // AssetBundles.
 
 async function getAssetListEntry(account, model, revId, legacy) {
-	const assets = db.findOne(account, model + ".stash.repobundles", {_id: revId});
+	const assets = await db.findOne(account, model + ".stash.repobundles", {_id: revId});
 	if(assets && !legacy) {
 		return Promise.resolve(assets);
 	}else {
