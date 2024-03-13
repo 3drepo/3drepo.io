@@ -52,7 +52,7 @@ const validateTicket = (isNewTicket) => async (req, res, next) => {
 			throw createResponseCode(templates.invalidArguments, 'Template has been deprecated');
 		}
 
-		res.body = await processTicket(teamspace, project, model, template, user, req.body, req.ticketData);
+		req.body = await processTicket(teamspace, project, model, template, user, req.body, req.ticketData);
 
 		await next();
 	} catch (err) {

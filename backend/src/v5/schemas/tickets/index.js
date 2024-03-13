@@ -171,7 +171,10 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 	};
 
 	if (isImport) {
-		validatorObj.comments = Yup.array().min(1).of(importCommentSchema);
+		if (template.config.comments) validatorObj.comments = Yup.array().min(1).of(importCommentSchema);
+		else if (newTicket.comments) {
+			throw new Error('Comments are not supported for this template type.');
+		}
 	}
 
 	const validatedTicket = await Yup.object(validatorObj).validate(newTicket, { stripUnknown: true });

@@ -289,13 +289,13 @@ const testImportTickets = () => {
 	describe('Import tickets', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const uniquePropertyName = ServiceHelper.generateRandomString();
-		const template = ServiceHelper.generateTemplate();
-		const template2 = ServiceHelper.generateTemplate();
+		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
+		const templateWithoutComments = ServiceHelper.generateTemplate();
 		template.properties.push({ name: uniquePropertyName, type: propTypes.TEXT, unique: true });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed],
-				[template, template2]);
+				[template, templateWithoutComments]);
 		});
 
 		const generateTestData = (isFed) => {
@@ -319,6 +319,11 @@ const testImportTickets = () => {
 				['the ticket data does not conforms to the template', false, getRoute(), templates.invalidArguments, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
 				['the ticket data conforms to the template', true, getRoute()],
 				['the ticket data conforms to the template but the user is a viewer', false, getRoute({ key: users.viewer.apiKey }), templates.notAuthorized],
+				['the ticket data contains comments', true, getRoute(), undefined, { comments: times(10, ServiceHelper.generateImportedComment) }],
+				['the ticket data contains comments when comments are disabled', false, getRoute({ templateId: templateWithoutComments._id }), templates.invalidArguments, {
+					...ServiceHelper.generateTicket(templateWithoutComments),
+					comments: times(10, ServiceHelper.generateImportedComment) }],
+				['the ticket data contains invalid comments', false, getRoute(), templates.invalidArguments, { comments: times(10, ServiceHelper.generateComment) }],
 			];
 		};
 
@@ -336,9 +341,15 @@ const testImportTickets = () => {
 					const { tickets } = res.body;
 					expect(tickets).not.toBeUndefined();
 
-					await Promise.all(tickets.map(async (id) => {
+					await Promise.all(tickets.map(async (id, i) => {
 						const getEndpoint = route.replace('/tickets/import', `/tickets/${id}`);
 						await agent.get(getEndpoint).expect(templates.ok.status);
+						if (payload.tickets[i].comments?.length) {
+							const getCommentsEndpoint = route.replace('/tickets/import', `/tickets/${id}/comments`);
+							const { body: commentRes } = await agent.get(getCommentsEndpoint)
+								.expect(templates.ok.status);
+							expect(commentRes.comments?.length).toEqual(payload.tickets[i].comments.length);
+						}
 					}));
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);

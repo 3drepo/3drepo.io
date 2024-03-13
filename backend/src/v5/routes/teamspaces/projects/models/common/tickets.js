@@ -380,9 +380,28 @@ const establishRoutes = (isFed) => {
 	 *                                 type: string
 	 *                                 description: Any properties in the module should be filled in this way
 	 *                                 example: Data1
-	 *                       modules:
+	 *                       comments:
 	 *                         type: array
 	 *                         description: array of comments to import as part of the ticket
+	 *                         items:
+	 *                           type: object
+	 *                           properties:
+	 *                             message:
+	 *                               type: string
+	 *                               description: Content of the comment
+	 *                               example: Example message
+	 *                             originalAuthor:
+	 *                               type: string
+	 *                               description: Original author of the message
+	 *                             createdAt:
+	 *                               type: number
+	 *                               description: When the original comment was created (in epoch timestamp)
+	 *                             images:
+	 *                               description: Images of the comment
+	 *                               type: array
+	 *                               items:
+	 *                                 type: string
+	 *                                 description: Image in a Base64 format or an ID of an image currently used in the comment
 	 *
 	 *
 	 *     responses:
