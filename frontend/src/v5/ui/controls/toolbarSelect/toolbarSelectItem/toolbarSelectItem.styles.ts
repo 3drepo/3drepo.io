@@ -28,7 +28,6 @@ export const IconContainer = styled.div<{ disabled?: boolean; selected?: boolean
 	overflow: hidden;
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
 	margin-bottom: 5px;
-	box-sizing: border-box;
 	border-radius: 50%;
 
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
