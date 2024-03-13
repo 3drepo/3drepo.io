@@ -19,7 +19,7 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProjectAndDrawingId, SuccessAndErrorCallbacks } from '../store.types';
-import { Drawing, DrawingStats } from './drawings.types';
+import { IDrawing, DrawingStats } from './drawings.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 
 export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions({
@@ -33,7 +33,7 @@ export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions
 	createDrawingSuccess: ['projectId', 'drawing'],
 	updateDrawing: ['teamspace', 'projectId', 'drawingId', 'drawing', 'onSuccess', 'onError'],
 	updateDrawingSuccess: ['projectId', 'drawing'],
-}, { prefix: 'DRAWINGS/' }) as { Types: Constants<DrawingsActionCreators>; Creators: DrawingsActionCreators };
+}, { prefix: 'DRAWINGS/' }) as { Types: Constants<IDrawingsActionCreators>; Creators: IDrawingsActionCreators };
 
 
 const getDrawingFromState = (state: DrawingsState, projectId, drawingId) => (
@@ -68,7 +68,7 @@ const INITIAL_STATE: DrawingsState = {
 };
 
 export interface DrawingsState {
-	drawingsByProject: Record<string, Drawing[]>;
+	drawingsByProject: Record<string, IDrawing[]>;
 	categoriesByProject: Record<string, string[]>;
 }
 
@@ -82,31 +82,31 @@ export const drawingsReducer = createReducer<DrawingsState>(INITIAL_STATE, produ
 
 
 export type FetchDrawingsAction = Action<'FETCH_DRAWINGS'> & TeamspaceAndProjectId;
-export type FetchDrawingsSuccessAction = Action<'FETCH_DRAWINGS_SUCCESS'> & ProjectId & { drawings: Drawing[] };
+export type FetchDrawingsSuccessAction = Action<'FETCH_DRAWINGS_SUCCESS'> & ProjectId & { drawings: IDrawing[] };
 export type FetchDrawingStatsAction = Action<'FETCH_DRAWING_STATS'> & TeamspaceProjectAndDrawingId;
 export type FetchDrawingStatsSuccessAction = Action<'FETCH_DRAWING_STATS_SUCCESS'> & ProjectAndDrawingId & { stats: DrawingStats };
 export type FetchCategoriesAction = Action<'FETCH_DRAWINGS_CATEGORIES'> & TeamspaceAndProjectId;
 export type FetchCategoriesSuccessAction = Action<'FETCH_DRAWINGS_CATEGORIES_SUCCESS'> & ProjectId & { categories: string[] };
-export type CreateDrawingAction = Action<'CREATE_DRAWING'> & TeamspaceAndProjectId & SuccessAndErrorCallbacks & { drawing: Drawing };
-export type CreateDrawingSuccessAction = Action<'CREATE_DRAWING_SUCCESS'> &  ProjectId & { drawing: Drawing };
-export type UpdateDrawingAction = Action<'UPDATE_DRAWING'> & TeamspaceProjectAndDrawingId & SuccessAndErrorCallbacks & { drawing: Drawing };
-export type UpdateDrawingSuccessAction = Action<'UPDATE_DRAWING_SUCCESS'> &  ProjectId & { drawing: Drawing };
-export interface DrawingsActionCreators {
+export type CreateDrawingAction = Action<'CREATE_DRAWING'> & TeamspaceAndProjectId & SuccessAndErrorCallbacks & { drawing: IDrawing };
+export type CreateDrawingSuccessAction = Action<'CREATE_DRAWING_SUCCESS'> &  ProjectId & { drawing: IDrawing };
+export type UpdateDrawingAction = Action<'UPDATE_DRAWING'> & TeamspaceProjectAndDrawingId & SuccessAndErrorCallbacks & { drawing: IDrawing };
+export type UpdateDrawingSuccessAction = Action<'UPDATE_DRAWING_SUCCESS'> &  ProjectId & { drawing: IDrawing };
+export interface IDrawingsActionCreators {
 	fetchDrawings: (teamspace: string, projectId: string) => FetchDrawingsAction;
-	fetchDrawingsSuccess: (projectId: string, drawings: Drawing[]) => FetchDrawingsSuccessAction;
+	fetchDrawingsSuccess: (projectId: string, drawings: IDrawing[]) => FetchDrawingsSuccessAction;
 	fetchDrawingStats: (teamspace: string, projectId: string, drawingId: string) => FetchDrawingStatsAction;
 	fetchDrawingStatsSuccess: ( projectId: string, drawingId: string, stats: DrawingStats ) => FetchDrawingStatsSuccessAction;
 	fetchCategories: (teamspace: string, projectId: string) => FetchCategoriesAction;
 	fetchCategoriesSuccess: (projectId: string, categories: string[]) => FetchCategoriesSuccessAction;
-	createDrawing: (teamspace: string, projectId: string, drawing: Drawing, onSuccess: () => void, onError: (e:Error) => void) => CreateDrawingAction;
-	createDrawingSuccess: (projecId: string, drawing: Drawing) => CreateDrawingSuccessAction;
+	createDrawing: (teamspace: string, projectId: string, drawing: IDrawing, onSuccess: () => void, onError: (e:Error) => void) => CreateDrawingAction;
+	createDrawingSuccess: (projecId: string, drawing: IDrawing) => CreateDrawingSuccessAction;
 	updateDrawing: (
 		teamspace: string, 
 		projectId: string, 
 		drawingId: string, 
-		drawing: Drawing, 
+		drawing: IDrawing, 
 		onSuccess: () => void, 
 		onError: (e:Error) => void
 	) => UpdateDrawingAction;
-	updateDrawingSuccess: (projecId: string, drawing: Drawing) => UpdateDrawingSuccessAction;
+	updateDrawingSuccess: (projecId: string, drawing: IDrawing) => UpdateDrawingSuccessAction;
 }

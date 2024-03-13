@@ -17,7 +17,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { delay } from '@/v4/helpers/async';
-import { Drawing, DrawingStats } from '@/v5/store/drawings/drawings.types';
+import { IDrawing, DrawingStats } from '@/v5/store/drawings/drawings.types';
 import uuid from 'uuidv4';
 
 const categories =  ['A drawing category', 'Another drawing category', 'Yet another one'];
@@ -37,8 +37,8 @@ const drawings = [ // TODO: The schema is unfinished
 	}];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const fetchDrawings = (teamspace, projectId): Promise<Drawing[]> => {
-	return delay<Drawing[]>(Math.random() *  300, drawings) ;
+export const fetchDrawings = (teamspace, projectId): Promise<IDrawing[]> => {
+	return delay<IDrawing[]>(Math.random() *  300, drawings) ;
 };
 
 export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promise<DrawingStats> => {

@@ -16,7 +16,7 @@
  */
 
 // TODO: Unfinished interface
-export interface Drawing {
+export interface IDrawing {
 	_id: string;
 	name: string;
 	drawingNumber: string;

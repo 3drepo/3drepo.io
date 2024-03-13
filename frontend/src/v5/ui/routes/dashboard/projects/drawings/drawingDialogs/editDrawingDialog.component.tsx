@@ -21,11 +21,11 @@ import { MenuItem } from '@mui/material';
 import { SubmitHandler } from 'react-hook-form';
 import { FormModal } from '@controls/formModal/formModal.component';
 import { DrawingHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { DrawingActionDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawinsgActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { nameAlreadyExists, numberAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { IFormInput, useDrawingForm } from './drawingsDialogs.hooks';
-import { Drawing } from '@/v5/store/drawings/drawings.types';
+import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { ShareTextField } from '@controls/shareTextField';
 import { FormattedMessage } from 'react-intl';
 import { SectionTitle } from '../../settingsModal/settingsModal.styles';
@@ -33,7 +33,7 @@ import { SectionTitle } from '../../settingsModal/settingsModal.styles';
 interface Props { 
 	open: boolean; 
 	onClickClose: () => void;
-	drawing: Drawing
+	drawing: IDrawing
 }
 
 export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
@@ -52,7 +52,7 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 
 	const onSubmit: SubmitHandler<IFormInput> = async (body) => {
 		try {
-			await new Promise<void>((accept, reject ) => DrawingActionDispatchers.updateDrawing(teamspace, project, drawing._id, body as any, accept, reject));
+			await new Promise<void>((accept, reject ) => DrawinsgActionsDispatchers.updateDrawing(teamspace, project, drawing._id, body as any, accept, reject));
 			onClickClose();
 		} catch (err) {
 			onSubmitError(err);
@@ -72,7 +72,7 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 			<SectionTitle>
 				<FormattedMessage
 					id="drawing.edit.informationTitle"
-					defaultMessage={'Drawing information'}
+					defaultMessage="Drawing information"
 				/>
 			</SectionTitle>
 			<ShareTextField
@@ -107,7 +107,7 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 			<FormTextField
 				control={control}
 				name="desc"
-				label={formatMessage({ id: 'drawings.creation.form.code', defaultMessage: 'Description' })}
+				label={formatMessage({ id: 'drawings.creation.form.description', defaultMessage: 'Description' })}
 				formError={errors.desc}
 			/>
 			<UnhandledErrorInterceptor expectedErrorValidators={[nameAlreadyExists, numberAlreadyExists]} />
