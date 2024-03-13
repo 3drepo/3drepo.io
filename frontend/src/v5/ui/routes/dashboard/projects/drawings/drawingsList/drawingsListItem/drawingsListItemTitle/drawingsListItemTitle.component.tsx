@@ -21,8 +21,9 @@ import { Highlight } from '@controls/highlight';
 import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { LatestRevision } from '../../../../containers/containersList/latestRevision/latestRevision.component';
 import { Drawing } from '@/v5/store/drawings/drawings.types';
+import { Container, Label } from '../../../../containers/containersList/latestRevision/latestRevision.styles';
+import { RevisionCodeAndStatus } from './drawingsListItemTitle.styles';
 
 interface IDrawingsListItemTitle extends FixedOrGrowContainerProps {
 	drawing: Drawing;
@@ -41,17 +42,25 @@ export const DrawingsListItemTitle = ({
 	return (
 		<DashboardListItemTitle
 			{...props}
-			subtitle={!drawing.hasStatsPending && (
-				<LatestRevision
-					name={(
+			subtitle={!drawing.hasStatsPending && hasRevisions && (
+				<Container>
+					<Label>
+						Latest revision:
+					</Label>
+					<RevisionCodeAndStatus>
 						<Highlight search={query}>
-							{drawing.latestRevision}
+							{drawing.latestRevision} 
 						</Highlight>
-					)}
-					status={drawing.status}
-					error={drawing.errorReason}
-					hasRevisions={hasRevisions}
-				/>
+						{drawing.status && (
+							<>
+								<span>-</span>
+								<Highlight search={query}>
+									{drawing.status}
+								</Highlight>
+							</>
+						)}
+					</RevisionCodeAndStatus>
+				</Container>
 			)}
 			selected={isSelected}
 			tooltipTitle={canLaunchDrawing ? (

@@ -30,7 +30,7 @@ export const DRAWING_LIST_COLUMN_WIDTHS = {
 	actions: 72,
 };
 
-export const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'type', 'code'];
+export const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'type', 'code', 'status'];
 
 export const CALIBRATION_MAP = {
 	calibrated: {

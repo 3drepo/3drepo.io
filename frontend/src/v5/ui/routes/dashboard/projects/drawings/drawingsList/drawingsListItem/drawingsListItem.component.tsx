@@ -67,14 +67,8 @@ export const DrawingListItem = memo(({
 	};
 
 	return (
-		<DashboardListItem
-			selected={isSelected}
-			key={drawing._id}
-		>
-			<DashboardListItemRow
-				selected={isSelected}
-				onClick={() => onSelectOrToggleItem(drawing._id)}
-			>
+		<DashboardListItem selected={isSelected} key={drawing._id}>
+			<DashboardListItemRow selected={isSelected} onClick={() => onSelectOrToggleItem(drawing._id)}>
 				<DrawingsListItemTitle
 					minWidth={DRAWING_LIST_COLUMN_WIDTHS.name}
 					drawing={drawing}
@@ -103,10 +97,7 @@ export const DrawingListItem = memo(({
 						<FormattedMessage id="drawings.list.item.calibration.tooltip" defaultMessage="Calibrate" />
 					}
 				/>
-				<DashboardListItemText
-					selected={isSelected}
-					width={DRAWING_LIST_COLUMN_WIDTHS.code}
-				>
+				<DashboardListItemText selected={isSelected} width={DRAWING_LIST_COLUMN_WIDTHS.code}>
 					{drawing.code}
 				</DashboardListItemText>
 				<DashboardListItemText

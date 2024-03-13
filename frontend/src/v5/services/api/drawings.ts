@@ -66,7 +66,7 @@ export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promi
 		},
 		liuhiuhlk: {
 			_id: 'liuhiuhlk',
-			revisions : { revisionsCount: 1, lastUpdated: 1709569331628,  latestRevision:'I dunno', calibration: 'calibrated', isFavourite: false, type: 'Existing', code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0002' },
+			revisions : { revisionsCount: 1, lastUpdated: 1709569331628,  latestRevision:'I dunno', calibration: 'calibrated', isFavourite: false, type: 'Existing', code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0002', status: 's4s' },
 		},
 		stilllife: {
 			_id: 'stilllife',
@@ -74,7 +74,7 @@ export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promi
 		},
 		boring: {
 			_id: 'boring',
-			revisions : { revisionsCount: 10, lastUpdated: 1609569331628,  latestRevision:'Shading and other such things to improve the drawing', calibration: 'uncalibrated', isFavourite: false, type: 'MEP', code: 'SC2-SFT-V1-01-M4-ST-30_11_30-0001' },
+			revisions : { revisionsCount: 10, lastUpdated: 1609569331628,  latestRevision:'Shading and other such things to improve the drawing', calibration: 'uncalibrated', isFavourite: false, type: 'MEP', code: 'SC2-SFT-V1-01-M4-ST-30_11_30-0001', status: 's5' },
 		},
 
 	};
