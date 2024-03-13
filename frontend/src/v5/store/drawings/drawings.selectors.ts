@@ -19,10 +19,10 @@ import { createSelector } from 'reselect';
 import { selectCurrentProject } from '../projects/projects.selectors';
 import { DrawingsState } from './drawings.redux';
 
-const selectContainersDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
+const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
 export const selectDrawings = createSelector(
-	selectContainersDomain, selectCurrentProject,
+	selectDrawingsDomain, selectCurrentProject,
 	(state, currentProject) => (state.drawingsByProject[currentProject] ?? []),
 );
 
@@ -34,18 +34,18 @@ export const selectDrawingById = createSelector(
 
 
 export const selectIsListPending = createSelector(
-	selectContainersDomain, selectCurrentProject,
+	selectDrawingsDomain, selectCurrentProject,
 	// Checks if the drawings for the project have been fetched
 	(state, currentProject) => !state.drawingsByProject[currentProject],
 );
 
 export const selectCategories = createSelector(
-	selectContainersDomain, selectCurrentProject,
+	selectDrawingsDomain, selectCurrentProject,
 	(state, currentProject) => (state.categoriesByProject[currentProject] ?? []),
 );
 
 export const selectIsCategoriesPending = createSelector(
-	selectContainersDomain, selectCurrentProject,
+	selectDrawingsDomain, selectCurrentProject,
 	// Checks if the categories for the project have been fetched
 	(state, currentProject) => !state.categoriesByProject[currentProject],
 );
