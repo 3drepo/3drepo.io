@@ -915,6 +915,58 @@ const testImportedTickets = () => {
 			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, false);
 		});
+
+		const comments = times(5, () => ({
+			message: generateRandomString(),
+			originalAuthor: generateRandomString(),
+			createdAt: Date.now(),
+		}));
+		describe.each([
+			['and should not contain comments in the output if it was not provided to begin with', true, importTestInput],
+			['and should contain comments in the output', true, { ...importTestInput, comments }],
+			['if comments is not of the right type', false, { ...importTestInput, comments: true }],
+			['if comments array is empty', false, { ...importTestInput, comments: [] }],
+			['if comments contains items of the incorrect type', false, { ...importTestInput, comments: [...comments, undefined, 1, true] }],
+			['if a comment does not have an original author', false, { ...importTestInput,
+				comments: [...comments, {
+					message: generateRandomString(),
+					createdAt: Date.now() }] }],
+			['if a comment does not have a created at date', false, { ...importTestInput,
+				comments: [...comments, {
+					message: generateRandomString(),
+					originalAuthor: generateRandomString(),
+				}] }],
+			['if a comment have a created at date in the future', false, { ...importTestInput,
+				comments: [...comments, {
+					message: generateRandomString(),
+					originalAuthor: generateRandomString(),
+					createdAt: Date.now() + 100000,
+				}] }],
+
+		])('Imported with comments', (desc, success, ticket) => {
+			test(`Should${success ? '' : ' not'} validate ${desc}`, async () => {
+				const test = TicketSchema.validateTicket(teamspace, project, model, importTestTem,
+					ticket, undefined, true);
+				if (success) {
+					const output = await test;
+					if (ticket.comments) {
+						expect(ticket.comments.length).toEqual(output.comments.length);
+						ticket.comments.forEach(({ others, createdAt }, i) => {
+							expect(output.comments[i]).toEqual(expect.objectContaining({ ...others,
+								createdAt: new Date(createdAt),
+							}));
+						});
+					} else {
+						expect(output.comments).toBeUndefined();
+					}
+				} else {
+					expect(test).rejects.not.toBeUndefined();
+				}
+
+				expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
+				expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, true);
+			});
+		});
 	});
 };
 
