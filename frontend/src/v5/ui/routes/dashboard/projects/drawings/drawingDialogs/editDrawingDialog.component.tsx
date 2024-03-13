@@ -29,6 +29,7 @@ import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { ShareTextField } from '@controls/shareTextField';
 import { FormattedMessage } from 'react-intl';
 import { SectionTitle } from '../../settingsModal/settingsModal.styles';
+import { dirtyValuesChanged } from '@/v5/helpers/form.helper';
 
 interface Props { 
 	open: boolean; 
@@ -68,6 +69,7 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 			confirmLabel={formatMessage({ id: 'drawings.edit.ok', defaultMessage: 'Save Drawing' })}
 			maxWidth="sm"
 			{...formState}
+			isValid={dirtyValuesChanged(formData, drawing) && formState.isValid}
 		>
 			<SectionTitle>
 				<FormattedMessage
