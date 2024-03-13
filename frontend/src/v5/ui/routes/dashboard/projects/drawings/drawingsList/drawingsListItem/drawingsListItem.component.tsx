@@ -69,7 +69,6 @@ export const DrawingsListItem = memo(({
 		<DashboardListItem selected={isSelected} key={drawing._id}>
 			<DashboardListItemRow selected={isSelected} onClick={() => onSelectOrToggleItem(drawing._id)}>
 				<DrawingsListItemTitle
-					// minWidth={DRAWING_LIST_COLUMN_WIDTHS.name.width}
 					drawing={drawing}
 					isSelected={isSelected}
 					{...DRAWING_LIST_COLUMN_WIDTHS.name}

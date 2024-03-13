@@ -17,7 +17,7 @@
 
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
-import { ContainersHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Display } from '@/v5/ui/themes/media';
 import { DashboardListCollapse, DashboardListHeader, DashboardListHeaderLabel, DashboardList, DashboardListEmptyContainer, DashboardListEmptySearchResults } from '@components/dashboard/dashboardList';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
@@ -36,6 +36,7 @@ import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
 import { DrawingsListItem } from './drawingsListItem/drawingsListItem.component';
 import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers';
 import { DrawingListItemLoading } from './drawingsListItem/drawingsListItemLoading.component';
+import { Drawing } from '@/v5/store/drawings/drawings.types';
 
 export const DrawingsList = ({
 	emptyMessage,
@@ -45,7 +46,7 @@ export const DrawingsList = ({
 }) => {
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
-	const { items: drawings, filteredItems: filteredDrawings } = useContext<SearchContextType<any>>(SearchContext); // TODO add search context type IDrawing
+	const { items: drawings, filteredItems: filteredDrawings } = useContext<SearchContextType<Drawing>>(SearchContext);
 	const hasDrawings = drawings.length > 0;
 
 	const selectOrToggleItem = useCallback((id: string) => {
@@ -53,9 +54,9 @@ export const DrawingsList = ({
 	}, []);
 
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	const isListPending = false; // TODO add selector
-	const areStatsPending = false; // TODO add selector
-	const canUpload = ContainersHooksSelectors.selectCanUploadToProject(); // TODO Does this need to change?
+	const isListPending = DrawingsHooksSelectors.selectIsListPending();
+	const areStatsPending = DrawingsHooksSelectors.selectAreStatsPending();
+	const canUpload = DrawingsHooksSelectors.selectCanUploadToProject();
 	const { sortedList, setSortConfig } = useOrderedList(filteredDrawings, DEFAULT_SORT_CONFIG);
 
 	return (
@@ -94,7 +95,6 @@ export const DrawingsList = ({
 				)}
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
-					{/* TODO Check names match object keys */}
 					<DashboardListHeaderLabel name="name" {...DRAWING_LIST_COLUMN_WIDTHS.name}>
 						<FormattedMessage id="drawings.list.header.drawing" defaultMessage="Drawing" />
 					</DashboardListHeaderLabel>

@@ -16,7 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { selectCurrentProject } from '../projects/projects.selectors';
+import { selectCurrentProject, selectIsProjectAdmin } from '../projects/projects.selectors';
 import { DrawingsState } from './drawings.redux';
 import { Role } from '../currentUser/currentUser.types';
 import { isCollaboratorRole } from '../store.helpers';
@@ -45,6 +45,11 @@ export const selectIsListPending = createSelector(
 	(state, currentProject) => !state.drawingsByProject[currentProject],
 );
 
+export const selectAreStatsPending = createSelector(
+	selectDrawings,
+	(drawings) => drawings.some(({ hasStatsPending }) => hasStatsPending),
+);
+
 export const selectDrawingRole = createSelector(
 	selectDrawingById,
 	(drawing): Role | null => drawing?.role || null,
@@ -53,4 +58,10 @@ export const selectDrawingRole = createSelector(
 export const selectHasCollaboratorAccess = createSelector(
 	selectDrawingRole,
 	(role): boolean => isCollaboratorRole(role),
+);
+
+export const selectCanUploadToProject = createSelector(
+	selectDrawings,
+	selectIsProjectAdmin,
+	(drawings, isAdmin): boolean => isAdmin || drawings.some(({ role }) => isCollaboratorRole(role)),
 );
