@@ -17,55 +17,38 @@
 
 import StrokeWidthIcon from '@assets/icons/outlined/stroke_width-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { ClickAwayListener } from '@mui/material';
-import { useState } from 'react';
-import { ButtonOptionsContainer, IconWithFooterContainer } from '../buttons.styles';
+import { IconWithFooterContainer, FloatingBar } from '../../toolbarButton/multioptionIcons.styles';
 import { STROKE_WIDTH } from '../../../imageMarkup.types';
-import { FloatingBarItem, StrokeOption } from './strokeWidthButton.styles';
+import { FlatToolbarSelectItem, StrokeOption } from './strokeWidthButton.styles';
 import { invert } from 'lodash';
-import { FloatingBar, FloatingButtonsContainer } from '../../toolbarButton/multioptionIcons.styles';
-import { ToolbarButton } from '../../toolbarButton/toolbarButton.component';
+import { ToolbarSelect } from '@controls/toolbarSelect/toolbarSelect.component';
 
 const VALUE_TO_WIDTH = invert(STROKE_WIDTH);
+const Icon = ({ value }) => (
+	<IconWithFooterContainer $footer={VALUE_TO_WIDTH[value]}>
+		<StrokeWidthIcon />
+	</IconWithFooterContainer>
+);
 
 type StrokeWidthButtonProps = {
 	value: number,
 	onChange: (value: number) => void,
 };
-export const StrokeWidthButton = ({ value, onChange }: StrokeWidthButtonProps) => {
-	const [expanded, setExpanded] = useState(false);
-
-	const handleChange = (val: number) => {
-		onChange(val);
-		setExpanded(false);
-	};
-
-	const Icon = () => (
-		<IconWithFooterContainer $footer={VALUE_TO_WIDTH[value]}>
-			<StrokeWidthIcon />
-		</IconWithFooterContainer>
-	);
-
-	return (
-		<ClickAwayListener onClickAway={() => setExpanded(false)}>
-			<ButtonOptionsContainer>
-				<FloatingButtonsContainer>
-					{expanded && (
-						<FloatingBar>
-							{Object.values(STROKE_WIDTH).map((width, index) => (
-								<FloatingBarItem onClick={() => handleChange(width)} key={width}>
-									<StrokeOption selected={width === value} $height={(index + 1) * 2} />
-								</FloatingBarItem>
-							))}
-						</FloatingBar>
-					)}
-				</FloatingButtonsContainer>
-				<ToolbarButton
-					Icon={Icon}
-					onClick={() => setExpanded(!expanded)}
-					title={formatMessage({ id: 'imageMarkup.icon.title.strokeWidth', defaultMessage: 'Stroke width' })}
+export const StrokeWidthButton = ({ value, onChange }: StrokeWidthButtonProps) => (
+	<ToolbarSelect
+		onChange={onChange}
+		renderToolbarButton={Icon}
+		value={value}
+		title={formatMessage({ id: 'imageMarkup.strokeWidth.button.title', defaultMessage: 'Stroke width' })}
+	>
+		<FloatingBar>
+			{Object.values(STROKE_WIDTH).map((width, index) => (
+				<FlatToolbarSelectItem
+					value={width}
+					key={width}
+					Icon={() => <StrokeOption selected={width === value} $height={(index + 1) * 2} />}
 				/>
-			</ButtonOptionsContainer>
-		</ClickAwayListener>
-	);
-};
+			))}
+		</FloatingBar>
+	</ToolbarSelect>
+);

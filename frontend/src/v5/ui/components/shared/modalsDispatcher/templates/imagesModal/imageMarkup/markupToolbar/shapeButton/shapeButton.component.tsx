@@ -21,14 +21,11 @@ import RectangleIcon from '@assets/icons/outlined/square-outlined.svg';
 import ArrowIcon from '@assets/icons/outlined/arrow_draw-outlined.svg';
 import PolygonIcon from '@assets/icons/outlined/polygon-outlined.svg';
 import LineIcon from '@assets/icons/outlined/line_draw-outlined.svg';
-import { ClickAwayListener } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
-import { useState } from 'react';
 import { IMode, IShapeType, SHAPES } from '../../imageMarkup.types';
-import { ToolbarButton } from '../toolbarButton/toolbarButton.component';
-import { FloatingButton, FloatingButtonsContainer } from '../toolbarButton/multioptionIcons.styles';
-import { ButtonOptionsContainer } from '../buttons/buttons.styles';
 import { MODES } from '@/v4/routes/components/screenshotDialog/markupStage/markupStage.helpers';
+import { ToolbarSelect } from '@controls/toolbarSelect/toolbarSelect.component';
+import { ToolbarSelectItem } from '@controls/toolbarSelect/toolbarSelectItem/toolbarSelectItem.component';
 
 const SHAPES_DATA: Record<IShapeType, any> = {
 	[SHAPES.RECTANGLE]: {
@@ -69,40 +66,28 @@ const SHAPES_DATA: Record<IShapeType, any> = {
 };
 
 type ShapeButtonProps = {
-	shape: IShapeType,
-	onShapeChange: (callout: IShapeType) => void,
+	value: IShapeType,
+	onChange: (callout: IShapeType) => void,
 	mode: IMode,
 };
-export const ShapeButton = ({ mode, shape, onShapeChange }: ShapeButtonProps) => {
-	const [expanded, setExpanded] = useState(false);
-
+export const ShapeButton = ({ mode, value, onChange }: ShapeButtonProps) => {
 	const isShapeMode = mode === MODES.SHAPE || mode === MODES.POLYGON;
 
-	const selectShape = (newShape: IShapeType) => {
-		setExpanded(false);
-		onShapeChange(newShape);
-	};
-
 	return (
-		<ClickAwayListener onClickAway={() => setExpanded(false)}>
-			<ButtonOptionsContainer>
-				<FloatingButtonsContainer>
-					{expanded && Object.values(SHAPES_DATA).map(({ value, ...shapeData }) => (
-						<FloatingButton
-							{...shapeData}
-							onClick={() => selectShape(value)}
-							selected={isShapeMode && shape === value}
-							key={value}
-						/>
-					))}
-				</FloatingButtonsContainer>
-				<ToolbarButton
-					Icon={SHAPES_DATA[shape].Icon}
-					onClick={() => setExpanded(!expanded)}
-					title={!expanded ? SHAPES_DATA[shape].title : ''}
-					selected={isShapeMode}
+		<ToolbarSelect
+			value={value}
+			defaultIcon={SHAPES_DATA[value].Icon}
+			onChange={onChange}
+			title={formatMessage({ id: 'imageMarkup.shape.button.title', defaultMessage: 'Shape' })}
+			selected={isShapeMode}
+		>
+			{Object.values(SHAPES_DATA).map((shapeData) => (
+				<ToolbarSelectItem
+					{...shapeData}
+					selected={isShapeMode && shapeData.value === value}
+					key={shapeData.value}
 				/>
-			</ButtonOptionsContainer>
-		</ClickAwayListener>
+			))}
+		</ToolbarSelect>
 	);
 };

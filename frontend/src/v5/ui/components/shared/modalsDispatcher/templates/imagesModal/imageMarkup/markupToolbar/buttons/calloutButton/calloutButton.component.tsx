@@ -18,14 +18,11 @@ import CalloutCircleIcon from '@assets/icons/outlined/callout_circle-outlined.sv
 import CalloutDotIcon from '@assets/icons/outlined/callout_dot-outlined.svg';
 import CalloutRectangleIcon from '@assets/icons/outlined/callout_square-outlined.svg';
 
-import { ClickAwayListener } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
-import { useState } from 'react';
-import { ToolbarButton } from '../../toolbarButton/toolbarButton.component';
 import { CALLOUTS, ICalloutType, IMode } from '../../../imageMarkup.types';
-import { FloatingButton, FloatingButtonsContainer } from '../../toolbarButton/multioptionIcons.styles';
-import { ButtonOptionsContainer } from '../buttons.styles';
 import { MODES } from '@/v4/routes/components/screenshotDialog/markupStage/markupStage.helpers';
+import { ToolbarSelect } from '@controls/toolbarSelect/toolbarSelect.component';
+import { ToolbarSelectItem } from '@controls/toolbarSelect/toolbarSelectItem/toolbarSelectItem.component';
 
 const CALLOUT_DATA = {
 	[CALLOUTS.CIRCLE]: {
@@ -46,40 +43,28 @@ const CALLOUT_DATA = {
 };
 
 type CalloutButtonProps = {
-	callout: ICalloutType,
-	onCalloutChange: (callout: ICalloutType) => void,
+	value: ICalloutType,
+	onChange: (callout: ICalloutType) => void,
 	mode: IMode,
 };
-export const CalloutButton = ({ callout, onCalloutChange, mode }: CalloutButtonProps) => {
-	const [expanded, setExpanded] = useState(false);
-
+export const CalloutButton = ({ value, onChange, mode }: CalloutButtonProps) => {
 	const isCalloutMode = mode === MODES.CALLOUT;
 
-	const selectCallout = (newCallout: ICalloutType) => {
-		setExpanded(false);
-		onCalloutChange(newCallout);
-	};
-
 	return (
-		<ClickAwayListener onClickAway={() => setExpanded(false)}>
-			<ButtonOptionsContainer>
-				<FloatingButtonsContainer>
-					{expanded && Object.values(CALLOUT_DATA).map(({ value, ...calloutData }) => (
-						<FloatingButton
-							{...calloutData}
-							onClick={() => selectCallout(value)}
-							selected={isCalloutMode && callout === value}
-							key={value}
-						/>
-					))}
-				</FloatingButtonsContainer>
-				<ToolbarButton
-					Icon={CALLOUT_DATA[callout].Icon}
-					onClick={() => setExpanded(!expanded)}
-					title={!expanded ? CALLOUT_DATA[callout].title : ''}
-					selected={isCalloutMode}
+		<ToolbarSelect
+			onChange={onChange}
+			title={formatMessage({ id: 'imageMarkup.callout.button.title', defaultMessage: 'Callout' })}
+			defaultIcon={CALLOUT_DATA[value].Icon}
+			value={value}
+			selected={isCalloutMode}
+		>
+			{Object.values(CALLOUT_DATA).map((calloutData) => (
+				<ToolbarSelectItem
+					{...calloutData}
+					selected={isCalloutMode && calloutData.value === value}
+					key={calloutData.value}
 				/>
-			</ButtonOptionsContainer>
-		</ClickAwayListener>
+			))}
+		</ToolbarSelect>
 	);
 };

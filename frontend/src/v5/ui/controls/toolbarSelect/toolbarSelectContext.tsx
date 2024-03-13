@@ -15,20 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { FlatToolbarSelectItem as FlatToolbarSelectItemBase } from '../../toolbarButton/multioptionIcons.styles';
+import { createContext } from 'react';
 
-export const StrokeOption = styled.div<{ selected, $height }>`
-	background-color: ${({ theme: { palette }, selected }) => selected ? palette.primary.main : palette.secondary.main};
-	border-radius: ${({ $height }) => $height}px;
-	border: none;
-	outline: none;
-	width: 30px;
-	height: ${({ $height }) => $height}px;
-`;
-
-export const FlatToolbarSelectItem = styled(FlatToolbarSelectItemBase)`
-	&:hover ${StrokeOption} {
-		background-color: ${({ theme }) => theme.palette.primary.main};
-	}
-`;
+export interface ToolbarSelectContextType<T> {
+	onChange: (data: { value: T, Icon: any }) => void;
+	expanded: boolean;
+	setExpanded: (expanded: boolean) => void;
+}
+const defaultValue: ToolbarSelectContextType<any> = {
+	onChange: () => { },
+	expanded: false,
+	setExpanded: () => { },
+};
+export const ToolbarSelectContext = createContext(defaultValue);
+ToolbarSelectContext.displayName = 'ToolbarSelectContext';

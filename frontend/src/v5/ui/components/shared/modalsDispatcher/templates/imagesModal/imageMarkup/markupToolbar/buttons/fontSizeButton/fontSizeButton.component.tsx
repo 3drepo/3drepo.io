@@ -15,56 +15,40 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ButtonOptionsContainer, IconWithFooterContainer } from '../buttons.styles';
+import { IconWithFooterContainer, FlatToolbarSelectItem, FloatingBar } from '../../toolbarButton/multioptionIcons.styles';
 import TextIcon from '@assets/icons/outlined/text-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { ClickAwayListener } from '@mui/material';
-import { FloatingBarItem, FloatingButtonsContainer, FloatingBar } from '../../toolbarButton/multioptionIcons.styles';
-import { useState } from 'react';
 import { FONT_SIZE } from '../../../imageMarkup.types';
 import { invert } from 'lodash';
-import { ToolbarButton } from '../../toolbarButton/toolbarButton.component';
+import { ToolbarSelect } from '@controls/toolbarSelect/toolbarSelect.component';
 
 const VALUE_TO_SIZE = invert(FONT_SIZE);
+const Icon = ({ value }) => (
+	<IconWithFooterContainer $footer={VALUE_TO_SIZE[value]}>
+		<TextIcon />
+	</IconWithFooterContainer>
+);
 
 type FontSizeButtonProps = {
 	value: number,
 	onChange: (value: number) => void,
 };
-export const FontSizeButton = ({ value, onChange }: FontSizeButtonProps) => {
-	const [expanded, setExpanded] = useState(false);
-
-	const handleChange = (val: number) => {
-		onChange(val);
-		setExpanded(false);
-	};
-
-	const Icon = () => (
-		<IconWithFooterContainer $footer={VALUE_TO_SIZE[value]}>
-			<TextIcon />
-		</IconWithFooterContainer>
-	);
-
-	return (
-		<ClickAwayListener onClickAway={() => setExpanded(false)}>
-			<ButtonOptionsContainer>
-				<FloatingButtonsContainer>
-					{expanded && (
-						<FloatingBar>
-							{Object.entries(FONT_SIZE).map(([key, val]) => (
-								<FloatingBarItem onClick={() => handleChange(val)} selected={val === value} key={key}>
-									{key}
-								</FloatingBarItem>
-							))}
-						</FloatingBar>
-					)}
-				</FloatingButtonsContainer>
-				<ToolbarButton
-					onClick={() => setExpanded(!expanded)}
-					Icon={Icon}
-					title={formatMessage({ id: 'imageMarkup.icon.title.fontSize', defaultMessage: 'Font size' })}
+export const FontSizeButton = ({ value, onChange }: FontSizeButtonProps) => (
+	<ToolbarSelect
+		onChange={onChange}
+		renderToolbarButton={Icon}
+		value={value}
+		title={formatMessage({ id: 'imageMarkup.fontSize.button.title', defaultMessage: 'Font size' })}
+	>
+		<FloatingBar>
+			{Object.entries(FONT_SIZE).map(([key, val]) => (
+				<FlatToolbarSelectItem
+					Icon={() => <span>{key}</span>}
+					value={val}
+					selected={val === value}
+					key={key}
 				/>
-			</ButtonOptionsContainer>
-		</ClickAwayListener>
-	);
-};
+			))}
+		</FloatingBar>
+	</ToolbarSelect>
+);

@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import { Container as ToolbarButtonContainer } from '../../toolbarButton/toolbarButton.styles';
 
 export const ColorIcon = styled.div<{ color: string }>`
 	width: 18px;
@@ -31,4 +32,20 @@ export const PickerContainer = styled.div`
 	cursor: initial;
 	position: relative;
 	z-index: 10;
+`;
+
+export const ButtonOptionsContainer = styled.div<{ disabled?: boolean; }> `
+	position: relative;
+
+	& > ${ /* sc-selector */ToolbarButtonContainer}::after {
+		content: '';
+		position: absolute;
+		height: 0;
+		width: 0;
+		top: 6px;
+		right: 6px;
+		border: solid 3px ${({ theme }) => theme.palette.base.main};
+		border-left-color: transparent;
+		border-bottom-color: transparent;
+	}
 `;

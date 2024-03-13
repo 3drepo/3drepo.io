@@ -96,8 +96,8 @@ export const MarkupToolbar = ({
 				selected={mode === MODES.TEXT}
 				onClick={() => onModeChange(MODES.TEXT)}
 			/>
-			<ShapeButton shape={shape} onShapeChange={onShapeChange} mode={mode} />
-			<CalloutButton callout={callout} onCalloutChange={onCalloutChange} mode={mode} />
+			<ShapeButton value={shape} onChange={onShapeChange} mode={mode} />
+			<CalloutButton value={callout} onChange={onCalloutChange} mode={mode} />
 			<Divider />
 			<ToolbarButton
 				Icon={UndoIcon}

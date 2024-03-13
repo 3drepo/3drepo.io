@@ -15,16 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ColorIcon, PickerContainer } from './colorButton.styles';
+import { ColorIcon, PickerContainer, ButtonOptionsContainer } from './colorButton.styles';
 import { ClickAwayListener, ThemeProvider } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from '../../toolbarButton/toolbarButton.component';
-import { ButtonOptionsContainer } from '../buttons.styles';
 import { ColorPickerPalette } from '@controls/inputs/colorPicker/colorPickerPalette/colorPickerPalette.component';
 import { theme } from '@/v5/ui/routes/viewer/theme';
 import { decimalToHex, hexToDecimal } from '@controls/inputs/colorPicker/colorPicker.helpers';
 import { useState } from 'react';
-import { FloatingButtonsContainer } from '../../toolbarButton/multioptionIcons.styles';
+import { FloatingButtonsContainer } from '@controls/toolbarSelect/toolbarSelect.styles';
 
 type ColorButtonProps = {
 	onChange: (value: string) => void;

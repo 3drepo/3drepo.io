@@ -15,27 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { ToolbarButton } from './toolbarButton.component';
+import styled from 'styled-components';
+import { ToolbarSelectItem } from '@controls/toolbarSelect/toolbarSelectItem/toolbarSelectItem.component';
 
-export const FloatingButtonsContainer = styled.div`
-	display: flex;
-	flex-direction: column;
-	position: absolute;
-	bottom: 44px;
-	z-index: 10;
-`;
-
-const floatingElementStyles = css`
+export const FloatingBar = styled.div`
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_5};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	margin-bottom: 5px;
 	box-sizing: border-box;
 	border: solid 1px ${({ theme }) => theme.palette.secondary.lightest};
-`;
-
-export const FloatingBar = styled.div`
-	${floatingElementStyles}
 	border-radius: 20px;
 	width: 40px;
 	display: flex;
@@ -44,7 +32,7 @@ export const FloatingBar = styled.div`
 	cursor: inherit;
 `;
 
-export const FloatingBarItem = styled.div<{ selected?: boolean }>`
+export const FlatToolbarSelectItem = styled(ToolbarSelectItem)<{ selected?: boolean }>`
 	cursor: pointer;
 	width: 100%;
 	height: 19px;
@@ -52,18 +40,30 @@ export const FloatingBarItem = styled.div<{ selected?: boolean }>`
 	color: ${({ theme, selected }) => selected ? theme.palette.primary.main : theme.palette.secondary.main};
 	display: grid;
 	place-content: center;
+	box-shadow: none;
+	margin-bottom: unset;
+	border: none;
 
 	&:hover {
 		color: ${({ theme }) => theme.palette.primary.main};
 	}
 `;
 
-export const FloatingButton = styled(ToolbarButton).attrs({
-	tooltipProps: {
-		placement: 'right',
-	},
-})`
-	${floatingElementStyles}
-	border-radius: 50%;
-	cursor: pointer;
+export const IconWithFooterContainer = styled.div<{ $footer }> `
+	position: relative;
+	height: 16.5px;
+
+	&::after {
+		content: "${({ $footer }) => $footer}";
+		font-size: 10px;
+		font-weight: 600;
+		position: absolute;
+		bottom: -4px;
+		left: 13px;
+		height: 10px;
+		line-height: 10px;
+		background: ${({ theme }) => theme.palette.primary.contrast};
+		padding: 0 2px;
+	}
 `;
+
