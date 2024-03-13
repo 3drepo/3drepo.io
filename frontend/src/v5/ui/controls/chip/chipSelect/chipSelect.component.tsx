@@ -71,7 +71,7 @@ export const ChipSelect = ({
 					<SelectItem key={label} value={label} label={label} {...itemProps} />
 				))}
 			</HiddenSelect>
-			<Chip disabled={disabled} {...values[value]} onClick={handleOpen} {...props} />
+			<Chip disabled={disabled} onClick={handleOpen} {...values[value]} {...props} />
 		</>
 	);
 };
