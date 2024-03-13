@@ -42,7 +42,7 @@ interface IDrawingsListItem {
 	onSelectOrToggleItem: (id: string) => void;
 }
 
-export const DrawingListItem = memo(({
+export const DrawingsListItem = memo(({
 	isSelected,
 	drawing,
 	onSelectOrToggleItem,

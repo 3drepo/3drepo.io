@@ -25,7 +25,6 @@ import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { ContainerListItemLoading } from '../../containers/containersList/containerListItem/containerListItemLoading.component';
 import { CollapseSideElementGroup, Container } from '../../containers/containersList/containersList.styles';
 import { UploadFileForm } from '../../containers/uploadFileForm/uploadFileForm.component';
 import { AddCircleIcon } from '../../federations/editFederationModal/editFederation/editFederationContainersList/editFederationContainersListItem/groupOption/groupOption.styles';
@@ -34,8 +33,9 @@ import { useCallback, useContext, useState } from 'react';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { Button } from '@controls/button';
 import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
-import { DrawingListItem } from './drawingsListItem/drawingsListItem.component';
+import { DrawingsListItem } from './drawingsListItem/drawingsListItem.component';
 import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers';
+import { DrawingListItemLoading } from './drawingsListItem/drawingsListItemLoading.component';
 
 export const DrawingsList = ({
 	emptyMessage,
@@ -122,10 +122,9 @@ export const DrawingsList = ({
 						<VirtualList items={sortedList} itemHeight={81} itemContent={
 							(drawing, index) => (
 								drawing.hasStatsPending ? (
-									// TODO - Drawing list item loading?
-									<ContainerListItemLoading  delay={index / 10} container={drawing} key={drawing._id} />
+									<DrawingListItemLoading  delay={index / 10} drawing={drawing} key={drawing._id} />
 								) : (
-									<DrawingListItem
+									<DrawingsListItem
 										key={drawing._id}
 										isSelected={drawing._id === selectedItemId}
 										drawing={drawing}
