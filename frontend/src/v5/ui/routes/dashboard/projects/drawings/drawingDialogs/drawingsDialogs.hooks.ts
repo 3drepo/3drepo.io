@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DrawinsgActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawinsgActionDispatchers } from '@/v5/services/actionsDispatchers';
 import { DrawingHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { CreateDrawingSchema } from '@/v5/validation/drawingsSchemes/drawingSchemes';
+import { CreateDrawingSchema } from '@/v5/validation/drawingSchemes/drawingSchemes';
 import { nameAlreadyExists, numberAlreadyExists } from '@/v5/validation/errors.helpers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useEffect, useState } from 'react';
@@ -79,7 +79,7 @@ export const useDrawingForm = (defaultValues?: IDrawing) => {
 
 	useEffect(() => {
 		if (!isCategoriesPending) return;
-		DrawinsgActionsDispatchers.fetchCategories(teamspace, project);
+		DrawinsgActionDispatchers.fetchCategories(teamspace, project);
 	}, []);
 
 

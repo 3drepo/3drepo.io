@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DialogsActionsDispatchers, DrawinsgActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DialogsActionsDispatchers, DrawinsgActionDispatchers } from '@/v5/services/actionsDispatchers';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
@@ -36,7 +36,7 @@ export const Drawings = () => {
 
 	useEffect(() => {
 		if (!isPending) return;
-		DrawinsgActionsDispatchers.fetchDrawings(teamspace, project);
+		DrawinsgActionDispatchers.fetchDrawings(teamspace, project);
 	}, [isPending]);
 
 	const onClickCreate = () => DialogsActionsDispatchers.open(CreateDrawingDialog);

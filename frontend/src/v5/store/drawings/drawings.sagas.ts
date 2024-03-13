@@ -65,7 +65,7 @@ export function* fetchCategories({ teamspace, projectId }: FetchCategoriesAction
 
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'drawings.fetchCategories.error', defaultMessage: 'trying to fetch categories' }),
+			currentActions: formatMessage({ id: 'drawings.fetchCategories.error', defaultMessage: 'trying to fetch drawing categories' }),
 			error,
 		}));
 	}

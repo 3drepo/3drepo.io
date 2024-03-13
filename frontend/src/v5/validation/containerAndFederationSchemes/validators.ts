@@ -68,7 +68,6 @@ export const type = Yup.string().required().default('Uncategorised');
 
 export const alphaNumericHyphens = /^[\w|_|-]*$/;
 
-
 export const code = Yup.lazy((value) => (
 	stripIfBlankString(value)
 		.max(50,
