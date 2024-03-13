@@ -35,6 +35,7 @@ const { deserialiseGroupSchema } = require('./tickets.groups');
 const { generateFullSchema } = require('./templates');
 const { getJobNames } = require('../../models/jobs');
 const { getTicketsByQuery } = require('../../models/tickets');
+const { importCommentSchema } = require('./tickets.comments');
 const { logger } = require('../../utils/logger');
 const { propTypesToValidator } = require('./validators');
 
@@ -168,6 +169,10 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 		).default({}),
 		type: isNewTicket ? Yup.mixed().required() : Yup.mixed().strip(),
 	};
+
+	if (isImport) {
+		validatorObj.comments = Yup.array().min(1).of(importCommentSchema);
+	}
 
 	const validatedTicket = await Yup.object(validatorObj).validate(newTicket, { stripUnknown: true });
 

@@ -24,13 +24,14 @@ const Comments = {};
 
 const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal));
 
-Comments.validateComment = (newData, existingComment) => {
+const generateCommentSchema = (existingComment, isImport = false) => {
 	const isNewComment = !existingComment;
 	const history = existingComment?.history ?? [];
 	const historyImages = history.flatMap(({ images }) => images ?? []);
 	const currentImages = existingComment?.images ?? [];
 	const acceptableRefs = [...new Set([...currentImages, ...historyImages])].map(UUIDToString);
-	const schema = Yup.object().shape({
+
+	const schemaObj = {
 		message: types.strings.longDescription,
 		images: Yup.array().min(1).of(
 			isNewComment
@@ -39,16 +40,24 @@ Comments.validateComment = (newData, existingComment) => {
 					.test('Image ref test', 'One or more image refs do not correspond to a current comment image ref',
 						(value, { originalValue }) => !isUUIDString(originalValue)
 								|| acceptableRefs.includes(originalValue)),
-		),
-	}).test(
+		) };
+
+	if (isImport) {
+		schemaObj.originalAuthor = types.strings.title.required();
+		schemaObj.createdAt = types.dateInThePast.required();
+	}
+
+	return Yup.object().shape(schemaObj).test(
 		'at-least-one-property',
 		'You must provide at least a message or a set of images',
-		(value) => Object.keys(value).length,
+		({ message, images } = {}) => message || images,
 	).required()
 		.noUnknown();
-
-	return schema.validate(newData);
 };
+
+Comments.importCommentSchema = generateCommentSchema(undefined, true);
+
+Comments.validateComment = (newData, existingComment) => generateCommentSchema(existingComment).validate(newData);
 
 Comments.serialiseComment = (comment) => {
 	const caster = Yup.object({
