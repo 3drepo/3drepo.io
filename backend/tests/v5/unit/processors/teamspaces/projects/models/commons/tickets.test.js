@@ -17,7 +17,7 @@
 
 const { cloneDeep, times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup } = require('../../../../../../helper/services');
+const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup } = require('../../../../../../helper/services');
 
 const Tickets = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
 
@@ -33,6 +33,9 @@ const { events } = require(`${src}/services/eventsManager/eventsManager.constant
 
 jest.mock('../../../../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);
+
+jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.comments');
+const CommentsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/tickets.comments`);
 
 jest.mock('../../../../../../../../src/v5/models/tickets.groups');
 const TicketGroupsModel = require(`${src}/models/tickets.groups`);
@@ -709,6 +712,7 @@ const insertTicketsTestHelper = (isImport) => {
 			template._id, tickets);
 
 		expect(FilesManager.storeFile).not.toHaveBeenCalled();
+		expect(CommentsProcessor.importComments).not.toHaveBeenCalled();
 
 		expect(EventsManager.publish).toHaveBeenCalledTimes(expectedOutput.length);
 		expectedOutput.forEach((ticket) => expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
@@ -733,6 +737,47 @@ const testAddTicket = () => {
 const testImportTickets = () => {
 	describe('Import ticket', () => {
 		insertTicketsTestHelper(true);
+		describe('Import tickets with comments', () => {
+			const template = generateTemplate();
+			const tickets = times(10, () => ({ ...generateTicket(template),
+				comments: times(10, generateRandomObject) }));
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const author = generateRandomString();
+			test('should call importComments if there are comments', async () => {
+				const expectedOutput = tickets.map((ticketData) => ({ ...ticketData,
+					_id: generateRandomString() }));
+
+				TicketsModel.addTicketsWithTemplate.mockResolvedValueOnce(expectedOutput);
+				TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
+
+				await expect(Tickets.importTickets(teamspace, project, model, template, tickets, author))
+					.resolves.toEqual(expectedOutput.map(({ _id }) => _id));
+
+				expect(TemplatesModel.generateFullSchema).toHaveBeenCalledTimes(1);
+				expect(TemplatesModel.generateFullSchema).toHaveBeenCalledWith(template);
+
+				expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledTimes(1);
+				expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project, model,
+					template._id, tickets);
+
+				expect(FilesManager.storeFile).not.toHaveBeenCalled();
+
+				expect(EventsManager.publish).toHaveBeenCalledTimes(expectedOutput.length);
+				expectedOutput.forEach((ticket) => expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
+					{ teamspace,
+						project,
+						model,
+						ticket }));
+
+				expect(CommentsProcessor.importComments).toHaveBeenCalledTimes(tickets.length);
+				expectedOutput.forEach(({ _id }, i) => {
+					expect(CommentsProcessor.importComments).toHaveBeenCalledWith(teamspace, project, model, _id,
+						tickets[i].comments, author);
+				});
+			});
+		});
 	});
 };
 

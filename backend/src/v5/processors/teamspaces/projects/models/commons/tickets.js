@@ -33,6 +33,7 @@ const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
+const { importComments } = require('./tickets.comments');
 const { isUUID } = require('../../../../../utils/helper/typeCheck');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 
@@ -200,7 +201,17 @@ const processNewTickets = async (teamspace, project, model, template, tickets) =
 	return ids;
 };
 
-Tickets.importTickets = processNewTickets;
+Tickets.importTickets = async (teamspace, project, model, template, tickets, author) => {
+	const ids = await processNewTickets(teamspace, project, model, template, tickets);
+
+	await Promise.all(tickets.map(async ({ comments }, i) => {
+		if (comments?.length) {
+			await importComments(teamspace, project, model, ids[i], comments, author);
+		}
+	}));
+
+	return ids;
+};
 
 Tickets.addTicket = async (teamspace, project, model, template, ticket) => {
 	const [id] = await processNewTickets(teamspace, project, model, template, [ticket]);

@@ -29,6 +29,7 @@ const findMany = (ts, query, projection, sort) => db.find(ts, TICKET_COMMENTS_CO
 const findOne = (ts, query, projection) => db.findOne(ts, TICKET_COMMENTS_COL, query, projection);
 const updateOne = (ts, query, data) => db.updateOne(ts, TICKET_COMMENTS_COL, query, data);
 const insertOne = (ts, data) => db.insertOne(ts, TICKET_COMMENTS_COL, data);
+const insertMany = (ts, data) => db.insertMany(ts, TICKET_COMMENTS_COL, data);
 
 TicketComments.getCommentById = async (teamspace, project, model, ticket, _id,
 	projection = {
@@ -62,21 +63,33 @@ TicketComments.getCommentsByTicket = (teamspace, project, model, ticket,
 TicketComments.addComment = async (teamspace, project, model, ticket, commentData, author) => {
 	const _id = generateUUID();
 	const createdAt = new Date();
-	const comment = { ...commentData, _id, ticket, teamspace, project, model, author, createdAt, updatedAt: createdAt };
+	const comment = { ...commentData, _id, ticket, author, createdAt, updatedAt: createdAt };
 
-	await insertOne(teamspace, comment);
+	await insertOne(teamspace, { ...comment, teamspace, project, model });
 
-	publish(events.NEW_COMMENT, { teamspace,
-		project,
-		model,
-		data: { ticket,
-			_id,
-			message: comment.message,
-			images: comment.images,
-			author: comment.author,
-			createdAt } });
+	return comment;
+};
 
-	return _id;
+TicketComments.importComments = async (teamspace, project, model, ticket, comments, author) => {
+	const currDate = new Date();
+	const toReturn = [];
+	const docsToInsert = comments.map((comment) => {
+		const fullComment = { ...comment,
+			_id: generateUUID(),
+			updatedAt: currDate,
+			importedAt: currDate,
+			author,
+			ticket };
+		toReturn.push(fullComment);
+		return { ...fullComment,
+			teamspace,
+			project,
+			model };
+	});
+
+	await insertMany(teamspace, docsToInsert);
+
+	return toReturn;
 };
 
 const getUpdatedComment = (oldComment, updateData) => {

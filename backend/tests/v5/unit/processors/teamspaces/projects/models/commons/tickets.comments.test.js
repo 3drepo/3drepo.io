@@ -15,8 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { cloneDeep, times } = require('lodash');
+
 const { src } = require('../../../../../../helper/path');
-const { generateRandomString, generateUUIDString, generateRandomBuffer } = require('../../../../../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomObject, generateUUID, generateUUIDString, generateRandomBuffer } = require('../../../../../../helper/services');
 
 const Comments = require(`${src}/processors/teamspaces/projects/models/commons/tickets.comments`);
 
@@ -28,6 +30,10 @@ const { TICKETS_RESOURCES_COL } = require(`${src}/models/tickets.constants`);
 jest.mock('../../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 
+jest.mock('../../../../../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+
 const testAddComment = () => {
 	describe('Add comment', () => {
 		const teamspace = generateRandomString();
@@ -35,20 +41,30 @@ const testAddComment = () => {
 		const model = generateRandomString();
 		const ticket = generateRandomString();
 		const author = generateRandomString();
-		const expectedOutput = generateRandomString();
+		const expectedOutput = {
+			_id: generateRandomString(),
+			...generateRandomObject(),
+		};
 
 		test('should call addComment in model and return whatever it returns', async () => {
 			const commentData = generateRandomString();
 			CommentsModel.addComment.mockResolvedValueOnce(expectedOutput);
 
 			await expect(Comments.addComment(teamspace, project, model, ticket, commentData, author))
-				.resolves.toEqual(expectedOutput);
+				.resolves.toEqual(expectedOutput._id);
 
 			expect(CommentsModel.addComment).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.addComment).toHaveBeenCalledWith(teamspace, project, model,
 				ticket, commentData, author);
 
 			expect(FilesManager.storeFile).not.toHaveBeenCalled();
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(
+				events.NEW_COMMENT, { teamspace,
+					project,
+					model,
+					data: expectedOutput });
 		});
 
 		test('should process image and store a ref', async () => {
@@ -60,7 +76,7 @@ const testAddComment = () => {
 			CommentsModel.addComment.mockResolvedValueOnce(expectedOutput);
 
 			await expect(Comments.addComment(teamspace, project, model, ticket, commentData, author))
-				.resolves.toEqual(expectedOutput);
+				.resolves.toEqual(expectedOutput._id);
 
 			const imgRef = CommentsModel.addComment.mock.calls[0][4].images[0];
 			expect(CommentsModel.addComment).toHaveBeenCalledTimes(1);
@@ -71,6 +87,89 @@ const testAddComment = () => {
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
 			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
 				imgRef, imageBuffer, meta);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(
+				events.NEW_COMMENT, { teamspace,
+					project,
+					model,
+					data: expectedOutput });
+		});
+	});
+};
+
+const testImportComments = () => {
+	describe('Import comments', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const ticket = generateRandomString();
+		const author = generateRandomString();
+
+		test('should call addComment in model and return whatever it returns', async () => {
+			const commentData = times(10, () => ({
+				message: generateRandomString(),
+			}));
+
+			const expectedOutput = commentData.map((comment) => ({ ...comment, _id: generateUUID() }));
+
+			CommentsModel.importComments.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Comments.importComments(teamspace, project, model, ticket, commentData, author))
+				.resolves.toEqual(expectedOutput.map(({ _id }) => _id));
+
+			expect(CommentsModel.importComments).toHaveBeenCalledTimes(1);
+			expect(CommentsModel.importComments).toHaveBeenCalledWith(teamspace, project, model,
+				ticket, commentData, author);
+
+			expect(FilesManager.storeFile).not.toHaveBeenCalled();
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(expectedOutput.length);
+			expectedOutput.forEach((data) => {
+				expect(EventsManager.publish).toHaveBeenCalledWith(
+					events.NEW_COMMENT, { teamspace,
+						project,
+						model,
+						data });
+			});
+		});
+
+		test('should process image and store a ref', async () => {
+			const commentData = times(10, () => ({
+				[generateRandomString()]: generateRandomString(),
+				images: [generateRandomBuffer()],
+			}));
+			const expectedOutput = commentData.map((comment) => ({ ...comment, _id: generateUUID() }));
+
+			CommentsModel.importComments.mockResolvedValueOnce(expectedOutput);
+
+			await expect(Comments.importComments(teamspace, project, model, ticket, cloneDeep(commentData), author))
+				.resolves.toEqual(expectedOutput.map(({ _id }) => _id));
+
+			const commentsWithRefs = CommentsModel.importComments.mock.calls[0][4];
+
+			expect(CommentsModel.importComments).toHaveBeenCalledTimes(1);
+			expect(CommentsModel.importComments).toHaveBeenCalledWith(teamspace, project, model, ticket,
+				expect.any(Array), author);
+
+			expect(FilesManager.storeFile).toHaveBeenCalledTimes(expectedOutput.length);
+			commentsWithRefs.forEach(({ images: [imgRef], ...others }, i) => {
+				const { images, ...orgComment } = commentData[i];
+				expect(others).toEqual(orgComment);
+
+				const meta = { teamspace, project, model, ticket };
+				expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, TICKETS_RESOURCES_COL,
+					imgRef, images[0], meta);
+			});
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(expectedOutput.length);
+			expectedOutput.forEach((data) => {
+				expect(EventsManager.publish).toHaveBeenCalledWith(
+					events.NEW_COMMENT, { teamspace,
+						project,
+						model,
+						data });
+			});
 		});
 	});
 };
@@ -219,8 +318,9 @@ const testGetCommentById = () => {
 	});
 };
 
-describe('processors/teamspaces/projects/models/commons/tickets.comments', () => {
+describe(determineTestGroup(__filename), () => {
 	testAddComment();
+	testImportComments();
 	testUpdateComment();
 	testDeleteComment();
 	testGetCommentsByTicket();
