@@ -34,6 +34,7 @@ import { ImageMarkup } from './imageMarkup/imageMarkup.component';
 
 export type ImagesModalProps = {
 	onClickClose: () => void;
+	onClose?: () => void;
 	open: boolean;
 	images: string[];
 	// to use if the image to display is not the first one
@@ -42,19 +43,22 @@ export type ImagesModalProps = {
 	onUpload?: () => void;
 	onDelete?: (index) => void;
 	disabledDeleteMessage?: string;
+	openInMarkupMode?: boolean;
 };
 export const ImagesModal = ({
 	images,
 	displayImageIndex = 0,
 	onClickClose,
+	onClose,
 	open,
 	onUpload,
 	onDelete,
 	onAddMarkup,
 	disabledDeleteMessage,
+	openInMarkupMode = false,
 }: ImagesModalProps) => {
 	const [imageIndex, setImageIndex] = useState(displayImageIndex);
-	const [markupMode, setMarkupMode] = useState(false);
+	const [markupMode, setMarkupMode] = useState(openInMarkupMode);
 	const imagesLength = images.length;
 	const imageRef = useRef<HTMLImageElement>(null);
 	const hasManyImages = imagesLength > 1;
@@ -65,6 +69,11 @@ export const ImagesModal = ({
 		setImageIndex(newIndex);
 	};
 
+	const handleClose = () => {
+		onClickClose();
+		onClose?.();
+	};
+
 	const handleKeyDown = ({ keyCode }) => {
 		const ESCAPE_KEY = 27;
 		const LEFT_KEY = 37;
@@ -72,7 +81,7 @@ export const ImagesModal = ({
 
 		switch (keyCode) {
 			case ESCAPE_KEY:
-				onClickClose();
+				handleClose();
 				break;
 			case LEFT_KEY:
 				changeImageIndex(-1);
@@ -119,7 +128,7 @@ export const ImagesModal = ({
 
 	useEffect(() => {
 		if (!imagesLength) {
-			onClickClose();
+			handleClose();
 		}
 	}, [imagesLength]);
 
@@ -137,7 +146,7 @@ export const ImagesModal = ({
 	);
 
 	return (
-		<Modal open={open} onClose={onClickClose}>
+		<Modal open={open} onClose={handleClose}>
 			<TopBar>
 				<Buttons>
 					{hasManyImages && (
@@ -176,7 +185,7 @@ export const ImagesModal = ({
 						</Tooltip>
 					)}
 				</Buttons>
-				<CloseButton onClick={onClickClose}>
+				<CloseButton onClick={handleClose}>
 					<CloseIcon />
 				</CloseButton>
 			</TopBar>

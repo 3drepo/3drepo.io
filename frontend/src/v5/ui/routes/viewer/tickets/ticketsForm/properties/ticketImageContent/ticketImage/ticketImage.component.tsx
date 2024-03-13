@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
@@ -24,19 +24,33 @@ import { TicketImageContent } from '../ticketImageContent.component';
 import { TicketImageActionMenu } from '../ticketImageActionMenu.component';
 import { InputContainer, Label } from './ticketImage.styles';
 import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
 
 type TicketImageProps = FormInputProps & { onImageClick: () => void; };
 export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperText, onImageClick, ...props }: TicketImageProps) => {
-	const [modalIsOpen, setModalIsOpen] = useState(false);
 	const imgSrc = getImgSrc(value);
+	const imgInModal = useRef(imgSrc);
+	const syncProps = useSyncProps({ images: [imgInModal.current] });
+	
+	const handleImageClick = () => DialogsActionsDispatchers.open(ImagesModal, {
+		onAddMarkup: disabled
+			? null
+			: (newValue) => onChange(newValue ? stripBase64Prefix(newValue) : null),
+	}, syncProps);
 
-	const openImageModal = () => setModalIsOpen(true);
-
-	const onImageChange = (newValue) => {
-		onChange(newValue ? stripBase64Prefix(newValue) : null);
-		if (newValue) {
-			openImageModal();
+	const onUploadNewImage = (newValue) => {
+		if (!newValue) {
+			onChange(newValue);
+			return;
 		}
+
+		imgInModal.current = newValue;
+		DialogsActionsDispatchers.open(ImagesModal, {
+			onClose: () => onChange(stripBase64Prefix(imgInModal.current)),
+			onAddMarkup: (newImg) => { imgInModal.current = newImg; },
+			openInMarkupMode: true,
+		}, syncProps);
 	};
 
 	useEffect(() => onBlur?.(), [value]);
@@ -47,22 +61,14 @@ export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperTe
 				<Label>{label}</Label>
 				<TicketImageContent
 					value={imgSrc}
-					onChange={onImageChange}
+					onChange={onUploadNewImage}
 					disabled={disabled}
-					onImageClick={openImageModal}
+					onImageClick={handleImageClick}
 				>
-					<TicketImageActionMenu value={imgSrc} onChange={onImageChange} disabled={disabled} onClick={openImageModal} />
+					<TicketImageActionMenu value={imgSrc} onChange={onUploadNewImage} disabled={disabled} onClick={handleImageClick} />
 				</TicketImageContent>
 				<FormHelperText>{helperText}</FormHelperText>
 			</InputContainer>
-			{modalIsOpen && (
-				<ImagesModal
-					open
-					images={[imgSrc]}
-					onAddMarkup={disabled ? null : onImageChange}
-					onClickClose={() => setModalIsOpen(false)}
-				/>
-			)}
 		</>
 	);
 };

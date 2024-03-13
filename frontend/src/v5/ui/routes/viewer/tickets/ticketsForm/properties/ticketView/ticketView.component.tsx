@@ -19,7 +19,7 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import ViewpointIcon from '@assets/icons/outlined/aim-outlined.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { cloneDeep, isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
@@ -38,6 +38,8 @@ import { Header, HeaderSection, Label, Tooltip } from './ticketView.styles';
 import { CameraActionMenu } from './viewActionMenu/menus/cameraActionMenu.component';
 import { GroupsActionMenu } from './viewActionMenu/menus/groupsActionMenu.component';
 import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
+import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 type ITicketView = {
 	value: Viewpoint | undefined;
@@ -60,27 +62,44 @@ export const TicketView = ({
 	required,
 	...props
 }: ITicketView) => {
-	const [modalIsOpen, setModalIsOpen] = useState(false);
 	const { setDetailViewAndProps } = useContext(TicketContext);
 	const hasViewpoint = value?.camera;
+	const imgSrc = getImgSrc(value?.screenshot);
+	const imgInModal = useRef(imgSrc);
+	const syncProps = useSyncProps({ images: [imgInModal.current] });
 
-	const openImageModal = () => setModalIsOpen(true);
+	// Image
+	const handleImageClick = () => DialogsActionsDispatchers.open(ImagesModal, {
+		onAddMarkup: disabled
+			? null
+			: (newValue) => onChange({ ...value, screenshot: stripBase64Prefix(newValue) }),
+	}, syncProps);
+
+	const handleNewImageUpload = (newImage, onSave) => {
+		imgInModal.current = newImage;
+		DialogsActionsDispatchers.open(ImagesModal, {
+			onClose: () => onSave(stripBase64Prefix(imgInModal.current)),
+			onAddMarkup: (newImg) => { imgInModal.current = newImg; },
+			openInMarkupMode: true,
+		}, syncProps);
+	};
+
+	const onUpdateImage = (newValue) => {
+		if (!newValue) {
+			onChange({ ...value, screenshot: null });
+			return;
+		}
+
+		handleNewImageUpload(newValue, (newImage) => onChange({ ...value, screenshot: newImage }));
+	};
 
 	// Viewpoint
 	const updateViewpoint = async () => {
 		const currentCameraAndClipping = await ViewerService.getViewpoint();
-		const screenshot = stripBase64Prefix(await ViewerService.getScreenshot());
+		const screenshot = await ViewerService.getScreenshot();
 		const state = await getViewerState();
-		onChange?.({ screenshot, ...currentCameraAndClipping, state });
-		openImageModal();
-	};
 
-	// Image
-	const onImageChange = (newImg) => {
-		onChange({ ...value, screenshot: newImg ? stripBase64Prefix(newImg) : '' });
-		if (newImg) {
-			openImageModal();
-		}
+		handleNewImageUpload(screenshot, (newImage) => onChange({ screenshot: newImage, ...currentCameraAndClipping, state }));
 	};
 
 	// Camera
@@ -116,8 +135,6 @@ export const TicketView = ({
 	const onGroupsClick = () => {
 		setDetailViewAndProps(TicketDetailsView.Groups, props);
 	};
-
-	const imgSrc = getImgSrc(value?.screenshot);
 
 	return (
 		<>
@@ -161,11 +178,16 @@ export const TicketView = ({
 				</Header>
 				<TicketImageContent
 					value={imgSrc}
-					onChange={onImageChange}
+					onChange={onUpdateImage}
 					disabled={disabled}
-					onImageClick={openImageModal}
+					onImageClick={handleImageClick}
 				>
-					<TicketImageActionMenu onClick={openImageModal} value={imgSrc} onChange={onImageChange} disabled={disabled} />
+					<TicketImageActionMenu
+						onClick={handleImageClick}
+						value={imgSrc}
+						onChange={onUpdateImage}
+						disabled={disabled}
+					/>
 					<CameraActionMenu
 						value={value?.camera}
 						disabled={disabled}
@@ -182,14 +204,6 @@ export const TicketView = ({
 				</TicketImageContent>
 				<FormHelperText>{helperText}</FormHelperText>
 			</ViewerInputContainer>
-			{modalIsOpen && (
-				<ImagesModal
-					open
-					images={[imgSrc]}
-					onAddMarkup={disabled ? null : onImageChange}
-					onClickClose={() => setModalIsOpen(false)}
-				/>
-			)}
 		</>
 	);
 };
