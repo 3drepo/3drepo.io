@@ -19,7 +19,7 @@
 export interface IDrawing {
 	_id: string;
 	name: string;
-	desc: string;
+	desc?: string;
 	drawingNumber: string;
 	category: string;
 }
