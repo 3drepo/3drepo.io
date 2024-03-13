@@ -32,7 +32,7 @@ export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions
 	createDrawing: ['teamspace', 'projectId', 'drawing', 'onSuccess', 'onError'],
 	createDrawingSuccess: ['projectId', 'drawing'],
 	updateDrawing: ['teamspace', 'projectId', 'drawingId', 'drawing', 'onSuccess', 'onError'],
-	updateDrawingSuccess: ['projectId', 'drawing'],
+	updateDrawingSuccess: ['projectId', 'drawingId', 'drawing'],
 }, { prefix: 'DRAWINGS/' }) as { Types: Constants<IDrawingsActionCreators>; Creators: IDrawingsActionCreators };
 
 
@@ -57,8 +57,8 @@ export const createDrawingSuccess = (state: DrawingsState, { projectId, drawing 
 	state.drawingsByProject[projectId] = (state.drawingsByProject[projectId] || []).concat([drawing]);
 };
 
-export const updateDrawingSuccess = (state: DrawingsState, { projectId, drawing }:UpdateDrawingSuccessAction ) => {
-	const oldDrawing = getDrawingFromState(state, projectId, drawing._id);
+export const updateDrawingSuccess = (state: DrawingsState, { projectId, drawingId, drawing }:UpdateDrawingSuccessAction ) => {
+	const oldDrawing = getDrawingFromState(state, projectId, drawingId);
 	Object.assign(oldDrawing,  drawing);
 };
 
@@ -89,8 +89,9 @@ export type FetchCategoriesAction = Action<'FETCH_DRAWINGS_CATEGORIES'> & Teamsp
 export type FetchCategoriesSuccessAction = Action<'FETCH_DRAWINGS_CATEGORIES_SUCCESS'> & ProjectId & { categories: string[] };
 export type CreateDrawingAction = Action<'CREATE_DRAWING'> & TeamspaceAndProjectId & SuccessAndErrorCallbacks & { drawing: IDrawing };
 export type CreateDrawingSuccessAction = Action<'CREATE_DRAWING_SUCCESS'> &  ProjectId & { drawing: IDrawing };
-export type UpdateDrawingAction = Action<'UPDATE_DRAWING'> & TeamspaceProjectAndDrawingId & SuccessAndErrorCallbacks & { drawing: IDrawing };
-export type UpdateDrawingSuccessAction = Action<'UPDATE_DRAWING_SUCCESS'> &  ProjectId & { drawing: IDrawing };
+export type UpdateDrawingAction = Action<'UPDATE_DRAWING'> & TeamspaceProjectAndDrawingId & SuccessAndErrorCallbacks & { drawing: Partial<IDrawing> };
+export type UpdateDrawingSuccessAction = Action<'UPDATE_DRAWING_SUCCESS'> &  TeamspaceProjectAndDrawingId & { drawing: Partial<IDrawing> };
+
 export interface IDrawingsActionCreators {
 	fetchDrawings: (teamspace: string, projectId: string) => FetchDrawingsAction;
 	fetchDrawingsSuccess: (projectId: string, drawings: IDrawing[]) => FetchDrawingsSuccessAction;
@@ -104,9 +105,9 @@ export interface IDrawingsActionCreators {
 		teamspace: string, 
 		projectId: string, 
 		drawingId: string, 
-		drawing: IDrawing, 
+		drawing: Partial<IDrawing>, 
 		onSuccess: () => void, 
 		onError: (e:Error) => void
 	) => UpdateDrawingAction;
-	updateDrawingSuccess: (projecId: string, drawing: IDrawing) => UpdateDrawingSuccessAction;
+	updateDrawingSuccess: (projecId: string, drawingId: string, drawing: Partial<IDrawing>) => UpdateDrawingSuccessAction;
 }

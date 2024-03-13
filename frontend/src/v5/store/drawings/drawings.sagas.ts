@@ -86,8 +86,7 @@ export function* createDrawing({ teamspace, projectId, drawing, onSuccess, onErr
 export function* updateDrawing({ teamspace, projectId, drawingId, drawing, onSuccess, onError }: UpdateDrawingAction) {
 	try {
 		yield API.Drawings.updateDrawing(teamspace, projectId, drawingId, drawing);
-		const updatedDrawing = { _id: drawingId, ...drawing };
-		yield put(DrawingsActions.updateDrawingSuccess(projectId, updatedDrawing));
+		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, drawing));
 		onSuccess();
 	} catch (error) {
 		onError(error);
