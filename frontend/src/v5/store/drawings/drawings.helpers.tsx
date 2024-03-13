@@ -19,15 +19,33 @@ import { formatMessage } from '@/v5/services/intl';
 import WarningIcon from '@assets/icons/outlined/warning-outlined.svg';
 import CalibratedIcon from '@assets/icons/filled/calibration-filled.svg';
 import NotCalibrated from '@assets/icons/filled/no_calibration-filled.svg';
+import { Display } from '@/v5/ui/themes/media';
 
 export const DRAWING_LIST_COLUMN_WIDTHS = {
-	name: 90,
-	revisionsCount: 165,
-	calibration: 165,
-	code: 190,
-	type: 120,
-	lastUpdated: 135,
-	actions: 72,
+	name: {
+		minWidth: 90,
+	},
+	revisionsCount: {
+		width: 165,
+		hideWhenSmallerThan: Display.Desktop,
+	},
+	calibration: {
+		width: 165,
+		hideWhenSmallerThan: Display.Tablet,
+	},
+	code: {
+		width: 190,
+	},
+	type: {
+		width: 120,
+		hideWhenSmallerThan: Display.Desktop,
+	},
+	lastUpdated: {
+		width: 135,
+	},
+	actions: {
+		width: 72,
+	},
 };
 
 export const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'type', 'code', 'status'];

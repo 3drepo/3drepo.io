@@ -26,7 +26,6 @@ import {
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
-import { Display } from '@/v5/ui/themes/media';
 import { formatShortDateTime } from '@/v5/helpers/intl.helper';
 import { DrawingsListItemTitle } from './drawingsListItemTitle/drawingsListItemTitle.component';
 import { DrawingsCalibrationButton } from './drawingsCalibrationButton/drawingsCalibrationButton.styles';
@@ -70,17 +69,17 @@ export const DrawingListItem = memo(({
 		<DashboardListItem selected={isSelected} key={drawing._id}>
 			<DashboardListItemRow selected={isSelected} onClick={() => onSelectOrToggleItem(drawing._id)}>
 				<DrawingsListItemTitle
-					minWidth={DRAWING_LIST_COLUMN_WIDTHS.name}
+					// minWidth={DRAWING_LIST_COLUMN_WIDTHS.name.width}
 					drawing={drawing}
 					isSelected={isSelected}
+					{...DRAWING_LIST_COLUMN_WIDTHS.name}
 				/>
 				<DashboardListItemButton
 					onClick={() => onSelectOrToggleItem(drawing._id)}
-					width={DRAWING_LIST_COLUMN_WIDTHS.revisionsCount}
-					hideWhenSmallerThan={Display.Desktop}
 					tooltipTitle={
 						<FormattedMessage id="drawings.list.item.revisions.tooltip" defaultMessage="View revisions" />
 					}
+					{...DRAWING_LIST_COLUMN_WIDTHS.revisionsCount}
 				>
 					<FormattedMessage
 						id="drawings.list.item.revisions"
@@ -91,26 +90,21 @@ export const DrawingListItem = memo(({
 				<DrawingsCalibrationButton
 					calibration={drawing.calibration}
 					onClick={() => { }} // TODO - add calibrate functionality
-					width={DRAWING_LIST_COLUMN_WIDTHS.calibration}
-					hideWhenSmallerThan={Display.Desktop}
 					tooltipTitle={
 						<FormattedMessage id="drawings.list.item.calibration.tooltip" defaultMessage="Calibrate" />
 					}
+					{...DRAWING_LIST_COLUMN_WIDTHS.calibration}
 				/>
-				<DashboardListItemText selected={isSelected} width={DRAWING_LIST_COLUMN_WIDTHS.code}>
+				<DashboardListItemText selected={isSelected} width={DRAWING_LIST_COLUMN_WIDTHS.code.width}>
 					{drawing.code}
 				</DashboardListItemText>
-				<DashboardListItemText
-					width={DRAWING_LIST_COLUMN_WIDTHS.type}
-					hideWhenSmallerThan={Display.Tablet}
-					selected={isSelected}
-				>
+				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.type}>
 					{drawing.type}
 				</DashboardListItemText>
 				<DashboardListItemText
-					width={DRAWING_LIST_COLUMN_WIDTHS.lastUpdated}
 					selected={isSelected}
 					dontHighlight
+					{...DRAWING_LIST_COLUMN_WIDTHS.lastUpdated}
 				>
 					{drawing.lastUpdated && formatShortDateTime(drawing.lastUpdated)}
 				</DashboardListItemText>

@@ -95,25 +95,25 @@ export const DrawingsList = ({
 			>
 				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
 					{/* TODO Check names match object keys */}
-					<DashboardListHeaderLabel name="name" minWidth={DRAWING_LIST_COLUMN_WIDTHS.name}>
+					<DashboardListHeaderLabel name="name" {...DRAWING_LIST_COLUMN_WIDTHS.name}>
 						<FormattedMessage id="drawings.list.header.drawing" defaultMessage="Drawing" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="revisionsCount" width={DRAWING_LIST_COLUMN_WIDTHS.revisionsCount} hideWhenSmallerThan={Display.Desktop}>
+					<DashboardListHeaderLabel name="revisionsCount" {...DRAWING_LIST_COLUMN_WIDTHS.revisionsCount} hideWhenSmallerThan={Display.Desktop}>
 						<FormattedMessage id="drawings.list.header.revisions" defaultMessage="Revisions" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="calibration" width={DRAWING_LIST_COLUMN_WIDTHS.calibration}>
+					<DashboardListHeaderLabel name="calibration" {...DRAWING_LIST_COLUMN_WIDTHS.calibration}>
 						<FormattedMessage id="drawings.list.header.calibration" defaultMessage="2D/3D Calibration" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="code" width={DRAWING_LIST_COLUMN_WIDTHS.code} hideWhenSmallerThan={Display.Tablet}>
+					<DashboardListHeaderLabel name="code" {...DRAWING_LIST_COLUMN_WIDTHS.code} hideWhenSmallerThan={Display.Tablet}>
 						<FormattedMessage id="drawings.list.header.drawingNo" defaultMessage="Drawing Number" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="type" width={DRAWING_LIST_COLUMN_WIDTHS.type}>
+					<DashboardListHeaderLabel name="type" {...DRAWING_LIST_COLUMN_WIDTHS.type}>
 						<FormattedMessage id="drawings.list.header.category" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="lastUpdated" width={DRAWING_LIST_COLUMN_WIDTHS.lastUpdated}>
+					<DashboardListHeaderLabel name="lastUpdated" {...DRAWING_LIST_COLUMN_WIDTHS.lastUpdated}>
 						<FormattedMessage id="drawings.list.header.lastUpdated" defaultMessage="Last Updated" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="Actions" width={DRAWING_LIST_COLUMN_WIDTHS.actions}>
+					<DashboardListHeaderLabel {...DRAWING_LIST_COLUMN_WIDTHS.actions}>
 						<FormattedMessage id="drawings.list.header.actions" defaultMessage="Actions" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
