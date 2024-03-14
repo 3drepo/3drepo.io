@@ -38,6 +38,7 @@ export const FontSizeButton = ({ value, onChange }: FontSizeButtonProps) => (
 		onChange={onChange}
 		renderToolbarButton={Icon}
 		value={value}
+		active
 		title={formatMessage({ id: 'imageMarkup.fontSize.button.title', defaultMessage: 'Font size' })}
 	>
 		<FloatingBar>
@@ -45,7 +46,6 @@ export const FontSizeButton = ({ value, onChange }: FontSizeButtonProps) => (
 				<FlatToolbarSelectItem
 					Icon={() => <span>{key}</span>}
 					value={val}
-					selected={val === value}
 					key={key}
 				/>
 			))}

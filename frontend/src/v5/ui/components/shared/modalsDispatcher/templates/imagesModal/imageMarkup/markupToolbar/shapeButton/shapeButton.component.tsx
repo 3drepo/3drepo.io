@@ -79,14 +79,10 @@ export const ShapeButton = ({ mode, value, onChange }: ShapeButtonProps) => {
 			defaultIcon={SHAPES_DATA[value].Icon}
 			onChange={onChange}
 			title={formatMessage({ id: 'imageMarkup.shape.button.title', defaultMessage: 'Shape' })}
-			selected={isShapeMode}
+			active={isShapeMode}
 		>
 			{Object.values(SHAPES_DATA).map((shapeData) => (
-				<ToolbarSelectItem
-					{...shapeData}
-					selected={isShapeMode && shapeData.value === value}
-					key={shapeData.value}
-				/>
+				<ToolbarSelectItem {...shapeData} key={shapeData.value} />
 			))}
 		</ToolbarSelect>
 	);

@@ -19,11 +19,15 @@ import { createContext } from 'react';
 
 export interface ToolbarSelectContextType<T> {
 	onChange: (data: { value: T, Icon: any }) => void;
+	active: boolean;
+	selectedValue: T;
 	expanded: boolean;
 	setExpanded: (expanded: boolean) => void;
 }
 const defaultValue: ToolbarSelectContextType<any> = {
 	onChange: () => { },
+	active: false,
+	selectedValue: null,
 	expanded: false,
 	setExpanded: () => { },
 };

@@ -24,13 +24,12 @@ type ToolbarSelectItemProps = {
 	value: any;
 	title?: string;
 	Icon: any;
-	selected?: boolean;
 	className?: string;
 	onClick?: () => void;
 	disabled?: boolean,
 };
 export const ToolbarSelectItem = ({ value, title = '', Icon, onClick, ...props }: ToolbarSelectItemProps) => {
-	const { onChange, setExpanded } = useContext(ToolbarSelectContext);
+	const { onChange, setExpanded, active, selectedValue } = useContext(ToolbarSelectContext);
 
 	const handleClick = () => {
 		onChange({ value, Icon });
@@ -39,7 +38,7 @@ export const ToolbarSelectItem = ({ value, title = '', Icon, onClick, ...props }
 	};
 
 	return (
-		<IconContainer onClick={handleClick} {...props}>
+		<IconContainer onClick={handleClick} selected={active && selectedValue === value} {...props}>
 			<Tooltip placement='right' title={title}>
 				<RefContainer>
 					<Icon />

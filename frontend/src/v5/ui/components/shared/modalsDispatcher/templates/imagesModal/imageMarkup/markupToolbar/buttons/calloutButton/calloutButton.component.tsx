@@ -56,14 +56,10 @@ export const CalloutButton = ({ value, onChange, mode }: CalloutButtonProps) => 
 			title={formatMessage({ id: 'imageMarkup.callout.button.title', defaultMessage: 'Callout' })}
 			defaultIcon={CALLOUT_DATA[value].Icon}
 			value={value}
-			selected={isCalloutMode}
+			active={isCalloutMode}
 		>
 			{Object.values(CALLOUT_DATA).map((calloutData) => (
-				<ToolbarSelectItem
-					{...calloutData}
-					selected={isCalloutMode && calloutData.value === value}
-					key={calloutData.value}
-				/>
+				<ToolbarSelectItem {...calloutData} key={calloutData.value} />
 			))}
 		</ToolbarSelect>
 	);

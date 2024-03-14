@@ -39,6 +39,7 @@ export const StrokeWidthButton = ({ value, onChange }: StrokeWidthButtonProps) =
 		onChange={onChange}
 		renderToolbarButton={Icon}
 		value={value}
+		active
 		title={formatMessage({ id: 'imageMarkup.strokeWidth.button.title', defaultMessage: 'Stroke width' })}
 	>
 		<FloatingBar>
@@ -46,7 +47,7 @@ export const StrokeWidthButton = ({ value, onChange }: StrokeWidthButtonProps) =
 				<FlatToolbarSelectItem
 					value={width}
 					key={width}
-					Icon={() => <StrokeOption selected={width === value} $height={(index + 1) * 2} />}
+					Icon={() => <StrokeOption $height={(index + 1) * 2} />}
 				/>
 			))}
 		</FloatingBar>
