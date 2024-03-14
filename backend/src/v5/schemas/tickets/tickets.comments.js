@@ -65,6 +65,7 @@ Comments.serialiseComment = (comment) => {
 		ticket: uuidString,
 		createdAt: types.timestamp,
 		updatedAt: types.timestamp,
+		importedAt: types.timestamp,
 		images: Yup.array().of(uuidString),
 		history: Yup.array().of(Yup.object({
 			timestamp: types.timestamp,
