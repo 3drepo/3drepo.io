@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
@@ -28,7 +27,8 @@ import { Button } from '@controls/button';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { DrawingsList } from './drawingsList/drawingsList.component';
 import { DRAWINGS_SEARCH_FIELDS } from '@/v5/store/drawings/drawings.helpers';
-
+import { DialogsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CreateDrawingDialog } from './drawingDialogs/createDrawingDialog.component';
 
 export const Drawings = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
@@ -38,7 +38,7 @@ export const Drawings = () => {
 	const drawings = DrawingsHooksSelectors.selectDrawings();
 	const favouriteDrawings = DrawingsHooksSelectors.selectFavouriteDrawings();
 
-	const onClickCreate = () => { }; // TODO add func #4782
+	const onClickCreate = () => DialogsActionsDispatchers.open(CreateDrawingDialog);
 
 	useEffect(() => {
 		if (!isPending) return;

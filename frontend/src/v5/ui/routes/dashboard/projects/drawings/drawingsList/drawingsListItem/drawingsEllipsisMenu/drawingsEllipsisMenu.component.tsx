@@ -22,11 +22,12 @@ import { EllipsisMenu } from '@controls/ellipsisMenu/ellipsisMenu.component';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 import { DrawingsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { Drawing } from '@/v5/store/drawings/drawings.types';
+import { IDrawing } from '@/v5/store/drawings/drawings.types';
+import { EditDrawingDialog } from '../../../drawingDialogs/editDrawingDialog.component';
 
 type DrawingsEllipsisMenuProps = {
 	selected?: boolean,
-	drawing: Drawing,
+	drawing: IDrawing,
 	onSelectOrToggleItem?: (id: string) => void,
 };
 
@@ -39,8 +40,8 @@ export const DrawingsEllipsisMenu = ({
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const hasCollaboratorAccess = DrawingsHooksSelectors.selectHasCollaboratorAccess(drawing._id);
 
-	const onClickSettings = () => { }; // TODO - add drawing settings modal #4782
-
+	const onClickSettings = () => DialogsActionsDispatchers.open(EditDrawingDialog, { drawing });
+	
 	const onClickDelete = () => DialogsActionsDispatchers.open('delete', {
 		name: drawing.name,
 		onClickConfirm: () => new Promise<void>(
@@ -66,7 +67,7 @@ export const DrawingsEllipsisMenu = ({
 					defaultMessage: 'Calibrate',
 				})}
 				onClick={() => { }} // TODO - add calibration functionality
-				disabled={!drawing.revisionsCount}
+				disabled={!drawing.total}
 				hidden={!hasCollaboratorAccess}
 			/>
 			<EllipsisMenuItem

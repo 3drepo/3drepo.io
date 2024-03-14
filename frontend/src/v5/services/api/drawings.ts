@@ -18,8 +18,9 @@
 
 import { delay } from '@/v4/helpers/async';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
-import { Drawing, DrawingStats, MinimumDrawing } from '@/v5/store/drawings/drawings.types';
+import { DrawingStats, MinimumDrawing } from '@/v5/store/drawings/drawings.types';
 import { AxiosResponse } from 'axios';
+import uuid from 'uuidv4';
 
 export const addFavourite = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => {
 	return delay(Math.random() * 15 ** 2, null) ;
@@ -29,57 +30,121 @@ export const removeFavourite = (teamspace, projectId, drawingId): Promise<AxiosR
 	return delay(Math.random() * 15 ** 2, null) ;
 };
 
+const categories =  ['A drawing category', 'Another drawing category', 'Yet another one'];
+
+const drawings = [ // TODO: The schema is unfinished
+	{
+		_id: uuid(),
+		drawingNumber: uuid(),
+		name: 'My cool drawing',
+		isFavourite: true,
+		role: Role.ADMIN,
+	},
+	{
+		_id: uuid(),
+		drawingNumber: uuid(),
+		name: 'Still life',
+		isFavourite: true,
+		role: Role.COLLABORATOR,
+	},
+	{
+		_id: uuid(),
+		drawingNumber: uuid(),
+		name: 'Boring Drawing',
+		isFavourite: false,
+		role: Role.COMMENTER,
+	},
+	{
+		_id: uuid(),
+		drawingNumber: uuid(),
+		name: 'Another drawing',
+		isFavourite: false,
+		role: Role.VIEWER,
+	},
+];
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const fetchDrawings = (teamspace, projectId): Promise<MinimumDrawing[]> => {
-	return delay<MinimumDrawing[]>(Math.random() *  300, [ // TODO: The schema is unfinished
-		{
-			_id: 'asdasdmom',
-			name: 'My cool drawing',
-			isFavourite: true,
-			role: Role.ADMIN,
-		},
-		{
-			_id: 'stilllife',
-			name: 'Still life',
-			isFavourite: true,
-			role: Role.COLLABORATOR,
-		},
-		{
-			_id: 'boring',
-			name: 'Boring Drawing',
-			isFavourite: false,
-			role: Role.COMMENTER,
-		},
-		{
-			_id: 'liuhiuhlk',
-			name: 'Another drawing',
-			isFavourite: false,
-			role: Role.VIEWER,
-		}]) ;
+	return delay<MinimumDrawing[]>(Math.random() *  300, drawings);
 };
 
 export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promise<DrawingStats> => {
-	const stats =  { // TODO: The schema is unfinished
-		asdasdmom: {
-			_id: 'asdasdmom',
-			revisions : { revisionsCount: 0, calibration: 'empty', isFavourite: false, type: 'Architectural', code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0001' },
+	const stats = [ // TODO: The schema is unfinished
+		{
+			_id: drawings[0]._id,
+			revisions : {
+				lastUpdated: null,
+				total: 0,
+				calibration: 'empty',
+				isFavourite: false,
+				type: 'Architectural',
+				code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0001',
+				category: categories[1],
+			},
 		},
-		liuhiuhlk: {
-			_id: 'liuhiuhlk',
-			revisions : { revisionsCount: 1, lastUpdated: 1709569331628,  latestRevision:'I dunno', calibration: 'calibrated', isFavourite: false, type: 'Existing', code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0002', status: 's4s' },
+		{
+			_id: drawings[1]._id,
+			revisions : {
+				total: 1,
+				lastUpdated: 1709569331628,
+				latestRevision:'I dunno',
+				calibration: 'calibrated',
+				isFavourite: false,
+				type: 'Existing',
+				code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0002',
+				status: 's4s',
+				category: categories[0],
+			},
 		},
-		stilllife: {
-			_id: 'stilllife',
-			revisions : { revisionsCount: 2,  lastUpdated: 1009569331628,  latestRevision:'Apple', calibration: 'outOfSync', isFavourite: true, type: 'Existing', code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0003' },
+		{
+			_id: drawings[2]._id,
+			revisions : {
+				total: 2,
+				lastUpdated: 1009569331628,
+				latestRevision:'Apple',
+				calibration: 'outOfSync',
+				isFavourite: true,
+				type: 'Existing',
+				code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0003',
+				category: categories[2],
+			},
 		},
-		boring: {
-			_id: 'boring',
-			revisions : { revisionsCount: 10, lastUpdated: 1609569331628,  latestRevision:'Shading and other such things to improve the drawing', calibration: 'uncalibrated', isFavourite: false, type: 'MEP', code: 'SC2-SFT-V1-01-M4-ST-30_11_30-0001', status: 's5' },
+		{
+			_id: drawings[3]._id,
+			revisions : {
+				total: 10,
+				lastUpdated: 1609569331628,
+				latestRevision:'Shading and other such things to improve the drawing',
+				calibration: 'uncalibrated',
+				isFavourite: false,
+				type: 'MEP',
+				code: 'SC2-SFT-V1-01-M4-ST-30_11_30-0001',
+				status: 's5',
+				category: categories[0],
+			},
 		},
+	];
 
-	};
+	return delay<DrawingStats>(Math.random() * 250, stats.find(((s)=> s._id === drawingId)));
+};
 
-	return delay<DrawingStats>(Math.random() * 250, stats[drawingId]) ;
+
+export const fetchCategories = (teamspace, projectId): Promise<string[]> => {
+	return delay<string[]>(1000, categories) ;
+};
+
+export const createDrawing = (teamspace, projectId, drawing): Promise<string> => {
+	delay(200, null);
+	// throw new Error('name already exists');
+	// throw new Error('Drawing number already exists');
+	return delay<string>(500, uuid()) ;
+};
+
+export const updateDrawing = (teamspace, projectId, drawingId, drawing): Promise<string> => {
+	// delay(200, null);
+	// throw new Error('name already exists');
+	// throw new Error('Drawing number already exists');
+	return delay(500, null);
 };
 
 export const deleteDrawing = (teamspace, projectId, drawingId): Promise<AxiosResponse<void>> => {

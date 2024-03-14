@@ -34,11 +34,11 @@ import { DrawingsEllipsisMenu } from './drawingsEllipsisMenu/drawingsEllipsisMen
 import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Drawing } from '@/v5/store/drawings/drawings.types';
+import { IDrawing } from '@/v5/store/drawings/drawings.types';
 
 interface IDrawingsListItem {
 	isSelected: boolean;
-	drawing: Drawing;
+	drawing: IDrawing;
 	onSelectOrToggleItem: (id: string) => void;
 }
 
@@ -78,12 +78,12 @@ export const DrawingsListItem = memo(({
 					tooltipTitle={
 						<FormattedMessage id="drawings.list.item.revisions.tooltip" defaultMessage="View revisions" />
 					}
-					{...DRAWING_LIST_COLUMN_WIDTHS.revisionsCount}
+					{...DRAWING_LIST_COLUMN_WIDTHS.total}
 				>
 					<FormattedMessage
 						id="drawings.list.item.revisions"
 						defaultMessage="{count, plural, =0 {No revisions} one {# revision} other {# revisions}}"
-						values={{ count: drawing.revisionsCount }}
+						values={{ count: drawing.total }}
 					/>
 				</DashboardListItemButton>
 				<DrawingsCalibrationButton
@@ -94,11 +94,11 @@ export const DrawingsListItem = memo(({
 					}
 					{...DRAWING_LIST_COLUMN_WIDTHS.calibration}
 				/>
-				<DashboardListItemText selected={isSelected} width={DRAWING_LIST_COLUMN_WIDTHS.code.width}>
-					{drawing.code}
+				<DashboardListItemText selected={isSelected} width={DRAWING_LIST_COLUMN_WIDTHS.drawingNumber.width}>
+					{drawing.drawingNumber}
 				</DashboardListItemText>
-				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.type}>
-					{drawing.type}
+				<DashboardListItemText selected={isSelected} {...DRAWING_LIST_COLUMN_WIDTHS.category}>
+					{drawing.category}
 				</DashboardListItemText>
 				<DashboardListItemText
 					selected={isSelected}

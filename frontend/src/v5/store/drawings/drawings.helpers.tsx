@@ -25,7 +25,7 @@ export const DRAWING_LIST_COLUMN_WIDTHS = {
 	name: {
 		minWidth: 90,
 	},
-	revisionsCount: {
+	total: {
 		width: 165,
 		hideWhenSmallerThan: Display.Desktop,
 	},
@@ -33,10 +33,10 @@ export const DRAWING_LIST_COLUMN_WIDTHS = {
 		width: 165,
 		hideWhenSmallerThan: Display.Tablet,
 	},
-	code: {
+	drawingNumber: {
 		width: 190,
 	},
-	type: {
+	category: {
 		width: 120,
 		hideWhenSmallerThan: Display.Desktop,
 	},

@@ -24,7 +24,7 @@ import {
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
 
 import { DashboardListItem } from '@components/dashboard/dashboardList';
-import { Drawing } from '@/v5/store/drawings/drawings.types';
+import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
@@ -34,7 +34,7 @@ import { DrawingsEllipsisMenu } from './drawingsEllipsisMenu/drawingsEllipsisMen
 import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers';
 
 interface IDrawingListItem {
-	drawing: Drawing;
+	drawing: IDrawing;
 	delay?: number;
 }
 
@@ -60,16 +60,16 @@ export const DrawingListItemLoading = ({
 		<DashboardListItem>
 			<DashboardListItemRow>
 				<DrawingsListItemTitle drawing={drawing} {...DRAWING_LIST_COLUMN_WIDTHS.name} />
-				<FixedOrGrowContainer {...DRAWING_LIST_COLUMN_WIDTHS.revisionsCount} >
+				<FixedOrGrowContainer {...DRAWING_LIST_COLUMN_WIDTHS.total} >
 					<SkeletonBlock delay={delay} height={50} width="80%" />
 				</FixedOrGrowContainer>
 				<FixedOrGrowContainer {...DRAWING_LIST_COLUMN_WIDTHS.calibration} >
 					<SkeletonBlock delay={delay} height={50} width="80%" />
 				</FixedOrGrowContainer>
-				<FixedOrGrowContainer {...DRAWING_LIST_COLUMN_WIDTHS.code}>
+				<FixedOrGrowContainer {...DRAWING_LIST_COLUMN_WIDTHS.drawingNumber}>
 					<SkeletonBlock delay={delay} width="80%" />
 				</FixedOrGrowContainer>
-				<FixedOrGrowContainer {...DRAWING_LIST_COLUMN_WIDTHS.type} >
+				<FixedOrGrowContainer {...DRAWING_LIST_COLUMN_WIDTHS.category} >
 					<SkeletonBlock delay={delay} width="80%" />
 				</FixedOrGrowContainer>
 				<FixedOrGrowContainer {...DRAWING_LIST_COLUMN_WIDTHS.lastUpdated} >

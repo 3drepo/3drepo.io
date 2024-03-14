@@ -18,17 +18,18 @@
 import { Role } from '../currentUser/currentUser.types';
 
 // TODO: Unfinished interface
-export interface Drawing {
+export interface IDrawing {
 	_id: string;
 	name: string;
 	isFavourite: boolean;
 	role: Role;
-	revisionsCount: number;
+	desc?: string;
+	total: number;
 	lastUpdated?: number;
 	latestRevision?: string;
 	calibration?: string;
-	type?: string;
-	code?: string;
+	category?: string; // TODO - add category types?
+	drawingNumber: string;
 	hasStatsPending?: boolean;
 	status?: any; // TODO - add drawing statuses
 	errorReason?: {
@@ -48,7 +49,7 @@ export interface MinimumDrawing {
 export interface DrawingStats {
 	_id: string,
 	revisions: {
-		revisionsCount: number,
+		total: number,
 		lastUpdated?: number,
 		latestRevision?: string,
 	}

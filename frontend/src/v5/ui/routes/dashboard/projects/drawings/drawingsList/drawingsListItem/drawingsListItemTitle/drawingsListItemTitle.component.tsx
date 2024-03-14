@@ -21,12 +21,12 @@ import { Highlight } from '@controls/highlight';
 import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { Drawing } from '@/v5/store/drawings/drawings.types';
+import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { Container, Label } from '../../../../containers/containersList/latestRevision/latestRevision.styles';
 import { RevisionCodeAndStatus } from './drawingsListItemTitle.styles';
 
 interface IDrawingsListItemTitle extends FixedOrGrowContainerProps {
-	drawing: Drawing;
+	drawing: IDrawing;
 	isSelected?: boolean;
 }
 
@@ -36,7 +36,7 @@ export const DrawingsListItemTitle = ({
 	...props
 }: IDrawingsListItemTitle): JSX.Element => {
 	const { query } = useContext(SearchContext);
-	const hasRevisions = drawing.revisionsCount > 0;
+	const hasRevisions = drawing.total > 0;
 	const canLaunchDrawing = drawing.hasStatsPending || hasRevisions;
 
 	return (

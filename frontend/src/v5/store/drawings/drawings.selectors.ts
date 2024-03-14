@@ -65,3 +65,14 @@ export const selectCanUploadToProject = createSelector(
 	selectIsProjectAdmin,
 	(drawings, isAdmin): boolean => isAdmin || drawings.some(({ role }) => isCollaboratorRole(role)),
 );
+
+export const selectCategories = createSelector(
+	selectDrawingsDomain, selectCurrentProject,
+	(state, currentProject) => (state.categoriesByProject[currentProject] ?? []),
+);
+
+export const selectIsCategoriesPending = createSelector(
+	selectDrawingsDomain, selectCurrentProject,
+	// Checks if the categories for the project have been fetched
+	(state, currentProject) => !state.categoriesByProject[currentProject],
+);

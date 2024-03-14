@@ -36,7 +36,7 @@ import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
 import { DrawingsListItem } from './drawingsListItem/drawingsListItem.component';
 import { DRAWING_LIST_COLUMN_WIDTHS } from '@/v5/store/drawings/drawings.helpers';
 import { DrawingListItemLoading } from './drawingsListItem/drawingsListItemLoading.component';
-import { Drawing } from '@/v5/store/drawings/drawings.types';
+import { IDrawing } from '@/v5/store/drawings/drawings.types';
 
 export const DrawingsList = ({
 	emptyMessage,
@@ -46,7 +46,7 @@ export const DrawingsList = ({
 }) => {
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
-	const { items: drawings, filteredItems: filteredDrawings } = useContext<SearchContextType<Drawing>>(SearchContext);
+	const { items: drawings, filteredItems: filteredDrawings } = useContext<SearchContextType<IDrawing>>(SearchContext);
 	const hasDrawings = drawings.length > 0;
 
 	const selectOrToggleItem = useCallback((id: string) => {
@@ -98,16 +98,16 @@ export const DrawingsList = ({
 					<DashboardListHeaderLabel name="name" {...DRAWING_LIST_COLUMN_WIDTHS.name}>
 						<FormattedMessage id="drawings.list.header.drawing" defaultMessage="Drawing" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="revisionsCount" {...DRAWING_LIST_COLUMN_WIDTHS.revisionsCount} hideWhenSmallerThan={Display.Desktop}>
+					<DashboardListHeaderLabel name="total" {...DRAWING_LIST_COLUMN_WIDTHS.total} hideWhenSmallerThan={Display.Desktop}>
 						<FormattedMessage id="drawings.list.header.revisions" defaultMessage="Revisions" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="calibration" {...DRAWING_LIST_COLUMN_WIDTHS.calibration}>
 						<FormattedMessage id="drawings.list.header.calibration" defaultMessage="2D/3D Calibration" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="code" {...DRAWING_LIST_COLUMN_WIDTHS.code} hideWhenSmallerThan={Display.Tablet}>
+					<DashboardListHeaderLabel name="code" {...DRAWING_LIST_COLUMN_WIDTHS.drawingNumber} hideWhenSmallerThan={Display.Tablet}>
 						<FormattedMessage id="drawings.list.header.drawingNo" defaultMessage="Drawing Number" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="type" {...DRAWING_LIST_COLUMN_WIDTHS.type}>
+					<DashboardListHeaderLabel name="type" {...DRAWING_LIST_COLUMN_WIDTHS.category}>
 						<FormattedMessage id="drawings.list.header.category" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="lastUpdated" {...DRAWING_LIST_COLUMN_WIDTHS.lastUpdated}>
