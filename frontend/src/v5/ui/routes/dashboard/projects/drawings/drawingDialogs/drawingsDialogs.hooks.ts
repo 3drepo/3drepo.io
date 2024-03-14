@@ -18,7 +18,7 @@
 import { DrawinsgActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DrawingHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { CreateDrawingSchema } from '@/v5/validation/drawingSchemes/drawingSchemes';
+import { DrawingFormSchema } from '@/v5/validation/drawingSchemes/drawingSchemes';
 import { nameAlreadyExists, numberAlreadyExists } from '@/v5/validation/errors.helpers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useEffect, useState } from 'react';
@@ -52,7 +52,7 @@ export const useDrawingForm = (defaultValues?: IDrawing) => {
 	
 	const formData = useForm<IFormInput>({
 		mode: 'onChange',
-		resolver: yupResolver(CreateDrawingSchema),
+		resolver: yupResolver(DrawingFormSchema),
 		context: { alreadyExistingNames, alreadyExistingNumbers },
 		defaultValues,
 	});

@@ -18,7 +18,7 @@ import * as Yup from 'yup';
 import { alphaNumericHyphens, desc, name } from '../containerAndFederationSchemes/validators';
 import { formatMessage } from '@/v5/services/intl';
 
-export const CreateDrawingSchema =  Yup.object().shape({
+export const DrawingFormSchema =  Yup.object().shape({
 	name,
 	drawingNumber: Yup.string().matches(alphaNumericHyphens,
 		formatMessage({
