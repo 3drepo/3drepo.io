@@ -21,7 +21,7 @@ import { MenuItem } from '@mui/material';
 import { SubmitHandler } from 'react-hook-form';
 import { FormModal } from '@controls/formModal/formModal.component';
 import { DrawingHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { DrawinsgActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { nameAlreadyExists, numberAlreadyExists } from '@/v5/validation/errors.helpers';
 import { UnhandledErrorInterceptor } from '@controls/errorMessage/unhandledErrorInterceptor/unhandledErrorInterceptor.component';
 import { IFormInput, useDrawingForm } from './drawingsDialogs.hooks';
@@ -54,7 +54,7 @@ export const EditDrawingDialog = ({ open, onClickClose, drawing }:Props) => {
 	const onSubmit: SubmitHandler<IFormInput> = async (body) => {
 		try {
 			await new Promise<void>((accept, reject ) => 
-				DrawinsgActionsDispatchers.updateDrawing(teamspace, project, drawing._id, body as any, accept, reject));
+				DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawing._id, body as any, accept, reject));
 			onClickClose();
 		} catch (err) {
 			onSubmitError(err);

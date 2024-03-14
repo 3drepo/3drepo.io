@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DrawinsgActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DrawingHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingFormSchema } from '@/v5/validation/drawingSchemes/drawingSchemes';
@@ -79,7 +79,7 @@ export const useDrawingForm = (defaultValues?: IDrawing) => {
 
 	useEffect(() => {
 		if (!isCategoriesPending) return;
-		DrawinsgActionsDispatchers.fetchCategories(teamspace, project);
+		DrawingsActionsDispatchers.fetchCategories(teamspace, project);
 	}, []);
 
 
