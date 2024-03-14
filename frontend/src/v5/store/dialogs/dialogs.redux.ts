@@ -28,11 +28,11 @@ export const INITIAL_STATE: IDialogState = {
 };
 
 export const { Types: DialogsTypes, Creators: DialogsActions } = createActions({
-	open: ['modalType', 'props'],
+	open: ['modalType', 'props', 'syncProps'],
 	close: ['dialogId'],
 }, { prefix: 'MODALS/' }) as { Types: Constants<IDialogsActionCreators>; Creators: IDialogsActionCreators };
 
-export const openHandler = (state, { modalType, props }: OpenAction) => {
+export const openHandler = (state, { modalType, props, syncProps }: OpenAction) => {
 	// avoid opening 2+ redirect modals
 	if (getErrorCode(props?.error)) {
 		const currentErrorIsPathNotFound = isPathNotFound(props?.error);
@@ -44,6 +44,7 @@ export const openHandler = (state, { modalType, props }: OpenAction) => {
 		id: uuid(),
 		modalType,
 		props,
+		syncProps,
 	};
 
 	state.dialogs = [...state.dialogs, dialog];
@@ -61,13 +62,13 @@ export const dialogsReducer = createReducer(INITIAL_STATE, produceAll({
 /**
  * Types
  */
-type OpenAction = Action<'OPEN'> & { modalType: string | ((any) => JSX.Element), props: any };
+type OpenAction = Action<'OPEN'> & { modalType: string | ((any) => JSX.Element), props: any, syncProps: any };
 type CloseAction = Action<'CLOSE'> & { dialogId: string };
 
 export type ModalType = 'alert' | 'warning' | 'delete' | 'info' | 'share' | 'images' | ((any) => JSX.Element);
 
 export interface IDialogsActionCreators {
-	open: (type?: ModalType, props?: any) => OpenAction;
+	open: (type?: ModalType, props?: any | undefined, syncProps?: any | undefined) => OpenAction;
 	close: (id: string) => CloseAction;
 }
 
@@ -75,6 +76,7 @@ export interface IDialogConfig {
 	id: string;
 	modalType?: ModalType;
 	props: any;
+	syncProps: any,
 }
 
 export interface IDialogState {

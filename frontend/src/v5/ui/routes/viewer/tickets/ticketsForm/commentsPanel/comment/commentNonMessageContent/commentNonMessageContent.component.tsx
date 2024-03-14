@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
 import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
 import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { useParams } from 'react-router-dom';
@@ -25,12 +24,15 @@ import { formatMessage } from '@/v5/services/intl';
 import { CommentImages } from '../commentImages/commentImages.component';
 import { CommentAuthor } from './commentNonMessageContent.styles';
 import { CommentReply } from '../commentReply/commentReply.component';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
 
 export type CommentNonMessageContentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
 	metadata?: TicketCommentReplyMetadata;
 	isCurrentUserComment?: boolean;
 	onUploadImages?: () => void;
 	onDeleteImage?: (index) => void;
+	onEditImage?: (img, index) => void;
 	hasMessage: boolean;
 };
 export const CommentNonMessageContent = ({
@@ -38,13 +40,12 @@ export const CommentNonMessageContent = ({
 	images = [],
 	metadata,
 	isCurrentUserComment = true,
+	hasMessage,
 	onUploadImages,
 	onDeleteImage,
-	hasMessage,
+	onEditImage,
 }: CommentNonMessageContentProps) => {
 	const { teamspace, project, containerOrFederation } = useParams();
-	const [displayImageIndex, setDisplayImageIndex] = useState(-1);
-	const modalIsOpen = displayImageIndex !== -1;
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isFederation = modelIsFederation(containerOrFederation);
 
@@ -58,10 +59,19 @@ export const CommentNonMessageContent = ({
 		return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, img, isFederation);
 	});
 
+	const syncProps = useSyncProps({
+		images: imgsSrcs,
+		onUpload: onUploadImages,
+		onDelete: onDeleteImage,
+		onAddMarkup: onEditImage,
+		disabledDeleteMessage: disabledDeleteMessage,
+	});
+	const openImagesModal = (index) => DialogsActionsDispatchers.open(ImagesModal, { displayImageIndex: index },  syncProps);
+
 	return (
 		<>
 			{images.length === 1 && (
-				<CommentImages images={imgsSrcs} onImageClick={setDisplayImageIndex} />
+				<CommentImages images={imgsSrcs} onImageClick={openImagesModal} />
 			)}
 			{author && (<CommentAuthor>{author}</CommentAuthor>)}
 			{metadata && (
@@ -71,18 +81,7 @@ export const CommentNonMessageContent = ({
 				/>
 			)}
 			{images.length > 1 && (
-				<CommentImages images={imgsSrcs} onImageClick={setDisplayImageIndex} />
-			)}
-			{modalIsOpen && (
-				<ImagesModal
-					open
-					images={imgsSrcs}
-					onClickClose={() => setDisplayImageIndex(-1)}
-					displayImageIndex={displayImageIndex}
-					onUpload={onUploadImages}
-					onDelete={onDeleteImage}
-					disabledDeleteMessage={disabledDeleteMessage}
-				/>
+				<CommentImages images={imgsSrcs} onImageClick={openImagesModal} />
 			)}
 		</>
 	);

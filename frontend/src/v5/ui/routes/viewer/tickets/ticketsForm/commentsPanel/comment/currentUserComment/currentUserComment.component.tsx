@@ -56,6 +56,12 @@ export const CurrentUserComment = ({
 	const [isEditMode, setIsEditMode] = useState(false);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 
+	const onEditImage = (img, index) => {
+		const newImages = [...images];
+		newImages[index] = img;
+		onEdit(_id, message, newImages);
+	};
+
 	// @ts-ignore
 	const onDeleteImage = (index) => onEdit(_id, message, images.toSpliced(index, 1));
 
@@ -107,7 +113,7 @@ export const CurrentUserComment = ({
 			});
 		}
 	};
-	const imagesEditingFunctions = { onDeleteImage, onUploadImages };
+	const imagesEditingFunctions = { onDeleteImage, onUploadImages, onEditImage };
 
 	if (deleted) return (<DeletedComment author={author} />);
 
