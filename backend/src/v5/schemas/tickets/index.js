@@ -262,7 +262,7 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 		props.forEach(({ type, name, deprecated }) => {
 			if (stripDeprecated && deprecated) {
 				res[name] = Yup.mixed().strip();
-			} else if (type === propTypes.DATE) {
+			} else if (type === propTypes.DATE || type === propTypes.PAST_DATE) {
 				res[name] = Yup.number().transform((_, val) => val.getTime());
 			} else if (type === propTypes.VIEW) {
 				res[name] = Yup.object({

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
 const SuperTest = require('supertest');
@@ -144,6 +145,109 @@ const ticketAddedTest = () => {
 					number: 1,
 				},
 			});
+
+			socket.close();
+		});
+	});
+};
+
+const ticketsImportedTest = () => {
+	describe('On importing tickets', () => {
+		test(`should trigger ${EVENTS.CONTAINER_NEW_TICKET} events when a list of new container tickets have been added`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: container._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const newTickets = times(1, () => generateTicket(template));
+			const socketPromise = new Promise((resolve, reject) => {
+				const eventsReceived = [];
+				socket.on(EVENTS.CONTAINER_NEW_TICKET, (eventData) => {
+					eventsReceived.push(eventData);
+					if (eventsReceived.length === newTickets.length) resolve(eventsReceived);
+				});
+				setTimeout(reject, 1000);
+			});
+
+			const postRes = await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/import?key=${user.apiKey}&template=${template._id}`)
+				.send({ tickets: newTickets })
+				.expect(templates.ok.status);
+
+			const eventData = await socketPromise;
+
+			const expectedData = await Promise.all(postRes.body.tickets.map(async (id, i) => {
+				const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/${id}?key=${user.apiKey}`)
+					.expect(templates.ok.status);
+
+				return {
+					...data,
+					data: {
+						...newTickets[i],
+						_id: id,
+						properties: {
+							...newTickets[i].properties,
+							[basePropertyLabels.OWNER]: getRes.body.properties[basePropertyLabels.OWNER],
+							[basePropertyLabels.UPDATED_AT]:
+                            new Date(getRes.body.properties[basePropertyLabels.UPDATED_AT]).getTime(),
+							[basePropertyLabels.CREATED_AT]:
+                            new Date(getRes.body.properties[basePropertyLabels.CREATED_AT]).getTime(),
+							[basePropertyLabels.STATUS]: getRes.body.properties[basePropertyLabels.STATUS],
+						},
+						number: 1 + i,
+					},
+				};
+			}));
+
+			expect(eventData).toEqual(expectedData);
+
+			socket.close();
+		});
+		test(`should trigger ${EVENTS.FEDERATION_NEW_TICKET} events when a list of new federation tickets have been added`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: federation._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const newTickets = times(1, () => generateTicket(template));
+			const socketPromise = new Promise((resolve, reject) => {
+				const eventsReceived = [];
+				socket.on(EVENTS.FEDERATION_NEW_TICKET, (eventData) => {
+					eventsReceived.push(eventData);
+					if (eventsReceived.length === newTickets.length) resolve(eventsReceived);
+				});
+				setTimeout(reject, 1000);
+			});
+
+			const postRes = await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}/tickets/import?key=${user.apiKey}&template=${template._id}`)
+				.send({ tickets: newTickets })
+				.expect(templates.ok.status);
+
+			const eventData = await socketPromise;
+
+			const expectedData = await Promise.all(postRes.body.tickets.map(async (id, i) => {
+				const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}/tickets/${id}?key=${user.apiKey}`)
+					.expect(templates.ok.status);
+
+				return {
+					...data,
+					data: {
+						...newTickets[i],
+						_id: id,
+						properties: {
+							...newTickets[i].properties,
+							[basePropertyLabels.OWNER]: getRes.body.properties[basePropertyLabels.OWNER],
+							[basePropertyLabels.UPDATED_AT]:
+                            new Date(getRes.body.properties[basePropertyLabels.UPDATED_AT]).getTime(),
+							[basePropertyLabels.CREATED_AT]:
+                            new Date(getRes.body.properties[basePropertyLabels.CREATED_AT]).getTime(),
+							[basePropertyLabels.STATUS]: getRes.body.properties[basePropertyLabels.STATUS],
+						},
+						number: 1 + i,
+					},
+				};
+			}));
+
+			expect(eventData).toEqual(expectedData);
 
 			socket.close();
 		});
@@ -481,6 +585,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		chatApp.close()]));
 
 	ticketAddedTest();
+	ticketsImportedTest();
 	ticketUpdatedTest();
 	commentAddedTest();
 	commentUpdatedTest();

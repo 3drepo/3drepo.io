@@ -183,39 +183,42 @@ const processExternalData = async (teamspace, project, model, ticketIds, data) =
 const processNewTickets = async (teamspace, project, model, template, tickets) => {
 	const externalDataDelta = processSpecialProperties(template, undefined, tickets);
 	const res = await addTicketsWithTemplate(teamspace, project, model, template._id, tickets);
-	const ids = [];
-
-	res.forEach((ticket) => {
-		publish(events.NEW_TICKET,
-			{ teamspace,
-				project,
-				model,
-				ticket,
-			});
-
-		ids.push(ticket._id);
-	});
-
-	await processExternalData(teamspace, project, model, ids, externalDataDelta);
-
-	return ids;
+	await processExternalData(teamspace, project, model, res.map(({ _id }) => _id), externalDataDelta);
+	return res;
 };
 
 Tickets.importTickets = async (teamspace, project, model, template, tickets, author) => {
-	const ids = await processNewTickets(teamspace, project, model, template, tickets);
+	const savedTickets = await processNewTickets(teamspace, project, model, template,
+		tickets.map(({ comments, ...others }) => others));
+
+	const ids = [];
 
 	await Promise.all(tickets.map(async ({ comments }, i) => {
+		ids.push(savedTickets[i]._id);
 		if (comments?.length) {
 			await importComments(teamspace, project, model, ids[i], comments, author);
 		}
 	}));
 
+	publish(events.TICKETS_IMPORTED,
+		{ teamspace,
+			project,
+			model,
+			tickets: savedTickets,
+		});
+
 	return ids;
 };
 
 Tickets.addTicket = async (teamspace, project, model, template, ticket) => {
-	const [id] = await processNewTickets(teamspace, project, model, template, [ticket]);
-	return id;
+	const [savedTicket] = await processNewTickets(teamspace, project, model, template, [ticket]);
+	publish(events.NEW_TICKET,
+		{ teamspace,
+			project,
+			model,
+			ticket: savedTicket,
+		});
+	return savedTicket._id;
 };
 
 Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData, author) => {

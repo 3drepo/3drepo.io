@@ -181,12 +181,20 @@ const insertTicketsImageTest = async (isImport, isView) => {
 		);
 	});
 
-	expect(EventsManager.publish).toHaveBeenCalledTimes(expectedOutput.length);
-	expectedOutput.forEach((ticket) => expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
-		{ teamspace,
-			project,
-			model,
-			ticket }));
+	expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+	if (isImport) {
+		expect(EventsManager.publish).toHaveBeenCalledWith(events.TICKETS_IMPORTED,
+			{ teamspace,
+				project,
+				model,
+				tickets: expectedOutput });
+	} else {
+		expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
+			{ teamspace,
+				project,
+				model,
+				ticket: expectedOutput[0] });
+	}
 };
 
 const updateTicketImageTest = async (isView) => {
@@ -370,12 +378,20 @@ const insertTicketsGroupTests = (isImport) => {
 			expect(groupIDsToSave.length).toBe(expectedGroupIds.length);
 			expect(groupIDsToSave).toEqual(expect.arrayContaining(expectedGroupIds));
 			expect(TicketGroupsModel.deleteGroups).not.toHaveBeenCalled();
-			expect(EventsManager.publish).toHaveBeenCalledTimes(expectedOutput.length);
-			expectedOutput.forEach((ticket) => expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
-				{ teamspace,
-					project,
-					model,
-					ticket }));
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			if (isImport) {
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.TICKETS_IMPORTED,
+					{ teamspace,
+						project,
+						model,
+						tickets: expectedOutput });
+			} else {
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
+					{ teamspace,
+						project,
+						model,
+						ticket: expectedOutput[0] });
+			}
 		});
 	});
 };
@@ -714,12 +730,20 @@ const insertTicketsTestHelper = (isImport) => {
 		expect(FilesManager.storeFile).not.toHaveBeenCalled();
 		expect(CommentsProcessor.importComments).not.toHaveBeenCalled();
 
-		expect(EventsManager.publish).toHaveBeenCalledTimes(expectedOutput.length);
-		expectedOutput.forEach((ticket) => expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
-			{ teamspace,
-				project,
-				model,
-				ticket }));
+		expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+		if (isImport) {
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.TICKETS_IMPORTED,
+				{ teamspace,
+					project,
+					model,
+					tickets: expectedOutput });
+		} else {
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
+				{ teamspace,
+					project,
+					model,
+					ticket: expectedOutput[0] });
+		}
 	});
 
 	test('should process images and store refs', () => insertTicketsImageTest(isImport));
@@ -746,7 +770,7 @@ const testImportTickets = () => {
 			const model = generateRandomString();
 			const author = generateRandomString();
 			test('should call importComments if there are comments', async () => {
-				const expectedOutput = tickets.map((ticketData) => ({ ...ticketData,
+				const expectedOutput = tickets.map(({ comments, ...ticketData }) => ({ ...ticketData,
 					_id: generateRandomString() }));
 
 				TicketsModel.addTicketsWithTemplate.mockResolvedValueOnce(expectedOutput);
@@ -760,17 +784,16 @@ const testImportTickets = () => {
 
 				expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledTimes(1);
 				expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project, model,
-					template._id, tickets);
+					template._id, tickets.map(({ comments, ...others }) => others));
 
 				expect(FilesManager.storeFile).not.toHaveBeenCalled();
 
-				expect(EventsManager.publish).toHaveBeenCalledTimes(expectedOutput.length);
-				expectedOutput.forEach((ticket) => expect(EventsManager.publish).toHaveBeenCalledWith(events.NEW_TICKET,
+				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.TICKETS_IMPORTED,
 					{ teamspace,
 						project,
 						model,
-						ticket }));
-
+						tickets: expectedOutput });
 				expect(CommentsProcessor.importComments).toHaveBeenCalledTimes(tickets.length);
 				expectedOutput.forEach(({ _id }, i) => {
 					expect(CommentsProcessor.importComments).toHaveBeenCalledWith(teamspace, project, model, _id,
