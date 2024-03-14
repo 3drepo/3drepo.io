@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DrawinsgActionDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawinsgActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DrawingHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { CreateDrawingSchema } from '@/v5/validation/drawingSchemes/drawingSchemes';
@@ -48,7 +48,7 @@ export const useDrawingForm = (defaultValues?: IDrawing) => {
 	});
 
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState(drawingsNames);
-	const [alreadyExistingNumbers, setAlreadyExistingNumbers] = useState(drawingsNames);
+	const [alreadyExistingNumbers, setAlreadyExistingNumbers] = useState(drawingNumbers);
 	
 	const formData = useForm<IFormInput>({
 		mode: 'onChange',
@@ -79,7 +79,7 @@ export const useDrawingForm = (defaultValues?: IDrawing) => {
 
 	useEffect(() => {
 		if (!isCategoriesPending) return;
-		DrawinsgActionDispatchers.fetchCategories(teamspace, project);
+		DrawinsgActionsDispatchers.fetchCategories(teamspace, project);
 	}, []);
 
 
