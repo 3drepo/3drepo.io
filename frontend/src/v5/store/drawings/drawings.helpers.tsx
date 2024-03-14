@@ -49,7 +49,7 @@ export const DRAWING_LIST_COLUMN_WIDTHS = {
 	},
 };
 
-export const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'type', 'code', 'status'];
+export const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'category', 'drawingNumber', 'status'];
 
 export const CALIBRATION_MAP = {
 	[CalibrationStates.CALIBRATED]: {

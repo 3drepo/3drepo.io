@@ -104,16 +104,16 @@ export const DrawingsList = ({
 					<DashboardListHeaderLabel name="calibration" {...DRAWING_LIST_COLUMN_WIDTHS.calibration}>
 						<FormattedMessage id="drawings.list.header.calibration" defaultMessage="2D/3D Calibration" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="code" {...DRAWING_LIST_COLUMN_WIDTHS.drawingNumber} hideWhenSmallerThan={Display.Tablet}>
+					<DashboardListHeaderLabel name="drawingNumber" {...DRAWING_LIST_COLUMN_WIDTHS.drawingNumber} hideWhenSmallerThan={Display.Tablet}>
 						<FormattedMessage id="drawings.list.header.drawingNo" defaultMessage="Drawing Number" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="type" {...DRAWING_LIST_COLUMN_WIDTHS.category}>
+					<DashboardListHeaderLabel name="category" {...DRAWING_LIST_COLUMN_WIDTHS.category}>
 						<FormattedMessage id="drawings.list.header.category" defaultMessage="Category" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="lastUpdated" {...DRAWING_LIST_COLUMN_WIDTHS.lastUpdated}>
 						<FormattedMessage id="drawings.list.header.lastUpdated" defaultMessage="Last Updated" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel {...DRAWING_LIST_COLUMN_WIDTHS.actions}>
+					<DashboardListHeaderLabel name="isFavourite" {...DRAWING_LIST_COLUMN_WIDTHS.actions}>
 						<FormattedMessage id="drawings.list.header.actions" defaultMessage="Actions" />
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
