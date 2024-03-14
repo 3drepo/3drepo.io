@@ -30,7 +30,6 @@ const CommentsMiddleware = {};
 const validateComment = async (req, res, next) => {
 	try {
 		req.body = await validateCommentSchema(req.body, req.commentData);
-
 		if (req.commentData) {
 			const { message, images } = req.body;
 			const existingImgRefs = req.commentData.images?.map(UUIDToString).sort();
@@ -56,6 +55,10 @@ CommentsMiddleware.canUpdateComment = async (req, res, next) => {
 		await getTicketById(teamspace, project, model, ticket, { _id: 1 });
 
 		const comment = await getCommentById(teamspace, project, model, ticket, _id);
+
+		if (comment.importedAt) {
+			throw createResponseCode(templates.notAuthorized, 'Imported comments cannot be modified');
+		}
 
 		if (user !== comment.author) {
 			throw templates.notAuthorized;

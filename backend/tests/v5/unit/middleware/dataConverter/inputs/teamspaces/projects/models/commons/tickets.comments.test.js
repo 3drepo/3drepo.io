@@ -91,11 +91,14 @@ const testValidateUpdateComment = () => {
 		};
 
 		describe.each([
-			[{ ...req, body: { message: generateRandomString() } }, false, 'with non authorized user', { ...existingComment, author: generateRandomString() }, templates.notAuthorized],
-			[{ ...req, body: { message: generateRandomString() } }, false, 'with deleted comment', { ...existingComment, deleted: true }],
-			[{ ...req, body: { message: '' } }, false, 'with invalid message', existingComment, templates.invalidArguments, false],
-			[{ ...req, body: { images: [UUIDToString(existingRef)], message: existingComment.message } }, false, 'with no actual changes', { ...existingComment, history: undefined }],
-		])('Check if req arguments for updating a comment are valid', (request, shouldPass, desc, comment = existingComment, error = templates.invalidArguments, passValidation) => {
+			[{ ...req, body: { message: generateRandomString() } }, false, true, 'with non authorized user', { ...existingComment, author: generateRandomString() }, templates.notAuthorized],
+			[{ ...req, body: { message: generateRandomString() } }, false, true, 'with deleted comment', { ...existingComment, deleted: true }],
+			[{ ...req, body: { message: generateRandomString() } }, false, true, 'with an imported comment', { ...existingComment, importedAt: new Date() }, templates.notAuthorized],
+			[{ ...req, body: { message: '' } }, false, false, 'with invalid message', existingComment, templates.invalidArguments],
+			[{ ...req, body: { message: generateRandomString() } }, true, true, 'with a message'],
+			[{ ...req, body: { images: [UUIDToString(existingRef)], message: existingComment.message } }, false, true, 'with no actual changes', { ...existingComment, history: undefined }],
+		])('Check if req arguments for updating a comment are valid', (request, shouldPass, passValidation, desc, comment = existingComment, error = templates.invalidArguments) => {
+			afterEach(() => { jest.resetAllMocks(); });
 			test(`${desc} ${shouldPass ? ' should call next()' : 'should respond with invalidArguments'}`, async () => {
 				const mockCB = jest.fn();
 
