@@ -110,7 +110,7 @@ YupHelper.types.date = Yup.date().transform((n, orgVal) => {
 
 YupHelper.types.dateInThePast = YupHelper.types.date.test(('date-in-the-past', 'Date must be in the past', (v) => {
 	const now = new Date();
-	return (now - v) >= 0;
+	return !v || (now - v) >= 0;
 }));
 
 const imageValidityTests = (yupType, isNullable) => yupType.test('image-validity-test', 'Image is not valid', async (value, { createError, originalValue }) => {

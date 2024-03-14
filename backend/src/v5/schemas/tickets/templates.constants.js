@@ -33,6 +33,7 @@ const propTypes = createConstantMapping([
 	'longText',
 	'boolean',
 	'date',
+	'pastDate',
 	'number',
 	'oneOf',
 	'manyOf',
@@ -145,7 +146,7 @@ TemplateConstants.presetModulesProperties = {
 const defaultProperties = [
 	createPropertyEntry('Description', propTypes.LONG_TEXT),
 	createPropertyEntry('Owner', propTypes.TEXT, { [propOptions.READ_ONLY]: true }),
-	createPropertyEntry('Created at', propTypes.DATE, { [propOptions.READ_ONLY]: true, [propOptions.ALLOW_WRITE_ON_IMPORT]: true }),
+	createPropertyEntry('Created at', propTypes.PAST_DATE, { [propOptions.READ_ONLY]: true, [propOptions.ALLOW_WRITE_ON_IMPORT]: true }),
 	createPropertyEntry('Updated at', propTypes.DATE, { [propOptions.READ_ONLY]: true }),
 	createPropertyEntry('Default Image', propTypes.IMAGE, { [propOptions.AVAILABLE_IF]: ({ defaultImage }) => defaultImage }),
 	createPropertyEntry('Default View', propTypes.VIEW, { [propOptions.AVAILABLE_IF]: ({ defaultView }) => defaultView }),

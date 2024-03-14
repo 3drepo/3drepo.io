@@ -547,6 +547,7 @@ const testAllProperties = () => {
 			['Long text', { type: propTypes.LONG_TEXT }, generateRandomString(), generateRandomString(1201)],
 			['Boolean', { type: propTypes.BOOLEAN }, true, new Date()],
 			['Date', { type: propTypes.DATE }, Date.now(), generateRandomString()],
+			['Past Date', { type: propTypes.PAST_DATE }, Date.now(), Date.now() + 1000],
 			['Number', { type: propTypes.NUMBER }, generateRandomNumber(), generateRandomString()],
 			['Coordinates', { type: propTypes.COORDS }, [1, 2, 3], [2, 3]],
 			['One Of', { type: propTypes.ONE_OF, values: ['a', 'b'] }, 'a', generateRandomString()],
@@ -583,6 +584,7 @@ const testAllProperties = () => {
 			['Long text (unset)', { type: propTypes.LONG_TEXT }, null],
 			['Boolean (unset)', { type: propTypes.BOOLEAN }, null],
 			['Date (unset)', { type: propTypes.DATE }, null],
+			['Past Date (unset)', { type: propTypes.PAST_DATE }, null],
 			['Number (unset)', { type: propTypes.NUMBER }, null],
 			['Coordinates (unset)', { type: propTypes.COORDS }, null],
 			['One Of (unset)', { type: propTypes.ONE_OF, values: ['a', 'b'] }, null],
@@ -914,6 +916,23 @@ const testImportedTickets = () => {
 				importTestInput, importTestInput, true);
 			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, false);
+		});
+
+		test('Should allow users to specify creation date', async () => {
+			const date = Date.now();
+			const { properties, ...others } = importTestInput;
+			const res = await TicketSchema.validateTicket(teamspace, project, model, importTestTem,
+				{ ...others,
+					properties: {
+						...properties,
+						[basePropertyLabels.CREATED_AT]: date,
+					},
+
+				}, undefined, true);
+			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
+			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, true);
+
+			expect(res.properties[basePropertyLabels.CREATED_AT]).toEqual(new Date(date));
 		});
 
 		const comments = times(5, () => ({
