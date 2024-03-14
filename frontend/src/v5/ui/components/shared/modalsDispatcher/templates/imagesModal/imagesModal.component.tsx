@@ -26,30 +26,52 @@ import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Tooltip } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
 import {
-	Modal, CenterBar, Image, NextButton, PreviousButton, FloatingButton, Counter,
+	Modal, CenterBar, Image, NextButton, PreviousButton, Counter,
 	TopBar, Buttons, TopBarButton, TextTopBarButton, ImageThumbnail,
-	BottomBar, ImageWithArrows, ImageThumbnailContainer, ImageContainer,
+	BottomBar, ImageWithArrows, ImageThumbnailContainer, ImageContainer, CloseButton,
 } from './imagesModal.styles';
+import { ImageMarkup } from './imageMarkup/imageMarkup.component';
 
 export type ImagesModalProps = {
 	onClickClose: () => void;
+	onClose?: () => void;
 	open: boolean;
 	images: string[];
 	// to use if the image to display is not the first one
 	displayImageIndex?: number;
+	onAddMarkup?: (img, index) => void;
 	onUpload?: () => void;
 	onDelete?: (index) => void;
 	disabledDeleteMessage?: string;
+	openInMarkupMode?: boolean;
 };
-export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open, onUpload, onDelete, disabledDeleteMessage }: ImagesModalProps) => {
+export const ImagesModal = ({
+	images,
+	displayImageIndex = 0,
+	onClickClose,
+	onClose,
+	open,
+	onUpload,
+	onDelete,
+	onAddMarkup,
+	disabledDeleteMessage,
+	openInMarkupMode = false,
+}: ImagesModalProps) => {
 	const [imageIndex, setImageIndex] = useState(displayImageIndex);
+	const [markupMode, setMarkupMode] = useState(openInMarkupMode);
 	const imagesLength = images.length;
 	const imageRef = useRef<HTMLImageElement>(null);
 	const hasManyImages = imagesLength > 1;
+	const currentImage = images[imageIndex];
 
 	const changeImageIndex = (delta) => {
 		const newIndex = Math.max(0, Math.min(imagesLength - 1, imageIndex + delta));
 		setImageIndex(newIndex);
+	};
+
+	const handleClose = () => {
+		onClickClose();
+		onClose?.();
 	};
 
 	const handleKeyDown = ({ keyCode }) => {
@@ -59,7 +81,7 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 
 		switch (keyCode) {
 			case ESCAPE_KEY:
-				onClickClose();
+				handleClose();
 				break;
 			case LEFT_KEY:
 				changeImageIndex(-1);
@@ -106,14 +128,25 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 
 	useEffect(() => {
 		if (!imagesLength) {
-			onClickClose();
+			handleClose();
 		}
 	}, [imagesLength]);
 
 	useEffect(() => { centerSelectedThumbnail(); }, [imagesLength, imageIndex]);
 
+	if (markupMode) return (
+		<Modal open={open}>
+			<TopBar>
+				<CloseButton onClick={() => setMarkupMode(false)}>
+					<CloseIcon />
+				</CloseButton>
+			</TopBar>
+			<ImageMarkup image={currentImage} onSave={(img) => onAddMarkup(img, imageIndex)} onClose={() => setMarkupMode(false)} />
+		</Modal>
+	);
+
 	return (
-		<Modal open={open} onClose={onClickClose}>
+		<Modal open={open} onClose={handleClose}>
 			<TopBar>
 				<Buttons>
 					{hasManyImages && (
@@ -128,13 +161,15 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 							/>
 						</Counter>
 					)}
-					<TextTopBarButton>
-						<EditIcon />
-						<FormattedMessage
-							id="images.button.addMarkup"
-							defaultMessage="Add markup"
-						/>
-					</TextTopBarButton>
+					{onAddMarkup && (
+						<TextTopBarButton onClick={() => setMarkupMode(true)}>
+							<EditIcon />
+							<FormattedMessage
+								id="images.button.addMarkup"
+								defaultMessage="Add markup"
+							/>
+						</TextTopBarButton>
+					)}
 					{onUpload && (
 						<TopBarButton onClick={onUpload}>
 							<UploadImageIcon />
@@ -150,14 +185,14 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 						</Tooltip>
 					)}
 				</Buttons>
-				<FloatingButton onClick={onClickClose}>
+				<CloseButton onClick={handleClose}>
 					<CloseIcon />
-				</FloatingButton>
+				</CloseButton>
 			</TopBar>
 			<CenterBar>
 				{!hasManyImages && (
 					<ImageContainer>
-						<Image src={images[imageIndex]} />
+						<Image src={currentImage} />
 					</ImageContainer>
 				)}
 				{hasManyImages && (
@@ -166,7 +201,7 @@ export const ImagesModal = ({ images, displayImageIndex = 0, onClickClose, open,
 							<ChevronIcon />
 						</PreviousButton>
 						<ImageContainer $isCarousel>
-							<Image src={images[imageIndex]} key={images[imageIndex]} />
+							<Image src={currentImage} key={currentImage} />
 						</ImageContainer>
 						<NextButton onClick={() => changeImageIndex(1)} disabled={imageIndex === (imagesLength - 1)}>
 							<ChevronIcon />

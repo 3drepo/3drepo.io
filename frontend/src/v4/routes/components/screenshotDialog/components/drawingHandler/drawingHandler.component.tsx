@@ -16,7 +16,7 @@
  */
 import { useMemo } from 'react';
 import Konva from 'konva';
-import { MODES } from '../../screenshotDialog.helpers';
+import { MODES } from '../../markupStage/markupStage.helpers';
 import { HandleCalloutDrawing } from './handleCalloutDrawing/handleCalloutDrawing.component';
 import { HandleLineDrawing } from './handleLineDrawing/handleLineDrawing.component';
 import { HandlePolygonDrawing } from './handlePolygonDrawing/handlePolygonDrawing.component';

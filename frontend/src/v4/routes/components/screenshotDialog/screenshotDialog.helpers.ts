@@ -15,17 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { formatMessage } from '@/v5/services/intl';
 import { COLOR } from '../../../styles';
 import { initialBrushSize, initialTextSize} from './components/tools/tools.helpers';
-
-export const MODES = {
-	BRUSH: 'brush',
-	ERASER: 'eraser',
-	TEXT: 'text',
-	SHAPE: 'shape',
-	POLYGON: 'polygon',
-	CALLOUT: 'callout',
-};
+import { MODES } from './markupStage/markupStage.helpers';
 
 export const INITIAL_VALUES = {
 	color: COLOR.RED,
@@ -40,62 +33,5 @@ export const MODE_OPERATION = {
 	eraser: 'destination-out'
 };
 
-export const ELEMENT_TYPES = {
-	TEXT: 'text',
-	SHAPE: 'shape',
-	DRAWING: 'drawing',
-	POLYGON: 'polygon',
-};
-
-const createUniqueName = (type) => `${type}-${(Number(String(Math.random()).slice(2)) + Date.now()).toString(36)}`;
-
-export const getNewShape = (figure, color, attrs) => {
-	const name = createUniqueName(ELEMENT_TYPES.SHAPE);
-	const newShape = {
-		type: ELEMENT_TYPES.SHAPE,
-		figure,
-		name,
-		color,
-		rotation: 0,
-		fill: 'transparent',
-		...attrs
-	};
-
-	return newShape;
-};
-
-export const getNewDrawnLine = (lineAttrs, color, type = ELEMENT_TYPES.DRAWING) => {
-	const name = createUniqueName(type);
-	const newLine = {
-		type: ELEMENT_TYPES.DRAWING,
-		name,
-		color,
-		rotation: 0,
-		points: lineAttrs.points,
-		lineCap: lineAttrs.lineCap,
-		strokeWidth: lineAttrs.strokeWidth,
-		globalCompositeOperation: lineAttrs.globalCompositeOperation,
-		x: 0,
-		y: 0
-	};
-
-	return newLine;
-};
-
-export const getNewText = (color, size, position, text) => {
-	const name = createUniqueName(ELEMENT_TYPES.TEXT);
-	const newText = {
-		type: ELEMENT_TYPES.TEXT,
-		text,
-		color,
-		name,
-		fontFamily: 'Arial',
-		fontSize: size,
-		...position
-	};
-
-	return newText;
-};
-
-export const EDITABLE_TEXTAREA_NAME = 'editable-textarea';
-export const EDITABLE_TEXTAREA_PLACEHOLDER = 'Type to change text...';
+export const EDITABLE_TEXTAREA_NAME = formatMessage({ id: 'imageMarkup.textarea.editable', defaultMessage: 'editable-textarea' });
+export const EDITABLE_TEXTAREA_PLACEHOLDER = formatMessage({ id: 'imageMarkup.textarea.placeholder', defaultMessage: 'Type to change text...' });
