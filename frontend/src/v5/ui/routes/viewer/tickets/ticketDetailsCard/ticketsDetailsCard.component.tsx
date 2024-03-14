@@ -20,12 +20,12 @@ import { useContext, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { findEditedGroup, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
+import { findEditedGroup, getAllPaths, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { FormProvider, useForm } from 'react-hook-form';
 import { CircleButton } from '@controls/circleButton';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { isEmpty, set } from 'lodash';
+import { get, isEmpty, set } from 'lodash';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
@@ -118,7 +118,12 @@ export const TicketDetailsCard = () => {
 
 		sanitizeViewVals(validVals, ticket, template);
 		if (isEmpty(validVals)) return;
-		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticket._id, validVals, isFederation);
+		const onError = () => {
+			getAllPaths(validVals).forEach((path) => {
+				formData.setValue(path, get(ticket, path));
+			});
+		};
+		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticket._id, validVals, isFederation, onError);
 	};
 
 	useEffect(() => {

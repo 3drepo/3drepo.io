@@ -287,3 +287,41 @@ export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
 		Object.values(values.modules).forEach(fillEmptyOverrides);
 	}
 };
+
+/* When given an object returns all the possible paths
+	e.g. getAllPaths({
+		modules: {
+			safetibase: {
+				location: 'Cambridge',
+				treatment: 'Spa',
+			}
+		}
+		properties: {
+			foo: true,
+		}
+	})
+	returns ['modules.safetibase.location', 'modules.safetibase.treatment', 'properties.foo']
+*/
+export const getAllPaths = (root) => {
+	let paths = [];
+	let nodes = [{
+	  obj: root,
+	  path: [],
+	}];
+	while (nodes.length > 0) {
+		let n = nodes.pop();
+		Object.keys(n.obj).forEach((k) => {
+			if (typeof n.obj[k] === 'object') {
+				let path = n.path.concat(k);
+				nodes.unshift({
+					obj: n.obj[k],
+					path,
+				});
+			} else {
+				let path = n.path.concat(k);
+				paths.push(path.join('.'));
+			}
+		});
+	}
+	return paths;
+};
