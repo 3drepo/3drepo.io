@@ -163,7 +163,7 @@ export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket,
 			),
 			error,
 		}));
-		onError();
+		onError?.();
 	}
 }
 

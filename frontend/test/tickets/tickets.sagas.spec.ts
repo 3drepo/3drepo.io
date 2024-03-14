@@ -121,10 +121,11 @@ describe('Tickets: sagas', () => {
 
 			const updateProp = { title: 'updatedContainerTicketName' };
 			await waitForActions(() => {
-				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, false));
+				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, false, onError));
 			}, [
 				TicketsActions.upsertTicketSuccess(modelId, { _id: ticket._id, ...updateProp }),
 			]);
+			expect(onError).not.toHaveBeenCalled();
 		});
 		it('should call updateContainerTicket with a 404', async () => {
 			populateTicketsStore();
@@ -134,11 +135,12 @@ describe('Tickets: sagas', () => {
 
 			const updateProp = { title: 'updatedContainerTicketName' };
 			await waitForActions(() => {
-				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, false));
+				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, false, onError));
 			}, [DialogsTypes.OPEN]);
 
 			const ticketsFromState = selectTickets(getState(), modelId);
 			expect(ticketsFromState).toEqual(tickets);
+			expect(onError).toHaveBeenCalled();
 		});
 
 		it('should call createContainerTicket endpoint', async () => {
@@ -234,8 +236,9 @@ describe('Tickets: sagas', () => {
 			const updateProp = { _id: ticket._id, title: 'updatedFederationTicketName' };
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, true));
+				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, true, onError));
 			}, [TicketsActions.upsertTicketSuccess(modelId, updateProp)]);
+			expect(onError).not.toHaveBeenCalled();
 		});
 
 		it('should call updateFederationTicket endpoint with a 404', async () => {
@@ -247,11 +250,12 @@ describe('Tickets: sagas', () => {
 			const updateProp = { _id: ticket._id, title: 'updatedFederationTicketName' };
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, true));
+				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, true, onError));
 			}, [DialogsTypes.OPEN]);
 
 			const ticketsFromState = selectTickets(getState(), modelId);
 			expect(ticketsFromState).toEqual(tickets);
+			expect(onError).toHaveBeenCalled();
 		});
 
 		it('should call createFederationTicket endpoint', async () => {

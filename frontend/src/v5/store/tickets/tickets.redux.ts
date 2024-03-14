@@ -128,7 +128,7 @@ export interface ITicketsState {
 
 export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean, filter?: string[] };
 export type FetchTicketAction = Action<'FETCH_TICKET'> & TeamspaceProjectAndModel & { ticketId: string, isFederation: boolean, revision?: string };
-export type UpdateTicketAction = Action<'UPDATE_TICKET'> & TeamspaceProjectAndModel & { ticketId: string, ticket: Partial<ITicket>, isFederation: boolean, onError: () => void };
+export type UpdateTicketAction = Action<'UPDATE_TICKET'> & TeamspaceProjectAndModel & { ticketId: string, ticket: Partial<ITicket>, isFederation: boolean, onError?: () => void };
 export type CreateTicketAction = Action<'CREATE_TICKET'> & TeamspaceProjectAndModel & { ticket: NewTicket, isFederation: boolean, onSuccess: (ticketId) => void, onError: () => void };
 export type FetchTicketsSuccessAction = Action<'FETCH_TICKETS_SUCCESS'> & ModelId & { tickets: ITicket[] };
 export type UpsertTicketSuccessAction = Action<'UPSERT_TICKET_SUCCESS'> & ModelId & { ticket: Partial<ITicket> };
@@ -168,7 +168,7 @@ export interface ITicketsActionCreators {
 		ticketId: string,
 		ticket: Partial<ITicket>,
 		isFederation: boolean,
-		onError: () => void,
+		onError?: () => void,
 	) => UpdateTicketAction;
 	createTicket: (
 		teamspace: string,

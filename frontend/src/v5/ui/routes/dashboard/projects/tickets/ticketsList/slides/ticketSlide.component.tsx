@@ -19,13 +19,13 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { enableRealtimeContainerUpdateTicket, enableRealtimeFederationUpdateTicket } from '@/v5/services/realtime/ticket.events';
-import { modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
+import { getAllPaths, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { TicketForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketForm.component';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { isEmpty, set } from 'lodash';
+import { get, isEmpty, set } from 'lodash';
 import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
@@ -61,7 +61,12 @@ export const TicketSlide = ({ template, ticket }: TicketSlideProps) => {
 		const validVals = removeEmptyObjects(nullifyEmptyObjects(filterErrors(values, errors)));
 		sanitizeViewVals(validVals, ticket, template);
 		if (isEmpty(validVals)) return;
-		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticketId, validVals, isFederation);
+		const onError = () => {
+			getAllPaths(validVals).forEach((path) => {
+				formData.setValue(path, get(ticket, path));
+			});
+		};
+		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticketId, validVals, isFederation, onError);
 	};
 
 	useEffect(() => {
