@@ -20,13 +20,16 @@ import TextIcon from '@assets/icons/outlined/text-outlined.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { FONT_SIZE } from '../../../imageMarkup.types';
 import { invert } from 'lodash';
+import { Tooltip } from '@mui/material';
 import { ToolbarSelect } from '@controls/toolbarSelect/toolbarSelect.component';
 
 const VALUE_TO_SIZE = invert(FONT_SIZE);
-const Icon = ({ value }) => (
-	<IconWithFooterContainer $footer={VALUE_TO_SIZE[value]}>
-		<TextIcon />
-	</IconWithFooterContainer>
+const Icon = ({ value, title }) => (
+	<Tooltip title={title}>
+		<IconWithFooterContainer $footer={VALUE_TO_SIZE[value]}>
+			<TextIcon />
+		</IconWithFooterContainer>
+	</Tooltip>
 );
 
 type FontSizeButtonProps = {

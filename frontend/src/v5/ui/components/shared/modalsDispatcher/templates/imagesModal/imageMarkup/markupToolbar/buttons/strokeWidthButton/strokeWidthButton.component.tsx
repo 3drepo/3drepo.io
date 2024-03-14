@@ -22,12 +22,15 @@ import { STROKE_WIDTH } from '../../../imageMarkup.types';
 import { FlatToolbarSelectItem, StrokeOption } from './strokeWidthButton.styles';
 import { invert } from 'lodash';
 import { ToolbarSelect } from '@controls/toolbarSelect/toolbarSelect.component';
+import { Tooltip } from '@mui/material';
 
 const VALUE_TO_WIDTH = invert(STROKE_WIDTH);
-const Icon = ({ value }) => (
-	<IconWithFooterContainer $footer={VALUE_TO_WIDTH[value]}>
-		<StrokeWidthIcon />
-	</IconWithFooterContainer>
+const Icon = ({ value, title }) => (
+	<Tooltip title={title}>
+		<IconWithFooterContainer $footer={VALUE_TO_WIDTH[value]}>
+			<StrokeWidthIcon />
+		</IconWithFooterContainer>
+	</Tooltip>
 );
 
 type StrokeWidthButtonProps = {

@@ -32,12 +32,11 @@ export const FloatingBar = styled.div`
 	cursor: inherit;
 `;
 
-export const FlatToolbarSelectItem = styled(ToolbarSelectItem)<{ selected?: boolean }>`
+export const FlatToolbarSelectItem = styled(ToolbarSelectItem)`
 	cursor: pointer;
 	width: 100%;
 	height: 19px;
 	font-weight: 500;
-	color: ${({ theme, selected }) => selected ? theme.palette.primary.main : theme.palette.secondary.main};
 	display: grid;
 	place-content: center;
 	box-shadow: none;
@@ -51,18 +50,33 @@ export const FlatToolbarSelectItem = styled(ToolbarSelectItem)<{ selected?: bool
 
 export const IconWithFooterContainer = styled.div<{ $footer }> `
 	position: relative;
-	height: 16.5px;
+	height: 40px;
+	width: 40px;
+	padding: 0 10px;
+	box-sizing: border-box;
+	cursor: pointer;
+	display: grid;
+	place-content: center;
+	border-radius: 50%;
+
+	svg {
+		width: 100%;
+	}
+
+	&:hover {
+		color: ${({ theme }) => theme.palette.primary.main};
+	}
 
 	&::after {
 		content: "${({ $footer }) => $footer}";
 		font-size: 10px;
 		font-weight: 600;
 		position: absolute;
-		bottom: -4px;
-		left: 13px;
+		bottom: 8px;
+		left: 24px;
 		height: 10px;
 		line-height: 10px;
-		background: ${({ theme }) => theme.palette.primary.contrast};
+		background-color: ${({ theme }) => theme.palette.primary.contrast};
 		padding: 0 2px;
 	}
 `;

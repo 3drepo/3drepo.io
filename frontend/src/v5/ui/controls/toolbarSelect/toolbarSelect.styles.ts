@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { hexToOpacity } from '../../themes/theme';
+import styled from 'styled-components';
 
 export const FloatingButtonsContainer = styled.div`
 	display: flex;
@@ -42,35 +41,3 @@ export const Container = styled.div<{ disabled?: boolean; }>`
 		border-bottom-color: transparent;
 	}
 `;
-
-export const ToolbarButtonContainer = styled.div<{ disabled?: boolean, selected?: boolean }>`
-	height: 40px;
-	width: 40px;
-	padding: 0 10px;
-	box-sizing: border-box;
-	cursor: pointer;
-	display: grid;
-	place-content: center;
-	color: ${({ theme }) => theme.palette.secondary.main};
-	border-radius: 50%;
-
-	${({ selected, theme }) => selected && css`
-		color: ${theme.palette.primary.main};
-		background-color: ${hexToOpacity(theme.palette.primary.light, 25)};
-	`}
-
-	${({ disabled, theme }) => disabled ? css`
-		cursor: default;
-		pointer-events: none;
-		color: ${theme.palette.base.light};
-	` : css`
-		&:hover {
-			color: ${theme.palette.primary.main};
-		}
-	`}
-
-	svg {
-		width: 100%;
-	}
-`;
-

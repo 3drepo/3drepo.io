@@ -18,8 +18,8 @@
 import styled from 'styled-components';
 import { FlatToolbarSelectItem as FlatToolbarSelectItemBase } from '../../toolbarButton/multioptionIcons.styles';
 
-export const StrokeOption = styled.div<{ selected, $height }>`
-	background-color: ${({ theme: { palette }, selected }) => selected ? palette.primary.main : palette.secondary.main};
+export const StrokeOption = styled.div<{ $height }>`
+	background-color: currentColor;
 	border-radius: ${({ $height }) => $height}px;
 	border: none;
 	outline: none;
@@ -29,6 +29,6 @@ export const StrokeOption = styled.div<{ selected, $height }>`
 
 export const FlatToolbarSelectItem = styled(FlatToolbarSelectItemBase)`
 	&:hover ${StrokeOption} {
-		background-color: ${({ theme }) => theme.palette.primary.main};
+		color: ${({ theme }) => theme.palette.primary.main};
 	}
 `;

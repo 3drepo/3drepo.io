@@ -16,7 +16,7 @@
  */
 
 import { ClickAwayListener } from '@mui/material';
-import { Container, FloatingButtonsContainer, ToolbarButtonContainer } from './toolbarSelect.styles';
+import { Container, FloatingButtonsContainer } from './toolbarSelect.styles';
 import { useEffect, useState } from 'react';
 import { ToolbarSelectContext } from './toolbarSelectContext';
 import { ToolbarButton } from '@components/shared/modalsDispatcher/templates/imagesModal/imageMarkup/markupToolbar/toolbarButton/toolbarButton.component';
@@ -25,11 +25,11 @@ type ToolbarSelectProps = {
 	disabled?: boolean;
 	onChange: (value) => void;
 	children: any;
-	renderToolbarButton?: ({ Icon, value }) => JSX.Element;
+	renderToolbarButton?: ({ Icon, value, title }) => JSX.Element;
 	value?: any;
 	defaultIcon?: any;
 	title: string;
-	selected?: boolean;
+	active?: boolean;
 };
 export const ToolbarSelect = ({
 	renderToolbarButton,
@@ -39,11 +39,12 @@ export const ToolbarSelect = ({
 	value = null,
 	defaultIcon = () => null,
 	title,
-	selected,
+	active,
 	...props
 }: ToolbarSelectProps) => {
 	const [expanded, setExpanded] = useState(false);
 	const [selectedData, setSelectedData] = useState({ Icon: defaultIcon, value });
+	const tooltipTitle = expanded ? '' : title;
 
 	const handleChange = (data) => {
 		onChange(data.value);
@@ -55,7 +56,7 @@ export const ToolbarSelect = ({
 	}, [value]);
 
 	return (
-		<ToolbarSelectContext.Provider value={{ onChange: handleChange, expanded, setExpanded }}>
+		<ToolbarSelectContext.Provider value={{ onChange: handleChange, expanded, setExpanded, active, selectedValue: selectedData.value }}>
 			<ClickAwayListener onClickAway={() => setExpanded(false)}>
 				<Container>
 					{expanded && (
@@ -63,12 +64,12 @@ export const ToolbarSelect = ({
 							{children}
 						</FloatingButtonsContainer>
 					)}
-					<ToolbarButtonContainer onClick={() => setExpanded(!expanded)} disabled={disabled}>
+					<div onClick={() => setExpanded(!expanded)}>
 						{renderToolbarButton
-							? renderToolbarButton(selectedData)
-							: <ToolbarButton title={expanded ? '' : title} Icon={selectedData.Icon} selected={selected} />
+							? renderToolbarButton({ ...selectedData, title: tooltipTitle })
+							: <ToolbarButton title={tooltipTitle} Icon={selectedData.Icon} selected={active} />
 						}
-					</ToolbarButtonContainer>
+					</div>
 				</Container>
 			</ClickAwayListener>
 		</ToolbarSelectContext.Provider>
