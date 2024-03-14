@@ -20,6 +20,7 @@ import WarningIcon from '@assets/icons/outlined/warning-outlined.svg';
 import CalibratedIcon from '@assets/icons/filled/calibration-filled.svg';
 import NotCalibrated from '@assets/icons/filled/no_calibration-filled.svg';
 import { Display } from '@/v5/ui/themes/media';
+import { CalibrationStates } from './drawings.types';
 
 export const DRAWING_LIST_COLUMN_WIDTHS = {
 	name: {
@@ -51,19 +52,19 @@ export const DRAWING_LIST_COLUMN_WIDTHS = {
 export const DRAWINGS_SEARCH_FIELDS = ['name', 'latestRevision', 'type', 'code', 'status'];
 
 export const CALIBRATION_MAP = {
-	calibrated: {
+	[CalibrationStates.CALIBRATED]: {
 		label: formatMessage({ id: 'drawings.calibration.calibrated', defaultMessage: 'Calibrated' }),
 		icon: <CalibratedIcon />,
 	},
-	outOfSync: {
+	[CalibrationStates.OUT_OF_SYNC]: {
 		label: formatMessage({ id: 'drawings.calibration.outOfSync', defaultMessage: 'Calibrated' }),
 		icon: <WarningIcon />,
 	},
-	uncalibrated: {
+	[CalibrationStates.UNCALIBRATED]: {
 		label: formatMessage({ id: 'drawings.calibration.uncalibrated', defaultMessage: 'Uncalibrated' }),
 		icon: <NotCalibrated />,
 	},
-	empty: {
+	[CalibrationStates.EMPTY]: {
 		label: formatMessage({ id: 'drawings.calibration.empty', defaultMessage: 'Empty' }),
 		icon: <NotCalibrated />,
 	},

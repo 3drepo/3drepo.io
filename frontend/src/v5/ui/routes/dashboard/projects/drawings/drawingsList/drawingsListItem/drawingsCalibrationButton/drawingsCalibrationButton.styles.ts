@@ -16,6 +16,7 @@
  */
 
 import { CALIBRATION_MAP } from '@/v5/store/drawings/drawings.helpers';
+import { CalibrationStates } from '@/v5/store/drawings/drawings.types';
 import { DashboardListItemButton } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import styled, { css } from 'styled-components';
 
@@ -39,18 +40,18 @@ const emptyStyles = css`
 	background-color: ${({ theme }) => theme.palette.secondary.lightest};
 `;
 
-export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{ calibration: string }>(({ calibration }) => ({
+export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{ calibration: CalibrationStates }>(({ calibration }) => ({
 	children: CALIBRATION_MAP[calibration]?.label,
 	startIcon: CALIBRATION_MAP[calibration]?.icon,
 }))<{ calibration: string }>`
 	.MuiButtonBase-root {
 		${({ calibration }) => {
 		switch (calibration) {
-			case 'calibrated':
+			case CalibrationStates.CALIBRATED:
 				return calibratedStyles;
-			case 'outOfSync':
+			case CalibrationStates.OUT_OF_SYNC:
 				return outOfSyncStyles;
-			case 'uncalibrated':
+			case CalibrationStates.UNCALIBRATED:
 				return uncalibratedStyles;
 			default:
 				return emptyStyles;

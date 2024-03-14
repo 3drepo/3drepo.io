@@ -17,6 +17,13 @@
 
 import { Role } from '../currentUser/currentUser.types';
 
+export enum CalibrationStates {
+	CALIBRATED = 'calibrated',
+	OUT_OF_SYNC = 'outOfSync',
+	UNCALIBRATED = 'uncalibrated',
+	EMPTY = 'empty',
+}
+
 export interface MinimumDrawing {
 	_id: string;
 	name: string;
@@ -30,7 +37,7 @@ export interface IDrawing extends MinimumDrawing {
 	total: number;
 	lastUpdated?: Date;
 	latestRevision?: string;
-	calibration?: string; // TODO - add calibration types
+	calibration?: CalibrationStates;
 	category?: string; // TODO - add category types?
 	drawingNumber: string;
 	hasStatsPending?: boolean;
@@ -48,7 +55,7 @@ export interface DrawingStats {
 		total: number,
 		lastUpdated?: Date,
 		latestRevision?: string,
-		calibration?: string, // TODO - add calibration types
+		calibration?: CalibrationStates,
 		category?: string;// TODO - add category types
 		status?: any; // TODO - add drawing statuses
 	}
