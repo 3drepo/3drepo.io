@@ -17,17 +17,20 @@
 
 import { Role } from '../currentUser/currentUser.types';
 
-// TODO: Unfinished interface
-export interface IDrawing {
+export interface MinimumDrawing {
 	_id: string;
 	name: string;
-	isFavourite: boolean;
 	role: Role;
+	isFavourite: boolean;
+}
+
+// TODO: Unfinished interface
+export interface IDrawing extends MinimumDrawing {
 	desc?: string;
 	total: number;
-	lastUpdated?: number;
+	lastUpdated?: Date;
 	latestRevision?: string;
-	calibration?: string;
+	calibration?: string; // TODO - add calibration types
 	category?: string; // TODO - add category types?
 	drawingNumber: string;
 	hasStatsPending?: boolean;
@@ -38,19 +41,15 @@ export interface IDrawing {
 	};
 }
 
-export interface MinimumDrawing {
-	_id: string;
-	name: string;
-	role: Role;
-	isFavourite: boolean;
-}
-
 // TODO: Unfinished interface
 export interface DrawingStats {
 	_id: string,
 	revisions: {
 		total: number,
-		lastUpdated?: number,
+		lastUpdated?: Date,
 		latestRevision?: string,
+		calibration?: string, // TODO - add calibration types
+		category?: string;// TODO - add category types
+		status?: any; // TODO - add drawing statuses
 	}
 }

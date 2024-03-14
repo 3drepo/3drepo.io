@@ -69,16 +69,13 @@ export const fetchDrawings = (teamspace, projectId): Promise<MinimumDrawing[]> =
 };
 
 export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promise<DrawingStats> => {
-	const stats = [ // TODO: The schema is unfinished
+	const stats: DrawingStats[] = [ // TODO: The schema is unfinished
 		{
 			_id: drawings[0]._id,
 			revisions : {
 				lastUpdated: null,
 				total: 0,
 				calibration: 'empty',
-				isFavourite: false,
-				type: 'Architectural',
-				code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0001',
 				category: categories[1],
 			},
 		},
@@ -86,26 +83,20 @@ export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promi
 			_id: drawings[1]._id,
 			revisions : {
 				total: 1,
-				lastUpdated: 1709569331628,
+				lastUpdated: new Date(1709569331628),
 				latestRevision:'I dunno',
 				calibration: 'calibrated',
-				isFavourite: false,
-				type: 'Existing',
-				code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0002',
-				status: 's4s',
 				category: categories[0],
+				status: 's4s',
 			},
 		},
 		{
 			_id: drawings[2]._id,
 			revisions : {
 				total: 2,
-				lastUpdated: 1009569331628,
+				lastUpdated: new Date(709569331628),
 				latestRevision:'Apple',
 				calibration: 'outOfSync',
-				isFavourite: true,
-				type: 'Existing',
-				code: 'SC1-SFT-V1-01-M3-ST-30_10_30-0003',
 				category: categories[2],
 			},
 		},
@@ -113,12 +104,9 @@ export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promi
 			_id: drawings[3]._id,
 			revisions : {
 				total: 10,
-				lastUpdated: 1609569331628,
+				lastUpdated: new Date(1449569331628),
 				latestRevision:'Shading and other such things to improve the drawing',
 				calibration: 'uncalibrated',
-				isFavourite: false,
-				type: 'MEP',
-				code: 'SC2-SFT-V1-01-M4-ST-30_11_30-0001',
 				status: 's5',
 				category: categories[0],
 			},
