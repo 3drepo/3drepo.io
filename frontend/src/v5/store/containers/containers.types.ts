@@ -17,7 +17,6 @@
 import { formatMessage } from '@/v5/services/intl';
 import { Role } from '../currentUser/currentUser.types';
 import { SurveyPoint, View } from '../store.types';
-import { ContainerCreateRevisionBody } from '../containerRevisions/containerRevisions.types';
 
 export enum UploadStatuses {
 	OK = 'ok',
@@ -184,23 +183,3 @@ export type ContainerSettings = Omit<ContainerBackendSettings, 'surveyPoints'> &
 };
 
 export type FetchContainerViewsResponseView = { views: View[] };
-
-export type DestinationOption = {
-	containerId: string;
-	containerName: string;
-	containerUnit?: string;
-	containerType?: string;
-	containerDesc?: string;
-	containerCode?: string;
-	latestRevision: string;
-};
-
-export type UploadItemFields = ContainerCreateRevisionBody & {
-	uploadId: string;
-	progress: number;
-	extension: string;
-};
-
-export type UploadFieldArray = {
-	uploads: UploadItemFields[];
-};

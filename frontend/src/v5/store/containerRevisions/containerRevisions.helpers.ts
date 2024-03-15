@@ -16,7 +16,7 @@
  */
 
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
-import { ContainerCreateRevisionBody, IContainerRevision } from './containerRevisions.types';
+import { CreateContainerRevisionBody, IContainerRevision } from './containerRevisions.types';
 
 export const prepareRevisionData = (revision): IContainerRevision => ({
 	...revision,
@@ -27,7 +27,7 @@ export const prepareRevisionData = (revision): IContainerRevision => ({
 	void: revision?.void || false,
 });
 
-export const createContainerFromRevisionBody = (body: ContainerCreateRevisionBody) => ({
+export const createContainerFromRevisionBody = (body: CreateContainerRevisionBody) => ({
 	name: body.containerName,
 	unit: body.containerUnit,
 	type: body.containerType,
@@ -35,7 +35,7 @@ export const createContainerFromRevisionBody = (body: ContainerCreateRevisionBod
 	desc: body.containerDesc,
 });
 
-export const createFormDataFromRevisionBody = (body: ContainerCreateRevisionBody) => {
+export const createFormDataFromRevisionBody = (body: CreateContainerRevisionBody) => {
 	const formData = new FormData();
 	formData.append('file', body.file);
 	formData.append('tag', body.revisionTag);

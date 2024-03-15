@@ -78,7 +78,7 @@ export type ContainerRevisionVoidStatusPayload = {
 	isVoid: boolean;
 };
 
-export type ContainerCreateRevisionBody = {
+export type CreateContainerRevisionBody = {
 	revisionTag: string;
 	revisionDesc?: string;
 	file: File;
@@ -98,9 +98,30 @@ export type CreateContainerRevisionPayload = {
 	teamspace: string;
 	projectId: string;
 	uploadId: string;
-	body: ContainerCreateRevisionBody;
+	body: CreateContainerRevisionBody;
 };
 
 export type IContainerRevisionUpdate = Partial<Omit<IContainerRevision, '_id'>> & {
 	_id: string;
 };
+
+export type DestinationOption = {
+	containerId: string;
+	containerName: string;
+	containerUnit?: string;
+	containerType?: string;
+	containerDesc?: string;
+	containerCode?: string;
+	latestRevision: string;
+};
+
+export type UploadItemFields = CreateContainerRevisionBody & {
+	uploadId: string;
+	progress: number;
+	extension: string;
+};
+
+export type UploadFieldArray = {
+	uploads: UploadItemFields[];
+};
+

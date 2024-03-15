@@ -35,7 +35,7 @@ import { selectRevisions } from './containerRevisions.selectors';
 export function* fetch({ teamspace, projectId, containerId, onSuccess }: FetchAction) {
 	yield put(ContainerRevisionsActions.setIsPending(containerId, true));
 	try {
-		const { data: { revisions } } = yield API.Revisions.fetchRevisions(teamspace, projectId, containerId);
+		const { data: { revisions } } = yield API.ContainerRevisions.fetchRevisions(teamspace, projectId, containerId);
 		onSuccess?.();
 		yield put(ContainerRevisionsActions.fetchSuccess(containerId, revisions));
 	} catch (error) {
@@ -49,7 +49,7 @@ export function* fetch({ teamspace, projectId, containerId, onSuccess }: FetchAc
 
 export function* setVoidStatus({ teamspace, projectId, containerId, revisionId, isVoid }: SetRevisionVoidStatusAction) {
 	try {
-		yield API.Revisions.setRevisionVoidStatus(teamspace, projectId, containerId, revisionId, isVoid);
+		yield API.ContainerRevisions.setRevisionVoidStatus(teamspace, projectId, containerId, revisionId, isVoid);
 		yield put(ContainerRevisionsActions.setVoidStatusSuccess(containerId, revisionId, isVoid));
 		const revisions = yield select(selectRevisions, containerId);
 		const activeRevisions = revisions.filter((rev) => !rev.void);
@@ -90,7 +90,7 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 			return;
 		}
 		yield put(ContainerRevisionsActions.setUploadComplete(uploadId, false));
-		yield API.Revisions.createRevision(
+		yield API.ContainerRevisions.createRevision(
 			teamspace,
 			projectId,
 			containerId,

@@ -16,7 +16,7 @@
  */
 
 import * as faker from 'faker';
-import { ContainerCreateRevisionBody, IContainerRevision } from '@/v5/store/containerRevisions/containerRevisions.types';
+import { CreateContainerRevisionBody, IContainerRevision } from '@/v5/store/containerRevisions/containerRevisions.types';
 
 export const containerRevisionsMockFactory = (overrides?: Partial<IContainerRevision>): IContainerRevision => ({
 	_id: faker.datatype.uuid(),
@@ -29,7 +29,7 @@ export const containerRevisionsMockFactory = (overrides?: Partial<IContainerRevi
 	...overrides,
 });
 
-export const mockCreateRevisionBody = (overrides?: Partial<ContainerCreateRevisionBody>): ContainerCreateRevisionBody => ({
+export const mockCreateRevisionBody = (overrides?: Partial<CreateContainerRevisionBody>): CreateContainerRevisionBody => ({
 	revisionTag: faker.random.words(1),
 	revisionDesc: faker.random.words(3),
 	file: new File(['file'], 'filename.obj'),

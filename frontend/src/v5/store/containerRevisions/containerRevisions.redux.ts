@@ -20,7 +20,7 @@ import { Action } from 'redux';
 import { Constants } from '@/v5/helpers/actions.helper';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { TeamspaceProjectAndContainerId, ContainerId, OnSuccess } from '../store.types';
-import { ContainerCreateRevisionBody, CreateContainerRevisionPayload, IContainerRevision, IContainerRevisionUpdate, IUploadStatus } from './containerRevisions.types';
+import { CreateContainerRevisionBody, CreateContainerRevisionPayload, IContainerRevision, IContainerRevisionUpdate, IUploadStatus } from './containerRevisions.types';
 
 export const { Types: ContainerRevisionsTypes, Creators: ContainerRevisionsActions } = createActions({
 	setVoidStatus: ['teamspace', 'projectId', 'containerId', 'revisionId', 'isVoid'],
@@ -137,7 +137,7 @@ export interface IContainerRevisionsActionCreators {
 	createRevision: (teamspace: string,
 		projectId: string,
 		uploadId: string,
-		body: ContainerCreateRevisionBody,
+		body: CreateContainerRevisionBody,
 	) => CreateRevisionAction;
 	setUploadComplete: (uploadId: string, isComplete: boolean, errorMessage?: string) => SetUploadCompleteAction;
 	setUploadProgress: (uploadId: string, progress: number) => SetUploadProgressAction;
