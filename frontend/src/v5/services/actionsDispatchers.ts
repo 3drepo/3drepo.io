@@ -118,4 +118,3 @@ export const TreeActionsDispatchers = createActionsDispatchers<ITreeActionCreato
 export const UsersActionsDispatchers = createActionsDispatchers<IUsersActions>(UsersActions);
 export const ViewerActionsDispatchers = createActionsDispatchers<ViewerActionsCreators>(ViewerActions);
 export const ViewerGuiActionsDispatchers = createActionsDispatchers<IViewerGuiActionCreators>(ViewerGuiActions);
-
