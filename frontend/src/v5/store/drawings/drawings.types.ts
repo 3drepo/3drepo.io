@@ -24,13 +24,40 @@ export interface IDrawing {
 	category: string;
 	status: DrawingUploadStatus;
 	revisionsCount: number;
+	role: any;
+	latestRevision: string;
+	lastUpdated: Date;
+	isFavourite: boolean;
+	hasStatsPending: boolean;
+	errorReason?: {
+		message: string;
+		timestamp: Date | null;
+	};
 }
+
+export type MinimumDrawing = Pick<IDrawing, '_id' | 'name' | 'drawingNumber' | 'category' | 'role' | 'isFavourite'>;
 
 // TODO: Unfinished interface
 export interface DrawingStats {
 	_id: string;
-	revisions : { total: number, lastUpdated?: number, latestRevision?: string }
+	revisions : {
+		total: number;
+		lastUpdated?: number;
+		latestRevision?: string;
+	};
+	type: string;
+	errorReason?: {
+		message: string;
+		timestamp: number;
+	};
+	status: DrawingUploadStatus;
 }
 
-// TODO: Check values
-export type DrawingUploadStatus = 'ok' | 'failed' | 'uploading' | 'uploaded' | 'queued' | 'processing';
+export enum DrawingUploadStatus {
+	OK = 'ok',
+	FAILED = 'failed',
+	UPLOADING = 'uploading',
+	UPLOADED = 'uploaded',
+	QUEUED = 'queued',
+	PROCESSING = 'processing',
+}

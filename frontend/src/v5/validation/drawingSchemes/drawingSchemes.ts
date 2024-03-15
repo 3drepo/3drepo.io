@@ -15,32 +15,56 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import * as Yup from 'yup';
-import { alphaNumericHyphens, desc, name } from '../containerAndFederationSchemes/validators';
+import { alphaNumericHyphens, desc, name, revisionDesc, uploadFile } from '../containerAndFederationSchemes/validators';
+import { revisionName } from './validators';
 import { formatMessage } from '@/v5/services/intl';
+
+const drawingNumber = Yup.string().matches(alphaNumericHyphens,
+	formatMessage({
+		id: 'validation.drawing.drawingNumber',
+		defaultMessage: 'Drawing Number can only consist of letters, numbers, hyphens or underscores',
+	}))
+	.required(
+		formatMessage({
+			id: 'validation.drawingNumber.error.required',
+			defaultMessage: 'Drawing Number is a required field',
+		}),
+	).test(
+		'alreadyExistingNumbers',
+		formatMessage({
+			id: 'validation.drawingNumber.alreadyExisting',
+			defaultMessage: 'Your Drawing Number is already in use, please use a unique Drawing Number',
+		}),
+		(value, testContext) => {
+			if (!testContext.options?.context) return true;
+			return !testContext.options.context.alreadyExistingNumbers?.map((n) => n.trim().toLocaleLowerCase()).includes(value?.toLocaleLowerCase());
+		},
+	);
 
 export const DrawingFormSchema =  Yup.object().shape({
 	name,
-	drawingNumber: Yup.string().matches(alphaNumericHyphens,
-		formatMessage({
-			id: 'validation.drawing.drawingNumber',
-			defaultMessage: 'Drawing Number can only consist of letters, numbers, hyphens or underscores',
-		}))
-		.required(
-			formatMessage({
-				id: 'validation.drawingNumber.error.required',
-				defaultMessage: 'Drawing Number is a required field',
-			}),
-		).test(
-			'alreadyExistingNumbers',
-			formatMessage({
-				id: 'validation.drawingNumber.alreadyExisting',
-				defaultMessage: 'Your Drawing Number is already in use, please use a unique Drawing Number',
-			}),
-			(value, testContext) => {
-				if (!testContext.options?.context) return true;
-				return !testContext.options.context.alreadyExistingNumbers?.map((n) => n.trim().toLocaleLowerCase()).includes(value?.toLocaleLowerCase());
-			},
-		)
-	,
+	drawingNumber,
 	desc,
+});
+
+export const ListItemSchema = Yup.object().shape({
+	file: uploadFile,
+	revisionName,
+	statusCode: Yup.string(),
+	revisionCode: Yup.string(),
+	revisionDesc,
+});
+
+export const SidebarSchema = Yup.object().shape({
+	drawingName: name,
+	drawingNumber,
+	drwaingDesc: desc,
+});
+
+export const UploadsSchema = Yup.object().shape({
+	uploads: Yup
+		.array()
+		.of(ListItemSchema.concat(SidebarSchema))
+		.required()
+		.min(1),
 });

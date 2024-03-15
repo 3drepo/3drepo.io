@@ -17,24 +17,40 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { delay } from '@/v4/helpers/async';
+import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { IDrawing, DrawingStats } from '@/v5/store/drawings/drawings.types';
 import uuid from 'uuidv4';
 
 const categories =  ['A drawing category', 'Another drawing category', 'Yet another one'];
 
-const drawings = [ // TODO: The schema is unfinished
+const drawings: IDrawing[] = [ // TODO: The schema is unfinished
 	{
 		_id: uuid(),
 		name: 'My cool drawing',
 		drawingNumber: uuid(),
 		category: categories[0],
+		role: Role.COLLABORATOR,
+		status: null,
+		revisionsCount: 0,
+		latestRevision: null,
+		lastUpdated: null,
+		isFavourite: false,
+		hasStatsPending: false,
 	},
 	{
 		_id: uuid(),
 		name: 'Another drawing',
 		drawingNumber: uuid(),
 		category: categories[1],
-	}];
+		role: Role.COLLABORATOR,
+		status: null,
+		revisionsCount: 0,
+		latestRevision: null,
+		lastUpdated: null,
+		isFavourite: false,
+		hasStatsPending: false,
+	},
+];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const fetchDrawings = (teamspace, projectId): Promise<IDrawing[]> => {

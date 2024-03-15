@@ -19,20 +19,19 @@ import { DialogsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/serv
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { DrawingHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { Button } from '@controls/button';
 import { FormattedMessage } from 'react-intl';
 import { CreateDrawingDialog } from './drawingDialogs/createDrawingDialog.component';
 import { EditDrawingDialog } from './drawingDialogs/editDrawingDialog.component';
-
-
+import { UploadDrawingRevisionForm } from './uploadDrawingRevisionForm/uploadDrawingRevisionForm.component';
 
 export const Drawings = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
 
-	const isPending = DrawingHooksSelectors.selectIsListPending();
-	const drawings = DrawingHooksSelectors.selectDrawings();
+	const isPending = DrawingsHooksSelectors.selectIsListPending();
+	const drawings = DrawingsHooksSelectors.selectDrawings();
 
 	useEffect(() => {
 		if (!isPending) return;
@@ -41,9 +40,11 @@ export const Drawings = () => {
 
 	const onClickCreate = () => DialogsActionsDispatchers.open(CreateDrawingDialog);
 	const onClickEdit = (drawing) => DialogsActionsDispatchers.open(EditDrawingDialog, { drawing });
+	const onClickUploadRevision = (drawing?) => DialogsActionsDispatchers.open(UploadDrawingRevisionForm, { drawing });
 
 	return (<div>
 		<h1>Drawings list</h1>
+		<button type='button' onClick={onClickUploadRevision}>Open upload revision modal</button>
 		{isPending ? 
 			(<b>Loading...</b>) : 
 			(
