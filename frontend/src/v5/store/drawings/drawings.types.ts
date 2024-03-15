@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,16 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as CurrentUser from './currentUser';
-import * as TicketComments from './ticketComments';
-import * as Auth from './auth';
-import * as Teamspaces from './teamspaces';
-import * as Projects from './projects';
-import * as Containers from './containers';
-import * as Federations from './federations';
-import * as Revisions from './revisions';
-import * as Users from './users';
-import * as Tickets from './tickets';
-import * as Drawings from './drawings';
+// TODO: Unfinished interface
+export interface IDrawing {
+	_id: string;
+	name: string;
+	desc?: string;
+	drawingNumber: string;
+	category: string;
+}
 
-export { Auth, TicketComments, CurrentUser, Teamspaces, Projects, Containers, Federations, Revisions, Users, Tickets, Drawings };
+// TODO: Unfinished interface
+export interface DrawingStats {
+	_id: string;
+	revisions : { total: number, lastUpdated?: number, latestRevision?: string }
+}
+
