@@ -108,7 +108,7 @@ export const UploadFiles = ({
 				</UploadsListScroll>
 				{!isUploading && (
 					<UploadFilesSidebar>
-						{SideBarComponent}
+						<SideBarComponent />
 					</UploadFilesSidebar>
 				)}
 			</UploadsContainer>
