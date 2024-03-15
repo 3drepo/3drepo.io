@@ -146,9 +146,9 @@ export class ExternalWebRequestHandler {
 	}
 
 	// When a byte[] array (or other managed object) is passed to an imported
-	// function, it arrives as an offset into the managed Heap. We can use this
-	// to access the contents of the array directly in the Module's heap
-	// ArrayBuffer, to get or set the contents.
+	// function, it arrives as an offset into the WASM Heap. We can use this
+	// to access the contents of the array directly in the Module's ArrayBuffer,
+	// to get or set the contents.
 
 	/**
 	 * Copies the data returned from a get request into the heap at offset.
