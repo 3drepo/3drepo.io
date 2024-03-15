@@ -27,7 +27,7 @@ import { DashboardListItemContainerTitle } from '@components/dashboard/dashboard
 import { uniq } from 'lodash';
 import { ContainerRevisionDetails } from '@components/shared/containerRevisionDetails/containerRevisionDetails.component';
 import { AutocompleteTextfield, DashboardListItemRow, Autocomplete } from './editFederationContainersListItem.styles';
-import { OptionsBox } from '../../../../../containers/uploadContainerRevisionForm/uploadList/uploadListItem/components/uploadListItemDestination/options/optionsBox.styles';
+import { OptionsBox } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 import { EditFederationContext } from '../../../editFederationContext';
 import { GroupOption } from './groupOption/groupOption.component';
 

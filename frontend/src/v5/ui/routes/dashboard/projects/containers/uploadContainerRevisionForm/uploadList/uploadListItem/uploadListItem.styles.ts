@@ -19,7 +19,7 @@ import styled, { css } from 'styled-components';
 import { CircleButton } from '@controls/circleButton';
 import { Container as ItemRowContainer } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemRow/dashboardListItemRow.styles';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
-import { DestinationAutocomplete } from './components/uploadListItemDestination/uploadListItemDestination.styles';
+import { DestinationAutocomplete } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 import { RevisionTagField } from './components/uploadListItemRevisionTag/uploadListItemRevisionTag.styles';
 
 export const UploadListItemButton = styled(CircleButton)`
