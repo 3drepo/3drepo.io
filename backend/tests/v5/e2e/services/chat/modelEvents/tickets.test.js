@@ -31,6 +31,7 @@ const project = ServiceHelper.generateRandomProject();
 const container = ServiceHelper.generateRandomModel();
 const federation = ServiceHelper.generateRandomModel({ isFederation: true });
 const template = ServiceHelper.generateTemplate();
+const templateWithComments = ServiceHelper.generateTemplate(false, false, { comments: true });
 const containerTicket = ServiceHelper.generateTicket(template);
 const federationTicket = ServiceHelper.generateTicket(template);
 const containerComment = ServiceHelper.generateComment(user.user);
@@ -58,7 +59,7 @@ const setupData = async () => {
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id],
 			[user.user]),
 	]);
-	await ServiceHelper.db.createTemplates(teamspace, [template]);
+	await ServiceHelper.db.createTemplates(teamspace, [template, templateWithComments]);
 	await ServiceHelper.db.createTicket(teamspace, project.id, container._id, containerTicket);
 	await ServiceHelper.db.createTicket(teamspace, project.id, federation._id, federationTicket);
 	await ServiceHelper.db.createComment(teamspace, project.id, container._id, containerTicket._id,
@@ -159,7 +160,7 @@ const ticketsImportedTest = () => {
 			const data = { teamspace, project: project.id, model: container._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
 
-			const newTickets = times(1, () => generateTicket(template));
+			const newTickets = times(10, () => generateTicket(template));
 			const socketPromise = new Promise((resolve, reject) => {
 				const eventsReceived = [];
 				socket.on(EVENTS.CONTAINER_NEW_TICKET, (eventData) => {
@@ -198,7 +199,8 @@ const ticketsImportedTest = () => {
 				};
 			}));
 
-			expect(eventData).toEqual(expectedData);
+			expect(eventData.length).toEqual(expectedData.length);
+			expect(eventData).toEqual(expect.arrayContaining(expectedData));
 
 			socket.close();
 		});
@@ -208,7 +210,7 @@ const ticketsImportedTest = () => {
 			const data = { teamspace, project: project.id, model: federation._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
 
-			const newTickets = times(1, () => generateTicket(template));
+			const newTickets = times(10, () => generateTicket(template));
 			const socketPromise = new Promise((resolve, reject) => {
 				const eventsReceived = [];
 				socket.on(EVENTS.FEDERATION_NEW_TICKET, (eventData) => {
@@ -247,7 +249,124 @@ const ticketsImportedTest = () => {
 				};
 			}));
 
-			expect(eventData).toEqual(expectedData);
+			expect(eventData.length).toEqual(expectedData.length);
+			expect(eventData).toEqual(expect.arrayContaining(expectedData));
+
+			socket.close();
+		});
+
+		test(`should trigger ${EVENTS.CONTAINER_NEW_TICKET_COMMENT} events when a ticket with comments has been imported`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: container._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const newTickets = times(1, () => ({ ...generateTicket(templateWithComments),
+				comments: times(10, () => ServiceHelper.generateImportedComment(user.user)) }));
+			const socketPromise = new Promise((resolve, reject) => {
+				const eventsReceived = [];
+				socket.on(EVENTS.CONTAINER_NEW_TICKET_COMMENT, (eventData) => {
+					eventsReceived.push(eventData);
+					if (eventsReceived.length === newTickets[0].comments.length) resolve(eventsReceived);
+				});
+				setTimeout(reject, 1000);
+			});
+
+			const postRes = await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/import?key=${user.apiKey}&template=${templateWithComments._id}`)
+				.send({ tickets: newTickets })
+				.expect(templates.ok.status);
+
+			const eventData = await socketPromise;
+
+			const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/containers/${container._id}/tickets/${postRes.body.tickets[0]}/comments?key=${user.apiKey}`)
+				.expect(templates.ok.status);
+
+			const { comments } = getRes.body;
+
+			expect(comments.length).toEqual(newTickets[0].comments.length);
+
+			const expectedData = newTickets[0].comments.map((comment) => {
+				const resComment = comments.find(({ message }) => comment.message === message);
+
+				const expectedComment = {
+					...comment,
+					_id: expect.any(String),
+					images: expect.any(Array),
+					createdAt: comment.createdAt.getTime(),
+					updatedAt: expect.any(Number),
+					importedAt: expect.any(Number),
+				};
+				expect(resComment).toEqual(expectedComment);
+
+				return {
+					...data,
+					data: {
+						...resComment,
+						ticket: postRes.body.tickets[0],
+					},
+				};
+			});
+
+			expect(eventData.length).toEqual(expectedData.length);
+			expect(eventData).toEqual(expect.arrayContaining(expectedData));
+
+			socket.close();
+		});
+
+		test(`should trigger ${EVENTS.FEDERATION_NEW_TICKET_COMMENT} events when a ticket with comments has been imported`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+
+			const data = { teamspace, project: project.id, model: federation._id };
+			await ServiceHelper.socket.joinRoom(socket, data);
+
+			const newTickets = times(1, () => ({ ...generateTicket(templateWithComments),
+				comments: times(10, () => ServiceHelper.generateImportedComment(user.user)) }));
+			const socketPromise = new Promise((resolve, reject) => {
+				const eventsReceived = [];
+				socket.on(EVENTS.FEDERATION_NEW_TICKET_COMMENT, (eventData) => {
+					eventsReceived.push(eventData);
+					if (eventsReceived.length === newTickets[0].comments.length) resolve(eventsReceived);
+				});
+				setTimeout(reject, 1000);
+			});
+
+			const postRes = await agent.post(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}/tickets/import?key=${user.apiKey}&template=${templateWithComments._id}`)
+				.send({ tickets: newTickets })
+				.expect(templates.ok.status);
+
+			const eventData = await socketPromise;
+
+			const getRes = await agent.get(`/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}/tickets/${postRes.body.tickets[0]}/comments?key=${user.apiKey}`)
+				.expect(templates.ok.status);
+
+			const { comments } = getRes.body;
+
+			expect(comments.length).toEqual(newTickets[0].comments.length);
+
+			const expectedData = newTickets[0].comments.map((comment) => {
+				const resComment = comments.find(({ message }) => comment.message === message);
+
+				const expectedComment = {
+					...comment,
+					_id: expect.any(String),
+					images: expect.any(Array),
+					createdAt: comment.createdAt.getTime(),
+					updatedAt: expect.any(Number),
+					importedAt: expect.any(Number),
+				};
+				expect(resComment).toEqual(expectedComment);
+
+				return {
+					...data,
+					data: {
+						...resComment,
+						ticket: postRes.body.tickets[0],
+					},
+				};
+			});
+
+			expect(eventData.length).toEqual(expectedData.length);
+			expect(eventData).toEqual(expect.arrayContaining(expectedData));
 
 			socket.close();
 		});

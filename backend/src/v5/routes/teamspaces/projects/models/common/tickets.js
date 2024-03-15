@@ -63,8 +63,9 @@ const createTicket = (isFed) => async (req, res) => {
 const importTickets = (isFed) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
 	try {
+		const user = getUserFromSession(req.session);
 		const importTicketsToModel = isFed ? importFedTickets : importConTickets;
-		const ids = await importTicketsToModel(teamspace, project, model, req.templateData, req.body.tickets);
+		const ids = await importTicketsToModel(teamspace, project, model, req.templateData, req.body.tickets, user);
 
 		respond(req, res, templates.ok, { tickets: ids.map(UUIDToString) });
 	} catch (err) {

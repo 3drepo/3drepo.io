@@ -592,8 +592,8 @@ ServiceHelper.generateTicket = (template, internalType = false, container) => {
 	return ticket;
 };
 
-ServiceHelper.generateImportedComment = () => ({
-	...ServiceHelper.generateComment(),
+ServiceHelper.generateImportedComment = (author = ServiceHelper.generateRandomString()) => ({
+	...ServiceHelper.generateComment(author),
 	originalAuthor: ServiceHelper.generateRandomString(),
 	createdAt: ServiceHelper.generateRandomDate(),
 });
