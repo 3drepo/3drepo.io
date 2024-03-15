@@ -22,7 +22,8 @@ import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { ContainerRevisionsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { IContainer, UploadFieldArray } from '@/v5/store/containers/containers.types';
+import { IContainer } from '@/v5/store/containers/containers.types';
+import { UploadFieldArray } from '@/v5/store/containerRevisions/containerRevisions.types';
 import { UploadsSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
 import {
 	TeamspacesHooksSelectors,
@@ -33,9 +34,10 @@ import {
 import { getSupportedFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadFiles } from '@components/shared/uploadFiles/uploadFiles.component';
 import { UploadFilesContextComponent } from '@components/shared/uploadFiles/uploadFilesContext';
-import { extensionIsSpm, reduceFileData } from './uploadContainerRevisionForm.helpers';
+import { extensionIsSpm } from './uploadContainerRevisionForm.helpers';
 import { UploadList } from './uploadList/uploadList.component';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
+import { parseFilename, reduceFileData } from '@components/shared/uploadFiles/uploadFiles.helpers';
 
 type UploadModalLabelTypes = {
 	isUploading: boolean;
@@ -112,14 +114,6 @@ export const UploadContainerRevisionForm = ({
 		return revTagMax.params.max;
 	}, []);
 
-	const parseFilename = (filename: string): string => {
-		const baseName = filename.split('.').slice(0)[0];
-		const noSpecialChars = baseName.replace(/[^a-zA-Z0-9_\- ]/g, '');
-		const noSpaces = noSpecialChars.replace(/ /g, '_');
-		const noExceedingMax = noSpaces.substring(0, revTagMaxValue);
-		return noExceedingMax;
-	};
-
 	const addFilesToList = (files: File[], container?: IContainer): void => {
 		const filesToAppend = [];
 		for (const file of files) {
@@ -128,7 +122,7 @@ export const UploadContainerRevisionForm = ({
 				file,
 				progress: 0,
 				extension,
-				revisionTag: parseFilename(file.name),
+				revisionTag: parseFilename(file.name, revTagMaxValue),
 				containerName: container?.name || '',
 				containerId: container?._id || '',
 				containerUnit: container?.unit || 'mm',
@@ -162,7 +156,7 @@ export const UploadContainerRevisionForm = ({
 	}), [fields.length]);
 
 	const supportedFilesMessage = formatMessage({
-		id: 'uploads.dropzone.message',
+		id: 'containerRevision.uploads.dropzone.message',
 		defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>',
 	}, {
 		MoreLink: (child: string) => (

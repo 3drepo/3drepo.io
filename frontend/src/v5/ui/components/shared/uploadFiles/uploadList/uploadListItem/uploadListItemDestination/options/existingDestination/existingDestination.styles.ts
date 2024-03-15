@@ -15,25 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
-import { AddCircleIcon, NewContainerOption, Message } from './newContainer.styles';
+import { Name as RevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus/revisionStatus.styles';
+import styled from 'styled-components';
 
-interface INewContainer {
-	containerName: string;
-}
+export const ExistingDestinationOption = styled.div`
+	display: flex;
+	flex-direction: column;
+	color: ${({ theme }) => theme.palette.base.main};
+	align-items: baseline;
+	
+	${RevisionStatus} {
+		color: ${({ theme }) => theme.palette.base.main};
+	}
+`;
 
-export const NewContainer = ({ containerName, ...props }: INewContainer) => (
-	<NewContainerOption {...props}>
-		<AddCircleIcon />
-		<Message>
-			<FormattedMessage
-				id="uploads.destination.addNewContainer"
-				defaultMessage="Add <Bold>{containerName}</Bold> as a new container"
-				values={{
-					Bold: (val: string) => <b>{val}</b>,
-					containerName,
-				}}
-			/>
-		</Message>
-	</NewContainerOption>
-);
+export const Name = styled.div`
+	width: calc(100% - 10px);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+`;
+
+export const InUseText = styled.div`
+	color: ${({ theme }) => theme.palette.error.main};
+`;

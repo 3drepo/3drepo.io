@@ -18,7 +18,7 @@
 import styled from 'styled-components';
 import UnstyledIcon from '@assets/icons/filled/add_circle-filled.svg';
 
-export const NewContainerOption = styled.div`
+export const NewDestinationOption = styled.div`
 	&& {
 		display: inline-flex;
 		color: ${({ theme }) => theme.palette.primary.dark};

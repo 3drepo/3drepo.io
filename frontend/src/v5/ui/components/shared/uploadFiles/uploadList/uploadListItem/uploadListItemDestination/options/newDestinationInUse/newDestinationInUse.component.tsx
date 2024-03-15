@@ -16,27 +16,15 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { Message, NewContainerOption } from './newContainerInUse.styles';
-import { InUseText } from '../existingContainer/existingContainer.styles';
+import { Message, NewContainerOption } from './newDestinationInUse.styles';
+import { InUseText } from '../existingDestination/existingDestination.styles';
 
-interface INewContainer {
-	containerName: string;
-}
-
-export const NewContainerInUse = ({ containerName, ...props }: INewContainer) => (
+interface INewDestinationInUse { message: string; }
+export const NewDestinationInUse = ({ message, ...props }: INewDestinationInUse) => (
 	<NewContainerOption {...props}>
-		<Message>
-			<FormattedMessage
-				id="uploads.destination.newContainer"
-				defaultMessage=" <Bold>{containerName}</Bold> is a new container"
-				values={{
-					Bold: (val: string) => <b>{val}</b>,
-					containerName,
-				}}
-			/>
-		</Message>
-		<InUseText >
-			<FormattedMessage id="uploads.destination.containerInUse" defaultMessage="Already in use in another file upload" />
+		<Message>{message}</Message>
+		<InUseText>
+			<FormattedMessage id="uploads.destination.destinationInUse" defaultMessage="Already in use in another file upload" />
 		</InUseText>
 	</NewContainerOption>
 );

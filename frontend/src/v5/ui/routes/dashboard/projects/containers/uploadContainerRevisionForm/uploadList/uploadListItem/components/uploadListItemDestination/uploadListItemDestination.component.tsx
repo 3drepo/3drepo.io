@@ -18,7 +18,6 @@
 import { memo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ErrorTooltip } from '@controls/errorTooltip';
-import { createFilterOptions } from '@mui/material';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { canUploadToBackend, prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
@@ -26,13 +25,12 @@ import { formatMessage } from '@/v5/services/intl';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
 import { name as containerNameScheme } from '@/v5/validation/containerAndFederationSchemes/validators';
 import { isCollaboratorRole } from '@/v5/store/store.helpers';
-import { DestinationAutocomplete, DestinationInput, NewOrExisting } from './uploadListItemDestination.styles';
-import { NewContainer } from './options/newContainer/newContainer.component';
-import { AlreadyUsedName } from './options/alreadyUsedName/alreadyUsedName.component';
-import { ExistingContainer } from './options/existingContainer/existingContainer.component';
-import { OptionsBox } from './options/optionsBox.styles';
-import { NewContainerInUse } from './options/newContainerInUse/newContainerInUse.component';
-import { orderBy } from 'lodash';
+import { DestinationAutocomplete, DestinationInput, NewOrExisting, OptionsBox } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
+import { getFilteredDestinationOptions, sortByName } from '@components/shared/uploadFiles/uploadFiles.helpers';
+import { AlreadyUsedName } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/alreadyUsedName/alreadyUsedName.component';
+import { NewDestination } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/newDestination/newDestination.component';
+import { NewDestinationInUse } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/newDestinationInUse/newDestinationInUse.component';
+import { ExistingDestination } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/existingDestination/existingDestination.component';
 
 const NO_OPTIONS_TEXT_ADMIN = formatMessage({
 	id: 'uploads.destination.noOptions.admin',
@@ -52,10 +50,6 @@ const EMPTY_OPTION = prepareSingleContainerData({
 });
 
 const NEW_ID = 'new';
-
-const getFilteredContainersOptions = createFilterOptions<IContainer>({ trim: true });
-
-const sortByName = (options) => orderBy(options, ({ name }) => name.toLowerCase());
 
 interface IUploadListItemDestination {
 	value?: string;
@@ -110,7 +104,7 @@ export const UploadListItemDestination = memo(({
 		const inputValue = params.inputValue.trim();
 
 		// filter out currently selected value and containers with insufficient permissions
-		const filteredOptions = getFilteredContainersOptions(options, params)
+		const filteredOptions = getFilteredDestinationOptions(options, params)
 			.filter(({ name, role }) => name !== value && isCollaboratorRole(role));
 
 		const containerNameExists = options.some(({ name }) => inputValue.toLowerCase() === (name || '').toLowerCase());
@@ -137,18 +131,32 @@ export const UploadListItemDestination = memo(({
 			}
 
 			if (isProjectAdmin) {
-				return (<NewContainer containerName={option.name} {...optionProps} />);
+				const message = formatMessage({
+					id: 'uploads.destination.addNewContainer',
+					defaultMessage: 'Add <Bold>{name}</Bold> as a new container',
+				}, {
+					Bold: (val: string) => <b>{val}</b>,
+					name: option.name,
+				});
+				return (<NewDestination message={message} containerName={option.name} {...optionProps} />);
 			}
 		}
 
 		// option is an existing container
 		if (option._id) {
 			if (option._id === NEW_ID) {
-				return (<NewContainerInUse containerName={option.name} {...optionProps}/>);
+				const message = formatMessage({
+					id: 'uploads.destination.newContainer',
+					defaultMessage: '=" <Bold>{name}</Bold> is a new container',
+				}, {
+					Bold: (val: string) => <b>{val}</b>,
+					name: option.name,
+				});
+				return (<NewDestinationInUse message={message} containerName={option.name} {...optionProps}/>);
 			}
 
 			return (
-				<ExistingContainer
+				<ExistingDestination
 					key={option.name}
 					container={option}
 					inUse={(nameIsTaken(option))}

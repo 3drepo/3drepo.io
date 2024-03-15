@@ -15,27 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Name as RevisionStatus } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/revisionStatus/revisionStatus.styles';
-import styled from 'styled-components';
+import { AddCircleIcon, NewDestinationOption, Message } from './newDestination.styles';
 
-export const ExistingContainerOption = styled.div`
-	display: flex;
-	flex-direction: column;
-	color: ${({ theme }) => theme.palette.base.main};
-	align-items: baseline;
-	
-	${RevisionStatus} {
-		color: ${({ theme }) => theme.palette.base.main};
-	}
-`;
-
-export const Name = styled.div`
-	width: calc(100% - 10px);
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-`;
-
-export const InUseText = styled.div`
-	color: ${({ theme }) => theme.palette.error.main};
-`;
+interface INewDestination { message: string; }
+export const NewDestination = ({ message, ...props }: INewDestination) => (
+	<NewDestinationOption {...props}>
+		<AddCircleIcon />
+		<Message>{message}</Message>
+	</NewDestinationOption>
+);

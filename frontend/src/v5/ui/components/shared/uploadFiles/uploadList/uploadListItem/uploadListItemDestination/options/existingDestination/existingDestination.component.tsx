@@ -15,26 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { IContainer } from '@/v5/store/containers/containers.types';
 import { LatestRevision } from '@/v5/ui/routes/dashboard/projects/containers/containersList/latestRevision/latestRevision.component';
 import { FormattedMessage } from 'react-intl';
-import { ExistingContainerOption, InUseText, Name } from './existingContainer.styles';
+import { ExistingDestinationOption, InUseText, Name } from './existingDestination.styles';
 
-interface IExistingContainer {
-	container: IContainer;
+interface IExistingDestination {
 	inUse: boolean;
+	name: string,
+	latestRevision: string;
+	hasRevisions: boolean;
+	status: any,
 }
-
-export const ExistingContainer = ({ container, inUse, ...props }: IExistingContainer) => (
-	<ExistingContainerOption {...props}>
-		<Name>{container.name}</Name>
-		<LatestRevision
-			hasRevisions={!!container.revisionsCount}
-			name={container.latestRevision}
-			status={container.status}
-		/>
+export const ExistingDestination = ({ name, latestRevision, hasRevisions, status, inUse, ...props }: IExistingDestination) => (
+	<ExistingDestinationOption {...props}>
+		<Name>{name}</Name>
+		<LatestRevision hasRevisions={hasRevisions} name={latestRevision} status={status} />
 		<InUseText hidden={!inUse}>
 			<FormattedMessage id="uploads.destination.containerInUse" defaultMessage="Already in use in another file upload" />
 		</InUseText>
-	</ExistingContainerOption>
+	</ExistingDestinationOption>
 );

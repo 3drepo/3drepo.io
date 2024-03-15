@@ -80,6 +80,7 @@ export const HelpText = styled(Typography).attrs({
 })`
 	color: ${({ theme }) => theme.palette.base.main};
 	padding: 10px;
+	text-align: center;
 	a {
 		color: inherit;
 	}

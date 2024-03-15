@@ -21,8 +21,6 @@ import { UploadContainerRevisionForm } from './uploadContainerRevisionForm.compo
 
 export const extensionIsSpm = (extension: string) => extension === 'spm';
 
-export const reduceFileData = (files) => files.map(({ file: { name, size }, ...rest }) => ({ file: { name, size }, ...rest }));
-
 export const extensionIsRevit = (extension: string) => ['rvt', 'rfa'].includes(extension);
 
 export const uploadToContainer = async (presetContainerId: string) => {

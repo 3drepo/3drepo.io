@@ -47,36 +47,37 @@ export const DestinationInput = styled(TextField)<{ neworexisting: NewOrExisting
 				height: 36px;
 			}
 		}
-		${({ neworexisting, theme }) => {
-		if (neworexisting === 'new') {
-			return css`
+		${({ neworexisting, theme }) => neworexisting === 'new' && css`
+			color: ${theme.palette.primary.main};
+			background-color: ${theme.palette.primary.lightest};
+
+			& > .MuiInputBase-input {
 				color: ${theme.palette.primary.main};
-				background-color: ${theme.palette.primary.lightest};
+			}
 
-				& > .MuiInputBase-input {
-					color: ${theme.palette.primary.main};
-				}
+			fieldset, &:hover fieldset {
+				border: none;
+			}
+		`}
 
-				fieldset, &:hover fieldset {
-					border: none;
-				}
-			`;
-		}
-		if (neworexisting === 'existing') {
-			return css`
+		${({ neworexisting, theme }) => neworexisting === 'existing' && css`
+			color: ${theme.palette.secondary.main};
+			background-color: ${theme.palette.tertiary.lightest};
+
+			& > .MuiInputBase-input {
 				color: ${theme.palette.secondary.main};
-				background-color: ${theme.palette.tertiary.lightest};
+			}
 
-				& > .MuiInputBase-input {
-					color: ${theme.palette.secondary.main};
-				}
-
-				fieldset, &:hover fieldset {
-					border: none;
-				}
-			`;
-		}
-		return '';
-	}}
+			fieldset, &:hover fieldset {
+				border: none;
+			}
+		`}
 	}
+`;
+
+export const OptionsBox = styled.div`
+	padding: 0;
+	${({ theme }) => theme.typography.body1};
+	font-weight: 500;
+	max-height: 350px;
 `;
