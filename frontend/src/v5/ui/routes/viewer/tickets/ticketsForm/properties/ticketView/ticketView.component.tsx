@@ -19,7 +19,7 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import ViewpointIcon from '@assets/icons/outlined/aim-outlined.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { cloneDeep, isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
@@ -29,6 +29,7 @@ import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { formatMessage } from '@/v5/services/intl';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { getViewerState, goToView } from '@/v5/helpers/viewpoint.helpers';
+import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
 import { TicketContext, TicketDetailsView } from '../../../ticket.context';
 import { TicketImageContent } from '../ticketImageContent/ticketImageContent.component';
 import { TicketImageActionMenu } from '../ticketImageContent/ticketImageActionMenu.component';
@@ -37,6 +38,8 @@ import { Header, HeaderSection, Label, Tooltip } from './ticketView.styles';
 import { CameraActionMenu } from './viewActionMenu/menus/cameraActionMenu.component';
 import { GroupsActionMenu } from './viewActionMenu/menus/groupsActionMenu.component';
 import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
+import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 type ITicketView = {
 	value: Viewpoint | undefined;
@@ -61,18 +64,42 @@ export const TicketView = ({
 }: ITicketView) => {
 	const { setDetailViewAndProps } = useContext(TicketContext);
 	const hasViewpoint = value?.camera;
+	const imgSrc = getImgSrc(value?.screenshot);
+	const imgInModal = useRef(imgSrc);
+	const syncProps = useSyncProps({ images: [imgInModal.current] });
+
+	// Image
+	const handleImageClick = () => DialogsActionsDispatchers.open(ImagesModal, {
+		onAddMarkup: disabled
+			? null
+			: (newValue) => onChange({ ...value, screenshot: stripBase64Prefix(newValue) }),
+	}, syncProps);
+
+	const handleNewImageUpload = (newImage, onSave) => {
+		imgInModal.current = newImage;
+		DialogsActionsDispatchers.open(ImagesModal, {
+			onClose: () => onSave(stripBase64Prefix(imgInModal.current)),
+			onAddMarkup: (newImg) => { imgInModal.current = newImg; },
+			openInMarkupMode: true,
+		}, syncProps);
+	};
+
+	const onUpdateImage = (newValue) => {
+		if (!newValue) {
+			onChange({ ...value, screenshot: null });
+			return;
+		}
+
+		handleNewImageUpload(newValue, (newImage) => onChange({ ...value, screenshot: newImage }));
+	};
 
 	// Viewpoint
 	const updateViewpoint = async () => {
 		const currentCameraAndClipping = await ViewerService.getViewpoint();
-		const screenshot = stripBase64Prefix(await ViewerService.getScreenshot());
+		const screenshot = await ViewerService.getScreenshot();
 		const state = await getViewerState();
-		onChange?.({ screenshot, ...currentCameraAndClipping, state });
-	};
 
-	// Image
-	const onImageChange = (newImg) => {
-		onChange({ ...value, screenshot: newImg ? stripBase64Prefix(newImg) : '' });
+		handleNewImageUpload(screenshot, (newImage) => onChange({ screenshot: newImage, ...currentCameraAndClipping, state }));
 	};
 
 	// Camera
@@ -109,68 +136,74 @@ export const TicketView = ({
 		setDetailViewAndProps(TicketDetailsView.Groups, props);
 	};
 
-	const imgSrc = getImgSrc(value?.screenshot);
-
 	return (
-		<ViewerInputContainer disabled={disabled} required={required} {...props}>
-			<Header>
-				<Label>
-					{label}
-				</Label>
-				<HeaderSection>
-					{!hasViewpoint ? (
-						<Tooltip title={(formatMessage({ id: 'viewer.card.button.saveCurrentView', defaultMessage: 'Save current view' }))}>
-							<div hidden={disabled}>
-								<TicketButton variant="primary" onClick={updateViewpoint}>
-									<TickIcon />
-								</TicketButton>
-							</div>
-						</Tooltip>
-					) : (
-						<Tooltip title={(formatMessage({ id: 'viewer.card.button.gotToView', defaultMessage: 'Go to view' }))}>
-							<div>
-								<TicketButton variant="primary" onClick={goToViewpoint}>
-									<ViewpointIcon />
-								</TicketButton>
-							</div>
-						</Tooltip>
-					)}
-					<EllipsisMenu disabled={!hasViewpoint}>
-						<EllipsisMenuItem
-							hidden={!hasViewpoint}
-							title={(<FormattedMessage id="viewer.card.ticketView.action.updateViewpoint" defaultMessage="Update to current view" />)}
-							onClick={updateViewpoint}
-							disabled={disabled}
-						/>
-						<EllipsisMenuItem
-							hidden={!hasViewpoint}
-							title={(<FormattedMessage id="viewer.card.ticketView.action.gotToView" defaultMessage="Go to view" />)}
-							onClick={goToViewpoint}
-						/>
-					</EllipsisMenu>
-				</HeaderSection>
-			</Header>
-			<TicketImageContent
-				value={imgSrc}
-				onChange={onImageChange}
-				disabled={disabled}
-			>
-				<TicketImageActionMenu value={imgSrc} onChange={onImageChange} disabled={disabled} />
-				<CameraActionMenu
-					value={value?.camera}
+		<>
+			<ViewerInputContainer disabled={disabled} required={required} {...props}>
+				<Header>
+					<Label>
+						{label}
+					</Label>
+					<HeaderSection>
+						{!hasViewpoint ? (
+							<Tooltip title={(formatMessage({ id: 'viewer.card.button.saveCurrentView', defaultMessage: 'Save current view' }))}>
+								<div hidden={disabled}>
+									<TicketButton variant="primary" onClick={updateViewpoint}>
+										<TickIcon />
+									</TicketButton>
+								</div>
+							</Tooltip>
+						) : (
+							<Tooltip title={(formatMessage({ id: 'viewer.card.button.gotToView', defaultMessage: 'Go to view' }))}>
+								<div>
+									<TicketButton variant="primary" onClick={goToViewpoint}>
+										<ViewpointIcon />
+									</TicketButton>
+								</div>
+							</Tooltip>
+						)}
+						<EllipsisMenu disabled={!hasViewpoint}>
+							<EllipsisMenuItem
+								hidden={!hasViewpoint}
+								title={(<FormattedMessage id="viewer.card.ticketView.action.updateViewpoint" defaultMessage="Update to current view" />)}
+								onClick={updateViewpoint}
+								disabled={disabled}
+							/>
+							<EllipsisMenuItem
+								hidden={!hasViewpoint}
+								title={(<FormattedMessage id="viewer.card.ticketView.action.gotToView" defaultMessage="Go to view" />)}
+								onClick={goToViewpoint}
+							/>
+						</EllipsisMenu>
+					</HeaderSection>
+				</Header>
+				<TicketImageContent
+					value={imgSrc}
+					onChange={onUpdateImage}
 					disabled={disabled}
-					onChange={onUpdateCamera}
-					onDelete={onDeleteCamera}
-					onGoTo={onGoToCamera}
-				/>
-				<GroupsActionMenu
-					value={value?.state}
-					disabled={disabled}
-					onClick={onGroupsClick}
-					onDelete={onDeleteGroups}
-				/>
-			</TicketImageContent>
-			<FormHelperText>{helperText}</FormHelperText>
-		</ViewerInputContainer>
+					onImageClick={handleImageClick}
+				>
+					<TicketImageActionMenu
+						onClick={handleImageClick}
+						value={imgSrc}
+						onChange={onUpdateImage}
+						disabled={disabled}
+					/>
+					<CameraActionMenu
+						value={value?.camera}
+						disabled={disabled}
+						onChange={onUpdateCamera}
+						onDelete={onDeleteCamera}
+						onGoTo={onGoToCamera}
+					/>
+					<GroupsActionMenu
+						value={value?.state}
+						disabled={disabled}
+						onClick={onGroupsClick}
+						onDelete={onDeleteGroups}
+					/>
+				</TicketImageContent>
+				<FormHelperText>{helperText}</FormHelperText>
+			</ViewerInputContainer>
+		</>
 	);
 };
