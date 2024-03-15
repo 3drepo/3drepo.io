@@ -16,7 +16,7 @@
  */
 
 import { getNullableDate } from '@/v5/helpers/getNullableDate';
-import { CreateRevisionBody, IDrawingRevision } from './drawingRevisions.types';
+import { CreateDrawingRevisionBody, IDrawingRevision } from './drawingRevisions.types';
 
 export const prepareRevisionData = (revision): IDrawingRevision => ({
 	...revision,
@@ -27,7 +27,7 @@ export const prepareRevisionData = (revision): IDrawingRevision => ({
 	void: revision?.void || false,
 });
 
-export const createContainerFromRevisionBody = (body: CreateRevisionBody) => ({
+export const createContainerFromRevisionBody = (body: CreateDrawingRevisionBody) => ({
 	...body,
 	// desc: body.containerDesc,
 	// name: body.containerName,
@@ -36,7 +36,7 @@ export const createContainerFromRevisionBody = (body: CreateRevisionBody) => ({
 	// code: body.containerCode,
 });
 
-export const createFormDataFromRevisionBody = (body: CreateRevisionBody) => {
+export const createFormDataFromRevisionBody = (body: CreateDrawingRevisionBody) => {
 	const formData = new FormData();
 	formData.append('file', body.file);
 	formData.append('revisionCode', body.revisionCode);

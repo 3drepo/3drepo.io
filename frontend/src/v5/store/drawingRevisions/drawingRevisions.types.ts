@@ -31,13 +31,13 @@ export interface IDrawingRevisionUploadStatus {
 	progress: number;
 }
 
-export type FetchRevisionsPayload = {
+export type FetchDrawingRevisionsPayload = {
 	teamspace: string;
 	projectId: string;
 	drawingId: string;
 };
 
-export type RevisionVoidStatusPayload = {
+export type DrawingRevisionVoidStatusPayload = {
 	teamspace?: string;
 	projectId: string;
 	drawingId: string;
@@ -45,22 +45,38 @@ export type RevisionVoidStatusPayload = {
 	isVoid: boolean;
 };
 
-export type CreateRevisionBody = {
+export type CreateDrawingRevisionBody = {
 	name: string;
 	description?: string;
 	file: File;
 	statusCode: string;
 	revisionCode: string;
+
 	drawingId?: string;
+	drawingName: string;
+	drawingNumber: string;
+	drawingCategory: string;
+	drawingDesc?: string;
 };
 
-export type CreateRevisionPayload = {
+export type CreateDrawingRevisionPayload = {
 	teamspace: string;
 	projectId: string;
 	uploadId: string;
-	body: CreateRevisionBody;
+	body: CreateDrawingRevisionBody;
 };
 
 export type IRevisionUpdate = Partial<IDrawingRevision> & {
 	_id: string;
+};
+
+export type UploadItemFields = CreateDrawingRevisionBody & {
+	file: File,
+	uploadId: string;
+	progress: number;
+	extension: string;
+};
+
+export type UploadFieldArray = {
+	uploads: UploadItemFields[];
 };

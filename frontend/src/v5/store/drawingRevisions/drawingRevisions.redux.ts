@@ -20,7 +20,7 @@ import { Action } from 'redux';
 import { Constants } from '@/v5/helpers/actions.helper';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { TeamspaceProjectAndDrawingId, DrawingId, OnSuccess } from '../store.types';
-import { CreateRevisionBody, CreateRevisionPayload, IDrawingRevision, IRevisionUpdate, IDrawingRevisionUploadStatus } from './drawingRevisions.types';
+import { CreateDrawingRevisionBody, CreateDrawingRevisionPayload, IDrawingRevision, IRevisionUpdate, IDrawingRevisionUploadStatus } from './drawingRevisions.types';
 
 export const { Types: DrawingRevisionsTypes, Creators: DrawingRevisionsActions } = createActions({
 	setVoidStatus: ['teamspace', 'projectId', 'drawingId', 'revisionId', 'isVoid'],
@@ -117,7 +117,7 @@ export type SetRevisionVoidStatusSuccessAction = Action<'SET_REVISION_VOID_STATU
 export type FetchAction = Action<'FETCH'> & TeamspaceProjectAndDrawingId & OnSuccess;
 export type FetchSuccessAction = Action<'FETCH_SUCCESS'> & DrawingId & { revisions: IDrawingRevision[] };
 export type SetIsPendingAction = Action<'SET_IS_PENDING'> & DrawingId & { isPending: boolean };
-export type CreateRevisionAction = Action<'CREATE_REVISION'> & CreateRevisionPayload;
+export type CreateRevisionAction = Action<'CREATE_REVISION'> & CreateDrawingRevisionPayload;
 export type SetUploadCompleteAction = Action<'SET_UPLOAD_COMPLETE'> & { uploadId: string, isComplete: boolean, errorMessage?: string };
 export type SetUploadProgressAction = Action<'SET_UPLOAD_PROGRESS'> & { uploadId: string, progress: number };
 export type UpdateRevisionSuccessAction = Action<'FETCH_REVISION_STATS_SUCCESS'> & DrawingId & { data: IRevisionUpdate };
@@ -134,7 +134,7 @@ export interface IDrawingRevisionsActionCreators {
 	createRevision: (teamspace: string,
 		projectId: string,
 		uploadId: string,
-		body: CreateRevisionBody,
+		body: CreateDrawingRevisionBody,
 	) => CreateRevisionAction;
 	setUploadComplete: (uploadId: string, isComplete: boolean, errorMessage?: string) => SetUploadCompleteAction;
 	setUploadProgress: (uploadId: string, progress: number) => SetUploadProgressAction;
