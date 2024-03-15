@@ -17,8 +17,8 @@
 
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
-import { PROGRESS_BAR_COLOUR_MAP } from '@controls/uploadProgressBar/uploadProgressBar.styles';
-import { UploadProgressBar } from '@controls/uploadProgressBar';
+import { getProgressBarColor, PROGRESS_BAR_COLOR_MAP } from '@controls/uploadProgressBar/uploadProgressBar.styles';
+import { UploadProgressBar } from '@controls/uploadProgressBar/uploadProgressBar.component';
 import { Display } from '@/v5/ui/themes/media';
 
 export const Container = styled.div`
@@ -35,7 +35,7 @@ export const StatusText = styled(Typography).attrs({
 	font-weight: bold;
 	user-select: none;
 	display: inline-flex;
-	color: ${({ uploadstatus }) => PROGRESS_BAR_COLOUR_MAP[uploadstatus]};
+	color: ${({ uploadstatus }) => getProgressBarColor(uploadstatus)};
 	align-items: center;
 
 	@media (max-width: ${Display.Tablet}px) {
@@ -47,7 +47,7 @@ export const CompletionMark = styled.div`
 	height: 15px;
 	width: 15px;
 	margin: auto 0 auto 5px;
-	color: ${PROGRESS_BAR_COLOUR_MAP.uploaded};
+	color: ${PROGRESS_BAR_COLOR_MAP.uploaded};
 `;
 
 export const Progress = styled(UploadProgressBar)`

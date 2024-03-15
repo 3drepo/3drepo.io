@@ -15,20 +15,5 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextField as TextFieldBase, TextFieldProps } from '@mui/material';
-import { forwardRef } from 'react';
 
-// These inputes are temporal. We are using them for the upload form for improved performance. With more testing 
-// we should replace the ones in  frominputs
-type Props = TextFieldProps & {
-	formError?: any
-};
 
-export const TextField:(props: Props) =>  JSX.Element = forwardRef(({ formError, ...props }:Props, ref)=> {
-	return <TextFieldBase 
-		{...props} 
-		inputRef={ref}
-		error={!!formError}
-		helperText={formError?.message}
-	/>;
-});

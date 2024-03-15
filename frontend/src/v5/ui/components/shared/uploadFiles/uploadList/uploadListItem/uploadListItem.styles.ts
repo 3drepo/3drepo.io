@@ -15,27 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { CircleButton } from '@controls/circleButton';
+import { Container as ItemRowContainer } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemRow/dashboardListItemRow.styles';
+import { DashboardListItem } from '@components/dashboard/dashboardList';
 
-export const SidebarContainer = styled.span<{ open: boolean }>`
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	position: relative;
-	width: ${({ open }) => (open ? '400px' : '0')};
-	transition: width 0.1s;
-	overflow: auto;
-	flex-shrink: 0;
+export const UploadListItemButton = styled(CircleButton)`
+	margin: 0;
+	&:hover, &.Mui-focusVisible { 
+		box-shadow: none;
+	}
 `;
 
-export const SidebarContent = styled.div`
-	padding: 30px;
-	width: 100%;
-	box-sizing: border-box;
-`;
-
-export const ExpandButton = styled(CircleButton)`
-	position: absolute;
-	right: 11px;
-	top: 14px;
-	z-index: 1;
+export const UploadListItemRowWrapper = styled(DashboardListItem)<{ selected: boolean; order: number }>`
+	${({ order }) => css`order: ${order}`};
+	${ItemRowContainer} {
+		padding: 8px 15px 8px 5px;
+		height: auto;
+		cursor: default;
+		overflow: hidden;
+	}
 `;

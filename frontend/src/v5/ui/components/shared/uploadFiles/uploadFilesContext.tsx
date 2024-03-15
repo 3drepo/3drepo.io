@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,30 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { createContext, useState } from 'react';
 
-export interface UploadsContextType {
-	fields: UploadFieldArray;
+export type UploadFieldArray<T> = { uploads: T[]; };
+export interface UploadsContextType<T> {
+	fields: UploadFieldArray<T>;
 	selectedId: string;
 	setSelectedId: (id?: string) => void;
 }
 
-const defaultValue: UploadsContextType = {
+const defaultValue: UploadsContextType<any> = {
 	fields: { uploads: [] },
 	selectedId: null,
 	setSelectedId: () => {},
 };
 
-export const UploadFileFormContext = createContext(defaultValue);
-UploadFileFormContext.displayName = 'UploadFileFormContext';
+export const UploadFilesContext = createContext(defaultValue);
+UploadFilesContext.displayName = 'UploadFilesContext';
 
-export const UploadFileFormContextComponent = ({ fields, children }) => {
+export interface UploadsContextProps<T> {
+	fields: UploadFieldArray<T>,
+	children: any,
+}
+export const UploadFilesContextComponent = ({ fields, children }: UploadsContextProps<any>) => {
 	const [selectedId, setSelectedId] = useState(null);
 
 	return (
-		<UploadFileFormContext.Provider value={{ fields, selectedId, setSelectedId }}>
+		<UploadFilesContext.Provider value={{ fields, selectedId, setSelectedId }}>
 			{children}
-		</UploadFileFormContext.Provider>
+		</UploadFilesContext.Provider>
 	);
 };

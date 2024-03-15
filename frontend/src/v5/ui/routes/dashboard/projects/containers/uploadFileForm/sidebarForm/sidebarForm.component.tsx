@@ -25,11 +25,9 @@ import { FormSelect, FormTextField } from '@controls/inputs/formInputs.component
 import { get } from 'lodash';
 import { LOD_VALUES } from '@/v5/store/revisions/revisions.types';
 import { Heading, AnimationsCheckbox, TimezoneSelect, Title, FlexContainer, HiddenMenuItem } from './sidebarForm.styles';
-import { extensionIsRevit, extensionIsSpm } from '../../uploadFileForm.helpers';
-
-type ISidebarForm = {
-	revisionPrefix: string;
-};
+import { extensionIsRevit, extensionIsSpm } from '../uploadFileForm.helpers';
+import { useContext } from 'react';
+import { UploadFilesContext } from '@components/shared/uploadFiles/uploadFilesContext';
 
 const getTimezoneOptions = () => {
 	type ITimezone = { name: string; label: string; utcOffset: number; };
@@ -50,10 +48,13 @@ const getTimezoneOptions = () => {
 	return allTimezones || [];
 };
 
-export const SidebarForm = ({
-	revisionPrefix,
-}: ISidebarForm): JSX.Element => {
+export const SidebarForm = () => {
 	const { getValues, formState: { errors } } = useFormContext();
+	const { fields, selectedId } = useContext(UploadFilesContext);
+	// @ts-ignore
+	const selectedIndex = fields.findIndex(({ uploadId }) => uploadId === selectedId);
+	
+	const revisionPrefix = `uploads.${selectedIndex}`;
 	const [containerId, extension, containerName] = getValues([`${revisionPrefix}.containerId`, `${revisionPrefix}.extension`, `${revisionPrefix}.containerName`]);
 
 	const isNewEditableContainer = containerName && !containerId;

@@ -20,16 +20,34 @@ import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
 import { ContainersHooksSelectors, ProjectsHooksSelectors, RevisionsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { InputController } from '@controls/inputs/inputController.component';
 import { DashboardListItemRow as UploadListItemRow } from '@components/dashboard/dashboardList/dashboardListItem/components';
-import { UploadListItemFileIcon } from './components/uploadListItemFileIcon/uploadListItemFileIcon.component';
-import { UploadListItemTitle } from './components/uploadListItemTitle/uploadListItemTitle.component';
-import { UploadProgress } from './components/uploadProgress/uploadProgress.component';
 import { UploadListItemDestination } from './components/uploadListItemDestination/uploadListItemDestination.component';
 import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag/uploadListItemRevisionTag.component';
 import { UploadListItemButton } from './uploadListItem.styles';
 import { useFormContext } from 'react-hook-form';
 import { useEffect } from 'react';
-import { IContainer, UploadItemFields } from '@/v5/store/containers/containers.types';
+import { IContainer, UploadItemFields, UploadStatuses } from '@/v5/store/containers/containers.types';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { UploadListItemFileIcon } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemFileIcon/uploadListItemFileIcon.component';
+import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemTitle/uploadListItemTitle.component';
+import { UploadProgress } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadProgress/uploadProgress.component';
+import { formatMessage } from '@/v5/services/intl';
+
+const UNEXPETED_STATUS_ERROR = undefined;
+const STATUS_TEXT_BY_UPLOAD = {
+	[UNEXPETED_STATUS_ERROR]: formatMessage({ id: 'uploads.progress.status.unexpectedError', defaultMessage: 'Unexpected error' }),
+	[UploadStatuses.FAILED]: formatMessage({ id: 'uploads.progress.status.failed', defaultMessage: 'Upload failed' }),
+	[UploadStatuses.UPLOADED]: formatMessage({ id: 'uploads.progress.status.uploaded', defaultMessage: 'Upload complete' }),
+	[UploadStatuses.UPLOADING]: formatMessage({ id: 'uploads.progress.status.uploading', defaultMessage: 'Uploading' }),
+	[UploadStatuses.QUEUED]: formatMessage({ id: 'uploads.progress.status.queued', defaultMessage: 'Waiting to upload' }),
+};
+
+const getUploadStatus = (progress, errorMessage) => {
+	if (errorMessage) return UploadStatuses.FAILED;
+	if (progress === 100) return UploadStatuses.UPLOADED;
+	if (progress < 100 && progress > 0) return UploadStatuses.UPLOADING;
+	if (progress === 0) return UploadStatuses.QUEUED;
+	return UNEXPETED_STATUS_ERROR;
+};
 
 type IUploadListItem = {
 	uploadId: string;
@@ -61,6 +79,9 @@ export const UploadListItem = ({
 	const projectId = ProjectsHooksSelectors.selectCurrentProject();
 	const containerId = watch(`${revisionPrefix}.containerId`);
 	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerId);
+	const progress = RevisionsHooksSelectors.selectUploadProgress(uploadId);
+
+	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
 
 	const sanitiseContainer = (container: IContainer): Partial<UploadItemFields> => ({
 		containerCode: container?.code || '',
@@ -87,12 +108,8 @@ export const UploadListItem = ({
 		);
 	}, [containerId]);
 
-
-
 	return (
-		<UploadListItemRow
-			selected={isSelected}
-		>
+		<UploadListItemRow selected={isSelected}>
 			<UploadListItemFileIcon extension={fileData.extension} />
 			<UploadListItemTitle
 				key={`${uploadId}.title`}
@@ -115,8 +132,16 @@ export const UploadListItem = ({
 				disabled={isUploading}
 			/>
 			{isUploading
-				? (<UploadProgress uploadId={uploadId} errorMessage={uploadErrorMessage} />)
-				: (
+				? (
+					<UploadProgress
+						uploadId={uploadId}
+						errorMessage={uploadErrorMessage}
+						uploadStatus={uploadStatus}
+						uploadCompleted={uploadStatus === UploadStatuses.UPLOADED}
+						statusText={STATUS_TEXT_BY_UPLOAD[uploadStatus]}
+						progress={progress}
+					/>
+				) : (
 					<>
 						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit}>
 							<EditIcon />

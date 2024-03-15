@@ -21,7 +21,7 @@ import { LabelledProgressBar, ProgressBarLabelLight, ProgressBarLabelDark } from
 
 type IUploadProgressBar = {
 	progress: number;
-	uploadStatus: 'queued' | 'uploading' | 'uploaded' | 'failed';
+	uploadStatus: string;
 	noLabel?: boolean;
 	failure?: boolean;
 	hidden?: boolean;

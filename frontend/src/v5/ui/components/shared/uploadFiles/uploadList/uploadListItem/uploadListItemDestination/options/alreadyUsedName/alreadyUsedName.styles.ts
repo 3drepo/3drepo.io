@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextField as TextFieldBase, TextFieldProps } from '@mui/material';
-import { forwardRef } from 'react';
+import styled from 'styled-components';
 
-// These inputes are temporal. We are using them for the upload form for improved performance. With more testing 
-// we should replace the ones in  frominputs
-type Props = TextFieldProps & {
-	formError?: any
-};
-
-export const TextField:(props: Props) =>  JSX.Element = forwardRef(({ formError, ...props }:Props, ref)=> {
-	return <TextFieldBase 
-		{...props} 
-		inputRef={ref}
-		error={!!formError}
-		helperText={formError?.message}
-	/>;
-});
+export const AlreadyUsedNameContainer = styled.div`
+	color: ${({ theme }) => theme.palette.error.main};
+	padding: 12px;
+`;

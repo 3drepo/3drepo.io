@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,25 +16,20 @@
  */
 
 import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
-import { useContext } from 'react';
-import { SidebarContainer, ExpandButton, SidebarContent } from './sidebar.styles';
-import { UploadFileFormContext } from '../uploadFileFormContext';
-import { SidebarForm } from './sidebarForm/sidebarForm.component';
+import React, { useContext } from 'react';
+import { SidebarContainer, ExpandButton, SidebarContent } from './uploadFilesSideBar.styles';
+import { UploadFilesContext } from '../uploadFilesContext';
 
-interface ISidebar {
+interface IUploadFilesSidebar {
 	className?: string;
+	children,
 }
-
-export const Sidebar = ({
-	className,
-}: ISidebar): JSX.Element => {
-	const { fields, selectedId, setSelectedId } = useContext(UploadFileFormContext);
-	const onClose = () => {
-		setSelectedId(null);
-	};
+export const UploadFilesSidebar = ({ className, children }: IUploadFilesSidebar) => {
+	const { selectedId, setSelectedId } = useContext(UploadFilesContext);
 	const isOpen = !!selectedId;
-	// @ts-ignore
-	const selectedIndex = fields.findIndex(({ uploadId }) => uploadId === selectedId);
+
+	const onClose = () => setSelectedId(null);
+
 	return (
 		<SidebarContainer className={className} open={isOpen}>
 			<ExpandButton onClick={onClose}>
@@ -42,10 +37,9 @@ export const Sidebar = ({
 			</ExpandButton>
 			<SidebarContent>
 				{isOpen && (
-					<SidebarForm
-						key={selectedId}
-						revisionPrefix={`uploads.${selectedIndex}`}
-					/>
+					<React.Fragment key={selectedId}>
+						{children}
+					</React.Fragment>
 				)}
 			</SidebarContent>
 		</SidebarContainer>

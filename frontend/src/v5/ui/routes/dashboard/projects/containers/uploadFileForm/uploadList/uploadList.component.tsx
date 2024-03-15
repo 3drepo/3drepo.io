@@ -19,10 +19,11 @@ import { UploadItemFields } from '@/v5/store/containers/containers.types';
 import { useContext } from 'react';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
+import { UploadFilesContext } from '@components/shared/uploadFiles/uploadFilesContext';
+import { DashboardListHeader, DashboardListHeaderLabel as Label } from '@components/dashboard/dashboardList';
+import { FormattedMessage } from 'react-intl';
 import { UploadListItem } from './uploadListItem/uploadListItem.component';
 import { ListContainer } from './uploadList.styles';
-import { UploadFileFormContext } from '../uploadFileFormContext';
-import { UploadListHeaders } from './uploadListHeaders/uploadListHeaders.component';
 import { UploadListItemRowWrapper } from './uploadListItem/uploadListItem.styles';
 
 type IUploadList = {
@@ -41,7 +42,7 @@ export const UploadList = ({
 	removeUploadById,
 	isUploading,
 }: IUploadList): JSX.Element => {
-	const { selectedId, setSelectedId } = useContext(UploadFileFormContext);
+	const { selectedId, setSelectedId } = useContext(UploadFilesContext);
 	const { sortedList, setSortConfig } = useOrderedList(values, DEFAULT_SORT_CONFIG);
 
 	const deleteItem = (id, isSelected) => {
@@ -51,11 +52,20 @@ export const UploadList = ({
 
 	return (
 		<>
-			<UploadListHeaders
-				setSortConfig={setSortConfig}
-				defaultSortConfig={DEFAULT_SORT_CONFIG}
-				isUploading={isUploading}
-			/>
+			<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
+				<Label name="file.name" minWidth={122} sort>
+					<FormattedMessage id="uploads.list.header.filename" defaultMessage="Filename" />
+				</Label>
+				<Label width={352}>
+					<FormattedMessage id="uploads.list.header.destination" defaultMessage="Destination" />
+				</Label>
+				<Label width={isUploading ? 359 : 399}>
+					<FormattedMessage id="uploads.list.header.revisionName" defaultMessage="Revision Name" />
+				</Label>
+				<Label width={297} hidden={!isUploading}>
+					<FormattedMessage id="uploads.list.header.progress" defaultMessage="Upload Progress" />
+				</Label>
+			</DashboardListHeader>
 			<ListContainer>
 				{
 					values.map(({ uploadId, file, extension }, index) => {

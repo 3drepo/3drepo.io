@@ -15,8 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { uploadFile, getSupportedFileExtensions } from '@controls/fileUploader/uploadFile';
+import { UploadFileForm } from './uploadFileForm.component';
+
 export const extensionIsSpm = (extension: string) => extension === 'spm';
 
 export const reduceFileData = (files) => files.map(({ file: { name, size }, ...rest }) => ({ file: { name, size }, ...rest }));
 
 export const extensionIsRevit = (extension: string) => ['rvt', 'rfa'].includes(extension);
+
+export const uploadToContainer = async (presetContainerId: string) => {
+	const onUpload = (presetFile) => {
+		DialogsActionsDispatchers.open(UploadFileForm, {
+			presetFile,
+			presetContainerId,
+		});
+	};
+	const file = await uploadFile(getSupportedFileExtensions());
+	onUpload(file);
+};

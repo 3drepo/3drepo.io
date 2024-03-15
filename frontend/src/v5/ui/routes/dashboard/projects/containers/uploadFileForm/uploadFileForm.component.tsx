@@ -22,12 +22,8 @@ import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { RevisionsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Button } from '@controls/button';
 import { IContainer, UploadFieldArray } from '@/v5/store/containers/containers.types';
 import { UploadsSchema } from '@/v5/validation/containerAndFederationSchemes/containerSchemes';
-import { FormattedMessage } from 'react-intl';
-import { Typography } from '@controls/typography';
-import { FileInputField } from '@controls/fileInputField/fileInputField.component';
 import {
 	TeamspacesHooksSelectors,
 	ProjectsHooksSelectors,
@@ -35,11 +31,11 @@ import {
 	ContainersHooksSelectors,
 } from '@/v5/services/selectorsHooks';
 import { getSupportedFileExtensions } from '@controls/fileUploader/uploadFile';
-import { UploadList } from './uploadList/uploadList.component';
-import { UploadsContainer, DropZone, Modal, Padding, UploadsListScroll, HelpText } from './uploadFileForm.styles';
+import { UploadFiles } from '@components/shared/uploadFiles/uploadFiles.component';
+import { UploadFilesContextComponent } from '@components/shared/uploadFiles/uploadFilesContext';
 import { extensionIsSpm, reduceFileData } from './uploadFileForm.helpers';
-import { UploadFileFormContextComponent } from './uploadFileFormContext';
-import { Sidebar } from './sideBar/sidebar.component';
+import { UploadList } from './uploadList/uploadList.component';
+import { SidebarForm } from './sidebarForm/sidebarForm.component';
 
 type UploadModalLabelTypes = {
 	isUploading: boolean;
@@ -165,12 +161,20 @@ export const UploadFileForm = ({
 		}
 	}), [fields.length]);
 
-	const preventEnter = useCallback((e) => e.key === 'Enter' && e.preventDefault(), []);
-	const finishedSubmit = (e) => {
-		e.preventDefault();
-		setIsUploading(false);
-		onClickClose();
-	};
+	const supportedFilesMessage = formatMessage({
+		id: 'uploads.dropzone.message',
+		defaultMessage: 'Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>',
+	}, {
+		MoreLink: (child: string) => (
+			<a
+				href="https://help.3drepo.io/en/articles/4798885-supported-file-formats"
+				target="_blank"
+				rel="noreferrer"
+			>
+				{child}
+			</a>
+		),
+	});
 
 	useEffect(() => {
 		if (presetFile) {
@@ -186,76 +190,29 @@ export const UploadFileForm = ({
 
 	return (
 		<FormProvider {...formData}>
-			<Modal
-				open={open}
-				onSubmit={!isUploading ? onSubmit : finishedSubmit}
-				onClickClose={onClickClose}
-				onKeyPress={preventEnter}
-				maxWidth="xl"
-				isValid={!isUploading ? isValid : allUploadsComplete}
-				contrastColorHeader
-				fields={fields}
-				isUploading={isUploading}
-				{...uploadModalLabels({ isUploading, fileCount: fields.length })}
-			>
-				<UploadFileFormContextComponent fields={fields}>
-					<UploadsContainer>
-						<UploadsListScroll>
-							<Padding>
-								{!!fields.length && (
-									<UploadList
-										values={reduceFileData(fields)}
-										isUploading={isUploading}
-										removeUploadById={removeUploadById}
-									/>
-								)}
-								<DropZone
-									hidden={isUploading}
-									onDrop={addFilesToList}
-									accept={getSupportedFileExtensions()}
-								>
-									<Typography variant="h3" color="secondary">
-										<FormattedMessage id="dragAndDrop.drop" defaultMessage="Drop files here" />
-									</Typography>
-									<Typography variant="h5" color="secondary">
-										<FormattedMessage id="dragAndDrop.or" defaultMessage="or" />
-									</Typography>
-									<FileInputField
-										accept={getSupportedFileExtensions()}
-										onChange={(files) => addFilesToList(files)}
-										multiple
-									>
-										<Button component="span" variant="contained" color="primary">
-											<FormattedMessage
-												id="uploads.fileInput.browse"
-												defaultMessage="Browse"
-											/>
-										</Button>
-									</FileInputField>
-									<HelpText>
-										<FormattedMessage
-											id="uploads.dropzone.message"
-											defaultMessage="Supported file formats: IFC, RVT, DGN, FBX, OBJ and <MoreLink>more</MoreLink>"
-											values={{
-												MoreLink: (child: string) => (
-													<a
-														href="https://help.3drepo.io/en/articles/4798885-supported-file-formats"
-														target="_blank"
-														rel="noreferrer"
-													>
-														{child}
-													</a>
-												),
-											}}
-										/>
-									</HelpText>
-								</DropZone>
-							</Padding>
-						</UploadsListScroll>
-						{!isUploading && <Sidebar />}
-					</UploadsContainer>
-				</UploadFileFormContextComponent>
-			</Modal>
+			{/* @ts-ignore */}
+			<UploadFilesContextComponent fields={fields}>
+				<UploadFiles
+					open={open}
+					onClickClose={onClickClose}
+					onUploadFiles={addFilesToList}
+					onSubmit={onSubmit}
+					SideBarComponent={<SidebarForm />}
+					supportedFilesMessage={supportedFilesMessage}
+					isUploading={isUploading}
+					setIsUploading={setIsUploading}
+					modalLabels={uploadModalLabels({ isUploading, fileCount: fields.length })}
+					fields={fields}
+					isValid={!isUploading ? isValid : allUploadsComplete}
+					supportedFileExtensions={getSupportedFileExtensions()}
+				>
+					<UploadList
+						values={reduceFileData(fields)}
+						isUploading={isUploading}
+						removeUploadById={removeUploadById}
+					/>
+				</UploadFiles>
+			</UploadFilesContextComponent>
 		</FormProvider>
 	);
 };
