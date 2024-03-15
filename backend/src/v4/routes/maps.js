@@ -644,7 +644,7 @@ function getHereMapsTile(req, res) {
 function getHereAerialMapsTile(req, res) {
 	const domain = hereBaseDomain;
 	const uri = "/v3/base/mc/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/png8";
-	req.query.style = "satellite.day"
+	req.query.style = "satellite.day";
 	systemLogger.logInfo("Fetching Here map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
@@ -652,7 +652,7 @@ function getHereAerialMapsTile(req, res) {
 function getHereTrafficTile(req, res) {
 	const domain = hereBaseDomain;
 	const uri = "/v3/base/mc/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/png8";
-	req.query.style = "logistics.day"
+	req.query.style = "logistics.day";
 	systemLogger.logInfo("Fetching Here traffic flow map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
@@ -667,7 +667,7 @@ function getHereTrafficFlowTile(req, res) {
 function getHereTerrainTile(req, res) {
 	const domain = hereBaseDomain;
 	const uri = "/v3/base/mc/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/png8";
-	req.query.style = "topo.day"
+	req.query.style = "topo.day";
 	systemLogger.logInfo("Fetching Here terrain map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
@@ -675,7 +675,7 @@ function getHereTerrainTile(req, res) {
 function getHereHybridTile(req, res) {
 	const domain = hereBaseDomain;
 	const uri = "/v3/base/mc/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/png8";
-	req.query.style = "explore.satellite.day"
+	req.query.style = "explore.satellite.day";
 	systemLogger.logInfo("Fetching Here hybrid map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
@@ -683,7 +683,7 @@ function getHereHybridTile(req, res) {
 function getHereGreyTile(req, res) {
 	const domain = hereBaseDomain;
 	const uri = "/v3/base/mc/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/png8";
-	req.query.style = "lite.day"
+	req.query.style = "lite.day";
 	systemLogger.logInfo("Fetching Here colour-reduced street map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
 }
@@ -691,7 +691,7 @@ function getHereGreyTile(req, res) {
 function getHereTruckRestrictionsTile(req, res) {
 	const domain = hereBaseDomain;
 	const uri = "/v3/base/mc/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/png8";
-	req.query.style = "explore.day"
+	req.query.style = "explore.day";
 	req.query.features = "vehicle_restrictions:active_and_inactive";
 	systemLogger.logInfo("Fetching Here truck restrictions map tile: " + uri);
 	requestHereMapTile(req, res, domain, uri);
