@@ -27,7 +27,7 @@ import { GroupsActions } from '@/v4/modules/groups';
 import { JobsActions } from '@/v4/modules/jobs';
 import { MeasurementsActions } from '@/v4/modules/measurements';
 import { IProjectsActionCreators, ProjectsActions } from '@/v5/store/projects/projects.redux';
-import { IRevisionsActionCreators, RevisionsActions } from '@/v5/store/revisions/revisions.redux';
+import { IContainerRevisionsActionCreators, ContainerRevisionsActions } from '@/v5/store/containerRevisions/containerRevisions.redux';
 import { ITeamspacesActionCreators, TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { SequencesActions } from '@/v4/modules/sequences';
 import { TicketsActions, ITicketsActionCreators } from '@/v5/store/tickets/tickets.redux';
@@ -108,7 +108,7 @@ export const GroupsActionsDispatchers = createActionsDispatchers<IGroupsActionCr
 export const JobsActionsDispatchers = createActionsDispatchers<IJobsActionCreators>(JobsActions);
 export const MeasurementsActionsDispatchers = createActionsDispatchers<IMeasurementsActionCreators>(MeasurementsActions);
 export const ProjectsActionsDispatchers = createActionsDispatchers<IProjectsActionCreators>(ProjectsActions);
-export const RevisionsActionsDispatchers = createActionsDispatchers<IRevisionsActionCreators>(RevisionsActions);
+export const ContainerRevisionsActionsDispatchers = createActionsDispatchers<IContainerRevisionsActionCreators>(ContainerRevisionsActions);
 export const SequencesActionsDispatchers = createActionsDispatchers<ISequencesActionCreators>(SequencesActions);
 export const TeamspacesActionsDispatchers = createActionsDispatchers<ITeamspacesActionCreators>(TeamspacesActions);
 export const TicketsActionsDispatchers = createActionsDispatchers<ITicketsActionCreators>(TicketsActions);

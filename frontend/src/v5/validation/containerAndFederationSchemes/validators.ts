@@ -20,8 +20,8 @@ import { formatMessage } from '@/v5/services/intl';
 import filesize from 'filesize';
 import { trimmedString } from '../shared/validators';
 import { getState } from '@/v4/modules/store';
-import { selectRevisions, selectRevisionsPending } from '@/v5/store/revisions/revisions.selectors';
-import { RevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { selectRevisions, selectRevisionsPending } from '@/v5/store/containerRevisions/containerRevisions.selectors';
+import { ContainerRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 const stripIfBlankString = (value) => (
 	value === ''
@@ -123,7 +123,7 @@ export const revisionTag = Yup.string()
 
 			if (isPending) {
 				const { teamspace, project }  = testContext.options.context;
-				await new Promise((resolve) => RevisionsActionsDispatchers.fetch(teamspace, project, containerId, resolve as any));
+				await new Promise((resolve) => ContainerRevisionsActionsDispatchers.fetch(teamspace, project, containerId, resolve as any));
 			}
 
 			const revisions = selectRevisions(getState(), containerId);

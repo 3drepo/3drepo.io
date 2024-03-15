@@ -23,7 +23,7 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { ContainerStats, IContainer, NewContainer, UploadStatuses, ContainerSettings } from './containers.types';
 import { TeamspaceProjectAndContainerId, ProjectAndContainerId, TeamspaceAndProjectId, ProjectId, SuccessAndErrorCallbacks, View } from '../store.types';
-import { IRevision } from '../revisions/revisions.types';
+import { IContainerRevision } from '../containerRevisions/containerRevisions.types';
 import { Role } from '../currentUser/currentUser.types';
 
 export const { Types: ContainersTypes, Creators: ContainersActions } = createActions({
@@ -204,7 +204,7 @@ export type CreateContainerSuccessAction = Action<'CREATE_CONTAINER_SUCCESS'> & 
 export type DeleteContainerAction = Action<'DELETE'> & TeamspaceProjectAndContainerId & SuccessAndErrorCallbacks;
 export type DeleteContainerSuccessAction = Action<'DELETE_SUCCESS'> & ProjectAndContainerId;
 export type SetContainerStatusAction = Action<'SET_CONTAINER_STATUS'> & ProjectAndContainerId & { status: UploadStatuses };
-export type ContainerProcessingSuccessAction = Action<'CONTAINER_PROCESSING_SUCCESS'> & ProjectAndContainerId & { revision: IRevision };
+export type ContainerProcessingSuccessAction = Action<'CONTAINER_PROCESSING_SUCCESS'> & ProjectAndContainerId & { revision: IContainerRevision };
 
 export interface IContainersActionCreators {
 	addFavourite: (teamspace: string, projectId: string, containerId: string) => AddFavouriteAction;
@@ -274,7 +274,7 @@ export interface IContainersActionCreators {
 	containerProcessingSuccess: (
 		projectId: string,
 		containerId: string,
-		revision: IRevision
+		revision: IContainerRevision
 	) => ContainerProcessingSuccessAction;
 	resetContainerStatsQueue:() => Action<'RESET_CONTAINER_STATS_QUEUE'>;
 }

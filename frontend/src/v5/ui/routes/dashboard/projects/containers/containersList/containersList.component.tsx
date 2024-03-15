@@ -40,7 +40,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
-import { UploadFileForm } from '../uploadFileForm/uploadFileForm.component';
+import { UploadContainerRevisionForm } from '../uploadContainerRevisionForm/uploadContainerRevisionForm.component';
 import { ContainerListItemLoading } from './containerListItem/containerListItemLoading.component';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 
@@ -103,7 +103,7 @@ export const ContainersList = ({
 								startIcon={<ArrowUpCircleIcon />}
 								variant="contained"
 								color="primary"
-								onClick={() => DialogsActionsDispatchers.open(UploadFileForm)}
+								onClick={() => DialogsActionsDispatchers.open(UploadContainerRevisionForm)}
 							>
 								<FormattedMessage id="containers.mainHeader.uploadFiles" defaultMessage="Upload files" />
 							</Button>

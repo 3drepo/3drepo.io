@@ -23,7 +23,7 @@ import teamspaces2Saga from '@/v5/store/teamspaces/teamspaces.sagas';
 import currentUser2Saga from '@/v5/store/currentUser/currentUser.sagas';
 import auth2Saga from '@/v5/store/auth/auth.sagas';
 import usersSaga from '@/v5/store/users/users.sagas';
-import revisionsSaga from '@/v5/store/revisions/revisions.sagas';
+import containerRevisionsSaga from '@/v5/store/containerRevisions/containerRevisions.sagas';
 import ticketsSaga from '@/v5/store/tickets/tickets.sagas';
 import ticketCommentsSaga from '@/v5/store/tickets/comments/ticketComments.sagas';
 import viewer2Saga from '@/v5/store/viewer/viewer.sagas';
@@ -97,7 +97,7 @@ export default function* rootSaga() {
 		fork(currentUser2Saga),
 		fork(federationsSaga),
 		fork(projectsSaga),
-		fork(revisionsSaga),
+		fork(containerRevisionsSaga),
 		fork(ticketsSaga),
 		fork(ticketsCardSaga),
 		fork(ticketCommentsSaga),
