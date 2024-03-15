@@ -41,6 +41,7 @@ import { Action } from 'redux';
 import { CanvasHistoryActions } from '@/v4/modules/canvasHistory';
 
 import { ClipMode, GizmoMode, MeasureMode, NavigationMode, ProjectionMode } from '../ui/routes/viewer/toolbar/toolbar.types';
+import { DrawingRevisionsActions, IDrawingRevisionsActionCreators } from '../store/drawingRevisions/drawingRevisions.redux';
 
 interface IBimActionCreators {
 	setIsActive: (active: boolean) => Action;
@@ -100,15 +101,16 @@ export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreato
 export const BimActionsDispatchers = createActionsDispatchers<IBimActionCreators>(BimActions);
 export const CanvasHistoryActionsDispatchers = createActionsDispatchers<ICanvasHistoryActionCreators>(CanvasHistoryActions);
 export const ContainersActionsDispatchers = createActionsDispatchers<IContainersActionCreators>(ContainersActions);
+export const ContainerRevisionsActionsDispatchers = createActionsDispatchers<IContainerRevisionsActionCreators>(ContainerRevisionsActions);
 export const CurrentUserActionsDispatchers = createActionsDispatchers<ICurrentUserActionCreators>(CurrentUserActions);
 export const DialogsActionsDispatchers = createActionsDispatchers<IDialogsActionCreators>(DialogsActions);
 export const DrawingsActionsDispatchers =  createActionsDispatchers<IDrawingsActionCreators>(DrawingsActions);
+export const DrawingRevisionsActionDispatchers =  createActionsDispatchers<IDrawingRevisionsActionCreators>(DrawingRevisionsActions);
 export const FederationsActionsDispatchers = createActionsDispatchers<IFederationsActionCreators>(FederationsActions);
 export const GroupsActionsDispatchers = createActionsDispatchers<IGroupsActionCreators>(GroupsActions);
 export const JobsActionsDispatchers = createActionsDispatchers<IJobsActionCreators>(JobsActions);
 export const MeasurementsActionsDispatchers = createActionsDispatchers<IMeasurementsActionCreators>(MeasurementsActions);
 export const ProjectsActionsDispatchers = createActionsDispatchers<IProjectsActionCreators>(ProjectsActions);
-export const ContainerRevisionsActionsDispatchers = createActionsDispatchers<IContainerRevisionsActionCreators>(ContainerRevisionsActions);
 export const SequencesActionsDispatchers = createActionsDispatchers<ISequencesActionCreators>(SequencesActions);
 export const TeamspacesActionsDispatchers = createActionsDispatchers<ITeamspacesActionCreators>(TeamspacesActions);
 export const TicketsActionsDispatchers = createActionsDispatchers<ITicketsActionCreators>(TicketsActions);

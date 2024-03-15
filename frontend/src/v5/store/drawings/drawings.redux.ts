@@ -19,7 +19,7 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProjectAndDrawingId, SuccessAndErrorCallbacks } from '../store.types';
-import { IDrawing, DrawingStats } from './drawings.types';
+import { IDrawing, DrawingStats, DrawingUploadStatus } from './drawings.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 
 export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions({
@@ -34,7 +34,6 @@ export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions
 	updateDrawing: ['teamspace', 'projectId', 'drawingId', 'drawing', 'onSuccess', 'onError'],
 	updateDrawingSuccess: ['projectId', 'drawingId', 'drawing'],
 }, { prefix: 'DRAWINGS/' }) as { Types: Constants<IDrawingsActionCreators>; Creators: IDrawingsActionCreators };
-
 
 const getDrawingFromState = (state: DrawingsState, projectId, drawingId) => (
 	state.drawingsByProject[projectId].find((drawing) => drawing._id === drawingId)

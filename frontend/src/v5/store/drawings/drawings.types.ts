@@ -22,6 +22,8 @@ export interface IDrawing {
 	desc?: string;
 	drawingNumber: string;
 	category: string;
+	status: DrawingUploadStatus;
+	revisionsCount: number;
 }
 
 // TODO: Unfinished interface
@@ -30,3 +32,5 @@ export interface DrawingStats {
 	revisions : { total: number, lastUpdated?: number, latestRevision?: string }
 }
 
+// TODO: Check values
+export type DrawingUploadStatus = 'ok' | 'failed' | 'uploading' | 'uploaded' | 'queued' | 'processing';

@@ -27,4 +27,4 @@ import * as Users from './users';
 import * as Tickets from './tickets';
 import * as Drawings from './drawings';
 
-export { Auth, TicketComments, CurrentUser, Teamspaces, Projects, Containers, Federations, ContainerRevisions as Revisions, Users, Tickets, Drawings };
+export { Auth, TicketComments, CurrentUser, Teamspaces, Projects, Containers, Federations, ContainerRevisions, Users, Tickets, Drawings };
