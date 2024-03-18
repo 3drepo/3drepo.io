@@ -19,7 +19,7 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProjectAndDrawingId, SuccessAndErrorCallbacks } from '../store.types';
-import { IDrawing, DrawingStats } from './drawings.types';
+import { IDrawing, DrawingStats, CalibrationStates } from './drawings.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { prepareSingleDrawingData } from './drawings.helpers';
 
@@ -68,7 +68,11 @@ export const fetchCategoriesSuccess = (state: DrawingsState, { projectId, catego
 };
 
 export const createDrawingSuccess = (state: DrawingsState, { projectId, drawing }:CreateDrawingSuccessAction ) => {
-	state.drawingsByProject[projectId] = (state.drawingsByProject[projectId] || []).concat([drawing]);
+	state.drawingsByProject[projectId] = (state.drawingsByProject[projectId] || []).concat([{
+		...drawing,
+		total: 0,
+		calibration: CalibrationStates.EMPTY,
+	}]);
 };
 
 export const updateDrawingSuccess = (state: DrawingsState, { projectId, drawingId, drawing }:UpdateDrawingSuccessAction ) => {
