@@ -18,7 +18,7 @@
 
 import { delay } from '@/v4/helpers/async';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
-import { DrawingStats, MinimumDrawing } from '@/v5/store/drawings/drawings.types';
+import { CalibrationStates, DrawingStats, MinimumDrawing } from '@/v5/store/drawings/drawings.types';
 import { AxiosResponse } from 'axios';
 import uuid from 'uuidv4';
 
@@ -32,36 +32,51 @@ export const removeFavourite = (teamspace, projectId, drawingId): Promise<AxiosR
 
 const categories =  ['A drawing category', 'Another drawing category', 'Yet another one'];
 
-const drawings = [ // TODO: The schema is unfinished
-	{
+const arr = (new Array(1000)).fill(0);
+
+const drawings = arr.map((_, index) => {
+	return {
 		_id: uuid(),
-		drawingNumber: uuid(),
-		name: 'My cool drawing',
-		isFavourite: true,
+		name: 'A drawing ' + index,
+		isFavourite: (Math.random() > 0.5),
 		role: Role.ADMIN,
-	},
-	{
-		_id: uuid(),
-		drawingNumber: uuid(),
-		name: 'Still life',
-		isFavourite: true,
-		role: Role.COLLABORATOR,
-	},
-	{
-		_id: uuid(),
-		drawingNumber: uuid(),
-		name: 'Boring Drawing',
-		isFavourite: false,
-		role: Role.COMMENTER,
-	},
-	{
-		_id: uuid(),
-		drawingNumber: uuid(),
-		name: 'Another drawing',
-		isFavourite: false,
-		role: Role.VIEWER,
-	},
-];
+	};
+});
+
+const randCal = () => {
+	const i  = Math.round(Math.random() * 2);
+	switch (i) {
+		case 0:
+			return CalibrationStates.CALIBRATED;
+		case 1:
+			return CalibrationStates.OUT_OF_SYNC;
+		case 2:
+			return CalibrationStates.UNCALIBRATED;
+	}
+};
+
+
+const stats = arr.map((_, index) => {
+	const lastUpdated = (Math.random() > 0.5) ? 1709569331628 + Math.round( Math.random() * 31556952000) : null;
+	const total = lastUpdated ?  Math.round(Math.random() * 10) : 0;
+
+	const calibration = total ? randCal() : CalibrationStates.EMPTY;
+	const latestRevision = total ? 'Revision ' + total : undefined;
+	const status = total ? 'status' : undefined;
+
+	return {
+		_id: drawings[index]._id,
+		revisions : {
+			lastUpdated,
+			drawingNumber: uuid(), 
+			total,
+			calibration,
+			category: categories[Math.round(Math.random() * (categories.length - 1))],
+			latestRevision,
+			status,
+		},
+	} as DrawingStats;
+});
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const fetchDrawings = (teamspace, projectId): Promise<MinimumDrawing[]> => {
@@ -69,53 +84,8 @@ export const fetchDrawings = (teamspace, projectId): Promise<MinimumDrawing[]> =
 };
 
 export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promise<DrawingStats> => {
-	const stats: DrawingStats[] = [ // TODO: The schema is unfinished
-		{
-			_id: drawings[0]._id,
-			revisions : {
-				lastUpdated: null,
-				total: 0,
-				calibration: 'empty',
-				category: categories[1],
-			},
-		},
-		{
-			_id: drawings[1]._id,
-			revisions : {
-				total: 1,
-				lastUpdated: new Date(1709569331628),
-				latestRevision:'I dunno',
-				calibration: 'calibrated',
-				category: categories[0],
-				status: 's4s',
-			},
-		},
-		{
-			_id: drawings[2]._id,
-			revisions : {
-				total: 2,
-				lastUpdated: new Date(709569331628),
-				latestRevision:'Apple',
-				calibration: 'outOfSync',
-				category: categories[2],
-			},
-		},
-		{
-			_id: drawings[3]._id,
-			revisions : {
-				total: 10,
-				lastUpdated: new Date(1449569331628),
-				latestRevision:'Shading and other such things to improve the drawing',
-				calibration: 'uncalibrated',
-				status: 's5',
-				category: categories[0],
-			},
-		},
-	];
-
 	return delay<DrawingStats>(Math.random() * 250, stats.find(((s)=> s._id === drawingId)));
 };
-
 
 export const fetchCategories = (teamspace, projectId): Promise<string[]> => {
 	return delay<string[]>(1000, categories) ;
