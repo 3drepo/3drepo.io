@@ -20,7 +20,8 @@ import WarningIcon from '@assets/icons/outlined/warning-outlined.svg';
 import CalibratedIcon from '@assets/icons/filled/calibration-filled.svg';
 import NotCalibrated from '@assets/icons/filled/no_calibration-filled.svg';
 import { Display } from '@/v5/ui/themes/media';
-import { CalibrationStates } from './drawings.types';
+import { CalibrationStates, DrawingStats, IDrawing, MinimumDrawing } from './drawings.types';
+import { getNullableDate } from '@/v5/helpers/getNullableDate';
 
 export const DRAWING_LIST_COLUMN_WIDTHS = {
 	name: {
@@ -69,3 +70,29 @@ export const CALIBRATION_MAP = {
 		icon: <NotCalibrated />,
 	},
 };
+
+export const prepareSingleDrawingData = (
+	Drawing: MinimumDrawing,
+	stats?: DrawingStats,
+): IDrawing => ({
+	...Drawing,
+	total: stats?.revisions.total ?? 0,
+	lastUpdated: getNullableDate(stats?.revisions.lastUpdated),
+	latestRevision: stats?.revisions.latestRevision ?? '',
+	category: stats?.revisions.category ?? '',
+	drawingNumber: stats?.revisions.drawingNumber ?? '',
+	status: stats?.revisions.status ?? '',
+	hasStatsPending: !stats,
+	errorReason: stats?.revisions.errorReason && {
+		message: stats.revisions.errorReason.message,
+		timestamp: getNullableDate(stats?.revisions.errorReason.timestamp),
+	},
+});
+
+export const prepareDrawingsData = (
+	drawings: Array<MinimumDrawing>,
+	stats?: DrawingStats[],
+) => drawings.map<IDrawing>((Drawing, index) => {
+	const drawingStats = stats?.[index];
+	return prepareSingleDrawingData(Drawing, drawingStats);
+});

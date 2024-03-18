@@ -53,10 +53,15 @@ export interface DrawingStats {
 	_id: string,
 	revisions: {
 		total: number,
-		lastUpdated?: Date,
+		lastUpdated?: number,
+		drawingNumber: string,
 		latestRevision?: string,
 		calibration?: CalibrationStates,
-		category?: string;// TODO - add category types
-		status?: any; // TODO - add drawing statuses
+		category?: string, // TODO - add category types
+		status?: any, // TODO - add drawing statuses
+		errorReason?: {
+			message: string,
+			timestamp: number,
+		},
 	}
 }

@@ -20,7 +20,7 @@ import { FixedOrGrowContainer, FixedOrGrowContainerProps } from '@controls/fixed
 import { Tooltip } from '@mui/material';
 import { Button } from './dashboardListItemButton.styles';
 
-export interface IDashboardListItemButton extends FixedOrGrowContainerProps {
+interface IDashboardListItemButton extends FixedOrGrowContainerProps {
 	onClick: Dispatch<SyntheticEvent>;
 	tooltipTitle?: ReactNode;
 	startIcon?: ReactNode;

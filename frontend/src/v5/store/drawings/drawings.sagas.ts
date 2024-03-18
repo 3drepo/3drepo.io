@@ -15,13 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import { AddFavouriteAction, DeleteDrawingAction, RemoveFavouriteAction, CreateDrawingAction, DrawingsActions, DrawingsTypes, FetchCategoriesAction, FetchDrawingStatsAction, FetchDrawingsAction, UpdateDrawingAction } from './drawings.redux';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { LifoQueue } from '@/v5/helpers/functions.helpers';
 import { DrawingStats } from './drawings.types';
+import { prepareDrawingsData } from './drawings.helpers';
+import { selectDrawings, selectIsListPending } from './drawings.selectors';
+import { isEqualWith } from 'lodash';
+import { compByColum } from '../store.helpers';
 
 const statsQueue = new LifoQueue<DrawingStats>(API.Drawings.fetchDrawingsStats, 30);
 
@@ -56,10 +60,19 @@ export function* fetchDrawings({ teamspace, projectId }: FetchDrawingsAction) {
 		statsQueue.resetQueue();
 
 		const drawings = yield API.Drawings.fetchDrawings(teamspace, projectId);
-		yield put(DrawingsActions.fetchDrawingsSuccess(projectId, drawings));
+		const drawingsWithoutStats = prepareDrawingsData(drawings);
+		const storedDrawings = yield select(selectDrawings);
+		const isPending = yield select(selectIsListPending);
+
+		// Only update if theres is new data
+		if (isPending || !isEqualWith(storedDrawings, drawingsWithoutStats, compByColum(['_id', 'name', 'role', 'isFavourite']))) {
+			yield put(DrawingsActions.fetchDrawingsSuccess(projectId, drawingsWithoutStats));
+		}
+		
+		yield put(DrawingsActions.fetchDrawingsSuccess(projectId, drawingsWithoutStats));
 
 		yield all(
-			drawings.map(
+			drawingsWithoutStats.map(
 				(drawing) => put(DrawingsActions.fetchDrawingStats(teamspace, projectId, drawing._id)),
 			),
 		); 

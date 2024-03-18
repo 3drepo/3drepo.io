@@ -21,6 +21,7 @@ import { createActions, createReducer } from 'reduxsauce';
 import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProjectAndDrawingId, SuccessAndErrorCallbacks } from '../store.types';
 import { IDrawing, DrawingStats } from './drawings.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
+import { prepareSingleDrawingData } from './drawings.helpers';
 
 export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions({
 	addFavourite: ['teamspace', 'projectId', 'drawingId'],
@@ -59,7 +60,7 @@ export const fetchDrawingsSuccess = (state: DrawingsState, { projectId, drawings
 
 export const fetchDrawingStatsSuccess = (state: DrawingsState, { drawingId, projectId, stats }:FetchDrawingStatsSuccessAction ) => {
 	const drawing = getDrawingFromState(state, projectId, drawingId);
-	Object.assign(drawing,  { ...stats.revisions });
+	Object.assign(drawing, prepareSingleDrawingData(drawing, stats));
 };
 
 export const fetchCategoriesSuccess = (state: DrawingsState, { projectId, categories }:FetchCategoriesSuccessAction ) => {
