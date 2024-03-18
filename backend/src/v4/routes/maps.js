@@ -497,9 +497,7 @@ function requestMapTile(req, res, domain, uri) {
 function requestHereMapTile(req, res, domain, resource, style, features) {
 	const featureList = features ? features.split(",") : [];
 
-	let uri = `/v3/${resource}/mc/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}/png8`;
-
-	uri += `?apiKey=${config.here.apiKey}`;
+	let uri = `/v3/${resource}/mc/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}/png8?apiKey=${config.here.apiKey}`;
 
 	if (req.query.features) {
 		featureList.concat(req.query.features.split(","));
@@ -513,36 +511,6 @@ function requestHereMapTile(req, res, domain, resource, style, features) {
 		uri += `&style=${req.query.style}`;
 	} else if (style) {
 		uri += `&style=${style}`;
-	}
-
-	if (req.query.mv) {
-		uri += `&mv=${req.query.mv}`;
-	}
-
-	if (req.query.lang) {
-		uri += `&lang=${req.query.lang}`;
-	}
-	if (req.query.lang2) {
-		uri += `&lang2=${req.query.lang2}`;
-	}
-
-	if (req.query.minTrafficCongestion) {
-		uri += `&minTrafficCongestion=${req.query.minTrafficCongestion}`;
-	}
-	if (req.query.pois) {
-		uri += `&pois=${req.query.pois}`;
-	}
-
-	if (req.query.ppi) {
-		uri += `&ppi=${req.query.ppi}`;
-	}
-
-	if (req.query.pview) {
-		uri += `&pview=${req.query.pview}`;
-	}
-
-	if (req.query.size) {
-		uri += `&size=${req.query.size}`;
 	}
 
 	systemLogger.logInfo("Fetching Here map tile: " + domain + uri);
