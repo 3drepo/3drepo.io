@@ -18,7 +18,6 @@
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
 import { DrawingsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Display } from '@/v5/ui/themes/media';
 import { DashboardListCollapse, DashboardListHeader, DashboardListHeaderLabel, DashboardList, DashboardListEmptyContainer, DashboardListEmptySearchResults } from '@components/dashboard/dashboardList';
 import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
@@ -98,14 +97,14 @@ export const DrawingsList = ({
 					<DashboardListHeaderLabel name="name" {...DRAWING_LIST_COLUMN_WIDTHS.name}>
 						<FormattedMessage id="drawings.list.header.drawing" defaultMessage="Drawing" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="total" {...DRAWING_LIST_COLUMN_WIDTHS.total} hideWhenSmallerThan={Display.Desktop}>
+					<DashboardListHeaderLabel name="total" {...DRAWING_LIST_COLUMN_WIDTHS.total}>
 						<FormattedMessage id="drawings.list.header.revisions" defaultMessage="Revisions" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="calibration" {...DRAWING_LIST_COLUMN_WIDTHS.calibration}>
 						<FormattedMessage id="drawings.list.header.calibration" defaultMessage="2D/3D Calibration" />
 					</DashboardListHeaderLabel>
-					<DashboardListHeaderLabel name="drawingNumber" {...DRAWING_LIST_COLUMN_WIDTHS.drawingNumber} hideWhenSmallerThan={Display.Tablet}>
-						<FormattedMessage id="drawings.list.header.drawingNo" defaultMessage="Drawing Number" />
+					<DashboardListHeaderLabel name="drawingNumber" {...DRAWING_LIST_COLUMN_WIDTHS.drawingNumber}>
+						<FormattedMessage id="drawings.list.header.drawingNumber" defaultMessage="Drawing Number" />
 					</DashboardListHeaderLabel>
 					<DashboardListHeaderLabel name="category" {...DRAWING_LIST_COLUMN_WIDTHS.category}>
 						<FormattedMessage id="drawings.list.header.category" defaultMessage="Category" />

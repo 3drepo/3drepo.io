@@ -25,28 +25,29 @@ import { getNullableDate } from '@/v5/helpers/getNullableDate';
 
 export const DRAWING_LIST_COLUMN_WIDTHS = {
 	name: {
+		// width: 234,
 		minWidth: 90,
 	},
 	total: {
-		width: 165,
+		width: 155,
 		hideWhenSmallerThan: Display.Desktop,
 	},
 	calibration: {
-		width: 165,
+		width: 155,
 		hideWhenSmallerThan: Display.Tablet,
 	},
 	drawingNumber: {
-		width: 190,
+		width: 260,
 	},
 	category: {
 		width: 120,
 		hideWhenSmallerThan: Display.Desktop,
 	},
 	lastUpdated: {
-		width: 135,
+		width: 120,
 	},
 	actions: {
-		width: 72,
+		width: 84,
 	},
 };
 
@@ -81,6 +82,7 @@ export const prepareSingleDrawingData = (
 	latestRevision: stats?.revisions.latestRevision ?? '',
 	category: stats?.revisions.category ?? '',
 	drawingNumber: stats?.revisions.drawingNumber ?? '',
+	calibration: stats?.revisions.calibration ?? CalibrationStates.UNCALIBRATED,
 	status: stats?.revisions.status ?? '',
 	hasStatsPending: !stats,
 	errorReason: stats?.revisions.errorReason && {
