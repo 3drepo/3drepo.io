@@ -27,7 +27,7 @@ import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
+import { ButtonSkeleton, SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
 import { DrawingsListItemTitle } from './drawingsListItemTitle/drawingsListItemTitle.component';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { DrawingsEllipsisMenu } from './drawingsEllipsisMenu/drawingsEllipsisMenu.component';
@@ -61,10 +61,10 @@ export const DrawingListItemLoading = ({
 			<DashboardListItemRow>
 				<DrawingsListItemTitle drawing={drawing} {...DRAWING_LIST_COLUMN_WIDTHS.name} />
 				<FixedOrGrowContainer {...DRAWING_LIST_COLUMN_WIDTHS.total} >
-					<SkeletonBlock delay={delay} height={50} width="80%" />
+					<ButtonSkeleton delay={delay} />
 				</FixedOrGrowContainer>
 				<FixedOrGrowContainer {...DRAWING_LIST_COLUMN_WIDTHS.calibration} >
-					<SkeletonBlock delay={delay} height={50} width="80%" />
+					<ButtonSkeleton delay={delay} />
 				</FixedOrGrowContainer>
 				<FixedOrGrowContainer {...DRAWING_LIST_COLUMN_WIDTHS.drawingNumber}>
 					<SkeletonBlock delay={delay} width="80%" />
