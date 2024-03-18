@@ -24,11 +24,12 @@ const { getRefNodes } = require("./ref");
 const C = require("../constants");
 const db = require("../handler/db");
 const {v5Path} = require("../../interop");
+const responseCodes = require("../response_codes");
 const FilesManager = require(`${v5Path}/services/filesManager`);
 
 const UnityAssets = {};
 
-async function getAssetListFromRef(ref, username) {
+async function getAssetListFromRef(ref, username, legacy) {
 	const granted = await middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project);
 
 	if(granted) {
@@ -39,27 +40,36 @@ async function getAssetListFromRef(ref, username) {
 			{_id : ref._rid};
 
 		if (revInfo) {
-			return await  getAssetListEntry(ref.owner, ref.project, revInfo._id);
+			return await  getAssetListEntry(ref.owner, ref.project, revInfo._id, legacy);
 		}
 	}
 }
 
-function getAssetListEntry(account, model, revId) {
-	return db.findOne(account, model + ".stash.unity3d", {_id: revId});
+// This method returns RepoBundles, and falls back to AssetBundles if they
+// are not available. If the legacy flag is set, the method will only return
+// AssetBundles.
+
+async function getAssetListEntry(account, model, revId, legacy) {
+	const assets = await db.findOne(account, model + ".stash.repobundles", {_id: revId});
+	if(assets && !legacy) {
+		return Promise.resolve(assets);
+	}else {
+		return db.findOne(account, model + ".stash.unity3d", {_id: revId});
+	}
 }
 
-UnityAssets.getAssetList = function(account, model, branch, rev, username) {
+UnityAssets.getAssetList = function(account, model, branch, rev, username, legacy) {
 	return History.getHistory(account, model , branch, rev).then((history) => {
 		return getRefNodes(account, model, branch, rev).then((subModelRefs) => {
 			const fetchPromise = [];
 			if(subModelRefs.length) {
 				// This is a federation, get asset lists from subModels and merge them
 				subModelRefs.forEach((ref) => {
-					fetchPromise.push(getAssetListFromRef(ref, username));
+					fetchPromise.push(getAssetListFromRef(ref, username, legacy));
 				});
 			} else {
 				// Not a federation, get it's own assetList.
-				fetchPromise.push(getAssetListEntry(account, model, history._id));
+				fetchPromise.push(getAssetListEntry(account, model, history._id, legacy));
 			}
 
 			return Promise.all(fetchPromise).then((assetLists) => {
@@ -74,6 +84,46 @@ UnityAssets.getUnityBundle = function(account, model, id) {
 	const bundleFileName = `${id}.unity3d`;
 	const collection = `${model}.stash.unity3d.ref`;
 	return FilesManager.getFileAsStream(account, collection, bundleFileName);
+};
+
+UnityAssets.getRepoBundle = function(account, model, id) {
+	const bundleFileName = `${id}`;
+	const collection = `${model}.stash.repobundles.ref`;
+	return FilesManager.getFileAsStream(account, collection, bundleFileName);
+};
+
+UnityAssets.getTexture = async function(account, model, id) {
+	const textureFilename = `${id}`;
+	const collection = `${model}.scene`;
+
+	const node = await db.findOne(account, collection, { _id: utils.stringToUUID(textureFilename), type: "texture" }, {
+		_id: 1,
+		_blobRef: 1,
+		extension: 1
+	});
+
+	if(!node) {
+		throw (responseCodes.TEXTURE_NOT_FOUND);
+	}
+
+	const {elements, buffer} = node._blobRef;
+
+	// chunkInfo is passed to createReadStream, which expects `start` and `end` properties
+	const chunkInfo = {
+		start: buffer.start + elements.data.start,
+		end: buffer.start + elements.data.start + elements.data.size
+	};
+
+	const response = await FilesManager.getFileAsStream(account, collection, buffer.name, chunkInfo);
+
+	if(node.extension === "jpg") {
+		node.extension = "jpeg"; // jpg is not a valid mime type, only jpeg, even though the extensions are equivalent
+	}
+
+	response.mimeType = `image/${node.extension}`;
+	response.size = chunkInfo.end - chunkInfo.start;
+
+	return response;
 };
 
 module.exports = UnityAssets;
