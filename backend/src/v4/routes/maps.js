@@ -55,10 +55,14 @@ const hereTrafficDomain = "traffic.maps.hereapi.com";
 /**
  * @apiDefine HereOptions
  *
- * @apiParam (Query) {String} [lang] MARC three-letter language code for labels
- * @apiParam (Query) {String} [lang2] Secondary MARC three-letter language code for labels
- * @apiParam (Query) {Number} [ppi] Tile resolution in pixels per inch (72, 250, 320, 500)
+ * @apiParam (Query) {String} [features] v3 map features
+ * @apiParam (Query) {String} [lang] BCP47 language code (https://www.rfc-editor.org/rfc/bcp/bcp47.txt) for labels
+ * @apiParam (Query) {String} [lang2] Secondary language code for labels
+ * @apiParam (Query) {String} [minTrafficCongestion] Only displays traffic from a specified congestion level: free, heavy, queuing, blocked
+ * @apiParam (Query) {String} [mv] Specifies the map version to be used
+ * @apiParam (Query) {Number} [ppi] Tile resolution in pixels per inch (100, 200, 400)
  * @apiParam (Query) {String} [pview] Render map boundaries based on internal or local views
+ * @apiParam (Query) {String} [size] Image size in pixels: 256, 512
  * @apiParam (Query) {String} [style] Select style used to render map tile
  */
 
@@ -542,62 +546,43 @@ function requestMapTile(req, res, domain, uri) {
 }
 
 function requestHereMapTile(req, res, domain, uri) {
-	uri += "?apiKey=" + config.here.apiKey;
+	uri += `?apiKey=${config.here.apiKey}`;
 
 	if (req.query.features) {
-		uri += "&features=" + req.query.features;
+		uri += `&features=${req.query.features}`;
 	}
 	if (req.query.style) {
-		uri += "&style=" + req.query.style;
+		uri += `&style=${req.query.style}`;
 	}
 
-	// Specifies the map version to be used. The map version can be retrieved by querying /info.
 	if (req.query.mv) {
-		uri += "&mv=" + req.query.mv;
+		uri += `&mv=${req.query.mv}`;
 	}
 
-	// The BCP47 language code (https://www.rfc-editor.org/rfc/bcp/bcp47.txt) limited to ISO 639-1
-	// two-letter language code and, optionally, ISO 15924 four-letter script code.
-	// It is used for requesting a map tile rendered in a specific language.
-	// Supported values are listed in 'languages' resource.
 	if (req.query.lang) {
-		uri += "&lang=" + req.query.lang;
+		uri += `&lang=${req.query.lang}`;
 	}
-	// This parameter can be used to provide a second language for use in dual labeling,
-	// it follows the same behavior as the parameter 'lang'.
 	if (req.query.lang2) {
-		uri += "&lang2=" + req.query.lang2;
+		uri += `&lang2=${req.query.lang2}`;
 	}
 
-	// Only displays traffic from a specified congestion level. The available options are:
-	// free
-	// heavy
-	// queuing
-	// blocked
 	if (req.query.minTrafficCongestion) {
-		uri += "&minTrafficCongestion=" + req.query.minTrafficCongestion;
+		uri += `&minTrafficCongestion=${req.query.minTrafficCongestion}`;
 	}
 	if (req.query.pois) {
-		uri += "&pois=" + req.query.pois;
+		uri += `&pois=${req.query.pois}`;
 	}
 
-	// Pixels per inch. Resolution that can be requested, valid values are:
-	// 100 – normal
-	// 200 – intermediate
-	// 400 – hi-res
 	if (req.query.ppi) {
-		uri += "&ppi=" + req.query.ppi;
+		uri += `&ppi=${req.query.ppi}`;
 	}
 
-	// Use this parameter to render the map with boundaries based on international
-	// or local country views.
 	if (req.query.pview) {
-		uri += "&pview=" + req.query.pview;
+		uri += `&pview=${req.query.pview}`;
 	}
 
-	// Image size in pixels. Supported values are listed in 'info' resource.
 	if (req.query.size) {
-		uri += "&size=" + req.query.size;
+		uri += `&size=${req.query.size}`;
 	}
 
 	requestMapTile(req, res, domain, uri);
@@ -619,7 +604,7 @@ function getOSMTile(req, res) {
 function getHereBaseInfo(req, res) {
 	const domain = hereBaseDomain;
 	let uri = "/v3/info";
-	uri += "?apiKey=" + config.here.apiKey;
+	uri += `?apiKey=${config.here.apiKey}`;
 	httpsGet.get(domain, uri).then(info =>{
 		res.setHeader("Cache-Control", `private, max-age=${config.cachePolicy.maxAge}`);
 		res.write(info);
@@ -636,79 +621,79 @@ function getHereBaseInfo(req, res) {
 
 function getHereMapsTile(req, res) {
 	const domain = hereBaseDomain;
-	const uri = "/v3/base/mc/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/png8";
-	systemLogger.logInfo("Fetching Here map tile: " + uri);
+	const uri = `/v3/base/mc/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}/png8`;
+	systemLogger.logInfo(`Fetching Here map tile: ${uri}`);
 	requestHereMapTile(req, res, domain, uri);
 }
 
 function getHereAerialMapsTile(req, res) {
 	const domain = hereBaseDomain;
-	const uri = "/v3/base/mc/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/png8";
+	const uri = `/v3/base/mc/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}/png8`;
 	req.query.style = "satellite.day";
-	systemLogger.logInfo("Fetching Here map tile: " + uri);
+	systemLogger.logInfo(`Fetching Here map tile: ${uri}`);
 	requestHereMapTile(req, res, domain, uri);
 }
 
 function getHereTrafficTile(req, res) {
 	const domain = hereBaseDomain;
-	const uri = "/v3/base/mc/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/png8";
+	const uri = `/v3/base/mc/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}/png8`;
 	req.query.style = "logistics.day";
-	systemLogger.logInfo("Fetching Here traffic flow map tile: " + uri);
+	systemLogger.logInfo(`Fetching Here traffic flow map tile: ${uri}`);
 	requestHereMapTile(req, res, domain, uri);
 }
 
 function getHereTrafficFlowTile(req, res) {
 	const domain = hereTrafficDomain;
-	const uri = "/v3/flow/mc/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/png8";
-	systemLogger.logInfo("Fetching Here traffic flow map tile: " + uri);
+	const uri = `/v3/flow/mc/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}/png8`;
+	systemLogger.logInfo(`Fetching Here traffic flow map tile: ${uri}`);
 	requestHereMapTile(req, res, domain, uri);
 }
 
 function getHereTerrainTile(req, res) {
 	const domain = hereBaseDomain;
-	const uri = "/v3/base/mc/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/png8";
+	const uri = `/v3/base/mc/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}/png8`;
 	req.query.style = "topo.day";
-	systemLogger.logInfo("Fetching Here terrain map tile: " + uri);
+	systemLogger.logInfo(`Fetching Here terrain map tile: ${uri}`);
 	requestHereMapTile(req, res, domain, uri);
 }
 
 function getHereHybridTile(req, res) {
 	const domain = hereBaseDomain;
-	const uri = "/v3/base/mc/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/png8";
+	const uri = `/v3/base/mc/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}/png8`;
 	req.query.style = "explore.satellite.day";
-	systemLogger.logInfo("Fetching Here hybrid map tile: " + uri);
+	systemLogger.logInfo(`Fetching Here hybrid map tile: ${uri}`);
 	requestHereMapTile(req, res, domain, uri);
 }
 
 function getHereGreyTile(req, res) {
 	const domain = hereBaseDomain;
-	const uri = "/v3/base/mc/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/png8";
+	const uri = `/v3/base/mc/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}/png8`;
 	req.query.style = "lite.day";
-	systemLogger.logInfo("Fetching Here colour-reduced street map tile: " + uri);
+	systemLogger.logInfo(`Fetching Here colour-reduced street map tile: ${uri}`);
 	requestHereMapTile(req, res, domain, uri);
 }
 
 function getHereTruckRestrictionsTile(req, res) {
 	const domain = hereBaseDomain;
-	const uri = "/v3/base/mc/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/png8";
+	const uri = `/v3/base/mc/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}/png8`;
 	req.query.style = "explore.day";
 	req.query.features = "vehicle_restrictions:active_and_inactive";
-	systemLogger.logInfo("Fetching Here truck restrictions map tile: " + uri);
+	systemLogger.logInfo(`Fetching Here truck restrictions map tile: ${uri}`);
 	requestHereMapTile(req, res, domain, uri);
 }
 
 function getHereTruckRestrictionsOverlayTile(req, res) {
 	const domain = hereBaseDomain;
-	const uri = "/v3/blank/mc/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/png8";
+	const uri = `/v3/blank/mc/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}/png8`;
 	req.query.features = "vehicle_restrictions:active_and_inactive";
-	systemLogger.logInfo("Fetching Here truck restrictions overlay map tile: " + uri);
+	systemLogger.logInfo(`Fetching Here truck restrictions overlay map tile: ${uri}`);
 	requestHereMapTile(req, res, domain, uri);
 }
 
 function getHereLabelOverlayTile(req, res) {
 	const domain = hereBaseDomain;
-	const uri = "/v3/label/mc/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/png8";
-	systemLogger.logInfo("Fetching Here label overlay map tile: " + uri);
+	const uri = `/v3/label/mc/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}/png8`;
+	systemLogger.logInfo(`Fetching Here label overlay map tile: ${uri}`);
 	requestHereMapTile(req, res, domain, uri);
 }
 
