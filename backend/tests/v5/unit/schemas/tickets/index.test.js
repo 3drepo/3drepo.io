@@ -899,6 +899,11 @@ const testImportedTickets = () => {
 	describe('Imported tickets', () => {
 		const importTestTem = {
 			_id: generateUUID(),
+			...generateTemplate(false, false, { comments: true }),
+		};
+
+		const importTestTemNoComments = {
+			_id: generateUUID(),
 			...generateTemplate(),
 		};
 
@@ -918,7 +923,7 @@ const testImportedTickets = () => {
 			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, false);
 		});
 
-		test('Should allow users to specify creation date', async () => {
+		test('Should allow users to specify creation date if it is a new ticket', async () => {
 			const date = Date.now();
 			const { properties, ...others } = importTestInput;
 			const res = await TicketSchema.validateTicket(teamspace, project, model, importTestTem,
@@ -935,6 +940,23 @@ const testImportedTickets = () => {
 			expect(res.properties[basePropertyLabels.CREATED_AT]).toEqual(new Date(date));
 		});
 
+		test('Should NOT allow users to specify creation date if it is an existing ticket', async () => {
+			const date = Date.now();
+			const { properties, ...others } = importTestInput;
+			const res = await TicketSchema.validateTicket(teamspace, project, model, importTestTem,
+				{ ...others,
+					properties: {
+						...properties,
+						[basePropertyLabels.CREATED_AT]: date,
+					},
+
+				}, importTestInput, true);
+			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
+			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, false);
+
+			expect(res.properties[basePropertyLabels.CREATED_AT]).not.toEqual(new Date(date));
+		});
+
 		const comments = times(5, () => ({
 			message: generateRandomString(),
 			originalAuthor: generateRandomString(),
@@ -943,6 +965,7 @@ const testImportedTickets = () => {
 		describe.each([
 			['and should not contain comments in the output if it was not provided to begin with', true, importTestInput],
 			['and should contain comments in the output', true, { ...importTestInput, comments }],
+			['if the template does not support comments', false, { ...generateTicket(importTestTemNoComments), comments }, importTestTemNoComments],
 			['if comments is not of the right type', false, { ...importTestInput, comments: true }],
 			['if comments array is empty', false, { ...importTestInput, comments: [] }],
 			['if comments contains items of the incorrect type', false, { ...importTestInput, comments: [...comments, undefined, 1, true] }],
@@ -962,28 +985,31 @@ const testImportedTickets = () => {
 					createdAt: Date.now() + 100000,
 				}] }],
 
-		])('Imported with comments', (desc, success, ticket) => {
-			test(`Should${success ? '' : ' not'} validate ${desc}`, async () => {
-				const test = TicketSchema.validateTicket(teamspace, project, model, importTestTem,
-					ticket, undefined, true);
-				if (success) {
-					const output = await test;
-					if (ticket.comments) {
-						expect(ticket.comments.length).toEqual(output.comments.length);
-						ticket.comments.forEach(({ others, createdAt }, i) => {
-							expect(output.comments[i]).toEqual(expect.objectContaining({ ...others,
-								createdAt: new Date(createdAt),
-							}));
-						});
+		])('Imported with comments', (desc, success, ticket, template = importTestTem) => {
+			times(2, (iLoop) => {
+				const isNewTicket = iLoop === 0;
+				test(`[${isNewTicket ? 'New Ticket' : 'Update Ticket'}] Should${success ? '' : ' not'} validate ${desc}`, async () => {
+					const test = TicketSchema.validateTicket(teamspace, project, model, template,
+						ticket, isNewTicket ? undefined : importTestInput, true);
+					if (success) {
+						const output = await test;
+						if (ticket.comments) {
+							expect(ticket.comments.length).toEqual(output.comments.length);
+							ticket.comments.forEach(({ others, createdAt }, i) => {
+								expect(output.comments[i]).toEqual(expect.objectContaining({ ...others,
+									createdAt: new Date(createdAt),
+								}));
+							});
+						} else {
+							expect(output.comments).toBeUndefined();
+						}
 					} else {
-						expect(output.comments).toBeUndefined();
+						expect(test).rejects.not.toBeUndefined();
 					}
-				} else {
-					expect(test).rejects.not.toBeUndefined();
-				}
 
-				expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
-				expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, true);
+					expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
+					expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(template, isNewTicket);
+				});
 			});
 		});
 	});
