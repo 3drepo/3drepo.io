@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 
 import * as Yup from 'yup';
@@ -26,6 +26,7 @@ import {
 	TeamspacesHooksSelectors,
 	ProjectsHooksSelectors,
 	DrawingRevisionsHooksSelectors,
+	DrawingsHooksSelectors,
 } from '@/v5/services/selectorsHooks';
 import { getSupportedDrawingRevisionsFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadFiles } from '@components/shared/uploadFiles/uploadFiles.component';
@@ -76,12 +77,15 @@ type IUploadDrawingRevisionForm = {
 };
 
 export const UploadDrawingRevisionForm = ({
+	presetDrawingId,
+	presetFile,
 	open,
 	onClickClose,
 }: IUploadDrawingRevisionForm): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const allUploadsComplete = DrawingRevisionsHooksSelectors.selectUploadIsComplete();
+	const presetDrawing = DrawingsHooksSelectors.selectDrawingById(presetDrawingId);
 
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 
@@ -149,6 +153,17 @@ export const UploadDrawingRevisionForm = ({
 		id: 'drawingRevision.uploads.dropzone.message',
 		defaultMessage: 'Supported file formats: PDF and DWG{br}Note: AutoCalibration is only possible with DWG formats.',
 	}, { br: <br /> });
+
+	useEffect(() => {
+		if (presetFile) {
+			addFilesToList([presetFile], presetDrawing);
+			DrawingRevisionsActionDispatchers.fetch(
+				teamspace,
+				project,
+				presetDrawing._id,
+			);
+		}
+	}, []);
 
 	return (
 		<FormProvider {...formData}>
