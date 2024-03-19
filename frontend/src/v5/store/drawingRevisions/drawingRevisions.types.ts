@@ -18,11 +18,11 @@
 export interface IDrawingRevision {
 	_id: string;
 	timestamp: Date;
-	tag: string;
 	author: string;
 	desc?: string;
-	void?: boolean;
 	format: string;
+	statusCode?: string;
+	revisionCode: string;
 }
 
 export interface IDrawingRevisionUploadStatus {
