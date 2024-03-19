@@ -524,7 +524,7 @@ function getOSMTile(req, res) {
 
 function getHereBaseInfo(req, res) {
 	const domain = hereBaseDomain;
-	let uri = `/v3/info?apiKey=${config.here.apiKey}`;
+	const uri = `/v3/info?apiKey=${config.here.apiKey}`;
 	httpsGet.get(domain, uri).then(info =>{
 		res.setHeader("Cache-Control", `private, max-age=${config.cachePolicy.maxAge}`);
 		res.write(info);
