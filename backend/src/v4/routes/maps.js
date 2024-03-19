@@ -495,21 +495,13 @@ function requestMapTile(req, res, domain, uri) {
 }
 
 function requestHereMapTile(req, res, domain, resource, style, features) {
-	const featureList = features ? features.split(",") : [];
-
 	let uri = `/v3/${resource}/mc/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}/png8?apiKey=${config.here.apiKey}`;
 
-	if (req.query.features) {
-		featureList.concat(req.query.features.split(","));
+	if (features) {
+		uri += `&features=${features}`;
 	}
 
-	if (featureList.length > 0) {
-		uri += `&features=${featureList.join()}`;
-	}
-
-	if (req.query.style) {
-		uri += `&style=${req.query.style}`;
-	} else if (style) {
+	if (style) {
 		uri += `&style=${style}`;
 	}
 
@@ -532,8 +524,7 @@ function getOSMTile(req, res) {
 
 function getHereBaseInfo(req, res) {
 	const domain = hereBaseDomain;
-	let uri = "/v3/info";
-	uri += `?apiKey=${config.here.apiKey}`;
+	let uri = `/v3/info?apiKey=${config.here.apiKey}`;
 	httpsGet.get(domain, uri).then(info =>{
 		res.setHeader("Cache-Control", `private, max-age=${config.cachePolicy.maxAge}`);
 		res.write(info);
