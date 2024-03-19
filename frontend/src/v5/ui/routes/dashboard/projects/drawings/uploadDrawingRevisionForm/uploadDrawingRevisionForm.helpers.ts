@@ -16,7 +16,7 @@
  */
 
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { uploadFile, getSupportedFileExtensions } from '@controls/fileUploader/uploadFile';
+import { uploadFile, getSupportedDrawingRevisionsFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadDrawingRevisionForm } from './uploadDrawingRevisionForm.component';
 
 export const extensionIsSpm = (extension: string) => extension === 'spm';
@@ -30,7 +30,6 @@ export const uploadToDrawing = async (presetDrawingId: string) => {
 			presetDrawingId,
 		});
 	};
-	// TODO - set correct file extensions
-	const file = await uploadFile(getSupportedFileExtensions());
+	const file = await uploadFile(getSupportedDrawingRevisionsFileExtensions());
 	onUpload(file);
 };
