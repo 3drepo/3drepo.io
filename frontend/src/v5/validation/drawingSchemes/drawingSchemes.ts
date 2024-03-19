@@ -18,6 +18,7 @@ import * as Yup from 'yup';
 import { alphaNumericHyphens, desc, name, revisionDesc, uploadFile } from '../containerAndFederationSchemes/validators';
 import { revisionName } from './validators';
 import { formatMessage } from '@/v5/services/intl';
+import { trimmedString } from '../shared/validators';
 
 const drawingNumber = Yup.string().matches(alphaNumericHyphens,
 	formatMessage({
@@ -47,11 +48,39 @@ export const DrawingFormSchema =  Yup.object().shape({
 	desc,
 });
 
+const isSameCode = (codeA, codeB) => codeA?.toLocaleLowerCase() === codeB?.toLocaleLowerCase();
 export const ListItemSchema = Yup.object().shape({
 	file: uploadFile,
 	revisionName,
-	statusCode: Yup.string(),
-	revisionCode: Yup.string(),
+	statusCode: trimmedString.matches(alphaNumericHyphens,
+		formatMessage({
+			id: 'validation.drawing.statusCode',
+			defaultMessage: 'Status Code can only consist of letters, numbers, hyphens or underscores',
+		})),
+	revisionCode: trimmedString.matches(alphaNumericHyphens,
+		formatMessage({
+			id: 'validation.drawing.statusCode',
+			defaultMessage: 'Status Code can only consist of letters, numbers, hyphens or underscores',
+		}),
+	).required(
+		formatMessage({
+			id: 'validation.revisionCode.required',
+			defaultMessage: 'Revision Code is a required field',
+		}),
+	).test(
+		'statusCodeAndRevisionCodeAreUnique',
+		formatMessage({
+			id: 'validation.statusCodeAndRevisionCodeUnique.error',
+			defaultMessage: 'Combination Status Code and Revision Code must be unique',
+		}),
+		(revisionCode, testContext) => {
+			if (!testContext.options?.context || !testContext.parent?.drawingNumber) return true;
+			const revisionsByDrawingId = testContext.options.context.revisionsByDrawingId;
+			const revisions = revisionsByDrawingId[testContext.parent.drawingId] || [];
+
+			return !revisions.some((rev) => isSameCode(rev.statusCode, testContext.parent.statusCode) && isSameCode(rev.revisionCode, revisionCode));
+		},
+	),
 	revisionDesc,
 });
 

@@ -36,6 +36,8 @@ import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionsActionDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadList } from './uploadList/uploadList.component';
 import { parseFilename, reduceFileData } from '@components/shared/uploadFiles/uploadFiles.helpers';
+import { selectRevisions } from '@/v5/store/drawingRevisions/drawingRevisions.selectors';
+import { getState } from '@/v4/modules/store';
 
 type UploadModalLabelTypes = {
 	isUploading: boolean;
@@ -86,13 +88,23 @@ export const UploadDrawingRevisionForm = ({
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const allUploadsComplete = DrawingRevisionsHooksSelectors.selectUploadIsComplete();
 	const presetDrawing = DrawingsHooksSelectors.selectDrawingById(presetDrawingId);
+	const drawings = DrawingsHooksSelectors.selectDrawings();
+	const revisionsByDrawingId = drawings.reduce((acc, drawing) => ({
+		...acc,
+		[drawing._id]: selectRevisions(getState(), drawing._id),
+	}), {});
 
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 
 	const formData = useForm<{ uploads: any[] }>({
 		mode: 'onChange',
 		resolver: !isUploading ? yupResolver(UploadsSchema) : undefined,
-		context: { alreadyExistingNames: [], teamspace, project },
+		context: {
+			alreadyExistingNames: [],
+			revisionsByDrawingId,
+			teamspace,
+			project,
+		},
 	});
 
 	const {
@@ -165,6 +177,7 @@ export const UploadDrawingRevisionForm = ({
 			);
 		}
 		DrawingsActionsDispatchers.fetchCategories(teamspace, project);
+		drawings.forEach((drawing) => DrawingRevisionsActionDispatchers.fetch(teamspace, project, drawing._id));
 	}, []);
 
 	return (
