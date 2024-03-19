@@ -20,6 +20,7 @@ import { DrawingStats, DrawingUploadStatus, IDrawing, MinimumDrawing } from './d
 
 export const DRAWINGS_SEARCH_FIELDS = ['code', 'type', 'name', 'desc', 'latestRevision'];
 
+// TODO - fix (if necessary) when backend is available
 export const canUploadToBackend = (status?: DrawingUploadStatus): boolean => {
 	const statusesForUpload = [
 		DrawingUploadStatus.OK,

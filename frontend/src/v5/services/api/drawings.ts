@@ -18,7 +18,7 @@
 
 import { delay } from '@/v4/helpers/async';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
-import { IDrawing, DrawingStats } from '@/v5/store/drawings/drawings.types';
+import { IDrawing, DrawingStats, DrawingUploadStatus } from '@/v5/store/drawings/drawings.types';
 import uuid from 'uuidv4';
 
 const categories =  ['A drawing category', 'Another drawing category', 'Yet another one'];
@@ -30,7 +30,7 @@ const drawings: IDrawing[] = [ // TODO: The schema is unfinished
 		drawingNumber: uuid(),
 		category: categories[0],
 		role: Role.COLLABORATOR,
-		status: null,
+		status: DrawingUploadStatus.OK,
 		revisionsCount: 0,
 		latestRevision: null,
 		lastUpdated: null,
@@ -43,7 +43,7 @@ const drawings: IDrawing[] = [ // TODO: The schema is unfinished
 		drawingNumber: uuid(),
 		category: categories[1],
 		role: Role.COLLABORATOR,
-		status: null,
+		status: DrawingUploadStatus.OK,
 		revisionsCount: 0,
 		latestRevision: null,
 		lastUpdated: null,
