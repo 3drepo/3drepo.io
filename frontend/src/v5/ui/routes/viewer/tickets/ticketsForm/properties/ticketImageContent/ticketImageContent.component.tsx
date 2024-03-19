@@ -23,6 +23,7 @@ import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplaye
 
 type TicketImageContentProps = Omit<FormInputProps, 'onBlur'> & {
 	children: any,
+	onImageClick?: () => void,
 };
 
 export const TicketImageContent = ({
@@ -30,6 +31,7 @@ export const TicketImageContent = ({
 	value,
 	disabled,
 	onChange,
+	onImageClick,
 }: TicketImageContentProps) => {
 	const uploadImage = async () => {
 		const file = await uploadFile(getSupportedImageExtensions());
@@ -44,6 +46,7 @@ export const TicketImageContent = ({
 				imgSrc={value}
 				disabled={disabled || !isProjectAdmin}
 				onEmptyImageClick={uploadImage}
+				onImageClick={onImageClick}
 			/>
 			<Actions>
 				{children}

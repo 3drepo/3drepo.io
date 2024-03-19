@@ -30,8 +30,9 @@ type EditCommentProps = Pick<ITicketComment, 'author' | 'message' | 'images'> & 
 	onEditMessage: (newMessage) => void;
 	onDeleteImage: (index) => void;
 	onUploadImages: () => void;
+	onEditImage?: (img, index) => void;
 };
-export const EditComment = ({ message, images, author, metadata, onClose, onEditMessage, onDeleteImage, onUploadImages }: EditCommentProps) => {
+export const EditComment = ({ message, images, author, metadata, onClose, onEditMessage, onDeleteImage, onUploadImages, onEditImage }: EditCommentProps) => {
 	const { control, watch } = useForm<{ editedMessage }>({
 		defaultValues: { editedMessage: desanitiseMessage(message) },
 	});
@@ -58,6 +59,7 @@ export const EditComment = ({ message, images, author, metadata, onClose, onEdit
 					isCurrentUserComment={false}
 					onUploadImages={onUploadImages}
 					onDeleteImage={onDeleteImage}
+					onEditImage={onEditImage}
 					hasMessage={!!message}
 				/>
 				<EditCommentInput

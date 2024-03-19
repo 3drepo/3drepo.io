@@ -19,8 +19,6 @@ import { FlexContainer, CommentImage, MultiImagesContainer, SingleImage } from '
 
 type CommentImagesProps = {
 	images: string[];
-	onUpload?: (images: string[]) => void;
-	onDelete?: (index) => void;
 	onImageClick: (index) => void;
 };
 export const CommentImages = ({ images, onImageClick, ...props }: CommentImagesProps) => {
