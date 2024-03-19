@@ -68,7 +68,6 @@ interface IUploadListItemDestination {
 export const UploadListItemDestination = memo(({
 	value,
 	revisionPrefix,
-	className,
 	index,
 	...props
 }: IUploadListItemDestination): JSX.Element => {
@@ -155,11 +154,20 @@ export const UploadListItemDestination = memo(({
 				return (<NewDestinationInUse message={message} {...optionProps} />);
 			}
 
+			console.log(
+				'ExistingDestination',
+				takenDrawingNames.map((n) => n.toLowerCase()),
+				option.name.toLocaleLowerCase());
+			console.table({ drawingsNamesInModal, processingDrawingsNames });
 			return (
 				<ExistingDestination
 					key={option.name}
 					drawing={option}
 					inUse={(nameIsTaken(option))}
+					name={option.name}
+					latestRevision={option.latestRevision}
+					hasRevisions={!!option.revisionsCount}
+					status={option.status}
 					{...optionProps}
 				/>
 			);
@@ -197,7 +205,6 @@ export const UploadListItemDestination = memo(({
 		<DestinationAutocomplete
 			{...props}
 			defaultValue={selectedDrawing}
-			className={className}
 			filterOptions={getFilterOptions}
 			getOptionDisabled={nameIsTaken}
 			getOptionLabel={(option: IDrawing) => option.name || ''}

@@ -61,7 +61,6 @@ interface IUploadListItemDestination {
 export const UploadListItemDestination = memo(({
 	value,
 	revisionPrefix,
-	className,
 	index,
 	...props
 }: IUploadListItemDestination): JSX.Element => {
@@ -147,7 +146,7 @@ export const UploadListItemDestination = memo(({
 			if (option._id === NEW_ID) {
 				const message = formatMessage({
 					id: 'uploads.destination.newContainer',
-					defaultMessage: '=" <Bold>{name}</Bold> is a new container',
+					defaultMessage: '<Bold>{name}</Bold> is a new container',
 				}, {
 					Bold: (val: string) => <b>{val}</b>,
 					name: option.name,
@@ -160,6 +159,10 @@ export const UploadListItemDestination = memo(({
 					key={option.name}
 					container={option}
 					inUse={(nameIsTaken(option))}
+					name={option.name}
+					latestRevision={option.latestRevision}
+					hasRevisions={!!option.revisionsCount}
+					status={option.status}
 					{...optionProps}
 				/>
 			);
@@ -197,7 +200,6 @@ export const UploadListItemDestination = memo(({
 		<DestinationAutocomplete
 			{...props}
 			defaultValue={selectedContainer}
-			className={className}
 			filterOptions={getFilterOptions}
 			getOptionDisabled={nameIsTaken}
 			getOptionLabel={(option: IContainer) => option.name || ''}
