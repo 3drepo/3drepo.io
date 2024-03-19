@@ -31,7 +31,7 @@ export const ExistingDestination = ({ name, latestRevision, hasRevisions, status
 		<Name>{name}</Name>
 		<LatestRevision hasRevisions={hasRevisions} name={latestRevision} status={status} />
 		<InUseText hidden={!inUse}>
-			<FormattedMessage id="uploads.destination.containerInUse" defaultMessage="Already in use in another file upload" />
+			<FormattedMessage id="uploads.destination.destinationInUse" defaultMessage="Already in use in another file upload" />
 		</InUseText>
 	</ExistingDestinationOption>
 );
