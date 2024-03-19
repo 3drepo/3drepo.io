@@ -18,7 +18,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { Role } from '../currentUser/currentUser.types';
 import { SurveyPoint, View } from '../store.types';
 
-export enum UploadStatuses {
+export enum UploadStatus {
 	OK = 'ok',
 	FAILED = 'failed',
 	UPLOADING = 'uploading',
@@ -111,7 +111,7 @@ export interface IContainer {
 	lastUpdated: Date;
 	type: string;
 	code: string;
-	status: UploadStatuses;
+	status: UploadStatus;
 	isFavourite: boolean;
 	role: Role;
 	hasStatsPending: boolean;
@@ -154,7 +154,7 @@ export type ContainerStats = {
 		message: string;
 		timestamp: number;
 	};
-	status: UploadStatuses;
+	status: UploadStatus;
 	unit: string;
 	code: string;
 };
@@ -164,7 +164,7 @@ export type ContainerBackendSettings = {
 	desc?: string;
 	name?: string;
 	surveyPoints?: SurveyPoint[];
-	status?: UploadStatuses;
+	status?: UploadStatus;
 	timestamp?: number;
 	type?: string;
 	angleFromNorth?: number;

@@ -25,7 +25,7 @@ import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTa
 import { UploadListItemButton } from './uploadListItem.styles';
 import { useFormContext } from 'react-hook-form';
 import { useEffect } from 'react';
-import { IContainer, UploadStatuses } from '@/v5/store/containers/containers.types';
+import { IContainer, UploadStatus } from '@/v5/store/containers/containers.types';
 import { UploadItemFields } from '@/v5/store/containerRevisions/containerRevisions.types';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadListItemFileIcon } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemFileIcon/uploadListItemFileIcon.component';
@@ -36,17 +36,17 @@ import { formatMessage } from '@/v5/services/intl';
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
 	[UNEXPETED_STATUS_ERROR]: formatMessage({ id: 'uploads.progress.status.unexpectedError', defaultMessage: 'Unexpected error' }),
-	[UploadStatuses.FAILED]: formatMessage({ id: 'uploads.progress.status.failed', defaultMessage: 'Upload failed' }),
-	[UploadStatuses.UPLOADED]: formatMessage({ id: 'uploads.progress.status.uploaded', defaultMessage: 'Upload complete' }),
-	[UploadStatuses.UPLOADING]: formatMessage({ id: 'uploads.progress.status.uploading', defaultMessage: 'Uploading' }),
-	[UploadStatuses.QUEUED]: formatMessage({ id: 'uploads.progress.status.queued', defaultMessage: 'Waiting to upload' }),
+	[UploadStatus.FAILED]: formatMessage({ id: 'uploads.progress.status.failed', defaultMessage: 'Upload failed' }),
+	[UploadStatus.UPLOADED]: formatMessage({ id: 'uploads.progress.status.uploaded', defaultMessage: 'Upload complete' }),
+	[UploadStatus.UPLOADING]: formatMessage({ id: 'uploads.progress.status.uploading', defaultMessage: 'Uploading' }),
+	[UploadStatus.QUEUED]: formatMessage({ id: 'uploads.progress.status.queued', defaultMessage: 'Waiting to upload' }),
 };
 
 const getUploadStatus = (progress, errorMessage) => {
-	if (errorMessage) return UploadStatuses.FAILED;
-	if (progress === 100) return UploadStatuses.UPLOADED;
-	if (progress < 100 && progress > 0) return UploadStatuses.UPLOADING;
-	if (progress === 0) return UploadStatuses.QUEUED;
+	if (errorMessage) return UploadStatus.FAILED;
+	if (progress === 100) return UploadStatus.UPLOADED;
+	if (progress < 100 && progress > 0) return UploadStatus.UPLOADING;
+	if (progress === 0) return UploadStatus.QUEUED;
 	return UNEXPETED_STATUS_ERROR;
 };
 
@@ -138,7 +138,7 @@ export const UploadListItem = ({
 						uploadId={uploadId}
 						errorMessage={uploadErrorMessage}
 						uploadStatus={uploadStatus}
-						uploadCompleted={uploadStatus === UploadStatuses.UPLOADED}
+						uploadCompleted={uploadStatus === UploadStatus.UPLOADED}
 						statusText={STATUS_TEXT_BY_UPLOAD[uploadStatus]}
 						progress={progress}
 					/>
