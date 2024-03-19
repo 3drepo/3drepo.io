@@ -53,27 +53,6 @@ const hereTrafficDomain = "traffic.maps.hereapi.com";
  */
 
 /**
- * @apiDefine HereOptions
- *
- * @apiParam (Query) {String} [features] v3 map features
- * @apiParam (Query) {String} [lang] BCP47 language code (https://www.rfc-editor.org/rfc/bcp/bcp47.txt) for labels
- * @apiParam (Query) {String} [lang2] Secondary language code for labels
- * @apiParam (Query) {String} [minTrafficCongestion] Only displays traffic from a specified congestion level: free, heavy, queuing, blocked
- * @apiParam (Query) {String} [mv] Specifies the map version to be used
- * @apiParam (Query) {Number} [ppi] Tile resolution in pixels per inch (100, 200, 400)
- * @apiParam (Query) {String} [pview] Render map boundaries based on internal or local views
- * @apiParam (Query) {String} [size] Image size in pixels: 256, 512
- * @apiParam (Query) {String} [style] Select style used to render map tile
- */
-
-/**
- * @apiDefine HereTrafficOptions
- *
- * @apiParam (Query) {String} [minTrafficCongestion] Specifies the minimum traffic
- * congestion level to use for rendering traffic flow (free, heavy, queuing, blocked)
- */
-
-/**
  * @api {get} /:teamspace/:model/maps List maps
  * @apiName listMaps
  * @apiGroup Maps
@@ -198,7 +177,6 @@ router.get("/:model/maps/hereinfo/", middlewares.isHereEnabled, getHereBaseInfo)
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/here/17/65485/43574.png HTTP/1.1
@@ -213,7 +191,6 @@ router.get("/:model/maps/here/:zoomLevel/:gridx/:gridy.png", middlewares.isHereE
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/hereaerial/17/65485/43574.png HTTP/1.1
@@ -228,8 +205,6 @@ router.get("/:model/maps/hereaerial/:zoomLevel/:gridx/:gridy.png", middlewares.i
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
- * @apiUse HereTrafficOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/heretraffic/17/65485/43574.png HTTP/1.1
@@ -244,8 +219,6 @@ router.get("/:model/maps/heretraffic/:zoomLevel/:gridx/:gridy.png", middlewares.
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
- * @apiUse HereTrafficOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/heretrafficflow/17/65485/43574.png HTTP/1.1
@@ -260,7 +233,6 @@ router.get("/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png", middlewa
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/hereterrain/17/65485/43574.png HTTP/1.1
@@ -275,7 +247,6 @@ router.get("/:model/maps/hereterrain/:zoomLevel/:gridx/:gridy.png", middlewares.
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/herehybrid/17/65485/43574.png HTTP/1.1
@@ -290,7 +261,6 @@ router.get("/:model/maps/herehybrid/:zoomLevel/:gridx/:gridy.png", middlewares.i
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/heregrey/17/65485/43574.png HTTP/1.1
@@ -305,7 +275,6 @@ router.get("/:model/maps/heregrey/:zoomLevel/:gridx/:gridy.png", middlewares.isH
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/heretruck/17/65485/43574.png HTTP/1.1
@@ -320,7 +289,6 @@ router.get("/:model/maps/heretruck/:zoomLevel/:gridx/:gridy.png", middlewares.is
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/heretruckoverlay/17/65485/43574.png HTTP/1.1
@@ -335,7 +303,6 @@ router.get("/:model/maps/heretruckoverlay/:zoomLevel/:gridx/:gridy.png", middlew
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/herelabeloverlay/17/65485/43574.png HTTP/1.1
@@ -350,7 +317,6 @@ router.get("/:model/maps/herelabeloverlay/:zoomLevel/:gridx/:gridy.png", middlew
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/heretollzone/17/65485/43574.png HTTP/1.1
@@ -365,7 +331,6 @@ router.get("/:model/maps/heretollzone/:zoomLevel/:gridx/:gridy.png", middlewares
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/herepoi/17/65485/43574.png HTTP/1.1
