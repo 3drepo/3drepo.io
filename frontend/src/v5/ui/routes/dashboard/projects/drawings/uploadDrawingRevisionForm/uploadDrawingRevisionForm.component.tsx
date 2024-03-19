@@ -33,7 +33,7 @@ import { UploadFiles } from '@components/shared/uploadFiles/uploadFiles.componen
 import { UploadFilesContextComponent } from '@components/shared/uploadFiles/uploadFilesContext';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { DrawingRevisionsActionDispatchers } from '@/v5/services/actionsDispatchers';
+import { DrawingRevisionsActionDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadList } from './uploadList/uploadList.component';
 import { parseFilename, reduceFileData } from '@components/shared/uploadFiles/uploadFiles.helpers';
 
@@ -127,6 +127,7 @@ export const UploadDrawingRevisionForm = ({
 				drawingName: drawing?.name || '',
 				drawingNumber: drawing?.drawingNumber || '',
 				drwaingDesc: drawing?.desc || '',
+				drwaingCategory: drawing?.category || '',
 			});
 		}
 		append(filesToAppend);
@@ -163,6 +164,7 @@ export const UploadDrawingRevisionForm = ({
 				presetDrawing._id,
 			);
 		}
+		DrawingsActionsDispatchers.fetchCategories(teamspace, project);
 	}, []);
 
 	return (

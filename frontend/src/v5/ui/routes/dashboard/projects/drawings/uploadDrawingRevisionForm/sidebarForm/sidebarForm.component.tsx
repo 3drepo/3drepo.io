@@ -56,9 +56,9 @@ export const SidebarForm = () => {
 					required
 				/>
 				<FormSelect
-					name={`${revisionPrefix}.category`}
+					name={`${revisionPrefix}.drawingCategory`}
 					label={formatMessage({ id: 'uploads.sidebar.drawing.category', defaultMessage: 'Category' })}
-					formError={getError('category')}
+					formError={getError('drawingCategory')}
 					disabled={disableDrawingFields}
 					required
 				>
@@ -71,7 +71,6 @@ export const SidebarForm = () => {
 					label={formatMessage({ id: 'uploads.sidebar.drawing.description', defaultMessage: 'Description' })}
 					formError={getError('drawingDesc')}
 					disabled={disableDrawingFields}
-					required
 				/>
 			</FlexContainer>
 			<Heading>
