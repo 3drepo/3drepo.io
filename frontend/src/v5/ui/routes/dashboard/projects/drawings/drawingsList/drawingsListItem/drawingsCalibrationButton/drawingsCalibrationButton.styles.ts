@@ -57,4 +57,8 @@ export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{
 				return emptyStyles;
 		}
 	}}}
+	/* Need to set visibility to visible to fix weird bug where icons in bottom list disappear when top list is collapsed */
+	svg {
+		visibility: visible;
+	}
 `;
