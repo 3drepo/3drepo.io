@@ -36,6 +36,7 @@ const DestinationAndNameDimensions = css`
 
 export const UploadListItemRowWrapper = styled(DashboardListItem)<{ selected: boolean; order: number }>`
 	${({ order }) => css`order: ${order}`};
+
 	${ItemRowContainer} {
 		padding: 8px 15px 8px 5px;
 		height: auto;
@@ -47,6 +48,9 @@ export const UploadListItemRowWrapper = styled(DashboardListItem)<{ selected: bo
 		}
 
 		${RevisionCodeField} {
+			&:not(:last-of-type) {
+				margin-right: 0;
+			}
 			${DestinationAndNameDimensions}
 			${({ selected, theme }) => selected && css`
 				>.MuiOutlinedInput-root:not(.Mui-error) {
