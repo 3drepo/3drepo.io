@@ -30,6 +30,7 @@ export const uploadToDrawing = async (presetDrawingId: string) => {
 			presetDrawingId,
 		});
 	};
+	// TODO - set correct file extensions
 	const file = await uploadFile(getSupportedFileExtensions());
 	onUpload(file);
 };

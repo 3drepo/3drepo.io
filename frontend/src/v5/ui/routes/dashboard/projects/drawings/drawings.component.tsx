@@ -26,6 +26,7 @@ import { FormattedMessage } from 'react-intl';
 import { CreateDrawingDialog } from './drawingDialogs/createDrawingDialog.component';
 import { EditDrawingDialog } from './drawingDialogs/editDrawingDialog.component';
 import { UploadDrawingRevisionForm } from './uploadDrawingRevisionForm/uploadDrawingRevisionForm.component';
+import { uploadToDrawing } from './uploadDrawingRevisionForm/uploadDrawingRevisionForm.helpers';
 
 export const Drawings = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
@@ -40,7 +41,7 @@ export const Drawings = () => {
 
 	const onClickCreate = () => DialogsActionsDispatchers.open(CreateDrawingDialog);
 	const onClickEdit = (drawing) => DialogsActionsDispatchers.open(EditDrawingDialog, { drawing });
-	const onClickUploadRevision = (drawing?) => DialogsActionsDispatchers.open(UploadDrawingRevisionForm, { drawing });
+	const onClickUploadRevision = () => DialogsActionsDispatchers.open(UploadDrawingRevisionForm);
 
 	return (<div>
 		<h1>Drawings list</h1>
@@ -58,7 +59,11 @@ export const Drawings = () => {
 						<FormattedMessage id="drawings.newDrawing" defaultMessage="New drawing" />
 					</Button>
 					<ul>
-						{drawings.map((drawing) => (<li>{drawing.name} <button onClick={() => onClickEdit(drawing)}>Edit</button></li>))} 
+						{drawings.map((drawing) => (<li>
+							{drawing.name}
+							<button onClick={() => onClickEdit(drawing)}>Edit</button>
+							<button onClick={() => uploadToDrawing(drawing._id)}>Upload Revision</button>
+						</li>))} 
 					</ul>
 				</>
 
