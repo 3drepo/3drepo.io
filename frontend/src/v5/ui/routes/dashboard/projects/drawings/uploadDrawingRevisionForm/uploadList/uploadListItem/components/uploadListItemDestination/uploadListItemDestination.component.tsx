@@ -154,11 +154,6 @@ export const UploadListItemDestination = memo(({
 				return (<NewDestinationInUse message={message} {...optionProps} />);
 			}
 
-			console.log(
-				'ExistingDestination',
-				takenDrawingNames.map((n) => n.toLowerCase()),
-				option.name.toLocaleLowerCase());
-			console.table({ drawingsNamesInModal, processingDrawingsNames });
 			return (
 				<ExistingDestination
 					key={option.name}
