@@ -15,16 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString, stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
 const { deserialiseUUIDsInTicket, processReadOnlyValues, validateTicket: validateTicketSchema } = require('../../../../../../../schemas/tickets');
+const { getTicketById, getTicketsByQuery } = require('../../../../../../../models/tickets');
 const { checkTicketTemplateExists } = require('../../../settings');
+const { getArrayDifference } = require('../../../../../../../utils/helper/arrays');
 const { getTemplateById } = require('../../../../../../../models/tickets.templates');
-const { getTicketById } = require('../../../../../../../models/tickets');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isArray } = require('../../../../../../../utils/helper/typeCheck');
 const { isEqual } = require('../../../../../../../utils/helper/objects');
 const { respond } = require('../../../../../../../utils/responder');
-const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { validateMany } = require('../../../../../../common');
 
 const TicketsMiddleware = {};
@@ -81,10 +82,11 @@ const validateTicketImportData = (isNew) => async (req, res, next) => {
 			throw createResponseCode(templates.invalidArguments, 'Template has been deprecated');
 		}
 
-		req.body.tickets = await Promise.all(req.body.tickets.map(async (ticket, i) => {
+		req.body.tickets = await Promise.all(req.body.tickets.map(async (ticket) => {
+			const existingData = isNew ? undefined : req.ticketsData[ticket._id];
 			const validatedTicket = await processTicket(teamspace,
-				project, model, template, user, ticket, isNew ? undefined : req.ticketData[i], true);
-			validatedTicket.type = template._id;
+				project, model, template, user, ticket, existingData, true);
+			if (isNew) validatedTicket.type = template._id;
 			return validatedTicket;
 		}));
 
@@ -123,12 +125,53 @@ TicketsMiddleware.checkTicketExists = async (req, res, next) => {
 	}
 };
 
+const checkAllTicketsExist = async (req, res, next) => {
+	const { teamspace, project, model, template } = req.params;
+	const { tickets } = req.body;
+
+	try {
+		if (!isArray(tickets) || !tickets.length) throw createResponseCode(templates.invalidArguments, 'Payload should contain an array of tickets to update');
+
+		req.templateData = await getTemplateById(teamspace, template);
+
+		const ticketIds = tickets.map(({ _id }) => {
+			if (_id) return stringToUUID(_id);
+			throw createResponseCode(templates.invalidArguments, '_id field must be provided for all tickets');
+		});
+
+		const ticketsData = await getTicketsByQuery(teamspace, project, model,
+			{ _id: { $in: ticketIds }, type: template });
+
+		const idToData = {};
+
+		ticketsData.forEach(({ _id, ...data }) => {
+			const idStr = UUIDToString(_id);
+			idToData[idStr] = data;
+		});
+
+		const idsNotFound = getArrayDifference(Object.keys(idToData), tickets.map(({ _id }) => _id));
+
+		if (idsNotFound.length) {
+			throw createResponseCode(templates.invalidArguments, `The following IDs were not found: ${idsNotFound.join(',')}`);
+		}
+
+		req.ticketsData = idToData;
+
+		await next();
+	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
 TicketsMiddleware.validateImportTickets = validateMany([templateIDToParams(true), checkTicketTemplateExists,
 	validateTicketImportData(true)]);
 
 TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams(false), checkTicketTemplateExists,
 	validateTicket(true)]);
 TicketsMiddleware.validateUpdateTicket = validateMany([TicketsMiddleware.checkTicketExists, validateTicket(false)]);
+TicketsMiddleware.validateUpdateMultipleTickets = validateMany([
+	templateIDToParams(true), checkTicketTemplateExists,
+	checkAllTicketsExist, validateTicketImportData(false)]);
 
 TicketsMiddleware.templateExists = checkTicketTemplateExists;
 
