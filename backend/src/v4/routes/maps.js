@@ -25,9 +25,8 @@ const httpsGet = require("../libs/httpsReq");
 const config = require("../config");
 const User = require("../models/user");
 
-const hereBaseDomain = ".base.maps.ls.hereapi.com";
-const hereAerialDomain = ".aerial.maps.ls.hereapi.com";
-const hereTrafficDomain = ".traffic.maps.ls.hereapi.com";
+const hereBaseDomain = "maps.hereapi.com";
+const hereTrafficDomain = "traffic.maps.hereapi.com";
 
 /**
  * @apiDefine Maps Maps
@@ -51,27 +50,6 @@ const hereTrafficDomain = ".traffic.maps.ls.hereapi.com";
  * @apiSuccessExample {png} Success-Response
  * HTTP/1.1 200 OK
  * <binary image>
- */
-
-/**
- * @apiDefine HereOptions
- *
- * @apiParam (Query) {Boolean} [congestion] Flag that enables congestion and environmental
- * zone display
- * @apiParam (Query) {String} [lg] MARC three-letter language code for labels
- * @apiParam (Query) {String} [lg2] Secondary MARC three-letter language code for labels
- * @apiParam (Query) {String} [pois] Mask for Here Maps POIs categories
- * @apiParam (Query) {Number} [ppi] Tile resolution in pixels per inch (72, 250, 320, 500)
- * @apiParam (Query) {String} [pview] Render map boundaries based on internal or local views
- * @apiParam (Query) {String} [style] Select style used to render map tile
- */
-
-/**
- * @apiDefine HereTrafficOptions
- *
- * @apiParam (Query) {String} [min_traffic_congestion] Specifies the minimum traffic
- * congestion level to use for rendering traffic flow (free, heavy, queuing, blocked)
- * @apiParam (Query) {DateTime} [time] Date and time for showing historical traffic patterns
  */
 
 /**
@@ -199,7 +177,6 @@ router.get("/:model/maps/hereinfo/", middlewares.isHereEnabled, getHereBaseInfo)
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/here/17/65485/43574.png HTTP/1.1
@@ -214,7 +191,6 @@ router.get("/:model/maps/here/:zoomLevel/:gridx/:gridy.png", middlewares.isHereE
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/hereaerial/17/65485/43574.png HTTP/1.1
@@ -229,8 +205,6 @@ router.get("/:model/maps/hereaerial/:zoomLevel/:gridx/:gridy.png", middlewares.i
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
- * @apiUse HereTrafficOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/heretraffic/17/65485/43574.png HTTP/1.1
@@ -245,8 +219,6 @@ router.get("/:model/maps/heretraffic/:zoomLevel/:gridx/:gridy.png", middlewares.
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
- * @apiUse HereTrafficOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/heretrafficflow/17/65485/43574.png HTTP/1.1
@@ -261,7 +233,6 @@ router.get("/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png", middlewa
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/hereterrain/17/65485/43574.png HTTP/1.1
@@ -276,7 +247,6 @@ router.get("/:model/maps/hereterrain/:zoomLevel/:gridx/:gridy.png", middlewares.
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/herehybrid/17/65485/43574.png HTTP/1.1
@@ -291,27 +261,11 @@ router.get("/:model/maps/herehybrid/:zoomLevel/:gridx/:gridy.png", middlewares.i
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/heregrey/17/65485/43574.png HTTP/1.1
  */
 router.get("/:model/maps/heregrey/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereGreyTile);
-
-/**
- * @api {get} /:teamspace/:model/maps/heregreytransit/:zoomLevel/:gridx/:gridy.png?[query] Here transit (grey) tile
- * @apiName getHereGreyTransitTile
- * @apiGroup Maps
- * @apiDescription Retrieve a Here Maps grey transit map tile image.
- *
- * @apiUse Maps
- * @apiUse MapTile
- * @apiUse HereOptions
- *
- * @apiExample {get} Example usage:
- * GET /acme/00000000-0000-0000-0000-000000000000/maps/heregreytransit/17/65485/43574.png HTTP/1.1
- */
-router.get("/:model/maps/heregreytransit/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereGreyTransitTile);
 
 /**
  * @api {get} /:teamspace/:model/maps/heretruck/:zoomLevel/:gridx/:gridy.png?[query] Here truck restrictions tile
@@ -321,7 +275,6 @@ router.get("/:model/maps/heregreytransit/:zoomLevel/:gridx/:gridy.png", middlewa
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/heretruck/17/65485/43574.png HTTP/1.1
@@ -336,27 +289,11 @@ router.get("/:model/maps/heretruck/:zoomLevel/:gridx/:gridy.png", middlewares.is
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/heretruckoverlay/17/65485/43574.png HTTP/1.1
  */
 router.get("/:model/maps/heretruckoverlay/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereTruckRestrictionsOverlayTile);
-
-/**
- * @api {get} /:teamspace/:model/maps/hereadminlabeloverlay/:zoomLevel/:gridx/:gridy.png?[query] Here admin layer
- * @apiName getHereAdminOverlayTile
- * @apiGroup Maps
- * @apiDescription Retrieve a Here Maps administrative labels overlay tile image.
- *
- * @apiUse Maps
- * @apiUse MapTile
- * @apiUse HereOptions
- *
- * @apiExample {get} Example usage:
- * GET /acme/00000000-0000-0000-0000-000000000000/maps/hereadminlabeloverlay/17/65485/43574.png HTTP/1.1
- */
-router.get("/:model/maps/hereadminlabeloverlay/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereAdminLabelOverlayTile);
 
 /**
  * @api {get} /:teamspace/:model/maps/herelabeloverlay/:zoomLevel/:gridx/:gridy.png?[query] Here label layer
@@ -366,28 +303,11 @@ router.get("/:model/maps/hereadminlabeloverlay/:zoomLevel/:gridx/:gridy.png", mi
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/herelabeloverlay/17/65485/43574.png HTTP/1.1
  */
 router.get("/:model/maps/herelabeloverlay/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereLabelOverlayTile);
-
-/**
- * @api {get} /:teamspace/:model/maps/herelinelabeloverlay/:zoomLevel/:gridx/:gridy.png?[query] Here line & label layer
- * @apiName getHereLineLabelOverlayTile
- * @apiGroup Maps
- * @apiDescription Retrieve a Here Maps line and label overlay tile image of street lines, city centre labels,
- * and item labels.
- *
- * @apiUse Maps
- * @apiUse MapTile
- * @apiUse HereOptions
- *
- * @apiExample {get} Example usage:
- * GET /acme/00000000-0000-0000-0000-000000000000/maps/herelinelabeloverlay/17/65485/43574.png HTTP/1.1
- */
-router.get("/:model/maps/herelinelabeloverlay/:zoomLevel/:gridx/:gridy.png", middlewares.isHereEnabled, getHereLineLabelOverlayTile);
 
 /**
  * @api {get} /:teamspace/:model/maps/heretollzone/:zoomLevel/:gridx/:gridy.png?[query] Here toll zone tile
@@ -397,7 +317,6 @@ router.get("/:model/maps/herelinelabeloverlay/:zoomLevel/:gridx/:gridy.png", mid
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/heretollzone/17/65485/43574.png HTTP/1.1
@@ -412,7 +331,6 @@ router.get("/:model/maps/heretollzone/:zoomLevel/:gridx/:gridy.png", middlewares
  *
  * @apiUse Maps
  * @apiUse MapTile
- * @apiUse HereOptions
  *
  * @apiExample {get} Example usage:
  * GET /acme/00000000-0000-0000-0000-000000000000/maps/herepoi/17/65485/43574.png HTTP/1.1
@@ -504,11 +422,6 @@ function listMaps(req, res) {
 					{ name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" },
 					{ name: "Truck Restrictions", source: "HERE_TRUCK_OVERLAY" }
 				] },
-				{ name: "Here (Transit)", layers: [
-					{ name: "Map Tiles", source: "HERE_TRANSIT" },
-					{ name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" },
-					{ name: "Truck Restrictions", source: "HERE_TRUCK_OVERLAY" }
-				] },
 				{ name: "Here (Toll Zone)", layers: [
 					{ name: "Map Tiles", source: "HERE_TOLL_ZONE" },
 					{ name: "Traffic Flow", source: "HERE_TRAFFIC_FLOW" },
@@ -546,39 +459,18 @@ function requestMapTile(req, res, domain, uri) {
 	});
 }
 
-function requestHereMapTile(req, res, domain, uri) {
-	uri += "?apiKey=" + config.here.apiKey;
+function requestHereMapTile(req, res, domain, resource, style, features) {
+	let uri = `/v3/${resource}/mc/${req.params.zoomLevel}/${req.params.gridx}/${req.params.gridy}/png8?apiKey=${config.here.apiKey}`;
 
-	if (req.query.congestion) {
-		uri += "&congestion=" + req.query.congestion;
+	if (features) {
+		uri += `&features=${features}`;
 	}
-	if (req.query.lg) {
-		uri += "&lg=" + req.query.lg;
+
+	if (style) {
+		uri += `&style=${style}`;
 	}
-	if (req.query.lg2) {
-		uri += "&lg2=" + req.query.lg2;
-	}
-	if (req.query.min_traffic_congestion) {
-		uri += "&min_traffic_congestion=" + req.query.min_traffic_congestion;
-	}
-	if (req.query.pois) {
-		uri += "&pois=" + req.query.pois;
-	}
-	if (req.query.ppi) {
-		uri += "&ppi=" + req.query.ppi;
-	}
-	if (req.query.pview) {
-		uri += "&pview=" + req.query.pview;
-	}
-	if (req.query.range) {
-		uri += "&range=" + req.query.range;
-	}
-	if (req.query.style) {
-		uri += "&style=" + req.query.style;
-	}
-	if (req.query.time) {
-		uri += "&time=" + req.query.time;
-	}
+
+	systemLogger.logInfo("Fetching Here map tile: " + domain + uri);
 	requestMapTile(req, res, domain, uri);
 }
 
@@ -596,9 +488,8 @@ function getOSMTile(req, res) {
 }
 
 function getHereBaseInfo(req, res) {
-	const domain = "1" + hereBaseDomain;
-	let uri = "/maptile/2.1/info";
-	uri += "?apiKey=" + config.here.apiKey;
+	const domain = hereBaseDomain;
+	const uri = `/v3/info?apiKey=${config.here.apiKey}`;
 	httpsGet.get(domain, uri).then(info =>{
 		res.setHeader("Cache-Control", `private, max-age=${config.cachePolicy.maxAge}`);
 		res.write(info);
@@ -614,123 +505,51 @@ function getHereBaseInfo(req, res) {
 }
 
 function getHereMapsTile(req, res) {
-	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
-	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereBaseDomain;
-	const uri = "/maptile/2.1/maptile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
-	systemLogger.logInfo("Fetching Here map tile: " + uri);
-	requestHereMapTile(req, res, domain, uri);
+	requestHereMapTile(req, res, hereBaseDomain, "base");
 }
 
 function getHereAerialMapsTile(req, res) {
-	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
-	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereAerialDomain;
-	const uri = "/maptile/2.1/maptile/newest/satellite.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
-	systemLogger.logInfo("Fetching Here map tile: " + uri);
-	requestHereMapTile(req, res, domain, uri);
+	requestHereMapTile(req, res, hereBaseDomain, "base", "satellite.day");
 }
 
 function getHereTrafficTile(req, res) {
-	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
-	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereTrafficDomain;
-	const uri = "/maptile/2.1/traffictile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
-	systemLogger.logInfo("Fetching Here traffic flow map tile: " + uri);
-	requestHereMapTile(req, res, domain, uri);
+	requestHereMapTile(req, res, hereBaseDomain, "base", "logistics.day");
 }
 
 function getHereTrafficFlowTile(req, res) {
-	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
-	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereTrafficDomain;
-	const uri = "/maptile/2.1/flowtile/newest/normal.traffic.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
-	systemLogger.logInfo("Fetching Here traffic flow map tile: " + uri);
-	requestHereMapTile(req, res, domain, uri);
+	requestHereMapTile(req, res, hereTrafficDomain, "flow");
 }
 
 function getHereTerrainTile(req, res) {
-	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
-	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereAerialDomain;
-	const uri = "/maptile/2.1/maptile/newest/terrain.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
-	systemLogger.logInfo("Fetching Here terrain map tile: " + uri);
-	requestHereMapTile(req, res, domain, uri);
+	requestHereMapTile(req, res, hereBaseDomain, "base", "topo.day");
 }
 
 function getHereHybridTile(req, res) {
-	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
-	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereAerialDomain;
-	const uri = "/maptile/2.1/maptile/newest/hybrid.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
-	systemLogger.logInfo("Fetching Here hybrid map tile: " + uri);
-	requestHereMapTile(req, res, domain, uri);
+	requestHereMapTile(req, res, hereBaseDomain, "base", "explore.satellite.day");
 }
 
 function getHereGreyTile(req, res) {
-	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
-	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereBaseDomain;
-	const uri = "/maptile/2.1/maptile/newest/normal.day.grey/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
-	systemLogger.logInfo("Fetching Here colour-reduced street map tile: " + uri);
-	requestHereMapTile(req, res, domain, uri);
-}
-
-function getHereGreyTransitTile(req, res) {
-	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
-	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereBaseDomain;
-	const uri = "/maptile/2.1/maptile/newest/normal.day.transit/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
-	systemLogger.logInfo("Fetching Here colour-reduced transit map tile: " + uri);
-	requestHereMapTile(req, res, domain, uri);
+	requestHereMapTile(req, res, hereBaseDomain, "base", "lite.day");
 }
 
 function getHereTruckRestrictionsTile(req, res) {
-	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
-	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereBaseDomain;
-	const uri = "/maptile/2.1/trucktile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
-	systemLogger.logInfo("Fetching Here truck restrictions map tile: " + uri);
-	requestHereMapTile(req, res, domain, uri);
+	requestHereMapTile(req, res, hereBaseDomain, "base", "explore.day", "vehicle_restrictions:active_and_inactive");
 }
 
 function getHereTruckRestrictionsOverlayTile(req, res) {
-	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
-	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereBaseDomain;
-	const uri = "/maptile/2.1/truckonlytile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
-	systemLogger.logInfo("Fetching Here truck restrictions overlay map tile: " + uri);
-	requestHereMapTile(req, res, domain, uri);
-}
-
-function getHereAdminLabelOverlayTile(req, res) {
-	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
-	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereBaseDomain;
-	const uri = "/maptile/2.1/alabeltile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
-	systemLogger.logInfo("Fetching Here administrative label overlay map tile: " + uri);
-	requestHereMapTile(req, res, domain, uri);
+	requestHereMapTile(req, res, hereBaseDomain, "blank", undefined, "vehicle_restrictions:active_and_inactive");
 }
 
 function getHereLabelOverlayTile(req, res) {
-	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
-	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereBaseDomain;
-	const uri = "/maptile/2.1/labeltile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
-	systemLogger.logInfo("Fetching Here label overlay map tile: " + uri);
-	requestHereMapTile(req, res, domain, uri);
-}
-
-function getHereLineLabelOverlayTile(req, res) {
-	const size = 256; // 256 = [256,256]; 512 = [512,512]; Deprecated: 128
-	const domain = (1 + ((req.params.gridx + req.params.gridy) % 4)) + hereBaseDomain;
-	const uri = "/maptile/2.1/lltile/newest/normal.day/" + req.params.zoomLevel + "/" + req.params.gridx + "/" + req.params.gridy + "/" + size + "/png8";
-	systemLogger.logInfo("Fetching Here line label overlay map tile: " + uri);
-	requestHereMapTile(req, res, domain, uri);
+	requestHereMapTile(req, res, hereBaseDomain, "label");
 }
 
 function getHereTollZoneTile(req, res) {
-	if (!req.query) {
-		req.query = {};
-	}
-	req.query.congestion = true;
-	getHereMapsTile(req, res);
+	requestHereMapTile(req, res, hereBaseDomain, "base", undefined, "congestion_zones:all");
 }
 
 function getHerePOITile(req, res) {
-	if (!req.query) {
-		req.query = {};
-	}
-	req.query.pois = true;
-	getHereMapsTile(req, res);
+	requestHereMapTile(req, res, hereBaseDomain, "base", undefined, "pois:all");
 }
 
 function getHereBuildingsFromLongLat(req, res) {
