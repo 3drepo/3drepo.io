@@ -16,13 +16,16 @@
  */
 import { useEffect } from 'react';
 import { UserManagementActions } from '@/v4/modules/userManagement';
+import { useParams } from 'react-router';
 
 import { useDispatch } from 'react-redux';
 import { ProjectsHooksSelectors, CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { Container, V4ModelsPermissions } from './userPermissions.styles';
+import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 export const UserPermissions = () => {
+	const { teamspace, project } = useParams();
 	const dispatch = useDispatch();
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails()?.name;
 	const username = CurrentUserHooksSelectors.selectUsername();
@@ -35,6 +38,7 @@ export const UserPermissions = () => {
 		dispatch(UserManagementActions.fetchTeamspaceUsers());
 		dispatch(UserManagementActions.fetchProject(projectName));
 		dispatch(TeamspacesActions.fetchTeamspacesIfNecessary(username));
+		DrawingsActionsDispatchers.fetchDrawings(teamspace, project);
 	}, [projectName, username]);
 
 	if (!username || !projectName) {
