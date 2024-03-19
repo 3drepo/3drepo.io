@@ -42,13 +42,6 @@ export const SidebarForm = () => {
 			<Title>{drawingName}</Title>
 			<FlexContainer>
 				<FormTextField
-					name={`${revisionPrefix}.drawingName`}
-					label={formatMessage({ id: 'uploads.sidebar.drawing.name', defaultMessage: 'Name' })}
-					formError={getError('drawingName')}
-					disabled={disableDrawingFields}
-					required
-				/>
-				<FormTextField
 					name={`${revisionPrefix}.drawingNumber`}
 					label={formatMessage({ id: 'uploads.sidebar.drawing.drawingNumber', defaultMessage: 'Drawing Number' })}
 					formError={getError('drawingNumber')}
