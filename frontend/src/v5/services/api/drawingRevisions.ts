@@ -18,27 +18,59 @@ import { AxiosResponse } from 'axios';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { generateV5ApiUrl } from './default';
 import { delay } from '@/v4/helpers/async';
+import { getWaitablePromise } from '@/v5/helpers/async.helpers';
+import { IDrawingRevision } from '@/v5/store/drawingRevisions/drawingRevisions.types';
+import { uuid } from '@/v4/helpers/uuid';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-const revisions = [];
+const revisions: IDrawingRevision[] = [
+	{
+		_id: uuid(),
+		timestamp: new Date(),
+		author: 'John',
+		format: '.dwg',
+		statusCode: '1',
+		revisionCode: '1',
+	}, {
+		_id: uuid(),
+		timestamp: new Date(),
+		author: 'John',
+		format: '.pdf',
+		revisionCode: '2',
+	},
+];
 
 export const fetchRevisions = (teamspace: string, projectId: string, drawingId: string, showVoid = true): Promise<any> => {
 	// throw new Error('name already exists');
 	// throw new Error('Drawing number already exists');
-	return delay(500, revisions);
+	return delay(500, { data: { revisions } });
 };
 
 export const setRevisionVoidStatus = (teamspace: string, projectId: string, drawingId: string, revision: string, isVoid = true) => {
 	return delay(500, null);
 };
 
-export const createRevision = (
+export const createRevision = async (
 	teamspace: string,
 	projectId: string,
 	drawingId: string,
 	onProgress: any,
 	body: any,
 ): Promise<AxiosResponse<void>> => {
+	const config = {
+		onUploadProgress: (progressEvent) => onProgress(
+			Math.round((progressEvent.loaded * 100) / progressEvent.total),
+		),
+	};
+	for (let progress = 0; progress < 100;) {
+		const { promiseToResolve, resolve } = getWaitablePromise();
+		setTimeout(() => {
+			progress = Math.min(progress + Math.round(Math.random() ** 2 * 100), 100);
+			onProgress(progress);
+			resolve();
+		}, Math.random() * 1500);
+		await promiseToResolve;
+	}
 	return delay(500, null);
 };
 

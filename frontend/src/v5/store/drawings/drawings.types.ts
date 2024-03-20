@@ -53,6 +53,14 @@ export interface DrawingStats {
 	status: DrawingUploadStatus;
 }
 
+export type NewDrawing = {
+	_id?: string;
+	name: string;
+	category: string;
+	drawingNumber: string;
+	desc?: string;
+};
+
 export enum DrawingUploadStatus {
 	OK = 'ok',
 	FAILED = 'failed',

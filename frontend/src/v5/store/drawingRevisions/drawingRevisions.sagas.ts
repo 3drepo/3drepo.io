@@ -28,7 +28,7 @@ import { CreateRevisionAction,
 	SetRevisionVoidStatusAction,
 } from './drawingRevisions.redux';
 import { DrawingsActions } from '../drawings/drawings.redux';
-import { UploadStatuses } from '../drawings/drawings.types';
+import { DrawingUploadStatus } from '../drawings/drawings.types';
 import { createDrawingFromRevisionBody, createFormDataFromRevisionBody } from './drawingRevisions.helpers';
 import { selectRevisions } from './drawingRevisions.selectors';
 
@@ -97,7 +97,7 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 			(percent) => DrawingRevisionsActionDispatchers.setUploadProgress(uploadId, percent),
 			createFormDataFromRevisionBody(body),
 		);
-		yield put(DrawingsActions.setDrawingStatus(projectId, drawingId, UploadStatuses.QUEUED));
+		yield put(DrawingsActions.setDrawingStatus(projectId, drawingId, DrawingUploadStatus.QUEUED));
 		yield put(DrawingRevisionsActions.setUploadComplete(uploadId, true));
 	} catch (error) {
 		let errorMessage = error.message;

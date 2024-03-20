@@ -94,7 +94,7 @@ export const revisionProcessingSuccess = (state, {
 	revisions[containerId].push(revision);
 };
 
-export const revisionsReducer = createReducer<IContainerRevisionsState>(INITIAL_STATE, produceAll({
+export const containerRevisionsReducer = createReducer<IContainerRevisionsState>(INITIAL_STATE, produceAll({
 	[ContainerRevisionsTypes.FETCH_SUCCESS]: fetchSuccess,
 	[ContainerRevisionsTypes.SET_IS_PENDING]: setIsPending,
 	[ContainerRevisionsTypes.SET_VOID_STATUS_SUCCESS]: setVoidStatusSuccess,

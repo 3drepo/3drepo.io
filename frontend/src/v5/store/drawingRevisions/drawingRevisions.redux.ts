@@ -100,7 +100,7 @@ export const revisionProcessingSuccess = (state, {
 	revisions[drawingId].push(revision);
 };
 
-export const revisionsReducer = createReducer<IDrawingRevisionsState>(INITIAL_STATE, produceAll({
+export const drawingRevisionsReducer = createReducer<IDrawingRevisionsState>(INITIAL_STATE, produceAll({
 	[DrawingRevisionsTypes.FETCH_SUCCESS]: fetchSuccess,
 	[DrawingRevisionsTypes.SET_IS_PENDING]: setIsPending,
 	[DrawingRevisionsTypes.SET_VOID_STATUS_SUCCESS]: setVoidStatusSuccess,

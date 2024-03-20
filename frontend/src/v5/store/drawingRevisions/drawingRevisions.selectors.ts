@@ -20,7 +20,7 @@ import { prepareRevisionData } from './drawingRevisions.helpers';
 import { IDrawingRevisionsState } from './drawingRevisions.redux';
 import { selectDrawingById } from '../drawings/drawings.selectors';
 
-const selectRevisionsDomain = (state): IDrawingRevisionsState => state.revisions;
+const selectRevisionsDomain = (state): IDrawingRevisionsState => state.drawingRevisions;
 const selectDrawingIdParam = (_, drawingId: string) => drawingId;
 
 export const selectRevisionsByDrawing = createSelector(
