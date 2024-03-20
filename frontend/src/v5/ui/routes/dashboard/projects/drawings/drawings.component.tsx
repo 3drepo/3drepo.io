@@ -29,21 +29,25 @@ import { DrawingsList } from './drawingsList/drawingsList.component';
 import { DRAWINGS_SEARCH_FIELDS } from '@/v5/store/drawings/drawings.helpers';
 import { DialogsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CreateDrawingDialog } from './drawingDialogs/createDrawingDialog.component';
+import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashboardSkeletonList/dashboardSkeletonList.component';
+import { SkeletonListItem } from '../containers/containersList/skeletonListItem/skeletonListItem.component';
 
 export const Drawings = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
-	const isPending = DrawingsHooksSelectors.selectIsListPending();
+	const isListPending = DrawingsHooksSelectors.selectIsListPending();
 	const drawings = DrawingsHooksSelectors.selectDrawings();
 	const favouriteDrawings = DrawingsHooksSelectors.selectFavouriteDrawings();
 
 	const onClickCreate = () => DialogsActionsDispatchers.open(CreateDrawingDialog);
 
 	useEffect(() => {
-		if (!isPending) return;
+		if (!project) return;
 		DrawingsActionsDispatchers.fetchDrawings(teamspace, project);
-	}, [isPending]);
+	}, [project]);
+
+	if (isListPending) return (<DashboardSkeletonList itemComponent={<SkeletonListItem />} />);
 
 	return (
 		<>
