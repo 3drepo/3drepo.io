@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors, SequencesHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { camelCase, isEmpty, isEqual, isObject, mapKeys } from 'lodash';
+import { camelCase, isEmpty, isEqual, isObject, isPlainObject, mapKeys } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
@@ -293,14 +293,14 @@ export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
 		modules: {
 			safetibase: {
 				location: 'Cambridge',
-				treatment: 'Spa',
+				someArray: ['a', 'b', 'c'],
 			}
 		}
 		properties: {
 			foo: true,
 		}
 	})
-	returns ['modules.safetibase.location', 'modules.safetibase.treatment', 'properties.foo']
+	returns ['modules.safetibase.location', 'modules.safetibase.someArray', 'properties.foo']
 */
 export const getAllPaths = (root) => {
 	let paths = [];
@@ -311,7 +311,7 @@ export const getAllPaths = (root) => {
 	while (nodes.length > 0) {
 		let n = nodes.pop();
 		Object.keys(n.obj).forEach((k) => {
-			if (typeof n.obj[k] === 'object') {
+			if (isPlainObject(n.obj[k])) {
 				let path = n.path.concat(k);
 				nodes.unshift({
 					obj: n.obj[k],
