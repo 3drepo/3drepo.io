@@ -16,5 +16,9 @@
  */
 import styled from 'styled-components';
 
-export const ToolbarContainer = styled.div`
+export const SvgContainer = styled.div`
+	background-color: white;
+	user-select: none;
+	border: 1px solid ${({ theme }) => theme.palette.base.light};
+	box-sizing: border-box;
 `;

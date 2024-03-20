@@ -3922,6 +3922,11 @@
     "@types/express" "^4.7.0"
     file-system-cache "2.3.0"
 
+"@svgedit/svgcanvas@^7.2.2":
+  version "7.2.2"
+  resolved "https://registry.yarnpkg.com/@svgedit/svgcanvas/-/svgcanvas-7.2.2.tgz#1109629183c16fa663194a07f9f0e2504030f265"
+  integrity sha512-7lDSHsaL5VhyworiYdUPQFsJMuTetpU8iHkoVu02fbeQsdtob1aqHArioPeHXxv2I9+/nEklAtRwYPjKti1QGw==
+
 "@swc/core-darwin-arm64@1.3.86":
   version "1.3.86"
   resolved "https://registry.yarnpkg.com/@swc/core-darwin-arm64/-/core-darwin-arm64-1.3.86.tgz#f6e9a8c08579902dee51e1d94f8c166a5e53eae7"
@@ -5079,6 +5084,13 @@ ajv@^8.0.0, ajv@^8.0.1, ajv@^8.9.0:
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
+amator@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/amator/-/amator-1.1.0.tgz#08c6b60bc93aec2b61bbfc0c4d677d30323cc0f1"
+  integrity sha512-V5+aH8pe+Z3u/UG3L3pG3BaFQGXAyXHVQDroRwjPHdh08bcUEchAVsU1MCuJSCaU5o60wTK6KaE6te5memzgYw==
+  dependencies:
+    bezier-easing "^2.0.3"
+
 ansi-escapes@^1.1.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-1.4.0.tgz#d3a8a83b319aa67793662b13e761c7911422306e"
@@ -5573,6 +5585,11 @@ better-opn@^3.0.2:
   integrity sha512-aVNobHnJqLiUelTaHat9DZ1qM2w0C0Eym4LPI/3JxOnSokGVdsl1T1kN7TFvsEAD8G47A6VKQ0TVHqbBnYMJlQ==
   dependencies:
     open "^8.0.4"
+
+bezier-easing@^2.0.3:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/bezier-easing/-/bezier-easing-2.1.0.tgz#c04dfe8b926d6ecaca1813d69ff179b7c2025d86"
+  integrity sha512-gbIqZ/eslnUFC1tjEvtz0sgx+xTK20wDnYMIA27VA04R7w6xxXQPZDbibjA9DTWZRA2CXtwHykkVzlCaAJAZig==
 
 big-integer@^1.6.44:
   version "1.6.51"
@@ -10513,6 +10530,11 @@ neo-async@^2.5.0, neo-async@^2.6.1, neo-async@^2.6.2:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.2.tgz#b4aafb93e3aeb2d8174ca53cf163ab7d7308305f"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
 
+ngraph.events@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/ngraph.events/-/ngraph.events-1.2.2.tgz#3ceb92d676a04a4e7ce60a09fa8e17a4f0346d7f"
+  integrity sha512-JsUbEOzANskax+WSYiAPETemLWYXmixuPAlmZmhIbIj6FH/WDgEGCGnRwUQBK0GjOnVm8Ui+e5IJ+5VZ4e32eQ==
+
 no-case@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/no-case/-/no-case-3.0.4.tgz#d361fd5c9800f558551a8369fc0dcd4662b6124d"
@@ -10896,6 +10918,15 @@ pako@~0.2.0:
   version "0.2.9"
   resolved "https://registry.yarnpkg.com/pako/-/pako-0.2.9.tgz#f3f7522f4ef782348da8161bad9ecfd51bf83a75"
   integrity sha512-NUcwaKxUxWrZLpDG+z/xZaCgQITkA/Dv4V/T6bw7VON6l1Xz/VnrBqrYjZQ12TamKHzITTfOEIYUj48y2KXImA==
+
+panzoom@^9.4.3:
+  version "9.4.3"
+  resolved "https://registry.yarnpkg.com/panzoom/-/panzoom-9.4.3.tgz#195c4031bb643f2e6c42f1de0ca87cc10e224042"
+  integrity sha512-xaxCpElcRbQsUtIdwlrZA90P90+BHip4Vda2BC8MEb4tkI05PmR6cKECdqUCZ85ZvBHjpI9htJrZBxV5Gp/q/w==
+  dependencies:
+    amator "^1.1.0"
+    ngraph.events "^1.2.2"
+    wheel "^1.0.0"
 
 param-case@^3.0.3, param-case@^3.0.4:
   version "3.0.4"
@@ -14541,6 +14572,11 @@ whatwg-url@^8.4.0:
     lodash "^4.7.0"
     tr46 "^2.1.0"
     webidl-conversions "^6.1.0"
+
+wheel@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/wheel/-/wheel-1.0.0.tgz#6cf46e06a854181adb8649228077f8b0d5c574ce"
+  integrity sha512-XiCMHibOiqalCQ+BaNSwRoZ9FDTAvOsXxGHXChBugewDj7HC8VBIER71dEOiRH1fSdLbRCQzngKTSiZ06ZQzeA==
 
 which-boxed-primitive@^1.0.2:
   version "1.0.2"
