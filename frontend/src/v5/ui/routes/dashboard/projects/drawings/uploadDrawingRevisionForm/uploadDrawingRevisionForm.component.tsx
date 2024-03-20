@@ -36,6 +36,7 @@ import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionsActionDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadList } from './uploadList/uploadList.component';
 import { parseFilename, reduceFileData } from '@components/shared/uploadFiles/uploadFiles.helpers';
+import { sanitiseDrawing } from './uploadDrawingRevisionForm.helpers';
 import { selectRevisions } from '@/v5/store/drawingRevisions/drawingRevisions.selectors';
 import { getState } from '@/v4/modules/store';
 
@@ -136,10 +137,7 @@ export const UploadDrawingRevisionForm = ({
 				statusCode: '',
 				revisionCode: '',
 				revisionDesc: '',
-				drawingName: drawing?.name || '',
-				drawingNumber: drawing?.drawingNumber || '',
-				drwaingDesc: drawing?.desc || '',
-				drwaingCategory: drawing?.category || '',
+				...sanitiseDrawing(drawing),
 			});
 		}
 		append(filesToAppend);
@@ -198,6 +196,7 @@ export const UploadDrawingRevisionForm = ({
 					isValid={!isUploading ? isValid : allUploadsComplete}
 					supportedFileExtensions={getSupportedDrawingRevisionsFileExtensions()}
 				>
+					<div onClick={() => console.log(formData.formState.errors)}>print errors</div>
 					<UploadList
 						values={reduceFileData(fields)}
 						isUploading={isUploading}

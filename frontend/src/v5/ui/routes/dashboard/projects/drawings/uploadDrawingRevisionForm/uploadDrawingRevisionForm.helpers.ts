@@ -18,6 +18,8 @@
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { uploadFile, getSupportedDrawingRevisionsFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadDrawingRevisionForm } from './uploadDrawingRevisionForm.component';
+import { IDrawing } from '@/v5/store/drawings/drawings.types';
+import { UploadItemFields } from '@/v5/store/drawingRevisions/drawingRevisions.types';
 
 export const extensionIsSpm = (extension: string) => extension === 'spm';
 
@@ -33,3 +35,10 @@ export const uploadToDrawing = async (presetDrawingId: string) => {
 	const file = await uploadFile(getSupportedDrawingRevisionsFileExtensions());
 	onUpload(file);
 };
+
+export const sanitiseDrawing = (drawing: IDrawing): Partial<UploadItemFields> => ({
+	drawingName: drawing?.name?.trim() || '',
+	drawingNumber: drawing?.drawingNumber || '',
+	drawingDesc: drawing?.desc || '',
+	drawingCategory: drawing?.category || '',
+});

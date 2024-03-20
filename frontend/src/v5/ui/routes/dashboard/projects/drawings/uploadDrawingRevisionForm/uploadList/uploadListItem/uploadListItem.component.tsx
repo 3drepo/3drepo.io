@@ -29,8 +29,8 @@ import { UploadListItemFileIcon } from '@components/shared/uploadFiles/uploadLis
 import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemTitle/uploadListItemTitle.component';
 import { UploadProgress } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadProgress/uploadProgress.component';
 import { formatMessage } from '@/v5/services/intl';
-import { IDrawing, DrawingUploadStatus } from '@/v5/store/drawings/drawings.types';
-import { UploadItemFields } from '@/v5/store/drawingRevisions/drawingRevisions.types';
+import { DrawingUploadStatus } from '@/v5/store/drawings/drawings.types';
+import { sanitiseDrawing } from '../../uploadDrawingRevisionForm.helpers';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -74,23 +74,21 @@ export const UploadListItem = ({
 }: IUploadListItem): JSX.Element => {
 	const revisionPrefix = `uploads.${index}`;
 	const uploadErrorMessage: string = DrawingRevisionsHooksSelectors.selectUploadError(uploadId);
-	const { watch, trigger, setValue } = useFormContext();
+	const { watch, trigger, setValue, getValues } = useFormContext();
 	const drawingId = watch(`${revisionPrefix}.drawingId`);
+	const statusCode = watch(`${revisionPrefix}.statusCode`);
 	const selectedDrawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 	const progress = DrawingRevisionsHooksSelectors.selectUploadProgress(uploadId);
-
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
 
-	const sanitiseDrawing = (drawing: IDrawing): Partial<UploadItemFields> => ({
-		drawingName: drawing?.name || '',
-		drawingNumber: drawing?.drawingNumber || '',
-		drawingDesc: drawing?.desc || '',
-		drawingCategory: drawing?.category || '',
-	});
 
 	useEffect(() => {
-		trigger(`${revisionPrefix}.revisionTag`);
+		if (getValues(`${revisionPrefix}.revisionCode`)) {
+			trigger(`${revisionPrefix}.revisionCode`);
+		}
+	}, [drawingId, statusCode]);
 
+	useEffect(() => {
 		for (const [key, val] of Object.entries(sanitiseDrawing(selectedDrawing))) {
 			setValue(`${revisionPrefix}.${key}`, val);
 		}
