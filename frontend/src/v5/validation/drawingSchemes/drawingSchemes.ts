@@ -48,7 +48,7 @@ export const DrawingFormSchema =  Yup.object().shape({
 	desc,
 });
 
-const isSameCode = (codeA, codeB) => codeA?.toLocaleLowerCase() === codeB?.toLocaleLowerCase();
+const isSameCode = (codeA = '', codeB = '') => codeA.toLocaleLowerCase().trim() === codeB.toLocaleLowerCase().trim();
 export const ListItemSchema = Yup.object().shape({
 	file: uploadFile,
 	revisionName,
@@ -71,13 +71,13 @@ export const ListItemSchema = Yup.object().shape({
 		'statusCodeAndRevisionCodeAreUnique',
 		formatMessage({
 			id: 'validation.statusCodeAndRevisionCodeUnique.error',
-			defaultMessage: 'Combination Status Code and Revision Code must be unique',
+			defaultMessage: 'The combination of "Status Code" and "Revision Code" must be unique',
 		}),
 		(revisionCode, testContext) => {
 			if (!testContext.options?.context || !testContext.parent?.drawingNumber) return true;
-			const revisionsByDrawingId = testContext.options.context.revisionsByDrawingId;
+			const { revisionsByDrawingId } = testContext.options.context;
 			const revisions = revisionsByDrawingId[testContext.parent.drawingId] || [];
-
+			
 			return !revisions.some((rev) => isSameCode(rev.statusCode, testContext.parent.statusCode) && isSameCode(rev.revisionCode, revisionCode));
 		},
 	),
