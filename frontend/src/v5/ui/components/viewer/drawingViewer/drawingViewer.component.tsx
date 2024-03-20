@@ -17,48 +17,94 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { ToolbarButton } from '@/v5/ui/routes/viewer/toolbar/buttons/toolbarButton.component';
-import { SectionToolbar } from '@/v5/ui/routes/viewer/toolbar/selectionToolbar/selectionToolbar.component';
 import { ToolbarContainer, MainToolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.styles';
-import { useState } from 'react';
-import HomeIcon from '@assets/icons/viewer/home.svg';
-import CoordinatesIcon from '@assets/icons/viewer/coordinates.svg';
-import { CentredContainer } from '@controls/centredContainer/centredContainer.component';
+import { useEffect, useRef, useState } from 'react';
+import ZoomOutIcon from '@assets/icons/viewer/zoom_out.svg';
+import ZoomInIcon from '@assets/icons/viewer/zoom_in.svg';
 
+import { FileInputField } from '@controls/fileInputField/fileInputField.component';
+import { Button } from '@controls/button/button.component';
+import { FormattedMessage } from 'react-intl';
+import { sanitizeSvg } from '@svgedit/svgcanvas/core/sanitize';
+import { SvgContainer } from './drawingViewer.styles';
+// import panzoom from 'panzoom';
 
 const SvgViewer = ({ svgContent }) => {
+	const svgContainerRef = useRef<HTMLElement>(null);
+	const svgRef = useRef<HTMLElement>(null);
+
+	useEffect(() => {
+		if (!svgContainerRef.current || !svgContent) return;
+
+		const svgContainer = document.createElement('div');
+		svgContainer.innerHTML = svgContent;
+
+		const svg = svgContainer.querySelector('svg') as SVGSVGElement;
+		sanitizeSvg(svg);
+
+		if (svgContainerRef.current.children.length > 1) {
+			svgContainerRef.current.removeChild(svgContainerRef.current.children[0]);
+		}
+
+		svgContainerRef.current.insertBefore(svg, svgContainerRef.current.children[0]);
+
+		svg.removeAttribute('height');
+		svg.removeAttribute('width');
+		
+
+		// const pz = panzoom(svg, {
+		// 	maxZoom: 10,
+		// 	minZoom: 1,
+		// });
+
+		// const editorRect = svgContainerRef.current.getBoundingClientRect();
+		
+		// pz.on('transform', () => {
+		// 	const t = pz.getTransform();
+		// 	const svgRect = svg.getBoundingClientRect();
+		// 	const minX =  -(svgRect.width - editorRect.width) ;
+		// 	const minY =  -(svgRect.height - editorRect.height) ;
+
+		// 	if (t.x > 0 || t.y > 0 || t.x < minX || t.y < minY) {
+		// 		pz.moveTo(Math.max(Math.min(t.x, 0), minX), Math.max(Math.min(t.y, 0), minY));
+		// 	}
+		// });
+
+	}, [svgContent]);
+
 	return (
-		<CentredContainer horizontal vertical>
-			hello
-		</CentredContainer>
+		<div style={{ width: '100%', height:'100%', overflow: 'auto' }}> 
+			<SvgContainer ref={svgContainerRef as any} />
+		</div>
 	);
 };
 
 
 const DrawingToolbar = () => {
 	const onClickZoomIn = () => {
-		console.log('zoom in');
+		// console.log('zoom in');
 	};
 
 	const onClickZoomOut = () => {
-		console.log('zoom out');
+		// console.log('zoom out');
 	};
 
 
 	return (
+
 		<ToolbarContainer>
 			<MainToolbar>
 				<ToolbarButton
-					Icon={HomeIcon}
-					onClick={onClickZoomIn}
-					title={formatMessage({ id: 'drawingWiewer.toolbar.zoomIn', defaultMessage: 'Zoom in' })}
+					Icon={ZoomOutIcon}
+					onClick={onClickZoomOut}
+					title={formatMessage({ id: 'drawingWiewer.toolbar.zoomIn', defaultMessage: 'Zoom out' })}
 				/>
 				<ToolbarButton
-					Icon={CoordinatesIcon}
-					onClick={onClickZoomOut}
-					title={formatMessage({ id: 'drawingWiewer.toolbar.zoomOut', defaultMessage: 'Zoom out' })}
+					Icon={ZoomInIcon}
+					onClick={onClickZoomIn}
+					title={formatMessage({ id: 'drawingWiewer.toolbar.zoomOut', defaultMessage: 'Zoom in' })}
 				/>
 			</MainToolbar>
-			<SectionToolbar />
 		</ToolbarContainer>
 	);
 };
@@ -66,13 +112,24 @@ const DrawingToolbar = () => {
 export const DrawingViewer = () => {
 	const [svgContent, setSvgContent] = useState('');
 
-	const onClickButton = () => {
-		// alert('click!');
+	const onClickButton = async (files: File[]) => {
+		setSvgContent(await files[0].text());
 	};
 
 	return (
 		<>
-			<button onClick={onClickButton}> Load svg </button>
+			<FileInputField
+				accept=".svg"
+				onChange={onClickButton as any}
+				multiple
+			>
+				<Button component="span" variant="contained" color="primary" style={{ position:'absolute' }}>
+					<FormattedMessage
+						id="uploads.fileInput.browse"
+						defaultMessage="Browse"
+					/>
+				</Button>
+			</FileInputField>
 			<SvgViewer svgContent={svgContent} />
 			<DrawingToolbar />
 		</>
