@@ -29,6 +29,7 @@ import ticketCommentsSaga from '@/v5/store/tickets/comments/ticketComments.sagas
 import viewer2Saga from '@/v5/store/viewer/viewer.sagas';
 import ticketsCardSaga from '@/v5/store/tickets/card/ticketsCard.sagas';
 import drawingsSaga from '@/v5/store/drawings/drawings.sagas';
+import drawingRevisionsSaga from '@/v5/store/drawingRevisions/drawingRevisions.sagas';
 import activitiesSaga from './activities/activities.sagas';
 import authSaga from './auth/auth.sagas';
 import billingSaga from './billing/billing.sagas';
@@ -93,11 +94,12 @@ export default function* rootSaga() {
 
 		fork(auth2Saga),
 		fork(containersSaga),
-		fork(drawingsSaga),
+		fork(containerRevisionsSaga),
 		fork(currentUser2Saga),
+		fork(drawingsSaga),
+		fork(drawingRevisionsSaga),
 		fork(federationsSaga),
 		fork(projectsSaga),
-		fork(containerRevisionsSaga),
 		fork(ticketsSaga),
 		fork(ticketsCardSaga),
 		fork(ticketCommentsSaga),

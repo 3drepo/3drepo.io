@@ -20,14 +20,15 @@ import * as AuthSelectors from '@/v5/store/auth/auth.selectors';
 import * as BimSelectors from '@/v4/modules/bim/bim.selectors';
 import * as CanvasHistorySelectors from '@/v4/modules/canvasHistory/canvasHistory.selectors';
 import * as ContainersSelectors from '@/v5/store/containers/containers.selectors';
+import * as ContainerRevisionsSelectors from '@/v5/store/containerRevisions/containerRevisions.selectors';
 import * as CurrentUserSelectors from '@/v5/store/currentUser/currentUser.selectors';
+import * as DrawingSelectors from '@/v5/store/drawings/drawings.selectors';
 import * as DrawingRevisionsSelectors from '@/v5/store/drawingRevisions/drawingRevisions.selectors';
 import * as ProjectsSelectors from '@/v5/store/projects/projects.selectors';
 import * as FederationsSelectors from '@/v5/store/federations/federations.selectors';
 import * as GroupsSelectors from '@/v4/modules/groups/groups.selectors';
 import * as ModelSelectors from '@/v4/modules/model/model.selectors';
 import * as RouterSelectors from '@/v4/modules/router/router.selectors';
-import * as ContainerRevisionsSelectors from '@/v5/store/containerRevisions/containerRevisions.selectors';
 import * as SequencesSelctors from '@/v4/modules/sequences/sequences.selectors';
 import * as TreeSelectors from '@/v4/modules/tree/tree.selectors';
 import * as TicketsSelectors from '@/v5/store/tickets/tickets.selectors';
@@ -37,7 +38,6 @@ import * as TeamspacesSelectors from '@/v5/store/teamspaces/teamspaces.selectors
 import * as UsersSelectors from '@/v5/store/users/users.selectors';
 import * as ViewerSelectors from '@/v5/store/viewer/viewer.selectors';
 import * as ViewerGuiSelectors from '@/v4/modules/viewerGui/viewerGui.selectors';
-import * as DrawingSelectors from '@/v5/store/drawings/drawings.selectors';
 
 
 export const AuthHooksSelectors = createHooksSelectors(AuthSelectors);
