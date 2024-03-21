@@ -17,7 +17,8 @@
 
 export interface IDrawingRevision {
 	_id: string;
-	timestamp: Date;
+	name: string;
+	timestamp: number;
 	author: string;
 	desc?: string;
 	format: string;

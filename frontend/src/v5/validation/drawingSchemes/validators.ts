@@ -24,27 +24,27 @@ import { getState } from '@/v4/modules/store';
 export const revisionName = Yup.string()
 	.max(50,
 		formatMessage({
-			id: 'validation.revisions.tag.error.error.max',
+			id: 'validation.revisions.name.error.error.max',
 			defaultMessage: 'Revision Name is limited to 50 characters',
 		}))
 	.matches(alphaNumericHyphens,
 		formatMessage({
-			id: 'validation.revisions.tag.error.characters',
+			id: 'validation.revisions.name.error.characters',
 			defaultMessage: 'Revision Name can only consist of letters, numbers, hyphens or underscores',
 		}))
 	.required(
 		formatMessage({
-			id: 'validation.revisions.tag.error.required',
+			id: 'validation.revisions.name.error.required',
 			defaultMessage: 'Revision Name is a required field',
 		}),
 	)
 	.test(
-		'alreadyExistingTags',
+		'alreadyExistingName',
 		formatMessage({
-			id: 'validation.model.tag.alreadyExisting',
-			defaultMessage: 'This tag is already used within this drawing',
+			id: 'validation.model.name.alreadyExisting',
+			defaultMessage: 'This name is already used within this drawing',
 		}),
-		async (tagValue, testContext) => {
+		async (nameValue, testContext) => {
 			const { drawingId } = testContext.parent;
 
 			if (!drawingId) return true; // Is a new drawing, it has no revisions
@@ -57,6 +57,6 @@ export const revisionName = Yup.string()
 			}
 
 			const revisions = selectRevisions(getState(), drawingId);
-			return !revisions.find(({ tag }) => tagValue === tag);
+			return !revisions.find(({ name }) => nameValue === name);
 		},
 	);

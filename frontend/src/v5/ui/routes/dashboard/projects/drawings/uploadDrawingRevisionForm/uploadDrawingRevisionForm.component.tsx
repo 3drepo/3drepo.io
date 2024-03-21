@@ -37,8 +37,6 @@ import { DrawingRevisionsActionDispatchers, DrawingsActionsDispatchers } from '@
 import { UploadList } from './uploadList/uploadList.component';
 import { parseFileName, reduceFileData, isPdf, getPdfFirstPage, fileToPdf, pdfToFile } from '@components/shared/uploadFiles/uploadFiles.helpers';
 import { sanitiseDrawing } from './uploadDrawingRevisionForm.helpers';
-import { selectRevisions } from '@/v5/store/drawingRevisions/drawingRevisions.selectors';
-import { getState } from '@/v4/modules/store';
 
 type UploadModalLabelTypes = {
 	isUploading: boolean;
@@ -90,10 +88,6 @@ export const UploadDrawingRevisionForm = ({
 	const allUploadsComplete = DrawingRevisionsHooksSelectors.selectUploadIsComplete();
 	const presetDrawing = DrawingsHooksSelectors.selectDrawingById(presetDrawingId);
 	const drawings = DrawingsHooksSelectors.selectDrawings();
-	const revisionsByDrawingId = drawings.reduce((acc, drawing) => ({
-		...acc,
-		[drawing._id]: selectRevisions(getState(), drawing._id),
-	}), {});
 
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 
@@ -102,7 +96,6 @@ export const UploadDrawingRevisionForm = ({
 		resolver: !isUploading ? yupResolver(UploadsSchema) : undefined,
 		context: {
 			alreadyExistingNames: [],
-			revisionsByDrawingId,
 			teamspace,
 			project,
 		},
@@ -135,12 +128,12 @@ export const UploadDrawingRevisionForm = ({
 					const fileAsPdf = await fileToPdf(fileAsGeneric);
 					const pageCount = fileAsPdf.getPageCount();
 					if (pageCount > 1) {
-						alert(`${fileName} has ${pageCount} pages, only the first one will be kept`);
+						// alert(`${fileName} has ${pageCount} pages, only the first one will be kept`);
 						const pdfSinglePage = await getPdfFirstPage(fileAsPdf);
 						file = await pdfToFile(pdfSinglePage, fileName);
 					}
 				} catch (e) {
-					alert(`Error: ${fileName} was processed as a PDF, but it seems corrupted. It will be skipped`);
+					// alert(`Error: ${fileName} was processed as a PDF, but it seems corrupted. It will be skipped`);
 					continue;
 				}
 			}
@@ -183,11 +176,6 @@ export const UploadDrawingRevisionForm = ({
 	useEffect(() => {
 		if (presetFile) {
 			addFilesToList([presetFile], presetDrawing);
-			DrawingRevisionsActionDispatchers.fetch(
-				teamspace,
-				project,
-				presetDrawing._id,
-			);
 		}
 		DrawingsActionsDispatchers.fetchCategories(teamspace, project);
 		drawings.forEach((drawing) => DrawingRevisionsActionDispatchers.fetch(teamspace, project, drawing._id));
@@ -211,7 +199,6 @@ export const UploadDrawingRevisionForm = ({
 					isValid={!isUploading ? isValid : allUploadsComplete}
 					supportedFileExtensions={getSupportedDrawingRevisionsFileExtensions()}
 				>
-					<div onClick={() => console.log(formData.formState.errors)}>print errors</div>
 					<UploadList
 						values={reduceFileData(fields)}
 						isUploading={isUploading}

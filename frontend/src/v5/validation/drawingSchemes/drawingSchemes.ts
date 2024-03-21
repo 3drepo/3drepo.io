@@ -19,6 +19,8 @@ import { alphaNumericHyphens, desc, name, revisionDesc, uploadFile } from '../co
 import { revisionName } from './validators';
 import { formatMessage } from '@/v5/services/intl';
 import { trimmedString } from '../shared/validators';
+import { selectRevisions } from '@/v5/store/drawingRevisions/drawingRevisions.selectors';
+import { getState } from '@/v4/modules/store';
 
 const drawingNumber = Yup.string().matches(alphaNumericHyphens,
 	formatMessage({
@@ -74,10 +76,8 @@ export const ListItemSchema = Yup.object().shape({
 			defaultMessage: 'The combination of "Status Code" and "Revision Code" must be unique',
 		}),
 		(revisionCode, testContext) => {
-			if (!testContext.options?.context || !testContext.parent?.drawingNumber) return true;
-			const { revisionsByDrawingId } = testContext.options.context;
-			const revisions = revisionsByDrawingId[testContext.parent.drawingId] || [];
-			
+			if (!testContext.options?.context || !testContext.parent?.drawingId) return true;
+			const revisions = selectRevisions(getState(), testContext.parent.drawingId);
 			return !revisions.some((rev) => isSameCode(rev.statusCode, testContext.parent.statusCode) && isSameCode(rev.revisionCode, revisionCode));
 		},
 	),

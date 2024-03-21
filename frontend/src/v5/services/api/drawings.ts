@@ -31,7 +31,7 @@ const drawings: IDrawing[] = [ // TODO: The schema is unfinished
 		category: categories[0],
 		role: Role.COLLABORATOR,
 		status: DrawingUploadStatus.OK,
-		revisionsCount: 0,
+		revisionsCount: 2,
 		latestRevision: null,
 		lastUpdated: null,
 		isFavourite: false,
@@ -44,7 +44,7 @@ const drawings: IDrawing[] = [ // TODO: The schema is unfinished
 		category: categories[1],
 		role: Role.COLLABORATOR,
 		status: DrawingUploadStatus.OK,
-		revisionsCount: 0,
+		revisionsCount: 2,
 		latestRevision: null,
 		lastUpdated: null,
 		isFavourite: false,
@@ -60,11 +60,11 @@ export const fetchDrawings = (teamspace, projectId): Promise<IDrawing[]> => {
 export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promise<DrawingStats> => {
 	const stats =   [{
 		_id: drawings[0]._id,
-		revisions : { total: 0 },
+		revisions : { total: 2, lastUpdated: 1709569331628,  latestRevision:'rev2' },
 	},
 	{
 		_id: drawings[1]._id,
-		revisions : { total: 1, lastUpdated: 1709569331628,  latestRevision:'I dunno' },
+		revisions : { total: 2, lastUpdated: 1709569331628,  latestRevision:'rev2' },
 	}];
 
 	return delay<DrawingStats>(Math.random() * 250, stats.find(((s)=> s._id === drawingId))) ;

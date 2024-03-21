@@ -26,14 +26,16 @@ import { uuid } from '@/v4/helpers/uuid';
 const revisions: IDrawingRevision[] = [
 	{
 		_id: uuid(),
-		timestamp: new Date(),
+		name: 'rev1',
+		timestamp: 1409009331628,
 		author: 'John',
 		format: '.dwg',
 		statusCode: '1',
 		revisionCode: '1',
 	}, {
 		_id: uuid(),
-		timestamp: new Date(),
+		name: 'rev2',
+		timestamp: 1709569331628,
 		author: 'John',
 		format: '.pdf',
 		revisionCode: '2',

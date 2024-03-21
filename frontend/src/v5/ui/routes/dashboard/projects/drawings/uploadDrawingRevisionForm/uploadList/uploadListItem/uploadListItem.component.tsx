@@ -31,6 +31,8 @@ import { UploadProgress } from '@components/shared/uploadFiles/uploadList/upload
 import { formatMessage } from '@/v5/services/intl';
 import { DrawingUploadStatus } from '@/v5/store/drawings/drawings.types';
 import { sanitiseDrawing } from '../../uploadDrawingRevisionForm.helpers';
+import { get } from 'lodash';
+import { DrawingRevisionsActionDispatchers } from '@/v5/services/actionsDispatchers';
 
 const UNEXPETED_STATUS_ERROR = undefined;
 const STATUS_TEXT_BY_UPLOAD = {
@@ -74,12 +76,13 @@ export const UploadListItem = ({
 }: IUploadListItem): JSX.Element => {
 	const revisionPrefix = `uploads.${index}`;
 	const uploadErrorMessage: string = DrawingRevisionsHooksSelectors.selectUploadError(uploadId);
-	const { watch, trigger, setValue, getValues } = useFormContext();
+	const { watch, trigger, setValue, getValues, formState: { errors } } = useFormContext();
 	const drawingId = watch(`${revisionPrefix}.drawingId`);
 	const statusCode = watch(`${revisionPrefix}.statusCode`);
 	const selectedDrawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 	const progress = DrawingRevisionsHooksSelectors.selectUploadProgress(uploadId);
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
+	const getError = (name) => get(errors, name);
 
 	useEffect(() => {
 		if (getValues(`${revisionPrefix}.revisionCode`)) {
@@ -88,7 +91,8 @@ export const UploadListItem = ({
 	}, [drawingId, statusCode]);
 
 	useEffect(() => {
-		for (const [key, val] of Object.entries(sanitiseDrawing(selectedDrawing))) {
+		const { drawingName, ...drawingData } = sanitiseDrawing(selectedDrawing);
+		for (const [key, val] of Object.entries(drawingData)) {
 			setValue(`${revisionPrefix}.${key}`, val);
 		}
 	}, [JSON.stringify(selectedDrawing)]);
@@ -115,11 +119,13 @@ export const UploadListItem = ({
 				key={`${uploadId}.statusCode`}
 				name={`${revisionPrefix}.statusCode`}
 				disabled={isUploading}
+				error={getError(`${revisionPrefix}.statusCode`) || getError(`${revisionPrefix}.revisionCode`)}
 			/>
 			<UploadListItemCode
 				key={`${uploadId}.revisionCode`}
 				name={`${revisionPrefix}.revisionCode`}
 				disabled={isUploading}
+				error={getError(`${revisionPrefix}.revisionCode`)}
 			/>
 			{isUploading
 				? (
