@@ -51,6 +51,11 @@ export const DrawingFormSchema =  Yup.object().shape({
 });
 
 const isSameCode = (codeA = '', codeB = '') => codeA.toLocaleLowerCase().trim() === codeB.toLocaleLowerCase().trim();
+const testCombinationIsUnique = (val, testContext) => {
+	if (!testContext.options?.context || !testContext.parent?.drawingId) return true;
+	const revisions = selectRevisions(getState(), testContext.parent.drawingId);
+	return !revisions.some((rev) => isSameCode(rev.statusCode, testContext.parent.statusCode) && isSameCode(rev.revisionCode, testContext.parent.revisionCode));
+};
 export const ListItemSchema = Yup.object().shape({
 	file: uploadFile,
 	revisionName,
@@ -58,11 +63,19 @@ export const ListItemSchema = Yup.object().shape({
 		formatMessage({
 			id: 'validation.drawing.statusCode',
 			defaultMessage: 'Status Code can only consist of letters, numbers, hyphens or underscores',
-		})),
+		}),
+	).test(
+		'statusCodeAndRevisionCodeAreUnique',
+		formatMessage({
+			id: 'validation.statusCodeAndRevisionCodeUnique.error',
+			defaultMessage: 'The combination of "Status Code" and "Revision Code" must be unique',
+		}),
+		testCombinationIsUnique,
+	),
 	revisionCode: trimmedString.matches(alphaNumericHyphens,
 		formatMessage({
 			id: 'validation.drawing.statusCode',
-			defaultMessage: 'Status Code can only consist of letters, numbers, hyphens or underscores',
+			defaultMessage: 'Revision Code can only consist of letters, numbers, hyphens or underscores',
 		}),
 	).required(
 		formatMessage({
@@ -75,11 +88,7 @@ export const ListItemSchema = Yup.object().shape({
 			id: 'validation.statusCodeAndRevisionCodeUnique.error',
 			defaultMessage: 'The combination of "Status Code" and "Revision Code" must be unique',
 		}),
-		(revisionCode, testContext) => {
-			if (!testContext.options?.context || !testContext.parent?.drawingId) return true;
-			const revisions = selectRevisions(getState(), testContext.parent.drawingId);
-			return !revisions.some((rev) => isSameCode(rev.statusCode, testContext.parent.statusCode) && isSameCode(rev.revisionCode, revisionCode));
-		},
+		testCombinationIsUnique,
 	),
 	revisionDesc,
 });

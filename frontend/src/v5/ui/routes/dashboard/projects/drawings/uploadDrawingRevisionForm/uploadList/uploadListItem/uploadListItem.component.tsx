@@ -76,19 +76,23 @@ export const UploadListItem = ({
 }: IUploadListItem): JSX.Element => {
 	const revisionPrefix = `uploads.${index}`;
 	const uploadErrorMessage: string = DrawingRevisionsHooksSelectors.selectUploadError(uploadId);
-	const { watch, trigger, setValue, getValues, formState: { errors } } = useFormContext();
+	const { watch, trigger, setValue } = useFormContext();
 	const drawingId = watch(`${revisionPrefix}.drawingId`);
 	const statusCode = watch(`${revisionPrefix}.statusCode`);
+	const revisionCode = watch(`${revisionPrefix}.revisionCode`);
 	const selectedDrawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 	const progress = DrawingRevisionsHooksSelectors.selectUploadProgress(uploadId);
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
-	const getError = (name) => get(errors, name);
 
 	useEffect(() => {
-		if (getValues(`${revisionPrefix}.revisionCode`)) {
+		if (revisionCode) {
 			trigger(`${revisionPrefix}.revisionCode`);
 		}
 	}, [drawingId, statusCode]);
+
+	useEffect(() => {
+		trigger(`${revisionPrefix}.statusCode`);
+	}, [drawingId, revisionCode]);
 
 	useEffect(() => {
 		const { drawingName, ...drawingData } = sanitiseDrawing(selectedDrawing);
@@ -119,13 +123,11 @@ export const UploadListItem = ({
 				key={`${uploadId}.statusCode`}
 				name={`${revisionPrefix}.statusCode`}
 				disabled={isUploading}
-				error={getError(`${revisionPrefix}.statusCode`) || getError(`${revisionPrefix}.revisionCode`)}
 			/>
 			<UploadListItemCode
 				key={`${uploadId}.revisionCode`}
 				name={`${revisionPrefix}.revisionCode`}
 				disabled={isUploading}
-				error={getError(`${revisionPrefix}.revisionCode`)}
 			/>
 			{isUploading
 				? (
