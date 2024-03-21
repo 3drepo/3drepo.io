@@ -37,7 +37,7 @@ import { UploadFilesContextComponent } from '@components/shared/uploadFiles/uplo
 import { extensionIsSpm } from './uploadContainerRevisionForm.helpers';
 import { UploadList } from './uploadList/uploadList.component';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
-import { parseFilename, reduceFileData } from '@components/shared/uploadFiles/uploadFiles.helpers';
+import { parseFileName, reduceFileData } from '@components/shared/uploadFiles/uploadFiles.helpers';
 
 type UploadModalLabelTypes = {
 	isUploading: boolean;
@@ -122,7 +122,7 @@ export const UploadContainerRevisionForm = ({
 				file,
 				progress: 0,
 				extension,
-				revisionTag: parseFilename(file.name, revTagMaxValue),
+				revisionTag: parseFileName(file.name, revTagMaxValue),
 				containerName: container?.name || '',
 				containerId: container?._id || '',
 				containerUnit: container?.unit || 'mm',

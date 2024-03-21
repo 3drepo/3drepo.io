@@ -35,7 +35,7 @@ import { SidebarForm } from './sidebarForm/sidebarForm.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionsActionDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadList } from './uploadList/uploadList.component';
-import { parseFilename, reduceFileData } from '@components/shared/uploadFiles/uploadFiles.helpers';
+import { parseFileName, reduceFileData, isPdf, getPdfFirstPage, fileToPdf, pdfToFile } from '@components/shared/uploadFiles/uploadFiles.helpers';
 import { sanitiseDrawing } from './uploadDrawingRevisionForm.helpers';
 import { selectRevisions } from '@/v5/store/drawingRevisions/drawingRevisions.selectors';
 import { getState } from '@/v4/modules/store';
@@ -125,15 +125,30 @@ export const UploadDrawingRevisionForm = ({
 		return revisionNameMax.params.max;
 	}, []);
 
-	const addFilesToList = (files: File[], drawing?: IDrawing): void => {
+	const addFilesToList = async (files: File[], drawing?: IDrawing) => {
 		const filesToAppend = [];
-		for (const file of files) {
-			const extension = file.name.split('.').slice(-1)[0].toLocaleLowerCase();
+		for (let fileAsGeneric of files) {
+			const fileName = fileAsGeneric.name;
+			let file: File = fileAsGeneric;
+			if (isPdf(file)) {
+				try {
+					const fileAsPdf = await fileToPdf(fileAsGeneric);
+					const pageCount = fileAsPdf.getPageCount();
+					if (pageCount > 1) {
+						alert(`${fileName} has ${pageCount} pages, only the first one will be kept`);
+						const pdfSinglePage = await getPdfFirstPage(fileAsPdf);
+						file = await pdfToFile(pdfSinglePage, fileName);
+					}
+				} catch (e) {
+					alert(`Error: ${fileName} was processed as a PDF, but it seems corrupted. It will be skipped`);
+					continue;
+				}
+			}
 			filesToAppend.push({
 				file,
 				progress: 0,
-				extension,
-				revisionName: parseFilename(file.name, revisionNameMaxLength),
+				extension: fileName.split('.').slice(-1)[0].toLocaleLowerCase(),
+				revisionName: parseFileName(fileName, revisionNameMaxLength),
 				statusCode: '',
 				revisionCode: '',
 				revisionDesc: '',

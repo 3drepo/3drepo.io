@@ -17,11 +17,12 @@
 
 import { createFilterOptions } from '@mui/material';
 import { orderBy } from 'lodash';
+import { PDFDocument } from 'pdf-lib';
 
 export const reduceFileData = (files) => files.map(({ file: { name, size }, ...rest }) => ({ file: { name, size }, ...rest }));
 
-export const parseFilename = (filename: string, maxLength: number): string => {
-	const baseName = filename.split('.').slice(0)[0];
+export const parseFileName = (fileName: string, maxLength: number): string => {
+	const baseName = fileName.split('.').slice(0)[0];
 	const noSpecialChars = baseName.replace(/[^a-zA-Z0-9_\- ]/g, '');
 	const noSpaces = noSpecialChars.replace(/ /g, '_');
 	const noExceedingMax = noSpaces.substring(0, maxLength);
@@ -31,3 +32,29 @@ export const parseFilename = (filename: string, maxLength: number): string => {
 export const getFilteredDestinationOptions = createFilterOptions({ trim: true });
 
 export const sortByName = (options) => orderBy(options, ({ name }) => name.toLowerCase());
+export const isPdf = (file: File) => file.type.endsWith('pdf');
+const fileToArrayBuffer = (file: File) => new Promise<ArrayBuffer>((resolve, reject) => {
+	const reader = new FileReader();
+	reader.onload = () => resolve(reader.result as ArrayBuffer);
+	reader.onerror = reject;
+	reader.readAsArrayBuffer(file);
+});
+
+export const fileToPdf = async (file: File) => {
+	const arrayBuffer = await fileToArrayBuffer(file);
+	const pdf = await PDFDocument.load(arrayBuffer);
+	return pdf;
+};
+
+export const pdfToFile = async (pdf: PDFDocument, fileName) => {
+	const fileAsUintArray = await pdf.save();
+	return new File([new Blob([fileAsUintArray])], fileName);
+};
+
+export const getPdfFirstPage = async (pdf: PDFDocument) => {
+	const singlePagePdf = await PDFDocument.create();
+	const [firstPage] = await singlePagePdf.copyPages(pdf, [0]);
+	singlePagePdf.addPage(firstPage);
+	return singlePagePdf;
+};
+

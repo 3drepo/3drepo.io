@@ -21,10 +21,6 @@ import { UploadDrawingRevisionForm } from './uploadDrawingRevisionForm.component
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { UploadItemFields } from '@/v5/store/drawingRevisions/drawingRevisions.types';
 
-export const extensionIsSpm = (extension: string) => extension === 'spm';
-
-export const extensionIsRevit = (extension: string) => ['rvt', 'rfa'].includes(extension);
-
 export const uploadToDrawing = async (presetDrawingId: string) => {
 	const onUpload = (presetFile) => {
 		DialogsActionsDispatchers.open(UploadDrawingRevisionForm, {

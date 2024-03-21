@@ -81,7 +81,6 @@ export const UploadListItem = ({
 	const progress = DrawingRevisionsHooksSelectors.selectUploadProgress(uploadId);
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
 
-
 	useEffect(() => {
 		if (getValues(`${revisionPrefix}.revisionCode`)) {
 			trigger(`${revisionPrefix}.revisionCode`);
