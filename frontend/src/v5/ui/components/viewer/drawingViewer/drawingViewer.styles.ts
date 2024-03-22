@@ -17,8 +17,13 @@
 import styled from 'styled-components';
 
 export const SvgContainer = styled.div`
-	background-color: white;
+	svg {
+		background-color: white;
+		border: 1px solid ${({ theme }) => theme.palette.base.light};
+	}
+
+	width:100%;
+	height:100%;
 	user-select: none;
-	border: 1px solid ${({ theme }) => theme.palette.base.light};
-	box-sizing: border-box;
+	overflow:hidden;
 `;
