@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-export const Wrapper = styled.div`
+export const Wrapper = styled.div<{ active: boolean }>`
 	width: 24px;
 	cursor: pointer;
 	margin: 0 3px;
@@ -25,9 +25,15 @@ export const Wrapper = styled.div`
 	&& + && {
 		margin: 0 10px;
 	}
+
+	color: ${({active, theme}) => active ?  theme.palette.primary.main  : theme.palette.base.main };
 `;
 
-export const Icon = styled.img`
+export const Icon2 = styled.img`
 	max-height: 24px;
 	max-width: 24px;
+`;
+
+export const Icon = styled.div`
+	
 `;

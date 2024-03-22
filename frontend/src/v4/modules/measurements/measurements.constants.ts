@@ -15,11 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { componentToHex } from '../../helpers/colors';
-
-export const DEFAULT = 'default';
-export const ACTIVE = 'active';
-
 export const MEASURE_TYPE = {
 	POINT: -1,
 	LENGTH: 0,

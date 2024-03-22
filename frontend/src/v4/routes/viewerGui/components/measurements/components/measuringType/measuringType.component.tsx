@@ -20,7 +20,7 @@ import { useEffect } from 'react';
 import { Tooltip } from '@mui/material';
 
 import { BASIC_TYPES, MEASURING_TYPES } from './measuringType.constants';
-import { Icon, Wrapper } from './measuringType.styles';
+import {  Wrapper } from './measuringType.styles';
 
 interface IProps {
 	setMeasureMode: (mode) => void;
@@ -53,14 +53,10 @@ export const MeasuringType = ({
 
 	return (
 			<>
-				{AVAILABLE_TYPES.map(({ icon, activeIcon, name, mode }) => (
+				{AVAILABLE_TYPES.map(({ Icon, name, mode }) => (
 					<Tooltip title={name} key={name}>
-						<Wrapper>
-							<Icon
-								src={mode === measureMode ? activeIcon : icon}
-								alt={name}
-								onClick={handleMeasuringTypeClick(mode)}
-							/>
+						<Wrapper onClick={handleMeasuringTypeClick(mode)} active={ mode === measureMode}>
+							<Icon />
 						</Wrapper>
 					</Tooltip>
 				))}
