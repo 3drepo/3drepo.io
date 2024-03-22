@@ -17,7 +17,7 @@
 
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, deleteGroups, getGroupsByIds } = require('./tickets.groups');
-const { addTicketsWithTemplate, getAllTickets, getTicketById, updateTicket } = require('../../../../../models/tickets');
+const { addTicketsWithTemplate, getAllTickets, getTicketById, updateManyTickets, updateTicket } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
 	modulePropertyLabels,
@@ -169,7 +169,6 @@ const processExternalData = async (teamspace, project, model, ticketIds, data) =
 				throw createResponseCode(templates.invalidArguments, `The following groups are not found: ${notFoundGroups.join(',')}`);
 			}
 		}
-
 		await Promise.all([
 			...binaries.toRemove.map((ref) => removeFile(teamspace, TICKETS_RESOURCES_COL, ref)),
 			storeFiles(teamspace, project, model, ticketId, binaries.toAdd),
@@ -223,8 +222,42 @@ Tickets.addTicket = async (teamspace, project, model, template, ticket) => {
 
 Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, updateData, author) => {
 	const externalDataDelta = processSpecialProperties(template, [oldTicket], [updateData]);
-	await updateTicket(teamspace, project, model, oldTicket, updateData, author);
+	const data = await updateTicket(teamspace, project, model, oldTicket, updateData, author);
 	await processExternalData(teamspace, project, model, [oldTicket._id], externalDataDelta);
+
+	publish(events.UPDATE_TICKET, {
+		teamspace,
+		project,
+		model,
+		...data });
+};
+
+Tickets.updateManyTickets = async (teamspace, project, model, template, oldTickets, updateData, author) => {
+	const commentsPromises = [];
+	const dataWithoutComments = updateData.map(({ comments, _id, ...others }, i) => {
+		if (comments?.length) {
+			commentsPromises.push(
+				importComments(teamspace, project, model, oldTickets[i]._id, comments, author),
+			);
+		}
+
+		return others;
+	});
+
+	const externalDataDelta = processSpecialProperties(template, oldTickets, dataWithoutComments);
+	const changeSet = await updateManyTickets(teamspace, project, model, oldTickets, dataWithoutComments, author);
+	await Promise.all([
+		processExternalData(teamspace, project, model, oldTickets.map(({ _id }) => _id), externalDataDelta),
+		...commentsPromises,
+	]);
+
+	changeSet.forEach((data) => {
+		publish(events.UPDATE_TICKET, {
+			teamspace,
+			project,
+			model,
+			...data });
+	});
 };
 
 Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource) => getFileWithMetaAsStream(
