@@ -20,6 +20,7 @@ import panzoom, { PanZoom } from 'panzoom';
 import { useRef, useEffect } from 'react';
 import { SvgContainer } from './drawingViewer.styles';
 import { sanitizeSvg } from '@svgedit/svgcanvas/core/sanitize';
+import { debounce } from 'lodash';
 
 
 export interface Zoomer { 
@@ -37,6 +38,38 @@ export const SvgViewer = ({ svgContent, zRef }: Props) => {
 	const svgContainerRef = useRef<HTMLElement>(null);
 	const svgRef = useRef<SVGSVGElement>(null);
 	const zoomerRef = useRef<PanZoom>(null);
+	const resizeObserver = useRef<any>(null);
+
+
+	const zoom = (scale) => {
+		if (!zoomerRef.current || !svgContainerRef.current) return;
+		const editorRect = svgContainerRef.current.getBoundingClientRect();
+		zoomerRef.current.smoothZoom(editorRect.width / 2 + editorRect.x, editorRect.height / 2 + editorRect.y, scale);
+
+	};
+
+	const zoomIn = () => zoom(1.5);
+
+	const zoomOut = () => zoom(0.8);
+
+	const debouncedZoom = debounce(zoom, 300);
+
+	const scaleSVG = () => {
+		if (!svgContainerRef.current || !svgContent) return;
+		const svgContainer = svgContainerRef.current;
+		const svg = svgRef.current;
+
+
+		const editorRect = svgContainer.getBoundingClientRect();
+		const viewBox = svg.viewBox.baseVal;
+		const size = aspectRatio(viewBox.width, viewBox.height, editorRect.width - padding.horizontal * 2, editorRect.height - padding.vertical * 2);
+
+		svg.setAttribute('width', size.scaledWidth + 'px');
+		svg.setAttribute('height', size.scaledHeight + 'px');
+
+		debouncedZoom(1);
+	};
+
 
 	useEffect(() => {
 		if (!svgContainerRef.current || !svgContent) return;
@@ -53,17 +86,14 @@ export const SvgViewer = ({ svgContent, zRef }: Props) => {
 		}
 
 		svgContainer.insertBefore(svg, svgContainer.children[0]);
-		const editorRect = svgContainer.getBoundingClientRect();
 		svgRef.current = svg;
+		
+		resizeObserver.current = new ResizeObserver(scaleSVG);
+		resizeObserver.current.observe(svgContainer);
 
-		const viewBox = svg.viewBox.baseVal;
-	
+		scaleSVG();
 
-		const size = aspectRatio(viewBox.width, viewBox.height, editorRect.width - padding.horizontal * 2, editorRect.height - padding.vertical * 2);
-
-		svg.setAttribute('width', size.scaledWidth + 'px');
-		svg.setAttribute('height', size.scaledHeight + 'px');
-
+		
 		const pz = panzoom(svg, {
 			maxZoom: 10,
 			minZoom: 1,
@@ -72,6 +102,8 @@ export const SvgViewer = ({ svgContent, zRef }: Props) => {
 		zoomerRef.current = pz;
 
 		pz.on('transform', () => {
+			const editorRect = svgContainer.getBoundingClientRect();
+
 			const t = pz.getTransform();
 
 			const svgRect = svg.getBoundingClientRect();
@@ -94,24 +126,12 @@ export const SvgViewer = ({ svgContent, zRef }: Props) => {
 		});
 
 		return () => {
-			pz.dispose();
+			pz?.dispose();
 			svgRef.current = null;
 			zoomerRef.current = null;
+			resizeObserver.current?.disconnect();
 		};
-
 	}, [svgContent]);
-
-
-	const zoom = (scale) => {
-		if (!zoomerRef.current || !svgContainerRef.current) return;
-		const editorRect = svgContainerRef.current.getBoundingClientRect();
-		zoomerRef.current.smoothZoom(editorRect.width / 2 + editorRect.x, editorRect.height / 2 + editorRect.y, scale);
-
-	};
-
-	const zoomIn = () => zoom(1.5);
-
-	const zoomOut = () => zoom(0.8);
 
 
 	useEffect(() => {
