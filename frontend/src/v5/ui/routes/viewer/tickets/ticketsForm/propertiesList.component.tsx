@@ -35,11 +35,10 @@ interface PropertiesListProps {
 const isSequencingProperty = (inputName: string) => [SEQUENCING_START_TIME, SEQUENCING_END_TIME].includes(inputName);
 
 export const PropertiesList = ({ module, properties, onPropertyBlur }: PropertiesListProps) => {
-	const { formState } = useFormContext();
+	const { formState, getValues } = useFormContext();
 	const ticketIsReadOnly = TicketsCardHooksSelectors.selectReadOnly();
 
 	if (!properties.length) return null;
-	const storeTicketValues = TicketsCardHooksSelectors.selectSelectedTicket();
 	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
 
 	if (!properties.length) return null;
@@ -58,9 +57,9 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 				const type = isSequencingProperty(inputName) ? 'sequencing' : basicType;
 				const PropertyComponent = TicketProperty[type] || UnsupportedProperty;
 				const formError = get(formState.errors, inputName);
-				const immutableDisabled = immutable && !isNewTicket && !isUndefined(get(storeTicketValues, inputName));
+				const immutableDisabled = immutable && !isNewTicket && !isUndefined(getValues(inputName));
 				return (
-					<Fragment key={name}>
+					<Fragment key={inputName}>
 						<InputController
 							Input={PropertyComponent}
 							label={name}
