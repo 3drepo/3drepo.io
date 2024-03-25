@@ -16,8 +16,10 @@
  */
 
 import { createSelector } from 'reselect';
-import { selectCurrentProject } from '../projects/projects.selectors';
+import { selectCurrentProject, selectIsProjectAdmin } from '../projects/projects.selectors';
 import { DrawingsState } from './drawings.redux';
+import { Role } from '../currentUser/currentUser.types';
+import { isCollaboratorRole } from '../store.helpers';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
@@ -26,17 +28,42 @@ export const selectDrawings = createSelector(
 	(state, currentProject) => (state.drawingsByProject[currentProject] ?? []),
 );
 
+export const selectFavouriteDrawings = createSelector(
+	selectDrawings,
+	(drawings) => drawings.filter(({ isFavourite }) => isFavourite),
+);
+
 export const selectDrawingById = createSelector(
 	selectDrawings,
 	(_, _id) => _id,
 	(drawings, _id) => drawings.find((d) => d._id === _id),
 );
 
-
 export const selectIsListPending = createSelector(
 	selectDrawingsDomain, selectCurrentProject,
 	// Checks if the drawings for the project have been fetched
 	(state, currentProject) => !state.drawingsByProject[currentProject],
+);
+
+export const selectAreStatsPending = createSelector(
+	selectDrawings,
+	(drawings) => drawings.some(({ hasStatsPending }) => hasStatsPending),
+);
+
+export const selectDrawingRole = createSelector(
+	selectDrawingById,
+	(drawing): Role | null => drawing?.role || null,
+);
+
+export const selectHasCollaboratorAccess = createSelector(
+	selectDrawingRole,
+	(role): boolean => isCollaboratorRole(role),
+);
+
+export const selectCanUploadToProject = createSelector(
+	selectDrawings,
+	selectIsProjectAdmin,
+	(drawings, isAdmin): boolean => isAdmin || drawings.some(({ role }) => isCollaboratorRole(role)),
 );
 
 export const selectCategories = createSelector(
