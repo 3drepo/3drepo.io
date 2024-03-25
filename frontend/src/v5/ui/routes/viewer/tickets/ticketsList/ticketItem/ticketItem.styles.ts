@@ -17,9 +17,7 @@
 
 import { ControlledAssigneesSelect } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
 import styled, { css } from 'styled-components';
-import ViewpointIconBase from '@assets/icons/outlined/cube_in_square-outlined.svg';
 import { Title } from './ticketItemBaseInfo/ticketItemBaseInfo.styles';
-import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
 import { StatusChip } from '@controls/chip/statusChip/statusChip.component';
 
 export const TicketItemContainer = styled.div<{ $selected?: boolean }>`
@@ -47,52 +45,6 @@ export const FlexRow = styled.div`
 export const IssuePropertiesRow = styled(FlexRow)`
 	align-items: center;
 	gap: 0;
-`;
-
-export const ThumbnailContainer = styled(OverlappingContainer)`
-	margin-left: auto;
-	height: 50px;
-	width: 50px;
-	min-width: 50px;
-	box-sizing: border-box;
-	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-	border-radius: 5px;
-	overflow: hidden;
-`;
-
-export const HoverState = styled.div`
-	background-color: ${({ theme }) => theme.palette.secondary.main};
-	opacity: 0;
-	&:hover {
-		opacity: 0.75;
-	}
-`;
-
-export const ViewpointIcon = styled(ViewpointIconBase)`
-	position: absolute;
-	color: ${({ theme }) => theme.palette.primary.contrast};
-	height: 18px;
-	width: 18px;
-	top: 8px;
-	left: 8px;
-`;
-
-export const Thumbnail = styled.img`
-	object-fit: cover;
-	user-select: none;
-`;
-
-export const ImagePlaceholder = styled.div`
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	${({ theme }) => theme.typography.label};
-	color: ${({ theme }) => theme.palette.base.main};
-	display: flex;
-	flex-flow: column;
-	align-items: center;
-	text-align: center;
-	justify-content: center;
-	gap: 4px;
-	line-height: 12px;
 `;
 
 export const Assignees = styled(ControlledAssigneesSelect).attrs({

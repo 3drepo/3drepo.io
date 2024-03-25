@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { HoverState, ImagePlaceholder, Thumbnail, ThumbnailContainer, ViewpointIcon } from '../ticketItem.styles';
+import { ViewpointOverlay, ImagePlaceholder, Thumbnail, ThumbnailContainer, ViewpointIcon } from './ticketItemThumbnail.styles';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { hasDefaultPin } from '../../../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { get, has } from 'lodash';
@@ -24,7 +24,6 @@ import { useParams } from 'react-router-dom';
 import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import ImageIcon from '@assets/icons/outlined/image_thin-outlined.svg';
-import { FormattedMessage } from 'react-intl';
 import { AdditionalProperties } from '../../../tickets.constants';
 
 export const TicketItemThumbnail = ({ ticket }) => {
@@ -39,6 +38,7 @@ export const TicketItemThumbnail = ({ ticket }) => {
 		getTicketResourceUrl(teamspace, project, containerOrFederation, ticket._id, resourceId, isFederation) : null;
 
 	const goToViewpoint = (event) => {
+		if (!hasViewpoint) return;
 		event.stopPropagation();
 
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
@@ -49,17 +49,16 @@ export const TicketItemThumbnail = ({ ticket }) => {
 	};
 
 	return (
-		<ThumbnailContainer>
+		<ThumbnailContainer onClick={goToViewpoint}>
 			{thumbnailSrc ? ( <Thumbnail src={thumbnailSrc} loading="lazy" /> ) : (
 				<ImagePlaceholder>
 					<ImageIcon />
-					<FormattedMessage id="ticketItem.thumbnail.placeholderImageText" defaultMessage="Image Unavailable" />
 				</ImagePlaceholder>
 			)}
 			{hasViewpoint && (
-				<HoverState onClick={goToViewpoint}>
+				<ViewpointOverlay>
 					<ViewpointIcon />
-				</HoverState>
+				</ViewpointOverlay>
 			)}
 		</ThumbnailContainer>
 	);
