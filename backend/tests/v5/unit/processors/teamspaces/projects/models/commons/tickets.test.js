@@ -208,12 +208,6 @@ const updateImagesTestHelper = async (updateMany, isView) => {
 	TemplatesModel.generateFullSchema.mockImplementationOnce((t) => t);
 	const response = [];
 
-	if (updateMany) {
-		TicketsModel.updateManyTickets.mockResolvedValueOnce(response);
-	} else {
-		TicketsModel.updateTicket.mockResolvedValueOnce(response[0]);
-	}
-
 	const imageTestData = generateImageTestData(true, isView, nTickets);
 
 	const tickets = [];
@@ -236,6 +230,12 @@ const updateImagesTestHelper = async (updateMany, isView) => {
 			},
 		};
 	});
+
+	if (updateMany) {
+		TicketsModel.updateManyTickets.mockResolvedValueOnce(response);
+	} else {
+		TicketsModel.updateTicket.mockResolvedValueOnce(response[0]);
+	}
 
 	if (updateMany) {
 		await expect(Tickets.updateManyTickets(teamspace, project, model, imageTestData.template,
@@ -899,7 +899,7 @@ const testUpdateTicket = () => {
 		});
 
 		test('should process image and store a ref', () => updateImagesTestHelper(false));
-		test('should process screenshot from view data and store a ref', () => updateImagesTestHelper(false, true));
+		test('!!!should process screenshot from view data and store a ref', () => updateImagesTestHelper(false, true));
 
 		updateGroupTestsHelper(false);
 	});

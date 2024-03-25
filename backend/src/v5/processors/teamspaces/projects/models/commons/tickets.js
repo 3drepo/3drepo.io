@@ -225,7 +225,6 @@ Tickets.updateTicket = async (teamspace, project, model, template, oldTicket, up
 	const data = await updateTicket(teamspace, project, model, oldTicket, updateData, author);
 	await processExternalData(teamspace, project, model, [oldTicket._id], externalDataDelta);
 
-	console.log(data);
 	publish(events.UPDATE_TICKET, {
 		teamspace,
 		project,
