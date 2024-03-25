@@ -949,6 +949,7 @@ const testImportedTickets = () => {
 			['and should not contain comments in the output if it was not provided to begin with', true, importTestInput],
 			['and should contain comments in the output', true, { ...importTestInput, comments }],
 			['if the template does not support comments', false, { ...generateTicket(importTestTemNoComments), comments }, importTestTemNoComments],
+			['if the template does not support comments and there are no comments', true, { ...generateTicket(importTestTemNoComments) }, importTestTemNoComments],
 			['if comments is not of the right type', false, { ...importTestInput, comments: true }],
 			['if comments array is empty', false, { ...importTestInput, comments: [] }],
 			['if comments contains items of the incorrect type', false, { ...importTestInput, comments: [...comments, undefined, 1, true] }],

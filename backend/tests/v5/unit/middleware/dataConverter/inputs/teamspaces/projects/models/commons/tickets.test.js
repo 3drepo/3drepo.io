@@ -167,6 +167,7 @@ const testValidateImportTickets = () => {
 	const goodTickets = times(5, () => generateTicket(template));
 
 	const badTicket = generateTicket(template);
+	const throwTicket = generateTicket(template);
 
 	const templateCheck = async (req, res, next) => {
 		const { template: tem } = req.params;
@@ -184,8 +185,11 @@ const testValidateImportTickets = () => {
 		}
 	};
 
-	const validation = (t, p, m, tem, ticket) => (ticket === badTicket
-		? Promise.reject(templates.invalidArguments) : Promise.resolve(ticket));
+	const validation = (t, p, m, tem, ticket) => {
+		if (ticket === badTicket) return Promise.reject(templates.invalidArguments);
+		if (ticket === throwTicket) return Promise.reject(new Error('abc'));
+		return Promise.resolve(ticket);
+	};
 	const processReadOnly = (e, ticket) => {
 		// eslint-disable-next-line no-param-reassign
 		ticket.processed = true;
@@ -199,6 +203,7 @@ const testValidateImportTickets = () => {
 		['template is provided within the ticket', { query: {}, body: { tickets: [{ type: knownTemplateID }] } }, false, createResponseCode(templates.invalidArguments, 'Template must be provided')],
 		['a deprecated template is provided', { query: { template: deprecatedTemplateID } }, false, createResponseCode(templates.invalidArguments, 'Template has been deprecated')],
 		['the request has invalid body', { body: 1 }, false, createResponseCode(templates.invalidArguments, 'Expected body to contain an array of tickets')],
+		['validation caused an unrecognised error', { body: { tickets: [throwTicket] } }, false, createResponseCode(templates.invalidArguments, 'abc')],
 		['tickets array doesn\'t exist', { body: { } }, false, createResponseCode(templates.invalidArguments, 'Expected body to contain an array of tickets')],
 		['tickets is not an array', { body: { tickets: 1 } }, false, createResponseCode(templates.invalidArguments, 'Expected body to contain an array of tickets')],
 		['ticket array is empty', { body: { tickets: [] } }, false, createResponseCode(templates.invalidArguments, 'Must contain at least 1 ticket')],
