@@ -50,7 +50,7 @@ const generateCommentSchema = (existingComment, isImport = false) => {
 	return Yup.object().shape(schemaObj).test(
 		'at-least-one-property',
 		'You must provide at least a message or a set of images',
-		({ message, images } = {}) => message || images,
+		({ message, images }) => message || images,
 	).required()
 		.noUnknown();
 };

@@ -32,6 +32,8 @@ const testValidateComment = () => {
 	};
 	describe.each([
 		['with empty message (new comment)', false, { message: '' }],
+		['with no object', false, undefined],
+		['with no object', false, null],
 		['with too long message (new comment)', false, { message: generateRandomString(1201) }],
 		['with valid message (new comment)', true, { message: generateRandomString() }],
 		['with invalid images (new comment)', false, { images: [] }],

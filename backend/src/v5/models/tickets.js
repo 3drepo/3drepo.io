@@ -52,8 +52,6 @@ Tickets.addTicketsWithTemplate = async (teamspace, project, model, templateId, t
 };
 
 Tickets.updateManyTickets = async (teamspace, project, model, oldTickets, data, author) => {
-	if (!data?.length) return [];
-
 	const changeSet = [];
 
 	const writeOps = data.flatMap((updateData, i) => {
